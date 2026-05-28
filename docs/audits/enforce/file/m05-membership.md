@@ -1,19 +1,32 @@
 # Per-File Spec Traceability Report: M05 Membership
 
-**Generated:** 2026-05-27
+**Generated:** 2026-05-28
 **Auditor:** oli-enforce-file (full re-audit)
 **Scope:** `services/api-ts/src/handlers/membership/` + membership-related files in `association:member/`
+**Spec:** `docs/product/modules/m05-membership/MODULE_SPEC.md`
 
 ## Summary
 
 | Metric | Count |
 |--------|-------|
-| Files audited | 22 (12 handlers/jobs, 2 repos, 8 association:member utils) |
-| Findings total | 26 |
-| P0 (Blocker) | 2 |
-| P1 (Critical) | 6 |
-| P2 (Warning) | 10 |
-| P3 (Info) | 8 |
+| Files audited | 34 (15 membership/ handlers+jobs, 2 repos, 1 types, 9 association:member directory/transfer/application handlers, 5 utils, 2 schemas) |
+| Findings total | 21 |
+| P0 (Blocker) | 0 |
+| P1 (Critical) | 5 |
+| P2 (Warning) | 9 |
+| P3 (Info) | 7 |
+
+### Delta from Prior Audit (2026-05-27)
+
+| Finding | Previous | Current | Reason |
+|---------|----------|---------|--------|
+| EF-M05-344c98c0 addMember no duplicate check | P0 | RESOLVED | ConflictError added, checks existing membership |
+| EF-M05-5f67b806 addMember no auth guard | P0 | RESOLVED | ForbiddenError + officer check added |
+| EF-M05-0ac7b5e5 compute-membership-status missing terminal states | P1 | RESOLVED | `expired`, `resigned`, `deceased`, `expelled` all present in type + function |
+| EF-M05-831ee966 graceToLapsed no status history | P1 | RESOLVED | Now imports `membershipStatusHistory` and inserts records |
+| EF-M05-0f378f1b updateMember no domain event | P1 | RESOLVED | `domainEvents.emit('membership.status.changed', ...)` added |
+| EF-M05-c3a01407 addMember hardcoded active | P2 | RESOLVED | `addMember.ts` now references status properly |
+| EF-M05-1c971b3e addMember missing ConflictError import | P3 | RESOLVED | Import present |
 
 ---
 
@@ -21,20 +34,25 @@
 
 ### `membership/` handlers (implementation files)
 
-| File | Role | Lines | Spec Trace |
-|------|------|-------|------------|
-| `addMember.ts` | Handler | ~30 | WF-030, BR-01 (partial) |
-| `getMember.ts` | Handler | ~50 | WF-030, BR-01 |
-| `listMembers.ts` | Handler | ~55 | WF-030, BR-01 |
-| `updateMember.ts` | Handler | ~80 | WF-030, BR-03 |
-| `listApplications.ts` | Handler | ~15 | WF-029 |
-| `listOrgApplications.ts` | Handler | ~60 | WF-029 |
-| `listCategories.ts` | Handler | ~10 | WF-033 |
-| `getOrgProfile.ts` | Handler | ~30 | (cross-boundary) |
-| `importMembers.ts` | Handler | ~180 | WF-031, BR-22, BR-25 |
-| `csvImport.ts` | Handler | ~250 | WF-031, BR-22, AC-M05-003 |
-| `jobs/graceToLapsed.ts` | Job | ~100 | BR-02, GAP-015 |
-| `jobs/index.ts` | Job registry | ~25 | GAP-015 |
+| File | Role | Spec Trace |
+|------|------|------------|
+| `addMember.ts` | Handler | WF-030, BR-21, AC-M05-001 |
+| `getMember.ts` | Handler | WF-030, BR-01 |
+| `listMembers.ts` | Handler | WF-030, BR-01 |
+| `listOrgMembers.ts` | Handler | WF-030 (org-scoped variant) |
+| `updateMember.ts` | Handler | WF-030, BR-03, Section 8 |
+| `reviewApplication.ts` | Handler | WF-029 |
+| `listApplications.ts` | Handler | WF-029 |
+| `listOrgApplications.ts` | Handler | WF-029 |
+| `csvImport.ts` | Handler | WF-031, BR-22, AC-M05-003 |
+| `importMembers.ts` | Handler | WF-031, BR-22, BR-25 |
+| `listCategories.ts` | Handler | WF-033 |
+| `upsertCategory.ts` | Handler | WF-033, BR-04 |
+| `getOrgProfile.ts` | Handler | (cross-boundary) |
+| `updateOrgProfile.ts` | Handler | (cross-boundary) |
+| `import-types.ts` | Types | WF-031 shared types |
+| `jobs/graceToLapsed.ts` | Job | BR-02, Section 8 |
+| `jobs/index.ts` | Job registry | -- |
 
 ### `membership/repos/`
 
@@ -47,154 +65,124 @@
 
 | File | Role | Spec Trace |
 |------|------|------------|
-| `repos/membership.schema.ts` | Schema (source of truth) | Section 7 Data Requirements |
-| `utils/compute-membership-status.ts` | Pure function | BR-01 |
-| `utils/compute-membership-status.test.ts` | Unit test | -- |
+| `repos/membership.schema.ts` | Schema | Section 7 Data Requirements |
+| `repos/status-history.schema.ts` | Schema | Section 7 `MembershipStatusHistory` |
+| `utils/compute-membership-status.ts` | Pure function | BR-01 (all 10 states) |
 | `utils/status-transitions.ts` | State machine | Section 8 State Transitions |
-| `utils/status-transitions.test.ts` | Unit test | -- |
 | `utils/membership-lifecycle.ts` | Lifecycle service | BR-03, BR-07 |
+| `utils/membership-status-middleware.ts` | Middleware | BR-01 query-time computation |
+| `reinstateMembership.ts` | Handler | WF-035, M05-S8 |
+| `deceaseMembership.ts` | Handler | M05-S10, LIF-04 |
+| `createMembershipApplication.ts` | Handler | WF-029, M05-S3 |
+| `approveMembershipApplication.ts` | Handler | WF-029, M05-S3 |
+| `createAffiliationTransfer.ts` | Handler | WF-036, M05-S9 |
+| `approveTransferBySource.ts` | Handler | WF-036, M05-S9 |
+| `approveTransferByTarget.ts` | Handler | WF-036, M05-S9 |
+| `completeAffiliationTransfer.ts` | Handler | WF-036, M05-S9 |
+| `createDirectoryProfile.ts` | Handler | WF-034, M05-S6 |
+| `listDirectoryProfiles.ts` | Handler | WF-034 |
+| `searchDirectory.ts` | Handler | WF-034 |
+
+### Frontend routes (membership-related)
+
+| Route | Spec Screen |
+|-------|-------------|
+| `org/$orgSlug/officer/roster.tsx` | Screen: Member Roster |
+| `org/$orgSlug/officer/roster/index.tsx` | Screen: Member Roster |
+| `org/$orgSlug/officer/roster/import.tsx` | Screen: Bulk CSV Import |
+| `org/$orgSlug/officer/roster/$memberId.tsx` | Member Detail |
+| `org/$orgSlug/officer/applications.tsx` | Screen: Application Review |
+| `org/$orgSlug/directory.tsx` | Screen: Member Directory |
+| `org/$orgSlug/directory/$personId.tsx` | Directory Profile Detail |
+| `org/$orgSlug/members.tsx` | Members list |
+| `org/$orgSlug/officer/settings/membership-categories.tsx` | WF-033 Categories |
 
 ---
 
 ## Findings
 
-### P0 -- Blockers
-
-#### EF-M05-344c98c0: `addMember.ts` -- No duplicate membership check
-
-- **Check:** Data shape / Business rule
-- **Spec ref:** AC-M05-001 ("No Duplicate Accounts"), BR-21 (one membership per person per org)
-- **Schema:** `membership` table has `uniqueIndex('membership_org_person_unique').on(organizationId, personId)`
-
-The handler inserts directly without checking for existing membership. The unique index will throw a raw Postgres error (23505) instead of the spec-mandated `409 CONFLICT` with message "Already a member of this organization."
-
-```typescript
-// addMember.ts -- inserts without duplicate check
-const member = await repo.addMember({
-  organizationId: orgId,
-  personId: body.personId,
-  // ... no pre-check for existing membership
-});
-```
-
-**Fix:** Add `repo.getMember(orgId, body.personId)` check before insert; throw `ConflictError` on match. API_CONTRACTS specifies error code `409 MEMBERSHIP_ALREADY_EXISTS`.
-
----
-
-#### EF-M05-5f67b806: `addMember.ts` -- No authorization guard
-
-- **Check:** Naming / Import boundaries
-- **Spec ref:** Section 6 Permissions -- "Import roster: super, admin, president (2FA), secretary (2FA)"
-- **API_CONTRACTS:** POST `/org/:id/members` requires `officer` auth with `hasMinimumRole('secretary')`
-
-The handler reads `session` but performs zero role/permission checks. Any authenticated user can add members to any org.
-
-```typescript
-// addMember.ts -- no auth check at all
-const session = ctx.get('session') as Session;
-// session.user.id used only for createdBy/updatedBy audit fields
-```
-
-**Fix:** Add `officerAuthMiddleware` + `requirePosition([PRESIDENT, SECRETARY])` or equivalent `hasMinimumRole` guard. Compare with `importMembers.ts` which correctly implements `requirePosition`.
-
----
-
 ### P1 -- Critical
+
+#### EF-M05-04598714: `csvImport.ts` + `importMembers.ts` -- Duplicate import logic
+
+- **Check:** Import boundaries / DRY
+- **Spec ref:** WF-031
+
+Two files implement overlapping CSV import logic. Both have local `findPersonMatch()` functions. Shared types (`importMemberRowSchema`, `normalizeLicense`, `ImportMemberRow`) are correctly extracted to `import-types.ts`, but person-matching logic remains duplicated:
+- `csvImport.ts:296` -- local `findPersonMatch()`
+- `importMembers.ts:150` -- local `findPersonMatch()`
+
+Divergence risk for BR-22 (matching rules).
+
+**Fix:** Extract `findPersonMatch` to `import-types.ts` or a new `membership/utils/person-matching.ts`.
+
+---
+
+#### EF-M05-adff0894: `csvImport.ts` -- No authorization guard
+
+- **Check:** Authorization
+- **Spec ref:** Section 6 Permissions -- "Import roster: super, admin, president (2FA), secretary (2FA)"
+
+`csvImport.ts` reads `session.user.id` for audit fields but performs no role/permission check. `importMembers.ts` correctly implements `requirePosition`. Anyone authenticated can invoke the CSV import endpoint via `csvImport.ts`.
+
+**Fix:** Add `requirePosition` or `officerAuthMiddleware` guard matching `importMembers.ts`.
+
+---
+
+#### EF-M05-e2e2e2e2: `reinstateMembership.ts` -- Rejects `expired` and `lapsed` statuses
+
+- **Check:** State machine conformance
+- **Spec ref:** Section 8 -- `expired: ['active', 'removed']`, `lapsed: ['active', ...]`; M05-S8 Reinstatement slice
+
+`reinstatableStatuses = ['removed', 'suspended']` -- missing `expired` and `lapsed`. The canonical state machine in `status-transitions.ts` allows `expired -> active` and `lapsed -> active`. The spec's M05-S8 vertical slice is "Pay dues to restore Active from Lapsed."
+
+**Fix:** Add `'expired'` and `'lapsed'` to `reinstatableStatuses`.
+
+---
 
 #### EF-M05-cee2b87c: `listApplications.ts` -- Silent error swallowing
 
 - **Check:** Error taxonomy
 - **Spec ref:** Section 15 Error Handling
 
-Handler catches ALL errors and returns `{ data: [] }` with 200 status. This masks database errors, permission issues, and schema mismatches.
+Handler catches ALL errors and returns `{ data: [] }` with 200 status. This masks database errors, permission issues, and schema mismatches. Comment says "Table schema mismatch" but this catch-all hides real failures in production.
 
-```typescript
-} catch {
-  // Table schema mismatch — return empty until data model unification
-  return ctx.json({ data: [] }, 200);
-}
-```
-
-**Fix:** Remove catch-all. If schema mismatch is expected, catch only the specific Drizzle error and log it. Return 500 for unknown errors.
+**Fix:** Remove catch-all. Return 500 for unknown errors. If schema mismatch is the concern, fix the schema query instead.
 
 ---
 
-#### EF-M05-04598714 / EF-M05-adff0894: `csvImport.ts` + `importMembers.ts` -- Duplicate import logic
+#### EF-M05-0f378f1b: `updateMember.ts` -- No status history insert
 
-- **Check:** Import boundaries / DRY
-- **Spec ref:** WF-031
+- **Check:** Data shape / Audit
+- **Spec ref:** Section 7 Entity `MembershipStatusHistory`, Section 17 Observability
 
-Two files implement nearly identical CSV import logic with person matching (BR-22), license normalization, conflict flagging, and batch insert. Both have `findPersonMatch`, `normalizeLicense`, `ImportMemberRow` schema, and matching result types. Divergence risk is high.
+Domain event `membership.status.changed` IS now emitted (resolved), but `membership_status_history` table is NOT written to. The `graceToLapsed.ts` job correctly writes status history; `updateMember.ts` does not. Officer-initiated status changes lack audit trail.
 
-- `csvImport.ts`: preview + full import, has `IMPORT_BATCH_SIZE`, audit logging
-- `importMembers.ts`: full import only, has `requirePosition` auth guard
-
-**Fix:** Extract shared logic into `membership/utils/csv-import-logic.ts`. Both handlers should delegate to it. Keep auth guards in individual handlers.
-
----
-
-#### EF-M05-0ac7b5e5: `computeMembershipStatus` -- Missing `expired`, `resigned`, `deceased`, `expelled` states
-
-- **Check:** Domain terms
-- **Spec ref:** Section 8 State Transitions lists 10 membership statuses
-- **Schema:** `membershipStatusEnum` has: `pendingPayment | active | gracePeriod | lapsed | expired | suspended | removed | resigned | deceased | expelled`
-
-The `ComputedMembershipStatus` type only covers 6 states:
-
-```typescript
-export type ComputedMembershipStatus =
-  | 'pendingPayment' | 'active' | 'gracePeriod'
-  | 'lapsed' | 'suspended' | 'removed';
-```
-
-Missing: `expired`, `resigned`, `deceased`, `expelled`. The function cannot return these even when the schema stores them. The spec says `resigned`, `deceased`, and `expelled` are terminal states (LIF-04).
-
-**Fix:** Extend `ComputedMembershipStatus` and `MembershipStatusInput` to handle all 10 states. Add checks for `resignedAt`, `dateOfDeath`, `expelledAt` fields (some exist in schema: `dateOfDeath`).
-
----
-
-#### EF-M05-831ee966: `graceToLapsed.ts` -- No `membership_status_history` logging
-
-- **Check:** Data shape
-- **Spec ref:** Section 7 Entity `MembershipStatusHistory`, Section 17 Observability Hooks
-- **API_CONTRACTS:** Domain event `membership.status.changed` required on transition
-
-The job transitions members from `gracePeriod` to `lapsed` but does not insert into `membership_status_history` table. The spec requires all status changes to be logged with `previousStatus`, `newStatus`, `changedBy` (null for system), and `reason`.
-
-**Fix:** After each batch update, insert corresponding `membership_status_history` records. Emit `membership.status.changed` domain event.
-
----
-
-#### EF-M05-0f378f1b: `updateMember.ts` -- No audit log or status history
-
-- **Check:** Data shape / Observability
-- **Spec ref:** Section 17 -- `membership.status.changed` log event, `MembershipStatusHistory` entity
-
-Officer-initiated status changes via `updateMember` are not logged to `membership_status_history`. The spec requires: `changedBy` = officer personId, `reason` = required for officer-initiated changes. No domain event emitted.
-
-**Fix:** After successful update where `status !== currentStatus`, insert into `membership_status_history` and emit `membership.status.changed`.
-
----
-
-#### EF-M05-e2e2e2e2: `reinstateMembership.ts` (association:member) -- Rejects `expired` status
-
-- **Check:** Domain terms / State machine
-- **Spec ref:** Section 8 -- `expired: ['active', 'removed']`
-
-The reinstatement handler allows reinstating from `removed` and `suspended` but rejects `expired`. The canonical state machine in `status-transitions.ts` allows `expired -> active`.
-
-**Fix:** Add `expired` to the set of reinstatable statuses.
+**Fix:** After status change, insert into `membershipStatusHistory` with `changedBy = session.user.id`.
 
 ---
 
 ### P2 -- Warnings
 
-#### EF-M05-c3a01407: `addMember.ts` -- Hardcoded `status: 'active'`
+#### EF-M05-181ccc65: `updateMember.ts` -- Silent rejection of invalid transitions
 
-- **Check:** Domain terms
-- **Spec ref:** Section 8 -- initial state should be `pendingPayment` per the state machine
+- **Check:** Error taxonomy
+- **Spec ref:** Section 15 Error Handling -- spec says return 400 for invalid transitions; BR-03 says "rejected silently"
 
-The handler always sets `status: 'active'` on new members. Per spec, new members should start as `pendingPayment` unless manually overridden by an officer with an explicit status. The schema default is also `pendingPayment`.
+Contradiction between BR-03 ("Invalid transitions rejected silently") and Section 15 (400 error). Current implementation follows BR-03 (silent no-op, returns 200). API callers have no way to know the transition was rejected.
+
+**Impact:** UX confusion. Officer changes status, gets 200, but status unchanged.
+
+---
+
+#### EF-M05-fd7eab23: `updateMember.ts` -- Duplicated transition map
+
+- **Check:** Import boundaries
+- **Spec ref:** Section 8
+
+Local `OFFICER_TRANSITIONS` map covers only 5 source states (`active`, `grace`, `gracePeriod`, `lapsed`, `suspended`). The canonical `MEMBERSHIP_VALID_TRANSITIONS` in `status-transitions.ts` covers all 10 states including `expired`, `resigned`, `deceased`, `expelled`. These maps will diverge.
+
+**Fix:** Import from `status-transitions.ts` and filter to officer-allowed subset.
 
 ---
 
@@ -202,7 +190,7 @@ The handler always sets `status: 'active'` on new members. Per spec, new members
 
 - **Check:** Data shape
 
-The flattening logic uses `(row: any)` which bypasses TypeScript type safety. The repo returns `{ membership, person, category }` tuples -- these should be properly typed.
+Flattening logic uses `(row: any)` which bypasses TypeScript safety. Repo returns typed tuples -- should be properly typed.
 
 ---
 
@@ -210,196 +198,181 @@ The flattening logic uses `(row: any)` which bypasses TypeScript type safety. Th
 
 - **Check:** Data shape
 
-The handler casts the repo result through `Record<string, unknown>` to access nested fields. This loses type safety and could silently return null for misnamed fields.
-
----
-
-#### EF-M05-181ccc65: `updateMember.ts` -- Silent rejection of invalid transitions
-
-- **Check:** Error taxonomy
-- **Spec ref:** Section 15 Error Handling -- spec says return 400 for invalid transitions
-
-The handler silently ignores invalid status transitions (returns current status unchanged, 200 OK). The API_CONTRACTS spec says invalid transitions should return `400 INVALID_STATUS_TRANSITION`.
-
-```typescript
-const status = isValidOfficerTransition(currentStatus, requestedDbStatus)
-  ? requestedDbStatus
-  : currentStatus; // silent no-op
-```
-
-Note: The `[BR-03]` comment says "silently reject" but this contradicts Section 15 error handling which mandates a 400 response.
-
----
-
-#### EF-M05-fd7eab23: `updateMember.ts` -- Duplicated transition map instead of importing
-
-- **Check:** Import boundaries
-- **Spec ref:** Section 8 State Transitions
-
-`updateMember.ts` defines its own `OFFICER_TRANSITIONS` map and `isValidOfficerTransition()` function instead of importing from `association:member/utils/status-transitions.ts`. The canonical `MEMBERSHIP_VALID_TRANSITIONS` in `status-transitions.ts` could diverge from the local copy.
-
-**Fix:** Export `isValidMembershipTransition` from `status-transitions.ts` and use it in `updateMember.ts`, filtering to officer-allowed subset.
+Handler casts repo result through `Record<string, unknown>` to access nested fields. Loses type safety.
 
 ---
 
 #### EF-M05-41e59aae: `getOrgProfile.ts` -- Cross-boundary module import
 
 - **Check:** Import boundaries
-- **Spec ref:** Module Map -- Organization belongs to Platform Admin (M03)
 
-Handler imports `OrganizationRepository` from `platformadmin/repos/`. This creates a direct coupling from M05 (Membership) to M03 (Platform Admin). Per the domain model's anti-corruption layer guidance, cross-context access should go through ID-based references or a shared service.
-
----
-
-#### EF-M05-abc60110: `listOrgApplications.ts` -- Raw Drizzle queries bypass repository
-
-- **Check:** Naming / Architecture
-
-Handler performs raw Drizzle `db.select().from(membershipApplications)` instead of using `MembershipRepository.listApplications()`. This bypasses the repository pattern used by all other handlers, creating an inconsistent data access path.
+Imports `OrganizationRepository` from `platformadmin/repos/`. Direct coupling from M05 to M03. Per domain model, cross-context access should use ID-based refs or shared service.
 
 ---
 
-#### EF-M05-b1042638: `membership/repos/` -- No own schema, imports from `association:member`
+#### EF-M05-abc60110: `listOrgApplications.ts` -- Raw Drizzle bypasses repository
+
+- **Check:** Architecture
+
+Performs raw `db.select().from(membershipApplications)` instead of using `MembershipRepository.listApplications()`. Inconsistent data access path.
+
+---
+
+#### EF-M05-b1042638: `membership/repos/` -- No own schema
 
 - **Check:** Import boundaries
 
-`membership.repo.ts` imports all schema types from `../../association:member/repos/membership.schema`. The `membership/` module has no `repos/membership.schema.ts` of its own. This means `membership/` is fully dependent on `association:member/` for its data model -- a consequence of the mega-module split being incomplete.
-
-**Impact:** Acceptable as-is per ROADMAP.md deferred item P1-11 (mega-module split). Track for resolution in v1.2.0.
+`membership.repo.ts` imports all schema from `association:member/repos/membership.schema`. Acceptable per ROADMAP.md deferred item P1-11 (mega-module split v1.2.0).
 
 ---
 
-#### EF-M05-0e99b010: `csvImport.ts` -- No streaming for large CSV files
+#### EF-M05-0e99b010: `csvImport.ts` -- No streaming for large CSV
 
-- **Check:** Data shape / Performance
-- **Spec ref:** AC-M05-003 ("500 rows < 30s"), Section 16 Performance
+- **Check:** Performance
+- **Spec ref:** AC-M05-003 ("500 rows < 30s"), AI Instructions section 5
 
-The handler parses the entire CSV string in memory. For large files (1000+ rows), this could cause memory pressure. The spec mentions "streaming CSV parse" in AI Instructions section 5.
+Parses entire CSV in memory. For 1000+ rows, could cause memory pressure.
 
 ---
 
-#### EF-M05-d1d1d1d1: `membership.schema.ts` stores status as mutable column vs BR-01
+#### EF-M05-d1d1d1d1: `membership.schema.ts` -- Status stored as mutable column vs BR-01
 
 - **Check:** Data shape
-- **Spec ref:** BR-01 -- "compute from dues_expiry_date + grace period at query time. Never store as mutable field."
+- **Spec ref:** BR-01 -- "compute at query time, never store as mutable"
 
-The schema has `status: membershipStatusEnum('status').notNull().default('pendingPayment')` as a mutable column. BR-01 says status should be computed, not stored. Current implementation stores AND computes -- the `computeMembershipStatus` function is used at read time in handlers, but the DB column is also written to by `graceToLapsed.ts` and `updateMember.ts`.
-
-**Impact:** Dual-write pattern (store + compute) works but risks inconsistency. The stored value and computed value can diverge if a handler writes without going through `computeMembershipStatus`.
-
----
-
-#### EF-M05-3a468fe4: `listCategories.ts` -- No error handling
-
-- **Check:** Error taxonomy
-
-Handler has zero error handling. If the DB query fails, the error propagates to the global handler. While the global handler catches it, the spec (Section 15) defines specific error codes for this endpoint (403 for non-members).
+Schema has `status` as mutable column. Implementation uses dual-write pattern (store + compute via `membership-status-middleware.ts`). Risk of inconsistency if any handler writes status without going through `persistWithComputedStatus()`.
 
 ---
 
 ### P3 -- Info
 
-#### EF-M05-1c971b3e: `addMember.ts` -- Missing `ConflictError` import
+#### EF-M05-3c42ea2d: `getMember.ts` -- No status history in response
 
-The handler doesn't import `ConflictError` from `@/core/errors`. When duplicate check is added (per P0 fix), this import will be needed.
-
----
-
-#### EF-M05-3c42ea2d: `getMember.ts` -- No `MembershipStatusHistory` query
-
-Spec Section 9 UI shows member detail should include status history. The handler returns only current computed status with no history data.
+Spec Section 9 UI shows member detail should include status history. Handler returns only current computed status.
 
 ---
 
 #### EF-M05-info-01: Inconsistent context typing across handlers
 
-`importMembers.ts` uses `BaseContext`, `addMember.ts` uses `Context` from Hono, `listOrgApplications.ts` uses `ValidatedContext`. Should standardize on one approach.
+`importMembers.ts` uses `BaseContext`, `addMember.ts` uses `Context`, `listOrgApplications.ts` uses `ValidatedContext`. Should standardize.
 
 ---
 
 #### EF-M05-info-02: `csvImport.ts` has two exported handlers in one file
 
-`previewCSVImport` and `bulkCSVImport` in a single file. Convention in this codebase is one handler per file.
+`previewCSVImport` and `bulkCSVImport` in one file. Convention is one handler per file.
 
 ---
 
-#### EF-M05-info-03: `membership-lifecycle.ts` calls repo methods not in `membership/repos/`
+#### EF-M05-info-03: `reviewApplication.ts` -- Approved members default to `status: 'active'`
 
-The lifecycle service calls `findMany()` and `updateOneById()` on MembershipRepository, but `membership/repos/membership.repo.ts` only has `listMembers()` and `updateMember()`. These are methods on a different repo instance in `association:member/`.
+When application is approved, membership is created with `status: 'active'`. Per spec state machine, new memberships should start as `pendingPayment` unless dues are pre-paid. However, if dues config exists and invoice is generated simultaneously (which this handler does), `active` may be intentional.
 
 ---
 
 #### EF-M05-info-04: Status enum alias fragility
 
-`VALID_STATUSES` in `updateMember.ts` includes `'grace'` (aliased to `'gracePeriod'`). The alias mapping works but is undocumented -- if a client sends `'gracePeriod'` directly, it passes Zod but skips the mapping (correct behavior, but fragile).
+`VALID_STATUSES` in `updateMember.ts` includes `'grace'` (aliased to `'gracePeriod'`). The alias mapping works but is undocumented.
 
 ---
 
-#### EF-M05-info-05: Duplicate key in test factory
+#### EF-M05-info-05: `graceToLapsed.ts` -- No domain event emission
 
-`membership.repo.test.ts` `makeCategory` has `organizationId: 'org-1'` listed twice. Harmless (last wins) but indicates copy-paste.
+Job writes status history to `membership_status_history` (resolved from prior audit) but does not emit `membership.status.changed` domain event. `updateMember.ts` emits the event but not the job. Inconsistent.
 
 ---
 
 #### EF-M05-info-06: `compute-membership-status.ts` -- Exemplary isolation
 
-Pure function with no DB dependency, deterministic, injectable `now` parameter for testing. Good pattern to replicate.
+Pure function with no DB dependency, deterministic, injectable `now` parameter. All 10 states covered with correct priority ordering. Good pattern.
+
+---
+
+#### EF-M05-info-07: `reviewApplication.ts` emits `membership.created` event
+
+Handler correctly emits `domainEvents.emit('membership.created', ...)` on approval. This is the only handler emitting this event.
 
 ---
 
 ## Spec Coverage Matrix
 
-### API Endpoints (from API_CONTRACTS Section 2)
+### API Endpoints (from MODULE_SPEC Section 10)
 
-| Endpoint | Handler | Status | Gaps |
-|----------|---------|--------|------|
-| GET `/org/:id/members` | `listMembers.ts` | Implemented | P2: `any` casts |
-| GET `/org/:id/members/:id` | `getMember.ts` | Implemented | P2: unsafe casts, P3: no history |
-| POST `/org/:id/members` | `addMember.ts` | Implemented | **P0: no duplicate check, no auth** |
-| POST `/org/:id/members/:id/transfer` | -- | **MISSING** | No handler exists |
-| POST `/org/:id/applications` | -- | **MISSING** | No submit-application handler |
-| PUT `/org/:id/applications/:id` | -- | **MISSING** | No review-application handler (repo method exists) |
-| POST `/org/:id/members/import` | `csvImport.ts` / `importMembers.ts` | Implemented (2x) | P1: duplicated logic |
-| POST `/org/:id/members/import/confirm` | -- | **MISSING** | Two-step import confirm not wired |
-| GET `/org/:id/directory` | -- | **MISSING** | No directory handler |
-| GET `/org/:id/membership-categories` | `listCategories.ts` | Implemented | P3: no error handling |
-| POST `/org/:id/membership-categories` | -- | **MISSING** | No create-category handler |
-| PATCH `/org/:id/membership-categories/:id` | -- | **MISSING** | No update-category handler |
+| Spec Endpoint | Handler(s) | Status | Notes |
+|---------------|-----------|--------|-------|
+| GET `/org/:id/members` | `listMembers.ts`, `listOrgMembers.ts` | IMPLEMENTED | P2: any casts |
+| GET `/org/:id/members/:id` | `getMember.ts` | IMPLEMENTED | P2: unsafe casts, P3: no history |
+| POST `/org/:id/members` | `addMember.ts` | IMPLEMENTED | Auth + duplicate check now present |
+| POST `/org/:id/members/import` | `csvImport.ts` / `importMembers.ts` | IMPLEMENTED (2x) | P1: duplicated logic, P1: csvImport no auth |
+| POST `/org/:id/members/import/confirm` | `csvImport.ts` (bulkCSVImport) | PARTIAL | Two-step via preview+confirm in same file |
+| POST `/org/:id/applications` | `createMembershipApplication.ts` (assoc:member) | IMPLEMENTED | TypeSpec-covered |
+| PUT `/org/:id/applications/:id` | `reviewApplication.ts` + `approveMembershipApplication.ts` (assoc:member) | IMPLEMENTED | Both hand-wired and TypeSpec versions |
+| POST `/org/:id/members/:id/transfer` | `createAffiliationTransfer.ts` (assoc:member) | IMPLEMENTED | TypeSpec-covered, dual-approval |
+| GET `/org/:id/directory` | `searchDirectory.ts`, `listDirectoryProfiles.ts` (assoc:member) | IMPLEMENTED | TypeSpec-covered |
 
-### Domain Events (from API_CONTRACTS Section 3-4)
+### Domain Events (from MODULE_SPEC Section 10b)
 
-| Event | Emitted By | Status |
-|-------|-----------|--------|
-| `membership.created` | `addMember.ts` | **NOT EMITTED** |
-| `membership.status.changed` | `updateMember.ts`, `graceToLapsed.ts` | **NOT EMITTED** |
-| `membership.approved` | (no handler) | **MISSING** |
-| `membership.transferred` | (no handler) | **MISSING** |
-| `membership.imported` | `csvImport.ts` | **NOT EMITTED** |
-| `membership.lapsed` | `graceToLapsed.ts` | **NOT EMITTED** (notification sent, no domain event) |
+| Event | Status | Emitter |
+|-------|--------|---------|
+| `membership.created` | EMITTED | `reviewApplication.ts` on approval |
+| `membership.status.changed` | PARTIAL | `updateMember.ts` emits; `graceToLapsed.ts` does NOT |
+| `membership.approved` | NOT EMITTED | No handler emits this distinct event |
+| `membership.transferred` | NOT VERIFIED | Likely in `completeAffiliationTransfer.ts` |
+| `membership.imported` | NOT EMITTED | Neither import handler emits |
+| `membership.lapsed` | NOT EMITTED | `graceToLapsed.ts` writes history but no event |
 
-### Business Rules (from MODULE_SPEC Section 5)
+### Business Rules Coverage
 
-| BR | Description | Implementation | Gaps |
-|----|-------------|---------------|------|
-| BR-01 | Status computed at query time | `compute-membership-status.ts` | P1: missing 4 terminal states |
-| BR-02 | Grace-to-lapsed daily job | `graceToLapsed.ts` | P1: no status history |
-| BR-03 | Officer transitions restricted | `updateMember.ts` | P2: silent reject vs spec's 400 |
-| BR-07 | Payment reactivates lapsed | `membership-lifecycle.ts` | Implemented correctly |
-| BR-21 | Multi-org isolation | Schema unique constraint | P0: handler doesn't enforce pre-check |
-| BR-22 | Cross-org person matching | `csvImport.ts`, `importMembers.ts` | P1: duplicated |
-| BR-25 | Import requires president/secretary | `importMembers.ts` | Correct. `csvImport.ts` missing. |
+| BR | Implementation | Status |
+|----|---------------|--------|
+| BR-01 | `compute-membership-status.ts` | COMPLETE (all 10 states) |
+| BR-02 | `graceToLapsed.ts` | COMPLETE (org-specific grace) |
+| BR-03 | `updateMember.ts` | PARTIAL (silent reject, no 400) |
+| BR-04 | `upsertCategory.ts` | NEEDS VERIFICATION |
+| BR-21 | `addMember.ts` unique check | COMPLETE |
+| BR-22 | `csvImport.ts` + `importMembers.ts` | COMPLETE (duplicated) |
+| BR-23 | `import-types.ts` normalizeLicense | COMPLETE |
+| M5-R1 | `status-transitions.ts` | COMPLETE |
+| M5-R2 | `import-types.ts` normalizeLicense | COMPLETE |
+| M5-R3 | Both import handlers | COMPLETE |
+| M5-R5 | `createMembershipApplication.ts` | NEEDS VERIFICATION |
+| M5-R6 | Transfer handlers | NEEDS VERIFICATION |
+| M5-R8 | Both import handlers | COMPLETE (= M5-R3) |
+| M5-R10 | Schema constraint + compute function | COMPLETE |
+
+### Vertical Slice Coverage
+
+| Slice | Status | Notes |
+|-------|--------|-------|
+| M05-S1 Status Computation | COMPLETE | All 10 states, priority ordering correct |
+| M05-S2 Member Roster | COMPLETE | List, search, filter implemented |
+| M05-S3 Application Flow | COMPLETE | Submit + review in both handler dirs |
+| M05-S4 Bulk CSV Import | COMPLETE (duplicated) | Two implementations |
+| M05-S5 Cross-Org Matching | COMPLETE | Email + license normalization |
+| M05-S6 Member Directory | COMPLETE | Full CRUD + search in assoc:member |
+| M05-S7 Categories | PARTIAL | List + upsert present, no explicit deactivate |
+| M05-S8 Reinstatement | PARTIAL | Missing `expired` + `lapsed` from reinstatable set |
+| M05-S9 Member Transfer | COMPLETE | Create + dual-approve + complete |
+| M05-S10 Terminal States | COMPLETE | `deceaseMembership.ts` handles terminal check |
+
+### UI Screen Coverage
+
+| Spec Screen | Route | Status |
+|-------------|-------|--------|
+| Member Roster (`/org/[id]/officer/roster`) | `officer/roster/index.tsx` | PRESENT |
+| Bulk CSV Import (`/org/[id]/officer/roster/import`) | `officer/roster/import.tsx` | PRESENT |
+| Member Directory (`/org/[id]/members`) | `directory.tsx` | PRESENT |
+| Application Review (`/org/[id]/officer/applications`) | `officer/applications.tsx` | PRESENT |
 
 ---
 
 ## Recommendations (Priority Order)
 
-1. **P0 Fix `addMember.ts`**: Add duplicate check + auth guard. Estimated: 30min.
-2. **P1 Consolidate CSV import logic**: Extract shared module, delete duplication. Estimated: 2hr.
-3. **P1 Extend `ComputedMembershipStatus`**: Add 4 missing terminal states. Estimated: 1hr.
-4. **P1 Add `membership_status_history` writes**: To `updateMember.ts` and `graceToLapsed.ts`. Estimated: 1hr.
-5. **P1 Fix `listApplications.ts` error swallowing**: Remove catch-all. Estimated: 15min.
-6. **P1 Fix `reinstateMembership.ts` expired rejection**: Add expired to reinstatable set. Estimated: 15min.
-7. **P2 Fix silent transition rejection**: Return 400 per spec. Estimated: 15min.
-8. **P2 Import status-transitions**: Replace local map in `updateMember.ts`. Estimated: 15min.
-9. **Missing handlers**: 7 endpoints from API_CONTRACTS have no handler. Plan as vertical slices per MODULE_SPEC Section 19.
-10. **Domain events**: Zero of 6 specified events are emitted. Requires event bus integration.
+1. **P1 Fix `csvImport.ts` auth**: Add officer role guard. Estimated: 15min.
+2. **P1 Consolidate `findPersonMatch`**: Extract to shared module. Estimated: 1hr.
+3. **P1 Fix `reinstateMembership.ts`**: Add `expired` and `lapsed` to reinstatable set. Estimated: 15min.
+4. **P1 Fix `listApplications.ts`**: Remove catch-all error swallowing. Estimated: 15min.
+5. **P1 Add status history to `updateMember.ts`**: Insert `membershipStatusHistory` on change. Estimated: 30min.
+6. **P2 Resolve BR-03 vs Section 15 contradiction**: Decide silent reject or 400 and align. Estimated: 15min.
+7. **P2 Import canonical transitions**: Replace local `OFFICER_TRANSITIONS` in `updateMember.ts`. Estimated: 15min.
+8. **Domain events**: 3 of 6 specified events are not emitted. Wire up `membership.approved`, `membership.imported`, `membership.lapsed`.

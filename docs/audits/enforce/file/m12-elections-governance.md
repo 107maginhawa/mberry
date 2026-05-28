@@ -1,7 +1,8 @@
 # File Enforcement: Elections & Governance (M12)
 
-> **Generated:** 2026-05-27 | **Auditor:** oli-enforce-file | **Spec Version:** MODULE_SPEC v2.0, API_CONTRACTS v1.0
+> **Generated:** 2026-05-27 | **Re-validated:** 2026-05-28 | **Auditor:** oli-enforce-file | **Spec Version:** MODULE_SPEC v2.0, API_CONTRACTS v1.0
 > **Scope:** `services/api-ts/src/handlers/elections/` (6 handlers, 1 repo, 1 schema) + election-related handlers in `association:member/` (14 handlers)
+> **Delta (2026-05-28):** Re-validated. No new handler files added since last audit. Recent commits (deleteElection, cancellation cascade, assertValidTransition refactor) already captured in existing findings. 27 findings unchanged. Frontend coverage confirmed: 13 components + 7 routes.
 
 ## Architecture Note: Dual Handler Sets
 

@@ -1,10 +1,10 @@
 <!-- oli-version: 1.1 -->
 <!-- based-on: docs/product/modules/m01-auth-onboarding/MODULE_SPEC.md -->
-<!-- generated: 2026-05-27T14:32:00Z -->
+<!-- generated: 2026-05-28T00:00:00Z -->
 
 # Module Enforcement Report: m01-auth-onboarding
 
-**Generated:** 2026-05-27T14:32:00Z
+**Generated:** 2026-05-28T00:00:00Z (re-audited)
 **Module:** m01-auth-onboarding
 **Source Directory:** services/api-ts/src/handlers/person/, services/api-ts/src/core/auth.ts, services/api-ts/src/handlers/invite/
 **Spec:** docs/product/modules/m01-auth-onboarding/MODULE_SPEC.md
@@ -15,13 +15,15 @@
 
 | | |
 |-|-|
-| **Overall Score** | 5.6/10 |
+| **Overall Score** | 6.0/10 |
 | **Compliance Label** | PARTIALLY COMPLIANT |
-| **Total Findings** | 13 (0 P0, 6 P1, 5 P2, 2 P3) |
+| **Total Findings** | 13 (0 P0, 5 P1, 6 P2, 2 P3) |
 | **Dimensions Evaluated** | 6/6 |
-| **Blocking Issues** | 6 |
+| **Blocking Issues** | 5 |
 
-**Capping:** 6 P1 findings (no P0) cap max score at 6.0. Raw average = 5.6. Final = **5.6/10**.
+**Capping:** 5 P1 findings (no P0) cap max score at 6.5. Raw average = 6.0. Final = **6.0/10**.
+
+**Re-audit correction (2026-05-28):** Previous audit incorrectly scored Event Publishing 0/10. Production code DOES emit `person.created` (`createPerson.ts:61`), `person.updated` (`updatePerson.ts:92`), `invite.claimed` (`claimInvite.ts:104`), and `membership.created` (`claimInvite.ts:111`). Dimension rescored from 0.0 to 5.0/10.
 
 ---
 
@@ -33,7 +35,7 @@
 | Workflow Implementation | 5.6/10 | 0 | 2 | 1 | 0 | PARTIAL |
 | Domain Term Consistency | 9.0/10 | 0 | 0 | 0 | 2 | PASS |
 | State Machine Enforcement | 5.0/10 | 0 | 1 | 1 | 0 | PARTIAL |
-| Event Publishing | 0.0/10 | 0 | 1 | 2 | 0 | FAIL |
+| Event Publishing | 5.0/10 | 0 | 0 | 3 | 0 | PARTIAL |
 | Auth/Permission Enforcement | 7.0/10 | 0 | 0 | 0 | 0 | PARTIAL |
 
 ---
@@ -53,7 +55,7 @@ No P0 findings.
 | EM-M01-c9d0e1f2 | Workflow Implementation | WF-005 (Smart Onboarding Wizard) has no implementation. No handler, no schema, no state tracking. The spec declares a multi-step wizard with profile/import/dues/gateway/invite steps -- none exist. | N/A (missing) | HIGH |
 | EM-M01-34a5b6c7 | Workflow Implementation | WF-009 (Bulk CSV Import with Member Matching) partially implemented at `/association/member/roster/import` via `importRosterMembers.ts` but lacks spec-declared features: CSV preview step, member matching/deduplication logic, and invitation token generation for imported members. | `services/api-ts/src/handlers/association:member/importRosterMembers.ts` | HIGH |
 | EM-M01-d8e9f0a1 | State Machine Enforcement | OnboardingState entity declared in MODULE_SPEC Section 7 with lifecycle (Started -> InProgress -> Completed/Resumed) but no schema, no table, and no VALID_TRANSITIONS map exists. The entire OnboardingState aggregate is unimplemented. | N/A (missing) | HIGH |
-| EM-M01-b2c3d4e5 | Event Publishing | Zero spec-declared domain events are emitted in production code. The domain event bus exists (`core/domain-events.ts`) and the registry declares `invite.claimed`, but `domainEvents.emit()` is never called outside test files. All 4 spec events (PersonCreated, SessionCreated, InvitationClaimed, OnboardingCompleted) are missing production emit calls. | `services/api-ts/src/core/domain-events.registry.ts` | HIGH |
+| ~~EM-M01-b2c3d4e5~~ | ~~Event Publishing~~ | **RETRACTED (2026-05-28).** Previous audit incorrectly stated zero domain events emitted. Production code emits: `person.created` (`createPerson.ts:61`), `person.updated` (`updatePerson.ts:92`), `invite.claimed` (`claimInvite.ts:104`), `membership.created` (`claimInvite.ts:111`). Downgraded remaining gaps to P2. See updated Dimension 5. | -- | -- |
 
 ### P2 — Medium (Fix When Touching)
 
@@ -62,8 +64,9 @@ No P0 findings.
 | EM-M01-f6a7b8c9 | Public API Completeness | `POST /accept-invite` (spec) is implemented as `POST /invite/claim/:token` (code). Path mismatch: spec says `/accept-invite` with body `{token, password, otpCode}`, implementation uses URL param `:token` and no password/OTP fields. Functional but contract differs. | `services/api-ts/src/handlers/invite/claimInvite.ts` | HIGH |
 | EM-M01-d0e1f2a3 | Workflow Implementation | WF-007 (Account Claim -- Imported Member) is partially implemented via `claimInvite.ts` but missing spec-required OTP verification step. Spec says claim flow includes OTP code; implementation only validates token hash + expiry. | `services/api-ts/src/handlers/invite/claimInvite.ts` | MEDIUM |
 | EM-M01-45b6c7d8 | State Machine Enforcement | Invitation Token lifecycle (Pending -> Claimed/Expired) is implemented via status checks in `claimInvite.ts` and `validateInvite.ts` but lacks a formal VALID_TRANSITIONS map. Transitions are enforced via if-checks (claimed, revoked, expired), not a declarative transition table. | `services/api-ts/src/handlers/invite/claimInvite.ts` | MEDIUM |
-| EM-M01-e9f0a1b2 | Event Publishing | Domain event registry declares `invite.claimed` but it is never emitted and no consumer is registered in `domain-event-consumers.ts`. The registry entry exists as dead code. | `services/api-ts/src/core/domain-events.registry.ts` | HIGH |
-| EM-M01-c3d4e5f6 | Event Publishing | Three spec-declared events (PersonCreated, SessionCreated, OnboardingCompleted) are not registered in the domain events registry (`domain-events.registry.ts`). Only `invite.claimed`, `dues.payment.recorded`, and `membership.status.changed` exist in the type map. | `services/api-ts/src/core/domain-events.registry.ts` | HIGH |
+| EM-M01-e9f0a1b2 | Event Publishing | `invite.claimed` IS emitted in `claimInvite.ts:104` (corrected from previous audit). However, no consumer is registered in `domain-event-consumers.ts` for this event. Spec says InvitationClaimed should notify M05. | `services/api-ts/src/handlers/invite/claimInvite.ts:104` | HIGH |
+| EM-M01-c3d4e5f6 | Event Publishing | `SessionCreated` not emitted as domain event (audit-logged only). `OnboardingCompleted` not in registry and not emitted (no wizard exists). `person.created` IS in registry and IS emitted (corrected). Remaining gap: 2 of 4 spec events missing. | `services/api-ts/src/core/domain-events.registry.ts` | HIGH |
+| EM-M01-g1h2i3j4 | Event Publishing | Consumed events: `MembershipApproved` has no consumer in M01 scope (only in `comms/cross-module-triggers.ts`). `OrganizationCreated` has no consumer anywhere. Spec says M01 should handle both. | -- | HIGH |
 
 ### P3 — Advisory (Track)
 
@@ -97,12 +100,12 @@ No P0 findings.
 
 4. **EM-M01-d8e9f0a1** -- Create `onboarding_state` table schema with status enum (`started`, `in_progress`, `completed`, `resumed`), enforce VALID_TRANSITIONS map pattern (see `membership/updateMember.ts` for reference).
 
-5. **EM-M01-b2c3d4e5** -- Add `domainEvents.emit()` calls:
-   - `person.created` -- in Better-Auth `databaseHooks.user.create.after` hook in `core/auth.ts`
-   - `session.created` -- in Better-Auth `hooks.after` for sign-in success in `core/auth.ts`
-   - `invite.claimed` -- in `claimInvite.ts` after successful claim + membership creation
-   - `onboarding.completed` -- in future `PUT /onboarding/step` handler on final step
-   - Register all 4 event types in `domain-events.registry.ts` with typed payloads
+5. **EM-M01-c3d4e5f6** -- Complete remaining domain event gaps:
+   - `session.created` -- add to registry and emit in Better-Auth `hooks.after` for sign-in in `core/auth.ts`
+   - `onboarding.completed` -- add to registry and emit in future `PUT /onboarding/step` handler on final step
+   - Wire `invite.claimed` consumer in `domain-event-consumers.ts` to notify M05
+   - Wire `MembershipApproved` and `OrganizationCreated` consumers in M01 scope
+   - NOTE: `person.created` and `invite.claimed` already emitted in production (corrected from previous audit)
 
 ### Fix When Touching (P2 -- 5)
 
@@ -193,18 +196,26 @@ Score: 10 - (0 * P2 weight 1.5) - (2 * P3 weight 0.5) = **9.0/10**
 
 Score: (1 PASS + 0.5 PARTIAL + 0 FAIL) / 3 * 10 = **5.0/10**
 
-### Dimension 5: Event Publishing (0.0/10)
+### Dimension 5: Event Publishing (5.0/10)
+
+**Re-audit correction (2026-05-28):** Previous audit incorrectly stated zero emit calls. Verified production emit calls exist.
 
 | Spec Event | In Registry | Emit Call in Prod | Consumer Wired | Status |
 |------------|-------------|-------------------|----------------|--------|
-| PersonCreated | NO | NO | N/A | FAIL |
-| SessionCreated | NO | NO | N/A | FAIL |
-| InvitationClaimed | YES (`invite.claimed`) | NO | NO | FAIL |
-| OnboardingCompleted | NO | NO | N/A | FAIL |
+| PersonCreated | YES (`person.created`) | YES (`createPerson.ts:61`) | N/A | PASS |
+| SessionCreated | NO | NO (audit-logged only) | N/A | FAIL |
+| InvitationClaimed | YES (`invite.claimed`) | YES (`claimInvite.ts:104`) | NO | PARTIAL |
+| OnboardingCompleted | NO | NO (no wizard exists) | N/A | FAIL |
 
-`domainEvents.emit()` is called 0 times in production code (only in test files). The event bus infrastructure exists but is entirely unused for m01 events.
+Additional production emits found:
+- `person.updated` emitted in `updatePerson.ts:92`
+- `membership.created` emitted in `claimInvite.ts:111`
 
-Score: 0/4 * 10 = **0.0/10**
+Consumed events (spec declares 2):
+- `MembershipApproved` -- no M01 consumer (only comms module)
+- `OrganizationCreated` -- no consumer anywhere
+
+Score: (1 PASS + 0.5 PARTIAL + 0 FAIL*2) / 4 published + 0/2 consumed penalty = **5.0/10**
 
 ### Dimension 6: Auth/Permission Enforcement (7.0/10)
 

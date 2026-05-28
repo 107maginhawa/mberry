@@ -1,14 +1,15 @@
 # Module Enforcement Audit: M05 Membership
 
-> Generated: 2026-05-27 (deep audit) | Auditor: oli-enforce-module | Branch: audit/codebase-improvements
+> Generated: 2026-05-28 (deep re-audit) | Auditor: oli-enforce-module | Branch: main
+> Supersedes: 2026-05-27 audit (corrects 3 false findings from prior run)
 
 ## 1. Module Overview
 
 **Spec source:** `docs/product/modules/m05-membership/MODULE_SPEC.md`
-**API contracts:** `docs/product/modules/m05-membership/API_CONTRACTS.md`
-**Handler dirs:** `services/api-ts/src/handlers/membership/` (12 handlers) + `services/api-ts/src/handlers/association:member/` (shared, membership-related subset)
+**Handler dirs:** `services/api-ts/src/handlers/membership/` (15 handler files) + `services/api-ts/src/handlers/association:member/` (shared)
+**TypeSpec:** `specs/api/src/modules/membership-custom.tsp` (3 endpoints: getOrgProfile, listOrgMembers, listOrgApplications)
 
-**Workflows (9):** WF-029 through WF-037 (Application Review, Roster, Bulk CSV Import, Status Computation, Categories, Directory, Reinstatement, Transfer, Cross-Org Matching)
+**Workflows (3 detailed):** WF-029 (Application Review), WF-031 (Bulk CSV Import), WF-036 (Member Transfer)
 
 ---
 
@@ -16,268 +17,218 @@
 
 | Dimension | Score | Weight | Weighted |
 |-----------|-------|--------|----------|
-| Dim 1: Public API | 7.0 | 1.0 | 7.0 |
+| Dim 1: Public API | 6.0 | 1.0 | 6.0 |
 | Dim 2: Workflow | 7.0 | 1.0 | 7.0 |
-| Dim 3: Domain Terms | 8.0 | 1.0 | 8.0 |
-| Dim 4: State Machine | 7.5 | 1.0 | 7.5 |
-| Dim 5: Events | 1.0 | 1.0 | 1.0 |
-| Dim 6: Auth/Permission | 7.0 | 1.0 | 7.0 |
-| **Raw Average** | | | **6.25** |
-| **P0 Cap Applied** | | | **3.0** |
+| Dim 3: Domain Terms | 9.0 | 1.0 | 9.0 |
+| Dim 4: State Machine | 9.0 | 1.0 | 9.0 |
+| Dim 5: Events | 3.0 | 1.0 | 3.0 |
+| Dim 6: Auth/Permission | 5.0 | 1.0 | 5.0 |
+| **Raw Average** | | | **6.5** |
 
-**Overall Score: 3.0 / 10** (capped by P0: zero domain events emitted)
+**Overall Score: 6 / 10**
 
 ---
 
-## 3. Dimension Details
+## 3. Corrections to Prior Audit (2026-05-27)
 
-### Dim 1: Public API (7.0/10)
+The prior audit contained 3 factual errors, corrected here:
 
-**API_CONTRACTS specifies 11 endpoints.** Coverage:
+1. **FALSE: "Zero domain events emitted"** -- `reviewApplication.ts` emits `membership.created` (line 41) and `updateMember.ts` emits `membership.status.changed` (line 112). Two events ARE emitted. The prior P0 cap was incorrect.
 
-| Endpoint | Handler Found | Location | Status |
-|----------|--------------|----------|--------|
-| GET `/org/:orgId/members` | `listMembers.ts` | membership/ | FOUND |
-| GET `/org/:orgId/members/:memberId` | `getMember.ts` | membership/ | FOUND |
-| POST `/org/:orgId/members` | `addMember.ts` | membership/ | FOUND |
-| POST `/org/:orgId/members/:memberId/transfer` | `approveTransferBySource.ts` + `approveTransferByTarget.ts` | association:member/ | PARTIAL -- transfer creation handler exists as `createAffiliationTransfer.ts` but route path differs from spec |
-| POST `/org/:orgId/applications` | None dedicated | -- | MISSING (see EM-M05-e5f6g7h8) |
-| PUT `/org/:orgId/applications/:appId` | `reviewApplication.ts` | membership/ | FOUND |
-| POST `/org/:orgId/members/import` | `csvImport.ts` (previewCSVImport) | membership/ | FOUND |
-| POST `/org/:orgId/members/import/confirm` | `csvImport.ts` (bulkCSVImport) | membership/ | FOUND |
-| GET `/org/:orgId/directory` | directory repo exists, no GET handler | association:member/ | PARTIAL (see EM-M05-u1v2w3x4) |
-| GET `/org/:orgId/membership-categories` | `listCategories.ts` | membership/ | FOUND |
-| POST `/org/:orgId/membership-categories` | `upsertCategory.ts` | membership/ | FOUND |
-| PATCH `/org/:orgId/membership-categories/:catId` | `upsertCategory.ts` | membership/ | FOUND |
+2. **FALSE: "compute-membership-status.ts returns only 6 statuses"** -- The function returns all 10: `deceased`, `expelled`, `resigned`, `removed`, `suspended`, `expired`, `pendingPayment`, `active`, `gracePeriod`, `lapsed`. Input interface includes `dateOfDeath`, `expelledAt`, `resignedAt`, `isExpired`. Prior EM-M05-m3n4o5p6 was false.
 
-**Note:** Application submit endpoint (`POST /org/:orgId/applications`) has no dedicated self-service handler; `reviewApplication.ts` handles officer review only. Bulk approve exists in `association:member/bulkApproveMembershipApplications.ts`.
+3. **FALSE: "PaymentRecorded has a registered consumer"** -- `grep` for consumed event handlers returned zero matches. No `domain-event-consumers.ts` file with `PaymentRecorded` listener was confirmed. All 4 consumed events lack listeners.
+
+---
+
+## 4. Dimension Details
+
+### Dim 1: Public API (6.0/10)
+
+Spec declares 9 endpoints (Section 10). Coverage:
+
+| Spec Endpoint | Handler | Status |
+|---|---|---|
+| `GET /org/:id/members` | `listMembers.ts`, `listOrgMembers.ts` | IMPLEMENTED (route: `/membership/members/{orgId}`) |
+| `GET /org/:id/members/:id` | `getMember.ts` | IMPLEMENTED |
+| `POST /org/:id/members/import` | `importMembers.ts`, `csvImport.ts` | IMPLEMENTED |
+| `POST /org/:id/members/import/confirm` | `csvImport.ts` (bulkCSVImport fn) | PARTIAL -- function exists, no route |
+| `POST /org/:id/applications` | -- | **MISSING** |
+| `PUT /org/:id/applications/:id` | `reviewApplication.ts` | IMPLEMENTED |
+| `POST /org/:id/members` | `addMember.ts` | IMPLEMENTED |
+| `POST /org/:id/members/:id/transfer` | `association:member/createAffiliationTransfer.ts` | DELEGATED (different route path) |
+| `GET /org/:id/directory` | -- | **MISSING** |
+
+Additional non-spec endpoints: `getOrgProfile.ts`, `updateOrgProfile.ts`, `listOrgApplications.ts`, `listCategories.ts`, `upsertCategory.ts`
 
 ### Dim 2: Workflow (7.0/10)
 
-| Workflow | Status | Evidence |
-|----------|--------|----------|
-| WF-029: Application Review | IMPLEMENTED | `reviewApplication.ts`, `approveMembershipApplication.ts`, `bulkApproveMembershipApplications.ts` |
-| WF-030: Member Roster | IMPLEMENTED | `listMembers.ts`, `listOrgMembers.ts` with search, filter, pagination |
-| WF-031: Bulk CSV Import | IMPLEMENTED | `csvImport.ts` (parse, validate, preview, bulk import), `importMembers.ts`, `importRosterMembers.ts` |
-| WF-032: Status Computation | IMPLEMENTED | `compute-membership-status.ts` -- pure function, called at query time in `getMember.ts` and `listMembers.ts` |
-| WF-033: Membership Categories | IMPLEMENTED | `listCategories.ts`, `upsertCategory.ts` |
-| WF-034: Member Directory | PARTIAL | `publishMyDirectoryProfile.ts`, `directory.repo.ts`, `directoryAutoPopulate.ts` exist but no GET directory list handler found |
-| WF-035: Reinstatement | IMPLEMENTED | `membership-lifecycle.ts` -- `PAYMENT_REACTIVATABLE_STATUSES` includes `lapsed`; payment extends expiry and sets status to `active` |
-| WF-036: Member Transfer | IMPLEMENTED | `approveTransferBySource.ts`, `approveTransferByTarget.ts` -- dual-approval flow with status progression |
-| WF-037: Cross-Org Matching | IMPLEMENTED | `importMembers.ts` -- email + license matching with normalization, conflict flagging |
+| Workflow | ID | Status |
+|---|---|---|
+| Bulk CSV Import | WF-031 | PARTIAL -- parse/validate/preview works; confirm route unwired; no `MemberImported` event |
+| Application Review | WF-029 | PARTIAL -- review works; no self-service submit; event name mismatch |
+| Member Transfer | WF-036 | IMPLEMENTED -- full dual-approval lifecycle in `association:member/` |
 
-**Gap:** WF-034 directory GET listing endpoint not found as standalone handler.
+### Dim 3: Domain Terms (9.0/10)
 
-### Dim 3: Domain Terms (8.0/10)
+All 5 spec entities have matching schema tables:
+- `memberships` -- full field coverage including LIF-04 fields
+- `membershipApplications` -- all status enum values
+- `membershipCategories` + `membershipTiers` -- separate tables
+- `membershipStatusHistory` -- used by `graceToLapsed` job
+- `affiliation_transfer` -- in `chapters.schema.ts`
 
-Verified against DOMAIN_MODEL Section 2 (Membership bounded context):
+Domain glossary alignment strong. `ComputedMembershipStatus` type includes all 10 statuses.
 
-| Term | Spec Definition | Code Usage | Status |
-|------|----------------|------------|--------|
-| Membership | Central entity with computed status | `membership.schema.ts`, `membership.repo.ts` | ALIGNED |
-| MembershipApplication | Application lifecycle | `membershipApplications` table, `reviewApplication.ts` | ALIGNED |
-| MembershipCategory / MembershipTier | Per-org classification | `membershipCategories` table, `listCategories.ts`, `upsertCategory.ts` | ALIGNED |
-| MembershipStatusHistory | Audit trail for transitions | `status-history.schema.ts` | ALIGNED |
-| AffiliationTransfer | Inter-org transfer | `AffiliationTransferRepository`, dual-approval handlers | ALIGNED |
-| ComputedMembershipStatus | Enum: active, gracePeriod, lapsed, etc. | `compute-membership-status.ts` type definition | PARTIAL (missing 4 terminal statuses) |
-| DirectoryProfile | Privacy-filtered member info | `directory.schema.ts`, `directory.repo.ts` | ALIGNED |
+### Dim 4: State Machine (9.0/10)
 
-**Minor gap:** Spec defines `expired`, `deceased`, `expelled`, `resigned` as terminal computed statuses; compute function only returns 6 of 10.
+**Status Computation** (`compute-membership-status.ts`):
+- Priority: deceased > expelled > resigned > removed > suspended > expired > pendingPayment > active > gracePeriod > lapsed
+- Correctly extends spec's 6-status priority to 10 statuses
+- Pure function, no DB dependency, date-only comparison
 
-### Dim 4: State Machine (7.5/10)
-
-**Status Computation (`compute-membership-status.ts`):**
-- Priority ordering: removed > suspended > pendingPayment > active > gracePeriod > lapsed
-- Life/honorary members (null expiry) always active
-- Grace period window calculation correct
-
-**Officer Transitions (`status-transitions.ts`):**
-- Full VALID_TRANSITIONS map with terminal states: `removed`, `resigned`, `deceased`, `expelled`, `expired`
-- Covers all 10 statuses: pendingPayment, active, gracePeriod, lapsed, suspended, expired, removed, resigned, deceased, expelled
-- Terminal states correctly return empty arrays
-
-**Officer Subset (`updateMember.ts`):**
-- Restricted OFFICER_TRANSITIONS map: active->suspended/removed, grace->suspended, lapsed->suspended/active, suspended->active
+**Officer Transitions** (`updateMember.ts`):
+- Restricted subset: active->suspended/removed, grace->suspended, lapsed->suspended/active, suspended->active
+- Invalid transitions silently rejected (BR-03 compliant)
 - No-op transitions always valid
-- Silently rejects invalid transitions (no error thrown) -- matches BR-03
 
-**Gaps:**
-1. `compute-membership-status.ts` returns only 6 statuses (`pendingPayment`, `active`, `gracePeriod`, `lapsed`, `suspended`, `removed`). Spec requires 10 including `expired`, `resigned`, `deceased`, `expelled`. The extended set exists in `status-transitions.ts` but NOT in the compute function.
-2. Spec says `expired` is a terminal computed status with configurable threshold beyond lapse. No `expired` computation logic exists.
-3. `graceToLapsed.ts` handles automatic gracePeriod->lapsed as daily cron. No corresponding lapsed->expired job exists.
+**Transfer State Machine**: 7-state dual-approval workflow fully tested.
 
-### Dim 5: Events (1.0/10) -- P0
+Minor gap: `underReview` application state exists in enum but no handler sets it.
 
-**Spec declares 6 published events:**
+### Dim 5: Events (3.0/10)
 
-| Event | Required By | Emitted in Code? |
-|-------|-------------|-----------------|
-| MembershipApproved | M01, M06, M07 | NO |
-| MembershipSuspended | M04, M07 | NO |
-| MembershipStatusChanged | M02, M06, M07, M11 | NO |
-| MembershipResigned | M07 | NO |
-| MembershipDeceased | M07 | NO |
-| MemberImported | M07 | NO |
+**Published Events:**
 
-**Spec declares 4 consumed events:**
+| Spec Event | Emitted? | Handler | Event Name Used |
+|---|---|---|---|
+| MembershipApproved | YES | `reviewApplication.ts:41` | `membership.created` (name mismatch) |
+| MembershipStatusChanged | YES | `updateMember.ts:112` | `membership.status.changed` |
+| MembershipSuspended | NO | -- | -- |
+| MembershipResigned | NO | `association:member/resignMembership.ts` uses audit only | -- |
+| MembershipDeceased | NO | `association:member/deceaseMembership.ts` uses audit only | -- |
+| MemberImported | NO | -- | -- |
 
-| Event | Source | Handler Exists? |
-|-------|--------|----------------|
-| PaymentRecorded (dues.payment.recorded) | M06 | YES -- `domain-event-consumers.ts` updates duesExpiryDate |
-| PaymentRefunded | M06 | PARTIAL -- `membership-lifecycle.ts` processRefund handles directly, no event consumer registered |
-| MemberSuspended | M04 | NO |
-| MemberRemoved | M04 | NO |
+**Result:** 2/6 published events emitted. 4 missing.
 
-**Summary:** Domain event infrastructure exists (`DomainEventBus` class with `emit`/`on`). One consumer registered (`dues.payment.recorded`). **Zero events are emitted** from any membership handler. Cross-module integration is fully broken for event-driven workflows.
+**Consumed Events:**
 
-### Dim 6: Auth/Permission (7.0/10)
+| Spec Event | Listener? |
+|---|---|
+| PaymentRecorded | NO |
+| PaymentRefunded | NO |
+| MemberSuspended | NO |
+| MemberRemoved | NO |
+
+**Result:** 0/4 consumed events have registered listeners.
+
+### Dim 6: Auth/Permission (5.0/10)
 
 | Handler | Guard | Spec Requirement | Status |
-|---------|-------|-----------------|--------|
-| `importMembers.ts` | `requirePosition([PRESIDENT, SECRETARY])` | president(2FA), secretary(2FA) | PARTIAL -- position check present, 2FA not verified in handler |
+|---|---|---|---|
+| `importMembers.ts` | `requirePosition([PRESIDENT, SECRETARY])` | president/secretary + 2FA | PARTIAL -- no 2FA |
 | `updateOrgProfile.ts` | `requirePosition([PRESIDENT])` | president | OK |
-| `listOrgApplications.ts` | platformAdmin check via DB query | admin | OK |
-| `listOrgMembers.ts` | platformAdmin check via DB query | admin | OK |
-| `approveMembershipApplication.ts` | `requirePosition([SECRETARY, PRESIDENT])` | secretary(2FA), president(2FA) | PARTIAL -- 2FA not verified in handler |
-| `bulkApproveMembershipApplications.ts` | `requirePosition([SECRETARY, PRESIDENT])` | secretary(2FA), president(2FA) | PARTIAL -- 2FA not verified in handler |
-| `addMember.ts` | session only | officer | WEAK |
-| `listMembers.ts` | session only | all org members | OK for read |
-| `getMember.ts` | session only | all org members | OK for read |
-| `reviewApplication.ts` | session only | officer | WEAK |
+| `listOrgApplications.ts` | platformAdmin OR org member check | admin | OK |
+| `listOrgMembers.ts` | platformAdmin OR org member check | admin | OK |
+| `reviewApplication.ts` | session only | president/secretary + 2FA | **WEAK** |
+| `addMember.ts` | session only | officer | **WEAK** |
+| `listMembers.ts` | session only | all org members | OK |
+| `getMember.ts` | session only | all org members | OK |
 
-**Gaps:**
-1. `addMember.ts` and `reviewApplication.ts` (in `membership/` dir) have no position/role check beyond session auth.
-2. The parallel `association:member/` handlers DO have proper `requirePosition` guards -- creating an inconsistent security surface.
+Critical: `reviewApplication.ts` and `addMember.ts` in `membership/` lack position checks. Parallel `association:member/` handlers have proper guards.
 
 ---
 
-## 4. Findings
-
-### P0 Findings (Score Cap: 3.0)
-
-#### EM-M05-00a1b2c3: Zero Domain Events Emitted
-
-**Severity:** P0
-**Dimension:** Events (Dim 5)
-**Description:** MODULE_SPEC section 10b declares 6 published events (MembershipApproved, MembershipSuspended, MembershipStatusChanged, MembershipResigned, MembershipDeceased, MemberImported). The domain event bus infrastructure exists (`core/domain-events.ts`) with `emit()` capability. However, NO membership handler calls `domainEvents.emit()` for any event. Downstream modules M01, M06, M07, M11 receive no signals.
-
-**Impact:** M06 cannot auto-generate dues invoices on approval. M07 cannot send welcome emails. M01 cannot complete onboarding. M11 cannot issue credentials. Cross-module integration is completely broken for event-driven workflows.
-
-**Evidence:**
-- `grep -rn 'emit\|domainEvent' handlers/membership/` -- zero matches for event emission
-- `grep -rn 'emit\|domainEvent' handlers/association:member/` -- zero matches (only `publishedAt` for directory profiles, unrelated)
-- `core/domain-event-consumers.ts` registers only 1 consumer (`dues.payment.recorded`)
-
-**Fix:** Add `domainEvents.emit()` calls to `approveMembershipApplication.ts`, `reviewApplication.ts`, `updateMember.ts` (for suspension/removal/resignation), `bulkApproveMembershipApplications.ts`, and import handlers. Register event types in `domain-events.registry.ts`.
-
----
+## 5. Findings
 
 ### P1 Findings
 
-#### EM-M05-d4e5f6g7: Consumed Events Not Registered (3 of 4)
+#### EM-M05-a1b2c3d4: Directory Endpoint Missing
+**Dim:** Public API | **Impact:** AC-M05-005 unmet
+`GET /org/:id/directory` -- privacy-filtered member search declared in spec, no handler exists anywhere.
 
-**Severity:** P1
-**Dimension:** Events (Dim 5)
-**Description:** Of 4 consumed events declared in spec, only `PaymentRecorded` has a registered consumer (`domain-event-consumers.ts`). `PaymentRefunded`, `MemberSuspended`, and `MemberRemoved` have no registered consumers.
+#### EM-M05-e5f6g7h8: Application Submit Endpoint Missing
+**Dim:** Public API | **Impact:** Self-service membership application impossible
+`POST /org/:id/applications` -- spec declares user self-service apply; no handler implements creation.
 
-**Impact:** Refunds don't revert membership status via event bus (only works through direct `processRefund` call). Suspension/removal from M04 doesn't propagate to membership status flags via events.
+#### EM-M05-c9d0e1f2: 4/6 Published Domain Events Missing
+**Dim:** Events | **Impact:** Downstream modules M04, M07 get no signals
+`MembershipSuspended`, `MembershipResigned`, `MembershipDeceased`, `MemberImported` are never emitted. `resignMembership.ts` and `deceaseMembership.ts` exist but use audit logging only, not domain events.
 
-**Evidence:** `domain-event-consumers.ts` only registers handler for `dues.payment.recorded`.
+#### EM-M05-g3h4i5j6: 0/4 Consumed Events Have Listeners
+**Dim:** Events | **Impact:** Payment and disciplinary events from M04/M06 don't propagate
+`PaymentRecorded`, `PaymentRefunded`, `MemberSuspended`, `MemberRemoved` -- no event consumers registered. Status recomputation from external triggers is broken.
 
-#### EM-M05-e5f6g7h8: Missing Application Submit Endpoint
-
-**Severity:** P1
-**Dimension:** Public API (Dim 1)
-**Description:** API_CONTRACTS specifies `POST /org/:orgId/applications` for self-service application submission (actor: user). No handler implements this. `reviewApplication.ts` handles officer review only. `approveMembershipApplication.ts` handles approval only.
-
-**Impact:** Members cannot self-apply for membership through the API. The WF-029 workflow assumes applications already exist but provides no creation path.
-
-**Evidence:** No file matching `*submit*Application*` or `*create*Application*` in either handler directory.
-
-#### EM-M05-i9j0k1l2: Weak Auth Guards on membership/ Handlers
-
-**Severity:** P1
-**Dimension:** Auth/Permission (Dim 6)
-**Description:** `addMember.ts` and `reviewApplication.ts` in `membership/` directory require only session auth (no role/position check). The parallel `association:member/` handlers (`approveMembershipApplication.ts`, `bulkApproveMembershipApplications.ts`) correctly use `requirePosition([SECRETARY, PRESIDENT])`. If both route sets are active, the `membership/` handlers create a bypass path.
-
-**Impact:** Any authenticated user could potentially add members or review applications if these routes are exposed without middleware guards.
-
-**Evidence:**
-- `addMember.ts`: No `requirePosition` or `requireOrgRole` call
-- `reviewApplication.ts`: No `requirePosition` or `requireOrgRole` call
-
----
+#### EM-M05-k7l8m9n0: reviewApplication Lacks Officer Check
+**Dim:** Auth | **Impact:** Any authenticated member can approve/deny applications
+`reviewApplication.ts` requires only session auth. Spec mandates president/secretary with 2FA. Creates bypass path since parallel `association:member/approveMembershipApplication.ts` has proper guards.
 
 ### P2 Findings
 
-#### EM-M05-m3n4o5p6: Computed Status Missing 4 Terminal States
+#### EM-M05-i9j0k1l2: Route Path Divergence from Spec
+**Dim:** Public API
+All implemented routes use `/membership/...` prefix, not `/org/:id/...` as spec declares. Spec or routes need alignment.
 
-**Severity:** P2
-**Dimension:** State Machine (Dim 4)
-**Description:** `compute-membership-status.ts` returns only 6 statuses (`pendingPayment`, `active`, `gracePeriod`, `lapsed`, `suspended`, `removed`). Spec section 8 requires 10 including `expired`, `resigned`, `deceased`, `expelled`. The `status-transitions.ts` VALID_TRANSITIONS map includes all 10, but the compute function doesn't check `deceasedAt`, `expelledAt`, `resignedAt` flags or implement the `expired` threshold.
+#### EM-M05-m3n4o5p6: Import Confirm Route Unwired
+**Dim:** Workflow
+`bulkCSVImport()` function exists in `csvImport.ts` but `POST /org/:id/members/import/confirm` has no registered HTTP route.
 
-**Impact:** `getMember.ts` and `listMembers.ts` will never return `deceased`, `expelled`, `resigned`, or `expired` status since they delegate to the compute function. Terminal states are only reflected via the stored `status` field.
+#### EM-M05-o1p2q3r4: No 2FA Verification
+**Dim:** Auth
+Import and approve actions use `requirePosition` but skip 2FA verification. Spec explicitly requires 2FA for these sensitive operations.
 
-**Evidence:** `MembershipStatusInput` interface has no `deceasedAt`, `expelledAt`, or `resignedAt` fields. `ComputedMembershipStatus` type union excludes these 4 values.
+#### EM-M05-s5t6u7v8: BR-04 Category Delete Guard Missing
+**Dim:** Data Model
+BR-04: categories with assigned members cannot be deleted (deactivate only). `upsertCategory.ts` handles create/update but no delete handler with member-count guard exists.
 
-#### EM-M05-q7r8s9t0: No Lapsed-to-Expired Transition Job
-
-**Severity:** P2
-**Dimension:** State Machine (Dim 4)
-**Description:** Spec section 8 defines `expired` as a terminal state triggered by "configurable threshold beyond lapse." `graceToLapsed.ts` handles grace->lapsed as daily cron, but no equivalent job exists for lapsed->expired.
-
-**Impact:** Members stay in `lapsed` indefinitely instead of transitioning to `expired` (which requires re-application per spec).
-
-#### EM-M05-u1v2w3x4: Directory GET Listing Handler Missing
-
-**Severity:** P2
-**Dimension:** Workflow (Dim 2)
-**Description:** WF-034 and API_CONTRACTS `GET /org/:orgId/directory` specify a privacy-filtered searchable member list. Code has `directory.repo.ts`, `directory.schema.ts`, and `publishMyDirectoryProfile.ts` (for updating own profile), but no handler for the GET listing endpoint.
-
-**Impact:** Member directory search/browse not available through API.
-
----
+#### EM-M05-u1v2w3x4: Event Name Mismatch
+**Dim:** Events
+`reviewApplication.ts` emits `membership.created` but spec declares `MembershipApproved`. Downstream consumers expecting `MembershipApproved` won't match.
 
 ### P3 Findings
 
-#### EM-M05-y5z6a7b8: Duplicate Handler Paths (membership/ vs association:member/)
+#### EM-M05-y5z6a7b8: underReview State Never Set
+**Dim:** State Machine
+`underReview` exists in `applicationStatusEnum` but no handler transitions to it. Applications go directly from `submitted` to `approved/denied`.
 
-**Severity:** P3
-**Dimension:** Public API (Dim 1)
-**Description:** Two handler directories implement overlapping functionality. `membership/reviewApplication.ts` and `association:member/approveMembershipApplication.ts` both handle application approval with different auth patterns. `membership/importMembers.ts` and `association:member/importRosterMembers.ts` both handle import. The `association:member/` versions are generally higher quality (proper auth guards, transactions, audit logging).
+#### EM-M05-w9x0y1z2: Feature Flags Not Implemented
+**Dim:** Feature Flags
+Spec declares `csv_import_enabled` and `public_directory_enabled`. Neither is checked at runtime.
 
-**Impact:** Maintenance burden, inconsistent behavior depending on which route is hit.
+#### EM-M05-a3b4c5d6: Observability Metrics Missing
+**Dim:** Observability
+4 spec-declared metrics unimplemented. Only `graceToLapsed` job has adequate structured logging. Other handlers minimal.
 
-#### EM-M05-c9d0e1f2: Incomplete MembershipStatusHistory Writes
-
-**Severity:** P3
-**Dimension:** Domain Terms (Dim 3)
-**Description:** `status-history.schema.ts` exists. Only `graceToLapsed.ts` writes to it. Officer-initiated transitions in `updateMember.ts` and application approval flows do not record status history entries.
-
-**Impact:** Incomplete audit trail for membership status changes.
+#### EM-M05-f7g8h9i0: Status History Writes Incomplete
+**Dim:** Domain Terms
+Only `graceToLapsed.ts` writes to `membershipStatusHistory`. Officer-initiated transitions in `updateMember.ts` and application approval flows don't record history entries.
 
 ---
 
-## 5. Summary
+## 6. Summary
 
 | Category | Count |
 |----------|-------|
-| P0 | 1 |
-| P1 | 3 |
-| P2 | 3 |
-| P3 | 2 |
-| **Total Findings** | **9** |
+| P1 | 5 |
+| P2 | 5 |
+| P3 | 4 |
+| **Total** | **14** |
 
 **Strengths:**
-- Robust CSV bulk import with per-row validation, matching, conflict flagging (BR-22, M5-R3, M5-R8, AC-M05-003, AC-M05-004)
-- Well-designed computed status pattern -- pure function at query time in `getMember.ts` and `listMembers.ts` (BR-01)
-- Comprehensive state machine in `status-transitions.ts` with 10 statuses and terminal states
-- Dual-approval transfer flow (source + target) with correct status progression
-- `membership-lifecycle.ts` centralizes payment->membership orchestration (settlePayment, processRefund, recomputeStatus)
-- `graceToLapsed.ts` daily cron job with notifications and idempotency
-- Good test coverage (20+ test files across both directories)
-- `approveMembershipApplication.ts` uses transactions wrapping approval + membership creation
+1. BR-01 (computed status) -- pure function with full 10-status priority, correctly extended beyond spec
+2. BR-03 (state machine) -- silent rejection of invalid officer transitions
+3. License normalization (BR-22/BR-23) -- tested with edge cases
+4. Transfer workflow -- full dual-approval lifecycle with good test coverage
+5. `graceToLapsed` job -- production-quality with idempotency and status history
+6. Module boundary docs -- clear comments explain two-repo split
+7. Test honesty -- `br-p2-gap.test.ts` uses `.todo()` for unimplemented rules
+8. Schema completeness -- all 5 spec entities have tables with correct fields
 
-**Critical Gap:** Zero domain events emitted. The event bus infrastructure is ready (`DomainEventBus` with `emit`/`on`) but unused by membership handlers. This blocks all cross-module integration: invoice generation on approval (M06), welcome emails (M07), onboarding completion (M01), credential issuance (M11).
-
-**Recommendation:** Fix P0 first (add `domainEvents.emit()` calls to all mutation handlers), then P1s (register missing consumed event handlers, add application submit endpoint, add auth guards to `membership/` handlers). P2/P3 can follow in subsequent iterations.
+**Remediation Priority:**
+1. P1-AUTH: Add `requirePosition` to `reviewApplication.ts` (security bypass)
+2. P1-EVENTS: Emit `MembershipSuspended/Resigned/Deceased/Imported` from handlers
+3. P1-CONSUMERS: Register listeners for `PaymentRecorded/Refunded/MemberSuspended/MemberRemoved`
+4. P1-ENDPOINTS: Implement directory GET and application submit POST
+5. P2-2FA: Add 2FA to import/review handlers
+6. P2-GUARDS: Implement BR-04 category delete protection
+7. P3: Feature flags, metrics, status history writes

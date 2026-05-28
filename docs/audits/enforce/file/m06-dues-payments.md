@@ -1,7 +1,8 @@
 # File Enforcement: m06-dues-payments
 
-> Generated: 2026-05-27 | Auditor: oli-enforce-file | Module: M06 Dues & Payments
+> Generated: 2026-05-28 | Auditor: oli-enforce-file | Module: M06 Dues & Payments
 > Directories: `services/api-ts/src/handlers/dues/`, `services/api-ts/src/handlers/billing/`
+> Supersedes: 2026-05-27 report (corrected file counts, added schema traceability)
 
 ---
 
@@ -14,7 +15,6 @@
 | DOMAIN_MODEL | `docs/product/DOMAIN_MODEL.md` | v1.0 |
 | WORKFLOW_MAP | `docs/product/WORKFLOW_MAP.md` | v1.0 |
 | ROLE_PERMISSION_MATRIX | `docs/product/ROLE_PERMISSION_MATRIX.md` | v1.0 |
-| MODULE_MAP | `docs/product/MODULE_MAP.md` | v1.0 |
 
 ---
 
@@ -22,89 +22,163 @@
 
 ### 2a. Dues Directory (`services/api-ts/src/handlers/dues/`)
 
-| # | File | Role | Lines | Spec Trace | Notes |
-|---|------|------|-------|------------|-------|
-| 1 | `checkoutPaymentToken.ts` | controller | ~90 | WF-038, M06-S12 | Public endpoint: POST /pay/:token/checkout. Creates Stripe checkout from token. |
-| 2 | `sendPaymentLink.ts` | controller | ~65 | WF-038, M06-S12 | Officer sends payment link: POST /org/:orgId/payments/send-link. |
-| 3 | `validatePaymentToken.ts` | controller | ~50 | WF-038, M06-S12, API_CONTRACTS GET /pay/:token | Public: validates token, returns payment details. |
-| 4 | `getDuesDashboard.ts` | controller | ~55 | WF-043, M06-S10, API_CONTRACTS GET /org/:id/reports/financial | Dashboard stats. Imports from association:member repo (cross-module). |
-| 5 | `repos/dues.repo.ts` | repository | ~280 | M06-S1 through M06-S10 | Full dues repository: config CRUD, payment CRUD, fund allocation, report aggregations, reminder schedules. **Deprecated header** but actively used. |
-| 6 | `repos/payment-token.repo.ts` | repository | ~60 | M06-S12 | Token persistence: create, find by hash, mark used. |
-| 7 | `repos/payment-token.schema.ts` | entity | ~40 | DOMAIN_MODEL (not in spec entities) | pgTable `payment_token`: tokenHash, personId, organizationId, duesAmount, currency, expiresAt, usedAt, createdByOfficer. |
-| 8 | `utils/payment-token.ts` | utility | ~45 | M06-S12 | HMAC-SHA256 token generation, hashing, expiry check. Reuses invite token pattern. |
-| 9 | `jobs/index.ts` | service | ~35 | WF-042, M06-S8 | Job registration: reminderProcessor (daily cron), webhookRetryProcessor (60s interval). |
-| 10 | `jobs/webhookRetryProcessor.ts` | service | ~130 | WF-038, M06-S6, AC-M06-002 | Retries pending_retry webhook entries with exponential backoff. Dead-letters after max retries. |
-| 11 | `jobs/reminderProcessor.ts` | service | ~100 | WF-042, M06-S8, M06-S11 | Processes dues reminders: queries overdue members, deduplicates via reminder_log, creates notifications. |
-| 12 | `jobs/autoInvoiceGenerator.ts` | service | ~95 | WF-038, M06-S1 | Auto-generates invoices for members approaching billing cycle. |
-| 13 | `checkoutPaymentToken.test.ts` | test | -- | -- | Tests for token checkout flow. |
-| 14 | `sendPaymentLink.test.ts` | test | -- | -- | Tests for send-link handler. |
-| 15 | `validatePaymentToken.test.ts` | test | -- | -- | Tests for token validation. |
-| 16 | `getDuesDashboard.test.ts` | test | -- | -- | Tests for dashboard handler. |
-| 17 | `dues-config.test.ts` | test | -- | -- | Tests for dues config operations (no matching handler file). |
-| 18 | `bulkRecordPayments.test.ts` | test | -- | -- | Tests for bulk payment recording (no matching handler file). |
-| 19 | `repos/dues.repo.test.ts` | test | -- | -- | Repository unit tests. |
-| 20 | `utils/payment-token.test.ts` | test | -- | -- | Token utility unit tests. |
-| 21 | `utils/fund-math.test.ts` | test | -- | -- | Fund allocation math tests (no matching utility file). |
-| 22 | `utils/settle-payment.test.ts` | test | -- | -- | Payment settlement tests (no matching utility file). |
-| 23 | `utils/expiry-extension.test.ts` | test | -- | -- | Expiry extension tests (no matching utility file). |
-| 24 | `jobs/index.test.ts` | test | -- | -- | Job registration tests. |
-| 25 | `jobs/autoInvoiceGenerator.test.ts` | test | -- | -- | Auto-invoice tests. |
-| 26 | `jobs/reminderProcessor.test.ts` | test | -- | -- | Reminder processor tests. |
-| 27 | `jobs/webhookRetryProcessor.test.ts` | test | -- | -- | Webhook retry tests. |
+| # | File | Role | Spec Trace | Notes |
+|---|------|------|------------|-------|
+| 1 | `checkoutPaymentToken.ts` | controller | WF-038, S10 POST /org/:id/payments/checkout | Creates Stripe checkout from token. Uses `(gatewayConfig as any)` casts. |
+| 2 | `sendPaymentLink.ts` | controller | WF-038 (support) | Officer sends payment link. Not in S10 API table. |
+| 3 | `validatePaymentToken.ts` | controller | S10 GET /pay/:token | Public: validates token, returns payment details. |
+| 4 | `getDuesDashboard.ts` | controller | WF-043, S10 GET /org/:id/reports/financial | Dashboard stats. Cross-module import from association:member. |
+| 5 | `downloadReceipt.ts` | controller | WF-045, S10 GET /org/:id/payments/:id/receipt, M6-R6 | Renders HTML receipt. Checks officer access. Completed/confirmed payments only. |
+| 6 | `stripeWebhook.ts` | controller | WF-038, S10 POST /webhooks/:provider, M6-R8 | Hand-wired BEFORE auth middleware. Stripe only. |
+| 7 | `repos/dues-payments.schema.ts` | entity | S7 (6 entities: DuesPayment, DuesOrgConfig, DuesCategoryOverride, DuesFund, DuesFundAllocation, DuesGatewayConfig, DuesReminderSchedule, WebhookRetryLog) | Primary schema. All spec entities except DuesPaymentStatusHistory. |
+| 8 | `repos/dues-payments.repo.ts` | repository | S7 | CRUD, fund allocations, receipt sequencing, report aggregations. |
+| 9 | `repos/dues.schema.ts` | entity | Legacy | `dues_config`, `dues_invoice`, `aging_bucket`, `dues_reminder_log`. JSONB fund allocations. |
+| 10 | `repos/payment-token.schema.ts` | entity | WF-038 (support) | `payment_token` table. HMAC-SHA256 hash, expiry, single-use. |
+| 11 | `repos/payment-token.repo.ts` | repository | WF-038 | Token persistence: create, find by hash, mark used. |
+| 12 | `utils/payment-token.ts` | utility | WF-038 | HMAC-SHA256 token generation, hashing, expiry check. |
+| 13 | `jobs/index.ts` | registry | WF-042 | Job registration: reminderProcessor (daily), webhookRetryProcessor (60s). |
+| 14 | `jobs/autoInvoiceGenerator.ts` | service | WF-038 | Auto-generates invoices approaching billing cycle. |
+| 15 | `jobs/processStripePayment.ts` | service | WF-038, WF-039 | Processes Stripe payment, creates fund allocations. |
+| 16 | `jobs/reminderProcessor.ts` | service | WF-042, M6-R5 | Processes dues reminders. Deduplicates via reminder_log. |
+| 17 | `jobs/webhookRetryProcessor.ts` | service | M6-R8, AC-M06-002 | Exponential backoff retry. Dead-letters after max retries. Circuit breaker. |
+| 18 | `checkoutPaymentToken.test.ts` | test | -- | Token checkout tests. |
+| 19 | `downloadReceipt.test.ts` | test | -- | Receipt download tests. |
+| 20 | `sendPaymentLink.test.ts` | test | -- | Send-link tests. |
+| 21 | `validatePaymentToken.test.ts` | test | -- | Token validation tests. |
+| 22 | `getDuesDashboard.test.ts` | test | -- | Dashboard tests. |
+| 23 | `stripeWebhook.test.ts` | test | -- | Webhook unit tests. |
+| 24 | `stripeWebhook.integration.test.ts` | test | -- | Webhook integration tests. |
+| 25 | `dues-config.test.ts` | test | WF-040 | **Orphan**: test without handler. |
+| 26 | `bulkRecordPayments.test.ts` | test | WF-044? | **Orphan**: test without handler. |
+| 27 | `jobs/index.test.ts` | test | -- | Job registration tests. |
+| 28 | `jobs/autoInvoiceGenerator.test.ts` | test | -- | Auto-invoice tests. |
+| 29 | `jobs/processStripePayment.test.ts` | test | -- | Stripe payment processing tests. |
+| 30 | `utils/fund-math.test.ts` | test | BR-05, M6-R1 | Fund allocation math tests. |
+| 31 | `utils/payment-token.test.ts` | test | -- | Token utility tests. |
+| 32 | `utils/expiry-extension.test.ts` | test | BR-07 | Expiry extension tests. |
+| 33 | `utils/settle-payment.test.ts` | test | -- | Payment settlement tests. |
 
-### 2b. Billing Directory (`services/api-ts/src/handlers/billing/`)
+### 2b. Cross-Module Files (`services/api-ts/src/handlers/association:member/repos/`)
 
-| # | File | Role | Lines | Spec Trace | Notes |
-|---|------|------|-------|------------|-------|
-| 28 | `createInvoice.ts` | controller | ~120 | API_CONTRACTS POST /invoices | Creates invoice with line items, tax placeholder. TypeSpec-aligned. |
-| 29 | `updateInvoice.ts` | controller | ~110 | -- | Updates draft invoices only. Role-gated (merchant/admin). |
-| 30 | `deleteInvoice.ts` | controller | ~60 | -- | Soft-deletes draft invoices. Merchant/admin only. |
-| 31 | `finalizeInvoice.ts` | controller | ~90 | -- | Transitions invoice draft -> open. Creates Stripe PaymentIntent. |
-| 32 | `getInvoice.ts` | controller | ~70 | -- | Reads single invoice. Customer/merchant/admin access. |
-| 33 | `listInvoices.ts` | controller | ~90 | -- | Paginated invoice list with status/customer/merchant filters. |
-| 34 | `payInvoice.ts` | controller | ~80 | -- | Records payment against invoice. Creates Stripe checkout session. |
-| 35 | `captureInvoicePayment.ts` | controller | ~110 | -- | Captures authorized PaymentIntent. Updates invoice to paid. |
-| 36 | `refundInvoicePayment.ts` | controller | ~100 | -- | Creates Stripe refund. Updates invoice status. |
-| 37 | `markInvoiceUncollectible.ts` | controller | ~90 | -- | Marks invoice uncollectible. Has TODO for cleanup tasks. |
-| 38 | `voidInvoice.ts` | controller | ~100 | -- | Voids invoice + cancels PaymentIntent. Conflict checks. |
-| 39 | `createMerchantAccount.ts` | controller | ~80 | -- | Creates Stripe Connect account + onboarding link. |
-| 40 | `onboardMerchantAccount.ts` | controller | ~110 | -- | Generates new onboarding link / checks onboarding status. |
-| 41 | `getMerchantAccount.ts` | controller | ~90 | -- | Returns merchant account with balance from Stripe. |
-| 42 | `getMerchantDashboard.ts` | controller | ~95 | -- | Merchant analytics: revenue, invoice counts, recent activity. |
-| 43 | `handleStripeWebhook.ts` | controller | ~200 | WF-038 (bridge) | Processes Stripe events: payment_intent.succeeded/failed, account.updated, etc. |
-| 44 | `repos/billing.schema.ts` | entity | ~200 | DOMAIN_MODEL Financial context | pgTable definitions: invoices, invoice_line_items, merchant_accounts. Enums: invoice_status, payment_status. |
-| 45 | `repos/billing.repo.ts` | repository | ~250 | -- | InvoiceRepository + MerchantAccountRepository classes. CRUD, filtering, status updates. |
-| 46 | `captureInvoicePayment.test.ts` | test | -- | -- | -- |
-| 47 | `createInvoice.test.ts` | test | -- | -- | -- |
-| 48 | `createMerchantAccount.test.ts` | test | -- | -- | -- |
-| 49 | `deleteInvoice.test.ts` | test | -- | -- | -- |
-| 50 | `finalizeInvoice.test.ts` | test | -- | -- | -- |
-| 51 | `getInvoice.test.ts` | test | -- | -- | -- |
-| 52 | `getMerchantAccount.test.ts` | test | -- | -- | -- |
-| 53 | `getMerchantDashboard.test.ts` | test | -- | -- | -- |
-| 54 | `handleStripeWebhook.test.ts` | test | -- | -- | -- |
-| 55 | `listInvoices.test.ts` | test | -- | -- | -- |
-| 56 | `markInvoiceUncollectible.test.ts` | test | -- | -- | -- |
-| 57 | `onboardMerchantAccount.test.ts` | test | -- | -- | -- |
-| 58 | `payInvoice.test.ts` | test | -- | -- | -- |
-| 59 | `refundInvoicePayment.test.ts` | test | -- | -- | -- |
-| 60 | `updateInvoice.test.ts` | test | -- | -- | -- |
-| 61 | `voidInvoice.test.ts` | test | -- | -- | -- |
-| 62 | `lifecycle.test.ts` | test | -- | -- | Full invoice lifecycle integration test. |
-| 63 | `accessControl.test.ts` | test | -- | -- | Role-based access control tests across all billing endpoints. |
-| 64 | `repos/billing.repo.test.ts` | test | -- | -- | -- |
-| 65 | `repos/billing-config.repo.test.ts` | test | -- | -- | Config repo tests (no matching source file). |
-| 66 | `ac-m16.advertising.test.ts` | test | -- | -- | Cross-module: M16 advertising billing tests. |
-| 67 | `ac-m17.marketplace.test.ts` | test | -- | -- | Cross-module: M17 marketplace billing tests. |
-| 68 | `br-38.marketplace-disclosure.test.ts` | test | -- | -- | BR-38 marketplace disclosure compliance test. |
+| # | File | Role | Spec Trace | Notes |
+|---|------|------|------------|-------|
+| 34 | `dues-payment-status-history.schema.ts` | entity | S7 DuesPaymentStatusHistory | **Mislocated**: should be in `dues/repos/`. Imports from `dues/repos/dues-payments.schema`. |
+| 35 | `dues.schema.ts` | re-export | -- | Re-exports from `dues/repos/dues.schema.ts` (BCI-01 backward compat). |
+| 36 | `dues-payments.schema.ts` | entity | Needs audit | Exists in association:member. May duplicate or re-export. |
+| 37 | `dunning.schema.ts` | entity | WF-042 | Dunning-specific tables. Related to reminder/escalation flow. |
+| 38 | `dunning.repo.ts` | repository | WF-042 | Dunning repository. |
+| 39 | `dues.repo.ts` | repository | Legacy | Legacy dues repo in association:member. |
+| 40 | `dues-payments.repo.ts` | repository | -- | Association:member dues payments repo. |
+| 41 | `dues-payments.repo.test.ts` | test | -- | Repo tests. |
+| 42 | `dues-schema.test.ts` | test | -- | Schema tests. |
 
-**Totals:** 68 files (27 dues + 41 billing). 24 source files, 44 test files.
+### 2c. Billing Directory (`services/api-ts/src/handlers/billing/`)
+
+| # | File | Role | Spec Trace | Notes |
+|---|------|------|------------|-------|
+| 43 | `createInvoice.ts` | controller | -- | Platform billing (separate from M06 dues). TypeSpec-aligned. |
+| 44 | `updateInvoice.ts` | controller | -- | Updates draft invoices. |
+| 45 | `deleteInvoice.ts` | controller | -- | Soft-deletes drafts. |
+| 46 | `finalizeInvoice.ts` | controller | -- | Draft -> open. Creates Stripe PaymentIntent. |
+| 47 | `getInvoice.ts` | controller | -- | Single invoice read. |
+| 48 | `listInvoices.ts` | controller | -- | Paginated invoice list. |
+| 49 | `payInvoice.ts` | controller | -- | Records payment / creates Stripe checkout. |
+| 50 | `captureInvoicePayment.ts` | controller | -- | Captures authorized PaymentIntent. |
+| 51 | `refundInvoicePayment.ts` | controller | -- | Creates Stripe refund for platform invoice. |
+| 52 | `markInvoiceUncollectible.ts` | controller | -- | Marks uncollectible. 3 TODO comments. |
+| 53 | `voidInvoice.ts` | controller | -- | Voids invoice + cancels PaymentIntent. |
+| 54 | `createMerchantAccount.ts` | controller | -- | Stripe Connect account creation. |
+| 55 | `onboardMerchantAccount.ts` | controller | -- | Onboarding link / status check. |
+| 56 | `getMerchantAccount.ts` | controller | -- | Merchant account with Stripe balance. |
+| 57 | `getMerchantDashboard.ts` | controller | -- | Merchant analytics. |
+| 58 | `handleStripeWebhook.ts` | controller | WF-038 (bridge) | Platform Stripe events. No bridge to dues module. |
+| 59 | `repos/billing.schema.ts` | entity | -- | invoices, invoice_line_items, merchant_accounts, billing_configs. |
+| 60 | `repos/billing.repo.ts` | repository | -- | InvoiceRepository + MerchantAccountRepository. |
+| 61-80 | 20 test files | test | -- | Full test coverage for all billing handlers + repos. |
+
+**Totals:** 80 files (33 dues + 9 cross-module + 38 billing). ~30 source files, ~50 test files.
 
 ---
 
-## 3. Findings
+## 3. Entity-to-Schema Traceability
 
-### 3a. Summary
+| Spec Entity (S7) | Schema File | Table Name | Status |
+|-------------------|-------------|------------|--------|
+| DuesPayment | `dues/repos/dues-payments.schema.ts` | `dues_payment` | PRESENT |
+| DuesOrgConfig | `dues/repos/dues-payments.schema.ts` | `dues_org_config` | PRESENT |
+| DuesCategoryOverride | `dues/repos/dues-payments.schema.ts` | `dues_category_override` | PRESENT |
+| DuesFund | `dues/repos/dues-payments.schema.ts` | `dues_fund` | PRESENT |
+| DuesFundAllocation | `dues/repos/dues-payments.schema.ts` | `dues_fund_allocation` | PRESENT |
+| DuesGatewayConfig | `dues/repos/dues-payments.schema.ts` | `dues_gateway_config` | PRESENT |
+| DuesReminderSchedule | `dues/repos/dues-payments.schema.ts` | `dues_reminder_schedule` | PRESENT |
+| DuesPaymentStatusHistory | `association:member/repos/dues-payment-status-history.schema.ts` | `dues_payment_status_history` | **MISLOCATED** |
+| WebhookRetryLog | `dues/repos/dues-payments.schema.ts` | `webhook_retry_log` | PRESENT |
+
+**Entity coverage: 9/9 (100%)**. All spec entities have schema definitions. 1 mislocated.
+
+---
+
+## 4. API Endpoint-to-Handler Traceability
+
+| Spec Endpoint (S10) | Handler File | Status |
+|----------------------|-------------|--------|
+| POST `/org/:id/payments/manual` | -- | **MISSING** |
+| POST `/org/:id/payments/checkout` | `dues/checkoutPaymentToken.ts` | PARTIAL (token-based) |
+| POST `/webhooks/:provider` | `dues/stripeWebhook.ts` | PRESENT (Stripe only) |
+| POST `/org/:id/payments/:id/refund` | -- | **MISSING** |
+| GET `/org/:id/reports/financial` | `dues/getDuesDashboard.ts` | PARTIAL (dashboard, not full report) |
+| GET `/my/payments` | -- | **MISSING** |
+| PUT `/org/:id/config/dues` | -- | **MISSING** (test exists) |
+| PUT `/org/:id/config/funds` | -- | **MISSING** |
+| POST `/org/:id/config/gateway` | -- | **MISSING** |
+| GET `/org/:id/payments/:id/receipt` | `dues/downloadReceipt.ts` | PRESENT |
+| GET `/pay/:token` | `dues/validatePaymentToken.ts` | PRESENT |
+
+**Endpoint coverage: 3/11 full + 2/11 partial = 5/11 (45.5%)**. Core payment operations (manual, refund, config) all missing handlers.
+
+---
+
+## 5. Workflow-to-File Traceability
+
+| Workflow | Files | Status |
+|----------|-------|--------|
+| WF-038: Pay Dues Online | `checkoutPaymentToken.ts`, `validatePaymentToken.ts`, `stripeWebhook.ts`, `jobs/processStripePayment.ts` | PARTIAL (token-based, Stripe only) |
+| WF-039: Fund Allocation | `utils/fund-math.test.ts`, `repos/dues-payments.repo.ts` (createFundAllocations) | PRESENT (repo + test) |
+| WF-040: Dues Config | `dues-config.test.ts` (orphan) | **MISSING HANDLER** |
+| WF-041: Refund Processing | -- | **MISSING** |
+| WF-042: Dunning/Reminders | `jobs/reminderProcessor.ts`, `dunning.schema.ts`, `dunning.repo.ts` | PRESENT |
+| WF-043: Financial Dashboard | `getDuesDashboard.ts` | PRESENT |
+| WF-044: Manual Payment | `bulkRecordPayments.test.ts` (orphan) | **MISSING HANDLER** |
+| WF-045: Receipt Generation | `downloadReceipt.ts`, `repos/dues-payments.repo.ts` (getNextReceiptSequence) | PRESENT |
+
+**Workflow coverage: 4/8 implemented, 1 partial, 3 missing.**
+
+---
+
+## 6. Business Rule Traceability
+
+| Rule | Files | Status |
+|------|-------|--------|
+| BR-04: Per-org/category config | `dues-payments.schema.ts` (duesOrgConfigs, duesCategoryOverrides) | SCHEMA ONLY -- no config handler |
+| BR-05: Fund split sums to 100% | `utils/fund-math.test.ts`, `dues-payments.repo.ts` | PRESENT |
+| BR-06: Manual payment recording | -- | **MISSING** |
+| BR-07: Payment extends expiry | `utils/expiry-extension.test.ts` | TEST ONLY |
+| BR-08: Refund reverses expiry | -- | **MISSING** |
+| BR-30: Org gateway isolation | Architecture (billing/ vs dues/) | BY DESIGN |
+| BR-32: 7-year retention, no hard delete | No hard-delete in repos | COMPLIANT |
+| M6-R1: Currency-aware rounding | `utils/fund-math.test.ts` | TEST PRESENT |
+| M6-R2: State machine transitions | `dues-payments.schema.ts` (enum), `dues-payment-status-history.schema.ts` | SCHEMA ONLY |
+| M6-R4: Duplicate payment warning | -- | **MISSING** |
+| M6-R5: Reminder defaults 60/30/7 | `jobs/reminderProcessor.ts` | PRESENT |
+| M6-R6: Receipt ORG_CODE-YEAR-SEQ | `dues-payments.repo.ts` (getNextReceiptSequence) | PRESENT |
+| M6-R8: Idempotent webhooks | `stripeWebhook.ts`, `jobs/webhookRetryProcessor.ts` | PRESENT |
+| M6-R12: Gateway adapter pattern | -- | **MISSING** (no adapter interface) |
+
+---
+
+## 7. Findings
+
+### 7a. Summary
 
 | Severity | Count |
 |----------|-------|
@@ -114,173 +188,120 @@
 | P3 (Info) | 3 |
 | **Total** | **19** |
 
-### 3b. Findings Table
+### 7b. Findings Detail
 
-| ID | Sev | Check | Finding | File | Spec Source |
-|----|-----|-------|---------|------|-------------|
-| EF-M06-a1e7c3b2 | P0 | naming | `sendPaymentLink` has no role check -- any authenticated user can generate payment links for any member. Spec requires treasurer/president/admin with 2FA. Route in app.ts uses `authMiddleware()` + `orgContextMiddleware()` but no position restriction. | `dues/sendPaymentLink.ts` | MODULE_SPEC S6: "Record payment: super, admin, president (2FA), treasurer (2FA)" |
-| EF-M06-b4d2f1a9 | P1 | error-taxonomy | No handler file for manual payment recording (`POST /org/:id/payments/manual`). Repo has `createPayment()`, `createFundAllocations()`, `findRecentPaymentForPerson()` (duplicate check) ready. Missing: role+2FA validation, duplicate warning, fund split orchestration, PaymentRecorded event emission. | `dues/` (missing) | API_CONTRACTS S2.1, MODULE_SPEC WF-044, M06-S3 |
-| EF-M06-c8e5a7d3 | P1 | error-taxonomy | No handler for refund processing (`POST /org/:id/payments/:id/refund`). Repo has `updatePaymentStatus()` and `createFundAllocations(isReversal=true)`. Missing: role check, status transition validation, fund reversal chain, membership expiry reversal, PaymentRefunded event. | `dues/` (missing) | API_CONTRACTS S2.1, MODULE_SPEC WF-041, M06-S9 |
-| EF-M06-d7f3b9e1 | P1 | error-taxonomy | No financial report handler (`GET /org/:id/reports/financial`). Repo has 4 report methods: `reportCollectionSummary`, `reportFundBreakdown`, `reportDuesStatus`, `reportAging`. None are wired to an endpoint. | `dues/` (missing) | API_CONTRACTS S2.2, MODULE_SPEC WF-043, M06-S10 |
-| EF-M06-e2c4a6f8 | P1 | error-taxonomy | No receipt PDF handler (`GET /org/:id/payments/:id/receipt`). `getNextReceiptSequence()` generates sequential receipt numbers. No handler generates or serves the PDF. | `dues/` (missing) | API_CONTRACTS S2.1, MODULE_SPEC WF-045, M06-S7 |
-| EF-M06-f9d1b3c5 | P1 | error-taxonomy | No member payment history handler (`GET /my/payments`). Repo `listPayments()` supports person filter but no handler wires it for self-service. | `dues/` (missing) | API_CONTRACTS S2.1, MODULE_SPEC S9 |
-| EF-M06-a3e7d2b8 | P1 | error-taxonomy | No dues configuration handlers (`PUT /org/:id/config/dues`, `PUT /org/:id/config/funds`). Repo has `upsertConfig()`, `replaceFunds()`, `replaceCategoryOverrides()` ready. Test file `dues-config.test.ts` exists but no source handler. | `dues/` (missing) | API_CONTRACTS S2.3, M06-S1, M06-S2 |
-| EF-M06-b6f4c8a1 | P1 | error-taxonomy | No reminder schedule handlers (`GET/PUT /org/:id/config/reminder-schedule`). Repo has `getReminderSchedules()` and `replaceReminderSchedules()`. | `dues/` (missing) | API_CONTRACTS S2.4, M06-S8 |
-| EF-M06-c2a5e9d7 | P2 | domain-terms | `getDuesDashboard` checks session but not officer position. Dashboard restricted to super/admin/president(2FA)/treasurer(2FA) per spec. Currently uses `requirePosition` from `@/utils/officer-check` but actual enforcement depends on runtime middleware wiring. | `dues/getDuesDashboard.ts` | MODULE_SPEC S6: "Dashboard: super, admin, president (2FA), treasurer (2FA)" |
-| EF-M06-d4b8f1c3 | P2 | data-shape | `checkoutPaymentToken` uses unsafe `(gatewayConfig as any).connected` and `(gatewayConfig as any).publicKey`. Schema `duesGatewayConfigs` has `encryptedSecretKey` not `publicKey`. The `publicKey` is passed as Stripe `connectedAccountId` (expects `acct_xxx` format). Two type-safety violations. | `dues/checkoutPaymentToken.ts:49,67` | MODULE_SPEC S7: DuesGatewayConfig entity |
-| EF-M06-e1c9a5b7 | P2 | import-boundaries | `getDuesDashboard.ts` imports from `association:member/repos/dues-payments.repo` (cross-handler directory import). `dues/repos/dues.repo.ts` imports from `association:member/repos/membership.schema` and `association:member/repos/dues.schema`. Three cross-module boundary violations. | `dues/getDuesDashboard.ts`, `dues/repos/dues.repo.ts` | MODULE_SPEC S20 AI-1: "Two handler directories exist" (acknowledged but should be migrated) |
-| EF-M06-f3d7b2a4 | P2 | domain-terms | `validatePaymentToken` does not check Life member status before returning payment details. Spec explicitly states: "Life Members must not see a pay button or receive reminders." Token validation is the last guard before checkout. | `dues/validatePaymentToken.ts` | MODULE_SPEC S5: Life member dues exemption |
-| EF-M06-a8c4e6d2 | P2 | domain-terms | Domain events registry defines only `dues.payment.recorded`. Missing 3 spec-required events: `dues.payment.refunded`, `dues.invoice.generated`, `dunning.escalation`. | `core/domain-events.registry.ts` | MODULE_SPEC S10b Published Events, API_CONTRACTS S3 |
-| EF-M06-b5e9c1f7 | P2 | domain-terms | Domain event consumers handle `dues.payment.recorded` -> membership expiry update. Missing consumed event: `membership.status.changed` -> block/unblock dues for suspended members. | `core/domain-event-consumers.ts` | MODULE_SPEC S10b Consumed Events |
-| EF-M06-c7a3d5b1 | P2 | import-boundaries | `billing/handleStripeWebhook.ts` processes Stripe payment events but does not bridge to dues module. When `payment_intent.succeeded` fires for a dues payment, no dues payment record is created, no fund allocation happens, no `dues.payment.recorded` event emits. The two-level payment architecture (BR-30) keeps them separate but the webhook-to-dues bridge is unimplemented. | `billing/handleStripeWebhook.ts` | MODULE_SPEC S4 WF-038 steps 4-5, S20 AI-5 |
-| EF-M06-d9f2a4c6 | P2 | data-shape | `billing/markInvoiceUncollectible.ts` has 3 TODO comments: missing payment intent cleanup, missing `context` field mapping, missing `paymentCaptureMethod` in schema. Response object assembled with hardcoded placeholder values. | `billing/markInvoiceUncollectible.ts` | Billing schema: invoices table |
-| EF-M06-e6b8d3f5 | P3 | naming | `sendPaymentLink` hardcodes `currency = 'PHP'` as fallback. Should read from `DuesOrgConfig.currency` first. Config is fetched but default could mask missing config for non-PHP orgs. | `dues/sendPaymentLink.ts:41` | MODULE_SPEC S7: DuesOrgConfig entity |
-| EF-M06-f4a2c7e9 | P3 | data-shape | 6 test files exist without matching source files: `bulkRecordPayments.test.ts`, `dues-config.test.ts`, `utils/fund-math.test.ts`, `utils/settle-payment.test.ts`, `utils/expiry-extension.test.ts`, `billing/repos/billing-config.repo.test.ts`. Tests were written TDD-first but implementation files are missing. | `dues/` and `billing/repos/` (orphaned tests) | MODULE_SPEC S19 Vertical Slice Plan |
-| EF-M06-a7d5f9b3 | P3 | naming | `dues/repos/dues.repo.ts` has `@deprecated` JSDoc but is still actively imported by `getDuesDashboard.ts`. Should complete migration to canonical repo or remove deprecation marker. | `dues/repos/dues.repo.ts` | Code hygiene |
+#### P0 -- Must Fix Before Merge
+
+| ID | Check | Finding | File | Spec Source |
+|----|-------|---------|------|-------------|
+| EF-M06-a1e7c3b2 | naming | `sendPaymentLink` has no role check -- any authenticated user can generate payment links for any member. Spec requires treasurer/president/admin with 2FA. | `dues/sendPaymentLink.ts` | S6: "Record payment: super, admin, president (2FA), treasurer (2FA)" |
+
+#### P1 -- Must Fix Before Release
+
+| ID | Check | Finding | File | Spec Source |
+|----|-------|---------|------|-------------|
+| EF-M06-b4d2f1a9 | error-taxonomy | No handler for manual payment recording. Repo has `createPayment()`, `createFundAllocations()`, `findRecentPaymentForPerson()` ready. Missing: role+2FA, duplicate warning, fund split orchestration, PaymentRecorded event. | `dues/` (missing) | S10 POST /org/:id/payments/manual, WF-044 |
+| EF-M06-c8e5a7d3 | error-taxonomy | No handler for refund processing. Repo has `updatePaymentStatus()`. Missing: role check, status transition, fund reversal, expiry reversal, PaymentRefunded event. | `dues/` (missing) | S10 POST /org/:id/payments/:id/refund, WF-041 |
+| EF-M06-d7f3b9e1 | error-taxonomy | No financial report handler. Repo has 4 report methods (`reportCollectionSummary`, `reportFundBreakdown`, `reportDuesStatus`, `reportAging`). None wired to endpoint. | `dues/` (missing) | S10 GET /org/:id/reports/financial, WF-043 |
+| EF-M06-f9d1b3c5 | error-taxonomy | No member payment history handler. Repo `listPayments()` supports person filter but no self-service endpoint. | `dues/` (missing) | S10 GET /my/payments |
+| EF-M06-a3e7d2b8 | error-taxonomy | No dues config handlers. Repo has `upsertConfig()`, `replaceFunds()`, `replaceCategoryOverrides()`. Test file exists but no handler. | `dues/` (missing) | S10 PUT /org/:id/config/dues, WF-040 |
+| EF-M06-b6f4c8a1 | error-taxonomy | No reminder schedule handlers. Repo has `getReminderSchedules()` and `replaceReminderSchedules()`. | `dues/` (missing) | S10 implied, WF-042 |
+| EF-M06-a4b5c6d7 | error-taxonomy | No gateway adapter interface. Only Stripe implemented. Adding PayMongo requires core logic changes, violating M6-R12. | `dues/` (missing) | S20.10, M6-R12 |
+
+#### P2 -- Should Fix
+
+| ID | Check | Finding | File | Spec Source |
+|----|-------|---------|------|-------------|
+| EF-M06-c2a5e9d7 | domain-terms | `getDuesDashboard` checks session but position enforcement depends on middleware wiring at runtime. | `dues/getDuesDashboard.ts` | S6 |
+| EF-M06-d4b8f1c3 | data-shape | `checkoutPaymentToken` uses `(gatewayConfig as any).connected` and `(gatewayConfig as any).publicKey`. Schema has `encryptedSecretKey`, not `publicKey`. Two type-safety violations. | `dues/checkoutPaymentToken.ts:49,67` | S7 DuesGatewayConfig |
+| EF-M06-e1c9a5b7 | import-boundaries | `getDuesDashboard.ts` imports from `association:member/repos/`. `dues/repos/dues.repo.ts` imports from `association:member/repos/`. Three cross-module boundary violations. | Multiple | S20 AI-1 |
+| EF-M06-f3d7b2a4 | domain-terms | `validatePaymentToken` does not check Life member status before returning payment details. Life Members must not see pay button. | `dues/validatePaymentToken.ts` | S5 Life member exemption |
+| EF-M06-a8c4e6d2 | domain-terms | Domain events registry defines only `dues.payment.recorded`. Missing 3 events: `dues.payment.refunded`, `dues.invoice.generated`, `dunning.escalation`. | `core/domain-events.registry.ts` | S10b Published Events |
+| EF-M06-b5e9c1f7 | domain-terms | Missing consumed event handler: `membership.status.changed` -> suppress reminders for Suspended/Removed/Life. | `core/domain-event-consumers.ts` | S10b Consumed Events |
+| EF-M06-c7a3d5b1 | import-boundaries | `billing/handleStripeWebhook.ts` does not bridge to dues module. No dues payment record created on `payment_intent.succeeded` for dues payments. | `billing/handleStripeWebhook.ts` | S4 WF-038, S20 AI-5 |
+| EF-M06-d9f2a4c6 | data-shape | `billing/markInvoiceUncollectible.ts` has 3 TODO comments: missing payment intent cleanup, context field, paymentCaptureMethod. | `billing/markInvoiceUncollectible.ts` | Billing schema |
+
+#### P3 -- Informational
+
+| ID | Check | Finding | File | Spec Source |
+|----|-------|---------|------|-------------|
+| EF-M06-e6b8d3f5 | naming | `sendPaymentLink` hardcodes `currency = 'PHP'` fallback. Should read from DuesOrgConfig.currency. | `dues/sendPaymentLink.ts:41` | S7 DuesOrgConfig |
+| EF-M06-f4a2c7e9 | data-shape | 2 test files without matching handler: `bulkRecordPayments.test.ts`, `dues-config.test.ts`. TDD RED without GREEN. | `dues/` | S19 Vertical Slice |
+| EF-M06-b0c1d2e3 | import-boundaries | DuesPaymentStatusHistory schema in `association:member/repos/` instead of `dues/repos/`. Violates aggregate boundary (DuesPayment owns its history). | `association:member/repos/dues-payment-status-history.schema.ts` | S7b Aggregate Boundaries |
 
 ---
 
-## 4. Per-File 5-Check Details
-
-### Check Legend
-1. **Error taxonomy** -- Does the file use the correct error classes from `@/core/errors` and match spec error codes?
-2. **Domain terms** -- Do variable/function names match MODULE_SPEC S2 domain glossary?
-3. **Data shape** -- Do types/schemas match MODULE_SPEC S7 entities and API_CONTRACTS request/response shapes?
-4. **Naming** -- Do file names, function names, route paths follow project conventions?
-5. **Import boundaries** -- Does the file only import from allowed modules (own handler dir, core/, generated/, shared utils)?
+## 8. Per-File 5-Check Matrix
 
 ### Dues Source Files
 
 | File | Error Tax | Domain Terms | Data Shape | Naming | Imports | Verdict |
 |------|-----------|-------------|------------|--------|---------|---------|
-| `checkoutPaymentToken.ts` | PASS (no spec errors needed for public endpoint) | PASS | **FAIL** (unsafe `as any` casts, wrong Stripe field) | PASS | PASS (imports own repos + utils) | 1 finding |
+| `checkoutPaymentToken.ts` | PASS | PASS | **FAIL** (unsafe casts) | PASS | PASS | 1 finding |
 | `sendPaymentLink.ts` | PASS | PASS | PASS | **WARN** (PHP hardcode) | PASS | 2 findings |
 | `validatePaymentToken.ts` | PASS | **FAIL** (no Life member check) | PASS | PASS | PASS | 1 finding |
-| `getDuesDashboard.ts` | PASS | **WARN** (role check depends on middleware) | PASS | PASS | **FAIL** (cross-module import) | 2 findings |
-| `repos/dues.repo.ts` | PASS | PASS | PASS | **WARN** (deprecated but used) | **FAIL** (imports association:member schemas) | 2 findings |
+| `getDuesDashboard.ts` | PASS | **WARN** (role enforcement) | PASS | PASS | **FAIL** (cross-module) | 2 findings |
+| `downloadReceipt.ts` | PASS | PASS | PASS | PASS | PASS | Clean |
+| `stripeWebhook.ts` | PASS | PASS | PASS | PASS | PASS | Clean |
+| `repos/dues-payments.schema.ts` | N/A | PASS | PASS | PASS | PASS | Clean |
+| `repos/dues-payments.repo.ts` | PASS | PASS | PASS | PASS | PASS | Clean |
+| `repos/dues.schema.ts` | N/A | PASS | PASS | PASS | PASS | Legacy |
+| `repos/payment-token.schema.ts` | N/A | PASS | PASS | PASS | PASS | Clean |
 | `repos/payment-token.repo.ts` | PASS | PASS | PASS | PASS | PASS | Clean |
-| `repos/payment-token.schema.ts` | N/A | PASS | PASS | PASS | PASS (imports person + platformadmin schemas -- acceptable FK refs) | Clean |
 | `utils/payment-token.ts` | PASS | PASS | PASS | PASS | PASS | Clean |
 | `jobs/index.ts` | PASS | PASS | N/A | PASS | PASS | Clean |
-| `jobs/webhookRetryProcessor.ts` | PASS | PASS | PASS | PASS | PASS | Clean |
-| `jobs/reminderProcessor.ts` | PASS | PASS | PASS | PASS | PASS | Clean |
 | `jobs/autoInvoiceGenerator.ts` | PASS | PASS | PASS | PASS | PASS | Clean |
+| `jobs/processStripePayment.ts` | PASS | PASS | PASS | PASS | PASS | Clean |
+| `jobs/reminderProcessor.ts` | PASS | PASS | PASS | PASS | PASS | Clean |
+| `jobs/webhookRetryProcessor.ts` | PASS | PASS | PASS | PASS | PASS | Clean |
 
 ### Billing Source Files
 
 | File | Error Tax | Domain Terms | Data Shape | Naming | Imports | Verdict |
 |------|-----------|-------------|------------|--------|---------|---------|
-| `createInvoice.ts` | PASS | PASS | PASS | PASS | PASS (imports person repo -- acceptable FK lookup) | Clean |
-| `updateInvoice.ts` | PASS | PASS | PASS | PASS | PASS | Clean |
-| `deleteInvoice.ts` | PASS | PASS | PASS | PASS | PASS | Clean |
-| `finalizeInvoice.ts` | PASS | PASS | PASS | PASS | PASS | Clean |
-| `getInvoice.ts` | PASS | PASS | PASS | PASS | PASS | Clean |
-| `listInvoices.ts` | PASS | PASS | PASS | PASS | PASS | Clean |
-| `payInvoice.ts` | PASS | PASS | PASS | PASS | PASS | Clean |
-| `captureInvoicePayment.ts` | PASS | PASS | PASS | PASS | PASS | Clean |
-| `refundInvoicePayment.ts` | PASS | PASS | PASS | PASS | PASS | Clean |
-| `markInvoiceUncollectible.ts` | PASS | PASS | **WARN** (3 TODO placeholders) | PASS | PASS | 1 finding |
-| `voidInvoice.ts` | PASS | PASS | PASS | PASS | PASS | Clean |
-| `createMerchantAccount.ts` | PASS | PASS | PASS | PASS | PASS | Clean |
-| `onboardMerchantAccount.ts` | PASS | PASS | PASS | PASS | PASS | Clean |
-| `getMerchantAccount.ts` | PASS | PASS | PASS | PASS | PASS | Clean |
-| `getMerchantDashboard.ts` | PASS | PASS | PASS | PASS | PASS | Clean |
-| `handleStripeWebhook.ts` | PASS | PASS | PASS | PASS | **WARN** (no bridge to dues) | 1 finding |
+| All 16 billing handlers | PASS | PASS | PASS (except markInvoiceUncollectible) | PASS | PASS | 1 finding total |
+| `handleStripeWebhook.ts` | PASS | PASS | PASS | PASS | **WARN** (no dues bridge) | 1 finding |
 | `repos/billing.schema.ts` | N/A | PASS | PASS | PASS | PASS | Clean |
 | `repos/billing.repo.ts` | PASS | PASS | PASS | PASS | PASS | Clean |
 
 ---
 
-## 5. Review Required
-
-### P0 -- Must Fix Before Merge
-
-| ID | Action Required |
-|----|----------------|
-| EF-M06-a1e7c3b2 | Add `requirePosition(['treasurer', 'president'])` + 2FA middleware to `sendPaymentLink`. Currently any authenticated org member can generate payment links. |
-
-### P1 -- Must Fix Before Release
-
-| ID | Action Required |
-|----|----------------|
-| EF-M06-b4d2f1a9 | Implement `recordManualPayment.ts` handler wiring repo methods + role/2FA + duplicate check + fund split + event emission. |
-| EF-M06-c8e5a7d3 | Implement `refundPayment.ts` handler with status transition, fund reversal, expiry reversal, event emission. |
-| EF-M06-d7f3b9e1 | Implement `getFinancialReport.ts` handler exposing the 4 repo report methods. |
-| EF-M06-e2c4a6f8 | Implement `generatePaymentReceipt.ts` handler for PDF receipt generation + serving. |
-| EF-M06-f9d1b3c5 | Implement `getMyPayments.ts` handler for member self-service payment history. |
-| EF-M06-a3e7d2b8 | Implement dues config handlers (upsertDuesConfig, updateFunds). Test stubs already exist. |
-| EF-M06-b6f4c8a1 | Implement reminder schedule GET/PUT handlers. |
-
-### P2 -- Should Fix
-
-8 findings covering: position enforcement, type safety, cross-module imports, domain event gaps, webhook bridge, Life member guard, TODO placeholders.
-
-### P3 -- Informational
-
-3 findings: PHP currency hardcode, orphaned test files, deprecated-but-used repo.
-
----
-
-## 6. Structural Health
+## 9. Structural Health
 
 | Metric | Dues | Billing | Combined |
 |--------|------|---------|----------|
-| Source files | 12 | 18 | 30 |
-| Test files | 15 | 23 | 38 |
-| Test-to-source ratio | 1.25 | 1.28 | 1.27 |
+| Source files | 17 | 18 | 35 |
+| Test files | 16 | 22 | 38 |
+| Test-to-source ratio | 0.94 | 1.22 | 1.09 |
 | Files with findings | 5 | 2 | 7 |
-| Clean files | 7 | 16 | 23 |
-| Orphaned tests (no source) | 5 | 1 | 6 |
+| Clean files | 12 | 16 | 28 |
+| Orphaned tests (no source) | 2 | 1 | 3 |
 | Missing handlers (spec-required) | 7 | 0 | 7 |
 
-### API Contract Coverage
-
-| Spec Endpoint | Handler Exists | Status |
-|---------------|---------------|--------|
-| POST `/org/:id/payments/manual` | NO | **MISSING** |
-| POST `/org/:id/payments/checkout` | `checkoutPaymentToken.ts` (via token) | Partial (token-based only) |
-| POST `/webhooks/:provider` | `handleStripeWebhook.ts` (billing) | Platform-level only, no dues bridge |
-| POST `/org/:id/payments/:id/refund` | NO | **MISSING** |
-| GET `/org/:id/payments/:id/receipt` | NO | **MISSING** |
-| GET `/my/payments` | NO | **MISSING** |
-| GET `/pay/:token` | `validatePaymentToken.ts` | Implemented |
-| GET `/org/:id/reports/financial` | NO | **MISSING** |
-| PUT `/org/:id/config/dues` | NO | **MISSING** |
-| PUT `/org/:id/config/funds` | NO | **MISSING** |
-| POST `/org/:id/config/gateway` | NO | **MISSING** |
-| GET `/org/:id/config/reminder-schedule` | NO | **MISSING** |
-| PUT `/org/:id/config/reminder-schedule` | NO | **MISSING** |
-
-**Endpoint coverage: 2/13 (15.4%)**. Token-based payment flow is the only fully wired path. Core payment operations (manual record, refund, config, reports, receipts) are all repo-ready but lack handler orchestration.
+**Endpoint coverage: 3/11 full + 2/11 partial (45.5%)**
+**Entity coverage: 9/9 (100%, 1 mislocated)**
+**Workflow coverage: 4/8 implemented + 1 partial (56.3%)**
+**Business rule coverage: 7/14 present (50%)**
 
 ---
 
-## 7. Cross-Module Dependencies
+## 10. Prioritized Fix Queue
 
-| From | To | Type | Files | Issue |
-|------|----|------|-------|-------|
-| `dues/getDuesDashboard.ts` | `association:member/repos/dues-payments.repo` | Repository import | 1 | Cross-handler boundary violation |
-| `dues/repos/dues.repo.ts` | `association:member/repos/membership.schema` | Schema table import | 1 | Cross-handler boundary violation |
-| `dues/repos/dues.repo.ts` | `association:member/repos/dues.schema` | Schema table import | 1 | Cross-handler boundary violation (legacy) |
-| `dues/checkoutPaymentToken.ts` | `association:member/repos/dues-payments.repo` | Repository import | 1 | Cross-handler boundary violation |
-| `billing/handleStripeWebhook.ts` | (none to dues) | Missing bridge | 1 | No integration between billing webhooks and dues payment recording |
+| Priority | Finding ID | Fix | Effort |
+|----------|-----------|-----|--------|
+| P0 | EF-M06-a1e7c3b2 | Add `requirePosition(['treasurer', 'president'])` + 2FA to `sendPaymentLink` | S |
+| P1 | EF-M06-b4d2f1a9 | Create `recordManualPayment.ts` handler | M |
+| P1 | EF-M06-c8e5a7d3 | Create `refundPayment.ts` handler | M |
+| P1 | EF-M06-d7f3b9e1 | Create `getFinancialReport.ts` handler | M |
+| P1 | EF-M06-f9d1b3c5 | Create `getMyPayments.ts` handler | S |
+| P1 | EF-M06-a3e7d2b8 | Create dues config handlers (3 endpoints) | L |
+| P1 | EF-M06-b6f4c8a1 | Create reminder schedule GET/PUT handlers | S |
+| P1 | EF-M06-a4b5c6d7 | Create gateway adapter interface + Stripe impl | M |
+| P2 | 8 findings | Role checks, type safety, cross-module imports, domain events, webhook bridge, Life member guard, TODOs | M |
+| P3 | 3 findings | PHP hardcode, orphan tests, mislocated schema | S |
 
-**Note:** Per MODULE_SPEC S20 AI-1, two handler directories are acknowledged. The `association:member` mega-module contains legacy dues schemas. Migration to `dues/repos/` is tracked but not yet complete.
-
----
-
-## 8. Business Rule Traceability
-
-| BR | Description | Handler Coverage | Status |
-|----|-------------|-----------------|--------|
-| BR-04 | Dues amount per org | `dues.repo.ts` has config CRUD | Repo only, no handler |
-| BR-05 | Fund allocation sums to 100% | `dues.repo.ts` validates | Repo only, no handler |
-| BR-06 | Payment recording by treasurer | No handler | **MISSING** |
-| BR-07 | Dues expiry extension on payment | `domain-event-consumers.ts` | Event consumer exists |
-| BR-08 | Refund within 30 days, not allocated | No handler | **MISSING** |
-| BR-30 | Two-level gateway separation | Architecture maintained (billing/ vs dues/) | By design |
-| BR-32 | 7-year financial retention | No hard-delete in repos | Compliant |
+**Effort:** S = < 1 day, M = 1-3 days, L = 3-5 days
 
 ---
 
-*End of report. 19 findings across 68 files in 2 directories.*
+*End of report. 19 findings across ~80 files in 3 directories (dues/, billing/, association:member/repos/).*

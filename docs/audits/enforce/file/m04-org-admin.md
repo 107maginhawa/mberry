@@ -3,13 +3,28 @@
 **Module**: `services/api-ts/src/handlers/association:member/`
 **Spec Sources**: `docs/product/modules/m04-org-admin/MODULE_SPEC.md`, `API_CONTRACTS.md`
 **Cross-references**: `DOMAIN_MODEL.md`, `WORKFLOW_MAP.md`, `ROLE_PERMISSION_MATRIX.md`, `MODULE_MAP.md`
-**Audit Date**: 2026-05-27
-**Total Files**: 157+ (largest handler directory in codebase)
+**Audit Date**: 2026-05-28 (refreshed from 2026-05-27)
+**Total Files**: 194 non-test handlers in mega-module (31 M04-relevant)
 **Prior Findings Preserved**: Yes (EF-M04-a1a1a1a1 through EF-M04-f2f2f2f2 from prior module-level audit)
 
 ---
 
-## 1. File Classification Table
+## 1. Spec-to-Handler Traceability Matrix
+
+### 1.0 API Endpoint Coverage (MODULE_SPEC Section 10)
+
+| Spec Endpoint | Method | Path | Handler File | Status |
+|---|---|---|---|---|
+| API-01 | GET | `/org/:id` | `getOrganizationProfile.ts` | IMPLEMENTED |
+| API-02 | PUT | `/org/:id` | `updateOrganizationProfile.ts` | IMPLEMENTED |
+| API-03 | POST | `/org/:id/officers` | `createOfficerTerm.ts` | IMPLEMENTED |
+| API-04 | DELETE | `/org/:id/officers/:termId` | `deleteOfficerTerm.ts` | IMPLEMENTED |
+| API-05 | POST | `/org/:id/officers/:termId/transition` | `transitionOfficerTerm.ts` | IMPLEMENTED |
+| API-06 | POST | `/org/:id/discipline` | `createDisciplinaryAction.ts` | IMPLEMENTED |
+| API-07 | GET | `/org/:slug/public` | -- | **MISSING** (EF-M04-fe07) |
+| API-08 | GET | `/org/:id/dashboard` | `getOrgDashboard.ts` | IMPLEMENTED |
+
+**Coverage: 7/8 spec endpoints implemented (87.5%)**
 
 ### 1.1 Schema/Entity Files (12 files)
 
@@ -45,6 +60,8 @@
 | `repos/compliance.repo.ts` | repository | Compliance reporting | PASS |
 | `repos/dues-payments.repo.test.ts` | test | DuesPayment repo unit tests | PASS |
 | `repos/dues-schema.test.ts` | test | Dues schema validation tests | PASS |
+| `repos/institutional-membership.repo.ts` | repository | Institutional membership CRUD | PASS |
+| `repos/institutional-membership.schema.ts` | entity | Institutional membership table | PASS |
 
 ### 1.3 Utility/Service Files (27 files)
 
@@ -65,6 +82,8 @@
 | `utils/gateway-adapter.ts` | service | Payment gateway abstraction | PASS |
 | `utils/gateway-adapter.test.ts` | test | Gateway adapter tests | PASS |
 | `utils/membership-lifecycle.ts` | service | Membership lifecycle operations | PASS |
+| `utils/membership-status-middleware.ts` | service | Membership status middleware | PASS |
+| `utils/membership-status-middleware.test.ts` | test | Membership status middleware tests | PASS |
 | `utils/payment-token.ts` | service | Payment token generation | PASS |
 | `utils/paymongo.adapter.ts` | service | PayMongo gateway adapter (PH-specific) | PASS |
 | `utils/receipt-number.ts` | service | Receipt number generation | PASS |
@@ -75,10 +94,8 @@
 | `utils/reminder-schedule.test.ts` | test | Reminder schedule tests | PASS |
 | `utils/settle-payment.ts` | service | Payment settlement logic | PASS |
 | `utils/settle-payment.test.ts` | test | Payment settlement tests | PASS |
-| `utils/transcript-template.ts` | service | Credit transcript PDF template | PASS |
-| `utils/transcript-template.test.ts` | test | Transcript template tests | PASS |
 
-### 1.4 Job/Background Service Files (13 files)
+### 1.4 Job/Background Service Files (14 files)
 
 | File | Classification | Purpose | Status |
 |------|---------------|---------|--------|
@@ -93,6 +110,7 @@
 | `jobs/directoryAutoPopulate.integration.test.ts` | test | Directory auto-populate integration tests | PASS |
 | `jobs/reminderProcessor.ts` | service | Daily dues reminder processing | PASS |
 | `jobs/reminderProcessor.test.ts` | test | Reminder processor tests | PASS |
+| `jobs/statusRecomputeCron.ts` | service | Periodic membership status recomputation | PASS |
 | `jobs/webhookRetryProcessor.ts` | service | Payment webhook retry logic | PASS |
 | `jobs/webhookRetryProcessor.test.ts` | test | Webhook retry tests | PASS |
 
@@ -102,22 +120,25 @@
 
 | File | Classification | Spec Trace | Status |
 |------|---------------|-----------|--------|
-| `createOfficerTerm.ts` | controller | API_CONTRACTS 2.3; BR-09, M4-R1, M4-R2 | WARN (EF-M04-fe02, EF-M04-fe05) |
+| `createOfficerTerm.ts` | controller | API-03; BR-09, BR-09e, M4-R1, M4-R2 | PASS (auth + one-per-role + board-member exception + platform-admin for president) |
 | `createOfficerTerm.test.ts` | test | AC-M04-002 | PASS |
-| `deleteOfficerTerm.ts` | controller | API_CONTRACTS 2.3 DELETE | PASS |
-| `listOfficerTerms.ts` | controller | (list variant) | WARN (EF-M04-fe03) |
-| `updateOfficerTerm.ts` | controller | (update variant) | PASS |
-| `getOfficerTerm.ts` | controller | (get variant) | PASS |
-| `getMyOfficerRole.ts` | controller | (self-check) | PASS |
-| `createPosition.ts` | controller | MODULE_SPEC s7 Entity: Position | PASS |
-| `deletePosition.ts` | controller | (CRUD) | PASS |
-| `listPositions.ts` | controller | (CRUD) | PASS |
-| `getPosition.ts` | controller | (CRUD) | PASS |
-| `updatePosition.ts` | controller | (CRUD) | PASS |
-| `createDisciplinaryAction.ts` | controller | API_CONTRACTS 2.5; M4-R4, M4-R6 | PASS |
-| `createTransitionChecklist.ts` | controller | API_CONTRACTS 2.4; M4-R3 | PASS |
-| `getOrganizationProfile.ts` | controller | API_CONTRACTS 2.1 GET | WARN (EF-M04-fe04) |
-| `updateOrganizationProfile.ts` | controller | API_CONTRACTS 2.1 PUT; M4-R5, BR-31 | WARN (EF-M04-fe04) |
+| `deleteOfficerTerm.ts` | controller | API-04 | PASS |
+| `transitionOfficerTerm.ts` | controller | API-05; M4-R3 | WARN (EF-M04-fe08) |
+| `listOfficerTerms.ts` | controller | (list variant, not in spec) | INFO -- orphan, legitimate |
+| `listOfficerTermsSummary.ts` | controller | (summary variant, not in spec) | INFO -- orphan, legitimate |
+| `updateOfficerTerm.ts` | controller | (update variant, not in spec) | INFO -- orphan, legitimate |
+| `updateOfficerTerm.test.ts` | test | Officer term update | PASS |
+| `getOfficerTerm.ts` | controller | (get variant, not in spec) | INFO -- orphan, legitimate |
+| `getMyOfficerRole.ts` | controller | (self-check, not in spec) | INFO -- orphan, legitimate |
+| `createPosition.ts` | controller | MODULE_SPEC s7 Entity: Position | INFO -- orphan, legitimate |
+| `deletePosition.ts` | controller | (CRUD) | INFO -- orphan, legitimate |
+| `listPositions.ts` | controller | (CRUD) | INFO -- orphan, legitimate |
+| `getPosition.ts` | controller | (CRUD) | INFO -- orphan, legitimate |
+| `updatePosition.ts` | controller | (CRUD) | INFO -- orphan, legitimate |
+| `createDisciplinaryAction.ts` | controller | API-06; M4-R4, M4-R2, M4-R6 | PASS |
+| `getOrganizationProfile.ts` | controller | API-01 | WARN (EF-M04-fe10) |
+| `updateOrganizationProfile.ts` | controller | API-02; M4-R5, BR-31 | WARN (EF-M04-fe09) |
+| `getOrgDashboard.ts` | controller | API-08; AC-M04-005 | PASS |
 | `ac-m04.org-admin.test.ts` | test | AC-M04-001 through AC-M04-007 | PASS |
 | `officer-admin.test.ts` | test | Officer admin tests | PASS |
 | `governance.test.ts` | test | Governance unit tests | PASS |
@@ -142,7 +163,11 @@
 | `deceaseMembership.ts` | controller | PASS |
 | `deceaseMembership.test.ts` | test | PASS |
 | `createInstitutionalMembership.ts` | controller | PASS |
+| `createInstitutionalMembership.test.ts` | test | PASS |
 | `deleteInstitutionalMembership.ts` | controller | PASS |
+| `deleteInstitutionalMembership.test.ts` | test | PASS |
+| `getInstitutionalMembership.ts` | controller | PASS |
+| `getInstitutionalMembership.test.ts` | test | PASS |
 | `updateInstitutionalMembership.ts` | controller | PASS |
 | `membership.test.ts` | test | PASS |
 
@@ -164,6 +189,7 @@
 |------|---------------|--------|
 | `createMembershipApplication.ts` | controller | PASS |
 | `deleteMembershipApplication.ts` | controller | PASS |
+| `getMembershipApplication.ts` | controller | PASS |
 | `listMembershipApplications.ts` | controller | WARN (EF-M04-fe03) |
 | `approveMembershipApplication.ts` | controller | PASS |
 | `approveMembershipApplication.test.ts` | test | PASS |
@@ -244,6 +270,7 @@
 | `updateCpdConfig.test.ts` | test | PASS |
 | `getCpdConfig.ts` | controller | PASS |
 | `getCpdConfig.test.ts` | test | PASS |
+| `updateOrgCpdConfig.ts` | controller | PASS |
 | `refreshCompliance.ts` | controller | PASS |
 | `refreshCompliance.test.ts` | test | PASS |
 | `awardManualCredit.ts` | controller | PASS |
@@ -381,8 +408,16 @@
 | `updateRosterMember.ts` | controller | PASS |
 | `importRosterMembers.ts` | controller | PASS |
 | `allocateSeat.ts` | controller | PASS |
+| `allocateSeat.test.ts` | test | PASS |
 | `revokeSeat.ts` | controller | PASS |
 | `listSeatAllocations.ts` | controller | PASS |
+
+#### Subscriptions
+
+| File | Classification | Status |
+|------|---------------|--------|
+| `createSubscriptionCheckout.ts` | controller | PASS |
+| `getMySubscription.ts` | controller | PASS |
 
 ---
 
@@ -397,7 +432,7 @@
 | President | position_level enum | `positionLevelEnum` in governance.schema.ts | PASS |
 | Position | position table | `repos/governance.schema.ts` L34 | PASS |
 | Officer Term | officer_term table | `repos/governance.schema.ts` L47 | PASS |
-| Org Public Page | (frontend concern + public slug) | getOrganizationProfile.ts reads org by slug | PASS |
+| Org Public Page | (frontend concern + public slug) | No dedicated handler (EF-M04-fe07) | FAIL |
 | Disciplinary Action | disciplinary_action table | `repos/governance.schema.ts` L93 | PASS |
 | Transition Checklist | transition_checklist table | `repos/governance.schema.ts` L70 | PASS |
 
@@ -414,164 +449,269 @@
 
 ---
 
-## 3. New Findings (Per-File Audit)
+## 3. New Findings (File-Level Audit, 2026-05-28)
 
-### EF-M04-fe01 | P1 | Missing `cancelled` key in PAYMENT_VALID_TRANSITIONS
+### EF-M04-fe07 | P1 | Missing Public Page Handler (GET /org/:slug/public)
 
-**File**: `utils/status-transitions.ts`
-**Check**: Data shape / state machine alignment
-**Finding**: `PAYMENT_VALID_TRANSITIONS` includes `pending: ['submitted', 'expired', 'cancelled']` -- so `cancelled` is a valid target state. But `cancelled` is NOT listed as a key in the map. Result: `isValidPaymentTransition('cancelled', anything)` correctly returns `false` (terminal behavior). However, `paymentTransitionError('cancelled', x)` returns `"Unknown payment status 'cancelled'"` instead of `"none (terminal state)"`.
-**Impact**: Misleading error message when validating transitions from cancelled state.
-**Recommendation**: Add `cancelled: []` to `PAYMENT_VALID_TRANSITIONS` for consistency with other terminal states (refunded, failed, rejected, expired all have explicit empty-array entries).
+**File**: (does not exist)
+**Spec Ref**: API-07, BR-29, WF-028, AC-M04-006
+**Finding**: No handler implements `GET /org/:slug/public`. The spec requires a public-facing org page accessible without auth, returning org profile data and "Apply to Join" CTA. `getPublicDirectoryProfile.ts` exists but is member-directory-scoped, not org-profile-scoped. No file matching `*public*` or `*slug*` exists in the association:member handler directory.
+**Impact**: Public page unreachable. Apply-to-Join flow dead. BR-29 not satisfied.
+**Fix**: Create `getPublicOrgPage.ts` handler with slug-based org lookup, no auth middleware, suspended-org banner support per error handling spec row 6.
 
-### EF-M04-fe02 | P2 | Cross-Handler Import: platformadmin repository
+### EF-M04-fe08 | P2 | Transition Checklist Optional, Not Required (M4-R3)
 
-**File**: `createOfficerTerm.ts`
-**Check**: Import boundaries
-**Finding**: Imports `PlatformAdminRepository` from `@/handlers/platformadmin/repos/platform-admin.repo`. Used to verify organization existence before creating an officer term. This is a runtime dependency on another module's repository class (not just schema reference).
-**Impact**: Business logic dependency across bounded contexts. If PlatformAdminRepository API changes, this handler breaks.
-**Recommendation**: Consider injecting org-existence check via middleware or shared utility. Part of mega-module split plan.
+**File**: `transitionOfficerTerm.ts`
+**Spec Ref**: M4-R3, WF-025, AC-M04-003
+**Finding**: Spec says "IF officer transition THEN checklist required before transfer" and "Role-specific items auto-generated." Handler treats checklist items as optional: `if (body.checklistItems && body.checklistItems.length > 0)`. An officer transition can complete with zero checklist items, bypassing accountability.
+**Impact**: Knowledge transfer can be skipped entirely. No forced handover documentation.
+**Fix**: Either (a) require non-empty `checklistItems` array in body validation, or (b) auto-generate default checklist items when none provided (per M4-R3 "auto-generated" directive).
 
-### EF-M04-fe03 | P3 | Cross-Handler Import: person schema (read-only JOINs)
+### EF-M04-fe09 | P2 | SVG Handling Diverges from Spec (Block vs. Sanitize)
 
-**Files**: `createDuesInvoice.ts`, `getDuesInvoice.ts`, `listDuesInvoices.ts`, `listMembershipApplications.ts`, `listOfficerTerms.ts`, `publishMyDirectoryProfile.ts`, `lookupCredentialPublic.ts`, `jobs/directoryAutoPopulate.ts`
-**Check**: Import boundaries
-**Finding**: 8 files import `persons` table from `@/handlers/person/repos/person.schema` for JOIN operations (display name in lists). One file (`lookupCredentialPublic.ts`) imports `personPrivacySettings`.
-**Impact**: Read-only schema reference for JOINs. Low risk -- Person is the root entity referenced by every context (DOMAIN_MODEL s9 Context 1).
-**Recommendation**: Acceptable pattern for read-only JOINs. No action needed.
+**File**: `updateOrganizationProfile.ts`
+**Spec Ref**: BR-31, M4-R5, AC-M04-007
+**Finding**: Spec says "sanitize SVG (strip scripts, event handlers, external refs)" -- sanitize and allow. Handler **blocks SVGs entirely** via `throw new ValidationError('SVG logos are not allowed')`. The AC test file has a `sanitizeSvg()` function that correctly strips scripts, but this function is not used in the actual handler. The handler is more restrictive than spec requires.
+**Impact**: SVG logos cannot be uploaded. Spec and code disagree on behavior.
+**Fix**: Blocking is arguably more secure than sanitizing. Recommend updating MODULE_SPEC BR-31, M4-R5, and AC-M04-007 to reflect the current "block SVG" policy. Alternative: implement sanitization per spec if SVG support is desired.
 
-### EF-M04-fe04 | P2 | Cross-Handler Import: platformadmin schema (organization table)
+### EF-M04-fe10 | P2 | No Suspended Org Banner in Profile Response
 
-**Files**: `getOrganizationProfile.ts`, `updateOrganizationProfile.ts`
-**Check**: Import boundaries
-**Finding**: Import `organizations` table directly from `@/handlers/platformadmin/repos/platform-admin.schema`. The Organization entity is owned by the Platform bounded context (DOMAIN_MODEL s8) but accessed directly.
-**Impact**: Tight coupling between Membership and Platform contexts. Documented in DOMAIN_MODEL s12 "Anti-Corruption Layers" as known coupling.
-**Recommendation**: Acceptable for now. Target resolution in mega-module split (P1-11, deferred to v1.2.0).
+**File**: `getOrganizationProfile.ts`
+**Spec Ref**: Error Handling row 6 ("Org suspended -> 200 with banner")
+**Finding**: Spec error table says suspended orgs should return 200 with banner "This organization is currently inactive." Handler returns raw org data without checking or surfacing org status.
+**Impact**: Suspended orgs appear identical to active orgs in API responses.
+**Fix**: Add org status check in response; include `isSuspended: boolean` and optional `statusBanner: string` fields.
 
-### EF-M04-fe05 | P3 | Naming: ValidatedContext<any> in governance handlers
+### EF-M04-fe11 | P2 | Domain Event Consumers Not Wired
 
-**Files**: `createOfficerTerm.ts`, `createDisciplinaryAction.ts`, `createPosition.ts` (and likely other governance handlers)
-**Check**: Naming / typing
-**Finding**: M04-governance handlers use `ValidatedContext<any, never, never>` instead of importing specific generated validator types from `@/generated/openapi/validators`. Contrast with membership handlers (e.g., `createMembership.ts`) which correctly use typed variants (`ValidatedContext<CreateMembershipBody, never, never>`).
-**Impact**: Loss of compile-time body type safety. Runtime validation still occurs via OpenAPI middleware.
-**Recommendation**: Update governance handlers to use generated validator types for full type safety.
+**File**: (no consumer file exists)
+**Spec Ref**: MODULE_SPEC 10b Consumed Events
+**Finding**: Spec declares two consumed events: `ElectionPublished` (from M12, triggers officer transition from election results) and `OrganizationCreated` (from M03, initializes dashboard + creates default positions). Grep for both event names across the entire `association:member/` directory returns zero matches.
+**Impact**: Election results don't auto-trigger officer transitions. New orgs don't get default positions.
+**Fix**: Register domain event listeners in `association:member/` for `ElectionPublished` (create officer terms from election results) and `OrganizationCreated` (create default position records).
 
-### EF-M04-fe06 | P3 | Cross-Handler Import: membership module (separate handler dir)
+### EF-M04-fe12 | P3 | Self-Discipline Not Blocked
 
-**Files**: `getRosterMember.ts`, `listRosterMembers.ts`, `getCreditCompliance.ts`
-**Check**: Import boundaries
-**Finding**: Import `MembershipRepository` from `@/handlers/membership/repos/membership.repo` (the separate `membership/` handler directory), not from `./repos/membership.repo` (the internal one). Two different `membership.repo.ts` files exist for different concerns.
-**Impact**: Ambiguous -- two repos with same name in different modules. Part of mega-module debt.
-**Recommendation**: Clarify ownership. Part of mega-module split plan.
+**File**: `createDisciplinaryAction.ts`
+**Spec Ref**: Edge Cases (UI Blueprint S05)
+**Finding**: UI blueprint says "Self-discipline: server rejects -- president cannot discipline themselves." Handler does not check `body.targetPersonId === user.id`. President can issue disciplinary action against self.
+**Impact**: Low -- unlikely in practice, but spec says it should be blocked.
+**Fix**: Add `if (body.targetPersonId === user.id) return ctx.json({ error: 'Cannot issue disciplinary action against yourself' }, 400)`.
+
+### EF-M04-fe13 | INFO | 2FA Enforcement Correctly Implemented
+
+**File**: `utils/officer-check.ts` (shared utility, not in handler dir)
+**Spec Ref**: MODULE_SPEC Section 6 Permissions, AI Instruction #3
+**Finding**: `requirePosition()` correctly enforces 2FA for privileged positions (president, secretary, treasurer) in production. Skipped in dev via `NODE_ENV` check (line 102). All governance mutation handlers use `requirePosition()`.
+**Status**: PASS -- no action needed.
+
+### EF-M04-fe14 | INFO | Auth Pattern Consistent Across Governance Handlers
+
+**File**: All governance mutation handlers
+**Spec Ref**: M4-R2
+**Finding**: `createOfficerTerm`, `deleteOfficerTerm`, `transitionOfficerTerm`, `createDisciplinaryAction`, `updateOrganizationProfile` all use `requirePosition([POSITION_TITLES.PRESIDENT])`. `getOrgDashboard` uses `requirePosition([PRESIDENT, TREASURER, SECRETARY])` for read access per spec.
+**Status**: PASS -- auth patterns are correct and consistent.
+
+### EF-M04-fe15 | INFO | Domain Events Published Correctly
+
+**File**: Multiple governance handlers
+**Spec Ref**: MODULE_SPEC 10b Published Events
+**Finding**: All three officer lifecycle events emit correctly: `officer.assigned` (createOfficerTerm L89), `officer.removed` (deleteOfficerTerm L50), `officer.transitioned` (transitionOfficerTerm L109). Disciplinary events emit `member.suspended` and `member.removed` based on action type.
+**Status**: PASS -- published events aligned with spec.
 
 ---
 
 ## 4. Prior Module-Level Findings (Preserved)
 
-These were identified in the prior module-level audit and remain valid:
+These were identified in the prior module-level audit. Status updated where findings have been resolved.
 
 | ID | Sev | Finding Summary | Status |
 |----|-----|----------------|--------|
-| EF-M04-a1a1a1a1 | P0 | Domain event registry missing all M04 events (OfficerAssigned, OfficerRemoved, etc.) | OPEN |
-| EF-M04-b1b1b1b1 | P0 | domain-event-consumers.ts only wires dues.payment.recorded; no MemberSuspended/MemberRemoved consumers | OPEN |
-| EF-M04-c1c1c1c1 | P1 | createDisciplinaryAction.ts does not emit MemberSuspended/MemberRemoved events or update membership status | OPEN |
-| EF-M04-d1d1d1d1 | P1 | No transitionOfficerTerm handler; TransitionChecklistRepository methods unused | OPEN |
-| EF-M04-e1e1e1e1 | P1 | No unified org dashboard handler matching API_CONTRACTS GET /org/:id/dashboard | OPEN |
-| EF-M04-f1f1f1f1 | P2 | getOrgProfile.ts returns hardcoded empty strings for schema-missing fields | OPEN |
-| EF-M04-a2a2a2a2 | P2 | getOrganizationBySlug.ts missing description/logoUrl/meetingSchedule/foundingDate | OPEN |
+| EF-M04-a1a1a1a1 | P0 | Domain event registry missing all M04 events (OfficerAssigned, OfficerRemoved, etc.) | **RESOLVED** -- events emitted via `domainEvents.emit()` in handlers (see EF-M04-fe15) |
+| EF-M04-b1b1b1b1 | P0 | domain-event-consumers.ts only wires dues.payment.recorded; no MemberSuspended/MemberRemoved consumers | OPEN (subsumed by EF-M04-fe11) |
+| EF-M04-c1c1c1c1 | P1 | createDisciplinaryAction.ts does not emit MemberSuspended/MemberRemoved events or update membership status | **RESOLVED** -- handler now emits `member.suspended` and `member.removed` based on actionType |
+| EF-M04-d1d1d1d1 | P1 | No transitionOfficerTerm handler; TransitionChecklistRepository methods unused | **RESOLVED** -- `transitionOfficerTerm.ts` exists and uses TransitionChecklistRepository |
+| EF-M04-e1e1e1e1 | P1 | No unified org dashboard handler matching API_CONTRACTS GET /org/:id/dashboard | **RESOLVED** -- `getOrgDashboard.ts` implements full dashboard with metrics + action cards |
+| EF-M04-f1f1f1f1 | P2 | getOrgProfile.ts returns hardcoded empty strings for schema-missing fields | NEEDS RE-VERIFY (handler renamed to getOrganizationProfile.ts) |
+| EF-M04-a2a2a2a2 | P2 | getOrganizationBySlug.ts missing description/logoUrl/meetingSchedule/foundingDate | OPEN (no slug handler exists; subsumed by EF-M04-fe07) |
 | EF-M04-b2b2b2b2 | P2 | positions table uses free-text title instead of enum; no constraint on spec values | OPEN |
-| EF-M04-c2c2c2c2 | P2 | No POST /org/:id/officers handler found (API_CONTRACTS 2.3) | OPEN |
-| EF-M04-d2d2d2d2 | P2 | No DELETE /org/:id/officers/:termId handler (API_CONTRACTS 2.3) | OPEN |
-| EF-M04-e2e2e2e2 | P2 | SVG upload excluded from storage; AC-M04-007 sanitization not implemented | OPEN |
+| EF-M04-c2c2c2c2 | P2 | No POST /org/:id/officers handler found (API_CONTRACTS 2.3) | **RESOLVED** -- `createOfficerTerm.ts` implements this |
+| EF-M04-d2d2d2d2 | P2 | No DELETE /org/:id/officers/:termId handler (API_CONTRACTS 2.3) | **RESOLVED** -- `deleteOfficerTerm.ts` implements this |
+| EF-M04-e2e2e2e2 | P2 | SVG upload excluded from storage; AC-M04-007 sanitization not implemented | OPEN (subsumed by EF-M04-fe09) |
 | EF-M04-f2f2f2f2 | P3 | governance.schema.ts disciplinary_action correctly has immutable design (spec-compliant) | PASS |
 
 ---
 
-## 5. Schema Entity Inventory
+## 5. Orphan Handler Analysis
 
-### Enums (~35 total across 12 schema files)
+10 handlers exist in governance scope but are **not listed in the M04 spec's 8 API endpoints**:
 
-| Schema File | Enums |
-|------------|-------|
-| governance.schema.ts | position_level, term_status, transition_checklist_status, disciplinary_action_type |
-| membership.schema.ts | tier_status, membership_status, application_status |
-| chapters.schema.ts | affiliation_status, transfer_status |
-| credentials.schema.ts | license_status, renewal_alert_status, credential_type, credential_template_status, credential_status |
-| credits.schema.ts | credit_entry_type, credit_source_type, credit_status, credit_cpd_category, credit_verification_status |
-| directory.schema.ts | directory_visibility |
-| dues-payments.schema.ts | billing_frequency, dues_payment_method, dues_payment_status, gateway_provider, webhook_retry_status |
-| dues.schema.ts | dues_config_status, dues_invoice_status |
-| dunning.schema.ts | dunning_channel, dunning_template_status, dunning_delivery_status |
-| special-assessments.schema.ts | special_assessment_status, special_assessment_payment_status |
+| Handler | Classification | Notes |
+|---|---|---|
+| `createPosition.ts` | Legitimate extension | Position CRUD. Spec lists Position entity (s7) but no explicit CRUD endpoints. |
+| `deletePosition.ts` | Legitimate extension | Position CRUD. |
+| `getPosition.ts` | Legitimate extension | Position CRUD. |
+| `listPositions.ts` | Legitimate extension | Position CRUD. |
+| `updatePosition.ts` | Legitimate extension | Position CRUD. |
+| `getOfficerTerm.ts` | Legitimate extension | Single-term read. Spec has assign/remove/transition but no GET single. |
+| `listOfficerTerms.ts` | Legitimate extension | List terms. Needed by officer management UI. |
+| `listOfficerTermsSummary.ts` | Legitimate extension | Summary view for dashboard. |
+| `updateOfficerTerm.ts` | Legitimate extension | Update term metadata (notes, dates). |
+| `getMyOfficerRole.ts` | Legitimate extension | Current user's role lookup. Needed by frontend auth context. |
 
-### Tables (~40 total)
-
-| Schema File | Tables |
-|------------|--------|
-| governance.schema.ts | position, officer_term, transition_checklist, disciplinary_action |
-| membership.schema.ts | membership_tier, membership_category, membership, membership_application |
-| chapters.schema.ts | chapter_affiliation, affiliation_transfer, royalty_split |
-| credentials.schema.ts | professional_license, license_renewal_alert, credential_template, digital_credential |
-| credits.schema.ts | credit_entry, org_cpd_config |
-| directory.schema.ts | directory_profile |
-| dues-payments.schema.ts | dues_org_config, dues_category_override, dues_fund, dues_payment, dues_fund_allocation, dues_reminder_schedule, dues_gateway_config, webhook_retry_log |
-| dues.schema.ts | dues_config, dues_invoice, aging_bucket, dues_reminder_log |
-| dunning.schema.ts | dunning_template, dunning_event |
-| special-assessments.schema.ts | special_assessment, special_assessment_payment |
-| status-history.schema.ts | membership_status_history |
-| dues-payment-status-history.schema.ts | dues_payment_status_history |
+**Verdict**: All 10 are legitimate CRUD extensions needed by the UI. **Recommend adding Position CRUD and officer term read/list endpoints to spec Section 10** to close the traceability gap.
 
 ---
 
-## 6. Cross-Handler Import Summary
+## 6. Extended Handlers (Cross-Module in Mega-Module)
 
-| Source Handler | Target Module | Import Type | Files |
-|---------------|--------------|-------------|-------|
-| association:member | platformadmin | schema (organizations table) | getOrganizationProfile.ts, updateOrganizationProfile.ts |
-| association:member | platformadmin | repository (PlatformAdminRepository) | createOfficerTerm.ts |
-| association:member | person | schema (persons table) | createDuesInvoice.ts, getDuesInvoice.ts, listDuesInvoices.ts, listMembershipApplications.ts, listOfficerTerms.ts, publishMyDirectoryProfile.ts |
-| association:member | person | schema (personPrivacySettings) | lookupCredentialPublic.ts |
-| association:member | person | schema (persons table) | jobs/directoryAutoPopulate.ts |
-| association:member | membership | repository (MembershipRepository) | getRosterMember.ts, listRosterMembers.ts, getCreditCompliance.ts |
+14 handlers matched M04 keywords but belong to other modules sharing the mega-module directory:
 
-**Total cross-handler imports**: 13 files, 3 target modules (platformadmin, person, membership)
+| Handler | Belongs To | Reason |
+|---|---|---|
+| `addRosterMember.ts` | M05 Membership | Roster management |
+| `getRosterMember.ts` | M05 Membership | Roster management |
+| `importRosterMembers.ts` | M05 Membership | Roster management |
+| `listRosterMembers.ts` | M05 Membership | Roster management |
+| `updateRosterMember.ts` | M05 Membership | Roster management |
+| `generateDuesInvoicesForOrg.ts` | M06 Dues | Org-scoped dues generation |
+| `getDuesDashboard.ts` | M06 Dues | Finance dashboard |
+| `getDuesFinancialDashboard.ts` | M06 Dues | Finance dashboard |
+| `getOrgCpdConfig.ts` | M09 Training/CPD | CPD config per org |
+| `updateOrgCpdConfig.ts` | M09 Training/CPD | CPD config per org |
+| `getPublicDirectoryProfile.ts` | M05 Directory | Public member lookup |
+| `lookupCredentialPublic.ts` | M11 Credentials | Public verification |
+| `verifyCertificatePublic.ts` | M11 Certificates | Public verification |
+| `verifyCredentialPublic.ts` | M11 Credentials | Public verification |
+
+This is expected in the mega-module architecture. See P1-11 (deferred mega-module split, v1.2.0).
 
 ---
 
-## 7. Test Coverage Summary
+## 7. Business Rule Coverage
+
+| Rule | Status | Evidence |
+|---|---|---|
+| BR-09 / M4-R1 | IMPLEMENTED | `createOfficerTerm.ts`: `findActiveByPosition()` check, Board Member exception via title match |
+| BR-09 / M4-R2 | IMPLEMENTED | All governance mutation handlers: `requirePosition([POSITION_TITLES.PRESIDENT])` |
+| BR-09e | IMPLEMENTED | `createOfficerTerm.ts`: President position requires `PlatformAdminRepository.findById()` check |
+| BR-29 | **NOT IMPLEMENTED** | No public page handler (EF-M04-fe07) |
+| BR-31 / M4-R5 | **DIVERGENT** | SVGs blocked entirely, not sanitized per spec (EF-M04-fe09) |
+| M4-R3 | **PARTIAL** | Checklist optional, not required (EF-M04-fe08) |
+| M4-R4 | IMPLEMENTED | Reason required (handler check + schema `NOT NULL`), no update handler (immutable by design) |
+| M4-R6 | IMPLEMENTED | `auditAction()` called in create/transition/delete/update governance handlers |
+| M4-R7 | IMPLEMENTED | All queries scoped by `organizationId` parameter or context |
+
+---
+
+## 8. Domain Event Coverage
+
+### Published Events
+
+| Event | Handler | Line | Status |
+|---|---|---|---|
+| `officer.assigned` | `createOfficerTerm.ts` | L89 | IMPLEMENTED |
+| `officer.removed` | `deleteOfficerTerm.ts` | L50 | IMPLEMENTED |
+| `officer.transitioned` | `transitionOfficerTerm.ts` | L109 | IMPLEMENTED |
+| `member.suspended` | `createDisciplinaryAction.ts` | (suspension type) | IMPLEMENTED |
+| `member.removed` | `createDisciplinaryAction.ts` | (removal/expulsion type) | IMPLEMENTED |
+
+### Consumed Events
+
+| Event | Source | Expected Side Effect | Status |
+|---|---|---|---|
+| `ElectionPublished` | M12 Elections | Trigger officer transition from election results | **NOT IMPLEMENTED** (EF-M04-fe11) |
+| `OrganizationCreated` | M03 Platform | Initialize dashboard, create default positions | **NOT IMPLEMENTED** (EF-M04-fe11) |
+
+---
+
+## 9. Error Handling Coverage
+
+| Spec Error Scenario | Expected | Handler | Status |
+|---|---|---|---|
+| Duplicate role assignment | 409 "This role is currently held by [Name]." | `createOfficerTerm.ts` | IMPLEMENTED (message slightly different but correct) |
+| Non-president assigns role | 403 "Only the President can assign officer roles." | `createOfficerTerm.ts` via `requirePosition` | IMPLEMENTED |
+| Empty disciplinary reason | Block submission | `createDisciplinaryAction.ts` | IMPLEMENTED (400) |
+| SVG with scripts | Strip and save (sanitize) | `updateOrganizationProfile.ts` | **DIVERGENT** -- blocks SVG entirely (EF-M04-fe09) |
+| Org not found (public page) | 404 "Organization not found." | -- | **NOT IMPLEMENTED** (no handler, EF-M04-fe07) |
+| Org suspended (public page) | 200 with banner | `getOrganizationProfile.ts` | **NOT IMPLEMENTED** (EF-M04-fe10) |
+| Cross-org 403 | "You do not have permission in this organization." | All handlers via orgId context | IMPLEMENTED |
+
+---
+
+## 10. Test Coverage Summary
 
 | Category | Test Files | Coverage Notes |
 |----------|-----------|----------------|
-| Schema validation | repos/dues-schema.test.ts | Entity shape |
-| Repository | repos/dues-payments.repo.test.ts | CRUD operations |
-| Status transitions | utils/status-transitions.test.ts | Comprehensive (all 5 state machines) |
-| Utility functions | 10 test files in utils/ | Unit tests with edge cases |
-| Background jobs | 7 test files in jobs/ (incl. 1 integration) | Unit + integration |
-| Handler/controller tests | 40+ test files in root | Business logic |
-| Integration tests | ac-m04.org-admin.test.ts, jobs/directoryAutoPopulate.integration.test.ts | End-to-end flows |
+| Acceptance criteria | `ac-m04.org-admin.test.ts` | All 7 ACs covered with pure-logic tests |
+| Schema validation | `repos/dues-schema.test.ts` | Entity shape |
+| Repository | `repos/dues-payments.repo.test.ts` | CRUD operations |
+| Status transitions | `utils/status-transitions.test.ts` | Comprehensive (all 5 state machines) |
+| Utility functions | 10+ test files in `utils/` | Unit tests with edge cases |
+| Background jobs | 7 test files in `jobs/` (incl. 1 integration) | Unit + integration |
+| Handler tests | 40+ test files in root | Business logic validation |
+| Governance-specific | `officer-admin.test.ts`, `governance.test.ts`, `createOfficerTerm.test.ts`, `updateOfficerTerm.test.ts` | Officer lifecycle |
+
+**Gap**: AC tests use pure-logic inline helpers, not actual handler imports. Handler-level tests exist separately but are not tagged to ACs.
 
 ---
 
-## 8. Audit Verdict
+## 11. Cross-Handler Import Summary
+
+| Source Handler | Target Module | Import Type | Files |
+|---------------|--------------|-------------|-------|
+| association:member | platformadmin | schema (organizations table) | `getOrganizationProfile.ts`, `updateOrganizationProfile.ts` |
+| association:member | platformadmin | repository (PlatformAdminRepository) | `createOfficerTerm.ts` |
+| association:member | person | schema (persons table) | `createDuesInvoice.ts`, `getDuesInvoice.ts`, `listDuesInvoices.ts`, `listMembershipApplications.ts`, `listOfficerTerms.ts`, `publishMyDirectoryProfile.ts` |
+| association:member | person | schema (personPrivacySettings) | `lookupCredentialPublic.ts` |
+| association:member | person | repository (PersonRepository) | `transitionOfficerTerm.ts` |
+| association:member | membership | repository (MembershipRepository) | `getRosterMember.ts`, `listRosterMembers.ts`, `getCreditCompliance.ts` |
+| association:member | association:operations | schema (events, trainings) | `getOrgDashboard.ts` |
+
+**Total cross-handler imports**: 14 files, 4 target modules
+
+---
+
+## 12. Audit Verdict
 
 | Check | Result |
 |-------|--------|
-| Error taxonomy | PASS -- Error classes from @/core/errors used consistently |
-| Domain terms | PASS -- All 8 M04 domain terms found in code |
+| API endpoint coverage | **WARN** -- 7/8 spec endpoints implemented (public page missing) |
+| Error taxonomy | PASS -- Error classes from `@/core/errors` used consistently |
+| Domain terms | WARN -- "Org Public Page" has no handler implementation |
 | Data shape | WARN -- `cancelled` status missing from PAYMENT_VALID_TRANSITIONS keys |
-| Naming | WARN -- Some governance handlers use `any` instead of generated types |
-| Import boundaries | WARN -- 13 cross-handler imports across 3 modules (documented tech debt) |
-| State machines | PASS -- 5/6 state machines fully aligned (1 minor key gap) |
+| Auth patterns | PASS -- All governance mutations use `requirePosition(PRESIDENT)` with 2FA |
+| Business rules | WARN -- 3/9 rules not fully implemented (BR-29, M4-R3, BR-31/M4-R5) |
+| Domain events (published) | PASS -- 5/5 events emitted correctly |
+| Domain events (consumed) | **FAIL** -- 0/2 consumed events wired |
+| Import boundaries | WARN -- 14 cross-handler imports across 4 modules (documented tech debt) |
+| State machines | PASS -- 5/6 state machines fully aligned |
+| Naming/typing | WARN -- Some governance handlers use `any` instead of generated types |
 
 ### Finding Summary
 
-| Severity | New (per-file) | Prior (module-level) | Total |
-|----------|---------------|---------------------|-------|
-| P0 | 0 | 2 | 2 |
-| P1 | 1 (fe01) | 3 | 4 |
-| P2 | 2 (fe02, fe04) | 5 | 7 |
-| P3 | 3 (fe03, fe05, fe06) | 1 (PASS) | 3 |
-| INFO | 0 | 0 | 0 |
-| **Total** | **6** | **11** | **16** (1 PASS) |
+| Severity | Count | IDs |
+|----------|-------|-----|
+| P1 | 1 | EF-M04-fe07 (public page handler missing) |
+| P2 | 4 | EF-M04-fe08 (checklist optional), EF-M04-fe09 (SVG divergent), EF-M04-fe10 (suspended banner), EF-M04-fe11 (event consumers) |
+| P3 | 1 | EF-M04-fe12 (self-discipline) |
+| INFO | 3 | EF-M04-fe13 (2FA OK), EF-M04-fe14 (auth consistent), EF-M04-fe15 (events published) |
+| **Total new** | **9** | 1 P1, 4 P2, 1 P3, 3 INFO |
 
-The P0s (domain event registry gaps) and P1s (missing handlers, cancelled transition key) are the highest priority. P2 cross-handler imports are documented tech debt tracked in the mega-module split plan (deferred to v1.2.0).
+### Prior Findings Status
+
+| Status | Count |
+|--------|-------|
+| RESOLVED | 5 (a1a1, c1c1, d1d1, e1e1, c2c2/d2d2) |
+| OPEN | 4 (b1b1 subsumed by fe11, f1f1 needs re-verify, a2a2 subsumed by fe07, b2b2, e2e2 subsumed by fe09) |
+| PASS | 1 (f2f2) |
+
+### Priority Fix Order
+
+1. **P1** EF-M04-fe07 -- Create public page handler (`GET /org/:slug/public`)
+2. **P2** EF-M04-fe11 -- Wire domain event consumers (`ElectionPublished`, `OrganizationCreated`)
+3. **P2** EF-M04-fe08 -- Enforce or auto-generate transition checklist items
+4. **P2** EF-M04-fe09 -- Resolve SVG spec/code divergence (recommend updating spec to match code)
+5. **P2** EF-M04-fe10 -- Add suspended org status check in profile response
+6. **P3** EF-M04-fe12 -- Block self-discipline
