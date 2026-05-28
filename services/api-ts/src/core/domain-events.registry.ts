@@ -209,6 +209,12 @@ export interface DomainEventMap {
     createdBy: string;
   };
 
+  'election.deleted': {
+    electionId: string;
+    organizationId: string;
+    deletedBy: string;
+  };
+
   'election.status.changed': {
     electionId: string;
     organizationId: string;

@@ -80,8 +80,9 @@ import { deleteAccreditedProvider } from '@/handlers/training/deleteAccreditedPr
 import { completeTraining } from '@/handlers/training/completeTraining';
 import { publishTraining } from '@/handlers/training/publishTraining';
 
-// Elections: nominee status update (hand-wired, not in TypeSpec)
+// Elections: hand-wired (not in TypeSpec)
 import { updateNomineeStatus } from '@/handlers/elections/updateNomineeStatus';
+import { deleteElection } from '@/handlers/elections/deleteElection';
 
 // Email: hand-wired for middleware ordering reasons.
 // - unsubscribeEmail: MUST be registered BEFORE /email/* auth middleware (RFC 8058 public access)
@@ -406,6 +407,8 @@ export function createApp(config: Config): App {
 
   // Elections: nominee status update (accept/decline nomination)
   app.patch('/association/member/elections/:electionId/nominees/:nomineeId', authMiddleware(), updateNomineeStatus as any);
+  // Elections: delete draft election (soft-delete, draft-only)
+  app.delete('/association/member/elections/:id', authMiddleware(), deleteElection as any);
 
   // Wave 2b: CPD config, manual credit, compliance, my-credits — MIGRATED to generated routes.ts
   // All now have authMiddleware in generated output. /association/* wildcard provides defense-in-depth.

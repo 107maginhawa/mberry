@@ -90,6 +90,10 @@ export class ElectionsRepository {
       .groupBy(electionNominees.positionId);
   }
 
+  async delete(id: string): Promise<void> {
+    await this.db.delete(elections).where(eq(elections.id, id));
+  }
+
   /** Withdraw all non-terminal nominees when election is cancelled */
   async withdrawAllNominees(electionId: string): Promise<number> {
     const terminalStatuses = ['declined', 'elected'];
