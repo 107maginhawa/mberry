@@ -409,7 +409,7 @@ export function createApp(config: Config): App {
   registerOpenAPIRoutes(app as unknown as Parameters<typeof registerOpenAPIRoutes>[0]); // structural: Hono app type narrowing
 
   // ──────────────────────────────────────────────────────────────────────────
-  // PRE-MIGRATION ROUTES — 33 hand-wired routes not in TypeSpec
+  // HAND-WIRED ROUTES — remaining routes not served via generated OpenAPI routes
   // See ROADMAP.md "TypeSpec Migration Backlog" for full inventory.
   //
   // BY DESIGN (9) — middleware ordering or public-before-auth requirements:
@@ -417,12 +417,11 @@ export function createApp(config: Config): App {
   //   /certificates/verify/:num, /pay/:token/* (2),
   //   /email/unsubscribe (GET+POST), /email/suppressions
   //
-  // PRE-MIGRATION (14) — should be TypeSpec, migrate when touching module:
-  //   /admin/* (3), /org/:id/payments/send-link,
-  //   /certificates/bulk-issue, /special-assessments/* (6), /segments/* (3)
-  //
-  // MIGRATED TO GENERATED (Cycle 8): accredited-providers (4), cpd-config (2),
-  //   credits/manual, compliance (2), persons/me/credits — 10 routes removed
+  // ALL PRE-MIGRATION ROUTES MIGRATED (Cycle 8 + Phase 35):
+  //   Cycle 8: accredited-providers (4), cpd-config (2),
+  //     credits/manual, compliance (2), persons/me/credits — 10 routes
+  //   Phase 35: admin/* (3), send-link, special-assessments (6),
+  //     bulk-issue, segments (3) — 14 routes
   //
   // HANDLER CONSOLIDATION STATUS (Wave 4):
   //   m05 membership/: query-rich repo (JOINs, search) — complementary to
