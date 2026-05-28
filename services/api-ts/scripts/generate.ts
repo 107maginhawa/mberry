@@ -501,19 +501,19 @@ async function generateRoutes(paths: Record<string, PathItem>, spec: any) {
       if (!operation.operationId) continue;
 
       const honoPath = path.replace(/{([^}]+)}/g, ':$1'); // Convert {id} to :id
+      // Extract x-security-required-roles from the operation (before hasAuth so it can inform the check)
+      const requiredRoles = (operation as any)['x-security-required-roles'] as string[] | undefined;
       // security: [{}] means NoAuth (public endpoint) — don't add auth middleware
       const isNoAuth = operation.security?.length === 1 && Object.keys(operation.security[0]).length === 0;
-      const hasAuth = !!operation.security?.length && !isNoAuth;
-      
+      // Route needs auth if: explicit security field present OR x-security-required-roles defined
+      const hasAuth = (!!operation.security?.length && !isNoAuth) || !!requiredRoles?.length;
+
       // Check if authentication is optional (contains both bearerAuth and empty object)
-      const isOptionalAuth = hasAuth && operation.security?.some((sec: any) => 
+      const isOptionalAuth = hasAuth && operation.security?.some((sec: any) =>
         Object.keys(sec).length === 0
-      ) && operation.security?.some((sec: any) => 
+      ) && operation.security?.some((sec: any) =>
         sec.bearerAuth !== undefined
       );
-      
-      // Extract x-security-required-roles from the operation
-      const requiredRoles = (operation as any)['x-security-required-roles'] as string[] | undefined;
       
       routes.push(`  // ${operation.summary || operation.operationId}`);
       routes.push(`  app.${method}('${honoPath}',`);
