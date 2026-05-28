@@ -157,13 +157,7 @@ import { getMyCredits } from '@/handlers/person/getMyCredits';
 import { bulkIssueCertificates } from '@/handlers/certificates/bulkIssueCertificates';
 import { verifyCertificatePublic } from '@/handlers/certificates/verifyCertificatePublic';
 
-// Wave 1 Financial: Special Assessments CRUD (T8)
-import { createSpecialAssessment } from '@/handlers/association:member/createSpecialAssessment';
-import { listSpecialAssessments } from '@/handlers/association:member/listSpecialAssessments';
-import { updateSpecialAssessment } from '@/handlers/association:member/updateSpecialAssessment';
-import { deleteSpecialAssessment } from '@/handlers/association:member/deleteSpecialAssessment';
-import { applySpecialAssessment } from '@/handlers/association:member/applySpecialAssessment';
-import { getSpecialAssessmentCollection } from '@/handlers/association:member/getSpecialAssessmentCollection';
+// Special Assessments — now in generated routes (Phase 35)
 
 // Officer transition — hand-wired (M4-R3 checklist-based handover, not in TypeSpec)
 import { transitionOfficerTerm } from '@/handlers/association:member/transitionOfficerTerm';
@@ -481,31 +475,7 @@ export function createApp(config: Config): App {
   }).passthrough(), validationErrorHandler);
   app.post('/certificates/bulk-issue', bulkIssueBody, authMiddleware(), orgContextMiddleware(), bulkIssueCertificates as unknown as Handler);
 
-  // @hand-wired reason="special assessments CRUD, not in TypeSpec" wave="Wave-1"
-  const saCreateBody = zValidator('json', z.object({
-    name: z.string().min(1).max(255),
-    description: z.string().max(2000).nullish(),
-    amount: z.number().positive(),
-    currency: z.string().length(3).optional(),
-    dueDate: z.string().min(1),
-    fundId: z.string().uuid().nullish(),
-    appliesTo: z.enum(['all', 'active', 'custom']).optional(),
-  }), validationErrorHandler);
-  const saUpdateBody = zValidator('json', z.object({
-    name: z.string().min(1).max(255).optional(),
-    description: z.string().max(2000).nullish(),
-    amount: z.number().positive().optional(),
-    currency: z.string().length(3).optional(),
-    dueDate: z.string().min(1).optional(),
-    fundId: z.string().uuid().nullish(),
-    appliesTo: z.enum(['all', 'active', 'custom']).optional(),
-  }), validationErrorHandler);
-  app.post('/association/member/special-assessments', authMiddleware(), saCreateBody, createSpecialAssessment as unknown as Handler);
-  app.get('/association/member/special-assessments/:orgId', orgIdShortParam, authMiddleware(), listSpecialAssessments as unknown as Handler);
-  app.put('/association/member/special-assessments/:id', uuidIdParam, authMiddleware(), saUpdateBody, updateSpecialAssessment as unknown as Handler);
-  app.delete('/association/member/special-assessments/:id', uuidIdParam, authMiddleware(), deleteSpecialAssessment as unknown as Handler);
-  app.post('/association/member/special-assessments/:id/apply', uuidIdParam, authMiddleware(), applySpecialAssessment as unknown as Handler);
-  app.get('/association/member/special-assessments/:id/collection', uuidIdParam, authMiddleware(), getSpecialAssessmentCollection as unknown as Handler);
+  // special-assessments CRUD — migrated to generated routes (Phase 35)
 
   // @hand-wired reason="officer transition checklist handover, not in TypeSpec" wave="M4-R3"
   const transitionParams = zValidator('param', z.object({ organizationId: z.string().uuid(), termId: z.string().uuid() }), validationErrorHandler);
