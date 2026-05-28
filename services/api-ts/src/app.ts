@@ -5,6 +5,7 @@
 
 import { Hono } from 'hono';
 import { bodyLimit } from 'hono/body-limit';
+import { csrf } from 'hono/csrf';
 import type { Variables, App } from '@/types/app';
 import type { Config } from '@/core/config';
 
@@ -252,6 +253,11 @@ export function createApp(config: Config): App {
 
   // CORS - Required early for preflight
   app.use('*', createCorsMiddleware(config, logger));
+
+  // CSRF protection — origin verification + Sec-Fetch-Site header check
+  // Blocks cross-origin state-changing requests (POST/PUT/PATCH/DELETE)
+  // Uses same origins as CORS config for consistency
+  app.use('*', csrf({ origin: config.cors.origins }));
 
   // Body size limits — prevent large payload DoS
   app.use('*', bodyLimit({ maxSize: 1 * 1024 * 1024, onError: (c) => c.json({ error: 'Payload too large', code: 'PAYLOAD_TOO_LARGE', maxSize: '1MB' }, 413) }));
