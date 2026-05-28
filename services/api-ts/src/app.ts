@@ -6,6 +6,9 @@
 import { Hono } from 'hono';
 import { bodyLimit } from 'hono/body-limit';
 import { csrf } from 'hono/csrf';
+import { zValidator } from '@hono/zod-validator';
+import { z } from 'zod';
+import { validationErrorHandler } from '@/middleware/validation';
 import type { Variables, App } from '@/types/app';
 import type { Config } from '@/core/config';
 
@@ -321,8 +324,9 @@ export function createApp(config: Config): App {
 
   // One-tap payment token: PUBLIC endpoints (member clicks from email, no auth)
   // Registered before any wildcard auth middleware to avoid interception
-  app.get('/pay/:token/validate', validatePaymentToken as any);
-  app.post('/pay/:token/checkout', checkoutPaymentToken as any);
+  const paymentTokenParam = zValidator('param', z.object({ token: z.string().min(1).max(512) }), validationErrorHandler);
+  app.get('/pay/:token/validate', paymentTokenParam, validatePaymentToken as any);
+  app.post('/pay/:token/checkout', paymentTokenParam, checkoutPaymentToken as any);
 
   // Public unsubscribe endpoint — registered BEFORE /email/* auth middleware
   // RFC 8058: users click from email client without being logged in

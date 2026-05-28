@@ -50,7 +50,7 @@ export async function checkoutPaymentToken(
   // Look up gateway config for the org
   const duesRepo = new DuesRepository(db);
   const gatewayConfig = await duesRepo.getGatewayConfig(tokenRecord.organizationId);
-  if (!gatewayConfig || !(gatewayConfig as any).connected) {
+  if (!gatewayConfig || !gatewayConfig.connected) {
     return ctx.json({ error: 'Online payment is not configured for this organization' }, 400);
   }
 
@@ -65,7 +65,7 @@ export async function checkoutPaymentToken(
     const result = await billing.createPaymentIntent({
       amount: tokenRecord.amount,
       currency: tokenRecord.currency.toLowerCase(),
-      connectedAccountId: (gatewayConfig as any).publicKey || '', // Stripe connected account
+      connectedAccountId: gatewayConfig.publicKey || '', // Stripe connected account
       platformFeeAmount: 0,
       description: `Dues payment - ${tokenRecord.currency} ${(tokenRecord.amount / 100).toFixed(2)}`,
       successUrl: `${publicUrl}/pay/${rawToken}?status=success`,
