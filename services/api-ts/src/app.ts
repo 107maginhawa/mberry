@@ -285,16 +285,16 @@ export function createApp(config: Config): App {
   // Register feature flags endpoint (public, no auth)
   registerFeatureFlagRoutes(app as App);
 
-  // Public org discovery — no auth required
+  // @hand-wired reason="public discovery, not in TypeSpec" wave="pre-migration"
   app.get('/public/orgs', listPublicOrgs as any);
 
-  // OG meta for event social sharing — serves HTML with og:meta for crawlers
+  // @hand-wired reason="HTML og:meta for social crawlers, not REST" wave="by-design"
   app.get('/og/events/:slug', serveEventOgMeta as any);
 
-  // Public credential lookup by credential number (Wave 3a — Trust Directory)
+  // @hand-wired reason="public credential lookup, no auth by design" wave="Wave-3a"
   app.get('/association/member/credentials/lookup/:credentialNumber', lookupCredentialPublic as any);
 
-  // Public certificate verification (Wave 2b)
+  // @hand-wired reason="public certificate verification, no auth by design" wave="Wave-2b"
   app.get('/certificates/verify/:certificateNumber', verifyCertificatePublic as any);
 
   // Register auth routes
@@ -303,12 +303,12 @@ export function createApp(config: Config): App {
   // Platform admin authorization — auth first (sets user), then check platform_admin table
   app.use('/admin/*', authMiddleware(), platformAdminAuthMiddleware());
 
-  // Platform admin: national dashboard + cross-org committees (hand-wired, under /admin/*)
+  // @hand-wired reason="national dashboard + cross-org committees, not in TypeSpec" wave="M4-DASHBOARD"
   app.get('/admin/national-dashboard/:associationId', getNationalDashboard as any);
   app.get('/admin/committees', listAllCommittees as any);
   app.get('/admin/committees/:id', getCommittee as any);
 
-  // Breach notification endpoints — DPA 2012 / M3-R11 (under /admin/* auth middleware)
+  // @hand-wired reason="DPA 2012 breach notification, admin-only" wave="M3-R11"
   const reportBreachBody = zValidator('json', z.object({
     organizationId: z.string().uuid().optional(),
     discoveredAt: z.string().min(1),
@@ -320,23 +320,19 @@ export function createApp(config: Config): App {
   app.get('/admin/breaches', listBreaches as any);
   app.put('/admin/breaches/:id', updateBreachStatus as any);
 
-  // Support ticket endpoints — M3-R12
-  // createTicket: any authenticated user (no platformAdmin check)
+  // @hand-wired reason="support ticket SLA system, not in TypeSpec" wave="M3-R12"
   app.post('/support/tickets', authMiddleware(), createTicket as any);
-  // Admin-only ticket management (covered by /admin/* middleware above)
   app.get('/admin/tickets', listTickets as any);
   app.get('/admin/tickets/:id', getTicket as any);
   app.put('/admin/tickets/:id', updateTicketStatus as any);
   app.post('/admin/tickets/:id/comments', addTicketComment as any);
 
-  // One-tap payment token: PUBLIC endpoints (member clicks from email, no auth)
-  // Registered before any wildcard auth middleware to avoid interception
+  // @hand-wired reason="public payment token, must precede auth middleware" wave="by-design"
   const paymentTokenParam = zValidator('param', z.object({ token: z.string().min(1).max(512) }), validationErrorHandler);
   app.get('/pay/:token/validate', paymentTokenParam, validatePaymentToken as any);
   app.post('/pay/:token/checkout', paymentTokenParam, checkoutPaymentToken as any);
 
-  // Public unsubscribe endpoint — registered BEFORE /email/* auth middleware
-  // RFC 8058: users click from email client without being logged in
+  // @hand-wired reason="RFC 8058 unsubscribe, must precede /email/* auth" wave="by-design"
   app.get('/email/unsubscribe', unsubscribeEmail);
   app.post('/email/unsubscribe', unsubscribeEmail);
 
@@ -345,7 +341,7 @@ export function createApp(config: Config): App {
   app.use('/email/*', authMiddleware());
   app.use('/email/*', orgContextMiddleware());
 
-  // Officer-only suppression list (auth-protected, registered after auth middleware)
+  // @hand-wired reason="suppression list, middleware ordering with /email/* auth" wave="by-design"
   app.get('/email/suppressions', listEmailSuppressions);
 
   // Public association endpoints that must NOT have auth middleware
@@ -426,36 +422,32 @@ export function createApp(config: Config): App {
   // completeEvent — removed hand-wired duplicate; now served via generated TypeSpec route
   // (see generated/openapi/routes.ts)
 
-  // One-tap payment send-link — officer generates payment link (auth required)
+  // @hand-wired reason="officer payment link generation, not in TypeSpec" wave="pre-migration"
   app.post('/org/:organizationId/payments/send-link', authMiddleware(), orgContextMiddleware(), sendPaymentLink as any);
-  // Receipt PDF download — member (own) or officer (any in org) (Cycle 8, M6-R6)
+  // @hand-wired reason="receipt PDF download, not in TypeSpec" wave="Cycle-8"
   app.get('/org/:organizationId/payments/:paymentId/receipt', authMiddleware(), downloadReceipt as any);
 
-  // National dashboard export — CSV/JSON for national officers (Cycle 8, BR-36)
+  // @hand-wired reason="national dashboard CSV/JSON export, admin-only" wave="Cycle-8"
   app.post('/admin/national-dashboard/:associationId/export', authMiddleware(), exportNationalDashboard as any);
 
   // PRC Accredited Providers — MIGRATED: now in generated routes.ts with authMiddleware.
   // Wildcard app.use('/accredited-providers/*', authMiddleware()) at line 362 provides
   // defense-in-depth. Hand-wired duplicates removed (Cycle 8 auth guard fix).
 
-  // Training entity lifecycle — transition training status (not enrollment)
+  // @hand-wired reason="training lifecycle transitions, hand-wired CRUD" wave="pre-migration"
   app.post('/organizations/:organizationId/training/:id/complete', authMiddleware(), completeTraining as any);
   app.put('/org/:organizationId/trainings/:id/publish', authMiddleware(), publishTraining as any);
 
-  // Elections: nominee status update (accept/decline nomination)
+  // @hand-wired reason="elections module entirely hand-wired, TypeSpec deferred" wave="pre-migration"
   app.patch('/association/member/elections/:electionId/nominees/:nomineeId', authMiddleware(), updateNomineeStatus as any);
-  // Elections: delete draft election (soft-delete, draft-only)
   app.delete('/association/member/elections/:id', authMiddleware(), deleteElection as any);
 
-  // Wave 2b: CPD config, manual credit, compliance, my-credits — MIGRATED to generated routes.ts
-  // All now have authMiddleware in generated output. /association/* wildcard provides defense-in-depth.
-  // /persons/me/credits now has per-route auth in generated routes (was the one truly unguarded route).
-  // Hand-wired duplicates removed (Cycle 8 auth guard fix).
+  // @hand-wired reason="ID card + bulk certificate issue, not in TypeSpec" wave="Wave-2b"
   app.get('/persons/me/id-card/:orgId', authMiddleware(), getMyIdCard as any);
   app.get('/persons/me/id-card/:orgId/pdf', authMiddleware(), getMyIdCardPdf as any);
   app.post('/certificates/bulk-issue', authMiddleware(), orgContextMiddleware(), bulkIssueCertificates as any);
 
-  // Wave 1 Financial: Special Assessments CRUD (T8)
+  // @hand-wired reason="special assessments CRUD, not in TypeSpec" wave="Wave-1"
   app.post('/association/member/special-assessments', authMiddleware(), createSpecialAssessment as any);
   app.get('/association/member/special-assessments/:orgId', authMiddleware(), listSpecialAssessments as any);
   app.put('/association/member/special-assessments/:id', authMiddleware(), updateSpecialAssessment as any);
@@ -463,48 +455,46 @@ export function createApp(config: Config): App {
   app.post('/association/member/special-assessments/:id/apply', authMiddleware(), applySpecialAssessment as any);
   app.get('/association/member/special-assessments/:id/collection', authMiddleware(), getSpecialAssessmentCollection as any);
 
-  // Officer transition — M4-R3 checklist-based handover
+  // @hand-wired reason="officer transition checklist handover, not in TypeSpec" wave="M4-R3"
   app.post('/association/member/org/:organizationId/officers/:termId/transition', authMiddleware(), orgContextMiddleware(), transitionOfficerTerm as any);
 
-  // Org-wide dashboard — M4-DASHBOARD AC-M04-005
-  // Defense-in-depth: explicit auth (also covered by /association/* wildcard)
+  // @hand-wired reason="org-wide dashboard, not in TypeSpec" wave="M4-DASHBOARD"
   app.get('/association/member/org/:organizationId/dashboard', authMiddleware(), getOrgDashboard as any);
 
-  // Subscription system (UJ-M03) — admin pricing tier management (under /admin/* auth middleware)
+  // @hand-wired reason="admin pricing tier CRUD, not in TypeSpec" wave="UJ-M03"
   app.get('/admin/pricing', listPricingTiers as any);
   app.post('/admin/pricing', createPricingTier as any);
   app.put('/admin/pricing/:tierId', updatePricingTier as any);
 
-  // Subscription system (UJ-M03) — admin subscription management
+  // @hand-wired reason="admin subscription management, not in TypeSpec" wave="UJ-M03"
   app.get('/admin/subscriptions', listSubscriptions as any);
   app.get('/admin/subscriptions/:id', getSubscription as any);
   app.put('/admin/subscriptions/:id/cancel', cancelSubscription as any);
 
-  // Subscription system (UJ-M03) — org-facing subscription routes (under /association/* auth middleware)
+  // @hand-wired reason="org-facing subscription routes, not in TypeSpec" wave="UJ-M03"
   app.get('/association/member/org/:organizationId/subscription', getMySubscription as any);
   app.post('/association/member/org/:organizationId/subscription/upgrade', upgradeSubscription as any);
   app.post('/association/member/org/:organizationId/subscription/checkout', createSubscriptionCheckout as any);
 
-  // Wave 4β: Saved Segments — CRUD for audience segment presets
+  // @hand-wired reason="saved segment CRUD, not in TypeSpec" wave="Wave-4b"
   app.post('/communications/segments', authMiddleware(), createSavedSegment as any);
   app.get('/communications/segments', authMiddleware(), listSavedSegments as any);
   app.delete('/communications/segments/:id', authMiddleware(), deleteSavedSegment as any);
 
-  // Communications: schedule announcement + get stats (Cycle 8)
+  // @hand-wired reason="announcement scheduling + stats, not in TypeSpec" wave="Cycle-8"
   app.post('/communications/announcements/:id/schedule', authMiddleware(), scheduleAnnouncement as any);
   app.get('/communications/announcements/:id/stats', authMiddleware(), getAnnouncementStats as any);
 
-  // Events: cancel registration (DELETE /org/:orgId/events/:eventId/register/:registrationId)
-  // Hand-wired — org-scoped path per API_CONTRACTS spec. Allows registrant or officer to cancel.
+  // @hand-wired reason="event registration cancel, org-scoped path per API_CONTRACTS" wave="pre-migration"
   app.delete('/org/:orgId/events/:eventId/register/:registrationId', authMiddleware(), cancelRegistration as any);
 
-  // Survey module extras — hand-wired
+  // @hand-wired reason="survey export/clone/analytics, not in TypeSpec" wave="pre-migration"
   app.get('/surveys/:survey/export', authMiddleware(), orgContextMiddleware(), exportSurveyResponses as any);
   app.post('/surveys/:survey/clone', authMiddleware(), orgContextMiddleware(), cloneSurvey as any);
   app.get('/surveys/analytics/nps-trends', authMiddleware(), orgContextMiddleware(), getNpsTrends as any);
   app.delete('/surveys/my-responses', authMiddleware(), deleteMemberResponses as any);
 
-  // Admin survey dashboard — platform admin only
+  // @hand-wired reason="admin survey dashboard, platform admin only" wave="pre-migration"
   app.get('/admin/surveys', authMiddleware(), platformAdminAuthMiddleware(), listAdminSurveys as any);
 
   // Register WebSocket handlers
