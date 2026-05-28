@@ -10,14 +10,18 @@ import { domainEvents } from './domain-events';
 import type { DatabaseInstance } from './database';
 import type { Logger } from '@/types/logger';
 import { SYSTEM_USER_ID } from './constants';
-import { notifications } from '@/handlers/notifs/repos/notification.schema';
-import { bookings } from '@/handlers/booking/repos/booking.schema';
-import { platformAdmins } from '@/handlers/platformadmin/repos/platform-admin.schema';
-import { trainingEnrollments, trainings } from '@/handlers/association:operations/repos/training.schema';
-import { memberships } from '@/handlers/association:member/repos/membership.schema';
-import { positions } from '@/handlers/association:member/repos/governance.schema';
-import { events, eventRegistrations } from '@/handlers/association:operations/repos/events.schema';
-import { invitationTokens } from '@/handlers/invite/repos/invite.schema';
+import {
+  notifications,
+  bookings,
+  platformAdmins,
+  trainingEnrollments,
+  trainings,
+  memberships,
+  positions,
+  events,
+  eventRegistrations,
+  invitationTokens,
+} from './schema-registry';
 
 /** Minimal contract for the membership repo used by domain event consumers. */
 export interface DomainEventMembershipRepo {
