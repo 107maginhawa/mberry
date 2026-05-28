@@ -17,6 +17,8 @@
 | v1.5.0 | Brownfield Rescue Cycle 2 | 38–45 | 2026-05-20 |
 | — | Wave 0a Foundation | Wave 0a | 2026-05-23 |
 | — | Wave 0-7 Compliance Audit | Waves 0–7 | 2026-05-24 |
+| — | Wave 0b Foundation | Wave 0b | 2026-05-28 |
+| — | Waves 1-6 Frontend + Backend | Waves 1–6 | 2026-05-28 |
 
 ---
 
@@ -105,9 +107,9 @@ The `association:member` handler directory contains ~211 handlers across 7 natur
 
 ## TypeSpec Migration Backlog
 
-33 routes registered directly in `services/api-ts/src/app.ts` instead of via TypeSpec-generated router.
+9 routes registered directly in `services/api-ts/src/app.ts` instead of via TypeSpec-generated router. All are by-design (middleware ordering or public-before-auth requirements).
 
-### By Design (12 routes) — keep as-is
+### By Design (9 routes) — keep as-is
 
 These require specific middleware ordering or must be registered before auth middleware.
 
@@ -125,31 +127,10 @@ These require specific middleware ordering or must be registered before auth mid
 
 Note: auth routes (via `registerAuthRoutes`) and WebSocket routes (via `registerWebSocketRoutes`) are separate registration functions, not counted here.
 
-### Pre-migration (21 routes) — migrate when touching the module
+### Pre-migration — COMPLETE
 
-| Route | Module |
-|-------|--------|
-| GET `/admin/national-dashboard/:associationId` | platformadmin |
-| GET `/admin/committees` | platformadmin |
-| GET `/admin/committees/:id` | platformadmin |
-| POST `/org/:organizationId/payments/send-link` | dues |
-| GET `/accredited-providers/:organizationId` | training |
-| POST `/accredited-providers/:organizationId` | training |
-| PATCH `/accredited-providers/:organizationId/:providerId` | training |
-| DELETE `/accredited-providers/:organizationId/:providerId` | training |
-| GET `/association/member/cpd-config/:organizationId` | credits |
-| PATCH `/association/member/cpd-config/:organizationId` | credits |
-| POST `/association/member/credits/manual` | credits |
-| GET `/association/member/compliance/:organizationId` | credits |
-| POST `/association/member/compliance/:organizationId/refresh` | credits |
-| GET `/persons/me/credits` | credits |
-| POST `/certificates/bulk-issue` | certificates |
-| POST `/association/member/special-assessments` | dues |
-| GET `/association/member/special-assessments/:orgId` | dues |
-| PUT `/association/member/special-assessments/:id` | dues |
-| DELETE `/association/member/special-assessments/:id` | dues |
-| POST `/association/member/special-assessments/:id/apply` | dues |
-| GET `/association/member/special-assessments/:id/collection` | dues |
-| POST `/communications/segments` | communications |
-| GET `/communications/segments` | communications |
-| DELETE `/communications/segments/:id` | communications |
+All 24 pre-migration routes migrated to TypeSpec:
+- **Cycle 8:** accredited-providers (4), cpd-config (2), credits/manual (1), compliance (2), persons/me/credits (1) — 10 routes
+- **Phase 35:** admin/national-dashboard + committees (3), send-link (1), special-assessments (6), bulk-issue (1), segments (3) — 14 routes
+
+Original ROADMAP listed 21 routes; actual count was 24 (3 communications/segments routes added post-inventory).

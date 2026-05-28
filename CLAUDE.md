@@ -297,7 +297,7 @@ All apps share the same API and SDK.
 All P0/P1 risks resolved (gate satisfied 2026-05-12). Planned work tracked in [ROADMAP.md](./ROADMAP.md).
 
 - P1-11 (association:member mega-module split) deferred to v1.2.0 — split plan at `.planning/deferred/14-mega-module-split/SPLIT-PLAN.md`
-- 33 pre-migration routes (9 by-design, 24 pre-migration) — see ROADMAP.md
+- 9 by-design hand-wired routes remain (middleware ordering); all 24 pre-migration routes migrated to TypeSpec (Phase 35)
 
 ## Development Protocol
 
