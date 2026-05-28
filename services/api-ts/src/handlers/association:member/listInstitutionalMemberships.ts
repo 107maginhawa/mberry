@@ -1,42 +1,54 @@
-import { DeferredScopeError } from '@/core/errors';
 import type { ValidatedContext } from '@/types/app';
-import { 
-  UnauthorizedError,
-  ForbiddenError,
-  NotFoundError,
-  ValidationError,
-  BusinessLogicError
-} from '@/core/errors';
+import type { DatabaseInstance } from '@/core/database';
 import type { ListInstitutionalMembershipsQuery } from '@/generated/openapi/validators';
+import { InstitutionalMembershipRepository } from './repos/institutional-membership.repo';
 
 /**
  * listInstitutionalMemberships
- * 
+ *
  * Path: GET /association/member/institutional-memberships
  * OperationId: listInstitutionalMemberships
  */
 export async function listInstitutionalMemberships(
   ctx: ValidatedContext<never, ListInstitutionalMembershipsQuery, never>
 ): Promise<Response> {
-  // Get authenticated session from Better-Auth
-  const session = ctx.get('session');
-  if (!session) {
-    throw new UnauthorizedError();
-  }
-  
-  
-  // Extract validated query parameters
+  const user = ctx.get('user');
+  if (!user) return ctx.json({ error: 'Unauthorized' }, 401);
+
   const query = ctx.req.valid('query');
-  
-  
-  // Implementation-Status: STUB — institutional memberships deferred to v1.2.0
-  // Tracked: GAP-BACKLOG.md, association:member mega-module split plan
-  // Examples of throwing errors:
-  // throw new UnauthorizedError();
-  // throw new ForbiddenError('You do not have access to this resource');
-  // throw new NotFoundError('Resource');
-  // throw new ValidationError('Invalid input');
-  // throw new BusinessLogicError('Business rule violated', 'BUSINESS_ERROR');
-  
-  throw new DeferredScopeError('listInstitutionalMemberships', 'Wave 2');
+  const db = ctx.get('database') as DatabaseInstance;
+  const logger = ctx.get('logger');
+  const repo = new InstitutionalMembershipRepository(db, logger);
+
+  const offset = query.offset ?? 0;
+  const limit = query.limit ?? query.pageSize ?? 20;
+
+  const filters = {
+    ...(query.organizationId ? { organizationId: query.organizationId } : {}),
+    ...(query.status ? { status: query.status } : {}),
+  };
+
+  const { data, totalCount } = await repo.findManyWithPagination(filters, {
+    pagination: { offset, limit },
+  });
+
+  const totalPages = Math.ceil(totalCount / limit);
+  const currentPage = Math.floor(offset / limit) + 1;
+
+  return ctx.json(
+    {
+      data,
+      pagination: {
+        offset,
+        limit,
+        count: data.length,
+        totalCount,
+        totalPages,
+        currentPage,
+        hasNextPage: offset + limit < totalCount,
+        hasPreviousPage: offset > 0,
+      },
+    },
+    200,
+  );
 }
