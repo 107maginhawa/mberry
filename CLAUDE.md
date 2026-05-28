@@ -84,7 +84,10 @@ The API service has **25 handler directories** under `services/api-ts/src/handle
 21. **email** — Transactional email queue (9 handlers, TypeSpec)
 22. **notifs** — Multi-channel notifications via OneSignal (5 handlers, mixed)
 
-**Note**: Authentication is handled by Better-Auth (integrated, not a separate module). Two communication modules exist by design: `comms` (real-time video/chat, 11 handlers, WebSocket) and `communication` (async messaging/templates/announcements, 28 handlers). No functional overlap — separate bounded contexts.
+**Note**: Authentication is handled by Better-Auth (integrated, not a separate module). Three communication-related modules exist by design — separate bounded contexts, no functional overlap:
+- `comms` — Real-time: WebSocket video calls, chat rooms, DMs (11 handlers)
+- `communication` — Async messaging: templates, message queue, person subscriptions, saved segments (28 handlers)
+- `communications` — Org announcements: draft/schedule/send announcements to members (8 handlers)
 
 ## Key Architectural Patterns
 
