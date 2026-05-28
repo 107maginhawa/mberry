@@ -1,43 +1,62 @@
-import { DeferredScopeError } from '@/core/errors';
 import type { ValidatedContext } from '@/types/app';
-import { 
-  UnauthorizedError,
-  ForbiddenError,
-  NotFoundError,
-  ValidationError,
-  BusinessLogicError
-} from '@/core/errors';
+import type { DatabaseInstance } from '@/core/database';
+import { NotFoundError } from '@/core/errors';
 import type { ListSeatAllocationsQuery, ListSeatAllocationsParams } from '@/generated/openapi/validators';
+import { InstitutionalMembershipRepository, SeatAllocationRepository } from './repos/institutional-membership.repo';
 
 /**
  * listSeatAllocations
- * 
+ *
  * Path: GET /association/member/institutional-memberships/{institutionalMembershipId}/seats
  * OperationId: listSeatAllocations
  */
 export async function listSeatAllocations(
   ctx: ValidatedContext<never, ListSeatAllocationsQuery, ListSeatAllocationsParams>
 ): Promise<Response> {
-  // Get authenticated session from Better-Auth
-  const session = ctx.get('session');
-  if (!session) {
-    throw new UnauthorizedError();
-  }
-  
-  // Extract validated parameters
+  const user = ctx.get('user');
+  if (!user) return ctx.json({ error: 'Unauthorized' }, 401);
+
+  const db = ctx.get('database') as DatabaseInstance;
+  const logger = ctx.get('logger');
+
   const params = ctx.req.valid('param');
-  // Extract validated query parameters
   const query = ctx.req.valid('query');
-  
-  
-  // Implementation-Status: STUB — institutional memberships deferred to v1.2.0
-  // Tracked: GAP-BACKLOG.md, association:member mega-module split plan
-  // Examples of throwing errors:
-  // throw new UnauthorizedError();
-  // throw new ForbiddenError('You do not have access to this resource');
-  // throw new NotFoundError('Resource');
-  // throw new ValidationError('Invalid input');
-  // throw new BusinessLogicError('Business rule violated', 'BUSINESS_ERROR');
-  
-  throw new DeferredScopeError('listSeatAllocations', 'Wave 2');
+
+  const instRepo = new InstitutionalMembershipRepository(db, logger);
+  const seatRepo = new SeatAllocationRepository(db, logger);
+
+  // Verify institutional membership exists
+  const instMembership = await instRepo.findOneById(params.institutionalMembershipId);
+  if (!instMembership) throw new NotFoundError('Institutional membership');
+
+  const offset = query.offset ?? (query.page != null && query.pageSize != null
+    ? (query.page - 1) * query.pageSize
+    : 0);
+  const limit = query.limit ?? query.pageSize ?? 20;
+
+  const filters = {
+    institutionalMembershipId: params.institutionalMembershipId,
+    ...(query.status ? { status: query.status } : {}),
+  };
+
+  const { data, totalCount } = await seatRepo.findManyWithPagination(filters, {
+    pagination: { offset, limit },
+  });
+
+  const totalPages = Math.ceil(totalCount / limit);
+  const currentPage = Math.floor(offset / limit) + 1;
+
+  return ctx.json({
+    data,
+    pagination: {
+      offset,
+      limit,
+      count: data.length,
+      totalCount,
+      totalPages,
+      currentPage,
+      hasNextPage: currentPage < totalPages,
+      hasPreviousPage: currentPage > 1,
+    },
+  }, 200);
 }
