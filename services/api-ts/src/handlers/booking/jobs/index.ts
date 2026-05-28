@@ -6,7 +6,7 @@
 import type { JobScheduler } from '@/core/jobs';
 import type { DatabaseInstance } from '@/core/database';
 import type { NotificationService } from '@/core/notifs';
-import { DeferredScopeError } from '@/core/errors';
+import { BookingEventRepository } from '../repos/bookingEvent.repo';
 import { slotGeneratorJob } from './slotGenerator';
 import { confirmationTimerJob } from './confirmationTimer';
 import { slotCleanupJob } from './slotCleanup';
@@ -56,12 +56,18 @@ export async function triggerSlotGeneration(
   // This can be called manually to trigger slot generation for a specific owner
   const { regenerateEventSlots } = await import('./slotGenerator');
   
+  const eventRepo = new BookingEventRepository(db);
+
   if (ownerId) {
-    // DEFERRED: regenerateEventSlots takes eventId, not ownerId — needs API redesign or a lookup join. Wave 2.
-    throw new DeferredScopeError('triggerSlotGeneration with ownerId');
+    const events = await eventRepo.findActiveEventsByOwner(ownerId);
+    for (const event of events) {
+      await regenerateEventSlots(db, event.id);
+    }
   } else {
-    // DEFERRED: Manual full-job trigger endpoint not yet exposed in TypeSpec. Wave 2.
-    throw new DeferredScopeError('Full job trigger');
+    const events = await eventRepo.findMany({ status: 'active' });
+    for (const event of events) {
+      await regenerateEventSlots(db, event.id);
+    }
   }
 }
 
