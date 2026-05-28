@@ -1,9 +1,10 @@
 import type { ValidatedContext } from '@/types/app';
 import type { DatabaseInstance } from '@/core/database';
 import type { UploadNewDocumentVersionBody, UploadNewDocumentVersionParams } from '@/generated/openapi/validators';
-import { UnauthorizedError, NotFoundError } from '@/core/errors';
+import { UnauthorizedError, NotFoundError, ValidationError } from '@/core/errors';
 import { DocumentRepository, DocumentVersionRepository } from './repos/documents.repo';
 import { auditAction } from '@/utils/audit';
+import { isBlockedDocumentFile } from '@/utils/sanitize';
 
 /**
  * uploadNewDocumentVersion
@@ -24,6 +25,12 @@ export async function uploadNewDocumentVersion(
 
   const { documentId } = ctx.req.valid('param');
   const body = ctx.req.valid('json');
+
+  // EF-M11-004: Block SVG uploads (XSS vector — script tags, event handlers, foreignObject)
+  if (isBlockedDocumentFile(body.fileName)) {
+    throw new ValidationError('SVG files are not allowed due to security risks. Please convert to PNG or PDF.');
+  }
+
   const db = ctx.get('database') as DatabaseInstance;
   const logger = ctx.get('logger');
 
@@ -32,6 +39,8 @@ export async function uploadNewDocumentVersion(
 
   const document = await docRepo.findOneById(documentId);
   if (!document) throw new NotFoundError('Document');
+  // EF-M11-005: IDOR guard — verify document belongs to caller's org
+  if (document.organizationId !== orgId) throw new NotFoundError('Document');
 
   // Get next version number
   const latestVersion = await versionRepo.getLatestVersionNumber(documentId);

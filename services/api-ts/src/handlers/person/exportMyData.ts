@@ -31,10 +31,29 @@ export async function exportMyData(ctx: BaseContext): Promise<Response> {
     creditRepo.findMany({ personId }),
   ]);
 
+  // EF-M01: Filter to GDPR-appropriate fields only — exclude internal IDs,
+  // timestamps, deletion fields, and system metadata.
+  const safePerson = person ? {
+    firstName: person.firstName,
+    lastName: person.lastName,
+    middleName: person.middleName,
+    dateOfBirth: person.dateOfBirth,
+    gender: person.gender,
+    primaryAddress: person.primaryAddress,
+    contactInfo: person.contactInfo,
+    avatar: person.avatar,
+    languagesSpoken: person.languagesSpoken,
+    timezone: person.timezone,
+    licenseNumber: person.licenseNumber,
+    specialization: person.specialization,
+    preferredLanguage: person.preferredLanguage,
+    bio: person.bio,
+  } : null;
+
   return ctx.json({
     exportedAt: new Date().toISOString(),
     personId,
-    person,
+    person: safePerson,
     memberships,
     creditEntries,
   }, 200);

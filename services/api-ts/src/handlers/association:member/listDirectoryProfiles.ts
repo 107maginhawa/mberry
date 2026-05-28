@@ -16,6 +16,12 @@ export async function listDirectoryProfiles(
   const session = ctx.get('session');
   if (!session) throw new UnauthorizedError();
 
+  // EF-M04: Verify caller is a member of the org whose directory they're listing
+  const orgMembership = ctx.get('orgMembership');
+  if (!orgMembership) {
+    return ctx.json({ error: 'Organization membership required' }, 403);
+  }
+
   const orgId = ctx.get('organizationId');
   const query = ctx.req.valid('query');
   const visibility = (query as Record<string, unknown>)['visibility'] as 'public' | 'memberOnly' | 'hidden' | undefined;

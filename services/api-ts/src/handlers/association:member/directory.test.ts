@@ -90,6 +90,14 @@ describe('searchDirectory handler', () => {
     }
   });
 
+  test('[EF-M04] returns 403 when caller has no org membership', async () => {
+    const { searchDirectory } = await import('./searchDirectory');
+    const ctx = makeCtx({ orgMembership: null, _query: { limit: '20', offset: '0' } });
+    const res = await searchDirectory(ctx as any) as any;
+    expect(res.status).toBe(403);
+    expect(res.body.error).toBe('Organization membership required');
+  });
+
   test('returns paginated results for authenticated user', async () => {
     const { searchDirectory } = await import('./searchDirectory');
 
@@ -103,7 +111,7 @@ describe('searchDirectory handler', () => {
       }),
     });
 
-    const ctx = makeCtx({ _query: { limit: '20', offset: '0' }, _batchLoadTrustSignals: mockBatchLoadTrustSignals });
+    const ctx = makeCtx({ orgMembership: { id: 'mem-1' }, _query: { limit: '20', offset: '0' }, _batchLoadTrustSignals: mockBatchLoadTrustSignals });
     const res = await searchDirectory(ctx as any) as any;
 
     expect(res.status).toBe(200);
@@ -122,7 +130,7 @@ describe('searchDirectory handler', () => {
       },
     });
 
-    const ctx = makeCtx({ organizationId: 'org-alpha', _query: { limit: '20', offset: '0' }, _batchLoadTrustSignals: mockBatchLoadTrustSignals });
+    const ctx = makeCtx({ organizationId: 'org-alpha', orgMembership: { id: 'mem-1' }, _query: { limit: '20', offset: '0' }, _batchLoadTrustSignals: mockBatchLoadTrustSignals });
     await searchDirectory(ctx as any);
 
     expect(capturedOrgId).toBe('org-alpha');
@@ -139,7 +147,7 @@ describe('searchDirectory handler', () => {
       },
     });
 
-    const ctx = makeCtx({ _query: { q: 'cardio', limit: '20', offset: '0' }, _batchLoadTrustSignals: mockBatchLoadTrustSignals });
+    const ctx = makeCtx({ orgMembership: { id: 'mem-1' }, _query: { q: 'cardio', limit: '20', offset: '0' }, _batchLoadTrustSignals: mockBatchLoadTrustSignals });
     await searchDirectory(ctx as any);
 
     expect(capturedQ).toBe('cardio');
@@ -156,7 +164,7 @@ describe('searchDirectory handler', () => {
       },
     });
 
-    const ctx = makeCtx({ _query: { chapter: 'ch-1', duesStatus: 'current', tier: 'tier-gold', limit: '20', offset: '0' }, _batchLoadTrustSignals: mockBatchLoadTrustSignals });
+    const ctx = makeCtx({ orgMembership: { id: 'mem-1' }, _query: { chapter: 'ch-1', duesStatus: 'current', tier: 'tier-gold', limit: '20', offset: '0' }, _batchLoadTrustSignals: mockBatchLoadTrustSignals });
     await searchDirectory(ctx as any);
 
     expect(capturedFilters.chapter).toBe('ch-1');
@@ -174,7 +182,7 @@ describe('searchDirectory handler', () => {
 
     const trustMock = mock(async () => new Map([['p-1', { duesStatus: 'current', credentialCount: 2, ceCreditsEarned: 15, hasVerifiedLicense: true }]]));
 
-    const ctx = makeCtx({ _query: { limit: '20', offset: '0' }, _batchLoadTrustSignals: trustMock });
+    const ctx = makeCtx({ orgMembership: { id: 'mem-1' }, _query: { limit: '20', offset: '0' }, _batchLoadTrustSignals: trustMock });
     const res = await searchDirectory(ctx as any) as any;
 
     expect(res.body.data[0].trustSignals.duesStatus).toBe('current');
@@ -191,7 +199,7 @@ describe('searchDirectory handler', () => {
 
     const trustMock = mock(async () => new Map([['p-lapsed', { duesStatus: null, credentialCount: 0, ceCreditsEarned: 0, hasVerifiedLicense: false }]]));
 
-    const ctx = makeCtx({ _query: { duesStatus: 'current', limit: '20', offset: '0' }, _batchLoadTrustSignals: trustMock });
+    const ctx = makeCtx({ orgMembership: { id: 'mem-1' }, _query: { duesStatus: 'current', limit: '20', offset: '0' }, _batchLoadTrustSignals: trustMock });
     const res = await searchDirectory(ctx as any) as any;
 
     // Lapsed member has null duesStatus — not "current"
@@ -210,7 +218,7 @@ describe('searchDirectory handler', () => {
       }),
     });
 
-    const ctx = makeCtx({ _query: { q: 'test', limit: '20', offset: '0' }, _batchLoadTrustSignals: mockBatchLoadTrustSignals });
+    const ctx = makeCtx({ orgMembership: { id: 'mem-1' }, _query: { q: 'test', limit: '20', offset: '0' }, _batchLoadTrustSignals: mockBatchLoadTrustSignals });
     const start = performance.now();
     await searchDirectory(ctx as any);
     const elapsed = performance.now() - start;
@@ -312,6 +320,40 @@ describe('getPublicDirectoryProfile handler', () => {
     } catch (e: any) {
       expect(e.message ?? '').toContain('Public directory profile');
     }
+  });
+});
+
+// ---------------------------------------------------------------------------
+// listDirectoryProfiles handler
+// ---------------------------------------------------------------------------
+
+describe('listDirectoryProfiles handler', () => {
+  afterEach(() => {
+    restoreRepo(DirectoryProfileRepository);
+  });
+
+  test('[EF-M04] returns 403 when caller has no org membership', async () => {
+    const { listDirectoryProfiles } = await import('./listDirectoryProfiles');
+    const ctx = makeCtx({ orgMembership: null, _query: { limit: '20', offset: '0' } });
+    const res = await listDirectoryProfiles(ctx as any) as any;
+    expect(res.status).toBe(403);
+    expect(res.body.error).toBe('Organization membership required');
+  });
+
+  test('returns 200 with profiles when org membership exists', async () => {
+    const { listDirectoryProfiles } = await import('./listDirectoryProfiles');
+
+    stubRepo(DirectoryProfileRepository, {
+      findManyWithPagination: async () => ({
+        data: [makeDirectoryProfile()],
+        totalCount: 1,
+      }),
+    });
+
+    const ctx = makeCtx({ orgMembership: { id: 'mem-1' }, _query: { limit: '20', offset: '0' } });
+    const res = await listDirectoryProfiles(ctx as any) as any;
+    expect(res.status).toBe(200);
+    expect(res.body.data.length).toBe(1);
   });
 });
 

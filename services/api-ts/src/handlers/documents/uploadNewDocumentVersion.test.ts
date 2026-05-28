@@ -51,4 +51,21 @@ describe('uploadNewDocumentVersion', () => {
     const ctx = makeCtx({ _params: { documentId: 'nonexistent' }, _body: { fileName: 'v2.pdf', size: 2048, storageKey: 'uploads/v2.pdf' } });
     await expect(uploadNewDocumentVersion(ctx)).rejects.toBeInstanceOf(NotFoundError);
   });
+
+  test('[EF-M11-005] throws NotFoundError when document belongs to different org (IDOR)', async () => {
+    restoreRepo(DocumentRepository);
+    stubRepo(DocumentRepository, {
+      findOneById: async () => ({ id: 'doc-1', organizationId: 'other-org', title: 'Stolen Doc', status: 'published' }),
+    });
+    // Caller's org is 'tenant-1' (default from makeCtx), document belongs to 'other-org'
+    const ctx = makeCtx({ _params: { documentId: 'doc-1' }, _body: { fileName: 'v2.pdf', size: 2048, storageKey: 'uploads/v2.pdf' } });
+    await expect(uploadNewDocumentVersion(ctx)).rejects.toBeInstanceOf(NotFoundError);
+  });
+
+  test('[EF-M11-005] allows upload when document belongs to same org', async () => {
+    // existingDoc has organizationId: 'tenant-1' which matches makeCtx default
+    const ctx = makeCtx({ _params: { documentId: 'doc-1' }, _body: { fileName: 'v2.pdf', size: 2048, storageKey: 'uploads/v2.pdf' } });
+    const res = await uploadNewDocumentVersion(ctx);
+    expect(res.status).toBe(201);
+  });
 });

@@ -21,6 +21,12 @@ export async function searchDirectory(
   const session = ctx.get('session');
   if (!session) throw new UnauthorizedError();
 
+  // EF-M04: Verify caller is a member of the org whose directory they're searching
+  const orgMembership = ctx.get('orgMembership');
+  if (!orgMembership) {
+    return ctx.json({ error: 'Organization membership required' }, 403);
+  }
+
   const orgId = ctx.get('organizationId');
   const query = ctx.req.valid('query');
   const qr = query as Record<string, string>;
