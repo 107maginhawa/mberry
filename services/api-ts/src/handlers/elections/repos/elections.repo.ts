@@ -90,6 +90,20 @@ export class ElectionsRepository {
       .groupBy(electionNominees.positionId);
   }
 
+  /** Withdraw all non-terminal nominees when election is cancelled */
+  async withdrawAllNominees(electionId: string): Promise<number> {
+    const terminalStatuses = ['declined', 'elected'];
+    const result = await this.db
+      .update(electionNominees)
+      .set({ status: 'declined' as ElectionNominee['status'], updatedAt: new Date() })
+      .where(and(
+        eq(electionNominees.electionId, electionId),
+        sql`${electionNominees.status} NOT IN (${sql.join(terminalStatuses.map(s => sql`${s}`), sql`, `)})`,
+      ))
+      .returning();
+    return result.length;
+  }
+
   /** Void all votes cast for a specific nominee (BR-33: removed candidate vote voiding) */
   async voidVotesForNominee(electionId: string, nomineeId: string): Promise<number> {
     const result = await this.db

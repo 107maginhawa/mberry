@@ -33,6 +33,14 @@ export async function updateTraining(ctx: Context): Promise<Response> {
   const existing = await repo.getByOrg(id, orgId);
   if (!existing) throw new NotFoundError('Training not found');
 
+  // [AC-M09-005] Post-completion lock — completed/cancelled trainings are immutable
+  if (existing.status === 'completed' || existing.status === 'cancelled') {
+    throw new BusinessLogicError(
+      `Cannot update training in '${existing.status}' status. Completed and cancelled trainings are locked.`,
+      'TRAINING_LOCKED',
+    );
+  }
+
   // Status can only be changed via dedicated endpoints (publish, cancel, complete)
   if (body.status !== undefined) {
     throw new BusinessLogicError(

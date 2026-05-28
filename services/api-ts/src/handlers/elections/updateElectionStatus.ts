@@ -56,6 +56,11 @@ export async function updateElectionStatus(ctx: Context): Promise<Response> {
 
   const updated = await repo.update(id, { status: body.status, ...extra });
 
+  // Cascade: withdraw all non-terminal nominees when election is cancelled
+  if (body.status === 'cancelled') {
+    await repo.withdrawAllNominees(id);
+  }
+
   domainEvents.emit('election.status.changed', {
     electionId: id,
     organizationId: existing.organizationId,
