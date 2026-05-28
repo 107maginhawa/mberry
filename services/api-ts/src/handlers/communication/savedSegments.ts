@@ -17,12 +17,13 @@ export async function createSavedSegment(ctx: Context): Promise<Response> {
   const body = await ctx.req.json();
   const { organizationId, name, filters } = body;
 
-  if (!organizationId || !name || !filters) {
-    return ctx.json({ error: 'organizationId, name, and filters are required' }, 400);
+  // name presence + type guaranteed by zValidator in app.ts
+  if (!organizationId || !filters) {
+    return ctx.json({ error: 'organizationId and filters are required' }, 400);
   }
 
-  if (typeof name !== 'string' || name.length > 100) {
-    return ctx.json({ error: 'name must be a string of 100 characters or fewer' }, 400);
+  if (name.length > 100) {
+    return ctx.json({ error: 'name must be 100 characters or fewer' }, 400);
   }
 
   const db = ctx.get('database') as DatabaseInstance;

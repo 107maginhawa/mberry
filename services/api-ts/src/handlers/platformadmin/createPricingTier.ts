@@ -35,9 +35,7 @@ export async function createPricingTier(ctx: Context): Promise<Response> {
 		sortOrder,
 	} = body;
 
-	if (!name || typeof name !== "string") {
-		throw new ValidationError("name is required");
-	}
+	// name presence + type guaranteed by zValidator in app.ts
 	if (!slug || typeof slug !== "string") {
 		throw new ValidationError("slug is required");
 	}

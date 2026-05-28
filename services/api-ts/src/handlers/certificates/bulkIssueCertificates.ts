@@ -17,6 +17,7 @@ export async function bulkIssueCertificates(ctx: Context): Promise<Response> {
   if (!session) throw new UnauthorizedError();
   const body = (await ctx.req.json()) as BulkIssueBody;
   const db = ctx.get('database') as DatabaseInstance;
+  // personIds presence + min(1) guaranteed by zValidator in app.ts (defense-in-depth for direct calls)
   if (!body.personIds?.length) throw new ValidationError('personIds required');
   if (body.personIds.length > 100) throw new ValidationError('Max 100 per batch');
   if (!body.trainingTitle || !body.orgCode || !body.signingOfficerId) throw new ValidationError('trainingTitle, orgCode, signingOfficerId required');

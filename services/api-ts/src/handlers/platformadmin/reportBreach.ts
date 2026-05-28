@@ -25,9 +25,7 @@ export async function reportBreach(ctx: Context): Promise<Response> {
   const body = await ctx.req.json();
   const { organizationId, discoveredAt, description, affectedRecordsCount, dataCategories } = body;
 
-  if (!discoveredAt || !description) {
-    throw new ValidationError('discoveredAt and description are required');
-  }
+  // discoveredAt and description presence guaranteed by zValidator in app.ts
 
   const discovered = new Date(discoveredAt);
   if (Number.isNaN(discovered.getTime())) {

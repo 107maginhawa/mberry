@@ -33,9 +33,7 @@ export async function updateBreachStatus(ctx: Context): Promise<Response> {
   const body = await ctx.req.json();
   const { status, npcReferenceNumber } = body as { status?: string; npcReferenceNumber?: string };
 
-  if (!status) {
-    throw new ValidationError('status is required');
-  }
+  // status presence + enum guaranteed by zValidator in app.ts
 
   const [existing] = await db
     .select()

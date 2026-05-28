@@ -8,7 +8,6 @@
 
 import type { Context } from 'hono';
 import type { DatabaseInstance } from '@/core/database';
-import { ValidationError } from '@/core/errors';
 import { domainEvents } from '@/core/domain-events';
 import { supportTickets } from './repos/platform-admin.schema';
 
@@ -30,9 +29,7 @@ export async function createTicket(ctx: Context): Promise<Response> {
   const body = await ctx.req.json();
   const { subject, description, category, priority, organizationId } = body;
 
-  if (!subject || !description) {
-    throw new ValidationError('subject and description are required');
-  }
+  // subject + description presence guaranteed by zValidator in app.ts
 
   const resolvedPriority: string = priority ?? 'standard';
   const resolvedCategory: string = category ?? 'general';
