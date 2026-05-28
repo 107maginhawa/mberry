@@ -115,8 +115,7 @@ import { deleteMemberResponses } from '@/handlers/surveys/deleteMemberResponses'
 
 // completeEvent now served via generated TypeSpec route (was hand-wired, duplicate removed)
 
-// One-tap payment token: public validate + checkout, officer send-link
-import { sendPaymentLink } from '@/handlers/dues/sendPaymentLink';
+// One-tap payment token: public validate + checkout (sendPaymentLink now in generated routes)
 import { validatePaymentToken } from '@/handlers/dues/validatePaymentToken';
 import { checkoutPaymentToken } from '@/handlers/dues/checkoutPaymentToken';
 
@@ -446,9 +445,8 @@ export function createApp(config: Config): App {
   // completeEvent — removed hand-wired duplicate; now served via generated TypeSpec route
   // (see generated/openapi/routes.ts)
 
-  // @hand-wired reason="officer payment link generation, not in TypeSpec" wave="pre-migration"
+  // sendPaymentLink — migrated to generated routes (Phase 35)
   const orgIdParam = zValidator('param', z.object({ organizationId: z.string().uuid() }), validationErrorHandler);
-  app.post('/org/:organizationId/payments/send-link', orgIdParam, authMiddleware(), orgContextMiddleware(), sendPaymentLink as unknown as Handler);
   // @hand-wired reason="receipt PDF download, not in TypeSpec" wave="Cycle-8"
   const receiptParams = zValidator('param', z.object({ organizationId: z.string().uuid(), paymentId: z.string().uuid() }), validationErrorHandler);
   app.get('/org/:organizationId/payments/:paymentId/receipt', receiptParams, authMiddleware(), downloadReceipt as unknown as Handler);
