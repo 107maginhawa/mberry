@@ -14,6 +14,37 @@ let totalRequests = 0;
 let totalErrors = 0;
 const startTime = Date.now();
 
+// ─── Histograms ─────────────────────────────────────────
+
+/** Histogram bucket boundaries in milliseconds */
+const LATENCY_BUCKETS = [5, 10, 25, 50, 100, 250, 500, 1000, 2500, 5000, 10000];
+
+/** Per-route latency histogram data */
+interface HistogramData {
+  buckets: number[];  // counts per bucket
+  sum: number;        // total duration ms
+  count: number;      // total observations
+}
+
+const latencyHistograms = new Map<string, HistogramData>();
+
+function recordLatency(route: string, durationMs: number): void {
+  let hist = latencyHistograms.get(route);
+  if (!hist) {
+    hist = { buckets: new Array(LATENCY_BUCKETS.length + 1).fill(0), sum: 0, count: 0 };
+    latencyHistograms.set(route, hist);
+  }
+  hist.sum += durationMs;
+  hist.count++;
+  for (let i = 0; i < LATENCY_BUCKETS.length; i++) {
+    if (durationMs <= LATENCY_BUCKETS[i]!) {
+      hist.buckets[i]!++;
+      return;
+    }
+  }
+  hist.buckets[LATENCY_BUCKETS.length]!++; // +Inf bucket
+}
+
 /**
  * Middleware to track request metrics.
  * Call registerMetricsMiddleware(app) before route registration.
@@ -24,7 +55,11 @@ export function registerMetricsMiddleware(app: App): void {
     const key = `${ctx.req.method} ${ctx.req.routePath || ctx.req.path}`;
     requestCounts.set(key, (requestCounts.get(key) || 0) + 1);
 
+    const start = performance.now();
     await next();
+    const durationMs = performance.now() - start;
+
+    recordLatency(key, durationMs);
 
     if (ctx.res.status >= 400) {
       totalErrors++;
@@ -71,6 +106,30 @@ export function registerMetricsRoute(app: App): void {
       lines.push('', '# HELP http_requests_by_route Requests per route.', '# TYPE http_requests_by_route counter');
       for (const [route, count] of topRoutes) {
         lines.push(`http_requests_by_route{route="${route}"} ${count}`);
+      }
+    }
+
+    // Latency histograms — top 20 routes by request count
+    const topLatencyRoutes = [...latencyHistograms.entries()]
+      .sort((a, b) => b[1].count - a[1].count)
+      .slice(0, 20);
+
+    if (topLatencyRoutes.length > 0) {
+      lines.push(
+        '',
+        '# HELP http_request_duration_ms HTTP request duration in milliseconds.',
+        '# TYPE http_request_duration_ms histogram',
+      );
+      for (const [route, hist] of topLatencyRoutes) {
+        let cumulative = 0;
+        for (let i = 0; i < LATENCY_BUCKETS.length; i++) {
+          cumulative += hist.buckets[i]!;
+          lines.push(`http_request_duration_ms_bucket{route="${route}",le="${LATENCY_BUCKETS[i]}"} ${cumulative}`);
+        }
+        cumulative += hist.buckets[LATENCY_BUCKETS.length]!;
+        lines.push(`http_request_duration_ms_bucket{route="${route}",le="+Inf"} ${cumulative}`);
+        lines.push(`http_request_duration_ms_sum{route="${route}"} ${hist.sum.toFixed(2)}`);
+        lines.push(`http_request_duration_ms_count{route="${route}"} ${hist.count}`);
       }
     }
 
