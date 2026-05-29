@@ -7,6 +7,8 @@ vi.mock('@/components/motion/glass-card', () => ({
 
 vi.mock('@monobase/ui', () => ({
   Button: ({ children, onClick, ...props }: any) => <button onClick={onClick} {...props}>{children}</button>,
+  Input: ({ onChange, value, ...props }: any) => <input value={value} onChange={onChange} {...props} />,
+  Textarea: ({ onChange, value, ...props }: any) => <textarea value={value} onChange={onChange} {...props} />,
 }))
 
 const { TemplateSplitEditor } = await import('../components/template-split-editor')
