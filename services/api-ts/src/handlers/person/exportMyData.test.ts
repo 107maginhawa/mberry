@@ -14,6 +14,26 @@ mock.module('@/utils/audit', () => ({
 
 import { exportMyData } from './exportMyData';
 
+// Thenable Drizzle query stub: chain methods return self; awaiting it (or
+// calling .limit()) resolves to the provided rows.
+function arrChain(result: any[]): any {
+  const chain: any = {
+    from: () => chain,
+    where: () => chain,
+    orderBy: () => chain,
+    limit: () => Promise.resolve(result),
+    then: (resolve: any, reject: any) => Promise.resolve(result).then(resolve, reject),
+  };
+  return chain;
+}
+
+function makeExportDb(recent: any[]): any {
+  return {
+    select: () => arrChain(recent),
+    insert: () => ({ values: async () => undefined }),
+  };
+}
+
 describe('exportMyData', () => {
   beforeEach(() => {
     restoreRepo(PersonRepository);
@@ -41,7 +61,22 @@ describe('exportMyData', () => {
     stubRepo(CreditEntryRepository, {
       findMany: async () => [],
     });
-    const ctx = makeCtx();
+    const ctx = makeCtx({ database: makeExportDb([]) });
+    const res = await exportMyData(ctx);
+    expect(res.status).toBe(200);
+  });
+
+  test('[M2-R4] rate limits to 1 export per 24h', async () => {
+    const ctx = makeCtx({ database: makeExportDb([{ id: 'old', status: 'ready' }]) });
+    const res = await exportMyData(ctx);
+    expect(res.status).toBe(429);
+  });
+
+  test('[M2-R4] allows export when the only recent attempt failed', async () => {
+    stubRepo(PersonRepository, { findOneById: async () => ({ id: 'user-1', firstName: 'Test' }) });
+    stubRepo(MembershipRepository, { findAllByPerson: async () => [] });
+    stubRepo(CreditEntryRepository, { findMany: async () => [] });
+    const ctx = makeCtx({ database: makeExportDb([{ id: 'old', status: 'failed' }]) });
     const res = await exportMyData(ctx);
     expect(res.status).toBe(200);
   });
@@ -52,7 +87,7 @@ describe('exportMyData', () => {
     stubRepo(CreditEntryRepository, { findMany: async () => [] });
 
     auditCalls.length = 0;
-    const ctx = makeCtx();
+    const ctx = makeCtx({ database: makeExportDb([]) });
     await exportMyData(ctx);
 
     expect(auditCalls.length).toBe(1);
@@ -96,7 +131,7 @@ describe('exportMyData', () => {
     stubRepo(MembershipRepository, { findAllByPerson: async () => [] });
     stubRepo(CreditEntryRepository, { findMany: async () => [] });
 
-    const ctx = makeCtx();
+    const ctx = makeCtx({ database: makeExportDb([]) });
     const res = await exportMyData(ctx) as any;
 
     expect(res.status).toBe(200);

@@ -1,6 +1,6 @@
 import type { ValidatedContext } from '@/types/app';
 import type { DatabaseInstance } from '@/core/database';
-import { NotFoundError } from '@/core/errors';
+import { NotFoundError, ConflictError } from '@/core/errors';
 import { MembershipCategoryRepository } from './repos/membership.repo';
 import { auditAction } from '@/utils/audit';
 
@@ -28,6 +28,14 @@ export async function deleteMembershipCategory(
     throw new NotFoundError('Membership category');
   }
 
+  // BR-04: categories with assigned members cannot be deleted (deactivate only)
+  const memberCount = await repo.countMembersInCategory(id);
+  if (memberCount > 0) {
+    throw new ConflictError(
+      `Cannot delete category "${existing.name}": ${memberCount} member(s) still assigned. Reassign members first.`,
+    );
+  }
+
   await repo.deleteOneById(id);
 
   await auditAction(ctx, {
@@ -37,5 +45,5 @@ export async function deleteMembershipCategory(
     description: `Membership category "${existing.name}" deleted`,
   });
 
-  return ctx.json({ deleted: true });
+  return ctx.json({ deleted: true }, 200);
 }

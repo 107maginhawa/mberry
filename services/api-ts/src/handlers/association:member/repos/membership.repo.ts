@@ -305,4 +305,13 @@ export class MembershipCategoryRepository extends DatabaseRepository<
 
     return conditions.length > 0 ? and(...conditions) : undefined;
   }
+
+  /** BR-04: count memberships assigned to a category (gate for delete). */
+  async countMembersInCategory(categoryId: string): Promise<number> {
+    const [row] = await this.db
+      .select({ count: sql<number>`count(*)` })
+      .from(memberships)
+      .where(eq(memberships.categoryId, categoryId));
+    return Number(row?.count ?? 0);
+  }
 }

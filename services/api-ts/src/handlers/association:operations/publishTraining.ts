@@ -1,7 +1,7 @@
 import type { ValidatedContext } from '@/types/app';
 import type { DatabaseInstance } from '@/core/database';
 import type { PublishTrainingParams } from '@/generated/openapi/validators';
-import { NotFoundError } from '@/core/errors';
+import { NotFoundError, ValidationError } from '@/core/errors';
 import { TrainingRepository } from './repos/training.repo';
 import { domainEvents } from '@/core/domain-events';
 import { auditAction } from '@/utils/audit';
@@ -33,6 +33,22 @@ export async function publishTraining(
   if (!existing) throw new NotFoundError('Training not found');
 
   assertValidTransition(TRAINING_VALID_TRANSITIONS, existing.status, 'published', 'training');
+
+  // Completeness gate: a training must be fully specified before it goes live.
+  const incomplete: string[] = [];
+  if (!existing.title?.trim()) incomplete.push('title');
+  if (!existing.description?.trim()) incomplete.push('description');
+  if (!existing.startDate || !existing.endDate) {
+    incomplete.push('dates');
+  } else if (new Date(existing.endDate) < new Date(existing.startDate)) {
+    incomplete.push('endDate must not precede startDate');
+  }
+  if (existing.creditBearing && (existing.creditAmount ?? 0) <= 0) {
+    incomplete.push('creditAmount');
+  }
+  if (incomplete.length > 0) {
+    throw new ValidationError(`Cannot publish incomplete training: ${incomplete.join(', ')}`);
+  }
 
   const published = await repo.publish(params.trainingId);
 
