@@ -81,9 +81,9 @@ describe('NotificationPreferences', () => {
 
     await waitFor(() => {
       expect(mockApi.post).toHaveBeenCalledWith(
-        '/api/communications/subscriptions/bulk',
+        '/api/association/person-subscriptions/bulk-update',
         expect.objectContaining({
-          personId: 'person-1',
+          updates: expect.any(Array),
         })
       )
     })

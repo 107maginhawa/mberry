@@ -45,9 +45,10 @@ function OrganizationDetailPage() {
 
   async function transitionOrgStatus(newStatus: string) {
     try {
-      const res = await fetch(`/api/admin/organizations/${organizationId}/status`, {
-        method: 'PATCH',
+      const res = await fetch(`/api/admin/organizations/${organizationId}/transition`, {
+        method: 'POST',
         headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
         body: JSON.stringify({ status: newStatus }),
       })
       if (!res.ok) throw new Error(`HTTP ${res.status}`)

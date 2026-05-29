@@ -100,8 +100,7 @@ export function NotificationPreferences({ orgId, personId }: PreferencesProps) {
   // Save mutation
   const saveMutation = useMutation({
     mutationFn: (updates: { topicId: string; enabled: boolean }[]) =>
-      api.post('/api/communications/subscriptions/bulk', {
-        personId,
+      api.post('/api/association/person-subscriptions/bulk-update', {
         updates,
       }),
     onError: () => toast.error('Failed to save preference'),
