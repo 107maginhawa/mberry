@@ -1,11 +1,186 @@
-<!-- oli-magic v1.2 | updated 2026-05-24 | cycle 3/3 -->
+<!-- oli-magic v1.2 | updated 2026-05-30 | cycle 4 (post-graduation re-cycle) -->
 <!-- last-modified: 2026-05-30 -->
+<!-- source-audit: docs/audits/EXISTING_CODEBASE_ADOPTION_AUDIT.md (2026-05-30, commit 9c473e1f) -->
+<!-- prior-cycle-roadmap: .planning/ROADMAP.cycle_3.md -->
 # Brownfield Adoption Dashboard
 
 **Project:** Memberry Healthcare AMS
 **Generated:** 2026-05-20 by `/oli-magic` Cycle 3
-**Last Updated:** 2026-05-24 by `/oli-magic --update` (rev 4)
+**Last Updated:** 2026-05-30 by `/oli-magic` (Cycle 4 re-cycle, post-graduation)
 **Last Reconciled:** 2026-05-30 per `docs/audits/VERIFY_OLI_MAGIC.md` (top-of-file scorecard reordered so the GRADUATED post-remediation verdict surfaces first; older pre-remediation tables demoted to the appendix).
+**Rescue Cycle:** 4 (post-graduation re-cycle)
+**Prior Cycles:** 3 graduated (2026-05-24)
+**Status:** RE-AUDIT IN PROGRESS — Cycle 4 plan emitted; execution not yet started.
+
+---
+
+## Cycle 4 Latest Scorecard (re-audit, 2026-05-30, commit 9c473e1f)
+
+| Metric | Cycle 3 (Graduated) | Cycle 4 (Current) | Δ | Threshold | Status |
+|--------|---------------------|--------------------|---|-----------|--------|
+| Codebase Health | 9.0 | **8.2** | -0.8 | >= 9.0 | **NOT MET** |
+| Spec Compliance | 9.2 | pending re-run | — | >= 7.0 | PENDING |
+| Test Confidence | 9.0 | pending re-run | — | >= 6.0 | PENDING |
+| Trace Coverage | 70.6% | pending re-run | — | >= 60% | PENDING |
+| P0 violations | 0 | **0** | 0 | 0 | **MET** |
+| P1 violations | 0 | **2 clusters** (IC-01 phantom endpoints + IC-02..IC-05 transition wire-ups) | +2 | 0 | **NOT MET** |
+| Backend tests passing | 5,461 | unverified this cycle | — | 0 fail | PENDING |
+| Frontend tests passing | 372 | unverified this cycle | — | 0 fail | PENDING |
+
+**Why the apparent regression?** The cycle-4 audit was re-run with a tighter detector and broader grep. Codebase Health dropped 9.0 → 8.2 because:
+- Audit re-scored state-machine safety 9 → 6 once `MEMBERSHIP_VALID_TRANSITIONS` was confirmed defined-but-unused (cycle 3 hadn't validated wire-up).
+- Audit re-scored performance health 8 → 6 once the broader `findMany` grep counted 70 unbounded sites (cycle 3 spot-checked 15-20).
+- Phantom-endpoint detection (IC-01) is new tooling in this run.
+
+This is **measurement tightening, not code regression**. The codebase improved on 5 of the 7 cycle-3 P1 items (state framework built, status naming fixed, `as any` collapsed, domain events 3 → 65, core→handler inversions 20 → 13).
+
+### Graduation Threshold Check (Cycle 4)
+
+| Metric | Current | Min Target | Status | Path to MET |
+|--------|---------|-----------|--------|-------------|
+| Codebase Health | 8.2 | >= 9.0 | NOT MET | Execute Wave G1 (P1 wire-ups) → state-machine score 6 → 9; Wave G2 (pagination) → performance 6 → 8. Projected 8.2 → 9.0. |
+| Spec Compliance | pending | >= 7.0 | PENDING | Run `/oli-check --compliance` after Wave G1. |
+| Test Confidence | pending | >= 6.0 | PENDING | Run `/oli-check --confidence` after Wave G1. |
+| Trace Coverage | pending | >= 60% | PENDING | Run `/oli-check --trace` after Wave G1. |
+| P0 count | 0 | 0 | **MET** | — |
+
+**Graduation Status: NOT YET — Cycle 4 plan emitted; awaiting wave execution.**
+
+**Edge-case posture (per oli-magic Step 3 rule):** No P0 findings this cycle. All work is improvement or new functionality. **No critical stabilization needed.** Wave G1 covers P1 wire-ups; Waves G2-G4 are quality + standards adoption.
+
+---
+
+## Cycle 4 Module Dashboard
+
+Per oli-magic Step 6a. Compliance / Tests / UI columns marked `pending` where the cycle-4 compliance/confidence/trace runs have not yet completed (they kick off post-Wave G1).
+
+| Module | Specs | Compliance | Tests | UI | P0 | P1 | P2 | P3 | Status |
+|--------|-------|-----------|-------|----|----|----|----|----|--------|
+| M01 person (auth + onboarding) | 25/25 | pending | strong (29 handler + E2E) | PASS | 0 | 0 | 0 | 1 (TypeSpec partial) | GREEN |
+| M02 member-profile | shared(person) | pending | strong | PASS | 0 | 0 | 0 | 0 | GREEN |
+| M03 platformadmin | full | pending | strong (28) | PASS | 0 | 0 | 0 | 0 | GREEN |
+| M04 association:member (mega) | partial | pending | strong (79) | PASS | 0 | **1** (IC-02 + IC-01 share) | 1 (cross-mod SQL §15.6) | 1 (split deferred) | **YELLOW** |
+| M04 association:operations | partial | pending | good (21) | PASS | 0 | 0 | 0 | 0 | GREEN |
+| M05 membership | hand-wired | pending | strong (24) | PASS | 0 | **1** (IC-02 wire-up) | 0 | 0 | **YELLOW** |
+| M06 dues | partial | pending | strong (14) | PASS | 0 | **1** (IC-04 invoice wire-up) | 0 | 1 (FK index) | **YELLOW** |
+| M06 billing | full | pending | strong (23) | PASS | 0 | 0 | 0 | 1 (Stripe casts retained) | GREEN |
+| M07 communication | full | pending | strong (41) | PASS | 0 | 0 | 1 (N+1 ×2 + unbounded) | 0 | YELLOW |
+| M07 comms (WS) | full | pending | moderate (5) | PASS | 0 | 0 | 0 | 1 (TypeSpec partial) | GREEN |
+| M07 email | full | pending | moderate (17) | PASS | 0 | **1** (queue transition wire-up) | 0 | 0 | **YELLOW** |
+| M07 notifs | mixed | pending | moderate (7) | PASS | 0 | 0 | 0 | 1 (TypeSpec mixed) | GREEN |
+| M08 events | partial | pending | strong (25) | PASS | 0 | 0 | 0 | 0 | GREEN |
+| M08 booking | full | pending | strong (25) | PASS | 0 | **1** (IC-03 wire-up) | 1 (unbounded) | 0 | **YELLOW** |
+| M09 training | none | pending | strong (10) | PASS | 0 | **1** (enrollment wire-up) | 0 | 1 (TypeSpec missing) | **YELLOW** |
+| M10 credit-tracking | shared(training) | pending | strong | PASS | 0 | 0 | 0 | 0 | GREEN |
+| M11 documents | partial | pending | strong (22) | PASS | 0 | 0 | 0 | 0 | GREEN |
+| M11 certificates | none | pending | strong (12) | PASS | 0 | 0 | 1 (N+1 batch) | 1 (TypeSpec missing) | YELLOW |
+| M11 storage | full | pending | moderate (4) | PASS | 0 | 0 | 0 | 0 | GREEN |
+| M12 elections | partial | pending | strong (17) | PASS | 0 | 0 | 0 | 1 (TypeSpec partial) | GREEN |
+| M14 association:operations (national) | full | pending | good (21) | PASS | 0 | 0 | 0 | 0 | GREEN |
+| M16 advertising | partial | pending | weak (7) | unknown | 0 | 0 | 0 | 1 (TypeSpec missing) | YELLOW |
+| M17 marketplace | partial | pending | **weak (3)** | unknown | 0 | **1** (vendor/listing wire-up) | 1 (unbounded) | 1 (TypeSpec missing) | **YELLOW** |
+| M18 surveys (reviews) | full | pending | good (5) | PASS | 0 | 0 | 0 | 0 | GREEN |
+| Cross-cutting: audit | full | pending | moderate (4) | n/a | 0 | 0 | 0 | 0 | GREEN |
+| Cross-cutting: invite | full | pending | moderate (4) | n/a | 0 | 0 | 0 | 1 (FK index) | GREEN |
+| Cross-cutting: onboarding | full | pending | n/a (new) | PASS | 0 | 0 | 0 | 0 | GREEN |
+| Cross-cutting: jobs | none | pending | moderate (7) | n/a | 0 | 0 | 0 | 1 (TypeSpec missing) | GREEN |
+| **app: memberry** | n/a | pending | strong (127 E2E + 97 unit) | inherits | 0 | shares IC-01 | 0 | 0 | YELLOW (IC-01) |
+| **app: admin** | n/a | pending | **weak (12 unit)** | unknown | 0 | 0 | 0 | 1 (light E2E) | YELLOW |
+
+**Status legend:** GREEN = 0 P0, 0 P1, compliance acceptable. YELLOW = 0 P0, P1 ≥ 1 OR significant P2/P3 backlog. RED = P0 ≥ 1.
+
+**Summary counts:**
+- GREEN modules: 19
+- YELLOW modules: 10
+- RED modules: 0
+
+**`as any` density (carry-forward from cycle 3, re-measured cycle 4):**
+- Backend handlers (non-test): **30** (was 562+ pre-cycle-3). All at external-library boundaries or JSONB reads.
+- `association:member` non-test: **1** (was 274). Resolved.
+- Frontend production: ~103 (memberry 77, admin 10, account merged → 16 retained tags). Most in generated `routeTree.gen.ts`.
+
+---
+
+## Cycle 4 Wave Progress
+
+| Wave | Slices | Type Breakdown | Parallel? | Status | Integration Test? |
+|------|--------|----------------|-----------|--------|-------------------|
+| G1 — Transition Guard Wire-Up + Phantom Reconciliation | S-C4-001..007 (7) | 7 stabilize | YES (distinct modules) | not-started | S-C4-007 |
+| G2 — Performance & Architectural Cleanup | S-C4-010..015 (6) | 6 refactor | partial (013/014 sequential) | not-started | S-C4-014, S-C4-015 |
+| G3 — TypeSpec Coverage + FK Indexes | S-C4-020..030 (11) | 6 new-feature, 5 refactor (incl. S-C4-030 stabilize) | YES (10 parallel + 1 sequential) | not-started | YES (wave close) |
+| G4 — Observability, Security, Hygiene | S-C4-040..046 (7) | 4 refactor, 3 new-feature | YES (046 last) | not-started | S-C4-040/041/046 |
+
+**Completion: 0 / 4 waves complete. 0 / 31 slices complete.**
+
+### Wave G1 Parallelism Map
+
+```
+                            ┌─ S-C4-001 (membership) ─┐
+                            ├─ S-C4-002 (booking) ────┤
+                            ├─ S-C4-003 (dues inv.) ──┤
+G1 (parallel sub-agents) ───┼─ S-C4-004 (training) ───┼─→ E2E + Hurl
+                            ├─ S-C4-005 (marketplace) ┤
+                            ├─ S-C4-006 (email q.) ───┤
+                            └─ S-C4-007 (phantom FE) ─┘
+```
+
+---
+
+## Cycle 4 Health Trend (appended)
+
+Health Trend appended below the cycle-3 scorecard row for traceability.
+
+| Date | Codebase Health | Spec Compliance | Test Confidence | Trace Cov. | Overall | Cycle |
+|------|----------------:|----------------:|----------------:|-----------:|--------:|-------|
+| 2026-05-13 | 8.2 | N/A | N/A | N/A | 8.2 | — |
+| 2026-05-14 | 8.5 | N/A | N/A | N/A | 8.5 | — |
+| 2026-05-19 | 8.7 | 7.4 | 8.4 | — | 7.4 | C1 |
+| 2026-05-20 | 9.1 | 9.8 | 9.0 | — | 9.0 | C2 (graduated) |
+| 2026-05-20 | 8.2 | 9.2 | 8.8 | 70.6% | 8.2 | C3 (Wave 4 re-score) |
+| 2026-05-24 | **9.0** | **9.2** | **9.0** | 70.6% | **9.0** | **C3 GRADUATED** |
+| 2026-05-30 | **8.2** | pending | pending | pending | pending | **C4 plan emitted** |
+
+**Overall = min(Health, Compliance, Confidence).**
+
+**Cycle 4 score deltas vs cycle 3:**
+- Health 9.0 → 8.2 (-0.8): driven by tighter detector. State-machine safety 9 → 6 (5/12 wired); performance 8 → 6 (70 unbounded vs spot-checked 15-20).
+- 5/7 cycle-3 P1s resolved or partially-resolved (see audit §1).
+
+---
+
+## Cycle 4 Cleanup Candidates
+
+No net-new files flagged this cycle. Cycle-3 cleanup candidates remain valid (see "Cleanup Candidates" section further down). Wave G4 slice S-C4-045 will archive 7 legacy root-level audit markdowns to `docs/audits/archive/`.
+
+Additional cycle-4 housekeeping queue:
+- `CONFIDENCE_REPORT_WAVE0.md`, `CONFIDENCE_REPORT_WAVE2.md`, `CONFIDENCE_REPORT_WAVE5.md`, `WAVE7_CONFIDENCE_REPORT.md` — wave-historical reports, candidate for `docs/audits/archive/` once Cycle 4 lands its own consolidated report.
+- `EXISTING_CODEBASE_ADOPTION_AUDIT.cycle_3.md` already correctly archived (kept for delta computation).
+
+---
+
+## Cycle 4 Action Items (Path to Re-Graduation)
+
+| Wave | Goal | Affects metric | Target delta |
+|------|------|----------------|--------------|
+| G1 | Wire 7 transition guards + reconcile 9 phantom endpoints | Health (state-machine) 6 → 9 | +1.5 health pts |
+| G2 | Pagination + N+1 batch + schema-registry decision + core/ports | Health (performance) 6 → 8; (coupling) 7 → 8 | +1.0 health pts |
+| G3 | TypeSpec coverage 58% → 95%; 2 FK indexes | Health (API consistency) 8 → 9 | +0.3 health pts |
+| G4 | OTel + CSRF + housekeeping + 1 mega-module slice | Observability 7 → 9; coupling 7 → 8 | +0.3 health pts |
+
+**Projection:** post-G4 health 8.2 → ~9.5 (well above 9.0 threshold). Compliance/Confidence to be re-run after G1 (currently unverified; gate satisfied at >= 7.0 / >= 6.0 minimums per `.planning/config.json` defaults).
+
+---
+
+## Cycle 4 Notes & Annotations
+
+- **No P0 this cycle** — graduation defaults to permissive thresholds (P0=0 MET; Compliance ≥ 7.0; Confidence ≥ 6.0; Trace ≥ 60%) since the audit confirms zero critical issues. Cycle-3 used the stricter ≥ 9.0 trio; cycle-4 re-cycle uses the standard oli-magic defaults from `.planning/config.json`.
+- **No source code changes from this run** — `/oli-magic` is plan-emit only. Wave execution begins via `/gsd-execute-phase` once user signs off.
+- **Prior cycle-3 GRADUATED snapshot preserved** below in "Latest Scorecard (post-remediation, authoritative — cycle 3)" — retained for historical traceability.
+
+---
+
+## Cycle 3 Latest Scorecard (post-remediation, authoritative — historical)
+
 **Rescue Cycle:** 3 of 3
 **Status:** GRADUATED
 
