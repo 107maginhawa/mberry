@@ -4,6 +4,7 @@ import type { CreateOrganizationBody } from '@/generated/openapi/validators';
 import { ConflictError, NotFoundError, ValidationError } from '@/core/errors';
 import { OrganizationRepository, AssociationRepository } from './repos/platform-admin.repo';
 import { auditAction } from '@/utils/audit';
+import { domainEvents } from '@/core/domain-events';
 import { generateSlug, ensureUniqueSlug } from './utils/slug';
 
 /**
@@ -68,6 +69,15 @@ export async function createOrganization(
     resourceId: org.id,
     description: `Organization "${org.name}" created in association "${association.name}"`,
   });
+
+  // [EM-M03-d1e2f3a4] Emit spec-declared OrganizationCreated event.
+  domainEvents
+    .emit('organization.created', {
+      organizationId: org.id,
+      associationId: body.associationId,
+      name: org.name,
+    })
+    .catch(() => {});
 
   return ctx.json(org, 201);
 }

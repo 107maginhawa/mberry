@@ -1,8 +1,9 @@
-import { describe, test, expect, beforeEach, afterEach } from 'bun:test';
+import { describe, test, expect, beforeEach, afterEach, spyOn } from 'bun:test';
 import { makeCtx, stubRepo, restoreRepo } from '@/test-utils/make-ctx';
 import { fakeFeatureFlag } from '@/test-utils/factories';
 import { FeatureFlagRepository } from './repos/platform-admin.repo';
 import { setFeatureFlag } from './setFeatureFlag';
+import { domainEvents } from '@/core/domain-events';
 
 const fakeFlag = fakeFeatureFlag();
 
@@ -55,5 +56,16 @@ describe('setFeatureFlag', () => {
     const ctx = makeCtx({ _body: { targetType: 'org', targetId: 'org-1', moduleName: 'billing', enabled: true } });
     const res = await setFeatureFlag(ctx);
     expect((res as any).body?.warning).toBeUndefined();
+  });
+
+  // [EM-M03-d1e2f3a4]
+  test('emits feature_flag.changed', async () => {
+    const emitSpy = spyOn(domainEvents, 'emit');
+    const ctx = makeCtx({ _body: { targetType: 'org', targetId: 'org-1', moduleName: 'billing', enabled: true } });
+    await setFeatureFlag(ctx);
+    const call = emitSpy.mock.calls.find((c) => c[0] === 'feature_flag.changed');
+    expect(call).toBeDefined();
+    expect(call?.[1]).toMatchObject({ targetType: 'org', targetId: 'org-1', moduleName: 'billing', enabled: true });
+    emitSpy.mockRestore();
   });
 });

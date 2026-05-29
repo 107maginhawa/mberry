@@ -164,6 +164,8 @@ import { updatePricingTier } from '@/handlers/platformadmin/updatePricingTier';
 import { listSubscriptions } from '@/handlers/platformadmin/listSubscriptions';
 import { getSubscription } from '@/handlers/platformadmin/getSubscription';
 import { cancelSubscription } from '@/handlers/platformadmin/cancelSubscription';
+import { getRevenueAnalytics } from '@/handlers/platformadmin/getRevenueAnalytics';
+import { getOrgHealthScores } from '@/handlers/platformadmin/getOrgHealthScores';
 import { getMySubscription } from '@/handlers/association:member/getMySubscription';
 import { upgradeSubscription } from '@/handlers/association:member/upgradeSubscription';
 import { createSubscriptionCheckout } from '@/handlers/association:member/createSubscriptionCheckout';
@@ -512,6 +514,10 @@ export function createApp(config: Config): App {
   app.get('/admin/subscriptions', listSubscriptions as unknown as Handler);
   app.get('/admin/subscriptions/:id', uuidIdParam, getSubscription as unknown as Handler);
   app.put('/admin/subscriptions/:id/cancel', uuidIdParam, cancelSubscription as unknown as Handler);
+
+  // @hand-wired reason="platform revenue/health analytics, not in TypeSpec" wave="23" finding="EM-M03-b4c5d6e7"
+  app.get('/admin/analytics/revenue', getRevenueAnalytics as unknown as Handler);
+  app.get('/admin/analytics/health', getOrgHealthScores as unknown as Handler);
 
   // @hand-wired reason="org-facing subscription routes, not in TypeSpec" wave="UJ-M03"
   app.get('/association/member/org/:organizationId/subscription', orgIdParam, getMySubscription as unknown as Handler);

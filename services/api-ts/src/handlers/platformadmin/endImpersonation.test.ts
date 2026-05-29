@@ -1,8 +1,9 @@
-import { describe, test, expect, afterEach, beforeEach } from 'bun:test';
+import { describe, test, expect, afterEach, beforeEach, spyOn } from 'bun:test';
 import { makeCtx, stubRepo, restoreRepo } from '@/test-utils/make-ctx';
 import { endImpersonation } from './endImpersonation';
 import { ImpersonationSessionRepository } from './repos/platform-admin.repo';
 import { NotFoundError } from '@/core/errors';
+import { domainEvents } from '@/core/domain-events';
 
 // ─── Fixtures ────────────────────────────────────────────
 
@@ -145,5 +146,22 @@ describe('endImpersonation', () => {
     } else {
       expect(response.body.targetUserId).toBe('target-user-1');
     }
+  });
+
+  // [EM-M03-d1e2f3a4]
+  test('emits impersonation.ended', async () => {
+    mocks = stubRepo(ImpersonationSessionRepository, {
+      findById: async () => activeSession,
+      end: async () => endedSession,
+    });
+    const emitSpy = spyOn(domainEvents, 'emit');
+
+    const ctx = makeCtx({ _params: { sessionId: 'imp-session-1' } });
+    await endImpersonation(ctx);
+
+    const call = emitSpy.mock.calls.find((c) => c[0] === 'impersonation.ended');
+    expect(call).toBeDefined();
+    expect(call?.[1]).toMatchObject({ sessionId: 'imp-session-1', adminId: 'user-1', targetUserId: 'target-user-1' });
+    emitSpy.mockRestore();
   });
 });

@@ -4,6 +4,7 @@ import type { InviteAdminBody } from '@/generated/openapi/validators';
 import { ConflictError } from '@/core/errors';
 import { PlatformAdminRepository } from './repos/platform-admin.repo';
 import { auditAction } from '@/utils/audit';
+import { domainEvents } from '@/core/domain-events';
 
 /**
  * inviteAdmin
@@ -48,6 +49,12 @@ export async function inviteAdmin(
     resourceId: admin.id,
     description: `Platform admin "${admin.name}" (${admin.role}) invited`,
   });
+
+  // [EM-M03-d1e2f3a4] Emit spec-declared AdminInvited event so the invite
+  // email can be delivered by a downstream consumer (WF-022 step 2).
+  domainEvents
+    .emit('admin.invited', { adminId: admin.id, email: admin.email, role: admin.role })
+    .catch(() => {});
 
   return ctx.json(admin, 201);
 }

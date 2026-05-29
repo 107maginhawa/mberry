@@ -1,9 +1,10 @@
 // Business Rules: [BR-10] — impersonation audit with both admin + target IDs
-import { describe, test, expect, afterEach, beforeEach } from 'bun:test';
+import { describe, test, expect, afterEach, beforeEach, spyOn } from 'bun:test';
 import { makeCtx, stubRepo, restoreRepo } from '@/test-utils/make-ctx';
 import { startImpersonation } from './startImpersonation';
 import { PlatformAdminRepository, ImpersonationSessionRepository } from './repos/platform-admin.repo';
 import { ForbiddenError } from '@/core/errors';
+import { domainEvents } from '@/core/domain-events';
 
 // ─── Fixtures ────────────────────────────────────────────
 
@@ -291,5 +292,30 @@ describe('startImpersonation [BR-10]', () => {
     });
 
     await expect(startImpersonation(ctx)).rejects.toThrow('Cannot impersonate another platform administrator');
+  });
+
+  // [EM-M03-d1e2f3a4]
+  test('emits impersonation.started', async () => {
+    const session = makeImpersonationSession();
+    mocks = {
+      ...stubRepo(PlatformAdminRepository, {
+        findById: async (id: string) => id === 'user-1' ? superAdmin : undefined,
+      }),
+      ...stubRepo(ImpersonationSessionRepository, {
+        create: async () => session,
+      }),
+    };
+    const emitSpy = spyOn(domainEvents, 'emit');
+
+    const ctx = makeCtx({
+      user: { id: 'user-1', role: 'super' },
+      _body: { targetUserId: 'target-user-1' },
+    });
+
+    await startImpersonation(ctx);
+    const call = emitSpy.mock.calls.find((c) => c[0] === 'impersonation.started');
+    expect(call).toBeDefined();
+    expect(call?.[1]).toMatchObject({ sessionId: 'imp-session-1', adminId: 'user-1', targetUserId: 'target-user-1' });
+    emitSpy.mockRestore();
   });
 });

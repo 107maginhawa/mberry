@@ -5,6 +5,7 @@ import type { EndImpersonationParams } from '@/generated/openapi/validators';
 import { NotFoundError } from '@/core/errors';
 import { ImpersonationSessionRepository } from './repos/platform-admin.repo';
 import { auditAction } from '@/utils/audit';
+import { domainEvents } from '@/core/domain-events';
 
 /**
  * endImpersonation
@@ -40,6 +41,15 @@ export async function endImpersonation(
     description: `Impersonation session ended for target user ${impSession.targetUserId}`,
     eventSubType: 'authentication.impersonation-ended',
   });
+
+  // [EM-M03-d1e2f3a4] Emit spec-declared ImpersonationEnded event.
+  domainEvents
+    .emit('impersonation.ended', {
+      sessionId,
+      adminId: impSession.adminId,
+      targetUserId: impSession.targetUserId,
+    })
+    .catch(() => {});
 
   return ctx.json(ended, 200);
 }

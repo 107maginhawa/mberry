@@ -4,10 +4,12 @@ import type { TransitionOrgStatusBody, TransitionOrgStatusParams } from '@/gener
 import { NotFoundError, BusinessLogicError } from '@/core/errors';
 import { OrganizationRepository } from './repos/platform-admin.repo';
 import { auditAction } from '@/utils/audit';
+import { domainEvents } from '@/core/domain-events';
 
-/** Valid status transitions. */
+// [EM-M03-c7d8e9f0] trial -> cancelled (trial expired, no conversion) is a
+// spec-declared transition (M3-R10) — was missing, blocking the trial-expiry flow.
 const VALID_TRANSITIONS: Record<string, string[]> = {
-  trial: ['active'],
+  trial: ['active', 'cancelled'],
   active: ['suspended', 'cancelled'],
   suspended: ['active', 'cancelled'],
   cancelled: ['active'],
@@ -68,6 +70,16 @@ export async function transitionOrgStatus(
     resourceId: organizationId,
     description: `Organization status transitioned from "${currentStatus}" to "${targetStatus}"`,
   });
+
+  // [EM-M03-d1e2f3a4] Emit the spec-declared OrgStatusTransitioned event so
+  // cross-module consumers (M04/M05) can react to lifecycle changes.
+  domainEvents
+    .emit('org.status.transitioned', {
+      organizationId,
+      fromStatus: currentStatus,
+      toStatus: targetStatus,
+    })
+    .catch(() => {});
 
   return ctx.json(updated, 200);
 }

@@ -1,8 +1,9 @@
-import { describe, test, expect, afterEach } from 'bun:test';
+import { describe, test, expect, afterEach, spyOn } from 'bun:test';
 import { makeCtx, stubRepo } from '@/test-utils/make-ctx';
 import { transitionOrgStatus } from './transitionOrgStatus';
 import { OrganizationRepository } from './repos/platform-admin.repo';
 import { NotFoundError, BusinessLogicError } from '@/core/errors';
+import { domainEvents } from '@/core/domain-events';
 
 // ─── Fixtures ────────────────────────────────────────────
 
@@ -38,6 +39,7 @@ describe('transitionOrgStatus', () => {
 
   const validTransitions: [string, string][] = [
     ['trial', 'active'],
+    ['trial', 'cancelled'], // [EM-M03-c7d8e9f0] trial expired, no conversion
     ['active', 'suspended'],
     ['active', 'cancelled'],
     ['suspended', 'active'],
@@ -68,7 +70,7 @@ describe('transitionOrgStatus', () => {
 
   const invalidTransitions: [string, string][] = [
     ['trial', 'suspended'],
-    ['trial', 'cancelled'],
+    ['cancelled', 'suspended'],
   ];
 
   for (const [from, to] of invalidTransitions) {
@@ -153,5 +155,31 @@ describe('transitionOrgStatus', () => {
 
     const response = await transitionOrgStatus(ctx);
     expect(response.status).toBe(200);
+  });
+
+  // ─── Domain event [EM-M03-d1e2f3a4] ──────────────────
+
+  test('emits org.status.transitioned with from/to statuses', async () => {
+    mocks = stubRepo(OrganizationRepository, {
+      findById: async () => makeOrg('trial'),
+      update: async () => makeOrg('active'),
+    });
+    const emitSpy = spyOn(domainEvents, 'emit');
+
+    const ctx = makeCtx({
+      _params: { organizationId: 'org-1' },
+      _body: { status: 'active' },
+    });
+
+    await transitionOrgStatus(ctx);
+
+    const call = emitSpy.mock.calls.find((c) => c[0] === 'org.status.transitioned');
+    expect(call).toBeDefined();
+    expect(call?.[1]).toMatchObject({
+      organizationId: 'org-1',
+      fromStatus: 'trial',
+      toStatus: 'active',
+    });
+    emitSpy.mockRestore();
   });
 });

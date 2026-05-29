@@ -383,6 +383,49 @@ export interface DomainEventMap {
     organizationId: string;
     officerId: string;
   };
+
+  // ── Platform Admin Context (M03) ──────────────────────────────────────
+  'association.created': {
+    associationId: string;
+    name: string;
+  };
+
+  'organization.created': {
+    organizationId: string;
+    associationId: string;
+    name: string;
+  };
+
+  'org.status.transitioned': {
+    organizationId: string;
+    fromStatus: string;
+    toStatus: string;
+  };
+
+  'feature_flag.changed': {
+    targetType: string;
+    targetId: string;
+    moduleName: string;
+    enabled: boolean;
+  };
+
+  'impersonation.started': {
+    sessionId: string;
+    adminId: string;
+    targetUserId: string;
+  };
+
+  'impersonation.ended': {
+    sessionId: string;
+    adminId: string;
+    targetUserId: string;
+  };
+
+  'admin.invited': {
+    adminId: string;
+    email: string;
+    role: string;
+  };
 }
 
 export type DomainEventName = keyof DomainEventMap;

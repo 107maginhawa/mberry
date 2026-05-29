@@ -1,8 +1,9 @@
-import { describe, test, expect, beforeEach, afterEach } from 'bun:test';
+import { describe, test, expect, beforeEach, afterEach, spyOn } from 'bun:test';
 import { makeCtx, stubRepo, restoreRepo } from '@/test-utils/make-ctx';
 import { AssociationRepository } from './repos/platform-admin.repo';
 import { createAssociation } from './createAssociation';
 import { ConflictError } from '@/core/errors';
+import { domainEvents } from '@/core/domain-events';
 
 const newAssoc = { id: 'assoc-new', name: 'New Dental Assoc', country: 'PH', currency: 'PHP', locale: 'en' };
 
@@ -40,5 +41,16 @@ describe('createAssociation', () => {
     });
     const ctx = makeCtx({ _body: { name: 'New Dental Assoc', country: 'PH', currency: 'PHP' }, platformAdmin: { id: 'pa-1', role: 'super' } });
     await expect(createAssociation(ctx)).rejects.toBeInstanceOf(ConflictError);
+  });
+
+  // [EM-M03-d1e2f3a4]
+  test('emits association.created', async () => {
+    const emitSpy = spyOn(domainEvents, 'emit');
+    const ctx = makeCtx({ _body: { name: 'New Dental Assoc', country: 'PH', currency: 'PHP' }, platformAdmin: { id: 'pa-1', role: 'super' } });
+    await createAssociation(ctx);
+    const call = emitSpy.mock.calls.find((c) => c[0] === 'association.created');
+    expect(call).toBeDefined();
+    expect(call?.[1]).toMatchObject({ associationId: 'assoc-new', name: 'New Dental Assoc' });
+    emitSpy.mockRestore();
   });
 });

@@ -3,6 +3,7 @@ import type { DatabaseInstance } from '@/core/database';
 import type { SetFeatureFlagBody } from '@/generated/openapi/validators';
 import { FeatureFlagRepository } from './repos/platform-admin.repo';
 import { auditAction } from '@/utils/audit';
+import { domainEvents } from '@/core/domain-events';
 
 /**
  * setFeatureFlag
@@ -34,6 +35,16 @@ export async function setFeatureFlag(
     resourceId: flag.id,
     description: `Feature flag "${body.moduleName}" ${body.enabled ? 'enabled' : 'disabled'} for ${body.targetType}:${body.targetId}`,
   });
+
+  // [EM-M03-d1e2f3a4] Emit spec-declared FeatureFlagChanged event.
+  domainEvents
+    .emit('feature_flag.changed', {
+      targetType: body.targetType,
+      targetId: body.targetId,
+      moduleName: body.moduleName,
+      enabled: body.enabled,
+    })
+    .catch(() => {});
 
   // AC-M03-002: Include warning when disabling a feature flag
   const response: Record<string, unknown> = { ...flag };

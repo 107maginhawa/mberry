@@ -4,6 +4,7 @@ import type { CreateAssociationBody } from '@/generated/openapi/validators';
 import { ConflictError } from '@/core/errors';
 import { AssociationRepository } from './repos/platform-admin.repo';
 import { auditAction } from '@/utils/audit';
+import { domainEvents } from '@/core/domain-events';
 
 /**
  * createAssociation
@@ -50,6 +51,11 @@ export async function createAssociation(
     resourceId: association.id,
     description: `Association "${association.name}" created`,
   });
+
+  // [EM-M03-d1e2f3a4] Emit spec-declared AssociationCreated event.
+  domainEvents
+    .emit('association.created', { associationId: association.id, name: association.name })
+    .catch(() => {});
 
   return ctx.json(association, 201);
 }

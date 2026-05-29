@@ -1,9 +1,10 @@
-import { describe, test, expect, beforeEach, afterEach } from 'bun:test';
+import { describe, test, expect, beforeEach, afterEach, spyOn } from 'bun:test';
 import { makeCtx, stubRepo, restoreRepo } from '@/test-utils/make-ctx';
 import { fakeOrg as createFakeOrg } from '@/test-utils/factories';
 import { OrganizationRepository, AssociationRepository } from './repos/platform-admin.repo';
 import { createOrganization } from './createOrganization';
 import { NotFoundError, ConflictError } from '@/core/errors';
+import { domainEvents } from '@/core/domain-events';
 
 const fakeAssoc = createFakeOrg({ id: 'assoc-1', name: 'PDA', country: 'PH', currency: 'PHP' });
 const fakeOrg = createFakeOrg({ id: 'org-new', associationId: 'assoc-1', name: 'Manila Chapter', slug: 'manila-chapter', status: 'trial' });
@@ -54,5 +55,16 @@ describe('createOrganization', () => {
     });
     const ctx = makeCtx({ _body: { associationId: 'assoc-1', name: 'Manila Chapter', orgType: 'chapter' } });
     await expect(createOrganization(ctx)).rejects.toBeInstanceOf(ConflictError);
+  });
+
+  // [EM-M03-d1e2f3a4]
+  test('emits organization.created', async () => {
+    const emitSpy = spyOn(domainEvents, 'emit');
+    const ctx = makeCtx({ _body: { associationId: 'assoc-1', name: 'Manila Chapter', orgType: 'chapter' } });
+    await createOrganization(ctx);
+    const call = emitSpy.mock.calls.find((c) => c[0] === 'organization.created');
+    expect(call).toBeDefined();
+    expect(call?.[1]).toMatchObject({ organizationId: 'org-new', associationId: 'assoc-1', name: 'Manila Chapter' });
+    emitSpy.mockRestore();
   });
 });
