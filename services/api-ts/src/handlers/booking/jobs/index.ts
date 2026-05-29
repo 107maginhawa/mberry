@@ -48,25 +48,39 @@ export { slotCleanupJob } from './slotCleanup';
 
 /**
  * Job management utilities
+ *
+ * Dependencies are injectable so tests can isolate the orchestration logic
+ * without process-global mock.module (which would bleed into sibling test
+ * files sharing the same Bun process).
  */
+export interface TriggerSlotGenerationDeps {
+  eventRepoFactory?: (db: DatabaseInstance) => {
+    findActiveEventsByOwner: (ownerId: string) => Promise<Array<{ id: string }>>;
+    findMany: (filters: { status: string }) => Promise<Array<{ id: string }>>;
+  };
+  regenerate?: (db: DatabaseInstance, eventId: string) => Promise<void>;
+}
+
 export async function triggerSlotGeneration(
   db: DatabaseInstance,
-  ownerId?: string
+  ownerId?: string,
+  deps: TriggerSlotGenerationDeps = {}
 ): Promise<void> {
   // This can be called manually to trigger slot generation for a specific owner
-  const { regenerateEventSlots } = await import('./slotGenerator');
-  
-  const eventRepo = new BookingEventRepository(db);
+  const regenerate = deps.regenerate ?? (await import('./slotGenerator')).regenerateEventSlots;
+  const eventRepo = deps.eventRepoFactory
+    ? deps.eventRepoFactory(db)
+    : new BookingEventRepository(db);
 
   if (ownerId) {
     const events = await eventRepo.findActiveEventsByOwner(ownerId);
     for (const event of events) {
-      await regenerateEventSlots(db, event.id);
+      await regenerate(db, event.id);
     }
   } else {
     const events = await eventRepo.findMany({ status: 'active' });
     for (const event of events) {
-      await regenerateEventSlots(db, event.id);
+      await regenerate(db, event.id);
     }
   }
 }

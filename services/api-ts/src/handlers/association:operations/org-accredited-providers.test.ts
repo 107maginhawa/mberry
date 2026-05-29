@@ -14,7 +14,7 @@
 
 import { describe, test, expect, beforeEach, afterEach } from 'bun:test';
 import { makeCtx, stubRepo, restoreRepo } from '@/test-utils/make-ctx';
-import { AccreditedProviderRepository } from '@/handlers/training/repos/accredited-provider.repo';
+import { AccreditedProviderRepository } from '@/handlers/association:operations/repos/accredited-provider.repo';
 import { OfficerTermRepository } from '@/handlers/association:member/repos/governance.repo';
 
 // ─── Fixtures ────────────────────────────────────────────

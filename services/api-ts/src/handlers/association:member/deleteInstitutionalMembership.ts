@@ -47,5 +47,5 @@ export async function deleteInstitutionalMembership(
     description: 'Institutional membership removed (soft-delete); all active seats revoked',
   });
 
-  return ctx.json({}, 200);
+  return ctx.json({ success: true }, 200);
 }

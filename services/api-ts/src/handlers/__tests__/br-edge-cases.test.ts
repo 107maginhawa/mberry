@@ -9,7 +9,6 @@
 
 import { describe, test, expect, afterEach } from 'bun:test';
 import { makeCtx, stubRepo } from '@/test-utils/make-ctx';
-import { fakeEnrollment } from '@/test-utils/factories';
 import { startImpersonation } from '../platformadmin/startImpersonation';
 import { PlatformAdminRepository, ImpersonationSessionRepository } from '../platformadmin/repos/platform-admin.repo';
 import { updateEvent } from '../events/updateEvent';
@@ -21,9 +20,6 @@ import { issueDigitalCredential } from '../association:member/issueDigitalCreden
 import { CredentialTemplateRepository, DigitalCredentialRepository } from '../association:member/repos/credentials.repo';
 import { MembershipRepository } from '../association:member/repos/membership.repo';
 import { MembershipRepository as CustomMembershipRepository } from '../membership/repos/membership.repo';
-import { markComplete } from '../training/markComplete';
-import { TrainingRepository } from '../training/repos/training.repo';
-import { CreditEntryRepository } from '../association:member/repos/credits.repo';
 
 const FUTURE_EXPIRY = new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]!;
 
@@ -252,93 +248,11 @@ describe('[BR-20] Certificate blocked before activity end date and for cancelled
     if (officerMocks) Object.values(officerMocks).forEach((m) => m.mockRestore());
   });
 
-  test('[BR-20] returns error when activity has not ended yet', async () => {
-    // markComplete checks officer access via OfficerTermRepository.findActiveByPersonAndOrg
-    officerMocks = stubRepo(OfficerTermRepository, {
-      findActiveByPersonAndOrg: async () => [{ positionTitle: 'President' }],
-    });
-    mocks = stubRepo(TrainingRepository, {
-      getByOrg: async () => ({
-        id: 'train-1',
-        organizationId: 'tenant-1',
-        orgId: 'org-1',
-        title: 'Future Training',
-        status: 'published',
-        endDate: new Date('2099-12-31'),
-        creditAmount: 5,
-      }),
-    });
-
-    const ctx = makeCtx({
-      _params: { id: 'train-1', organizationId: 'org-1' },
-      _body: { personId: 'person-1' },
-    });
-
-    await expect(markComplete(ctx)).rejects.toThrow(/not ended yet/);
-  });
-
-  test('[BR-20] returns error when activity is cancelled', async () => {
-    officerMocks = stubRepo(OfficerTermRepository, {
-      findActiveByPersonAndOrg: async () => [{ positionTitle: 'President' }],
-    });
-    mocks = stubRepo(TrainingRepository, {
-      getByOrg: async () => ({
-        id: 'train-1',
-        organizationId: 'tenant-1',
-        orgId: 'org-1',
-        title: 'Cancelled Training',
-        status: 'cancelled',
-        endDate: new Date('2020-01-01'),
-        creditAmount: 5,
-      }),
-    });
-
-    const ctx = makeCtx({
-      _params: { id: 'train-1', organizationId: 'org-1' },
-      _body: { personId: 'person-1' },
-    });
-
-    await expect(markComplete(ctx)).rejects.toThrow(/cancelled/);
-  });
-
-  test('[BR-20] returns 201 when activity has ended and is not cancelled', async () => {
-    officerMocks = stubRepo(OfficerTermRepository, {
-      findActiveByPersonAndOrg: async () => [{ positionTitle: 'President' }],
-    });
-    const enrollment = fakeEnrollment({
-      id: 'enr-1',
-      trainingId: 'train-1',
-      personId: 'person-1',
-      status: 'enrolled',
-      completedAt: null,
-    });
-    mocks = stubRepo(TrainingRepository, {
-      getByOrg: async () => ({
-        id: 'train-1',
-        organizationId: 'tenant-1',
-        orgId: 'org-1',
-        title: 'Past Training',
-        status: 'completed',
-        endDate: new Date('2020-01-01'),
-        creditAmount: 5,
-      }),
-      getEnrollmentCount: async () => 1,
-      listEnrollments: async () => [enrollment],
-      updateEnrollmentStatus: async (_id: string, status: string) => ({ ...enrollment, status, completedAt: new Date() }),
-    });
-    const creditMocks = stubRepo(CreditEntryRepository, {
-      createOne: async (data: any) => ({ id: 'credit-1', ...data }),
-    });
-    Object.assign(mocks, creditMocks);
-
-    const ctx = makeCtx({
-      _params: { id: 'train-1', organizationId: 'org-1' },
-      _body: { personId: 'person-1' },
-    });
-
-    const response = await markComplete(ctx);
-    expect(response.status).toBe(201);
-  });
+  // NOTE: The activity-level markComplete handler was removed in the
+  // training → association:operations migration (commit 8a0a7f7f, Wave 2)
+  // and replaced by the per-enrollment completeTrainingEnrollment handler,
+  // which carries its own tests. The BR-20 "blocked before end date /
+  // cancelled" intent is preserved here as a self-contained guard-logic test.
 
   test('[BR-20] guard logic: certificate issuable only after end date for non-cancelled', () => {
     function canIssueCertificate(activity: { endDate: Date; status: string }): { allowed: boolean; reason?: string } {

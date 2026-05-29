@@ -166,6 +166,8 @@ describe('certifyElection [BR-33]', () => {
       get: async () => baseElection, // status: awaitingConfirmation
       getVoteTallies: async () => [{ positionId: 'pos-1', nomineeId: 'nom-1', count: 10 }],
       getVoterCount: async () => 15,
+      listNominees: async () => [{ id: 'nom-1', personId: 'person-1' }],
+      updateNomineeStatus: async () => undefined,
       update: async (_id: string, data: any) => ({ ...publishedElection, ...data }),
     });
     stubRepo(OfficerTermRepository, {
@@ -185,6 +187,8 @@ describe('certifyElection [BR-33]', () => {
       get: async () => baseElection,
       getVoteTallies: async () => [],
       getVoterCount: async () => 0,
+      listNominees: async () => [],
+      updateNomineeStatus: async () => undefined,
       update: async (_id: string, data: any) => {
         capturedUpdate = data;
         return { ...publishedElection, ...data };
@@ -208,6 +212,8 @@ describe('certifyElection [BR-33]', () => {
       get: async () => baseElection,
       getVoteTallies: async () => tallies,
       getVoterCount: async () => 15,
+      listNominees: async () => [{ id: 'nom-1', personId: 'person-1' }],
+      updateNomineeStatus: async () => undefined,
       update: async () => publishedElection,
     });
     stubRepo(OfficerTermRepository, {
