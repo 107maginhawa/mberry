@@ -219,12 +219,14 @@ No new P0/P1 BR-correctness regressions detected. Stub remaining: 9 institutiona
 
 | Metric | Value |
 |---|---|
-| Total endpoints (OpenAPI) | 428 |
+| Total endpoints (OpenAPI) | 451 (post Wave G3: +23 advertising/jobs/marketplace) |
 | Hand-wired routes (not from OpenAPI generation) | ~33 by-design |
-| Phantom (FE-calls without BE route) | 9 — see Phantom report below |
+| Phantom (FE-calls without BE route) | 0 — closed in Wave G1 (S-G1-07) |
 | Unauthed / unknown-auth endpoints | 21 (intentional public surface) |
-| OpenAPI spec size | 83,238 lines (`specs/api/dist/openapi/openapi.json`) |
-| TypeSpec module coverage | 58% (15 of 25 handler dirs) |
+| OpenAPI spec size | 83,238+ lines (`specs/api/dist/openapi/openapi.json`) |
+| TypeSpec module coverage | **96% (24 of 25 handler dirs)** — Wave G3 closed |
+
+**Wave G3 closure note (2026-05-30, oli-magic/wave-g3):** Three new TypeSpec modules added (advertising, jobs, marketplace — previously unmounted handlers). Modules previously listed as "no TypeSpec" were re-audited and found to be covered by `association/member/*.tsp` or `association/operations/*.tsp` (certificates, elections, training, etc.); only the `elections/` top-level handler dir retains 4 election-only functions (updateNomineeStatus, updateElectionStatus, castVote, createNominee) not yet contract-defined — deferred (low risk, hand-wired path is internal/admin). FK indexes called out in S-C4-030 (`invite.personId`, `webhook_retry_log.idempotencyKey`) verified present in migrations 0056 and 0050 respectively.
 
 ### 8b. API Contract Drift (against per-module API_CONTRACTS.md)
 
