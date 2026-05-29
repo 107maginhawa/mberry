@@ -43,6 +43,8 @@ export const AUDIT_EVENT_CATEGORIES = {
     'impersonation-started',
     'impersonation-ended',
     'password-changed',
+    'mfa-enabled',
+    'mfa-disabled',
   ],
   training: [
     'training-created',

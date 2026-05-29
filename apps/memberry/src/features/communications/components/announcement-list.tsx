@@ -3,7 +3,7 @@ import { useQuery } from '@tanstack/react-query'
 import { Button, Skeleton } from '@monobase/ui'
 import { Input } from '@monobase/ui'
 import { api } from '@/lib/api'
-import { useParams } from '@tanstack/react-router'
+import { Link, useParams } from '@tanstack/react-router'
 
 interface AnnouncementListProps {
   orgId: string
@@ -117,9 +117,10 @@ export function AnnouncementList({ orgId }: AnnouncementListProps) {
       ) : (
         <div className="border rounded-lg overflow-hidden divide-y">
           {announcements.map((ann: any) => (
-            <a
+            <Link
               key={ann.id}
-              href={`/org/${orgSlug}/officer/communications/${ann.id}`}
+              to="/org/$orgSlug/officer/communications/$announcementId"
+              params={{ orgSlug, announcementId: ann.id }}
               className="flex items-center justify-between p-4 hover:bg-[var(--color-surface-warm)] transition-colors"
             >
               <div className="min-w-0 flex-1">
@@ -138,7 +139,7 @@ export function AnnouncementList({ orgId }: AnnouncementListProps) {
                   {ann.status.charAt(0).toUpperCase() + ann.status.slice(1).replace('_', ' ')}
                 </span>
               </div>
-            </a>
+            </Link>
           ))}
         </div>
       )}

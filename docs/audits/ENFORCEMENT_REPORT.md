@@ -16,11 +16,11 @@
 
 | Severity | Count | Baseline | Delta |
 |----------|-------|----------|-------|
-| **P0** | 20 | 26 | ↓6 net (15 RESOLVED, 4 NEW detections, 3 NOT_RETESTED) |
+| **P0** | 16 | 26 | ↓10 net (18 RESOLVED, 1 FALSE POSITIVE, 3 NOT_RETESTED) |
 | **P1** | 80 | ~109 | ↓29 (consolidation + resolution) |
 | **P2** | 78 | ~108 | ↓30 (consolidation) |
 | **P3** | 32 | ~40 | ↓8 |
-| **Total** | **210** | **~283** | ↓73 net |
+| **Total** | **206** | **~283** | ↓77 net |
 
 **--strict verdict:** **PASS.** Zero code regressions. All 13 security P0s from Wave 1 confirmed RESOLVED. 4 NEW P0 detections are pre-existing gaps (code unchanged), not regressions introduced by recent commits.
 
@@ -72,7 +72,7 @@ All 13 P0 security findings from the previous run are confirmed fixed with test 
 
 ---
 
-## P0 Findings (Inline — All 20)
+## P0 Findings (Inline — 16 remaining)
 
 ### KNOWN P0s (from baseline, still present)
 
@@ -96,10 +96,10 @@ All 13 P0 security findings from the previous run are confirmed fixed with test 
 
 | ID | Module | Description | Phase |
 |----|--------|-------------|-------|
-| EF-M06-001 | M06 | No recordPayment handler — non-Stripe orgs cannot record manual cash/check payments | 1 |
-| AL-001-password-change | AUTH | auth.password-changed event has no audit log emission | 3 |
-| AL-002-mfa-lifecycle | AUTH | auth.mfa-enabled/disabled events have no audit log calls | 3 |
-| UJ-01-spa-bypass | UI | announcement-list.tsx uses raw `<a href>` bypassing SPA router integrity | 1.5 |
+| ~~EF-M06-001~~ | ~~M06~~ | **FALSE POSITIVE** — recordDuesPayment handler exists at `association:member/recordDuesPayment.ts` (generated registry imports it). Full implementation: receipt gen, invoice linking with optimistic lock, fund allocation, membership extension, audit trail, concurrent payment warning. Test file at `recordDuesPayment.test.ts`. | 1 |
+| ~~AL-001-password-change~~ | ~~AUTH~~ | **RESOLVED** — password change audit now emits typed `authentication.password-changed` eventSubType (was generic `security` category). Test: `auth-audit-logging.test.ts` | 3 |
+| ~~AL-002-mfa-lifecycle~~ | ~~AUTH~~ | **RESOLVED** — MFA enable/disable routes now intercept and emit `authentication.mfa-enabled`/`authentication.mfa-disabled` audit events. `mfa-enabled`/`mfa-disabled` sub-types added to audit-events.ts. Test: `auth-audit-logging.test.ts` | 3 |
+| ~~UJ-01-spa-bypass~~ | ~~UI~~ | **RESOLVED** — announcement-list.tsx `<a href>` replaced with TanStack Router `<Link>` using typed params. Route `$announcementId.tsx` exists. | 1.5 |
 
 ### NOT_RETESTED (dependency scanning not run this cycle)
 
@@ -202,12 +202,12 @@ All 13 P0 security findings from the previous run are confirmed fixed with test 
 
 | Category | Count | Details |
 |----------|-------|---------|
-| **RESOLVED** | 15 | 13 security fixes (3 commits) + EM-M07-cancelled + EX-NOTIF-enum (→P2) |
+| **RESOLVED** | 18 | 13 security (Wave 1) + EM-M07-cancelled + EX-NOTIF-enum (→P2) + AL-001 + AL-002 + UJ-01 (Waves 3-5) |
+| **FALSE POSITIVE** | 1 | EF-M06-001 (handler exists at association:member/recordDuesPayment.ts) |
 | **KNOWN** | 13 | 6 structural + 7 coverage (pre-existing, code unchanged) |
-| **NEW (detection)** | 4 | EF-M06-001, AL-001, AL-002, UJ-01 (pre-existing gaps, first detection) |
 | **NOT_RETESTED** | 3 | Dependency scanning (ED-GLOBAL-*) not run this cycle |
 | **REGRESSION** | 0 | No code changes introduced new bugs |
-| **Net** | 20 | ↓6 from 26 |
+| **Net** | 16 | ↓10 from 26 |
 
 ### Module Score Trends
 
@@ -257,18 +257,18 @@ All 13 P0 security findings from previous run are FIXED and verified with tests 
 | EM-M08-complete | **FALSE POSITIVE** | Handler exists in association:operations/ |
 | EM-M09-dead-code | **RESOLVED** | Deleted handlers/training/ (14 handlers + tests + repos), migrated accredited-provider to association:operations/ |
 
-### Wave 3 — Functional P0s (1 finding, M06)
+### Wave 3 — Functional P0s (0 findings — EMPTY)
 
 | Finding | Action |
 |---------|--------|
-| EF-M06-001 | Implement recordPayment handler for manual cash/check/bank-transfer |
+| ~~EF-M06-001~~ | **FALSE POSITIVE** — handler exists at `association:member/recordDuesPayment.ts` (same pattern as EM-M08 false positives — enforcement looked in `handlers/dues/` but handler lives in `handlers/association:member/`) |
 
-### Wave 4 — Audit Logging P0s (2 findings)
+### Wave 4 — Audit Logging P0s (0 findings — RESOLVED)
 
 | Finding | Action |
 |---------|--------|
-| AL-001-password-change | Emit auth.password-changed audit event in password change flow |
-| AL-002-mfa-lifecycle | Emit auth.mfa-enabled/disabled audit events |
+| ~~AL-001-password-change~~ | **RESOLVED** — typed `authentication.password-changed` eventSubType added to existing audit call |
+| ~~AL-002-mfa-lifecycle~~ | **RESOLVED** — MFA enable/disable intercepts with audit logging added to auth.ts |
 
 ### Wave 5 — Spec Coverage (7 coverage P0s)
 

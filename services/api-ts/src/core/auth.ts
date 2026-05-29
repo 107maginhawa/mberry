@@ -540,6 +540,7 @@ export function registerRoutes(app: App): void {
             const auditRepo = new AuditRepository(database, logger);
             await auditRepo.logEvent({
               eventType: 'security',
+              eventSubType: 'authentication.password-changed',
               category: 'security',
               action: 'update',
               outcome: 'success',
@@ -547,7 +548,7 @@ export function registerRoutes(app: App): void {
               userType: 'client',
               resourceType: 'user',
               resource: userId,
-              description: 'Password changed — other sessions revoked (EF-M02)',
+              description: 'Password changed — other sessions revoked (EF-M02, AL-001)',
             });
           } catch (auditErr) {
             logger?.warn({ error: auditErr }, 'EF-M02: Failed to audit password change');
@@ -580,8 +581,60 @@ export function registerRoutes(app: App): void {
         }
       }
     }
-    // Not a platform admin — pass through to Better-Auth
-    return auth.handler(c.req.raw);
+    // Not a platform admin — pass through to Better-Auth and audit
+    const result = await auth.handler(c.req.raw);
+    if (result.ok && session) {
+      const userId = session.userId;
+      try {
+        const { AuditRepository } = await import('@/handlers/audit/repos/audit.repo');
+        const auditRepo = new AuditRepository(database, logger);
+        await auditRepo.logEvent({
+          eventType: 'security',
+          eventSubType: 'authentication.mfa-disabled',
+          category: 'security',
+          action: 'update',
+          outcome: 'success',
+          user: userId,
+          userType: 'client',
+          resourceType: 'user',
+          resource: userId,
+          description: 'Two-factor authentication disabled (AL-002)',
+        });
+      } catch (auditErr) {
+        logger?.warn({ error: auditErr }, 'AL-002: Failed to audit MFA disable');
+      }
+    }
+    return result;
+  });
+
+  // AL-002: Audit MFA enable
+  app.post('/auth/two-factor/enable', async (c) => {
+    const result = await auth.handler(c.req.raw);
+    if (result.ok) {
+      const session = c.get('session');
+      const userId = session?.userId;
+      if (userId) {
+        try {
+          const { AuditRepository } = await import('@/handlers/audit/repos/audit.repo');
+          const auditRepo = new AuditRepository(database, logger);
+          await auditRepo.logEvent({
+            eventType: 'security',
+            eventSubType: 'authentication.mfa-enabled',
+            category: 'security',
+            action: 'update',
+            outcome: 'success',
+            user: userId,
+            userType: 'client',
+            resourceType: 'user',
+            resource: userId,
+            description: 'Two-factor authentication enabled (AL-002)',
+          });
+        } catch (auditErr) {
+          logger?.warn({ error: auditErr }, 'AL-002: Failed to audit MFA enable');
+        }
+      }
+    }
+    return result;
   });
 
   // Better-Auth handles all /auth/* routes with all HTTP methods
