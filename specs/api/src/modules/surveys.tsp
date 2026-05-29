@@ -198,6 +198,12 @@ model Survey extends BaseEntity {
 
   @doc("Person who created the survey")
   createdBy: UUID;
+
+  @doc("Requesting member's response status (only populated when mine=true)")
+  myResponseStatus?: ResponseStatus;
+
+  @doc("When the requesting member completed this survey (only populated when mine=true)")
+  myCompletedAt?: utcDateTime;
 }
 
 @doc("Response status")

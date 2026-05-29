@@ -9487,7 +9487,9 @@ export const SurveySchema = z.object({
   completionRate: z.number(),
   npsScore: z.number().optional(),
   questionBreakdown: z.record(z.string(), z.unknown())
-}).optional()
+}).optional(),
+  myResponseStatus: z.enum(["pending", "completed", "skipped", "dismissed"]).optional(),
+  myCompletedAt: z.string().datetime().transform((str) => new Date(str)).optional()
 });
 
 export const SurveyAnalyticsSchema = z.object({
@@ -9608,7 +9610,9 @@ export const SurveyUpdateSchema = z.object({
   completionRate: z.number().optional(),
   npsScore: z.number().optional(),
   questionBreakdown: z.record(z.string(), z.unknown()).optional()
-}).optional()
+}).optional(),
+  myResponseStatus: z.enum(["pending", "completed", "skipped", "dismissed"]).optional(),
+  myCompletedAt: z.string().datetime().transform((str) => new Date(str)).optional()
 });
 
 export const TargetAudienceFilterSchema = z.object({

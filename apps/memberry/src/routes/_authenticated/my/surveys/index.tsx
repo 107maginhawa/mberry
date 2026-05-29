@@ -1,11 +1,11 @@
 import { createFileRoute, Link } from '@tanstack/react-router'
 import { useQuery } from '@tanstack/react-query'
 import { ClipboardList, Clock, CheckCircle2, ChevronRight } from 'lucide-react'
+import { listSurveysOptions } from '@monobase/sdk-ts/generated/@tanstack/react-query.gen'
 import { PageHeader } from '@/components/patterns/page-header'
 import { EmptyState } from '@/components/patterns/empty-state'
 import { GlassCard } from '@/components/motion/glass-card'
 import { StaggerGrid, StaggerItem } from '@/components/motion/stagger-grid'
-import { api } from '@/lib/api'
 
 export const Route = createFileRoute('/_authenticated/my/surveys/')({
   component: MySurveys,
@@ -17,12 +17,9 @@ interface SurveyListItem {
   description?: string
   surveyType: string
   status: string
-  deadline?: string
-  completedAt?: string
-}
-
-interface SurveyListResponse {
-  data: SurveyListItem[]
+  myResponseStatus?: string
+  myCompletedAt?: string
+  settings?: { deadline?: string }
 }
 
 function formatDate(iso: string | null | undefined) {
@@ -51,14 +48,13 @@ function isOverdue(deadline?: string): boolean {
 }
 
 function MySurveys() {
-  const { data, isLoading, error } = useQuery<SurveyListResponse>({
-    queryKey: ['surveys', 'mine'],
-    queryFn: () => api.get<SurveyListResponse>('/surveys?mine=true'),
-  })
+  const { data, isLoading, error } = useQuery(
+    listSurveysOptions({ query: { mine: true } }),
+  )
 
-  const allSurveys = data?.data ?? []
-  const pending = allSurveys.filter((s) => s.status === 'pending')
-  const completed = allSurveys.filter((s) => s.status === 'completed')
+  const allSurveys = ((data?.data ?? []) as unknown as SurveyListItem[])
+  const pending = allSurveys.filter((s) => s.myResponseStatus === 'pending')
+  const completed = allSurveys.filter((s) => s.myResponseStatus === 'completed')
 
   return (
     <div className="space-y-6">
@@ -129,15 +125,15 @@ function MySurveys() {
                                 {survey.description}
                               </p>
                             )}
-                            {survey.deadline && (
+                            {survey.settings?.deadline && (
                               <p
                                 className={`text-xs font-medium ${
-                                  isOverdue(survey.deadline)
+                                  isOverdue(survey.settings.deadline)
                                     ? 'text-[var(--color-error)]'
                                     : 'text-[var(--color-muted)]'
                                 }`}
                               >
-                                {isOverdue(survey.deadline) ? 'Overdue' : 'Due'}: {formatDate(survey.deadline)}
+                                {isOverdue(survey.settings.deadline) ? 'Overdue' : 'Due'}: {formatDate(survey.settings.deadline)}
                               </p>
                             )}
                           </div>
@@ -177,9 +173,9 @@ function MySurveys() {
                         <h3 className="text-sm font-semibold text-[var(--color-text)]">
                           {survey.title}
                         </h3>
-                        {survey.completedAt && (
+                        {survey.myCompletedAt && (
                           <p className="text-xs text-[var(--color-muted)]">
-                            Submitted: {formatDate(survey.completedAt)}
+                            Submitted: {formatDate(survey.myCompletedAt)}
                           </p>
                         )}
                       </div>
