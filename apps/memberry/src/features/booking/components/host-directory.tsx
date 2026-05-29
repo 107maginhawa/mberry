@@ -77,6 +77,7 @@ export function HostDirectory() {
             key={event.id}
             to="/my/bookings/host/$personId"
             params={{ personId: owner.id }}
+            search={{ eventId: event.id }}
             className="block focus:outline-none"
           >
             <Card className="h-full transition-shadow hover:shadow-md">

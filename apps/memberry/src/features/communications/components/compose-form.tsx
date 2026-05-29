@@ -95,7 +95,7 @@ export function ComposeForm({ orgId, existingAnnouncement }: ComposeFormProps) {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['announcements', orgId] })
-      navigate({ to: `/org/${orgSlug}/officer/communications` })
+      navigate({ to: '/org/$orgSlug/officer/communications', params: { orgSlug } })
     },
     onError: (err: Error) => {
       setServerError(err.message)
@@ -254,7 +254,7 @@ export function ComposeForm({ orgId, existingAnnouncement }: ComposeFormProps) {
         <Button
           type="button"
           variant="ghost"
-          onClick={() => navigate({ to: `/org/${orgSlug}/officer/communications` })}
+          onClick={() => navigate({ to: '/org/$orgSlug/officer/communications', params: { orgSlug } })}
           disabled={mutation.isPending}
         >
           Cancel

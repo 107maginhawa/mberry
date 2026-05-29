@@ -3,6 +3,7 @@ import { MembershipRepository } from './repos/membership.repo';
 import { DuesConfigRepository } from '../association:member/repos/dues.repo';
 import type { Session } from '@/types/auth';
 import { domainEvents } from '@/core/domain-events';
+import { auditAction } from '@/utils/audit';
 
 export async function reviewApplication(ctx: Context): Promise<Response> {
   const db = ctx.get('database');
@@ -45,6 +46,19 @@ export async function reviewApplication(ctx: Context): Promise<Response> {
       source: 'application',
     }).catch(() => {});
   }
+
+  const auditSubType = status === 'approved' ? 'membership.member-approved'
+    : status === 'denied' ? 'membership.member-denied'
+    : 'membership.application-submitted';
+
+  await auditAction(ctx, {
+    action: status === 'approved' ? 'approve' : status === 'denied' ? 'deny' : 'update',
+    resourceType: 'application',
+    resourceId: appId,
+    description: `Application ${status}: ${body.reason ?? 'no reason provided'}`,
+    eventSubType: auditSubType,
+    details: { personId: updated.personId, status },
+  });
 
   return ctx.json({ data: updated }, 200);
 }

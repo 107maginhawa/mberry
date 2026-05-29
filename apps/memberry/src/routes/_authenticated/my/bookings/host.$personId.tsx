@@ -17,8 +17,15 @@ import {
   toBookingTimeSlot,
 } from '@/features/booking/lib/adapters'
 
+import { z } from 'zod'
+
+const hostSearchSchema = z.object({
+  eventId: z.string().optional(),
+})
+
 export const Route = createFileRoute('/_authenticated/my/bookings/host/$personId')({
   component: HostPage,
+  validateSearch: hostSearchSchema,
 })
 
 function ownerOf(value: string | Person): Person | null {
@@ -32,18 +39,20 @@ function initials(person: Person | null | undefined): string {
 
 function HostPage() {
   const { personId } = Route.useParams()
+  const { eventId } = Route.useSearch()
   const navigate = useNavigate()
 
-  // Pull the host's first active event (we model one event per user). Expanding
-  // owner saves a separate getPerson call when one already exists.
+  // Pull the host's active events. When eventId is provided (from host directory),
+  // we pre-select that specific event instead of defaulting to the first one.
   const eventsQuery = useQuery({
     ...listBookingEventsOptions({
-      query: { owner: personId, status: 'active', expand: 'owner', limit: 1 },
+      query: { owner: personId, status: 'active', expand: 'owner', limit: 10 },
     }),
     staleTime: 60_000,
   })
 
-  const event = eventsQuery.data?.data[0]
+  const events = eventsQuery.data?.data ?? []
+  const event = (eventId ? events.find((e) => e.id === eventId) : events[0]) ?? events[0]
 
   // Fall back to a separate getPerson if expand didn't yield a person object
   // (e.g. if the host has no event at all, eventsQuery returns nothing).

@@ -67,6 +67,12 @@ export const AUDIT_EVENT_CATEGORIES = {
     'event-cancelled',
     'event-completed',
   ],
+  data: [
+    'pii-accessed',
+    'bulk-export',
+    'document-accessed',
+    'credential-verified',
+  ],
 } as const;
 
 export type AuditCategory = keyof typeof AUDIT_EVENT_CATEGORIES;

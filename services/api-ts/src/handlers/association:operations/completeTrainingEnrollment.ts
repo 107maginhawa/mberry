@@ -13,6 +13,9 @@ import { POSITION_TITLES } from '@/utils/position-titles';
  * completeTrainingEnrollment
  *
  * Path: POST /association/training/enrollments/{enrollmentId}/complete
+ *
+ * BR-43 (M9-R3): Completed training locks further enrollment changes
+ * BR-44 (M9-R7): Idempotent attendance — no duplicate credits awarded
  * OperationId: completeTrainingEnrollment
  *
  * Business rules:

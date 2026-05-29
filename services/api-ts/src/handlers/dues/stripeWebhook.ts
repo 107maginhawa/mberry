@@ -10,6 +10,7 @@ import type { Context } from 'hono';
 import type { Variables } from '@/types/app';
 import { handleIncomingWebhook, type WebhookEvent } from './jobs/webhookRetryProcessor';
 import { createProcessPayment } from './jobs/processStripePayment';
+import { auditAction } from '@/utils/audit';
 
 /**
  * Map a Stripe event to our internal WebhookEvent shape.
@@ -79,6 +80,17 @@ export async function stripeWebhookHandler(
     event: webhookEvent,
     processPayment,
   });
+
+  if (result.action === 'processed') {
+    await auditAction(c, {
+      action: 'create',
+      resourceType: 'payment',
+      resourceId: stripeEvent.id,
+      description: `Stripe webhook processed: ${stripeEvent.type}`,
+      eventSubType: 'financial.payment-recorded',
+      details: { eventType: stripeEvent.type, organizationId: webhookEvent.organizationId },
+    });
+  }
 
   return c.json({ received: true, action: result.action }, result.status as 200);
 }

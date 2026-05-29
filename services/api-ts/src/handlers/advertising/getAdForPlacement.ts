@@ -5,8 +5,8 @@
  * OperationId: getAdForPlacement
  *
  * Retrieve an ad for display in a feed slot.
- * Respects opt-out (M16-R4), approval gate (AC-M16-001),
- * budget limits (M16-R6), and sponsored label (AC-M16-003).
+ * Respects opt-out (M16-R4), approval gate (AC-M16-001 / BR-45),
+ * budget limits (M16-R6), and sponsored label (AC-M16-003 / BR-47).
  */
 
 import type { ValidatedContext } from '@/types/app';

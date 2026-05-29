@@ -5,6 +5,8 @@
  * OperationId: createCreative
  *
  * Submit a creative for admin review (AC-M16-001: no display without approval)
+ * BR-45 (M16-R1): Ad creative requires admin approval before display
+ * BR-47 (M16-R3): Sponsored content must be labeled "Sponsored"
  */
 
 import type { ValidatedContext } from '@/types/app';

@@ -9,6 +9,7 @@ import {
   BusinessLogicError
 } from '@/core/errors';
 import { PersonRepository } from './repos/person.repo';
+import { auditAction } from '@/utils/audit';
 
 /**
  * getPerson
@@ -65,14 +66,17 @@ export async function getPerson(
     }
   }
   
-  // Log audit trail
-  logger?.info({
-    personId: person.id,
-    action: 'view',
-    viewedBy: user?.id || 'internal-expand',
-    isOwner: isInternalExpand ? null : (user?.id === personId),
-    internalExpand: isInternalExpand
-  }, 'Person retrieved');
+  // Structured audit for PII access (skip internal expand — already authorized at parent level)
+  if (!isInternalExpand) {
+    await auditAction(ctx, {
+      action: 'read',
+      resourceType: 'person',
+      resourceId: person.id,
+      description: `PII accessed: person ${person.id}`,
+      eventSubType: 'data.pii-accessed',
+      eventType: 'data-access',
+    });
+  }
   
   // Ensure dateOfBirth is serialized as ISO string for JSON response
   // Note: With strict typing, dateOfBirth is typed as string | null from DB,

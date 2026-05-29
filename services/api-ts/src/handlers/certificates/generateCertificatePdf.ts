@@ -2,6 +2,7 @@ import type { ValidatedContext } from '@/types/app';
 import type { DatabaseInstance } from '@/core/database';
 import { CertificatesRepository } from './repos/certificates.repo';
 import { NotFoundError, ForbiddenError } from '@/core/errors';
+import { auditAction } from '@/utils/audit';
 import {
   renderCertificateHtml,
   validateTemplateData,
@@ -64,6 +65,15 @@ export async function generateCertificatePdf(
   };
 
   const html = renderCertificateHtml(templateData, branding);
+
+  await auditAction(ctx, {
+    action: 'create',
+    resourceType: 'certificate',
+    resourceId: cert.id,
+    description: `Certificate PDF generated: ${cert.certificateNumber}`,
+    eventSubType: 'content.certificate-generated',
+    details: { certificateNumber: cert.certificateNumber, certificateType: templateData.certificateType },
+  });
 
   // Return HTML directly with proper content type.
   // Clients can render this in a browser/webview and use window.print()

@@ -6,6 +6,7 @@ import { MembershipRepository } from './repos/membership.repo';
 import { persistWithComputedStatus } from '../association:member/utils/membership-status-middleware';
 import type { DatabaseInstance } from '@/core/database';
 import type { Session } from '@/types/auth';
+import { auditAction } from '@/utils/audit';
 
 // [V-20] Zod schema for updateMember request body
 const VALID_STATUSES = ['active', 'suspended', 'removed', 'grace', 'lapsed'] as const;
@@ -115,6 +116,22 @@ export async function updateMember(ctx: Context): Promise<Response> {
       organizationId: orgId,
       oldStatus: currentStatus,
       newStatus: status,
+    });
+  }
+
+  if (status !== currentStatus) {
+    const subTypeMap: Record<string, string> = {
+      suspended: 'membership.member-suspended',
+      removed: 'membership.member-terminated',
+      active: 'membership.member-reinstated',
+    };
+    await auditAction(ctx, {
+      action: status === 'suspended' ? 'terminate' : status === 'removed' ? 'terminate' : 'reinstate',
+      resourceType: 'membership',
+      resourceId: existing.membership.id,
+      description: `Membership status changed: ${currentStatus} → ${status}`,
+      eventSubType: subTypeMap[status] ?? 'membership.member-suspended',
+      details: { personId: existing.membership.personId, oldStatus: currentStatus, newStatus: status },
     });
   }
 

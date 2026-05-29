@@ -1,5 +1,5 @@
 /**
- * Audit logging helper for data-modifying handlers.
+ * Audit logging helper for handlers.
  *
  * Wraps the audit service's logEvent() with user/IP extraction and
  * try/catch so audit failures never crash the handler.
@@ -9,16 +9,17 @@ import type { BaseContext } from '@/types/app';
 import type { AuditEventSubType } from './audit-events';
 
 interface AuditActionOpts {
-  action: 'create' | 'update' | 'delete' | 'approve' | 'deny' | 'renew' | 'terminate' | 'reinstate' | 'mark-paid' | 'complete' | 'transfer' | 'resign' | 'deceased';
+  action: 'create' | 'update' | 'delete' | 'approve' | 'deny' | 'renew' | 'terminate' | 'reinstate' | 'mark-paid' | 'complete' | 'transfer' | 'resign' | 'deceased' | 'read' | 'export';
   resourceType: string;
   resourceId: string;
   description: string;
   details?: Record<string, unknown>;
   eventSubType?: AuditEventSubType | string;  // typed audit sub-type like 'financial.payment-recorded'
+  eventType?: 'data-modification' | 'data-access';  // defaults to 'data-modification'
 }
 
 /**
- * Log an audit event for a data-modifying operation.
+ * Log an audit event for a data-modifying or data-access operation.
  * Fire-and-forget with try/catch — never blocks the response.
  */
 export async function auditAction(ctx: BaseContext, opts: AuditActionOpts): Promise<void> {
@@ -31,7 +32,7 @@ export async function auditAction(ctx: BaseContext, opts: AuditActionOpts): Prom
 
   try {
     await audit.logEvent({
-      eventType: 'data-modification',
+      eventType: opts.eventType ?? 'data-modification',
       eventSubType: opts.eventSubType,
       category: 'association',
       action: opts.action,

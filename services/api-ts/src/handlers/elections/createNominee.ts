@@ -15,6 +15,7 @@ import { ElectionsRepository } from './repos/elections.repo';
 import { memberships } from '../association:member/repos/membership.schema';
 import { domainEvents } from '@/core/domain-events';
 import type { Session } from '@/types/auth';
+import { auditAction } from '@/utils/audit';
 
 const createNomineeSchema = z.object({
   positionId: z.string().uuid('positionId must be a valid UUID'),
@@ -119,6 +120,14 @@ export async function createNominee(ctx: Context): Promise<Response> {
     positionId: body.positionId,
     organizationId: orgId,
   }).catch(() => {});
+
+  await auditAction(ctx, {
+    action: 'create',
+    resourceType: 'nominee',
+    resourceId: nominee.id,
+    description: `Nomination submitted for election ${electionId}, position ${body.positionId}`,
+    eventSubType: 'governance.nomination-submitted',
+  });
 
   return ctx.json({ data: nominee }, 201);
 }

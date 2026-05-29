@@ -4,7 +4,7 @@
  * Path: POST /association/advertising/creatives/:creativeId/review
  * OperationId: reviewCreative
  *
- * Admin approves or rejects a creative (AC-M16-001)
+ * Admin approves or rejects a creative (AC-M16-001 / BR-45)
  */
 
 import type { ValidatedContext } from '@/types/app';

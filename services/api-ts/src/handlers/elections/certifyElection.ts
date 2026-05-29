@@ -18,6 +18,7 @@ import { NotFoundError, BusinessLogicError, ForbiddenError, UnauthorizedError } 
 import { ElectionsRepository } from './repos/elections.repo';
 import { OfficerTermRepository, TransitionChecklistRepository } from '../association:member/repos/governance.repo';
 import type { Session } from '@/types/auth';
+import { auditAction } from '@/utils/audit';
 
 const DEFAULT_CHECKLIST_ITEMS = [
   'Hand over account credentials and passwords',
@@ -109,6 +110,15 @@ export async function certifyElection(ctx: Context): Promise<Response> {
   const updated = await electionRepo.update(id, {
     status: 'published',
     publishedAt: new Date(),
+  });
+
+  await auditAction(ctx, {
+    action: 'approve',
+    resourceType: 'election',
+    resourceId: id,
+    description: `Election certified: ${termsCreated} terms created, ${termsEnded} ended`,
+    eventSubType: 'governance.election-closed',
+    details: { termsCreated, termsEnded, checklistsGenerated },
   });
 
   return ctx.json({

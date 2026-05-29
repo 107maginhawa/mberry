@@ -10,6 +10,8 @@ import { auditAction } from '@/utils/audit';
  *
  * Path: POST /association/training/enrollments
  * OperationId: createTrainingEnrollment
+ *
+ * BR-41 (M9-R2): Paid training requires payment before enrollment
  */
 export async function createTrainingEnrollment(
   ctx: ValidatedContext<CreateTrainingEnrollmentBody, never, never>

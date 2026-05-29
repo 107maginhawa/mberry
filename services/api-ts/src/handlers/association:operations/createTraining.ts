@@ -11,6 +11,8 @@ import { POSITION_TITLES } from '@/utils/position-titles';
  *
  * Path: POST /association/training
  * OperationId: createTraining
+ *
+ * BR-42 (M9-R1): Training type restricted to platform-defined types
  */
 export async function createTraining(
   ctx: ValidatedContext<CreateTrainingBody, never, never>

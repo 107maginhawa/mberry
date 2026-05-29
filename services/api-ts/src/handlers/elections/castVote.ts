@@ -5,6 +5,7 @@ import { ElectionsRepository } from './repos/elections.repo';
 import { MembershipRepository } from '../association:member/repos/membership.repo';
 import { computeMembershipStatus } from '../association:member/utils/compute-membership-status';
 import type { Session } from '@/types/auth';
+import { auditAction } from '@/utils/audit';
 
 const castVoteSchema = z.object({
   positionId: z.string().uuid('positionId must be a valid UUID'),
@@ -72,6 +73,14 @@ export async function castVote(ctx: Context): Promise<Response> {
     }
     throw error;
   }
+
+  await auditAction(ctx, {
+    action: 'create',
+    resourceType: 'vote',
+    resourceId: vote.id,
+    description: `Vote cast in election ${electionId} for position ${body.positionId}`,
+    eventSubType: 'governance.vote-cast',
+  });
 
   return ctx.json({ data: vote }, 201);
 }

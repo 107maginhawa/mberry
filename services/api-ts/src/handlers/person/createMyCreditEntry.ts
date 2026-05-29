@@ -2,8 +2,7 @@ import type { ValidatedContext } from '@/types/app';
 import type { DatabaseInstance } from '@/core/database';
 import { UnauthorizedError, ValidationError } from '@/core/errors';
 import type { CreateMyCreditEntryBody } from '@/generated/openapi/validators';
-import { CreditEntryRepository } from '@/handlers/association:member/repos/credits.repo';
-import { getCycleForDate } from '@/handlers/association:member/utils/credit-cycle';
+import { CreditService } from '@/handlers/association:member/services/credit.service';
 import { auditAction } from '@/utils/audit';
 
 /**
@@ -29,24 +28,18 @@ export async function createMyCreditEntry(
     throw new ValidationError('activityName required and creditAmount must be positive');
   }
 
-  const activityDate = new Date(b['activityDate'] as string);
-  const registrationDate = new Date((b['registrationDate'] as string) ?? activityDate.toISOString());
-  const cyclePeriodYears = (b['cyclePeriodYears'] as number) ?? 2;
+  const creditService = new CreditService(db, logger);
 
-  const cycle = getCycleForDate(registrationDate, activityDate, cyclePeriodYears);
-
-  const repo = new CreditEntryRepository(db, logger);
-
-  const entry = await repo.createOne({
+  const entry = await creditService.createEntry({
     organizationId: b['organizationId'] as string,
     personId,
     type: 'manual',
     activityName: b['activityName'] as string,
     provider: b['provider'] as string,
-    activityDate,
+    activityDate: new Date(b['activityDate'] as string),
     creditAmount: b['creditAmount'] as number,
-    cycleStart: cycle.cycleStart,
-    cycleEnd: cycle.cycleEnd,
+    registrationDate: b['registrationDate'] ? new Date(b['registrationDate'] as string) : undefined,
+    cyclePeriodYears: (b['cyclePeriodYears'] as number) ?? undefined,
     supportingDocumentId: b['supportingDocumentId'] as string,
   });
 

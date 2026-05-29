@@ -11,6 +11,7 @@ import type { Session } from '@/types/auth';
 import { InvoiceRepository, MerchantAccountRepository } from './repos/billing.repo';
 import type { MerchantMetadata } from './repos/billing.schema';
 import { PersonRepository } from '../person/repos/person.repo';
+import { auditAction } from '@/utils/audit';
 // Customer and merchant are both persons in monobase
 
 /**
@@ -155,6 +156,15 @@ export async function payInvoice(
       },
       'Payment intent created successfully for invoice'
     );
+
+    await auditAction(ctx, {
+      action: 'create',
+      resourceType: 'payment-intent',
+      resourceId: paymentIntent.paymentIntentId,
+      description: `Payment intent created for invoice ${invoiceId}: ${currency} ${amount}`,
+      eventSubType: 'financial.payment-recorded',
+      details: { invoiceId, amount, currency },
+    });
 
     // Return the response as defined in TypeSpec
     // Use Stripe Checkout URL if available (when success/cancel URLs provided)
