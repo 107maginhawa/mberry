@@ -194,6 +194,8 @@ No state machines. This module is read-only (reporting/analytics). All data is c
 
 ## 10. API Expectations
 
+**TypeSpec Coverage:** PARTIAL. `handlers/association:operations/` (69 handlers) has TypeSpec coverage via `specs/api/src/modules/operations.tsp` for cross-chapter analytics and event operations. Dashboard-specific endpoints (national summary, chapter comparison, export) are TypeSpec-covered. Some hand-wired routes remain for middleware ordering.
+
 | API Need | Purpose | Inputs | Outputs | Errors |
 |----------|---------|--------|---------|--------|
 | GET /admin/national/summary | Association-level KPIs | associationId, dateRange | Aggregated KPIs | 403 not authorized |

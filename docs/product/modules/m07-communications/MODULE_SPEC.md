@@ -246,6 +246,8 @@ scheduled ──cancel──► cancelled
 
 ## 10. API Expectations
 
+**TypeSpec Coverage:** PARTIAL. `comms.tsp` covers real-time WebSocket handlers (11 handlers). `communication.tsp` defines enums only — 28 async broadcast handlers (announcements, templates, messages, segments, subscriptions) remain hand-wired with no TypeSpec operation definitions. Full TypeSpec migration deferred (EM-M07-no-typespec).
+
 | API Need | Purpose | Inputs | Outputs | Errors |
 |----------|---------|--------|---------|--------|
 | POST /org/:id/announcements | Create announcement | title, body, audience, channels | announcementId | 403 not officer |

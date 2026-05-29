@@ -349,6 +349,8 @@ States:
 
 ## 10. API Expectations
 
+**TypeSpec Coverage:** PARTIAL. `handlers/platformadmin/` (40 handlers) has TypeSpec coverage via `specs/api/src/modules/platformadmin.tsp` for core CRUD (associations, orgs, admin team, impersonation, feature flags). Analytics endpoints (revenue dashboard, org health) and some support ticket operations have spec coverage gaps. 21 of 40 handlers are TypeSpec-covered.
+
 | API Need | Purpose | Inputs | Outputs | Errors |
 |----------|---------|--------|---------|--------|
 | POST /admin/associations | Create association | name, country, config | associationId | 409 duplicate |

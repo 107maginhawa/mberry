@@ -306,6 +306,8 @@ States: Loading (skeleton), Empty ("No pending applications"), Populated, Valida
 
 ## 10. API Expectations
 
+**TypeSpec Coverage:** SPLIT. `handlers/association:member/` (157+ handlers) has TypeSpec coverage via `specs/api/src/modules/member.tsp`. `handlers/membership/` (15 handlers) is entirely hand-wired with no TypeSpec. New membership endpoints should be added to `association:member/` with TypeSpec definitions. Legacy `membership/` handlers retained for middleware ordering reasons (9 by-design hand-wired routes).
+
 | API Need | Purpose | Inputs | Outputs | Errors |
 |----------|---------|--------|---------|--------|
 | GET /org/:id/members | List members | filters, pagination | Member list with computed status | 403 |
