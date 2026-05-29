@@ -136,6 +136,8 @@ import { lookupCredentialPublic } from '@/handlers/association:member/lookupCred
 // ID card — JSON + PDF download (UJ-M02)
 import { getMyIdCard } from '@/handlers/person/getMyIdCard';
 import { getMyIdCardPdf } from '@/handlers/person/getMyIdCardPdf';
+import { getCreditTranscript } from '@/handlers/association:member/getCreditTranscript';
+import { getCreditTranscriptPdf } from '@/handlers/association:member/getCreditTranscriptPdf';
 
 // Wave 2b: Credit pipeline, CPD config, compliance, certificates
 import { getCpdConfig } from '@/handlers/association:member/getCpdConfig';
@@ -456,6 +458,29 @@ export function createApp(config: Config): App {
   app.get('/persons/me/id-card/:orgId', orgIdShortParam, authMiddleware(), getMyIdCard as unknown as Handler);
   app.get('/persons/me/id-card/:orgId/pdf', orgIdShortParam, authMiddleware(), getMyIdCardPdf as unknown as Handler);
   // bulkIssueCertificates — migrated to generated routes (Phase 35)
+
+  // @hand-wired reason="WF-070 cross-org credit transcript export, inline query schema not in TypeSpec" wave="Wave-22"
+  const creditTranscriptQuery = zValidator('query', z.object({
+    registrationDate: z.string().min(1),
+    cyclePeriodYears: z.string().optional(),
+    requiredCredits: z.string().optional(),
+    carryoverEnabled: z.string().optional(),
+    previousCycleEarned: z.string().optional(),
+    targetDate: z.string().optional(),
+  }), validationErrorHandler);
+  const creditTranscriptPdfQuery = zValidator('query', z.object({
+    registrationDate: z.string().min(1),
+    cyclePeriodYears: z.string().optional(),
+    requiredCredits: z.string().optional(),
+    carryoverEnabled: z.string().optional(),
+    previousCycleEarned: z.string().optional(),
+    targetDate: z.string().optional(),
+    personName: z.string().optional(),
+    cycleStartMonth: z.string().optional(),
+    cycleStartDay: z.string().optional(),
+  }), validationErrorHandler);
+  app.get('/persons/me/credit-transcript', creditTranscriptQuery, authMiddleware(), getCreditTranscript as unknown as Handler);
+  app.get('/persons/me/credit-transcript/pdf', creditTranscriptPdfQuery, authMiddleware(), getCreditTranscriptPdf as unknown as Handler);
 
   // special-assessments CRUD — migrated to generated routes (Phase 35)
 

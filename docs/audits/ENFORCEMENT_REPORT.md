@@ -4,7 +4,7 @@
 
 # Enforcement Report
 
-**Generated:** 2026-05-29 (post-Wave 21 update)
+**Generated:** 2026-05-29 (post-Wave 22 update)
 **Engine:** oli-enforce-all v3 --strict
 **Scope:** 22 modules, 8 phases, 10 agents
 **Baseline:** 2026-05-29T22:00:00Z → 2026-05-29T23:30:00Z (v4)
@@ -234,6 +234,7 @@ All 13 P0 security findings from the previous run are confirmed fixed with test 
 | M09 | 5.0 | 4.5 | ↓ | Dead code still present |
 | M09 | 6.5 | 7.5 | ↑ | Wave 21: cert-on-completion P1 fixed — completeTrainingEnrollment emits training.completed (WF-061/BR-20), firing the existing cert-available consumer for the credit-award path |
 | M10 | 6.5 | 7.0 | ↑ | SQL injection fix |
+| M10 | 7.0 | 8.0 | ↑ | Wave 22: 3 REAL P1s — createMyCreditEntry emits credit.awarded; M10-R5 supporting-doc validation; WF-070 transcript export routes hand-wired. 1 FP (GDPR anonymization via accountDeletionCascade) |
 | M11 | 3.0 | 6.0 | ↑↑ | 3 security fixes (HMAC, SVG, IDOR) |
 | M12 | 5.5 | 6.5 | ↑ | Election auth fix |
 | M14 | 5.0 | 5.5 | ↑ | CSV injection fix |
@@ -638,12 +639,36 @@ Verify-first sweep of the lone m09 P1. The 2026-05-28 module audit (`docs/audits
 
 ---
 
+### Wave 22 — m10 Credit-Tracking Remediation (COMPLETE ✅)
+
+Verify-first sweep of the m10 P1 cluster (baseline P1=3). Credit handlers split across `handlers/person/` (self-service `createMyCreditEntry.ts`) and `handlers/association:member/` (officer award + transcript export). Three genuine gaps fixed in live wired handlers; one GDPR finding reclassified FP (already covered by the account-deletion cascade).
+
+**3 REAL (fixed in live wired handlers):**
+
+| ID | Finding | Fix |
+|----|---------|-----|
+| EM-M10-15ad42e8 | Self-service `createMyCreditEntry.ts` awarded credit but emitted no `credit.awarded` → member never notified (parity gap vs. training auto-credit + officer-award paths). | Emit `domainEvents.emit('credit.awarded', {personId, organizationId, creditEntryId, creditAmount, activityName})` (fire-and-forget `.catch`) after `createEntry`. Registry `credit.awarded` payload widened (`trainingId?`/`creditEntryId?`); consumer `relatedEntity` made dynamic (`training` vs `credit-entry`). |
+| EM-M10-d9f14b3e | M10-R5: supporting documents accepted with no type/size validation. | Validate `supportingDocumentId` via `DocumentRepository.findOneById` — reject non-PDF/non-image MIME and files >5MB (`ValidationError`). |
+| EM-M10-c9d0e1f2 / EM-M10-c9f1e2d3 | WF-070 credit transcript export (`getCreditTranscript` / `getCreditTranscriptPdf`) implemented but never route-wired → unreachable. | Hand-wire `GET /persons/me/credit-transcript` and `…/pdf` in `app.ts` with `zValidator` query schemas + `authMiddleware`, mirroring the existing `/persons/me/id-card` custom-route pattern. |
+
+**1 FP (live cascade already satisfies the rule):**
+
+| ID | Finding | Verdict |
+|----|---------|---------|
+| EM-M10-o1p2q3r4 | GDPR: credit entries not anonymized on account deletion | **FP** — `accountDeletionCascade.ts` Flow 6.6 Step 4 already anonymizes credit entries. |
+
+**Pipeline:** pure event/validation/route-wiring — no `src/generated/*` touched, no SDK schema change → no codegen (handlers use inline query interfaces built for hand-wiring; `getCreditTranscriptPdf` returns JSON). Tests: `createMyCreditEntry.test.ts` rewritten (7 pass — auth, validation, happy path, `credit.awarded` emit assertion, MIME reject, >5MB reject, valid PDF accept); affected person/ + association:member/ suites pass (3 pre-existing unrelated `certifyElection`/elections db-mock failures ignored per protocol). Typecheck passes: api-ts, memberry, sdk-ts.
+
+**Outcome:** m10 P1 **3→0** (3 REAL / 1 FP), score **7.0→8.0**.
+
+---
+
 ## What's Next
 
-1. **Waves 1-21 COMPLETE.** Security gate satisfied. No P0 regressions. All P1 audit logging resolved (incl. 9 billing handlers in Wave 11). Revenue analytics gap filled. Baseline P1s fully triaged with named IDs. **Wave 12 closed m12 elections (5 REAL, 3 FP); Wave 13 closed m11 documents/credentials (5 REAL); Wave 14 closed m14 national dashboard (5 REAL); Wave 15 closed m01 auth-onboarding (5 REAL); Wave 16 closed m05 membership (3 REAL, 1 FP); Wave 17 closed m04 org-admin (1 REAL event, 2 doc reconciliations, 1 partial FP); Wave 18 closed m06 dues-payments (2 REAL, 3 FP/reclassified); Wave 19 closed m07 communications (0 REAL, 3 FP — module already remediated; removed dead CrossModuleTriggers); Wave 20 closed m08 events (2 REAL emit gaps in live association:operations handlers, 5 FP — audit read dead handlers/events/ dir); Wave 21 closed m09 training (1 REAL — training.completed emit connects WF-061/BR-20 certificate generation to the credit-award completion path).**
+1. **Waves 1-22 COMPLETE.** Security gate satisfied. No P0 regressions. All P1 audit logging resolved (incl. 9 billing handlers in Wave 11). Revenue analytics gap filled. Baseline P1s fully triaged with named IDs. **Wave 12 closed m12 elections (5 REAL, 3 FP); Wave 13 closed m11 documents/credentials (5 REAL); Wave 14 closed m14 national dashboard (5 REAL); Wave 15 closed m01 auth-onboarding (5 REAL); Wave 16 closed m05 membership (3 REAL, 1 FP); Wave 17 closed m04 org-admin (1 REAL event, 2 doc reconciliations, 1 partial FP); Wave 18 closed m06 dues-payments (2 REAL, 3 FP/reclassified); Wave 19 closed m07 communications (0 REAL, 3 FP — module already remediated; removed dead CrossModuleTriggers); Wave 20 closed m08 events (2 REAL emit gaps in live association:operations handlers, 5 FP — audit read dead handlers/events/ dir); Wave 21 closed m09 training (1 REAL — training.completed emit connects WF-061/BR-20 certificate generation to the credit-award completion path); Wave 22 closed m10 credit-tracking (3 REAL — createMyCreditEntry credit.awarded emit, M10-R5 supporting-doc validation, WF-070 transcript export route-wiring; 1 FP — GDPR anonymization already in accountDeletionCascade).**
 2. **Remaining P0s: 2** (EM-M07-no-typespec — communication 28 hand-wired handlers, DEFERRED; EM-M06 zero-domain-events — m06 dues event bridge, out of P1 scope, still caps m06 score).
-3. **Remaining P1s (built modules): m10 + m03 + m02 clusters left** (see `wave11_p1_triage` in baseline; m01/m04/m05/m06/m07/m08/m09/m11/m12/m14 resolved). Priority order for next fix wave:
-   - **P1 — m10 (credit-tracking):** events/export gaps (createMyCreditEntry emit, supporting-doc validation, transcript export wiring).
-   - **P1 — m03 (platform-admin), m02 (member-profile):** remaining clusters.
+3. **Remaining P1s (built modules): m03 + m02 clusters left** (see `wave11_p1_triage` in baseline; m01/m04/m05/m06/m07/m08/m09/m10/m11/m12/m14 resolved). Priority order for next fix wave:
+   - **P1 — m03 (platform-admin):** remaining cluster (P1=3).
+   - **P1 — m02 (member-profile):** remaining cluster (P1=2).
    - **DEFERRED:** ~170 future-module P1 stubs (m13/m15/m16/m17/m18/m19); 7 TypeSpec, 3 coupling, 1 event from Wave 10.
 4. **Coverage Score: 78 → ~85** (estimated after Wave 10 + Wave 11 billing audit logging).

@@ -61,7 +61,8 @@ export interface DomainEventMap {
   'credit.awarded': {
     personId: string;
     organizationId: string;
-    trainingId: string;
+    trainingId?: string;
+    creditEntryId?: string;
     creditAmount: number;
     activityName: string;
   };
