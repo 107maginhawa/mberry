@@ -363,6 +363,12 @@ export interface DomainEventMap {
     subscriptionId: string;
     organizationId: string;
   };
+
+  // ── Onboarding Context ────────────────────────────────────────────────
+  'onboarding.completed': {
+    organizationId: string;
+    officerId: string;
+  };
 }
 
 export type DomainEventName = keyof DomainEventMap;

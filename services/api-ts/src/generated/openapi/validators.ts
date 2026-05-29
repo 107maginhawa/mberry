@@ -2927,6 +2927,57 @@ export const BulkApproveApplicationsResponseSchema = z.object({
   failed: z.array(BulkApproveFailureSchema)
 });
 
+export const BulkImportModeSchema = z.enum(["preview", "import"]);
+
+export const BulkImportPreviewRowSchema = z.object({
+  row: z.number().int(),
+  email: z.string().optional(),
+  name: z.string().optional(),
+  licenseNumber: z.string().optional(),
+  status: z.enum(["valid", "invalid", "duplicate"]),
+  reason: z.string().optional()
+});
+
+export const BulkImportPreviewResponseSchema = z.object({
+  totalRows: z.number().int(),
+  validRows: z.number().int(),
+  invalidRows: z.number().int(),
+  duplicateRows: z.number().int(),
+  preview: z.array(BulkImportPreviewRowSchema),
+  errors: z.array(z.string())
+});
+
+export const BulkImportRequestSchema = z.object({
+  orgId: z.string().uuid(),
+  csvContent: z.string().max(1048576),
+  mode: z.enum(["preview", "import"]).optional()
+});
+
+export const BulkImportResponseSchema = z.object({
+  mode: z.string(),
+  previewResult: z.object({
+  totalRows: z.number().int(),
+  validRows: z.number().int(),
+  invalidRows: z.number().int(),
+  duplicateRows: z.number().int(),
+  preview: z.array(BulkImportPreviewRowSchema),
+  errors: z.array(z.string())
+}).optional(),
+  importResult: z.object({
+  importId: z.string().uuid(),
+  imported: z.number().int(),
+  skipped: z.number().int(),
+  invitationsSent: z.number().int()
+}).optional()
+});
+
+export const BulkImportResultResponseSchema = z.object({
+  importId: z.string().uuid(),
+  imported: z.number().int(),
+  skipped: z.number().int(),
+  invitationsSent: z.number().int()
+});
+
 export const BulkIssueCertificateResultSchema = z.object({
   personId: z.string(),
   certificateNumber: z.string(),
@@ -7377,6 +7428,14 @@ export const OnboardingResponseSchema = z.object({
   metadata: z.record(z.string(), z.unknown()).optional()
 });
 
+export const OnboardingStateResponseSchema = z.object({
+  id: z.string().uuid(),
+  organizationId: z.string().uuid(),
+  currentStep: z.number().int().gte(1).lte(5),
+  stepsCompleted: z.array(z.number().int()),
+  completedAt: z.union([z.string().datetime().transform((str) => new Date(str)), z.null()])
+});
+
 export const OrgAccreditedProviderSchema = z.object({
   id: z.string().uuid(),
   version: z.number().int(),
@@ -9814,6 +9873,18 @@ export const UpdateMemberRequestSchema = z.object({
 
 export const UpdateNotificationPreferencesRequestSchema = z.object({
   preferences: z.array(NotificationPreferenceUpdateSchema).optional()
+});
+
+export const UpdateOnboardingStepRequestSchema = z.object({
+  orgId: z.string().uuid(),
+  step: z.number().int().gte(1).lte(5),
+  data: z.record(z.string(), z.unknown())
+});
+
+export const UpdateOnboardingStepResponseSchema = z.object({
+  saved: z.boolean(),
+  currentStep: z.number().int(),
+  stepsCompleted: z.array(z.number().int())
 });
 
 export const UpdateOrgProfileRequestSchema = z.object({
@@ -13469,6 +13540,11 @@ export type UnsubscribeEmailPostQuery = z.infer<typeof UnsubscribeEmailPostQuery
 
 export const UnsubscribeEmailPostResponse = z.string();
 
+export const BulkImportMembersBody = BulkImportRequestSchema;
+export type BulkImportMembersBody = z.infer<typeof BulkImportMembersBody>;
+
+export const BulkImportMembersResponse = BulkImportResponseSchema;
+
 export const CreateInviteBody = CreateInviteRequestSchema;
 export type CreateInviteBody = z.infer<typeof CreateInviteBody>;
 
@@ -13576,6 +13652,18 @@ export type ListOfficerTermsSummaryParams = z.infer<typeof ListOfficerTermsSumma
 export const ListOfficerTermsSummaryResponse = z.object({
   data: z.array(OfficerTermRecordSchema)
 });
+
+export const GetOnboardingStateQuery = z.object({
+  orgId: UUIDSchema,
+});
+export type GetOnboardingStateQuery = z.infer<typeof GetOnboardingStateQuery>;
+
+export const GetOnboardingStateResponse = OnboardingStateResponseSchema;
+
+export const UpdateOnboardingStepBody = UpdateOnboardingStepRequestSchema;
+export type UpdateOnboardingStepBody = z.infer<typeof UpdateOnboardingStepBody>;
+
+export const UpdateOnboardingStepResponse = UpdateOnboardingStepResponseSchema;
 
 export const SendPaymentLinkParams = z.object({
   organizationId: z.string(),

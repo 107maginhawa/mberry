@@ -1,10 +1,10 @@
 {
-  "version": 7,
-  "timestamp": "2026-05-29T25:00:00Z",
-  "enforcement_depth": "FULL — all 8 phases + Wave 11 (billing audit + P1 re-triage) + Wave 12 (m12 elections: 5 REAL P1s fixed, 3 FPs reclassified) + Wave 13 (m11 documents/credentials: 5 REAL P1s fixed) + Wave 14 (m14 national dashboard: 5 REAL P1s fixed)",
-  "previous_baseline": "2026-05-29T24:30:00Z",
+  "version": 8,
+  "timestamp": "2026-05-29T25:30:00Z",
+  "enforcement_depth": "FULL — all 8 phases + Wave 11 (billing audit + P1 re-triage) + Wave 12 (m12 elections: 5 REAL P1s fixed, 3 FPs reclassified) + Wave 13 (m11 documents/credentials: 5 REAL P1s fixed) + Wave 14 (m14 national dashboard: 5 REAL P1s fixed) + Wave 15 (m01 auth-onboarding: 5 REAL P1s fixed)",
+  "previous_baseline": "2026-05-29T25:00:00Z",
   "module_identity": {
-    "m01-auth-onboarding": { "source_path": "services/api-ts/src/handlers/person/", "spec_hash": "m01deep01" },
+    "m01-auth-onboarding": { "source_path": "services/api-ts/src/handlers/person/", "spec_hash": "m01deep01", "note": "onboarding wizard handlers live in handlers/onboarding/ (Wave 15); bulk import in handlers/invite/bulkImportMembers.ts" },
     "m02-member-profile": { "source_path": "services/api-ts/src/handlers/person/", "spec_hash": "m02deep02" },
     "m03-platform-admin": { "source_path": "services/api-ts/src/handlers/platformadmin/", "spec_hash": "m03deep03" },
     "m04-org-admin": { "source_path": "services/api-ts/src/handlers/association:member/", "spec_hash": "m04deep04" },
@@ -25,7 +25,7 @@
     "m19-committee-management": { "source_path": null, "spec_hash": "m19fut019" }
   },
   "modules": {
-    "m01-auth-onboarding": { "P0": 0, "P1": 5, "P2": 3, "P3": 1, "score": 6.0, "p1_corrected": "3→5 (Wave 11: onboarding-wizard suite confirmed REAL)" },
+    "m01-auth-onboarding": { "P0": 0, "P1": 0, "P2": 3, "P3": 1, "score": 9.0, "p1_corrected": "5→0 (Wave 15: OnboardingState entity + GET /onboarding/state + PUT /onboarding/step [WF-005 wizard] + POST /invitations/bulk-import [WF-009 preview/dedup/token] implemented)" },
     "m02-member-profile": { "P0": 0, "P1": 2, "P2": 4, "P3": 1, "score": 7.8 },
     "m03-platform-admin": { "P0": 0, "P1": 3, "P2": 4, "P3": 1, "score": 7.5 },
     "m04-org-admin": { "P0": 0, "P1": 3, "P2": 3, "P3": 1, "score": 7.5 },
@@ -154,7 +154,12 @@
     "EM-M14-82b4f3a1": { "resolved_in": "wave14", "reason": "GET /admin/national/chapters/{organizationId} implemented (getNationalChapterDetail.ts). Returns memberStatusBreakdown + creditComplianceBreakdown; 404 when snapshot missing." },
     "EM-M14-93c5a4b2": { "resolved_in": "wave14", "reason": "GET /admin/national/platform implemented (getPlatformSummary.ts). Platform-admin-only cross-association rollup via listAssociationIdsForMonth + getAssociationAggregate; sortable + paginated." },
     "EM-M14-c6f8d7e5": { "resolved_in": "wave14", "reason": "WF-085 chapter drill-down satisfied by getNationalChapterDetail — single-chapter detail with status + credit compliance breakdowns from chapterSnapshots." },
-    "EM-M14-b1e3c2d0": { "resolved_in": "wave14", "reason": "dashboard.exported domain event added to registry and emitted from exportNationalDashboard with {exportId, associationId, format, exportedBy}." }
+    "EM-M14-b1e3c2d0": { "resolved_in": "wave14", "reason": "dashboard.exported domain event added to registry and emitted from exportNationalDashboard with {exportId, associationId, format, exportedBy}." },
+    "EM-M01-d8e9f0a1": { "resolved_in": "wave15", "reason": "OnboardingState entity created — onboarding_state table (org-scoped, organizationId unique, currentStep 1-5, stepsCompleted jsonb, completedAt) via handlers/onboarding/repos/onboarding.schema.ts + migration 0058_fast_stingray.sql." },
+    "EM-M01-a1b2c3d4": { "resolved_in": "wave15", "reason": "GET /onboarding/state implemented (TypeSpec getOnboardingState → handlers/onboarding/getOnboardingState.ts). Officer-gated via requireOfficerTerm against requested orgId; 404 when wizard not started." },
+    "EM-M01-e5f6a7b8": { "resolved_in": "wave15", "reason": "PUT /onboarding/step implemented (handlers/onboarding/updateOnboardingStep.ts). Enforces in-order steps (M01-004 → 422), bootstraps at step 1, advances currentStep, emits onboarding.completed on final step." },
+    "EM-M01-c9d0e1f2": { "resolved_in": "wave15", "reason": "WF-005 resumable onboarding wizard satisfied — state persisted org-scoped across 5 steps (profile/import/dues/gateway/invite); resume via GET /onboarding/state, save via PUT /onboarding/step." },
+    "EM-M01-34a5b6c7": { "resolved_in": "wave15", "reason": "WF-009 bulk import implemented (POST /invitations/bulk-import → handlers/invite/bulkImportMembers.ts). CSV parse (quoted fields), preview|import modes, dedup (within-CSV + against pending invites), HMAC claim-token issuance per valid row. Deviation: JSON csvContent string instead of multipart (codegen pipeline does not support multipart)." }
   },
   "wave11_p1_triage": {
     "method": "5 parallel verification agents read module .md findings + verified against live code (read-only)",

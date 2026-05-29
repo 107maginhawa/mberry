@@ -371,6 +371,7 @@ import { updateEmailTemplate } from '../../handlers/email/updateEmailTemplate';
 import { testEmailTemplate } from '../../handlers/email/testEmailTemplate';
 import { unsubscribeEmailGet } from '../../handlers/email/unsubscribeEmailGet';
 import { unsubscribeEmailPost } from '../../handlers/email/unsubscribeEmailPost';
+import { bulkImportMembers } from '../../handlers/invite/bulkImportMembers';
 import { createInvite } from '../../handlers/invite/createInvite';
 import { claimInvite } from '../../handlers/invite/claimInvite';
 import { validateInvite } from '../../handlers/invite/validateInvite';
@@ -383,6 +384,8 @@ import { markAllNotificationsAsRead } from '../../handlers/notifs/markAllNotific
 import { getNotification } from '../../handlers/notifs/getNotification';
 import { markNotificationAsRead } from '../../handlers/notifs/markNotificationAsRead';
 import { markAllNotificationsRead } from '../../handlers/notifs/markAllNotificationsRead';
+import { getOnboardingState } from '../../handlers/onboarding/getOnboardingState';
+import { updateOnboardingStep } from '../../handlers/onboarding/updateOnboardingStep';
 import { createPerson } from '../../handlers/person/createPerson';
 import { listPersons } from '../../handlers/person/listPersons';
 import { updateMyProfile } from '../../handlers/person/updateMyProfile';
@@ -812,6 +815,7 @@ export const registry = {
   unsubscribeEmailPost,
 
   // Invite handlers
+  bulkImportMembers,
   createInvite,
   claimInvite,
   validateInvite,
@@ -828,6 +832,10 @@ export const registry = {
   getNotification,
   markNotificationAsRead,
   markAllNotificationsRead,
+
+  // Onboarding handlers
+  getOnboardingState,
+  updateOnboardingStep,
 
   // Person handlers
   createPerson,

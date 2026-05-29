@@ -4,7 +4,7 @@
 
 # Enforcement Report
 
-**Generated:** 2026-05-29 (post-Wave 13 update)
+**Generated:** 2026-05-29 (post-Wave 15 update)
 **Engine:** oli-enforce-all v3 --strict
 **Scope:** 22 modules, 8 phases, 10 agents
 **Baseline:** 2026-05-29T22:00:00Z → 2026-05-29T23:30:00Z (v4)
@@ -465,12 +465,35 @@ Fixed the m14 cluster. Verified all 5 findings against live code first: **all 5 
 
 ---
 
+### Wave 15 — m01 Auth-Onboarding Remediation (COMPLETE ✅)
+
+Fixed the m01 onboarding cluster. Verified all 5 findings against live code first: **all 5 REAL** — no onboarding handlers, endpoints, or entity existed. Module identity per baseline `module_identity` is `handlers/person/`; the new resumable wizard handlers were placed in `handlers/onboarding/` (tag `Onboarding` → generator dir rule) and bulk import in `handlers/invite/` (tag `Invite`).
+
+**5 REAL fixes:**
+
+| ID | Finding | Fix |
+|----|---------|-----|
+| EM-M01-d8e9f0a1 | `OnboardingState` entity absent | New org-scoped `onboarding_state` table (`organizationId` unique, `currentStep` 1-5, `stepsCompleted` jsonb int[], `completedAt` nullable) via `handlers/onboarding/repos/onboarding.schema.ts` + repo; migration `0058_fast_stingray.sql` |
+| EM-M01-a1b2c3d4 | `GET /onboarding/state` missing | TypeSpec `getOnboardingState` + `handlers/onboarding/getOnboardingState.ts`. Query `orgId`; officer-gated via `requireOfficerTerm` against the *requested* org; 404 when wizard not started |
+| EM-M01-e5f6a7b8 | `PUT /onboarding/step` missing | TypeSpec `updateOnboardingStep` + handler. Enforces in-order steps (out-of-order → `M01-004` 422), bootstraps at step 1, advances `currentStep`, marks complete + emits `onboarding.completed` on final step |
+| EM-M01-c9d0e1f2 | WF-005 resumable wizard unimplemented | Satisfied by state/step endpoints — progress persisted org-scoped across the 5 steps (profile/import/dues/gateway/invite), resumable across sessions |
+| EM-M01-34a5b6c7 | WF-009 bulk import lacks preview/dedup/token | TypeSpec `bulkImportMembers` (POST `/invitations/bulk-import`) + `handlers/invite/bulkImportMembers.ts`. CSV parser (quoted fields/embedded commas), `preview`/`import` modes, dedup (within-CSV + against pending invites), HMAC claim-token issuance per valid row |
+
+**Domain event:** added `onboarding.completed` (`{organizationId, officerId}`) to `domain-events.registry.ts`; emitted once on the transition into completed (not re-emitted on re-save of the final step).
+
+**Deliberate deviation:** the contract specifies `multipart/form-data` for bulk import, but the codegen pipeline does not support multipart bodies. CSV is passed inline as a JSON `csvContent` string instead (≤1 MiB). Behavior (preview/dedup/token) matches the contract.
+
+**Pipeline:** TypeSpec → `specs/api` build → `api-ts` generate (3 routes/validators/registry entries + 3 handler stubs) → `db:generate`. Unrelated regen churn (better-auth, websocket registry) reverted to HEAD. Typecheck passes: api-ts, memberry, sdk-ts. Tests: 16 new pass (10 onboarding + 6 bulk import). Existing pure-domain `ac-m01` AC test left untouched.
+
+**Outcome:** m01 P1 **5→0**, score **6.0→9.0**. No remaining REAL P1s in m01.
+
+---
+
 ## What's Next
 
-1. **Waves 1-14 COMPLETE.** Security gate satisfied. No P0 regressions. All P1 audit logging resolved (incl. 9 billing handlers in Wave 11). Revenue analytics gap filled. Baseline P1s fully triaged with named IDs. **Wave 12 closed m12 elections (5 REAL, 3 FP); Wave 13 closed m11 documents/credentials (5 REAL); Wave 14 closed m14 national dashboard (5 REAL).**
+1. **Waves 1-15 COMPLETE.** Security gate satisfied. No P0 regressions. All P1 audit logging resolved (incl. 9 billing handlers in Wave 11). Revenue analytics gap filled. Baseline P1s fully triaged with named IDs. **Wave 12 closed m12 elections (5 REAL, 3 FP); Wave 13 closed m11 documents/credentials (5 REAL); Wave 14 closed m14 national dashboard (5 REAL); Wave 15 closed m01 auth-onboarding (5 REAL).**
 2. **Remaining P0s: 1** (EM-M07-no-typespec — communication module 28 hand-wired handlers, DEFERRED).
-3. **Remaining P1s (built modules): ~12 REAL, now named** (see `wave11_p1_triage` in baseline; m11 + m12 + m14 clusters of 18 now resolved). Priority order for next fix wave:
-   - **P1 — m01 onboarding (5):** onboarding state/step endpoints, WF-005 wizard, WF-009 bulk import, OnboardingState entity.
+3. **Remaining P1s (built modules): ~7 REAL, now named** (see `wave11_p1_triage` in baseline; m01 + m11 + m12 + m14 clusters of 23 now resolved). Priority order for next fix wave:
    - **P1 — m04/m05/m02 (scattered):** event emission + spec/path divergence; m09 certificate↔training wiring.
    - **DEFERRED:** ~170 future-module P1 stubs (m13/m15/m16/m17/m18/m19); 7 TypeSpec, 3 coupling, 1 event from Wave 10.
 4. **Coverage Score: 78 → ~85** (estimated after Wave 10 + Wave 11 billing audit logging).

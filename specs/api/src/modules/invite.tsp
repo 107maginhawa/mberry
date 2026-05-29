@@ -141,6 +141,97 @@ model InviteGoneResponse {
   orgId?: UUID;
 }
 
+@doc("Bulk import mode — 'preview' validates without persisting, 'import' creates invites")
+enum BulkImportMode {
+  @doc("Validate and report without persisting")
+  preview: "preview",
+
+  @doc("Persist invitations and issue tokens")
+  commit: "import",
+}
+
+@doc("Request body for bulk-importing members from CSV")
+model BulkImportRequest {
+  @doc("Organization to import members into")
+  orgId: UUID;
+
+  @doc("Raw CSV content. Expected header columns: email, name, licenseNumber. multipart/form-data is not supported by the codegen pipeline, so CSV is passed inline as a string.")
+  @maxLength(1048576)
+  csvContent: string;
+
+  @doc("Operation mode — 'preview' to validate only, 'import' to persist")
+  mode?: BulkImportMode = BulkImportMode.preview;
+}
+
+@doc("A single parsed CSV row with validation outcome")
+model BulkImportPreviewRow {
+  @doc("1-based row number in the source CSV (excluding header)")
+  row: int32;
+
+  @doc("Parsed email address")
+  email?: string;
+
+  @doc("Parsed name")
+  name?: string;
+
+  @doc("Parsed license number")
+  licenseNumber?: string;
+
+  @doc("Row status: valid, invalid, or duplicate")
+  status: "valid" | "invalid" | "duplicate";
+
+  @doc("Reason the row is invalid or duplicate")
+  reason?: string;
+}
+
+@doc("Response for a bulk import in preview mode")
+model BulkImportPreviewResponse {
+  @doc("Total data rows parsed (excluding header)")
+  totalRows: int32;
+
+  @doc("Count of rows that would be imported")
+  validRows: int32;
+
+  @doc("Count of rows failing validation")
+  invalidRows: int32;
+
+  @doc("Count of rows skipped as duplicates")
+  duplicateRows: int32;
+
+  @doc("Per-row preview details")
+  preview: BulkImportPreviewRow[];
+
+  @doc("Aggregate error messages")
+  errors: string[];
+}
+
+@doc("Response for a bulk import in import mode")
+model BulkImportResultResponse {
+  @doc("Identifier for this import batch")
+  importId: UUID;
+
+  @doc("Count of invitations created")
+  imported: int32;
+
+  @doc("Count of rows skipped (invalid or duplicate)")
+  skipped: int32;
+
+  @doc("Count of invitation tokens issued/sent")
+  invitationsSent: int32;
+}
+
+@doc("Bulk import response — shape depends on requested mode")
+model BulkImportResponse {
+  @doc("Echoes the mode the import ran in")
+  mode: string;
+
+  @doc("Preview results (present when mode=preview)")
+  previewResult?: BulkImportPreviewResponse;
+
+  @doc("Import results (present when mode=import)")
+  importResult?: BulkImportResultResponse;
+}
+
 @doc("Response after successfully claiming an invitation")
 model ClaimInviteResponse {
   @doc("Whether the claim was successful")
@@ -193,6 +284,19 @@ namespace InviteModule {
       | ApiUnauthorizedResponse
       | ApiForbiddenResponse
       | ApiConflictResponse;
+
+    @doc("Bulk-import members from CSV. Preview mode validates and reports duplicates without persisting; import mode creates invitations and issues claim tokens. Requires officer auth and org context.")
+    @operationId("bulkImportMembers")
+    @post
+    @route("/invitations/bulk-import")
+    @useAuth(bearerAuth)
+    @extension("x-security-required-roles", #["officer"])
+    bulkImportMembers(
+      @body body: BulkImportRequest
+    ): ApiOkResponse<BulkImportResponse>
+      | ApiBadRequestResponse
+      | ApiUnauthorizedResponse
+      | ApiForbiddenResponse;
   }
 
   @doc("Public and authenticated invite token endpoints")

@@ -2619,6 +2619,13 @@ export function registerRoutes(app: Hono<{ Variables: Variables }>) {
     registry.unsubscribeEmailPost as unknown as Handler
   );
 
+  // bulkImportMembers
+  app.post('/invitations/bulk-import',
+    authMiddleware({ roles: ["officer"] }),
+    zValidator('json', validators.BulkImportMembersBody, validationErrorHandler),
+    registry.bulkImportMembers as unknown as Handler
+  );
+
   // createInvite
   app.post('/invite',
     authMiddleware({ roles: ["officer"] }),
@@ -2702,6 +2709,20 @@ export function registerRoutes(app: Hono<{ Variables: Variables }>) {
     authMiddleware({ roles: ["user"] }),
     zValidator('param', validators.ListOfficerTermsSummaryParams, validationErrorHandler),
     registry.listOfficerTermsSummary as unknown as Handler
+  );
+
+  // getOnboardingState
+  app.get('/onboarding/state',
+    authMiddleware({ roles: ["user"] }),
+    zValidator('query', validators.GetOnboardingStateQuery, validationErrorHandler),
+    registry.getOnboardingState as unknown as Handler
+  );
+
+  // updateOnboardingStep
+  app.put('/onboarding/step',
+    authMiddleware({ roles: ["user"] }),
+    zValidator('json', validators.UpdateOnboardingStepBody, validationErrorHandler),
+    registry.updateOnboardingStep as unknown as Handler
   );
 
   // sendPaymentLink

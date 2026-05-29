@@ -407,6 +407,13 @@
       "when": 1779969629420,
       "tag": "0057_smart_bushwacker",
       "breakpoints": true
+    },
+    {
+      "idx": 58,
+      "version": "7",
+      "when": 1780035188543,
+      "tag": "0058_fast_stingray",
+      "breakpoints": true
     }
   ]
 }

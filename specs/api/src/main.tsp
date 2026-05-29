@@ -36,6 +36,9 @@ import "./modules/dues-custom.tsp";
 // Invite module — officer invites, public validation, authenticated claim
 import "./modules/invite.tsp";
 
+// Onboarding module — resumable org setup wizard (m01 auth-onboarding)
+import "./modules/onboarding.tsp";
+
 // Surveys & NPS — Wave 6
 import "./modules/surveys.tsp";
 
@@ -142,6 +145,9 @@ using TypeSpec.OpenAPI;
 })
 @tagMetadata("PlatformAdmin", #{
   description: "Platform administration endpoints for Memberry ops team. Association provisioning, org lifecycle management, feature flags, user impersonation, and admin team management. Desktop-only, internal tooling."
+})
+@tagMetadata("Onboarding", #{
+  description: "Resumable organization setup wizard for the m01 auth-onboarding flow. Officers walk through profile, member import, dues configuration, payment gateway, and invite steps. Progress is persisted org-scoped so the wizard can be resumed across sessions, with completion emitting an OnboardingCompleted domain event."
 })
 namespace MonobaseAPI {
 
@@ -646,6 +652,13 @@ namespace MonobaseAPI {
 
   @tag("Invite")
   interface InviteTokenEndpoints extends InviteModule.InviteTokenEndpoints {}
+
+  // =========================================================================
+  // Onboarding Module — resumable org setup wizard (m01 auth-onboarding)
+  // =========================================================================
+
+  @tag("Onboarding")
+  interface OnboardingManagement extends OnboardingModule.OnboardingManagement {}
 
   // =========================================================================
   // Infrastructure Endpoints
