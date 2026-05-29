@@ -27,8 +27,15 @@ describe('revokeAdmin', () => {
     expect(res.status).toBe(401);
   });
 
+  // [EM-M03-9a3e7b12] super-only caller guard
+  test('returns 403 when caller is not super (support)', async () => {
+    const ctx = makeCtx({ platformAdmin: { id: 'pa-1', role: 'support' }, _params: { adminId: 'admin-1' } });
+    const res = await revokeAdmin(ctx);
+    expect(res.status).toBe(403);
+  });
+
   test('returns 204 when admin revoked', async () => {
-    const ctx = makeCtx({ _params: { adminId: 'admin-1' } });
+    const ctx = makeCtx({ platformAdmin: { id: 'pa-1', role: 'super' }, _params: { adminId: 'admin-1' } });
     const res = await revokeAdmin(ctx);
     expect(res.status).toBe(204);
   });
@@ -40,7 +47,7 @@ describe('revokeAdmin', () => {
       countByRole: async () => 2,
       delete: async () => {},
     });
-    const ctx = makeCtx({ _params: { adminId: 'nonexistent' } });
+    const ctx = makeCtx({ platformAdmin: { id: 'pa-1', role: 'super' }, _params: { adminId: 'nonexistent' } });
     await expect(revokeAdmin(ctx)).rejects.toBeInstanceOf(NotFoundError);
   });
 
@@ -51,7 +58,7 @@ describe('revokeAdmin', () => {
       countByRole: async () => 1,
       delete: async () => {},
     });
-    const ctx = makeCtx({ _params: { adminId: 'admin-1' } });
+    const ctx = makeCtx({ platformAdmin: { id: 'pa-1', role: 'super' }, _params: { adminId: 'admin-1' } });
     await expect(revokeAdmin(ctx)).rejects.toBeInstanceOf(BusinessLogicError);
   });
 
@@ -62,7 +69,7 @@ describe('revokeAdmin', () => {
       countByRole: async () => 2,
       delete: async () => {},
     });
-    const ctx = makeCtx({ _params: { adminId: 'admin-1' } });
+    const ctx = makeCtx({ platformAdmin: { id: 'pa-1', role: 'super' }, _params: { adminId: 'admin-1' } });
     const res = await revokeAdmin(ctx);
     expect(res.status).toBe(204);
   });

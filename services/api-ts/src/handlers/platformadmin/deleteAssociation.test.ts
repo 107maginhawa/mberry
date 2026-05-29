@@ -25,8 +25,15 @@ describe('deleteAssociation', () => {
     expect(res.status).toBe(401);
   });
 
+  // [EM-M03-9a3e7b12] super-only caller guard
+  test('returns 403 when caller is not super (support)', async () => {
+    const ctx = makeCtx({ platformAdmin: { id: 'pa-1', role: 'support' }, _params: { associationId: 'assoc-1' } });
+    const res = await deleteAssociation(ctx);
+    expect(res.status).toBe(403);
+  });
+
   test('returns 204 on successful deletion', async () => {
-    const ctx = makeCtx({ _params: { associationId: 'assoc-1' } });
+    const ctx = makeCtx({ platformAdmin: { id: 'pa-1', role: 'super' }, _params: { associationId: 'assoc-1' } });
     const res = await deleteAssociation(ctx);
     expect(res.status).toBe(204);
   });
@@ -37,7 +44,7 @@ describe('deleteAssociation', () => {
       findById: async () => undefined,
       delete: async () => {},
     });
-    const ctx = makeCtx({ _params: { associationId: 'nonexistent' } });
+    const ctx = makeCtx({ platformAdmin: { id: 'pa-1', role: 'super' }, _params: { associationId: 'nonexistent' } });
     await expect(deleteAssociation(ctx)).rejects.toBeInstanceOf(NotFoundError);
   });
 });

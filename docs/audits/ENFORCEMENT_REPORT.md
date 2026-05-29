@@ -4,7 +4,7 @@
 
 # Enforcement Report
 
-**Generated:** 2026-05-29 (post-Wave 24 update)
+**Generated:** 2026-05-29 (post-Wave 25 update)
 **Engine:** oli-enforce-all v3 --strict
 **Scope:** 22 modules, 8 phases, 10 agents
 **Baseline:** 2026-05-29T22:00:00Z → 2026-05-29T23:30:00Z (v4)
@@ -679,7 +679,7 @@ Verify-first sweep of the m03 P1 cluster (baseline P1=3). The 2026-05-28 module 
 
 **Pipeline:** pure event/route-wiring — no `src/generated/*` touched, no SDK schema change → no codegen (analytics handlers use `Context` directly + return JSON). Tests: `transitionOrgStatus.test.ts` moves `trial→cancelled` from the invalid to the valid set + asserts `org.status.transitioned` emit; emit-assertion tests added to createAssociation/createOrganization/setFeatureFlag/inviteAdmin/startImpersonation/endImpersonation. Full `platformadmin/` suite: **256 pass, 0 fail (29 files)**. Typecheck passes: api-ts, memberry, sdk-ts.
 
-**Note (out of P1 scope):** audit P0 `EM-M03-9a3e7b12` (super-only caller guards still missing on `revokeAdmin`/`deleteAssociation`/`updateAdmin` — a `support` PA can perform privileged ops) remains. Baseline records m03 P0=0, so it is untracked here; flagged for a dedicated security pass.
+**Note:** the untracked security P0 `EM-M03-9a3e7b12` (super-only caller guards missing on `revokeAdmin`/`deleteAssociation`/`updateAdmin`) flagged here was fixed in **Wave 25** (see below).
 
 **Outcome:** m03 P1 **3→0** (3 REAL / 0 FP), score **7.5→8.5**.
 
@@ -702,10 +702,24 @@ Verify-first sweep of the m03 P1 cluster (baseline P1=3). The 2026-05-28 module 
 
 ---
 
+### Wave 25 — m03 Super-Only Guard Hardening (security P0) (COMPLETE ✅)
+
+Closed the one untracked security P0 surfaced during Wave 23. The `/admin/*` middleware (`app.ts:294` `app.use('/admin/*', authMiddleware(), platformAdminAuthMiddleware())`) only verifies that the caller **is** a platform admin and sets `ctx.platformAdmin`; it does **not** distinguish role tiers (`super`/`support`/`analyst`, enum at `platformadmin/repos/platform-admin.schema.ts:41-44`). Three privileged handlers therefore lacked the per-handler super-only caller guard, letting a `support` or `analyst` PA perform super-only operations.
+
+| ID | Finding | Fix |
+|----|---------|-----|
+| EM-M03-9a3e7b12 | `revokeAdmin.ts` (revoke platform admins), `deleteAssociation.ts` (delete associations), `updateAdmin.ts` (promote/demote admins) had no caller role-tier guard — any platform admin tier could call them. | Added the existing guard block — `const callerAdmin = ctx.get('platformAdmin'); if (!callerAdmin || callerAdmin.role !== 'super') return ctx.json({ error: 'Super admin access required' }, 403)` — after the `if (!session)` check in all three, mirroring `inviteAdmin.ts:22-25` / `createAssociation.ts`. `revokeAdmin` retains its separate **last-super-admin** protection (`role === 'super'` + `countByRole('super') <= 1`) *below* the new caller guard. |
+
+**Pipeline:** pure auth-guard change — **no codegen**, no `src/generated/*` touched. Test-first (VERTICAL_TDD): each of the 3 handlers gets a `support`-role → 403 test via `makeCtx({ platformAdmin: { id:'pa-1', role:'support' }, ... })`; existing super happy-path / NotFound / BusinessLogic tests updated to pass `platformAdmin { role: 'super' }` (they previously set no `platformAdmin`, so the new guard would have 403'd them). Full `platformadmin/` suite: **259 pass, 0 fail (29 files)**. Full-workspace typecheck (`bun run --filter '*' typecheck`): exit 0 (ui, admin, sdk-ts, api-ts, memberry).
+
+**Outcome:** untracked security P0 `EM-M03-9a3e7b12` closed; m03 P0 remains 0 (gap closed before tracking), score unchanged at **8.5**.
+
+---
+
 ## What's Next
 
 1. **Waves 1-24 COMPLETE — all built-module P1 clusters resolved.** Security gate satisfied. No P0 regressions. All P1 audit logging resolved (incl. 9 billing handlers in Wave 11). Revenue analytics gap filled. Baseline P1s fully triaged with named IDs. **Wave 12 closed m12 elections (5 REAL, 3 FP); Wave 13 closed m11 documents/credentials (5 REAL); Wave 14 closed m14 national dashboard (5 REAL); Wave 15 closed m01 auth-onboarding (5 REAL); Wave 16 closed m05 membership (3 REAL, 1 FP); Wave 17 closed m04 org-admin (1 REAL event, 2 doc reconciliations, 1 partial FP); Wave 18 closed m06 dues-payments (2 REAL, 3 FP/reclassified); Wave 19 closed m07 communications (0 REAL, 3 FP — module already remediated; removed dead CrossModuleTriggers); Wave 20 closed m08 events (2 REAL emit gaps in live association:operations handlers, 5 FP — audit read dead handlers/events/ dir); Wave 21 closed m09 training (1 REAL — training.completed emit connects WF-061/BR-20 certificate generation to the credit-award completion path); Wave 22 closed m10 credit-tracking (3 REAL — createMyCreditEntry credit.awarded emit, M10-R5 supporting-doc validation, WF-070 transcript export route-wiring; 1 FP — GDPR anonymization already in accountDeletionCascade); Wave 23 closed m03 platform-admin (3 REAL — all 7 spec domain events emitted from live handlers +7 registry keys, revenue/health analytics dead-code routes hand-wired, M3-R10 trial→cancelled transition; 0 FP); Wave 24 closed m02 member-profile (2 REAL — 4 domain events emitted incl. person.updated→existing id-card consumer, DataExport async vertical slice with rate limit + TTL + emit; 0 FP). FINAL built-module cluster.**
-2. **Remaining P0s: 2** (EM-M07-no-typespec — communication 28 hand-wired handlers, DEFERRED; EM-M06 zero-domain-events — m06 dues event bridge, out of P1 scope, still caps m06 score). **Plus 1 untracked security P0** `EM-M03-9a3e7b12` (super-only caller guards missing on revokeAdmin/deleteAssociation/updateAdmin; baseline records m03 P0=0 — flag for a dedicated security pass).
+2. **Remaining P0s: 2** (EM-M07-no-typespec — communication 28 hand-wired handlers, DEFERRED; EM-M06 zero-domain-events — m06 dues event bridge, out of P1 scope, still caps m06 score). The previously-untracked security P0 `EM-M03-9a3e7b12` (super-only caller guards on revokeAdmin/deleteAssociation/updateAdmin) was **fixed in Wave 25**.
 3. **Remaining P1s (built modules): NONE.** All 13 built-module P1 clusters resolved (m01/m02/m03/m04/m05/m06/m07/m08/m09/m10/m11/m12/m14). Only deferred future-module stubs remain:
    - **DEFERRED:** ~170 future-module P1 stubs (m13/m15/m16/m17/m18/m19 — unbuilt-feature stubs); 7 TypeSpec, 3 coupling, 1 event from Wave 10.
 4. **Coverage Score: 78 → ~85** (estimated after Wave 10 + Wave 11 billing audit logging).

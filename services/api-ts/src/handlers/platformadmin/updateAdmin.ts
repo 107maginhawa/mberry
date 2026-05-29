@@ -17,6 +17,12 @@ export async function updateAdmin(
   const session = ctx.get('session');
   if (!session) return ctx.json({ error: 'Unauthorized' }, 401);
 
+  // [EM-M03-9a3e7b12] Only super admins can update platform admins
+  const callerAdmin = ctx.get('platformAdmin') as { role: string } | undefined;
+  if (!callerAdmin || callerAdmin.role !== 'super') {
+    return ctx.json({ error: 'Super admin access required' }, 403);
+  }
+
   const { adminId } = ctx.req.valid('param');
   const body = ctx.req.valid('json');
   const db = ctx.get('database') as DatabaseInstance;

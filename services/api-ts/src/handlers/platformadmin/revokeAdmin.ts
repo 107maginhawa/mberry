@@ -17,6 +17,12 @@ export async function revokeAdmin(
   const session = ctx.get('session');
   if (!session) return ctx.json({ error: 'Unauthorized' }, 401);
 
+  // [EM-M03-9a3e7b12] Only super admins can revoke platform admins
+  const callerAdmin = ctx.get('platformAdmin') as { role: string } | undefined;
+  if (!callerAdmin || callerAdmin.role !== 'super') {
+    return ctx.json({ error: 'Super admin access required' }, 403);
+  }
+
   const { adminId } = ctx.req.valid('param');
   const db = ctx.get('database') as DatabaseInstance;
   const logger = ctx.get('logger');
