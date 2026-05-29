@@ -121,4 +121,76 @@ describe('registerDomainEventConsumers', () => {
     }));
     expect(logger.info).toHaveBeenCalled();
   });
+
+  // ─── [EM-M06] Wave 26 — dues lifecycle notification consumers ───────────
+
+  function makeCapturingDb(inserted: any[]) {
+    return {
+      insert: () => ({ values: async (v: any) => { inserted.push(v); } }),
+      select: () => ({ from: () => ({ where: () => ({ limit: () => Promise.resolve([]) }) }) }),
+    } as any;
+  }
+
+  test('dues.payment.refunded → inserts refund notification for member', async () => {
+    const inserted: any[] = [];
+    registerDomainEventConsumers({ membershipRepo: makeMembershipRepo(), db: makeCapturingDb(inserted) }, logger as any);
+
+    await domainEvents.emit('dues.payment.refunded', {
+      paymentId: 'pay-1',
+      personId: 'person-1',
+      organizationId: 'org-1',
+      refundAmount: 5000,
+      isFullRefund: true,
+    });
+
+    expect(inserted).toHaveLength(1);
+    expect(inserted[0]).toMatchObject({
+      organizationId: 'org-1',
+      recipient: 'person-1',
+      relatedEntityType: 'dues-payment',
+      relatedEntity: 'pay-1',
+    });
+  });
+
+  test('dues.invoice.generated → inserts new-invoice notification for member', async () => {
+    const inserted: any[] = [];
+    registerDomainEventConsumers({ membershipRepo: makeMembershipRepo(), db: makeCapturingDb(inserted) }, logger as any);
+
+    await domainEvents.emit('dues.invoice.generated', {
+      invoiceId: 'inv-1',
+      organizationId: 'org-1',
+      personId: 'person-2',
+      amount: 5000,
+      dueDate: '2026-12-31',
+    });
+
+    expect(inserted).toHaveLength(1);
+    expect(inserted[0]).toMatchObject({
+      organizationId: 'org-1',
+      recipient: 'person-2',
+      relatedEntityType: 'dues-invoice',
+      relatedEntity: 'inv-1',
+    });
+  });
+
+  test('dues.payment.proof.rejected → inserts resubmit-proof notification for member', async () => {
+    const inserted: any[] = [];
+    registerDomainEventConsumers({ membershipRepo: makeMembershipRepo(), db: makeCapturingDb(inserted) }, logger as any);
+
+    await domainEvents.emit('dues.payment.proof.rejected', {
+      paymentId: 'pay-3',
+      personId: 'person-3',
+      organizationId: 'org-1',
+      reason: 'Blurry receipt',
+    });
+
+    expect(inserted).toHaveLength(1);
+    expect(inserted[0]).toMatchObject({
+      organizationId: 'org-1',
+      recipient: 'person-3',
+      relatedEntityType: 'dues-payment',
+      relatedEntity: 'pay-3',
+    });
+    expect(inserted[0].message).toContain('Blurry receipt');
+  });
 });

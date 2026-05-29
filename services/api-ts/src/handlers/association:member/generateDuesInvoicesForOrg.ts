@@ -2,6 +2,7 @@ import type { ValidatedContext } from '@/types/app';
 import type { DatabaseInstance } from '@/core/database';
 import { UnauthorizedError, ForbiddenError } from '@/core/errors';
 import type { GenerateDuesInvoicesForOrgBody } from '@/generated/openapi/validators';
+import { domainEvents } from '@/core/domain-events';
 import { auditAction } from '@/utils/audit';
 import { requirePosition } from '@/utils/officer-check';
 import { POSITION_TITLES } from '@/utils/position-titles';
@@ -130,6 +131,17 @@ export async function generateDuesInvoicesForOrg(
 
     return invoices;
   });
+
+  // Emit one dues.invoice.generated per newly created invoice (fire-and-forget)
+  for (const inv of generatedInvoices) {
+    domainEvents.emit('dues.invoice.generated', {
+      invoiceId: inv.id,
+      organizationId: orgId,
+      personId: inv.personId,
+      amount: inv.totalAmount,
+      dueDate: body.periodEnd,
+    }).catch(() => {});
+  }
 
   // 3. Trigger reminder processing for this org (fire-and-forget)
   processDuesReminders({ db, logger }).catch((err: any) => {

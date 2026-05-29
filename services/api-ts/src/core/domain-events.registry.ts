@@ -77,6 +77,29 @@ export interface DomainEventMap {
     newExpiryDate: string | null;
   };
 
+  'dues.payment.refunded': {
+    paymentId: string;
+    personId: string;
+    organizationId: string;
+    refundAmount: number;
+    isFullRefund: boolean;
+  };
+
+  'dues.invoice.generated': {
+    invoiceId: string;
+    organizationId: string;
+    personId: string;
+    amount: number;
+    dueDate: string;
+  };
+
+  'dues.payment.proof.rejected': {
+    paymentId: string;
+    personId: string;
+    organizationId: string;
+    reason: string;
+  };
+
   'credit.awarded': {
     personId: string;
     organizationId: string;

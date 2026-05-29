@@ -1,4 +1,8 @@
-import { describe, test, expect } from 'bun:test';
+import { describe, test, expect, afterEach, beforeEach, spyOn } from 'bun:test';
+import { makeCtx, stubRepo, restoreRepo } from '@/test-utils/make-ctx';
+import { generateDuesInvoicesForOrg } from './generateDuesInvoicesForOrg';
+import { OfficerTermRepository } from './repos/governance.repo';
+import { domainEvents } from '@/core/domain-events';
 // Factory N/A: handler test with inline primitives — no domain entity construction needed
 
 /**
@@ -178,5 +182,75 @@ describe('LIF-03: departed member exclusion from dues invoice generation', () =>
     // The filter string must not be broadened to include departed statuses
     const filterMatchesDeparted = DEPARTED_STATUSES.some((s) => s === ACTIVE_ONLY_FILTER);
     expect(filterMatchesDeparted).toBe(false);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// [EM-M06] Wave 26 — dues.invoice.generated emission (one per created invoice)
+// ---------------------------------------------------------------------------
+
+describe('generateDuesInvoicesForOrg — dues.invoice.generated emission', () => {
+  let officerMocks: ReturnType<typeof stubRepo>;
+
+  beforeEach(() => {
+    restoreRepo(OfficerTermRepository);
+    officerMocks = stubRepo(OfficerTermRepository, {
+      findActiveByPersonAndOrg: async () => [{ positionTitle: 'Treasurer' }],
+    });
+  });
+
+  afterEach(() => {
+    Object.values(officerMocks).forEach((m) => m.mockRestore());
+    restoreRepo(OfficerTermRepository);
+  });
+
+  test('emits one dues.invoice.generated per newly created invoice', async () => {
+    const config = { organizationId: 'tenant-1', annualAmount: 5000, fundAllocations: [] };
+    const members = [
+      { id: 'mem-1', personId: 'person-1', status: 'active', organizationId: 'tenant-1' },
+      { id: 'mem-2', personId: 'person-2', status: 'active', organizationId: 'tenant-1' },
+    ];
+
+    // top-level selects: call 0 = duesConfigs (uses .limit), call 1 = memberships (awaited, no .limit)
+    let selectIdx = 0;
+    function thenable(rows: any[]) {
+      const p: any = Promise.resolve(rows);
+      p.limit = () => Promise.resolve(rows.slice(0, 1));
+      return p;
+    }
+    const txMock = {
+      select: () => ({ from: () => ({ where: () => ({ limit: () => Promise.resolve([]) }) }) }),
+      insert: () => ({ values: (val: any) => ({ returning: () => Promise.resolve([{ id: 'inv-new', ...val }]) }) }),
+    };
+    const db: any = {
+      select: () => ({
+        from: () => {
+          const idx = selectIdx++;
+          const rows = idx === 0 ? [config] : members;
+          return { where: () => thenable(rows) };
+        },
+      }),
+      transaction: async (cb: (tx: any) => Promise<any>) => cb(txMock),
+    };
+
+    const emitSpy = spyOn(domainEvents, 'emit');
+    const ctx = makeCtx({
+      database: db,
+      _body: { organizationId: 'tenant-1', periodStart: '2026-01-01', periodEnd: '2026-12-31' },
+    });
+
+    const res = await generateDuesInvoicesForOrg(ctx);
+    expect(res.status).toBe(200);
+
+    const calls = emitSpy.mock.calls.filter((c) => c[0] === 'dues.invoice.generated');
+    expect(calls).toHaveLength(2);
+    expect(calls[0]?.[1]).toMatchObject({
+      organizationId: 'tenant-1',
+      amount: 5000,
+      dueDate: '2026-12-31',
+    });
+    const personIds = calls.map((c) => (c[1] as any).personId).sort();
+    expect(personIds).toEqual(['person-1', 'person-2']);
+    emitSpy.mockRestore();
   });
 });

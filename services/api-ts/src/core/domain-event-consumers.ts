@@ -91,6 +91,82 @@ export function registerDomainEventConsumers(
   });
 
   // -----------------------------------------------------------------------
+  // dues.payment.refunded → notify member of the refund
+  // (expiry already reset inside the refund transaction — notification only)
+  // -----------------------------------------------------------------------
+  domainEvents.on('dues.payment.refunded', async (payload) => {
+    try {
+      await deps.db.insert(notifications).values({
+        organizationId: payload.organizationId,
+        recipient: payload.personId,
+        type: 'system',
+        channel: 'in-app',
+        title: payload.isFullRefund ? 'Your dues payment was refunded' : 'Your dues payment was partially refunded',
+        message: `A refund of ${payload.refundAmount} has been processed for your dues payment.`,
+        status: 'sent',
+        sentAt: new Date(),
+        relatedEntityType: 'dues-payment',
+        relatedEntity: payload.paymentId,
+        consentValidated: false,
+        createdBy: SYSTEM_USER_ID,
+        updatedBy: SYSTEM_USER_ID,
+      });
+    } catch (err) {
+      logger.error({ error: err }, '[consumer] dues.payment.refunded failed');
+    }
+  });
+
+  // -----------------------------------------------------------------------
+  // dues.invoice.generated → notify member they have a new dues invoice
+  // -----------------------------------------------------------------------
+  domainEvents.on('dues.invoice.generated', async (payload) => {
+    try {
+      await deps.db.insert(notifications).values({
+        organizationId: payload.organizationId,
+        recipient: payload.personId,
+        type: 'system',
+        channel: 'in-app',
+        title: 'New dues invoice',
+        message: `You have a new dues invoice of ${payload.amount} due by ${payload.dueDate}.`,
+        status: 'sent',
+        sentAt: new Date(),
+        relatedEntityType: 'dues-invoice',
+        relatedEntity: payload.invoiceId,
+        consentValidated: false,
+        createdBy: SYSTEM_USER_ID,
+        updatedBy: SYSTEM_USER_ID,
+      });
+    } catch (err) {
+      logger.error({ error: err }, '[consumer] dues.invoice.generated failed');
+    }
+  });
+
+  // -----------------------------------------------------------------------
+  // dues.payment.proof.rejected → notify member to resubmit proof
+  // -----------------------------------------------------------------------
+  domainEvents.on('dues.payment.proof.rejected', async (payload) => {
+    try {
+      await deps.db.insert(notifications).values({
+        organizationId: payload.organizationId,
+        recipient: payload.personId,
+        type: 'system',
+        channel: 'in-app',
+        title: 'Payment proof rejected',
+        message: `Your payment proof was rejected: ${payload.reason}. Please resubmit.`,
+        status: 'sent',
+        sentAt: new Date(),
+        relatedEntityType: 'dues-payment',
+        relatedEntity: payload.paymentId,
+        consentValidated: false,
+        createdBy: SYSTEM_USER_ID,
+        updatedBy: SYSTEM_USER_ID,
+      });
+    } catch (err) {
+      logger.error({ error: err }, '[consumer] dues.payment.proof.rejected failed');
+    }
+  });
+
+  // -----------------------------------------------------------------------
   // booking.confirmed → notify client directly (clientId in payload)
   // -----------------------------------------------------------------------
   domainEvents.on('booking.confirmed', async (payload) => {

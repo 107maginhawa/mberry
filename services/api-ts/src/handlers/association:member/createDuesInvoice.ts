@@ -5,6 +5,7 @@ import { requirePosition } from '@/utils/officer-check';
 import { POSITION_TITLES } from '@/utils/position-titles';
 import type { CreateDuesInvoiceBody } from '@/generated/openapi/validators';
 import { DuesInvoiceRepository } from './repos/dues.repo';
+import { domainEvents } from '@/core/domain-events';
 import { auditAction } from '@/utils/audit';
 import { orgScopedPersonIds } from '@/core/org-scoped-persons';
 import { inArray, eq, and } from 'drizzle-orm';
@@ -70,6 +71,14 @@ export async function createDuesInvoice(
     description: 'Dues invoice created',
     eventSubType: 'financial.invoice-created',
   });
+
+  domainEvents.emit('dues.invoice.generated', {
+    invoiceId: invoice.id,
+    organizationId: orgId,
+    personId: targetPersonId,
+    amount: body.totalAmount,
+    dueDate: body.periodEnd,
+  }).catch(() => {});
 
   return ctx.json(invoice, 201);
 }

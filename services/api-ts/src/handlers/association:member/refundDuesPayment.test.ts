@@ -1,11 +1,12 @@
 // Business Rules: [BR-08]
-import { describe, test, expect, afterEach, beforeEach } from 'bun:test';
+import { describe, test, expect, afterEach, beforeEach, spyOn } from 'bun:test';
 import { makeCtx, makeMockDb, stubRepo, restoreRepo } from '@/test-utils/make-ctx';
 import { fakeDuesPayment as createFakeDuesPayment, fakeMembership as createFakeMembership } from '@/test-utils/factories';
 import { refundDuesPayment } from './refundDuesPayment';
 import { DuesRepository } from './repos/dues-payments.repo';
 import { MembershipRepository } from './repos/membership.repo';
 import { OfficerTermRepository } from './repos/governance.repo';
+import { domainEvents } from '@/core/domain-events';
 
 // ─── Fixtures ───────────────────────────────────────────
 
@@ -397,5 +398,40 @@ describe('[Phase15] refundDuesPayment — fund reversal + membership status', ()
 
     await expect(refundDuesPayment(ctx)).rejects.toThrow('Membership update failed');
     expect(transactionCalled).toBe(true);
+  });
+
+  // [EM-M06] Wave 26 — dues lifecycle event
+  test('emits dues.payment.refunded after successful refund', async () => {
+    stubRepo(DuesRepository, {
+      getPayment: async () => ({ ...fakePayment, amount: 5000, refundedAmount: 0 }),
+      getFundAllocations: async () => [...fakeAllocations],
+      createFundAllocations: async () => {},
+      updatePaymentStatus: async (_id: string, _cur: string, status: string, extra: any) => ({
+        ...fakePayment, status, ...extra,
+      }),
+    });
+    stubRepo(MembershipRepository, {
+      findMany: async () => [{ ...fakeMembership }],
+      updateOneById: async () => fakeMembership,
+    });
+
+    const emitSpy = spyOn(domainEvents, 'emit');
+    const ctx = makeCtx({
+      database: txDb,
+      _params: { paymentId: 'pay-1' },
+      _body: {}, // full refund
+    });
+
+    await refundDuesPayment(ctx);
+
+    const call = emitSpy.mock.calls.find((c) => c[0] === 'dues.payment.refunded');
+    expect(call).toBeDefined();
+    expect(call?.[1]).toMatchObject({
+      paymentId: 'pay-1',
+      personId: 'person-1',
+      refundAmount: 5000,
+      isFullRefund: true,
+    });
+    emitSpy.mockRestore();
   });
 });

@@ -4,7 +4,7 @@
 
 # Enforcement Report
 
-**Generated:** 2026-05-29 (post-Wave 25 update)
+**Generated:** 2026-05-29 (post-Wave 26 update)
 **Engine:** oli-enforce-all v3 --strict
 **Scope:** 22 modules, 8 phases, 10 agents
 **Baseline:** 2026-05-29T22:00:00Z → 2026-05-29T23:30:00Z (v4)
@@ -716,10 +716,26 @@ Closed the one untracked security P0 surfaced during Wave 23. The `/admin/*` mid
 
 ---
 
+### Wave 26 — m06 dues event bridge (residual lifecycle events) (COMPLETE ✅)
+
+Lifted the m06 `zero-domain-events` P0 cap. **Verify-first found the premise stale:** the baseline framed m06 as emitting *no* domain events, but `dues.payment.recorded` was **already** emitted from `association:member/utils/settle-payment.ts:45` (called by `recordDuesPayment`, `bulkRecordPayments`, `confirmPaymentProof`, `initiateOnlinePayment`, and `dues/jobs/processStripePayment`) with a **live consumer** at `domain-event-consumers.ts:57` that updates membership `duesExpiryDate`. That bridge was left untouched. Only **three residual lifecycle events** were genuinely missing (`auditAction()` only, no `domainEvents.emit`). Note: dues mutations live in `handlers/association:member/`, **not** `handlers/dues/`, despite the baseline `source_path`.
+
+| ID | Finding | Fix |
+|----|---------|-----|
+| EM-M06 (refund) | `refundDuesPayment.ts` reversed funds + reset expiry inside the tx but emitted no event | Emit `dues.payment.refunded {paymentId, personId, organizationId, refundAmount, isFullRefund}` after the tx + `auditAction` (fire-and-forget `.catch`). Consumer notifies the member (expiry already reset → notification-only). |
+| EM-M06 (invoice) | New dues invoices emitted no event — no member-facing "dues are due" trigger | Emit `dues.invoice.generated {invoiceId, organizationId, personId, amount, dueDate}` from `createDuesInvoice.ts` (single) **and** `generateDuesInvoicesForOrg.ts` (bulk, one per created invoice). Consumer notifies the member of the new invoice. Highest-value of the three. |
+| EM-M06 (proof) | `rejectPaymentProof.ts` rejected proofs silently | Emit `dues.payment.proof.rejected {paymentId, personId, organizationId, reason}` after `auditAction`. Consumer notifies the member to resubmit. (Proof CONFIRMED already flows `settlePayment → dues.payment.recorded`, so only the reject path needed an event.) |
+
+**Pipeline:** pure event/consumer change — **no codegen**, no `src/generated/*` touched. 3 typed keys added to `DomainEventMap` (`domain-events.registry.ts`, Financial Context — hand-authored, not generated); 3 notify consumers added to `domain-event-consumers.ts` via `deps.db.insert(notifications)`, mirroring the existing `booking.confirmed`/`membership.created` consumers. Test-first (VERTICAL_TDD): one emit-assertion test per handler (`spyOn(domainEvents, 'emit')`, `emitSpy.mock.calls.find(c => c[0] === '<event>')`) + 3 consumer notification tests asserting the insert side-effect. New test files for `createDuesInvoice` and `rejectPaymentProof` (none existed). Affected suites green; full-workspace typecheck (`bun run --filter '*' typecheck`): exit 0 (ui, admin, sdk-ts, api-ts, memberry). 3 pre-existing `certifyElection` failures confirmed present on clean tree (unrelated — elections repo mock), not introduced here.
+
+**Outcome:** m06 `zero-domain-events` P0 cap **lifted**; m06 P0 **1→0**, score **6.5→8.0**.
+
+---
+
 ## What's Next
 
 1. **Waves 1-24 COMPLETE — all built-module P1 clusters resolved.** Security gate satisfied. No P0 regressions. All P1 audit logging resolved (incl. 9 billing handlers in Wave 11). Revenue analytics gap filled. Baseline P1s fully triaged with named IDs. **Wave 12 closed m12 elections (5 REAL, 3 FP); Wave 13 closed m11 documents/credentials (5 REAL); Wave 14 closed m14 national dashboard (5 REAL); Wave 15 closed m01 auth-onboarding (5 REAL); Wave 16 closed m05 membership (3 REAL, 1 FP); Wave 17 closed m04 org-admin (1 REAL event, 2 doc reconciliations, 1 partial FP); Wave 18 closed m06 dues-payments (2 REAL, 3 FP/reclassified); Wave 19 closed m07 communications (0 REAL, 3 FP — module already remediated; removed dead CrossModuleTriggers); Wave 20 closed m08 events (2 REAL emit gaps in live association:operations handlers, 5 FP — audit read dead handlers/events/ dir); Wave 21 closed m09 training (1 REAL — training.completed emit connects WF-061/BR-20 certificate generation to the credit-award completion path); Wave 22 closed m10 credit-tracking (3 REAL — createMyCreditEntry credit.awarded emit, M10-R5 supporting-doc validation, WF-070 transcript export route-wiring; 1 FP — GDPR anonymization already in accountDeletionCascade); Wave 23 closed m03 platform-admin (3 REAL — all 7 spec domain events emitted from live handlers +7 registry keys, revenue/health analytics dead-code routes hand-wired, M3-R10 trial→cancelled transition; 0 FP); Wave 24 closed m02 member-profile (2 REAL — 4 domain events emitted incl. person.updated→existing id-card consumer, DataExport async vertical slice with rate limit + TTL + emit; 0 FP). FINAL built-module cluster.**
-2. **Remaining P0s: 2** (EM-M07-no-typespec — communication 28 hand-wired handlers, DEFERRED; EM-M06 zero-domain-events — m06 dues event bridge, out of P1 scope, still caps m06 score). The previously-untracked security P0 `EM-M03-9a3e7b12` (super-only caller guards on revokeAdmin/deleteAssociation/updateAdmin) was **fixed in Wave 25**.
+2. **Remaining P0s: 1** (EM-M07-no-typespec — communication 28 hand-wired handlers, DEFERRED). The `EM-M06 zero-domain-events` cap was **lifted in Wave 26** (verify-first: `dues.payment.recorded` bridge pre-existed; added `dues.payment.refunded` / `dues.invoice.generated` / `dues.payment.proof.rejected` events + consumers; m06 6.5→8.0). The previously-untracked security P0 `EM-M03-9a3e7b12` (super-only caller guards on revokeAdmin/deleteAssociation/updateAdmin) was **fixed in Wave 25**.
 3. **Remaining P1s (built modules): NONE.** All 13 built-module P1 clusters resolved (m01/m02/m03/m04/m05/m06/m07/m08/m09/m10/m11/m12/m14). Only deferred future-module stubs remain:
    - **DEFERRED:** ~170 future-module P1 stubs (m13/m15/m16/m17/m18/m19 — unbuilt-feature stubs); 7 TypeSpec, 3 coupling, 1 event from Wave 10.
 4. **Coverage Score: 78 → ~85** (estimated after Wave 10 + Wave 11 billing audit logging).

@@ -4,6 +4,7 @@ import { UnauthorizedError, NotFoundError, BusinessLogicError } from '@/core/err
 import type { RefundDuesPaymentBody, RefundDuesPaymentParams } from '@/generated/openapi/validators';
 import { DuesRepository } from './repos/dues-payments.repo';
 import { membershipLifecycle } from './utils/membership-lifecycle';
+import { domainEvents } from '@/core/domain-events';
 import { auditAction } from '@/utils/audit';
 import { requirePosition } from '@/utils/officer-check';
 import { POSITION_TITLES } from '@/utils/position-titles';
@@ -78,6 +79,14 @@ export async function refundDuesPayment(
     description: `Payment ${isFullRefund ? 'fully' : 'partially'} refunded`,
     eventSubType: 'financial.payment-reversed',
   });
+
+  domainEvents.emit('dues.payment.refunded', {
+    paymentId,
+    personId: payment.personId,
+    organizationId: payment.organizationId,
+    refundAmount,
+    isFullRefund,
+  }).catch(() => {});
 
   return ctx.json(updated, 200);
 }
