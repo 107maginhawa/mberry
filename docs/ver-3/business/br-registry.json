@@ -767,12 +767,14 @@
       "backend": [
         "services/api-ts/src/handlers/elections/castVote.test.ts"
       ],
-      "contract": [],
+      "contract": [
+        "specs/api/tests/contract/br-43-voting-status-guard.hurl"
+      ],
       "e2e": [
         "apps/memberry/tests/e2e/officer/elections.spec.ts"
       ]
     },
-    "annotations": "Wave 4 discovery. Guard checks election.status === 'votingOpen'."
+    "annotations": "Wave 4 discovery. Guard checks election.status === 'votingOpen'. | 2026-05-30: Backend tests in castVote.test.ts now carry [BR-43] tags with explicit table-driven coverage of every non-votingOpen lifecycle status. | Contract test br-43-voting-status-guard.hurl added (runs when Hurl runner is repaired by GATE 2)."
   },
   "BR-44": {
     "rule": "Election Certification Cross-Module Effects",
@@ -828,13 +830,16 @@
     "module": "M01",
     "ruleClass": "p0-auth",
     "tests": {
-      "backend": [],
+      "backend": [
+        "services/api-ts/src/middleware/auth.test.ts"
+      ],
       "contract": [],
       "e2e": [
         "apps/memberry/tests/e2e/auth.spec.ts"
       ]
     },
-    "annotations": "Wave 4 discovery. session.user.banned check in middleware/auth.ts."
+    "annotations": "Wave 4 discovery. session.user.banned check in middleware/auth.ts. | 2026-05-30: Backend integration tests added in middleware/auth.test.ts \u2014 banned-user rejection verified against required, optional, and role-gated routes.",
+    "deferredReason": "Contract layer deferred \u2014 Better-Auth ban is admin-internal with no public-API surface to exercise. Backend integration (middleware/auth.test.ts) + E2E (auth.spec.ts) cover the rule."
   },
   "BR-48": {
     "rule": "Bulk Payment Batch Size Limit",
@@ -848,7 +853,8 @@
       "contract": [],
       "e2e": []
     },
-    "annotations": "Wave 4 discovery. MAX_BATCH_SIZE constant limits bulk payment operations."
+    "annotations": "Wave 4 discovery. MAX_BATCH_SIZE constant limits bulk payment operations. | 2026-05-30: Contract test deferred \u2014 bulkRecordPayments handler is not yet wired to an HTTP route (no entry in OpenAPI). Backend coverage extended with boundary-table tests for sizes 1/49/51/100/1000.",
+    "deferredReason": "Contract+E2E deferred \u2014 bulkRecordPayments handler is not yet wired to an HTTP route. Backend boundary-table tests cover sizes 1/49/50/51/100/1000."
   },
   "BR-49": {
     "rule": "Active Status Includes Grace Period",
@@ -873,14 +879,17 @@
     "ruleClass": "p0-data",
     "tests": {
       "backend": [
-        "services/api-ts/src/handlers/elections/createElection.test.ts"
+        "services/api-ts/src/handlers/elections/createElection.test.ts",
+        "services/api-ts/src/handlers/elections/elections-schema.test.ts"
       ],
-      "contract": [],
+      "contract": [
+        "specs/api/tests/contract/br-50-election-date-ordering.hurl"
+      ],
       "e2e": [
         "apps/memberry/tests/e2e/officer/election-integrity.spec.ts"
       ]
     },
-    "annotations": "Wave 4 discovery. CHECK constraints enforce: nominations close > open, voting close > open, voting open >= nominations close."
+    "annotations": "Wave 4 discovery. CHECK constraints enforce: nominations close > open, voting close > open, voting open >= nominations close. | 2026-05-30: BR-50 date-ordering CHECK constraints verified at schema/migration layer in elections-schema.test.ts. | Contract test br-50-election-date-ordering.hurl added covering all three DB CHECK constraints."
   },
   "BR-51": {
     "rule": "Internal Service Token Timing-Safe Comparison",
@@ -894,6 +903,7 @@
       "contract": [],
       "e2e": []
     },
-    "annotations": "Wave 4 discovery. timingSafeEqual against rotated token list in middleware/auth.ts. 4 test cases cover: valid token bypass, missing header, mismatch logging, context flag."
+    "annotations": "Wave 4 discovery. timingSafeEqual against rotated token list in middleware/auth.ts. 4 test cases cover: valid token bypass, missing header, mismatch logging, context flag. | 2026-05-30: Backend assertion added in middleware/auth.test.ts that the comparator is crypto.timingSafeEqual on hashed inputs (not raw equality).",
+    "deferredReason": "Contract+E2E deferred \u2014 timing-safety is a cryptographic property of the comparator, not observable at the wire layer. Backend test in middleware/auth.test.ts asserts crypto.timingSafeEqual is used and near-miss tokens reject identically to unrelated tokens."
   }
 }
