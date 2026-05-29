@@ -5,6 +5,8 @@ import { UnauthorizedError, ValidationError } from '@/core/errors';
 import { DocumentRepository } from './repos/documents.repo';
 import { auditAction } from '@/utils/audit';
 import { isBlockedDocumentFile } from '@/utils/sanitize';
+import { requireOfficerTerm } from '@/utils/officer-check';
+import { domainEvents } from '@/core/domain-events';
 
 /**
  * createDocument
@@ -28,10 +30,20 @@ export async function createDocument(
     throw new ValidationError('SVG files are not allowed due to security risks. Please convert to PNG or PDF.');
   }
 
+  // EM-M11-g4b67c23: role guard. Members may create documents they personally
+  // own (member:owner); org/chapter-scoped documents require officer access.
+  const isSelfOwned = body.ownerType === 'person' && body.ownerId === user.id;
+  if (!isSelfOwned) {
+    const denied = await requireOfficerTerm(ctx);
+    if (denied) return denied;
+  }
+
   const db = ctx.get('database') as DatabaseInstance;
   const logger = ctx.get('logger');
   const repo = new DocumentRepository(db, logger);
 
+  // EM-M11-7a3e1c02: honor the document lifecycle (draft -> published -> archived).
+  // Default to draft so documents are not auto-published on creation.
   const document = await repo.createOne({
     organizationId: orgId,
     title: body.title,
@@ -44,7 +56,7 @@ export async function createDocument(
     accessLevel: body.accessLevel,
     category: body.category ?? null,
     tags: body.tags ?? [],
-    status: 'published',
+    status: body.status ?? 'draft',
   });
 
   await auditAction(ctx, {
@@ -53,6 +65,16 @@ export async function createDocument(
     resourceId: document.id,
     description: `Document "${body.title}" created`,
   });
+
+  // EM-M11-d1e34f90: emit DocumentUploaded domain event.
+  domainEvents.emit('document.created', {
+    documentId: document.id,
+    organizationId: orgId,
+    ownerId: body.ownerId,
+    ownerType: body.ownerType,
+    createdBy: user.id,
+    isNewVersion: false,
+  }).catch(() => {});
 
   return ctx.json(document, 201);
 }

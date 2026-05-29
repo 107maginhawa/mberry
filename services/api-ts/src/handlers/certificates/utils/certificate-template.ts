@@ -5,6 +5,8 @@
  * multiple certificate types (attendance, completion, speaker).
  */
 
+import { PDFDocument, rgb, StandardFonts, type RGB } from 'pdf-lib';
+
 export interface CertificateTemplateData {
   certificateNumber: string;
   recipientName: string;
@@ -131,6 +133,104 @@ export function renderCertificateHtml(
   ${signatoryHtml}
 </body>
 </html>`;
+}
+
+/** Parse a hex color (#rgb / #rrggbb) into a pdf-lib RGB, falling back to navy. */
+function hexToRgb(color: string | undefined, fallback: RGB = rgb(0.1, 0.21, 0.36)): RGB {
+  if (!color) return fallback;
+  let hex = color.trim().replace(/^#/, '');
+  if (hex.length === 3) hex = hex.split('').map((c) => c + c).join('');
+  if (!/^[0-9a-fA-F]{6}$/.test(hex)) return fallback;
+  const r = parseInt(hex.slice(0, 2), 16) / 255;
+  const g = parseInt(hex.slice(2, 4), 16) / 255;
+  const b = parseInt(hex.slice(4, 6), 16) / 255;
+  return rgb(r, g, b);
+}
+
+/**
+ * Render a certificate as a real PDF (US Letter landscape, 792×612 pts).
+ * Returns the PDF bytes. Text is drawn with embedded standard fonts; org
+ * branding controls the accent color and signatory block.
+ *
+ * EM-M11-83a8b9c0: spec WF-074 requires PDF output, not HTML.
+ */
+export async function renderCertificatePdf(
+  data: CertificateTemplateData,
+  branding?: Partial<OrgBranding>,
+): Promise<Uint8Array> {
+  const brand = { ...DEFAULT_BRANDING, ...branding };
+  const typeLabel = TYPE_LABELS[data.certificateType] ?? 'Certificate';
+  const dateStr = data.issuedAt.toLocaleDateString('en-US', {
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric',
+  });
+  const accent = hexToRgb(brand.primaryColor);
+
+  const PAGE_WIDTH = 792;
+  const PAGE_HEIGHT = 612;
+  const pdfDoc = await PDFDocument.create();
+  pdfDoc.setTitle(`${typeLabel} — ${data.certificateNumber}`);
+  const page = pdfDoc.addPage([PAGE_WIDTH, PAGE_HEIGHT]);
+
+  const serifBold = await pdfDoc.embedFont(StandardFonts.TimesRomanBold);
+  const serif = await pdfDoc.embedFont(StandardFonts.TimesRoman);
+  const serifItalic = await pdfDoc.embedFont(StandardFonts.TimesRomanItalic);
+
+  const center = (text: string, font: typeof serif, size: number, y: number, color = rgb(0.2, 0.2, 0.2)) => {
+    const width = font.widthOfTextAtSize(text, size);
+    page.drawText(text, { x: (PAGE_WIDTH - width) / 2, y, size, font, color });
+  };
+
+  // Background + decorative border
+  page.drawRectangle({ x: 0, y: 0, width: PAGE_WIDTH, height: PAGE_HEIGHT, color: rgb(1, 1, 1) });
+  page.drawRectangle({
+    x: 24, y: 24, width: PAGE_WIDTH - 48, height: PAGE_HEIGHT - 48,
+    borderColor: accent, borderWidth: 3,
+  });
+  page.drawRectangle({
+    x: 34, y: 34, width: PAGE_WIDTH - 68, height: PAGE_HEIGHT - 68,
+    borderColor: accent, borderWidth: 0.75,
+  });
+
+  // Heading
+  center(typeLabel, serifBold, 34, PAGE_HEIGHT - 130, accent);
+  center(brand.orgName, serif, 16, PAGE_HEIGHT - 162, rgb(0.4, 0.4, 0.4));
+
+  // Body
+  center('This certifies that', serif, 14, PAGE_HEIGHT - 230);
+  center(data.recipientName, serifBold, 30, PAGE_HEIGHT - 272, rgb(0.1, 0.1, 0.12));
+  center(
+    data.certificateType === 'speaker' ? 'has presented at' : 'has completed',
+    serif, 14, PAGE_HEIGHT - 306,
+  );
+  center(data.trainingTitle, serifItalic, 20, PAGE_HEIGHT - 340, rgb(0.15, 0.15, 0.18));
+
+  if (data.creditAmount != null) {
+    const creditText = `${data.creditAmount} CPD Credit${data.creditAmount !== 1 ? 's' : ''}${data.creditCategory ? ` (${data.creditCategory})` : ''}`;
+    center(creditText, serif, 13, PAGE_HEIGHT - 372, rgb(0.33, 0.33, 0.33));
+  }
+
+  // Footer: date (left) + certificate number (left) + signatory (right)
+  page.drawText(dateStr, { x: 80, y: 110, size: 12, font: serif, color: rgb(0.4, 0.4, 0.4) });
+  page.drawLine({ start: { x: 80, y: 128 }, end: { x: 260, y: 128 }, thickness: 0.5, color: rgb(0.6, 0.6, 0.6) });
+  page.drawText('Date Issued', { x: 80, y: 96, size: 9, font: serif, color: rgb(0.55, 0.55, 0.55) });
+
+  page.drawText(`Certificate No. ${data.certificateNumber}`, {
+    x: 80, y: 64, size: 9, font: serif, color: rgb(0.6, 0.6, 0.6),
+  });
+
+  if (brand.signatoryName) {
+    const sigX = PAGE_WIDTH - 280;
+    page.drawText(brand.signatoryName, { x: sigX, y: 110, size: 13, font: serifBold, color: rgb(0.15, 0.15, 0.18) });
+    page.drawLine({ start: { x: sigX, y: 128 }, end: { x: sigX + 200, y: 128 }, thickness: 0.5, color: rgb(0.6, 0.6, 0.6) });
+    const sigTitle = (brand.signatoryTitle ?? '').slice(0, 100);
+    if (sigTitle) {
+      page.drawText(sigTitle, { x: sigX, y: 96, size: 9, font: serif, color: rgb(0.55, 0.55, 0.55) });
+    }
+  }
+
+  return pdfDoc.save();
 }
 
 /**

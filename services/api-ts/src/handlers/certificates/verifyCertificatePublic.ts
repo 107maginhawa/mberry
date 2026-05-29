@@ -4,6 +4,7 @@ import { NotFoundError } from '@/core/errors';
 import type { DatabaseInstance } from '@/core/database';
 import { certificates } from './repos/certificates.schema';
 import { verifyCertificateQR } from './utils/certificate-qr';
+import { domainEvents } from '@/core/domain-events';
 
 export async function verifyCertificatePublic(ctx: Context): Promise<Response> {
   const certificateNumber = ctx.req.param('certificateNumber')!;
@@ -22,6 +23,12 @@ export async function verifyCertificatePublic(ctx: Context): Promise<Response> {
   if (signature && qrSecret) {
     verified = verifyCertificateQR(certificateNumber, signature, qrSecret);
   }
+
+  // EM-M11-d1e34f90: emit VerificationRequested domain event.
+  domainEvents.emit('verification.requested', {
+    credentialNumber: cert.certificateNumber,
+    verified,
+  }).catch(() => {});
 
   return ctx.json({ data: { certificateNumber: cert.certificateNumber, issuedAt: cert.issuedAt, status: cert.status ?? 'issued', creditHours: cert.creditHours, cpdActivityType: cert.cpdActivityType, isValid: cert.status !== 'revoked', verified } });
 }

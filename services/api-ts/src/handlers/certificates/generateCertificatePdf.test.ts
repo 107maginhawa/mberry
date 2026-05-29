@@ -59,7 +59,8 @@ describe('[042] generateCertificatePdf', () => {
     await expect(generateCertificatePdf(ctx)).rejects.toThrow('Access denied');
   });
 
-  test('returns 200 with HTML content for owned certificate', async () => {
+  // EM-M11-83a8b9c0: WF-074 requires real PDF output, not HTML.
+  test('returns 200 with PDF bytes for owned certificate', async () => {
     stubRepo(CertificatesRepository, {
       get: async () => fakeCert,
     });
@@ -75,16 +76,18 @@ describe('[042] generateCertificatePdf', () => {
     const res = await generateCertificatePdf(ctx);
 
     expect(res.status).toBe(200);
-    expect(res.headers.get('Content-Type')).toBe('text/html; charset=utf-8');
+    expect(res.headers.get('Content-Type')).toBe('application/pdf');
+    expect(res.headers.get('Content-Disposition')).toContain('CERT_2026_000001.pdf');
     expect(res.headers.get('X-Certificate-Id')).toBe('cert-1');
     expect(res.headers.get('X-Certificate-Number')).toBe('CERT-2026-000001');
-    const html = await res.text();
-    expect(html).toContain('Dr. Maria Santos');
-    expect(html).toContain('Advanced Implants');
-    expect(html).toContain('Certificate of Attendance');
+
+    const bytes = new Uint8Array(await res.arrayBuffer());
+    expect(bytes.byteLength).toBeGreaterThan(0);
+    // PDF magic header: %PDF
+    expect(String.fromCharCode(bytes[0]!, bytes[1]!, bytes[2]!, bytes[3]!)).toBe('%PDF');
   });
 
-  test('applies org branding (logo, color, signatory)', async () => {
+  test('produces a valid PDF with org branding applied', async () => {
     stubRepo(CertificatesRepository, {
       get: async () => fakeCert,
     });
@@ -95,7 +98,6 @@ describe('[042] generateCertificatePdf', () => {
         trainingTitle: 'Test Training',
         organizationName: 'Test Org',
         certificateType: 'completion',
-        logoUrl: 'https://example.com/logo.png',
         primaryColor: '#ff0000',
         signatoryName: 'Dr. President',
         signatoryTitle: 'President',
@@ -104,14 +106,12 @@ describe('[042] generateCertificatePdf', () => {
     const res = await generateCertificatePdf(ctx);
 
     expect(res.status).toBe(200);
-    const html = await res.text();
-    expect(html).toContain('https://example.com/logo.png');
-    expect(html).toContain('#ff0000');
-    expect(html).toContain('Dr. President');
-    expect(html).toContain('Certificate of Completion');
+    expect(res.headers.get('Content-Type')).toBe('application/pdf');
+    const bytes = new Uint8Array(await res.arrayBuffer());
+    expect(String.fromCharCode(bytes[0]!, bytes[1]!, bytes[2]!, bytes[3]!)).toBe('%PDF');
   });
 
-  test('includes credit information when provided', async () => {
+  test('produces a valid PDF when credit information is provided', async () => {
     stubRepo(CertificatesRepository, {
       get: async () => fakeCert,
     });
@@ -129,8 +129,8 @@ describe('[042] generateCertificatePdf', () => {
     const res = await generateCertificatePdf(ctx);
 
     expect(res.status).toBe(200);
-    const html = await res.text();
-    expect(html).toContain('8 CPD Credits');
-    expect(html).toContain('(Major)');
+    expect(res.headers.get('Content-Type')).toBe('application/pdf');
+    const bytes = new Uint8Array(await res.arrayBuffer());
+    expect(String.fromCharCode(bytes[0]!, bytes[1]!, bytes[2]!, bytes[3]!)).toBe('%PDF');
   });
 });

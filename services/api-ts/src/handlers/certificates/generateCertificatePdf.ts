@@ -4,20 +4,18 @@ import { CertificatesRepository } from './repos/certificates.repo';
 import { NotFoundError, ForbiddenError } from '@/core/errors';
 import { auditAction } from '@/utils/audit';
 import {
-  renderCertificateHtml,
+  renderCertificatePdf,
   validateTemplateData,
   type CertificateTemplateData,
   type OrgBranding,
 } from './utils/certificate-template';
+import { domainEvents } from '@/core/domain-events';
 
 /**
  * generateCertificatePdf
  *
- * Renders a certificate as HTML for PDF conversion. Supports org-specific
- * branding (logo, colors, signatory) and multiple certificate types.
- *
- * Returns HTML content that can be converted to PDF by the client or
- * a downstream PDF service.
+ * Renders a certificate as a downloadable PDF. Supports org-specific
+ * branding (colors, signatory) and multiple certificate types.
  */
 export async function generateCertificatePdf(
   ctx: ValidatedContext<any, never, never>,
@@ -64,7 +62,7 @@ export async function generateCertificatePdf(
     orgName: body.organizationName,
   };
 
-  const html = renderCertificateHtml(templateData, branding);
+  const pdfBytes = await renderCertificatePdf(templateData, branding);
 
   await auditAction(ctx, {
     action: 'create',
@@ -75,13 +73,24 @@ export async function generateCertificatePdf(
     details: { certificateNumber: cert.certificateNumber, certificateType: templateData.certificateType },
   });
 
-  // Return HTML directly with proper content type.
-  // Clients can render this in a browser/webview and use window.print()
-  // or a downstream service (e.g. Puppeteer, wkhtmltopdf) to convert to PDF.
-  return new Response(html, {
+  // EM-M11-d1e34f90: emit CredentialGenerated domain event.
+  domainEvents.emit('credential.generated', {
+    credentialId: cert.id,
+    credentialNumber: cert.certificateNumber,
+    personId: cert.personId,
+    credentialType: 'certificate',
+    generatedBy: user.id,
+  }).catch(() => {});
+
+  const safeFileName = `${cert.certificateNumber.replace(/[^a-zA-Z0-9]/g, '_')}.pdf`;
+
+  return new Response(pdfBytes, {
     status: 200,
     headers: {
-      'Content-Type': 'text/html; charset=utf-8',
+      'Content-Type': 'application/pdf',
+      'Content-Disposition': `attachment; filename="${safeFileName}"`,
+      'Content-Length': pdfBytes.byteLength.toString(),
+      'Cache-Control': 'no-store',
       'X-Certificate-Id': cert.id,
       'X-Certificate-Number': cert.certificateNumber,
     },

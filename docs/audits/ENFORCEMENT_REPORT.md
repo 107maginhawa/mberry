@@ -4,7 +4,7 @@
 
 # Enforcement Report
 
-**Generated:** 2026-05-29 (post-Wave 12 update)
+**Generated:** 2026-05-29 (post-Wave 13 update)
 **Engine:** oli-enforce-all v3 --strict
 **Scope:** 22 modules, 8 phases, 10 agents
 **Baseline:** 2026-05-29T22:00:00Z → 2026-05-29T23:30:00Z (v4)
@@ -423,12 +423,33 @@ Fixed the Wave-11 highest-risk cluster. Verified all 8 findings against live cod
 
 ---
 
+### Wave 13 — m11 Documents/Credentials Remediation (COMPLETE ✅)
+
+Fixed the m11 cluster. Verified all 5 findings against live code first: **all 5 REAL.**
+
+**5 REAL fixes:**
+
+| ID | Finding | Fix |
+|----|---------|-----|
+| EM-M11-7a3e1c02 | createDocument hardcoded `status: 'published'`, skipping draft state | Added `status?: "draft" \| "published"` to `DocumentCreateRequest` (TypeSpec); `createDocument` defaults to `'draft'` when omitted, honors explicit `'published'` |
+| EM-M11-g4b67c23 | createDocument missing role check | Org/chapter-owned documents now require officer access via `requireOfficerTerm`; self-owned person documents (member:owner) still permitted per API contract |
+| EM-M11-d1e34f90 | M11 handlers emit zero domain events | Wired `document.created` (createDocument + uploadNewDocumentVersion), `credential.generated` (generateCertificatePdf), `verification.requested` (verifyCertificatePublic); events added to `domain-events.registry.ts` |
+| EM-M11-e2f45a01 | Zero event consumers | Added consumers in `domain-event-consumers.ts`: `person.updated` (ID-card re-download notification on identity-field change), `membership.status.changed`, `training.completed` (certificate-available notification) |
+| EM-M11-83a8b9c0 | generateCertificatePdf returned HTML, not real PDF | New `renderCertificatePdf` (pdf-lib, US Letter landscape 792×612, embedded Times fonts, accent border, signatory block); handler returns `application/pdf` bytes with `%PDF` header — WF-074 satisfied. `renderCertificateHtml` retained for batch/bulk issuance |
+
+**Pipeline:** TypeSpec → `specs/api` build → `api-ts` generate (validators.ts gained `status` enum field). Unrelated regen churn (better-auth, websocket registry) reverted to HEAD. Typecheck passes: api-ts, memberry, sdk-ts. Tests: 326 pass / 0 fail across documents + certificates + consumers.
+
+**Outcome:** m11 P1 **5→0**, score **6.0→9.0**. No remaining REAL P1s in m11.
+
+---
+
 ## What's Next
 
-1. **Waves 1-12 COMPLETE.** Security gate satisfied. No P0 regressions. All P1 audit logging resolved (incl. 9 billing handlers in Wave 11). Revenue analytics gap filled. Baseline P1s fully triaged with named IDs. **Wave 12 closed the m12 elections cluster (5 REAL fixed, 3 FP reclassified).**
+1. **Waves 1-13 COMPLETE.** Security gate satisfied. No P0 regressions. All P1 audit logging resolved (incl. 9 billing handlers in Wave 11). Revenue analytics gap filled. Baseline P1s fully triaged with named IDs. **Wave 12 closed the m12 elections cluster (5 REAL fixed, 3 FP reclassified); Wave 13 closed the m11 documents/credentials cluster (5 REAL fixed).**
 2. **Remaining P0s: 1** (EM-M07-no-typespec — communication module 28 hand-wired handlers, DEFERRED).
-3. **Remaining P1s (built modules): ~22 REAL, now named** (see `wave11_p1_triage` in baseline; m12 cluster of 8 now resolved). Priority order for next fix wave:
-   - **P1 — m11 documents (5):** role check on createDocument, draft-state default, domain events, real PDF output.
-   - **P3 — m14 dashboard (5), m10 credits (transcript dead-code), m01 onboarding wizard.**
+3. **Remaining P1s (built modules): ~17 REAL, now named** (see `wave11_p1_triage` in baseline; m11 + m12 clusters of 13 now resolved). Priority order for next fix wave:
+   - **P1 — m14 national dashboard (5):** missing chapters/platform endpoints, WF-085 drill-down, DashboardExported event.
+   - **P1 — m01 onboarding (5):** onboarding state/step endpoints, WF-005 wizard, WF-009 bulk import, OnboardingState entity.
+   - **P1 — m04/m05/m02 (scattered):** event emission + spec/path divergence; m09 certificate↔training wiring.
    - **DEFERRED:** ~170 future-module P1 stubs (m13/m15/m16/m17/m18/m19); 7 TypeSpec, 3 coupling, 1 event from Wave 10.
 4. **Coverage Score: 78 → ~85** (estimated after Wave 10 + Wave 11 billing audit logging).

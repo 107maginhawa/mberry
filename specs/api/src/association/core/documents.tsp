@@ -156,6 +156,9 @@ model DocumentCreateRequest {
 
   @doc("Initial tags (optional).")
   tags?: string[];
+
+  @doc("Initial publication status. Defaults to 'draft'; only 'draft' or 'published' are valid on creation.")
+  status?: "draft" | "published";
 }
 
 @doc("Partial update for document metadata.")

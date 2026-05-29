@@ -851,4 +851,121 @@ export function registerDomainEventConsumers(
       logger.error({ error: err }, '[consumer] election.published failed');
     }
   });
+
+  // -----------------------------------------------------------------------
+  // person.updated → ID cards are generated on-the-fly, so an identity change
+  // implicitly refreshes them. Notify the member (per active membership) when
+  // identity-relevant fields change so they can re-download an updated card.
+  // (EM-M11-e2f45a01 / BR-19 auto-regenerate ID card)
+  // -----------------------------------------------------------------------
+  const ID_CARD_FIELDS = new Set(['firstName', 'lastName', 'licenseNumber', 'photoUrl', 'suffix']);
+  domainEvents.on('person.updated', async (payload) => {
+    if (!payload.updatedFields.some((f) => ID_CARD_FIELDS.has(f))) return;
+
+    (async () => {
+      try {
+        const orgs = await deps.db
+          .select({ organizationId: memberships.organizationId })
+          .from(memberships)
+          .where(
+            and(
+              eq(memberships.personId, payload.personId),
+              eq(memberships.status, 'active'),
+            ),
+          );
+
+        if (orgs.length === 0) return;
+
+        const rows = orgs.map((o) => ({
+          organizationId: o.organizationId,
+          recipient: payload.personId,
+          type: 'system' as const,
+          channel: 'in-app' as const,
+          title: 'Member ID Card Updated',
+          message: 'Your profile changed — your digital member ID card now reflects the latest details.',
+          status: 'sent' as const,
+          sentAt: new Date(),
+          relatedEntityType: 'person',
+          relatedEntity: payload.personId,
+          consentValidated: false,
+          createdBy: SYSTEM_USER_ID,
+          updatedBy: SYSTEM_USER_ID,
+        }));
+        await deps.db.insert(notifications).values(rows);
+      } catch (err) {
+        logger.error({ error: err }, '[consumer] person.updated id-card refresh failed');
+      }
+    })();
+  });
+
+  // -----------------------------------------------------------------------
+  // membership.status.changed → notify member that their ID card reflects
+  // the new membership status. (EM-M11-e2f45a01)
+  // -----------------------------------------------------------------------
+  domainEvents.on('membership.status.changed', async (payload) => {
+    try {
+      await deps.db.insert(notifications).values({
+        organizationId: payload.organizationId,
+        recipient: payload.personId,
+        type: 'system',
+        channel: 'in-app',
+        title: 'Member ID Card Updated',
+        message: `Your membership status is now "${payload.newStatus}". Your digital member ID card has been updated.`,
+        status: 'sent',
+        sentAt: new Date(),
+        relatedEntityType: 'membership',
+        relatedEntity: payload.membershipId,
+        consentValidated: false,
+        createdBy: SYSTEM_USER_ID,
+        updatedBy: SYSTEM_USER_ID,
+      });
+    } catch (err) {
+      logger.error({ error: err }, '[consumer] membership.status.changed id-card refresh failed');
+    }
+  });
+
+  // -----------------------------------------------------------------------
+  // training.completed → make certificate available: notify enrolled members
+  // that their certificate can now be downloaded. (EM-M11-e2f45a01)
+  // -----------------------------------------------------------------------
+  domainEvents.on('training.completed', async (payload) => {
+    (async () => {
+      try {
+        const enrollees = await deps.db
+          .select({ personId: trainingEnrollments.personId })
+          .from(trainingEnrollments)
+          .where(
+            and(
+              eq(trainingEnrollments.trainingId, payload.trainingId),
+              inArray(trainingEnrollments.status, ['enrolled', 'completed']),
+            ),
+          );
+
+        if (enrollees.length === 0) return;
+
+        const CHUNK_SIZE = 100;
+        for (let i = 0; i < enrollees.length; i += CHUNK_SIZE) {
+          const chunk = enrollees.slice(i, i + CHUNK_SIZE);
+          const rows = chunk.map((e) => ({
+            organizationId: payload.organizationId,
+            recipient: e.personId,
+            type: 'system' as const,
+            channel: 'in-app' as const,
+            title: 'Certificate Available',
+            message: 'Your certificate for a completed training is now available to download.',
+            status: 'sent' as const,
+            sentAt: new Date(),
+            relatedEntityType: 'training',
+            relatedEntity: payload.trainingId,
+            consentValidated: false,
+            createdBy: SYSTEM_USER_ID,
+            updatedBy: SYSTEM_USER_ID,
+          }));
+          await deps.db.insert(notifications).values(rows);
+        }
+      } catch (err) {
+        logger.error({ error: err }, '[consumer] training.completed certificate-available failed');
+      }
+    })();
+  });
 }

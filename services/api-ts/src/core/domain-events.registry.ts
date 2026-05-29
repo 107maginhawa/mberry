@@ -307,6 +307,29 @@ export interface DomainEventMap {
     description: string;
   };
 
+  // ── Documents / Credentials Context (M11) ─────────────────────────────
+  'document.created': {
+    documentId: string;
+    organizationId: string;
+    ownerId: string;
+    ownerType: string;
+    createdBy: string;
+    isNewVersion: boolean;
+  };
+
+  'credential.generated': {
+    credentialId: string;
+    credentialNumber: string;
+    personId: string;
+    credentialType: 'certificate' | 'idCard';
+    generatedBy: string;
+  };
+
+  'verification.requested': {
+    credentialNumber: string;
+    verified: boolean;
+  };
+
   // ── Subscription Context (UJ-M03) ─────────────────────────────────────
   'subscription.created': {
     subscriptionId: string;

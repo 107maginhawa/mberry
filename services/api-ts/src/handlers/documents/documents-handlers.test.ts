@@ -119,7 +119,8 @@ describe('createDocument', () => {
     expect((res as any).body.id).toBe(DOC_ID);
   });
 
-  test('uses published status by default (not draft)', async () => {
+  // EM-M11-7a3e1c02: documents start as draft, not auto-published.
+  test('defaults status to draft when not provided', async () => {
     let capturedInput: any;
     stubRepo(DocumentRepository, {
       createOne: async (input: any) => {
@@ -131,7 +132,7 @@ describe('createDocument', () => {
     const { createDocument } = await import('./createDocument');
     const ctx = makeCtx({ _body: validBody });
     await createDocument(ctx);
-    expect(capturedInput.status).toBe('published');
+    expect(capturedInput.status).toBe('draft');
   });
 
   test('passes through optional category and tags', async () => {
@@ -412,7 +413,7 @@ describe('uploadNewDocumentVersion', () => {
     });
 
     const { uploadNewDocumentVersion } = await import('./uploadNewDocumentVersion');
-    const ctx = makeCtx({ _params: { documentId: DOC_ID }, _body: validVersionBody });
+    const ctx = makeCtx({ organizationId: ORG_ID, _params: { documentId: DOC_ID }, _body: validVersionBody });
     const res = await uploadNewDocumentVersion(ctx);
     expect(res.status).toBe(201);
     expect((res as any).body.id).toBe(VERSION_ID);
@@ -433,7 +434,7 @@ describe('uploadNewDocumentVersion', () => {
     });
 
     const { uploadNewDocumentVersion } = await import('./uploadNewDocumentVersion');
-    const ctx = makeCtx({ _params: { documentId: DOC_ID }, _body: validVersionBody });
+    const ctx = makeCtx({ organizationId: ORG_ID, _params: { documentId: DOC_ID }, _body: validVersionBody });
     await uploadNewDocumentVersion(ctx);
     expect(capturedVersionNumber).toBe(4); // 3 + 1
   });
@@ -453,7 +454,7 @@ describe('uploadNewDocumentVersion', () => {
     });
 
     const { uploadNewDocumentVersion } = await import('./uploadNewDocumentVersion');
-    const ctx = makeCtx({ _params: { documentId: DOC_ID }, _body: validVersionBody });
+    const ctx = makeCtx({ organizationId: ORG_ID, _params: { documentId: DOC_ID }, _body: validVersionBody });
     await uploadNewDocumentVersion(ctx);
     expect(capturedVersionNumber).toBe(1);
   });
@@ -473,7 +474,7 @@ describe('uploadNewDocumentVersion', () => {
     });
 
     const { uploadNewDocumentVersion } = await import('./uploadNewDocumentVersion');
-    const ctx = makeCtx({ _params: { documentId: DOC_ID }, _body: validVersionBody });
+    const ctx = makeCtx({ organizationId: ORG_ID, _params: { documentId: DOC_ID }, _body: validVersionBody });
     await uploadNewDocumentVersion(ctx);
     expect(capturedPatch.currentVersionId).toBe(VERSION_ID);
   });
@@ -494,6 +495,7 @@ describe('uploadNewDocumentVersion', () => {
 
     const { uploadNewDocumentVersion } = await import('./uploadNewDocumentVersion');
     const ctx = makeCtx({
+      organizationId: ORG_ID,
       _params: { documentId: DOC_ID },
       _body: { ...validVersionBody, changeNotes: 'Fixed typo on page 3' },
     });
@@ -516,7 +518,7 @@ describe('uploadNewDocumentVersion', () => {
     });
 
     const { uploadNewDocumentVersion } = await import('./uploadNewDocumentVersion');
-    const ctx = makeCtx({ _params: { documentId: DOC_ID }, _body: validVersionBody });
+    const ctx = makeCtx({ organizationId: ORG_ID, _params: { documentId: DOC_ID }, _body: validVersionBody });
     await uploadNewDocumentVersion(ctx);
     expect(capturedInput.changeNote).toBeNull();
   });

@@ -1178,7 +1178,8 @@ export const AssociationCoreDocumentsDocumentCreateRequestSchema = z.object({
   ownerType: z.string(),
   accessLevel: z.enum(["public", "tenantOnly", "unitOnly", "restricted", "privileged"]),
   category: z.string().optional(),
-  tags: z.array(z.string()).optional()
+  tags: z.array(z.string()).optional(),
+  status: z.enum(["draft", "published"]).optional()
 });
 
 export const AssociationCoreDocumentsDocumentNewVersionRequestSchema = z.object({

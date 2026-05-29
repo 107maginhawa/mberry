@@ -5,6 +5,7 @@ import { UnauthorizedError, NotFoundError, ValidationError } from '@/core/errors
 import { DocumentRepository, DocumentVersionRepository } from './repos/documents.repo';
 import { auditAction } from '@/utils/audit';
 import { isBlockedDocumentFile } from '@/utils/sanitize';
+import { domainEvents } from '@/core/domain-events';
 
 /**
  * uploadNewDocumentVersion
@@ -66,6 +67,16 @@ export async function uploadNewDocumentVersion(
     resourceId: version.id,
     description: `Document version ${nextVersion} uploaded for document ${documentId}`,
   });
+
+  // EM-M11-d1e34f90: emit DocumentUploaded domain event for new versions.
+  domainEvents.emit('document.created', {
+    documentId,
+    organizationId: orgId,
+    ownerId: document.ownerId,
+    ownerType: document.ownerType,
+    createdBy: user.id,
+    isNewVersion: true,
+  }).catch(() => {});
 
   return ctx.json(version, 201);
 }

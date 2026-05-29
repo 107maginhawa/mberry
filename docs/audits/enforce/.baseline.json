@@ -1,8 +1,8 @@
 {
-  "version": 5,
-  "timestamp": "2026-05-29T24:00:00Z",
-  "enforcement_depth": "FULL — all 8 phases + Wave 11 (billing audit + P1 re-triage) + Wave 12 (m12 elections: 5 REAL P1s fixed, 3 FPs reclassified)",
-  "previous_baseline": "2026-05-29T23:30:00Z",
+  "version": 6,
+  "timestamp": "2026-05-29T24:30:00Z",
+  "enforcement_depth": "FULL — all 8 phases + Wave 11 (billing audit + P1 re-triage) + Wave 12 (m12 elections: 5 REAL P1s fixed, 3 FPs reclassified) + Wave 13 (m11 documents/credentials: 5 REAL P1s fixed)",
+  "previous_baseline": "2026-05-29T24:00:00Z",
   "module_identity": {
     "m01-auth-onboarding": { "source_path": "services/api-ts/src/handlers/person/", "spec_hash": "m01deep01" },
     "m02-member-profile": { "source_path": "services/api-ts/src/handlers/person/", "spec_hash": "m02deep02" },
@@ -35,7 +35,7 @@
     "m08-events": { "P0": 0, "P1": 2, "P2": 5, "P3": 1, "score": 6.5 },
     "m09-training": { "P0": 0, "P1": 1, "P2": 4, "P3": 2, "score": 6.5, "p1_corrected": "3→1 (Wave 11: 2 resolved in prior waves, only cert-wiring REAL)" },
     "m10-credit-tracking": { "P0": 0, "P1": 3, "P2": 3, "P3": 2, "score": 7.0 },
-    "m11-documents-credentials": { "P0": 0, "P1": 5, "P2": 5, "P3": 2, "score": 6.0, "p1_corrected": "4→5 (Wave 11: all 5 confirmed REAL)" },
+    "m11-documents-credentials": { "P0": 0, "P1": 0, "P2": 5, "P3": 2, "score": 9.0, "p1_corrected": "5→0 (Wave 13: all 5 REAL P1s fixed)" },
     "m12-elections-governance": { "P0": 0, "P1": 0, "P2": 4, "P3": 2, "score": 9.0, "p1_corrected": "8→0 (Wave 12: 5 REAL fixed [enum reconcile, updateCandidateStatus migration, passageThreshold, domain events, election.published+M04 consumer], 3 FP reclassified [castVote/createNominee/WF-076-077 are unreachable dead duplicates; live castBallot/createCandidate are TypeSpec-registered])" },
     "m13-professional-feed": { "P0": 0, "P1": 1, "P2": 0, "P3": 1, "score": 0.0 },
     "m14-national-dashboard": { "P0": 0, "P1": 5, "P2": 2, "P3": 1, "score": 5.5, "p1_corrected": "3→5 (Wave 11: 3 missing endpoints + drill-down + DashboardExported event)" },
@@ -144,7 +144,12 @@
     "EM-M12-8e9f0a1b": { "resolved_in": "wave12", "reason": "updateNomineeStatus migrated to TypeSpec as updateCandidateStatus (POST /association/member/candidates/{candidateId}/status); hand-wire removed from app.ts." },
     "EM-M12-a1b2c3d4": { "resolved_in": "wave12", "reason": "WF-078 passageThreshold now evaluated in certifyElection — bylaw winners must clear threshold % of voters; winners determined by plurality per position and marked elected." },
     "EM-M12-a0b1c2d3": { "resolved_in": "wave12", "reason": "Live association:member election handlers now emit domain events: election.created, election.status.changed (open-nominations/open-voting), election.deleted, nomination.submitted." },
-    "EM-M12-e4f5a6b7": { "resolved_in": "wave12", "reason": "election.published event added to registry with winners payload; emitted from certifyElection; new consumer performs M04 officer transition (ends outgoing terms + checklist, creates winner terms, emits officer.transitioned/assigned)." }
+    "EM-M12-e4f5a6b7": { "resolved_in": "wave12", "reason": "election.published event added to registry with winners payload; emitted from certifyElection; new consumer performs M04 officer transition (ends outgoing terms + checklist, creates winner terms, emits officer.transitioned/assigned)." },
+    "EM-M11-7a3e1c02": { "resolved_in": "wave13", "reason": "createDocument no longer hardcodes status:published — added status?: 'draft'|'published' to DocumentCreateRequest (TypeSpec), defaults to 'draft' when omitted, honors explicit 'published'." },
+    "EM-M11-g4b67c23": { "resolved_in": "wave13", "reason": "createDocument now role-guards org/chapter-owned documents via requireOfficerTerm; self-owned person documents (member:owner) still permitted per API contract." },
+    "EM-M11-d1e34f90": { "resolved_in": "wave13", "reason": "M11 handlers now emit domain events: document.created (createDocument + uploadNewDocumentVersion), credential.generated (generateCertificatePdf), verification.requested (verifyCertificatePublic). Events added to domain-events.registry.ts." },
+    "EM-M11-e2f45a01": { "resolved_in": "wave13", "reason": "Event consumers added in domain-event-consumers.ts: person.updated (ID card re-download notification), membership.status.changed, training.completed (certificate-available notification)." },
+    "EM-M11-83a8b9c0": { "resolved_in": "wave13", "reason": "generateCertificatePdf now returns real PDF bytes (application/pdf, %PDF header) via renderCertificatePdf (pdf-lib, US Letter landscape) instead of HTML; WF-074 satisfied." }
   },
   "wave11_p1_triage": {
     "method": "5 parallel verification agents read module .md findings + verified against live code (read-only)",
