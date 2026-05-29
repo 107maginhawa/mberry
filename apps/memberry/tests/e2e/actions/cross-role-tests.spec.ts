@@ -20,7 +20,9 @@ test.describe('Cross-Role Access Control', () => {
   test('fresh signup user: officer route redirects away', async ({ page }) => {
     await signUp(page)
     await page.goto(`/org/${ORG_ID}/officer/dashboard`)
-    await page.waitForTimeout(3000)
+    // Wait for the guard (requireOrgOfficer) to evaluate and redirect.
+    // For non-officers the guard throws redirect({ to: '/dashboard' }).
+    await page.waitForURL(url => !url.pathname.includes('/officer/'), { timeout: 15000 })
 
     // Should NOT be on officer dashboard
     expect(page.url()).not.toContain('/officer/dashboard')

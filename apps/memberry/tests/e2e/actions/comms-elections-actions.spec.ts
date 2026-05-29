@@ -15,7 +15,9 @@ test.describe('Communications Actions', () => {
   test('announcement list shows real announcements', async ({ page }) => {
     await page.goto(`/org/${ORG_ID}/officer/communications`)
 
-    await expect(page.locator('main').getByText(/Communications/i)).toBeVisible({ timeout: 10000 })
+    await expect(
+      page.locator('main').getByRole('heading', { name: /Communications/i, level: 1 })
+    ).toBeVisible({ timeout: 10000 })
     // At least one announcement row should be visible
     await expect(page.locator('.divide-y a').first()).toBeVisible({ timeout: 5000 })
   })
