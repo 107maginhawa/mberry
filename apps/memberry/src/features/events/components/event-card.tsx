@@ -114,7 +114,7 @@ export function EventCard({ event, orgId, onEdit, onCancel, onDuplicate, linkBas
               variant="ghost"
               size="icon"
               onClick={() => setMenuOpen((v) => !v)}
-              aria-label="Actions"
+              aria-label="Event actions"
             >
               <MoreHorizontal className="w-4 h-4 text-[var(--color-muted)]" />
             </Button>

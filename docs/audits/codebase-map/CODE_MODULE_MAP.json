@@ -10,7 +10,7 @@
         "apps/admin/src/router.ts"
       ],
       "public_exports": [],
-      "file_count": 40,
+      "file_count": 44,
       "has_spec": false,
       "spec_path": null,
       "confidence": "HIGH"
@@ -24,7 +24,7 @@
         "apps/memberry/src/router.ts"
       ],
       "public_exports": [],
-      "file_count": 362,
+      "file_count": 445,
       "has_spec": true,
       "spec_path": "docs/product/modules/m02-member-profile/MODULE_SPEC.md",
       "confidence": "HIGH"
@@ -48,7 +48,7 @@
         "packages/sdk-ts/src/flows/index.ts"
       ],
       "public_exports": [],
-      "file_count": 14,
+      "file_count": 17,
       "has_spec": false,
       "spec_path": null,
       "confidence": "MEDIUM"
@@ -75,7 +75,7 @@
         "services/api-ts/src/index.ts"
       ],
       "public_exports": [],
-      "file_count": 89,
+      "file_count": 47,
       "has_spec": false,
       "spec_path": null,
       "confidence": "HIGH"
@@ -86,7 +86,7 @@
       "framework": "hono",
       "entry_points": [],
       "public_exports": [],
-      "file_count": 11,
+      "file_count": 18,
       "has_spec": true,
       "spec_path": "docs/product/modules/m16-advertising/MODULE_SPEC.md",
       "confidence": "HIGH"
@@ -99,7 +99,7 @@
         "services/api-ts/src/handlers/association:member/jobs/index.ts"
       ],
       "public_exports": [],
-      "file_count": 246,
+      "file_count": 341,
       "has_spec": true,
       "spec_path": "docs/product/modules/m02-member-profile/MODULE_SPEC.md",
       "confidence": "HIGH"
@@ -110,7 +110,7 @@
       "framework": "hono",
       "entry_points": [],
       "public_exports": [],
-      "file_count": 80,
+      "file_count": 105,
       "has_spec": false,
       "spec_path": null,
       "confidence": "HIGH"
@@ -123,7 +123,7 @@
         "services/api-ts/src/handlers/audit/jobs/index.ts"
       ],
       "public_exports": [],
-      "file_count": 4,
+      "file_count": 8,
       "has_spec": false,
       "spec_path": null,
       "confidence": "HIGH"
@@ -134,7 +134,7 @@
       "framework": "hono",
       "entry_points": [],
       "public_exports": [],
-      "file_count": 18,
+      "file_count": 41,
       "has_spec": true,
       "spec_path": "docs/product/modules/m21-billing/MODULE_SPEC.md",
       "confidence": "HIGH"
@@ -147,7 +147,7 @@
         "services/api-ts/src/handlers/booking/jobs/index.ts"
       ],
       "public_exports": [],
-      "file_count": 32,
+      "file_count": 61,
       "has_spec": true,
       "spec_path": "docs/product/modules/m20-booking/MODULE_SPEC.md",
       "confidence": "HIGH"
@@ -158,7 +158,7 @@
       "framework": "hono",
       "entry_points": [],
       "public_exports": [],
-      "file_count": 11,
+      "file_count": 25,
       "has_spec": false,
       "spec_path": null,
       "confidence": "HIGH"
@@ -169,7 +169,7 @@
       "framework": "hono",
       "entry_points": [],
       "public_exports": [],
-      "file_count": 16,
+      "file_count": 22,
       "has_spec": false,
       "spec_path": null,
       "confidence": "HIGH"
@@ -180,7 +180,7 @@
       "framework": "hono",
       "entry_points": [],
       "public_exports": [],
-      "file_count": 53,
+      "file_count": 96,
       "has_spec": true,
       "spec_path": "docs/product/modules/m07-communications/MODULE_SPEC.md",
       "confidence": "HIGH"
@@ -191,7 +191,7 @@
       "framework": "hono",
       "entry_points": [],
       "public_exports": [],
-      "file_count": 17,
+      "file_count": 39,
       "has_spec": true,
       "spec_path": "docs/product/modules/m11-documents-credentials/MODULE_SPEC.md",
       "confidence": "HIGH"
@@ -204,7 +204,7 @@
         "services/api-ts/src/handlers/dues/jobs/index.ts"
       ],
       "public_exports": [],
-      "file_count": 17,
+      "file_count": 33,
       "has_spec": true,
       "spec_path": "docs/product/modules/m06-dues-payments/MODULE_SPEC.md",
       "confidence": "HIGH"
@@ -215,7 +215,7 @@
       "framework": "hono",
       "entry_points": [],
       "public_exports": [],
-      "file_count": 11,
+      "file_count": 31,
       "has_spec": true,
       "spec_path": "docs/product/modules/m12-elections-governance/MODULE_SPEC.md",
       "confidence": "HIGH"
@@ -228,7 +228,7 @@
         "services/api-ts/src/handlers/email/jobs/index.ts"
       ],
       "public_exports": [],
-      "file_count": 23,
+      "file_count": 41,
       "has_spec": true,
       "spec_path": "docs/product/modules/m22-email/MODULE_SPEC.md",
       "confidence": "HIGH"
@@ -239,7 +239,7 @@
       "framework": "hono",
       "entry_points": [],
       "public_exports": [],
-      "file_count": 18,
+      "file_count": 43,
       "has_spec": true,
       "spec_path": "docs/product/modules/m08-events/MODULE_SPEC.md",
       "confidence": "HIGH"
@@ -250,7 +250,7 @@
       "framework": "hono",
       "entry_points": [],
       "public_exports": [],
-      "file_count": 7,
+      "file_count": 12,
       "has_spec": false,
       "spec_path": null,
       "confidence": "HIGH"
@@ -261,7 +261,7 @@
       "framework": "hono",
       "entry_points": [],
       "public_exports": [],
-      "file_count": 9,
+      "file_count": 16,
       "has_spec": false,
       "spec_path": null,
       "confidence": "HIGH"
@@ -272,7 +272,7 @@
       "framework": "hono",
       "entry_points": [],
       "public_exports": [],
-      "file_count": 13,
+      "file_count": 16,
       "has_spec": true,
       "spec_path": "docs/product/modules/m17-marketplace/MODULE_SPEC.md",
       "confidence": "HIGH"
@@ -285,7 +285,7 @@
         "services/api-ts/src/handlers/membership/jobs/index.ts"
       ],
       "public_exports": [],
-      "file_count": 18,
+      "file_count": 43,
       "has_spec": true,
       "spec_path": "docs/product/modules/m02-member-profile/MODULE_SPEC.md",
       "confidence": "HIGH"
@@ -298,7 +298,7 @@
         "services/api-ts/src/handlers/notifs/jobs/index.ts"
       ],
       "public_exports": [],
-      "file_count": 9,
+      "file_count": 17,
       "has_spec": false,
       "spec_path": null,
       "confidence": "HIGH"
@@ -309,7 +309,7 @@
       "framework": "hono",
       "entry_points": [],
       "public_exports": [],
-      "file_count": 4,
+      "file_count": 5,
       "has_spec": true,
       "spec_path": "docs/product/modules/m01-auth-onboarding/MODULE_SPEC.md",
       "confidence": "HIGH"
@@ -322,7 +322,7 @@
         "services/api-ts/src/handlers/person/jobs/index.ts"
       ],
       "public_exports": [],
-      "file_count": 35,
+      "file_count": 68,
       "has_spec": false,
       "spec_path": null,
       "confidence": "HIGH"
@@ -335,7 +335,7 @@
         "services/api-ts/src/handlers/platformadmin/jobs/index.ts"
       ],
       "public_exports": [],
-      "file_count": 56,
+      "file_count": 87,
       "has_spec": true,
       "spec_path": "docs/product/modules/m03-platform-admin/MODULE_SPEC.md",
       "confidence": "HIGH"
@@ -346,7 +346,7 @@
       "framework": "hono",
       "entry_points": [],
       "public_exports": [],
-      "file_count": 6,
+      "file_count": 11,
       "has_spec": false,
       "spec_path": null,
       "confidence": "HIGH"
@@ -357,7 +357,7 @@
       "framework": "hono",
       "entry_points": [],
       "public_exports": [],
-      "file_count": 8,
+      "file_count": 12,
       "has_spec": false,
       "spec_path": null,
       "confidence": "HIGH"
@@ -370,7 +370,7 @@
         "services/api-ts/src/handlers/surveys/jobs/index.ts"
       ],
       "public_exports": [],
-      "file_count": 20,
+      "file_count": 35,
       "has_spec": true,
       "spec_path": "docs/product/modules/m18-surveys-polls/MODULE_SPEC.md",
       "confidence": "HIGH"
@@ -381,7 +381,7 @@
       "framework": "generic",
       "entry_points": [],
       "public_exports": [],
-      "file_count": 3,
+      "file_count": 1,
       "has_spec": false,
       "spec_path": null,
       "confidence": "MEDIUM"
