@@ -47,7 +47,7 @@ export interface CreateAuditLogRequest {
   eventType: 'authentication' | 'data-access' | 'data-modification' | 'data-deletion' | 'system-config' | 'security' | 'compliance';
   eventSubType?: string;
   category: 'hipaa' | 'security' | 'privacy' | 'administrative' | 'clinical' | 'financial' | 'association';
-  action: 'create' | 'read' | 'update' | 'delete' | 'login' | 'logout' | 'approve' | 'deny' | 'renew' | 'terminate' | 'reinstate' | 'mark-paid' | 'complete' | 'transfer' | 'delete-request' | 'delete-cancel' | 'anonymize' | 'export' | 'resign' | 'deceased';
+  action: 'create' | 'read' | 'update' | 'delete' | 'login' | 'logout' | 'approve' | 'deny' | 'renew' | 'terminate' | 'reinstate' | 'mark-paid' | 'complete' | 'transfer' | 'delete-request' | 'delete-cancel' | 'anonymize' | 'export' | 'resign' | 'deceased' | 'capture' | 'finalize';
   outcome: 'success' | 'failure' | 'partial' | 'denied';
   organizationId?: string;
   user?: string;

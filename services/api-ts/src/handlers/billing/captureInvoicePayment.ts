@@ -11,6 +11,7 @@ import type { Session } from '@/types/auth';
 import { InvoiceRepository, MerchantAccountRepository } from './repos/billing.repo';
 import type { InvoiceMetadata, MerchantMetadata } from './repos/billing.schema';
 import { PersonRepository } from '../person/repos/person.repo';
+import { auditAction } from '@/utils/audit';
 
 /**
  * captureInvoicePayment
@@ -171,6 +172,23 @@ export async function captureInvoicePayment(
       },
       'Payment captured successfully for invoice'
     );
+
+    await auditAction(ctx, {
+      action: 'capture',
+      resourceType: 'invoice',
+      resourceId: invoiceId,
+      description: `Payment captured for invoice ${invoice.invoiceNumber} (${invoice.total} ${invoice.currency})`,
+      eventSubType: 'financial.payment-captured',
+      details: {
+        invoiceNumber: invoice.invoiceNumber,
+        total: invoice.total,
+        currency: invoice.currency,
+        chargeId: captureResult.chargeId,
+        transferId: captureResult.transferId,
+        customerId: invoice.customer,
+        merchantId: invoice.merchant,
+      },
+    });
 
     // Fetch the updated invoice to return
     const updatedInvoice = await invoiceRepo.findOneById(invoiceId);

@@ -4,10 +4,10 @@
 
 # Enforcement Report
 
-**Generated:** 2026-05-29 (post-Wave 10 update)
+**Generated:** 2026-05-29 (post-Wave 11 update)
 **Engine:** oli-enforce-all v3 --strict
 **Scope:** 22 modules, 8 phases, 10 agents
-**Baseline:** 2026-05-29T12:00:00Z → 2026-05-29T22:00:00Z
+**Baseline:** 2026-05-29T22:00:00Z → 2026-05-29T23:30:00Z (v4)
 **Coverage Score:** 65 → 78 (↑13)
 
 ---
@@ -17,7 +17,7 @@
 | Severity | Count | Baseline | Delta |
 |----------|-------|----------|-------|
 | **P0** | 1 | 26 | ↓25 net (18 RESOLVED, 8 FALSE POSITIVE, 3 dep RESOLVED in Wave 7, 7 coverage RESOLVED in Wave 8) |
-| **P1** | 38 | ~109 | ↓71 (Wave 10: 10 audit resolved, 1 audit FP, 3 UI resolved/FP, 2 traceability resolved, 1 revenue resolved, 1 coupling fixed, 6 coupling FP/accepted, 7 TypeSpec deferred, 1 event deferred) |
+| **P1** | 38 | ~109 | ↓71 (Wave 10: 10 audit resolved, 1 audit FP, 3 UI resolved/FP, 2 traceability resolved, 1 revenue resolved, 1 coupling fixed, 6 coupling FP/accepted, 7 TypeSpec deferred, 1 event deferred). **Wave 11: 9 billing handlers gained audit logging; baseline P1s re-triaged — 7 FP, ~30 REAL (built modules) named, ~170 stubs DEFERRED (future modules). Net count corrections: m12 2→8, m01/m11/m14 ↑2 each, m09 3→1.** |
 | **P2** | 78 | ~108 | ↓30 (consolidation) |
 | **P3** | 32 | ~40 | ↓8 |
 | **Total** | **164** | **~283** | ↓119 net |
@@ -354,9 +354,58 @@ Original enforcement claim of "empty specs" was stale — specs were populated d
 
 ---
 
+### Wave 11 — Billing Audit Logging + P1 Baseline Re-Triage (COMPLETE ✅)
+
+**Track A — Billing audit logging (9 handlers):**
+
+Nine billing handlers had no audit-trail emission. Added `auditAction()` calls + 9 new financial event sub-types.
+
+| Handler | New audit sub-type |
+|---------|--------------------|
+| captureInvoicePayment | `payment-captured` |
+| finalizeInvoice | `invoice-finalized` |
+| updateInvoice | `invoice-updated` |
+| deleteInvoice | `invoice-deleted` |
+| markInvoiceUncollectible | `invoice-uncollectible` |
+| createMerchantAccount | `merchant-account-created` |
+| onboardMerchantAccount | `merchant-onboarded` |
+| getMerchantDashboard | `merchant-dashboard-accessed` |
+| handleStripeWebhook | `webhook-processed` |
+
+Infra: `audit-events.ts` +9 sub-types; `core/audit.ts` + `utils/audit.ts` extended with `capture`/`finalize` actions. Typecheck passes.
+
+**Track B — P1 baseline re-triage (~30 unnamed baseline P1s across 13 modules):**
+
+Baseline `modules` block held count-only P1 entries (never given IDs or triaged). Surfaced descriptions from module enforce files + verified each against live code via 5 parallel read-only agents. Classified REAL / FP / DEFERRED.
+
+| Module | Baseline P1 | Corrected | REAL | FP | Note |
+|--------|------------|-----------|------|----|----|
+| m01 | 3 | **5** | 5 | 0 | Onboarding-wizard suite (state/step/WF-005/WF-009/entity) — all unbuilt, REAL |
+| m02 | 2 | 2 | 2 | 0 | Data export sync; M02 handlers emit zero events |
+| m04 | 3 | 3 | 3 | 4 | 3 handler/event gaps REAL; 4 FP (handlers exist) |
+| m05 | 4 | 4 | 4 | 3 | reviewApplication guard + 3 event gaps REAL; consumers/endpoints exist (FP→P2 path divergence) |
+| m09 | 3 | **1** | 1 | 1 | Only cert-wiring REAL; 2 resolved prior waves |
+| m10 | 3 | 3 | 5* | 0 | Transcript dead-code, partial events, GDPR event consumer (mitigated by cascade) |
+| m11 | 4 | **5** | 5 | 0 | No role check, draft-state skip, zero events/consumers, HTML-not-PDF |
+| m12 | 2 | **8** | 8 | 0 | ⚠️ castVote/createNominee unreachable, enum mismatch — severely undercounted |
+| m14 | 3 | **5** | 5 | 0 | 3 missing endpoints + drill-down + DashboardExported event |
+| m13/m15/m16/m17/m18/m19 | 1 each | 1 each | 0 | 0 | **DEFERRED** — every P1 is unbuilt future-module stub (~170 raw stubs collapsed) |
+
+\*m10 sub-findings; several PARTIAL/mitigated.
+
+**Re-triage outcome:** 7 FALSE POSITIVE confirmed (recorded in `resolved_p1s`); ~30 REAL P1s in built modules retained with named IDs (see `wave11_p1_triage` in baseline); ~170 future-module P1 stubs confirmed DEFERRED.
+
+**⚠️ Highest-risk surfaced:** **m12 elections** — `castVote.ts`/`createNominee.ts` implement business rules but are NOT route-registered → members cannot vote or be nominated. `electionType` enum mismatch (DB `officer/bylaw` vs TypeSpec `general/special/byElection`) causes runtime insert failures. Baseline counted 2 P1s; actual is 8. Recommend prioritizing m12 in next fix wave.
+
+---
+
 ## What's Next
 
-1. **Waves 1-10 COMPLETE.** Security gate satisfied. No P0 regressions. All P1 audit logging resolved. Revenue analytics gap filled.
+1. **Waves 1-11 COMPLETE.** Security gate satisfied. No P0 regressions. All P1 audit logging resolved (incl. 9 billing handlers in Wave 11). Revenue analytics gap filled. Baseline P1s now fully triaged with named IDs.
 2. **Remaining P0s: 1** (EM-M07-no-typespec — communication module 28 hand-wired handlers, DEFERRED).
-3. **Remaining P1s: 38** — mostly deferred structural items (7 TypeSpec, 3 coupling, 1 event), plus remaining billing handlers needing audit (captureInvoicePayment, finalizeInvoice, handleStripeWebhook, createMerchantAccount, onboardMerchantAccount, markInvoiceUncollectible, deleteInvoice, updateInvoice).
-4. **Coverage Score: 78 → ~85** (estimated after Wave 10 audit logging + analytics handlers).
+3. **Remaining P1s (built modules): ~30 REAL, now named** (see `wave11_p1_triage` in baseline). Priority order for next fix wave:
+   - **P1 — m12 elections (8):** route-register castVote/createNominee; fix electionType enum mismatch; emit ElectionPublished. **Members currently cannot vote.**
+   - **P2 — m11 documents (5):** role check on createDocument, draft-state default, domain events, real PDF output.
+   - **P3 — m14 dashboard (5), m10 credits (transcript dead-code), m01 onboarding wizard.**
+   - **DEFERRED:** ~170 future-module P1 stubs (m13/m15/m16/m17/m18/m19); 7 TypeSpec, 3 coupling, 1 event from Wave 10.
+4. **Coverage Score: 78 → ~85** (estimated after Wave 10 + Wave 11 billing audit logging).

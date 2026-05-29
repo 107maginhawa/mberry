@@ -1,8 +1,8 @@
 {
-  "version": 3,
-  "timestamp": "2026-05-29T22:00:00Z",
-  "enforcement_depth": "FULL — all 8 phases dispatched across 19 modules (10 agents)",
-  "previous_baseline": "2026-05-29T12:00:00Z",
+  "version": 4,
+  "timestamp": "2026-05-29T23:30:00Z",
+  "enforcement_depth": "FULL — all 8 phases + Wave 11 (billing audit logging + P1 baseline re-triage across 13 modules)",
+  "previous_baseline": "2026-05-29T22:00:00Z",
   "module_identity": {
     "m01-auth-onboarding": { "source_path": "services/api-ts/src/handlers/person/", "spec_hash": "m01deep01" },
     "m02-member-profile": { "source_path": "services/api-ts/src/handlers/person/", "spec_hash": "m02deep02" },
@@ -25,7 +25,7 @@
     "m19-committee-management": { "source_path": null, "spec_hash": "m19fut019" }
   },
   "modules": {
-    "m01-auth-onboarding": { "P0": 0, "P1": 3, "P2": 3, "P3": 1, "score": 7.5 },
+    "m01-auth-onboarding": { "P0": 0, "P1": 5, "P2": 3, "P3": 1, "score": 6.0, "p1_corrected": "3→5 (Wave 11: onboarding-wizard suite confirmed REAL)" },
     "m02-member-profile": { "P0": 0, "P1": 2, "P2": 4, "P3": 1, "score": 7.8 },
     "m03-platform-admin": { "P0": 0, "P1": 3, "P2": 4, "P3": 1, "score": 7.5 },
     "m04-org-admin": { "P0": 0, "P1": 3, "P2": 3, "P3": 1, "score": 7.5 },
@@ -33,12 +33,12 @@
     "m06-dues-payments": { "P0": 1, "P1": 4, "P2": 4, "P3": 1, "score": 4.5 },
     "m07-communications": { "P0": 1, "P1": 3, "P2": 6, "P3": 2, "score": 5.5 },
     "m08-events": { "P0": 0, "P1": 2, "P2": 5, "P3": 1, "score": 6.5 },
-    "m09-training": { "P0": 0, "P1": 3, "P2": 4, "P3": 2, "score": 6.5 },
+    "m09-training": { "P0": 0, "P1": 1, "P2": 4, "P3": 2, "score": 6.5, "p1_corrected": "3→1 (Wave 11: 2 resolved in prior waves, only cert-wiring REAL)" },
     "m10-credit-tracking": { "P0": 0, "P1": 3, "P2": 3, "P3": 2, "score": 7.0 },
-    "m11-documents-credentials": { "P0": 0, "P1": 4, "P2": 5, "P3": 2, "score": 6.0 },
-    "m12-elections-governance": { "P0": 0, "P1": 2, "P2": 4, "P3": 2, "score": 6.5 },
+    "m11-documents-credentials": { "P0": 0, "P1": 5, "P2": 5, "P3": 2, "score": 6.0, "p1_corrected": "4→5 (Wave 11: all 5 confirmed REAL)" },
+    "m12-elections-governance": { "P0": 0, "P1": 8, "P2": 4, "P3": 2, "score": 6.0, "p1_corrected": "2→8 (Wave 11: castVote/createNominee unreachable, enum mismatch, zero events — severely undercounted)" },
     "m13-professional-feed": { "P0": 0, "P1": 1, "P2": 0, "P3": 1, "score": 0.0 },
-    "m14-national-dashboard": { "P0": 0, "P1": 3, "P2": 2, "P3": 1, "score": 5.5 },
+    "m14-national-dashboard": { "P0": 0, "P1": 5, "P2": 2, "P3": 1, "score": 5.5, "p1_corrected": "3→5 (Wave 11: 3 missing endpoints + drill-down + DashboardExported event)" },
     "m15-job-board": { "P0": 0, "P1": 1, "P2": 1, "P3": 0, "score": 2.0 },
     "m16-advertising": { "P0": 0, "P1": 1, "P2": 1, "P3": 0, "score": 2.0 },
     "m17-marketplace": { "P0": 0, "P1": 1, "P2": 1, "P3": 0, "score": 2.0 },
@@ -128,5 +128,34 @@
     "EM-M08-publish": { "resolved_in": "false-positive", "reason": "Handler exists at association:operations/publishEvent.ts" },
     "EM-M08-complete": { "resolved_in": "false-positive", "reason": "Handler exists at association:operations/completeEvent.ts" },
     "EM-M09-dead-code": { "resolved_in": "wave2-structural", "reason": "Deleted handlers/training/ — all superseded by association:operations/" }
+  },
+  "resolved_p1s": {
+    "EM-M04-i9j0k1l2": { "resolved_in": "wave11-fp", "reason": "createDisciplinaryAction.ts exists, emits member.suspended/removed" },
+    "EM-M04-m3n4o5p6": { "resolved_in": "wave11-fp", "reason": "transitionOfficerTerm.ts exists with checklist generation" },
+    "EM-M04-q7r8s9t0": { "resolved_in": "wave11-fp", "reason": "getOrgDashboard.ts exists; route registered app.ts:475" },
+    "EM-M04-y5z6a7b8": { "resolved_in": "wave11-fp", "reason": "getOrganizationProfile behind authMiddleware (routes.ts:1467); session auth present" },
+    "EM-M05-consumers": { "resolved_in": "wave11-fp", "reason": "Listeners now registered in domain-event-consumers.ts (dues.payment.recorded:45, member.suspended:672, member.removed:697); residual notification-only gap is P2 not P1" },
+    "EM-M05-directory-endpoint": { "resolved_in": "wave11-fp", "reason": "searchDirectory.ts exists; routes.ts:908 GET /association/member/directory/search — path divergence is P2 EM-M05-i9j0k1l2" },
+    "EM-M05-application-endpoint": { "resolved_in": "wave11-fp", "reason": "createMembershipApplication.ts exists; routes.ts:570 POST /association/member/applications — path divergence is P2" }
+  },
+  "wave11_p1_triage": {
+    "method": "5 parallel verification agents read module .md findings + verified against live code (read-only)",
+    "summary": { "REAL": "~30 (built modules)", "FP": 7, "DEFERRED": "~6 future modules (m13/m15/m16/m17/m18/m19) — all P1s are unbuilt-feature stubs" },
+    "real_findings": {
+      "m01": ["EM-M01-a1b2c3d4 GET /onboarding/state missing", "EM-M01-e5f6a7b8 PUT /onboarding/step missing", "EM-M01-c9d0e1f2 WF-005 wizard unimplemented", "EM-M01-34a5b6c7 WF-009 bulk import lacks preview/dedup/token", "EM-M01-d8e9f0a1 OnboardingState entity absent"],
+      "m02": ["EM-M02-e5f6g7h8 data export sync GET, no DataExport entity/async/ZIP", "EM-M02-m3n4o5p6 M02 handlers emit zero domain events"],
+      "m04": ["EM-M04-01a8b7c6 spec paths diverge from OpenAPI", "EM-M04-02d5e4f3 10 endpoints undocumented in spec §10", "EM-M04-u1v2w3x4 OrgSettingsUpdated event not emitted (5/6 wired)"],
+      "m05": ["EM-M05-P1-AUTH reviewApplication.ts lacks requirePosition guard", "EM-M05-evt-resigned resignMembership no event", "EM-M05-evt-deceased deceaseMembership no event", "EM-M05-evt-imported import handlers no MemberImported event"],
+      "m09": ["EM-M09-n4o5p6q7 certificate generation not connected to training completion"],
+      "m10": ["EM-M10-15ad42e8 createMyCreditEntry emits no event (partial)", "EM-M10-d9f14b3e supporting-doc validation missing (partial)", "EM-M10-c9d0e1f2/c9f1e2d3 transcript export handlers not route-registered (dead code)", "EM-M10-o1p2q3r4 no AccountDeletionProcessed event consumer (mitigated by accountDeletionCascade.ts:173)"],
+      "m11": ["EM-M11-7a3e1c02 createDocument hardcodes status:published, skips draft", "EM-M11-d1e34f90 zero domain events emitted", "EM-M11-e2f45a01 zero event consumers", "EM-M11-g4b67c23 createDocument missing role check", "EM-M11-83a8b9c0 generateCertificatePdf returns HTML not PDF"],
+      "m12": ["EM-M12-3f8a1b2c castVote handler unreachable (no route)", "EM-M12-7d4e5f6a createNominee handler unreachable", "EM-M12-8e9f0a1b updateNomineeStatus hand-wired, absent from OpenAPI", "EM-M12-6e7f8a9b WF-076/077 voting+nomination flows unreachable", "EM-M12-a1b2c3d4 WF-078 passageThreshold never evaluated", "EM-M12-d2e3f4a5 electionType enum mismatch DB(officer/bylaw) vs TypeSpec(general/special/byElection)", "EM-M12-a0b1c2d3 live handlers emit zero domain events", "EM-M12-e4f5a6b7 ElectionPublished event never emitted"],
+      "m14": ["EM-M14-71a3e2f0 GET /admin/national/chapters missing", "EM-M14-82b4f3a1 GET /admin/national/chapters/{orgId} missing", "EM-M14-93c5a4b2 GET /admin/national/platform missing", "EM-M14-c6f8d7e5 WF-085 chapter drill-down unimplemented", "EM-M14-b1e3c2d0 DashboardExported event not emitted"]
+    },
+    "deferred_future_modules": {
+      "note": "m13/m15/m16/m17/m18/m19 — every P1 is an unbuilt-feature stub ('Not implemented (future module)'). Collapsed to representative P1:1 in modules block. ~170 raw P1 stubs total (m15:33, m16:43, m17:33, m18:32). All DEFERRED — not defects in current scope.",
+      "modules": ["m13-professional-feed", "m15-job-board", "m16-advertising", "m17-marketplace", "m18-surveys-polls", "m19-committee-management"]
+    },
+    "highest_risk": "EM-M12 cluster — elections core (castVote/createNominee) implemented but NOT route-registered; members cannot vote or be nominated. electionType enum mismatch causes runtime insert failures. 8 REAL P1s, baseline had 2."
   }
 }

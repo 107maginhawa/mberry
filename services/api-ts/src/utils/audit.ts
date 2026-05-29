@@ -9,7 +9,7 @@ import type { BaseContext } from '@/types/app';
 import type { AuditEventSubType } from './audit-events';
 
 interface AuditActionOpts {
-  action: 'create' | 'update' | 'delete' | 'approve' | 'deny' | 'renew' | 'terminate' | 'reinstate' | 'mark-paid' | 'complete' | 'transfer' | 'resign' | 'deceased' | 'read' | 'export';
+  action: 'create' | 'update' | 'delete' | 'approve' | 'deny' | 'renew' | 'terminate' | 'reinstate' | 'mark-paid' | 'complete' | 'transfer' | 'resign' | 'deceased' | 'read' | 'export' | 'capture' | 'finalize';
   resourceType: string;
   resourceId: string;
   description: string;

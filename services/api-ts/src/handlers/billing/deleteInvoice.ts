@@ -14,6 +14,7 @@ import type { ValidatedContext } from '@/types/app';
 import type { DeleteInvoiceParams } from '@/generated/openapi/validators';
 import type { Session } from '@/types/auth';
 import { InvoiceRepository } from './repos/billing.repo';
+import { auditAction } from '@/utils/audit';
 
 /**
  * deleteInvoice
@@ -78,6 +79,21 @@ export async function deleteInvoice(
     merchantId: invoice.merchant,
     deletedByUser: user.id
   }, 'Invoice deleted successfully');
+
+  await auditAction(ctx, {
+    action: 'delete',
+    resourceType: 'invoice',
+    resourceId: invoiceId,
+    description: `Draft invoice ${invoice.invoiceNumber} deleted`,
+    eventSubType: 'financial.invoice-deleted',
+    details: {
+      invoiceNumber: invoice.invoiceNumber,
+      total: invoice.total,
+      currency: invoice.currency,
+      customerId: invoice.customer,
+      merchantId: invoice.merchant,
+    },
+  });
 
   // Return 204 No Content as specified in TypeSpec
   return ctx.body(null, 204);

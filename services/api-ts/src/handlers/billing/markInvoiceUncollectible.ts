@@ -15,6 +15,7 @@ import type { MarkInvoiceUncollectibleParams } from '@/generated/openapi/validat
 import type { Session } from '@/types/auth';
 import { InvoiceRepository } from './repos/billing.repo';
 import { PersonRepository } from '../person/repos/person.repo';
+import { auditAction } from '@/utils/audit';
 
 /**
  * markInvoiceUncollectible
@@ -99,6 +100,21 @@ export async function markInvoiceUncollectible(
     total: updatedInvoice.total,
     markedUncollectibleBy: user.id
   }, 'Invoice marked as uncollectible successfully');
+
+  await auditAction(ctx, {
+    action: 'update',
+    resourceType: 'invoice',
+    resourceId: invoiceId,
+    description: `Invoice ${updatedInvoice.invoiceNumber} marked uncollectible (${updatedInvoice.total} ${updatedInvoice.currency})`,
+    eventSubType: 'financial.invoice-uncollectible',
+    details: {
+      invoiceNumber: updatedInvoice.invoiceNumber,
+      total: updatedInvoice.total,
+      currency: updatedInvoice.currency,
+      customerId: updatedInvoice.customer,
+      merchantId: updatedInvoice.merchant,
+    },
+  });
 
   // Format response to match TypeSpec Invoice model
   const response = {

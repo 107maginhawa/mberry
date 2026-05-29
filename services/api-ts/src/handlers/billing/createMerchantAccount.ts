@@ -18,6 +18,7 @@ import type { Session } from '@/types/auth';
 import { MerchantAccountRepository } from './repos/billing.repo';
 import type { MerchantMetadata } from './repos/billing.schema';
 import { PersonRepository } from '../person/repos/person.repo';
+import { auditAction } from '@/utils/audit';
 
 /**
  * createMerchantAccount
@@ -134,6 +135,19 @@ export async function createMerchantAccount(
       stripeAccountId: connectAccount.accountId,
       onboardingUrl: connectAccount.onboardingUrl
     }, 'Merchant account created successfully');
+
+    await auditAction(ctx, {
+      action: 'create',
+      resourceType: 'merchant-account',
+      resourceId: merchantAccount.id,
+      description: `Merchant account created for person ${personId}`,
+      eventSubType: 'financial.merchant-account-created',
+      details: {
+        personId,
+        stripeAccountId: connectAccount.accountId,
+        organizationId,
+      },
+    });
 
     // Return response matching TypeSpec schema
     return ctx.json({
