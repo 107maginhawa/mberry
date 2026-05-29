@@ -18,6 +18,12 @@ import {
   Shield,
   ArrowLeft,
   GraduationCap,
+  BookMarked,
+  IdCard,
+  CreditCard,
+  Wallet,
+  Clock,
+  Download,
 } from "lucide-react"
 
 interface NavItem {
@@ -37,16 +43,37 @@ const PERSONAL_SECTIONS: NavSection[] = [
       { to: "/dashboard", label: "Home", icon: Home },
       { to: "/my/events", label: "My Events", icon: Calendar },
       { to: "/my/calendar", label: "My Calendar", icon: CalendarDays },
+      { to: "/my/bookings", label: "My Bookings", icon: BookMarked },
       { to: "/my/credits", label: "Credits", icon: Award },
-      { to: "/my/profile", label: "Profile", icon: User },
       { to: "/my/certificates", label: "Certificates", icon: ScrollText },
-      { to: "/my/settings", label: "Settings", icon: Settings },
+      { to: "/my/id-card", label: "Digital ID", icon: IdCard },
+    ],
+  },
+  {
+    label: "FINANCES",
+    items: [
+      { to: "/my/payments", label: "Payments", icon: CreditCard },
+      { to: "/my/billing", label: "Billing", icon: Wallet },
+    ],
+  },
+  {
+    label: "SERVICES",
+    items: [
+      { to: "/my/schedule", label: "My Schedule", icon: Clock },
     ],
   },
   {
     label: "Feedback",
     items: [
       { to: "/my/surveys", label: "My Surveys", icon: ClipboardList },
+    ],
+  },
+  {
+    label: "ACCOUNT",
+    items: [
+      { to: "/my/profile", label: "Profile", icon: User },
+      { to: "/my/data-export", label: "Data Export", icon: Download },
+      { to: "/my/settings", label: "Settings", icon: Settings },
     ],
   },
 ]

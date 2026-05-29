@@ -1,7 +1,6 @@
 import { createFileRoute, Link } from '@tanstack/react-router'
 import { useQuery } from '@tanstack/react-query'
-import { api } from '@/lib/api'
-import { searchEventsOptions } from '@monobase/sdk-ts/generated/react-query'
+import { searchEventsOptions, listAnnouncementsOptions } from '@monobase/sdk-ts/generated/react-query'
 import { Megaphone, Calendar, MapPin, ArrowRight } from 'lucide-react'
 import { useOrg } from '@/hooks/useOrg'
 import { PageHeader } from '@/components/patterns/page-header'
@@ -27,12 +26,9 @@ function formatDate(iso: string) {
 function OrgHome() {
   const { orgId, orgSlug } = useOrg()
 
-  const { data: announcements, isLoading: loadingAnnouncements, error: announcementsError } = useQuery({
-    queryKey: ['org-announcements', orgId],
-    queryFn: async () => {
-      return api.get<{ data: any[] }>(`/api/communications/announcements/${orgId}?status=sent&limit=5`)
-    },
-  })
+  const { data: announcements, isLoading: loadingAnnouncements, error: announcementsError } = useQuery(
+    listAnnouncementsOptions({ path: { organizationId: orgId }, query: { status: 'sent', limit: 5 } })
+  )
 
   const { data: events, isLoading: loadingEvents, error: eventsError } = useQuery(
     searchEventsOptions({ query: { organizationId: orgId, limit: 5 } })
