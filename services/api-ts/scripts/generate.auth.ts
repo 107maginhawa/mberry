@@ -4,4 +4,4 @@ import { createAuth } from '@/core/auth';
 
 const config = parseConfig();
 const database = createDatabase(config.database);
-export const auth = createAuth(database, config, undefined, {} as any);
+export const auth = createAuth(database, config, undefined, {} as any, {} as any);

@@ -5,6 +5,7 @@ import type { CertifyElectionParams } from '@/generated/openapi/validators';
 import { ElectionsRepository } from '../elections/repos/elections.repo';
 import { OfficerTermRepository } from './repos/governance.repo';
 import { auditAction } from '@/utils/audit';
+import { domainEvents } from '@/core/domain-events';
 
 /**
  * certifyElection
@@ -56,6 +57,33 @@ export async function certifyElection(
   // Tally votes
   const tallies = await repo.getVoteTallies(params.electionId);
   const voterCount = await repo.getVoterCount(params.electionId);
+  const nominees = await repo.listNominees(params.electionId);
+  const nomineeToPerson = new Map(nominees.map((n) => [n.id, n.personId]));
+
+  // ─── Winner determination (WF-078) ───────────────────
+  // Highest votes per position wins. For bylaw elections, the winning
+  // nominee must also clear passageThreshold (% of total voters).
+  const maxByPosition = new Map<string, { nomineeId: string; count: number }>();
+  for (const t of tallies) {
+    const current = maxByPosition.get(t.positionId);
+    if (!current || t.count > current.count) {
+      maxByPosition.set(t.positionId, { nomineeId: t.nomineeId, count: t.count });
+    }
+  }
+
+  const isBylaw = existing.type === 'bylaw';
+  const threshold = existing.passageThreshold ?? null;
+
+  const winners: { positionId: string; winnerId: string }[] = [];
+  for (const [positionId, top] of maxByPosition) {
+    if (isBylaw && threshold !== null) {
+      const pct = voterCount > 0 ? (top.count / voterCount) * 100 : 0;
+      if (pct < threshold) continue; // failed to pass threshold
+    }
+    await repo.updateNomineeStatus(top.nomineeId, 'elected');
+    const winnerId = nomineeToPerson.get(top.nomineeId) ?? top.nomineeId;
+    winners.push({ positionId, winnerId });
+  }
 
   const updated = await repo.update(params.electionId, {
     status: 'published',
@@ -67,9 +95,16 @@ export async function certifyElection(
     resourceType: 'election',
     resourceId: updated.id,
     description: `Election certified and published: ${updated.title}`,
-    details: { voterCount, tallies },
+    details: { voterCount, tallies, winners },
     eventSubType: 'governance.election-closed',
   });
 
-  return ctx.json({ data: { election: updated, tallies, voterCount } }, 200);
+  domainEvents.emit('election.published', {
+    electionId: updated.id,
+    organizationId: existing.organizationId,
+    publishedBy: user.id,
+    winners,
+  }).catch(() => {});
+
+  return ctx.json({ data: { election: updated, tallies, voterCount, winners } }, 200);
 }

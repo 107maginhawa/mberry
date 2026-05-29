@@ -10168,6 +10168,16 @@ export type CandidateRequestUpdate = {
 export type CandidateStatus = 'nominated' | 'accepted' | 'declined' | 'withdrawn' | 'elected' | 'notElected';
 
 /**
+ * Request to update a candidate/nominee's acceptance status
+ */
+export type CandidateStatusUpdateRequest = {
+    /**
+     * New status — a nominee may accept or decline their nomination
+     */
+    status: 'accepted' | 'declined';
+};
+
+/**
  * A candidate nominated for a position in an election
  */
 export type CandidateUpdate = {
@@ -16804,39 +16814,43 @@ export type Election = {
     /**
      * Type of election
      */
-    electionType: 'general' | 'special' | 'byElection';
-    /**
-     * IDs of positions open in this election
-     */
-    positions: Array<string>;
-    /**
-     * Start of the nomination period
-     */
-    nominationStart: Date;
-    /**
-     * End of the nomination period
-     */
-    nominationEnd: Date;
-    /**
-     * Start of the voting period
-     */
-    votingStart: Date;
-    /**
-     * End of the voting period
-     */
-    votingEnd: Date;
+    type: 'officer' | 'bylaw';
     /**
      * Current status of the election
      */
     status: 'draft' | 'nominationsOpen' | 'votingOpen' | 'awaitingConfirmation' | 'published' | 'cancelled';
     /**
-     * Minimum number of votes required for the election results to be valid
+     * How votes are collected
      */
-    quorumRequired?: number;
+    votingMode: 'online' | 'inPerson' | 'hybrid';
     /**
-     * Whether quorum was met when voting closed
+     * Start of the nomination period
      */
-    quorumMet?: boolean;
+    nominationsOpenAt?: Date | null;
+    /**
+     * End of the nomination period
+     */
+    nominationsCloseAt?: Date | null;
+    /**
+     * Start of the voting period
+     */
+    votingOpenAt?: Date | null;
+    /**
+     * End of the voting period
+     */
+    votingCloseAt?: Date | null;
+    /**
+     * Percentage of votes required for a bylaw election to pass
+     */
+    passageThreshold?: number | null;
+    /**
+     * Position slots open in this election
+     */
+    positions?: Array<ElectionPositionSlot>;
+    /**
+     * Timestamp when the election was certified and published
+     */
+    publishedAt?: Date | null;
 };
 
 /**
@@ -16845,13 +16859,20 @@ export type Election = {
 export type ElectionCreateRequest = {
     organizationId: string;
     title: string;
-    electionType: ElectionType;
-    positions: Array<string>;
-    nominationStart: Date;
-    nominationEnd: Date;
-    votingStart: Date;
-    votingEnd: Date;
-    quorumRequired?: number;
+    type: ElectionType;
+    votingMode?: VotingMode;
+    /**
+     * Titles of the position slots open in this election
+     */
+    positions?: Array<string>;
+    nominationsOpenAt?: Date | null;
+    nominationsCloseAt?: Date | null;
+    votingOpenAt?: Date | null;
+    votingCloseAt?: Date | null;
+    /**
+     * Percentage of votes required for a bylaw election to pass
+     */
+    passageThreshold?: number | null;
 };
 
 /**
@@ -16860,13 +16881,20 @@ export type ElectionCreateRequest = {
 export type ElectionCreateRequestUpdate = {
     organizationId?: string;
     title?: string;
-    electionType?: ElectionType;
+    type?: ElectionType;
+    votingMode?: VotingMode;
+    /**
+     * Titles of the position slots open in this election
+     */
     positions?: Array<string>;
-    nominationStart?: Date;
-    nominationEnd?: Date;
-    votingStart?: Date;
-    votingEnd?: Date;
-    quorumRequired?: number;
+    nominationsOpenAt?: Date | null;
+    nominationsCloseAt?: Date | null;
+    votingOpenAt?: Date | null;
+    votingCloseAt?: Date | null;
+    /**
+     * Percentage of votes required for a bylaw election to pass
+     */
+    passageThreshold?: number | null;
 };
 
 /**
@@ -16917,14 +16945,32 @@ export type ElectionListResponse = {
 };
 
 /**
+ * A position slot open in an election
+ */
+export type ElectionPositionSlot = {
+    /**
+     * Generated slot identifier
+     */
+    id: string;
+    /**
+     * Display title of the position
+     */
+    title: string;
+    /**
+     * Ordering index of the slot
+     */
+    sortOrder: number;
+};
+
+/**
  * Lifecycle status of an election
  */
 export type ElectionStatus = 'draft' | 'nominationsOpen' | 'votingOpen' | 'awaitingConfirmation' | 'published' | 'cancelled';
 
 /**
- * Type of election
+ * Type of election — officer elections fill positions; bylaw elections ratify amendments
  */
-export type ElectionType = 'general' | 'special' | 'byElection';
+export type ElectionType = 'officer' | 'bylaw';
 
 /**
  * An election event for one or more positions
@@ -16965,39 +17011,43 @@ export type ElectionUpdate = {
     /**
      * Type of election
      */
-    electionType?: 'general' | 'special' | 'byElection';
-    /**
-     * IDs of positions open in this election
-     */
-    positions?: Array<string>;
-    /**
-     * Start of the nomination period
-     */
-    nominationStart?: Date;
-    /**
-     * End of the nomination period
-     */
-    nominationEnd?: Date;
-    /**
-     * Start of the voting period
-     */
-    votingStart?: Date;
-    /**
-     * End of the voting period
-     */
-    votingEnd?: Date;
+    type?: 'officer' | 'bylaw';
     /**
      * Current status of the election
      */
     status?: 'draft' | 'nominationsOpen' | 'votingOpen' | 'awaitingConfirmation' | 'published' | 'cancelled';
     /**
-     * Minimum number of votes required for the election results to be valid
+     * How votes are collected
      */
-    quorumRequired?: number;
+    votingMode?: 'online' | 'inPerson' | 'hybrid';
     /**
-     * Whether quorum was met when voting closed
+     * Start of the nomination period
      */
-    quorumMet?: boolean;
+    nominationsOpenAt?: Date | null;
+    /**
+     * End of the nomination period
+     */
+    nominationsCloseAt?: Date | null;
+    /**
+     * Start of the voting period
+     */
+    votingOpenAt?: Date | null;
+    /**
+     * End of the voting period
+     */
+    votingCloseAt?: Date | null;
+    /**
+     * Percentage of votes required for a bylaw election to pass
+     */
+    passageThreshold?: number | null;
+    /**
+     * Position slots open in this election
+     */
+    positions?: Array<ElectionPositionSlot>;
+    /**
+     * Timestamp when the election was certified and published
+     */
+    publishedAt?: Date | null;
 };
 
 /**
@@ -33778,6 +33828,11 @@ export type VolunteerOpportunityUpdate = {
 };
 
 /**
+ * How votes are collected for an election
+ */
+export type VotingMode = 'online' | 'inPerson' | 'hybrid';
+
+/**
  * A position held on an event waitlist
  */
 export type WaitlistEntry = {
@@ -38091,6 +38146,45 @@ export type UpdateCandidateResponses = {
 
 export type UpdateCandidateResponse = UpdateCandidateResponses[keyof UpdateCandidateResponses];
 
+export type UpdateCandidateStatusData = {
+    body: CandidateStatusUpdateRequest;
+    path: {
+        candidateId: string;
+    };
+    query?: never;
+    url: '/association/member/candidates/{candidateId}/status';
+};
+
+export type UpdateCandidateStatusErrors = {
+    /**
+     * Validation error response
+     */
+    400: ValidationError;
+    /**
+     * Forbidden access response
+     */
+    403: AuthorizationError;
+    /**
+     * Resource not found response
+     */
+    404: NotFoundError;
+    /**
+     * Conflict response
+     */
+    409: ConflictError;
+};
+
+export type UpdateCandidateStatusError = UpdateCandidateStatusErrors[keyof UpdateCandidateStatusErrors];
+
+export type UpdateCandidateStatusResponses = {
+    /**
+     * Success response with data
+     */
+    200: Candidate;
+};
+
+export type UpdateCandidateStatusResponse = UpdateCandidateStatusResponses[keyof UpdateCandidateStatusResponses];
+
 export type ListMyCertificatesData = {
     body?: never;
     path?: never;
@@ -40784,6 +40878,7 @@ export type ListElectionsData = {
         sort?: SafeQueryString;
         organizationId?: string;
         status?: ElectionStatus;
+        type?: ElectionType;
     };
     url: '/association/member/elections';
 };

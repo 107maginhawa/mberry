@@ -7,6 +7,7 @@ import type { NewElection } from '../elections/repos/elections.schema';
 import { auditAction } from '@/utils/audit';
 import { requirePosition } from '@/utils/officer-check';
 import { POSITION_TITLES } from '@/utils/position-titles';
+import { domainEvents } from '@/core/domain-events';
 
 /**
  * createElection
@@ -22,6 +23,8 @@ export async function createElection(
 
   const session = ctx.get('session');
   if (!session) throw new UnauthorizedError();
+  const user = ctx.get('user');
+  if (!user) throw new UnauthorizedError();
 
   const orgId = ctx.get('organizationId');
   if (!orgId) return ctx.json({ error: 'Organization context required' }, 403);
@@ -37,11 +40,21 @@ export async function createElection(
     sortOrder: i,
   }));
 
+  // Explicit field mapping (TypeSpec request fields now match schema columns)
   const election = await repo.create({
-    ...body,
-    positions: positionObjects,
     organizationId: orgId,
+    title: body.title,
+    type: body.type,
     status: 'draft',
+    votingMode: body.votingMode ?? 'online',
+    nominationsOpenAt: body.nominationsOpenAt ?? null,
+    nominationsCloseAt: body.nominationsCloseAt ?? null,
+    votingOpenAt: body.votingOpenAt ?? null,
+    votingCloseAt: body.votingCloseAt ?? null,
+    passageThreshold: body.passageThreshold ?? null,
+    positions: positionObjects,
+    createdBy: user.id,
+    updatedBy: user.id,
   } as NewElection);
 
   await auditAction(ctx, {
@@ -51,6 +64,12 @@ export async function createElection(
     description: `Election created: ${election.title}`,
     eventSubType: 'governance.election-created',
   });
+
+  domainEvents.emit('election.created', {
+    electionId: election.id,
+    organizationId: orgId,
+    createdBy: user.id,
+  }).catch(() => {});
 
   return ctx.json({ data: election }, 201);
 }

@@ -6,6 +6,7 @@ import { ElectionsRepository } from '../elections/repos/elections.repo';
 import { MembershipRepository } from './repos/membership.repo';
 import { computeMembershipStatus } from './utils/compute-membership-status';
 import { auditAction } from '@/utils/audit';
+import { domainEvents } from '@/core/domain-events';
 
 /**
  * createCandidate
@@ -80,6 +81,14 @@ export async function createCandidate(
     description: `Nominee added to election ${body.electionId}`,
     details: { positionId: body.positionId, personId: body.personId },
   });
+
+  domainEvents.emit('nomination.submitted', {
+    nomineeId: nominee.id,
+    electionId: body.electionId,
+    personId: body.personId,
+    positionId: body.positionId,
+    organizationId: election.organizationId,
+  }).catch(() => {});
 
   return ctx.json({ data: nominee }, 201);
 }

@@ -4,7 +4,7 @@
 
 # Enforcement Report
 
-**Generated:** 2026-05-29 (post-Wave 11 update)
+**Generated:** 2026-05-29 (post-Wave 12 update)
 **Engine:** oli-enforce-all v3 --strict
 **Scope:** 22 modules, 8 phases, 10 agents
 **Baseline:** 2026-05-29T22:00:00Z → 2026-05-29T23:30:00Z (v4)
@@ -399,13 +399,36 @@ Baseline `modules` block held count-only P1 entries (never given IDs or triaged)
 
 ---
 
+### Wave 12 — m12 Elections Remediation (COMPLETE ✅)
+
+Fixed the Wave-11 highest-risk cluster. Verified all 8 findings against live code first: **3 were FALSE POSITIVES, 5 REAL.**
+
+**False positives (reclassified):** The flagged `elections/castVote.ts`, `elections/createNominee.ts`, and WF-076/077 unreachability are about *legacy dead duplicates*. The live voting/nomination flows — `castBallot` (POST /association/member/ballots) and `createCandidate` (POST /association/member/candidates) — were always TypeSpec-registered with real handlers. Members could vote/be nominated all along.
+
+**5 REAL fixes:**
+
+| ID | Finding | Fix |
+|----|---------|-----|
+| EM-M12-d2e3f4a5 | electionType enum mismatch (DB officer/bylaw vs TypeSpec general/special/byElection) | Reconciled TypeSpec→DB in `governance.tsp` (Election model + ElectionType + VotingMode + ElectionPositionSlot rewritten to match schema); `createElection` blind spread replaced with explicit field mapping |
+| EM-M12-8e9f0a1b | updateNomineeStatus hand-wired, absent from OpenAPI | Migrated to TypeSpec as `updateCandidateStatus` (POST /association/member/candidates/{candidateId}/status); hand-wire + import removed from `app.ts` |
+| EM-M12-a1b2c3d4 | WF-078 passageThreshold never evaluated | `certifyElection` now determines winners (plurality per position) and enforces passageThreshold (% of voters) for bylaw elections; winners marked `elected` |
+| EM-M12-a0b1c2d3 | Live handlers emit zero domain events | Wired `election.created`, `election.status.changed` (open-nominations + open-voting), `election.deleted`, `nomination.submitted` |
+| EM-M12-e4f5a6b7 | ElectionPublished never emitted | Added `election.published` to event registry (winners payload); emitted from `certifyElection`; new consumer performs M04 officer transition — ends outgoing terms + generates checklists, creates winner terms, emits `officer.transitioned`/`officer.assigned` |
+
+**Frontend:** `election-form.tsx` submit mapping updated to new contract field names (`type`, `nominationsOpenAt/CloseAt`, `votingOpenAt/CloseAt`, `passageThreshold`) after SDK regen.
+
+**Pipeline:** TypeSpec → `specs/api` build → `api-ts` generate → SDK regen. Unrelated regen churn (better-auth, websocket registry) reverted to HEAD. Typecheck passes: api-ts, memberry, sdk-ts.
+
+**Outcome:** m12 P1 **8→0**, score **6.0→9.0**. No remaining REAL P1s in m12.
+
+---
+
 ## What's Next
 
-1. **Waves 1-11 COMPLETE.** Security gate satisfied. No P0 regressions. All P1 audit logging resolved (incl. 9 billing handlers in Wave 11). Revenue analytics gap filled. Baseline P1s now fully triaged with named IDs.
+1. **Waves 1-12 COMPLETE.** Security gate satisfied. No P0 regressions. All P1 audit logging resolved (incl. 9 billing handlers in Wave 11). Revenue analytics gap filled. Baseline P1s fully triaged with named IDs. **Wave 12 closed the m12 elections cluster (5 REAL fixed, 3 FP reclassified).**
 2. **Remaining P0s: 1** (EM-M07-no-typespec — communication module 28 hand-wired handlers, DEFERRED).
-3. **Remaining P1s (built modules): ~30 REAL, now named** (see `wave11_p1_triage` in baseline). Priority order for next fix wave:
-   - **P1 — m12 elections (8):** route-register castVote/createNominee; fix electionType enum mismatch; emit ElectionPublished. **Members currently cannot vote.**
-   - **P2 — m11 documents (5):** role check on createDocument, draft-state default, domain events, real PDF output.
+3. **Remaining P1s (built modules): ~22 REAL, now named** (see `wave11_p1_triage` in baseline; m12 cluster of 8 now resolved). Priority order for next fix wave:
+   - **P1 — m11 documents (5):** role check on createDocument, draft-state default, domain events, real PDF output.
    - **P3 — m14 dashboard (5), m10 credits (transcript dead-code), m01 onboarding wizard.**
    - **DEFERRED:** ~170 future-module P1 stubs (m13/m15/m16/m17/m18/m19); 7 TypeSpec, 3 coupling, 1 event from Wave 10.
 4. **Coverage Score: 78 → ~85** (estimated after Wave 10 + Wave 11 billing audit logging).

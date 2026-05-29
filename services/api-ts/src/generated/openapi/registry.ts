@@ -134,6 +134,7 @@ import { listCandidates } from '../../handlers/association:member/listCandidates
 import { getCandidate } from '../../handlers/association:member/getCandidate';
 import { updateCandidate } from '../../handlers/association:member/updateCandidate';
 import { deleteCandidate } from '../../handlers/association:member/deleteCandidate';
+import { updateCandidateStatus } from '../../handlers/association:member/updateCandidateStatus';
 import { listMyCertificates } from '../../handlers/association:member/listMyCertificates';
 import { getCertificate } from '../../handlers/association:member/getCertificate';
 import { createChapterAffiliation } from '../../handlers/association:member/createChapterAffiliation';
@@ -555,6 +556,7 @@ export const registry = {
   getCandidate,
   updateCandidate,
   deleteCandidate,
+  updateCandidateStatus,
   listMyCertificates,
   getCertificate,
   createChapterAffiliation,

@@ -7,6 +7,7 @@ import { elections } from '../elections/repos/elections.schema';
 import { eq } from 'drizzle-orm';
 import { auditAction } from '@/utils/audit';
 import { requireOfficerTerm } from '@/utils/officer-check';
+import { domainEvents } from '@/core/domain-events';
 
 /**
  * deleteElection
@@ -45,6 +46,12 @@ export async function deleteElection(
     resourceId: params.electionId,
     description: `Election deleted: ${existing.title}`,
   });
+
+  domainEvents.emit('election.deleted', {
+    electionId: params.electionId,
+    organizationId: existing.organizationId,
+    deletedBy: ctx.get('user')?.id ?? '',
+  }).catch(() => {});
 
   return ctx.json({ success: true }, 200);
 }

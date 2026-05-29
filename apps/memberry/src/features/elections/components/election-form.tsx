@@ -155,17 +155,15 @@ export function ElectionForm({ orgId, electionId, initialData, onSuccess, onCanc
     const body: ElectionCreateRequest = {
       organizationId: orgId,
       title: data.title,
-      // NOTE: Form uses 'officer'/'bylaw' (Drizzle schema enums).
-      // TypeSpec API expects 'general'/'special' (governance.tsp ElectionType).
-      // This mapping bridges the schema/TypeSpec enum drift.
-      // To fix: align Drizzle enum with TypeSpec, then remove this mapping.
-      electionType: (data.type === 'bylaw' ? 'special' : 'general') as ElectionType,
+      type: data.type as ElectionType,
       positions: positions.filter((p) => p.title.trim()).map((p) => p.title.trim()),
-      nominationStart: data.nominationsOpenAt ? new Date(data.nominationsOpenAt) : new Date(),
-      nominationEnd: data.nominationsCloseAt ? new Date(data.nominationsCloseAt) : new Date(),
-      votingStart: data.votingOpenAt ? new Date(data.votingOpenAt) : new Date(),
-      votingEnd: data.votingCloseAt ? new Date(data.votingCloseAt) : new Date(),
-      ...(data.type === 'bylaw' && data.passageThreshold ? { quorumRequired: parseInt(data.passageThreshold, 10) } : {}),
+      nominationsOpenAt: data.nominationsOpenAt ? new Date(data.nominationsOpenAt) : null,
+      nominationsCloseAt: data.nominationsCloseAt ? new Date(data.nominationsCloseAt) : null,
+      votingOpenAt: data.votingOpenAt ? new Date(data.votingOpenAt) : null,
+      votingCloseAt: data.votingCloseAt ? new Date(data.votingCloseAt) : null,
+      ...(data.type === 'bylaw' && data.passageThreshold
+        ? { passageThreshold: parseInt(data.passageThreshold, 10) }
+        : {}),
     }
     if (isEdit) {
       updateMut.mutate({ path: { electionId: electionId! }, body })

@@ -76,8 +76,7 @@ import { impersonationResolver, impersonationWriteBlock } from '@/middleware/imp
 // PRC Accredited Providers — MIGRATED to generated routes (association:operations).
 // Training lifecycle — MIGRATED to generated routes (completeCustomTraining, publishTraining).
 
-// Elections: hand-wired (not in TypeSpec)
-import { updateNomineeStatus } from '@/handlers/elections/updateNomineeStatus';
+// Elections: deleteElection legacy path hand-wired (not in TypeSpec)
 import { deleteElection } from '@/handlers/elections/deleteElection';
 
 // Email: hand-wired for middleware ordering reasons.
@@ -447,12 +446,9 @@ export function createApp(config: Config): App {
   // Training lifecycle — MIGRATED: completeCustomTraining + publishTraining now in generated routes.
   // Legacy paths /organizations/:organizationId/training/:id/complete and /org/:organizationId/trainings/:id/publish removed.
 
-  // @hand-wired reason="elections module entirely hand-wired, TypeSpec deferred" wave="pre-migration"
-  const nomineeParams = zValidator('param', z.object({ electionId: z.string().uuid(), nomineeId: z.string().uuid() }), validationErrorHandler);
-  const nomineeStatusBody = zValidator('json', z.object({
-    status: z.enum(['accepted', 'declined']),
-  }), validationErrorHandler);
-  app.patch('/association/member/elections/:electionId/nominees/:nomineeId', nomineeParams, nomineeStatusBody, authMiddleware(), updateNomineeStatus as unknown as Handler);
+  // updateNomineeStatus — MIGRATED to TypeSpec as updateCandidateStatus
+  // (POST /association/member/candidates/{candidateId}/status). Wave 12.
+  // @hand-wired reason="elections deleteElection legacy path, TypeSpec deferred" wave="pre-migration"
   app.delete('/association/member/elections/:id', uuidIdParam, authMiddleware(), deleteElection as unknown as Handler);
 
   // @hand-wired reason="ID card + bulk certificate issue, not in TypeSpec" wave="Wave-2b"

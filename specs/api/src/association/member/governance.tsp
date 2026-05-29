@@ -38,11 +38,17 @@ enum ElectionStatus {
   cancelled: "cancelled",
 }
 
-@doc("Type of election")
+@doc("Type of election — officer elections fill positions; bylaw elections ratify amendments")
 enum ElectionType {
-  general: "general",
-  special: "special",
-  byElection: "byElection",
+  officer: "officer",
+  bylaw: "bylaw",
+}
+
+@doc("How votes are collected for an election")
+enum VotingMode {
+  online: "online",
+  inPerson: "inPerson",
+  hybrid: "hybrid",
 }
 
 @doc("Status of a nomination/candidacy")
@@ -180,6 +186,18 @@ model Position extends BaseEntity {
   status: PositionStatus;
 }
 
+@doc("A position slot open in an election")
+model ElectionPositionSlot {
+  @doc("Generated slot identifier")
+  id: string;
+
+  @doc("Display title of the position")
+  title: string;
+
+  @doc("Ordering index of the slot")
+  sortOrder: int32;
+}
+
 @doc("An election event for one or more positions")
 model Election extends BaseEntity {
 
@@ -192,32 +210,36 @@ model Election extends BaseEntity {
   title: string;
 
   @doc("Type of election")
-  electionType: ElectionType;
-
-  @doc("IDs of positions open in this election")
-  positions: string[];
-
-  @doc("Start of the nomination period")
-  nominationStart: utcDateTime;
-
-  @doc("End of the nomination period")
-  nominationEnd: utcDateTime;
-
-  @doc("Start of the voting period")
-  votingStart: utcDateTime;
-
-  @doc("End of the voting period")
-  votingEnd: utcDateTime;
+  type: ElectionType;
 
   @doc("Current status of the election")
   status: ElectionStatus;
 
-  @doc("Minimum number of votes required for the election results to be valid")
-  @minValue(1)
-  quorumRequired?: int32;
+  @doc("How votes are collected")
+  votingMode: VotingMode;
 
-  @doc("Whether quorum was met when voting closed")
-  quorumMet?: boolean;
+  @doc("Start of the nomination period")
+  nominationsOpenAt?: utcDateTime | null;
+
+  @doc("End of the nomination period")
+  nominationsCloseAt?: utcDateTime | null;
+
+  @doc("Start of the voting period")
+  votingOpenAt?: utcDateTime | null;
+
+  @doc("End of the voting period")
+  votingCloseAt?: utcDateTime | null;
+
+  @doc("Percentage of votes required for a bylaw election to pass")
+  @minValue(1)
+  @maxValue(100)
+  passageThreshold?: int32 | null;
+
+  @doc("Position slots open in this election")
+  positions?: ElectionPositionSlot[];
+
+  @doc("Timestamp when the election was certified and published")
+  publishedAt?: utcDateTime | null;
 }
 
 @doc("A candidate nominated for a position in an election")
@@ -508,13 +530,21 @@ model PositionRequest {
 model ElectionCreateRequest {
   organizationId: string;
   title: string;
-  electionType: ElectionType;
-  positions: string[];
-  nominationStart: utcDateTime;
-  nominationEnd: utcDateTime;
-  votingStart: utcDateTime;
-  votingEnd: utcDateTime;
-  quorumRequired?: int32;
+  type: ElectionType;
+  votingMode?: VotingMode;
+
+  @doc("Titles of the position slots open in this election")
+  positions?: string[];
+
+  nominationsOpenAt?: utcDateTime | null;
+  nominationsCloseAt?: utcDateTime | null;
+  votingOpenAt?: utcDateTime | null;
+  votingCloseAt?: utcDateTime | null;
+
+  @doc("Percentage of votes required for a bylaw election to pass")
+  @minValue(1)
+  @maxValue(100)
+  passageThreshold?: int32 | null;
 }
 
 @doc("Request to create or update a candidate")
@@ -525,6 +555,12 @@ model CandidateRequest {
   nominatedBy: string;
   bio?: string;
   platform?: string;
+}
+
+@doc("Request to update a candidate/nominee's acceptance status")
+model CandidateStatusUpdateRequest {
+  @doc("New status — a nominee may accept or decline their nomination")
+  status: "accepted" | "declined";
 }
 
 @doc("Request to cast a ballot")
@@ -702,7 +738,7 @@ namespace Association.Member.Governance {
     @get
     @useAuth(bearerAuth)
     @extension("x-security-required-roles", #["association:admin", "association:member"])
-    listElections(...PaginationQuery, @query organizationId?: string, @query status?: ElectionStatus): ApiOkResponse<PaginatedResponse<Election>> | ApiUnauthorizedResponse | ApiForbiddenResponse;
+    listElections(...PaginationQuery, @query organizationId?: string, @query status?: ElectionStatus, @query type?: ElectionType): ApiOkResponse<PaginatedResponse<Election>> | ApiUnauthorizedResponse | ApiForbiddenResponse;
 
     @doc("Update an election.")
     @operationId("updateElection")
@@ -785,6 +821,14 @@ namespace Association.Member.Governance {
     @useAuth(bearerAuth)
     @extension("x-security-required-roles", #["association:admin"])
     deleteCandidate(@path candidateId: string): ApiNoContentResponse | ApiNotFoundResponse | ApiConflictResponse | ApiForbiddenResponse;
+
+    @doc("Update a candidate/nominee's acceptance status (nominee accepts or declines, or an officer updates it).")
+    @operationId("updateCandidateStatus")
+    @post
+    @route("/{candidateId}/status")
+    @useAuth(bearerAuth)
+    @extension("x-security-required-roles", #["association:admin", "association:member"])
+    updateCandidateStatus(@path candidateId: string, @body body: CandidateStatusUpdateRequest): ApiOkResponse<Candidate> | ApiBadRequestResponse | ApiNotFoundResponse | ApiConflictResponse | ApiForbiddenResponse;
   }
 
   @doc("Cast and search ballots — no update or delete permitted after casting")

@@ -22,6 +22,18 @@ import {
   eventRegistrations,
   invitationTokens,
 } from './schema-registry';
+import {
+  OfficerTermRepository,
+  TransitionChecklistRepository,
+} from '@/handlers/association:member/repos/governance.repo';
+
+const ELECTION_TRANSITION_CHECKLIST_ITEMS = [
+  'Hand over account credentials and passwords',
+  'Transfer financial records and bank access',
+  'Provide status update on ongoing projects',
+  'Update official contact information',
+  'Brief incoming officer on pending matters',
+];
 
 /** Minimal contract for the membership repo used by domain event consumers. */
 export interface DomainEventMembershipRepo {
@@ -775,6 +787,68 @@ export function registerDomainEventConsumers(
       });
     } catch (err) {
       logger.error({ error: err }, '[consumer] invite.claimed failed');
+    }
+  });
+
+  // -----------------------------------------------------------------------
+  // election.published → M04 officer transition
+  // End outgoing terms, generate transition checklists, create new terms
+  // for winners, and emit officer.transitioned / officer.assigned.
+  // -----------------------------------------------------------------------
+  domainEvents.on('election.published', async (payload) => {
+    try {
+      const termRepo = new OfficerTermRepository(deps.db);
+      const checklistRepo = new TransitionChecklistRepository(deps.db);
+
+      for (const winner of payload.winners) {
+        const outgoing = await termRepo.findActiveByPosition(winner.positionId);
+
+        if (outgoing) {
+          await termRepo.update(outgoing.id, {
+            status: 'completed',
+            endDate: new Date(),
+          });
+          for (const item of ELECTION_TRANSITION_CHECKLIST_ITEMS) {
+            await checklistRepo.create({
+              officerTermId: outgoing.id,
+              organizationId: payload.organizationId,
+              item,
+              status: 'pending',
+            });
+          }
+        }
+
+        const newTerm = await termRepo.create({
+          positionId: winner.positionId,
+          personId: winner.winnerId,
+          organizationId: payload.organizationId,
+          status: 'active',
+          startDate: new Date(),
+          notes: `Elected via election ${payload.electionId}`,
+        });
+
+        if (outgoing) {
+          domainEvents.emit('officer.transitioned', {
+            outgoingTermId: outgoing.id,
+            newTermId: newTerm.id,
+            outgoingPersonId: outgoing.personId,
+            successorPersonId: winner.winnerId,
+            positionId: winner.positionId,
+            organizationId: payload.organizationId,
+            transitionedBy: payload.publishedBy,
+          }).catch(() => {});
+        } else {
+          domainEvents.emit('officer.assigned', {
+            termId: newTerm.id,
+            personId: winner.winnerId,
+            positionId: winner.positionId,
+            organizationId: payload.organizationId,
+            assignedBy: payload.publishedBy,
+          }).catch(() => {});
+        }
+      }
+    } catch (err) {
+      logger.error({ error: err }, '[consumer] election.published failed');
     }
   });
 }

@@ -3162,6 +3162,10 @@ export const CandidateRequestUpdateSchema = z.object({
 
 export const CandidateStatusSchema = z.enum(["nominated", "accepted", "declined", "withdrawn", "elected", "notElected"]);
 
+export const CandidateStatusUpdateRequestSchema = z.object({
+  status: z.enum(["accepted", "declined"])
+});
+
 export const CandidateUpdateSchema = z.object({
   id: z.string().uuid().optional(),
   version: z.number().int().optional(),
@@ -5154,6 +5158,12 @@ export const DunningTemplateUpdateRequestSchema = z.object({
   status: DunningTemplateStatusSchema.optional()
 });
 
+export const ElectionPositionSlotSchema = z.object({
+  id: z.string(),
+  title: z.string(),
+  sortOrder: z.number().int()
+});
+
 export const ElectionSchema = z.object({
   id: z.string().uuid(),
   version: z.number().int(),
@@ -5163,41 +5173,46 @@ export const ElectionSchema = z.object({
   updatedBy: z.string().uuid().optional(),
   organizationId: z.string(),
   title: z.string().min(1).max(200),
-  electionType: z.enum(["general", "special", "byElection"]),
-  positions: z.array(z.string()),
-  nominationStart: z.string().datetime().transform((str) => new Date(str)),
-  nominationEnd: z.string().datetime().transform((str) => new Date(str)),
-  votingStart: z.string().datetime().transform((str) => new Date(str)),
-  votingEnd: z.string().datetime().transform((str) => new Date(str)),
+  type: z.enum(["officer", "bylaw"]),
   status: z.enum(["draft", "nominationsOpen", "votingOpen", "awaitingConfirmation", "published", "cancelled"]),
-  quorumRequired: z.number().int().gte(1).optional(),
-  quorumMet: z.boolean().optional()
+  votingMode: z.enum(["online", "inPerson", "hybrid"]),
+  nominationsOpenAt: z.union([z.string().datetime().transform((str) => new Date(str)), z.null()]).optional(),
+  nominationsCloseAt: z.union([z.string().datetime().transform((str) => new Date(str)), z.null()]).optional(),
+  votingOpenAt: z.union([z.string().datetime().transform((str) => new Date(str)), z.null()]).optional(),
+  votingCloseAt: z.union([z.string().datetime().transform((str) => new Date(str)), z.null()]).optional(),
+  passageThreshold: z.union([z.number().int().gte(1).lte(100), z.null()]).optional(),
+  positions: z.array(ElectionPositionSlotSchema).optional(),
+  publishedAt: z.union([z.string().datetime().transform((str) => new Date(str)), z.null()]).optional()
 });
 
-export const ElectionTypeSchema = z.enum(["general", "special", "byElection"]);
+export const ElectionTypeSchema = z.enum(["officer", "bylaw"]);
+
+export const VotingModeSchema = z.enum(["online", "inPerson", "hybrid"]);
 
 export const ElectionCreateRequestSchema = z.object({
   organizationId: z.string(),
   title: z.string(),
-  electionType: ElectionTypeSchema,
-  positions: z.array(z.string()),
-  nominationStart: z.string().datetime().transform((str) => new Date(str)),
-  nominationEnd: z.string().datetime().transform((str) => new Date(str)),
-  votingStart: z.string().datetime().transform((str) => new Date(str)),
-  votingEnd: z.string().datetime().transform((str) => new Date(str)),
-  quorumRequired: z.number().int().optional()
+  type: ElectionTypeSchema,
+  votingMode: VotingModeSchema.optional(),
+  positions: z.array(z.string()).optional(),
+  nominationsOpenAt: z.union([z.string().datetime().transform((str) => new Date(str)), z.null()]).optional(),
+  nominationsCloseAt: z.union([z.string().datetime().transform((str) => new Date(str)), z.null()]).optional(),
+  votingOpenAt: z.union([z.string().datetime().transform((str) => new Date(str)), z.null()]).optional(),
+  votingCloseAt: z.union([z.string().datetime().transform((str) => new Date(str)), z.null()]).optional(),
+  passageThreshold: z.union([z.number().int().gte(1).lte(100), z.null()]).optional()
 });
 
 export const ElectionCreateRequestUpdateSchema = z.object({
   organizationId: z.string().optional(),
   title: z.string().optional(),
-  electionType: ElectionTypeSchema.optional(),
+  type: ElectionTypeSchema.optional(),
+  votingMode: VotingModeSchema.optional(),
   positions: z.array(z.string()).optional(),
-  nominationStart: z.string().datetime().transform((str) => new Date(str)).optional(),
-  nominationEnd: z.string().datetime().transform((str) => new Date(str)).optional(),
-  votingStart: z.string().datetime().transform((str) => new Date(str)).optional(),
-  votingEnd: z.string().datetime().transform((str) => new Date(str)).optional(),
-  quorumRequired: z.number().int().optional()
+  nominationsOpenAt: z.union([z.string().datetime().transform((str) => new Date(str)), z.null()]).optional(),
+  nominationsCloseAt: z.union([z.string().datetime().transform((str) => new Date(str)), z.null()]).optional(),
+  votingOpenAt: z.union([z.string().datetime().transform((str) => new Date(str)), z.null()]).optional(),
+  votingCloseAt: z.union([z.string().datetime().transform((str) => new Date(str)), z.null()]).optional(),
+  passageThreshold: z.union([z.number().int().gte(1).lte(100), z.null()]).optional()
 });
 
 export const ElectionListResponseSchema = z.object({
@@ -5225,15 +5240,16 @@ export const ElectionUpdateSchema = z.object({
   updatedBy: z.string().uuid().optional(),
   organizationId: z.string().optional(),
   title: z.string().min(1).max(200).optional(),
-  electionType: z.enum(["general", "special", "byElection"]).optional(),
-  positions: z.array(z.string()).optional(),
-  nominationStart: z.string().datetime().transform((str) => new Date(str)).optional(),
-  nominationEnd: z.string().datetime().transform((str) => new Date(str)).optional(),
-  votingStart: z.string().datetime().transform((str) => new Date(str)).optional(),
-  votingEnd: z.string().datetime().transform((str) => new Date(str)).optional(),
+  type: z.enum(["officer", "bylaw"]).optional(),
   status: z.enum(["draft", "nominationsOpen", "votingOpen", "awaitingConfirmation", "published", "cancelled"]).optional(),
-  quorumRequired: z.number().int().gte(1).optional(),
-  quorumMet: z.boolean().optional()
+  votingMode: z.enum(["online", "inPerson", "hybrid"]).optional(),
+  nominationsOpenAt: z.union([z.string().datetime().transform((str) => new Date(str)), z.null()]).optional(),
+  nominationsCloseAt: z.union([z.string().datetime().transform((str) => new Date(str)), z.null()]).optional(),
+  votingOpenAt: z.union([z.string().datetime().transform((str) => new Date(str)), z.null()]).optional(),
+  votingCloseAt: z.union([z.string().datetime().transform((str) => new Date(str)), z.null()]).optional(),
+  passageThreshold: z.union([z.number().int().gte(1).lte(100), z.null()]).optional(),
+  positions: z.array(ElectionPositionSlotSchema).optional(),
+  publishedAt: z.union([z.string().datetime().transform((str) => new Date(str)), z.null()]).optional()
 });
 
 export const EmailSchema = z.string().email();
@@ -10936,6 +10952,16 @@ export type DeleteCandidateParams = z.infer<typeof DeleteCandidateParams>;
 
 export const DeleteCandidateResponse = z.void();
 
+export const UpdateCandidateStatusParams = z.object({
+  candidateId: z.string(),
+});
+export type UpdateCandidateStatusParams = z.infer<typeof UpdateCandidateStatusParams>;
+
+export const UpdateCandidateStatusBody = CandidateStatusUpdateRequestSchema;
+export type UpdateCandidateStatusBody = z.infer<typeof UpdateCandidateStatusBody>;
+
+export const UpdateCandidateStatusResponse = CandidateSchema;
+
 export const ListMyCertificatesQuery = z.object({
   offset: z.coerce.number().int().gte(0).lte(2147483647).optional(),
   limit: z.coerce.number().int().gte(1).lte(100).optional(),
@@ -11560,6 +11586,7 @@ export const ListElectionsQuery = z.object({
   sort: SafeQueryStringSchema.optional(),
   organizationId: z.string().optional(),
   status: ElectionStatusSchema.optional(),
+  type: ElectionTypeSchema.optional(),
 });
 export type ListElectionsQuery = z.infer<typeof ListElectionsQuery>;
 

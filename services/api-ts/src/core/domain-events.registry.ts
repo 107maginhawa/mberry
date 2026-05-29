@@ -275,6 +275,13 @@ export interface DomainEventMap {
     organizationId: string;
   };
 
+  'election.published': {
+    electionId: string;
+    organizationId: string;
+    publishedBy: string;
+    winners: { positionId: string; winnerId: string }[];
+  };
+
   // ── Support Ticket Context ────────────────────────────────────────────
   'ticket.created': {
     ticketId: string;

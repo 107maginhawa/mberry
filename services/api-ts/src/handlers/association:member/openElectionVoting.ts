@@ -5,6 +5,7 @@ import type { OpenElectionVotingParams } from '@/generated/openapi/validators';
 import { ElectionsRepository } from '../elections/repos/elections.repo';
 import { auditAction } from '@/utils/audit';
 import { requireOfficerTerm } from '@/utils/officer-check';
+import { domainEvents } from '@/core/domain-events';
 
 /**
  * openElectionVoting
@@ -76,6 +77,14 @@ export async function openElectionVoting(
     resourceId: updated.id,
     description: `Election voting opened: ${updated.title}`,
   });
+
+  domainEvents.emit('election.status.changed', {
+    electionId: updated.id,
+    organizationId: existing.organizationId,
+    oldStatus: 'nominationsOpen',
+    newStatus: 'votingOpen',
+    changedBy: ctx.get('user')?.id ?? '',
+  }).catch(() => {});
 
   return ctx.json({ data: updated }, 200);
 }
