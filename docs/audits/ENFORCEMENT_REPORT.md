@@ -4,7 +4,7 @@
 
 # Enforcement Report
 
-**Generated:** 2026-05-29 (post-Wave 18 update)
+**Generated:** 2026-05-29 (post-Wave 19 update)
 **Engine:** oli-enforce-all v3 --strict
 **Scope:** 22 modules, 8 phases, 10 agents
 **Baseline:** 2026-05-29T22:00:00Z → 2026-05-29T23:30:00Z (v4)
@@ -228,6 +228,7 @@ All 13 P0 security findings from the previous run are confirmed fixed with test 
 | M05 | 6.0 | 9.0 | ↑↑ | Wave 16: resign/decease emit status.changed, roster import emits membership.imported; auth gap was FP (path divergence) |
 | M06 | 6.5 | 4.5 | ↓ | recordPayment P0 detected |
 | M07 | 5.5 | 4.0 | ↓ | WebRTC fixed but structural P0s remain |
+| M07 | 5.5 | 6.0 | ↑ | Wave 19: 3 P1s all FP — getAnnouncementStats handler+route exist, createSubscriptionTopic role-guarded, consumed events wired via consumers; removed dead CrossModuleTriggers. P0-capped (no-typespec) |
 | M08 | 4.0 | 4.5 | ↑ | listEvents auth fix |
 | M09 | 5.0 | 4.5 | ↓ | Dead code still present |
 | M10 | 6.5 | 7.0 | ↑ | SQL injection fix |
@@ -566,12 +567,35 @@ Fixed the m06 dues-payments cluster. Verify-first paid off again: 3 of 5 audit P
 
 ---
 
+### Wave 19 — m07 Communications Remediation (COMPLETE ✅)
+
+Verify-first sweep of the m07 P1 cluster. All 3 baseline P1s turned out **FALSE POSITIVE** — the module was materially remediated since the 2026-05-28 audit. No net-new feature fix was warranted; the wave's concrete change is removing leftover dead code. (The module P0 `EM-M07-no-typespec` is DEFERRED and untouched per instruction.)
+
+**3 FP (all resolved in live code):**
+
+| ID | Finding | Verdict |
+|----|---------|---------|
+| EM-M07-a8f7e6d5 | `GET /announcements/:id/stats` has no handler | **FP** — `getAnnouncementStats.ts` exists + route wired at `app.ts:506` (`GET /communications/announcements/:id/stats`, authMiddleware). Backed by repo `getStats()`/`createStats()`. AC-M07-004 satisfiable |
+| EM-M07-e2d1c0b9 | `createSubscriptionTopic` lacks president role + 2FA | **FP (role)** — line 22 enforces `requirePosition([President, Secretary])`. 2FA step-up is the same cross-cutting platform concern deferred in Wave 18 → P2 |
+| EM-M07-c4b3a2e1 | 0/4 consumed events wired; `cross-module-triggers.ts` dead | **FP** — consumed events ARE wired via `domain-event-consumers.ts` (event.published:428, training.published:556, election.status.changed:382, membership.created:217 all fan out notifications). The `CrossModuleTriggers` class was unimported dead Phase-4 scaffolding — **removed** |
+
+**Deferred (not P1-actionable this wave):**
+- `EM-M07-7a6b5c4d` — extract 7 professional-feed files to `handlers/feed/`. m13 is a future module; moving working code for purity is high-churn/low-value → P2, defer to m13 build.
+- `EM-M07-f9e8d7c6` — `email.tsp` / `notifs.tsp` missing. TypeSpec/spec-first, deferred with the `EM-M07-no-typespec` P0.
+
+**Pipeline:** dead-code removal only (deleted `comms/cross-module-triggers.ts`, fully unreferenced). No `src/generated/*` touched, no SDK schema change → no codegen. Typecheck passes: api-ts, memberry, sdk-ts. Tests: 523 pass across comms/ + communication/ (49 files).
+
+**Note:** m07 P0 (`EM-M07-no-typespec`) remains DEFERRED — score stays P0-capped.
+
+**Outcome:** m07 P1 **3→0** (0 REAL / 3 FP), score **5.5→6.0** (P0-capped).
+
+---
+
 ## What's Next
 
-1. **Waves 1-18 COMPLETE.** Security gate satisfied. No P0 regressions. All P1 audit logging resolved (incl. 9 billing handlers in Wave 11). Revenue analytics gap filled. Baseline P1s fully triaged with named IDs. **Wave 12 closed m12 elections (5 REAL, 3 FP); Wave 13 closed m11 documents/credentials (5 REAL); Wave 14 closed m14 national dashboard (5 REAL); Wave 15 closed m01 auth-onboarding (5 REAL); Wave 16 closed m05 membership (3 REAL, 1 FP); Wave 17 closed m04 org-admin (1 REAL event, 2 doc reconciliations, 1 partial FP); Wave 18 closed m06 dues-payments (2 REAL, 3 FP/reclassified).**
+1. **Waves 1-19 COMPLETE.** Security gate satisfied. No P0 regressions. All P1 audit logging resolved (incl. 9 billing handlers in Wave 11). Revenue analytics gap filled. Baseline P1s fully triaged with named IDs. **Wave 12 closed m12 elections (5 REAL, 3 FP); Wave 13 closed m11 documents/credentials (5 REAL); Wave 14 closed m14 national dashboard (5 REAL); Wave 15 closed m01 auth-onboarding (5 REAL); Wave 16 closed m05 membership (3 REAL, 1 FP); Wave 17 closed m04 org-admin (1 REAL event, 2 doc reconciliations, 1 partial FP); Wave 18 closed m06 dues-payments (2 REAL, 3 FP/reclassified); Wave 19 closed m07 communications (0 REAL, 3 FP — module already remediated; removed dead CrossModuleTriggers).**
 2. **Remaining P0s: 2** (EM-M07-no-typespec — communication 28 hand-wired handlers, DEFERRED; EM-M06 zero-domain-events — m06 dues event bridge, out of P1 scope, still caps m06 score).
-3. **Remaining P1s (built modules): m07 + m08 + m09 + m10 + m03 + m02 clusters left** (see `wave11_p1_triage` in baseline; m01/m04/m05/m06/m11/m12/m14 resolved). Priority order for next fix wave:
-   - **P1 — m07 (communications):** 3 P1s (P0 no-typespec is deferred — fix only P1s).
+3. **Remaining P1s (built modules): m08 + m09 + m10 + m03 + m02 clusters left** (see `wave11_p1_triage` in baseline; m01/m04/m05/m06/m07/m11/m12/m14 resolved). Priority order for next fix wave:
    - **P1 — m08 (events):** 2 P1s.
    - **P1 — m09 + m10:** certificate↔training wiring; credit-tracking events/export gaps.
    - **P1 — m03 (platform-admin), m02 (member-profile):** remaining clusters.
