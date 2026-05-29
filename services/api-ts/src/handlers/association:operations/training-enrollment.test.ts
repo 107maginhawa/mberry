@@ -1,5 +1,9 @@
-import { describe, test, expect } from 'bun:test';
-import { makeCtx } from '@/test-utils/make-ctx';
+import { describe, test, expect, beforeEach, afterEach, spyOn } from 'bun:test';
+import { makeCtx, stubRepo, restoreRepo } from '@/test-utils/make-ctx';
+import { TrainingRepository, TrainingEnrollmentRepository } from './repos/training.repo';
+import { CreditEntryRepository } from '../association:member/repos/credits.repo';
+import { OfficerTermRepository } from '@/handlers/association:member/repos/governance.repo';
+import { domainEvents } from '@/core/domain-events';
 
 /**
  * Training Enrollment Tests
@@ -111,6 +115,78 @@ describe('completeTrainingEnrollment — business logic', () => {
     const training = { creditBearing: false, creditAmount: 15 };
     const creditAwarded = training.creditBearing ? training.creditAmount : 0;
     expect(creditAwarded).toBe(0);
+  });
+});
+
+// ─── completeTrainingEnrollment — WF-061/BR-20 certificate wiring ──
+
+describe('completeTrainingEnrollment — emits training.completed (EM-M09-n4o5p6q7)', () => {
+  let trainingMocks: ReturnType<typeof stubRepo>;
+  let enrollMocks: ReturnType<typeof stubRepo>;
+  let creditMocks: ReturnType<typeof stubRepo>;
+  let officerMocks: ReturnType<typeof stubRepo>;
+  let emitSpy: ReturnType<typeof spyOn>;
+
+  beforeEach(() => {
+    restoreRepo(TrainingRepository);
+    restoreRepo(TrainingEnrollmentRepository);
+    restoreRepo(CreditEntryRepository);
+    restoreRepo(OfficerTermRepository);
+    emitSpy = spyOn(domainEvents, 'emit');
+  });
+
+  afterEach(() => {
+    [trainingMocks, enrollMocks, creditMocks, officerMocks].forEach(
+      (m) => m && Object.values(m).forEach((s) => s.mockRestore()),
+    );
+    emitSpy.mockRestore();
+    restoreRepo(TrainingRepository);
+    restoreRepo(TrainingEnrollmentRepository);
+    restoreRepo(CreditEntryRepository);
+    restoreRepo(OfficerTermRepository);
+  });
+
+  test('emits training.completed after credit-bearing enrollment completion', async () => {
+    const { completeTrainingEnrollment } = await import('./completeTrainingEnrollment');
+
+    officerMocks = stubRepo(OfficerTermRepository, {
+      findActiveByPersonAndOrg: async () => [{ positionTitle: 'Society Officer' }],
+    });
+    enrollMocks = stubRepo(TrainingEnrollmentRepository, {
+      findOneById: async () => ({ id: 'e-1', trainingId: 't-1', personId: 'm-1', status: 'enrolled' }),
+      updateOneById: async () => ({ id: 'e-1', trainingId: 't-1', personId: 'm-1', status: 'completed' }),
+    });
+    trainingMocks = stubRepo(TrainingRepository, {
+      findOneById: async () => ({
+        id: 't-1',
+        organizationId: 'org-1',
+        title: 'CPD Seminar',
+        creditBearing: true,
+        creditAmount: 10,
+        endDate: new Date(),
+      }),
+    });
+    creditMocks = stubRepo(CreditEntryRepository, {
+      findByTrainingAndPerson: async () => null,
+      createOne: async () => ({ id: 'c-1' }),
+    });
+
+    const ctx = makeCtx({
+      user: { id: 'officer-1', role: 'user', twoFactorEnabled: true },
+      _params: { enrollmentId: 'e-1' },
+      _body: {},
+    });
+
+    const response = await completeTrainingEnrollment(ctx);
+    expect(response.status).toBe(200);
+
+    const completedEmit = emitSpy.mock.calls.find((c) => c[0] === 'training.completed');
+    expect(completedEmit).toBeDefined();
+    expect(completedEmit![1]).toMatchObject({
+      trainingId: 't-1',
+      organizationId: 'org-1',
+      completedBy: 'officer-1',
+    });
   });
 });
 

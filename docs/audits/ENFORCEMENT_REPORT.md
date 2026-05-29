@@ -4,7 +4,7 @@
 
 # Enforcement Report
 
-**Generated:** 2026-05-29 (post-Wave 20 update)
+**Generated:** 2026-05-29 (post-Wave 21 update)
 **Engine:** oli-enforce-all v3 --strict
 **Scope:** 22 modules, 8 phases, 10 agents
 **Baseline:** 2026-05-29T22:00:00Z → 2026-05-29T23:30:00Z (v4)
@@ -232,6 +232,7 @@ All 13 P0 security findings from the previous run are confirmed fixed with test 
 | M08 | 4.0 | 4.5 | ↑ | listEvents auth fix |
 | M08 | 6.5 | 8.0 | ↑↑ | Wave 20: 2 REAL emit gaps fixed in LIVE association:operations handlers (event.cancelled + M8-R3 notify consumer; event.registered confirmed+waitlisted). 5 FP — audit read dead handlers/events/ dir |
 | M09 | 5.0 | 4.5 | ↓ | Dead code still present |
+| M09 | 6.5 | 7.5 | ↑ | Wave 21: cert-on-completion P1 fixed — completeTrainingEnrollment emits training.completed (WF-061/BR-20), firing the existing cert-available consumer for the credit-award path |
 | M10 | 6.5 | 7.0 | ↑ | SQL injection fix |
 | M11 | 3.0 | 6.0 | ↑↑ | 3 security fixes (HMAC, SVG, IDOR) |
 | M12 | 5.5 | 6.5 | ↑ | Election auth fix |
@@ -621,12 +622,28 @@ Verify-first sweep of the m08 P1 cluster. The 2026-05-28 module audit (`docs/aud
 
 ---
 
+### Wave 21 — m09 Training Remediation (COMPLETE ✅)
+
+Verify-first sweep of the lone m09 P1. The 2026-05-28 module audit (`docs/audits/enforce/module/m09-training.md`, scored 5.0) cited the now-deleted `handlers/training/markComplete.ts`; live training routes are generated TypeSpec routes bound to the **`handlers/association:operations/`** set. Two completion handlers exist: `completeCustomTraining.ts` (self-complete, already emits `training.completed`, awards no credit) and `completeTrainingEnrollment.ts` (officer completes an enrollment, **awards credit** — the WF-061/BR-20 attendance+credit flow — but emitted no event). The cert-available consumer (`domain-event-consumers.ts:1009`, added Wave 13 for EM-M11-e2f45a01) therefore never fired for the credit-award path.
+
+**1 REAL (fixed in live wired handler):**
+
+| ID | Finding | Fix |
+|----|---------|-----|
+| EM-M09-n4o5p6q7 | WF-061/BR-20 certificate generation not connected to training completion. Live `completeTrainingEnrollment.ts` (`routes.ts:2051`) awards credit but never emitted `training.completed` → member never notified certificate is downloadable. | Emit `domainEvents.emit('training.completed', {trainingId, organizationId, completedBy})` (fire-and-forget `.catch`) after credit award, matching sibling `completeCustomTraining.ts`. Existing consumer fans out the cert-available notification. |
+
+**Pipeline:** pure event change — no `src/generated/*` touched, no SDK schema change → no codegen. Tests: `training-enrollment.test.ts` spies `domainEvents.emit` (RED→GREEN); affected suite `training-enrollment` + `training-lifecycle` + `training` = 69 pass. Typecheck passes: api-ts, memberry, sdk-ts. (Pre-existing unrelated failure `org-accredited-providers.test.ts` ignored per protocol.)
+
+**Outcome:** m09 P1 **1→0** (1 REAL / 0 FP), score **6.5→7.5**.
+
+---
+
 ## What's Next
 
-1. **Waves 1-19 COMPLETE.** Security gate satisfied. No P0 regressions. All P1 audit logging resolved (incl. 9 billing handlers in Wave 11). Revenue analytics gap filled. Baseline P1s fully triaged with named IDs. **Wave 12 closed m12 elections (5 REAL, 3 FP); Wave 13 closed m11 documents/credentials (5 REAL); Wave 14 closed m14 national dashboard (5 REAL); Wave 15 closed m01 auth-onboarding (5 REAL); Wave 16 closed m05 membership (3 REAL, 1 FP); Wave 17 closed m04 org-admin (1 REAL event, 2 doc reconciliations, 1 partial FP); Wave 18 closed m06 dues-payments (2 REAL, 3 FP/reclassified); Wave 19 closed m07 communications (0 REAL, 3 FP — module already remediated; removed dead CrossModuleTriggers); Wave 20 closed m08 events (2 REAL emit gaps in live association:operations handlers, 5 FP — audit read dead handlers/events/ dir).**
+1. **Waves 1-21 COMPLETE.** Security gate satisfied. No P0 regressions. All P1 audit logging resolved (incl. 9 billing handlers in Wave 11). Revenue analytics gap filled. Baseline P1s fully triaged with named IDs. **Wave 12 closed m12 elections (5 REAL, 3 FP); Wave 13 closed m11 documents/credentials (5 REAL); Wave 14 closed m14 national dashboard (5 REAL); Wave 15 closed m01 auth-onboarding (5 REAL); Wave 16 closed m05 membership (3 REAL, 1 FP); Wave 17 closed m04 org-admin (1 REAL event, 2 doc reconciliations, 1 partial FP); Wave 18 closed m06 dues-payments (2 REAL, 3 FP/reclassified); Wave 19 closed m07 communications (0 REAL, 3 FP — module already remediated; removed dead CrossModuleTriggers); Wave 20 closed m08 events (2 REAL emit gaps in live association:operations handlers, 5 FP — audit read dead handlers/events/ dir); Wave 21 closed m09 training (1 REAL — training.completed emit connects WF-061/BR-20 certificate generation to the credit-award completion path).**
 2. **Remaining P0s: 2** (EM-M07-no-typespec — communication 28 hand-wired handlers, DEFERRED; EM-M06 zero-domain-events — m06 dues event bridge, out of P1 scope, still caps m06 score).
-3. **Remaining P1s (built modules): m09 + m10 + m03 + m02 clusters left** (see `wave11_p1_triage` in baseline; m01/m04/m05/m06/m07/m08/m11/m12/m14 resolved). Priority order for next fix wave:
-   - **P1 — m09 + m10:** certificate↔training wiring; credit-tracking events/export gaps.
+3. **Remaining P1s (built modules): m10 + m03 + m02 clusters left** (see `wave11_p1_triage` in baseline; m01/m04/m05/m06/m07/m08/m09/m11/m12/m14 resolved). Priority order for next fix wave:
+   - **P1 — m10 (credit-tracking):** events/export gaps (createMyCreditEntry emit, supporting-doc validation, transcript export wiring).
    - **P1 — m03 (platform-admin), m02 (member-profile):** remaining clusters.
    - **DEFERRED:** ~170 future-module P1 stubs (m13/m15/m16/m17/m18/m19); 7 TypeSpec, 3 coupling, 1 event from Wave 10.
 4. **Coverage Score: 78 → ~85** (estimated after Wave 10 + Wave 11 billing audit logging).

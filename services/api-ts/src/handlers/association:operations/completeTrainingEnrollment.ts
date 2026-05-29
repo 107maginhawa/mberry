@@ -5,6 +5,7 @@ import { NotFoundError, BusinessLogicError } from '@/core/errors';
 import { TrainingEnrollmentRepository, TrainingRepository } from './repos/training.repo';
 import { CreditEntryRepository } from '../association:member/repos/credits.repo';
 import { getCycleForDate } from '../association:member/utils/credit-cycle';
+import { domainEvents } from '@/core/domain-events';
 import { auditAction } from '@/utils/audit';
 import { requirePosition } from '@/utils/officer-check';
 import { POSITION_TITLES } from '@/utils/position-titles';
@@ -87,6 +88,19 @@ export async function completeTrainingEnrollment(
     } catch {
       // Credit creation failure should not block enrollment completion
     }
+  }
+
+  // [WF-061 / BR-20] Connect certificate generation to completion: emit
+  // training.completed so the cert-available consumer (EM-M11-e2f45a01)
+  // notifies the member their certificate can be downloaded.
+  if (training) {
+    domainEvents
+      .emit('training.completed', {
+        trainingId: training.id,
+        organizationId: training.organizationId,
+        completedBy: user.id,
+      })
+      .catch(() => {});
   }
 
   await auditAction(ctx, {
