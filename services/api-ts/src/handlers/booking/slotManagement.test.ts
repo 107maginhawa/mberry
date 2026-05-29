@@ -631,6 +631,7 @@ describe('041 — Booking CRUD lifecycle', () => {
   });
 
   test('markAsNoShow sets correct status for client no-show', async () => {
+    const existing = makeBooking({ status: 'confirmed' });
     const noShow = makeBooking({ status: 'no_show_client', noShowMarkedBy: 'host', noShowMarkedAt: new Date() });
 
     const db: any = {
@@ -648,11 +649,13 @@ describe('041 — Booking CRUD lifecycle', () => {
     };
 
     const repo = new BookingRepository(db);
+    (repo as any).findOneById = async () => existing;
     const result = await repo.markAsNoShow('booking-1', 'client');
     expect(result.status).toBe('no_show_client');
   });
 
   test('markAsNoShow sets correct status for host no-show', async () => {
+    const existing = makeBooking({ status: 'confirmed' });
     const noShow = makeBooking({ status: 'no_show_host', noShowMarkedBy: 'client', noShowMarkedAt: new Date() });
 
     const db: any = {
@@ -669,6 +672,7 @@ describe('041 — Booking CRUD lifecycle', () => {
     };
 
     const repo = new BookingRepository(db);
+    (repo as any).findOneById = async () => existing;
     const result = await repo.markAsNoShow('booking-1', 'host');
     expect(result.status).toBe('no_show_host');
   });

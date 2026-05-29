@@ -3,16 +3,17 @@ import type { RejectBookingBody, RejectBookingParams } from '@/generated/openapi
 import type { DatabaseInstance } from '@/core/database';
 import type { NotificationService } from '@/core/notifs';
 import type { User } from '@/types/auth';
-import { 
+import {
   ForbiddenError,
   NotFoundError,
-  ValidationError,
-  BusinessLogicError
+  ValidationError
 } from '@/core/errors';
 import { BookingRepository } from './repos/booking.repo';
 import type { BookingActionRequest } from './repos/booking.schema';
 import { checkBookingHostOwnership } from './utils/ownership';
 import { domainEvents } from '@/core/domain-events';
+import { assertValidTransition } from '@/utils/status-transitions';
+import { BOOKING_VALID_TRANSITIONS } from './utils/status-transitions';
 
 /**
  * rejectBooking
@@ -59,13 +60,8 @@ export async function rejectBooking(
     throw new ForbiddenError('You can only reject your own bookings');
   }
   
-  // Validate current status - can only reject pending bookings
-  if (booking.status !== 'pending') {
-    throw new BusinessLogicError(
-      `Cannot reject booking in ${booking.status} status`,
-      'INVALID_STATUS_TRANSITION'
-    );
-  }
+  // Validate current status — map-driven guard (ConflictError 409 on violation)
+  assertValidTransition(BOOKING_VALID_TRANSITIONS, booking.status, 'rejected', 'booking');
   
   // Validate reason length if provided
   if (body.reason && body.reason.length > 500) {

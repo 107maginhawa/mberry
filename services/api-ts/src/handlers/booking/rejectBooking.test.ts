@@ -1,6 +1,7 @@
 import { describe, test, expect, afterEach, mock } from 'bun:test';
 import { makeCtx, stubRepo } from '@/test-utils/make-ctx';
 import { fakeBooking as fakeBookingFactory } from '@/test-utils/factories';
+import { ConflictError } from '@/core/errors';
 import { BookingRepository } from './repos/booking.repo';
 import { rejectBooking } from './rejectBooking';
 
@@ -95,7 +96,7 @@ describe('rejectBooking', () => {
     expect((res as any).body.cancelledAt).toBeDefined();
   });
 
-  test('throws BusinessLogicError when booking is not pending', async () => {
+  test('throws ConflictError when booking is not pending', async () => {
     const confirmedBooking = { ...fakeBooking, status: 'confirmed' };
     mocks = stubRepo(BookingRepository, {
       findOneById: async () => confirmedBooking,
@@ -110,6 +111,6 @@ describe('rejectBooking', () => {
       _body: {},
     });
 
-    await expect(rejectBooking(ctx as any)).rejects.toThrow();
+    await expect(rejectBooking(ctx as any)).rejects.toBeInstanceOf(ConflictError);
   });
 });

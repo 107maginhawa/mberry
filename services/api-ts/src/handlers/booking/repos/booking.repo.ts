@@ -40,6 +40,8 @@ import { bookingEvents } from './booking.schema';
 import { persons } from '../../person/repos/person.schema';
 import { NotFoundError, ConflictError, ValidationError } from '@/core/errors';
 import { InvoiceRepository } from '../../billing/repos/billing.repo';
+import { assertValidTransition } from '@/utils/status-transitions';
+import { BOOKING_VALID_TRANSITIONS } from '../utils/status-transitions';
 
 export interface BookingFilters {
   client?: string;
@@ -226,6 +228,10 @@ export class BookingRepository extends DatabaseRepository<Booking, NewBooking, B
   async confirmBooking(bookingId: string): Promise<Booking> {
     this.logger?.debug({ bookingId }, 'Confirming booking');
 
+    const current = await this.findOneById(bookingId);
+    if (!current) throw new NotFoundError('Booking not found');
+    assertValidTransition(BOOKING_VALID_TRANSITIONS, current.status, 'confirmed', 'booking');
+
     const booking = await this.updateOneById(bookingId, {
       status: 'confirmed',
       confirmationTimestamp: new Date()
@@ -249,6 +255,8 @@ export class BookingRepository extends DatabaseRepository<Booking, NewBooking, B
     if (!booking) {
       throw new NotFoundError('Booking not found');
     }
+
+    assertValidTransition(BOOKING_VALID_TRANSITIONS, booking.status, 'cancelled', 'booking');
 
     // Update booking
     const cancelled = await this.updateOneById(bookingId, {
@@ -294,6 +302,10 @@ export class BookingRepository extends DatabaseRepository<Booking, NewBooking, B
     this.logger?.debug({ bookingId, markedBy }, 'Marking booking as no-show');
 
     const status = markedBy === 'client' ? 'no_show_client' : 'no_show_host';
+
+    const current = await this.findOneById(bookingId);
+    if (!current) throw new NotFoundError('Booking not found');
+    assertValidTransition(BOOKING_VALID_TRANSITIONS, current.status, status, 'booking');
 
     const updated = await this.updateOneById(bookingId, {
       status,
