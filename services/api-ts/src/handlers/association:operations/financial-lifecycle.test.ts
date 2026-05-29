@@ -114,6 +114,10 @@ describe('publishTraining — lifecycle gate', () => {
     id: 'tr-1',
     organizationId: 'org-1',
     title: 'CPD Seminar',
+    description: 'A continuing professional development seminar.',
+    startDate: new Date('2026-06-01'),
+    endDate: new Date('2026-06-02'),
+    creditBearing: false,
     status: 'draft',
   };
 
