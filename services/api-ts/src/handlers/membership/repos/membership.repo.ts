@@ -1,4 +1,4 @@
-import { eq, and, or, ilike, desc, sql, type SQL } from 'drizzle-orm';
+import { eq, and, or, ilike, desc, sql, notInArray, type SQL } from 'drizzle-orm';
 import type { DatabaseInstance } from '@/core/database';
 import { escapeLikePattern } from '@/utils/sanitize';
 import {
@@ -339,4 +339,49 @@ export class MembershipRepository {
       .returning();
     return result!;
   }
+}
+
+// ── Port adapter (S-C4-014) ─────────────────────────────────────────────
+// org-context middleware previously issued raw `db.select().from(memberships)`
+// queries. This adapter keeps the SQL co-located with the membership module
+// and exposes only the narrow lookup middleware needs.
+
+import type {
+  MembershipPort,
+  ActiveMembership,
+} from '@/core/ports/membership.port';
+
+export function membershipRepoPort(db: DatabaseInstance): MembershipPort {
+  return {
+    async findActiveMembershipByPersonAndOrg(
+      personId: string,
+      orgId: string,
+    ): Promise<ActiveMembership | undefined> {
+      const [row] = await db
+        .select({
+          id: memberships.id,
+          personId: memberships.personId,
+          organizationId: memberships.organizationId,
+          status: memberships.status,
+        })
+        .from(memberships)
+        .where(
+          and(
+            eq(memberships.personId, personId),
+            eq(memberships.organizationId, orgId),
+            // BR-01: status is computed at query time from duesExpiryDate.
+            // Allow all statuses except permanently removed members.
+            notInArray(memberships.status, ['removed', 'expelled', 'deceased']),
+          ),
+        )
+        .limit(1);
+      if (!row) return undefined;
+      return {
+        membershipId: row.id,
+        personId: row.personId,
+        organizationId: row.organizationId,
+        status: row.status,
+      };
+    },
+  };
 }

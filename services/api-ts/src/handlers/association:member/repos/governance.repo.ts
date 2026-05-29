@@ -179,3 +179,26 @@ export class DisciplinaryActionRepository {
 
   // M4-R4: No update method — disciplinary actions are immutable after creation
 }
+
+// ── Port adapter (S-C4-014) ─────────────────────────────────────────────
+// Hexagonal adapter that exposes only the slice of OfficerTermRepository
+// consumed by core/middleware. core/ports/governance.port.ts holds the
+// contract; the helper at core/ports/index.ts wires this in lazily.
+
+import type { GovernancePort, ActiveOfficerTerm } from '@/core/ports/governance.port';
+
+export function governanceRepoPort(db: NodePgDatabase): GovernancePort {
+  const repo = new OfficerTermRepository(db);
+  return {
+    async findActiveOfficerTermsByPersonAndOrg(
+      personId: string,
+      orgId: string,
+    ): Promise<ActiveOfficerTerm[]> {
+      const rows = await repo.findActiveByPersonAndOrg(personId, orgId);
+      return rows.map((r: { id: string; positionTitle?: string }) => ({
+        id: r.id,
+        positionTitle: r.positionTitle,
+      }));
+    },
+  };
+}

@@ -203,3 +203,51 @@ export class ImpersonationSessionRepository {
     return row;
   }
 }
+
+// ── Port adapters (S-C4-014) ────────────────────────────────────────────
+// Hexagonal adapters that expose only the slice of these repos consumed
+// by core/middleware. Interfaces live at core/ports/platform-admin.port.ts;
+// middleware reaches them through core/ports/index.ts.
+
+import type {
+  PlatformAdminPort,
+  PlatformAdminRecord,
+  ImpersonationPort,
+  ImpersonationSessionRecord,
+} from '@/core/ports/platform-admin.port';
+
+export function platformAdminRepoPort(db: NodePgDatabase): PlatformAdminPort {
+  const repo = new PlatformAdminRepository(db);
+  return {
+    async findByUserId(userId: string): Promise<PlatformAdminRecord | undefined> {
+      const row = await repo.findByUserId(userId);
+      if (!row) return undefined;
+      // Pass through the full record (see port doc). The cast is safe:
+      // PlatformAdmin is a plain JSON-like object with known id/userId/role.
+      return row as unknown as PlatformAdminRecord;
+    },
+  };
+}
+
+export function impersonationRepoPort(
+  db: NodePgDatabase,
+  logger?: Logger,
+): ImpersonationPort {
+  const repo = new ImpersonationSessionRepository(db, logger);
+  return {
+    async findByToken(token: string): Promise<ImpersonationSessionRecord | undefined> {
+      const row = await repo.findByToken(token);
+      if (!row) return undefined;
+      return {
+        id: row.id,
+        adminId: row.adminId,
+        targetUserId: row.targetUserId,
+        targetOrgId: row.targetOrgId,
+        sessionToken: row.sessionToken,
+        endedAt: row.endedAt,
+        expiresAt: row.expiresAt,
+        createdAt: row.createdAt,
+      };
+    },
+  };
+}
