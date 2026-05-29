@@ -1354,6 +1354,7 @@ export function registerRoutes(app: App) {
   for (const [name, config] of Object.entries(wsRegistry)) {
     const handlers = config.middleware || [];
 
+    // @ts-expect-error — generated code: handler type mismatch with Hono WebSocket types
     app.get(config.path, ...handlers, ws.upgradeWebSocket((ctx: Context) => ({
       async onOpen(event: MessageEvent, wsCtx: any) {
         const logger = ctx.get('logger');
