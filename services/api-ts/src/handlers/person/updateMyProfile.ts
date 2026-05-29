@@ -4,6 +4,7 @@ import { UnauthorizedError, NotFoundError } from '@/core/errors';
 import type { UpdateMyProfileBody } from '@/generated/openapi/validators';
 import { PersonRepository } from './repos/person.repo';
 import { auditAction } from '@/utils/audit';
+import { domainEvents } from '@/core/domain-events';
 
 /**
  * updateMyProfile
@@ -52,6 +53,12 @@ export async function updateMyProfile(
     resourceId: personId,
     description: 'Self-service profile update',
   });
+
+  // changedFields excludes the audit-only updatedBy marker
+  const updatedFields = Object.keys(updateData).filter((k) => k !== 'updatedBy');
+  domainEvents
+    .emit('person.updated', { personId, updatedBy: personId, updatedFields })
+    .catch(() => {});
 
   return ctx.json(updated, 200);
 }

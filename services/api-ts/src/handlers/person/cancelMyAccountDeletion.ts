@@ -3,6 +3,7 @@ import type { DatabaseInstance } from '@/core/database';
 import { UnauthorizedError, BusinessLogicError } from '@/core/errors';
 import { PersonRepository } from './repos/person.repo';
 import { auditAction } from '@/utils/audit';
+import { domainEvents } from '@/core/domain-events';
 
 /**
  * cancelMyAccountDeletion
@@ -39,6 +40,8 @@ export async function cancelMyAccountDeletion(ctx: BaseContext): Promise<Respons
     resourceId: personId,
     description: 'Account deletion request cancelled',
   });
+
+  domainEvents.emit('person.deletion.cancelled', { personId }).catch(() => {});
 
   return ctx.json({ message: 'Deletion request cancelled.' }, 200);
 }

@@ -19,6 +19,25 @@ export interface DomainEventMap {
     updatedFields: string[];
   };
 
+  'person.anonymized': {
+    personId: string;
+  };
+
+  'person.deletion.requested': {
+    personId: string;
+    scheduledDate: string;
+  };
+
+  'person.deletion.cancelled': {
+    personId: string;
+  };
+
+  'data-export.ready': {
+    personId: string;
+    exportId: string;
+    downloadUrl: string;
+  };
+
   // ── Membership Context ────────────────────────────────────────────────
   'membership.created': {
     membershipId: string;

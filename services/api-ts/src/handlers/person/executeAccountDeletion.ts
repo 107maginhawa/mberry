@@ -27,6 +27,7 @@ import { duesPayments } from '../association:member/repos/dues-payments.schema';
 import * as schema from '@/generated/better-auth/schema';
 import { eq } from 'drizzle-orm';
 import { executeCascadeDeletion } from './accountDeletionCascade';
+import { domainEvents } from '@/core/domain-events';
 
 export async function executeAccountDeletion(
   ctx: ValidatedContext<never, never, never>
@@ -106,6 +107,8 @@ export async function executeAccountDeletion(
   }
 
   logger?.info({ personId }, 'Account deletion executed — PII anonymized');
+
+  domainEvents.emit('person.anonymized', { personId }).catch(() => {});
 
   return ctx.json({ anonymized: true, personId }, 200);
 }

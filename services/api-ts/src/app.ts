@@ -138,6 +138,9 @@ import { getMyIdCard } from '@/handlers/person/getMyIdCard';
 import { getMyIdCardPdf } from '@/handlers/person/getMyIdCardPdf';
 import { getCreditTranscript } from '@/handlers/association:member/getCreditTranscript';
 import { getCreditTranscriptPdf } from '@/handlers/association:member/getCreditTranscriptPdf';
+import { requestDataExport } from '@/handlers/person/requestDataExport';
+import { getDataExportStatus } from '@/handlers/person/getDataExportStatus';
+import { getDataExportDownload } from '@/handlers/person/getDataExportDownload';
 
 // Wave 2b: Credit pipeline, CPD config, compliance, certificates
 import { getCpdConfig } from '@/handlers/association:member/getCpdConfig';
@@ -483,6 +486,12 @@ export function createApp(config: Config): App {
   }), validationErrorHandler);
   app.get('/persons/me/credit-transcript', creditTranscriptQuery, authMiddleware(), getCreditTranscript as unknown as Handler);
   app.get('/persons/me/credit-transcript/pdf', creditTranscriptPdfQuery, authMiddleware(), getCreditTranscriptPdf as unknown as Handler);
+
+  // @hand-wired reason="WF-014 async DPA data export (DataExport entity + status poll + download), inline schema not in TypeSpec" wave="Wave-24"
+  const dataExportIdParam = zValidator('param', z.object({ id: z.string().uuid() }), validationErrorHandler);
+  app.post('/persons/me/data-export', authMiddleware(), requestDataExport as unknown as Handler);
+  app.get('/persons/me/data-export/:id', dataExportIdParam, authMiddleware(), getDataExportStatus as unknown as Handler);
+  app.get('/persons/me/data-export/:id/download', dataExportIdParam, authMiddleware(), getDataExportDownload as unknown as Handler);
 
   // special-assessments CRUD — migrated to generated routes (Phase 35)
 

@@ -4,7 +4,7 @@
 
 # Enforcement Report
 
-**Generated:** 2026-05-29 (post-Wave 23 update)
+**Generated:** 2026-05-29 (post-Wave 24 update)
 **Engine:** oli-enforce-all v3 --strict
 **Scope:** 22 modules, 8 phases, 10 agents
 **Baseline:** 2026-05-29T22:00:00Z → 2026-05-29T23:30:00Z (v4)
@@ -222,6 +222,7 @@ All 13 P0 security findings from the previous run are confirmed fixed with test 
 |--------|----------|---------|-------|--------|
 | M01 | 6.0 | 7.5 | ↑ | PII export fix |
 | M02 | 6.4 | 7.8 | ↑ | Session invalidation fix |
+| M02 | 7.8 | 8.5 | ↑ | Wave 24: 2 REAL P1s — 4 domain events emitted (person.updated→id-card consumer, deletion.requested/cancelled, anonymized; +4 registry keys); DataExport async vertical slice (entity + state machine + POST/status/download routes + M2-R4 rate limit + 7-day TTL + data-export.ready). 0 FP. ZIP→S3 deferred P3 |
 | M03 | 6.5 | 7.5 | ↑ | Impersonation confirmed resolved |
 | M03 | 7.5 | 8.5 | ↑ | Wave 23: 3 REAL P1s — all 7 spec domain events emitted from live handlers (+7 registry keys); revenue/health analytics dead-code routes hand-wired; M3-R10 trial→cancelled transition added. 0 FP |
 | M04 | 6.5 | 8.5 | ↑↑ | Wave 17: OrgSettingsUpdated event wired; spec §10 reconciled to actual paths + 10 bonus endpoints documented (path-mismatch finding partly FP) |
@@ -684,11 +685,27 @@ Verify-first sweep of the m03 P1 cluster (baseline P1=3). The 2026-05-28 module 
 
 ---
 
+### Wave 24 — m02 Member-Profile Remediation (COMPLETE ✅)
+
+**FINAL built-module P1 cluster.** Verify-first sweep of the m02 P1 cluster (baseline P1=2). Both confirmed REAL against the live `handlers/person/` set; 0 false positives.
+
+**2 REAL (fixed in live wired handlers):**
+
+| ID | Finding | Fix |
+|----|---------|-----|
+| EM-M02-m3n4o5p6 | M02 handlers emitted **zero domain events** — every mutating handler used `auditAction()` but never `domainEvents.emit()`, so M02 was invisible to cross-module reactivity. | Added 4 typed keys to `DomainEventMap` (Person Context M02) and emit (fire-and-forget `.catch`) from each live handler: `person.updated` (`updateMyProfile.ts` — wires the **existing** id-card-refresh consumer at `domain-event-consumers.ts`), `person.deletion.requested` (`requestMyAccountDeletion.ts`), `person.deletion.cancelled` (`cancelMyAccountDeletion.ts`), `person.anonymized` (`executeAccountDeletion.ts`). |
+| EM-M02-e5f6g7h8 | Data export was a synchronous `GET` with no `DataExport` entity, no async lifecycle, no rate limit. | Implemented an async vertical slice: `data-export.schema.ts` entity (`pgEnum data_export_status` requested/processing/ready/failed/expired + state machine, migration `0059`), `POST /persons/me/data-export` (`requestDataExport` — M2-R4 1/24h rate limit→429, aggregates GDPR-safe person + memberships + credits + dues, 7-day TTL, emits `data-export.ready`, returns 202), `GET /persons/me/data-export/:id` (`getDataExportStatus` — ownership-scoped, reports `expired` past TTL), `GET /persons/me/data-export/:id/download` (`getDataExportDownload` — JSON attachment). All 3 hand-wired in `app.ts` under `authMiddleware()`. Residual ZIP→S3 packaging deferred to **P3** (no zip dependency exists; payload delivered as JSON). |
+
+**Pipeline:** event + entity/route-wiring. Schema change required `db:generate` (migration 0059 — `data_export` table only, no unrelated churn); routes hand-wired so **no OpenAPI codegen**. No `src/generated/openapi/*` touched. Tests: emit-assertion tests (`spyOn(domainEvents,'emit')`) added to updateMyProfile/requestMyAccountDeletion/cancelMyAccountDeletion/executeAccountDeletion; new requestDataExport.test.ts (unauth, rate-limit 429, 202+emit) + getDataExportStatus.test.ts (ownership, expiry). Full `person/` suite: **190 pass, 0 fail**. Typecheck passes across all workspaces.
+
+**Outcome:** m02 P1 **2→0** (2 REAL / 0 FP), score **7.8→8.5**. **All built-module P1 clusters now resolved.**
+
+---
+
 ## What's Next
 
-1. **Waves 1-23 COMPLETE.** Security gate satisfied. No P0 regressions. All P1 audit logging resolved (incl. 9 billing handlers in Wave 11). Revenue analytics gap filled. Baseline P1s fully triaged with named IDs. **Wave 12 closed m12 elections (5 REAL, 3 FP); Wave 13 closed m11 documents/credentials (5 REAL); Wave 14 closed m14 national dashboard (5 REAL); Wave 15 closed m01 auth-onboarding (5 REAL); Wave 16 closed m05 membership (3 REAL, 1 FP); Wave 17 closed m04 org-admin (1 REAL event, 2 doc reconciliations, 1 partial FP); Wave 18 closed m06 dues-payments (2 REAL, 3 FP/reclassified); Wave 19 closed m07 communications (0 REAL, 3 FP — module already remediated; removed dead CrossModuleTriggers); Wave 20 closed m08 events (2 REAL emit gaps in live association:operations handlers, 5 FP — audit read dead handlers/events/ dir); Wave 21 closed m09 training (1 REAL — training.completed emit connects WF-061/BR-20 certificate generation to the credit-award completion path); Wave 22 closed m10 credit-tracking (3 REAL — createMyCreditEntry credit.awarded emit, M10-R5 supporting-doc validation, WF-070 transcript export route-wiring; 1 FP — GDPR anonymization already in accountDeletionCascade); Wave 23 closed m03 platform-admin (3 REAL — all 7 spec domain events emitted from live handlers +7 registry keys, revenue/health analytics dead-code routes hand-wired, M3-R10 trial→cancelled transition; 0 FP).**
+1. **Waves 1-24 COMPLETE — all built-module P1 clusters resolved.** Security gate satisfied. No P0 regressions. All P1 audit logging resolved (incl. 9 billing handlers in Wave 11). Revenue analytics gap filled. Baseline P1s fully triaged with named IDs. **Wave 12 closed m12 elections (5 REAL, 3 FP); Wave 13 closed m11 documents/credentials (5 REAL); Wave 14 closed m14 national dashboard (5 REAL); Wave 15 closed m01 auth-onboarding (5 REAL); Wave 16 closed m05 membership (3 REAL, 1 FP); Wave 17 closed m04 org-admin (1 REAL event, 2 doc reconciliations, 1 partial FP); Wave 18 closed m06 dues-payments (2 REAL, 3 FP/reclassified); Wave 19 closed m07 communications (0 REAL, 3 FP — module already remediated; removed dead CrossModuleTriggers); Wave 20 closed m08 events (2 REAL emit gaps in live association:operations handlers, 5 FP — audit read dead handlers/events/ dir); Wave 21 closed m09 training (1 REAL — training.completed emit connects WF-061/BR-20 certificate generation to the credit-award completion path); Wave 22 closed m10 credit-tracking (3 REAL — createMyCreditEntry credit.awarded emit, M10-R5 supporting-doc validation, WF-070 transcript export route-wiring; 1 FP — GDPR anonymization already in accountDeletionCascade); Wave 23 closed m03 platform-admin (3 REAL — all 7 spec domain events emitted from live handlers +7 registry keys, revenue/health analytics dead-code routes hand-wired, M3-R10 trial→cancelled transition; 0 FP); Wave 24 closed m02 member-profile (2 REAL — 4 domain events emitted incl. person.updated→existing id-card consumer, DataExport async vertical slice with rate limit + TTL + emit; 0 FP). FINAL built-module cluster.**
 2. **Remaining P0s: 2** (EM-M07-no-typespec — communication 28 hand-wired handlers, DEFERRED; EM-M06 zero-domain-events — m06 dues event bridge, out of P1 scope, still caps m06 score). **Plus 1 untracked security P0** `EM-M03-9a3e7b12` (super-only caller guards missing on revokeAdmin/deleteAssociation/updateAdmin; baseline records m03 P0=0 — flag for a dedicated security pass).
-3. **Remaining P1s (built modules): m02 cluster left** (see `wave11_p1_triage` in baseline; m01/m03/m04/m05/m06/m07/m08/m09/m10/m11/m12/m14 resolved). Priority order for next fix wave:
-   - **P1 — m02 (member-profile):** remaining cluster (P1=2) — final built-module P1 cluster.
-   - **DEFERRED:** ~170 future-module P1 stubs (m13/m15/m16/m17/m18/m19); 7 TypeSpec, 3 coupling, 1 event from Wave 10.
+3. **Remaining P1s (built modules): NONE.** All 13 built-module P1 clusters resolved (m01/m02/m03/m04/m05/m06/m07/m08/m09/m10/m11/m12/m14). Only deferred future-module stubs remain:
+   - **DEFERRED:** ~170 future-module P1 stubs (m13/m15/m16/m17/m18/m19 — unbuilt-feature stubs); 7 TypeSpec, 3 coupling, 1 event from Wave 10.
 4. **Coverage Score: 78 → ~85** (estimated after Wave 10 + Wave 11 billing audit logging).

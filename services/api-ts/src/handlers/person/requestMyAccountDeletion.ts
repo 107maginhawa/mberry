@@ -4,6 +4,7 @@ import type { DatabaseInstance } from '@/core/database';
 import { UnauthorizedError, BusinessLogicError } from '@/core/errors';
 import { PersonRepository } from './repos/person.repo';
 import { auditAction } from '@/utils/audit';
+import { domainEvents } from '@/core/domain-events';
 import { duesPayments } from '@/handlers/association:member/repos/dues-payments.schema';
 import { officerTerms } from '@/handlers/association:member/repos/governance.schema';
 
@@ -98,6 +99,13 @@ export async function requestMyAccountDeletion(ctx: BaseContext): Promise<Respon
     description: 'Account deletion requested',
     details: { scheduledAt: scheduledAt.toISOString() },
   });
+
+  domainEvents
+    .emit('person.deletion.requested', {
+      personId,
+      scheduledDate: scheduledAt.toISOString(),
+    })
+    .catch(() => {});
 
   return ctx.json({
     message: 'Deletion request recorded. Your account will be deleted in 30 days.',
