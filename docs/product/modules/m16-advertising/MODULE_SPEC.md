@@ -163,6 +163,13 @@ Revenue-generating advertising module for the Memberry platform. Enables healthc
 | M16-R5 | IF ad reported N times THEN auto-pause creative for review | Moderation | Threshold configurable per association |
 | M16-R6 | IF campaign budget exhausted (spentCents >= budgetCents) THEN pause delivery | Budget | No overspend; system auto-pauses |
 | M16-R7 | IF ad slot configured per association THEN admin configures which slots active | Configuration | Per-association slot activation |
+| BR-45 | IF ad creative submitted THEN require admin approval before display (no self-serve) | Creative review (WF-093) | Canonical WORKFLOW_MAP ID for M16-R1. Creative state Pending -> Approved/Rejected; only Approved creatives display. |
+| BR-46 | IF ad targeting configured THEN segment-based only, no individual member data shared | Privacy (WF-093, WF-094) | Canonical WORKFLOW_MAP ID for M16-R2. Advertiser sees aggregate segment counts only. |
+| BR-47 | IF sponsored content displayed THEN clearly labeled "Sponsored" | Display (WF-094) | Canonical WORKFLOW_MAP ID for M16-R3. `sponsoredLabel` boolean, default true. |
+| BR-48 | IF member opts out THEN no targeted ads, generic ads only | Opt-out (WF-094) | Canonical WORKFLOW_MAP ID for M16-R4. Respected immediately upon toggle. |
+| BR-49 | IF campaign budget exhausted (spentCents >= budgetCents) THEN auto-pause delivery (no overspend) | Budget (WF-093, WF-095) | Canonical WORKFLOW_MAP ID for M16-R6. System auto-pauses campaign delivery. |
+
+> **Note:** BR-45..BR-49 are the canonical WORKFLOW_MAP §4 identifiers; M16-R1..R7 are the module-local rule names. They describe the same rules. M16 is an unbuilt-roadmap module — these are spec-only rules; no implementation exists yet (see ROADMAP.md).
 
 ## 6. Permissions
 
