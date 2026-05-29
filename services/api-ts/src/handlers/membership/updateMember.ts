@@ -7,6 +7,8 @@ import { persistWithComputedStatus } from '../association:member/utils/membershi
 import type { DatabaseInstance } from '@/core/database';
 import type { Session } from '@/types/auth';
 import { auditAction } from '@/utils/audit';
+import { assertValidTransition } from '@/utils/status-transitions';
+import { MEMBERSHIP_VALID_TRANSITIONS } from '@/handlers/association:member/utils/status-transitions';
 
 // [V-20] Zod schema for updateMember request body
 const VALID_STATUSES = ['active', 'suspended', 'removed', 'grace', 'lapsed'] as const;
@@ -71,6 +73,15 @@ export async function updateMember(ctx: Context): Promise<Response> {
   const status = isValidOfficerTransition(currentStatus, requestedDbStatus)
     ? requestedDbStatus
     : currentStatus;
+
+  // [S-G1-01] Defensive full-FSM assertion downstream of officer-subset gate.
+  // Blocks any future caller that bypasses isValidOfficerTransition. The
+  // `status !== currentStatus` guard preserves BR-03 silent fall-through.
+  // Normalize the 'grace' alias for the FSM-keyed map (which uses 'gracePeriod').
+  if (status !== currentStatus) {
+    const fromNormalized = (currentStatus as string) === 'grace' ? 'gracePeriod' : currentStatus;
+    assertValidTransition(MEMBERSHIP_VALID_TRANSITIONS, fromNormalized, status, 'membership');
+  }
 
   // [BR-01] Map requested status to flag fields — never write status directly.
   const flagUpdates: { suspendedAt?: Date | null; removedAt?: Date | null } = {};
