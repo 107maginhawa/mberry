@@ -1,4 +1,4 @@
-// Business Rules: [BR-01]
+// Business Rules: [BR-01] [BR-02 / AC-M06-003: grace period enforcement]
 /**
  * RED tests for computeMembershipStatus — BR-01
  *

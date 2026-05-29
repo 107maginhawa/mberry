@@ -120,7 +120,7 @@ describe('[SEC-01] deleteDuesInvoice — position-based auth + cross-org', () =>
     }
   });
 
-  // [M06 P1-5 BR-32] soft-delete only — financial records have a 7-year
+  // [M06 P1-5 BR-32 / AC-M06-006] soft-delete only — financial records have a 7-year
   // retention requirement, so deletion transitions to 'cancelled', never hard-delete.
   test('soft-deletes via status=cancelled and never hard-deletes (BR-32)', async () => {
     let updatedWith: any;

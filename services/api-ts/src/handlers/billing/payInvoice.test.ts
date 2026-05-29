@@ -1,6 +1,9 @@
 /**
  * Tests for payInvoice.ts handler.
  *
+ * AC-M06-007: payment gateway isolation per org — payment routes through the
+ * payee org's own MerchantAccountRepository.findByPerson (404 when absent).
+ *
  * Tests cover:
  * - State validation: only invoices with null/pending paymentStatus can be paid
  * - Authorization: only the customer of the invoice can pay it

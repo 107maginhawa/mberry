@@ -1,5 +1,5 @@
 /**
- * BR-07: Payment extends membership expiry by billing period.
+ * BR-07 / AC-M06-005: Payment extends membership expiry by billing period.
  *
  * Source lives at association:member/utils/expiry-extension.ts — tested here
  * at the path registered in br-registry.json for BR-07.
