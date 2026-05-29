@@ -1,7 +1,7 @@
 import type { ValidatedContext } from '@/types/app';
 import type { DatabaseInstance } from '@/core/database';
 import type { CompleteTrainingEnrollmentBody, CompleteTrainingEnrollmentParams } from '@/generated/openapi/validators';
-import { NotFoundError, BusinessLogicError } from '@/core/errors';
+import { NotFoundError } from '@/core/errors';
 import { TrainingEnrollmentRepository, TrainingRepository } from './repos/training.repo';
 import { CreditEntryRepository } from '../association:member/repos/credits.repo';
 import { getCycleForDate } from '../association:member/utils/credit-cycle';
@@ -9,6 +9,7 @@ import { domainEvents } from '@/core/domain-events';
 import { auditAction } from '@/utils/audit';
 import { requirePosition } from '@/utils/officer-check';
 import { POSITION_TITLES } from '@/utils/position-titles';
+import { assertValidTransition, TRAINING_ENROLLMENT_VALID_TRANSITIONS } from '@/utils/status-transitions';
 
 /**
  * completeTrainingEnrollment
@@ -44,13 +45,14 @@ export async function completeTrainingEnrollment(
   const enrollment = await enrollRepo.findOneById(params.enrollmentId);
   if (!enrollment) throw new NotFoundError('Training enrollment not found');
 
-  if (enrollment.status === 'completed') {
-    throw new BusinessLogicError('Enrollment is already completed', 'ALREADY_COMPLETED');
-  }
-
-  if (enrollment.status !== 'enrolled') {
-    throw new BusinessLogicError('Only enrolled enrollments can be completed', 'INVALID_STATUS');
-  }
+  // S-G1-04: FSM guard — only `enrolled` may transition to `completed`.
+  // Terminal states (completed, cancelled, noShow) raise ConflictError (409).
+  assertValidTransition(
+    TRAINING_ENROLLMENT_VALID_TRANSITIONS,
+    enrollment.status,
+    'completed',
+    'training enrollment',
+  );
 
   const completed = await enrollRepo.updateOneById(enrollment.id, {
     status: 'completed',
