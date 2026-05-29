@@ -42,6 +42,13 @@ import "./modules/onboarding.tsp";
 // Surveys & NPS — Wave 6
 import "./modules/surveys.tsp";
 
+// Wave G3 — Standards Adoption (TypeSpec coverage for legacy hand-wired modules)
+// Note: routes for advertising/jobs/marketplace are NOT mounted in app.ts.
+// TypeSpec authored to surface contracts in the OpenAPI spec; activation deferred.
+import "./modules/advertising.tsp";
+import "./modules/jobs.tsp";
+import "./modules/marketplace.tsp";
+
 // Infrastructure endpoints (health.tsp and feature-flags.tsp removed — real
 // implementations live in core/health.ts and platformadmin/listFeatureFlags.ts)
 
@@ -659,6 +666,38 @@ namespace MonobaseAPI {
 
   @tag("Onboarding")
   interface OnboardingManagement extends OnboardingModule.OnboardingManagement {}
+
+  // =========================================================================
+  // Wave G3 — Advertising / Jobs / Marketplace
+  // (TypeSpec-only; routes are NOT mounted in app.ts pending product decision)
+  // =========================================================================
+
+  @tag("Advertising")
+  interface AdvertisingAdvertiserManagement extends AdvertisingModule.AdvertiserManagement {}
+
+  @tag("Advertising")
+  interface AdvertisingCampaignManagement extends AdvertisingModule.CampaignManagement {}
+
+  @tag("Advertising")
+  interface AdvertisingCreativeManagement extends AdvertisingModule.CreativeManagement {}
+
+  @tag("Advertising")
+  interface AdvertisingAdPlacement extends AdvertisingModule.AdPlacement {}
+
+  @tag("Jobs")
+  interface JobsJobPostingManagement extends JobsModule.JobBoardPostingManagement {}
+
+  @tag("Jobs")
+  interface JobsJobApplicationManagement extends JobsModule.JobBoardApplicationManagement {}
+
+  @tag("Marketplace")
+  interface MarketplaceVendorManagement extends MarketplaceModule.VendorManagement {}
+
+  @tag("Marketplace")
+  interface MarketplaceListingManagement extends MarketplaceModule.ListingManagement {}
+
+  @tag("Marketplace")
+  interface MarketplaceOrderManagement extends MarketplaceModule.OrderManagement {}
 
   // =========================================================================
   // Infrastructure Endpoints
