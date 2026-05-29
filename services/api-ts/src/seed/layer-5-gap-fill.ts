@@ -785,11 +785,14 @@ export async function seedFinanceDeepFill(
     if (paidInvoices.length > 0) {
       let linked = 0;
       for (const inv of paidInvoices) {
-        const result = await db.execute(sql`
+        await db.execute(sql`
           UPDATE dues_payment SET invoice_id = ${inv.id}
-          WHERE person_id = ${inv.personId} AND organization_id = ${orgId}
-            AND status = 'completed' AND invoice_id IS NULL
-          LIMIT 1
+          WHERE id = (
+            SELECT id FROM dues_payment
+            WHERE person_id = ${inv.personId} AND organization_id = ${orgId}
+              AND status = 'completed' AND invoice_id IS NULL
+            LIMIT 1
+          )
         `);
         linked++;
       }
@@ -994,8 +997,11 @@ export async function seedCommsGapFill(
   try {
     await db.execute(sql`
       UPDATE chat_room SET room_type = 'channel', name = 'General'
-      WHERE organization_id = ${orgId} AND room_type IS NULL
-      LIMIT 1
+      WHERE id = (
+        SELECT id FROM chat_room
+        WHERE organization_id = ${orgId} AND room_type IS NULL
+        LIMIT 1
+      )
     `);
     console.log('    ✓ Room type updated to channel');
   } catch (e) {
@@ -1134,14 +1140,20 @@ export async function seedCpdBackfill(
   try {
     await db.execute(sql`
       UPDATE credit_entry SET source_type = 'event_checkin'
-      WHERE source_type IS NULL AND organization_id = ${orgId}
-      LIMIT 10
+      WHERE id IN (
+        SELECT id FROM credit_entry
+        WHERE source_type IS NULL AND organization_id = ${orgId}
+        LIMIT 10
+      )
     `);
     // Add 1 voided credit
     await db.execute(sql`
       UPDATE credit_entry SET status = 'voided', voided_reason = 'Duplicate entry — same event credited twice'
-      WHERE status = 'active' AND organization_id = ${orgId}
-      LIMIT 1
+      WHERE id = (
+        SELECT id FROM credit_entry
+        WHERE status = 'active' AND organization_id = ${orgId}
+        LIMIT 1
+      )
     `);
     console.log('    ✓ Credit entries backfilled (sourceType + 1 voided)');
   } catch (e) {
@@ -1152,14 +1164,16 @@ export async function seedCpdBackfill(
   try {
     await db.execute(sql`
       UPDATE certificate SET status = 'issued'
-      WHERE status IS NULL
-      LIMIT 20
+      WHERE id IN (
+        SELECT id FROM certificate WHERE status IS NULL LIMIT 20
+      )
     `);
     // Add 1 revoked cert
     await db.execute(sql`
       UPDATE certificate SET status = 'revoked', revoked_at = ${daysAgo(30)}, revoked_reason = 'Training provider accreditation revoked — credits invalidated'
-      WHERE status = 'issued'
-      LIMIT 1
+      WHERE id = (
+        SELECT id FROM certificate WHERE status = 'issued' LIMIT 1
+      )
     `);
     console.log('    ✓ Certificates backfilled (status + 1 revoked)');
   } catch (e) {

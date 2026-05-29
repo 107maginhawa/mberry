@@ -40,6 +40,11 @@ import { seedEvents, seedTraining, seedElections, seedAnnouncements, seedCredits
 import { seedNotifications, seedCertificates, seedDocuments, seedComms, seedBilling, seedDunningEventsAndAudit, seedRemainingModules, seedDuesInfrastructure, seedCommittees } from './seed/layer-4-cross-module';
 import { seedEventsGapFill, seedTrainingGapFill, seedCredentialsGapFill, seedProfileAndGovernanceGapFill, seedFinanceDeepFill, seedCommsGapFill, seedSurveysModule, seedCpdBackfill, seedSavedSegments, seedJobsModule, seedPrivacyBackfill } from './seed/layer-5-gap-fill';
 import { seedStateCoverage } from './seed/layer-6-states';
+import { seedCommsCoverage } from './seed/layer-7-comms';
+import { seedPlatformCoverage } from './seed/layer-7-platform';
+import { seedDuesCoverage } from './seed/layer-7-dues';
+import { seedMemberGovernanceCoverage } from './seed/layer-7-member';
+import { seedMiscCoverage } from './seed/layer-7-misc';
 
 async function main() {
   console.log('╔══════════════════════════════════════════╗');
@@ -60,7 +65,7 @@ async function main() {
   const db = drizzle(pool);
 
   // ═══ Layer 1: Foundation ═══
-  const { orgId, org2Id, regularTierId, associateTierId, org2RegularTierId } = await bootstrapDB(db);
+  const { assocId, orgId, org2Id, regularTierId, associateTierId, org2RegularTierId } = await bootstrapDB(db);
 
   // ═══ Layer 2: Users ═══
   const president = await seedPresident(db, orgId, regularTierId);
@@ -198,6 +203,22 @@ async function main() {
 
   console.log('\nPhase 31: Missing role users...');
   await seedMissingRoles(db, orgId, regularTierId);
+
+  // ═══ Layer 7: Table Coverage — fill remaining unseeded tables ═══
+  console.log('\nPhase 32: Comms coverage (feed, templates, subscriptions, email)...');
+  await seedCommsCoverage(db, orgId, president.personId, memberPersonIds);
+
+  console.log('\nPhase 33: Platform admin coverage (flags, tiers, tickets, security)...');
+  await seedPlatformCoverage(db, orgId, assocId, president.personId, memberPersonIds);
+
+  console.log('\nPhase 34: Dues + privacy coverage (aging, reminders, tokens, exports)...');
+  await seedDuesCoverage(db, orgId, president.personId, memberPersonIds);
+
+  console.log('\nPhase 35: Member governance coverage (transfers, royalties, discipline)...');
+  await seedMemberGovernanceCoverage(db, orgId, president.personId, memberPersonIds);
+
+  console.log('\nPhase 36: Misc coverage (advertising, booking, document tags)...');
+  await seedMiscCoverage(db, orgId, president.personId, memberPersonIds);
 
   // ═══ Summary ═══
   const personCount = await db.select().from(persons);

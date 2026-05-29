@@ -104,9 +104,9 @@ export async function seedStateCoverage(
       const existing = (await db.execute(sql`SELECT id FROM election WHERE title = ${e.title} LIMIT 1`)) as unknown as { rows: Array<{ id: string }> };
       if (existing.rows?.length === 0) {
         await db.execute(sql`
-          INSERT INTO election (organization_id, title, description, election_type, voting_mode, status,
+          INSERT INTO election (organization_id, title, type, voting_mode, status,
             nominations_open_at, nominations_close_at, voting_open_at, voting_close_at)
-          VALUES (${orgId}, ${e.title}, ${'State coverage seed — ' + e.status},
+          VALUES (${orgId}, ${e.title},
             'officer'::election_type, 'online'::voting_mode, ${e.status}::election_status,
             ${daysAgo(120)}, ${daysAgo(90)}, ${daysAgo(60)}, ${daysAgo(30)})
         `);

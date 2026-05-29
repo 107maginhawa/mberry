@@ -460,9 +460,8 @@ export async function seedMissingRoles(
     console.log(`    ✓ ${ru.firstName} ${ru.lastName} — ${ru.position ?? 'Staff'} (${ru.email})`);
   }
 
-  // Platform admin roles (support + analyst) — DB-only, no API signup needed
-  // Note: userId is required by schema but unavailable without signup; these inserts
-  // rely on raw SQL fallback at runtime if the NOT NULL constraint is enforced.
+  // Platform admin roles (support + analyst) — backed by a real auth user so
+  // platform_admin.userId holds a valid uuid (the column is a NOT NULL uuid FK).
   const platformRoles: Array<{ email: string; name: string; role: typeof platformAdmins.$inferInsert['role'] }> = [
     { email: 'support-admin@memberry.ph', name: 'Platform Support', role: 'support' },
     { email: 'viewer-admin@memberry.ph', name: 'Platform Viewer', role: 'analyst' },
@@ -470,15 +469,27 @@ export async function seedMissingRoles(
 
   for (const pr of platformRoles) {
     const existing = (await db.execute(sql`SELECT id FROM platform_admin WHERE email = ${pr.email} LIMIT 1`)) as unknown as { rows: Array<{ id: string }> };
-    if (existing.rows?.length === 0) {
-      await db.insert(platformAdmins).values({
-        email: pr.email,
-        name: pr.name,
-        role: pr.role,
-        userId: '', // placeholder — these DB-only admins lack a real user signup
-      });
-      console.log(`    ✓ ${pr.name} — platform ${pr.role} (${pr.email})`);
+    if (existing.rows?.length > 0) continue;
+
+    const existingUser = (await db.execute(sql`SELECT id FROM "user" WHERE email = ${pr.email} LIMIT 1`)) as unknown as { rows: Array<{ id: string }> };
+    let userId: string;
+    if (existingUser.rows?.length > 0) {
+      userId = existingUser.rows[0]!.id;
+    } else {
+      const client = new SeedClient(orgId);
+      await client.signUp(pr.email, pr.name);
+      await verifyEmail(db, pr.email);
+      await client.signIn(pr.email);
+      userId = client.userId;
     }
+
+    await db.insert(platformAdmins).values({
+      email: pr.email,
+      name: pr.name,
+      role: pr.role,
+      userId,
+    });
+    console.log(`    ✓ ${pr.name} — platform ${pr.role} (${pr.email})`);
   }
 
   console.log('  Missing roles complete.');
