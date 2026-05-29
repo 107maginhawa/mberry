@@ -57,7 +57,8 @@ export async function getIdCardData(
   const validUntil = membership?.duesExpiryDate ?? null;
   const licenseNumber = person.licenseNumber ?? person.prcId ?? null;
 
-  // Build QR payload
+  // Build QR payload. timestamp (issued-at) lets verifiers detect stale/replayed
+  // codes — validUntil bounds membership validity, timestamp bounds the QR itself (BR-18).
   const payload = {
     version: 1,
     personId,
@@ -65,6 +66,7 @@ export async function getIdCardData(
     licenseNumber,
     status,
     validUntil,
+    timestamp: new Date().toISOString(),
   };
   const payloadJson = JSON.stringify(payload);
   const qrPayload = Buffer.from(payloadJson).toString('base64');
