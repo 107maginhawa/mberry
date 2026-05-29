@@ -98,6 +98,20 @@ import { updateOrganization } from '../../handlers/platformadmin/updateOrganizat
 import { transitionOrgStatus } from '../../handlers/platformadmin/transitionOrgStatus';
 import { getOrganizationBySlug } from '../../handlers/platformadmin/getOrganizationBySlug';
 import { listPublicOrgs } from '../../handlers/platformadmin/listPublicOrgs';
+import { createAdvertiser } from '../../handlers/advertising/createAdvertiser';
+import { createCampaign } from '../../handlers/advertising/createCampaign';
+import { createCreative } from '../../handlers/advertising/createCreative';
+import { reportAd } from '../../handlers/advertising/reportAd';
+import { reviewCreative } from '../../handlers/advertising/reviewCreative';
+import { setMemberOptOut } from '../../handlers/advertising/setMemberOptOut';
+import { getAdForPlacement } from '../../handlers/advertising/getAdForPlacement';
+import { createJobApplication } from '../../handlers/jobs/createJobApplication';
+import { updateJobApplication } from '../../handlers/jobs/updateJobApplication';
+import { createJobPosting } from '../../handlers/jobs/createJobPosting';
+import { searchJobPostings } from '../../handlers/jobs/searchJobPostings';
+import { getJobPosting } from '../../handlers/jobs/getJobPosting';
+import { updateJobPosting } from '../../handlers/jobs/updateJobPosting';
+import { deleteJobPosting } from '../../handlers/jobs/deleteJobPosting';
 import { createDocumentTag } from '../../handlers/documents/createDocumentTag';
 import { listDocumentTags } from '../../handlers/documents/listDocumentTags';
 import { getDocumentTag } from '../../handlers/documents/getDocumentTag';
@@ -375,6 +389,15 @@ import { bulkImportMembers } from '../../handlers/invite/bulkImportMembers';
 import { createInvite } from '../../handlers/invite/createInvite';
 import { claimInvite } from '../../handlers/invite/claimInvite';
 import { validateInvite } from '../../handlers/invite/validateInvite';
+import { createListing } from '../../handlers/marketplace/createListing';
+import { listListings } from '../../handlers/marketplace/listListings';
+import { createOrder } from '../../handlers/marketplace/createOrder';
+import { fulfillOrder } from '../../handlers/marketplace/fulfillOrder';
+import { createVendor } from '../../handlers/marketplace/createVendor';
+import { listVendors } from '../../handlers/marketplace/listVendors';
+import { getVendor } from '../../handlers/marketplace/getVendor';
+import { updateVendor } from '../../handlers/marketplace/updateVendor';
+import { verifyVendor } from '../../handlers/marketplace/verifyVendor';
 import { listOrgApplications } from '../../handlers/membership/listOrgApplications';
 import { listOrgMembers } from '../../handlers/membership/listOrgMembers';
 import { getOrgProfile } from '../../handlers/membership/getOrgProfile';
@@ -522,6 +545,24 @@ export const registry = {
   transitionOrgStatus,
   getOrganizationBySlug,
   listPublicOrgs,
+
+  // Advertising handlers
+  createAdvertiser,
+  createCampaign,
+  createCreative,
+  reportAd,
+  reviewCreative,
+  setMemberOptOut,
+  getAdForPlacement,
+
+  // Jobs handlers
+  createJobApplication,
+  updateJobApplication,
+  createJobPosting,
+  searchJobPostings,
+  getJobPosting,
+  updateJobPosting,
+  deleteJobPosting,
 
   // Documents handlers
   createDocumentTag,
@@ -819,6 +860,17 @@ export const registry = {
   createInvite,
   claimInvite,
   validateInvite,
+
+  // Marketplace handlers
+  createListing,
+  listListings,
+  createOrder,
+  fulfillOrder,
+  createVendor,
+  listVendors,
+  getVendor,
+  updateVendor,
+  verifyVendor,
 
   // Membership handlers
   listOrgApplications,
