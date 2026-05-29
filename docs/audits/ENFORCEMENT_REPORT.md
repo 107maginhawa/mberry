@@ -4,7 +4,7 @@
 
 # Enforcement Report
 
-**Generated:** 2026-05-29 (post-Wave 29 update)
+**Generated:** 2026-05-29 (post-Wave 30 update)
 **Engine:** oli-enforce-all v3 --strict
 **Scope:** 22 modules, 8 phases, 10 agents
 **Baseline:** 2026-05-29T22:00:00Z → 2026-05-29T23:30:00Z (v4)
@@ -789,10 +789,29 @@ First non-module lens after the per-module gate was satisfied. Both audit-log P0
 
 ---
 
+### Wave 30 — coverage P0s (EC-001/002/003/005/006/007) (COMPLETE ✅ — ALL 6 STALE)
+
+The largest non-module cluster. Six coverage P0s claimed missing `MODULE_SPEC` docs or *no TypeSpec coverage*. **Verify-first found every premise false** — same "expect more stale" pattern as m07 (Wave 27). `dist/openapi.json` tag→opId counts: Booking 18, Billing 16, Email 12, Association:Member 166, Association:Operations 60, PlatformAdmin 28 (419 total opIds).
+
+| Finding | Claim | Reality |
+|---------|-------|---------|
+| `EC-001-booking` | booking (19 handlers) — no MODULE_SPEC | `specs/api/src/modules/booking.tsp` exists (18 ops, all registry-wired) **and** `docs/product/modules/m20-booking/MODULE_SPEC.md` exists |
+| `EC-002-billing` | billing (16 handlers) — no MODULE_SPEC | `association/core/billing.tsp` + `modules/billing.tsp` exist (16 ops, registry-wired) **and** `docs/product/modules/m21-billing/MODULE_SPEC.md` exists |
+| `EC-003-email` | email (13 handlers) — no MODULE_SPEC | `specs/api/src/modules/email.tsp` exists (12 ops, registry-wired) **and** `docs/product/modules/m22-email/MODULE_SPEC.md` exists |
+| `EC-005-assocmember-notsp` | association:member (194) — no TypeSpec | **13** `.tsp` under `association/member/` compiling **166** opIds |
+| `EC-006-assocops-notsp` | association:operations (69) — no TypeSpec | **9** `.tsp` under `association/operations/` compiling **60** opIds |
+| `EC-007-platformadmin-gap` | platformadmin (40) — spec gap vs handlers | **28/28** PlatformAdmin opIds registry-wired (0 missing). Of 45 handler files, the 17 delta = **16 hand-wired live routes** in `app.ts` (support tickets, subscriptions, pricing tiers, breaches, Wave-23 analytics — by-design middleware ordering) + **1 dark** (`exportDashboardReport`, `app.ts` refs=0 → P3 cleanup, not P0) |
+
+**Pipeline:** doc-only enforcement-tracking correction — **no code, no codegen**. All 6 reclassified RESOLVED/stale. The booking/billing/email `MODULE_SPEC.md` docs were created at `docs/product/modules/m20-booking/`, `m21-billing/`, `m22-email/` (separate artifact from TypeSpec — both now confirmed present).
+
+**Outcome:** coverage lens cleared (**6 P0→0**); `coverage_score` **67→82**. Total tracked P0 findings **10→4** (all remaining are Wave 31: `EF-M06-001` + 3 `ED-GLOBAL-*`). Lone follow-up: `exportDashboardReport` is dead code (P3 cleanup, optional).
+
+---
+
 ## What's Next
 
 1. **Waves 1-24 COMPLETE — all built-module P1 clusters resolved.** Security gate satisfied. No P0 regressions. All P1 audit logging resolved (incl. 9 billing handlers in Wave 11). Revenue analytics gap filled. Baseline P1s fully triaged with named IDs. **Wave 12 closed m12 elections (5 REAL, 3 FP); Wave 13 closed m11 documents/credentials (5 REAL); Wave 14 closed m14 national dashboard (5 REAL); Wave 15 closed m01 auth-onboarding (5 REAL); Wave 16 closed m05 membership (3 REAL, 1 FP); Wave 17 closed m04 org-admin (1 REAL event, 2 doc reconciliations, 1 partial FP); Wave 18 closed m06 dues-payments (2 REAL, 3 FP/reclassified); Wave 19 closed m07 communications (0 REAL, 3 FP — module already remediated; removed dead CrossModuleTriggers); Wave 20 closed m08 events (2 REAL emit gaps in live association:operations handlers, 5 FP — audit read dead handlers/events/ dir); Wave 21 closed m09 training (1 REAL — training.completed emit connects WF-061/BR-20 certificate generation to the credit-award completion path); Wave 22 closed m10 credit-tracking (3 REAL — createMyCreditEntry credit.awarded emit, M10-R5 supporting-doc validation, WF-070 transcript export route-wiring; 1 FP — GDPR anonymization already in accountDeletionCascade); Wave 23 closed m03 platform-admin (3 REAL — all 7 spec domain events emitted from live handlers +7 registry keys, revenue/health analytics dead-code routes hand-wired, M3-R10 trial→cancelled transition; 0 FP); Wave 24 closed m02 member-profile (2 REAL — 4 domain events emitted incl. person.updated→existing id-card consumer, DataExport async vertical slice with rate limit + TTL + emit; 0 FP). FINAL built-module cluster.**
-2. **Remaining per-module P0s: 0 — ENFORCEMENT GATE FULLY SATISFIED.** The final cap (`EM-M07-no-typespec` + duplicate `EC-004-communication-notsp`) was **lifted in Wave 27** (verify-first: `communication.tsp` (24 ops) + `announcements.tsp` (7 ops) exist, compile, and are registry-wired — IN_SPEC 31/31, IN_ROUTES 31/31; the "no TypeSpec" premise was stale; reclassified RESOLVED). The `EM-M06 zero-domain-events` cap was **lifted in Wave 26** (verify-first: `dues.payment.recorded` bridge pre-existed; added `dues.payment.refunded` / `dues.invoice.generated` / `dues.payment.proof.rejected` events + consumers; m06 6.5→8.0). The previously-untracked security P0 `EM-M03-9a3e7b12` (super-only caller guards on revokeAdmin/deleteAssociation/updateAdmin) was **fixed in Wave 25**. (Non-module P0 lenses tracked separately in the baseline are now being worked as Waves 28+. **Wave 28 reclassified both audit-log P0s `AL-001/AL-002` as STALE** — already fixed in commit `1554b12e`; `audit_compliance` lens P0 2→0.) **Wave 29 reclassified UI-journey P0 `UJ-01` as STALE** — same commit `1554b12e`, `announcement-list.tsx` already uses typed `<Link>`; `ui_journey` lens P0 1→0.) Remaining non-module P0 lenses: coverage `EC-001/002/003/005/006/007` (Wave 30), functional `EF-M06-001` (Wave 31 — same commit `1554b12e`, expect stale), dependency `ED-GLOBAL-*` (Wave 31). Total tracked P0 findings **13→10**.
+2. **Remaining per-module P0s: 0 — ENFORCEMENT GATE FULLY SATISFIED.** The final cap (`EM-M07-no-typespec` + duplicate `EC-004-communication-notsp`) was **lifted in Wave 27** (verify-first: `communication.tsp` (24 ops) + `announcements.tsp` (7 ops) exist, compile, and are registry-wired — IN_SPEC 31/31, IN_ROUTES 31/31; the "no TypeSpec" premise was stale; reclassified RESOLVED). The `EM-M06 zero-domain-events` cap was **lifted in Wave 26** (verify-first: `dues.payment.recorded` bridge pre-existed; added `dues.payment.refunded` / `dues.invoice.generated` / `dues.payment.proof.rejected` events + consumers; m06 6.5→8.0). The previously-untracked security P0 `EM-M03-9a3e7b12` (super-only caller guards on revokeAdmin/deleteAssociation/updateAdmin) was **fixed in Wave 25**. (Non-module P0 lenses tracked separately in the baseline are now being worked as Waves 28+. **Wave 28 reclassified both audit-log P0s `AL-001/AL-002` as STALE** — already fixed in commit `1554b12e`; `audit_compliance` lens P0 2→0.) **Wave 29 reclassified UI-journey P0 `UJ-01` as STALE** — same commit `1554b12e`, `announcement-list.tsx` already uses typed `<Link>`; `ui_journey` lens P0 1→0.) **Wave 30 reclassified all 6 coverage P0s `EC-001/002/003/005/006/007` as STALE** — every `.tsp` exists+compiles+registry-wired, MODULE_SPEC docs present (m20/m21/m22), platformadmin gap is by-design hand-wiring; `coverage_score` 67→82.) Remaining non-module P0 lenses (Wave 31): functional `EF-M06-001` (same commit `1554b12e`, expect stale), dependency `ED-GLOBAL-*` ×3 (better-auth 2FA + 2 dev-only happy-dom). **Total tracked P0 findings 13→4.**
 3. **Remaining P1s (built modules): NONE.** All 13 built-module P1 clusters resolved (m01/m02/m03/m04/m05/m06/m07/m08/m09/m10/m11/m12/m14). Only deferred future-module stubs remain:
    - **DEFERRED:** ~170 future-module P1 stubs (m13/m15/m16/m17/m18/m19 — unbuilt-feature stubs); 7 TypeSpec, 3 coupling, 1 event from Wave 10.
 4. **Coverage Score: 78 → ~85** (estimated after Wave 10 + Wave 11 billing audit logging).
