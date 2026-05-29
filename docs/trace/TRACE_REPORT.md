@@ -3,9 +3,9 @@
 ---
 oli-version: trace-v1
 Report Date: 2026-05-30
-Phase: all
+Phase: D (all phases A–D evaluated; code + tests + specs all present)
 Modules Traced: all (22 module specs: m01–m22)
-Mode: standalone
+Mode: standalone (full re-trace, not fragment-cached)
 Data Sources: artifacts, compliance_report, confidence_report
 Partial Staleness: none
 Trace Status: COMPLETE (all 114 WF, 49 BR, 116 AC traced; no IDs skipped)
@@ -13,14 +13,21 @@ Trace Status: COMPLETE (all 114 WF, 49 BR, 116 AC traced; no IDs skipped)
 
 ## Changes Since Last Run
 
-Targeted re-verification (2026-05-30) after M09/M16 traceability P1 remediation. Only the changed chains were re-traced (BR-41, BR-43, BR-45..49); the rest of the graph is carried forward unchanged from the full A–D run earlier the same day.
+Full-scope re-trace (2026-05-30, Phase D) confirming the three commits that just landed (test + feat for training BR-41/BR-43, docs for m16). The prior entry was a targeted re-verification; this run independently re-checked the BR-41/BR-43/m16 chains at the source-file level (spec → handler → test) and re-walked the rest of the graph. Counts hold: P0=0, P1=1, P2=24, chain 87%. No new gaps.
 
-- **Resolved P1:** G-T1 (BR-41 paid-training gate — now in m09 MODULE_SPEC §5 **and** tested in `training-enrollment.test.ts`), G-T2 (BR-43 enrollment lock — now in §5 and tested), G-U2 (m16 BR-45..49 — now authored in m16 MODULE_SPEC §5).
-- **Resolved P2 (side effect of spec edits):** G-S1 shrinks from 11 → 4 BRs lacking a spec edge (BR-41/43/45/46/47/48/49 now defined). BR-24, BR-28, BR-42, BR-44 remain (untouched — out of scope).
-- **Remaining P1:** G-U1 (m13 professional-feed, m15 job-board) — unbuilt-roadmap modules, roadmap-tracked, intentionally out of scope for this run.
-- New gaps: 0.
+- **Confirmed RESOLVED (independently verified this run):**
+  - **G-T1 / BR-41** (M09 paid-training gate) — spec `m09-training/MODULE_SPEC.md:146` → handlers `createTrainingEnrollment.ts:42` + `enrollInCustomTraining.ts:37` (both throw `PAYMENT_REQUIRED` 422) → tests `training-enrollment.test.ts:228` (create) + `:271` (enrollInCustom) + `:253` free-path. Full chain intact for BOTH free-enrollment endpoints.
+  - **G-T2 / BR-43** (M09 completion lock) — spec `m09-training/MODULE_SPEC.md:147` → handlers `updateTrainingEnrollment.ts:34` + `deleteTrainingEnrollment.ts` (both throw `TRAINING_COMPLETED` 422) → tests `training-enrollment.test.ts:331` (update) + `:362` (delete) + `:309` create-lock + `:391` not-completed allow. Chain intact. TDD_PROOF present at `docs/execution/slices/m09-training-paid-gate-completion-lock/TDD_PROOF.md`.
+  - **G-U2 / m16 BR-45..49** (advertising) — authored in `m16-advertising/MODULE_SPEC.md:166-170` with explicit unbuilt-roadmap note (`:172`). Spec→spec trace only is CORRECT here; absence of code/test is EXPECTED for an unbuilt-roadmap module, not a gap. (Note: `advertising/` handlers exist but do not carry BR-45..49 IDs — they predate/are unrelated to the spec'd ad-campaign rules; the spec correctly declares the module unbuilt.)
+- **Resolved P2 (side effect of spec edits):** G-S1 shrank from 11 → 4 BRs lacking a spec edge (BR-41/43/45/46/47/48/49 now defined). Remaining 4 with no MODULE_SPEC §5 edge: BR-24 (invite expiry), BR-28 (comms dedup), BR-42 (training type restriction), BR-44 (idempotent attendance credit) — present in WORKFLOW_MAP §4 only, untouched, out of scope.
+- **Remaining P1:** G-U1 (m13 professional-feed BR-35, m15 job-board BR-37) — unbuilt-roadmap modules, ROADMAP.md-tracked (lines 87/89), intentionally deferred. Accepted, not a new actionable gap.
+- New gaps: 0. Resolved gaps since pre-remediation baseline: 3 P1 + 7 P2.
 
-### Prior run (2026-05-27 → earlier 2026-05-30 full A–D)
+### Prior run (targeted re-verification, 2026-05-30)
+
+Targeted re-verification after M09/M16 P1 remediation — re-traced only the changed chains (BR-41, BR-43, BR-45..49), carried forward the rest. Resolved G-T1/G-T2/G-U2; G-S1 shrank 11→4.
+
+### Earlier run (2026-05-27 → earlier 2026-05-30 full A–D)
 
 Full standalone trace (all phases A–D, brownfield). publishTraining gate fixture completed → BR-13/43 family stronger; reclassified slice-coverage shortfall as a structural (brownfield) artifact, not a broken chain.
 
@@ -183,7 +190,7 @@ _None._ No dangling reference to an undefined ID; no cross-module blind spot. Cr
 
 ## Ratchet Status
 
-Baseline at `docs/trace/.trace-baseline.json` (created 2026-05-21, all gaps 0 at Phase B with coarser counting). This run was NOT invoked with `--no-new-gaps`, so it is informational only. Current full-phase counts (P0=0, P1=4, P2=31) supersede the Phase-B baseline; baseline not auto-overwritten (run did not pass `--no-new-gaps`).
+Baseline at `docs/trace/.trace-baseline.json` (created 2026-05-21, all gaps 0 at Phase B with coarser counting). This run was NOT invoked with `--no-new-gaps`, so it is informational only. Current post-remediation full-phase counts (P0=0, P1=1, P2=24) supersede both the Phase-B baseline and the pre-remediation snapshot (P0=0, P1=4, P2=31); baseline not auto-overwritten (run did not pass `--no-new-gaps`).
 
 | Severity | Baseline (Phase B) | Current (A–D) | Status |
 |----------|--------------------|---------------|--------|

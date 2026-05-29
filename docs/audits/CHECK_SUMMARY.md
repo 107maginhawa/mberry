@@ -20,12 +20,13 @@ last-modified-by: oli-check
 
 | Dimension | Verdict | Report | Key findings |
 |-----------|---------|--------|--------------|
-| Confidence | PASS | `docs/audits/CONFIDENCE_REPORT.md` | All 4 layers 9/10. Test-Confidence 9, Release-Readiness 9, Ship-Readiness 9. P0=0, P1=6, P2=6, P3=2. Zero TDD-proof fabrication (16 proofs, 84/84 test files exist, 82% test-first git ordering). |
+| Confidence | PASS | `docs/audits/CONFIDENCE_REPORT.md` | All 4 layers 9/10. Test-Confidence 9, Release-Readiness 9, Ship-Readiness 9. **TDD_PROOF 4g flipped WARN→VERIFIED** post-commit (test 9c17378e @01:47:48 precedes feat eaae7870 @01:48:11, identical training scope). 17 proofs now verified (was 16), zero fabrication. |
 | Traceability | WARN (no actionable gaps) | `docs/trace/TRACE_REPORT.md` | Re-verified 2026-05-30 after M09/M16 remediation. WF→test chain 87%. P0=0, P1=1 (only unbuilt-roadmap m13/m15), P2=24. 3 actionable P1s resolved (BR-41, BR-43, m16 BR-45..49). |
 
 ### Confidence details (test quality + TDD proof)
 - **535 backend test files scanned.** 7,598 strong vs 322 weak assertions (95.9% strong), 97.8% stable, 94.9% appropriate mocks.
-- **16 TDD proofs verified** against git history — 84/84 claimed test files exist on disk, 82% test-first commit ordering, **zero fabrication**.
+- **17 TDD proofs verified** against git history (m09 paid-gate/completion-lock proof flipped to VERIFIED) — claimed test files exist on disk, test-first commit ordering confirmed, **zero fabrication**. m09 row improved 8→9.
+- **4g content-delta caveat:** test file + 4 handlers pre-exist from Initial commit (brownfield extension), so strict 6c.2 file-add rule N/A; verified at diff level — BR-41/BR-43 *test* diff (9c17378e) landed 23s before the *guard* diff (eaae7870). Strongest test-first signal obtainable for handler extension; flip stands.
 - **L1 9** (+1 git test-first bonus, 82%) · **L2 9** · **L3 9** (79% data-seeding, 21 brittle UUIDs, 7 undocumented DB mocks) · **L4 9** (CI mature; forward-only migrations, no rollback files).
 - All P1s = spec'd-but-unbuilt roadmap modules (m13/m15/m16/m17/m18/m19), not test defects.
 
