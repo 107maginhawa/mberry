@@ -1,0 +1,1952 @@
+{
+  "version": 1,
+  "edges": [
+    {
+      "from_module": "app-admin",
+      "to_module": "pkg-ui",
+      "import_count": 22,
+      "files": [
+        "apps/admin/src/lib/utils.ts",
+        "apps/admin/src/routes/__root.tsx",
+        "apps/admin/src/routes/associations/$associationId.tsx",
+        "apps/admin/src/routes/associations/index.tsx",
+        "apps/admin/src/routes/audit/index.tsx",
+        "apps/admin/src/routes/committees/index.tsx",
+        "apps/admin/src/routes/communications/email.tsx",
+        "apps/admin/src/routes/communications/index.tsx",
+        "apps/admin/src/routes/communications/moderation.tsx",
+        "apps/admin/src/routes/communications/templates.tsx",
+        "apps/admin/src/routes/events/index.tsx",
+        "apps/admin/src/routes/feature-flags/index.tsx",
+        "apps/admin/src/routes/impersonate/index.tsx",
+        "apps/admin/src/routes/index.tsx",
+        "apps/admin/src/routes/members/$personId.tsx",
+        "apps/admin/src/routes/members/index.tsx",
+        "apps/admin/src/routes/national-dashboard/index.tsx",
+        "apps/admin/src/routes/operators/index.tsx",
+        "apps/admin/src/routes/organizations/$organizationId.tsx",
+        "apps/admin/src/routes/organizations/index.tsx"
+      ],
+      "confidence": "HIGH"
+    },
+    {
+      "from_module": "app-admin",
+      "to_module": "pkg-sdk",
+      "import_count": 19,
+      "files": [
+        "apps/admin/src/main.tsx",
+        "apps/admin/src/routes/associations/$associationId.tsx",
+        "apps/admin/src/routes/associations/index.tsx",
+        "apps/admin/src/routes/audit/index.tsx",
+        "apps/admin/src/routes/events/index.tsx",
+        "apps/admin/src/routes/feature-flags/index.tsx",
+        "apps/admin/src/routes/impersonate/index.tsx",
+        "apps/admin/src/routes/index.tsx",
+        "apps/admin/src/routes/members/$personId.tsx",
+        "apps/admin/src/routes/members/index.tsx",
+        "apps/admin/src/routes/national-dashboard/index.tsx",
+        "apps/admin/src/routes/operators/index.tsx",
+        "apps/admin/src/routes/organizations/$organizationId.tsx",
+        "apps/admin/src/routes/organizations/index.tsx",
+        "apps/admin/src/routes/training/index.tsx"
+      ],
+      "confidence": "HIGH"
+    },
+    {
+      "from_module": "app-memberry",
+      "to_module": "pkg-ui",
+      "import_count": 419,
+      "files": [
+        "apps/memberry/src/components/combobox.tsx",
+        "apps/memberry/src/components/image-cropper-dialog.tsx",
+        "apps/memberry/src/components/layout/member-header.tsx",
+        "apps/memberry/src/components/layout/officer-mobile-nav.tsx",
+        "apps/memberry/src/components/layout/org-icon-rail.tsx",
+        "apps/memberry/src/components/layout/org-picker-sheet.tsx",
+        "apps/memberry/src/components/notification-drawer.tsx",
+        "apps/memberry/src/components/patterns/combobox.tsx",
+        "apps/memberry/src/components/patterns/confirm-dialog.tsx",
+        "apps/memberry/src/components/patterns/data-table.tsx",
+        "apps/memberry/src/components/patterns/date-picker.tsx",
+        "apps/memberry/src/components/patterns/empty-state.tsx",
+        "apps/memberry/src/components/patterns/error-boundary.tsx",
+        "apps/memberry/src/components/patterns/error-state.tsx",
+        "apps/memberry/src/components/patterns/form-field.tsx",
+        "apps/memberry/src/components/phone-input.tsx",
+        "apps/memberry/src/features/account/components/data-export.tsx",
+        "apps/memberry/src/features/admin/components/dashboard/action-queue.tsx",
+        "apps/memberry/src/features/admin/components/officer-dashboard.tsx",
+        "apps/memberry/src/features/admin/components/officer-management.tsx"
+      ],
+      "confidence": "HIGH"
+    },
+    {
+      "from_module": "app-memberry",
+      "to_module": "pkg-sdk",
+      "import_count": 177,
+      "files": [
+        "apps/memberry/src/features/admin/components/officer-dashboard.tsx",
+        "apps/memberry/src/features/billing/components/merchant-account-setup.tsx",
+        "apps/memberry/src/features/booking/components/active-booking-card.tsx",
+        "apps/memberry/src/features/booking/components/booking-event-editor.tsx",
+        "apps/memberry/src/features/booking/components/booking-list.tsx",
+        "apps/memberry/src/features/booking/components/host-directory.tsx",
+        "apps/memberry/src/features/booking/lib/adapters.ts",
+        "apps/memberry/src/features/booking/lib/event-state.ts",
+        "apps/memberry/src/features/booking/lib/partition-bookings.ts",
+        "apps/memberry/src/features/booking/types.ts",
+        "apps/memberry/src/features/certificates/components/certificate-list.tsx",
+        "apps/memberry/src/features/certificates/components/certificate-preview.tsx",
+        "apps/memberry/src/features/chapters/components/affiliation-list.tsx",
+        "apps/memberry/src/features/comms/components/channel-list.tsx",
+        "apps/memberry/src/features/comms/components/chat-thread.tsx",
+        "apps/memberry/src/features/comms/components/chat-view.tsx",
+        "apps/memberry/src/features/comms/components/create-channel-dialog.tsx",
+        "apps/memberry/src/features/comms/components/dm-list.tsx",
+        "apps/memberry/src/features/comms/components/message-bubble.tsx",
+        "apps/memberry/src/features/comms/components/message-composer.tsx"
+      ],
+      "confidence": "HIGH"
+    },
+    {
+      "from_module": "api-core",
+      "to_module": "spec-api",
+      "import_count": 4,
+      "files": [
+        "services/api-ts/scripts/generate.ts",
+        "services/api-ts/src/app.ts",
+        "services/api-ts/src/utils/expand.ts"
+      ],
+      "confidence": "HIGH"
+    },
+    {
+      "from_module": "api-core",
+      "to_module": "root",
+      "import_count": 1,
+      "files": [
+        "services/api-ts/scripts/generate.ts"
+      ],
+      "confidence": "HIGH"
+    },
+    {
+      "from_module": "api-core",
+      "to_module": "audit",
+      "import_count": 3,
+      "files": [
+        "services/api-ts/src/app.ts",
+        "services/api-ts/src/seed/layer-4-cross-module.ts"
+      ],
+      "confidence": "HIGH"
+    },
+    {
+      "from_module": "api-core",
+      "to_module": "notifs",
+      "import_count": 7,
+      "files": [
+        "services/api-ts/src/app.ts",
+        "services/api-ts/src/core/schema-registry.ts",
+        "services/api-ts/src/seed/layer-4-cross-module.ts",
+        "services/api-ts/src/seed/layer-6-states.ts",
+        "services/api-ts/src/seed.ts",
+        "services/api-ts/src/test-utils/preload-pristine.ts"
+      ],
+      "confidence": "HIGH"
+    },
+    {
+      "from_module": "api-core",
+      "to_module": "person",
+      "import_count": 14,
+      "files": [
+        "services/api-ts/src/app.ts",
+        "services/api-ts/src/seed/layer-3-modules.ts",
+        "services/api-ts/src/seed/layer-5-gap-fill.ts",
+        "services/api-ts/src/seed/layer-7-dues.ts",
+        "services/api-ts/src/seed.ts",
+        "services/api-ts/src/test-utils/preload-pristine.ts"
+      ],
+      "confidence": "HIGH"
+    },
+    {
+      "from_module": "api-core",
+      "to_module": "email",
+      "import_count": 13,
+      "files": [
+        "services/api-ts/src/app.ts",
+        "services/api-ts/src/seed/layer-7-comms.ts",
+        "services/api-ts/src/test-utils/preload-pristine.ts"
+      ],
+      "confidence": "HIGH"
+    },
+    {
+      "from_module": "api-core",
+      "to_module": "association:member",
+      "import_count": 54,
+      "files": [
+        "services/api-ts/src/app.ts",
+        "services/api-ts/src/core/domain-event-consumers.ts",
+        "services/api-ts/src/core/schema-registry.ts",
+        "services/api-ts/src/middleware/officer-auth.ts",
+        "services/api-ts/src/middleware/org-context.ts",
+        "services/api-ts/src/seed/layer-1-foundation.ts",
+        "services/api-ts/src/seed/layer-2-users.ts",
+        "services/api-ts/src/seed/layer-3-modules.ts",
+        "services/api-ts/src/seed/layer-4-cross-module.ts",
+        "services/api-ts/src/seed/layer-5-gap-fill.ts",
+        "services/api-ts/src/seed/layer-6-states.ts",
+        "services/api-ts/src/seed/layer-7-member.ts",
+        "services/api-ts/src/seed.ts",
+        "services/api-ts/src/test-utils/preload-pristine.ts",
+        "services/api-ts/src/utils/officer-check.ts"
+      ],
+      "confidence": "HIGH"
+    },
+    {
+      "from_module": "api-core",
+      "to_module": "booking",
+      "import_count": 7,
+      "files": [
+        "services/api-ts/src/app.ts",
+        "services/api-ts/src/core/schema-registry.ts",
+        "services/api-ts/src/seed/layer-7-misc.ts",
+        "services/api-ts/src/test-utils/preload-pristine.ts"
+      ],
+      "confidence": "HIGH"
+    },
+    {
+      "from_module": "api-core",
+      "to_module": "membership",
+      "import_count": 2,
+      "files": [
+        "services/api-ts/src/app.ts",
+        "services/api-ts/src/test-utils/preload-pristine.ts"
+      ],
+      "confidence": "HIGH"
+    },
+    {
+      "from_module": "api-core",
+      "to_module": "surveys",
+      "import_count": 7,
+      "files": [
+        "services/api-ts/src/app.ts",
+        "services/api-ts/src/seed/layer-5-gap-fill.ts"
+      ],
+      "confidence": "HIGH"
+    },
+    {
+      "from_module": "api-core",
+      "to_module": "platformadmin",
+      "import_count": 28,
+      "files": [
+        "services/api-ts/src/app.ts",
+        "services/api-ts/src/core/schema-registry.ts",
+        "services/api-ts/src/middleware/impersonation-guard.ts",
+        "services/api-ts/src/middleware/org-context.ts",
+        "services/api-ts/src/middleware/platform-admin-auth.ts",
+        "services/api-ts/src/seed/layer-1-foundation.ts",
+        "services/api-ts/src/seed/layer-2-users.ts",
+        "services/api-ts/src/seed/layer-7-platform.ts",
+        "services/api-ts/src/test-utils/preload-pristine.ts",
+        "services/api-ts/src/types/app.ts"
+      ],
+      "confidence": "HIGH"
+    },
+    {
+      "from_module": "api-core",
+      "to_module": "elections",
+      "import_count": 3,
+      "files": [
+        "services/api-ts/src/app.ts",
+        "services/api-ts/src/seed/layer-5-gap-fill.ts",
+        "services/api-ts/src/test-utils/preload-pristine.ts"
+      ],
+      "confidence": "HIGH"
+    },
+    {
+      "from_module": "api-core",
+      "to_module": "communication",
+      "import_count": 7,
+      "files": [
+        "services/api-ts/src/app.ts",
+        "services/api-ts/src/seed/layer-5-gap-fill.ts",
+        "services/api-ts/src/seed/layer-6-states.ts",
+        "services/api-ts/src/seed/layer-7-comms.ts",
+        "services/api-ts/src/test-utils/preload-pristine.ts"
+      ],
+      "confidence": "HIGH"
+    },
+    {
+      "from_module": "api-core",
+      "to_module": "dues",
+      "import_count": 7,
+      "files": [
+        "services/api-ts/src/app.ts",
+        "services/api-ts/src/seed/layer-7-dues.ts"
+      ],
+      "confidence": "HIGH"
+    },
+    {
+      "from_module": "api-core",
+      "to_module": "association:operations",
+      "import_count": 18,
+      "files": [
+        "services/api-ts/src/app.ts",
+        "services/api-ts/src/core/schema-registry.ts",
+        "services/api-ts/src/seed/layer-3-modules.ts",
+        "services/api-ts/src/seed/layer-4-cross-module.ts",
+        "services/api-ts/src/seed/layer-5-gap-fill.ts",
+        "services/api-ts/src/seed/layer-6-states.ts",
+        "services/api-ts/src/seed.ts",
+        "services/api-ts/src/test-utils/preload-pristine.ts"
+      ],
+      "confidence": "HIGH"
+    },
+    {
+      "from_module": "api-core",
+      "to_module": "events",
+      "import_count": 3,
+      "files": [
+        "services/api-ts/src/app.ts",
+        "services/api-ts/src/test-utils/preload-pristine.ts"
+      ],
+      "confidence": "HIGH"
+    },
+    {
+      "from_module": "api-core",
+      "to_module": "certificates",
+      "import_count": 6,
+      "files": [
+        "services/api-ts/src/app.ts",
+        "services/api-ts/src/seed/layer-4-cross-module.ts",
+        "services/api-ts/src/seed/layer-5-gap-fill.ts",
+        "services/api-ts/src/seed.ts",
+        "services/api-ts/src/test-utils/preload-pristine.ts"
+      ],
+      "confidence": "HIGH"
+    },
+    {
+      "from_module": "api-core",
+      "to_module": "invite",
+      "import_count": 3,
+      "files": [
+        "services/api-ts/src/core/schema-registry.ts",
+        "services/api-ts/src/seed/layer-4-cross-module.ts",
+        "services/api-ts/src/test-utils/preload-pristine.ts"
+      ],
+      "confidence": "HIGH"
+    },
+    {
+      "from_module": "api-core",
+      "to_module": "documents",
+      "import_count": 4,
+      "files": [
+        "services/api-ts/src/seed/layer-4-cross-module.ts",
+        "services/api-ts/src/seed/layer-7-misc.ts",
+        "services/api-ts/src/seed.ts",
+        "services/api-ts/src/test-utils/preload-pristine.ts"
+      ],
+      "confidence": "HIGH"
+    },
+    {
+      "from_module": "api-core",
+      "to_module": "comms",
+      "import_count": 2,
+      "files": [
+        "services/api-ts/src/seed/layer-4-cross-module.ts",
+        "services/api-ts/src/seed/layer-5-gap-fill.ts"
+      ],
+      "confidence": "HIGH"
+    },
+    {
+      "from_module": "api-core",
+      "to_module": "billing",
+      "import_count": 2,
+      "files": [
+        "services/api-ts/src/seed/layer-4-cross-module.ts",
+        "services/api-ts/src/test-utils/preload-pristine.ts"
+      ],
+      "confidence": "HIGH"
+    },
+    {
+      "from_module": "api-core",
+      "to_module": "marketplace",
+      "import_count": 1,
+      "files": [
+        "services/api-ts/src/seed/layer-4-cross-module.ts"
+      ],
+      "confidence": "HIGH"
+    },
+    {
+      "from_module": "api-core",
+      "to_module": "reviews",
+      "import_count": 2,
+      "files": [
+        "services/api-ts/src/seed/layer-4-cross-module.ts",
+        "services/api-ts/src/test-utils/preload-pristine.ts"
+      ],
+      "confidence": "HIGH"
+    },
+    {
+      "from_module": "api-core",
+      "to_module": "storage",
+      "import_count": 2,
+      "files": [
+        "services/api-ts/src/seed/layer-4-cross-module.ts",
+        "services/api-ts/src/test-utils/preload-pristine.ts"
+      ],
+      "confidence": "HIGH"
+    },
+    {
+      "from_module": "api-core",
+      "to_module": "jobs",
+      "import_count": 1,
+      "files": [
+        "services/api-ts/src/seed/layer-5-gap-fill.ts"
+      ],
+      "confidence": "HIGH"
+    },
+    {
+      "from_module": "api-core",
+      "to_module": "onboarding",
+      "import_count": 1,
+      "files": [
+        "services/api-ts/src/seed/layer-7-member.ts"
+      ],
+      "confidence": "HIGH"
+    },
+    {
+      "from_module": "api-core",
+      "to_module": "advertising",
+      "import_count": 1,
+      "files": [
+        "services/api-ts/src/seed/layer-7-misc.ts"
+      ],
+      "confidence": "HIGH"
+    },
+    {
+      "from_module": "advertising",
+      "to_module": "api-core",
+      "import_count": 35,
+      "files": [
+        "services/api-ts/src/handlers/advertising/createAdvertiser.ts",
+        "services/api-ts/src/handlers/advertising/createCampaign.ts",
+        "services/api-ts/src/handlers/advertising/createCreative.ts",
+        "services/api-ts/src/handlers/advertising/getAdForPlacement.ts",
+        "services/api-ts/src/handlers/advertising/reportAd.ts",
+        "services/api-ts/src/handlers/advertising/repos/advertiser.repo.ts",
+        "services/api-ts/src/handlers/advertising/repos/advertising.schema.ts",
+        "services/api-ts/src/handlers/advertising/repos/campaign.repo.ts",
+        "services/api-ts/src/handlers/advertising/repos/creative.repo.ts",
+        "services/api-ts/src/handlers/advertising/reviewCreative.ts",
+        "services/api-ts/src/handlers/advertising/setMemberOptOut.ts"
+      ],
+      "confidence": "HIGH"
+    },
+    {
+      "from_module": "association:member",
+      "to_module": "api-core",
+      "import_count": 965,
+      "files": [
+        "services/api-ts/src/handlers/association:member/acknowledgeLicenseRenewalAlert.ts",
+        "services/api-ts/src/handlers/association:member/addRosterMember.ts",
+        "services/api-ts/src/handlers/association:member/allocateSeat.ts",
+        "services/api-ts/src/handlers/association:member/applySpecialAssessment.ts",
+        "services/api-ts/src/handlers/association:member/approveMembershipApplication.ts",
+        "services/api-ts/src/handlers/association:member/approveTransferBySource.ts",
+        "services/api-ts/src/handlers/association:member/approveTransferByTarget.ts",
+        "services/api-ts/src/handlers/association:member/awardManualCredit.ts",
+        "services/api-ts/src/handlers/association:member/bulkApproveMembershipApplications.ts",
+        "services/api-ts/src/handlers/association:member/bulkRecordPayments.ts",
+        "services/api-ts/src/handlers/association:member/castBallot.ts",
+        "services/api-ts/src/handlers/association:member/certifyElection.ts",
+        "services/api-ts/src/handlers/association:member/completeAffiliationTransfer.ts",
+        "services/api-ts/src/handlers/association:member/confirmPaymentProof.ts",
+        "services/api-ts/src/handlers/association:member/createAffiliationTransfer.ts",
+        "services/api-ts/src/handlers/association:member/createCandidate.ts",
+        "services/api-ts/src/handlers/association:member/createChapterAffiliation.ts",
+        "services/api-ts/src/handlers/association:member/createCredentialTemplate.ts",
+        "services/api-ts/src/handlers/association:member/createCreditEntry.ts",
+        "services/api-ts/src/handlers/association:member/createDirectoryProfile.ts"
+      ],
+      "confidence": "HIGH"
+    },
+    {
+      "from_module": "association:member",
+      "to_module": "certificates",
+      "import_count": 2,
+      "files": [
+        "services/api-ts/src/handlers/association:member/bulkIssueCertificates.ts",
+        "services/api-ts/src/handlers/association:member/verifyCertificatePublic.ts"
+      ],
+      "confidence": "HIGH"
+    },
+    {
+      "from_module": "association:member",
+      "to_module": "elections",
+      "import_count": 19,
+      "files": [
+        "services/api-ts/src/handlers/association:member/castBallot.ts",
+        "services/api-ts/src/handlers/association:member/certifyElection.ts",
+        "services/api-ts/src/handlers/association:member/createCandidate.ts",
+        "services/api-ts/src/handlers/association:member/createElection.ts",
+        "services/api-ts/src/handlers/association:member/deleteCandidate.ts",
+        "services/api-ts/src/handlers/association:member/deleteElection.ts",
+        "services/api-ts/src/handlers/association:member/getCandidate.ts",
+        "services/api-ts/src/handlers/association:member/getElection.ts",
+        "services/api-ts/src/handlers/association:member/listBallots.ts",
+        "services/api-ts/src/handlers/association:member/listCandidates.ts",
+        "services/api-ts/src/handlers/association:member/listElections.ts",
+        "services/api-ts/src/handlers/association:member/openElectionNominations.ts",
+        "services/api-ts/src/handlers/association:member/openElectionVoting.ts",
+        "services/api-ts/src/handlers/association:member/updateCandidate.ts",
+        "services/api-ts/src/handlers/association:member/updateCandidateStatus.ts",
+        "services/api-ts/src/handlers/association:member/updateElection.ts"
+      ],
+      "confidence": "HIGH"
+    },
+    {
+      "from_module": "association:member",
+      "to_module": "person",
+      "import_count": 15,
+      "files": [
+        "services/api-ts/src/handlers/association:member/createDuesInvoice.ts",
+        "services/api-ts/src/handlers/association:member/getDuesInvoice.ts",
+        "services/api-ts/src/handlers/association:member/getOrgDashboard.ts",
+        "services/api-ts/src/handlers/association:member/jobs/directoryAutoPopulate.ts",
+        "services/api-ts/src/handlers/association:member/listDuesInvoices.ts",
+        "services/api-ts/src/handlers/association:member/listMembershipApplications.ts",
+        "services/api-ts/src/handlers/association:member/listOfficerTerms.ts",
+        "services/api-ts/src/handlers/association:member/lookupCredentialPublic.ts",
+        "services/api-ts/src/handlers/association:member/publishMyDirectoryProfile.ts",
+        "services/api-ts/src/handlers/association:member/repos/dues-payment-status-history.schema.ts",
+        "services/api-ts/src/handlers/association:member/repos/membership.schema.ts",
+        "services/api-ts/src/handlers/association:member/repos/special-assessments.schema.ts",
+        "services/api-ts/src/handlers/association:member/repos/status-history.schema.ts",
+        "services/api-ts/src/handlers/association:member/transitionOfficerTerm.ts",
+        "services/api-ts/src/handlers/association:member/utils/trust-signals.ts"
+      ],
+      "confidence": "HIGH"
+    },
+    {
+      "from_module": "association:member",
+      "to_module": "platformadmin",
+      "import_count": 8,
+      "files": [
+        "services/api-ts/src/handlers/association:member/createOfficerTerm.ts",
+        "services/api-ts/src/handlers/association:member/createSubscriptionCheckout.ts",
+        "services/api-ts/src/handlers/association:member/getMySubscription.ts",
+        "services/api-ts/src/handlers/association:member/getOrganizationProfile.ts",
+        "services/api-ts/src/handlers/association:member/repos/credentials.schema.ts",
+        "services/api-ts/src/handlers/association:member/repos/special-assessments.schema.ts",
+        "services/api-ts/src/handlers/association:member/updateOrganizationProfile.ts",
+        "services/api-ts/src/handlers/association:member/upgradeSubscription.ts"
+      ],
+      "confidence": "HIGH"
+    },
+    {
+      "from_module": "association:member",
+      "to_module": "membership",
+      "import_count": 3,
+      "files": [
+        "services/api-ts/src/handlers/association:member/getCreditCompliance.ts",
+        "services/api-ts/src/handlers/association:member/getRosterMember.ts",
+        "services/api-ts/src/handlers/association:member/listRosterMembers.ts"
+      ],
+      "confidence": "HIGH"
+    },
+    {
+      "from_module": "association:member",
+      "to_module": "association:operations",
+      "import_count": 4,
+      "files": [
+        "services/api-ts/src/handlers/association:member/getDuesDashboard.ts",
+        "services/api-ts/src/handlers/association:member/getOrgDashboard.ts",
+        "services/api-ts/src/handlers/association:member/repos/credits.schema.ts"
+      ],
+      "confidence": "HIGH"
+    },
+    {
+      "from_module": "association:member",
+      "to_module": "dues",
+      "import_count": 4,
+      "files": [
+        "services/api-ts/src/handlers/association:member/jobs/index.ts",
+        "services/api-ts/src/handlers/association:member/repos/dues-payments.repo.ts",
+        "services/api-ts/src/handlers/association:member/repos/dues-payments.schema.ts",
+        "services/api-ts/src/handlers/association:member/repos/dues.schema.ts"
+      ],
+      "confidence": "HIGH"
+    },
+    {
+      "from_module": "association:operations",
+      "to_module": "api-core",
+      "import_count": 363,
+      "files": [
+        "services/api-ts/src/handlers/association:operations/cancelCustomTraining.ts",
+        "services/api-ts/src/handlers/association:operations/cancelEvent.ts",
+        "services/api-ts/src/handlers/association:operations/cancelEventRegistration.ts",
+        "services/api-ts/src/handlers/association:operations/checkInCustomEvent.ts",
+        "services/api-ts/src/handlers/association:operations/checkInCustomTraining.ts",
+        "services/api-ts/src/handlers/association:operations/completeCommitteeTask.ts",
+        "services/api-ts/src/handlers/association:operations/completeCustomTraining.ts",
+        "services/api-ts/src/handlers/association:operations/completeEvent.ts",
+        "services/api-ts/src/handlers/association:operations/completeTrainingEnrollment.ts",
+        "services/api-ts/src/handlers/association:operations/createCheckIn.ts",
+        "services/api-ts/src/handlers/association:operations/createCommittee.ts",
+        "services/api-ts/src/handlers/association:operations/createCommitteeTask.ts",
+        "services/api-ts/src/handlers/association:operations/createCourse.ts",
+        "services/api-ts/src/handlers/association:operations/createCourseEnrollment.ts",
+        "services/api-ts/src/handlers/association:operations/createEvent.ts",
+        "services/api-ts/src/handlers/association:operations/createEventRegistration.ts",
+        "services/api-ts/src/handlers/association:operations/createOrgAccreditedProvider.ts",
+        "services/api-ts/src/handlers/association:operations/createQuizAttempt.ts",
+        "services/api-ts/src/handlers/association:operations/createTraining.ts",
+        "services/api-ts/src/handlers/association:operations/createTrainingEnrollment.ts"
+      ],
+      "confidence": "HIGH"
+    },
+    {
+      "from_module": "association:operations",
+      "to_module": "notifs",
+      "import_count": 2,
+      "files": [
+        "services/api-ts/src/handlers/association:operations/cancelEventRegistration.ts",
+        "services/api-ts/src/handlers/association:operations/promoteWaitlistEntry.ts"
+      ],
+      "confidence": "HIGH"
+    },
+    {
+      "from_module": "association:operations",
+      "to_module": "association:member",
+      "import_count": 2,
+      "files": [
+        "services/api-ts/src/handlers/association:operations/completeTrainingEnrollment.ts"
+      ],
+      "confidence": "HIGH"
+    },
+    {
+      "from_module": "association:operations",
+      "to_module": "platformadmin",
+      "import_count": 1,
+      "files": [
+        "services/api-ts/src/handlers/association:operations/exportNationalDashboard.ts"
+      ],
+      "confidence": "HIGH"
+    },
+    {
+      "from_module": "association:operations",
+      "to_module": "billing",
+      "import_count": 1,
+      "files": [
+        "services/api-ts/src/handlers/association:operations/registerAndPayForEvent.ts"
+      ],
+      "confidence": "HIGH"
+    },
+    {
+      "from_module": "association:operations",
+      "to_module": "events",
+      "import_count": 1,
+      "files": [
+        "services/api-ts/src/handlers/association:operations/registerAndPayForEvent.ts"
+      ],
+      "confidence": "HIGH"
+    },
+    {
+      "from_module": "audit",
+      "to_module": "api-core",
+      "import_count": 13,
+      "files": [
+        "services/api-ts/src/handlers/audit/jobs/index.ts",
+        "services/api-ts/src/handlers/audit/listAuditLogs.ts",
+        "services/api-ts/src/handlers/audit/repos/audit.repo.ts",
+        "services/api-ts/src/handlers/audit/repos/audit.schema.ts"
+      ],
+      "confidence": "HIGH"
+    },
+    {
+      "from_module": "billing",
+      "to_module": "api-core",
+      "import_count": 83,
+      "files": [
+        "services/api-ts/src/handlers/billing/captureInvoicePayment.ts",
+        "services/api-ts/src/handlers/billing/createInvoice.ts",
+        "services/api-ts/src/handlers/billing/createMerchantAccount.ts",
+        "services/api-ts/src/handlers/billing/deleteInvoice.ts",
+        "services/api-ts/src/handlers/billing/finalizeInvoice.ts",
+        "services/api-ts/src/handlers/billing/getInvoice.ts",
+        "services/api-ts/src/handlers/billing/getMerchantAccount.ts",
+        "services/api-ts/src/handlers/billing/getMerchantDashboard.ts",
+        "services/api-ts/src/handlers/billing/handleStripeWebhook.ts",
+        "services/api-ts/src/handlers/billing/listInvoices.ts",
+        "services/api-ts/src/handlers/billing/markInvoiceUncollectible.ts",
+        "services/api-ts/src/handlers/billing/onboardMerchantAccount.ts",
+        "services/api-ts/src/handlers/billing/payInvoice.ts",
+        "services/api-ts/src/handlers/billing/refundInvoicePayment.ts",
+        "services/api-ts/src/handlers/billing/repos/billing.repo.ts",
+        "services/api-ts/src/handlers/billing/repos/billing.schema.ts",
+        "services/api-ts/src/handlers/billing/updateInvoice.ts",
+        "services/api-ts/src/handlers/billing/voidInvoice.ts"
+      ],
+      "confidence": "HIGH"
+    },
+    {
+      "from_module": "billing",
+      "to_module": "person",
+      "import_count": 10,
+      "files": [
+        "services/api-ts/src/handlers/billing/captureInvoicePayment.ts",
+        "services/api-ts/src/handlers/billing/createInvoice.ts",
+        "services/api-ts/src/handlers/billing/createMerchantAccount.ts",
+        "services/api-ts/src/handlers/billing/markInvoiceUncollectible.ts",
+        "services/api-ts/src/handlers/billing/onboardMerchantAccount.ts",
+        "services/api-ts/src/handlers/billing/payInvoice.ts",
+        "services/api-ts/src/handlers/billing/refundInvoicePayment.ts",
+        "services/api-ts/src/handlers/billing/repos/billing.repo.ts",
+        "services/api-ts/src/handlers/billing/repos/billing.schema.ts",
+        "services/api-ts/src/handlers/billing/voidInvoice.ts"
+      ],
+      "confidence": "HIGH"
+    },
+    {
+      "from_module": "billing",
+      "to_module": "platformadmin",
+      "import_count": 1,
+      "files": [
+        "services/api-ts/src/handlers/billing/handleStripeWebhook.ts"
+      ],
+      "confidence": "HIGH"
+    },
+    {
+      "from_module": "booking",
+      "to_module": "api-core",
+      "import_count": 122,
+      "files": [
+        "services/api-ts/src/handlers/booking/cancelBooking.ts",
+        "services/api-ts/src/handlers/booking/confirmBooking.ts",
+        "services/api-ts/src/handlers/booking/createBooking.ts",
+        "services/api-ts/src/handlers/booking/createBookingEvent.ts",
+        "services/api-ts/src/handlers/booking/createScheduleException.ts",
+        "services/api-ts/src/handlers/booking/deleteBookingEvent.ts",
+        "services/api-ts/src/handlers/booking/deleteScheduleException.ts",
+        "services/api-ts/src/handlers/booking/getBooking.ts",
+        "services/api-ts/src/handlers/booking/getBookingEvent.ts",
+        "services/api-ts/src/handlers/booking/getScheduleException.ts",
+        "services/api-ts/src/handlers/booking/getTimeSlot.ts",
+        "services/api-ts/src/handlers/booking/jobs/confirmationTimer.ts",
+        "services/api-ts/src/handlers/booking/jobs/index.ts",
+        "services/api-ts/src/handlers/booking/jobs/slotCleanup.ts",
+        "services/api-ts/src/handlers/booking/jobs/slotGenerator.ts",
+        "services/api-ts/src/handlers/booking/listBookingEvents.ts",
+        "services/api-ts/src/handlers/booking/listBookings.ts",
+        "services/api-ts/src/handlers/booking/listEventSlots.ts",
+        "services/api-ts/src/handlers/booking/listScheduleExceptions.ts",
+        "services/api-ts/src/handlers/booking/markNoShowBooking.ts"
+      ],
+      "confidence": "HIGH"
+    },
+    {
+      "from_module": "booking",
+      "to_module": "person",
+      "import_count": 4,
+      "files": [
+        "services/api-ts/src/handlers/booking/repos/booking.repo.ts",
+        "services/api-ts/src/handlers/booking/repos/booking.schema.ts",
+        "services/api-ts/src/handlers/booking/repos/bookingEvent.repo.ts",
+        "services/api-ts/src/handlers/booking/repos/timeSlot.repo.ts"
+      ],
+      "confidence": "HIGH"
+    },
+    {
+      "from_module": "booking",
+      "to_module": "billing",
+      "import_count": 1,
+      "files": [
+        "services/api-ts/src/handlers/booking/repos/booking.repo.ts"
+      ],
+      "confidence": "HIGH"
+    },
+    {
+      "from_module": "certificates",
+      "to_module": "api-core",
+      "import_count": 21,
+      "files": [
+        "services/api-ts/src/handlers/certificates/batchGenerateCertificates.ts",
+        "services/api-ts/src/handlers/certificates/bulkIssueCertificates.ts",
+        "services/api-ts/src/handlers/certificates/generateCertificatePdf.ts",
+        "services/api-ts/src/handlers/certificates/getCertificate.ts",
+        "services/api-ts/src/handlers/certificates/listCertificates.ts",
+        "services/api-ts/src/handlers/certificates/repos/certificates.repo.ts",
+        "services/api-ts/src/handlers/certificates/repos/certificates.schema.ts",
+        "services/api-ts/src/handlers/certificates/utils/certificate-numbering.ts",
+        "services/api-ts/src/handlers/certificates/verifyCertificatePublic.ts"
+      ],
+      "confidence": "HIGH"
+    },
+    {
+      "from_module": "certificates",
+      "to_module": "person",
+      "import_count": 1,
+      "files": [
+        "services/api-ts/src/handlers/certificates/repos/certificates.schema.ts"
+      ],
+      "confidence": "HIGH"
+    },
+    {
+      "from_module": "certificates",
+      "to_module": "association:operations",
+      "import_count": 1,
+      "files": [
+        "services/api-ts/src/handlers/certificates/repos/certificates.schema.ts"
+      ],
+      "confidence": "HIGH"
+    },
+    {
+      "from_module": "comms",
+      "to_module": "api-core",
+      "import_count": 63,
+      "files": [
+        "services/api-ts/src/handlers/comms/createChatRoom.ts",
+        "services/api-ts/src/handlers/comms/default-channels.ts",
+        "services/api-ts/src/handlers/comms/endVideoCall.ts",
+        "services/api-ts/src/handlers/comms/getChatMessages.ts",
+        "services/api-ts/src/handlers/comms/getChatRoom.ts",
+        "services/api-ts/src/handlers/comms/getIceServers.ts",
+        "services/api-ts/src/handlers/comms/joinVideoCall.ts",
+        "services/api-ts/src/handlers/comms/leaveVideoCall.ts",
+        "services/api-ts/src/handlers/comms/listChatRooms.ts",
+        "services/api-ts/src/handlers/comms/repos/chatMessage.repo.ts",
+        "services/api-ts/src/handlers/comms/repos/chatRoom.repo.ts",
+        "services/api-ts/src/handlers/comms/repos/chatRoomMember.repo.ts",
+        "services/api-ts/src/handlers/comms/repos/comms.schema.ts",
+        "services/api-ts/src/handlers/comms/sendChatMessage.ts",
+        "services/api-ts/src/handlers/comms/updateVideoCallParticipant.ts",
+        "services/api-ts/src/handlers/comms/ws.chat-room.ts"
+      ],
+      "confidence": "HIGH"
+    },
+    {
+      "from_module": "communication",
+      "to_module": "api-core",
+      "import_count": 171,
+      "files": [
+        "services/api-ts/src/handlers/communication/archiveAnnouncement.ts",
+        "services/api-ts/src/handlers/communication/bulkUpdatePersonSubscriptions.ts",
+        "services/api-ts/src/handlers/communication/cancelMessage.ts",
+        "services/api-ts/src/handlers/communication/createAnnouncement.ts",
+        "services/api-ts/src/handlers/communication/createFeedPost.ts",
+        "services/api-ts/src/handlers/communication/createMessage.ts",
+        "services/api-ts/src/handlers/communication/createMessageTemplate.ts",
+        "services/api-ts/src/handlers/communication/createPoll.ts",
+        "services/api-ts/src/handlers/communication/createSubscriptionTopic.ts",
+        "services/api-ts/src/handlers/communication/createSurvey.ts",
+        "services/api-ts/src/handlers/communication/deleteAnnouncement.ts",
+        "services/api-ts/src/handlers/communication/deleteFeedPost.ts",
+        "services/api-ts/src/handlers/communication/deleteMessage.ts",
+        "services/api-ts/src/handlers/communication/deleteMessageTemplate.ts",
+        "services/api-ts/src/handlers/communication/deleteSubscriptionTopic.ts",
+        "services/api-ts/src/handlers/communication/getAnnouncement.ts",
+        "services/api-ts/src/handlers/communication/getAnnouncementStats.ts",
+        "services/api-ts/src/handlers/communication/getMessage.ts",
+        "services/api-ts/src/handlers/communication/getMessageTemplate.ts",
+        "services/api-ts/src/handlers/communication/getSubscriptionTopic.ts"
+      ],
+      "confidence": "HIGH"
+    },
+    {
+      "from_module": "communication",
+      "to_module": "membership",
+      "import_count": 1,
+      "files": [
+        "services/api-ts/src/handlers/communication/jobs/announcementSend.ts"
+      ],
+      "confidence": "HIGH"
+    },
+    {
+      "from_module": "communication",
+      "to_module": "notifs",
+      "import_count": 1,
+      "files": [
+        "services/api-ts/src/handlers/communication/jobs/announcementSend.ts"
+      ],
+      "confidence": "HIGH"
+    },
+    {
+      "from_module": "communication",
+      "to_module": "person",
+      "import_count": 1,
+      "files": [
+        "services/api-ts/src/handlers/communication/repos/communication.schema.ts"
+      ],
+      "confidence": "HIGH"
+    },
+    {
+      "from_module": "communication",
+      "to_module": "association:member",
+      "import_count": 1,
+      "files": [
+        "services/api-ts/src/handlers/communication/sendMessage.ts"
+      ],
+      "confidence": "HIGH"
+    },
+    {
+      "from_module": "documents",
+      "to_module": "api-core",
+      "import_count": 83,
+      "files": [
+        "services/api-ts/src/handlers/documents/archiveDocument.ts",
+        "services/api-ts/src/handlers/documents/createDocument.ts",
+        "services/api-ts/src/handlers/documents/createDocumentTag.ts",
+        "services/api-ts/src/handlers/documents/deleteDocument.ts",
+        "services/api-ts/src/handlers/documents/deleteDocumentTag.ts",
+        "services/api-ts/src/handlers/documents/getDocument.ts",
+        "services/api-ts/src/handlers/documents/getDocumentAccessLog.ts",
+        "services/api-ts/src/handlers/documents/getDocumentTag.ts",
+        "services/api-ts/src/handlers/documents/getDocumentVersion.ts",
+        "services/api-ts/src/handlers/documents/listDocumentTags.ts",
+        "services/api-ts/src/handlers/documents/listDocumentVersions.ts",
+        "services/api-ts/src/handlers/documents/repos/documents.repo.ts",
+        "services/api-ts/src/handlers/documents/repos/documents.schema.ts",
+        "services/api-ts/src/handlers/documents/searchDocuments.ts",
+        "services/api-ts/src/handlers/documents/updateDocument.ts",
+        "services/api-ts/src/handlers/documents/updateDocumentTag.ts",
+        "services/api-ts/src/handlers/documents/uploadNewDocumentVersion.ts"
+      ],
+      "confidence": "HIGH"
+    },
+    {
+      "from_module": "dues",
+      "to_module": "api-core",
+      "import_count": 28,
+      "files": [
+        "services/api-ts/src/handlers/dues/checkoutPaymentToken.ts",
+        "services/api-ts/src/handlers/dues/downloadReceipt.ts",
+        "services/api-ts/src/handlers/dues/getDuesDashboard.ts",
+        "services/api-ts/src/handlers/dues/jobs/autoInvoiceGenerator.ts",
+        "services/api-ts/src/handlers/dues/jobs/index.ts",
+        "services/api-ts/src/handlers/dues/jobs/processStripePayment.ts",
+        "services/api-ts/src/handlers/dues/jobs/reminderProcessor.ts",
+        "services/api-ts/src/handlers/dues/jobs/webhookRetryProcessor.ts",
+        "services/api-ts/src/handlers/dues/repos/dues-payments.repo.ts",
+        "services/api-ts/src/handlers/dues/repos/dues-payments.schema.ts",
+        "services/api-ts/src/handlers/dues/repos/dues.schema.ts",
+        "services/api-ts/src/handlers/dues/repos/payment-token.schema.ts",
+        "services/api-ts/src/handlers/dues/sendPaymentLink.ts",
+        "services/api-ts/src/handlers/dues/stripeWebhook.ts",
+        "services/api-ts/src/handlers/dues/utils/payment-token.ts",
+        "services/api-ts/src/handlers/dues/validatePaymentToken.ts"
+      ],
+      "confidence": "HIGH"
+    },
+    {
+      "from_module": "dues",
+      "to_module": "association:member",
+      "import_count": 16,
+      "files": [
+        "services/api-ts/src/handlers/dues/checkoutPaymentToken.ts",
+        "services/api-ts/src/handlers/dues/downloadReceipt.ts",
+        "services/api-ts/src/handlers/dues/getDuesDashboard.ts",
+        "services/api-ts/src/handlers/dues/jobs/autoInvoiceGenerator.ts",
+        "services/api-ts/src/handlers/dues/jobs/processStripePayment.ts",
+        "services/api-ts/src/handlers/dues/jobs/reminderProcessor.ts",
+        "services/api-ts/src/handlers/dues/jobs/webhookRetryProcessor.ts",
+        "services/api-ts/src/handlers/dues/repos/dues-payments.repo.ts",
+        "services/api-ts/src/handlers/dues/repos/dues-payments.schema.ts",
+        "services/api-ts/src/handlers/dues/sendPaymentLink.ts"
+      ],
+      "confidence": "HIGH"
+    },
+    {
+      "from_module": "dues",
+      "to_module": "person",
+      "import_count": 4,
+      "files": [
+        "services/api-ts/src/handlers/dues/repos/dues-payments.repo.ts",
+        "services/api-ts/src/handlers/dues/repos/dues-payments.schema.ts",
+        "services/api-ts/src/handlers/dues/repos/payment-token.repo.ts",
+        "services/api-ts/src/handlers/dues/repos/payment-token.schema.ts"
+      ],
+      "confidence": "HIGH"
+    },
+    {
+      "from_module": "dues",
+      "to_module": "platformadmin",
+      "import_count": 3,
+      "files": [
+        "services/api-ts/src/handlers/dues/repos/dues-payments.schema.ts",
+        "services/api-ts/src/handlers/dues/repos/payment-token.repo.ts",
+        "services/api-ts/src/handlers/dues/repos/payment-token.schema.ts"
+      ],
+      "confidence": "HIGH"
+    },
+    {
+      "from_module": "elections",
+      "to_module": "api-core",
+      "import_count": 29,
+      "files": [
+        "services/api-ts/src/handlers/elections/castVote.ts",
+        "services/api-ts/src/handlers/elections/certifyElection.ts",
+        "services/api-ts/src/handlers/elections/createElection.ts",
+        "services/api-ts/src/handlers/elections/createNominee.ts",
+        "services/api-ts/src/handlers/elections/deleteElection.ts",
+        "services/api-ts/src/handlers/elections/getElection.ts",
+        "services/api-ts/src/handlers/elections/repos/elections.repo.ts",
+        "services/api-ts/src/handlers/elections/repos/elections.schema.ts",
+        "services/api-ts/src/handlers/elections/updateElectionStatus.ts",
+        "services/api-ts/src/handlers/elections/updateNomineeStatus.ts"
+      ],
+      "confidence": "HIGH"
+    },
+    {
+      "from_module": "elections",
+      "to_module": "association:member",
+      "import_count": 8,
+      "files": [
+        "services/api-ts/src/handlers/elections/castVote.ts",
+        "services/api-ts/src/handlers/elections/certifyElection.ts",
+        "services/api-ts/src/handlers/elections/createElection.ts",
+        "services/api-ts/src/handlers/elections/createNominee.ts",
+        "services/api-ts/src/handlers/elections/deleteElection.ts",
+        "services/api-ts/src/handlers/elections/repos/elections.schema.ts",
+        "services/api-ts/src/handlers/elections/updateNomineeStatus.ts"
+      ],
+      "confidence": "HIGH"
+    },
+    {
+      "from_module": "elections",
+      "to_module": "person",
+      "import_count": 2,
+      "files": [
+        "services/api-ts/src/handlers/elections/getElection.ts",
+        "services/api-ts/src/handlers/elections/repos/elections.schema.ts"
+      ],
+      "confidence": "HIGH"
+    },
+    {
+      "from_module": "email",
+      "to_module": "api-core",
+      "import_count": 72,
+      "files": [
+        "services/api-ts/src/handlers/email/cancelEmailQueueItem.ts",
+        "services/api-ts/src/handlers/email/createEmailTemplate.ts",
+        "services/api-ts/src/handlers/email/getEmailQueueItem.ts",
+        "services/api-ts/src/handlers/email/getEmailTemplate.ts",
+        "services/api-ts/src/handlers/email/jobs/index.ts",
+        "services/api-ts/src/handlers/email/jobs/processor.ts",
+        "services/api-ts/src/handlers/email/listEmailQueueItems.ts",
+        "services/api-ts/src/handlers/email/listEmailSuppressions.ts",
+        "services/api-ts/src/handlers/email/listEmailTemplates.ts",
+        "services/api-ts/src/handlers/email/repos/email.schema.ts",
+        "services/api-ts/src/handlers/email/repos/queue.repo.ts",
+        "services/api-ts/src/handlers/email/repos/suppression.repo.ts",
+        "services/api-ts/src/handlers/email/repos/suppression.schema.ts",
+        "services/api-ts/src/handlers/email/repos/template.repo.ts",
+        "services/api-ts/src/handlers/email/retryEmailQueueItem.ts",
+        "services/api-ts/src/handlers/email/templates/initializer.ts",
+        "services/api-ts/src/handlers/email/testEmailTemplate.ts",
+        "services/api-ts/src/handlers/email/unsubscribeEmail.ts",
+        "services/api-ts/src/handlers/email/updateEmailTemplate.ts"
+      ],
+      "confidence": "HIGH"
+    },
+    {
+      "from_module": "events",
+      "to_module": "api-core",
+      "import_count": 31,
+      "files": [
+        "services/api-ts/src/handlers/events/bulkCreateEventSeries.ts",
+        "services/api-ts/src/handlers/events/cancelEvent.ts",
+        "services/api-ts/src/handlers/events/cancelRegistration.ts",
+        "services/api-ts/src/handlers/events/checkIn.ts",
+        "services/api-ts/src/handlers/events/createEvent.ts",
+        "services/api-ts/src/handlers/events/getEvent.ts",
+        "services/api-ts/src/handlers/events/getPublicEvent.ts",
+        "services/api-ts/src/handlers/events/listAttendance.ts",
+        "services/api-ts/src/handlers/events/listEvents.ts",
+        "services/api-ts/src/handlers/events/listMyEvents.ts",
+        "services/api-ts/src/handlers/events/listRegistrations.ts",
+        "services/api-ts/src/handlers/events/registerForEvent.ts",
+        "services/api-ts/src/handlers/events/repos/events.repo.ts",
+        "services/api-ts/src/handlers/events/updateEvent.ts",
+        "services/api-ts/src/handlers/events/utils/membership-check.ts"
+      ],
+      "confidence": "HIGH"
+    },
+    {
+      "from_module": "events",
+      "to_module": "association:member",
+      "import_count": 7,
+      "files": [
+        "services/api-ts/src/handlers/events/bulkCreateEventSeries.ts",
+        "services/api-ts/src/handlers/events/cancelEvent.ts",
+        "services/api-ts/src/handlers/events/cancelRegistration.ts",
+        "services/api-ts/src/handlers/events/checkIn.ts",
+        "services/api-ts/src/handlers/events/createEvent.ts",
+        "services/api-ts/src/handlers/events/updateEvent.ts",
+        "services/api-ts/src/handlers/events/utils/membership-check.ts"
+      ],
+      "confidence": "HIGH"
+    },
+    {
+      "from_module": "events",
+      "to_module": "notifs",
+      "import_count": 1,
+      "files": [
+        "services/api-ts/src/handlers/events/cancelEvent.ts"
+      ],
+      "confidence": "HIGH"
+    },
+    {
+      "from_module": "events",
+      "to_module": "association:operations",
+      "import_count": 2,
+      "files": [
+        "services/api-ts/src/handlers/events/cancelEvent.ts",
+        "services/api-ts/src/handlers/events/repos/events.repo.ts"
+      ],
+      "confidence": "HIGH"
+    },
+    {
+      "from_module": "events",
+      "to_module": "membership",
+      "import_count": 3,
+      "files": [
+        "services/api-ts/src/handlers/events/getEvent.ts",
+        "services/api-ts/src/handlers/events/listAttendance.ts",
+        "services/api-ts/src/handlers/events/listRegistrations.ts"
+      ],
+      "confidence": "HIGH"
+    },
+    {
+      "from_module": "invite",
+      "to_module": "api-core",
+      "import_count": 19,
+      "files": [
+        "services/api-ts/src/handlers/invite/bulkImportMembers.ts",
+        "services/api-ts/src/handlers/invite/claimInvite.ts",
+        "services/api-ts/src/handlers/invite/createInvite.ts",
+        "services/api-ts/src/handlers/invite/repos/invite.repo.ts",
+        "services/api-ts/src/handlers/invite/repos/invite.schema.ts",
+        "services/api-ts/src/handlers/invite/validateInvite.ts"
+      ],
+      "confidence": "HIGH"
+    },
+    {
+      "from_module": "invite",
+      "to_module": "association:member",
+      "import_count": 1,
+      "files": [
+        "services/api-ts/src/handlers/invite/bulkImportMembers.ts"
+      ],
+      "confidence": "HIGH"
+    },
+    {
+      "from_module": "invite",
+      "to_module": "membership",
+      "import_count": 1,
+      "files": [
+        "services/api-ts/src/handlers/invite/claimInvite.ts"
+      ],
+      "confidence": "HIGH"
+    },
+    {
+      "from_module": "invite",
+      "to_module": "platformadmin",
+      "import_count": 2,
+      "files": [
+        "services/api-ts/src/handlers/invite/claimInvite.ts",
+        "services/api-ts/src/handlers/invite/repos/invite.schema.ts"
+      ],
+      "confidence": "HIGH"
+    },
+    {
+      "from_module": "jobs",
+      "to_module": "api-core",
+      "import_count": 8,
+      "files": [
+        "services/api-ts/src/handlers/jobs/createJobApplication.ts",
+        "services/api-ts/src/handlers/jobs/createJobPosting.ts",
+        "services/api-ts/src/handlers/jobs/repos/jobs.repo.ts",
+        "services/api-ts/src/handlers/jobs/repos/jobs.schema.ts",
+        "services/api-ts/src/handlers/jobs/updateJobApplication.ts",
+        "services/api-ts/src/handlers/jobs/updateJobPosting.ts"
+      ],
+      "confidence": "HIGH"
+    },
+    {
+      "from_module": "marketplace",
+      "to_module": "api-core",
+      "import_count": 44,
+      "files": [
+        "services/api-ts/src/handlers/marketplace/createListing.ts",
+        "services/api-ts/src/handlers/marketplace/createOrder.ts",
+        "services/api-ts/src/handlers/marketplace/createVendor.ts",
+        "services/api-ts/src/handlers/marketplace/fulfillOrder.ts",
+        "services/api-ts/src/handlers/marketplace/getVendor.ts",
+        "services/api-ts/src/handlers/marketplace/listListings.ts",
+        "services/api-ts/src/handlers/marketplace/listVendors.ts",
+        "services/api-ts/src/handlers/marketplace/repos/listing.repo.ts",
+        "services/api-ts/src/handlers/marketplace/repos/marketplace.schema.ts",
+        "services/api-ts/src/handlers/marketplace/repos/order.repo.ts",
+        "services/api-ts/src/handlers/marketplace/repos/vendor.repo.ts",
+        "services/api-ts/src/handlers/marketplace/updateVendor.ts",
+        "services/api-ts/src/handlers/marketplace/verifyVendor.ts"
+      ],
+      "confidence": "HIGH"
+    },
+    {
+      "from_module": "membership",
+      "to_module": "api-core",
+      "import_count": 37,
+      "files": [
+        "services/api-ts/src/handlers/membership/addMember.ts",
+        "services/api-ts/src/handlers/membership/csvImport.ts",
+        "services/api-ts/src/handlers/membership/getMember.ts",
+        "services/api-ts/src/handlers/membership/getOrgProfile.ts",
+        "services/api-ts/src/handlers/membership/importMembers.ts",
+        "services/api-ts/src/handlers/membership/jobs/graceToLapsed.ts",
+        "services/api-ts/src/handlers/membership/jobs/index.ts",
+        "services/api-ts/src/handlers/membership/listOrgApplications.ts",
+        "services/api-ts/src/handlers/membership/listOrgMembers.ts",
+        "services/api-ts/src/handlers/membership/repos/membership.repo.ts",
+        "services/api-ts/src/handlers/membership/reviewApplication.ts",
+        "services/api-ts/src/handlers/membership/updateMember.ts",
+        "services/api-ts/src/handlers/membership/updateOrgProfile.ts",
+        "services/api-ts/src/handlers/membership/upsertCategory.ts"
+      ],
+      "confidence": "HIGH"
+    },
+    {
+      "from_module": "membership",
+      "to_module": "association:member",
+      "import_count": 14,
+      "files": [
+        "services/api-ts/src/handlers/membership/addMember.ts",
+        "services/api-ts/src/handlers/membership/csvImport.ts",
+        "services/api-ts/src/handlers/membership/getMember.ts",
+        "services/api-ts/src/handlers/membership/importMembers.ts",
+        "services/api-ts/src/handlers/membership/jobs/graceToLapsed.ts",
+        "services/api-ts/src/handlers/membership/listMembers.ts",
+        "services/api-ts/src/handlers/membership/listOrgApplications.ts",
+        "services/api-ts/src/handlers/membership/listOrgMembers.ts",
+        "services/api-ts/src/handlers/membership/repos/membership.repo.ts",
+        "services/api-ts/src/handlers/membership/reviewApplication.ts",
+        "services/api-ts/src/handlers/membership/updateMember.ts"
+      ],
+      "confidence": "HIGH"
+    },
+    {
+      "from_module": "membership",
+      "to_module": "person",
+      "import_count": 4,
+      "files": [
+        "services/api-ts/src/handlers/membership/csvImport.ts",
+        "services/api-ts/src/handlers/membership/importMembers.ts",
+        "services/api-ts/src/handlers/membership/listOrgMembers.ts",
+        "services/api-ts/src/handlers/membership/repos/membership.repo.ts"
+      ],
+      "confidence": "HIGH"
+    },
+    {
+      "from_module": "membership",
+      "to_module": "platformadmin",
+      "import_count": 4,
+      "files": [
+        "services/api-ts/src/handlers/membership/getOrgProfile.ts",
+        "services/api-ts/src/handlers/membership/listOrgApplications.ts",
+        "services/api-ts/src/handlers/membership/listOrgMembers.ts",
+        "services/api-ts/src/handlers/membership/updateOrgProfile.ts"
+      ],
+      "confidence": "HIGH"
+    },
+    {
+      "from_module": "notifs",
+      "to_module": "api-core",
+      "import_count": 31,
+      "files": [
+        "services/api-ts/src/handlers/notifs/getNotification.ts",
+        "services/api-ts/src/handlers/notifs/jobs/index.ts",
+        "services/api-ts/src/handlers/notifs/listNotifications.ts",
+        "services/api-ts/src/handlers/notifs/markAllNotificationsAsRead.ts",
+        "services/api-ts/src/handlers/notifs/markAllNotificationsRead.ts",
+        "services/api-ts/src/handlers/notifs/markNotificationAsRead.ts",
+        "services/api-ts/src/handlers/notifs/notification-triggers.ts",
+        "services/api-ts/src/handlers/notifs/repos/notification.repo.ts",
+        "services/api-ts/src/handlers/notifs/repos/notification.schema.ts"
+      ],
+      "confidence": "HIGH"
+    },
+    {
+      "from_module": "notifs",
+      "to_module": "person",
+      "import_count": 6,
+      "files": [
+        "services/api-ts/src/handlers/notifs/getNotification.ts",
+        "services/api-ts/src/handlers/notifs/listNotifications.ts",
+        "services/api-ts/src/handlers/notifs/markAllNotificationsAsRead.ts",
+        "services/api-ts/src/handlers/notifs/markAllNotificationsRead.ts",
+        "services/api-ts/src/handlers/notifs/markNotificationAsRead.ts",
+        "services/api-ts/src/handlers/notifs/repos/notification.repo.ts"
+      ],
+      "confidence": "HIGH"
+    },
+    {
+      "from_module": "onboarding",
+      "to_module": "api-core",
+      "import_count": 12,
+      "files": [
+        "services/api-ts/src/handlers/onboarding/getOnboardingState.ts",
+        "services/api-ts/src/handlers/onboarding/repos/onboarding.repo.ts",
+        "services/api-ts/src/handlers/onboarding/repos/onboarding.schema.ts",
+        "services/api-ts/src/handlers/onboarding/updateOnboardingStep.ts"
+      ],
+      "confidence": "HIGH"
+    },
+    {
+      "from_module": "onboarding",
+      "to_module": "association:member",
+      "import_count": 2,
+      "files": [
+        "services/api-ts/src/handlers/onboarding/getOnboardingState.ts",
+        "services/api-ts/src/handlers/onboarding/updateOnboardingStep.ts"
+      ],
+      "confidence": "HIGH"
+    },
+    {
+      "from_module": "onboarding",
+      "to_module": "platformadmin",
+      "import_count": 1,
+      "files": [
+        "services/api-ts/src/handlers/onboarding/repos/onboarding.schema.ts"
+      ],
+      "confidence": "HIGH"
+    },
+    {
+      "from_module": "person",
+      "to_module": "api-core",
+      "import_count": 124,
+      "files": [
+        "services/api-ts/src/handlers/person/accountDeletionCascade.ts",
+        "services/api-ts/src/handlers/person/cancelMyAccountDeletion.ts",
+        "services/api-ts/src/handlers/person/createMyCreditEntry.ts",
+        "services/api-ts/src/handlers/person/createPerson.ts",
+        "services/api-ts/src/handlers/person/executeAccountDeletion.ts",
+        "services/api-ts/src/handlers/person/exportMyData.ts",
+        "services/api-ts/src/handlers/person/getDataExportDownload.ts",
+        "services/api-ts/src/handlers/person/getDataExportStatus.ts",
+        "services/api-ts/src/handlers/person/getMyCreditSummary.ts",
+        "services/api-ts/src/handlers/person/getMyCredits.ts",
+        "services/api-ts/src/handlers/person/getMyIdCard.ts",
+        "services/api-ts/src/handlers/person/getMyIdCardPdf.ts",
+        "services/api-ts/src/handlers/person/getMyMemberships.ts",
+        "services/api-ts/src/handlers/person/getMyNotificationPreferences.ts",
+        "services/api-ts/src/handlers/person/getMyOfficerRole.ts",
+        "services/api-ts/src/handlers/person/getMyPrivacySettings.ts",
+        "services/api-ts/src/handlers/person/getPerson.ts",
+        "services/api-ts/src/handlers/person/jobs/deletionProcessor.ts",
+        "services/api-ts/src/handlers/person/jobs/index.ts",
+        "services/api-ts/src/handlers/person/listMyCreditEntries.ts"
+      ],
+      "confidence": "HIGH"
+    },
+    {
+      "from_module": "person",
+      "to_module": "association:member",
+      "import_count": 28,
+      "files": [
+        "services/api-ts/src/handlers/person/accountDeletionCascade.ts",
+        "services/api-ts/src/handlers/person/createMyCreditEntry.ts",
+        "services/api-ts/src/handlers/person/executeAccountDeletion.ts",
+        "services/api-ts/src/handlers/person/exportMyData.ts",
+        "services/api-ts/src/handlers/person/getMyCreditSummary.ts",
+        "services/api-ts/src/handlers/person/getMyCredits.ts",
+        "services/api-ts/src/handlers/person/getMyMemberships.ts",
+        "services/api-ts/src/handlers/person/getMyOfficerRole.ts",
+        "services/api-ts/src/handlers/person/listMyCreditEntries.ts",
+        "services/api-ts/src/handlers/person/requestDataExport.ts",
+        "services/api-ts/src/handlers/person/requestMyAccountDeletion.ts",
+        "services/api-ts/src/handlers/person/updateMyPrivacySettings.ts",
+        "services/api-ts/src/handlers/person/updatePrivacySettings.ts",
+        "services/api-ts/src/handlers/person/utils/id-card-data.ts"
+      ],
+      "confidence": "HIGH"
+    },
+    {
+      "from_module": "person",
+      "to_module": "association:operations",
+      "import_count": 2,
+      "files": [
+        "services/api-ts/src/handlers/person/accountDeletionCascade.ts"
+      ],
+      "confidence": "HIGH"
+    },
+    {
+      "from_module": "person",
+      "to_module": "elections",
+      "import_count": 1,
+      "files": [
+        "services/api-ts/src/handlers/person/accountDeletionCascade.ts"
+      ],
+      "confidence": "HIGH"
+    },
+    {
+      "from_module": "person",
+      "to_module": "communication",
+      "import_count": 1,
+      "files": [
+        "services/api-ts/src/handlers/person/accountDeletionCascade.ts"
+      ],
+      "confidence": "HIGH"
+    },
+    {
+      "from_module": "person",
+      "to_module": "certificates",
+      "import_count": 1,
+      "files": [
+        "services/api-ts/src/handlers/person/accountDeletionCascade.ts"
+      ],
+      "confidence": "HIGH"
+    },
+    {
+      "from_module": "person",
+      "to_module": "documents",
+      "import_count": 2,
+      "files": [
+        "services/api-ts/src/handlers/person/accountDeletionCascade.ts",
+        "services/api-ts/src/handlers/person/createMyCreditEntry.ts"
+      ],
+      "confidence": "HIGH"
+    },
+    {
+      "from_module": "person",
+      "to_module": "invite",
+      "import_count": 1,
+      "files": [
+        "services/api-ts/src/handlers/person/accountDeletionCascade.ts"
+      ],
+      "confidence": "HIGH"
+    },
+    {
+      "from_module": "person",
+      "to_module": "billing",
+      "import_count": 1,
+      "files": [
+        "services/api-ts/src/handlers/person/accountDeletionCascade.ts"
+      ],
+      "confidence": "HIGH"
+    },
+    {
+      "from_module": "person",
+      "to_module": "platformadmin",
+      "import_count": 3,
+      "files": [
+        "services/api-ts/src/handlers/person/getMyCreditSummary.ts",
+        "services/api-ts/src/handlers/person/getMyMemberships.ts",
+        "services/api-ts/src/handlers/person/utils/id-card-data.ts"
+      ],
+      "confidence": "HIGH"
+    },
+    {
+      "from_module": "platformadmin",
+      "to_module": "api-core",
+      "import_count": 159,
+      "files": [
+        "services/api-ts/src/handlers/platformadmin/addTicketComment.ts",
+        "services/api-ts/src/handlers/platformadmin/cancelSubscription.ts",
+        "services/api-ts/src/handlers/platformadmin/createAssociation.ts",
+        "services/api-ts/src/handlers/platformadmin/createOrganization.ts",
+        "services/api-ts/src/handlers/platformadmin/createPricingTier.ts",
+        "services/api-ts/src/handlers/platformadmin/createTicket.ts",
+        "services/api-ts/src/handlers/platformadmin/deleteAssociation.ts",
+        "services/api-ts/src/handlers/platformadmin/deleteFeatureFlag.ts",
+        "services/api-ts/src/handlers/platformadmin/endImpersonation.ts",
+        "services/api-ts/src/handlers/platformadmin/exportDashboardReport.ts",
+        "services/api-ts/src/handlers/platformadmin/getAdminRole.ts",
+        "services/api-ts/src/handlers/platformadmin/getAssociation.ts",
+        "services/api-ts/src/handlers/platformadmin/getNationalChapterDetail.ts",
+        "services/api-ts/src/handlers/platformadmin/getNationalDashboard.ts",
+        "services/api-ts/src/handlers/platformadmin/getOrgHealthScores.ts",
+        "services/api-ts/src/handlers/platformadmin/getOrganization.ts",
+        "services/api-ts/src/handlers/platformadmin/getOrganizationBySlug.ts",
+        "services/api-ts/src/handlers/platformadmin/getPlatformSummary.ts",
+        "services/api-ts/src/handlers/platformadmin/getRevenueAnalytics.ts",
+        "services/api-ts/src/handlers/platformadmin/getSubscription.ts"
+      ],
+      "confidence": "HIGH"
+    },
+    {
+      "from_module": "platformadmin",
+      "to_module": "association:operations",
+      "import_count": 2,
+      "files": [
+        "services/api-ts/src/handlers/platformadmin/getCommittee.ts",
+        "services/api-ts/src/handlers/platformadmin/listAllCommittees.ts"
+      ],
+      "confidence": "HIGH"
+    },
+    {
+      "from_module": "platformadmin",
+      "to_module": "notifs",
+      "import_count": 4,
+      "files": [
+        "services/api-ts/src/handlers/platformadmin/jobs/breachDeadlineMonitor.ts",
+        "services/api-ts/src/handlers/platformadmin/jobs/pastDueMonitor.ts",
+        "services/api-ts/src/handlers/platformadmin/jobs/ticketSlaMonitor.ts",
+        "services/api-ts/src/handlers/platformadmin/jobs/trialExpiryMonitor.ts"
+      ],
+      "confidence": "HIGH"
+    },
+    {
+      "from_module": "platformadmin",
+      "to_module": "association:member",
+      "import_count": 2,
+      "files": [
+        "services/api-ts/src/handlers/platformadmin/jobs/pastDueMonitor.ts",
+        "services/api-ts/src/handlers/platformadmin/jobs/trialExpiryMonitor.ts"
+      ],
+      "confidence": "HIGH"
+    },
+    {
+      "from_module": "reviews",
+      "to_module": "api-core",
+      "import_count": 20,
+      "files": [
+        "services/api-ts/src/handlers/reviews/createReview.ts",
+        "services/api-ts/src/handlers/reviews/deleteReview.ts",
+        "services/api-ts/src/handlers/reviews/getReview.ts",
+        "services/api-ts/src/handlers/reviews/listReviews.ts",
+        "services/api-ts/src/handlers/reviews/repos/review.repo.ts",
+        "services/api-ts/src/handlers/reviews/repos/review.schema.ts"
+      ],
+      "confidence": "HIGH"
+    },
+    {
+      "from_module": "reviews",
+      "to_module": "person",
+      "import_count": 1,
+      "files": [
+        "services/api-ts/src/handlers/reviews/repos/review.schema.ts"
+      ],
+      "confidence": "HIGH"
+    },
+    {
+      "from_module": "storage",
+      "to_module": "api-core",
+      "import_count": 36,
+      "files": [
+        "services/api-ts/src/handlers/storage/completeFileUpload.ts",
+        "services/api-ts/src/handlers/storage/deleteFile.ts",
+        "services/api-ts/src/handlers/storage/getFile.ts",
+        "services/api-ts/src/handlers/storage/getFileDownload.ts",
+        "services/api-ts/src/handlers/storage/listFiles.ts",
+        "services/api-ts/src/handlers/storage/repos/file.repo.ts",
+        "services/api-ts/src/handlers/storage/repos/file.schema.ts",
+        "services/api-ts/src/handlers/storage/uploadFile.ts"
+      ],
+      "confidence": "HIGH"
+    },
+    {
+      "from_module": "surveys",
+      "to_module": "api-core",
+      "import_count": 66,
+      "files": [
+        "services/api-ts/src/handlers/surveys/cloneSurvey.ts",
+        "services/api-ts/src/handlers/surveys/closeSurvey.ts",
+        "services/api-ts/src/handlers/surveys/createSurvey.ts",
+        "services/api-ts/src/handlers/surveys/deleteMemberResponses.ts",
+        "services/api-ts/src/handlers/surveys/deleteSurvey.ts",
+        "services/api-ts/src/handlers/surveys/dismissSurveyResponse.ts",
+        "services/api-ts/src/handlers/surveys/exportSurveyResponses.ts",
+        "services/api-ts/src/handlers/surveys/getNpsTrends.ts",
+        "services/api-ts/src/handlers/surveys/getSurvey.ts",
+        "services/api-ts/src/handlers/surveys/getSurveyAnalytics.ts",
+        "services/api-ts/src/handlers/surveys/jobs/index.ts",
+        "services/api-ts/src/handlers/surveys/listAdminSurveys.ts",
+        "services/api-ts/src/handlers/surveys/listSurveyResponses.ts",
+        "services/api-ts/src/handlers/surveys/listSurveys.ts",
+        "services/api-ts/src/handlers/surveys/publishSurvey.ts",
+        "services/api-ts/src/handlers/surveys/repos/survey.repo.ts",
+        "services/api-ts/src/handlers/surveys/repos/survey.schema.ts",
+        "services/api-ts/src/handlers/surveys/submitSurveyResponse.ts",
+        "services/api-ts/src/handlers/surveys/updateSurvey.ts"
+      ],
+      "confidence": "HIGH"
+    },
+    {
+      "from_module": "surveys",
+      "to_module": "association:member",
+      "import_count": 10,
+      "files": [
+        "services/api-ts/src/handlers/surveys/cloneSurvey.ts",
+        "services/api-ts/src/handlers/surveys/closeSurvey.ts",
+        "services/api-ts/src/handlers/surveys/createSurvey.ts",
+        "services/api-ts/src/handlers/surveys/deleteSurvey.ts",
+        "services/api-ts/src/handlers/surveys/exportSurveyResponses.ts",
+        "services/api-ts/src/handlers/surveys/getNpsTrends.ts",
+        "services/api-ts/src/handlers/surveys/getSurveyAnalytics.ts",
+        "services/api-ts/src/handlers/surveys/listSurveyResponses.ts",
+        "services/api-ts/src/handlers/surveys/publishSurvey.ts",
+        "services/api-ts/src/handlers/surveys/updateSurvey.ts"
+      ],
+      "confidence": "HIGH"
+    },
+    {
+      "from_module": "surveys",
+      "to_module": "person",
+      "import_count": 1,
+      "files": [
+        "services/api-ts/src/handlers/surveys/repos/survey.schema.ts"
+      ],
+      "confidence": "HIGH"
+    }
+  ],
+  "circular_deps": [
+    [
+      "api-core",
+      "audit",
+      "api-core"
+    ],
+    [
+      "api-core",
+      "notifs",
+      "api-core"
+    ],
+    [
+      "api-core",
+      "notifs",
+      "person",
+      "api-core"
+    ],
+    [
+      "api-core",
+      "notifs",
+      "person",
+      "association:member",
+      "api-core"
+    ],
+    [
+      "api-core",
+      "notifs",
+      "person",
+      "association:member",
+      "certificates",
+      "api-core"
+    ],
+    [
+      "person",
+      "association:member",
+      "certificates",
+      "person"
+    ],
+    [
+      "api-core",
+      "notifs",
+      "person",
+      "association:member",
+      "certificates",
+      "association:operations",
+      "api-core"
+    ],
+    [
+      "notifs",
+      "person",
+      "association:member",
+      "certificates",
+      "association:operations",
+      "notifs"
+    ],
+    [
+      "association:member",
+      "certificates",
+      "association:operations",
+      "association:member"
+    ],
+    [
+      "api-core",
+      "notifs",
+      "person",
+      "association:member",
+      "certificates",
+      "association:operations",
+      "platformadmin",
+      "api-core"
+    ],
+    [
+      "association:operations",
+      "platformadmin",
+      "association:operations"
+    ],
+    [
+      "notifs",
+      "person",
+      "association:member",
+      "certificates",
+      "association:operations",
+      "platformadmin",
+      "notifs"
+    ],
+    [
+      "association:member",
+      "certificates",
+      "association:operations",
+      "platformadmin",
+      "association:member"
+    ],
+    [
+      "api-core",
+      "notifs",
+      "person",
+      "association:member",
+      "certificates",
+      "association:operations",
+      "billing",
+      "api-core"
+    ],
+    [
+      "person",
+      "association:member",
+      "certificates",
+      "association:operations",
+      "billing",
+      "person"
+    ],
+    [
+      "api-core",
+      "notifs",
+      "person",
+      "association:member",
+      "certificates",
+      "association:operations",
+      "events",
+      "api-core"
+    ],
+    [
+      "association:member",
+      "certificates",
+      "association:operations",
+      "events",
+      "association:member"
+    ],
+    [
+      "notifs",
+      "person",
+      "association:member",
+      "certificates",
+      "association:operations",
+      "events",
+      "notifs"
+    ],
+    [
+      "association:operations",
+      "events",
+      "association:operations"
+    ],
+    [
+      "api-core",
+      "notifs",
+      "person",
+      "association:member",
+      "certificates",
+      "association:operations",
+      "events",
+      "membership",
+      "api-core"
+    ],
+    [
+      "association:member",
+      "certificates",
+      "association:operations",
+      "events",
+      "membership",
+      "association:member"
+    ],
+    [
+      "person",
+      "association:member",
+      "certificates",
+      "association:operations",
+      "events",
+      "membership",
+      "person"
+    ],
+    [
+      "api-core",
+      "notifs",
+      "person",
+      "association:member",
+      "elections",
+      "api-core"
+    ],
+    [
+      "association:member",
+      "elections",
+      "association:member"
+    ],
+    [
+      "person",
+      "association:member",
+      "elections",
+      "person"
+    ],
+    [
+      "person",
+      "association:member",
+      "person"
+    ],
+    [
+      "api-core",
+      "notifs",
+      "person",
+      "association:member",
+      "dues",
+      "api-core"
+    ],
+    [
+      "association:member",
+      "dues",
+      "association:member"
+    ],
+    [
+      "person",
+      "association:member",
+      "dues",
+      "person"
+    ],
+    [
+      "api-core",
+      "notifs",
+      "person",
+      "communication",
+      "api-core"
+    ],
+    [
+      "notifs",
+      "person",
+      "communication",
+      "notifs"
+    ],
+    [
+      "person",
+      "communication",
+      "person"
+    ],
+    [
+      "api-core",
+      "notifs",
+      "person",
+      "documents",
+      "api-core"
+    ],
+    [
+      "api-core",
+      "notifs",
+      "person",
+      "invite",
+      "api-core"
+    ],
+    [
+      "api-core",
+      "email",
+      "api-core"
+    ],
+    [
+      "api-core",
+      "booking",
+      "api-core"
+    ],
+    [
+      "api-core",
+      "surveys",
+      "api-core"
+    ],
+    [
+      "api-core",
+      "comms",
+      "api-core"
+    ],
+    [
+      "api-core",
+      "marketplace",
+      "api-core"
+    ],
+    [
+      "api-core",
+      "reviews",
+      "api-core"
+    ],
+    [
+      "api-core",
+      "storage",
+      "api-core"
+    ],
+    [
+      "api-core",
+      "jobs",
+      "api-core"
+    ],
+    [
+      "api-core",
+      "onboarding",
+      "api-core"
+    ],
+    [
+      "api-core",
+      "advertising",
+      "api-core"
+    ]
+  ],
+  "high_fan_in": [
+    {
+      "module": "api-core",
+      "importers": 25
+    },
+    {
+      "module": "person",
+      "importers": 12
+    },
+    {
+      "module": "association:member",
+      "importers": 12
+    },
+    {
+      "module": "platformadmin",
+      "importers": 9
+    },
+    {
+      "module": "association:operations",
+      "importers": 6
+    },
+    {
+      "module": "notifs",
+      "importers": 5
+    },
+    {
+      "module": "membership",
+      "importers": 5
+    }
+  ],
+  "high_fan_out": [
+    {
+      "module": "api-core",
+      "imports": 27
+    },
+    {
+      "module": "person",
+      "imports": 10
+    },
+    {
+      "module": "association:member",
+      "imports": 8
+    },
+    {
+      "module": "association:operations",
+      "imports": 6
+    },
+    {
+      "module": "communication",
+      "imports": 5
+    },
+    {
+      "module": "events",
+      "imports": 5
+    }
+  ]
+}

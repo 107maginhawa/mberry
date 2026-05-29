@@ -1,0 +1,3349 @@
+{
+  "version": 1,
+  "flows": {
+    "apps/admin/src/components/skeletons.tsx": {
+      "props_received_from": [],
+      "events_emitted_to": [],
+      "store_reads": [],
+      "store_writes": [],
+      "api_calls": []
+    },
+    "apps/admin/src/lib/role-gate.tsx": {
+      "props_received_from": [],
+      "events_emitted_to": [],
+      "store_reads": [
+        {
+          "store": "context",
+          "fields": [
+            "*"
+          ]
+        },
+        {
+          "store": "context",
+          "fields": [
+            "*"
+          ]
+        }
+      ],
+      "store_writes": [],
+      "api_calls": []
+    },
+    "apps/admin/src/lib/utils.ts": {
+      "props_received_from": [],
+      "events_emitted_to": [],
+      "store_reads": [],
+      "store_writes": [],
+      "api_calls": []
+    },
+    "apps/admin/src/main.tsx": {
+      "props_received_from": [],
+      "events_emitted_to": [],
+      "store_reads": [],
+      "store_writes": [],
+      "api_calls": []
+    },
+    "apps/admin/src/routeTree.gen.ts": {
+      "props_received_from": [],
+      "events_emitted_to": [],
+      "store_reads": [],
+      "store_writes": [],
+      "api_calls": []
+    },
+    "apps/admin/src/router.ts": {
+      "props_received_from": [],
+      "events_emitted_to": [],
+      "store_reads": [],
+      "store_writes": [],
+      "api_calls": []
+    },
+    "apps/admin/src/routes/__root.tsx": {
+      "props_received_from": [],
+      "events_emitted_to": [],
+      "store_reads": [],
+      "store_writes": [],
+      "api_calls": []
+    },
+    "apps/admin/src/routes/associations/$associationId.tsx": {
+      "props_received_from": [],
+      "events_emitted_to": [],
+      "store_reads": [],
+      "store_writes": [],
+      "api_calls": [
+        {
+          "method": "GET",
+          "endpoint": "/api/admin/national-dashboard/${associationId}?snapshotMonth=${currentMonth}",
+          "trigger": null
+        }
+      ]
+    },
+    "apps/admin/src/routes/associations/index.tsx": {
+      "props_received_from": [],
+      "events_emitted_to": [],
+      "store_reads": [],
+      "store_writes": [],
+      "api_calls": []
+    },
+    "apps/admin/src/routes/audit/index.tsx": {
+      "props_received_from": [],
+      "events_emitted_to": [],
+      "store_reads": [],
+      "store_writes": [],
+      "api_calls": []
+    },
+    "apps/admin/src/routes/committees/index.tsx": {
+      "props_received_from": [],
+      "events_emitted_to": [],
+      "store_reads": [],
+      "store_writes": [],
+      "api_calls": [
+        {
+          "method": "GET",
+          "endpoint": "/api/admin/committees?limit=100",
+          "trigger": null
+        }
+      ]
+    },
+    "apps/admin/src/routes/communications/email.tsx": {
+      "props_received_from": [],
+      "events_emitted_to": [],
+      "store_reads": [],
+      "store_writes": [],
+      "api_calls": []
+    },
+    "apps/admin/src/routes/communications/index.tsx": {
+      "props_received_from": [],
+      "events_emitted_to": [],
+      "store_reads": [],
+      "store_writes": [],
+      "api_calls": []
+    },
+    "apps/admin/src/routes/communications/moderation.tsx": {
+      "props_received_from": [],
+      "events_emitted_to": [],
+      "store_reads": [],
+      "store_writes": [],
+      "api_calls": []
+    },
+    "apps/admin/src/routes/communications/templates.tsx": {
+      "props_received_from": [],
+      "events_emitted_to": [],
+      "store_reads": [],
+      "store_writes": [],
+      "api_calls": []
+    },
+    "apps/admin/src/routes/compliance/index.tsx": {
+      "props_received_from": [],
+      "events_emitted_to": [],
+      "store_reads": [],
+      "store_writes": [],
+      "api_calls": []
+    },
+    "apps/admin/src/routes/events/index.tsx": {
+      "props_received_from": [],
+      "events_emitted_to": [],
+      "store_reads": [],
+      "store_writes": [],
+      "api_calls": []
+    },
+    "apps/admin/src/routes/feature-flags/index.tsx": {
+      "props_received_from": [],
+      "events_emitted_to": [],
+      "store_reads": [],
+      "store_writes": [],
+      "api_calls": []
+    },
+    "apps/admin/src/routes/impersonate/index.tsx": {
+      "props_received_from": [],
+      "events_emitted_to": [],
+      "store_reads": [],
+      "store_writes": [],
+      "api_calls": []
+    },
+    "apps/admin/src/routes/index.tsx": {
+      "props_received_from": [],
+      "events_emitted_to": [],
+      "store_reads": [],
+      "store_writes": [],
+      "api_calls": []
+    },
+    "apps/admin/src/routes/members/$personId.tsx": {
+      "props_received_from": [],
+      "events_emitted_to": [],
+      "store_reads": [],
+      "store_writes": [],
+      "api_calls": []
+    },
+    "apps/admin/src/routes/members/index.tsx": {
+      "props_received_from": [],
+      "events_emitted_to": [],
+      "store_reads": [],
+      "store_writes": [],
+      "api_calls": []
+    },
+    "apps/admin/src/routes/national-dashboard/index.tsx": {
+      "props_received_from": [],
+      "events_emitted_to": [],
+      "store_reads": [],
+      "store_writes": [],
+      "api_calls": [
+        {
+          "method": "GET",
+          "endpoint": "/api/admin/national-dashboard/${selectedAssociation}?snapshotMonth=${snapshotMonth}",
+          "trigger": null
+        }
+      ]
+    },
+    "apps/admin/src/routes/operators/index.tsx": {
+      "props_received_from": [],
+      "events_emitted_to": [],
+      "store_reads": [],
+      "store_writes": [],
+      "api_calls": []
+    },
+    "apps/admin/src/routes/organizations/$organizationId.tsx": {
+      "props_received_from": [],
+      "events_emitted_to": [],
+      "store_reads": [],
+      "store_writes": [],
+      "api_calls": [
+        {
+          "method": "GET",
+          "endpoint": "/api/admin/organizations/${organizationId}/status",
+          "trigger": null
+        }
+      ]
+    },
+    "apps/admin/src/routes/organizations/index.tsx": {
+      "props_received_from": [],
+      "events_emitted_to": [],
+      "store_reads": [],
+      "store_writes": [],
+      "api_calls": []
+    },
+    "apps/admin/src/routes/surveys/index.tsx": {
+      "props_received_from": [],
+      "events_emitted_to": [],
+      "store_reads": [],
+      "store_writes": [],
+      "api_calls": [
+        {
+          "method": "GET",
+          "endpoint": "/api/admin/surveys?${params}",
+          "trigger": null
+        }
+      ]
+    },
+    "apps/admin/src/routes/training/index.tsx": {
+      "props_received_from": [],
+      "events_emitted_to": [],
+      "store_reads": [],
+      "store_writes": [],
+      "api_calls": []
+    },
+    "apps/admin/src/routes/verifications/index.tsx": {
+      "props_received_from": [],
+      "events_emitted_to": [],
+      "store_reads": [],
+      "store_writes": [],
+      "api_calls": []
+    },
+    "apps/admin/src/test/route-helper.tsx": {
+      "props_received_from": [],
+      "events_emitted_to": [],
+      "store_reads": [],
+      "store_writes": [],
+      "api_calls": []
+    },
+    "apps/admin/src/test/setup.ts": {
+      "props_received_from": [],
+      "events_emitted_to": [],
+      "store_reads": [],
+      "store_writes": [],
+      "api_calls": []
+    },
+    "apps/admin/src/test/utils.tsx": {
+      "props_received_from": [],
+      "events_emitted_to": [],
+      "store_reads": [],
+      "store_writes": [],
+      "api_calls": []
+    },
+    "apps/memberry/src/components/combobox.tsx": {
+      "props_received_from": [],
+      "events_emitted_to": [],
+      "store_reads": [],
+      "store_writes": [],
+      "api_calls": []
+    },
+    "apps/memberry/src/components/image-cropper-dialog.tsx": {
+      "props_received_from": [],
+      "events_emitted_to": [],
+      "store_reads": [],
+      "store_writes": [],
+      "api_calls": []
+    },
+    "apps/memberry/src/components/layout/member-bottom-nav.tsx": {
+      "props_received_from": [],
+      "events_emitted_to": [],
+      "store_reads": [],
+      "store_writes": [],
+      "api_calls": []
+    },
+    "apps/memberry/src/components/layout/member-header.tsx": {
+      "props_received_from": [],
+      "events_emitted_to": [],
+      "store_reads": [],
+      "store_writes": [],
+      "api_calls": []
+    },
+    "apps/memberry/src/components/layout/member-sidebar.tsx": {
+      "props_received_from": [],
+      "events_emitted_to": [],
+      "store_reads": [],
+      "store_writes": [],
+      "api_calls": []
+    },
+    "apps/memberry/src/components/layout/officer-mobile-nav.tsx": {
+      "props_received_from": [],
+      "events_emitted_to": [],
+      "store_reads": [],
+      "store_writes": [],
+      "api_calls": []
+    },
+    "apps/memberry/src/components/layout/officer-sidebar.tsx": {
+      "props_received_from": [],
+      "events_emitted_to": [],
+      "store_reads": [],
+      "store_writes": [],
+      "api_calls": []
+    },
+    "apps/memberry/src/components/layout/org-icon-rail.tsx": {
+      "props_received_from": [],
+      "events_emitted_to": [],
+      "store_reads": [],
+      "store_writes": [],
+      "api_calls": []
+    },
+    "apps/memberry/src/components/layout/org-picker-sheet.tsx": {
+      "props_received_from": [],
+      "events_emitted_to": [],
+      "store_reads": [],
+      "store_writes": [],
+      "api_calls": []
+    },
+    "apps/memberry/src/components/motion/count-up.tsx": {
+      "props_received_from": [],
+      "events_emitted_to": [],
+      "store_reads": [],
+      "store_writes": [],
+      "api_calls": []
+    },
+    "apps/memberry/src/components/motion/glass-card.tsx": {
+      "props_received_from": [],
+      "events_emitted_to": [],
+      "store_reads": [],
+      "store_writes": [],
+      "api_calls": []
+    },
+    "apps/memberry/src/components/motion/stagger-grid.tsx": {
+      "props_received_from": [],
+      "events_emitted_to": [],
+      "store_reads": [],
+      "store_writes": [],
+      "api_calls": []
+    },
+    "apps/memberry/src/components/motion/use-spring-transition.ts": {
+      "props_received_from": [],
+      "events_emitted_to": [],
+      "store_reads": [],
+      "store_writes": [],
+      "api_calls": []
+    },
+    "apps/memberry/src/components/notification-drawer.tsx": {
+      "props_received_from": [],
+      "events_emitted_to": [],
+      "store_reads": [],
+      "store_writes": [],
+      "api_calls": [
+        {
+          "method": "POST",
+          "endpoint": "/api/notifs/${id}/read",
+          "trigger": null
+        },
+        {
+          "method": "POST",
+          "endpoint": "/api/notifs/read-all",
+          "trigger": null
+        }
+      ]
+    },
+    "apps/memberry/src/components/patterns/avatar-initials.tsx": {
+      "props_received_from": [],
+      "events_emitted_to": [],
+      "store_reads": [],
+      "store_writes": [],
+      "api_calls": []
+    },
+    "apps/memberry/src/components/patterns/combobox.tsx": {
+      "props_received_from": [],
+      "events_emitted_to": [],
+      "store_reads": [],
+      "store_writes": [],
+      "api_calls": []
+    },
+    "apps/memberry/src/components/patterns/confirm-dialog.tsx": {
+      "props_received_from": [],
+      "events_emitted_to": [],
+      "store_reads": [],
+      "store_writes": [],
+      "api_calls": []
+    },
+    "apps/memberry/src/components/patterns/data-table.tsx": {
+      "props_received_from": [],
+      "events_emitted_to": [],
+      "store_reads": [],
+      "store_writes": [],
+      "api_calls": []
+    },
+    "apps/memberry/src/components/patterns/date-picker.tsx": {
+      "props_received_from": [],
+      "events_emitted_to": [],
+      "store_reads": [],
+      "store_writes": [],
+      "api_calls": []
+    },
+    "apps/memberry/src/components/patterns/empty-state.tsx": {
+      "props_received_from": [],
+      "events_emitted_to": [],
+      "store_reads": [],
+      "store_writes": [],
+      "api_calls": []
+    },
+    "apps/memberry/src/components/patterns/error-boundary.tsx": {
+      "props_received_from": [],
+      "events_emitted_to": [],
+      "store_reads": [],
+      "store_writes": [],
+      "api_calls": []
+    },
+    "apps/memberry/src/components/patterns/error-state.tsx": {
+      "props_received_from": [],
+      "events_emitted_to": [],
+      "store_reads": [],
+      "store_writes": [],
+      "api_calls": []
+    },
+    "apps/memberry/src/components/patterns/form-field.tsx": {
+      "props_received_from": [],
+      "events_emitted_to": [],
+      "store_reads": [],
+      "store_writes": [],
+      "api_calls": []
+    },
+    "apps/memberry/src/components/patterns/page-header.tsx": {
+      "props_received_from": [],
+      "events_emitted_to": [],
+      "store_reads": [],
+      "store_writes": [],
+      "api_calls": []
+    },
+    "apps/memberry/src/components/patterns/skeleton-loader.tsx": {
+      "props_received_from": [],
+      "events_emitted_to": [],
+      "store_reads": [],
+      "store_writes": [],
+      "api_calls": []
+    },
+    "apps/memberry/src/components/patterns/stat-card.tsx": {
+      "props_received_from": [],
+      "events_emitted_to": [],
+      "store_reads": [],
+      "store_writes": [],
+      "api_calls": []
+    },
+    "apps/memberry/src/components/patterns/status-badge.tsx": {
+      "props_received_from": [],
+      "events_emitted_to": [],
+      "store_reads": [],
+      "store_writes": [],
+      "api_calls": []
+    },
+    "apps/memberry/src/components/phone-input.tsx": {
+      "props_received_from": [],
+      "events_emitted_to": [],
+      "store_reads": [],
+      "store_writes": [],
+      "api_calls": []
+    },
+    "apps/memberry/src/config/position-nav.ts": {
+      "props_received_from": [],
+      "events_emitted_to": [],
+      "store_reads": [],
+      "store_writes": [],
+      "api_calls": []
+    },
+    "apps/memberry/src/constants/countries.ts": {
+      "props_received_from": [],
+      "events_emitted_to": [],
+      "store_reads": [],
+      "store_writes": [],
+      "api_calls": []
+    },
+    "apps/memberry/src/constants/languages.ts": {
+      "props_received_from": [],
+      "events_emitted_to": [],
+      "store_reads": [],
+      "store_writes": [],
+      "api_calls": []
+    },
+    "apps/memberry/src/constants/timezones.ts": {
+      "props_received_from": [],
+      "events_emitted_to": [],
+      "store_reads": [],
+      "store_writes": [],
+      "api_calls": []
+    },
+    "apps/memberry/src/features/account/components/data-export.tsx": {
+      "props_received_from": [],
+      "events_emitted_to": [],
+      "store_reads": [],
+      "store_writes": [],
+      "api_calls": []
+    },
+    "apps/memberry/src/features/admin/components/dashboard/action-queue.tsx": {
+      "props_received_from": [],
+      "events_emitted_to": [],
+      "store_reads": [],
+      "store_writes": [],
+      "api_calls": []
+    },
+    "apps/memberry/src/features/admin/components/dashboard/dashboard-kpi-card.tsx": {
+      "props_received_from": [],
+      "events_emitted_to": [],
+      "store_reads": [],
+      "store_writes": [],
+      "api_calls": []
+    },
+    "apps/memberry/src/features/admin/components/dashboard/module-summary-card.tsx": {
+      "props_received_from": [],
+      "events_emitted_to": [],
+      "store_reads": [],
+      "store_writes": [],
+      "api_calls": []
+    },
+    "apps/memberry/src/features/admin/components/officer-dashboard.tsx": {
+      "props_received_from": [],
+      "events_emitted_to": [],
+      "store_reads": [
+        {
+          "store": "session",
+          "fields": [
+            "*"
+          ]
+        },
+        {
+          "store": "session",
+          "fields": [
+            "*"
+          ]
+        }
+      ],
+      "store_writes": [],
+      "api_calls": []
+    },
+    "apps/memberry/src/features/admin/components/officer-management.tsx": {
+      "props_received_from": [],
+      "events_emitted_to": [],
+      "store_reads": [],
+      "store_writes": [],
+      "api_calls": [
+        {
+          "method": "DELETE",
+          "endpoint": "/api/association/member/officer-terms/${termId}",
+          "trigger": null
+        }
+      ]
+    },
+    "apps/memberry/src/features/admin/components/org-settings-form.tsx": {
+      "props_received_from": [],
+      "events_emitted_to": [],
+      "store_reads": [],
+      "store_writes": [],
+      "api_calls": [
+        {
+          "method": "PUT",
+          "endpoint": "/api/membership/org-profile/${orgId}",
+          "trigger": null
+        }
+      ]
+    },
+    "apps/memberry/src/features/billing/components/merchant-account-setup.tsx": {
+      "props_received_from": [],
+      "events_emitted_to": [],
+      "store_reads": [],
+      "store_writes": [],
+      "api_calls": []
+    },
+    "apps/memberry/src/features/booking/components/active-booking-card.tsx": {
+      "props_received_from": [],
+      "events_emitted_to": [],
+      "store_reads": [],
+      "store_writes": [],
+      "api_calls": []
+    },
+    "apps/memberry/src/features/booking/components/booking-event-editor.tsx": {
+      "props_received_from": [],
+      "events_emitted_to": [],
+      "store_reads": [],
+      "store_writes": [],
+      "api_calls": []
+    },
+    "apps/memberry/src/features/booking/components/booking-list.tsx": {
+      "props_received_from": [],
+      "events_emitted_to": [],
+      "store_reads": [],
+      "store_writes": [],
+      "api_calls": []
+    },
+    "apps/memberry/src/features/booking/components/booking-widget-skeleton.tsx": {
+      "props_received_from": [],
+      "events_emitted_to": [],
+      "store_reads": [],
+      "store_writes": [],
+      "api_calls": []
+    },
+    "apps/memberry/src/features/booking/components/booking-widget.tsx": {
+      "props_received_from": [],
+      "events_emitted_to": [],
+      "store_reads": [],
+      "store_writes": [],
+      "api_calls": []
+    },
+    "apps/memberry/src/features/booking/components/host-directory.tsx": {
+      "props_received_from": [],
+      "events_emitted_to": [],
+      "store_reads": [],
+      "store_writes": [],
+      "api_calls": []
+    },
+    "apps/memberry/src/features/booking/lib/adapters.ts": {
+      "props_received_from": [],
+      "events_emitted_to": [],
+      "store_reads": [],
+      "store_writes": [],
+      "api_calls": []
+    },
+    "apps/memberry/src/features/booking/lib/event-state.ts": {
+      "props_received_from": [],
+      "events_emitted_to": [],
+      "store_reads": [],
+      "store_writes": [],
+      "api_calls": []
+    },
+    "apps/memberry/src/features/booking/lib/partition-bookings.ts": {
+      "props_received_from": [],
+      "events_emitted_to": [],
+      "store_reads": [],
+      "store_writes": [],
+      "api_calls": []
+    },
+    "apps/memberry/src/features/booking/types.ts": {
+      "props_received_from": [],
+      "events_emitted_to": [],
+      "store_reads": [],
+      "store_writes": [],
+      "api_calls": []
+    },
+    "apps/memberry/src/features/certificates/components/certificate-list.tsx": {
+      "props_received_from": [],
+      "events_emitted_to": [],
+      "store_reads": [],
+      "store_writes": [],
+      "api_calls": []
+    },
+    "apps/memberry/src/features/certificates/components/certificate-preview.tsx": {
+      "props_received_from": [],
+      "events_emitted_to": [],
+      "store_reads": [],
+      "store_writes": [],
+      "api_calls": []
+    },
+    "apps/memberry/src/features/chapters/components/affiliation-list.tsx": {
+      "props_received_from": [],
+      "events_emitted_to": [],
+      "store_reads": [],
+      "store_writes": [],
+      "api_calls": []
+    },
+    "apps/memberry/src/features/chapters/lib/royalty-split.ts": {
+      "props_received_from": [],
+      "events_emitted_to": [],
+      "store_reads": [],
+      "store_writes": [],
+      "api_calls": []
+    },
+    "apps/memberry/src/features/comms/components/call-controls.tsx": {
+      "props_received_from": [],
+      "events_emitted_to": [],
+      "store_reads": [],
+      "store_writes": [],
+      "api_calls": []
+    },
+    "apps/memberry/src/features/comms/components/channel-list.tsx": {
+      "props_received_from": [],
+      "events_emitted_to": [],
+      "store_reads": [],
+      "store_writes": [],
+      "api_calls": []
+    },
+    "apps/memberry/src/features/comms/components/chat-thread.tsx": {
+      "props_received_from": [],
+      "events_emitted_to": [],
+      "store_reads": [],
+      "store_writes": [],
+      "api_calls": []
+    },
+    "apps/memberry/src/features/comms/components/chat-view.tsx": {
+      "props_received_from": [],
+      "events_emitted_to": [],
+      "store_reads": [],
+      "store_writes": [],
+      "api_calls": []
+    },
+    "apps/memberry/src/features/comms/components/connection-status.tsx": {
+      "props_received_from": [],
+      "events_emitted_to": [],
+      "store_reads": [],
+      "store_writes": [],
+      "api_calls": []
+    },
+    "apps/memberry/src/features/comms/components/create-channel-dialog.tsx": {
+      "props_received_from": [],
+      "events_emitted_to": [],
+      "store_reads": [],
+      "store_writes": [],
+      "api_calls": []
+    },
+    "apps/memberry/src/features/comms/components/dm-list.tsx": {
+      "props_received_from": [],
+      "events_emitted_to": [],
+      "store_reads": [],
+      "store_writes": [],
+      "api_calls": []
+    },
+    "apps/memberry/src/features/comms/components/message-bubble.tsx": {
+      "props_received_from": [],
+      "events_emitted_to": [],
+      "store_reads": [],
+      "store_writes": [],
+      "api_calls": []
+    },
+    "apps/memberry/src/features/comms/components/message-composer.tsx": {
+      "props_received_from": [],
+      "events_emitted_to": [],
+      "store_reads": [],
+      "store_writes": [],
+      "api_calls": []
+    },
+    "apps/memberry/src/features/comms/components/message-reactions.tsx": {
+      "props_received_from": [],
+      "events_emitted_to": [],
+      "store_reads": [],
+      "store_writes": [],
+      "api_calls": []
+    },
+    "apps/memberry/src/features/comms/components/message-search.tsx": {
+      "props_received_from": [],
+      "events_emitted_to": [],
+      "store_reads": [],
+      "store_writes": [],
+      "api_calls": []
+    },
+    "apps/memberry/src/features/comms/components/thread-panel.tsx": {
+      "props_received_from": [],
+      "events_emitted_to": [],
+      "store_reads": [],
+      "store_writes": [],
+      "api_calls": []
+    },
+    "apps/memberry/src/features/comms/components/typing-indicator.tsx": {
+      "props_received_from": [],
+      "events_emitted_to": [],
+      "store_reads": [],
+      "store_writes": [],
+      "api_calls": []
+    },
+    "apps/memberry/src/features/comms/components/video-call-panel.tsx": {
+      "props_received_from": [],
+      "events_emitted_to": [],
+      "store_reads": [],
+      "store_writes": [],
+      "api_calls": []
+    },
+    "apps/memberry/src/features/comms/components/video-call-ui.tsx": {
+      "props_received_from": [],
+      "events_emitted_to": [],
+      "store_reads": [],
+      "store_writes": [],
+      "api_calls": []
+    },
+    "apps/memberry/src/features/comms/components/video-grid.tsx": {
+      "props_received_from": [],
+      "events_emitted_to": [],
+      "store_reads": [],
+      "store_writes": [],
+      "api_calls": []
+    },
+    "apps/memberry/src/features/comms/components/video-lobby.tsx": {
+      "props_received_from": [],
+      "events_emitted_to": [],
+      "store_reads": [],
+      "store_writes": [],
+      "api_calls": []
+    },
+    "apps/memberry/src/features/comms/components/video-tile.tsx": {
+      "props_received_from": [],
+      "events_emitted_to": [],
+      "store_reads": [],
+      "store_writes": [],
+      "api_calls": []
+    },
+    "apps/memberry/src/features/comms/hooks/use-chat-websocket.ts": {
+      "props_received_from": [],
+      "events_emitted_to": [],
+      "store_reads": [],
+      "store_writes": [],
+      "api_calls": []
+    },
+    "apps/memberry/src/features/comms/hooks/use-media-stream.ts": {
+      "props_received_from": [],
+      "events_emitted_to": [],
+      "store_reads": [],
+      "store_writes": [],
+      "api_calls": []
+    },
+    "apps/memberry/src/features/comms/hooks/use-unread-counts.ts": {
+      "props_received_from": [],
+      "events_emitted_to": [],
+      "store_reads": [],
+      "store_writes": [],
+      "api_calls": []
+    },
+    "apps/memberry/src/features/comms/hooks/use-video-call.ts": {
+      "props_received_from": [],
+      "events_emitted_to": [],
+      "store_reads": [],
+      "store_writes": [],
+      "api_calls": []
+    },
+    "apps/memberry/src/features/comms/lib/media-devices.ts": {
+      "props_received_from": [],
+      "events_emitted_to": [],
+      "store_reads": [],
+      "store_writes": [],
+      "api_calls": []
+    },
+    "apps/memberry/src/features/communications/components/announcement-content.tsx": {
+      "props_received_from": [],
+      "events_emitted_to": [],
+      "store_reads": [],
+      "store_writes": [],
+      "api_calls": []
+    },
+    "apps/memberry/src/features/communications/components/announcement-list.tsx": {
+      "props_received_from": [],
+      "events_emitted_to": [],
+      "store_reads": [],
+      "store_writes": [],
+      "api_calls": []
+    },
+    "apps/memberry/src/features/communications/components/audience-picker.tsx": {
+      "props_received_from": [],
+      "events_emitted_to": [],
+      "store_reads": [],
+      "store_writes": [],
+      "api_calls": [
+        {
+          "method": "POST",
+          "endpoint": "/api/communications/segments",
+          "trigger": null
+        },
+        {
+          "method": "DELETE",
+          "endpoint": "/api/communications/segments/${id}?organizationId=${orgId}",
+          "trigger": null
+        }
+      ]
+    },
+    "apps/memberry/src/features/communications/components/compose-form.tsx": {
+      "props_received_from": [],
+      "events_emitted_to": [],
+      "store_reads": [],
+      "store_writes": [],
+      "api_calls": [
+        {
+          "method": "PATCH",
+          "endpoint": "/api/communications/announcements/${existingAnnouncement.id}",
+          "trigger": null
+        },
+        {
+          "method": "POST",
+          "endpoint": "/api/communications/announcements/${orgId}",
+          "trigger": null
+        }
+      ]
+    },
+    "apps/memberry/src/features/communications/components/delivery-funnel.tsx": {
+      "props_received_from": [],
+      "events_emitted_to": [],
+      "store_reads": [],
+      "store_writes": [],
+      "api_calls": []
+    },
+    "apps/memberry/src/features/communications/components/notification-preferences.tsx": {
+      "props_received_from": [],
+      "events_emitted_to": [],
+      "store_reads": [],
+      "store_writes": [],
+      "api_calls": [
+        {
+          "method": "POST",
+          "endpoint": "/api/communications/subscriptions/bulk",
+          "trigger": null
+        }
+      ]
+    },
+    "apps/memberry/src/features/communications/components/template-form.tsx": {
+      "props_received_from": [],
+      "events_emitted_to": [],
+      "store_reads": [],
+      "store_writes": [],
+      "api_calls": [
+        {
+          "method": "PATCH",
+          "endpoint": "/api/association/message-templates/${existingTemplate.id}",
+          "trigger": null
+        },
+        {
+          "method": "POST",
+          "endpoint": "/api/association/message-templates",
+          "trigger": null
+        }
+      ]
+    },
+    "apps/memberry/src/features/communications/components/template-list.tsx": {
+      "props_received_from": [],
+      "events_emitted_to": [],
+      "store_reads": [],
+      "store_writes": [],
+      "api_calls": [
+        {
+          "method": "DELETE",
+          "endpoint": "/api/association/message-templates/${id}",
+          "trigger": null
+        }
+      ]
+    },
+    "apps/memberry/src/features/communications/components/template-preview.tsx": {
+      "props_received_from": [],
+      "events_emitted_to": [],
+      "store_reads": [],
+      "store_writes": [],
+      "api_calls": []
+    },
+    "apps/memberry/src/features/communications/components/template-split-editor.tsx": {
+      "props_received_from": [],
+      "events_emitted_to": [],
+      "store_reads": [],
+      "store_writes": [],
+      "api_calls": []
+    },
+    "apps/memberry/src/features/dashboard/components/action-widget.tsx": {
+      "props_received_from": [],
+      "events_emitted_to": [],
+      "store_reads": [],
+      "store_writes": [],
+      "api_calls": []
+    },
+    "apps/memberry/src/features/dashboard/components/alert-banner.tsx": {
+      "props_received_from": [],
+      "events_emitted_to": [],
+      "store_reads": [],
+      "store_writes": [],
+      "api_calls": []
+    },
+    "apps/memberry/src/features/dashboard/components/credit-breakdown.tsx": {
+      "props_received_from": [],
+      "events_emitted_to": [],
+      "store_reads": [],
+      "store_writes": [],
+      "api_calls": []
+    },
+    "apps/memberry/src/features/dashboard/components/member-dashboard.tsx": {
+      "props_received_from": [],
+      "events_emitted_to": [],
+      "store_reads": [],
+      "store_writes": [],
+      "api_calls": []
+    },
+    "apps/memberry/src/features/dashboard/components/org-announcements.tsx": {
+      "props_received_from": [],
+      "events_emitted_to": [],
+      "store_reads": [],
+      "store_writes": [],
+      "api_calls": []
+    },
+    "apps/memberry/src/features/dashboard/components/quick-actions.tsx": {
+      "props_received_from": [],
+      "events_emitted_to": [],
+      "store_reads": [],
+      "store_writes": [],
+      "api_calls": []
+    },
+    "apps/memberry/src/features/directory/components/directory-filters.tsx": {
+      "props_received_from": [],
+      "events_emitted_to": [],
+      "store_reads": [],
+      "store_writes": [],
+      "api_calls": []
+    },
+    "apps/memberry/src/features/directory/components/directory-search.tsx": {
+      "props_received_from": [],
+      "events_emitted_to": [],
+      "store_reads": [],
+      "store_writes": [],
+      "api_calls": []
+    },
+    "apps/memberry/src/features/directory/components/member-profile.tsx": {
+      "props_received_from": [],
+      "events_emitted_to": [],
+      "store_reads": [],
+      "store_writes": [],
+      "api_calls": []
+    },
+    "apps/memberry/src/features/directory/components/trust-card.tsx": {
+      "props_received_from": [],
+      "events_emitted_to": [],
+      "store_reads": [],
+      "store_writes": [],
+      "api_calls": []
+    },
+    "apps/memberry/src/features/directory/components/trust-directory.tsx": {
+      "props_received_from": [],
+      "events_emitted_to": [],
+      "store_reads": [],
+      "store_writes": [],
+      "api_calls": []
+    },
+    "apps/memberry/src/features/directory/lib/visibility.ts": {
+      "props_received_from": [],
+      "events_emitted_to": [],
+      "store_reads": [],
+      "store_writes": [],
+      "api_calls": []
+    },
+    "apps/memberry/src/features/documents/components/document-browser.tsx": {
+      "props_received_from": [],
+      "events_emitted_to": [],
+      "store_reads": [],
+      "store_writes": [],
+      "api_calls": []
+    },
+    "apps/memberry/src/features/documents/components/document-library.tsx": {
+      "props_received_from": [],
+      "events_emitted_to": [],
+      "store_reads": [],
+      "store_writes": [],
+      "api_calls": []
+    },
+    "apps/memberry/src/features/dues/components/alert-banner.tsx": {
+      "props_received_from": [],
+      "events_emitted_to": [],
+      "store_reads": [],
+      "store_writes": [],
+      "api_calls": []
+    },
+    "apps/memberry/src/features/dues/components/arrears-breakdown.tsx": {
+      "props_received_from": [],
+      "events_emitted_to": [],
+      "store_reads": [],
+      "store_writes": [],
+      "api_calls": []
+    },
+    "apps/memberry/src/features/dues/components/billing-schedule-preview.tsx": {
+      "props_received_from": [],
+      "events_emitted_to": [],
+      "store_reads": [],
+      "store_writes": [],
+      "api_calls": []
+    },
+    "apps/memberry/src/features/dues/components/collection-rate-card.tsx": {
+      "props_received_from": [],
+      "events_emitted_to": [],
+      "store_reads": [],
+      "store_writes": [],
+      "api_calls": []
+    },
+    "apps/memberry/src/features/dues/components/collections-area-chart.tsx": {
+      "props_received_from": [],
+      "events_emitted_to": [],
+      "store_reads": [],
+      "store_writes": [],
+      "api_calls": []
+    },
+    "apps/memberry/src/features/dues/components/dues-config-form.tsx": {
+      "props_received_from": [],
+      "events_emitted_to": [],
+      "store_reads": [],
+      "store_writes": [],
+      "api_calls": []
+    },
+    "apps/memberry/src/features/dues/components/dues-config-form.utils.ts": {
+      "props_received_from": [],
+      "events_emitted_to": [],
+      "store_reads": [],
+      "store_writes": [],
+      "api_calls": []
+    },
+    "apps/memberry/src/features/dues/components/dues-gate-banner.tsx": {
+      "props_received_from": [],
+      "events_emitted_to": [],
+      "store_reads": [],
+      "store_writes": [],
+      "api_calls": []
+    },
+    "apps/memberry/src/features/dues/components/dues-invoice-list.tsx": {
+      "props_received_from": [],
+      "events_emitted_to": [],
+      "store_reads": [],
+      "store_writes": [],
+      "api_calls": []
+    },
+    "apps/memberry/src/features/dues/components/dues-setup-checklist.tsx": {
+      "props_received_from": [],
+      "events_emitted_to": [],
+      "store_reads": [],
+      "store_writes": [],
+      "api_calls": []
+    },
+    "apps/memberry/src/features/dues/components/dues-status-badge.tsx": {
+      "props_received_from": [],
+      "events_emitted_to": [],
+      "store_reads": [],
+      "store_writes": [],
+      "api_calls": []
+    },
+    "apps/memberry/src/features/dues/components/dues-status-card.tsx": {
+      "props_received_from": [],
+      "events_emitted_to": [],
+      "store_reads": [],
+      "store_writes": [],
+      "api_calls": []
+    },
+    "apps/memberry/src/features/dues/components/financial-dashboard.tsx": {
+      "props_received_from": [],
+      "events_emitted_to": [],
+      "store_reads": [],
+      "store_writes": [],
+      "api_calls": []
+    },
+    "apps/memberry/src/features/dues/components/fund-allocation-editor.tsx": {
+      "props_received_from": [],
+      "events_emitted_to": [],
+      "store_reads": [],
+      "store_writes": [],
+      "api_calls": []
+    },
+    "apps/memberry/src/features/dues/components/fund-allocation-preview.tsx": {
+      "props_received_from": [],
+      "events_emitted_to": [],
+      "store_reads": [],
+      "store_writes": [],
+      "api_calls": []
+    },
+    "apps/memberry/src/features/dues/components/gateway-setup.tsx": {
+      "props_received_from": [],
+      "events_emitted_to": [],
+      "store_reads": [],
+      "store_writes": [],
+      "api_calls": []
+    },
+    "apps/memberry/src/features/dues/components/metric-card.tsx": {
+      "props_received_from": [],
+      "events_emitted_to": [],
+      "store_reads": [],
+      "store_writes": [],
+      "api_calls": []
+    },
+    "apps/memberry/src/features/dues/components/monthly-trend-chart.tsx": {
+      "props_received_from": [],
+      "events_emitted_to": [],
+      "store_reads": [],
+      "store_writes": [],
+      "api_calls": []
+    },
+    "apps/memberry/src/features/dues/components/payment-history-table.tsx": {
+      "props_received_from": [],
+      "events_emitted_to": [],
+      "store_reads": [],
+      "store_writes": [],
+      "api_calls": []
+    },
+    "apps/memberry/src/features/dues/components/payment-schedule-timeline.tsx": {
+      "props_received_from": [],
+      "events_emitted_to": [],
+      "store_reads": [],
+      "store_writes": [],
+      "api_calls": []
+    },
+    "apps/memberry/src/features/dues/components/pending-proofs-list.tsx": {
+      "props_received_from": [],
+      "events_emitted_to": [],
+      "store_reads": [],
+      "store_writes": [],
+      "api_calls": []
+    },
+    "apps/memberry/src/features/dues/components/proof-upload-form.tsx": {
+      "props_received_from": [],
+      "events_emitted_to": [],
+      "store_reads": [],
+      "store_writes": [],
+      "api_calls": [
+        {
+          "method": "GET",
+          "endpoint": "/api/storage/files",
+          "trigger": null
+        }
+      ]
+    },
+    "apps/memberry/src/features/dues/components/recent-activity-feed.tsx": {
+      "props_received_from": [],
+      "events_emitted_to": [],
+      "store_reads": [],
+      "store_writes": [],
+      "api_calls": []
+    },
+    "apps/memberry/src/features/dues/components/record-payment-form.tsx": {
+      "props_received_from": [],
+      "events_emitted_to": [],
+      "store_reads": [],
+      "store_writes": [],
+      "api_calls": []
+    },
+    "apps/memberry/src/features/dues/components/refund-form.tsx": {
+      "props_received_from": [],
+      "events_emitted_to": [],
+      "store_reads": [],
+      "store_writes": [],
+      "api_calls": []
+    },
+    "apps/memberry/src/features/dues/components/report-results.tsx": {
+      "props_received_from": [],
+      "events_emitted_to": [],
+      "store_reads": [],
+      "store_writes": [],
+      "api_calls": []
+    },
+    "apps/memberry/src/features/dues/components/report-selector.tsx": {
+      "props_received_from": [],
+      "events_emitted_to": [],
+      "store_reads": [],
+      "store_writes": [],
+      "api_calls": []
+    },
+    "apps/memberry/src/features/dues/components/special-assessments-list.tsx": {
+      "props_received_from": [],
+      "events_emitted_to": [],
+      "store_reads": [],
+      "store_writes": [],
+      "api_calls": [
+        {
+          "method": "POST",
+          "endpoint": "/api/association/member/special-assessments",
+          "trigger": null
+        },
+        {
+          "method": "PUT",
+          "endpoint": "/api/association/member/special-assessments/${id}",
+          "trigger": null
+        },
+        {
+          "method": "DELETE",
+          "endpoint": "/api/association/member/special-assessments/${id}",
+          "trigger": null
+        },
+        {
+          "method": "POST",
+          "endpoint": "/api/association/member/special-assessments/${id}/apply",
+          "trigger": null
+        }
+      ]
+    },
+    "apps/memberry/src/features/dues/components/status-distribution-chart.tsx": {
+      "props_received_from": [],
+      "events_emitted_to": [],
+      "store_reads": [],
+      "store_writes": [],
+      "api_calls": []
+    },
+    "apps/memberry/src/features/dues/components/top-unpaid-list.tsx": {
+      "props_received_from": [],
+      "events_emitted_to": [],
+      "store_reads": [],
+      "store_writes": [],
+      "api_calls": []
+    },
+    "apps/memberry/src/features/dues/lib/billing-dates.ts": {
+      "props_received_from": [],
+      "events_emitted_to": [],
+      "store_reads": [],
+      "store_writes": [],
+      "api_calls": []
+    },
+    "apps/memberry/src/features/dues/lib/csv-export.ts": {
+      "props_received_from": [],
+      "events_emitted_to": [],
+      "store_reads": [],
+      "store_writes": [],
+      "api_calls": []
+    },
+    "apps/memberry/src/features/dues/lib/fund-math.ts": {
+      "props_received_from": [],
+      "events_emitted_to": [],
+      "store_reads": [],
+      "store_writes": [],
+      "api_calls": []
+    },
+    "apps/memberry/src/features/dues/lib/money.ts": {
+      "props_received_from": [],
+      "events_emitted_to": [],
+      "store_reads": [],
+      "store_writes": [],
+      "api_calls": []
+    },
+    "apps/memberry/src/features/elections/components/election-detail.tsx": {
+      "props_received_from": [],
+      "events_emitted_to": [],
+      "store_reads": [],
+      "store_writes": [],
+      "api_calls": []
+    },
+    "apps/memberry/src/features/elections/components/election-form.tsx": {
+      "props_received_from": [],
+      "events_emitted_to": [],
+      "store_reads": [],
+      "store_writes": [],
+      "api_calls": []
+    },
+    "apps/memberry/src/features/elections/components/election-list.tsx": {
+      "props_received_from": [],
+      "events_emitted_to": [],
+      "store_reads": [],
+      "store_writes": [],
+      "api_calls": []
+    },
+    "apps/memberry/src/features/elections/components/election-timeline.tsx": {
+      "props_received_from": [],
+      "events_emitted_to": [],
+      "store_reads": [],
+      "store_writes": [],
+      "api_calls": []
+    },
+    "apps/memberry/src/features/elections/components/member-election-detail.tsx": {
+      "props_received_from": [],
+      "events_emitted_to": [],
+      "store_reads": [],
+      "store_writes": [],
+      "api_calls": []
+    },
+    "apps/memberry/src/features/elections/components/member-election-list.tsx": {
+      "props_received_from": [],
+      "events_emitted_to": [],
+      "store_reads": [],
+      "store_writes": [],
+      "api_calls": []
+    },
+    "apps/memberry/src/features/elections/components/nominee-picker-dialog.tsx": {
+      "props_received_from": [],
+      "events_emitted_to": [],
+      "store_reads": [],
+      "store_writes": [],
+      "api_calls": []
+    },
+    "apps/memberry/src/features/elections/components/self-nomination-dialog.tsx": {
+      "props_received_from": [],
+      "events_emitted_to": [],
+      "store_reads": [],
+      "store_writes": [],
+      "api_calls": []
+    },
+    "apps/memberry/src/features/elections/components/voting-ballot.tsx": {
+      "props_received_from": [],
+      "events_emitted_to": [],
+      "store_reads": [],
+      "store_writes": [],
+      "api_calls": []
+    },
+    "apps/memberry/src/features/events/components/attendance-view.tsx": {
+      "props_received_from": [],
+      "events_emitted_to": [],
+      "store_reads": [],
+      "store_writes": [],
+      "api_calls": []
+    },
+    "apps/memberry/src/features/events/components/event-calendar.tsx": {
+      "props_received_from": [],
+      "events_emitted_to": [],
+      "store_reads": [],
+      "store_writes": [],
+      "api_calls": []
+    },
+    "apps/memberry/src/features/events/components/event-card.tsx": {
+      "props_received_from": [],
+      "events_emitted_to": [],
+      "store_reads": [],
+      "store_writes": [],
+      "api_calls": []
+    },
+    "apps/memberry/src/features/events/components/event-form.tsx": {
+      "props_received_from": [],
+      "events_emitted_to": [],
+      "store_reads": [],
+      "store_writes": [],
+      "api_calls": []
+    },
+    "apps/memberry/src/features/events/components/event-list.tsx": {
+      "props_received_from": [],
+      "events_emitted_to": [],
+      "store_reads": [],
+      "store_writes": [],
+      "api_calls": []
+    },
+    "apps/memberry/src/features/events/components/event-timeline.tsx": {
+      "props_received_from": [],
+      "events_emitted_to": [],
+      "store_reads": [],
+      "store_writes": [],
+      "api_calls": []
+    },
+    "apps/memberry/src/features/events/components/post-event-actions.tsx": {
+      "props_received_from": [],
+      "events_emitted_to": [],
+      "store_reads": [],
+      "store_writes": [],
+      "api_calls": [
+        {
+          "method": "GET",
+          "endpoint": "/api/association/member/credits/void-event",
+          "trigger": null
+        }
+      ]
+    },
+    "apps/memberry/src/features/events/utils/generate-ics.ts": {
+      "props_received_from": [],
+      "events_emitted_to": [],
+      "store_reads": [],
+      "store_writes": [],
+      "api_calls": []
+    },
+    "apps/memberry/src/features/invite/lib/token-validation.ts": {
+      "props_received_from": [],
+      "events_emitted_to": [],
+      "store_reads": [],
+      "store_writes": [],
+      "api_calls": []
+    },
+    "apps/memberry/src/features/membership/components/application-list.tsx": {
+      "props_received_from": [],
+      "events_emitted_to": [],
+      "store_reads": [],
+      "store_writes": [],
+      "api_calls": [
+        {
+          "method": "GET",
+          "endpoint": "/api/association/member/applications/bulk-approve",
+          "trigger": null
+        }
+      ]
+    },
+    "apps/memberry/src/features/membership/components/category-editor.tsx": {
+      "props_received_from": [],
+      "events_emitted_to": [],
+      "store_reads": [],
+      "store_writes": [],
+      "api_calls": []
+    },
+    "apps/memberry/src/features/membership/components/credential-list.tsx": {
+      "props_received_from": [],
+      "events_emitted_to": [],
+      "store_reads": [],
+      "store_writes": [],
+      "api_calls": []
+    },
+    "apps/memberry/src/features/membership/components/institutional-membership-form.tsx": {
+      "props_received_from": [],
+      "events_emitted_to": [],
+      "store_reads": [],
+      "store_writes": [],
+      "api_calls": []
+    },
+    "apps/memberry/src/features/membership/components/institutional-membership-table.tsx": {
+      "props_received_from": [],
+      "events_emitted_to": [],
+      "store_reads": [],
+      "store_writes": [],
+      "api_calls": []
+    },
+    "apps/memberry/src/features/membership/components/member-detail.tsx": {
+      "props_received_from": [],
+      "events_emitted_to": [],
+      "store_reads": [],
+      "store_writes": [],
+      "api_calls": []
+    },
+    "apps/memberry/src/features/membership/components/member-table.tsx": {
+      "props_received_from": [],
+      "events_emitted_to": [],
+      "store_reads": [],
+      "store_writes": [],
+      "api_calls": []
+    },
+    "apps/memberry/src/features/membership/components/membership-list.tsx": {
+      "props_received_from": [],
+      "events_emitted_to": [],
+      "store_reads": [],
+      "store_writes": [],
+      "api_calls": []
+    },
+    "apps/memberry/src/features/membership/components/seat-management-panel.tsx": {
+      "props_received_from": [],
+      "events_emitted_to": [],
+      "store_reads": [],
+      "store_writes": [],
+      "api_calls": []
+    },
+    "apps/memberry/src/features/membership/lib/membership-status.ts": {
+      "props_received_from": [],
+      "events_emitted_to": [],
+      "store_reads": [],
+      "store_writes": [],
+      "api_calls": []
+    },
+    "apps/memberry/src/features/notifications/components/notification-inbox.tsx": {
+      "props_received_from": [],
+      "events_emitted_to": [],
+      "store_reads": [],
+      "store_writes": [],
+      "api_calls": [
+        {
+          "method": "POST",
+          "endpoint": "/api/notifs/read-all",
+          "trigger": null
+        },
+        {
+          "method": "POST",
+          "endpoint": "/api/notifs/${id}/read",
+          "trigger": null
+        }
+      ]
+    },
+    "apps/memberry/src/features/onboarding/lib/professional-fields.ts": {
+      "props_received_from": [],
+      "events_emitted_to": [],
+      "store_reads": [],
+      "store_writes": [],
+      "api_calls": []
+    },
+    "apps/memberry/src/features/person/components/address-form.tsx": {
+      "props_received_from": [],
+      "events_emitted_to": [],
+      "store_reads": [],
+      "store_writes": [],
+      "api_calls": []
+    },
+    "apps/memberry/src/features/person/components/contact-info-form.tsx": {
+      "props_received_from": [],
+      "events_emitted_to": [],
+      "store_reads": [],
+      "store_writes": [],
+      "api_calls": []
+    },
+    "apps/memberry/src/features/person/components/personal-info-form.tsx": {
+      "props_received_from": [],
+      "events_emitted_to": [],
+      "store_reads": [],
+      "store_writes": [],
+      "api_calls": []
+    },
+    "apps/memberry/src/features/person/components/preferences-form.tsx": {
+      "props_received_from": [],
+      "events_emitted_to": [],
+      "store_reads": [],
+      "store_writes": [],
+      "api_calls": []
+    },
+    "apps/memberry/src/features/person/schemas.ts": {
+      "props_received_from": [],
+      "events_emitted_to": [],
+      "store_reads": [],
+      "store_writes": [],
+      "api_calls": []
+    },
+    "apps/memberry/src/features/profile/components/standing-meter.tsx": {
+      "props_received_from": [],
+      "events_emitted_to": [],
+      "store_reads": [],
+      "store_writes": [],
+      "api_calls": []
+    },
+    "apps/memberry/src/features/profile/components/trust-badges.tsx": {
+      "props_received_from": [],
+      "events_emitted_to": [],
+      "store_reads": [],
+      "store_writes": [],
+      "api_calls": []
+    },
+    "apps/memberry/src/features/profile/lib/profile-display.ts": {
+      "props_received_from": [],
+      "events_emitted_to": [],
+      "store_reads": [],
+      "store_writes": [],
+      "api_calls": []
+    },
+    "apps/memberry/src/features/surveys/components/nps-gauge.tsx": {
+      "props_received_from": [],
+      "events_emitted_to": [],
+      "store_reads": [],
+      "store_writes": [],
+      "api_calls": []
+    },
+    "apps/memberry/src/features/surveys/components/nps-modal.tsx": {
+      "props_received_from": [],
+      "events_emitted_to": [],
+      "store_reads": [],
+      "store_writes": [],
+      "api_calls": [
+        {
+          "method": "POST",
+          "endpoint": "/surveys/${surveyId}/responses/dismiss",
+          "trigger": null
+        },
+        {
+          "method": "POST",
+          "endpoint": "/surveys/${survey.id}/responses",
+          "trigger": null
+        }
+      ]
+    },
+    "apps/memberry/src/features/surveys/components/nps-provider.tsx": {
+      "props_received_from": [],
+      "events_emitted_to": [],
+      "store_reads": [],
+      "store_writes": [],
+      "api_calls": []
+    },
+    "apps/memberry/src/features/surveys/components/nps-trend-chart.tsx": {
+      "props_received_from": [],
+      "events_emitted_to": [],
+      "store_reads": [],
+      "store_writes": [],
+      "api_calls": []
+    },
+    "apps/memberry/src/features/surveys/components/poll-card.tsx": {
+      "props_received_from": [],
+      "events_emitted_to": [],
+      "store_reads": [],
+      "store_writes": [],
+      "api_calls": [
+        {
+          "method": "POST",
+          "endpoint": "/api/surveys/${surveyId}/responses",
+          "trigger": null
+        }
+      ]
+    },
+    "apps/memberry/src/features/surveys/components/question-editor.tsx": {
+      "props_received_from": [],
+      "events_emitted_to": [],
+      "store_reads": [],
+      "store_writes": [],
+      "api_calls": []
+    },
+    "apps/memberry/src/features/surveys/components/question-renderers/choice-question.tsx": {
+      "props_received_from": [],
+      "events_emitted_to": [],
+      "store_reads": [],
+      "store_writes": [],
+      "api_calls": []
+    },
+    "apps/memberry/src/features/surveys/components/question-renderers/nps-question.tsx": {
+      "props_received_from": [],
+      "events_emitted_to": [],
+      "store_reads": [],
+      "store_writes": [],
+      "api_calls": []
+    },
+    "apps/memberry/src/features/surveys/components/question-renderers/rating-question.tsx": {
+      "props_received_from": [],
+      "events_emitted_to": [],
+      "store_reads": [],
+      "store_writes": [],
+      "api_calls": []
+    },
+    "apps/memberry/src/features/surveys/components/question-renderers/text-question.tsx": {
+      "props_received_from": [],
+      "events_emitted_to": [],
+      "store_reads": [],
+      "store_writes": [],
+      "api_calls": []
+    },
+    "apps/memberry/src/features/surveys/components/question-renderers/yes-no-question.tsx": {
+      "props_received_from": [],
+      "events_emitted_to": [],
+      "store_reads": [],
+      "store_writes": [],
+      "api_calls": []
+    },
+    "apps/memberry/src/features/surveys/components/survey-builder.tsx": {
+      "props_received_from": [],
+      "events_emitted_to": [],
+      "store_reads": [],
+      "store_writes": [],
+      "api_calls": []
+    },
+    "apps/memberry/src/features/surveys/components/survey-flow.tsx": {
+      "props_received_from": [],
+      "events_emitted_to": [],
+      "store_reads": [],
+      "store_writes": [],
+      "api_calls": [
+        {
+          "method": "POST",
+          "endpoint": "/surveys/${survey.id}/responses",
+          "trigger": null
+        }
+      ]
+    },
+    "apps/memberry/src/features/surveys/components/survey-list.tsx": {
+      "props_received_from": [],
+      "events_emitted_to": [],
+      "store_reads": [],
+      "store_writes": [],
+      "api_calls": [
+        {
+          "method": "PATCH",
+          "endpoint": "/api/surveys/${id}",
+          "trigger": null
+        },
+        {
+          "method": "PATCH",
+          "endpoint": "/api/surveys/${id}",
+          "trigger": null
+        },
+        {
+          "method": "DELETE",
+          "endpoint": "/api/surveys/${id}",
+          "trigger": null
+        },
+        {
+          "method": "POST",
+          "endpoint": "/api/surveys/${id}/clone",
+          "trigger": null
+        }
+      ]
+    },
+    "apps/memberry/src/features/surveys/components/survey-results.tsx": {
+      "props_received_from": [],
+      "events_emitted_to": [],
+      "store_reads": [],
+      "store_writes": [],
+      "api_calls": []
+    },
+    "apps/memberry/src/features/surveys/components/survey-templates.tsx": {
+      "props_received_from": [],
+      "events_emitted_to": [],
+      "store_reads": [],
+      "store_writes": [],
+      "api_calls": []
+    },
+    "apps/memberry/src/features/surveys/hooks/use-pending-nps.ts": {
+      "props_received_from": [],
+      "events_emitted_to": [],
+      "store_reads": [],
+      "store_writes": [],
+      "api_calls": []
+    },
+    "apps/memberry/src/features/surveys/hooks/use-survey-draft.ts": {
+      "props_received_from": [],
+      "events_emitted_to": [],
+      "store_reads": [],
+      "store_writes": [],
+      "api_calls": []
+    },
+    "apps/memberry/src/features/training/components/completion-table.tsx": {
+      "props_received_from": [],
+      "events_emitted_to": [],
+      "store_reads": [],
+      "store_writes": [],
+      "api_calls": []
+    },
+    "apps/memberry/src/features/training/components/training-card.tsx": {
+      "props_received_from": [],
+      "events_emitted_to": [],
+      "store_reads": [],
+      "store_writes": [],
+      "api_calls": []
+    },
+    "apps/memberry/src/features/training/components/training-form.tsx": {
+      "props_received_from": [],
+      "events_emitted_to": [],
+      "store_reads": [],
+      "store_writes": [],
+      "api_calls": []
+    },
+    "apps/memberry/src/features/training/components/training-list.tsx": {
+      "props_received_from": [],
+      "events_emitted_to": [],
+      "store_reads": [],
+      "store_writes": [],
+      "api_calls": []
+    },
+    "apps/memberry/src/hooks/use-detect-country.ts": {
+      "props_received_from": [],
+      "events_emitted_to": [],
+      "store_reads": [],
+      "store_writes": [],
+      "api_calls": []
+    },
+    "apps/memberry/src/hooks/use-detect-language.ts": {
+      "props_received_from": [],
+      "events_emitted_to": [],
+      "store_reads": [],
+      "store_writes": [],
+      "api_calls": []
+    },
+    "apps/memberry/src/hooks/use-detect-timezone.ts": {
+      "props_received_from": [],
+      "events_emitted_to": [],
+      "store_reads": [],
+      "store_writes": [],
+      "api_calls": []
+    },
+    "apps/memberry/src/hooks/use-format-date.ts": {
+      "props_received_from": [],
+      "events_emitted_to": [],
+      "store_reads": [],
+      "store_writes": [],
+      "api_calls": []
+    },
+    "apps/memberry/src/hooks/use-mutation-feedback.ts": {
+      "props_received_from": [],
+      "events_emitted_to": [],
+      "store_reads": [],
+      "store_writes": [],
+      "api_calls": []
+    },
+    "apps/memberry/src/hooks/useFinancialStanding.ts": {
+      "props_received_from": [],
+      "events_emitted_to": [],
+      "store_reads": [],
+      "store_writes": [],
+      "api_calls": []
+    },
+    "apps/memberry/src/hooks/useMyOrgs.ts": {
+      "props_received_from": [],
+      "events_emitted_to": [],
+      "store_reads": [],
+      "store_writes": [],
+      "api_calls": []
+    },
+    "apps/memberry/src/hooks/useOrg.ts": {
+      "props_received_from": [],
+      "events_emitted_to": [],
+      "store_reads": [],
+      "store_writes": [],
+      "api_calls": []
+    },
+    "apps/memberry/src/hooks/useOrgContext.ts": {
+      "props_received_from": [],
+      "events_emitted_to": [],
+      "store_reads": [],
+      "store_writes": [],
+      "api_calls": []
+    },
+    "apps/memberry/src/lib/api.ts": {
+      "props_received_from": [],
+      "events_emitted_to": [],
+      "store_reads": [],
+      "store_writes": [],
+      "api_calls": []
+    },
+    "apps/memberry/src/lib/detect-country.ts": {
+      "props_received_from": [],
+      "events_emitted_to": [],
+      "store_reads": [],
+      "store_writes": [],
+      "api_calls": []
+    },
+    "apps/memberry/src/lib/detect-language.ts": {
+      "props_received_from": [],
+      "events_emitted_to": [],
+      "store_reads": [],
+      "store_writes": [],
+      "api_calls": []
+    },
+    "apps/memberry/src/lib/detect-timezone.ts": {
+      "props_received_from": [],
+      "events_emitted_to": [],
+      "store_reads": [],
+      "store_writes": [],
+      "api_calls": []
+    },
+    "apps/memberry/src/lib/format-date.ts": {
+      "props_received_from": [],
+      "events_emitted_to": [],
+      "store_reads": [],
+      "store_writes": [],
+      "api_calls": []
+    },
+    "apps/memberry/src/lib/utils.ts": {
+      "props_received_from": [],
+      "events_emitted_to": [],
+      "store_reads": [],
+      "store_writes": [],
+      "api_calls": []
+    },
+    "apps/memberry/src/lib/zod-resolver.ts": {
+      "props_received_from": [],
+      "events_emitted_to": [],
+      "store_reads": [],
+      "store_writes": [],
+      "api_calls": []
+    },
+    "apps/memberry/src/main.tsx": {
+      "props_received_from": [],
+      "events_emitted_to": [],
+      "store_reads": [
+        {
+          "store": "session",
+          "fields": [
+            "*"
+          ]
+        },
+        {
+          "store": "session",
+          "fields": [
+            "*"
+          ]
+        }
+      ],
+      "store_writes": [],
+      "api_calls": []
+    },
+    "apps/memberry/src/providers/OrgProvider.tsx": {
+      "props_received_from": [],
+      "events_emitted_to": [],
+      "store_reads": [
+        {
+          "store": "context",
+          "fields": [
+            "*"
+          ]
+        },
+        {
+          "store": "context",
+          "fields": [
+            "*"
+          ]
+        },
+        {
+          "store": "context",
+          "fields": [
+            "*"
+          ]
+        }
+      ],
+      "store_writes": [],
+      "api_calls": []
+    },
+    "apps/memberry/src/routeTree.gen.ts": {
+      "props_received_from": [],
+      "events_emitted_to": [],
+      "store_reads": [],
+      "store_writes": [],
+      "api_calls": []
+    },
+    "apps/memberry/src/router.ts": {
+      "props_received_from": [],
+      "events_emitted_to": [],
+      "store_reads": [],
+      "store_writes": [],
+      "api_calls": []
+    },
+    "apps/memberry/src/routes/__root.tsx": {
+      "props_received_from": [],
+      "events_emitted_to": [],
+      "store_reads": [],
+      "store_writes": [],
+      "api_calls": []
+    },
+    "apps/memberry/src/routes/_authenticated/dashboard.tsx": {
+      "props_received_from": [],
+      "events_emitted_to": [],
+      "store_reads": [],
+      "store_writes": [],
+      "api_calls": []
+    },
+    "apps/memberry/src/routes/_authenticated/my/billing.tsx": {
+      "props_received_from": [],
+      "events_emitted_to": [],
+      "store_reads": [],
+      "store_writes": [],
+      "api_calls": []
+    },
+    "apps/memberry/src/routes/_authenticated/my/bookings/$bookingId.tsx": {
+      "props_received_from": [],
+      "events_emitted_to": [],
+      "store_reads": [],
+      "store_writes": [],
+      "api_calls": []
+    },
+    "apps/memberry/src/routes/_authenticated/my/bookings/host.$personId.$slotId.tsx": {
+      "props_received_from": [],
+      "events_emitted_to": [],
+      "store_reads": [],
+      "store_writes": [],
+      "api_calls": []
+    },
+    "apps/memberry/src/routes/_authenticated/my/bookings/host.$personId.tsx": {
+      "props_received_from": [],
+      "events_emitted_to": [],
+      "store_reads": [],
+      "store_writes": [],
+      "api_calls": []
+    },
+    "apps/memberry/src/routes/_authenticated/my/bookings/index.tsx": {
+      "props_received_from": [],
+      "events_emitted_to": [],
+      "store_reads": [],
+      "store_writes": [],
+      "api_calls": []
+    },
+    "apps/memberry/src/routes/_authenticated/my/calendar.tsx": {
+      "props_received_from": [],
+      "events_emitted_to": [],
+      "store_reads": [],
+      "store_writes": [],
+      "api_calls": []
+    },
+    "apps/memberry/src/routes/_authenticated/my/certificates/$certificateId.tsx": {
+      "props_received_from": [],
+      "events_emitted_to": [],
+      "store_reads": [],
+      "store_writes": [],
+      "api_calls": []
+    },
+    "apps/memberry/src/routes/_authenticated/my/certificates/index.tsx": {
+      "props_received_from": [],
+      "events_emitted_to": [],
+      "store_reads": [],
+      "store_writes": [],
+      "api_calls": []
+    },
+    "apps/memberry/src/routes/_authenticated/my/credits/index.tsx": {
+      "props_received_from": [],
+      "events_emitted_to": [],
+      "store_reads": [],
+      "store_writes": [],
+      "api_calls": []
+    },
+    "apps/memberry/src/routes/_authenticated/my/credits/log.tsx": {
+      "props_received_from": [],
+      "events_emitted_to": [],
+      "store_reads": [],
+      "store_writes": [],
+      "api_calls": [
+        {
+          "method": "POST",
+          "endpoint": "/api/persons/me/credit-entries",
+          "trigger": null
+        }
+      ]
+    },
+    "apps/memberry/src/routes/_authenticated/my/data-export.tsx": {
+      "props_received_from": [],
+      "events_emitted_to": [],
+      "store_reads": [],
+      "store_writes": [],
+      "api_calls": []
+    },
+    "apps/memberry/src/routes/_authenticated/my/events.tsx": {
+      "props_received_from": [],
+      "events_emitted_to": [],
+      "store_reads": [],
+      "store_writes": [],
+      "api_calls": []
+    },
+    "apps/memberry/src/routes/_authenticated/my/id-card.tsx": {
+      "props_received_from": [],
+      "events_emitted_to": [],
+      "store_reads": [],
+      "store_writes": [],
+      "api_calls": [
+        {
+          "method": "GET",
+          "endpoint": "/api/persons/me",
+          "trigger": null
+        }
+      ]
+    },
+    "apps/memberry/src/routes/_authenticated/my/notifications.tsx": {
+      "props_received_from": [],
+      "events_emitted_to": [],
+      "store_reads": [],
+      "store_writes": [],
+      "api_calls": []
+    },
+    "apps/memberry/src/routes/_authenticated/my/organizations.tsx": {
+      "props_received_from": [],
+      "events_emitted_to": [],
+      "store_reads": [],
+      "store_writes": [],
+      "api_calls": [
+        {
+          "method": "POST",
+          "endpoint": "/api/association/member/memberships/${leaveTarget.membershipId}/terminate",
+          "trigger": null
+        },
+        {
+          "method": "POST",
+          "endpoint": "/api/association/member/affiliation-transfers",
+          "trigger": null
+        }
+      ]
+    },
+    "apps/memberry/src/routes/_authenticated/my/payments.tsx": {
+      "props_received_from": [],
+      "events_emitted_to": [],
+      "store_reads": [],
+      "store_writes": [],
+      "api_calls": []
+    },
+    "apps/memberry/src/routes/_authenticated/my/profile.tsx": {
+      "props_received_from": [],
+      "events_emitted_to": [],
+      "store_reads": [],
+      "store_writes": [],
+      "api_calls": [
+        {
+          "method": "PATCH",
+          "endpoint": "/api/association/member/directory/profiles/${directoryProfile.id}",
+          "trigger": null
+        },
+        {
+          "method": "POST",
+          "endpoint": "/api/association/member/directory/profiles",
+          "trigger": null
+        }
+      ]
+    },
+    "apps/memberry/src/routes/_authenticated/my/schedule.tsx": {
+      "props_received_from": [],
+      "events_emitted_to": [],
+      "store_reads": [],
+      "store_writes": [],
+      "api_calls": []
+    },
+    "apps/memberry/src/routes/_authenticated/my/settings.tsx": {
+      "props_received_from": [],
+      "events_emitted_to": [],
+      "store_reads": [],
+      "store_writes": [],
+      "api_calls": [
+        {
+          "method": "POST",
+          "endpoint": "/api/persons/me/cancel-delete",
+          "trigger": null
+        },
+        {
+          "method": "PATCH",
+          "endpoint": "/api/persons/me/notification-preferences",
+          "trigger": null
+        },
+        {
+          "method": "PATCH",
+          "endpoint": "/api/persons/me/privacy",
+          "trigger": null
+        }
+      ]
+    },
+    "apps/memberry/src/routes/_authenticated/my/surveys/$surveyId.tsx": {
+      "props_received_from": [],
+      "events_emitted_to": [],
+      "store_reads": [],
+      "store_writes": [],
+      "api_calls": []
+    },
+    "apps/memberry/src/routes/_authenticated/my/surveys/index.tsx": {
+      "props_received_from": [],
+      "events_emitted_to": [],
+      "store_reads": [],
+      "store_writes": [],
+      "api_calls": []
+    },
+    "apps/memberry/src/routes/_authenticated/my/training.tsx": {
+      "props_received_from": [],
+      "events_emitted_to": [],
+      "store_reads": [],
+      "store_writes": [],
+      "api_calls": []
+    },
+    "apps/memberry/src/routes/_authenticated/org/$orgSlug/announcements/$announcementId.tsx": {
+      "props_received_from": [],
+      "events_emitted_to": [],
+      "store_reads": [],
+      "store_writes": [],
+      "api_calls": []
+    },
+    "apps/memberry/src/routes/_authenticated/org/$orgSlug/announcements/index.tsx": {
+      "props_received_from": [],
+      "events_emitted_to": [],
+      "store_reads": [],
+      "store_writes": [],
+      "api_calls": []
+    },
+    "apps/memberry/src/routes/_authenticated/org/$orgSlug/directory/$personId.tsx": {
+      "props_received_from": [],
+      "events_emitted_to": [],
+      "store_reads": [],
+      "store_writes": [],
+      "api_calls": []
+    },
+    "apps/memberry/src/routes/_authenticated/org/$orgSlug/directory.tsx": {
+      "props_received_from": [],
+      "events_emitted_to": [],
+      "store_reads": [],
+      "store_writes": [],
+      "api_calls": []
+    },
+    "apps/memberry/src/routes/_authenticated/org/$orgSlug/documents/$documentId.tsx": {
+      "props_received_from": [],
+      "events_emitted_to": [],
+      "store_reads": [],
+      "store_writes": [],
+      "api_calls": []
+    },
+    "apps/memberry/src/routes/_authenticated/org/$orgSlug/documents/index.tsx": {
+      "props_received_from": [],
+      "events_emitted_to": [],
+      "store_reads": [],
+      "store_writes": [],
+      "api_calls": []
+    },
+    "apps/memberry/src/routes/_authenticated/org/$orgSlug/dues.tsx": {
+      "props_received_from": [],
+      "events_emitted_to": [],
+      "store_reads": [],
+      "store_writes": [],
+      "api_calls": []
+    },
+    "apps/memberry/src/routes/_authenticated/org/$orgSlug/elections/$electionId/index.tsx": {
+      "props_received_from": [],
+      "events_emitted_to": [],
+      "store_reads": [],
+      "store_writes": [],
+      "api_calls": []
+    },
+    "apps/memberry/src/routes/_authenticated/org/$orgSlug/elections/$electionId/vote.tsx": {
+      "props_received_from": [],
+      "events_emitted_to": [],
+      "store_reads": [],
+      "store_writes": [],
+      "api_calls": []
+    },
+    "apps/memberry/src/routes/_authenticated/org/$orgSlug/elections/index.tsx": {
+      "props_received_from": [],
+      "events_emitted_to": [],
+      "store_reads": [],
+      "store_writes": [],
+      "api_calls": []
+    },
+    "apps/memberry/src/routes/_authenticated/org/$orgSlug/events/$eventId.tsx": {
+      "props_received_from": [],
+      "events_emitted_to": [],
+      "store_reads": [],
+      "store_writes": [],
+      "api_calls": []
+    },
+    "apps/memberry/src/routes/_authenticated/org/$orgSlug/events/index.tsx": {
+      "props_received_from": [],
+      "events_emitted_to": [],
+      "store_reads": [],
+      "store_writes": [],
+      "api_calls": []
+    },
+    "apps/memberry/src/routes/_authenticated/org/$orgSlug/governance/index.tsx": {
+      "props_received_from": [],
+      "events_emitted_to": [],
+      "store_reads": [],
+      "store_writes": [],
+      "api_calls": []
+    },
+    "apps/memberry/src/routes/_authenticated/org/$orgSlug/home.tsx": {
+      "props_received_from": [],
+      "events_emitted_to": [],
+      "store_reads": [],
+      "store_writes": [],
+      "api_calls": []
+    },
+    "apps/memberry/src/routes/_authenticated/org/$orgSlug/members.tsx": {
+      "props_received_from": [],
+      "events_emitted_to": [],
+      "store_reads": [],
+      "store_writes": [],
+      "api_calls": []
+    },
+    "apps/memberry/src/routes/_authenticated/org/$orgSlug/messages/dm/index.tsx": {
+      "props_received_from": [],
+      "events_emitted_to": [],
+      "store_reads": [],
+      "store_writes": [],
+      "api_calls": []
+    },
+    "apps/memberry/src/routes/_authenticated/org/$orgSlug/messages/index.tsx": {
+      "props_received_from": [],
+      "events_emitted_to": [],
+      "store_reads": [],
+      "store_writes": [],
+      "api_calls": []
+    },
+    "apps/memberry/src/routes/_authenticated/org/$orgSlug/my-cpd.tsx": {
+      "props_received_from": [],
+      "events_emitted_to": [],
+      "store_reads": [],
+      "store_writes": [],
+      "api_calls": [
+        {
+          "method": "GET",
+          "endpoint": "/api/persons/me/credits",
+          "trigger": null
+        }
+      ]
+    },
+    "apps/memberry/src/routes/_authenticated/org/$orgSlug/my-notifications.tsx": {
+      "props_received_from": [],
+      "events_emitted_to": [],
+      "store_reads": [],
+      "store_writes": [],
+      "api_calls": []
+    },
+    "apps/memberry/src/routes/_authenticated/org/$orgSlug/officer/applications.tsx": {
+      "props_received_from": [],
+      "events_emitted_to": [],
+      "store_reads": [],
+      "store_writes": [],
+      "api_calls": []
+    },
+    "apps/memberry/src/routes/_authenticated/org/$orgSlug/officer/certificates.tsx": {
+      "props_received_from": [],
+      "events_emitted_to": [],
+      "store_reads": [],
+      "store_writes": [],
+      "api_calls": [
+        {
+          "method": "POST",
+          "endpoint": "/api/certificates/bulk-issue",
+          "trigger": null
+        },
+        {
+          "method": "GET",
+          "endpoint": "/certificates/verify/${encodeURIComponent(num)}",
+          "trigger": null
+        }
+      ]
+    },
+    "apps/memberry/src/routes/_authenticated/org/$orgSlug/officer/communications/$announcementId.tsx": {
+      "props_received_from": [],
+      "events_emitted_to": [],
+      "store_reads": [],
+      "store_writes": [],
+      "api_calls": [
+        {
+          "method": "POST",
+          "endpoint": "/api/communications/announcements/${announcementId}/publish",
+          "trigger": null
+        },
+        {
+          "method": "POST",
+          "endpoint": "/api/communications/announcements/${announcementId}/archive",
+          "trigger": null
+        },
+        {
+          "method": "DELETE",
+          "endpoint": "/api/communications/announcements/${announcementId}",
+          "trigger": null
+        }
+      ]
+    },
+    "apps/memberry/src/routes/_authenticated/org/$orgSlug/officer/communications/analytics.tsx": {
+      "props_received_from": [],
+      "events_emitted_to": [],
+      "store_reads": [],
+      "store_writes": [],
+      "api_calls": []
+    },
+    "apps/memberry/src/routes/_authenticated/org/$orgSlug/officer/communications/index.tsx": {
+      "props_received_from": [],
+      "events_emitted_to": [],
+      "store_reads": [],
+      "store_writes": [],
+      "api_calls": []
+    },
+    "apps/memberry/src/routes/_authenticated/org/$orgSlug/officer/communications/new.tsx": {
+      "props_received_from": [],
+      "events_emitted_to": [],
+      "store_reads": [],
+      "store_writes": [],
+      "api_calls": []
+    },
+    "apps/memberry/src/routes/_authenticated/org/$orgSlug/officer/communications/sent.tsx": {
+      "props_received_from": [],
+      "events_emitted_to": [],
+      "store_reads": [],
+      "store_writes": [],
+      "api_calls": []
+    },
+    "apps/memberry/src/routes/_authenticated/org/$orgSlug/officer/communications/templates/index.tsx": {
+      "props_received_from": [],
+      "events_emitted_to": [],
+      "store_reads": [],
+      "store_writes": [],
+      "api_calls": []
+    },
+    "apps/memberry/src/routes/_authenticated/org/$orgSlug/officer/communications/templates/new.tsx": {
+      "props_received_from": [],
+      "events_emitted_to": [],
+      "store_reads": [],
+      "store_writes": [],
+      "api_calls": []
+    },
+    "apps/memberry/src/routes/_authenticated/org/$orgSlug/officer/communications.tsx": {
+      "props_received_from": [],
+      "events_emitted_to": [],
+      "store_reads": [],
+      "store_writes": [],
+      "api_calls": []
+    },
+    "apps/memberry/src/routes/_authenticated/org/$orgSlug/officer/compliance.tsx": {
+      "props_received_from": [],
+      "events_emitted_to": [],
+      "store_reads": [],
+      "store_writes": [],
+      "api_calls": [
+        {
+          "method": "GET",
+          "endpoint": "/api/association/member/compliance/${orgId}${statusFilter !== ",
+          "trigger": null
+        },
+        {
+          "method": "POST",
+          "endpoint": "/api/association/member/compliance/${orgId}/refresh",
+          "trigger": null
+        }
+      ]
+    },
+    "apps/memberry/src/routes/_authenticated/org/$orgSlug/officer/dashboard.tsx": {
+      "props_received_from": [],
+      "events_emitted_to": [],
+      "store_reads": [],
+      "store_writes": [],
+      "api_calls": []
+    },
+    "apps/memberry/src/routes/_authenticated/org/$orgSlug/officer/documents/$documentId.tsx": {
+      "props_received_from": [],
+      "events_emitted_to": [],
+      "store_reads": [],
+      "store_writes": [],
+      "api_calls": []
+    },
+    "apps/memberry/src/routes/_authenticated/org/$orgSlug/officer/documents/index.tsx": {
+      "props_received_from": [],
+      "events_emitted_to": [],
+      "store_reads": [],
+      "store_writes": [],
+      "api_calls": []
+    },
+    "apps/memberry/src/routes/_authenticated/org/$orgSlug/officer/dues/assessments.tsx": {
+      "props_received_from": [],
+      "events_emitted_to": [],
+      "store_reads": [],
+      "store_writes": [],
+      "api_calls": []
+    },
+    "apps/memberry/src/routes/_authenticated/org/$orgSlug/officer/dues/member.$memberId.tsx": {
+      "props_received_from": [],
+      "events_emitted_to": [],
+      "store_reads": [],
+      "store_writes": [],
+      "api_calls": []
+    },
+    "apps/memberry/src/routes/_authenticated/org/$orgSlug/officer/dues/treasurer.tsx": {
+      "props_received_from": [],
+      "events_emitted_to": [],
+      "store_reads": [],
+      "store_writes": [],
+      "api_calls": []
+    },
+    "apps/memberry/src/routes/_authenticated/org/$orgSlug/officer/elections/$electionId/edit.tsx": {
+      "props_received_from": [],
+      "events_emitted_to": [],
+      "store_reads": [],
+      "store_writes": [],
+      "api_calls": []
+    },
+    "apps/memberry/src/routes/_authenticated/org/$orgSlug/officer/elections/$electionId.tsx": {
+      "props_received_from": [],
+      "events_emitted_to": [],
+      "store_reads": [],
+      "store_writes": [],
+      "api_calls": []
+    },
+    "apps/memberry/src/routes/_authenticated/org/$orgSlug/officer/elections/index.tsx": {
+      "props_received_from": [],
+      "events_emitted_to": [],
+      "store_reads": [],
+      "store_writes": [],
+      "api_calls": []
+    },
+    "apps/memberry/src/routes/_authenticated/org/$orgSlug/officer/elections/new.tsx": {
+      "props_received_from": [],
+      "events_emitted_to": [],
+      "store_reads": [],
+      "store_writes": [],
+      "api_calls": []
+    },
+    "apps/memberry/src/routes/_authenticated/org/$orgSlug/officer/events/$eventId/attendance.tsx": {
+      "props_received_from": [],
+      "events_emitted_to": [],
+      "store_reads": [],
+      "store_writes": [],
+      "api_calls": []
+    },
+    "apps/memberry/src/routes/_authenticated/org/$orgSlug/officer/events/$eventId.tsx": {
+      "props_received_from": [],
+      "events_emitted_to": [],
+      "store_reads": [],
+      "store_writes": [],
+      "api_calls": []
+    },
+    "apps/memberry/src/routes/_authenticated/org/$orgSlug/officer/events/index.tsx": {
+      "props_received_from": [],
+      "events_emitted_to": [],
+      "store_reads": [],
+      "store_writes": [],
+      "api_calls": []
+    },
+    "apps/memberry/src/routes/_authenticated/org/$orgSlug/officer/events/new.tsx": {
+      "props_received_from": [],
+      "events_emitted_to": [],
+      "store_reads": [],
+      "store_writes": [],
+      "api_calls": []
+    },
+    "apps/memberry/src/routes/_authenticated/org/$orgSlug/officer/finances/assessments.tsx": {
+      "props_received_from": [],
+      "events_emitted_to": [],
+      "store_reads": [],
+      "store_writes": [],
+      "api_calls": []
+    },
+    "apps/memberry/src/routes/_authenticated/org/$orgSlug/officer/finances/dues.tsx": {
+      "props_received_from": [],
+      "events_emitted_to": [],
+      "store_reads": [],
+      "store_writes": [],
+      "api_calls": []
+    },
+    "apps/memberry/src/routes/_authenticated/org/$orgSlug/officer/finances/funds.tsx": {
+      "props_received_from": [],
+      "events_emitted_to": [],
+      "store_reads": [],
+      "store_writes": [],
+      "api_calls": []
+    },
+    "apps/memberry/src/routes/_authenticated/org/$orgSlug/officer/finances/index.tsx": {
+      "props_received_from": [],
+      "events_emitted_to": [],
+      "store_reads": [],
+      "store_writes": [],
+      "api_calls": []
+    },
+    "apps/memberry/src/routes/_authenticated/org/$orgSlug/officer/finances/invoices/$invoiceId.tsx": {
+      "props_received_from": [],
+      "events_emitted_to": [],
+      "store_reads": [],
+      "store_writes": [],
+      "api_calls": []
+    },
+    "apps/memberry/src/routes/_authenticated/org/$orgSlug/officer/finances/invoices/index.tsx": {
+      "props_received_from": [],
+      "events_emitted_to": [],
+      "store_reads": [],
+      "store_writes": [],
+      "api_calls": []
+    },
+    "apps/memberry/src/routes/_authenticated/org/$orgSlug/officer/finances/invoices.tsx": {
+      "props_received_from": [],
+      "events_emitted_to": [],
+      "store_reads": [],
+      "store_writes": [],
+      "api_calls": []
+    },
+    "apps/memberry/src/routes/_authenticated/org/$orgSlug/officer/finances/members/$memberId.tsx": {
+      "props_received_from": [],
+      "events_emitted_to": [],
+      "store_reads": [],
+      "store_writes": [],
+      "api_calls": [
+        {
+          "method": "GET",
+          "endpoint": "/association/member/dues-member-summary/${orgId}/${memberId}",
+          "trigger": null
+        }
+      ]
+    },
+    "apps/memberry/src/routes/_authenticated/org/$orgSlug/officer/finances/members.tsx": {
+      "props_received_from": [],
+      "events_emitted_to": [],
+      "store_reads": [],
+      "store_writes": [],
+      "api_calls": []
+    },
+    "apps/memberry/src/routes/_authenticated/org/$orgSlug/officer/institutional-memberships/$institutionalMembershipId.tsx": {
+      "props_received_from": [],
+      "events_emitted_to": [],
+      "store_reads": [],
+      "store_writes": [],
+      "api_calls": []
+    },
+    "apps/memberry/src/routes/_authenticated/org/$orgSlug/officer/institutional-memberships/index.tsx": {
+      "props_received_from": [],
+      "events_emitted_to": [],
+      "store_reads": [],
+      "store_writes": [],
+      "api_calls": []
+    },
+    "apps/memberry/src/routes/_authenticated/org/$orgSlug/officer/institutional-memberships/new.tsx": {
+      "props_received_from": [],
+      "events_emitted_to": [],
+      "store_reads": [],
+      "store_writes": [],
+      "api_calls": []
+    },
+    "apps/memberry/src/routes/_authenticated/org/$orgSlug/officer/messages/index.tsx": {
+      "props_received_from": [],
+      "events_emitted_to": [],
+      "store_reads": [],
+      "store_writes": [],
+      "api_calls": []
+    },
+    "apps/memberry/src/routes/_authenticated/org/$orgSlug/officer/officers.tsx": {
+      "props_received_from": [],
+      "events_emitted_to": [],
+      "store_reads": [],
+      "store_writes": [],
+      "api_calls": []
+    },
+    "apps/memberry/src/routes/_authenticated/org/$orgSlug/officer/payments/$paymentId.tsx": {
+      "props_received_from": [],
+      "events_emitted_to": [],
+      "store_reads": [],
+      "store_writes": [],
+      "api_calls": []
+    },
+    "apps/memberry/src/routes/_authenticated/org/$orgSlug/officer/payments/index.tsx": {
+      "props_received_from": [],
+      "events_emitted_to": [],
+      "store_reads": [],
+      "store_writes": [],
+      "api_calls": []
+    },
+    "apps/memberry/src/routes/_authenticated/org/$orgSlug/officer/payments/new.tsx": {
+      "props_received_from": [],
+      "events_emitted_to": [],
+      "store_reads": [],
+      "store_writes": [],
+      "api_calls": []
+    },
+    "apps/memberry/src/routes/_authenticated/org/$orgSlug/officer/payments.tsx": {
+      "props_received_from": [],
+      "events_emitted_to": [],
+      "store_reads": [],
+      "store_writes": [],
+      "api_calls": []
+    },
+    "apps/memberry/src/routes/_authenticated/org/$orgSlug/officer/reports/credits.tsx": {
+      "props_received_from": [],
+      "events_emitted_to": [],
+      "store_reads": [],
+      "store_writes": [],
+      "api_calls": [
+        {
+          "method": "GET",
+          "endpoint": "/api/credit-compliance/${orgId}?requiredCredits=45&cyclePeriodYears=3",
+          "trigger": null
+        }
+      ]
+    },
+    "apps/memberry/src/routes/_authenticated/org/$orgSlug/officer/reports/financial.tsx": {
+      "props_received_from": [],
+      "events_emitted_to": [],
+      "store_reads": [],
+      "store_writes": [],
+      "api_calls": []
+    },
+    "apps/memberry/src/routes/_authenticated/org/$orgSlug/officer/reviews/index.tsx": {
+      "props_received_from": [],
+      "events_emitted_to": [],
+      "store_reads": [],
+      "store_writes": [],
+      "api_calls": []
+    },
+    "apps/memberry/src/routes/_authenticated/org/$orgSlug/officer/roster/$memberId.tsx": {
+      "props_received_from": [],
+      "events_emitted_to": [],
+      "store_reads": [
+        {
+          "store": "session",
+          "fields": [
+            "*"
+          ]
+        },
+        {
+          "store": "session",
+          "fields": [
+            "*"
+          ]
+        }
+      ],
+      "store_writes": [],
+      "api_calls": [
+        {
+          "method": "PATCH",
+          "endpoint": "/api/association/member/licenses/${licenseId}",
+          "trigger": null
+        }
+      ]
+    },
+    "apps/memberry/src/routes/_authenticated/org/$orgSlug/officer/roster/import.tsx": {
+      "props_received_from": [],
+      "events_emitted_to": [],
+      "store_reads": [],
+      "store_writes": [],
+      "api_calls": []
+    },
+    "apps/memberry/src/routes/_authenticated/org/$orgSlug/officer/roster/index.tsx": {
+      "props_received_from": [],
+      "events_emitted_to": [],
+      "store_reads": [],
+      "store_writes": [],
+      "api_calls": []
+    },
+    "apps/memberry/src/routes/_authenticated/org/$orgSlug/officer/roster.tsx": {
+      "props_received_from": [],
+      "events_emitted_to": [],
+      "store_reads": [],
+      "store_writes": [],
+      "api_calls": []
+    },
+    "apps/memberry/src/routes/_authenticated/org/$orgSlug/officer/settings/chapters.tsx": {
+      "props_received_from": [],
+      "events_emitted_to": [],
+      "store_reads": [],
+      "store_writes": [],
+      "api_calls": []
+    },
+    "apps/memberry/src/routes/_authenticated/org/$orgSlug/officer/settings/cpd.tsx": {
+      "props_received_from": [],
+      "events_emitted_to": [],
+      "store_reads": [],
+      "store_writes": [],
+      "api_calls": [
+        {
+          "method": "GET",
+          "endpoint": "/api/association/member/cpd-config/${orgId}",
+          "trigger": null
+        },
+        {
+          "method": "PATCH",
+          "endpoint": "/api/association/member/cpd-config/${orgId}",
+          "trigger": null
+        }
+      ]
+    },
+    "apps/memberry/src/routes/_authenticated/org/$orgSlug/officer/settings/dues.tsx": {
+      "props_received_from": [],
+      "events_emitted_to": [],
+      "store_reads": [],
+      "store_writes": [],
+      "api_calls": []
+    },
+    "apps/memberry/src/routes/_authenticated/org/$orgSlug/officer/settings/funds.tsx": {
+      "props_received_from": [],
+      "events_emitted_to": [],
+      "store_reads": [],
+      "store_writes": [],
+      "api_calls": []
+    },
+    "apps/memberry/src/routes/_authenticated/org/$orgSlug/officer/settings/gateway.tsx": {
+      "props_received_from": [],
+      "events_emitted_to": [],
+      "store_reads": [],
+      "store_writes": [],
+      "api_calls": []
+    },
+    "apps/memberry/src/routes/_authenticated/org/$orgSlug/officer/settings/membership-categories.tsx": {
+      "props_received_from": [],
+      "events_emitted_to": [],
+      "store_reads": [],
+      "store_writes": [],
+      "api_calls": []
+    },
+    "apps/memberry/src/routes/_authenticated/org/$orgSlug/officer/settings/org.tsx": {
+      "props_received_from": [],
+      "events_emitted_to": [],
+      "store_reads": [],
+      "store_writes": [],
+      "api_calls": []
+    },
+    "apps/memberry/src/routes/_authenticated/org/$orgSlug/officer/settings/providers.tsx": {
+      "props_received_from": [],
+      "events_emitted_to": [],
+      "store_reads": [],
+      "store_writes": [],
+      "api_calls": [
+        {
+          "method": "GET",
+          "endpoint": "/api/accredited-providers/${orgId}",
+          "trigger": null
+        },
+        {
+          "method": "POST",
+          "endpoint": "/api/accredited-providers/${orgId}",
+          "trigger": null
+        },
+        {
+          "method": "PATCH",
+          "endpoint": "/api/accredited-providers/${orgId}/${id}",
+          "trigger": null
+        },
+        {
+          "method": "DELETE",
+          "endpoint": "/api/accredited-providers/${orgId}/${id}",
+          "trigger": null
+        }
+      ]
+    },
+    "apps/memberry/src/routes/_authenticated/org/$orgSlug/officer/surveys/$surveyId.tsx": {
+      "props_received_from": [],
+      "events_emitted_to": [],
+      "store_reads": [],
+      "store_writes": [],
+      "api_calls": []
+    },
+    "apps/memberry/src/routes/_authenticated/org/$orgSlug/officer/surveys/index.tsx": {
+      "props_received_from": [],
+      "events_emitted_to": [],
+      "store_reads": [],
+      "store_writes": [],
+      "api_calls": []
+    },
+    "apps/memberry/src/routes/_authenticated/org/$orgSlug/officer/surveys/new.tsx": {
+      "props_received_from": [],
+      "events_emitted_to": [],
+      "store_reads": [],
+      "store_writes": [],
+      "api_calls": []
+    },
+    "apps/memberry/src/routes/_authenticated/org/$orgSlug/officer/training/$trainingId/attendance.tsx": {
+      "props_received_from": [],
+      "events_emitted_to": [],
+      "store_reads": [],
+      "store_writes": [],
+      "api_calls": []
+    },
+    "apps/memberry/src/routes/_authenticated/org/$orgSlug/officer/training/$trainingId.tsx": {
+      "props_received_from": [],
+      "events_emitted_to": [],
+      "store_reads": [],
+      "store_writes": [],
+      "api_calls": []
+    },
+    "apps/memberry/src/routes/_authenticated/org/$orgSlug/officer/training/index.tsx": {
+      "props_received_from": [],
+      "events_emitted_to": [],
+      "store_reads": [],
+      "store_writes": [],
+      "api_calls": []
+    },
+    "apps/memberry/src/routes/_authenticated/org/$orgSlug/officer/training/new.tsx": {
+      "props_received_from": [],
+      "events_emitted_to": [],
+      "store_reads": [],
+      "store_writes": [],
+      "api_calls": []
+    },
+    "apps/memberry/src/routes/_authenticated/org/$orgSlug/officer.tsx": {
+      "props_received_from": [],
+      "events_emitted_to": [],
+      "store_reads": [],
+      "store_writes": [],
+      "api_calls": []
+    },
+    "apps/memberry/src/routes/_authenticated/org/$orgSlug/route.tsx": {
+      "props_received_from": [],
+      "events_emitted_to": [],
+      "store_reads": [],
+      "store_writes": [],
+      "api_calls": []
+    },
+    "apps/memberry/src/routes/_authenticated/org/$orgSlug/training/$trainingId.tsx": {
+      "props_received_from": [],
+      "events_emitted_to": [],
+      "store_reads": [],
+      "store_writes": [],
+      "api_calls": []
+    },
+    "apps/memberry/src/routes/_authenticated/org/$orgSlug/training/index.tsx": {
+      "props_received_from": [],
+      "events_emitted_to": [],
+      "store_reads": [],
+      "store_writes": [],
+      "api_calls": []
+    },
+    "apps/memberry/src/routes/_authenticated/settings/account.tsx": {
+      "props_received_from": [],
+      "events_emitted_to": [],
+      "store_reads": [],
+      "store_writes": [],
+      "api_calls": []
+    },
+    "apps/memberry/src/routes/_authenticated/settings/security.tsx": {
+      "props_received_from": [],
+      "events_emitted_to": [],
+      "store_reads": [],
+      "store_writes": [],
+      "api_calls": []
+    },
+    "apps/memberry/src/routes/_authenticated.tsx": {
+      "props_received_from": [],
+      "events_emitted_to": [],
+      "store_reads": [],
+      "store_writes": [],
+      "api_calls": []
+    },
+    "apps/memberry/src/routes/auth/$authView.tsx": {
+      "props_received_from": [],
+      "events_emitted_to": [],
+      "store_reads": [],
+      "store_writes": [],
+      "api_calls": []
+    },
+    "apps/memberry/src/routes/discover/events.tsx": {
+      "props_received_from": [],
+      "events_emitted_to": [],
+      "store_reads": [],
+      "store_writes": [],
+      "api_calls": []
+    },
+    "apps/memberry/src/routes/events/$eventSlug.tsx": {
+      "props_received_from": [],
+      "events_emitted_to": [],
+      "store_reads": [],
+      "store_writes": [],
+      "api_calls": []
+    },
+    "apps/memberry/src/routes/index.tsx": {
+      "props_received_from": [],
+      "events_emitted_to": [],
+      "store_reads": [],
+      "store_writes": [],
+      "api_calls": []
+    },
+    "apps/memberry/src/routes/invite/$token.tsx": {
+      "props_received_from": [],
+      "events_emitted_to": [],
+      "store_reads": [
+        {
+          "store": "session",
+          "fields": [
+            "*"
+          ]
+        },
+        {
+          "store": "session",
+          "fields": [
+            "*"
+          ]
+        }
+      ],
+      "store_writes": [],
+      "api_calls": []
+    },
+    "apps/memberry/src/routes/join.tsx": {
+      "props_received_from": [],
+      "events_emitted_to": [],
+      "store_reads": [],
+      "store_writes": [],
+      "api_calls": [
+        {
+          "method": "GET",
+          "endpoint": "/api/public/orgs${qs ? ",
+          "trigger": null
+        }
+      ]
+    },
+    "apps/memberry/src/routes/onboarding.tsx": {
+      "props_received_from": [],
+      "events_emitted_to": [],
+      "store_reads": [],
+      "store_writes": [],
+      "api_calls": []
+    },
+    "apps/memberry/src/routes/org/$slug.tsx": {
+      "props_received_from": [],
+      "events_emitted_to": [],
+      "store_reads": [],
+      "store_writes": [],
+      "api_calls": [
+        {
+          "method": "GET",
+          "endpoint": "/api/public/org/${encodeURIComponent(slug)}",
+          "trigger": null
+        },
+        {
+          "method": "GET",
+          "endpoint": "/api/persons/me",
+          "trigger": null
+        },
+        {
+          "method": "GET",
+          "endpoint": "/api/association/member/tiers",
+          "trigger": null
+        },
+        {
+          "method": "POST",
+          "endpoint": "/api/association/member/applications",
+          "trigger": null
+        }
+      ]
+    },
+    "apps/memberry/src/routes/pay/$token.tsx": {
+      "props_received_from": [],
+      "events_emitted_to": [],
+      "store_reads": [],
+      "store_writes": [],
+      "api_calls": []
+    },
+    "apps/memberry/src/routes/verify/$certificateNumber.tsx": {
+      "props_received_from": [],
+      "events_emitted_to": [],
+      "store_reads": [],
+      "store_writes": [],
+      "api_calls": []
+    },
+    "apps/memberry/src/routes/verify/$credentialNumber.tsx": {
+      "props_received_from": [],
+      "events_emitted_to": [],
+      "store_reads": [],
+      "store_writes": [],
+      "api_calls": []
+    },
+    "apps/memberry/src/routes/verify/$token.tsx": {
+      "props_received_from": [],
+      "events_emitted_to": [],
+      "store_reads": [],
+      "store_writes": [],
+      "api_calls": []
+    },
+    "apps/memberry/src/routes/verify-email.tsx": {
+      "props_received_from": [],
+      "events_emitted_to": [],
+      "store_reads": [],
+      "store_writes": [],
+      "api_calls": []
+    },
+    "apps/memberry/src/test/setup.ts": {
+      "props_received_from": [],
+      "events_emitted_to": [],
+      "store_reads": [],
+      "store_writes": [],
+      "api_calls": []
+    },
+    "apps/memberry/src/test/utils.tsx": {
+      "props_received_from": [],
+      "events_emitted_to": [],
+      "store_reads": [],
+      "store_writes": [],
+      "api_calls": []
+    },
+    "apps/memberry/src/types/api.ts": {
+      "props_received_from": [],
+      "events_emitted_to": [],
+      "store_reads": [],
+      "store_writes": [],
+      "api_calls": []
+    },
+    "apps/memberry/src/utils/error.ts": {
+      "props_received_from": [],
+      "events_emitted_to": [],
+      "store_reads": [],
+      "store_writes": [],
+      "api_calls": []
+    },
+    "apps/memberry/src/utils/guards.ts": {
+      "props_received_from": [],
+      "events_emitted_to": [],
+      "store_reads": [],
+      "store_writes": [],
+      "api_calls": []
+    },
+    "packages/ui/src/components/alert-dialog.tsx": {
+      "props_received_from": [],
+      "events_emitted_to": [],
+      "store_reads": [],
+      "store_writes": [],
+      "api_calls": []
+    },
+    "packages/ui/src/components/alert.tsx": {
+      "props_received_from": [],
+      "events_emitted_to": [],
+      "store_reads": [],
+      "store_writes": [],
+      "api_calls": []
+    },
+    "packages/ui/src/components/avatar.tsx": {
+      "props_received_from": [],
+      "events_emitted_to": [],
+      "store_reads": [],
+      "store_writes": [],
+      "api_calls": []
+    },
+    "packages/ui/src/components/badge.tsx": {
+      "props_received_from": [],
+      "events_emitted_to": [],
+      "store_reads": [],
+      "store_writes": [],
+      "api_calls": []
+    },
+    "packages/ui/src/components/button.tsx": {
+      "props_received_from": [],
+      "events_emitted_to": [],
+      "store_reads": [],
+      "store_writes": [],
+      "api_calls": []
+    },
+    "packages/ui/src/components/calendar.tsx": {
+      "props_received_from": [],
+      "events_emitted_to": [],
+      "store_reads": [],
+      "store_writes": [],
+      "api_calls": []
+    },
+    "packages/ui/src/components/card.tsx": {
+      "props_received_from": [],
+      "events_emitted_to": [],
+      "store_reads": [],
+      "store_writes": [],
+      "api_calls": []
+    },
+    "packages/ui/src/components/checkbox.tsx": {
+      "props_received_from": [],
+      "events_emitted_to": [],
+      "store_reads": [],
+      "store_writes": [],
+      "api_calls": []
+    },
+    "packages/ui/src/components/command.tsx": {
+      "props_received_from": [],
+      "events_emitted_to": [],
+      "store_reads": [],
+      "store_writes": [],
+      "api_calls": []
+    },
+    "packages/ui/src/components/dialog.tsx": {
+      "props_received_from": [],
+      "events_emitted_to": [],
+      "store_reads": [],
+      "store_writes": [],
+      "api_calls": []
+    },
+    "packages/ui/src/components/dropdown-menu.tsx": {
+      "props_received_from": [],
+      "events_emitted_to": [],
+      "store_reads": [],
+      "store_writes": [],
+      "api_calls": []
+    },
+    "packages/ui/src/components/form.tsx": {
+      "props_received_from": [],
+      "events_emitted_to": [],
+      "store_reads": [
+        {
+          "store": "context",
+          "fields": [
+            "*"
+          ]
+        },
+        {
+          "store": "context",
+          "fields": [
+            "*"
+          ]
+        }
+      ],
+      "store_writes": [],
+      "api_calls": []
+    },
+    "packages/ui/src/components/input.tsx": {
+      "props_received_from": [],
+      "events_emitted_to": [],
+      "store_reads": [],
+      "store_writes": [],
+      "api_calls": []
+    },
+    "packages/ui/src/components/label.tsx": {
+      "props_received_from": [],
+      "events_emitted_to": [],
+      "store_reads": [],
+      "store_writes": [],
+      "api_calls": []
+    },
+    "packages/ui/src/components/popover.tsx": {
+      "props_received_from": [],
+      "events_emitted_to": [],
+      "store_reads": [],
+      "store_writes": [],
+      "api_calls": []
+    },
+    "packages/ui/src/components/progress.tsx": {
+      "props_received_from": [],
+      "events_emitted_to": [],
+      "store_reads": [],
+      "store_writes": [],
+      "api_calls": []
+    },
+    "packages/ui/src/components/scroll-area.tsx": {
+      "props_received_from": [],
+      "events_emitted_to": [],
+      "store_reads": [],
+      "store_writes": [],
+      "api_calls": []
+    },
+    "packages/ui/src/components/select.tsx": {
+      "props_received_from": [],
+      "events_emitted_to": [],
+      "store_reads": [],
+      "store_writes": [],
+      "api_calls": []
+    },
+    "packages/ui/src/components/separator.tsx": {
+      "props_received_from": [],
+      "events_emitted_to": [],
+      "store_reads": [],
+      "store_writes": [],
+      "api_calls": []
+    },
+    "packages/ui/src/components/sheet.tsx": {
+      "props_received_from": [],
+      "events_emitted_to": [],
+      "store_reads": [],
+      "store_writes": [],
+      "api_calls": []
+    },
+    "packages/ui/src/components/skeleton.tsx": {
+      "props_received_from": [],
+      "events_emitted_to": [],
+      "store_reads": [],
+      "store_writes": [],
+      "api_calls": []
+    },
+    "packages/ui/src/components/slider.tsx": {
+      "props_received_from": [],
+      "events_emitted_to": [],
+      "store_reads": [],
+      "store_writes": [],
+      "api_calls": []
+    },
+    "packages/ui/src/components/switch.tsx": {
+      "props_received_from": [],
+      "events_emitted_to": [],
+      "store_reads": [],
+      "store_writes": [],
+      "api_calls": []
+    },
+    "packages/ui/src/components/table.tsx": {
+      "props_received_from": [],
+      "events_emitted_to": [],
+      "store_reads": [],
+      "store_writes": [],
+      "api_calls": []
+    },
+    "packages/ui/src/components/tabs.tsx": {
+      "props_received_from": [],
+      "events_emitted_to": [],
+      "store_reads": [],
+      "store_writes": [],
+      "api_calls": []
+    },
+    "packages/ui/src/components/textarea.tsx": {
+      "props_received_from": [],
+      "events_emitted_to": [],
+      "store_reads": [],
+      "store_writes": [],
+      "api_calls": []
+    },
+    "packages/ui/src/components/toggle-group.tsx": {
+      "props_received_from": [],
+      "events_emitted_to": [],
+      "store_reads": [
+        {
+          "store": "context",
+          "fields": [
+            "*"
+          ]
+        }
+      ],
+      "store_writes": [],
+      "api_calls": []
+    },
+    "packages/ui/src/components/toggle.tsx": {
+      "props_received_from": [],
+      "events_emitted_to": [],
+      "store_reads": [],
+      "store_writes": [],
+      "api_calls": []
+    },
+    "packages/ui/src/components/tooltip.tsx": {
+      "props_received_from": [],
+      "events_emitted_to": [],
+      "store_reads": [],
+      "store_writes": [],
+      "api_calls": []
+    },
+    "packages/ui/src/index.ts": {
+      "props_received_from": [],
+      "events_emitted_to": [],
+      "store_reads": [],
+      "store_writes": [],
+      "api_calls": []
+    },
+    "packages/ui/src/lib/utils.ts": {
+      "props_received_from": [],
+      "events_emitted_to": [],
+      "store_reads": [],
+      "store_writes": [],
+      "api_calls": []
+    }
+  }
+}

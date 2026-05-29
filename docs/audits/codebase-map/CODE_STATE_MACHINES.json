@@ -1,0 +1,60 @@
+{
+  "version": 1,
+  "state_machines": [
+    {
+      "id": "fsm:index-0",
+      "name": "index.tsx",
+      "source_file": "apps/admin/src/routes/events/index.tsx",
+      "source_line": 66,
+      "module": "app-admin",
+      "detection_method": "useState_union",
+      "states": [
+        "details",
+        "registrations"
+      ],
+      "transitions": [],
+      "spec_match": null,
+      "confidence": "HIGH"
+    },
+    {
+      "id": "fsm:dues-config-form-1",
+      "name": "dues-config-form.tsx",
+      "source_file": "apps/memberry/src/features/dues/components/dues-config-form.tsx",
+      "source_line": 114,
+      "module": "app-memberry",
+      "detection_method": "useState_union",
+      "states": [
+        "annual",
+        "semi-annual",
+        "quarterly"
+      ],
+      "transitions": [],
+      "spec_match": null,
+      "confidence": "HIGH"
+    },
+    {
+      "id": "fsm:application-list-2",
+      "name": "application-list.tsx",
+      "source_file": "apps/memberry/src/features/membership/components/application-list.tsx",
+      "source_line": 59,
+      "module": "app-memberry",
+      "detection_method": "useState_union",
+      "states": [
+        "date",
+        "name"
+      ],
+      "transitions": [],
+      "spec_match": null,
+      "confidence": "HIGH"
+    }
+  ],
+  "spec_comparison": {
+    "matched": [],
+    "code_only": [
+      "fsm:index-0",
+      "fsm:dues-config-form-1",
+      "fsm:application-list-2"
+    ],
+    "spec_only": []
+  }
+}

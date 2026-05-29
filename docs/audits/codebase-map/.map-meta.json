@@ -1,0 +1,23 @@
+{
+  "version": 1,
+  "timestamp": "2026-05-29T16:51:31.647Z",
+  "git_sha": "dff13f3e61c872e61b37dea78c41331f7edffb33",
+  "file_count": 1284,
+  "frameworks": [
+    "react",
+    "generic",
+    "hono"
+  ],
+  "mode": "full",
+  "phase_timings": {},
+  "artifact_hashes": {
+    "CODE_API_SURFACE.json": "f0dfa35885dd110d4ebd58348408e44b3bc9b150b6078d8835033e9d4a0fd534",
+    "CODE_COMPONENT_REGISTRY.json": "3d1a2d9d70023f71eb01e9544af751fc932f79018466364e5abf2106aaeb420f",
+    "CODE_DATA_FLOW.json": "ecfe44c59710718ef6d90b793f4670c369ad8b779775d28b7c87d8d96305018f",
+    "CODE_IMPORT_GRAPH.json": "15e8d5ade014cfe9501e6a825c5770c738085cc24beeaaee84bb7ad15ec819fe",
+    "CODE_MODULE_MAP.json": "4bd5cf9799d1459f3493f45877a882d183a4f7965d6dd823c29568d12caf89e4",
+    "CODE_ROUTE_MAP.json": "c8397fa59bd4e59aa7a1588ac30345ecd8ab12b11610550bb394f28e39c370ae",
+    "CODE_STATE_MACHINES.json": "8c09fc92e07ee9b1929819ccc443b554a789dd053ee3418c23dc3c946d6a4291",
+    "CODE_TERMINOLOGY_MAP.json": "30529c862deb210c3898211e06b71c61dbd335f532b6ebf58072d82f2a3bedf2"
+  }
+}
