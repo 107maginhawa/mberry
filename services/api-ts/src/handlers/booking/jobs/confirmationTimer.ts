@@ -179,7 +179,7 @@ async function queueAutoRejectionNotifications(
     // Client notification - booking was auto-rejected
     await notificationService.createNotification({
       recipient: booking.client,
-      type: 'booking_auto_rejected',
+      type: 'booking.auto-rejected',
       title: 'Booking Request Expired',
       message: 'Your booking request has expired as the host did not confirm within 15 minutes.',
       data: {
@@ -196,7 +196,7 @@ async function queueAutoRejectionNotifications(
     // Provider notification - booking expired
     await notificationService.createNotification({
       recipient: booking.host,
-      type: 'booking_expired',
+      type: 'booking.expired',
       title: 'Booking Request Expired',
       message: 'A booking request has expired due to no confirmation within the time limit.',
       data: {

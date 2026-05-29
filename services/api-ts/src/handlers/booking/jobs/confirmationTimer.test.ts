@@ -14,6 +14,7 @@ import {
   getTimeUntilAutoRejection,
 } from './confirmationTimer';
 import { subMinutes, addMinutes } from 'date-fns';
+import { notificationTypeEnum } from '@/handlers/notifs/repos/notification.schema';
 
 // Mock-Classification: APPROPRIATE — background job with external scheduler
 // ---------------------------------------------------------------------------
@@ -261,6 +262,44 @@ describe('confirmationTimerJob', () => {
     );
     expect(recipients).toContain('client-2');
     expect(recipients).toContain('host-2');
+  });
+
+  test('[EX-BOOK-NOTF] auto-rejection notifications use enum-valid notification types', async () => {
+    const logger = makeLogger();
+    const notificationService = makeNotificationService();
+
+    const expiredBooking = {
+      id: 'b-enum',
+      client: 'client-e',
+      host: 'host-e',
+      slot: 'slot-e',
+      status: 'pending',
+      bookedAt: subMinutes(new Date(), 20),
+      scheduledAt: addMinutes(new Date(), 90),
+    };
+
+    const txStub: any = {
+      update: () => ({ set: () => ({ where: () => Promise.resolve() }) }),
+    };
+    const db: any = {
+      select: () => ({
+        from: () => ({
+          where: () => ({ limit: () => Promise.resolve([expiredBooking]) }),
+        }),
+      }),
+      transaction: async (fn: any) => fn(txStub),
+    };
+
+    await confirmationTimerJob({ db, logger, jobId: 'test-job', notificationService } as any);
+
+    const validTypes = notificationTypeEnum.enumValues as readonly string[];
+    const emittedTypes = notificationService.createNotification.mock.calls.map(
+      (call: any) => call[0].type,
+    );
+    expect(emittedTypes.length).toBe(2);
+    for (const t of emittedTypes) {
+      expect(validTypes).toContain(t);
+    }
   });
 
   test('continues processing remaining bookings when one fails', async () => {

@@ -1,0 +1,2 @@
+ALTER TYPE "public"."notification_type" ADD VALUE 'booking.auto-rejected' BEFORE 'comms.video-call-started';--> statement-breakpoint
+ALTER TYPE "public"."notification_type" ADD VALUE 'booking.expired' BEFORE 'comms.video-call-started';

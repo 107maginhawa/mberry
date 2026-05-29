@@ -18,6 +18,8 @@ export const notificationTypeEnum = pgEnum('notification_type', [
   'booking.cancelled',
   'booking.no-show-client',
   'booking.no-show-host',
+  'booking.auto-rejected',
+  'booking.expired',
   // Comms module notifications
   'comms.video-call-started',
   'comms.video-call-joined',
@@ -112,7 +114,7 @@ export interface NotificationResponse {
 export interface CreateNotificationRequest {
   organizationId: string;
   recipient: string;
-  type: 'billing' | 'security' | 'system' | 'booking.created' | 'booking.confirmed' | 'booking.rejected' | 'booking.cancelled' | 'booking.no-show-client' | 'booking.no-show-host' | 'comms.video-call-started' | 'comms.video-call-joined' | 'comms.video-call-left' | 'comms.video-call-ended' | 'comms.chat-message' | 'waitlist.promoted' | 'event.late-cancellation' | 'dunning.escalation' | 'task.overdue';
+  type: 'billing' | 'security' | 'system' | 'booking.created' | 'booking.confirmed' | 'booking.rejected' | 'booking.cancelled' | 'booking.no-show-client' | 'booking.no-show-host' | 'booking.auto-rejected' | 'booking.expired' | 'comms.video-call-started' | 'comms.video-call-joined' | 'comms.video-call-left' | 'comms.video-call-ended' | 'comms.chat-message' | 'waitlist.promoted' | 'event.late-cancellation' | 'dunning.escalation' | 'task.overdue';
   channel: 'email' | 'push' | 'in-app';
   title: string;
   message: string;

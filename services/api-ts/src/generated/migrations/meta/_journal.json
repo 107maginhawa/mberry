@@ -421,6 +421,13 @@
       "when": 1780043149220,
       "tag": "0059_aspiring_mathemanic",
       "breakpoints": true
+    },
+    {
+      "idx": 60,
+      "version": "7",
+      "when": 1780058739621,
+      "tag": "0060_known_luckman",
+      "breakpoints": true
     }
   ]
 }
