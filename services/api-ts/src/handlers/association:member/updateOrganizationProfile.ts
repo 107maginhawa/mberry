@@ -7,6 +7,7 @@ import { organizations } from '@/handlers/platformadmin/repos/platform-admin.sch
 import { auditAction } from '@/utils/audit';
 import { requirePosition } from '@/utils/officer-check';
 import { POSITION_TITLES } from '@/utils/position-titles';
+import { domainEvents } from '@/core/domain-events';
 
 const ALLOWED_LOGO_MIME_PREFIXES = ['image/png', 'image/jpeg', 'image/gif', 'image/webp'];
 const SVG_SIGNATURES = ['<svg', '<?xml', 'xmlns="http://www.w3.org/2000/svg"'];
@@ -60,6 +61,12 @@ export async function updateOrganizationProfile(
     resourceId: params.organizationId,
     description: 'Organization profile updated',
   });
+
+  domainEvents.emit('org.settings.updated', {
+    organizationId: params.organizationId,
+    updatedBy: session.user.id,
+    updatedFields: Object.keys(bodyRecord),
+  }).catch(() => {});
 
   return ctx.json(updated[0], 200);
 }

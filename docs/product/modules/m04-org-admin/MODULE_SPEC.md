@@ -235,28 +235,52 @@ States: Loading (skeleton), NotFound (404), Suspended ("Org inactive"), NoActivi
 
 ## 10. API Expectations
 
-| API Need | Purpose | Inputs | Outputs | Errors |
-|----------|---------|--------|---------|--------|
-| GET /org/:id | Get org profile | orgId | Org data | 404 |
-| PUT /org/:id | Update org profile | fields | Updated org | 403, 400 |
-| POST /org/:id/officers | Assign officer role | personId, positionId | OfficerTerm record | 403 not president, 409 role taken |
-| DELETE /org/:id/officers/:termId | Remove officer role | -- | -- | 403 |
-| POST /org/:id/officers/:termId/transition | Start officer transition | incomingPersonId | Checklist | 403 |
-| POST /org/:id/discipline | Disciplinary action | personId, actionType, reason | Action record | 403, 400 empty reason |
-| GET /org/:slug/public | Public page data | slug | Public org data | 404 |
-| GET /org/:id/dashboard | Dashboard metrics | orgId | Dashboard data | 403 |
+Paths below reflect the **actual wired API surface** (OpenAPI-generated unless
+marked hand-wired). The earlier `/org/:id` shorthand was a spec placeholder and
+never matched the implementation.
+
+| API Need | Actual Path | Wiring | Inputs | Outputs | Errors |
+|----------|-------------|--------|--------|---------|--------|
+| Get org profile | `GET /association/member/org-profile/:organizationId` | OpenAPI | orgId | Org data | 404 |
+| Update org profile | `PUT /association/member/org-profile/:organizationId` | OpenAPI | fields | Updated org | 403, 400 |
+| Assign officer role | `POST /association/member/officer-terms` | OpenAPI | personId, positionId | OfficerTerm record | 403 not president, 409 role taken |
+| Remove officer role | `DELETE /association/member/officer-terms/:termId` | OpenAPI | -- | -- | 403 |
+| Start officer transition | `POST /association/member/org/:organizationId/officers/:termId/transition` | hand-wired (app.ts) | incomingPersonId | Checklist | 403 |
+| Disciplinary action | `POST /association/member/disciplinary-actions` | handler present, **not yet route-registered** | personId, actionType, reason | Action record | 403, 400 empty reason |
+| Public page data | `GET /public/org/:slug` | OpenAPI | slug | Public org data | 404 |
+| Dashboard metrics | `GET /association/member/org/:organizationId/dashboard` | hand-wired (app.ts) | orgId | Dashboard data | 403 |
+
+### Position & Officer-Term Management Endpoints
+
+These exist in the implementation (OpenAPI-generated) and are part of the
+org-admin surface. Position CRUD backs officer assignment; the officer-term
+read endpoints back dashboards and role lookups.
+
+| API Need | Actual Path | Wiring |
+|----------|-------------|--------|
+| Create position | `POST /association/member/positions` | OpenAPI |
+| List positions | `GET /association/member/positions` | OpenAPI |
+| Get position | `GET /association/member/positions/:positionId` | OpenAPI |
+| Update position | `PATCH /association/member/positions/:positionId` | OpenAPI |
+| Delete position | `DELETE /association/member/positions/:positionId` | OpenAPI |
+| List officer terms | `GET /association/member/officer-terms` | OpenAPI |
+| Get officer term | `GET /association/member/officer-terms/:termId` | OpenAPI |
+| Update officer term | `PATCH /association/member/officer-terms/:termId` | OpenAPI |
+| Officer terms summary | `GET /officer-terms/:organizationId` | hand-wired (app.ts) |
+| My officer role | `GET /persons/me/officer-role/:organizationId` | hand-wired (app.ts) |
 
 ## 10b. Domain Events
 
 ### Published Events
 
-| Event Name | Trigger | Payload | Consumers |
-|---|---|---|---|
-| OfficerAssigned | Officer term created | orgId, personId, positionId | M07, M12 |
-| OfficerRemoved | Officer term removed | orgId, personId, positionId | M07, M12 |
-| OfficerTransitioned | Handover completed | orgId, positionId, outgoingPersonId, incomingPersonId | M07 |
-| MemberSuspended | Disciplinary suspension | orgId, personId, reason | M05 |
-| MemberRemoved | Disciplinary removal | orgId, personId, reason | M05 |
+| Event Name | Registry Key | Trigger | Payload | Consumers |
+|---|---|---|---|---|
+| OfficerAssigned | `officer.assigned` | Officer term created | orgId, personId, positionId | M07, M12 |
+| OfficerRemoved | `officer.removed` | Officer term removed | orgId, personId, positionId | M07, M12 |
+| OfficerTransitioned | `officer.transitioned` | Handover completed | orgId, positionId, outgoingPersonId, incomingPersonId | M07 |
+| MemberSuspended | `member.suspended` | Disciplinary suspension | orgId, personId, reason | M05 |
+| MemberRemoved | `member.removed` | Disciplinary removal | orgId, personId, reason | M05 |
+| OrgSettingsUpdated | `org.settings.updated` | Org profile updated | organizationId, updatedBy, updatedFields | (none yet) |
 
 ### Consumed Events
 

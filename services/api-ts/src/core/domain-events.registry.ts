@@ -212,6 +212,12 @@ export interface DomainEventMap {
   };
 
   // ── Governance Context ────────────────────────────────────────────────
+  'org.settings.updated': {
+    organizationId: string;
+    updatedBy: string;
+    updatedFields: string[];
+  };
+
   'officer.assigned': {
     termId: string;
     personId: string;

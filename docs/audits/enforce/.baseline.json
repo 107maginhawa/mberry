@@ -1,8 +1,8 @@
 {
-  "version": 9,
-  "timestamp": "2026-05-29T26:00:00Z",
-  "enforcement_depth": "FULL — all 8 phases + Wave 11 (billing audit + P1 re-triage) + Wave 12 (m12 elections: 5 REAL P1s fixed, 3 FPs reclassified) + Wave 13 (m11 documents/credentials: 5 REAL P1s fixed) + Wave 14 (m14 national dashboard: 5 REAL P1s fixed) + Wave 15 (m01 auth-onboarding: 5 REAL P1s fixed)",
-  "previous_baseline": "2026-05-29T25:30:00Z",
+  "version": 10,
+  "timestamp": "2026-05-29T26:30:00Z",
+  "enforcement_depth": "FULL — all 8 phases + Wave 11 (billing audit + P1 re-triage) + Wave 12 (m12 elections: 5 REAL P1s fixed, 3 FPs reclassified) + Wave 13 (m11 documents/credentials: 5 REAL P1s fixed) + Wave 14 (m14 national dashboard: 5 REAL P1s fixed) + Wave 15 (m01 auth-onboarding: 5 REAL P1s fixed) + Wave 16 (m05 membership: 3 REAL P1s fixed, 1 FP reclassified) + Wave 17 (m04 org-admin: 3 P1s resolved — 1 REAL event fix, 2 doc reconciliations)",
+  "previous_baseline": "2026-05-29T26:00:00Z",
   "module_identity": {
     "m01-auth-onboarding": { "source_path": "services/api-ts/src/handlers/person/", "spec_hash": "m01deep01", "note": "onboarding wizard handlers live in handlers/onboarding/ (Wave 15); bulk import in handlers/invite/bulkImportMembers.ts" },
     "m02-member-profile": { "source_path": "services/api-ts/src/handlers/person/", "spec_hash": "m02deep02" },
@@ -28,7 +28,7 @@
     "m01-auth-onboarding": { "P0": 0, "P1": 0, "P2": 3, "P3": 1, "score": 9.0, "p1_corrected": "5→0 (Wave 15: OnboardingState entity + GET /onboarding/state + PUT /onboarding/step [WF-005 wizard] + POST /invitations/bulk-import [WF-009 preview/dedup/token] implemented)" },
     "m02-member-profile": { "P0": 0, "P1": 2, "P2": 4, "P3": 1, "score": 7.8 },
     "m03-platform-admin": { "P0": 0, "P1": 3, "P2": 4, "P3": 1, "score": 7.5 },
-    "m04-org-admin": { "P0": 0, "P1": 3, "P2": 3, "P3": 1, "score": 7.5 },
+    "m04-org-admin": { "P0": 0, "P1": 0, "P2": 3, "P3": 1, "score": 8.5 },
     "m05-membership": { "P0": 0, "P1": 0, "P2": 3, "P3": 1, "score": 9.0, "p1_corrected": "4→0 (Wave 16: 3 REAL fixed — resignMembership + deceaseMembership emit membership.status.changed, importRosterMembers emits membership.imported with new consumer; 1 FALSE POSITIVE — auth gap was on unwired legacy membership/reviewApplication.ts, the live wired approveMembershipApplication.ts already enforces requirePosition[Secretary,President])" },
     "m06-dues-payments": { "P0": 1, "P1": 4, "P2": 4, "P3": 1, "score": 4.5 },
     "m07-communications": { "P0": 1, "P1": 3, "P2": 6, "P3": 2, "score": 5.5 },
@@ -163,7 +163,10 @@
     "EM-M01-a1b2c3d4": { "resolved_in": "wave15", "reason": "GET /onboarding/state implemented (TypeSpec getOnboardingState → handlers/onboarding/getOnboardingState.ts). Officer-gated via requireOfficerTerm against requested orgId; 404 when wizard not started." },
     "EM-M01-e5f6a7b8": { "resolved_in": "wave15", "reason": "PUT /onboarding/step implemented (handlers/onboarding/updateOnboardingStep.ts). Enforces in-order steps (M01-004 → 422), bootstraps at step 1, advances currentStep, emits onboarding.completed on final step." },
     "EM-M01-c9d0e1f2": { "resolved_in": "wave15", "reason": "WF-005 resumable onboarding wizard satisfied — state persisted org-scoped across 5 steps (profile/import/dues/gateway/invite); resume via GET /onboarding/state, save via PUT /onboarding/step." },
-    "EM-M01-34a5b6c7": { "resolved_in": "wave15", "reason": "WF-009 bulk import implemented (POST /invitations/bulk-import → handlers/invite/bulkImportMembers.ts). CSV parse (quoted fields), preview|import modes, dedup (within-CSV + against pending invites), HMAC claim-token issuance per valid row. Deviation: JSON csvContent string instead of multipart (codegen pipeline does not support multipart)." }
+    "EM-M01-34a5b6c7": { "resolved_in": "wave15", "reason": "WF-009 bulk import implemented (POST /invitations/bulk-import → handlers/invite/bulkImportMembers.ts). CSV parse (quoted fields), preview|import modes, dedup (within-CSV + against pending invites), HMAC claim-token issuance per valid row. Deviation: JSON csvContent string instead of multipart (codegen pipeline does not support multipart)." },
+    "EM-M04-u1v2w3x4": { "resolved_in": "wave17", "reason": "OrgSettingsUpdated domain event now wired (REAL fix). Added 'org.settings.updated' to DomainEventMap (Governance context) with {organizationId, updatedBy, updatedFields}; emitted from updateOrganizationProfile.ts after audit (fire-and-forget .catch). Test updateOrganizationProfile.test.ts verifies emit on success + no emit on 403. No consumer registered (no side-effect warranted — informational event)." },
+    "EM-M04-01a8b7c6": { "resolved_in": "wave17-fp", "reason": "Spec-to-OpenAPI path mismatch — partial FP + doc reconcile. Audit (2026-05-28) claimed 4/8 endpoints hand-wired; live code shows getOrganizationProfile + updateOrganizationProfile ARE OpenAPI-generated (/association/member/org-profile/:organizationId, routes.ts:1498/1505). Only transition + dashboard are hand-wired (app.ts:468/471); disciplinary handler exists but is not route-registered. Remediation: MODULE_SPEC §10 rewritten to actual wired paths with OpenAPI/hand-wired wiring column." },
+    "EM-M04-02d5e4f3": { "resolved_in": "wave17", "reason": "10 bonus endpoints (position CRUD ×5, officer-term list/get/update ×3, officer-terms summary, my-officer-role) documented in MODULE_SPEC §10 new 'Position & Officer-Term Management Endpoints' table with actual paths + wiring source." }
   },
   "wave11_p1_triage": {
     "method": "5 parallel verification agents read module .md findings + verified against live code (read-only)",
