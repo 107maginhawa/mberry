@@ -86,9 +86,9 @@ import { ReviewRepository } from '@/handlers/reviews/repos/review.repo';
 // --- storage repos ---
 import { StorageFileRepository } from '@/handlers/storage/repos/file.repo';
 
-// --- training repos ---
-import { TrainingRepository } from '@/handlers/training/repos/training.repo';
-import { AccreditedProviderRepository } from '@/handlers/training/repos/accredited-provider.repo';
+// --- training repos (moved to association:operations) ---
+import { TrainingRepository } from '@/handlers/association:operations/repos/training.repo';
+import { AccreditedProviderRepository } from '@/handlers/association:operations/repos/accredited-provider.repo';
 
 // Snapshot all 50 repo prototypes
 for (const Repo of [

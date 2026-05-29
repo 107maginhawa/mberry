@@ -4,6 +4,7 @@ import { CommunicationsRepository } from './repos/communication.repo';
 import { requirePosition } from '@/utils/officer-check';
 import { POSITION_TITLES } from '@/utils/position-titles';
 import { auditAction } from '@/utils/audit';
+import { domainEvents } from '@/core/domain-events';
 import type { Session } from '@/types/auth';
 
 export async function scheduleAnnouncement(ctx: Context): Promise<Response> {
@@ -32,6 +33,13 @@ export async function scheduleAnnouncement(ctx: Context): Promise<Response> {
   }
 
   const updated = await repo.updateStatus(id, 'scheduled', { scheduledAt });
+
+  await domainEvents.emit('announcement.scheduled', {
+    announcementId: id,
+    organizationId: existing.organizationId,
+    scheduledBy: session.user.id,
+    scheduledAt: scheduledAt.toISOString(),
+  });
 
   await auditAction(ctx, {
     action: 'update',

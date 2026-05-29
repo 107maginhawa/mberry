@@ -5,6 +5,7 @@ import type { CreateAnnouncementBody, CreateAnnouncementParams } from '@/generat
 import type { NewAnnouncement } from './repos/communication.schema';
 import { CommunicationsRepository } from './repos/communication.repo';
 import { auditAction } from '@/utils/audit';
+import { domainEvents } from '@/core/domain-events';
 
 /**
  * createAnnouncement
@@ -30,6 +31,13 @@ export async function createAnnouncement(
     authorId: session.user.id,
     status: 'draft',
   } as NewAnnouncement);
+
+  await domainEvents.emit('announcement.created', {
+    announcementId: announcement.id,
+    organizationId: params.organizationId,
+    createdBy: session.user.id,
+    title: announcement.title,
+  });
 
   await auditAction(ctx, {
     action: 'create',

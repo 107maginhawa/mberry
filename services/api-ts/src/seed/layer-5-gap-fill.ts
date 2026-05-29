@@ -14,7 +14,7 @@ import { NOW, daysAgo, daysFromNow, dateStr } from './helpers';
 import { events } from '@/handlers/association:operations/repos/events.schema';
 import { checkIns, waitlistEntries } from '@/handlers/association:operations/repos/events.schema';
 import { courses, courseEnrollments, quizAttempts } from '@/handlers/association:operations/repos/training.schema';
-import { accreditedProviders } from '@/handlers/training/repos/accredited-provider.schema';
+import { accreditedProviders } from '@/handlers/association:operations/repos/accredited-provider.schema';
 import { electionNominees, electionVotes, elections } from '@/handlers/elections/repos/elections.schema';
 import { positions } from '@/handlers/association:member/repos/governance.schema';
 import { memberships } from '@/handlers/association:member/repos/membership.schema';

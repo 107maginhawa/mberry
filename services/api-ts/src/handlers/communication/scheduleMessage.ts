@@ -4,6 +4,7 @@ import type { ScheduleMessageBody, ScheduleMessageParams } from '@/generated/ope
 import { NotFoundError, BusinessLogicError } from '@/core/errors';
 import { MessageRepository } from './repos/communication.repo';
 import { auditAction } from '@/utils/audit';
+import { domainEvents } from '@/core/domain-events';
 
 /**
  * scheduleMessage
@@ -53,6 +54,13 @@ export async function scheduleMessage(
     scheduledAt,
     status: 'scheduled',
     updatedBy: user.id,
+  });
+
+  await domainEvents.emit('message.scheduled', {
+    messageId: params.messageId,
+    organizationId: orgId,
+    scheduledBy: user.id,
+    scheduledAt: scheduledAt.toISOString(),
   });
 
   await auditAction(ctx, {

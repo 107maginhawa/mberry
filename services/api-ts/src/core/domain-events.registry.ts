@@ -125,10 +125,54 @@ export interface DomainEventMap {
   };
 
   // ── Communications Context ────────────────────────────────────────────
+  'message.created': {
+    messageId: string;
+    organizationId: string;
+    createdBy: string;
+    channel: string;
+    recipientCount: number;
+  };
+
+  'message.sent': {
+    messageId: string;
+    organizationId: string;
+    sentBy: string;
+    channel: string;
+    recipientCount: number;
+  };
+
+  'message.scheduled': {
+    messageId: string;
+    organizationId: string;
+    scheduledBy: string;
+    scheduledAt: string;
+  };
+
+  'message.cancelled': {
+    messageId: string;
+    organizationId: string;
+    cancelledBy: string;
+    previousStatus: string;
+  };
+
+  'announcement.created': {
+    announcementId: string;
+    organizationId: string;
+    createdBy: string;
+    title: string;
+  };
+
   'announcement.published': {
     announcementId: string;
     organizationId: string;
     publishedBy: string;
+  };
+
+  'announcement.scheduled': {
+    announcementId: string;
+    organizationId: string;
+    scheduledBy: string;
+    scheduledAt: string;
   };
 
   // ── Training Context ──────────────────────────────────────────────────

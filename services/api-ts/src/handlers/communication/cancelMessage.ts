@@ -4,6 +4,7 @@ import type { CancelMessageParams } from '@/generated/openapi/validators';
 import { NotFoundError, BusinessLogicError } from '@/core/errors';
 import { MessageRepository } from './repos/communication.repo';
 import { auditAction } from '@/utils/audit';
+import { domainEvents } from '@/core/domain-events';
 
 /**
  * cancelMessage
@@ -42,6 +43,13 @@ export async function cancelMessage(
   const updated = await repo.update(params.messageId, {
     status: 'cancelled',
     updatedBy: user.id,
+  });
+
+  await domainEvents.emit('message.cancelled', {
+    messageId: params.messageId,
+    organizationId: orgId,
+    cancelledBy: user.id,
+    previousStatus: existing.status,
   });
 
   await auditAction(ctx, {

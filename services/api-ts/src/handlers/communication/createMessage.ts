@@ -4,6 +4,7 @@ import type { CreateMessageBody } from '@/generated/openapi/validators';
 import type { MessageRecipient } from './repos/communication.schema';
 import { MessageRepository } from './repos/communication.repo';
 import { auditAction } from '@/utils/audit';
+import { domainEvents } from '@/core/domain-events';
 
 /**
  * createMessage
@@ -53,6 +54,14 @@ export async function createMessage(
     scheduledAt: body.scheduledAt ? new Date(body.scheduledAt as unknown as string) : null,
     status: body.scheduledAt ? 'scheduled' : 'draft',
     createdBy: user.id,
+  });
+
+  await domainEvents.emit('message.created', {
+    messageId: message.id,
+    organizationId: orgId,
+    createdBy: user.id,
+    channel: body.channel,
+    recipientCount: dedupedRecipients.length,
   });
 
   await auditAction(ctx, {

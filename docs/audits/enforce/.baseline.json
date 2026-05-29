@@ -1,6 +1,6 @@
 {
   "version": 3,
-  "timestamp": "2026-05-29T18:00:00Z",
+  "timestamp": "2026-05-29T22:00:00Z",
   "enforcement_depth": "FULL — all 8 phases dispatched across 19 modules (10 agents)",
   "previous_baseline": "2026-05-29T12:00:00Z",
   "module_identity": {
@@ -12,8 +12,8 @@
     "m06-dues-payments": { "source_path": "services/api-ts/src/handlers/dues/", "spec_hash": "m06deep06" },
     "m07-communications": { "source_path": "services/api-ts/src/handlers/communication/", "spec_hash": "m07deep07" },
     "m08-events": { "source_path": "services/api-ts/src/handlers/events/", "spec_hash": "m08deep08" },
-    "m09-training": { "source_path": "services/api-ts/src/handlers/training/", "spec_hash": "m09deep09" },
-    "m10-credit-tracking": { "source_path": "services/api-ts/src/handlers/training/", "spec_hash": "m10deep10" },
+    "m09-training": { "source_path": "services/api-ts/src/handlers/association:operations/", "spec_hash": "m09deep09", "note": "handlers/training/ deleted — all training handlers live in association:operations/" },
+    "m10-credit-tracking": { "source_path": "services/api-ts/src/handlers/association:operations/", "spec_hash": "m10deep10" },
     "m11-documents-credentials": { "source_path": "services/api-ts/src/handlers/documents/", "spec_hash": "m11deep11" },
     "m12-elections-governance": { "source_path": "services/api-ts/src/handlers/elections/", "spec_hash": "m12deep12" },
     "m13-professional-feed": { "source_path": null, "spec_hash": "m13fut013" },
@@ -31,9 +31,9 @@
     "m04-org-admin": { "P0": 0, "P1": 3, "P2": 3, "P3": 1, "score": 7.5 },
     "m05-membership": { "P0": 0, "P1": 4, "P2": 3, "P3": 1, "score": 6.0 },
     "m06-dues-payments": { "P0": 1, "P1": 4, "P2": 4, "P3": 1, "score": 4.5 },
-    "m07-communications": { "P0": 3, "P1": 5, "P2": 6, "P3": 2, "score": 4.0 },
-    "m08-events": { "P0": 2, "P1": 2, "P2": 5, "P3": 1, "score": 4.5 },
-    "m09-training": { "P0": 1, "P1": 3, "P2": 4, "P3": 2, "score": 4.5 },
+    "m07-communications": { "P0": 1, "P1": 3, "P2": 6, "P3": 2, "score": 5.5 },
+    "m08-events": { "P0": 0, "P1": 2, "P2": 5, "P3": 1, "score": 6.5 },
+    "m09-training": { "P0": 0, "P1": 3, "P2": 4, "P3": 2, "score": 6.5 },
     "m10-credit-tracking": { "P0": 0, "P1": 3, "P2": 3, "P3": 2, "score": 7.0 },
     "m11-documents-credentials": { "P0": 0, "P1": 4, "P2": 5, "P3": 2, "score": 6.0 },
     "m12-elections-governance": { "P0": 0, "P1": 2, "P2": 4, "P3": 2, "score": 6.5 },
@@ -58,12 +58,7 @@
   "ui_journey": { "P0": 1, "P1": 3, "P2": 9, "P3": 6 },
   "coverage_score": 67,
   "p0_findings": {
-    "EM-M07-zero-events": { "first_seen": "2026-05-27", "severity": "P0", "description": "Domain events emitted in only 1 of ~47 comms handlers (publishAnnouncement only)" },
-    "EM-M07-deceased": { "first_seen": "2026-05-27", "severity": "P0", "description": "Deceased/suppressed check only in batch announcement path, missing in direct sendMessage" },
-    "EM-M07-no-typespec": { "first_seen": "2026-05-27", "severity": "P0", "description": "No communication.tsp TypeSpec file — 28-handler module entirely hand-wired" },
-    "EM-M08-publish": { "first_seen": "2026-05-28", "severity": "P0", "description": "publishEvent handler does not exist — events stuck in draft" },
-    "EM-M08-complete": { "first_seen": "2026-05-28", "severity": "P0", "description": "completeEvent handler does not exist — events never complete" },
-    "EM-M09-dead-code": { "first_seen": "2026-05-28", "severity": "P0", "description": "8/14 training handler files unrouted — superseded by association:operations equivalents" },
+    "EM-M07-no-typespec": { "first_seen": "2026-05-27", "severity": "P0", "description": "No communication.tsp TypeSpec file — 28-handler module entirely hand-wired (deferred — enums exist)" },
     "EC-001-booking": { "first_seen": "2026-05-29", "severity": "P0", "description": "booking (19 handlers) — no MODULE_SPEC" },
     "EC-002-billing": { "first_seen": "2026-05-29", "severity": "P0", "description": "billing (16 handlers) — no MODULE_SPEC" },
     "EC-003-email": { "first_seen": "2026-05-29", "severity": "P0", "description": "email (13 handlers) — no MODULE_SPEC" },
@@ -127,6 +122,11 @@
     "EM-M07-cancelled": { "resolved_in": "code-fix", "reason": "cancelled enum value now present in messageStatusEnum" },
     "EX-NOTIF-enum": { "resolved_in": "downgraded", "reason": "Code correct (18 types in schema + EVENT_CONTRACTS). DOMAIN_MODEL doc stale → P2" },
     "UJ-NAV-orphan10": { "resolved_in": "reclassified", "reason": "Replaced by UJ-01-spa-bypass (different finding at same severity)" },
-    "AL-PERSON-5da31612": { "resolved_in": "reclassified", "reason": "Subsumed by AL-001-password-change + AL-002-mfa-lifecycle" }
+    "AL-PERSON-5da31612": { "resolved_in": "reclassified", "reason": "Subsumed by AL-001-password-change + AL-002-mfa-lifecycle" },
+    "EM-M07-zero-events": { "resolved_in": "wave2-structural", "reason": "Domain events added to 6 key communication handlers (7/46 now emit)" },
+    "EM-M07-deceased": { "resolved_in": "wave2-structural", "reason": "Deceased/suspended/removed filter added to sendMessage" },
+    "EM-M08-publish": { "resolved_in": "false-positive", "reason": "Handler exists at association:operations/publishEvent.ts" },
+    "EM-M08-complete": { "resolved_in": "false-positive", "reason": "Handler exists at association:operations/completeEvent.ts" },
+    "EM-M09-dead-code": { "resolved_in": "wave2-structural", "reason": "Deleted handlers/training/ — all superseded by association:operations/" }
   }
 }

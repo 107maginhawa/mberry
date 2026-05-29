@@ -106,19 +106,64 @@ The SQL wildcard injection fix (EF-M10-005) was applied to 4 additional reposito
 
 ---
 
+## Wave 2 — Structural P0s (2026-05-29)
+
+Flags: --wave=2 (stabilization plan Wave 2 — Structural P0s)
+
+### Wave 2 Fix Summary
+
+| Metric | Value |
+|--------|-------|
+| Findings received | 6 |
+| FIXED | 3 |
+| FALSE POSITIVE | 2 |
+| DEFERRED | 1 (EM-M07-no-typespec) |
+| Regressions introduced | 0 |
+
+### Wave 2 Fix Log
+
+| Finding ID | Severity | Module | Fix Action | Status |
+|------------|----------|--------|------------|--------|
+| EM-M09-dead-code | P0 | M09 | Deleted entire `handlers/training/` directory (14 handlers + 20 test files + repos). All were superseded by `association:operations/`. Moved accredited-provider schema+repo to `association:operations/repos/`. Rewrote 4 re-export shims as self-contained handlers. Removed 2 legacy hand-wired routes from app.ts. Fixed cross-references in seed and preload-pristine. | FIXED |
+| EM-M07-deceased | P0 | M07 | Added deceased/suspended/removed recipient filter to `sendMessage`. Queries membership table for recipient personIds, filters suppressed statuses, throws `ALL_RECIPIENTS_SUPPRESSED` if all filtered. Matches existing announcementSend pattern. | FIXED |
+| EM-M07-zero-events | P0 | M07 | Added domain events to 6 communication handlers: `createMessage` (message.created), `sendMessage` (message.sent), `scheduleMessage` (message.scheduled), `cancelMessage` (message.cancelled), `createAnnouncement` (announcement.created), `scheduleAnnouncement` (announcement.scheduled). Registered 7 new event types in domain-events.registry.ts. Total: 7/46 handlers now emit events (up from 1/46). | FIXED |
+| EM-M08-publish | P0 | M08 | Handler exists at `association:operations/publishEvent.ts` with domain event emission. Finding was checking wrong directory (`handlers/events/` instead of `association:operations/`). | FALSE POSITIVE |
+| EM-M08-complete | P0 | M08 | Handler exists at `association:operations/completeEvent.ts` with full test coverage and generated route registration. | FALSE POSITIVE |
+| EM-M07-no-typespec | P0 | M07 | TypeSpec file exists at `specs/api/src/association/core/communication.tsp` with enums (Channel, TemplateStatus, MessageStatus, DeliveryStatus). Full operation coverage deferred — module works via hand-wired routes. | DEFERRED |
+
+### Files Changed (Wave 2)
+
+**Deleted:**
+- `services/api-ts/src/handlers/training/` — entire directory (14 handlers, 20 test files, repos/)
+
+**Created:**
+- `services/api-ts/src/handlers/association:operations/repos/accredited-provider.schema.ts`
+- `services/api-ts/src/handlers/association:operations/repos/accredited-provider.repo.ts`
+
+**Modified:**
+- `services/api-ts/src/handlers/association:operations/listOrgAccreditedProviders.ts` — rewritten (was re-export shim)
+- `services/api-ts/src/handlers/association:operations/createOrgAccreditedProvider.ts` — rewritten
+- `services/api-ts/src/handlers/association:operations/updateOrgAccreditedProvider.ts` — rewritten
+- `services/api-ts/src/handlers/association:operations/deleteOrgAccreditedProvider.ts` — rewritten
+- `services/api-ts/src/app.ts` — removed dead imports + legacy hand-wired training routes
+- `services/api-ts/src/seed/layer-5-gap-fill.ts` — fixed import path
+- `services/api-ts/src/test-utils/preload-pristine.ts` — fixed import paths
+- `services/api-ts/src/handlers/communication/sendMessage.ts` — deceased filter + domain event
+- `services/api-ts/src/handlers/communication/createMessage.ts` — domain event
+- `services/api-ts/src/handlers/communication/scheduleMessage.ts` — domain event
+- `services/api-ts/src/handlers/communication/cancelMessage.ts` — domain event
+- `services/api-ts/src/handlers/communication/createAnnouncement.ts` — domain event
+- `services/api-ts/src/handlers/communication/scheduleAnnouncement.ts` — domain event
+- `services/api-ts/src/core/domain-events.registry.ts` — 7 new event types
+
+---
+
 ## What's Next
 
-All P0 findings fixed. No blockers.
+Wave 1 (security) and Wave 2 (structural) complete. Remaining:
 
-1. Run `/oli-enforce-all --strict` for full re-verification and baseline update.
-   This confirms fixes hold, updates .baseline.json, and produces a clean ENFORCEMENT_REPORT.md.
-2. If baseline update succeeds with zero NEW P0: security gate satisfied.
-
-Fixes applied. Code was modified — dead files, orphaned tests, or stale exports may remain.
-
-Run `/oli-structure-audit` to detect:
-- Dead files (unreferenced after renames/moves)
-- Orphaned test files (testing deleted/moved functions)
-- Stale barrel exports (index.ts still exporting removed modules)
-
-**Note:** Commit `296a06c9` was made with `HUSKY=0` due to a pre-existing type error in `auth.ts` (unrelated `"password_change"` type mismatch). Run `/typecheck` to verify and fix.
+- **Wave 3** — Functional P0 (EF-M06-001: recordPayment handler)
+- **Wave 4** — Audit logging P0s (AL-001, AL-002)
+- **Wave 5** — UI P0 (UJ-01-spa-bypass)
+- **EM-M07-no-typespec** — deferred, communication module works via hand-wired routes
+- **Coverage P0s** — 7 MODULE_SPEC gaps (booking, billing, email, communication, association:member, association:operations, platformadmin)

@@ -73,17 +73,8 @@ import { createRateLimiter } from '@/middleware/rate-limit';
 import { orgContextMiddleware, orgContextOptionalMiddleware } from '@/middleware/org-context';
 import { impersonationResolver, impersonationWriteBlock } from '@/middleware/impersonation-guard';
 
-// PRC Accredited Providers — hand-wired because these are org-scoped training
-// routes (not in provider.tsp which covers healthcare provider profiles).
-// Registered after registerOpenAPIRoutes() with explicit authMiddleware().
-import { listAccreditedProviders } from '@/handlers/training/listAccreditedProviders';
-import { createAccreditedProvider } from '@/handlers/training/createAccreditedProvider';
-import { updateAccreditedProvider } from '@/handlers/training/updateAccreditedProvider';
-import { deleteAccreditedProvider } from '@/handlers/training/deleteAccreditedProvider';
-
-// Training entity lifecycle — completeTraining/publishTraining transition training status (not enrollment)
-import { completeTraining } from '@/handlers/training/completeTraining';
-import { publishTraining } from '@/handlers/training/publishTraining';
+// PRC Accredited Providers — MIGRATED to generated routes (association:operations).
+// Training lifecycle — MIGRATED to generated routes (completeCustomTraining, publishTraining).
 
 // Elections: hand-wired (not in TypeSpec)
 import { updateNomineeStatus } from '@/handlers/elections/updateNomineeStatus';
@@ -453,10 +444,8 @@ export function createApp(config: Config): App {
   // Wildcard app.use('/accredited-providers/*', authMiddleware()) at line 362 provides
   // defense-in-depth. Hand-wired duplicates removed (Cycle 8 auth guard fix).
 
-  // @hand-wired reason="training lifecycle transitions, hand-wired CRUD" wave="pre-migration"
-  const orgAndIdParams = zValidator('param', z.object({ organizationId: z.string().uuid(), id: z.string().uuid() }), validationErrorHandler);
-  app.post('/organizations/:organizationId/training/:id/complete', orgAndIdParams, authMiddleware(), completeTraining as unknown as Handler);
-  app.put('/org/:organizationId/trainings/:id/publish', orgAndIdParams, authMiddleware(), publishTraining as unknown as Handler);
+  // Training lifecycle — MIGRATED: completeCustomTraining + publishTraining now in generated routes.
+  // Legacy paths /organizations/:organizationId/training/:id/complete and /org/:organizationId/trainings/:id/publish removed.
 
   // @hand-wired reason="elections module entirely hand-wired, TypeSpec deferred" wave="pre-migration"
   const nomineeParams = zValidator('param', z.object({ electionId: z.string().uuid(), nomineeId: z.string().uuid() }), validationErrorHandler);
