@@ -340,3 +340,37 @@ The existing 25 handler modules were built pre-TDD using the horizontal approach
 ### Known code issues
 
 Documented in brownfield audit reports under `docs/audits/`. Key items tracked in `.planning/` state files. See CLAUDE.md "P0/P1 Risk Summary" for current status.
+
+## Schema Registry Pattern
+
+### ADR-001 — Ratify the schema-registry as the single audited cross-module surface
+
+**Status:** Accepted (Wave G2, 2026-05-30)
+**Context:** Cycle-3 audit IC-01 identified 20 core → handler imports across 11 files. The largest cluster (8 handler-owned Drizzle schemas re-exported by `services/api-ts/src/core/schema-registry.ts`) is consumed exclusively by `core/domain-event-consumers.ts` for cross-module event reactions (membership lapse, election completion, training credit award, etc.).
+
+**Decision:** Ratify the registry as a sanctioned, single-point inversion rather than physically moving schemas into `core/`.
+
+**Rationale:**
+- Moving schemas into `core/` would invert ownership: `core/` would own handler tables, violating module autonomy and complicating migrations.
+- The registry is a thin re-export layer with one consumer (`domain-event-consumers.ts`). Its blast radius is bounded and auditable.
+- The pattern is explicit: every entry is annotated with the consuming use case, and the file carries an `[INTENTIONAL]` marker that distinguishes it from accidental core → handler imports.
+- The set of exported tables is locked by `services/api-ts/src/core/schema-registry.test.ts`. Adding a new entry requires updating the test + this ADR.
+
+**Enumerated tables (current surface):**
+
+| Table | Owner module | Why core needs it |
+|-------|--------------|-------------------|
+| `notifications` | `notifs` | Domain-event consumers create notifications on cross-module triggers |
+| `bookings` | `booking` | Audit + analytics rollups |
+| `platformAdmins` | `platformadmin` | Impersonation guard, admin-bypass in org-context middleware |
+| `trainings`, `trainingEnrollments` | `association:operations` | Training-credit award events |
+| `memberships` | `association:member` | Org-context middleware lookup; lifecycle event consumers |
+| `positions` | `association:member` | Election-completed events provision officer terms |
+| `events`, `eventRegistrations` | `association:operations` | Registration confirmation flow |
+| `invitationTokens` | `invite` | Invite-claimed events tie back to person/membership |
+
+**Consequences:**
+- All other core → handler imports (10 remaining per audit IC-01) are NOT sanctioned by this ADR. Those are tracked by Wave G2 slice **S-C4-014** (ports for governance / platform-admin repos) and follow-on slices for `core/email.ts`, `core/auth.ts`, etc.
+- New cross-module schema needs must be added via the registry + ADR update, never via ad-hoc imports inside `core/`.
+
+**Boundary rule:** If a core/ file imports a handler schema/repo NOT listed above, that import is an inversion debt — open a fix slice, do not extend the registry casually.
