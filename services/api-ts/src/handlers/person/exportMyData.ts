@@ -1,6 +1,7 @@
 import type { BaseContext } from '@/types/app';
 import type { DatabaseInstance } from '@/core/database';
 import { UnauthorizedError } from '@/core/errors';
+import { auditAction } from '@/utils/audit';
 import { PersonRepository } from './repos/person.repo';
 import { MembershipRepository } from '@/handlers/association:member/repos/membership.repo';
 import { CreditEntryRepository } from '@/handlers/association:member/repos/credits.repo';
@@ -49,6 +50,15 @@ export async function exportMyData(ctx: BaseContext): Promise<Response> {
     preferredLanguage: person.preferredLanguage,
     bio: person.bio,
   } : null;
+
+  await auditAction(ctx, {
+    action: 'export',
+    resourceType: 'person',
+    resourceId: personId,
+    description: 'User exported personal data (GDPR/DPA portability)',
+    eventSubType: 'data.bulk-export',
+    eventType: 'data-access',
+  });
 
   return ctx.json({
     exportedAt: new Date().toISOString(),

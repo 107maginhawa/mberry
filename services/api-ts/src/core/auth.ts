@@ -260,6 +260,7 @@ export function createAuth(
         create: {
           after: async (session: { id: string; userId: string; ipAddress?: string | null; userAgent?: string | null }) => {
             // AC-M01-005: Clear failed attempts on successful login
+            let userEmail: string | undefined;
             try {
               const [userRow] = await database
                 .select({ email: schema.user.email })
@@ -267,6 +268,7 @@ export function createAuth(
                 .where(eq(schema.user.id, session.userId))
                 .limit(1);
               if (userRow?.email) {
+                userEmail = userRow.email;
                 clearFailedAttempts(userRow.email);
               }
             } catch (clearErr) {
@@ -284,6 +286,7 @@ export function createAuth(
                 resourceType: 'session',
                 resource: session.id,
                 description: 'User logged in — session created',
+                details: userEmail ? { email: userEmail } : undefined,
                 ipAddress: session.ipAddress ?? undefined,
                 userAgent: session.userAgent ?? undefined,
               });
