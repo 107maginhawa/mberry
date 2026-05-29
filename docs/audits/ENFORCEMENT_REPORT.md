@@ -4,7 +4,7 @@
 
 # Enforcement Report
 
-**Generated:** 2026-05-29 (post-Wave 27 update)
+**Generated:** 2026-05-29 (post-Wave 28 update)
 **Engine:** oli-enforce-all v3 --strict
 **Scope:** 22 modules, 8 phases, 10 agents
 **Baseline:** 2026-05-29T22:00:00Z → 2026-05-29T23:30:00Z (v4)
@@ -753,10 +753,28 @@ Lifted the **final per-module P0 cap**. The two m07 P0 findings (`EM-M07-no-type
 
 ---
 
+### Wave 28 — audit-log P0s (AL-001 + AL-002) (COMPLETE ✅ — STALE)
+
+First non-module lens after the per-module gate was satisfied. Both audit-log P0s claimed auth lifecycle events emit **no audit log**. **Verify-first found both stale** — the fixes shipped in commit `1554b12e` (2026-05-29, *"Waves 3-5 — audit logging, SPA router fix, FP reclassification (AL-001, AL-002, UJ-01, EF-M06-001)"*) but were never removed from baseline tracking.
+
+**Evidence (read-only verification, no code changed):**
+
+| Finding | Claim | Reality |
+|---------|-------|---------|
+| `AL-001-password-change` | `auth.password-changed` has no audit emission | `core/auth.ts:519-565` intercepts `POST /auth/change-password`, forces `revokeOtherSessions:true`, and on `result.ok` calls `AuditRepository.logEvent({ eventSubType: 'authentication.password-changed', category: 'security', action: 'update', outcome: 'success' })` (`auth.ts:544`, description cites EF-M02/AL-001) |
+| `AL-002-mfa-lifecycle` | `auth.mfa-enabled/disabled` have no audit calls | `auth.ts:569-609` `POST /auth/two-factor/disable` emits `'authentication.mfa-disabled'` (`auth.ts:594`, after the M3-R7 platform-admin block); `auth.ts:611+` `POST /auth/two-factor/enable` emits `'authentication.mfa-enabled'` (`auth.ts:623`). Both sub-types declared in `utils/audit-events.ts:54` |
+| Test coverage | — | `src/core/auth-audit-logging.test.ts` (8 tests) asserts all three eventSubTypes + `AuditRepository` usage + `audit-events.ts` sub-type registration — **8 pass / 0 fail** |
+
+**Pipeline:** doc-only enforcement-tracking correction — **no handler edits, no codegen, `src/generated/*` untouched**. `AL-001-password-change` + `AL-002-mfa-lifecycle` reclassified RESOLVED/stale (moved to `resolved_p0s`, `resolved_in: 1554b12e`).
+
+**Outcome:** `audit_compliance` lens **P0 2→0**. Total tracked P0 findings **13→11**. NOTE: the same commit `1554b12e` also addresses `UJ-01` (Wave 29) and `EF-M06-001` (Wave 31) — to be verified in their own waves.
+
+---
+
 ## What's Next
 
 1. **Waves 1-24 COMPLETE — all built-module P1 clusters resolved.** Security gate satisfied. No P0 regressions. All P1 audit logging resolved (incl. 9 billing handlers in Wave 11). Revenue analytics gap filled. Baseline P1s fully triaged with named IDs. **Wave 12 closed m12 elections (5 REAL, 3 FP); Wave 13 closed m11 documents/credentials (5 REAL); Wave 14 closed m14 national dashboard (5 REAL); Wave 15 closed m01 auth-onboarding (5 REAL); Wave 16 closed m05 membership (3 REAL, 1 FP); Wave 17 closed m04 org-admin (1 REAL event, 2 doc reconciliations, 1 partial FP); Wave 18 closed m06 dues-payments (2 REAL, 3 FP/reclassified); Wave 19 closed m07 communications (0 REAL, 3 FP — module already remediated; removed dead CrossModuleTriggers); Wave 20 closed m08 events (2 REAL emit gaps in live association:operations handlers, 5 FP — audit read dead handlers/events/ dir); Wave 21 closed m09 training (1 REAL — training.completed emit connects WF-061/BR-20 certificate generation to the credit-award completion path); Wave 22 closed m10 credit-tracking (3 REAL — createMyCreditEntry credit.awarded emit, M10-R5 supporting-doc validation, WF-070 transcript export route-wiring; 1 FP — GDPR anonymization already in accountDeletionCascade); Wave 23 closed m03 platform-admin (3 REAL — all 7 spec domain events emitted from live handlers +7 registry keys, revenue/health analytics dead-code routes hand-wired, M3-R10 trial→cancelled transition; 0 FP); Wave 24 closed m02 member-profile (2 REAL — 4 domain events emitted incl. person.updated→existing id-card consumer, DataExport async vertical slice with rate limit + TTL + emit; 0 FP). FINAL built-module cluster.**
-2. **Remaining per-module P0s: 0 — ENFORCEMENT GATE FULLY SATISFIED.** The final cap (`EM-M07-no-typespec` + duplicate `EC-004-communication-notsp`) was **lifted in Wave 27** (verify-first: `communication.tsp` (24 ops) + `announcements.tsp` (7 ops) exist, compile, and are registry-wired — IN_SPEC 31/31, IN_ROUTES 31/31; the "no TypeSpec" premise was stale; reclassified RESOLVED). The `EM-M06 zero-domain-events` cap was **lifted in Wave 26** (verify-first: `dues.payment.recorded` bridge pre-existed; added `dues.payment.refunded` / `dues.invoice.generated` / `dues.payment.proof.rejected` events + consumers; m06 6.5→8.0). The previously-untracked security P0 `EM-M03-9a3e7b12` (super-only caller guards on revokeAdmin/deleteAssociation/updateAdmin) was **fixed in Wave 25**. (Non-module P0 lenses tracked separately in the baseline — coverage `EC-001/002/003/005/006/007`, audit-log `AL-001/002`, UI-journey `UJ-01`, dependency `ED-GLOBAL-*` — are out of scope for per-module enforcement and unaffected by this wave.)
+2. **Remaining per-module P0s: 0 — ENFORCEMENT GATE FULLY SATISFIED.** The final cap (`EM-M07-no-typespec` + duplicate `EC-004-communication-notsp`) was **lifted in Wave 27** (verify-first: `communication.tsp` (24 ops) + `announcements.tsp` (7 ops) exist, compile, and are registry-wired — IN_SPEC 31/31, IN_ROUTES 31/31; the "no TypeSpec" premise was stale; reclassified RESOLVED). The `EM-M06 zero-domain-events` cap was **lifted in Wave 26** (verify-first: `dues.payment.recorded` bridge pre-existed; added `dues.payment.refunded` / `dues.invoice.generated` / `dues.payment.proof.rejected` events + consumers; m06 6.5→8.0). The previously-untracked security P0 `EM-M03-9a3e7b12` (super-only caller guards on revokeAdmin/deleteAssociation/updateAdmin) was **fixed in Wave 25**. (Non-module P0 lenses tracked separately in the baseline are now being worked as Waves 28+. **Wave 28 reclassified both audit-log P0s `AL-001/AL-002` as STALE** — already fixed in commit `1554b12e`; `audit_compliance` lens P0 2→0.) Remaining non-module P0 lenses: coverage `EC-001/002/003/005/006/007` (Wave 30), UI-journey `UJ-01` (Wave 29 — same commit `1554b12e`, expect stale), functional `EF-M06-001` (Wave 31 — same commit), dependency `ED-GLOBAL-*` (Wave 31).
 3. **Remaining P1s (built modules): NONE.** All 13 built-module P1 clusters resolved (m01/m02/m03/m04/m05/m06/m07/m08/m09/m10/m11/m12/m14). Only deferred future-module stubs remain:
    - **DEFERRED:** ~170 future-module P1 stubs (m13/m15/m16/m17/m18/m19 — unbuilt-feature stubs); 7 TypeSpec, 3 coupling, 1 event from Wave 10.
 4. **Coverage Score: 78 → ~85** (estimated after Wave 10 + Wave 11 billing audit logging).
