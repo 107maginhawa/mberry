@@ -6,6 +6,8 @@ import type { NewAnnouncement } from './repos/communication.schema';
 import { CommunicationsRepository } from './repos/communication.repo';
 import { auditAction } from '@/utils/audit';
 import { domainEvents } from '@/core/domain-events';
+import { requirePosition } from '@/utils/officer-check';
+import { POSITION_TITLES } from '@/utils/position-titles';
 
 /**
  * createAnnouncement
@@ -18,6 +20,10 @@ export async function createAnnouncement(
 ): Promise<Response> {
   const session = ctx.get('session');
   if (!session) throw new UnauthorizedError();
+
+  // M7: Only president/secretary can author announcements (matches publish/schedule).
+  const denied = await requirePosition(ctx, [POSITION_TITLES.PRESIDENT, POSITION_TITLES.SECRETARY]);
+  if (denied) return denied;
 
   const params = ctx.req.valid('param');
   const body = ctx.req.valid('json');
