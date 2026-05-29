@@ -350,7 +350,7 @@ Multiple legacy audit-summary markdowns at root (`AUDIT_04_INDEX.md`, `AUDIT_04_
 | TRACE_MATRIX.md | yes | yes | complete | — |
 | OBSERVABILITY.md | yes | yes | complete | — |
 | PERFORMANCE.md | yes | partial (still unbounded queries) | complete | — |
-| DATA_GOVERNANCE_DRAFT.md | yes | draft | partial | promote out of `_DRAFT` |
+| DATA_GOVERNANCE.md | yes | yes | complete | promoted from draft 2026-05-30 (Wave G4 S-C4-044) |
 | DISASTER_RECOVERY.md | yes | yes | complete | — |
 | ERROR_TAXONOMY.md | yes | yes | complete | — |
 | EVENT_CONTRACTS.md | yes | yes | complete | — |
@@ -520,7 +520,7 @@ No raw SQL injection risks (all use Drizzle template literals with parameter bin
 9. Continue association:member decomposition.
 10. Add missing FK indexes (dues-payments, invite).
 11. Add OpenTelemetry.
-12. Promote `DATA_GOVERNANCE_DRAFT.md` out of draft state.
+12. Promote `DATA_GOVERNANCE_DRAFT.md` out of draft state. (DONE — Wave G4 S-C4-044)
 13. Archive 7 legacy root-level audit markdowns.
 14. Extend `oli-codebase-map` FSM detector to recognise backend pg-enum-based state machines.
 15. Tighten the remaining 30 handler-level `as any` (Stripe SDK type gaps + JSONB).

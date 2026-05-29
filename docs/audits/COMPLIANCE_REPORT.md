@@ -30,7 +30,7 @@ Hand-written files that consume generated types ARE in scope: handlers, repos, `
 | EVENT_CONTRACTS.md | ✓ | Steps 6.3, 9c |
 | ERROR_TAXONOMY.md | ✓ | Steps 6.4, 8b |
 | AUDIT_CONTRACTS.md | ✓ | Step 9d |
-| DATA_GOVERNANCE.md | ✗ (only DATA_GOVERNANCE_DRAFT.md) | Step 9e SKIPPED (not `--regulated`) |
+| DATA_GOVERNANCE.md | ✓ | Promoted from draft 2026-05-30 (Wave G4 S-C4-044) |
 | WORKFLOW_MAP.md | ✓ | Step 11 (workflow trace) |
 | STATE_MACHINES.md | ✓ | Step 9 (state transitions) |
 | SEED_MANIFEST.md | ✓ | Step 11b (data path) |

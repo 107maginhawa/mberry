@@ -138,7 +138,7 @@ All questions resolved. No blocking items remain.
 | ROLE_PERMISSION_MATRIX.md | Preserved | Existing file comprehensive (21 module matrices, auth middleware stack). No changes. |
 | MODULE_MAP.md | Preserved | Existing file covers all 19 modules + handler cross-reference. No changes. |
 | THREAT_MODEL.md | **Created** | Security=YES and Regulated=YES triggered generation. |
-| DATA_GOVERNANCE_DRAFT.md | **Created** | Regulated=YES triggered generation. DRAFT for `/oli-domain-model` to finalize. |
+| DATA_GOVERNANCE.md | **Promoted (was DATA_GOVERNANCE_DRAFT.md)** | Wave G4 S-C4-044 — draft sections completed and renamed. |
 | PERFORMANCE.md | **Created** | SLAs present in PRD S7 triggered generation. |
 | STATE_MACHINES.md | **Created** | 10 entity lifecycles extracted from schema enums. Cross-module dependencies mapped. |
 | OBSERVABILITY.md | **Created** | RED metrics, alerting thresholds from NFR targets, health check endpoints, PII logging rules. |
