@@ -66,6 +66,7 @@ import healthOpenapi from '@/core/health.openapi.json';
 import { createRequestId, createRequestLogger } from '@/middleware/request';
 import { createDependencyInjection } from '@/middleware/dependency';
 import { createSecurityHeaders, createCorsMiddleware } from '@/middleware/security';
+import { createCsrfTokenMiddleware, registerCsrfTokenEndpoint } from '@/middleware/csrf-token';
 import { authMiddleware } from '@/middleware/auth';
 import { platformAdminAuthMiddleware } from '@/middleware/platform-admin-auth';
 import { createAuditMiddleware } from '@/middleware/audit';
@@ -254,6 +255,29 @@ export function createApp(config: Config): App {
   // Blocks cross-origin state-changing requests (POST/PUT/PATCH/DELETE)
   // Uses same origins as CORS config for consistency
   app.use('*', csrf({ origin: config.cors.origins }));
+
+  // CSRF token endpoint — issues double-submit token cookie + JSON body.
+  // Must be registered BEFORE the token-enforcement middleware below so it
+  // can answer requests that don't yet have a token.
+  registerCsrfTokenEndpoint(app);
+
+  // CSRF defense-in-depth: double-submit cookie pattern.
+  // Above the origin check, this forces the requesting page to read a
+  // same-origin cookie and mirror it into the x-csrf-token header — which a
+  // pure CSRF attack cannot do. Webhooks and the public unsubscribe endpoint
+  // intentionally precede auth and have their own integrity story; allowlist
+  // those prefixes. See docs/product/THREAT_MODEL.md §A04 for rationale.
+  app.use(
+    '*',
+    createCsrfTokenMiddleware({
+      allowlist: [
+        '/webhooks/',          // Stripe webhook signature is the integrity story
+        '/email/unsubscribe',  // RFC 8058 List-Unsubscribe (signed token in query)
+        '/pay/',               // signed one-tap payment token in URL
+        '/auth/',              // Better-Auth has its own CSRF + cookie story
+      ],
+    }),
+  );
 
   // Body size limits — prevent large payload DoS
   app.use('*', bodyLimit({ maxSize: 1 * 1024 * 1024, onError: (c) => c.json({ error: 'Payload too large', code: 'PAYLOAD_TOO_LARGE', maxSize: '1MB' }, 413) }));
