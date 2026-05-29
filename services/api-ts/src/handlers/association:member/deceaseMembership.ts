@@ -7,9 +7,18 @@ import { MembershipRepository } from './repos/membership.repo';
 import { withComputedStatus } from './utils/membership-status-middleware';
 import type { Membership } from './repos/membership.schema';
 import { duesInvoices } from './repos/dues.schema';
+import { INVOICE_VALID_TRANSITIONS } from './utils/status-transitions';
+import { isValidTransition } from '@/utils/status-transitions';
 import { auditAction } from '@/utils/audit';
 import { domainEvents } from '@/core/domain-events';
-import { eq, and, notInArray } from 'drizzle-orm';
+import { eq, and, inArray } from 'drizzle-orm';
+
+// [S-G1-03 / IC-04] Derive the FSM-permitted set of "from" statuses that
+// may transition to 'cancelled'. Cascade filters silently — already-terminal
+// invoices are skipped, not raised as errors.
+const INVOICE_STATUSES_CANCELABLE: string[] = Object.keys(INVOICE_VALID_TRANSITIONS).filter(
+  (from) => isValidTransition(INVOICE_VALID_TRANSITIONS, from, 'cancelled'),
+);
 
 const TERMINAL_STATUSES = ['resigned', 'deceased', 'expelled', 'removed'];
 
@@ -51,13 +60,15 @@ export async function deceaseMembership(
       removalReason: body.terminationReason ?? null,
     } as Partial<Membership>);
 
-    // Void open invoices in same transaction
+    // Void open invoices in same transaction. The status filter is derived
+    // from INVOICE_VALID_TRANSITIONS so it stays in sync with the FSM — only
+    // invoices whose current status admits a 'cancelled' transition are touched.
     await tx.update(duesInvoices)
       .set({ status: 'cancelled' })
       .where(
         and(
           eq(duesInvoices.membershipId, membershipId),
-          notInArray(duesInvoices.status, ['paid', 'cancelled', 'writtenOff']),
+          inArray(duesInvoices.status, INVOICE_STATUSES_CANCELABLE as any),
         ),
       );
   });

@@ -5,8 +5,10 @@
 
 import { eq, and, lt, notInArray, type SQL } from 'drizzle-orm';
 import type { DatabaseInstance } from '@/core/database';
-import { ConflictError } from '@/core/errors';
+import { ConflictError, NotFoundError } from '@/core/errors';
 import { DatabaseRepository, type PaginationOptions } from '@/core/database.repo';
+import { assertValidTransition } from '@/utils/status-transitions';
+import { INVOICE_VALID_TRANSITIONS } from '../utils/status-transitions';
 import {
   duesConfigs,
   duesInvoices,
@@ -137,6 +139,15 @@ export class DuesInvoiceRepository extends DatabaseRepository<DuesInvoice, NewDu
     paidAt?: Date
   ): Promise<DuesInvoice> {
     this.logger?.debug({ invoiceId, paymentId, expectedVersion }, 'Marking invoice as paid');
+
+    // [S-G1-03 / IC-04] FSM guard: assert current status permits 'paid' BEFORE
+    // optimistic-lock update. Distinguishes a 409 from "invalid state" vs.
+    // "concurrent modification" — the former cannot succeed on retry.
+    const current = await this.findOneById(invoiceId);
+    if (!current) {
+      throw new NotFoundError('Invoice not found');
+    }
+    assertValidTransition(INVOICE_VALID_TRANSITIONS, current.status, 'paid', 'invoice');
 
     const [updated] = await this.db
       .update(duesInvoices)
