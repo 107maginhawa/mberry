@@ -243,7 +243,25 @@ describe('Fund config CRUD', () => {
 
 // ─── BR-05: Fund Split Validation ────────────────────────
 
-describe('BR-05: Fund allocation percentages', () => {
+describe('AC-M06-001 / BR-05: Fund allocation percentages', () => {
+  test('[AC-M06-001] fund allocation must sum to exactly 100%', () => {
+    // Exactly 100% passes
+    expect(validateFundSplits([
+      { fundId: 'general', percentage: 70 },
+      { fundId: 'building', percentage: 30 },
+    ])).toBeNull();
+    // Under 100% rejected
+    expect(validateFundSplits([
+      { fundId: 'general', percentage: 70 },
+      { fundId: 'building', percentage: 25 },
+    ])).toContain('must sum to 100%');
+    // Over 100% rejected
+    expect(validateFundSplits([
+      { fundId: 'general', percentage: 70 },
+      { fundId: 'building', percentage: 40 },
+    ])).toContain('must sum to 100%');
+  });
+
   test('[BR-05] valid 3-fund split at 60/30/10 passes', () => {
     const funds: FundSplit[] = [
       { fundId: 'general', percentage: 60 },

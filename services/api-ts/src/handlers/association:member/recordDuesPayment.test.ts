@@ -674,3 +674,106 @@ describe('[PAY-01] invoice linking on payment recording', () => {
     await expect(recordDuesPayment(ctx)).rejects.toThrow("Cannot pay invoice with status 'cancelled'");
   });
 });
+
+describe('[AC-M06-002] recordDuesPayment treasurer/president-only RBAC', () => {
+  beforeEach(() => {
+    restoreRepo(DuesRepository);
+    restoreRepo(MembershipRepository);
+    restoreRepo(OfficerTermRepository);
+  });
+
+  afterEach(() => {
+    restoreRepo(DuesRepository);
+    restoreRepo(MembershipRepository);
+    restoreRepo(OfficerTermRepository);
+  });
+
+  test('[AC-M06-002] non-officer member is denied with 403', async () => {
+    const officerStub = stubRepo(OfficerTermRepository, {
+      findActiveByPersonAndOrg: async () => [],
+    });
+    // createPayment must NOT be reached when RBAC denies
+    let createCalled = false;
+    stubRepo(DuesRepository, {
+      createPayment: async (data: any) => { createCalled = true; return { ...fakePayment, ...data }; },
+    });
+
+    const ctx = makeCtx({
+      database: txDb,
+      _body: {
+        organizationId: 'org-1',
+        personId: 'person-1',
+        amount: 5000,
+        currency: 'PHP',
+        paymentMethod: 'cash',
+      },
+    });
+
+    const response = await recordDuesPayment(ctx);
+    expect(response.status).toBe(403);
+    expect(createCalled).toBe(false);
+
+    Object.values(officerStub).forEach((m) => m.mockRestore());
+  });
+
+  test('[AC-M06-002] member holding a non-treasurer position is denied with 403', async () => {
+    const officerStub = stubRepo(OfficerTermRepository, {
+      findActiveByPersonAndOrg: async () => [{ positionTitle: 'Member' }],
+    });
+    let createCalled = false;
+    stubRepo(DuesRepository, {
+      createPayment: async (data: any) => { createCalled = true; return { ...fakePayment, ...data }; },
+    });
+
+    const ctx = makeCtx({
+      database: txDb,
+      _body: {
+        organizationId: 'org-1',
+        personId: 'person-1',
+        amount: 5000,
+        currency: 'PHP',
+        paymentMethod: 'cash',
+      },
+    });
+
+    const response = await recordDuesPayment(ctx);
+    expect(response.status).toBe(403);
+    expect(createCalled).toBe(false);
+
+    Object.values(officerStub).forEach((m) => m.mockRestore());
+  });
+
+  test('[AC-M06-002] treasurer is allowed (201)', async () => {
+    const officerStub = stubRepo(OfficerTermRepository, {
+      findActiveByPersonAndOrg: async () => [{ positionTitle: 'Treasurer' }],
+    });
+    stubRepo(DuesRepository, {
+      findRecentPaymentForPerson: async () => undefined,
+      getNextReceiptSequence: async () => 1,
+      createPayment: async (data: any) => ({ ...fakePayment, ...data }),
+      getConfig: async () => undefined,
+      listFunds: async () => [],
+      updatePaymentStatus: async (_id: string, _s: string, extra: any) => ({ ...fakePayment, ...extra }),
+    });
+    stubRepo(MembershipRepository, {
+      findMany: async () => [fakeMembership],
+      updateOneById: async () => fakeMembership,
+    });
+
+    const ctx = makeCtx({
+      database: txDb,
+      _body: {
+        organizationId: 'org-1',
+        personId: 'person-1',
+        amount: 5000,
+        currency: 'PHP',
+        paymentMethod: 'cash',
+      },
+    });
+
+    const response = await recordDuesPayment(ctx);
+    expect(response.status).toBe(201);
+
+    Object.values(officerStub).forEach((m) => m.mockRestore());
+  });
+});
