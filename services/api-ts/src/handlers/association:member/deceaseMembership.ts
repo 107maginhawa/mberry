@@ -16,8 +16,11 @@ import { eq, and, inArray } from 'drizzle-orm';
 // [S-G1-03 / IC-04] Derive the FSM-permitted set of "from" statuses that
 // may transition to 'cancelled'. Cascade filters silently — already-terminal
 // invoices are skipped, not raised as errors.
-const INVOICE_STATUSES_CANCELABLE: string[] = Object.keys(INVOICE_VALID_TRANSITIONS).filter(
-  (from) => isValidTransition(INVOICE_VALID_TRANSITIONS, from, 'cancelled'),
+type DuesInvoiceStatus = typeof duesInvoices.status.enumValues[number];
+const INVOICE_STATUSES_CANCELABLE: DuesInvoiceStatus[] = (
+  Object.keys(INVOICE_VALID_TRANSITIONS).filter(
+    (from) => isValidTransition(INVOICE_VALID_TRANSITIONS, from, 'cancelled'),
+  ) as DuesInvoiceStatus[]
 );
 
 const TERMINAL_STATUSES = ['resigned', 'deceased', 'expelled', 'removed'];
@@ -68,7 +71,7 @@ export async function deceaseMembership(
       .where(
         and(
           eq(duesInvoices.membershipId, membershipId),
-          inArray(duesInvoices.status, INVOICE_STATUSES_CANCELABLE as any),
+          inArray(duesInvoices.status, INVOICE_STATUSES_CANCELABLE),
         ),
       );
   });

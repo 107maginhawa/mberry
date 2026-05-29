@@ -6,6 +6,7 @@ import {
   ForbiddenError,
 } from '@/core/errors';
 import { SurveyRepository } from './repos/survey.repo';
+import type { SurveySettings } from './repos/survey.schema';
 import { OfficerTermRepository } from '../association:member/repos/governance.repo';
 
 /**
@@ -47,10 +48,10 @@ export async function createSurvey(
     description: body.description ?? null,
     surveyType: body.surveyType,
     questions: body.questions ?? [],
-    settings: body.settings ? {
+    settings: body.settings ? ({
       ...body.settings,
       deadline: body.settings.deadline ? body.settings.deadline.toISOString() : undefined,
-    } as any : {},
+    } satisfies SurveySettings) : {},
     status: 'draft',
     createdBy: userId,
     updatedBy: userId,

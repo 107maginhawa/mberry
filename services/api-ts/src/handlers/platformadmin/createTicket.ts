@@ -9,18 +9,30 @@
 import type { Context } from 'hono';
 import type { DatabaseInstance } from '@/core/database';
 import { domainEvents } from '@/core/domain-events';
-import { supportTickets } from './repos/platform-admin.schema';
+import {
+  supportTickets,
+  ticketCategoryEnum,
+  ticketPriorityEnum,
+} from './repos/platform-admin.schema';
+
+type TicketCategory = typeof ticketCategoryEnum.enumValues[number];
+type TicketPriority = typeof ticketPriorityEnum.enumValues[number];
 
 // SLA matrix: [firstResponseHours, resolutionHours]
-const SLA_HOURS: Record<string, [number, number]> = {
+const SLA_HOURS: Record<TicketPriority, [number, number]> = {
   critical: [2, 12],
   high: [4, 24],
   standard: [8, 72],
   low: [16, 168],
 };
 
+interface SessionLike {
+  userId?: string;
+  user?: { id?: string };
+}
+
 export async function createTicket(ctx: Context): Promise<Response> {
-  const session = ctx.get('session');
+  const session = ctx.get('session') as SessionLike | null;
   if (!session) return ctx.json({ error: 'Unauthorized' }, 401);
 
   const db = ctx.get('database') as DatabaseInstance;
@@ -31,25 +43,30 @@ export async function createTicket(ctx: Context): Promise<Response> {
 
   // subject + description presence guaranteed by zValidator in app.ts
 
-  const resolvedPriority: string = priority ?? 'standard';
-  const resolvedCategory: string = category ?? 'general';
+  const isPriority = (v: unknown): v is TicketPriority =>
+    typeof v === 'string' && (ticketPriorityEnum.enumValues as readonly string[]).includes(v);
+  const isCategory = (v: unknown): v is TicketCategory =>
+    typeof v === 'string' && (ticketCategoryEnum.enumValues as readonly string[]).includes(v);
 
-  const slaEntry: [number, number] = SLA_HOURS[resolvedPriority] ?? SLA_HOURS['standard'] ?? [8, 72];
+  const resolvedPriority: TicketPriority = isPriority(priority) ? priority : 'standard';
+  const resolvedCategory: TicketCategory = isCategory(category) ? category : 'general';
+
+  const slaEntry = SLA_HOURS[resolvedPriority];
   const firstResponseHours = slaEntry[0];
   const resolutionHours = slaEntry[1];
   const now = new Date();
   const slaFirstResponseDeadline = new Date(now.getTime() + firstResponseHours * 60 * 60 * 1000);
   const slaResolutionDeadline = new Date(now.getTime() + resolutionHours * 60 * 60 * 1000);
 
-  const userId: string = (session as any).userId ?? (session as any).user?.id;
+  const userId = session.userId ?? session.user?.id ?? '';
 
   const [ticket] = await db.insert(supportTickets).values({
     organizationId: organizationId ?? null,
     reportedBy: userId,
     subject,
     description,
-    category: resolvedCategory as any,
-    priority: resolvedPriority as any,
+    category: resolvedCategory,
+    priority: resolvedPriority,
     status: 'open',
     slaFirstResponseDeadline,
     slaResolutionDeadline,

@@ -23,6 +23,20 @@ export class CommitteeRepository {
       .limit(100);
   }
 
+  /**
+   * Cross-org list for platform admins.
+   * @param limit  bounded 1..500 by the route handler
+   * @param offset non-negative pagination offset
+   */
+  async listAll(limit: number, offset: number): Promise<Committee[]> {
+    return this.db
+      .select()
+      .from(committees)
+      .orderBy(desc(committees.createdAt))
+      .limit(limit)
+      .offset(offset);
+  }
+
   async get(id: string): Promise<Committee | undefined> {
     const [result] = await this.db
       .select()

@@ -57,20 +57,24 @@ export async function resolveRecipients(
 
   // [M7-R5] Filter out deceased and suppressed members
   recipients = recipients.filter((row) => {
-    const status = (row.membership as any).status;
+    const status = row.membership.status;
     return status !== 'deceased' && status !== 'suspended' && status !== 'removed';
   });
 
-  // Apply filters not supported by listMembers query
+  // Apply filters not supported by listMembers query.
+  // chapterId is not a column on the memberships table — it's looked up
+  // via chapter_affiliation. For now we read it as an optional ad-hoc
+  // attribute pending the chapter-segment join (Wave G5 / saved-segments).
   if (filters?.chapterIds?.length) {
-    recipients = recipients.filter((row) =>
-      filters.chapterIds!.includes((row.membership as any).chapterId)
-    );
+    recipients = recipients.filter((row) => {
+      const chapterId = (row.membership as Record<string, unknown>)['chapterId'];
+      return typeof chapterId === 'string' && filters.chapterIds!.includes(chapterId);
+    });
   }
   if (filters?.joinedAfter) {
     const cutoff = new Date(filters.joinedAfter);
     recipients = recipients.filter((row) => {
-      const joined = (row.membership as any).joinedAt;
+      const joined = row.membership.joinedAt;
       return joined && new Date(joined) >= cutoff;
     });
   }
@@ -98,7 +102,10 @@ export async function processAnnouncementSend(
     throw new NotFoundError(`Announcement ${announcementId} not found`, { resourceType: 'announcement', resource: announcementId });
   }
 
-  const recipients = await resolveRecipients(db, announcement.organizationId, (announcement as any).segmentFilters);
+  // segmentFilters is not yet on the announcements schema — saved-segment
+  // join is planned for Wave G5. Read defensively as an optional attribute.
+  const segmentFilters = (announcement as Record<string, unknown>)['segmentFilters'] as SegmentFilters | undefined;
+  const recipients = await resolveRecipients(db, announcement.organizationId, segmentFilters);
   const stats = { recipients: recipients.length, emailSent: 0, pushDelivered: 0, inAppSent: 0 };
 
   if (recipients.length === 0) {
@@ -171,7 +178,10 @@ export async function processAnnouncementSend(
           const emailResult = await db.execute(
             sql`SELECT id, email FROM "user" WHERE id = ANY(${personIds})`
           );
-          const rows = (emailResult as any).rows ?? emailResult;
+          // node-postgres returns { rows }, postgres-js returns the array directly.
+          // structural: driver-shape varies — narrow to a uniform array shape.
+          const rawRows = emailResult as unknown as { rows?: Array<{ id: string; email: string | null }> } | Array<{ id: string; email: string | null }>;
+          const rows: Array<{ id: string; email: string | null }> = Array.isArray(rawRows) ? rawRows : (rawRows.rows ?? []);
           for (const row of rows) {
             if (row.email) emailMap.set(row.id, row.email);
           }
