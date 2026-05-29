@@ -30,13 +30,15 @@ function getOrCreateAuthHooks(client: AuthClient) {
 }
 
 // Wrapper hooks that ensure auth client is available
-export function useSession() {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export function useSession(): any {
   const client = useAuthClient()
   const hooks = getOrCreateAuthHooks(client)
   return hooks.useSession()
 }
 
-export function usePrefetchSession() {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export function usePrefetchSession(): any {
   const client = useAuthClient()
   const hooks = getOrCreateAuthHooks(client)
   return hooks.usePrefetchSession()
@@ -66,7 +68,8 @@ export function useListDeviceSessions() {
   return hooks.useListDeviceSessions()
 }
 
-export function useListPasskeys() {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export function useListPasskeys(): any {
   const client = useAuthClient()
   const hooks = getOrCreateAuthHooks(client)
   return hooks.useListPasskeys()

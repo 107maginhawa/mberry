@@ -4,13 +4,14 @@
  */
 
 import { createAccessControl } from 'better-auth/plugins/access';
-import type { betterAuth } from 'better-auth';
+import type { betterAuth, BetterAuthOptions } from 'better-auth';
+import type { Auth } from 'better-auth';
 import type { DatabaseInstance } from '@/core/database';
 import { user } from '@/generated/better-auth/schema';
 import { eq } from 'drizzle-orm';
 
 // Export auth instance type for type safety
-export type AuthInstance = ReturnType<typeof betterAuth>;
+export type AuthInstance = Auth<BetterAuthOptions>;
 
 /**
  * Access control definitions for healthcare platform

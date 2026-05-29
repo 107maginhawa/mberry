@@ -1,12 +1,13 @@
 /**
  * Auth client for React
- * 
+ *
  * This module provides Better-Auth client initialization and React context
  * for accessing the auth client throughout the application.
  */
 import { createContext, useContext } from 'react'
 import { createAuthClient } from "better-auth/react"
-import { passkeyClient, twoFactorClient } from "better-auth/client/plugins"
+import { twoFactorClient } from "better-auth/client/plugins"
+import { passkeyClient } from "@better-auth/passkey/client"
 
 // ============================================================================
 // Auth Client Configuration
@@ -16,7 +17,8 @@ export interface AuthConfig {
   baseURL: string
 }
 
-export function createAuth(config: AuthConfig) {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export function createAuth(config: AuthConfig): any {
   return createAuthClient({
     baseURL: `${config.baseURL}/auth`,
     plugins: [
@@ -26,7 +28,8 @@ export function createAuth(config: AuthConfig) {
   })
 }
 
-export type AuthClient = ReturnType<typeof createAuth>
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export type AuthClient = any
 
 // ============================================================================
 // React Context
