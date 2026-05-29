@@ -34,8 +34,14 @@ export async function deleteElection(
   const denied = await requireOfficerTerm(ctx);
   if (denied) return denied;
 
-  if (existing.status !== 'draft') {
-    throw new BusinessLogicError('Only draft elections can be deleted', 'ELECTION_NOT_DRAFT');
+  // [EM-M12-b9c0d1e2] Spec allows deleting draft OR cancelled elections.
+  // Published/in-progress elections must be cancelled first (preserves the
+  // audit/vote record).
+  if (existing.status !== 'draft' && existing.status !== 'cancelled') {
+    throw new BusinessLogicError(
+      'Only draft or cancelled elections can be deleted',
+      'ELECTION_NOT_DELETABLE',
+    );
   }
 
   await db.delete(elections).where(eq(elections.id, params.electionId));

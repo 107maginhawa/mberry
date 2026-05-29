@@ -11,6 +11,7 @@ import { fakeNominee as createFakeNominee } from '@/test-utils/factories';
 import { ElectionsRepository } from '../elections/repos/elections.repo';
 import { OfficerTermRepository } from './repos/governance.repo';
 import { MembershipRepository } from './repos/membership.repo';
+import { BusinessLogicError } from '@/core/errors';
 
 // ─── Handlers under test ─────────────────────────────────
 import { createElection } from './createElection';
@@ -311,6 +312,31 @@ describe('Election role enforcement sweep [Plan 11]', () => {
       });
       const res = await deleteElection(ctx);
       expect(res.status).toBe(200);
+    });
+
+    test('[EM-M12-b9c0d1e2] allows officer to delete cancelled election', async () => {
+      stubElectionRepo({ get: async () => ({ ...baseElection, status: 'cancelled' }) });
+      stubOfficerTerms([presidentTerm]);
+
+      const ctx = makeCtx({
+        _params: { electionId: 'election-1' },
+        database: txDb,
+      });
+      const res = await deleteElection(ctx);
+      expect(res.status).toBe(200);
+    });
+
+    test('[EM-M12-b9c0d1e2] still rejects deleting a published election', async () => {
+      stubElectionRepo({ get: async () => ({ ...baseElection, status: 'published' }) });
+      stubOfficerTerms([presidentTerm]);
+
+      const ctx = makeCtx({
+        _params: { electionId: 'election-1' },
+        database: txDb,
+      });
+      const err = await deleteElection(ctx).catch((e: unknown) => e);
+      expect(err).toBeInstanceOf(BusinessLogicError);
+      expect((err as BusinessLogicError).code).toBe('ELECTION_NOT_DELETABLE');
     });
   });
 
