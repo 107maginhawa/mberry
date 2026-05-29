@@ -21,6 +21,11 @@ export async function updatePricingTier(ctx: Context): Promise<Response> {
 	const admin = ctx.get("platformAdmin");
 	if (!admin) return ctx.json({ error: "Platform admin access required" }, 403);
 
+	// MODULE_SPEC permission matrix: "Manage pricing: super only".
+	if (admin.role !== "super") {
+		return ctx.json({ error: "Super admin access required" }, 403);
+	}
+
 	const db = ctx.get("database") as DatabaseInstance;
 	const logger = ctx.get("logger");
 	const tierId = ctx.req.param("tierId");

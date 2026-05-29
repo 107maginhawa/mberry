@@ -58,6 +58,21 @@ describe('setFeatureFlag', () => {
     expect((res as any).body?.warning).toBeUndefined();
   });
 
+  // [EM-M03-f5a6b7c8] WF-018: authentication module must be always-on
+  test('rejects disabling the authentication module (BusinessLogicError)', async () => {
+    const ctx = makeCtx({ _body: { targetType: 'org', targetId: 'org-1', moduleName: 'authentication', enabled: false } });
+    await expect(setFeatureFlag(ctx)).rejects.toMatchObject({ statusCode: expect.any(Number) });
+  });
+
+  test('allows enabling the authentication module', async () => {
+    const enabledAuth = { ...fakeFlag, moduleName: 'authentication', enabled: true };
+    restoreRepo(FeatureFlagRepository);
+    stubRepo(FeatureFlagRepository, { upsert: async () => enabledAuth });
+    const ctx = makeCtx({ _body: { targetType: 'org', targetId: 'org-1', moduleName: 'authentication', enabled: true } });
+    const res = await setFeatureFlag(ctx);
+    expect(res.status).toBe(200);
+  });
+
   // [EM-M03-d1e2f3a4]
   test('emits feature_flag.changed', async () => {
     const emitSpy = spyOn(domainEvents, 'emit');

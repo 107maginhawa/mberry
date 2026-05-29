@@ -4,6 +4,7 @@ import type { SetFeatureFlagBody } from '@/generated/openapi/validators';
 import { FeatureFlagRepository } from './repos/platform-admin.repo';
 import { auditAction } from '@/utils/audit';
 import { domainEvents } from '@/core/domain-events';
+import { BusinessLogicError } from '@/core/errors';
 
 /**
  * setFeatureFlag
@@ -18,6 +19,13 @@ export async function setFeatureFlag(
   if (!session) return ctx.json({ error: 'Unauthorized' }, 401);
 
   const body = ctx.req.valid('json');
+
+  // WF-018: the authentication module must be always-on — disabling it would lock
+  // every user out, so the toggle is refused regardless of target scope.
+  if (body.moduleName === 'authentication' && !body.enabled) {
+    throw new BusinessLogicError('Cannot disable the authentication module', 'AUTH_MODULE_PROTECTED');
+  }
+
   const db = ctx.get('database') as DatabaseInstance;
   const logger = ctx.get('logger');
   const repo = new FeatureFlagRepository(db, logger);

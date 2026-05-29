@@ -1,22 +1,27 @@
 import { describe, test, expect, beforeEach, afterEach } from 'bun:test';
 import { makeCtx, stubRepo, restoreRepo } from '@/test-utils/make-ctx';
-import { AssociationRepository } from './repos/platform-admin.repo';
+import { AssociationRepository, OrganizationRepository } from './repos/platform-admin.repo';
 import { deleteAssociation } from './deleteAssociation';
-import { NotFoundError } from '@/core/errors';
+import { NotFoundError, ConflictError } from '@/core/errors';
 
 const existingAssoc = { id: 'assoc-1', name: 'PDA', country: 'PH', currency: 'PHP' };
 
 describe('deleteAssociation', () => {
   beforeEach(() => {
     restoreRepo(AssociationRepository);
+    restoreRepo(OrganizationRepository);
     stubRepo(AssociationRepository, {
       findById: async () => existingAssoc,
       delete: async () => {},
+    });
+    stubRepo(OrganizationRepository, {
+      findByAssociation: async () => [],
     });
   });
 
   afterEach(() => {
     restoreRepo(AssociationRepository);
+    restoreRepo(OrganizationRepository);
   });
 
   test('returns 401 without session', async () => {
@@ -36,6 +41,16 @@ describe('deleteAssociation', () => {
     const ctx = makeCtx({ platformAdmin: { id: 'pa-1', role: 'super' }, _params: { associationId: 'assoc-1' } });
     const res = await deleteAssociation(ctx);
     expect(res.status).toBe(204);
+  });
+
+  // [EM-M03-b5c6d7e8] cannot delete an association that still has organizations
+  test('throws ConflictError (409) when association has active organizations', async () => {
+    restoreRepo(OrganizationRepository);
+    stubRepo(OrganizationRepository, {
+      findByAssociation: async () => [{ id: 'org-1', associationId: 'assoc-1' }],
+    });
+    const ctx = makeCtx({ platformAdmin: { id: 'pa-1', role: 'super' }, _params: { associationId: 'assoc-1' } });
+    await expect(deleteAssociation(ctx)).rejects.toBeInstanceOf(ConflictError);
   });
 
   test('throws NotFoundError when association not found', async () => {
