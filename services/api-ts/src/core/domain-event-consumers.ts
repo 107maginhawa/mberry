@@ -237,6 +237,40 @@ export function registerDomainEventConsumers(
   });
 
   // -----------------------------------------------------------------------
+  // membership.imported → welcome each roster-imported member (bulk async)
+  // -----------------------------------------------------------------------
+  domainEvents.on('membership.imported', async (payload) => {
+    (async () => {
+      try {
+        if (payload.personIds.length === 0) return;
+
+        const CHUNK_SIZE = 100;
+        for (let i = 0; i < payload.personIds.length; i += CHUNK_SIZE) {
+          const chunk = payload.personIds.slice(i, i + CHUNK_SIZE);
+          const rows = chunk.map((personId) => ({
+            organizationId: payload.organizationId,
+            recipient: personId,
+            type: 'system' as const,
+            channel: 'in-app' as const,
+            title: 'Welcome to the organization',
+            message: 'Your membership has been added to the organization via roster import.',
+            status: 'sent' as const,
+            sentAt: new Date(),
+            relatedEntityType: 'membership',
+            relatedEntity: payload.organizationId,
+            consentValidated: false,
+            createdBy: SYSTEM_USER_ID,
+            updatedBy: SYSTEM_USER_ID,
+          }));
+          await deps.db.insert(notifications).values(rows);
+        }
+      } catch (err) {
+        logger.error({ error: err }, '[consumer] membership.imported bulk welcome failed');
+      }
+    })();
+  });
+
+  // -----------------------------------------------------------------------
   // credit.awarded → notify member of CPD credits earned
   // -----------------------------------------------------------------------
   domainEvents.on('credit.awarded', async (payload) => {

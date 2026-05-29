@@ -8,6 +8,7 @@ import { withComputedStatus } from './utils/membership-status-middleware';
 import type { Membership } from './repos/membership.schema';
 import { duesInvoices } from './repos/dues.schema';
 import { auditAction } from '@/utils/audit';
+import { domainEvents } from '@/core/domain-events';
 import { eq, and, notInArray } from 'drizzle-orm';
 
 const TERMINAL_STATUSES = ['resigned', 'deceased', 'expelled', 'removed'];
@@ -68,6 +69,15 @@ export async function deceaseMembership(
     description: `Membership marked deceased (date of death: ${body.dateOfDeath})${body.terminationReason ? `: ${body.terminationReason}` : ''}`,
     eventSubType: 'membership.member-deceased',
   });
+
+  // Cross-module visibility: marking deceased is a terminal status change.
+  domainEvents.emit('membership.status.changed', {
+    membershipId,
+    personId: membership.personId ?? '',
+    organizationId: membership.organizationId,
+    oldStatus: enriched.status,
+    newStatus: 'deceased',
+  }).catch(() => {});
 
   // P1-4: Revoke departed member's sessions so they can't access org resources
   try {

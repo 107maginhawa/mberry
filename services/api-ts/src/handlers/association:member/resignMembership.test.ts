@@ -4,6 +4,7 @@ import { fakeMembership as createFakeMembership } from '@/test-utils/factories';
 import { resignMembership } from './resignMembership';
 import { MembershipRepository } from './repos/membership.repo';
 import { NotFoundError, UnauthorizedError, BusinessLogicError } from '@/core/errors';
+import { domainEvents } from '@/core/domain-events';
 
 // ─── Fixtures ───────────────────────────────────────────
 
@@ -218,6 +219,35 @@ describe('resignMembership', () => {
     expect(capturedUpdate.removedAt).toBeInstanceOf(Date);
     expect(capturedUpdate.removedAt.getTime()).toBeGreaterThanOrEqual(before.getTime());
     expect(capturedUpdate.removedAt.getTime()).toBeLessThanOrEqual(after.getTime());
+  });
+
+  // Test: emits membership.status.changed for cross-module visibility (EM-M05-evt-resigned)
+  test('emits membership.status.changed with newStatus=resigned', async () => {
+    mocks = stubRepo(MembershipRepository, {
+      findOneById: async () => fakeMembership,
+      updateOneById: async (_id: string, data: any) => ({ ...fakeMembership, ...data }),
+    });
+
+    const emitted: Array<{ e: string; p: any }> = [];
+    const origEmit = domainEvents.emit.bind(domainEvents);
+    (domainEvents as any).emit = async (e: string, p: any) => { emitted.push({ e, p }); };
+    try {
+      const ctx = makeCtx({
+        database: txDb,
+        _params: { membershipId: 'mem-1' },
+        _body: {},
+      });
+      await resignMembership(ctx);
+
+      const evt = emitted.find((x) => x.e === 'membership.status.changed');
+      expect(evt).toBeDefined();
+      expect(evt!.p.newStatus).toBe('resigned');
+      expect(evt!.p.membershipId).toBe('mem-1');
+      expect(evt!.p.personId).toBe('person-1');
+      expect(evt!.p.organizationId).toBe('org-1');
+    } finally {
+      (domainEvents as any).emit = origEmit;
+    }
   });
 
   // Test 8: resigns memberships from any non-terminal status

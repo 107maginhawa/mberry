@@ -35,6 +35,13 @@ export interface DomainEventMap {
     newStatus: string;
   };
 
+  'membership.imported': {
+    organizationId: string;
+    importedBy: string;
+    importedCount: number;
+    personIds: string[];
+  };
+
   'invite.claimed': {
     inviteId: string;
     personId: string;

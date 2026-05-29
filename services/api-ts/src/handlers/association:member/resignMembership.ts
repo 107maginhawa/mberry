@@ -8,6 +8,7 @@ import { MembershipRepository } from './repos/membership.repo';
 import { withComputedStatus } from './utils/membership-status-middleware';
 import { duesInvoices } from './repos/dues.schema';
 import { auditAction } from '@/utils/audit';
+import { domainEvents } from '@/core/domain-events';
 import { eq, and, notInArray } from 'drizzle-orm';
 
 const TERMINAL_STATUSES = ['resigned', 'deceased', 'expelled', 'removed'];
@@ -67,6 +68,15 @@ export async function resignMembership(
     description: `Membership resigned${body.terminationReason ? `: ${body.terminationReason}` : ''}`,
     eventSubType: 'governance.officer-resigned',
   });
+
+  // Cross-module visibility: a resignation is a terminal status change.
+  domainEvents.emit('membership.status.changed', {
+    membershipId,
+    personId: membership.personId ?? '',
+    organizationId: membership.organizationId,
+    oldStatus: enriched.status,
+    newStatus: 'resigned',
+  }).catch(() => {});
 
   // P1-4: Revoke departed member's sessions so they can't access org resources
   try {

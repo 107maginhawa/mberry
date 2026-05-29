@@ -4,7 +4,7 @@
 
 # Enforcement Report
 
-**Generated:** 2026-05-29 (post-Wave 15 update)
+**Generated:** 2026-05-29 (post-Wave 16 update)
 **Engine:** oli-enforce-all v3 --strict
 **Scope:** 22 modules, 8 phases, 10 agents
 **Baseline:** 2026-05-29T22:00:00Z → 2026-05-29T23:30:00Z (v4)
@@ -224,7 +224,7 @@ All 13 P0 security findings from the previous run are confirmed fixed with test 
 | M02 | 6.4 | 7.8 | ↑ | Session invalidation fix |
 | M03 | 6.5 | 7.5 | ↑ | Impersonation confirmed resolved |
 | M04 | 6.5 | 7.5 | ↑ | Directory privacy fix |
-| M05 | 6.0 | 6.0 | → | Unchanged + new transfer gap detected |
+| M05 | 6.0 | 9.0 | ↑↑ | Wave 16: resign/decease emit status.changed, roster import emits membership.imported; auth gap was FP (path divergence) |
 | M06 | 6.5 | 4.5 | ↓ | recordPayment P0 detected |
 | M07 | 5.5 | 4.0 | ↓ | WebRTC fixed but structural P0s remain |
 | M08 | 4.0 | 4.5 | ↑ | listEvents auth fix |
@@ -489,11 +489,37 @@ Fixed the m01 onboarding cluster. Verified all 5 findings against live code firs
 
 ---
 
+### Wave 16 — m05 Membership Remediation (COMPLETE ✅)
+
+Fixed the m05 membership cluster. Verified all 4 findings against live code first — uncovered a **path divergence**: the baseline `module_identity` for m05 is `handlers/membership/`, but those handlers (`reviewApplication.ts`, `importMembers.ts`, `csvImport.ts`) are **UNWIRED** — no route in `app.ts` or `generated/openapi/routes.ts`; only their repo is consumed by sibling modules. The live, route-wired membership lifecycle lives in `handlers/association:member/` (TypeSpec). Fixes were applied to the **wired** handlers.
+
+**3 REAL fixes:**
+
+| ID | Finding | Fix |
+|----|---------|-----|
+| EM-M05-evt-resigned | `resignMembership` emits no event | `association:member/resignMembership.ts` now emits `membership.status.changed` (`oldStatus`=computed current → `newStatus`=`resigned`) after audit. Existing consumer (`domain-event-consumers.ts:905`) notifies member of status/ID-card change |
+| EM-M05-evt-deceased | `deceaseMembership` emits no event | `association:member/deceaseMembership.ts` now emits `membership.status.changed` (→`deceased`). Same consumer fires |
+| EM-M05-evt-imported | import handlers emit no event | `association:member/importRosterMembers.ts` collects successfully-imported `personIds` and emits new `membership.imported` (`{organizationId, importedBy, importedCount, personIds[]}`) when ≥1 imported. New bulk-async consumer sends welcome notifications |
+
+**1 FALSE POSITIVE (reclassified):**
+
+| ID | Finding | Verdict |
+|----|---------|---------|
+| EM-M05-P1-AUTH | `reviewApplication.ts` lacks `requirePosition` guard | **FALSE POSITIVE** — path divergence. The flagged `membership/reviewApplication.ts` is unwired/dead. Live application approval is `association:member/approveMembershipApplication.ts`, which already enforces `requirePosition([Secretary,President])` at line 20 (and `denyMembershipApplication` likewise). No live attack surface |
+
+**Domain event:** added `membership.imported` to `domain-events.registry.ts` + consumer in `domain-event-consumers.ts`.
+
+**Pipeline:** hand-wired/TypeSpec handlers edited directly + internal event registry/consumer (no SDK-facing schema change → no codegen). No `src/generated/*` touched. Typecheck passes: api-ts, memberry, sdk-ts. Tests: 34 pass across resign/decease/import handler suites (incl. 3 new emit assertions + new `importRosterMembers.test.ts`); 287 core tests pass.
+
+**Outcome:** m05 P1 **4→0** (3 REAL fixed, 1 FP), score **6.0→9.0**.
+
+---
+
 ## What's Next
 
-1. **Waves 1-15 COMPLETE.** Security gate satisfied. No P0 regressions. All P1 audit logging resolved (incl. 9 billing handlers in Wave 11). Revenue analytics gap filled. Baseline P1s fully triaged with named IDs. **Wave 12 closed m12 elections (5 REAL, 3 FP); Wave 13 closed m11 documents/credentials (5 REAL); Wave 14 closed m14 national dashboard (5 REAL); Wave 15 closed m01 auth-onboarding (5 REAL).**
+1. **Waves 1-16 COMPLETE.** Security gate satisfied. No P0 regressions. All P1 audit logging resolved (incl. 9 billing handlers in Wave 11). Revenue analytics gap filled. Baseline P1s fully triaged with named IDs. **Wave 12 closed m12 elections (5 REAL, 3 FP); Wave 13 closed m11 documents/credentials (5 REAL); Wave 14 closed m14 national dashboard (5 REAL); Wave 15 closed m01 auth-onboarding (5 REAL); Wave 16 closed m05 membership (3 REAL, 1 FP).**
 2. **Remaining P0s: 1** (EM-M07-no-typespec — communication module 28 hand-wired handlers, DEFERRED).
-3. **Remaining P1s (built modules): ~7 REAL, now named** (see `wave11_p1_triage` in baseline; m01 + m11 + m12 + m14 clusters of 23 now resolved). Priority order for next fix wave:
-   - **P1 — m04/m05/m02 (scattered):** event emission + spec/path divergence; m09 certificate↔training wiring.
+3. **Remaining P1s (built modules): ~4 REAL, now named** (see `wave11_p1_triage` in baseline; m01 + m05 + m11 + m12 + m14 clusters resolved). Priority order for next fix wave:
+   - **P1 — m04/m02 (scattered):** event emission + spec/path divergence; m09 certificate↔training wiring.
    - **DEFERRED:** ~170 future-module P1 stubs (m13/m15/m16/m17/m18/m19); 7 TypeSpec, 3 coupling, 1 event from Wave 10.
 4. **Coverage Score: 78 → ~85** (estimated after Wave 10 + Wave 11 billing audit logging).

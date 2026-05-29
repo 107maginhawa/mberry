@@ -4,6 +4,7 @@ import { fakeMembership as createFakeMembership } from '@/test-utils/factories';
 import { deceaseMembership } from './deceaseMembership';
 import { MembershipRepository } from './repos/membership.repo';
 import { NotFoundError, UnauthorizedError, BusinessLogicError } from '@/core/errors';
+import { domainEvents } from '@/core/domain-events';
 
 // ─── Fixtures ───────────────────────────────────────────
 
@@ -57,6 +58,35 @@ describe('deceaseMembership', () => {
     const response = await deceaseMembership(ctx);
     expect(response.status).toBe(200);
     expect(response.body.status).toBe('deceased');
+  });
+
+  // Test: emits membership.status.changed for cross-module visibility (EM-M05-evt-deceased)
+  test('emits membership.status.changed with newStatus=deceased', async () => {
+    mocks = stubRepo(MembershipRepository, {
+      findOneById: async () => fakeMembership,
+      updateOneById: async (_id: string, data: any) => ({ ...fakeMembership, ...data }),
+    });
+
+    const emitted: Array<{ e: string; p: any }> = [];
+    const origEmit = domainEvents.emit.bind(domainEvents);
+    (domainEvents as any).emit = async (e: string, p: any) => { emitted.push({ e, p }); };
+    try {
+      const ctx = makeCtx({
+        database: txDb,
+        _params: { membershipId: 'mem-1' },
+        _body: { dateOfDeath: '2026-01-15' },
+      });
+      await deceaseMembership(ctx);
+
+      const evt = emitted.find((x) => x.e === 'membership.status.changed');
+      expect(evt).toBeDefined();
+      expect(evt!.p.newStatus).toBe('deceased');
+      expect(evt!.p.membershipId).toBe('mem-1');
+      expect(evt!.p.personId).toBe('person-1');
+      expect(evt!.p.organizationId).toBe('org-1');
+    } finally {
+      (domainEvents as any).emit = origEmit;
+    }
   });
 
   // Test 2: throws NotFoundError for non-existent membershipId

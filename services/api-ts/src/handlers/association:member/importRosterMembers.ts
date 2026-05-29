@@ -7,6 +7,7 @@ import type { NewMembership } from './repos/membership.schema';
 import { auditAction } from '@/utils/audit';
 import { requirePosition } from '@/utils/officer-check';
 import { POSITION_TITLES } from '@/utils/position-titles';
+import { domainEvents } from '@/core/domain-events';
 
 /**
  * importRosterMembers
@@ -32,11 +33,13 @@ export async function importRosterMembers(
   let imported = 0;
   let failed = 0;
   const errors: Array<{ index: number; error: string }> = [];
+  const importedPersonIds: string[] = [];
 
   for (let i = 0; i < body.members.length; i++) {
     try {
-      await repo.createOne({ ...body.members[i], organizationId: orgId } as NewMembership);
+      const created = await repo.createOne({ ...body.members[i], organizationId: orgId } as NewMembership);
       imported++;
+      if (created?.personId) importedPersonIds.push(created.personId);
     } catch (err) {
       failed++;
       errors.push({ index: i, error: err instanceof Error ? err.message : String(err) });
@@ -49,6 +52,16 @@ export async function importRosterMembers(
     resourceId: orgId,
     description: `Roster import: ${imported} imported, ${failed} failed`,
   });
+
+  // Cross-module visibility: imported members need welcome/onboarding follow-up.
+  if (imported > 0) {
+    domainEvents.emit('membership.imported', {
+      organizationId: orgId,
+      importedBy: session.user.id,
+      importedCount: imported,
+      personIds: importedPersonIds,
+    }).catch(() => {});
+  }
 
   return ctx.json({ imported, failed, errors }, 200);
 }
