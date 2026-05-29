@@ -1,11 +1,43 @@
 <!-- oli-magic v1.2 | updated 2026-05-24 | cycle 3/3 -->
+<!-- last-modified: 2026-05-30 -->
 # Brownfield Adoption Dashboard
 
 **Project:** Memberry Healthcare AMS
 **Generated:** 2026-05-20 by `/oli-magic` Cycle 3
 **Last Updated:** 2026-05-24 by `/oli-magic --update` (rev 4)
+**Last Reconciled:** 2026-05-30 per `docs/audits/VERIFY_OLI_MAGIC.md` (top-of-file scorecard reordered so the GRADUATED post-remediation verdict surfaces first; older pre-remediation tables demoted to the appendix).
 **Rescue Cycle:** 3 of 3
 **Status:** GRADUATED
+
+---
+
+## Latest Scorecard (post-remediation, authoritative)
+
+Authoritative verdict per `docs/audits/CHECK_SUMMARY.md` (2026-05-30): **PASS 9 / 9 / 9** — Confidence PASS, Traceability WARN (no actionable gaps; only unbuilt-roadmap m13/m15 remain). The Cycle 3 Phase B scorecard below is the source of truth for graduation. Any conflicting numbers later in this document are pre-remediation snapshots, retained for history under "Appendix: Pre-Remediation Snapshot (Superseded)".
+
+### Cycle 3 Scorecard (Phase B — GRADUATED)
+
+| Metric | Cycle 2 (final) | Cycle 3 (prev) | Cycle 3 (current) | Threshold | Status |
+|--------|-----------------|----------------|--------------------|-----------|--------|
+| Codebase Health | 9.1/10 | 8.7/10 | **9.0/10** | >= 9.0 | **MET** |
+| Spec Compliance | 9.8/10 | 9.2/10 | **9.2/10** | >= 9.0 | MET |
+| Test Confidence | 9.0/10 | 8.9/10 | **9.0/10** | >= 9.0 | **MET** |
+| P0 violations | 0 | 0 | 0 | 0 | MET |
+| P1 violations | 0 | 0 | 0 | 0 | MET |
+| TypeScript errors | 0 | 0 | 0 | 0 | MET |
+| Backend tests pass | 4,284 | 4,277 | 5,461 | 0 fail | MET (1 pre-existing flaky timing test) |
+| Frontend tests pass | 362 | 362 | 372 | 0 fail | MET (+10 OrgProvider behavior tests) |
+| test.todo | -- | 21 | 21 | tracked | -- |
+
+### Graduation Threshold Check (latest)
+
+| Metric | Current | Min Target | Status |
+|--------|---------|-----------|--------|
+| Codebase Health | 9.0 | >= 9.0 | **MET** |
+| Spec Compliance | 9.2 | >= 9.0 | MET |
+| Test Confidence | 9.0 | >= 9.0 | **MET** |
+
+**Graduation Status: GRADUATED — All 3 metrics meet threshold. Cycle 3 complete.**
 
 ---
 
@@ -143,17 +175,7 @@ Fixes applied during Cycle 3 stabilization:
 
 ### Cycle 3 Scorecard
 
-| Metric | Cycle 2 (final) | Cycle 3 (prev) | Cycle 3 (current) | Threshold | Status |
-|--------|-----------------|----------------|--------------------|-----------|--------|
-| Codebase Health | 9.1/10 | 8.7/10 | **9.0/10** | >= 9.0 | **MET** |
-| Spec Compliance | 9.8/10 | 9.2/10 | **9.2/10** | >= 9.0 | MET |
-| Test Confidence | 9.0/10 | 8.9/10 | **9.0/10** | >= 9.0 | **MET** |
-| P0 violations | 0 | 0 | 0 | 0 | MET |
-| P1 violations | 0 | 0 | 0 | 0 | MET |
-| TypeScript errors | 0 | 0 | 0 | 0 | MET |
-| Backend tests pass | 4,284 | 4,277 | 5,461 | 0 fail | MET (1 pre-existing flaky timing test) |
-| Frontend tests pass | 362 | 362 | 372 | 0 fail | MET (+10 OrgProvider behavior tests) |
-| test.todo | -- | 21 | 21 | tracked | -- |
+> See "Latest Scorecard" at the top of this document — the Phase B scorecard table has been hoisted there to surface the GRADUATED verdict immediately. Score-change rationale retained below for history.
 
 **Why scores changed (rev 4):**
 - **Health 8.7 → 9.0:** Error handling uniformity 7→8 (4 generic throws migrated to AppError subclasses). Cross-module coupling 6→7 (dependency rules documented in CONTRIBUTING.md). Stub density 7→8 (22 DeferredScopeError stubs audited and annotated with rationale).
@@ -163,13 +185,7 @@ Fixes applied during Cycle 3 stabilization:
 
 ### Graduation Threshold Check
 
-| Metric | Current | Min Target | Status |
-|--------|---------|-----------|--------|
-| Codebase Health | 9.0 | >= 9.0 | **MET** |
-| Spec Compliance | 9.2 | >= 9.0 | MET |
-| Test Confidence | 9.0 | >= 9.0 | **MET** |
-
-**Graduation Status: GRADUATED — All 3 metrics meet threshold. Cycle 3 complete.**
+> See "Latest Scorecard" at the top of this document — graduation table has been hoisted there. Status: GRADUATED (Health 9.0 / Compliance 9.2 / Confidence 9.0, all ≥ 9.0).
 
 ### Action Items to Reach Graduation
 
@@ -266,9 +282,13 @@ Tier 3 (sequential):            Phase 44 <┘  (re-audit + fix survivors)
 
 ---
 
-## Score Matrix — Current vs Cycle 3 Target
+## Appendix: Pre-Remediation Snapshot (Superseded)
 
-### Top-Level Metrics
+> **SUPERSEDED 2026-05-30.** The tables in this appendix (Score Matrix, Health Trend, Graduation Threshold Check) reflect the pre-remediation Cycle 3 mid-cycle snapshot (Health 8.2 / Compliance 9.2 / Confidence 8.8, NOT GRADUATED). They are retained for history only. **The authoritative current scorecard is at the top of this document ("Latest Scorecard") — GRADUATED, 9.0 / 9.2 / 9.0.** See also `docs/audits/CHECK_SUMMARY.md` (2026-05-30, PASS 9/9/9) and `docs/audits/VERIFY_OLI_MAGIC.md` for the reconciliation.
+
+## Score Matrix — Current vs Cycle 3 Target *(superseded pre-remediation snapshot)*
+
+### Top-Level Metrics *(superseded — see "Latest Scorecard" at top)*
 
 | Metric | Cycle 2 Final | Cycle 3 Current | Cycle 3 Target | Gap |
 |--------|---------------|-----------------|----------------|-----|
@@ -358,7 +378,7 @@ Tier 3 (sequential):            Phase 44 <┘  (re-audit + fix survivors)
 
 ---
 
-## Health Trend
+## Health Trend *(pre-remediation snapshot through 2026-05-20; see top scorecard for 2026-05-24 GRADUATED row and CHECK_SUMMARY for 2026-05-30 PASS)*
 
 | Date | Codebase Health | Spec Compliance | Test Confidence | Overall | Cycle |
 |------|----------------|-----------------|-----------------|---------|-------|
@@ -376,7 +396,9 @@ Tier 3 (sequential):            Phase 44 <┘  (re-audit + fix survivors)
 
 ---
 
-## Graduation Threshold Check
+## Graduation Threshold Check *(SUPERSEDED — pre-remediation, see "Latest Scorecard" at top of doc)*
+
+> **This table reflects the 2026-05-20 mid-Cycle-3 snapshot only.** It was superseded on 2026-05-24 when remediation closed Health 8.2 → 9.0 and Confidence 8.8 → 9.0 (see top scorecard), and re-ratified by `docs/audits/CHECK_SUMMARY.md` on 2026-05-30 (PASS 9/9/9). **Do not read this as the current verdict.**
 
 | Metric | Current | Min Target | Status |
 |--------|---------|-----------|--------|
@@ -391,7 +413,7 @@ Tier 3 (sequential):            Phase 44 <┘  (re-audit + fix survivors)
 | Frontend tests | 362 pass | 0 fail | MET |
 | test.todo | 21 | tracked | -- |
 
-**Graduation Status: NOT GRADUATED**
+**Graduation Status: NOT GRADUATED** *(historical — superseded by GRADUATED verdict at top of doc, 2026-05-24, re-ratified 2026-05-30.)*
 
 Two of three core metrics are below the >= 9.0 threshold. Health is the primary blocker at 8.2 (-0.8 from target). Confidence improved from 8.6 to 8.8 after closing BR-49/BR-51 gaps but still needs +0.2 (storage module tests + weak assertion reduction would close it). Compliance stable at 9.2 (MET).
 
