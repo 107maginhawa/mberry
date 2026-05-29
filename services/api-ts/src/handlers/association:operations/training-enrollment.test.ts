@@ -4,6 +4,7 @@ import { TrainingRepository, TrainingEnrollmentRepository } from './repos/traini
 import { CreditEntryRepository } from '../association:member/repos/credits.repo';
 import { OfficerTermRepository } from '@/handlers/association:member/repos/governance.repo';
 import { domainEvents } from '@/core/domain-events';
+import { BusinessLogicError } from '@/core/errors';
 
 /**
  * Training Enrollment Tests
@@ -209,6 +210,207 @@ describe('searchTrainingEnrollments — org guard', () => {
     const ctx = makeCtx({ organizationId: null });
     const response = await searchTrainingEnrollments(ctx);
     expect(response.status).toBe(403);
+  });
+});
+
+// ─── BR-41 — paid training requires payment before enrollment ──
+
+describe('BR-41 — paid training requires payment before enrollment', () => {
+  beforeEach(() => {
+    restoreRepo(TrainingRepository);
+    restoreRepo(TrainingEnrollmentRepository);
+  });
+  afterEach(() => {
+    restoreRepo(TrainingRepository);
+    restoreRepo(TrainingEnrollmentRepository);
+  });
+
+  test('BR-41: createTrainingEnrollment rejects a paid training with PAYMENT_REQUIRED', async () => {
+    const { createTrainingEnrollment } = await import('./createTrainingEnrollment');
+    let createCalled = false;
+    stubRepo(TrainingRepository, {
+      findOneById: async () => ({ id: 't-paid', status: 'published', capacity: null, registrationFee: 5000 }),
+    });
+    stubRepo(TrainingEnrollmentRepository, {
+      count: async () => 0,
+      createOne: async () => { createCalled = true; return { id: 'should-not-be-created' }; },
+    });
+
+    const ctx = makeCtx({ _body: { trainingId: 't-paid' } });
+    let thrown: unknown;
+    try {
+      await createTrainingEnrollment(ctx);
+    } catch (e) {
+      thrown = e;
+    }
+    expect(thrown).toBeInstanceOf(BusinessLogicError);
+    expect((thrown as BusinessLogicError).code).toBe('PAYMENT_REQUIRED');
+    expect((thrown as BusinessLogicError).message).toContain('payment');
+    // gate fires before any enrollment row is written
+    expect(createCalled).toBe(false);
+  });
+
+  test('BR-41: createTrainingEnrollment allows a free training (registrationFee 0)', async () => {
+    const { createTrainingEnrollment } = await import('./createTrainingEnrollment');
+    let createCalled = false;
+    stubRepo(TrainingRepository, {
+      findOneById: async () => ({ id: 't-free', status: 'published', capacity: null, registrationFee: 0 }),
+    });
+    stubRepo(TrainingEnrollmentRepository, {
+      count: async () => 0,
+      createOne: async () => { createCalled = true; return { id: 'e-free', trainingId: 't-free', status: 'enrolled' }; },
+    });
+
+    const ctx = makeCtx({ _body: { trainingId: 't-free' } });
+    const response = await createTrainingEnrollment(ctx);
+    expect(response.status).toBe(201);
+    expect(createCalled).toBe(true);
+    expect((response as any).body).toMatchObject({ trainingId: 't-free', status: 'enrolled' });
+  });
+
+  test('BR-41: enrollInCustomTraining rejects a paid training with PAYMENT_REQUIRED', async () => {
+    const { enrollInCustomTraining } = await import('./enrollInCustomTraining');
+    let createCalled = false;
+    stubRepo(TrainingRepository, {
+      findOneById: async () => ({ id: 't-paid', status: 'published', capacity: null, registrationFee: 2500 }),
+    });
+    stubRepo(TrainingEnrollmentRepository, {
+      count: async () => 0,
+      createOne: async () => { createCalled = true; return { id: 'should-not-be-created' }; },
+    });
+
+    const ctx = makeCtx({ _params: { trainingId: 't-paid' } });
+    let thrown: unknown;
+    try {
+      await enrollInCustomTraining(ctx);
+    } catch (e) {
+      thrown = e;
+    }
+    expect(thrown).toBeInstanceOf(BusinessLogicError);
+    expect((thrown as BusinessLogicError).code).toBe('PAYMENT_REQUIRED');
+    expect(createCalled).toBe(false);
+  });
+});
+
+// ─── BR-43 — completed training locks enrollments ──────────
+
+describe('BR-43 — completed training locks enrollments', () => {
+  beforeEach(() => {
+    restoreRepo(TrainingRepository);
+    restoreRepo(TrainingEnrollmentRepository);
+    restoreRepo(OfficerTermRepository);
+  });
+  afterEach(() => {
+    restoreRepo(TrainingRepository);
+    restoreRepo(TrainingEnrollmentRepository);
+    restoreRepo(OfficerTermRepository);
+  });
+
+  test('BR-43: enrollment in a completed training is rejected (creation locked)', async () => {
+    const { createTrainingEnrollment } = await import('./createTrainingEnrollment');
+    let createCalled = false;
+    stubRepo(TrainingRepository, {
+      findOneById: async () => ({ id: 't-done', status: 'completed', capacity: null, registrationFee: 0 }),
+    });
+    stubRepo(TrainingEnrollmentRepository, {
+      count: async () => 0,
+      createOne: async () => { createCalled = true; return { id: 'should-not-be-created' }; },
+    });
+    const ctx = makeCtx({ _body: { trainingId: 't-done' } });
+    let thrown: unknown;
+    try {
+      await createTrainingEnrollment(ctx);
+    } catch (e) {
+      thrown = e;
+    }
+    expect(thrown).toBeInstanceOf(BusinessLogicError);
+    expect((thrown as BusinessLogicError).code).toBe('TRAINING_NOT_PUBLISHED');
+    expect(createCalled).toBe(false);
+  });
+
+  test('BR-43: updateTrainingEnrollment rejects changes when training is completed', async () => {
+    const { updateTrainingEnrollment } = await import('./updateTrainingEnrollment');
+    let updateCalled = false;
+    stubRepo(OfficerTermRepository, {
+      findActiveByPersonAndOrg: async () => [{ positionTitle: 'Society Officer' }],
+    });
+    stubRepo(TrainingEnrollmentRepository, {
+      findOneById: async () => ({ id: 'e-1', trainingId: 't-done', status: 'enrolled' }),
+      updateOneById: async () => { updateCalled = true; return { id: 'e-1', status: 'noShow' }; },
+    });
+    stubRepo(TrainingRepository, {
+      findOneById: async () => ({ id: 't-done', status: 'completed' }),
+    });
+
+    const ctx = makeCtx({
+      user: { id: 'officer-1', role: 'user', twoFactorEnabled: true },
+      _params: { enrollmentId: 'e-1' },
+      _body: { status: 'noShow' },
+    });
+    let thrown: unknown;
+    try {
+      await updateTrainingEnrollment(ctx);
+    } catch (e) {
+      thrown = e;
+    }
+    expect(thrown).toBeInstanceOf(BusinessLogicError);
+    expect((thrown as BusinessLogicError).code).toBe('TRAINING_COMPLETED');
+    // lock fires before the enrollment is mutated
+    expect(updateCalled).toBe(false);
+  });
+
+  test('BR-43: deleteTrainingEnrollment rejects deletion when training is completed', async () => {
+    const { deleteTrainingEnrollment } = await import('./deleteTrainingEnrollment');
+    let deleteCalled = false;
+    stubRepo(OfficerTermRepository, {
+      findActiveByPersonAndOrg: async () => [{ positionTitle: 'Society Officer' }],
+    });
+    stubRepo(TrainingEnrollmentRepository, {
+      findOneById: async () => ({ id: 'e-1', trainingId: 't-done', status: 'enrolled' }),
+      deleteOneById: async () => { deleteCalled = true; return { id: 'e-1' }; },
+    });
+    stubRepo(TrainingRepository, {
+      findOneById: async () => ({ id: 't-done', status: 'completed' }),
+    });
+
+    const ctx = makeCtx({
+      user: { id: 'officer-1', role: 'user', twoFactorEnabled: true },
+      _params: { enrollmentId: 'e-1' },
+    });
+    let thrown: unknown;
+    try {
+      await deleteTrainingEnrollment(ctx);
+    } catch (e) {
+      thrown = e;
+    }
+    expect(thrown).toBeInstanceOf(BusinessLogicError);
+    expect((thrown as BusinessLogicError).code).toBe('TRAINING_COMPLETED');
+    expect(deleteCalled).toBe(false);
+  });
+
+  test('BR-43: updateTrainingEnrollment allows changes when training is not completed', async () => {
+    const { updateTrainingEnrollment } = await import('./updateTrainingEnrollment');
+    let updateCalled = false;
+    stubRepo(OfficerTermRepository, {
+      findActiveByPersonAndOrg: async () => [{ positionTitle: 'Society Officer' }],
+    });
+    stubRepo(TrainingEnrollmentRepository, {
+      findOneById: async () => ({ id: 'e-1', trainingId: 't-pub', status: 'enrolled' }),
+      updateOneById: async () => { updateCalled = true; return { id: 'e-1', status: 'noShow' }; },
+    });
+    stubRepo(TrainingRepository, {
+      findOneById: async () => ({ id: 't-pub', status: 'published' }),
+    });
+
+    const ctx = makeCtx({
+      user: { id: 'officer-1', role: 'user', twoFactorEnabled: true },
+      _params: { enrollmentId: 'e-1' },
+      _body: { status: 'noShow' },
+    });
+    const response = await updateTrainingEnrollment(ctx);
+    expect(response.status).toBe(200);
+    expect(updateCalled).toBe(true);
+    expect((response as any).body).toMatchObject({ id: 'e-1', status: 'noShow' });
   });
 });
 
