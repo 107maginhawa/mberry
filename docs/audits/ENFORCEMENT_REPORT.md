@@ -4,7 +4,7 @@
 
 # Enforcement Report
 
-**Generated:** 2026-05-29 (post-Wave 17 update)
+**Generated:** 2026-05-29 (post-Wave 18 update)
 **Engine:** oli-enforce-all v3 --strict
 **Scope:** 22 modules, 8 phases, 10 agents
 **Baseline:** 2026-05-29T22:00:00Z → 2026-05-29T23:30:00Z (v4)
@@ -224,6 +224,7 @@ All 13 P0 security findings from the previous run are confirmed fixed with test 
 | M02 | 6.4 | 7.8 | ↑ | Session invalidation fix |
 | M03 | 6.5 | 7.5 | ↑ | Impersonation confirmed resolved |
 | M04 | 6.5 | 8.5 | ↑↑ | Wave 17: OrgSettingsUpdated event wired; spec §10 reconciled to actual paths + 10 bonus endpoints documented (path-mismatch finding partly FP) |
+| M06 | 4.5 | 6.5 | ↑↑ | Wave 18: status-history logging wired into updatePaymentStatus; deleteDuesInvoice soft-delete (BR-32). 3 FP/reclassified (RBAC GREEN, /my/payments via PAY-02, 2FA deferred). Still P0-capped (zero domain events) |
 | M05 | 6.0 | 9.0 | ↑↑ | Wave 16: resign/decease emit status.changed, roster import emits membership.imported; auth gap was FP (path divergence) |
 | M06 | 6.5 | 4.5 | ↓ | recordPayment P0 detected |
 | M07 | 5.5 | 4.0 | ↓ | WebRTC fixed but structural P0s remain |
@@ -538,12 +539,41 @@ Fixed the m04 org-admin cluster (3 P1s). Verified each against live code first. 
 
 ---
 
+### Wave 18 — m06 Dues-Payments Remediation (COMPLETE ✅)
+
+Fixed the m06 dues-payments cluster. Verify-first paid off again: 3 of 5 audit P1s were stale or mis-scoped. The module spans 3 dirs (`dues/`, `billing/`, `association:member/`); edits scoped to dues handlers only.
+
+**2 REAL fixes:**
+
+| ID | Finding | Fix |
+|----|---------|-----|
+| EM-M06-06f3c5d8 | DuesPaymentStatusHistory transitions not logged | Entity already existed (`dues_payment_status_history` + migration 0032) but was only written by seed. Wired logging into `DuesRepository.updatePaymentStatus` — the single chokepoint for every transition (refund, proof confirm/reject, completed). Inserts `{organizationId, paymentId, personId, fromStatus, toStatus, reason, changedBy}`; added optional `actorId` threaded through record/bulk/refund/confirm/reject callers. Test asserts history row written per transition |
+| EM-M06-11e8b0c3 | BR-32 deleteDuesInvoice hard-deletes (violates 7-yr retention) | Converted `deleteDuesInvoice` from `repo.deleteOneById` to soft-delete `repo.updateOneById(id, {status:'cancelled', updatedBy})`. Row preserved for BIR retention; `cancelled` already a terminal enum value excluded from overdue queries. Test asserts status=cancelled and `deleteOneById` never called |
+
+**3 FP / reclassified:**
+
+| ID | Finding | Verdict |
+|----|---------|---------|
+| EM-M06-09c6f8a1 | SEC-01: 4 invoice handlers lack org-scoped RBAC | **FALSE POSITIVE** — all 4 (create/update/delete/generate) enforce `requirePosition([Treasurer,President])` + org-scope. SEC-01 [RED] tests now PASS GREEN (6/6); RBAC added in a prior wave, RED tests were stale |
+| EM-M06-02b7d1e4 | `GET /my/payments` missing | **Mitigated → P2** — `listDuesPayments` PAY-02 already forces non-officers to their own `personId` (member self-service works). Cross-org aggregation is convenience (switch org context), not a blocker |
+| EM-M06-08b5e7f0 | No 2FA on financial handlers | **Accepted-risk → P2** — step-up 2FA exists nowhere; it's a cross-cutting platform auth feature (better-auth enforces 2FA at login), not a dues fix. Half-building security gating would be worse. Deferred to a dedicated platform auth phase; all financial handlers already enforce officer RBAC |
+
+**Pipeline:** repo + handler + test edits only (no SDK-facing schema change → no codegen). No `src/generated/*` touched. Typecheck passes: api-ts, memberry, sdk-ts. Tests: 249 pass across dues-mutation-auth, dues-payments.repo, refund/record/bulk + dues/ dir.
+
+**Note:** m06 P0 (EM-M06 zero-domain-events) remains out of this P1 wave — score stays P0-capped.
+
+**Outcome:** m06 P1 **4→0** (2 REAL fixed, 3 FP/reclassified), score **4.5→6.5** (P0-capped).
+
+---
+
 ## What's Next
 
-1. **Waves 1-17 COMPLETE.** Security gate satisfied. No P0 regressions. All P1 audit logging resolved (incl. 9 billing handlers in Wave 11). Revenue analytics gap filled. Baseline P1s fully triaged with named IDs. **Wave 12 closed m12 elections (5 REAL, 3 FP); Wave 13 closed m11 documents/credentials (5 REAL); Wave 14 closed m14 national dashboard (5 REAL); Wave 15 closed m01 auth-onboarding (5 REAL); Wave 16 closed m05 membership (3 REAL, 1 FP); Wave 17 closed m04 org-admin (1 REAL event, 2 doc reconciliations, 1 partial FP).**
-2. **Remaining P0s: 1** (EM-M07-no-typespec — communication module 28 hand-wired handlers, DEFERRED).
-3. **Remaining P1s (built modules): ~2 clusters left** (see `wave11_p1_triage` in baseline; m01 + m04 + m05 + m11 + m12 + m14 clusters resolved). Priority order for next fix wave:
-   - **P1 — m02 (assoc-ops):** cross-chapter rollup spec/path divergence.
-   - **P1 — m09 + m10:** certificate↔training wiring; storage/events scattered gaps.
+1. **Waves 1-18 COMPLETE.** Security gate satisfied. No P0 regressions. All P1 audit logging resolved (incl. 9 billing handlers in Wave 11). Revenue analytics gap filled. Baseline P1s fully triaged with named IDs. **Wave 12 closed m12 elections (5 REAL, 3 FP); Wave 13 closed m11 documents/credentials (5 REAL); Wave 14 closed m14 national dashboard (5 REAL); Wave 15 closed m01 auth-onboarding (5 REAL); Wave 16 closed m05 membership (3 REAL, 1 FP); Wave 17 closed m04 org-admin (1 REAL event, 2 doc reconciliations, 1 partial FP); Wave 18 closed m06 dues-payments (2 REAL, 3 FP/reclassified).**
+2. **Remaining P0s: 2** (EM-M07-no-typespec — communication 28 hand-wired handlers, DEFERRED; EM-M06 zero-domain-events — m06 dues event bridge, out of P1 scope, still caps m06 score).
+3. **Remaining P1s (built modules): m07 + m08 + m09 + m10 + m03 + m02 clusters left** (see `wave11_p1_triage` in baseline; m01/m04/m05/m06/m11/m12/m14 resolved). Priority order for next fix wave:
+   - **P1 — m07 (communications):** 3 P1s (P0 no-typespec is deferred — fix only P1s).
+   - **P1 — m08 (events):** 2 P1s.
+   - **P1 — m09 + m10:** certificate↔training wiring; credit-tracking events/export gaps.
+   - **P1 — m03 (platform-admin), m02 (member-profile):** remaining clusters.
    - **DEFERRED:** ~170 future-module P1 stubs (m13/m15/m16/m17/m18/m19); 7 TypeSpec, 3 coupling, 1 event from Wave 10.
 4. **Coverage Score: 78 → ~85** (estimated after Wave 10 + Wave 11 billing audit logging).

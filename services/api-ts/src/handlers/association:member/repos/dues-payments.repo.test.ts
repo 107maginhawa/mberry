@@ -501,6 +501,9 @@ describe('DuesRepository.updatePaymentStatus', () => {
           };
         },
       }),
+      insert: (_table: any) => ({
+        values: (_data: any) => ({ then: (r: any) => Promise.resolve().then(r) }),
+      }),
     };
 
     const repo = safeRepo(db);
@@ -540,6 +543,36 @@ describe('DuesRepository.updatePaymentStatus', () => {
 
     const result = await repo.updatePaymentStatus('pay-1', 'submitted', 'confirmed');
     expect(result.status).toBe('confirmed');
+  });
+
+  // [M06 P1-4] financial audit trail — every transition logs to dues_payment_status_history
+  test('logs status transition to dues_payment_status_history', async () => {
+    const updated = makePayment({ status: 'confirmed', organizationId: 'org-1', personId: 'person-1' });
+    let historyRow: any;
+    const db: any = {
+      update: (_table: any) => ({
+        set: (_data: any) => ({
+          where: () => ({ returning: () => Promise.resolve([updated]) }),
+        }),
+      }),
+      insert: (_table: any) => ({
+        values: (data: any) => {
+          historyRow = data;
+          return { then: (r: any) => Promise.resolve().then(r) };
+        },
+      }),
+    };
+    const repo = safeRepo(db);
+
+    await repo.updatePaymentStatus('pay-1', 'submitted', 'confirmed', undefined, 'officer-1');
+
+    expect(historyRow).toBeDefined();
+    expect(historyRow.paymentId).toBe(updated.id);
+    expect(historyRow.organizationId).toBe('org-1');
+    expect(historyRow.personId).toBe('person-1');
+    expect(historyRow.fromStatus).toBe('submitted');
+    expect(historyRow.toStatus).toBe('confirmed');
+    expect(historyRow.changedBy).toBe('officer-1');
   });
 });
 

@@ -66,7 +66,7 @@ export async function confirmPaymentProof(
     recordedBy: session.user.id,
     membershipExtendedFrom: settlement.membershipExtendedFrom,
     membershipExtendedTo: settlement.membershipExtendedTo,
-  } as Partial<DuesPayment>);
+  } as Partial<DuesPayment>, session.user.id);
 
   // Mark linked invoice as paid if present
   if (payment.invoiceId) {

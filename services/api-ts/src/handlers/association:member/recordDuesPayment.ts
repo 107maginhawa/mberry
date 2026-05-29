@@ -105,7 +105,7 @@ export async function recordDuesPayment(
       await txRepo.updatePaymentStatus(pay.id, pay.status, 'completed', {
         membershipExtendedFrom: settle.membershipExtendedFrom,
         membershipExtendedTo: settle.membershipExtendedTo,
-      } as Partial<DuesPayment>);
+      } as Partial<DuesPayment>, session.user.id);
     }
 
     return { payment: pay, settlement: settle };

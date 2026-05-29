@@ -31,13 +31,19 @@ export async function deleteDuesInvoice(
   const orgId = ctx.get('organizationId') as string;
   if (existing.organizationId !== orgId) throw new ForbiddenError();
 
-  await repo.deleteOneById(invoiceId);
+  // BR-32: financial records have a 7-year retention requirement (BIR compliance).
+  // Never hard-delete — soft-delete by transitioning the invoice to the terminal
+  // 'cancelled' state so the row is preserved for the audit/retention window.
+  await repo.updateOneById(invoiceId, {
+    status: 'cancelled',
+    updatedBy: session.user.id,
+  } as Partial<typeof existing>);
 
   await auditAction(ctx, {
     action: 'delete',
     resourceType: 'dues-invoice',
     resourceId: invoiceId,
-    description: 'Dues invoice deleted',
+    description: 'Dues invoice soft-deleted (cancelled) — BR-32 7-year retention',
   });
 
   return new Response(null, { status: 204 });

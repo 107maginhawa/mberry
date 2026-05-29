@@ -124,7 +124,7 @@ export async function bulkRecordPayments(
           await txRepo.updatePaymentStatus(pay.id, pay.status, 'completed', {
             membershipExtendedFrom: settle.membershipExtendedFrom,
             membershipExtendedTo: settle.membershipExtendedTo,
-          });
+          }, recordedBy);
         }
 
         return { payment: pay, receiptNumber: rcptNumber };

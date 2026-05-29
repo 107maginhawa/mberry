@@ -1,6 +1,7 @@
 import { eq, and, desc, sql, gte, lte, count, ne, type SQL } from 'drizzle-orm';
 import type { DatabaseInstance } from '@/core/database';
 import { memberships } from '../../association:member/repos/membership.schema';
+import { duesPaymentStatusHistory } from '../../association:member/repos/dues-payment-status-history.schema';
 import { duesInvoices } from './dues.schema';
 import { persons } from '../../person/repos/person.schema';
 import { assertValidTransition, DUES_PAYMENT_VALID_TRANSITIONS } from '@/utils/status-transitions';
@@ -175,13 +176,31 @@ export class DuesRepository {
     return result!;
   }
 
-  async updatePaymentStatus(id: string, currentStatus: string, newStatus: string, extra?: Partial<DuesPayment>): Promise<DuesPayment> {
+  async updatePaymentStatus(id: string, currentStatus: string, newStatus: string, extra?: Partial<DuesPayment>, actorId?: string): Promise<DuesPayment> {
     assertValidTransition(DUES_PAYMENT_VALID_TRANSITIONS, currentStatus, newStatus, 'dues payment');
     const [result] = await this.db
       .update(duesPayments)
       .set({ status: newStatus as DuesPayment['status'], ...extra, updatedAt: new Date() })
       .where(eq(duesPayments.id, id))
       .returning();
+
+    // [M06 BR financial audit trail] log every status transition
+    if (result) {
+      const reason =
+        (extra as Record<string, unknown> | undefined)?.['refundReason'] ??
+        (extra as Record<string, unknown> | undefined)?.['rejectionReason'] ??
+        null;
+      await this.db.insert(duesPaymentStatusHistory).values({
+        organizationId: result.organizationId,
+        paymentId: result.id,
+        personId: result.personId,
+        fromStatus: currentStatus as DuesPayment['status'],
+        toStatus: newStatus as DuesPayment['status'],
+        reason: reason as string | null,
+        changedBy: actorId ?? null,
+      });
+    }
+
     return result!;
   }
 

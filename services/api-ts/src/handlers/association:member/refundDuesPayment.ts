@@ -66,7 +66,7 @@ export async function refundDuesPayment(
     const updatedPayment = await txRepo.updatePaymentStatus(paymentId, payment.status, newStatus, {
       refundedAmount: newRefundedAmount,
       refundReason: bodyRecord['reason'] as string,
-    } as Record<string, unknown>);
+    } as Record<string, unknown>, session.user.id);
 
     return updatedPayment;
   });

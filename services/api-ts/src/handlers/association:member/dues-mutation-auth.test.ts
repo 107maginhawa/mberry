@@ -119,6 +119,28 @@ describe('[SEC-01] deleteDuesInvoice — position-based auth + cross-org', () =>
       expect(e.statusCode ?? e.status ?? 403).toBe(403);
     }
   });
+
+  // [M06 P1-5 BR-32] soft-delete only — financial records have a 7-year
+  // retention requirement, so deletion transitions to 'cancelled', never hard-delete.
+  test('soft-deletes via status=cancelled and never hard-deletes (BR-32)', async () => {
+    let updatedWith: any;
+    let hardDeleteCalled = false;
+    stubRepo(OfficerTermRepository, { findActiveByPersonAndOrg: async () => [{ id: 'term-1', positionTitle: 'President' }] });
+    stubRepo(DuesInvoiceRepository, {
+      findOneById: async () => ({ id: 'inv-1', organizationId: 'org-1', status: 'generated', membershipId: 'm-1' }),
+      updateOneById: async (_id: string, data: any) => { updatedWith = data; return { id: 'inv-1', ...data }; },
+      deleteOneById: async () => { hardDeleteCalled = true; },
+    });
+    const ctx = makeCtx({
+      _params: { invoiceId: 'inv-1' },
+      organizationId: 'org-1',
+    });
+
+    const res = await deleteDuesInvoice(ctx as any);
+    expect(res.status).toBe(204);
+    expect(updatedWith?.status).toBe('cancelled');
+    expect(hardDeleteCalled).toBe(false);
+  });
 });
 
 describe('[SEC-01] generateDuesInvoicesForOrg — cross-org body param enforcement', () => {
