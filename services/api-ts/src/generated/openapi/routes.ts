@@ -173,6 +173,28 @@ export function registerRoutes(app: Hono<{ Variables: Variables }>) {
     registry.getNationalDashboard as unknown as Handler
   );
 
+  // listNationalChapters
+  app.get('/admin/national/chapters',
+    authMiddleware({ roles: ["platform_admin", "national_officer"] }),
+    zValidator('query', validators.ListNationalChaptersQuery, validationErrorHandler),
+    registry.listNationalChapters as unknown as Handler
+  );
+
+  // getNationalChapterDetail
+  app.get('/admin/national/chapters/:organizationId',
+    authMiddleware({ roles: ["platform_admin", "national_officer"] }),
+    zValidator('param', validators.GetNationalChapterDetailParams, validationErrorHandler),
+    zValidator('query', validators.GetNationalChapterDetailQuery, validationErrorHandler),
+    registry.getNationalChapterDetail as unknown as Handler
+  );
+
+  // getPlatformSummary
+  app.get('/admin/national/platform',
+    authMiddleware({ roles: ["platform_admin"] }),
+    zValidator('query', validators.GetPlatformSummaryQuery, validationErrorHandler),
+    registry.getPlatformSummary as unknown as Handler
+  );
+
   // createOrganization
   app.post('/admin/organizations',
     authMiddleware(),

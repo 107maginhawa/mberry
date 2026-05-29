@@ -88,6 +88,9 @@ import { startImpersonation } from '../../handlers/platformadmin/startImpersonat
 import { endImpersonation } from '../../handlers/platformadmin/endImpersonation';
 import { getAdminRole } from '../../handlers/platformadmin/getAdminRole';
 import { getNationalDashboard } from '../../handlers/platformadmin/getNationalDashboard';
+import { listNationalChapters } from '../../handlers/platformadmin/listNationalChapters';
+import { getNationalChapterDetail } from '../../handlers/platformadmin/getNationalChapterDetail';
+import { getPlatformSummary } from '../../handlers/platformadmin/getPlatformSummary';
 import { createOrganization } from '../../handlers/platformadmin/createOrganization';
 import { listOrganizations } from '../../handlers/platformadmin/listOrganizations';
 import { getOrganization } from '../../handlers/platformadmin/getOrganization';
@@ -506,6 +509,9 @@ export const registry = {
   endImpersonation,
   getAdminRole,
   getNationalDashboard,
+  listNationalChapters,
+  getNationalChapterDetail,
+  getPlatformSummary,
   createOrganization,
   listOrganizations,
   getOrganization,

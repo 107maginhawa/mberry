@@ -4,6 +4,7 @@ import type { DatabaseInstance } from '@/core/database';
 import { DashboardRepository } from '../platformadmin/repos/dashboard.repo';
 import { auditAction } from '@/utils/audit';
 import { escapeCsvValue } from '@/utils/sanitize';
+import { domainEvents } from '@/core/domain-events';
 import type { Session } from '@/types/auth';
 
 function snapshotsToCsv(snapshots: Record<string, any>[]): string {
@@ -66,6 +67,14 @@ export async function exportNationalDashboard(ctx: Context): Promise<Response> {
     resourceId: exportLog.id,
     description: `National dashboard exported: ${format} for ${snapshotMonth}`,
   });
+
+  // EM-M14-b1e3c2d0: emit DashboardExported domain event (spec §10b).
+  domainEvents.emit('dashboard.exported', {
+    exportId: exportLog.id,
+    associationId,
+    format,
+    exportedBy: user.id,
+  }).catch(() => {});
 
   if (format === 'json') {
     return ctx.json({

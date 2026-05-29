@@ -137,6 +137,164 @@ model NationalDashboardResponse {
   chapters: ChapterMetrics[];
 }
 
+@doc("Per-chapter comparative metrics row for the chapter comparison list (S10 row 2)")
+model ChapterComparisonItem {
+  @doc("Chapter organization ID")
+  organizationId: string;
+
+  @doc("Chapter display name")
+  organizationName?: string;
+
+  @doc("Total member count")
+  totalMembers: int32;
+
+  @doc("Active (paid) member count")
+  activeMembers: int32;
+
+  @doc("Active members as a percentage of total (0-100)")
+  activePercentage: float64;
+
+  @doc("Dues collection rate as a percentage (0-100)")
+  collectionRate: float64;
+
+  @doc("Credit (CPD) compliance as a percentage (0-100)")
+  creditCompliance: float64;
+
+  @doc("Total dues revenue in cents")
+  totalRevenueCents: int32;
+
+  @doc("Events held in the period")
+  eventCount: int32;
+
+  @doc("Trainings held in the period")
+  trainingCount: int32;
+
+  @doc("True when the chapter has fewer than 5 members; individual metrics are suppressed (M14-R2)")
+  isSuppressed: boolean;
+}
+
+@doc("Cursor pagination metadata for national dashboard list endpoints")
+model NationalListMeta {
+  @doc("Opaque cursor for the next page; null when no further pages")
+  cursor: string | null;
+
+  @doc("Whether more results exist beyond this page")
+  hasMore: boolean;
+
+  @doc("Total matching record count")
+  total: int32 | null;
+}
+
+@doc("Paginated chapter comparison list response")
+model ChapterComparisonListResponse {
+  @doc("Chapter comparison rows")
+  data: ChapterComparisonItem[];
+
+  @doc("Pagination metadata")
+  meta: NationalListMeta;
+}
+
+@doc("Member status distribution for a chapter drill-down")
+model MemberStatusBreakdown {
+  active: int32;
+  grace: int32;
+  lapsed: int32;
+  suspended: int32;
+}
+
+@doc("Credit compliance distribution for a chapter drill-down")
+model CreditComplianceBreakdown {
+  @doc("Members meeting credit requirements")
+  compliant: int32;
+
+  @doc("Members not meeting credit requirements")
+  nonCompliant: int32;
+
+  @doc("Members exempt from credit requirements")
+  exempt: int32;
+}
+
+@doc("Detailed metrics for a single chapter (WF-085 drill-down)")
+model ChapterDrilldownResponse {
+  @doc("Chapter organization ID")
+  organizationId: string;
+
+  @doc("Chapter display name")
+  organizationName?: string;
+
+  @doc("Total member count")
+  totalMembers: int32;
+
+  @doc("Active member count")
+  activeMembers: int32;
+
+  @doc("Active members as a percentage of total (0-100)")
+  activePercentage: float64;
+
+  @doc("Member status distribution")
+  memberStatusBreakdown: MemberStatusBreakdown;
+
+  @doc("Dues collection rate as a percentage (0-100)")
+  collectionRate: float64;
+
+  @doc("Total dues revenue in cents")
+  totalRevenueCents: int32;
+
+  @doc("Credit (CPD) compliance as a percentage (0-100)")
+  creditCompliance: float64;
+
+  @doc("Credit compliance distribution")
+  creditComplianceBreakdown: CreditComplianceBreakdown;
+
+  @doc("Events held in the period")
+  eventCount: int32;
+
+  @doc("Trainings held in the period")
+  trainingCount: int32;
+
+  @doc("Snapshot month (YYYY-MM)")
+  snapshotMonth: string;
+
+  @doc("True when the chapter has fewer than 5 members (M14-R2)")
+  isSuppressed: boolean;
+}
+
+@doc("Platform-wide per-association summary row (S10 row 5)")
+model PlatformAssociationSummary {
+  @doc("Association ID")
+  associationId: string;
+
+  @doc("Association display name")
+  associationName?: string;
+
+  @doc("Number of chapters in the association")
+  chapterCount: int32;
+
+  @doc("Total member count across all chapters")
+  totalMembers: int32;
+
+  @doc("Active member count across all chapters")
+  activeMembers: int32;
+
+  @doc("Dues collection rate as a percentage (0-100)")
+  collectionRate: float64;
+
+  @doc("Credit (CPD) compliance as a percentage (0-100)")
+  creditCompliance: float64;
+
+  @doc("Total dues revenue in cents")
+  totalRevenueCents: int32;
+}
+
+@doc("Platform-wide summary list response (platform admin only)")
+model PlatformSummaryListResponse {
+  @doc("Per-association summaries")
+  data: PlatformAssociationSummary[];
+
+  @doc("Pagination metadata")
+  meta: NationalListMeta;
+}
+
 @doc("Committee summary for cross-org committee listing")
 model CommitteeSummary {
   @doc("Committee ID")
@@ -227,6 +385,64 @@ namespace PlatformAdminCustomModule {
       @query snapshotMonth?: string,
     ): ApiOkResponse<{ data: NationalDashboardResponse }>
       | ApiBadRequestResponse
+      | ApiUnauthorizedResponse
+      | ApiForbiddenResponse;
+
+    @doc("List chapters with comparative metrics for benchmarking (S10 row 2, WF-084). Small chapters (<5 members) are suppressed (M14-R2). Accessible to platform admins and designated national officers (BR-36).")
+    @operationId("listNationalChapters")
+    @get
+    @route("/admin/national/chapters")
+    @useAuth(bearerAuth)
+    @extension("x-security-required-roles", #["platform_admin", "national_officer"])
+    listNationalChapters(
+      @doc("Association to query. Required for platform admins; inferred from grant for national officers")
+      @query associationId?: string,
+      @doc("Snapshot month in YYYY-MM format (defaults to current month)")
+      @query snapshotMonth?: string,
+      @doc("Sort field: totalMembers, collectionRate, creditCompliance, prefix with - for descending. Default -totalMembers")
+      @query sort?: string,
+      @doc("Items per page (1-100, default 20)")
+      @query limit?: int32,
+      @doc("Offset for pagination (default 0)")
+      @query offset?: int32,
+    ): ApiOkResponse<ChapterComparisonListResponse>
+      | ApiBadRequestResponse
+      | ApiUnauthorizedResponse
+      | ApiForbiddenResponse;
+
+    @doc("Get detailed metrics for a single chapter (S10 row 3, WF-085 drill-down). Includes member status and credit compliance breakdowns. Accessible to platform admins and designated national officers (BR-36).")
+    @operationId("getNationalChapterDetail")
+    @get
+    @route("/admin/national/chapters/{organizationId}")
+    @useAuth(bearerAuth)
+    @extension("x-security-required-roles", #["platform_admin", "national_officer"])
+    getNationalChapterDetail(
+      @path organizationId: string,
+      @doc("Association the chapter belongs to. Required for platform admins; inferred from grant for national officers")
+      @query associationId?: string,
+      @doc("Snapshot month in YYYY-MM format (defaults to current month)")
+      @query snapshotMonth?: string,
+    ): ApiOkResponse<{ data: ChapterDrilldownResponse }>
+      | ApiUnauthorizedResponse
+      | ApiForbiddenResponse
+      | ApiNotFoundResponse;
+
+    @doc("Get platform-wide analytics across all associations (S10 row 5). Platform admin only.")
+    @operationId("getPlatformSummary")
+    @get
+    @route("/admin/national/platform")
+    @useAuth(bearerAuth)
+    @extension("x-security-required-roles", #["platform_admin"])
+    getPlatformSummary(
+      @doc("Snapshot month in YYYY-MM format (defaults to current month)")
+      @query snapshotMonth?: string,
+      @doc("Sort field: totalMembers, collectionRate, prefix with - for descending. Default -totalMembers")
+      @query sort?: string,
+      @doc("Items per page (1-100, default 20)")
+      @query limit?: int32,
+      @doc("Offset for pagination (default 0)")
+      @query offset?: int32,
+    ): ApiOkResponse<PlatformSummaryListResponse>
       | ApiUnauthorizedResponse
       | ApiForbiddenResponse;
 

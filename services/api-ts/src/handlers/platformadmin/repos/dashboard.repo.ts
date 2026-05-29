@@ -3,7 +3,7 @@
  * Handles chapter snapshots, national officer access grants, and export logs.
  */
 
-import { eq, and, isNull, sql } from 'drizzle-orm';
+import { eq, and, isNull, inArray, sql } from 'drizzle-orm';
 import type { NodePgDatabase } from 'drizzle-orm/node-postgres';
 import type { Logger } from '@/types/logger';
 import {
@@ -17,6 +17,7 @@ import {
   type DashboardExportLog,
   type NewDashboardExportLog,
 } from './dashboard-snapshot.schema';
+import { organizations } from './platform-admin.schema';
 
 // ---------------------------------------------------------------------------
 // Aggregate shape returned by getAssociationAggregate
@@ -60,6 +61,62 @@ export class DashboardRepository {
   async createChapterSnapshot(data: NewChapterSnapshot): Promise<ChapterSnapshot> {
     const [row] = await this.db.insert(chapterSnapshots).values(data).returning();
     return row!;
+  }
+
+  /** Fetch a single chapter snapshot for an org/month, optionally scoped to an association. */
+  async getChapterSnapshot(
+    orgId: string,
+    snapshotMonth: string,
+    associationId?: string,
+  ): Promise<ChapterSnapshot | undefined> {
+    const conditions = [
+      eq(chapterSnapshots.orgId, orgId),
+      eq(chapterSnapshots.snapshotMonth, snapshotMonth),
+    ];
+    if (associationId) conditions.push(eq(chapterSnapshots.associationId, associationId));
+    const [row] = await this.db
+      .select()
+      .from(chapterSnapshots)
+      .where(and(...conditions))
+      .limit(1);
+    return row;
+  }
+
+  /** Map of organization id → display name, used to enrich snapshot rows that store only orgId. */
+  async getOrgNames(orgIds: string[]): Promise<Map<string, string>> {
+    const map = new Map<string, string>();
+    if (orgIds.length === 0) return map;
+    const rows = await this.db
+      .select({ id: organizations.id, name: organizations.name })
+      .from(organizations)
+      .where(inArray(organizations.id, orgIds));
+    for (const r of rows) map.set(r.id, r.name);
+    return map;
+  }
+
+  /** Distinct association IDs that have snapshots for the given month (platform-wide rollup). */
+  async listAssociationIdsForMonth(snapshotMonth: string): Promise<string[]> {
+    const rows = await this.db
+      .selectDistinct({ associationId: chapterSnapshots.associationId })
+      .from(chapterSnapshots)
+      .where(eq(chapterSnapshots.snapshotMonth, snapshotMonth))
+      .limit(500);
+    return rows.map((r) => r.associationId);
+  }
+
+  /** Association IDs for which a member holds an active national dashboard grant. */
+  async getOfficerAssociationIds(memberId: string): Promise<string[]> {
+    const rows = await this.db
+      .select({ associationId: nationalDashboardAccess.associationId })
+      .from(nationalDashboardAccess)
+      .where(
+        and(
+          eq(nationalDashboardAccess.memberId, memberId),
+          isNull(nationalDashboardAccess.revokedAt),
+        ),
+      )
+      .limit(50);
+    return [...new Set(rows.map((r) => r.associationId))];
   }
 
   /**

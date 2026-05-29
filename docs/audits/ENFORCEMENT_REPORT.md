@@ -443,12 +443,33 @@ Fixed the m11 cluster. Verified all 5 findings against live code first: **all 5 
 
 ---
 
+### Wave 14 — m14 National Dashboard Remediation (COMPLETE ✅)
+
+Fixed the m14 cluster. Verified all 5 findings against live code first: **all 5 REAL.** Module identity confirmed via baseline `module_identity` — m14 source is `association:operations/` (export handler) with the dashboard read endpoints served from `platformadmin/` via generated TypeSpec routes.
+
+**5 REAL fixes:**
+
+| ID | Finding | Fix |
+|----|---------|-----|
+| EM-M14-71a3e2f0 | `GET /admin/national/chapters` missing (S10 row 2) | Added TypeSpec `listNationalChapters` + handler `platformadmin/listNationalChapters.ts`. Sortable (`totalMembers`/`collectionRate`/`creditCompliance`), offset-paginated chapter comparison list; reuses `listChapterSnapshots` + new `getOrgNames`; M14-R2 suppresses <5-member chapters |
+| EM-M14-82b4f3a1 | `GET /admin/national/chapters/{organizationId}` missing (S10 row 3) | Added TypeSpec `getNationalChapterDetail` + handler. Returns `memberStatusBreakdown` + `creditComplianceBreakdown` from snapshot; new repo `getChapterSnapshot`; 404 when no snapshot |
+| EM-M14-93c5a4b2 | `GET /admin/national/platform` missing (S10 row 5) | Added TypeSpec `getPlatformSummary` + handler. Platform-admin-only cross-association rollup; new repo `listAssociationIdsForMonth` + reuse `getAssociationAggregate`; sortable + paginated |
+| EM-M14-c6f8d7e5 | WF-085 chapter drill-down unimplemented | Satisfied by `getNationalChapterDetail` (single-chapter detailed view) |
+| EM-M14-b1e3c2d0 | `DashboardExported` event not emitted | Added `dashboard.exported` to `domain-events.registry.ts`; emitted from `exportNationalDashboard` with `{exportId, associationId, format, exportedBy}` |
+
+**Access control:** new `platformadmin/utils/national-access.ts` centralizes BR-36 — platform admins must pass `associationId`; national officers may omit it when holding exactly one active grant (new repo `getOfficerAssociationIds`), else required. Officer access verified via existing `isDesignatedNationalOfficer`.
+
+**Pipeline:** TypeSpec → `specs/api` build → `api-ts` generate (3 routes/validators/registry entries + 3 handler stubs). Unrelated regen churn (better-auth, websocket registry) reverted to HEAD. Typecheck passes: api-ts, memberry, sdk-ts. Tests: 11 new pass; 254 pass / 0 fail across platformadmin + export suites.
+
+**Outcome:** m14 P1 **5→0**, score **5.5→9.0**. No remaining REAL P1s in m14.
+
+---
+
 ## What's Next
 
-1. **Waves 1-13 COMPLETE.** Security gate satisfied. No P0 regressions. All P1 audit logging resolved (incl. 9 billing handlers in Wave 11). Revenue analytics gap filled. Baseline P1s fully triaged with named IDs. **Wave 12 closed the m12 elections cluster (5 REAL fixed, 3 FP reclassified); Wave 13 closed the m11 documents/credentials cluster (5 REAL fixed).**
+1. **Waves 1-14 COMPLETE.** Security gate satisfied. No P0 regressions. All P1 audit logging resolved (incl. 9 billing handlers in Wave 11). Revenue analytics gap filled. Baseline P1s fully triaged with named IDs. **Wave 12 closed m12 elections (5 REAL, 3 FP); Wave 13 closed m11 documents/credentials (5 REAL); Wave 14 closed m14 national dashboard (5 REAL).**
 2. **Remaining P0s: 1** (EM-M07-no-typespec — communication module 28 hand-wired handlers, DEFERRED).
-3. **Remaining P1s (built modules): ~17 REAL, now named** (see `wave11_p1_triage` in baseline; m11 + m12 clusters of 13 now resolved). Priority order for next fix wave:
-   - **P1 — m14 national dashboard (5):** missing chapters/platform endpoints, WF-085 drill-down, DashboardExported event.
+3. **Remaining P1s (built modules): ~12 REAL, now named** (see `wave11_p1_triage` in baseline; m11 + m12 + m14 clusters of 18 now resolved). Priority order for next fix wave:
    - **P1 — m01 onboarding (5):** onboarding state/step endpoints, WF-005 wizard, WF-009 bulk import, OnboardingState entity.
    - **P1 — m04/m05/m02 (scattered):** event emission + spec/path divergence; m09 certificate↔training wiring.
    - **DEFERRED:** ~170 future-module P1 stubs (m13/m15/m16/m17/m18/m19); 7 TypeSpec, 3 coupling, 1 event from Wave 10.

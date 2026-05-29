@@ -330,6 +330,14 @@ export interface DomainEventMap {
     verified: boolean;
   };
 
+  // ── National Dashboard Context (M14) ──────────────────────────────────
+  'dashboard.exported': {
+    exportId: string;
+    associationId: string;
+    format: string;
+    exportedBy: string;
+  };
+
   // ── Subscription Context (UJ-M03) ─────────────────────────────────────
   'subscription.created': {
     subscriptionId: string;

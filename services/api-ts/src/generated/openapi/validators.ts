@@ -3379,6 +3379,55 @@ export const ChapterAffiliationUpdateRequestSchema = z.object({
   status: AffiliationStatusSchema.optional()
 });
 
+export const ChapterComparisonItemSchema = z.object({
+  organizationId: z.string(),
+  organizationName: z.string().optional(),
+  totalMembers: z.number().int(),
+  activeMembers: z.number().int(),
+  activePercentage: z.number(),
+  collectionRate: z.number(),
+  creditCompliance: z.number(),
+  totalRevenueCents: z.number().int(),
+  eventCount: z.number().int(),
+  trainingCount: z.number().int(),
+  isSuppressed: z.boolean()
+});
+
+export const ChapterComparisonListResponseSchema = z.object({
+  data: z.array(ChapterComparisonItemSchema),
+  meta: z.object({
+  cursor: z.union([z.string(), z.null()]),
+  hasMore: z.boolean(),
+  total: z.union([z.number().int(), z.null()])
+})
+});
+
+export const ChapterDrilldownResponseSchema = z.object({
+  organizationId: z.string(),
+  organizationName: z.string().optional(),
+  totalMembers: z.number().int(),
+  activeMembers: z.number().int(),
+  activePercentage: z.number(),
+  memberStatusBreakdown: z.object({
+  active: z.number().int(),
+  grace: z.number().int(),
+  lapsed: z.number().int(),
+  suspended: z.number().int()
+}),
+  collectionRate: z.number(),
+  totalRevenueCents: z.number().int(),
+  creditCompliance: z.number(),
+  creditComplianceBreakdown: z.object({
+  compliant: z.number().int(),
+  nonCompliant: z.number().int(),
+  exempt: z.number().int()
+}),
+  eventCount: z.number().int(),
+  trainingCount: z.number().int(),
+  snapshotMonth: z.string(),
+  isSuppressed: z.boolean()
+});
+
 export const ChapterMetricsSchema = z.object({
   orgId: z.string(),
   chapterName: z.string().optional(),
@@ -4253,6 +4302,12 @@ export const CreditCategoryBreakdownSchema = z.object({
   general: z.number(),
   major: z.number(),
   selfDirected: z.number()
+});
+
+export const CreditComplianceBreakdownSchema = z.object({
+  compliant: z.number().int(),
+  nonCompliant: z.number().int(),
+  exempt: z.number().int()
 });
 
 export const CreditComplianceReportSchema = z.object({
@@ -6528,6 +6583,13 @@ export const MeetingMinutesUpdateSchema = z.object({
 
 export const MeetingStatusSchema = z.enum(["scheduled", "inProgress", "completed", "cancelled"]);
 
+export const MemberStatusBreakdownSchema = z.object({
+  active: z.number().int(),
+  grace: z.number().int(),
+  lapsed: z.number().int(),
+  suspended: z.number().int()
+});
+
 export const MemberSummarySchema = z.object({
   id: z.string().uuid(),
   personId: z.string().uuid(),
@@ -7030,6 +7092,12 @@ export const NationalDashboardResponseSchema = z.object({
   snapshotMonth: z.string(),
   aggregate: z.record(z.string(), z.unknown()),
   chapters: z.array(ChapterMetricsSchema)
+});
+
+export const NationalListMetaSchema = z.object({
+  cursor: z.union([z.string(), z.null()]),
+  hasMore: z.boolean(),
+  total: z.union([z.number().int(), z.null()])
 });
 
 export const NominationStatusSchema = z.enum(["submitted", "underReview", "shortlisted", "selected", "notSelected", "withdrawn"]);
@@ -7815,6 +7883,26 @@ export const PlatformAdminModulePlatformAdminRequestUpdateSchema = z.object({
   email: z.string().optional(),
   name: z.string().optional(),
   role: PlatformAdminModuleAdminRoleSchema.optional()
+});
+
+export const PlatformAssociationSummarySchema = z.object({
+  associationId: z.string(),
+  associationName: z.string().optional(),
+  chapterCount: z.number().int(),
+  totalMembers: z.number().int(),
+  activeMembers: z.number().int(),
+  collectionRate: z.number(),
+  creditCompliance: z.number(),
+  totalRevenueCents: z.number().int()
+});
+
+export const PlatformSummaryListResponseSchema = z.object({
+  data: z.array(PlatformAssociationSummarySchema),
+  meta: z.object({
+  cursor: z.union([z.string(), z.null()]),
+  hasMore: z.boolean(),
+  total: z.union([z.number().int(), z.null()])
+})
 });
 
 export const PledgeSchema = z.object({
@@ -10314,6 +10402,42 @@ export type GetNationalDashboardQuery = z.infer<typeof GetNationalDashboardQuery
 export const GetNationalDashboardResponse = z.object({
   data: NationalDashboardResponseSchema
 });
+
+export const ListNationalChaptersQuery = z.object({
+  associationId: z.string().optional(),
+  snapshotMonth: z.string().optional(),
+  sort: z.string().optional(),
+  limit: z.coerce.number().int().optional(),
+  offset: z.coerce.number().int().optional(),
+});
+export type ListNationalChaptersQuery = z.infer<typeof ListNationalChaptersQuery>;
+
+export const ListNationalChaptersResponse = ChapterComparisonListResponseSchema;
+
+export const GetNationalChapterDetailParams = z.object({
+  organizationId: z.string(),
+});
+export type GetNationalChapterDetailParams = z.infer<typeof GetNationalChapterDetailParams>;
+
+export const GetNationalChapterDetailQuery = z.object({
+  associationId: z.string().optional(),
+  snapshotMonth: z.string().optional(),
+});
+export type GetNationalChapterDetailQuery = z.infer<typeof GetNationalChapterDetailQuery>;
+
+export const GetNationalChapterDetailResponse = z.object({
+  data: ChapterDrilldownResponseSchema
+});
+
+export const GetPlatformSummaryQuery = z.object({
+  snapshotMonth: z.string().optional(),
+  sort: z.string().optional(),
+  limit: z.coerce.number().int().optional(),
+  offset: z.coerce.number().int().optional(),
+});
+export type GetPlatformSummaryQuery = z.infer<typeof GetPlatformSummaryQuery>;
+
+export const GetPlatformSummaryResponse = PlatformSummaryListResponseSchema;
 
 export const CreateOrganizationBody = PlatformAdminModuleOrganizationRequestSchema;
 export type CreateOrganizationBody = z.infer<typeof CreateOrganizationBody>;
