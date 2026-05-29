@@ -63,6 +63,7 @@ import betterAuthOpenapi from '@/generated/better-auth/openapi.json';
 import healthOpenapi from '@/core/health.openapi.json';
 
 // Middleware
+import { createTracingMiddleware } from '@/core/observability';
 import { createRequestId, createRequestLogger } from '@/middleware/request';
 import { createDependencyInjection } from '@/middleware/dependency';
 import { createSecurityHeaders, createCorsMiddleware } from '@/middleware/security';
@@ -235,6 +236,11 @@ export function createApp(config: Config): App {
 
   // Request ID generation - Needed for all logging
   app.use('*', createRequestId(config));
+
+  // OpenTelemetry tracing — produces a server span per request, propagates
+  // W3C traceparent context. No-op when OTEL_EXPORTER_OTLP_ENDPOINT unset.
+  // Wired AFTER createRequestId so spans can carry the request.id attribute.
+  app.use('*', createTracingMiddleware());
 
   // Dependency injection - Inject logger, database, storage, auth, jobs early
   app.use('*', createDependencyInjection(app as App, config));
