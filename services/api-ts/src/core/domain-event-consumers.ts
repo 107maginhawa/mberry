@@ -526,6 +526,50 @@ export function registerDomainEventConsumers(
   });
 
   // -----------------------------------------------------------------------
+  // event.cancelled → bulk async notify all confirmed registrants (M8-R3)
+  // -----------------------------------------------------------------------
+  domainEvents.on('event.cancelled', async (payload) => {
+    (async () => {
+      try {
+        const registrants = await deps.db
+          .select({ personId: eventRegistrations.personId })
+          .from(eventRegistrations)
+          .where(
+            and(
+              eq(eventRegistrations.eventId, payload.eventId),
+              eq(eventRegistrations.status, 'confirmed'),
+            ),
+          );
+
+        if (registrants.length === 0) return;
+
+        const CHUNK_SIZE = 100;
+        for (let i = 0; i < registrants.length; i += CHUNK_SIZE) {
+          const chunk = registrants.slice(i, i + CHUNK_SIZE);
+          const rows = chunk.map((r) => ({
+            organizationId: payload.organizationId,
+            recipient: r.personId,
+            type: 'system' as const,
+            channel: 'in-app' as const,
+            title: 'Event Cancelled',
+            message: 'An event you registered for has been cancelled.',
+            status: 'sent' as const,
+            sentAt: new Date(),
+            relatedEntityType: 'event',
+            relatedEntity: payload.eventId,
+            consentValidated: false,
+            createdBy: SYSTEM_USER_ID,
+            updatedBy: SYSTEM_USER_ID,
+          }));
+          await deps.db.insert(notifications).values(rows);
+        }
+      } catch (err) {
+        logger.error({ error: err }, '[consumer] event.cancelled bulk notify failed');
+      }
+    })();
+  });
+
+  // -----------------------------------------------------------------------
   // event.registered → notify the registrant directly
   // -----------------------------------------------------------------------
   domainEvents.on('event.registered', async (payload) => {

@@ -3,6 +3,7 @@ import type { DatabaseInstance } from '@/core/database';
 import type { CancelEventParams } from '@/generated/openapi/validators';
 import { NotFoundError, BusinessLogicError } from '@/core/errors';
 import { EventRepository } from './repos/events.repo';
+import { domainEvents } from '@/core/domain-events';
 import { auditAction } from '@/utils/audit';
 import { requirePosition } from '@/utils/officer-check';
 import { POSITION_TITLES } from '@/utils/position-titles';
@@ -43,6 +44,12 @@ export async function cancelEvent(
     description: 'Event cancelled',
     eventSubType: 'association.event-cancelled',
   });
+
+  domainEvents.emit('event.cancelled', {
+    eventId: cancelled.id,
+    organizationId: cancelled.organizationId,
+    cancelledBy: user.id,
+  }).catch(() => {});
 
   return ctx.json(cancelled, 200);
 }

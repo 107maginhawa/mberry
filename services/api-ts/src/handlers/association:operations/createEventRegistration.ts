@@ -3,6 +3,7 @@ import type { DatabaseInstance } from '@/core/database';
 import type { CreateEventRegistrationBody } from '@/generated/openapi/validators';
 import { NotFoundError, BusinessLogicError } from '@/core/errors';
 import { EventRepository, EventRegistrationRepository, WaitlistEntryRepository } from './repos/events.repo';
+import { domainEvents } from '@/core/domain-events';
 import { auditAction } from '@/utils/audit';
 
 /**
@@ -63,6 +64,13 @@ export async function createEventRegistration(
         eventSubType: 'association.booking-created',
       });
 
+      domainEvents.emit('event.registered', {
+        eventId,
+        personId,
+        organizationId: orgId,
+        status: 'waitlisted',
+      }).catch(() => {});
+
       return ctx.json({ ...entry, waitlisted: true }, 201);
     }
   }
@@ -81,6 +89,13 @@ export async function createEventRegistration(
     description: 'Event registration created',
     eventSubType: 'association.booking-created',
   });
+
+  domainEvents.emit('event.registered', {
+    eventId,
+    personId,
+    organizationId: orgId,
+    status: 'confirmed',
+  }).catch(() => {});
 
   return ctx.json(registration, 201);
 }

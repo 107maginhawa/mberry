@@ -4,7 +4,7 @@
 
 # Enforcement Report
 
-**Generated:** 2026-05-29 (post-Wave 19 update)
+**Generated:** 2026-05-29 (post-Wave 20 update)
 **Engine:** oli-enforce-all v3 --strict
 **Scope:** 22 modules, 8 phases, 10 agents
 **Baseline:** 2026-05-29T22:00:00Z → 2026-05-29T23:30:00Z (v4)
@@ -230,6 +230,7 @@ All 13 P0 security findings from the previous run are confirmed fixed with test 
 | M07 | 5.5 | 4.0 | ↓ | WebRTC fixed but structural P0s remain |
 | M07 | 5.5 | 6.0 | ↑ | Wave 19: 3 P1s all FP — getAnnouncementStats handler+route exist, createSubscriptionTopic role-guarded, consumed events wired via consumers; removed dead CrossModuleTriggers. P0-capped (no-typespec) |
 | M08 | 4.0 | 4.5 | ↑ | listEvents auth fix |
+| M08 | 6.5 | 8.0 | ↑↑ | Wave 20: 2 REAL emit gaps fixed in LIVE association:operations handlers (event.cancelled + M8-R3 notify consumer; event.registered confirmed+waitlisted). 5 FP — audit read dead handlers/events/ dir |
 | M09 | 5.0 | 4.5 | ↓ | Dead code still present |
 | M10 | 6.5 | 7.0 | ↑ | SQL injection fix |
 | M11 | 3.0 | 6.0 | ↑↑ | 3 security fixes (HMAC, SVG, IDOR) |
@@ -591,12 +592,40 @@ Verify-first sweep of the m07 P1 cluster. All 3 baseline P1s turned out **FALSE 
 
 ---
 
+### Wave 20 — m08 Events Remediation (COMPLETE ✅)
+
+Verify-first sweep of the m08 P1 cluster. The 2026-05-28 module audit (`docs/audits/enforce/module/m08-events.md`, scored 4.0) inspected the **dead `handlers/events/` directory**; the production routes are generated TypeSpec routes bound to the **`handlers/association:operations/`** handler set (`src/generated/openapi/routes.ts`). Severe path divergence — the 2 P0s were already reclassified FP in prior baselines (publishEvent/completeEvent exist in association:operations). This wave fixed the 2 genuine emit gaps in the LIVE wired handlers and reclassified the rest.
+
+**2 REAL (fixed in live wired handlers):**
+
+| ID | Finding | Fix |
+|----|---------|-----|
+| EM-M08-u1v2w3x4 (a) | `event.cancelled` emitted only by dead `handlers/events/cancelEvent.ts`; live `association:operations/cancelEvent.ts` did not emit → registrants never notified (M8-R3) | Emit `event.cancelled {eventId, organizationId, cancelledBy}` (fire-and-forget `.catch`) after audit. New consumer in `domain-event-consumers.ts` bulk-notifies confirmed registrants ("Event Cancelled", in-app, 100-chunk). |
+| EM-M08-u1v2w3x4 (b) | `event.registered` emitted only by dead `handlers/events/registerForEvent.ts`; live `association:operations/createEventRegistration.ts` did not emit → existing consumer never fired | Emit `event.registered {eventId, personId, organizationId, status}` for both `confirmed` and `waitlisted` outcomes. Existing consumer (`domain-event-consumers.ts:~571`) sends the registration-confirmation notification. |
+
+**5 FP (live `association:operations/` set satisfies the rule; audit read dead `handlers/events/`):**
+
+| ID | Finding | Verdict |
+|----|---------|---------|
+| EM-M08-i9j0k1l2 | No `events.tsp` → routes hand-wired | **FP** — event routes are generated TypeSpec routes with generated validators (`CreateEventBody`, `PublishEventParams`, …) in `src/generated/openapi/routes.ts`. |
+| EM-M08-m3n4o5p6 | BR-15: events store CPD credit fields | **FP** — live `createEvent.ts` stores no credit fields (title/desc/location/dates/capacity/registrationFee/status only). |
+| EM-M08-q7r8s9t0 | M8-R6: registration not locked post-completion | **FP** — live `createEventRegistration.ts:41` throws `EVENT_NOT_PUBLISHED` for any non-published event. |
+| EM-M08-f4a1c2e8 | createEvent accepts arbitrary status | **FP** — live `createEvent.ts:41` hardcodes `status:'draft'`, never reads `body.status`. |
+| EM-M08-3b7d9e0f | No `VALID_TRANSITIONS` map | **FP (≤P3)** — transitions guarded per-handler (publish⟵draft, complete⟵published, cancel⟵draft\|published, register⟵published); central map is cosmetic. |
+
+**Also FP-noted:** `EM-M08-y5z6a7b8` (consumed PaymentRecorded/RefundCompleted) — paid/refund flows handled by dedicated live handlers (`registerAndPayForEvent.ts` via Stripe `checkout.session.completed` webhook; `refundEventRegistration.ts`), not M06 domain-event consumers; functionally complete, residual ≤P2.
+
+**Pipeline:** pure event/consumer changes — no `src/generated/*` touched, no SDK schema change → no codegen. Tests: 2 new files (`cancelEvent.test.ts`, `createEventRegistration.test.ts`) spy `domainEvents.emit` → 7 pass; affected `association:operations/` suite 391 pass (1 pre-existing unrelated failure: `org-accredited-providers.test.ts` missing `@/handlers/training/repos/accredited-provider.repo`); `domain-event-consumers.test.ts` 4 pass. Typecheck passes: api-ts, memberry, sdk-ts.
+
+**Outcome:** m08 P1 **2→0** (2 REAL / 5 FP), score **6.5→8.0**.
+
+---
+
 ## What's Next
 
-1. **Waves 1-19 COMPLETE.** Security gate satisfied. No P0 regressions. All P1 audit logging resolved (incl. 9 billing handlers in Wave 11). Revenue analytics gap filled. Baseline P1s fully triaged with named IDs. **Wave 12 closed m12 elections (5 REAL, 3 FP); Wave 13 closed m11 documents/credentials (5 REAL); Wave 14 closed m14 national dashboard (5 REAL); Wave 15 closed m01 auth-onboarding (5 REAL); Wave 16 closed m05 membership (3 REAL, 1 FP); Wave 17 closed m04 org-admin (1 REAL event, 2 doc reconciliations, 1 partial FP); Wave 18 closed m06 dues-payments (2 REAL, 3 FP/reclassified); Wave 19 closed m07 communications (0 REAL, 3 FP — module already remediated; removed dead CrossModuleTriggers).**
+1. **Waves 1-19 COMPLETE.** Security gate satisfied. No P0 regressions. All P1 audit logging resolved (incl. 9 billing handlers in Wave 11). Revenue analytics gap filled. Baseline P1s fully triaged with named IDs. **Wave 12 closed m12 elections (5 REAL, 3 FP); Wave 13 closed m11 documents/credentials (5 REAL); Wave 14 closed m14 national dashboard (5 REAL); Wave 15 closed m01 auth-onboarding (5 REAL); Wave 16 closed m05 membership (3 REAL, 1 FP); Wave 17 closed m04 org-admin (1 REAL event, 2 doc reconciliations, 1 partial FP); Wave 18 closed m06 dues-payments (2 REAL, 3 FP/reclassified); Wave 19 closed m07 communications (0 REAL, 3 FP — module already remediated; removed dead CrossModuleTriggers); Wave 20 closed m08 events (2 REAL emit gaps in live association:operations handlers, 5 FP — audit read dead handlers/events/ dir).**
 2. **Remaining P0s: 2** (EM-M07-no-typespec — communication 28 hand-wired handlers, DEFERRED; EM-M06 zero-domain-events — m06 dues event bridge, out of P1 scope, still caps m06 score).
-3. **Remaining P1s (built modules): m08 + m09 + m10 + m03 + m02 clusters left** (see `wave11_p1_triage` in baseline; m01/m04/m05/m06/m07/m11/m12/m14 resolved). Priority order for next fix wave:
-   - **P1 — m08 (events):** 2 P1s.
+3. **Remaining P1s (built modules): m09 + m10 + m03 + m02 clusters left** (see `wave11_p1_triage` in baseline; m01/m04/m05/m06/m07/m08/m11/m12/m14 resolved). Priority order for next fix wave:
    - **P1 — m09 + m10:** certificate↔training wiring; credit-tracking events/export gaps.
    - **P1 — m03 (platform-admin), m02 (member-profile):** remaining clusters.
    - **DEFERRED:** ~170 future-module P1 stubs (m13/m15/m16/m17/m18/m19); 7 TypeSpec, 3 coupling, 1 event from Wave 10.
