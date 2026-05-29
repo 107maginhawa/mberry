@@ -1,9 +1,16 @@
-import { describe, test, expect, afterEach } from 'bun:test';
+import { describe, test, expect, afterEach, mock } from 'bun:test';
 import { makeCtx, stubRepo, restoreRepo } from '@/test-utils/make-ctx';
 import { fakeMember as createFakeMember } from '@/test-utils/factories';
 import { addMember } from './addMember';
 import { MembershipRepository } from './repos/membership.repo';
 import { OfficerTermRepository } from '../association:member/repos/governance.repo';
+
+// Capture audit calls via our own module mock — bun mock.module is process-global,
+// so other test files may no-op @/utils/audit; install our capturing version here.
+const auditCalls: any[] = [];
+mock.module('@/utils/audit', () => ({
+  auditAction: async (_ctx: any, opts: any) => { auditCalls.push(opts); },
+}));
 
 // ─── Fixtures ───────────────────────────────────────────
 
@@ -131,6 +138,28 @@ describe('addMember', () => {
 
     await addMember(ctx);
     expect(captured.memberNumber).toBe('LIC-123');
+  });
+
+  test('[AL-MEMBERSHIP-f9a0b1c2] logs membership.member-added audit event', async () => {
+    auditCalls.length = 0;
+    officerMocks = stubRepo(OfficerTermRepository, {
+      findActiveByPersonAndOrg: async () => [{ id: 'term-1' }],
+    });
+    mocks = stubRepo(MembershipRepository, {
+      addMember: async (data: any) => ({ ...fakeMember, ...data }),
+    });
+
+    const ctx = makeCtx({
+      _params: { organizationId: 'org-7' },
+      _body: { personId: 'person-1', tierId: 'tier-1' },
+    });
+
+    await addMember(ctx);
+    const ev = auditCalls.find((c) => c.eventSubType === 'membership.member-added');
+    expect(ev).toBeDefined();
+    expect(ev.resourceType).toBe('membership');
+    expect(ev.details.organizationId).toBe('org-7');
+    expect(ev.details.personId).toBe('person-1');
   });
 
   test('sets createdBy and updatedBy to session user id', async () => {

@@ -6,6 +6,7 @@ import { persons } from '../person/repos/person.schema';
 import type { Session } from '@/types/auth';
 import { requirePosition } from '@/utils/officer-check';
 import { POSITION_TITLES } from '@/utils/position-titles';
+import { auditAction } from '@/utils/audit';
 import { importMemberRowSchema, importMembersSchema, normalizeLicense, type ImportMemberRow } from './import-types';
 
 // Re-export shared types/schemas for backward compatibility
@@ -128,6 +129,21 @@ export async function importMembers(ctx: BaseContext): Promise<Response> {
   }
 
   const imported = await repo.bulkImportMembers(toImport);
+
+  await auditAction(ctx, {
+    action: 'create',
+    resourceType: 'membership',
+    resourceId: orgId ?? 'unknown',
+    description: `Bulk member import: ${imported.length} imported, ${created.length} created, ${flagged.length} flagged`,
+    eventSubType: 'membership.bulk-imported',
+    details: {
+      organizationId: orgId,
+      imported: imported.length,
+      matched: matched.length,
+      created: created.length,
+      flagged: flagged.length,
+    },
+  });
 
   return ctx.json({
     data: {

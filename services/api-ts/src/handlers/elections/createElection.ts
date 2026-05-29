@@ -3,6 +3,7 @@ import { ForbiddenError, UnauthorizedError } from '@/core/errors';
 import { ElectionsRepository } from './repos/elections.repo';
 import { OfficerTermRepository } from '../association:member/repos/governance.repo';
 import { domainEvents } from '@/core/domain-events';
+import { auditAction } from '@/utils/audit';
 import type { Session } from '@/types/auth';
 
 export async function createElection(ctx: Context): Promise<Response> {
@@ -42,6 +43,15 @@ export async function createElection(ctx: Context): Promise<Response> {
     organizationId: orgId!,
     createdBy: session.user.id,
   }).catch(() => {});
+
+  await auditAction(ctx, {
+    action: 'create',
+    resourceType: 'election',
+    resourceId: election.id,
+    description: `Election created: ${election.title}`,
+    eventSubType: 'governance.election-created',
+    details: { organizationId: orgId, type: election.type, title: election.title },
+  });
 
   return ctx.json({ data: election }, 201);
 }

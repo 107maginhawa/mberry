@@ -1,11 +1,18 @@
 // Business Rules: [BR-22] [BR-23]
-import { describe, test, expect, afterEach, beforeEach } from 'bun:test';
+import { describe, test, expect, afterEach, beforeEach, mock } from 'bun:test';
 import { makeCtx, stubRepo, restoreRepo } from '@/test-utils/make-ctx';
 import { fakeMember as createFakeMember } from '@/test-utils/factories';
 import { importMembers, normalizeLicense, importMembersSchema } from './importMembers';
 import { MembershipRepository } from './repos/membership.repo';
 import { OfficerTermRepository } from '@/handlers/association:member/repos/governance.repo';
 import { DuesConfigRepository } from '../association:member/repos/dues.repo';
+
+// Capture audit calls via our own module mock — bun mock.module is process-global,
+// so other test files may no-op @/utils/audit; install our capturing version here.
+const auditCalls: any[] = [];
+mock.module('@/utils/audit', () => ({
+  auditAction: async (_ctx: any, opts: any) => { auditCalls.push(opts); },
+}));
 
 // ─── Fixtures ───────────────────────────────────────────
 
@@ -56,6 +63,29 @@ describe('[BR-22] importMembers', () => {
     const response = await importMembers(ctx);
     expect(response.status).toBe(201);
     expect(response.body.data.imported).toBe(2);
+  });
+
+  test('[AL-MEMBERSHIP-c5d6e7f8] logs membership.bulk-imported audit event', async () => {
+    auditCalls.length = 0;
+    mocks = stubRepo(MembershipRepository, {
+      bulkImportMembers: async (members: any[]) => members.map((m: any, i: number) => ({ ...fakeMember, id: `mem-${i}`, ...m })),
+    });
+
+    const ctx = makeCtx({
+      _params: { organizationId: 'org-9' },
+      _body: {
+        members: [
+          { personId: 'p-1', tierId: 'tier-1' },
+          { personId: 'p-2', tierId: 'tier-1' },
+        ],
+      },
+    });
+
+    await importMembers(ctx);
+    const ev = auditCalls.find((c) => c.eventSubType === 'membership.bulk-imported');
+    expect(ev).toBeDefined();
+    expect(ev.details.organizationId).toBe('org-9');
+    expect(ev.details.imported).toBe(2);
   });
 
   test('handles empty members array', async () => {

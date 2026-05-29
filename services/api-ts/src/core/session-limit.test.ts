@@ -126,6 +126,29 @@ describe('V-15: enforceSessionLimit', () => {
     const revoked = await enforceSessionLimit(db as any, 'user-1', 1);
     expect(revoked).toBe(2);
   });
+
+  test('[AL-AUTH-b9c0d1e2] logs authentication.session-revoked to audit table per revocation', async () => {
+    const auditCalls: any[] = [];
+    const auditRepo = { logEvent: async (e: any) => { auditCalls.push(e); } };
+    const sessions = makeSessions('user-1', 7);
+    const db = createMockDb(sessions);
+    const revoked = await enforceSessionLimit(db as any, 'user-1', 5, undefined, auditRepo);
+    expect(revoked).toBe(2);
+    const revokeEvents = auditCalls.filter((c) => c.eventSubType === 'authentication.session-revoked');
+    expect(revokeEvents).toHaveLength(2);
+    expect(revokeEvents[0].resourceType).toBe('session');
+    expect(revokeEvents[0].user).toBe('user-1');
+    expect(revokeEvents.map((e) => e.resource)).toContain('session-1');
+  });
+
+  test('does not audit when no sessions revoked', async () => {
+    const auditCalls: any[] = [];
+    const auditRepo = { logEvent: async (e: any) => { auditCalls.push(e); } };
+    const sessions = makeSessions('user-1', 3);
+    const db = createMockDb(sessions);
+    await enforceSessionLimit(db as any, 'user-1', 5, undefined, auditRepo);
+    expect(auditCalls).toHaveLength(0);
+  });
 });
 
 // ---------------------------------------------------------------------------

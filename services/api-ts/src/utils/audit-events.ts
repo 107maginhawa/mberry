@@ -30,6 +30,7 @@ export const AUDIT_EVENT_CATEGORIES = {
     'officer-resigned',
   ],
   membership: [
+    'member-added',
     'member-approved',
     'member-denied',
     'member-renewed',
@@ -38,6 +39,7 @@ export const AUDIT_EVENT_CATEGORIES = {
     'member-terminated',
     'member-deceased',
     'application-submitted',
+    'bulk-imported',
   ],
   content: [
     'certificate-generated',
@@ -49,6 +51,7 @@ export const AUDIT_EVENT_CATEGORIES = {
   authentication: [
     'session-created',
     'session-terminated',
+    'session-revoked',
     'impersonation-started',
     'impersonation-ended',
     'password-changed',

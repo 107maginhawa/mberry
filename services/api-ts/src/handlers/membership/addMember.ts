@@ -2,6 +2,7 @@ import type { Context } from 'hono';
 import { ConflictError, ForbiddenError } from '@/core/errors';
 import { MembershipRepository } from './repos/membership.repo';
 import { OfficerTermRepository } from '../association:member/repos/governance.repo';
+import { auditAction } from '@/utils/audit';
 import type { Session } from '@/types/auth';
 
 export async function addMember(ctx: Context): Promise<Response> {
@@ -35,6 +36,15 @@ export async function addMember(ctx: Context): Promise<Response> {
       joinedAt: new Date(),
       createdBy: session.user.id,
       updatedBy: session.user.id,
+    });
+
+    await auditAction(ctx, {
+      action: 'create',
+      resourceType: 'membership',
+      resourceId: member.id,
+      description: `Member added to organization ${orgId}`,
+      eventSubType: 'membership.member-added',
+      details: { personId: body.personId, organizationId: orgId, status: 'active' },
     });
 
     return ctx.json({ data: member }, 201);

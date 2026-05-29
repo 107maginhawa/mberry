@@ -12,9 +12,15 @@ import { eq, asc } from 'drizzle-orm';
 import * as schema from '@/generated/better-auth/schema';
 import type { DatabaseInstance } from '@/core/database';
 import type { Logger } from '@/types/logger';
+import type { CreateAuditLogRequest } from '@/core/audit';
 
 /** Default maximum concurrent sessions per user */
 export const DEFAULT_SESSION_LIMIT = 5;
+
+/** Minimal audit repo contract — only logEvent needed for session-revoke auditing. */
+interface SessionAuditLogger {
+  logEvent(request: CreateAuditLogRequest): Promise<unknown>;
+}
 
 /**
  * Enforce session limit for a user.
@@ -30,6 +36,7 @@ export async function enforceSessionLimit(
   userId: string,
   limit: number,
   logger?: Logger,
+  auditRepo?: SessionAuditLogger,
 ): Promise<number> {
   if (limit < 1) {
     logger?.warn({ userId, limit }, 'Session limit must be >= 1; skipping enforcement');
@@ -62,6 +69,29 @@ export async function enforceSessionLimit(
     { userId, sessionsRevoked: revokeIds.length, limit, totalBefore: sessions.length },
     'V-15: Oldest sessions revoked — concurrent session limit exceeded',
   );
+
+  // AL-AUTH-b9c0d1e2: record each revocation to the audit table (not just Pino)
+  if (auditRepo) {
+    for (const sessionId of revokeIds) {
+      try {
+        await auditRepo.logEvent({
+          eventType: 'authentication',
+          eventSubType: 'authentication.session-revoked',
+          category: 'security',
+          action: 'terminate',
+          outcome: 'success',
+          user: userId,
+          userType: 'client',
+          resourceType: 'session',
+          resource: sessionId,
+          description: 'Session revoked — concurrent session limit exceeded',
+          details: { limit, totalBefore: sessions.length },
+        });
+      } catch (err) {
+        logger?.warn({ error: err, userId, sessionId }, 'V-15: Failed to audit session revocation');
+      }
+    }
+  }
 
   return revokeIds.length;
 }

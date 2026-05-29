@@ -297,7 +297,7 @@ export function createAuth(
             // V-15: Enforce concurrent session limit — revoke oldest sessions
             try {
               const limit = config.auth.sessionLimit ?? DEFAULT_SESSION_LIMIT;
-              await enforceSessionLimit(database, session.userId, limit, logger);
+              await enforceSessionLimit(database, session.userId, limit, logger, auditRepo);
             } catch (err) {
               logger?.warn({ error: err, userId: session.userId }, 'V-15: Failed to enforce session limit');
             }
