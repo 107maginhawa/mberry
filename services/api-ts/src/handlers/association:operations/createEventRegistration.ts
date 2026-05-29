@@ -1,7 +1,7 @@
 import type { ValidatedContext } from '@/types/app';
 import type { DatabaseInstance } from '@/core/database';
 import type { CreateEventRegistrationBody } from '@/generated/openapi/validators';
-import { NotFoundError, BusinessLogicError } from '@/core/errors';
+import { NotFoundError, BusinessLogicError, ConflictError } from '@/core/errors';
 import { EventRepository, EventRegistrationRepository, WaitlistEntryRepository } from './repos/events.repo';
 import { domainEvents } from '@/core/domain-events';
 import { auditAction } from '@/utils/audit';
@@ -41,6 +41,14 @@ export async function createEventRegistration(
 
   if (event.status !== 'published') {
     throw new BusinessLogicError('Registrations are only accepted for published events', 'EVENT_NOT_PUBLISHED');
+  }
+
+  // [EM-M08-k7l8m9n0] Prevent duplicate active registrations for the same
+  // (event, person). A DB unique constraint would wrongly block re-registration
+  // after a cancellation, so the guard is scoped to confirmed registrations.
+  const alreadyConfirmed = await regRepo.count({ eventId, personId, status: 'confirmed' });
+  if (alreadyConfirmed > 0) {
+    throw new ConflictError('Person is already registered for this event');
   }
 
   // Check capacity

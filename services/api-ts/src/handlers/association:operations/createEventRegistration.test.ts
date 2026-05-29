@@ -72,7 +72,8 @@ describe('createEventRegistration', () => {
       findOneById: async () => makeEvent({ capacity: 1 }),
     });
     regMocks = stubRepo(EventRegistrationRepository, {
-      count: async () => 1,
+      // 0 existing for this person (dup-check), 1 confirmed for the event (capacity)
+      count: async (f: any) => (f?.personId ? 0 : 1),
     });
     waitlistMocks = stubRepo(WaitlistEntryRepository, {
       nextPosition: async () => 1,
@@ -95,6 +96,24 @@ describe('createEventRegistration', () => {
       personId: 'member-1',
       status: 'waitlisted',
     });
+  });
+
+  test('rejects duplicate active registration for the same person+event with 409', async () => {
+    eventMocks = stubRepo(EventRepository, {
+      findOneById: async () => makeEvent(),
+    });
+    regMocks = stubRepo(EventRegistrationRepository, {
+      count: async () => 1, // person already has a confirmed registration
+      createOne: async () => ({ id: 'reg-x' }),
+    });
+
+    const ctx = makeCtx({
+      user: { id: 'member-1', role: 'user', twoFactorEnabled: true },
+      _body: { eventId: 'event-1', personId: 'member-1' },
+    });
+
+    await expect(createEventRegistration(ctx)).rejects.toThrow();
+    expect(emitSpy.mock.calls.some((c) => c[0] === 'event.registered')).toBe(false);
   });
 
   test('rejects registration for a non-published event without emitting', async () => {

@@ -706,7 +706,7 @@ describe('[AC-M08-002] createEventRegistration — capacity management', () => {
         findOneById: async () => publishedEvent,
       }),
       ...stubRepo(EventRegistrationRepository, {
-        count: async () => 30,
+        count: async (f: any) => (f?.personId ? 0 : 30),
         createOne: async (data: any) => ({ ...fakeRegistration, ...data }),
       }),
       ...stubRepo(WaitlistEntryRepository, {
@@ -729,7 +729,7 @@ describe('[AC-M08-002] createEventRegistration — capacity management', () => {
         findOneById: async () => publishedEvent,
       }),
       ...stubRepo(EventRegistrationRepository, {
-        count: async () => 50, // at capacity
+        count: async (f: any) => (f?.personId ? 0 : 50), // at capacity
         createOne: async (data: any) => ({ ...fakeRegistration, ...data }),
       }),
       ...stubRepo(WaitlistEntryRepository, {
@@ -752,7 +752,7 @@ describe('[AC-M08-002] createEventRegistration — capacity management', () => {
         findOneById: async () => publishedEvent,
       }),
       ...stubRepo(EventRegistrationRepository, {
-        count: async () => 60, // over capacity
+        count: async (f: any) => (f?.personId ? 0 : 60), // over capacity
         createOne: async (data: any) => ({ ...fakeRegistration, ...data }),
       }),
       ...stubRepo(WaitlistEntryRepository, {
@@ -775,7 +775,7 @@ describe('[AC-M08-002] createEventRegistration — capacity management', () => {
         findOneById: async () => ({ ...publishedEvent, capacity: null }),
       }),
       ...stubRepo(EventRegistrationRepository, {
-        count: async () => 999,
+        count: async (f: any) => (f?.personId ? 0 : 999),
         createOne: async (data: any) => ({ ...fakeRegistration, ...data }),
       }),
       ...stubRepo(WaitlistEntryRepository, {
