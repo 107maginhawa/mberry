@@ -26,11 +26,12 @@ The remediation work between 2026-05-27 and 2026-05-30 measurably moved the code
 - **Core → handler inversions reduced.** Cycle 3 counted 20 inverted imports across 11 core/middleware files. Current count: **9 production inversions** (8 in `core/schema-registry.ts` — schema re-exports, arguably acceptable as a centralization point; 1 in `core/domain-event-consumers.ts` → governance.repo) + **4 middleware → handler** (`officer-auth`, `platform-admin-auth`, `impersonation-guard`, `org-context`). Net ~13 inverted, down from 20. `core/email.ts`, `core/auth.ts`, `core/notifs.ts`, `core/audit.ts` no longer import handler repos.
 
 **Top Remaining Risks (P1):**
-1. **Membership / Booking / Invoice / License / Training-Enrollment transitions defined but unenforced** — `MEMBERSHIP_VALID_TRANSITIONS` is imported only by its own test file. Handlers that mutate `membership.status` (e.g., `handlers/membership/updateMember.ts`, `handlers/association:member/terminateMembership.ts`) do NOT call `isValidMembershipTransition`. Cycle 3's P1 partially mitigated: framework now exists, wiring incomplete.
+1. ~~**Membership / Booking / Invoice / License / Training-Enrollment transitions defined but unenforced**~~ **CLOSED in Wave G1 (2026-05-30).** All 6 production transition maps (membership, booking, invoice, training-enrollment, marketplace-vendor, email-queue) now have ≥1 runtime `assertValidTransition` site. Marketplace-listing map has no mutators in code (no listing CRUD exists yet) — deferred until listing routes ship.
 2. **Schema-registry as a hub** — `core/schema-registry.ts` re-exports 8 handler schemas (notifications, bookings, platformAdmins, training, memberships, positions, events, eventRegistrations, invitationTokens). This works at runtime but is still an inverted dependency at the type layer. Either move schemas to `core/` or formalize the registry pattern in ARCHITECTURE.md.
 3. **N+1 + unbounded queries persist.** 70 `findMany` calls without `.limit()` outside the well-paginated repos. Spot-checks confirm cycle 3's 15-20 unbounded list endpoints + 3 N+1s are still present (booking, marketplace, person, communication).
+4. ~~**Phantom FE endpoints**~~ **CLOSED in Wave G1 (2026-05-30).** All 9 phantom endpoints reconciled via S-G1-07 (`078bd00a`) — drift fixes + hand-wired registrations.
 
-**Recommended adoption posture:** continue the cycle-3 stabilization plan; the foundation is now strong enough to enter **Phase 4 (Adopt Standards)** in parallel with finishing the remaining state-guard wiring.
+**Recommended adoption posture:** Wave G1 closes the cycle-3 P1 stabilization items. Codebase is now ready to enter **Phase 4 (Adopt Standards)**; remaining stabilization work is N+1/pagination (P2-tier) and schema-registry formalization.
 
 ---
 
@@ -531,12 +532,12 @@ No raw SQL injection risks (all use Drizzle template literals with parameter bin
 ### Fix Immediately (P0)
 None.
 
-### Fix Before Major New Work (P1)
-- [ ] Wire `isValidMembershipTransition` into all membership-status mutators (3 sites).
-- [ ] Wire `isValidBookingTransition` into booking-status mutators.
-- [ ] Wire `isValidInvoiceTransition` into invoice-status mutators.
-- [ ] Wire remaining guards (training enrollment, marketplace vendor/listing, email queue).
-- [ ] Reconcile 9 phantom FE endpoints.
+### Fix Before Major New Work (P1) — CLOSED in Wave G1 (oli-magic/wave-g1, 2026-05-30)
+- [x] Wire `isValidMembershipTransition` into all membership-status mutators (3 sites). _(S-G1-01 `189b75db`)_
+- [x] Wire `isValidBookingTransition` into booking-status mutators. _(S-G1-02 `98ac4666`)_
+- [x] Wire `isValidInvoiceTransition` into invoice-status mutators. _(S-G1-03 `d676c7fa`)_
+- [x] Wire remaining guards (training enrollment, marketplace vendor, email queue). _(S-G1-04 `fca2d891`, S-G1-05 `b1b0a865`, S-G1-06 `ae65bb69`)_ Marketplace **listing** guard deferred — no listing mutators exist (documented in S-G1-05).
+- [x] Reconcile 9 phantom FE endpoints. _(S-G1-07 `078bd00a`)_
 
 ### Fix When Touching Module (P2)
 - [ ] Batch the 3 N+1 sites.
@@ -557,15 +558,15 @@ All root docs present and current.
 ### Phase 2: Document Current Reality — DONE
 22 module specs, 65 typed events, DOMAIN_MODEL aligned to code.
 
-### Phase 3: Stabilize Risky Areas — IN PROGRESS (~75%)
+### Phase 3: Stabilize Risky Areas — IN PROGRESS (~90%, Wave G1 closed)
 - [x] State-machine framework
 - [x] 5 state guards wired
 - [x] `as any` collapse (~290 → 30)
 - [x] Status naming aligned (`removed`)
 - [x] Domain events expanded (3 → 65)
 - [x] Core → handler inversions reduced (20 → 13)
-- [ ] 7 guards still to wire
-- [ ] Phantom endpoints to reconcile
+- [x] Remaining 6/7 state guards wired (Wave G1; marketplace listing deferred — no mutators)
+- [x] 9 phantom endpoints reconciled (Wave G1)
 - [ ] N+1 + pagination
 
 ### Phase 4: Adopt Standards
