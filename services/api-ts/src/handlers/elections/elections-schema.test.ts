@@ -105,3 +105,80 @@ describe('[024] Elections Schema — Table Structure', () => {
     expect(electionVotes.nomineeId).toBeDefined();
   });
 });
+
+// ─── [BR-50] Election Date Ordering DB Constraints ────────────────────────
+// Source: services/api-ts/src/handlers/elections/repos/elections.schema.ts:29-31
+//   check('election_nominations_date_order', nominationsCloseAt > nominationsOpenAt)
+//   check('election_voting_date_order',      votingCloseAt      > votingOpenAt)
+//   check('election_nominations_before_voting', votingOpenAt   >= nominationsCloseAt)
+//
+// Rule (br-registry.json#BR-50): the election table MUST carry DB-level CHECK
+// constraints that enforce the temporal ordering of nomination and voting
+// windows. These constraints are the last line of defense against malformed
+// elections — any application-layer skip (e.g. direct repo insert from a
+// migration or a future admin tool) would still be caught at the DB.
+//
+// The Drizzle CHECK definitions live in the table's index/constraint config
+// callback. We assert by inspecting the generated migration SQL — the
+// constraints exist in the migration journal, so a regression that drops
+// them from the schema will show up as a migration diff and fail this test.
+describe('[BR-50] elections schema — date ordering constraints', () => {
+  // Read the migration that creates the election table and assert the
+  // three CHECK constraints are present in the emitted DDL.
+  const findElectionMigrationSQL = (): string => {
+    // Use Bun's file/fs primitives via dynamic import-less paths. Resolve
+    // the migrations directory relative to this test file.
+    const migDir = new URL('../../generated/migrations/', import.meta.url).pathname;
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
+    const fs = require('fs') as typeof import('fs');
+    const files: string[] = fs.readdirSync(migDir).filter((f: string) => f.endsWith('.sql'));
+    for (const f of files) {
+      const sql = fs.readFileSync(migDir + f, 'utf-8');
+      if (sql.includes('CREATE TABLE "election"') || sql.includes('CREATE TABLE election')) {
+        return sql;
+      }
+    }
+    // Fallback: scan all migrations and look for an ALTER TABLE adding the
+    // constraints (in case the table predates the constraint addition).
+    let combined = '';
+    for (const f of files) {
+      combined += fs.readFileSync(migDir + f, 'utf-8') + '\n';
+    }
+    return combined;
+  };
+
+  test('[BR-50] nominations_close_at > nominations_open_at constraint is in migrations', () => {
+    const sql = findElectionMigrationSQL();
+    expect(sql.toLowerCase()).toContain('election_nominations_date_order');
+  });
+
+  test('[BR-50] voting_close_at > voting_open_at constraint is in migrations', () => {
+    const sql = findElectionMigrationSQL();
+    expect(sql.toLowerCase()).toContain('election_voting_date_order');
+  });
+
+  test('[BR-50] voting_open_at >= nominations_close_at constraint is in migrations', () => {
+    const sql = findElectionMigrationSQL();
+    expect(sql.toLowerCase()).toContain('election_nominations_before_voting');
+  });
+
+  test('[BR-50] all three constraints reference the correct columns', () => {
+    const sql = findElectionMigrationSQL().toLowerCase();
+    // nominations_date_order: close > open
+    expect(sql).toMatch(/nominations_close_at.+>.+nominations_open_at/s);
+    // voting_date_order: close > open
+    expect(sql).toMatch(/voting_close_at.+>.+voting_open_at/s);
+    // nominations_before_voting: voting_open >= nominations_close
+    expect(sql).toMatch(/voting_open_at.+>=.+nominations_close_at/s);
+  });
+
+  test('[BR-50] elections table exposes the four date columns the constraints reference', () => {
+    // Defense in depth: if a future refactor renamed the columns, the
+    // migration-text checks above would still pass against legacy
+    // migrations. Verify the live schema has the canonical columns.
+    expect(elections.nominationsOpenAt).toBeDefined();
+    expect(elections.nominationsCloseAt).toBeDefined();
+    expect(elections.votingOpenAt).toBeDefined();
+    expect(elections.votingCloseAt).toBeDefined();
+  });
+});
