@@ -32,7 +32,7 @@ function stubDocRepoWith(doc: any) {
 
 function stubOfficerAllowed() {
   stubRepo(OfficerTermRepository, {
-    findActiveByPersonAndOrg: async () => [{ positionTitle: 'Secretary' }],
+    findActiveByPersonAndOrg: async () => [{ positionTitle: 'President' }],
   });
 }
 

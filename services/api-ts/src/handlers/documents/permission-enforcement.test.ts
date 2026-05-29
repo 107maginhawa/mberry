@@ -34,7 +34,7 @@ function stubDocRepo(doc: any) {
 
 function stubOfficer(isOfficer: boolean) {
   stubRepo(OfficerTermRepository, {
-    findActiveByPersonAndOrg: async () => isOfficer ? [{ id: 'term-1' }] : [],
+    findActiveByPersonAndOrg: async () => isOfficer ? [{ id: 'term-1', positionTitle: 'President' }] : [],
   });
 }
 

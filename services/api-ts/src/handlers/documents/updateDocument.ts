@@ -1,10 +1,18 @@
 import type { ValidatedContext } from '@/types/app';
 import type { DatabaseInstance } from '@/core/database';
 import type { UpdateDocumentBody, UpdateDocumentParams } from '@/generated/openapi/validators';
-import { UnauthorizedError, NotFoundError, ForbiddenError } from '@/core/errors';
+import { UnauthorizedError, NotFoundError, ForbiddenError, BusinessLogicError } from '@/core/errors';
 import { DocumentRepository } from './repos/documents.repo';
 import { auditAction } from '@/utils/audit';
 import { requireOfficerTerm } from '@/utils/officer-check';
+
+// [EM-M11-b4f29d18] Document status lifecycle: draft → published → archived.
+// Archived is terminal; published cannot revert to draft.
+const ALLOWED_STATUS_TRANSITIONS: Record<string, string[]> = {
+  draft: ['published', 'archived'],
+  published: ['archived'],
+  archived: [],
+};
 
 /**
  * updateDocument
@@ -34,6 +42,18 @@ export async function updateDocument(
   const orgId = ctx.get('organizationId');
   if (existing.organizationId !== orgId) {
     throw new ForbiddenError('Access denied to this document');
+  }
+
+  // [EM-M11-b4f29d18] Guard status changes against the document state machine.
+  const nextStatus = (body as Record<string, unknown>)['status'] as string | undefined;
+  if (nextStatus && nextStatus !== existing.status) {
+    const allowed = ALLOWED_STATUS_TRANSITIONS[existing.status] ?? [];
+    if (!allowed.includes(nextStatus)) {
+      throw new BusinessLogicError(
+        `Invalid document status transition: ${existing.status} → ${nextStatus}`,
+        'INVALID_STATUS_TRANSITION',
+      );
+    }
   }
 
   const updated = await repo.updateOneById(documentId, body as Record<string, unknown>);

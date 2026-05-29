@@ -17,7 +17,7 @@ describe('deleteDocument', () => {
     });
     // Stub officer check to allow access in unit tests
     stubRepo(OfficerTermRepository, {
-      findActiveByPersonAndOrg: async () => [{ positionTitle: 'Secretary' }],
+      findActiveByPersonAndOrg: async () => [{ positionTitle: 'President' }],
     });
   });
 
@@ -37,6 +37,16 @@ describe('deleteDocument', () => {
     expect(res.status).toBe(204);
   });
 
+  test('returns 403 for a non-president officer (Secretary)', async () => {
+    restoreRepo(OfficerTermRepository);
+    stubRepo(OfficerTermRepository, {
+      findActiveByPersonAndOrg: async () => [{ positionTitle: 'Secretary' }],
+    });
+    const ctx = makeCtx({ _params: { documentId: 'doc-1' } });
+    const res = await deleteDocument(ctx);
+    expect(res.status).toBe(403);
+  });
+
   test('throws NotFoundError when document not found', async () => {
     restoreRepo(DocumentRepository);
     stubRepo(DocumentRepository, {
@@ -44,7 +54,7 @@ describe('deleteDocument', () => {
       deleteOneById: async () => {},
     });
     stubRepo(OfficerTermRepository, {
-      findActiveByPersonAndOrg: async () => [{ positionTitle: 'Secretary' }],
+      findActiveByPersonAndOrg: async () => [{ positionTitle: 'President' }],
     });
     const ctx = makeCtx({ _params: { documentId: 'nonexistent' } });
     await expect(deleteDocument(ctx)).rejects.toBeInstanceOf(NotFoundError);

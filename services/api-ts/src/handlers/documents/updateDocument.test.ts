@@ -38,6 +38,25 @@ describe('updateDocument', () => {
     expect((res as any).body?.title).toBe('New Title');
   });
 
+  test('rejects an invalid status transition (published -> draft)', async () => {
+    const ctx = makeCtx({ _params: { documentId: 'doc-1' }, _body: { status: 'draft' } });
+    await expect(updateDocument(ctx)).rejects.toThrow();
+  });
+
+  test('allows a valid status transition (published -> archived)', async () => {
+    restoreRepo(DocumentRepository);
+    stubRepo(DocumentRepository, {
+      findOneById: async () => existingDoc,
+      updateOneById: async () => ({ ...existingDoc, status: 'archived' }),
+    });
+    stubRepo(OfficerTermRepository, {
+      findActiveByPersonAndOrg: async () => [{ positionTitle: 'Secretary' }],
+    });
+    const ctx = makeCtx({ _params: { documentId: 'doc-1' }, _body: { status: 'archived' } });
+    const res = await updateDocument(ctx);
+    expect(res.status).toBe(200);
+  });
+
   test('throws NotFoundError when document not found', async () => {
     restoreRepo(DocumentRepository);
     stubRepo(DocumentRepository, {

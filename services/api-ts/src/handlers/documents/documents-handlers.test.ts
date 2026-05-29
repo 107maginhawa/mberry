@@ -18,7 +18,7 @@ import { OfficerTermRepository } from '@/handlers/association:member/repos/gover
 // Stub officer check globally so all handler tests pass the new auth guards.
 // Auth enforcement is tested separately in auth-enforcement.test.ts.
 stubRepo(OfficerTermRepository, {
-  findActiveByPersonAndOrg: async () => [{ positionTitle: 'Secretary' }],
+  findActiveByPersonAndOrg: async () => [{ positionTitle: 'President' }],
 });
 
 // ─── Shared fixtures ──────────────────────────────────────────────────────────

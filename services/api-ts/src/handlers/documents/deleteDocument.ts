@@ -4,7 +4,8 @@ import type { DeleteDocumentParams } from '@/generated/openapi/validators';
 import { UnauthorizedError, NotFoundError, ForbiddenError } from '@/core/errors';
 import { DocumentRepository } from './repos/documents.repo';
 import { auditAction } from '@/utils/audit';
-import { requireOfficerTerm } from '@/utils/officer-check';
+import { requirePosition } from '@/utils/officer-check';
+import { POSITION_TITLES } from '@/utils/position-titles';
 
 /**
  * deleteDocument
@@ -18,8 +19,9 @@ export async function deleteDocument(
   const session = ctx.get('session');
   if (!session) throw new UnauthorizedError();
 
-  // P1: Officer/admin restriction for document deletion
-  const denied = await requireOfficerTerm(ctx);
+  // [EM-M11-h5c78d34] Document deletion is president-only (spec: super/admin/president).
+  // requireOfficerTerm allowed any officer, which was over-permissive.
+  const denied = await requirePosition(ctx, [POSITION_TITLES.PRESIDENT]);
   if (denied) return denied;
 
   const { documentId } = ctx.req.valid('param');
