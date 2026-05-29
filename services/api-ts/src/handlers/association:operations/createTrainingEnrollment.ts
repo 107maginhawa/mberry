@@ -39,6 +39,16 @@ export async function createTrainingEnrollment(
     throw new BusinessLogicError('Enrollment is only accepted for published trainings', 'TRAINING_NOT_PUBLISHED');
   }
 
+  // BR-41: paid training requires confirmed payment before enrollment.
+  // The free-enrollment path must not create an enrolled record for a paid
+  // training — payment is confirmed out-of-band (M06 billing) first.
+  if (training.registrationFee && training.registrationFee > 0) {
+    throw new BusinessLogicError(
+      'This training requires payment. Complete payment before enrolling.',
+      'PAYMENT_REQUIRED',
+    );
+  }
+
   if (training.capacity) {
     const enrolledCount = await enrollRepo.count({ trainingId, status: 'enrolled' });
     if (enrolledCount >= training.capacity) {

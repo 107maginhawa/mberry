@@ -1,8 +1,8 @@
 import type { ValidatedContext } from '@/types/app';
 import type { DatabaseInstance } from '@/core/database';
 import type { DeleteTrainingEnrollmentParams } from '@/generated/openapi/validators';
-import { NotFoundError } from '@/core/errors';
-import { TrainingEnrollmentRepository } from './repos/training.repo';
+import { NotFoundError, BusinessLogicError } from '@/core/errors';
+import { TrainingRepository, TrainingEnrollmentRepository } from './repos/training.repo';
 import { auditAction } from '@/utils/audit';
 import { requirePosition } from '@/utils/officer-check';
 import { POSITION_TITLES } from '@/utils/position-titles';
@@ -29,6 +29,15 @@ export async function deleteTrainingEnrollment(
 
   const existing = await repo.findOneById(params.enrollmentId);
   if (!existing) throw new NotFoundError('Training enrollment not found');
+
+  // BR-43: completed training locks enrollments — no changes post-completion.
+  const training = await new TrainingRepository(db, logger).findOneById(existing.trainingId);
+  if (training?.status === 'completed') {
+    throw new BusinessLogicError(
+      'This training is completed. Enrollments are locked and cannot be removed.',
+      'TRAINING_COMPLETED',
+    );
+  }
 
   await repo.deleteOneById(params.enrollmentId, user.id);
 

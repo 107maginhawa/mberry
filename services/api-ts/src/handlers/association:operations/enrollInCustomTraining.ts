@@ -34,6 +34,14 @@ export async function enrollInCustomTraining(
     throw new BusinessLogicError('Enrollment is only accepted for published trainings', 'TRAINING_NOT_PUBLISHED');
   }
 
+  // BR-41: paid training requires confirmed payment before enrollment.
+  if (training.registrationFee && training.registrationFee > 0) {
+    throw new BusinessLogicError(
+      'This training requires payment. Complete payment before enrolling.',
+      'PAYMENT_REQUIRED',
+    );
+  }
+
   if (training.capacity) {
     const enrolledCount = await enrollRepo.count({ trainingId: params.trainingId, status: 'enrolled' });
     if (enrolledCount >= training.capacity) {
