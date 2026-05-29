@@ -63,7 +63,7 @@ export const ROUTE_ROLES: Record<string, AdminRole[]> = {
   '/compliance': ['super', 'support', 'analyst'],
   '/events': ['super', 'support'],
   '/training': ['super', 'support', 'analyst'],
-  '/national-dashboard': ['super', 'support', 'analyst'],
+  '/national-dashboard': ['super'],
   '/committees': ['super', 'support'],
   '/operators': ['super'],
   '/impersonate': ['super'],

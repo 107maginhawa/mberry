@@ -114,6 +114,10 @@ describe('ROUTE_ROLES', () => {
     expect(ROUTE_ROLES['/']).toContain('support')
     expect(ROUTE_ROLES['/']).toContain('analyst')
   })
+
+  test('[EM-M14] national-dashboard restricted to super only (matches backend isPlatformAdmin)', () => {
+    expect(ROUTE_ROLES['/national-dashboard']).toEqual(['super'])
+  })
 })
 
 describe('useAdminUser', () => {

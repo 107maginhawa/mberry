@@ -21,7 +21,7 @@ import { listAssociationsOptions } from '@monobase/sdk-ts/generated/@tanstack/re
 
 export const Route = createFileRoute('/national-dashboard/')({
   component: () => (
-    <RequireRole allowed={['super', 'support', 'analyst']}>
+    <RequireRole allowed={['super']}>
       <NationalDashboardPage />
     </RequireRole>
   ),
