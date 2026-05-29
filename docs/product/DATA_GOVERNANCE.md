@@ -1,7 +1,7 @@
-<!-- oli:artifact data-governance v1.0 generated:2026-05-21 updated:2026-05-21 source:MASTER_PRD.md,cross-cutting.md -->
+<!-- oli:artifact data-governance v1.1 generated:2026-05-21 updated:2026-05-30 source:MASTER_PRD.md,cross-cutting.md -->
 # Data Governance: Memberry
 
-> Data classification, retention, and deletion policies derived from PRD audit. Finalized 2026-05-21 — all open items resolved or deferred.
+> Data classification, retention, and deletion policies derived from PRD audit. Promoted from draft 2026-05-30 (Wave G4 S-C4-044) — all open items resolved or deferred.
 
 ## Regulatory Context
 

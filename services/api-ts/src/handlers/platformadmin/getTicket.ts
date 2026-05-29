@@ -12,13 +12,18 @@ import type { DatabaseInstance } from '@/core/database';
 import { eq, and, type SQL } from 'drizzle-orm';
 import { supportTickets, ticketComments } from './repos/platform-admin.schema';
 
+interface SessionLike {
+  userId?: string;
+  user?: { id?: string };
+}
+
 export async function getTicket(ctx: Context): Promise<Response> {
-  const session = ctx.get('session');
+  const session = ctx.get('session') as SessionLike | null;
   if (!session) return ctx.json({ error: 'Unauthorized' }, 401);
 
   const db = ctx.get('database') as DatabaseInstance;
   const admin = ctx.get('platformAdmin');
-  const userId: string = (session as any).userId ?? (session as any).user?.id;
+  const userId = session.userId ?? session.user?.id ?? '';
   const ticketId = ctx.req.param('id') as string;
 
   const [ticket] = await db

@@ -1,4 +1,4 @@
-<!-- oli:artifact observability v1.0 generated:2026-05-21 source:MASTER_PRD.md,codebase -->
+<!-- oli:artifact observability v1.1 generated:2026-05-21 updated:2026-05-30 source:MASTER_PRD.md,codebase -->
 # Observability Strategy: Memberry
 
 > Defines logging, metrics, alerting, and tracing standards. Ensures NFR targets (PRD S7) are measurable and enforceable. NFR breaches are P1 incidents with 24-hour resolution SLA.
@@ -131,14 +131,40 @@ Phase 2 (when scale demands): OpenTelemetry SDK with Prometheus exporter for rea
 - Enables full request reconstruction: HTTP request → handler → DB changes → audit entry
 - Financial operations (payments, refunds) include `requestId` in status history tables
 
-### Future: OpenTelemetry
+### OpenTelemetry (Wave G4 — S-C4-040)
 
-When the platform scales beyond a single process:
+**Status:** Wired. SDK + manual Hono middleware live in `services/api-ts/src/core/observability.ts`.
 
-1. Add `@opentelemetry/sdk-node` with auto-instrumentation
-2. Export traces to Jaeger or Grafana Tempo
-3. Instrument critical paths: auth → handler → DB → external service (Stripe, OneSignal, S3)
-4. Add span attributes for `organizationId`, `personId`, `module`
+**Stack:**
+
+| Component | Package | Notes |
+|-----------|---------|-------|
+| API | `@opentelemetry/api` | trace/context/propagation surface |
+| SDK | `@opentelemetry/sdk-node` | NodeSDK with idempotent `initObservability()` |
+| Auto-instrumentation | `@opentelemetry/auto-instrumentations-node` | pg + http enabled; fs + dns disabled (noise) |
+| Exporter | `@opentelemetry/exporter-trace-otlp-http` | OTLP/HTTP to `${OTEL_EXPORTER_OTLP_ENDPOINT}/v1/traces` |
+
+**Environment variables:**
+
+| Variable | Default | Effect |
+|----------|---------|--------|
+| `OTEL_EXPORTER_OTLP_ENDPOINT` | _(unset)_ | When unset, SDK does not start (zero overhead in dev/test) |
+| `OTEL_SERVICE_NAME` | `memberry-api` | Service name attached to spans |
+| `OTEL_ENABLED` | _(unset)_ | Set to `false` to force-disable even when endpoint is set |
+
+**Initialization order:** `initObservability()` runs FIRST in `services/api-ts/src/index.ts` (before `createApp`) so auto-instrumentation can hook the Hono/pg/http modules at import time. The SDK is torn down in the shutdown handler.
+
+**Manual Hono span:** Every request gets a `${METHOD} ${path}` server span via `createTracingMiddleware()` (registered right after `createRequestId`). When the SDK is inactive, the span calls are no-ops with negligible cost. Attributes set: `http.method`, `http.route`, `http.target`, `http.scheme`, `http.host`, `net.host.name`, `request.id`, `http.status_code`. 5xx responses mark the span as `ERROR`.
+
+**Context propagation:** Inbound `traceparent` / `tracestate` headers are extracted on every request, so cross-service traces stitch automatically. Outbound HTTP calls instrumented by `auto-instrumentations-node` will propagate context downstream.
+
+**Smoke check:**
+
+```bash
+OTEL_EXPORTER_OTLP_ENDPOINT=http://localhost:4318 bun --cwd services/api-ts dev
+curl http://localhost:7213/health
+# Check collector for a span: http.method=GET http.route=/health
+```
 
 ---
 

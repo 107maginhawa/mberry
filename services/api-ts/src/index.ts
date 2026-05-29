@@ -7,9 +7,15 @@
 
 import { createApp, initializeApp, cleanupApp } from '@/app';
 import { parseConfig } from '@/core/config';
+import { initObservability } from '@/core/observability';
 
 // Export for Boa bundle
 export { createApp, parseConfig };
+
+// Initialize OpenTelemetry SDK BEFORE creating the app so auto-instrumentation
+// captures Hono / pg / http bootstrap spans. No-op when OTEL_EXPORTER_OTLP_ENDPOINT
+// is unset.
+const otelTeardown = await initObservability();
 
 // Parse configuration from CLI args and environment
 const config = parseConfig();
@@ -39,6 +45,7 @@ async function handleShutdown(signal: string) {
   
   try {
     await cleanupApp(app);
+    await otelTeardown();
     log.info('Graceful shutdown completed');
     process.exit(0);
   } catch (error) {

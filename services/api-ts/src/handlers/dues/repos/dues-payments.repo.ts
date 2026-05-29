@@ -103,7 +103,10 @@ export class DuesRepository {
     toDate?: Date;
     limit?: number;
     offset?: number;
-  }): Promise<{ data: DuesPayment[]; total: number }> {
+  }): Promise<{
+    data: Array<DuesPayment & { person: { firstName: string | null; lastName: string | null } | null }>;
+    total: number;
+  }> {
     const conditions: SQL<unknown>[] = [];
 
     if (filters.organizationId) conditions.push(eq(duesPayments.organizationId, filters.organizationId));
@@ -159,7 +162,13 @@ export class DuesRepository {
       person: row.personFirstName ? { firstName: row.personFirstName, lastName: row.personLastName } : null,
     }));
 
-    return { data: shaped as any, total: countResult[0]?.count ?? 0 };
+    // The select set above is a strict subset of DuesPayment columns (no version,
+    // createdBy, updatedBy, metadata). Widen via `unknown` to attach a typed
+    // shape that matches the declared return type. structural: partial select.
+    return {
+      data: shaped as unknown as Array<DuesPayment & { person: { firstName: string | null; lastName: string | null } | null }>,
+      total: countResult[0]?.count ?? 0,
+    };
   }
 
   async getPayment(id: string): Promise<DuesPayment | undefined> {

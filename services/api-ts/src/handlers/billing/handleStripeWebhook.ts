@@ -888,7 +888,10 @@ async function handleInvoicePaymentSucceeded(
   const stripeEventId = event.id;
 
   // Try to match a platform subscription via subscription ID
-  const stripeSubscriptionId = (invoice as any).subscription as string | null;
+  // structural: Stripe 2025 API — `subscription` was removed from the static
+  // Invoice type in Stripe SDK v19 but is still present at runtime when the
+  // invoice originated from a subscription (verified via Stripe payload schema).
+  const stripeSubscriptionId = (invoice as { subscription?: string | null }).subscription ?? null;
   if (stripeSubscriptionId) {
     const [local] = await database
       .select()
@@ -902,7 +905,8 @@ async function handleInvoicePaymentSucceeded(
         return;
       }
 
-      const lines = (invoice as any).lines?.data ?? [];
+      // structural: Stripe 2025 API — `lines.data` typing intermittent; runtime always present.
+      const lines = (invoice as { lines?: { data?: Array<{ period?: { end?: number } }> } }).lines?.data ?? [];
       const periodEnd = lines[0]?.period?.end
         ? new Date(lines[0].period.end * 1000)
         : null;
@@ -939,7 +943,8 @@ async function handleInvoicePaymentFailed(
   const invoice = event.data.object as Stripe.Invoice;
   const stripeEventId = event.id;
 
-  const stripeSubscriptionId = (invoice as any).subscription as string | null;
+  // structural: Stripe 2025 API — `subscription` removed from static Invoice type, present at runtime.
+  const stripeSubscriptionId = (invoice as { subscription?: string | null }).subscription ?? null;
   if (!stripeSubscriptionId) {
     logger.debug({ invoiceId: invoice.id }, 'invoice.payment_failed — no subscription ID, skipping');
     return;

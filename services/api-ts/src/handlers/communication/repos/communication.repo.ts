@@ -150,7 +150,7 @@ export class MessageRepository {
 
     for (const m of rows) {
       if (Array.isArray(m.recipients)) {
-        for (const r of m.recipients as any[]) {
+        for (const r of m.recipients) {
           if (r.personId && personIdSet.has(r.personId)) {
             duplicates.add(r.personId);
           }

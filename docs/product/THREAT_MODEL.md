@@ -1,4 +1,4 @@
-<!-- oli:artifact threat-model v1.0 generated:2026-05-21 source:MASTER_PRD.md,cross-cutting.md -->
+<!-- oli:artifact threat-model v1.1 generated:2026-05-21 updated:2026-05-30 source:MASTER_PRD.md,cross-cutting.md -->
 # Threat Model: Memberry
 
 > Security threat analysis derived from PRD audit. Triggered by: Security=YES, Regulated=YES.
@@ -32,6 +32,7 @@
 | SVG/file upload XSS | Medium | High | SVG sanitization (BR-31) | Mitigated |
 | Fund allocation tampering | Low | High | Percentage validation, last-fund remainder absorption (BR-05) | Mitigated |
 | Membership status falsification | Low | Medium | Status computed from dues_expiry_date (BR-01), not mutable | Mitigated |
+| Cross-site request forgery (CSRF) | Medium | High | Defense-in-depth (Wave G4 S-C4-041): (1) `SameSite=Lax` Better-Auth cookies, (2) Hono origin/Sec-Fetch-Site check via `hono/csrf`, (3) double-submit token middleware (`createCsrfTokenMiddleware`). Webhooks + `/email/unsubscribe` + `/pay/*` allowlisted (they have signed-token integrity). | Mitigated |
 
 ### Repudiation
 

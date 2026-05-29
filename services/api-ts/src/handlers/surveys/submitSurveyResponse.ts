@@ -9,6 +9,7 @@ import {
   ConflictError,
 } from '@/core/errors';
 import { SurveyRepository, SurveyResponseRepository } from './repos/survey.repo';
+import type { QuestionAnswer } from './repos/survey.schema';
 
 /**
  * submitSurveyResponse
@@ -71,7 +72,7 @@ export async function submitSurveyResponse(
     surveyId,
     // P0 privacy fix: strip responderId for anonymous surveys
     responderId: isAnonymous ? null : userId,
-    answers: (body.answers ?? []) as any,
+    answers: (body.answers ?? []) as QuestionAnswer[],
     contextId: body.contextId ?? null,
     createdBy: userId,
     updatedBy: userId,

@@ -15,7 +15,7 @@ export async function listAllCommittees(ctx: Context): Promise<Response> {
   const db = ctx.get('database');
   const repo = new CommitteeRepository(db);
 
-  const committees = await (repo as any).listAll(limit, offset);
+  const committees = await repo.listAll(limit, offset);
 
   return ctx.json({ data: committees }, 200);
 }
