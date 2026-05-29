@@ -14,6 +14,7 @@ import {
   type QueueEmailRequest
 } from './email.schema';
 import { ValidationError, NotFoundError, BusinessLogicError } from '@/core/errors';
+import { assertValidTransition, EMAIL_QUEUE_VALID_TRANSITIONS } from '@/utils/status-transitions';
 import { v4 as uuidv4 } from 'uuid';
 import { subDays } from 'date-fns';
 
@@ -174,7 +175,16 @@ export class EmailQueueRepository extends DatabaseRepository<EmailQueueItem, New
    */
   async markAsProcessing(id: string): Promise<EmailQueueItem> {
     this.logger?.debug({ id }, 'Marking email as processing');
-    
+
+    const current = await this.findOneById(id);
+    if (!current) {
+      throw new NotFoundError('Email queue item not found', {
+        resourceType: 'emailQueue',
+        resource: id,
+      });
+    }
+    assertValidTransition(EMAIL_QUEUE_VALID_TRANSITIONS, current.status, 'processing', 'email queue item');
+
     return this.updateOneById(id, {
       status: 'processing',
       lastAttemptAt: new Date()
@@ -185,12 +195,21 @@ export class EmailQueueRepository extends DatabaseRepository<EmailQueueItem, New
    * Mark email as sent
    */
   async markAsSent(
-    id: string, 
-    provider: 'smtp' | 'postmark' | 'onesignal', 
+    id: string,
+    provider: 'smtp' | 'postmark' | 'onesignal',
     providerMessageId: string
   ): Promise<EmailQueueItem> {
     this.logger?.debug({ id, provider, providerMessageId }, 'Marking email as sent');
-    
+
+    const current = await this.findOneById(id);
+    if (!current) {
+      throw new NotFoundError('Email queue item not found', {
+        resourceType: 'emailQueue',
+        resource: id,
+      });
+    }
+    assertValidTransition(EMAIL_QUEUE_VALID_TRANSITIONS, current.status, 'sent', 'email queue item');
+
     return this.updateOneById(id, {
       status: 'sent',
       sentAt: new Date(),
@@ -204,10 +223,19 @@ export class EmailQueueRepository extends DatabaseRepository<EmailQueueItem, New
    */
   async markAsFailed(id: string, error: string, attempts: number): Promise<EmailQueueItem> {
     this.logger?.debug({ id, error, attempts }, 'Marking email as failed');
-    
+
+    const current = await this.findOneById(id);
+    if (!current) {
+      throw new NotFoundError('Email queue item not found', {
+        resourceType: 'emailQueue',
+        resource: id,
+      });
+    }
+    assertValidTransition(EMAIL_QUEUE_VALID_TRANSITIONS, current.status, 'failed', 'email queue item');
+
     // Calculate next retry time with exponential backoff
     const nextRetryAt = this.calculateNextRetryTime(attempts);
-    
+
     return this.updateOneById(id, {
       status: 'failed',
       attempts: attempts + 1,
@@ -240,7 +268,7 @@ export class EmailQueueRepository extends DatabaseRepository<EmailQueueItem, New
    */
   async cancelEmail(id: string, userId: string, reason: string): Promise<EmailQueueItem> {
     this.logger?.debug({ id, userId, reason }, 'Cancelling email');
-    
+
     const email = await this.findOneById(id);
     if (!email) {
       throw new NotFoundError('Email not found', {
@@ -248,16 +276,12 @@ export class EmailQueueRepository extends DatabaseRepository<EmailQueueItem, New
         resource: id
       });
     }
-    
-    // Validate email can be cancelled
-    if (email.status === 'sent') {
-      throw new BusinessLogicError('Cannot cancel email that has already been sent', 'EMAIL_ALREADY_SENT');
-    }
-    
-    if (email.status === 'cancelled') {
-      throw new BusinessLogicError('Email is already cancelled', 'EMAIL_ALREADY_CANCELLED');
-    }
-    
+
+    // Guard via EMAIL_QUEUE_VALID_TRANSITIONS — supersedes the prior ad-hoc
+    // already-sent / already-cancelled BusinessLogicError checks. Cancellation
+    // is only valid from `pending` per the transition map.
+    assertValidTransition(EMAIL_QUEUE_VALID_TRANSITIONS, email.status, 'cancelled', 'email queue item');
+
     return this.updateOneById(id, {
       status: 'cancelled',
       cancelledAt: new Date(),
@@ -271,7 +295,7 @@ export class EmailQueueRepository extends DatabaseRepository<EmailQueueItem, New
    */
   async retryEmail(id: string): Promise<EmailQueueItem> {
     this.logger?.debug({ id }, 'Retrying email');
-    
+
     const email = await this.findOneById(id);
     if (!email) {
       throw new NotFoundError('Email not found', {
@@ -279,16 +303,16 @@ export class EmailQueueRepository extends DatabaseRepository<EmailQueueItem, New
         resource: id
       });
     }
-    
-    // Validate email can be retried
-    if (email.status !== 'failed') {
-      throw new BusinessLogicError(`Cannot retry email with status ${email.status}`, 'INVALID_STATUS_FOR_RETRY');
-    }
-    
+
+    // Guard via EMAIL_QUEUE_VALID_TRANSITIONS — supersedes the prior ad-hoc
+    // "status must be failed" BusinessLogicError. Only `failed → pending` is
+    // a valid user-triggered retry transition.
+    assertValidTransition(EMAIL_QUEUE_VALID_TRANSITIONS, email.status, 'pending', 'email queue item');
+
     if (email.attempts >= 3) {
       throw new BusinessLogicError('Email has exceeded maximum retry attempts', 'MAX_RETRIES_EXCEEDED');
     }
-    
+
     return this.updateOneById(id, {
       status: 'pending',
       nextRetryAt: null,

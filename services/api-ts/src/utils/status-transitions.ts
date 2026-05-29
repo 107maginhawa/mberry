@@ -14,11 +14,15 @@ export const BOOKING_EVENT_VALID_TRANSITIONS: Record<string, string[]> = {
 };
 
 // Email queue status (emailQueueStatusEnum: pending, processing, sent, failed, cancelled)
+// `failed → processing` is permitted because the job runner auto-retries failed
+// items directly via markAsProcessing without an intermediate retryEmail() call
+// (see core/email.ts processPendingEmails). User-triggered retry still goes
+// `failed → pending` via retryEmail().
 export const EMAIL_QUEUE_VALID_TRANSITIONS: Record<string, string[]> = {
   pending: ['processing', 'cancelled'],
   processing: ['sent', 'failed'],
   sent: [],      // terminal
-  failed: ['pending'],  // retry
+  failed: ['pending', 'processing'],  // user retry → pending; auto retry → processing
   cancelled: [],  // terminal
 };
 
