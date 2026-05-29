@@ -5,6 +5,11 @@
 import { eq, and, type SQL } from 'drizzle-orm';
 import type { DatabaseInstance } from '@/core/database';
 import { DatabaseRepository } from '@/core/database.repo';
+import { NotFoundError } from '@/core/errors';
+import {
+  assertValidTransition,
+  MARKETPLACE_VENDOR_VALID_TRANSITIONS,
+} from '@/utils/status-transitions';
 import {
   vendors,
   type Vendor,
@@ -49,9 +54,18 @@ export class VendorRepository extends DatabaseRepository<Vendor, NewVendor, Vend
   }
 
   /**
-   * Verify a vendor (admin action)
+   * Verify a vendor (admin action). Defensive FSM guard — handler also guards;
+   * this chokehold catches any future caller that bypasses the handler.
    */
   async verifyVendor(vendorId: string, verifiedBy: string): Promise<Vendor> {
+    const current = await this.findOneById(vendorId);
+    if (!current) throw new NotFoundError('Vendor not found');
+    assertValidTransition(
+      MARKETPLACE_VENDOR_VALID_TRANSITIONS,
+      current.verificationStatus,
+      'verified',
+      'vendor',
+    );
     return this.updateOneById(vendorId, {
       verificationStatus: 'verified',
       verifiedAt: new Date(),
@@ -60,9 +74,17 @@ export class VendorRepository extends DatabaseRepository<Vendor, NewVendor, Vend
   }
 
   /**
-   * Suspend a vendor (admin action)
+   * Suspend a vendor (admin action). FSM-guarded: only verified → suspended is allowed.
    */
   async suspendVendor(vendorId: string, updatedBy: string): Promise<Vendor> {
+    const current = await this.findOneById(vendorId);
+    if (!current) throw new NotFoundError('Vendor not found');
+    assertValidTransition(
+      MARKETPLACE_VENDOR_VALID_TRANSITIONS,
+      current.verificationStatus,
+      'suspended',
+      'vendor',
+    );
     return this.updateOneById(vendorId, {
       verificationStatus: 'suspended',
       updatedBy,

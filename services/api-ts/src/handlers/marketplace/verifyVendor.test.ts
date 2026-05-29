@@ -7,7 +7,7 @@
 import { describe, test, expect, mock, beforeEach } from 'bun:test';
 import { verifyVendor } from './verifyVendor';
 import { VendorRepository } from './repos/vendor.repo';
-import { ValidationError, NotFoundError, BusinessLogicError } from '@/core/errors';
+import { ValidationError, NotFoundError, BusinessLogicError, ConflictError } from '@/core/errors';
 import type { Vendor } from './repos/marketplace.schema';
 
 function makeVendor(overrides: Partial<Vendor> = {}): Vendor {
@@ -74,11 +74,50 @@ describe('verifyVendor (BR-38)', () => {
     await expect(verifyVendor(ctx)).rejects.toBeInstanceOf(NotFoundError);
   });
 
-  test('throws BusinessLogicError when vendor is already verified', async () => {
+  test('throws ConflictError when vendor is already verified (FSM guard)', async () => {
     VendorRepository.prototype.findOneById = mock(async () =>
       makeVendor({ verificationStatus: 'verified' })
     ) as any;
     const ctx = makeCtx({ params: { vendorId: 'vendor-1' } });
-    await expect(verifyVendor(ctx)).rejects.toBeInstanceOf(BusinessLogicError);
+    await expect(verifyVendor(ctx)).rejects.toBeInstanceOf(ConflictError);
+  });
+});
+
+describe('verifyVendor — MARKETPLACE_VENDOR_VALID_TRANSITIONS guard', () => {
+  beforeEach(() => {
+    VendorRepository.prototype.verifyVendor = mock(async () =>
+      makeVendor({ verificationStatus: 'verified', verifiedBy: 'user-1', verifiedAt: new Date() })
+    ) as any;
+  });
+
+  test('throws ConflictError when verifying a rejected vendor (terminal)', async () => {
+    VendorRepository.prototype.findOneById = mock(async () =>
+      makeVendor({ verificationStatus: 'rejected' })
+    ) as any;
+    const ctx = makeCtx({ params: { vendorId: 'vendor-1' } });
+    await expect(verifyVendor(ctx)).rejects.toBeInstanceOf(ConflictError);
+  });
+
+  test('throws ConflictError when verifying a suspended vendor (must go verified)', async () => {
+    // suspended -> verified is allowed; this exercises the success-side path
+    VendorRepository.prototype.findOneById = mock(async () =>
+      makeVendor({ verificationStatus: 'suspended' })
+    ) as any;
+    const ctx = makeCtx({ params: { vendorId: 'vendor-1' } });
+    // suspended -> verified IS allowed per FSM: should NOT throw
+    await verifyVendor(ctx);
+    const { status, data } = ctx._captured();
+    expect(status).toBe(200);
+    expect(data.verificationStatus).toBe('verified');
+  });
+
+  test('allows pending -> verified (happy path)', async () => {
+    VendorRepository.prototype.findOneById = mock(async () =>
+      makeVendor({ verificationStatus: 'pending' })
+    ) as any;
+    const ctx = makeCtx({ params: { vendorId: 'vendor-1' } });
+    await verifyVendor(ctx);
+    const { status } = ctx._captured();
+    expect(status).toBe(200);
   });
 });
