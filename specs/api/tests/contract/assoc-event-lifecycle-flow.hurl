@@ -75,6 +75,4 @@ HTTP 200
 
 # 6. 401 — request without auth cookie.
 GET {{api}}/association/event-lifecycle/my
-[Options]
-cookie:
 HTTP 401

@@ -70,6 +70,4 @@ HTTP 200
 # 6. 401 — request without auth cookie.
 GET {{api}}/association/member/officer-terms
 x-org-id: ed8e3a96-8126-4341-be42-e6eb7940c562
-[Options]
-cookie:
 HTTP 401
