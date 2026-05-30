@@ -7,6 +7,7 @@ import { Button } from '@monobase/ui'
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@monobase/ui'
 import { GlassCard } from '@/components/motion/glass-card'
 import { PageHeader } from '@/components/patterns/page-header'
+import { ErrorState } from '@/components/patterns/error-state'
 import { DuesStatusBadge } from '@/features/dues/components/dues-status-badge'
 import { formatCents } from '@/features/dues/lib/money'
 import { MoreHorizontal, CreditCard, Bell, FileText, Plus } from 'lucide-react'
@@ -20,12 +21,20 @@ function MemberFinancialDetailPage() {
   const { orgId, orgSlug } = useOrg()
   const { memberId } = Route.useParams()
 
-  const { data: summary, isLoading } = useQuery({
+  const { data: summary, isLoading, isError, refetch } = useQuery({
     queryKey: ['dues-member-summary', orgId, memberId],
     queryFn: () =>
-      api.get(`/association/member/dues-member-summary/${orgId}/${memberId}`).then((r: any) => r.data),
+      api.get(`/api/association/member/dues-member-summary/${orgId}/${memberId}`).then((r: any) => r.data),
     enabled: !!orgId && !!memberId,
   })
+
+  if (isError) {
+    return (
+      <div className="p-6 max-w-2xl">
+        <ErrorState message="Could not load member finances" onRetry={() => refetch()} />
+      </div>
+    )
+  }
 
   if (isLoading) {
     return (

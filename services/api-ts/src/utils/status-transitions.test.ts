@@ -92,8 +92,16 @@ describe('EMAIL_QUEUE_VALID_TRANSITIONS', () => {
     expect(isValidTransition(EMAIL_QUEUE_VALID_TRANSITIONS, 'processing', 'failed')).toBe(true);
   });
 
-  it('failed → pending is valid (retry)', () => {
+  it('failed → pending is valid (user-triggered retry)', () => {
     expect(isValidTransition(EMAIL_QUEUE_VALID_TRANSITIONS, 'failed', 'pending')).toBe(true);
+  });
+
+  it('failed → processing is valid (job-runner auto-retry path)', () => {
+    // Job runner picks up failed items eligible for retry and marks them
+    // processing directly (see core/email.ts processPendingEmails). Both
+    // failed → pending (user retry) and failed → processing (auto retry)
+    // are legitimate forward paths from failed.
+    expect(isValidTransition(EMAIL_QUEUE_VALID_TRANSITIONS, 'failed', 'processing')).toBe(true);
   });
 
   it('sent has no valid transitions (terminal)', () => {

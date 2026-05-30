@@ -3,6 +3,7 @@
  *
  * Provides a unified interface for making API requests via HTTP fetch.
  */
+import { CSRF_HEADER, readCsrfCookie, isStateChangingMethod, seedCsrfToken } from './csrf'
 
 /**
  * Response from transport layer
@@ -41,13 +42,22 @@ export class HttpTransport implements Transport {
     const timeoutId = setTimeout(() => controller.abort(), 30000);
 
     try {
+      const headersOut: Record<string, string> = {
+        'Content-Type': 'application/json',
+        ...req.headers,
+      }
+      if (isStateChangingMethod(req.method)) {
+        let token = readCsrfCookie()
+        if (!token) {
+          await seedCsrfToken(this.baseUrl)
+          token = readCsrfCookie()
+        }
+        if (token) headersOut[CSRF_HEADER] = token
+      }
       const response = await fetch(`${this.baseUrl}${req.url}`, {
         method: req.method,
         body: req.body,
-        headers: {
-          'Content-Type': 'application/json',
-          ...req.headers,
-        },
+        headers: headersOut,
         credentials: 'include',
         signal: controller.signal,
       });

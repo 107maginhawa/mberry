@@ -198,6 +198,12 @@ model Survey extends BaseEntity {
 
   @doc("Person who created the survey")
   createdBy: UUID;
+
+  @doc("Requesting member's response status (only populated when mine=true)")
+  myResponseStatus?: ResponseStatus;
+
+  @doc("When the requesting member completed this survey (only populated when mine=true)")
+  myCompletedAt?: utcDateTime;
 }
 
 @doc("Response status")
@@ -267,6 +273,93 @@ model SurveyAnalytics {
 
   @doc("Per-question breakdown")
   questionBreakdown: Record<unknown>;
+}
+
+/**
+ * Trend point for NPS over time
+ */
+@doc("Single data point on an NPS trend line")
+model NpsTrendPoint {
+  @doc("Survey creation date")
+  date: utcDateTime;
+
+  @doc("NPS score (-100 to 100)")
+  score: float32;
+
+  @doc("Title of the survey producing this score")
+  surveyTitle: string;
+
+  @doc("Total responses contributing to this score")
+  responseCount: int32;
+}
+
+/**
+ * Result of bulk delete of a member's survey responses
+ */
+@doc("Outcome of deleting a member's survey responses (data retention / right-to-deletion)")
+model DeleteMemberResponsesResult {
+  @doc("Number of responses deleted")
+  deletedCount: int32;
+}
+
+/**
+ * Admin-tier flattened survey row (cross-org listing)
+ */
+@doc("Survey row in the platform-admin cross-org listing")
+model AdminSurveyListItem {
+  @doc("Survey ID")
+  id: UUID;
+
+  @doc("Survey title")
+  title: string;
+
+  @doc("Organization that owns the survey")
+  organizationName?: string;
+
+  @doc("Survey type")
+  surveyType: SurveyType;
+
+  @doc("Current lifecycle status")
+  status: SurveyStatus;
+
+  @doc("Response count from analytics snapshot")
+  responseCount: int32;
+
+  @doc("Number of questions on the survey")
+  questionCount: int32;
+
+  @doc("NPS score from analytics snapshot, if any")
+  npsScore?: float32;
+
+  @doc("When the survey was created")
+  createdAt: utcDateTime;
+}
+
+@doc("Aggregate stats for the platform-admin survey overview")
+model AdminSurveyStats {
+  @doc("Total surveys across all orgs")
+  totalSurveys: int32;
+
+  @doc("Surveys currently in 'active' status")
+  activeSurveys: int32;
+
+  @doc("Average NPS across surveys with analytics, if any")
+  avgNps?: float32;
+
+  @doc("Average response rate (completion %) across surveys with analytics")
+  avgResponseRate: float32;
+}
+
+@doc("Platform-admin cross-org survey listing")
+model AdminSurveyListResponse {
+  @doc("Survey rows for the requested page")
+  data: AdminSurveyListItem[];
+
+  @doc("Total matching surveys")
+  total: int32;
+
+  @doc("Aggregate stats across ALL surveys (unfiltered)")
+  stats: AdminSurveyStats;
 }
 
 // ============================================================================
@@ -509,6 +602,48 @@ namespace SurveysModule {
       @path survey: UUID
     ): ApiCreatedResponse<Survey>
       | ApiNotFoundResponse
+      | ApiUnauthorizedResponse
+      | ApiForbiddenResponse;
+
+    @doc("NPS trends across surveys for trend visualization. Officer/admin only.")
+    @operationId("getNpsTrends")
+    @get
+    @route("/analytics/nps-trends")
+    @useAuth(bearerAuth)
+    @extension("x-security-required-roles", #["officer", "admin"])
+    getNpsTrends(): ApiOkResponse<NpsTrendPoint[]>
+      | ApiUnauthorizedResponse
+      | ApiForbiddenResponse;
+
+    @doc("Delete all survey responses for the authenticated member (right-to-deletion).")
+    @operationId("deleteMemberResponses")
+    @delete
+    @route("/my-responses")
+    @useAuth(bearerAuth)
+    @extension("x-security-required-roles", #["user"])
+    deleteMemberResponses(): ApiOkResponse<DeleteMemberResponsesResult>
+      | ApiUnauthorizedResponse;
+  }
+
+  @doc("Platform-admin cross-org survey listing")
+  interface AdminSurveysManagement {
+
+    @doc("List surveys across all orgs with aggregate stats. Platform admin only.")
+    @operationId("listAdminSurveys")
+    @get
+    @route("/")
+    @useAuth(bearerAuth)
+    @extension("x-security-required-roles", #["admin"])
+    listAdminSurveys(
+      @doc("Page size (max 100, default 25)")
+      @query limit?: int32,
+      @doc("Page offset (default 0)")
+      @query offset?: int32,
+      @doc("Filter by lifecycle status")
+      @query status?: SurveyStatus,
+      @doc("Filter by survey type")
+      @query surveyType?: SurveyType
+    ): ApiOkResponse<AdminSurveyListResponse>
       | ApiUnauthorizedResponse
       | ApiForbiddenResponse;
   }

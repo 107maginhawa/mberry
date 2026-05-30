@@ -13,6 +13,7 @@ import {
   TableCell,
 } from '@monobase/ui'
 import { RequireRole } from '@/lib/role-gate'
+import { ErrorState } from '@/components/skeletons'
 import { searchCoursesOptions } from '@monobase/sdk-ts/generated/@tanstack/react-query.gen'
 
 export const Route = createFileRoute('/training/')({
@@ -43,7 +44,7 @@ function TrainingPage() {
   const [search, setSearch] = useState('')
   const [page, setPage] = useState(0)
 
-  const { data, isLoading, error } = useQuery(
+  const { data, isLoading, isError, refetch } = useQuery(
     searchCoursesOptions({
       query: {
         ...(search.length >= 2 ? { q: search } : {}),
@@ -52,6 +53,14 @@ function TrainingPage() {
       },
     })
   )
+
+  if (isError) {
+    return (
+      <div className="p-8 max-w-2xl">
+        <ErrorState message="Could not load training" onRetry={() => refetch()} />
+      </div>
+    )
+  }
 
   const courses = (data?.data ?? []) as unknown as CourseItem[]
   const hasMore = courses.length === PAGE_SIZE
@@ -81,15 +90,8 @@ function TrainingPage() {
         </div>
       </div>
 
-      {/* Error */}
-      {error && (
-        <div className="rounded-lg border border-red-300 bg-red-50 p-4 mb-4 text-red-700 text-sm">
-          {error instanceof Error ? error.message : 'Failed to load courses'}
-        </div>
-      )}
-
       {/* Summary */}
-      {!isLoading && !error && (
+      {!isLoading && (
         <p className="text-sm text-muted-foreground mb-4">
           {courses.length === 0
             ? 'No courses'

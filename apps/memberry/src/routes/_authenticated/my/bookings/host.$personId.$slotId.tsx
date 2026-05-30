@@ -14,6 +14,7 @@ import { Label } from '@monobase/ui'
 import { Textarea } from '@monobase/ui'
 import { Loader2, Calendar, Clock } from 'lucide-react'
 import { formatDate } from '@/lib/format-date'
+import { ErrorState } from '@/components/patterns/error-state'
 import type { LocationType } from '@monobase/sdk-ts/generated/types.gen'
 
 export const Route = createFileRoute('/_authenticated/my/bookings/host/$personId/$slotId')({
@@ -63,6 +64,20 @@ function ConfirmPage() {
     if (!cfg || cfg.price <= 0) return 'Free'
     return `${cfg.currency} ${(cfg.price / 100).toFixed(2)}`
   }, [event])
+
+  if (slotQuery.isError || eventQuery.isError) {
+    return (
+      <div className="p-6 max-w-2xl">
+        <ErrorState
+          message="Could not load this slot"
+          onRetry={() => {
+            slotQuery.refetch()
+            eventQuery.refetch()
+          }}
+        />
+      </div>
+    )
+  }
 
   if (slotQuery.isPending || eventQuery.isPending) {
     return (

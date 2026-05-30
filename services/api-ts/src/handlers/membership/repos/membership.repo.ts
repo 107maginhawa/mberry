@@ -1,4 +1,4 @@
-import { eq, and, or, ilike, desc, sql, type SQL } from 'drizzle-orm';
+import { eq, and, or, ilike, desc, sql, notInArray, type SQL } from 'drizzle-orm';
 import type { DatabaseInstance } from '@/core/database';
 import { escapeLikePattern } from '@/utils/sanitize';
 import {
@@ -14,6 +14,12 @@ import {
   type NewMembershipApplication,
 } from '../../association:member/repos/membership.schema';
 import { persons } from '../../person/repos/person.schema';
+// S-C4-015: cross-module references must resolve through canonical Drizzle
+// schemas (no hardcoded table-name strings). Both schemas are co-located in
+// existing module homes and used here only as references inside correlated
+// subqueries — handler→handler imports are clean per audit IC-07.
+import { duesInvoices } from '../../dues/repos/dues.schema';
+import { creditEntries } from '../../association:member/repos/credits.schema';
 
 // ── Module Boundary ─────────────────────────────────────────────────────
 // Schema canonical home: association:member/repos/membership.schema.ts
@@ -92,8 +98,8 @@ export class MembershipRepository {
    * Returns the chapter roster enriched with per-member dues status and training
    * compliance in a single query — no N+1.
    *
-   * - duesInvoiceStatus: latest invoice status from dues_invoice (correlated subquery)
-   * - creditsEarned: SUM(credit_amount) for the active training cycle (correlated subquery)
+   * - duesInvoiceStatus: latest invoice status from duesInvoices (correlated subquery)
+   * - creditsEarned: SUM(creditAmount) for the active training cycle (correlated subquery)
    * - trainingCompliant: creditsEarned >= 40 (threshold per A1 assumption)
    *
    * Filters duesStatus and trainingCompliant are applied as WHERE clauses at DB level.
@@ -125,22 +131,22 @@ export class MembershipRepository {
       )!);
     }
 
-    // OPS-04: DB-level filter by latest dues invoice status
+    // OPS-04: DB-level filter by latest dues invoice status.
+    // S-C4-015: schema references go through the duesInvoices Drizzle table,
+    // not a hardcoded 'dues_invoice' string.
+    const latestInvoiceStatusSql = sql<string | null>`(SELECT ${duesInvoices.status} FROM ${duesInvoices} WHERE ${duesInvoices.membershipId} = ${memberships.id}::text ORDER BY ${duesInvoices.createdAt} DESC LIMIT 1)`;
     if (filters.duesStatus !== undefined) {
-      conditions.push(
-        sql`(SELECT status FROM dues_invoice WHERE membership_id = ${memberships.id}::text ORDER BY created_at DESC LIMIT 1) = ${filters.duesStatus}`,
-      );
+      conditions.push(sql`${latestInvoiceStatusSql} = ${filters.duesStatus}`);
     }
 
-    // OPS-04: DB-level filter by training compliance
+    // OPS-04: DB-level filter by training compliance.
+    // S-C4-015: schema references go through the creditEntries Drizzle table,
+    // not a hardcoded 'credit_entry' string.
+    const cycleCreditSumSql = sql<number>`COALESCE((SELECT SUM(${creditEntries.creditAmount}) FROM ${creditEntries} WHERE ${creditEntries.personId} = ${memberships.personId} AND ${creditEntries.organizationId} = ${memberships.organizationId} AND ${creditEntries.cycleStart} <= NOW() AND ${creditEntries.cycleEnd} >= NOW()), 0)`;
     if (filters.trainingCompliant === true) {
-      conditions.push(
-        sql`COALESCE((SELECT SUM(credit_amount) FROM credit_entry WHERE person_id = ${memberships.personId} AND organization_id = ${memberships.organizationId} AND cycle_start <= NOW() AND cycle_end >= NOW()), 0) >= ${TRAINING_THRESHOLD}`,
-      );
+      conditions.push(sql`${cycleCreditSumSql} >= ${TRAINING_THRESHOLD}`);
     } else if (filters.trainingCompliant === false) {
-      conditions.push(
-        sql`COALESCE((SELECT SUM(credit_amount) FROM credit_entry WHERE person_id = ${memberships.personId} AND organization_id = ${memberships.organizationId} AND cycle_start <= NOW() AND cycle_end >= NOW()), 0) < ${TRAINING_THRESHOLD}`,
-      );
+      conditions.push(sql`${cycleCreditSumSql} < ${TRAINING_THRESHOLD}`);
     }
 
     const where = and(...conditions);
@@ -157,12 +163,13 @@ export class MembershipRepository {
             avatar: persons.avatar,
           },
           category: { id: membershipCategories.id, name: membershipCategories.name },
-          // OPS-01: correlated subquery for latest invoice status (no N+1)
-          duesInvoiceStatus: sql<string | null>`(SELECT status FROM dues_invoice WHERE membership_id = ${memberships.id}::text ORDER BY created_at DESC LIMIT 1)`,
-          // OPS-01: correlated subquery for total training credits in active cycle (no N+1)
-          creditsEarned: sql<number>`COALESCE((SELECT SUM(credit_amount) FROM credit_entry WHERE person_id = ${memberships.personId} AND organization_id = ${memberships.organizationId} AND cycle_start <= NOW() AND cycle_end >= NOW()), 0)`,
-          // Computed compliance flag
-          trainingCompliant: sql<boolean>`COALESCE((SELECT SUM(credit_amount) FROM credit_entry WHERE person_id = ${memberships.personId} AND organization_id = ${memberships.organizationId} AND cycle_start <= NOW() AND cycle_end >= NOW()), 0) >= ${TRAINING_THRESHOLD}`,
+          // OPS-01: correlated subquery for latest invoice status (no N+1).
+          // S-C4-015: reuses the typed SQL fragment built above.
+          duesInvoiceStatus: latestInvoiceStatusSql,
+          // OPS-01: correlated subquery for total training credits in active cycle (no N+1).
+          creditsEarned: cycleCreditSumSql,
+          // Computed compliance flag.
+          trainingCompliant: sql<boolean>`${cycleCreditSumSql} >= ${TRAINING_THRESHOLD}`,
         })
         .from(memberships)
         .leftJoin(persons, eq(memberships.personId, persons.id))
@@ -339,4 +346,49 @@ export class MembershipRepository {
       .returning();
     return result!;
   }
+}
+
+// ── Port adapter (S-C4-014) ─────────────────────────────────────────────
+// org-context middleware previously issued raw `db.select().from(memberships)`
+// queries. This adapter keeps the SQL co-located with the membership module
+// and exposes only the narrow lookup middleware needs.
+
+import type {
+  MembershipPort,
+  ActiveMembership,
+} from '@/core/ports/membership.port';
+
+export function membershipRepoPort(db: DatabaseInstance): MembershipPort {
+  return {
+    async findActiveMembershipByPersonAndOrg(
+      personId: string,
+      orgId: string,
+    ): Promise<ActiveMembership | undefined> {
+      const [row] = await db
+        .select({
+          id: memberships.id,
+          personId: memberships.personId,
+          organizationId: memberships.organizationId,
+          status: memberships.status,
+        })
+        .from(memberships)
+        .where(
+          and(
+            eq(memberships.personId, personId),
+            eq(memberships.organizationId, orgId),
+            // BR-01: status is computed at query time from duesExpiryDate.
+            // Allow all statuses except permanently removed members.
+            notInArray(memberships.status, ['removed', 'expelled', 'deceased']),
+          ),
+        )
+        .limit(1);
+      if (!row) return undefined;
+      return {
+        membershipId: row.id,
+        personId: row.personId,
+        organizationId: row.organizationId,
+        status: row.status,
+      };
+    },
+  };
 }

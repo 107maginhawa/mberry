@@ -10,11 +10,15 @@
  * P1-3 FIX: Enforces 2FA for privileged officer positions (President,
  * Treasurer, Secretary). Users holding these positions must have 2FA
  * enabled on their account.
+ *
+ * S-C4-014 (Wave G2): governance lookup now goes through `core/ports`
+ * instead of importing `OfficerTermRepository` directly. The middleware
+ * no longer reaches into `handlers/*`.
  */
 
 import type { Context, Next } from 'hono';
 import { ForbiddenError, ValidationError } from '@/core/errors';
-import { OfficerTermRepository } from '@/handlers/association:member/repos/governance.repo';
+import { getGovernancePort, type GovernancePort } from '@/core/ports';
 
 /**
  * Privileged positions that require 2FA (P1-3).
@@ -26,7 +30,16 @@ const PRIVILEGED_POSITIONS = new Set([
   'secretary',
 ]);
 
-export function officerAuthMiddleware() {
+export interface OfficerAuthDeps {
+  /**
+   * Optional override for the governance port. When omitted, the middleware
+   * resolves the production adapter from `core/ports`. Tests inject a fake
+   * port to avoid the dynamic import + DB round-trip.
+   */
+  governancePort?: GovernancePort;
+}
+
+export function officerAuthMiddleware(deps: OfficerAuthDeps = {}) {
   return async (ctx: Context, next: Next) => {
     const user = ctx.get('user');
     if (!user) throw new ForbiddenError('Authentication required');
@@ -37,8 +50,8 @@ export function officerAuthMiddleware() {
     }
 
     const db = ctx.get('database');
-    const repo = new OfficerTermRepository(db);
-    const terms = await repo.findActiveByPersonAndOrg(user.id, orgId);
+    const port = deps.governancePort ?? (await getGovernancePort(db));
+    const terms = await port.findActiveOfficerTermsByPersonAndOrg(user.id, orgId);
 
     if (terms.length === 0) {
       throw new ForbiddenError('Officer access required for this organization');
@@ -46,7 +59,7 @@ export function officerAuthMiddleware() {
 
     // P1-3: Enforce 2FA for privileged officer positions
     const holdsPrivilegedPosition = terms.some(t => {
-      const title = t.positionTitle as string | undefined;
+      const title = t.positionTitle;
       return title ? PRIVILEGED_POSITIONS.has(title.toLowerCase()) : false;
     });
 

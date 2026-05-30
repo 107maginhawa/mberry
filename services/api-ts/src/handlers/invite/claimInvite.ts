@@ -81,7 +81,10 @@ export async function claimInvite(
   const membership = await membershipRepo.addMember({
     organizationId: invite.organizationId,
     personId: user.id,
-    tierId: metadata?.membershipTierId ?? null as any,
+    // structural: tier_id is notNull at the DB level but invite metadata may
+    // legitimately omit it (org default applied by trigger). Inline null-cast
+    // preserves runtime semantics pending a real default-tier resolver (Wave G5).
+    tierId: (metadata?.membershipTierId ?? null) as unknown as string,
     categoryId: metadata?.membershipCategoryId ?? null,
     memberNumber: metadata?.licenseNumber ?? null,
     startDate: now.toISOString().split('T')[0]!,

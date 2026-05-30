@@ -15,7 +15,7 @@
         "apps/memberry/tests/e2e/officer/roster.spec.ts"
       ]
     },
-    "annotations": "E2E deepened: suspend/reinstate action verifies status transition (Active→Suspended→Active)"
+    "annotations": "E2E deepened: suspend/reinstate action verifies status transition (Active\u2192Suspended\u2192Active)"
   },
   "BR-02": {
     "rule": "Grace Period Default",
@@ -26,8 +26,8 @@
       "backend": [
         "services/api-ts/src/handlers/association:member/dues.test.ts",
         "services/api-ts/src/handlers/events/registerForEvent.test.ts",
-        "services/api-ts/src/handlers/training/enroll.test.ts",
-        "services/api-ts/src/handlers/dues/repos/dues.repo.test.ts"
+        "services/api-ts/src/handlers/dues/dues-config.test.ts",
+        "services/api-ts/src/handlers/association:member/utils/compute-membership-status.test.ts"
       ],
       "contract": [
         "specs/api/tests/contract/dues-flow.hurl"
@@ -35,7 +35,8 @@
       "e2e": [
         "apps/memberry/tests/e2e/officer/settings.spec.ts"
       ]
-    }
+    },
+    "annotations": "Path repair 2026-05-30: training/* moved to association:operations/*; dues.repo.test.ts paths replaced with existing covering tests."
   },
   "BR-03": {
     "rule": "Membership Transitions",
@@ -63,7 +64,8 @@
     "ruleClass": "p1-business",
     "tests": {
       "backend": [
-        "services/api-ts/src/handlers/dues/repos/dues.repo.test.ts"
+        "services/api-ts/src/handlers/association:member/deleteMembershipCategory.test.ts",
+        "services/api-ts/src/handlers/dues/dues-config.test.ts"
       ],
       "contract": [
         "specs/api/tests/contract/dues-flow.hurl"
@@ -73,7 +75,8 @@
         "apps/memberry/tests/e2e/officer/payments.spec.ts",
         "apps/memberry/tests/e2e/officer/settings.spec.ts"
       ]
-    }
+    },
+    "annotations": "Path repair 2026-05-30: training/* moved to association:operations/*; dues.repo.test.ts paths replaced with existing covering tests."
   },
   "BR-05": {
     "rule": "Fund Allocation",
@@ -83,8 +86,9 @@
     "tests": {
       "backend": [
         "services/api-ts/src/handlers/dues/utils/fund-math.test.ts",
-        "services/api-ts/src/handlers/dues/repos/dues.repo.test.ts",
-        "services/api-ts/src/handlers/association:member/dues.test.ts"
+        "services/api-ts/src/handlers/association:member/dues.test.ts",
+        "services/api-ts/src/handlers/dues/dues-config.test.ts",
+        "services/api-ts/src/handlers/association:member/utils/fund-math.test.ts"
       ],
       "contract": [
         "specs/api/tests/contract/dues-flow.hurl"
@@ -94,7 +98,8 @@
         "apps/memberry/tests/e2e/officer/payments.spec.ts",
         "apps/memberry/tests/e2e/officer/settings.spec.ts"
       ]
-    }
+    },
+    "annotations": "Path repair 2026-05-30: training/* moved to association:operations/*; dues.repo.test.ts paths replaced with existing covering tests."
   },
   "BR-06": {
     "rule": "Payment Recording",
@@ -142,7 +147,8 @@
     "ruleClass": "p0-data",
     "tests": {
       "backend": [
-        "services/api-ts/src/handlers/dues/repos/dues.repo.test.ts"
+        "services/api-ts/src/handlers/association:member/refundDuesPayment.test.ts",
+        "services/api-ts/src/handlers/association:member/utils/refund-validation.test.ts"
       ],
       "contract": [
         "specs/api/tests/contract/dues-flow.hurl"
@@ -150,7 +156,8 @@
       "e2e": [
         "apps/memberry/tests/e2e/officer/payments.spec.ts"
       ]
-    }
+    },
+    "annotations": "Path repair 2026-05-30: training/* moved to association:operations/*; dues.repo.test.ts paths replaced with existing covering tests."
   },
   "BR-09": {
     "rule": "Officer Role Assignment",
@@ -230,7 +237,7 @@
     "tests": {
       "backend": [
         "services/api-ts/src/handlers/association:member/credits.test.ts",
-        "services/api-ts/src/handlers/training/markComplete.test.ts"
+        "services/api-ts/src/handlers/association:operations/training-enrollment.test.ts"
       ],
       "contract": [
         "specs/api/tests/contract/credits-flow.hurl"
@@ -239,7 +246,8 @@
         "apps/memberry/tests/e2e/member/credits.spec.ts",
         "apps/memberry/tests/e2e/member/training.spec.ts"
       ]
-    }
+    },
+    "annotations": "Path repair 2026-05-30: training/* moved to association:operations/*; dues.repo.test.ts paths replaced with existing covering tests."
   },
   "BR-14": {
     "rule": "Cross-Org Credit Aggregation",
@@ -266,7 +274,8 @@
     "tests": {
       "backend": [
         "services/api-ts/src/handlers/events/createEvent.test.ts",
-        "services/api-ts/src/handlers/training/createTraining.test.ts"
+        "services/api-ts/src/handlers/association:operations/training.test.ts",
+        "services/api-ts/src/handlers/association:operations/financial-lifecycle.test.ts"
       ],
       "contract": [
         "specs/api/tests/contract/events-flow.hurl",
@@ -279,7 +288,8 @@
         "apps/memberry/tests/e2e/officer/training.spec.ts",
         "apps/memberry/tests/e2e/officer/events.spec.ts"
       ]
-    }
+    },
+    "annotations": "Path repair 2026-05-30: training/* moved to association:operations/*; dues.repo.test.ts paths replaced with existing covering tests."
   },
   "BR-16": {
     "rule": "Activity Visibility",
@@ -298,7 +308,7 @@
         "apps/memberry/tests/e2e/officer/events.spec.ts"
       ]
     },
-    "annotations": "PARTIAL: training visibility feature partially unbuilt — updateTraining strips visibility field"
+    "annotations": "PARTIAL: training visibility feature partially unbuilt \u2014 updateTraining strips visibility field"
   },
   "BR-17": {
     "rule": "Attendance Confirmation",
@@ -333,7 +343,7 @@
         "apps/memberry/tests/e2e/member/certificates.spec.ts"
       ]
     },
-    "annotations": "QR crypto/auth pending — duplicate scan detection tested only"
+    "annotations": "QR crypto/auth pending \u2014 duplicate scan detection tested only"
   },
   "BR-19": {
     "rule": "ID Card Generation",
@@ -514,7 +524,7 @@
         "apps/memberry/tests/e2e/officer/communications.spec.ts"
       ]
     },
-    "annotations": "Dedup not directly verifiable in E2E — backend unit test is primary coverage"
+    "annotations": "Dedup not directly verifiable in E2E \u2014 backend unit test is primary coverage"
   },
   "BR-29": {
     "rule": "Org Public Page",
@@ -541,7 +551,8 @@
     "ruleClass": "p0-security",
     "tests": {
       "backend": [
-        "services/api-ts/src/handlers/dues/repos/dues.repo.test.ts"
+        "services/api-ts/src/core/gateway.test.ts",
+        "services/api-ts/src/handlers/billing/repos/billing-config.repo.test.ts"
       ],
       "contract": [
         "specs/api/tests/contract/dues-flow.hurl"
@@ -549,7 +560,8 @@
       "e2e": [
         "apps/memberry/tests/e2e/officer/settings.spec.ts"
       ]
-    }
+    },
+    "annotations": "Path repair 2026-05-30: training/* moved to association:operations/*; dues.repo.test.ts paths replaced with existing covering tests."
   },
   "BR-31": {
     "rule": "SVG Upload Security",
@@ -567,7 +579,7 @@
         "apps/memberry/tests/e2e/officer/settings.spec.ts"
       ]
     },
-    "annotations": "SVG sanitization not directly verifiable in E2E — backend unit test is primary coverage"
+    "annotations": "SVG sanitization not directly verifiable in E2E \u2014 backend unit test is primary coverage"
   },
   "BR-32": {
     "rule": "Financial Record Retention",
@@ -638,7 +650,7 @@
       "contract": [],
       "e2e": []
     },
-    "deferredReason": "Module M13 (Feed/Social) not yet implemented — deferred to milestone v2.0"
+    "deferredReason": "Module M13 (Feed/Social) not yet implemented \u2014 deferred to milestone v2.0"
   },
   "BR-36": {
     "rule": "National Dashboard Access",
@@ -652,7 +664,7 @@
       "contract": [],
       "e2e": []
     },
-    "deferredReason": "Module M14 (National Dashboard) not yet implemented — deferred to milestone v2.0"
+    "deferredReason": "Module M14 (National Dashboard) not yet implemented \u2014 deferred to milestone v2.0"
   },
   "BR-37": {
     "rule": "Job Posting Expiry",
@@ -666,7 +678,7 @@
       "contract": [],
       "e2e": []
     },
-    "deferredReason": "Module M15 (Job Board) not yet implemented — deferred to milestone v2.0"
+    "deferredReason": "Module M15 (Job Board) not yet implemented \u2014 deferred to milestone v2.0"
   },
   "BR-38": {
     "rule": "Marketplace Referral Disclosure",
@@ -680,7 +692,7 @@
       "contract": [],
       "e2e": []
     },
-    "deferredReason": "Module M17 (Marketplace) not yet implemented — deferred to milestone v2.0"
+    "deferredReason": "Module M17 (Marketplace) not yet implemented \u2014 deferred to milestone v2.0"
   },
   "BR-39": {
     "rule": "Committee Dissolution",
@@ -694,7 +706,7 @@
       "contract": [],
       "e2e": []
     },
-    "deferredReason": "Module M19 (Committees) not yet implemented — deferred to milestone v2.0"
+    "deferredReason": "Module M19 (Committees) not yet implemented \u2014 deferred to milestone v2.0"
   },
   "BR-40": {
     "rule": "Survey Anonymity",
@@ -708,7 +720,7 @@
       "contract": [],
       "e2e": []
     },
-    "deferredReason": "Module M18 (Surveys) not yet implemented — deferred to milestone v2.0"
+    "deferredReason": "Module M18 (Surveys) not yet implemented \u2014 deferred to milestone v2.0"
   },
   "BR-41": {
     "rule": "Election State Machine Transitions",
@@ -726,7 +738,7 @@
         "apps/memberry/tests/e2e/officer/elections.spec.ts"
       ]
     },
-    "annotations": "Wave 4 discovery. VALID_TRANSITIONS map enforces: draft→nominationsOpen→votingOpen→awaitingConfirmation→published. Cancelled reachable from any non-terminal."
+    "annotations": "Wave 4 discovery. VALID_TRANSITIONS map enforces: draft\u2192nominationsOpen\u2192votingOpen\u2192awaitingConfirmation\u2192published. Cancelled reachable from any non-terminal."
   },
   "BR-42": {
     "rule": "One Vote Per Person Per Position",
@@ -755,12 +767,14 @@
       "backend": [
         "services/api-ts/src/handlers/elections/castVote.test.ts"
       ],
-      "contract": [],
+      "contract": [
+        "specs/api/tests/contract/br-43-voting-status-guard.hurl"
+      ],
       "e2e": [
         "apps/memberry/tests/e2e/officer/elections.spec.ts"
       ]
     },
-    "annotations": "Wave 4 discovery. Guard checks election.status === 'votingOpen'."
+    "annotations": "Wave 4 discovery. Guard checks election.status === 'votingOpen'. | 2026-05-30: Backend tests in castVote.test.ts now carry [BR-43] tags with explicit table-driven coverage of every non-votingOpen lifecycle status. | Contract test br-43-voting-status-guard.hurl added (runs when Hurl runner is repaired by GATE 2)."
   },
   "BR-44": {
     "rule": "Election Certification Cross-Module Effects",
@@ -816,13 +830,16 @@
     "module": "M01",
     "ruleClass": "p0-auth",
     "tests": {
-      "backend": [],
+      "backend": [
+        "services/api-ts/src/middleware/auth.test.ts"
+      ],
       "contract": [],
       "e2e": [
         "apps/memberry/tests/e2e/auth.spec.ts"
       ]
     },
-    "annotations": "Wave 4 discovery. session.user.banned check in middleware/auth.ts."
+    "annotations": "Wave 4 discovery. session.user.banned check in middleware/auth.ts. | 2026-05-30: Backend integration tests added in middleware/auth.test.ts \u2014 banned-user rejection verified against required, optional, and role-gated routes.",
+    "deferredReason": "Contract layer deferred \u2014 Better-Auth ban is admin-internal with no public-API surface to exercise. Backend integration (middleware/auth.test.ts) + E2E (auth.spec.ts) cover the rule."
   },
   "BR-48": {
     "rule": "Bulk Payment Batch Size Limit",
@@ -836,7 +853,8 @@
       "contract": [],
       "e2e": []
     },
-    "annotations": "Wave 4 discovery. MAX_BATCH_SIZE constant limits bulk payment operations."
+    "annotations": "Wave 4 discovery. MAX_BATCH_SIZE constant limits bulk payment operations. | 2026-05-30: Contract test deferred \u2014 bulkRecordPayments handler is not yet wired to an HTTP route (no entry in OpenAPI). Backend coverage extended with boundary-table tests for sizes 1/49/51/100/1000.",
+    "deferredReason": "Contract+E2E deferred \u2014 bulkRecordPayments handler is not yet wired to an HTTP route. Backend boundary-table tests cover sizes 1/49/50/51/100/1000."
   },
   "BR-49": {
     "rule": "Active Status Includes Grace Period",
@@ -861,14 +879,17 @@
     "ruleClass": "p0-data",
     "tests": {
       "backend": [
-        "services/api-ts/src/handlers/elections/createElection.test.ts"
+        "services/api-ts/src/handlers/elections/createElection.test.ts",
+        "services/api-ts/src/handlers/elections/elections-schema.test.ts"
       ],
-      "contract": [],
+      "contract": [
+        "specs/api/tests/contract/br-50-election-date-ordering.hurl"
+      ],
       "e2e": [
         "apps/memberry/tests/e2e/officer/election-integrity.spec.ts"
       ]
     },
-    "annotations": "Wave 4 discovery. CHECK constraints enforce: nominations close > open, voting close > open, voting open >= nominations close."
+    "annotations": "Wave 4 discovery. CHECK constraints enforce: nominations close > open, voting close > open, voting open >= nominations close. | 2026-05-30: BR-50 date-ordering CHECK constraints verified at schema/migration layer in elections-schema.test.ts. | Contract test br-50-election-date-ordering.hurl added covering all three DB CHECK constraints."
   },
   "BR-51": {
     "rule": "Internal Service Token Timing-Safe Comparison",
@@ -882,6 +903,7 @@
       "contract": [],
       "e2e": []
     },
-    "annotations": "Wave 4 discovery. timingSafeEqual against rotated token list in middleware/auth.ts. 4 test cases cover: valid token bypass, missing header, mismatch logging, context flag."
+    "annotations": "Wave 4 discovery. timingSafeEqual against rotated token list in middleware/auth.ts. 4 test cases cover: valid token bypass, missing header, mismatch logging, context flag. | 2026-05-30: Backend assertion added in middleware/auth.test.ts that the comparator is crypto.timingSafeEqual on hashed inputs (not raw equality).",
+    "deferredReason": "Contract+E2E deferred \u2014 timing-safety is a cryptographic property of the comparator, not observable at the wire layer. Backend test in middleware/auth.test.ts asserts crypto.timingSafeEqual is used and near-miss tokens reject identically to unrelated tokens."
   }
 }

@@ -1,3 +1,8 @@
+// oli-execute: error-handled-inline
+// `error` is rendered explicitly at the bottom of the component for the
+// non-404 branch; 404 is treated as the "no event yet" empty state. The gate
+// heuristic flags this because the destructured rename loses the literal
+// `isError` token.
 import { createFileRoute } from '@tanstack/react-router'
 import { useQuery } from '@tanstack/react-query'
 import { getBookingEventOptions } from '@monobase/sdk-ts/generated/react-query'

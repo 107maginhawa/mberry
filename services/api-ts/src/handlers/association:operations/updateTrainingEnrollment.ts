@@ -6,6 +6,7 @@ import { TrainingRepository, TrainingEnrollmentRepository } from './repos/traini
 import { auditAction } from '@/utils/audit';
 import { requirePosition } from '@/utils/officer-check';
 import { POSITION_TITLES } from '@/utils/position-titles';
+import { assertValidTransition, TRAINING_ENROLLMENT_VALID_TRANSITIONS } from '@/utils/status-transitions';
 
 /**
  * updateTrainingEnrollment
@@ -37,6 +38,18 @@ export async function updateTrainingEnrollment(
     throw new BusinessLogicError(
       'This training is completed. Enrollments are locked and cannot be changed.',
       'TRAINING_COMPLETED',
+    );
+  }
+
+  // S-G1-04: FSM guard — body.status change must be a valid transition from existing.status.
+  // Allows same-status writes (no transition); rejects invalid moves with ConflictError (409).
+  const bodyAny = body as Record<string, unknown> | undefined;
+  if (bodyAny?.['status'] && bodyAny['status'] !== existing.status) {
+    assertValidTransition(
+      TRAINING_ENROLLMENT_VALID_TRANSITIONS,
+      existing.status,
+      String(bodyAny['status']),
+      'training enrollment',
     );
   }
 

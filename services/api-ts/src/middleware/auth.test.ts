@@ -543,4 +543,155 @@ describe('authMiddleware', () => {
       expect(nextCalled).toBe(true);
     });
   });
+
+  // -------------------------------------------------------------------------
+  // [BR-47] Banned users rejected at auth middleware
+  // -------------------------------------------------------------------------
+  // Source: services/api-ts/src/middleware/auth.ts:151-154
+  //   if (session.user.banned) throw new ForbiddenError('Account is suspended')
+  // Rule: any authenticated request whose user record has `banned: true` must
+  // be rejected by the auth middleware before reaching any handler. This is
+  // the platform's hard kill-switch — bypassing it would allow disabled
+  // accounts to keep operating until session expiry.
+  describe('[BR-47] banned user rejection', () => {
+    it('[BR-47] throws ForbiddenError when session.user.banned is true', async () => {
+      const bannedUser = { ...SESSION_USER, banned: true };
+      const session    = makeSession(bannedUser);
+      const auth       = makeAuth(session);
+      const ctx        = makeCtx({ contextValues: { auth } });
+      const mw         = authMiddleware();
+
+      const { nextCalled, error } = await runMiddleware(mw, ctx);
+
+      expect(error).toBeInstanceOf(ForbiddenError);
+      expect((error as ForbiddenError).statusCode).toBe(403);
+      expect((error as Error).message).toMatch(/suspend/i);
+      expect(nextCalled).toBe(false);
+    });
+
+    it('[BR-47] banned rejection fires even when auth is optional (required:false)', async () => {
+      const bannedUser = { ...SESSION_USER, banned: true };
+      const session    = makeSession(bannedUser);
+      const auth       = makeAuth(session);
+      const ctx        = makeCtx({ contextValues: { auth } });
+      const mw         = authMiddleware({ required: false });
+
+      const { nextCalled, error } = await runMiddleware(mw, ctx);
+
+      // Even on optional-auth routes, a session that resolves to a banned
+      // user must be rejected. Optional means "anonymous is fine", not
+      // "banned is fine".
+      expect(error).toBeInstanceOf(ForbiddenError);
+      expect(nextCalled).toBe(false);
+    });
+
+    it('[BR-47] banned rejection takes precedence over role checks', async () => {
+      // Even if the banned user nominally has an admin role, the ban rejects
+      // them before the role gate is evaluated.
+      const bannedAdmin = { ...ADMIN_USER, banned: true };
+      const session     = makeSession(bannedAdmin);
+      const auth        = makeAuth(session);
+      const ctx         = makeCtx({ contextValues: { auth } });
+      const mw          = authMiddleware({ roles: ['admin'] });
+
+      const { nextCalled, error } = await runMiddleware(mw, ctx);
+
+      expect(error).toBeInstanceOf(ForbiddenError);
+      expect((error as Error).message).toMatch(/suspend/i);
+      expect(nextCalled).toBe(false);
+    });
+
+    it('[BR-47] non-banned user with banned=false passes through', async () => {
+      // Negative control: explicitly setting banned=false must not block.
+      const okUser = { ...SESSION_USER, banned: false };
+      const session = makeSession(okUser);
+      const auth    = makeAuth(session);
+      const ctx     = makeCtx({ contextValues: { auth } });
+      const mw      = authMiddleware();
+
+      const { nextCalled, error } = await runMiddleware(mw, ctx);
+
+      expect(error).toBeNull();
+      expect(nextCalled).toBe(true);
+    });
+  });
+
+  // -------------------------------------------------------------------------
+  // [BR-51] Internal service token comparison is timing-safe
+  // -------------------------------------------------------------------------
+  // Source: services/api-ts/src/middleware/auth.ts:114
+  //   return timingSafeEqual(incomingHash, storedHash);
+  // Rule: the X-Internal-Service-Token check must use crypto.timingSafeEqual
+  // (or equivalent constant-time comparison) on equal-length digest buffers.
+  // Plain string equality leaks token length and partial-prefix matches via
+  // early-exit timing. The existing 'internal service-to-service token bypass'
+  // describe block above tests acceptance/rejection paths; this block adds
+  // an explicit assertion that the comparison is hashed (not raw) so prefix
+  // timing attacks are infeasible.
+  describe('[BR-51] internal service token timing-safe comparison', () => {
+    it('[BR-51] near-miss tokens (1-char-off) are rejected the same way as totally-different tokens', async () => {
+      // Behavioural witness for timing-safety: a token that shares a long
+      // prefix with the real token must be rejected identically to a totally
+      // unrelated token. A non-timing-safe comparison would still reject both
+      // but with measurably different timings; we cannot assert wall-time
+      // here, but we CAN assert both reject via the same code path.
+      const SECRET = 'super-secret-token-abcdef';
+
+      const auth = makeAuth(null); // no user session — relies on token only
+      // First: long-shared-prefix near-miss
+      const nearMissCtx = makeCtx({
+        headers: {
+          'X-Internal-Service-Token': 'super-secret-token-abcdeX', // last char differs
+          'X-Internal-Expand-Module': 'person',
+          'X-Internal-Expand-Org':    '00000000-0000-0000-0000-000000000000',
+        },
+        contextValues: {
+          auth,
+          internalServiceTokens: [SECRET],
+        },
+      });
+
+      // Second: totally-unrelated token of the same length
+      const unrelatedCtx = makeCtx({
+        headers: {
+          'X-Internal-Service-Token': 'zzzzzzzzzzzzzzzzzzzzzzzzz',
+          'X-Internal-Expand-Module': 'person',
+          'X-Internal-Expand-Org':    '00000000-0000-0000-0000-000000000000',
+        },
+        contextValues: {
+          auth,
+          internalServiceTokens: [SECRET],
+        },
+      });
+
+      const mw = authMiddleware();
+
+      const nearMissRes  = await runMiddleware(mw, nearMissCtx);
+      const unrelatedRes = await runMiddleware(mw, unrelatedCtx);
+
+      // Both should fall through to the normal auth path. Since there is no
+      // session and required=true (default), both must throw UnauthorizedError
+      // — proving the internal-token gate rejected both the same way, with
+      // no early-accept for the long-prefix near-miss.
+      expect(nearMissRes.error).toBeInstanceOf(UnauthorizedError);
+      expect(unrelatedRes.error).toBeInstanceOf(UnauthorizedError);
+      expect(nearMissRes.nextCalled).toBe(false);
+      expect(unrelatedRes.nextCalled).toBe(false);
+    });
+
+    it('[BR-51] timingSafeEqual is the documented comparator (source contract)', async () => {
+      // Static contract: auth.ts must use timingSafeEqual, not ===. We can't
+      // monkey-patch crypto from this test scope easily; instead, assert the
+      // source contains the comparator. This is a guardrail against future
+      // refactors silently replacing it with `===`.
+      const fs = await import('fs');
+      const src = fs.readFileSync(
+        new URL('./auth.ts', import.meta.url).pathname,
+        'utf-8',
+      );
+      expect(src).toContain('timingSafeEqual');
+      // And the import is from 'crypto' (not some shim that could be naive).
+      expect(src).toMatch(/from\s+['"]crypto['"]/);
+    });
+  });
 });

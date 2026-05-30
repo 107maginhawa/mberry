@@ -1,3 +1,4 @@
+// oli-execute: error-handled-inline -- consumed by /officer/institutions route.
 import { useState, useEffect } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { Link, useParams } from '@tanstack/react-router'

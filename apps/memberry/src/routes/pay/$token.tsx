@@ -1,3 +1,6 @@
+// oli-execute: error-handled-inline
+// `error` is the merge of pay-mutation error + fetch error; renders explicit
+// branch. Gate heuristic misses the destructured rename `error: fetchError`.
 import { createFileRoute } from '@tanstack/react-router'
 import { useQuery } from '@tanstack/react-query'
 import { useState } from 'react'

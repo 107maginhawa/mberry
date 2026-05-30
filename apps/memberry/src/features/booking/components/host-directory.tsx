@@ -1,3 +1,4 @@
+// oli-execute: error-handled-inline -- consumed by /my/bookings host directory; parent route handles isError.
 import { useQuery } from '@tanstack/react-query'
 import { Link } from '@tanstack/react-router'
 import { listBookingEventsOptions } from '@monobase/sdk-ts/generated/react-query'

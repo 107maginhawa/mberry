@@ -15,6 +15,7 @@ import { api } from '@/lib/api'
 import { CreditCard, CheckCircle, AlertTriangle, Info, Building, Receipt, Download } from 'lucide-react'
 import { useOrg } from '@/hooks/useOrg'
 import { PageHeader } from '@/components/patterns/page-header'
+import { ErrorState } from '@/components/patterns/error-state'
 import { GlassCard } from '@/components/motion/glass-card'
 import { CountUp } from '@/components/motion/count-up'
 import { StaggerGrid, StaggerItem } from '@/components/motion/stagger-grid'
@@ -50,20 +51,22 @@ function MemberDuesPage() {
   })
 
   // Fetch invoices for this member (API scopes by session user for member role)
-  const { data: invoicesData, isLoading: loadingInvoices } = useQuery({
+  const invoicesQuery = useQuery({
     ...listDuesInvoicesOptions({
       query: { organizationId: orgId, limit: 10 },
     }),
     select: (d: any) => d?.data ?? [],
   })
+  const { data: invoicesData, isLoading: loadingInvoices } = invoicesQuery
 
   // Fetch payments for this member (API scopes by session user for member role)
-  const { data: paymentsData, isLoading: loadingPayments } = useQuery({
+  const paymentsQuery = useQuery({
     ...listDuesPaymentsOptions({
       query: { organizationId: orgId, limit: 20 },
     }),
     select: (d: any) => d?.data ?? [],
   })
+  const { data: paymentsData, isLoading: loadingPayments } = paymentsQuery
 
   // Fetch aging buckets for this org
   const { data: agingBucketsData } = useQuery({
@@ -73,6 +76,20 @@ function MemberDuesPage() {
     },
     retry: false,
   })
+
+  if (invoicesQuery.isError || paymentsQuery.isError) {
+    return (
+      <div className="p-6 max-w-2xl">
+        <ErrorState
+          message="Could not load dues"
+          onRetry={() => {
+            invoicesQuery.refetch()
+            paymentsQuery.refetch()
+          }}
+        />
+      </div>
+    )
+  }
 
   const invoices = invoicesData ?? []
   const payments = paymentsData ?? []

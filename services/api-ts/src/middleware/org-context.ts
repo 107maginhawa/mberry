@@ -6,13 +6,19 @@
  * ctx.var.organizationId and ctx.var.orgMembership.
  *
  * Fails closed: if org context cannot be established, returns 403.
+ *
+ * S-C4-014 (Wave G2): membership + platform-admin lookups go through
+ * `core/ports` instead of importing handler-owned schemas / repos.
  */
 
 import { createMiddleware } from 'hono/factory';
-import { eq, and, notInArray } from 'drizzle-orm';
 import type { Variables } from '@/types/app';
-import { memberships } from '@/handlers/association:member/repos/membership.schema';
-import { platformAdmins } from '@/handlers/platformadmin/repos/platform-admin.schema';
+import {
+  getMembershipPort,
+  getPlatformAdminPort,
+  type MembershipPort,
+  type PlatformAdminPort,
+} from '@/core/ports';
 
 /**
  * Creates org-context middleware.
@@ -30,7 +36,12 @@ const ORG_CONTEXT_EXEMPT: { path: string; methods: string[] }[] = [
   { path: '/association/training-lifecycle/my', methods: ['GET'] },
 ];
 
-export function orgContextMiddleware() {
+export interface OrgContextDeps {
+  membershipPort?: MembershipPort;
+  platformAdminPort?: PlatformAdminPort;
+}
+
+export function orgContextMiddleware(deps: OrgContextDeps = {}) {
   return createMiddleware<{ Variables: Variables }>(async (ctx, next): Promise<void | Response> => {
     // Skip org-context for user-scoped endpoints (e.g. "my events", "my certificates")
     const isExempt = ORG_CONTEXT_EXEMPT.some(
@@ -83,11 +94,8 @@ export function orgContextMiddleware() {
     const db = ctx.get('database');
 
     // Check if user is a platform admin — bypass membership check
-    const [admin] = await db
-      .select({ id: platformAdmins.id })
-      .from(platformAdmins)
-      .where(eq(platformAdmins.userId, user.id))
-      .limit(1);
+    const adminPort = deps.platformAdminPort ?? (await getPlatformAdminPort(db));
+    const admin = await adminPort.findByUserId(user.id);
 
     if (admin) {
       ctx.set('organizationId', orgId);
@@ -103,24 +111,8 @@ export function orgContextMiddleware() {
     }
 
     // Query membership table to verify user belongs to this org
-    const [membership] = await db
-      .select({
-        id: memberships.id,
-        personId: memberships.personId,
-        organizationId: memberships.organizationId,
-        status: memberships.status,
-      })
-      .from(memberships)
-      .where(
-        and(
-          eq(memberships.personId, user.id),
-          eq(memberships.organizationId, orgId),
-          // BR-01: status is computed at query time from duesExpiryDate.
-          // Allow all statuses except permanently removed members.
-          notInArray(memberships.status, ['removed', 'expelled', 'deceased']),
-        )
-      )
-      .limit(1);
+    const membershipPort = deps.membershipPort ?? (await getMembershipPort(db));
+    const membership = await membershipPort.findActiveMembershipByPersonAndOrg(user.id, orgId);
 
     if (!membership) {
       return ctx.json(
@@ -131,7 +123,7 @@ export function orgContextMiddleware() {
 
     ctx.set('organizationId', orgId);
     ctx.set('orgMembership', {
-      membershipId: membership.id,
+      membershipId: membership.membershipId,
       personId: membership.personId,
       organizationId: membership.organizationId,
       role: 'member', // role granularity comes from governance module
@@ -153,7 +145,7 @@ export function orgContextMiddleware() {
  * Use on /billing/*, /booking/*, /comms/*, /storage/*, /reviews/*, /audit/*, /persons/*
  * where org context is helpful but not mandatory.
  */
-export function orgContextOptionalMiddleware() {
+export function orgContextOptionalMiddleware(deps: OrgContextDeps = {}) {
   return createMiddleware<{ Variables: Variables }>(async (ctx, next): Promise<void | Response> => {
     const user = ctx.get('user');
     if (!user) {
@@ -191,11 +183,8 @@ export function orgContextOptionalMiddleware() {
     const db = ctx.get('database');
 
     // Platform admin bypass
-    const [admin] = await db
-      .select({ id: platformAdmins.id })
-      .from(platformAdmins)
-      .where(eq(platformAdmins.userId, user.id))
-      .limit(1);
+    const adminPort = deps.platformAdminPort ?? (await getPlatformAdminPort(db));
+    const admin = await adminPort.findByUserId(user.id);
 
     if (admin) {
       ctx.set('organizationId', orgId);
@@ -211,28 +200,13 @@ export function orgContextOptionalMiddleware() {
     }
 
     // Check membership — skip silently if not a member
-    const [membership] = await db
-      .select({
-        id: memberships.id,
-        personId: memberships.personId,
-        organizationId: memberships.organizationId,
-        status: memberships.status,
-      })
-      .from(memberships)
-      .where(
-        and(
-          eq(memberships.personId, user.id),
-          eq(memberships.organizationId, orgId),
-          // BR-01: status is computed at query time from duesExpiryDate.
-          notInArray(memberships.status, ['removed', 'expelled', 'deceased']),
-        )
-      )
-      .limit(1);
+    const membershipPort = deps.membershipPort ?? (await getMembershipPort(db));
+    const membership = await membershipPort.findActiveMembershipByPersonAndOrg(user.id, orgId);
 
     if (membership) {
       ctx.set('organizationId', orgId);
       ctx.set('orgMembership', {
-        membershipId: membership.id,
+        membershipId: membership.membershipId,
         personId: membership.personId,
         organizationId: membership.organizationId,
         role: 'member',

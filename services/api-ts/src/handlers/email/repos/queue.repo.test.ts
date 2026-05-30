@@ -5,9 +5,9 @@
  * DB calls are mocked at the class level — we test business logic, not SQL.
  */
 
-import { describe, test, expect, mock, beforeEach, spyOn } from 'bun:test';
+import { describe, test, expect, it, mock, beforeEach, spyOn } from 'bun:test';
 import { EmailQueueRepository } from './queue.repo';
-import { ValidationError, NotFoundError, BusinessLogicError } from '@/core/errors';
+import { ValidationError, NotFoundError, BusinessLogicError, ConflictError } from '@/core/errors';
 import type { EmailQueueItem, QueueEmailRequest } from './email.schema';
 
 // Mock-Classification: APPROPRIATE — external email/SMTP service boundary
@@ -264,6 +264,7 @@ describe('EmailQueueRepository', () => {
   describe('markAsProcessing', () => {
     test('calls updateOneById with processing status', async () => {
       const repo = makeRepo();
+      spyOn(repo, 'findOneById' as any).mockResolvedValue(makeQueueItem({ status: 'pending' }));
       const updated = makeQueueItem({ status: 'processing' });
       const updateSpy = spyOn(repo, 'updateOneById' as any).mockResolvedValue(updated);
 
@@ -276,6 +277,29 @@ describe('EmailQueueRepository', () => {
       expect(data.status).toBe('processing');
       expect(data.lastAttemptAt).toBeInstanceOf(Date);
     });
+
+    test('throws NotFoundError when email queue item does not exist', async () => {
+      const repo = makeRepo();
+      spyOn(repo, 'findOneById' as any).mockResolvedValue(null);
+
+      await expect(repo.markAsProcessing('nonexistent')).rejects.toBeInstanceOf(NotFoundError);
+    });
+
+    test('allows failed → processing for job-runner auto-retry path', async () => {
+      const repo = makeRepo();
+      spyOn(repo, 'findOneById' as any).mockResolvedValue(makeQueueItem({ status: 'failed' }));
+      spyOn(repo, 'updateOneById' as any).mockResolvedValue(makeQueueItem({ status: 'processing' }));
+
+      const result = await repo.markAsProcessing('queue-item-1');
+      expect(result.status).toBe('processing');
+    });
+
+    test('throws ConflictError when current status is sent (terminal)', async () => {
+      const repo = makeRepo();
+      spyOn(repo, 'findOneById' as any).mockResolvedValue(makeQueueItem({ status: 'sent' }));
+
+      await expect(repo.markAsProcessing('queue-item-1')).rejects.toBeInstanceOf(ConflictError);
+    });
   });
 
   // ---------------------------------------------------------------------------
@@ -285,6 +309,7 @@ describe('EmailQueueRepository', () => {
   describe('markAsSent', () => {
     test('updates status, sentAt, provider, and providerMessageId', async () => {
       const repo = makeRepo();
+      spyOn(repo, 'findOneById' as any).mockResolvedValue(makeQueueItem({ status: 'processing' }));
       const updated = makeQueueItem({ status: 'sent', provider: 'smtp' });
       const updateSpy = spyOn(repo, 'updateOneById' as any).mockResolvedValue(updated);
 
@@ -301,6 +326,7 @@ describe('EmailQueueRepository', () => {
 
     test('accepts postmark provider', async () => {
       const repo = makeRepo();
+      spyOn(repo, 'findOneById' as any).mockResolvedValue(makeQueueItem({ status: 'processing' }));
       const updateSpy = spyOn(repo, 'updateOneById' as any).mockResolvedValue(
         makeQueueItem({ status: 'sent', provider: 'postmark' })
       );
@@ -313,12 +339,20 @@ describe('EmailQueueRepository', () => {
 
     test('accepts onesignal provider', async () => {
       const repo = makeRepo();
+      spyOn(repo, 'findOneById' as any).mockResolvedValue(makeQueueItem({ status: 'processing' }));
       spyOn(repo, 'updateOneById' as any).mockResolvedValue(
         makeQueueItem({ status: 'sent', provider: 'onesignal' })
       );
 
       const result = await repo.markAsSent('queue-item-1', 'onesignal', 'os-789');
       expect(result.provider).toBe('onesignal');
+    });
+
+    test('throws NotFoundError when email queue item does not exist', async () => {
+      const repo = makeRepo();
+      spyOn(repo, 'findOneById' as any).mockResolvedValue(null);
+
+      await expect(repo.markAsSent('nonexistent', 'smtp', 'msg-1')).rejects.toBeInstanceOf(NotFoundError);
     });
   });
 
@@ -329,6 +363,7 @@ describe('EmailQueueRepository', () => {
   describe('markAsFailed', () => {
     test('increments attempts by 1', async () => {
       const repo = makeRepo();
+      spyOn(repo, 'findOneById' as any).mockResolvedValue(makeQueueItem({ status: 'processing' }));
       const updateSpy = spyOn(repo, 'updateOneById' as any).mockResolvedValue(
         makeQueueItem({ status: 'failed', attempts: 1 })
       );
@@ -341,6 +376,7 @@ describe('EmailQueueRepository', () => {
 
     test('sets lastError message', async () => {
       const repo = makeRepo();
+      spyOn(repo, 'findOneById' as any).mockResolvedValue(makeQueueItem({ status: 'processing' }));
       const updateSpy = spyOn(repo, 'updateOneById' as any).mockResolvedValue(
         makeQueueItem({ status: 'failed' })
       );
@@ -353,6 +389,7 @@ describe('EmailQueueRepository', () => {
 
     test('sets lastAttemptAt to current time', async () => {
       const repo = makeRepo();
+      spyOn(repo, 'findOneById' as any).mockResolvedValue(makeQueueItem({ status: 'processing' }));
       const updateSpy = spyOn(repo, 'updateOneById' as any).mockResolvedValue(
         makeQueueItem({ status: 'failed' })
       );
@@ -369,6 +406,7 @@ describe('EmailQueueRepository', () => {
 
     test('first failure (attempts=0): nextRetryAt ~5 minutes in future', async () => {
       const repo = makeRepo();
+      spyOn(repo, 'findOneById' as any).mockResolvedValue(makeQueueItem({ status: 'processing' }));
       const updateSpy = spyOn(repo, 'updateOneById' as any).mockResolvedValue(
         makeQueueItem({ status: 'failed' })
       );
@@ -387,6 +425,7 @@ describe('EmailQueueRepository', () => {
 
     test('second failure (attempts=1): nextRetryAt ~30 minutes in future', async () => {
       const repo = makeRepo();
+      spyOn(repo, 'findOneById' as any).mockResolvedValue(makeQueueItem({ status: 'processing' }));
       const updateSpy = spyOn(repo, 'updateOneById' as any).mockResolvedValue(
         makeQueueItem({ status: 'failed' })
       );
@@ -404,6 +443,7 @@ describe('EmailQueueRepository', () => {
 
     test('third failure (attempts=2): nextRetryAt ~2 hours in future', async () => {
       const repo = makeRepo();
+      spyOn(repo, 'findOneById' as any).mockResolvedValue(makeQueueItem({ status: 'processing' }));
       const updateSpy = spyOn(repo, 'updateOneById' as any).mockResolvedValue(
         makeQueueItem({ status: 'failed' })
       );
@@ -421,6 +461,7 @@ describe('EmailQueueRepository', () => {
 
     test('fourth failure (attempts=3): nextRetryAt is null (no more retries)', async () => {
       const repo = makeRepo();
+      spyOn(repo, 'findOneById' as any).mockResolvedValue(makeQueueItem({ status: 'processing' }));
       const updateSpy = spyOn(repo, 'updateOneById' as any).mockResolvedValue(
         makeQueueItem({ status: 'failed', attempts: 4 })
       );
@@ -433,6 +474,7 @@ describe('EmailQueueRepository', () => {
 
     test('attempts beyond 3 also get null nextRetryAt', async () => {
       const repo = makeRepo();
+      spyOn(repo, 'findOneById' as any).mockResolvedValue(makeQueueItem({ status: 'processing' }));
       const updateSpy = spyOn(repo, 'updateOneById' as any).mockResolvedValue(
         makeQueueItem({ status: 'failed' })
       );
@@ -441,6 +483,20 @@ describe('EmailQueueRepository', () => {
 
       const [, data] = updateSpy.mock.calls[0] as any;
       expect(data.nextRetryAt).toBeNull();
+    });
+
+    test('throws NotFoundError when email queue item does not exist', async () => {
+      const repo = makeRepo();
+      spyOn(repo, 'findOneById' as any).mockResolvedValue(null);
+
+      await expect(repo.markAsFailed('nonexistent', 'err', 0)).rejects.toBeInstanceOf(NotFoundError);
+    });
+
+    test('throws ConflictError when current status is sent (terminal)', async () => {
+      const repo = makeRepo();
+      spyOn(repo, 'findOneById' as any).mockResolvedValue(makeQueueItem({ status: 'sent' }));
+
+      await expect(repo.markAsFailed('queue-item-1', 'err', 0)).rejects.toBeInstanceOf(ConflictError);
     });
   });
 
@@ -467,30 +523,30 @@ describe('EmailQueueRepository', () => {
       expect(data.cancelledAt).toBeInstanceOf(Date);
     });
 
-    test('cancels a failed email', async () => {
+    test('throws ConflictError when cancelling a failed email (no longer valid per guard)', async () => {
+      // Semantics tightened by EMAIL_QUEUE_VALID_TRANSITIONS: cancellation is
+      // only valid from `pending`. failed → cancelled is now blocked.
       const repo = makeRepo();
       spyOn(repo, 'findOneById' as any).mockResolvedValue(
         makeQueueItem({ status: 'failed' })
       );
-      spyOn(repo, 'updateOneById' as any).mockResolvedValue(
-        makeQueueItem({ status: 'cancelled' })
-      );
 
-      const result = await repo.cancelEmail('queue-item-1', 'user-1', 'Giving up');
-      expect(result.status).toBe('cancelled');
+      await expect(
+        repo.cancelEmail('queue-item-1', 'user-1', 'Giving up')
+      ).rejects.toBeInstanceOf(ConflictError);
     });
 
-    test('cancels a processing email', async () => {
+    test('throws ConflictError when cancelling a processing email (in-flight)', async () => {
+      // Semantics tightened by EMAIL_QUEUE_VALID_TRANSITIONS: processing items
+      // are mid-send by the job runner; cancellation is not permitted.
       const repo = makeRepo();
       spyOn(repo, 'findOneById' as any).mockResolvedValue(
         makeQueueItem({ status: 'processing' })
       );
-      spyOn(repo, 'updateOneById' as any).mockResolvedValue(
-        makeQueueItem({ status: 'cancelled' })
-      );
 
-      const result = await repo.cancelEmail('queue-item-1', 'user-1', 'Cancel it');
-      expect(result.status).toBe('cancelled');
+      await expect(
+        repo.cancelEmail('queue-item-1', 'user-1', 'Cancel it')
+      ).rejects.toBeInstanceOf(ConflictError);
     });
 
     test('throws NotFoundError when email does not exist', async () => {
@@ -502,7 +558,7 @@ describe('EmailQueueRepository', () => {
       ).rejects.toBeInstanceOf(NotFoundError);
     });
 
-    test('throws BusinessLogicError when email is already sent', async () => {
+    test('throws ConflictError when email is already sent (terminal)', async () => {
       const repo = makeRepo();
       spyOn(repo, 'findOneById' as any).mockResolvedValue(
         makeQueueItem({ status: 'sent' })
@@ -510,16 +566,10 @@ describe('EmailQueueRepository', () => {
 
       await expect(
         repo.cancelEmail('queue-item-1', 'user-1', 'too late')
-      ).rejects.toBeInstanceOf(BusinessLogicError);
-
-      try {
-        await repo.cancelEmail('queue-item-1', 'user-1', 'too late');
-      } catch (e: any) {
-        expect(e.code).toBe('EMAIL_ALREADY_SENT');
-      }
+      ).rejects.toBeInstanceOf(ConflictError);
     });
 
-    test('throws BusinessLogicError when email is already cancelled', async () => {
+    test('throws ConflictError when email is already cancelled (terminal)', async () => {
       const repo = makeRepo();
       spyOn(repo, 'findOneById' as any).mockResolvedValue(
         makeQueueItem({ status: 'cancelled' })
@@ -527,13 +577,7 @@ describe('EmailQueueRepository', () => {
 
       await expect(
         repo.cancelEmail('queue-item-1', 'user-1', 'again')
-      ).rejects.toBeInstanceOf(BusinessLogicError);
-
-      try {
-        await repo.cancelEmail('queue-item-1', 'user-1', 'again');
-      } catch (e: any) {
-        expect(e.code).toBe('EMAIL_ALREADY_CANCELLED');
-      }
+      ).rejects.toBeInstanceOf(ConflictError);
     });
   });
 
@@ -567,28 +611,23 @@ describe('EmailQueueRepository', () => {
       await expect(repo.retryEmail('nonexistent')).rejects.toBeInstanceOf(NotFoundError);
     });
 
-    test('throws BusinessLogicError when email is not failed', async () => {
+    test('throws ConflictError when email is not failed (pending source)', async () => {
+      // Replaces prior BusinessLogicError check — guard supersedes ad-hoc check.
       const repo = makeRepo();
       spyOn(repo, 'findOneById' as any).mockResolvedValue(
         makeQueueItem({ status: 'pending' })
       );
 
-      await expect(repo.retryEmail('queue-item-1')).rejects.toBeInstanceOf(BusinessLogicError);
-
-      try {
-        await repo.retryEmail('queue-item-1');
-      } catch (e: any) {
-        expect(e.code).toBe('INVALID_STATUS_FOR_RETRY');
-      }
+      await expect(repo.retryEmail('queue-item-1')).rejects.toBeInstanceOf(ConflictError);
     });
 
-    test('throws BusinessLogicError when status is sent', async () => {
+    test('throws ConflictError when status is sent (terminal)', async () => {
       const repo = makeRepo();
       spyOn(repo, 'findOneById' as any).mockResolvedValue(
         makeQueueItem({ status: 'sent' })
       );
 
-      await expect(repo.retryEmail('queue-item-1')).rejects.toBeInstanceOf(BusinessLogicError);
+      await expect(repo.retryEmail('queue-item-1')).rejects.toBeInstanceOf(ConflictError);
     });
 
     test('throws BusinessLogicError when attempts >= 3', async () => {
@@ -668,6 +707,28 @@ describe('EmailQueueRepository', () => {
       await repo.getPendingEmails(10);
 
       expect(limitMock).toHaveBeenCalledWith(10);
+    });
+  });
+
+  // ---------------------------------------------------------------------------
+  // EMAIL_QUEUE_VALID_TRANSITIONS guard (S-G1-06)
+  // ---------------------------------------------------------------------------
+
+  describe('EmailQueueRepository — EMAIL_QUEUE_VALID_TRANSITIONS guard', () => {
+    it('markAsSent throws ConflictError when current status is cancelled (terminal)', async () => {
+      const { EmailQueueRepository } = await import('./queue.repo');
+      const { ConflictError } = await import('@/core/errors');
+      (EmailQueueRepository.prototype as any).findOneById = mock(async () => makeQueueItem({ status: 'cancelled' }));
+      const repo = new EmailQueueRepository({} as any, undefined);
+      await expect(repo.markAsSent('e-1', 'smtp', 'msg-1')).rejects.toBeInstanceOf(ConflictError);
+    });
+
+    it('retryEmail throws ConflictError when status is sent (no retry from terminal)', async () => {
+      const { EmailQueueRepository } = await import('./queue.repo');
+      const { ConflictError } = await import('@/core/errors');
+      (EmailQueueRepository.prototype as any).findOneById = mock(async () => makeQueueItem({ status: 'sent' }));
+      const repo = new EmailQueueRepository({} as any, undefined);
+      await expect(repo.retryEmail('e-1')).rejects.toBeInstanceOf(ConflictError);
     });
   });
 });

@@ -3,6 +3,8 @@ import type { DatabaseInstance } from '@/core/database';
 import { UnauthorizedError, NotFoundError, ForbiddenError } from '@/core/errors';
 import { requirePosition } from '@/utils/officer-check';
 import { POSITION_TITLES } from '@/utils/position-titles';
+import { assertValidTransition } from '@/utils/status-transitions';
+import { INVOICE_VALID_TRANSITIONS } from './utils/status-transitions';
 import type { DeleteDuesInvoiceParams } from '@/generated/openapi/validators';
 import { DuesInvoiceRepository } from './repos/dues.repo';
 import { auditAction } from '@/utils/audit';
@@ -30,6 +32,11 @@ export async function deleteDuesInvoice(
   if (!existing) throw new NotFoundError('DuesInvoice');
   const orgId = ctx.get('organizationId') as string;
   if (existing.organizationId !== orgId) throw new ForbiddenError();
+
+  // [S-G1-03 / IC-04] FSM guard: enforce that the current state may transition
+  // to 'cancelled' before the soft-delete write. Terminal states (paid,
+  // cancelled, writtenOff) cannot be re-cancelled — throws ConflictError(409).
+  assertValidTransition(INVOICE_VALID_TRANSITIONS, existing.status, 'cancelled', 'invoice');
 
   // BR-32: financial records have a 7-year retention requirement (BIR compliance).
   // Never hard-delete — soft-delete by transitioning the invoice to the terminal

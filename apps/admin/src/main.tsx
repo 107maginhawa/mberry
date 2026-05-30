@@ -7,6 +7,7 @@ import type { RouterContext, AdminUser } from './router'
 import { AdminUserContext } from './lib/role-gate'
 import { getAdminRole } from '@monobase/sdk-ts/generated/sdk.gen'
 import type { AdminRoleResponse } from '@monobase/sdk-ts/generated/types.gen'
+import { seedCsrfToken } from '@monobase/sdk-ts/csrf'
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -35,6 +36,7 @@ function App() {
   const [auth, setAuth] = useState<RouterContext['auth']>({ user: null, loading: true })
 
   useEffect(() => {
+    void seedCsrfToken('/api')
     getAdminRole()
       .then(({ data }) => {
         if (data) {

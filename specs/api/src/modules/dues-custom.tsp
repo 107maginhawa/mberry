@@ -148,6 +148,31 @@ namespace DuesCustomModule {
       | ApiBadRequestResponse;
   }
 
+  /**
+   * Member-facing receipt endpoint. Returns the receipt rendered as HTML for
+   * print / save-as-PDF. Eligible only for payments in completed / confirmed
+   * states. NOTE: Response body is text/html, not JSON.
+   */
+  interface ReceiptEndpoints {
+    @doc("Download a printable receipt for a completed dues payment. Returns text/html.")
+    @operationId("downloadReceipt")
+    @get
+    @route("/org/{organizationId}/payments/{paymentId}/receipt")
+    @useAuth(bearerAuth)
+    @extension("x-security-required-roles", #["association:member"])
+    downloadReceipt(
+      @path organizationId: UUID,
+      @path paymentId: UUID,
+    ): {
+      @statusCode statusCode: 200;
+      @header contentType: "text/html";
+      @body body: string;
+    } | ApiNotFoundResponse
+      | ApiUnauthorizedResponse
+      | ApiForbiddenResponse
+      | ApiBadRequestResponse;
+  }
+
   @doc("Officer endpoint for generating payment links")
   interface PaymentLinkManagement {
     @doc("Generate a one-tap payment link for a member. Requires officer auth and org context.")

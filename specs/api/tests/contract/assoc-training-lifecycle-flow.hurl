@@ -86,6 +86,4 @@ HTTP 200
 
 # 7. 401 — request without auth cookie.
 GET {{api}}/association/training-lifecycle/my
-[Options]
-cookie:
 HTTP 401

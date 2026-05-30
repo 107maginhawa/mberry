@@ -7,14 +7,19 @@
  * Platform admin only.
  */
 
-import { and, eq, inArray } from "drizzle-orm";
+import { and, eq } from "drizzle-orm";
 import type { Context } from "hono";
 import type { DatabaseInstance } from "@/core/database";
 import {
 	organizations,
 	pricingTiers,
 	subscriptions,
+	subscriptionStatusEnum,
 } from "./repos/platform-admin.schema";
+
+type SubscriptionStatus = typeof subscriptionStatusEnum.enumValues[number];
+const isSubscriptionStatus = (v: string): v is SubscriptionStatus =>
+	(subscriptionStatusEnum.enumValues as readonly string[]).includes(v);
 
 export async function listSubscriptions(ctx: Context): Promise<Response> {
 	const session = ctx.get("session");
@@ -31,22 +36,15 @@ export async function listSubscriptions(ctx: Context): Promise<Response> {
 
 	const conditions = [];
 	if (statusFilter) {
-		const validStatuses = [
-			"trial",
-			"active",
-			"past_due",
-			"cancelled",
-			"expired",
-		];
-		if (!validStatuses.includes(statusFilter)) {
+		if (!isSubscriptionStatus(statusFilter)) {
 			return ctx.json(
 				{
-					error: `Invalid status. Must be one of: ${validStatuses.join(", ")}`,
+					error: `Invalid status. Must be one of: ${subscriptionStatusEnum.enumValues.join(", ")}`,
 				},
 				400,
 			);
 		}
-		conditions.push(eq(subscriptions.status, statusFilter as any));
+		conditions.push(eq(subscriptions.status, statusFilter));
 	}
 	if (tierIdFilter) {
 		conditions.push(eq(subscriptions.pricingTierId, tierIdFilter));

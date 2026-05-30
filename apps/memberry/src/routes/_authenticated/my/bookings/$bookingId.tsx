@@ -21,6 +21,7 @@ import { Button } from '@monobase/ui'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@monobase/ui'
 import { Loader2, ExternalLink } from 'lucide-react'
 import { ConfirmDialog } from '@/components/patterns/confirm-dialog'
+import { ErrorState } from '@/components/patterns/error-state'
 
 export const Route = createFileRoute('/_authenticated/my/bookings/$bookingId')({
   component: BookingDetailPage,
@@ -174,6 +175,14 @@ function BookingDetailPage() {
       { onSettled: invalidateBooking },
     )
   }, [confirm, reject, bookingId, invalidateBooking])
+
+  if (bookingQuery.isError) {
+    return (
+      <div className="p-6 max-w-2xl">
+        <ErrorState message="Could not load booking" onRetry={() => bookingQuery.refetch()} />
+      </div>
+    )
+  }
 
   if (bookingQuery.isPending) {
     return (

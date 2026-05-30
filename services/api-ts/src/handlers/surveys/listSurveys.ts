@@ -5,7 +5,6 @@ import {
   UnauthorizedError,
 } from '@/core/errors';
 import { SurveyRepository, type SurveyFilters } from './repos/survey.repo';
-import { SurveyResponseRepository } from './repos/survey.repo';
 import { buildPaginationMeta } from '@/utils/query';
 
 /**
@@ -36,13 +35,24 @@ export async function listSurveys(
   const limit = query.limit ? Number(query.limit) : 20;
   const offset = (page - 1) * limit;
 
+  const repo = new SurveyRepository(db, logger);
+
+  if (query.mine) {
+    const mineResult = await repo.findMineWithPagination(organizationId, userId, {
+      pagination: { limit, offset },
+    });
+    return ctx.json({
+      data: mineResult.data,
+      pagination: buildPaginationMeta(mineResult.data, mineResult.totalCount, limit, offset),
+    }, 200);
+  }
+
   const filters: SurveyFilters = {
     organizationId,
     status: query.status as string | undefined,
     surveyType: query.surveyType as string | undefined,
   };
 
-  const repo = new SurveyRepository(db, logger);
   const result = await repo.findManyWithPagination(filters, {
     pagination: { limit, offset },
   });

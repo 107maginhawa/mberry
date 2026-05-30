@@ -240,3 +240,89 @@ describe('[BR-33] castVote', () => {
     await expect(castVote(ctx)).rejects.toThrow('Voting requires active membership');
   });
 });
+
+// ─── [BR-43] Voting Only When Election Status Is `votingOpen` ────────────
+// Source: services/api-ts/src/handlers/elections/castVote.ts:29
+//   if (election.status !== 'votingOpen') throw new ConflictError('Voting is not open');
+//
+// Rule (br-registry.json#BR-43): the castVote handler MUST reject any vote
+// attempt unless `election.status === 'votingOpen'`. This is the M12 election
+// integrity guard — votes cast during draft / nominationsOpen / published /
+// cancelled / awaitingConfirmation are integrity violations. The status
+// values are pinned by the electionStatusEnum (Drizzle schema). This block
+// asserts the positive case explicitly and table-drives all negative cases
+// against every other lifecycle value so a new status added to the enum
+// without a guard update would fail this test by omission.
+describe('[BR-43] castVote — voting only when status is votingOpen', () => {
+  beforeEach(() => {
+    restoreRepo(ElectionsRepository);
+    restoreRepo(MembershipRepository);
+    stubRepo(MembershipRepository, {
+      findByPersonAndOrg: async () => ({
+        id: 'mem-1',
+        duesExpiryDate: '2027-12-31',
+        gracePeriodDays: 30,
+        suspendedAt: null,
+        removedAt: null,
+      }),
+    });
+  });
+
+  afterEach(() => {
+    restoreRepo(ElectionsRepository);
+    restoreRepo(MembershipRepository);
+  });
+
+  test('[BR-43] positive case: status=votingOpen accepts vote', async () => {
+    stubRepo(ElectionsRepository, {
+      get: async () => ({ ...fakeElection, status: 'votingOpen' }),
+      hasVoted: async () => false,
+      castVote: async (data: any) => ({ ...fakeVote, ...data }),
+    });
+
+    const ctx = makeCtx({
+      _params: { id: 'election-1' },
+      _body: {
+        positionId: '00000000-0000-4000-8000-000000000001',
+        nomineeId:  '00000000-0000-4000-8000-000000000002',
+      },
+    });
+
+    const response = await castVote(ctx);
+    expect(response.status).toBe(201);
+  });
+
+  // Every non-votingOpen lifecycle value must be rejected.
+  // electionStatusEnum (services/api-ts/src/handlers/elections/repos/elections.schema.ts):
+  //   draft | nominationsOpen | nominationsClosed | votingOpen | awaitingConfirmation
+  //   | published | certified | cancelled
+  const NON_VOTING_STATUSES = [
+    'draft',
+    'nominationsOpen',
+    'nominationsClosed',
+    'awaitingConfirmation',
+    'published',
+    'certified',
+    'cancelled',
+  ] as const;
+
+  for (const status of NON_VOTING_STATUSES) {
+    test(`[BR-43] negative case: status=${status} rejects vote with ConflictError`, async () => {
+      stubRepo(ElectionsRepository, {
+        get: async () => ({ ...fakeElection, status }),
+        hasVoted: async () => false,
+        castVote: async () => { throw new Error('GUARD BYPASSED — castVote should not be called'); },
+      });
+
+      const ctx = makeCtx({
+        _params: { id: 'election-1' },
+        _body: {
+          positionId: '00000000-0000-4000-8000-000000000001',
+          nomineeId:  '00000000-0000-4000-8000-000000000002',
+        },
+      });
+
+      await expect(castVote(ctx)).rejects.toThrow('Voting is not open');
+    });
+  }
+});

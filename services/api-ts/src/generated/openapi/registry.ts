@@ -98,6 +98,36 @@ import { updateOrganization } from '../../handlers/platformadmin/updateOrganizat
 import { transitionOrgStatus } from '../../handlers/platformadmin/transitionOrgStatus';
 import { getOrganizationBySlug } from '../../handlers/platformadmin/getOrganizationBySlug';
 import { listPublicOrgs } from '../../handlers/platformadmin/listPublicOrgs';
+import { listAdminSurveys } from '../../handlers/surveys/listAdminSurveys';
+import { createSurvey } from '../../handlers/surveys/createSurvey';
+import { listSurveys } from '../../handlers/surveys/listSurveys';
+import { getNpsTrends } from '../../handlers/surveys/getNpsTrends';
+import { deleteMemberResponses } from '../../handlers/surveys/deleteMemberResponses';
+import { getSurvey } from '../../handlers/surveys/getSurvey';
+import { updateSurvey } from '../../handlers/surveys/updateSurvey';
+import { deleteSurvey } from '../../handlers/surveys/deleteSurvey';
+import { getSurveyAnalytics } from '../../handlers/surveys/getSurveyAnalytics';
+import { cloneSurvey } from '../../handlers/surveys/cloneSurvey';
+import { closeSurvey } from '../../handlers/surveys/closeSurvey';
+import { exportSurveyResponses } from '../../handlers/surveys/exportSurveyResponses';
+import { publishSurvey } from '../../handlers/surveys/publishSurvey';
+import { submitSurveyResponse } from '../../handlers/surveys/submitSurveyResponse';
+import { listSurveyResponses } from '../../handlers/surveys/listSurveyResponses';
+import { dismissSurveyResponse } from '../../handlers/surveys/dismissSurveyResponse';
+import { createAdvertiser } from '../../handlers/advertising/createAdvertiser';
+import { createCampaign } from '../../handlers/advertising/createCampaign';
+import { createCreative } from '../../handlers/advertising/createCreative';
+import { reportAd } from '../../handlers/advertising/reportAd';
+import { reviewCreative } from '../../handlers/advertising/reviewCreative';
+import { setMemberOptOut } from '../../handlers/advertising/setMemberOptOut';
+import { getAdForPlacement } from '../../handlers/advertising/getAdForPlacement';
+import { createJobApplication } from '../../handlers/jobs/createJobApplication';
+import { updateJobApplication } from '../../handlers/jobs/updateJobApplication';
+import { createJobPosting } from '../../handlers/jobs/createJobPosting';
+import { searchJobPostings } from '../../handlers/jobs/searchJobPostings';
+import { getJobPosting } from '../../handlers/jobs/getJobPosting';
+import { updateJobPosting } from '../../handlers/jobs/updateJobPosting';
+import { deleteJobPosting } from '../../handlers/jobs/deleteJobPosting';
 import { createDocumentTag } from '../../handlers/documents/createDocumentTag';
 import { listDocumentTags } from '../../handlers/documents/listDocumentTags';
 import { getDocumentTag } from '../../handlers/documents/getDocumentTag';
@@ -305,6 +335,8 @@ import { updateAnnouncement } from '../../handlers/communication/updateAnnouncem
 import { deleteAnnouncement } from '../../handlers/communication/deleteAnnouncement';
 import { archiveAnnouncement } from '../../handlers/communication/archiveAnnouncement';
 import { publishAnnouncement } from '../../handlers/communication/publishAnnouncement';
+import { scheduleAnnouncement } from '../../handlers/communication/scheduleAnnouncement';
+import { getAnnouncementStats } from '../../handlers/communication/getAnnouncementStats';
 import { listAnnouncements } from '../../handlers/communication/listAnnouncements';
 import { createAnnouncement } from '../../handlers/communication/createAnnouncement';
 import { createSavedSegment } from '../../handlers/communication/createSavedSegment';
@@ -357,6 +389,7 @@ import { updateVideoCallParticipant } from '../../handlers/comms/updateVideoCall
 import { getIceServers } from '../../handlers/comms/getIceServers';
 import { getDuesDashboard } from '../../handlers/dues/getDuesDashboard';
 import { sendPaymentLink } from '../../handlers/dues/sendPaymentLink';
+import { downloadReceipt } from '../../handlers/dues/downloadReceipt';
 import { checkoutPaymentToken } from '../../handlers/dues/checkoutPaymentToken';
 import { validatePaymentToken } from '../../handlers/dues/validatePaymentToken';
 import { listEmailQueueItems } from '../../handlers/email/listEmailQueueItems';
@@ -375,6 +408,15 @@ import { bulkImportMembers } from '../../handlers/invite/bulkImportMembers';
 import { createInvite } from '../../handlers/invite/createInvite';
 import { claimInvite } from '../../handlers/invite/claimInvite';
 import { validateInvite } from '../../handlers/invite/validateInvite';
+import { createListing } from '../../handlers/marketplace/createListing';
+import { listListings } from '../../handlers/marketplace/listListings';
+import { createOrder } from '../../handlers/marketplace/createOrder';
+import { fulfillOrder } from '../../handlers/marketplace/fulfillOrder';
+import { createVendor } from '../../handlers/marketplace/createVendor';
+import { listVendors } from '../../handlers/marketplace/listVendors';
+import { getVendor } from '../../handlers/marketplace/getVendor';
+import { updateVendor } from '../../handlers/marketplace/updateVendor';
+import { verifyVendor } from '../../handlers/marketplace/verifyVendor';
 import { listOrgApplications } from '../../handlers/membership/listOrgApplications';
 import { listOrgMembers } from '../../handlers/membership/listOrgMembers';
 import { getOrgProfile } from '../../handlers/membership/getOrgProfile';
@@ -416,19 +458,6 @@ import { getFile } from '../../handlers/storage/getFile';
 import { deleteFile } from '../../handlers/storage/deleteFile';
 import { completeFileUpload } from '../../handlers/storage/completeFileUpload';
 import { getFileDownload } from '../../handlers/storage/getFileDownload';
-import { createSurvey } from '../../handlers/surveys/createSurvey';
-import { listSurveys } from '../../handlers/surveys/listSurveys';
-import { getSurvey } from '../../handlers/surveys/getSurvey';
-import { updateSurvey } from '../../handlers/surveys/updateSurvey';
-import { deleteSurvey } from '../../handlers/surveys/deleteSurvey';
-import { getSurveyAnalytics } from '../../handlers/surveys/getSurveyAnalytics';
-import { cloneSurvey } from '../../handlers/surveys/cloneSurvey';
-import { closeSurvey } from '../../handlers/surveys/closeSurvey';
-import { exportSurveyResponses } from '../../handlers/surveys/exportSurveyResponses';
-import { publishSurvey } from '../../handlers/surveys/publishSurvey';
-import { submitSurveyResponse } from '../../handlers/surveys/submitSurveyResponse';
-import { listSurveyResponses } from '../../handlers/surveys/listSurveyResponses';
-import { dismissSurveyResponse } from '../../handlers/surveys/dismissSurveyResponse';
 
 export const registry = {
   // Association:operations handlers
@@ -522,6 +551,42 @@ export const registry = {
   transitionOrgStatus,
   getOrganizationBySlug,
   listPublicOrgs,
+
+  // Surveys handlers
+  listAdminSurveys,
+  createSurvey,
+  listSurveys,
+  getNpsTrends,
+  deleteMemberResponses,
+  getSurvey,
+  updateSurvey,
+  deleteSurvey,
+  getSurveyAnalytics,
+  cloneSurvey,
+  closeSurvey,
+  exportSurveyResponses,
+  publishSurvey,
+  submitSurveyResponse,
+  listSurveyResponses,
+  dismissSurveyResponse,
+
+  // Advertising handlers
+  createAdvertiser,
+  createCampaign,
+  createCreative,
+  reportAd,
+  reviewCreative,
+  setMemberOptOut,
+  getAdForPlacement,
+
+  // Jobs handlers
+  createJobApplication,
+  updateJobApplication,
+  createJobPosting,
+  searchJobPostings,
+  getJobPosting,
+  updateJobPosting,
+  deleteJobPosting,
 
   // Documents handlers
   createDocumentTag,
@@ -735,6 +800,8 @@ export const registry = {
   deleteAnnouncement,
   archiveAnnouncement,
   publishAnnouncement,
+  scheduleAnnouncement,
+  getAnnouncementStats,
   listAnnouncements,
   createAnnouncement,
   createSavedSegment,
@@ -797,6 +864,7 @@ export const registry = {
   // Dues handlers
   getDuesDashboard,
   sendPaymentLink,
+  downloadReceipt,
   checkoutPaymentToken,
   validatePaymentToken,
 
@@ -819,6 +887,17 @@ export const registry = {
   createInvite,
   claimInvite,
   validateInvite,
+
+  // Marketplace handlers
+  createListing,
+  listListings,
+  createOrder,
+  fulfillOrder,
+  createVendor,
+  listVendors,
+  getVendor,
+  updateVendor,
+  verifyVendor,
 
   // Membership handlers
   listOrgApplications,
@@ -874,20 +953,5 @@ export const registry = {
   deleteFile,
   completeFileUpload,
   getFileDownload,
-
-  // Surveys handlers
-  createSurvey,
-  listSurveys,
-  getSurvey,
-  updateSurvey,
-  deleteSurvey,
-  getSurveyAnalytics,
-  cloneSurvey,
-  closeSurvey,
-  exportSurveyResponses,
-  publishSurvey,
-  submitSurveyResponse,
-  listSurveyResponses,
-  dismissSurveyResponse,
 
 };

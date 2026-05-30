@@ -97,4 +97,54 @@ describe('listSurveys', () => {
     expect(capturedFilters.surveyType).toBe('nps');
     expect(capturedFilters.organizationId).toBe('tenant-1');
   });
+
+  test('mine=true routes to findMineWithPagination scoped to current user', async () => {
+    let capturedOrg: string | undefined;
+    let capturedResponder: string | undefined;
+    let manyCalled = false;
+    stubRepo(SurveyRepository, {
+      findMineWithPagination: async (organizationId: string, responderId: string) => {
+        capturedOrg = organizationId;
+        capturedResponder = responderId;
+        return { data: surveyList, totalCount: 2 };
+      },
+      findManyWithPagination: async () => {
+        manyCalled = true;
+        return { data: [], totalCount: 0 };
+      },
+    });
+
+    const ctx = makeCtx({
+      user: { id: 'member-42', role: 'user', twoFactorEnabled: true },
+      _query: { mine: true },
+    });
+
+    const res = await listSurveys(ctx);
+    expect(res.status).toBe(200);
+    expect((res as any).body.data.length).toBe(2);
+    expect(capturedOrg).toBe('tenant-1');
+    expect(capturedResponder).toBe('member-42');
+    expect(manyCalled).toBe(false);
+  });
+
+  test('mine falsy keeps officer path (findManyWithPagination)', async () => {
+    let mineCalled = false;
+    let manyCalled = false;
+    stubRepo(SurveyRepository, {
+      findMineWithPagination: async () => {
+        mineCalled = true;
+        return { data: [], totalCount: 0 };
+      },
+      findManyWithPagination: async () => {
+        manyCalled = true;
+        return { data: surveyList, totalCount: 2 };
+      },
+    });
+
+    const ctx = makeCtx({ _query: {} });
+
+    await listSurveys(ctx);
+    expect(manyCalled).toBe(true);
+    expect(mineCalled).toBe(false);
+  });
 });

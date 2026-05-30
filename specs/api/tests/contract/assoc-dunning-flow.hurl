@@ -81,8 +81,6 @@ HTTP 200
 # 8. 401 — request without auth cookie.
 GET {{api}}/association/member/dunning/events
 x-org-id: ed8e3a96-8126-4341-be42-e6eb7940c562
-[Options]
-cookie:
 HTTP 401
 
 

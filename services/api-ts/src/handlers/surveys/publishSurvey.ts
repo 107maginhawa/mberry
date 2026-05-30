@@ -52,8 +52,10 @@ export async function publishSurvey(
     throw new BusinessLogicError('Only draft surveys can be published');
   }
 
-  const questions = existing.questions as any[] | null;
-  if (!questions || questions.length === 0) {
+  // existing.questions is typed `SurveyQuestion[]` (jsonb default `[]`),
+  // but legacy rows may be null — guard accordingly.
+  const questions = existing.questions ?? [];
+  if (questions.length === 0) {
     throw new BusinessLogicError('Survey must have at least one question before publishing');
   }
 

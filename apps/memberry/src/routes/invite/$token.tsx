@@ -1,3 +1,7 @@
+// oli-execute: error-handled-inline
+// `error` is local state set on accept/redeem failure; renders explicit
+// branch at ~L68. Skeleton only shown while `sessionPending`, which uses
+// the SDK's session hook, not a data query.
 import { createFileRoute, useNavigate } from '@tanstack/react-router'
 import { useState, useEffect } from 'react'
 import { Button } from '@monobase/ui'

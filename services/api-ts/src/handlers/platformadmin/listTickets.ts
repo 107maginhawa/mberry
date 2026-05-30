@@ -9,7 +9,19 @@
 import type { Context } from 'hono';
 import type { DatabaseInstance } from '@/core/database';
 import { eq, and, type SQL } from 'drizzle-orm';
-import { supportTickets } from './repos/platform-admin.schema';
+import {
+  supportTickets,
+  ticketStatusEnum,
+  ticketPriorityEnum,
+} from './repos/platform-admin.schema';
+
+type TicketStatus = typeof ticketStatusEnum.enumValues[number];
+type TicketPriority = typeof ticketPriorityEnum.enumValues[number];
+
+const isStatus = (v: string): v is TicketStatus =>
+  (ticketStatusEnum.enumValues as readonly string[]).includes(v);
+const isPriority = (v: string): v is TicketPriority =>
+  (ticketPriorityEnum.enumValues as readonly string[]).includes(v);
 
 const AT_RISK_THRESHOLD_MS = 2 * 60 * 60 * 1000; // 2 hours
 
@@ -38,8 +50,8 @@ export async function listTickets(ctx: Context): Promise<Response> {
   const { status, priority, assignee } = ctx.req.query() as Record<string, string>;
 
   const filters: SQL[] = [];
-  if (status) filters.push(eq(supportTickets.status, status as any));
-  if (priority) filters.push(eq(supportTickets.priority, priority as any));
+  if (status && isStatus(status)) filters.push(eq(supportTickets.status, status));
+  if (priority && isPriority(priority)) filters.push(eq(supportTickets.priority, priority));
   if (assignee) filters.push(eq(supportTickets.assignedTo, assignee));
 
   const rows = await db

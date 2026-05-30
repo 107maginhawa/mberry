@@ -3,7 +3,7 @@ import { makeCtx, stubRepo } from '@/test-utils/make-ctx';
 import { fakeMembership as createFakeMembership } from '@/test-utils/factories';
 import { terminateMembership } from './terminateMembership';
 import { MembershipRepository } from './repos/membership.repo';
-import { NotFoundError, UnauthorizedError, BusinessLogicError } from '@/core/errors';
+import { NotFoundError, UnauthorizedError, BusinessLogicError, ConflictError } from '@/core/errors';
 
 // ─── Fixtures ───────────────────────────────────────────
 
@@ -156,6 +156,34 @@ describe('terminateMembership', () => {
     });
 
     await expect(terminateMembership(ctx)).rejects.toBeInstanceOf(BusinessLogicError);
+  });
+
+  // ─── [S-G1-01] MEMBERSHIP_VALID_TRANSITIONS guard — terminal states ──
+
+  describe('[S-G1-01] MEMBERSHIP_VALID_TRANSITIONS guard', () => {
+    const terminalFlags: Record<string, Record<string, any>> = {
+      removed:  { removedAt: new Date('2025-01-01'), suspendedAt: null, dateOfDeath: null, expelledAt: null, resignedAt: null, isPendingPayment: false },
+      resigned: { resignedAt: new Date('2025-01-01'), removedAt: null, suspendedAt: null, dateOfDeath: null, expelledAt: null, isPendingPayment: false },
+      deceased: { dateOfDeath: new Date('2025-01-01'), removedAt: null, suspendedAt: null, expelledAt: null, resignedAt: null, isPendingPayment: false },
+      expelled: { expelledAt: new Date('2025-01-01'), removedAt: null, suspendedAt: null, dateOfDeath: null, resignedAt: null, isPendingPayment: false },
+    };
+
+    for (const [terminalStatus, flags] of Object.entries(terminalFlags)) {
+      test(`rejects terminate on a terminal (${terminalStatus}) membership with ConflictError`, async () => {
+        const terminalMembership = { ...fakeMembership, ...flags };
+        mocks = stubRepo(MembershipRepository, {
+          findOneById: async () => terminalMembership,
+          updateOneById: async (_id: string, data: any) => ({ ...terminalMembership, ...data }),
+        });
+
+        const ctx = makeCtx({
+          _params: { membershipId: 'mem-1' },
+          _body: { terminationReason: 'r' },
+        });
+
+        await expect(terminateMembership(ctx)).rejects.toBeInstanceOf(ConflictError);
+      });
+    }
   });
 
   // ─── Terminatable statuses (all except pendingPayment) ──

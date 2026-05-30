@@ -129,6 +129,7 @@ Manage elections and governance processes for healthcare associations — office
 | M12-R4 | IF nominations close THEN no new nominees accepted | Nomination window | Strict cutoff enforced by state machine |
 | M12-R5 | IF voting mode = hybrid THEN both online and in-person votes counted | Voting | Unified tally |
 | M12-R6 | IF voting closes with < 2 candidates for a position THEN block transition | Minimum candidates | BusinessLogicError('INSUFFICIENT_CANDIDATES') |
+| BR-44 | IF election certified THEN end outgoing officer terms, create new terms for winners, generate transition checklists, propagate role permissions in M04/M05 | Election certification cross-module effects | Wave 4 discovery. Coverage: `handlers/elections/certifyElection.test.ts`, `tests/e2e/officer/election-integrity.spec.ts`. Annotation: contract test gap — backend unit + E2E primary |
 
 ## 6. Permissions
 

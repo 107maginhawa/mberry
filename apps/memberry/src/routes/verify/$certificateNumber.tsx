@@ -1,6 +1,8 @@
+// oli-execute: error-handled-inline
+// `error` renders explicit "Could not verify certificate" branch.
 import { createFileRoute } from '@tanstack/react-router'
 import { useQuery } from '@tanstack/react-query'
-import { Badge } from '@monobase/ui'
+import { Badge, Button } from '@monobase/ui'
 import { api } from '@/lib/api'
 
 export const Route = createFileRoute('/verify/$certificateNumber')({
@@ -105,12 +107,14 @@ function VerifyCertificatePage() {
 
         {/* Print button */}
         <div className="mt-4 text-center print:hidden">
-          <button
+          <Button
+            variant="ghost"
+            size="sm"
             onClick={() => window.print()}
             className="text-sm text-muted-foreground underline hover:text-foreground"
           >
             Print this verification
-          </button>
+          </Button>
         </div>
       </div>
     </div>

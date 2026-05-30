@@ -6,7 +6,7 @@
  * jobs, privacy backfill.
  */
 
-import { eq, sql } from 'drizzle-orm';
+import { and, eq, sql } from 'drizzle-orm';
 import type { drizzle } from 'drizzle-orm/node-postgres';
 import { NOW, daysAgo, daysFromNow, dateStr } from './helpers';
 
@@ -1021,69 +1021,111 @@ export async function seedSurveysModule(
 ) {
   console.log('  Surveys module...');
   try {
+    // ── Base surveys (NPS + draft + completed responses) ──
+    // Guarded together: skip if any survey already exists.
     const existing = await db.select().from(surveysTable).limit(1);
     if (existing.length > 0) {
-      console.log('    (surveys already seeded, skipping)');
-      return;
+      console.log('    (base surveys already seeded, skipping)');
+    } else {
+      // NPS survey
+      const [npsSurvey] = await db.insert(surveysTable).values({
+        organizationId: orgId,
+        title: 'Member Satisfaction — Q2 2026',
+        description: 'How likely are you to recommend our association to a colleague?',
+        surveyType: 'nps',
+        status: 'active',
+        createdBy: presidentPersonId,
+        questions: [
+          { id: 'q1', type: 'nps', text: 'How likely are you to recommend our association to a colleague?', required: true, order: 1 },
+          { id: 'q2', type: 'text', text: 'What could we do better?', required: false, order: 2 },
+        ],
+        settings: { anonymous: false, fatigueThreshold: 2 },
+      }).returning({ id: surveysTable.id });
+
+      // General feedback survey (draft)
+      await db.insert(surveysTable).values({
+        organizationId: orgId,
+        title: 'Annual Convention Feedback',
+        description: 'Help us improve next year\'s convention.',
+        surveyType: 'general',
+        status: 'draft',
+        createdBy: presidentPersonId,
+        questions: [
+          { id: 'q1', type: 'rating', text: 'Rate the overall convention experience', required: true, order: 1, scale: { min: 1, max: 5 } },
+          { id: 'q2', type: 'text', text: 'What was the highlight of the convention?', required: false, order: 2 },
+          { id: 'q3', type: 'text', text: 'What should we improve?', required: false, order: 3 },
+        ],
+        settings: { anonymous: true },
+      });
+
+      // NPS responses (completed)
+      if (npsSurvey) {
+        const npsScores = [10, 9, 9, 8, 7, 6, 3];
+        const comments = [
+          'Excellent organization — events are always well-planned.',
+          'Great CPD programs. Keep it up!',
+          '',
+          'Good but could improve communication frequency.',
+          'Dues are a bit high for what we get.',
+          'Need more hands-on clinical workshops.',
+          'Very poor response time from officers.',
+        ];
+        for (let i = 0; i < Math.min(npsScores.length, memberPersonIds.length); i++) {
+          await db.insert(surveyResponsesTable).values({
+            organizationId: orgId,
+            surveyId: npsSurvey.id,
+            responderId: memberPersonIds[i]!,
+            answers: [
+              { questionId: 'q1', value: npsScores[i]! },
+              ...(comments[i] ? [{ questionId: 'q2', value: comments[i]! }] : []),
+            ],
+            status: 'completed',
+            completedAt: daysAgo(Math.floor(Math.random() * 14)),
+          });
+        }
+        console.log(`    ✓ 2 base surveys + ${Math.min(npsScores.length, memberPersonIds.length)} completed responses seeded`);
+      }
     }
 
-    // NPS survey
-    const [npsSurvey] = await db.insert(surveysTable).values({
-      organizationId: orgId,
-      title: 'Member Satisfaction — Q2 2026',
-      description: 'How likely are you to recommend our association to a colleague?',
-      surveyType: 'nps',
-      status: 'active',
-      createdBy: presidentPersonId,
-      questions: [
-        { id: 'q1', type: 'nps', text: 'How likely are you to recommend our association to a colleague?', required: true, order: 1 },
-        { id: 'q2', type: 'text', text: 'What could we do better?', required: false, order: 2 },
-      ],
-      settings: { anonymous: false, fatigueThreshold: 2 },
-    }).returning({ id: surveysTable.id });
+    // ── Active survey with OUTSTANDING (pending) assignments ──
+    // Independently idempotent (checked by title) so existing DBs gain a
+    // visible "Pending" card on the My Surveys page without a full reset.
+    const PENDING_TITLE = 'Continuing Education Needs — 2026';
+    const existingPending = await db
+      .select({ id: surveysTable.id })
+      .from(surveysTable)
+      .where(and(eq(surveysTable.organizationId, orgId), eq(surveysTable.title, PENDING_TITLE)))
+      .limit(1);
 
-    // General feedback survey (draft)
-    await db.insert(surveysTable).values({
-      organizationId: orgId,
-      title: 'Annual Convention Feedback',
-      description: 'Help us improve next year\'s convention.',
-      surveyType: 'general',
-      status: 'draft',
-      createdBy: presidentPersonId,
-      questions: [
-        { id: 'q1', type: 'rating', text: 'Rate the overall convention experience', required: true, order: 1, scale: { min: 1, max: 5 } },
-        { id: 'q2', type: 'text', text: 'What was the highlight of the convention?', required: false, order: 2 },
-        { id: 'q3', type: 'text', text: 'What should we improve?', required: false, order: 3 },
-      ],
-      settings: { anonymous: true },
-    });
+    if (existingPending.length === 0) {
+      const [pendingSurvey] = await db.insert(surveysTable).values({
+        organizationId: orgId,
+        title: PENDING_TITLE,
+        description: 'Tell us which CPD topics matter most to you this year.',
+        surveyType: 'satisfaction',
+        status: 'active',
+        createdBy: presidentPersonId,
+        questions: [
+          { id: 'q1', type: 'rating', text: 'How satisfied are you with current CPD offerings?', required: true, order: 1, scale: { min: 1, max: 5 } },
+          { id: 'q2', type: 'multi_choice', text: 'Which topics would you like more of?', required: false, order: 2, options: ['Clinical workshops', 'Practice management', 'Ethics', 'Research methods'] },
+        ],
+        settings: { anonymous: false, deadline: daysFromNow(14).toISOString() },
+      }).returning({ id: surveysTable.id });
 
-    // NPS responses
-    if (npsSurvey) {
-      const npsScores = [10, 9, 9, 8, 7, 6, 3];
-      const comments = [
-        'Excellent organization — events are always well-planned.',
-        'Great CPD programs. Keep it up!',
-        '',
-        'Good but could improve communication frequency.',
-        'Dues are a bit high for what we get.',
-        'Need more hands-on clinical workshops.',
-        'Very poor response time from officers.',
-      ];
-      for (let i = 0; i < Math.min(npsScores.length, memberPersonIds.length); i++) {
-        await db.insert(surveyResponsesTable).values({
-          organizationId: orgId,
-          surveyId: npsSurvey.id,
-          responderId: memberPersonIds[i]!,
-          answers: [
-            { questionId: 'q1', value: npsScores[i]! },
-            ...(comments[i] ? [{ questionId: 'q2', value: comments[i]! }] : []),
-          ],
-          status: 'completed',
-          completedAt: daysAgo(Math.floor(Math.random() * 14)),
-        });
+      if (pendingSurvey) {
+        for (const memberId of memberPersonIds) {
+          await db.insert(surveyResponsesTable).values({
+            organizationId: orgId,
+            surveyId: pendingSurvey.id,
+            responderId: memberId,
+            answers: [],
+            status: 'pending',
+          });
+        }
+        console.log(`    ✓ 1 active survey + ${memberPersonIds.length} pending responses seeded`);
       }
-      console.log(`    ✓ 2 surveys + ${Math.min(npsScores.length, memberPersonIds.length)} responses seeded`);
+    } else {
+      console.log('    (pending survey already seeded, skipping)');
     }
   } catch (e) {
     console.log(`    (surveys failed: ${(e as Error).message?.slice(0, 80)})`);

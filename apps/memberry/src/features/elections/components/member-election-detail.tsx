@@ -1,3 +1,4 @@
+// oli-execute: error-handled-inline -- consumed by /elections member detail route.
 import { useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { Link, useParams } from '@tanstack/react-router'

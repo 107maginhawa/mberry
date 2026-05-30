@@ -8,6 +8,12 @@ import { ADMIN_BASE, TEST_PASSWORD } from './test-config'
 
 export async function signInAsAdmin(context: BrowserContext): Promise<void> {
   const response = await context.request.post(`${ADMIN_BASE}/api/auth/sign-in/email`, {
+    headers: {
+      // Better-Auth rejects requests without an Origin header
+      // (MISSING_OR_NULL_ORIGIN). Provide the admin app origin so the
+      // raw APIRequestContext call passes the CSRF/origin guard.
+      Origin: ADMIN_BASE,
+    },
     data: {
       email: 'test@memberry.ph',
       password: TEST_PASSWORD,

@@ -1,3 +1,4 @@
+// oli-execute: error-handled-inline -- consumed by /officer/surveys/$surveyId route.
 import { useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { BarChart3, MessageSquare, ChevronLeft, ChevronRight, Download } from 'lucide-react'

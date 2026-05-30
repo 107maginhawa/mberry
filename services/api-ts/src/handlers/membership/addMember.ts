@@ -49,7 +49,7 @@ export async function addMember(ctx: Context): Promise<Response> {
 
     return ctx.json({ data: member }, 201);
   } catch (err: unknown) {
-    if (err instanceof Error && 'code' in err && (err as any).code === '23505') {
+    if (err instanceof Error && 'code' in err && (err as { code?: unknown }).code === '23505') {
       throw new ConflictError('Member already exists in this organization');
     }
     throw err;

@@ -6234,7 +6234,7 @@
       "module": "app-memberry"
     },
     {
-      "text": "Actions",
+      "text": "Event actions",
       "source_file": "apps/memberry/src/features/events/components/event-card.tsx",
       "source_line": 117,
       "extraction_method": "attribute",

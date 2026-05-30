@@ -387,6 +387,7 @@ describe('BookingRepository.cancelBooking', () => {
 
 describe('BookingRepository.markAsNoShow', () => {
   test('marks as no_show_client when markedBy is client', async () => {
+    const existing = makeBooking({ status: 'confirmed' });
     const noShow = makeBooking({ status: 'no_show_client', noShowMarkedBy: 'client' });
 
     const db: any = {
@@ -400,6 +401,7 @@ describe('BookingRepository.markAsNoShow', () => {
     };
 
     const repo = new BookingRepository(db);
+    (repo as any).findOneById = async () => existing;
     const result = await repo.markAsNoShow('booking-1', 'client');
 
     expect(result.status).toBe('no_show_client');
@@ -407,6 +409,7 @@ describe('BookingRepository.markAsNoShow', () => {
   });
 
   test('marks as no_show_host when markedBy is host', async () => {
+    const existing = makeBooking({ status: 'confirmed' });
     const noShow = makeBooking({ status: 'no_show_host', noShowMarkedBy: 'host' });
 
     const db: any = {
@@ -420,6 +423,7 @@ describe('BookingRepository.markAsNoShow', () => {
     };
 
     const repo = new BookingRepository(db);
+    (repo as any).findOneById = async () => existing;
     const result = await repo.markAsNoShow('booking-1', 'host');
 
     expect(result.status).toBe('no_show_host');
@@ -487,6 +491,34 @@ describe('BookingRepository.getUpcomingBookings', () => {
 // ---------------------------------------------------------------------------
 // buildWhereConditions (state filter coverage)
 // ---------------------------------------------------------------------------
+
+// ---------------------------------------------------------------------------
+// BookingRepository — BOOKING_VALID_TRANSITIONS guard
+// ---------------------------------------------------------------------------
+
+describe('BookingRepository — BOOKING_VALID_TRANSITIONS guard', () => {
+  test('confirmBooking rejects confirm on already-cancelled booking with ConflictError', async () => {
+    const repo = new BookingRepository({} as any);
+    (repo as any).findOneById = async () => makeBooking({ status: 'cancelled' });
+    await expect(repo.confirmBooking('booking-1')).rejects.toBeInstanceOf(ConflictError);
+  });
+
+  test('cancelBooking rejects cancel on completed booking with ConflictError', async () => {
+    const repo = new BookingRepository({} as any);
+    (repo as any).findOneById = async () => makeBooking({ status: 'completed', slot: 'slot-1' });
+    await expect(
+      repo.cancelBooking('booking-1', 'host', 'r')
+    ).rejects.toBeInstanceOf(ConflictError);
+  });
+
+  test('markAsNoShow rejects on rejected booking with ConflictError', async () => {
+    const repo = new BookingRepository({} as any);
+    (repo as any).findOneById = async () => makeBooking({ status: 'rejected' });
+    await expect(
+      repo.markAsNoShow('booking-1', 'client')
+    ).rejects.toBeInstanceOf(ConflictError);
+  });
+});
 
 describe('BookingRepository.buildWhereConditions', () => {
   test('returns undefined for no filters', () => {

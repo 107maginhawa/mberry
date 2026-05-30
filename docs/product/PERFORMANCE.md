@@ -69,6 +69,56 @@ From PRD S7: "NFR breaches in production are treated as P1 incidents with 24-hou
 | Image optimization | TBD | No target in PRD — S3/CDN serving |
 | Offline resilience | N/A | Removed from architecture |
 
+## Pagination Convention
+
+> **Adopted Wave G2 (S-C4-010)** in response to cycle-3 audit finding IC-05
+> (~70 unbounded `findMany` call sites).
+
+### Constants
+
+| Constant | Value | Source |
+|----------|-------|--------|
+| `DEFAULT_PAGE_SIZE` | 100 | `services/api-ts/src/core/pagination.ts` |
+| `MAX_PAGE_SIZE` | 500 | `services/api-ts/src/core/pagination.ts` |
+| `DEFAULT_QUERY_LIMIT` | 100 | `services/api-ts/src/core/database.repo.ts` (mirrors `DEFAULT_PAGE_SIZE`) |
+
+The two `DEFAULT_*` constants must stay equal — `pagination-convention.test.ts`
+fails the build if they drift.
+
+### Rules
+
+1. **No unbounded result sets in production code.** Any `db.select()...` chain
+   without `.limit()` or `.findMany()` without pagination is a defect. The
+   base `DatabaseRepository.findMany()` enforces `DEFAULT_QUERY_LIMIT` as a
+   safety net, but relying on the silent cap risks **silent truncation**:
+   a job that "iterates all events" will quietly process only the first 100
+   when the underlying table grows past that threshold.
+2. **Callers that need more than `DEFAULT_PAGE_SIZE` rows** must either:
+   - paginate explicitly via `findManyWithPagination` and walk pages, or
+   - use a streaming cursor (planned, not yet implemented), or
+   - pass `pagination: { limit: N, offset: 0 }` with `N <= MAX_PAGE_SIZE`
+     and document why a single large page is acceptable.
+3. **Hand-written `db.select()` queries** outside the base repo must include
+   an explicit `.limit()`. Search for `db.select` in code review when
+   adding new queries.
+4. **Jobs / cron tasks that iterate "all rows"** must page or stream. Single
+   `findMany()` calls inside a job are a code smell — the silent 100-row
+   cap will eventually cause production drift.
+5. **`MAX_PAGE_SIZE`** is the upper bound a client may request via `?limit=`.
+   Handlers that accept user-supplied page sizes should clamp via
+   `clampPageSize(req.limit)` from `core/pagination.ts`.
+
+### High-risk sites identified by the audit
+
+| Site | Status (Wave G2) | Notes |
+|------|------------------|-------|
+| `booking/jobs/index.ts` event regen loop | Bounded by `DEFAULT_QUERY_LIMIT` | Acceptable: orgs rarely exceed 100 active events; flag for cursor if breached. |
+| `comms/repos/chatMessage.repo.ts` history fetch | Bounded by `DEFAULT_QUERY_LIMIT` | UI already paginates; convention now documented. |
+| `audit/repos/audit.repo.ts:177` retention scan | Bounded by `DEFAULT_QUERY_LIMIT` | Retention job runs nightly per-shard, page over MAX_PAGE_SIZE chunks if shards grow. |
+
+When a site graduates from "bounded by default" to "needs explicit paging,"
+update both the site and this table.
+
 ## Recommendations
 
 1. **Define observability pipeline** before production — SLA enforcement requires measurement

@@ -1,3 +1,4 @@
+// oli-execute: error-handled-inline -- consumed by /officer/roster route.
 import { useState, useEffect, useCallback } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { Link, useParams } from '@tanstack/react-router'

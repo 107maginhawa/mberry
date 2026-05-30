@@ -232,6 +232,76 @@ export const ActionAlertUpdateSchema = z.object({
   status: z.enum(["draft", "active", "closed"]).optional()
 });
 
+export const AdCampaignSchema = z.object({
+  id: z.string().uuid(),
+  version: z.number().int(),
+  createdAt: z.string().datetime().transform((str) => new Date(str)),
+  createdBy: z.string().uuid().optional(),
+  updatedAt: z.string().datetime().transform((str) => new Date(str)),
+  updatedBy: z.string().uuid().optional(),
+  organizationId: z.string().uuid(),
+  advertiserId: z.string().uuid(),
+  name: z.string(),
+  description: z.string().optional(),
+  status: z.enum(["draft", "pending_review", "active", "paused", "completed", "rejected"]),
+  targetSegmentId: z.string().optional(),
+  targetSegmentSize: z.number().int().optional(),
+  budgetCents: z.number().int().gte(0),
+  spentCents: z.number().int().gte(0),
+  startsAt: z.string().datetime().transform((str) => new Date(str)).optional(),
+  endsAt: z.string().datetime().transform((str) => new Date(str)).optional(),
+  adSlot: z.enum(["feed_banner", "sidebar", "email_footer", "event_sponsor"])
+});
+
+export const AdCampaignStatusSchema = z.enum(["draft", "pending_review", "active", "paused", "completed", "rejected"]);
+
+export const AdCampaignUpdateSchema = z.object({
+  id: z.string().uuid().optional(),
+  version: z.number().int().optional(),
+  createdAt: z.string().datetime().transform((str) => new Date(str)).optional(),
+  createdBy: z.string().uuid().optional(),
+  updatedAt: z.string().datetime().transform((str) => new Date(str)).optional(),
+  updatedBy: z.string().uuid().optional(),
+  organizationId: z.string().uuid().optional(),
+  advertiserId: z.string().uuid().optional(),
+  name: z.string().optional(),
+  description: z.string().optional(),
+  status: z.enum(["draft", "pending_review", "active", "paused", "completed", "rejected"]).optional(),
+  targetSegmentId: z.string().optional(),
+  targetSegmentSize: z.number().int().optional(),
+  budgetCents: z.number().int().gte(0).optional(),
+  spentCents: z.number().int().gte(0).optional(),
+  startsAt: z.string().datetime().transform((str) => new Date(str)).optional(),
+  endsAt: z.string().datetime().transform((str) => new Date(str)).optional(),
+  adSlot: z.enum(["feed_banner", "sidebar", "email_footer", "event_sponsor"]).optional()
+});
+
+export const AdPlacementResponseSchema = z.object({
+  ad: z.union([z.object({
+  id: z.string().uuid(),
+  version: z.number().int(),
+  createdAt: z.string().datetime().transform((str) => new Date(str)),
+  createdBy: z.string().uuid().optional(),
+  updatedAt: z.string().datetime().transform((str) => new Date(str)),
+  updatedBy: z.string().uuid().optional(),
+  organizationId: z.string().uuid(),
+  campaignId: z.string().uuid(),
+  title: z.string(),
+  bodyText: z.string(),
+  imageUrl: z.string().url().optional(),
+  clickUrl: z.string().url().optional(),
+  status: z.enum(["pending", "approved", "rejected"]),
+  reviewedBy: z.string().uuid().optional(),
+  reviewedAt: z.string().datetime().transform((str) => new Date(str)).optional(),
+  rejectionReason: z.string().optional(),
+  sponsoredLabel: z.boolean()
+}), z.null()]),
+  generic: z.boolean(),
+  reason: z.string().optional()
+});
+
+export const AdSlotSchema = z.enum(["feed_banner", "sidebar", "email_footer", "event_sponsor"]);
+
 export const AddMemberRequestSchema = z.object({
   personId: z.string(),
   tierId: z.string(),
@@ -289,6 +359,64 @@ export const AdminRoleResponseSchema = z.object({
   role: z.string(),
   email: z.string(),
   name: z.string()
+});
+
+export const AdminSurveyListItemSchema = z.object({
+  id: z.string().uuid(),
+  title: z.string(),
+  organizationName: z.string().optional(),
+  surveyType: z.enum(["nps", "satisfaction", "poll", "custom"]),
+  status: z.enum(["draft", "active", "closed", "archived"]),
+  responseCount: z.number().int(),
+  questionCount: z.number().int(),
+  npsScore: z.number().optional(),
+  createdAt: z.string().datetime().transform((str) => new Date(str))
+});
+
+export const AdminSurveyListResponseSchema = z.object({
+  data: z.array(AdminSurveyListItemSchema),
+  total: z.number().int(),
+  stats: z.object({
+  totalSurveys: z.number().int(),
+  activeSurveys: z.number().int(),
+  avgNps: z.number().optional(),
+  avgResponseRate: z.number()
+})
+});
+
+export const AdminSurveyStatsSchema = z.object({
+  totalSurveys: z.number().int(),
+  activeSurveys: z.number().int(),
+  avgNps: z.number().optional(),
+  avgResponseRate: z.number()
+});
+
+export const AdvertiserSchema = z.object({
+  id: z.string().uuid(),
+  version: z.number().int(),
+  createdAt: z.string().datetime().transform((str) => new Date(str)),
+  createdBy: z.string().uuid().optional(),
+  updatedAt: z.string().datetime().transform((str) => new Date(str)),
+  updatedBy: z.string().uuid().optional(),
+  organizationId: z.string().uuid(),
+  companyName: z.string(),
+  contactEmail: z.string().email(),
+  contactPersonId: z.string().uuid().optional(),
+  isActive: z.boolean()
+});
+
+export const AdvertiserUpdateSchema = z.object({
+  id: z.string().uuid().optional(),
+  version: z.number().int().optional(),
+  createdAt: z.string().datetime().transform((str) => new Date(str)).optional(),
+  createdBy: z.string().uuid().optional(),
+  updatedAt: z.string().datetime().transform((str) => new Date(str)).optional(),
+  updatedBy: z.string().uuid().optional(),
+  organizationId: z.string().uuid().optional(),
+  companyName: z.string().optional(),
+  contactEmail: z.string().email().optional(),
+  contactPersonId: z.string().uuid().optional(),
+  isActive: z.boolean().optional()
 });
 
 export const AffiliationStatusSchema = z.enum(["active", "transferred", "withdrawn"]);
@@ -406,6 +534,13 @@ export const AnnouncementSchema = z.object({
   publishedAt: z.string().datetime().transform((str) => new Date(str)).optional()
 });
 
+export const AnnouncementChannelStatsSchema = z.object({
+  targeted: z.number().int().optional(),
+  delivered: z.number().int().optional(),
+  failed: z.number().int().optional(),
+  opened: z.number().int().optional()
+});
+
 export const AnnouncementCreateRequestSchema = z.object({
   title: z.string().max(200),
   content: z.string(),
@@ -430,6 +565,57 @@ export const AnnouncementListResponseSchema = z.object({
   hasNextPage: z.boolean(),
   hasPreviousPage: z.boolean()
 })
+});
+
+export const AnnouncementScheduleRequestSchema = z.object({
+  scheduledAt: z.string().datetime().transform((str) => new Date(str))
+});
+
+export const AnnouncementStatsSchema = z.object({
+  push: z.object({
+  targeted: z.number().int().optional(),
+  delivered: z.number().int().optional(),
+  failed: z.number().int().optional(),
+  opened: z.number().int().optional()
+}).optional(),
+  email: z.object({
+  targeted: z.number().int().optional(),
+  delivered: z.number().int().optional(),
+  failed: z.number().int().optional(),
+  opened: z.number().int().optional()
+}).optional(),
+  inApp: z.object({
+  targeted: z.number().int().optional(),
+  delivered: z.number().int().optional(),
+  failed: z.number().int().optional(),
+  opened: z.number().int().optional()
+}).optional()
+});
+
+export const AnnouncementStatsResponseSchema = z.object({
+  id: z.string().uuid(),
+  title: z.string(),
+  status: z.enum(["draft", "scheduled", "sent", "scheduledFailed", "archived"]),
+  stats: z.object({
+  push: z.object({
+  targeted: z.number().int().optional(),
+  delivered: z.number().int().optional(),
+  failed: z.number().int().optional(),
+  opened: z.number().int().optional()
+}).optional(),
+  email: z.object({
+  targeted: z.number().int().optional(),
+  delivered: z.number().int().optional(),
+  failed: z.number().int().optional(),
+  opened: z.number().int().optional()
+}).optional(),
+  inApp: z.object({
+  targeted: z.number().int().optional(),
+  delivered: z.number().int().optional(),
+  failed: z.number().int().optional(),
+  opened: z.number().int().optional()
+}).optional()
+}).optional()
 });
 
 export const AnnouncementStatusSchema = z.enum(["draft", "scheduled", "sent", "scheduledFailed", "archived"]);
@@ -4117,11 +4303,37 @@ export const CourseUpdateSchema = z.object({
 
 export const CpdActivityTypeSchema = z.enum(["seminar", "workshop", "conference", "webinar", "hands_on", "community", "research", "mentorship", "self_directed", "other"]);
 
+export const CreateAdvertiserRequestSchema = z.object({
+  companyName: z.string().min(1).max(255),
+  contactEmail: z.string().email(),
+  contactPersonId: z.string().uuid().optional()
+});
+
+export const CreateCampaignRequestSchema = z.object({
+  advertiserId: z.string().uuid(),
+  name: z.string().min(1).max(255),
+  description: z.string().optional(),
+  targetSegmentId: z.string().optional(),
+  targetSegmentSize: z.number().int().optional(),
+  budgetCents: z.number().int().gte(0).optional(),
+  startsAt: z.string().datetime().transform((str) => new Date(str)).optional(),
+  endsAt: z.string().datetime().transform((str) => new Date(str)).optional(),
+  adSlot: z.enum(["feed_banner", "sidebar", "email_footer", "event_sponsor"]).optional()
+});
+
 export const CreateChatRoomRequestSchema = z.object({
   participants: z.array(UUIDSchema),
   admins: z.array(UUIDSchema).optional(),
   context: z.string().uuid().optional(),
   upsert: z.boolean().optional()
+});
+
+export const CreateCreativeRequestSchema = z.object({
+  campaignId: z.string().uuid(),
+  title: z.string().min(1).max(255),
+  bodyText: z.string().min(1),
+  imageUrl: z.string().url().optional(),
+  clickUrl: z.string().url().optional()
 });
 
 export const CreateCreditEntryRequestSchema = z.object({
@@ -4170,6 +4382,51 @@ export const CreateInvoiceRequestSchema = z.object({
   voidThresholdMinutes: z.number().int().optional(),
   lineItems: z.array(CreateLineItemRequestSchema),
   metadata: z.record(z.string(), z.unknown()).optional()
+});
+
+export const CreateJobBoardApplicationRequestSchema = z.object({
+  postingId: z.string().uuid(),
+  resumeRef: z.string().optional(),
+  coverLetter: z.string().optional()
+});
+
+export const CreateJobBoardPostingRequestSchema = z.object({
+  title: z.string().min(1).max(255),
+  organizationName: z.string().min(1).max(255),
+  organizationId: z.string().uuid().optional(),
+  location: z.string().optional(),
+  type: z.enum(["full_time", "part_time", "contract", "fellowship", "internship"]).optional(),
+  salary: z.string().optional(),
+  description: z.string().optional(),
+  requirements: z.array(z.string()).optional(),
+  postedAt: z.string().datetime().transform((str) => new Date(str)).optional(),
+  expiresAt: z.string().datetime().transform((str) => new Date(str)).optional(),
+  status: z.enum(["draft", "active", "filled", "expired", "closed"]).optional()
+});
+
+export const CreateMarketplaceListingRequestSchema = z.object({
+  vendorId: z.string().uuid(),
+  title: z.string().min(1).max(255),
+  description: z.string().min(1),
+  price: z.string().optional(),
+  currency: z.string().optional(),
+  status: z.enum(["draft", "active", "archived"]).optional(),
+  categoryTags: z.array(z.string()).optional()
+});
+
+export const CreateMarketplaceOrderRequestSchema = z.object({
+  listingId: z.string().uuid(),
+  quantity: z.number().int().gte(1).optional(),
+  notes: z.string().optional()
+});
+
+export const CreateMarketplaceVendorRequestSchema = z.object({
+  companyName: z.string().min(1).max(255),
+  category: z.enum(["emr", "supplies", "insurance", "telehealth", "other"]),
+  description: z.string().min(1),
+  websiteUrl: z.string().url().optional(),
+  contactEmail: z.string().email(),
+  contactPersonId: z.string().uuid().optional()
 });
 
 export const CreateMerchantAccountRequestSchema = z.object({
@@ -4250,6 +4507,48 @@ export const CreateTemplateRequestSchema = z.object({
   replyToEmail: z.string().email().optional(),
   replyToName: z.string().optional(),
   status: z.enum(["draft", "active", "archived"]).optional()
+});
+
+export const CreativeSchema = z.object({
+  id: z.string().uuid(),
+  version: z.number().int(),
+  createdAt: z.string().datetime().transform((str) => new Date(str)),
+  createdBy: z.string().uuid().optional(),
+  updatedAt: z.string().datetime().transform((str) => new Date(str)),
+  updatedBy: z.string().uuid().optional(),
+  organizationId: z.string().uuid(),
+  campaignId: z.string().uuid(),
+  title: z.string(),
+  bodyText: z.string(),
+  imageUrl: z.string().url().optional(),
+  clickUrl: z.string().url().optional(),
+  status: z.enum(["pending", "approved", "rejected"]),
+  reviewedBy: z.string().uuid().optional(),
+  reviewedAt: z.string().datetime().transform((str) => new Date(str)).optional(),
+  rejectionReason: z.string().optional(),
+  sponsoredLabel: z.boolean()
+});
+
+export const CreativeStatusSchema = z.enum(["pending", "approved", "rejected"]);
+
+export const CreativeUpdateSchema = z.object({
+  id: z.string().uuid().optional(),
+  version: z.number().int().optional(),
+  createdAt: z.string().datetime().transform((str) => new Date(str)).optional(),
+  createdBy: z.string().uuid().optional(),
+  updatedAt: z.string().datetime().transform((str) => new Date(str)).optional(),
+  updatedBy: z.string().uuid().optional(),
+  organizationId: z.string().uuid().optional(),
+  campaignId: z.string().uuid().optional(),
+  title: z.string().optional(),
+  bodyText: z.string().optional(),
+  imageUrl: z.string().url().optional(),
+  clickUrl: z.string().url().optional(),
+  status: z.enum(["pending", "approved", "rejected"]).optional(),
+  reviewedBy: z.string().uuid().optional(),
+  reviewedAt: z.string().datetime().transform((str) => new Date(str)).optional(),
+  rejectionReason: z.string().optional(),
+  sponsoredLabel: z.boolean().optional()
 });
 
 export const CredentialStatusSchema = z.enum(["active", "suspended", "revoked", "expired"]);
@@ -4468,6 +4767,10 @@ export const CycleStatusSchema = z.enum(["active", "completed", "deficient", "gr
 export const DashboardResponseSchema = z.object({
   dashboardUrl: z.string().url(),
   expiresAt: z.string().datetime().transform((str) => new Date(str))
+});
+
+export const DeleteMemberResponsesResultSchema = z.object({
+  deletedCount: z.number().int()
 });
 
 export const DigitalCredentialSchema = z.object({
@@ -6390,6 +6693,93 @@ export const JobApplicationUpdateSchema = z.object({
   status: z.enum(["applied", "screening", "interviewed", "offered", "hired", "rejected", "withdrawn"]).optional()
 });
 
+export const JobBoardApplicationSchema = z.object({
+  id: z.string().uuid(),
+  version: z.number().int(),
+  createdAt: z.string().datetime().transform((str) => new Date(str)),
+  createdBy: z.string().uuid().optional(),
+  updatedAt: z.string().datetime().transform((str) => new Date(str)),
+  updatedBy: z.string().uuid().optional(),
+  postingId: z.string().uuid(),
+  personId: z.string().uuid(),
+  resumeRef: z.string().optional(),
+  coverLetter: z.string().optional(),
+  appliedAt: z.string().datetime().transform((str) => new Date(str)),
+  status: z.enum(["applied", "screening", "interviewed", "offered", "hired", "rejected", "withdrawn"])
+});
+
+export const JobBoardApplicationStatusSchema = z.enum(["applied", "screening", "interviewed", "offered", "hired", "rejected", "withdrawn"]);
+
+export const JobBoardApplicationUpdateSchema = z.object({
+  id: z.string().uuid().optional(),
+  version: z.number().int().optional(),
+  createdAt: z.string().datetime().transform((str) => new Date(str)).optional(),
+  createdBy: z.string().uuid().optional(),
+  updatedAt: z.string().datetime().transform((str) => new Date(str)).optional(),
+  updatedBy: z.string().uuid().optional(),
+  postingId: z.string().uuid().optional(),
+  personId: z.string().uuid().optional(),
+  resumeRef: z.string().optional(),
+  coverLetter: z.string().optional(),
+  appliedAt: z.string().datetime().transform((str) => new Date(str)).optional(),
+  status: z.enum(["applied", "screening", "interviewed", "offered", "hired", "rejected", "withdrawn"]).optional()
+});
+
+export const JobBoardPostingSchema = z.object({
+  id: z.string().uuid(),
+  version: z.number().int(),
+  createdAt: z.string().datetime().transform((str) => new Date(str)),
+  createdBy: z.string().uuid().optional(),
+  updatedAt: z.string().datetime().transform((str) => new Date(str)),
+  updatedBy: z.string().uuid().optional(),
+  organizationId: z.string().uuid(),
+  title: z.string(),
+  organizationName: z.string(),
+  location: z.string().optional(),
+  type: z.enum(["full_time", "part_time", "contract", "fellowship", "internship"]),
+  salary: z.string().optional(),
+  description: z.string().optional(),
+  requirements: z.array(z.string()).optional(),
+  postedAt: z.string().datetime().transform((str) => new Date(str)).optional(),
+  expiresAt: z.string().datetime().transform((str) => new Date(str)).optional(),
+  status: z.enum(["draft", "active", "filled", "expired", "closed"]),
+  postedBy: z.string().uuid().optional()
+});
+
+export const JobBoardPostingListResponseSchema = z.object({
+  data: z.array(JobBoardPostingSchema),
+  pagination: z.object({
+  total: z.number().int(),
+  limit: z.number().int(),
+  offset: z.number().int()
+})
+});
+
+export const JobBoardPostingStatusSchema = z.enum(["draft", "active", "filled", "expired", "closed"]);
+
+export const JobBoardPostingTypeSchema = z.enum(["full_time", "part_time", "contract", "fellowship", "internship"]);
+
+export const JobBoardPostingUpdateSchema = z.object({
+  id: z.string().uuid().optional(),
+  version: z.number().int().optional(),
+  createdAt: z.string().datetime().transform((str) => new Date(str)).optional(),
+  createdBy: z.string().uuid().optional(),
+  updatedAt: z.string().datetime().transform((str) => new Date(str)).optional(),
+  updatedBy: z.string().uuid().optional(),
+  organizationId: z.string().uuid().optional(),
+  title: z.string().optional(),
+  organizationName: z.string().optional(),
+  location: z.string().optional(),
+  type: z.enum(["full_time", "part_time", "contract", "fellowship", "internship"]).optional(),
+  salary: z.string().optional(),
+  description: z.string().optional(),
+  requirements: z.array(z.string()).optional(),
+  postedAt: z.string().datetime().transform((str) => new Date(str)).optional(),
+  expiresAt: z.string().datetime().transform((str) => new Date(str)).optional(),
+  status: z.enum(["draft", "active", "filled", "expired", "closed"]).optional(),
+  postedBy: z.string().uuid().optional()
+});
+
 export const JobPostingSchema = z.object({
   id: z.string().uuid(),
   version: z.number().int(),
@@ -6524,6 +6914,34 @@ export const LicenseRenewalAlertUpdateSchema = z.object({
 
 export const LicenseStatusSchema = z.enum(["active", "expired", "suspended", "revoked", "pending"]);
 
+export const MarketplaceListingSchema = z.object({
+  id: z.string().uuid(),
+  version: z.number().int(),
+  createdAt: z.string().datetime().transform((str) => new Date(str)),
+  createdBy: z.string().uuid().optional(),
+  updatedAt: z.string().datetime().transform((str) => new Date(str)),
+  updatedBy: z.string().uuid().optional(),
+  organizationId: z.string().uuid(),
+  vendorId: z.string().uuid(),
+  title: z.string(),
+  description: z.string(),
+  price: z.string().optional(),
+  currency: z.string().optional(),
+  status: z.enum(["draft", "active", "archived"]),
+  categoryTags: z.array(z.string()).optional()
+});
+
+export const ListingListResponseSchema = z.object({
+  data: z.array(MarketplaceListingSchema),
+  pagination: z.object({
+  total: z.number().int(),
+  limit: z.number().int(),
+  offset: z.number().int()
+})
+});
+
+export const ListingStatusSchema = z.enum(["draft", "active", "archived"]);
+
 export const ManualCreditAwardRequestSchema = z.object({
   personId: z.string(),
   activityName: z.string().min(1).max(300),
@@ -6590,6 +7008,97 @@ export const MarketingCampaignUpdateSchema = z.object({
   sentCount: z.number().int().gte(0).optional(),
   openRate: z.number().gte(0).lte(1).optional(),
   clickRate: z.number().gte(0).lte(1).optional()
+});
+
+export const MarketplaceListingUpdateSchema = z.object({
+  id: z.string().uuid().optional(),
+  version: z.number().int().optional(),
+  createdAt: z.string().datetime().transform((str) => new Date(str)).optional(),
+  createdBy: z.string().uuid().optional(),
+  updatedAt: z.string().datetime().transform((str) => new Date(str)).optional(),
+  updatedBy: z.string().uuid().optional(),
+  organizationId: z.string().uuid().optional(),
+  vendorId: z.string().uuid().optional(),
+  title: z.string().optional(),
+  description: z.string().optional(),
+  price: z.string().optional(),
+  currency: z.string().optional(),
+  status: z.enum(["draft", "active", "archived"]).optional(),
+  categoryTags: z.array(z.string()).optional()
+});
+
+export const MarketplaceOrderSchema = z.object({
+  id: z.string().uuid(),
+  version: z.number().int(),
+  createdAt: z.string().datetime().transform((str) => new Date(str)),
+  createdBy: z.string().uuid().optional(),
+  updatedAt: z.string().datetime().transform((str) => new Date(str)),
+  updatedBy: z.string().uuid().optional(),
+  organizationId: z.string().uuid(),
+  listingId: z.string().uuid(),
+  buyerPersonId: z.string().uuid(),
+  vendorId: z.string().uuid(),
+  quantity: z.number().int().gte(1),
+  totalPrice: z.string(),
+  status: z.enum(["pending", "confirmed", "fulfilled", "cancelled", "refunded"]),
+  notes: z.string().optional(),
+  fulfilledAt: z.string().datetime().transform((str) => new Date(str)).optional()
+});
+
+export const MarketplaceOrderUpdateSchema = z.object({
+  id: z.string().uuid().optional(),
+  version: z.number().int().optional(),
+  createdAt: z.string().datetime().transform((str) => new Date(str)).optional(),
+  createdBy: z.string().uuid().optional(),
+  updatedAt: z.string().datetime().transform((str) => new Date(str)).optional(),
+  updatedBy: z.string().uuid().optional(),
+  organizationId: z.string().uuid().optional(),
+  listingId: z.string().uuid().optional(),
+  buyerPersonId: z.string().uuid().optional(),
+  vendorId: z.string().uuid().optional(),
+  quantity: z.number().int().gte(1).optional(),
+  totalPrice: z.string().optional(),
+  status: z.enum(["pending", "confirmed", "fulfilled", "cancelled", "refunded"]).optional(),
+  notes: z.string().optional(),
+  fulfilledAt: z.string().datetime().transform((str) => new Date(str)).optional()
+});
+
+export const MarketplaceVendorSchema = z.object({
+  id: z.string().uuid(),
+  version: z.number().int(),
+  createdAt: z.string().datetime().transform((str) => new Date(str)),
+  createdBy: z.string().uuid().optional(),
+  updatedAt: z.string().datetime().transform((str) => new Date(str)),
+  updatedBy: z.string().uuid().optional(),
+  organizationId: z.string().uuid(),
+  companyName: z.string(),
+  category: z.enum(["emr", "supplies", "insurance", "telehealth", "other"]),
+  description: z.string(),
+  verificationStatus: z.enum(["pending", "verified", "suspended", "rejected"]),
+  websiteUrl: z.string().url().optional(),
+  contactEmail: z.string().email(),
+  contactPersonId: z.string().uuid().optional(),
+  verifiedAt: z.string().datetime().transform((str) => new Date(str)).optional(),
+  verifiedBy: z.string().uuid().optional()
+});
+
+export const MarketplaceVendorUpdateSchema = z.object({
+  id: z.string().uuid().optional(),
+  version: z.number().int().optional(),
+  createdAt: z.string().datetime().transform((str) => new Date(str)).optional(),
+  createdBy: z.string().uuid().optional(),
+  updatedAt: z.string().datetime().transform((str) => new Date(str)).optional(),
+  updatedBy: z.string().uuid().optional(),
+  organizationId: z.string().uuid().optional(),
+  companyName: z.string().optional(),
+  category: z.enum(["emr", "supplies", "insurance", "telehealth", "other"]).optional(),
+  description: z.string().optional(),
+  verificationStatus: z.enum(["pending", "verified", "suspended", "rejected"]).optional(),
+  websiteUrl: z.string().url().optional(),
+  contactEmail: z.string().email().optional(),
+  contactPersonId: z.string().uuid().optional(),
+  verifiedAt: z.string().datetime().transform((str) => new Date(str)).optional(),
+  verifiedBy: z.string().uuid().optional()
 });
 
 export const MaybeStoredFileSchema = z.object({
@@ -7247,6 +7756,13 @@ export const NotificationUpdateSchema = z.object({
   consentValidated: z.boolean().optional()
 });
 
+export const NpsTrendPointSchema = z.object({
+  date: z.string().datetime().transform((str) => new Date(str)),
+  score: z.number(),
+  surveyTitle: z.string(),
+  responseCount: z.number().int()
+});
+
 export const OfficerPositionSchema = z.object({
   id: z.string().uuid(),
   title: z.string(),
@@ -7435,6 +7951,8 @@ export const OnboardingStateResponseSchema = z.object({
   stepsCompleted: z.array(z.number().int()),
   completedAt: z.union([z.string().datetime().transform((str) => new Date(str)), z.null()])
 });
+
+export const OrderStatusSchema = z.enum(["pending", "confirmed", "fulfilled", "cancelled", "refunded"]);
 
 export const OrgAccreditedProviderSchema = z.object({
   id: z.string().uuid(),
@@ -8624,6 +9142,10 @@ export const RenewalCycleUpdateSchema = z.object({
 
 export const RenewalStatusSchema = z.enum(["pending", "invoiced", "paid", "overdue", "lapsed"]);
 
+export const ReportAdRequestSchema = z.object({
+  reason: z.string().min(1).max(1000)
+});
+
 export const ResolutionStatusSchema = z.enum(["proposed", "discussed", "adopted", "rejected", "tabled"]);
 
 export const ResourceSchema = z.object({
@@ -8693,6 +9215,11 @@ export const ReviewSchema = z.object({
   reviewedEntity: z.string().uuid().optional(),
   npsScore: z.number().int().gte(0).lte(10),
   comment: z.string().max(1000).optional()
+});
+
+export const ReviewCreativeRequestSchema = z.object({
+  approved: z.boolean(),
+  rejectionReason: z.string().optional()
 });
 
 export const ReviewDecisionSchema = z.enum(["approve", "modify", "reject"]);
@@ -9117,6 +9644,10 @@ export const SessionUpdateSchema = z.object({
   status: z.enum(["scheduled", "in_progress", "completed", "cancelled"]).optional()
 });
 
+export const SetMemberOptOutRequestSchema = z.object({
+  optedOut: z.boolean()
+});
+
 export const SkipLogicConfigSchema = z.object({
   condition: z.string(),
   targetQuestionId: z.string().uuid()
@@ -9487,7 +10018,9 @@ export const SurveySchema = z.object({
   completionRate: z.number(),
   npsScore: z.number().optional(),
   questionBreakdown: z.record(z.string(), z.unknown())
-}).optional()
+}).optional(),
+  myResponseStatus: z.enum(["pending", "completed", "skipped", "dismissed"]).optional(),
+  myCompletedAt: z.string().datetime().transform((str) => new Date(str)).optional()
 });
 
 export const SurveyAnalyticsSchema = z.object({
@@ -9608,7 +10141,9 @@ export const SurveyUpdateSchema = z.object({
   completionRate: z.number().optional(),
   npsScore: z.number().optional(),
   questionBreakdown: z.record(z.string(), z.unknown()).optional()
-}).optional()
+}).optional(),
+  myResponseStatus: z.enum(["pending", "completed", "skipped", "dismissed"]).optional(),
+  myCompletedAt: z.string().datetime().transform((str) => new Date(str)).optional()
 });
 
 export const TargetAudienceFilterSchema = z.object({
@@ -9861,6 +10396,32 @@ export const UpdateInvoiceRequestSchema = z.object({
   metadata: z.record(z.string(), z.unknown()).optional()
 });
 
+export const UpdateJobBoardApplicationRequestSchema = z.object({
+  status: z.enum(["applied", "screening", "interviewed", "offered", "hired", "rejected", "withdrawn"]).optional(),
+  note: z.string().optional()
+});
+
+export const UpdateJobBoardPostingRequestSchema = z.object({
+  title: z.string().max(255).optional(),
+  organizationName: z.string().max(255).optional(),
+  location: z.string().optional(),
+  type: z.enum(["full_time", "part_time", "contract", "fellowship", "internship"]).optional(),
+  salary: z.string().optional(),
+  description: z.string().optional(),
+  requirements: z.array(z.string()).optional(),
+  expiresAt: z.string().datetime().transform((str) => new Date(str)).optional(),
+  status: z.enum(["draft", "active", "filled", "expired", "closed"]).optional()
+});
+
+export const UpdateMarketplaceVendorRequestSchema = z.object({
+  companyName: z.string().optional(),
+  category: z.enum(["emr", "supplies", "insurance", "telehealth", "other"]).optional(),
+  description: z.string().optional(),
+  websiteUrl: z.string().url().optional(),
+  contactEmail: z.string().email().optional(),
+  verificationStatus: z.enum(["pending", "verified", "suspended", "rejected"]).optional()
+});
+
 export const UpdateMemberRequestSchema = z.object({
   tierId: z.string().optional(),
   categoryId: z.union([z.string(), z.null()]).optional(),
@@ -9989,6 +10550,19 @@ export const ValidationErrorSchema = z.object({
 });
 
 export const VariableTypeSchema = z.enum(["string", "number", "boolean", "date", "datetime", "url", "email", "array"]);
+
+export const VendorCategorySchema = z.enum(["emr", "supplies", "insurance", "telehealth", "other"]);
+
+export const VendorListResponseSchema = z.object({
+  data: z.array(MarketplaceVendorSchema),
+  pagination: z.object({
+  total: z.number().int(),
+  limit: z.number().int(),
+  offset: z.number().int()
+})
+});
+
+export const VendorStatusSchema = z.enum(["pending", "verified", "suspended", "rejected"]);
 
 export const VerificationResultSchema = z.enum(["valid", "expired", "revoked", "notFound"]);
 
@@ -10557,6 +11131,40 @@ export const TransitionOrgStatusBody = z.object({
 export type TransitionOrgStatusBody = z.infer<typeof TransitionOrgStatusBody>;
 
 export const TransitionOrgStatusResponse = PlatformAdminModuleOrganizationSchema;
+
+export const ListAdminSurveysQuery = z.object({
+  limit: z.coerce.number().int().optional(),
+  offset: z.coerce.number().int().optional(),
+  status: SurveyStatusSchema.optional(),
+  surveyType: SurveyTypeSchema.optional(),
+});
+export type ListAdminSurveysQuery = z.infer<typeof ListAdminSurveysQuery>;
+
+export const ListAdminSurveysResponse = AdminSurveyListResponseSchema;
+
+export const CreateAdvertiserBody = CreateAdvertiserRequestSchema;
+export type CreateAdvertiserBody = z.infer<typeof CreateAdvertiserBody>;
+
+export const CreateAdvertiserResponse = AdvertiserSchema;
+
+export const CreateJobApplicationBody = CreateJobBoardApplicationRequestSchema;
+export type CreateJobApplicationBody = z.infer<typeof CreateJobApplicationBody>;
+
+export const CreateJobApplicationResponse = z.object({
+  data: JobBoardApplicationSchema
+});
+
+export const UpdateJobApplicationParams = z.object({
+  applicationId: UUIDSchema,
+});
+export type UpdateJobApplicationParams = z.infer<typeof UpdateJobApplicationParams>;
+
+export const UpdateJobApplicationBody = UpdateJobBoardApplicationRequestSchema;
+export type UpdateJobApplicationBody = z.infer<typeof UpdateJobApplicationBody>;
+
+export const UpdateJobApplicationResponse = z.object({
+  data: JobBoardApplicationSchema
+});
 
 export const CreateDocumentTagBody = AssociationCoreDocumentsDocumentTagCreateRequestSchema;
 export type CreateDocumentTagBody = z.infer<typeof CreateDocumentTagBody>;
@@ -13211,6 +13819,11 @@ export type GetTimeSlotQuery = z.infer<typeof GetTimeSlotQuery>;
 
 export const GetTimeSlotResponse = TimeSlotSchema;
 
+export const CreateCampaignBody = CreateCampaignRequestSchema;
+export type CreateCampaignBody = z.infer<typeof CreateCampaignBody>;
+
+export const CreateCampaignResponse = AdCampaignSchema;
+
 export const BulkIssueCertificatesBody = BulkIssueCertificatesRequestSchema;
 export type BulkIssueCertificatesBody = z.infer<typeof BulkIssueCertificatesBody>;
 
@@ -13357,6 +13970,23 @@ export type PublishAnnouncementParams = z.infer<typeof PublishAnnouncementParams
 
 export const PublishAnnouncementResponse = AnnouncementSchema;
 
+export const ScheduleAnnouncementParams = z.object({
+  id: UUIDSchema,
+});
+export type ScheduleAnnouncementParams = z.infer<typeof ScheduleAnnouncementParams>;
+
+export const ScheduleAnnouncementBody = AnnouncementScheduleRequestSchema;
+export type ScheduleAnnouncementBody = z.infer<typeof ScheduleAnnouncementBody>;
+
+export const ScheduleAnnouncementResponse = AnnouncementSchema;
+
+export const GetAnnouncementStatsParams = z.object({
+  id: UUIDSchema,
+});
+export type GetAnnouncementStatsParams = z.infer<typeof GetAnnouncementStatsParams>;
+
+export const GetAnnouncementStatsResponse = AnnouncementStatsResponseSchema;
+
 export const ListAnnouncementsParams = z.object({
   organizationId: UUIDSchema,
 });
@@ -13409,6 +14039,33 @@ export const DeleteSavedSegmentQuery = z.object({
 export type DeleteSavedSegmentQuery = z.infer<typeof DeleteSavedSegmentQuery>;
 
 export const DeleteSavedSegmentResponse = AssociationCoreCommunicationSavedSegmentDeleteResponseSchema;
+
+export const CreateCreativeBody = CreateCreativeRequestSchema;
+export type CreateCreativeBody = z.infer<typeof CreateCreativeBody>;
+
+export const CreateCreativeResponse = CreativeSchema;
+
+export const ReportAdParams = z.object({
+  creativeId: UUIDSchema,
+});
+export type ReportAdParams = z.infer<typeof ReportAdParams>;
+
+export const ReportAdBody = ReportAdRequestSchema;
+export type ReportAdBody = z.infer<typeof ReportAdBody>;
+
+export const ReportAdResponse = z.object({
+  success: z.boolean()
+});
+
+export const ReviewCreativeParams = z.object({
+  creativeId: UUIDSchema,
+});
+export type ReviewCreativeParams = z.infer<typeof ReviewCreativeParams>;
+
+export const ReviewCreativeBody = ReviewCreativeRequestSchema;
+export type ReviewCreativeBody = z.infer<typeof ReviewCreativeBody>;
+
+export const ReviewCreativeResponse = CreativeSchema;
 
 export const GetCreditComplianceParams = z.object({
   organizationId: UUIDSchema,
@@ -13564,6 +14221,23 @@ export type ValidateInviteParams = z.infer<typeof ValidateInviteParams>;
 
 export const ValidateInviteResponse = ValidateInviteResponseSchema;
 
+export const CreateListingBody = CreateMarketplaceListingRequestSchema;
+export type CreateListingBody = z.infer<typeof CreateListingBody>;
+
+export const CreateListingResponse = MarketplaceListingSchema;
+
+export const ListListingsQuery = z.object({
+  organizationId: UUIDSchema.optional(),
+  vendorId: UUIDSchema.optional(),
+  status: ListingStatusSchema.optional(),
+  categoryTag: z.string().optional(),
+  limit: z.coerce.number().int().optional(),
+  offset: z.coerce.number().int().optional(),
+});
+export type ListListingsQuery = z.infer<typeof ListListingsQuery>;
+
+export const ListListingsResponse = ListingListResponseSchema;
+
 export const ListOrgApplicationsParams = z.object({
   organizationId: UUIDSchema,
 });
@@ -13665,6 +14339,25 @@ export type UpdateOnboardingStepBody = z.infer<typeof UpdateOnboardingStepBody>;
 
 export const UpdateOnboardingStepResponse = UpdateOnboardingStepResponseSchema;
 
+export const SetMemberOptOutBody = SetMemberOptOutRequestSchema;
+export type SetMemberOptOutBody = z.infer<typeof SetMemberOptOutBody>;
+
+export const SetMemberOptOutResponse = z.object({
+  success: z.boolean()
+});
+
+export const CreateOrderBody = CreateMarketplaceOrderRequestSchema;
+export type CreateOrderBody = z.infer<typeof CreateOrderBody>;
+
+export const CreateOrderResponse = MarketplaceOrderSchema;
+
+export const FulfillOrderParams = z.object({
+  orderId: UUIDSchema,
+});
+export type FulfillOrderParams = z.infer<typeof FulfillOrderParams>;
+
+export const FulfillOrderResponse = MarketplaceOrderSchema;
+
 export const SendPaymentLinkParams = z.object({
   organizationId: z.string(),
 });
@@ -13674,6 +14367,14 @@ export const SendPaymentLinkBody = SendPaymentLinkRequestSchema;
 export type SendPaymentLinkBody = z.infer<typeof SendPaymentLinkBody>;
 
 export const SendPaymentLinkResponse = SendPaymentLinkResponseSchema;
+
+export const DownloadReceiptParams = z.object({
+  organizationId: UUIDSchema,
+  paymentId: UUIDSchema,
+});
+export type DownloadReceiptParams = z.infer<typeof DownloadReceiptParams>;
+
+export const DownloadReceiptResponse = z.string();
 
 export const CheckoutPaymentTokenParams = z.object({
   token: z.string(),
@@ -13785,6 +14486,61 @@ export const UpdatePersonBody = PersonUpdateRequestSchema;
 export type UpdatePersonBody = z.infer<typeof UpdatePersonBody>;
 
 export const UpdatePersonResponse = PersonSchema;
+
+export const GetAdForPlacementQuery = z.object({
+  optedOut: z.coerce.boolean().optional(),
+  adSlot: AdSlotSchema.optional(),
+});
+export type GetAdForPlacementQuery = z.infer<typeof GetAdForPlacementQuery>;
+
+export const GetAdForPlacementResponse = AdPlacementResponseSchema;
+
+export const CreateJobPostingBody = CreateJobBoardPostingRequestSchema;
+export type CreateJobPostingBody = z.infer<typeof CreateJobPostingBody>;
+
+export const CreateJobPostingResponse = z.object({
+  data: JobBoardPostingSchema
+});
+
+export const SearchJobPostingsQuery = z.object({
+  organizationId: UUIDSchema.optional(),
+  status: JobBoardPostingStatusSchema.optional(),
+  type: JobBoardPostingTypeSchema.optional(),
+  search: z.string().optional(),
+  limit: z.coerce.number().int().optional(),
+  offset: z.coerce.number().int().optional(),
+});
+export type SearchJobPostingsQuery = z.infer<typeof SearchJobPostingsQuery>;
+
+export const SearchJobPostingsResponse = JobBoardPostingListResponseSchema;
+
+export const GetJobPostingParams = z.object({
+  postingId: UUIDSchema,
+});
+export type GetJobPostingParams = z.infer<typeof GetJobPostingParams>;
+
+export const GetJobPostingResponse = z.object({
+  data: JobBoardPostingSchema
+});
+
+export const UpdateJobPostingParams = z.object({
+  postingId: UUIDSchema,
+});
+export type UpdateJobPostingParams = z.infer<typeof UpdateJobPostingParams>;
+
+export const UpdateJobPostingBody = UpdateJobBoardPostingRequestSchema;
+export type UpdateJobPostingBody = z.infer<typeof UpdateJobPostingBody>;
+
+export const UpdateJobPostingResponse = z.object({
+  data: JobBoardPostingSchema
+});
+
+export const DeleteJobPostingParams = z.object({
+  postingId: UUIDSchema,
+});
+export type DeleteJobPostingParams = z.infer<typeof DeleteJobPostingParams>;
+
+export const DeleteJobPostingResponse = z.void();
 
 export const ListPublicEventsQuery = z.object({
   offset: z.coerce.number().int().gte(0).lte(2147483647).optional(),
@@ -13930,6 +14686,10 @@ export type ListSurveysQuery = z.infer<typeof ListSurveysQuery>;
 
 export const ListSurveysResponse = SurveyListResponseSchema;
 
+export const GetNpsTrendsResponse = z.array(NpsTrendPointSchema);
+
+export const DeleteMemberResponsesResponse = DeleteMemberResponsesResultSchema;
+
 export const GetSurveyParams = z.object({
   survey: UUIDSchema,
 });
@@ -14027,3 +14787,43 @@ export const DismissSurveyResponseParams = z.object({
 export type DismissSurveyResponseParams = z.infer<typeof DismissSurveyResponseParams>;
 
 export const DismissSurveyResponseResponse = z.void();
+
+export const CreateVendorBody = CreateMarketplaceVendorRequestSchema;
+export type CreateVendorBody = z.infer<typeof CreateVendorBody>;
+
+export const CreateVendorResponse = MarketplaceVendorSchema;
+
+export const ListVendorsQuery = z.object({
+  organizationId: UUIDSchema.optional(),
+  category: VendorCategorySchema.optional(),
+  verificationStatus: VendorStatusSchema.optional(),
+  limit: z.coerce.number().int().optional(),
+  offset: z.coerce.number().int().optional(),
+});
+export type ListVendorsQuery = z.infer<typeof ListVendorsQuery>;
+
+export const ListVendorsResponse = VendorListResponseSchema;
+
+export const GetVendorParams = z.object({
+  vendorId: UUIDSchema,
+});
+export type GetVendorParams = z.infer<typeof GetVendorParams>;
+
+export const GetVendorResponse = MarketplaceVendorSchema;
+
+export const UpdateVendorParams = z.object({
+  vendorId: UUIDSchema,
+});
+export type UpdateVendorParams = z.infer<typeof UpdateVendorParams>;
+
+export const UpdateVendorBody = UpdateMarketplaceVendorRequestSchema;
+export type UpdateVendorBody = z.infer<typeof UpdateVendorBody>;
+
+export const UpdateVendorResponse = MarketplaceVendorSchema;
+
+export const VerifyVendorParams = z.object({
+  vendorId: UUIDSchema,
+});
+export type VerifyVendorParams = z.infer<typeof VerifyVendorParams>;
+
+export const VerifyVendorResponse = MarketplaceVendorSchema;

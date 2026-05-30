@@ -3,6 +3,8 @@
  * All requests include credentials and JSON handling.
  */
 
+import { CSRF_HEADER, isStateChangingMethod, readCsrfCookie } from '@monobase/sdk-ts/csrf'
+
 class ApiError extends Error {
   constructor(
     message: string,
@@ -18,11 +20,18 @@ async function request<T = unknown>(
   path: string,
   options: RequestInit = {},
 ): Promise<T> {
+  const method = (options.method ?? 'GET').toUpperCase()
+  const csrfHeader: Record<string, string> = {}
+  if (isStateChangingMethod(method)) {
+    const token = readCsrfCookie()
+    if (token) csrfHeader[CSRF_HEADER] = token
+  }
   const res = await fetch(path, {
     credentials: 'include',
     ...options,
     headers: {
       'Content-Type': 'application/json',
+      ...csrfHeader,
       ...options.headers,
     },
   })

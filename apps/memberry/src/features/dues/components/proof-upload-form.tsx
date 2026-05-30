@@ -8,6 +8,7 @@ import {
   listDuesPaymentsQueryKey,
   listDuesInvoicesQueryKey,
 } from '@monobase/sdk-ts/generated/react-query'
+import { CSRF_HEADER, readCsrfCookie } from '@monobase/sdk-ts/csrf'
 import { Button, Input, Label } from '@monobase/ui'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@monobase/ui'
 import { Upload, CheckCircle } from 'lucide-react'
@@ -100,10 +101,12 @@ export function ProofUploadForm({
       formData.append('file', file)
       formData.append('category', 'dues-proof')
 
+      const csrfToken = readCsrfCookie()
       const uploadResponse = await fetch('/api/storage/files', {
         method: 'POST',
         credentials: 'include',
         body: formData,
+        headers: csrfToken ? { [CSRF_HEADER]: csrfToken } : undefined,
         // No Content-Type header — browser sets multipart boundary
       })
       if (!uploadResponse.ok) throw new Error('File upload failed')

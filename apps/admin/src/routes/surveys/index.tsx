@@ -17,6 +17,7 @@ import {
   TableCell,
 } from '@monobase/ui'
 import { RequireRole } from '@/lib/role-gate'
+import { ErrorState } from '@/components/skeletons'
 
 export const Route = createFileRoute('/surveys/' as any)({
   component: () => (
@@ -75,7 +76,7 @@ function SurveysPage() {
   const [page, setPage] = useState(0)
 
   // Fetch surveys — admin sees all orgs
-  const { data, isLoading, refetch } = useQuery({
+  const { data, isLoading, isError, refetch } = useQuery({
     queryKey: ['admin-surveys', statusFilter, typeFilter, page],
     queryFn: async () => {
       const params = new URLSearchParams({
@@ -92,6 +93,14 @@ function SurveysPage() {
       return res.json() as Promise<{ data: AdminSurvey[]; total: number; stats: SurveyStats }>
     },
   })
+
+  if (isError) {
+    return (
+      <div className="p-8 max-w-2xl">
+        <ErrorState message="Could not load surveys" onRetry={() => refetch()} />
+      </div>
+    )
+  }
 
   const surveys = data?.data ?? []
   const total = data?.total ?? 0

@@ -7,6 +7,8 @@ import type { TerminateMembershipBody, TerminateMembershipParams } from '@/gener
 import { MembershipRepository } from './repos/membership.repo';
 import { withComputedStatus } from './utils/membership-status-middleware';
 import { auditAction } from '@/utils/audit';
+import { assertValidTransition } from '@/utils/status-transitions';
+import { MEMBERSHIP_VALID_TRANSITIONS } from './utils/status-transitions';
 
 /**
  * terminateMembership
@@ -35,6 +37,7 @@ export async function terminateMembership(
       'CANNOT_TERMINATE_PENDING',
     );
   }
+  assertValidTransition(MEMBERSHIP_VALID_TRANSITIONS, enriched.status, 'removed', 'membership');
 
   const updated = await repo.updateOneById(membershipId, {
     status: 'removed',

@@ -4,7 +4,7 @@ import { TrainingRepository, TrainingEnrollmentRepository } from './repos/traini
 import { CreditEntryRepository } from '../association:member/repos/credits.repo';
 import { OfficerTermRepository } from '@/handlers/association:member/repos/governance.repo';
 import { domainEvents } from '@/core/domain-events';
-import { BusinessLogicError } from '@/core/errors';
+import { BusinessLogicError, ConflictError } from '@/core/errors';
 
 /**
  * Training Enrollment Tests
@@ -443,5 +443,188 @@ describe('Enrollment status machine', () => {
     const enrollment = { status: 'completed' };
     const canCancel = enrollment.status !== 'cancelled' && enrollment.status !== 'completed';
     expect(canCancel).toBe(false);
+  });
+});
+
+// ─── S-G1-04 — TRAINING_ENROLLMENT_VALID_TRANSITIONS guard ──
+
+describe('completeTrainingEnrollment — TRAINING_ENROLLMENT_VALID_TRANSITIONS guard', () => {
+  beforeEach(() => {
+    restoreRepo(OfficerTermRepository);
+    restoreRepo(TrainingEnrollmentRepository);
+    restoreRepo(TrainingRepository);
+    restoreRepo(CreditEntryRepository);
+  });
+
+  afterEach(() => {
+    restoreRepo(OfficerTermRepository);
+    restoreRepo(TrainingEnrollmentRepository);
+    restoreRepo(TrainingRepository);
+    restoreRepo(CreditEntryRepository);
+  });
+
+  test('throws ConflictError when current enrollment status is cancelled (not enrolled)', async () => {
+    stubRepo(OfficerTermRepository, {
+      findActiveByPersonAndOrg: async () => [{ id: 'term-1', positionTitle: 'President' }] as any,
+    });
+    let updateCalled = false;
+    stubRepo(TrainingEnrollmentRepository, {
+      findOneById: async () => ({ id: 'e-1', status: 'cancelled', personId: 'p-1', trainingId: 't-1' }) as any,
+      updateOneById: async () => {
+        updateCalled = true;
+        return {} as any;
+      },
+    });
+
+    const { completeTrainingEnrollment } = await import('./completeTrainingEnrollment');
+    const ctx = makeCtx({ _params: { enrollmentId: 'e-1' }, _body: {} });
+
+    await expect(completeTrainingEnrollment(ctx as any)).rejects.toBeInstanceOf(ConflictError);
+    expect(updateCalled).toBe(false);
+  });
+
+  test('throws ConflictError when current enrollment status is noShow (terminal)', async () => {
+    stubRepo(OfficerTermRepository, {
+      findActiveByPersonAndOrg: async () => [{ id: 'term-1', positionTitle: 'President' }] as any,
+    });
+    stubRepo(TrainingEnrollmentRepository, {
+      findOneById: async () => ({ id: 'e-1', status: 'noShow', personId: 'p-1', trainingId: 't-1' }) as any,
+      updateOneById: async () => ({}) as any,
+    });
+
+    const { completeTrainingEnrollment } = await import('./completeTrainingEnrollment');
+    const ctx = makeCtx({ _params: { enrollmentId: 'e-1' }, _body: {} });
+
+    await expect(completeTrainingEnrollment(ctx as any)).rejects.toBeInstanceOf(ConflictError);
+  });
+
+  test('throws ConflictError when current enrollment status is already completed (terminal)', async () => {
+    stubRepo(OfficerTermRepository, {
+      findActiveByPersonAndOrg: async () => [{ id: 'term-1', positionTitle: 'President' }] as any,
+    });
+    stubRepo(TrainingEnrollmentRepository, {
+      findOneById: async () => ({ id: 'e-1', status: 'completed', personId: 'p-1', trainingId: 't-1' }) as any,
+      updateOneById: async () => ({}) as any,
+    });
+
+    const { completeTrainingEnrollment } = await import('./completeTrainingEnrollment');
+    const ctx = makeCtx({ _params: { enrollmentId: 'e-1' }, _body: {} });
+
+    await expect(completeTrainingEnrollment(ctx as any)).rejects.toBeInstanceOf(ConflictError);
+  });
+});
+
+describe('updateTrainingEnrollment — TRAINING_ENROLLMENT_VALID_TRANSITIONS guard', () => {
+  beforeEach(() => {
+    restoreRepo(OfficerTermRepository);
+    restoreRepo(TrainingEnrollmentRepository);
+    restoreRepo(TrainingRepository);
+  });
+
+  afterEach(() => {
+    restoreRepo(OfficerTermRepository);
+    restoreRepo(TrainingEnrollmentRepository);
+    restoreRepo(TrainingRepository);
+  });
+
+  test('throws ConflictError when body.status attempts noShow → completed', async () => {
+    stubRepo(OfficerTermRepository, {
+      findActiveByPersonAndOrg: async () => [{ id: 'term-1', positionTitle: 'President' }] as any,
+    });
+    let updateCalled = false;
+    stubRepo(TrainingEnrollmentRepository, {
+      findOneById: async () => ({ id: 'e-1', status: 'noShow', trainingId: 't-1' }) as any,
+      updateOneById: async () => {
+        updateCalled = true;
+        return {} as any;
+      },
+    });
+    stubRepo(TrainingRepository, {
+      findOneById: async () => ({ id: 't-1', status: 'published' }) as any,
+    });
+
+    const { updateTrainingEnrollment } = await import('./updateTrainingEnrollment');
+    const ctx = makeCtx({
+      _params: { enrollmentId: 'e-1' },
+      _body: { status: 'completed' },
+    });
+
+    await expect(updateTrainingEnrollment(ctx as any)).rejects.toBeInstanceOf(ConflictError);
+    expect(updateCalled).toBe(false);
+  });
+
+  test('throws ConflictError when body.status attempts cancelled → completed', async () => {
+    stubRepo(OfficerTermRepository, {
+      findActiveByPersonAndOrg: async () => [{ id: 'term-1', positionTitle: 'President' }] as any,
+    });
+    stubRepo(TrainingEnrollmentRepository, {
+      findOneById: async () => ({ id: 'e-1', status: 'cancelled', trainingId: 't-1' }) as any,
+      updateOneById: async () => ({}) as any,
+    });
+    stubRepo(TrainingRepository, {
+      findOneById: async () => ({ id: 't-1', status: 'published' }) as any,
+    });
+
+    const { updateTrainingEnrollment } = await import('./updateTrainingEnrollment');
+    const ctx = makeCtx({
+      _params: { enrollmentId: 'e-1' },
+      _body: { status: 'completed' },
+    });
+
+    await expect(updateTrainingEnrollment(ctx as any)).rejects.toBeInstanceOf(ConflictError);
+  });
+
+  test('allows update when body.status equals existing.status (no transition)', async () => {
+    stubRepo(OfficerTermRepository, {
+      findActiveByPersonAndOrg: async () => [{ id: 'term-1', positionTitle: 'President' }] as any,
+    });
+    let updateCalled = false;
+    stubRepo(TrainingEnrollmentRepository, {
+      findOneById: async () => ({ id: 'e-1', status: 'enrolled', trainingId: 't-1' }) as any,
+      updateOneById: async () => {
+        updateCalled = true;
+        return { id: 'e-1', status: 'enrolled' } as any;
+      },
+    });
+    stubRepo(TrainingRepository, {
+      findOneById: async () => ({ id: 't-1', status: 'published' }) as any,
+    });
+
+    const { updateTrainingEnrollment } = await import('./updateTrainingEnrollment');
+    const ctx = makeCtx({
+      _params: { enrollmentId: 'e-1' },
+      _body: { status: 'enrolled' },
+    });
+
+    const res = await updateTrainingEnrollment(ctx as any);
+    expect(res.status).toBe(200);
+    expect(updateCalled).toBe(true);
+  });
+
+  test('allows enrolled → completed via update body.status', async () => {
+    stubRepo(OfficerTermRepository, {
+      findActiveByPersonAndOrg: async () => [{ id: 'term-1', positionTitle: 'President' }] as any,
+    });
+    let captured: any = null;
+    stubRepo(TrainingEnrollmentRepository, {
+      findOneById: async () => ({ id: 'e-1', status: 'enrolled', trainingId: 't-1' }) as any,
+      updateOneById: async (_id: string, data: any) => {
+        captured = data;
+        return { id: 'e-1', ...data } as any;
+      },
+    });
+    stubRepo(TrainingRepository, {
+      findOneById: async () => ({ id: 't-1', status: 'published' }) as any,
+    });
+
+    const { updateTrainingEnrollment } = await import('./updateTrainingEnrollment');
+    const ctx = makeCtx({
+      _params: { enrollmentId: 'e-1' },
+      _body: { status: 'completed' },
+    });
+
+    const res = await updateTrainingEnrollment(ctx as any);
+    expect(res.status).toBe(200);
+    expect(captured?.status).toBe('completed');
   });
 });

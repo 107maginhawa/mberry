@@ -85,7 +85,7 @@ describe('Template Library (VS-030)', () => {
 
       await waitFor(() => {
         expect(mockApi.post).toHaveBeenCalledWith(
-          '/api/communications/templates',
+          '/api/association/message-templates',
           expect.objectContaining({
             organizationId: 'org-1',
             name: 'Welcome Email',

@@ -1,3 +1,4 @@
+// oli-execute: error-handled-inline -- search popover; non-critical, errors silent fallback.
 import { useState, useCallback } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { GlassCard } from '@/components/motion/glass-card'

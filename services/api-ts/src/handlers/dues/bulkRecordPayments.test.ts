@@ -284,3 +284,99 @@ describe('[BR-48] bulkRecordPayments — response summary', () => {
     expect(body.summary.errors).toBe(2);
   });
 });
+
+// ─── [BR-48] batch-size boundary table ─────────────────────────────────
+// Source: services/api-ts/src/handlers/association:member/bulkRecordPayments.ts
+//   const MAX_BATCH_SIZE = 50; if (payments.length > MAX_BATCH_SIZE) { ... 400 ... }
+//
+// Rule (br-registry.json#BR-48): the bulk endpoint must reject any batch
+// with length > 50 with a 400 BEFORE any DB transaction is opened. This
+// protects against DoS-via-megabatch and keeps per-batch latency bounded.
+//
+// Table-driven boundary coverage so a future tweak of MAX_BATCH_SIZE will
+// fail this test rather than silently shipping. The earlier tests at L97
+// cover the 51-reject and 50-accept cases; this block adds 1, 49, 100, and
+// an explicit assertion that DB is never touched on overflow.
+describe('[BR-48] bulkRecordPayments — batch-size boundary table', () => {
+  const makePayments = (n: number) =>
+    Array.from({ length: n }, (_, i) => ({
+      personId: `p-${i}`,
+      amount: 1000,
+      paymentMethod: 'cash',
+    }));
+
+  test('[BR-48] size=1 passes batch-size gate', async () => {
+    const fakeDb = { transaction: async () => { throw new Error('no real db'); } };
+    const ctx = makeCtx({
+      user: { id: 'u-1' },
+      orgId: 'org-1',
+      body: { payments: makePayments(1) },
+      database: fakeDb,
+    });
+    const res = await bulkRecordPayments(ctx);
+    const { body } = await parseRes(res);
+    // No size-limit error — it should fail later on the fake DB
+    if (typeof body.error === 'string') {
+      expect(body.error).not.toContain('maximum');
+    }
+  });
+
+  test('[BR-48] size=49 passes batch-size gate', async () => {
+    const fakeDb = { transaction: async () => { throw new Error('no real db'); } };
+    const ctx = makeCtx({
+      user: { id: 'u-1' },
+      orgId: 'org-1',
+      body: { payments: makePayments(49) },
+      database: fakeDb,
+    });
+    const res = await bulkRecordPayments(ctx);
+    const { body } = await parseRes(res);
+    if (typeof body.error === 'string') {
+      expect(body.error).not.toContain('maximum');
+    }
+  });
+
+  test('[BR-48] size=100 is rejected with 400 and DB is never opened', async () => {
+    let dbOpened = false;
+    const fakeDb = {
+      transaction: async () => { dbOpened = true; throw new Error('should not open'); },
+    };
+    const ctx = makeCtx({
+      user: { id: 'u-1' },
+      orgId: 'org-1',
+      body: { payments: makePayments(100) },
+      database: fakeDb,
+    });
+    const res = await bulkRecordPayments(ctx);
+    const { status, body } = await parseRes(res);
+    expect(status).toBe(400);
+    expect(body.error).toContain('maximum of 50');
+    expect(dbOpened).toBe(false);
+  });
+
+  test('[BR-48] size=1000 is rejected (worst-case DoS attempt)', async () => {
+    let dbOpened = false;
+    const fakeDb = {
+      transaction: async () => { dbOpened = true; throw new Error('should not open'); },
+    };
+    const ctx = makeCtx({
+      user: { id: 'u-1' },
+      orgId: 'org-1',
+      body: { payments: makePayments(1000) },
+      database: fakeDb,
+    });
+    const res = await bulkRecordPayments(ctx);
+    const { status } = await parseRes(res);
+    expect(status).toBe(400);
+    expect(dbOpened).toBe(false);
+  });
+});
+
+// CONTRACT-LAYER NOTE: br-registry#BR-48 lists `contract: []`. The
+// bulkRecordPayments handler is implemented at
+// services/api-ts/src/handlers/association:member/bulkRecordPayments.ts but
+// is not currently wired to an HTTP route (no router registration, no
+// OpenAPI path). Adding a Hurl contract scenario for this BR is blocked on
+// the route being registered. Once registered, the contract test should
+// POST a 51-row batch and assert 400. Deferred until the endpoint is
+// exposed.

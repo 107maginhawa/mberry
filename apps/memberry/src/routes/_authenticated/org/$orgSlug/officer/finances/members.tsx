@@ -10,6 +10,7 @@ import type { MembershipStatus, DuesInvoice } from '@monobase/sdk-ts/generated/t
 import { PageHeader } from '@/components/patterns/page-header'
 import { GlassCard } from '@/components/motion/glass-card'
 import { EmptyState } from '@/components/patterns/empty-state'
+import { ErrorState } from '@/components/patterns/error-state'
 import { useOrg } from '@/hooks/useOrg'
 import { Button, Skeleton, Badge } from '@monobase/ui'
 import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from '@monobase/ui'
@@ -64,9 +65,10 @@ function FinancialMembersPage() {
     ...(debouncedSearch ? { search: debouncedSearch } : {}),
   }
 
-  const { data: rosterData, isLoading } = useQuery(
+  const rosterDataQuery = useQuery(
     listRosterMembersOptions({ query: rosterQuery, headers: { 'x-org-id': orgId } })
   )
+  const { data: rosterData, isLoading } = rosterDataQuery
 
   // Fetch invoices for outstanding balance calculation
   const { data: invoiceData } = useQuery({
@@ -106,6 +108,14 @@ function FinancialMembersPage() {
       setSelectedIds(new Set(members.map((m: any) => m.id)))
     }
   }, [selectedIds.size, members])
+
+  if (rosterDataQuery.isError) {
+    return (
+      <div className="p-6 max-w-2xl">
+        <ErrorState message="Could not load member finances" onRetry={() => rosterDataQuery.refetch()} />
+      </div>
+    )
+  }
 
   function handleExportCsv() {
     const headers = ['Name', 'Category', 'Status', 'Outstanding', 'Member Since']

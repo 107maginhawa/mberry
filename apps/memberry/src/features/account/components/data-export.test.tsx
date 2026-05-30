@@ -16,6 +16,7 @@ vi.mock('sonner', () => ({
 vi.mock('@/lib/api', () => ({
   api: {
     get: vi.fn(),
+    post: vi.fn(),
   },
 }))
 
@@ -35,6 +36,7 @@ import { api } from '@/lib/api'
 import { toast } from 'sonner'
 
 const mockApiGet = api.get as ReturnType<typeof vi.fn>
+const mockApiPost = api.post as ReturnType<typeof vi.fn>
 
 describe('DataExport', () => {
   beforeEach(() => {
@@ -80,7 +82,7 @@ describe('DataExport', () => {
 
   test('shows export table after successful request', async () => {
     const user = userEvent.setup()
-    mockApiGet.mockResolvedValue({ categories: ['profile', 'membership'] })
+    mockApiPost.mockResolvedValue({ categories: ['profile', 'membership'] })
 
     renderWithProviders(<DataExport />)
 
@@ -98,7 +100,7 @@ describe('DataExport', () => {
 
   test('shows error toast on failed request', async () => {
     const user = userEvent.setup()
-    mockApiGet.mockRejectedValue(new Error('Network error'))
+    mockApiPost.mockRejectedValue(new Error('Network error'))
 
     renderWithProviders(<DataExport />)
 

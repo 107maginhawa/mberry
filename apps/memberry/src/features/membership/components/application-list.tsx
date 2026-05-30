@@ -7,6 +7,7 @@ import {
   denyMembershipApplicationMutation,
 } from '@monobase/sdk-ts/generated/react-query'
 import type { ApplicationStatus, MembershipApplication } from '@monobase/sdk-ts/generated/types.gen'
+import { CSRF_HEADER, readCsrfCookie } from '@monobase/sdk-ts/csrf'
 
 /**
  * Hand-wired endpoint enriches MembershipApplication with display fields
@@ -112,9 +113,13 @@ export function ApplicationList({ orgId }: ApplicationListProps) {
   // codegen not re-run), so we call the API directly via the Vite proxy.
   const bulkApprove = useMutation({
     mutationFn: async ({ applicationIds }: { applicationIds: string[] }) => {
+      const csrfToken = readCsrfCookie()
       const response = await fetch('/api/association/member/applications/bulk-approve', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          ...(csrfToken ? { [CSRF_HEADER]: csrfToken } : {}),
+        },
         body: JSON.stringify({ applicationIds }),
         credentials: 'include',
       })

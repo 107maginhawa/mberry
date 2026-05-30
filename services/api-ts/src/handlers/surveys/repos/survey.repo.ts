@@ -91,6 +91,49 @@ export class SurveyRepository {
     return { data, totalCount: Number(countResult[0]?.count ?? 0) };
   }
 
+  async findMineWithPagination(
+    organizationId: string | undefined,
+    responderId: string,
+    opts: { pagination: { limit: number; offset: number } }
+  ): Promise<{ data: Array<Survey & { myResponseStatus: string; myCompletedAt: Date | null }>; totalCount: number }> {
+    // responderId is the member-scoping boundary; org is an optional narrowing
+    // filter (omitted when no org context is present on the request).
+    const conditions: SQL<unknown>[] = [eq(surveyResponses.responderId, responderId)];
+    if (organizationId) {
+      conditions.push(eq(surveys.organizationId, organizationId));
+    }
+    const where = and(...conditions);
+
+    const [data, countResult] = await Promise.all([
+      this.db
+        .select({
+          survey: surveys,
+          myResponseStatus: surveyResponses.status,
+          myCompletedAt: surveyResponses.completedAt,
+        })
+        .from(surveys)
+        .innerJoin(surveyResponses, eq(surveyResponses.surveyId, surveys.id))
+        .where(where)
+        .limit(opts.pagination.limit)
+        .offset(opts.pagination.offset)
+        .orderBy(surveys.createdAt),
+      this.db
+        .select({ count: count() })
+        .from(surveys)
+        .innerJoin(surveyResponses, eq(surveyResponses.surveyId, surveys.id))
+        .where(where),
+    ]);
+
+    return {
+      data: data.map((row) => ({
+        ...row.survey,
+        myResponseStatus: row.myResponseStatus,
+        myCompletedAt: row.myCompletedAt,
+      })),
+      totalCount: Number(countResult[0]?.count ?? 0),
+    };
+  }
+
   async createSurvey(data: NewSurvey): Promise<Survey> {
     const [row] = await this.db.insert(surveys).values(data).returning();
     return row!;

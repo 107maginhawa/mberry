@@ -7,9 +7,10 @@ import {
 import { AuthQueryProvider } from '@daveyplate/better-auth-tanstack'
 import { setSdkBaseUrl, errorInterceptor, SdkError } from '../client'
 import { client as generatedClient } from '../generated/client.gen'
+import { CSRF_HEADER, readCsrfCookie, isStateChangingMethod, seedCsrfToken } from '../csrf'
 import { initAuthClient, AuthClientContext } from './auth'
 import type { ReactNode } from 'react'
-import { useMemo, useRef } from 'react'
+import { useEffect, useMemo, useRef } from 'react'
 
 /**
  * Optional notifier interface — the SDK no longer ships a hard dependency on
@@ -148,12 +149,26 @@ export function ApiProvider({
     [providedQueryClient, notifier, onSessionExpired],
   )
 
-  // Install the error interceptor exactly once across the app's lifetime.
-  // Hey-api's `interceptors.error.use(...)` registers globally on the client
-  // instance, so re-running on every render would stack duplicate handlers.
+  // Install interceptors exactly once across the app's lifetime. Hey-api's
+  // `interceptors.*.use(...)` registers globally on the client instance, so
+  // re-running on every render would stack duplicate handlers.
   const interceptorInstalledRef = useRef(false)
   if (!interceptorInstalledRef.current) {
     generatedClient.interceptors.error.use(errorInterceptor)
+    // CSRF double-submit (Wave G5 W1.7): state-changing requests must carry
+    // an x-csrf-token header matching the csrf_token cookie. We seed the cookie
+    // on provider mount; this interceptor mirrors the cookie into the header.
+    generatedClient.interceptors.request.use(async (request) => {
+      if (isStateChangingMethod(request.method)) {
+        let token = readCsrfCookie()
+        if (!token) {
+          await seedCsrfToken(apiBaseUrl)
+          token = readCsrfCookie()
+        }
+        if (token) request.headers.set(CSRF_HEADER, token)
+      }
+      return request
+    })
     interceptorInstalledRef.current = true
   }
 
@@ -161,6 +176,12 @@ export function ApiProvider({
     setSdkBaseUrl(apiBaseUrl)
     generatedClient.setConfig({ baseUrl: apiBaseUrl })
     return initAuthClient(apiBaseUrl)
+  }, [apiBaseUrl])
+
+  // Seed the csrf_token cookie once per provider mount so the first
+  // state-changing request doesn't need to round-trip for one.
+  useEffect(() => {
+    void seedCsrfToken(apiBaseUrl)
   }, [apiBaseUrl])
 
   return (

@@ -76,8 +76,10 @@ export async function seedPresident(
     });
   }
 
-  // Set admin role so president can access all association endpoints
-  await db.update(userTable).set({ role: 'admin,association:admin,association:member,association:officer' }).where(eq(userTable.id, client.userId));
+  // Set admin role so president can access all association endpoints (plus
+  // platform_admin so the admin app's /admin/me/role endpoint is reachable —
+  // seedPresident also inserts Maria into the platform_admin table).
+  await db.update(userTable).set({ role: 'admin,platform_admin,association:admin,association:member,association:officer' }).where(eq(userTable.id, client.userId));
 
   console.log(`  ✓ Maria Santos — President, membership PDA-2025-001`);
   return client;

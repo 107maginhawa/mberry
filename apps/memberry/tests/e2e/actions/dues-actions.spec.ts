@@ -14,8 +14,8 @@ test.describe('Dues & Payments Actions', () => {
   test('payments page shows real payment data', async ({ page }) => {
     await page.goto(`/org/${ORG_ID}/officer/payments`)
 
-    // Must show real receipts, amounts, statuses
-    await expect(page.getByText(/PDA-/).first()).toBeVisible({ timeout: 10000 })
+    // Must show real receipts, amounts, statuses (receipt prefix: RCP- or legacy PDA-)
+    await expect(page.getByText(/RCP-|PDA-/).first()).toBeVisible({ timeout: 10000 })
     await expect(page.getByText(/₱/).first()).toBeVisible()
     await expect(page.getByText(/completed|pending/i).first()).toBeVisible()
   })

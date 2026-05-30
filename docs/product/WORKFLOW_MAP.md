@@ -425,7 +425,7 @@ Pipeline Stage: Phase A -- Workflow Discovery
 | BR-41 | Paid training requires payment confirmation before enrollment | WF-062 | M09 |
 | BR-42 | Training type restricted to 5 platform-defined types (not org-customizable) | WF-058 | M09 |
 | BR-43 | Completed training locks enrollments (no changes post-completion) | WF-058, WF-060 | M09 |
-| BR-44 | Duplicate attendance confirmation = no duplicate credits (idempotent) | WF-060 | M09 |
+| BR-44 | Election certification cross-module effects (ends outgoing officer terms, creates new terms, generates transition checklists) | WF-077 | M12 |
 | BR-45 | Ad creative requires admin approval before display (no self-serve) | WF-093 | M16 |
 | BR-46 | Ad targeting segment-based only, no individual member data shared | WF-093, WF-094 | M16 |
 | BR-47 | Sponsored content clearly labeled "Sponsored" | WF-094 | M16 |

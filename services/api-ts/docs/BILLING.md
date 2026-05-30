@@ -10,6 +10,22 @@ The billing module implements invoice-based payments with Stripe Connect integra
 
 ---
 
+## Configuration
+
+| Variable | Required | Purpose |
+|----------|----------|---------|
+| `STRIPE_SECRET_KEY` | Production: yes. Local: optional. | Auth for Stripe API calls. |
+| `STRIPE_WEBHOOK_SECRET` | Production: yes. Local: optional. | Verifies `Stripe-Signature` on `/billing/webhooks/stripe`. |
+| `STRIPE_URL` | Optional (test only). | Redirect the SDK at a stripe-mock endpoint (default: `api.stripe.com`). The contract suite uses `http://localhost:12111` from `docker-compose.deps.yml`. |
+
+**Unset behavior (local dev)**: billing endpoints return HTTP 503 `ExternalServiceError` with body `{ error: "Stripe is not configured...", code: "EXTERNAL_SERVICE_UNAVAILABLE" }`. The memberry app at `/my/billing` renders an explicit error UI with retry CTA (Wave G5). No infinite skeleton, no server crash.
+
+**Production**: Service init throws at boot if `STRIPE_SECRET_KEY` is missing. Set both keys via your secret manager.
+
+See `.env.example` for stub values.
+
+---
+
 ## Architecture
 
 ### Payment Flow

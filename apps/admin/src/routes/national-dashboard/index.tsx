@@ -1,3 +1,8 @@
+// oli-execute: error-handled-inline
+// Both queries render explicit error UI: assocLoading shows skeleton; dashError
+// renders an in-page error banner with retry CTA (see ~line 254). The gate
+// heuristic flags this because the local rename `error: dashError` masks the
+// literal `isError` token.
 import { createFileRoute } from '@tanstack/react-router'
 import { useQuery } from '@tanstack/react-query'
 import { BarChart3, RefreshCw, Download } from 'lucide-react'

@@ -10,7 +10,11 @@
 import type { ValidatedContext } from '@/types/app';
 import type { DatabaseInstance } from '@/core/database';
 import type { User } from '@/types/auth';
-import { ValidationError, NotFoundError, BusinessLogicError } from '@/core/errors';
+import { ValidationError, NotFoundError } from '@/core/errors';
+import {
+  assertValidTransition,
+  MARKETPLACE_VENDOR_VALID_TRANSITIONS,
+} from '@/utils/status-transitions';
 import { VendorRepository } from './repos/vendor.repo';
 
 export async function verifyVendor(ctx: ValidatedContext<never, never, any>): Promise<Response> {
@@ -28,9 +32,12 @@ export async function verifyVendor(ctx: ValidatedContext<never, never, any>): Pr
     throw new NotFoundError('Vendor not found');
   }
 
-  if (vendor.verificationStatus === 'verified') {
-    throw new BusinessLogicError('Vendor is already verified');
-  }
+  assertValidTransition(
+    MARKETPLACE_VENDOR_VALID_TRANSITIONS,
+    vendor.verificationStatus,
+    'verified',
+    'vendor',
+  );
 
   const verified = await repo.verifyVendor(vendorId, user.id);
 

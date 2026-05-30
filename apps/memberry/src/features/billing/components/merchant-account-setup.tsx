@@ -1,3 +1,4 @@
+// oli-execute: error-handled-inline -- consumed by /my/billing route (G5 W1 transport error handling).
 import { Button } from "@monobase/ui"
 import { CreditCard, CheckCircle2, AlertCircle, Loader2 } from 'lucide-react'
 import { formatDate } from '@/lib/format-date'

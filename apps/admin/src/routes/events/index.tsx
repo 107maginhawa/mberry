@@ -22,6 +22,7 @@ import {
   TableCell,
 } from '@monobase/ui'
 import { RequireRole } from '@/lib/role-gate'
+import { ErrorState } from '@/components/skeletons'
 import { searchEventsOptions, listOrganizationsOptions, listCustomEventRegistrationsOptions } from '@monobase/sdk-ts/generated/@tanstack/react-query.gen'
 
 export const Route = createFileRoute('/events/')({
@@ -65,7 +66,7 @@ function EventsPage() {
   const [selectedEvent, setSelectedEvent] = useState<EventItem | null>(null)
   const [detailTab, setDetailTab] = useState<'details' | 'registrations'>('details')
 
-  const { data, isLoading, error } = useQuery(
+  const { data, isLoading, isError, refetch } = useQuery(
     searchEventsOptions({
       query: {
         ...(search.length >= 2 ? { q: search } : {}),
@@ -79,6 +80,14 @@ function EventsPage() {
 
   const { data: orgsData } = useQuery(listOrganizationsOptions())
   const organizations = (orgsData?.data ?? []) as unknown as { id: string; name: string }[]
+
+  if (isError) {
+    return (
+      <div className="p-8 max-w-2xl">
+        <ErrorState message="Could not load events" onRetry={() => refetch()} />
+      </div>
+    )
+  }
 
   const events = (data?.data ?? []) as unknown as EventItem[]
   const hasMore = events.length === PAGE_SIZE
@@ -135,15 +144,8 @@ function EventsPage() {
         </div>
       </div>
 
-      {/* Error */}
-      {error && (
-        <div className="rounded-lg border border-red-300 bg-red-50 p-4 mb-4 text-red-700 text-sm">
-          {error instanceof Error ? error.message : 'Failed to load events'}
-        </div>
-      )}
-
       {/* Summary */}
-      {!isLoading && !error && (
+      {!isLoading && (
         <p className="text-sm text-muted-foreground mb-4">
           {events.length === 0
             ? 'No events'
@@ -362,10 +364,18 @@ interface AdminRegItem {
 }
 
 function AdminRegistrationsTab({ eventId, orgId }: { eventId: string; orgId?: string }) {
-  const { data, isLoading } = useQuery(
+  const { data, isLoading, isError, refetch } = useQuery(
     listCustomEventRegistrationsOptions({ path: { eventId }, ...(orgId ? { headers: { 'x-org-id': orgId } } : {}) })
   )
   const registrations = (data?.data ?? []) as unknown as AdminRegItem[]
+
+  if (isError) {
+    return (
+      <div className="py-4">
+        <ErrorState message="Could not load registrations" onRetry={() => refetch()} />
+      </div>
+    )
+  }
 
   function exportCsv() {
     const headers = ['Name', 'Email', 'Status', 'Registered']

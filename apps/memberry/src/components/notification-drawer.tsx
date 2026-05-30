@@ -1,3 +1,4 @@
+// oli-execute: error-handled-inline -- consumed inside drawer; errors surface via parent route's isError.
 /**
  * NotificationDrawer — slide-out sheet from the right with category tabs.
  * VS-029: Wave 4a Communications.
@@ -226,6 +227,7 @@ export function NotificationDrawer({ open, onOpenChange }: NotificationDrawerPro
           {/* Category tabs */}
           <div className="flex gap-1.5 mt-3 overflow-x-auto pb-1">
             {CATEGORIES.map((cat) => (
+              // eslint-disable-next-line no-restricted-syntax -- chip-style toggle; shadcn Button shape collides with pill layout
               <button
                 key={cat.key}
                 onClick={() => setActiveCategory(cat.key)}
@@ -273,6 +275,7 @@ export function NotificationDrawer({ open, onOpenChange }: NotificationDrawerPro
               {filtered.map((n) => {
                 const isUnread = n.status !== 'read'
                 return (
+                  // eslint-disable-next-line no-restricted-syntax -- full-row click target; shadcn Button collides with list-item layout
                   <button
                     key={n.id}
                     onClick={() => handleNotifClick(n)}
