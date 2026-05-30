@@ -31,6 +31,36 @@ Triggered by a stuck Billing skeleton report from production. Used as the forcin
 
 The CSRF gap was a real Wave G4 regression — the middleware shipped server-side without the matching SDK transport changes. Any frontend POST/PUT/DELETE through the SDK was returning 403 since G4 landed. This wave restores the contract.
 
+**Layer 2 follow-up (Wave G5 W1.8, 2026-05-30):** smoke-testing the CSRF fix across SDK mutations exposed a second client path that bypassed the header injection — `apps/memberry/src/lib/api.ts` (raw `fetch`, 80 importers, 54 mutation call sites), three inline raw fetch sites, and the admin app. Patched in the same wave by extending `@monobase/sdk-ts/csrf` with a public subpath export and wiring it into every client path. End-to-end verified via `/browse`: profile PATCH 200, announcement POST 201, chat-room message POST 201. Bare PATCH without header returns 403 as expected.
+
+### Wave G6 (spec & doc lane, 2026-05-30)
+
+- **G6.1** — TypeSpec backfill of 3 hand-wired survey extras (`getNpsTrends`, `deleteMemberResponses`, `listAdminSurveys`) with 4 supporting models (NpsTrendPoint, DeleteMemberResponsesResult, AdminSurveyListItem/Stats/Response) and a new `AdminSurveysManagement` interface on `/admin/surveys`. Feed (5) + polls (2) backfill deferred — handler files exist but are NOT wired in `app.ts`; they are scaffolding for unbuilt m13 (professional-feed) and m18 (polls UI) product features, not active hand-wired routes. Backfilling them now would be wasted regen work.
+- **G6.2** — Audit-grade `API_CONTRACTS.md` v0.1 added for `m20-booking`, `m21-billing`, `m22-email` (previously missing). Each scaffold derives endpoints from the generated OpenAPI, plus event ledger pointers and shared-types references. Promotable to full m05-depth reference docs when the next product cycle touches these modules.
+- **G6.3** — Linked BR-24 (Invitation Expiry) into m01 §5, BR-28 (Communication Deduplication) into m07 §5, BR-44 (Election Certification Cross-Module Effects) into m12 §5. Fixed a stale BR-44 entry in `WORKFLOW_MAP.md` that pointed at "duplicate attendance confirmation / M09" — that rule was subsumed under BR-17 (Attendance Confirmation, M08) during the v3 registry rewrite.
+- **G6.4** — Clarified `STRIPE_SECRET_KEY` requirement in `.env.example` (local optional / prod required) and added a new "Configuration" section in `services/api-ts/docs/BILLING.md` linking the unset → 503 contract to the Wave G5 W1 graceful UI.
+
+### Wave G7 (loading-state routes, 2026-05-30)
+
+19 memberry routes + 7 admin routes drained. Real `isError` branch added where the query was the primary data source (reusing `@/components/patterns/error-state` in memberry; new `ErrorState` added to `apps/admin/src/components/skeletons.tsx`). `// oli-execute: error-handled-inline` marker applied where the route already rendered an error branch but the destructured rename (`error: foo`) hid the literal `isError` token from the gate's regex. Drive-by lint fixes on two touched files (raw `<button>` → shadcn `Button`).
+
+### Wave G8 (loading-state components, 2026-05-30)
+
+27 feature components + 3 shell files drained via `// oli-execute: error-handled-inline` markers, each citing the consuming route or near-by error-handling context. These were the false-positive class explicitly noted in the original audit caveat: feature components receive `isLoading` as a prop and render a skeleton internally, but the parent route already owns `isError`.
+
+Two raw `<button>` in `notification-drawer.tsx` carry per-line `eslint-disable-next-line` comments (chip + list-item geometry collides with shadcn Button shape — pre-existing).
+
+### Wave G8 ratchet (gate flip, 2026-05-30)
+
+`scripts/gates/loading-state-hygiene.ts` is now fail-closed by default (full tree, 0 violations allowed, exemption cap 5). The pre-commit step 0.8 invocation in `.claude/skills/pre-commit/SKILL.md` was updated to drop `--changed-only`. `--changed-only` remains available for local-dev iteration. `LOADING_STATE_AUDIT.md` now reads as drained.
+
+### Audited and explicitly NOT done in Waves G6–G8
+
+- **BR-47/48/51 contract+E2E layers** — the registry already carries documented `deferredReason` entries: BR-47 (Banned Users) is an admin-internal Better-Auth API with no public wire surface; BR-48 (Bulk Payment Batch Size Limit) targets a handler not yet wired to an HTTP route; BR-51 (Service Token Timing-Safe Comparison) tests a cryptographic property not observable at the wire layer. Backend assertions are the right layer; adding wire-level theater would not improve coverage.
+- **Mega-module split (P1-11)** — `association:member` 157 handlers → 7 sub-modules. Deferred to v1.3.0 per `.planning/deferred/14-mega-module-split/SPLIT-PLAN.md`. Graduation gate met without the split.
+- **Feed (m13), polls (m18), unbuilt product modules** — not backlog, on the roadmap.
+- **By-design hand-wired routes (9)** — middleware ordering depends on them being raw; promoting them to TypeSpec would break the validatePaymentToken / unsubscribe / stripeWebhook public-before-auth ordering.
+
 ---
 
 ## Cycle 4 Latest Scorecard (post-execution, 2026-05-30, HEAD `28c42566`)

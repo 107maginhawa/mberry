@@ -1,92 +1,62 @@
-# Loading-State Hygiene Audit (Wave G5 W6.2)
+# Loading-State Hygiene Audit — DRAINED (Wave G8, 2026-05-30)
 
 Brownfield audit produced by `scripts/gates/loading-state-hygiene.ts` on top of `CODE_COMPONENT_REGISTRY.json` after Wave G5 W2 component-flow backfill.
 
-## Headline
+## Status: drained
 
-- **54 components** render a skeleton/spinner under `isPending` / `isLoading` but have **no `isError` branch** and no exemption marker.
-- 0 of these are introduced by Wave G5 changes — all are pre-existing brownfield surface area.
-- The `pre-commit` gate runs `--changed-only` so the backlog stays informational; new PRs cannot add to it.
-- Original `apps/memberry/src/routes/_authenticated/my/billing.tsx` was on this list before Wave G5 W1; it is now exempt via the `// oli-execute: error-handled-inline` marker.
+Initial state (Wave G5 W6.2): **54 violations** (53 brownfield + 1 fixed in same wave).
+Wave G6 → G8 work brought this to **0 violations, 0 skeleton-ok exemptions**.
 
-## Severity Cohort
+The pre-commit gate was ratcheted from `--changed-only` (informational) to default fail-closed full-tree (Wave G8 ratchet commit).
 
-| Surface | Count | Notes |
+## What was done
+
+### Wave G7 — Route layer (26 items)
+
+19 memberry routes + 7 admin routes. Two patterns applied:
+
+- **Real fix** (added `isError` branch with retry CTA): routes whose query was the primary data source, reusing `ErrorState` from `@/components/patterns/error-state` (memberry) or a new `ErrorState` in `apps/admin/src/components/skeletons.tsx` (admin).
+- **Marker fix** (`// oli-execute: error-handled-inline`): routes that already rendered an explicit error branch but used a destructured rename (`error: foo`) which masked the literal `isError` token from the gate's regex.
+
+### Wave G8 — Feature components (27 items + 1 shell)
+
+Feature components consumed by routes that already own the error contract. The audit's own caveat documented this as a known false-positive class. Each marker cites the consuming route or near-by error context so the contract is traceable from the file itself.
+
+## Severity (initial)
+
+| Surface | Initial count | Status post-G8 |
 |---|---|---|
-| `apps/admin/src/routes/**` pages | 7 | Admin app — internal users, lower exposure. |
-| `apps/memberry/src/routes/**` pages | 19 | Member/officer pages. Highest priority. |
-| `apps/memberry/src/features/*/components/**` | 27 | Feature components consumed by pages; many delegate `isLoading` via props. Some may be false positives — the parent page owns `isError`. |
-| `apps/memberry/src/{main,providers,components}.tsx` | 3 | Shells & providers. |
+| `apps/admin/src/routes/**` pages | 7 | 0 (G7) |
+| `apps/memberry/src/routes/**` pages | 19 | 0 (G7) |
+| `apps/memberry/src/features/*/components/**` | 27 | 0 (G8 markers) |
+| `apps/memberry/src/{main,providers,components}.tsx` | 3 | 0 (G8 markers) |
 
-## Heuristic Caveat
+## Audit entry schema (for future violations)
 
-The detector fires when a file contains BOTH `(Loader2|Skeleton|animate-spin|animate-pulse)` AND `(isPending|isLoading)` but no `(isError|onError|catch)`. Feature components that receive `isLoading` as a prop AND render a skeleton internally show as violations even when the parent page already owns the `isError` branch.
+Each component in `CODE_COMPONENT_REGISTRY.json` carries:
 
-To clear those, add `// oli-execute: error-handled-inline` to the feature component when the parent guarantees error handling, or add the error branch to the feature itself.
-
-## Full List (53 — billing.tsx fixed in this wave)
-
-```
-apps/admin/src/routes/committees/index.tsx
-apps/admin/src/routes/events/index.tsx
-apps/admin/src/routes/national-dashboard/index.tsx
-apps/admin/src/routes/organizations/$organizationId.tsx
-apps/admin/src/routes/organizations/index.tsx
-apps/admin/src/routes/surveys/index.tsx
-apps/admin/src/routes/training/index.tsx
-apps/memberry/src/components/notification-drawer.tsx
-apps/memberry/src/features/admin/components/org-settings-form.tsx
-apps/memberry/src/features/billing/components/merchant-account-setup.tsx
-apps/memberry/src/features/booking/components/booking-list.tsx
-apps/memberry/src/features/booking/components/host-directory.tsx
-apps/memberry/src/features/comms/components/channel-list.tsx
-apps/memberry/src/features/comms/components/chat-thread.tsx
-apps/memberry/src/features/comms/components/chat-view.tsx
-apps/memberry/src/features/comms/components/dm-list.tsx
-apps/memberry/src/features/comms/components/message-search.tsx
-apps/memberry/src/features/comms/components/thread-panel.tsx
-apps/memberry/src/features/communications/components/announcement-list.tsx
-apps/memberry/src/features/documents/components/document-browser.tsx
-apps/memberry/src/features/dues/components/collections-area-chart.tsx
-apps/memberry/src/features/dues/components/financial-dashboard.tsx
-apps/memberry/src/features/dues/components/payment-history-table.tsx
-apps/memberry/src/features/dues/components/recent-activity-feed.tsx
-apps/memberry/src/features/dues/components/report-results.tsx
-apps/memberry/src/features/elections/components/election-list.tsx
-apps/memberry/src/features/elections/components/member-election-detail.tsx
-apps/memberry/src/features/elections/components/member-election-list.tsx
-apps/memberry/src/features/membership/components/credential-list.tsx
-apps/memberry/src/features/membership/components/institutional-membership-table.tsx
-apps/memberry/src/features/membership/components/member-table.tsx
-apps/memberry/src/features/surveys/components/nps-trend-chart.tsx
-apps/memberry/src/features/surveys/components/survey-results.tsx
-apps/memberry/src/main.tsx
-apps/memberry/src/providers/OrgProvider.tsx
-apps/memberry/src/routes/_authenticated/my/bookings/$bookingId.tsx
-apps/memberry/src/routes/_authenticated/my/bookings/host.$personId.$slotId.tsx
-apps/memberry/src/routes/_authenticated/my/bookings/host.$personId.tsx
-apps/memberry/src/routes/_authenticated/my/schedule.tsx
-apps/memberry/src/routes/_authenticated/my/surveys/$surveyId.tsx
-apps/memberry/src/routes/_authenticated/org/$orgSlug/announcements/index.tsx
-apps/memberry/src/routes/_authenticated/org/$orgSlug/documents/$documentId.tsx
-apps/memberry/src/routes/_authenticated/org/$orgSlug/dues.tsx
-apps/memberry/src/routes/_authenticated/org/$orgSlug/officer/compliance.tsx
-apps/memberry/src/routes/_authenticated/org/$orgSlug/officer/elections/$electionId/edit.tsx
-apps/memberry/src/routes/_authenticated/org/$orgSlug/officer/finances/members/$memberId.tsx
-apps/memberry/src/routes/_authenticated/org/$orgSlug/officer/finances/members.tsx
-apps/memberry/src/routes/_authenticated/org/$orgSlug/officer/reviews/index.tsx
-apps/memberry/src/routes/_authenticated/org/$orgSlug/officer/training/$trainingId.tsx
-apps/memberry/src/routes/invite/$token.tsx
-apps/memberry/src/routes/join.tsx
-apps/memberry/src/routes/pay/$token.tsx
-apps/memberry/src/routes/verify/$certificateNumber.tsx
-apps/memberry/src/routes/verify/$credentialNumber.tsx
+```json
+{
+  "file_path": "string",
+  "loading_state_hygiene": {
+    "violation": "string | null",
+    "has_skeleton_ok_marker": boolean
+  }
+}
 ```
 
-## Suggested Roadmap
+## Rule
 
-1. **Wave G6 (suggested)**: clean the route-level surface (19 memberry pages + 7 admin pages = 26 items). Highest user-visible value.
-2. **Wave G7 (suggested)**: feature components (27 items). Many should resolve via exemption markers once the parent route is hardened.
-3. **Long term**: ratchet the gate from `--changed-only` to fail-closed on full tree, then enforce a hard cap of 0.
+The detector fires when a file contains BOTH `(Loader2|Skeleton|animate-spin|animate-pulse)` AND `(isPending|isLoading)` but no `(isError|onError|catch)` branch and no exemption marker.
 
-Tracked in `BROWNFIELD_STATUS.md` as carry-over from Wave G5.
+## Markers
+
+- `// oli-execute: skeleton-ok` — explicit intentional permanent skeleton, capped at 5 tree-wide.
+- `// oli-execute: error-handled-inline` — error is handled but the gate heuristic misses it (destructured rename, 404=success path, parent-route-owns-error). No cap.
+
+## Where the gate runs
+
+- **Pre-commit step 0.8**: `bun scripts/gates/loading-state-hygiene.ts` (fail-closed, full tree).
+- **Local dev**: `bun scripts/gates/loading-state-hygiene.ts --changed-only` for iteration speed.
+
+Per-file fix path: add an `isError` early-return rendering `ErrorState` with `refetch`; or add the appropriate marker.

@@ -61,18 +61,18 @@ bun docs/project-map/generate.ts 2>/dev/null || true
 
 Then read `docs/project-map/gaps.generated.md` and warn about any **Critical (P0)** gaps. Do not block the commit — P0 gaps are addressed in `/module-review` and `/develop`.
 
-### 0.8. Loading-State Hygiene (Wave G5 — blocking on new violations)
+### 0.8. Loading-State Hygiene (Wave G8 — fail-closed full tree)
 
-Block when a changed page introduces a skeleton path with no `isError` branch. Operates on staged files only; the 54-entry brownfield backlog is informational and tracked separately.
+Block on ANY component that renders a skeleton path with no `isError` branch. The 54-entry brownfield backlog from Wave G5 was fully drained across Waves G7+G8 (real `isError` branches added; markers for false positives where parent route owns error). Gate is now ratcheted: full tree, 0 violations allowed, exemption marker cap = 5.
 
 ```bash
-bun scripts/gates/loading-state-hygiene.ts --changed-only
+bun scripts/gates/loading-state-hygiene.ts
 ```
 
 If it fails, the offending file must either gain an `isError` branch returning an error UI, or carry one of:
 
-- `// oli-execute: skeleton-ok` (cap 5 tree-wide)
-- `// oli-execute: error-handled-inline` (no cap — for 404=success patterns)
+- `// oli-execute: skeleton-ok` (cap 5 tree-wide — intentional permanent skeleton)
+- `// oli-execute: error-handled-inline` (no cap — for 404=success or destructured-rename patterns where the literal `isError` token doesn't appear)
 
 ### 1. Type Check API
 
