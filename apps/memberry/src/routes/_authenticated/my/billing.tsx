@@ -7,18 +7,22 @@ import {
 } from '@monobase/sdk-ts/flows'
 import { SdkError } from '@monobase/sdk-ts/client'
 import { MerchantAccountSetup } from '@/features/billing/components/merchant-account-setup'
-import { useState } from 'react'
+import { Button } from '@monobase/ui'
+import { AlertCircle } from 'lucide-react'
+import { useEffect, useState } from 'react'
 
 export const Route = createFileRoute('/_authenticated/my/billing')({
   component: BillingPage,
 })
 
+const STALL_TIMEOUT_MS = 12_000
+
+// oli-execute: error-handled-inline
 function BillingPage() {
   const navigate = useNavigate()
   const [isStarting, setIsStarting] = useState(false)
+  const [stalled, setStalled] = useState(false)
 
-  // Fetch the user's merchant account; 404 means "not yet created"
-  // and getAccountSetupStatus(null) -> 'none'.
   const accountQuery = useQuery({
     ...getMerchantAccountOptions({ path: { merchantAccount: 'me' } }),
     retry: (failureCount, err) => {
@@ -43,9 +47,59 @@ function BillingPage() {
     },
   })
 
-  const handleSetup = () => {
-    setIsStarting(true)
-    onboard.mutate()
+  useEffect(() => {
+    if (onboard.isError) setIsStarting(false)
+  }, [onboard.isError])
+
+  useEffect(() => {
+    if (!(accountQuery.isPending || isStarting)) {
+      setStalled(false)
+      return
+    }
+    const handle = window.setTimeout(() => setStalled(true), STALL_TIMEOUT_MS)
+    return () => window.clearTimeout(handle)
+  }, [accountQuery.isPending, isStarting])
+
+  const transportFailed = accountQuery.isError && !isNotFound
+
+  if (transportFailed || stalled) {
+    return (
+      <div className="flex flex-col gap-6 max-w-3xl">
+        <div>
+          <h1 className="text-h1">Billing</h1>
+          <p className="text-muted-foreground">
+            Connect a Stripe account if you want to charge for your sessions.
+          </p>
+        </div>
+        <div role="alert" className="rounded-lg border border-destructive/40 bg-destructive/5 p-6 flex flex-col gap-3">
+          <div className="flex items-center gap-2 text-destructive">
+            <AlertCircle className="h-5 w-5" />
+            <span className="font-medium">
+              {transportFailed ? 'Could not load billing status' : 'Billing is taking longer than expected'}
+            </span>
+          </div>
+          <p className="text-sm text-muted-foreground">
+            {transportFailed
+              ? 'The server returned an error. Retry, or skip for now.'
+              : 'The request has not resolved. Retry, or skip for now.'}
+          </p>
+          <div className="flex gap-2">
+            <Button
+              onClick={() => {
+                setStalled(false)
+                setIsStarting(false)
+                accountQuery.refetch()
+              }}
+            >
+              Retry
+            </Button>
+            <Button variant="outline" onClick={() => navigate({ to: '/dashboard' })}>
+              Skip for now
+            </Button>
+          </div>
+        </div>
+      </div>
+    )
   }
 
   return (
@@ -60,7 +114,10 @@ function BillingPage() {
         account={account ? { id: account.id, metadata: account.metadata as { onboardingStartedAt?: string } | undefined } : null}
         status={status}
         isLoading={accountQuery.isPending || isStarting}
-        onSetupAccount={handleSetup}
+        onSetupAccount={() => {
+          setIsStarting(true)
+          onboard.mutate()
+        }}
         onSubmit={() => navigate({ to: '/dashboard' })}
         onSkip={() => navigate({ to: '/dashboard' })}
       />
