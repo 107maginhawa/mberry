@@ -17,6 +17,7 @@ import {
   sendMessageMutation,
   getEventQueryKey,
 } from '@monobase/sdk-ts/generated/react-query'
+import { CSRF_HEADER, readCsrfCookie } from '@monobase/sdk-ts/csrf'
 
 interface PostEventActionsProps {
   event: {
@@ -233,9 +234,13 @@ export function PostEventActions({ event, orgId, orgSlug, userId, onEventComplet
     }
     setRevoking(true)
     try {
+      const csrfToken = readCsrfCookie()
       const res = await fetch('/api/association/member/credits/void-event', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          ...(csrfToken ? { [CSRF_HEADER]: csrfToken } : {}),
+        },
         credentials: 'include',
         body: JSON.stringify({
           eventId: event.id,

@@ -4,6 +4,7 @@ import { Building, ArrowLeft, Pencil, Play, Pause, Archive } from 'lucide-react'
 import { Button, Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from '@monobase/ui'
 import { toast } from 'sonner'
 import { getOrganizationOptions } from '@monobase/sdk-ts/generated/@tanstack/react-query.gen'
+import { CSRF_HEADER, readCsrfCookie } from '@monobase/sdk-ts/csrf'
 
 export const Route = createFileRoute('/organizations/$organizationId')({
   component: OrganizationDetailPage,
@@ -45,9 +46,13 @@ function OrganizationDetailPage() {
 
   async function transitionOrgStatus(newStatus: string) {
     try {
+      const csrfToken = readCsrfCookie()
       const res = await fetch(`/api/admin/organizations/${organizationId}/transition`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          ...(csrfToken ? { [CSRF_HEADER]: csrfToken } : {}),
+        },
         credentials: 'include',
         body: JSON.stringify({ status: newStatus }),
       })
