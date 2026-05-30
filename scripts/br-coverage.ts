@@ -56,6 +56,22 @@ const KNOWN_INCOMPLETE: Set<string> = new Set([
   // BR-32 removed: soft-delete explicitly asserted in deletionProcessor.test.ts (Phase 28)
   // BR-33 removed: handler-level tests cover all integrity rules (Phase 27-28)
   // BR-34 removed: handler-level tests + contract cover all eligibility rules (Phase 27-28)
+
+  // Wave G8 audit (2026-05-30) — three BRs carry documented `deferredReason`
+  // in br-registry.json explaining why contract/E2E layers cannot exist for
+  // them. Backend assertions are the correct (and only feasible) coverage
+  // layer. Allowlisted so the gate respects the registry's deferral rationale.
+  "BR-47", // Banned Users: Better-Auth ban is admin-internal, no public-API
+           // wire to exercise; backend integration in middleware/auth.test.ts
+           // + E2E in auth.spec.ts cover the rule.
+  "BR-48", // Bulk Payment Batch Size: bulkRecordPayments handler is not yet
+           // wired to an HTTP route (no OpenAPI surface); contract+E2E
+           // unreachable. Backend boundary-table tests cover sizes
+           // 1/49/50/51/100/1000.
+  "BR-51", // Service Token Timing-Safe Comparison: cryptographic property of
+           // the comparator, not observable at the wire layer. Backend test
+           // in middleware/auth.test.ts asserts crypto.timingSafeEqual is the
+           // primitive and that near-miss tokens reject identically.
 ]);
 
 // ── Coverage derivation ──────────────────────────────────
