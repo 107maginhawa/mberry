@@ -504,6 +504,13 @@ export const AnnouncementSchema = z.object({
   publishedAt: z.string().datetime().transform((str) => new Date(str)).optional()
 });
 
+export const AnnouncementChannelStatsSchema = z.object({
+  targeted: z.number().int().optional(),
+  delivered: z.number().int().optional(),
+  failed: z.number().int().optional(),
+  opened: z.number().int().optional()
+});
+
 export const AnnouncementCreateRequestSchema = z.object({
   title: z.string().max(200),
   content: z.string(),
@@ -528,6 +535,57 @@ export const AnnouncementListResponseSchema = z.object({
   hasNextPage: z.boolean(),
   hasPreviousPage: z.boolean()
 })
+});
+
+export const AnnouncementScheduleRequestSchema = z.object({
+  scheduledAt: z.string().datetime().transform((str) => new Date(str))
+});
+
+export const AnnouncementStatsSchema = z.object({
+  push: z.object({
+  targeted: z.number().int().optional(),
+  delivered: z.number().int().optional(),
+  failed: z.number().int().optional(),
+  opened: z.number().int().optional()
+}).optional(),
+  email: z.object({
+  targeted: z.number().int().optional(),
+  delivered: z.number().int().optional(),
+  failed: z.number().int().optional(),
+  opened: z.number().int().optional()
+}).optional(),
+  inApp: z.object({
+  targeted: z.number().int().optional(),
+  delivered: z.number().int().optional(),
+  failed: z.number().int().optional(),
+  opened: z.number().int().optional()
+}).optional()
+});
+
+export const AnnouncementStatsResponseSchema = z.object({
+  id: z.string().uuid(),
+  title: z.string(),
+  status: z.enum(["draft", "scheduled", "sent", "scheduledFailed", "archived"]),
+  stats: z.object({
+  push: z.object({
+  targeted: z.number().int().optional(),
+  delivered: z.number().int().optional(),
+  failed: z.number().int().optional(),
+  opened: z.number().int().optional()
+}).optional(),
+  email: z.object({
+  targeted: z.number().int().optional(),
+  delivered: z.number().int().optional(),
+  failed: z.number().int().optional(),
+  opened: z.number().int().optional()
+}).optional(),
+  inApp: z.object({
+  targeted: z.number().int().optional(),
+  delivered: z.number().int().optional(),
+  failed: z.number().int().optional(),
+  opened: z.number().int().optional()
+}).optional()
+}).optional()
 });
 
 export const AnnouncementStatusSchema = z.enum(["draft", "scheduled", "sent", "scheduledFailed", "archived"]);
@@ -13861,6 +13919,23 @@ export type PublishAnnouncementParams = z.infer<typeof PublishAnnouncementParams
 
 export const PublishAnnouncementResponse = AnnouncementSchema;
 
+export const ScheduleAnnouncementParams = z.object({
+  id: UUIDSchema,
+});
+export type ScheduleAnnouncementParams = z.infer<typeof ScheduleAnnouncementParams>;
+
+export const ScheduleAnnouncementBody = AnnouncementScheduleRequestSchema;
+export type ScheduleAnnouncementBody = z.infer<typeof ScheduleAnnouncementBody>;
+
+export const ScheduleAnnouncementResponse = AnnouncementSchema;
+
+export const GetAnnouncementStatsParams = z.object({
+  id: UUIDSchema,
+});
+export type GetAnnouncementStatsParams = z.infer<typeof GetAnnouncementStatsParams>;
+
+export const GetAnnouncementStatsResponse = AnnouncementStatsResponseSchema;
+
 export const ListAnnouncementsParams = z.object({
   organizationId: UUIDSchema,
 });
@@ -14241,6 +14316,14 @@ export const SendPaymentLinkBody = SendPaymentLinkRequestSchema;
 export type SendPaymentLinkBody = z.infer<typeof SendPaymentLinkBody>;
 
 export const SendPaymentLinkResponse = SendPaymentLinkResponseSchema;
+
+export const DownloadReceiptParams = z.object({
+  organizationId: UUIDSchema,
+  paymentId: UUIDSchema,
+});
+export type DownloadReceiptParams = z.infer<typeof DownloadReceiptParams>;
+
+export const DownloadReceiptResponse = z.string();
 
 export const CheckoutPaymentTokenParams = z.object({
   token: z.string(),

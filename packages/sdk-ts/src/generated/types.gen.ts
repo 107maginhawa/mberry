@@ -609,6 +609,259 @@ export type ActionAlertUpdate = {
 };
 
 /**
+ * An ad campaign owned by an advertiser
+ */
+export type AdCampaign = {
+    /**
+     * Unique identifier
+     */
+    id: string;
+    /**
+     * Entity version for optimistic locking
+     */
+    version: number;
+    /**
+     * Creation timestamp
+     */
+    createdAt: Date;
+    /**
+     * User who created the entity
+     */
+    createdBy?: string;
+    /**
+     * Last update timestamp
+     */
+    updatedAt: Date;
+    /**
+     * User who last updated the entity
+     */
+    updatedBy?: string;
+    /**
+     * Organisation the campaign runs in
+     */
+    organizationId: string;
+    /**
+     * Advertiser running this campaign
+     */
+    advertiserId: string;
+    /**
+     * Campaign name
+     */
+    name: string;
+    /**
+     * Free-text campaign description
+     */
+    description?: string;
+    /**
+     * Current lifecycle status
+     */
+    status: 'draft' | 'pending_review' | 'active' | 'paused' | 'completed' | 'rejected';
+    /**
+     * Segment ID used for targeting (M16-R2: no PII targeting)
+     */
+    targetSegmentId?: string;
+    /**
+     * Estimated reach of the target segment
+     */
+    targetSegmentSize?: number;
+    /**
+     * Budget cap in minor units (cents)
+     */
+    budgetCents: number;
+    /**
+     * Amount spent so far in minor units (cents)
+     */
+    spentCents: number;
+    /**
+     * Campaign start time (ISO 8601)
+     */
+    startsAt?: Date;
+    /**
+     * Campaign end time (ISO 8601)
+     */
+    endsAt?: Date;
+    /**
+     * Display surface for this campaign
+     */
+    adSlot: 'feed_banner' | 'sidebar' | 'email_footer' | 'event_sponsor';
+};
+
+/**
+ * Lifecycle status of an ad campaign
+ */
+export type AdCampaignStatus = 'draft' | 'pending_review' | 'active' | 'paused' | 'completed' | 'rejected';
+
+/**
+ * An ad campaign owned by an advertiser
+ */
+export type AdCampaignUpdate = {
+    /**
+     * Unique identifier
+     */
+    id?: string;
+    /**
+     * Entity version for optimistic locking
+     */
+    version?: number;
+    /**
+     * Creation timestamp
+     */
+    createdAt?: Date;
+    /**
+     * User who created the entity
+     */
+    createdBy?: string;
+    /**
+     * Last update timestamp
+     */
+    updatedAt?: Date;
+    /**
+     * User who last updated the entity
+     */
+    updatedBy?: string;
+    /**
+     * Organisation the campaign runs in
+     */
+    organizationId?: string;
+    /**
+     * Advertiser running this campaign
+     */
+    advertiserId?: string;
+    /**
+     * Campaign name
+     */
+    name?: string;
+    /**
+     * Free-text campaign description
+     */
+    description?: string;
+    /**
+     * Current lifecycle status
+     */
+    status?: 'draft' | 'pending_review' | 'active' | 'paused' | 'completed' | 'rejected';
+    /**
+     * Segment ID used for targeting (M16-R2: no PII targeting)
+     */
+    targetSegmentId?: string;
+    /**
+     * Estimated reach of the target segment
+     */
+    targetSegmentSize?: number;
+    /**
+     * Budget cap in minor units (cents)
+     */
+    budgetCents?: number;
+    /**
+     * Amount spent so far in minor units (cents)
+     */
+    spentCents?: number;
+    /**
+     * Campaign start time (ISO 8601)
+     */
+    startsAt?: Date;
+    /**
+     * Campaign end time (ISO 8601)
+     */
+    endsAt?: Date;
+    /**
+     * Display surface for this campaign
+     */
+    adSlot?: 'feed_banner' | 'sidebar' | 'email_footer' | 'event_sponsor';
+};
+
+/**
+ * Response for ad placement requests
+ */
+export type AdPlacementResponse = {
+    /**
+     * Selected creative for display, or null if no eligible ads
+     */
+    ad: {
+        /**
+         * Unique identifier
+         */
+        id: string;
+        /**
+         * Entity version for optimistic locking
+         */
+        version: number;
+        /**
+         * Creation timestamp
+         */
+        createdAt: Date;
+        /**
+         * User who created the entity
+         */
+        createdBy?: string;
+        /**
+         * Last update timestamp
+         */
+        updatedAt: Date;
+        /**
+         * User who last updated the entity
+         */
+        updatedBy?: string;
+        /**
+         * Organisation the creative belongs to
+         */
+        organizationId: string;
+        /**
+         * Campaign this creative belongs to
+         */
+        campaignId: string;
+        /**
+         * Creative headline
+         */
+        title: string;
+        /**
+         * Creative body copy
+         */
+        bodyText: string;
+        /**
+         * Optional image URL
+         */
+        imageUrl?: string;
+        /**
+         * Click-through URL
+         */
+        clickUrl?: string;
+        /**
+         * Current review status
+         */
+        status: 'pending' | 'approved' | 'rejected';
+        /**
+         * Reviewer Person ID (set on review)
+         */
+        reviewedBy?: string;
+        /**
+         * Timestamp of the review decision
+         */
+        reviewedAt?: Date;
+        /**
+         * Reason if the creative was rejected
+         */
+        rejectionReason?: string;
+        /**
+         * Whether the 'Sponsored' label must render with the creative (M16-R3)
+         */
+        sponsoredLabel: boolean;
+    } | null;
+    /**
+     * Whether the response is a generic/fallback ad
+     */
+    generic: boolean;
+    /**
+     * Reason a generic ad was returned (when applicable)
+     */
+    reason?: string;
+};
+
+/**
+ * Display surface where the ad will appear
+ */
+export type AdSlot = 'feed_banner' | 'sidebar' | 'email_footer' | 'event_sponsor';
+
+/**
  * Request to add a new member to the organization roster
  */
 export type AddMemberRequest = {
@@ -803,6 +1056,106 @@ export type AdminRoleResponse = {
      * Display name of the platform admin
      */
     name: string;
+};
+
+/**
+ * A registered advertiser in the association's ad system
+ */
+export type Advertiser = {
+    /**
+     * Unique identifier
+     */
+    id: string;
+    /**
+     * Entity version for optimistic locking
+     */
+    version: number;
+    /**
+     * Creation timestamp
+     */
+    createdAt: Date;
+    /**
+     * User who created the entity
+     */
+    createdBy?: string;
+    /**
+     * Last update timestamp
+     */
+    updatedAt: Date;
+    /**
+     * User who last updated the entity
+     */
+    updatedBy?: string;
+    /**
+     * Organisation the advertiser is registered with
+     */
+    organizationId: string;
+    /**
+     * Advertiser company name
+     */
+    companyName: string;
+    /**
+     * Primary contact email
+     */
+    contactEmail: string;
+    /**
+     * Optional Person ID of the contact representative
+     */
+    contactPersonId?: string;
+    /**
+     * Whether the advertiser is currently active
+     */
+    isActive: boolean;
+};
+
+/**
+ * A registered advertiser in the association's ad system
+ */
+export type AdvertiserUpdate = {
+    /**
+     * Unique identifier
+     */
+    id?: string;
+    /**
+     * Entity version for optimistic locking
+     */
+    version?: number;
+    /**
+     * Creation timestamp
+     */
+    createdAt?: Date;
+    /**
+     * User who created the entity
+     */
+    createdBy?: string;
+    /**
+     * Last update timestamp
+     */
+    updatedAt?: Date;
+    /**
+     * User who last updated the entity
+     */
+    updatedBy?: string;
+    /**
+     * Organisation the advertiser is registered with
+     */
+    organizationId?: string;
+    /**
+     * Advertiser company name
+     */
+    companyName?: string;
+    /**
+     * Primary contact email
+     */
+    contactEmail?: string;
+    /**
+     * Optional Person ID of the contact representative
+     */
+    contactPersonId?: string;
+    /**
+     * Whether the advertiser is currently active
+     */
+    isActive?: boolean;
 };
 
 /**
@@ -1209,6 +1562,28 @@ export type Announcement = {
 };
 
 /**
+ * Per-channel delivery counters for a sent announcement
+ */
+export type AnnouncementChannelStats = {
+    /**
+     * Number of recipients targeted on this channel
+     */
+    targeted?: number;
+    /**
+     * Number of successful deliveries
+     */
+    delivered?: number;
+    /**
+     * Number of failed deliveries
+     */
+    failed?: number;
+    /**
+     * Number of opens (email/in-app only)
+     */
+    opened?: number;
+};
+
+/**
  * Request body for creating an announcement
  */
 export type AnnouncementCreateRequest = {
@@ -1294,6 +1669,171 @@ export type AnnouncementListResponse = {
          * Whether there are previous pages
          */
         hasPreviousPage: boolean;
+    };
+};
+
+/**
+ * Request body for scheduling a draft announcement
+ */
+export type AnnouncementScheduleRequest = {
+    /**
+     * Future timestamp when the announcement should be sent
+     */
+    scheduledAt: Date;
+};
+
+/**
+ * Engagement statistics for a published announcement
+ */
+export type AnnouncementStats = {
+    /**
+     * Push channel counters (omitted if push was not used)
+     */
+    push?: {
+        /**
+         * Number of recipients targeted on this channel
+         */
+        targeted?: number;
+        /**
+         * Number of successful deliveries
+         */
+        delivered?: number;
+        /**
+         * Number of failed deliveries
+         */
+        failed?: number;
+        /**
+         * Number of opens (email/in-app only)
+         */
+        opened?: number;
+    };
+    /**
+     * Email channel counters (omitted if email was not used)
+     */
+    email?: {
+        /**
+         * Number of recipients targeted on this channel
+         */
+        targeted?: number;
+        /**
+         * Number of successful deliveries
+         */
+        delivered?: number;
+        /**
+         * Number of failed deliveries
+         */
+        failed?: number;
+        /**
+         * Number of opens (email/in-app only)
+         */
+        opened?: number;
+    };
+    /**
+     * In-app channel counters
+     */
+    inApp?: {
+        /**
+         * Number of recipients targeted on this channel
+         */
+        targeted?: number;
+        /**
+         * Number of successful deliveries
+         */
+        delivered?: number;
+        /**
+         * Number of failed deliveries
+         */
+        failed?: number;
+        /**
+         * Number of opens (email/in-app only)
+         */
+        opened?: number;
+    };
+};
+
+/**
+ * Response payload for the announcement stats endpoint
+ */
+export type AnnouncementStatsResponse = {
+    /**
+     * Announcement identifier
+     */
+    id: string;
+    /**
+     * Announcement title at time of read
+     */
+    title: string;
+    /**
+     * Current lifecycle status
+     */
+    status: 'draft' | 'scheduled' | 'sent' | 'scheduledFailed' | 'archived';
+    /**
+     * Aggregated engagement stats
+     */
+    stats?: {
+        /**
+         * Push channel counters (omitted if push was not used)
+         */
+        push?: {
+            /**
+             * Number of recipients targeted on this channel
+             */
+            targeted?: number;
+            /**
+             * Number of successful deliveries
+             */
+            delivered?: number;
+            /**
+             * Number of failed deliveries
+             */
+            failed?: number;
+            /**
+             * Number of opens (email/in-app only)
+             */
+            opened?: number;
+        };
+        /**
+         * Email channel counters (omitted if email was not used)
+         */
+        email?: {
+            /**
+             * Number of recipients targeted on this channel
+             */
+            targeted?: number;
+            /**
+             * Number of successful deliveries
+             */
+            delivered?: number;
+            /**
+             * Number of failed deliveries
+             */
+            failed?: number;
+            /**
+             * Number of opens (email/in-app only)
+             */
+            opened?: number;
+        };
+        /**
+         * In-app channel counters
+         */
+        inApp?: {
+            /**
+             * Number of recipients targeted on this channel
+             */
+            targeted?: number;
+            /**
+             * Number of successful deliveries
+             */
+            delivered?: number;
+            /**
+             * Number of failed deliveries
+             */
+            failed?: number;
+            /**
+             * Number of opens (email/in-app only)
+             */
+            opened?: number;
+        };
     };
 };
 
@@ -3877,6 +4417,10 @@ export type AssociationCoreDocumentsDocumentCreateRequest = {
      * Initial tags (optional).
      */
     tags?: Array<string>;
+    /**
+     * Initial publication status. Defaults to 'draft'; only 'draft' or 'published' are valid on creation.
+     */
+    status?: 'draft' | 'published';
 };
 
 /**
@@ -9387,6 +9931,171 @@ export type BulkApproveFailure = {
 };
 
 /**
+ * Bulk import mode — 'preview' validates without persisting, 'import' creates invites
+ */
+export type BulkImportMode = 'preview' | 'import';
+
+/**
+ * Response for a bulk import in preview mode
+ */
+export type BulkImportPreviewResponse = {
+    /**
+     * Total data rows parsed (excluding header)
+     */
+    totalRows: number;
+    /**
+     * Count of rows that would be imported
+     */
+    validRows: number;
+    /**
+     * Count of rows failing validation
+     */
+    invalidRows: number;
+    /**
+     * Count of rows skipped as duplicates
+     */
+    duplicateRows: number;
+    /**
+     * Per-row preview details
+     */
+    preview: Array<BulkImportPreviewRow>;
+    /**
+     * Aggregate error messages
+     */
+    errors: Array<string>;
+};
+
+/**
+ * A single parsed CSV row with validation outcome
+ */
+export type BulkImportPreviewRow = {
+    /**
+     * 1-based row number in the source CSV (excluding header)
+     */
+    row: number;
+    /**
+     * Parsed email address
+     */
+    email?: string;
+    /**
+     * Parsed name
+     */
+    name?: string;
+    /**
+     * Parsed license number
+     */
+    licenseNumber?: string;
+    /**
+     * Row status: valid, invalid, or duplicate
+     */
+    status: 'valid' | 'invalid' | 'duplicate';
+    /**
+     * Reason the row is invalid or duplicate
+     */
+    reason?: string;
+};
+
+/**
+ * Request body for bulk-importing members from CSV
+ */
+export type BulkImportRequest = {
+    /**
+     * Organization to import members into
+     */
+    orgId: string;
+    /**
+     * Raw CSV content. Expected header columns: email, name, licenseNumber. multipart/form-data is not supported by the codegen pipeline, so CSV is passed inline as a string.
+     */
+    csvContent: string;
+    /**
+     * Operation mode — 'preview' to validate only, 'import' to persist
+     */
+    mode?: 'preview' | 'import';
+};
+
+/**
+ * Bulk import response — shape depends on requested mode
+ */
+export type BulkImportResponse = {
+    /**
+     * Echoes the mode the import ran in
+     */
+    mode: string;
+    /**
+     * Preview results (present when mode=preview)
+     */
+    previewResult?: {
+        /**
+         * Total data rows parsed (excluding header)
+         */
+        totalRows: number;
+        /**
+         * Count of rows that would be imported
+         */
+        validRows: number;
+        /**
+         * Count of rows failing validation
+         */
+        invalidRows: number;
+        /**
+         * Count of rows skipped as duplicates
+         */
+        duplicateRows: number;
+        /**
+         * Per-row preview details
+         */
+        preview: Array<BulkImportPreviewRow>;
+        /**
+         * Aggregate error messages
+         */
+        errors: Array<string>;
+    };
+    /**
+     * Import results (present when mode=import)
+     */
+    importResult?: {
+        /**
+         * Identifier for this import batch
+         */
+        importId: string;
+        /**
+         * Count of invitations created
+         */
+        imported: number;
+        /**
+         * Count of rows skipped (invalid or duplicate)
+         */
+        skipped: number;
+        /**
+         * Count of invitation tokens issued/sent
+         */
+        invitationsSent: number;
+    };
+};
+
+/**
+ * Response for a bulk import in import mode
+ */
+export type BulkImportResultResponse = {
+    /**
+     * Identifier for this import batch
+     */
+    importId: string;
+    /**
+     * Count of invitations created
+     */
+    imported: number;
+    /**
+     * Count of rows skipped (invalid or duplicate)
+     */
+    skipped: number;
+    /**
+     * Count of invitation tokens issued/sent
+     */
+    invitationsSent: number;
+};
+
+/**
  * Result of an individual certificate issuance
  */
 export type BulkIssueCertificateResult = {
@@ -10876,6 +11585,163 @@ export type ChapterAffiliationUpdate = {
 export type ChapterAffiliationUpdateRequest = {
     isPrimary?: boolean;
     status?: AffiliationStatus;
+};
+
+/**
+ * Per-chapter comparative metrics row for the chapter comparison list (S10 row 2)
+ */
+export type ChapterComparisonItem = {
+    /**
+     * Chapter organization ID
+     */
+    organizationId: string;
+    /**
+     * Chapter display name
+     */
+    organizationName?: string;
+    /**
+     * Total member count
+     */
+    totalMembers: number;
+    /**
+     * Active (paid) member count
+     */
+    activeMembers: number;
+    /**
+     * Active members as a percentage of total (0-100)
+     */
+    activePercentage: number;
+    /**
+     * Dues collection rate as a percentage (0-100)
+     */
+    collectionRate: number;
+    /**
+     * Credit (CPD) compliance as a percentage (0-100)
+     */
+    creditCompliance: number;
+    /**
+     * Total dues revenue in cents
+     */
+    totalRevenueCents: number;
+    /**
+     * Events held in the period
+     */
+    eventCount: number;
+    /**
+     * Trainings held in the period
+     */
+    trainingCount: number;
+    /**
+     * True when the chapter has fewer than 5 members; individual metrics are suppressed (M14-R2)
+     */
+    isSuppressed: boolean;
+};
+
+/**
+ * Paginated chapter comparison list response
+ */
+export type ChapterComparisonListResponse = {
+    /**
+     * Chapter comparison rows
+     */
+    data: Array<ChapterComparisonItem>;
+    /**
+     * Pagination metadata
+     */
+    meta: {
+        /**
+         * Opaque cursor for the next page; null when no further pages
+         */
+        cursor: string | null;
+        /**
+         * Whether more results exist beyond this page
+         */
+        hasMore: boolean;
+        /**
+         * Total matching record count
+         */
+        total: number | null;
+    };
+};
+
+/**
+ * Detailed metrics for a single chapter (WF-085 drill-down)
+ */
+export type ChapterDrilldownResponse = {
+    /**
+     * Chapter organization ID
+     */
+    organizationId: string;
+    /**
+     * Chapter display name
+     */
+    organizationName?: string;
+    /**
+     * Total member count
+     */
+    totalMembers: number;
+    /**
+     * Active member count
+     */
+    activeMembers: number;
+    /**
+     * Active members as a percentage of total (0-100)
+     */
+    activePercentage: number;
+    /**
+     * Member status distribution
+     */
+    memberStatusBreakdown: {
+        active: number;
+        grace: number;
+        lapsed: number;
+        suspended: number;
+    };
+    /**
+     * Dues collection rate as a percentage (0-100)
+     */
+    collectionRate: number;
+    /**
+     * Total dues revenue in cents
+     */
+    totalRevenueCents: number;
+    /**
+     * Credit (CPD) compliance as a percentage (0-100)
+     */
+    creditCompliance: number;
+    /**
+     * Credit compliance distribution
+     */
+    creditComplianceBreakdown: {
+        /**
+         * Members meeting credit requirements
+         */
+        compliant: number;
+        /**
+         * Members not meeting credit requirements
+         */
+        nonCompliant: number;
+        /**
+         * Members exempt from credit requirements
+         */
+        exempt: number;
+    };
+    /**
+     * Events held in the period
+     */
+    eventCount: number;
+    /**
+     * Trainings held in the period
+     */
+    trainingCount: number;
+    /**
+     * Snapshot month (YYYY-MM)
+     */
+    snapshotMonth: string;
+    /**
+     * True when the chapter has fewer than 5 members (M14-R2)
+     */
+    isSuppressed: boolean;
 };
 
 /**
@@ -13088,6 +13954,66 @@ export type CourseUpdate = {
 export type CpdActivityType = 'seminar' | 'workshop' | 'conference' | 'webinar' | 'hands_on' | 'community' | 'research' | 'mentorship' | 'self_directed' | 'other';
 
 /**
+ * Request body for registering a new advertiser
+ */
+export type CreateAdvertiserRequest = {
+    /**
+     * Advertiser company name
+     */
+    companyName: string;
+    /**
+     * Primary contact email address
+     */
+    contactEmail: string;
+    /**
+     * Optional Person ID of the contact representative
+     */
+    contactPersonId?: string;
+};
+
+/**
+ * Request body for creating a new campaign
+ */
+export type CreateCampaignRequest = {
+    /**
+     * Advertiser running this campaign
+     */
+    advertiserId: string;
+    /**
+     * Campaign name
+     */
+    name: string;
+    /**
+     * Free-text description
+     */
+    description?: string;
+    /**
+     * Segment ID used for targeting (M16-R2: PII targeting rejected)
+     */
+    targetSegmentId?: string;
+    /**
+     * Estimated segment size
+     */
+    targetSegmentSize?: number;
+    /**
+     * Budget cap in minor units (cents)
+     */
+    budgetCents?: number;
+    /**
+     * Campaign start time (ISO 8601)
+     */
+    startsAt?: Date;
+    /**
+     * Campaign end time (ISO 8601)
+     */
+    endsAt?: Date;
+    /**
+     * Display surface for this campaign
+     */
+    adSlot?: 'feed_banner' | 'sidebar' | 'email_footer' | 'event_sponsor';
+};
+
+/**
  * Create chat room request
  */
 export type CreateChatRoomRequest = {
@@ -13107,6 +14033,32 @@ export type CreateChatRoomRequest = {
      * If true, return existing room instead of error when unique constraint is hit
      */
     upsert?: boolean;
+};
+
+/**
+ * Request body for submitting a creative
+ */
+export type CreateCreativeRequest = {
+    /**
+     * Campaign this creative belongs to
+     */
+    campaignId: string;
+    /**
+     * Creative headline
+     */
+    title: string;
+    /**
+     * Creative body copy
+     */
+    bodyText: string;
+    /**
+     * Optional image URL
+     */
+    imageUrl?: string;
+    /**
+     * Optional click-through URL
+     */
+    clickUrl?: string;
 };
 
 /**
@@ -13249,6 +14201,74 @@ export type CreateInvoiceRequest = {
 };
 
 /**
+ * Request body for submitting a job application
+ */
+export type CreateJobBoardApplicationRequest = {
+    /**
+     * Job posting being applied to
+     */
+    postingId: string;
+    /**
+     * Reference (storage key / URL) to the uploaded resume
+     */
+    resumeRef?: string;
+    /**
+     * Cover letter text
+     */
+    coverLetter?: string;
+};
+
+/**
+ * Request body for creating a job posting
+ */
+export type CreateJobBoardPostingRequest = {
+    /**
+     * Job title
+     */
+    title: string;
+    /**
+     * Hiring organization name
+     */
+    organizationName: string;
+    /**
+     * Optional organization id override (defaults to the path :organizationId)
+     */
+    organizationId?: string;
+    /**
+     * Free-text location
+     */
+    location?: string;
+    /**
+     * Employment type
+     */
+    type?: 'full_time' | 'part_time' | 'contract' | 'fellowship' | 'internship';
+    /**
+     * Salary range as free-text
+     */
+    salary?: string;
+    /**
+     * Long-form description
+     */
+    description?: string;
+    /**
+     * Requirements / qualifications list
+     */
+    requirements?: Array<string>;
+    /**
+     * Publish time (ISO 8601). Defaults to now.
+     */
+    postedAt?: Date;
+    /**
+     * Expiry time (ISO 8601)
+     */
+    expiresAt?: Date;
+    /**
+     * Initial lifecycle status. Defaults to draft.
+     */
+    status?: 'draft' | 'active' | 'filled' | 'expired' | 'closed';
+};
+
+/**
  * Request to create a line item
  */
 export type CreateLineItemRequest = {
@@ -13270,6 +14290,88 @@ export type CreateLineItemRequest = {
     metadata?: {
         [key: string]: unknown;
     };
+};
+
+/**
+ * Request body for creating a marketplace listing
+ */
+export type CreateMarketplaceListingRequest = {
+    /**
+     * Vendor owning the listing
+     */
+    vendorId: string;
+    /**
+     * Listing title
+     */
+    title: string;
+    /**
+     * Listing description
+     */
+    description: string;
+    /**
+     * Unit price as decimal string
+     */
+    price?: string;
+    /**
+     * ISO 4217 currency code (default USD)
+     */
+    currency?: string;
+    /**
+     * Initial status (default draft)
+     */
+    status?: 'draft' | 'active' | 'archived';
+    /**
+     * Optional category tags
+     */
+    categoryTags?: Array<string>;
+};
+
+/**
+ * Request body for placing an order
+ */
+export type CreateMarketplaceOrderRequest = {
+    /**
+     * Listing being ordered
+     */
+    listingId: string;
+    /**
+     * Quantity to order
+     */
+    quantity?: number;
+    /**
+     * Optional buyer notes
+     */
+    notes?: string;
+};
+
+/**
+ * Request body for registering a vendor
+ */
+export type CreateMarketplaceVendorRequest = {
+    /**
+     * Vendor company name
+     */
+    companyName: string;
+    /**
+     * Vendor category
+     */
+    category: 'emr' | 'supplies' | 'insurance' | 'telehealth' | 'other';
+    /**
+     * Vendor description
+     */
+    description: string;
+    /**
+     * Vendor website URL
+     */
+    websiteUrl?: string;
+    /**
+     * Primary contact email
+     */
+    contactEmail: string;
+    /**
+     * Optional Person ID of the contact representative
+     */
+    contactPersonId?: string;
 };
 
 /**
@@ -13434,6 +14536,159 @@ export type CreateTemplateRequest = {
      * Initial status
      */
     status?: 'draft' | 'active' | 'archived';
+};
+
+/**
+ * A creative (ad asset) submitted under a campaign
+ */
+export type Creative = {
+    /**
+     * Unique identifier
+     */
+    id: string;
+    /**
+     * Entity version for optimistic locking
+     */
+    version: number;
+    /**
+     * Creation timestamp
+     */
+    createdAt: Date;
+    /**
+     * User who created the entity
+     */
+    createdBy?: string;
+    /**
+     * Last update timestamp
+     */
+    updatedAt: Date;
+    /**
+     * User who last updated the entity
+     */
+    updatedBy?: string;
+    /**
+     * Organisation the creative belongs to
+     */
+    organizationId: string;
+    /**
+     * Campaign this creative belongs to
+     */
+    campaignId: string;
+    /**
+     * Creative headline
+     */
+    title: string;
+    /**
+     * Creative body copy
+     */
+    bodyText: string;
+    /**
+     * Optional image URL
+     */
+    imageUrl?: string;
+    /**
+     * Click-through URL
+     */
+    clickUrl?: string;
+    /**
+     * Current review status
+     */
+    status: 'pending' | 'approved' | 'rejected';
+    /**
+     * Reviewer Person ID (set on review)
+     */
+    reviewedBy?: string;
+    /**
+     * Timestamp of the review decision
+     */
+    reviewedAt?: Date;
+    /**
+     * Reason if the creative was rejected
+     */
+    rejectionReason?: string;
+    /**
+     * Whether the 'Sponsored' label must render with the creative (M16-R3)
+     */
+    sponsoredLabel: boolean;
+};
+
+/**
+ * Review status of a creative asset
+ */
+export type CreativeStatus = 'pending' | 'approved' | 'rejected';
+
+/**
+ * A creative (ad asset) submitted under a campaign
+ */
+export type CreativeUpdate = {
+    /**
+     * Unique identifier
+     */
+    id?: string;
+    /**
+     * Entity version for optimistic locking
+     */
+    version?: number;
+    /**
+     * Creation timestamp
+     */
+    createdAt?: Date;
+    /**
+     * User who created the entity
+     */
+    createdBy?: string;
+    /**
+     * Last update timestamp
+     */
+    updatedAt?: Date;
+    /**
+     * User who last updated the entity
+     */
+    updatedBy?: string;
+    /**
+     * Organisation the creative belongs to
+     */
+    organizationId?: string;
+    /**
+     * Campaign this creative belongs to
+     */
+    campaignId?: string;
+    /**
+     * Creative headline
+     */
+    title?: string;
+    /**
+     * Creative body copy
+     */
+    bodyText?: string;
+    /**
+     * Optional image URL
+     */
+    imageUrl?: string;
+    /**
+     * Click-through URL
+     */
+    clickUrl?: string;
+    /**
+     * Current review status
+     */
+    status?: 'pending' | 'approved' | 'rejected';
+    /**
+     * Reviewer Person ID (set on review)
+     */
+    reviewedBy?: string;
+    /**
+     * Timestamp of the review decision
+     */
+    reviewedAt?: Date;
+    /**
+     * Reason if the creative was rejected
+     */
+    rejectionReason?: string;
+    /**
+     * Whether the 'Sponsored' label must render with the creative (M16-R3)
+     */
+    sponsoredLabel?: boolean;
 };
 
 /**
@@ -13748,6 +15003,24 @@ export type CreditCategoryBreakdown = {
      * Self-directed learning credits
      */
     selfDirected: number;
+};
+
+/**
+ * Credit compliance distribution for a chapter drill-down
+ */
+export type CreditComplianceBreakdown = {
+    /**
+     * Members meeting credit requirements
+     */
+    compliant: number;
+    /**
+     * Members not meeting credit requirements
+     */
+    nonCompliant: number;
+    /**
+     * Members exempt from credit requirements
+     */
+    exempt: number;
 };
 
 /**
@@ -20618,6 +21891,312 @@ export type JobApplicationUpdate = {
 };
 
 /**
+ * A member application against a job posting
+ */
+export type JobBoardApplication = {
+    /**
+     * Unique identifier
+     */
+    id: string;
+    /**
+     * Entity version for optimistic locking
+     */
+    version: number;
+    /**
+     * Creation timestamp
+     */
+    createdAt: Date;
+    /**
+     * User who created the entity
+     */
+    createdBy?: string;
+    /**
+     * Last update timestamp
+     */
+    updatedAt: Date;
+    /**
+     * User who last updated the entity
+     */
+    updatedBy?: string;
+    /**
+     * Job posting the application is against
+     */
+    postingId: string;
+    /**
+     * Person who submitted the application
+     */
+    personId: string;
+    /**
+     * Reference (storage key / URL) to the uploaded resume
+     */
+    resumeRef?: string;
+    /**
+     * Optional cover letter text
+     */
+    coverLetter?: string;
+    /**
+     * When the application was submitted
+     */
+    appliedAt: Date;
+    /**
+     * Current application status
+     */
+    status: 'applied' | 'screening' | 'interviewed' | 'offered' | 'hired' | 'rejected' | 'withdrawn';
+};
+
+/**
+ * Lifecycle status of a job application
+ */
+export type JobBoardApplicationStatus = 'applied' | 'screening' | 'interviewed' | 'offered' | 'hired' | 'rejected' | 'withdrawn';
+
+/**
+ * A member application against a job posting
+ */
+export type JobBoardApplicationUpdate = {
+    /**
+     * Unique identifier
+     */
+    id?: string;
+    /**
+     * Entity version for optimistic locking
+     */
+    version?: number;
+    /**
+     * Creation timestamp
+     */
+    createdAt?: Date;
+    /**
+     * User who created the entity
+     */
+    createdBy?: string;
+    /**
+     * Last update timestamp
+     */
+    updatedAt?: Date;
+    /**
+     * User who last updated the entity
+     */
+    updatedBy?: string;
+    /**
+     * Job posting the application is against
+     */
+    postingId?: string;
+    /**
+     * Person who submitted the application
+     */
+    personId?: string;
+    /**
+     * Reference (storage key / URL) to the uploaded resume
+     */
+    resumeRef?: string;
+    /**
+     * Optional cover letter text
+     */
+    coverLetter?: string;
+    /**
+     * When the application was submitted
+     */
+    appliedAt?: Date;
+    /**
+     * Current application status
+     */
+    status?: 'applied' | 'screening' | 'interviewed' | 'offered' | 'hired' | 'rejected' | 'withdrawn';
+};
+
+/**
+ * A job posting published on the association job board
+ */
+export type JobBoardPosting = {
+    /**
+     * Unique identifier
+     */
+    id: string;
+    /**
+     * Entity version for optimistic locking
+     */
+    version: number;
+    /**
+     * Creation timestamp
+     */
+    createdAt: Date;
+    /**
+     * User who created the entity
+     */
+    createdBy?: string;
+    /**
+     * Last update timestamp
+     */
+    updatedAt: Date;
+    /**
+     * User who last updated the entity
+     */
+    updatedBy?: string;
+    /**
+     * Organisation that owns the posting
+     */
+    organizationId: string;
+    /**
+     * Job title
+     */
+    title: string;
+    /**
+     * Hiring organization name (may differ from the association)
+     */
+    organizationName: string;
+    /**
+     * Free-text location (city / 'Remote' / etc.)
+     */
+    location?: string;
+    /**
+     * Employment type
+     */
+    type: 'full_time' | 'part_time' | 'contract' | 'fellowship' | 'internship';
+    /**
+     * Salary range as free-text (e.g. '$80,000 - $100,000 / yr')
+     */
+    salary?: string;
+    /**
+     * Long-form job description
+     */
+    description?: string;
+    /**
+     * List of requirements / qualifications
+     */
+    requirements?: Array<string>;
+    /**
+     * When the posting was published (null while in draft)
+     */
+    postedAt?: Date;
+    /**
+     * When the posting expires and stops accepting applications
+     */
+    expiresAt?: Date;
+    /**
+     * Current lifecycle status
+     */
+    status: 'draft' | 'active' | 'filled' | 'expired' | 'closed';
+    /**
+     * Person ID of the officer who posted it
+     */
+    postedBy?: string;
+};
+
+/**
+ * Paginated list of job postings
+ */
+export type JobBoardPostingListResponse = {
+    /**
+     * Page of job postings
+     */
+    data: Array<JobBoardPosting>;
+    /**
+     * Pagination metadata
+     */
+    pagination: {
+        /**
+         * Total matching postings
+         */
+        total: number;
+        /**
+         * Page size
+         */
+        limit: number;
+        /**
+         * Pagination offset
+         */
+        offset: number;
+    };
+};
+
+/**
+ * Lifecycle status of a job posting
+ */
+export type JobBoardPostingStatus = 'draft' | 'active' | 'filled' | 'expired' | 'closed';
+
+/**
+ * Employment type of a job posting
+ */
+export type JobBoardPostingType = 'full_time' | 'part_time' | 'contract' | 'fellowship' | 'internship';
+
+/**
+ * A job posting published on the association job board
+ */
+export type JobBoardPostingUpdate = {
+    /**
+     * Unique identifier
+     */
+    id?: string;
+    /**
+     * Entity version for optimistic locking
+     */
+    version?: number;
+    /**
+     * Creation timestamp
+     */
+    createdAt?: Date;
+    /**
+     * User who created the entity
+     */
+    createdBy?: string;
+    /**
+     * Last update timestamp
+     */
+    updatedAt?: Date;
+    /**
+     * User who last updated the entity
+     */
+    updatedBy?: string;
+    /**
+     * Organisation that owns the posting
+     */
+    organizationId?: string;
+    /**
+     * Job title
+     */
+    title?: string;
+    /**
+     * Hiring organization name (may differ from the association)
+     */
+    organizationName?: string;
+    /**
+     * Free-text location (city / 'Remote' / etc.)
+     */
+    location?: string;
+    /**
+     * Employment type
+     */
+    type?: 'full_time' | 'part_time' | 'contract' | 'fellowship' | 'internship';
+    /**
+     * Salary range as free-text (e.g. '$80,000 - $100,000 / yr')
+     */
+    salary?: string;
+    /**
+     * Long-form job description
+     */
+    description?: string;
+    /**
+     * List of requirements / qualifications
+     */
+    requirements?: Array<string>;
+    /**
+     * When the posting was published (null while in draft)
+     */
+    postedAt?: Date;
+    /**
+     * When the posting expires and stops accepting applications
+     */
+    expiresAt?: Date;
+    /**
+     * Current lifecycle status
+     */
+    status?: 'draft' | 'active' | 'filled' | 'expired' | 'closed';
+    /**
+     * Person ID of the officer who posted it
+     */
+    postedBy?: string;
+};
+
+/**
  * A job posting on the association member job board
  */
 export type JobPosting = {
@@ -21090,6 +22669,29 @@ export type LicenseRenewalAlertUpdate = {
 export type LicenseStatus = 'active' | 'expired' | 'suspended' | 'revoked' | 'pending';
 
 /**
+ * Paginated list of listings
+ */
+export type ListingListResponse = {
+    /**
+     * Page of listings
+     */
+    data: Array<MarketplaceListing>;
+    /**
+     * Pagination metadata
+     */
+    pagination: {
+        total: number;
+        limit: number;
+        offset: number;
+    };
+};
+
+/**
+ * Lifecycle status of a marketplace listing
+ */
+export type ListingStatus = 'draft' | 'active' | 'archived';
+
+/**
  * Location types for bookings
  */
 export type LocationType = 'video' | 'phone' | 'in-person';
@@ -21330,6 +22932,402 @@ export type MarketingCampaignUpdate = {
 };
 
 /**
+ * A product/service listing posted by a vendor
+ */
+export type MarketplaceListing = {
+    /**
+     * Unique identifier
+     */
+    id: string;
+    /**
+     * Entity version for optimistic locking
+     */
+    version: number;
+    /**
+     * Creation timestamp
+     */
+    createdAt: Date;
+    /**
+     * User who created the entity
+     */
+    createdBy?: string;
+    /**
+     * Last update timestamp
+     */
+    updatedAt: Date;
+    /**
+     * User who last updated the entity
+     */
+    updatedBy?: string;
+    /**
+     * Organisation the listing belongs to
+     */
+    organizationId: string;
+    /**
+     * Vendor owning the listing
+     */
+    vendorId: string;
+    /**
+     * Listing title
+     */
+    title: string;
+    /**
+     * Listing description
+     */
+    description: string;
+    /**
+     * Unit price (decimal as string)
+     */
+    price?: string;
+    /**
+     * ISO 4217 currency code
+     */
+    currency?: string;
+    /**
+     * Current lifecycle status
+     */
+    status: 'draft' | 'active' | 'archived';
+    /**
+     * Free-form category tags
+     */
+    categoryTags?: Array<string>;
+};
+
+/**
+ * A product/service listing posted by a vendor
+ */
+export type MarketplaceListingUpdate = {
+    /**
+     * Unique identifier
+     */
+    id?: string;
+    /**
+     * Entity version for optimistic locking
+     */
+    version?: number;
+    /**
+     * Creation timestamp
+     */
+    createdAt?: Date;
+    /**
+     * User who created the entity
+     */
+    createdBy?: string;
+    /**
+     * Last update timestamp
+     */
+    updatedAt?: Date;
+    /**
+     * User who last updated the entity
+     */
+    updatedBy?: string;
+    /**
+     * Organisation the listing belongs to
+     */
+    organizationId?: string;
+    /**
+     * Vendor owning the listing
+     */
+    vendorId?: string;
+    /**
+     * Listing title
+     */
+    title?: string;
+    /**
+     * Listing description
+     */
+    description?: string;
+    /**
+     * Unit price (decimal as string)
+     */
+    price?: string;
+    /**
+     * ISO 4217 currency code
+     */
+    currency?: string;
+    /**
+     * Current lifecycle status
+     */
+    status?: 'draft' | 'active' | 'archived';
+    /**
+     * Free-form category tags
+     */
+    categoryTags?: Array<string>;
+};
+
+/**
+ * An order placed by a member against a listing
+ */
+export type MarketplaceOrder = {
+    /**
+     * Unique identifier
+     */
+    id: string;
+    /**
+     * Entity version for optimistic locking
+     */
+    version: number;
+    /**
+     * Creation timestamp
+     */
+    createdAt: Date;
+    /**
+     * User who created the entity
+     */
+    createdBy?: string;
+    /**
+     * Last update timestamp
+     */
+    updatedAt: Date;
+    /**
+     * User who last updated the entity
+     */
+    updatedBy?: string;
+    /**
+     * Organisation the order belongs to
+     */
+    organizationId: string;
+    /**
+     * Listing being ordered
+     */
+    listingId: string;
+    /**
+     * Person placing the order
+     */
+    buyerPersonId: string;
+    /**
+     * Vendor fulfilling the order
+     */
+    vendorId: string;
+    /**
+     * Quantity ordered
+     */
+    quantity: number;
+    /**
+     * Total price (decimal as string)
+     */
+    totalPrice: string;
+    /**
+     * Current lifecycle status
+     */
+    status: 'pending' | 'confirmed' | 'fulfilled' | 'cancelled' | 'refunded';
+    /**
+     * Free-text buyer notes
+     */
+    notes?: string;
+    /**
+     * When the order was fulfilled
+     */
+    fulfilledAt?: Date;
+};
+
+/**
+ * An order placed by a member against a listing
+ */
+export type MarketplaceOrderUpdate = {
+    /**
+     * Unique identifier
+     */
+    id?: string;
+    /**
+     * Entity version for optimistic locking
+     */
+    version?: number;
+    /**
+     * Creation timestamp
+     */
+    createdAt?: Date;
+    /**
+     * User who created the entity
+     */
+    createdBy?: string;
+    /**
+     * Last update timestamp
+     */
+    updatedAt?: Date;
+    /**
+     * User who last updated the entity
+     */
+    updatedBy?: string;
+    /**
+     * Organisation the order belongs to
+     */
+    organizationId?: string;
+    /**
+     * Listing being ordered
+     */
+    listingId?: string;
+    /**
+     * Person placing the order
+     */
+    buyerPersonId?: string;
+    /**
+     * Vendor fulfilling the order
+     */
+    vendorId?: string;
+    /**
+     * Quantity ordered
+     */
+    quantity?: number;
+    /**
+     * Total price (decimal as string)
+     */
+    totalPrice?: string;
+    /**
+     * Current lifecycle status
+     */
+    status?: 'pending' | 'confirmed' | 'fulfilled' | 'cancelled' | 'refunded';
+    /**
+     * Free-text buyer notes
+     */
+    notes?: string;
+    /**
+     * When the order was fulfilled
+     */
+    fulfilledAt?: Date;
+};
+
+/**
+ * A registered marketplace vendor
+ */
+export type MarketplaceVendor = {
+    /**
+     * Unique identifier
+     */
+    id: string;
+    /**
+     * Entity version for optimistic locking
+     */
+    version: number;
+    /**
+     * Creation timestamp
+     */
+    createdAt: Date;
+    /**
+     * User who created the entity
+     */
+    createdBy?: string;
+    /**
+     * Last update timestamp
+     */
+    updatedAt: Date;
+    /**
+     * User who last updated the entity
+     */
+    updatedBy?: string;
+    /**
+     * Organisation the vendor is registered with
+     */
+    organizationId: string;
+    /**
+     * Vendor company name
+     */
+    companyName: string;
+    /**
+     * Vendor category
+     */
+    category: 'emr' | 'supplies' | 'insurance' | 'telehealth' | 'other';
+    /**
+     * Vendor description
+     */
+    description: string;
+    /**
+     * Current verification status
+     */
+    verificationStatus: 'pending' | 'verified' | 'suspended' | 'rejected';
+    /**
+     * Vendor website URL
+     */
+    websiteUrl?: string;
+    /**
+     * Primary contact email
+     */
+    contactEmail: string;
+    /**
+     * Optional Person ID of the contact representative
+     */
+    contactPersonId?: string;
+    /**
+     * Timestamp when the vendor was verified
+     */
+    verifiedAt?: Date;
+    /**
+     * Officer Person ID who verified the vendor
+     */
+    verifiedBy?: string;
+};
+
+/**
+ * A registered marketplace vendor
+ */
+export type MarketplaceVendorUpdate = {
+    /**
+     * Unique identifier
+     */
+    id?: string;
+    /**
+     * Entity version for optimistic locking
+     */
+    version?: number;
+    /**
+     * Creation timestamp
+     */
+    createdAt?: Date;
+    /**
+     * User who created the entity
+     */
+    createdBy?: string;
+    /**
+     * Last update timestamp
+     */
+    updatedAt?: Date;
+    /**
+     * User who last updated the entity
+     */
+    updatedBy?: string;
+    /**
+     * Organisation the vendor is registered with
+     */
+    organizationId?: string;
+    /**
+     * Vendor company name
+     */
+    companyName?: string;
+    /**
+     * Vendor category
+     */
+    category?: 'emr' | 'supplies' | 'insurance' | 'telehealth' | 'other';
+    /**
+     * Vendor description
+     */
+    description?: string;
+    /**
+     * Current verification status
+     */
+    verificationStatus?: 'pending' | 'verified' | 'suspended' | 'rejected';
+    /**
+     * Vendor website URL
+     */
+    websiteUrl?: string;
+    /**
+     * Primary contact email
+     */
+    contactEmail?: string;
+    /**
+     * Optional Person ID of the contact representative
+     */
+    contactPersonId?: string;
+    /**
+     * Timestamp when the vendor was verified
+     */
+    verifiedAt?: Date;
+    /**
+     * Officer Person ID who verified the vendor
+     */
+    verifiedBy?: string;
+};
+
+/**
  * File reference supporting both stored files and external URLs
  */
 export type MaybeStoredFile = {
@@ -21469,6 +23467,16 @@ export type MeetingMinutesUpdate = {
  * Status of a committee or board meeting
  */
 export type MeetingStatus = 'scheduled' | 'inProgress' | 'completed' | 'cancelled';
+
+/**
+ * Member status distribution for a chapter drill-down
+ */
+export type MemberStatusBreakdown = {
+    active: number;
+    grace: number;
+    lapsed: number;
+    suspended: number;
+};
 
 /**
  * A member record with joined person details for officer dashboards
@@ -23178,6 +25186,24 @@ export type NationalDashboardResponse = {
 };
 
 /**
+ * Cursor pagination metadata for national dashboard list endpoints
+ */
+export type NationalListMeta = {
+    /**
+     * Opaque cursor for the next page; null when no further pages
+     */
+    cursor: string | null;
+    /**
+     * Whether more results exist beyond this page
+     */
+    hasMore: boolean;
+    /**
+     * Total matching record count
+     */
+    total: number | null;
+};
+
+/**
  * Status of an award nomination
  */
 export type NominationStatus = 'submitted' | 'underReview' | 'shortlisted' | 'selected' | 'notSelected' | 'withdrawn';
@@ -24098,6 +26124,37 @@ export type OnboardingResponse = {
         [key: string]: unknown;
     };
 };
+
+/**
+ * Resumable onboarding wizard state for an organization
+ */
+export type OnboardingStateResponse = {
+    /**
+     * Onboarding state record ID
+     */
+    id: string;
+    /**
+     * Organization this onboarding belongs to
+     */
+    organizationId: string;
+    /**
+     * Current wizard step (1-5)
+     */
+    currentStep: number;
+    /**
+     * Step numbers already completed
+     */
+    stepsCompleted: Array<number>;
+    /**
+     * When the wizard was completed (null while in progress)
+     */
+    completedAt: Date | null;
+};
+
+/**
+ * Lifecycle status of a marketplace order
+ */
+export type OrderStatus = 'pending' | 'confirmed' | 'fulfilled' | 'cancelled' | 'refunded';
 
 /**
  * A PRC-accredited training provider scoped to an organization
@@ -25993,6 +28050,71 @@ export type PlatformAdminModulePlatformAdminRequestUpdate = {
     email?: string;
     name?: string;
     role?: PlatformAdminModuleAdminRole;
+};
+
+/**
+ * Platform-wide per-association summary row (S10 row 5)
+ */
+export type PlatformAssociationSummary = {
+    /**
+     * Association ID
+     */
+    associationId: string;
+    /**
+     * Association display name
+     */
+    associationName?: string;
+    /**
+     * Number of chapters in the association
+     */
+    chapterCount: number;
+    /**
+     * Total member count across all chapters
+     */
+    totalMembers: number;
+    /**
+     * Active member count across all chapters
+     */
+    activeMembers: number;
+    /**
+     * Dues collection rate as a percentage (0-100)
+     */
+    collectionRate: number;
+    /**
+     * Credit (CPD) compliance as a percentage (0-100)
+     */
+    creditCompliance: number;
+    /**
+     * Total dues revenue in cents
+     */
+    totalRevenueCents: number;
+};
+
+/**
+ * Platform-wide summary list response (platform admin only)
+ */
+export type PlatformSummaryListResponse = {
+    /**
+     * Per-association summaries
+     */
+    data: Array<PlatformAssociationSummary>;
+    /**
+     * Pagination metadata
+     */
+    meta: {
+        /**
+         * Opaque cursor for the next page; null when no further pages
+         */
+        cursor: string | null;
+        /**
+         * Whether more results exist beyond this page
+         */
+        hasMore: boolean;
+        /**
+         * Total matching record count
+         */
+        total: number | null;
+    };
 };
 
 /**
@@ -28209,6 +30331,16 @@ export type RenewalCycleUpdate = {
 export type RenewalStatus = 'pending' | 'invoiced' | 'paid' | 'overdue' | 'lapsed';
 
 /**
+ * Member abuse report payload
+ */
+export type ReportAdRequest = {
+    /**
+     * Free-text reason the member is reporting the ad
+     */
+    reason: string;
+};
+
+/**
  * Status of a board resolution
  */
 export type ResolutionStatus = 'proposed' | 'discussed' | 'adopted' | 'rejected' | 'tabled';
@@ -28457,6 +30589,20 @@ export type Review = {
      * Optional comment/feedback
      */
     comment?: string;
+};
+
+/**
+ * Decision payload for a creative review
+ */
+export type ReviewCreativeRequest = {
+    /**
+     * Whether to approve the creative
+     */
+    approved: boolean;
+    /**
+     * Reason if rejecting (required when approved=false)
+     */
+    rejectionReason?: string;
 };
 
 /**
@@ -29909,6 +32055,16 @@ export type SessionUpdate = {
 };
 
 /**
+ * Member opt-out request payload (M16-R4)
+ */
+export type SetMemberOptOutRequest = {
+    /**
+     * Whether the member is opting out of ad personalization
+     */
+    optedOut: boolean;
+};
+
+/**
  * Skip logic configuration for conditional question branching
  */
 export type SkipLogicConfig = {
@@ -31211,6 +33367,14 @@ export type Survey = {
             [key: string]: unknown;
         };
     };
+    /**
+     * Requesting member's response status (only populated when mine=true)
+     */
+    myResponseStatus?: 'pending' | 'completed' | 'skipped' | 'dismissed';
+    /**
+     * When the requesting member completed this survey (only populated when mine=true)
+     */
+    myCompletedAt?: Date;
 };
 
 /**
@@ -31686,6 +33850,14 @@ export type SurveyUpdate = {
             [key: string]: unknown;
         };
     };
+    /**
+     * Requesting member's response status (only populated when mine=true)
+     */
+    myResponseStatus?: 'pending' | 'completed' | 'skipped' | 'dismissed';
+    /**
+     * When the requesting member completed this survey (only populated when mine=true)
+     */
+    myCompletedAt?: Date;
 };
 
 /**
@@ -32821,6 +34993,92 @@ export type UpdateInvoiceRequest = {
 };
 
 /**
+ * Request body for updating a job application (officer-only)
+ */
+export type UpdateJobBoardApplicationRequest = {
+    /**
+     * Updated lifecycle status
+     */
+    status?: 'applied' | 'screening' | 'interviewed' | 'offered' | 'hired' | 'rejected' | 'withdrawn';
+    /**
+     * Optional reviewer note
+     */
+    note?: string;
+};
+
+/**
+ * Request body for updating a job posting
+ */
+export type UpdateJobBoardPostingRequest = {
+    /**
+     * Job title
+     */
+    title?: string;
+    /**
+     * Hiring organization name
+     */
+    organizationName?: string;
+    /**
+     * Free-text location
+     */
+    location?: string;
+    /**
+     * Employment type
+     */
+    type?: 'full_time' | 'part_time' | 'contract' | 'fellowship' | 'internship';
+    /**
+     * Salary range
+     */
+    salary?: string;
+    /**
+     * Description
+     */
+    description?: string;
+    /**
+     * Requirements
+     */
+    requirements?: Array<string>;
+    /**
+     * Expiry time (ISO 8601)
+     */
+    expiresAt?: Date;
+    /**
+     * Lifecycle status
+     */
+    status?: 'draft' | 'active' | 'filled' | 'expired' | 'closed';
+};
+
+/**
+ * Request body for updating a vendor
+ */
+export type UpdateMarketplaceVendorRequest = {
+    /**
+     * Vendor company name
+     */
+    companyName?: string;
+    /**
+     * Vendor category
+     */
+    category?: 'emr' | 'supplies' | 'insurance' | 'telehealth' | 'other';
+    /**
+     * Vendor description
+     */
+    description?: string;
+    /**
+     * Vendor website URL
+     */
+    websiteUrl?: string;
+    /**
+     * Primary contact email
+     */
+    contactEmail?: string;
+    /**
+     * Verification status (officer-only transitions)
+     */
+    verificationStatus?: 'pending' | 'verified' | 'suspended' | 'rejected';
+};
+
+/**
  * Request to update an existing roster member
  */
 export type UpdateMemberRequest = {
@@ -32862,6 +35120,44 @@ export type UpdateNotificationPreferencesRequest = {
      * List of preference updates to apply
      */
     preferences?: Array<NotificationPreferenceUpdate>;
+};
+
+/**
+ * Request body for saving onboarding step progress
+ */
+export type UpdateOnboardingStepRequest = {
+    /**
+     * Organization ID the wizard belongs to
+     */
+    orgId: string;
+    /**
+     * Step being saved (1-5). Must be the current step (no skipping ahead).
+     */
+    step: number;
+    /**
+     * Arbitrary step payload persisted by the client
+     */
+    data: {
+        [key: string]: unknown;
+    };
+};
+
+/**
+ * Response after saving onboarding step progress
+ */
+export type UpdateOnboardingStepResponse = {
+    /**
+     * Whether the step was saved
+     */
+    saved: boolean;
+    /**
+     * Current wizard step after saving
+     */
+    currentStep: number;
+    /**
+     * Step numbers completed after saving
+     */
+    stepsCompleted: Array<number>;
 };
 
 /**
@@ -33208,6 +35504,34 @@ export type ValidationError = {
  * Variable data types for email templates
  */
 export type VariableType = 'string' | 'number' | 'boolean' | 'date' | 'datetime' | 'url' | 'email' | 'array';
+
+/**
+ * Category of marketplace vendor
+ */
+export type VendorCategory = 'emr' | 'supplies' | 'insurance' | 'telehealth' | 'other';
+
+/**
+ * Paginated list of vendors
+ */
+export type VendorListResponse = {
+    /**
+     * Page of vendors
+     */
+    data: Array<MarketplaceVendor>;
+    /**
+     * Pagination metadata
+     */
+    pagination: {
+        total: number;
+        limit: number;
+        offset: number;
+    };
+};
+
+/**
+ * Verification status of a marketplace vendor
+ */
+export type VendorStatus = 'pending' | 'verified' | 'suspended' | 'rejected';
 
 /**
  * Result of a credential verification attempt
@@ -35267,6 +37591,152 @@ export type GetNationalDashboardResponses = {
 
 export type GetNationalDashboardResponse = GetNationalDashboardResponses[keyof GetNationalDashboardResponses];
 
+export type ListNationalChaptersData = {
+    body?: never;
+    path?: never;
+    query?: {
+        /**
+         * Association to query. Required for platform admins; inferred from grant for national officers
+         */
+        associationId?: string;
+        /**
+         * Snapshot month in YYYY-MM format (defaults to current month)
+         */
+        snapshotMonth?: string;
+        /**
+         * Sort field: totalMembers, collectionRate, creditCompliance, prefix with - for descending. Default -totalMembers
+         */
+        sort?: string;
+        /**
+         * Items per page (1-100, default 20)
+         */
+        limit?: number;
+        /**
+         * Offset for pagination (default 0)
+         */
+        offset?: number;
+    };
+    url: '/admin/national/chapters';
+};
+
+export type ListNationalChaptersErrors = {
+    /**
+     * Validation error response
+     */
+    400: ValidationError;
+    /**
+     * Unauthorized access response
+     */
+    401: AuthenticationError;
+    /**
+     * Forbidden access response
+     */
+    403: AuthorizationError;
+};
+
+export type ListNationalChaptersError = ListNationalChaptersErrors[keyof ListNationalChaptersErrors];
+
+export type ListNationalChaptersResponses = {
+    /**
+     * Success response with data
+     */
+    200: ChapterComparisonListResponse;
+};
+
+export type ListNationalChaptersResponse = ListNationalChaptersResponses[keyof ListNationalChaptersResponses];
+
+export type GetNationalChapterDetailData = {
+    body?: never;
+    path: {
+        organizationId: string;
+    };
+    query?: {
+        /**
+         * Association the chapter belongs to. Required for platform admins; inferred from grant for national officers
+         */
+        associationId?: string;
+        /**
+         * Snapshot month in YYYY-MM format (defaults to current month)
+         */
+        snapshotMonth?: string;
+    };
+    url: '/admin/national/chapters/{organizationId}';
+};
+
+export type GetNationalChapterDetailErrors = {
+    /**
+     * Unauthorized access response
+     */
+    401: AuthenticationError;
+    /**
+     * Forbidden access response
+     */
+    403: AuthorizationError;
+    /**
+     * Resource not found response
+     */
+    404: NotFoundError;
+};
+
+export type GetNationalChapterDetailError = GetNationalChapterDetailErrors[keyof GetNationalChapterDetailErrors];
+
+export type GetNationalChapterDetailResponses = {
+    /**
+     * Success response with data
+     */
+    200: {
+        data: ChapterDrilldownResponse;
+    };
+};
+
+export type GetNationalChapterDetailResponse = GetNationalChapterDetailResponses[keyof GetNationalChapterDetailResponses];
+
+export type GetPlatformSummaryData = {
+    body?: never;
+    path?: never;
+    query?: {
+        /**
+         * Snapshot month in YYYY-MM format (defaults to current month)
+         */
+        snapshotMonth?: string;
+        /**
+         * Sort field: totalMembers, collectionRate, prefix with - for descending. Default -totalMembers
+         */
+        sort?: string;
+        /**
+         * Items per page (1-100, default 20)
+         */
+        limit?: number;
+        /**
+         * Offset for pagination (default 0)
+         */
+        offset?: number;
+    };
+    url: '/admin/national/platform';
+};
+
+export type GetPlatformSummaryErrors = {
+    /**
+     * Unauthorized access response
+     */
+    401: AuthenticationError;
+    /**
+     * Forbidden access response
+     */
+    403: AuthorizationError;
+};
+
+export type GetPlatformSummaryError = GetPlatformSummaryErrors[keyof GetPlatformSummaryErrors];
+
+export type GetPlatformSummaryResponses = {
+    /**
+     * Success response with data
+     */
+    200: PlatformSummaryListResponse;
+};
+
+export type GetPlatformSummaryResponse = GetPlatformSummaryResponses[keyof GetPlatformSummaryResponses];
+
 export type ListOrganizationsData = {
     body?: never;
     path?: never;
@@ -35442,6 +37912,119 @@ export type TransitionOrgStatusResponses = {
 };
 
 export type TransitionOrgStatusResponse = TransitionOrgStatusResponses[keyof TransitionOrgStatusResponses];
+
+export type CreateAdvertiserData = {
+    body: CreateAdvertiserRequest;
+    path?: never;
+    query?: never;
+    url: '/advertisers';
+};
+
+export type CreateAdvertiserErrors = {
+    /**
+     * Validation error response
+     */
+    400: ValidationError;
+    /**
+     * Unauthorized access response
+     */
+    401: AuthenticationError;
+    /**
+     * Forbidden access response
+     */
+    403: AuthorizationError;
+};
+
+export type CreateAdvertiserError = CreateAdvertiserErrors[keyof CreateAdvertiserErrors];
+
+export type CreateAdvertiserResponses = {
+    /**
+     * Resource created response
+     */
+    201: Advertiser;
+};
+
+export type CreateAdvertiserResponse = CreateAdvertiserResponses[keyof CreateAdvertiserResponses];
+
+export type CreateJobApplicationData = {
+    body: CreateJobBoardApplicationRequest;
+    path?: never;
+    query?: never;
+    url: '/applications';
+};
+
+export type CreateJobApplicationErrors = {
+    /**
+     * Validation error response
+     */
+    400: ValidationError;
+    /**
+     * Unauthorized access response
+     */
+    401: AuthenticationError;
+    /**
+     * Resource not found response
+     */
+    404: NotFoundError;
+    /**
+     * Conflict response
+     */
+    409: ConflictError;
+};
+
+export type CreateJobApplicationError = CreateJobApplicationErrors[keyof CreateJobApplicationErrors];
+
+export type CreateJobApplicationResponses = {
+    /**
+     * Resource created response
+     */
+    201: {
+        data: JobBoardApplication;
+    };
+};
+
+export type CreateJobApplicationResponse = CreateJobApplicationResponses[keyof CreateJobApplicationResponses];
+
+export type UpdateJobApplicationData = {
+    body: UpdateJobBoardApplicationRequest;
+    path: {
+        applicationId: Uuid;
+    };
+    query?: never;
+    url: '/applications/{applicationId}';
+};
+
+export type UpdateJobApplicationErrors = {
+    /**
+     * Validation error response
+     */
+    400: ValidationError;
+    /**
+     * Unauthorized access response
+     */
+    401: AuthenticationError;
+    /**
+     * Forbidden access response
+     */
+    403: AuthorizationError;
+    /**
+     * Resource not found response
+     */
+    404: NotFoundError;
+};
+
+export type UpdateJobApplicationError = UpdateJobApplicationErrors[keyof UpdateJobApplicationErrors];
+
+export type UpdateJobApplicationResponses = {
+    /**
+     * Success response with data
+     */
+    200: {
+        data: JobBoardApplication;
+    };
+};
+
+export type UpdateJobApplicationResponse = UpdateJobApplicationResponses[keyof UpdateJobApplicationResponses];
 
 export type ListDocumentTagsData = {
     body?: never;
@@ -47104,6 +49687,43 @@ export type GetTimeSlotResponses = {
 
 export type GetTimeSlotResponse = GetTimeSlotResponses[keyof GetTimeSlotResponses];
 
+export type CreateCampaignData = {
+    body: CreateCampaignRequest;
+    path?: never;
+    query?: never;
+    url: '/campaigns';
+};
+
+export type CreateCampaignErrors = {
+    /**
+     * Validation error response
+     */
+    400: ValidationError;
+    /**
+     * Unauthorized access response
+     */
+    401: AuthenticationError;
+    /**
+     * Forbidden access response
+     */
+    403: AuthorizationError;
+    /**
+     * Resource not found response
+     */
+    404: NotFoundError;
+};
+
+export type CreateCampaignError = CreateCampaignErrors[keyof CreateCampaignErrors];
+
+export type CreateCampaignResponses = {
+    /**
+     * Resource created response
+     */
+    201: AdCampaign;
+};
+
+export type CreateCampaignResponse = CreateCampaignResponses[keyof CreateCampaignResponses];
+
 export type BulkIssueCertificatesData = {
     body: BulkIssueCertificatesRequest;
     path?: never;
@@ -47767,6 +50387,80 @@ export type PublishAnnouncementResponses = {
 
 export type PublishAnnouncementResponse = PublishAnnouncementResponses[keyof PublishAnnouncementResponses];
 
+export type ScheduleAnnouncementData = {
+    body: AnnouncementScheduleRequest;
+    path: {
+        id: Uuid;
+    };
+    query?: never;
+    url: '/communications/announcements/{id}/schedule';
+};
+
+export type ScheduleAnnouncementErrors = {
+    /**
+     * Validation error response
+     */
+    400: ValidationError;
+    /**
+     * Unauthorized access response
+     */
+    401: AuthenticationError;
+    /**
+     * Forbidden access response
+     */
+    403: AuthorizationError;
+    /**
+     * Resource not found response
+     */
+    404: NotFoundError;
+};
+
+export type ScheduleAnnouncementError = ScheduleAnnouncementErrors[keyof ScheduleAnnouncementErrors];
+
+export type ScheduleAnnouncementResponses = {
+    /**
+     * Success response with data
+     */
+    200: Announcement;
+};
+
+export type ScheduleAnnouncementResponse = ScheduleAnnouncementResponses[keyof ScheduleAnnouncementResponses];
+
+export type GetAnnouncementStatsData = {
+    body?: never;
+    path: {
+        id: Uuid;
+    };
+    query?: never;
+    url: '/communications/announcements/{id}/stats';
+};
+
+export type GetAnnouncementStatsErrors = {
+    /**
+     * Unauthorized access response
+     */
+    401: AuthenticationError;
+    /**
+     * Forbidden access response
+     */
+    403: AuthorizationError;
+    /**
+     * Resource not found response
+     */
+    404: NotFoundError;
+};
+
+export type GetAnnouncementStatsError = GetAnnouncementStatsErrors[keyof GetAnnouncementStatsErrors];
+
+export type GetAnnouncementStatsResponses = {
+    /**
+     * Success response with data
+     */
+    200: AnnouncementStatsResponse;
+};
+
+export type GetAnnouncementStatsResponse = GetAnnouncementStatsResponses[keyof GetAnnouncementStatsResponses];
+
 export type ListAnnouncementsData = {
     body?: never;
     path: {
@@ -47964,6 +50658,111 @@ export type DeleteSavedSegmentResponses = {
 };
 
 export type DeleteSavedSegmentResponse = DeleteSavedSegmentResponses[keyof DeleteSavedSegmentResponses];
+
+export type CreateCreativeData = {
+    body: CreateCreativeRequest;
+    path?: never;
+    query?: never;
+    url: '/creatives';
+};
+
+export type CreateCreativeErrors = {
+    /**
+     * Validation error response
+     */
+    400: ValidationError;
+    /**
+     * Unauthorized access response
+     */
+    401: AuthenticationError;
+};
+
+export type CreateCreativeError = CreateCreativeErrors[keyof CreateCreativeErrors];
+
+export type CreateCreativeResponses = {
+    /**
+     * Resource created response
+     */
+    201: Creative;
+};
+
+export type CreateCreativeResponse = CreateCreativeResponses[keyof CreateCreativeResponses];
+
+export type ReportAdData = {
+    body: ReportAdRequest;
+    path: {
+        creativeId: Uuid;
+    };
+    query?: never;
+    url: '/creatives/{creativeId}/report';
+};
+
+export type ReportAdErrors = {
+    /**
+     * Validation error response
+     */
+    400: ValidationError;
+    /**
+     * Unauthorized access response
+     */
+    401: AuthenticationError;
+    /**
+     * Resource not found response
+     */
+    404: NotFoundError;
+};
+
+export type ReportAdError = ReportAdErrors[keyof ReportAdErrors];
+
+export type ReportAdResponses = {
+    /**
+     * Success response with data
+     */
+    200: {
+        success: boolean;
+    };
+};
+
+export type ReportAdResponse = ReportAdResponses[keyof ReportAdResponses];
+
+export type ReviewCreativeData = {
+    body: ReviewCreativeRequest;
+    path: {
+        creativeId: Uuid;
+    };
+    query?: never;
+    url: '/creatives/{creativeId}/review';
+};
+
+export type ReviewCreativeErrors = {
+    /**
+     * Validation error response
+     */
+    400: ValidationError;
+    /**
+     * Unauthorized access response
+     */
+    401: AuthenticationError;
+    /**
+     * Forbidden access response
+     */
+    403: AuthorizationError;
+    /**
+     * Resource not found response
+     */
+    404: NotFoundError;
+};
+
+export type ReviewCreativeError = ReviewCreativeErrors[keyof ReviewCreativeErrors];
+
+export type ReviewCreativeResponses = {
+    /**
+     * Success response with data
+     */
+    200: Creative;
+};
+
+export type ReviewCreativeResponse = ReviewCreativeResponses[keyof ReviewCreativeResponses];
 
 export type GetCreditComplianceData = {
     body?: never;
@@ -48556,6 +51355,39 @@ export type UnsubscribeEmailPostResponses = {
 
 export type UnsubscribeEmailPostResponse = UnsubscribeEmailPostResponses[keyof UnsubscribeEmailPostResponses];
 
+export type BulkImportMembersData = {
+    body: BulkImportRequest;
+    path?: never;
+    query?: never;
+    url: '/invitations/bulk-import';
+};
+
+export type BulkImportMembersErrors = {
+    /**
+     * Validation error response
+     */
+    400: ValidationError;
+    /**
+     * Unauthorized access response
+     */
+    401: AuthenticationError;
+    /**
+     * Forbidden access response
+     */
+    403: AuthorizationError;
+};
+
+export type BulkImportMembersError = BulkImportMembersErrors[keyof BulkImportMembersErrors];
+
+export type BulkImportMembersResponses = {
+    /**
+     * Success response with data
+     */
+    200: BulkImportResponse;
+};
+
+export type BulkImportMembersResponse = BulkImportMembersResponses[keyof BulkImportMembersResponses];
+
 export type CreateInviteData = {
     body: CreateInviteRequest;
     path?: never;
@@ -48662,6 +51494,75 @@ export type ValidateInviteResponses = {
 };
 
 export type ValidateInviteResponse2 = ValidateInviteResponses[keyof ValidateInviteResponses];
+
+export type ListListingsData = {
+    body?: never;
+    path?: never;
+    query?: {
+        organizationId?: Uuid;
+        vendorId?: Uuid;
+        status?: ListingStatus;
+        categoryTag?: string;
+        limit?: number;
+        offset?: number;
+    };
+    url: '/listings';
+};
+
+export type ListListingsErrors = {
+    /**
+     * Unauthorized access response
+     */
+    401: AuthenticationError;
+};
+
+export type ListListingsError = ListListingsErrors[keyof ListListingsErrors];
+
+export type ListListingsResponses = {
+    /**
+     * Success response with data
+     */
+    200: ListingListResponse;
+};
+
+export type ListListingsResponse = ListListingsResponses[keyof ListListingsResponses];
+
+export type CreateListingData = {
+    body: CreateMarketplaceListingRequest;
+    path?: never;
+    query?: never;
+    url: '/listings';
+};
+
+export type CreateListingErrors = {
+    /**
+     * Validation error response
+     */
+    400: ValidationError;
+    /**
+     * Unauthorized access response
+     */
+    401: AuthenticationError;
+    /**
+     * Forbidden access response
+     */
+    403: AuthorizationError;
+    /**
+     * Resource not found response
+     */
+    404: NotFoundError;
+};
+
+export type CreateListingError = CreateListingErrors[keyof CreateListingErrors];
+
+export type CreateListingResponses = {
+    /**
+     * Resource created response
+     */
+    201: MarketplaceListing;
+};
+
+export type CreateListingResponse = CreateListingResponses[keyof CreateListingResponses];
 
 export type ListOrgApplicationsData = {
     body?: never;
@@ -49035,6 +51936,184 @@ export type ListOfficerTermsSummaryResponses = {
 
 export type ListOfficerTermsSummaryResponse = ListOfficerTermsSummaryResponses[keyof ListOfficerTermsSummaryResponses];
 
+export type GetOnboardingStateData = {
+    body?: never;
+    path?: never;
+    query: {
+        /**
+         * Organization to fetch onboarding state for
+         */
+        orgId: Uuid;
+    };
+    url: '/onboarding/state';
+};
+
+export type GetOnboardingStateErrors = {
+    /**
+     * Unauthorized access response
+     */
+    401: AuthenticationError;
+    /**
+     * Forbidden access response
+     */
+    403: AuthorizationError;
+    /**
+     * Resource not found response
+     */
+    404: NotFoundError;
+};
+
+export type GetOnboardingStateError = GetOnboardingStateErrors[keyof GetOnboardingStateErrors];
+
+export type GetOnboardingStateResponses = {
+    /**
+     * Success response with data
+     */
+    200: OnboardingStateResponse;
+};
+
+export type GetOnboardingStateResponse = GetOnboardingStateResponses[keyof GetOnboardingStateResponses];
+
+export type UpdateOnboardingStepData = {
+    body: UpdateOnboardingStepRequest;
+    path?: never;
+    query?: never;
+    url: '/onboarding/step';
+};
+
+export type UpdateOnboardingStepErrors = {
+    /**
+     * Validation error response
+     */
+    400: ValidationError;
+    /**
+     * Unauthorized access response
+     */
+    401: AuthenticationError;
+    /**
+     * Forbidden access response
+     */
+    403: AuthorizationError;
+    /**
+     * Unprocessable entity — request well-formed but semantically invalid (e.g. onboarding step out of order)
+     */
+    422: ValidationError;
+};
+
+export type UpdateOnboardingStepError = UpdateOnboardingStepErrors[keyof UpdateOnboardingStepErrors];
+
+export type UpdateOnboardingStepResponses = {
+    /**
+     * Success response with data
+     */
+    200: UpdateOnboardingStepResponse;
+};
+
+export type UpdateOnboardingStepResponse2 = UpdateOnboardingStepResponses[keyof UpdateOnboardingStepResponses];
+
+export type SetMemberOptOutData = {
+    body: SetMemberOptOutRequest;
+    path?: never;
+    query?: never;
+    url: '/opt-out';
+};
+
+export type SetMemberOptOutErrors = {
+    /**
+     * Validation error response
+     */
+    400: ValidationError;
+    /**
+     * Unauthorized access response
+     */
+    401: AuthenticationError;
+};
+
+export type SetMemberOptOutError = SetMemberOptOutErrors[keyof SetMemberOptOutErrors];
+
+export type SetMemberOptOutResponses = {
+    /**
+     * Success response with data
+     */
+    200: {
+        success: boolean;
+    };
+};
+
+export type SetMemberOptOutResponse = SetMemberOptOutResponses[keyof SetMemberOptOutResponses];
+
+export type CreateOrderData = {
+    body: CreateMarketplaceOrderRequest;
+    path?: never;
+    query?: never;
+    url: '/orders';
+};
+
+export type CreateOrderErrors = {
+    /**
+     * Validation error response
+     */
+    400: ValidationError;
+    /**
+     * Unauthorized access response
+     */
+    401: AuthenticationError;
+    /**
+     * Resource not found response
+     */
+    404: NotFoundError;
+};
+
+export type CreateOrderError = CreateOrderErrors[keyof CreateOrderErrors];
+
+export type CreateOrderResponses = {
+    /**
+     * Resource created response
+     */
+    201: MarketplaceOrder;
+};
+
+export type CreateOrderResponse = CreateOrderResponses[keyof CreateOrderResponses];
+
+export type FulfillOrderData = {
+    body?: never;
+    path: {
+        orderId: Uuid;
+    };
+    query?: never;
+    url: '/orders/{orderId}/fulfill';
+};
+
+export type FulfillOrderErrors = {
+    /**
+     * Unauthorized access response
+     */
+    401: AuthenticationError;
+    /**
+     * Forbidden access response
+     */
+    403: AuthorizationError;
+    /**
+     * Resource not found response
+     */
+    404: NotFoundError;
+    /**
+     * Conflict response
+     */
+    409: ConflictError;
+};
+
+export type FulfillOrderError = FulfillOrderErrors[keyof FulfillOrderErrors];
+
+export type FulfillOrderResponses = {
+    /**
+     * Success response with data
+     */
+    200: MarketplaceOrder;
+};
+
+export type FulfillOrderResponse = FulfillOrderResponses[keyof FulfillOrderResponses];
+
 export type SendPaymentLinkData = {
     body: SendPaymentLinkRequest;
     path: {
@@ -49069,6 +52148,46 @@ export type SendPaymentLinkResponses = {
 };
 
 export type SendPaymentLinkResponse2 = SendPaymentLinkResponses[keyof SendPaymentLinkResponses];
+
+export type DownloadReceiptData = {
+    body?: never;
+    path: {
+        organizationId: Uuid;
+        paymentId: Uuid;
+    };
+    query?: never;
+    url: '/org/{organizationId}/payments/{paymentId}/receipt';
+};
+
+export type DownloadReceiptErrors = {
+    /**
+     * Validation error response
+     */
+    400: ValidationError;
+    /**
+     * Unauthorized access response
+     */
+    401: AuthenticationError;
+    /**
+     * Forbidden access response
+     */
+    403: AuthorizationError;
+    /**
+     * Resource not found response
+     */
+    404: NotFoundError;
+};
+
+export type DownloadReceiptError = DownloadReceiptErrors[keyof DownloadReceiptErrors];
+
+export type DownloadReceiptResponses = {
+    /**
+     * The request has succeeded.
+     */
+    200: string;
+};
+
+export type DownloadReceiptResponse = DownloadReceiptResponses[keyof DownloadReceiptResponses];
 
 export type CheckoutPaymentTokenData = {
     body?: never;
@@ -49694,6 +52813,210 @@ export type UpdatePersonResponses = {
 };
 
 export type UpdatePersonResponse = UpdatePersonResponses[keyof UpdatePersonResponses];
+
+export type GetAdForPlacementData = {
+    body?: never;
+    path?: never;
+    query?: {
+        optedOut?: boolean;
+        adSlot?: AdSlot;
+    };
+    url: '/placement';
+};
+
+export type GetAdForPlacementErrors = {
+    /**
+     * Unauthorized access response
+     */
+    401: AuthenticationError;
+};
+
+export type GetAdForPlacementError = GetAdForPlacementErrors[keyof GetAdForPlacementErrors];
+
+export type GetAdForPlacementResponses = {
+    /**
+     * Success response with data
+     */
+    200: AdPlacementResponse;
+};
+
+export type GetAdForPlacementResponse = GetAdForPlacementResponses[keyof GetAdForPlacementResponses];
+
+export type SearchJobPostingsData = {
+    body?: never;
+    path?: never;
+    query?: {
+        organizationId?: Uuid;
+        status?: JobBoardPostingStatus;
+        type?: JobBoardPostingType;
+        search?: string;
+        limit?: number;
+        offset?: number;
+    };
+    url: '/postings';
+};
+
+export type SearchJobPostingsErrors = {
+    /**
+     * Unauthorized access response
+     */
+    401: AuthenticationError;
+};
+
+export type SearchJobPostingsError = SearchJobPostingsErrors[keyof SearchJobPostingsErrors];
+
+export type SearchJobPostingsResponses = {
+    /**
+     * Success response with data
+     */
+    200: JobBoardPostingListResponse;
+};
+
+export type SearchJobPostingsResponse = SearchJobPostingsResponses[keyof SearchJobPostingsResponses];
+
+export type CreateJobPostingData = {
+    body: CreateJobBoardPostingRequest;
+    path?: never;
+    query?: never;
+    url: '/postings';
+};
+
+export type CreateJobPostingErrors = {
+    /**
+     * Validation error response
+     */
+    400: ValidationError;
+    /**
+     * Unauthorized access response
+     */
+    401: AuthenticationError;
+    /**
+     * Forbidden access response
+     */
+    403: AuthorizationError;
+};
+
+export type CreateJobPostingError = CreateJobPostingErrors[keyof CreateJobPostingErrors];
+
+export type CreateJobPostingResponses = {
+    /**
+     * Resource created response
+     */
+    201: {
+        data: JobBoardPosting;
+    };
+};
+
+export type CreateJobPostingResponse = CreateJobPostingResponses[keyof CreateJobPostingResponses];
+
+export type DeleteJobPostingData = {
+    body?: never;
+    path: {
+        postingId: Uuid;
+    };
+    query?: never;
+    url: '/postings/{postingId}';
+};
+
+export type DeleteJobPostingErrors = {
+    /**
+     * Unauthorized access response
+     */
+    401: AuthenticationError;
+    /**
+     * Forbidden access response
+     */
+    403: AuthorizationError;
+    /**
+     * Resource not found response
+     */
+    404: NotFoundError;
+};
+
+export type DeleteJobPostingError = DeleteJobPostingErrors[keyof DeleteJobPostingErrors];
+
+export type DeleteJobPostingResponses = {
+    /**
+     * Success response with no content
+     */
+    204: void;
+};
+
+export type DeleteJobPostingResponse = DeleteJobPostingResponses[keyof DeleteJobPostingResponses];
+
+export type GetJobPostingData = {
+    body?: never;
+    path: {
+        postingId: Uuid;
+    };
+    query?: never;
+    url: '/postings/{postingId}';
+};
+
+export type GetJobPostingErrors = {
+    /**
+     * Unauthorized access response
+     */
+    401: AuthenticationError;
+    /**
+     * Resource not found response
+     */
+    404: NotFoundError;
+};
+
+export type GetJobPostingError = GetJobPostingErrors[keyof GetJobPostingErrors];
+
+export type GetJobPostingResponses = {
+    /**
+     * Success response with data
+     */
+    200: {
+        data: JobBoardPosting;
+    };
+};
+
+export type GetJobPostingResponse = GetJobPostingResponses[keyof GetJobPostingResponses];
+
+export type UpdateJobPostingData = {
+    body: UpdateJobBoardPostingRequest;
+    path: {
+        postingId: Uuid;
+    };
+    query?: never;
+    url: '/postings/{postingId}';
+};
+
+export type UpdateJobPostingErrors = {
+    /**
+     * Validation error response
+     */
+    400: ValidationError;
+    /**
+     * Unauthorized access response
+     */
+    401: AuthenticationError;
+    /**
+     * Forbidden access response
+     */
+    403: AuthorizationError;
+    /**
+     * Resource not found response
+     */
+    404: NotFoundError;
+};
+
+export type UpdateJobPostingError = UpdateJobPostingErrors[keyof UpdateJobPostingErrors];
+
+export type UpdateJobPostingResponses = {
+    /**
+     * Success response with data
+     */
+    200: {
+        data: JobBoardPosting;
+    };
+};
+
+export type UpdateJobPostingResponse = UpdateJobPostingResponses[keyof UpdateJobPostingResponses];
 
 export type ListPublicEventsData = {
     body?: never;
@@ -50797,3 +54120,176 @@ export type DismissSurveyResponseResponses = {
 };
 
 export type DismissSurveyResponseResponse = DismissSurveyResponseResponses[keyof DismissSurveyResponseResponses];
+
+export type ListVendorsData = {
+    body?: never;
+    path?: never;
+    query?: {
+        organizationId?: Uuid;
+        category?: VendorCategory;
+        verificationStatus?: VendorStatus;
+        limit?: number;
+        offset?: number;
+    };
+    url: '/vendors';
+};
+
+export type ListVendorsErrors = {
+    /**
+     * Unauthorized access response
+     */
+    401: AuthenticationError;
+};
+
+export type ListVendorsError = ListVendorsErrors[keyof ListVendorsErrors];
+
+export type ListVendorsResponses = {
+    /**
+     * Success response with data
+     */
+    200: VendorListResponse;
+};
+
+export type ListVendorsResponse = ListVendorsResponses[keyof ListVendorsResponses];
+
+export type CreateVendorData = {
+    body: CreateMarketplaceVendorRequest;
+    path?: never;
+    query?: never;
+    url: '/vendors';
+};
+
+export type CreateVendorErrors = {
+    /**
+     * Validation error response
+     */
+    400: ValidationError;
+    /**
+     * Unauthorized access response
+     */
+    401: AuthenticationError;
+    /**
+     * Forbidden access response
+     */
+    403: AuthorizationError;
+};
+
+export type CreateVendorError = CreateVendorErrors[keyof CreateVendorErrors];
+
+export type CreateVendorResponses = {
+    /**
+     * Resource created response
+     */
+    201: MarketplaceVendor;
+};
+
+export type CreateVendorResponse = CreateVendorResponses[keyof CreateVendorResponses];
+
+export type GetVendorData = {
+    body?: never;
+    path: {
+        vendorId: Uuid;
+    };
+    query?: never;
+    url: '/vendors/{vendorId}';
+};
+
+export type GetVendorErrors = {
+    /**
+     * Unauthorized access response
+     */
+    401: AuthenticationError;
+    /**
+     * Resource not found response
+     */
+    404: NotFoundError;
+};
+
+export type GetVendorError = GetVendorErrors[keyof GetVendorErrors];
+
+export type GetVendorResponses = {
+    /**
+     * Success response with data
+     */
+    200: MarketplaceVendor;
+};
+
+export type GetVendorResponse = GetVendorResponses[keyof GetVendorResponses];
+
+export type UpdateVendorData = {
+    body: UpdateMarketplaceVendorRequest;
+    path: {
+        vendorId: Uuid;
+    };
+    query?: never;
+    url: '/vendors/{vendorId}';
+};
+
+export type UpdateVendorErrors = {
+    /**
+     * Validation error response
+     */
+    400: ValidationError;
+    /**
+     * Unauthorized access response
+     */
+    401: AuthenticationError;
+    /**
+     * Forbidden access response
+     */
+    403: AuthorizationError;
+    /**
+     * Resource not found response
+     */
+    404: NotFoundError;
+};
+
+export type UpdateVendorError = UpdateVendorErrors[keyof UpdateVendorErrors];
+
+export type UpdateVendorResponses = {
+    /**
+     * Success response with data
+     */
+    200: MarketplaceVendor;
+};
+
+export type UpdateVendorResponse = UpdateVendorResponses[keyof UpdateVendorResponses];
+
+export type VerifyVendorData = {
+    body?: never;
+    path: {
+        vendorId: Uuid;
+    };
+    query?: never;
+    url: '/vendors/{vendorId}/verify';
+};
+
+export type VerifyVendorErrors = {
+    /**
+     * Unauthorized access response
+     */
+    401: AuthenticationError;
+    /**
+     * Forbidden access response
+     */
+    403: AuthorizationError;
+    /**
+     * Resource not found response
+     */
+    404: NotFoundError;
+    /**
+     * Conflict response
+     */
+    409: ConflictError;
+};
+
+export type VerifyVendorError = VerifyVendorErrors[keyof VerifyVendorErrors];
+
+export type VerifyVendorResponses = {
+    /**
+     * Success response with data
+     */
+    200: MarketplaceVendor;
+};
+
+export type VerifyVendorResponse = VerifyVendorResponses[keyof VerifyVendorResponses];

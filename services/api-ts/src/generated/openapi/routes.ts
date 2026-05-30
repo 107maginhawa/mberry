@@ -2511,6 +2511,21 @@ export function registerRoutes(app: Hono<{ Variables: Variables }>) {
     registry.publishAnnouncement as unknown as Handler
   );
 
+  // scheduleAnnouncement
+  app.post('/communications/announcements/:id/schedule',
+    authMiddleware({ roles: ["association:officer"] }),
+    zValidator('param', validators.ScheduleAnnouncementParams, validationErrorHandler),
+    zValidator('json', validators.ScheduleAnnouncementBody, validationErrorHandler),
+    registry.scheduleAnnouncement as unknown as Handler
+  );
+
+  // getAnnouncementStats
+  app.get('/communications/announcements/:id/stats',
+    authMiddleware({ roles: ["association:member"] }),
+    zValidator('param', validators.GetAnnouncementStatsParams, validationErrorHandler),
+    registry.getAnnouncementStats as unknown as Handler
+  );
+
   // listAnnouncements
   app.get('/communications/announcements/:organizationId',
     authMiddleware({ roles: ["association:member"] }),
@@ -2818,6 +2833,13 @@ export function registerRoutes(app: Hono<{ Variables: Variables }>) {
     zValidator('param', validators.SendPaymentLinkParams, validationErrorHandler),
     zValidator('json', validators.SendPaymentLinkBody, validationErrorHandler),
     registry.sendPaymentLink as unknown as Handler
+  );
+
+  // downloadReceipt
+  app.get('/org/:organizationId/payments/:paymentId/receipt',
+    authMiddleware({ roles: ["association:member"] }),
+    zValidator('param', validators.DownloadReceiptParams, validationErrorHandler),
+    registry.downloadReceipt as unknown as Handler
   );
 
   // checkoutPaymentToken

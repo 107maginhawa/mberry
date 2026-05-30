@@ -112,6 +112,46 @@ model AnnouncementCreateRequest {
   scheduledAt?: utcDateTime;
 }
 
+@doc("Request body for scheduling a draft announcement")
+model AnnouncementScheduleRequest {
+  @doc("Future timestamp when the announcement should be sent")
+  scheduledAt: utcDateTime;
+}
+
+@doc("Per-channel delivery counters for a sent announcement")
+model AnnouncementChannelStats {
+  @doc("Number of recipients targeted on this channel")
+  targeted?: int32;
+  @doc("Number of successful deliveries")
+  delivered?: int32;
+  @doc("Number of failed deliveries")
+  failed?: int32;
+  @doc("Number of opens (email/in-app only)")
+  opened?: int32;
+}
+
+@doc("Engagement statistics for a published announcement")
+model AnnouncementStats {
+  @doc("Push channel counters (omitted if push was not used)")
+  push?: AnnouncementChannelStats;
+  @doc("Email channel counters (omitted if email was not used)")
+  email?: AnnouncementChannelStats;
+  @doc("In-app channel counters")
+  inApp?: AnnouncementChannelStats;
+}
+
+@doc("Response payload for the announcement stats endpoint")
+model AnnouncementStatsResponse {
+  @doc("Announcement identifier")
+  id: UUID;
+  @doc("Announcement title at time of read")
+  title: string;
+  @doc("Current lifecycle status")
+  status: AnnouncementStatus;
+  @doc("Aggregated engagement stats")
+  stats?: AnnouncementStats;
+}
+
 @doc("Request body for updating an announcement")
 model AnnouncementUpdateRequest {
   @doc("Updated title")
@@ -239,6 +279,34 @@ namespace Association.Operations.Announcements {
     deleteAnnouncement(
       @path id: UUID
     ): ApiNoContentResponse
+      | ApiNotFoundResponse
+      | ApiUnauthorizedResponse
+      | ApiForbiddenResponse;
+
+    @doc("Schedule a draft announcement for future delivery. Requires President or Secretary position.")
+    @operationId("scheduleAnnouncement")
+    @post
+    @route("/communications/announcements/{id}/schedule")
+    @useAuth(bearerAuth)
+    @extension("x-security-required-roles", #["association:officer"])
+    scheduleAnnouncement(
+      @path id: UUID,
+      @body body: AnnouncementScheduleRequest
+    ): ApiOkResponse<Announcement>
+      | ApiBadRequestResponse
+      | ApiNotFoundResponse
+      | ApiUnauthorizedResponse
+      | ApiForbiddenResponse;
+
+    @doc("Retrieve delivery and engagement stats for a published announcement.")
+    @operationId("getAnnouncementStats")
+    @get
+    @route("/communications/announcements/{id}/stats")
+    @useAuth(bearerAuth)
+    @extension("x-security-required-roles", #["association:member"])
+    getAnnouncementStats(
+      @path id: UUID
+    ): ApiOkResponse<AnnouncementStatsResponse>
       | ApiNotFoundResponse
       | ApiUnauthorizedResponse
       | ApiForbiddenResponse;

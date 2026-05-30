@@ -319,6 +319,8 @@ import { updateAnnouncement } from '../../handlers/communication/updateAnnouncem
 import { deleteAnnouncement } from '../../handlers/communication/deleteAnnouncement';
 import { archiveAnnouncement } from '../../handlers/communication/archiveAnnouncement';
 import { publishAnnouncement } from '../../handlers/communication/publishAnnouncement';
+import { scheduleAnnouncement } from '../../handlers/communication/scheduleAnnouncement';
+import { getAnnouncementStats } from '../../handlers/communication/getAnnouncementStats';
 import { listAnnouncements } from '../../handlers/communication/listAnnouncements';
 import { createAnnouncement } from '../../handlers/communication/createAnnouncement';
 import { createSavedSegment } from '../../handlers/communication/createSavedSegment';
@@ -371,6 +373,7 @@ import { updateVideoCallParticipant } from '../../handlers/comms/updateVideoCall
 import { getIceServers } from '../../handlers/comms/getIceServers';
 import { getDuesDashboard } from '../../handlers/dues/getDuesDashboard';
 import { sendPaymentLink } from '../../handlers/dues/sendPaymentLink';
+import { downloadReceipt } from '../../handlers/dues/downloadReceipt';
 import { checkoutPaymentToken } from '../../handlers/dues/checkoutPaymentToken';
 import { validatePaymentToken } from '../../handlers/dues/validatePaymentToken';
 import { listEmailQueueItems } from '../../handlers/email/listEmailQueueItems';
@@ -776,6 +779,8 @@ export const registry = {
   deleteAnnouncement,
   archiveAnnouncement,
   publishAnnouncement,
+  scheduleAnnouncement,
+  getAnnouncementStats,
   listAnnouncements,
   createAnnouncement,
   createSavedSegment,
@@ -838,6 +843,7 @@ export const registry = {
   // Dues handlers
   getDuesDashboard,
   sendPaymentLink,
+  downloadReceipt,
   checkoutPaymentToken,
   validatePaymentToken,
 

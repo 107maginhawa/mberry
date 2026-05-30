@@ -650,6 +650,9 @@ namespace MonobaseAPI {
   @tag("Dues")
   interface PaymentLinkManagement extends DuesCustomModule.PaymentLinkManagement {}
 
+  @tag("Dues")
+  interface ReceiptEndpoints extends DuesCustomModule.ReceiptEndpoints {}
+
   // =========================================================================
   // Invite Module — officer invites, public validation, authenticated claim
   // =========================================================================
