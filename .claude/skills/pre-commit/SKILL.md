@@ -61,6 +61,19 @@ bun docs/project-map/generate.ts 2>/dev/null || true
 
 Then read `docs/project-map/gaps.generated.md` and warn about any **Critical (P0)** gaps. Do not block the commit — P0 gaps are addressed in `/module-review` and `/develop`.
 
+### 0.8. Loading-State Hygiene (Wave G5 — blocking on new violations)
+
+Block when a changed page introduces a skeleton path with no `isError` branch. Operates on staged files only; the 54-entry brownfield backlog is informational and tracked separately.
+
+```bash
+bun scripts/gates/loading-state-hygiene.ts --changed-only
+```
+
+If it fails, the offending file must either gain an `isError` branch returning an error UI, or carry one of:
+
+- `// oli-execute: skeleton-ok` (cap 5 tree-wide)
+- `// oli-execute: error-handled-inline` (no cap — for 404=success patterns)
+
 ### 1. Type Check API
 
 ```bash
