@@ -232,6 +232,13 @@ export function registerRoutes(app: Hono<{ Variables: Variables }>) {
     registry.transitionOrgStatus as unknown as Handler
   );
 
+  // listAdminSurveys
+  app.get('/admin/surveys/',
+    authMiddleware({ roles: ["admin"] }),
+    zValidator('query', validators.ListAdminSurveysQuery, validationErrorHandler),
+    registry.listAdminSurveys as unknown as Handler
+  );
+
   // createAdvertiser
   app.post('/advertisers',
     authMiddleware({ roles: ["association:admin", "association:staff"] }),
@@ -3129,6 +3136,18 @@ export function registerRoutes(app: Hono<{ Variables: Variables }>) {
     authMiddleware({ roles: ["user"] }),
     zValidator('query', validators.ListSurveysQuery, validationErrorHandler),
     registry.listSurveys as unknown as Handler
+  );
+
+  // getNpsTrends
+  app.get('/surveys/analytics/nps-trends',
+    authMiddleware({ roles: ["officer", "admin"] }),
+    registry.getNpsTrends as unknown as Handler
+  );
+
+  // deleteMemberResponses
+  app.delete('/surveys/my-responses',
+    authMiddleware({ roles: ["user"] }),
+    registry.deleteMemberResponses as unknown as Handler
   );
 
   // getSurvey

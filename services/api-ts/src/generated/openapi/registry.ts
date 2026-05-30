@@ -98,6 +98,22 @@ import { updateOrganization } from '../../handlers/platformadmin/updateOrganizat
 import { transitionOrgStatus } from '../../handlers/platformadmin/transitionOrgStatus';
 import { getOrganizationBySlug } from '../../handlers/platformadmin/getOrganizationBySlug';
 import { listPublicOrgs } from '../../handlers/platformadmin/listPublicOrgs';
+import { listAdminSurveys } from '../../handlers/surveys/listAdminSurveys';
+import { createSurvey } from '../../handlers/surveys/createSurvey';
+import { listSurveys } from '../../handlers/surveys/listSurveys';
+import { getNpsTrends } from '../../handlers/surveys/getNpsTrends';
+import { deleteMemberResponses } from '../../handlers/surveys/deleteMemberResponses';
+import { getSurvey } from '../../handlers/surveys/getSurvey';
+import { updateSurvey } from '../../handlers/surveys/updateSurvey';
+import { deleteSurvey } from '../../handlers/surveys/deleteSurvey';
+import { getSurveyAnalytics } from '../../handlers/surveys/getSurveyAnalytics';
+import { cloneSurvey } from '../../handlers/surveys/cloneSurvey';
+import { closeSurvey } from '../../handlers/surveys/closeSurvey';
+import { exportSurveyResponses } from '../../handlers/surveys/exportSurveyResponses';
+import { publishSurvey } from '../../handlers/surveys/publishSurvey';
+import { submitSurveyResponse } from '../../handlers/surveys/submitSurveyResponse';
+import { listSurveyResponses } from '../../handlers/surveys/listSurveyResponses';
+import { dismissSurveyResponse } from '../../handlers/surveys/dismissSurveyResponse';
 import { createAdvertiser } from '../../handlers/advertising/createAdvertiser';
 import { createCampaign } from '../../handlers/advertising/createCampaign';
 import { createCreative } from '../../handlers/advertising/createCreative';
@@ -442,19 +458,6 @@ import { getFile } from '../../handlers/storage/getFile';
 import { deleteFile } from '../../handlers/storage/deleteFile';
 import { completeFileUpload } from '../../handlers/storage/completeFileUpload';
 import { getFileDownload } from '../../handlers/storage/getFileDownload';
-import { createSurvey } from '../../handlers/surveys/createSurvey';
-import { listSurveys } from '../../handlers/surveys/listSurveys';
-import { getSurvey } from '../../handlers/surveys/getSurvey';
-import { updateSurvey } from '../../handlers/surveys/updateSurvey';
-import { deleteSurvey } from '../../handlers/surveys/deleteSurvey';
-import { getSurveyAnalytics } from '../../handlers/surveys/getSurveyAnalytics';
-import { cloneSurvey } from '../../handlers/surveys/cloneSurvey';
-import { closeSurvey } from '../../handlers/surveys/closeSurvey';
-import { exportSurveyResponses } from '../../handlers/surveys/exportSurveyResponses';
-import { publishSurvey } from '../../handlers/surveys/publishSurvey';
-import { submitSurveyResponse } from '../../handlers/surveys/submitSurveyResponse';
-import { listSurveyResponses } from '../../handlers/surveys/listSurveyResponses';
-import { dismissSurveyResponse } from '../../handlers/surveys/dismissSurveyResponse';
 
 export const registry = {
   // Association:operations handlers
@@ -548,6 +551,24 @@ export const registry = {
   transitionOrgStatus,
   getOrganizationBySlug,
   listPublicOrgs,
+
+  // Surveys handlers
+  listAdminSurveys,
+  createSurvey,
+  listSurveys,
+  getNpsTrends,
+  deleteMemberResponses,
+  getSurvey,
+  updateSurvey,
+  deleteSurvey,
+  getSurveyAnalytics,
+  cloneSurvey,
+  closeSurvey,
+  exportSurveyResponses,
+  publishSurvey,
+  submitSurveyResponse,
+  listSurveyResponses,
+  dismissSurveyResponse,
 
   // Advertising handlers
   createAdvertiser,
@@ -932,20 +953,5 @@ export const registry = {
   deleteFile,
   completeFileUpload,
   getFileDownload,
-
-  // Surveys handlers
-  createSurvey,
-  listSurveys,
-  getSurvey,
-  updateSurvey,
-  deleteSurvey,
-  getSurveyAnalytics,
-  cloneSurvey,
-  closeSurvey,
-  exportSurveyResponses,
-  publishSurvey,
-  submitSurveyResponse,
-  listSurveyResponses,
-  dismissSurveyResponse,
 
 };

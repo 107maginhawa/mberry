@@ -361,6 +361,36 @@ export const AdminRoleResponseSchema = z.object({
   name: z.string()
 });
 
+export const AdminSurveyListItemSchema = z.object({
+  id: z.string().uuid(),
+  title: z.string(),
+  organizationName: z.string().optional(),
+  surveyType: z.enum(["nps", "satisfaction", "poll", "custom"]),
+  status: z.enum(["draft", "active", "closed", "archived"]),
+  responseCount: z.number().int(),
+  questionCount: z.number().int(),
+  npsScore: z.number().optional(),
+  createdAt: z.string().datetime().transform((str) => new Date(str))
+});
+
+export const AdminSurveyListResponseSchema = z.object({
+  data: z.array(AdminSurveyListItemSchema),
+  total: z.number().int(),
+  stats: z.object({
+  totalSurveys: z.number().int(),
+  activeSurveys: z.number().int(),
+  avgNps: z.number().optional(),
+  avgResponseRate: z.number()
+})
+});
+
+export const AdminSurveyStatsSchema = z.object({
+  totalSurveys: z.number().int(),
+  activeSurveys: z.number().int(),
+  avgNps: z.number().optional(),
+  avgResponseRate: z.number()
+});
+
 export const AdvertiserSchema = z.object({
   id: z.string().uuid(),
   version: z.number().int(),
@@ -4739,6 +4769,10 @@ export const DashboardResponseSchema = z.object({
   expiresAt: z.string().datetime().transform((str) => new Date(str))
 });
 
+export const DeleteMemberResponsesResultSchema = z.object({
+  deletedCount: z.number().int()
+});
+
 export const DigitalCredentialSchema = z.object({
   id: z.string().uuid(),
   version: z.number().int(),
@@ -7720,6 +7754,13 @@ export const NotificationUpdateSchema = z.object({
   readAt: z.string().datetime().transform((str) => new Date(str)).optional(),
   metadata: z.record(z.string(), z.unknown()).optional(),
   consentValidated: z.boolean().optional()
+});
+
+export const NpsTrendPointSchema = z.object({
+  date: z.string().datetime().transform((str) => new Date(str)),
+  score: z.number(),
+  surveyTitle: z.string(),
+  responseCount: z.number().int()
 });
 
 export const OfficerPositionSchema = z.object({
@@ -11090,6 +11131,16 @@ export const TransitionOrgStatusBody = z.object({
 export type TransitionOrgStatusBody = z.infer<typeof TransitionOrgStatusBody>;
 
 export const TransitionOrgStatusResponse = PlatformAdminModuleOrganizationSchema;
+
+export const ListAdminSurveysQuery = z.object({
+  limit: z.coerce.number().int().optional(),
+  offset: z.coerce.number().int().optional(),
+  status: SurveyStatusSchema.optional(),
+  surveyType: SurveyTypeSchema.optional(),
+});
+export type ListAdminSurveysQuery = z.infer<typeof ListAdminSurveysQuery>;
+
+export const ListAdminSurveysResponse = AdminSurveyListResponseSchema;
 
 export const CreateAdvertiserBody = CreateAdvertiserRequestSchema;
 export type CreateAdvertiserBody = z.infer<typeof CreateAdvertiserBody>;
@@ -14634,6 +14685,10 @@ export const ListSurveysQuery = z.object({
 export type ListSurveysQuery = z.infer<typeof ListSurveysQuery>;
 
 export const ListSurveysResponse = SurveyListResponseSchema;
+
+export const GetNpsTrendsResponse = z.array(NpsTrendPointSchema);
+
+export const DeleteMemberResponsesResponse = DeleteMemberResponsesResultSchema;
 
 export const GetSurveyParams = z.object({
   survey: UUIDSchema,

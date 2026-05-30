@@ -251,6 +251,11 @@ namespace MonobaseAPI {
   @route("/surveys")
   interface SurveysManagement extends SurveysModule.SurveysManagement {}
 
+  // Platform-admin cross-org survey listing
+  @tag("Surveys")
+  @route("/admin/surveys")
+  interface AdminSurveysManagement extends SurveysModule.AdminSurveysManagement {}
+
   // =========================================================================
   // Association Domain — Membership (test: one interface)
   // =========================================================================

@@ -1059,6 +1059,105 @@ export type AdminRoleResponse = {
 };
 
 /**
+ * Survey row in the platform-admin cross-org listing
+ */
+export type AdminSurveyListItem = {
+    /**
+     * Survey ID
+     */
+    id: string;
+    /**
+     * Survey title
+     */
+    title: string;
+    /**
+     * Organization that owns the survey
+     */
+    organizationName?: string;
+    /**
+     * Survey type
+     */
+    surveyType: 'nps' | 'satisfaction' | 'poll' | 'custom';
+    /**
+     * Current lifecycle status
+     */
+    status: 'draft' | 'active' | 'closed' | 'archived';
+    /**
+     * Response count from analytics snapshot
+     */
+    responseCount: number;
+    /**
+     * Number of questions on the survey
+     */
+    questionCount: number;
+    /**
+     * NPS score from analytics snapshot, if any
+     */
+    npsScore?: number;
+    /**
+     * When the survey was created
+     */
+    createdAt: Date;
+};
+
+/**
+ * Platform-admin cross-org survey listing
+ */
+export type AdminSurveyListResponse = {
+    /**
+     * Survey rows for the requested page
+     */
+    data: Array<AdminSurveyListItem>;
+    /**
+     * Total matching surveys
+     */
+    total: number;
+    /**
+     * Aggregate stats across ALL surveys (unfiltered)
+     */
+    stats: {
+        /**
+         * Total surveys across all orgs
+         */
+        totalSurveys: number;
+        /**
+         * Surveys currently in 'active' status
+         */
+        activeSurveys: number;
+        /**
+         * Average NPS across surveys with analytics, if any
+         */
+        avgNps?: number;
+        /**
+         * Average response rate (completion %) across surveys with analytics
+         */
+        avgResponseRate: number;
+    };
+};
+
+/**
+ * Aggregate stats for the platform-admin survey overview
+ */
+export type AdminSurveyStats = {
+    /**
+     * Total surveys across all orgs
+     */
+    totalSurveys: number;
+    /**
+     * Surveys currently in 'active' status
+     */
+    activeSurveys: number;
+    /**
+     * Average NPS across surveys with analytics, if any
+     */
+    avgNps?: number;
+    /**
+     * Average response rate (completion %) across surveys with analytics
+     */
+    avgResponseRate: number;
+};
+
+/**
  * A registered advertiser in the association's ad system
  */
 export type Advertiser = {
@@ -15431,6 +15530,16 @@ export type DashboardResponse = {
 };
 
 /**
+ * Outcome of deleting a member's survey responses (data retention / right-to-deletion)
+ */
+export type DeleteMemberResponsesResult = {
+    /**
+     * Number of responses deleted
+     */
+    deletedCount: number;
+};
+
+/**
  * A digital credential issued to a specific member
  */
 export type DigitalCredential = {
@@ -25540,6 +25649,28 @@ export type NotificationUpdate = {
      * Consent validation status
      */
     consentValidated?: boolean;
+};
+
+/**
+ * Single data point on an NPS trend line
+ */
+export type NpsTrendPoint = {
+    /**
+     * Survey creation date
+     */
+    date: Date;
+    /**
+     * NPS score (-100 to 100)
+     */
+    score: number;
+    /**
+     * Title of the survey producing this score
+     */
+    surveyTitle: string;
+    /**
+     * Total responses contributing to this score
+     */
+    responseCount: number;
 };
 
 /**
@@ -37912,6 +38043,52 @@ export type TransitionOrgStatusResponses = {
 };
 
 export type TransitionOrgStatusResponse = TransitionOrgStatusResponses[keyof TransitionOrgStatusResponses];
+
+export type ListAdminSurveysData = {
+    body?: never;
+    path?: never;
+    query?: {
+        /**
+         * Page size (max 100, default 25)
+         */
+        limit?: number;
+        /**
+         * Page offset (default 0)
+         */
+        offset?: number;
+        /**
+         * Filter by lifecycle status
+         */
+        status?: SurveyStatus;
+        /**
+         * Filter by survey type
+         */
+        surveyType?: SurveyType;
+    };
+    url: '/admin/surveys/';
+};
+
+export type ListAdminSurveysErrors = {
+    /**
+     * Unauthorized access response
+     */
+    401: AuthenticationError;
+    /**
+     * Forbidden access response
+     */
+    403: AuthorizationError;
+};
+
+export type ListAdminSurveysError = ListAdminSurveysErrors[keyof ListAdminSurveysErrors];
+
+export type ListAdminSurveysResponses = {
+    /**
+     * Success response with data
+     */
+    200: AdminSurveyListResponse;
+};
+
+export type ListAdminSurveysResponse = ListAdminSurveysResponses[keyof ListAdminSurveysResponses];
 
 export type CreateAdvertiserData = {
     body: CreateAdvertiserRequest;
@@ -53689,6 +53866,60 @@ export type CreateSurveyResponses = {
 };
 
 export type CreateSurveyResponse = CreateSurveyResponses[keyof CreateSurveyResponses];
+
+export type GetNpsTrendsData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/surveys/analytics/nps-trends';
+};
+
+export type GetNpsTrendsErrors = {
+    /**
+     * Unauthorized access response
+     */
+    401: AuthenticationError;
+    /**
+     * Forbidden access response
+     */
+    403: AuthorizationError;
+};
+
+export type GetNpsTrendsError = GetNpsTrendsErrors[keyof GetNpsTrendsErrors];
+
+export type GetNpsTrendsResponses = {
+    /**
+     * Success response with data
+     */
+    200: Array<NpsTrendPoint>;
+};
+
+export type GetNpsTrendsResponse = GetNpsTrendsResponses[keyof GetNpsTrendsResponses];
+
+export type DeleteMemberResponsesData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/surveys/my-responses';
+};
+
+export type DeleteMemberResponsesErrors = {
+    /**
+     * Unauthorized access response
+     */
+    401: AuthenticationError;
+};
+
+export type DeleteMemberResponsesError = DeleteMemberResponsesErrors[keyof DeleteMemberResponsesErrors];
+
+export type DeleteMemberResponsesResponses = {
+    /**
+     * Success response with data
+     */
+    200: DeleteMemberResponsesResult;
+};
+
+export type DeleteMemberResponsesResponse = DeleteMemberResponsesResponses[keyof DeleteMemberResponsesResponses];
 
 export type DeleteSurveyData = {
     body?: never;
