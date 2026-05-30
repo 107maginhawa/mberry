@@ -12,7 +12,15 @@
       "state_access": [],
       "api_calls": [],
       "routes_used_in": [],
-      "confidence": "LOW"
+      "confidence": "LOW",
+      "loading_state_hygiene": {
+        "has_skeleton": false,
+        "has_error_branch": false,
+        "has_timeout": false,
+        "has_inline_error_marker": false,
+        "has_skeleton_ok_marker": false,
+        "violation": null
+      }
     },
     "apps/admin/src/lib/role-gate.tsx": {
       "name": "role-gate",
@@ -144,12 +152,20 @@
       "state_access": [],
       "api_calls": [
         {
-          "method": "GET",
+          "method": "UNKNOWN",
           "endpoint": "/api/admin/national-dashboard/${associationId}?snapshotMonth=${currentMonth}"
         }
       ],
       "routes_used_in": [],
-      "confidence": "LOW"
+      "confidence": "LOW",
+      "loading_state_hygiene": {
+        "has_skeleton": true,
+        "has_error_branch": true,
+        "has_timeout": false,
+        "has_inline_error_marker": false,
+        "has_skeleton_ok_marker": false,
+        "violation": null
+      }
     },
     "apps/admin/src/routes/associations/index.tsx": {
       "name": "index",
@@ -175,7 +191,15 @@
       "state_access": [],
       "api_calls": [],
       "routes_used_in": [],
-      "confidence": "LOW"
+      "confidence": "LOW",
+      "loading_state_hygiene": {
+        "has_skeleton": true,
+        "has_error_branch": true,
+        "has_timeout": false,
+        "has_inline_error_marker": false,
+        "has_skeleton_ok_marker": false,
+        "violation": null
+      }
     },
     "apps/admin/src/routes/audit/index.tsx": {
       "name": "index",
@@ -188,7 +212,15 @@
       "state_access": [],
       "api_calls": [],
       "routes_used_in": [],
-      "confidence": "LOW"
+      "confidence": "LOW",
+      "loading_state_hygiene": {
+        "has_skeleton": true,
+        "has_error_branch": true,
+        "has_timeout": false,
+        "has_inline_error_marker": false,
+        "has_skeleton_ok_marker": false,
+        "violation": null
+      }
     },
     "apps/admin/src/routes/committees/index.tsx": {
       "name": "index",
@@ -201,12 +233,20 @@
       "state_access": [],
       "api_calls": [
         {
-          "method": "GET",
+          "method": "UNKNOWN",
           "endpoint": "/api/admin/committees?limit=100"
         }
       ],
       "routes_used_in": [],
-      "confidence": "LOW"
+      "confidence": "LOW",
+      "loading_state_hygiene": {
+        "has_skeleton": true,
+        "has_error_branch": false,
+        "has_timeout": false,
+        "has_inline_error_marker": false,
+        "has_skeleton_ok_marker": false,
+        "violation": "SKELETON_WITHOUT_ERROR_BRANCH"
+      }
     },
     "apps/admin/src/routes/communications/email.tsx": {
       "name": "email",
@@ -284,7 +324,15 @@
       "state_access": [],
       "api_calls": [],
       "routes_used_in": [],
-      "confidence": "LOW"
+      "confidence": "LOW",
+      "loading_state_hygiene": {
+        "has_skeleton": true,
+        "has_error_branch": false,
+        "has_timeout": false,
+        "has_inline_error_marker": false,
+        "has_skeleton_ok_marker": false,
+        "violation": "SKELETON_WITHOUT_ERROR_BRANCH"
+      }
     },
     "apps/admin/src/routes/feature-flags/index.tsx": {
       "name": "index",
@@ -318,7 +366,15 @@
       "state_access": [],
       "api_calls": [],
       "routes_used_in": [],
-      "confidence": "LOW"
+      "confidence": "LOW",
+      "loading_state_hygiene": {
+        "has_skeleton": true,
+        "has_error_branch": true,
+        "has_timeout": false,
+        "has_inline_error_marker": false,
+        "has_skeleton_ok_marker": false,
+        "violation": null
+      }
     },
     "apps/admin/src/routes/impersonate/index.tsx": {
       "name": "index",
@@ -361,7 +417,15 @@
       "state_access": [],
       "api_calls": [],
       "routes_used_in": [],
-      "confidence": "LOW"
+      "confidence": "LOW",
+      "loading_state_hygiene": {
+        "has_skeleton": true,
+        "has_error_branch": true,
+        "has_timeout": false,
+        "has_inline_error_marker": false,
+        "has_skeleton_ok_marker": false,
+        "violation": null
+      }
     },
     "apps/admin/src/routes/members/$personId.tsx": {
       "name": "$personId",
@@ -374,7 +438,15 @@
       "state_access": [],
       "api_calls": [],
       "routes_used_in": [],
-      "confidence": "LOW"
+      "confidence": "LOW",
+      "loading_state_hygiene": {
+        "has_skeleton": true,
+        "has_error_branch": true,
+        "has_timeout": false,
+        "has_inline_error_marker": false,
+        "has_skeleton_ok_marker": false,
+        "violation": null
+      }
     },
     "apps/admin/src/routes/members/index.tsx": {
       "name": "index",
@@ -387,7 +459,15 @@
       "state_access": [],
       "api_calls": [],
       "routes_used_in": [],
-      "confidence": "LOW"
+      "confidence": "LOW",
+      "loading_state_hygiene": {
+        "has_skeleton": true,
+        "has_error_branch": true,
+        "has_timeout": false,
+        "has_inline_error_marker": false,
+        "has_skeleton_ok_marker": false,
+        "violation": null
+      }
     },
     "apps/admin/src/routes/national-dashboard/index.tsx": {
       "name": "index",
@@ -400,12 +480,20 @@
       "state_access": [],
       "api_calls": [
         {
-          "method": "GET",
+          "method": "UNKNOWN",
           "endpoint": "/api/admin/national-dashboard/${selectedAssociation}?snapshotMonth=${snapshotMonth}"
         }
       ],
       "routes_used_in": [],
-      "confidence": "LOW"
+      "confidence": "LOW",
+      "loading_state_hygiene": {
+        "has_skeleton": true,
+        "has_error_branch": false,
+        "has_timeout": false,
+        "has_inline_error_marker": false,
+        "has_skeleton_ok_marker": false,
+        "violation": "SKELETON_WITHOUT_ERROR_BRANCH"
+      }
     },
     "apps/admin/src/routes/operators/index.tsx": {
       "name": "index",
@@ -439,7 +527,15 @@
       "state_access": [],
       "api_calls": [],
       "routes_used_in": [],
-      "confidence": "LOW"
+      "confidence": "LOW",
+      "loading_state_hygiene": {
+        "has_skeleton": true,
+        "has_error_branch": true,
+        "has_timeout": false,
+        "has_inline_error_marker": false,
+        "has_skeleton_ok_marker": false,
+        "violation": null
+      }
     },
     "apps/admin/src/routes/organizations/$organizationId.tsx": {
       "name": "$organizationId",
@@ -452,12 +548,20 @@
       "state_access": [],
       "api_calls": [
         {
-          "method": "GET",
-          "endpoint": "/api/admin/organizations/${organizationId}/status"
+          "method": "UNKNOWN",
+          "endpoint": "/api/admin/organizations/${organizationId}/transition"
         }
       ],
       "routes_used_in": [],
-      "confidence": "LOW"
+      "confidence": "LOW",
+      "loading_state_hygiene": {
+        "has_skeleton": true,
+        "has_error_branch": false,
+        "has_timeout": false,
+        "has_inline_error_marker": false,
+        "has_skeleton_ok_marker": false,
+        "violation": "SKELETON_WITHOUT_ERROR_BRANCH"
+      }
     },
     "apps/admin/src/routes/organizations/index.tsx": {
       "name": "index",
@@ -470,7 +574,15 @@
       "state_access": [],
       "api_calls": [],
       "routes_used_in": [],
-      "confidence": "LOW"
+      "confidence": "LOW",
+      "loading_state_hygiene": {
+        "has_skeleton": true,
+        "has_error_branch": false,
+        "has_timeout": false,
+        "has_inline_error_marker": false,
+        "has_skeleton_ok_marker": false,
+        "violation": "SKELETON_WITHOUT_ERROR_BRANCH"
+      }
     },
     "apps/admin/src/routes/surveys/index.tsx": {
       "name": "index",
@@ -483,12 +595,20 @@
       "state_access": [],
       "api_calls": [
         {
-          "method": "GET",
+          "method": "UNKNOWN",
           "endpoint": "/api/admin/surveys?${params}"
         }
       ],
       "routes_used_in": [],
-      "confidence": "LOW"
+      "confidence": "LOW",
+      "loading_state_hygiene": {
+        "has_skeleton": true,
+        "has_error_branch": false,
+        "has_timeout": false,
+        "has_inline_error_marker": false,
+        "has_skeleton_ok_marker": false,
+        "violation": "SKELETON_WITHOUT_ERROR_BRANCH"
+      }
     },
     "apps/admin/src/routes/training/index.tsx": {
       "name": "index",
@@ -501,7 +621,15 @@
       "state_access": [],
       "api_calls": [],
       "routes_used_in": [],
-      "confidence": "LOW"
+      "confidence": "LOW",
+      "loading_state_hygiene": {
+        "has_skeleton": true,
+        "has_error_branch": false,
+        "has_timeout": false,
+        "has_inline_error_marker": false,
+        "has_skeleton_ok_marker": false,
+        "violation": "SKELETON_WITHOUT_ERROR_BRANCH"
+      }
     },
     "apps/admin/src/routes/verifications/index.tsx": {
       "name": "index",
@@ -715,7 +843,15 @@
       "state_access": [],
       "api_calls": [],
       "routes_used_in": [],
-      "confidence": "MEDIUM"
+      "confidence": "MEDIUM",
+      "loading_state_hygiene": {
+        "has_skeleton": false,
+        "has_error_branch": true,
+        "has_timeout": false,
+        "has_inline_error_marker": false,
+        "has_skeleton_ok_marker": false,
+        "violation": null
+      }
     },
     "apps/memberry/src/components/layout/member-bottom-nav.tsx": {
       "name": "member-bottom-nav",
@@ -1093,18 +1229,17 @@
       ],
       "slots": [],
       "state_access": [],
-      "api_calls": [
-        {
-          "method": "POST",
-          "endpoint": "/api/notifs/${id}/read"
-        },
-        {
-          "method": "POST",
-          "endpoint": "/api/notifs/read-all"
-        }
-      ],
+      "api_calls": [],
       "routes_used_in": [],
-      "confidence": "MEDIUM"
+      "confidence": "MEDIUM",
+      "loading_state_hygiene": {
+        "has_skeleton": true,
+        "has_error_branch": false,
+        "has_timeout": false,
+        "has_inline_error_marker": false,
+        "has_skeleton_ok_marker": false,
+        "violation": "SKELETON_WITHOUT_ERROR_BRANCH"
+      }
     },
     "apps/memberry/src/components/patterns/avatar-initials.tsx": {
       "name": "avatar-initials",
@@ -1590,7 +1725,15 @@
       "state_access": [],
       "api_calls": [],
       "routes_used_in": [],
-      "confidence": "LOW"
+      "confidence": "LOW",
+      "loading_state_hygiene": {
+        "has_skeleton": false,
+        "has_error_branch": false,
+        "has_timeout": false,
+        "has_inline_error_marker": false,
+        "has_skeleton_ok_marker": false,
+        "violation": null
+      }
     },
     "apps/memberry/src/components/patterns/stat-card.tsx": {
       "name": "stat-card",
@@ -1885,7 +2028,15 @@
       ],
       "api_calls": [],
       "routes_used_in": [],
-      "confidence": "MEDIUM"
+      "confidence": "MEDIUM",
+      "loading_state_hygiene": {
+        "has_skeleton": false,
+        "has_error_branch": false,
+        "has_timeout": false,
+        "has_inline_error_marker": false,
+        "has_skeleton_ok_marker": false,
+        "violation": null
+      }
     },
     "apps/memberry/src/features/admin/components/officer-management.tsx": {
       "name": "officer-management",
@@ -1912,14 +2063,17 @@
       ],
       "slots": [],
       "state_access": [],
-      "api_calls": [
-        {
-          "method": "DELETE",
-          "endpoint": "/api/association/member/officer-terms/${termId}"
-        }
-      ],
+      "api_calls": [],
       "routes_used_in": [],
-      "confidence": "MEDIUM"
+      "confidence": "MEDIUM",
+      "loading_state_hygiene": {
+        "has_skeleton": false,
+        "has_error_branch": true,
+        "has_timeout": true,
+        "has_inline_error_marker": false,
+        "has_skeleton_ok_marker": false,
+        "violation": null
+      }
     },
     "apps/memberry/src/features/admin/components/org-settings-form.tsx": {
       "name": "org-settings-form",
@@ -1937,14 +2091,17 @@
       "events_out": [],
       "slots": [],
       "state_access": [],
-      "api_calls": [
-        {
-          "method": "PUT",
-          "endpoint": "/api/membership/org-profile/${orgId}"
-        }
-      ],
+      "api_calls": [],
       "routes_used_in": [],
-      "confidence": "MEDIUM"
+      "confidence": "MEDIUM",
+      "loading_state_hygiene": {
+        "has_skeleton": true,
+        "has_error_branch": false,
+        "has_timeout": false,
+        "has_inline_error_marker": false,
+        "has_skeleton_ok_marker": false,
+        "violation": "SKELETON_WITHOUT_ERROR_BRANCH"
+      }
     },
     "apps/memberry/src/features/billing/components/merchant-account-setup.tsx": {
       "name": "merchant-account-setup",
@@ -1995,7 +2152,15 @@
       "state_access": [],
       "api_calls": [],
       "routes_used_in": [],
-      "confidence": "MEDIUM"
+      "confidence": "MEDIUM",
+      "loading_state_hygiene": {
+        "has_skeleton": true,
+        "has_error_branch": false,
+        "has_timeout": false,
+        "has_inline_error_marker": false,
+        "has_skeleton_ok_marker": false,
+        "violation": "SKELETON_WITHOUT_ERROR_BRANCH"
+      }
     },
     "apps/memberry/src/features/booking/components/active-booking-card.tsx": {
       "name": "active-booking-card",
@@ -2117,9 +2282,40 @@
       ],
       "slots": [],
       "state_access": [],
-      "api_calls": [],
+      "api_calls": [
+        {
+          "kind": "react-query-mutation",
+          "name": "createBookingEventMutation",
+          "operation_id": "createBookingEvent",
+          "endpoint": "POST /booking/events",
+          "imported_from": "@monobase/sdk-ts/generated/react-query",
+          "confidence": "HIGH"
+        },
+        {
+          "kind": "react-query-mutation",
+          "name": "updateBookingEventMutation",
+          "operation_id": "updateBookingEvent",
+          "endpoint": "PATCH /booking/events/{event}",
+          "imported_from": "@monobase/sdk-ts/generated/react-query",
+          "confidence": "HIGH"
+        },
+        {
+          "kind": "react-query-options",
+          "name": "listBookingEventsQueryKey",
+          "imported_from": "@monobase/sdk-ts/generated/react-query",
+          "confidence": "LOW"
+        }
+      ],
       "routes_used_in": [],
-      "confidence": "MEDIUM"
+      "confidence": "MEDIUM",
+      "loading_state_hygiene": {
+        "has_skeleton": false,
+        "has_error_branch": false,
+        "has_timeout": false,
+        "has_inline_error_marker": false,
+        "has_skeleton_ok_marker": false,
+        "violation": null
+      }
     },
     "apps/memberry/src/features/booking/components/booking-list.tsx": {
       "name": "booking-list",
@@ -2142,9 +2338,26 @@
         }
       ],
       "state_access": [],
-      "api_calls": [],
+      "api_calls": [
+        {
+          "kind": "react-query-options",
+          "name": "listBookingsOptions",
+          "operation_id": "listBookings",
+          "endpoint": "GET /booking/bookings",
+          "imported_from": "@monobase/sdk-ts/generated/react-query",
+          "confidence": "HIGH"
+        }
+      ],
       "routes_used_in": [],
-      "confidence": "MEDIUM"
+      "confidence": "MEDIUM",
+      "loading_state_hygiene": {
+        "has_skeleton": true,
+        "has_error_branch": false,
+        "has_timeout": false,
+        "has_inline_error_marker": false,
+        "has_skeleton_ok_marker": false,
+        "violation": "SKELETON_WITHOUT_ERROR_BRANCH"
+      }
     },
     "apps/memberry/src/features/booking/components/booking-widget-skeleton.tsx": {
       "name": "booking-widget-skeleton",
@@ -2157,7 +2370,15 @@
       "state_access": [],
       "api_calls": [],
       "routes_used_in": [],
-      "confidence": "LOW"
+      "confidence": "LOW",
+      "loading_state_hygiene": {
+        "has_skeleton": false,
+        "has_error_branch": false,
+        "has_timeout": false,
+        "has_inline_error_marker": false,
+        "has_skeleton_ok_marker": false,
+        "violation": null
+      }
     },
     "apps/memberry/src/features/booking/components/booking-widget.tsx": {
       "name": "booking-widget",
@@ -2222,9 +2443,26 @@
       "events_out": [],
       "slots": [],
       "state_access": [],
-      "api_calls": [],
+      "api_calls": [
+        {
+          "kind": "react-query-options",
+          "name": "listBookingEventsOptions",
+          "operation_id": "listBookingEvents",
+          "endpoint": "GET /booking/events",
+          "imported_from": "@monobase/sdk-ts/generated/react-query",
+          "confidence": "HIGH"
+        }
+      ],
       "routes_used_in": [],
-      "confidence": "LOW"
+      "confidence": "LOW",
+      "loading_state_hygiene": {
+        "has_skeleton": true,
+        "has_error_branch": false,
+        "has_timeout": false,
+        "has_inline_error_marker": false,
+        "has_skeleton_ok_marker": false,
+        "violation": "SKELETON_WITHOUT_ERROR_BRANCH"
+      }
     },
     "apps/memberry/src/features/booking/lib/adapters.ts": {
       "name": "adapters",
@@ -2289,7 +2527,15 @@
       "state_access": [],
       "api_calls": [],
       "routes_used_in": [],
-      "confidence": "LOW"
+      "confidence": "LOW",
+      "loading_state_hygiene": {
+        "has_skeleton": false,
+        "has_error_branch": false,
+        "has_timeout": false,
+        "has_inline_error_marker": false,
+        "has_skeleton_ok_marker": false,
+        "violation": null
+      }
     },
     "apps/memberry/src/features/certificates/components/certificate-preview.tsx": {
       "name": "certificate-preview",
@@ -2309,7 +2555,15 @@
       "state_access": [],
       "api_calls": [],
       "routes_used_in": [],
-      "confidence": "MEDIUM"
+      "confidence": "MEDIUM",
+      "loading_state_hygiene": {
+        "has_skeleton": false,
+        "has_error_branch": false,
+        "has_timeout": false,
+        "has_inline_error_marker": false,
+        "has_skeleton_ok_marker": false,
+        "violation": null
+      }
     },
     "apps/memberry/src/features/chapters/components/affiliation-list.tsx": {
       "name": "affiliation-list",
@@ -2492,9 +2746,26 @@
       ],
       "slots": [],
       "state_access": [],
-      "api_calls": [],
+      "api_calls": [
+        {
+          "kind": "react-query-options",
+          "name": "listChatRoomsOptions",
+          "operation_id": "listChatRooms",
+          "endpoint": "GET /comms/chat-rooms",
+          "imported_from": "@monobase/sdk-ts/generated/react-query",
+          "confidence": "HIGH"
+        }
+      ],
       "routes_used_in": [],
-      "confidence": "MEDIUM"
+      "confidence": "MEDIUM",
+      "loading_state_hygiene": {
+        "has_skeleton": true,
+        "has_error_branch": false,
+        "has_timeout": false,
+        "has_inline_error_marker": false,
+        "has_skeleton_ok_marker": false,
+        "violation": "SKELETON_WITHOUT_ERROR_BRANCH"
+      }
     },
     "apps/memberry/src/features/comms/components/chat-thread.tsx": {
       "name": "chat-thread",
@@ -2527,9 +2798,40 @@
       ],
       "slots": [],
       "state_access": [],
-      "api_calls": [],
+      "api_calls": [
+        {
+          "kind": "react-query-options",
+          "name": "getChatMessagesOptions",
+          "operation_id": "getChatMessages",
+          "endpoint": "GET /comms/chat-rooms/{room}/messages",
+          "imported_from": "@monobase/sdk-ts/generated/react-query",
+          "confidence": "HIGH"
+        },
+        {
+          "kind": "react-query-options",
+          "name": "getChatMessagesQueryKey",
+          "imported_from": "@monobase/sdk-ts/generated/react-query",
+          "confidence": "LOW"
+        },
+        {
+          "kind": "react-query-mutation",
+          "name": "sendChatMessageMutation",
+          "operation_id": "sendChatMessage",
+          "endpoint": "POST /comms/chat-rooms/{room}/messages",
+          "imported_from": "@monobase/sdk-ts/generated/react-query",
+          "confidence": "HIGH"
+        }
+      ],
       "routes_used_in": [],
-      "confidence": "MEDIUM"
+      "confidence": "MEDIUM",
+      "loading_state_hygiene": {
+        "has_skeleton": true,
+        "has_error_branch": false,
+        "has_timeout": false,
+        "has_inline_error_marker": false,
+        "has_skeleton_ok_marker": false,
+        "violation": "SKELETON_WITHOUT_ERROR_BRANCH"
+      }
     },
     "apps/memberry/src/features/comms/components/chat-view.tsx": {
       "name": "chat-view",
@@ -2559,9 +2861,32 @@
       "events_out": [],
       "slots": [],
       "state_access": [],
-      "api_calls": [],
+      "api_calls": [
+        {
+          "kind": "react-query-options",
+          "name": "getChatMessagesOptions",
+          "operation_id": "getChatMessages",
+          "endpoint": "GET /comms/chat-rooms/{room}/messages",
+          "imported_from": "@monobase/sdk-ts/generated/react-query",
+          "confidence": "HIGH"
+        },
+        {
+          "kind": "react-query-options",
+          "name": "getChatMessagesQueryKey",
+          "imported_from": "@monobase/sdk-ts/generated/react-query",
+          "confidence": "LOW"
+        }
+      ],
       "routes_used_in": [],
-      "confidence": "MEDIUM"
+      "confidence": "MEDIUM",
+      "loading_state_hygiene": {
+        "has_skeleton": true,
+        "has_error_branch": false,
+        "has_timeout": true,
+        "has_inline_error_marker": false,
+        "has_skeleton_ok_marker": false,
+        "violation": "SKELETON_WITHOUT_ERROR_BRANCH"
+      }
     },
     "apps/memberry/src/features/comms/components/connection-status.tsx": {
       "name": "connection-status",
@@ -2587,7 +2912,15 @@
       "state_access": [],
       "api_calls": [],
       "routes_used_in": [],
-      "confidence": "MEDIUM"
+      "confidence": "MEDIUM",
+      "loading_state_hygiene": {
+        "has_skeleton": false,
+        "has_error_branch": false,
+        "has_timeout": false,
+        "has_inline_error_marker": false,
+        "has_skeleton_ok_marker": false,
+        "violation": null
+      }
     },
     "apps/memberry/src/features/comms/components/create-channel-dialog.tsx": {
       "name": "create-channel-dialog",
@@ -2634,9 +2967,26 @@
       ],
       "slots": [],
       "state_access": [],
-      "api_calls": [],
+      "api_calls": [
+        {
+          "kind": "react-query-mutation",
+          "name": "createChatRoomMutation",
+          "operation_id": "createChatRoom",
+          "endpoint": "POST /comms/chat-rooms",
+          "imported_from": "@monobase/sdk-ts/generated/react-query",
+          "confidence": "HIGH"
+        }
+      ],
       "routes_used_in": [],
-      "confidence": "MEDIUM"
+      "confidence": "MEDIUM",
+      "loading_state_hygiene": {
+        "has_skeleton": false,
+        "has_error_branch": true,
+        "has_timeout": false,
+        "has_inline_error_marker": false,
+        "has_skeleton_ok_marker": false,
+        "violation": null
+      }
     },
     "apps/memberry/src/features/comms/components/dm-list.tsx": {
       "name": "dm-list",
@@ -2681,9 +3031,26 @@
       ],
       "slots": [],
       "state_access": [],
-      "api_calls": [],
+      "api_calls": [
+        {
+          "kind": "react-query-options",
+          "name": "listChatRoomsOptions",
+          "operation_id": "listChatRooms",
+          "endpoint": "GET /comms/chat-rooms",
+          "imported_from": "@monobase/sdk-ts/generated/react-query",
+          "confidence": "HIGH"
+        }
+      ],
       "routes_used_in": [],
-      "confidence": "MEDIUM"
+      "confidence": "MEDIUM",
+      "loading_state_hygiene": {
+        "has_skeleton": true,
+        "has_error_branch": false,
+        "has_timeout": false,
+        "has_inline_error_marker": false,
+        "has_skeleton_ok_marker": false,
+        "violation": "SKELETON_WITHOUT_ERROR_BRANCH"
+      }
     },
     "apps/memberry/src/features/comms/components/message-bubble.tsx": {
       "name": "message-bubble",
@@ -2789,9 +3156,26 @@
       ],
       "slots": [],
       "state_access": [],
-      "api_calls": [],
+      "api_calls": [
+        {
+          "kind": "react-query-mutation",
+          "name": "sendChatMessageMutation",
+          "operation_id": "sendChatMessage",
+          "endpoint": "POST /comms/chat-rooms/{room}/messages",
+          "imported_from": "@monobase/sdk-ts/generated/react-query",
+          "confidence": "HIGH"
+        }
+      ],
       "routes_used_in": [],
-      "confidence": "MEDIUM"
+      "confidence": "MEDIUM",
+      "loading_state_hygiene": {
+        "has_skeleton": false,
+        "has_error_branch": true,
+        "has_timeout": true,
+        "has_inline_error_marker": false,
+        "has_skeleton_ok_marker": false,
+        "violation": null
+      }
     },
     "apps/memberry/src/features/comms/components/message-reactions.tsx": {
       "name": "message-reactions",
@@ -2873,7 +3257,15 @@
       "state_access": [],
       "api_calls": [],
       "routes_used_in": [],
-      "confidence": "MEDIUM"
+      "confidence": "MEDIUM",
+      "loading_state_hygiene": {
+        "has_skeleton": true,
+        "has_error_branch": false,
+        "has_timeout": true,
+        "has_inline_error_marker": false,
+        "has_skeleton_ok_marker": false,
+        "violation": "SKELETON_WITHOUT_ERROR_BRANCH"
+      }
     },
     "apps/memberry/src/features/comms/components/thread-panel.tsx": {
       "name": "thread-panel",
@@ -2914,9 +3306,26 @@
       ],
       "slots": [],
       "state_access": [],
-      "api_calls": [],
+      "api_calls": [
+        {
+          "kind": "react-query-options",
+          "name": "getChatMessagesOptions",
+          "operation_id": "getChatMessages",
+          "endpoint": "GET /comms/chat-rooms/{room}/messages",
+          "imported_from": "@monobase/sdk-ts/generated/react-query",
+          "confidence": "HIGH"
+        }
+      ],
       "routes_used_in": [],
-      "confidence": "MEDIUM"
+      "confidence": "MEDIUM",
+      "loading_state_hygiene": {
+        "has_skeleton": true,
+        "has_error_branch": false,
+        "has_timeout": false,
+        "has_inline_error_marker": false,
+        "has_skeleton_ok_marker": false,
+        "violation": "SKELETON_WITHOUT_ERROR_BRANCH"
+      }
     },
     "apps/memberry/src/features/comms/components/typing-indicator.tsx": {
       "name": "typing-indicator",
@@ -2972,9 +3381,42 @@
       "events_out": [],
       "slots": [],
       "state_access": [],
-      "api_calls": [],
+      "api_calls": [
+        {
+          "kind": "react-query-options",
+          "name": "getIceServersOptions",
+          "operation_id": "getIceServers",
+          "endpoint": "GET /comms/ice-servers",
+          "imported_from": "@monobase/sdk-ts/generated/react-query",
+          "confidence": "HIGH"
+        },
+        {
+          "kind": "react-query-mutation",
+          "name": "joinVideoCallMutation",
+          "operation_id": "joinVideoCall",
+          "endpoint": "POST /comms/chat-rooms/{room}/video-call/join",
+          "imported_from": "@monobase/sdk-ts/generated/react-query",
+          "confidence": "HIGH"
+        },
+        {
+          "kind": "react-query-mutation",
+          "name": "leaveVideoCallMutation",
+          "operation_id": "leaveVideoCall",
+          "endpoint": "POST /comms/chat-rooms/{room}/video-call/leave",
+          "imported_from": "@monobase/sdk-ts/generated/react-query",
+          "confidence": "HIGH"
+        }
+      ],
       "routes_used_in": [],
-      "confidence": "MEDIUM"
+      "confidence": "MEDIUM",
+      "loading_state_hygiene": {
+        "has_skeleton": false,
+        "has_error_branch": false,
+        "has_timeout": false,
+        "has_inline_error_marker": false,
+        "has_skeleton_ok_marker": false,
+        "violation": null
+      }
     },
     "apps/memberry/src/features/comms/components/video-call-ui.tsx": {
       "name": "video-call-ui",
@@ -3468,7 +3910,15 @@
       "state_access": [],
       "api_calls": [],
       "routes_used_in": [],
-      "confidence": "MEDIUM"
+      "confidence": "MEDIUM",
+      "loading_state_hygiene": {
+        "has_skeleton": true,
+        "has_error_branch": false,
+        "has_timeout": false,
+        "has_inline_error_marker": false,
+        "has_skeleton_ok_marker": false,
+        "violation": "SKELETON_WITHOUT_ERROR_BRANCH"
+      }
     },
     "apps/memberry/src/features/communications/components/audience-picker.tsx": {
       "name": "audience-picker",
@@ -3695,14 +4145,17 @@
       ],
       "slots": [],
       "state_access": [],
-      "api_calls": [
-        {
-          "method": "POST",
-          "endpoint": "/api/communications/subscriptions/bulk"
-        }
-      ],
+      "api_calls": [],
       "routes_used_in": [],
-      "confidence": "MEDIUM"
+      "confidence": "MEDIUM",
+      "loading_state_hygiene": {
+        "has_skeleton": true,
+        "has_error_branch": true,
+        "has_timeout": false,
+        "has_inline_error_marker": false,
+        "has_skeleton_ok_marker": false,
+        "violation": null
+      }
     },
     "apps/memberry/src/features/communications/components/template-form.tsx": {
       "name": "template-form",
@@ -3807,14 +4260,17 @@
       ],
       "slots": [],
       "state_access": [],
-      "api_calls": [
-        {
-          "method": "DELETE",
-          "endpoint": "/api/association/message-templates/${id}"
-        }
-      ],
+      "api_calls": [],
       "routes_used_in": [],
-      "confidence": "MEDIUM"
+      "confidence": "MEDIUM",
+      "loading_state_hygiene": {
+        "has_skeleton": false,
+        "has_error_branch": true,
+        "has_timeout": false,
+        "has_inline_error_marker": false,
+        "has_skeleton_ok_marker": false,
+        "violation": null
+      }
     },
     "apps/memberry/src/features/communications/components/template-preview.tsx": {
       "name": "template-preview",
@@ -4013,7 +4469,15 @@
       "state_access": [],
       "api_calls": [],
       "routes_used_in": [],
-      "confidence": "LOW"
+      "confidence": "LOW",
+      "loading_state_hygiene": {
+        "has_skeleton": false,
+        "has_error_branch": false,
+        "has_timeout": false,
+        "has_inline_error_marker": false,
+        "has_skeleton_ok_marker": false,
+        "violation": null
+      }
     },
     "apps/memberry/src/features/dashboard/components/org-announcements.tsx": {
       "name": "org-announcements",
@@ -4128,7 +4592,15 @@
       "state_access": [],
       "api_calls": [],
       "routes_used_in": [],
-      "confidence": "MEDIUM"
+      "confidence": "MEDIUM",
+      "loading_state_hygiene": {
+        "has_skeleton": false,
+        "has_error_branch": false,
+        "has_timeout": false,
+        "has_inline_error_marker": false,
+        "has_skeleton_ok_marker": false,
+        "violation": null
+      }
     },
     "apps/memberry/src/features/directory/components/member-profile.tsx": {
       "name": "member-profile",
@@ -4160,7 +4632,15 @@
       "state_access": [],
       "api_calls": [],
       "routes_used_in": [],
-      "confidence": "MEDIUM"
+      "confidence": "MEDIUM",
+      "loading_state_hygiene": {
+        "has_skeleton": false,
+        "has_error_branch": true,
+        "has_timeout": false,
+        "has_inline_error_marker": false,
+        "has_skeleton_ok_marker": false,
+        "violation": null
+      }
     },
     "apps/memberry/src/features/directory/components/trust-card.tsx": {
       "name": "trust-card",
@@ -4254,7 +4734,15 @@
       "state_access": [],
       "api_calls": [],
       "routes_used_in": [],
-      "confidence": "MEDIUM"
+      "confidence": "MEDIUM",
+      "loading_state_hygiene": {
+        "has_skeleton": false,
+        "has_error_branch": false,
+        "has_timeout": false,
+        "has_inline_error_marker": false,
+        "has_skeleton_ok_marker": false,
+        "violation": null
+      }
     },
     "apps/memberry/src/features/directory/lib/visibility.ts": {
       "name": "visibility",
@@ -4287,7 +4775,15 @@
       "state_access": [],
       "api_calls": [],
       "routes_used_in": [],
-      "confidence": "MEDIUM"
+      "confidence": "MEDIUM",
+      "loading_state_hygiene": {
+        "has_skeleton": true,
+        "has_error_branch": false,
+        "has_timeout": true,
+        "has_inline_error_marker": false,
+        "has_skeleton_ok_marker": false,
+        "violation": "SKELETON_WITHOUT_ERROR_BRANCH"
+      }
     },
     "apps/memberry/src/features/documents/components/document-library.tsx": {
       "name": "document-library",
@@ -4350,9 +4846,64 @@
       ],
       "slots": [],
       "state_access": [],
-      "api_calls": [],
+      "api_calls": [
+        {
+          "kind": "react-query-options",
+          "name": "searchDocumentsOptions",
+          "operation_id": "searchDocuments",
+          "endpoint": "GET /association/documents",
+          "imported_from": "@monobase/sdk-ts/generated/react-query",
+          "confidence": "HIGH"
+        },
+        {
+          "kind": "react-query-options",
+          "name": "searchDocumentsQueryKey",
+          "imported_from": "@monobase/sdk-ts/generated/react-query",
+          "confidence": "LOW"
+        },
+        {
+          "kind": "react-query-mutation",
+          "name": "createDocumentMutation",
+          "operation_id": "createDocument",
+          "endpoint": "POST /association/documents",
+          "imported_from": "@monobase/sdk-ts/generated/react-query",
+          "confidence": "HIGH"
+        },
+        {
+          "kind": "react-query-mutation",
+          "name": "archiveDocumentMutation",
+          "operation_id": "archiveDocument",
+          "endpoint": "POST /association/documents/{documentId}/archive",
+          "imported_from": "@monobase/sdk-ts/generated/react-query",
+          "confidence": "HIGH"
+        },
+        {
+          "kind": "react-query-mutation",
+          "name": "deleteDocumentMutation",
+          "operation_id": "deleteDocument",
+          "endpoint": "DELETE /association/documents/{documentId}",
+          "imported_from": "@monobase/sdk-ts/generated/react-query",
+          "confidence": "HIGH"
+        },
+        {
+          "kind": "react-query-mutation",
+          "name": "updateDocumentMutation",
+          "operation_id": "updateDocument",
+          "endpoint": "PATCH /association/documents/{documentId}",
+          "imported_from": "@monobase/sdk-ts/generated/react-query",
+          "confidence": "HIGH"
+        }
+      ],
       "routes_used_in": [],
-      "confidence": "MEDIUM"
+      "confidence": "MEDIUM",
+      "loading_state_hygiene": {
+        "has_skeleton": true,
+        "has_error_branch": true,
+        "has_timeout": false,
+        "has_inline_error_marker": false,
+        "has_skeleton_ok_marker": false,
+        "violation": null
+      }
     },
     "apps/memberry/src/features/dues/components/alert-banner.tsx": {
       "name": "alert-banner",
@@ -4541,7 +5092,15 @@
       "state_access": [],
       "api_calls": [],
       "routes_used_in": [],
-      "confidence": "MEDIUM"
+      "confidence": "MEDIUM",
+      "loading_state_hygiene": {
+        "has_skeleton": true,
+        "has_error_branch": false,
+        "has_timeout": false,
+        "has_inline_error_marker": false,
+        "has_skeleton_ok_marker": false,
+        "violation": "SKELETON_WITHOUT_ERROR_BRANCH"
+      }
     },
     "apps/memberry/src/features/dues/components/dues-config-form.tsx": {
       "name": "dues-config-form",
@@ -4584,9 +5143,48 @@
       ],
       "slots": [],
       "state_access": [],
-      "api_calls": [],
+      "api_calls": [
+        {
+          "kind": "react-query-options",
+          "name": "getDuesConfigOptions",
+          "operation_id": "getDuesConfig",
+          "endpoint": "GET /association/member/dues-configs/{duesConfigId}",
+          "imported_from": "@monobase/sdk-ts/generated/react-query",
+          "confidence": "HIGH"
+        },
+        {
+          "kind": "react-query-options",
+          "name": "getDuesConfigQueryKey",
+          "imported_from": "@monobase/sdk-ts/generated/react-query",
+          "confidence": "LOW"
+        },
+        {
+          "kind": "react-query-mutation",
+          "name": "createDuesConfigMutation",
+          "operation_id": "createDuesConfig",
+          "endpoint": "POST /association/member/dues-configs",
+          "imported_from": "@monobase/sdk-ts/generated/react-query",
+          "confidence": "HIGH"
+        },
+        {
+          "kind": "react-query-mutation",
+          "name": "updateDuesConfigMutation",
+          "operation_id": "updateDuesConfig",
+          "endpoint": "PATCH /association/member/dues-configs/{duesConfigId}",
+          "imported_from": "@monobase/sdk-ts/generated/react-query",
+          "confidence": "HIGH"
+        }
+      ],
       "routes_used_in": [],
-      "confidence": "MEDIUM"
+      "confidence": "MEDIUM",
+      "loading_state_hygiene": {
+        "has_skeleton": true,
+        "has_error_branch": true,
+        "has_timeout": false,
+        "has_inline_error_marker": false,
+        "has_skeleton_ok_marker": false,
+        "violation": null
+      }
     },
     "apps/memberry/src/features/dues/components/dues-config-form.utils.ts": {
       "name": "dues-config-form.utils",
@@ -4676,7 +5274,15 @@
       "state_access": [],
       "api_calls": [],
       "routes_used_in": [],
-      "confidence": "MEDIUM"
+      "confidence": "MEDIUM",
+      "loading_state_hygiene": {
+        "has_skeleton": true,
+        "has_error_branch": true,
+        "has_timeout": false,
+        "has_inline_error_marker": false,
+        "has_skeleton_ok_marker": false,
+        "violation": null
+      }
     },
     "apps/memberry/src/features/dues/components/dues-setup-checklist.tsx": {
       "name": "dues-setup-checklist",
@@ -4694,9 +5300,42 @@
       "events_out": [],
       "slots": [],
       "state_access": [],
-      "api_calls": [],
+      "api_calls": [
+        {
+          "kind": "react-query-options",
+          "name": "getDuesConfigOptions",
+          "operation_id": "getDuesConfig",
+          "endpoint": "GET /association/member/dues-configs/{duesConfigId}",
+          "imported_from": "@monobase/sdk-ts/generated/react-query",
+          "confidence": "HIGH"
+        },
+        {
+          "kind": "react-query-options",
+          "name": "getDuesGatewayConfigOptions",
+          "operation_id": "getDuesGatewayConfig",
+          "endpoint": "GET /association/member/dues-gateway/{organizationId}",
+          "imported_from": "@monobase/sdk-ts/generated/react-query",
+          "confidence": "HIGH"
+        },
+        {
+          "kind": "react-query-options",
+          "name": "listDuesFundsOptions",
+          "operation_id": "listDuesFunds",
+          "endpoint": "GET /association/member/dues-reporting",
+          "imported_from": "@monobase/sdk-ts/generated/react-query",
+          "confidence": "HIGH"
+        }
+      ],
       "routes_used_in": [],
-      "confidence": "MEDIUM"
+      "confidence": "MEDIUM",
+      "loading_state_hygiene": {
+        "has_skeleton": false,
+        "has_error_branch": false,
+        "has_timeout": false,
+        "has_inline_error_marker": false,
+        "has_skeleton_ok_marker": false,
+        "violation": null
+      }
     },
     "apps/memberry/src/features/dues/components/dues-status-badge.tsx": {
       "name": "dues-status-badge",
@@ -4795,9 +5434,26 @@
       "events_out": [],
       "slots": [],
       "state_access": [],
-      "api_calls": [],
+      "api_calls": [
+        {
+          "kind": "react-query-options",
+          "name": "getDuesFinancialDashboardOptions",
+          "operation_id": "getDuesFinancialDashboard",
+          "endpoint": "GET /association/member/dues-reporting/{organizationId}/dashboard",
+          "imported_from": "@monobase/sdk-ts/generated/react-query",
+          "confidence": "HIGH"
+        }
+      ],
       "routes_used_in": [],
-      "confidence": "MEDIUM"
+      "confidence": "MEDIUM",
+      "loading_state_hygiene": {
+        "has_skeleton": true,
+        "has_error_branch": false,
+        "has_timeout": false,
+        "has_inline_error_marker": false,
+        "has_skeleton_ok_marker": false,
+        "violation": "SKELETON_WITHOUT_ERROR_BRANCH"
+      }
     },
     "apps/memberry/src/features/dues/components/fund-allocation-editor.tsx": {
       "name": "fund-allocation-editor",
@@ -4901,9 +5557,56 @@
       ],
       "slots": [],
       "state_access": [],
-      "api_calls": [],
+      "api_calls": [
+        {
+          "kind": "react-query-options",
+          "name": "getDuesGatewayConfigOptions",
+          "operation_id": "getDuesGatewayConfig",
+          "endpoint": "GET /association/member/dues-gateway/{organizationId}",
+          "imported_from": "@monobase/sdk-ts/generated/react-query",
+          "confidence": "HIGH"
+        },
+        {
+          "kind": "react-query-options",
+          "name": "getDuesGatewayConfigQueryKey",
+          "imported_from": "@monobase/sdk-ts/generated/react-query",
+          "confidence": "LOW"
+        },
+        {
+          "kind": "react-query-mutation",
+          "name": "upsertDuesGatewayConfigMutation",
+          "operation_id": "upsertDuesGatewayConfig",
+          "endpoint": "PUT /association/member/dues-gateway/{organizationId}",
+          "imported_from": "@monobase/sdk-ts/generated/react-query",
+          "confidence": "HIGH"
+        },
+        {
+          "kind": "react-query-mutation",
+          "name": "testDuesGatewayConnectionMutation",
+          "operation_id": "testDuesGatewayConnection",
+          "endpoint": "POST /association/member/dues-gateway/{organizationId}/test",
+          "imported_from": "@monobase/sdk-ts/generated/react-query",
+          "confidence": "HIGH"
+        },
+        {
+          "kind": "react-query-mutation",
+          "name": "disconnectDuesGatewayMutation",
+          "operation_id": "disconnectDuesGateway",
+          "endpoint": "DELETE /association/member/dues-gateway/{organizationId}",
+          "imported_from": "@monobase/sdk-ts/generated/react-query",
+          "confidence": "HIGH"
+        }
+      ],
       "routes_used_in": [],
-      "confidence": "MEDIUM"
+      "confidence": "MEDIUM",
+      "loading_state_hygiene": {
+        "has_skeleton": true,
+        "has_error_branch": true,
+        "has_timeout": false,
+        "has_inline_error_marker": false,
+        "has_skeleton_ok_marker": false,
+        "violation": null
+      }
     },
     "apps/memberry/src/features/dues/components/metric-card.tsx": {
       "name": "metric-card",
@@ -4959,7 +5662,15 @@
       "state_access": [],
       "api_calls": [],
       "routes_used_in": [],
-      "confidence": "MEDIUM"
+      "confidence": "MEDIUM",
+      "loading_state_hygiene": {
+        "has_skeleton": false,
+        "has_error_branch": false,
+        "has_timeout": false,
+        "has_inline_error_marker": false,
+        "has_skeleton_ok_marker": false,
+        "violation": null
+      }
     },
     "apps/memberry/src/features/dues/components/monthly-trend-chart.tsx": {
       "name": "monthly-trend-chart",
@@ -5003,9 +5714,26 @@
       "events_out": [],
       "slots": [],
       "state_access": [],
-      "api_calls": [],
+      "api_calls": [
+        {
+          "kind": "react-query-options",
+          "name": "listDuesPaymentsOptions",
+          "operation_id": "listDuesPayments",
+          "endpoint": "GET /association/member/dues-payments",
+          "imported_from": "@monobase/sdk-ts/generated/react-query",
+          "confidence": "HIGH"
+        }
+      ],
       "routes_used_in": [],
-      "confidence": "MEDIUM"
+      "confidence": "MEDIUM",
+      "loading_state_hygiene": {
+        "has_skeleton": true,
+        "has_error_branch": false,
+        "has_timeout": false,
+        "has_inline_error_marker": false,
+        "has_skeleton_ok_marker": false,
+        "violation": "SKELETON_WITHOUT_ERROR_BRANCH"
+      }
     },
     "apps/memberry/src/features/dues/components/payment-schedule-timeline.tsx": {
       "name": "payment-schedule-timeline",
@@ -5094,9 +5822,54 @@
       ],
       "slots": [],
       "state_access": [],
-      "api_calls": [],
+      "api_calls": [
+        {
+          "kind": "react-query-options",
+          "name": "listPendingProofsOptions",
+          "operation_id": "listPendingProofs",
+          "endpoint": "GET /association/member/dues-payments/pending-proofs",
+          "imported_from": "@monobase/sdk-ts/generated/react-query",
+          "confidence": "HIGH"
+        },
+        {
+          "kind": "react-query-options",
+          "name": "listPendingProofsQueryKey",
+          "imported_from": "@monobase/sdk-ts/generated/react-query",
+          "confidence": "LOW"
+        },
+        {
+          "kind": "react-query-options",
+          "name": "listDuesPaymentsQueryKey",
+          "imported_from": "@monobase/sdk-ts/generated/react-query",
+          "confidence": "LOW"
+        },
+        {
+          "kind": "react-query-mutation",
+          "name": "confirmPaymentProofMutation",
+          "operation_id": "confirmPaymentProof",
+          "endpoint": "POST /association/member/dues-payments/{paymentId}/confirm",
+          "imported_from": "@monobase/sdk-ts/generated/react-query",
+          "confidence": "HIGH"
+        },
+        {
+          "kind": "react-query-mutation",
+          "name": "rejectPaymentProofMutation",
+          "operation_id": "rejectPaymentProof",
+          "endpoint": "POST /association/member/dues-payments/{paymentId}/reject",
+          "imported_from": "@monobase/sdk-ts/generated/react-query",
+          "confidence": "HIGH"
+        }
+      ],
       "routes_used_in": [],
-      "confidence": "MEDIUM"
+      "confidence": "MEDIUM",
+      "loading_state_hygiene": {
+        "has_skeleton": false,
+        "has_error_branch": true,
+        "has_timeout": false,
+        "has_inline_error_marker": false,
+        "has_skeleton_ok_marker": false,
+        "violation": null
+      }
     },
     "apps/memberry/src/features/dues/components/proof-upload-form.tsx": {
       "name": "proof-upload-form",
@@ -5153,12 +5926,40 @@
       "state_access": [],
       "api_calls": [
         {
-          "method": "GET",
+          "kind": "react-query-mutation",
+          "name": "submitPaymentProofMutation",
+          "operation_id": "submitPaymentProof",
+          "endpoint": "POST /association/member/dues-payments/submit-proof",
+          "imported_from": "@monobase/sdk-ts/generated/react-query",
+          "confidence": "HIGH"
+        },
+        {
+          "kind": "react-query-options",
+          "name": "listDuesPaymentsQueryKey",
+          "imported_from": "@monobase/sdk-ts/generated/react-query",
+          "confidence": "LOW"
+        },
+        {
+          "kind": "react-query-options",
+          "name": "listDuesInvoicesQueryKey",
+          "imported_from": "@monobase/sdk-ts/generated/react-query",
+          "confidence": "LOW"
+        },
+        {
+          "method": "UNKNOWN",
           "endpoint": "/api/storage/files"
         }
       ],
       "routes_used_in": [],
-      "confidence": "MEDIUM"
+      "confidence": "MEDIUM",
+      "loading_state_hygiene": {
+        "has_skeleton": false,
+        "has_error_branch": true,
+        "has_timeout": false,
+        "has_inline_error_marker": false,
+        "has_skeleton_ok_marker": false,
+        "violation": null
+      }
     },
     "apps/memberry/src/features/dues/components/recent-activity-feed.tsx": {
       "name": "recent-activity-feed",
@@ -5188,9 +5989,26 @@
       "events_out": [],
       "slots": [],
       "state_access": [],
-      "api_calls": [],
+      "api_calls": [
+        {
+          "kind": "react-query-options",
+          "name": "listDuesPaymentsOptions",
+          "operation_id": "listDuesPayments",
+          "endpoint": "GET /association/member/dues-payments",
+          "imported_from": "@monobase/sdk-ts/generated/react-query",
+          "confidence": "HIGH"
+        }
+      ],
       "routes_used_in": [],
-      "confidence": "MEDIUM"
+      "confidence": "MEDIUM",
+      "loading_state_hygiene": {
+        "has_skeleton": true,
+        "has_error_branch": false,
+        "has_timeout": false,
+        "has_inline_error_marker": false,
+        "has_skeleton_ok_marker": false,
+        "violation": "SKELETON_WITHOUT_ERROR_BRANCH"
+      }
     },
     "apps/memberry/src/features/dues/components/record-payment-form.tsx": {
       "name": "record-payment-form",
@@ -5213,9 +6031,42 @@
       ],
       "slots": [],
       "state_access": [],
-      "api_calls": [],
+      "api_calls": [
+        {
+          "kind": "react-query-options",
+          "name": "listDuesFundsOptions",
+          "operation_id": "listDuesFunds",
+          "endpoint": "GET /association/member/dues-reporting",
+          "imported_from": "@monobase/sdk-ts/generated/react-query",
+          "confidence": "HIGH"
+        },
+        {
+          "kind": "react-query-options",
+          "name": "listRosterMembersOptions",
+          "operation_id": "listRosterMembers",
+          "endpoint": "GET /association/member/roster",
+          "imported_from": "@monobase/sdk-ts/generated/react-query",
+          "confidence": "HIGH"
+        },
+        {
+          "kind": "react-query-mutation",
+          "name": "recordDuesPaymentMutation",
+          "operation_id": "recordDuesPayment",
+          "endpoint": "POST /association/member/dues-payments",
+          "imported_from": "@monobase/sdk-ts/generated/react-query",
+          "confidence": "HIGH"
+        }
+      ],
       "routes_used_in": [],
-      "confidence": "MEDIUM"
+      "confidence": "MEDIUM",
+      "loading_state_hygiene": {
+        "has_skeleton": false,
+        "has_error_branch": false,
+        "has_timeout": true,
+        "has_inline_error_marker": false,
+        "has_skeleton_ok_marker": false,
+        "violation": null
+      }
     },
     "apps/memberry/src/features/dues/components/refund-form.tsx": {
       "name": "refund-form",
@@ -5254,9 +6105,32 @@
       ],
       "slots": [],
       "state_access": [],
-      "api_calls": [],
+      "api_calls": [
+        {
+          "kind": "react-query-mutation",
+          "name": "refundDuesPaymentMutation",
+          "operation_id": "refundDuesPayment",
+          "endpoint": "POST /association/member/dues-payments/{paymentId}/refund",
+          "imported_from": "@monobase/sdk-ts/generated/react-query",
+          "confidence": "HIGH"
+        },
+        {
+          "kind": "react-query-options",
+          "name": "getDuesPaymentQueryKey",
+          "imported_from": "@monobase/sdk-ts/generated/react-query",
+          "confidence": "LOW"
+        }
+      ],
       "routes_used_in": [],
-      "confidence": "MEDIUM"
+      "confidence": "MEDIUM",
+      "loading_state_hygiene": {
+        "has_skeleton": false,
+        "has_error_branch": true,
+        "has_timeout": false,
+        "has_inline_error_marker": false,
+        "has_skeleton_ok_marker": false,
+        "violation": null
+      }
     },
     "apps/memberry/src/features/dues/components/report-results.tsx": {
       "name": "report-results",
@@ -5294,7 +6168,15 @@
       "state_access": [],
       "api_calls": [],
       "routes_used_in": [],
-      "confidence": "MEDIUM"
+      "confidence": "MEDIUM",
+      "loading_state_hygiene": {
+        "has_skeleton": true,
+        "has_error_branch": false,
+        "has_timeout": false,
+        "has_inline_error_marker": false,
+        "has_skeleton_ok_marker": false,
+        "violation": "SKELETON_WITHOUT_ERROR_BRANCH"
+      }
     },
     "apps/memberry/src/features/dues/components/report-selector.tsx": {
       "name": "report-selector",
@@ -5376,26 +6258,17 @@
       ],
       "slots": [],
       "state_access": [],
-      "api_calls": [
-        {
-          "method": "POST",
-          "endpoint": "/api/association/member/special-assessments"
-        },
-        {
-          "method": "PUT",
-          "endpoint": "/api/association/member/special-assessments/${id}"
-        },
-        {
-          "method": "DELETE",
-          "endpoint": "/api/association/member/special-assessments/${id}"
-        },
-        {
-          "method": "POST",
-          "endpoint": "/api/association/member/special-assessments/${id}/apply"
-        }
-      ],
+      "api_calls": [],
       "routes_used_in": [],
-      "confidence": "MEDIUM"
+      "confidence": "MEDIUM",
+      "loading_state_hygiene": {
+        "has_skeleton": true,
+        "has_error_branch": true,
+        "has_timeout": false,
+        "has_inline_error_marker": false,
+        "has_skeleton_ok_marker": false,
+        "violation": null
+      }
     },
     "apps/memberry/src/features/dues/components/status-distribution-chart.tsx": {
       "name": "status-distribution-chart",
@@ -5563,7 +6436,15 @@
       "state_access": [],
       "api_calls": [],
       "routes_used_in": [],
-      "confidence": "MEDIUM"
+      "confidence": "MEDIUM",
+      "loading_state_hygiene": {
+        "has_skeleton": true,
+        "has_error_branch": true,
+        "has_timeout": false,
+        "has_inline_error_marker": false,
+        "has_skeleton_ok_marker": false,
+        "violation": null
+      }
     },
     "apps/memberry/src/features/elections/components/election-form.tsx": {
       "name": "election-form",
@@ -5646,7 +6527,15 @@
       "state_access": [],
       "api_calls": [],
       "routes_used_in": [],
-      "confidence": "MEDIUM"
+      "confidence": "MEDIUM",
+      "loading_state_hygiene": {
+        "has_skeleton": true,
+        "has_error_branch": false,
+        "has_timeout": false,
+        "has_inline_error_marker": false,
+        "has_skeleton_ok_marker": false,
+        "violation": "SKELETON_WITHOUT_ERROR_BRANCH"
+      }
     },
     "apps/memberry/src/features/elections/components/election-timeline.tsx": {
       "name": "election-timeline",
@@ -5728,7 +6617,15 @@
       "state_access": [],
       "api_calls": [],
       "routes_used_in": [],
-      "confidence": "MEDIUM"
+      "confidence": "MEDIUM",
+      "loading_state_hygiene": {
+        "has_skeleton": true,
+        "has_error_branch": false,
+        "has_timeout": false,
+        "has_inline_error_marker": false,
+        "has_skeleton_ok_marker": false,
+        "violation": "SKELETON_WITHOUT_ERROR_BRANCH"
+      }
     },
     "apps/memberry/src/features/elections/components/member-election-list.tsx": {
       "name": "member-election-list",
@@ -5748,7 +6645,15 @@
       "state_access": [],
       "api_calls": [],
       "routes_used_in": [],
-      "confidence": "MEDIUM"
+      "confidence": "MEDIUM",
+      "loading_state_hygiene": {
+        "has_skeleton": true,
+        "has_error_branch": false,
+        "has_timeout": false,
+        "has_inline_error_marker": false,
+        "has_skeleton_ok_marker": false,
+        "violation": "SKELETON_WITHOUT_ERROR_BRANCH"
+      }
     },
     "apps/memberry/src/features/elections/components/nominee-picker-dialog.tsx": {
       "name": "nominee-picker-dialog",
@@ -5803,9 +6708,26 @@
       ],
       "slots": [],
       "state_access": [],
-      "api_calls": [],
+      "api_calls": [
+        {
+          "kind": "react-query-options",
+          "name": "listRosterMembersOptions",
+          "operation_id": "listRosterMembers",
+          "endpoint": "GET /association/member/roster",
+          "imported_from": "@monobase/sdk-ts/generated/react-query",
+          "confidence": "HIGH"
+        }
+      ],
       "routes_used_in": [],
-      "confidence": "MEDIUM"
+      "confidence": "MEDIUM",
+      "loading_state_hygiene": {
+        "has_skeleton": true,
+        "has_error_branch": true,
+        "has_timeout": false,
+        "has_inline_error_marker": false,
+        "has_skeleton_ok_marker": false,
+        "violation": null
+      }
     },
     "apps/memberry/src/features/elections/components/self-nomination-dialog.tsx": {
       "name": "self-nomination-dialog",
@@ -5910,7 +6832,15 @@
       "state_access": [],
       "api_calls": [],
       "routes_used_in": [],
-      "confidence": "MEDIUM"
+      "confidence": "MEDIUM",
+      "loading_state_hygiene": {
+        "has_skeleton": true,
+        "has_error_branch": true,
+        "has_timeout": false,
+        "has_inline_error_marker": false,
+        "has_skeleton_ok_marker": false,
+        "violation": null
+      }
     },
     "apps/memberry/src/features/events/components/attendance-view.tsx": {
       "name": "attendance-view",
@@ -5939,7 +6869,15 @@
       "state_access": [],
       "api_calls": [],
       "routes_used_in": [],
-      "confidence": "MEDIUM"
+      "confidence": "MEDIUM",
+      "loading_state_hygiene": {
+        "has_skeleton": true,
+        "has_error_branch": true,
+        "has_timeout": true,
+        "has_inline_error_marker": false,
+        "has_skeleton_ok_marker": false,
+        "violation": null
+      }
     },
     "apps/memberry/src/features/events/components/event-calendar.tsx": {
       "name": "event-calendar",
@@ -6264,7 +7202,15 @@
       "state_access": [],
       "api_calls": [],
       "routes_used_in": [],
-      "confidence": "MEDIUM"
+      "confidence": "MEDIUM",
+      "loading_state_hygiene": {
+        "has_skeleton": true,
+        "has_error_branch": true,
+        "has_timeout": false,
+        "has_inline_error_marker": false,
+        "has_skeleton_ok_marker": false,
+        "violation": null
+      }
     },
     "apps/memberry/src/features/events/components/event-timeline.tsx": {
       "name": "event-timeline",
@@ -6415,12 +7361,82 @@
       "state_access": [],
       "api_calls": [
         {
-          "method": "GET",
+          "kind": "react-query-options",
+          "name": "listCustomEventAttendanceOptions",
+          "operation_id": "listCustomEventAttendance",
+          "endpoint": "GET /association/event-lifecycle/{eventId}/attendance",
+          "imported_from": "@monobase/sdk-ts/generated/react-query",
+          "confidence": "HIGH"
+        },
+        {
+          "kind": "react-query-options",
+          "name": "getMyOfficerRoleOptions",
+          "operation_id": "getMyOfficerRole",
+          "endpoint": "GET /persons/me/officer-role/{organizationId}",
+          "imported_from": "@monobase/sdk-ts/generated/react-query",
+          "confidence": "HIGH"
+        },
+        {
+          "kind": "react-query-mutation",
+          "name": "awardManualCreditMutation",
+          "operation_id": "awardManualCredit",
+          "endpoint": "POST /association/member/credits/manual",
+          "imported_from": "@monobase/sdk-ts/generated/react-query",
+          "confidence": "HIGH"
+        },
+        {
+          "kind": "react-query-mutation",
+          "name": "bulkIssueCertificatesMutation",
+          "operation_id": "bulkIssueCertificates",
+          "endpoint": "POST /certificates/bulk-issue",
+          "imported_from": "@monobase/sdk-ts/generated/react-query",
+          "confidence": "HIGH"
+        },
+        {
+          "kind": "react-query-mutation",
+          "name": "completeEventMutation",
+          "operation_id": "completeEvent",
+          "endpoint": "POST /association/event-lifecycle/{eventId}/complete",
+          "imported_from": "@monobase/sdk-ts/generated/react-query",
+          "confidence": "HIGH"
+        },
+        {
+          "kind": "react-query-mutation",
+          "name": "createMessageMutation",
+          "operation_id": "createMessage",
+          "endpoint": "POST /association/messages",
+          "imported_from": "@monobase/sdk-ts/generated/react-query",
+          "confidence": "HIGH"
+        },
+        {
+          "kind": "react-query-mutation",
+          "name": "sendMessageMutation",
+          "operation_id": "sendMessage",
+          "endpoint": "POST /association/messages/{messageId}/send",
+          "imported_from": "@monobase/sdk-ts/generated/react-query",
+          "confidence": "HIGH"
+        },
+        {
+          "kind": "react-query-options",
+          "name": "getEventQueryKey",
+          "imported_from": "@monobase/sdk-ts/generated/react-query",
+          "confidence": "LOW"
+        },
+        {
+          "method": "UNKNOWN",
           "endpoint": "/api/association/member/credits/void-event"
         }
       ],
       "routes_used_in": [],
-      "confidence": "MEDIUM"
+      "confidence": "MEDIUM",
+      "loading_state_hygiene": {
+        "has_skeleton": true,
+        "has_error_branch": true,
+        "has_timeout": false,
+        "has_inline_error_marker": false,
+        "has_skeleton_ok_marker": false,
+        "violation": null
+      }
     },
     "apps/memberry/src/features/events/utils/generate-ics.ts": {
       "name": "generate-ics",
@@ -6495,12 +7511,50 @@
       "state_access": [],
       "api_calls": [
         {
-          "method": "GET",
+          "kind": "react-query-options",
+          "name": "listMembershipApplicationsOptions",
+          "operation_id": "listMembershipApplications",
+          "endpoint": "GET /association/member/applications",
+          "imported_from": "@monobase/sdk-ts/generated/react-query",
+          "confidence": "HIGH"
+        },
+        {
+          "kind": "react-query-options",
+          "name": "listMembershipApplicationsQueryKey",
+          "imported_from": "@monobase/sdk-ts/generated/react-query",
+          "confidence": "LOW"
+        },
+        {
+          "kind": "react-query-mutation",
+          "name": "approveMembershipApplicationMutation",
+          "operation_id": "approveMembershipApplication",
+          "endpoint": "POST /association/member/applications/{applicationId}/approve",
+          "imported_from": "@monobase/sdk-ts/generated/react-query",
+          "confidence": "HIGH"
+        },
+        {
+          "kind": "react-query-mutation",
+          "name": "denyMembershipApplicationMutation",
+          "operation_id": "denyMembershipApplication",
+          "endpoint": "POST /association/member/applications/{applicationId}/deny",
+          "imported_from": "@monobase/sdk-ts/generated/react-query",
+          "confidence": "HIGH"
+        },
+        {
+          "method": "UNKNOWN",
           "endpoint": "/api/association/member/applications/bulk-approve"
         }
       ],
       "routes_used_in": [],
-      "confidence": "MEDIUM"
+      "confidence": "MEDIUM",
+      "loading_state_hygiene": {
+        "has_skeleton": false,
+        "has_error_branch": true,
+        "has_timeout": false,
+        "has_inline_error_marker": false,
+        "has_skeleton_ok_marker": false,
+        "violation": null
+      }
     },
     "apps/memberry/src/features/membership/components/category-editor.tsx": {
       "name": "category-editor",
@@ -6527,9 +7581,40 @@
       ],
       "slots": [],
       "state_access": [],
-      "api_calls": [],
+      "api_calls": [
+        {
+          "kind": "react-query-options",
+          "name": "listMembershipCategoriesOptions",
+          "operation_id": "listMembershipCategories",
+          "endpoint": "GET /association/member/membership-categories",
+          "imported_from": "@monobase/sdk-ts/generated/react-query",
+          "confidence": "HIGH"
+        },
+        {
+          "kind": "react-query-options",
+          "name": "listMembershipCategoriesQueryKey",
+          "imported_from": "@monobase/sdk-ts/generated/react-query",
+          "confidence": "LOW"
+        },
+        {
+          "kind": "react-query-mutation",
+          "name": "upsertMembershipCategoryMutation",
+          "operation_id": "upsertMembershipCategory",
+          "endpoint": "PUT /association/member/membership-categories/{organizationId}",
+          "imported_from": "@monobase/sdk-ts/generated/react-query",
+          "confidence": "HIGH"
+        }
+      ],
       "routes_used_in": [],
-      "confidence": "MEDIUM"
+      "confidence": "MEDIUM",
+      "loading_state_hygiene": {
+        "has_skeleton": true,
+        "has_error_branch": true,
+        "has_timeout": false,
+        "has_inline_error_marker": false,
+        "has_skeleton_ok_marker": false,
+        "violation": null
+      }
     },
     "apps/memberry/src/features/membership/components/credential-list.tsx": {
       "name": "credential-list",
@@ -6555,7 +7640,15 @@
       "state_access": [],
       "api_calls": [],
       "routes_used_in": [],
-      "confidence": "MEDIUM"
+      "confidence": "MEDIUM",
+      "loading_state_hygiene": {
+        "has_skeleton": true,
+        "has_error_branch": false,
+        "has_timeout": false,
+        "has_inline_error_marker": false,
+        "has_skeleton_ok_marker": false,
+        "violation": "SKELETON_WITHOUT_ERROR_BRANCH"
+      }
     },
     "apps/memberry/src/features/membership/components/institutional-membership-form.tsx": {
       "name": "institutional-membership-form",
@@ -6636,9 +7729,26 @@
       "events_out": [],
       "slots": [],
       "state_access": [],
-      "api_calls": [],
+      "api_calls": [
+        {
+          "kind": "react-query-options",
+          "name": "listInstitutionalMembershipsOptions",
+          "operation_id": "listInstitutionalMemberships",
+          "endpoint": "GET /association/member/institutional-memberships",
+          "imported_from": "@monobase/sdk-ts/generated/react-query",
+          "confidence": "HIGH"
+        }
+      ],
       "routes_used_in": [],
-      "confidence": "MEDIUM"
+      "confidence": "MEDIUM",
+      "loading_state_hygiene": {
+        "has_skeleton": true,
+        "has_error_branch": false,
+        "has_timeout": true,
+        "has_inline_error_marker": false,
+        "has_skeleton_ok_marker": false,
+        "violation": "SKELETON_WITHOUT_ERROR_BRANCH"
+      }
     },
     "apps/memberry/src/features/membership/components/member-detail.tsx": {
       "name": "member-detail",
@@ -6687,9 +7797,70 @@
       ],
       "slots": [],
       "state_access": [],
-      "api_calls": [],
+      "api_calls": [
+        {
+          "kind": "react-query-options",
+          "name": "getRosterMemberOptions",
+          "operation_id": "getRosterMember",
+          "endpoint": "GET /association/member/roster/{memberId}",
+          "imported_from": "@monobase/sdk-ts/generated/react-query",
+          "confidence": "HIGH"
+        },
+        {
+          "kind": "react-query-options",
+          "name": "getRosterMemberQueryKey",
+          "imported_from": "@monobase/sdk-ts/generated/react-query",
+          "confidence": "LOW"
+        },
+        {
+          "kind": "react-query-mutation",
+          "name": "updateRosterMemberMutation",
+          "operation_id": "updateRosterMember",
+          "endpoint": "PUT /association/member/roster/{memberId}",
+          "imported_from": "@monobase/sdk-ts/generated/react-query",
+          "confidence": "HIGH"
+        },
+        {
+          "kind": "react-query-options",
+          "name": "listRosterMembersQueryKey",
+          "imported_from": "@monobase/sdk-ts/generated/react-query",
+          "confidence": "LOW"
+        },
+        {
+          "kind": "react-query-options",
+          "name": "listMembershipCategoriesOptions",
+          "operation_id": "listMembershipCategories",
+          "endpoint": "GET /association/member/membership-categories",
+          "imported_from": "@monobase/sdk-ts/generated/react-query",
+          "confidence": "HIGH"
+        },
+        {
+          "kind": "react-query-mutation",
+          "name": "reinstateMembershipMutation",
+          "operation_id": "reinstateMembership",
+          "endpoint": "POST /association/member/memberships/{membershipId}/reinstate",
+          "imported_from": "@monobase/sdk-ts/generated/react-query",
+          "confidence": "HIGH"
+        },
+        {
+          "kind": "react-query-mutation",
+          "name": "terminateMembershipMutation",
+          "operation_id": "terminateMembership",
+          "endpoint": "POST /association/member/memberships/{membershipId}/terminate",
+          "imported_from": "@monobase/sdk-ts/generated/react-query",
+          "confidence": "HIGH"
+        }
+      ],
       "routes_used_in": [],
-      "confidence": "MEDIUM"
+      "confidence": "MEDIUM",
+      "loading_state_hygiene": {
+        "has_skeleton": false,
+        "has_error_branch": true,
+        "has_timeout": false,
+        "has_inline_error_marker": false,
+        "has_skeleton_ok_marker": false,
+        "violation": null
+      }
     },
     "apps/memberry/src/features/membership/components/member-table.tsx": {
       "name": "member-table",
@@ -6725,9 +7896,34 @@
       "events_out": [],
       "slots": [],
       "state_access": [],
-      "api_calls": [],
+      "api_calls": [
+        {
+          "kind": "react-query-options",
+          "name": "listRosterMembersOptions",
+          "operation_id": "listRosterMembers",
+          "endpoint": "GET /association/member/roster",
+          "imported_from": "@monobase/sdk-ts/generated/react-query",
+          "confidence": "HIGH"
+        },
+        {
+          "kind": "react-query-options",
+          "name": "listMembershipCategoriesOptions",
+          "operation_id": "listMembershipCategories",
+          "endpoint": "GET /association/member/membership-categories",
+          "imported_from": "@monobase/sdk-ts/generated/react-query",
+          "confidence": "HIGH"
+        }
+      ],
       "routes_used_in": [],
-      "confidence": "MEDIUM"
+      "confidence": "MEDIUM",
+      "loading_state_hygiene": {
+        "has_skeleton": true,
+        "has_error_branch": false,
+        "has_timeout": true,
+        "has_inline_error_marker": false,
+        "has_skeleton_ok_marker": false,
+        "violation": "SKELETON_WITHOUT_ERROR_BRANCH"
+      }
     },
     "apps/memberry/src/features/membership/components/membership-list.tsx": {
       "name": "membership-list",
@@ -6808,7 +8004,15 @@
       "state_access": [],
       "api_calls": [],
       "routes_used_in": [],
-      "confidence": "MEDIUM"
+      "confidence": "MEDIUM",
+      "loading_state_hygiene": {
+        "has_skeleton": true,
+        "has_error_branch": true,
+        "has_timeout": false,
+        "has_inline_error_marker": false,
+        "has_skeleton_ok_marker": false,
+        "violation": null
+      }
     },
     "apps/memberry/src/features/membership/lib/membership-status.ts": {
       "name": "membership-status",
@@ -6837,18 +8041,17 @@
       ],
       "slots": [],
       "state_access": [],
-      "api_calls": [
-        {
-          "method": "POST",
-          "endpoint": "/api/notifs/read-all"
-        },
-        {
-          "method": "POST",
-          "endpoint": "/api/notifs/${id}/read"
-        }
-      ],
+      "api_calls": [],
       "routes_used_in": [],
-      "confidence": "LOW"
+      "confidence": "LOW",
+      "loading_state_hygiene": {
+        "has_skeleton": false,
+        "has_error_branch": false,
+        "has_timeout": false,
+        "has_inline_error_marker": false,
+        "has_skeleton_ok_marker": false,
+        "violation": null
+      }
     },
     "apps/memberry/src/features/onboarding/lib/professional-fields.ts": {
       "name": "professional-fields",
@@ -7106,7 +8309,15 @@
       "state_access": [],
       "api_calls": [],
       "routes_used_in": [],
-      "confidence": "MEDIUM"
+      "confidence": "MEDIUM",
+      "loading_state_hygiene": {
+        "has_skeleton": false,
+        "has_error_branch": true,
+        "has_timeout": false,
+        "has_inline_error_marker": false,
+        "has_skeleton_ok_marker": false,
+        "violation": null
+      }
     },
     "apps/memberry/src/features/person/components/preferences-form.tsx": {
       "name": "preferences-form",
@@ -7369,7 +8580,15 @@
       "state_access": [],
       "api_calls": [],
       "routes_used_in": [],
-      "confidence": "MEDIUM"
+      "confidence": "MEDIUM",
+      "loading_state_hygiene": {
+        "has_skeleton": true,
+        "has_error_branch": false,
+        "has_timeout": false,
+        "has_inline_error_marker": false,
+        "has_skeleton_ok_marker": false,
+        "violation": "SKELETON_WITHOUT_ERROR_BRANCH"
+      }
     },
     "apps/memberry/src/features/surveys/components/poll-card.tsx": {
       "name": "poll-card",
@@ -7408,14 +8627,17 @@
       ],
       "slots": [],
       "state_access": [],
-      "api_calls": [
-        {
-          "method": "POST",
-          "endpoint": "/api/surveys/${surveyId}/responses"
-        }
-      ],
+      "api_calls": [],
       "routes_used_in": [],
-      "confidence": "MEDIUM"
+      "confidence": "MEDIUM",
+      "loading_state_hygiene": {
+        "has_skeleton": true,
+        "has_error_branch": true,
+        "has_timeout": false,
+        "has_inline_error_marker": false,
+        "has_skeleton_ok_marker": false,
+        "violation": null
+      }
     },
     "apps/memberry/src/features/surveys/components/question-editor.tsx": {
       "name": "question-editor",
@@ -7780,26 +9002,17 @@
       ],
       "slots": [],
       "state_access": [],
-      "api_calls": [
-        {
-          "method": "PATCH",
-          "endpoint": "/api/surveys/${id}"
-        },
-        {
-          "method": "PATCH",
-          "endpoint": "/api/surveys/${id}"
-        },
-        {
-          "method": "DELETE",
-          "endpoint": "/api/surveys/${id}"
-        },
-        {
-          "method": "POST",
-          "endpoint": "/api/surveys/${id}/clone"
-        }
-      ],
+      "api_calls": [],
       "routes_used_in": [],
-      "confidence": "LOW"
+      "confidence": "LOW",
+      "loading_state_hygiene": {
+        "has_skeleton": true,
+        "has_error_branch": true,
+        "has_timeout": false,
+        "has_inline_error_marker": false,
+        "has_skeleton_ok_marker": false,
+        "violation": null
+      }
     },
     "apps/memberry/src/features/surveys/components/survey-results.tsx": {
       "name": "survey-results",
@@ -7825,7 +9038,15 @@
       "state_access": [],
       "api_calls": [],
       "routes_used_in": [],
-      "confidence": "MEDIUM"
+      "confidence": "MEDIUM",
+      "loading_state_hygiene": {
+        "has_skeleton": true,
+        "has_error_branch": false,
+        "has_timeout": false,
+        "has_inline_error_marker": false,
+        "has_skeleton_ok_marker": false,
+        "violation": "SKELETON_WITHOUT_ERROR_BRANCH"
+      }
     },
     "apps/memberry/src/features/surveys/components/survey-templates.tsx": {
       "name": "survey-templates",
@@ -8076,7 +9297,15 @@
       "state_access": [],
       "api_calls": [],
       "routes_used_in": [],
-      "confidence": "MEDIUM"
+      "confidence": "MEDIUM",
+      "loading_state_hygiene": {
+        "has_skeleton": true,
+        "has_error_branch": true,
+        "has_timeout": false,
+        "has_inline_error_marker": false,
+        "has_skeleton_ok_marker": false,
+        "violation": null
+      }
     },
     "apps/memberry/src/hooks/use-detect-country.ts": {
       "name": "use-detect-country",
@@ -8219,7 +9448,15 @@
       "state_access": [],
       "api_calls": [],
       "routes_used_in": [],
-      "confidence": "LOW"
+      "confidence": "LOW",
+      "loading_state_hygiene": {
+        "has_skeleton": false,
+        "has_error_branch": true,
+        "has_timeout": false,
+        "has_inline_error_marker": false,
+        "has_skeleton_ok_marker": false,
+        "violation": null
+      }
     },
     "apps/memberry/src/lib/detect-country.ts": {
       "name": "detect-country",
@@ -8321,7 +9558,15 @@
       ],
       "api_calls": [],
       "routes_used_in": [],
-      "confidence": "LOW"
+      "confidence": "LOW",
+      "loading_state_hygiene": {
+        "has_skeleton": true,
+        "has_error_branch": false,
+        "has_timeout": false,
+        "has_inline_error_marker": false,
+        "has_skeleton_ok_marker": false,
+        "violation": "SKELETON_WITHOUT_ERROR_BRANCH"
+      }
     },
     "apps/memberry/src/providers/OrgProvider.tsx": {
       "name": "OrgProvider",
@@ -8353,9 +9598,26 @@
           "mode": "read"
         }
       ],
-      "api_calls": [],
+      "api_calls": [
+        {
+          "kind": "react-query-options",
+          "name": "getOrganizationBySlugOptions",
+          "operation_id": "getOrganizationBySlug",
+          "endpoint": "GET /public/org/{slug}",
+          "imported_from": "@monobase/sdk-ts/generated/react-query",
+          "confidence": "HIGH"
+        }
+      ],
       "routes_used_in": [],
-      "confidence": "LOW"
+      "confidence": "LOW",
+      "loading_state_hygiene": {
+        "has_skeleton": true,
+        "has_error_branch": false,
+        "has_timeout": false,
+        "has_inline_error_marker": false,
+        "has_skeleton_ok_marker": false,
+        "violation": "SKELETON_WITHOUT_ERROR_BRANCH"
+      }
     },
     "apps/memberry/src/routeTree.gen.ts": {
       "name": "routeTree.gen",
@@ -8392,9 +9654,24 @@
       "events_out": [],
       "slots": [],
       "state_access": [],
-      "api_calls": [],
+      "api_calls": [
+        {
+          "kind": "react-query-options",
+          "name": "getPersonQueryKey",
+          "imported_from": "@monobase/sdk-ts/generated/react-query",
+          "confidence": "LOW"
+        }
+      ],
       "routes_used_in": [],
-      "confidence": "LOW"
+      "confidence": "LOW",
+      "loading_state_hygiene": {
+        "has_skeleton": false,
+        "has_error_branch": false,
+        "has_timeout": false,
+        "has_inline_error_marker": false,
+        "has_skeleton_ok_marker": false,
+        "violation": null
+      }
     },
     "apps/memberry/src/routes/_authenticated/dashboard.tsx": {
       "name": "dashboard",
@@ -8412,7 +9689,15 @@
       "state_access": [],
       "api_calls": [],
       "routes_used_in": [],
-      "confidence": "LOW"
+      "confidence": "LOW",
+      "loading_state_hygiene": {
+        "has_skeleton": false,
+        "has_error_branch": true,
+        "has_timeout": false,
+        "has_inline_error_marker": false,
+        "has_skeleton_ok_marker": false,
+        "violation": null
+      }
     },
     "apps/memberry/src/routes/_authenticated/my/billing.tsx": {
       "name": "billing",
@@ -8428,9 +9713,38 @@
       ],
       "slots": [],
       "state_access": [],
-      "api_calls": [],
+      "api_calls": [
+        {
+          "kind": "react-query-options",
+          "name": "getMerchantAccountOptions",
+          "operation_id": "getMerchantAccount",
+          "endpoint": "GET /billing/merchant-accounts/{merchantAccount}",
+          "imported_from": "@monobase/sdk-ts/generated/react-query",
+          "confidence": "HIGH"
+        },
+        {
+          "kind": "sdk-flow",
+          "name": "startBillingOnboarding",
+          "imported_from": "@monobase/sdk-ts/flows",
+          "confidence": "MEDIUM"
+        },
+        {
+          "kind": "sdk-flow",
+          "name": "getAccountSetupStatus",
+          "imported_from": "@monobase/sdk-ts/flows",
+          "confidence": "MEDIUM"
+        }
+      ],
       "routes_used_in": [],
-      "confidence": "LOW"
+      "confidence": "LOW",
+      "loading_state_hygiene": {
+        "has_skeleton": false,
+        "has_error_branch": true,
+        "has_timeout": true,
+        "has_inline_error_marker": true,
+        "has_skeleton_ok_marker": false,
+        "violation": null
+      }
     },
     "apps/memberry/src/routes/_authenticated/my/bookings/$bookingId.tsx": {
       "name": "$bookingId",
@@ -8458,9 +9772,86 @@
       ],
       "slots": [],
       "state_access": [],
-      "api_calls": [],
+      "api_calls": [
+        {
+          "kind": "react-query-options",
+          "name": "getBookingOptions",
+          "operation_id": "getBooking",
+          "endpoint": "GET /booking/bookings/{booking}",
+          "imported_from": "@monobase/sdk-ts/generated/react-query",
+          "confidence": "HIGH"
+        },
+        {
+          "kind": "react-query-options",
+          "name": "getBookingQueryKey",
+          "imported_from": "@monobase/sdk-ts/generated/react-query",
+          "confidence": "LOW"
+        },
+        {
+          "kind": "react-query-options",
+          "name": "listBookingsQueryKey",
+          "imported_from": "@monobase/sdk-ts/generated/react-query",
+          "confidence": "LOW"
+        },
+        {
+          "kind": "react-query-options",
+          "name": "listChatRoomsOptions",
+          "operation_id": "listChatRooms",
+          "endpoint": "GET /comms/chat-rooms",
+          "imported_from": "@monobase/sdk-ts/generated/react-query",
+          "confidence": "HIGH"
+        },
+        {
+          "kind": "react-query-mutation",
+          "name": "createChatRoomMutation",
+          "operation_id": "createChatRoom",
+          "endpoint": "POST /comms/chat-rooms",
+          "imported_from": "@monobase/sdk-ts/generated/react-query",
+          "confidence": "HIGH"
+        },
+        {
+          "kind": "react-query-mutation",
+          "name": "confirmBookingMutation",
+          "operation_id": "confirmBooking",
+          "endpoint": "POST /booking/bookings/{booking}/confirm",
+          "imported_from": "@monobase/sdk-ts/generated/react-query",
+          "confidence": "HIGH"
+        },
+        {
+          "kind": "react-query-mutation",
+          "name": "rejectBookingMutation",
+          "operation_id": "rejectBooking",
+          "endpoint": "POST /booking/bookings/{booking}/reject",
+          "imported_from": "@monobase/sdk-ts/generated/react-query",
+          "confidence": "HIGH"
+        },
+        {
+          "kind": "react-query-mutation",
+          "name": "cancelBookingMutation",
+          "operation_id": "cancelBooking",
+          "endpoint": "POST /booking/bookings/{booking}/cancel",
+          "imported_from": "@monobase/sdk-ts/generated/react-query",
+          "confidence": "HIGH"
+        },
+        {
+          "kind": "react-query-mutation",
+          "name": "payInvoiceMutation",
+          "operation_id": "payInvoice",
+          "endpoint": "POST /billing/invoices/{invoice}/pay",
+          "imported_from": "@monobase/sdk-ts/generated/react-query",
+          "confidence": "HIGH"
+        }
+      ],
       "routes_used_in": [],
-      "confidence": "LOW"
+      "confidence": "LOW",
+      "loading_state_hygiene": {
+        "has_skeleton": true,
+        "has_error_branch": false,
+        "has_timeout": false,
+        "has_inline_error_marker": false,
+        "has_skeleton_ok_marker": false,
+        "violation": "SKELETON_WITHOUT_ERROR_BRANCH"
+      }
     },
     "apps/memberry/src/routes/_authenticated/my/bookings/host.$personId.$slotId.tsx": {
       "name": "host.$personId.$slotId",
@@ -8476,9 +9867,48 @@
       ],
       "slots": [],
       "state_access": [],
-      "api_calls": [],
+      "api_calls": [
+        {
+          "kind": "react-query-options",
+          "name": "getTimeSlotOptions",
+          "operation_id": "getTimeSlot",
+          "endpoint": "GET /booking/slots/{slotId}",
+          "imported_from": "@monobase/sdk-ts/generated/react-query",
+          "confidence": "HIGH"
+        },
+        {
+          "kind": "react-query-options",
+          "name": "getBookingEventOptions",
+          "operation_id": "getBookingEvent",
+          "endpoint": "GET /booking/events/{event}",
+          "imported_from": "@monobase/sdk-ts/generated/react-query",
+          "confidence": "HIGH"
+        },
+        {
+          "kind": "react-query-mutation",
+          "name": "createBookingMutation",
+          "operation_id": "createBooking",
+          "endpoint": "POST /booking/bookings",
+          "imported_from": "@monobase/sdk-ts/generated/react-query",
+          "confidence": "HIGH"
+        },
+        {
+          "kind": "react-query-options",
+          "name": "listBookingsQueryKey",
+          "imported_from": "@monobase/sdk-ts/generated/react-query",
+          "confidence": "LOW"
+        }
+      ],
       "routes_used_in": [],
-      "confidence": "LOW"
+      "confidence": "LOW",
+      "loading_state_hygiene": {
+        "has_skeleton": true,
+        "has_error_branch": false,
+        "has_timeout": false,
+        "has_inline_error_marker": false,
+        "has_skeleton_ok_marker": false,
+        "violation": "SKELETON_WITHOUT_ERROR_BRANCH"
+      }
     },
     "apps/memberry/src/routes/_authenticated/my/bookings/host.$personId.tsx": {
       "name": "host.$personId",
@@ -8489,9 +9919,42 @@
       "events_out": [],
       "slots": [],
       "state_access": [],
-      "api_calls": [],
+      "api_calls": [
+        {
+          "kind": "react-query-options",
+          "name": "listBookingEventsOptions",
+          "operation_id": "listBookingEvents",
+          "endpoint": "GET /booking/events",
+          "imported_from": "@monobase/sdk-ts/generated/react-query",
+          "confidence": "HIGH"
+        },
+        {
+          "kind": "react-query-options",
+          "name": "listEventSlotsOptions",
+          "operation_id": "listEventSlots",
+          "endpoint": "GET /booking/events/{event}/slots",
+          "imported_from": "@monobase/sdk-ts/generated/react-query",
+          "confidence": "HIGH"
+        },
+        {
+          "kind": "react-query-options",
+          "name": "getPersonOptions",
+          "operation_id": "getPerson",
+          "endpoint": "GET /persons/{person}",
+          "imported_from": "@monobase/sdk-ts/generated/react-query",
+          "confidence": "HIGH"
+        }
+      ],
       "routes_used_in": [],
-      "confidence": "LOW"
+      "confidence": "LOW",
+      "loading_state_hygiene": {
+        "has_skeleton": true,
+        "has_error_branch": false,
+        "has_timeout": false,
+        "has_inline_error_marker": false,
+        "has_skeleton_ok_marker": false,
+        "violation": "SKELETON_WITHOUT_ERROR_BRANCH"
+      }
     },
     "apps/memberry/src/routes/_authenticated/my/bookings/index.tsx": {
       "name": "index",
@@ -8561,7 +10024,15 @@
       "state_access": [],
       "api_calls": [],
       "routes_used_in": [],
-      "confidence": "LOW"
+      "confidence": "LOW",
+      "loading_state_hygiene": {
+        "has_skeleton": false,
+        "has_error_branch": true,
+        "has_timeout": false,
+        "has_inline_error_marker": false,
+        "has_skeleton_ok_marker": false,
+        "violation": null
+      }
     },
     "apps/memberry/src/routes/_authenticated/my/credits/log.tsx": {
       "name": "log",
@@ -8614,7 +10085,15 @@
       "state_access": [],
       "api_calls": [],
       "routes_used_in": [],
-      "confidence": "LOW"
+      "confidence": "LOW",
+      "loading_state_hygiene": {
+        "has_skeleton": true,
+        "has_error_branch": true,
+        "has_timeout": false,
+        "has_inline_error_marker": false,
+        "has_skeleton_ok_marker": false,
+        "violation": null
+      }
     },
     "apps/memberry/src/routes/_authenticated/my/id-card.tsx": {
       "name": "id-card",
@@ -8625,14 +10104,17 @@
       "events_out": [],
       "slots": [],
       "state_access": [],
-      "api_calls": [
-        {
-          "method": "GET",
-          "endpoint": "/api/persons/me"
-        }
-      ],
+      "api_calls": [],
       "routes_used_in": [],
-      "confidence": "LOW"
+      "confidence": "LOW",
+      "loading_state_hygiene": {
+        "has_skeleton": false,
+        "has_error_branch": true,
+        "has_timeout": false,
+        "has_inline_error_marker": false,
+        "has_skeleton_ok_marker": false,
+        "violation": null
+      }
     },
     "apps/memberry/src/routes/_authenticated/my/notifications.tsx": {
       "name": "notifications",
@@ -8661,18 +10143,17 @@
       ],
       "slots": [],
       "state_access": [],
-      "api_calls": [
-        {
-          "method": "POST",
-          "endpoint": "/api/association/member/memberships/${leaveTarget.membershipId}/terminate"
-        },
-        {
-          "method": "POST",
-          "endpoint": "/api/association/member/affiliation-transfers"
-        }
-      ],
+      "api_calls": [],
       "routes_used_in": [],
-      "confidence": "LOW"
+      "confidence": "LOW",
+      "loading_state_hygiene": {
+        "has_skeleton": false,
+        "has_error_branch": true,
+        "has_timeout": false,
+        "has_inline_error_marker": false,
+        "has_skeleton_ok_marker": false,
+        "violation": null
+      }
     },
     "apps/memberry/src/routes/_authenticated/my/payments.tsx": {
       "name": "payments",
@@ -8721,18 +10202,17 @@
       ],
       "slots": [],
       "state_access": [],
-      "api_calls": [
-        {
-          "method": "PATCH",
-          "endpoint": "/api/association/member/directory/profiles/${directoryProfile.id}"
-        },
-        {
-          "method": "POST",
-          "endpoint": "/api/association/member/directory/profiles"
-        }
-      ],
+      "api_calls": [],
       "routes_used_in": [],
-      "confidence": "LOW"
+      "confidence": "LOW",
+      "loading_state_hygiene": {
+        "has_skeleton": false,
+        "has_error_branch": true,
+        "has_timeout": false,
+        "has_inline_error_marker": false,
+        "has_skeleton_ok_marker": false,
+        "violation": null
+      }
     },
     "apps/memberry/src/routes/_authenticated/my/schedule.tsx": {
       "name": "schedule",
@@ -8743,9 +10223,26 @@
       "events_out": [],
       "slots": [],
       "state_access": [],
-      "api_calls": [],
+      "api_calls": [
+        {
+          "kind": "react-query-options",
+          "name": "getBookingEventOptions",
+          "operation_id": "getBookingEvent",
+          "endpoint": "GET /booking/events/{event}",
+          "imported_from": "@monobase/sdk-ts/generated/react-query",
+          "confidence": "HIGH"
+        }
+      ],
       "routes_used_in": [],
-      "confidence": "LOW"
+      "confidence": "LOW",
+      "loading_state_hygiene": {
+        "has_skeleton": true,
+        "has_error_branch": false,
+        "has_timeout": false,
+        "has_inline_error_marker": false,
+        "has_skeleton_ok_marker": false,
+        "violation": "SKELETON_WITHOUT_ERROR_BRANCH"
+      }
     },
     "apps/memberry/src/routes/_authenticated/my/settings.tsx": {
       "name": "settings",
@@ -8761,22 +10258,17 @@
       ],
       "slots": [],
       "state_access": [],
-      "api_calls": [
-        {
-          "method": "POST",
-          "endpoint": "/api/persons/me/cancel-delete"
-        },
-        {
-          "method": "PATCH",
-          "endpoint": "/api/persons/me/notification-preferences"
-        },
-        {
-          "method": "PATCH",
-          "endpoint": "/api/persons/me/privacy"
-        }
-      ],
+      "api_calls": [],
       "routes_used_in": [],
-      "confidence": "LOW"
+      "confidence": "LOW",
+      "loading_state_hygiene": {
+        "has_skeleton": false,
+        "has_error_branch": true,
+        "has_timeout": false,
+        "has_inline_error_marker": false,
+        "has_skeleton_ok_marker": false,
+        "violation": null
+      }
     },
     "apps/memberry/src/routes/_authenticated/my/surveys/$surveyId.tsx": {
       "name": "$surveyId",
@@ -8789,7 +10281,15 @@
       "state_access": [],
       "api_calls": [],
       "routes_used_in": [],
-      "confidence": "LOW"
+      "confidence": "LOW",
+      "loading_state_hygiene": {
+        "has_skeleton": true,
+        "has_error_branch": false,
+        "has_timeout": true,
+        "has_inline_error_marker": false,
+        "has_skeleton_ok_marker": false,
+        "violation": "SKELETON_WITHOUT_ERROR_BRANCH"
+      }
     },
     "apps/memberry/src/routes/_authenticated/my/surveys/index.tsx": {
       "name": "index",
@@ -8813,9 +10313,34 @@
       "events_out": [],
       "slots": [],
       "state_access": [],
-      "api_calls": [],
+      "api_calls": [
+        {
+          "kind": "react-query-options",
+          "name": "listMyCustomTrainingsOptions",
+          "operation_id": "listMyCustomTrainings",
+          "endpoint": "GET /association/training-lifecycle/my",
+          "imported_from": "@monobase/sdk-ts/generated/react-query",
+          "confidence": "HIGH"
+        },
+        {
+          "kind": "react-query-options",
+          "name": "searchTrainingsOptions",
+          "operation_id": "searchTrainings",
+          "endpoint": "GET /association/training",
+          "imported_from": "@monobase/sdk-ts/generated/react-query",
+          "confidence": "HIGH"
+        }
+      ],
       "routes_used_in": [],
-      "confidence": "LOW"
+      "confidence": "LOW",
+      "loading_state_hygiene": {
+        "has_skeleton": false,
+        "has_error_branch": false,
+        "has_timeout": false,
+        "has_inline_error_marker": false,
+        "has_skeleton_ok_marker": false,
+        "violation": null
+      }
     },
     "apps/memberry/src/routes/_authenticated/org/$orgSlug/announcements/$announcementId.tsx": {
       "name": "$announcementId",
@@ -8833,7 +10358,15 @@
       "state_access": [],
       "api_calls": [],
       "routes_used_in": [],
-      "confidence": "LOW"
+      "confidence": "LOW",
+      "loading_state_hygiene": {
+        "has_skeleton": false,
+        "has_error_branch": false,
+        "has_timeout": false,
+        "has_inline_error_marker": false,
+        "has_skeleton_ok_marker": false,
+        "violation": null
+      }
     },
     "apps/memberry/src/routes/_authenticated/org/$orgSlug/announcements/index.tsx": {
       "name": "index",
@@ -8846,7 +10379,15 @@
       "state_access": [],
       "api_calls": [],
       "routes_used_in": [],
-      "confidence": "LOW"
+      "confidence": "LOW",
+      "loading_state_hygiene": {
+        "has_skeleton": true,
+        "has_error_branch": false,
+        "has_timeout": false,
+        "has_inline_error_marker": false,
+        "has_skeleton_ok_marker": false,
+        "violation": "SKELETON_WITHOUT_ERROR_BRANCH"
+      }
     },
     "apps/memberry/src/routes/_authenticated/org/$orgSlug/directory/$personId.tsx": {
       "name": "$personId",
@@ -8885,7 +10426,15 @@
       "state_access": [],
       "api_calls": [],
       "routes_used_in": [],
-      "confidence": "LOW"
+      "confidence": "LOW",
+      "loading_state_hygiene": {
+        "has_skeleton": true,
+        "has_error_branch": false,
+        "has_timeout": false,
+        "has_inline_error_marker": false,
+        "has_skeleton_ok_marker": false,
+        "violation": "SKELETON_WITHOUT_ERROR_BRANCH"
+      }
     },
     "apps/memberry/src/routes/_authenticated/org/$orgSlug/documents/index.tsx": {
       "name": "index",
@@ -8909,9 +10458,34 @@
       "events_out": [],
       "slots": [],
       "state_access": [],
-      "api_calls": [],
+      "api_calls": [
+        {
+          "kind": "react-query-options",
+          "name": "listDuesInvoicesOptions",
+          "operation_id": "listDuesInvoices",
+          "endpoint": "GET /association/member/dues-invoices",
+          "imported_from": "@monobase/sdk-ts/generated/react-query",
+          "confidence": "HIGH"
+        },
+        {
+          "kind": "react-query-options",
+          "name": "listDuesPaymentsOptions",
+          "operation_id": "listDuesPayments",
+          "endpoint": "GET /association/member/dues-payments",
+          "imported_from": "@monobase/sdk-ts/generated/react-query",
+          "confidence": "HIGH"
+        }
+      ],
       "routes_used_in": [],
-      "confidence": "LOW"
+      "confidence": "LOW",
+      "loading_state_hygiene": {
+        "has_skeleton": true,
+        "has_error_branch": false,
+        "has_timeout": false,
+        "has_inline_error_marker": false,
+        "has_skeleton_ok_marker": false,
+        "violation": "SKELETON_WITHOUT_ERROR_BRANCH"
+      }
     },
     "apps/memberry/src/routes/_authenticated/org/$orgSlug/elections/$electionId/index.tsx": {
       "name": "index",
@@ -8988,7 +10562,15 @@
       "state_access": [],
       "api_calls": [],
       "routes_used_in": [],
-      "confidence": "LOW"
+      "confidence": "LOW",
+      "loading_state_hygiene": {
+        "has_skeleton": true,
+        "has_error_branch": true,
+        "has_timeout": false,
+        "has_inline_error_marker": false,
+        "has_skeleton_ok_marker": false,
+        "violation": null
+      }
     },
     "apps/memberry/src/routes/_authenticated/org/$orgSlug/events/index.tsx": {
       "name": "index",
@@ -9014,7 +10596,15 @@
       "state_access": [],
       "api_calls": [],
       "routes_used_in": [],
-      "confidence": "LOW"
+      "confidence": "LOW",
+      "loading_state_hygiene": {
+        "has_skeleton": false,
+        "has_error_branch": false,
+        "has_timeout": false,
+        "has_inline_error_marker": false,
+        "has_skeleton_ok_marker": false,
+        "violation": null
+      }
     },
     "apps/memberry/src/routes/_authenticated/org/$orgSlug/home.tsx": {
       "name": "home",
@@ -9025,9 +10615,34 @@
       "events_out": [],
       "slots": [],
       "state_access": [],
-      "api_calls": [],
+      "api_calls": [
+        {
+          "kind": "react-query-options",
+          "name": "searchEventsOptions",
+          "operation_id": "searchEvents",
+          "endpoint": "GET /association/events",
+          "imported_from": "@monobase/sdk-ts/generated/react-query",
+          "confidence": "HIGH"
+        },
+        {
+          "kind": "react-query-options",
+          "name": "listAnnouncementsOptions",
+          "operation_id": "listAnnouncements",
+          "endpoint": "GET /communications/announcements/{organizationId}",
+          "imported_from": "@monobase/sdk-ts/generated/react-query",
+          "confidence": "HIGH"
+        }
+      ],
       "routes_used_in": [],
-      "confidence": "LOW"
+      "confidence": "LOW",
+      "loading_state_hygiene": {
+        "has_skeleton": false,
+        "has_error_branch": false,
+        "has_timeout": false,
+        "has_inline_error_marker": false,
+        "has_skeleton_ok_marker": false,
+        "violation": null
+      }
     },
     "apps/memberry/src/routes/_authenticated/org/$orgSlug/members.tsx": {
       "name": "members",
@@ -9051,9 +10666,26 @@
       "events_out": [],
       "slots": [],
       "state_access": [],
-      "api_calls": [],
+      "api_calls": [
+        {
+          "kind": "react-query-options",
+          "name": "getPersonOptions",
+          "operation_id": "getPerson",
+          "endpoint": "GET /persons/{person}",
+          "imported_from": "@monobase/sdk-ts/generated/react-query",
+          "confidence": "HIGH"
+        }
+      ],
       "routes_used_in": [],
-      "confidence": "LOW"
+      "confidence": "LOW",
+      "loading_state_hygiene": {
+        "has_skeleton": false,
+        "has_error_branch": false,
+        "has_timeout": false,
+        "has_inline_error_marker": false,
+        "has_skeleton_ok_marker": false,
+        "violation": null
+      }
     },
     "apps/memberry/src/routes/_authenticated/org/$orgSlug/messages/index.tsx": {
       "name": "index",
@@ -9064,9 +10696,26 @@
       "events_out": [],
       "slots": [],
       "state_access": [],
-      "api_calls": [],
+      "api_calls": [
+        {
+          "kind": "react-query-options",
+          "name": "getPersonOptions",
+          "operation_id": "getPerson",
+          "endpoint": "GET /persons/{person}",
+          "imported_from": "@monobase/sdk-ts/generated/react-query",
+          "confidence": "HIGH"
+        }
+      ],
       "routes_used_in": [],
-      "confidence": "LOW"
+      "confidence": "LOW",
+      "loading_state_hygiene": {
+        "has_skeleton": false,
+        "has_error_branch": false,
+        "has_timeout": false,
+        "has_inline_error_marker": false,
+        "has_skeleton_ok_marker": false,
+        "violation": null
+      }
     },
     "apps/memberry/src/routes/_authenticated/org/$orgSlug/my-cpd.tsx": {
       "name": "my-cpd",
@@ -9077,14 +10726,17 @@
       "events_out": [],
       "slots": [],
       "state_access": [],
-      "api_calls": [
-        {
-          "method": "GET",
-          "endpoint": "/api/persons/me/credits"
-        }
-      ],
+      "api_calls": [],
       "routes_used_in": [],
-      "confidence": "LOW"
+      "confidence": "LOW",
+      "loading_state_hygiene": {
+        "has_skeleton": false,
+        "has_error_branch": false,
+        "has_timeout": false,
+        "has_inline_error_marker": false,
+        "has_skeleton_ok_marker": false,
+        "violation": null
+      }
     },
     "apps/memberry/src/routes/_authenticated/org/$orgSlug/my-notifications.tsx": {
       "name": "my-notifications",
@@ -9181,22 +10833,17 @@
       ],
       "slots": [],
       "state_access": [],
-      "api_calls": [
-        {
-          "method": "POST",
-          "endpoint": "/api/communications/announcements/${announcementId}/publish"
-        },
-        {
-          "method": "POST",
-          "endpoint": "/api/communications/announcements/${announcementId}/archive"
-        },
-        {
-          "method": "DELETE",
-          "endpoint": "/api/communications/announcements/${announcementId}"
-        }
-      ],
+      "api_calls": [],
       "routes_used_in": [],
-      "confidence": "LOW"
+      "confidence": "LOW",
+      "loading_state_hygiene": {
+        "has_skeleton": false,
+        "has_error_branch": true,
+        "has_timeout": false,
+        "has_inline_error_marker": false,
+        "has_skeleton_ok_marker": false,
+        "violation": null
+      }
     },
     "apps/memberry/src/routes/_authenticated/org/$orgSlug/officer/communications/analytics.tsx": {
       "name": "analytics",
@@ -9209,7 +10856,15 @@
       "state_access": [],
       "api_calls": [],
       "routes_used_in": [],
-      "confidence": "LOW"
+      "confidence": "LOW",
+      "loading_state_hygiene": {
+        "has_skeleton": false,
+        "has_error_branch": false,
+        "has_timeout": false,
+        "has_inline_error_marker": false,
+        "has_skeleton_ok_marker": false,
+        "violation": null
+      }
     },
     "apps/memberry/src/routes/_authenticated/org/$orgSlug/officer/communications/index.tsx": {
       "name": "index",
@@ -9248,7 +10903,15 @@
       "state_access": [],
       "api_calls": [],
       "routes_used_in": [],
-      "confidence": "LOW"
+      "confidence": "LOW",
+      "loading_state_hygiene": {
+        "has_skeleton": false,
+        "has_error_branch": false,
+        "has_timeout": false,
+        "has_inline_error_marker": false,
+        "has_skeleton_ok_marker": false,
+        "violation": null
+      }
     },
     "apps/memberry/src/routes/_authenticated/org/$orgSlug/officer/communications/templates/index.tsx": {
       "name": "index",
@@ -9303,18 +10966,17 @@
       ],
       "slots": [],
       "state_access": [],
-      "api_calls": [
-        {
-          "method": "GET",
-          "endpoint": "/api/association/member/compliance/${orgId}${statusFilter !== "
-        },
-        {
-          "method": "POST",
-          "endpoint": "/api/association/member/compliance/${orgId}/refresh"
-        }
-      ],
+      "api_calls": [],
       "routes_used_in": [],
-      "confidence": "LOW"
+      "confidence": "LOW",
+      "loading_state_hygiene": {
+        "has_skeleton": true,
+        "has_error_branch": false,
+        "has_timeout": false,
+        "has_inline_error_marker": false,
+        "has_skeleton_ok_marker": false,
+        "violation": "SKELETON_WITHOUT_ERROR_BRANCH"
+      }
     },
     "apps/memberry/src/routes/_authenticated/org/$orgSlug/officer/dashboard.tsx": {
       "name": "dashboard",
@@ -9363,9 +11025,92 @@
       ],
       "slots": [],
       "state_access": [],
-      "api_calls": [],
+      "api_calls": [
+        {
+          "kind": "react-query-options",
+          "name": "getDocumentOptions",
+          "operation_id": "getDocument",
+          "endpoint": "GET /association/documents/{documentId}",
+          "imported_from": "@monobase/sdk-ts/generated/react-query",
+          "confidence": "HIGH"
+        },
+        {
+          "kind": "react-query-options",
+          "name": "getDocumentQueryKey",
+          "imported_from": "@monobase/sdk-ts/generated/react-query",
+          "confidence": "LOW"
+        },
+        {
+          "kind": "react-query-mutation",
+          "name": "updateDocumentMutation",
+          "operation_id": "updateDocument",
+          "endpoint": "PATCH /association/documents/{documentId}",
+          "imported_from": "@monobase/sdk-ts/generated/react-query",
+          "confidence": "HIGH"
+        },
+        {
+          "kind": "react-query-options",
+          "name": "listDocumentVersionsOptions",
+          "operation_id": "listDocumentVersions",
+          "endpoint": "GET /association/documents/{documentId}/versions",
+          "imported_from": "@monobase/sdk-ts/generated/react-query",
+          "confidence": "HIGH"
+        },
+        {
+          "kind": "react-query-options",
+          "name": "listDocumentVersionsQueryKey",
+          "imported_from": "@monobase/sdk-ts/generated/react-query",
+          "confidence": "LOW"
+        },
+        {
+          "kind": "react-query-mutation",
+          "name": "uploadNewDocumentVersionMutation",
+          "operation_id": "uploadNewDocumentVersion",
+          "endpoint": "POST /association/documents/{documentId}/versions",
+          "imported_from": "@monobase/sdk-ts/generated/react-query",
+          "confidence": "HIGH"
+        },
+        {
+          "kind": "react-query-options",
+          "name": "getDocumentAccessLogOptions",
+          "operation_id": "getDocumentAccessLog",
+          "endpoint": "GET /association/documents/{documentId}/access-log",
+          "imported_from": "@monobase/sdk-ts/generated/react-query",
+          "confidence": "HIGH"
+        },
+        {
+          "kind": "react-query-options",
+          "name": "listDocumentTagsOptions",
+          "operation_id": "listDocumentTags",
+          "endpoint": "GET /association/document-tags",
+          "imported_from": "@monobase/sdk-ts/generated/react-query",
+          "confidence": "HIGH"
+        },
+        {
+          "kind": "react-query-mutation",
+          "name": "createDocumentTagMutation",
+          "operation_id": "createDocumentTag",
+          "endpoint": "POST /association/document-tags",
+          "imported_from": "@monobase/sdk-ts/generated/react-query",
+          "confidence": "HIGH"
+        },
+        {
+          "kind": "react-query-options",
+          "name": "listDocumentTagsQueryKey",
+          "imported_from": "@monobase/sdk-ts/generated/react-query",
+          "confidence": "LOW"
+        }
+      ],
       "routes_used_in": [],
-      "confidence": "LOW"
+      "confidence": "LOW",
+      "loading_state_hygiene": {
+        "has_skeleton": false,
+        "has_error_branch": true,
+        "has_timeout": false,
+        "has_inline_error_marker": false,
+        "has_skeleton_ok_marker": false,
+        "violation": null
+      }
     },
     "apps/memberry/src/routes/_authenticated/org/$orgSlug/officer/documents/index.tsx": {
       "name": "index",
@@ -9430,7 +11175,15 @@
       "state_access": [],
       "api_calls": [],
       "routes_used_in": [],
-      "confidence": "LOW"
+      "confidence": "LOW",
+      "loading_state_hygiene": {
+        "has_skeleton": true,
+        "has_error_branch": false,
+        "has_timeout": false,
+        "has_inline_error_marker": false,
+        "has_skeleton_ok_marker": false,
+        "violation": "SKELETON_WITHOUT_ERROR_BRANCH"
+      }
     },
     "apps/memberry/src/routes/_authenticated/org/$orgSlug/officer/elections/$electionId.tsx": {
       "name": "$electionId",
@@ -9505,9 +11258,40 @@
       ],
       "slots": [],
       "state_access": [],
-      "api_calls": [],
+      "api_calls": [
+        {
+          "kind": "react-query-options",
+          "name": "listCustomEventRegistrationsOptions",
+          "operation_id": "listCustomEventRegistrations",
+          "endpoint": "GET /association/event-lifecycle/{eventId}/registrations",
+          "imported_from": "@monobase/sdk-ts/generated/react-query",
+          "confidence": "HIGH"
+        },
+        {
+          "kind": "react-query-options",
+          "name": "listCustomEventRegistrationsQueryKey",
+          "imported_from": "@monobase/sdk-ts/generated/react-query",
+          "confidence": "LOW"
+        },
+        {
+          "kind": "react-query-mutation",
+          "name": "checkInCustomEventMutation",
+          "operation_id": "checkInCustomEvent",
+          "endpoint": "POST /association/event-lifecycle/{eventId}/check-in",
+          "imported_from": "@monobase/sdk-ts/generated/react-query",
+          "confidence": "HIGH"
+        }
+      ],
       "routes_used_in": [],
-      "confidence": "LOW"
+      "confidence": "LOW",
+      "loading_state_hygiene": {
+        "has_skeleton": true,
+        "has_error_branch": true,
+        "has_timeout": true,
+        "has_inline_error_marker": false,
+        "has_skeleton_ok_marker": false,
+        "violation": null
+      }
     },
     "apps/memberry/src/routes/_authenticated/org/$orgSlug/officer/events/$eventId.tsx": {
       "name": "$eventId",
@@ -9518,9 +11302,34 @@
       "events_out": [],
       "slots": [],
       "state_access": [],
-      "api_calls": [],
+      "api_calls": [
+        {
+          "kind": "react-query-options",
+          "name": "getEventOptions",
+          "operation_id": "getEvent",
+          "endpoint": "GET /association/events/{eventId}",
+          "imported_from": "@monobase/sdk-ts/generated/react-query",
+          "confidence": "HIGH"
+        },
+        {
+          "kind": "react-query-options",
+          "name": "listCustomEventRegistrationsOptions",
+          "operation_id": "listCustomEventRegistrations",
+          "endpoint": "GET /association/event-lifecycle/{eventId}/registrations",
+          "imported_from": "@monobase/sdk-ts/generated/react-query",
+          "confidence": "HIGH"
+        }
+      ],
       "routes_used_in": [],
-      "confidence": "LOW"
+      "confidence": "LOW",
+      "loading_state_hygiene": {
+        "has_skeleton": false,
+        "has_error_branch": false,
+        "has_timeout": false,
+        "has_inline_error_marker": false,
+        "has_skeleton_ok_marker": false,
+        "violation": null
+      }
     },
     "apps/memberry/src/routes/_authenticated/org/$orgSlug/officer/events/index.tsx": {
       "name": "index",
@@ -9559,7 +11368,15 @@
       "state_access": [],
       "api_calls": [],
       "routes_used_in": [],
-      "confidence": "LOW"
+      "confidence": "LOW",
+      "loading_state_hygiene": {
+        "has_skeleton": false,
+        "has_error_branch": false,
+        "has_timeout": false,
+        "has_inline_error_marker": false,
+        "has_skeleton_ok_marker": false,
+        "violation": null
+      }
     },
     "apps/memberry/src/routes/_authenticated/org/$orgSlug/officer/finances/dues.tsx": {
       "name": "dues",
@@ -9592,9 +11409,42 @@
       ],
       "slots": [],
       "state_access": [],
-      "api_calls": [],
+      "api_calls": [
+        {
+          "kind": "react-query-options",
+          "name": "listDuesFundsOptions",
+          "operation_id": "listDuesFunds",
+          "endpoint": "GET /association/member/dues-reporting",
+          "imported_from": "@monobase/sdk-ts/generated/react-query",
+          "confidence": "HIGH"
+        },
+        {
+          "kind": "react-query-mutation",
+          "name": "upsertDuesFundsMutation",
+          "operation_id": "upsertDuesFunds",
+          "endpoint": "PUT /association/member/dues-reporting/{organizationId}",
+          "imported_from": "@monobase/sdk-ts/generated/react-query",
+          "confidence": "HIGH"
+        },
+        {
+          "kind": "react-query-options",
+          "name": "getDuesFinancialDashboardOptions",
+          "operation_id": "getDuesFinancialDashboard",
+          "endpoint": "GET /association/member/dues-reporting/{organizationId}/dashboard",
+          "imported_from": "@monobase/sdk-ts/generated/react-query",
+          "confidence": "HIGH"
+        }
+      ],
       "routes_used_in": [],
-      "confidence": "LOW"
+      "confidence": "LOW",
+      "loading_state_hygiene": {
+        "has_skeleton": true,
+        "has_error_branch": true,
+        "has_timeout": false,
+        "has_inline_error_marker": false,
+        "has_skeleton_ok_marker": false,
+        "violation": null
+      }
     },
     "apps/memberry/src/routes/_authenticated/org/$orgSlug/officer/finances/index.tsx": {
       "name": "index",
@@ -9614,9 +11464,26 @@
       ],
       "slots": [],
       "state_access": [],
-      "api_calls": [],
+      "api_calls": [
+        {
+          "kind": "react-query-options",
+          "name": "getDuesFinancialDashboardOptions",
+          "operation_id": "getDuesFinancialDashboard",
+          "endpoint": "GET /association/member/dues-reporting/{organizationId}/dashboard",
+          "imported_from": "@monobase/sdk-ts/generated/react-query",
+          "confidence": "HIGH"
+        }
+      ],
       "routes_used_in": [],
-      "confidence": "LOW"
+      "confidence": "LOW",
+      "loading_state_hygiene": {
+        "has_skeleton": false,
+        "has_error_branch": false,
+        "has_timeout": false,
+        "has_inline_error_marker": false,
+        "has_skeleton_ok_marker": false,
+        "violation": null
+      }
     },
     "apps/memberry/src/routes/_authenticated/org/$orgSlug/officer/finances/invoices/$invoiceId.tsx": {
       "name": "$invoiceId",
@@ -9638,7 +11505,15 @@
       "state_access": [],
       "api_calls": [],
       "routes_used_in": [],
-      "confidence": "LOW"
+      "confidence": "LOW",
+      "loading_state_hygiene": {
+        "has_skeleton": true,
+        "has_error_branch": true,
+        "has_timeout": false,
+        "has_inline_error_marker": false,
+        "has_skeleton_ok_marker": false,
+        "violation": null
+      }
     },
     "apps/memberry/src/routes/_authenticated/org/$orgSlug/officer/finances/invoices/index.tsx": {
       "name": "index",
@@ -9676,7 +11551,15 @@
       "state_access": [],
       "api_calls": [],
       "routes_used_in": [],
-      "confidence": "LOW"
+      "confidence": "LOW",
+      "loading_state_hygiene": {
+        "has_skeleton": true,
+        "has_error_branch": true,
+        "has_timeout": false,
+        "has_inline_error_marker": false,
+        "has_skeleton_ok_marker": false,
+        "violation": null
+      }
     },
     "apps/memberry/src/routes/_authenticated/org/$orgSlug/officer/finances/invoices.tsx": {
       "name": "invoices",
@@ -9698,7 +11581,15 @@
       "state_access": [],
       "api_calls": [],
       "routes_used_in": [],
-      "confidence": "LOW"
+      "confidence": "LOW",
+      "loading_state_hygiene": {
+        "has_skeleton": true,
+        "has_error_branch": true,
+        "has_timeout": false,
+        "has_inline_error_marker": false,
+        "has_skeleton_ok_marker": false,
+        "violation": null
+      }
     },
     "apps/memberry/src/routes/_authenticated/org/$orgSlug/officer/finances/members/$memberId.tsx": {
       "name": "$memberId",
@@ -9709,14 +11600,17 @@
       "events_out": [],
       "slots": [],
       "state_access": [],
-      "api_calls": [
-        {
-          "method": "GET",
-          "endpoint": "/association/member/dues-member-summary/${orgId}/${memberId}"
-        }
-      ],
+      "api_calls": [],
       "routes_used_in": [],
-      "confidence": "LOW"
+      "confidence": "LOW",
+      "loading_state_hygiene": {
+        "has_skeleton": true,
+        "has_error_branch": false,
+        "has_timeout": false,
+        "has_inline_error_marker": false,
+        "has_skeleton_ok_marker": false,
+        "violation": "SKELETON_WITHOUT_ERROR_BRANCH"
+      }
     },
     "apps/memberry/src/routes/_authenticated/org/$orgSlug/officer/finances/members.tsx": {
       "name": "members",
@@ -9727,9 +11621,42 @@
       "events_out": [],
       "slots": [],
       "state_access": [],
-      "api_calls": [],
+      "api_calls": [
+        {
+          "kind": "react-query-options",
+          "name": "listRosterMembersOptions",
+          "operation_id": "listRosterMembers",
+          "endpoint": "GET /association/member/roster",
+          "imported_from": "@monobase/sdk-ts/generated/react-query",
+          "confidence": "HIGH"
+        },
+        {
+          "kind": "react-query-options",
+          "name": "listMembershipCategoriesOptions",
+          "operation_id": "listMembershipCategories",
+          "endpoint": "GET /association/member/membership-categories",
+          "imported_from": "@monobase/sdk-ts/generated/react-query",
+          "confidence": "HIGH"
+        },
+        {
+          "kind": "react-query-options",
+          "name": "listDuesInvoicesOptions",
+          "operation_id": "listDuesInvoices",
+          "endpoint": "GET /association/member/dues-invoices",
+          "imported_from": "@monobase/sdk-ts/generated/react-query",
+          "confidence": "HIGH"
+        }
+      ],
       "routes_used_in": [],
-      "confidence": "LOW"
+      "confidence": "LOW",
+      "loading_state_hygiene": {
+        "has_skeleton": true,
+        "has_error_branch": false,
+        "has_timeout": true,
+        "has_inline_error_marker": false,
+        "has_skeleton_ok_marker": false,
+        "violation": "SKELETON_WITHOUT_ERROR_BRANCH"
+      }
     },
     "apps/memberry/src/routes/_authenticated/org/$orgSlug/officer/institutional-memberships/$institutionalMembershipId.tsx": {
       "name": "$institutionalMembershipId",
@@ -9751,7 +11678,15 @@
       "state_access": [],
       "api_calls": [],
       "routes_used_in": [],
-      "confidence": "LOW"
+      "confidence": "LOW",
+      "loading_state_hygiene": {
+        "has_skeleton": true,
+        "has_error_branch": true,
+        "has_timeout": false,
+        "has_inline_error_marker": false,
+        "has_skeleton_ok_marker": false,
+        "violation": null
+      }
     },
     "apps/memberry/src/routes/_authenticated/org/$orgSlug/officer/institutional-memberships/index.tsx": {
       "name": "index",
@@ -9788,9 +11723,26 @@
       "events_out": [],
       "slots": [],
       "state_access": [],
-      "api_calls": [],
+      "api_calls": [
+        {
+          "kind": "react-query-options",
+          "name": "getPersonOptions",
+          "operation_id": "getPerson",
+          "endpoint": "GET /persons/{person}",
+          "imported_from": "@monobase/sdk-ts/generated/react-query",
+          "confidence": "HIGH"
+        }
+      ],
       "routes_used_in": [],
-      "confidence": "LOW"
+      "confidence": "LOW",
+      "loading_state_hygiene": {
+        "has_skeleton": false,
+        "has_error_branch": false,
+        "has_timeout": false,
+        "has_inline_error_marker": false,
+        "has_skeleton_ok_marker": false,
+        "violation": null
+      }
     },
     "apps/memberry/src/routes/_authenticated/org/$orgSlug/officer/officers.tsx": {
       "name": "officers",
@@ -9814,9 +11766,26 @@
       "events_out": [],
       "slots": [],
       "state_access": [],
-      "api_calls": [],
+      "api_calls": [
+        {
+          "kind": "react-query-options",
+          "name": "getDuesPaymentOptions",
+          "operation_id": "getDuesPayment",
+          "endpoint": "GET /association/member/dues-payments/{paymentId}",
+          "imported_from": "@monobase/sdk-ts/generated/react-query",
+          "confidence": "HIGH"
+        }
+      ],
       "routes_used_in": [],
-      "confidence": "LOW"
+      "confidence": "LOW",
+      "loading_state_hygiene": {
+        "has_skeleton": false,
+        "has_error_branch": false,
+        "has_timeout": false,
+        "has_inline_error_marker": false,
+        "has_skeleton_ok_marker": false,
+        "violation": null
+      }
     },
     "apps/memberry/src/routes/_authenticated/org/$orgSlug/officer/payments/index.tsx": {
       "name": "index",
@@ -9836,9 +11805,26 @@
       ],
       "slots": [],
       "state_access": [],
-      "api_calls": [],
+      "api_calls": [
+        {
+          "kind": "react-query-mutation",
+          "name": "generateDuesInvoicesForOrgMutation",
+          "operation_id": "generateDuesInvoicesForOrg",
+          "endpoint": "POST /association/member/dues-invoices/generate",
+          "imported_from": "@monobase/sdk-ts/generated/react-query",
+          "confidence": "HIGH"
+        }
+      ],
       "routes_used_in": [],
-      "confidence": "LOW"
+      "confidence": "LOW",
+      "loading_state_hygiene": {
+        "has_skeleton": false,
+        "has_error_branch": true,
+        "has_timeout": false,
+        "has_inline_error_marker": false,
+        "has_skeleton_ok_marker": false,
+        "violation": null
+      }
     },
     "apps/memberry/src/routes/_authenticated/org/$orgSlug/officer/payments/new.tsx": {
       "name": "new",
@@ -9875,14 +11861,17 @@
       "events_out": [],
       "slots": [],
       "state_access": [],
-      "api_calls": [
-        {
-          "method": "GET",
-          "endpoint": "/api/credit-compliance/${orgId}?requiredCredits=45&cyclePeriodYears=3"
-        }
-      ],
+      "api_calls": [],
       "routes_used_in": [],
-      "confidence": "LOW"
+      "confidence": "LOW",
+      "loading_state_hygiene": {
+        "has_skeleton": false,
+        "has_error_branch": false,
+        "has_timeout": false,
+        "has_inline_error_marker": false,
+        "has_skeleton_ok_marker": false,
+        "violation": null
+      }
     },
     "apps/memberry/src/routes/_authenticated/org/$orgSlug/officer/reports/financial.tsx": {
       "name": "financial",
@@ -9893,9 +11882,26 @@
       "events_out": [],
       "slots": [],
       "state_access": [],
-      "api_calls": [],
+      "api_calls": [
+        {
+          "kind": "react-query-options",
+          "name": "generateDuesReportOptions",
+          "operation_id": "generateDuesReport",
+          "endpoint": "GET /association/member/dues-reporting/{organizationId}/report",
+          "imported_from": "@monobase/sdk-ts/generated/react-query",
+          "confidence": "HIGH"
+        }
+      ],
       "routes_used_in": [],
-      "confidence": "LOW"
+      "confidence": "LOW",
+      "loading_state_hygiene": {
+        "has_skeleton": false,
+        "has_error_branch": false,
+        "has_timeout": false,
+        "has_inline_error_marker": false,
+        "has_skeleton_ok_marker": false,
+        "violation": null
+      }
     },
     "apps/memberry/src/routes/_authenticated/org/$orgSlug/officer/reviews/index.tsx": {
       "name": "index",
@@ -9908,7 +11914,15 @@
       "state_access": [],
       "api_calls": [],
       "routes_used_in": [],
-      "confidence": "LOW"
+      "confidence": "LOW",
+      "loading_state_hygiene": {
+        "has_skeleton": true,
+        "has_error_branch": false,
+        "has_timeout": false,
+        "has_inline_error_marker": false,
+        "has_skeleton_ok_marker": false,
+        "violation": "SKELETON_WITHOUT_ERROR_BRANCH"
+      }
     },
     "apps/memberry/src/routes/_authenticated/org/$orgSlug/officer/roster/$memberId.tsx": {
       "name": "$memberId",
@@ -9939,14 +11953,17 @@
           "mode": "read"
         }
       ],
-      "api_calls": [
-        {
-          "method": "PATCH",
-          "endpoint": "/api/association/member/licenses/${licenseId}"
-        }
-      ],
+      "api_calls": [],
       "routes_used_in": [],
-      "confidence": "LOW"
+      "confidence": "LOW",
+      "loading_state_hygiene": {
+        "has_skeleton": true,
+        "has_error_branch": true,
+        "has_timeout": false,
+        "has_inline_error_marker": false,
+        "has_skeleton_ok_marker": false,
+        "violation": null
+      }
     },
     "apps/memberry/src/routes/_authenticated/org/$orgSlug/officer/roster/import.tsx": {
       "name": "import",
@@ -9957,9 +11974,26 @@
       "events_out": [],
       "slots": [],
       "state_access": [],
-      "api_calls": [],
+      "api_calls": [
+        {
+          "kind": "react-query-mutation",
+          "name": "importRosterMembersMutation",
+          "operation_id": "importRosterMembers",
+          "endpoint": "POST /association/member/roster/import",
+          "imported_from": "@monobase/sdk-ts/generated/react-query",
+          "confidence": "HIGH"
+        }
+      ],
       "routes_used_in": [],
-      "confidence": "LOW"
+      "confidence": "LOW",
+      "loading_state_hygiene": {
+        "has_skeleton": false,
+        "has_error_branch": true,
+        "has_timeout": false,
+        "has_inline_error_marker": false,
+        "has_skeleton_ok_marker": false,
+        "violation": null
+      }
     },
     "apps/memberry/src/routes/_authenticated/org/$orgSlug/officer/roster/index.tsx": {
       "name": "index",
@@ -9975,9 +12009,34 @@
       ],
       "slots": [],
       "state_access": [],
-      "api_calls": [],
+      "api_calls": [
+        {
+          "kind": "react-query-mutation",
+          "name": "addRosterMemberMutation",
+          "operation_id": "addRosterMember",
+          "endpoint": "POST /association/member/roster",
+          "imported_from": "@monobase/sdk-ts/generated/react-query",
+          "confidence": "HIGH"
+        },
+        {
+          "kind": "react-query-options",
+          "name": "getOrgCpdConfigOptions",
+          "operation_id": "getOrgCpdConfig",
+          "endpoint": "GET /association/member/cpd-config/{organizationId}",
+          "imported_from": "@monobase/sdk-ts/generated/react-query",
+          "confidence": "HIGH"
+        }
+      ],
       "routes_used_in": [],
-      "confidence": "LOW"
+      "confidence": "LOW",
+      "loading_state_hygiene": {
+        "has_skeleton": false,
+        "has_error_branch": true,
+        "has_timeout": false,
+        "has_inline_error_marker": false,
+        "has_skeleton_ok_marker": false,
+        "violation": null
+      }
     },
     "apps/memberry/src/routes/_authenticated/org/$orgSlug/officer/roster.tsx": {
       "name": "roster",
@@ -10023,18 +12082,17 @@
       ],
       "slots": [],
       "state_access": [],
-      "api_calls": [
-        {
-          "method": "GET",
-          "endpoint": "/api/association/member/cpd-config/${orgId}"
-        },
-        {
-          "method": "PATCH",
-          "endpoint": "/api/association/member/cpd-config/${orgId}"
-        }
-      ],
+      "api_calls": [],
       "routes_used_in": [],
-      "confidence": "LOW"
+      "confidence": "LOW",
+      "loading_state_hygiene": {
+        "has_skeleton": false,
+        "has_error_branch": true,
+        "has_timeout": false,
+        "has_inline_error_marker": false,
+        "has_skeleton_ok_marker": false,
+        "violation": null
+      }
     },
     "apps/memberry/src/routes/_authenticated/org/$orgSlug/officer/settings/dues.tsx": {
       "name": "dues",
@@ -10143,26 +12201,17 @@
       ],
       "slots": [],
       "state_access": [],
-      "api_calls": [
-        {
-          "method": "GET",
-          "endpoint": "/api/accredited-providers/${orgId}"
-        },
-        {
-          "method": "POST",
-          "endpoint": "/api/accredited-providers/${orgId}"
-        },
-        {
-          "method": "PATCH",
-          "endpoint": "/api/accredited-providers/${orgId}/${id}"
-        },
-        {
-          "method": "DELETE",
-          "endpoint": "/api/accredited-providers/${orgId}/${id}"
-        }
-      ],
+      "api_calls": [],
       "routes_used_in": [],
-      "confidence": "LOW"
+      "confidence": "LOW",
+      "loading_state_hygiene": {
+        "has_skeleton": false,
+        "has_error_branch": true,
+        "has_timeout": false,
+        "has_inline_error_marker": false,
+        "has_skeleton_ok_marker": false,
+        "violation": null
+      }
     },
     "apps/memberry/src/routes/_authenticated/org/$orgSlug/officer/surveys/$surveyId.tsx": {
       "name": "$surveyId",
@@ -10221,9 +12270,34 @@
       ],
       "slots": [],
       "state_access": [],
-      "api_calls": [],
+      "api_calls": [
+        {
+          "kind": "react-query-options",
+          "name": "listCustomTrainingEnrollmentsOptions",
+          "operation_id": "listCustomTrainingEnrollments",
+          "endpoint": "GET /association/training-lifecycle/{trainingId}/enrollments",
+          "imported_from": "@monobase/sdk-ts/generated/react-query",
+          "confidence": "HIGH"
+        },
+        {
+          "kind": "react-query-mutation",
+          "name": "checkInCustomTrainingMutation",
+          "operation_id": "checkInCustomTraining",
+          "endpoint": "POST /association/training-lifecycle/{trainingId}/check-in",
+          "imported_from": "@monobase/sdk-ts/generated/react-query",
+          "confidence": "HIGH"
+        }
+      ],
       "routes_used_in": [],
-      "confidence": "LOW"
+      "confidence": "LOW",
+      "loading_state_hygiene": {
+        "has_skeleton": true,
+        "has_error_branch": true,
+        "has_timeout": false,
+        "has_inline_error_marker": false,
+        "has_skeleton_ok_marker": false,
+        "violation": null
+      }
     },
     "apps/memberry/src/routes/_authenticated/org/$orgSlug/officer/training/$trainingId.tsx": {
       "name": "$trainingId",
@@ -10234,9 +12308,26 @@
       "events_out": [],
       "slots": [],
       "state_access": [],
-      "api_calls": [],
+      "api_calls": [
+        {
+          "kind": "react-query-options",
+          "name": "getTrainingOptions",
+          "operation_id": "getTraining",
+          "endpoint": "GET /association/training/{trainingId}",
+          "imported_from": "@monobase/sdk-ts/generated/react-query",
+          "confidence": "HIGH"
+        }
+      ],
       "routes_used_in": [],
-      "confidence": "LOW"
+      "confidence": "LOW",
+      "loading_state_hygiene": {
+        "has_skeleton": true,
+        "has_error_branch": false,
+        "has_timeout": false,
+        "has_inline_error_marker": false,
+        "has_skeleton_ok_marker": false,
+        "violation": "SKELETON_WITHOUT_ERROR_BRANCH"
+      }
     },
     "apps/memberry/src/routes/_authenticated/org/$orgSlug/officer/training/index.tsx": {
       "name": "index",
@@ -10275,7 +12366,15 @@
       "state_access": [],
       "api_calls": [],
       "routes_used_in": [],
-      "confidence": "LOW"
+      "confidence": "LOW",
+      "loading_state_hygiene": {
+        "has_skeleton": false,
+        "has_error_branch": false,
+        "has_timeout": false,
+        "has_inline_error_marker": false,
+        "has_skeleton_ok_marker": false,
+        "violation": null
+      }
     },
     "apps/memberry/src/routes/_authenticated/org/$orgSlug/route.tsx": {
       "name": "route",
@@ -10308,9 +12407,42 @@
       ],
       "slots": [],
       "state_access": [],
-      "api_calls": [],
+      "api_calls": [
+        {
+          "kind": "react-query-options",
+          "name": "getTrainingOptions",
+          "operation_id": "getTraining",
+          "endpoint": "GET /association/training/{trainingId}",
+          "imported_from": "@monobase/sdk-ts/generated/react-query",
+          "confidence": "HIGH"
+        },
+        {
+          "kind": "react-query-mutation",
+          "name": "enrollInCustomTrainingMutation",
+          "operation_id": "enrollInCustomTraining",
+          "endpoint": "POST /association/training-lifecycle/{trainingId}/enroll",
+          "imported_from": "@monobase/sdk-ts/generated/react-query",
+          "confidence": "HIGH"
+        },
+        {
+          "kind": "react-query-options",
+          "name": "listMyCustomTrainingsOptions",
+          "operation_id": "listMyCustomTrainings",
+          "endpoint": "GET /association/training-lifecycle/my",
+          "imported_from": "@monobase/sdk-ts/generated/react-query",
+          "confidence": "HIGH"
+        }
+      ],
       "routes_used_in": [],
-      "confidence": "LOW"
+      "confidence": "LOW",
+      "loading_state_hygiene": {
+        "has_skeleton": true,
+        "has_error_branch": true,
+        "has_timeout": false,
+        "has_inline_error_marker": false,
+        "has_skeleton_ok_marker": false,
+        "violation": null
+      }
     },
     "apps/memberry/src/routes/_authenticated/org/$orgSlug/training/index.tsx": {
       "name": "index",
@@ -10321,9 +12453,26 @@
       "events_out": [],
       "slots": [],
       "state_access": [],
-      "api_calls": [],
+      "api_calls": [
+        {
+          "kind": "react-query-options",
+          "name": "searchTrainingsOptions",
+          "operation_id": "searchTrainings",
+          "endpoint": "GET /association/training",
+          "imported_from": "@monobase/sdk-ts/generated/react-query",
+          "confidence": "HIGH"
+        }
+      ],
       "routes_used_in": [],
-      "confidence": "LOW"
+      "confidence": "LOW",
+      "loading_state_hygiene": {
+        "has_skeleton": false,
+        "has_error_branch": false,
+        "has_timeout": false,
+        "has_inline_error_marker": false,
+        "has_skeleton_ok_marker": false,
+        "violation": null
+      }
     },
     "apps/memberry/src/routes/_authenticated/settings/account.tsx": {
       "name": "account",
@@ -10355,9 +12504,70 @@
       ],
       "slots": [],
       "state_access": [],
-      "api_calls": [],
+      "api_calls": [
+        {
+          "kind": "react-query-mutation",
+          "name": "cancelMyAccountDeletionMutation",
+          "operation_id": "cancelMyAccountDeletion",
+          "endpoint": "POST /persons/me/cancel-delete",
+          "imported_from": "@monobase/sdk-ts/generated/react-query",
+          "confidence": "HIGH"
+        },
+        {
+          "kind": "react-query-options",
+          "name": "exportMyDataOptions",
+          "operation_id": "exportMyData",
+          "endpoint": "GET /persons/me/export",
+          "imported_from": "@monobase/sdk-ts/generated/react-query",
+          "confidence": "HIGH"
+        },
+        {
+          "kind": "react-query-options",
+          "name": "getPersonOptions",
+          "operation_id": "getPerson",
+          "endpoint": "GET /persons/{person}",
+          "imported_from": "@monobase/sdk-ts/generated/react-query",
+          "confidence": "HIGH"
+        },
+        {
+          "kind": "react-query-options",
+          "name": "getPersonQueryKey",
+          "imported_from": "@monobase/sdk-ts/generated/react-query",
+          "confidence": "LOW"
+        },
+        {
+          "kind": "react-query-mutation",
+          "name": "requestMyAccountDeletionMutation",
+          "operation_id": "requestMyAccountDeletion",
+          "endpoint": "POST /persons/me/delete",
+          "imported_from": "@monobase/sdk-ts/generated/react-query",
+          "confidence": "HIGH"
+        },
+        {
+          "kind": "react-query-mutation",
+          "name": "updatePersonMutation",
+          "operation_id": "updatePerson",
+          "endpoint": "PATCH /persons/{person}",
+          "imported_from": "@monobase/sdk-ts/generated/react-query",
+          "confidence": "HIGH"
+        },
+        {
+          "kind": "sdk-flow",
+          "name": "useFileUpload",
+          "imported_from": "@monobase/sdk-ts/flows",
+          "confidence": "MEDIUM"
+        }
+      ],
       "routes_used_in": [],
-      "confidence": "LOW"
+      "confidence": "LOW",
+      "loading_state_hygiene": {
+        "has_skeleton": false,
+        "has_error_branch": true,
+        "has_timeout": false,
+        "has_inline_error_marker": false,
+        "has_skeleton_ok_marker": false,
+        "violation": null
+      }
     },
     "apps/memberry/src/routes/_authenticated/settings/security.tsx": {
       "name": "security",
@@ -10459,7 +12669,15 @@
       ],
       "api_calls": [],
       "routes_used_in": [],
-      "confidence": "LOW"
+      "confidence": "LOW",
+      "loading_state_hygiene": {
+        "has_skeleton": true,
+        "has_error_branch": false,
+        "has_timeout": false,
+        "has_inline_error_marker": false,
+        "has_skeleton_ok_marker": false,
+        "violation": "SKELETON_WITHOUT_ERROR_BRANCH"
+      }
     },
     "apps/memberry/src/routes/join.tsx": {
       "name": "join",
@@ -10470,14 +12688,17 @@
       "events_out": [],
       "slots": [],
       "state_access": [],
-      "api_calls": [
-        {
-          "method": "GET",
-          "endpoint": "/api/public/orgs${qs ? "
-        }
-      ],
+      "api_calls": [],
       "routes_used_in": [],
-      "confidence": "LOW"
+      "confidence": "LOW",
+      "loading_state_hygiene": {
+        "has_skeleton": true,
+        "has_error_branch": false,
+        "has_timeout": true,
+        "has_inline_error_marker": false,
+        "has_skeleton_ok_marker": false,
+        "violation": "SKELETON_WITHOUT_ERROR_BRANCH"
+      }
     },
     "apps/memberry/src/routes/onboarding.tsx": {
       "name": "onboarding",
@@ -10497,9 +12718,32 @@
       ],
       "slots": [],
       "state_access": [],
-      "api_calls": [],
+      "api_calls": [
+        {
+          "kind": "react-query-mutation",
+          "name": "createPersonMutation",
+          "operation_id": "createPerson",
+          "endpoint": "POST /persons",
+          "imported_from": "@monobase/sdk-ts/generated/react-query",
+          "confidence": "HIGH"
+        },
+        {
+          "kind": "react-query-options",
+          "name": "getPersonQueryKey",
+          "imported_from": "@monobase/sdk-ts/generated/react-query",
+          "confidence": "LOW"
+        }
+      ],
       "routes_used_in": [],
-      "confidence": "LOW"
+      "confidence": "LOW",
+      "loading_state_hygiene": {
+        "has_skeleton": false,
+        "has_error_branch": false,
+        "has_timeout": true,
+        "has_inline_error_marker": false,
+        "has_skeleton_ok_marker": false,
+        "violation": null
+      }
     },
     "apps/memberry/src/routes/org/$slug.tsx": {
       "name": "$slug",
@@ -10510,26 +12754,17 @@
       "events_out": [],
       "slots": [],
       "state_access": [],
-      "api_calls": [
-        {
-          "method": "GET",
-          "endpoint": "/api/public/org/${encodeURIComponent(slug)}"
-        },
-        {
-          "method": "GET",
-          "endpoint": "/api/persons/me"
-        },
-        {
-          "method": "GET",
-          "endpoint": "/api/association/member/tiers"
-        },
-        {
-          "method": "POST",
-          "endpoint": "/api/association/member/applications"
-        }
-      ],
+      "api_calls": [],
       "routes_used_in": [],
-      "confidence": "LOW"
+      "confidence": "LOW",
+      "loading_state_hygiene": {
+        "has_skeleton": true,
+        "has_error_branch": true,
+        "has_timeout": false,
+        "has_inline_error_marker": false,
+        "has_skeleton_ok_marker": false,
+        "violation": null
+      }
     },
     "apps/memberry/src/routes/pay/$token.tsx": {
       "name": "$token",
@@ -10542,7 +12777,15 @@
       "state_access": [],
       "api_calls": [],
       "routes_used_in": [],
-      "confidence": "LOW"
+      "confidence": "LOW",
+      "loading_state_hygiene": {
+        "has_skeleton": true,
+        "has_error_branch": false,
+        "has_timeout": false,
+        "has_inline_error_marker": false,
+        "has_skeleton_ok_marker": false,
+        "violation": "SKELETON_WITHOUT_ERROR_BRANCH"
+      }
     },
     "apps/memberry/src/routes/verify/$certificateNumber.tsx": {
       "name": "$certificateNumber",
@@ -10555,7 +12798,15 @@
       "state_access": [],
       "api_calls": [],
       "routes_used_in": [],
-      "confidence": "LOW"
+      "confidence": "LOW",
+      "loading_state_hygiene": {
+        "has_skeleton": true,
+        "has_error_branch": false,
+        "has_timeout": false,
+        "has_inline_error_marker": false,
+        "has_skeleton_ok_marker": false,
+        "violation": "SKELETON_WITHOUT_ERROR_BRANCH"
+      }
     },
     "apps/memberry/src/routes/verify/$credentialNumber.tsx": {
       "name": "$credentialNumber",
@@ -10568,7 +12819,15 @@
       "state_access": [],
       "api_calls": [],
       "routes_used_in": [],
-      "confidence": "LOW"
+      "confidence": "LOW",
+      "loading_state_hygiene": {
+        "has_skeleton": true,
+        "has_error_branch": false,
+        "has_timeout": false,
+        "has_inline_error_marker": false,
+        "has_skeleton_ok_marker": false,
+        "violation": "SKELETON_WITHOUT_ERROR_BRANCH"
+      }
     },
     "apps/memberry/src/routes/verify/$token.tsx": {
       "name": "$token",
@@ -10581,7 +12840,15 @@
       "state_access": [],
       "api_calls": [],
       "routes_used_in": [],
-      "confidence": "LOW"
+      "confidence": "LOW",
+      "loading_state_hygiene": {
+        "has_skeleton": true,
+        "has_error_branch": true,
+        "has_timeout": false,
+        "has_inline_error_marker": false,
+        "has_skeleton_ok_marker": false,
+        "violation": null
+      }
     },
     "apps/memberry/src/routes/verify-email.tsx": {
       "name": "verify-email",
@@ -10599,7 +12866,15 @@
       "state_access": [],
       "api_calls": [],
       "routes_used_in": [],
-      "confidence": "LOW"
+      "confidence": "LOW",
+      "loading_state_hygiene": {
+        "has_skeleton": false,
+        "has_error_branch": true,
+        "has_timeout": false,
+        "has_inline_error_marker": false,
+        "has_skeleton_ok_marker": false,
+        "violation": null
+      }
     },
     "apps/memberry/src/test/setup.ts": {
       "name": "setup",

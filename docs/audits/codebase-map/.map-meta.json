@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "timestamp": "2026-05-30T12:00:00+00:00",
+  "timestamp": "2026-05-30T04:39:58.245Z",
   "git_sha": "28c42566d8c531df657bdb01e8221f10b7e7a3dc",
   "file_count": 1814,
   "frameworks": [
@@ -20,5 +20,5 @@
     "CODE_STATE_MACHINES.json": "6362680fe4b139306edcbaffa920552edb68866b2214980ae5f992b115af7474",
     "CODE_TERMINOLOGY_MAP.json": "911cb2bb810cd9d5a3977b155fc19a1aba51c54c47c38aed571d28352d5b6b90"
   },
-  "regen_note": "Incremental refresh from 9c473e1f → 28c42566 (cycle-4 integration: Waves G1+G2+G3+G4). ~30 commits, ~140 changed source files re-scanned. Artifact deltas: (1) CODE_API_SURFACE.json — phantom endpoints 9 → 0 via S-G1-07 reconciliation: 4 real drift fixes (FE re-route + 2 new hand-wired BE routes for voidCreditEntry/getDuesMemberSummary) and 5 false-positive template-literal mis-parses now verified against existing routes; total endpoints 428 → 421 (removed 9 phantom placeholders, added 2 real). (2) CODE_STATE_MACHINES.json — FSMs 3 → 18 via new `transition_map` detection method targeting *_VALID_TRANSITIONS literal maps + assertValidTransition() call sites; 12 of the 15 transition maps are wired by Wave G1 across membership/booking/dues/training/marketplace/email/elections handlers. (3) CODE_MODULE_MAP.json — api-core file_count 47 → 144 (reflects accurate current count incl. tests; previous baseline undercounted core/ subdir); subsystems map added on api-core documenting core/ports (ADR-001 hex boundary), core/schema-registry, core/observability (OTel), core/pagination, middleware/csrf-token (S-C4-041 double-submit); association:member 341 → 343 (voidCreditEntry + getDuesMemberSummary handlers); communication 96 → 97 (n-plus-one-guard.test); membership 43 → 44 (cross-module-sql.test). (4) Markdown companions regenerated: 7 of 7 (MODULE_MAP, STATE_MACHINES, API_SURFACE, TERMINOLOGY, DATA_FLOW, COMPONENT_REGISTRY, ROUTE_MAP). Wave G3 added TypeSpec for advertising/jobs/marketplace (15 contract operations), but routes are NOT mounted in app.ts — recorded in CODE_API_SURFACE.md narrative section, not in endpoint counts. Wave G4 added CSRF middleware + OTel tracing middleware (registered in app.ts but introduce no new HTTP endpoints; csrf-token GET /csrf-token registered by registerCsrfTokenEndpoint — only externally visible new endpoint, not yet catalogued because it is infrastructure-mode like /health). CODE_COMPONENT_REGISTRY, CODE_DATA_FLOW, CODE_TERMINOLOGY, CODE_ROUTE_MAP, CODE_IMPORT_GRAPH JSONs are byte-identical (only their MD companions advanced)."
+  "regen_note": "Wave G5 W2: component→hook→endpoint trace backfill. Visited 378 files; updated 157, added 0; loading_state_hygiene violations: 54."
 }
