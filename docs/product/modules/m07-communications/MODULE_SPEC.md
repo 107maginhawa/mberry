@@ -121,6 +121,7 @@ Enable officers to communicate with members through announcements, templated mes
 | M7-R5 | IF recipient is deceased or suppressed THEN skip all delivery channels | All channels | Check suppression list before dispatch |
 | M7-R6 | IF high-priority notification (security, dues overdue) THEN push regardless of preference | Security alerts | Override member prefs |
 | BR-26 | IF notification sent THEN respect member channel preferences per category | All | Per-category toggles honored |
+| BR-28 | IF same recipient + template + payload key sent within dedup window THEN suppress duplicate delivery | Templates, scheduling, fan-out | Dedup key derived per template; coverage: `handlers/communication/communication.test.ts`, `handlers/membership/br-p2-gap.test.ts`, `tests/contract/communications-flow.hurl`, `tests/e2e/officer/communications.spec.ts`. Annotation: not directly E2E-verifiable — backend unit test is primary coverage |
 
 ## 6. Permissions
 

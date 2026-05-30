@@ -274,6 +274,7 @@ Postconditions:
 | M1-R11 | IF imported member already linked to org THEN do not re-import | Bulk Import | Counted separately in preview |
 | BR-22 | IF importing member THEN match by email (exact, case-insensitive) OR license number (normalized). IF email matches Person A but license matches Person B THEN flag for human resolution | Bulk Import | Auto-link existing accounts; conflict flagged |
 | BR-23 | IF license number entered THEN validate format per association regex (strip spaces, dashes, leading zeros; case-insensitive) | Registration, Import | Format enforcement per association |
+| BR-24 | IF invitation token age > expiry window THEN reject and surface "expired" message; officer may regenerate | Invite Member (WF-008) | Default expiry 7 days; coverage: `handlers/invite/invite.test.ts`, `tests/contract/auth-verification.hurl`, `tests/e2e/auth.spec.ts` |
 | BR-25 | IF OTP generated THEN 6-digit, 10-minute expiry pattern | Registration, Claim | Standard OTP pattern |
 | BR-26 | IF session created THEN concurrent sessions allowed, 24-hour token expiry | Session Management | Device-linked sessions |
 
