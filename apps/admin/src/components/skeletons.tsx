@@ -1,3 +1,5 @@
+import { Button } from '@monobase/ui'
+
 function Bone({ className }: { className?: string }) {
   return (
     <div
@@ -37,6 +39,23 @@ export function StatCardSkeleton() {
     <div className="rounded-lg border bg-card p-6 space-y-2">
       <Bone className="h-3 w-[50%]" />
       <Bone className="h-8 w-[30%]" />
+    </div>
+  )
+}
+
+export function ErrorState({ message, onRetry }: { message: string; onRetry?: () => void }) {
+  return (
+    <div
+      role="alert"
+      aria-live="polite"
+      className="flex flex-col items-center gap-3 p-6 rounded-lg border border-destructive/40 bg-destructive/5 text-center"
+    >
+      <p className="text-sm text-destructive">{message}</p>
+      {onRetry && (
+        <Button type="button" variant="outline" size="sm" onClick={onRetry}>
+          Try again
+        </Button>
+      )}
     </div>
   )
 }

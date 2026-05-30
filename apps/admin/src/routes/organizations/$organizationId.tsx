@@ -5,6 +5,7 @@ import { Button, Table, TableHeader, TableBody, TableRow, TableHead, TableCell }
 import { toast } from 'sonner'
 import { getOrganizationOptions } from '@monobase/sdk-ts/generated/@tanstack/react-query.gen'
 import { CSRF_HEADER, readCsrfCookie } from '@monobase/sdk-ts/csrf'
+import { ErrorState } from '@/components/skeletons'
 
 export const Route = createFileRoute('/organizations/$organizationId')({
   component: OrganizationDetailPage,
@@ -34,9 +35,17 @@ function OrganizationDetailPage() {
   const { organizationId } = Route.useParams()
   const queryClient = useQueryClient()
 
-  const { data: sdkOrg, isLoading, error } = useQuery(
+  const { data: sdkOrg, isLoading, isError, refetch } = useQuery(
     getOrganizationOptions({ path: { organizationId } })
   )
+
+  if (isError) {
+    return (
+      <div className="p-8 max-w-2xl">
+        <ErrorState message="Could not load organization" onRetry={() => refetch()} />
+      </div>
+    )
+  }
   // Cast to local interface — SDK type doesn't include extended fields (members, associationName)
   const org = sdkOrg as Organization | undefined
 
@@ -73,12 +82,6 @@ function OrganizationDetailPage() {
         <ArrowLeft className="w-4 h-4" />
         Back to Organizations
       </Link>
-
-      {error && (
-        <div className="rounded-lg border border-red-300 bg-red-50 p-4 mb-4 text-red-700 text-sm">
-          {error.message}
-        </div>
-      )}
 
       {isLoading ? (
         <div className="text-muted-foreground animate-pulse">Loading organization...</div>

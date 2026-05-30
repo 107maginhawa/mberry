@@ -13,6 +13,7 @@ import {
   TableCell,
 } from '@monobase/ui'
 import { RequireRole } from '@/lib/role-gate'
+import { ErrorState } from '@/components/skeletons'
 
 export const Route = createFileRoute('/committees/')({
   component: () => (
@@ -39,7 +40,7 @@ function CommitteesPage() {
   const [search, setSearch] = useState('')
   const [page, setPage] = useState(0)
 
-  const { data, isLoading, error } = useQuery<{ data: CommitteeItem[] }>({
+  const { data, isLoading, isError, refetch } = useQuery<{ data: CommitteeItem[] }>({
     queryKey: ['admin-committees'],
     queryFn: async () => {
       const res = await fetch('/api/admin/committees?limit=100')
@@ -47,6 +48,14 @@ function CommitteesPage() {
       return res.json()
     },
   })
+
+  if (isError) {
+    return (
+      <div className="p-8 max-w-2xl">
+        <ErrorState message="Could not load committees" onRetry={() => refetch()} />
+      </div>
+    )
+  }
 
   const allCommittees = data?.data ?? []
   const filtered = search.length >= 2
@@ -104,13 +113,6 @@ function CommitteesPage() {
           />
         </div>
       </div>
-
-      {/* Error */}
-      {error && (
-        <div className="rounded-lg border border-red-300 bg-red-50 p-4 mb-4 text-red-700 text-sm">
-          {error instanceof Error ? error.message : 'Failed to load committees'}
-        </div>
-      )}
 
       {/* Table */}
       <div className="rounded-lg border bg-card">

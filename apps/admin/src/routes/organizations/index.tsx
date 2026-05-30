@@ -3,6 +3,7 @@ import { useQuery } from '@tanstack/react-query'
 import { Building, Plus } from 'lucide-react'
 import { Button, Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from '@monobase/ui'
 import { listOrganizationsOptions } from '@monobase/sdk-ts/generated/@tanstack/react-query.gen'
+import { ErrorState } from '@/components/skeletons'
 
 export const Route = createFileRoute('/organizations/')({
   component: OrganizationsPage,
@@ -23,7 +24,15 @@ interface Organization {
 
 
 function OrganizationsPage() {
-  const { data, isLoading, error } = useQuery(listOrganizationsOptions({ query: { limit: 50 } }))
+  const { data, isLoading, isError, refetch } = useQuery(listOrganizationsOptions({ query: { limit: 50 } }))
+
+  if (isError) {
+    return (
+      <div className="p-8 max-w-2xl">
+        <ErrorState message="Could not load organizations" onRetry={() => refetch()} />
+      </div>
+    )
+  }
 
   // Cast to local Organization interface which includes extended fields (associationName, type, memberCount)
   const organizations = (data?.data ?? []) as unknown as Organization[]
@@ -66,13 +75,6 @@ function OrganizationsPage() {
           <p className="text-3xl font-bold mt-1">{isLoading ? '...' : suspendedCount}</p>
         </div>
       </div>
-
-      {/* Error state */}
-      {error && (
-        <div className="rounded-lg border border-red-300 bg-red-50 p-4 mb-4 text-red-700 text-sm">
-          {error instanceof Error ? error.message : 'Failed to load organizations'}
-        </div>
-      )}
 
       {/* Table */}
       <div className="rounded-lg border bg-card">
