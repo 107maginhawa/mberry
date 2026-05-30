@@ -1,17 +1,14 @@
 {
-  "version": 1,
+  "version": 2,
   "state_machines": [
     {
-      "id": "fsm:index-0",
-      "name": "index.tsx",
+      "id": "fsm:events-index-0",
+      "name": "events/index.tsx",
       "source_file": "apps/admin/src/routes/events/index.tsx",
       "source_line": 66,
       "module": "app-admin",
       "detection_method": "useState_union",
-      "states": [
-        "details",
-        "registrations"
-      ],
+      "states": ["details", "registrations"],
       "transitions": [],
       "spec_match": null,
       "confidence": "HIGH"
@@ -23,11 +20,7 @@
       "source_line": 114,
       "module": "app-memberry",
       "detection_method": "useState_union",
-      "states": [
-        "annual",
-        "semi-annual",
-        "quarterly"
-      ],
+      "states": ["annual", "semi-annual", "quarterly"],
       "transitions": [],
       "spec_match": null,
       "confidence": "HIGH"
@@ -39,21 +32,331 @@
       "source_line": 59,
       "module": "app-memberry",
       "detection_method": "useState_union",
-      "states": [
-        "date",
-        "name"
-      ],
+      "states": ["date", "name"],
       "transitions": [],
       "spec_match": null,
       "confidence": "HIGH"
+    },
+    {
+      "id": "fsm:membership-status",
+      "name": "MEMBERSHIP_VALID_TRANSITIONS",
+      "source_file": "services/api-ts/src/utils/status-transitions.ts",
+      "source_line": 72,
+      "module": "membership",
+      "detection_method": "transition_map",
+      "states": ["pendingPayment", "active", "gracePeriod", "lapsed", "expired", "suspended", "removed", "resigned", "deceased", "expelled"],
+      "transitions": [
+        { "from": "pendingPayment", "to": "active", "trigger": "approval", "site": "services/api-ts/src/utils/status-transitions.ts:73" },
+        { "from": "pendingPayment", "to": "removed", "trigger": "*", "site": "services/api-ts/src/utils/status-transitions.ts:73" },
+        { "from": "active", "to": "gracePeriod", "trigger": "auto:dues_expiry", "site": "services/api-ts/src/utils/status-transitions.ts:74" },
+        { "from": "active", "to": "lapsed", "trigger": "*", "site": "services/api-ts/src/utils/status-transitions.ts:74" },
+        { "from": "active", "to": "suspended", "trigger": "officer", "site": "services/api-ts/src/utils/status-transitions.ts:74" },
+        { "from": "active", "to": "removed", "trigger": "officer:terminateMembership", "site": "services/api-ts/src/handlers/association:member/terminateMembership.ts:40" },
+        { "from": "active", "to": "resigned", "trigger": "self:resignMembership", "site": "services/api-ts/src/handlers/association:member/resignMembership.ts" },
+        { "from": "active", "to": "deceased", "trigger": "officer:deceaseMembership", "site": "services/api-ts/src/handlers/association:member/deceaseMembership.ts" },
+        { "from": "active", "to": "expelled", "trigger": "officer", "site": "services/api-ts/src/utils/status-transitions.ts:74" },
+        { "from": "gracePeriod", "to": "active", "trigger": "payment", "site": "services/api-ts/src/utils/status-transitions.ts:75" },
+        { "from": "gracePeriod", "to": "lapsed", "trigger": "auto:grace_expiry", "site": "services/api-ts/src/utils/status-transitions.ts:75" },
+        { "from": "lapsed", "to": "active", "trigger": "payment(BR-07)", "site": "services/api-ts/src/utils/status-transitions.ts:76" },
+        { "from": "*", "to": "removed", "trigger": "officer", "site": "services/api-ts/src/handlers/membership/updateMember.ts:83" }
+      ],
+      "spec_match": null,
+      "wired_in": [
+        "services/api-ts/src/handlers/association:member/terminateMembership.ts:40",
+        "services/api-ts/src/handlers/membership/updateMember.ts:83"
+      ],
+      "confidence": "HIGH"
+    },
+    {
+      "id": "fsm:booking-status",
+      "name": "BOOKING_VALID_TRANSITIONS",
+      "source_file": "services/api-ts/src/handlers/booking/utils/status-transitions.ts",
+      "source_line": 8,
+      "module": "booking",
+      "detection_method": "transition_map",
+      "states": ["pending", "confirmed", "rejected", "cancelled", "completed", "no_show_client", "no_show_host"],
+      "transitions": [
+        { "from": "pending", "to": "confirmed", "trigger": "officer:confirmBooking", "site": "services/api-ts/src/handlers/booking/repos/booking.repo.ts:233" },
+        { "from": "pending", "to": "rejected", "trigger": "officer:rejectBooking", "site": "services/api-ts/src/handlers/booking/rejectBooking.ts:64" },
+        { "from": "pending", "to": "cancelled", "trigger": "officer:cancelBooking", "site": "services/api-ts/src/handlers/booking/repos/booking.repo.ts:259" },
+        { "from": "confirmed", "to": "cancelled", "trigger": "officer", "site": "services/api-ts/src/handlers/booking/repos/booking.repo.ts:259" },
+        { "from": "confirmed", "to": "completed", "trigger": "officer", "site": "services/api-ts/src/handlers/booking/repos/booking.repo.ts:308" },
+        { "from": "confirmed", "to": "no_show_client", "trigger": "officer:markAsNoShow", "site": "services/api-ts/src/handlers/booking/repos/booking.repo.ts:308" },
+        { "from": "confirmed", "to": "no_show_host", "trigger": "officer:markAsNoShow", "site": "services/api-ts/src/handlers/booking/repos/booking.repo.ts:308" }
+      ],
+      "spec_match": null,
+      "wired_in": [
+        "services/api-ts/src/handlers/booking/rejectBooking.ts:64",
+        "services/api-ts/src/handlers/booking/repos/booking.repo.ts:233",
+        "services/api-ts/src/handlers/booking/repos/booking.repo.ts:259",
+        "services/api-ts/src/handlers/booking/repos/booking.repo.ts:308"
+      ],
+      "confidence": "HIGH"
+    },
+    {
+      "id": "fsm:invoice-status",
+      "name": "INVOICE_VALID_TRANSITIONS",
+      "source_file": "services/api-ts/src/handlers/association:member/utils/status-transitions.ts",
+      "source_line": 10,
+      "module": "association:member",
+      "detection_method": "transition_map",
+      "states": ["generated", "sent", "paid", "overdue", "cancelled", "writtenOff"],
+      "transitions": [
+        { "from": "generated", "to": "sent", "trigger": "send", "site": "services/api-ts/src/handlers/association:member/utils/status-transitions.ts:11" },
+        { "from": "sent", "to": "paid", "trigger": "officer:markPaid", "site": "services/api-ts/src/handlers/association:member/repos/dues.repo.ts:150" },
+        { "from": "sent", "to": "overdue", "trigger": "auto:due_date", "site": "services/api-ts/src/handlers/association:member/utils/status-transitions.ts:12" },
+        { "from": "*", "to": "cancelled", "trigger": "officer:deleteDuesInvoice", "site": "services/api-ts/src/handlers/association:member/deleteDuesInvoice.ts:39" },
+        { "from": "overdue", "to": "writtenOff", "trigger": "officer", "site": "services/api-ts/src/handlers/association:member/utils/status-transitions.ts:13" }
+      ],
+      "spec_match": null,
+      "wired_in": [
+        "services/api-ts/src/handlers/association:member/repos/dues.repo.ts:150",
+        "services/api-ts/src/handlers/association:member/deleteDuesInvoice.ts:39"
+      ],
+      "confidence": "HIGH"
+    },
+    {
+      "id": "fsm:dues-payment-status",
+      "name": "DUES_PAYMENT_VALID_TRANSITIONS",
+      "source_file": "services/api-ts/src/utils/status-transitions.ts",
+      "source_line": 87,
+      "module": "dues",
+      "detection_method": "transition_map",
+      "states": ["pending", "submitted", "underReview", "confirmed", "completed", "partiallyRefunded", "failed", "rejected", "refunded", "expired"],
+      "transitions": [
+        { "from": "pending", "to": "completed", "trigger": "*", "site": "services/api-ts/src/utils/status-transitions.ts:88" },
+        { "from": "pending", "to": "failed", "trigger": "*", "site": "services/api-ts/src/utils/status-transitions.ts:88" },
+        { "from": "submitted", "to": "underReview", "trigger": "*", "site": "services/api-ts/src/utils/status-transitions.ts:89" },
+        { "from": "underReview", "to": "confirmed", "trigger": "officer:approve", "site": "services/api-ts/src/utils/status-transitions.ts:90" },
+        { "from": "underReview", "to": "rejected", "trigger": "officer:reject", "site": "services/api-ts/src/utils/status-transitions.ts:90" },
+        { "from": "confirmed", "to": "completed", "trigger": "*", "site": "services/api-ts/src/utils/status-transitions.ts:91" },
+        { "from": "completed", "to": "refunded", "trigger": "officer", "site": "services/api-ts/src/utils/status-transitions.ts:92" },
+        { "from": "completed", "to": "partiallyRefunded", "trigger": "officer", "site": "services/api-ts/src/utils/status-transitions.ts:92" },
+        { "from": "partiallyRefunded", "to": "refunded", "trigger": "officer", "site": "services/api-ts/src/utils/status-transitions.ts:93" }
+      ],
+      "spec_match": null,
+      "wired_in": [
+        "services/api-ts/src/handlers/dues/repos/dues-payments.repo.ts:189"
+      ],
+      "confidence": "HIGH"
+    },
+    {
+      "id": "fsm:email-queue-status",
+      "name": "EMAIL_QUEUE_VALID_TRANSITIONS",
+      "source_file": "services/api-ts/src/utils/status-transitions.ts",
+      "source_line": 21,
+      "module": "email",
+      "detection_method": "transition_map",
+      "states": ["pending", "processing", "sent", "failed", "cancelled"],
+      "transitions": [
+        { "from": "pending", "to": "processing", "trigger": "worker:claim", "site": "services/api-ts/src/handlers/email/repos/queue.repo.ts:186" },
+        { "from": "pending", "to": "cancelled", "trigger": "officer:cancel", "site": "services/api-ts/src/handlers/email/repos/queue.repo.ts:283" },
+        { "from": "processing", "to": "sent", "trigger": "worker:success", "site": "services/api-ts/src/handlers/email/repos/queue.repo.ts:211" },
+        { "from": "processing", "to": "failed", "trigger": "worker:error", "site": "services/api-ts/src/handlers/email/repos/queue.repo.ts:234" },
+        { "from": "failed", "to": "pending", "trigger": "user:retryEmail", "site": "services/api-ts/src/handlers/email/repos/queue.repo.ts:310" },
+        { "from": "failed", "to": "processing", "trigger": "worker:auto-retry", "site": "services/api-ts/src/handlers/email/repos/queue.repo.ts:186" }
+      ],
+      "spec_match": null,
+      "wired_in": [
+        "services/api-ts/src/handlers/email/repos/queue.repo.ts:186",
+        "services/api-ts/src/handlers/email/repos/queue.repo.ts:211",
+        "services/api-ts/src/handlers/email/repos/queue.repo.ts:234",
+        "services/api-ts/src/handlers/email/repos/queue.repo.ts:283",
+        "services/api-ts/src/handlers/email/repos/queue.repo.ts:310"
+      ],
+      "confidence": "HIGH"
+    },
+    {
+      "id": "fsm:marketplace-vendor-status",
+      "name": "MARKETPLACE_VENDOR_VALID_TRANSITIONS",
+      "source_file": "services/api-ts/src/utils/status-transitions.ts",
+      "source_line": 113,
+      "module": "marketplace",
+      "detection_method": "transition_map",
+      "states": ["pending", "verified", "suspended", "rejected"],
+      "transitions": [
+        { "from": "pending", "to": "verified", "trigger": "officer:verifyVendor", "site": "services/api-ts/src/handlers/marketplace/verifyVendor.ts:35" },
+        { "from": "pending", "to": "rejected", "trigger": "officer:verifyVendor(reject)", "site": "services/api-ts/src/handlers/marketplace/verifyVendor.ts:35" },
+        { "from": "verified", "to": "suspended", "trigger": "officer", "site": "services/api-ts/src/handlers/marketplace/repos/vendor.repo.ts:63" },
+        { "from": "suspended", "to": "verified", "trigger": "officer:reinstate", "site": "services/api-ts/src/handlers/marketplace/repos/vendor.repo.ts:82" }
+      ],
+      "spec_match": null,
+      "wired_in": [
+        "services/api-ts/src/handlers/marketplace/verifyVendor.ts:35",
+        "services/api-ts/src/handlers/marketplace/repos/vendor.repo.ts:63",
+        "services/api-ts/src/handlers/marketplace/repos/vendor.repo.ts:82"
+      ],
+      "confidence": "HIGH"
+    },
+    {
+      "id": "fsm:marketplace-order-status",
+      "name": "MARKETPLACE_ORDER_VALID_TRANSITIONS",
+      "source_file": "services/api-ts/src/utils/status-transitions.ts",
+      "source_line": 126,
+      "module": "marketplace",
+      "detection_method": "transition_map",
+      "states": ["pending", "confirmed", "fulfilled", "cancelled", "refunded"],
+      "transitions": [
+        { "from": "pending", "to": "confirmed", "trigger": "*", "site": "services/api-ts/src/utils/status-transitions.ts:127" },
+        { "from": "pending", "to": "fulfilled", "trigger": "*", "site": "services/api-ts/src/utils/status-transitions.ts:127" },
+        { "from": "pending", "to": "cancelled", "trigger": "*", "site": "services/api-ts/src/utils/status-transitions.ts:127" },
+        { "from": "confirmed", "to": "fulfilled", "trigger": "officer:fulfillOrder", "site": "services/api-ts/src/handlers/marketplace/fulfillOrder.ts:30" },
+        { "from": "fulfilled", "to": "refunded", "trigger": "officer", "site": "services/api-ts/src/utils/status-transitions.ts:130" }
+      ],
+      "spec_match": null,
+      "wired_in": [
+        "services/api-ts/src/handlers/marketplace/fulfillOrder.ts:30"
+      ],
+      "confidence": "HIGH"
+    },
+    {
+      "id": "fsm:training-status",
+      "name": "TRAINING_VALID_TRANSITIONS",
+      "source_file": "services/api-ts/src/utils/status-transitions.ts",
+      "source_line": 136,
+      "module": "association:operations",
+      "detection_method": "transition_map",
+      "states": ["draft", "published", "completed", "cancelled"],
+      "transitions": [
+        { "from": "draft", "to": "published", "trigger": "officer:publishTraining", "site": "services/api-ts/src/handlers/association:operations/publishTraining.ts:35" },
+        { "from": "draft", "to": "cancelled", "trigger": "officer", "site": "services/api-ts/src/utils/status-transitions.ts:137" },
+        { "from": "published", "to": "completed", "trigger": "*", "site": "services/api-ts/src/utils/status-transitions.ts:138" },
+        { "from": "published", "to": "cancelled", "trigger": "officer", "site": "services/api-ts/src/utils/status-transitions.ts:138" }
+      ],
+      "spec_match": null,
+      "wired_in": [
+        "services/api-ts/src/handlers/association:operations/publishTraining.ts:35"
+      ],
+      "confidence": "HIGH"
+    },
+    {
+      "id": "fsm:training-enrollment-status",
+      "name": "TRAINING_ENROLLMENT_VALID_TRANSITIONS",
+      "source_file": "services/api-ts/src/utils/status-transitions.ts",
+      "source_line": 143,
+      "module": "association:operations",
+      "detection_method": "transition_map",
+      "states": ["enrolled", "completed", "cancelled", "noShow"],
+      "transitions": [
+        { "from": "enrolled", "to": "completed", "trigger": "officer:completeTrainingEnrollment", "site": "services/api-ts/src/handlers/association:operations/completeTrainingEnrollment.ts:50" },
+        { "from": "enrolled", "to": "cancelled", "trigger": "officer:updateTrainingEnrollment", "site": "services/api-ts/src/handlers/association:operations/updateTrainingEnrollment.ts:48" },
+        { "from": "enrolled", "to": "noShow", "trigger": "officer:updateTrainingEnrollment", "site": "services/api-ts/src/handlers/association:operations/updateTrainingEnrollment.ts:48" }
+      ],
+      "spec_match": null,
+      "wired_in": [
+        "services/api-ts/src/handlers/association:operations/completeTrainingEnrollment.ts:50",
+        "services/api-ts/src/handlers/association:operations/updateTrainingEnrollment.ts:48"
+      ],
+      "confidence": "HIGH"
+    },
+    {
+      "id": "fsm:election-status",
+      "name": "ELECTION_VALID_TRANSITIONS",
+      "source_file": "services/api-ts/src/utils/status-transitions.ts",
+      "source_line": 102,
+      "module": "elections",
+      "detection_method": "transition_map",
+      "states": ["draft", "nominationsOpen", "votingOpen", "awaitingConfirmation", "published", "cancelled"],
+      "transitions": [
+        { "from": "draft", "to": "nominationsOpen", "trigger": "officer:updateElectionStatus", "site": "services/api-ts/src/handlers/elections/updateElectionStatus.ts:26" },
+        { "from": "nominationsOpen", "to": "votingOpen", "trigger": "officer:updateElectionStatus", "site": "services/api-ts/src/handlers/elections/updateElectionStatus.ts:26" },
+        { "from": "votingOpen", "to": "awaitingConfirmation", "trigger": "officer:updateElectionStatus", "site": "services/api-ts/src/handlers/elections/updateElectionStatus.ts:26" },
+        { "from": "awaitingConfirmation", "to": "published", "trigger": "officer:updateElectionStatus", "site": "services/api-ts/src/handlers/elections/updateElectionStatus.ts:26" },
+        { "from": "*", "to": "cancelled", "trigger": "officer:updateElectionStatus", "site": "services/api-ts/src/handlers/elections/updateElectionStatus.ts:26" }
+      ],
+      "spec_match": null,
+      "wired_in": [
+        "services/api-ts/src/handlers/elections/updateElectionStatus.ts:26"
+      ],
+      "confidence": "HIGH"
+    },
+    {
+      "id": "fsm:booking-event-status",
+      "name": "BOOKING_EVENT_VALID_TRANSITIONS",
+      "source_file": "services/api-ts/src/utils/status-transitions.ts",
+      "source_line": 9,
+      "module": "booking",
+      "detection_method": "transition_map",
+      "states": ["draft", "active", "paused", "archived"],
+      "transitions": [],
+      "spec_match": null,
+      "wired_in": [],
+      "confidence": "MEDIUM"
+    },
+    {
+      "id": "fsm:feed-post-status",
+      "name": "FEED_POST_VALID_TRANSITIONS",
+      "source_file": "services/api-ts/src/utils/status-transitions.ts",
+      "source_line": 30,
+      "module": "communication",
+      "detection_method": "transition_map",
+      "states": ["draft", "published", "flagged", "removed"],
+      "transitions": [],
+      "spec_match": null,
+      "wired_in": [],
+      "confidence": "MEDIUM"
+    },
+    {
+      "id": "fsm:marketplace-listing-status",
+      "name": "MARKETPLACE_LISTING_VALID_TRANSITIONS",
+      "source_file": "services/api-ts/src/utils/status-transitions.ts",
+      "source_line": 120,
+      "module": "marketplace",
+      "detection_method": "transition_map",
+      "states": ["draft", "active", "archived"],
+      "transitions": [],
+      "spec_match": null,
+      "wired_in": [],
+      "confidence": "MEDIUM"
+    },
+    {
+      "id": "fsm:license-status",
+      "name": "LICENSE_VALID_TRANSITIONS",
+      "source_file": "services/api-ts/src/handlers/association:member/utils/status-transitions.ts",
+      "source_line": 120,
+      "module": "association:member",
+      "detection_method": "transition_map",
+      "states": ["pending", "active", "expired", "suspended", "revoked"],
+      "transitions": [],
+      "spec_match": null,
+      "wired_in": [],
+      "confidence": "MEDIUM"
+    },
+    {
+      "id": "fsm:officer-term-status",
+      "name": "TERM_VALID_TRANSITIONS",
+      "source_file": "services/api-ts/src/handlers/association:member/utils/status-transitions.ts",
+      "source_line": 145,
+      "module": "association:member",
+      "detection_method": "transition_map",
+      "states": ["upcoming", "active", "completed", "resigned", "removed"],
+      "transitions": [],
+      "spec_match": null,
+      "wired_in": [],
+      "confidence": "MEDIUM"
     }
   ],
   "spec_comparison": {
     "matched": [],
     "code_only": [
-      "fsm:index-0",
+      "fsm:events-index-0",
       "fsm:dues-config-form-1",
-      "fsm:application-list-2"
+      "fsm:application-list-2",
+      "fsm:membership-status",
+      "fsm:booking-status",
+      "fsm:invoice-status",
+      "fsm:dues-payment-status",
+      "fsm:email-queue-status",
+      "fsm:marketplace-vendor-status",
+      "fsm:marketplace-order-status",
+      "fsm:training-status",
+      "fsm:training-enrollment-status",
+      "fsm:election-status",
+      "fsm:booking-event-status",
+      "fsm:feed-post-status",
+      "fsm:marketplace-listing-status",
+      "fsm:license-status",
+      "fsm:officer-term-status"
     ],
     "spec_only": []
   }

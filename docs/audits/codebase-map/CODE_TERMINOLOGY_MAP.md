@@ -1,6 +1,6 @@
 ---
 oli-version: "1.0"
-last-modified: 2026-05-29T16:51:31.647Z
+last-modified: 2026-05-30T12:00:00.000Z
 last-modified-by: oli-codebase-map
 ---
 
@@ -20,3 +20,10 @@ Glossary available: true
 - **document** — 15 variants, 20 strings, modules: app-memberry
 - **election** — 15 variants, 24 strings, modules: app-memberry
 - **committee** — 4 variants, 5 strings, modules: app-admin, app-memberry
+
+## Cycle-4 delta
+
+No net new clusters; cycle 4 changed handler/repository internals (transition guards, ports, schema-registry, observability, CSRF middleware) but did not introduce new domain vocabulary surfaced in user-facing strings. Frontend churn limited to:
+- `apps/admin/src/routes/organizations/$organizationId.tsx` (admin-org-status route rename, no new tokens)
+- `apps/memberry/src/features/communications/components/notification-preferences.tsx` (re-routed bulk endpoint, no new tokens)
+- `apps/memberry/src/routes/_authenticated/org/$orgSlug/officer/finances/members/$memberId.tsx` (consumes new dues-member-summary endpoint, no new tokens)

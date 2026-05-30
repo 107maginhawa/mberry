@@ -1,13 +1,13 @@
 ---
 oli-version: "1.0"
-last-modified: 2026-05-29T16:51:31.647Z
+last-modified: 2026-05-30T12:00:00.000Z
 last-modified-by: oli-codebase-map
 ---
 
 # Code Route Map
 
 Strategy: file-based
-Total routes: 143
+Total routes: 143 (unchanged this cycle; only `apps/admin/src/routes/organizations/$organizationId.tsx` and `apps/memberry/src/routes/_authenticated/org/$orgSlug/officer/finances/members/$memberId.tsx` were modified — no new route slugs)
 
 <!-- oli:regen:route-table:begin -->
 | Route | Module | Auth | Params |

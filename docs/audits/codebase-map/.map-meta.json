@@ -1,7 +1,7 @@
 {
   "version": 2,
-  "timestamp": "2026-05-30T00:00:00+00:00",
-  "git_sha": "9c473e1fd7ce5d6c1986070f966eb37b6e9bcd2e",
+  "timestamp": "2026-05-30T12:00:00+00:00",
+  "git_sha": "28c42566d8c531df657bdb01e8221f10b7e7a3dc",
   "file_count": 1814,
   "frameworks": [
     "generic",
@@ -11,14 +11,14 @@
   "mode": "incremental",
   "phase_timings": {},
   "artifact_hashes": {
-    "CODE_API_SURFACE.json": "f0dfa35885dd110d4ebd58348408e44b3bc9b150b6078d8835033e9d4a0fd534",
+    "CODE_API_SURFACE.json": "82e7999fd8e881d563bacc4258cd6a7e383fb967ef057e1fbaf2ea669348a7aa",
     "CODE_COMPONENT_REGISTRY.json": "3d1a2d9d70023f71eb01e9544af751fc932f79018466364e5abf2106aaeb420f",
     "CODE_DATA_FLOW.json": "ecfe44c59710718ef6d90b793f4670c369ad8b779775d28b7c87d8d96305018f",
     "CODE_IMPORT_GRAPH.json": "15e8d5ade014cfe9501e6a825c5770c738085cc24beeaaee84bb7ad15ec819fe",
-    "CODE_MODULE_MAP.json": "8d9acdd3bf88a5eeb4129e37468429629e5e233e80be58aaae28a48ca847a9be",
+    "CODE_MODULE_MAP.json": "d77a22700493513c178ecbcbcb6566dc9455a709b2a959e40a6691e4f57ef185",
     "CODE_ROUTE_MAP.json": "c8397fa59bd4e59aa7a1588ac30345ecd8ab12b11610550bb394f28e39c370ae",
-    "CODE_STATE_MACHINES.json": "8c09fc92e07ee9b1929819ccc443b554a789dd053ee3418c23dc3c946d6a4291",
+    "CODE_STATE_MACHINES.json": "6362680fe4b139306edcbaffa920552edb68866b2214980ae5f992b115af7474",
     "CODE_TERMINOLOGY_MAP.json": "911cb2bb810cd9d5a3977b155fc19a1aba51c54c47c38aed571d28352d5b6b90"
   },
-  "regen_note": "Incremental refresh from 23c4b38f → 9c473e1f. 62 changed files (mostly tests + .hurl contract suites — excluded from map per Phase 0a). 3 source files re-scanned: event-card.tsx (aria-label string change → terminology updated), officer.tsx (div→main semantic wrap, no contract change), app.ts (added /communications/* prefix to optional-org-context middleware loop + explicit authMiddleware({required:false}); no new endpoints — middleware ordering only). Only CODE_TERMINOLOGY_MAP.json hash advanced; other 7 artifacts byte-identical."
+  "regen_note": "Incremental refresh from 9c473e1f → 28c42566 (cycle-4 integration: Waves G1+G2+G3+G4). ~30 commits, ~140 changed source files re-scanned. Artifact deltas: (1) CODE_API_SURFACE.json — phantom endpoints 9 → 0 via S-G1-07 reconciliation: 4 real drift fixes (FE re-route + 2 new hand-wired BE routes for voidCreditEntry/getDuesMemberSummary) and 5 false-positive template-literal mis-parses now verified against existing routes; total endpoints 428 → 421 (removed 9 phantom placeholders, added 2 real). (2) CODE_STATE_MACHINES.json — FSMs 3 → 18 via new `transition_map` detection method targeting *_VALID_TRANSITIONS literal maps + assertValidTransition() call sites; 12 of the 15 transition maps are wired by Wave G1 across membership/booking/dues/training/marketplace/email/elections handlers. (3) CODE_MODULE_MAP.json — api-core file_count 47 → 144 (reflects accurate current count incl. tests; previous baseline undercounted core/ subdir); subsystems map added on api-core documenting core/ports (ADR-001 hex boundary), core/schema-registry, core/observability (OTel), core/pagination, middleware/csrf-token (S-C4-041 double-submit); association:member 341 → 343 (voidCreditEntry + getDuesMemberSummary handlers); communication 96 → 97 (n-plus-one-guard.test); membership 43 → 44 (cross-module-sql.test). (4) Markdown companions regenerated: 7 of 7 (MODULE_MAP, STATE_MACHINES, API_SURFACE, TERMINOLOGY, DATA_FLOW, COMPONENT_REGISTRY, ROUTE_MAP). Wave G3 added TypeSpec for advertising/jobs/marketplace (15 contract operations), but routes are NOT mounted in app.ts — recorded in CODE_API_SURFACE.md narrative section, not in endpoint counts. Wave G4 added CSRF middleware + OTel tracing middleware (registered in app.ts but introduce no new HTTP endpoints; csrf-token GET /csrf-token registered by registerCsrfTokenEndpoint — only externally visible new endpoint, not yet catalogued because it is infrastructure-mode like /health). CODE_COMPONENT_REGISTRY, CODE_DATA_FLOW, CODE_TERMINOLOGY, CODE_ROUTE_MAP, CODE_IMPORT_GRAPH JSONs are byte-identical (only their MD companions advanced)."
 }

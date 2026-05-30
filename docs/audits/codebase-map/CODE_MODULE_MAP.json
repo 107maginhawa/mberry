@@ -74,11 +74,24 @@
         "services/api-ts/src/app.ts",
         "services/api-ts/src/index.ts"
       ],
-      "public_exports": [],
-      "file_count": 47,
+      "public_exports": [
+        "services/api-ts/src/core/ports/index.ts",
+        "services/api-ts/src/core/schema-registry.ts",
+        "services/api-ts/src/core/observability.ts",
+        "services/api-ts/src/core/pagination.ts",
+        "services/api-ts/src/middleware/csrf-token.ts"
+      ],
+      "file_count": 144,
       "has_spec": false,
       "spec_path": null,
-      "confidence": "HIGH"
+      "confidence": "HIGH",
+      "subsystems": {
+        "core/ports": "Hexagonal port interfaces (GovernancePort, PlatformAdminPort, ImpersonationPort, MembershipPort) consumed by middleware. See services/api-ts/src/core/ports/README.md and ARCHITECTURE.md ADR-001.",
+        "core/schema-registry": "Audited cross-module schema re-exports for domain-event consumers + cron jobs. ADR-001.",
+        "core/observability": "OpenTelemetry SDK init + Hono tracing middleware (Wave G4 / S-C4-040). Env-gated.",
+        "core/pagination": "Pagination convention + unified page-size constants (S-C4-010).",
+        "middleware/csrf-token": "Double-submit CSRF token middleware (S-C4-041). Defense-in-depth above hono/csrf origin check."
+      }
     },
     "advertising": {
       "name": "advertising",
@@ -98,8 +111,12 @@
       "entry_points": [
         "services/api-ts/src/handlers/association:member/jobs/index.ts"
       ],
-      "public_exports": [],
-      "file_count": 341,
+      "public_exports": [
+        "services/api-ts/src/handlers/association:member/voidCreditEntry.ts",
+        "services/api-ts/src/handlers/association:member/getDuesMemberSummary.ts",
+        "services/api-ts/src/handlers/association:member/repos/governance.repo.ts"
+      ],
+      "file_count": 343,
       "has_spec": true,
       "spec_path": "docs/product/modules/m02-member-profile/MODULE_SPEC.md",
       "confidence": "HIGH"
@@ -180,7 +197,7 @@
       "framework": "hono",
       "entry_points": [],
       "public_exports": [],
-      "file_count": 96,
+      "file_count": 97,
       "has_spec": true,
       "spec_path": "docs/product/modules/m07-communications/MODULE_SPEC.md",
       "confidence": "HIGH"
@@ -284,8 +301,10 @@
       "entry_points": [
         "services/api-ts/src/handlers/membership/jobs/index.ts"
       ],
-      "public_exports": [],
-      "file_count": 43,
+      "public_exports": [
+        "services/api-ts/src/handlers/membership/repos/membership.repo.ts"
+      ],
+      "file_count": 44,
       "has_spec": true,
       "spec_path": "docs/product/modules/m02-member-profile/MODULE_SPEC.md",
       "confidence": "HIGH"
@@ -334,7 +353,10 @@
       "entry_points": [
         "services/api-ts/src/handlers/platformadmin/jobs/index.ts"
       ],
-      "public_exports": [],
+      "public_exports": [
+        "services/api-ts/src/handlers/platformadmin/repos/platform-admin.repo.ts",
+        "services/api-ts/src/handlers/platformadmin/transitionOrgStatus.ts"
+      ],
       "file_count": 87,
       "has_spec": true,
       "spec_path": "docs/product/modules/m03-platform-admin/MODULE_SPEC.md",

@@ -9844,212 +9844,56 @@
         "last_modified_days_ago": null
       }
     },
-    "GET /api/admin/organizations/${organizationId}/status (phantom)": {
-      "method": "GET",
-      "path": "/api/admin/organizations/${organizationId}/status",
-      "handler_file": null,
-      "handler_function": null,
-      "auth_required": null,
-      "auth_middleware": null,
-      "request_shape": {},
-      "response_shape": {},
-      "module": "app-admin",
-      "confidence": "LOW",
-      "consumer_count": 1,
-      "consumers": [
-        "app-admin"
-      ],
-      "is_phantom": true,
-      "deprecation_signals": {
-        "single_consumer": true,
-        "has_todo_fixme": false,
-        "deprecated_annotation": false,
-        "last_modified_days_ago": null
-      }
-    },
-    "GET /api/admin/surveys?${params} (phantom)": {
-      "method": "GET",
-      "path": "/api/admin/surveys?${params}",
-      "handler_file": null,
-      "handler_function": null,
-      "auth_required": null,
-      "auth_middleware": null,
-      "request_shape": {},
-      "response_shape": {},
-      "module": "app-admin",
-      "confidence": "LOW",
-      "consumer_count": 1,
-      "consumers": [
-        "app-admin"
-      ],
-      "is_phantom": true,
-      "deprecation_signals": {
-        "single_consumer": true,
-        "has_todo_fixme": false,
-        "deprecated_annotation": false,
-        "last_modified_days_ago": null
-      }
-    },
-    "POST /api/communications/subscriptions/bulk (phantom)": {
+    "POST /association/member/credits/void-event": {
       "method": "POST",
-      "path": "/api/communications/subscriptions/bulk",
-      "handler_file": null,
-      "handler_function": null,
-      "auth_required": null,
-      "auth_middleware": null,
+      "path": "/association/member/credits/void-event",
+      "handler_file": "services/api-ts/src/handlers/association:member/voidCreditEntry.ts",
+      "handler_function": "voidCreditEntry",
+      "auth_required": true,
+      "auth_middleware": "authMiddleware,orgContextMiddleware,self-enforced:officer-position",
       "request_shape": {},
       "response_shape": {},
-      "module": "app-memberry",
-      "confidence": "LOW",
+      "module": "association:member",
+      "confidence": "HIGH",
       "consumer_count": 1,
       "consumers": [
         "app-memberry"
       ],
-      "is_phantom": true,
+      "is_phantom": false,
       "deprecation_signals": {
         "single_consumer": true,
         "has_todo_fixme": false,
         "deprecated_annotation": false,
         "last_modified_days_ago": null
-      }
+      },
+      "notes": "Hand-wired. S-G1-07 phantom #4 reconciliation. Bulk-void manual credit awards by activityName; handler self-enforces officer position."
     },
-    "GET /api/association/member/credits/void-event (phantom)": {
+    "GET /association/member/dues-member-summary/{organizationId}/{personId}": {
       "method": "GET",
-      "path": "/api/association/member/credits/void-event",
-      "handler_file": null,
-      "handler_function": null,
-      "auth_required": null,
-      "auth_middleware": null,
-      "request_shape": {},
+      "path": "/association/member/dues-member-summary/{organizationId}/{personId}",
+      "handler_file": "services/api-ts/src/handlers/association:member/getDuesMemberSummary.ts",
+      "handler_function": "getDuesMemberSummary",
+      "auth_required": true,
+      "auth_middleware": "authMiddleware,orgContextMiddleware,self-enforced:TREASURER|PRESIDENT",
+      "request_shape": {
+        "organizationId": "uuid",
+        "personId": "uuid"
+      },
       "response_shape": {},
-      "module": "app-memberry",
-      "confidence": "LOW",
+      "module": "association:member",
+      "confidence": "HIGH",
       "consumer_count": 1,
       "consumers": [
         "app-memberry"
       ],
-      "is_phantom": true,
+      "is_phantom": false,
       "deprecation_signals": {
         "single_consumer": true,
         "has_todo_fixme": false,
         "deprecated_annotation": false,
         "last_modified_days_ago": null
-      }
-    },
-    "GET /api/association/member/applications/bulk-approve (phantom)": {
-      "method": "GET",
-      "path": "/api/association/member/applications/bulk-approve",
-      "handler_file": null,
-      "handler_function": null,
-      "auth_required": null,
-      "auth_middleware": null,
-      "request_shape": {},
-      "response_shape": {},
-      "module": "app-memberry",
-      "confidence": "LOW",
-      "consumer_count": 1,
-      "consumers": [
-        "app-memberry"
-      ],
-      "is_phantom": true,
-      "deprecation_signals": {
-        "single_consumer": true,
-        "has_todo_fixme": false,
-        "deprecated_annotation": false,
-        "last_modified_days_ago": null
-      }
-    },
-    "GET /api/persons/me (phantom)": {
-      "method": "GET",
-      "path": "/api/persons/me",
-      "handler_file": null,
-      "handler_function": null,
-      "auth_required": null,
-      "auth_middleware": null,
-      "request_shape": {},
-      "response_shape": {},
-      "module": "app-memberry",
-      "confidence": "LOW",
-      "consumer_count": 1,
-      "consumers": [
-        "app-memberry"
-      ],
-      "is_phantom": true,
-      "deprecation_signals": {
-        "single_consumer": true,
-        "has_todo_fixme": false,
-        "deprecated_annotation": false,
-        "last_modified_days_ago": null
-      }
-    },
-    "GET /api/association/member/compliance/${orgId}${statusFilter !==  (phantom)": {
-      "method": "GET",
-      "path": "/api/association/member/compliance/${orgId}${statusFilter !== ",
-      "handler_file": null,
-      "handler_function": null,
-      "auth_required": null,
-      "auth_middleware": null,
-      "request_shape": {},
-      "response_shape": {},
-      "module": "app-memberry",
-      "confidence": "LOW",
-      "consumer_count": 1,
-      "consumers": [
-        "app-memberry"
-      ],
-      "is_phantom": true,
-      "deprecation_signals": {
-        "single_consumer": true,
-        "has_todo_fixme": false,
-        "deprecated_annotation": false,
-        "last_modified_days_ago": null
-      }
-    },
-    "GET /association/member/dues-member-summary/${orgId}/${memberId} (phantom)": {
-      "method": "GET",
-      "path": "/association/member/dues-member-summary/${orgId}/${memberId}",
-      "handler_file": null,
-      "handler_function": null,
-      "auth_required": null,
-      "auth_middleware": null,
-      "request_shape": {},
-      "response_shape": {},
-      "module": "app-memberry",
-      "confidence": "LOW",
-      "consumer_count": 1,
-      "consumers": [
-        "app-memberry"
-      ],
-      "is_phantom": true,
-      "deprecation_signals": {
-        "single_consumer": true,
-        "has_todo_fixme": false,
-        "deprecated_annotation": false,
-        "last_modified_days_ago": null
-      }
-    },
-    "GET /api/public/orgs${qs ?  (phantom)": {
-      "method": "GET",
-      "path": "/api/public/orgs${qs ? ",
-      "handler_file": null,
-      "handler_function": null,
-      "auth_required": null,
-      "auth_middleware": null,
-      "request_shape": {},
-      "response_shape": {},
-      "module": "app-memberry",
-      "confidence": "LOW",
-      "consumer_count": 1,
-      "consumers": [
-        "app-memberry"
-      ],
-      "is_phantom": true,
-      "deprecation_signals": {
-        "single_consumer": true,
-        "has_todo_fixme": false,
-        "deprecated_annotation": false,
-        "last_modified_days_ago": null
-      }
+      },
+      "notes": "Hand-wired. S-G1-07 phantom #8 reconciliation. Per-member dues financial summary for officers; handler self-enforces TREASURER/PRESIDENT."
     }
   }
 }
