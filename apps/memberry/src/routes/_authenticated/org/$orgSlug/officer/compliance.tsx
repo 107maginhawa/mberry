@@ -4,9 +4,10 @@ import { RefreshCw, Users, CheckCircle, AlertTriangle, XCircle } from 'lucide-re
 import { PageHeader } from '@/components/patterns/page-header'
 import { GlassCard } from '@/components/motion/glass-card'
 import { CardSkeleton } from '@/components/patterns/skeleton-loader'
+import { ErrorState } from '@/components/patterns/error-state'
 import { useOrg } from '@/hooks/useOrg'
 import { api } from '@/lib/api'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@monobase/ui'
+import { Button, Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@monobase/ui'
 import { useState } from 'react'
 
 export const Route = createFileRoute('/_authenticated/org/$orgSlug/officer/compliance')({
@@ -18,7 +19,7 @@ function OfficerCompliance() {
   const queryClient = useQueryClient()
   const [statusFilter, setStatusFilter] = useState<string>('all')
 
-  const { data, isLoading } = useQuery({
+  const { data, isLoading, isError, refetch } = useQuery({
     queryKey: ['compliance-report', orgId, statusFilter],
     queryFn: () => api.get(`/api/association/member/compliance/${orgId}${statusFilter !== 'all' ? `?status=${statusFilter}` : ''}`),
     enabled: !!orgId,
@@ -30,6 +31,14 @@ function OfficerCompliance() {
   })
 
   const report = (data as any)?.data
+
+  if (isError) {
+    return (
+      <div className="p-6 max-w-2xl">
+        <ErrorState message="Could not load compliance report" onRetry={() => refetch()} />
+      </div>
+    )
+  }
 
   if (isLoading) {
     return (
@@ -50,14 +59,14 @@ function OfficerCompliance() {
         title="Compliance Dashboard"
         subtitle="Monitor member CPD compliance"
         actions={
-          <button
+          <Button
             onClick={() => refreshMutation.mutate()}
             disabled={refreshMutation.isPending}
-            className="inline-flex items-center gap-2 px-3 py-2 rounded-lg bg-[var(--color-primary)] text-white text-sm hover:opacity-90 disabled:opacity-50"
+            size="sm"
           >
             <RefreshCw className={`w-4 h-4 ${refreshMutation.isPending ? 'animate-spin' : ''}`} />
             Refresh
-          </button>
+          </Button>
         }
       />
 

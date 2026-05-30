@@ -3,6 +3,7 @@ import { useQuery } from '@tanstack/react-query'
 import { PageHeader } from '@/components/patterns/page-header'
 import { GlassCard } from '@/components/motion/glass-card'
 import { EmptyState } from '@/components/patterns/empty-state'
+import { ErrorState } from '@/components/patterns/error-state'
 import { Skeleton } from '@monobase/ui'
 import { Megaphone } from 'lucide-react'
 import { useOrg } from '@/hooks/useOrg'
@@ -24,7 +25,7 @@ function formatDate(iso: string | null | undefined) {
 function MemberAnnouncementFeed() {
   const { orgId, orgSlug } = useOrg()
 
-  const { data, isLoading } = useQuery({
+  const { data, isLoading, isError, refetch } = useQuery({
     queryKey: ['announcements', orgId, 'sent'],
     queryFn: async () => {
       return api.get<{ data: Array<{ id: string; title: string; content?: string; publishedAt?: string; createdBy?: string }> }>(
@@ -46,7 +47,9 @@ function MemberAnnouncementFeed() {
         ]}
       />
 
-      {isLoading ? (
+      {isError ? (
+        <ErrorState message="Could not load announcements" onRetry={() => refetch()} />
+      ) : isLoading ? (
         <div className="space-y-4">
           {Array.from({ length: 4 }).map((_, i) => (
             <Skeleton key={i} className="h-24 w-full rounded-xl" />

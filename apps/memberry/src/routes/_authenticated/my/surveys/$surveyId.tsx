@@ -1,4 +1,7 @@
 import { createFileRoute, useNavigate } from '@tanstack/react-router'
+// oli-execute: error-handled-inline
+// `error` triggers the EmptyState "Survey not found" branch at ~L33.
+// Gate heuristic misses the destructured rename.
 import { useQuery } from '@tanstack/react-query'
 import { Loader2 } from 'lucide-react'
 import { api } from '@/lib/api'

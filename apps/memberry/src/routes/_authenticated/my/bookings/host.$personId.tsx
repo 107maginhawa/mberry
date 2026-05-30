@@ -12,6 +12,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '@monobase/ui'
 import { Badge } from '@monobase/ui'
 import { Loader2 } from 'lucide-react'
 import { BookingWidget } from '@/features/booking/components/booking-widget'
+import { ErrorState } from '@/components/patterns/error-state'
 import {
   toBookingHost,
   toBookingTimeSlot,
@@ -76,6 +77,20 @@ function HostPage() {
     if (!slotsQuery.data || !event) return []
     return slotsQuery.data.map((s) => toBookingTimeSlot(s, event))
   }, [slotsQuery.data, event])
+
+  if (eventsQuery.isError || personQuery.isError) {
+    return (
+      <div className="p-6 max-w-2xl">
+        <ErrorState
+          message="Could not load host availability"
+          onRetry={() => {
+            eventsQuery.refetch()
+            personQuery.refetch()
+          }}
+        />
+      </div>
+    )
+  }
 
   if (eventsQuery.isPending || (!expandedOwner && personQuery.isPending)) {
     return (

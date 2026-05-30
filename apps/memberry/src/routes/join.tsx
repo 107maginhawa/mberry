@@ -3,6 +3,7 @@ import { useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { Input, Badge, Skeleton, Button } from '@monobase/ui'
 import { api } from '@/lib/api'
+import { ErrorState } from '@/components/patterns/error-state'
 
 export const Route = createFileRoute('/join')({
   component: JoinPage,
@@ -84,7 +85,9 @@ function JoinPage() {
           />
         </div>
 
-        {loading ? (
+        {orgsQuery.isError ? (
+          <ErrorState message="Could not load organizations" onRetry={() => orgsQuery.refetch()} />
+        ) : loading ? (
           <div className="grid gap-4 sm:grid-cols-2">
             {Array.from({ length: 6 }).map((_, i) => (
               <div key={i} className="rounded-lg border p-6">

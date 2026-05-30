@@ -1,3 +1,6 @@
+// oli-execute: error-handled-inline
+// `error` renders "Failed to load training" branch at ~L78-81. Gate
+// heuristic misses the destructured rename.
 import { createFileRoute } from '@tanstack/react-router'
 import { useQuery } from '@tanstack/react-query'
 import { useState } from 'react'

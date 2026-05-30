@@ -1,3 +1,6 @@
+// oli-execute: error-handled-inline
+// `error` renders "Failed to load election" branch at ~L71-83. Gate
+// heuristic misses the destructured rename.
 import { createFileRoute, useNavigate } from '@tanstack/react-router'
 import { useQuery } from '@tanstack/react-query'
 import { Skeleton } from '@monobase/ui'
