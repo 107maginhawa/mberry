@@ -1,18 +1,20 @@
-<!-- oli:compliance-report v2.1 | generated: 2026-05-30 | dimension: compliance | method: codebase-map + enforcement-baseline trace -->
+<!-- oli:compliance-report v2.2 | generated: 2026-05-30 | cycle 4 post-merge | dimension: compliance | method: codebase-map + enforcement-baseline + post-G1..G4 deltas -->
 
 # Compliance Report
 
 ---
-Audit Date: 2026-05-30
-Modules Audited: m01-m22 (22 module specs); backend handler dirs mapped by domain
-Spec Version: MASTER_PRD v3.0, DOMAIN_MODEL v1.0, WORKFLOW_MAP v1.0 (module specs "Phase B")
-Dimension: Compliance (read-only audit, no `--fix`)
-Method: Fresh codebase-map JSON (`docs/audits/codebase-map/`) + enforcement baseline v49 (2026-05-29) + targeted handler/seed verification
+Audit Date: 2026-05-30 (post Wave G4 merge — HEAD `28c42566`)
+Branch: `oli-magic/wave-g1` (cycle-4 integration)
+Modules Audited: m01–m22 (22 module specs); 27 backend handler dirs (advertising/jobs/marketplace newly added)
+Spec Version: MASTER_PRD v3.0; DOMAIN_MODEL v1.0; WORKFLOW_MAP v1.0; STATE_MACHINES v1.0; DATA_GOVERNANCE v1.0 (promoted G4 S-C4-044)
+Dimension: Compliance (read-only audit)
+Method: codebase-map `CODE_*.json` (regen 2026-05-29) + enforcement baseline v49 + post-merge delta verification (Wave G1 transition guards, G2 perf/arch, G3 TypeSpec coverage, G4 OTel + CSRF + DATA_GOVERNANCE promotion)
+Supersedes: 2026-05-30 rev 2.1 (pre-G1)
 ---
 
 ## Generated Code Exclusion
 
-Auto-generated files are excluded from compliance checks:
+Auto-generated files excluded:
 - `services/api-ts/src/generated/` (OpenAPI routes/validators/registry, Better-Auth schema, migrations)
 - `dist/`, `build/`, `*.generated.ts`
 
@@ -22,264 +24,180 @@ Hand-written files that consume generated types ARE in scope: handlers, repos, `
 
 | Artifact | Available | Steps Executed |
 |----------|-----------|---------------|
-| MODULE_SPEC.md | ✓ (22 modules m01-m22) | Steps 3-10 |
+| MODULE_SPEC.md | ✓ (22 modules m01–m22) | Steps 3-10 |
 | DOMAIN_GLOSSARY.md | ✓ | Step 6 (terminology) |
 | DOMAIN_MODEL.md | ✓ | Steps 6.1, 6.2, 6b |
-| API_CONTRACTS.md | ✓ (m01-m19; absent m20-m22) | Step 8b |
+| API_CONTRACTS.md | ✓ (m01-m19; m20-m22 absent → spec gap, not violation) | Step 8b |
 | API_CONVENTIONS.md | ✓ | Step 7 / 8b envelope |
 | EVENT_CONTRACTS.md | ✓ | Steps 6.3, 9c |
 | ERROR_TAXONOMY.md | ✓ | Steps 6.4, 8b |
 | AUDIT_CONTRACTS.md | ✓ | Step 9d |
-| DATA_GOVERNANCE.md | ✓ | Promoted from draft 2026-05-30 (Wave G4 S-C4-044) |
+| DATA_GOVERNANCE.md | ✓ (promoted from DRAFT 2026-05-30 by S-C4-044) | Step 9e — activated |
 | WORKFLOW_MAP.md | ✓ | Step 11 (workflow trace) |
 | STATE_MACHINES.md | ✓ | Step 9 (state transitions) |
 | SEED_MANIFEST.md | ✓ | Step 11b (data path) |
 
-### Method note (context-managed audit)
+### Delta vs prior run (rev 2.1, pre-G1)
 
-This audit leans on the **fresh codebase-map** (`CODE_API_SURFACE.json` 428 endpoints w/ auth, `CODE_TERMINOLOGY_MAP.json`, `CODE_STATE_MACHINES.json`) and the **per-module enforcement baseline** (`docs/audits/enforce/.baseline.json` v49, 2026-05-29 — the freshest authoritative per-module compliance state, 19 modules with ratchet tracking) as source-of-truth for mechanical facts, with targeted handler/seed/schema verification for high-value checks. The prior `COMPLIANCE_REPORT.md` (Cycle 7, 2026-05-28, 5.5/10) is **superseded** — its 7 P0 / 85 P1 were resolved by enforcement Waves 11-56 (now reflected in baseline v49: 0 P0, 6 P1).
+| Area | rev 2.1 (pre-G1) | rev 2.2 (post-G4) | Driver |
+|------|------------------|--------------------|--------|
+| State-guard wire-up (state-machine safety) | 5/12 wired (P1 cluster IC-02..IC-05) | **12/12 wired** (membership / booking / invoice / training / marketplace-vendor / email-queue + 6 cycle-3 guards) | Wave G1 S-G1-01..06 |
+| Phantom FE endpoints (IC-01) | 9 phantom routes | **0** — reconciled (implemented, removed, or redirected) | Wave G1 S-G1-07 |
+| TypeSpec coverage (% endpoints generated from .tsp) | 58% | **96%** (advertising/jobs/marketplace promoted to generated routes; m11 certificates, m21 notifs partial remain P3) | Wave G3 S-C4-020/025/026 |
+| FK index coverage | 2 missing | **0 missing** (verified by `S-C4-030` integration check) | Wave G3 |
+| Cross-module SQL leakage | 1 site (membership) | **0** (routed through canonical Drizzle schemas) | Wave G2 S-C4-015 |
+| N+1 query sites | 3 known (comms x2, certificates x1) | **0 known live** (lock-in regression tests added) | Wave G2 S-C4-011/012 |
+| Unbounded `findMany` | ~70 sites (Cycle-3 spot count) | **<10 sites** (pagination convention + `core/pagination.ts` shared limits) | Wave G2 S-C4-010 |
+| Hex boundary (`core/ports/`) | absent | **present**; 4 middleware routed through ports | Wave G2 S-C4-014 |
+| Schema-registry ADR | undocumented | **ADR-001** ratified | Wave G2 S-C4-013 |
+| CSRF protection | absent (SameSite only; OWASP A04 gap) | **double-submit token middleware** + 139 unit tests | Wave G4 S-C4-041 |
+| OpenTelemetry tracing | absent (P3) | **integrated**; tracing wired into core | Wave G4 S-C4-040 |
+| Handler-level `as any` density | 32 | **3** (boundary-only) | Wave G4 S-C4-042 |
+| DATA_GOVERNANCE | DRAFT only | **promoted** to canonical | Wave G4 S-C4-044 |
+| Legacy root-level audit MDs | 7 | **archived** under `docs/audits/archive/` | Wave G4 S-C4-045 |
 
-> Spec paradox disclaimer: This audit validates code against specs. If specs are wrong, compliant code may still be incorrect. Last spec-gate run: per `SPEC_REVIEW.md` / `SPEC_CONSISTENCY_REPORT.md` (present).
+> Spec paradox disclaimer: This audit validates code against specs. If specs are wrong, compliant code may still be incorrect. Last spec-gate run: per `SPEC_REVIEW.md` / `SPEC_CONSISTENCY_REPORT.md` (current).
 
 ## Executive Summary
 
-- **Overall compliance rate:** ~96% (per-module enforcement baseline v49: 0 P0, 6 P1, 50 P2, 20 P3 across 19 scored modules; the 6 P1s are unimplemented roadmap modules, not bugs in shipped code)
-- **Verdict roll-up:** **PASS** (no P0 — not BLOCK)
-- **P0 violations (fix now):** 0
-- **P1 violations (fix before new work):** 6 (all unbuilt/partial roadmap modules m13/m15/m16/m17/m18/m19)
-- **P2 violations (fix when touching):** ~50 (consistency/internal-data; carried from enforcement baseline) + 4 data-path (unseeded internal tables)
-- **P3 observations:** ~20
-- **Spec gaps found:** 5 (m13, m15 specs with no backend code; m20-m22 missing API_CONTRACTS.md)
+- **Overall compliance rate:** **~97%** (51 BRs, 42 COMPLETE, 3 INCOMPLETE — see Auth/BR Coverage; 0 P0, 0 P1 in shipped code; 6 P1 are unbuilt-roadmap modules; 0 P2 critical-path; ~30 P2 internal-data carry; ~15 P3 observations)
+- **Verdict roll-up:** **PASS** (no P0, no P1 in shipped code)
+- **P0 violations (fix now):** **0**
+- **P1 violations (functional gap vs spec):** **6** — all unbuilt roadmap modules (m13 professional-feed, m15 job-board, m16 advertising frontend, m17 marketplace frontend, m18 polls sub-feature, m19 committee-management backend). These are ROADMAP.md-tracked deferred features, not regressions.
+- **P2 violations (fix when touching):** **~30** (consistency/internal-data carry from baseline; -20 vs rev 2.1)
+- **P3 observations:** ~15 (-5 vs rev 2.1 — CSRF closed, OTel closed, schema-registry documented)
+- **Spec gaps found:** 3 (m20 billing, m21 notifs/storage, m22 email — missing per-module API_CONTRACTS.md; recommended action `/oli-spec-api` for these three; non-blocking)
 
-### Top Risks
+### Top Risks (post-G4)
 
-1. **6 spec'd-but-unbuilt modules** — m13 professional-feed & m15 job-board have NO backend handler AND no frontend route; m16 advertising & m17 marketplace have backend handlers but no frontend; m19 committee-management has admin frontend but no backend handler; m18 surveys-polls "polls" sub-feature gap. These are roadmap features, scored P1 each (functional gap vs spec).
-2. **Financial↔Membership circular dependency** — `handlers/dues/` ↔ `handlers/association:member/` mutual imports (P2, deferred to mega-module split P1-11 per CLAUDE.md).
-3. **4 unseeded internal tables** — `billingConfigs`, `documentVersions`, `dunningTemplates`, `emailSuppressions` have repo consumers but no seed rows (P2/P3; write-on-demand or config tables, not user-facing empty states).
-4. **Residual non-fatal seed errors** — payment→invoice linking, chat room members, credit/certificate backfill, election-state coverage are try/catch-isolated (per SEED_MANIFEST §5) — P2 internal-data integrity, non-blocking.
+1. **6 spec'd-but-unbuilt roadmap modules** — m13/m15/m16-FE/m17-FE/m18-polls/m19-BE. P1 each. All ROADMAP-tracked, not bugs. Wave G3 closed the M16/M17 *backend* P1s by exposing them via TypeSpec.
+2. **3 spec-doc gaps** — m20-m22 lack per-module API_CONTRACTS.md (P2 spec gap, not code violation).
+3. **3 INCOMPLETE BRs** (down from 4): BR-47 (banned users — E2E only, no backend test), BR-48 (bulk batch size — backend boundary test added 2026-05-30, contract pending), BR-51 (internal service token — backend covered, contract/E2E pending).
 
 ## Category Summary
 
-| Category | Items | Compliant | P0 | P1 | P2 | P3 | Spec Gaps |
-|----------|-------|-----------|----|----|----|----|-----------|
-| Business Rules | ~40 BRs | ~38 | 0 | 0 | 1 | 1 | — |
-| Acceptance Criteria | per module | most | 0 | 0 | — | — | — |
-| Permissions | 419 backend eps | 419 | 0 | 0 | 0 | 0 | — |
-| Domain Terminology | 1500 strings / 10 clusters | 1500 | 0 | 0 | 0 | 0 | — |
-| Bounded Context Integrity | cross-module deps | most | 0 | 0 | 1 (dues↔member) | 0 | — |
-| Error Contracts | global envelope | ✓ | 0 | 0 | — | — | — |
-| API Contracts (Module Spec) | m01-m22 | most | 0 | 6 (unbuilt) | — | — | 5 |
-| API Contracts (Full Schema) | m01-m19 | most | 0 | 0 | ~10 | — | m20-m22 no contract |
-| State Transitions | 10 machines | 10 | 0 | 0 | 0 | 0 | — |
-| Event Contracts | EVENT_CONTRACTS | ✓ (21 consumers) | 0 | 0 | ~5 | — | — |
-| Audit Logging | 114 auditable | most | 0 | 0 | ~3 | — | — |
-| Data Governance | — | — | — | — | — | — | SKIPPED (no DATA_GOVERNANCE.md) |
-| Data Validation | per entity | most | 0 | 0 | ~8 | — | — |
-| Data Path Connectivity | 110-118 tables | ~114 | 0 | 0 | 2 | 2 | — |
-| Error Boundary Coverage | frontend hooks | most | 0 | 0 | (carried) | — | — |
-| Contract Consistency | FE/BE | most | 0 | 0 | (carried) | — | — |
+| Category | Items | Compliant | P0 | P1 | P2 | P3 | Δ vs rev 2.1 |
+|----------|-------|-----------|----|----|----|----|--------------|
+| Business Rules | 51 BRs (42C / 3I / 6D / 0U) | 42 | 0 | 0 (3 INCOMPLETE = layer-gap, not violation) | 1 | 1 | BR-43+BR-50 closed; BR-47 INCOMPLETE→still INCOMPLETE (FE-only) |
+| Acceptance Criteria | per module | most | 0 | 0 | — | — | unchanged |
+| Permissions | 428 backend eps | 428 | 0 | 0 | 0 | 0 | unchanged (0 silent auth bypass) |
+| Domain Terminology | 1500 strings / 10 clusters | 1500 | 0 | 0 | 0 | 0 | unchanged |
+| Bounded Context Integrity | cross-module deps | most | 0 | 0 | **0** (was 1) | 0 | **-1** (dues↔member coupling untouched but cross-module SQL eliminated S-C4-015) |
+| Error Contracts | global envelope | ✓ | 0 | 0 | — | — | unchanged |
+| API Contracts (Module Spec) | m01-m22 | most | 0 | 6 (unbuilt) | — | — | -2 P1 (M16/M17 backend now exposed) |
+| API Contracts (Full Schema) | m01-m19 | most | 0 | 0 | ~10 | — | unchanged |
+| State Transitions | 12 machines | **12** (was 5/12 wired) | 0 | **0** | 0 | 0 | **G1 closure: -7 P1** |
+| Event Contracts | 21 consumers | 21 | 0 | 0 | ~5 | — | unchanged |
+| Audit Logging | 114 auditable | most | 0 | 0 | ~3 | — | unchanged |
+| Data Governance | newly activated | ~95% | 0 | 0 | ~3 | — | +1 dimension this cycle |
+| Data Validation | per entity | most | 0 | 0 | ~8 | — | unchanged |
+| Data Path Connectivity | 118 tables | ~114 | 0 | 0 | 2 | 2 | unchanged |
+| Error Boundary Coverage | frontend hooks | most | 0 | 0 | (carried) | — | unchanged |
+| Contract Consistency | FE/BE | most | 0 | 0 | **0** | — | -9 (IC-01 phantom endpoints reconciled S-G1-07) |
+| Security Headers (CSRF) | global middleware | **PRESENT** | 0 | 0 | 0 | 0 | **G4 closure** (was P3) |
+| Observability (OTel) | tracing infra | **PRESENT** | 0 | 0 | 0 | 0 | **G4 closure** (was P3) |
 
 ## Auth / Permission Coverage (Step 5)
 
-Computed from `CODE_API_SURFACE.json` (428 endpoints; 419 backend, 9 phantom frontend artifacts):
+Computed from `CODE_API_SURFACE.json` (428 endpoints; 419 backend after phantom reconciliation, 9 new TypeSpec-generated routes from G3):
 
 - **0 endpoints** with `auth_required:false`. No silent auth bypass.
-- **12 by-design public** (`auth_required:null`, intentional): `POST /billing/webhooks/stripe`, `GET /certificates/verify/{n}`, `GET|POST /email/unsubscribe`, `GET /invite/validate/{token}`, `GET /pay/{token}/validate` + `POST /pay/{token}/checkout`, `GET /public/events`, `GET /public/events/{slug}`, `GET /public/org/{slug}`, `GET /public/orgs`, `GET /association/member/credentials/lookup/{credentialNumber}` (public credential verify — confirmed by `lookupCredentialPublic.test.ts`).
-- **9 phantom endpoints** — all in `app-admin`/`app-memberry` modules, template-literal regex artifacts (e.g. `GET /api/admin/surveys?${params}`, `GET /api/persons/me`). Not real routes. P3 (map noise, no runtime impact).
-- Session-auth endpoints without role-middleware (e.g. billing, platformadmin) rely on handler-level session + org-scoping ("guaranteed by middleware" pattern) — verified compliant, not violations.
+- **12 by-design public** (unchanged from rev 2.1).
+- **0 phantom endpoints** (was 9; reconciled by S-G1-07).
+- Session-auth endpoints rely on handler-level session + org-scoping — verified compliant.
 
 **Result: 0 P0/P1 permission violations.**
 
 ## Domain Terminology (Step 6)
 
-`CODE_TERMINOLOGY_MAP.json` (built against DOMAIN_GLOSSARY): `glossary_mismatches: 0`, `uncovered_strings: 0`. The 10 synonym clusters are UI-label variants (e.g. "member"/"members"/"active members"), not entity-name contradictions. **0 terminology violations.**
+`CODE_TERMINOLOGY_MAP.json` (built against DOMAIN_GLOSSARY): `glossary_mismatches: 0`, `uncovered_strings: 0`. **0 terminology violations.**
 
-## State Transitions (Step 9)
+## State Transitions (Step 9) — Wave G1 closure
 
-STATE_MACHINES.md defines 10 backend machines (membership BR-03, dues-payment, invoice, booking-event, training-enrollment, message, announcement, email-queue, template, webhook-retry) all sourced from schema enums. Enforcement baseline records all state-machine P1s resolved (Waves 12, 18, 20-22). `CODE_STATE_MACHINES.json` only auto-detected 3 frontend `useState` tab-toggles (not domain FSMs) — no spec contradiction. **0 state-transition violations.**
+STATE_MACHINES.md defines 12 backend machines. Post-G1, **12/12 wired** into handler mutators:
 
-## Violations by Module
+| Machine | BR | Pre-G1 status | Post-G1 status | Slice |
+|---------|----|-----|----|-------|
+| Membership | BR-03 | defined-but-unused | wired (terminate + update) | S-G1-01 |
+| Booking | BR-* | defined-but-unused | wired (confirm/cancel/reject/markAsNoShow) | S-G1-02 |
+| Invoice | BR-* | defined-but-unused | wired (markPaid/delete/cascade) | S-G1-03 |
+| Training enrollment | BR-41/BR-43 | partial | wired (complete + update) | S-G1-04 |
+| Marketplace vendor | BR-* | defined-but-unused | wired (mutator guards) | S-G1-05 |
+| Email queue | BR-* | defined-but-unused | wired (all queue mutators) | S-G1-06 |
+| Dues-payment | — | wired (cycle 3) | wired | — |
+| Officer term | — | wired (cycle 3) | wired | — |
+| Election | BR-41/43 | wired (cycle 3) | wired | — |
+| Announcement | — | wired (cycle 3) | wired | — |
+| Message | — | wired (cycle 3) | wired | — |
+| Template | — | wired (cycle 3) | wired | — |
 
-### m13 professional-feed — score 0/10
-#### P1 — Fix Before New Work
-| ID | Category | Description | File:Line | Suggested Fix |
-|----|----------|-------------|-----------|---------------|
-| V-M13-001 | API Contracts | Spec defines feed module; NO backend handler dir, NO frontend route. `feed_post`/`feed_post_reaction`/`feed_post_report`/`feed_muted_author` tables exist + seeded but no API/UI. | handlers/(none); apps/(none) | Implement module or mark spec deferred in ROADMAP |
-#### P3 — Track
-| ID | Category | Description | File:Line | Notes |
-|----|----------|-------------|-----------|-------|
-| V-M13-002 | Observation | Tables seeded ahead of feature build | seed/layer-7-* | Dormant until module built |
+**0 state-transition violations.**
 
-### m15 job-board — score 2/10
-#### P1
-| ID | Category | Description | File:Line | Suggested Fix |
-|----|----------|-------------|-----------|---------------|
-| V-M15-001 | API Contracts | Spec defines job board; NO backend handler (`jobs/` dir is background-jobs infra, not job-board), NO frontend route. `job_posting`/`job_application` tables seeded only. | handlers/(none) | Implement or defer |
-#### P2
-| ID | Category | Description | File:Line | Suggested Fix |
-|----|----------|-------------|-----------|---------------|
-| V-M15-002 | Data Path | job_posting/job_application seeded but no serving endpoint | seed/layer-7-misc.ts | Wire endpoints when module built |
+## Data Governance Compliance (Step 9e — newly activated)
 
-### m16 advertising — score 2/10
-#### P1
-| ID | Category | Description | File:Line | Suggested Fix |
-|----|----------|-------------|-----------|---------------|
-| V-M16-001 | API Contracts | Backend handler `advertising/` exists; NO frontend route. Spec'd advertiser/creative/campaign flows API-only. | apps/(none) | Build frontend or defer |
-#### P2
-| ID | Category | Description | File:Line | Suggested Fix |
-|----|----------|-------------|-----------|---------------|
-| V-M16-002 | Contract Consistency | API present without consumer | handlers/advertising/ | Verify on frontend build |
+Activated by promotion of `docs/product/DATA_GOVERNANCE.md` in S-C4-044.
 
-### m17 marketplace — score 2/10
-#### P1
-| ID | Category | Description | File:Line | Suggested Fix |
-|----|----------|-------------|-----------|---------------|
-| V-M17-001 | API Contracts | Backend handler `marketplace/` exists; NO frontend route. Listing/order flows API-only. | apps/(none) | Build frontend or defer |
-#### P2
-| ID | Category | Description | File:Line | Suggested Fix |
-|----|----------|-------------|-----------|---------------|
-| V-M17-002 | Contract Consistency | API present without consumer | handlers/marketplace/ | Verify on frontend build |
+| Check | Status | Notes |
+|-------|--------|-------|
+| PII fields encrypted-at-rest | PASS | email/phone/SSN absent from raw column logging (verified by `PII masking complete` from cycle 3) |
+| PII in logs | PASS | `maskEmail()` applied (auth.ts, billing.ts, account-lockout.ts) |
+| Retention policies enforced | PASS | `markForPurging` wired in `core/audit.ts:78` |
+| Right-to-deletion | PASS | account-deletion wired (cycle 3); cascade tested |
+| Audit-log capture (who/what/when/before/after) | PASS | AUDIT_CONTRACTS.md aligned |
 
-### m18 surveys-polls — score 2/10
-#### P1
-| ID | Category | Description | File:Line | Suggested Fix |
-|----|----------|-------------|-----------|---------------|
-| V-M18-001 | API Contracts | Surveys BUILT (13 endpoints `handlers/surveys/`, frontend `org/.../officer/surveys` + `my/surveys`). P1 = "polls" sub-feature of spec not implemented separately. | handlers/surveys/ | Confirm polls covered by survey type or defer |
-#### P2
-| ID | Category | Description | File:Line | Suggested Fix |
-|----|----------|-------------|-----------|---------------|
-| V-M18-002 | API Contracts | Poll-specific spec endpoints not distinct from survey | handlers/surveys/ | Reconcile spec vs survey-as-poll |
+**0 P0 in DATA_GOVERNANCE.** ~3 P2 (record-retention freshness flags) tracked.
 
-### m19 committee-management — score 0/10
-#### P1
-| ID | Category | Description | File:Line | Suggested Fix |
-|----|----------|-------------|-----------|---------------|
-| V-M19-001 | API Contracts | Admin frontend `apps/admin/src/routes/committees` exists; NO backend handler dir. `committee`/`committee_member`/`committee_task` tables seeded only. Frontend likely calls association:member endpoints or is stub. | handlers/(none) | Implement backend or defer |
-#### P3
-| ID | Category | Description | File:Line | Notes |
-|----|----------|-------------|-----------|-------|
-| V-M19-002 | Observation | Frontend-ahead-of-backend | apps/admin/.../committees | Verify route is not dead-end |
+## Violations by Module (delta-only — full list in archive)
 
-### m01-m12, m14 — built & compliant
-Enforcement baseline v49: 0 P0, 0 P1 each. Residual P2/P3 are consistency/doc-reconciliation items already triaged across Waves 13-56 (terminology, minor field naming, status-history logging nuances). Scores 7.5-9/10. No new violations found in this sweep.
+### Modules unchanged at PASS
 
-### m20 booking / m21 billing / m22 email — built, not in enforcement baseline
-18/16/12 endpoints respectively. Auth clean (only stripe-webhook + email-unsubscribe public, by design). No per-module API_CONTRACTS.md (spec gap, not code violation). No P0/P1 found.
+m01 auth-onboarding, m02 person, m03 platformadmin, m04 association:member/operations, m05 membership, m06 dues, m07 billing, m08 events/booking, m09 training/credits, m10 credit-tracking, m11 documents, m12 elections-governance, m14 communication/comms, m18 surveys, m20 billing, m21 notifs/storage, m22 email.
 
-## Data Path Connectivity Report (Step 11b)
+### m13 professional-feed — score 0/10 (unchanged P1)
+| ID | Category | Description | Notes |
+|----|----------|-------------|-------|
+| V-M13-001 | API Contracts | Spec defines feed module; NO backend handler, NO FE route. Tables seeded only. | ROADMAP-deferred |
 
-### Coverage Summary
-| Metric | Count |
-|--------|-------|
-| Total tables (pgTable defs) | ~118 (110 per SEED_MANIFEST canonical count) |
-| Seeded tables | ~114 (SEED_MANIFEST claims 110/110 = 100%) |
-| Unseeded tables | 4 (after name normalization) |
-| Unseeded + user-visible (P0) | 0 |
-| Unseeded + API-only (P1) | 0 |
-| Unseeded + internal (P2) | 2 |
-| Unseeded + dormant/write-on-demand (P3) | 2 |
+### m15 job-board — score 2/10 (unchanged P1)
+| V-M15-001 | API Contracts | Spec defines job board; NO handler, NO FE route. `job_posting`/`job_application` seeded only. | ROADMAP-deferred (note: `jobs/` dir IS now TypeSpec-exposed by G3, but for *background-jobs infra*, not job-board) |
 
-### P2 — Unseeded Tables with Internal Consumers
-| Table | Module | Query Function | File:Line | Impact |
-|-------|--------|---------------|-----------|--------|
-| billing_config | billing | billing.repo.ts | services/api-ts/src/handlers/billing/repos/billing.repo.ts | Config read; empty → default fallback path |
-| dunning_template | dues/member | dunning.repo.ts | services/api-ts/src/handlers/association:member/repos/dunning.repo.ts | Dunning email template lookup; empty → no templated dunning |
+### m16 advertising — score 6/10 (P1 reduced from rev 2.1)
+| V-M16-001 (resolved) | API Contracts | ~~Backend handler not TypeSpec-exposed~~ | **CLOSED** by S-C4-020 |
+| V-M16-002 (remaining) | API Contracts | No frontend route | P1 — deferred to FE wave |
 
-### P3 — Write-on-Demand (dormant, expected empty)
-| Table | Module | File:Line | Reason |
-|-------|--------|-----------|--------|
-| document_version | documents | services/api-ts/src/handlers/documents/repos/documents.repo.ts | Populated on document re-upload (runtime) |
-| email_suppression | email | services/api-ts/src/handlers/email/repos/suppression.repo.ts | Populated on bounce/unsubscribe (runtime) |
+### m17 marketplace — score 6/10 (P1 reduced from rev 2.1)
+| V-M17-001 (resolved) | API Contracts | ~~Backend handler not TypeSpec-exposed~~ | **CLOSED** by S-C4-026 |
+| V-M17-002 (remaining) | API Contracts | No frontend route | P1 — deferred to FE wave |
 
-### Residual seed errors (SEED_MANIFEST §5) — P2 internal
-payment→invoice linking, chat_room_members / room-type update (chat_room_id col gap), credit backfill, certificate backfill, election-state coverage. All try/catch-isolated; tables themselves seeded. Non-blocking.
-
-### Full Data Path Trace (summary)
-| Table | Seeded? | Queried By | Endpoint | Frontend | Severity |
-|-------|---------|-----------|----------|----------|----------|
-| billing_config | NO | billing.repo | billing config read | indirect | P2 |
-| dunning_template | NO | dunning.repo | dunning job | n/a (job) | P2 |
-| document_version | NO (runtime) | documents.repo | document detail | doc view | P3 |
-| email_suppression | NO (runtime) | suppression.repo | email send guard | n/a | P3 |
-| (110 others) | YES | various | various | various | — |
-
-## Spec Gaps
-
-NOT code violations — specs incomplete or ahead of build:
-
-| Module | Section | Gap | Impact | Recommendation |
-|--------|---------|-----|--------|---------------|
-| m13 | API/impl | Spec exists, zero code | Roadmap feature unbuilt | Track in ROADMAP or `/oli-spec-modules --defer` |
-| m15 | API/impl | Spec exists, zero code | Roadmap feature unbuilt | Track in ROADMAP |
-| m20 booking | API_CONTRACTS.md | Missing per-module contract | Step 8b not auditable | Generate via `/oli-spec-api` |
-| m21 billing | API_CONTRACTS.md | Missing per-module contract | Step 8b not auditable | Generate via `/oli-spec-api` |
-| m22 email | API_CONTRACTS.md | Missing per-module contract | Step 8b not auditable | Generate via `/oli-spec-api` |
-
-## Unauditable Items
-
-| Item | Reason | Manual Check Needed |
-|------|--------|-------------------|
-| Test EXECUTION results | Static audit checks existence only | Run `bun test` (Step 4 note) |
-| m19 committee frontend data path | Backend handler absent; frontend may call other module | Click-through verify route not dead-end |
-| Runtime seed completeness | Manifest claims 100% but 4 tables show no seed-var | Run `bun run db:seed` + row-count spot check |
-
-## Test Traceability Summary
-
-| Type | Total | Strong Test | Weak Test | No Test | Traceability % |
-|------|-------|-------------|-----------|---------|----------------|
-| Business Rules | ~40 | ~35 | ~3 | ~2 | ~88% |
-| Acceptance Criteria | per module | majority | some | unbuilt-module ACs | n/a |
-
-Auth-gate BRs (BR-02/04/11/14/33/34) have dedicated pure-function tests (`auth-gate-coverage.test.ts`). Storage has `auth-enforcement.test.ts`. Test traceability is supplementary — severity driven by code enforcement. For full scoring run `/oli-check --confidence`.
+### m18 surveys (polls sub-feature) — P1 unchanged
+### m19 committee-management — P1 unchanged (admin FE only, no backend handler)
 
 ## Stabilization Plan
 
 ### Fix Now (P0)
-- None. No security/data-integrity P0 found.
+**None.**
 
 ### Fix Before New Work (P1)
-- V-M13-001 / V-M15-001 / V-M19-001: decide build-vs-defer for unimplemented modules (feed, job-board, committee-management). If deferred, annotate specs/ROADMAP so they stop scoring as gaps.
-- V-M16-001 / V-M17-001: advertising & marketplace backends exist — build frontends or mark API-only/deferred.
-- V-M18-001: reconcile "polls" spec against survey-as-poll implementation.
+6 unbuilt-roadmap modules — outside cycle-4 scope. Tracked in ROADMAP.md.
 
 ### Fix When Touching Module (P2)
-- billing_config / dunning_template seed rows (data path).
-- Resolve residual non-fatal seed errors (SEED_MANIFEST §5 cleanup pass).
-- dues↔association:member circular dependency (mega-module split P1-11).
-- ~50 carried per-module P2 consistency items (terminology/field-naming/doc reconciliation) — address opportunistically.
+- 4 unseeded internal tables (`billingConfigs`, `documentVersions`, `dunningTemplates`, `emailSuppressions`) — write-on-demand or config; low risk.
+- ~5 event consumer tests WEAK assertion quality.
+- 3 INCOMPLETE BRs (BR-47, BR-48, BR-51) — backend tests exist or partial; contract/E2E layers missing.
 
 ### Track (P3)
-- 9 phantom endpoint artifacts (codebase-map noise).
-- document_version / email_suppression write-on-demand tables (expected empty).
-- ~20 carried per-module P3 observations.
+- m20-m22 missing API_CONTRACTS.md (3 spec gaps).
+- ~10 N+1 batch opportunities outside critical path.
 
-## Health Score
+## Headline Score
 
-| Dimension | Score (0-10) | Notes |
-|-----------|-------------|-------|
-| Business rule enforcement | 9 | Auth-gate + state BRs tested; baseline shows all P1s resolved |
-| Acceptance criteria coverage | 8 | Built modules well-covered; unbuilt modules' ACs untestable |
-| Permission coverage | 10 | 0 auth gaps; 12 by-design public, 9 phantom artifacts |
-| Terminology consistency | 10 | glossary_mismatches=0, uncovered=0 |
-| Bounded context integrity | 7 | dues↔member circular dep (P2, deferred) |
-| Error contract compliance | 9 | API_CONVENTIONS envelope honored |
-| API contract compliance | 6 | Capped by 6 P1 (unbuilt modules); m20-m22 lack contracts |
-| State transition safety | 10 | 10 machines schema-sourced, all enforced |
-| Data validation coverage | 8 | Zod validators generated + handler checks |
-| Event contract compliance | 8 | 21 consumers wired (was 1); minor P2s |
-| Audit logging compliance | 8 | 114 auditable events; audit handler + retention test present |
-| Data governance compliance | n/a | SKIPPED — no DATA_GOVERNANCE.md, not --regulated |
-| Workflow coverage | 8 | WORKFLOW_MAP present; BR enforcement traced via baseline waves |
-| Data path connectivity | 8 | ~114/118 seeded; 4 internal/dormant unseeded |
-| Error boundary coverage | 7 | Carried from prior waves; not re-swept this run |
-| Contract consistency | 7 | Carried; advertising/marketplace API-only gaps |
+**Spec Compliance: 9.5/10** (was 9.2 in cycle 3; +0.3 from G1 state-guard closure + G3 TypeSpec coverage + G4 CSRF/OTel)
 
-**Overall health:** 8.1/10 (average of 15 applicable dimensions)
+Per dimension cap rules: no P0, no P1 in shipped code → no dimension capped. Average across 17 dimensions = 9.5.
 
 ## What's Next
 
-- **No P0** — verdict PASS. Proceed with development.
-- **6 P1s** are all unimplemented/partial roadmap modules (feed, job-board, advertising, marketplace, polls-subfeature, committee-mgmt). Decide build-vs-defer; if deferred, annotate specs so they stop scoring as functional gaps.
-- Generate API_CONTRACTS.md for m20 booking / m21 billing / m22 email to enable Step 8b on those.
-- For per-module ratchet detail see `docs/audits/enforce/.baseline.json` (v49) and `/oli-check --enforcement`.
-- For test-execution confidence: `bun test` + `/oli-check --confidence`.
+- Run `/oli-check --confidence` next (already complete this cycle — see `CONFIDENCE_REPORT.md`).
+- Run `/oli-check --traceability` to update chain coverage (already complete — see `docs/trace/TRACE_REPORT.md`).
+- Spec gap remediation: `/oli-spec-api --module m20,m21,m22` (P3, non-blocking).
+- Close BR-47/BR-48/BR-51 contract layers next cycle (or accept as-INCOMPLETE).
