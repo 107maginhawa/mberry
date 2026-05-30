@@ -91,13 +91,13 @@ jobs:
         run: bun install --frozen-lockfile
 
       - name: Build the OpenAPI spec
-        run: bun --filter @monobase/api-spec run build
+        run: cd specs/api && bun run build
 
       # ----- Implementation under test: services/api-ts (TypeScript) -----
       # Swap this step when testing a different impl (e.g. services/api-rs).
 
       - name: Generate API codegen
-        run: bun --filter @monobase/api-ts run generate
+        run: cd services/api-ts && bun run generate
 
       - name: Boot the implementation
         run: |
