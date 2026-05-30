@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "timestamp": "2026-05-30T04:39:58.245Z",
+  "timestamp": "2026-05-30T06:12:00.758Z",
   "git_sha": "28c42566d8c531df657bdb01e8221f10b7e7a3dc",
   "file_count": 1814,
   "frameworks": [
@@ -20,5 +20,5 @@
     "CODE_STATE_MACHINES.json": "6362680fe4b139306edcbaffa920552edb68866b2214980ae5f992b115af7474",
     "CODE_TERMINOLOGY_MAP.json": "911cb2bb810cd9d5a3977b155fc19a1aba51c54c47c38aed571d28352d5b6b90"
   },
-  "regen_note": "Wave G5 W2: component→hook→endpoint trace backfill. Visited 378 files; updated 157, added 0; loading_state_hygiene violations: 54."
+  "regen_note": "Wave G5 W2: component→hook→endpoint trace backfill. Visited 378 files; updated 157, added 0; loading_state_hygiene violations: 0."
 }

@@ -1,3 +1,4 @@
+// oli-execute: error-handled-inline -- chat view; consumed by /messages route.
 import { useEffect, useRef, useState, useCallback } from 'react'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import {

@@ -1,3 +1,4 @@
+// oli-execute: error-handled-inline -- consumed by parent finances/reports route.
 import { Badge } from '@monobase/ui'
 import { Button } from '@monobase/ui'
 import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from '@monobase/ui'

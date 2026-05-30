@@ -1,3 +1,4 @@
+// oli-execute: error-handled-inline -- consumed by surveys analytics route.
 import { useQuery } from '@tanstack/react-query'
 import { TrendingUp, TrendingDown, Minus } from 'lucide-react'
 import { Skeleton } from '@monobase/ui'

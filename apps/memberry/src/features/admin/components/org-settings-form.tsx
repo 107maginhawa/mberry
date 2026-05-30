@@ -1,3 +1,4 @@
+// oli-execute: error-handled-inline -- consumed by /org/$orgSlug/officer route which handles isError; mutations surface via toast.
 import { useState, useEffect } from 'react'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { api } from '@/lib/api'

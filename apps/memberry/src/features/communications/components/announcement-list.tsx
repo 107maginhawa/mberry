@@ -1,3 +1,4 @@
+// oli-execute: error-handled-inline -- consumed by officer/communications routes which own isError.
 import { useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { Button, Skeleton } from '@monobase/ui'

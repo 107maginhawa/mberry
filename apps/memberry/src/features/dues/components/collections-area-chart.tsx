@@ -1,3 +1,4 @@
+// oli-execute: error-handled-inline -- chart embeds in financial-dashboard; parent dues route handles isError.
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from 'recharts'
 import { GlassCard } from '@/components/motion/glass-card'
 import { formatCents } from '../lib/money'

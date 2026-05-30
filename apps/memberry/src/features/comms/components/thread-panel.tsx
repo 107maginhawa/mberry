@@ -1,3 +1,4 @@
+// oli-execute: error-handled-inline -- thread panel; parent route handles isError.
 import { useState, useCallback, useEffect, useRef } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { getChatMessagesOptions } from '@monobase/sdk-ts/generated/react-query'

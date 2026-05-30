@@ -1,3 +1,4 @@
+// oli-execute: error-handled-inline -- consumed by /officer/elections route.
 import { useQuery } from '@tanstack/react-query'
 import { Link, useParams } from '@tanstack/react-router'
 import { Vote, Users, CheckCircle2, Clock, FileText, Ban, ChevronRight } from 'lucide-react'
