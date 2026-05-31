@@ -92,6 +92,7 @@ export function InstitutionalMembershipTable({ orgId }: InstitutionalMembershipT
       <Tabs value={statusTab} onValueChange={(v) => { setStatusTab(v); setPage(0) }}>
         <TabsList className="flex-wrap h-auto bg-[var(--color-surface-warm)]">
           {STATUS_TABS.map((tab) => (
+            // oli-ui: exempt(reason="EU-CONTRAST false-positive: text-[var(--color-text-secondary)] is #554B60 (8.2:1 on white); active state recolors text to --color-text. Audit misreads arbitrary-value class as bare text-secondary.")
             <TabsTrigger
               key={tab.value}
               value={tab.value}
