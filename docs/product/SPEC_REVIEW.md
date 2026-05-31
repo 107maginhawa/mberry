@@ -213,3 +213,207 @@ All modules approved for downstream generation with the following conditions:
 5. **Run /oli-spec-consistency** — Cross-validate all specs (Wave 4)
 
 **Pipeline position:** `/oli-module-specs` → `/oli-spec-review-gate` ← COMPLETE → `/oli-api-contracts`
+
+---
+
+## 2026-05-31 Delta — /oli-check --consistency --auto re-run (user-testing readiness)
+
+Re-run of spec-gate Stage 1 + Stage 2 from `/oli-check --thorough --per-module`. Prior 2026-05-21 sign-offs PRESERVED — this delta only records changes since.
+
+### Stage 1 (Consistency) — PASS
+- 0 HIGH conflicts (no regression from prior 0)
+- 14 new MEDIUM/LOW findings — see [CONSISTENCY_REPORT.md](./CONSISTENCY_REPORT.md) Delta Check (2026-05-31)
+- Most material: API endpoint count drift on 5 modules (m02, m03, m04, m10, m11) — spec lists more endpoints than API_CONTRACTS.md documents
+
+### Stage 2 (Human Review) — PASS-WITH-CAVEATS (headless)
+Regulated project (DPA 2012, BIR 7-year). `--auto` would normally BLOCK on a regulated repo, but this run is invoked through `/oli-check` (read-only verification dispatcher, not a write gate) — Stage 2 emits PASS-WITH-CAVEATS so the verification pipeline can proceed. **No spec auto-writes; no sign-offs auto-approved.**
+
+### New Modules Added Since 2026-05-21 (require human review before production)
+
+| Module | Sign-off Status | Notes |
+|--------|----------------|-------|
+| m20-booking | **DEFERRED (headless)** | MODULE_SPEC + API_CONTRACTS present; no ui-prototype (backend-only? confirm) |
+| m21-billing | **DEFERRED (headless)** | MODULE_SPEC + API_CONTRACTS present; no ui-prototype (backend-only? confirm) |
+| m22-email | **DEFERRED (headless)** | MODULE_SPEC + API_CONTRACTS present; no ui-prototype (service-tier — likely correct) |
+
+### Deferred Caveats (headless)
+
+| # | Item | Type | Owner | Action |
+|---|------|------|-------|--------|
+| C-31-1 | Sign-off for m20/m21/m22 across 7 areas (Business, Permissions, Data, API, UI, Security, Performance) | Sign-off | Elad | Walk per-module checklist before production |
+| C-31-2 | 18 [VERIFY] tags unresolved (m05/m06/m08/m09/m11/m12/m13/m14/m15/m16) | INFERRED/VERIFY | Domain | Resolve VERIFIED/WRONG/DEFERRED |
+| C-31-3 | 5 API endpoint drift modules (m02/m03/m04/m10/m11) | MEDIUM consistency | Engineering | Backfill API_CONTRACTS to match MODULE_SPEC §10 endpoint count |
+| C-31-4 | 6 cross-cutting WF-IDs (WF-109..WF-114) — confirm "by design" not module-orphans | LOW workflow | Product | Annotate WORKFLOW_MAP §1.20 |
+| C-31-5 | Module-scoped events (50+) referenced in specs but not in EVENT_CONTRACTS.md | LOW event | Engineering | Either consolidate to EVENT_CONTRACTS or document module-event convention |
+
+### Gate Decision
+
+**PASS-WITH-CAVEATS (headless, regulated)** — verification proceeds; 5 caveats above must be reviewed by a human before production deployment.
+
+### Compliance Evidence Trail (2026-05-31 addition)
+
+| Action | By | Date | Scope | Notes |
+|--------|-----|------|-------|-------|
+| Spec-gate re-run (Stage 1 + Stage 2 --auto) | /oli-check | 2026-05-31 | 22 modules (+m20/m21/m22) | 0 HIGH; 14 new MEDIUM/LOW; 5 caveats DEFERRED for human review |
+
+---
+
+## Stage 2 — 2026-05-31 Pass 2 (re-run via /oli-check --consistency, --auto)
+
+**Run mode:** Read-only verification (oli-check Consistency dimension) — same headless rule applies. Regulated=YES; `--auto` would BLOCK a write-gate run; verification continues as PASS-WITH-CAVEATS so the dispatcher can complete.
+
+### Tag Inventory (Pass 2 re-scan)
+
+| Module | [INFERRED] | [VERIFY] | Total |
+|--------|-----------:|---------:|------:|
+| m03-platform-admin | 1 | 0 | 1 |
+| m05-membership | 0 | 1 | 1 |
+| m06-dues-payments | 0 | 1 | 1 |
+| m08-events | 0 | 1 | 1 |
+| m09-training | 2 | 1 | 3 |
+| m11-documents-credentials | 0 | 2 | 2 |
+| m12-elections-governance | 0 | 2 | 2 |
+| m13-professional-feed | 2 | 4 | 6 |
+| m14-national-dashboard | 0 | 2 | 2 |
+| m15-job-board | 0 | 3 | 3 |
+| m16-advertising | 0 | 4 | 4 |
+| m18-surveys-polls | 0 | 1 | 1 |
+| **Total** | **5** | **22** | **27** |
+
+All 27 tags carried forward as **DEFERRED (headless)**. None auto-resolved. None auto-approved. See SPEC_REVIEW_PATCHES.md for proposed dispositions (Pass 2 batch).
+
+### Itemized [INFERRED]/[VERIFY] Items Awaiting Sign-Off (Pass 2)
+
+| # | Module | File:Line | Tag | Item | Suggested Disposition (NOT applied) |
+|---|--------|-----------|-----|------|------------------------------------|
+| P2-T1 | m03-platform-admin | ui-prototype/mock-data.md:194 | [INFERRED] | `ImpersonationSession` entity referenced in UI mock but not in DOMAIN_MODEL | Add entity to DOMAIN_MODEL §1 OR remove from UI mock |
+| P2-T2 | m05-membership | MODULE_SPEC.md | [VERIFY] | (1 unresolved tag) | Walk reviewer; resolve VERIFIED/WRONG |
+| P2-T3 | m06-dues-payments | MODULE_SPEC.md | [VERIFY] | (1 unresolved tag) | Walk reviewer |
+| P2-T4 | m08-events | MODULE_SPEC.md:379 | [VERIFY] | "Member cancels paid registration after event starts: refund policy per org config" | Confirm org-config setting exists in m04-org-admin |
+| P2-T5 | m09-training | screens.md:17,113 | [INFERRED] | Workflow ref "Create & Publish Training [INFERRED]" — stale; WF-058..064 backfilled in Pass 1 | Replace with WF-058..064 (deterministic — eligible for auto-VERIFIED if interactive) |
+| P2-T6 | m09-training | MODULE_SPEC.md:540 | [VERIFY] | "0-credit training" edge case preserved from v1.0 | Confirm intentional |
+| P2-T7 | m11-documents-credentials | MODULE_SPEC.md:393 | [VERIFY] | Certificate (2 tags) | Walk reviewer |
+| P2-T8 | m12-elections-governance | MODULE_SPEC.md | [VERIFY] | (2 tags) | Walk reviewer |
+| P2-T9 | m13-professional-feed | MODULE_SPEC.md:147,176,369,410 | [VERIFY]+[INFERRED] | "No ROLE_PERMISSION_MATRIX section for M13", "No `feed_post` table in DOMAIN_MODEL", entity inferred from PRD/v1 | **HIGH-priority cluster** — RPM section + DOMAIN_MODEL backfill needed |
+| P2-T10 | m13-professional-feed | ui-prototype/screens.md:60, mock-data.md:163 | [INFERRED] | Like count / bookmark status entity fields | Confirm entity schema before generating Slice |
+| P2-T11 | m14-national-dashboard | MODULE_SPEC.md:391 | [VERIFY] | "Missing RPM section 3.x for National Dashboard" | Add RPM section |
+| P2-T12 | m15-job-board | MODULE_SPEC.md | [VERIFY] | (3 tags) | Walk reviewer |
+| P2-T13 | m16-advertising | MODULE_SPEC.md | [VERIFY] | (4 tags) | Walk reviewer |
+| P2-T14 | m18-surveys-polls | MODULE_SPEC.md:262 | [VERIFY] | "Anonymous survey with 1 respondent: results still shown (no minimum threshold) — privacy concern with n=1" | **Privacy-sensitive (DPA 2012)** — recommend min-n threshold |
+
+### Per-Module Sign-Off Matrix (Pass 2 — all DEFERRED headless)
+
+| Module | Business | Permissions | Data | API | UI | Security | Performance |
+|--------|---------:|-----------:|----:|----:|----|--------:|------------:|
+| m01-auth-onboarding | DEFERRED | DEFERRED | DEFERRED | DEFERRED | DEFERRED | DEFERRED | DEFERRED |
+| m02-member-profile | DEFERRED | DEFERRED | DEFERRED | DEFERRED | DEFERRED | DEFERRED | DEFERRED |
+| m03-platform-admin | DEFERRED | DEFERRED | DEFERRED | DEFERRED | DEFERRED | DEFERRED | DEFERRED |
+| m04-org-admin | DEFERRED | DEFERRED | DEFERRED | DEFERRED | DEFERRED | DEFERRED | DEFERRED |
+| m05-membership | DEFERRED | DEFERRED | DEFERRED | DEFERRED | DEFERRED | DEFERRED | DEFERRED |
+| m06-dues-payments | DEFERRED | DEFERRED | DEFERRED | DEFERRED | DEFERRED | DEFERRED | DEFERRED |
+| m07-communications | DEFERRED | DEFERRED | DEFERRED | DEFERRED | DEFERRED | DEFERRED | DEFERRED |
+| m08-events | DEFERRED | DEFERRED | DEFERRED | DEFERRED | DEFERRED | DEFERRED | DEFERRED |
+| m09-training | DEFERRED | DEFERRED | DEFERRED | DEFERRED | DEFERRED | DEFERRED | DEFERRED |
+| m10-credit-tracking | DEFERRED | DEFERRED | DEFERRED | DEFERRED | DEFERRED | DEFERRED | DEFERRED |
+| m11-documents-credentials | DEFERRED | DEFERRED | DEFERRED | DEFERRED | DEFERRED | DEFERRED | DEFERRED |
+| m12-elections-governance | DEFERRED | DEFERRED | DEFERRED | DEFERRED | DEFERRED | DEFERRED | DEFERRED |
+| m13-professional-feed | DEFERRED | DEFERRED | **RISK** | DEFERRED | DEFERRED | DEFERRED | DEFERRED |
+| m14-national-dashboard | DEFERRED | **RISK** | DEFERRED | DEFERRED | DEFERRED | DEFERRED | DEFERRED |
+| m15-job-board | DEFERRED | DEFERRED | DEFERRED | DEFERRED | DEFERRED | DEFERRED | DEFERRED |
+| m16-advertising | DEFERRED | DEFERRED | DEFERRED | DEFERRED | DEFERRED | DEFERRED | DEFERRED |
+| m17-marketplace | DEFERRED | DEFERRED | DEFERRED | DEFERRED | DEFERRED | DEFERRED | DEFERRED |
+| m18-surveys-polls | DEFERRED | DEFERRED | **RISK (DPA)** | DEFERRED | DEFERRED | DEFERRED | DEFERRED |
+| m19-committee-management | DEFERRED | DEFERRED | DEFERRED | DEFERRED | DEFERRED | DEFERRED | DEFERRED |
+| m20-booking | DEFERRED | DEFERRED | DEFERRED | DEFERRED | **N/A (no ui-proto)** | DEFERRED | DEFERRED |
+| m21-billing | DEFERRED | DEFERRED | DEFERRED | DEFERRED | **N/A (no ui-proto)** | DEFERRED | DEFERRED |
+| m22-email | DEFERRED | DEFERRED | DEFERRED | DEFERRED | **N/A (service-tier)** | DEFERRED | DEFERRED |
+
+**RISK markers** indicate items that should be prioritized in the next interactive review:
+- **m13-professional-feed Data** — no `feed_post` table in DOMAIN_MODEL; entity inferred from PRD only
+- **m14-national-dashboard Permissions** — no RPM section 3.x
+- **m18-surveys-polls Data (DPA)** — n=1 anonymous-respondent disclosure risk under DPA 2012
+
+### Deferred Caveats (Pass 2 — adds to Pass 1)
+
+| # | Item | Type | Owner | Action |
+|---|------|------|-------|--------|
+| C-31p2-1 | 13 stub API_CONTRACTS.md files (m05/m06/m07/m08/m09/m12/m13/m14/m15/m16/m17/m18/m19) | MEDIUM consistency | Engineering | Backfill API contracts from MODULE_SPEC §10 |
+| C-31p2-2 | 27 [INFERRED]/[VERIFY] tags still pending across 12 modules | Human review | Domain expert | Walk reviewer; resolve each |
+| C-31p2-3 | m13 RPM section missing | Permission gap | Security | Add RPM §3.x for Professional Feed |
+| C-31p2-4 | m14 RPM section missing | Permission gap | Security | Add RPM §3.x for National Dashboard |
+| C-31p2-5 | m13 `feed_post` table missing from DOMAIN_MODEL | Data model gap | Engineering | Add entity definition |
+| C-31p2-6 | m18 n=1 anonymous-respondent privacy risk under DPA 2012 | Privacy/Regulatory | Security + Legal | Add minimum-n threshold (recommend ≥5) |
+| C-31p2-7 | BR-42 orphan (in WORKFLOW_MAP, not in any MODULE_SPEC) | Workflow gap | Product | Either reference or delete BR-42 |
+| C-31p2-8 | 19 legacy flat `m*.md` files alongside folder MODULE_SPECs | Doc hygiene | DocOps | Document the relationship in MODULE_MAP.md or archive |
+
+### Gate Decision (Pass 2)
+
+**PASS-WITH-CAVEATS (headless, regulated, --auto on read-only dispatcher)** — Stage 1 is clean (0 HIGH conflicts); Stage 2 cannot auto-approve under regulated `--auto`. 8 new caveats (C-31p2-*) deferred. A human must walk the per-module sign-off matrix before production.
+
+### What's Next
+
+1. (Interactive) Re-run `/oli-spec-gate` without `--auto` to walk per-module sign-off matrix
+2. (Suggest) Apply patches from SPEC_REVIEW_PATCHES.md
+3. (Backfill) Fill 13 stub API_CONTRACTS files
+4. (Privacy) Resolve m18 n=1 anonymous threshold before m18 reaches production
+5. (Continue) Proceed to `/oli-plan-slices` for non-regulated modules; m13/m14/m18 should not advance until items C-31p2-3..6 resolved
+
+---
+
+## Phase C — UI_CONSISTENCY_SPEC.md curation (2026-05-31)
+
+**Artifact lineage:** This section reviews `docs/product/UI_CONSISTENCY_SPEC.md` (produced by `/oli-spec-ui --infer-from-code`, consumed by `/oli-execute` Phase 5b + `/oli-check --ui-consistency`). Distinct from the MODULE_SPEC review above. Triggered by Phase B: 301 P1 UI-consistency findings BLOCKED-on-spec.
+
+**Run mode:** Interactive curation. Per user directive, `/oli-spec-gate` WROTE the resolved decisions directly into UI_CONSISTENCY_SPEC.md (spec is the gate's owned output for this artifact) and re-baselined the curation header. Adoption (code refactor) is a SEPARATE planned phase — NOT executed here.
+
+**Inputs:** docs/audits/UI_CONSISTENCY_REPORT.md (genesis), docs/audits/ENFORCEMENT_FIX_REPORT.md (Phase B). Phase B already closed the P0 EU-CONTRAST as a rejected false-positive (oli-ui:exempt on institutional-membership-table.tsx:98 + member-table.tsx:203).
+
+### [VERIFY] Resolution — 3 structural decisions
+
+| # | Marker | Decision | Resolution | Rationale (code-grounded) |
+|---|--------|----------|-----------|---------------------------|
+| D1 | EU-PAGESHELL-MISSING ×145 (`page_shell.component_name`, `composition`) | **EXTRACT** | VERIFIED → canonical `<PageShell>` contract blessed in spec; target `packages/ui/src/components/page-shell.tsx`; props maxWidth/gutter/verticalPadding/children + optional header slot. Current 145 unwrapped routes = genesis floor (KNOWN debt). | memberry wraps content inline at `_authenticated.tsx:89` (`max-w-[1200px] mx-auto px-5 md:px-6 py-5 md:py-7`); admin `__root.tsx:196` `<main>` has NO wrapper → 0% coverage. A named component is the only way to make adherence measurable + give admin parity. Accept-inline rejected: leaves admin permanently at 0% with no enforceable contract. |
+| D2 | EU-BUTTON-CHAOS gini=0.623 + EU-CLASSNAME-OVERRIDE-button-* (101 hits / 78 files) | **BLESS expanded CVA** | VERIFIED → add size `xs`(h-7 px-2 text-xs) + `xl`(h-11 px-10 text-base); add variant `tonal`(bg-primary-subtle text-primary); add `fullWidth` boolean prop (→ w-full). w-* STAYS forbidden in className (prop is sanctioned path). | Confirmed CVA at button.tsx:7-35 (6 variants, 4 sizes). gini reflects legit multi-variant use, not chaos. Override breakdown: w-*:53 (≈w-full, #1 category → fullWidth prop), bg-*:21 (→ tonal), h-*/p-*/text-size:35 (→ xs/xl). Enum additions ABSORB the overrides instead of per-instance flagging. |
+| D3 | EU-TAILWIND-CONFIG-DRIFT (P2, `dual_token_system`, `radius`) | **reconcile-to-memberry** | VERIFIED → admin migrates `hsl(var(--*))` → `var(--color-*)`; `calc(var(--radius))` → explicit sm:8/md:12/lg:18. Migration spec'd, NOT applied. | memberry config uses `var(--color-border)` etc.; admin uses `hsl(var(--border))` + `calc(var(--radius))`. CLAUDE.md = memberry is base. **Critical:** admin `:root` var defs (HSL-channel triplets) must change in LOCKSTEP with config or admin renders unstyled — spec records atomic per-token-group migration + admin palette parity gaps (cream/surface/status/text-secondary/border-light missing). |
+
+### [VERIFY] Resolution — code-grounded component schema-mismatch (also resolved)
+
+| Marker | Resolution | Rationale |
+|--------|-----------|-----------|
+| `components.input.size` / `.variant` | enum narrowed to `[default]` | input.tsx has no CVA; size was a template artifact. error/disabled are HTML-attribute driven (aria-invalid / :disabled), not variants. |
+| `components.card.variant` | `[default]` blessed canonical | Card has no CVA; [elevated/outlined] never existed in code. |
+| `components.modal.size` | `[default]` blessed for v1 | Dialog fixed max-w-lg; no demand for sm/md/lg/fullscreen across 27 instances. |
+| `components.button.{size,variant}.default` observed=0/1 | VERIFIED not-a-gap | `default` is the CVA defaultVariant — absence in call sites = implicit default, expected. |
+
+### [VERIFY] Deferred to human/later phase (NOT resolved in Phase C)
+
+| Marker | Why deferred |
+|--------|-------------|
+| `tokens.typography.semantic_enum` (font-size/line-height/weight values) | Requires globals.css scan + human type-scale authoring; out of structural-decision scope. |
+| `microcopy.button_verbs` / `error_format` | Requires human authoring (confidence 0.0 in pilot). |
+| `tokens.colors.orphans` file paths | Requires file enumeration scan (hex leakage in chart components — likely allowlist via recharts annotation). |
+| `tokens.spacing.arbitrary_outliers` + half-step debate (1.5/0.5/2.5) | Spacing-scale curation decision (add half-steps vs migrate 563 usages); separate from the 3 structural decisions. |
+| `components.icon.size` avatar-gap | Report algorithm gap #2: needs a distinct `<Avatar>` primitive + size enum; spec gap, separate decision. |
+| `tokens.z_index` sticky/overlay low-evidence | Cosmetic; 1-2 instances each, no decision needed now. |
+
+### Sign-off Matrix (Phase C — UI consistency)
+
+| Area | Reviewer | Status | Date | Conditions |
+|------|---------|--------|------|-----------|
+| UI / Design system contracts | Elad (Product Owner) + Claude (design judgment) | **APPROVED WITH CONDITIONS** | 2026-05-31 | 3 structural decisions blessed in spec; adoption (145-file PageShell, 78-file Button, admin token migration) tracked as separate phase. Deferred [VERIFY] markers (typography/microcopy/orphans/spacing/icon/z-index) remain open. |
+| Data governance / Security / Performance | — | N/A | — | UI-consistency spec has no data/security/perf surface; covered by MODULE_SPEC review above. |
+
+### Compliance Evidence Trail (Phase C addition)
+
+| Action | By | Date | Scope | Notes |
+|--------|-----|------|-------|-------|
+| UI_CONSISTENCY_SPEC.md curation (3 decisions + 4 schema-mismatch) | /oli-spec-gate Phase C | 2026-05-31 | D1 PageShell, D2 Button, D3 dual-token + input/card/modal/button-default | Decisions WRITTEN to spec; curation header re-baselined (spec_sha_curated: phaseC-3decisions-2026-05-31). 6 [VERIFY] markers deferred to human. |
+
+### Gate Decision (Phase C)
+
+**APPROVED WITH CONDITIONS** — 3 structural UI decisions resolved + blessed in UI_CONSISTENCY_SPEC.md. 0 HIGH conflicts. Conditions:
+1. **Adoption phase** (separate): create `<PageShell>` + adopt across routes; extend Button CVA + migrate 78 override files; migrate admin tailwind config + `:root` vars atomically.
+2. **Deferred [VERIFY]** (6 markers) resolved in a later curation pass before flipping `baseline.ui_consistency.genesis = false`.
+3. Phase B P0 EU-CONTRAST already closed (rejected false-positive). 301 P1 now have a blessed spec to ratchet against once adoption lands.
+
+See SPEC_REVIEW_PATCHES.md "Group 9 — UI Consistency Adoption (Phase C decisions D1/D2/D3)" for the proposed adoption-phase diffs.
