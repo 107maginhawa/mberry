@@ -1,190 +1,209 @@
-<!-- oli:confidence-report v1.2 | generated: 2026-05-30 | cycle 4 post-merge | dimension: confidence | method: prior-audit inventory + live bun test + TDD-proof verification -->
+<!-- oli:confidence-report v1.4 | generated: 2026-05-31 | rev 5 engine-anchored | dimension: confidence | method: engine-map v5 graph signals + static scans + banned-pattern grep + TDD-proof inventory -->
 
 # Confidence Stack Report
 
-**Date:** 2026-05-30 (rev 3 — cycle 4 post Wave G4 merge, HEAD `28c42566`)
-**Branch:** `oli-magic/wave-g1` (cycle-4 integration)
+**Date:** 2026-05-31 (rev 5 — /oli-check --confidence, Phase D engine re-verify)
+**HEAD:** `caf33141` (Phase A — engine map regen + trust banner)
+**Codebase-map:** **FRESH-ENOUGH** — `.map-meta.json git_sha = 7ba0b7e2` vs HEAD `caf33141` (overlap; graph signals trusted)
+**Engine version:** **v5** (CODE_COMPONENT_REGISTRY.version=5) → loading-state-hygiene cap §4.5 and FE↔BE edge-density cap §5.5 **NOW COMPUTED** (was skipped under engine v1)
+**Producer:** `engine` @0.1.0 · `fields_unavailable: []` · `spec_trace_optin: true`
 **Team size:** small
-**Layers audited:** 1-4 (static analysis + live test exec)
-**Layers deferred:** 5-6 (require CI/CD/runtime evidence)
-**Prior audits used:** `EXISTING_CODEBASE_ADOPTION_AUDIT.md`, `COMPLIANCE_REPORT.md` (rev 2.2), enforcement baseline v49, 19× per-module `API_CONTRACTS.md`, `EVENT_CONTRACTS.md`
-**Supersedes:** 2026-05-30 rev 2 (pre-G1)
+**Confidence threshold:** MEDIUM (`.oli/config.json` present — Phase A bootstrap)
+**Layers audited:** 1–4 (static analysis)
+**Layers deferred:** 5–6 (CI/CD/runtime evidence)
+**Prior audits used:** `COMPLIANCE_REPORT.md` rev 2.2; existing `CONFIDENCE_REPORT.md` rev 4 (delta); per-module module-specs (m01–m22); 17× `TDD_PROOF.md`
+**Supersedes:** rev 4 (2026-05-31, computed on STALE regex map `28c42566`)
 
-## Diff Since Last Run (rev 2 → rev 3)
+## Trust banner (R1)
 
-| Area | rev 2 (pre-G1) | rev 3 (post-G4) | Driver |
-|------|----------------|------------------|--------|
-| Backend tests passing | 6,013 | **6,008 pass / 0 fail / 93 skip / 20 todo** (544 files, 12,463 expect calls, 18.71s) | Live verification this run |
-| Backend tests `*.test.ts` files | 535 | **544** | +9 test files (G1 state-guard tests + G2 N+1 regression tests + G4 CSRF tests) |
-| BR coverage | 40 COMPLETE / 4 INCOMPLETE / 6 DEFERRED / 1 UNTESTED | **42 COMPLETE / 3 INCOMPLETE / 6 DEFERRED / 0 UNTESTED** | BR-43 + BR-50 + BR-41 contracts closed (S-G1, contract tests) |
-| State-machine guard tests | 5 wired + tested | **12 wired + tested** | G1 closure (S-G1-01..06 each ship guard tests) |
-| Typecheck (5 workspaces) | clean | **clean** | Verified this run |
-| Frontend unit tests (memberry) | 636 pass / 10 fail | unchanged this run (not re-executed; cycle-4 scope was backend/infra) | — |
-| CSRF middleware tests | absent | **+139 tests** (`csrf-token.test.ts`) | S-C4-041 |
-| OpenTelemetry integration | absent | tracing wired | S-C4-040 |
-| TDD_PROOF count | 17 | **24** (7 new G1 slice proofs: S-G1-01..07) | G1 |
-| Git-history test-first | 82% (46/56) | **84%** (~58/69) | New G1 slices land test-first per S-G1 commit pattern |
-| Overall gauges | 9/9/9 | **9/9/9** (held; +0 because already at ceiling) | — |
+Codebase map is **FRESH-ENOUGH** and **engine-produced** (`@oli/engine@0.1.0`, `fields_unavailable: []`). **THESIS IN FORCE** for confidence signals. The rev-4 trust degrade (map stale `28c42566` + engine pre-v4) is **CLEARED**. All graph-anchored confidence signals (loading-state hygiene, FE→BE edge density, component→endpoint binding) are now first-class scored inputs rather than `unverified`-bucket placeholders. **Score invariant honored:** §4.5/§5.5 caps are max-not-add subscore ceilings (per skill spec), not R1 unverified re-weights.
+
+**Honest-delta note:** the rev-4 headline (8/10) was computed with §4.5 and §5.5 **skipped** (engine v1 could not emit `loading_state_hygiene.violation` or resolve `api_calls`). Engine v5 now computes both. The result is NOT that the project regressed — it's that two real, previously-invisible signals now bite. The headline moves 8 → 6 because **§5.5 FE→BE edge density (0.669) caps Layer 2 at 6**. See §4.5/§5.5 detail below.
 
 ## Score Summary
 
 | Layer | Score | Meaning | Top Gaps |
 |-------|-------|---------|----------|
-| 1. Coverage Integrity | **9/10** | Strong — auth/BR/state classes 100% (12/12 state machines now wired+tested); +1 git test-first bonus | 4 unseeded internal tables (P2); ~10 API-route response-shape assertions partial |
-| 2. Behavior Traceability | **9/10** | Strong — comprehensive prior-audit inventory; ~97% behaviors have test owner | 6 spec'd-but-unbuilt roadmap modules (m13/m15/m16-FE/m17-FE/m18-polls/m19-BE); ~5 event consumer tests WEAK; 3 INCOMPLETE BRs (BR-47/48/51) lack contract or E2E layer |
-| 3. Test Quality Hardening | **9/10** | Strong — 95.9% strong assertions, 97.8% stable, 94.9% mocks appropriate | 79.1% data-seeding (107 data tests lack explicit setup); 21 brittle hardcoded UUIDs; 7 DB-mock files w/o rationale |
-| 4. Release Gate Readiness | **9/10** | Strong — full CI (test+lint+typecheck+build+audit), deep health check, OTel tracing newly wired, deploy workflow | No migration down/rollback files (forward-only by design); release script informal |
+| 1. Coverage Integrity | **9/10** | Strong — 26/26 handler dirs have tests except `training` (0 unit) and `marketplace` (3/9). **§4.5 now computed:** loading-hygiene coverage = 279/315 = **0.886** → L1 capped at 9 (36 violators). | training 0 unit tests (P1); marketplace 33% (P2); 36 loading-hygiene violators (P2 — newly visible) |
+| 2. Behavior Traceability | **6/10** ⬇ | Capped — 42/45 BRs COMPLETE; ~97% behaviors have a test owner. **§5.5 now computed:** FE→BE edge density = 99/148 = **0.669** < 0.70 → **L2 capped at 6** (49 data-hook consumers resolved 0 endpoints — engine SDK-resolver coverage gap, see detail). | 49 unresolved FE→BE edges (resolver-attributed); 3 INCOMPLETE BRs (BR-47/48/51) |
+| 3. Test Quality Hardening | **8/10** | Good — 263 WEAK assertions (mostly E2E); 64 `page.waitForTimeout` hardcoded waits → flake risk. (Source-derived; unaffected by map.) | 263 weak assertions (P2); 64 hardcoded waits (P1); 31 `test.skip` (mostly env-gated) |
+| 4. Release Gate Readiness | **9/10** | Strong — 4 CI workflows; typecheck/test/build wired; OTel G4; forward-only migrations by design. | No rollback files (by design); informal release script |
 
-**Overall Test-Confidence (min L1-L3):** **9/10** — headline test-quality signal (UNCHANGED from rev 2; held at ceiling)
+**Overall Test-Confidence (min L1–L3):** **6/10** ⬇ — headline (down from rev 4's 8; driver = §5.5 L2 cap, now computable on engine v5)
 **Release-Readiness (L4):** **9/10** — separate release-infra gauge
-**Ship-Readiness (min L1-L4):** **9/10** — conservative combined gate
-**Average Score:** **9.0/10**
+**Ship-Readiness (min L1–L4):** **6/10** — combined gate
+**Average Score:** **8.0/10**
 
-## Scoring Rubric
+### Verdict: **WARN**
 
-| Score | Meaning |
-|-------|---------|
-| 9-10 | Strong — comprehensive coverage, high assertion quality, minimal gaps |
+- No P0 fabrication / no Layer = 0 trigger / no missing test runner.
+- L2 cap at 6 is **resolver-attributed**, not a behavior defect — 49 unresolved edges are dominated by SDK-provider infra + public-route pages whose factory-hook pattern the engine resolver missed. Real traceability of scored behaviors remains ~97%.
+- P1 clusters (training unit-test absence + 64 hardcoded waits) persist from rev 4.
+- Recommended: file engine SDK-resolver gap upstream; re-run after resolver improvement to lift L2 back toward 9.
+
+## §4.5 Loading-State Hygiene Coverage (engine v5 — NOW COMPUTED)
+
+| Metric | Value |
+|--------|-------|
+| ui-typed components (page/component/layout) | 315 |
+| analyzed (`loading_state_hygiene != null`) | 136 |
+| `violation == true` | **36** |
+| `violation == false` | 100 |
+| compliant (`null` OR `violation==false`) | 279 |
+| **loading_hygiene_coverage** | **279 / 315 = 0.886** |
+| **Ceiling applied** | coverage ∈ [0.85, 0.95) → **L1 capped at 9/10** |
+
+**Top loading-hygiene violators** (data-fetching components missing skeleton and/or error branch):
+- `OfficerDashboard` — `apps/memberry/src/features/admin/components/officer-dashboard.tsx`
+- `OrgSettingsForm` — `apps/memberry/src/features/admin/components/org-settings-form.tsx`
+- `CertificateList` — `apps/memberry/src/features/certificates/components/certificate-list.tsx`
+- `CertificatePreview` — `apps/memberry/src/features/certificates/components/certificate-preview.tsx`
+- `AnnouncementList` — `apps/memberry/src/features/communications/components/announcement-list.tsx`
+
+The 223 null-hygiene ui components are non-data primitives (presentational, no `api_calls`) where hygiene is correctly N/A — counted compliant per formula. These 36 violators are the real, newly-visible coverage holes (infinite-skeleton risk class — the Memberry 2026-05-30 bug lineage).
+
+## §5.5 FE→BE Edge Density (engine v5 — NOW COMPUTED)
+
+| Metric | Value |
+|--------|-------|
+| data_hook_consumers (ui components using a query/mutation/SDK-factory hook) | 148 |
+| resolved_consumers (`api_calls.length > 0`) | 99 |
+| **fe_be_edge_density** | **99 / 148 = 0.669** |
+| **Ceiling applied** | density < 0.70 → **L2 capped at 6/10** |
+
+**Top unresolved consumers** (import/use a data hook but `api_calls` came back empty):
+- `ApiProvider` — `packages/sdk-ts/src/react/provider.tsx` (SDK infra — false-positive; provider setup, no endpoint)
+- `NotificationDrawer` — `apps/memberry/src/components/notification-drawer.tsx`
+- `JoinPage` — `apps/memberry/src/routes/join.tsx`
+- `MemberDetailPage` — `apps/memberry/src/routes/_authenticated/org/$orgSlug/officer/roster/$memberId.tsx`
+- `PublicPaymentPage` — `apps/memberry/src/routes/pay/$token.tsx`
+
+**Attribution:** density 0.669 sits a hair under the 0.70 cap-8 / cap-6 boundary. The unresolved set is dominated by (a) SDK-infra/provider false-positives and (b) public-route pages whose factory-hook pattern the engine resolver still misses (the W1 `useGetX()` fix did not cover every factory shape). Per §5.5 design this is intentionally gate-affecting ("you can't have confidence in what you can't trace"), so the cap is applied — but it reflects an **engine SDK-resolver coverage gap**, not 49 broken behaviors. Candidate upstream engine improvement (file separately at github.com/eladventures/oli/issues).
+
+## Unverified Bucket (R1 — graph-anchored low-confidence)
+
+**rev-4 bucket (~504 nodes) → rev-5: COLLAPSED to ~0.**
+
+| rev-4 signal | rev-4 count | rev-5 status |
+|--------------|-------------|--------------|
+| Handler→behavior mapping (map-stale `28c42566`) | ~26 handler dirs | **CLEARED** — map FRESH-ENOUGH (engine `7ba0b7e2`) |
+| Component→hook→endpoint trace (engine pre-v4, 38% resolved) | 109 components | **CLEARED** at binding layer — `api_calls` populated (100 data-fetch comps, 202 calls); 49 residual unresolved now a **scored §5.5 cap**, not unverified |
+| `loading_state_hygiene.violation == null` (engine wrote fields, no verdict) | 369 components | **CLEARED** — engine v5 emits real `violation` verdicts (36 true / 100 false); §4.5 cap computed |
+| §4.5 / §5.5 caps "skipped (engine pre-v4)" | n/a | **CLEARED** — both now computed (§4.5 → L1 cap 9; §5.5 → L2 cap 6) |
+
+**`unverified` node count: ~0** (engine v5 + fresh map resolves all rev-4 graph-anchored placeholders). Residual engine limitation: `request_shape`/`response_shape` empty `{}` for all 454 endpoints (engine v0.1.0 field gap) — affects traceability 5g field-level phantom classification (see TRACE_REPORT rev 5), NOT confidence layer scoring directly.
 
 ## Cross-Layer Consistency
 
-No inconsistencies. L1 (9) and L2 (9) within 3 points. L3 (9) does not exceed L1/L2 by >4. L4 (9) does not exceed L1-L3 by >4. Mature codebase signature (544 backend `*.test.ts`, 127 E2E specs, full CI + OTel).
+- L1 (9) − L2 (6) = 3 → **flagged**: L2 trails L1 by 3. This is the §5.5 resolver-attributed cap, not a behavior-inventory hole. Without the §5.5 cap, L2 would be 9 (consistent with L1). Documented so the gap is not misread as a coverage regression.
+- L3 (8) — source-derived, unchanged from rev 4.
+- L4 (9) ≤ L1 — no leading-infra inconsistency.
 
-## Per-Module Breakdown (post-G4)
+## Per-Module Breakdown (22 modules)
 
-| Module | L1 | L2 | L3 | L4 | Overall | Priority Gaps |
-|--------|----|----|----|----|---------|---------------|
-| m01 auth-onboarding | 9 | 9 | 9 | 9 | 9 | — |
-| m02 person | 9 | 9 | 9 | 9 | 9 | — |
-| m03 platformadmin | 9 | 9 | 9 | 9 | 9 | — |
-| m04 association:member/operations | 9 | 9 | 9 | 9 | 9 | dues↔member coupling SQL eliminated (S-C4-015); mega-split still deferred |
-| m05 membership | 9 | 9 | 9 | 9 | 9 | MEMBERSHIP_VALID_TRANSITIONS now wired (S-G1-01) |
-| m06 dues | 9 | 9 | 9 | 9 | 9 | INVOICE_VALID_TRANSITIONS now wired (S-G1-03); BR-48 batch-size contract pending |
-| m07 billing | 9 | 9 | 9 | 9 | 9 | Stripe boundary `as any` reduced 32→3 (S-C4-042) |
-| m08 events/booking | 9 | 9 | 9 | 9 | 9 | BOOKING_VALID_TRANSITIONS now wired (S-G1-02) |
-| m09 training/credits | 9 | 9 | 9 | 9 | 9 | TRAINING_ENROLLMENT_VALID_TRANSITIONS wired (S-G1-04); BR-41/43 enforced + tested + contract |
-| m10 credit-tracking | 9 | 9 | 9 | 9 | 9 | — |
-| m11 documents-credentials | 9 | 9 | 9 | 9 | 9 | — |
-| m12 elections-governance | 9 | 9 | 9 | 9 | 9 | BR-43 + BR-50 contracts added (closed INCOMPLETE) |
-| m13 professional-feed | 2 | 0 | — | 9 | 1 | unbuilt — ROADMAP-deferred |
-| m14 communication/comms | 9 | 9 | 9 | 9 | 9 | N+1 fix + regression tests (S-C4-011) |
-| m15 job-board | 2 | 0 | — | 9 | 1 | unbuilt — ROADMAP-deferred |
-| m16 advertising | 6 | 5 | 7 | 9 | 6 | TypeSpec backend now exposed (S-C4-020); FE route still pending |
-| m17 marketplace | 6 | 5 | 7 | 9 | 6 | TypeSpec backend now exposed (S-C4-026); FE route still pending |
-| m18 surveys-polls | 6 | 5 | 8 | 9 | 6 | "polls" sub-feature still gap |
-| m19 committee-management | 4 | 3 | 7 | 9 | 4 | admin FE only |
-| m20 billing-Stripe | 9 | 8 | 9 | 9 | 8 | no API_CONTRACTS.md (spec gap) |
-| m21 notifs/storage | 9 | 8 | 9 | 9 | 8 | no API_CONTRACTS.md (spec gap) |
-| m22 email | 9 | 9 | 9 | 9 | 9 | EMAIL_QUEUE_VALID_TRANSITIONS wired (S-G1-06); suppression table unseeded (P2) |
+Score derivation: backend handler-test ratio + presence of E2E coverage + module-spec existence. **`⊘` = unbuilt by design.** **`✓` = scored ≥ 6.** **`✗` = scored < 6.** (Module rows unchanged from rev 4 — backend handler/test ratios are source-derived and map-independent; the §4.5/§5.5 caps are cross-cutting headline ceilings, not per-module backend deltas.)
 
-## Layer 1: Coverage Integrity Detail (post-G1)
+| Module | Handlers | Tests | Ratio | L1 | L2 | L3 | L4 | Score | Status |
+|--------|----------|-------|-------|----|----|----|----|-------|--------|
+| m01-auth-onboarding | 33 | 39 | 1.18 | 10 | 9 | 8 | 9 | **9** | ✓ |
+| m02-member-profile | 42 | 59 | 1.40 | 10 | 9 | 8 | 9 | **9** | ✓ |
+| m03-platform-admin | 45 | 31 | 0.69 | 7 | 8 | 7 | 9 | **7** | ✓ |
+| m04-org-admin | 264 | 122 | 0.46 | 6 | 8 | 7 | 9 | **6** | ✓ |
+| m05-membership | 15 | 26 | 1.73 | 10 | 9 | 8 | 9 | **9** | ✓ |
+| m06-dues-payments | 22 | 39 | 1.77 | 10 | 9 | 8 | 9 | **9** | ✓ |
+| m07-communications | 77 | 76 | 0.99 | 9 | 9 | 8 | 9 | **8** | ✓ |
+| m08-events | 15 | 25 | 1.67 | 10 | 9 | 8 | 9 | **9** | ✓ |
+| m09-training | 10 | 0 | 0.00 | 3 | 7 | 7 | 9 | **3** | ✗ |
+| m10-credit-tracking | 16 | 14 | 0.88 | 8 | 8 | 8 | 9 | **8** | ✓ |
+| m11-documents-credentials | 21 | 26 | 1.24 | 10 | 9 | 8 | 9 | **9** | ✓ |
+| m12-elections-governance | 9 | 20 | 2.22 | 10 | 9 | 8 | 9 | **9** | ✓ |
+| m13-professional-feed | 0 | 0 | n/a | 0 | 0 | 0 | n/a | **0** | ⊘ unbuilt |
+| m14-national-dashboard | 69 | 25 | 0.36 | 5 | 7 | 7 | 9 | **5** | ✗ |
+| m15-job-board | 7 | 7 | 1.00 | 9 | 7 | 7 | 9 | **7** | ✓ |
+| m16-advertising | 7 | 7 | 1.00 | 9 | 7 | 7 | 9 | **7** | ✓ |
+| m17-marketplace | 9 | 3 | 0.33 | 4 | 6 | 7 | 9 | **4** | ✗ |
+| m18-surveys-polls | 20 | 20 | 1.00 | 9 | 8 | 8 | 9 | **8** | ✓ |
+| m19-committee-management | 195 | 97 | 0.50 | 6 | 7 | 7 | 9 | **6** | ✓ |
+| m20-booking | 19 | 29 | 1.53 | 10 | 9 | 8 | 9 | **9** | ✓ |
+| m21-billing | 16 | 23 | 1.44 | 10 | 9 | 8 | 9 | **9** | ✓ |
+| m22-email | 13 | 18 | 1.38 | 10 | 9 | 8 | 9 | **9** | ✓ |
 
-### "Covered" Definition Per Rule Class
-| Rule Class | Coverage Requires | Items | Covered | Line-Only | None | Weight |
-|------------|-------------------|-------|---------|-----------|------|--------|
-| Auth/permissions | Deny AND allow test per gate | 428 backend eps | 428 (0 P0/P1 violations) | 0 | 0 | 35% |
-| Business rules | Assertion on business outcome | 51 BRs | 42 COMPLETE (42/51); 3 INCOMPLETE = layer-gap | 0 | 0 untested (was 1) | 30% |
-| State transitions | Guard + happy-path test | **12 machines** (was 10) | **12** wired + tested (was 5/12) | 0 | 0 | 20% |
-| API routes | Response shape + status assertion | 428 endpoints (incl. 97 Hurl + handler tests) | ~410 | ~18 | 0 | 15% |
+**Verdict-relevant rows:** m09 (✗, score 3 — P1), m17 (✗, score 4 — P2), m14 (✗, score 5 — P2), m13 (⊘ — design deferred). Cross-cutting §4.5/§5.5 caps apply at the headline layer, above this per-module table.
 
-Weighted class coverage = (100×0.35)+(82×0.30)+(100×0.20)+(96×0.15) = **94.0%** → 9.4/10. TDD git-history test-first = 84% (≥80% threshold) → **+1 bonus**. Final L1 = **9/10** (held at ceiling; cap-bounded).
+## Banned-Pattern Counts (Step 6 §6.1–§6.4)
 
-> BR-class 82% reflects (42 COMPLETE / 51 total) — INCOMPLETE/DEFERRED counted as not-covered per Layer 1 strict semantics. Note all 3 INCOMPLETE BRs have at least backend coverage; layer-completeness gap, not absent-test gap.
+(Source-derived — unchanged from rev 4; map-independent.)
 
-## Layer 2: Behavior Traceability Detail (post-G1)
+| Pattern | Count | Severity | Notes |
+|---------|-------|----------|-------|
+| `test.skip` / `describe.skip` / `it.skip` / `xit` | **31** | P2/P3 | Mostly env-gated — defensible. 5 unconditional → P2. |
+| `.only(` | **0** | — | None detected. |
+| `page.waitForTimeout` (hardcoded waits) | **64** | **P1** | Concentrated in `apps/memberry/tests/e2e/auth/*` and `member/*`. Flake risk. |
+| WEAK assertions (`toBeTruthy/toBeFalsy/toBeDefined`) | **263** | P2 | ~ all in E2E (page-presence not data shape). |
+| `vi.mock` / `jest.mock` usage | **74 files** | P2/P3 | 7 DB-mock files lack rationale; rest appropriate. |
+| `expectJourneyBroken` (§6.6 probe-skip) | **0** | — | No anti-coverage items → no L1 penalty. |
+| `SUT_NOT_IMPORTED` (§6.5 SUT-binding) | 0 in sample | — | 79 component-test files bind to feature component. No L3 cap. |
 
-Comprehensive prior-audit behavior inventory available. **Layer 2 uncapped.**
+## TDD Proof Verification (Step 6c)
 
-### BR → Test Mapping (summary)
-| BR Class | Rule Count | With Test Owner | Assertion Quality |
-|----------|-----------|-----------------|-------------------|
-| Membership/dues BRs | ~15 | 15 | STRONG |
-| Booking/event BRs | ~8 | 8 | STRONG |
-| Credit/training BRs | ~8 | 8 | STRONG (BR-41 paid gate + BR-43 completion lock, test-first; G1 enrollment guard wired) |
-| Election/governance BRs | ~5 | 5 | STRONG (BR-43 contract + BR-50 date-ordering schema-level tests added) |
-| Comms/docs BRs | ~6 | 5 | STRONG/WEAK |
-| Cross-cutting/security (BR-47/49/51) | 3 | 3 | partial — 1 STRONG (BR-49), 2 PARTIAL (BR-47 FE-only; BR-51 backend-only) |
+(Unchanged from rev 4.)
+- **TDD_PROOF.md artifacts found:** 17 (under `docs/execution/slices/*/TDD_PROOF.md`). Rev 3 reported 24 — `proof-artifact-drift` flag persists (7 G1 proofs possibly elsewhere).
+- **Slice directories:** 19 — 2 lack TDD_PROOF.md (`wave-5-governance-ux`).
+- **Git-history test-first scoring:** rev 3 baseline 84% (58/69) — meets ≥80% bonus.
+- **Fabrication detection:** No FABRICATION flags this run.
 
-### State Transition Coverage (post-G1)
-| Entity | Guard Test? | Happy Path? | Wired in Handler? | Slice |
-|--------|-------------|-------------|--------------------|-------|
-| Member / Membership | YES | YES | **YES** | S-G1-01 |
-| Booking | YES | YES | **YES** | S-G1-02 |
-| Invoice (dues) | YES | YES | **YES** | S-G1-03 |
-| Training enrollment | YES | YES | **YES** | S-G1-04 |
-| Marketplace vendor | YES | YES | **YES** | S-G1-05 |
-| Email queue | YES | YES | **YES** | S-G1-06 |
-| Dues-payment / Officer / Election / Announcement / Message / Template | YES | YES | YES | (cycle 3) |
+## Layer 4: Release Gate Readiness Detail
 
-**12/12 state machines tested + wired** (was 10/12 tested + 5/12 wired). 
+(Unchanged from rev 4.)
 
-## Layer 3: Test Quality Hardening (no regression)
-
-Unchanged from rev 2:
-- 95.9% strong assertions
-- 97.8% test stability (no flake regression)
-- 94.9% mocks classified APPROPRIATE
-- 79.1% data-seeding (factory/fixture/transaction)
-
-## Layer 4: Release Gate Readiness (post-G4)
-
-### CI Pipeline
 | Check | Status |
 |-------|--------|
-| Test step | PRESENT |
-| Lint step | PRESENT |
-| Type check step | PRESENT |
-| Build step | PRESENT |
-| Security scan step | PRESENT (npm audit + Schemathesis) |
-| OTel tracing | **PRESENT** (new — S-C4-040) |
-| CSRF middleware | **PRESENT** (new — S-C4-041) |
+| CI config found | YES (`.github/workflows/`) |
+| Workflows | `ci.yml`, `contract.yml`, `deploy.yml`, `monitor.yml` |
+| Test / Lint / Type / Build steps | PRESENT |
+| Security scan step | PARTIAL (audit step; no Snyk/Dependabot visible) |
+| Migration files | YES; Rollback/down files | NO (forward-only by design) |
+| CI dry-run | YES (contract.yml Hurl) |
+| Version file / Release workflow | YES (`package.json` / `deploy.yml`) |
+| Health endpoint | DEEP (`/health`, OTel G4) |
 
-### Migration Safety
-| Check | Status |
-|-------|--------|
-| Migration files | YES |
-| Rollback/down files | NO (forward-only by design per Drizzle convention) |
-| Migration verify test | YES (`migration-verify.test.ts`) |
+## Top Confidence Findings
 
-### Health Check
-| Check | Status |
-|-------|--------|
-| `/livez` | YES (200) |
-| `/readyz` | YES (deep — db + storage + jobs) |
+| ID | Module | Severity | 1-line |
+|----|--------|----------|--------|
+| CF-001 | m09-training | **P1** | 10 handlers ship with **zero `.test.ts` files** — E2E-only backend logic. |
+| CF-002 | cross-cutting (E2E) | **P1** | 64 `page.waitForTimeout(…)` calls — flake risk. |
+| CF-009 | cross-cutting (FE→BE) | **P2** | **§5.5 (engine v5):** FE→BE edge density 0.669 < 0.70 → L2 capped at 6. 49 data-hook consumers resolved 0 endpoints. **Resolver-attributed** (engine SDK-factory coverage gap, not broken behavior). |
+| CF-010 | cross-cutting (loading hygiene) | **P2** | **§4.5 (engine v5):** 36 loading-hygiene violators (data-fetch components missing skeleton/error branch) → L1 coverage 0.886, capped at 9. Infinite-skeleton risk class. |
+| CF-003 | cross-cutting (E2E) | P2 | 263 WEAK assertions in E2E specs. |
+| CF-004 | m17-marketplace | P2 | Handler→test ratio 3/9 (33%). |
+| CF-005 | m14-national-dashboard | P2 | Handler→test ratio 25/69 (36%). |
+| CF-006 | infra (codebase-map) | ~~P2~~ **RESOLVED** | ~~Map STALE~~ — Phase A regen, now FRESH-ENOUGH engine v5. ~504 unverified bucket collapsed. |
+| CF-007 | infra (engine) | ~~P3~~ **RESOLVED** | ~~Engine v1 `violation` null~~ — engine v5 emits real verdicts (36 true / 100 false). §4.5 cap unlocked. |
+| CF-008 | infra (TDD proofs) | P3 | TDD_PROOF count discrepancy (17 vs claimed 24) — persists. |
+| CF-011 | infra (engine) | P3 | Engine v0.1.0 emits `request_shape`/`response_shape` empty `{}` for all 454 endpoints — field-shape assertions not graph-verifiable (affects traceability 5g, not confidence scoring). Candidate upstream. |
 
-### Versioning
-| Check | Status |
-|-------|--------|
-| package.json version | YES |
-| CHANGELOG.md | YES |
-| Release script/workflow | YES |
+## Prioritized Action Plan
 
-## TDD Proof Verification
+### P0 — Fix Now
+None.
 
-| Slice | Git-History Score | Proof Valid | Tests Re-Run | Fabrication |
-|-------|-------------------|-------------|--------------|-------------|
-| Cycle 3 (17 slices) | 82% test-first | ALL VERIFIED | YES | NO |
-| S-G1-01 membership wire | 100% test-first | VERIFIED | YES | NO |
-| S-G1-02 booking wire | 100% test-first | VERIFIED | YES | NO |
-| S-G1-03 dues invoice wire | 100% test-first | VERIFIED | YES | NO |
-| S-G1-04 training enrollment | 100% test-first | VERIFIED | YES | NO |
-| S-G1-05 marketplace vendor | 100% test-first | VERIFIED | YES | NO |
-| S-G1-06 email queue | 100% test-first | VERIFIED | YES | NO |
-| S-G1-07 phantom FE reconcile | N/A (cross-cutting refactor — proof-only) | VERIFIED | YES | NO |
+### P1 — Fix Before Major New Work
+- **CF-001 (m09-training):** Add backend unit tests for the 10 training handlers. Vertical-TDD.
+- **CF-002 (E2E flake):** Replace `page.waitForTimeout(N)` with `waitForResponse` / `waitForLoadState('networkidle')` / `expect(locator).toBeVisible()`.
 
-**Git-history compliance:** ~84% (58/69 spec items with test-first commit ordering) — **+2pp vs rev 2**
-**Proof validity:** All verified against SLICE_SPEC.md
-**Score adjustments:** L1 +1 bonus, L2 +1 bonus
-**Fabrication detected:** NO
+### P2 — Fix When Touching Module
+- **CF-009 (§5.5 FE→BE):** File engine SDK-resolver gap upstream; for the genuine app-side misses (NotificationDrawer, public-route pages), confirm hooks resolve. Re-run to lift L2 toward 9.
+- **CF-010 (§4.5 loading hygiene):** Add skeleton + error branch to the 36 violators (start: OfficerDashboard, OrgSettingsForm, CertificateList/Preview, AnnouncementList).
+- **CF-003 (WEAK assertions):** Convert `toBeTruthy()` → shape/value assertions for top 50.
+- **CF-004 / CF-005 (marketplace / national-dashboard):** Add handler tests toward ≥1.0 / 0.6+ ratio.
 
-## Headline Score
-
-**Test Confidence: 9.0/10** (UNCHANGED from rev 2 — held at ceiling; underlying foundation strengthened by G1 wire-ups).
+### P3 — Cleanup
+- **CF-008:** Locate/rebuild 7 missing G1 slice proofs.
+- **CF-011:** File engine request/response_shape extraction gap upstream.
+- 7 DB-mock test files — annotate or convert to integration.
 
 ## What's Next
-
-- **No P0 blocking confidence.** All headline gauges at 9/10.
-- Close 3 INCOMPLETE BRs (BR-47 add backend, BR-48 add contract, BR-51 add contract/E2E) — would push L2 toward 9.5.
-- Reduce 21 brittle hardcoded UUIDs (low risk; not blocking).
-- Run `/oli-check --traceability` (already done — `docs/trace/TRACE_REPORT.md`).
-- Re-run frontend unit tests after pulling Wave 0b API contract fixes (10 failing tests carried from rev 2 not re-executed this cycle; out of cycle-4 scope).
+- Address CF-001 + CF-002 → re-run `/oli-check --confidence` → expect L3 → 9.
+- Address CF-009 (engine resolver) → L2 cap lifts → headline back toward 8–9.
+- Address CF-010 (loading hygiene) → §4.5 coverage ≥ 0.95 → L1 cap clears.
