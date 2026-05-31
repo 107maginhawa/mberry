@@ -1,158 +1,155 @@
----
-oli-version: "1.0"
-last-modified: 2026-05-30T12:00:00.000Z
-last-modified-by: oli-codebase-map
----
-
 # Code Route Map
 
-Strategy: file-based
-Total routes: 143 (unchanged this cycle; only `apps/admin/src/routes/organizations/$organizationId.tsx` and `apps/memberry/src/routes/_authenticated/org/$orgSlug/officer/finances/members/$memberId.tsx` were modified — no new route slugs)
+<!-- oli:regen:code-route-map:begin -->
+Strategy: `file-based`
 
-<!-- oli:regen:route-table:begin -->
-| Route | Module | Auth | Params |
-|---|---|---|---|
-| `/` | app-admin | ? | - |
-| `/associations` | app-admin | ? | - |
-| `/associations/{associationId}` | app-admin | ? | associationId |
-| `/audit` | app-admin | ? | - |
-| `/auth/{authView}` | app-memberry | ? | authView |
-| `/committees` | app-admin | ? | - |
-| `/communications` | app-admin | ? | - |
-| `/communications/email` | app-admin | ? | - |
-| `/communications/moderation` | app-admin | ? | - |
-| `/communications/templates` | app-admin | ? | - |
-| `/compliance` | app-admin | ? | - |
-| `/dashboard` | app-memberry | true | - |
-| `/discover/events` | app-memberry | ? | - |
-| `/events` | app-admin | ? | - |
-| `/events/{eventSlug}` | app-memberry | ? | eventSlug |
-| `/feature-flags` | app-admin | ? | - |
-| `/impersonate` | app-admin | ? | - |
-| `/invite/{token}` | app-memberry | ? | token |
-| `/join` | app-memberry | ? | - |
-| `/members` | app-admin | ? | - |
-| `/members/{personId}` | app-admin | ? | personId |
-| `/my/billing` | app-memberry | true | - |
-| `/my/bookings` | app-memberry | true | - |
-| `/my/bookings/host.{personId}` | app-memberry | true | personId |
-| `/my/bookings/host.{personId}.{slotId}` | app-memberry | true | personId,slotId |
-| `/my/bookings/{bookingId}` | app-memberry | true | bookingId |
-| `/my/calendar` | app-memberry | true | - |
-| `/my/certificates` | app-memberry | true | - |
-| `/my/certificates/{certificateId}` | app-memberry | true | certificateId |
-| `/my/credits` | app-memberry | true | - |
-| `/my/credits/log` | app-memberry | true | - |
-| `/my/data-export` | app-memberry | true | - |
-| `/my/events` | app-memberry | true | - |
-| `/my/id-card` | app-memberry | true | - |
-| `/my/notifications` | app-memberry | true | - |
-| `/my/organizations` | app-memberry | true | - |
-| `/my/payments` | app-memberry | true | - |
-| `/my/profile` | app-memberry | true | - |
-| `/my/schedule` | app-memberry | true | - |
-| `/my/settings` | app-memberry | true | - |
-| `/my/surveys` | app-memberry | true | - |
-| `/my/surveys/{surveyId}` | app-memberry | true | surveyId |
-| `/my/training` | app-memberry | true | - |
-| `/national-dashboard` | app-admin | ? | - |
-| `/onboarding` | app-memberry | true | - |
-| `/operators` | app-admin | ? | - |
-| `/org/{orgSlug}/announcements` | app-memberry | true | orgSlug |
-| `/org/{orgSlug}/announcements/{announcementId}` | app-memberry | true | orgSlug,announcementId |
-| `/org/{orgSlug}/directory` | app-memberry | true | orgSlug |
-| `/org/{orgSlug}/directory/{personId}` | app-memberry | true | orgSlug,personId |
-| `/org/{orgSlug}/documents` | app-memberry | true | orgSlug |
-| `/org/{orgSlug}/documents/{documentId}` | app-memberry | true | orgSlug,documentId |
-| `/org/{orgSlug}/dues` | app-memberry | true | orgSlug |
-| `/org/{orgSlug}/elections` | app-memberry | true | orgSlug |
-| `/org/{orgSlug}/elections/{electionId}` | app-memberry | true | orgSlug,electionId |
-| `/org/{orgSlug}/elections/{electionId}/vote` | app-memberry | true | orgSlug,electionId |
-| `/org/{orgSlug}/events` | app-memberry | true | orgSlug |
-| `/org/{orgSlug}/events/{eventId}` | app-memberry | true | orgSlug,eventId |
-| `/org/{orgSlug}/governance` | app-memberry | true | orgSlug |
-| `/org/{orgSlug}/home` | app-memberry | true | orgSlug |
-| `/org/{orgSlug}/members` | app-memberry | true | orgSlug |
-| `/org/{orgSlug}/messages` | app-memberry | true | orgSlug |
-| `/org/{orgSlug}/messages/dm` | app-memberry | true | orgSlug |
-| `/org/{orgSlug}/my-cpd` | app-memberry | true | orgSlug |
-| `/org/{orgSlug}/my-notifications` | app-memberry | true | orgSlug |
-| `/org/{orgSlug}/officer` | app-memberry | true | orgSlug |
-| `/org/{orgSlug}/officer/applications` | app-memberry | true | orgSlug |
-| `/org/{orgSlug}/officer/certificates` | app-memberry | true | orgSlug |
-| `/org/{orgSlug}/officer/communications` | app-memberry | true | orgSlug |
-| `/org/{orgSlug}/officer/communications/analytics` | app-memberry | true | orgSlug |
-| `/org/{orgSlug}/officer/communications/new` | app-memberry | true | orgSlug |
-| `/org/{orgSlug}/officer/communications/sent` | app-memberry | true | orgSlug |
-| `/org/{orgSlug}/officer/communications/templates` | app-memberry | true | orgSlug |
-| `/org/{orgSlug}/officer/communications/templates/new` | app-memberry | true | orgSlug |
-| `/org/{orgSlug}/officer/communications/{announcementId}` | app-memberry | true | orgSlug,announcementId |
-| `/org/{orgSlug}/officer/compliance` | app-memberry | true | orgSlug |
-| `/org/{orgSlug}/officer/dashboard` | app-memberry | true | orgSlug |
-| `/org/{orgSlug}/officer/documents` | app-memberry | true | orgSlug |
-| `/org/{orgSlug}/officer/documents/{documentId}` | app-memberry | true | orgSlug,documentId |
-| `/org/{orgSlug}/officer/dues/assessments` | app-memberry | true | orgSlug |
-| `/org/{orgSlug}/officer/dues/member.{memberId}` | app-memberry | true | orgSlug,memberId |
-| `/org/{orgSlug}/officer/dues/treasurer` | app-memberry | true | orgSlug |
-| `/org/{orgSlug}/officer/elections` | app-memberry | true | orgSlug |
-| `/org/{orgSlug}/officer/elections/new` | app-memberry | true | orgSlug |
-| `/org/{orgSlug}/officer/elections/{electionId}` | app-memberry | true | orgSlug,electionId |
-| `/org/{orgSlug}/officer/elections/{electionId}/edit` | app-memberry | true | orgSlug,electionId |
-| `/org/{orgSlug}/officer/events` | app-memberry | true | orgSlug |
-| `/org/{orgSlug}/officer/events/new` | app-memberry | true | orgSlug |
-| `/org/{orgSlug}/officer/events/{eventId}` | app-memberry | true | orgSlug,eventId |
-| `/org/{orgSlug}/officer/events/{eventId}/attendance` | app-memberry | true | orgSlug,eventId |
-| `/org/{orgSlug}/officer/finances` | app-memberry | true | orgSlug |
-| `/org/{orgSlug}/officer/finances/assessments` | app-memberry | true | orgSlug |
-| `/org/{orgSlug}/officer/finances/dues` | app-memberry | true | orgSlug |
-| `/org/{orgSlug}/officer/finances/funds` | app-memberry | true | orgSlug |
-| `/org/{orgSlug}/officer/finances/invoices` | app-memberry | true | orgSlug |
-| `/org/{orgSlug}/officer/finances/invoices/{invoiceId}` | app-memberry | true | orgSlug,invoiceId |
-| `/org/{orgSlug}/officer/finances/members` | app-memberry | true | orgSlug |
-| `/org/{orgSlug}/officer/finances/members/{memberId}` | app-memberry | true | orgSlug,memberId |
-| `/org/{orgSlug}/officer/institutional-memberships` | app-memberry | true | orgSlug |
-| `/org/{orgSlug}/officer/institutional-memberships/new` | app-memberry | true | orgSlug |
-| `/org/{orgSlug}/officer/institutional-memberships/{institutionalMembershipId}` | app-memberry | true | orgSlug,institutionalMembershipId |
-| `/org/{orgSlug}/officer/messages` | app-memberry | true | orgSlug |
-| `/org/{orgSlug}/officer/officers` | app-memberry | true | orgSlug |
-| `/org/{orgSlug}/officer/payments` | app-memberry | true | orgSlug |
-| `/org/{orgSlug}/officer/payments/new` | app-memberry | true | orgSlug |
-| `/org/{orgSlug}/officer/payments/{paymentId}` | app-memberry | true | orgSlug,paymentId |
-| `/org/{orgSlug}/officer/reports/credits` | app-memberry | true | orgSlug |
-| `/org/{orgSlug}/officer/reports/financial` | app-memberry | true | orgSlug |
-| `/org/{orgSlug}/officer/reviews` | app-memberry | true | orgSlug |
-| `/org/{orgSlug}/officer/roster` | app-memberry | true | orgSlug |
-| `/org/{orgSlug}/officer/roster/import` | app-memberry | true | orgSlug |
-| `/org/{orgSlug}/officer/roster/{memberId}` | app-memberry | true | orgSlug,memberId |
-| `/org/{orgSlug}/officer/settings/chapters` | app-memberry | true | orgSlug |
-| `/org/{orgSlug}/officer/settings/cpd` | app-memberry | true | orgSlug |
-| `/org/{orgSlug}/officer/settings/dues` | app-memberry | true | orgSlug |
-| `/org/{orgSlug}/officer/settings/funds` | app-memberry | true | orgSlug |
-| `/org/{orgSlug}/officer/settings/gateway` | app-memberry | true | orgSlug |
-| `/org/{orgSlug}/officer/settings/membership-categories` | app-memberry | true | orgSlug |
-| `/org/{orgSlug}/officer/settings/org` | app-memberry | true | orgSlug |
-| `/org/{orgSlug}/officer/settings/providers` | app-memberry | true | orgSlug |
-| `/org/{orgSlug}/officer/surveys` | app-memberry | true | orgSlug |
-| `/org/{orgSlug}/officer/surveys/new` | app-memberry | true | orgSlug |
-| `/org/{orgSlug}/officer/surveys/{surveyId}` | app-memberry | true | orgSlug,surveyId |
-| `/org/{orgSlug}/officer/training` | app-memberry | true | orgSlug |
-| `/org/{orgSlug}/officer/training/new` | app-memberry | true | orgSlug |
-| `/org/{orgSlug}/officer/training/{trainingId}` | app-memberry | true | orgSlug,trainingId |
-| `/org/{orgSlug}/officer/training/{trainingId}/attendance` | app-memberry | true | orgSlug,trainingId |
-| `/org/{orgSlug}/route` | app-memberry | true | orgSlug |
-| `/org/{orgSlug}/training` | app-memberry | true | orgSlug |
-| `/org/{orgSlug}/training/{trainingId}` | app-memberry | true | orgSlug,trainingId |
-| `/org/{slug}` | app-memberry | ? | slug |
-| `/organizations` | app-admin | ? | - |
-| `/organizations/{organizationId}` | app-admin | ? | organizationId |
-| `/pay/{token}` | app-memberry | ? | token |
-| `/settings/account` | app-memberry | true | - |
-| `/settings/security` | app-memberry | true | - |
-| `/surveys` | app-admin | ? | - |
-| `/training` | app-admin | ? | - |
-| `/verifications` | app-admin | ? | - |
-| `/verify-email` | app-memberry | true | - |
-| `/verify/{certificateNumber}` | app-memberry | ? | certificateNumber |
-| `/verify/{credentialNumber}` | app-memberry | ? | credentialNumber |
-| `/verify/{token}` | app-memberry | ? | token |
-<!-- oli:regen:route-table:end -->
+| Route | Method | Component | Auth | Params | Module |
+|---|---|---|---|---|---|
+| `/` | * | — | ? | — | apps/memberry |
+| `/_authenticated` | * | AuthenticatedLayout | true | — | apps/memberry |
+| `/join` | * | JoinPage | ? | — | apps/memberry |
+| `/onboarding` | * | OnboardingPage | true | — | apps/memberry |
+| `/verify-email` | * | VerifyEmailPage | true | — | apps/memberry |
+| `/associations/$associationId` | * | AssociationDetailPage | ? | associationId | apps/admin |
+| `/associations/` | * | AssociationsPage | ? | — | apps/admin |
+| `/audit/` | * | — | ? | — | apps/admin |
+| `/committees/` | * | — | ? | — | apps/admin |
+| `/communications/email` | * | EmailHealth | ? | — | apps/admin |
+| `/communications/` | * | CommunicationsBroadcasts | ? | — | apps/admin |
+| `/communications/moderation` | * | ModerationQueue | ? | — | apps/admin |
+| `/communications/templates` | * | PlatformTemplates | ? | — | apps/admin |
+| `/compliance/` | * | CompliancePage | ? | — | apps/admin |
+| `/events/` | * | — | ? | — | apps/admin |
+| `/feature-flags/` | * | — | ? | — | apps/admin |
+| `/impersonate/` | * | — | ? | — | apps/admin |
+| `/members/$personId` | * | MemberDetailPage | ? | personId | apps/admin |
+| `/members/` | * | MembersPage | ? | — | apps/admin |
+| `/national-dashboard/` | * | — | ? | — | apps/admin |
+| `/operators/` | * | — | ? | — | apps/admin |
+| `/organizations/$organizationId` | * | OrganizationDetailPage | ? | organizationId | apps/admin |
+| `/organizations/` | * | OrganizationsPage | ? | — | apps/admin |
+| `/training/` | * | — | ? | — | apps/admin |
+| `/verifications/` | * | VerificationsPage | ? | — | apps/admin |
+| `/_authenticated/dashboard` | * | DashboardPage | true | — | apps/memberry |
+| `/auth/$authView` | * | AuthPage | ? | authView | apps/memberry |
+| `/discover/events` | * | DiscoverEvents | ? | — | apps/memberry |
+| `/events/$eventSlug` | * | PublicEventPage | ? | eventSlug | apps/memberry |
+| `/invite/$token` | * | InvitePage | ? | token | apps/memberry |
+| `/org/$slug` | * | PublicOrgProfile | ? | slug | apps/memberry |
+| `/pay/$token` | * | PublicPaymentPage | ? | token | apps/memberry |
+| `/verify/$certificateNumber` | * | VerifyCertificatePage | ? | certificateNumber | apps/memberry |
+| `/verify/$credentialNumber` | * | VerifyCredentialPage | ? | credentialNumber | apps/memberry |
+| `/verify/$token` | * | PublicVerification | ? | token | apps/memberry |
+| `/_authenticated/my/billing` | * | BillingPage | true | — | apps/memberry |
+| `/_authenticated/my/calendar` | * | MyCalendar | true | — | apps/memberry |
+| `/_authenticated/my/data-export` | * | DataExportPage | true | — | apps/memberry |
+| `/_authenticated/my/events` | * | MyEvents | true | — | apps/memberry |
+| `/_authenticated/my/id-card` | * | MyIdCard | true | — | apps/memberry |
+| `/_authenticated/my/notifications` | * | NotificationsPage | true | — | apps/memberry |
+| `/_authenticated/my/organizations` | * | MyOrganizationsPage | true | — | apps/memberry |
+| `/_authenticated/my/payments` | * | MyPaymentsPage | true | — | apps/memberry |
+| `/_authenticated/my/profile` | * | MyProfilePage | true | — | apps/memberry |
+| `/_authenticated/my/schedule` | * | SchedulePage | true | — | apps/memberry |
+| `/_authenticated/my/settings` | * | MySettingsPage | true | — | apps/memberry |
+| `/_authenticated/my/training` | * | MyTraining | true | — | apps/memberry |
+| `/_authenticated/settings/account` | * | AccountSettingsPage | true | — | apps/memberry |
+| `/_authenticated/settings/security` | * | SecuritySettingsPage | true | — | apps/memberry |
+| `/_authenticated/my/bookings/$bookingId` | * | BookingDetailPage | true | bookingId | apps/memberry |
+| `/_authenticated/my/bookings/host/$personId/$slotId` | * | ConfirmPage | true | personId, slotId | apps/memberry |
+| `/_authenticated/my/bookings/host/$personId` | * | HostPage | true | personId | apps/memberry |
+| `/_authenticated/my/bookings/` | * | BookingsPage | true | — | apps/memberry |
+| `/_authenticated/my/certificates/$certificateId` | * | CertificateDetail | true | certificateId | apps/memberry |
+| `/_authenticated/my/certificates/` | * | MyCertificates | true | — | apps/memberry |
+| `/_authenticated/my/credits/` | * | MyCredits | true | — | apps/memberry |
+| `/_authenticated/my/credits/log` | * | CreditLog | true | — | apps/memberry |
+| `/_authenticated/my/surveys/$surveyId` | * | SurveyDetailPage | true | surveyId | apps/memberry |
+| `/_authenticated/my/surveys/` | * | MySurveys | true | — | apps/memberry |
+| `/_authenticated/org/$orgSlug/directory` | * | DirectoryPage | true | orgSlug | apps/memberry |
+| `/_authenticated/org/$orgSlug/dues` | * | MemberDuesPage | true | orgSlug | apps/memberry |
+| `/_authenticated/org/$orgSlug/home` | * | OrgHome | true | orgSlug | apps/memberry |
+| `/_authenticated/org/$orgSlug/members` | * | MembersDirectoryPage | true | orgSlug | apps/memberry |
+| `/_authenticated/org/$orgSlug/my-cpd` | * | MyCpdDashboard | true | orgSlug | apps/memberry |
+| `/_authenticated/org/$orgSlug/my-notifications` | * | MyNotificationsPage | true | orgSlug | apps/memberry |
+| `/_authenticated/org/$orgSlug/officer` | * | OfficerLayout | true | orgSlug | apps/memberry |
+| `/_authenticated/org/$orgSlug` | * | OrgLayout | true | orgSlug | apps/memberry |
+| `/_authenticated/org/$orgSlug/announcements/$announcementId` | * | MemberAnnouncementPage | true | orgSlug, announcementId | apps/memberry |
+| `/_authenticated/org/$orgSlug/announcements/` | * | MemberAnnouncementFeed | true | orgSlug | apps/memberry |
+| `/_authenticated/org/$orgSlug/directory/$personId` | * | MemberProfilePage | true | orgSlug, personId | apps/memberry |
+| `/_authenticated/org/$orgSlug/documents/$documentId` | * | MemberDocumentDetailPage | true | orgSlug, documentId | apps/memberry |
+| `/_authenticated/org/$orgSlug/documents/` | * | MemberDocumentsPage | true | orgSlug | apps/memberry |
+| `/_authenticated/org/$orgSlug/elections/` | * | MemberElectionsPage | true | orgSlug | apps/memberry |
+| `/_authenticated/org/$orgSlug/events/$eventId` | * | EventDetail | true | orgSlug, eventId | apps/memberry |
+| `/_authenticated/org/$orgSlug/events/` | * | OrgEvents | true | orgSlug | apps/memberry |
+| `/_authenticated/org/$orgSlug/governance/` | * | GovernancePage | true | orgSlug | apps/memberry |
+| `/_authenticated/org/$orgSlug/messages/` | * | MessagesIndexPage | true | orgSlug | apps/memberry |
+| `/_authenticated/org/$orgSlug/officer/applications` | * | ApplicationsPage | true | orgSlug | apps/memberry |
+| `/_authenticated/org/$orgSlug/officer/certificates` | * | OfficerCertificates | true | orgSlug | apps/memberry |
+| `/_authenticated/org/$orgSlug/officer/communications` | * | — | true | orgSlug | apps/memberry |
+| `/_authenticated/org/$orgSlug/officer/compliance` | * | OfficerCompliance | true | orgSlug | apps/memberry |
+| `/_authenticated/org/$orgSlug/officer/dashboard` | * | OfficerDashboardPage | true | orgSlug | apps/memberry |
+| `/_authenticated/org/$orgSlug/officer/officers` | * | OfficersPage | true | orgSlug | apps/memberry |
+| `/_authenticated/org/$orgSlug/officer/payments` | * | — | true | orgSlug | apps/memberry |
+| `/_authenticated/org/$orgSlug/officer/roster` | * | — | true | orgSlug | apps/memberry |
+| `/_authenticated/org/$orgSlug/training/$trainingId` | * | TrainingDetail | true | orgSlug, trainingId | apps/memberry |
+| `/_authenticated/org/$orgSlug/training/` | * | OrgTraining | true | orgSlug | apps/memberry |
+| `/_authenticated/org/$orgSlug/elections/$electionId/` | * | MemberElectionDetailPage | true | orgSlug, electionId | apps/memberry |
+| `/_authenticated/org/$orgSlug/elections/$electionId/vote` | * | VotePage | true | orgSlug, electionId | apps/memberry |
+| `/_authenticated/org/$orgSlug/messages/dm/` | * | DmIndexPage | true | orgSlug | apps/memberry |
+| `/_authenticated/org/$orgSlug/officer/communications/$announcementId` | * | AnnouncementDetailPage | true | orgSlug, announcementId | apps/memberry |
+| `/_authenticated/org/$orgSlug/officer/communications/analytics` | * | AnalyticsDashboardPage | true | orgSlug | apps/memberry |
+| `/_authenticated/org/$orgSlug/officer/communications/` | * | OfficerCommunications | true | orgSlug | apps/memberry |
+| `/_authenticated/org/$orgSlug/officer/communications/new` | * | NewAnnouncementPage | true | orgSlug | apps/memberry |
+| `/_authenticated/org/$orgSlug/officer/communications/sent` | * | SentHistoryPage | true | orgSlug | apps/memberry |
+| `/_authenticated/org/$orgSlug/officer/documents/$documentId` | * | DocumentDetail | true | orgSlug, documentId | apps/memberry |
+| `/_authenticated/org/$orgSlug/officer/documents/` | * | OfficerDocuments | true | orgSlug | apps/memberry |
+| `/_authenticated/org/$orgSlug/officer/dues/assessments` | * | — | true | orgSlug | apps/memberry |
+| `/_authenticated/org/$orgSlug/officer/dues/member/$memberId` | * | — | true | orgSlug, memberId | apps/memberry |
+| `/_authenticated/org/$orgSlug/officer/dues/treasurer` | * | — | true | orgSlug | apps/memberry |
+| `/_authenticated/org/$orgSlug/officer/elections/$electionId` | * | ElectionDetailLayout | true | orgSlug, electionId | apps/memberry |
+| `/_authenticated/org/$orgSlug/officer/elections/` | * | OfficerElections | true | orgSlug | apps/memberry |
+| `/_authenticated/org/$orgSlug/officer/elections/new` | * | NewElection | true | orgSlug | apps/memberry |
+| `/_authenticated/org/$orgSlug/officer/events/$eventId` | * | EventDetail | true | orgSlug, eventId | apps/memberry |
+| `/_authenticated/org/$orgSlug/officer/events/` | * | OfficerEvents | true | orgSlug | apps/memberry |
+| `/_authenticated/org/$orgSlug/officer/events/new` | * | NewEvent | true | orgSlug | apps/memberry |
+| `/_authenticated/org/$orgSlug/officer/finances/assessments` | * | FinancesAssessmentsPage | true | orgSlug | apps/memberry |
+| `/_authenticated/org/$orgSlug/officer/finances/dues` | * | DuesSchedulePage | true | orgSlug | apps/memberry |
+| `/_authenticated/org/$orgSlug/officer/finances/funds` | * | FundsPage | true | orgSlug | apps/memberry |
+| `/_authenticated/org/$orgSlug/officer/finances/` | * | FinancesOverviewPage | true | orgSlug | apps/memberry |
+| `/_authenticated/org/$orgSlug/officer/finances/invoices` | * | InvoicesPage | true | orgSlug | apps/memberry |
+| `/_authenticated/org/$orgSlug/officer/finances/members` | * | FinancialMembersPage | true | orgSlug | apps/memberry |
+| `/_authenticated/org/$orgSlug/officer/institutional-memberships/$institutionalMembershipId` | * | InstitutionalMembershipDetailPage | true | orgSlug, institutionalMembershipId | apps/memberry |
+| `/_authenticated/org/$orgSlug/officer/institutional-memberships/` | * | InstitutionalMembershipsPage | true | orgSlug | apps/memberry |
+| `/_authenticated/org/$orgSlug/officer/institutional-memberships/new` | * | NewInstitutionalMembershipPage | true | orgSlug | apps/memberry |
+| `/_authenticated/org/$orgSlug/officer/messages/` | * | OfficerMessagesPage | true | orgSlug | apps/memberry |
+| `/_authenticated/org/$orgSlug/officer/payments/$paymentId` | * | PaymentDetailPage | true | orgSlug, paymentId | apps/memberry |
+| `/_authenticated/org/$orgSlug/officer/payments/` | * | OfficerPaymentsPage | true | orgSlug | apps/memberry |
+| `/_authenticated/org/$orgSlug/officer/payments/new` | * | RecordPaymentPage | true | orgSlug | apps/memberry |
+| `/_authenticated/org/$orgSlug/officer/reports/credits` | * | CreditReport | true | orgSlug | apps/memberry |
+| `/_authenticated/org/$orgSlug/officer/reports/financial` | * | FinancialReportsPage | true | orgSlug | apps/memberry |
+| `/_authenticated/org/$orgSlug/officer/reviews/` | * | OfficerReviews | true | orgSlug | apps/memberry |
+| `/_authenticated/org/$orgSlug/officer/roster/$memberId` | * | MemberDetailPage | true | orgSlug, memberId | apps/memberry |
+| `/_authenticated/org/$orgSlug/officer/roster/import` | * | RosterImportPage | true | orgSlug | apps/memberry |
+| `/_authenticated/org/$orgSlug/officer/roster/` | * | RosterPage | true | orgSlug | apps/memberry |
+| `/_authenticated/org/$orgSlug/officer/settings/chapters` | * | ChaptersSettingsPage | true | orgSlug | apps/memberry |
+| `/_authenticated/org/$orgSlug/officer/settings/cpd` | * | CpdSettings | true | orgSlug | apps/memberry |
+| `/_authenticated/org/$orgSlug/officer/settings/dues` | * | — | true | orgSlug | apps/memberry |
+| `/_authenticated/org/$orgSlug/officer/settings/funds` | * | — | true | orgSlug | apps/memberry |
+| `/_authenticated/org/$orgSlug/officer/settings/gateway` | * | GatewaySettingsPage | true | orgSlug | apps/memberry |
+| `/_authenticated/org/$orgSlug/officer/settings/membership-categories` | * | CategoriesPage | true | orgSlug | apps/memberry |
+| `/_authenticated/org/$orgSlug/officer/settings/org` | * | OrgSettingsPage | true | orgSlug | apps/memberry |
+| `/_authenticated/org/$orgSlug/officer/settings/providers` | * | ProvidersPage | true | orgSlug | apps/memberry |
+| `/_authenticated/org/$orgSlug/officer/surveys/$surveyId` | * | SurveyDetailPage | true | orgSlug, surveyId | apps/memberry |
+| `/_authenticated/org/$orgSlug/officer/surveys/` | * | OfficerSurveys | true | orgSlug | apps/memberry |
+| `/_authenticated/org/$orgSlug/officer/surveys/new` | * | NewSurveyPage | true | orgSlug | apps/memberry |
+| `/_authenticated/org/$orgSlug/officer/training/$trainingId` | * | TrainingDetail | true | orgSlug, trainingId | apps/memberry |
+| `/_authenticated/org/$orgSlug/officer/training/` | * | OfficerTraining | true | orgSlug | apps/memberry |
+| `/_authenticated/org/$orgSlug/officer/training/new` | * | NewTraining | true | orgSlug | apps/memberry |
+| `/_authenticated/org/$orgSlug/officer/communications/templates/` | * | TemplateListPage | true | orgSlug | apps/memberry |
+| `/_authenticated/org/$orgSlug/officer/communications/templates/new` | * | NewTemplatePage | true | orgSlug | apps/memberry |
+| `/_authenticated/org/$orgSlug/officer/elections/$electionId/edit` | * | EditElection | true | orgSlug, electionId | apps/memberry |
+| `/_authenticated/org/$orgSlug/officer/events/$eventId/attendance` | * | EventAttendance | true | orgSlug, eventId | apps/memberry |
+| `/_authenticated/org/$orgSlug/officer/finances/invoices/$invoiceId` | * | InvoiceDetailPage | true | orgSlug, invoiceId | apps/memberry |
+| `/_authenticated/org/$orgSlug/officer/finances/invoices/` | * | InvoicesPage | true | orgSlug | apps/memberry |
+| `/_authenticated/org/$orgSlug/officer/finances/members/$memberId` | * | MemberFinancialDetailPage | true | orgSlug, memberId | apps/memberry |
+| `/_authenticated/org/$orgSlug/officer/training/$trainingId/attendance` | * | TrainingAttendance | true | orgSlug, trainingId | apps/memberry |
+<!-- oli:regen:code-route-map:end -->

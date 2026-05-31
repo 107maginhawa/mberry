@@ -1,24 +1,44 @@
 {
-  "version": 2,
-  "timestamp": "2026-05-30T06:15:49.614Z",
-  "git_sha": "28c42566d8c531df657bdb01e8221f10b7e7a3dc",
-  "file_count": 1814,
+  "version": 5,
+  "timestamp": "2026-05-31T09:52:54.236Z",
+  "git_sha": "7ba0b7e210e7ef6b827a562b8672cb57b879cf72",
+  "file_count": 1402,
   "frameworks": [
     "generic",
     "hono",
     "react"
   ],
-  "mode": "incremental",
-  "phase_timings": {},
-  "artifact_hashes": {
-    "CODE_API_SURFACE.json": "82e7999fd8e881d563bacc4258cd6a7e383fb967ef057e1fbaf2ea669348a7aa",
-    "CODE_COMPONENT_REGISTRY.json": "3d1a2d9d70023f71eb01e9544af751fc932f79018466364e5abf2106aaeb420f",
-    "CODE_DATA_FLOW.json": "ecfe44c59710718ef6d90b793f4670c369ad8b779775d28b7c87d8d96305018f",
-    "CODE_IMPORT_GRAPH.json": "15e8d5ade014cfe9501e6a825c5770c738085cc24beeaaee84bb7ad15ec819fe",
-    "CODE_MODULE_MAP.json": "d77a22700493513c178ecbcbcb6566dc9455a709b2a959e40a6691e4f57ef185",
-    "CODE_ROUTE_MAP.json": "c8397fa59bd4e59aa7a1588ac30345ecd8ab12b11610550bb394f28e39c370ae",
-    "CODE_STATE_MACHINES.json": "6362680fe4b139306edcbaffa920552edb68866b2214980ae5f992b115af7474",
-    "CODE_TERMINOLOGY_MAP.json": "911cb2bb810cd9d5a3977b155fc19a1aba51c54c47c38aed571d28352d5b6b90"
+  "mode": "full",
+  "phase_timings": {
+    "structural": 45,
+    "module-map": 8,
+    "react": 4456,
+    "hono": 448,
+    "tanstack": 763,
+    "terminology": 2,
+    "data-model": 22,
+    "state-machines": 355,
+    "behavior": 247,
+    "data-flow": 171,
+    "api-usage": 1,
+    "spec-trace": 9
   },
-  "regen_note": "Wave G5 W2: component→hook→endpoint trace backfill. Visited 378 files; updated 157, added 0; loading_state_hygiene violations: 0."
+  "artifact_hashes": {
+    "CODE_MODULE_MAP": "fff0cb620abadb0adf613809952496cc08babb45d6ee2a15ad41fd511d63d350",
+    "CODE_COMPONENT_REGISTRY": "8d44690f038107b0edb1c76e1e4c585f2caec08eaee715adf44064ad4ebdd343",
+    "CODE_ROUTE_MAP": "b9b160b0b8337b92550e3568f4aa535c7f643f2ea0f3da524c352e3e8077953b",
+    "CODE_DATA_FLOW": "5b23e14d8608d818fa8ebad0e951658b4074453ab4c693e808e2aa38b61e47ef",
+    "CODE_API_SURFACE": "eb2affb0aee802cc6b779e6ee5482db2244490dc3adb631efae1616bad6a4958",
+    "CODE_IMPORT_GRAPH": "7f0d1d9d95c5a9272554a353ad74175d7b684cb4a80025ad3fcf82ca8498bdc0",
+    "CODE_TERMINOLOGY_MAP": "7153a6e6a42370d4f72ef4b2bcf5b8ede63dcc03c6ac1b890b80564cf46c08a6",
+    "CODE_STATE_MACHINES": "708b6b7d706161b62129156ee799d3e506a06e569e3b8e15dc8fb99e7def320f",
+    "CODE_DATA_MODEL": "a49020780c0bc033d0d680293fdd959d993137056deacd69e77b9b8f6fa52395",
+    "CODE_SPEC_TRACE": "6221fcf213c3c4fc460724b811b2b5d975d5a30312907d4d2d3dba3780aa3257"
+  },
+  "provenance": {
+    "producer": "engine",
+    "engine_version": "0.1.0",
+    "fields_unavailable": [],
+    "spec_trace_optin": true
+  }
 }

@@ -1,1516 +1,1574 @@
 {
-  "version": 1,
+  "version": 5,
   "strategy": "file-based",
   "routes": {
-    "/dashboard": {
-      "method": "*",
-      "page_component": "apps/memberry/src/routes/_authenticated/dashboard.tsx",
-      "layout": null,
-      "middleware": [],
-      "auth_required": true,
-      "params": [],
-      "module": "app-memberry"
-    },
-    "/my/billing": {
-      "method": "*",
-      "page_component": "apps/memberry/src/routes/_authenticated/my/billing.tsx",
-      "layout": null,
-      "middleware": [],
-      "auth_required": true,
-      "params": [],
-      "module": "app-memberry"
-    },
-    "/my/bookings/{bookingId}": {
-      "method": "*",
-      "page_component": "apps/memberry/src/routes/_authenticated/my/bookings/$bookingId.tsx",
-      "layout": null,
-      "middleware": [],
-      "auth_required": true,
-      "params": [
-        "bookingId"
-      ],
-      "module": "app-memberry"
-    },
-    "/my/bookings/host.{personId}.{slotId}": {
-      "method": "*",
-      "page_component": "apps/memberry/src/routes/_authenticated/my/bookings/host.$personId.$slotId.tsx",
-      "layout": null,
-      "middleware": [],
-      "auth_required": true,
-      "params": [
-        "personId",
-        "slotId"
-      ],
-      "module": "app-memberry"
-    },
-    "/my/bookings/host.{personId}": {
-      "method": "*",
-      "page_component": "apps/memberry/src/routes/_authenticated/my/bookings/host.$personId.tsx",
-      "layout": null,
-      "middleware": [],
-      "auth_required": true,
-      "params": [
-        "personId"
-      ],
-      "module": "app-memberry"
-    },
-    "/my/bookings": {
-      "method": "*",
-      "page_component": "apps/memberry/src/routes/_authenticated/my/bookings/index.tsx",
-      "layout": null,
-      "middleware": [],
-      "auth_required": true,
-      "params": [],
-      "module": "app-memberry"
-    },
-    "/my/calendar": {
-      "method": "*",
-      "page_component": "apps/memberry/src/routes/_authenticated/my/calendar.tsx",
-      "layout": null,
-      "middleware": [],
-      "auth_required": true,
-      "params": [],
-      "module": "app-memberry"
-    },
-    "/my/certificates/{certificateId}": {
-      "method": "*",
-      "page_component": "apps/memberry/src/routes/_authenticated/my/certificates/$certificateId.tsx",
-      "layout": null,
-      "middleware": [],
-      "auth_required": true,
-      "params": [
-        "certificateId"
-      ],
-      "module": "app-memberry"
-    },
-    "/my/certificates": {
-      "method": "*",
-      "page_component": "apps/memberry/src/routes/_authenticated/my/certificates/index.tsx",
-      "layout": null,
-      "middleware": [],
-      "auth_required": true,
-      "params": [],
-      "module": "app-memberry"
-    },
-    "/my/credits": {
-      "method": "*",
-      "page_component": "apps/memberry/src/routes/_authenticated/my/credits/index.tsx",
-      "layout": null,
-      "middleware": [],
-      "auth_required": true,
-      "params": [],
-      "module": "app-memberry"
-    },
-    "/my/credits/log": {
-      "method": "*",
-      "page_component": "apps/memberry/src/routes/_authenticated/my/credits/log.tsx",
-      "layout": null,
-      "middleware": [],
-      "auth_required": true,
-      "params": [],
-      "module": "app-memberry"
-    },
-    "/my/data-export": {
-      "method": "*",
-      "page_component": "apps/memberry/src/routes/_authenticated/my/data-export.tsx",
-      "layout": null,
-      "middleware": [],
-      "auth_required": true,
-      "params": [],
-      "module": "app-memberry"
-    },
-    "/my/events": {
-      "method": "*",
-      "page_component": "apps/memberry/src/routes/_authenticated/my/events.tsx",
-      "layout": null,
-      "middleware": [],
-      "auth_required": true,
-      "params": [],
-      "module": "app-memberry"
-    },
-    "/my/id-card": {
-      "method": "*",
-      "page_component": "apps/memberry/src/routes/_authenticated/my/id-card.tsx",
-      "layout": null,
-      "middleware": [],
-      "auth_required": true,
-      "params": [],
-      "module": "app-memberry"
-    },
-    "/my/notifications": {
-      "method": "*",
-      "page_component": "apps/memberry/src/routes/_authenticated/my/notifications.tsx",
-      "layout": null,
-      "middleware": [],
-      "auth_required": true,
-      "params": [],
-      "module": "app-memberry"
-    },
-    "/my/organizations": {
-      "method": "*",
-      "page_component": "apps/memberry/src/routes/_authenticated/my/organizations.tsx",
-      "layout": null,
-      "middleware": [],
-      "auth_required": true,
-      "params": [],
-      "module": "app-memberry"
-    },
-    "/my/payments": {
-      "method": "*",
-      "page_component": "apps/memberry/src/routes/_authenticated/my/payments.tsx",
-      "layout": null,
-      "middleware": [],
-      "auth_required": true,
-      "params": [],
-      "module": "app-memberry"
-    },
-    "/my/profile": {
-      "method": "*",
-      "page_component": "apps/memberry/src/routes/_authenticated/my/profile.tsx",
-      "layout": null,
-      "middleware": [],
-      "auth_required": true,
-      "params": [],
-      "module": "app-memberry"
-    },
-    "/my/schedule": {
-      "method": "*",
-      "page_component": "apps/memberry/src/routes/_authenticated/my/schedule.tsx",
-      "layout": null,
-      "middleware": [],
-      "auth_required": true,
-      "params": [],
-      "module": "app-memberry"
-    },
-    "/my/settings": {
-      "method": "*",
-      "page_component": "apps/memberry/src/routes/_authenticated/my/settings.tsx",
-      "layout": null,
-      "middleware": [],
-      "auth_required": true,
-      "params": [],
-      "module": "app-memberry"
-    },
-    "/my/surveys/{surveyId}": {
-      "method": "*",
-      "page_component": "apps/memberry/src/routes/_authenticated/my/surveys/$surveyId.tsx",
-      "layout": null,
-      "middleware": [],
-      "auth_required": true,
-      "params": [
-        "surveyId"
-      ],
-      "module": "app-memberry"
-    },
-    "/my/surveys": {
-      "method": "*",
-      "page_component": "apps/memberry/src/routes/_authenticated/my/surveys/index.tsx",
-      "layout": null,
-      "middleware": [],
-      "auth_required": true,
-      "params": [],
-      "module": "app-memberry"
-    },
-    "/my/training": {
-      "method": "*",
-      "page_component": "apps/memberry/src/routes/_authenticated/my/training.tsx",
-      "layout": null,
-      "middleware": [],
-      "auth_required": true,
-      "params": [],
-      "module": "app-memberry"
-    },
-    "/org/{orgSlug}/announcements/{announcementId}": {
-      "method": "*",
-      "page_component": "apps/memberry/src/routes/_authenticated/org/$orgSlug/announcements/$announcementId.tsx",
-      "layout": null,
-      "middleware": [],
-      "auth_required": true,
-      "params": [
-        "orgSlug",
-        "announcementId"
-      ],
-      "module": "app-memberry"
-    },
-    "/org/{orgSlug}/announcements": {
-      "method": "*",
-      "page_component": "apps/memberry/src/routes/_authenticated/org/$orgSlug/announcements/index.tsx",
-      "layout": null,
-      "middleware": [],
-      "auth_required": true,
-      "params": [
-        "orgSlug"
-      ],
-      "module": "app-memberry"
-    },
-    "/org/{orgSlug}/directory/{personId}": {
-      "method": "*",
-      "page_component": "apps/memberry/src/routes/_authenticated/org/$orgSlug/directory/$personId.tsx",
-      "layout": null,
-      "middleware": [],
-      "auth_required": true,
-      "params": [
-        "orgSlug",
-        "personId"
-      ],
-      "module": "app-memberry"
-    },
-    "/org/{orgSlug}/directory": {
-      "method": "*",
-      "page_component": "apps/memberry/src/routes/_authenticated/org/$orgSlug/directory.tsx",
-      "layout": null,
-      "middleware": [],
-      "auth_required": true,
-      "params": [
-        "orgSlug"
-      ],
-      "module": "app-memberry"
-    },
-    "/org/{orgSlug}/documents/{documentId}": {
-      "method": "*",
-      "page_component": "apps/memberry/src/routes/_authenticated/org/$orgSlug/documents/$documentId.tsx",
-      "layout": null,
-      "middleware": [],
-      "auth_required": true,
-      "params": [
-        "orgSlug",
-        "documentId"
-      ],
-      "module": "app-memberry"
-    },
-    "/org/{orgSlug}/documents": {
-      "method": "*",
-      "page_component": "apps/memberry/src/routes/_authenticated/org/$orgSlug/documents/index.tsx",
-      "layout": null,
-      "middleware": [],
-      "auth_required": true,
-      "params": [
-        "orgSlug"
-      ],
-      "module": "app-memberry"
-    },
-    "/org/{orgSlug}/dues": {
-      "method": "*",
-      "page_component": "apps/memberry/src/routes/_authenticated/org/$orgSlug/dues.tsx",
-      "layout": null,
-      "middleware": [],
-      "auth_required": true,
-      "params": [
-        "orgSlug"
-      ],
-      "module": "app-memberry"
-    },
-    "/org/{orgSlug}/elections/{electionId}": {
-      "method": "*",
-      "page_component": "apps/memberry/src/routes/_authenticated/org/$orgSlug/elections/$electionId/index.tsx",
-      "layout": null,
-      "middleware": [],
-      "auth_required": true,
-      "params": [
-        "orgSlug",
-        "electionId"
-      ],
-      "module": "app-memberry"
-    },
-    "/org/{orgSlug}/elections/{electionId}/vote": {
-      "method": "*",
-      "page_component": "apps/memberry/src/routes/_authenticated/org/$orgSlug/elections/$electionId/vote.tsx",
-      "layout": null,
-      "middleware": [],
-      "auth_required": true,
-      "params": [
-        "orgSlug",
-        "electionId"
-      ],
-      "module": "app-memberry"
-    },
-    "/org/{orgSlug}/elections": {
-      "method": "*",
-      "page_component": "apps/memberry/src/routes/_authenticated/org/$orgSlug/elections/index.tsx",
-      "layout": null,
-      "middleware": [],
-      "auth_required": true,
-      "params": [
-        "orgSlug"
-      ],
-      "module": "app-memberry"
-    },
-    "/org/{orgSlug}/events/{eventId}": {
-      "method": "*",
-      "page_component": "apps/memberry/src/routes/_authenticated/org/$orgSlug/events/$eventId.tsx",
-      "layout": null,
-      "middleware": [],
-      "auth_required": true,
-      "params": [
-        "orgSlug",
-        "eventId"
-      ],
-      "module": "app-memberry"
-    },
-    "/org/{orgSlug}/events": {
-      "method": "*",
-      "page_component": "apps/memberry/src/routes/_authenticated/org/$orgSlug/events/index.tsx",
-      "layout": null,
-      "middleware": [],
-      "auth_required": true,
-      "params": [
-        "orgSlug"
-      ],
-      "module": "app-memberry"
-    },
-    "/org/{orgSlug}/governance": {
-      "method": "*",
-      "page_component": "apps/memberry/src/routes/_authenticated/org/$orgSlug/governance/index.tsx",
-      "layout": null,
-      "middleware": [],
-      "auth_required": true,
-      "params": [
-        "orgSlug"
-      ],
-      "module": "app-memberry"
-    },
-    "/org/{orgSlug}/home": {
-      "method": "*",
-      "page_component": "apps/memberry/src/routes/_authenticated/org/$orgSlug/home.tsx",
-      "layout": null,
-      "middleware": [],
-      "auth_required": true,
-      "params": [
-        "orgSlug"
-      ],
-      "module": "app-memberry"
-    },
-    "/org/{orgSlug}/members": {
-      "method": "*",
-      "page_component": "apps/memberry/src/routes/_authenticated/org/$orgSlug/members.tsx",
-      "layout": null,
-      "middleware": [],
-      "auth_required": true,
-      "params": [
-        "orgSlug"
-      ],
-      "module": "app-memberry"
-    },
-    "/org/{orgSlug}/messages/dm": {
-      "method": "*",
-      "page_component": "apps/memberry/src/routes/_authenticated/org/$orgSlug/messages/dm/index.tsx",
-      "layout": null,
-      "middleware": [],
-      "auth_required": true,
-      "params": [
-        "orgSlug"
-      ],
-      "module": "app-memberry"
-    },
-    "/org/{orgSlug}/messages": {
-      "method": "*",
-      "page_component": "apps/memberry/src/routes/_authenticated/org/$orgSlug/messages/index.tsx",
-      "layout": null,
-      "middleware": [],
-      "auth_required": true,
-      "params": [
-        "orgSlug"
-      ],
-      "module": "app-memberry"
-    },
-    "/org/{orgSlug}/my-cpd": {
-      "method": "*",
-      "page_component": "apps/memberry/src/routes/_authenticated/org/$orgSlug/my-cpd.tsx",
-      "layout": null,
-      "middleware": [],
-      "auth_required": true,
-      "params": [
-        "orgSlug"
-      ],
-      "module": "app-memberry"
-    },
-    "/org/{orgSlug}/my-notifications": {
-      "method": "*",
-      "page_component": "apps/memberry/src/routes/_authenticated/org/$orgSlug/my-notifications.tsx",
-      "layout": null,
-      "middleware": [],
-      "auth_required": true,
-      "params": [
-        "orgSlug"
-      ],
-      "module": "app-memberry"
-    },
-    "/org/{orgSlug}/officer/applications": {
-      "method": "*",
-      "page_component": "apps/memberry/src/routes/_authenticated/org/$orgSlug/officer/applications.tsx",
-      "layout": null,
-      "middleware": [],
-      "auth_required": true,
-      "params": [
-        "orgSlug"
-      ],
-      "module": "app-memberry"
-    },
-    "/org/{orgSlug}/officer/certificates": {
-      "method": "*",
-      "page_component": "apps/memberry/src/routes/_authenticated/org/$orgSlug/officer/certificates.tsx",
-      "layout": null,
-      "middleware": [],
-      "auth_required": true,
-      "params": [
-        "orgSlug"
-      ],
-      "module": "app-memberry"
-    },
-    "/org/{orgSlug}/officer/communications/{announcementId}": {
-      "method": "*",
-      "page_component": "apps/memberry/src/routes/_authenticated/org/$orgSlug/officer/communications/$announcementId.tsx",
-      "layout": null,
-      "middleware": [],
-      "auth_required": true,
-      "params": [
-        "orgSlug",
-        "announcementId"
-      ],
-      "module": "app-memberry"
-    },
-    "/org/{orgSlug}/officer/communications/analytics": {
-      "method": "*",
-      "page_component": "apps/memberry/src/routes/_authenticated/org/$orgSlug/officer/communications/analytics.tsx",
-      "layout": null,
-      "middleware": [],
-      "auth_required": true,
-      "params": [
-        "orgSlug"
-      ],
-      "module": "app-memberry"
-    },
-    "/org/{orgSlug}/officer/communications": {
-      "method": "*",
-      "page_component": "apps/memberry/src/routes/_authenticated/org/$orgSlug/officer/communications.tsx",
-      "layout": null,
-      "middleware": [],
-      "auth_required": true,
-      "params": [
-        "orgSlug"
-      ],
-      "module": "app-memberry"
-    },
-    "/org/{orgSlug}/officer/communications/new": {
-      "method": "*",
-      "page_component": "apps/memberry/src/routes/_authenticated/org/$orgSlug/officer/communications/new.tsx",
-      "layout": null,
-      "middleware": [],
-      "auth_required": true,
-      "params": [
-        "orgSlug"
-      ],
-      "module": "app-memberry"
-    },
-    "/org/{orgSlug}/officer/communications/sent": {
-      "method": "*",
-      "page_component": "apps/memberry/src/routes/_authenticated/org/$orgSlug/officer/communications/sent.tsx",
-      "layout": null,
-      "middleware": [],
-      "auth_required": true,
-      "params": [
-        "orgSlug"
-      ],
-      "module": "app-memberry"
-    },
-    "/org/{orgSlug}/officer/communications/templates": {
-      "method": "*",
-      "page_component": "apps/memberry/src/routes/_authenticated/org/$orgSlug/officer/communications/templates/index.tsx",
-      "layout": null,
-      "middleware": [],
-      "auth_required": true,
-      "params": [
-        "orgSlug"
-      ],
-      "module": "app-memberry"
-    },
-    "/org/{orgSlug}/officer/communications/templates/new": {
-      "method": "*",
-      "page_component": "apps/memberry/src/routes/_authenticated/org/$orgSlug/officer/communications/templates/new.tsx",
-      "layout": null,
-      "middleware": [],
-      "auth_required": true,
-      "params": [
-        "orgSlug"
-      ],
-      "module": "app-memberry"
-    },
-    "/org/{orgSlug}/officer/compliance": {
-      "method": "*",
-      "page_component": "apps/memberry/src/routes/_authenticated/org/$orgSlug/officer/compliance.tsx",
-      "layout": null,
-      "middleware": [],
-      "auth_required": true,
-      "params": [
-        "orgSlug"
-      ],
-      "module": "app-memberry"
-    },
-    "/org/{orgSlug}/officer/dashboard": {
-      "method": "*",
-      "page_component": "apps/memberry/src/routes/_authenticated/org/$orgSlug/officer/dashboard.tsx",
-      "layout": null,
-      "middleware": [],
-      "auth_required": true,
-      "params": [
-        "orgSlug"
-      ],
-      "module": "app-memberry"
-    },
-    "/org/{orgSlug}/officer/documents/{documentId}": {
-      "method": "*",
-      "page_component": "apps/memberry/src/routes/_authenticated/org/$orgSlug/officer/documents/$documentId.tsx",
-      "layout": null,
-      "middleware": [],
-      "auth_required": true,
-      "params": [
-        "orgSlug",
-        "documentId"
-      ],
-      "module": "app-memberry"
-    },
-    "/org/{orgSlug}/officer/documents": {
-      "method": "*",
-      "page_component": "apps/memberry/src/routes/_authenticated/org/$orgSlug/officer/documents/index.tsx",
-      "layout": null,
-      "middleware": [],
-      "auth_required": true,
-      "params": [
-        "orgSlug"
-      ],
-      "module": "app-memberry"
-    },
-    "/org/{orgSlug}/officer/dues/assessments": {
-      "method": "*",
-      "page_component": "apps/memberry/src/routes/_authenticated/org/$orgSlug/officer/dues/assessments.tsx",
-      "layout": null,
-      "middleware": [],
-      "auth_required": true,
-      "params": [
-        "orgSlug"
-      ],
-      "module": "app-memberry"
-    },
-    "/org/{orgSlug}/officer/dues/member.{memberId}": {
-      "method": "*",
-      "page_component": "apps/memberry/src/routes/_authenticated/org/$orgSlug/officer/dues/member.$memberId.tsx",
-      "layout": null,
-      "middleware": [],
-      "auth_required": true,
-      "params": [
-        "orgSlug",
-        "memberId"
-      ],
-      "module": "app-memberry"
-    },
-    "/org/{orgSlug}/officer/dues/treasurer": {
-      "method": "*",
-      "page_component": "apps/memberry/src/routes/_authenticated/org/$orgSlug/officer/dues/treasurer.tsx",
-      "layout": null,
-      "middleware": [],
-      "auth_required": true,
-      "params": [
-        "orgSlug"
-      ],
-      "module": "app-memberry"
-    },
-    "/org/{orgSlug}/officer/elections/{electionId}/edit": {
-      "method": "*",
-      "page_component": "apps/memberry/src/routes/_authenticated/org/$orgSlug/officer/elections/$electionId/edit.tsx",
-      "layout": null,
-      "middleware": [],
-      "auth_required": true,
-      "params": [
-        "orgSlug",
-        "electionId"
-      ],
-      "module": "app-memberry"
-    },
-    "/org/{orgSlug}/officer/elections/{electionId}": {
-      "method": "*",
-      "page_component": "apps/memberry/src/routes/_authenticated/org/$orgSlug/officer/elections/$electionId.tsx",
-      "layout": null,
-      "middleware": [],
-      "auth_required": true,
-      "params": [
-        "orgSlug",
-        "electionId"
-      ],
-      "module": "app-memberry"
-    },
-    "/org/{orgSlug}/officer/elections": {
-      "method": "*",
-      "page_component": "apps/memberry/src/routes/_authenticated/org/$orgSlug/officer/elections/index.tsx",
-      "layout": null,
-      "middleware": [],
-      "auth_required": true,
-      "params": [
-        "orgSlug"
-      ],
-      "module": "app-memberry"
-    },
-    "/org/{orgSlug}/officer/elections/new": {
-      "method": "*",
-      "page_component": "apps/memberry/src/routes/_authenticated/org/$orgSlug/officer/elections/new.tsx",
-      "layout": null,
-      "middleware": [],
-      "auth_required": true,
-      "params": [
-        "orgSlug"
-      ],
-      "module": "app-memberry"
-    },
-    "/org/{orgSlug}/officer/events/{eventId}/attendance": {
-      "method": "*",
-      "page_component": "apps/memberry/src/routes/_authenticated/org/$orgSlug/officer/events/$eventId/attendance.tsx",
-      "layout": null,
-      "middleware": [],
-      "auth_required": true,
-      "params": [
-        "orgSlug",
-        "eventId"
-      ],
-      "module": "app-memberry"
-    },
-    "/org/{orgSlug}/officer/events/{eventId}": {
-      "method": "*",
-      "page_component": "apps/memberry/src/routes/_authenticated/org/$orgSlug/officer/events/$eventId.tsx",
-      "layout": null,
-      "middleware": [],
-      "auth_required": true,
-      "params": [
-        "orgSlug",
-        "eventId"
-      ],
-      "module": "app-memberry"
-    },
-    "/org/{orgSlug}/officer/events": {
-      "method": "*",
-      "page_component": "apps/memberry/src/routes/_authenticated/org/$orgSlug/officer/events/index.tsx",
-      "layout": null,
-      "middleware": [],
-      "auth_required": true,
-      "params": [
-        "orgSlug"
-      ],
-      "module": "app-memberry"
-    },
-    "/org/{orgSlug}/officer/events/new": {
-      "method": "*",
-      "page_component": "apps/memberry/src/routes/_authenticated/org/$orgSlug/officer/events/new.tsx",
-      "layout": null,
-      "middleware": [],
-      "auth_required": true,
-      "params": [
-        "orgSlug"
-      ],
-      "module": "app-memberry"
-    },
-    "/org/{orgSlug}/officer/finances/assessments": {
-      "method": "*",
-      "page_component": "apps/memberry/src/routes/_authenticated/org/$orgSlug/officer/finances/assessments.tsx",
-      "layout": null,
-      "middleware": [],
-      "auth_required": true,
-      "params": [
-        "orgSlug"
-      ],
-      "module": "app-memberry"
-    },
-    "/org/{orgSlug}/officer/finances/dues": {
-      "method": "*",
-      "page_component": "apps/memberry/src/routes/_authenticated/org/$orgSlug/officer/finances/dues.tsx",
-      "layout": null,
-      "middleware": [],
-      "auth_required": true,
-      "params": [
-        "orgSlug"
-      ],
-      "module": "app-memberry"
-    },
-    "/org/{orgSlug}/officer/finances/funds": {
-      "method": "*",
-      "page_component": "apps/memberry/src/routes/_authenticated/org/$orgSlug/officer/finances/funds.tsx",
-      "layout": null,
-      "middleware": [],
-      "auth_required": true,
-      "params": [
-        "orgSlug"
-      ],
-      "module": "app-memberry"
-    },
-    "/org/{orgSlug}/officer/finances": {
-      "method": "*",
-      "page_component": "apps/memberry/src/routes/_authenticated/org/$orgSlug/officer/finances/index.tsx",
-      "layout": null,
-      "middleware": [],
-      "auth_required": true,
-      "params": [
-        "orgSlug"
-      ],
-      "module": "app-memberry"
-    },
-    "/org/{orgSlug}/officer/finances/invoices/{invoiceId}": {
-      "method": "*",
-      "page_component": "apps/memberry/src/routes/_authenticated/org/$orgSlug/officer/finances/invoices/$invoiceId.tsx",
-      "layout": null,
-      "middleware": [],
-      "auth_required": true,
-      "params": [
-        "orgSlug",
-        "invoiceId"
-      ],
-      "module": "app-memberry"
-    },
-    "/org/{orgSlug}/officer/finances/invoices": {
-      "method": "*",
-      "page_component": "apps/memberry/src/routes/_authenticated/org/$orgSlug/officer/finances/invoices.tsx",
-      "layout": null,
-      "middleware": [],
-      "auth_required": true,
-      "params": [
-        "orgSlug"
-      ],
-      "module": "app-memberry"
-    },
-    "/org/{orgSlug}/officer/finances/members/{memberId}": {
-      "method": "*",
-      "page_component": "apps/memberry/src/routes/_authenticated/org/$orgSlug/officer/finances/members/$memberId.tsx",
-      "layout": null,
-      "middleware": [],
-      "auth_required": true,
-      "params": [
-        "orgSlug",
-        "memberId"
-      ],
-      "module": "app-memberry"
-    },
-    "/org/{orgSlug}/officer/finances/members": {
-      "method": "*",
-      "page_component": "apps/memberry/src/routes/_authenticated/org/$orgSlug/officer/finances/members.tsx",
-      "layout": null,
-      "middleware": [],
-      "auth_required": true,
-      "params": [
-        "orgSlug"
-      ],
-      "module": "app-memberry"
-    },
-    "/org/{orgSlug}/officer/institutional-memberships/{institutionalMembershipId}": {
-      "method": "*",
-      "page_component": "apps/memberry/src/routes/_authenticated/org/$orgSlug/officer/institutional-memberships/$institutionalMembershipId.tsx",
-      "layout": null,
-      "middleware": [],
-      "auth_required": true,
-      "params": [
-        "orgSlug",
-        "institutionalMembershipId"
-      ],
-      "module": "app-memberry"
-    },
-    "/org/{orgSlug}/officer/institutional-memberships": {
-      "method": "*",
-      "page_component": "apps/memberry/src/routes/_authenticated/org/$orgSlug/officer/institutional-memberships/index.tsx",
-      "layout": null,
-      "middleware": [],
-      "auth_required": true,
-      "params": [
-        "orgSlug"
-      ],
-      "module": "app-memberry"
-    },
-    "/org/{orgSlug}/officer/institutional-memberships/new": {
-      "method": "*",
-      "page_component": "apps/memberry/src/routes/_authenticated/org/$orgSlug/officer/institutional-memberships/new.tsx",
-      "layout": null,
-      "middleware": [],
-      "auth_required": true,
-      "params": [
-        "orgSlug"
-      ],
-      "module": "app-memberry"
-    },
-    "/org/{orgSlug}/officer/messages": {
-      "method": "*",
-      "page_component": "apps/memberry/src/routes/_authenticated/org/$orgSlug/officer/messages/index.tsx",
-      "layout": null,
-      "middleware": [],
-      "auth_required": true,
-      "params": [
-        "orgSlug"
-      ],
-      "module": "app-memberry"
-    },
-    "/org/{orgSlug}/officer/officers": {
-      "method": "*",
-      "page_component": "apps/memberry/src/routes/_authenticated/org/$orgSlug/officer/officers.tsx",
-      "layout": null,
-      "middleware": [],
-      "auth_required": true,
-      "params": [
-        "orgSlug"
-      ],
-      "module": "app-memberry"
-    },
-    "/org/{orgSlug}/officer/payments/{paymentId}": {
-      "method": "*",
-      "page_component": "apps/memberry/src/routes/_authenticated/org/$orgSlug/officer/payments/$paymentId.tsx",
-      "layout": null,
-      "middleware": [],
-      "auth_required": true,
-      "params": [
-        "orgSlug",
-        "paymentId"
-      ],
-      "module": "app-memberry"
-    },
-    "/org/{orgSlug}/officer/payments": {
-      "method": "*",
-      "page_component": "apps/memberry/src/routes/_authenticated/org/$orgSlug/officer/payments.tsx",
-      "layout": null,
-      "middleware": [],
-      "auth_required": true,
-      "params": [
-        "orgSlug"
-      ],
-      "module": "app-memberry"
-    },
-    "/org/{orgSlug}/officer/payments/new": {
-      "method": "*",
-      "page_component": "apps/memberry/src/routes/_authenticated/org/$orgSlug/officer/payments/new.tsx",
-      "layout": null,
-      "middleware": [],
-      "auth_required": true,
-      "params": [
-        "orgSlug"
-      ],
-      "module": "app-memberry"
-    },
-    "/org/{orgSlug}/officer/reports/credits": {
-      "method": "*",
-      "page_component": "apps/memberry/src/routes/_authenticated/org/$orgSlug/officer/reports/credits.tsx",
-      "layout": null,
-      "middleware": [],
-      "auth_required": true,
-      "params": [
-        "orgSlug"
-      ],
-      "module": "app-memberry"
-    },
-    "/org/{orgSlug}/officer/reports/financial": {
-      "method": "*",
-      "page_component": "apps/memberry/src/routes/_authenticated/org/$orgSlug/officer/reports/financial.tsx",
-      "layout": null,
-      "middleware": [],
-      "auth_required": true,
-      "params": [
-        "orgSlug"
-      ],
-      "module": "app-memberry"
-    },
-    "/org/{orgSlug}/officer/reviews": {
-      "method": "*",
-      "page_component": "apps/memberry/src/routes/_authenticated/org/$orgSlug/officer/reviews/index.tsx",
-      "layout": null,
-      "middleware": [],
-      "auth_required": true,
-      "params": [
-        "orgSlug"
-      ],
-      "module": "app-memberry"
-    },
-    "/org/{orgSlug}/officer/roster/{memberId}": {
-      "method": "*",
-      "page_component": "apps/memberry/src/routes/_authenticated/org/$orgSlug/officer/roster/$memberId.tsx",
-      "layout": null,
-      "middleware": [],
-      "auth_required": true,
-      "params": [
-        "orgSlug",
-        "memberId"
-      ],
-      "module": "app-memberry"
-    },
-    "/org/{orgSlug}/officer/roster/import": {
-      "method": "*",
-      "page_component": "apps/memberry/src/routes/_authenticated/org/$orgSlug/officer/roster/import.tsx",
-      "layout": null,
-      "middleware": [],
-      "auth_required": true,
-      "params": [
-        "orgSlug"
-      ],
-      "module": "app-memberry"
-    },
-    "/org/{orgSlug}/officer/roster": {
-      "method": "*",
-      "page_component": "apps/memberry/src/routes/_authenticated/org/$orgSlug/officer/roster.tsx",
-      "layout": null,
-      "middleware": [],
-      "auth_required": true,
-      "params": [
-        "orgSlug"
-      ],
-      "module": "app-memberry"
-    },
-    "/org/{orgSlug}/officer/settings/chapters": {
-      "method": "*",
-      "page_component": "apps/memberry/src/routes/_authenticated/org/$orgSlug/officer/settings/chapters.tsx",
-      "layout": null,
-      "middleware": [],
-      "auth_required": true,
-      "params": [
-        "orgSlug"
-      ],
-      "module": "app-memberry"
-    },
-    "/org/{orgSlug}/officer/settings/cpd": {
-      "method": "*",
-      "page_component": "apps/memberry/src/routes/_authenticated/org/$orgSlug/officer/settings/cpd.tsx",
-      "layout": null,
-      "middleware": [],
-      "auth_required": true,
-      "params": [
-        "orgSlug"
-      ],
-      "module": "app-memberry"
-    },
-    "/org/{orgSlug}/officer/settings/dues": {
-      "method": "*",
-      "page_component": "apps/memberry/src/routes/_authenticated/org/$orgSlug/officer/settings/dues.tsx",
-      "layout": null,
-      "middleware": [],
-      "auth_required": true,
-      "params": [
-        "orgSlug"
-      ],
-      "module": "app-memberry"
-    },
-    "/org/{orgSlug}/officer/settings/funds": {
-      "method": "*",
-      "page_component": "apps/memberry/src/routes/_authenticated/org/$orgSlug/officer/settings/funds.tsx",
-      "layout": null,
-      "middleware": [],
-      "auth_required": true,
-      "params": [
-        "orgSlug"
-      ],
-      "module": "app-memberry"
-    },
-    "/org/{orgSlug}/officer/settings/gateway": {
-      "method": "*",
-      "page_component": "apps/memberry/src/routes/_authenticated/org/$orgSlug/officer/settings/gateway.tsx",
-      "layout": null,
-      "middleware": [],
-      "auth_required": true,
-      "params": [
-        "orgSlug"
-      ],
-      "module": "app-memberry"
-    },
-    "/org/{orgSlug}/officer/settings/membership-categories": {
-      "method": "*",
-      "page_component": "apps/memberry/src/routes/_authenticated/org/$orgSlug/officer/settings/membership-categories.tsx",
-      "layout": null,
-      "middleware": [],
-      "auth_required": true,
-      "params": [
-        "orgSlug"
-      ],
-      "module": "app-memberry"
-    },
-    "/org/{orgSlug}/officer/settings/org": {
-      "method": "*",
-      "page_component": "apps/memberry/src/routes/_authenticated/org/$orgSlug/officer/settings/org.tsx",
-      "layout": null,
-      "middleware": [],
-      "auth_required": true,
-      "params": [
-        "orgSlug"
-      ],
-      "module": "app-memberry"
-    },
-    "/org/{orgSlug}/officer/settings/providers": {
-      "method": "*",
-      "page_component": "apps/memberry/src/routes/_authenticated/org/$orgSlug/officer/settings/providers.tsx",
-      "layout": null,
-      "middleware": [],
-      "auth_required": true,
-      "params": [
-        "orgSlug"
-      ],
-      "module": "app-memberry"
-    },
-    "/org/{orgSlug}/officer/surveys/{surveyId}": {
-      "method": "*",
-      "page_component": "apps/memberry/src/routes/_authenticated/org/$orgSlug/officer/surveys/$surveyId.tsx",
-      "layout": null,
-      "middleware": [],
-      "auth_required": true,
-      "params": [
-        "orgSlug",
-        "surveyId"
-      ],
-      "module": "app-memberry"
-    },
-    "/org/{orgSlug}/officer/surveys": {
-      "method": "*",
-      "page_component": "apps/memberry/src/routes/_authenticated/org/$orgSlug/officer/surveys/index.tsx",
-      "layout": null,
-      "middleware": [],
-      "auth_required": true,
-      "params": [
-        "orgSlug"
-      ],
-      "module": "app-memberry"
-    },
-    "/org/{orgSlug}/officer/surveys/new": {
-      "method": "*",
-      "page_component": "apps/memberry/src/routes/_authenticated/org/$orgSlug/officer/surveys/new.tsx",
-      "layout": null,
-      "middleware": [],
-      "auth_required": true,
-      "params": [
-        "orgSlug"
-      ],
-      "module": "app-memberry"
-    },
-    "/org/{orgSlug}/officer/training/{trainingId}/attendance": {
-      "method": "*",
-      "page_component": "apps/memberry/src/routes/_authenticated/org/$orgSlug/officer/training/$trainingId/attendance.tsx",
-      "layout": null,
-      "middleware": [],
-      "auth_required": true,
-      "params": [
-        "orgSlug",
-        "trainingId"
-      ],
-      "module": "app-memberry"
-    },
-    "/org/{orgSlug}/officer/training/{trainingId}": {
-      "method": "*",
-      "page_component": "apps/memberry/src/routes/_authenticated/org/$orgSlug/officer/training/$trainingId.tsx",
-      "layout": null,
-      "middleware": [],
-      "auth_required": true,
-      "params": [
-        "orgSlug",
-        "trainingId"
-      ],
-      "module": "app-memberry"
-    },
-    "/org/{orgSlug}/officer/training": {
-      "method": "*",
-      "page_component": "apps/memberry/src/routes/_authenticated/org/$orgSlug/officer/training/index.tsx",
-      "layout": null,
-      "middleware": [],
-      "auth_required": true,
-      "params": [
-        "orgSlug"
-      ],
-      "module": "app-memberry"
-    },
-    "/org/{orgSlug}/officer/training/new": {
-      "method": "*",
-      "page_component": "apps/memberry/src/routes/_authenticated/org/$orgSlug/officer/training/new.tsx",
-      "layout": null,
-      "middleware": [],
-      "auth_required": true,
-      "params": [
-        "orgSlug"
-      ],
-      "module": "app-memberry"
-    },
-    "/org/{orgSlug}/officer": {
-      "method": "*",
-      "page_component": "apps/memberry/src/routes/_authenticated/org/$orgSlug/officer.tsx",
-      "layout": null,
-      "middleware": [],
-      "auth_required": true,
-      "params": [
-        "orgSlug"
-      ],
-      "module": "app-memberry"
-    },
-    "/org/{orgSlug}/route": {
-      "method": "*",
-      "page_component": "apps/memberry/src/routes/_authenticated/org/$orgSlug/route.tsx",
-      "layout": null,
-      "middleware": [],
-      "auth_required": true,
-      "params": [
-        "orgSlug"
-      ],
-      "module": "app-memberry"
-    },
-    "/org/{orgSlug}/training/{trainingId}": {
-      "method": "*",
-      "page_component": "apps/memberry/src/routes/_authenticated/org/$orgSlug/training/$trainingId.tsx",
-      "layout": null,
-      "middleware": [],
-      "auth_required": true,
-      "params": [
-        "orgSlug",
-        "trainingId"
-      ],
-      "module": "app-memberry"
-    },
-    "/org/{orgSlug}/training": {
-      "method": "*",
-      "page_component": "apps/memberry/src/routes/_authenticated/org/$orgSlug/training/index.tsx",
-      "layout": null,
-      "middleware": [],
-      "auth_required": true,
-      "params": [
-        "orgSlug"
-      ],
-      "module": "app-memberry"
-    },
-    "/settings/account": {
-      "method": "*",
-      "page_component": "apps/memberry/src/routes/_authenticated/settings/account.tsx",
-      "layout": null,
-      "middleware": [],
-      "auth_required": true,
-      "params": [],
-      "module": "app-memberry"
-    },
-    "/settings/security": {
-      "method": "*",
-      "page_component": "apps/memberry/src/routes/_authenticated/settings/security.tsx",
-      "layout": null,
-      "middleware": [],
-      "auth_required": true,
-      "params": [],
-      "module": "app-memberry"
-    },
     "/": {
       "method": "*",
-      "page_component": "apps/admin/src/routes/index.tsx",
+      "page_component": null,
       "layout": null,
       "middleware": [],
       "auth_required": null,
       "params": [],
-      "module": "app-admin"
+      "module": "apps/memberry"
     },
-    "/auth/{authView}": {
+    "/_authenticated": {
       "method": "*",
-      "page_component": "apps/memberry/src/routes/auth/$authView.tsx",
+      "page_component": "AuthenticatedLayout",
       "layout": null,
-      "middleware": [],
-      "auth_required": null,
-      "params": [
-        "authView"
+      "middleware": [
+        "requireAuth"
       ],
-      "module": "app-memberry"
-    },
-    "/discover/events": {
-      "method": "*",
-      "page_component": "apps/memberry/src/routes/discover/events.tsx",
-      "layout": null,
-      "middleware": [],
-      "auth_required": null,
+      "auth_required": true,
       "params": [],
-      "module": "app-memberry"
-    },
-    "/events/{eventSlug}": {
-      "method": "*",
-      "page_component": "apps/memberry/src/routes/events/$eventSlug.tsx",
-      "layout": null,
-      "middleware": [],
-      "auth_required": null,
-      "params": [
-        "eventSlug"
-      ],
-      "module": "app-memberry"
-    },
-    "/invite/{token}": {
-      "method": "*",
-      "page_component": "apps/memberry/src/routes/invite/$token.tsx",
-      "layout": null,
-      "middleware": [],
-      "auth_required": null,
-      "params": [
-        "token"
-      ],
-      "module": "app-memberry"
+      "module": "apps/memberry"
     },
     "/join": {
       "method": "*",
-      "page_component": "apps/memberry/src/routes/join.tsx",
+      "page_component": "JoinPage",
       "layout": null,
       "middleware": [],
       "auth_required": null,
       "params": [],
-      "module": "app-memberry"
+      "module": "apps/memberry"
     },
     "/onboarding": {
       "method": "*",
-      "page_component": "apps/memberry/src/routes/onboarding.tsx",
+      "page_component": "OnboardingPage",
       "layout": null,
-      "middleware": [],
+      "middleware": [
+        "requireAuth",
+        "requireEmailVerified",
+        "requireNoPerson"
+      ],
       "auth_required": true,
       "params": [],
-      "module": "app-memberry"
-    },
-    "/org/{slug}": {
-      "method": "*",
-      "page_component": "apps/memberry/src/routes/org/$slug.tsx",
-      "layout": null,
-      "middleware": [],
-      "auth_required": null,
-      "params": [
-        "slug"
-      ],
-      "module": "app-memberry"
-    },
-    "/pay/{token}": {
-      "method": "*",
-      "page_component": "apps/memberry/src/routes/pay/$token.tsx",
-      "layout": null,
-      "middleware": [],
-      "auth_required": null,
-      "params": [
-        "token"
-      ],
-      "module": "app-memberry"
-    },
-    "/verify/{certificateNumber}": {
-      "method": "*",
-      "page_component": "apps/memberry/src/routes/verify/$certificateNumber.tsx",
-      "layout": null,
-      "middleware": [],
-      "auth_required": null,
-      "params": [
-        "certificateNumber"
-      ],
-      "module": "app-memberry"
-    },
-    "/verify/{credentialNumber}": {
-      "method": "*",
-      "page_component": "apps/memberry/src/routes/verify/$credentialNumber.tsx",
-      "layout": null,
-      "middleware": [],
-      "auth_required": null,
-      "params": [
-        "credentialNumber"
-      ],
-      "module": "app-memberry"
-    },
-    "/verify/{token}": {
-      "method": "*",
-      "page_component": "apps/memberry/src/routes/verify/$token.tsx",
-      "layout": null,
-      "middleware": [],
-      "auth_required": null,
-      "params": [
-        "token"
-      ],
-      "module": "app-memberry"
+      "module": "apps/memberry"
     },
     "/verify-email": {
       "method": "*",
-      "page_component": "apps/memberry/src/routes/verify-email.tsx",
+      "page_component": "VerifyEmailPage",
       "layout": null,
-      "middleware": [],
+      "middleware": [
+        "requireAuth",
+        "requireNotEmailVerified"
+      ],
       "auth_required": true,
       "params": [],
-      "module": "app-memberry"
+      "module": "apps/memberry"
     },
-    "/associations/{associationId}": {
+    "/associations/$associationId": {
       "method": "*",
-      "page_component": "apps/admin/src/routes/associations/$associationId.tsx",
+      "page_component": "AssociationDetailPage",
       "layout": null,
       "middleware": [],
       "auth_required": null,
       "params": [
         "associationId"
       ],
-      "module": "app-admin"
+      "module": "apps/admin"
     },
-    "/associations": {
+    "/associations/": {
       "method": "*",
-      "page_component": "apps/admin/src/routes/associations/index.tsx",
+      "page_component": "AssociationsPage",
       "layout": null,
       "middleware": [],
       "auth_required": null,
       "params": [],
-      "module": "app-admin"
+      "module": "apps/admin"
     },
-    "/audit": {
+    "/audit/": {
       "method": "*",
-      "page_component": "apps/admin/src/routes/audit/index.tsx",
+      "page_component": null,
       "layout": null,
       "middleware": [],
       "auth_required": null,
       "params": [],
-      "module": "app-admin"
+      "module": "apps/admin"
     },
-    "/committees": {
+    "/committees/": {
       "method": "*",
-      "page_component": "apps/admin/src/routes/committees/index.tsx",
+      "page_component": null,
       "layout": null,
       "middleware": [],
       "auth_required": null,
       "params": [],
-      "module": "app-admin"
+      "module": "apps/admin"
     },
     "/communications/email": {
       "method": "*",
-      "page_component": "apps/admin/src/routes/communications/email.tsx",
+      "page_component": "EmailHealth",
       "layout": null,
       "middleware": [],
       "auth_required": null,
       "params": [],
-      "module": "app-admin"
+      "module": "apps/admin"
     },
-    "/communications": {
+    "/communications/": {
       "method": "*",
-      "page_component": "apps/admin/src/routes/communications/index.tsx",
+      "page_component": "CommunicationsBroadcasts",
       "layout": null,
       "middleware": [],
       "auth_required": null,
       "params": [],
-      "module": "app-admin"
+      "module": "apps/admin"
     },
     "/communications/moderation": {
       "method": "*",
-      "page_component": "apps/admin/src/routes/communications/moderation.tsx",
+      "page_component": "ModerationQueue",
       "layout": null,
       "middleware": [],
       "auth_required": null,
       "params": [],
-      "module": "app-admin"
+      "module": "apps/admin"
     },
     "/communications/templates": {
       "method": "*",
-      "page_component": "apps/admin/src/routes/communications/templates.tsx",
+      "page_component": "PlatformTemplates",
       "layout": null,
       "middleware": [],
       "auth_required": null,
       "params": [],
-      "module": "app-admin"
+      "module": "apps/admin"
     },
-    "/compliance": {
+    "/compliance/": {
       "method": "*",
-      "page_component": "apps/admin/src/routes/compliance/index.tsx",
+      "page_component": "CompliancePage",
       "layout": null,
       "middleware": [],
       "auth_required": null,
       "params": [],
-      "module": "app-admin"
+      "module": "apps/admin"
     },
-    "/events": {
+    "/events/": {
       "method": "*",
-      "page_component": "apps/admin/src/routes/events/index.tsx",
+      "page_component": null,
       "layout": null,
       "middleware": [],
       "auth_required": null,
       "params": [],
-      "module": "app-admin"
+      "module": "apps/admin"
     },
-    "/feature-flags": {
+    "/feature-flags/": {
       "method": "*",
-      "page_component": "apps/admin/src/routes/feature-flags/index.tsx",
+      "page_component": null,
       "layout": null,
       "middleware": [],
       "auth_required": null,
       "params": [],
-      "module": "app-admin"
+      "module": "apps/admin"
     },
-    "/impersonate": {
+    "/impersonate/": {
       "method": "*",
-      "page_component": "apps/admin/src/routes/impersonate/index.tsx",
+      "page_component": null,
       "layout": null,
       "middleware": [],
       "auth_required": null,
       "params": [],
-      "module": "app-admin"
+      "module": "apps/admin"
     },
-    "/members/{personId}": {
+    "/members/$personId": {
       "method": "*",
-      "page_component": "apps/admin/src/routes/members/$personId.tsx",
+      "page_component": "MemberDetailPage",
       "layout": null,
       "middleware": [],
       "auth_required": null,
       "params": [
         "personId"
       ],
-      "module": "app-admin"
+      "module": "apps/admin"
     },
-    "/members": {
+    "/members/": {
       "method": "*",
-      "page_component": "apps/admin/src/routes/members/index.tsx",
+      "page_component": "MembersPage",
       "layout": null,
       "middleware": [],
       "auth_required": null,
       "params": [],
-      "module": "app-admin"
+      "module": "apps/admin"
     },
-    "/national-dashboard": {
+    "/national-dashboard/": {
       "method": "*",
-      "page_component": "apps/admin/src/routes/national-dashboard/index.tsx",
+      "page_component": null,
       "layout": null,
       "middleware": [],
       "auth_required": null,
       "params": [],
-      "module": "app-admin"
+      "module": "apps/admin"
     },
-    "/operators": {
+    "/operators/": {
       "method": "*",
-      "page_component": "apps/admin/src/routes/operators/index.tsx",
+      "page_component": null,
       "layout": null,
       "middleware": [],
       "auth_required": null,
       "params": [],
-      "module": "app-admin"
+      "module": "apps/admin"
     },
-    "/organizations/{organizationId}": {
+    "/organizations/$organizationId": {
       "method": "*",
-      "page_component": "apps/admin/src/routes/organizations/$organizationId.tsx",
+      "page_component": "OrganizationDetailPage",
       "layout": null,
       "middleware": [],
       "auth_required": null,
       "params": [
         "organizationId"
       ],
-      "module": "app-admin"
+      "module": "apps/admin"
     },
-    "/organizations": {
+    "/organizations/": {
       "method": "*",
-      "page_component": "apps/admin/src/routes/organizations/index.tsx",
+      "page_component": "OrganizationsPage",
       "layout": null,
       "middleware": [],
       "auth_required": null,
       "params": [],
-      "module": "app-admin"
+      "module": "apps/admin"
     },
-    "/surveys": {
+    "/training/": {
       "method": "*",
-      "page_component": "apps/admin/src/routes/surveys/index.tsx",
+      "page_component": null,
       "layout": null,
       "middleware": [],
       "auth_required": null,
       "params": [],
-      "module": "app-admin"
+      "module": "apps/admin"
     },
-    "/training": {
+    "/verifications/": {
       "method": "*",
-      "page_component": "apps/admin/src/routes/training/index.tsx",
+      "page_component": "VerificationsPage",
       "layout": null,
       "middleware": [],
       "auth_required": null,
       "params": [],
-      "module": "app-admin"
+      "module": "apps/admin"
     },
-    "/verifications": {
+    "/_authenticated/dashboard": {
       "method": "*",
-      "page_component": "apps/admin/src/routes/verifications/index.tsx",
+      "page_component": "DashboardPage",
+      "layout": "AuthenticatedLayout",
+      "middleware": [],
+      "auth_required": true,
+      "params": [],
+      "module": "apps/memberry"
+    },
+    "/auth/$authView": {
+      "method": "*",
+      "page_component": "AuthPage",
+      "layout": null,
+      "middleware": [],
+      "auth_required": null,
+      "params": [
+        "authView"
+      ],
+      "module": "apps/memberry"
+    },
+    "/discover/events": {
+      "method": "*",
+      "page_component": "DiscoverEvents",
       "layout": null,
       "middleware": [],
       "auth_required": null,
       "params": [],
-      "module": "app-admin"
+      "module": "apps/memberry"
+    },
+    "/events/$eventSlug": {
+      "method": "*",
+      "page_component": "PublicEventPage",
+      "layout": null,
+      "middleware": [],
+      "auth_required": null,
+      "params": [
+        "eventSlug"
+      ],
+      "module": "apps/memberry"
+    },
+    "/invite/$token": {
+      "method": "*",
+      "page_component": "InvitePage",
+      "layout": null,
+      "middleware": [],
+      "auth_required": null,
+      "params": [
+        "token"
+      ],
+      "module": "apps/memberry"
+    },
+    "/org/$slug": {
+      "method": "*",
+      "page_component": "PublicOrgProfile",
+      "layout": null,
+      "middleware": [],
+      "auth_required": null,
+      "params": [
+        "slug"
+      ],
+      "module": "apps/memberry"
+    },
+    "/pay/$token": {
+      "method": "*",
+      "page_component": "PublicPaymentPage",
+      "layout": null,
+      "middleware": [],
+      "auth_required": null,
+      "params": [
+        "token"
+      ],
+      "module": "apps/memberry"
+    },
+    "/verify/$certificateNumber": {
+      "method": "*",
+      "page_component": "VerifyCertificatePage",
+      "layout": null,
+      "middleware": [],
+      "auth_required": null,
+      "params": [
+        "certificateNumber"
+      ],
+      "module": "apps/memberry"
+    },
+    "/verify/$credentialNumber": {
+      "method": "*",
+      "page_component": "VerifyCredentialPage",
+      "layout": null,
+      "middleware": [],
+      "auth_required": null,
+      "params": [
+        "credentialNumber"
+      ],
+      "module": "apps/memberry"
+    },
+    "/verify/$token": {
+      "method": "*",
+      "page_component": "PublicVerification",
+      "layout": null,
+      "middleware": [],
+      "auth_required": null,
+      "params": [
+        "token"
+      ],
+      "module": "apps/memberry"
+    },
+    "/_authenticated/my/billing": {
+      "method": "*",
+      "page_component": "BillingPage",
+      "layout": "AuthenticatedLayout",
+      "middleware": [],
+      "auth_required": true,
+      "params": [],
+      "module": "apps/memberry"
+    },
+    "/_authenticated/my/calendar": {
+      "method": "*",
+      "page_component": "MyCalendar",
+      "layout": "AuthenticatedLayout",
+      "middleware": [],
+      "auth_required": true,
+      "params": [],
+      "module": "apps/memberry"
+    },
+    "/_authenticated/my/data-export": {
+      "method": "*",
+      "page_component": "DataExportPage",
+      "layout": "AuthenticatedLayout",
+      "middleware": [],
+      "auth_required": true,
+      "params": [],
+      "module": "apps/memberry"
+    },
+    "/_authenticated/my/events": {
+      "method": "*",
+      "page_component": "MyEvents",
+      "layout": "AuthenticatedLayout",
+      "middleware": [],
+      "auth_required": true,
+      "params": [],
+      "module": "apps/memberry"
+    },
+    "/_authenticated/my/id-card": {
+      "method": "*",
+      "page_component": "MyIdCard",
+      "layout": "AuthenticatedLayout",
+      "middleware": [],
+      "auth_required": true,
+      "params": [],
+      "module": "apps/memberry"
+    },
+    "/_authenticated/my/notifications": {
+      "method": "*",
+      "page_component": "NotificationsPage",
+      "layout": "AuthenticatedLayout",
+      "middleware": [],
+      "auth_required": true,
+      "params": [],
+      "module": "apps/memberry"
+    },
+    "/_authenticated/my/organizations": {
+      "method": "*",
+      "page_component": "MyOrganizationsPage",
+      "layout": "AuthenticatedLayout",
+      "middleware": [],
+      "auth_required": true,
+      "params": [],
+      "module": "apps/memberry"
+    },
+    "/_authenticated/my/payments": {
+      "method": "*",
+      "page_component": "MyPaymentsPage",
+      "layout": "AuthenticatedLayout",
+      "middleware": [],
+      "auth_required": true,
+      "params": [],
+      "module": "apps/memberry"
+    },
+    "/_authenticated/my/profile": {
+      "method": "*",
+      "page_component": "MyProfilePage",
+      "layout": "AuthenticatedLayout",
+      "middleware": [],
+      "auth_required": true,
+      "params": [],
+      "module": "apps/memberry"
+    },
+    "/_authenticated/my/schedule": {
+      "method": "*",
+      "page_component": "SchedulePage",
+      "layout": "AuthenticatedLayout",
+      "middleware": [],
+      "auth_required": true,
+      "params": [],
+      "module": "apps/memberry"
+    },
+    "/_authenticated/my/settings": {
+      "method": "*",
+      "page_component": "MySettingsPage",
+      "layout": "AuthenticatedLayout",
+      "middleware": [],
+      "auth_required": true,
+      "params": [],
+      "module": "apps/memberry"
+    },
+    "/_authenticated/my/training": {
+      "method": "*",
+      "page_component": "MyTraining",
+      "layout": "AuthenticatedLayout",
+      "middleware": [],
+      "auth_required": true,
+      "params": [],
+      "module": "apps/memberry"
+    },
+    "/_authenticated/settings/account": {
+      "method": "*",
+      "page_component": "AccountSettingsPage",
+      "layout": "AuthenticatedLayout",
+      "middleware": [],
+      "auth_required": true,
+      "params": [],
+      "module": "apps/memberry"
+    },
+    "/_authenticated/settings/security": {
+      "method": "*",
+      "page_component": "SecuritySettingsPage",
+      "layout": "AuthenticatedLayout",
+      "middleware": [
+        "requireAuth",
+        "requirePerson"
+      ],
+      "auth_required": true,
+      "params": [],
+      "module": "apps/memberry"
+    },
+    "/_authenticated/my/bookings/$bookingId": {
+      "method": "*",
+      "page_component": "BookingDetailPage",
+      "layout": "AuthenticatedLayout",
+      "middleware": [],
+      "auth_required": true,
+      "params": [
+        "bookingId"
+      ],
+      "module": "apps/memberry"
+    },
+    "/_authenticated/my/bookings/host/$personId/$slotId": {
+      "method": "*",
+      "page_component": "ConfirmPage",
+      "layout": "AuthenticatedLayout",
+      "middleware": [],
+      "auth_required": true,
+      "params": [
+        "personId",
+        "slotId"
+      ],
+      "module": "apps/memberry"
+    },
+    "/_authenticated/my/bookings/host/$personId": {
+      "method": "*",
+      "page_component": "HostPage",
+      "layout": "AuthenticatedLayout",
+      "middleware": [],
+      "auth_required": true,
+      "params": [
+        "personId"
+      ],
+      "module": "apps/memberry"
+    },
+    "/_authenticated/my/bookings/": {
+      "method": "*",
+      "page_component": "BookingsPage",
+      "layout": "AuthenticatedLayout",
+      "middleware": [],
+      "auth_required": true,
+      "params": [],
+      "module": "apps/memberry"
+    },
+    "/_authenticated/my/certificates/$certificateId": {
+      "method": "*",
+      "page_component": "CertificateDetail",
+      "layout": "AuthenticatedLayout",
+      "middleware": [],
+      "auth_required": true,
+      "params": [
+        "certificateId"
+      ],
+      "module": "apps/memberry"
+    },
+    "/_authenticated/my/certificates/": {
+      "method": "*",
+      "page_component": "MyCertificates",
+      "layout": "AuthenticatedLayout",
+      "middleware": [],
+      "auth_required": true,
+      "params": [],
+      "module": "apps/memberry"
+    },
+    "/_authenticated/my/credits/": {
+      "method": "*",
+      "page_component": "MyCredits",
+      "layout": "AuthenticatedLayout",
+      "middleware": [],
+      "auth_required": true,
+      "params": [],
+      "module": "apps/memberry"
+    },
+    "/_authenticated/my/credits/log": {
+      "method": "*",
+      "page_component": "CreditLog",
+      "layout": "AuthenticatedLayout",
+      "middleware": [],
+      "auth_required": true,
+      "params": [],
+      "module": "apps/memberry"
+    },
+    "/_authenticated/my/surveys/$surveyId": {
+      "method": "*",
+      "page_component": "SurveyDetailPage",
+      "layout": "AuthenticatedLayout",
+      "middleware": [],
+      "auth_required": true,
+      "params": [
+        "surveyId"
+      ],
+      "module": "apps/memberry"
+    },
+    "/_authenticated/my/surveys/": {
+      "method": "*",
+      "page_component": "MySurveys",
+      "layout": "AuthenticatedLayout",
+      "middleware": [],
+      "auth_required": true,
+      "params": [],
+      "module": "apps/memberry"
+    },
+    "/_authenticated/org/$orgSlug/directory": {
+      "method": "*",
+      "page_component": "DirectoryPage",
+      "layout": "AuthenticatedLayout",
+      "middleware": [],
+      "auth_required": true,
+      "params": [
+        "orgSlug"
+      ],
+      "module": "apps/memberry"
+    },
+    "/_authenticated/org/$orgSlug/dues": {
+      "method": "*",
+      "page_component": "MemberDuesPage",
+      "layout": "AuthenticatedLayout",
+      "middleware": [],
+      "auth_required": true,
+      "params": [
+        "orgSlug"
+      ],
+      "module": "apps/memberry"
+    },
+    "/_authenticated/org/$orgSlug/home": {
+      "method": "*",
+      "page_component": "OrgHome",
+      "layout": "AuthenticatedLayout",
+      "middleware": [],
+      "auth_required": true,
+      "params": [
+        "orgSlug"
+      ],
+      "module": "apps/memberry"
+    },
+    "/_authenticated/org/$orgSlug/members": {
+      "method": "*",
+      "page_component": "MembersDirectoryPage",
+      "layout": "AuthenticatedLayout",
+      "middleware": [],
+      "auth_required": true,
+      "params": [
+        "orgSlug"
+      ],
+      "module": "apps/memberry"
+    },
+    "/_authenticated/org/$orgSlug/my-cpd": {
+      "method": "*",
+      "page_component": "MyCpdDashboard",
+      "layout": "AuthenticatedLayout",
+      "middleware": [],
+      "auth_required": true,
+      "params": [
+        "orgSlug"
+      ],
+      "module": "apps/memberry"
+    },
+    "/_authenticated/org/$orgSlug/my-notifications": {
+      "method": "*",
+      "page_component": "MyNotificationsPage",
+      "layout": "AuthenticatedLayout",
+      "middleware": [],
+      "auth_required": true,
+      "params": [
+        "orgSlug"
+      ],
+      "module": "apps/memberry"
+    },
+    "/_authenticated/org/$orgSlug/officer": {
+      "method": "*",
+      "page_component": "OfficerLayout",
+      "layout": "AuthenticatedLayout",
+      "middleware": [
+        "requireOrgOfficer"
+      ],
+      "auth_required": true,
+      "params": [
+        "orgSlug"
+      ],
+      "module": "apps/memberry"
+    },
+    "/_authenticated/org/$orgSlug": {
+      "method": "*",
+      "page_component": "OrgLayout",
+      "layout": "AuthenticatedLayout",
+      "middleware": [],
+      "auth_required": true,
+      "params": [
+        "orgSlug"
+      ],
+      "module": "apps/memberry"
+    },
+    "/_authenticated/org/$orgSlug/announcements/$announcementId": {
+      "method": "*",
+      "page_component": "MemberAnnouncementPage",
+      "layout": "AuthenticatedLayout",
+      "middleware": [],
+      "auth_required": true,
+      "params": [
+        "orgSlug",
+        "announcementId"
+      ],
+      "module": "apps/memberry"
+    },
+    "/_authenticated/org/$orgSlug/announcements/": {
+      "method": "*",
+      "page_component": "MemberAnnouncementFeed",
+      "layout": "AuthenticatedLayout",
+      "middleware": [],
+      "auth_required": true,
+      "params": [
+        "orgSlug"
+      ],
+      "module": "apps/memberry"
+    },
+    "/_authenticated/org/$orgSlug/directory/$personId": {
+      "method": "*",
+      "page_component": "MemberProfilePage",
+      "layout": "AuthenticatedLayout",
+      "middleware": [],
+      "auth_required": true,
+      "params": [
+        "orgSlug",
+        "personId"
+      ],
+      "module": "apps/memberry"
+    },
+    "/_authenticated/org/$orgSlug/documents/$documentId": {
+      "method": "*",
+      "page_component": "MemberDocumentDetailPage",
+      "layout": "AuthenticatedLayout",
+      "middleware": [],
+      "auth_required": true,
+      "params": [
+        "orgSlug",
+        "documentId"
+      ],
+      "module": "apps/memberry"
+    },
+    "/_authenticated/org/$orgSlug/documents/": {
+      "method": "*",
+      "page_component": "MemberDocumentsPage",
+      "layout": "AuthenticatedLayout",
+      "middleware": [],
+      "auth_required": true,
+      "params": [
+        "orgSlug"
+      ],
+      "module": "apps/memberry"
+    },
+    "/_authenticated/org/$orgSlug/elections/": {
+      "method": "*",
+      "page_component": "MemberElectionsPage",
+      "layout": "AuthenticatedLayout",
+      "middleware": [],
+      "auth_required": true,
+      "params": [
+        "orgSlug"
+      ],
+      "module": "apps/memberry"
+    },
+    "/_authenticated/org/$orgSlug/events/$eventId": {
+      "method": "*",
+      "page_component": "EventDetail",
+      "layout": "AuthenticatedLayout",
+      "middleware": [],
+      "auth_required": true,
+      "params": [
+        "orgSlug",
+        "eventId"
+      ],
+      "module": "apps/memberry"
+    },
+    "/_authenticated/org/$orgSlug/events/": {
+      "method": "*",
+      "page_component": "OrgEvents",
+      "layout": "AuthenticatedLayout",
+      "middleware": [],
+      "auth_required": true,
+      "params": [
+        "orgSlug"
+      ],
+      "module": "apps/memberry"
+    },
+    "/_authenticated/org/$orgSlug/governance/": {
+      "method": "*",
+      "page_component": "GovernancePage",
+      "layout": "AuthenticatedLayout",
+      "middleware": [],
+      "auth_required": true,
+      "params": [
+        "orgSlug"
+      ],
+      "module": "apps/memberry"
+    },
+    "/_authenticated/org/$orgSlug/messages/": {
+      "method": "*",
+      "page_component": "MessagesIndexPage",
+      "layout": "AuthenticatedLayout",
+      "middleware": [],
+      "auth_required": true,
+      "params": [
+        "orgSlug"
+      ],
+      "module": "apps/memberry"
+    },
+    "/_authenticated/org/$orgSlug/officer/applications": {
+      "method": "*",
+      "page_component": "ApplicationsPage",
+      "layout": "AuthenticatedLayout",
+      "middleware": [],
+      "auth_required": true,
+      "params": [
+        "orgSlug"
+      ],
+      "module": "apps/memberry"
+    },
+    "/_authenticated/org/$orgSlug/officer/certificates": {
+      "method": "*",
+      "page_component": "OfficerCertificates",
+      "layout": "AuthenticatedLayout",
+      "middleware": [],
+      "auth_required": true,
+      "params": [
+        "orgSlug"
+      ],
+      "module": "apps/memberry"
+    },
+    "/_authenticated/org/$orgSlug/officer/communications": {
+      "method": "*",
+      "page_component": null,
+      "layout": "AuthenticatedLayout",
+      "middleware": [],
+      "auth_required": true,
+      "params": [
+        "orgSlug"
+      ],
+      "module": "apps/memberry"
+    },
+    "/_authenticated/org/$orgSlug/officer/compliance": {
+      "method": "*",
+      "page_component": "OfficerCompliance",
+      "layout": "AuthenticatedLayout",
+      "middleware": [],
+      "auth_required": true,
+      "params": [
+        "orgSlug"
+      ],
+      "module": "apps/memberry"
+    },
+    "/_authenticated/org/$orgSlug/officer/dashboard": {
+      "method": "*",
+      "page_component": "OfficerDashboardPage",
+      "layout": "AuthenticatedLayout",
+      "middleware": [],
+      "auth_required": true,
+      "params": [
+        "orgSlug"
+      ],
+      "module": "apps/memberry"
+    },
+    "/_authenticated/org/$orgSlug/officer/officers": {
+      "method": "*",
+      "page_component": "OfficersPage",
+      "layout": "AuthenticatedLayout",
+      "middleware": [],
+      "auth_required": true,
+      "params": [
+        "orgSlug"
+      ],
+      "module": "apps/memberry"
+    },
+    "/_authenticated/org/$orgSlug/officer/payments": {
+      "method": "*",
+      "page_component": null,
+      "layout": "AuthenticatedLayout",
+      "middleware": [],
+      "auth_required": true,
+      "params": [
+        "orgSlug"
+      ],
+      "module": "apps/memberry"
+    },
+    "/_authenticated/org/$orgSlug/officer/roster": {
+      "method": "*",
+      "page_component": null,
+      "layout": "AuthenticatedLayout",
+      "middleware": [],
+      "auth_required": true,
+      "params": [
+        "orgSlug"
+      ],
+      "module": "apps/memberry"
+    },
+    "/_authenticated/org/$orgSlug/training/$trainingId": {
+      "method": "*",
+      "page_component": "TrainingDetail",
+      "layout": "AuthenticatedLayout",
+      "middleware": [],
+      "auth_required": true,
+      "params": [
+        "orgSlug",
+        "trainingId"
+      ],
+      "module": "apps/memberry"
+    },
+    "/_authenticated/org/$orgSlug/training/": {
+      "method": "*",
+      "page_component": "OrgTraining",
+      "layout": "AuthenticatedLayout",
+      "middleware": [],
+      "auth_required": true,
+      "params": [
+        "orgSlug"
+      ],
+      "module": "apps/memberry"
+    },
+    "/_authenticated/org/$orgSlug/elections/$electionId/": {
+      "method": "*",
+      "page_component": "MemberElectionDetailPage",
+      "layout": "AuthenticatedLayout",
+      "middleware": [],
+      "auth_required": true,
+      "params": [
+        "orgSlug",
+        "electionId"
+      ],
+      "module": "apps/memberry"
+    },
+    "/_authenticated/org/$orgSlug/elections/$electionId/vote": {
+      "method": "*",
+      "page_component": "VotePage",
+      "layout": "AuthenticatedLayout",
+      "middleware": [],
+      "auth_required": true,
+      "params": [
+        "orgSlug",
+        "electionId"
+      ],
+      "module": "apps/memberry"
+    },
+    "/_authenticated/org/$orgSlug/messages/dm/": {
+      "method": "*",
+      "page_component": "DmIndexPage",
+      "layout": "AuthenticatedLayout",
+      "middleware": [],
+      "auth_required": true,
+      "params": [
+        "orgSlug"
+      ],
+      "module": "apps/memberry"
+    },
+    "/_authenticated/org/$orgSlug/officer/communications/$announcementId": {
+      "method": "*",
+      "page_component": "AnnouncementDetailPage",
+      "layout": "AuthenticatedLayout",
+      "middleware": [],
+      "auth_required": true,
+      "params": [
+        "orgSlug",
+        "announcementId"
+      ],
+      "module": "apps/memberry"
+    },
+    "/_authenticated/org/$orgSlug/officer/communications/analytics": {
+      "method": "*",
+      "page_component": "AnalyticsDashboardPage",
+      "layout": "AuthenticatedLayout",
+      "middleware": [],
+      "auth_required": true,
+      "params": [
+        "orgSlug"
+      ],
+      "module": "apps/memberry"
+    },
+    "/_authenticated/org/$orgSlug/officer/communications/": {
+      "method": "*",
+      "page_component": "OfficerCommunications",
+      "layout": "AuthenticatedLayout",
+      "middleware": [],
+      "auth_required": true,
+      "params": [
+        "orgSlug"
+      ],
+      "module": "apps/memberry"
+    },
+    "/_authenticated/org/$orgSlug/officer/communications/new": {
+      "method": "*",
+      "page_component": "NewAnnouncementPage",
+      "layout": "AuthenticatedLayout",
+      "middleware": [],
+      "auth_required": true,
+      "params": [
+        "orgSlug"
+      ],
+      "module": "apps/memberry"
+    },
+    "/_authenticated/org/$orgSlug/officer/communications/sent": {
+      "method": "*",
+      "page_component": "SentHistoryPage",
+      "layout": "AuthenticatedLayout",
+      "middleware": [],
+      "auth_required": true,
+      "params": [
+        "orgSlug"
+      ],
+      "module": "apps/memberry"
+    },
+    "/_authenticated/org/$orgSlug/officer/documents/$documentId": {
+      "method": "*",
+      "page_component": "DocumentDetail",
+      "layout": "AuthenticatedLayout",
+      "middleware": [],
+      "auth_required": true,
+      "params": [
+        "orgSlug",
+        "documentId"
+      ],
+      "module": "apps/memberry"
+    },
+    "/_authenticated/org/$orgSlug/officer/documents/": {
+      "method": "*",
+      "page_component": "OfficerDocuments",
+      "layout": "AuthenticatedLayout",
+      "middleware": [],
+      "auth_required": true,
+      "params": [
+        "orgSlug"
+      ],
+      "module": "apps/memberry"
+    },
+    "/_authenticated/org/$orgSlug/officer/dues/assessments": {
+      "method": "*",
+      "page_component": null,
+      "layout": "AuthenticatedLayout",
+      "middleware": [],
+      "auth_required": true,
+      "params": [
+        "orgSlug"
+      ],
+      "module": "apps/memberry"
+    },
+    "/_authenticated/org/$orgSlug/officer/dues/member/$memberId": {
+      "method": "*",
+      "page_component": null,
+      "layout": "AuthenticatedLayout",
+      "middleware": [],
+      "auth_required": true,
+      "params": [
+        "orgSlug",
+        "memberId"
+      ],
+      "module": "apps/memberry"
+    },
+    "/_authenticated/org/$orgSlug/officer/dues/treasurer": {
+      "method": "*",
+      "page_component": null,
+      "layout": "AuthenticatedLayout",
+      "middleware": [],
+      "auth_required": true,
+      "params": [
+        "orgSlug"
+      ],
+      "module": "apps/memberry"
+    },
+    "/_authenticated/org/$orgSlug/officer/elections/$electionId": {
+      "method": "*",
+      "page_component": "ElectionDetailLayout",
+      "layout": "AuthenticatedLayout",
+      "middleware": [],
+      "auth_required": true,
+      "params": [
+        "orgSlug",
+        "electionId"
+      ],
+      "module": "apps/memberry"
+    },
+    "/_authenticated/org/$orgSlug/officer/elections/": {
+      "method": "*",
+      "page_component": "OfficerElections",
+      "layout": "AuthenticatedLayout",
+      "middleware": [],
+      "auth_required": true,
+      "params": [
+        "orgSlug"
+      ],
+      "module": "apps/memberry"
+    },
+    "/_authenticated/org/$orgSlug/officer/elections/new": {
+      "method": "*",
+      "page_component": "NewElection",
+      "layout": "AuthenticatedLayout",
+      "middleware": [],
+      "auth_required": true,
+      "params": [
+        "orgSlug"
+      ],
+      "module": "apps/memberry"
+    },
+    "/_authenticated/org/$orgSlug/officer/events/$eventId": {
+      "method": "*",
+      "page_component": "EventDetail",
+      "layout": "AuthenticatedLayout",
+      "middleware": [],
+      "auth_required": true,
+      "params": [
+        "orgSlug",
+        "eventId"
+      ],
+      "module": "apps/memberry"
+    },
+    "/_authenticated/org/$orgSlug/officer/events/": {
+      "method": "*",
+      "page_component": "OfficerEvents",
+      "layout": "AuthenticatedLayout",
+      "middleware": [],
+      "auth_required": true,
+      "params": [
+        "orgSlug"
+      ],
+      "module": "apps/memberry"
+    },
+    "/_authenticated/org/$orgSlug/officer/events/new": {
+      "method": "*",
+      "page_component": "NewEvent",
+      "layout": "AuthenticatedLayout",
+      "middleware": [],
+      "auth_required": true,
+      "params": [
+        "orgSlug"
+      ],
+      "module": "apps/memberry"
+    },
+    "/_authenticated/org/$orgSlug/officer/finances/assessments": {
+      "method": "*",
+      "page_component": "FinancesAssessmentsPage",
+      "layout": "AuthenticatedLayout",
+      "middleware": [],
+      "auth_required": true,
+      "params": [
+        "orgSlug"
+      ],
+      "module": "apps/memberry"
+    },
+    "/_authenticated/org/$orgSlug/officer/finances/dues": {
+      "method": "*",
+      "page_component": "DuesSchedulePage",
+      "layout": "AuthenticatedLayout",
+      "middleware": [],
+      "auth_required": true,
+      "params": [
+        "orgSlug"
+      ],
+      "module": "apps/memberry"
+    },
+    "/_authenticated/org/$orgSlug/officer/finances/funds": {
+      "method": "*",
+      "page_component": "FundsPage",
+      "layout": "AuthenticatedLayout",
+      "middleware": [],
+      "auth_required": true,
+      "params": [
+        "orgSlug"
+      ],
+      "module": "apps/memberry"
+    },
+    "/_authenticated/org/$orgSlug/officer/finances/": {
+      "method": "*",
+      "page_component": "FinancesOverviewPage",
+      "layout": "AuthenticatedLayout",
+      "middleware": [],
+      "auth_required": true,
+      "params": [
+        "orgSlug"
+      ],
+      "module": "apps/memberry"
+    },
+    "/_authenticated/org/$orgSlug/officer/finances/invoices": {
+      "method": "*",
+      "page_component": "InvoicesPage",
+      "layout": "AuthenticatedLayout",
+      "middleware": [],
+      "auth_required": true,
+      "params": [
+        "orgSlug"
+      ],
+      "module": "apps/memberry"
+    },
+    "/_authenticated/org/$orgSlug/officer/finances/members": {
+      "method": "*",
+      "page_component": "FinancialMembersPage",
+      "layout": "AuthenticatedLayout",
+      "middleware": [],
+      "auth_required": true,
+      "params": [
+        "orgSlug"
+      ],
+      "module": "apps/memberry"
+    },
+    "/_authenticated/org/$orgSlug/officer/institutional-memberships/$institutionalMembershipId": {
+      "method": "*",
+      "page_component": "InstitutionalMembershipDetailPage",
+      "layout": "AuthenticatedLayout",
+      "middleware": [],
+      "auth_required": true,
+      "params": [
+        "orgSlug",
+        "institutionalMembershipId"
+      ],
+      "module": "apps/memberry"
+    },
+    "/_authenticated/org/$orgSlug/officer/institutional-memberships/": {
+      "method": "*",
+      "page_component": "InstitutionalMembershipsPage",
+      "layout": "AuthenticatedLayout",
+      "middleware": [],
+      "auth_required": true,
+      "params": [
+        "orgSlug"
+      ],
+      "module": "apps/memberry"
+    },
+    "/_authenticated/org/$orgSlug/officer/institutional-memberships/new": {
+      "method": "*",
+      "page_component": "NewInstitutionalMembershipPage",
+      "layout": "AuthenticatedLayout",
+      "middleware": [],
+      "auth_required": true,
+      "params": [
+        "orgSlug"
+      ],
+      "module": "apps/memberry"
+    },
+    "/_authenticated/org/$orgSlug/officer/messages/": {
+      "method": "*",
+      "page_component": "OfficerMessagesPage",
+      "layout": "AuthenticatedLayout",
+      "middleware": [],
+      "auth_required": true,
+      "params": [
+        "orgSlug"
+      ],
+      "module": "apps/memberry"
+    },
+    "/_authenticated/org/$orgSlug/officer/payments/$paymentId": {
+      "method": "*",
+      "page_component": "PaymentDetailPage",
+      "layout": "AuthenticatedLayout",
+      "middleware": [],
+      "auth_required": true,
+      "params": [
+        "orgSlug",
+        "paymentId"
+      ],
+      "module": "apps/memberry"
+    },
+    "/_authenticated/org/$orgSlug/officer/payments/": {
+      "method": "*",
+      "page_component": "OfficerPaymentsPage",
+      "layout": "AuthenticatedLayout",
+      "middleware": [],
+      "auth_required": true,
+      "params": [
+        "orgSlug"
+      ],
+      "module": "apps/memberry"
+    },
+    "/_authenticated/org/$orgSlug/officer/payments/new": {
+      "method": "*",
+      "page_component": "RecordPaymentPage",
+      "layout": "AuthenticatedLayout",
+      "middleware": [],
+      "auth_required": true,
+      "params": [
+        "orgSlug"
+      ],
+      "module": "apps/memberry"
+    },
+    "/_authenticated/org/$orgSlug/officer/reports/credits": {
+      "method": "*",
+      "page_component": "CreditReport",
+      "layout": "AuthenticatedLayout",
+      "middleware": [],
+      "auth_required": true,
+      "params": [
+        "orgSlug"
+      ],
+      "module": "apps/memberry"
+    },
+    "/_authenticated/org/$orgSlug/officer/reports/financial": {
+      "method": "*",
+      "page_component": "FinancialReportsPage",
+      "layout": "AuthenticatedLayout",
+      "middleware": [],
+      "auth_required": true,
+      "params": [
+        "orgSlug"
+      ],
+      "module": "apps/memberry"
+    },
+    "/_authenticated/org/$orgSlug/officer/reviews/": {
+      "method": "*",
+      "page_component": "OfficerReviews",
+      "layout": "AuthenticatedLayout",
+      "middleware": [],
+      "auth_required": true,
+      "params": [
+        "orgSlug"
+      ],
+      "module": "apps/memberry"
+    },
+    "/_authenticated/org/$orgSlug/officer/roster/$memberId": {
+      "method": "*",
+      "page_component": "MemberDetailPage",
+      "layout": "AuthenticatedLayout",
+      "middleware": [],
+      "auth_required": true,
+      "params": [
+        "orgSlug",
+        "memberId"
+      ],
+      "module": "apps/memberry"
+    },
+    "/_authenticated/org/$orgSlug/officer/roster/import": {
+      "method": "*",
+      "page_component": "RosterImportPage",
+      "layout": "AuthenticatedLayout",
+      "middleware": [],
+      "auth_required": true,
+      "params": [
+        "orgSlug"
+      ],
+      "module": "apps/memberry"
+    },
+    "/_authenticated/org/$orgSlug/officer/roster/": {
+      "method": "*",
+      "page_component": "RosterPage",
+      "layout": "AuthenticatedLayout",
+      "middleware": [],
+      "auth_required": true,
+      "params": [
+        "orgSlug"
+      ],
+      "module": "apps/memberry"
+    },
+    "/_authenticated/org/$orgSlug/officer/settings/chapters": {
+      "method": "*",
+      "page_component": "ChaptersSettingsPage",
+      "layout": "AuthenticatedLayout",
+      "middleware": [],
+      "auth_required": true,
+      "params": [
+        "orgSlug"
+      ],
+      "module": "apps/memberry"
+    },
+    "/_authenticated/org/$orgSlug/officer/settings/cpd": {
+      "method": "*",
+      "page_component": "CpdSettings",
+      "layout": "AuthenticatedLayout",
+      "middleware": [],
+      "auth_required": true,
+      "params": [
+        "orgSlug"
+      ],
+      "module": "apps/memberry"
+    },
+    "/_authenticated/org/$orgSlug/officer/settings/dues": {
+      "method": "*",
+      "page_component": null,
+      "layout": "AuthenticatedLayout",
+      "middleware": [],
+      "auth_required": true,
+      "params": [
+        "orgSlug"
+      ],
+      "module": "apps/memberry"
+    },
+    "/_authenticated/org/$orgSlug/officer/settings/funds": {
+      "method": "*",
+      "page_component": null,
+      "layout": "AuthenticatedLayout",
+      "middleware": [],
+      "auth_required": true,
+      "params": [
+        "orgSlug"
+      ],
+      "module": "apps/memberry"
+    },
+    "/_authenticated/org/$orgSlug/officer/settings/gateway": {
+      "method": "*",
+      "page_component": "GatewaySettingsPage",
+      "layout": "AuthenticatedLayout",
+      "middleware": [],
+      "auth_required": true,
+      "params": [
+        "orgSlug"
+      ],
+      "module": "apps/memberry"
+    },
+    "/_authenticated/org/$orgSlug/officer/settings/membership-categories": {
+      "method": "*",
+      "page_component": "CategoriesPage",
+      "layout": "AuthenticatedLayout",
+      "middleware": [],
+      "auth_required": true,
+      "params": [
+        "orgSlug"
+      ],
+      "module": "apps/memberry"
+    },
+    "/_authenticated/org/$orgSlug/officer/settings/org": {
+      "method": "*",
+      "page_component": "OrgSettingsPage",
+      "layout": "AuthenticatedLayout",
+      "middleware": [],
+      "auth_required": true,
+      "params": [
+        "orgSlug"
+      ],
+      "module": "apps/memberry"
+    },
+    "/_authenticated/org/$orgSlug/officer/settings/providers": {
+      "method": "*",
+      "page_component": "ProvidersPage",
+      "layout": "AuthenticatedLayout",
+      "middleware": [],
+      "auth_required": true,
+      "params": [
+        "orgSlug"
+      ],
+      "module": "apps/memberry"
+    },
+    "/_authenticated/org/$orgSlug/officer/surveys/$surveyId": {
+      "method": "*",
+      "page_component": "SurveyDetailPage",
+      "layout": "AuthenticatedLayout",
+      "middleware": [],
+      "auth_required": true,
+      "params": [
+        "orgSlug",
+        "surveyId"
+      ],
+      "module": "apps/memberry"
+    },
+    "/_authenticated/org/$orgSlug/officer/surveys/": {
+      "method": "*",
+      "page_component": "OfficerSurveys",
+      "layout": "AuthenticatedLayout",
+      "middleware": [],
+      "auth_required": true,
+      "params": [
+        "orgSlug"
+      ],
+      "module": "apps/memberry"
+    },
+    "/_authenticated/org/$orgSlug/officer/surveys/new": {
+      "method": "*",
+      "page_component": "NewSurveyPage",
+      "layout": "AuthenticatedLayout",
+      "middleware": [],
+      "auth_required": true,
+      "params": [
+        "orgSlug"
+      ],
+      "module": "apps/memberry"
+    },
+    "/_authenticated/org/$orgSlug/officer/training/$trainingId": {
+      "method": "*",
+      "page_component": "TrainingDetail",
+      "layout": "AuthenticatedLayout",
+      "middleware": [],
+      "auth_required": true,
+      "params": [
+        "orgSlug",
+        "trainingId"
+      ],
+      "module": "apps/memberry"
+    },
+    "/_authenticated/org/$orgSlug/officer/training/": {
+      "method": "*",
+      "page_component": "OfficerTraining",
+      "layout": "AuthenticatedLayout",
+      "middleware": [],
+      "auth_required": true,
+      "params": [
+        "orgSlug"
+      ],
+      "module": "apps/memberry"
+    },
+    "/_authenticated/org/$orgSlug/officer/training/new": {
+      "method": "*",
+      "page_component": "NewTraining",
+      "layout": "AuthenticatedLayout",
+      "middleware": [],
+      "auth_required": true,
+      "params": [
+        "orgSlug"
+      ],
+      "module": "apps/memberry"
+    },
+    "/_authenticated/org/$orgSlug/officer/communications/templates/": {
+      "method": "*",
+      "page_component": "TemplateListPage",
+      "layout": "AuthenticatedLayout",
+      "middleware": [],
+      "auth_required": true,
+      "params": [
+        "orgSlug"
+      ],
+      "module": "apps/memberry"
+    },
+    "/_authenticated/org/$orgSlug/officer/communications/templates/new": {
+      "method": "*",
+      "page_component": "NewTemplatePage",
+      "layout": "AuthenticatedLayout",
+      "middleware": [],
+      "auth_required": true,
+      "params": [
+        "orgSlug"
+      ],
+      "module": "apps/memberry"
+    },
+    "/_authenticated/org/$orgSlug/officer/elections/$electionId/edit": {
+      "method": "*",
+      "page_component": "EditElection",
+      "layout": "AuthenticatedLayout",
+      "middleware": [],
+      "auth_required": true,
+      "params": [
+        "orgSlug",
+        "electionId"
+      ],
+      "module": "apps/memberry"
+    },
+    "/_authenticated/org/$orgSlug/officer/events/$eventId/attendance": {
+      "method": "*",
+      "page_component": "EventAttendance",
+      "layout": "AuthenticatedLayout",
+      "middleware": [],
+      "auth_required": true,
+      "params": [
+        "orgSlug",
+        "eventId"
+      ],
+      "module": "apps/memberry"
+    },
+    "/_authenticated/org/$orgSlug/officer/finances/invoices/$invoiceId": {
+      "method": "*",
+      "page_component": "InvoiceDetailPage",
+      "layout": "AuthenticatedLayout",
+      "middleware": [],
+      "auth_required": true,
+      "params": [
+        "orgSlug",
+        "invoiceId"
+      ],
+      "module": "apps/memberry"
+    },
+    "/_authenticated/org/$orgSlug/officer/finances/invoices/": {
+      "method": "*",
+      "page_component": "InvoicesPage",
+      "layout": "AuthenticatedLayout",
+      "middleware": [],
+      "auth_required": true,
+      "params": [
+        "orgSlug"
+      ],
+      "module": "apps/memberry"
+    },
+    "/_authenticated/org/$orgSlug/officer/finances/members/$memberId": {
+      "method": "*",
+      "page_component": "MemberFinancialDetailPage",
+      "layout": "AuthenticatedLayout",
+      "middleware": [],
+      "auth_required": true,
+      "params": [
+        "orgSlug",
+        "memberId"
+      ],
+      "module": "apps/memberry"
+    },
+    "/_authenticated/org/$orgSlug/officer/training/$trainingId/attendance": {
+      "method": "*",
+      "page_component": "TrainingAttendance",
+      "layout": "AuthenticatedLayout",
+      "middleware": [],
+      "auth_required": true,
+      "params": [
+        "orgSlug",
+        "trainingId"
+      ],
+      "module": "apps/memberry"
     }
   }
 }
