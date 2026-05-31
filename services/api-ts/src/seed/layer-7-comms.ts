@@ -24,6 +24,7 @@ import {
   messageTemplates,
   subscriptionTopics,
   personSubscriptions,
+  messages,
 } from '@/handlers/communication/repos/communication.schema';
 import {
   emailQueue,
@@ -362,6 +363,36 @@ export async function seedCommsCoverage(
     }
   } catch (e) {
     console.log(`    (email templates failed: ${(e as Error).message?.slice(0, 120)})`);
+  }
+
+  // ─── BR-28 (Communication Dedup, M07, WF-046): seed precondition row ───
+  // Pre-existing sent email to memberPersonIds[0] today — re-sending same
+  // channel+recipient should be deduped by createMessage findDuplicatesSentToday.
+  try {
+    const existing = (await db.execute(
+      sql`SELECT id FROM message WHERE organization_id = ${orgId} AND status = 'sent' AND body = 'SEED-BR-28: dedup precondition' LIMIT 1`,
+    )) as unknown as { rows: Array<{ id: string }> };
+
+    if (existing.rows?.length === 0 && memberPersonIds.length > 0) {
+      const now = new Date();
+      await db.insert(messages).values({
+        organizationId: orgId,
+        channel: 'email',
+        senderId: presidentPersonId,
+        recipients: [
+          { personId: memberPersonIds[0]!, deliveryStatus: 'delivered', deliveredAt: now.toISOString() },
+        ],
+        subject: 'SEED-BR-28',
+        body: 'SEED-BR-28: dedup precondition',
+        sentAt: now,
+        status: 'sent',
+      });
+      console.log('    ✓ BR-28 dedup precondition seeded (1 sent message today)');
+    } else {
+      console.log('    (BR-28 dedup precondition already seeded, skipping)');
+    }
+  } catch (e) {
+    console.log(`    (BR-28 dedup precondition failed: ${(e as Error).message?.slice(0, 120)})`);
   }
 
   console.log('  Comms coverage complete.');

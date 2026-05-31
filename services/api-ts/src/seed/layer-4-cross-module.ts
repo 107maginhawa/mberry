@@ -536,34 +536,44 @@ export async function seedRemainingModules(
 
   // ─── Invitations ──────────────────────────────────────────
   try {
-    const existingInvites = await db.select().from(invitationTokens).limit(1);
-    if (existingInvites.length === 0) {
-      const inviteData = [
-        { email: 'newmember1@memberry.ph', message: 'You are invited to join PDA Metro Manila Chapter. Click the link to complete your registration.', type: 'invite' as const },
-        { email: 'newmember2@memberry.ph', message: 'Welcome! Please claim your membership by setting up your account.', type: 'claim' as const },
-      ];
+    const inviteData = [
+      { email: 'newmember1@memberry.ph', message: 'You are invited to join PDA Metro Manila Chapter. Click the link to complete your registration.', type: 'invite' as const, status: 'pending' as const, expiresAt: new Date(Date.now() + 7 * 86400000) },
+      { email: 'newmember2@memberry.ph', message: 'Welcome! Please claim your membership by setting up your account.', type: 'claim' as const, status: 'pending' as const, expiresAt: new Date(Date.now() + 7 * 86400000) },
+      // BR-24 (Invitation Expiry, M01, WF-008/WF-002): expired invite — exercises invite.repo expiry gate
+      { email: 'expired-invite@memberry.ph', message: 'Past-due invitation for BR-24 fixture.', type: 'invite' as const, status: 'expired' as const, expiresAt: new Date(Date.now() - 2 * 86400000) },
+    ];
 
-      for (const inv of inviteData) {
-        const { createHash } = await import('crypto');
-        const tokenHash = createHash('sha256').update(`seed-invite-${inv.email}-${Date.now()}`).digest('hex');
-        await db.insert(invitationTokens).values({
-          organizationId: orgId,
-          tokenHash,
-          type: inv.type,
-          status: 'pending',
-          expiresAt: new Date(Date.now() + 7 * 86400000),
-          createdByOfficer: presidentPersonId,
-          email: inv.email,
-          message: inv.message,
-          metadata: { name: inv.email.split('@')[0], resendCount: 0 },
-        });
-      }
-      console.log('    ✓ 2 invitations seeded');
-    } else {
-      console.log('    (invitations already seeded, skipping)');
+    let inserted = 0;
+    for (const inv of inviteData) {
+      // Per-email existence check — allows incremental seeding
+      const existing = await db.select({ id: invitationTokens.id })
+        .from(invitationTokens)
+        .where(eq(invitationTokens.email, inv.email))
+        .limit(1);
+      if (existing.length > 0) continue;
+
+      const { createHash } = await import('crypto');
+      const tokenHash = createHash('sha256').update(`seed-invite-${inv.email}-${Date.now()}`).digest('hex');
+      await db.insert(invitationTokens).values({
+        organizationId: orgId,
+        tokenHash,
+        type: inv.type,
+        status: inv.status,
+        expiresAt: inv.expiresAt,
+        createdByOfficer: presidentPersonId,
+        email: inv.email,
+        message: inv.message,
+        metadata: { name: inv.email.split('@')[0], resendCount: 0 },
+      });
+      inserted++;
     }
-  } catch {
-    console.log('    (invitations table not ready, skipping)');
+    if (inserted > 0) {
+      console.log(`    ✓ ${inserted} invitation(s) seeded (BR-24 expired fixture if not present)`);
+    } else {
+      console.log('    (all 3 invitations already seeded, skipping)');
+    }
+  } catch (e) {
+    console.log(`    (invitations table not ready: ${(e as Error).message?.slice(0, 80)})`);
   }
 
   // ─── Storage (file metadata) ──────────────────────────────

@@ -2,6 +2,7 @@ import { API_URL, PASSWORD, extractCookie } from './helpers';
 
 export class SeedClient {
   cookie = '';
+  csrfToken = '';
   orgId = '';
   personId = '';
   userId = '';
@@ -9,6 +10,35 @@ export class SeedClient {
 
   constructor(orgId: string) {
     this.orgId = orgId;
+  }
+
+  /**
+   * Fetch CSRF token + cookie (double-submit pattern, see middleware/csrf-token.ts).
+   * Must be called before any POST/PUT/PATCH/DELETE that is not /auth/*.
+   * Merges the csrf_token cookie into this.cookie so subsequent state-changing
+   * requests carry both the auth session cookie and the csrf cookie.
+   */
+  async fetchCsrf(): Promise<void> {
+    const res = await fetch(`${API_URL}/csrf-token`, {
+      headers: this.cookie ? { Cookie: this.cookie } : {},
+    });
+    if (!res.ok) {
+      console.error(`  ✗ Fetch /csrf-token failed: ${res.status}`);
+      return;
+    }
+    const data = await res.json() as { token?: string; csrf_token?: string };
+    this.csrfToken = data.token || data.csrf_token || '';
+    const setCookie = res.headers.get('set-cookie') || '';
+    const m = /csrf_token=([^;]+)/.exec(setCookie);
+    if (m) {
+      const csrfCookie = `csrf_token=${m[1]}`;
+      // Merge into existing cookie jar (remove any prior csrf_token entry first)
+      const filtered = this.cookie
+        .split(/;\s*/)
+        .filter((c) => c && !c.startsWith('csrf_token='))
+        .join('; ');
+      this.cookie = filtered ? `${filtered}; ${csrfCookie}` : csrfCookie;
+    }
   }
 
   async signUp(email: string, name: string): Promise<boolean> {
@@ -30,6 +60,7 @@ export class SeedClient {
     const data = await res.json() as { user?: { id: string }; id?: string };
     this.userId = data.user?.id || data.id || '';
     this.cookie = extractCookie(res);
+    await this.fetchCsrf();
     return true;
   }
 
@@ -47,6 +78,7 @@ export class SeedClient {
     const data = await res.json() as { user?: { id: string }; id?: string };
     this.userId = data.user?.id || data.id || '';
     this.cookie = extractCookie(res);
+    await this.fetchCsrf();
     return true;
   }
 
@@ -74,6 +106,9 @@ export class SeedClient {
       'Content-Type': 'application/json',
       Cookie: this.cookie,
     };
+    if (this.csrfToken) {
+      headers['x-csrf-token'] = this.csrfToken;
+    }
     if (this.orgId && path.startsWith('/association/')) {
       headers['x-org-id'] = this.orgId;
     }
@@ -109,6 +144,9 @@ export class SeedClient {
       'Content-Type': 'application/json',
       Cookie: this.cookie,
     };
+    if (this.csrfToken) {
+      headers['x-csrf-token'] = this.csrfToken;
+    }
     if (this.orgId && path.startsWith('/association/')) {
       headers['x-org-id'] = this.orgId;
     }

@@ -16,7 +16,7 @@ import { checkIns, waitlistEntries } from '@/handlers/association:operations/rep
 import { courses, courseEnrollments, quizAttempts } from '@/handlers/association:operations/repos/training.schema';
 import { accreditedProviders } from '@/handlers/association:operations/repos/accredited-provider.schema';
 import { electionNominees, electionVotes, elections } from '@/handlers/elections/repos/elections.schema';
-import { positions } from '@/handlers/association:member/repos/governance.schema';
+import { positions, officerTerms } from '@/handlers/association:member/repos/governance.schema';
 import { memberships } from '@/handlers/association:member/repos/membership.schema';
 import { membershipStatusHistory, type NewMembershipStatusHistory } from '@/handlers/association:member/repos/status-history.schema';
 import { professionalLicenses, licenseRenewalAlerts, credentialTemplates, digitalCredentials } from '@/handlers/association:member/repos/credentials.schema';
@@ -201,6 +201,7 @@ export async function seedEventsGapFill(
         } else if (!skipVotes) {
           console.log('    (election votes already seeded, skipping)');
         }
+
       } else {
         console.log('    (no positions found, skipping nominees/votes)');
       }
@@ -209,6 +210,68 @@ export async function seedEventsGapFill(
     }
   } else {
     console.log('    (election nominees already seeded, skipping)');
+  }
+
+  // ─── BR-44 (Election Certification Cross-Module Effects, M12, WF-077) ───
+  // Runs regardless of whether nominees were just seeded or pre-existing —
+  // for each elected nominee on any published election, end any current
+  // active officer_term on the same position and create a new active term
+  // for the elected nominee. Transition checklists for new terms get
+  // populated downstream by layer-7-member seedOfficerHandover.
+  try {
+    const pubElectionsForRotation = await db.select({ id: elections.id })
+      .from(elections)
+      .where(sql`${elections.status} = 'published' AND ${elections.organizationId} = ${orgId}`);
+
+    let totalRotated = 0;
+    for (const pe of pubElectionsForRotation) {
+      const electedNominees = await db
+        .select({ positionId: electionNominees.positionId, personId: electionNominees.personId })
+        .from(electionNominees)
+        .where(and(eq(electionNominees.electionId, pe.id), eq(electionNominees.status, 'elected')));
+
+      for (const n of electedNominees) {
+        // Skip if nominee already holds an active term on this position
+        const existingNewTerm = await db.select({ id: officerTerms.id })
+          .from(officerTerms)
+          .where(and(
+            eq(officerTerms.personId, n.personId),
+            eq(officerTerms.positionId, n.positionId),
+            eq(officerTerms.status, 'active'),
+          ))
+          .limit(1);
+        if (existingNewTerm.length > 0) continue;
+
+        // End any other currently-active term on this position
+        await db
+          .update(officerTerms)
+          .set({ status: 'completed', endDate: daysAgo(1) })
+          .where(and(
+            eq(officerTerms.positionId, n.positionId),
+            eq(officerTerms.status, 'active'),
+            sql`${officerTerms.personId} <> ${n.personId}`,
+          ));
+
+        // Create new active term for elected nominee
+        await db.insert(officerTerms).values({
+          positionId: n.positionId,
+          personId: n.personId,
+          organizationId: orgId,
+          status: 'active',
+          startDate: NOW,
+          endDate: daysFromNow(365),
+          notes: 'BR-44: created on election certification (WF-077)',
+        });
+        totalRotated++;
+      }
+    }
+    if (totalRotated > 0) {
+      console.log(`    ✓ BR-44: rotated ${totalRotated} officer term(s) post-certification`);
+    } else {
+      console.log('    (BR-44 rotation: no eligible nominees or already rotated)');
+    }
+  } catch (e) {
+    console.log(`    (BR-44 rotation failed: ${(e as Error).message?.slice(0, 120)})`);
   }
 }
 
