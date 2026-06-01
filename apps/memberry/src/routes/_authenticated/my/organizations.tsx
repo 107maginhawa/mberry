@@ -119,11 +119,10 @@ function MyOrganizationsPage() {
               <div className="flex items-center gap-3 shrink-0">
                 <StatusBadge status={m.status ?? 'pending'} />
                 {(m.status === 'grace' || m.status === 'lapsed' || m.status === 'gracePeriod') && (
-                  <Button
-                    size="sm"
-                    onClick={(e) => { e.preventDefault(); e.stopPropagation() }}
-                  >
-                    Pay Dues
+                  <Button size="sm" asChild>
+                    <Link to="/org/$orgSlug/dues" params={{ orgSlug: m.orgSlug || normalizeOrgId(m) || '' }}>
+                      Pay Dues
+                    </Link>
                   </Button>
                 )}
                 {m.status !== 'terminated' && (

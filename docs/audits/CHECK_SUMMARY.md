@@ -1,159 +1,92 @@
 ---
-oli-version: "1.3"
+oli-version: "1.0"
 based-on:
+  - docs/audits/JOURNEY_COVERAGE_REPORT.md
+  - docs/audits/RUNTIME_EXEC_REPORT.md
+  - docs/audits/runtime/runtime-exec-results.json
   - docs/audits/codebase-map/.map-meta.json
-  - .oli/config.json
-  - docs/product/CONSISTENCY_REPORT.md
-  - docs/product/SPEC_REVIEW.md
-  - docs/product/SPEC_REVIEW_PATCHES.md
-  - docs/trace/TRACE_REPORT.md
-  - docs/audits/COMPLIANCE_REPORT.md
-  - docs/audits/CONFIDENCE_REPORT.md
-  - docs/audits/ENFORCEMENT_REPORT.md
-  - docs/audits/ENFORCEMENT_COVERAGE.md
-  - docs/audits/UI_JOURNEY_AUDIT.md
-  - docs/audits/UI_CONSISTENCY_REPORT.md
-  - docs/audits/SEED_COHERENCE_REPORT.md
-  - docs/execution/RUNTIME_TEST_PLAN.md
-last-modified: 2026-05-31
-last-modified-by: oli-check --discovery (Phase A trust refresh; prior run: --auto)
-flags_used: --auto (thorough, all 9 dimensions, 22 modules) → trust banner refreshed by --discovery
-modules_scanned: 22 (m01..m22)
+last-modified: 2026-06-01T00:00:00Z
+last-modified-by: oli-check
+flags: --journeys
 ---
 
-# Check Summary
+# OLI Check Summary — `--journeys` (re-run after fixes)
 
 ## 0. TRUST STATUS
 
-> Refreshed 2026-05-31 by `/oli-check --discovery` after engine bootstrap (fix-sequence Phase A).
+| Field | Value |
+|-------|-------|
+| Producer | **engine** (engine_version 0.1.0) |
+| Map version | 5 |
+| MAP-FRESHNESS | **STALE-OVERLAP** — 5 working-tree files newer than map (certificate-preview.tsx, officer/compliance.tsx, officer/certificates.tsx, my/settings.tsx, my/profile.tsx) |
+| map@ | engine v5 build · HEAD@82dd56dc |
+| fields_unavailable | `[]` |
+| unverified (below-threshold nodes) | 0 |
 
-```
-PRODUCER          : engine  (@oli/engine@0.1.0 via default dev path /Users/elad-mini/Desktop/oli-engine/dist/cli.js; .oli/config.json committed @7ba0b7e2)
-MAP-FRESHNESS     : FRESH   (map@7ba0b7e2 == HEAD@7ba0b7e2; working tree clean in scope)
-map_sha           : 7ba0b7e210e7ef6b827a562b8672cb57b879cf72
-head_sha          : 7ba0b7e210e7ef6b827a562b8672cb57b879cf72
-file_count        : 1402   (engine scope: excludes node_modules/dist/generated/tests; regex prior counted 2084)
-fields_unavailable: (none — engine fills full contract)
-spec_trace_optin  : true   (CODE_SPEC_TRACE.json populated, ~247KB)
-engine self-findings: 7
-```
-
-**THESIS IN FORCE for the static signal** (engine producer + FRESH + zero fields_unavailable). Phase-A trust-floor driver (regex-fallback + STALE-OVERLAP) **CLEARED via escalation path (a)**.
-
-⚠️ **Dimension verdicts below are STALE** — confidence/compliance/traceability/enforcement were computed against the prior **regex-fallback** map and have NOT yet re-consumed the engine's new fields (`loading_state_hygiene`, `CODE_DATA_MODEL`, `CODE_SPEC_TRACE`). Re-run fix-sequence Phase D (`--confidence`, `--traceability`, `--enforcement`) before trusting the unverified buckets (prior: 580 nodes) or GATE.
-
-→ Trust-banner escalation (R1-strict): the `degraded_static_signal` floor is lifted. GATE still **FAIL** on real project findings (1 P0 UI contrast, 341 P1, 23 ✗ gap cells) — project gaps cleared by Phases B–F, not here.
-
-**Prior regex-run trust block (superseded — kept for diff):**
-```
-PRODUCER  : regex-fallback  · MAP-FRESHNESS : STALE-OVERLAP (map@bf2e6dca; 4 uncommitted seed edits)
-fields_unavailable: loading_state_hygiene · interaction_hygiene · CODE_DATA_MODEL · CODE_SPEC_TRACE
-unverified: 580 (compliance 4 · confidence 504 · traceability 76 +1 algo)
-```
+**Journeys is source-scanned (immune to map staleness).** This `--journeys` re-run targets the 4 P0/P1 findings from the `--all --live` run (2026-05-31); each is verified resolved in code + browser. No runtime dimension selected this run.
 
 ## 1. Run Context
 
-| | |
-|---|---|
-| Mode | `/oli-check --auto` (no isolation flags) |
-| State detected | specs ✓ (22 module dirs) · code ✓ (apps/services/packages) · tests ✓ (795 files) · UI_BLUEPRINT ✓ · PERFORMANCE ✓ · SEED_MANIFEST ✓ |
-| Dimensions selected | all 9 (consistency, traceability, discovery, compliance, confidence, enforcement, journeys, runtime, seed-coherence) |
-| Modules in scope | 22 (m01..m22 — superset of MODULE_MAP's 19 + booking/billing/email) |
-| Codebase map | regenerated this run (producer=regex-fallback, fields_unavailable populated) |
-| Live runtime | NOT executed (no `--live` flag) — Tier-3 skipped, Tier-1+2 ran |
+- **Detected state:** source code present, UI present (UI_BLUEPRINT).
+- **Dimensions selected:** Journeys (static). Runtime not selected (no `--live` this run).
+- **Flags:** `--journeys`.
 
 ## 2. Dimension Results
 
-| Dimension | Verdict | P0 | P1 | P2 | P3 | unverified | Report |
-|-----------|---------|----|----|----|----|------------|--------|
-| Consistency | WARN | 0 | 13 | 4 | 27 | — | [CONSISTENCY_REPORT.md](../product/CONSISTENCY_REPORT.md) · [SPEC_REVIEW.md](../product/SPEC_REVIEW.md) · [SPEC_REVIEW_PATCHES.md](../product/SPEC_REVIEW_PATCHES.md) |
-| Traceability | WARN (map stale — verify) | 0 | 5 | 20 | 0 | 76 | [TRACE_REPORT.md](../trace/TRACE_REPORT.md) |
-| Discovery | WARN (regex-fallback) | 0 | 0 | 0 | 0 | 0 | [codebase-map/](codebase-map/) |
-| Compliance | PASS (with caveats — map stale) | 0 | 6 | 4 | 16 | 4 | [COMPLIANCE_REPORT.md](COMPLIANCE_REPORT.md) |
-| Confidence | WARN (map stale — verify) | 0 | 2 | 4 | 2 | 504 | [CONFIDENCE_REPORT.md](CONFIDENCE_REPORT.md) |
-| Enforcement | WARN (DEGRADED coverage) | 1 KNOWN | 306 (5 stub + 301 UI KNOWN) | 1414 | 1734 | — | [ENFORCEMENT_REPORT.md](ENFORCEMENT_REPORT.md) · [ENFORCEMENT_COVERAGE.md](ENFORCEMENT_COVERAGE.md) · [ENFORCEMENT_REPORT.json](ENFORCEMENT_REPORT.json) |
-| Journeys | WARN (map stale — verify) | 0 | 5 | 12 | 14 | — | [UI_JOURNEY_AUDIT.md](UI_JOURNEY_AUDIT.md) |
-| Runtime | WARN (tier-3 skipped, map v1) | 0 | 3 | 1 | 0 | — | [RUNTIME_TEST_PLAN.md](../execution/RUNTIME_TEST_PLAN.md) |
-| Seed Coherence | WARN (STATIC mode) | 0 | 1 | 3 | 5 | — | [SEED_COHERENCE_REPORT.md](SEED_COHERENCE_REPORT.md) |
+| Dimension | Verdict | Report | Findings | unverified |
+|-----------|---------|--------|----------|------------|
+| Journeys | **PASS** | `JOURNEY_COVERAGE_REPORT.md` | P0:0 P1:0 P2:2 P3:2 | 0 |
 
-**Totals:** P0=1 (UI contrast KNOWN) · P1=341 · P2=1461 · P3=1798 · unverified=584
+Prior P0/P1 (now resolved): J-ORG-001 (P0), J-MY-001 (P1), J-OFC-001 (P1), J-OFC-002 (P1).
 
-## 3. Coverage Matrix (22 modules × 9 dimensions)
+## 3. Coverage Matrix (module × applicable dimension)
 
-Legend: ✓ checked & verdict produced · ⊘ skipped (reason) · ✗ gap (applicable but no verdict / errored)
+Single dimension this run (Journeys static). `✓` = ran + verdict; `⊘ reason` = legitimately N/A; `✗` = applicable but no verdict.
 
-| Module | Cons | Trace | Disc | Comp | Conf | Enf | Jrn | Runt | Seed |
-|--------|:----:|:-----:|:----:|:----:|:----:|:---:|:---:|:----:|:----:|
-| m01-auth-onboarding | ✓ | ✓ | ✓ | ✓ | ✓ (9) | ✓ | ✓ | ⊘ wave-future | ✓ |
-| m02-member-profile | ✓ | ✓ | ✓ | ✓ | ✓ (9) | ✓ | ✓ | ✓ | ✓ |
-| m03-platform-admin | ✓ | ✓ | ✓ | ✓ | ✓ (7) | ✓ | ✓ | ⊘ wave-future | ✓ |
-| m04-org-admin | ✓ | ✓ | ✓ | ✓ | ✓ (6) | ✓ | ✓ | ⊘ wave-future | ✓ |
-| m05-membership | ✓ | ✓ | ✓ | ✓ | ✓ (9) | ✓ | ✓ | ⊘ wave-future | ✓ |
-| m06-dues-payments | ✓ | ✓ | ✓ | ✓ | ✓ (9) | ✓ | ✓ | ⊘ wave-future | ✓ |
-| m07-communications | ✓ | ✓ | ✓ | ✓ | ✓ (8) | ✓ | ✓ | ⊘ wave-future | ✓ |
-| m08-events | ✓ | ✓ | ✓ | ✓ | ✓ (9) | ✓ | ✓ | ⊘ wave-future | ✓ |
-| m09-training | ✓ | ✓ | ✓ | ✓ | ✗ (3) | ✓ | ✓ | ⊘ wave-future | ✓ |
-| m10-credit-tracking | ✓ | ✓ | ✓ | ✓ | ✓ (8) | ✓ | ✓ | ⊘ wave-future | ✓ |
-| m11-documents-credentials | ✓ | ✓ | ✓ | ✓ | ✓ (9) | ✓ | ✓ | ⊘ wave-future | ✓ |
-| m12-elections-governance | ✓ | ✓ | ✓ | ✓ | ✓ (9) | ✓ | ✓ | ✗ (uncovered) | ✓ |
-| m13-professional-feed | ✓ | ✓ | ✓ | ✗ (BE missing) | ⊘ no-code (0) | ✓ WARN | ✗ (orphan) | ✗ (uncovered) | ✓ |
-| m14-national-dashboard | ✓ | ✓ | ✓ | ✓ | ✗ (5) | ✓ | ✓ (officer 404) | ⊘ wave-future | ✓ |
-| m15-job-board | ✓ | ✓ | ✓ | ✗ (BE missing) | ✓ (7) | ✓ WARN | ✗ (orphan) | ✗ (uncovered) | ✓ |
-| m16-advertising | ✓ | ✓ | ✓ | ✗ (FE missing) | ✓ (7) | ✓ WARN | ✗ (orphan) | ✗ (uncovered) | ✓ |
-| m17-marketplace | ✓ | ✓ | ✓ | ✗ (FE missing) | ✗ (4) | ✓ WARN | ✗ (orphan) | ✗ (uncovered) | ⊘ undeclared |
-| m18-surveys-polls | ✓ | ✓ | ✓ | ✓ | ✓ (8) | ✓ | ✓ | ⊘ wave-future | ✓ |
-| m19-committee-management | ✓ | ✓ | ✓ | ✗ (BE deferred) | ✓ (6) | ✓ WARN | ✓ (admin-only) | ✗ (uncovered) | ✓ |
-| m20-booking | ✓ | ✗ (zero-anchor) | ✓ | ✓ | ✓ (9) | ✗ DEGRADED | ✓ | ✓ | ✓ |
-| m21-billing | ✓ | ✗ (zero-anchor) | ✓ | ✓ | ✓ (9) | ✗ DEGRADED | ✓ | ✓ | ✓ |
-| m22-email | ✓ | ✗ (zero-anchor) | ✓ | ✓ | ✓ (9) | ✗ DEGRADED | ✓ | ✓ | ✓ |
+| Module | Journeys (static) |
+|--------|-------------------|
+| M01 Auth / public | ✓ |
+| M02 Profile | ✓ |
+| M03 Settings | ✓ |
+| M04 ID Card / Certificates (member) | ✓ |
+| M05 Training / CPD | ✓ (J-MY-009 P3) |
+| M06 Events / Booking | ✓ |
+| M07 Dues / Payments (member) | ✓ (J-MY-001 RESOLVED; J-MY-002 P2) |
+| M08 Org membership | ✓ (J-ORG-001 RESOLVED) |
+| M09 Documents | ✓ (J-ORG-001 RESOLVED) |
+| M10 Governance / Elections | ✓ |
+| M11 Announcements / Comms | ✓ |
+| M12 Notifications | ✓ |
+| M13 Professional Feed | ⊘ no-ui (unbuilt) |
+| M14 National Dashboard | ⊘ no-ui (unbuilt) |
+| M15 Job Board | ⊘ no-ui (unbuilt) |
+| M16 Advertising | ⊘ no-ui (unbuilt) |
+| M17 Marketplace | ⊘ no-ui (unbuilt) |
+| M18 Surveys & Polls | ✓ (J-OFC-003 P3) |
+| M19 Officer / Finance (gateway) | ✓ (J-OFC-001/002 RESOLVED; J-ERROR-GENERIC P2) |
 
-### Uncovered modules callout
+**Uncovered modules (✗ gap):** none. All built modules covered by Journeys.
 
-- **m20-booking, m21-billing, m22-email** — Traceability ✗ (specs are prose-only, no BR/AC/WF/SM IDs to anchor) + Enforcement ✗ DEGRADED (no per-module sub-check artifacts emitted). 6 ✗ cells.
-- **m13-professional-feed, m15-job-board, m16-advertising, m17-marketplace** — entire UI surface orphan + BE/FE missing per ROADMAP defer. Per dim: Compliance ✗, Journeys ✗, Runtime ✗. 12 ✗ cells.
-- **m12-elections-governance, m19-committee-management** — Runtime ✗ uncovered (no e2e walker coverage even though specs exist).
-- **m14-national-dashboard** — officer route `/officer/national-dashboard` returns 404; routes exist but role-route gap.
-
-Total ✗ cells: 23 (across 9 modules). Total ⊘ cells: 19 (16 runtime wave-future + 1 no-code + 1 undeclared seed + 1 already covered above).
-
-## 4. GATE Verdict
+## 4. GATE
 
 ```
-GATE: FAIL
-overall_verdict_floor: WARN-WITH-PROOF (driver: degraded_static_signal — THESIS NOT FULLY IN FORCE)
+GATE: PASS
 ```
 
-### FAIL drivers
+**Resolved this cycle (verified in code + browser):**
+- J-ORG-001 (P0) — document download → registered backend route `GET /documents/:documentId/download` (app.ts:490, handler `downloadDocument.ts`); client repointed to `/api/documents/${documentId}/download`. Browser-verified 302 → presigned MinIO URL; 401 unauth, 400 bad-uuid, membership-gated.
+- J-MY-001 (P1) — Pay Dues now a `<Link to="/org/$orgSlug/dues">` (organizations.tsx:123). Browser-verified: navigates to dues page, which renders real dues content with no ErrorBoundary.
+- J-OFC-001 (P1) — `testMutation` has `onError` (gateway-setup.tsx:48) with `toast.error`.
+- J-OFC-002 (P1) — `disconnectMutation` has `onError` (gateway-setup.tsx:75) with `toast.error`.
 
-| Driver | Dimension | Finding(s) | Module(s) |
-|--------|-----------|------------|-----------|
-| P0 finding | Enforcement (UI consistency) | `EU-CONTRAST-text-secondary-bg-white` (1.07:1 contrast) — KNOWN | cross-cutting UI |
-| P1 findings (341 total) | All 8 non-discovery dimensions | see per-dim totals | mostly KNOWN/ROADMAP-deferred but rule-driven FAIL |
-| ✗ gap cells (23 total) | Trace×3, Compliance×5, Confidence×3, Enforcement×3, Journeys×4, Runtime×5 | see matrix | m13/m14/m15/m16/m17/m19/m20/m21/m22 |
-| Trust-banner escalation | Discovery | regex-fallback + STALE-OVERLAP + 584 unverified nodes | global |
+Remaining findings are P2/P3 only (do not gate): J-MY-002, J-ERROR-GENERIC (P2); J-MY-009, J-OFC-003 (P3).
 
-### To promote to PASS
-
-1. **Static path** — install `oli-engine`, author `.oli/config.json`, commit seed working-tree edits, re-scan to `FRESH`/`FRESH-ENOUGH`.
-2. **Empirical path** — run `/oli-check --runtime --live` against in-scope routes with `ER-` P0/P1 = 0.
-
-Plus close the 23 ✗ gap cells (most importantly the 3 zero-anchor specs m20/m21/m22).
+No `✗ gap`. No P0/P1 remain → **PASS**.
 
 ## 5. What's Next
 
-| Priority | Action | Command |
-|----------|--------|---------|
-| P0 | Fix UI contrast finding `EU-CONTRAST-text-secondary-bg-white` | `/oli-check --enforcement --fix` (suggest/dry-run) |
-| P1 | Author BR/AC/WF/SM IDs in m20/m21/m22 specs (close zero-anchor) | `/oli-spec-modules --module m20-booking,m21-billing,m22-email` |
-| P1 | Resolve 13 stub `API_CONTRACTS.md` (m06/m09/m16/m19 lead) | `/oli-spec-api` per module |
-| P1 | m13 cluster — author RPM §3.x + DOMAIN_MODEL `feed_post` entity | `/oli-spec-modules --module m13-professional-feed` |
-| P1 | m18 DPA min-n threshold for anonymous surveys (regulatory) | edit `docs/product/modules/m18-surveys-polls/MODULE_SPEC.md` |
-| P1 | Install `oli-engine`, author `.oli/config.json`, re-scan | `oli-engine install && /oli-check --discovery` |
-| P1 | m09-training: 10 handlers, zero `.test.ts` — write unit tests | `/test-api --module training` then `/oli-check --confidence` |
-| P1 | 17 orphan WF-NNN workflows (m13/m15/m16/m17) — implement UI | `/oli-plan-slices --modules m13,m15,m16,m17` |
-| P2 | 64 `page.waitForTimeout` calls in E2E — remove for flake | grep `apps/memberry/tests` |
-| P2 | 263 weak E2E assertions (`toBeTruthy/toBeDefined`) — tighten | grep `apps/memberry/tests` |
-| P2 | Cross-tenant DAST gap — author auth-matrix tests | `/oli-check --runtime --live` once engine landed |
-| P3 | Bring SEED_MANIFEST in sync (declare m17 marketplace + reviews + audit_log) | edit `docs/product/SEED_MANIFEST.md` |
-| meta | Confirm map FRESH state | `/oli-check --discovery` after committing seed edits |
-| meta | Run again with `--live` to clear WARN-WITH-PROOF floor | `/oli-check --runtime --live` |
+1. (Optional) Address P2s: `J-ERROR-GENERIC` (interpolate `err.code`/`err.message` in dues toasts), `J-MY-002`.
+2. (Optional) Re-run `/oli-check --journeys --all --live` with seeded `dataSurfaces` + officer auth for empirical Tier-3 backstop on download / Pay Dues / officer surfaces.
+3. Ship with `/ship` — journeys gate is clear.
+
+> Note: a separate dues-page render crash chain (Date-vs-string `periodStart` + BigInt arithmetic) was found and fixed during J-MY-001 verification — `dues.tsx` (fmtPeriod helper, `Number(...)` BigInt guards) and `arrears-breakdown.tsx` (`groupByYear` `getFullYear` instead of `.slice`). These were runtime crashes on the Pay Dues destination, not static journey findings; verified clean in browser.

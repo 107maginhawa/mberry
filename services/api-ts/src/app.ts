@@ -94,6 +94,8 @@ import { getAnnouncementStats } from '@/handlers/communication/getAnnouncementSt
 
 // Dues: receipt download (hand-wired, Cycle 8)
 import { downloadReceipt } from '@/handlers/dues/downloadReceipt';
+// Documents: byte download (hand-wired, see handler header — browser GET, no x-org-id)
+import { downloadDocument } from '@/handlers/documents/downloadDocument';
 // Stripe webhook endpoint (hand-wired, must precede auth middleware)
 import { stripeWebhookHandler } from '@/handlers/dues/stripeWebhook';// National dashboard export (hand-wired, Cycle 8)
 import { exportNationalDashboard } from '@/handlers/association:operations/exportNationalDashboard';
@@ -153,6 +155,7 @@ import { refreshCompliance } from '@/handlers/association:member/refreshComplian
 import { getMyCredits } from '@/handlers/person/getMyCredits';
 // bulkIssueCertificates — now in generated routes (Phase 35)
 import { verifyCertificatePublic } from '@/handlers/certificates/verifyCertificatePublic';
+import { generateCertificatePdf } from '@/handlers/certificates/generateCertificatePdf';
 
 // Special Assessments — now in generated routes (Phase 35)
 
@@ -482,6 +485,10 @@ export function createApp(config: Config): App {
   const receiptParams = zValidator('param', z.object({ organizationId: z.string().uuid(), paymentId: z.string().uuid() }), validationErrorHandler);
   app.get('/org/:organizationId/payments/:paymentId/receipt', receiptParams, authMiddleware(), downloadReceipt as unknown as Handler);
 
+  // @hand-wired reason="document byte download, browser GET cannot send x-org-id; self-enforces membership" wave="oli-J-ORG-001"
+  const documentIdParam = zValidator('param', z.object({ documentId: z.string().uuid() }), validationErrorHandler);
+  app.get('/documents/:documentId/download', documentIdParam, authMiddleware(), downloadDocument as unknown as Handler);
+
   // @hand-wired reason="national dashboard CSV/JSON export, admin-only" wave="Cycle-8"
   app.post('/admin/national-dashboard/:associationId/export', assocIdParam, authMiddleware(), exportNationalDashboard as unknown as Handler);
 
@@ -502,6 +509,10 @@ export function createApp(config: Config): App {
   app.get('/persons/me/id-card/:orgId', orgIdShortParam, authMiddleware(), getMyIdCard as unknown as Handler);
   app.get('/persons/me/id-card/:orgId/pdf', orgIdShortParam, authMiddleware(), getMyIdCardPdf as unknown as Handler);
   // bulkIssueCertificates — migrated to generated routes (Phase 35)
+
+  // @hand-wired reason="WF-074 certificate PDF download, handler exists but not in TypeSpec" wave="Wave-2b"
+  const certIdParam = zValidator('param', z.object({ id: z.string().uuid() }), validationErrorHandler);
+  app.get('/certificates/:id/pdf', certIdParam, authMiddleware(), generateCertificatePdf as unknown as Handler);
 
   // @hand-wired reason="WF-070 cross-org credit transcript export, inline query schema not in TypeSpec" wave="Wave-22"
   const creditTranscriptQuery = zValidator('query', z.object({

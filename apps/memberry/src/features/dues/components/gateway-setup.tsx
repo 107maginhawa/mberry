@@ -45,6 +45,10 @@ export function GatewaySetup({ orgId }: GatewaySetupProps) {
     onSuccess: (data) => {
       setTestResult({ success: data.success, message: data.message })
     },
+    onError: (err) => {
+      setTestResult({ success: false, error: err instanceof Error ? err.message : 'Connection test failed' })
+      toast.error('Connection test failed', { description: err instanceof Error ? err.message : 'Please check your keys and try again.' })
+    },
   })
 
   const saveMutation = useMutation({
@@ -67,6 +71,9 @@ export function GatewaySetup({ orgId }: GatewaySetupProps) {
       queryClient.invalidateQueries({ queryKey: getDuesGatewayConfigQueryKey({ path: { organizationId: orgId } }) })
       setShowDisconnect(false)
       toast.success('Gateway disconnected')
+    },
+    onError: (err) => {
+      toast.error('Failed to disconnect', { description: err instanceof Error ? err.message : 'Please try again.' })
     },
   })
 

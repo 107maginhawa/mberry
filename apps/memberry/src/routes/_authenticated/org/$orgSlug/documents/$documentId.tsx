@@ -233,7 +233,7 @@ function MemberDocumentDetailPage() {
 
           <div className="shrink-0">
             <a
-              href={`/api/association/documents/${documentId}/download`}
+              href={`/api/documents/${documentId}/download`}
               download={doc.fileName}
             >
               <Button className="gap-2">
@@ -249,7 +249,7 @@ function MemberDocumentDetailPage() {
       {isPdf && (
         <GlassCard className="p-0 overflow-hidden">
           <iframe
-            src={`/api/association/documents/${documentId}/download`}
+            src={`/api/documents/${documentId}/download`}
             className="w-full h-[600px] border-0"
             title={`Preview of ${doc.title}`}
           />

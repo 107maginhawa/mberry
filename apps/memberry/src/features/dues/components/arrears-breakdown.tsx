@@ -38,7 +38,8 @@ function getDaysOverdue(dueDate: string): number {
 function groupByYear(invoices: ArrearsInvoice[]): Record<string, ArrearsInvoice[]> {
   const groups: Record<string, ArrearsInvoice[]> = {}
   for (const inv of invoices) {
-    const year = inv.periodStart.slice(0, 4)
+    const parsed = inv.periodStart ? new Date(inv.periodStart).getFullYear() : NaN
+    const year = Number.isNaN(parsed) ? 'Unknown' : String(parsed)
     if (!groups[year]) groups[year] = []
     groups[year].push(inv)
   }

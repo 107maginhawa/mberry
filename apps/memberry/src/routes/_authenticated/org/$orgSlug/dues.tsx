@@ -25,6 +25,13 @@ export const Route = createFileRoute('/_authenticated/org/$orgSlug/dues')({
   component: MemberDuesPage,
 })
 
+/** API serves period bounds as Date or ISO string; render a stable date label. */
+function fmtPeriod(value: string | Date | null | undefined): string {
+  if (!value) return '—'
+  const d = new Date(value)
+  return Number.isNaN(d.getTime()) ? '—' : d.toLocaleDateString('en-PH')
+}
+
 function MemberDuesPage() {
   const { orgId, orgSlug } = useOrg()
 
@@ -125,11 +132,12 @@ function MemberDuesPage() {
       )
       const isPaid = !!matchedPayment || inv.status === 'paid'
       const isOverdue = ['overdue'].includes(inv.status)
-      const year = inv.periodStart?.slice(0, 4) ?? ''
+      const periodYear = inv.periodStart ? new Date(inv.periodStart).getFullYear() : NaN
+      const year = Number.isNaN(periodYear) ? '' : String(periodYear)
       return {
         id: inv.id,
         label: year,
-        amount: inv.totalAmount ?? 0,
+        amount: Number(inv.totalAmount ?? 0),
         dueDate: inv.dueDate ?? inv.periodEnd ?? '',
         status: isPaid ? 'paid' as const : isOverdue ? 'overdue' as const : 'upcoming' as const,
         paidDate: matchedPayment?.paidAt,
@@ -229,10 +237,10 @@ function MemberDuesPage() {
                       <div>
                         <p className="font-mono text-[13px] text-[var(--color-muted)]">{inv.invoiceNumber}</p>
                         <p className="text-h2 font-display font-bold tabular-nums">
-                          <CountUp value={inv.totalAmount / 100} prefix="₱" format={(n) => n.toLocaleString('en-PH', { minimumFractionDigits: 2 })} />
+                          <CountUp value={Number(inv.totalAmount ?? 0) / 100} prefix="₱" format={(n) => n.toLocaleString('en-PH', { minimumFractionDigits: 2 })} />
                         </p>
                         <p className="text-[13px] text-[var(--color-muted)]">
-                          Period: {inv.periodStart} to {inv.periodEnd}
+                          Period: {fmtPeriod(inv.periodStart)} to {fmtPeriod(inv.periodEnd)}
                         </p>
                       </div>
                       <DuesStatusBadge type="invoice" status={inv.status} />
