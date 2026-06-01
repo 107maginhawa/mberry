@@ -20,6 +20,7 @@ import { Input } from '@monobase/ui'
 import { Checkbox } from '@monobase/ui'
 import { FileText, Search, Download, Bell, CheckCircle } from 'lucide-react'
 import { toast } from 'sonner'
+import { extractErrorMessage } from '@/utils/error'
 
 const invoiceSearchSchema = z.object({
   tab: z.enum(['all', 'generated', 'sent', 'overdue', 'paid']).optional().default('all'),
@@ -114,7 +115,7 @@ function InvoicesPage() {
       setSelectedIds(new Set())
       toast.success('Invoices marked as paid')
     },
-    onError: () => toast.error('Failed to mark invoices as paid'),
+    onError: (err) => toast.error('Failed to mark invoices as paid', { description: extractErrorMessage(err, 'Please try again.') }),
   })
 
   function toggleSelect(id: string) {

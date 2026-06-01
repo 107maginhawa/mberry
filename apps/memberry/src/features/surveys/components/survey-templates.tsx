@@ -142,6 +142,7 @@ export function SurveyTemplates({ onSelect, onSkip }: SurveyTemplatesProps) {
                 variant="ghost"
                 size="sm"
                 className="opacity-0 group-hover:opacity-100 transition-opacity text-xs"
+                onClick={(e) => { e.stopPropagation(); onSelect(t) }}
               >
                 Use Template
               </Button>

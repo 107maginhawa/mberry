@@ -21,6 +21,7 @@ import { Badge } from '@monobase/ui'
 import { Skeleton } from '@monobase/ui'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@monobase/ui'
 import { toast } from 'sonner'
+import { extractErrorMessage } from '@/utils/error'
 import { CheckCircle, XCircle, Wifi, WifiOff } from 'lucide-react'
 
 interface GatewaySetupProps {
@@ -60,8 +61,8 @@ export function GatewaySetup({ orgId }: GatewaySetupProps) {
       setSecretKey('')
       setTestResult(null)
     },
-    onError: () => {
-      toast.error('Failed to save', { description: 'Please try again.' })
+    onError: (err) => {
+      toast.error('Failed to save', { description: extractErrorMessage(err, 'Please try again.') })
     },
   })
 

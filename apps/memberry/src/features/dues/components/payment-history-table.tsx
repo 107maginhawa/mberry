@@ -7,7 +7,7 @@ import { Button } from '@monobase/ui'
 import { Skeleton } from '@monobase/ui'
 import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from '@monobase/ui'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@monobase/ui'
-import { Receipt } from 'lucide-react'
+import { Receipt, AlertTriangle } from 'lucide-react'
 import { formatCents } from '../lib/money'
 import { EmptyState } from '@/components/patterns/empty-state'
 import { GlassCard } from '@/components/motion/glass-card'
@@ -34,7 +34,7 @@ export function PaymentHistoryTable({ orgId, scope }: PaymentHistoryTableProps) 
   const [offset, setOffset] = useState(0)
   const limit = 25
 
-  const { data, isLoading } = useQuery({
+  const { data, isLoading, isError, refetch, isRefetching } = useQuery({
     ...listDuesPaymentsOptions({
       query: {
         ...(orgId ? { organizationId: orgId } : {}),
@@ -79,6 +79,17 @@ export function PaymentHistoryTable({ orgId, scope }: PaymentHistoryTableProps) 
 
       {isLoading ? (
         <div className="space-y-2">{Array.from({ length: 5 }).map((_, i) => <Skeleton key={i} className="h-12 w-full rounded-lg animate-shimmer" />)}</div>
+      ) : isError ? (
+        <GlassCard className="p-8 flex flex-col items-center text-center gap-3">
+          <AlertTriangle className="w-10 h-10 text-[var(--color-error)]" />
+          <div role="alert">
+            <h3 className="font-medium">Couldn't load payments</h3>
+            <p className="text-sm text-[var(--color-muted)] mt-1">Something went wrong fetching your payment history. Your payments are safe — this is a display error.</p>
+          </div>
+          <Button variant="outline" size="sm" onClick={() => refetch()} disabled={isRefetching}>
+            {isRefetching ? 'Retrying…' : 'Retry'}
+          </Button>
+        </GlassCard>
       ) : payments.length === 0 ? (
         <EmptyState
           icon={<Receipt className="w-10 h-10" />}

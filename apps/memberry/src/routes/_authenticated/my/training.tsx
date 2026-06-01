@@ -1,9 +1,10 @@
-import { createFileRoute } from '@tanstack/react-router'
+import { createFileRoute, useNavigate } from '@tanstack/react-router'
 import { useQuery } from '@tanstack/react-query'
 import { Award, Calendar, BookOpen, CheckCircle } from 'lucide-react'
 import { listMyCustomTrainingsOptions, searchTrainingsOptions } from '@monobase/sdk-ts/generated/react-query'
 import type { ApiListResponse } from '@/types/api'
 import { useOrgContext } from '@/hooks/useOrgContext'
+import { useMyOrgs } from '@/hooks/useMyOrgs'
 import { PageHeader } from '@/components/patterns/page-header'
 import { EmptyState } from '@/components/patterns/empty-state'
 import { CardSkeleton, TableSkeleton } from '@/components/patterns/skeleton-loader'
@@ -39,6 +40,9 @@ function formatDate(iso: string | null | undefined) {
 
 function MyTraining() {
   const { orgId } = useOrgContext()
+  const navigate = useNavigate()
+  const { orgs } = useMyOrgs()
+  const orgSlug = orgId ? orgs.find((o) => o.organizationId === orgId)?.orgSlug : undefined
   const orgHeaders = orgId ? { 'x-org-id': orgId } : undefined
 
   const { data, isLoading, error } = useQuery({
@@ -107,11 +111,20 @@ function MyTraining() {
           <CardSkeleton />
           <CardSkeleton />
         </div>
-      ) : error || items.length === 0 ? (
+      ) : error ? (
+        <div role="alert" className="p-4 rounded-lg bg-[var(--color-error-bg)] text-[var(--color-error)] text-sm">
+          Unable to load your training. Please try refreshing the page.
+        </div>
+      ) : items.length === 0 ? (
         <EmptyState
           icon={<BookOpen size={32} />}
           headline="No training sessions yet"
           description="Browse available trainings and enroll to start earning CPE credits."
+          action={
+            orgSlug
+              ? { label: 'Browse training catalog', onClick: () => navigate({ to: '/org/$orgSlug/training', params: { orgSlug } }) }
+              : { label: 'View my organizations', onClick: () => navigate({ to: '/my/organizations' }) }
+          }
         />
       ) : (
         <GlassCard className="overflow-hidden">

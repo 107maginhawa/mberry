@@ -12,11 +12,11 @@ thesis: source-scanned (journeys immune to map staleness)
 verdict: PASS
 ---
 
-# Journey Coverage Report — `--journeys` (re-run after fixes)
+# Journey Coverage Report — `--journeys` (re-run after P2/P3 fixes)
 
-Source-scanned static interaction-integrity audit. Re-run targeting the 4 P0/P1 findings from the `--all --live` run (2026-05-31). Journeys analysis is source-derived and immune to map staleness.
+Source-scanned static interaction-integrity audit. Re-run targeting the 2 P2 + 2 P3 advisories left after the P0/P1 clearance. Journeys analysis is source-derived and immune to map staleness.
 
-**Verdict: PASS** — all P0/P1 resolved + verified in code and browser. Only P2/P3 advisories remain.
+**Verdict: PASS** — all P0/P1/P2/P3 resolved + verified in code and browser. Zero open journey findings.
 
 ## Severity Summary
 
@@ -24,8 +24,8 @@ Source-scanned static interaction-integrity audit. Re-run targeting the 4 P0/P1 
 |----------|-------|---------|
 | P0 | 0 | — (J-ORG-001 resolved) |
 | P1 | 0 | — (J-MY-001, J-OFC-001, J-OFC-002 resolved) |
-| P2 | 2 | J-MY-002, J-ERROR-GENERIC cluster (officer) |
-| P3 | 2 | J-OFC-003, J-MY-009 |
+| P2 | 0 | — (J-MY-002, J-ERROR-GENERIC cluster resolved) |
+| P3 | 0 | — (J-OFC-003, J-MY-009 resolved) |
 
 ## Changes Since Last Run
 
@@ -68,23 +68,35 @@ Was: `<Button onClick={(e) => { e.preventDefault(); e.stopPropagation() }}>Pay D
 
 **Fix:** `disconnectMutation` now has `onError` surfacing `toast.error('Failed to disconnect', ...)`.
 
-## P2 Findings
+## P2 Findings — RESOLVED
 
-### J-MY-002 — Payment history empty state is indistinguishable from load failure (P2)
-`apps/memberry/src/routes/_authenticated/my/payments.tsx` — payment-history surface renders the same empty UI on a 2xx-empty as on a query error (no error branch). Silent-empty risk.
+### J-MY-002 — Payment history empty state is indistinguishable from load failure (P2) — RESOLVED
+`apps/memberry/src/features/dues/components/payment-history-table.tsx` (the query surface behind `/my/payments`).
 
-### J-ERROR-GENERIC cluster (P2, officer-heavy)
-Static error toasts/messages with no `err.code` / `err.message` interpolation — generic "Something went wrong" text that can't tell the user what to do. Concentrated in officer surfaces. Advisory-to-moderate; does not block.
+Was: `useQuery` destructured only `data, isLoading`; a query error fell through to the same empty UI as a 2xx-empty (silent-empty risk).
 
-## P3 Findings
+**Fix:** destructure `isError, refetch, isRefetching` and render a distinct error branch (AlertTriangle, "Couldn't load payments", `role="alert"`, Retry button) before the empty-state branch. Empty now renders only on a genuine 2xx-empty. **Browser-verified:** `/my/payments` renders a clean empty state (no false error); error branch is structurally separate.
 
-### J-OFC-003 — "Use Template" button has no own onClick (P3, downgraded)
-`apps/memberry/src/features/surveys/components/survey-templates.tsx:141-147`
+### J-ERROR-GENERIC cluster (P2, officer-heavy) — RESOLVED
+Static error toasts with no `err.code` / `err.message` interpolation across officer/finance surfaces.
 
-`<Button variant="ghost" size="sm">Use Template</Button>` has no `onClick`. Initially flagged P1, but the **parent card** (`onClick={() => onSelect(t)}`, line 128) handles selection and the button does not `stopPropagation`, so a click bubbles and the template IS selected. Functional via bubbling → downgraded to P3 (redundant/decorative button; relies on event bubbling, fragile but not dead).
+**Fix:** introduced `apps/memberry/src/utils/error.ts#extractErrorMessage` (handles both the flat `{message,code}` runtime shape and the taxonomy-documented nested `{error:{code,message}}` shape; surfaces the taxonomy code as `"message (CODE)"`). Repointed `onError` handlers to `toast.error('Failed to X', { description: extractErrorMessage(err, 'Please try again.') })` in: officer/settings/providers.tsx (3), officer/payments/index.tsx, officer/finances/invoices.tsx, officer/finances/invoices/$invoiceId.tsx, officer/finances/invoices/index.tsx (3), special-assessments-list.tsx (4), dues-config-form.tsx, gateway-setup.tsx (save). **Browser-verified:** officer finance pages (invoices, funds, payments) load clean as president.
 
-### J-MY-009 — Training discovery dead-end (P3)
-Training list offers no forward action when a member has no enrolled/available training — advisory dead-end, no data loss.
+## P3 Findings — RESOLVED
+
+### J-OFC-003 — "Use Template" button has no own onClick (P3) — RESOLVED
+`apps/memberry/src/features/surveys/components/survey-templates.tsx:141-148`
+
+Was: `<Button variant="ghost" size="sm">Use Template</Button>` selected only via bubbling to the parent card (fragile).
+
+**Fix:** button now has its own `onClick={(e) => { e.stopPropagation(); onSelect(t) }}`. **Browser-verified:** direct click on "Use Template" advances past template selection into the builder (template applied, inputs populated) as president.
+
+### J-MY-009 — Training discovery dead-end (P3) — RESOLVED
+`apps/memberry/src/routes/_authenticated/my/training.tsx`
+
+Was: empty training state offered no forward action.
+
+**Fix:** empty `EmptyState` now carries a forward `action` — "Browse training catalog" → `/org/$orgSlug/training` when the org slug resolves (via `useMyOrgs`), else "View my organizations" → `/my/organizations`. **Browser-verified:** `/my/training` empty state shows the CTA button as a seeded member.
 
 ## Live Reconciliation (ER- ↔ J-)
 

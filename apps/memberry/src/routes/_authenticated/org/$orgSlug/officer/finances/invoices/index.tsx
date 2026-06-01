@@ -23,6 +23,7 @@ import { Checkbox } from '@monobase/ui'
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@monobase/ui'
 import { FileText, Search, Download, Bell, CheckCircle, MoreHorizontal, Send, XCircle, FileDown, Plus } from 'lucide-react'
 import { toast } from 'sonner'
+import { extractErrorMessage } from '@/utils/error'
 
 const invoiceSearchSchema = z.object({
   tab: z.enum(['all', 'generated', 'sent', 'overdue', 'paid']).optional().default('all'),
@@ -115,13 +116,13 @@ function InvoicesPage() {
   const markPaidMut = useMutation({
     ...markDuesInvoicePaidMutation(),
     onSuccess: () => { invalidate(); setSelectedIds(new Set()); toast.success('Invoice marked as paid') },
-    onError: () => toast.error('Failed to mark invoice as paid'),
+    onError: (err) => toast.error('Failed to mark invoice as paid', { description: extractErrorMessage(err, 'Please try again.') }),
   })
 
   const updateStatusMut = useMutation({
     ...updateDuesInvoiceMutation(),
     onSuccess: () => { invalidate(); toast.success('Invoice updated') },
-    onError: () => toast.error('Failed to update invoice'),
+    onError: (err) => toast.error('Failed to update invoice', { description: extractErrorMessage(err, 'Please try again.') }),
   })
 
   const genInvoicesMut = useMutation({
@@ -131,7 +132,7 @@ function InvoicesPage() {
       const count = data?.data?.length ?? 0
       toast.success(`${count} invoice${count !== 1 ? 's' : ''} generated`)
     },
-    onError: () => toast.error('Failed to generate invoices'),
+    onError: (err) => toast.error('Failed to generate invoices', { description: extractErrorMessage(err, 'Please try again.') }),
   })
 
   function handleSendInvoice(inv: DuesInvoice) {

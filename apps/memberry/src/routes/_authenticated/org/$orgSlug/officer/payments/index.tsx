@@ -9,6 +9,7 @@ import { PageHeader } from '@/components/patterns/page-header'
 import { GlassCard } from '@/components/motion/glass-card'
 import { Plus, Bell } from 'lucide-react'
 import { toast } from 'sonner'
+import { extractErrorMessage } from '@/utils/error'
 import { useOrg } from '@/hooks/useOrg'
 
 export const Route = createFileRoute('/_authenticated/org/$orgSlug/officer/payments/')({
@@ -27,8 +28,8 @@ function OfficerPaymentsPage() {
         description: count > 0 ? `${count} reminders queued` : 'Reminder batch queued for processing',
       })
     },
-    onError: () => {
-      toast.error('Failed to send reminders')
+    onError: (err) => {
+      toast.error('Failed to send reminders', { description: extractErrorMessage(err, 'Please try again.') })
     },
   })
 

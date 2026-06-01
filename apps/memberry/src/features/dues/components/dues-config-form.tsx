@@ -46,6 +46,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Switch } from '@monobase/ui'
 import { Skeleton } from '@monobase/ui'
 import { toast } from 'sonner'
+import { extractErrorMessage } from '@/utils/error'
 import { parseCentsInput } from '../lib/money'
 import { chooseMutationAction, buildCreatePayload, buildUpdatePayload } from './dues-config-form.utils'
 
@@ -177,8 +178,8 @@ export function DuesConfigForm({ orgId }: DuesConfigFormProps) {
     setHasChanges(false)
   }
 
-  const onMutationError = () => {
-    toast.error('Failed to save', { description: 'Please try again.' })
+  const onMutationError = (err: unknown) => {
+    toast.error('Failed to save', { description: extractErrorMessage(err, 'Please try again.') })
   }
 
   const createMutation = useMutation({

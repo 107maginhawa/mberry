@@ -16,6 +16,7 @@ import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from '@
 import { EmptyState } from '@/components/patterns/empty-state'
 import { TableSkeleton } from '@/components/patterns/skeleton-loader'
 import { toast } from 'sonner'
+import { extractErrorMessage } from '@/utils/error'
 import { useOrg } from '@/hooks/useOrg'
 
 export const Route = createFileRoute('/_authenticated/org/$orgSlug/officer/settings/providers')({
@@ -81,7 +82,7 @@ function ProvidersPage() {
       toast.success('Provider created')
       setShowCreateDialog(false)
     },
-    onError: () => toast.error('Failed to create provider'),
+    onError: (err) => toast.error('Failed to create provider', { description: extractErrorMessage(err, 'Please try again.') }),
   })
 
   const editMutation = useMutation({
@@ -95,7 +96,7 @@ function ProvidersPage() {
       toast.success('Provider updated')
       setEditingProvider(null)
     },
-    onError: () => toast.error('Failed to update provider'),
+    onError: (err) => toast.error('Failed to update provider', { description: extractErrorMessage(err, 'Please try again.') }),
   })
 
   const deleteMutation = useMutation({
@@ -105,7 +106,7 @@ function ProvidersPage() {
       toast.success('Provider deleted')
       setDeletingProvider(null)
     },
-    onError: () => toast.error('Failed to delete provider'),
+    onError: (err) => toast.error('Failed to delete provider', { description: extractErrorMessage(err, 'Please try again.') }),
   })
 
   const isSubmitting = createMutation.isPending || editMutation.isPending

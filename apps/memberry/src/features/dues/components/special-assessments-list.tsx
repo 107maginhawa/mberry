@@ -17,6 +17,7 @@ import {
 } from '@monobase/ui'
 import { Plus, Pencil, Trash2, Play, Eye } from 'lucide-react'
 import { toast } from 'sonner'
+import { extractErrorMessage } from '@/utils/error'
 
 interface SpecialAssessment {
   id: string
@@ -86,7 +87,7 @@ export function SpecialAssessmentsList({ orgId }: SpecialAssessmentsListProps) {
       toast.success('Assessment created')
       closeDialog()
     },
-    onError: () => toast.error('Failed to create assessment'),
+    onError: (err) => toast.error('Failed to create assessment', { description: extractErrorMessage(err, 'Please try again.') }),
   })
 
   const updateMutation = useMutation({
@@ -97,7 +98,7 @@ export function SpecialAssessmentsList({ orgId }: SpecialAssessmentsListProps) {
       toast.success('Assessment updated')
       closeDialog()
     },
-    onError: () => toast.error('Failed to update assessment'),
+    onError: (err) => toast.error('Failed to update assessment', { description: extractErrorMessage(err, 'Please try again.') }),
   })
 
   const deleteMutation = useMutation({
@@ -107,7 +108,7 @@ export function SpecialAssessmentsList({ orgId }: SpecialAssessmentsListProps) {
       queryClient.invalidateQueries({ queryKey: ['special-assessments', orgId] })
       toast.success('Assessment deleted')
     },
-    onError: () => toast.error('Failed to delete assessment'),
+    onError: (err) => toast.error('Failed to delete assessment', { description: extractErrorMessage(err, 'Please try again.') }),
   })
 
   const applyMutation = useMutation({
@@ -117,7 +118,7 @@ export function SpecialAssessmentsList({ orgId }: SpecialAssessmentsListProps) {
       queryClient.invalidateQueries({ queryKey: ['special-assessments', orgId] })
       toast.success('Assessment applied — invoices generated')
     },
-    onError: () => toast.error('Failed to apply assessment'),
+    onError: (err) => toast.error('Failed to apply assessment', { description: extractErrorMessage(err, 'Please try again.') }),
   })
 
   function closeDialog() {
@@ -225,12 +226,13 @@ export function SpecialAssessmentsList({ orgId }: SpecialAssessmentsListProps) {
                     </TableCell>
                     <TableCell>
                       {a.collection ? (
-                        <button
+                        <Button
+                          variant="link"
                           onClick={() => setCollectionDialogId(a.id)}
-                          className="text-sm text-blue-600 hover:underline"
+                          className="h-auto p-0 text-sm text-blue-600 hover:underline"
                         >
                           {a.collection.paidCount}/{a.collection.totalTargets} paid
-                        </button>
+                        </Button>
                       ) : (
                         <span className="text-muted-foreground text-sm">--</span>
                       )}

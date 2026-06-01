@@ -15,6 +15,7 @@ import { Button, Skeleton } from '@monobase/ui'
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@monobase/ui'
 import { MoreHorizontal, CheckCircle, Send, XCircle, FileDown } from 'lucide-react'
 import { toast } from 'sonner'
+import { extractErrorMessage } from '@/utils/error'
 
 export const Route = createFileRoute('/_authenticated/org/$orgSlug/officer/finances/invoices/$invoiceId')({
   component: InvoiceDetailPage,
@@ -41,7 +42,7 @@ function InvoiceDetailPage() {
       queryClient.invalidateQueries({ queryKey: ['getDuesInvoice', invoiceId] })
       toast.success('Invoice marked as paid')
     },
-    onError: () => toast.error('Failed to mark invoice as paid'),
+    onError: (err) => toast.error('Failed to mark invoice as paid', { description: extractErrorMessage(err, 'Please try again.') }),
   })
 
   if (isLoading) {
