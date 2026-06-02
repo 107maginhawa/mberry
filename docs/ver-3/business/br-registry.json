@@ -1122,5 +1122,159 @@
       "e2e": []
     },
     "annotations": "Minted 2026-06-02 to resolve TR-P1-002. Aliases module-local M21-R7. IF invoice has line items THEN total = sum of (quantity × unitPrice) per item (calculated, not user-supplied). Backs WF-M21-02, AC-M21-002."
+  },
+  "BR-68": {
+    "rule": "Booking Event Must Be Active to Accept Bookings (alias M20-R1)",
+    "phase": 2,
+    "module": "M20",
+    "ruleClass": "p0-data",
+    "aliases": ["M20-R1"],
+    "tests": {
+      "backend": [
+        "services/api-ts/src/handlers/booking/createBooking.test.ts"
+      ],
+      "contract": [],
+      "e2e": []
+    },
+    "annotations": "Minted 2026-06-02 to resolve TR-P1-001 (m20-booking had zero global BR IDs). Module-local alias M20-R1 retained in MODULE_SPEC §4. Backs WF-117, WF-112, AC-M20-create-booking. (BR-52..BR-67 were claimed by parallel m21/m22/M12-split fixes for TR-P1-002/003/004; m20 booking IDs start at BR-68.)"
+  },
+  "BR-69": {
+    "rule": "Prevent Double-Booking on Booked or Blocked Slots (alias M20-R2)",
+    "phase": 2,
+    "module": "M20",
+    "ruleClass": "p0-data",
+    "aliases": ["M20-R2"],
+    "tests": {
+      "backend": [
+        "services/api-ts/src/handlers/booking/createBooking.test.ts",
+        "services/api-ts/src/handlers/booking/slotManagement.test.ts"
+      ],
+      "contract": [],
+      "e2e": []
+    },
+    "annotations": "Minted 2026-06-02 to resolve TR-P1-001. Slot status check prior to booking creation. Backs WF-117, WF-112."
+  },
+  "BR-70": {
+    "rule": "Enforce Minimum Booking Advance Notice (alias M20-R3, minBookingMinutes window)",
+    "phase": 2,
+    "module": "M20",
+    "ruleClass": "p1-business",
+    "aliases": ["M20-R3"],
+    "tests": {
+      "backend": [
+        "services/api-ts/src/handlers/booking/createBooking.test.ts"
+      ],
+      "contract": [],
+      "e2e": []
+    },
+    "annotations": "Minted 2026-06-02 to resolve TR-P1-001. Backs WF-117."
+  },
+  "BR-71": {
+    "rule": "Enforce Maximum Booking Lead Time (alias M20-R4, maxBookingDays window)",
+    "phase": 2,
+    "module": "M20",
+    "ruleClass": "p1-business",
+    "aliases": ["M20-R4"],
+    "tests": {
+      "backend": [
+        "services/api-ts/src/handlers/booking/createBooking.test.ts"
+      ],
+      "contract": [],
+      "e2e": []
+    },
+    "annotations": "Minted 2026-06-02 to resolve TR-P1-001. Backs WF-117."
+  },
+  "BR-72": {
+    "rule": "Schedule Exceptions Override Regular Schedule (alias M20-R5, block affected slots)",
+    "phase": 2,
+    "module": "M20",
+    "ruleClass": "p0-data",
+    "aliases": ["M20-R5"],
+    "tests": {
+      "backend": [
+        "services/api-ts/src/handlers/booking/createScheduleException.test.ts",
+        "services/api-ts/src/handlers/booking/slotManagement.test.ts"
+      ],
+      "contract": [],
+      "e2e": []
+    },
+    "annotations": "Minted 2026-06-02 to resolve TR-P1-001. Backs WF-116, WF-113."
+  },
+  "BR-73": {
+    "rule": "Cancelled or Rejected Booking Releases Slot (alias M20-R6, back to available)",
+    "phase": 2,
+    "module": "M20",
+    "ruleClass": "p0-data",
+    "aliases": ["M20-R6"],
+    "tests": {
+      "backend": [
+        "services/api-ts/src/handlers/booking/cancelBooking.test.ts",
+        "services/api-ts/src/handlers/booking/rejectBooking.test.ts"
+      ],
+      "contract": [],
+      "e2e": []
+    },
+    "annotations": "Minted 2026-06-02 to resolve TR-P1-001. Backs WF-118, WF-119."
+  },
+  "BR-74": {
+    "rule": "Slot Generation Respects Buffer Time (alias M20-R7, no overlap with bufferBefore/bufferAfter)",
+    "phase": 2,
+    "module": "M20",
+    "ruleClass": "p1-business",
+    "aliases": ["M20-R7"],
+    "tests": {
+      "backend": [
+        "services/api-ts/src/handlers/booking/slotManagement.test.ts"
+      ],
+      "contract": [],
+      "e2e": []
+    },
+    "annotations": "Minted 2026-06-02 to resolve TR-P1-001. Slot generator in repos/timeSlot.repo.ts. Backs WF-113."
+  },
+  "BR-75": {
+    "rule": "Booking Event effective_to Must Be After effective_from (alias M20-R8, date ordering)",
+    "phase": 2,
+    "module": "M20",
+    "ruleClass": "p1-business",
+    "aliases": ["M20-R8"],
+    "tests": {
+      "backend": [
+        "services/api-ts/src/handlers/booking/createBookingEvent.test.ts",
+        "services/api-ts/src/handlers/booking/updateBookingEvent.test.ts"
+      ],
+      "contract": [],
+      "e2e": []
+    },
+    "annotations": "Minted 2026-06-02 to resolve TR-P1-001. Date-ordering validation on BookingEvent. Backs WF-115."
+  },
+  "BR-76": {
+    "rule": "maxBookingDays Range Constraint 0-365 (alias M20-R9, DB CHECK)",
+    "phase": 2,
+    "module": "M20",
+    "ruleClass": "p1-business",
+    "aliases": ["M20-R9"],
+    "tests": {
+      "backend": [
+        "services/api-ts/src/handlers/booking/createBookingEvent.test.ts"
+      ],
+      "contract": [],
+      "e2e": []
+    },
+    "annotations": "Minted 2026-06-02 to resolve TR-P1-001. DB CHECK constraint on bookingEvent.maxBookingDays. Backs WF-115."
+  },
+  "BR-77": {
+    "rule": "minBookingMinutes Range Constraint 0-4320 / 72hr max (alias M20-R10, DB CHECK)",
+    "phase": 2,
+    "module": "M20",
+    "ruleClass": "p1-business",
+    "aliases": ["M20-R10"],
+    "tests": {
+      "backend": [
+        "services/api-ts/src/handlers/booking/createBookingEvent.test.ts"
+      ],
+      "contract": [],
+      "e2e": []
+    },
+    "annotations": "Minted 2026-06-02 to resolve TR-P1-001. DB CHECK constraint on bookingEvent.minBookingMinutes. Backs WF-115."
   }
 }

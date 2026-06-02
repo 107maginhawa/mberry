@@ -224,6 +224,18 @@ Pipeline Stage: Phase A -- Workflow Discovery
 | WF-113 | Booking | lifecycle | Slot Generation: auto-generate time slots from recurrence config | PRD |
 | WF-114 | Booking | lifecycle | Booking Confirmation Timer: auto-reject unconfirmed bookings | PRD |
 
+### 1.21 Booking (M20) — User-Facing Workflows
+
+| WF-ID | Module | Type | Description | Source |
+|-------|--------|------|-------------|--------|
+| WF-115 | M20 | CRUD | Create Booking Event: provider configures availability template (schedule, duration, location) | MODULE_SPEC m20-booking §3 |
+| WF-116 | M20 | CRUD | Manage Schedule Exceptions: provider blocks dates or modifies hours for specific periods | MODULE_SPEC m20-booking §3 |
+| WF-117 | M20 | lifecycle | Browse & Book: client views available slots and creates a booking | MODULE_SPEC m20-booking §3 |
+| WF-118 | M20 | lifecycle | Confirm/Reject Booking: provider accepts or declines pending bookings | MODULE_SPEC m20-booking §3 |
+| WF-119 | M20 | lifecycle | Cancel Booking: client or provider cancels existing booking, releases slot | MODULE_SPEC m20-booking §3 |
+| WF-120 | M20 | lifecycle | Mark No-Show: provider flags client or host no-show after appointment time | MODULE_SPEC m20-booking §3 |
+| WF-121 | M20 | CRUD | List My Bookings: client/provider views upcoming and past bookings | MODULE_SPEC m20-booking §3 |
+
 ---
 
 ## 2. Entity CRUD Lifecycle Matrix
@@ -703,17 +715,18 @@ Pipeline Stage: Phase A -- Workflow Discovery
 
 | Metric | Count |
 |--------|-------|
-| **Total Workflows** | 114 |
+| **Total Workflows** | 121 |
 | Explicit (PRD-sourced) | 114 |
+| Spec-sourced (MODULE_SPEC user-facing workflows) | 7 |
 | Inferred | 0 |
 | **By Type** | |
-| CRUD | 37 |
-| Lifecycle | 47 |
+| CRUD | 40 |
+| Lifecycle | 51 |
 | Cross-module | 10 |
 | Admin | 12 |
 | Reporting | 8 |
-| **Business Rules** | 49 |
-| BR -> WF mapped | 40 |
+| **Business Rules** | 77 |
+| BR -> WF mapped | 75 |
 | Orphan BRs (no workflow) | 0 |
 | **State Machines** | 22 |
 | **Cross-Module Flows** | 8 (with 36 handoff steps) |

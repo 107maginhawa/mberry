@@ -53,30 +53,35 @@ Time-based scheduling system for professional services. Providers create booking
 
 ## 3. Workflows
 
-| Workflow | Actor | Description | Priority |
-|----------|-------|-------------|----------|
-| Create Booking Event | Provider | Configure availability template with schedule, duration, location | P0 |
-| Manage Schedule Exceptions | Provider | Block dates or modify hours for specific periods | P0 |
-| Browse & Book | Client | View available slots, create booking | P0 |
-| Confirm/Reject Booking | Provider | Accept or decline pending bookings | P0 |
-| Cancel Booking | Client/Provider | Cancel existing booking, release slot | P0 |
-| Mark No-Show | Provider | Flag client or host no-show after appointment time | P1 |
-| List My Bookings | Client/Provider | View upcoming and past bookings | P0 |
+| Workflow | WF-ID | Actor | Description | Priority |
+|----------|-------|-------|-------------|----------|
+| Create Booking Event | WF-115 | Provider | Configure availability template with schedule, duration, location | P0 |
+| Manage Schedule Exceptions | WF-116 | Provider | Block dates or modify hours for specific periods | P0 |
+| Browse & Book | WF-117 | Client | View available slots, create booking | P0 |
+| Confirm/Reject Booking | WF-118 | Provider | Accept or decline pending bookings | P0 |
+| Cancel Booking | WF-119 | Client/Provider | Cancel existing booking, release slot | P0 |
+| Mark No-Show | WF-120 | Provider | Flag client or host no-show after appointment time | P1 |
+| List My Bookings | WF-121 | Client/Provider | View upcoming and past bookings | P0 |
+
+**Cross-cutting workflows referenced by this module (defined in WORKFLOW_MAP.md §1.20):**
+- WF-112 — Booking Event Lifecycle (create slots, accept bookings, confirmations)
+- WF-113 — Slot Generation (auto-generate time slots from recurrence config)
+- WF-114 — Booking Confirmation Timer (auto-reject unconfirmed bookings)
 
 ## 4. Business Rules
 
-| Rule ID | Rule | Applies To | Expected Behavior |
-|---------|------|-----------|-------------------|
-| M20-R1 | IF booking event status is not `active` THEN no new bookings allowed | Booking creation | Only active events accept bookings |
-| M20-R2 | IF slot status is `booked` or `blocked` THEN reject booking attempt | Slot availability | Prevent double-booking |
-| M20-R3 | IF booking within min booking minutes window THEN reject | Booking creation | Enforce minimum advance notice |
-| M20-R4 | IF booking beyond max booking days THEN reject | Booking creation | Enforce maximum advance booking |
-| M20-R5 | IF schedule exception covers a slot's date THEN mark slot blocked | Slot generation | Exceptions override regular schedule |
-| M20-R6 | IF booking cancelled THEN release slot back to `available` | Cancellation | Capacity reclaimed |
-| M20-R7 | IF booking event has buffer time THEN slots must not overlap with buffer | Slot generation | Prevent back-to-back without buffer |
-| M20-R8 | IF effective_to date set THEN must be after effective_from | Event validation | Date ordering constraint |
-| M20-R9 | IF max_booking_days set THEN must be 0-365 | Event validation | DB check constraint |
-| M20-R10 | IF min_booking_minutes set THEN must be 0-4320 (72hrs max) | Event validation | DB check constraint |
+| Rule ID | Module-Local Alias | Rule | Applies To | Expected Behavior |
+|---------|--------------------|------|-----------|-------------------|
+| BR-68 | M20-R1 | IF booking event status is not `active` THEN no new bookings allowed | Booking creation | Only active events accept bookings |
+| BR-69 | M20-R2 | IF slot status is `booked` or `blocked` THEN reject booking attempt | Slot availability | Prevent double-booking |
+| BR-70 | M20-R3 | IF booking within min booking minutes window THEN reject | Booking creation | Enforce minimum advance notice |
+| BR-71 | M20-R4 | IF booking beyond max booking days THEN reject | Booking creation | Enforce maximum advance booking |
+| BR-72 | M20-R5 | IF schedule exception covers a slot's date THEN mark slot blocked | Slot generation | Exceptions override regular schedule |
+| BR-73 | M20-R6 | IF booking cancelled THEN release slot back to `available` | Cancellation | Capacity reclaimed |
+| BR-74 | M20-R7 | IF booking event has buffer time THEN slots must not overlap with buffer | Slot generation | Prevent back-to-back without buffer |
+| BR-75 | M20-R8 | IF effective_to date set THEN must be after effective_from | Event validation | Date ordering constraint |
+| BR-76 | M20-R9 | IF max_booking_days set THEN must be 0-365 | Event validation | DB check constraint |
+| BR-77 | M20-R10 | IF min_booking_minutes set THEN must be 0-4320 (72hrs max) | Event validation | DB check constraint |
 
 ## 5. Permissions
 
@@ -184,27 +189,29 @@ Available ──block──► Blocked ──unblock──► Available
 
 ## 8. API Expectations
 
-| API Need | Method | Route | Auth | Notes |
-|----------|--------|-------|------|-------|
-| List booking events | GET | /booking/events | Optional | Public browsing |
-| Create booking event | POST | /booking/events | Required | Owner auto-set |
-| Get booking event | GET | /booking/events/:id | Optional | Public view |
-| Update booking event | PUT | /booking/events/:id | Required | Owner only |
-| Delete booking event | DELETE | /booking/events/:id | Required | Owner only |
-| List event slots | GET | /booking/events/:id/slots | Optional | Available slots |
-| Get time slot | GET | /booking/slots/:id | Optional | Slot details |
-| Create booking | POST | /booking/bookings | Required | Client books |
-| Get booking | GET | /booking/bookings/:id | Required | Owner or booker |
-| List bookings | GET | /booking/bookings | Required | Filtered by role |
-| Confirm booking | PUT | /booking/bookings/:id/confirm | Required | Event owner |
-| Reject booking | PUT | /booking/bookings/:id/reject | Required | Event owner |
-| Cancel booking | PUT | /booking/bookings/:id/cancel | Required | Either party |
-| Mark no-show | PUT | /booking/bookings/:id/no-show | Required | Event owner |
-| Create exception | POST | /booking/events/:id/exceptions | Required | Owner only |
-| Get exception | GET | /booking/exceptions/:id | Required | Owner only |
-| Update exception | PUT | /booking/exceptions/:id | Required | Owner only |
-| Delete exception | DELETE | /booking/exceptions/:id | Required | Owner only |
-| List exceptions | GET | /booking/events/:id/exceptions | Required | Owner only |
+Each endpoint anchors to one or more spec IDs (BR-* business rules from §4, WF-* workflows from §3 or WORKFLOW_MAP.md §1.20). This satisfies the traceability contract: spec → handler → test.
+
+| API Need | Method | Route | Auth | Spec-IDs | Notes |
+|----------|--------|-------|------|----------|-------|
+| List booking events | GET | /booking/events | Optional | WF-117 | Public browsing |
+| Create booking event | POST | /booking/events | Required | WF-115, WF-112, BR-75, BR-76, BR-77 | Owner auto-set; validates date ordering + booking-window bounds |
+| Get booking event | GET | /booking/events/:id | Optional | WF-117 | Public view |
+| Update booking event | PUT | /booking/events/:id | Required | WF-115, BR-75, BR-76, BR-77 | Owner only; re-validates bounds |
+| Delete booking event | DELETE | /booking/events/:id | Required | WF-115 | Owner only |
+| List event slots | GET | /booking/events/:id/slots | Optional | WF-117, WF-113, BR-72, BR-74 | Slots reflect exceptions + buffer rules |
+| Get time slot | GET | /booking/slots/:id | Optional | WF-117 | Slot details |
+| Create booking | POST | /booking/bookings | Required | WF-117, WF-112, BR-68, BR-69, BR-70, BR-71 | Client books; enforces event-active, slot-availability, booking-window |
+| Get booking | GET | /booking/bookings/:id | Required | WF-121 | Owner or booker |
+| List bookings | GET | /booking/bookings | Required | WF-121 | Filtered by role |
+| Confirm booking | PUT | /booking/bookings/:id/confirm | Required | WF-118, WF-112, WF-114 | Event owner; stops confirmation timer |
+| Reject booking | PUT | /booking/bookings/:id/reject | Required | WF-118, BR-73 | Event owner; releases slot |
+| Cancel booking | PUT | /booking/bookings/:id/cancel | Required | WF-119, BR-73 | Either party; releases slot |
+| Mark no-show | PUT | /booking/bookings/:id/no-show | Required | WF-120 | Event owner; post-appointment flag |
+| Create exception | POST | /booking/events/:id/exceptions | Required | WF-116, BR-72 | Owner only; blocks affected slots |
+| Get exception | GET | /booking/exceptions/:id | Required | WF-116 | Owner only |
+| Update exception | PUT | /booking/exceptions/:id | Required | WF-116, BR-72 | Owner only; re-applies blocking |
+| Delete exception | DELETE | /booking/exceptions/:id | Required | WF-116 | Owner only; restores slots |
+| List exceptions | GET | /booking/events/:id/exceptions | Required | WF-116 | Owner only |
 
 **TypeSpec:** `specs/api/src/modules/booking.tsp` — COMPLETE (all 19 operations defined)
 
@@ -243,11 +250,11 @@ When implementing this module:
 | 1. Module Overview | COMPLETE |
 | 2. Domain Terms | COMPLETE |
 | 3. Workflows | COMPLETE |
-| 4. Business Rules | COMPLETE (10 rules) |
+| 4. Business Rules | COMPLETE (10 rules, BR-68..BR-77) |
 | 5. Permissions | COMPLETE |
 | 6. Data Requirements | COMPLETE (4 entities) |
 | 7. State Transitions | COMPLETE (3 state machines) |
-| 8. API Expectations | COMPLETE (19 endpoints, TypeSpec COMPLETE) |
+| 8. API Expectations | COMPLETE (19 endpoints, TypeSpec COMPLETE, all anchored to BR/WF IDs) |
 | 9. Domain Events | COMPLETE |
 | 10. Dependencies | COMPLETE |
 | 11. AI Instructions | COMPLETE |
@@ -257,3 +264,4 @@ When implementing this module:
 | Version | Date | Author | Summary |
 |---------|------|--------|---------|
 | 1.0 | 2026-05-29 | Claude | Initial spec from existing codebase (Wave 8 coverage) |
+| 1.1 | 2026-06-02 | Claude | Added spec-ID anchors to all 19 API endpoints: assigned BR-68..BR-77 (global aliases of M20-R1..R10; BR-52..BR-66 were claimed by parallel m21/m22 fixes for TR-P1-002/003, BR-67 by BR-42 split for TR-P1-004), allocated WF-115..WF-121 for the 7 user-facing workflows, and added a Spec-IDs column to §8. Resolves TR-P1-001 from TRACEABILITY_REPORT.md. |
