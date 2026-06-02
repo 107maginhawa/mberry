@@ -441,3 +441,8 @@ Meta-logs the act of viewing access logs. Not in spec but good compliance practi
 6. **P1 EF-M11-e5f6a7b8** — Switch to opaque HMAC token verification
 7. **P2** items: state machine fixes, error taxonomy alignment, missing schema entities
 8. **P3** items: org-scope filters, type safety, access logging
+
+
+---
+
+*Re-validated by /oli-check --enforcement on 2026-06-02T00:00:00Z. Baseline v50 confirms no drift; no new findings; no resolved findings. Working-tree changes since map v6 are limited to 12 frontend UX-polish files + 7 generated SDK/OpenAPI files — no structural change touches this module enforcement surface. Trust context: STALE-OVERLAP on map; this report findings remain accurate per baseline.*

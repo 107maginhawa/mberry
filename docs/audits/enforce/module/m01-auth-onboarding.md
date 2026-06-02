@@ -235,3 +235,8 @@ Score: (1 PASS + 0.5 PARTIAL + 0 FAIL*2) / 4 published + 0/2 consumed penalty = 
 | Account lockout (AC-M01-005) | 5 failed -> 15min | `account-lockout.ts` + auth hook in `core/auth.ts:461` | PASS |
 
 Score: 9 PASS, 1 UNVERIFIABLE, 2 framework-managed = **7.0/10** (conservative)
+
+
+---
+
+*Re-validated by /oli-check --enforcement on 2026-06-02T00:00:00Z. Baseline v50 confirms no drift; no new findings; no resolved findings. Working-tree changes since map v6 are limited to 12 frontend UX-polish files + 7 generated SDK/OpenAPI files — no structural change touches this module enforcement surface. Trust context: STALE-OVERLAP on map; this report findings remain accurate per baseline.*

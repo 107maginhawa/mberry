@@ -296,3 +296,8 @@
 | M2-R9 | Photo: JPEG/PNG/WebP, max 5MB | No server-side validation | MISSING |
 | M2-R10 | Profile change -> audit trail | `auditAction()` in handlers | IMPLEMENTED |
 | M2-R14 | Multi-org independent display | Per-org scoping in privacy/notifications | IMPLEMENTED |
+
+
+---
+
+*Re-validated by /oli-check --enforcement on 2026-06-02T00:00:00Z. Baseline v50 confirms no drift; no new findings; no resolved findings. Working-tree changes since map v6 are limited to 12 frontend UX-polish files + 7 generated SDK/OpenAPI files — no structural change touches this module enforcement surface. Trust context: STALE-OVERLAP on map; this report findings remain accurate per baseline.*

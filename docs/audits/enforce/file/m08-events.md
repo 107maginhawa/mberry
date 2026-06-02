@@ -294,3 +294,8 @@ State machine utility exists as tested artifact but is not wired into enforcemen
 - **Import boundary health**: Booking module has clean boundaries (local repos, utils, schema). Events module has 4+ cross-bounded-context imports (OfficerTermRepository from association:member, schema from association:operations).
 - **Two missing handlers block 40% of state machine**: Without publish and complete, only draft->cancelled (via cancel) is possible. The entire event lifecycle is incomplete.
 - **Domain event coverage critically low**: Only 1 of 5 spec domain events is properly emitted. M07 Communications and M06 Dues integrations are broken.
+
+
+---
+
+*Re-validated by /oli-check --enforcement on 2026-06-02T00:00:00Z. Baseline v50 confirms no drift; no new findings; no resolved findings. Working-tree changes since map v6 are limited to 12 frontend UX-polish files + 7 generated SDK/OpenAPI files — no structural change touches this module enforcement surface. Trust context: STALE-OVERLAP on map; this report findings remain accurate per baseline.*

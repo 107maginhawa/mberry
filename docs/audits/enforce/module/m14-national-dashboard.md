@@ -147,3 +147,8 @@ No findings. Spec declares no state machines (read-only module). No violations.
 ### P3 — Nice to have
 11. Align domain term naming (NationalDashboardSnapshot vs ChapterSnapshot)
 12. Refactor M14 handlers into single directory (currently split platformadmin + association:operations)
+
+
+---
+
+*Re-validated by /oli-check --enforcement on 2026-06-02T00:00:00Z. Baseline v50 confirms no drift; no new findings; no resolved findings. Working-tree changes since map v6 are limited to 12 frontend UX-polish files + 7 generated SDK/OpenAPI files — no structural change touches this module enforcement surface. Trust context: STALE-OVERLAP on map; this report findings remain accurate per baseline.*

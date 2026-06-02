@@ -715,3 +715,8 @@ This is expected in the mega-module architecture. See P1-11 (deferred mega-modul
 4. **P2** EF-M04-fe09 -- Resolve SVG spec/code divergence (recommend updating spec to match code)
 5. **P2** EF-M04-fe10 -- Add suspended org status check in profile response
 6. **P3** EF-M04-fe12 -- Block self-discipline
+
+
+---
+
+*Re-validated by /oli-check --enforcement on 2026-06-02T00:00:00Z. Baseline v50 confirms no drift; no new findings; no resolved findings. Working-tree changes since map v6 are limited to 12 frontend UX-polish files + 7 generated SDK/OpenAPI files — no structural change touches this module enforcement surface. Trust context: STALE-OVERLAP on map; this report findings remain accurate per baseline.*

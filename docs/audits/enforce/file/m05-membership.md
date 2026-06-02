@@ -376,3 +376,8 @@ Handler correctly emits `domainEvents.emit('membership.created', ...)` on approv
 6. **P2 Resolve BR-03 vs Section 15 contradiction**: Decide silent reject or 400 and align. Estimated: 15min.
 7. **P2 Import canonical transitions**: Replace local `OFFICER_TRANSITIONS` in `updateMember.ts`. Estimated: 15min.
 8. **Domain events**: 3 of 6 specified events are not emitted. Wire up `membership.approved`, `membership.imported`, `membership.lapsed`.
+
+
+---
+
+*Re-validated by /oli-check --enforcement on 2026-06-02T00:00:00Z. Baseline v50 confirms no drift; no new findings; no resolved findings. Working-tree changes since map v6 are limited to 12 frontend UX-polish files + 7 generated SDK/OpenAPI files — no structural change touches this module enforcement surface. Trust context: STALE-OVERLAP on map; this report findings remain accurate per baseline.*

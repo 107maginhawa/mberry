@@ -263,3 +263,8 @@
 | `platform-admin.schema.ts` | `handlers/platformadmin/repos/` | Full |
 
 **Handler files in m04 scope:** ~31 of 334 total in `association:member/`. Remaining ~303 belong to m05/m06/m09/m10/m11/m12 and shared infrastructure.
+
+
+---
+
+*Re-validated by /oli-check --enforcement on 2026-06-02T00:00:00Z. Baseline v50 confirms no drift; no new findings; no resolved findings. Working-tree changes since map v6 are limited to 12 frontend UX-polish files + 7 generated SDK/OpenAPI files — no structural change touches this module enforcement surface. Trust context: STALE-OVERLAP on map; this report findings remain accurate per baseline.*

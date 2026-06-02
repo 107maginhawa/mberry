@@ -168,3 +168,8 @@ M10 credit tracking code is **distributed across 4 handler directories** (shared
 1. **P1 blockers first:** Add M10 error codes + closed-cycle validation, fix `getMyCredits` response shape to match API_CONTRACTS, refactor `markComplete.ts` cross-handler imports to use domain events
 2. **P2 warnings:** Consolidate manual credit handlers, fix route paths, add `adjusted` enum value, implement feature flags, emit `CreditAwarded` from all credit creation paths, add consumed event handlers
 3. **P3 notes:** Minor naming mismatches, frontend hardcoded defaults, acceptable cross-repo imports
+
+
+---
+
+*Re-validated by /oli-check --enforcement on 2026-06-02T00:00:00Z. Baseline v50 confirms no drift; no new findings; no resolved findings. Working-tree changes since map v6 are limited to 12 frontend UX-polish files + 7 generated SDK/OpenAPI files — no structural change touches this module enforcement surface. Trust context: STALE-OVERLAP on map; this report findings remain accurate per baseline.*

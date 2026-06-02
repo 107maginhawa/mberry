@@ -169,3 +169,8 @@ Implemented in `webhookRetryProcessor.ts` with exponential backoff (1m, 5m, 15m,
 - **Fund allocation math:** `allocateFunds()` correct (last-fund rounding, BR-05)
 - **Gateway adapter:** `GatewayAdapter` interface + PayMongo implementation confirmed
 - **Webhook idempotency:** `webhookRetryProcessor` with exponential backoff confirmed
+
+
+---
+
+*Re-validated by /oli-check --enforcement on 2026-06-02T00:00:00Z. Baseline v50 confirms no drift; no new findings; no resolved findings. Working-tree changes since map v6 are limited to 12 frontend UX-polish files + 7 generated SDK/OpenAPI files — no structural change touches this module enforcement surface. Trust context: STALE-OVERLAP on map; this report findings remain accurate per baseline.*

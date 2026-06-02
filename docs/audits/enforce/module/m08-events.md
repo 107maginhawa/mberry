@@ -163,3 +163,8 @@ The booking module (19 handlers) has full TypeSpec coverage (`booking.tsp`), pro
 | booking/ handlers | File list + key files | State machine, CRUD verified |
 
 **Previous audit:** 2026-05-27 (scored 5.8). That audit reported publishEvent/completeEvent in association:operations/. Fresh investigation confirms these handlers do NOT exist -- previous audit was incorrect. Score revised down from 5.8 to 4.0.
+
+
+---
+
+*Re-validated by /oli-check --enforcement on 2026-06-02T00:00:00Z. Baseline v50 confirms no drift; no new findings; no resolved findings. Working-tree changes since map v6 are limited to 12 frontend UX-polish files + 7 generated SDK/OpenAPI files — no structural change touches this module enforcement surface. Trust context: STALE-OVERLAP on map; this report findings remain accurate per baseline.*

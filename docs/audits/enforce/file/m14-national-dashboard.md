@@ -78,3 +78,8 @@ The remaining 67 handler files in `association:operations/` belong to other modu
 The previous assessment that `association:operations/` is a mapping error remains **partially valid**. While M14 now has real implementation (2 handlers, 1 repo, 1 schema, 3 test files), the code is split across two directories (`platformadmin/` and `association:operations/`) rather than having its own dedicated directory. The bulk of `association:operations/` (67/69 handlers) serves M08/M09/M10/M19, not M14.
 
 **Recommendation:** Consolidate all M14 code into a single directory (either `handlers/national-dashboard/` or keep in `platformadmin/`). Implement the 3 missing P1 endpoints before GA.
+
+
+---
+
+*Re-validated by /oli-check --enforcement on 2026-06-02T00:00:00Z. Baseline v50 confirms no drift; no new findings; no resolved findings. Working-tree changes since map v6 are limited to 12 frontend UX-polish files + 7 generated SDK/OpenAPI files — no structural change touches this module enforcement surface. Trust context: STALE-OVERLAP on map; this report findings remain accurate per baseline.*

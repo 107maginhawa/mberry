@@ -113,3 +113,8 @@
 | **Total** | **42** |
 
 **Spec Quality:** Complete (22/22 sections filled). 7 vertical slices defined (M19-S1 through M19-S7). Most complex of the three future modules with 12 endpoints, 4 entities, and 7 business rules. Ready for implementation when prioritized.
+
+
+---
+
+*Re-validated by /oli-check --enforcement on 2026-06-02T00:00:00Z. Baseline v50 confirms no drift; no new findings; no resolved findings. Working-tree changes since map v6 are limited to 12 frontend UX-polish files + 7 generated SDK/OpenAPI files — no structural change touches this module enforcement surface. Trust context: STALE-OVERLAP on map; this report findings remain accurate per baseline.*

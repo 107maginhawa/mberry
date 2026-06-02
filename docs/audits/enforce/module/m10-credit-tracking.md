@@ -79,3 +79,8 @@ All 5 spec API endpoints now have functional handlers, though route paths diverg
 7. **P2**: Add super/admin access to compliance endpoint
 8. **P2**: Reconcile spec API paths with actual OpenAPI paths (update spec to match implementation)
 9. **P3**: Document void/status pattern in spec as intentional divergence from "no state machine"
+
+
+---
+
+*Re-validated by /oli-check --enforcement on 2026-06-02T00:00:00Z. Baseline v50 confirms no drift; no new findings; no resolved findings. Working-tree changes since map v6 are limited to 12 frontend UX-polish files + 7 generated SDK/OpenAPI files — no structural change touches this module enforcement surface. Trust context: STALE-OVERLAP on map; this report findings remain accurate per baseline.*

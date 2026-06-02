@@ -509,3 +509,8 @@ The M07 communications subsystem has solid architectural boundaries (no cross-ha
 7. **P2 -- Adopt M07 error codes** (EF-M07-a4a00b63): Replace generic error classes with M07-prefixed codes per ERROR_TAXONOMY.md.
 8. **P2 -- Extract M13/M18** (EF-M07-ddba5682): Move professional-feed and surveys handlers to dedicated directories or document colocation.
 9. **P3 -- Type deduplication, import boundaries, naming** (5 items): Low-priority cleanup.
+
+
+---
+
+*Re-validated by /oli-check --enforcement on 2026-06-02T00:00:00Z. Baseline v50 confirms no drift; no new findings; no resolved findings. Working-tree changes since map v6 are limited to 12 frontend UX-polish files + 7 generated SDK/OpenAPI files — no structural change touches this module enforcement surface. Trust context: STALE-OVERLAP on map; this report findings remain accurate per baseline.*

@@ -214,3 +214,8 @@ Files in person/ that implement functionality outside M01 Auth & Onboarding scop
 | TypeSpec (person base) | `specs/api/src/modules/person.tsp` (inferred) | Found |
 | DOMAIN_MODEL | `docs/product/DOMAIN_MODEL.md` | Found, v1.0 |
 | WORKFLOW_MAP | `docs/product/WORKFLOW_MAP.md` | Found, v1.0 |
+
+
+---
+
+*Re-validated by /oli-check --enforcement on 2026-06-02T00:00:00Z. Baseline v50 confirms no drift; no new findings; no resolved findings. Working-tree changes since map v6 are limited to 12 frontend UX-polish files + 7 generated SDK/OpenAPI files — no structural change touches this module enforcement surface. Trust context: STALE-OVERLAP on map; this report findings remain accurate per baseline.*
