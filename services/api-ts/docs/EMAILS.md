@@ -550,7 +550,7 @@ Mailpit is included in the development dependencies:
 
 ```bash
 # Start all development dependencies including Mailpit
-bun run dev:deps:up
+bun --cwd ../.. infra:up
 
 # Mailpit is now running:
 # - SMTP server: localhost:1025
@@ -576,7 +576,7 @@ smtp: {
 
 #### Using Mailpit
 
-1. **Start dependencies**: `bun run dev:deps:up`
+1. **Start dependencies**: `bun --cwd ../.. infra:up`
 2. **Run the API**: `bun run dev`
 3. **Trigger emails**: Register a user, reset password, etc.
 4. **View emails**: Open http://localhost:8025 in your browser
