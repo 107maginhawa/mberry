@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { Search, UserPlus } from 'lucide-react'
-import { Button, Input } from '@monobase/ui'
+import { Button, Input, Dialog, DialogContent, DialogHeader, DialogTitle } from '@monobase/ui'
 import { Skeleton } from '@monobase/ui'
 import { toast } from 'sonner'
 import { listRosterMembersOptions } from '@monobase/sdk-ts/generated/react-query'
@@ -60,15 +60,11 @@ export function NomineePickerDialog({
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40" onClick={onClose}>
-      <div
-        className="bg-[var(--color-surface)] border rounded-xl shadow-lg w-full max-w-md max-h-[70vh] flex flex-col"
-        onClick={(e) => e.stopPropagation()}
-      >
-        {/* Header */}
-        <div className="p-4 border-b">
-          <h3 className="text-h4">Add Nominee</h3>
-          <div className="relative mt-2">
+    <Dialog open onOpenChange={(open) => { if (!open) onClose() }}>
+      <DialogContent className="max-w-md max-h-[70vh] flex flex-col p-0 gap-0">
+        <DialogHeader className="p-4 border-b space-y-2">
+          <DialogTitle className="text-h4">Add Nominee</DialogTitle>
+          <div className="relative">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[var(--color-muted)]" />
             <Input
               value={search}
@@ -78,7 +74,7 @@ export function NomineePickerDialog({
               autoFocus
             />
           </div>
-        </div>
+        </DialogHeader>
 
         {/* Member list */}
         <div className="flex-1 overflow-y-auto p-2">
@@ -129,7 +125,7 @@ export function NomineePickerDialog({
             Cancel
           </Button>
         </div>
-      </div>
-    </div>
+      </DialogContent>
+    </Dialog>
   )
 }

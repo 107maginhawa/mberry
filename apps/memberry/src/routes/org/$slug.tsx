@@ -8,6 +8,7 @@ import { toast } from 'sonner'
 import { Button } from '@monobase/ui'
 import { Label } from '@monobase/ui'
 import { Textarea } from '@monobase/ui'
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@monobase/ui'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@monobase/ui'
 import { api, ApiError } from '@/lib/api'
 import type { ApiErrorBody } from '@/types/api'
@@ -208,16 +209,16 @@ function PublicOrgProfile() {
       </div>
 
       {/* Apply to Join dialog */}
-      {applyOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center">
-          <div className="fixed inset-0 bg-black/50" onClick={() => { if (!submitting) setApplyOpen(false) }} />
-          <div className="relative bg-card rounded-lg border p-6 max-w-md w-full mx-4 shadow-lg">
-            <h3 className="text-h3 mb-1">Apply to Join {org.name}</h3>
-            <p className="text-sm text-[var(--color-muted)] mb-4">
+      <Dialog open={applyOpen} onOpenChange={(open) => { if (!open && !submitting) setApplyOpen(false) }}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>Apply to Join {org.name}</DialogTitle>
+            <DialogDescription>
               Your application will be reviewed by the organization's officers.
-            </p>
+            </DialogDescription>
+          </DialogHeader>
 
-            <form onSubmit={applyHandleSubmit(handleSubmitApplication)} className="space-y-4">
+          <form onSubmit={applyHandleSubmit(handleSubmitApplication)} className="space-y-4">
               {tiersLoading ? (
                 <div className="flex items-center gap-2 text-sm text-[var(--color-muted)] py-2">
                   <div className="animate-spin h-4 w-4 border-2 border-primary border-t-transparent rounded-full" />
@@ -290,10 +291,9 @@ function PublicOrgProfile() {
                   {submitting ? 'Submitting...' : 'Submit Application'}
                 </Button>
               </div>
-            </form>
-          </div>
-        </div>
-      )}
+          </form>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }

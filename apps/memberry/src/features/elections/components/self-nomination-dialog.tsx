@@ -1,6 +1,6 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { UserPlus } from 'lucide-react'
-import { Button } from '@monobase/ui'
+import { Button, Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@monobase/ui'
 import { toast } from 'sonner'
 import {
   createCandidateMutation,
@@ -51,33 +51,26 @@ export function SelfNominationDialog({
   }
 
   return (
-    <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/40"
-      onClick={onClose}
-    >
-      <div
-        className="bg-[var(--color-surface)] border rounded-xl shadow-lg w-full max-w-sm p-6 space-y-4"
-        onClick={(e) => e.stopPropagation()}
-      >
-        {/* Icon + title */}
-        <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-full bg-[var(--color-primary)]/10 flex items-center justify-center shrink-0">
-            <UserPlus className="w-5 h-5 text-[var(--color-primary)]" />
+    <Dialog open onOpenChange={(open) => { if (!open) onClose() }}>
+      <DialogContent className="max-w-sm">
+        <DialogHeader>
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-full bg-[var(--color-primary)]/10 flex items-center justify-center shrink-0">
+              <UserPlus className="w-5 h-5 text-[var(--color-primary)]" />
+            </div>
+            <div>
+              <DialogTitle className="text-h4">Nominate Yourself</DialogTitle>
+              <DialogDescription className="text-xs">Self-nomination</DialogDescription>
+            </div>
           </div>
-          <div>
-            <h3 className="text-h4">Nominate Yourself</h3>
-            <p className="text-xs text-[var(--color-muted)]">Self-nomination</p>
-          </div>
-        </div>
+        </DialogHeader>
 
-        {/* Confirmation message */}
         <p className="text-sm text-[var(--color-text)]">
           You are nominating yourself for{' '}
           <span className="font-semibold">{positionTitle}</span>. Are you sure?
         </p>
 
-        {/* Actions */}
-        <div className="flex gap-2 pt-1">
+        <DialogFooter>
           <Button
             variant="outline"
             onClick={onClose}
@@ -93,8 +86,8 @@ export function SelfNominationDialog({
           >
             {nominateMutation.isPending ? 'Submitting...' : 'Yes, Nominate Me'}
           </Button>
-        </div>
-      </div>
-    </div>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
   )
 }

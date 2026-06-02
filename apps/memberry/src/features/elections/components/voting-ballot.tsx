@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { useNavigate, useParams } from '@tanstack/react-router'
 import { Vote, CheckCircle2, AlertCircle } from 'lucide-react'
-import { Button, Skeleton } from '@monobase/ui'
+import { Button, Skeleton, Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@monobase/ui'
 import { toast } from 'sonner'
 import {
   getElectionOptions,
@@ -297,32 +297,32 @@ export function VotingBallot({ electionId, orgId, userId }: VotingBallotProps) {
       </div>
 
       {/* Vote confirmation dialog */}
-      {showConfirm && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40" onClick={() => setShowConfirm(false)}>
-          <div className="bg-[var(--color-surface)] rounded-xl border border-[var(--color-border-light)] p-6 max-w-md w-full mx-4 shadow-lg" onClick={e => e.stopPropagation()}>
-            <h3 className="text-lg font-semibold mb-4">Confirm Your Ballot</h3>
-            <div className="space-y-2 mb-4" id="dialog-description">
-              {positions.map(p => {
-                const selected = nominees.find(n => n.id === selections[p.id])
-                return (
-                  <div key={p.id} className="flex justify-between text-sm">
-                    <span className="text-[var(--color-muted)]">{p.title}:</span>
-                    <span className="font-medium">{selected?.personName ?? selected?.personId ?? '—'}</span>
-                  </div>
-                )
-              })}
-            </div>
-            <p className="text-xs text-[var(--color-warning)] mb-4">⚠ Your vote cannot be changed after submission.</p>
-            <div className="flex gap-2 justify-end">
-              <Button variant="ghost" onClick={() => setShowConfirm(false)}>Cancel</Button>
-              <Button onClick={handleConfirmedSubmit}>
-                <Vote className="w-4 h-4 mr-2" />
-                Submit Ballot
-              </Button>
-            </div>
+      <Dialog open={showConfirm} onOpenChange={(open) => { if (!open) setShowConfirm(false) }}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>Confirm Your Ballot</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-2" id="dialog-description">
+            {positions.map(p => {
+              const selected = nominees.find(n => n.id === selections[p.id])
+              return (
+                <div key={p.id} className="flex justify-between text-sm">
+                  <span className="text-[var(--color-muted)]">{p.title}:</span>
+                  <span className="font-medium">{selected?.personName ?? selected?.personId ?? '—'}</span>
+                </div>
+              )
+            })}
           </div>
-        </div>
-      )}
+          <p className="text-xs text-[var(--color-warning)]">⚠ Your vote cannot be changed after submission.</p>
+          <DialogFooter>
+            <Button variant="ghost" onClick={() => setShowConfirm(false)}>Cancel</Button>
+            <Button onClick={handleConfirmedSubmit}>
+              <Vote className="w-4 h-4 mr-2" />
+              Submit Ballot
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }

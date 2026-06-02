@@ -9,6 +9,17 @@ import { Button } from '@monobase/ui'
 import { Input } from '@monobase/ui'
 import { Label } from '@monobase/ui'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@monobase/ui'
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@monobase/ui'
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@monobase/ui'
 import { DatePicker } from '@/components/patterns/date-picker'
 import { PageHeader } from '@/components/patterns/page-header'
 import { GlassCard } from '@/components/motion/glass-card'
@@ -243,65 +254,66 @@ function ProvidersPage() {
       </GlassCard>
 
       {/* Create / Edit Dialog */}
-      {(showCreateDialog || editingProvider) && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
-          <div className="bg-white rounded-xl shadow-xl p-6 w-full max-w-md mx-4">
-            <h2 className="text-h3 mb-4">
-              {editingProvider ? 'Edit Provider' : 'New Provider'}
-            </h2>
-            <ProviderForm
-              key={editingProvider?.id ?? 'new'}
-              defaultValues={
-                editingProvider
-                  ? {
-                      name: editingProvider.name,
-                      accreditationNumber: editingProvider.accreditationNumber,
-                      status: editingProvider.status,
-                      expiryDate: editingProvider.expiryDate ? (editingProvider.expiryDate.split('T')[0] ?? '') : '',
-                    }
-                  : { name: '', accreditationNumber: '', status: 'active', expiryDate: '' }
+      <Dialog
+        open={showCreateDialog || !!editingProvider}
+        onOpenChange={(open) => {
+          if (!open) { setShowCreateDialog(false); setEditingProvider(null) }
+        }}
+      >
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>{editingProvider ? 'Edit Provider' : 'New Provider'}</DialogTitle>
+          </DialogHeader>
+          <ProviderForm
+            key={editingProvider?.id ?? 'new'}
+            defaultValues={
+              editingProvider
+                ? {
+                    name: editingProvider.name,
+                    accreditationNumber: editingProvider.accreditationNumber,
+                    status: editingProvider.status,
+                    expiryDate: editingProvider.expiryDate ? (editingProvider.expiryDate.split('T')[0] ?? '') : '',
+                  }
+                : { name: '', accreditationNumber: '', status: 'active', expiryDate: '' }
+            }
+            isSubmitting={isSubmitting}
+            onSubmit={(data) => {
+              if (editingProvider) {
+                editMutation.mutate({ id: editingProvider.id, body: data })
+              } else {
+                createMutation.mutate(data)
               }
-              isSubmitting={isSubmitting}
-              onSubmit={(data) => {
-                if (editingProvider) {
-                  editMutation.mutate({ id: editingProvider.id, body: data })
-                } else {
-                  createMutation.mutate(data)
-                }
-              }}
-              onCancel={() => { setShowCreateDialog(false); setEditingProvider(null) }}
-              submitLabel={editingProvider ? 'Save Changes' : 'Create Provider'}
-            />
-          </div>
-        </div>
-      )}
+            }}
+            onCancel={() => { setShowCreateDialog(false); setEditingProvider(null) }}
+            submitLabel={editingProvider ? 'Save Changes' : 'Create Provider'}
+          />
+        </DialogContent>
+      </Dialog>
 
       {/* Delete Confirmation Dialog */}
-      {deletingProvider && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
-          <div className="bg-white rounded-xl shadow-xl p-6 w-full max-w-sm mx-4">
-            <h2 className="text-h3 mb-2">Delete Provider</h2>
-            <p className="text-sm text-[var(--color-muted)] mb-4">
-              Are you sure you want to delete <strong>{deletingProvider.name}</strong>? This cannot be undone.
-            </p>
-            <div className="flex justify-end gap-2">
-              <Button
-                variant="outline"
-                onClick={() => setDeletingProvider(null)}
-              >
-                Cancel
-              </Button>
-              <Button
-                variant="destructive"
-                onClick={() => deleteMutation.mutate(deletingProvider.id)}
-                disabled={deleteMutation.isPending}
-              >
-                {deleteMutation.isPending ? 'Deleting...' : 'Delete'}
-              </Button>
-            </div>
-          </div>
-        </div>
-      )}
+      <AlertDialog
+        open={!!deletingProvider}
+        onOpenChange={(open) => { if (!open) setDeletingProvider(null) }}
+      >
+        <AlertDialogContent className="max-w-sm">
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete Provider</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to delete <strong>{deletingProvider?.name}</strong>? This cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={() => deletingProvider && deleteMutation.mutate(deletingProvider.id)}
+              disabled={deleteMutation.isPending}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              {deleteMutation.isPending ? 'Deleting...' : 'Delete'}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   )
 }

@@ -25,7 +25,6 @@ function EventAttendance() {
   const queryClient = useQueryClient()
   const [searchQuery, setSearchQuery] = useState('')
   const [scannerOpen, setScannerOpen] = useState(false)
-  const [checkInFlash, setCheckInFlash] = useState<{ name: string; success: boolean } | null>(null)
   const searchInputRef = useRef<HTMLInputElement>(null)
 
   const queryOpts = listCustomEventRegistrationsOptions({ path: { eventId } })
@@ -65,16 +64,12 @@ function EventAttendance() {
     },
     onSuccess: (_data, reg) => {
       const name = reg.memberName ?? reg.personName ?? 'Member'
-      setCheckInFlash({ name, success: true })
-      setTimeout(() => setCheckInFlash(null), 2000)
       toast.success(`${name} checked in`)
     },
     onError: (err, _reg, context) => {
       if (context?.previous) queryClient.setQueryData(regQueryKey, context.previous)
       const apiErr = err as { body?: { message?: string }; message?: string }
       const msg = apiErr?.body?.message ?? apiErr?.message ?? 'Check-in failed'
-      setCheckInFlash({ name: msg, success: false })
-      setTimeout(() => setCheckInFlash(null), 3000)
       toast.error(msg)
     },
     onSettled: () => {
@@ -116,19 +111,6 @@ function EventAttendance() {
 
   return (
     <div className="space-y-6">
-      {/* Check-in flash animation */}
-      {checkInFlash && (
-        <div
-          className={`fixed inset-0 z-50 flex items-center justify-center pointer-events-none ${
-            checkInFlash.success ? 'bg-[var(--color-success)]/20' : 'bg-[var(--color-error)]/20'
-          } animate-pulse`}
-        >
-          <div className={`text-3xl font-bold ${checkInFlash.success ? 'text-[var(--color-success)]' : 'text-[var(--color-error)]'}`}>
-            {checkInFlash.success ? `${checkInFlash.name} ✓` : checkInFlash.name}
-          </div>
-        </div>
-      )}
-
       <PageHeader
         title="Event Check-In"
         subtitle="Search by name or scan QR code"
