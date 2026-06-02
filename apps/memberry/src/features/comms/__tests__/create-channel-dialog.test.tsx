@@ -1,6 +1,9 @@
 import { describe, test, expect, vi } from 'vitest'
 import { render, screen, fireEvent, waitFor } from '@testing-library/react'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
+// SUT — first-party imports (static, so Confidence scanner detects SUT binding)
+import { CreateChannelDialog } from '../components/create-channel-dialog'
+import { ChannelList } from '../components/channel-list'
 
 vi.mock('@monobase/ui', () => ({
   Dialog: ({ children, open }: any) => open ? <div role="dialog">{children}</div> : null,
@@ -61,9 +64,6 @@ function wrapper({ children }: { children: React.ReactNode }) {
   const qc = new QueryClient({ defaultOptions: { queries: { retry: false } } })
   return <QueryClientProvider client={qc}>{children}</QueryClientProvider>
 }
-
-const { CreateChannelDialog } = await import('../components/create-channel-dialog')
-const { ChannelList } = await import('../components/channel-list')
 
 describe('CreateChannelDialog', () => {
   test('AC-002: renders Create Channel button text', () => {

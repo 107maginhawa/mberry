@@ -365,16 +365,43 @@ export async function seedCommsCoverage(
     console.log(`    (email templates failed: ${(e as Error).message?.slice(0, 120)})`);
   }
 
-  // ─── BR-28 (Communication Dedup, M07, WF-046): seed precondition row ───
-  // Pre-existing sent email to memberPersonIds[0] today — re-sending same
-  // channel+recipient should be deduped by createMessage findDuplicatesSentToday.
+  // ─── BR-28 (Communication Dedup, M07, WF-046): seed dedup fixture ───
+  // Two sent-today email messages to memberPersonIds[0] with the same
+  // (channel, recipient, day) tuple. Per BR-28 these MUST dedupe to a single
+  // unique notification when grouped — assertion target for
+  // `__tests__/br-edge-cases.test.ts` and the M07 dedup contract.
+  //
+  //   SELECT COUNT(DISTINCT (channel, recipient_person_id, DATE(sent_at)))
+  //     FROM message
+  //     WHERE body LIKE 'SEED-BR-28%'
+  //       AND organization_id = $orgId;
+  //   → expected 1 (two raw rows, deduped to one channel+recipient+day key)
   try {
     const existing = (await db.execute(
-      sql`SELECT id FROM message WHERE organization_id = ${orgId} AND status = 'sent' AND body = 'SEED-BR-28: dedup precondition' LIMIT 1`,
+      sql`SELECT id FROM message WHERE organization_id = ${orgId} AND status = 'sent' AND body LIKE 'SEED-BR-28%' LIMIT 2`,
     )) as unknown as { rows: Array<{ id: string }> };
 
-    if (existing.rows?.length === 0 && memberPersonIds.length > 0) {
+    const existingCount = existing.rows?.length ?? 0;
+
+    if (existingCount < 2 && memberPersonIds.length > 0) {
       const now = new Date();
+      // Row 1: the precondition (first send today)
+      if (existingCount < 1) {
+        await db.insert(messages).values({
+          organizationId: orgId,
+          channel: 'email',
+          senderId: presidentPersonId,
+          recipients: [
+            { personId: memberPersonIds[0]!, deliveryStatus: 'delivered', deliveredAt: now.toISOString() },
+          ],
+          subject: 'SEED-BR-28',
+          body: 'SEED-BR-28: dedup precondition',
+          sentAt: now,
+          status: 'sent',
+        });
+      }
+      // Row 2: the dedup target — same (channel=email, recipient=memberPersonIds[0],
+      // day=today) as row 1. BR-28 says these collapse to a single delivered notification.
       await db.insert(messages).values({
         organizationId: orgId,
         channel: 'email',
@@ -383,16 +410,16 @@ export async function seedCommsCoverage(
           { personId: memberPersonIds[0]!, deliveryStatus: 'delivered', deliveredAt: now.toISOString() },
         ],
         subject: 'SEED-BR-28',
-        body: 'SEED-BR-28: dedup precondition',
+        body: 'SEED-BR-28: dedup duplicate (same channel+recipient+day)',
         sentAt: now,
         status: 'sent',
       });
-      console.log('    ✓ BR-28 dedup precondition seeded (1 sent message today)');
+      console.log('    ✓ BR-28 dedup fixture seeded (2 raw rows → 1 deduped (channel,recipient,day) key)');
     } else {
-      console.log('    (BR-28 dedup precondition already seeded, skipping)');
+      console.log('    (BR-28 dedup fixture already seeded, skipping)');
     }
   } catch (e) {
-    console.log(`    (BR-28 dedup precondition failed: ${(e as Error).message?.slice(0, 120)})`);
+    console.log(`    (BR-28 dedup fixture failed: ${(e as Error).message?.slice(0, 120)})`);
   }
 
   console.log('  Comms coverage complete.');

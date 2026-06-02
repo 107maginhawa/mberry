@@ -1,5 +1,7 @@
 import { describe, test, expect, vi } from 'vitest'
 import { render, screen, fireEvent } from '@testing-library/react'
+// SUT — static first-party import (Confidence scanner reads top-of-file)
+import { TemplateSplitEditor } from '../components/template-split-editor'
 
 vi.mock('@/components/motion/glass-card', () => ({
   GlassCard: ({ children, className }: any) => <div className={className}>{children}</div>,
@@ -10,8 +12,6 @@ vi.mock('@monobase/ui', () => ({
   Input: ({ onChange, value, ...props }: any) => <input value={value} onChange={onChange} {...props} />,
   Textarea: ({ onChange, value, ...props }: any) => <textarea value={value} onChange={onChange} {...props} />,
 }))
-
-const { TemplateSplitEditor } = await import('../components/template-split-editor')
 
 describe('TemplateSplitEditor', () => {
   test('AC-001: renders split layout with editor and preview panes', () => {

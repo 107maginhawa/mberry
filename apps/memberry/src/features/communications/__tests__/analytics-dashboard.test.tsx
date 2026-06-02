@@ -1,6 +1,8 @@
 import { describe, test, expect, vi, beforeEach } from 'vitest'
 import { render, screen } from '@testing-library/react'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
+// SUT — static first-party import (Confidence scanner reads top-of-file)
+import { DeliveryFunnel } from '../components/delivery-funnel'
 
 // Mocks
 vi.mock('@monobase/ui', () => ({
@@ -37,9 +39,6 @@ function wrapper({ children }: { children: React.ReactNode }) {
   const qc = new QueryClient({ defaultOptions: { queries: { retry: false } } })
   return <QueryClientProvider client={qc}>{children}</QueryClientProvider>
 }
-
-// Import AFTER mocks
-const { DeliveryFunnel } = await import('../components/delivery-funnel')
 
 describe('DeliveryFunnel (AC-001, AC-002, AC-003)', () => {
   test('AC-001: renders 4 funnel stages', () => {
