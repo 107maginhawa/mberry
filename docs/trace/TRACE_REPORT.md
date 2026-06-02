@@ -36,7 +36,7 @@ Rev 4 ran on the regex/stale map (sha 28c42566, 79 files behind, `api_calls: []`
 
 - **ZA-01..03 (m20/m21/m22 zero-anchor)** — spec/api files contain zero BR/AC/WF/SM canonical IDs. m20-booking (18 EP + 19 handlers), m21-billing (16 EP + 16 handlers), m22-email (12 EP + 13 handlers) prose-only. **P1 ×3.** Engine map does not change this — purely a spec-authoring gap.
 - **TR-OVERLOAD-BR-42 (P1)** — BR-42 used with two incompatible meanings: M09 "training type restriction" (WORKFLOW_MAP §4, canonical) vs M12 "one vote per person/position" (`election-integrity.spec.ts`, `seed/layer-3-modules.ts:69`). Rename M12 use or namespace as `M12:BR-42`.
-- **TR-AC-ORPHAN ×12 (P2)** — Wave 59 verify-first triage: 7 RESOLVED via tag-add (file:line evidence below) + 1 RESOLVED via TypeSpec validator-enforcement + 4 reclassified VERIFIED-MISSING-LOGIC (not just missing tag — handler/test absent, escalate to vertical-TDD milestone).
+- **TR-AC-ORPHAN ×12 (P2)** — Wave 59 verify-first triage: 7 RESOLVED via tag-add (file:line evidence below) + 1 RESOLVED via TypeSpec validator-enforcement + 4 reclassified VERIFIED-MISSING-LOGIC. **Wave 61 update:** 3 of the 4 VERIFIED-MISSING-LOGIC orphans (AC-M10-005, AC-M18-004, AC-M18-006) RESOLVED via vertical-TDD slices — handlers implemented, tests tagged, full api-ts suite green (6033 pass). Net P2 → 0 actionable.
   - **RESOLVED (tag-added, Wave 59):**
     - `AC-M06-004` → `services/api-ts/src/handlers/association:member/recordDuesPayment.test.ts:1` (Concurrent payment 5-min warning; findRecentPaymentForPerson + hasConcurrentWarning logic per Wave 51).
     - `AC-M09-001` → `services/api-ts/src/handlers/association:operations/training-enrollment.test.ts:1` (Auto-credit award on attendance confirm).
@@ -48,10 +48,10 @@ Rev 4 ran on the regex/stale map (sha 28c42566, 79 files behind, `api_calls: []`
     - `AC-M18-005` → `services/api-ts/src/handlers/surveys/getSurveyAnalytics.test.ts:3` (Aggregated results per question type).
   - **RESOLVED (TypeSpec validator-enforcement, no test needed):**
     - `AC-M09-004` (5 platform training types) — enforced at `specs/api/src/association/operations/training.tsp:24` `enum TrainingType`. Generated Zod validators reject out-of-enum values at framework layer. Per-handler test redundant.
-  - **VERIFIED-MISSING-LOGIC (escalate to next milestone, NOT a tag gap):**
-    - `AC-M10-005` (Mandatory adjustment reason) — no `adjustCreditEntry` handler exists. `find services/api-ts/src/handlers -name '*[Aa]djust*[Cc]redit*'` returns empty. Genuinely unimplemented. Vertical-TDD slice needed.
-    - `AC-M18-004` (Response re-edit) — `submitSurveyResponse.ts` does not support update path (no `existing`/`update`/`edit` in handler body); single-submit only. Vertical-TDD slice needed.
-    - `AC-M18-006` (Instant poll inline results) — no poll handlers found; polls may not be implemented separately from surveys. Vertical-TDD slice needed.
+  - **RESOLVED (vertical-TDD slices, Wave 61):**
+    - `AC-M10-005` (Mandatory adjustment reason) → `services/api-ts/src/handlers/association:member/adjustCreditEntry.ts:11` (new handler self-enforces officer position; rejects missing/empty/<10-char reason with 400) + `adjustCreditEntry.test.ts:1` (16 tests tagged `[AC-M10-005]`). TypeSpec op `adjustCreditEntry` added to `specs/api/src/association/operations/training.tsp` `CreditAdjustmentManagement`; auto-wired to `POST /association/member/credits/adjust` via codegen.
+    - `AC-M18-004` (Response re-edit) → `services/api-ts/src/handlers/surveys/submitSurveyResponse.ts:62` (branches on `settings.allowReedit` + existing response → calls `updateResponseAnswers`, returns 200) + `survey.schema.ts:53` (`SurveySettings.allowReedit`) + `survey.repo.ts:303` (`updateResponseAnswers` method). 5 tests tagged `[AC-M18-004]` in `submitSurveyResponse.test.ts`.
+    - `AC-M18-006` (Instant poll inline results) → `services/api-ts/src/handlers/surveys/submitSurveyResponse.ts:15` (`aggregatePollResults` helper) + handler branches at L101/L143 (when `survey.surveyType === 'poll'`, response body augmented with `pollResults: [{ questionId, counts, total }]`). 4 tests tagged `[AC-M18-006]` in `submitSurveyResponse.test.ts`.
 
 ### Engine-field-gap (narrower residual unverified, not a project defect)
 
@@ -167,9 +167,10 @@ EPs = endpoints declared in API_CONTRACTS.md as `METHOD /path` rows. ic = INTEGR
 |--------|-----------|-------------|--------|---------------|
 | ~~AC-ORPHAN-M09-001..006~~ | 5c | **RESOLVED Wave 59** — AC-M09-001/003/005 tagged at `training-enrollment.test.ts:1`; AC-M09-002 at `verifyCertificatePublic.test.ts:1`; AC-M09-004 TypeSpec validator-enforced at `training.tsp:24`; AC-M09-006 at `publishTraining.test.ts:1` | — | — |
 | ~~AC-ORPHAN-M10-002~~ | 5c | **RESOLVED Wave 59** — AC-M10-002 tagged at `creditIssue.test.ts:1` (no duplicate AUTO credits; processCreditIssue idempotent) | — | — |
-| AC-ORPHAN-M10-005 (escalated) | 5c | **VERIFIED-MISSING-LOGIC Wave 59** — no `adjustCreditEntry` handler exists; genuinely unimplemented | `m10-credit-tracking/MODULE_SPEC.md` §11 | Vertical-TDD slice for `adjustCreditEntry` (handler + test + audit) in next milestone |
+| ~~AC-ORPHAN-M10-005~~ | 5c | **RESOLVED Wave 61** — vertical-TDD slice: `adjustCreditEntry.ts` + 16 tests tagged `[AC-M10-005]`; TypeSpec `CreditAdjustmentManagement` interface; auto-wired `POST /association/member/credits/adjust` | — | — |
 | ~~AC-ORPHAN-M18-005~~ | 5c | **RESOLVED Wave 59** — AC-M18-005 tagged at `getSurveyAnalytics.test.ts:3` (aggregated results per question type) | — | — |
-| AC-ORPHAN-M18-004,006 (escalated) | 5c | **VERIFIED-MISSING-LOGIC Wave 59** — M18-004 (response re-edit) handler does not support update path; M18-006 (instant poll) no poll handlers | `m18-surveys-polls/MODULE_SPEC.md` §11 | 2 vertical-TDD slices in next milestone |
+| ~~AC-ORPHAN-M18-004~~ | 5c | **RESOLVED Wave 61** — vertical-TDD slice: `submitSurveyResponse.ts` branches on `settings.allowReedit` + `updateResponseAnswers` repo method; 5 tests tagged `[AC-M18-004]` | — | — |
+| ~~AC-ORPHAN-M18-006~~ | 5c | **RESOLVED Wave 61** — vertical-TDD slice: `aggregatePollResults` helper; poll surveys augment response body with `pollResults`; 4 tests tagged `[AC-M18-006]` | — | — |
 | ~~AC-ORPHAN-M06-004~~ | 5c | **RESOLVED Wave 59** — AC-M06-004 tagged at `recordDuesPayment.test.ts:1` (concurrent 5-min warning) | — | — |
 | ~~TR-MAP-STALE~~ | discovery | **RESOLVED rev 5** — engine map FRESH-ENOUGH, no in-scope source drift | — | — |
 | TR-CODEONLY-CSRF (P3) | spec-trace | `GET /csrf-token` code-only (seed CSRF, commit 878fcc34) — not in openapi spec | `CODE_SPEC_TRACE` code_only | Document internal endpoint or add to spec |
@@ -185,7 +186,7 @@ EPs = endpoints declared in API_CONTRACTS.md as `METHOD /path` rows. ic = INTEGR
 | 1 | Mint BR/AC IDs for m20/m21/m22 specs | 3 P1 (ZA-01..03) | `/oli-spec-modules --module m20-booking,m21-billing,m22-email` |
 | 2 | Resolve BR-42 ID collision (rename M12 use) | 1 P1 (TR-OVERLOAD-BR-42) | manual edit + seed/test re-tag |
 | 3 | Fix 2 FE-phantom call sites (wrong/missing endpoint) | 2 P1 (TR-FE-PHANTOM-01/02) | fix FE call OR add backend route+spec |
-| ~~4~~ | ~~Tag 12 untested ACs~~ | **DONE Wave 59** — 8 tagged + 1 TypeSpec-enforced + 3 escalated VERIFIED-MISSING-LOGIC (AC-M10-005 / AC-M18-004 / AC-M18-006 need handler implementation, not tag) | — |
+| ~~4~~ | ~~Tag 12 untested ACs~~ | **DONE Wave 59 + Wave 61** — 8 tagged + 1 TypeSpec-enforced + 3 vertical-TDD slices shipped Wave 61 (AC-M10-005 / AC-M18-004 / AC-M18-006 — handlers + tests + TypeSpec) | — |
 | 5 | Document `GET /csrf-token` + reconcile API_CONTRACTS doc prose | 2 P3 | spec add + doc edit |
 
 ## Graph Statistics

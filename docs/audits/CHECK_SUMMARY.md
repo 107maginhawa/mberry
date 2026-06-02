@@ -14,9 +14,9 @@ based-on:
   - docs/audits/UI_JOURNEY_AUDIT.md
   - docs/audits/RUNTIME_EXEC_REPORT.md
   - docs/audits/SEED_COHERENCE_REPORT.md
-last-modified: 2026-06-02T21:00:00Z
-last-modified-by: oli-check (--auto, Wave 59 P3-housekeeping pass — AC-orphan tagging, m17/m18 P2 reclassify, m18 enforce mass RESOLVED-stale)
-run-id: 2026-06-02T21:00
+last-modified: 2026-06-03T00:00:00Z
+last-modified-by: oli-check (Wave 61 delta — 3 vertical-TDD slices shipped resolving AC-M10-005, AC-M18-004, AC-M18-006 escalated orphans)
+run-id: 2026-06-03T00:00
 flags: ["--auto"]
 ---
 
@@ -53,12 +53,12 @@ Without `--strict` the run does not hard-exit; matrix and verdict still written.
 
 Remaining items after Wave 59 (all P3 advisory or pre-cleared):
 - ~~13 P2 consistency stub API_CONTRACTS~~ — RESOLVED Wave 58
-- ~~17 P2 traceability AC orphans~~ — Wave 59 partially RESOLVED: 8 tagged + 1 TypeSpec-enforced + 3 escalated VERIFIED-MISSING-LOGIC (AC-M10-005 adjust-reason, AC-M18-004 response-re-edit, AC-M18-006 instant-poll — vertical-TDD slices for next milestone)
+- ~~17 P2 traceability AC orphans~~ — **FULLY RESOLVED** Wave 59 + 61: 8 tagged + 1 TypeSpec-enforced + 3 vertical-TDD slices shipped Wave 61 (AC-M10-005 `adjustCreditEntry`, AC-M18-004 response re-edit via `updateResponseAnswers`, AC-M18-006 inline `pollResults`). One residual VERIFIED-MISSING-LOGIC item rolled into m19-committee-management future scope (already covered as `m19 P1 future-scope` driver below).
 - ~~19 P2 compliance~~ — Wave 59 cleared CMP-P2-009 (m17 deferred per Wave 57) + CMP-P2-010 (m18 dismissSurveyResponse.test.ts exists); 17 carried (none gate-blocking)
 - ~~m18 P1 future-scope~~ — Wave 59 mass RESOLVED-stale (built end-to-end; prior 2026-05-28 report dated before implementation; baseline P1 1→0)
 - **m19 P1** carried — confirmed in-scope per MASTER_PRD v3.0 Add-on Phase 3 (NOT in descope list, unlike m13/m15/m16/m17). Build is separate milestone, not housekeeping.
 - Confidence L2=6.0 raw cap — engine SDK-resolver gap (upstream tooling). Wave 58 audit-extrapolated lift 6.0→8.2 applied; root fix waits for engine v7+.
-- 3 escalated AC-orphans (AC-M10-005, AC-M18-004, AC-M18-006) — vertical-TDD slices needed for: `adjustCreditEntry` handler, survey response update path, poll inline results. Not gate-blocking; track separately.
+- ~~3 escalated AC-orphans (AC-M10-005, AC-M18-004, AC-M18-006)~~ — **DELIVERED Wave 61**. 3 vertical-TDD slices shipped on `main`; full api-ts suite green (6033 pass). See Wave 61 RESOLVED block below.
 
 ## Run Context
 
@@ -107,7 +107,7 @@ Rows = 22 modules from `docs/product/modules/`. Columns = applicable dimensions 
 
 ## Overall
 
-**Worst dimension verdict:** PASS-with-footnote (Wave 58 cleared WARN drivers; Wave 59 cleared all addressable P3 housekeeping — 8 AC tags + m17/m18 P2 reclassify + m18 enforce mass RESOLVED-stale. Remaining: m19 future-scope P1 (KNOWN, in-scope per MASTER_PRD Add-on Phase 3) + 3 escalated AC orphans needing vertical-TDD slices (not gate-blocking)). Floor: `GATE: PASS`.
+**Worst dimension verdict:** PASS-with-footnote (Wave 58 cleared WARN drivers; Wave 59 cleared all addressable P3 housekeeping; Wave 61 delivered the 3 escalated AC-orphan vertical-TDD slices (AC-M10-005 / AC-M18-004 / AC-M18-006) on `main`. Remaining: m19 future-scope P1 (KNOWN, in-scope per MASTER_PRD Add-on Phase 3) only). Floor: `GATE: PASS`.
 
 **Trust-banner escalation (R1-strict):** NOT triggered. THESIS IN FORCE this run — fresh map + clean producer + 0 fields_unavailable.
 
@@ -130,8 +130,15 @@ Rows = 22 modules from `docs/product/modules/`. Columns = applicable dimensions 
 - **Enforcement P1** (2 → 1): m18-surveys-polls mass RESOLVED-stale (entire 2026-05-28 enforce report dated before implementation; live module ships 22 handlers + 13 tests + 10 TypeSpec ops registry-wired). m19-committee-management carried (in-scope per MASTER_PRD v3.0 Add-on Phase 3).
 
 **SURFACED for next-milestone work (not Wave 59 scope):**
-- 3 vertical-TDD slices: `adjustCreditEntry` handler (M10-R5 mandatory-reason), survey response update path (M18-R3 re-edit), poll inline results handler (M18-R4).
+- ~~3 vertical-TDD slices~~ — **DELIVERED Wave 61** (see below).
 - m19-committee-management build (when prioritized per MASTER_PRD Phase 3).
+
+**RESOLVED in Wave 61 (vertical-TDD slices, post-Wave 60 GATE: PASS):**
+- **`AC-M10-005`** (Mandatory adjustment reason, M10-R4) — new handler `services/api-ts/src/handlers/association:member/adjustCreditEntry.ts` (officer-position self-enforced; rejects missing/empty/<10-char reason with 400; allows signed creditAmount for award/deduction; emits `credit.adjusted`; refreshes `compliance_standings` view). TypeSpec `CreditAdjustmentManagement` interface + `AdjustCreditRequest` model added to `specs/api/src/association/operations/training.tsp`; auto-wired `POST /association/member/credits/adjust` via codegen. 16 tests tagged `[AC-M10-005]`.
+- **`AC-M18-004`** (Response re-edit, M18-R3) — `submitSurveyResponse.ts` now branches on `settings.allowReedit` + existing response → calls new `SurveyResponseRepository.updateResponseAnswers`, returns 200. `SurveySettings.allowReedit?: boolean` added. M18-R1 deadline check still gates both paths. 5 tests tagged `[AC-M18-004]`.
+- **`AC-M18-006`** (Instant poll inline results, M18-R4 / WF-103) — new `aggregatePollResults` helper in `submitSurveyResponse.ts`; when `surveyType === 'poll'` the submit (201) and re-edit (200) response bodies include `pollResults: [{ questionId, counts, total }]` computed across all completed responses (scalar + multi_choice array values both supported). 4 tests tagged `[AC-M18-006]`.
+
+**Verification:** full api-ts test suite green (6033 pass, 0 fail) post-slice. Three atomic commits on `main`. `TRACE_REPORT.md` AC-orphan rows promoted RESOLVED with file:line evidence. No baseline / P-count shifts on `.baseline.json` (P2 advisory orphans were not gate drivers).
 
 ## What's Next
 
