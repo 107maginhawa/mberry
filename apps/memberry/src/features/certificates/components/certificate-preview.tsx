@@ -1,4 +1,5 @@
 import { useQuery } from '@tanstack/react-query'
+import { toast } from 'sonner'
 import { getCertificateOptions } from '@monobase/sdk-ts/generated/@tanstack/react-query.gen'
 import type { Certificate } from '@monobase/sdk-ts/generated/types.gen'
 import { Button } from '@monobase/ui'
@@ -48,7 +49,7 @@ export function CertificatePreview({ certificateId }: CertificatePreviewProps) {
 
   const handleShareVerification = () => {
     navigator.clipboard.writeText(verificationUrl).then(() => {
-      alert('Verification link copied to clipboard!')
+      toast.success('Verification link copied to clipboard')
     })
   }
 
