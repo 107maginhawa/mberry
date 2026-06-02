@@ -14,6 +14,8 @@
   "scripts": {
     "build": "bun run --filter '*' build",
     "clean": "rm -rf node_modules bun.lock && find . -name 'node_modules' -type d -prune -exec rm -rf {} +",
+    "dev": "turbo run dev",
+    "generate": "turbo run generate",
     "infra:up": "docker compose up -d --wait",
     "infra:down": "docker compose down",
     "infra:reset": "docker compose down -v && docker compose up -d --wait",
@@ -53,6 +55,7 @@
     "@rollup/rollup-linux-x64-gnu": "^4.52.3",
     "husky": "^9.1.7",
     "lint-staged": "^16.4.0",
-    "react-hook-form": "^7.75.0"
+    "react-hook-form": "^7.75.0",
+    "turbo": "^2.3.3"
   }
 }

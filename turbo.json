@@ -1,0 +1,35 @@
+{
+  "$schema": "https://turbo.build/schema.json",
+  "ui": "tui",
+  "globalDependencies": [".env", ".env.local", "services/api-ts/.env"],
+  "globalEnv": ["NODE_ENV", "CI", "TZ", "PORT", "DATABASE_URL"],
+  "tasks": {
+    "build": {
+      "dependsOn": ["^build", "^generate", "generate"],
+      "outputs": ["dist/**", "build/**", "!.next/cache/**"]
+    },
+    "generate": {
+      "dependsOn": ["^build"],
+      "outputs": ["src/generated/**", "dist/**"]
+    },
+    "dev": {
+      "dependsOn": ["^build", "^generate", "generate"],
+      "cache": false,
+      "persistent": true
+    },
+    "typecheck": {
+      "dependsOn": ["^build", "^generate", "generate"]
+    },
+    "lint": {
+      "dependsOn": ["^build", "^generate", "generate"]
+    },
+    "test": {
+      "dependsOn": ["^build", "^generate", "generate"],
+      "outputs": ["coverage/**"]
+    },
+    "test:e2e": {
+      "dependsOn": ["^build", "^generate", "generate"],
+      "cache": false
+    }
+  }
+}
