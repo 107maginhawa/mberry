@@ -379,6 +379,137 @@ describe('submitSurveyResponse', () => {
     expect(res.status).toBe(201);
   });
 
+  // ─── [AC-M18-006] Instant Poll Inline Results (M18-R4 / WF-103) ───
+
+  test('[AC-M18-006] poll: returns aggregated counts inline in response body', async () => {
+    // Acceptance Criteria: [AC-M18-006]
+    const pollSurvey = {
+      ...activeSurvey,
+      surveyType: 'poll',
+      questions: [
+        { id: 'q1', type: 'single_choice', text: 'Best lunch?', required: true, order: 1, options: ['Pizza', 'Sushi', 'Salad'] },
+      ],
+      settings: {},
+    };
+    const priorResponses = [
+      { ...fakeResponse, id: 'r-a', answers: [{ questionId: 'q1', value: 'Pizza' }] },
+      { ...fakeResponse, id: 'r-b', answers: [{ questionId: 'q1', value: 'Sushi' }] },
+      { ...fakeResponse, id: 'r-c', answers: [{ questionId: 'q1', value: 'Pizza' }] },
+      { ...fakeResponse, id: 'r-new', answers: [{ questionId: 'q1', value: 'Pizza' }] },
+    ];
+    stubRepo(SurveyRepository, {
+      findById: async () => pollSurvey,
+    });
+    stubRepo(SurveyResponseRepository, {
+      findByResponderAndSurvey: async () => undefined,
+      submitResponse: async () => ({ ...fakeResponse, id: 'r-new', answers: [{ questionId: 'q1', value: 'Pizza' }] }),
+      findAllBySurveyId: async () => priorResponses,
+    });
+
+    const ctx = makeCtx({
+      _params: { survey: 'survey-1' },
+      _body: { answers: [{ questionId: 'q1', value: 'Pizza' }] },
+    });
+    const res = await submitSurveyResponse(ctx);
+    expect(res.status).toBe(201);
+    const body = (res as any).body;
+    expect(body.pollResults).toBeDefined();
+    expect(Array.isArray(body.pollResults)).toBe(true);
+    expect(body.pollResults.length).toBe(1);
+    expect(body.pollResults[0].questionId).toBe('q1');
+    expect(body.pollResults[0].counts.Pizza).toBe(3);
+    expect(body.pollResults[0].counts.Sushi).toBe(1);
+    expect(body.pollResults[0].total).toBe(4);
+  });
+
+  test('[AC-M18-006] non-poll survey: response body has no pollResults field', async () => {
+    // Acceptance Criteria: [AC-M18-006] — negative path, no leak into general surveys
+    stubRepo(SurveyRepository, {
+      findById: async () => activeSurvey, // surveyType: 'general'
+    });
+    stubRepo(SurveyResponseRepository, {
+      findByResponderAndSurvey: async () => undefined,
+      submitResponse: async () => fakeResponse,
+    });
+
+    const ctx = makeCtx({
+      _params: { survey: 'survey-1' },
+      _body: { answers: [{ questionId: 'q1', value: 'Some text' }] },
+    });
+    const res = await submitSurveyResponse(ctx);
+    expect(res.status).toBe(201);
+    expect((res as any).body.pollResults).toBeUndefined();
+  });
+
+  test('[AC-M18-006] poll re-edit: returns refreshed aggregated counts inline', async () => {
+    // Acceptance Criteria: [AC-M18-006] + [AC-M18-004] interaction
+    const pollReedit = {
+      ...activeSurvey,
+      surveyType: 'poll',
+      questions: [
+        { id: 'q1', type: 'single_choice', text: 'Pick one', required: true, order: 1, options: ['A', 'B'] },
+      ],
+      settings: { allowReedit: true },
+    };
+    const all = [
+      { ...fakeResponse, id: 'r-1', answers: [{ questionId: 'q1', value: 'A' }] },
+      { ...fakeResponse, id: 'r-2', answers: [{ questionId: 'q1', value: 'B' }] },
+    ];
+    stubRepo(SurveyRepository, {
+      findById: async () => pollReedit,
+    });
+    stubRepo(SurveyResponseRepository, {
+      findByResponderAndSurvey: async () => ({ ...fakeResponse, id: 'r-2', answers: [{ questionId: 'q1', value: 'B' }] }),
+      updateResponseAnswers: async (id: string, answers: any) => ({ ...fakeResponse, id, answers }),
+      findAllBySurveyId: async () => all,
+    });
+
+    const ctx = makeCtx({
+      _params: { survey: 'survey-1' },
+      _body: { answers: [{ questionId: 'q1', value: 'A' }] },
+    });
+    const res = await submitSurveyResponse(ctx);
+    expect(res.status).toBe(200);
+    const body = (res as any).body;
+    expect(body.pollResults).toBeDefined();
+    expect(body.pollResults[0].questionId).toBe('q1');
+  });
+
+  test('[AC-M18-006] poll with multi-choice: counts each selected option', async () => {
+    // Acceptance Criteria: [AC-M18-006] — array answers
+    const pollSurvey = {
+      ...activeSurvey,
+      surveyType: 'poll',
+      questions: [
+        { id: 'q1', type: 'multi_choice', text: 'Pick all', required: true, order: 1, options: ['X', 'Y', 'Z'] },
+      ],
+      settings: {},
+    };
+    const responses = [
+      { ...fakeResponse, id: 'r-1', answers: [{ questionId: 'q1', value: ['X', 'Y'] }] },
+      { ...fakeResponse, id: 'r-2', answers: [{ questionId: 'q1', value: ['X', 'Z'] }] },
+    ];
+    stubRepo(SurveyRepository, {
+      findById: async () => pollSurvey,
+    });
+    stubRepo(SurveyResponseRepository, {
+      findByResponderAndSurvey: async () => undefined,
+      submitResponse: async () => ({ ...fakeResponse, answers: [{ questionId: 'q1', value: ['X'] }] }),
+      findAllBySurveyId: async () => responses,
+    });
+
+    const ctx = makeCtx({
+      _params: { survey: 'survey-1' },
+      _body: { answers: [{ questionId: 'q1', value: ['X'] }] },
+    });
+    const res = await submitSurveyResponse(ctx);
+    expect(res.status).toBe(201);
+    const counts = (res as any).body.pollResults[0].counts;
+    expect(counts.X).toBe(2);
+    expect(counts.Y).toBe(1);
+    expect(counts.Z).toBe(1);
+  });
+
   test('[AC-M18-004] re-edit on anonymous survey: still works without responderId leak', async () => {
     // Acceptance Criteria: [AC-M18-004] — anonymity preserved on update
     const reeditAnon = {

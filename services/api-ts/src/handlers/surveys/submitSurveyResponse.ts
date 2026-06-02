@@ -9,7 +9,35 @@ import {
   ConflictError,
 } from '@/core/errors';
 import { SurveyRepository, SurveyResponseRepository } from './repos/survey.repo';
-import type { QuestionAnswer } from './repos/survey.schema';
+import type { QuestionAnswer, Survey, SurveyResponseRecord, SurveyQuestion } from './repos/survey.schema';
+
+/**
+ * [AC-M18-006] M18-R4 / WF-103 — aggregate inline poll results.
+ * Counts each selected value (scalar or array) per question across all completed
+ * responses. Used only when surveyType === 'poll'.
+ */
+function aggregatePollResults(
+  survey: Survey,
+  responses: SurveyResponseRecord[],
+): Array<{ questionId: string; counts: Record<string, number>; total: number }> {
+  const questions = (survey.questions ?? []) as SurveyQuestion[];
+  return questions.map((q) => {
+    const counts: Record<string, number> = {};
+    let total = 0;
+    for (const resp of responses) {
+      const answers = (resp.answers ?? []) as QuestionAnswer[];
+      const ans = answers.find((a) => a.questionId === q.id);
+      if (!ans) continue;
+      const values = Array.isArray(ans.value) ? ans.value : [ans.value];
+      for (const v of values) {
+        const key = String(v);
+        counts[key] = (counts[key] ?? 0) + 1;
+        total += 1;
+      }
+    }
+    return { questionId: q.id, counts, total };
+  });
+}
 
 /**
  * submitSurveyResponse
@@ -88,6 +116,13 @@ export async function submitSurveyResponse(
       action: 'update_survey_response',
     }, 'Survey response updated (re-edit)');
 
+    // [AC-M18-006] Polls: include inline aggregated counts in the response body.
+    if (survey.surveyType === 'poll') {
+      const all = await responseRepo.findAllBySurveyId(surveyId);
+      const pollResults = aggregatePollResults(survey, all);
+      return ctx.json({ ...updated, pollResults }, 200);
+    }
+
     return ctx.json(updated, 200);
   }
 
@@ -118,6 +153,13 @@ export async function submitSurveyResponse(
     responseId: response.id,
     action: 'submit_survey_response',
   }, 'Survey response submitted');
+
+  // [AC-M18-006] Polls: include inline aggregated counts in the response body.
+  if (survey.surveyType === 'poll') {
+    const all = await responseRepo.findAllBySurveyId(surveyId);
+    const pollResults = aggregatePollResults(survey, all);
+    return ctx.json({ ...response, pollResults }, 201);
+  }
 
   return ctx.json(response, 201);
 }
