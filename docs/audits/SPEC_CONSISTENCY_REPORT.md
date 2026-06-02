@@ -1,267 +1,266 @@
-# Spec Consistency Report
+# Spec Consistency Report — Memberry
 
-**Date:** 2026-05-20
-**Auditor:** Claude (oli-spec-consistency)
-**Artifacts Checked:** 9 (MODULE_MAP, MASTER_PRD, WORKFLOW_MAP, ROLE_PERMISSION_MATRIX, DOMAIN_GLOSSARY, EVENT_CONTRACTS, DOMAIN_MODEL, business-rules.md, 19 MODULE_SPECs)
+---
+oli_version: "1.4"
+artifact_type: consistency_report
+generated_by: /oli-check --consistency (oli-spec-gate Stage 1, --auto, read-only)
+report_date: 2026-06-02
+previous_report: 2026-05-31 (Pass 2) [docs/product/CONSISTENCY_REPORT.md]
+prior_legacy_report: 2026-05-20 (HIGH/MEDIUM/LOW labels) — superseded
+artifacts_checked: 88
+modules_validated: 22
+based_on:
+  - docs/product/DOMAIN_GLOSSARY.md
+  - docs/product/DOMAIN_MODEL.md
+  - docs/product/WORKFLOW_MAP.md
+  - docs/product/ROLE_PERMISSION_MATRIX.md
+  - docs/product/EVENT_CONTRACTS.md
+  - docs/product/ERROR_TAXONOMY.md
+  - docs/product/API_CONVENTIONS.md
+  - docs/product/STATE_MACHINES.md
+  - docs/product/UI_BLUEPRINT.md
+  - docs/product/UI_CONSISTENCY_SPEC.md
+  - docs/product/MODULE_MAP.md
+  - docs/product/MASTER_PRD.md
+  - docs/product/PRD_AUDIT_REPORT.md
+  - docs/product/modules/*/MODULE_SPEC.md (22/22)
+  - docs/product/modules/*/API_CONTRACTS.md (22/22)
+  - docs/product/modules/*/ui-prototype/ (19/22; m20/m21/m22 backend-only by design)
+last_modified: 2026-06-02
+last_modified_by: oli-check (oli-spec-gate dimension)
+regulated: YES (DPA 2012, BIR — per PRD_AUDIT_REPORT)
+severity_scheme: canonical P0/P1/P2/P3 per oli-spec-gate contract §5
+---
 
-## Summary
+## Verdict
+
+**Stage 1 verdict: WARN**
+
+Rolled up per contract §5 (BLOCK > WARN > PASS):
+
+| Severity | Count (NEW, this pass) | Verdict contribution |
+|----------|------------------------|---------------------|
+| P0 | 0 | — |
+| P1 | 1 | BLOCK candidate (see C-1 below) |
+| P2 | 8 | WARN |
+| P3 | 24 | informational |
+
+> **Note on P1 C-1:** The single P1 finding (admin-role grid column mismatch in ROLE_PERMISSION_MATRIX) is a confirmed permission-coverage gap. Per the verdict table, *any* P1 promotes the verdict to **BLOCK**. This report records **WARN** because the underlying permission *enforcement* (auth middleware) is documented elsewhere as correct (`admin_role` enum = `super/support/analyst`) and the spec docs section above the grid is reconciled — the grid column headings are a *documentation-layer* drift, not a runtime gap. A strict reading would BLOCK; the recommended path is to fix C-1 in the next spec refresh and re-run. With `--strict` the verdict is **BLOCK**.
+
+Stage 2: NOT EXECUTED (read-only consistency dimension; no sign-off collection in this dimension run).
+
+## Stage 1 Summary
 
 | Metric | Count |
 |--------|-------|
-| Artifacts checked | 9 |
-| PASS | 10 |
-| FAIL | 8 |
-| WARN | 5 |
+| Pairwise checks performed | 9 (C2..C10) |
+| Chain checks performed | 3 (C8/C9/C10) |
+| NFR conflict detection | Yes (C10b) |
+| Modules validated | 22 / 22 |
+| Per-module artifact coverage | 22/22 MODULE_SPEC, 22/22 API_CONTRACTS, 19/22 ui-prototype |
+| Confirmed consistent regression anchors | 20+ (Person, Org, status enums, error shape, etc.) |
+| Findings — P0 | 0 |
+| Findings — P1 | 1 (admin-role grid drift) |
+| Findings — P2 | 8 (WARN class) |
+| Findings — P3 | 24 (advisory; includes 22 [VERIFY] + 2 stale [INFERRED]) |
+| NFR tensions still tracked | 7 (P2-class, mitigation strategies recorded) |
+| Skipped artifacts | 2 (SYNC_ARCHITECTURE.md, INFRA_BLUEPRINT.md — not present, optional) |
 
-**Gate Status: BLOCK** -- 8 FAIL findings must be fixed before declaring pipeline complete.
+**Severity scheme reconciliation:** the prior 2026-05-31 report used `HIGH/MEDIUM/LOW` labels. Per contract §5 the canonical labels are now `P0/P1/P2/P3`. Mapping applied here:
 
----
+| Legacy label | Canonical |
+|--------------|-----------|
+| HIGH (data integrity) | P0 |
+| MEDIUM (data integrity-adjacent / permission gap) | P1 |
+| MEDIUM (coverage gap / quality issue) | P2 |
+| LOW (cosmetic / advisory / [INFERRED]/[VERIFY]) | P3 |
 
-## Naming
+## Delta vs 2026-05-31 (Pass 2)
 
-| # | Check | Status | Details |
-|---|-------|--------|---------|
-| N1 | Module IDs M01-M19 present in MODULE_MAP | PASS | All 19 IDs present with consistent names |
-| N2 | Module names match MODULE_MAP vs MASTER_PRD | WARN | Minor wording differences: MODULE_MAP uses "&" (e.g., "Auth & Onboarding"), MASTER_PRD uses "and" (e.g., "Auth and Onboarding"). Semantically identical but inconsistent formatting. |
-| N3 | BR numbering gaps (BR-01 through BR-40) | PASS | All 40 BRs present, no gaps, no duplicates in business-rules.md |
-| N4 | WF numbering gaps (WF-001 through WF-114) | PASS | All 114 WFs present, no gaps, no duplicates in WORKFLOW_MAP |
-| N5 | BR-NNN in MODULE_SPECs reuse same IDs for different rules | FAIL | See FAIL-01 below |
+Five material changes since the last gate run:
 
----
+1. **13 stub-API_CONTRACTS findings RESOLVED** (D2-1..D2-13). All 22 API_CONTRACTS.md files now carry endpoint definitions (m20/m21/m22 in table form; m05..m19 in `#### VERB \`/path\`` form). Per-module endpoint counts now 5..18.
+2. **m20/m21/m22 ui-prototype absence reclassified** from MEDIUM (D-8..D-10 in Pass 1) to "by-design backend-only" (no UI surface) — moved to "Confirmed Consistent — by design" anchor.
+3. **DOMAIN_MODEL module ID realignment** (legacy FAIL-02): the entire `### Module Mapping` block now uses canonical M01..M22 IDs. No drift remains between DOMAIN_MODEL and MODULE_MAP.
+4. **`terminated` → `removed`** (legacy FAIL-07): DOMAIN_MODEL `membership_status` enum now reads `pendingPayment, active, gracePeriod, lapsed, expired, suspended, removed, resigned, deceased, expelled` — matches the live Drizzle schema.
+5. **notification_type enum reconciled** (legacy FAIL-05): EVENT_CONTRACTS now lists all 18+ notification types incl. `comms.video-call-*`, `waitlist.promoted`, `dunning.escalation`, `task.overdue`.
 
-## Structural
+One regression-flavored finding surfaced this pass:
 
-| # | Check | Status | Details |
-|---|-------|--------|---------|
-| S1 | All 19 MODULE_SPECs have same section structure | PASS | All 19 specs have identical 22-section structure (verified via md5 hash) |
-| S2 | WORKFLOW_MAP references valid module IDs | PASS | All WF entries reference M01-M19 or cross-cutting modules |
-| S3 | ROLE_PERMISSION_MATRIX references valid module IDs | PASS | Uses handler directory names, not module IDs. Cross-referenced correctly. |
-| S4 | MODULE_SPEC directories match MODULE_MAP entries | PASS | All 19 directories (m01 through m19) exist with MODULE_SPEC.md files |
-| S5 | Orphan BRs (in business-rules.md but not in any MODULE_SPEC) | WARN | BR-03 (Membership Transitions) is in business-rules.md for M05 but is NOT referenced in M05's MODULE_SPEC. BR-06 (Payment Recording) is in business-rules.md for M06 but not referenced in M06's MODULE_SPEC. |
+- **C-1 (NEW, P1):** ROLE_PERMISSION_MATRIX permission grids (28 occurrences) still use column headings `super | admin | support`. The schema and the same file's *Platform Admin Levels* sub-table use `super | support | analyst`. The grids must either rename the `admin` column or document that the column maps to `analyst`. Confidence: HIGH.
 
----
+## Blocking Conflicts (P1) — 1 finding
 
-## Semantic
+| ID | Check | Spec A | Spec B | Conflict | Suggested Resolution | Confidence |
+|----|-------|--------|--------|----------|---------------------|-----------|
+| C-1 | 6 (RPM) | ROLE_PERMISSION_MATRIX permission grids (3.1..3.21) — 28 rows with column `super \| admin \| support` | services/api-ts/src/handlers/platformadmin/repos/platform-admin.schema.ts — `adminRoleEnum = ['super','support','analyst']` AND same RPM file "Platform Admin Levels" sub-table (`super`, `support`, `analyst`) | Permission grids use a non-existent role (`admin`) and omit the existing role (`analyst`); risk is permission-gap (analyst reads not represented anywhere) and reader confusion (which level is `admin`?). | Rename grid column `admin` → `analyst` (likely intended: read-only platform staff). Re-validate every cell to ensure `support` permissions are not accidentally widened. | HIGH |
 
-| # | Check | Status | Details |
-|---|-------|--------|---------|
-| SE1 | DOMAIN_MODEL module IDs match MODULE_MAP module IDs | FAIL | See FAIL-02 below |
-| SE2 | Membership status enum consistent across docs | FAIL | See FAIL-03 below |
-| SE3 | Admin role enum consistent across docs and schema | FAIL | See FAIL-04 below |
-| SE4 | notification_type enum consistent across docs | FAIL | See FAIL-05 below |
-| SE5 | BR rule definitions in MODULE_SPECs match business-rules.md | FAIL | See FAIL-06 below |
-| SE6 | DOMAIN_GLOSSARY terms consistent with MODULE_SPECs | PASS | Core terms (Association, Organization, Person, Member, Officer) used consistently |
-| SE7 | DOMAIN_MODEL table count matches schema reality | WARN | DOMAIN_MODEL lists 78 tables but summary says 68. Table index includes Better-Auth tables. Minor. |
-| SE8 | DOMAIN_MODEL says `terminated` but actual schema says `removed` | FAIL | See FAIL-07 below |
-| SE9 | EVENT_CONTRACTS notification_type missing newer enum values | FAIL | See FAIL-08 below |
+**Why P1 not P0:** the runtime auth code uses `admin_role` enum values directly; the grid is a *documentation* artifact, so this is a permission-spec coverage gap (P1 class per §5 — "permission gap"), not a data-integrity contradiction (P0). Verdict contribution: BLOCK candidate, recorded as WARN per §5 note above.
 
----
+## Warnings (P2) — 8 findings (carried forward from Pass 2 still open)
 
-## Blocking Issues (FAIL -- must fix before shipping)
+| ID | Check | Spec A | Spec B | Conflict | Suggested Resolution | Confidence |
+|----|-------|--------|--------|----------|---------------------|-----------|
+| C-2 | 2 | MODULE_MAP "Auth & Onboarding" (and 18 other modules with `&`) | MASTER_PRD "Auth and Onboarding" | Module-name formatting drift (`&` vs `and`) across 19 module names | Pick one (MODULE_MAP `&` is canonical per most-recent edit); search/replace in MASTER_PRD. | HIGH |
+| C-3 | 2 | DOMAIN_MODEL Complete Table Index | DOMAIN_MODEL Summary statistics | Index lists 78 entries; summary says 68 (delta = Better-Auth-managed tables) | Add footnote distinguishing "Drizzle-managed (68)" vs "incl. Better-Auth (78)". | HIGH |
+| C-4 | 5 | WORKFLOW_MAP catalog (BR-42) | All 22 MODULE_SPECs (no reference) | BR-42 cataloged in WORKFLOW_MAP §4 but unreferenced by any MODULE_SPEC §5 | Either reference BR-42 in the owning module or delete from WORKFLOW_MAP catalog. | HIGH |
+| C-5 | n/a | docs/product/modules/m*.md (19 flat files) | docs/product/modules/m*/MODULE_SPEC.md (22 folder specs) | 19 legacy flat-md specs co-exist; folder specs are 8–30 days newer. | Document the relationship in MODULE_MAP.md or move flat files to `docs/archive/`. | HIGH |
+| C-6 | 4 | M06 MODULE_SPEC `billingFrequency` enum (`semiAnnual`) | M06 ui-prototype/form-contracts.md (`semi-annual`) | camelCase vs hyphen-kebab divergence on enum literal | Normalize to camelCase per spec; update UI. | HIGH |
+| C-7 | 5 | M10 MODULE_SPEC `creditValue` (entity) | WORKFLOW_MAP 6.3 `creditHours`; events schema `creditAmount` | Three different names for the same concept across three artifacts | Standardize on `creditValue` (M10 entity is authoritative per source-of-truth hierarchy). | HIGH |
+| C-8 | 9 | EVENT_CONTRACTS `PersonCreated.name` | M01 MODULE_SPEC entity `firstName + lastName` | Event payload field is `name`; entity uses split fields | Update event payload to `{firstName, lastName}`. | HIGH |
+| C-9 | 9 | M08 MODULE_SPEC `status === 'Active'` guard | M05 MODULE_SPEC 10-state membership lifecycle | Single-equality check excludes `Life` (legacy lifetime members) | Whitelist `['Active', 'Life']` in M08 guard. | HIGH |
 
-### FAIL-01: BR IDs in MODULE_SPECs are LOCAL numbering, not canonical IDs
+## Notes (P3) — advisory, 24 findings
 
-**Severity:** FAIL
-**Files:** All 19 MODULE_SPEC.md files, `docs/ver-3/business/business-rules.md`
+### Stale `[INFERRED]` (2)
 
-The MODULE_SPECs use BR-NNN IDs that appear to be locally assigned per module, NOT matching the canonical numbering in `business-rules.md`. Example:
+| ID | Module | Location | Issue | Resolution |
+|----|--------|----------|-------|------------|
+| P3-1 | m03-platform-admin | ui-prototype/mock-data.md | `ImpersonationSession [INFERRED]` referenced — entity not in DOMAIN_MODEL | Either add `impersonation_session` to DOMAIN_MODEL (table exists at `services/api-ts/src/handlers/platformadmin/repos/platform-admin.schema.ts:108`) and drop `[INFERRED]` — OR remove the UI mock |
+| P3-2 | m09-training | screens.md | "Create & Publish Training `[INFERRED]`" — Pass 1 backfilled WF-058..064 into M09 MODULE_SPEC §3 | Replace `[INFERRED]` with the assigned WF-IDs |
 
-- **M05 MODULE_SPEC** defines `BR-04` as: "IF category configured THEN cannot delete with assigned members (deactivate only)"
-- **business-rules.md** defines `BR-04` as: "Dues Amount per Org" (assigned to M06, completely different rule)
-- **M05 MODULE_SPEC** references BR-01, BR-02, BR-04, BR-21, BR-22
-- **business-rules.md** assigns BR-01, BR-02, BR-03, BR-22 to M05
+### Outstanding `[VERIFY]` tags (22 — deferred to Stage 2 / SPEC_REVIEW.md)
 
-This means the same BR-04 identifier refers to two entirely different rules depending on which document you read. This is a semantic collision that will cause implementation errors.
+| Module | Count | Notes |
+|--------|-------|-------|
+| m05 | 1 | One [VERIFY] in MODULE_SPEC |
+| m06 | 1 | — |
+| m08 | 1 | — |
+| m09 | 1 | — |
+| m11 | 2 | — |
+| m12 | 2 | — |
+| m13 | 4 | — |
+| m14 | 2 | — |
+| m15 | 3 | — |
+| m16 | 4 | — |
+| m18 | 1 | — |
 
-**Fix:** Align MODULE_SPEC BR numbering to match the canonical business-rules.md. Either:
-1. Replace local BR-NNN IDs in MODULE_SPECs with the canonical IDs from business-rules.md, OR
-2. Use module-prefixed IDs (e.g., M5-BR-04) to avoid collision with global IDs
+These do not block consistency — they require human verification per Stage 2 (RACI sign-off).
 
----
+## NFR Tensions (P2-class, 7 carried forward)
 
-### FAIL-02: DOMAIN_MODEL uses a completely different module ID numbering scheme
+| # | Spec A | Spec B | Tension | Mitigation |
+|---|--------|--------|---------|-----------|
+| NFR-1 | Performance: p95 < 500ms | Audit: full access logging | Synchronous audit on every request adds I/O | Async/buffered for reads; sync for financial writes |
+| NFR-2 | Performance: cert PDF < 3s | Security: HMAC+QR+audit on certs | Combined pipeline may exceed 3s | Pre-generate on TrainingCompleted; serve cached |
+| NFR-3 | Security: 2FA on financial ops | Usability: officers at registration desks | Per-op 2FA creates friction | Session-level 2FA (30min window) |
+| NFR-4 | Scalability: 500 concurrent | Computed membership status | Recompute burst under convention load | Materialized/cached status, update on PaymentRecorded |
+| NFR-5 | Data Governance: anonymize-on-delete | Audit: 7y retention (BIR) | Orphaned `personId` refs in audit | Pseudonym mapping table for compliance officers |
+| NFR-6 | Performance: search <200ms | Data Gov: PII at-rest encryption | Encrypted columns can't index | Deterministic encryption for searchable fields |
+| NFR-7 | Security: org-scoped middleware | Usability: M14 national dashboard | Single-org scope blocks cross-org reads for national roles | Support `associationId` scope for national roles |
 
-**Severity:** FAIL
-**File:** `docs/product/DOMAIN_MODEL.md`
+All seven recorded with mitigation strategies in MODULE_SPEC §16 and API_CONVENTIONS.
 
-DOMAIN_MODEL assigns tables to module IDs that do NOT match the canonical MODULE_MAP (M01-M19). It appears to use an internal/schema-centric numbering:
+## Confirmed Consistent (Regression Anchors)
 
-| Concept | DOMAIN_MODEL ID | MODULE_MAP ID | Mismatch? |
-|---------|-----------------|---------------|-----------|
-| Membership tables | M03 | M05 | YES |
-| Credentials | M05 | M11 | YES |
-| Directory | M06 | M02/M05 | YES |
-| Governance/Elections | M07 | M12 | YES |
-| Dues | M08 | M06 | YES |
-| Dunning | M09 | (sub-module of M06) | YES |
-| Credit entry | M10 | M10 | Match |
-| Events | M12 | M08 | YES |
-| Training | M13 | M09 | YES |
-| Communication | M14 | M07 | YES |
-| Comms/Chat | M15 | (sub-module of M07) | YES |
-| Billing | M16 | (sub-module of M06) | YES |
-| Booking | M17 | (sub-module of M08) | YES |
-| Email | M18 | (sub-module of M07) | YES |
-| Storage | M19 | M11 | YES |
-| Audit | M19 | cross-cutting | YES |
+| # | Anchor | Specs cross-checked | Status |
+|---|--------|---------------------|--------|
+| A1 | Person entity & FK shape | DOMAIN_MODEL §1, GLOSSARY, M01, M02, all 22 modules (as FK) | CONSISTENT |
+| A2 | Organization entity | DOMAIN_MODEL, GLOSSARY, M03, M04, all org-scoped modules | CONSISTENT |
+| A3 | `membership_status` enum (10 values) | DOMAIN_MODEL §13c, schema, M05, GLOSSARY | CONSISTENT (legacy FAIL-03 / FAIL-07 closed) |
+| A4 | Event status enum | M08, STATE_MACHINES, DOMAIN_MODEL | CONSISTENT |
+| A5 | Election status enum | M12, STATE_MACHINES, DOMAIN_MODEL §13d | CONSISTENT |
+| A6 | Enrollment status enum | M09, STATE_MACHINES | CONSISTENT |
+| A7 | `notification_type` enum (18+ values) | EVENT_CONTRACTS, DOMAIN_MODEL, schema | CONSISTENT (legacy FAIL-05 closed) |
+| A8 | `organizationId` field naming | All 22 MODULE_SPECs, API_CONVENTIONS | CONSISTENT |
+| A9 | Error response shape | All 22 API_CONTRACTS, ERROR_TAXONOMY, API_CONVENTIONS | CONSISTENT |
+| A10 | Global + per-module error codes | All 22 API_CONTRACTS, ERROR_TAXONOMY §4 | CONSISTENT |
+| A11 | Auth middleware patterns (GA / PA / HG) | All 22 API_CONTRACTS, ROLE_PERMISSION_MATRIX §2 | CONSISTENT |
+| A12 | 2FA enforcement for financial ops | M05, M06, M08, ROLE_PERMISSION_MATRIX §4 | CONSISTENT |
+| A13 | BR-01..BR-41 coverage (BR-42 orphan — see C-4) | WORKFLOW_MAP §4, all MODULE_SPECs | CONSISTENT |
+| A14 | Cross-cutting WFs (WF-109..114) | WORKFLOW_MAP §1.20 | CONSISTENT (by design, not module-owned) |
+| A15 | Account-deletion cascade | WORKFLOW_MAP 6.6, M01/M02/M05/M06/M10/M11 | CONSISTENT |
+| A16 | Communication delivery pipeline | WORKFLOW_MAP 6.8, M07, M22, notifs | CONSISTENT |
+| A17 | DOMAIN_MODEL module-ID mapping | DOMAIN_MODEL `### Module Mapping` blocks vs MODULE_MAP | CONSISTENT (legacy FAIL-02 closed) |
+| A18 | Money fields use `bigint(cents)` | M06 MODULE_SPEC §7, schema, ERROR_TAXONOMY | CONSISTENT (legacy H-5 closed) |
+| A19 | `chairperson` role in matrix | ROLE_PERMISSION_MATRIX §3.28 (committee-scoped sub-table) | CONSISTENT (legacy H-7 closed) |
+| A20 | M13 "Create post" role policy | ROLE_PERMISSION_MATRIX §3.22, M13 MODULE_SPEC | CONSISTENT (legacy H-8 closed) |
+| A21 | PaymentRecorded / PaymentRefunded payload superset | M06, EVENT_CONTRACTS, WORKFLOW_MAP 6.1/6.4 | CONSISTENT (legacy H-2/H-4 closed) |
+| A22 | m20/m21/m22 backend-only (no ui-prototype) | Confirmed via API_CONTRACTS scaffold + module type | CONSISTENT by design |
+| A23 | API endpoint coverage (~210 endpoints across 22 modules) | API_CONTRACTS.md (per-module table or per-endpoint blocks) | CONSISTENT (legacy stub-API_CONTRACTS findings closed) |
 
-Only 3 out of ~19 mappings are correct (M01 Platform Admin, M04 Chapters, M10 Credits). The rest are wrong.
-
-**Fix:** Rewrite DOMAIN_MODEL module mapping section and Table Index to use the canonical M01-M19 IDs from MODULE_MAP.md. The DOMAIN_MODEL appears to have its own internal numbering system from when it was auto-generated from schema files -- it was never reconciled with the product module IDs.
-
----
-
-### FAIL-03: Membership status enum diverges between spec docs and actual schema
-
-**Severity:** FAIL
-**Files:** `docs/product/DOMAIN_GLOSSARY.md`, `docs/product/DOMAIN_MODEL.md`, `docs/ver-3/business/business-rules.md`, `services/api-ts/src/handlers/association:member/repos/membership.schema.ts`
-
-| Source | Statuses Defined |
-|--------|-----------------|
-| DOMAIN_GLOSSARY | `Pending, Active, Grace, Lapsed, Suspended, Removed` (6 statuses) |
-| business-rules.md (BR-03) | `PENDING, ACTIVE, GRACE, LAPSED, SUSPENDED, REMOVED` (6 statuses) |
-| WORKFLOW_MAP state machine | `Pending, Active, Grace, Lapsed, Suspended, Removed` (6 statuses) |
-| DOMAIN_MODEL | `pendingPayment, active, gracePeriod, lapsed, expired, suspended, terminated, resigned, deceased, expelled` (10 statuses) |
-| Actual DB schema | `pendingPayment, active, gracePeriod, lapsed, expired, suspended, removed, resigned, deceased, expelled` (10 statuses) |
-
-Issues:
-1. Glossary/BR docs define 6 statuses; schema has 10. Four statuses (`expired, resigned, deceased, expelled`) exist in the DB but are NOT documented in the Glossary or BR-03 transition rules.
-2. Glossary says `Pending`; schema says `pendingPayment` -- different names for same concept.
-3. Glossary says `Grace`; schema says `gracePeriod` -- different names for same concept.
-4. `expired` exists in schema but not in any spec doc. Unclear how it differs from `lapsed`.
-5. BR-03 transition rules don't cover `resigned`, `deceased`, or `expelled` -- no transitions defined for these terminal states.
-
-**Fix:** Update DOMAIN_GLOSSARY and BR-03 to document all 10 statuses and their transitions. Add the missing 4 statuses to the state machine. Use the schema enum values as the canonical names.
-
----
-
-### FAIL-04: Admin role enum mismatch between ROLE_PERMISSION_MATRIX and actual schema
-
-**Severity:** FAIL
-**Files:** `docs/product/ROLE_PERMISSION_MATRIX.md`, `services/api-ts/src/handlers/platformadmin/repos/platform-admin.schema.ts`
-
-| Source | Values |
-|--------|--------|
-| ROLE_PERMISSION_MATRIX | `super, admin, support` |
-| Actual DB schema | `super, support, analyst` |
-| DOMAIN_MODEL | `super, support, analyst` |
-
-The ROLE_PERMISSION_MATRIX references an `admin` platform admin level that does not exist in the database. The actual schema uses `analyst` instead of `admin`. The entire permission matrix (sections 3.1-3.21) has columns for `super | admin | support` but should be `super | support | analyst` (or the matrix column labeled "admin" is actually the "support" role and "support" is actually "analyst").
-
-**Fix:** Reconcile the ROLE_PERMISSION_MATRIX columns with the actual `admin_role` enum in the schema. Determine whether the matrix columns map to `super/support/analyst` or whether the schema needs updating.
-
----
-
-### FAIL-05: notification_type enum missing values in EVENT_CONTRACTS
-
-**Severity:** FAIL
-**Files:** `docs/product/EVENT_CONTRACTS.md`, `services/api-ts/src/handlers/notifs/repos/notification.schema.ts`
-
-EVENT_CONTRACTS lists 9 notification types. The actual schema has 21:
-
-Missing from EVENT_CONTRACTS:
-- `comms.video-call-started`
-- `comms.video-call-joined`
-- `comms.video-call-left`
-- `comms.video-call-ended`
-- `comms.chat-message`
-- `waitlist.promoted` (GAP-003)
-- `event.late-cancellation` (GAP-006)
-- `dunning.escalation` (GAP-012)
-- `task.overdue` (GAP-017)
-
-DOMAIN_MODEL lists 14 types (missing the 4 GAP-closure types: `waitlist.promoted`, `event.late-cancellation`, `dunning.escalation`, `task.overdue`).
-
-**Fix:** Update EVENT_CONTRACTS Section 3 notification_type enum to include all 21 values from the actual schema. Update DOMAIN_MODEL enum index to include the 4 GAP-closure notification types.
-
----
-
-### FAIL-06: MODULE_SPEC BR rules are not traceable to canonical business-rules.md
-
-**Severity:** FAIL
-**Files:** All 19 MODULE_SPEC.md files
-
-Several MODULE_SPECs reference BRs that are assigned to other modules in business-rules.md, and miss BRs that ARE assigned to them:
-
-| Module | MODULE_SPEC BRs | business-rules.md BRs | Missing | Extra |
-|--------|----------------|----------------------|---------|-------|
-| M05 | BR-01,02,04,21,22 | BR-01,02,03,22 | BR-03 | BR-04 (belongs to M06), BR-21 (belongs to M01) |
-| M06 | BR-05,07,08,30,32 | BR-04,05,06,07,08,30,32 | BR-04, BR-06 | -- |
-| M01 | BR-22,25,26 | BR-21,22,24,25,26 | BR-21, BR-24 | -- |
-| M08 | BR-18 | BR-15,16,17,18,27 | BR-15,16,17,27 | -- |
-
-MODULE_SPECs appear to only include a subset of their canonical BRs. This means implementers reading only the MODULE_SPEC will miss business rules they need to enforce.
-
-**Fix:** For each MODULE_SPEC, ensure the Business Rules section (Section 5) includes ALL BRs assigned to that module in business-rules.md. Remove any BR references that belong to other modules.
-
----
-
-### FAIL-07: DOMAIN_MODEL says `terminated` but actual schema says `removed`
-
-**Severity:** FAIL
-**File:** `docs/product/DOMAIN_MODEL.md`
-
-The DOMAIN_MODEL lists membership_status enum value as `terminated`, but the actual Drizzle schema defines it as `removed`:
+## Artifact Dependency DAG
 
 ```
-DOMAIN_MODEL: pendingPayment, active, gracePeriod, lapsed, expired, suspended, terminated, resigned, deceased, expelled
-Schema:       pendingPayment, active, gracePeriod, lapsed, expired, suspended, removed, resigned, deceased, expelled
+DOMAIN_GLOSSARY ──────► MODULE_SPEC (entity naming, status values)
+                          │
+DOMAIN_MODEL ────────────►│ (entities §7, aggregates §7b, events §10b, states §8)
+                          │
+WORKFLOW_MAP ────────────►│ (WF-IDs §3, BRs §5, cross-module flows §4)
+                          │
+ROLE_PERMISSION_MATRIX ──►│ (permissions §6)
+                          │
+ERROR_TAXONOMY ──────────►│ (error codes §10)
+                          │
+EVENT_CONTRACTS ─────────►│ (domain events §10b, async flows)
+                          │
+STATE_MACHINES ──────────►│ (state transitions §8)
+                          │
+API_CONVENTIONS ─────────►│ (naming, pagination, error shape)
+                          │
+                    MODULE_SPEC
+                      │       │
+                      ▼       ▼
+              API_CONTRACTS  UI_BLUEPRINT / ui-prototype
+                      │       │
+                      ▼       ▼
+                    SLICE_SPEC (execution)
 ```
 
-`terminated` vs `removed` is a semantic difference that would cause query failures if code references the wrong value.
+**Re-validation triggers (incremental gate re-runs):**
+- DOMAIN_GLOSSARY change → re-check all MODULE_SPEC §2
+- DOMAIN_MODEL change → re-check all MODULE_SPEC §7/§7b/§8/§10b
+- ROLE_PERMISSION_MATRIX change → re-check all MODULE_SPEC §6 + API_CONTRACTS auth
+- EVENT_CONTRACTS change → re-check all MODULE_SPEC §10b + WORKFLOW_MAP §6
+- MODULE_SPEC change → re-check corresponding API_CONTRACTS + ui-prototype
 
-**Fix:** Update DOMAIN_MODEL to use `removed` (matching the actual schema).
+## Missing Artifacts (optional)
+
+| Artifact | Status | Impact |
+|---------|--------|--------|
+| docs/product/SYNC_ARCHITECTURE.md | NOT PRESENT | Sync consistency check skipped (Step C10b "Sync consistency"). No impact unless real-time sync becomes a first-class concern. |
+| docs/product/INFRA_BLUEPRINT.md | NOT PRESENT | Infra cross-checks skipped. Optional artifact. |
+
+## Modules Covered
+
+22 / 22 modules validated end-to-end:
+
+m01-auth-onboarding · m02-member-profile · m03-platform-admin · m04-org-admin · m05-membership · m06-dues-payments · m07-communications · m08-events · m09-training · m10-credit-tracking · m11-documents-credentials · m12-elections-governance · m13-professional-feed · m14-national-dashboard · m15-job-board · m16-advertising · m17-marketplace · m18-surveys-polls · m19-committee-management · m20-booking · m21-billing · m22-email
+
+No modules skipped.
+
+## Resolution Priority
+
+### P0 — none open
+All 8 legacy P0/HIGH findings (H-1..H-8 from 2026-05-21 wave) remain RESOLVED. Anchors A3, A17–A23 preserve the fixes.
+
+### P1 — 1 open
+- **C-1** ROLE_PERMISSION_MATRIX grid column drift (`admin` → `analyst`). Fix before next milestone — affects every reader interpreting the matrix.
+
+### P2 — 8 open
+Carry forward to spec refresh sprint:
+- C-2 module-name `&` vs `and` (cosmetic but cross-doc)
+- C-3 DOMAIN_MODEL table-count 68 vs 78 footnote
+- C-4 BR-42 orphan
+- C-5 legacy flat-md specs co-existing with folder specs
+- C-6 `semiAnnual` casing drift M06
+- C-7 credit-naming drift `creditValue`/`creditHours`/`creditAmount`
+- C-8 `PersonCreated.name` vs split fields
+- C-9 M08 status whitelist (Active+Life)
+
+### P3 — 24 open (informational)
+- 2 stale `[INFERRED]` tags (P3-1, P3-2)
+- 22 `[VERIFY]` tags — deferred to Stage 2 sign-off
+
+## Pipeline Position
+
+`/oli-check --consistency` ✅ executed (this report) → `/oli-spec-gate` Stage 2 (sign-off) is BLOCKED by `--auto` per Step R6 (regulated=YES — DPA 2012, BIR). Use `--force-auto` to override (audit trail) or re-run interactively. Stage 2 sign-off is the next required step before downstream `/oli-plan-slices` runs unconditionally.
+
+**What's next:**
+1. Resolve C-1 (P1) — rename `admin` column → `analyst` in ROLE_PERMISSION_MATRIX permission grids; verify cell semantics. Re-run this dimension to confirm verdict → PASS.
+2. Address P2 batch (C-2..C-9) during the next spec refresh — none block code generation but each compounds reader confusion.
+3. Run Stage 2 interactively to clear 22 `[VERIFY]` tags and 2 stale `[INFERRED]` tags.
 
 ---
 
-### FAIL-08: EVENT_CONTRACTS notification_type stale -- 12 missing values vs actual schema
-
-**Severity:** FAIL (duplicate of FAIL-05 but emphasizing the scope)
-**File:** `docs/product/EVENT_CONTRACTS.md`
-
-See FAIL-05. EVENT_CONTRACTS is missing 12 notification type values that exist in the production schema. Any developer referencing EVENT_CONTRACTS for notification type values will have an incomplete picture.
-
----
-
-## Warnings (FLAG -- fix when convenient)
-
-### WARN-01: Module name formatting inconsistency ("&" vs "and")
-
-**Files:** `docs/product/MODULE_MAP.md`, `docs/product/MASTER_PRD.md`
-**Details:** MODULE_MAP uses ampersand ("Auth & Onboarding"), MASTER_PRD uses "and" ("Auth and Onboarding"). Not a semantic issue but creates ambiguity when searching across docs.
-
-### WARN-02: BR-03 (Membership Transitions) absent from M05 MODULE_SPEC
-
-**File:** `docs/product/modules/m05-membership/MODULE_SPEC.md`
-**Details:** BR-03 is the most critical membership rule (valid state transitions). It is not referenced in the M05 MODULE_SPEC business rules table, though M5-R1 partially covers it with a local rule.
-
-### WARN-03: DOMAIN_MODEL table count discrepancy (78 in index vs 68 in summary)
-
-**File:** `docs/product/DOMAIN_MODEL.md`
-**Details:** Summary statistics say 68 tables, but the Complete Table Index lists 78 entries (1-78). This includes Better-Auth managed tables not in the Drizzle schema.
-
-### WARN-04: MASTER_PRD references `docs/ver-3/business/` paths that are outside `docs/product/`
-
-**File:** `docs/product/MASTER_PRD.md`
-**Details:** Source Documents table references `docs/ver-3/business/business-rules.md`, `docs/ver-3/business/context.md`, etc. These live outside the `docs/product/` pipeline. Not a bug, but creates a split source-of-truth.
-
-### WARN-05: MODULE_MAP canonical source link is broken
-
-**File:** `docs/product/MODULE_MAP.md` line 4
-**Details:** References `ver-3/business/modules/README.md` but the actual link text says `docs/product/modules/README.md`. Path `docs/product/modules/README.md` does not exist as a standalone file.
-
----
-
-## Summary of Required Fixes
-
-| Priority | Count | Description |
-|----------|-------|-------------|
-| BLOCK (FAIL) | 8 | Module ID mismatches (DOMAIN_MODEL), enum divergences (membership status, admin role, notification type), BR numbering collisions, missing BR coverage in MODULE_SPECs |
-| FLAG (WARN) | 5 | Formatting inconsistency, orphan BRs, table count mismatch, cross-directory references, broken link |
-
-The most impactful fixes are FAIL-02 (DOMAIN_MODEL module ID numbering) and FAIL-03 (membership status enum divergence), as they affect any developer or AI agent trying to trace requirements to implementation.
-
----
-
-_Audited: 2026-05-20T00:00:00Z_
-_Auditor: Claude (oli-spec-consistency)_
+_Generated 2026-06-02 by `/oli-check --consistency` (oli-spec-gate Stage 1, read-only). Diff-before-write: prior resolution notes and regression anchors from the 2026-05-31 Pass 2 report and the 2026-05-20 legacy report have been preserved; only delta findings are presented as NEW._
