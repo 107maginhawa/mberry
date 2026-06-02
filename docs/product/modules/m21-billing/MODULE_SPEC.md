@@ -52,14 +52,14 @@ Stripe Connect billing infrastructure for the platform. Manages merchant account
 
 | WF-ID | Workflow | Actor | Description | Priority | Anchors |
 |-------|----------|-------|-------------|----------|---------|
-| WF-M21-01 | Onboard Merchant | Admin | Create Stripe Connect account, complete onboarding flow | P0 | BR-60, M21-R1 |
-| WF-M21-02 | Create Invoice | System/Admin | Generate invoice with line items for dues/events/services | P0 | BR-66, M21-R7 |
-| WF-M21-03 | Pay Invoice | Member | Process payment via Stripe Payment Intent | P0 | BR-60, BR-61, M21-R1, M21-R2 |
-| WF-M21-04 | Refund Payment | Admin | Process full or partial refund | P0 | BR-64, M21-R5 |
-| WF-M21-05 | Handle Webhook | System | Process Stripe webhook events (payment success/failure/refund) | P0 | BR-62, BR-63, M21-R3, M21-R4 |
-| WF-M21-06 | View Invoices | Member/Admin | List and filter invoices by status/date | P0 | BR-66 |
+| WF-128 | Onboard Merchant | Admin | Create Stripe Connect account, complete onboarding flow | P0 | BR-60, M21-R1 |
+| WF-129 | Create Invoice | System/Admin | Generate invoice with line items for dues/events/services | P0 | BR-66, M21-R7 |
+| WF-130 | Pay Invoice | Member | Process payment via Stripe Payment Intent | P0 | BR-60, BR-61, M21-R1, M21-R2 |
+| WF-131 | Refund Payment | Admin | Process full or partial refund | P0 | BR-64, M21-R5 |
+| WF-132 | Handle Webhook | System | Process Stripe webhook events (payment success/failure/refund) | P0 | BR-62, BR-63, M21-R3, M21-R4 |
+| WF-133 | View Invoices | Member/Admin | List and filter invoices by status/date | P0 | BR-66 |
 
-> **Note:** `WF-M21-*` IDs are module-scoped pending promotion to the canonical WORKFLOW_MAP registry (deferred — touches outside `m21-billing/` are out of scope for TR-P1-002). Anchors reference billing-module BR-* added in `br-registry.json` plus local `M21-R*` business rules.
+> **Note:** WF-128..133 are billing-module workflows registered in `docs/product/WORKFLOW_MAP.md` §1.23 (canonical global IDs). Anchors reference billing-module BR-* added in `br-registry.json` plus local `M21-R*` business rules.
 
 ## 4. Business Rules
 
@@ -161,7 +161,7 @@ Paid ──partial_refund──► PartiallyRefunded
 ```
 
 ### SM-M21-MERCHANT — Merchant Account Status
-Anchors: BR-60 (merchant-required guard), WF-M21-01 (onboarding workflow).
+Anchors: BR-60 (merchant-required guard), WF-128 (onboarding workflow).
 ```
 Pending ──onboard_complete──► Active
 Active ──restrict──► Restricted
@@ -171,26 +171,26 @@ Active ──disable──► Disabled
 
 ## 8. API Expectations
 
-Every endpoint anchors to ≥1 spec ID (BR-* in `br-registry.json`, M21-R* in §4, WF-M21-* in §3, AC-M21-* in §11b, or SM-M21-* in §7) — restores trace chain per TR-P1-002.
+Every endpoint anchors to ≥1 spec ID (BR-* in `br-registry.json`, M21-R* in §4, WF-128..133 in §3, AC-M21-* in §11b, or SM-M21-* in §7) — restores trace chain per TR-P1-002.
 
 | API Need | Method | Route | Auth | Handler | Spec Anchors | Notes |
 |----------|--------|-------|------|---------|--------------|-------|
-| Create invoice | POST | /billing/invoices | Required | `createInvoice.ts` | BR-66, M21-R7, WF-M21-02, AC-M21-002 | Admin/system; line-item sum enforced |
-| Get invoice | GET | /billing/invoices/:id | Required | `getInvoice.ts` | WF-M21-06 | Recipient or admin |
-| List invoices | GET | /billing/invoices | Required | `listInvoices.ts` | WF-M21-06 | Role-filtered |
+| Create invoice | POST | /billing/invoices | Required | `createInvoice.ts` | BR-66, M21-R7, WF-129, AC-M21-002 | Admin/system; line-item sum enforced |
+| Get invoice | GET | /billing/invoices/:id | Required | `getInvoice.ts` | WF-133 | Recipient or admin |
+| List invoices | GET | /billing/invoices | Required | `listInvoices.ts` | WF-133 | Role-filtered |
 | Update invoice | PUT | /billing/invoices/:id | Required | `updateInvoice.ts` | BR-61, M21-R2, SM-M21-INVOICE | Draft only (terminal-state guard) |
 | Delete invoice | DELETE | /billing/invoices/:id | Required | `deleteInvoice.ts` | BR-61, M21-R2, SM-M21-INVOICE | Draft only |
-| Finalize invoice (Send) | POST | /billing/invoices/:id/finalize | Required | `finalizeInvoice.ts` | SM-M21-INVOICE, WF-M21-02 | Draft → Sent transition |
-| Pay invoice | POST | /billing/invoices/:id/pay | Required | `payInvoice.ts` | BR-60, BR-61, M21-R1, M21-R2, WF-M21-03, AC-M21-001 | Creates Payment Intent |
-| Capture invoice payment | POST | /billing/invoices/:id/capture | Required | `captureInvoicePayment.ts` | BR-61, BR-63, SM-M21-INVOICE, WF-M21-03 | Manual capture after auth |
+| Finalize invoice (Send) | POST | /billing/invoices/:id/finalize | Required | `finalizeInvoice.ts` | SM-M21-INVOICE, WF-129 | Draft → Sent transition |
+| Pay invoice | POST | /billing/invoices/:id/pay | Required | `payInvoice.ts` | BR-60, BR-61, M21-R1, M21-R2, WF-130, AC-M21-001 | Creates Payment Intent |
+| Capture invoice payment | POST | /billing/invoices/:id/capture | Required | `captureInvoicePayment.ts` | BR-61, BR-63, SM-M21-INVOICE, WF-130 | Manual capture after auth |
 | Void invoice | POST | /billing/invoices/:id/void | Required | `voidInvoice.ts` | BR-61, M21-R2, SM-M21-INVOICE | Before payment |
-| Mark invoice uncollectible | POST | /billing/invoices/:id/uncollectible | Required | `markInvoiceUncollectible.ts` | SM-M21-INVOICE, WF-M21-06 | Admin write-off path |
-| Refund invoice payment | POST | /billing/invoices/:id/refund | Required | `refundInvoicePayment.ts` | BR-64, M21-R5, WF-M21-04, AC-M21-005 | Validates paid status |
-| Create merchant account | POST | /billing/merchants | Required | `createMerchantAccount.ts` | BR-60, M21-R1, WF-M21-01 | Owner auto-set |
-| Get merchant account | GET | /billing/merchants/:id | Required | `getMerchantAccount.ts` | BR-60, WF-M21-01 | Owner only |
-| Onboard merchant | POST | /billing/merchants/:id/onboard | Required | `onboardMerchantAccount.ts` | BR-60, M21-R1, WF-M21-01, SM-M21-MERCHANT, AC-M21-006 | Generates Stripe link |
-| Get merchant dashboard | GET | /billing/merchants/:id/dashboard | Required | `getMerchantDashboard.ts` | BR-65, M21-R6, WF-M21-01 | Owner only; Stripe Express link |
-| Stripe webhook | POST | /billing/webhooks/stripe | None (signature) | `handleStripeWebhook.ts` | BR-62, BR-63, M21-R3, M21-R4, WF-M21-05, AC-M21-003, AC-M21-004 | Signature-verified |
+| Mark invoice uncollectible | POST | /billing/invoices/:id/uncollectible | Required | `markInvoiceUncollectible.ts` | SM-M21-INVOICE, WF-133 | Admin write-off path |
+| Refund invoice payment | POST | /billing/invoices/:id/refund | Required | `refundInvoicePayment.ts` | BR-64, M21-R5, WF-131, AC-M21-005 | Validates paid status |
+| Create merchant account | POST | /billing/merchants | Required | `createMerchantAccount.ts` | BR-60, M21-R1, WF-128 | Owner auto-set |
+| Get merchant account | GET | /billing/merchants/:id | Required | `getMerchantAccount.ts` | BR-60, WF-128 | Owner only |
+| Onboard merchant | POST | /billing/merchants/:id/onboard | Required | `onboardMerchantAccount.ts` | BR-60, M21-R1, WF-128, SM-M21-MERCHANT, AC-M21-006 | Generates Stripe link |
+| Get merchant dashboard | GET | /billing/merchants/:id/dashboard | Required | `getMerchantDashboard.ts` | BR-65, M21-R6, WF-128 | Owner only; Stripe Express link |
+| Stripe webhook | POST | /billing/webhooks/stripe | None (signature) | `handleStripeWebhook.ts` | BR-62, BR-63, M21-R3, M21-R4, WF-132, AC-M21-003, AC-M21-004 | Signature-verified |
 
 **TypeSpec:** `specs/api/src/modules/billing.tsp` — COMPLETE (operations defined across InvoiceManagement and MerchantAccountManagement interfaces; routes auto-generated under `services/api-ts/src/generated/openapi/`).
 
@@ -229,37 +229,37 @@ When implementing this module:
 **Given** a person without an active merchant account
 **When** they attempt `POST /billing/invoices/:id/pay`
 **Then** the request is rejected with `MERCHANT_NOT_CONFIGURED` (422) and no Payment Intent is created.
-Anchors: BR-60, M21-R1, WF-M21-03
+Anchors: BR-60, M21-R1, WF-130
 
 ### AC-M21-002: Line-Item Total Integrity
 **Given** an invoice with N line items
 **When** the invoice is created or finalized
 **Then** `invoice.total == sum(lineItem.quantity * lineItem.unitPrice)` exactly; user-supplied totals are ignored.
-Anchors: BR-66, M21-R7, WF-M21-02
+Anchors: BR-66, M21-R7, WF-129
 
 ### AC-M21-003: Webhook Signature Verification
 **Given** a webhook POST to `/billing/webhooks/stripe` with an invalid `stripe-signature` header
 **When** the handler runs
 **Then** the response is 400 and no invoice state mutation occurs.
-Anchors: BR-62, M21-R3, WF-M21-05
+Anchors: BR-62, M21-R3, WF-132
 
 ### AC-M21-004: Idempotent Webhook Processing
 **Given** a `payment_intent.succeeded` webhook already processed (same event ID)
 **When** the same event arrives again
 **Then** the handler returns 200 OK with no duplicate `paid` transition.
-Anchors: BR-63, M21-R4, WF-M21-05, SM-M21-INVOICE
+Anchors: BR-63, M21-R4, WF-132, SM-M21-INVOICE
 
 ### AC-M21-005: Refund Precondition
 **Given** an invoice in any status other than `paid` or `partially_refunded`
 **When** `POST /billing/invoices/:id/refund` is called
 **Then** the request is rejected with `INVALID_REFUND_STATE` (422); refund only proceeds against a captured payment.
-Anchors: BR-64, M21-R5, WF-M21-04
+Anchors: BR-64, M21-R5, WF-131
 
 ### AC-M21-006: Stripe Connect Onboarding Round-Trip
 **Given** an admin initiates merchant onboarding
 **When** Stripe returns onboarding completion
 **Then** `merchantAccount.status` transitions `pending → active` and `MerchantOnboarded` is emitted.
-Anchors: BR-60, M21-R1, WF-M21-01, SM-M21-MERCHANT
+Anchors: BR-60, M21-R1, WF-128, SM-M21-MERCHANT
 
 ### AC-M21-007: Encrypted Key Storage
 **Given** an org sets Stripe credentials via billing config
@@ -273,7 +273,7 @@ Anchors: BR-65, M21-R6
 |---------|--------|
 | 1. Module Overview | COMPLETE |
 | 2. Domain Terms | COMPLETE |
-| 3. Workflows | COMPLETE (6 workflows, WF-M21-01..06 anchors) |
+| 3. Workflows | COMPLETE (6 workflows, WF-128..06 anchors) |
 | 4. Business Rules | COMPLETE (7 rules, canonical BR-60..BR-66) |
 | 5. Permissions | COMPLETE |
 | 6. Data Requirements | COMPLETE (4 entities) |
@@ -289,4 +289,4 @@ Anchors: BR-65, M21-R6
 | Version | Date | Author | Summary |
 |---------|------|--------|---------|
 | 1.0 | 2026-05-29 | Claude | Initial spec from existing codebase (Wave 8 coverage) |
-| 1.1 | 2026-06-02 | Claude | TR-P1-002 fix: minted BR-60..BR-66 in `br-registry.json`; added WF-M21-01..06 to §3, SM-M21-INVOICE/MERCHANT to §7, AC-M21-001..007 in §11b, and per-endpoint `Spec Anchors` column in §8 so every endpoint resolves to ≥1 BR-*/WF-*/AC-*/SM-* ID. |
+| 1.1 | 2026-06-02 | Claude | TR-P1-002 fix: minted BR-60..BR-66 in `br-registry.json`; added WF-128..06 to §3, SM-M21-INVOICE/MERCHANT to §7, AC-M21-001..007 in §11b, and per-endpoint `Spec Anchors` column in §8 so every endpoint resolves to ≥1 BR-*/WF-*/AC-*/SM-* ID. |

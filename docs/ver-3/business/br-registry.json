@@ -1030,7 +1030,7 @@
       "contract": [],
       "e2e": []
     },
-    "annotations": "Minted 2026-06-02 to resolve TR-P1-002. Aliases module-local M21-R1. IF merchant account does not exist THEN block payment processing for that person (require Stripe Connect onboarding first). Backs WF-M21-01 (Onboard Merchant), WF-M21-03 (Pay Invoice), AC-M21-001, AC-M21-006, SM-M21-MERCHANT."
+    "annotations": "Minted 2026-06-02 to resolve TR-P1-002. Aliases module-local M21-R1. IF merchant account does not exist THEN block payment processing for that person (require Stripe Connect onboarding first). Backs WF-128 (Onboard Merchant), WF-130 (Pay Invoice), AC-M21-001, AC-M21-006, SM-M21-MERCHANT."
   },
   "BR-61": {
     "rule": "Invoice Terminal-State Payment Guard (alias M21-R2)",
@@ -1047,7 +1047,7 @@
       "contract": [],
       "e2e": []
     },
-    "annotations": "Minted 2026-06-02 to resolve TR-P1-002. Aliases module-local M21-R2. IF invoice status is paid or void THEN reject further payment/update attempts (prevent double-payment). Backs SM-M21-INVOICE terminal-state guard, WF-M21-03, AC-M21-001."
+    "annotations": "Minted 2026-06-02 to resolve TR-P1-002. Aliases module-local M21-R2. IF invoice status is paid or void THEN reject further payment/update attempts (prevent double-payment). Backs SM-M21-INVOICE terminal-state guard, WF-130, AC-M21-001."
   },
   "BR-62": {
     "rule": "Stripe Webhook Signature Verification (alias M21-R3)",
@@ -1061,7 +1061,7 @@
       "contract": [],
       "e2e": []
     },
-    "annotations": "Minted 2026-06-02 to resolve TR-P1-002. Aliases module-local M21-R3. IF Stripe webhook signature invalid THEN reject with 400 (signature verification mandatory). Backs WF-M21-05, AC-M21-003."
+    "annotations": "Minted 2026-06-02 to resolve TR-P1-002. Aliases module-local M21-R3. IF Stripe webhook signature invalid THEN reject with 400 (signature verification mandatory). Backs WF-132, AC-M21-003."
   },
   "BR-63": {
     "rule": "Webhook-Driven Invoice Paid Transition (alias M21-R4)",
@@ -1076,7 +1076,7 @@
       "contract": [],
       "e2e": []
     },
-    "annotations": "Minted 2026-06-02 to resolve TR-P1-002. Aliases module-local M21-R4. IF payment_intent.succeeded webhook received THEN mark invoice paid (automated payment confirmation, idempotent on event ID). Backs WF-M21-05, AC-M21-004, SM-M21-INVOICE."
+    "annotations": "Minted 2026-06-02 to resolve TR-P1-002. Aliases module-local M21-R4. IF payment_intent.succeeded webhook received THEN mark invoice paid (automated payment confirmation, idempotent on event ID). Backs WF-132, AC-M21-004, SM-M21-INVOICE."
   },
   "BR-64": {
     "rule": "Refund Requires Paid Original Payment (alias M21-R5)",
@@ -1090,7 +1090,7 @@
       "contract": [],
       "e2e": []
     },
-    "annotations": "Minted 2026-06-02 to resolve TR-P1-002. Aliases module-local M21-R5. IF refund requested THEN validate original payment exists and is in paid status (cannot refund unpaid invoice). Backs WF-M21-04, AC-M21-005."
+    "annotations": "Minted 2026-06-02 to resolve TR-P1-002. Aliases module-local M21-R5. IF refund requested THEN validate original payment exists and is in paid status (cannot refund unpaid invoice). Backs WF-131, AC-M21-005."
   },
   "BR-65": {
     "rule": "Billing Config Key Encryption at Rest (alias M21-R6)",
@@ -1121,7 +1121,7 @@
       "contract": [],
       "e2e": []
     },
-    "annotations": "Minted 2026-06-02 to resolve TR-P1-002. Aliases module-local M21-R7. IF invoice has line items THEN total = sum of (quantity × unitPrice) per item (calculated, not user-supplied). Backs WF-M21-02, AC-M21-002."
+    "annotations": "Minted 2026-06-02 to resolve TR-P1-002. Aliases module-local M21-R7. IF invoice has line items THEN total = sum of (quantity × unitPrice) per item (calculated, not user-supplied). Backs WF-129, AC-M21-002."
   },
   "BR-68": {
     "rule": "Booking Event Must Be Active to Accept Bookings (alias M20-R1)",

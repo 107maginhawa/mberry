@@ -247,6 +247,17 @@ Pipeline Stage: Phase A -- Workflow Discovery
 | WF-126 | M22 | admin | Cancel Queued Email: admin cancels pending email before processing | MODULE_SPEC m22-email §3 |
 | WF-127 | M22 | lifecycle | Retry Failed Email: system re-attempts failed delivery up to max retries | MODULE_SPEC m22-email §3 |
 
+### 1.23 Billing (M21) — Module-Local Workflows
+
+| WF-ID | Module | Type | Description | Source |
+|-------|--------|------|-------------|--------|
+| WF-128 | M21 | lifecycle | Onboard Merchant: admin creates Stripe Connect account, completes onboarding flow | MODULE_SPEC m21-billing §3 |
+| WF-129 | M21 | CRUD | Create Invoice: system/admin generates invoice with line items for dues/events/services | MODULE_SPEC m21-billing §3 |
+| WF-130 | M21 | lifecycle | Pay Invoice: member processes payment via Stripe Payment Intent | MODULE_SPEC m21-billing §3 |
+| WF-131 | M21 | lifecycle | Refund Payment: admin processes full or partial refund | MODULE_SPEC m21-billing §3 |
+| WF-132 | M21 | lifecycle | Handle Webhook: system processes Stripe webhook events (payment success/failure/refund) | MODULE_SPEC m21-billing §3 |
+| WF-133 | M21 | CRUD | View Invoices: member/admin lists and filters invoices by status/date | MODULE_SPEC m21-billing §3 |
+
 ---
 
 ## 2. Entity CRUD Lifecycle Matrix
