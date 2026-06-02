@@ -5,7 +5,10 @@ import { ArrearsBreakdown } from './arrears-breakdown'
 
 // Mock formatCents
 vi.mock('@/features/dues/lib/money', () => ({
-  formatCents: (amount: number, currency: string) => `${currency} ${(amount / 100).toFixed(2)}`,
+  formatCents: (amount: number, currency: string) => {
+    const symbol = currency === 'PHP' ? '₱' : currency === 'USD' ? '$' : `${currency} `
+    return `${symbol}${(amount / 100).toFixed(2)}`
+  },
 }))
 
 // Mock GlassCard to pass through
@@ -91,10 +94,10 @@ describe('ArrearsBreakdown', () => {
     )
 
     // Verify amounts are rendered (mocked formatCents divides by 100)
-    expect(screen.getByText('PHP 100.00')).toBeInTheDocument() // current = 100_00 cents
-    expect(screen.getByText('PHP 200.00')).toBeInTheDocument() // thirtyDay = 200_00 cents
+    expect(screen.getByText('₱100.00')).toBeInTheDocument() // current = 100_00 cents
+    expect(screen.getByText('₱200.00')).toBeInTheDocument() // thirtyDay = 200_00 cents
     // overNinety = 500_00 matches invoice totalAmount (500_00), so multiple elements
-    expect(screen.getAllByText('PHP 500.00').length).toBeGreaterThanOrEqual(1)
+    expect(screen.getAllByText('₱500.00').length).toBeGreaterThanOrEqual(1)
   })
 
   test('[AC-T7-005] shows "All caught up!" when no unpaid invoices', () => {
@@ -118,6 +121,6 @@ describe('ArrearsBreakdown', () => {
     ]
     renderWithProviders(<ArrearsBreakdown invoices={invoices} currency="PHP" />)
 
-    expect(screen.getByText('PHP 750.00')).toBeInTheDocument()
+    expect(screen.getByText('₱750.00')).toBeInTheDocument()
   })
 })

@@ -5,7 +5,10 @@ import { DuesStatusCard } from './dues-status-card'
 
 // Mock formatCents
 vi.mock('@/features/dues/lib/money', () => ({
-  formatCents: (amount: number, currency: string) => `${currency} ${(amount / 100).toFixed(2)}`,
+  formatCents: (amount: number, currency: string) => {
+    const symbol = currency === 'PHP' ? '₱' : currency === 'USD' ? '$' : `${currency} `
+    return `${symbol}${(amount / 100).toFixed(2)}`
+  },
 }))
 
 // Mock GlassCard to pass through
@@ -99,6 +102,6 @@ describe('DuesStatusCard', () => {
       />
     )
 
-    expect(screen.getByText('PHP 1500.00')).toBeInTheDocument()
+    expect(screen.getByText('₱1500.00')).toBeInTheDocument()
   })
 })

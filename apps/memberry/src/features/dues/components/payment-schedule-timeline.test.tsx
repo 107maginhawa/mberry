@@ -5,7 +5,10 @@ import { PaymentScheduleTimeline } from './payment-schedule-timeline'
 
 // Mock formatCents
 vi.mock('@/features/dues/lib/money', () => ({
-  formatCents: (amount: number, currency: string) => `${currency} ${(amount / 100).toFixed(2)}`,
+  formatCents: (amount: number, currency: string) => {
+    const symbol = currency === 'PHP' ? '₱' : currency === 'USD' ? '$' : `${currency} `
+    return `${symbol}${(amount / 100).toFixed(2)}`
+  },
 }))
 
 // Mock GlassCard to pass through
@@ -85,7 +88,7 @@ describe('PaymentScheduleTimeline', () => {
     ]
     renderWithProviders(<PaymentScheduleTimeline periods={periods} currency="PHP" />)
 
-    expect(screen.getByText('PHP 750.00')).toBeInTheDocument()
+    expect(screen.getByText('₱750.00')).toBeInTheDocument()
   })
 
   test('[AC-T7-005] shows empty state when no timeline data', () => {
