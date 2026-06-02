@@ -14,6 +14,10 @@
   "scripts": {
     "build": "bun run --filter '*' build",
     "clean": "rm -rf node_modules bun.lock && find . -name 'node_modules' -type d -prune -exec rm -rf {} +",
+    "infra:up": "docker compose up -d --wait",
+    "infra:down": "docker compose down",
+    "infra:reset": "docker compose down -v && docker compose up -d --wait",
+    "infra:logs": "docker compose logs -f",
     "lint:migrations": "bun scripts/migration-safety.ts",
     "lint:no-skips": "bun scripts/lint-no-skips.ts",
     "lint:shallow": "bun scripts/lint-shallow-tests.ts",
