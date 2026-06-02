@@ -49,6 +49,7 @@ export interface SurveySettings {
   targetAudience?: string | TargetAudience; // backwards-compatible: string for old data, object for new
   fatigueThreshold?: number; // max surveys per member per week, default 2
   retentionDays?: number; // data retention period, default 1095 (3 years)
+  allowReedit?: boolean; // [AC-M18-004] M18-R3: members may update their response before deadline
 }
 
 export interface QuestionBreakdown {

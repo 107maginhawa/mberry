@@ -50,8 +50,8 @@ export async function submitSurveyResponse(
     throw new BusinessLogicError('Survey is not accepting responses');
   }
 
-  // Check deadline
-  const settings = survey.settings as { anonymous?: boolean; deadline?: string } | null;
+  // Check deadline (M18-R1) — gates both first-submit and re-edit (AC-M18-004)
+  const settings = survey.settings as { anonymous?: boolean; deadline?: string; allowReedit?: boolean } | null;
   if (settings?.deadline) {
     const deadline = new Date(settings.deadline);
     if (new Date() > deadline) {
@@ -59,10 +59,36 @@ export async function submitSurveyResponse(
     }
   }
 
-  // Check for duplicate response
+  // Check for existing response
+  // [AC-M18-004] M18-R3: if allowReedit is enabled, update the existing response;
+  // otherwise reject duplicate submissions with 409.
   const existing = await responseRepo.findByResponderAndSurvey(userId, surveyId);
   if (existing) {
-    throw new ConflictError('You have already responded to this survey');
+    if (!settings?.allowReedit) {
+      throw new ConflictError('You have already responded to this survey');
+    }
+
+    const updated = await responseRepo.updateResponseAnswers(
+      existing.id,
+      (body.answers ?? []) as QuestionAnswer[],
+      userId,
+    );
+
+    const jobsScheduler = ctx.get('jobs') as JobScheduler | undefined;
+    if (jobsScheduler) {
+      await jobsScheduler.trigger('survey.aggregateAnalytics', {
+        surveyId,
+        organizationId,
+      });
+    }
+
+    logger?.info({
+      surveyId,
+      responseId: updated?.id,
+      action: 'update_survey_response',
+    }, 'Survey response updated (re-edit)');
+
+    return ctx.json(updated, 200);
   }
 
   const isAnonymous = settings?.anonymous === true;

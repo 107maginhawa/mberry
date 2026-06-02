@@ -12,6 +12,7 @@ import {
   type SurveyResponseRecord,
   type NewSurveyResponse,
   type SurveyAnalyticsSnapshot,
+  type QuestionAnswer,
 } from './survey.schema';
 
 // ---------------------------------------------------------------------------
@@ -294,6 +295,30 @@ export class SurveyResponseRepository {
       .values({ ...data, status: 'pending' })
       .returning();
     return row!;
+  }
+
+  /**
+   * [AC-M18-004] M18-R3 — update an existing response's answers in place.
+   * Caller (handler) must enforce: survey.settings.allowReedit && deadline not passed.
+   * Anonymity preserved via the existing responderId column (null on anonymous responses).
+   */
+  async updateResponseAnswers(
+    responseId: string,
+    answers: QuestionAnswer[],
+    updatedBy: string,
+  ): Promise<SurveyResponseRecord | undefined> {
+    const [row] = await this.db
+      .update(surveyResponses)
+      .set({
+        answers,
+        status: 'completed',
+        completedAt: new Date(),
+        updatedBy,
+        updatedAt: new Date(),
+      })
+      .where(eq(surveyResponses.id, responseId))
+      .returning();
+    return row;
   }
 
   async findByResponderAndSurvey(responderId: string, surveyId: string): Promise<SurveyResponseRecord | undefined> {

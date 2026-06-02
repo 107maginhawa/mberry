@@ -286,4 +286,123 @@ describe('submitSurveyResponse', () => {
     expect(jobPayload.surveyId).toBe('survey-1');
     expect(jobPayload.organizationId).toBe('tenant-1');
   });
+
+  // ─── [AC-M18-004] Response Re-Edit (M18-R3) ─────────────
+
+  test('[AC-M18-004] re-edit allowed: updates existing response and returns 200', async () => {
+    // Acceptance Criteria: [AC-M18-004]
+    const reeditSurvey = {
+      ...activeSurvey,
+      settings: { allowReedit: true, deadline: new Date(Date.now() + 86400000).toISOString() },
+    };
+    let updateCalled = false;
+    let updatedAnswers: any;
+    stubRepo(SurveyRepository, {
+      findById: async () => reeditSurvey,
+    });
+    stubRepo(SurveyResponseRepository, {
+      findByResponderAndSurvey: async () => fakeResponse,
+      updateResponseAnswers: async (id: string, answers: any) => {
+        updateCalled = true;
+        updatedAnswers = answers;
+        return { ...fakeResponse, id, answers, updatedAt: new Date() };
+      },
+    });
+
+    const ctx = makeCtx({
+      _params: { survey: 'survey-1' },
+      _body: { answers: [{ questionId: 'q1', value: 'Updated feedback' }] },
+    });
+
+    const res = await submitSurveyResponse(ctx);
+    expect(res.status).toBe(200);
+    expect(updateCalled).toBe(true);
+    expect(updatedAnswers[0].value).toBe('Updated feedback');
+    expect((res as any).body.id).toBe('response-1');
+  });
+
+  test('[AC-M18-004] re-edit disabled (default): rejects duplicate with 409', async () => {
+    // Acceptance Criteria: [AC-M18-004] — negative path
+    stubRepo(SurveyRepository, {
+      findById: async () => activeSurvey, // settings: {} — allowReedit undefined
+    });
+    stubRepo(SurveyResponseRepository, {
+      findByResponderAndSurvey: async () => fakeResponse,
+    });
+
+    const ctx = makeCtx({
+      _params: { survey: 'survey-1' },
+      _body: { answers: [{ questionId: 'q1', value: 'Duplicate' }] },
+    });
+    await expect(submitSurveyResponse(ctx)).rejects.toThrow('You have already responded');
+  });
+
+  test('[AC-M18-004] re-edit enabled but deadline passed: still rejects via M18-R1', async () => {
+    // Acceptance Criteria: [AC-M18-004] — re-edit gated by deadline
+    const expiredReedit = {
+      ...activeSurvey,
+      settings: { allowReedit: true, deadline: new Date(Date.now() - 86400000).toISOString() },
+    };
+    stubRepo(SurveyRepository, {
+      findById: async () => expiredReedit,
+    });
+    stubRepo(SurveyResponseRepository, {
+      findByResponderAndSurvey: async () => fakeResponse,
+    });
+
+    const ctx = makeCtx({
+      _params: { survey: 'survey-1' },
+      _body: { answers: [{ questionId: 'q1', value: 'Too late' }] },
+    });
+    await expect(submitSurveyResponse(ctx)).rejects.toThrow('Survey deadline has passed');
+  });
+
+  test('[AC-M18-004] re-edit allowed but no existing response: creates new (returns 201)', async () => {
+    // Acceptance Criteria: [AC-M18-004] — allowReedit does not preclude first submission
+    const reeditSurvey = {
+      ...activeSurvey,
+      settings: { allowReedit: true },
+    };
+    stubRepo(SurveyRepository, {
+      findById: async () => reeditSurvey,
+    });
+    stubRepo(SurveyResponseRepository, {
+      findByResponderAndSurvey: async () => undefined,
+      submitResponse: async () => fakeResponse,
+    });
+
+    const ctx = makeCtx({
+      _params: { survey: 'survey-1' },
+      _body: { answers: [{ questionId: 'q1', value: 'First take' }] },
+    });
+    const res = await submitSurveyResponse(ctx);
+    expect(res.status).toBe(201);
+  });
+
+  test('[AC-M18-004] re-edit on anonymous survey: still works without responderId leak', async () => {
+    // Acceptance Criteria: [AC-M18-004] — anonymity preserved on update
+    const reeditAnon = {
+      ...activeSurvey,
+      settings: { allowReedit: true, anonymous: true },
+    };
+    let updateCalled = false;
+    stubRepo(SurveyRepository, {
+      findById: async () => reeditAnon,
+    });
+    stubRepo(SurveyResponseRepository, {
+      findByResponderAndSurvey: async () => ({ ...fakeResponse, responderId: null }),
+      updateResponseAnswers: async (id: string, answers: any) => {
+        updateCalled = true;
+        return { ...fakeResponse, id, answers, responderId: null };
+      },
+    });
+
+    const ctx = makeCtx({
+      _params: { survey: 'survey-1' },
+      _body: { answers: [{ questionId: 'q1', value: 'Updated anon feedback' }] },
+    });
+    const res = await submitSurveyResponse(ctx);
+    expect(res.status).toBe(200);
+    expect(updateCalled).toBe(true);
+  });
 });
