@@ -6,6 +6,7 @@ import { zodResolver } from '@/lib/zod-resolver'
 import { useState, useEffect } from 'react'
 import { useForm } from 'react-hook-form'
 import { z } from 'zod'
+import { toast } from 'sonner'
 import { PageHeader } from '@/components/patterns/page-header'
 import { AvatarInitials } from '@/components/patterns/avatar-initials'
 import { StatusBadge } from '@/components/patterns/status-badge'
@@ -98,6 +99,10 @@ function MyProfilePage() {
     },
     onSuccess: () => {
       refetchDirectory()
+      toast.success('Directory visibility updated')
+    },
+    onError: (err: any) => {
+      toast.error(err?.message ?? 'Failed to update directory visibility')
     },
   })
 

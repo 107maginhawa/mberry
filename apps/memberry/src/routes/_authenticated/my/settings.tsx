@@ -9,6 +9,7 @@ import { PageHeader } from '@/components/patterns/page-header'
 import { GlassCard } from '@/components/motion/glass-card'
 import { ListSkeleton } from '@/components/patterns/skeleton-loader'
 import { api } from '@/lib/api'
+import { toast } from 'sonner'
 
 export const Route = createFileRoute('/_authenticated/my/settings')({
   component: MySettingsPage,
@@ -87,8 +88,9 @@ function GeneralSection() {
       await queryClient.invalidateQueries({ queryKey: ['person-deletion-status'] })
       setShowConfirm(false)
       setConfirmText('')
-    } catch {
-      // error handled silently
+      toast.success('Account deletion scheduled')
+    } catch (err: any) {
+      toast.error(err?.message ?? 'Failed to schedule account deletion')
     } finally {
       setDeleting(false)
     }
@@ -99,8 +101,9 @@ function GeneralSection() {
     try {
       await api.post('/api/persons/me/cancel-delete')
       await queryClient.invalidateQueries({ queryKey: ['person-deletion-status'] })
-    } catch {
-      // error handled silently
+      toast.success('Account deletion cancelled')
+    } catch (err: any) {
+      toast.error(err?.message ?? 'Failed to cancel account deletion')
     } finally {
       setCancelling(false)
     }

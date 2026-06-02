@@ -51,7 +51,7 @@ function MyIdCard() {
   })
 
   const isLoading = personLoading || membershipsLoading
-  const hasError = personError || membershipsError
+  const isError = personError || membershipsError
   const p = person?.data ?? person
   const membership = Array.isArray(memberships) ? memberships[0] : null
 
@@ -97,7 +97,7 @@ function MyIdCard() {
 
       {isLoading ? (
         <IdCardSkeleton />
-      ) : hasError ? (
+      ) : isError ? (
         <div role="alert" className="p-4 rounded-lg bg-[var(--color-error-bg)] text-[var(--color-error)] text-sm">
           Unable to load your ID card. Please try refreshing the page.
         </div>

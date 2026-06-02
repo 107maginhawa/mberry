@@ -40,7 +40,17 @@ function MemberAnnouncementPage() {
     )
   }
 
-  if (error || !ann) {
+  if (error) {
+    return (
+      <div className="space-y-6 max-w-3xl">
+        <div role="alert" className="p-4 rounded-lg bg-[var(--color-error-bg)] text-[var(--color-error)] text-sm">
+          Unable to load this announcement. Please try refreshing the page.
+        </div>
+      </div>
+    )
+  }
+
+  if (!ann) {
     return (
       <div className="space-y-6 max-w-3xl">
         <EmptyState

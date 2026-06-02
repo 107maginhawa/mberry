@@ -21,7 +21,7 @@ function formatDate(iso: string | null | undefined) {
 function OrgTraining() {
   const { orgId, orgSlug } = useOrg()
 
-  const { data, isLoading } = useQuery({
+  const { data, isLoading, error } = useQuery({
     ...searchTrainingsOptions({ query: { status: 'published' }, headers: { 'x-org-id': orgId } }),
     enabled: !!orgId,
   })
@@ -41,6 +41,10 @@ function OrgTraining() {
           <CardSkeleton />
           <CardSkeleton />
           <CardSkeleton />
+        </div>
+      ) : error ? (
+        <div role="alert" className="p-4 rounded-lg bg-[var(--color-error-bg)] text-[var(--color-error)] text-sm">
+          Unable to load training. Please try refreshing the page.
         </div>
       ) : trainings.length === 0 ? (
         <EmptyState

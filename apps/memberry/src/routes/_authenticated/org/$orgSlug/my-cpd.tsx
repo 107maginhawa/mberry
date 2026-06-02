@@ -14,7 +14,7 @@ export const Route = createFileRoute('/_authenticated/org/$orgSlug/my-cpd')({
 function MyCpdDashboard() {
   const { orgId, orgSlug } = useOrg()
 
-  const { data, isLoading } = useQuery({
+  const { data, isLoading, error } = useQuery({
     queryKey: ['my-credits', orgId],
     queryFn: () => api.get(`/api/persons/me/credits`),
     enabled: !!orgId,
@@ -30,6 +30,17 @@ function MyCpdDashboard() {
           <CardSkeleton />
           <CardSkeleton />
           <CardSkeleton />
+        </div>
+      </div>
+    )
+  }
+
+  if (error) {
+    return (
+      <div className="space-y-6">
+        <PageHeader title="My CPD Credits" subtitle="Track your continuing professional development" />
+        <div role="alert" className="p-4 rounded-lg bg-[var(--color-error-bg)] text-[var(--color-error)] text-sm">
+          Unable to load your CPD credits. Please try refreshing the page.
         </div>
       </div>
     )

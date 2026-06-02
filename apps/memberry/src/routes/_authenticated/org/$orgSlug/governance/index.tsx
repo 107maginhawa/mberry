@@ -37,6 +37,7 @@ function GovernancePage() {
   const allDocuments = documents.data?.data ?? []
 
   const isLoading = elections.isLoading || documents.isLoading
+  const error = elections.error || documents.error
 
   return (
     <div className="space-y-6">
@@ -49,6 +50,12 @@ function GovernancePage() {
         ]}
       />
 
+      {error ? (
+        <div role="alert" className="p-4 rounded-lg bg-[var(--color-error-bg)] text-[var(--color-error)] text-sm">
+          Unable to load governance data. Please try refreshing the page.
+        </div>
+      ) : (
+        <>
       {/* Stat cards */}
       {isLoading ? (
         <div className="grid grid-cols-2 gap-4">
@@ -161,6 +168,8 @@ function GovernancePage() {
           </div>
         )}
       </section>
+        </>
+      )}
     </div>
   )
 }

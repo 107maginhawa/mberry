@@ -9,6 +9,7 @@ import { useOrg } from '@/hooks/useOrg'
 import { api } from '@/lib/api'
 import { Button, Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@monobase/ui'
 import { useState } from 'react'
+import { toast } from 'sonner'
 
 export const Route = createFileRoute('/_authenticated/org/$orgSlug/officer/compliance')({
   component: OfficerCompliance,
@@ -27,7 +28,13 @@ function OfficerCompliance() {
 
   const refreshMutation = useMutation({
     mutationFn: () => api.post(`/api/association/member/compliance/${orgId}/refresh`),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['compliance-report'] }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['compliance-report'] })
+      toast.success('Compliance report refreshed')
+    },
+    onError: (err: any) => {
+      toast.error(err?.message ?? 'Failed to refresh compliance report')
+    },
   })
 
   const report = (data as any)?.data
