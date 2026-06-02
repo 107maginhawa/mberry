@@ -236,6 +236,17 @@ Pipeline Stage: Phase A -- Workflow Discovery
 | WF-120 | M20 | lifecycle | Mark No-Show: provider flags client or host no-show after appointment time | MODULE_SPEC m20-booking §3 |
 | WF-121 | M20 | CRUD | List My Bookings: client/provider views upcoming and past bookings | MODULE_SPEC m20-booking §3 |
 
+### 1.22 Email (M22) — Module-Local Workflows
+
+| WF-ID | Module | Type | Description | Source |
+|-------|--------|------|-------------|--------|
+| WF-122 | M22 | CRUD | Create Template: admin defines reusable email template with variables | MODULE_SPEC m22-email §3 |
+| WF-123 | M22 | lifecycle | Enqueue Email: system adds email to processing queue with template and variables | MODULE_SPEC m22-email §3 |
+| WF-124 | M22 | lifecycle | Handle Bounce: system processes hard bounce, adds address to suppression list | MODULE_SPEC m22-email §3 |
+| WF-125 | M22 | admin | Manage Suppressions: admin views and removes suppressed addresses | MODULE_SPEC m22-email §3 |
+| WF-126 | M22 | admin | Cancel Queued Email: admin cancels pending email before processing | MODULE_SPEC m22-email §3 |
+| WF-127 | M22 | lifecycle | Retry Failed Email: system re-attempts failed delivery up to max retries | MODULE_SPEC m22-email §3 |
+
 ---
 
 ## 2. Entity CRUD Lifecycle Matrix

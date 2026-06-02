@@ -55,15 +55,15 @@ Transactional and bulk email infrastructure. Manages Handlebars-based email temp
 
 | Workflow | WF-ID | Actor | Description | Priority |
 |----------|-------|-------|-------------|----------|
-| Create Template | WF-115 | Admin | Define reusable email template with variables | P0 |
-| Enqueue Email | WF-116 | System | Add email to processing queue with template and variables | P0 |
+| Create Template | WF-122 | Admin | Define reusable email template with variables | P0 |
+| Enqueue Email | WF-123 | System | Add email to processing queue with template and variables | P0 |
 | Process Queue | WF-110 | System | Pick pending items, render template, send via provider; queue lifecycle pending -> sent/failed, 30-day cleanup | P0 |
-| Handle Bounce | WF-117 | System | Process hard bounce, add to suppression list | P0 |
-| Manage Suppressions | WF-118 | Admin | View/remove suppressed addresses | P0 |
-| Cancel Queued Email | WF-119 | Admin | Cancel pending email before processing | P1 |
-| Retry Failed Email | WF-120 | System | Re-attempt failed delivery up to max retries | P0 |
+| Handle Bounce | WF-124 | System | Process hard bounce, add to suppression list | P0 |
+| Manage Suppressions | WF-125 | Admin | View/remove suppressed addresses | P0 |
+| Cancel Queued Email | WF-126 | Admin | Cancel pending email before processing | P1 |
+| Retry Failed Email | WF-127 | System | Re-attempt failed delivery up to max retries | P0 |
 
-**Note:** WF-110 (Email Queue Processing) is the canonical cross-cutting workflow listed in `docs/product/WORKFLOW_MAP.md` §1.20. WF-115..WF-120 are minted in this spec for module-local admin/system workflows; they are owned by M22 and registered alongside this revision.
+**Note:** WF-110 (Email Queue Processing) is the canonical cross-cutting workflow listed in `docs/product/WORKFLOW_MAP.md` §1.20. WF-122..WF-127 are minted in this spec for module-local admin/system workflows; they are owned by M22 and registered alongside this revision.
 
 ## 4. Business Rules
 
@@ -172,26 +172,26 @@ Each endpoint is anchored to ≥1 WF (workflow) and/or BR (business rule) for tr
 
 | API Need | Method | Route | Auth | Anchors | Notes |
 |----------|--------|-------|------|---------|-------|
-| List email templates | GET | /email/templates | Required (admin) | WF-115 | Filter by status, tags |
-| Get email template | GET | /email/templates/:id | Required (admin) | WF-115 | — |
-| Create email template | POST | /email/templates | Required (admin) | WF-115, BR-58 | Required-variable validation (BR-58) |
-| Update email template | PUT | /email/templates/:id | Required (admin) | WF-115, BR-58 | Required-variable validation (BR-58) |
-| Delete email template | DELETE | /email/templates/:id | Required (admin) | WF-115 | — |
+| List email templates | GET | /email/templates | Required (admin) | WF-122 | Filter by status, tags |
+| Get email template | GET | /email/templates/:id | Required (admin) | WF-122 | — |
+| Create email template | POST | /email/templates | Required (admin) | WF-122, BR-58 | Required-variable validation (BR-58) |
+| Update email template | PUT | /email/templates/:id | Required (admin) | WF-122, BR-58 | Required-variable validation (BR-58) |
+| Delete email template | DELETE | /email/templates/:id | Required (admin) | WF-122 | — |
 | List email queue items | GET | /email/queue | Required (admin) | WF-110 | Filter by status |
 | Get email queue item | GET | /email/queue/:id | Required (admin) | WF-110 | — |
-| Cancel email queue item | PUT | /email/queue/:id/cancel | Required (admin) | WF-119, BR-59 | Records canceller/reason/timestamp (BR-59) |
-| Retry email queue item | POST | /email/queue/:id/retry | Required (admin) | WF-120, BR-54 | Bounded by max-attempts threshold (BR-54) |
-| Send email (direct) | POST | /email/send | Required (admin) | WF-116, BR-52, BR-53, BR-57, BR-58 | Suppression check (BR-52), active-template check (BR-53), transactional override (BR-57), variable validation (BR-58) |
-| List suppressions | GET | /email/suppressions | Required (admin) | WF-118 | — |
-| Remove suppression | DELETE | /email/suppressions/:id | Required (admin) | WF-118 | Unblock address |
+| Cancel email queue item | PUT | /email/queue/:id/cancel | Required (admin) | WF-126, BR-59 | Records canceller/reason/timestamp (BR-59) |
+| Retry email queue item | POST | /email/queue/:id/retry | Required (admin) | WF-127, BR-54 | Bounded by max-attempts threshold (BR-54) |
+| Send email (direct) | POST | /email/send | Required (admin) | WF-123, BR-52, BR-53, BR-57, BR-58 | Suppression check (BR-52), active-template check (BR-53), transactional override (BR-57), variable validation (BR-58) |
+| List suppressions | GET | /email/suppressions | Required (admin) | WF-125 | — |
+| Remove suppression | DELETE | /email/suppressions/:id | Required (admin) | WF-125 | Unblock address |
 
-**Anchor coverage:** 12/12 endpoints anchored. WF-110 (cross-cutting queue lifecycle from WORKFLOW_MAP §1.20) covers queue read paths; WF-115..WF-120 (minted in this spec) cover module-local admin workflows; BR-52..BR-59 (minted in this spec, registered in `br-registry.json`) cover per-endpoint business-rule constraints.
+**Anchor coverage:** 12/12 endpoints anchored. WF-110 (cross-cutting queue lifecycle from WORKFLOW_MAP §1.20) covers queue read paths; WF-122..WF-127 (minted in this spec) cover module-local admin workflows; BR-52..BR-59 (minted in this spec, registered in `br-registry.json`) cover per-endpoint business-rule constraints.
 
 **Handler mapping:** 13 handlers under `services/api-ts/src/handlers/email/`:
-- Template CRUD (5): `listEmailTemplates`, `getEmailTemplate`, `createEmailTemplate`, `updateEmailTemplate`, `testEmailTemplate` — anchored to WF-115, BR-58.
-- Queue management (4): `listEmailQueueItems`, `getEmailQueueItem`, `cancelEmailQueueItem`, `retryEmailQueueItem` — anchored to WF-110, WF-119, WF-120, BR-54, BR-59.
-- Suppression management (1): `listEmailSuppressions` — anchored to WF-118.
-- Unsubscribe endpoints (3): `unsubscribeEmail`, `unsubscribeEmailGet`, `unsubscribeEmailPost` — anchored to WF-117 (bounce/unsubscribe handling), BR-55, BR-56.
+- Template CRUD (5): `listEmailTemplates`, `getEmailTemplate`, `createEmailTemplate`, `updateEmailTemplate`, `testEmailTemplate` — anchored to WF-122, BR-58.
+- Queue management (4): `listEmailQueueItems`, `getEmailQueueItem`, `cancelEmailQueueItem`, `retryEmailQueueItem` — anchored to WF-110, WF-126, WF-127, BR-54, BR-59.
+- Suppression management (1): `listEmailSuppressions` — anchored to WF-125.
+- Unsubscribe endpoints (3): `unsubscribeEmail`, `unsubscribeEmailGet`, `unsubscribeEmailPost` — anchored to WF-124 (bounce/unsubscribe handling), BR-55, BR-56.
 
 **TypeSpec:** `specs/api/src/modules/email.tsp` — COMPLETE (all 12 operations defined across EmailTemplateManagement, EmailQueueManagement, EmailSuppressionManagement, and EmailUnsubscribeEndpoints interfaces)
 
@@ -231,7 +231,7 @@ When implementing this module:
 |---------|--------|
 | 1. Module Overview | COMPLETE |
 | 2. Domain Terms | COMPLETE |
-| 3. Workflows | COMPLETE (7 WFs: WF-110 + WF-115..WF-120) |
+| 3. Workflows | COMPLETE (7 WFs: WF-110 + WF-122..WF-127) |
 | 4. Business Rules | COMPLETE (8 rules: M22-R1..R8 = BR-52..BR-59) |
 | 5. Permissions | COMPLETE |
 | 6. Data Requirements | COMPLETE (3 entities) |
@@ -246,4 +246,4 @@ When implementing this module:
 | Version | Date | Author | Summary |
 |---------|------|--------|---------|
 | 1.0 | 2026-05-29 | Claude | Initial spec from existing codebase (Wave 8 coverage) |
-| 1.1 | 2026-06-02 | Claude | Add spec-ID anchors to satisfy TR-P1-003: mint BR-52..BR-59 (alias M22-R1..R8) and WF-115..WF-120; reuse WF-110 (cross-cutting); anchor 12/12 endpoints and 13 handlers in §3 + §8 |
+| 1.1 | 2026-06-02 | Claude | Add spec-ID anchors to satisfy TR-P1-003: mint BR-52..BR-59 (alias M22-R1..R8) and WF-122..WF-127; reuse WF-110 (cross-cutting); anchor 12/12 endpoints and 13 handlers in §3 + §8 |
