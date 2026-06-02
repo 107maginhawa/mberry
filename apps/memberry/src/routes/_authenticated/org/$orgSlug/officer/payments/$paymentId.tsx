@@ -31,12 +31,19 @@ function PaymentDetailPage() {
   const { orgId, orgSlug } = useOrg()
   const { paymentId } = Route.useParams()
 
-  const { data, isLoading, error } = useQuery({
+  const { data, isLoading, isError, error } = useQuery({
     ...getDuesPaymentOptions({ path: { paymentId } }),
     select: (d: any) => d?.data ?? d,
   })
 
   if (isLoading) return <div className="p-6 space-y-4"><CardSkeleton /><CardSkeleton /><CardSkeleton /></div>
+  if (isError) {
+    return (
+      <div role="alert" className="p-6 m-6 rounded-lg bg-[var(--color-error-bg)] text-[var(--color-error)] text-sm">
+        Unable to load payment detail. Please try refreshing the page.
+      </div>
+    )
+  }
   if (error || !data) return <div className="p-6 text-[var(--color-error)]">Payment not found.</div>
 
   const payment = data

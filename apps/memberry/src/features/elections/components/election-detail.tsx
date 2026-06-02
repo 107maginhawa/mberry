@@ -72,7 +72,7 @@ export function ElectionDetail({ electionId, orgId }: ElectionDetailProps) {
   const [nominatePositionId, setNominatePositionId] = useState<string | null>(null)
   const [confirmRemoveNominee, setConfirmRemoveNominee] = useState<string | null>(null)
 
-  const { data, isLoading, error } = useQuery(
+  const { data, isLoading, isError, error } = useQuery(
     getElectionOptions({ path: { electionId } }),
   )
 
@@ -131,6 +131,14 @@ export function ElectionDetail({ electionId, orgId }: ElectionDetailProps) {
         <Skeleton className="h-8 w-64" />
         <Skeleton className="h-4 w-40" />
         <Skeleton className="h-48 rounded-lg" />
+      </div>
+    )
+  }
+
+  if (isError) {
+    return (
+      <div role="alert" className="p-4 rounded-lg bg-[var(--color-error-bg)] text-[var(--color-error)] text-sm">
+        Unable to load election details. Please try refreshing the page.
       </div>
     )
   }

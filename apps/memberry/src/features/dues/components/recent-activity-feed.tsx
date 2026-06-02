@@ -1,4 +1,3 @@
-// oli-execute: error-handled-inline -- consumed by parent finances route.
 import { useQuery } from '@tanstack/react-query'
 import { listDuesPaymentsOptions } from '@monobase/sdk-ts/generated/react-query'
 import { GlassCard } from '@/components/motion/glass-card'
@@ -39,7 +38,7 @@ function formatTime(dateStr: string): string {
 }
 
 export function RecentActivityFeed({ orgId, orgSlug, limit = 5 }: RecentActivityFeedProps) {
-  const { data, isLoading } = useQuery({
+  const { data, isLoading, isError } = useQuery({
     ...listDuesPaymentsOptions({
       query: { organizationId: orgId, status: 'completed', limit, offset: 0 },
       headers: { 'x-org-id': orgId },
@@ -55,6 +54,17 @@ export function RecentActivityFeed({ orgId, orgSlug, limit = 5 }: RecentActivity
           {Array.from({ length: 3 }).map((_, i) => (
             <Skeleton key={i} className="h-12 rounded" />
           ))}
+        </div>
+      </GlassCard>
+    )
+  }
+
+  if (isError) {
+    return (
+      <GlassCard className="p-5">
+        <h2 className="text-h4 mb-4">Recent Activity</h2>
+        <div role="alert" className="p-3 rounded-lg bg-[var(--color-error-bg)] text-[var(--color-error)] text-sm">
+          Unable to load recent activity. Please try refreshing the page.
         </div>
       </GlassCard>
     )

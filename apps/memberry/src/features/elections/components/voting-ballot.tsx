@@ -62,7 +62,7 @@ export function VotingBallot({ electionId, orgId, userId }: VotingBallotProps) {
   const [showConfirm, setShowConfirm] = useState(false)
   const [votedPositions, setVotedPositions] = useState<Set<string>>(new Set())
 
-  const { data, isLoading, error } = useQuery(
+  const { data, isLoading, isError, error } = useQuery(
     getElectionOptions({ path: { electionId } }),
   )
 
@@ -79,6 +79,14 @@ export function VotingBallot({ electionId, orgId, userId }: VotingBallotProps) {
         <Skeleton className="h-8 w-64" />
         <Skeleton className="h-48 rounded-lg" />
         <Skeleton className="h-48 rounded-lg" />
+      </div>
+    )
+  }
+
+  if (isError) {
+    return (
+      <div role="alert" className="p-4 rounded-lg bg-[var(--color-error-bg)] text-[var(--color-error)] text-sm">
+        Unable to load ballot. Please try refreshing the page.
       </div>
     )
   }

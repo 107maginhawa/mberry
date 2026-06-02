@@ -68,7 +68,7 @@ export function SpecialAssessmentsList({ orgId }: SpecialAssessmentsListProps) {
   const [form, setForm] = useState<FormData>(emptyForm)
   const [collectionDialogId, setCollectionDialogId] = useState<string | null>(null)
 
-  const { data, isLoading } = useQuery({
+  const { data, isLoading, isError } = useQuery({
     queryKey: ['special-assessments', orgId],
     queryFn: () =>
       api.get<{ assessments: SpecialAssessment[] }>(
@@ -183,6 +183,19 @@ export function SpecialAssessmentsList({ orgId }: SpecialAssessmentsListProps) {
       <Card>
         <CardHeader><CardTitle>Special Assessments</CardTitle></CardHeader>
         <CardContent><Skeleton className="h-40" /></CardContent>
+      </Card>
+    )
+  }
+
+  if (isError) {
+    return (
+      <Card>
+        <CardHeader><CardTitle>Special Assessments</CardTitle></CardHeader>
+        <CardContent>
+          <div role="alert" className="p-4 rounded-lg bg-[var(--color-error-bg)] text-[var(--color-error)] text-sm">
+            Unable to load special assessments. Please try refreshing the page.
+          </div>
+        </CardContent>
       </Card>
     )
   }

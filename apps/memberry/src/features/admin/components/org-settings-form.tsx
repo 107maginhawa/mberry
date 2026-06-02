@@ -1,4 +1,3 @@
-// oli-execute: error-handled-inline -- consumed by /org/$orgSlug/officer route which handles isError; mutations surface via toast.
 import { useState, useEffect } from 'react'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { api } from '@/lib/api'
@@ -70,7 +69,7 @@ export function OrgSettingsForm({ orgId }: OrgSettingsFormProps) {
   const [isSaving, setIsSaving] = useState(false)
   const [draft, setDraft] = useState<OrgProfile>(EMPTY_PROFILE)
 
-  const { data: saved = EMPTY_PROFILE, isLoading } = useQuery({
+  const { data: saved = EMPTY_PROFILE, isLoading, isError } = useQuery({
     queryKey: ['org-profile', orgId],
     queryFn: () => fetchOrgProfile(orgId),
   })
@@ -123,6 +122,14 @@ export function OrgSettingsForm({ orgId }: OrgSettingsFormProps) {
             <Skeleton className="h-10 w-full" />
           </div>
         ))}
+      </div>
+    )
+  }
+
+  if (isError) {
+    return (
+      <div role="alert" className="p-4 rounded-lg bg-[var(--color-error-bg)] text-[var(--color-error)] text-sm">
+        Unable to load organization settings. Please try refreshing the page.
       </div>
     )
   }

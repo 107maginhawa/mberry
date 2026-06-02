@@ -34,7 +34,7 @@ function AnnouncementDetailPage() {
   const navigate = useNavigate()
   const queryClient = useQueryClient()
 
-  const { data, isLoading, error } = useQuery({
+  const { data, isLoading, isError, error } = useQuery({
     queryKey: ['announcement', announcementId],
     queryFn: () => api.get<{ data: any }>(`/api/communications/announcements/detail/${announcementId}`),
   })
@@ -63,6 +63,14 @@ function AnnouncementDetailPage() {
     return (
       <div className="space-y-6">
         <ListSkeleton rows={3} />
+      </div>
+    )
+  }
+
+  if (isError) {
+    return (
+      <div role="alert" className="p-4 rounded-lg bg-[var(--color-error-bg)] text-[var(--color-error)] text-sm">
+        Unable to load announcement. Please try refreshing the page.
       </div>
     )
   }

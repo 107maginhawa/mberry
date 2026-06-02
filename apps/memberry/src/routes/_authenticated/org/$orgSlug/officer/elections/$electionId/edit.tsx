@@ -1,6 +1,3 @@
-// oli-execute: error-handled-inline
-// `error` renders "Failed to load election" branch at ~L71-83. Gate
-// heuristic misses the destructured rename.
 import { createFileRoute, useNavigate } from '@tanstack/react-router'
 import { useQuery } from '@tanstack/react-query'
 import { Skeleton, PageContainer } from '@monobase/ui'
@@ -43,12 +40,30 @@ function EditElection() {
   const { electionId } = Route.useParams()
   const navigate = useNavigate()
 
-  const { data, isLoading, error } = useQuery(
+  const { data, isLoading, isError, error } = useQuery(
     getElectionOptions({ path: { electionId } }),
   )
 
   // SDK Election type has Date fields; runtime response has string dates + extra fields — use local RuntimeElection
   const election = data as unknown as RuntimeElection
+
+  if (isError) {
+    return (
+      <PageContainer width="default" className="space-y-6">
+        <PageHeader
+          title="Edit Election"
+          breadcrumbs={[
+            { label: 'Officer', href: `/org/${orgSlug}/officer/dashboard` },
+            { label: 'Elections', href: `/org/${orgSlug}/officer/elections` },
+            { label: 'Edit' },
+          ]}
+        />
+        <div role="alert" className="p-4 rounded-lg bg-[var(--color-error-bg)] text-[var(--color-error)] text-sm">
+          Unable to load election for editing. Please try refreshing the page.
+        </div>
+      </PageContainer>
+    )
+  }
 
   if (isLoading) {
     return (

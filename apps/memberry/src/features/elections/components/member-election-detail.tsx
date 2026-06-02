@@ -1,4 +1,3 @@
-// oli-execute: error-handled-inline -- consumed by /elections member detail route.
 import { useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { Link, useParams } from '@tanstack/react-router'
@@ -63,7 +62,7 @@ export function MemberElectionDetail({ electionId, orgId, userId }: MemberElecti
   const { orgSlug } = useParams({ strict: false }) as { orgSlug: string }
   const [selfNominatePositionId, setSelfNominatePositionId] = useState<string | null>(null)
 
-  const { data, isLoading, error } = useQuery(
+  const { data, isLoading, isError, error } = useQuery(
     getElectionOptions({ path: { electionId } }),
   )
 
@@ -80,6 +79,14 @@ export function MemberElectionDetail({ electionId, orgId, userId }: MemberElecti
         <Skeleton className="h-8 w-64" />
         <Skeleton className="h-4 w-40" />
         <Skeleton className="h-48 rounded-lg" />
+      </div>
+    )
+  }
+
+  if (isError) {
+    return (
+      <div role="alert" className="p-4 rounded-lg bg-[var(--color-error-bg)] text-[var(--color-error)] text-sm">
+        Unable to load election details. Please try refreshing the page.
       </div>
     )
   }

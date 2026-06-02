@@ -419,7 +419,7 @@ function DocumentDetail() {
   const [editingAccess, setEditingAccess] = useState(false)
   const [newAccessLevel, setNewAccessLevel] = useState<string>('')
 
-  const { data, isLoading, error } = useQuery(
+  const { data, isLoading, isError, error } = useQuery(
     getDocumentOptions({ path: { documentId }, headers: { 'x-org-id': orgId } }),
   )
 
@@ -451,6 +451,10 @@ function DocumentDetail() {
       {isLoading ? (
         <div className="space-y-3">
           <TableSkeleton rows={3} cols={1} />
+        </div>
+      ) : isError ? (
+        <div role="alert" className="p-4 rounded-lg bg-[var(--color-error-bg)] text-[var(--color-error)] text-sm">
+          Unable to load document. Please try refreshing the page.
         </div>
       ) : error || !doc ? (
         <div className="p-6 text-center text-[var(--color-error)]">Failed to load document</div>

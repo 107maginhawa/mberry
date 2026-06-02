@@ -16,7 +16,7 @@ function formatDate(iso: string | Date | null | undefined) {
 
 export function CertificateList() {
   const { orgId } = useOrgContext()
-  const { data, isLoading } = useQuery({
+  const { data, isLoading, isError } = useQuery({
     ...listMyCertificatesOptions(orgId ? { headers: { 'x-org-id': orgId } } : undefined),
     enabled: !!orgId,
   })
@@ -29,6 +29,14 @@ export function CertificateList() {
         <CardSkeleton />
         <CardSkeleton />
         <CardSkeleton />
+      </div>
+    )
+  }
+
+  if (isError) {
+    return (
+      <div role="alert" className="p-4 rounded-lg bg-[var(--color-error-bg)] text-[var(--color-error)] text-sm">
+        Unable to load certificates. Please try refreshing the page.
       </div>
     )
   }

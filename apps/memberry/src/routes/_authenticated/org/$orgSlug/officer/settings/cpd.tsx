@@ -6,7 +6,7 @@ import { GlassCard } from '@/components/motion/glass-card'
 import { CardSkeleton } from '@/components/patterns/skeleton-loader'
 import { useOrg } from '@/hooks/useOrg'
 import { api } from '@/lib/api'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@monobase/ui'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue, Label, Input, Button } from '@monobase/ui'
 import { useState, useEffect } from 'react'
 import { toast } from 'sonner'
 
@@ -18,7 +18,7 @@ function CpdSettings() {
   const { orgId } = useOrg()
   const queryClient = useQueryClient()
 
-  const { data, isLoading } = useQuery({
+  const { data, isLoading, isError } = useQuery({
     queryKey: ['cpd-config', orgId],
     queryFn: () => api.get(`/api/association/member/cpd-config/${orgId}`),
     enabled: !!orgId,
@@ -69,6 +69,17 @@ function CpdSettings() {
     )
   }
 
+  if (isError) {
+    return (
+      <div className="space-y-6">
+        <PageHeader title="CPD Settings" subtitle="Configure credit requirements and cycles" />
+        <div role="alert" className="p-4 rounded-lg bg-[var(--color-error-bg)] text-[var(--color-error)] text-sm">
+          Unable to load CPD configuration. Please try refreshing the page.
+        </div>
+      </div>
+    )
+  }
+
   return (
     <div className="space-y-6">
       <PageHeader
@@ -80,18 +91,18 @@ function CpdSettings() {
       <GlassCard className="p-5 max-w-xl">
         <div className="space-y-5">
           <div>
-            <label className="text-sm font-medium">Required Credits per Cycle</label>
-            <input
+            <Label className="text-sm font-medium">Required Credits per Cycle</Label>
+            <Input
               type="number"
               value={requiredCredits}
               onChange={e => setRequiredCredits(parseInt(e.target.value, 10) || 0)}
               min={1}
-              className="w-full mt-1 px-3 py-2 rounded-lg border border-[var(--color-border)] bg-transparent text-sm"
+              className="w-full mt-1"
             />
           </div>
 
           <div>
-            <label className="text-sm font-medium">Cycle Length (years)</label>
+            <Label className="text-sm font-medium">Cycle Length (years)</Label>
             <Select value={cycleLengthYears} onValueChange={setCycleLengthYears}>
               <SelectTrigger className="w-full mt-1">
                 <SelectValue />
@@ -107,14 +118,14 @@ function CpdSettings() {
           </div>
 
           <div>
-            <label className="text-sm font-medium">SDL Cap (%)</label>
-            <input
+            <Label className="text-sm font-medium">SDL Cap (%)</Label>
+            <Input
               type="number"
               value={sdlCapPercent}
               onChange={e => setSdlCapPercent(parseInt(e.target.value, 10) || 0)}
               min={0}
               max={100}
-              className="w-full mt-1 px-3 py-2 rounded-lg border border-[var(--color-border)] bg-transparent text-sm"
+              className="w-full mt-1"
             />
             <p className="text-xs text-[var(--color-muted)] mt-1">
               Maximum percentage of required credits that can come from Self-Directed Learning.
@@ -123,7 +134,7 @@ function CpdSettings() {
           </div>
 
           <div>
-            <label className="text-sm font-medium">Cycle Start Month</label>
+            <Label className="text-sm font-medium">Cycle Start Month</Label>
             <Select value={cycleStartMonth} onValueChange={setCycleStartMonth}>
               <SelectTrigger className="w-full mt-1">
                 <SelectValue />
@@ -136,13 +147,13 @@ function CpdSettings() {
             </Select>
           </div>
 
-          <button
+          <Button
             onClick={handleSave}
             disabled={updateMutation.isPending}
-            className="w-full px-4 py-2 rounded-lg bg-[var(--color-primary)] text-white text-sm hover:opacity-90 disabled:opacity-50"
+            className="w-full"
           >
             {updateMutation.isPending ? 'Saving...' : 'Save Configuration'}
-          </button>
+          </Button>
         </div>
       </GlassCard>
     </div>

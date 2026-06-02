@@ -1,4 +1,3 @@
-// oli-execute: error-handled-inline -- consumed by /officer/surveys/$surveyId route.
 import { useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { BarChart3, MessageSquare, ChevronLeft, ChevronRight, Download } from 'lucide-react'
@@ -164,7 +163,7 @@ export function SurveyResults({ orgId, surveyId }: SurveyResultsProps) {
   const [tab, setTab] = useState<TabView>('analytics')
   const [responsePage, setResponsePage] = useState(0)
 
-  const { data: survey, isLoading, error } = useQuery({
+  const { data: survey, isLoading, isError, error } = useQuery({
     queryKey: ['survey', surveyId],
     queryFn: () => api.get<SurveyDetail>(`/api/surveys/${surveyId}`),
   })
@@ -183,6 +182,14 @@ export function SurveyResults({ orgId, surveyId }: SurveyResultsProps) {
       <div className="space-y-4">
         <Skeleton className="h-8 w-48 rounded" />
         <Skeleton className="h-64 rounded-lg" />
+      </div>
+    )
+  }
+
+  if (isError) {
+    return (
+      <div role="alert" className="p-4 rounded-lg bg-[var(--color-error-bg)] text-[var(--color-error)] text-sm">
+        Unable to load survey results. Please try refreshing the page.
       </div>
     )
   }

@@ -32,7 +32,7 @@ interface SentAnnouncement {
 function SentHistoryPage() {
   const { orgId, orgSlug } = useOrg()
 
-  const { data, isLoading } = useQuery({
+  const { data, isLoading, isError } = useQuery({
     queryKey: ['announcements-sent', orgId],
     queryFn: () =>
       api.get<{ data: SentAnnouncement[]; total: number }>(
@@ -56,6 +56,10 @@ function SentHistoryPage() {
 
       {isLoading ? (
         <ListSkeleton />
+      ) : isError ? (
+        <div role="alert" className="p-4 rounded-lg bg-[var(--color-error-bg)] text-[var(--color-error)] text-sm">
+          Unable to load sent history. Please try refreshing the page.
+        </div>
       ) : announcements.length === 0 ? (
         <GlassCard className="p-8 text-center">
           <p className="text-muted-foreground">No sent announcements yet.</p>

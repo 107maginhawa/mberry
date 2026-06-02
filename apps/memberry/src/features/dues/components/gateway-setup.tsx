@@ -38,7 +38,7 @@ export function GatewaySetup({ orgId }: GatewaySetupProps) {
   const [testResult, setTestResult] = useState<{ success: boolean; message?: string; error?: string } | null>(null)
   const [showDisconnect, setShowDisconnect] = useState(false)
 
-  const { data: rawConfig, isLoading } = useQuery(getDuesGatewayConfigOptions({ path: { organizationId: orgId } }))
+  const { data: rawConfig, isLoading, isError } = useQuery(getDuesGatewayConfigOptions({ path: { organizationId: orgId } }))
   const config = rawConfig as GatewayConfigDetail | undefined
 
   const testMutation = useMutation({
@@ -79,6 +79,14 @@ export function GatewaySetup({ orgId }: GatewaySetupProps) {
   })
 
   if (isLoading) return <Skeleton className="h-64 w-full" />
+
+  if (isError) {
+    return (
+      <div role="alert" className="p-4 rounded-lg bg-[var(--color-error-bg)] text-[var(--color-error)] text-sm">
+        Unable to load gateway configuration. Please try refreshing the page.
+      </div>
+    )
+  }
 
   // Connected state
   if (config?.connected) {

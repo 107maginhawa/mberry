@@ -1,4 +1,3 @@
-// oli-execute: error-handled-inline -- consumed by officer/communications routes which own isError.
 import { useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { Button, Skeleton } from '@monobase/ui'
@@ -38,7 +37,7 @@ export function AnnouncementList({ orgId }: AnnouncementListProps) {
   const [activeTab, setActiveTab] = useState<StatusTab>('all')
   const [search, setSearch] = useState('')
 
-  const { data, isLoading } = useQuery({
+  const { data, isLoading, isError } = useQuery({
     queryKey: ['announcements', orgId, activeTab, search],
     queryFn: async () => {
       const params = new URLSearchParams()
@@ -108,6 +107,10 @@ export function AnnouncementList({ orgId }: AnnouncementListProps) {
           {Array.from({ length: 4 }).map((_, i) => (
             <Skeleton key={i} className="h-16 rounded-lg" />
           ))}
+        </div>
+      ) : isError ? (
+        <div role="alert" className="p-4 rounded-lg bg-[var(--color-error-bg)] text-[var(--color-error)] text-sm">
+          Unable to load announcements. Please try refreshing the page.
         </div>
       ) : announcements.length === 0 ? (
         <div className="border rounded-lg p-12 text-center text-[var(--color-muted)]">

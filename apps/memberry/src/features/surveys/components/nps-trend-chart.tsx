@@ -1,4 +1,3 @@
-// oli-execute: error-handled-inline -- consumed by surveys analytics route.
 import { useQuery } from '@tanstack/react-query'
 import { TrendingUp, TrendingDown, Minus } from 'lucide-react'
 import { Skeleton } from '@monobase/ui'
@@ -47,13 +46,21 @@ function TrendIndicator({ current, previous }: { current: number; previous?: num
 }
 
 export function NpsTrendChart({ orgId }: NpsTrendChartProps) {
-  const { data: trends, isLoading } = useQuery({
+  const { data: trends, isLoading, isError } = useQuery({
     queryKey: ['nps-trends', orgId],
     queryFn: () => api.get<NpsTrendPoint[]>(`/api/surveys/analytics/nps-trends?organizationId=${orgId}`),
   })
 
   if (isLoading) {
     return <Skeleton className="h-48 rounded-lg" />
+  }
+
+  if (isError) {
+    return (
+      <div role="alert" className="border rounded-lg p-4 bg-[var(--color-error-bg)] text-[var(--color-error)] text-sm">
+        Unable to load NPS trends. Please try refreshing the page.
+      </div>
+    )
   }
 
   if (!trends || trends.length === 0) {

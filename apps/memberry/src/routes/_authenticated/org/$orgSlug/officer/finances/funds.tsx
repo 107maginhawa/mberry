@@ -38,7 +38,7 @@ function FundsPage() {
   ])
   const [hasChanges, setHasChanges] = useState(false)
 
-  const { data: fundsData, isLoading } = useQuery({
+  const { data: fundsData, isLoading, isError } = useQuery({
     ...listDuesFundsOptions({ query: { organizationId: orgId } }),
     select: (d: { data?: DuesFund[] }) => d?.data ?? [],
   })
@@ -87,6 +87,14 @@ function FundsPage() {
           <Skeleton className="h-28 rounded-xl" />
           <Skeleton className="h-28 rounded-xl" />
         </div>
+      </div>
+    )
+  }
+
+  if (isError) {
+    return (
+      <div role="alert" className="p-4 rounded-lg bg-[var(--color-error-bg)] text-[var(--color-error)] text-sm">
+        Unable to load fund data. Please try refreshing the page.
       </div>
     )
   }

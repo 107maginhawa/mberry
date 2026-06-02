@@ -89,7 +89,7 @@ export function MemberDetail({ orgId, memberId }: MemberDetailProps) {
   const [suspendReason, setSuspendReason] = useState('')
 
   // Hand-wired endpoint enriches RosterMember with person data fields (name, email, phone, etc.)
-  const { data: rawData, isLoading, error } = useQuery(
+  const { data: rawData, isLoading, isError, error } = useQuery(
     getRosterMemberOptions({ path: { memberId }, query: { organizationId: orgId } })
   )
   const data = rawData as RosterMemberDetail | undefined
@@ -145,6 +145,14 @@ export function MemberDetail({ orgId, memberId }: MemberDetailProps) {
     return (
       <div className="space-y-6 max-w-3xl">
         <ProfileSkeleton />
+      </div>
+    )
+  }
+
+  if (isError) {
+    return (
+      <div role="alert" className="p-4 rounded-lg bg-[var(--color-error-bg)] text-[var(--color-error)] text-sm max-w-3xl">
+        Unable to load member detail. Please try refreshing the page.
       </div>
     )
   }

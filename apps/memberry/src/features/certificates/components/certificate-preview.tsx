@@ -16,7 +16,7 @@ function formatDate(iso: string | Date | null | undefined) {
 }
 
 export function CertificatePreview({ certificateId }: CertificatePreviewProps) {
-  const { data, isLoading, error } = useQuery(
+  const { data, isLoading, isError } = useQuery(
     getCertificateOptions({ path: { certificateId } }),
   )
 
@@ -31,7 +31,15 @@ export function CertificatePreview({ certificateId }: CertificatePreviewProps) {
     )
   }
 
-  if (error || !cert?.id) {
+  if (isError) {
+    return (
+      <div role="alert" className="max-w-2xl p-4 rounded-lg bg-[var(--color-error-bg)] text-[var(--color-error)] text-sm">
+        Unable to load certificate. Please try refreshing the page.
+      </div>
+    )
+  }
+
+  if (!cert?.id) {
     return (
       <GlassCard className="max-w-2xl p-8 text-center">
         <p className="text-sm text-[var(--color-muted)]">

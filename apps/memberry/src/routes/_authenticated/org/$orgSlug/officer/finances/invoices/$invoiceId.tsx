@@ -26,7 +26,7 @@ function InvoiceDetailPage() {
   const { invoiceId } = Route.useParams()
   const queryClient = useQueryClient()
 
-  const { data, isLoading, error } = useQuery(
+  const { data, isLoading, isError, error } = useQuery(
     getDuesInvoiceOptions({
       path: { invoiceId },
       headers: { 'x-org-id': orgId },
@@ -53,6 +53,14 @@ function InvoiceDetailPage() {
           <Skeleton className="h-64 flex-1" />
           <Skeleton className="h-64 w-[280px]" />
         </div>
+      </div>
+    )
+  }
+
+  if (isError) {
+    return (
+      <div role="alert" className="p-4 rounded-lg bg-[var(--color-error-bg)] text-[var(--color-error)] text-sm">
+        Unable to load invoice detail. Please try refreshing the page.
       </div>
     )
   }

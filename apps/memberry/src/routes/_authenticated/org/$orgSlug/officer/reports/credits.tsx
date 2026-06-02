@@ -25,7 +25,7 @@ function CreditReport() {
   const { orgId, orgSlug } = useOrg()
   const [filter, setFilter] = useState<string>('all')
 
-  const { data, isLoading } = useQuery<any>({
+  const { data, isLoading, isError } = useQuery<any>({
     queryKey: ['credit-compliance', orgId],
     queryFn: () => api.get(`/api/credit-compliance/${orgId}?requiredCredits=45&cyclePeriodYears=3`),
   })
@@ -49,6 +49,24 @@ function CreditReport() {
           {[1, 2, 3, 4].map(i => <CardSkeleton key={i} />)}
         </div>
         <TableSkeleton />
+      </div>
+    )
+  }
+
+  if (isError) {
+    return (
+      <div className="space-y-6">
+        <PageHeader
+          title="Credit Compliance Report"
+          breadcrumbs={[
+            { label: 'Officer', href: `/org/${orgSlug}/officer/dashboard` },
+            { label: 'Reports' },
+            { label: 'Credits' },
+          ]}
+        />
+        <div role="alert" className="p-4 rounded-lg bg-[var(--color-error-bg)] text-[var(--color-error)] text-sm">
+          Unable to load credit compliance report. Please try refreshing the page.
+        </div>
       </div>
     )
   }

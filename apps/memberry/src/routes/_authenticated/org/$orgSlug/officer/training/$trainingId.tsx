@@ -1,6 +1,3 @@
-// oli-execute: error-handled-inline
-// `error` renders "Failed to load training" branch at ~L78-81. Gate
-// heuristic misses the destructured rename.
 import { createFileRoute } from '@tanstack/react-router'
 import { useQuery } from '@tanstack/react-query'
 import { useState } from 'react'
@@ -62,7 +59,7 @@ function TrainingDetail() {
   const { trainingId } = Route.useParams()
   const [tab, setTab] = useState<Tab>('details')
 
-  const { data, isLoading, error } = useQuery(
+  const { data, isLoading, isError, error } = useQuery(
     getTrainingOptions({ path: { trainingId } })
   )
 
@@ -74,6 +71,14 @@ function TrainingDetail() {
       <div className="space-y-4">
         <div className="h-8 w-48 bg-[var(--color-surface-warm)] rounded animate-pulse" />
         <ListSkeleton rows={4} />
+      </div>
+    )
+  }
+
+  if (isError) {
+    return (
+      <div role="alert" className="p-4 rounded-lg bg-[var(--color-error-bg)] text-[var(--color-error)] text-sm">
+        Unable to load training detail. Please try refreshing the page.
       </div>
     )
   }

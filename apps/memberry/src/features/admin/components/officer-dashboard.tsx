@@ -134,7 +134,7 @@ export function OfficerDashboard({ orgId }: OfficerDashboardProps) {
   const upcomingEventsCount = upcomingEvents.length
 
   const isLoading = members.isLoading || dues.isLoading || applications.isLoading
-  const hasError = members.error || dues.error || applications.error
+  const isError = members.isError || dues.isError || applications.isError
 
   const m = members.data
   const d = dues.data
@@ -302,7 +302,7 @@ export function OfficerDashboard({ orgId }: OfficerDashboardProps) {
         subtitle="Membership health and action items at a glance"
       />
 
-      {hasError && (
+      {isError && (
         <div role="alert" aria-live="polite" className="text-sm text-[var(--color-error)] p-4 rounded-xl border border-destructive/20 mb-6">
           Some dashboard data failed to load. Showing partial results.
         </div>

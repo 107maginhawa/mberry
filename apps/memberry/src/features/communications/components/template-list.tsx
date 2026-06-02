@@ -31,7 +31,7 @@ export function TemplateList({ orgId, onEdit, onNew }: TemplateListProps) {
   const [search, setSearch] = useState('')
   const queryClient = useQueryClient()
 
-  const { data, isLoading } = useQuery({
+  const { data, isLoading, isError } = useQuery({
     queryKey: ['templates', orgId],
     queryFn: () =>
       api.get<{ data: Template[] }>(
@@ -59,6 +59,14 @@ export function TemplateList({ orgId, onEdit, onNew }: TemplateListProps) {
 
   if (isLoading) {
     return <TableSkeleton rows={5} cols={5} />
+  }
+
+  if (isError) {
+    return (
+      <div role="alert" className="p-4 rounded-lg bg-[var(--color-error-bg)] text-[var(--color-error)] text-sm">
+        Unable to load templates. Please try refreshing the page.
+      </div>
+    )
   }
 
   if (templates.length === 0) {

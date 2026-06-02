@@ -32,7 +32,7 @@ interface AnnouncementWithStats {
 function AnalyticsDashboardPage() {
   const { orgId, orgSlug } = useOrg()
 
-  const { data, isLoading } = useQuery({
+  const { data, isLoading, isError } = useQuery({
     queryKey: ['announcements-analytics', orgId],
     queryFn: () =>
       api.get<{ data: AnnouncementWithStats[]; total: number }>(
@@ -129,6 +129,10 @@ function AnalyticsDashboardPage() {
       {/* Announcements Table */}
       {isLoading ? (
         <ListSkeleton />
+      ) : isError ? (
+        <div role="alert" className="p-4 rounded-lg bg-[var(--color-error-bg)] text-[var(--color-error)] text-sm">
+          Unable to load analytics data. Please try refreshing the page.
+        </div>
       ) : announcements.length === 0 ? (
         <GlassCard className="p-8 text-center">
           <p className="text-muted-foreground">

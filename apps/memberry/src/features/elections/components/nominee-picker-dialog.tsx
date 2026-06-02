@@ -28,7 +28,7 @@ export function NomineePickerDialog({
   const queryClient = useQueryClient()
   const [search, setSearch] = useState('')
 
-  const { data, isLoading } = useQuery(
+  const { data, isLoading, isError } = useQuery(
     listRosterMembersOptions({ query: { organizationId: orgId, limit: 50, q: search || undefined } }),
   )
 
@@ -83,6 +83,10 @@ export function NomineePickerDialog({
               {Array.from({ length: 4 }).map((_, i) => (
                 <Skeleton key={i} className="h-12 rounded-lg" />
               ))}
+            </div>
+          ) : isError ? (
+            <div role="alert" className="m-2 p-3 rounded-lg bg-[var(--color-error-bg)] text-[var(--color-error)] text-sm">
+              Unable to load members. Please try again.
             </div>
           ) : members.length === 0 ? (
             <div className="p-8 text-center text-sm text-[var(--color-muted)]">

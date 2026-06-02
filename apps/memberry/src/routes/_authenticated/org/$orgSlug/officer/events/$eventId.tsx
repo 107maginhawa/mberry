@@ -198,7 +198,7 @@ function EventDetail() {
   const [tab, setTab] = useState<Tab>('details')
   const [editMode, setEditMode] = useState(false)
 
-  const { data, isLoading, error } = useQuery(
+  const { data, isLoading, isError, error } = useQuery(
     getEventOptions({ path: { eventId }, headers: { 'x-org-id': orgId } })
   )
   const event = data as unknown as RuntimeEvent | undefined
@@ -208,6 +208,10 @@ function EventDetail() {
       {isLoading ? (
         <div className="space-y-3">
           <TableSkeleton rows={3} cols={1} />
+        </div>
+      ) : isError ? (
+        <div role="alert" className="p-4 rounded-lg bg-[var(--color-error-bg)] text-[var(--color-error)] text-sm">
+          Unable to load event details. Please try refreshing the page.
         </div>
       ) : error || !event ? (
         <div className="p-6 text-center text-[var(--color-error)]">Failed to load event</div>
