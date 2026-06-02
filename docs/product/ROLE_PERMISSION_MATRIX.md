@@ -91,206 +91,206 @@ Listed in descending privilege order (index 0 = highest):
 
 ### 3.1 Person Module
 
-| Action | Auth | super | admin | support | president | VP | secretary | treasurer | board-member | officer | staff | member | user | client | host |
+| Action | Auth | super | support | analyst | president | VP | secretary | treasurer | board-member | officer | staff | member | user | client | host |
 |--------|------|-------|-------|---------|-----------|----|-----------|-----------|--------------|---------|----|--------|------|--------|------|
-| Create | GA | Y | Y | Y | -- | -- | -- | -- | -- | -- | -- | -- | Own | -- | -- |
+| Create | GA | Y | Y | -- | -- | -- | -- | -- | -- | -- | -- | -- | Own | -- | -- |
 | Read own | GA | Y | Y | Y | Y | Y | Y | Y | Y | Y | Y | Y | Y | Y | Y |
 | Read any | PA | Y | Y | Y | -- | -- | -- | -- | -- | -- | -- | -- | -- | -- | -- |
 | Update own | GA | Y | Y | Y | Y | Y | Y | Y | Y | Y | Y | Y | Y | Y | Y |
-| Update any | PA | Y | Y | -- | -- | -- | -- | -- | -- | -- | -- | -- | -- | -- | -- |
+| Update any | PA | Y | -- | -- | -- | -- | -- | -- | -- | -- | -- | -- | -- | -- | -- |
 | Delete | PA | Y | -- | -- | -- | -- | -- | -- | -- | -- | -- | -- | -- | -- | -- |
 
 ### 3.2 Association:Member Module
 
-| Action | Auth | super | admin | support | president | VP | secretary | treasurer | board-member | officer | staff | member | user |
+| Action | Auth | super | support | analyst | president | VP | secretary | treasurer | board-member | officer | staff | member | user |
 |--------|------|-------|-------|---------|-----------|----|-----------|-----------|--------------|---------|----|--------|------|
-| List members | GA+OA | Y | Y | Y | Y | Y | Y | Y | Y | Y | Y | R | -- |
-| Get member | GA+OA | Y | Y | Y | Y | Y | Y | Y | Y | Y | Y | Own | -- |
-| Import roster | GA+HG | Y | Y | -- | Y,2FA | -- | Y,2FA | -- | -- | -- | -- | -- | -- |
-| Manage credentials | GA+HG | Y | Y | -- | Y,2FA | -- | Y,2FA | -- | -- | -- | -- | -- | -- |
-| Create election | GA+HG | Y | Y | -- | Y,2FA | -- | -- | -- | -- | -- | -- | -- | -- |
-| Delete election | GA+HG | Y | Y | -- | Y,2FA | Y | Y,2FA | Y,2FA | Y | Y | -- | -- | -- |
-| Governance (mutations) | GA+HG | Y | Y | -- | Y,2FA | -- | -- | -- | -- | -- | -- | -- | -- |
-| Dues mutations | GA+HG | Y | Y | -- | Y,2FA | -- | -- | Y,2FA | -- | -- | -- | -- | -- |
+| List members | GA+OA | Y | Y | R | Y | Y | Y | Y | Y | Y | Y | R | -- |
+| Get member | GA+OA | Y | Y | R | Y | Y | Y | Y | Y | Y | Y | Own | -- |
+| Import roster | GA+HG | Y | -- | -- | Y,2FA | -- | Y,2FA | -- | -- | -- | -- | -- | -- |
+| Manage credentials | GA+HG | Y | -- | -- | Y,2FA | -- | Y,2FA | -- | -- | -- | -- | -- | -- |
+| Create election | GA+HG | Y | -- | -- | Y,2FA | -- | -- | -- | -- | -- | -- | -- | -- |
+| Delete election | GA+HG | Y | -- | -- | Y,2FA | Y | Y,2FA | Y,2FA | Y | Y | -- | -- | -- |
+| Governance (mutations) | GA+HG | Y | -- | -- | Y,2FA | -- | -- | -- | -- | -- | -- | -- | -- |
+| Dues mutations | GA+HG | Y | -- | -- | Y,2FA | -- | -- | Y,2FA | -- | -- | -- | -- | -- |
 | Public directory | Public | Y | Y | Y | Y | Y | Y | Y | Y | Y | Y | Y | Y |
 | Public complaints | Public | Y | Y | Y | Y | Y | Y | Y | Y | Y | Y | Y | Y |
 
 ### 3.3 Association:Operations Module
 
-| Action | Auth | super | admin | support | president | VP | secretary | treasurer | board-member | officer | staff | member | user |
+| Action | Auth | super | support | analyst | president | VP | secretary | treasurer | board-member | officer | staff | member | user |
 |--------|------|-------|-------|---------|-----------|----|-----------|-----------|--------------|---------|----|--------|------|
-| Create training | GA+HG | Y | Y | -- | Y,2FA | -- | -- | -- | -- | Y | -- | -- | -- |
-| Update training | GA+HG | Y | Y | -- | Y,2FA | -- | -- | -- | -- | Y | -- | -- | -- |
-| Delete training | GA+HG | Y | Y | -- | Y,2FA | -- | -- | -- | -- | Y | -- | -- | -- |
-| Publish training | GA+HG | Y | Y | -- | Y,2FA | -- | -- | -- | -- | Y | -- | -- | -- |
-| Cancel training | GA+HG | Y | Y | -- | Y,2FA | -- | -- | -- | -- | Y | -- | -- | -- |
-| Create event | GA+HG | Y | Y | -- | Y,2FA | -- | -- | -- | -- | Y | -- | -- | -- |
-| Update event | GA+HG | Y | Y | -- | Y,2FA | -- | -- | -- | -- | Y | -- | -- | -- |
-| Publish event | GA+HG | Y | Y | -- | Y,2FA | -- | -- | -- | -- | Y | -- | -- | -- |
-| Create/update course | GA+HG | Y | Y | -- | Y,2FA | -- | -- | -- | -- | Y | -- | -- | -- |
-| Delete course | GA+HG | Y | Y | -- | Y,2FA | -- | -- | -- | -- | Y | -- | -- | -- |
-| Manage enrollments | GA+HG | Y | Y | -- | Y,2FA | -- | -- | -- | -- | Y | -- | -- | -- |
-| Check-in | GA+HG | Y | Y | -- | Y,2FA | -- | -- | -- | -- | Y | -- | -- | -- |
-| Refund registration | GA+HG | Y | Y | -- | Y,2FA | -- | -- | -- | -- | Y | -- | -- | -- |
+| Create training | GA+HG | Y | -- | -- | Y,2FA | -- | -- | -- | -- | Y | -- | -- | -- |
+| Update training | GA+HG | Y | -- | -- | Y,2FA | -- | -- | -- | -- | Y | -- | -- | -- |
+| Delete training | GA+HG | Y | -- | -- | Y,2FA | -- | -- | -- | -- | Y | -- | -- | -- |
+| Publish training | GA+HG | Y | -- | -- | Y,2FA | -- | -- | -- | -- | Y | -- | -- | -- |
+| Cancel training | GA+HG | Y | -- | -- | Y,2FA | -- | -- | -- | -- | Y | -- | -- | -- |
+| Create event | GA+HG | Y | -- | -- | Y,2FA | -- | -- | -- | -- | Y | -- | -- | -- |
+| Update event | GA+HG | Y | -- | -- | Y,2FA | -- | -- | -- | -- | Y | -- | -- | -- |
+| Publish event | GA+HG | Y | -- | -- | Y,2FA | -- | -- | -- | -- | Y | -- | -- | -- |
+| Create/update course | GA+HG | Y | -- | -- | Y,2FA | -- | -- | -- | -- | Y | -- | -- | -- |
+| Delete course | GA+HG | Y | -- | -- | Y,2FA | -- | -- | -- | -- | Y | -- | -- | -- |
+| Manage enrollments | GA+HG | Y | -- | -- | Y,2FA | -- | -- | -- | -- | Y | -- | -- | -- |
+| Check-in | GA+HG | Y | -- | -- | Y,2FA | -- | -- | -- | -- | Y | -- | -- | -- |
+| Refund registration | GA+HG | Y | -- | -- | Y,2FA | -- | -- | -- | -- | Y | -- | -- | -- |
 | Analytics (read) | GA+OA | Y | Y | Y | Y | Y | Y | Y | Y | Y | Y | -- | -- |
 
 > **Note:** "officer" column refers to the `Society Officer` position title specifically (POSITION_TITLES.SOCIETY_OFFICER). General officers without this title are denied.
 
 ### 3.4 Dues Module
 
-| Action | Auth | super | admin | support | president | VP | secretary | treasurer | board-member | officer | staff | member | user |
+| Action | Auth | super | support | analyst | president | VP | secretary | treasurer | board-member | officer | staff | member | user |
 |--------|------|-------|-------|---------|-----------|----|-----------|-----------|--------------|---------|----|--------|------|
-| Dashboard | GA+HG | Y | Y | -- | Y,2FA | -- | -- | Y,2FA | -- | -- | -- | -- | -- |
+| Dashboard | GA+HG | Y | -- | R | Y,2FA | -- | -- | Y,2FA | -- | -- | -- | -- | -- |
 | List invoices | GA | Y | Y | Y | Y | Y | Y | Y | Y | Y | Y | Own | -- |
-| Create invoice | GA+HG | Y | Y | -- | Y,2FA | -- | -- | Y,2FA | -- | -- | -- | -- | -- |
-| Record payment | GA+HG | Y | Y | -- | Y,2FA | -- | -- | Y,2FA | -- | -- | -- | -- | -- |
-| Process refund | GA+HG | Y | Y | -- | Y,2FA | -- | -- | Y,2FA | -- | -- | -- | -- | -- |
+| Create invoice | GA+HG | Y | -- | -- | Y,2FA | -- | -- | Y,2FA | -- | -- | -- | -- | -- |
+| Record payment | GA+HG | Y | -- | -- | Y,2FA | -- | -- | Y,2FA | -- | -- | -- | -- | -- |
+| Process refund | GA+HG | Y | -- | -- | Y,2FA | -- | -- | Y,2FA | -- | -- | -- | -- | -- |
 | View own dues | GA | Y | Y | Y | Y | Y | Y | Y | Y | Y | Y | Y | -- |
 
 ### 3.5 Training Module
 
-| Action | Auth | super | admin | support | president | VP | secretary | treasurer | board-member | officer | staff | member | user |
+| Action | Auth | super | support | analyst | president | VP | secretary | treasurer | board-member | officer | staff | member | user |
 |--------|------|-------|-------|---------|-----------|----|-----------|-----------|--------------|---------|----|--------|------|
-| List providers | GA+HG | Y | Y | -- | Y,2FA | -- | -- | -- | -- | Y | -- | -- | -- |
-| Create provider | GA+HG | Y | Y | -- | Y,2FA | -- | -- | -- | -- | Y | -- | -- | -- |
-| Update provider | GA+HG | Y | Y | -- | Y,2FA | -- | -- | -- | -- | Y | -- | -- | -- |
-| Delete provider | GA+HG | Y | Y | -- | Y,2FA | -- | -- | -- | -- | Y | -- | -- | -- |
+| List providers | GA+HG | Y | -- | R | Y,2FA | -- | -- | -- | -- | Y | -- | -- | -- |
+| Create provider | GA+HG | Y | -- | -- | Y,2FA | -- | -- | -- | -- | Y | -- | -- | -- |
+| Update provider | GA+HG | Y | -- | -- | Y,2FA | -- | -- | -- | -- | Y | -- | -- | -- |
+| Delete provider | GA+HG | Y | -- | -- | Y,2FA | -- | -- | -- | -- | Y | -- | -- | -- |
 | View credits | GA | Y | Y | Y | Y | Y | Y | Y | Y | Y | Y | Own | -- |
 
 ### 3.6 Membership Module
 
-| Action | Auth | super | admin | support | president | VP | secretary | treasurer | board-member | officer | staff | member | user |
+| Action | Auth | super | support | analyst | president | VP | secretary | treasurer | board-member | officer | staff | member | user |
 |--------|------|-------|-------|---------|-----------|----|-----------|-----------|--------------|---------|----|--------|------|
 | Apply | GA | -- | -- | -- | -- | -- | -- | -- | -- | -- | -- | -- | Y |
-| Update org profile | GA+HG | Y | Y | -- | Y,2FA | -- | -- | -- | -- | -- | -- | -- | -- |
-| Approve/reject | GA+HG | Y | Y | -- | Y,2FA | -- | Y,2FA | -- | -- | -- | -- | -- | -- |
+| Update org profile | GA+HG | Y | -- | -- | Y,2FA | -- | -- | -- | -- | -- | -- | -- | -- |
+| Approve/reject | GA+HG | Y | -- | -- | Y,2FA | -- | Y,2FA | -- | -- | -- | -- | -- | -- |
 | View own membership | GA | Y | Y | Y | Y | Y | Y | Y | Y | Y | Y | Y | Y |
 
 ### 3.7 Platform Admin Module
 
-| Action | Auth | super | admin | support | president | VP | secretary | treasurer | board-member | officer | staff | member | user |
+| Action | Auth | super | support | analyst | president | VP | secretary | treasurer | board-member | officer | staff | member | user |
 |--------|------|-------|-------|---------|-----------|----|-----------|-----------|--------------|---------|----|--------|------|
 | List admins | PA | Y | Y | Y | -- | -- | -- | -- | -- | -- | -- | -- | -- |
 | Get admin role | PA | Y | Y | Y | -- | -- | -- | -- | -- | -- | -- | -- | -- |
-| Create org | PA | Y | Y | -- | -- | -- | -- | -- | -- | -- | -- | -- | -- |
+| Create org | PA | Y | -- | -- | -- | -- | -- | -- | -- | -- | -- | -- | -- |
 | Get/list orgs | PA | Y | Y | Y | -- | -- | -- | -- | -- | -- | -- | -- | -- |
-| Transition org status | PA | Y | Y | -- | -- | -- | -- | -- | -- | -- | -- | -- | -- |
-| Create/update assoc | PA | Y | Y | -- | -- | -- | -- | -- | -- | -- | -- | -- | -- |
+| Transition org status | PA | Y | -- | -- | -- | -- | -- | -- | -- | -- | -- | -- | -- |
+| Create/update assoc | PA | Y | -- | -- | -- | -- | -- | -- | -- | -- | -- | -- | -- |
 | Delete association | PA | Y | -- | -- | -- | -- | -- | -- | -- | -- | -- | -- | -- |
-| Feature flags | PA | Y | Y | -- | -- | -- | -- | -- | -- | -- | -- | -- | -- |
+| Feature flags | PA | Y | -- | -- | -- | -- | -- | -- | -- | -- | -- | -- | -- |
 | Impersonation | PA | Y | -- | -- | -- | -- | -- | -- | -- | -- | -- | -- | -- |
 
 ### 3.8 Billing Module
 
-| Action | Auth | super | admin | support | president | VP | secretary | treasurer | board-member | officer | staff | member | user |
+| Action | Auth | super | support | analyst | president | VP | secretary | treasurer | board-member | officer | staff | member | user |
 |--------|------|-------|-------|---------|-----------|----|-----------|-----------|--------------|---------|----|--------|------|
-| Connect Stripe | GA+HG | Y | Y | -- | Y,2FA | -- | -- | Y,2FA | -- | -- | -- | -- | -- |
-| View balance | GA+HG | Y | Y | -- | Y,2FA | -- | -- | Y,2FA | -- | -- | -- | -- | -- |
-| List transactions | GA+HG | Y | Y | -- | Y,2FA | -- | -- | Y,2FA | -- | -- | -- | -- | -- |
-| Process payout | GA+HG | Y | Y | -- | Y,2FA | -- | -- | Y,2FA | -- | -- | -- | -- | -- |
+| Connect Stripe | GA+HG | Y | -- | -- | Y,2FA | -- | -- | Y,2FA | -- | -- | -- | -- | -- |
+| View balance | GA+HG | Y | -- | R | Y,2FA | -- | -- | Y,2FA | -- | -- | -- | -- | -- |
+| List transactions | GA+HG | Y | -- | R | Y,2FA | -- | -- | Y,2FA | -- | -- | -- | -- | -- |
+| Process payout | GA+HG | Y | -- | -- | Y,2FA | -- | -- | Y,2FA | -- | -- | -- | -- | -- |
 | View own invoices | GA | Y | Y | Y | Y | Y | Y | Y | Y | Y | Y | Y | Y |
 
 ### 3.9 Booking Module
 
-| Action | Auth | super | admin | support | president | VP | secretary | treasurer | board-member | officer | staff | member | user |
+| Action | Auth | super | support | analyst | president | VP | secretary | treasurer | board-member | officer | staff | member | user |
 |--------|------|-------|-------|---------|-----------|----|-----------|-----------|--------------|---------|----|--------|------|
 | List slots | GA | Y | Y | Y | Y | Y | Y | Y | Y | Y | Y | Y | Y |
 | Create booking | GA | Y | Y | Y | Y | Y | Y | Y | Y | Y | Y | Y | Y |
 | Cancel own | GA | Y | Y | Y | Y | Y | Y | Y | Y | Y | Y | Y | Y |
-| Manage slots | GA+HG | Y | Y | -- | Y | Y | Y | -- | -- | Y | Y | -- | -- |
+| Manage slots | GA+HG | Y | -- | -- | Y | Y | Y | -- | -- | Y | Y | -- | -- |
 
 ### 3.10 Events Module
 
-| Action | Auth | super | admin | support | president | VP | secretary | treasurer | board-member | officer | staff | member | user |
+| Action | Auth | super | support | analyst | president | VP | secretary | treasurer | board-member | officer | staff | member | user |
 |--------|------|-------|-------|---------|-----------|----|-----------|-----------|--------------|---------|----|--------|------|
 | List events | GA | Y | Y | Y | Y | Y | Y | Y | Y | Y | Y | Y | Y |
 | View event | GA | Y | Y | Y | Y | Y | Y | Y | Y | Y | Y | Y | Y |
 | Register | GA | Y | Y | Y | Y | Y | Y | Y | Y | Y | Y | Y | Y |
-| Create/update | GA+HG | Y | Y | -- | Y,2FA | -- | -- | -- | -- | Y | -- | -- | -- |
-| Delete | GA+HG | Y | Y | -- | Y,2FA | -- | -- | -- | -- | Y | -- | -- | -- |
+| Create/update | GA+HG | Y | -- | -- | Y,2FA | -- | -- | -- | -- | Y | -- | -- | -- |
+| Delete | GA+HG | Y | -- | -- | Y,2FA | -- | -- | -- | -- | Y | -- | -- | -- |
 
 ### 3.11 Elections Module
 
-| Action | Auth | super | admin | support | president | VP | secretary | treasurer | board-member | officer | staff | member | user |
+| Action | Auth | super | support | analyst | president | VP | secretary | treasurer | board-member | officer | staff | member | user |
 |--------|------|-------|-------|---------|-----------|----|-----------|-----------|--------------|---------|----|--------|------|
 | View elections | GA | Y | Y | Y | Y | Y | Y | Y | Y | Y | Y | Y | -- |
 | Cast vote | GA | Y | Y | Y | Y | Y | Y | Y | Y | Y | Y | Y | -- |
-| Nominate | GA | Y | Y | -- | Y | Y | Y | Y | Y | Y | Y | Y | -- |
-| Create election | GA+HG | Y | Y | -- | Y,2FA | -- | -- | -- | -- | -- | -- | -- | -- |
-| Delete election | GA+HG | Y | Y | -- | Y,2FA | Y | Y,2FA | Y,2FA | Y | Y | -- | -- | -- |
+| Nominate | GA | Y | -- | -- | Y | Y | Y | Y | Y | Y | Y | Y | -- |
+| Create election | GA+HG | Y | -- | -- | Y,2FA | -- | -- | -- | -- | -- | -- | -- | -- |
+| Delete election | GA+HG | Y | -- | -- | Y,2FA | Y | Y,2FA | Y,2FA | Y | Y | -- | -- | -- |
 
 ### 3.12 Communication Module
 
-| Action | Auth | super | admin | support | president | VP | secretary | treasurer | board-member | officer | staff | member | user |
+| Action | Auth | super | support | analyst | president | VP | secretary | treasurer | board-member | officer | staff | member | user |
 |--------|------|-------|-------|---------|-----------|----|-----------|-----------|--------------|---------|----|--------|------|
 | List templates | GA+OA | Y | Y | Y | Y | Y | Y | Y | Y | Y | Y | -- | -- |
-| Create template | GA+HG | Y | Y | -- | Y | Y | Y | -- | -- | Y | -- | -- | -- |
-| Send broadcast | GA+HG | Y | Y | -- | Y | -- | Y | -- | -- | -- | -- | -- | -- |
+| Create template | GA+HG | Y | -- | -- | Y | Y | Y | -- | -- | Y | -- | -- | -- |
+| Send broadcast | GA+HG | Y | -- | -- | Y | -- | Y | -- | -- | -- | -- | -- | -- |
 | View own messages | GA | Y | Y | Y | Y | Y | Y | Y | Y | Y | Y | Y | Y |
 
 ### 3.13 Documents Module
 
-| Action | Auth | super | admin | support | president | VP | secretary | treasurer | board-member | officer | staff | member | user |
+| Action | Auth | super | support | analyst | president | VP | secretary | treasurer | board-member | officer | staff | member | user |
 |--------|------|-------|-------|---------|-----------|----|-----------|-----------|--------------|---------|----|--------|------|
 | List documents | GA | Y | Y | Y | Y | Y | Y | Y | Y | Y | Y | Y | -- |
 | Download | GA | Y | Y | Y | Y | Y | Y | Y | Y | Y | Y | Y | -- |
-| Upload | GA+HG | Y | Y | -- | Y | Y | Y | -- | -- | Y | Y | -- | -- |
-| Delete | GA+HG | Y | Y | -- | Y | -- | -- | -- | -- | -- | -- | -- | -- |
+| Upload | GA+HG | Y | -- | -- | Y | Y | Y | -- | -- | Y | Y | -- | -- |
+| Delete | GA+HG | Y | -- | -- | Y | -- | -- | -- | -- | -- | -- | -- | -- |
 
 ### 3.14 Storage Module
 
-| Action | Auth | super | admin | support | president | VP | secretary | treasurer | board-member | officer | staff | member | user |
+| Action | Auth | super | support | analyst | president | VP | secretary | treasurer | board-member | officer | staff | member | user |
 |--------|------|-------|-------|---------|-----------|----|-----------|-----------|--------------|---------|----|--------|------|
 | Upload file | GA | Y | Y | Y | Y | Y | Y | Y | Y | Y | Y | Y | Y |
 | Download file | GA | Y | Y | Y | Y | Y | Y | Y | Y | Y | Y | Y | Y |
-| Delete file | GA | Y | Y | Y | Y | Y | Y | Y | Y | Y | Y | Own | -- |
+| Delete file | GA | Y | Y | Own | Y | Y | Y | Y | Y | Y | Y | Own | -- |
 
 ### 3.15 Certificates Module
 
-| Action | Auth | super | admin | support | president | VP | secretary | treasurer | board-member | officer | staff | member | user |
+| Action | Auth | super | support | analyst | president | VP | secretary | treasurer | board-member | officer | staff | member | user |
 |--------|------|-------|-------|---------|-----------|----|-----------|-----------|--------------|---------|----|--------|------|
-| Generate cert | GA+HG | Y | Y | -- | Y | -- | Y | -- | -- | Y | -- | -- | -- |
+| Generate cert | GA+HG | Y | -- | -- | Y | -- | Y | -- | -- | Y | -- | -- | -- |
 | View own certs | GA | Y | Y | Y | Y | Y | Y | Y | Y | Y | Y | Y | Y |
 
 ### 3.16 Invite Module
 
-| Action | Auth | super | admin | support | president | VP | secretary | treasurer | board-member | officer | staff | member | user |
+| Action | Auth | super | support | analyst | president | VP | secretary | treasurer | board-member | officer | staff | member | user |
 |--------|------|-------|-------|---------|-----------|----|-----------|-----------|--------------|---------|----|--------|------|
-| Send invite | GA+HG | Y | Y | -- | Y | Y | Y | -- | -- | Y | Y | -- | -- |
+| Send invite | GA+HG | Y | -- | -- | Y | Y | Y | -- | -- | Y | Y | -- | -- |
 | Accept invite | GA | Y | Y | Y | Y | Y | Y | Y | Y | Y | Y | Y | Y |
 
 ### 3.17 Email Module
 
-| Action | Auth | super | admin | support | president | VP | secretary | treasurer | board-member | officer | staff | member | user |
+| Action | Auth | super | support | analyst | president | VP | secretary | treasurer | board-member | officer | staff | member | user |
 |--------|------|-------|-------|---------|-----------|----|-----------|-----------|--------------|---------|----|--------|------|
-| Queue email | GA+HG | Y | Y | -- | Y | -- | Y | -- | -- | Y | -- | -- | -- |
+| Queue email | GA+HG | Y | -- | -- | Y | -- | Y | -- | -- | Y | -- | -- | -- |
 | View queue | PA | Y | Y | Y | -- | -- | -- | -- | -- | -- | -- | -- | -- |
 | Unsubscribe | Public | Y | Y | Y | Y | Y | Y | Y | Y | Y | Y | Y | Y |
 
 ### 3.18 Notifications Module
 
-| Action | Auth | super | admin | support | president | VP | secretary | treasurer | board-member | officer | staff | member | user |
+| Action | Auth | super | support | analyst | president | VP | secretary | treasurer | board-member | officer | staff | member | user |
 |--------|------|-------|-------|---------|-----------|----|-----------|-----------|--------------|---------|----|--------|------|
 | View own notifs | GA | Y | Y | Y | Y | Y | Y | Y | Y | Y | Y | Y | Y |
-| Send push | GA+HG | Y | Y | -- | Y | -- | -- | -- | -- | Y | -- | -- | -- |
+| Send push | GA+HG | Y | -- | -- | Y | -- | -- | -- | -- | Y | -- | -- | -- |
 | Manage prefs | GA | Y | Y | Y | Y | Y | Y | Y | Y | Y | Y | Y | Y |
 
 ### 3.19 Reviews Module
 
-| Action | Auth | super | admin | support | president | VP | secretary | treasurer | board-member | officer | staff | member | user |
+| Action | Auth | super | support | analyst | president | VP | secretary | treasurer | board-member | officer | staff | member | user |
 |--------|------|-------|-------|---------|-----------|----|-----------|-----------|--------------|---------|----|--------|------|
 | Submit review | GA | Y | Y | Y | Y | Y | Y | Y | Y | Y | Y | Y | Y |
 | View reviews | GA | Y | Y | Y | Y | Y | Y | Y | Y | Y | Y | Y | Y |
 
 ### 3.20 Audit Module
 
-| Action | Auth | super | admin | support | president | VP | secretary | treasurer | board-member | officer | staff | member | user |
+| Action | Auth | super | support | analyst | president | VP | secretary | treasurer | board-member | officer | staff | member | user |
 |--------|------|-------|-------|---------|-----------|----|-----------|-----------|--------------|---------|----|--------|------|
 | View audit logs | PA | Y | Y | Y | -- | -- | -- | -- | -- | -- | -- | -- | -- |
 
 ### 3.21 Comms Module (WebSocket)
 
-| Action | Auth | super | admin | support | president | VP | secretary | treasurer | board-member | officer | staff | member | user |
+| Action | Auth | super | support | analyst | president | VP | secretary | treasurer | board-member | officer | staff | member | user |
 |--------|------|-------|-------|---------|-----------|----|-----------|-----------|--------------|---------|----|--------|------|
 | Join channel | GA | Y | Y | Y | Y | Y | Y | Y | Y | Y | Y | Y | Y |
 | Send message | GA | Y | Y | Y | Y | Y | Y | Y | Y | Y | Y | Y | Y |
@@ -298,11 +298,11 @@ Listed in descending privilege order (index 0 = highest):
 
 ### 3.22 Professional Feed Module (M13)
 
-| Action | Auth | super | admin | support | president | VP | secretary | treasurer | board-member | officer | staff | member | user |
+| Action | Auth | super | support | analyst | president | VP | secretary | treasurer | board-member | officer | staff | member | user |
 |--------|------|-------|-------|---------|-----------|----|-----------|-----------|--------------|---------|----|--------|------|
 | Browse feed | GA | Y | Y | Y | Y | Y | Y | Y | Y | Y | Y | Y | Y |
-| Create post | GA+HG | Y | Y | -- | Y | -- | Y | -- | -- | -- | -- | -- | -- |
-| Moderate (hide/remove) | GA+HG | Y | Y | Y | Y | Y | Y | -- | -- | -- | -- | -- | -- |
+| Create post | GA+HG | Y | -- | -- | Y | -- | Y | -- | -- | -- | -- | -- | -- |
+| Moderate (hide/remove) | GA+HG | Y | Y | -- | Y | Y | Y | -- | -- | -- | -- | -- | -- |
 | Mute/unmute author | GA | Y | Y | Y | Y | Y | Y | Y | Y | Y | Y | Y | Y |
 | View hidden posts | GA+HG | Y | Y | Y | Y | Y | Y | -- | -- | -- | -- | -- | -- |
 
@@ -310,71 +310,72 @@ Listed in descending privilege order (index 0 = highest):
 
 ### 3.23 National Dashboard Module (M14)
 
-| Action | Auth | super | admin | support | president | VP | secretary | treasurer | board-member | officer | staff | member | user |
+| Action | Auth | super | support | analyst | president | VP | secretary | treasurer | board-member | officer | staff | member | user |
 |--------|------|-------|-------|---------|-----------|----|-----------|-----------|--------------|---------|----|--------|------|
 | View association health | GA+HG | Y | Y | Y | Y | -- | -- | -- | -- | -- | -- | -- | -- |
 | Chapter drill-down | GA+HG | Y | Y | Y | Y | -- | -- | -- | -- | -- | -- | -- | -- |
 | Export data | GA+HG | Y | Y | Y | Y | -- | -- | -- | -- | -- | -- | -- | -- |
-| Configure dashboard access | PA | Y | Y | -- | -- | -- | -- | -- | -- | -- | -- | -- | -- |
-| View all associations | PA | Y | Y | -- | -- | -- | -- | -- | -- | -- | -- | -- | -- |
+| Configure dashboard access | PA | Y | -- | -- | -- | -- | -- | -- | -- | -- | -- | -- | -- |
+| View all associations | PA | Y | -- | -- | -- | -- | -- | -- | -- | -- | -- | -- | -- |
+<!-- TODO(C-1): `View all associations` and `Configure dashboard access` may need analyst=`Y` if read-only national analytics is in scope; mirrored support=`--` conservatively. -->
 
 ### 3.24 Job Board Module (M15)
 
-| Action | Auth | super | admin | support | president | VP | secretary | treasurer | board-member | officer | staff | member | user |
+| Action | Auth | super | support | analyst | president | VP | secretary | treasurer | board-member | officer | staff | member | user |
 |--------|------|-------|-------|---------|-----------|----|-----------|-----------|--------------|---------|----|--------|------|
 | Browse listings | GA | Y | Y | Y | Y | Y | Y | Y | Y | Y | Y | Y | Y |
-| Post job listing | GA+HG | Y | Y | Y | Y | Y | Y | -- | -- | -- | -- | -- | -- |
+| Post job listing | GA+HG | Y | Y | -- | Y | Y | Y | -- | -- | -- | -- | -- | -- |
 | Apply to job | GA | Y | Y | Y | Y | Y | Y | Y | Y | Y | Y | Y | -- |
 | Manage bookmarks/alerts | GA | Y | Y | Y | Y | Y | Y | Y | Y | Y | Y | Y | -- |
-| Approve external employers | PA | Y | Y | -- | -- | -- | -- | -- | -- | -- | -- | -- | -- |
+| Approve external employers | PA | Y | -- | -- | -- | -- | -- | -- | -- | -- | -- | -- | -- |
 
 > **External Actor — Verified Employer:** M15 `verified employer` is a domain entity status (public registration → platform admin approval), not an org role in ROLE_HIERARCHY. Auth uses `employer.verificationStatus` check, not `hasMinimumRole()`. Employers can only manage own job listings.
 
 ### 3.25 Advertising Module (M16)
 
-| Action | Auth | super | admin | support | president | VP | secretary | treasurer | board-member | officer | staff | member | user |
+| Action | Auth | super | support | analyst | president | VP | secretary | treasurer | board-member | officer | staff | member | user |
 |--------|------|-------|-------|---------|-----------|----|-----------|-----------|--------------|---------|----|--------|------|
 | View ads | GA | Y | Y | Y | Y | Y | Y | Y | Y | Y | Y | Y | Y |
-| Create campaign | PA | Y | Y | -- | -- | -- | -- | -- | -- | -- | -- | -- | -- |
-| Approve creative | PA | Y | Y | -- | -- | -- | -- | -- | -- | -- | -- | -- | -- |
-| View ad dashboard | PA | Y | Y | -- | -- | -- | -- | -- | -- | -- | -- | -- | -- |
+| Create campaign | PA | Y | -- | -- | -- | -- | -- | -- | -- | -- | -- | -- | -- |
+| Approve creative | PA | Y | -- | -- | -- | -- | -- | -- | -- | -- | -- | -- | -- |
+| View ad dashboard | PA | Y | -- | R | -- | -- | -- | -- | -- | -- | -- | -- | -- |
 | Report ad | GA | Y | Y | Y | Y | Y | Y | Y | Y | Y | Y | Y | Y |
 | Opt out of targeting | GA | Y | Y | Y | Y | Y | Y | Y | Y | Y | Y | Y | Y |
 
 ### 3.26 Marketplace Module (M17)
 
-| Action | Auth | super | admin | support | president | VP | secretary | treasurer | board-member | officer | staff | member | user |
+| Action | Auth | super | support | analyst | president | VP | secretary | treasurer | board-member | officer | staff | member | user |
 |--------|------|-------|-------|---------|-----------|----|-----------|-----------|--------------|---------|----|--------|------|
 | Browse marketplace | GA | Y | Y | Y | Y | Y | Y | Y | Y | Y | Y | Y | Y |
 | Place order | GA | Y | Y | Y | Y | Y | Y | Y | Y | Y | Y | Y | -- |
 | Register as vendor | GA | Y | Y | Y | Y | Y | Y | Y | Y | Y | Y | Y | Y |
-| Manage vendor listings | GA | Y | Y | Y | -- | -- | -- | -- | -- | -- | -- | -- | -- |
-| Verify/reject vendor | PA | Y | Y | -- | -- | -- | -- | -- | -- | -- | -- | -- | -- |
+| Manage vendor listings | GA | Y | Y | R | -- | -- | -- | -- | -- | -- | -- | -- | -- |
+| Verify/reject vendor | PA | Y | -- | -- | -- | -- | -- | -- | -- | -- | -- | -- | -- |
 
 > **External Actor — Verified Vendor:** M17 `verified vendor` is a domain entity status (public registration → platform admin verification), not an org role in ROLE_HIERARCHY. Auth uses `vendor.verificationStatus` check, not `hasMinimumRole()`. Vendors can only manage own listings and orders.
 
 ### 3.27 Surveys & Polls Module (M18)
 
-| Action | Auth | super | admin | support | president | VP | secretary | treasurer | board-member | officer | staff | member | user |
+| Action | Auth | super | support | analyst | president | VP | secretary | treasurer | board-member | officer | staff | member | user |
 |--------|------|-------|-------|---------|-----------|----|-----------|-----------|--------------|---------|----|--------|------|
-| Create survey | GA+HG | Y | Y | -- | Y | Y | Y | -- | -- | -- | -- | -- | -- |
+| Create survey | GA+HG | Y | -- | -- | Y | Y | Y | -- | -- | -- | -- | -- | -- |
 | Respond to survey | GA | Y | Y | Y | Y | Y | Y | Y | Y | Y | Y | Y | -- |
 | View survey results | GA+HG | Y | Y | Y | Y | Y | Y | -- | -- | -- | -- | -- | -- |
-| Create quick poll | GA+HG | Y | Y | Y | Y | Y | Y | -- | -- | -- | -- | -- | -- |
+| Create quick poll | GA+HG | Y | Y | -- | Y | Y | Y | -- | -- | -- | -- | -- | -- |
 | Vote on poll | GA | Y | Y | Y | Y | Y | Y | Y | Y | Y | Y | Y | -- |
 
 ### 3.28 Committee Management Module (M19)
 
 **Org-Level Roles:**
 
-| Action | Auth | super | admin | support | president | VP | secretary | treasurer | board-member | officer | staff | member | user |
+| Action | Auth | super | support | analyst | president | VP | secretary | treasurer | board-member | officer | staff | member | user |
 |--------|------|-------|-------|---------|-----------|----|-----------|-----------|--------------|---------|----|--------|------|
-| Create committee | GA+HG | Y | Y | -- | Y | Y | -- | -- | -- | -- | -- | -- | -- |
+| Create committee | GA+HG | Y | -- | -- | Y | Y | -- | -- | -- | -- | -- | -- | -- |
 | View committee (active) | GA | Y | Y | Y | Y | Y | Y | Y | Y | Y | Y | Y | -- |
 | View committee (dissolved) | GA+HG | Y | Y | Y | Y | Y | Y | -- | -- | -- | -- | -- | -- |
-| Manage members | GA+HG | Y | Y | Y | Y | Y | -- | -- | -- | -- | -- | -- | -- |
-| Manage tasks | GA+HG | Y | Y | Y | Y | Y | Y | -- | Y | Y | -- | -- | -- |
-| Dissolve committee | GA+HG | Y | Y | Y | Y | -- | -- | -- | -- | -- | -- | -- | -- |
+| Manage members | GA+HG | Y | Y | -- | Y | Y | -- | -- | -- | -- | -- | -- | -- |
+| Manage tasks | GA+HG | Y | Y | -- | Y | Y | Y | -- | Y | Y | -- | -- | -- |
+| Dissolve committee | GA+HG | Y | Y | -- | Y | -- | -- | -- | -- | -- | -- | -- | -- |
 
 **Committee-Scoped Roles** (stored in `committee_member.role`, checked via custom `requireCommitteeRole()` — not `hasMinimumRole()`):
 
