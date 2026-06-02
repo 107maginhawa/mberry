@@ -8,7 +8,8 @@ import {
   listDuesPaymentsQueryKey,
   listDuesInvoicesQueryKey,
 } from '@monobase/sdk-ts/generated/react-query'
-import { CSRF_HEADER, readCsrfCookie } from '@monobase/sdk-ts/csrf'
+import { useFileUpload, FileTooLargeError, S3UploadError } from '@monobase/sdk-ts/flows'
+import { SdkError } from '@monobase/sdk-ts/client'
 import { Button, Input, Label } from '@monobase/ui'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@monobase/ui'
 import { Upload, CheckCircle } from 'lucide-react'
@@ -48,7 +49,7 @@ export function ProofUploadForm({
 }: ProofUploadFormProps) {
   const queryClient = useQueryClient()
   const [file, setFile] = useState<File | null>(null)
-  const [uploading, setUploading] = useState(false)
+  const { upload, isUploading } = useFileUpload({ maxBytes: 10 * 1024 * 1024 })
 
   const {
     control,
@@ -94,56 +95,51 @@ export function ProofUploadForm({
       return
     }
 
+    // Step 1: Upload file via the SDK's presigned-URL flow (useFileUpload):
+    // POST upload init -> S3 PUT -> POST complete. Returns a stable file id.
+    let storageKey: string
     try {
-      setUploading(true)
-      // Step 1: Upload file to storage via multipart
-      const formData = new FormData()
-      formData.append('file', file)
-      formData.append('category', 'dues-proof')
-
-      const csrfToken = readCsrfCookie()
-      const uploadResponse = await fetch('/api/storage/files', {
-        method: 'POST',
-        credentials: 'include',
-        body: formData,
-        headers: csrfToken ? { [CSRF_HEADER]: csrfToken } : undefined,
-        // No Content-Type header — browser sets multipart boundary
-      })
-      if (!uploadResponse.ok) throw new Error('File upload failed')
-      const uploadRes = await uploadResponse.json()
-      const storageKey = uploadRes.key ?? uploadRes.data?.key
-
-      if (!storageKey) throw new Error('Upload failed — no storage key returned')
-
-      // Step 2: Submit proof
-      submitMutation.mutate({
-        body: {
-          invoiceId,
-          amount: BigInt(invoiceAmount),
-          currency,
-          paymentMethod: data.paymentMethod as 'online' | 'cash' | 'check' | 'bankTransfer' | 'gcash' | 'other',
-          referenceNumber: data.referenceNumber || undefined,
-          proofStorageKey: storageKey,
-          proofFileName: file.name,
-          proofMimeType: file.type,
-        },
-      }, {
-        onSuccess: handleSubmitSuccess,
-        onError: (err: unknown) => {
-          const msg = (err as { body?: { error?: string }; message?: string })?.body?.error
-            ?? (err as { message?: string })?.message
-            ?? 'Submission failed'
-          toast.error(msg)
-        },
-      })
+      const result = await upload(file)
+      storageKey = result.fileId
     } catch (err: unknown) {
-      toast.error((err as { message?: string })?.message ?? 'Upload failed')
-    } finally {
-      setUploading(false)
+      let msg = 'We couldn’t upload your proof file. Please try again.'
+      if (err instanceof FileTooLargeError) {
+        msg = 'File too large. Maximum 10MB.'
+      } else if (err instanceof S3UploadError) {
+        msg = 'Upload to storage failed. Check your connection and try again.'
+      } else if (err instanceof SdkError) {
+        msg = 'Storage rejected the upload. Please try again or use a different file.'
+      } else if (err instanceof Error && err.message) {
+        msg = err.message
+      }
+      toast.error(msg)
+      return
     }
+
+    // Step 2: Submit proof
+    submitMutation.mutate({
+      body: {
+        invoiceId,
+        amount: BigInt(invoiceAmount),
+        currency,
+        paymentMethod: data.paymentMethod as 'online' | 'cash' | 'check' | 'bankTransfer' | 'gcash' | 'other',
+        referenceNumber: data.referenceNumber || undefined,
+        proofStorageKey: storageKey,
+        proofFileName: file.name,
+        proofMimeType: file.type,
+      },
+    }, {
+      onSuccess: handleSubmitSuccess,
+      onError: (err: unknown) => {
+        const msg = (err as { body?: { error?: string }; message?: string })?.body?.error
+          ?? (err as { message?: string })?.message
+          ?? 'Submission failed'
+        toast.error(msg)
+      },
+    })
   }
 
-  const busy = uploading || submitMutation.isPending
+  const busy = isUploading || submitMutation.isPending
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
