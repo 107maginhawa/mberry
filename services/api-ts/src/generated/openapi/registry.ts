@@ -194,6 +194,7 @@ import { getDigitalCredential } from '../../handlers/association:member/getDigit
 import { updateDigitalCredential } from '../../handlers/association:member/updateDigitalCredential';
 import { deleteDigitalCredential } from '../../handlers/association:member/deleteDigitalCredential';
 import { revokeDigitalCredential } from '../../handlers/association:member/revokeDigitalCredential';
+import { adjustCreditEntry } from '../../handlers/association:member/adjustCreditEntry';
 import { awardManualCredit } from '../../handlers/association:member/awardManualCredit';
 import { voidCreditEntry } from '../../handlers/association:member/voidCreditEntry';
 import { createDirectoryProfile } from '../../handlers/association:member/createDirectoryProfile';
@@ -658,6 +659,7 @@ export const registry = {
   updateDigitalCredential,
   deleteDigitalCredential,
   revokeDigitalCredential,
+  adjustCreditEntry,
   awardManualCredit,
   voidCreditEntry,
   createDirectoryProfile,

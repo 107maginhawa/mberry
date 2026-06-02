@@ -544,6 +544,28 @@ model EventCreditVoidResponse {
   data: EventCreditVoidResult;
 }
 
+@doc("Request to record an officer credit adjustment (award or deduction). Mandatory reason — M10-R4 / AC-M10-005.")
+model AdjustCreditRequest {
+  @doc("Person whose credit balance is being adjusted")
+  personId: string;
+
+  @doc("Credit amount (positive to award, negative to deduct). Cannot be zero.")
+  creditAmount: int32;
+
+  @doc("Reason for the adjustment (minimum 10 characters, recorded in audit trail)")
+  @minLength(10)
+  reason: string;
+
+  @doc("Optional idempotency key to prevent duplicate adjustments")
+  idempotencyKey?: string;
+}
+
+@doc("Response from an officer credit adjustment")
+model AdjustCreditResponse {
+  @doc("The created adjustment credit entry")
+  data: Record<unknown>;
+}
+
 // ---------------------------------------------------------------------------
 // My Credits Models
 // ---------------------------------------------------------------------------
@@ -1448,6 +1470,25 @@ namespace Association.Operations.Training {
     awardManualCredit(
       @body body: ManualCreditAwardRequest
     ): ApiCreatedResponse<ManualCreditAwardResponse>
+      | ApiBadRequestResponse
+      | ApiUnauthorizedResponse
+      | ApiForbiddenResponse
+      | ApiConflictResponse;
+  }
+
+  /**
+   * Officer-level credit adjustment (award or deduction) with mandatory reason — AC-M10-005.
+   * Route: /association/member/credits/adjust
+   */
+  @useAuth(bearerAuth)
+  interface CreditAdjustmentManagement {
+    @doc("Record an officer credit adjustment (award or deduction) with mandatory reason. Officers only.")
+    @operationId("adjustCreditEntry")
+    @post
+    @extension("x-security-required-roles", #["association:admin", "association:staff"])
+    adjustCreditEntry(
+      @body body: AdjustCreditRequest
+    ): ApiCreatedResponse<AdjustCreditResponse>
       | ApiBadRequestResponse
       | ApiUnauthorizedResponse
       | ApiForbiddenResponse

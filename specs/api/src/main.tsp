@@ -569,6 +569,14 @@ namespace MonobaseAPI {
   interface AssocManualCreditManagement extends Association.Operations.Training.ManualCreditManagement {}
 
   // =========================================================================
+  // Association Domain — Credit Adjustment (officer award/deduct with reason)
+  // =========================================================================
+
+  @tag("Association:Member")
+  @route("/association/member/credits/adjust")
+  interface AssocCreditAdjustmentManagement extends Association.Operations.Training.CreditAdjustmentManagement {}
+
+  // =========================================================================
   // Association Domain — Event Credit Void (bulk revoke)
   // =========================================================================
 

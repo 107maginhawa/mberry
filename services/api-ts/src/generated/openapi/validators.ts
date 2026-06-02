@@ -355,6 +355,17 @@ export const AddressUpdateSchema = z.object({
 }).optional()
 });
 
+export const AdjustCreditRequestSchema = z.object({
+  personId: z.string(),
+  creditAmount: z.number().int(),
+  reason: z.string().min(10),
+  idempotencyKey: z.string().optional()
+});
+
+export const AdjustCreditResponseSchema = z.object({
+  data: z.record(z.string(), z.unknown())
+});
+
 export const AdminRoleResponseSchema = z.object({
   role: z.string(),
   email: z.string(),
@@ -12012,6 +12023,11 @@ export const RevokeDigitalCredentialBody = RevokeCredentialRequestSchema;
 export type RevokeDigitalCredentialBody = z.infer<typeof RevokeDigitalCredentialBody>;
 
 export const RevokeDigitalCredentialResponse = DigitalCredentialSchema;
+
+export const AdjustCreditEntryBody = AdjustCreditRequestSchema;
+export type AdjustCreditEntryBody = z.infer<typeof AdjustCreditEntryBody>;
+
+export const AdjustCreditEntryResponse = AdjustCreditResponseSchema;
 
 export const AwardManualCreditBody = ManualCreditAwardRequestSchema;
 export type AwardManualCreditBody = z.infer<typeof AwardManualCreditBody>;
