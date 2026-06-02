@@ -5909,6 +5909,23 @@ export const EventCreateRequestSchema = z.object({
   visibility: z.enum(["internal", "network"]).optional()
 });
 
+export const EventCreditVoidRequestSchema = z.object({
+  eventId: z.string().optional(),
+  activityName: z.string().min(1).max(300),
+  personIds: z.array(z.string()),
+  reason: z.string().min(10)
+});
+
+export const EventCreditVoidResponseSchema = z.object({
+  data: z.object({
+  voidedCount: z.number().int()
+})
+});
+
+export const EventCreditVoidResultSchema = z.object({
+  voidedCount: z.number().int()
+});
+
 export const EventListResponseSchema = z.object({
   data: z.array(EventSchema),
   pagination: z.object({
@@ -12000,6 +12017,11 @@ export const AwardManualCreditBody = ManualCreditAwardRequestSchema;
 export type AwardManualCreditBody = z.infer<typeof AwardManualCreditBody>;
 
 export const AwardManualCreditResponse = ManualCreditAwardResponseSchema;
+
+export const VoidCreditEntryBody = EventCreditVoidRequestSchema;
+export type VoidCreditEntryBody = z.infer<typeof VoidCreditEntryBody>;
+
+export const VoidCreditEntryResponse = EventCreditVoidResponseSchema;
 
 export const CreateDirectoryProfileBody = DirectoryProfileCreateRequestSchema;
 export type CreateDirectoryProfileBody = z.infer<typeof CreateDirectoryProfileBody>;

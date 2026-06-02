@@ -19335,6 +19335,53 @@ export type EventCreateRequest = {
 };
 
 /**
+ * Request to void all active manual CPD credits awarded for an event/activity to a set of members
+ */
+export type EventCreditVoidRequest = {
+    /**
+     * Event ID the credits were awarded for (audit context)
+     */
+    eventId?: string;
+    /**
+     * Activity name used when the credits were awarded
+     */
+    activityName: string;
+    /**
+     * Person IDs whose credits should be voided
+     */
+    personIds: Array<string>;
+    /**
+     * Reason for voiding the credits (minimum 10 characters)
+     */
+    reason: string;
+};
+
+/**
+ * Response wrapping the void-event credit result
+ */
+export type EventCreditVoidResponse = {
+    /**
+     * Void result payload
+     */
+    data: {
+        /**
+         * Number of credit entries voided
+         */
+        voidedCount: number;
+    };
+};
+
+/**
+ * Result payload of a void-event credit operation
+ */
+export type EventCreditVoidResult = {
+    /**
+     * Number of credit entries voided
+     */
+    voidedCount: number;
+};
+
+/**
  * Offset-based paginated response with page navigation
  */
 export type EventListResponse = {
@@ -41952,6 +41999,43 @@ export type AwardManualCreditResponses = {
 };
 
 export type AwardManualCreditResponse = AwardManualCreditResponses[keyof AwardManualCreditResponses];
+
+export type VoidCreditEntryData = {
+    body: EventCreditVoidRequest;
+    path?: never;
+    query?: never;
+    url: '/association/member/credits/void-event';
+};
+
+export type VoidCreditEntryErrors = {
+    /**
+     * Validation error response
+     */
+    400: ValidationError;
+    /**
+     * Unauthorized access response
+     */
+    401: AuthenticationError;
+    /**
+     * Forbidden access response
+     */
+    403: AuthorizationError;
+    /**
+     * Resource not found response
+     */
+    404: NotFoundError;
+};
+
+export type VoidCreditEntryError = VoidCreditEntryErrors[keyof VoidCreditEntryErrors];
+
+export type VoidCreditEntryResponses = {
+    /**
+     * Success response with data
+     */
+    200: EventCreditVoidResponse;
+};
+
+export type VoidCreditEntryResponse = VoidCreditEntryResponses[keyof VoidCreditEntryResponses];
 
 export type ListDirectoryProfilesData = {
     body?: never;

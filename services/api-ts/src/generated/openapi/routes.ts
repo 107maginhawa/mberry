@@ -927,6 +927,13 @@ export function registerRoutes(app: Hono<{ Variables: Variables }>) {
     registry.awardManualCredit as unknown as Handler
   );
 
+  // voidCreditEntry
+  app.post('/association/member/credits/void-event',
+    authMiddleware({ roles: ["association:admin", "association:staff"] }),
+    zValidator('json', validators.VoidCreditEntryBody, validationErrorHandler),
+    registry.voidCreditEntry as unknown as Handler
+  );
+
   // createDirectoryProfile
   app.post('/association/member/directory/profiles',
     authMiddleware({ roles: ["association:member:owner", "association:admin"] }),

@@ -514,6 +514,36 @@ model ManualCreditAwardResponse {
   warning?: string;
 }
 
+@doc("Request to void all active manual CPD credits awarded for an event/activity to a set of members")
+model EventCreditVoidRequest {
+  @doc("Event ID the credits were awarded for (audit context)")
+  eventId?: string;
+
+  @doc("Activity name used when the credits were awarded")
+  @minLength(1)
+  @maxLength(300)
+  activityName: string;
+
+  @doc("Person IDs whose credits should be voided")
+  personIds: string[];
+
+  @doc("Reason for voiding the credits (minimum 10 characters)")
+  @minLength(10)
+  reason: string;
+}
+
+@doc("Result payload of a void-event credit operation")
+model EventCreditVoidResult {
+  @doc("Number of credit entries voided")
+  voidedCount: int32;
+}
+
+@doc("Response wrapping the void-event credit result")
+model EventCreditVoidResponse {
+  @doc("Void result payload")
+  data: EventCreditVoidResult;
+}
+
 // ---------------------------------------------------------------------------
 // My Credits Models
 // ---------------------------------------------------------------------------
@@ -1422,6 +1452,25 @@ namespace Association.Operations.Training {
       | ApiUnauthorizedResponse
       | ApiForbiddenResponse
       | ApiConflictResponse;
+  }
+
+  /**
+   * Officer-level bulk void of CPD credits awarded for an event.
+   * Route: /association/member/credits/void-event
+   */
+  @useAuth(bearerAuth)
+  interface EventCreditVoidManagement {
+    @doc("Void all active manual CPD credits awarded for an event/activity to the given members. Officers only.")
+    @operationId("voidCreditEntry")
+    @post
+    @extension("x-security-required-roles", #["association:admin", "association:staff"])
+    voidCreditEntry(
+      @body body: EventCreditVoidRequest
+    ): ApiOkResponse<EventCreditVoidResponse>
+      | ApiBadRequestResponse
+      | ApiUnauthorizedResponse
+      | ApiForbiddenResponse
+      | ApiNotFoundResponse;
   }
 
   /**

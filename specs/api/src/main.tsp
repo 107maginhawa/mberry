@@ -569,6 +569,14 @@ namespace MonobaseAPI {
   interface AssocManualCreditManagement extends Association.Operations.Training.ManualCreditManagement {}
 
   // =========================================================================
+  // Association Domain — Event Credit Void (bulk revoke)
+  // =========================================================================
+
+  @tag("Association:Member")
+  @route("/association/member/credits/void-event")
+  interface AssocEventCreditVoidManagement extends Association.Operations.Training.EventCreditVoidManagement {}
+
+  // =========================================================================
   // Association Domain — My Credits (member-facing)
   // =========================================================================
 
