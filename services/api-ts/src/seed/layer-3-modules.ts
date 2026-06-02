@@ -66,7 +66,7 @@ export async function seedElections(db: ReturnType<typeof drizzle>, orgId: strin
   const electionData = [
     { title: 'PDA Metro Manila Officers Election 2025', status: 'published', nominationsOpenAt: '2025-01-01', nominationsCloseAt: '2025-01-15', votingOpenAt: '2025-01-20', votingCloseAt: '2025-01-25' },
     { title: 'PDA Metro Manila Officers Election 2026', status: 'draft', nominationsOpenAt: '2026-07-01', nominationsCloseAt: '2026-07-15', votingOpenAt: '2026-07-20', votingCloseAt: '2026-07-25' },
-    // votingOpen election — enables BR-42 vote integrity testing
+    // votingOpen election — enables BR-67 vote integrity testing
     { title: 'PDA Metro Manila Mid-Year Election 2026', status: 'votingOpen', nominationsOpenAt: dateStr(daysAgo(30)), nominationsCloseAt: dateStr(daysAgo(7)), votingOpenAt: dateStr(daysAgo(3)), votingCloseAt: dateStr(daysFromNow(14)) },
   ];
 

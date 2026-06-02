@@ -1,7 +1,15 @@
 # Intent Traceability Matrix
 
 **Generated:** 2026-05-20
+**Last Cross-Checked:** 2026-05-31 (rev-4 trace run — see `docs/trace/TRACE_REPORT.md`)
 **Scope:** All traceable IDs across docs/product/ specs, handler source, and test files
+
+> **Matrix staleness note (2026-05-31):** This matrix was authored at 51 BRs / 72 ACs / 19 modules.
+> Authoritative current totals per `docs/trace/TRACE_REPORT.md` rev 4 (HEAD `bf2e6dca`):
+> **49 BRs** (WORKFLOW_MAP §4 normalized) / **116 ACs** / **22 modules** (m01..m22).
+> Modules **m20-booking, m21-billing, m22-email** are NOT in this matrix and have **zero spec-ID anchors** (ZA-01..03, P1).
+> ~~BR-42 is **overloaded** (M09 training-type-restriction vs M12 vote-integrity — TR-OVERLOAD-BR-42, P1).~~ **RESOLVED 2026-06-02:** BR-42 now exclusively M09 training-type (canonical per WORKFLOW_MAP §4); M12 vote-integrity rule renamed to **BR-67** (skipping BR-52..BR-66 reserved for the m20-booking / m21-billing / m22-email spec-ID blocks). See TR-P1-004.
+> Per-BR rows below remain mostly accurate for M01–M19 BR-01..BR-49; refresh planned alongside m20–m22 spec-ID minting.
 
 ## Summary
 
@@ -67,7 +75,8 @@
 | BR-39 | MASTER_PRD, WORKFLOW_MAP | NONE | `committees.test.ts`, `br-39.committee-dissolution.test.ts` | WF-108 | PARTIAL (test only) |
 | BR-40 | MASTER_PRD, WORKFLOW_MAP | NONE | `surveys-polls.test.ts`, `br-40.survey-anonymity.test.ts` | WF-101, WF-102 | PARTIAL (test only) |
 | BR-41 | br-registry.json (Wave 4) | `updateElectionStatus.ts` | `updateElectionStatus.test.ts`, `elections-flow.hurl`, `elections.spec.ts` | -- | COMPLETE (no WF link) |
-| BR-42 | br-registry.json (Wave 4) | `castVote.ts` | `castVote.test.ts`, `elections-flow.hurl` | -- | COMPLETE (no WF link) |
+| BR-42 | MASTER_PRD, WORKFLOW_MAP, br-registry.json (split 2026-06-02) | `createTraining.ts` (VALID_TRAINING_TYPES) | `createTraining.test.ts` | WF-058 | COMPLETE (M09 training-type — canonical; previously overloaded with M12, M12 use moved to BR-67 per TR-P1-004) |
+| BR-67 | br-registry.json (Wave 4; minted 2026-06-02 from BR-42 split) | `castVote.ts` | `castVote.test.ts`, `elections-flow.hurl`, `election-integrity.spec.ts` | -- | COMPLETE (no WF link; BR-52..BR-66 reserved for m20-booking / m21-billing / m22-email blocks) |
 | BR-43 | br-registry.json (Wave 4) | `castVote.ts` | `castVote.test.ts`, `elections.spec.ts` | -- | COMPLETE (no WF link) |
 | BR-44 | br-registry.json (Wave 4) | `certifyElection.ts` | `certifyElection.test.ts` | -- | COMPLETE (no WF link) |
 | BR-45 | br-registry.json (Wave 4) | `createMyCreditEntry.ts` | `createMyCreditEntry.test.ts` | -- | COMPLETE (no WF link) |
@@ -80,7 +89,7 @@
 
 ### BR Summary
 
-- **COMPLETE** (spec + code + test): BR-01, BR-02, BR-03, BR-05, BR-06, BR-07, BR-08, BR-09, BR-11, BR-12, BR-13, BR-16, BR-17, BR-19, BR-20, BR-21, BR-22, BR-23, BR-25, BR-27, BR-28, BR-29, BR-30, BR-32, BR-33, BR-34, BR-37, BR-38, BR-41, BR-42, BR-43, BR-44, BR-45, BR-46, BR-48, BR-50 = **36 (70.6%)**
+- **COMPLETE** (spec + code + test): BR-01, BR-02, BR-03, BR-05, BR-06, BR-07, BR-08, BR-09, BR-11, BR-12, BR-13, BR-16, BR-17, BR-19, BR-20, BR-21, BR-22, BR-23, BR-25, BR-27, BR-28, BR-29, BR-30, BR-32, BR-33, BR-34, BR-37, BR-38, BR-41, BR-42, BR-43, BR-44, BR-45, BR-46, BR-48, BR-50, BR-67 = **37 (post BR-42 split, 2026-06-02)**
 - **PARTIAL** (test-only or missing backend test): BR-10, BR-14, BR-15, BR-18, BR-24, BR-26, BR-31, BR-35, BR-36, BR-39, BR-40, BR-47 = **12 (23.5%)**
 - **ORPHAN** (spec only, no code or test): BR-04 = **1 (2.0%)**
 - **GAP** (no test at all): BR-49, BR-51 = **2 (3.9%)**

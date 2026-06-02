@@ -1,6 +1,6 @@
 # Business Rules — Memberry Healthcare Association Management Platform
 
-This document is the definitive reference for all platform business rules. It covers Phase 1 (BR-01 through BR-32), Phase 2 (BR-33 through BR-37), and Phase 3 (BR-38 through BR-40). Every rule here is normative: the system must behave exactly as described. Rules are used by the tech team for implementation, by QA for validation, and by the product team as the authoritative source during story creation. When a rule conflicts with a story or specification, this document takes precedence unless a change has been formally approved and this document updated.
+This document is the definitive reference for all platform business rules. It covers Phase 1 (BR-01 through BR-32, plus the M09 training rules BR-41/BR-42/BR-43), Phase 2 (BR-33 through BR-37, plus the M12 election rules BR-44/BR-50/BR-67), and Phase 3 (BR-38 through BR-40). Additional Wave-4-discovery rules (BR-41..BR-51) are cataloged in `br-registry.json`; BR-52..BR-66 are reserved per the m20-booking / m21-billing / m22-email MODULE_SPECs (allocated to resolve TR-P1-001..003 anchor gaps). Authoritative per-module definitions live in each MODULE_SPEC §5; this file carries the long-form normative description for rules where prose disambiguation matters (e.g., BR-42 and BR-67 post-split). Every rule here is normative: the system must behave exactly as described. Rules are used by the tech team for implementation, by QA for validation, and by the product team as the authoritative source during story creation. When a rule conflicts with a story or specification, this document takes precedence unless a change has been formally approved and this document updated.
 
 ---
 
@@ -377,3 +377,21 @@ This document is the definitive reference for all platform business rules. It co
 - **Module(s):** M18
 - **Description:** For anonymous surveys, the platform does not store any mapping between a response and the responding member. Platform admins cannot reconstruct which member submitted which response — the architecture must make this technically impossible, not merely policy-prohibited. Only the response content and its submission timestamp are stored. For identified surveys, the member-response mapping is stored and visible to association officers only; platform admins cannot deanonymize any survey response regardless of survey type.
 - **Edge cases:** Anonymous surveys with very small response pools (below 10 responses by default) display a warning to the survey creator that anonymity may be compromised through inference, even though the platform itself does not expose identity. Free-text fields in anonymous surveys display a respondent-facing warning: "Avoid including personal details in open-ended answers to preserve your anonymity."
+
+---
+
+### BR-42: Training Type Restricted to Platform-Defined Types
+
+- **Phase:** 1
+- **Module(s):** M09
+- **Description:** Training type is restricted to a fixed enum of five platform-defined types (e.g., webinar, in-person, hybrid, self-paced, workshop). Associations cannot define custom training types — the catalog is platform-managed to keep reporting, credit-rules, and CE-board exports consistent across orgs. Enforced at the schema/enum layer and validated in `createTraining.ts` via the `VALID_TRAINING_TYPES` constant. Implements M9-R1; canonical per WORKFLOW_MAP §4. **Provenance:** previously this BR-ID was reused for the M12 vote-integrity rule. Per TR-P1-004 the M12 use was renamed to BR-67, leaving BR-42 exclusively for this M09 training-type rule (the canonical meaning per WORKFLOW_MAP §4).
+- **Edge cases:** A request that supplies a non-enum training type is rejected with a 422 validation error before the handler runs. Adding a new training type requires a platform-level migration and is not an org-admin operation.
+
+---
+
+### BR-67: One Vote Per Person Per Position
+
+- **Phase:** 2
+- **Module(s):** M12
+- **Description:** During an open election, each eligible member may cast exactly one vote per position per election. The vote-cast handler enforces this via a uniqueness check on `(electionId, positionId, voterId)`; duplicate submissions are rejected with a `ConflictError`. Implements M12-R1. **Provenance:** minted on 2026-06-02 to resolve TR-P1-004 (BR-42 overload). The previous tagging used `BR-42` in tests/seed/registry, which clashed with the canonical M09 BR-42 (training-type restriction) in WORKFLOW_MAP §4. The vote-integrity rule keeps the same semantics, just under the new ID BR-67. (BR-52..BR-66 are reserved for the m20-booking / m21-billing / m22-email spec-ID blocks; this rule jumps to BR-67 to avoid collision.)
+- **Edge cases:** Re-submitting the same ballot is idempotent only when the payload is byte-identical and arrives before the conflict guard reads — in practice all duplicates are rejected. Vote changes during the open window are not supported in v1: members must contact the election officer to invalidate the prior vote, and even that path is gated by `M12-R2` (results immutability once published). Cross-position votes within a single ballot are independent rows and do not trigger the conflict guard against each other.

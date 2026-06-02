@@ -1,5 +1,5 @@
-// Business Rules: [BR-42] [BR-44] [BR-50]
-// BR-42: One vote per person per position — prevents double-voting
+// Business Rules: [BR-67] [BR-44] [BR-50]
+// BR-67: One vote per person per position — prevents double-voting (M12 vote integrity; renamed from BR-42 per TR-P1-004 split, since canonical BR-42 = M09 training-type)
 // BR-44: Election certification effects — winners auto-assigned officer roles
 // BR-50: Election date ordering — nomination_start < voting_start < voting_end
 import { test, expect } from '../helpers/test-fixture'
@@ -7,7 +7,7 @@ import { signInAsOfficer, signInAsMember } from '../helpers/auth'
 
 const ORG_ID = 'ed8e3a96-8126-4341-be42-e6eb7940c562'
 
-test.describe('[BR-42, BR-44, BR-50] Election Integrity', () => {
+test.describe('[BR-67, BR-44, BR-50] Election Integrity', () => {
   test('officer can access election creation form', async ({ page }) => {
     await test.step('sign in as officer', async () => {
       await signInAsOfficer(page)
@@ -81,7 +81,7 @@ test.describe('[BR-42, BR-44, BR-50] Election Integrity', () => {
     expect(hasElections).toBeTruthy()
   })
 
-  test('[BR-42] voting page shows ballot positions', async ({ page }) => {
+  test('[BR-67] voting page shows ballot positions', async ({ page }) => {
     await signInAsMember(page)
 
     // Navigate to elections list first

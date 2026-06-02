@@ -144,6 +144,7 @@ Manage instructor-led and live professional development activities. Covers train
 | Rule ID | Rule | Applies To | Expected Behavior |
 |---------|------|-----------|-------------------|
 | BR-41 | IF training is paid (registrationFee > 0) THEN payment must be confirmed before enrollment | Paid enrollment (WF-062) | Free-enrollment endpoints reject paid trainings with `PAYMENT_REQUIRED` (422). Enrollment for a paid training is only created after M06 payment confirmation. Canonical WORKFLOW_MAP ID for M9-R2. |
+| BR-42 | IF training type provided THEN must be one of 5 platform-defined types (not org-customizable) | Training creation (WF-058) | Enum enforced at schema level + `VALID_TRAINING_TYPES` guard in `createTraining.ts`. Canonical WORKFLOW_MAP ID for M9-R1. Sole owner of BR-42 post TR-P1-004 split (M12 vote-integrity moved to BR-67). |
 | BR-43 | IF training status = completed THEN enrollments are locked (no create, update, or delete) | Completion lock (WF-058, WF-060) | Enroll on a completed training rejected via published-only check; update/delete enrollment rejected with `TRAINING_COMPLETED` (422). Canonical WORKFLOW_MAP ID for M9-R3. |
 | BR-13 | IF attendance confirmed THEN award credits immediately (AUTO type credit entry) | Auto-credit | No delay. Cross-module: M09 -> M10. |
 | BR-11 | IF credit cycle configured THEN start from registration date, not calendar year | Credit computation | Per-association config (enforced in M10) |
