@@ -3,6 +3,7 @@
  * Parses environment variables into a typed configuration object
  */
 
+import { z } from 'zod';
 import type { AuthConfig, VersionedSecret } from '@/types/auth';
 import { DEFAULT_ICE_SERVERS, parseIceServerUrls, type IceServer } from '@/utils/webrtc';
 import type { DatabaseConfig } from './database';
@@ -18,10 +19,10 @@ export interface Config {
     port: number;
     publicUrl?: string;
   };
-  
+
   // Database configuration
   database: DatabaseConfig;
-  
+
   // CORS configuration
   cors: {
     origins: string[];
@@ -30,25 +31,25 @@ export interface Config {
     allowTunneling: boolean;
     strict: boolean;
   };
-  
+
   // Logging configuration
   logging: {
     level: 'debug' | 'info' | 'warn' | 'error';
     pretty: boolean;
   };
-  
+
   // Authentication configuration
   auth: AuthConfig;
-  
+
   // Rate limiting configuration
   rateLimit: {
     enabled: boolean;
     max: number;
   };
-  
+
   // Storage configuration
   storage: StorageConfig;
-  
+
   // Email configuration
   email: EmailConfig;
 
@@ -72,246 +73,341 @@ export interface Config {
   };
 }
 
+// ---------------------------------------------------------------------------
+// Env schema — single validation surface for every env var the API reads.
+// ---------------------------------------------------------------------------
+
+const boolish = (defaultValue: boolean) =>
+  z.preprocess((v) => {
+    if (v === undefined || v === '') return defaultValue;
+    if (typeof v === 'string') return v.toLowerCase() === 'true';
+    return Boolean(v);
+  }, z.boolean());
+
+const intish = (defaultValue: number) =>
+  z.preprocess((v) => {
+    if (v === undefined || v === '') return defaultValue;
+    const n = Number.parseInt(String(v), 10);
+    return Number.isNaN(n) ? defaultValue : n;
+  }, z.number().int());
+
+const csvList = (defaultList: string[]) =>
+  z.preprocess((v) => {
+    if (v === undefined || v === '') return defaultList;
+    return String(v).split(',').map((s) => s.trim()).filter(Boolean);
+  }, z.array(z.string()));
+
+const logLevelSchema = z.preprocess((v) => {
+  const valid = ['debug', 'info', 'warn', 'error'];
+  const lower = String(v ?? '').toLowerCase();
+  return valid.includes(lower) ? lower : 'info';
+}, z.enum(['debug', 'info', 'warn', 'error']));
+
+const envSchema = z.object({
+  NODE_ENV: z.string().default('development'),
+
+  // Server
+  SERVER_HOST: z.string().default('0.0.0.0'),
+  // SERVER_PORT + PORT both optional so we can preserve original precedence:
+  // SERVER_PORT (if valid integer) → PORT (if valid integer) → 7213 default.
+  SERVER_PORT: z.string().optional(),
+  PORT: z.string().optional(),
+  SERVER_PUBLIC_URL: z.string().optional(),
+  PUBLIC_URL: z.string().optional(),
+
+  // Database — optional in schema (defaulted in body) so production check fires
+  // when the var is truly unset rather than silently filling in dev credentials.
+  // Empty string normalized to undefined so the dev default also kicks in.
+  DATABASE_URL: z.preprocess((v) => (v === '' ? undefined : v), z.string().optional()),
+  DB_POOL_MIN: intish(2),
+  DB_POOL_MAX: intish(20),
+  DB_IDLE_TIMEOUT: intish(30000),
+  DB_SSL: boolish(false),
+  DB_LOGGING: boolish(false),
+
+  // CORS
+  CORS_ORIGINS: csvList(['http://localhost:3003', 'http://localhost:3004']),
+  CORS_CREDENTIALS: boolish(true),
+  CORS_ALLOW_LOCAL_NETWORK: boolish(true),
+  CORS_ALLOW_TUNNELING: boolish(true),
+  CORS_STRICT: boolish(false),
+
+  // Logging
+  LOG_LEVEL: logLevelSchema,
+  LOG_PRETTY: boolish(true),
+
+  // Auth
+  AUTH_BASE_URL: z.string().optional(),
+  AUTH_SECRET: z.string().optional(),
+  BETTER_AUTH_SECRETS: z.string().optional(),
+  AUTH_SESSION_EXPIRES_IN: intish(60 * 60 * 24),
+  AUTH_RATE_LIMIT_ENABLED: boolish(true),
+  AUTH_RATE_LIMIT_WINDOW: intish(60),
+  AUTH_RATE_LIMIT_MAX: intish(10),
+  SESSION_LIMIT: intish(5),
+  AUTH_REQUIRE_EMAIL_VERIFICATION: boolish(true),
+  AUTH_ADMIN_EMAILS: csvList([]),
+  AUTH_COOKIE_SAMESITE: z.enum(['strict', 'lax', 'none']).optional(),
+  AUTH_COOKIE_SECURE: z.string().optional(),
+  GOOGLE_CLIENT_ID: z.string().optional(),
+  GOOGLE_CLIENT_SECRET: z.string().optional(),
+
+  // Rate limiting
+  RATE_LIMIT_ENABLED: boolish(true),
+  RATE_LIMIT_MAX: intish(100),
+
+  // Storage
+  STORAGE_PROVIDER: z.enum(['minio', 's3']).default('minio'),
+  STORAGE_ENDPOINT: z.string().default('http://localhost:9000'),
+  STORAGE_PUBLIC_ENDPOINT: z.string().default('http://localhost:9000'),
+  STORAGE_BUCKET: z.string().default('monobase-files'),
+  STORAGE_REGION: z.string().default('us-east-1'),
+  STORAGE_ACCESS_KEY_ID: z.string().default('minioadmin'),
+  STORAGE_SECRET_ACCESS_KEY: z.string().default('minioadmin'),
+  STORAGE_UPLOAD_URL_EXPIRY: intish(300),
+  STORAGE_DOWNLOAD_URL_EXPIRY: intish(900),
+
+  // Email
+  EMAIL_PROVIDER: z.enum(['smtp', 'postmark', 'onesignal']).default('smtp'),
+  EMAIL_FROM_NAME: z.string().default('Monobase'),
+  EMAIL_FROM_EMAIL: z.string().default('noreply@monobase.com'),
+  SMTP_HOST: z.string().default('127.0.0.1'),
+  SMTP_PORT: intish(1025),
+  SMTP_SECURE: boolish(false),
+  SMTP_USER: z.string().default(''),
+  SMTP_PASS: z.string().default(''),
+  POSTMARK_API_KEY: z.string().optional(),
+  POSTMARK_MESSAGE_STREAM: z.string().default('outbound'),
+
+  // OneSignal (shared by email + notifs)
+  ONESIGNAL_APP_ID: z.string().optional(),
+  ONESIGNAL_API_KEY: z.string().optional(),
+
+  // Billing
+  STRIPE_SECRET_KEY: z.string().optional(),
+  STRIPE_WEBHOOK_SECRET: z.string().optional(),
+  STRIPE_URL: z.string().optional(),
+
+  // Internal service token — production-required (random UUID fallback in dev)
+  INTERNAL_SERVICE_TOKEN: z.string().optional(),
+
+  // WebRTC
+  WEBRTC_ICE_SERVERS: z.string().optional(),
+}).superRefine((env, ctx) => {
+  // AUTH_SECRET required in every environment — original behaviour
+  if (!env.AUTH_SECRET) {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      path: ['AUTH_SECRET'],
+      message:
+        'AUTH_SECRET environment variable is required. ' +
+        'Set it in your .env file (e.g. AUTH_SECRET=$(openssl rand -hex 32)).',
+    });
+  }
+  if (env.NODE_ENV === 'production') {
+    if (!env.DATABASE_URL) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ['DATABASE_URL'],
+        message: 'Required in production',
+      });
+    }
+    if (!env.INTERNAL_SERVICE_TOKEN) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ['INTERNAL_SERVICE_TOKEN'],
+        message: 'Required in production',
+      });
+    }
+  }
+});
+
 /**
- * Parse configuration from environment variables
- * Provides sensible defaults for development
+ * Parse configuration from environment variables.
+ * Validates with Zod and fails fast on missing/malformed required vars.
  */
 export function parseConfig(): Config {
-  // Helper function to parse comma-separated lists
-  const parseList = (value: string | undefined, defaultList: string[]): string[] => {
-    if (!value) return defaultList;
-    return value.split(',').map(s => s.trim()).filter(Boolean);
+  const parsed = envSchema.safeParse(process.env);
+  if (!parsed.success) {
+    // Single-line summary listing variable names (in addition order from the
+    // schema/superRefine), with messages in parentheses. Format keeps regex
+    // matchers like /AUTH_SECRET.*DATABASE_URL/ usable in tests.
+    const issues = parsed.error.issues
+      .map((i) => `${i.path.join('.') || '(root)'} (${i.message})`)
+      .join(', ');
+    throw new Error(`Invalid environment configuration: ${issues}`);
+  }
+  const env = parsed.data;
+  const isProduction = env.NODE_ENV === 'production';
+
+  // Port precedence: SERVER_PORT (if valid) → PORT (if valid) → 7213 default.
+  // Matches original `parseIntValue(SERVER_PORT || PORT, 7213)` semantics.
+  const tryInt = (v: string | undefined): number | undefined => {
+    if (!v) return undefined;
+    const n = Number.parseInt(v, 10);
+    return Number.isNaN(n) ? undefined : n;
   };
+  const serverPort = tryInt(env.SERVER_PORT) ?? tryInt(env.PORT) ?? 7213;
+  const publicUrl = env.SERVER_PUBLIC_URL || env.PUBLIC_URL;
 
-  // Helper function to parse boolean values
-  const parseBool = (value: string | undefined, defaultValue: boolean): boolean => {
-    if (value === undefined) return defaultValue;
-    return value.toLowerCase() === 'true';
-  };
-
-  // Helper function to parse integer values
-  const parseIntValue = (value: string | undefined, defaultValue: number): number => {
-    if (!value) return defaultValue;
-    const parsed = Number.parseInt(value, 10);
-    return Number.isNaN(parsed) ? defaultValue : parsed;
-  };
-
-  // Helper function to parse log level
-  const parseLogLevel = (value: string | undefined): Config['logging']['level'] => {
-    const validLevels: Config['logging']['level'][] = ['debug', 'info', 'warn', 'error'];
-    const level = value?.toLowerCase();
-    return validLevels.includes(level as Config['logging']['level']) ? level as Config['logging']['level'] : 'info';
-  };
-
-  // Parse server configuration
-  const serverPort = parseIntValue(process.env['SERVER_PORT'] || process.env['PORT'], 7213);
-  const serverHost = process.env['SERVER_HOST'] || '0.0.0.0';
-  const publicUrl = process.env['SERVER_PUBLIC_URL'] || process.env['PUBLIC_URL'];
-
-  // Production guards: fail fast on missing critical vars
-  const nodeEnv = process.env['NODE_ENV'] || 'development';
-  const isProduction = nodeEnv === 'production';
-  const authSecret = process.env['AUTH_SECRET'];
-
+  // Production warnings for insecure defaults (advisory, not fatal)
   if (isProduction) {
-    const missing: string[] = [];
-    if (!authSecret) missing.push('AUTH_SECRET');
-    if (!process.env['DATABASE_URL']) missing.push('DATABASE_URL');
-    if (!process.env['INTERNAL_SERVICE_TOKEN']) missing.push('INTERNAL_SERVICE_TOKEN');
-
-    if (missing.length > 0) {
-      throw new Error(
-        `Missing required environment variables for production: ${missing.join(', ')}. ` +
-        'Set these before starting the server.'
-      );
-    }
-
-    // Warn on insecure defaults that slipped through
     const warnings: string[] = [];
-    if (process.env['CORS_ORIGINS'] === '*' || !process.env['CORS_ORIGINS']) {
+    if (!process.env['CORS_ORIGINS'] || process.env['CORS_ORIGINS'] === '*') {
       warnings.push('CORS_ORIGINS is wildcard — set explicit origins in production');
     }
-    if (process.env['STORAGE_ACCESS_KEY_ID'] === 'minioadmin' || !process.env['STORAGE_ACCESS_KEY_ID']) {
+    if (!process.env['STORAGE_ACCESS_KEY_ID'] || process.env['STORAGE_ACCESS_KEY_ID'] === 'minioadmin') {
       warnings.push('STORAGE_ACCESS_KEY_ID uses default — set real credentials');
     }
-    if (warnings.length > 0) {
-      // Use stderr directly since logger isn't initialized yet
-      for (const w of warnings) {
-        console.warn(`[config] WARNING: ${w}`);
-      }
-    }
+    for (const w of warnings) console.warn(`[config] WARNING: ${w}`);
   }
 
   // Parse versioned secrets for key rotation: "2:new-key,1:old-key"
   const parseSecrets = (raw: string | undefined): VersionedSecret[] | undefined => {
     if (!raw) return undefined;
-    const entries = raw.split(',').map(s => s.trim()).filter(Boolean);
-    return entries.map(entry => {
+    const entries = raw.split(',').map((s) => s.trim()).filter(Boolean);
+    return entries.map((entry) => {
       const colonIdx = entry.indexOf(':');
       if (colonIdx === -1) {
         throw new Error(
-          `Invalid BETTER_AUTH_SECRETS format: "${entry}". Expected "version:key" (e.g. "2:my-secret-key,1:old-key").`
+          `Invalid BETTER_AUTH_SECRETS format: "${entry}". Expected "version:key" (e.g. "2:my-secret-key,1:old-key").`,
         );
       }
       const version = Number.parseInt(entry.slice(0, colonIdx), 10);
       const value = entry.slice(colonIdx + 1);
       if (Number.isNaN(version) || version < 1 || !value) {
         throw new Error(
-          `Invalid BETTER_AUTH_SECRETS entry: "${entry}". Version must be ≥1 and key must be non-empty.`
+          `Invalid BETTER_AUTH_SECRETS entry: "${entry}". Version must be ≥1 and key must be non-empty.`,
         );
       }
       return { version, value };
     });
   };
 
-  const secrets = parseSecrets(process.env['BETTER_AUTH_SECRETS']);
-
   return {
-    // Server configuration
     server: {
-      host: serverHost,
+      host: env.SERVER_HOST,
       port: serverPort,
       publicUrl,
     },
-    
-    // Database configuration (dialect auto-detected from URL)
+
     database: {
-      url: process.env['DATABASE_URL'] || 'postgres://postgres:password@localhost:5432/monobase',
-      poolMin: parseIntValue(process.env['DB_POOL_MIN'], 2),
-      poolMax: parseIntValue(process.env['DB_POOL_MAX'], 20),
-      idleTimeoutMs: parseIntValue(process.env['DB_IDLE_TIMEOUT'], 30000),
-      ssl: parseBool(process.env['DB_SSL'], false),
-      logging: parseBool(process.env['DB_LOGGING'], false),
-    },
-    
-    // CORS configuration
-    cors: {
-      origins: parseList(process.env['CORS_ORIGINS'], ['http://localhost:3003', 'http://localhost:3004']),
-      credentials: parseBool(process.env['CORS_CREDENTIALS'], true),
-      allowLocalNetwork: parseBool(process.env['CORS_ALLOW_LOCAL_NETWORK'], true),
-      allowTunneling: parseBool(process.env['CORS_ALLOW_TUNNELING'], true),
-      strict: parseBool(process.env['CORS_STRICT'], false),
-    },
-    
-    // Logging configuration
-    logging: {
-      level: parseLogLevel(process.env['LOG_LEVEL']),
-      pretty: parseBool(process.env['LOG_PRETTY'], true),
-    },
-    
-    // Authentication configuration
-    auth: {
-      baseUrl: process.env['AUTH_BASE_URL'] || publicUrl || `http://${serverHost}:${serverPort}`,
-      secret: (() => {
-        if (authSecret) return authSecret;
-        if (isProduction) {
-          // Already caught above, but defense-in-depth
-          throw new Error('AUTH_SECRET is required');
-        }
-        throw new Error(
-          'AUTH_SECRET environment variable is required. ' +
-          'Set it in your .env file (e.g. AUTH_SECRET=$(openssl rand -hex 32)).'
-        );
-      })(),
-      secrets,
-      sessionExpiresIn: parseIntValue(process.env['AUTH_SESSION_EXPIRES_IN'], 60 * 60 * 24), // 24 hours (P0-2: reduced from 7d to limit token exposure window)
-      rateLimitEnabled: parseBool(process.env['AUTH_RATE_LIMIT_ENABLED'], true),
-      rateLimitWindow: parseIntValue(process.env['AUTH_RATE_LIMIT_WINDOW'], 60), // 1 minute
-      rateLimitMax: parseIntValue(process.env['AUTH_RATE_LIMIT_MAX'], 10), // 10 attempts
-      sessionLimit: parseIntValue(process.env['SESSION_LIMIT'], 5), // V-15: max concurrent sessions per user
-      requireEmailVerification: parseBool(process.env['AUTH_REQUIRE_EMAIL_VERIFICATION'], true),
-      adminEmails: parseList(process.env['AUTH_ADMIN_EMAILS'], []),
-      cookieSameSite: (process.env['AUTH_COOKIE_SAMESITE'] as 'strict' | 'lax' | 'none') || undefined,
-      secureCookies: process.env['AUTH_COOKIE_SECURE'] !== undefined ? parseBool(process.env['AUTH_COOKIE_SECURE'], false) : undefined,
-      socialProviders: {
-        google: process.env['GOOGLE_CLIENT_ID'] && process.env['GOOGLE_CLIENT_SECRET'] ? {
-          clientId: process.env['GOOGLE_CLIENT_ID'],
-          clientSecret: process.env['GOOGLE_CLIENT_SECRET'],
-        } : undefined,
-      },
-    },
-    
-    // Rate limiting configuration
-    rateLimit: {
-      enabled: parseBool(process.env['RATE_LIMIT_ENABLED'], true),
-      max: parseIntValue(process.env['RATE_LIMIT_MAX'], 100),
-    },
-    
-    // Storage configuration
-    storage: {
-      provider: (process.env['STORAGE_PROVIDER'] as 'minio' | 's3') || 'minio',
-      endpoint: process.env['STORAGE_ENDPOINT'] || 'http://localhost:9000', // Default to localhost for development
-      publicEndpoint: process.env['STORAGE_PUBLIC_ENDPOINT'] || 'http://localhost:9000', // External URL for presigned URLs
-      bucket: process.env['STORAGE_BUCKET'] || 'monobase-files',
-      region: process.env['STORAGE_REGION'] || 'us-east-1',
-      credentials: {
-        accessKeyId: process.env['STORAGE_ACCESS_KEY_ID'] || 'minioadmin',
-        secretAccessKey: process.env['STORAGE_SECRET_ACCESS_KEY'] || 'minioadmin',
-      },
-      uploadUrlExpiry: parseIntValue(process.env['STORAGE_UPLOAD_URL_EXPIRY'] || '300', 300), // 5 minutes
-      downloadUrlExpiry: parseIntValue(process.env['STORAGE_DOWNLOAD_URL_EXPIRY'] || '900', 900), // 15 minutes
-    },
-    
-    // Email configuration
-    email: {
-      provider: (process.env['EMAIL_PROVIDER'] as 'smtp' | 'postmark' | 'onesignal') || 'smtp',
-      from: {
-        name: process.env['EMAIL_FROM_NAME'] || 'Monobase',
-        email: process.env['EMAIL_FROM_EMAIL'] || 'noreply@monobase.com'
-      },
-      smtp: {
-        host: process.env['SMTP_HOST'] || '127.0.0.1',
-        port: parseIntValue(process.env['SMTP_PORT'] || '1025', 1025),
-        secure: parseBool(process.env['SMTP_SECURE'], false),
-        auth: {
-          user: process.env['SMTP_USER'] || '',
-          pass: process.env['SMTP_PASS'] || ''
-        }
-      },
-      postmark: process.env['POSTMARK_API_KEY'] ? {
-        apiKey: process.env['POSTMARK_API_KEY'],
-        messageStream: process.env['POSTMARK_MESSAGE_STREAM'] || 'outbound'
-      } : undefined,
-      onesignal: process.env['ONESIGNAL_APP_ID'] && process.env['ONESIGNAL_API_KEY'] ? {
-        appId: process.env['ONESIGNAL_APP_ID'],
-        apiKey: process.env['ONESIGNAL_API_KEY']
-      } : undefined
+      url: env.DATABASE_URL ?? 'postgres://postgres:password@localhost:5432/monobase',
+      poolMin: env.DB_POOL_MIN,
+      poolMax: env.DB_POOL_MAX,
+      idleTimeoutMs: env.DB_IDLE_TIMEOUT,
+      ssl: env.DB_SSL,
+      logging: env.DB_LOGGING,
     },
 
-    // Notification configuration
+    cors: {
+      origins: env.CORS_ORIGINS,
+      credentials: env.CORS_CREDENTIALS,
+      allowLocalNetwork: env.CORS_ALLOW_LOCAL_NETWORK,
+      allowTunneling: env.CORS_ALLOW_TUNNELING,
+      strict: env.CORS_STRICT,
+    },
+
+    logging: {
+      level: env.LOG_LEVEL,
+      pretty: env.LOG_PRETTY,
+    },
+
+    auth: {
+      baseUrl: env.AUTH_BASE_URL || publicUrl || `http://${env.SERVER_HOST}:${serverPort}`,
+      // biome-ignore lint: superRefine guarantees presence
+      secret: env.AUTH_SECRET!,
+      secrets: parseSecrets(env.BETTER_AUTH_SECRETS),
+      sessionExpiresIn: env.AUTH_SESSION_EXPIRES_IN,
+      rateLimitEnabled: env.AUTH_RATE_LIMIT_ENABLED,
+      rateLimitWindow: env.AUTH_RATE_LIMIT_WINDOW,
+      rateLimitMax: env.AUTH_RATE_LIMIT_MAX,
+      sessionLimit: env.SESSION_LIMIT,
+      requireEmailVerification: env.AUTH_REQUIRE_EMAIL_VERIFICATION,
+      adminEmails: env.AUTH_ADMIN_EMAILS,
+      cookieSameSite: env.AUTH_COOKIE_SAMESITE,
+      secureCookies:
+        env.AUTH_COOKIE_SECURE !== undefined
+          ? env.AUTH_COOKIE_SECURE.toLowerCase() === 'true'
+          : undefined,
+      socialProviders: {
+        google:
+          env.GOOGLE_CLIENT_ID && env.GOOGLE_CLIENT_SECRET
+            ? {
+                clientId: env.GOOGLE_CLIENT_ID,
+                clientSecret: env.GOOGLE_CLIENT_SECRET,
+              }
+            : undefined,
+      },
+    },
+
+    rateLimit: {
+      enabled: env.RATE_LIMIT_ENABLED,
+      max: env.RATE_LIMIT_MAX,
+    },
+
+    storage: {
+      provider: env.STORAGE_PROVIDER,
+      endpoint: env.STORAGE_ENDPOINT,
+      publicEndpoint: env.STORAGE_PUBLIC_ENDPOINT,
+      bucket: env.STORAGE_BUCKET,
+      region: env.STORAGE_REGION,
+      credentials: {
+        accessKeyId: env.STORAGE_ACCESS_KEY_ID,
+        secretAccessKey: env.STORAGE_SECRET_ACCESS_KEY,
+      },
+      uploadUrlExpiry: env.STORAGE_UPLOAD_URL_EXPIRY,
+      downloadUrlExpiry: env.STORAGE_DOWNLOAD_URL_EXPIRY,
+    },
+
+    email: {
+      provider: env.EMAIL_PROVIDER,
+      from: { name: env.EMAIL_FROM_NAME, email: env.EMAIL_FROM_EMAIL },
+      smtp: {
+        host: env.SMTP_HOST,
+        port: env.SMTP_PORT,
+        secure: env.SMTP_SECURE,
+        auth: { user: env.SMTP_USER, pass: env.SMTP_PASS },
+      },
+      postmark: env.POSTMARK_API_KEY
+        ? { apiKey: env.POSTMARK_API_KEY, messageStream: env.POSTMARK_MESSAGE_STREAM }
+        : undefined,
+      onesignal:
+        env.ONESIGNAL_APP_ID && env.ONESIGNAL_API_KEY
+          ? { appId: env.ONESIGNAL_APP_ID, apiKey: env.ONESIGNAL_API_KEY }
+          : undefined,
+    },
+
     notifs: {
       provider: 'onesignal',
-      onesignal: process.env['ONESIGNAL_APP_ID'] && process.env['ONESIGNAL_API_KEY'] ? {
-        appId: process.env['ONESIGNAL_APP_ID'],
-        apiKey: process.env['ONESIGNAL_API_KEY']
-      } : undefined
+      onesignal:
+        env.ONESIGNAL_APP_ID && env.ONESIGNAL_API_KEY
+          ? { appId: env.ONESIGNAL_APP_ID, apiKey: env.ONESIGNAL_API_KEY }
+          : undefined,
     },
 
-    // Billing configuration
     billing: {
       provider: 'stripe',
       stripe: {
-        secretKey: process.env['STRIPE_SECRET_KEY'],
-        webhookSecret: process.env['STRIPE_WEBHOOK_SECRET'],
-        url: process.env['STRIPE_URL'], // For testing with mock Stripe service
-      }
+        secretKey: env.STRIPE_SECRET_KEY,
+        webhookSecret: env.STRIPE_WEBHOOK_SECRET,
+        url: env.STRIPE_URL,
+      },
     },
 
-    // Internal service token (P1-2): comma-separated for rotation
-    // First token = active (outgoing), all tokens = valid (incoming)
     internalService: (() => {
-      const raw = process.env['INTERNAL_SERVICE_TOKEN'];
+      const raw = env.INTERNAL_SERVICE_TOKEN;
       const tokens = raw
-        ? raw.split(',').map(t => t.trim()).filter(Boolean)
-        : [crypto.randomUUID()]; // Dev fallback
+        ? raw.split(',').map((t) => t.trim()).filter(Boolean)
+        : [crypto.randomUUID()];
+      // biome-ignore lint: tokens[0] guaranteed non-null by construction
       return { activeToken: tokens[0]!, allTokens: tokens };
     })(),
 
-    // WebRTC configuration
     webrtc: {
-      iceServers: process.env['WEBRTC_ICE_SERVERS']
-        ? parseIceServerUrls(process.env['WEBRTC_ICE_SERVERS'])
-        : DEFAULT_ICE_SERVERS
+      iceServers: env.WEBRTC_ICE_SERVERS
+        ? parseIceServerUrls(env.WEBRTC_ICE_SERVERS)
+        : DEFAULT_ICE_SERVERS,
     },
   };
 }
