@@ -741,6 +741,20 @@
     "annotations": "Wave 4 discovery. VALID_TRANSITIONS map enforces: draft\u2192nominationsOpen\u2192votingOpen\u2192awaitingConfirmation\u2192published. Cancelled reachable from any non-terminal."
   },
   "BR-42": {
+    "rule": "Training Type Restricted to Platform-Defined Types",
+    "phase": 1,
+    "module": "M09",
+    "ruleClass": "p1-business",
+    "tests": {
+      "backend": [
+        "services/api-ts/src/handlers/association:operations/createTraining.test.ts"
+      ],
+      "contract": [],
+      "e2e": []
+    },
+    "annotations": "Canonical per WORKFLOW_MAP §4. Training type enum restricted to 5 platform-defined types (not org-customizable). Enforced in createTraining.ts via VALID_TRAINING_TYPES. Implements M9-R1. (Previously this key held the M12 vote-integrity rule due to ID overload — split into BR-52 per TR-P1-004 traceability fix.)"
+  },
+  "BR-52": {
     "rule": "One Vote Per Person Per Position",
     "phase": 2,
     "module": "M12",
@@ -756,7 +770,7 @@
         "apps/memberry/tests/e2e/officer/election-integrity.spec.ts"
       ]
     },
-    "annotations": "Wave 4 discovery. ConflictError on duplicate vote."
+    "annotations": "Wave 4 discovery. ConflictError on duplicate vote. Renamed from BR-42 (M12 usage) per TR-P1-004 to resolve BR-42 ID overload — canonical BR-42 = M09 training-type per WORKFLOW_MAP §4. Implements M12-R1."
   },
   "BR-43": {
     "rule": "Voting Only When Status Is votingOpen",
@@ -905,5 +919,101 @@
     },
     "annotations": "Wave 4 discovery. timingSafeEqual against rotated token list in middleware/auth.ts. 4 test cases cover: valid token bypass, missing header, mismatch logging, context flag. | 2026-05-30: Backend assertion added in middleware/auth.test.ts that the comparator is crypto.timingSafeEqual on hashed inputs (not raw equality).",
     "deferredReason": "Contract+E2E deferred \u2014 timing-safety is a cryptographic property of the comparator, not observable at the wire layer. Backend test in middleware/auth.test.ts asserts crypto.timingSafeEqual is used and near-miss tokens reject identically to unrelated tokens."
+  },
+  "BR-52": {
+    "rule": "Email Suppression Check Before Delivery (alias M22-R1)",
+    "phase": 2,
+    "module": "M22",
+    "ruleClass": "p0-data",
+    "tests": {
+      "backend": [],
+      "contract": [],
+      "e2e": []
+    },
+    "annotations": "Minted 2026-06-02 to resolve TR-P1-003. Aliases module-local M22-R1. IF recipient email is on suppression list THEN skip delivery. Test coverage to be backfilled in a follow-up audit pass."
+  },
+  "BR-53": {
+    "rule": "Active Template Required for Enqueue (alias M22-R2)",
+    "phase": 2,
+    "module": "M22",
+    "ruleClass": "p1-business",
+    "tests": {
+      "backend": [],
+      "contract": [],
+      "e2e": []
+    },
+    "annotations": "Minted 2026-06-02 to resolve TR-P1-003. Aliases module-local M22-R2. IF template status is not active THEN reject queue item creation. Test coverage to be backfilled."
+  },
+  "BR-54": {
+    "rule": "Max Retry Attempts Terminal Failure (alias M22-R3)",
+    "phase": 2,
+    "module": "M22",
+    "ruleClass": "p1-business",
+    "tests": {
+      "backend": [],
+      "contract": [],
+      "e2e": []
+    },
+    "annotations": "Minted 2026-06-02 to resolve TR-P1-003. Aliases module-local M22-R3. IF retry attempts exceed max THEN mark queue item failed (terminal). Test coverage to be backfilled."
+  },
+  "BR-55": {
+    "rule": "Hard Bounce Auto-Suppression (alias M22-R4)",
+    "phase": 2,
+    "module": "M22",
+    "ruleClass": "p0-data",
+    "tests": {
+      "backend": [],
+      "contract": [],
+      "e2e": []
+    },
+    "annotations": "Minted 2026-06-02 to resolve TR-P1-003. Aliases module-local M22-R4. IF hard bounce received THEN add to suppression with reason hard_bounce. Test coverage to be backfilled."
+  },
+  "BR-56": {
+    "rule": "Complaint Auto-Suppression / CAN-SPAM (alias M22-R5)",
+    "phase": 2,
+    "module": "M22",
+    "ruleClass": "p0-security",
+    "tests": {
+      "backend": [],
+      "contract": [],
+      "e2e": []
+    },
+    "annotations": "Minted 2026-06-02 to resolve TR-P1-003. Aliases module-local M22-R5. IF complaint received THEN add to suppression with reason complaint (CAN-SPAM). Test coverage to be backfilled."
+  },
+  "BR-57": {
+    "rule": "Transactional Email Suppression Override (alias M22-R6)",
+    "phase": 2,
+    "module": "M22",
+    "ruleClass": "p1-business",
+    "tests": {
+      "backend": [],
+      "contract": [],
+      "e2e": []
+    },
+    "annotations": "Minted 2026-06-02 to resolve TR-P1-003. Aliases module-local M22-R6. IF email category is transactional THEN check suppression but allow override of marketing suppressions. Test coverage to be backfilled."
+  },
+  "BR-58": {
+    "rule": "Template Variable Validation Before Enqueue (alias M22-R7)",
+    "phase": 2,
+    "module": "M22",
+    "ruleClass": "p1-business",
+    "tests": {
+      "backend": [],
+      "contract": [],
+      "e2e": []
+    },
+    "annotations": "Minted 2026-06-02 to resolve TR-P1-003. Aliases module-local M22-R7. IF template has required variables THEN validate all present before enqueue (prevent rendering errors). Test coverage to be backfilled."
+  },
+  "BR-59": {
+    "rule": "Queue Cancellation Audit Trail (alias M22-R8)",
+    "phase": 2,
+    "module": "M22",
+    "ruleClass": "p0-data",
+    "tests": {
+      "backend": [],
+      "contract": [],
+      "e2e": []
+    },
+    "annotations": "Minted 2026-06-02 to resolve TR-P1-003. Aliases module-local M22-R8. IF queue item cancelled THEN record canceller ID, reason, and timestamp (audit trail). Test coverage to be backfilled."
   }
 }
