@@ -144,7 +144,7 @@ const TEMPLATE_METADATA: Record<string, TemplateMetadata> = {
   'auth/welcome': {
     name: 'Welcome Email',
     description: 'Welcome email for new users after successful registration',
-    subject: 'Welcome to Monobase!',
+    subject: 'Welcome to Memberry!',
     tags: [EmailTemplateTags.AUTH_WELCOME],
     variables: [
       {
