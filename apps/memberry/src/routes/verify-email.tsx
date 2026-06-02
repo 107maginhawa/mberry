@@ -1,4 +1,4 @@
-import { createFileRoute } from '@tanstack/react-router'
+import { createFileRoute, Navigate } from '@tanstack/react-router'
 import { useState } from 'react'
 import { Button } from '@monobase/ui'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@monobase/ui'
@@ -15,9 +15,13 @@ export const Route = createFileRoute('/verify-email')({
 
 function VerifyEmailPage() {
   const { auth } = Route.useRouteContext()
-  const user = auth.user!
   const authClient = useAuthClient()
   const [isResending, setIsResending] = useState(false)
+
+  if (!auth.user) {
+    return <Navigate to="/auth/$authView" params={{ authView: 'sign-in' }} />
+  }
+  const user = auth.user
 
   const handleResendVerification = async () => {
     setIsResending(true)
