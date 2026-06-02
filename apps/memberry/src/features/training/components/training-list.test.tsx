@@ -82,11 +82,10 @@ describe('TrainingList', () => {
     renderWithProviders(<TrainingList orgId="org-1" />)
 
     await waitFor(() => {
-      expect(screen.getByText('No trainings found.')).toBeInTheDocument()
+      expect(screen.getByText('No trainings found')).toBeInTheDocument()
     })
 
-    const createLink = screen.getByText('Create one')
-    expect(createLink.closest('a')).toHaveAttribute('href', '/org/test-org/officer/training/new')
+    expect(screen.getByRole('button', { name: /create training/i })).toBeInTheDocument()
   })
 
   test('renders training cards when data exists', async () => {

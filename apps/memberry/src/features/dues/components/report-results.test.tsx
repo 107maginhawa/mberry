@@ -23,7 +23,7 @@ describe('ReportResults', () => {
     renderWithProviders(
       <ReportResults type="collection" data={[]} summary={null} isLoading={false} />
     )
-    expect(screen.getByText('No data found for the selected period and filters.')).toBeInTheDocument()
+    expect(screen.getByText('No data found')).toBeInTheDocument()
   })
 
   test('renders collection report table with data', () => {

@@ -16,6 +16,7 @@ import { Checkbox } from '@monobase/ui'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@monobase/ui'
 import { Tabs, TabsList, TabsTrigger } from '@monobase/ui'
 import { Search, Users } from 'lucide-react'
+import { EmptyState } from '@/components/patterns/empty-state'
 import { AvatarInitials } from '@/components/patterns/avatar-initials'
 
 interface MemberTableProps {
@@ -227,10 +228,11 @@ export function MemberTable({ orgId, initialStatus, expiringDays, requiredCredit
         ) : error ? (
           <div role="alert" aria-live="polite" className="p-10 text-center text-[var(--color-error)]">Failed to load members. Please try again.</div>
         ) : members.length === 0 ? (
-          <div className="p-14 flex flex-col items-center gap-3 text-[var(--color-muted)]">
-            <Users className="h-10 w-10 opacity-30" />
-            <p className="text-sm">No members found{debouncedSearch ? ` for "${debouncedSearch}"` : ''}.</p>
-          </div>
+          <EmptyState
+            icon={<Users size={40} />}
+            headline={debouncedSearch ? `No members match "${debouncedSearch}"` : 'No members yet'}
+            description={debouncedSearch ? 'Try a different search or clear filters.' : 'Members will appear here once they are added or invited.'}
+          />
         ) : (
           <Table className="text-sm">
             <TableHeader>

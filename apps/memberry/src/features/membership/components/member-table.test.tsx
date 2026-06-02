@@ -128,7 +128,7 @@ describe('MemberTable', () => {
     renderWithProviders(<MemberTable orgId="org-1" />)
 
     await waitFor(() => {
-      expect(screen.getByText(/No members found/i)).toBeInTheDocument()
+      expect(screen.getByText(/No members yet/i)).toBeInTheDocument()
     })
   })
 

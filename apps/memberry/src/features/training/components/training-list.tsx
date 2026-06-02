@@ -4,9 +4,10 @@ import { toast } from 'sonner'
 import { Button, Input } from '@monobase/ui'
 import { ConfirmDialog } from '@/components/patterns/confirm-dialog'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@monobase/ui'
-import { Link, useParams } from '@tanstack/react-router'
+import { Link, useNavigate, useParams } from '@tanstack/react-router'
 import { BookOpen, Users, Award, Search, SlidersHorizontal } from 'lucide-react'
 import { TrainingCard } from './training-card'
+import { EmptyState } from '@/components/patterns/empty-state'
 import {
   searchTrainingsOptions,
   searchTrainingsQueryKey,
@@ -40,6 +41,7 @@ interface TrainingListProps {
 
 export function TrainingList({ orgId }: TrainingListProps) {
   const { orgSlug } = useParams({ strict: false }) as { orgSlug: string }
+  const navigate = useNavigate()
   const [activeTab, setActiveTab] = useState('published')
   const [typeFilter, setTypeFilter] = useState('all')
   const [search, setSearch] = useState('')
@@ -190,12 +192,15 @@ export function TrainingList({ orgId }: TrainingListProps) {
           ))}
         </div>
       ) : trainings.length === 0 ? (
-        <div className="border rounded-xl p-12 text-center text-[var(--color-muted)]">
-          No trainings found.{' '}
-          <Link to="/org/$orgSlug/officer/training/new" params={{ orgSlug }} className="text-[var(--color-primary)] hover:underline">
-            Create one
-          </Link>
-        </div>
+        <EmptyState
+          icon={<BookOpen size={40} />}
+          headline="No trainings found"
+          description="Create a new training session to get started."
+          action={{
+            label: 'Create training',
+            onClick: () => navigate({ to: '/org/$orgSlug/officer/training/new', params: { orgSlug } }),
+          }}
+        />
       ) : (
         <>
           <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">

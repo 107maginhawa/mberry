@@ -4,7 +4,8 @@ import { Button } from '@monobase/ui'
 import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from '@monobase/ui'
 import { Skeleton } from '@monobase/ui'
 import { formatCents } from '../lib/money'
-import { Download } from 'lucide-react'
+import { Download, FileBarChart2, Inbox } from 'lucide-react'
+import { EmptyState } from '@/components/patterns/empty-state'
 
 interface ReportResultsProps {
   type: string
@@ -19,11 +20,23 @@ export function ReportResults({ type, data, summary, isLoading }: ReportResultsP
   }
 
   if (!data) {
-    return <p className="text-center text-[var(--color-muted)] py-8">Select a report type and click Generate.</p>
+    return (
+      <EmptyState
+        icon={<FileBarChart2 size={36} />}
+        headline="No report generated yet"
+        description="Select a report type and click Generate."
+      />
+    )
   }
 
   if (data.length === 0) {
-    return <p className="text-center text-[var(--color-muted)] py-8">No data found for the selected period and filters.</p>
+    return (
+      <EmptyState
+        icon={<Inbox size={36} />}
+        headline="No data found"
+        description="Try a different period or relax your filters."
+      />
+    )
   }
 
   const exportCSV = () => {

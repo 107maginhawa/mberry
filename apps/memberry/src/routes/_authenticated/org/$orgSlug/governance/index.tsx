@@ -5,6 +5,7 @@ import { PageHeader } from '@/components/patterns/page-header'
 import { GlassCard } from '@/components/motion/glass-card'
 import { CountUp } from '@/components/motion/count-up'
 import { CardSkeleton } from '@/components/patterns/skeleton-loader'
+import { EmptyState } from '@/components/patterns/empty-state'
 import { StaggerGrid, StaggerItem } from '@/components/motion/stagger-grid'
 import { useOrg } from '@/hooks/useOrg'
 import {
@@ -102,9 +103,11 @@ function GovernancePage() {
             <CardSkeleton />
           </div>
         ) : activeElections.length === 0 ? (
-          <GlassCard className="p-6 text-center text-[var(--color-muted)] text-sm">
-            No active elections at this time.
-          </GlassCard>
+          <EmptyState
+            icon={<Vote size={32} />}
+            headline="No active elections"
+            description="When officers open an election, it will appear here."
+          />
         ) : (
           <div className="space-y-2">
             {activeElections.map((election) => (
@@ -142,9 +145,11 @@ function GovernancePage() {
             {Array.from({ length: 3 }).map((_, i) => <CardSkeleton key={i} />)}
           </div>
         ) : allDocuments.length === 0 ? (
-          <GlassCard className="p-6 text-center text-[var(--color-muted)] text-sm">
-            No documents published yet.
-          </GlassCard>
+          <EmptyState
+            icon={<FileText size={32} />}
+            headline="No documents published yet"
+            description="Bylaws, minutes, and other published documents will appear here."
+          />
         ) : (
           <div className="space-y-2">
             {allDocuments.map((doc) => (

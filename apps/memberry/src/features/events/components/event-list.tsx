@@ -14,6 +14,8 @@ import {
 } from '@monobase/sdk-ts/generated/@tanstack/react-query.gen'
 import type { Event, EventStatus, EventType } from '@monobase/sdk-ts/generated/types.gen'
 import { ConfirmDialog } from '@/components/patterns/confirm-dialog'
+import { EmptyState } from '@/components/patterns/empty-state'
+import { Calendar } from 'lucide-react'
 
 interface EventListProps {
   orgId: string
@@ -160,13 +162,23 @@ export function EventList({ orgId }: EventListProps) {
           ))}
         </div>
       ) : events.length === 0 ? (
-        <div className="border rounded-lg p-12 text-center text-[var(--color-muted)]">
-          {search || typeFilter !== 'all'
-            ? 'No events match your filters.'
-            : tab === 'drafts'
-            ? 'No drafts. Create a new event to get started.'
-            : `No ${tab} events.`}
-        </div>
+        <EmptyState
+          icon={<Calendar size={40} />}
+          headline={
+            search || typeFilter !== 'all'
+              ? 'No events match your filters'
+              : tab === 'drafts'
+              ? 'No drafts yet'
+              : `No ${tab} events`
+          }
+          description={
+            search || typeFilter !== 'all'
+              ? 'Try clearing filters or adjusting your search.'
+              : tab === 'drafts'
+              ? 'Create a new event to get started.'
+              : undefined
+          }
+        />
       ) : (
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {events.map((event) => (
