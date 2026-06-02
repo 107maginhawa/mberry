@@ -1,5 +1,6 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { useQuery } from '@tanstack/react-query'
+import { QRCodeSVG } from 'qrcode.react'
 import { Badge, Button } from '@monobase/ui'
 import { getStatusLabel } from '@/features/membership/lib/membership-status'
 import type { MembershipStatus } from '@/features/membership/lib/membership-status'
@@ -77,6 +78,8 @@ function MyIdCard() {
     : '—'
 
   const orgId: string | null = membership?.organizationId ?? null
+  const memberId: string | null = membership?.memberNumber ?? membership?.id ?? null
+  const verifyUrl = memberId ? `${window.location.origin}/verify/${memberId}` : null
 
   function handleDownloadPdf() {
     if (!orgId) return
@@ -131,7 +134,19 @@ function MyIdCard() {
               <div className="flex justify-between"><span className="text-[var(--color-muted)]">Valid Until</span><span className="font-medium">{validUntil}</span></div>
             </div>
             <div className="border-t border-[var(--color-border-light)] pt-4 text-center">
-              <div className="w-24 h-24 bg-[var(--color-surface-warm)] mx-auto rounded-[8px] flex items-center justify-center text-xs text-[var(--color-muted)]">QR Code</div>
+              {verifyUrl ? (
+                <div className="w-24 h-24 bg-white mx-auto rounded-[8px] flex items-center justify-center p-1.5">
+                  <QRCodeSVG
+                    value={verifyUrl}
+                    size={84}
+                    level="M"
+                    marginSize={0}
+                    aria-label={`QR code to verify member ${memberId}`}
+                  />
+                </div>
+              ) : (
+                <div className="w-24 h-24 bg-[var(--color-surface-warm)] mx-auto rounded-[8px] flex items-center justify-center text-xs text-[var(--color-muted)]">No code</div>
+              )}
               <p className="text-xs text-[var(--color-muted)] mt-2">Verified by Memberry</p>
             </div>
           </GlassCard>
