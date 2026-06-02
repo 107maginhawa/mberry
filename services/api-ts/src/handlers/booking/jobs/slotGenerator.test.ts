@@ -23,6 +23,7 @@ import {
 import type { BookingEvent, DailyConfig } from '../repos/booking.schema';
 import { DayOfWeek } from '../repos/booking.schema';
 import { addDays, startOfDay, addMinutes, subDays } from 'date-fns';
+import { futureMonday } from '@/test-utils/dateFixtures';
 
 // Mock-Classification: APPROPRIATE — background job with external scheduler
 // ---------------------------------------------------------------------------
@@ -90,8 +91,8 @@ function makeLogger() {
 describe('generateSlotsForEvent', () => {
   test('generates slots only for enabled days', () => {
     const event = makeEvent();
-    // Mon/Tue/Wed enabled. Generate a full week starting from a known Monday.
-    const monday = new Date('2026-06-01T00:00:00.000Z'); // Known Monday
+    // Mon/Tue/Wed enabled. Generate a full week starting from a future Monday.
+    const monday = futureMonday();
     const sunday = addDays(monday, 6);
 
     const slots = generateSlotsForEvent({
@@ -157,7 +158,7 @@ describe('generateSlotsForEvent', () => {
       timeBlocks: [{ startTime: '09:00', endTime: '10:00', slotDuration: 15, bufferTime: 0 }],
     };
     const event = makeEvent({ dailyConfigs: configs });
-    const monday = new Date('2026-06-01T00:00:00.000Z');
+    const monday = futureMonday();
 
     const slots = generateSlotsForEvent({
       event,
@@ -184,7 +185,7 @@ describe('generateSlotsForEvent', () => {
       ],
     };
     const event = makeEvent({ dailyConfigs: configs });
-    const monday = new Date('2026-06-01T00:00:00.000Z');
+    const monday = futureMonday();
 
     const slots = generateSlotsForEvent({
       event,

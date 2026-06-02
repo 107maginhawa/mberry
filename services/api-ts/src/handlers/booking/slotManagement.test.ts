@@ -29,6 +29,7 @@ import { DayOfWeek } from './repos/booking.schema';
 import type { BookingEvent, DailyConfig, TimeBlock } from './repos/booking.schema';
 import { addDays, startOfDay, subDays, addMinutes } from 'date-fns';
 import { makeCtx, stubRepo, restoreRepo } from '@/test-utils/make-ctx';
+import { futureMonday, futureSundayAfter } from '@/test-utils/dateFixtures';
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -139,7 +140,7 @@ describe('041 — Slot creation from daily configs', () => {
     const event = makeEvent({
       dailyConfigs: makeDailyConfigs([DayOfWeek.mon]),
     });
-    const monday = new Date('2026-06-01T00:00:00.000Z'); // Monday
+    const monday = futureMonday();
 
     const slots = generateSlotsForEvent({ event, startDate: monday, endDate: monday });
     expect(slots.length).toBe(4);
@@ -149,7 +150,7 @@ describe('041 — Slot creation from daily configs', () => {
     const event = makeEvent({
       dailyConfigs: makeDailyConfigs([DayOfWeek.mon]),
     });
-    const monday = new Date('2026-06-01T00:00:00.000Z');
+    const monday = futureMonday();
 
     const slots = generateSlotsForEvent({ event, startDate: monday, endDate: monday });
 
@@ -174,7 +175,7 @@ describe('041 — Slot creation from daily configs', () => {
         { startTime: '09:00', endTime: '11:00', slotDuration: 30, bufferTime: 15 }
       ),
     });
-    const monday = new Date('2026-06-01T00:00:00.000Z');
+    const monday = futureMonday();
 
     const slots = generateSlotsForEvent({ event, startDate: monday, endDate: monday });
 
@@ -190,9 +191,9 @@ describe('041 — Slot creation from daily configs', () => {
     const event = makeEvent({
       dailyConfigs: makeDailyConfigs([DayOfWeek.mon, DayOfWeek.wed, DayOfWeek.fri]),
     });
-    // June 1 2026 = Monday, generate Mon-Sun
-    const monday = new Date('2026-06-01T00:00:00.000Z');
-    const sunday = new Date('2026-06-07T00:00:00.000Z');
+    // Monday-anchored future week, generate Mon-Sun
+    const monday = futureMonday();
+    const sunday = futureSundayAfter(monday);
 
     const slots = generateSlotsForEvent({ event, startDate: monday, endDate: sunday });
 
@@ -204,7 +205,7 @@ describe('041 — Slot creation from daily configs', () => {
     const event = makeEvent({
       dailyConfigs: makeDailyConfigs([DayOfWeek.tue]), // Only Tuesday
     });
-    const monday = new Date('2026-06-01T00:00:00.000Z'); // Monday
+    const monday = futureMonday(); // Monday
 
     // Monday only - should produce 0 slots
     const slots = generateSlotsForEvent({ event, startDate: monday, endDate: monday });
@@ -221,7 +222,7 @@ describe('041 — Slot creation from daily configs', () => {
       ],
     };
     const event = makeEvent({ dailyConfigs: configs });
-    const monday = new Date('2026-06-01T00:00:00.000Z');
+    const monday = futureMonday();
 
     const slots = generateSlotsForEvent({ event, startDate: monday, endDate: monday });
 
@@ -241,7 +242,7 @@ describe('041 — Slot creation from daily configs', () => {
         { startTime: '09:00', endTime: '10:00', slotDuration: 15, bufferTime: 0 }
       ),
     });
-    const monday = new Date('2026-06-01T00:00:00.000Z');
+    const monday = futureMonday();
 
     const slots = generateSlotsForEvent({ event, startDate: monday, endDate: monday });
     // 1 hour / 15 min = 4 slots
@@ -259,7 +260,7 @@ describe('041 — Slot creation from daily configs', () => {
       id: 'event-99',
       dailyConfigs: makeDailyConfigs([DayOfWeek.mon]),
     });
-    const monday = new Date('2026-06-01T00:00:00.000Z');
+    const monday = futureMonday();
 
     const slots = generateSlotsForEvent({ event, startDate: monday, endDate: monday });
 
@@ -273,7 +274,7 @@ describe('041 — Slot creation from daily configs', () => {
     const event = makeEvent({
       dailyConfigs: makeDailyConfigs([DayOfWeek.mon]),
     });
-    const monday = new Date('2026-06-01T00:00:00.000Z');
+    const monday = futureMonday();
 
     const slots = generateSlotsForEvent({ event, startDate: monday, endDate: monday });
 
@@ -372,28 +373,28 @@ describe('041 — Slot boundary validation', () => {
 
 describe('041 — Effective date window', () => {
   test('generates no slots before effectiveFrom', () => {
-    const wednesday = new Date('2026-06-03T00:00:00.000Z');
+    const monday = futureMonday();
+    const tuesday = addDays(monday, 1);
+    const wednesday = addDays(monday, 2);
     const event = makeEvent({
       effectiveFrom: wednesday,
       dailyConfigs: makeDailyConfigs([DayOfWeek.mon, DayOfWeek.tue, DayOfWeek.wed]),
     });
-
-    const monday = new Date('2026-06-01T00:00:00.000Z');
-    const tuesday = new Date('2026-06-02T00:00:00.000Z');
 
     const slots = generateSlotsForEvent({ event, startDate: monday, endDate: tuesday });
     expect(slots.length).toBe(0);
   });
 
   test('generates no slots after effectiveTo', () => {
+    const monday = futureMonday();
+    const tuesday = addDays(monday, 1);
+    const thursday = addDays(monday, 3);
+    const friday = addDays(monday, 4);
     const event = makeEvent({
-      effectiveFrom: new Date('2026-06-01T00:00:00.000Z'),
-      effectiveTo: new Date('2026-06-02T00:00:00.000Z'),
+      effectiveFrom: monday,
+      effectiveTo: tuesday,
       dailyConfigs: makeDailyConfigs([DayOfWeek.mon, DayOfWeek.tue, DayOfWeek.wed, DayOfWeek.thu, DayOfWeek.fri]),
     });
-
-    const thursday = new Date('2026-06-04T00:00:00.000Z');
-    const friday = new Date('2026-06-05T00:00:00.000Z');
 
     const slots = generateSlotsForEvent({ event, startDate: thursday, endDate: friday });
     expect(slots.length).toBe(0);
@@ -401,14 +402,14 @@ describe('041 — Effective date window', () => {
 
   test('generates slots only within effective window', () => {
     // Effective Mon-Wed, request Mon-Fri
+    const monday = futureMonday();
+    const wednesday = addDays(monday, 2);
+    const friday = addDays(monday, 4);
     const event = makeEvent({
-      effectiveFrom: new Date('2026-06-01T00:00:00.000Z'), // Monday
-      effectiveTo: new Date('2026-06-03T00:00:00.000Z'), // Wednesday
+      effectiveFrom: monday, // Monday
+      effectiveTo: wednesday, // Wednesday
       dailyConfigs: makeDailyConfigs([DayOfWeek.mon, DayOfWeek.tue, DayOfWeek.wed, DayOfWeek.thu, DayOfWeek.fri]),
     });
-
-    const monday = new Date('2026-06-01T00:00:00.000Z');
-    const friday = new Date('2026-06-05T00:00:00.000Z');
 
     const slots = generateSlotsForEvent({ event, startDate: monday, endDate: friday });
 
@@ -1080,8 +1081,8 @@ describe('041 — Batch slot generation for multiple events', () => {
     const event1 = makeEvent({ id: 'e1', owner: 'o1', dailyConfigs: makeDailyConfigs([DayOfWeek.mon]) });
     const event2 = makeEvent({ id: 'e2', owner: 'o2', dailyConfigs: makeDailyConfigs([DayOfWeek.tue]) });
 
-    const monday = new Date('2026-06-01T00:00:00.000Z');
-    const tuesday = new Date('2026-06-02T00:00:00.000Z');
+    const monday = futureMonday();
+    const tuesday = addDays(monday, 1);
 
     const allSlots = await batchGenerateSlots(
       [event1, event2],
