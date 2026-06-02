@@ -113,7 +113,7 @@ describe('CertificatePreview', () => {
     renderWithProviders(<CertificatePreview certificateId="cert-1" />)
 
     await waitFor(() => {
-      expect(screen.getByText(/verify\/certificate\/CERT-2025-001/)).toBeInTheDocument()
+      expect(screen.getByText(/verify\/CERT-2025-001/)).toBeInTheDocument()
     })
   })
 })

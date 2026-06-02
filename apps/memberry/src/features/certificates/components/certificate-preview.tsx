@@ -40,10 +40,10 @@ export function CertificatePreview({ certificateId }: CertificatePreviewProps) {
     )
   }
 
-  const verificationUrl = `${window.location.origin}/verify/certificate/${cert.certificateNumber}`
+  const verificationUrl = `${window.location.origin}/verify/${cert.certificateNumber}`
 
   const handleDownloadPdf = () => {
-    alert('PDF download will be available in a future update.')
+    window.open(`/api/certificates/${certificateId}/pdf`, '_blank', 'noopener')
   }
 
   const handleShareVerification = () => {
