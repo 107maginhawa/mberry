@@ -1,0 +1,1926 @@
+{
+  "generated_at_run": true,
+  "contract_version": 5,
+  "totals": {
+    "pass": 217,
+    "fail": 22,
+    "P0": 0,
+    "P1": 1,
+    "P2": 0,
+    "P3": 21
+  },
+  "findings": [
+    {
+      "id": "page-load /associations/$associationId (unresolved param)",
+      "kind": "skip",
+      "route": "-",
+      "severity": "P3",
+      "status": "fail",
+      "detail": "page-load /associations/$associationId (unresolved param)"
+    },
+    {
+      "id": "page-load /members/$personId (unresolved param)",
+      "kind": "skip",
+      "route": "-",
+      "severity": "P3",
+      "status": "fail",
+      "detail": "page-load /members/$personId (unresolved param)"
+    },
+    {
+      "id": "page-load /organizations/$organizationId (unresolved param)",
+      "kind": "skip",
+      "route": "-",
+      "severity": "P3",
+      "status": "fail",
+      "detail": "page-load /organizations/$organizationId (unresolved param)"
+    },
+    {
+      "id": "page-load /events/$eventSlug (unresolved param)",
+      "kind": "skip",
+      "route": "-",
+      "severity": "P3",
+      "status": "fail",
+      "detail": "page-load /events/$eventSlug (unresolved param)"
+    },
+    {
+      "id": "page-load /invite/$token (unresolved param)",
+      "kind": "skip",
+      "route": "-",
+      "severity": "P3",
+      "status": "fail",
+      "detail": "page-load /invite/$token (unresolved param)"
+    },
+    {
+      "id": "page-load /pay/$token (unresolved param)",
+      "kind": "skip",
+      "route": "-",
+      "severity": "P3",
+      "status": "fail",
+      "detail": "page-load /pay/$token (unresolved param)"
+    },
+    {
+      "id": "page-load /verify/$certificateNumber (unresolved param)",
+      "kind": "skip",
+      "route": "-",
+      "severity": "P3",
+      "status": "fail",
+      "detail": "page-load /verify/$certificateNumber (unresolved param)"
+    },
+    {
+      "id": "page-load /verify/$credentialNumber (unresolved param)",
+      "kind": "skip",
+      "route": "-",
+      "severity": "P3",
+      "status": "fail",
+      "detail": "page-load /verify/$credentialNumber (unresolved param)"
+    },
+    {
+      "id": "page-load /verify/$token (unresolved param)",
+      "kind": "skip",
+      "route": "-",
+      "severity": "P3",
+      "status": "fail",
+      "detail": "page-load /verify/$token (unresolved param)"
+    },
+    {
+      "id": "page-load /_authenticated/my/bookings/$bookingId (unresolved param)",
+      "kind": "skip",
+      "route": "-",
+      "severity": "P3",
+      "status": "fail",
+      "detail": "page-load /_authenticated/my/bookings/$bookingId (unresolved param)"
+    },
+    {
+      "id": "page-load /_authenticated/my/bookings/host/$personId/$slotId (unresolved param)",
+      "kind": "skip",
+      "route": "-",
+      "severity": "P3",
+      "status": "fail",
+      "detail": "page-load /_authenticated/my/bookings/host/$personId/$slotId (unresolved param)"
+    },
+    {
+      "id": "page-load /_authenticated/my/bookings/host/$personId (unresolved param)",
+      "kind": "skip",
+      "route": "-",
+      "severity": "P3",
+      "status": "fail",
+      "detail": "page-load /_authenticated/my/bookings/host/$personId (unresolved param)"
+    },
+    {
+      "id": "page-load /_authenticated/my/certificates/$certificateId (unresolved param)",
+      "kind": "skip",
+      "route": "-",
+      "severity": "P3",
+      "status": "fail",
+      "detail": "page-load /_authenticated/my/certificates/$certificateId (unresolved param)"
+    },
+    {
+      "id": "page-load /_authenticated/org/$orgSlug/directory/$personId (unresolved param)",
+      "kind": "skip",
+      "route": "-",
+      "severity": "P3",
+      "status": "fail",
+      "detail": "page-load /_authenticated/org/$orgSlug/directory/$personId (unresolved param)"
+    },
+    {
+      "id": "page-load /_authenticated/org/$orgSlug/documents/$documentId (unresolved param)",
+      "kind": "skip",
+      "route": "-",
+      "severity": "P3",
+      "status": "fail",
+      "detail": "page-load /_authenticated/org/$orgSlug/documents/$documentId (unresolved param)"
+    },
+    {
+      "id": "page-load /_authenticated/org/$orgSlug/officer/documents/$documentId (unresolved param)",
+      "kind": "skip",
+      "route": "-",
+      "severity": "P3",
+      "status": "fail",
+      "detail": "page-load /_authenticated/org/$orgSlug/officer/documents/$documentId (unresolved param)"
+    },
+    {
+      "id": "page-load /_authenticated/org/$orgSlug/officer/institutional-memberships/$institutionalMembershipId (unresolved param)",
+      "kind": "skip",
+      "route": "-",
+      "severity": "P3",
+      "status": "fail",
+      "detail": "page-load /_authenticated/org/$orgSlug/officer/institutional-memberships/$institutionalMembershipId (unresolved param)"
+    },
+    {
+      "id": "page-load /_authenticated/org/$orgSlug/officer/payments/$paymentId (unresolved param)",
+      "kind": "skip",
+      "route": "-",
+      "severity": "P3",
+      "status": "fail",
+      "detail": "page-load /_authenticated/org/$orgSlug/officer/payments/$paymentId (unresolved param)"
+    },
+    {
+      "id": "page-load /_authenticated/org/$orgSlug/officer/roster/$memberId (unresolved param)",
+      "kind": "skip",
+      "route": "-",
+      "severity": "P3",
+      "status": "fail",
+      "detail": "page-load /_authenticated/org/$orgSlug/officer/roster/$memberId (unresolved param)"
+    },
+    {
+      "id": "page-load /_authenticated/org/$orgSlug/officer/finances/invoices/$invoiceId (unresolved param)",
+      "kind": "skip",
+      "route": "-",
+      "severity": "P3",
+      "status": "fail",
+      "detail": "page-load /_authenticated/org/$orgSlug/officer/finances/invoices/$invoiceId (unresolved param)"
+    },
+    {
+      "id": "page-load /_authenticated/org/$orgSlug/officer/finances/members/$memberId (unresolved param)",
+      "kind": "skip",
+      "route": "-",
+      "severity": "P3",
+      "status": "fail",
+      "detail": "page-load /_authenticated/org/$orgSlug/officer/finances/members/$memberId (unresolved param)"
+    },
+    {
+      "id": "/_authenticated",
+      "kind": "page-load",
+      "route": "/_authenticated",
+      "severity": "P3",
+      "status": "pass",
+      "detail": "ok"
+    },
+    {
+      "id": "/_authenticated",
+      "kind": "nav-links",
+      "route": "/_authenticated",
+      "severity": "P3",
+      "status": "pass",
+      "detail": "links resolve"
+    },
+    {
+      "id": "/join",
+      "kind": "page-load",
+      "route": "/join",
+      "severity": "P3",
+      "status": "pass",
+      "detail": "ok"
+    },
+    {
+      "id": "/join",
+      "kind": "nav-links",
+      "route": "/join",
+      "severity": "P3",
+      "status": "pass",
+      "detail": "links resolve"
+    },
+    {
+      "id": "/onboarding",
+      "kind": "page-load",
+      "route": "/onboarding",
+      "severity": "P3",
+      "status": "pass",
+      "detail": "ok"
+    },
+    {
+      "id": "/onboarding",
+      "kind": "nav-links",
+      "route": "/onboarding",
+      "severity": "P3",
+      "status": "pass",
+      "detail": "links resolve"
+    },
+    {
+      "id": "/verify-email",
+      "kind": "page-load",
+      "route": "/verify-email",
+      "severity": "P3",
+      "status": "pass",
+      "detail": "ok"
+    },
+    {
+      "id": "/verify-email",
+      "kind": "nav-links",
+      "route": "/verify-email",
+      "severity": "P3",
+      "status": "pass",
+      "detail": "links resolve"
+    },
+    {
+      "id": "/associations/",
+      "kind": "page-load",
+      "route": "/associations/",
+      "severity": "P3",
+      "status": "pass",
+      "detail": "ok"
+    },
+    {
+      "id": "/associations/",
+      "kind": "nav-links",
+      "route": "/associations/",
+      "severity": "P3",
+      "status": "pass",
+      "detail": "links resolve"
+    },
+    {
+      "id": "/communications/email",
+      "kind": "page-load",
+      "route": "/communications/email",
+      "severity": "P3",
+      "status": "pass",
+      "detail": "ok"
+    },
+    {
+      "id": "/communications/email",
+      "kind": "nav-links",
+      "route": "/communications/email",
+      "severity": "P3",
+      "status": "pass",
+      "detail": "links resolve"
+    },
+    {
+      "id": "/communications/",
+      "kind": "page-load",
+      "route": "/communications/",
+      "severity": "P3",
+      "status": "pass",
+      "detail": "ok"
+    },
+    {
+      "id": "/communications/",
+      "kind": "nav-links",
+      "route": "/communications/",
+      "severity": "P3",
+      "status": "pass",
+      "detail": "links resolve"
+    },
+    {
+      "id": "/communications/moderation",
+      "kind": "page-load",
+      "route": "/communications/moderation",
+      "severity": "P3",
+      "status": "pass",
+      "detail": "ok"
+    },
+    {
+      "id": "/communications/moderation",
+      "kind": "nav-links",
+      "route": "/communications/moderation",
+      "severity": "P3",
+      "status": "pass",
+      "detail": "links resolve"
+    },
+    {
+      "id": "/communications/templates",
+      "kind": "page-load",
+      "route": "/communications/templates",
+      "severity": "P3",
+      "status": "pass",
+      "detail": "ok"
+    },
+    {
+      "id": "/communications/templates",
+      "kind": "nav-links",
+      "route": "/communications/templates",
+      "severity": "P3",
+      "status": "pass",
+      "detail": "links resolve"
+    },
+    {
+      "id": "/compliance/",
+      "kind": "page-load",
+      "route": "/compliance/",
+      "severity": "P3",
+      "status": "pass",
+      "detail": "ok"
+    },
+    {
+      "id": "/compliance/",
+      "kind": "nav-links",
+      "route": "/compliance/",
+      "severity": "P3",
+      "status": "pass",
+      "detail": "links resolve"
+    },
+    {
+      "id": "/members/",
+      "kind": "page-load",
+      "route": "/members/",
+      "severity": "P3",
+      "status": "pass",
+      "detail": "ok"
+    },
+    {
+      "id": "/members/",
+      "kind": "nav-links",
+      "route": "/members/",
+      "severity": "P3",
+      "status": "pass",
+      "detail": "links resolve"
+    },
+    {
+      "id": "/organizations/",
+      "kind": "page-load",
+      "route": "/organizations/",
+      "severity": "P3",
+      "status": "pass",
+      "detail": "ok"
+    },
+    {
+      "id": "/organizations/",
+      "kind": "nav-links",
+      "route": "/organizations/",
+      "severity": "P3",
+      "status": "pass",
+      "detail": "links resolve"
+    },
+    {
+      "id": "/verifications/",
+      "kind": "page-load",
+      "route": "/verifications/",
+      "severity": "P3",
+      "status": "pass",
+      "detail": "ok"
+    },
+    {
+      "id": "/verifications/",
+      "kind": "nav-links",
+      "route": "/verifications/",
+      "severity": "P3",
+      "status": "pass",
+      "detail": "links resolve"
+    },
+    {
+      "id": "/_authenticated/dashboard",
+      "kind": "page-load",
+      "route": "/_authenticated/dashboard",
+      "severity": "P3",
+      "status": "pass",
+      "detail": "ok"
+    },
+    {
+      "id": "/_authenticated/dashboard",
+      "kind": "nav-links",
+      "route": "/_authenticated/dashboard",
+      "severity": "P3",
+      "status": "pass",
+      "detail": "links resolve"
+    },
+    {
+      "id": "/auth/$authView",
+      "kind": "page-load",
+      "route": "/auth/$authView",
+      "severity": "P3",
+      "status": "pass",
+      "detail": "ok"
+    },
+    {
+      "id": "/auth/$authView",
+      "kind": "nav-links",
+      "route": "/auth/$authView",
+      "severity": "P3",
+      "status": "pass",
+      "detail": "links resolve"
+    },
+    {
+      "id": "/discover/events",
+      "kind": "page-load",
+      "route": "/discover/events",
+      "severity": "P3",
+      "status": "pass",
+      "detail": "ok"
+    },
+    {
+      "id": "/discover/events",
+      "kind": "nav-links",
+      "route": "/discover/events",
+      "severity": "P3",
+      "status": "pass",
+      "detail": "links resolve"
+    },
+    {
+      "id": "/org/$slug",
+      "kind": "page-load",
+      "route": "/org/$slug",
+      "severity": "P3",
+      "status": "pass",
+      "detail": "ok"
+    },
+    {
+      "id": "/org/$slug",
+      "kind": "nav-links",
+      "route": "/org/$slug",
+      "severity": "P3",
+      "status": "pass",
+      "detail": "links resolve"
+    },
+    {
+      "id": "/_authenticated/my/billing",
+      "kind": "page-load",
+      "route": "/_authenticated/my/billing",
+      "severity": "P3",
+      "status": "pass",
+      "detail": "ok"
+    },
+    {
+      "id": "/_authenticated/my/billing",
+      "kind": "nav-links",
+      "route": "/_authenticated/my/billing",
+      "severity": "P3",
+      "status": "pass",
+      "detail": "links resolve"
+    },
+    {
+      "id": "/_authenticated/my/calendar",
+      "kind": "page-load",
+      "route": "/_authenticated/my/calendar",
+      "severity": "P3",
+      "status": "pass",
+      "detail": "ok"
+    },
+    {
+      "id": "/_authenticated/my/calendar",
+      "kind": "nav-links",
+      "route": "/_authenticated/my/calendar",
+      "severity": "P3",
+      "status": "pass",
+      "detail": "links resolve"
+    },
+    {
+      "id": "/_authenticated/my/data-export",
+      "kind": "page-load",
+      "route": "/_authenticated/my/data-export",
+      "severity": "P3",
+      "status": "pass",
+      "detail": "ok"
+    },
+    {
+      "id": "/_authenticated/my/data-export",
+      "kind": "nav-links",
+      "route": "/_authenticated/my/data-export",
+      "severity": "P3",
+      "status": "pass",
+      "detail": "links resolve"
+    },
+    {
+      "id": "/_authenticated/my/events",
+      "kind": "page-load",
+      "route": "/_authenticated/my/events",
+      "severity": "P3",
+      "status": "pass",
+      "detail": "ok"
+    },
+    {
+      "id": "/_authenticated/my/events",
+      "kind": "nav-links",
+      "route": "/_authenticated/my/events",
+      "severity": "P3",
+      "status": "pass",
+      "detail": "links resolve"
+    },
+    {
+      "id": "/_authenticated/my/id-card",
+      "kind": "page-load",
+      "route": "/_authenticated/my/id-card",
+      "severity": "P3",
+      "status": "pass",
+      "detail": "ok"
+    },
+    {
+      "id": "/_authenticated/my/id-card",
+      "kind": "nav-links",
+      "route": "/_authenticated/my/id-card",
+      "severity": "P3",
+      "status": "pass",
+      "detail": "links resolve"
+    },
+    {
+      "id": "/_authenticated/my/notifications",
+      "kind": "page-load",
+      "route": "/_authenticated/my/notifications",
+      "severity": "P3",
+      "status": "pass",
+      "detail": "ok"
+    },
+    {
+      "id": "/_authenticated/my/notifications",
+      "kind": "nav-links",
+      "route": "/_authenticated/my/notifications",
+      "severity": "P3",
+      "status": "pass",
+      "detail": "links resolve"
+    },
+    {
+      "id": "/_authenticated/my/organizations",
+      "kind": "page-load",
+      "route": "/_authenticated/my/organizations",
+      "severity": "P3",
+      "status": "pass",
+      "detail": "ok"
+    },
+    {
+      "id": "/_authenticated/my/organizations",
+      "kind": "nav-links",
+      "route": "/_authenticated/my/organizations",
+      "severity": "P3",
+      "status": "pass",
+      "detail": "links resolve"
+    },
+    {
+      "id": "/_authenticated/my/payments",
+      "kind": "page-load",
+      "route": "/_authenticated/my/payments",
+      "severity": "P3",
+      "status": "pass",
+      "detail": "ok"
+    },
+    {
+      "id": "/_authenticated/my/payments",
+      "kind": "nav-links",
+      "route": "/_authenticated/my/payments",
+      "severity": "P1",
+      "status": "fail",
+      "detail": "runner exception: locator.getAttribute: Timeout 10000ms exceeded.\nCall log:\n\u001b[2m  - waiting for locator('a[href], [role=\"link\"]').nth(22)\u001b[22m\n"
+    },
+    {
+      "id": "/_authenticated/my/profile",
+      "kind": "page-load",
+      "route": "/_authenticated/my/profile",
+      "severity": "P3",
+      "status": "pass",
+      "detail": "ok"
+    },
+    {
+      "id": "/_authenticated/my/profile",
+      "kind": "nav-links",
+      "route": "/_authenticated/my/profile",
+      "severity": "P3",
+      "status": "pass",
+      "detail": "links resolve"
+    },
+    {
+      "id": "/_authenticated/my/schedule",
+      "kind": "page-load",
+      "route": "/_authenticated/my/schedule",
+      "severity": "P3",
+      "status": "pass",
+      "detail": "ok"
+    },
+    {
+      "id": "/_authenticated/my/schedule",
+      "kind": "nav-links",
+      "route": "/_authenticated/my/schedule",
+      "severity": "P3",
+      "status": "pass",
+      "detail": "links resolve"
+    },
+    {
+      "id": "/_authenticated/my/settings",
+      "kind": "page-load",
+      "route": "/_authenticated/my/settings",
+      "severity": "P3",
+      "status": "pass",
+      "detail": "ok"
+    },
+    {
+      "id": "/_authenticated/my/settings",
+      "kind": "nav-links",
+      "route": "/_authenticated/my/settings",
+      "severity": "P3",
+      "status": "pass",
+      "detail": "links resolve"
+    },
+    {
+      "id": "/_authenticated/my/training",
+      "kind": "page-load",
+      "route": "/_authenticated/my/training",
+      "severity": "P3",
+      "status": "pass",
+      "detail": "ok"
+    },
+    {
+      "id": "/_authenticated/my/training",
+      "kind": "nav-links",
+      "route": "/_authenticated/my/training",
+      "severity": "P3",
+      "status": "pass",
+      "detail": "links resolve"
+    },
+    {
+      "id": "/_authenticated/settings/account",
+      "kind": "page-load",
+      "route": "/_authenticated/settings/account",
+      "severity": "P3",
+      "status": "pass",
+      "detail": "ok"
+    },
+    {
+      "id": "/_authenticated/settings/account",
+      "kind": "nav-links",
+      "route": "/_authenticated/settings/account",
+      "severity": "P3",
+      "status": "pass",
+      "detail": "links resolve"
+    },
+    {
+      "id": "/_authenticated/settings/security",
+      "kind": "page-load",
+      "route": "/_authenticated/settings/security",
+      "severity": "P3",
+      "status": "pass",
+      "detail": "ok"
+    },
+    {
+      "id": "/_authenticated/settings/security",
+      "kind": "nav-links",
+      "route": "/_authenticated/settings/security",
+      "severity": "P3",
+      "status": "pass",
+      "detail": "links resolve"
+    },
+    {
+      "id": "/_authenticated/my/bookings/",
+      "kind": "page-load",
+      "route": "/_authenticated/my/bookings/",
+      "severity": "P3",
+      "status": "pass",
+      "detail": "ok"
+    },
+    {
+      "id": "/_authenticated/my/bookings/",
+      "kind": "nav-links",
+      "route": "/_authenticated/my/bookings/",
+      "severity": "P3",
+      "status": "pass",
+      "detail": "links resolve"
+    },
+    {
+      "id": "/_authenticated/my/certificates/",
+      "kind": "page-load",
+      "route": "/_authenticated/my/certificates/",
+      "severity": "P3",
+      "status": "pass",
+      "detail": "ok"
+    },
+    {
+      "id": "/_authenticated/my/certificates/",
+      "kind": "nav-links",
+      "route": "/_authenticated/my/certificates/",
+      "severity": "P3",
+      "status": "pass",
+      "detail": "links resolve"
+    },
+    {
+      "id": "/_authenticated/my/credits/",
+      "kind": "page-load",
+      "route": "/_authenticated/my/credits/",
+      "severity": "P3",
+      "status": "pass",
+      "detail": "ok"
+    },
+    {
+      "id": "/_authenticated/my/credits/",
+      "kind": "nav-links",
+      "route": "/_authenticated/my/credits/",
+      "severity": "P3",
+      "status": "pass",
+      "detail": "links resolve"
+    },
+    {
+      "id": "/_authenticated/my/credits/log",
+      "kind": "page-load",
+      "route": "/_authenticated/my/credits/log",
+      "severity": "P3",
+      "status": "pass",
+      "detail": "ok"
+    },
+    {
+      "id": "/_authenticated/my/credits/log",
+      "kind": "nav-links",
+      "route": "/_authenticated/my/credits/log",
+      "severity": "P3",
+      "status": "pass",
+      "detail": "links resolve"
+    },
+    {
+      "id": "/_authenticated/my/surveys/$surveyId",
+      "kind": "page-load",
+      "route": "/_authenticated/my/surveys/$surveyId",
+      "severity": "P3",
+      "status": "pass",
+      "detail": "ok"
+    },
+    {
+      "id": "/_authenticated/my/surveys/$surveyId",
+      "kind": "nav-links",
+      "route": "/_authenticated/my/surveys/$surveyId",
+      "severity": "P3",
+      "status": "pass",
+      "detail": "links resolve"
+    },
+    {
+      "id": "/_authenticated/my/surveys/",
+      "kind": "page-load",
+      "route": "/_authenticated/my/surveys/",
+      "severity": "P3",
+      "status": "pass",
+      "detail": "ok"
+    },
+    {
+      "id": "/_authenticated/my/surveys/",
+      "kind": "nav-links",
+      "route": "/_authenticated/my/surveys/",
+      "severity": "P3",
+      "status": "pass",
+      "detail": "links resolve"
+    },
+    {
+      "id": "/_authenticated/org/$orgSlug/directory",
+      "kind": "page-load",
+      "route": "/_authenticated/org/$orgSlug/directory",
+      "severity": "P3",
+      "status": "pass",
+      "detail": "ok"
+    },
+    {
+      "id": "/_authenticated/org/$orgSlug/directory",
+      "kind": "nav-links",
+      "route": "/_authenticated/org/$orgSlug/directory",
+      "severity": "P3",
+      "status": "pass",
+      "detail": "links resolve"
+    },
+    {
+      "id": "/_authenticated/org/$orgSlug/dues",
+      "kind": "page-load",
+      "route": "/_authenticated/org/$orgSlug/dues",
+      "severity": "P3",
+      "status": "pass",
+      "detail": "ok"
+    },
+    {
+      "id": "/_authenticated/org/$orgSlug/dues",
+      "kind": "nav-links",
+      "route": "/_authenticated/org/$orgSlug/dues",
+      "severity": "P3",
+      "status": "pass",
+      "detail": "links resolve"
+    },
+    {
+      "id": "/_authenticated/org/$orgSlug/home",
+      "kind": "page-load",
+      "route": "/_authenticated/org/$orgSlug/home",
+      "severity": "P3",
+      "status": "pass",
+      "detail": "ok"
+    },
+    {
+      "id": "/_authenticated/org/$orgSlug/home",
+      "kind": "nav-links",
+      "route": "/_authenticated/org/$orgSlug/home",
+      "severity": "P3",
+      "status": "pass",
+      "detail": "links resolve"
+    },
+    {
+      "id": "/_authenticated/org/$orgSlug/members",
+      "kind": "page-load",
+      "route": "/_authenticated/org/$orgSlug/members",
+      "severity": "P3",
+      "status": "pass",
+      "detail": "ok"
+    },
+    {
+      "id": "/_authenticated/org/$orgSlug/members",
+      "kind": "nav-links",
+      "route": "/_authenticated/org/$orgSlug/members",
+      "severity": "P3",
+      "status": "pass",
+      "detail": "links resolve"
+    },
+    {
+      "id": "/_authenticated/org/$orgSlug/my-cpd",
+      "kind": "page-load",
+      "route": "/_authenticated/org/$orgSlug/my-cpd",
+      "severity": "P3",
+      "status": "pass",
+      "detail": "ok"
+    },
+    {
+      "id": "/_authenticated/org/$orgSlug/my-cpd",
+      "kind": "nav-links",
+      "route": "/_authenticated/org/$orgSlug/my-cpd",
+      "severity": "P3",
+      "status": "pass",
+      "detail": "links resolve"
+    },
+    {
+      "id": "/_authenticated/org/$orgSlug/my-notifications",
+      "kind": "page-load",
+      "route": "/_authenticated/org/$orgSlug/my-notifications",
+      "severity": "P3",
+      "status": "pass",
+      "detail": "ok"
+    },
+    {
+      "id": "/_authenticated/org/$orgSlug/my-notifications",
+      "kind": "nav-links",
+      "route": "/_authenticated/org/$orgSlug/my-notifications",
+      "severity": "P3",
+      "status": "pass",
+      "detail": "links resolve"
+    },
+    {
+      "id": "/_authenticated/org/$orgSlug/officer",
+      "kind": "page-load",
+      "route": "/_authenticated/org/$orgSlug/officer",
+      "severity": "P3",
+      "status": "pass",
+      "detail": "ok"
+    },
+    {
+      "id": "/_authenticated/org/$orgSlug/officer",
+      "kind": "nav-links",
+      "route": "/_authenticated/org/$orgSlug/officer",
+      "severity": "P3",
+      "status": "pass",
+      "detail": "links resolve"
+    },
+    {
+      "id": "/_authenticated/org/$orgSlug",
+      "kind": "page-load",
+      "route": "/_authenticated/org/$orgSlug",
+      "severity": "P3",
+      "status": "pass",
+      "detail": "ok"
+    },
+    {
+      "id": "/_authenticated/org/$orgSlug",
+      "kind": "nav-links",
+      "route": "/_authenticated/org/$orgSlug",
+      "severity": "P3",
+      "status": "pass",
+      "detail": "links resolve"
+    },
+    {
+      "id": "/_authenticated/org/$orgSlug/announcements/$announcementId",
+      "kind": "page-load",
+      "route": "/_authenticated/org/$orgSlug/announcements/$announcementId",
+      "severity": "P3",
+      "status": "pass",
+      "detail": "ok"
+    },
+    {
+      "id": "/_authenticated/org/$orgSlug/announcements/$announcementId",
+      "kind": "nav-links",
+      "route": "/_authenticated/org/$orgSlug/announcements/$announcementId",
+      "severity": "P3",
+      "status": "pass",
+      "detail": "links resolve"
+    },
+    {
+      "id": "/_authenticated/org/$orgSlug/announcements/",
+      "kind": "page-load",
+      "route": "/_authenticated/org/$orgSlug/announcements/",
+      "severity": "P3",
+      "status": "pass",
+      "detail": "ok"
+    },
+    {
+      "id": "/_authenticated/org/$orgSlug/announcements/",
+      "kind": "nav-links",
+      "route": "/_authenticated/org/$orgSlug/announcements/",
+      "severity": "P3",
+      "status": "pass",
+      "detail": "links resolve"
+    },
+    {
+      "id": "/_authenticated/org/$orgSlug/documents/",
+      "kind": "page-load",
+      "route": "/_authenticated/org/$orgSlug/documents/",
+      "severity": "P3",
+      "status": "pass",
+      "detail": "ok"
+    },
+    {
+      "id": "/_authenticated/org/$orgSlug/documents/",
+      "kind": "nav-links",
+      "route": "/_authenticated/org/$orgSlug/documents/",
+      "severity": "P3",
+      "status": "pass",
+      "detail": "links resolve"
+    },
+    {
+      "id": "/_authenticated/org/$orgSlug/elections/",
+      "kind": "page-load",
+      "route": "/_authenticated/org/$orgSlug/elections/",
+      "severity": "P3",
+      "status": "pass",
+      "detail": "ok"
+    },
+    {
+      "id": "/_authenticated/org/$orgSlug/elections/",
+      "kind": "nav-links",
+      "route": "/_authenticated/org/$orgSlug/elections/",
+      "severity": "P3",
+      "status": "pass",
+      "detail": "links resolve"
+    },
+    {
+      "id": "/_authenticated/org/$orgSlug/events/$eventId",
+      "kind": "page-load",
+      "route": "/_authenticated/org/$orgSlug/events/$eventId",
+      "severity": "P3",
+      "status": "pass",
+      "detail": "ok"
+    },
+    {
+      "id": "/_authenticated/org/$orgSlug/events/$eventId",
+      "kind": "nav-links",
+      "route": "/_authenticated/org/$orgSlug/events/$eventId",
+      "severity": "P3",
+      "status": "pass",
+      "detail": "links resolve"
+    },
+    {
+      "id": "/_authenticated/org/$orgSlug/events/",
+      "kind": "page-load",
+      "route": "/_authenticated/org/$orgSlug/events/",
+      "severity": "P3",
+      "status": "pass",
+      "detail": "ok"
+    },
+    {
+      "id": "/_authenticated/org/$orgSlug/events/",
+      "kind": "nav-links",
+      "route": "/_authenticated/org/$orgSlug/events/",
+      "severity": "P3",
+      "status": "pass",
+      "detail": "links resolve"
+    },
+    {
+      "id": "/_authenticated/org/$orgSlug/governance/",
+      "kind": "page-load",
+      "route": "/_authenticated/org/$orgSlug/governance/",
+      "severity": "P3",
+      "status": "pass",
+      "detail": "ok"
+    },
+    {
+      "id": "/_authenticated/org/$orgSlug/governance/",
+      "kind": "nav-links",
+      "route": "/_authenticated/org/$orgSlug/governance/",
+      "severity": "P3",
+      "status": "pass",
+      "detail": "links resolve"
+    },
+    {
+      "id": "/_authenticated/org/$orgSlug/messages/",
+      "kind": "page-load",
+      "route": "/_authenticated/org/$orgSlug/messages/",
+      "severity": "P3",
+      "status": "pass",
+      "detail": "ok"
+    },
+    {
+      "id": "/_authenticated/org/$orgSlug/messages/",
+      "kind": "nav-links",
+      "route": "/_authenticated/org/$orgSlug/messages/",
+      "severity": "P3",
+      "status": "pass",
+      "detail": "links resolve"
+    },
+    {
+      "id": "/_authenticated/org/$orgSlug/officer/applications",
+      "kind": "page-load",
+      "route": "/_authenticated/org/$orgSlug/officer/applications",
+      "severity": "P3",
+      "status": "pass",
+      "detail": "ok"
+    },
+    {
+      "id": "/_authenticated/org/$orgSlug/officer/applications",
+      "kind": "nav-links",
+      "route": "/_authenticated/org/$orgSlug/officer/applications",
+      "severity": "P3",
+      "status": "pass",
+      "detail": "links resolve"
+    },
+    {
+      "id": "/_authenticated/org/$orgSlug/officer/certificates",
+      "kind": "page-load",
+      "route": "/_authenticated/org/$orgSlug/officer/certificates",
+      "severity": "P3",
+      "status": "pass",
+      "detail": "ok"
+    },
+    {
+      "id": "/_authenticated/org/$orgSlug/officer/certificates",
+      "kind": "nav-links",
+      "route": "/_authenticated/org/$orgSlug/officer/certificates",
+      "severity": "P3",
+      "status": "pass",
+      "detail": "links resolve"
+    },
+    {
+      "id": "/_authenticated/org/$orgSlug/officer/compliance",
+      "kind": "page-load",
+      "route": "/_authenticated/org/$orgSlug/officer/compliance",
+      "severity": "P3",
+      "status": "pass",
+      "detail": "ok"
+    },
+    {
+      "id": "/_authenticated/org/$orgSlug/officer/compliance",
+      "kind": "nav-links",
+      "route": "/_authenticated/org/$orgSlug/officer/compliance",
+      "severity": "P3",
+      "status": "pass",
+      "detail": "links resolve"
+    },
+    {
+      "id": "/_authenticated/org/$orgSlug/officer/dashboard",
+      "kind": "page-load",
+      "route": "/_authenticated/org/$orgSlug/officer/dashboard",
+      "severity": "P3",
+      "status": "pass",
+      "detail": "ok"
+    },
+    {
+      "id": "/_authenticated/org/$orgSlug/officer/dashboard",
+      "kind": "nav-links",
+      "route": "/_authenticated/org/$orgSlug/officer/dashboard",
+      "severity": "P3",
+      "status": "pass",
+      "detail": "links resolve"
+    },
+    {
+      "id": "/_authenticated/org/$orgSlug/officer/officers",
+      "kind": "page-load",
+      "route": "/_authenticated/org/$orgSlug/officer/officers",
+      "severity": "P3",
+      "status": "pass",
+      "detail": "ok"
+    },
+    {
+      "id": "/_authenticated/org/$orgSlug/officer/officers",
+      "kind": "nav-links",
+      "route": "/_authenticated/org/$orgSlug/officer/officers",
+      "severity": "P3",
+      "status": "pass",
+      "detail": "links resolve"
+    },
+    {
+      "id": "/_authenticated/org/$orgSlug/training/$trainingId",
+      "kind": "page-load",
+      "route": "/_authenticated/org/$orgSlug/training/$trainingId",
+      "severity": "P3",
+      "status": "pass",
+      "detail": "ok"
+    },
+    {
+      "id": "/_authenticated/org/$orgSlug/training/$trainingId",
+      "kind": "nav-links",
+      "route": "/_authenticated/org/$orgSlug/training/$trainingId",
+      "severity": "P3",
+      "status": "pass",
+      "detail": "links resolve"
+    },
+    {
+      "id": "/_authenticated/org/$orgSlug/training/",
+      "kind": "page-load",
+      "route": "/_authenticated/org/$orgSlug/training/",
+      "severity": "P3",
+      "status": "pass",
+      "detail": "ok"
+    },
+    {
+      "id": "/_authenticated/org/$orgSlug/training/",
+      "kind": "nav-links",
+      "route": "/_authenticated/org/$orgSlug/training/",
+      "severity": "P3",
+      "status": "pass",
+      "detail": "links resolve"
+    },
+    {
+      "id": "/_authenticated/org/$orgSlug/elections/$electionId/",
+      "kind": "page-load",
+      "route": "/_authenticated/org/$orgSlug/elections/$electionId/",
+      "severity": "P3",
+      "status": "pass",
+      "detail": "ok"
+    },
+    {
+      "id": "/_authenticated/org/$orgSlug/elections/$electionId/",
+      "kind": "nav-links",
+      "route": "/_authenticated/org/$orgSlug/elections/$electionId/",
+      "severity": "P3",
+      "status": "pass",
+      "detail": "links resolve"
+    },
+    {
+      "id": "/_authenticated/org/$orgSlug/elections/$electionId/vote",
+      "kind": "page-load",
+      "route": "/_authenticated/org/$orgSlug/elections/$electionId/vote",
+      "severity": "P3",
+      "status": "pass",
+      "detail": "ok"
+    },
+    {
+      "id": "/_authenticated/org/$orgSlug/elections/$electionId/vote",
+      "kind": "nav-links",
+      "route": "/_authenticated/org/$orgSlug/elections/$electionId/vote",
+      "severity": "P3",
+      "status": "pass",
+      "detail": "links resolve"
+    },
+    {
+      "id": "/_authenticated/org/$orgSlug/messages/dm/",
+      "kind": "page-load",
+      "route": "/_authenticated/org/$orgSlug/messages/dm/",
+      "severity": "P3",
+      "status": "pass",
+      "detail": "ok"
+    },
+    {
+      "id": "/_authenticated/org/$orgSlug/messages/dm/",
+      "kind": "nav-links",
+      "route": "/_authenticated/org/$orgSlug/messages/dm/",
+      "severity": "P3",
+      "status": "pass",
+      "detail": "links resolve"
+    },
+    {
+      "id": "/_authenticated/org/$orgSlug/officer/communications/$announcementId",
+      "kind": "page-load",
+      "route": "/_authenticated/org/$orgSlug/officer/communications/$announcementId",
+      "severity": "P3",
+      "status": "pass",
+      "detail": "ok"
+    },
+    {
+      "id": "/_authenticated/org/$orgSlug/officer/communications/$announcementId",
+      "kind": "nav-links",
+      "route": "/_authenticated/org/$orgSlug/officer/communications/$announcementId",
+      "severity": "P3",
+      "status": "pass",
+      "detail": "links resolve"
+    },
+    {
+      "id": "/_authenticated/org/$orgSlug/officer/communications/analytics",
+      "kind": "page-load",
+      "route": "/_authenticated/org/$orgSlug/officer/communications/analytics",
+      "severity": "P3",
+      "status": "pass",
+      "detail": "ok"
+    },
+    {
+      "id": "/_authenticated/org/$orgSlug/officer/communications/analytics",
+      "kind": "nav-links",
+      "route": "/_authenticated/org/$orgSlug/officer/communications/analytics",
+      "severity": "P3",
+      "status": "pass",
+      "detail": "links resolve"
+    },
+    {
+      "id": "/_authenticated/org/$orgSlug/officer/communications/",
+      "kind": "page-load",
+      "route": "/_authenticated/org/$orgSlug/officer/communications/",
+      "severity": "P3",
+      "status": "pass",
+      "detail": "ok"
+    },
+    {
+      "id": "/_authenticated/org/$orgSlug/officer/communications/",
+      "kind": "nav-links",
+      "route": "/_authenticated/org/$orgSlug/officer/communications/",
+      "severity": "P3",
+      "status": "pass",
+      "detail": "links resolve"
+    },
+    {
+      "id": "/_authenticated/org/$orgSlug/officer/communications/new",
+      "kind": "page-load",
+      "route": "/_authenticated/org/$orgSlug/officer/communications/new",
+      "severity": "P3",
+      "status": "pass",
+      "detail": "ok"
+    },
+    {
+      "id": "/_authenticated/org/$orgSlug/officer/communications/new",
+      "kind": "nav-links",
+      "route": "/_authenticated/org/$orgSlug/officer/communications/new",
+      "severity": "P3",
+      "status": "pass",
+      "detail": "links resolve"
+    },
+    {
+      "id": "/_authenticated/org/$orgSlug/officer/communications/sent",
+      "kind": "page-load",
+      "route": "/_authenticated/org/$orgSlug/officer/communications/sent",
+      "severity": "P3",
+      "status": "pass",
+      "detail": "ok"
+    },
+    {
+      "id": "/_authenticated/org/$orgSlug/officer/communications/sent",
+      "kind": "nav-links",
+      "route": "/_authenticated/org/$orgSlug/officer/communications/sent",
+      "severity": "P3",
+      "status": "pass",
+      "detail": "links resolve"
+    },
+    {
+      "id": "/_authenticated/org/$orgSlug/officer/documents/",
+      "kind": "page-load",
+      "route": "/_authenticated/org/$orgSlug/officer/documents/",
+      "severity": "P3",
+      "status": "pass",
+      "detail": "ok"
+    },
+    {
+      "id": "/_authenticated/org/$orgSlug/officer/documents/",
+      "kind": "nav-links",
+      "route": "/_authenticated/org/$orgSlug/officer/documents/",
+      "severity": "P3",
+      "status": "pass",
+      "detail": "links resolve"
+    },
+    {
+      "id": "/_authenticated/org/$orgSlug/officer/elections/$electionId",
+      "kind": "page-load",
+      "route": "/_authenticated/org/$orgSlug/officer/elections/$electionId",
+      "severity": "P3",
+      "status": "pass",
+      "detail": "ok"
+    },
+    {
+      "id": "/_authenticated/org/$orgSlug/officer/elections/$electionId",
+      "kind": "nav-links",
+      "route": "/_authenticated/org/$orgSlug/officer/elections/$electionId",
+      "severity": "P3",
+      "status": "pass",
+      "detail": "links resolve"
+    },
+    {
+      "id": "/_authenticated/org/$orgSlug/officer/elections/",
+      "kind": "page-load",
+      "route": "/_authenticated/org/$orgSlug/officer/elections/",
+      "severity": "P3",
+      "status": "pass",
+      "detail": "ok"
+    },
+    {
+      "id": "/_authenticated/org/$orgSlug/officer/elections/",
+      "kind": "nav-links",
+      "route": "/_authenticated/org/$orgSlug/officer/elections/",
+      "severity": "P3",
+      "status": "pass",
+      "detail": "links resolve"
+    },
+    {
+      "id": "/_authenticated/org/$orgSlug/officer/elections/new",
+      "kind": "page-load",
+      "route": "/_authenticated/org/$orgSlug/officer/elections/new",
+      "severity": "P3",
+      "status": "pass",
+      "detail": "ok"
+    },
+    {
+      "id": "/_authenticated/org/$orgSlug/officer/elections/new",
+      "kind": "nav-links",
+      "route": "/_authenticated/org/$orgSlug/officer/elections/new",
+      "severity": "P3",
+      "status": "pass",
+      "detail": "links resolve"
+    },
+    {
+      "id": "/_authenticated/org/$orgSlug/officer/events/$eventId",
+      "kind": "page-load",
+      "route": "/_authenticated/org/$orgSlug/officer/events/$eventId",
+      "severity": "P3",
+      "status": "pass",
+      "detail": "ok"
+    },
+    {
+      "id": "/_authenticated/org/$orgSlug/officer/events/$eventId",
+      "kind": "nav-links",
+      "route": "/_authenticated/org/$orgSlug/officer/events/$eventId",
+      "severity": "P3",
+      "status": "pass",
+      "detail": "links resolve"
+    },
+    {
+      "id": "/_authenticated/org/$orgSlug/officer/events/",
+      "kind": "page-load",
+      "route": "/_authenticated/org/$orgSlug/officer/events/",
+      "severity": "P3",
+      "status": "pass",
+      "detail": "ok"
+    },
+    {
+      "id": "/_authenticated/org/$orgSlug/officer/events/",
+      "kind": "nav-links",
+      "route": "/_authenticated/org/$orgSlug/officer/events/",
+      "severity": "P3",
+      "status": "pass",
+      "detail": "links resolve"
+    },
+    {
+      "id": "/_authenticated/org/$orgSlug/officer/events/new",
+      "kind": "page-load",
+      "route": "/_authenticated/org/$orgSlug/officer/events/new",
+      "severity": "P3",
+      "status": "pass",
+      "detail": "ok"
+    },
+    {
+      "id": "/_authenticated/org/$orgSlug/officer/events/new",
+      "kind": "nav-links",
+      "route": "/_authenticated/org/$orgSlug/officer/events/new",
+      "severity": "P3",
+      "status": "pass",
+      "detail": "links resolve"
+    },
+    {
+      "id": "/_authenticated/org/$orgSlug/officer/finances/assessments",
+      "kind": "page-load",
+      "route": "/_authenticated/org/$orgSlug/officer/finances/assessments",
+      "severity": "P3",
+      "status": "pass",
+      "detail": "ok"
+    },
+    {
+      "id": "/_authenticated/org/$orgSlug/officer/finances/assessments",
+      "kind": "nav-links",
+      "route": "/_authenticated/org/$orgSlug/officer/finances/assessments",
+      "severity": "P3",
+      "status": "pass",
+      "detail": "links resolve"
+    },
+    {
+      "id": "/_authenticated/org/$orgSlug/officer/finances/dues",
+      "kind": "page-load",
+      "route": "/_authenticated/org/$orgSlug/officer/finances/dues",
+      "severity": "P3",
+      "status": "pass",
+      "detail": "ok"
+    },
+    {
+      "id": "/_authenticated/org/$orgSlug/officer/finances/dues",
+      "kind": "nav-links",
+      "route": "/_authenticated/org/$orgSlug/officer/finances/dues",
+      "severity": "P3",
+      "status": "pass",
+      "detail": "links resolve"
+    },
+    {
+      "id": "/_authenticated/org/$orgSlug/officer/finances/funds",
+      "kind": "page-load",
+      "route": "/_authenticated/org/$orgSlug/officer/finances/funds",
+      "severity": "P3",
+      "status": "pass",
+      "detail": "ok"
+    },
+    {
+      "id": "/_authenticated/org/$orgSlug/officer/finances/funds",
+      "kind": "nav-links",
+      "route": "/_authenticated/org/$orgSlug/officer/finances/funds",
+      "severity": "P3",
+      "status": "pass",
+      "detail": "links resolve"
+    },
+    {
+      "id": "/_authenticated/org/$orgSlug/officer/finances/",
+      "kind": "page-load",
+      "route": "/_authenticated/org/$orgSlug/officer/finances/",
+      "severity": "P3",
+      "status": "pass",
+      "detail": "ok"
+    },
+    {
+      "id": "/_authenticated/org/$orgSlug/officer/finances/",
+      "kind": "nav-links",
+      "route": "/_authenticated/org/$orgSlug/officer/finances/",
+      "severity": "P3",
+      "status": "pass",
+      "detail": "links resolve"
+    },
+    {
+      "id": "/_authenticated/org/$orgSlug/officer/finances/invoices",
+      "kind": "page-load",
+      "route": "/_authenticated/org/$orgSlug/officer/finances/invoices",
+      "severity": "P3",
+      "status": "pass",
+      "detail": "ok"
+    },
+    {
+      "id": "/_authenticated/org/$orgSlug/officer/finances/invoices",
+      "kind": "nav-links",
+      "route": "/_authenticated/org/$orgSlug/officer/finances/invoices",
+      "severity": "P3",
+      "status": "pass",
+      "detail": "links resolve"
+    },
+    {
+      "id": "/_authenticated/org/$orgSlug/officer/finances/members",
+      "kind": "page-load",
+      "route": "/_authenticated/org/$orgSlug/officer/finances/members",
+      "severity": "P3",
+      "status": "pass",
+      "detail": "ok"
+    },
+    {
+      "id": "/_authenticated/org/$orgSlug/officer/finances/members",
+      "kind": "nav-links",
+      "route": "/_authenticated/org/$orgSlug/officer/finances/members",
+      "severity": "P3",
+      "status": "pass",
+      "detail": "links resolve"
+    },
+    {
+      "id": "/_authenticated/org/$orgSlug/officer/institutional-memberships/",
+      "kind": "page-load",
+      "route": "/_authenticated/org/$orgSlug/officer/institutional-memberships/",
+      "severity": "P3",
+      "status": "pass",
+      "detail": "ok"
+    },
+    {
+      "id": "/_authenticated/org/$orgSlug/officer/institutional-memberships/",
+      "kind": "nav-links",
+      "route": "/_authenticated/org/$orgSlug/officer/institutional-memberships/",
+      "severity": "P3",
+      "status": "pass",
+      "detail": "links resolve"
+    },
+    {
+      "id": "/_authenticated/org/$orgSlug/officer/institutional-memberships/new",
+      "kind": "page-load",
+      "route": "/_authenticated/org/$orgSlug/officer/institutional-memberships/new",
+      "severity": "P3",
+      "status": "pass",
+      "detail": "ok"
+    },
+    {
+      "id": "/_authenticated/org/$orgSlug/officer/institutional-memberships/new",
+      "kind": "nav-links",
+      "route": "/_authenticated/org/$orgSlug/officer/institutional-memberships/new",
+      "severity": "P3",
+      "status": "pass",
+      "detail": "links resolve"
+    },
+    {
+      "id": "/_authenticated/org/$orgSlug/officer/messages/",
+      "kind": "page-load",
+      "route": "/_authenticated/org/$orgSlug/officer/messages/",
+      "severity": "P3",
+      "status": "pass",
+      "detail": "ok"
+    },
+    {
+      "id": "/_authenticated/org/$orgSlug/officer/messages/",
+      "kind": "nav-links",
+      "route": "/_authenticated/org/$orgSlug/officer/messages/",
+      "severity": "P3",
+      "status": "pass",
+      "detail": "links resolve"
+    },
+    {
+      "id": "/_authenticated/org/$orgSlug/officer/payments/",
+      "kind": "page-load",
+      "route": "/_authenticated/org/$orgSlug/officer/payments/",
+      "severity": "P3",
+      "status": "pass",
+      "detail": "ok"
+    },
+    {
+      "id": "/_authenticated/org/$orgSlug/officer/payments/",
+      "kind": "nav-links",
+      "route": "/_authenticated/org/$orgSlug/officer/payments/",
+      "severity": "P3",
+      "status": "pass",
+      "detail": "links resolve"
+    },
+    {
+      "id": "/_authenticated/org/$orgSlug/officer/payments/new",
+      "kind": "page-load",
+      "route": "/_authenticated/org/$orgSlug/officer/payments/new",
+      "severity": "P3",
+      "status": "pass",
+      "detail": "ok"
+    },
+    {
+      "id": "/_authenticated/org/$orgSlug/officer/payments/new",
+      "kind": "nav-links",
+      "route": "/_authenticated/org/$orgSlug/officer/payments/new",
+      "severity": "P3",
+      "status": "pass",
+      "detail": "links resolve"
+    },
+    {
+      "id": "/_authenticated/org/$orgSlug/officer/reports/credits",
+      "kind": "page-load",
+      "route": "/_authenticated/org/$orgSlug/officer/reports/credits",
+      "severity": "P3",
+      "status": "pass",
+      "detail": "ok"
+    },
+    {
+      "id": "/_authenticated/org/$orgSlug/officer/reports/credits",
+      "kind": "nav-links",
+      "route": "/_authenticated/org/$orgSlug/officer/reports/credits",
+      "severity": "P3",
+      "status": "pass",
+      "detail": "links resolve"
+    },
+    {
+      "id": "/_authenticated/org/$orgSlug/officer/reports/financial",
+      "kind": "page-load",
+      "route": "/_authenticated/org/$orgSlug/officer/reports/financial",
+      "severity": "P3",
+      "status": "pass",
+      "detail": "ok"
+    },
+    {
+      "id": "/_authenticated/org/$orgSlug/officer/reports/financial",
+      "kind": "nav-links",
+      "route": "/_authenticated/org/$orgSlug/officer/reports/financial",
+      "severity": "P3",
+      "status": "pass",
+      "detail": "links resolve"
+    },
+    {
+      "id": "/_authenticated/org/$orgSlug/officer/reviews/",
+      "kind": "page-load",
+      "route": "/_authenticated/org/$orgSlug/officer/reviews/",
+      "severity": "P3",
+      "status": "pass",
+      "detail": "ok"
+    },
+    {
+      "id": "/_authenticated/org/$orgSlug/officer/reviews/",
+      "kind": "nav-links",
+      "route": "/_authenticated/org/$orgSlug/officer/reviews/",
+      "severity": "P3",
+      "status": "pass",
+      "detail": "links resolve"
+    },
+    {
+      "id": "/_authenticated/org/$orgSlug/officer/roster/import",
+      "kind": "page-load",
+      "route": "/_authenticated/org/$orgSlug/officer/roster/import",
+      "severity": "P3",
+      "status": "pass",
+      "detail": "ok"
+    },
+    {
+      "id": "/_authenticated/org/$orgSlug/officer/roster/import",
+      "kind": "nav-links",
+      "route": "/_authenticated/org/$orgSlug/officer/roster/import",
+      "severity": "P3",
+      "status": "pass",
+      "detail": "links resolve"
+    },
+    {
+      "id": "/_authenticated/org/$orgSlug/officer/roster/",
+      "kind": "page-load",
+      "route": "/_authenticated/org/$orgSlug/officer/roster/",
+      "severity": "P3",
+      "status": "pass",
+      "detail": "ok"
+    },
+    {
+      "id": "/_authenticated/org/$orgSlug/officer/roster/",
+      "kind": "nav-links",
+      "route": "/_authenticated/org/$orgSlug/officer/roster/",
+      "severity": "P3",
+      "status": "pass",
+      "detail": "links resolve"
+    },
+    {
+      "id": "/_authenticated/org/$orgSlug/officer/settings/chapters",
+      "kind": "page-load",
+      "route": "/_authenticated/org/$orgSlug/officer/settings/chapters",
+      "severity": "P3",
+      "status": "pass",
+      "detail": "ok"
+    },
+    {
+      "id": "/_authenticated/org/$orgSlug/officer/settings/chapters",
+      "kind": "nav-links",
+      "route": "/_authenticated/org/$orgSlug/officer/settings/chapters",
+      "severity": "P3",
+      "status": "pass",
+      "detail": "links resolve"
+    },
+    {
+      "id": "/_authenticated/org/$orgSlug/officer/settings/cpd",
+      "kind": "page-load",
+      "route": "/_authenticated/org/$orgSlug/officer/settings/cpd",
+      "severity": "P3",
+      "status": "pass",
+      "detail": "ok"
+    },
+    {
+      "id": "/_authenticated/org/$orgSlug/officer/settings/cpd",
+      "kind": "nav-links",
+      "route": "/_authenticated/org/$orgSlug/officer/settings/cpd",
+      "severity": "P3",
+      "status": "pass",
+      "detail": "links resolve"
+    },
+    {
+      "id": "/_authenticated/org/$orgSlug/officer/settings/gateway",
+      "kind": "page-load",
+      "route": "/_authenticated/org/$orgSlug/officer/settings/gateway",
+      "severity": "P3",
+      "status": "pass",
+      "detail": "ok"
+    },
+    {
+      "id": "/_authenticated/org/$orgSlug/officer/settings/gateway",
+      "kind": "nav-links",
+      "route": "/_authenticated/org/$orgSlug/officer/settings/gateway",
+      "severity": "P3",
+      "status": "pass",
+      "detail": "links resolve"
+    },
+    {
+      "id": "/_authenticated/org/$orgSlug/officer/settings/membership-categories",
+      "kind": "page-load",
+      "route": "/_authenticated/org/$orgSlug/officer/settings/membership-categories",
+      "severity": "P3",
+      "status": "pass",
+      "detail": "ok"
+    },
+    {
+      "id": "/_authenticated/org/$orgSlug/officer/settings/membership-categories",
+      "kind": "nav-links",
+      "route": "/_authenticated/org/$orgSlug/officer/settings/membership-categories",
+      "severity": "P3",
+      "status": "pass",
+      "detail": "links resolve"
+    },
+    {
+      "id": "/_authenticated/org/$orgSlug/officer/settings/org",
+      "kind": "page-load",
+      "route": "/_authenticated/org/$orgSlug/officer/settings/org",
+      "severity": "P3",
+      "status": "pass",
+      "detail": "ok"
+    },
+    {
+      "id": "/_authenticated/org/$orgSlug/officer/settings/org",
+      "kind": "nav-links",
+      "route": "/_authenticated/org/$orgSlug/officer/settings/org",
+      "severity": "P3",
+      "status": "pass",
+      "detail": "links resolve"
+    },
+    {
+      "id": "/_authenticated/org/$orgSlug/officer/settings/providers",
+      "kind": "page-load",
+      "route": "/_authenticated/org/$orgSlug/officer/settings/providers",
+      "severity": "P3",
+      "status": "pass",
+      "detail": "ok"
+    },
+    {
+      "id": "/_authenticated/org/$orgSlug/officer/settings/providers",
+      "kind": "nav-links",
+      "route": "/_authenticated/org/$orgSlug/officer/settings/providers",
+      "severity": "P3",
+      "status": "pass",
+      "detail": "links resolve"
+    },
+    {
+      "id": "/_authenticated/org/$orgSlug/officer/surveys/$surveyId",
+      "kind": "page-load",
+      "route": "/_authenticated/org/$orgSlug/officer/surveys/$surveyId",
+      "severity": "P3",
+      "status": "pass",
+      "detail": "ok"
+    },
+    {
+      "id": "/_authenticated/org/$orgSlug/officer/surveys/$surveyId",
+      "kind": "nav-links",
+      "route": "/_authenticated/org/$orgSlug/officer/surveys/$surveyId",
+      "severity": "P3",
+      "status": "pass",
+      "detail": "links resolve"
+    },
+    {
+      "id": "/_authenticated/org/$orgSlug/officer/surveys/",
+      "kind": "page-load",
+      "route": "/_authenticated/org/$orgSlug/officer/surveys/",
+      "severity": "P3",
+      "status": "pass",
+      "detail": "ok"
+    },
+    {
+      "id": "/_authenticated/org/$orgSlug/officer/surveys/",
+      "kind": "nav-links",
+      "route": "/_authenticated/org/$orgSlug/officer/surveys/",
+      "severity": "P3",
+      "status": "pass",
+      "detail": "links resolve"
+    },
+    {
+      "id": "/_authenticated/org/$orgSlug/officer/surveys/new",
+      "kind": "page-load",
+      "route": "/_authenticated/org/$orgSlug/officer/surveys/new",
+      "severity": "P3",
+      "status": "pass",
+      "detail": "ok"
+    },
+    {
+      "id": "/_authenticated/org/$orgSlug/officer/surveys/new",
+      "kind": "nav-links",
+      "route": "/_authenticated/org/$orgSlug/officer/surveys/new",
+      "severity": "P3",
+      "status": "pass",
+      "detail": "links resolve"
+    },
+    {
+      "id": "/_authenticated/org/$orgSlug/officer/training/$trainingId",
+      "kind": "page-load",
+      "route": "/_authenticated/org/$orgSlug/officer/training/$trainingId",
+      "severity": "P3",
+      "status": "pass",
+      "detail": "ok"
+    },
+    {
+      "id": "/_authenticated/org/$orgSlug/officer/training/$trainingId",
+      "kind": "nav-links",
+      "route": "/_authenticated/org/$orgSlug/officer/training/$trainingId",
+      "severity": "P3",
+      "status": "pass",
+      "detail": "links resolve"
+    },
+    {
+      "id": "/_authenticated/org/$orgSlug/officer/training/",
+      "kind": "page-load",
+      "route": "/_authenticated/org/$orgSlug/officer/training/",
+      "severity": "P3",
+      "status": "pass",
+      "detail": "ok"
+    },
+    {
+      "id": "/_authenticated/org/$orgSlug/officer/training/",
+      "kind": "nav-links",
+      "route": "/_authenticated/org/$orgSlug/officer/training/",
+      "severity": "P3",
+      "status": "pass",
+      "detail": "links resolve"
+    },
+    {
+      "id": "/_authenticated/org/$orgSlug/officer/training/new",
+      "kind": "page-load",
+      "route": "/_authenticated/org/$orgSlug/officer/training/new",
+      "severity": "P3",
+      "status": "pass",
+      "detail": "ok"
+    },
+    {
+      "id": "/_authenticated/org/$orgSlug/officer/training/new",
+      "kind": "nav-links",
+      "route": "/_authenticated/org/$orgSlug/officer/training/new",
+      "severity": "P3",
+      "status": "pass",
+      "detail": "links resolve"
+    },
+    {
+      "id": "/_authenticated/org/$orgSlug/officer/communications/templates/",
+      "kind": "page-load",
+      "route": "/_authenticated/org/$orgSlug/officer/communications/templates/",
+      "severity": "P3",
+      "status": "pass",
+      "detail": "ok"
+    },
+    {
+      "id": "/_authenticated/org/$orgSlug/officer/communications/templates/",
+      "kind": "nav-links",
+      "route": "/_authenticated/org/$orgSlug/officer/communications/templates/",
+      "severity": "P3",
+      "status": "pass",
+      "detail": "links resolve"
+    },
+    {
+      "id": "/_authenticated/org/$orgSlug/officer/communications/templates/new",
+      "kind": "page-load",
+      "route": "/_authenticated/org/$orgSlug/officer/communications/templates/new",
+      "severity": "P3",
+      "status": "pass",
+      "detail": "ok"
+    },
+    {
+      "id": "/_authenticated/org/$orgSlug/officer/communications/templates/new",
+      "kind": "nav-links",
+      "route": "/_authenticated/org/$orgSlug/officer/communications/templates/new",
+      "severity": "P3",
+      "status": "pass",
+      "detail": "links resolve"
+    },
+    {
+      "id": "/_authenticated/org/$orgSlug/officer/elections/$electionId/edit",
+      "kind": "page-load",
+      "route": "/_authenticated/org/$orgSlug/officer/elections/$electionId/edit",
+      "severity": "P3",
+      "status": "pass",
+      "detail": "ok"
+    },
+    {
+      "id": "/_authenticated/org/$orgSlug/officer/elections/$electionId/edit",
+      "kind": "nav-links",
+      "route": "/_authenticated/org/$orgSlug/officer/elections/$electionId/edit",
+      "severity": "P3",
+      "status": "pass",
+      "detail": "links resolve"
+    },
+    {
+      "id": "/_authenticated/org/$orgSlug/officer/events/$eventId/attendance",
+      "kind": "page-load",
+      "route": "/_authenticated/org/$orgSlug/officer/events/$eventId/attendance",
+      "severity": "P3",
+      "status": "pass",
+      "detail": "ok"
+    },
+    {
+      "id": "/_authenticated/org/$orgSlug/officer/events/$eventId/attendance",
+      "kind": "nav-links",
+      "route": "/_authenticated/org/$orgSlug/officer/events/$eventId/attendance",
+      "severity": "P3",
+      "status": "pass",
+      "detail": "links resolve"
+    },
+    {
+      "id": "/_authenticated/org/$orgSlug/officer/finances/invoices/",
+      "kind": "page-load",
+      "route": "/_authenticated/org/$orgSlug/officer/finances/invoices/",
+      "severity": "P3",
+      "status": "pass",
+      "detail": "ok"
+    },
+    {
+      "id": "/_authenticated/org/$orgSlug/officer/finances/invoices/",
+      "kind": "nav-links",
+      "route": "/_authenticated/org/$orgSlug/officer/finances/invoices/",
+      "severity": "P3",
+      "status": "pass",
+      "detail": "links resolve"
+    },
+    {
+      "id": "/_authenticated/org/$orgSlug/officer/training/$trainingId/attendance",
+      "kind": "page-load",
+      "route": "/_authenticated/org/$orgSlug/officer/training/$trainingId/attendance",
+      "severity": "P3",
+      "status": "pass",
+      "detail": "ok"
+    },
+    {
+      "id": "/_authenticated/org/$orgSlug/officer/training/$trainingId/attendance",
+      "kind": "nav-links",
+      "route": "/_authenticated/org/$orgSlug/officer/training/$trainingId/attendance",
+      "severity": "P3",
+      "status": "pass",
+      "detail": "links resolve"
+    }
+  ]
+}
