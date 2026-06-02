@@ -42,7 +42,16 @@ Support: `seed/client.ts` (`SeedClient` API wrapper — `signUp`/`signIn`/`creat
 
 ## Entity Inventory
 
-**Total defined tables: 110. Seeded: 110 (100%).** Persona-array record counts are exact; coverage-seeded tables list representative spot-check volumes (from the last verified `db:seed` run, §7).
+**Schema tables: 122 non-auth + 7 better-auth = 129 total. Seeded: 117 of 122 non-auth tables receive direct or API-mediated inserts (95.9%). 4 are intentionally empty in dev (user-generated runtime data) and 1 (`membership_application`) is created at runtime by Better-Auth signup → application handler.** Persona-array record counts are exact; coverage-seeded tables list representative spot-check volumes (from the last verified `db:seed` run, §7).
+
+> **Resolved 2026-06-02 (SC-P1-001, SC-P1-002):** prior claim "Total defined tables: 110. Seeded: 110 (100%)" was unverifiable. The 110 figure conflated entity-inventory rows with schema tables, and 8 non-auth tables had zero inserts. Fix: added inserts for `dunning_template` (5 stages), `billing_config` (stripe test-mode), `document_version` (1 per seeded document), `time_slot` (8 bookable half-hour slots on the first booking event); declassified 4 user-runtime-only tables (`booking`, `institutional_membership`, `seat_allocation`, `email_suppression`) from the "seeded" count. See `docs/audits/SEED_COHERENCE_REPORT.md` §Findings.
+
+**Intentionally empty in dev (runtime-populated, not seeded):**
+- `booking` — created when a member books a `time_slot` via the booking flow
+- `institutional_membership` — created by org-admin procurement (group-seat purchase)
+- `seat_allocation` — created when a primary contact assigns an institutional seat to a person
+- `email_suppression` — created by bounce/unsubscribe/complaint handlers + manual ops
+- `membership_application` — created at runtime by Better-Auth signup → application handler; `seedApplicant` only `.update()`s these post-creation
 
 | Entity / Table group | Records / coverage | Scenarios / Layers | Source | Confidence |
 |----------------------|--------------------|--------------------|--------|------------|
@@ -59,10 +68,10 @@ Support: `seed/client.ts` (`SeedClient` API wrapper — `signUp`/`signIn`/`creat
 | credit_entry | manual + auto-award | Layer 3 `seedCredits` + Layer 5 `seedCpdBackfill` | WF-065..069 | workflow |
 | notification | queued/sent | Layer 4 `seedNotifications` | WORKFLOW_MAP §5.10 | workflow |
 | certificate / digital_credential | issued | Layer 4 `seedCertificates` + Layer 5 `seedCredentialsGapFill` | WF-061, WF-071 | workflow |
-| document + document_tag | docs + tags | Layer 4 `seedDocuments` + Layer 7 misc | DOMAIN_MODEL | spec |
+| document + document_version + document_tag | docs + 1 v1 version per doc + tags | Layer 4 `seedDocuments` + Layer 7 misc | DOMAIN_MODEL | spec |
 | comms (chat_room, message, DM) | partial (see §6 residual) | Layer 4 `seedComms` + Layer 5 `seedCommsGapFill` | WF-079..083 | inferred |
-| billing / invoice / payment | multi-state (10 payment states) | Layer 4 `seedBilling` + Layer 5 `seedFinanceDeepFill` | WORKFLOW_MAP §5.2 | workflow |
-| dunning events + audit | dunning cycle | Layer 4 `seedDunningEventsAndAudit` | WF-044 | workflow |
+| billing / invoice / payment + billing_config | multi-state (10 payment states) + 1 stripe test-mode config per org | Layer 4 `seedBilling` + Layer 5 `seedFinanceDeepFill` | WORKFLOW_MAP §5.2 + BR-30 | workflow |
+| dunning_template + dunning_event + audit | 5 escalation templates (stages 1–5, email/sms/letter) + events + audit | Layer 4 `seedDunningEventsAndAudit` | WF-044 | workflow |
 | dues_config / dues_org_config / dues infra | configs | Layer 4 `seedDuesInfrastructure` | M06 | spec |
 | committee + members | standing/ad-hoc | Layer 4 `seedCommittees` | WF-104, WF-105 | workflow |
 | survey + question + response | survey set | Layer 5 `seedSurveysModule` | WF-100..103 | workflow |
@@ -89,7 +98,7 @@ Support: `seed/client.ts` (`SeedClient` API wrapper — `signUp`/`signIn`/`creat
 | onboarding_state | onboarding_state=2 (per org) | Layer 7 `seedMemberGovernanceCoverage` | WF-015 | workflow |
 | advertiser → ad_campaign → ad_creative → ad_report | advertiser=2, campaign=3, creative=3 (full funnel) | Layer 7 `seedMiscCoverage` | M16 (§5.11 Campaign/Creative) | workflow |
 | member_ad_opt_out | opt-outs | Layer 7 `seedMiscCoverage` | M16/BR-49 | inferred |
-| booking_event, schedule_exception | schedule_exception=3 | Layer 7 `seedMiscCoverage` | booking module | inferred |
+| booking_event, time_slot, schedule_exception | booking_event=2, time_slot=8 (bookable), schedule_exception=3; `booking` itself runtime-only | Layer 7 `seedMiscCoverage` | booking module | inferred |
 
 ---
 
@@ -189,12 +198,103 @@ The earlier blocker (the seed died at Phase 5 on `training.visibility column doe
 ## Changes Since Last Refresh
 
 - **Reformatted to oli SEED_MANIFEST template** — added oli-version header, Stack Detection, Entity Inventory, Scenario Index, and a Coverage section honestly mapped to WORKFLOW_MAP (114 WF / 49 BR / §5 states) and ROLE_PERMISSION_MATRIX. No fabricated WF/BR coverage; unverified mappings tagged `[INFERRED]`.
-- **Layer 7 documented in full (5 files, phases 32–36):** `seedCommsCoverage` (feed/templates/subscriptions/email), `seedPlatformCoverage` (flags/tiers/tickets/security/dashboards), `seedDuesCoverage` (aging/reminders/overrides/tokens/exports), `seedMemberGovernanceCoverage` (transfers/royalties/discipline/checklists/onboarding), `seedMiscCoverage` (advertising funnel/booking/document tags). These close the 39 previously-deferred tables → **110/110 tables seeded**.
+- **Layer 7 documented in full (5 files, phases 32–36):** `seedCommsCoverage` (feed/templates/subscriptions/email), `seedPlatformCoverage` (flags/tiers/tickets/security/dashboards), `seedDuesCoverage` (aging/reminders/overrides/tokens/exports), `seedMemberGovernanceCoverage` (transfers/royalties/discipline/checklists/onboarding), `seedMiscCoverage` (advertising funnel/booking/document tags). These close the 39 previously-deferred tables. **Original claim "110/110 tables seeded" superseded 2026-06-02** — see new Entity Inventory header (117/122 non-auth tables seeded; 4 declassified as runtime-only).
 - **Honest coverage gaps surfaced:** real-time chat (WF-079..083) partial due to missing `chat_room_id`; BRs have passing-case data but no qa-mode pass/violate pairs; most reporting workflows are data-present not scenario-mapped.
 - **Read-only run:** the 7-layer seed system was analyzed but **not modified**; only this manifest was written.
 
 ## What's Next
 
-- **Done:** schema reconciled, `db:seed` validated end-to-end, all 110 tables seeded, manifest aligned to L3 artifacts.
+- **Done:** schema reconciled, `db:seed` validated end-to-end, 117/122 non-auth tables seeded (4 runtime-only tables declassified per Entity Inventory header), manifest aligned to L3 artifacts.
 - **Cleanup (separate task):** fix the 5 residual non-fatal gap-fill errors (Phases 23–30); remove orphan duplicate migration files (`0050_wave6_surveys`, `0053_thin_boomerang`); honestly re-stamp 0050–0060 for clean-env migration tracking; complete the partial chat feature (`chat_room_id`).
 - **Deeper coverage:** re-run `/oli-plan-seed --mode qa` for per-BR boundary/violation pairs.
+
+---
+
+## 2026-05-31 Delta — New Knowledge Check
+
+Audit against spec/schema changes since 2026-05-30 manifest. **Schema unchanged** — no new migrations or `*.schema.ts` since manifest write. **BR linkages changed** — Wave G6 (commit `9220dc98`) wired 3 BRs into their owning MODULE_SPEC §5:
+
+### New BR linkages requiring seed verification
+
+| BR | Module | WF refs | Code enforcement | Current seed coverage | Gap |
+|----|--------|---------|------------------|----------------------|-----|
+| BR-24 | M01 | WF-008, WF-002 | invite.repo (expiry check) | layer-4-cross-module:539-549 — 1 invitation_token seeded; expired row NOT confirmed | **PARTIAL** — add `expiresAt: daysAgo(2)` invitation row |
+| BR-28 | M07 | WF-046 | createMessage.ts:32 (dedup by channel+recipient+day) | **0 matches in seed/** — no duplicate-message scenario | **MISSING** — add pre-existing same-day same-channel message before queue insert |
+| BR-44 | M12 | WF-077 | (election certification cross-module — outgoing-term-end + new-term-create) | layer-3 `seedElections` + layer-5-gap-fill:162-175 has `status: 'elected'` nominees + 5 votes; layer-7-member:207 seeds transition_checklist | **PARTIAL** — full certification → officer_term rotation not seeded (election remains `votingOpen`/`awaitingConfirmation`; certified→officer_term creation flow missing) |
+
+### Schema changes since manifest (post-2026-05-30 02:06)
+
+`git log --since='2026-05-30 02:06' -- **/repos/*.schema.ts **/migrations/`: **empty** — no schema drift. (Original "110/110" entity-inventory framing was retired 2026-06-02; see updated Entity Inventory header.)
+
+### Other spec changes since manifest (non-schema)
+
+| Commit | Impact on seed |
+|--------|---------------|
+| 733765be — API_CONTRACTS backfill m20/m21/m22 | None — booking_event + email_template + billing_config already seeded (layer-7-misc, layer-7-comms, layer-4 seedBilling per inventory) |
+| 9f23085c — CSRF middleware (THREAT_MODEL.md) | None — middleware, not data |
+| a4595051 — OTel observability | None — instrumentation, not data |
+| c4e0514b — DATA_GOVERNANCE.md promoted | Potential — DPA breach notification flows may need seeded notif_breach records; review next refresh |
+| 6237cb25 — pagination convention codified | None |
+
+### Recommended action
+
+Apply 3 small additions to seed (NOT auto-generated — surfaced for human implementation):
+
+```typescript
+// services/api-ts/src/seed/layer-4-cross-module.ts (BR-24)
+// Around line 549, add an expired invitation row:
+await db.insert(invitationTokens).values({
+  // ... existing fields ...
+  expiresAt: daysAgo(2),  // BR-24 violation case
+  usedAt: null,
+});
+
+// services/api-ts/src/seed/layer-7-comms.ts (BR-28)
+// In seedCommsCoverage, before any message_template insert, seed a same-day duplicate:
+const todayKey = new Date().toISOString().slice(0, 10);
+await db.insert(messages).values({
+  channel: 'email',
+  recipientPersonId: officerIds[0],
+  organizationId: orgId,
+  sentAt: new Date(),  // today
+  dedupKey: `${todayKey}:email:${officerIds[0]}`,  // BR-28 fixture
+  // ...
+});
+// (subsequent message to same recipient/channel/day should be deduped by createMessage)
+
+// services/api-ts/src/seed/layer-5-gap-fill.ts (BR-44)
+// After votingOpen election with 'elected' nominees, add a 'certified' election where
+// outgoing officer_term ended_at is set AND new officer_term started_at created from
+// nominee win. Match WF-077 cross-module effects.
+```
+
+### Verdict
+
+**Seed manifest accurate for the 27 entity-inventory groups.** 3 new BR enforcement gaps surfaced from Wave G6 spec linkages. (Note: schema-table count framing was reconciled 2026-06-02 — see updated Entity Inventory header.)
+
+### Applied (2026-05-31)
+
+Edits committed inline in the seed layers — not pure read-only this run. Verified by re-running `bun run db:seed` and querying DB:
+
+| Fixture | Code change | DB verification |
+|---------|-------------|-----------------|
+| BR-24 | `services/api-ts/src/seed/layer-4-cross-module.ts` — per-email existence check + `expired-invite@memberry.ph` row (status='expired', expires_at=daysAgo(2)) | `SELECT … FROM invitation_token WHERE email='expired-invite@memberry.ph'` → 1 row, is_expired=t ✓ |
+| BR-28 | `services/api-ts/src/seed/layer-7-comms.ts` — `messages` import + sent-today row to `memberPersonIds[0]` via email channel | `SELECT … FROM message WHERE body='SEED-BR-28: dedup precondition'` → 1 row, channel=email, status=sent, sent_at=today, recipient_count=1 ✓ |
+| BR-44 | `services/api-ts/src/seed/layer-5-gap-fill.ts` — `officerTerms` import + post-election rotation block (outside nominees-existed guard so it re-runs idempotently): for each elected nominee on a published election, end any other active term on the position + create new active term with `notes='BR-44: created on election certification (WF-077)'` | `SELECT … FROM officer_term WHERE notes LIKE 'BR-44%'` → 1 active row; 1 completed row with end_date set ✓ |
+
+### Companion fix (CSRF regression)
+
+`services/api-ts/src/seed/client.ts` updated for Wave G5 CSRF middleware:
+- Added `csrfToken` field + `fetchCsrf()` method (GET `/csrf-token`, merge cookie + extract token)
+- `fetchCsrf()` called after successful `signUp` / `signIn`
+- `x-csrf-token` header injected on all POST/PATCH requests
+
+Before this fix the seed died at Phase 1 (POST `/persons` → 403 CSRF_TOKEN_MISSING). After: SEED COMPLETE end-to-end.
+
+### Re-run command
+
+```bash
+cd services/api-ts && bun dev &  # API on :7213
+sleep 8
+bun run db:seed
+```

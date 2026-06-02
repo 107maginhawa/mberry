@@ -160,18 +160,42 @@ export async function seedDocuments(
   ];
 
   const insertedDocs: string[] = [];
+  const versionedDocs: Array<{ docId: string; fileName: string; size: number; storageKey: string }> = [];
   for (const doc of docData) {
+    const storageKey = `orgs/${orgId}/documents/${doc.fileName}`;
     const [inserted] = await db.insert(documents).values({
       organizationId: orgId,
       ...doc,
-      storageKey: `orgs/${orgId}/documents/${doc.fileName}`,
+      storageKey,
       ownerId: presidentPersonId,
       ownerType: 'person',
       tags: [],
     }).returning({ id: documents.id });
-    if (inserted) insertedDocs.push(inserted.id);
+    if (inserted) {
+      insertedDocs.push(inserted.id);
+      versionedDocs.push({ docId: inserted.id, fileName: doc.fileName, size: doc.size, storageKey });
+    }
   }
   console.log(`    ✓ ${insertedDocs.length} documents seeded`);
+
+  // SC-P1-002 fix: pair every document with its initial v1 immutable version.
+  // documentVersions is .select()-read at runtime (documents.repo.ts:128-131) for
+  // version history; without a row, the "version history" UI shows empty for seeded docs.
+  let versionCount = 0;
+  for (const v of versionedDocs) {
+    await db.insert(documentVersions).values({
+      organizationId: orgId,
+      documentId: v.docId,
+      versionNumber: 1,
+      fileName: v.fileName,
+      fileSize: v.size,
+      storageKey: v.storageKey,
+      uploadedBy: presidentPersonId,
+      changeNote: 'Initial seeded version',
+    });
+    versionCount++;
+  }
+  console.log(`    ✓ ${versionCount} document versions seeded`);
 
   // Access logs
   const accessActions = ['view', 'download', 'view', 'view', 'download'];
@@ -287,6 +311,27 @@ export async function seedBilling(
     return;
   }
 
+  // SC-P1-002 fix: org-scoped billing config (stripe test-mode default).
+  // billingConfigs is .select()-read by repo (billing-config.repo.ts) to resolve
+  // gateway credentials per org; empty table = silent fallback failures in dunning + payouts.
+  // Real values are encrypted at the handler layer via AES-256-GCM; seed uses placeholder
+  // ciphertext markers (test-mode only) to keep migrations/integration tests green.
+  const existingBillingConfig = await db.select().from(billingConfigs).limit(1);
+  if (existingBillingConfig.length === 0) {
+    await db.insert(billingConfigs).values({
+      organizationId: orgId,
+      provider: 'stripe',
+      encryptedSecretKey: 'seed:stripe:test:sk_placeholder_ciphertext',
+      encryptedWebhookSecret: 'seed:stripe:test:whsec_placeholder_ciphertext',
+      testMode: true,
+      apiUrl: null,
+      active: true,
+    });
+    console.log('    ✓ 1 billing config seeded (stripe test-mode)');
+  } else {
+    console.log('    (billing config already seeded, skipping)');
+  }
+
   // Invoices with line items
   const invoiceData = [
     { customer: memberPersonIds[0]!, number: 'INV-2025-001', status: 'paid' as const, total: 300000, paidAt: new Date('2025-01-15'), desc: 'Annual Membership Dues 2025' },
@@ -338,6 +383,30 @@ export async function seedDunningEventsAndAudit(
   memberPersonIds: string[],
 ) {
   console.log('  Dunning events & audit trail...');
+
+  // SC-P1-002 fix: ensure dunning templates exist before reading them.
+  // Without these rows the .select() below returns empty → dunning events skipped
+  // → escalation/reminder flows untestable + dunning_event table also empty.
+  const existingTemplates = await db.select().from(dunningTemplates).limit(1);
+  if (existingTemplates.length === 0) {
+    const templateSeeds = [
+      { stage: 1, daysAfterDue: 7, channel: 'email' as const, name: 'Stage 1 — Friendly reminder', subject: 'Friendly reminder: your dues are due', body: 'Hi,\n\nOur records show your association dues were due 7 days ago. Please settle at your earliest convenience.\n\nThanks,\nMembership Team' },
+      { stage: 2, daysAfterDue: 21, channel: 'email' as const, name: 'Stage 2 — Past due notice', subject: 'Past due: dues outstanding 21 days', body: 'Hello,\n\nYour dues remain unpaid 21 days past due. To avoid suspension of benefits, please settle within the next 7 days.\n\nMembership Team' },
+      { stage: 3, daysAfterDue: 45, channel: 'sms' as const, name: 'Stage 3 — Urgent SMS', subject: null, body: 'URGENT: Your association dues are 45 days overdue. Pay now to keep your membership active: https://example.org/pay' },
+      { stage: 4, daysAfterDue: 60, channel: 'email' as const, name: 'Stage 4 — Suspension warning', subject: 'Final notice — membership suspension imminent', body: 'This is a final notice. Your membership will be suspended in 7 days unless dues are paid in full.' },
+      { stage: 5, daysAfterDue: 90, channel: 'letter' as const, name: 'Stage 5 — Termination letter', subject: 'Notice of membership termination', body: 'Per association bylaws, your membership is being terminated for non-payment of dues exceeding 90 days.' },
+    ];
+    for (const t of templateSeeds) {
+      await db.insert(dunningTemplates).values({
+        organizationId: orgId,
+        ...t,
+        status: 'active' as const,
+      });
+    }
+    console.log(`    ✓ ${templateSeeds.length} dunning templates seeded`);
+  } else {
+    console.log('    (dunning templates already seeded, skipping)');
+  }
 
   // Dunning events — check existing
   const existingDunning = await db.select().from(dunningEvents).limit(1);

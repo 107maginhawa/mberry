@@ -24,6 +24,7 @@ import {
 import {
   bookingEvents,
   scheduleExceptions,
+  timeSlots,
   type DailyConfig,
   DayOfWeek,
 } from '@/handlers/booking/repos/booking.schema';
@@ -298,6 +299,40 @@ export async function seedMiscCoverage(
       if (created) eventIds.push(created.id);
     }
     console.log('    ✓ booking events');
+
+    // SC-P1-001 fix: generate a small slice of bookable time_slot rows tied to the
+    // first active booking_event so the booking flow has real availability in dev.
+    // Bookings remain user-generated runtime data (still empty by design).
+    const slotEventId = eventIds[0];
+    if (slotEventId) {
+      const existingSlots = (await db.execute(
+        sql`SELECT id FROM time_slot WHERE event_id = ${slotEventId} LIMIT 1`,
+      )) as unknown as { rows: Array<{ id: string }> };
+      if (existingSlots.rows?.length === 0) {
+        // Build 8 half-hour slots across the next 4 weekdays at 09:00 + 09:30 Manila time.
+        let slotCount = 0;
+        for (let dayOffset = 2; dayOffset <= 5; dayOffset++) {
+          for (const hour of [9, 10]) {
+            const start = daysFromNow(dayOffset);
+            start.setUTCHours(hour - 8, 0, 0, 0); // Asia/Manila is UTC+8
+            const end = new Date(start.getTime() + 30 * 60 * 1000);
+            await db.insert(timeSlots).values({
+              organizationId: orgId,
+              owner,
+              event: slotEventId,
+              startTime: start,
+              endTime: end,
+              locationTypes: ['video', 'in-person'],
+              status: 'available' as const,
+            });
+            slotCount++;
+          }
+        }
+        console.log(`    ✓ ${slotCount} time slots seeded`);
+      } else {
+        console.log('    (time slots already seeded, skipping)');
+      }
+    }
 
     // Schedule exceptions (holidays / blackout dates) on the first event
     const exceptionEventId = eventIds[0];

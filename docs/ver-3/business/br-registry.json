@@ -752,9 +752,9 @@
       "contract": [],
       "e2e": []
     },
-    "annotations": "Canonical per WORKFLOW_MAP §4. Training type enum restricted to 5 platform-defined types (not org-customizable). Enforced in createTraining.ts via VALID_TRAINING_TYPES. Implements M9-R1. (Previously this key held the M12 vote-integrity rule due to ID overload — split into BR-52 per TR-P1-004 traceability fix.)"
+    "annotations": "Canonical per WORKFLOW_MAP §4. Training type enum restricted to 5 platform-defined types (not org-customizable). Enforced in createTraining.ts via VALID_TRAINING_TYPES. Implements M9-R1. (Previously this key held the M12 vote-integrity rule due to ID overload — split into BR-67 per TR-P1-004 traceability fix.)"
   },
-  "BR-52": {
+  "BR-67": {
     "rule": "One Vote Per Person Per Position",
     "phase": 2,
     "module": "M12",
@@ -770,7 +770,7 @@
         "apps/memberry/tests/e2e/officer/election-integrity.spec.ts"
       ]
     },
-    "annotations": "Wave 4 discovery. ConflictError on duplicate vote. Renamed from BR-42 (M12 usage) per TR-P1-004 to resolve BR-42 ID overload — canonical BR-42 = M09 training-type per WORKFLOW_MAP §4. Implements M12-R1."
+    "annotations": "Wave 4 discovery. ConflictError on duplicate vote. Renamed from BR-42 (M12 usage) per TR-P1-004 to resolve BR-42 ID overload — canonical BR-42 = M09 training-type per WORKFLOW_MAP §4. Implements M12-R1. (BR-52..BR-66 reserved for m20-booking/m21-billing/m22-email spec-ID minting; this rule jumps to BR-67.)"
   },
   "BR-43": {
     "rule": "Voting Only When Status Is votingOpen",
@@ -1015,5 +1015,112 @@
       "e2e": []
     },
     "annotations": "Minted 2026-06-02 to resolve TR-P1-003. Aliases module-local M22-R8. IF queue item cancelled THEN record canceller ID, reason, and timestamp (audit trail). Test coverage to be backfilled."
+  },
+  "BR-60": {
+    "rule": "Merchant Account Required for Payment (alias M21-R1)",
+    "phase": 2,
+    "module": "M21",
+    "ruleClass": "p0-data",
+    "tests": {
+      "backend": [
+        "services/api-ts/src/handlers/billing/payInvoice.test.ts",
+        "services/api-ts/src/handlers/billing/createMerchantAccount.test.ts",
+        "services/api-ts/src/handlers/billing/onboardMerchantAccount.test.ts"
+      ],
+      "contract": [],
+      "e2e": []
+    },
+    "annotations": "Minted 2026-06-02 to resolve TR-P1-002. Aliases module-local M21-R1. IF merchant account does not exist THEN block payment processing for that person (require Stripe Connect onboarding first). Backs WF-M21-01 (Onboard Merchant), WF-M21-03 (Pay Invoice), AC-M21-001, AC-M21-006, SM-M21-MERCHANT."
+  },
+  "BR-61": {
+    "rule": "Invoice Terminal-State Payment Guard (alias M21-R2)",
+    "phase": 2,
+    "module": "M21",
+    "ruleClass": "p0-data",
+    "tests": {
+      "backend": [
+        "services/api-ts/src/handlers/billing/payInvoice.test.ts",
+        "services/api-ts/src/handlers/billing/voidInvoice.test.ts",
+        "services/api-ts/src/handlers/billing/updateInvoice.test.ts",
+        "services/api-ts/src/handlers/billing/captureInvoicePayment.test.ts"
+      ],
+      "contract": [],
+      "e2e": []
+    },
+    "annotations": "Minted 2026-06-02 to resolve TR-P1-002. Aliases module-local M21-R2. IF invoice status is paid or void THEN reject further payment/update attempts (prevent double-payment). Backs SM-M21-INVOICE terminal-state guard, WF-M21-03, AC-M21-001."
+  },
+  "BR-62": {
+    "rule": "Stripe Webhook Signature Verification (alias M21-R3)",
+    "phase": 2,
+    "module": "M21",
+    "ruleClass": "p0-security",
+    "tests": {
+      "backend": [
+        "services/api-ts/src/handlers/billing/handleStripeWebhook.test.ts"
+      ],
+      "contract": [],
+      "e2e": []
+    },
+    "annotations": "Minted 2026-06-02 to resolve TR-P1-002. Aliases module-local M21-R3. IF Stripe webhook signature invalid THEN reject with 400 (signature verification mandatory). Backs WF-M21-05, AC-M21-003."
+  },
+  "BR-63": {
+    "rule": "Webhook-Driven Invoice Paid Transition (alias M21-R4)",
+    "phase": 2,
+    "module": "M21",
+    "ruleClass": "p0-data",
+    "tests": {
+      "backend": [
+        "services/api-ts/src/handlers/billing/handleStripeWebhook.test.ts",
+        "services/api-ts/src/handlers/billing/captureInvoicePayment.test.ts"
+      ],
+      "contract": [],
+      "e2e": []
+    },
+    "annotations": "Minted 2026-06-02 to resolve TR-P1-002. Aliases module-local M21-R4. IF payment_intent.succeeded webhook received THEN mark invoice paid (automated payment confirmation, idempotent on event ID). Backs WF-M21-05, AC-M21-004, SM-M21-INVOICE."
+  },
+  "BR-64": {
+    "rule": "Refund Requires Paid Original Payment (alias M21-R5)",
+    "phase": 2,
+    "module": "M21",
+    "ruleClass": "p0-data",
+    "tests": {
+      "backend": [
+        "services/api-ts/src/handlers/billing/refundInvoicePayment.test.ts"
+      ],
+      "contract": [],
+      "e2e": []
+    },
+    "annotations": "Minted 2026-06-02 to resolve TR-P1-002. Aliases module-local M21-R5. IF refund requested THEN validate original payment exists and is in paid status (cannot refund unpaid invoice). Backs WF-M21-04, AC-M21-005."
+  },
+  "BR-65": {
+    "rule": "Billing Config Key Encryption at Rest (alias M21-R6)",
+    "phase": 2,
+    "module": "M21",
+    "ruleClass": "p0-security",
+    "tests": {
+      "backend": [
+        "services/api-ts/src/handlers/billing/repos/billing-config.repo.test.ts",
+        "services/api-ts/src/core/gateway.test.ts"
+      ],
+      "contract": [],
+      "e2e": []
+    },
+    "annotations": "Minted 2026-06-02 to resolve TR-P1-002. Aliases module-local M21-R6. IF billing config keys stored THEN encrypt with AES-256 (Stripe publishable/secret/webhook keys; never logged or exposed in API responses). Backs AC-M21-007."
+  },
+  "BR-66": {
+    "rule": "Invoice Total Computed From Line Items (alias M21-R7)",
+    "phase": 2,
+    "module": "M21",
+    "ruleClass": "p0-data",
+    "tests": {
+      "backend": [
+        "services/api-ts/src/handlers/billing/createInvoice.test.ts",
+        "services/api-ts/src/handlers/billing/updateInvoice.test.ts",
+        "services/api-ts/src/handlers/billing/finalizeInvoice.test.ts"
+      ],
+      "contract": [],
+      "e2e": []
+    },
+    "annotations": "Minted 2026-06-02 to resolve TR-P1-002. Aliases module-local M21-R7. IF invoice has line items THEN total = sum of (quantity × unitPrice) per item (calculated, not user-supplied). Backs WF-M21-02, AC-M21-002."
   }
 }
