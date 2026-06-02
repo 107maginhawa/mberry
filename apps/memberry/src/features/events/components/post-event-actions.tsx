@@ -15,9 +15,9 @@ import {
   completeEventMutation,
   createMessageMutation,
   sendMessageMutation,
+  voidCreditEntryMutation,
   getEventQueryKey,
 } from '@monobase/sdk-ts/generated/react-query'
-import { CSRF_HEADER, readCsrfCookie } from '@monobase/sdk-ts/csrf'
 
 interface PostEventActionsProps {
   event: {
@@ -226,6 +226,7 @@ export function PostEventActions({ event, orgId, orgSlug, userId, onEventComplet
   const [showRevokeDialog, setShowRevokeDialog] = useState(false)
   const [revokeReason, setRevokeReason] = useState('')
   const [revoking, setRevoking] = useState(false)
+  const voidMutOpts = voidCreditEntryMutation()
 
   async function handleRevokeCredits() {
     if (revokeReason.trim().length < 10) {
@@ -234,34 +235,24 @@ export function PostEventActions({ event, orgId, orgSlug, userId, onEventComplet
     }
     setRevoking(true)
     try {
-      const csrfToken = readCsrfCookie()
-      const res = await fetch('/api/association/member/credits/void-event', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          ...(csrfToken ? { [CSRF_HEADER]: csrfToken } : {}),
-        },
-        credentials: 'include',
-        body: JSON.stringify({
+      const result: any = await (voidMutOpts.mutationFn as any)({
+        body: {
           eventId: event.id,
           activityName: event.title,
           personIds: attendeePersonIds,
           reason: revokeReason.trim(),
-        }),
+        },
+        headers: { 'x-org-id': orgId },
       })
-      if (!res.ok) {
-        const err = await res.json().catch(() => ({}))
-        throw new Error(err.message ?? `Failed (${res.status})`)
-      }
-      const result = await res.json()
       setCompletionState(event.id, 'creditsAwarded', false)
       setLocalCompletionState(prev => ({ ...prev, creditsAwarded: false }))
       setShowRevokeDialog(false)
       setRevokeReason('')
-      toast.success(`${result.data?.voidedCount ?? 0} credits revoked`)
+      toast.success(`${result?.data?.voidedCount ?? 0} credits revoked`)
       queryClient.invalidateQueries({ queryKey: ['listMyCreditEntries'] })
     } catch (err: any) {
-      toast.error(err.message ?? 'Failed to revoke credits')
+      const msg = err?.body?.error ?? err?.body?.message ?? err?.message ?? 'Failed to revoke credits'
+      toast.error(msg)
     } finally {
       setRevoking(false)
     }
