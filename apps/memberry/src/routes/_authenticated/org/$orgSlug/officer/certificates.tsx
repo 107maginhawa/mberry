@@ -5,7 +5,7 @@ import { PageHeader } from '@/components/patterns/page-header'
 import { GlassCard } from '@/components/motion/glass-card'
 import { useOrg } from '@/hooks/useOrg'
 import { api } from '@/lib/api'
-import { Textarea } from '@monobase/ui'
+import { Button, Input, Label, Textarea } from '@monobase/ui'
 import { useState } from 'react'
 import { toast } from 'sonner'
 
@@ -35,7 +35,7 @@ function OfficerCertificates() {
   })
 
   const verifyMutation = useMutation({
-    mutationFn: (num: string) => api.get(`/certificates/verify/${encodeURIComponent(num)}`),
+    mutationFn: (num: string) => api.get(`/api/certificates/verify/${encodeURIComponent(num)}`),
     onSuccess: (data: any) => setVerifyResult(data?.data),
     onError: () => { setVerifyResult(null); toast.error('Certificate not found') },
   })
@@ -66,43 +66,43 @@ function OfficerCertificates() {
             <Send className="w-4 h-4" /> Bulk Issue Certificates
           </h3>
           <div className="space-y-3">
-            <div>
-              <label className="text-sm text-[var(--color-muted)]">Training Title *</label>
-              <input
+            <div className="space-y-1">
+              <Label htmlFor="cert-training-title" className="text-sm text-[var(--color-muted)]">Training Title *</Label>
+              <Input
+                id="cert-training-title"
                 type="text"
                 value={trainingTitle}
                 onChange={e => setTrainingTitle(e.target.value)}
-                className="w-full mt-1 px-3 py-2 rounded-lg border border-[var(--color-border)] bg-transparent text-sm"
                 placeholder="Annual Dental Conference 2026"
               />
             </div>
-            <div>
-              <label className="text-sm text-[var(--color-muted)]">Org Code *</label>
-              <input
+            <div className="space-y-1">
+              <Label htmlFor="cert-org-code" className="text-sm text-[var(--color-muted)]">Org Code *</Label>
+              <Input
+                id="cert-org-code"
                 type="text"
                 value={orgCode}
                 onChange={e => setOrgCode(e.target.value)}
-                className="w-full mt-1 px-3 py-2 rounded-lg border border-[var(--color-border)] bg-transparent text-sm"
                 placeholder="PDA"
               />
             </div>
-            <div>
-              <label className="text-sm text-[var(--color-muted)]">Person IDs (one per line) *</label>
+            <div className="space-y-1">
+              <Label htmlFor="cert-person-ids" className="text-sm text-[var(--color-muted)]">Person IDs (one per line) *</Label>
               <Textarea
+                id="cert-person-ids"
                 value={personIdsText}
                 onChange={e => setPersonIdsText(e.target.value)}
-                className="w-full mt-1"
                 rows={5}
                 placeholder="person-uuid-1&#10;person-uuid-2&#10;person-uuid-3"
               />
             </div>
-            <button
+            <Button
               onClick={handleBulkIssue}
               disabled={bulkMutation.isPending}
-              className="w-full px-4 py-2 rounded-lg bg-[var(--color-primary)] text-white text-sm hover:opacity-90 disabled:opacity-50"
+              className="w-full"
             >
               {bulkMutation.isPending ? 'Issuing...' : 'Issue Certificates'}
-            </button>
+            </Button>
           </div>
         </GlassCard>
 
@@ -111,23 +111,23 @@ function OfficerCertificates() {
             <FileText className="w-4 h-4" /> Verify Certificate
           </h3>
           <div className="space-y-3">
-            <div>
-              <label className="text-sm text-[var(--color-muted)]">Certificate Number</label>
-              <div className="flex gap-2 mt-1">
-                <input
+            <div className="space-y-1">
+              <Label htmlFor="cert-verify-number" className="text-sm text-[var(--color-muted)]">Certificate Number</Label>
+              <div className="flex gap-2">
+                <Input
+                  id="cert-verify-number"
                   type="text"
                   value={certNumber}
                   onChange={e => setCertNumber(e.target.value)}
-                  className="flex-1 px-3 py-2 rounded-lg border border-[var(--color-border)] bg-transparent text-sm"
+                  className="flex-1"
                   placeholder="PDA-2026-0001"
                 />
-                <button
+                <Button
                   onClick={() => verifyMutation.mutate(certNumber)}
                   disabled={!certNumber || verifyMutation.isPending}
-                  className="px-4 py-2 rounded-lg bg-[var(--color-primary)] text-white text-sm hover:opacity-90 disabled:opacity-50"
                 >
                   Verify
-                </button>
+                </Button>
               </div>
             </div>
             {verifyResult && (
