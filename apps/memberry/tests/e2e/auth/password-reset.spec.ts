@@ -38,7 +38,7 @@ test.describe('M-13: Password Reset', () => {
   })
 
   test('password reset email arrives in Mailpit', async ({ page }) => {
-    test.skip(!mailpitUp, 'Mailpit not running — start with: docker compose -f services/api-ts/docker-compose.deps.yml up -d mailpit')
+    test.skip(!mailpitUp, 'Mailpit not running — start with: bun infra:up (from repo root)')
 
     await deleteAllMessages()
 

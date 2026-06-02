@@ -259,7 +259,7 @@ The `specs/api/tests/contract/` Hurl scenarios drive against a single
 `API_URL` env var. Implementations must:
 
 1. Boot on a configurable port (`PORT` env var; default `7213`).
-2. Connect to the dependencies in `services/api-ts/docker-compose.deps.yml`
+2. Connect to the dependencies in the root `docker-compose.yml`
    (or equivalents) using the documented env vars.
 3. Idempotently run any required migrations on startup (or via a separate
    command — both patterns are acceptable, the test runner doesn't care).

@@ -62,10 +62,11 @@ It is a shadow layer; Hurl is the primary contract.
 
 ## Reference: backing infra
 
-The reference impl needs Postgres, MinIO, and an SMTP catcher. See
-`docker-compose.deps.yml` to spin them up locally:
+The reference impl needs Postgres, MinIO, and an SMTP catcher. Start the
+full dev stack from the repo root (also includes stripe-mock + Loki +
+Grafana):
 
 ```bash
-bun run dev:deps:up
-bun run dev
+bun infra:up   # from repo root
+cd services/api-ts && bun dev
 ```

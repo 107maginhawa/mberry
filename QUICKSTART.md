@@ -23,10 +23,9 @@ bun install
 createdb monobase
 ```
 
-**Option B — Docker (includes MinIO, Mailpit, Stripe mock):**
+**Option B — Docker (includes MinIO, Mailpit, Stripe mock, Loki, Grafana) from repo root:**
 ```bash
-cd services/api-ts
-docker compose -f docker-compose.deps.yml up -d
+bun infra:up      # starts Postgres + MinIO + Mailpit + stripe-mock + Loki + Grafana
 ```
 
 ### 3. Configure environment

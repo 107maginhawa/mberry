@@ -35,7 +35,7 @@ plan landed:
 
 ## Test infra used by the suite
 
-Both supplied by `services/api-ts/docker-compose.deps.yml`:
+Both supplied by the root `docker-compose.yml` (`bun infra:up`):
 
 - **Mailpit** (`localhost:8025`) — SMTP catcher with HTTP read API.
   Auth-email scenarios poll `/api/v1/search?query=to:<email>` then

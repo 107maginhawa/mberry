@@ -80,14 +80,19 @@ Ports are configured in each app's `vite.config.ts` and `services/api-ts/src/cor
           :9000
 ```
 
-### Docker Dev Dependencies (`services/api-ts/docker-compose.deps.yml`)
+### Docker Dev Dependencies (`docker-compose.yml` at repo root)
+
+Brought up via `bun infra:up` (orchestrated by Turborepo / root scripts).
 
 | Service | Image | Port | Purpose |
 |---------|-------|------|---------|
 | postgres | postgres:16-alpine | 5432 | Primary database |
 | minio | minio/minio:latest | 9000, 9001 | S3-compatible file storage |
+| createbuckets | minio/mc:latest | (init) | Auto-creates STORAGE_BUCKET on first start |
 | mailpit | axllent/mailpit:latest | 1025 (SMTP), 8025 (UI) | Email capture for dev |
 | stripe-mock | stripe/stripe-mock:latest | 12111 | Stripe API mock |
+| loki | grafana/loki:3.3.2 | 3100 | Log aggregation backend |
+| grafana | grafana/grafana:11.4.0 | 3030 | Log/metric visualization (pre-provisioned Loki + API dashboard) |
 
 ### External Integrations (Production)
 

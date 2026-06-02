@@ -42,13 +42,13 @@ Run PostgreSQL + MinIO + Mailpit in containers while developing the API locally 
 
 ```bash
 # Start dependencies
-bun run dev:deps:up
+bun --cwd ../.. infra:up
 
 # Run API in development mode
 bun run dev
 
 # Clean up
-bun run dev:deps:down
+bun --cwd ../.. infra:down
 ```
 
 ### Alternative: Individual Docker Commands
@@ -107,7 +107,7 @@ docker volume rm monobase-postgres-data monobase-minio-data
 
 2. **Start dependencies:**
    ```bash
-   bun run dev:deps:up
+   bun --cwd ../.. infra:up
    ```
 
 3. **Run the API:**
@@ -252,8 +252,10 @@ bun run db:generate  # Generate migrations
 bun run db:studio    # Open Drizzle Studio
 
 # Dependencies
-bun run dev:deps:up    # Start PostgreSQL + MinIO
-bun run dev:deps:down  # Stop dependencies
+bun --cwd ../.. infra:up    # Start PostgreSQL + MinIO + Mailpit + Loki + Grafana
+bun --cwd ../.. infra:down  # Stop dependencies (volumes preserved)
+bun --cwd ../.. infra:reset # Stop + wipe volumes + restart fresh
+bun --cwd ../.. infra:logs  # Tail all container logs
 ```
 
 ## 📚 Development

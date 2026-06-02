@@ -101,8 +101,8 @@ Hurl tests are organized **per user journey or feature flow**, not per module. A
 
 **Prerequisites**: Contract tests require a running API + supporting services:
 ```bash
-# Start dependencies (Mailpit, stripe-mock, etc.)
-cd services/api-ts && docker compose -f docker-compose.deps.yml up -d
+# Start dependencies (Postgres, MinIO, Mailpit, stripe-mock, Loki, Grafana)
+bun infra:up   # from repo root
 
 # Start the API
 cd services/api-ts && bun dev
