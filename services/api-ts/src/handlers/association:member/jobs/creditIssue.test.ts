@@ -1,3 +1,4 @@
+// Acceptance Criteria: [AC-M10-002] (No duplicate AUTO credits — processCreditIssue idempotent on member+training)
 import { describe, test, expect, mock } from 'bun:test';
 import { processCreditIssue } from './creditIssue';
 import type { JobContext } from '@/core/jobs';

@@ -1,6 +1,8 @@
 /**
  * Tests for getSurveyAnalytics handler
  *
+ * Acceptance Criteria: [AC-M18-005] (Aggregated results display — per question type: counts/average/text list)
+ *
  * Covers:
  * - Returns 401 without session
  * - Returns 403 for non-officer/non-admin

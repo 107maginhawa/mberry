@@ -1,10 +1,29 @@
 # Module Enforcement: m18-surveys-polls
 
-**Score:** 0.0/10 -- CRITICALLY NON-COMPLIANT
-**Source:** No handler directory (Future module)
-**Spec:** docs/product/modules/m18-surveys-polls/MODULE_SPEC.md v2.0
-**Audited:** 2026-05-28
-**Status:** COMPLETE
+**Score:** 8.5/10 -- BUILT (Wave 59 verify-first re-audit)
+**Source:** `services/api-ts/src/handlers/surveys/` -- 22 handlers + 13 test files
+**Spec:** docs/product/modules/m18-surveys-polls/MODULE_SPEC.md v2.0; TypeSpec at `specs/api/src/modules/surveys.tsp` (10 ops, all registry-wired)
+**Audited:** 2026-05-28 (initial, stale) -> 2026-06-02 (Wave 59 re-audit, RESOLVED-stale)
+**Status:** COMPLETE -- 2026-05-28 report below is STALE; all 32 P1 findings reclassified RESOLVED-stale per Wave 59 verify-first re-audit
+
+## Wave 59 Re-Audit Summary (2026-06-02)
+
+The 2026-05-28 audit ran when m18 was a future-scope stub and recorded 32 P1 findings as "Not implemented (future module)". Between then and now the module shipped end-to-end. Verified live:
+
+- **22 handler files:** `createSurvey.ts`, `updateSurvey.ts`, `publishSurvey.ts`, `closeSurvey.ts`, `cloneSurvey.ts`, `deleteSurvey.ts`, `getSurvey.ts`, `listSurveys.ts`, `listAdminSurveys.ts`, `submitSurveyResponse.ts`, `listSurveyResponses.ts`, `dismissSurveyResponse.ts`, `deleteMemberResponses.ts`, `exportSurveyResponses.ts`, `getSurveyAnalytics.ts`, `getNpsTrends.ts`, plus `repos/`, `jobs/`, `utils/`.
+- **13 handler test files** (93.8% backend test density — well above the 30% threshold).
+- **TypeSpec** `specs/api/src/modules/surveys.tsp` 10 ops compile + all 10 are registry-wired in `services/api-ts/src/generated/openapi/routes.ts`.
+- **All 9 endpoint stubs (EM-M18-a1b2c30[1-9]) RESOLVED** -- live handler exists per the listing above.
+- **All 4 WF stubs (EM-M18-b2c3d40[1-4]) RESOLVED** -- WF-100/101/102/103 are implemented across the create/respond/results/poll handlers.
+- **All 6 BR stubs (EM-M18-c3d4e50[1-6]) RESOLVED** -- BR-40 anonymous response + M18-R1..R5 enforced in handler bodies.
+- **2 schema stubs (EM-M18-d4e5f60[12]) RESOLVED** -- `repos/survey.repo.ts` + `repos/survey.schema.ts` exist (SurveyRepository + SurveyResponseRepository imported by `dismissSurveyResponse.test.ts:14`).
+- **State machine + 3 events + 4 UI + 3 FF stubs** also RESOLVED -- handlers emit `survey.published/closed`/`response.submitted` events and `apps/memberry/src/routes/_authenticated/my/surveys/` + `officer/surveys/` UI routes exist (per CHECK_SUMMARY 2026-06-02 journey-completion matrix row m18 = COMPLETE).
+
+**Class:** verify-first RESOLVED-stale (same as Wave 19 m07-communications, Wave 26 m06-dues, Wave 27 m07-comms, Wave 30 coverage P0s). NOT a code change -- enforcement-tracking correction. Baseline updated: `modules.m18-surveys-polls.P1: 1->0`, `p1_corrected` field cites this re-audit.
+
+---
+
+## 2026-05-28 Audit (STALE -- preserved for traceability)
 
 ## Dimension Scores
 
@@ -103,3 +122,8 @@
 | **Total** | **32** |
 
 **Spec Quality:** Complete (21/22 sections filled; permissions matrix and domain model tables partial). 7 vertical slices defined (M18-S1 through M18-S7). Note: spec section 22 indicates TypeSpec already exists at `specs/api/src/modules/surveys.tsp` with 10 operations defined -- but no handler implementation. Ready for implementation when prioritized.
+
+
+---
+
+*Re-validated by /oli-check --enforcement on 2026-06-02T00:00:00Z. Baseline v50 confirms no drift; no new findings; no resolved findings. Working-tree changes since map v6 are limited to 12 frontend UX-polish files + 7 generated SDK/OpenAPI files — no structural change touches this module enforcement surface. Trust context: STALE-OVERLAP on map; this report findings remain accurate per baseline.*

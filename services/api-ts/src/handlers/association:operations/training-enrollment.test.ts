@@ -1,3 +1,4 @@
+// Acceptance Criteria: [AC-M09-001] (Auto-credit award on attendance confirm), [AC-M09-003] (No duplicate credits — idempotent re-confirm), [AC-M09-005] (Post-completion lock — no enroll/modify)
 import { describe, test, expect, beforeEach, afterEach, spyOn } from 'bun:test';
 import { makeCtx, stubRepo, restoreRepo } from '@/test-utils/make-ctx';
 import { TrainingRepository, TrainingEnrollmentRepository } from './repos/training.repo';

@@ -1,4 +1,4 @@
-// Business Rules: WF Create & Publish — completeness gate (400 incomplete)
+// Business Rules: WF Create & Publish — completeness gate (400 incomplete) | Acceptance Criteria: [AC-M09-006] (Network visibility default on publish — visibility defaults to network-wide when not explicitly set)
 import { describe, test, expect, beforeEach, afterEach } from 'bun:test';
 import { makeCtx, stubRepo, restoreRepo } from '@/test-utils/make-ctx';
 import { publishTraining } from './publishTraining';

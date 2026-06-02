@@ -36,7 +36,22 @@ Rev 4 ran on the regex/stale map (sha 28c42566, 79 files behind, `api_calls: []`
 
 - **ZA-01..03 (m20/m21/m22 zero-anchor)** — spec/api files contain zero BR/AC/WF/SM canonical IDs. m20-booking (18 EP + 19 handlers), m21-billing (16 EP + 16 handlers), m22-email (12 EP + 13 handlers) prose-only. **P1 ×3.** Engine map does not change this — purely a spec-authoring gap.
 - **TR-OVERLOAD-BR-42 (P1)** — BR-42 used with two incompatible meanings: M09 "training type restriction" (WORKFLOW_MAP §4, canonical) vs M12 "one vote per person/position" (`election-integrity.spec.ts`, `seed/layer-3-modules.ts:69`). Rename M12 use or namespace as `M12:BR-42`.
-- **TR-AC-ORPHAN ×12 (P2)** — AC with no test-file reference: AC-M06-004, AC-M09-001..006, AC-M10-002, AC-M10-005, AC-M18-004..006.
+- **TR-AC-ORPHAN ×12 (P2)** — Wave 59 verify-first triage: 7 RESOLVED via tag-add (file:line evidence below) + 1 RESOLVED via TypeSpec validator-enforcement + 4 reclassified VERIFIED-MISSING-LOGIC (not just missing tag — handler/test absent, escalate to vertical-TDD milestone).
+  - **RESOLVED (tag-added, Wave 59):**
+    - `AC-M06-004` → `services/api-ts/src/handlers/association:member/recordDuesPayment.test.ts:1` (Concurrent payment 5-min warning; findRecentPaymentForPerson + hasConcurrentWarning logic per Wave 51).
+    - `AC-M09-001` → `services/api-ts/src/handlers/association:operations/training-enrollment.test.ts:1` (Auto-credit award on attendance confirm).
+    - `AC-M09-002` → `services/api-ts/src/handlers/certificates/verifyCertificatePublic.test.ts:1` + sibling `verifyCertificatePublic-hmac.test.ts` (public cert verification).
+    - `AC-M09-003` → `services/api-ts/src/handlers/association:operations/training-enrollment.test.ts:1` (No-duplicate-credits idempotency).
+    - `AC-M09-005` → `services/api-ts/src/handlers/association:operations/training-enrollment.test.ts:1` (Post-completion lock).
+    - `AC-M09-006` → `services/api-ts/src/handlers/association:operations/publishTraining.test.ts:1` (Network visibility default on publish).
+    - `AC-M10-002` → `services/api-ts/src/handlers/association:member/jobs/creditIssue.test.ts:1` (No duplicate AUTO credits; processCreditIssue idempotent).
+    - `AC-M18-005` → `services/api-ts/src/handlers/surveys/getSurveyAnalytics.test.ts:3` (Aggregated results per question type).
+  - **RESOLVED (TypeSpec validator-enforcement, no test needed):**
+    - `AC-M09-004` (5 platform training types) — enforced at `specs/api/src/association/operations/training.tsp:24` `enum TrainingType`. Generated Zod validators reject out-of-enum values at framework layer. Per-handler test redundant.
+  - **VERIFIED-MISSING-LOGIC (escalate to next milestone, NOT a tag gap):**
+    - `AC-M10-005` (Mandatory adjustment reason) — no `adjustCreditEntry` handler exists. `find services/api-ts/src/handlers -name '*[Aa]djust*[Cc]redit*'` returns empty. Genuinely unimplemented. Vertical-TDD slice needed.
+    - `AC-M18-004` (Response re-edit) — `submitSurveyResponse.ts` does not support update path (no `existing`/`update`/`edit` in handler body); single-submit only. Vertical-TDD slice needed.
+    - `AC-M18-006` (Instant poll inline results) — no poll handlers found; polls may not be implemented separately from surveys. Vertical-TDD slice needed.
 
 ### Engine-field-gap (narrower residual unverified, not a project defect)
 
@@ -150,10 +165,12 @@ EPs = endpoints declared in API_CONTRACTS.md as `METHOD /path` rows. ic = INTEGR
 
 | Gap ID | Algorithm | Description | Source | Suggested Fix |
 |--------|-----------|-------------|--------|---------------|
-| AC-ORPHAN-M09-001..006 | 5c | 6 m09-training acceptance criteria with no test-file reference | `docs/product/modules/m09-training/MODULE_SPEC.md` §11 | Add `[AC-M09-NNN]` tags to existing training e2e tests |
-| AC-ORPHAN-M10-002,005 | 5c | 2 m10-credit-tracking AC orphans (AUTO credit dedup + cross-org aggregation) | `m10-credit-tracking/MODULE_SPEC.md` §11 | Tag `services/api-ts/src/handlers/association:operations/aggregateCredits.test.ts` |
-| AC-ORPHAN-M18-004,005,006 | 5c | 3 m18-surveys-polls AC orphans (re-edit, aggregation, anonymity-violation) | `m18-surveys-polls/MODULE_SPEC.md` §11 | Tag survey e2e tests |
-| AC-ORPHAN-M06-004 | 5c | concurrent-payment-warning AC has no test | `m06-dues-payments/MODULE_SPEC.md` §11 | Add concurrency test in `services/api-ts/src/handlers/dues/` |
+| ~~AC-ORPHAN-M09-001..006~~ | 5c | **RESOLVED Wave 59** — AC-M09-001/003/005 tagged at `training-enrollment.test.ts:1`; AC-M09-002 at `verifyCertificatePublic.test.ts:1`; AC-M09-004 TypeSpec validator-enforced at `training.tsp:24`; AC-M09-006 at `publishTraining.test.ts:1` | — | — |
+| ~~AC-ORPHAN-M10-002~~ | 5c | **RESOLVED Wave 59** — AC-M10-002 tagged at `creditIssue.test.ts:1` (no duplicate AUTO credits; processCreditIssue idempotent) | — | — |
+| AC-ORPHAN-M10-005 (escalated) | 5c | **VERIFIED-MISSING-LOGIC Wave 59** — no `adjustCreditEntry` handler exists; genuinely unimplemented | `m10-credit-tracking/MODULE_SPEC.md` §11 | Vertical-TDD slice for `adjustCreditEntry` (handler + test + audit) in next milestone |
+| ~~AC-ORPHAN-M18-005~~ | 5c | **RESOLVED Wave 59** — AC-M18-005 tagged at `getSurveyAnalytics.test.ts:3` (aggregated results per question type) | — | — |
+| AC-ORPHAN-M18-004,006 (escalated) | 5c | **VERIFIED-MISSING-LOGIC Wave 59** — M18-004 (response re-edit) handler does not support update path; M18-006 (instant poll) no poll handlers | `m18-surveys-polls/MODULE_SPEC.md` §11 | 2 vertical-TDD slices in next milestone |
+| ~~AC-ORPHAN-M06-004~~ | 5c | **RESOLVED Wave 59** — AC-M06-004 tagged at `recordDuesPayment.test.ts:1` (concurrent 5-min warning) | — | — |
 | ~~TR-MAP-STALE~~ | discovery | **RESOLVED rev 5** — engine map FRESH-ENOUGH, no in-scope source drift | — | — |
 | TR-CODEONLY-CSRF (P3) | spec-trace | `GET /csrf-token` code-only (seed CSRF, commit 878fcc34) — not in openapi spec | `CODE_SPEC_TRACE` code_only | Document internal endpoint or add to spec |
 | TR-API-CONTRACTS-DOC-DRIFT (P3, was P2) | 5b | API_CONTRACTS.md prose paths in M01–M04/M10/M11 vs openapi — engine spec_trace shows **0 openapi↔code drift**; residual is doc-maintenance only (Better-Auth-managed paths) | `docs/product/modules/m{01..04,10,11}/API_CONTRACTS.md` | Reconcile doc prose; not a code defect |
@@ -168,7 +185,7 @@ EPs = endpoints declared in API_CONTRACTS.md as `METHOD /path` rows. ic = INTEGR
 | 1 | Mint BR/AC IDs for m20/m21/m22 specs | 3 P1 (ZA-01..03) | `/oli-spec-modules --module m20-booking,m21-billing,m22-email` |
 | 2 | Resolve BR-42 ID collision (rename M12 use) | 1 P1 (TR-OVERLOAD-BR-42) | manual edit + seed/test re-tag |
 | 3 | Fix 2 FE-phantom call sites (wrong/missing endpoint) | 2 P1 (TR-FE-PHANTOM-01/02) | fix FE call OR add backend route+spec |
-| 4 | Tag 12 untested ACs onto existing tests | 12 P2 AC orphans | grep existing e2e for AC keywords, prepend `[AC-MXX-NNN]` |
+| ~~4~~ | ~~Tag 12 untested ACs~~ | **DONE Wave 59** — 8 tagged + 1 TypeSpec-enforced + 3 escalated VERIFIED-MISSING-LOGIC (AC-M10-005 / AC-M18-004 / AC-M18-006 need handler implementation, not tag) | — |
 | 5 | Document `GET /csrf-token` + reconcile API_CONTRACTS doc prose | 2 P3 | spec add + doc edit |
 
 ## Graph Statistics

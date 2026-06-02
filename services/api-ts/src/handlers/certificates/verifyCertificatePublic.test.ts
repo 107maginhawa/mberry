@@ -1,3 +1,4 @@
+// Acceptance Criteria: [AC-M09-002] (Certificate verification via public endpoint — verifyCertificatePublic returns training details + member + date + credit value; QR-payload signature checked by sibling verifyCertificatePublic-hmac.test.ts)
 import { describe, test, expect, mock } from 'bun:test';
 import { verifyCertificatePublic } from './verifyCertificatePublic';
 

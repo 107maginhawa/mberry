@@ -1,4 +1,4 @@
-// Business Rules: [BR-06]
+// Business Rules: [BR-06] | Acceptance Criteria: [AC-M06-004] (Concurrent payment 5-min warning — findRecentPaymentForPerson + hasConcurrentWarning per Wave 51 EM-M06-12f9c1d4)
 import { describe, test, expect, afterEach, beforeEach } from 'bun:test';
 import { makeCtx, makeMockDb, stubRepo, restoreRepo } from '@/test-utils/make-ctx';
 import { fakeDuesPayment as createFakeDuesPayment, fakeMembership as createFakeMembership } from '@/test-utils/factories';
