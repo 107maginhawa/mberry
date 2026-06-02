@@ -4,7 +4,7 @@
 | Module | Framework | Files | Confidence |
 |---|---|---|---|
 | `apps/admin` | react | 48 | MEDIUM |
-| `apps/memberry` | react | 442 | MEDIUM |
+| `apps/memberry` | react | 443 | MEDIUM |
 | `handlers/advertising` | generic | 11 | LOW |
 | `handlers/association:member` | hono | 246 | MEDIUM |
 | `handlers/association:operations` | hono | 80 | MEDIUM |
@@ -14,7 +14,7 @@
 | `handlers/certificates` | hono | 11 | MEDIUM |
 | `handlers/comms` | hono | 16 | MEDIUM |
 | `handlers/communication` | hono | 53 | MEDIUM |
-| `handlers/documents` | generic | 17 | LOW |
+| `handlers/documents` | hono | 18 | MEDIUM |
 | `handlers/dues` | hono | 17 | MEDIUM |
 | `handlers/elections` | hono | 11 | MEDIUM |
 | `handlers/email` | hono | 23 | MEDIUM |
@@ -32,6 +32,6 @@
 | `handlers/surveys` | generic | 20 | LOW |
 | `packages/eslint-config` | generic | 3 | LOW |
 | `packages/sdk-ts` | react | 17 | MEDIUM |
-| `packages/ui` | react | 31 | MEDIUM |
+| `packages/ui` | react | 32 | MEDIUM |
 | `specs/api` | generic | 3 | LOW |
 <!-- oli:regen:code-module-map:end -->

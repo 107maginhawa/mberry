@@ -25,7 +25,7 @@
 | `POST /admin/impersonate` | `startImpersonation` | true | 0 |  | HIGH |
 | `POST /admin/impersonate/:sessionId/end` | `endImpersonation` | true | 0 |  | HIGH |
 | `GET /admin/me/role` | `getAdminRole` | true | 0 |  | HIGH |
-| `GET /admin/national-dashboard/:associationId` | `getNationalDashboard` | true | 0 |  | HIGH |
+| `GET /admin/national-dashboard/:associationId` | `getNationalDashboard` | true | 1 |  | HIGH |
 | `GET /admin/national/chapters` | `listNationalChapters` | true | 0 |  | HIGH |
 | `GET /admin/national/chapters/:organizationId` | `getNationalChapterDetail` | true | 0 |  | HIGH |
 | `GET /admin/national/platform` | `getPlatformSummary` | true | 0 |  | HIGH |
@@ -33,7 +33,7 @@
 | `GET /admin/organizations` | `listOrganizations` | true | 1 |  | HIGH |
 | `GET /admin/organizations/:organizationId` | `getOrganization` | true | 1 |  | HIGH |
 | `PATCH /admin/organizations/:organizationId` | `updateOrganization` | true | 0 |  | HIGH |
-| `POST /admin/organizations/:organizationId/transition` | `transitionOrgStatus` | true | 0 |  | HIGH |
+| `POST /admin/organizations/:organizationId/transition` | `transitionOrgStatus` | true | 1 |  | HIGH |
 | `GET /admin/surveys/` | `listAdminSurveys` | true | 0 |  | HIGH |
 | `POST /advertisers` | `createAdvertiser` | true | 0 |  | HIGH |
 | `POST /applications` | `createJobApplication` | true | 0 |  | HIGH |
@@ -89,7 +89,7 @@
 | `POST /association/member/aging-buckets/:organizationId/recalculate` | `recalculateAgingBucket` | true | 0 |  | HIGH |
 | `POST /association/member/applications` | `createMembershipApplication` | true | 0 |  | HIGH |
 | `GET /association/member/applications` | `listMembershipApplications` | true | 1 |  | HIGH |
-| `POST /association/member/applications/bulk-approve` | `bulkApproveMembershipApplications` | true | 0 |  | HIGH |
+| `POST /association/member/applications/bulk-approve` | `bulkApproveMembershipApplications` | true | 1 |  | HIGH |
 | `GET /association/member/applications/:applicationId` | `getMembershipApplication` | true | 0 |  | HIGH |
 | `PATCH /association/member/applications/:applicationId` | `updateMembershipApplication` | true | 0 |  | HIGH |
 | `DELETE /association/member/applications/:applicationId` | `deleteMembershipApplication` | true | 0 |  | HIGH |
@@ -130,6 +130,7 @@
 | `DELETE /association/member/credentials/:credentialId` | `deleteDigitalCredential` | true | 0 |  | HIGH |
 | `POST /association/member/credentials/:credentialId/revoke` | `revokeDigitalCredential` | true | 0 |  | HIGH |
 | `POST /association/member/credits/manual` | `awardManualCredit` | true | 1 |  | HIGH |
+| `POST /association/member/credits/void-event` | `voidCreditEntry` | true | 1 |  | HIGH |
 | `POST /association/member/directory/profiles` | `createDirectoryProfile` | true | 0 |  | HIGH |
 | `GET /association/member/directory/profiles` | `listDirectoryProfiles` | true | 0 |  | HIGH |
 | `GET /association/member/directory/profiles/:profileId` | `getDirectoryProfile` | true | 0 |  | HIGH |
@@ -452,9 +453,4 @@
 | `GET /vendors/:vendorId` | `getVendor` | true | 0 |  | HIGH |
 | `PATCH /vendors/:vendorId` | `updateVendor` | true | 0 |  | HIGH |
 | `POST /vendors/:vendorId/verify` | `verifyVendor` | true | 0 |  | HIGH |
-| `GET /api/admin/national-dashboard/:associationId` | — | ? | 1 | ⚠️ | LOW |
-| `POST /api/admin/organizations/:organizationId/transition` | — | ? | 1 | ⚠️ | LOW |
-| `POST /api/storage/files` | — | ? | 1 | ⚠️ | LOW |
-| `POST /api/association/member/credits/void-event` | — | ? | 1 | ⚠️ | LOW |
-| `POST /api/association/member/applications/bulk-approve` | — | ? | 1 | ⚠️ | LOW |
 <!-- oli:regen:code-api-surface:end -->

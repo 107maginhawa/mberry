@@ -1,5 +1,5 @@
 {
-  "version": 5,
+  "version": 6,
   "state_machines": [
     {
       "id": "fsm:accredited-provider-status",
@@ -120,7 +120,7 @@
       "id": "fsm:billing-frequency",
       "name": "billingFrequency",
       "source_file": "apps/memberry/src/features/dues/components/dues-config-form.tsx",
-      "source_line": 114,
+      "source_line": 115,
       "module": "apps/memberry",
       "detection_method": "useState_union",
       "states": [

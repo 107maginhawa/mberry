@@ -1,5 +1,5 @@
 {
-  "version": 5,
+  "version": 6,
   "modules": {
     "apps/admin": {
       "name": "apps/admin",
@@ -18,7 +18,7 @@
       "framework": "react",
       "entry_points": [],
       "public_exports": [],
-      "file_count": 442,
+      "file_count": 443,
       "has_spec": false,
       "spec_path": null,
       "confidence": "MEDIUM"
@@ -125,13 +125,13 @@
     "handlers/documents": {
       "name": "handlers/documents",
       "source_path": "services/api-ts/src/handlers/documents",
-      "framework": "generic",
+      "framework": "hono",
       "entry_points": [],
       "public_exports": [],
-      "file_count": 17,
+      "file_count": 18,
       "has_spec": false,
       "spec_path": null,
-      "confidence": "LOW"
+      "confidence": "MEDIUM"
     },
     "handlers/dues": {
       "name": "handlers/dues",
@@ -326,7 +326,7 @@
       "framework": "react",
       "entry_points": [],
       "public_exports": [],
-      "file_count": 31,
+      "file_count": 32,
       "has_spec": false,
       "spec_path": null,
       "confidence": "MEDIUM"

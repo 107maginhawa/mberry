@@ -86,7 +86,7 @@
 | `ListSkeleton` | apps/memberry | component | 1 | — | MEDIUM |
 | `ProfileSkeleton` | apps/memberry | component | 0 | — | MEDIUM |
 | `StatCard` | apps/memberry | component | 4 | — | MEDIUM |
-| `StatusBadge` | apps/memberry | component | 1 | — | MEDIUM |
+| `StatusBadge` | apps/memberry | component | 0 | — | MEDIUM |
 | `AuthPage` | apps/memberry | component | 0 | — | MEDIUM |
 | `DiscoverEvents` | apps/memberry | component | 0 | ✅ paired | MEDIUM |
 | `PublicEventPage` | apps/memberry | component | 0 | ✅ | MEDIUM |
@@ -116,9 +116,9 @@
 | `useSignOut` | packages/sdk-ts | hook | 0 | — | MEDIUM |
 | `useEmailVerification` | packages/sdk-ts | hook | 0 | — | MEDIUM |
 | `DataExport` | apps/memberry | component | 0 | — | MEDIUM |
-| `OfficerDashboard` | apps/memberry | component | 1 | ⚠️ violation | MEDIUM |
+| `OfficerDashboard` | apps/memberry | component | 1 | ✅ paired | MEDIUM |
 | `OfficerManagement` | apps/memberry | component | 1 | ✅ | MEDIUM |
-| `OrgSettingsForm` | apps/memberry | component | 1 | ⚠️ violation | MEDIUM |
+| `OrgSettingsForm` | apps/memberry | component | 1 | ✅ paired | MEDIUM |
 | `MerchantAccountSetup` | apps/memberry | component | 7 | — | MEDIUM |
 | `ActiveBookingCard` | apps/memberry | component | 10 | — | MEDIUM |
 | `BookingEventEditor` | apps/memberry | component | 1 | ✅ | MEDIUM |
@@ -128,8 +128,8 @@
 | `DateSelectionSkeleton` | apps/memberry | component | 0 | — | MEDIUM |
 | `BookingWidget` | apps/memberry | component | 5 | — | MEDIUM |
 | `HostDirectory` | apps/memberry | component | 0 | ✅ paired | MEDIUM |
-| `CertificateList` | apps/memberry | component | 0 | ⚠️ violation | MEDIUM |
-| `CertificatePreview` | apps/memberry | component | 1 | ⚠️ violation | MEDIUM |
+| `CertificateList` | apps/memberry | component | 0 | ✅ paired | MEDIUM |
+| `CertificatePreview` | apps/memberry | component | 1 | ✅ paired | MEDIUM |
 | `AffiliationList` | apps/memberry | component | 2 | ✅ paired | MEDIUM |
 | `CallControls` | apps/memberry | component | 9 | — | MEDIUM |
 | `ChannelList` | apps/memberry | component | 5 | ✅ paired | MEDIUM |
@@ -154,13 +154,13 @@
 | `useUnreadCounts` | apps/memberry | hook | 0 | — | MEDIUM |
 | `useVideoCall` | apps/memberry | hook | 0 | — | MEDIUM |
 | `AnnouncementContent` | apps/memberry | component | 9 | — | MEDIUM |
-| `AnnouncementList` | apps/memberry | component | 1 | ⚠️ violation | MEDIUM |
+| `AnnouncementList` | apps/memberry | component | 1 | ✅ paired | MEDIUM |
 | `AudiencePicker` | apps/memberry | component | 3 | ✅ paired | MEDIUM |
 | `ComposeForm` | apps/memberry | component | 2 | ✅ | MEDIUM |
 | `DeliveryFunnel` | apps/memberry | component | 4 | — | MEDIUM |
 | `NotificationPreferences` | apps/memberry | component | 2 | ✅ | MEDIUM |
 | `TemplateForm` | apps/memberry | component | 3 | ✅ | MEDIUM |
-| `TemplateList` | apps/memberry | component | 3 | ⚠️ violation | MEDIUM |
+| `TemplateList` | apps/memberry | component | 3 | ✅ paired | MEDIUM |
 | `TemplatePreview` | apps/memberry | component | 2 | — | MEDIUM |
 | `TemplateSplitEditor` | apps/memberry | component | 4 | — | MEDIUM |
 | `ActionWidget` | apps/memberry | component | 10 | — | MEDIUM |
@@ -181,7 +181,7 @@
 | `BillingSchedulePreview` | apps/memberry | component | 6 | — | MEDIUM |
 | `CollectionRateCard` | apps/memberry | component | 2 | — | MEDIUM |
 | `CollectionsAreaChart` | apps/memberry | component | 2 | — | MEDIUM |
-| `DuesConfigForm` | apps/memberry | component | 1 | ⚠️ violation | MEDIUM |
+| `DuesConfigForm` | apps/memberry | component | 1 | 🔧 exempt | MEDIUM |
 | `DuesGateBanner` | apps/memberry | component | 4 | — | MEDIUM |
 | `DuesInvoiceList` | apps/memberry | component | 2 | ✅ paired | MEDIUM |
 | `DuesSetupChecklist` | apps/memberry | component | 1 | ✅ | MEDIUM |
@@ -190,31 +190,31 @@
 | `FinancialDashboard` | apps/memberry | component | 1 | ✅ paired | MEDIUM |
 | `FundAllocationEditor` | apps/memberry | component | 3 | — | MEDIUM |
 | `FundAllocationPreview` | apps/memberry | component | 3 | — | MEDIUM |
-| `GatewaySetup` | apps/memberry | component | 1 | ⚠️ violation | MEDIUM |
+| `GatewaySetup` | apps/memberry | component | 1 | ✅ paired | MEDIUM |
 | `MetricCard` | apps/memberry | component | 7 | — | MEDIUM |
 | `MetricCardSkeleton` | apps/memberry | component | 0 | — | MEDIUM |
 | `MonthlyTrendChart` | apps/memberry | component | 1 | — | MEDIUM |
-| `PaymentHistoryTable` | apps/memberry | component | 2 | ⚠️ violation | MEDIUM |
+| `PaymentHistoryTable` | apps/memberry | component | 2 | ✅ paired | MEDIUM |
 | `PaymentScheduleTimeline` | apps/memberry | component | 2 | — | MEDIUM |
 | `PendingProofsList` | apps/memberry | component | 1 | ✅ paired | MEDIUM |
 | `ProofUploadForm` | apps/memberry | component | 5 | ✅ | MEDIUM |
-| `RecentActivityFeed` | apps/memberry | component | 3 | ⚠️ violation | MEDIUM |
+| `RecentActivityFeed` | apps/memberry | component | 3 | ✅ paired | MEDIUM |
 | `RecordPaymentForm` | apps/memberry | component | 1 | ✅ paired | MEDIUM |
 | `RefundForm` | apps/memberry | component | 3 | ✅ | MEDIUM |
 | `ReportResults` | apps/memberry | component | 4 | — | MEDIUM |
 | `ReportSelector` | apps/memberry | component | 2 | — | MEDIUM |
-| `SpecialAssessmentsList` | apps/memberry | component | 1 | ⚠️ violation | MEDIUM |
+| `SpecialAssessmentsList` | apps/memberry | component | 1 | ✅ paired | MEDIUM |
 | `StatusDistributionChart` | apps/memberry | component | 1 | — | MEDIUM |
 | `TopUnpaidList` | apps/memberry | component | 3 | — | MEDIUM |
-| `ElectionDetail` | apps/memberry | component | 2 | ⚠️ violation | MEDIUM |
+| `ElectionDetail` | apps/memberry | component | 2 | ✅ paired | MEDIUM |
 | `ElectionForm` | apps/memberry | component | 5 | ✅ | MEDIUM |
 | `ElectionList` | apps/memberry | component | 1 | ✅ paired | MEDIUM |
 | `ElectionTimeline` | apps/memberry | component | 6 | — | MEDIUM |
-| `MemberElectionDetail` | apps/memberry | component | 3 | ⚠️ violation | MEDIUM |
+| `MemberElectionDetail` | apps/memberry | component | 3 | ✅ paired | MEDIUM |
 | `MemberElectionList` | apps/memberry | component | 1 | ✅ paired | MEDIUM |
-| `NomineePickerDialog` | apps/memberry | component | 5 | ⚠️ violation | MEDIUM |
+| `NomineePickerDialog` | apps/memberry | component | 5 | ✅ paired | MEDIUM |
 | `SelfNominationDialog` | apps/memberry | component | 7 | ✅ | MEDIUM |
-| `VotingBallot` | apps/memberry | component | 3 | ⚠️ violation | MEDIUM |
+| `VotingBallot` | apps/memberry | component | 3 | ✅ paired | MEDIUM |
 | `AttendanceView` | apps/memberry | component | 1 | ✅ paired | MEDIUM |
 | `EventCalendar` | apps/memberry | component | 2 | — | MEDIUM |
 | `EventCard` | apps/memberry | component | 6 | — | MEDIUM |
@@ -227,7 +227,7 @@
 | `CredentialList` | apps/memberry | component | 2 | ✅ | MEDIUM |
 | `InstitutionalMembershipForm` | apps/memberry | component | 4 | — | MEDIUM |
 | `InstitutionalMembershipTable` | apps/memberry | component | 1 | ✅ paired | MEDIUM |
-| `MemberDetail` | apps/memberry | component | 2 | ⚠️ violation | MEDIUM |
+| `MemberDetail` | apps/memberry | component | 2 | ✅ paired | MEDIUM |
 | `MemberTable` | apps/memberry | component | 4 | ✅ paired | MEDIUM |
 | `MembershipList` | apps/memberry | component | 2 | ✅ paired | MEDIUM |
 | `SeatManagementPanel` | apps/memberry | component | 4 | ✅ paired | MEDIUM |
@@ -241,13 +241,13 @@
 | `NpsGauge` | apps/memberry | component | 4 | — | MEDIUM |
 | `NpsModal` | apps/memberry | component | 3 | — | MEDIUM |
 | `NpsProvider` | apps/memberry | component | 0 | — | MEDIUM |
-| `NpsTrendChart` | apps/memberry | component | 1 | ⚠️ violation | MEDIUM |
+| `NpsTrendChart` | apps/memberry | component | 1 | ✅ paired | MEDIUM |
 | `PollCard` | apps/memberry | component | 3 | ✅ | MEDIUM |
 | `QuestionEditor` | apps/memberry | component | 4 | — | MEDIUM |
 | `SurveyBuilder` | apps/memberry | component | 4 | ✅ | MEDIUM |
 | `SurveyFlow` | apps/memberry | component | 3 | — | MEDIUM |
 | `SurveyList` | apps/memberry | component | 0 | ✅ paired | MEDIUM |
-| `SurveyResults` | apps/memberry | component | 2 | ⚠️ violation | MEDIUM |
+| `SurveyResults` | apps/memberry | component | 2 | ✅ paired | MEDIUM |
 | `SurveyTemplates` | apps/memberry | component | 2 | — | MEDIUM |
 | `usePendingNps` | apps/memberry | hook | 0 | — | MEDIUM |
 | `useSurveyDraft` | apps/memberry | hook | 0 | — | MEDIUM |
@@ -259,14 +259,14 @@
 | `MyCalendar` | apps/memberry | component | 0 | ✅ | MEDIUM |
 | `DataExportPage` | apps/memberry | component | 0 | — | MEDIUM |
 | `MyEvents` | apps/memberry | component | 0 | ✅ paired | MEDIUM |
-| `MyIdCard` | apps/memberry | component | 0 | ⚠️ violation | MEDIUM |
+| `MyIdCard` | apps/memberry | component | 0 | ✅ paired | MEDIUM |
 | `NotificationsPage` | apps/memberry | component | 0 | — | MEDIUM |
 | `MyOrganizationsPage` | apps/memberry | component | 0 | ✅ | MEDIUM |
 | `MyPaymentsPage` | apps/memberry | component | 0 | — | MEDIUM |
 | `MyProfilePage` | apps/memberry | component | 0 | ✅ paired | MEDIUM |
 | `SchedulePage` | apps/memberry | component | 0 | ✅ paired | MEDIUM |
 | `MySettingsPage` | apps/memberry | component | 0 | — | MEDIUM |
-| `MyTraining` | apps/memberry | component | 0 | ⚠️ violation | MEDIUM |
+| `MyTraining` | apps/memberry | component | 0 | ✅ paired | MEDIUM |
 | `AccountSettingsPage` | apps/memberry | component | 0 | ✅ | MEDIUM |
 | `SecuritySettingsPage` | apps/memberry | component | 0 | — | MEDIUM |
 | `ActionQueue` | apps/memberry | component | 2 | — | MEDIUM |
@@ -291,36 +291,36 @@
 | `MemberDuesPage` | apps/memberry | component | 0 | ✅ | MEDIUM |
 | `OrgHome` | apps/memberry | component | 0 | ✅ | MEDIUM |
 | `MembersDirectoryPage` | apps/memberry | component | 0 | — | MEDIUM |
-| `MyCpdDashboard` | apps/memberry | component | 0 | ⚠️ violation | MEDIUM |
+| `MyCpdDashboard` | apps/memberry | component | 0 | ✅ paired | MEDIUM |
 | `MyNotificationsPage` | apps/memberry | component | 0 | — | MEDIUM |
 | `OfficerLayout` | apps/memberry | component | 0 | — | MEDIUM |
 | `OrgLayout` | apps/memberry | component | 0 | — | MEDIUM |
-| `MemberAnnouncementPage` | apps/memberry | component | 0 | ⚠️ violation | MEDIUM |
+| `MemberAnnouncementPage` | apps/memberry | component | 0 | ✅ paired | MEDIUM |
 | `MemberAnnouncementFeed` | apps/memberry | component | 0 | ✅ paired | MEDIUM |
 | `MemberProfilePage` | apps/memberry | component | 0 | — | MEDIUM |
 | `MemberDocumentDetailPage` | apps/memberry | component | 0 | ✅ paired | MEDIUM |
 | `MemberDocumentsPage` | apps/memberry | component | 0 | — | MEDIUM |
 | `MemberElectionsPage` | apps/memberry | component | 0 | — | MEDIUM |
-| `EventDetail` | apps/memberry | component | 0 | ⚠️ violation | MEDIUM |
+| `EventDetail` | apps/memberry | component | 0 | ✅ paired | MEDIUM |
 | `OrgEvents` | apps/memberry | component | 0 | ✅ paired | MEDIUM |
-| `GovernancePage` | apps/memberry | component | 0 | ⚠️ violation | MEDIUM |
+| `GovernancePage` | apps/memberry | component | 0 | ✅ paired | MEDIUM |
 | `MessagesIndexPage` | apps/memberry | component | 0 | — | MEDIUM |
 | `ApplicationsPage` | apps/memberry | component | 0 | — | MEDIUM |
 | `OfficerCertificates` | apps/memberry | component | 0 | ✅ | MEDIUM |
 | `OfficerCompliance` | apps/memberry | component | 0 | ✅ paired | MEDIUM |
 | `OfficerDashboardPage` | apps/memberry | component | 0 | — | MEDIUM |
 | `OfficersPage` | apps/memberry | component | 0 | — | MEDIUM |
-| `TrainingDetail` | apps/memberry | component | 0 | ⚠️ violation | MEDIUM |
-| `OrgTraining` | apps/memberry | component | 0 | ⚠️ violation | MEDIUM |
+| `TrainingDetail` | apps/memberry | component | 0 | ✅ paired | MEDIUM |
+| `OrgTraining` | apps/memberry | component | 0 | ✅ paired | MEDIUM |
 | `MemberElectionDetailPage` | apps/memberry | component | 0 | — | MEDIUM |
 | `VotePage` | apps/memberry | component | 0 | — | MEDIUM |
 | `DmIndexPage` | apps/memberry | component | 0 | — | MEDIUM |
-| `AnnouncementDetailPage` | apps/memberry | component | 0 | ⚠️ violation | MEDIUM |
-| `AnalyticsDashboardPage` | apps/memberry | component | 0 | ⚠️ violation | MEDIUM |
+| `AnnouncementDetailPage` | apps/memberry | component | 0 | ✅ paired | MEDIUM |
+| `AnalyticsDashboardPage` | apps/memberry | component | 0 | ✅ paired | MEDIUM |
 | `OfficerCommunications` | apps/memberry | component | 0 | — | MEDIUM |
 | `NewAnnouncementPage` | apps/memberry | component | 0 | — | MEDIUM |
-| `SentHistoryPage` | apps/memberry | component | 0 | ⚠️ violation | MEDIUM |
-| `DocumentDetail` | apps/memberry | component | 0 | ⚠️ violation | MEDIUM |
+| `SentHistoryPage` | apps/memberry | component | 0 | ✅ paired | MEDIUM |
+| `DocumentDetail` | apps/memberry | component | 0 | ✅ paired | MEDIUM |
 | `OfficerDocuments` | apps/memberry | component | 0 | — | MEDIUM |
 | `ElectionDetailLayout` | apps/memberry | component | 0 | — | MEDIUM |
 | `OfficerElections` | apps/memberry | component | 0 | — | MEDIUM |
@@ -329,7 +329,7 @@
 | `NewEvent` | apps/memberry | component | 0 | — | MEDIUM |
 | `FinancesAssessmentsPage` | apps/memberry | component | 0 | — | MEDIUM |
 | `DuesSchedulePage` | apps/memberry | component | 0 | — | MEDIUM |
-| `FundsPage` | apps/memberry | component | 0 | ⚠️ violation | MEDIUM |
+| `FundsPage` | apps/memberry | component | 0 | ✅ paired | MEDIUM |
 | `FinancesOverviewPage` | apps/memberry | component | 0 | ✅ paired | MEDIUM |
 | `InvoicesPage` | apps/memberry | component | 0 | ✅ paired | MEDIUM |
 | `FinancialMembersPage` | apps/memberry | component | 0 | ✅ paired | MEDIUM |
@@ -337,16 +337,16 @@
 | `InstitutionalMembershipsPage` | apps/memberry | component | 0 | — | MEDIUM |
 | `NewInstitutionalMembershipPage` | apps/memberry | component | 0 | — | MEDIUM |
 | `OfficerMessagesPage` | apps/memberry | component | 0 | — | MEDIUM |
-| `PaymentDetailPage` | apps/memberry | component | 0 | ⚠️ violation | MEDIUM |
+| `PaymentDetailPage` | apps/memberry | component | 0 | ✅ paired | MEDIUM |
 | `OfficerPaymentsPage` | apps/memberry | component | 0 | ✅ | MEDIUM |
 | `RecordPaymentPage` | apps/memberry | component | 0 | — | MEDIUM |
-| `CreditReport` | apps/memberry | component | 0 | ⚠️ violation | MEDIUM |
+| `CreditReport` | apps/memberry | component | 0 | ✅ paired | MEDIUM |
 | `FinancialReportsPage` | apps/memberry | component | 0 | ✅ | MEDIUM |
 | `OfficerReviews` | apps/memberry | component | 0 | ✅ paired | MEDIUM |
 | `RosterImportPage` | apps/memberry | component | 0 | — | MEDIUM |
 | `RosterPage` | apps/memberry | component | 0 | — | MEDIUM |
 | `ChaptersSettingsPage` | apps/memberry | component | 0 | — | MEDIUM |
-| `CpdSettings` | apps/memberry | component | 0 | ⚠️ violation | MEDIUM |
+| `CpdSettings` | apps/memberry | component | 0 | ✅ paired | MEDIUM |
 | `GatewaySettingsPage` | apps/memberry | component | 0 | — | MEDIUM |
 | `CategoriesPage` | apps/memberry | component | 0 | — | MEDIUM |
 | `OrgSettingsPage` | apps/memberry | component | 0 | — | MEDIUM |
@@ -357,9 +357,9 @@
 | `NewTraining` | apps/memberry | component | 0 | — | MEDIUM |
 | `TemplateListPage` | apps/memberry | component | 0 | — | MEDIUM |
 | `NewTemplatePage` | apps/memberry | component | 0 | — | MEDIUM |
-| `EditElection` | apps/memberry | component | 0 | ⚠️ violation | MEDIUM |
+| `EditElection` | apps/memberry | component | 0 | ✅ paired | MEDIUM |
 | `EventAttendance` | apps/memberry | component | 0 | ✅ paired | MEDIUM |
-| `InvoiceDetailPage` | apps/memberry | component | 0 | ⚠️ violation | MEDIUM |
+| `InvoiceDetailPage` | apps/memberry | component | 0 | ✅ paired | MEDIUM |
 | `MemberFinancialDetailPage` | apps/memberry | component | 0 | ✅ paired | MEDIUM |
 | `TrainingAttendance` | apps/memberry | component | 0 | ✅ paired | MEDIUM |
 <!-- oli:regen:code-component-registry:end -->

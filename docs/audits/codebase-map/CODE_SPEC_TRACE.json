@@ -1,5 +1,5 @@
 {
-  "version": 5,
+  "version": 6,
   "spec_source": "specs/api/dist/openapi/openapi.json",
   "operations": [
     {
@@ -855,7 +855,9 @@
         "handler_function": "getNationalDashboard",
         "module": "handlers/platformadmin"
       },
-      "consumers": [],
+      "consumers": [
+        "apps/admin"
+      ],
       "status": "matched",
       "auth_drift": false
     },
@@ -4658,7 +4660,9 @@
         "handler_function": "transitionOrgStatus",
         "module": "handlers/platformadmin"
       },
-      "consumers": [],
+      "consumers": [
+        "apps/admin"
+      ],
       "status": "matched",
       "auth_drift": false
     },
@@ -5145,7 +5149,9 @@
         "handler_function": "bulkApproveMembershipApplications",
         "module": "handlers/association:member"
       },
-      "consumers": [],
+      "consumers": [
+        "apps/memberry"
+      ],
       "status": "matched",
       "auth_drift": false
     },
@@ -5341,6 +5347,25 @@
       "backend": {
         "handler_file": "services/api-ts/src/handlers/association:member/awardManualCredit.ts",
         "handler_function": "awardManualCredit",
+        "module": "handlers/association:member"
+      },
+      "consumers": [
+        "apps/memberry"
+      ],
+      "status": "matched",
+      "auth_drift": false
+    },
+    {
+      "operation_id": "voidCreditEntry",
+      "method": "POST",
+      "path": "/association/member/credits/void-event",
+      "required_roles": [
+        "association:admin",
+        "association:staff"
+      ],
+      "backend": {
+        "handler_file": "services/api-ts/src/handlers/association:member/voidCreditEntry.ts",
+        "handler_function": "voidCreditEntry",
         "module": "handlers/association:member"
       },
       "consumers": [
@@ -7854,6 +7879,7 @@
       "POST /association/member/credentials/public-verify",
       "POST /association/member/credentials/verify",
       "POST /association/member/credits/manual",
+      "POST /association/member/credits/void-event",
       "POST /association/member/directory/profiles",
       "POST /association/member/dues-configs",
       "POST /association/member/dues-gateway/:organizationId/test",

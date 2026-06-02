@@ -1,5 +1,5 @@
 {
-  "version": 5,
+  "version": 6,
   "components": {
     "AlertDialogHeader": {
       "name": "AlertDialogHeader",
@@ -14,6 +14,7 @@
       "routes_used_in": [],
       "loading_state_hygiene": null,
       "interaction_hygiene": null,
+      "error_sink_calls": [],
       "confidence": "MEDIUM"
     },
     "AlertDialogFooter": {
@@ -29,6 +30,7 @@
       "routes_used_in": [],
       "loading_state_hygiene": null,
       "interaction_hygiene": null,
+      "error_sink_calls": [],
       "confidence": "MEDIUM"
     },
     "Badge": {
@@ -44,6 +46,7 @@
       "routes_used_in": [],
       "loading_state_hygiene": null,
       "interaction_hygiene": null,
+      "error_sink_calls": [],
       "confidence": "MEDIUM"
     },
     "Calendar": {
@@ -59,6 +62,7 @@
       "routes_used_in": [],
       "loading_state_hygiene": null,
       "interaction_hygiene": null,
+      "error_sink_calls": [],
       "confidence": "MEDIUM"
     },
     "CalendarDayButton": {
@@ -74,6 +78,7 @@
       "routes_used_in": [],
       "loading_state_hygiene": null,
       "interaction_hygiene": null,
+      "error_sink_calls": [],
       "confidence": "MEDIUM"
     },
     "CommandDialog": {
@@ -89,6 +94,7 @@
       "routes_used_in": [],
       "loading_state_hygiene": null,
       "interaction_hygiene": null,
+      "error_sink_calls": [],
       "confidence": "MEDIUM"
     },
     "CommandShortcut": {
@@ -104,6 +110,7 @@
       "routes_used_in": [],
       "loading_state_hygiene": null,
       "interaction_hygiene": null,
+      "error_sink_calls": [],
       "confidence": "MEDIUM"
     },
     "DialogHeader": {
@@ -119,6 +126,7 @@
       "routes_used_in": [],
       "loading_state_hygiene": null,
       "interaction_hygiene": null,
+      "error_sink_calls": [],
       "confidence": "MEDIUM"
     },
     "DialogFooter": {
@@ -134,6 +142,7 @@
       "routes_used_in": [],
       "loading_state_hygiene": null,
       "interaction_hygiene": null,
+      "error_sink_calls": [],
       "confidence": "MEDIUM"
     },
     "DropdownMenuShortcut": {
@@ -149,6 +158,7 @@
       "routes_used_in": [],
       "loading_state_hygiene": null,
       "interaction_hygiene": null,
+      "error_sink_calls": [],
       "confidence": "MEDIUM"
     },
     "FormField": {
@@ -212,6 +222,7 @@
       "routes_used_in": [],
       "loading_state_hygiene": null,
       "interaction_hygiene": null,
+      "error_sink_calls": [],
       "confidence": "MEDIUM"
     },
     "useFormField": {
@@ -227,6 +238,7 @@
       "routes_used_in": [],
       "loading_state_hygiene": null,
       "interaction_hygiene": null,
+      "error_sink_calls": [],
       "confidence": "MEDIUM"
     },
     "SheetHeader": {
@@ -242,6 +254,7 @@
       "routes_used_in": [],
       "loading_state_hygiene": null,
       "interaction_hygiene": null,
+      "error_sink_calls": [],
       "confidence": "MEDIUM"
     },
     "SheetFooter": {
@@ -257,6 +270,7 @@
       "routes_used_in": [],
       "loading_state_hygiene": null,
       "interaction_hygiene": null,
+      "error_sink_calls": [],
       "confidence": "MEDIUM"
     },
     "Skeleton": {
@@ -272,6 +286,7 @@
       "routes_used_in": [],
       "loading_state_hygiene": null,
       "interaction_hygiene": null,
+      "error_sink_calls": [],
       "confidence": "MEDIUM"
     },
     "CardSkeleton": {
@@ -287,6 +302,7 @@
       "routes_used_in": [],
       "loading_state_hygiene": null,
       "interaction_hygiene": null,
+      "error_sink_calls": [],
       "confidence": "MEDIUM"
     },
     "TableSkeleton": {
@@ -315,6 +331,7 @@
       "routes_used_in": [],
       "loading_state_hygiene": null,
       "interaction_hygiene": null,
+      "error_sink_calls": [],
       "confidence": "MEDIUM"
     },
     "StatCardSkeleton": {
@@ -330,6 +347,7 @@
       "routes_used_in": [],
       "loading_state_hygiene": null,
       "interaction_hygiene": null,
+      "error_sink_calls": [],
       "confidence": "MEDIUM"
     },
     "ErrorState": {
@@ -363,6 +381,7 @@
       "routes_used_in": [],
       "loading_state_hygiene": null,
       "interaction_hygiene": null,
+      "error_sink_calls": [],
       "confidence": "MEDIUM"
     },
     "useAdminUser": {
@@ -378,6 +397,7 @@
       "routes_used_in": [],
       "loading_state_hygiene": null,
       "interaction_hygiene": null,
+      "error_sink_calls": [],
       "confidence": "MEDIUM"
     },
     "RequireRole": {
@@ -411,6 +431,7 @@
       "routes_used_in": [],
       "loading_state_hygiene": null,
       "interaction_hygiene": null,
+      "error_sink_calls": [],
       "confidence": "MEDIUM"
     },
     "RootComponent": {
@@ -429,9 +450,17 @@
         "has_handler": true,
         "handler_nonempty": true,
         "reaches_api_or_nav": false,
+        "nav_targets": [],
+        "hrefs": [
+          "#main-content"
+        ],
+        "href_attrs": [
+          "href"
+        ],
         "violation": false,
         "confidence": "MEDIUM"
       },
+      "error_sink_calls": [],
       "confidence": "MEDIUM"
     },
     "DashboardPage": {
@@ -472,9 +501,17 @@
         "has_handler": true,
         "handler_nonempty": false,
         "reaches_api_or_nav": false,
+        "nav_targets": [],
+        "hrefs": [
+          "/onboarding"
+        ],
+        "href_attrs": [
+          "to"
+        ],
         "violation": false,
         "confidence": "MEDIUM"
       },
+      "error_sink_calls": [],
       "confidence": "MEDIUM"
     },
     "Combobox": {
@@ -493,9 +530,12 @@
         "has_handler": true,
         "handler_nonempty": true,
         "reaches_api_or_nav": true,
+        "nav_targets": [],
+        "hrefs": [],
         "violation": false,
         "confidence": "MEDIUM"
       },
+      "error_sink_calls": [],
       "confidence": "MEDIUM"
     },
     "ImageCropperDialog": {
@@ -560,9 +600,12 @@
         "has_handler": true,
         "handler_nonempty": true,
         "reaches_api_or_nav": true,
+        "nav_targets": [],
+        "hrefs": [],
         "violation": false,
         "confidence": "MEDIUM"
       },
+      "error_sink_calls": [],
       "confidence": "MEDIUM"
     },
     "NotificationDrawer": {
@@ -606,9 +649,12 @@
         "has_handler": true,
         "handler_nonempty": true,
         "reaches_api_or_nav": true,
+        "nav_targets": [],
+        "hrefs": [],
         "violation": false,
         "confidence": "MEDIUM"
       },
+      "error_sink_calls": [],
       "confidence": "MEDIUM"
     },
     "useDetectCountry": {
@@ -624,6 +670,7 @@
       "routes_used_in": [],
       "loading_state_hygiene": null,
       "interaction_hygiene": null,
+      "error_sink_calls": [],
       "confidence": "MEDIUM"
     },
     "useDetectLanguage": {
@@ -639,6 +686,7 @@
       "routes_used_in": [],
       "loading_state_hygiene": null,
       "interaction_hygiene": null,
+      "error_sink_calls": [],
       "confidence": "MEDIUM"
     },
     "useDetectTimezone": {
@@ -654,6 +702,7 @@
       "routes_used_in": [],
       "loading_state_hygiene": null,
       "interaction_hygiene": null,
+      "error_sink_calls": [],
       "confidence": "MEDIUM"
     },
     "useFormatDate": {
@@ -669,6 +718,7 @@
       "routes_used_in": [],
       "loading_state_hygiene": null,
       "interaction_hygiene": null,
+      "error_sink_calls": [],
       "confidence": "MEDIUM"
     },
     "useMutationFeedback": {
@@ -684,6 +734,7 @@
       "routes_used_in": [],
       "loading_state_hygiene": null,
       "interaction_hygiene": null,
+      "error_sink_calls": [],
       "confidence": "MEDIUM"
     },
     "useFinancialStanding": {
@@ -699,6 +750,7 @@
       "routes_used_in": [],
       "loading_state_hygiene": null,
       "interaction_hygiene": null,
+      "error_sink_calls": [],
       "confidence": "MEDIUM"
     },
     "useMyOrgs": {
@@ -714,6 +766,7 @@
       "routes_used_in": [],
       "loading_state_hygiene": null,
       "interaction_hygiene": null,
+      "error_sink_calls": [],
       "confidence": "MEDIUM"
     },
     "useOrg": {
@@ -729,6 +782,7 @@
       "routes_used_in": [],
       "loading_state_hygiene": null,
       "interaction_hygiene": null,
+      "error_sink_calls": [],
       "confidence": "MEDIUM"
     },
     "useOrgContext": {
@@ -744,6 +798,7 @@
       "routes_used_in": [],
       "loading_state_hygiene": null,
       "interaction_hygiene": null,
+      "error_sink_calls": [],
       "confidence": "MEDIUM"
     },
     "OrgProvider": {
@@ -783,6 +838,7 @@
         "confidence": "MEDIUM"
       },
       "interaction_hygiene": null,
+      "error_sink_calls": [],
       "confidence": "MEDIUM"
     },
     "useOrgProvider": {
@@ -798,6 +854,7 @@
       "routes_used_in": [],
       "loading_state_hygiene": null,
       "interaction_hygiene": null,
+      "error_sink_calls": [],
       "confidence": "MEDIUM"
     },
     "useOrgProviderOptional": {
@@ -813,6 +870,7 @@
       "routes_used_in": [],
       "loading_state_hygiene": null,
       "interaction_hygiene": null,
+      "error_sink_calls": [],
       "confidence": "MEDIUM"
     },
     "AuthenticatedLayout": {
@@ -833,9 +891,17 @@
         "has_handler": true,
         "handler_nonempty": false,
         "reaches_api_or_nav": false,
+        "nav_targets": [],
+        "hrefs": [
+          "#main-content"
+        ],
+        "href_attrs": [
+          "href"
+        ],
         "violation": false,
         "confidence": "MEDIUM"
       },
+      "error_sink_calls": [],
       "confidence": "MEDIUM"
     },
     "JoinPage": {
@@ -863,9 +929,12 @@
         "has_handler": true,
         "handler_nonempty": true,
         "reaches_api_or_nav": false,
+        "nav_targets": [],
+        "hrefs": [],
         "violation": false,
         "confidence": "MEDIUM"
       },
+      "error_sink_calls": [],
       "confidence": "MEDIUM"
     },
     "OnboardingPage": {
@@ -898,9 +967,12 @@
         "has_handler": true,
         "handler_nonempty": true,
         "reaches_api_or_nav": true,
+        "nav_targets": [],
+        "hrefs": [],
         "violation": false,
         "confidence": "MEDIUM"
       },
+      "error_sink_calls": [],
       "confidence": "MEDIUM"
     },
     "VerifyEmailPage": {
@@ -921,9 +993,25 @@
         "has_handler": true,
         "handler_nonempty": true,
         "reaches_api_or_nav": true,
+        "nav_targets": [],
+        "hrefs": [
+          "/auth/$authView"
+        ],
+        "href_attrs": [
+          "to"
+        ],
         "violation": false,
         "confidence": "MEDIUM"
       },
+      "error_sink_calls": [
+        {
+          "sink": "toast.error",
+          "arg_literal": "Failed to send verification email",
+          "generic": false,
+          "file": "apps/memberry/src/routes/verify-email.tsx",
+          "line": 37
+        }
+      ],
       "confidence": "MEDIUM"
     },
     "useFileUpload": {
@@ -939,6 +1027,7 @@
       "routes_used_in": [],
       "loading_state_hygiene": null,
       "interaction_hygiene": null,
+      "error_sink_calls": [],
       "confidence": "MEDIUM"
     },
     "useAuthClient": {
@@ -954,6 +1043,7 @@
       "routes_used_in": [],
       "loading_state_hygiene": null,
       "interaction_hygiene": null,
+      "error_sink_calls": [],
       "confidence": "MEDIUM"
     },
     "ApiProvider": {
@@ -1010,6 +1100,7 @@
       "routes_used_in": [],
       "loading_state_hygiene": null,
       "interaction_hygiene": null,
+      "error_sink_calls": [],
       "confidence": "MEDIUM"
     },
     "useOptimisticMutation": {
@@ -1025,6 +1116,7 @@
       "routes_used_in": [],
       "loading_state_hygiene": null,
       "interaction_hygiene": null,
+      "error_sink_calls": [],
       "confidence": "MEDIUM"
     },
     "useDirtyPatch": {
@@ -1040,6 +1132,7 @@
       "routes_used_in": [],
       "loading_state_hygiene": null,
       "interaction_hygiene": null,
+      "error_sink_calls": [],
       "confidence": "MEDIUM"
     },
     "useDirtyValues": {
@@ -1055,6 +1148,7 @@
       "routes_used_in": [],
       "loading_state_hygiene": null,
       "interaction_hygiene": null,
+      "error_sink_calls": [],
       "confidence": "MEDIUM"
     },
     "AssociationDetailPage": {
@@ -1089,7 +1183,7 @@
         },
         {
           "method": "GET",
-          "endpoint": "/api/admin/national-dashboard/:associationId"
+          "endpoint": "/admin/national-dashboard/:associationId"
         },
         {
           "method": "GET",
@@ -1115,9 +1209,43 @@
         "has_handler": true,
         "handler_nonempty": true,
         "reaches_api_or_nav": true,
+        "nav_targets": [],
+        "hrefs": [
+          "/associations",
+          "/national-dashboard",
+          "/organizations/$organizationId"
+        ],
+        "href_attrs": [
+          "to",
+          "to",
+          "to"
+        ],
         "violation": false,
         "confidence": "MEDIUM"
       },
+      "error_sink_calls": [
+        {
+          "sink": "toast.error",
+          "arg_literal": null,
+          "generic": false,
+          "file": "apps/admin/src/routes/associations/$associationId.tsx",
+          "line": 89
+        },
+        {
+          "sink": "toast.error",
+          "arg_literal": null,
+          "generic": false,
+          "file": "apps/admin/src/routes/associations/$associationId.tsx",
+          "line": 103
+        },
+        {
+          "sink": "toast.error",
+          "arg_literal": null,
+          "generic": false,
+          "file": "apps/admin/src/routes/associations/$associationId.tsx",
+          "line": 119
+        }
+      ],
       "confidence": "MEDIUM"
     },
     "AssociationsPage": {
@@ -1150,9 +1278,17 @@
         "has_handler": true,
         "handler_nonempty": true,
         "reaches_api_or_nav": true,
+        "nav_targets": [],
+        "hrefs": [
+          "/associations/$associationId"
+        ],
+        "href_attrs": [
+          "to"
+        ],
         "violation": false,
         "confidence": "MEDIUM"
       },
+      "error_sink_calls": [],
       "confidence": "MEDIUM"
     },
     "EmailHealth": {
@@ -1170,6 +1306,7 @@
       ],
       "loading_state_hygiene": null,
       "interaction_hygiene": null,
+      "error_sink_calls": [],
       "confidence": "MEDIUM"
     },
     "CommunicationsBroadcasts": {
@@ -1187,6 +1324,7 @@
       ],
       "loading_state_hygiene": null,
       "interaction_hygiene": null,
+      "error_sink_calls": [],
       "confidence": "MEDIUM"
     },
     "ModerationQueue": {
@@ -1204,6 +1342,7 @@
       ],
       "loading_state_hygiene": null,
       "interaction_hygiene": null,
+      "error_sink_calls": [],
       "confidence": "MEDIUM"
     },
     "PlatformTemplates": {
@@ -1221,6 +1360,7 @@
       ],
       "loading_state_hygiene": null,
       "interaction_hygiene": null,
+      "error_sink_calls": [],
       "confidence": "MEDIUM"
     },
     "CompliancePage": {
@@ -1238,6 +1378,7 @@
       ],
       "loading_state_hygiene": null,
       "interaction_hygiene": null,
+      "error_sink_calls": [],
       "confidence": "MEDIUM"
     },
     "MemberDetailPage": {
@@ -1256,6 +1397,7 @@
       ],
       "loading_state_hygiene": null,
       "interaction_hygiene": null,
+      "error_sink_calls": [],
       "confidence": "MEDIUM"
     },
     "MembersPage": {
@@ -1292,9 +1434,17 @@
         "has_handler": true,
         "handler_nonempty": true,
         "reaches_api_or_nav": true,
+        "nav_targets": [],
+        "hrefs": [
+          "/members/$personId"
+        ],
+        "href_attrs": [
+          "to"
+        ],
         "violation": false,
         "confidence": "MEDIUM"
       },
+      "error_sink_calls": [],
       "confidence": "MEDIUM"
     },
     "OrganizationDetailPage": {
@@ -1313,7 +1463,7 @@
         },
         {
           "method": "POST",
-          "endpoint": "/api/admin/organizations/:organizationId/transition"
+          "endpoint": "/admin/organizations/:organizationId/transition"
         }
       ],
       "routes_used_in": [
@@ -1331,9 +1481,25 @@
         "has_handler": true,
         "handler_nonempty": true,
         "reaches_api_or_nav": false,
+        "nav_targets": [],
+        "hrefs": [
+          "/organizations"
+        ],
+        "href_attrs": [
+          "to"
+        ],
         "violation": false,
         "confidence": "MEDIUM"
       },
+      "error_sink_calls": [
+        {
+          "sink": "toast.error",
+          "arg_literal": null,
+          "generic": false,
+          "file": "apps/admin/src/routes/organizations/$organizationId.tsx",
+          "line": 72
+        }
+      ],
       "confidence": "MEDIUM"
     },
     "OrganizationsPage": {
@@ -1366,9 +1532,17 @@
         "has_handler": true,
         "handler_nonempty": true,
         "reaches_api_or_nav": false,
+        "nav_targets": [],
+        "hrefs": [
+          "/organizations/$organizationId"
+        ],
+        "href_attrs": [
+          "to"
+        ],
         "violation": false,
         "confidence": "MEDIUM"
       },
+      "error_sink_calls": [],
       "confidence": "MEDIUM"
     },
     "VerificationsPage": {
@@ -1386,6 +1560,7 @@
       ],
       "loading_state_hygiene": null,
       "interaction_hygiene": null,
+      "error_sink_calls": [],
       "confidence": "MEDIUM"
     },
     "MemberBottomNav": {
@@ -1404,9 +1579,12 @@
         "has_handler": true,
         "handler_nonempty": false,
         "reaches_api_or_nav": false,
+        "nav_targets": [],
+        "hrefs": [],
         "violation": false,
         "confidence": "MEDIUM"
       },
+      "error_sink_calls": [],
       "confidence": "MEDIUM"
     },
     "MemberHeader": {
@@ -1432,9 +1610,17 @@
         "has_handler": true,
         "handler_nonempty": true,
         "reaches_api_or_nav": true,
+        "nav_targets": [],
+        "hrefs": [
+          "/my/notifications"
+        ],
+        "href_attrs": [
+          "to"
+        ],
         "violation": false,
         "confidence": "MEDIUM"
       },
+      "error_sink_calls": [],
       "confidence": "MEDIUM"
     },
     "MemberSidebar": {
@@ -1466,9 +1652,17 @@
         "has_handler": true,
         "handler_nonempty": false,
         "reaches_api_or_nav": false,
+        "nav_targets": [],
+        "hrefs": [
+          "/dashboard"
+        ],
+        "href_attrs": [
+          "to"
+        ],
         "violation": false,
         "confidence": "MEDIUM"
       },
+      "error_sink_calls": [],
       "confidence": "MEDIUM"
     },
     "OfficerMobileNav": {
@@ -1512,9 +1706,19 @@
         "has_handler": true,
         "handler_nonempty": true,
         "reaches_api_or_nav": true,
+        "nav_targets": [],
+        "hrefs": [
+          "/my/notifications",
+          "/dashboard"
+        ],
+        "href_attrs": [
+          "to",
+          "to"
+        ],
         "violation": false,
         "confidence": "MEDIUM"
       },
+      "error_sink_calls": [],
       "confidence": "MEDIUM"
     },
     "OfficerSidebar": {
@@ -1564,9 +1768,17 @@
         "has_handler": true,
         "handler_nonempty": false,
         "reaches_api_or_nav": false,
+        "nav_targets": [],
+        "hrefs": [
+          "/dashboard"
+        ],
+        "href_attrs": [
+          "to"
+        ],
         "violation": false,
         "confidence": "MEDIUM"
       },
+      "error_sink_calls": [],
       "confidence": "MEDIUM"
     },
     "OrgIconRail": {
@@ -1592,9 +1804,12 @@
         "has_handler": true,
         "handler_nonempty": true,
         "reaches_api_or_nav": true,
+        "nav_targets": [],
+        "hrefs": [],
         "violation": false,
         "confidence": "MEDIUM"
       },
+      "error_sink_calls": [],
       "confidence": "MEDIUM"
     },
     "OrgPickerSheet": {
@@ -1649,9 +1864,12 @@
         "has_handler": true,
         "handler_nonempty": true,
         "reaches_api_or_nav": false,
+        "nav_targets": [],
+        "hrefs": [],
         "violation": false,
         "confidence": "MEDIUM"
       },
+      "error_sink_calls": [],
       "confidence": "MEDIUM"
     },
     "CountUp": {
@@ -1704,6 +1922,7 @@
       "routes_used_in": [],
       "loading_state_hygiene": null,
       "interaction_hygiene": null,
+      "error_sink_calls": [],
       "confidence": "MEDIUM"
     },
     "GlassCard": {
@@ -1737,6 +1956,7 @@
       "routes_used_in": [],
       "loading_state_hygiene": null,
       "interaction_hygiene": null,
+      "error_sink_calls": [],
       "confidence": "MEDIUM"
     },
     "StaggerGrid": {
@@ -1776,6 +1996,7 @@
       "routes_used_in": [],
       "loading_state_hygiene": null,
       "interaction_hygiene": null,
+      "error_sink_calls": [],
       "confidence": "MEDIUM"
     },
     "StaggerItem": {
@@ -1809,6 +2030,7 @@
       "routes_used_in": [],
       "loading_state_hygiene": null,
       "interaction_hygiene": null,
+      "error_sink_calls": [],
       "confidence": "MEDIUM"
     },
     "useSpringTransition": {
@@ -1824,6 +2046,7 @@
       "routes_used_in": [],
       "loading_state_hygiene": null,
       "interaction_hygiene": null,
+      "error_sink_calls": [],
       "confidence": "MEDIUM"
     },
     "AvatarInitials": {
@@ -1864,6 +2087,7 @@
       "routes_used_in": [],
       "loading_state_hygiene": null,
       "interaction_hygiene": null,
+      "error_sink_calls": [],
       "confidence": "MEDIUM"
     },
     "ConfirmDialog": {
@@ -1951,9 +2175,12 @@
         "has_handler": true,
         "handler_nonempty": true,
         "reaches_api_or_nav": true,
+        "nav_targets": [],
+        "hrefs": [],
         "violation": false,
         "confidence": "MEDIUM"
       },
+      "error_sink_calls": [],
       "confidence": "MEDIUM"
     },
     "DataTable": {
@@ -1997,9 +2224,12 @@
         "has_handler": true,
         "handler_nonempty": true,
         "reaches_api_or_nav": false,
+        "nav_targets": [],
+        "hrefs": [],
         "violation": false,
         "confidence": "MEDIUM"
       },
+      "error_sink_calls": [],
       "confidence": "MEDIUM"
     },
     "DatePicker": {
@@ -2051,6 +2281,7 @@
       "routes_used_in": [],
       "loading_state_hygiene": null,
       "interaction_hygiene": null,
+      "error_sink_calls": [],
       "confidence": "MEDIUM"
     },
     "DateTimePicker": {
@@ -2105,9 +2336,12 @@
         "has_handler": true,
         "handler_nonempty": true,
         "reaches_api_or_nav": false,
+        "nav_targets": [],
+        "hrefs": [],
         "violation": false,
         "confidence": "MEDIUM"
       },
+      "error_sink_calls": [],
       "confidence": "MEDIUM"
     },
     "DateRangePicker": {
@@ -2159,6 +2393,7 @@
       "routes_used_in": [],
       "loading_state_hygiene": null,
       "interaction_hygiene": null,
+      "error_sink_calls": [],
       "confidence": "MEDIUM"
     },
     "EmptyState": {
@@ -2199,6 +2434,7 @@
       "routes_used_in": [],
       "loading_state_hygiene": null,
       "interaction_hygiene": null,
+      "error_sink_calls": [],
       "confidence": "MEDIUM"
     },
     "PageHeader": {
@@ -2242,9 +2478,12 @@
         "has_handler": true,
         "handler_nonempty": false,
         "reaches_api_or_nav": false,
+        "nav_targets": [],
+        "hrefs": [],
         "violation": false,
         "confidence": "MEDIUM"
       },
+      "error_sink_calls": [],
       "confidence": "MEDIUM"
     },
     "ListSkeleton": {
@@ -2267,6 +2506,7 @@
       "routes_used_in": [],
       "loading_state_hygiene": null,
       "interaction_hygiene": null,
+      "error_sink_calls": [],
       "confidence": "MEDIUM"
     },
     "ProfileSkeleton": {
@@ -2282,6 +2522,7 @@
       "routes_used_in": [],
       "loading_state_hygiene": null,
       "interaction_hygiene": null,
+      "error_sink_calls": [],
       "confidence": "MEDIUM"
     },
     "StatCard": {
@@ -2322,6 +2563,7 @@
       "routes_used_in": [],
       "loading_state_hygiene": null,
       "interaction_hygiene": null,
+      "error_sink_calls": [],
       "confidence": "MEDIUM"
     },
     "StatusBadge": {
@@ -2329,14 +2571,7 @@
       "file_path": "apps/memberry/src/components/patterns/status-badge.tsx",
       "module": "apps/memberry",
       "type": "component",
-      "props_in": [
-        {
-          "name": "status",
-          "type": "MembershipStatus",
-          "required": true,
-          "default": null
-        }
-      ],
+      "props_in": [],
       "events_out": [],
       "slots": [],
       "state_access": [],
@@ -2344,6 +2579,7 @@
       "routes_used_in": [],
       "loading_state_hygiene": null,
       "interaction_hygiene": null,
+      "error_sink_calls": [],
       "confidence": "MEDIUM"
     },
     "AuthPage": {
@@ -2361,6 +2597,7 @@
       ],
       "loading_state_hygiene": null,
       "interaction_hygiene": null,
+      "error_sink_calls": [],
       "confidence": "MEDIUM"
     },
     "DiscoverEvents": {
@@ -2393,9 +2630,12 @@
         "has_handler": true,
         "handler_nonempty": true,
         "reaches_api_or_nav": true,
+        "nav_targets": [],
+        "hrefs": [],
         "violation": false,
         "confidence": "MEDIUM"
       },
+      "error_sink_calls": [],
       "confidence": "MEDIUM"
     },
     "PublicEventPage": {
@@ -2428,9 +2668,17 @@
         "has_handler": true,
         "handler_nonempty": false,
         "reaches_api_or_nav": false,
+        "nav_targets": [],
+        "hrefs": [
+          "/join"
+        ],
+        "href_attrs": [
+          "to"
+        ],
         "violation": false,
         "confidence": "MEDIUM"
       },
+      "error_sink_calls": [],
       "confidence": "MEDIUM"
     },
     "InvitePage": {
@@ -2458,9 +2706,17 @@
         "has_handler": true,
         "handler_nonempty": true,
         "reaches_api_or_nav": true,
+        "nav_targets": [],
+        "hrefs": [
+          "/auth/sign-in"
+        ],
+        "href_attrs": [
+          "href"
+        ],
         "violation": false,
         "confidence": "MEDIUM"
       },
+      "error_sink_calls": [],
       "confidence": "MEDIUM"
     },
     "PublicOrgProfile": {
@@ -2488,9 +2744,48 @@
         "has_handler": true,
         "handler_nonempty": true,
         "reaches_api_or_nav": true,
+        "nav_targets": [],
+        "hrefs": [],
         "violation": false,
         "confidence": "MEDIUM"
       },
+      "error_sink_calls": [
+        {
+          "sink": "toast.error",
+          "arg_literal": "Please select a membership tier",
+          "generic": false,
+          "file": "apps/memberry/src/routes/org/$slug.tsx",
+          "line": 93
+        },
+        {
+          "sink": "toast.error",
+          "arg_literal": "Could not identify your account. Please sign in again.",
+          "generic": false,
+          "file": "apps/memberry/src/routes/org/$slug.tsx",
+          "line": 97
+        },
+        {
+          "sink": "toast.error",
+          "arg_literal": "You already have a pending application for this organization.",
+          "generic": false,
+          "file": "apps/memberry/src/routes/org/$slug.tsx",
+          "line": 121
+        },
+        {
+          "sink": "toast.error",
+          "arg_literal": null,
+          "generic": false,
+          "file": "apps/memberry/src/routes/org/$slug.tsx",
+          "line": 125
+        },
+        {
+          "sink": "toast.error",
+          "arg_literal": "Something went wrong. Please try again.",
+          "generic": false,
+          "file": "apps/memberry/src/routes/org/$slug.tsx",
+          "line": 127
+        }
+      ],
       "confidence": "MEDIUM"
     },
     "PublicPaymentPage": {
@@ -2518,9 +2813,12 @@
         "has_handler": true,
         "handler_nonempty": true,
         "reaches_api_or_nav": true,
+        "nav_targets": [],
+        "hrefs": [],
         "violation": false,
         "confidence": "MEDIUM"
       },
+      "error_sink_calls": [],
       "confidence": "MEDIUM"
     },
     "VerifyCertificatePage": {
@@ -2548,9 +2846,12 @@
         "has_handler": true,
         "handler_nonempty": true,
         "reaches_api_or_nav": false,
+        "nav_targets": [],
+        "hrefs": [],
         "violation": false,
         "confidence": "MEDIUM"
       },
+      "error_sink_calls": [],
       "confidence": "MEDIUM"
     },
     "VerifyCredentialPage": {
@@ -2578,9 +2879,12 @@
         "has_handler": true,
         "handler_nonempty": true,
         "reaches_api_or_nav": false,
+        "nav_targets": [],
+        "hrefs": [],
         "violation": false,
         "confidence": "MEDIUM"
       },
+      "error_sink_calls": [],
       "confidence": "MEDIUM"
     },
     "PublicVerification": {
@@ -2605,6 +2909,7 @@
         "confidence": "MEDIUM"
       },
       "interaction_hygiene": null,
+      "error_sink_calls": [],
       "confidence": "MEDIUM"
     },
     "useSession": {
@@ -2620,6 +2925,7 @@
       "routes_used_in": [],
       "loading_state_hygiene": null,
       "interaction_hygiene": null,
+      "error_sink_calls": [],
       "confidence": "MEDIUM"
     },
     "usePrefetchSession": {
@@ -2635,6 +2941,7 @@
       "routes_used_in": [],
       "loading_state_hygiene": null,
       "interaction_hygiene": null,
+      "error_sink_calls": [],
       "confidence": "MEDIUM"
     },
     "useToken": {
@@ -2650,6 +2957,7 @@
       "routes_used_in": [],
       "loading_state_hygiene": null,
       "interaction_hygiene": null,
+      "error_sink_calls": [],
       "confidence": "MEDIUM"
     },
     "useListAccounts": {
@@ -2665,6 +2973,7 @@
       "routes_used_in": [],
       "loading_state_hygiene": null,
       "interaction_hygiene": null,
+      "error_sink_calls": [],
       "confidence": "MEDIUM"
     },
     "useListSessions": {
@@ -2680,6 +2989,7 @@
       "routes_used_in": [],
       "loading_state_hygiene": null,
       "interaction_hygiene": null,
+      "error_sink_calls": [],
       "confidence": "MEDIUM"
     },
     "useListDeviceSessions": {
@@ -2695,6 +3005,7 @@
       "routes_used_in": [],
       "loading_state_hygiene": null,
       "interaction_hygiene": null,
+      "error_sink_calls": [],
       "confidence": "MEDIUM"
     },
     "useListPasskeys": {
@@ -2710,6 +3021,7 @@
       "routes_used_in": [],
       "loading_state_hygiene": null,
       "interaction_hygiene": null,
+      "error_sink_calls": [],
       "confidence": "MEDIUM"
     },
     "useUpdateUser": {
@@ -2725,6 +3037,7 @@
       "routes_used_in": [],
       "loading_state_hygiene": null,
       "interaction_hygiene": null,
+      "error_sink_calls": [],
       "confidence": "MEDIUM"
     },
     "useUnlinkAccount": {
@@ -2740,6 +3053,7 @@
       "routes_used_in": [],
       "loading_state_hygiene": null,
       "interaction_hygiene": null,
+      "error_sink_calls": [],
       "confidence": "MEDIUM"
     },
     "useRevokeOtherSessions": {
@@ -2755,6 +3069,7 @@
       "routes_used_in": [],
       "loading_state_hygiene": null,
       "interaction_hygiene": null,
+      "error_sink_calls": [],
       "confidence": "MEDIUM"
     },
     "useRevokeSession": {
@@ -2770,6 +3085,7 @@
       "routes_used_in": [],
       "loading_state_hygiene": null,
       "interaction_hygiene": null,
+      "error_sink_calls": [],
       "confidence": "MEDIUM"
     },
     "useRevokeSessions": {
@@ -2785,6 +3101,7 @@
       "routes_used_in": [],
       "loading_state_hygiene": null,
       "interaction_hygiene": null,
+      "error_sink_calls": [],
       "confidence": "MEDIUM"
     },
     "useSetActiveSession": {
@@ -2800,6 +3117,7 @@
       "routes_used_in": [],
       "loading_state_hygiene": null,
       "interaction_hygiene": null,
+      "error_sink_calls": [],
       "confidence": "MEDIUM"
     },
     "useRevokeDeviceSession": {
@@ -2815,6 +3133,7 @@
       "routes_used_in": [],
       "loading_state_hygiene": null,
       "interaction_hygiene": null,
+      "error_sink_calls": [],
       "confidence": "MEDIUM"
     },
     "useDeletePasskey": {
@@ -2830,6 +3149,7 @@
       "routes_used_in": [],
       "loading_state_hygiene": null,
       "interaction_hygiene": null,
+      "error_sink_calls": [],
       "confidence": "MEDIUM"
     },
     "useAuthQuery": {
@@ -2845,6 +3165,7 @@
       "routes_used_in": [],
       "loading_state_hygiene": null,
       "interaction_hygiene": null,
+      "error_sink_calls": [],
       "confidence": "MEDIUM"
     },
     "useAuthMutation": {
@@ -2860,6 +3181,7 @@
       "routes_used_in": [],
       "loading_state_hygiene": null,
       "interaction_hygiene": null,
+      "error_sink_calls": [],
       "confidence": "MEDIUM"
     },
     "useSignOut": {
@@ -2875,6 +3197,7 @@
       "routes_used_in": [],
       "loading_state_hygiene": null,
       "interaction_hygiene": null,
+      "error_sink_calls": [],
       "confidence": "MEDIUM"
     },
     "useEmailVerification": {
@@ -2890,6 +3213,7 @@
       "routes_used_in": [],
       "loading_state_hygiene": null,
       "interaction_hygiene": null,
+      "error_sink_calls": [],
       "confidence": "MEDIUM"
     },
     "DataExport": {
@@ -2908,9 +3232,27 @@
         "has_handler": true,
         "handler_nonempty": true,
         "reaches_api_or_nav": true,
+        "nav_targets": [],
+        "hrefs": [],
         "violation": false,
         "confidence": "MEDIUM"
       },
+      "error_sink_calls": [
+        {
+          "sink": "toast.error",
+          "arg_literal": "Export already requested",
+          "generic": false,
+          "file": "apps/memberry/src/features/account/components/data-export.tsx",
+          "line": 68
+        },
+        {
+          "sink": "toast.error",
+          "arg_literal": "Export failed",
+          "generic": false,
+          "file": "apps/memberry/src/features/account/components/data-export.tsx",
+          "line": 97
+        }
+      ],
       "confidence": "MEDIUM"
     },
     "OfficerDashboard": {
@@ -2946,19 +3288,22 @@
       "routes_used_in": [],
       "loading_state_hygiene": {
         "has_skeleton": true,
-        "has_error_branch": false,
+        "has_error_branch": true,
         "has_timeout": false,
         "has_exemption": false,
-        "violation": true,
+        "violation": false,
         "confidence": "MEDIUM"
       },
       "interaction_hygiene": {
         "has_handler": true,
         "handler_nonempty": false,
         "reaches_api_or_nav": false,
+        "nav_targets": [],
+        "hrefs": [],
         "violation": false,
         "confidence": "MEDIUM"
       },
+      "error_sink_calls": [],
       "confidence": "MEDIUM"
     },
     "OfficerManagement": {
@@ -2991,9 +3336,20 @@
         "has_handler": true,
         "handler_nonempty": true,
         "reaches_api_or_nav": true,
+        "nav_targets": [],
+        "hrefs": [],
         "violation": false,
         "confidence": "MEDIUM"
       },
+      "error_sink_calls": [
+        {
+          "sink": "toast.error",
+          "arg_literal": "Failed to remove officer",
+          "generic": false,
+          "file": "apps/memberry/src/features/admin/components/officer-management.tsx",
+          "line": 80
+        }
+      ],
       "confidence": "MEDIUM"
     },
     "OrgSettingsForm": {
@@ -3016,19 +3372,37 @@
       "routes_used_in": [],
       "loading_state_hygiene": {
         "has_skeleton": true,
-        "has_error_branch": false,
+        "has_error_branch": true,
         "has_timeout": false,
         "has_exemption": false,
-        "violation": true,
+        "violation": false,
         "confidence": "MEDIUM"
       },
       "interaction_hygiene": {
         "has_handler": true,
         "handler_nonempty": true,
         "reaches_api_or_nav": true,
+        "nav_targets": [],
+        "hrefs": [],
         "violation": false,
         "confidence": "MEDIUM"
       },
+      "error_sink_calls": [
+        {
+          "sink": "toast.error",
+          "arg_literal": "Organization name is required",
+          "generic": false,
+          "file": "apps/memberry/src/features/admin/components/org-settings-form.tsx",
+          "line": 96
+        },
+        {
+          "sink": "toast.error",
+          "arg_literal": "Failed to save settings",
+          "generic": false,
+          "file": "apps/memberry/src/features/admin/components/org-settings-form.tsx",
+          "line": 106
+        }
+      ],
       "confidence": "MEDIUM"
     },
     "MerchantAccountSetup": {
@@ -3100,6 +3474,7 @@
       "routes_used_in": [],
       "loading_state_hygiene": null,
       "interaction_hygiene": null,
+      "error_sink_calls": [],
       "confidence": "MEDIUM"
     },
     "ActiveBookingCard": {
@@ -3200,9 +3575,12 @@
         "has_handler": true,
         "handler_nonempty": true,
         "reaches_api_or_nav": true,
+        "nav_targets": [],
+        "hrefs": [],
         "violation": false,
         "confidence": "MEDIUM"
       },
+      "error_sink_calls": [],
       "confidence": "MEDIUM"
     },
     "BookingEventEditor": {
@@ -3244,9 +3622,12 @@
         "has_handler": true,
         "handler_nonempty": true,
         "reaches_api_or_nav": true,
+        "nav_targets": [],
+        "hrefs": [],
         "violation": false,
         "confidence": "MEDIUM"
       },
+      "error_sink_calls": [],
       "confidence": "MEDIUM"
     },
     "BookingList": {
@@ -3281,6 +3662,7 @@
         "confidence": "MEDIUM"
       },
       "interaction_hygiene": null,
+      "error_sink_calls": [],
       "confidence": "MEDIUM"
     },
     "BookingWidgetSkeleton": {
@@ -3303,6 +3685,7 @@
       "routes_used_in": [],
       "loading_state_hygiene": null,
       "interaction_hygiene": null,
+      "error_sink_calls": [],
       "confidence": "MEDIUM"
     },
     "TimeSlotsSkeleton": {
@@ -3318,6 +3701,7 @@
       "routes_used_in": [],
       "loading_state_hygiene": null,
       "interaction_hygiene": null,
+      "error_sink_calls": [],
       "confidence": "MEDIUM"
     },
     "DateSelectionSkeleton": {
@@ -3333,6 +3717,7 @@
       "routes_used_in": [],
       "loading_state_hygiene": null,
       "interaction_hygiene": null,
+      "error_sink_calls": [],
       "confidence": "MEDIUM"
     },
     "BookingWidget": {
@@ -3387,9 +3772,12 @@
         "has_handler": true,
         "handler_nonempty": true,
         "reaches_api_or_nav": true,
+        "nav_targets": [],
+        "hrefs": [],
         "violation": false,
         "confidence": "MEDIUM"
       },
+      "error_sink_calls": [],
       "confidence": "MEDIUM"
     },
     "HostDirectory": {
@@ -3420,9 +3808,17 @@
         "has_handler": true,
         "handler_nonempty": false,
         "reaches_api_or_nav": false,
+        "nav_targets": [],
+        "hrefs": [
+          "/my/bookings/host/$personId"
+        ],
+        "href_attrs": [
+          "to"
+        ],
         "violation": false,
         "confidence": "MEDIUM"
       },
+      "error_sink_calls": [],
       "confidence": "MEDIUM"
     },
     "CertificateList": {
@@ -3443,19 +3839,27 @@
       "routes_used_in": [],
       "loading_state_hygiene": {
         "has_skeleton": true,
-        "has_error_branch": false,
+        "has_error_branch": true,
         "has_timeout": false,
         "has_exemption": false,
-        "violation": true,
+        "violation": false,
         "confidence": "MEDIUM"
       },
       "interaction_hygiene": {
         "has_handler": true,
         "handler_nonempty": false,
         "reaches_api_or_nav": false,
+        "nav_targets": [],
+        "hrefs": [
+          "/my/certificates/$certificateId"
+        ],
+        "href_attrs": [
+          "to"
+        ],
         "violation": false,
         "confidence": "MEDIUM"
       },
+      "error_sink_calls": [],
       "confidence": "MEDIUM"
     },
     "CertificatePreview": {
@@ -3483,19 +3887,22 @@
       "routes_used_in": [],
       "loading_state_hygiene": {
         "has_skeleton": true,
-        "has_error_branch": false,
+        "has_error_branch": true,
         "has_timeout": false,
         "has_exemption": false,
-        "violation": true,
+        "violation": false,
         "confidence": "MEDIUM"
       },
       "interaction_hygiene": {
         "has_handler": true,
         "handler_nonempty": true,
         "reaches_api_or_nav": false,
+        "nav_targets": [],
+        "hrefs": [],
         "violation": false,
         "confidence": "MEDIUM"
       },
+      "error_sink_calls": [],
       "confidence": "MEDIUM"
     },
     "AffiliationList": {
@@ -3536,6 +3943,7 @@
         "confidence": "MEDIUM"
       },
       "interaction_hygiene": null,
+      "error_sink_calls": [],
       "confidence": "MEDIUM"
     },
     "CallControls": {
@@ -3627,6 +4035,7 @@
       "routes_used_in": [],
       "loading_state_hygiene": null,
       "interaction_hygiene": null,
+      "error_sink_calls": [],
       "confidence": "MEDIUM"
     },
     "ChannelList": {
@@ -3697,9 +4106,12 @@
         "has_handler": true,
         "handler_nonempty": true,
         "reaches_api_or_nav": false,
+        "nav_targets": [],
+        "hrefs": [],
         "violation": false,
         "confidence": "MEDIUM"
       },
+      "error_sink_calls": [],
       "confidence": "MEDIUM"
     },
     "ChatThread": {
@@ -3747,9 +4159,12 @@
         "has_handler": true,
         "handler_nonempty": true,
         "reaches_api_or_nav": true,
+        "nav_targets": [],
+        "hrefs": [],
         "violation": false,
         "confidence": "MEDIUM"
       },
+      "error_sink_calls": [],
       "confidence": "MEDIUM"
     },
     "ChatView": {
@@ -3799,9 +4214,12 @@
         "has_handler": true,
         "handler_nonempty": true,
         "reaches_api_or_nav": true,
+        "nav_targets": [],
+        "hrefs": [],
         "violation": false,
         "confidence": "MEDIUM"
       },
+      "error_sink_calls": [],
       "confidence": "MEDIUM"
     },
     "ConnectionStatus": {
@@ -3830,6 +4248,7 @@
       "routes_used_in": [],
       "loading_state_hygiene": null,
       "interaction_hygiene": null,
+      "error_sink_calls": [],
       "confidence": "MEDIUM"
     },
     "CreateChannelDialog": {
@@ -3888,9 +4307,20 @@
         "has_handler": true,
         "handler_nonempty": true,
         "reaches_api_or_nav": true,
+        "nav_targets": [],
+        "hrefs": [],
         "violation": false,
         "confidence": "MEDIUM"
       },
+      "error_sink_calls": [
+        {
+          "sink": "toast.error",
+          "arg_literal": "Failed to create channel",
+          "generic": false,
+          "file": "apps/memberry/src/features/comms/components/create-channel-dialog.tsx",
+          "line": 43
+        }
+      ],
       "confidence": "MEDIUM"
     },
     "DmList": {
@@ -3955,9 +4385,12 @@
         "has_handler": true,
         "handler_nonempty": true,
         "reaches_api_or_nav": false,
+        "nav_targets": [],
+        "hrefs": [],
         "violation": false,
         "confidence": "MEDIUM"
       },
+      "error_sink_calls": [],
       "confidence": "MEDIUM"
     },
     "MessageBubble": {
@@ -4026,9 +4459,12 @@
         "has_handler": true,
         "handler_nonempty": true,
         "reaches_api_or_nav": false,
+        "nav_targets": [],
+        "hrefs": [],
         "violation": false,
         "confidence": "MEDIUM"
       },
+      "error_sink_calls": [],
       "confidence": "MEDIUM"
     },
     "MessageComposer": {
@@ -4083,9 +4519,20 @@
         "has_handler": true,
         "handler_nonempty": true,
         "reaches_api_or_nav": true,
+        "nav_targets": [],
+        "hrefs": [],
         "violation": false,
         "confidence": "MEDIUM"
       },
+      "error_sink_calls": [
+        {
+          "sink": "toast.error",
+          "arg_literal": "Could not send message",
+          "generic": false,
+          "file": "apps/memberry/src/features/comms/components/message-composer.tsx",
+          "line": 36
+        }
+      ],
       "confidence": "MEDIUM"
     },
     "MessageReactions": {
@@ -4132,9 +4579,12 @@
         "has_handler": true,
         "handler_nonempty": true,
         "reaches_api_or_nav": true,
+        "nav_targets": [],
+        "hrefs": [],
         "violation": false,
         "confidence": "MEDIUM"
       },
+      "error_sink_calls": [],
       "confidence": "MEDIUM"
     },
     "MessageSearch": {
@@ -4188,9 +4638,12 @@
         "has_handler": true,
         "handler_nonempty": true,
         "reaches_api_or_nav": false,
+        "nav_targets": [],
+        "hrefs": [],
         "violation": false,
         "confidence": "MEDIUM"
       },
+      "error_sink_calls": [],
       "confidence": "MEDIUM"
     },
     "ThreadPanel": {
@@ -4248,6 +4701,7 @@
         "confidence": "MEDIUM"
       },
       "interaction_hygiene": null,
+      "error_sink_calls": [],
       "confidence": "MEDIUM"
     },
     "TypingIndicator": {
@@ -4270,6 +4724,7 @@
       "routes_used_in": [],
       "loading_state_hygiene": null,
       "interaction_hygiene": null,
+      "error_sink_calls": [],
       "confidence": "MEDIUM"
     },
     "VideoCallPanel": {
@@ -4326,9 +4781,12 @@
         "has_handler": true,
         "handler_nonempty": true,
         "reaches_api_or_nav": true,
+        "nav_targets": [],
+        "hrefs": [],
         "violation": false,
         "confidence": "MEDIUM"
       },
+      "error_sink_calls": [],
       "confidence": "MEDIUM"
     },
     "VideoCallUI": {
@@ -4450,6 +4908,7 @@
       "routes_used_in": [],
       "loading_state_hygiene": null,
       "interaction_hygiene": null,
+      "error_sink_calls": [],
       "confidence": "MEDIUM"
     },
     "VideoGrid": {
@@ -4559,6 +5018,7 @@
       "routes_used_in": [],
       "loading_state_hygiene": null,
       "interaction_hygiene": null,
+      "error_sink_calls": [],
       "confidence": "MEDIUM"
     },
     "VideoLobby": {
@@ -4611,9 +5071,12 @@
         "has_handler": true,
         "handler_nonempty": true,
         "reaches_api_or_nav": true,
+        "nav_targets": [],
+        "hrefs": [],
         "violation": false,
         "confidence": "MEDIUM"
       },
+      "error_sink_calls": [],
       "confidence": "MEDIUM"
     },
     "VideoTile": {
@@ -4654,6 +5117,7 @@
       "routes_used_in": [],
       "loading_state_hygiene": null,
       "interaction_hygiene": null,
+      "error_sink_calls": [],
       "confidence": "MEDIUM"
     },
     "useChatWebSocket": {
@@ -4669,6 +5133,7 @@
       "routes_used_in": [],
       "loading_state_hygiene": null,
       "interaction_hygiene": null,
+      "error_sink_calls": [],
       "confidence": "MEDIUM"
     },
     "useMediaStream": {
@@ -4684,6 +5149,7 @@
       "routes_used_in": [],
       "loading_state_hygiene": null,
       "interaction_hygiene": null,
+      "error_sink_calls": [],
       "confidence": "MEDIUM"
     },
     "useUnreadCounts": {
@@ -4699,6 +5165,7 @@
       "routes_used_in": [],
       "loading_state_hygiene": null,
       "interaction_hygiene": null,
+      "error_sink_calls": [],
       "confidence": "MEDIUM"
     },
     "useVideoCall": {
@@ -4714,6 +5181,7 @@
       "routes_used_in": [],
       "loading_state_hygiene": null,
       "interaction_hygiene": null,
+      "error_sink_calls": [],
       "confidence": "MEDIUM"
     },
     "AnnouncementContent": {
@@ -4800,9 +5268,12 @@
         "has_handler": true,
         "handler_nonempty": true,
         "reaches_api_or_nav": false,
+        "nav_targets": [],
+        "hrefs": [],
         "violation": false,
         "confidence": "MEDIUM"
       },
+      "error_sink_calls": [],
       "confidence": "MEDIUM"
     },
     "AnnouncementList": {
@@ -4825,19 +5296,27 @@
       "routes_used_in": [],
       "loading_state_hygiene": {
         "has_skeleton": true,
-        "has_error_branch": false,
+        "has_error_branch": true,
         "has_timeout": false,
         "has_exemption": false,
-        "violation": true,
+        "violation": false,
         "confidence": "MEDIUM"
       },
       "interaction_hygiene": {
         "has_handler": true,
         "handler_nonempty": true,
         "reaches_api_or_nav": true,
+        "nav_targets": [],
+        "hrefs": [
+          "/org/$orgSlug/officer/communications/$announcementId"
+        ],
+        "href_attrs": [
+          "to"
+        ],
         "violation": false,
         "confidence": "MEDIUM"
       },
+      "error_sink_calls": [],
       "confidence": "MEDIUM"
     },
     "AudiencePicker": {
@@ -4887,9 +5366,27 @@
         "has_handler": true,
         "handler_nonempty": true,
         "reaches_api_or_nav": true,
+        "nav_targets": [],
+        "hrefs": [],
         "violation": false,
         "confidence": "MEDIUM"
       },
+      "error_sink_calls": [
+        {
+          "sink": "toast.error",
+          "arg_literal": "Failed to save segment",
+          "generic": false,
+          "file": "apps/memberry/src/features/communications/components/audience-picker.tsx",
+          "line": 77
+        },
+        {
+          "sink": "toast.error",
+          "arg_literal": "Failed to delete segment",
+          "generic": false,
+          "file": "apps/memberry/src/features/communications/components/audience-picker.tsx",
+          "line": 87
+        }
+      ],
       "confidence": "MEDIUM"
     },
     "ComposeForm": {
@@ -4928,9 +5425,12 @@
         "has_handler": true,
         "handler_nonempty": true,
         "reaches_api_or_nav": true,
+        "nav_targets": [],
+        "hrefs": [],
         "violation": false,
         "confidence": "MEDIUM"
       },
+      "error_sink_calls": [],
       "confidence": "MEDIUM"
     },
     "DeliveryFunnel": {
@@ -4971,6 +5471,7 @@
       "routes_used_in": [],
       "loading_state_hygiene": null,
       "interaction_hygiene": null,
+      "error_sink_calls": [],
       "confidence": "MEDIUM"
     },
     "NotificationPreferences": {
@@ -5009,9 +5510,20 @@
         "has_handler": true,
         "handler_nonempty": true,
         "reaches_api_or_nav": false,
+        "nav_targets": [],
+        "hrefs": [],
         "violation": false,
         "confidence": "MEDIUM"
       },
+      "error_sink_calls": [
+        {
+          "sink": "toast.error",
+          "arg_literal": "Failed to save preference",
+          "generic": false,
+          "file": "apps/memberry/src/features/communications/components/notification-preferences.tsx",
+          "line": 106
+        }
+      ],
       "confidence": "MEDIUM"
     },
     "TemplateForm": {
@@ -5061,9 +5573,20 @@
         "has_handler": true,
         "handler_nonempty": true,
         "reaches_api_or_nav": true,
+        "nav_targets": [],
+        "hrefs": [],
         "violation": false,
         "confidence": "MEDIUM"
       },
+      "error_sink_calls": [
+        {
+          "sink": "toast.error",
+          "arg_literal": "Failed to save template",
+          "generic": false,
+          "file": "apps/memberry/src/features/communications/components/template-form.tsx",
+          "line": 142
+        }
+      ],
       "confidence": "MEDIUM"
     },
     "TemplateList": {
@@ -5107,19 +5630,30 @@
       "routes_used_in": [],
       "loading_state_hygiene": {
         "has_skeleton": true,
-        "has_error_branch": false,
+        "has_error_branch": true,
         "has_timeout": false,
         "has_exemption": false,
-        "violation": true,
+        "violation": false,
         "confidence": "MEDIUM"
       },
       "interaction_hygiene": {
         "has_handler": true,
         "handler_nonempty": true,
         "reaches_api_or_nav": true,
+        "nav_targets": [],
+        "hrefs": [],
         "violation": false,
         "confidence": "MEDIUM"
       },
+      "error_sink_calls": [
+        {
+          "sink": "toast.error",
+          "arg_literal": "Failed to delete template",
+          "generic": false,
+          "file": "apps/memberry/src/features/communications/components/template-list.tsx",
+          "line": 49
+        }
+      ],
       "confidence": "MEDIUM"
     },
     "TemplatePreview": {
@@ -5148,6 +5682,7 @@
       "routes_used_in": [],
       "loading_state_hygiene": null,
       "interaction_hygiene": null,
+      "error_sink_calls": [],
       "confidence": "MEDIUM"
     },
     "TemplateSplitEditor": {
@@ -5200,9 +5735,12 @@
         "has_handler": true,
         "handler_nonempty": true,
         "reaches_api_or_nav": true,
+        "nav_targets": [],
+        "hrefs": [],
         "violation": false,
         "confidence": "MEDIUM"
       },
+      "error_sink_calls": [],
       "confidence": "MEDIUM"
     },
     "ActionWidget": {
@@ -5287,9 +5825,12 @@
         "has_handler": true,
         "handler_nonempty": false,
         "reaches_api_or_nav": false,
+        "nav_targets": [],
+        "hrefs": [],
         "violation": false,
         "confidence": "MEDIUM"
       },
+      "error_sink_calls": [],
       "confidence": "MEDIUM"
     },
     "CreditRing": {
@@ -5324,6 +5865,7 @@
       "routes_used_in": [],
       "loading_state_hygiene": null,
       "interaction_hygiene": null,
+      "error_sink_calls": [],
       "confidence": "MEDIUM"
     },
     "AlertBanner": {
@@ -5373,9 +5915,12 @@
         "has_handler": true,
         "handler_nonempty": true,
         "reaches_api_or_nav": true,
+        "nav_targets": [],
+        "hrefs": [],
         "violation": false,
         "confidence": "MEDIUM"
       },
+      "error_sink_calls": [],
       "confidence": "MEDIUM"
     },
     "CreditBreakdown": {
@@ -5413,9 +5958,19 @@
         "has_handler": true,
         "handler_nonempty": false,
         "reaches_api_or_nav": false,
+        "nav_targets": [],
+        "hrefs": [
+          "/my/credits",
+          "/my/training"
+        ],
+        "href_attrs": [
+          "to",
+          "to"
+        ],
         "violation": false,
         "confidence": "MEDIUM"
       },
+      "error_sink_calls": [],
       "confidence": "MEDIUM"
     },
     "MemberDashboard": {
@@ -5438,6 +5993,7 @@
         "confidence": "MEDIUM"
       },
       "interaction_hygiene": null,
+      "error_sink_calls": [],
       "confidence": "MEDIUM"
     },
     "OrgAnnouncements": {
@@ -5472,6 +6028,7 @@
       "routes_used_in": [],
       "loading_state_hygiene": null,
       "interaction_hygiene": null,
+      "error_sink_calls": [],
       "confidence": "MEDIUM"
     },
     "QuickActions": {
@@ -5503,9 +6060,12 @@
         "has_handler": true,
         "handler_nonempty": false,
         "reaches_api_or_nav": false,
+        "nav_targets": [],
+        "hrefs": [],
         "violation": false,
         "confidence": "MEDIUM"
       },
+      "error_sink_calls": [],
       "confidence": "MEDIUM"
     },
     "DirectoryFilters": {
@@ -5554,9 +6114,12 @@
         "has_handler": true,
         "handler_nonempty": true,
         "reaches_api_or_nav": false,
+        "nav_targets": [],
+        "hrefs": [],
         "violation": false,
         "confidence": "MEDIUM"
       },
+      "error_sink_calls": [],
       "confidence": "MEDIUM"
     },
     "DirectorySearch": {
@@ -5600,9 +6163,12 @@
         "has_handler": true,
         "handler_nonempty": true,
         "reaches_api_or_nav": true,
+        "nav_targets": [],
+        "hrefs": [],
         "violation": false,
         "confidence": "MEDIUM"
       },
+      "error_sink_calls": [],
       "confidence": "MEDIUM"
     },
     "MemberProfile": {
@@ -5647,9 +6213,17 @@
         "has_handler": true,
         "handler_nonempty": false,
         "reaches_api_or_nav": false,
+        "nav_targets": [],
+        "hrefs": [
+          "/org/$orgSlug/directory"
+        ],
+        "href_attrs": [
+          "to"
+        ],
         "violation": false,
         "confidence": "MEDIUM"
       },
+      "error_sink_calls": [],
       "confidence": "MEDIUM"
     },
     "TrustCard": {
@@ -5681,9 +6255,17 @@
         "has_handler": true,
         "handler_nonempty": false,
         "reaches_api_or_nav": false,
+        "nav_targets": [],
+        "hrefs": [
+          "/org/$orgSlug/directory/$personId"
+        ],
+        "href_attrs": [
+          "to"
+        ],
         "violation": false,
         "confidence": "MEDIUM"
       },
+      "error_sink_calls": [],
       "confidence": "MEDIUM"
     },
     "TrustDirectory": {
@@ -5727,9 +6309,12 @@
         "has_handler": true,
         "handler_nonempty": true,
         "reaches_api_or_nav": true,
+        "nav_targets": [],
+        "hrefs": [],
         "violation": false,
         "confidence": "MEDIUM"
       },
+      "error_sink_calls": [],
       "confidence": "MEDIUM"
     },
     "DocumentBrowser": {
@@ -5767,9 +6352,17 @@
         "has_handler": true,
         "handler_nonempty": true,
         "reaches_api_or_nav": true,
+        "nav_targets": [],
+        "hrefs": [
+          "/org/$orgSlug/documents/$documentId"
+        ],
+        "href_attrs": [
+          "to"
+        ],
         "violation": false,
         "confidence": "MEDIUM"
       },
+      "error_sink_calls": [],
       "confidence": "MEDIUM"
     },
     "DocumentLibrary": {
@@ -5823,9 +6416,41 @@
         "has_handler": true,
         "handler_nonempty": true,
         "reaches_api_or_nav": true,
+        "nav_targets": [],
+        "hrefs": [],
         "violation": false,
         "confidence": "MEDIUM"
       },
+      "error_sink_calls": [
+        {
+          "sink": "toast.error",
+          "arg_literal": null,
+          "generic": false,
+          "file": "apps/memberry/src/features/documents/components/document-library.tsx",
+          "line": 256
+        },
+        {
+          "sink": "toast.error",
+          "arg_literal": null,
+          "generic": false,
+          "file": "apps/memberry/src/features/documents/components/document-library.tsx",
+          "line": 265
+        },
+        {
+          "sink": "toast.error",
+          "arg_literal": null,
+          "generic": false,
+          "file": "apps/memberry/src/features/documents/components/document-library.tsx",
+          "line": 275
+        },
+        {
+          "sink": "toast.error",
+          "arg_literal": null,
+          "generic": false,
+          "file": "apps/memberry/src/features/documents/components/document-library.tsx",
+          "line": 285
+        }
+      ],
       "confidence": "MEDIUM"
     },
     "ArrearsBreakdown": {
@@ -5860,6 +6485,7 @@
       "routes_used_in": [],
       "loading_state_hygiene": null,
       "interaction_hygiene": null,
+      "error_sink_calls": [],
       "confidence": "MEDIUM"
     },
     "BillingSchedulePreview": {
@@ -5912,6 +6538,7 @@
       "routes_used_in": [],
       "loading_state_hygiene": null,
       "interaction_hygiene": null,
+      "error_sink_calls": [],
       "confidence": "MEDIUM"
     },
     "CollectionRateCard": {
@@ -5940,6 +6567,7 @@
       "routes_used_in": [],
       "loading_state_hygiene": null,
       "interaction_hygiene": null,
+      "error_sink_calls": [],
       "confidence": "MEDIUM"
     },
     "CollectionsAreaChart": {
@@ -5968,6 +6596,7 @@
       "routes_used_in": [],
       "loading_state_hygiene": null,
       "interaction_hygiene": null,
+      "error_sink_calls": [],
       "confidence": "MEDIUM"
     },
     "DuesConfigForm": {
@@ -6005,17 +6634,28 @@
         "has_skeleton": true,
         "has_error_branch": false,
         "has_timeout": false,
-        "has_exemption": false,
-        "violation": true,
+        "has_exemption": true,
+        "violation": false,
         "confidence": "MEDIUM"
       },
       "interaction_hygiene": {
         "has_handler": true,
         "handler_nonempty": true,
         "reaches_api_or_nav": true,
+        "nav_targets": [],
+        "hrefs": [],
         "violation": false,
         "confidence": "MEDIUM"
       },
+      "error_sink_calls": [
+        {
+          "sink": "toast.error",
+          "arg_literal": "Failed to save",
+          "generic": false,
+          "file": "apps/memberry/src/features/dues/components/dues-config-form.tsx",
+          "line": 183
+        }
+      ],
       "confidence": "MEDIUM"
     },
     "DuesGateBanner": {
@@ -6059,9 +6699,12 @@
         "has_handler": true,
         "handler_nonempty": false,
         "reaches_api_or_nav": false,
+        "nav_targets": [],
+        "hrefs": [],
         "violation": false,
         "confidence": "MEDIUM"
       },
+      "error_sink_calls": [],
       "confidence": "MEDIUM"
     },
     "DuesInvoiceList": {
@@ -6109,9 +6752,20 @@
         "has_handler": true,
         "handler_nonempty": true,
         "reaches_api_or_nav": true,
+        "nav_targets": [],
+        "hrefs": [],
         "violation": false,
         "confidence": "MEDIUM"
       },
+      "error_sink_calls": [
+        {
+          "sink": "toast.error",
+          "arg_literal": null,
+          "generic": false,
+          "file": "apps/memberry/src/features/dues/components/dues-invoice-list.tsx",
+          "line": 51
+        }
+      ],
       "confidence": "MEDIUM"
     },
     "DuesSetupChecklist": {
@@ -6157,9 +6811,12 @@
         "has_handler": true,
         "handler_nonempty": false,
         "reaches_api_or_nav": false,
+        "nav_targets": [],
+        "hrefs": [],
         "violation": false,
         "confidence": "MEDIUM"
       },
+      "error_sink_calls": [],
       "confidence": "MEDIUM"
     },
     "DuesStatusBadge": {
@@ -6188,6 +6845,7 @@
       "routes_used_in": [],
       "loading_state_hygiene": null,
       "interaction_hygiene": null,
+      "error_sink_calls": [],
       "confidence": "MEDIUM"
     },
     "DuesStatusCard": {
@@ -6245,6 +6903,7 @@
       "routes_used_in": [],
       "loading_state_hygiene": null,
       "interaction_hygiene": null,
+      "error_sink_calls": [],
       "confidence": "MEDIUM"
     },
     "FinancialDashboard": {
@@ -6282,9 +6941,17 @@
         "has_handler": true,
         "handler_nonempty": false,
         "reaches_api_or_nav": false,
+        "nav_targets": [],
+        "hrefs": [
+          "/org/$orgSlug/officer/settings/gateway"
+        ],
+        "href_attrs": [
+          "to"
+        ],
         "violation": false,
         "confidence": "MEDIUM"
       },
+      "error_sink_calls": [],
       "confidence": "MEDIUM"
     },
     "FundAllocationEditor": {
@@ -6327,9 +6994,12 @@
         "has_handler": true,
         "handler_nonempty": true,
         "reaches_api_or_nav": false,
+        "nav_targets": [],
+        "hrefs": [],
         "violation": false,
         "confidence": "MEDIUM"
       },
+      "error_sink_calls": [],
       "confidence": "MEDIUM"
     },
     "FundAllocationPreview": {
@@ -6364,6 +7034,7 @@
       "routes_used_in": [],
       "loading_state_hygiene": null,
       "interaction_hygiene": null,
+      "error_sink_calls": [],
       "confidence": "MEDIUM"
     },
     "GatewaySetup": {
@@ -6403,19 +7074,44 @@
       "routes_used_in": [],
       "loading_state_hygiene": {
         "has_skeleton": true,
-        "has_error_branch": false,
+        "has_error_branch": true,
         "has_timeout": false,
         "has_exemption": false,
-        "violation": true,
+        "violation": false,
         "confidence": "MEDIUM"
       },
       "interaction_hygiene": {
         "has_handler": true,
         "handler_nonempty": true,
         "reaches_api_or_nav": true,
+        "nav_targets": [],
+        "hrefs": [],
         "violation": false,
         "confidence": "MEDIUM"
       },
+      "error_sink_calls": [
+        {
+          "sink": "toast.error",
+          "arg_literal": "Connection test failed",
+          "generic": false,
+          "file": "apps/memberry/src/features/dues/components/gateway-setup.tsx",
+          "line": 51
+        },
+        {
+          "sink": "toast.error",
+          "arg_literal": "Failed to save",
+          "generic": false,
+          "file": "apps/memberry/src/features/dues/components/gateway-setup.tsx",
+          "line": 65
+        },
+        {
+          "sink": "toast.error",
+          "arg_literal": "Failed to disconnect",
+          "generic": false,
+          "file": "apps/memberry/src/features/dues/components/gateway-setup.tsx",
+          "line": 77
+        }
+      ],
       "confidence": "MEDIUM"
     },
     "MetricCard": {
@@ -6474,6 +7170,7 @@
       "routes_used_in": [],
       "loading_state_hygiene": null,
       "interaction_hygiene": null,
+      "error_sink_calls": [],
       "confidence": "MEDIUM"
     },
     "MetricCardSkeleton": {
@@ -6489,6 +7186,7 @@
       "routes_used_in": [],
       "loading_state_hygiene": null,
       "interaction_hygiene": null,
+      "error_sink_calls": [],
       "confidence": "MEDIUM"
     },
     "MonthlyTrendChart": {
@@ -6511,6 +7209,7 @@
       "routes_used_in": [],
       "loading_state_hygiene": null,
       "interaction_hygiene": null,
+      "error_sink_calls": [],
       "confidence": "MEDIUM"
     },
     "PaymentHistoryTable": {
@@ -6544,19 +7243,22 @@
       "routes_used_in": [],
       "loading_state_hygiene": {
         "has_skeleton": true,
-        "has_error_branch": false,
+        "has_error_branch": true,
         "has_timeout": false,
         "has_exemption": false,
-        "violation": true,
+        "violation": false,
         "confidence": "MEDIUM"
       },
       "interaction_hygiene": {
         "has_handler": true,
         "handler_nonempty": true,
         "reaches_api_or_nav": true,
+        "nav_targets": [],
+        "hrefs": [],
         "violation": false,
         "confidence": "MEDIUM"
       },
+      "error_sink_calls": [],
       "confidence": "MEDIUM"
     },
     "PaymentScheduleTimeline": {
@@ -6585,6 +7287,7 @@
       "routes_used_in": [],
       "loading_state_hygiene": null,
       "interaction_hygiene": null,
+      "error_sink_calls": [],
       "confidence": "MEDIUM"
     },
     "PendingProofsList": {
@@ -6630,9 +7333,34 @@
         "has_handler": true,
         "handler_nonempty": true,
         "reaches_api_or_nav": true,
+        "nav_targets": [],
+        "hrefs": [],
         "violation": false,
         "confidence": "MEDIUM"
       },
+      "error_sink_calls": [
+        {
+          "sink": "toast.error",
+          "arg_literal": null,
+          "generic": false,
+          "file": "apps/memberry/src/features/dues/components/pending-proofs-list.tsx",
+          "line": 71
+        },
+        {
+          "sink": "toast.error",
+          "arg_literal": null,
+          "generic": false,
+          "file": "apps/memberry/src/features/dues/components/pending-proofs-list.tsx",
+          "line": 94
+        },
+        {
+          "sink": "toast.error",
+          "arg_literal": "Please provide a reason for rejection",
+          "generic": false,
+          "file": "apps/memberry/src/features/dues/components/pending-proofs-list.tsx",
+          "line": 108
+        }
+      ],
       "confidence": "MEDIUM"
     },
     "ProofUploadForm": {
@@ -6684,10 +7412,6 @@
         {
           "method": "POST",
           "endpoint": "/association/member/dues-payments/submit-proof"
-        },
-        {
-          "method": "POST",
-          "endpoint": "/api/storage/files"
         }
       ],
       "routes_used_in": [],
@@ -6703,9 +7427,48 @@
         "has_handler": true,
         "handler_nonempty": true,
         "reaches_api_or_nav": true,
+        "nav_targets": [],
+        "hrefs": [],
         "violation": false,
         "confidence": "MEDIUM"
       },
+      "error_sink_calls": [
+        {
+          "sink": "toast.error",
+          "arg_literal": "Invalid file type. Please upload JPEG, PNG, or PDF.",
+          "generic": false,
+          "file": "apps/memberry/src/features/dues/components/proof-upload-form.tsx",
+          "line": 82
+        },
+        {
+          "sink": "toast.error",
+          "arg_literal": "File too large. Maximum 10MB.",
+          "generic": false,
+          "file": "apps/memberry/src/features/dues/components/proof-upload-form.tsx",
+          "line": 86
+        },
+        {
+          "sink": "toast.error",
+          "arg_literal": "Please upload a proof of payment file.",
+          "generic": false,
+          "file": "apps/memberry/src/features/dues/components/proof-upload-form.tsx",
+          "line": 94
+        },
+        {
+          "sink": "toast.error",
+          "arg_literal": null,
+          "generic": false,
+          "file": "apps/memberry/src/features/dues/components/proof-upload-form.tsx",
+          "line": 115
+        },
+        {
+          "sink": "toast.error",
+          "arg_literal": null,
+          "generic": false,
+          "file": "apps/memberry/src/features/dues/components/proof-upload-form.tsx",
+          "line": 137
+        }
+      ],
       "confidence": "MEDIUM"
     },
     "RecentActivityFeed": {
@@ -6745,19 +7508,27 @@
       "routes_used_in": [],
       "loading_state_hygiene": {
         "has_skeleton": true,
-        "has_error_branch": false,
+        "has_error_branch": true,
         "has_timeout": false,
         "has_exemption": false,
-        "violation": true,
+        "violation": false,
         "confidence": "MEDIUM"
       },
       "interaction_hygiene": {
         "has_handler": true,
         "handler_nonempty": false,
         "reaches_api_or_nav": false,
+        "nav_targets": [],
+        "hrefs": [
+          "/org/$orgSlug/officer/payments"
+        ],
+        "href_attrs": [
+          "to"
+        ],
         "violation": false,
         "confidence": "MEDIUM"
       },
+      "error_sink_calls": [],
       "confidence": "MEDIUM"
     },
     "RecordPaymentForm": {
@@ -6803,9 +7574,20 @@
         "has_handler": true,
         "handler_nonempty": true,
         "reaches_api_or_nav": true,
+        "nav_targets": [],
+        "hrefs": [],
         "violation": false,
         "confidence": "MEDIUM"
       },
+      "error_sink_calls": [
+        {
+          "sink": "toast.error",
+          "arg_literal": "Please select a member",
+          "generic": false,
+          "file": "apps/memberry/src/features/dues/components/record-payment-form.tsx",
+          "line": 112
+        }
+      ],
       "confidence": "MEDIUM"
     },
     "RefundForm": {
@@ -6855,9 +7637,20 @@
         "has_handler": true,
         "handler_nonempty": true,
         "reaches_api_or_nav": true,
+        "nav_targets": [],
+        "hrefs": [],
         "violation": false,
         "confidence": "MEDIUM"
       },
+      "error_sink_calls": [
+        {
+          "sink": "toast.error",
+          "arg_literal": "Refund failed",
+          "generic": false,
+          "file": "apps/memberry/src/features/dues/components/refund-form.tsx",
+          "line": 43
+        }
+      ],
       "confidence": "MEDIUM"
     },
     "ReportResults": {
@@ -6901,9 +7694,12 @@
         "has_handler": true,
         "handler_nonempty": true,
         "reaches_api_or_nav": false,
+        "nav_targets": [],
+        "hrefs": [],
         "violation": false,
         "confidence": "MEDIUM"
       },
+      "error_sink_calls": [],
       "confidence": "MEDIUM"
     },
     "ReportSelector": {
@@ -6940,9 +7736,12 @@
         "has_handler": true,
         "handler_nonempty": true,
         "reaches_api_or_nav": false,
+        "nav_targets": [],
+        "hrefs": [],
         "violation": false,
         "confidence": "MEDIUM"
       },
+      "error_sink_calls": [],
       "confidence": "MEDIUM"
     },
     "SpecialAssessmentsList": {
@@ -6965,19 +7764,58 @@
       "routes_used_in": [],
       "loading_state_hygiene": {
         "has_skeleton": true,
-        "has_error_branch": false,
+        "has_error_branch": true,
         "has_timeout": false,
         "has_exemption": false,
-        "violation": true,
+        "violation": false,
         "confidence": "MEDIUM"
       },
       "interaction_hygiene": {
         "has_handler": true,
         "handler_nonempty": true,
         "reaches_api_or_nav": true,
+        "nav_targets": [],
+        "hrefs": [],
         "violation": false,
         "confidence": "MEDIUM"
       },
+      "error_sink_calls": [
+        {
+          "sink": "toast.error",
+          "arg_literal": "Failed to create assessment",
+          "generic": false,
+          "file": "apps/memberry/src/features/dues/components/special-assessments-list.tsx",
+          "line": 90
+        },
+        {
+          "sink": "toast.error",
+          "arg_literal": "Failed to update assessment",
+          "generic": false,
+          "file": "apps/memberry/src/features/dues/components/special-assessments-list.tsx",
+          "line": 101
+        },
+        {
+          "sink": "toast.error",
+          "arg_literal": "Failed to delete assessment",
+          "generic": false,
+          "file": "apps/memberry/src/features/dues/components/special-assessments-list.tsx",
+          "line": 111
+        },
+        {
+          "sink": "toast.error",
+          "arg_literal": "Failed to apply assessment",
+          "generic": false,
+          "file": "apps/memberry/src/features/dues/components/special-assessments-list.tsx",
+          "line": 121
+        },
+        {
+          "sink": "toast.error",
+          "arg_literal": "Name, amount, and due date are required",
+          "generic": false,
+          "file": "apps/memberry/src/features/dues/components/special-assessments-list.tsx",
+          "line": 152
+        }
+      ],
       "confidence": "MEDIUM"
     },
     "StatusDistributionChart": {
@@ -7000,6 +7838,7 @@
       "routes_used_in": [],
       "loading_state_hygiene": null,
       "interaction_hygiene": null,
+      "error_sink_calls": [],
       "confidence": "MEDIUM"
     },
     "TopUnpaidList": {
@@ -7042,9 +7881,12 @@
         "has_handler": true,
         "handler_nonempty": true,
         "reaches_api_or_nav": false,
+        "nav_targets": [],
+        "hrefs": [],
         "violation": false,
         "confidence": "MEDIUM"
       },
+      "error_sink_calls": [],
       "confidence": "MEDIUM"
     },
     "ElectionDetail": {
@@ -7094,19 +7936,42 @@
       "routes_used_in": [],
       "loading_state_hygiene": {
         "has_skeleton": true,
-        "has_error_branch": false,
+        "has_error_branch": true,
         "has_timeout": false,
         "has_exemption": false,
-        "violation": true,
+        "violation": false,
         "confidence": "MEDIUM"
       },
       "interaction_hygiene": {
         "has_handler": true,
         "handler_nonempty": true,
         "reaches_api_or_nav": true,
+        "nav_targets": [],
+        "hrefs": [
+          "/org/$orgSlug/officer/elections/$electionId/edit"
+        ],
+        "href_attrs": [
+          "to"
+        ],
         "violation": false,
         "confidence": "MEDIUM"
       },
+      "error_sink_calls": [
+        {
+          "sink": "toast.error",
+          "arg_literal": null,
+          "generic": false,
+          "file": "apps/memberry/src/features/elections/components/election-detail.tsx",
+          "line": 86
+        },
+        {
+          "sink": "toast.error",
+          "arg_literal": null,
+          "generic": false,
+          "file": "apps/memberry/src/features/elections/components/election-detail.tsx",
+          "line": 122
+        }
+      ],
       "confidence": "MEDIUM"
     },
     "ElectionForm": {
@@ -7185,9 +8050,12 @@
         "has_handler": true,
         "handler_nonempty": true,
         "reaches_api_or_nav": true,
+        "nav_targets": [],
+        "hrefs": [],
         "violation": false,
         "confidence": "MEDIUM"
       },
+      "error_sink_calls": [],
       "confidence": "MEDIUM"
     },
     "ElectionList": {
@@ -7225,9 +8093,17 @@
         "has_handler": true,
         "handler_nonempty": false,
         "reaches_api_or_nav": false,
+        "nav_targets": [],
+        "hrefs": [
+          "/org/$orgSlug/officer/elections/$electionId"
+        ],
+        "href_attrs": [
+          "to"
+        ],
         "violation": false,
         "confidence": "MEDIUM"
       },
+      "error_sink_calls": [],
       "confidence": "MEDIUM"
     },
     "ElectionTimeline": {
@@ -7280,6 +8156,7 @@
       "routes_used_in": [],
       "loading_state_hygiene": null,
       "interaction_hygiene": null,
+      "error_sink_calls": [],
       "confidence": "MEDIUM"
     },
     "MemberElectionDetail": {
@@ -7319,19 +8196,29 @@
       "routes_used_in": [],
       "loading_state_hygiene": {
         "has_skeleton": true,
-        "has_error_branch": false,
+        "has_error_branch": true,
         "has_timeout": false,
         "has_exemption": false,
-        "violation": true,
+        "violation": false,
         "confidence": "MEDIUM"
       },
       "interaction_hygiene": {
         "has_handler": true,
         "handler_nonempty": true,
         "reaches_api_or_nav": true,
+        "nav_targets": [],
+        "hrefs": [
+          "/org/$orgSlug/elections/$electionId/vote",
+          "/org/$orgSlug/elections"
+        ],
+        "href_attrs": [
+          "to",
+          "to"
+        ],
         "violation": false,
         "confidence": "MEDIUM"
       },
+      "error_sink_calls": [],
       "confidence": "MEDIUM"
     },
     "MemberElectionList": {
@@ -7369,9 +8256,17 @@
         "has_handler": true,
         "handler_nonempty": true,
         "reaches_api_or_nav": true,
+        "nav_targets": [],
+        "hrefs": [
+          "/org/$orgSlug/elections/$electionId"
+        ],
+        "href_attrs": [
+          "to"
+        ],
         "violation": false,
         "confidence": "MEDIUM"
       },
+      "error_sink_calls": [],
       "confidence": "MEDIUM"
     },
     "NomineePickerDialog": {
@@ -7436,19 +8331,30 @@
       "routes_used_in": [],
       "loading_state_hygiene": {
         "has_skeleton": true,
-        "has_error_branch": false,
+        "has_error_branch": true,
         "has_timeout": false,
         "has_exemption": false,
-        "violation": true,
+        "violation": false,
         "confidence": "MEDIUM"
       },
       "interaction_hygiene": {
         "has_handler": true,
         "handler_nonempty": true,
         "reaches_api_or_nav": true,
+        "nav_targets": [],
+        "hrefs": [],
         "violation": false,
         "confidence": "MEDIUM"
       },
+      "error_sink_calls": [
+        {
+          "sink": "toast.error",
+          "arg_literal": null,
+          "generic": false,
+          "file": "apps/memberry/src/features/elections/components/nominee-picker-dialog.tsx",
+          "line": 47
+        }
+      ],
       "confidence": "MEDIUM"
     },
     "SelfNominationDialog": {
@@ -7535,9 +8441,20 @@
         "has_handler": true,
         "handler_nonempty": true,
         "reaches_api_or_nav": true,
+        "nav_targets": [],
+        "hrefs": [],
         "violation": false,
         "confidence": "MEDIUM"
       },
+      "error_sink_calls": [
+        {
+          "sink": "toast.error",
+          "arg_literal": null,
+          "generic": false,
+          "file": "apps/memberry/src/features/elections/components/self-nomination-dialog.tsx",
+          "line": 38
+        }
+      ],
       "confidence": "MEDIUM"
     },
     "VotingBallot": {
@@ -7581,19 +8498,37 @@
       "routes_used_in": [],
       "loading_state_hygiene": {
         "has_skeleton": true,
-        "has_error_branch": false,
+        "has_error_branch": true,
         "has_timeout": false,
         "has_exemption": false,
-        "violation": true,
+        "violation": false,
         "confidence": "MEDIUM"
       },
       "interaction_hygiene": {
         "has_handler": true,
         "handler_nonempty": true,
         "reaches_api_or_nav": true,
+        "nav_targets": [],
+        "hrefs": [],
         "violation": false,
         "confidence": "MEDIUM"
       },
+      "error_sink_calls": [
+        {
+          "sink": "toast.error",
+          "arg_literal": null,
+          "generic": false,
+          "file": "apps/memberry/src/features/elections/components/voting-ballot.tsx",
+          "line": 190
+        },
+        {
+          "sink": "toast.error",
+          "arg_literal": "Failed to cast vote",
+          "generic": false,
+          "file": "apps/memberry/src/features/elections/components/voting-ballot.tsx",
+          "line": 201
+        }
+      ],
       "confidence": "MEDIUM"
     },
     "AttendanceView": {
@@ -7635,9 +8570,12 @@
         "has_handler": true,
         "handler_nonempty": true,
         "reaches_api_or_nav": true,
+        "nav_targets": [],
+        "hrefs": [],
         "violation": false,
         "confidence": "MEDIUM"
       },
+      "error_sink_calls": [],
       "confidence": "MEDIUM"
     },
     "EventCalendar": {
@@ -7669,9 +8607,12 @@
         "has_handler": true,
         "handler_nonempty": true,
         "reaches_api_or_nav": true,
+        "nav_targets": [],
+        "hrefs": [],
         "violation": false,
         "confidence": "MEDIUM"
       },
+      "error_sink_calls": [],
       "confidence": "MEDIUM"
     },
     "EventCard": {
@@ -7740,9 +8681,12 @@
         "has_handler": true,
         "handler_nonempty": true,
         "reaches_api_or_nav": true,
+        "nav_targets": [],
+        "hrefs": [],
         "violation": false,
         "confidence": "MEDIUM"
       },
+      "error_sink_calls": [],
       "confidence": "MEDIUM"
     },
     "EventForm": {
@@ -7811,9 +8755,27 @@
         "has_handler": true,
         "handler_nonempty": true,
         "reaches_api_or_nav": true,
+        "nav_targets": [],
+        "hrefs": [],
         "violation": false,
         "confidence": "MEDIUM"
       },
+      "error_sink_calls": [
+        {
+          "sink": "toast.error",
+          "arg_literal": null,
+          "generic": false,
+          "file": "apps/memberry/src/features/events/components/event-form.tsx",
+          "line": 127
+        },
+        {
+          "sink": "toast.error",
+          "arg_literal": null,
+          "generic": false,
+          "file": "apps/memberry/src/features/events/components/event-form.tsx",
+          "line": 137
+        }
+      ],
       "confidence": "MEDIUM"
     },
     "EventList": {
@@ -7855,9 +8817,20 @@
         "has_handler": true,
         "handler_nonempty": true,
         "reaches_api_or_nav": true,
+        "nav_targets": [],
+        "hrefs": [],
         "violation": false,
         "confidence": "MEDIUM"
       },
+      "error_sink_calls": [
+        {
+          "sink": "toast.error",
+          "arg_literal": null,
+          "generic": false,
+          "file": "apps/memberry/src/features/events/components/event-list.tsx",
+          "line": 100
+        }
+      ],
       "confidence": "MEDIUM"
     },
     "EventTimeline": {
@@ -7892,6 +8865,7 @@
       "routes_used_in": [],
       "loading_state_hygiene": null,
       "interaction_hygiene": null,
+      "error_sink_calls": [],
       "confidence": "MEDIUM"
     },
     "PostEventActions": {
@@ -7970,7 +8944,7 @@
         },
         {
           "method": "POST",
-          "endpoint": "/api/association/member/credits/void-event"
+          "endpoint": "/association/member/credits/void-event"
         }
       ],
       "routes_used_in": [],
@@ -7986,9 +8960,62 @@
         "has_handler": true,
         "handler_nonempty": true,
         "reaches_api_or_nav": true,
+        "nav_targets": [],
+        "hrefs": [],
         "violation": false,
         "confidence": "MEDIUM"
       },
+      "error_sink_calls": [
+        {
+          "sink": "toast.error",
+          "arg_literal": "No checked-in attendees to award credits to",
+          "generic": false,
+          "file": "apps/memberry/src/features/events/components/post-event-actions.tsx",
+          "line": 95
+        },
+        {
+          "sink": "toast.error",
+          "arg_literal": null,
+          "generic": false,
+          "file": "apps/memberry/src/features/events/components/post-event-actions.tsx",
+          "line": 134
+        },
+        {
+          "sink": "toast.error",
+          "arg_literal": null,
+          "generic": false,
+          "file": "apps/memberry/src/features/events/components/post-event-actions.tsx",
+          "line": 159
+        },
+        {
+          "sink": "toast.error",
+          "arg_literal": null,
+          "generic": false,
+          "file": "apps/memberry/src/features/events/components/post-event-actions.tsx",
+          "line": 186
+        },
+        {
+          "sink": "toast.error",
+          "arg_literal": null,
+          "generic": false,
+          "file": "apps/memberry/src/features/events/components/post-event-actions.tsx",
+          "line": 221
+        },
+        {
+          "sink": "toast.error",
+          "arg_literal": "Reason must be at least 10 characters",
+          "generic": false,
+          "file": "apps/memberry/src/features/events/components/post-event-actions.tsx",
+          "line": 233
+        },
+        {
+          "sink": "toast.error",
+          "arg_literal": null,
+          "generic": false,
+          "file": "apps/memberry/src/features/events/components/post-event-actions.tsx",
+          "line": 255
+        }
+      ],
       "confidence": "MEDIUM"
     },
     "ApplicationList": {
@@ -8022,7 +9049,7 @@
         },
         {
           "method": "POST",
-          "endpoint": "/api/association/member/applications/bulk-approve"
+          "endpoint": "/association/member/applications/bulk-approve"
         }
       ],
       "routes_used_in": [],
@@ -8038,9 +9065,55 @@
         "has_handler": true,
         "handler_nonempty": true,
         "reaches_api_or_nav": true,
+        "nav_targets": [],
+        "hrefs": [],
         "violation": false,
         "confidence": "MEDIUM"
       },
+      "error_sink_calls": [
+        {
+          "sink": "toast.error",
+          "arg_literal": "Action failed",
+          "generic": false,
+          "file": "apps/memberry/src/features/membership/components/application-list.tsx",
+          "line": 96
+        },
+        {
+          "sink": "toast.error",
+          "arg_literal": "Action failed",
+          "generic": false,
+          "file": "apps/memberry/src/features/membership/components/application-list.tsx",
+          "line": 107
+        },
+        {
+          "sink": "toast.error",
+          "arg_literal": null,
+          "generic": false,
+          "file": "apps/memberry/src/features/membership/components/application-list.tsx",
+          "line": 136
+        },
+        {
+          "sink": "toast.warning",
+          "arg_literal": null,
+          "generic": false,
+          "file": "apps/memberry/src/features/membership/components/application-list.tsx",
+          "line": 138
+        },
+        {
+          "sink": "toast.error",
+          "arg_literal": null,
+          "generic": false,
+          "file": "apps/memberry/src/features/membership/components/application-list.tsx",
+          "line": 141
+        },
+        {
+          "sink": "toast.error",
+          "arg_literal": "Bulk approve failed",
+          "generic": false,
+          "file": "apps/memberry/src/features/membership/components/application-list.tsx",
+          "line": 146
+        }
+      ],
       "confidence": "MEDIUM"
     },
     "CategoryEditor": {
@@ -8082,9 +9155,20 @@
         "has_handler": true,
         "handler_nonempty": true,
         "reaches_api_or_nav": true,
+        "nav_targets": [],
+        "hrefs": [],
         "violation": false,
         "confidence": "MEDIUM"
       },
+      "error_sink_calls": [
+        {
+          "sink": "toast.error",
+          "arg_literal": "Failed to save",
+          "generic": false,
+          "file": "apps/memberry/src/features/membership/components/category-editor.tsx",
+          "line": 87
+        }
+      ],
       "confidence": "MEDIUM"
     },
     "CredentialList": {
@@ -8120,6 +9204,7 @@
         "confidence": "MEDIUM"
       },
       "interaction_hygiene": null,
+      "error_sink_calls": [],
       "confidence": "MEDIUM"
     },
     "InstitutionalMembershipForm": {
@@ -8178,6 +9263,22 @@
       "routes_used_in": [],
       "loading_state_hygiene": null,
       "interaction_hygiene": null,
+      "error_sink_calls": [
+        {
+          "sink": "toast.error",
+          "arg_literal": null,
+          "generic": false,
+          "file": "apps/memberry/src/features/membership/components/institutional-membership-form.tsx",
+          "line": 76
+        },
+        {
+          "sink": "toast.error",
+          "arg_literal": null,
+          "generic": false,
+          "file": "apps/memberry/src/features/membership/components/institutional-membership-form.tsx",
+          "line": 87
+        }
+      ],
       "confidence": "MEDIUM"
     },
     "InstitutionalMembershipTable": {
@@ -8215,9 +9316,17 @@
         "has_handler": true,
         "handler_nonempty": true,
         "reaches_api_or_nav": true,
+        "nav_targets": [],
+        "hrefs": [
+          "/org/$orgSlug/officer/institutional-memberships/$institutionalMembershipId"
+        ],
+        "href_attrs": [
+          "to"
+        ],
         "violation": false,
         "confidence": "MEDIUM"
       },
+      "error_sink_calls": [],
       "confidence": "MEDIUM"
     },
     "MemberDetail": {
@@ -8267,19 +9376,49 @@
       "routes_used_in": [],
       "loading_state_hygiene": {
         "has_skeleton": true,
-        "has_error_branch": false,
+        "has_error_branch": true,
         "has_timeout": false,
         "has_exemption": false,
-        "violation": true,
+        "violation": false,
         "confidence": "MEDIUM"
       },
       "interaction_hygiene": {
         "has_handler": true,
         "handler_nonempty": true,
         "reaches_api_or_nav": true,
+        "nav_targets": [],
+        "hrefs": [
+          "/org/$orgSlug/officer/payments/new"
+        ],
+        "href_attrs": [
+          "to"
+        ],
         "violation": false,
         "confidence": "MEDIUM"
       },
+      "error_sink_calls": [
+        {
+          "sink": "toast.error",
+          "arg_literal": "Update failed",
+          "generic": false,
+          "file": "apps/memberry/src/features/membership/components/member-detail.tsx",
+          "line": 117
+        },
+        {
+          "sink": "toast.error",
+          "arg_literal": "Reinstatement failed",
+          "generic": false,
+          "file": "apps/memberry/src/features/membership/components/member-detail.tsx",
+          "line": 128
+        },
+        {
+          "sink": "toast.error",
+          "arg_literal": "Action failed",
+          "generic": false,
+          "file": "apps/memberry/src/features/membership/components/member-detail.tsx",
+          "line": 140
+        }
+      ],
       "confidence": "MEDIUM"
     },
     "MemberTable": {
@@ -8339,9 +9478,17 @@
         "has_handler": true,
         "handler_nonempty": true,
         "reaches_api_or_nav": true,
+        "nav_targets": [],
+        "hrefs": [
+          "/org/$orgSlug/officer/roster/$memberId"
+        ],
+        "href_attrs": [
+          "to"
+        ],
         "violation": false,
         "confidence": "MEDIUM"
       },
+      "error_sink_calls": [],
       "confidence": "MEDIUM"
     },
     "MembershipList": {
@@ -8382,6 +9529,7 @@
         "confidence": "MEDIUM"
       },
       "interaction_hygiene": null,
+      "error_sink_calls": [],
       "confidence": "MEDIUM"
     },
     "SeatManagementPanel": {
@@ -8445,9 +9593,34 @@
         "has_handler": true,
         "handler_nonempty": true,
         "reaches_api_or_nav": true,
+        "nav_targets": [],
+        "hrefs": [],
         "violation": false,
         "confidence": "MEDIUM"
       },
+      "error_sink_calls": [
+        {
+          "sink": "toast.error",
+          "arg_literal": null,
+          "generic": false,
+          "file": "apps/memberry/src/features/membership/components/seat-management-panel.tsx",
+          "line": 68
+        },
+        {
+          "sink": "toast.error",
+          "arg_literal": null,
+          "generic": false,
+          "file": "apps/memberry/src/features/membership/components/seat-management-panel.tsx",
+          "line": 79
+        },
+        {
+          "sink": "toast.error",
+          "arg_literal": "Person ID is required",
+          "generic": false,
+          "file": "apps/memberry/src/features/membership/components/seat-management-panel.tsx",
+          "line": 84
+        }
+      ],
       "confidence": "MEDIUM"
     },
     "NotificationInbox": {
@@ -8473,9 +9646,12 @@
         "has_handler": true,
         "handler_nonempty": true,
         "reaches_api_or_nav": true,
+        "nav_targets": [],
+        "hrefs": [],
         "violation": false,
         "confidence": "MEDIUM"
       },
+      "error_sink_calls": [],
       "confidence": "MEDIUM"
     },
     "AddressForm": {
@@ -8556,9 +9732,12 @@
         "has_handler": true,
         "handler_nonempty": true,
         "reaches_api_or_nav": true,
+        "nav_targets": [],
+        "hrefs": [],
         "violation": false,
         "confidence": "MEDIUM"
       },
+      "error_sink_calls": [],
       "confidence": "MEDIUM"
     },
     "ContactInfoForm": {
@@ -8644,6 +9823,7 @@
       "routes_used_in": [],
       "loading_state_hygiene": null,
       "interaction_hygiene": null,
+      "error_sink_calls": [],
       "confidence": "MEDIUM"
     },
     "PersonalInfoForm": {
@@ -8742,9 +9922,12 @@
         "has_handler": true,
         "handler_nonempty": true,
         "reaches_api_or_nav": true,
+        "nav_targets": [],
+        "hrefs": [],
         "violation": false,
         "confidence": "MEDIUM"
       },
+      "error_sink_calls": [],
       "confidence": "MEDIUM"
     },
     "PreferencesForm": {
@@ -8800,6 +9983,7 @@
       "routes_used_in": [],
       "loading_state_hygiene": null,
       "interaction_hygiene": null,
+      "error_sink_calls": [],
       "confidence": "MEDIUM"
     },
     "StandingMeter": {
@@ -8842,9 +10026,12 @@
         "has_handler": true,
         "handler_nonempty": true,
         "reaches_api_or_nav": true,
+        "nav_targets": [],
+        "hrefs": [],
         "violation": false,
         "confidence": "MEDIUM"
       },
+      "error_sink_calls": [],
       "confidence": "MEDIUM"
     },
     "TrustBadges": {
@@ -8867,6 +10054,7 @@
       "routes_used_in": [],
       "loading_state_hygiene": null,
       "interaction_hygiene": null,
+      "error_sink_calls": [],
       "confidence": "MEDIUM"
     },
     "NpsGauge": {
@@ -8907,6 +10095,7 @@
       "routes_used_in": [],
       "loading_state_hygiene": null,
       "interaction_hygiene": null,
+      "error_sink_calls": [],
       "confidence": "MEDIUM"
     },
     "NpsModal": {
@@ -8953,9 +10142,20 @@
         "has_handler": true,
         "handler_nonempty": true,
         "reaches_api_or_nav": true,
+        "nav_targets": [],
+        "hrefs": [],
         "violation": false,
         "confidence": "MEDIUM"
       },
+      "error_sink_calls": [
+        {
+          "sink": "toast.error",
+          "arg_literal": "Failed to submit. Please try again.",
+          "generic": false,
+          "file": "apps/memberry/src/features/surveys/components/nps-modal.tsx",
+          "line": 82
+        }
+      ],
       "confidence": "MEDIUM"
     },
     "NpsProvider": {
@@ -8971,6 +10171,7 @@
       "routes_used_in": [],
       "loading_state_hygiene": null,
       "interaction_hygiene": null,
+      "error_sink_calls": [],
       "confidence": "MEDIUM"
     },
     "NpsTrendChart": {
@@ -8993,13 +10194,14 @@
       "routes_used_in": [],
       "loading_state_hygiene": {
         "has_skeleton": true,
-        "has_error_branch": false,
+        "has_error_branch": true,
         "has_timeout": false,
         "has_exemption": false,
-        "violation": true,
+        "violation": false,
         "confidence": "MEDIUM"
       },
       "interaction_hygiene": null,
+      "error_sink_calls": [],
       "confidence": "MEDIUM"
     },
     "PollCard": {
@@ -9044,9 +10246,20 @@
         "has_handler": true,
         "handler_nonempty": true,
         "reaches_api_or_nav": true,
+        "nav_targets": [],
+        "hrefs": [],
         "violation": false,
         "confidence": "MEDIUM"
       },
+      "error_sink_calls": [
+        {
+          "sink": "toast.error",
+          "arg_literal": "Failed to vote",
+          "generic": false,
+          "file": "apps/memberry/src/features/surveys/components/poll-card.tsx",
+          "line": 61
+        }
+      ],
       "confidence": "MEDIUM"
     },
     "QuestionEditor": {
@@ -9099,9 +10312,12 @@
         "has_handler": true,
         "handler_nonempty": true,
         "reaches_api_or_nav": false,
+        "nav_targets": [],
+        "hrefs": [],
         "violation": false,
         "confidence": "MEDIUM"
       },
+      "error_sink_calls": [],
       "confidence": "MEDIUM"
     },
     "SurveyBuilder": {
@@ -9161,9 +10377,20 @@
         "has_handler": true,
         "handler_nonempty": true,
         "reaches_api_or_nav": true,
+        "nav_targets": [],
+        "hrefs": [],
         "violation": false,
         "confidence": "MEDIUM"
       },
+      "error_sink_calls": [
+        {
+          "sink": "toast.error",
+          "arg_literal": "Failed to create survey",
+          "generic": false,
+          "file": "apps/memberry/src/features/surveys/components/survey-builder.tsx",
+          "line": 142
+        }
+      ],
       "confidence": "MEDIUM"
     },
     "SurveyFlow": {
@@ -9206,9 +10433,20 @@
         "has_handler": true,
         "handler_nonempty": true,
         "reaches_api_or_nav": true,
+        "nav_targets": [],
+        "hrefs": [],
         "violation": false,
         "confidence": "MEDIUM"
       },
+      "error_sink_calls": [
+        {
+          "sink": "toast.error",
+          "arg_literal": "Failed to submit survey. Please try again.",
+          "generic": false,
+          "file": "apps/memberry/src/features/surveys/components/survey-flow.tsx",
+          "line": 203
+        }
+      ],
       "confidence": "MEDIUM"
     },
     "SurveyList": {
@@ -9234,9 +10472,46 @@
         "has_handler": true,
         "handler_nonempty": true,
         "reaches_api_or_nav": true,
+        "nav_targets": [],
+        "hrefs": [
+          "/org/$orgSlug/officer/surveys/$surveyId"
+        ],
+        "href_attrs": [
+          "to"
+        ],
         "violation": false,
         "confidence": "MEDIUM"
       },
+      "error_sink_calls": [
+        {
+          "sink": "toast.error",
+          "arg_literal": "Failed to publish survey",
+          "generic": false,
+          "file": "apps/memberry/src/features/surveys/components/survey-list.tsx",
+          "line": 103
+        },
+        {
+          "sink": "toast.error",
+          "arg_literal": "Failed to close survey",
+          "generic": false,
+          "file": "apps/memberry/src/features/surveys/components/survey-list.tsx",
+          "line": 112
+        },
+        {
+          "sink": "toast.error",
+          "arg_literal": "Failed to delete survey",
+          "generic": false,
+          "file": "apps/memberry/src/features/surveys/components/survey-list.tsx",
+          "line": 121
+        },
+        {
+          "sink": "toast.error",
+          "arg_literal": "Failed to duplicate survey",
+          "generic": false,
+          "file": "apps/memberry/src/features/surveys/components/survey-list.tsx",
+          "line": 130
+        }
+      ],
       "confidence": "MEDIUM"
     },
     "SurveyResults": {
@@ -9265,19 +10540,22 @@
       "routes_used_in": [],
       "loading_state_hygiene": {
         "has_skeleton": true,
-        "has_error_branch": false,
+        "has_error_branch": true,
         "has_timeout": false,
         "has_exemption": false,
-        "violation": true,
+        "violation": false,
         "confidence": "MEDIUM"
       },
       "interaction_hygiene": {
         "has_handler": true,
         "handler_nonempty": true,
         "reaches_api_or_nav": true,
+        "nav_targets": [],
+        "hrefs": [],
         "violation": false,
         "confidence": "MEDIUM"
       },
+      "error_sink_calls": [],
       "confidence": "MEDIUM"
     },
     "SurveyTemplates": {
@@ -9318,9 +10596,12 @@
         "has_handler": true,
         "handler_nonempty": true,
         "reaches_api_or_nav": false,
+        "nav_targets": [],
+        "hrefs": [],
         "violation": false,
         "confidence": "MEDIUM"
       },
+      "error_sink_calls": [],
       "confidence": "MEDIUM"
     },
     "usePendingNps": {
@@ -9336,6 +10617,7 @@
       "routes_used_in": [],
       "loading_state_hygiene": null,
       "interaction_hygiene": null,
+      "error_sink_calls": [],
       "confidence": "MEDIUM"
     },
     "useSurveyDraft": {
@@ -9351,6 +10633,7 @@
       "routes_used_in": [],
       "loading_state_hygiene": null,
       "interaction_hygiene": null,
+      "error_sink_calls": [],
       "confidence": "MEDIUM"
     },
     "CompletionTable": {
@@ -9404,9 +10687,12 @@
         "has_handler": true,
         "handler_nonempty": true,
         "reaches_api_or_nav": true,
+        "nav_targets": [],
+        "hrefs": [],
         "violation": false,
         "confidence": "MEDIUM"
       },
+      "error_sink_calls": [],
       "confidence": "MEDIUM"
     },
     "TrainingCard": {
@@ -9459,9 +10745,12 @@
         "has_handler": true,
         "handler_nonempty": true,
         "reaches_api_or_nav": true,
+        "nav_targets": [],
+        "hrefs": [],
         "violation": false,
         "confidence": "MEDIUM"
       },
+      "error_sink_calls": [],
       "confidence": "MEDIUM"
     },
     "TrainingForm": {
@@ -9515,9 +10804,20 @@
         "has_handler": true,
         "handler_nonempty": true,
         "reaches_api_or_nav": true,
+        "nav_targets": [],
+        "hrefs": [],
         "violation": false,
         "confidence": "MEDIUM"
       },
+      "error_sink_calls": [
+        {
+          "sink": "toast.error",
+          "arg_literal": null,
+          "generic": false,
+          "file": "apps/memberry/src/features/training/components/training-form.tsx",
+          "line": 87
+        }
+      ],
       "confidence": "MEDIUM"
     },
     "TrainingList": {
@@ -9559,9 +10859,20 @@
         "has_handler": true,
         "handler_nonempty": true,
         "reaches_api_or_nav": true,
+        "nav_targets": [],
+        "hrefs": [],
         "violation": false,
         "confidence": "MEDIUM"
       },
+      "error_sink_calls": [
+        {
+          "sink": "toast.error",
+          "arg_literal": null,
+          "generic": false,
+          "file": "apps/memberry/src/features/training/components/training-list.tsx",
+          "line": 83
+        }
+      ],
       "confidence": "MEDIUM"
     },
     "BillingPage": {
@@ -9594,9 +10905,12 @@
         "has_handler": true,
         "handler_nonempty": true,
         "reaches_api_or_nav": true,
+        "nav_targets": [],
+        "hrefs": [],
         "violation": false,
         "confidence": "MEDIUM"
       },
+      "error_sink_calls": [],
       "confidence": "MEDIUM"
     },
     "MyCalendar": {
@@ -9626,6 +10940,7 @@
         "confidence": "MEDIUM"
       },
       "interaction_hygiene": null,
+      "error_sink_calls": [],
       "confidence": "MEDIUM"
     },
     "DataExportPage": {
@@ -9643,6 +10958,7 @@
       ],
       "loading_state_hygiene": null,
       "interaction_hygiene": null,
+      "error_sink_calls": [],
       "confidence": "MEDIUM"
     },
     "MyEvents": {
@@ -9675,9 +10991,12 @@
         "has_handler": true,
         "handler_nonempty": true,
         "reaches_api_or_nav": true,
+        "nav_targets": [],
+        "hrefs": [],
         "violation": false,
         "confidence": "MEDIUM"
       },
+      "error_sink_calls": [],
       "confidence": "MEDIUM"
     },
     "MyIdCard": {
@@ -9695,19 +11014,22 @@
       ],
       "loading_state_hygiene": {
         "has_skeleton": true,
-        "has_error_branch": false,
+        "has_error_branch": true,
         "has_timeout": false,
         "has_exemption": false,
-        "violation": true,
+        "violation": false,
         "confidence": "MEDIUM"
       },
       "interaction_hygiene": {
         "has_handler": true,
         "handler_nonempty": true,
         "reaches_api_or_nav": false,
+        "nav_targets": [],
+        "hrefs": [],
         "violation": false,
         "confidence": "MEDIUM"
       },
+      "error_sink_calls": [],
       "confidence": "MEDIUM"
     },
     "NotificationsPage": {
@@ -9725,6 +11047,7 @@
       ],
       "loading_state_hygiene": null,
       "interaction_hygiene": null,
+      "error_sink_calls": [],
       "confidence": "MEDIUM"
     },
     "MyOrganizationsPage": {
@@ -9752,9 +11075,48 @@
         "has_handler": true,
         "handler_nonempty": true,
         "reaches_api_or_nav": true,
+        "nav_targets": [],
+        "hrefs": [
+          "/org/$orgSlug/members",
+          "/org/$orgSlug/dues"
+        ],
+        "href_attrs": [
+          "to",
+          "to"
+        ],
         "violation": false,
         "confidence": "MEDIUM"
       },
+      "error_sink_calls": [
+        {
+          "sink": "toast.error",
+          "arg_literal": null,
+          "generic": false,
+          "file": "apps/memberry/src/routes/_authenticated/my/organizations.tsx",
+          "line": 55
+        },
+        {
+          "sink": "toast.error",
+          "arg_literal": "Unable to process your request. Check your connection and try again.",
+          "generic": false,
+          "file": "apps/memberry/src/routes/_authenticated/my/organizations.tsx",
+          "line": 62
+        },
+        {
+          "sink": "toast.error",
+          "arg_literal": null,
+          "generic": false,
+          "file": "apps/memberry/src/routes/_authenticated/my/organizations.tsx",
+          "line": 213
+        },
+        {
+          "sink": "toast.error",
+          "arg_literal": "Something went wrong",
+          "generic": true,
+          "file": "apps/memberry/src/routes/_authenticated/my/organizations.tsx",
+          "line": 220
+        }
+      ],
       "confidence": "MEDIUM"
     },
     "MyPaymentsPage": {
@@ -9772,6 +11134,7 @@
       ],
       "loading_state_hygiene": null,
       "interaction_hygiene": null,
+      "error_sink_calls": [],
       "confidence": "MEDIUM"
     },
     "MyProfilePage": {
@@ -9812,9 +11175,31 @@
         "has_handler": true,
         "handler_nonempty": true,
         "reaches_api_or_nav": true,
+        "nav_targets": [],
+        "hrefs": [
+          "/my/settings",
+          "/settings/security",
+          "/my/id-card",
+          "/my/data-export"
+        ],
+        "href_attrs": [
+          "to",
+          "to",
+          "to",
+          "to"
+        ],
         "violation": false,
         "confidence": "MEDIUM"
       },
+      "error_sink_calls": [
+        {
+          "sink": "toast.error",
+          "arg_literal": null,
+          "generic": false,
+          "file": "apps/memberry/src/routes/_authenticated/my/profile.tsx",
+          "line": 105
+        }
+      ],
       "confidence": "MEDIUM"
     },
     "SchedulePage": {
@@ -9844,6 +11229,7 @@
         "confidence": "MEDIUM"
       },
       "interaction_hygiene": null,
+      "error_sink_calls": [],
       "confidence": "MEDIUM"
     },
     "MySettingsPage": {
@@ -9861,6 +11247,7 @@
       ],
       "loading_state_hygiene": null,
       "interaction_hygiene": null,
+      "error_sink_calls": [],
       "confidence": "MEDIUM"
     },
     "MyTraining": {
@@ -9887,13 +11274,14 @@
       ],
       "loading_state_hygiene": {
         "has_skeleton": true,
-        "has_error_branch": false,
+        "has_error_branch": true,
         "has_timeout": false,
         "has_exemption": false,
-        "violation": true,
+        "violation": false,
         "confidence": "MEDIUM"
       },
       "interaction_hygiene": null,
+      "error_sink_calls": [],
       "confidence": "MEDIUM"
     },
     "AccountSettingsPage": {
@@ -9942,9 +11330,34 @@
         "has_handler": true,
         "handler_nonempty": true,
         "reaches_api_or_nav": true,
+        "nav_targets": [],
+        "hrefs": [],
         "violation": false,
         "confidence": "MEDIUM"
       },
+      "error_sink_calls": [
+        {
+          "sink": "toast.error",
+          "arg_literal": "Failed to request deletion",
+          "generic": false,
+          "file": "apps/memberry/src/routes/_authenticated/settings/account.tsx",
+          "line": 83
+        },
+        {
+          "sink": "toast.error",
+          "arg_literal": "Failed to cancel deletion",
+          "generic": false,
+          "file": "apps/memberry/src/routes/_authenticated/settings/account.tsx",
+          "line": 92
+        },
+        {
+          "sink": "toast.error",
+          "arg_literal": "Failed to export data",
+          "generic": false,
+          "file": "apps/memberry/src/routes/_authenticated/settings/account.tsx",
+          "line": 102
+        }
+      ],
       "confidence": "MEDIUM"
     },
     "SecuritySettingsPage": {
@@ -9962,6 +11375,7 @@
       ],
       "loading_state_hygiene": null,
       "interaction_hygiene": null,
+      "error_sink_calls": [],
       "confidence": "MEDIUM"
     },
     "ActionQueue": {
@@ -9993,9 +11407,12 @@
         "has_handler": true,
         "handler_nonempty": true,
         "reaches_api_or_nav": true,
+        "nav_targets": [],
+        "hrefs": [],
         "violation": false,
         "confidence": "MEDIUM"
       },
+      "error_sink_calls": [],
       "confidence": "MEDIUM"
     },
     "DashboardKpiCard": {
@@ -10057,9 +11474,12 @@
         "has_handler": true,
         "handler_nonempty": false,
         "reaches_api_or_nav": false,
+        "nav_targets": [],
+        "hrefs": [],
         "violation": false,
         "confidence": "MEDIUM"
       },
+      "error_sink_calls": [],
       "confidence": "MEDIUM"
     },
     "ModuleSummaryCard": {
@@ -10115,9 +11535,12 @@
         "has_handler": true,
         "handler_nonempty": true,
         "reaches_api_or_nav": false,
+        "nav_targets": [],
+        "hrefs": [],
         "violation": false,
         "confidence": "MEDIUM"
       },
+      "error_sink_calls": [],
       "confidence": "MEDIUM"
     },
     "ChoiceQuestion": {
@@ -10166,9 +11589,12 @@
         "has_handler": true,
         "handler_nonempty": true,
         "reaches_api_or_nav": false,
+        "nav_targets": [],
+        "hrefs": [],
         "violation": false,
         "confidence": "MEDIUM"
       },
+      "error_sink_calls": [],
       "confidence": "MEDIUM"
     },
     "NpsQuestion": {
@@ -10205,9 +11631,12 @@
         "has_handler": true,
         "handler_nonempty": true,
         "reaches_api_or_nav": false,
+        "nav_targets": [],
+        "hrefs": [],
         "violation": false,
         "confidence": "MEDIUM"
       },
+      "error_sink_calls": [],
       "confidence": "MEDIUM"
     },
     "RatingQuestion": {
@@ -10250,9 +11679,12 @@
         "has_handler": true,
         "handler_nonempty": true,
         "reaches_api_or_nav": true,
+        "nav_targets": [],
+        "hrefs": [],
         "violation": false,
         "confidence": "MEDIUM"
       },
+      "error_sink_calls": [],
       "confidence": "MEDIUM"
     },
     "TextQuestion": {
@@ -10298,6 +11730,7 @@
       "routes_used_in": [],
       "loading_state_hygiene": null,
       "interaction_hygiene": null,
+      "error_sink_calls": [],
       "confidence": "MEDIUM"
     },
     "YesNoQuestion": {
@@ -10334,9 +11767,12 @@
         "has_handler": true,
         "handler_nonempty": true,
         "reaches_api_or_nav": false,
+        "nav_targets": [],
+        "hrefs": [],
         "violation": false,
         "confidence": "MEDIUM"
       },
+      "error_sink_calls": [],
       "confidence": "MEDIUM"
     },
     "BookingDetailPage": {
@@ -10393,9 +11829,12 @@
         "has_handler": true,
         "handler_nonempty": true,
         "reaches_api_or_nav": true,
+        "nav_targets": [],
+        "hrefs": [],
         "violation": false,
         "confidence": "MEDIUM"
       },
+      "error_sink_calls": [],
       "confidence": "MEDIUM"
     },
     "ConfirmPage": {
@@ -10436,9 +11875,17 @@
         "has_handler": true,
         "handler_nonempty": true,
         "reaches_api_or_nav": true,
+        "nav_targets": [],
+        "hrefs": [
+          "/my/bookings/host/$personId"
+        ],
+        "href_attrs": [
+          "to"
+        ],
         "violation": false,
         "confidence": "MEDIUM"
       },
+      "error_sink_calls": [],
       "confidence": "MEDIUM"
     },
     "HostPage": {
@@ -10479,9 +11926,12 @@
         "has_handler": true,
         "handler_nonempty": true,
         "reaches_api_or_nav": true,
+        "nav_targets": [],
+        "hrefs": [],
         "violation": false,
         "confidence": "MEDIUM"
       },
+      "error_sink_calls": [],
       "confidence": "MEDIUM"
     },
     "BookingsPage": {
@@ -10499,6 +11949,7 @@
       ],
       "loading_state_hygiene": null,
       "interaction_hygiene": null,
+      "error_sink_calls": [],
       "confidence": "MEDIUM"
     },
     "CertificateDetail": {
@@ -10516,6 +11967,7 @@
       ],
       "loading_state_hygiene": null,
       "interaction_hygiene": null,
+      "error_sink_calls": [],
       "confidence": "MEDIUM"
     },
     "MyCertificates": {
@@ -10533,6 +11985,7 @@
       ],
       "loading_state_hygiene": null,
       "interaction_hygiene": null,
+      "error_sink_calls": [],
       "confidence": "MEDIUM"
     },
     "MyCredits": {
@@ -10560,9 +12013,17 @@
         "has_handler": true,
         "handler_nonempty": false,
         "reaches_api_or_nav": false,
+        "nav_targets": [],
+        "hrefs": [
+          "/my/credits/log"
+        ],
+        "href_attrs": [
+          "to"
+        ],
         "violation": false,
         "confidence": "MEDIUM"
       },
+      "error_sink_calls": [],
       "confidence": "MEDIUM"
     },
     "CreditLog": {
@@ -10583,9 +12044,20 @@
         "has_handler": true,
         "handler_nonempty": true,
         "reaches_api_or_nav": false,
+        "nav_targets": [],
+        "hrefs": [],
         "violation": false,
         "confidence": "MEDIUM"
       },
+      "error_sink_calls": [
+        {
+          "sink": "toast.error",
+          "arg_literal": "Failed to add credit entry",
+          "generic": false,
+          "file": "apps/memberry/src/routes/_authenticated/my/credits/log.tsx",
+          "line": 64
+        }
+      ],
       "confidence": "MEDIUM"
     },
     "SurveyDetailPage": {
@@ -10604,6 +12076,7 @@
       ],
       "loading_state_hygiene": null,
       "interaction_hygiene": null,
+      "error_sink_calls": [],
       "confidence": "MEDIUM"
     },
     "MySurveys": {
@@ -10636,9 +12109,17 @@
         "has_handler": true,
         "handler_nonempty": false,
         "reaches_api_or_nav": false,
+        "nav_targets": [],
+        "hrefs": [
+          "/my/surveys/$surveyId"
+        ],
+        "href_attrs": [
+          "to"
+        ],
         "violation": false,
         "confidence": "MEDIUM"
       },
+      "error_sink_calls": [],
       "confidence": "MEDIUM"
     },
     "DirectoryPage": {
@@ -10656,6 +12137,7 @@
       ],
       "loading_state_hygiene": null,
       "interaction_hygiene": null,
+      "error_sink_calls": [],
       "confidence": "MEDIUM"
     },
     "MemberDuesPage": {
@@ -10692,9 +12174,12 @@
         "has_handler": true,
         "handler_nonempty": true,
         "reaches_api_or_nav": false,
+        "nav_targets": [],
+        "hrefs": [],
         "violation": false,
         "confidence": "MEDIUM"
       },
+      "error_sink_calls": [],
       "confidence": "MEDIUM"
     },
     "OrgHome": {
@@ -10731,9 +12216,19 @@
         "has_handler": true,
         "handler_nonempty": false,
         "reaches_api_or_nav": false,
+        "nav_targets": [],
+        "hrefs": [
+          "/org/$orgSlug/events",
+          "/org/$orgSlug/events/$eventId"
+        ],
+        "href_attrs": [
+          "to",
+          "to"
+        ],
         "violation": false,
         "confidence": "MEDIUM"
       },
+      "error_sink_calls": [],
       "confidence": "MEDIUM"
     },
     "MembersDirectoryPage": {
@@ -10751,6 +12246,7 @@
       ],
       "loading_state_hygiene": null,
       "interaction_hygiene": null,
+      "error_sink_calls": [],
       "confidence": "MEDIUM"
     },
     "MyCpdDashboard": {
@@ -10768,19 +12264,22 @@
       ],
       "loading_state_hygiene": {
         "has_skeleton": true,
-        "has_error_branch": false,
+        "has_error_branch": true,
         "has_timeout": false,
         "has_exemption": false,
-        "violation": true,
+        "violation": false,
         "confidence": "MEDIUM"
       },
       "interaction_hygiene": {
         "has_handler": true,
         "handler_nonempty": false,
         "reaches_api_or_nav": false,
+        "nav_targets": [],
+        "hrefs": [],
         "violation": false,
         "confidence": "MEDIUM"
       },
+      "error_sink_calls": [],
       "confidence": "MEDIUM"
     },
     "MyNotificationsPage": {
@@ -10798,6 +12297,7 @@
       ],
       "loading_state_hygiene": null,
       "interaction_hygiene": null,
+      "error_sink_calls": [],
       "confidence": "MEDIUM"
     },
     "OfficerLayout": {
@@ -10818,9 +12318,17 @@
         "has_handler": true,
         "handler_nonempty": false,
         "reaches_api_or_nav": false,
+        "nav_targets": [],
+        "hrefs": [
+          "#main-content"
+        ],
+        "href_attrs": [
+          "href"
+        ],
         "violation": false,
         "confidence": "MEDIUM"
       },
+      "error_sink_calls": [],
       "confidence": "MEDIUM"
     },
     "OrgLayout": {
@@ -10838,6 +12346,7 @@
       ],
       "loading_state_hygiene": null,
       "interaction_hygiene": null,
+      "error_sink_calls": [],
       "confidence": "MEDIUM"
     },
     "MemberAnnouncementPage": {
@@ -10855,19 +12364,22 @@
       ],
       "loading_state_hygiene": {
         "has_skeleton": true,
-        "has_error_branch": false,
+        "has_error_branch": true,
         "has_timeout": false,
         "has_exemption": false,
-        "violation": true,
+        "violation": false,
         "confidence": "MEDIUM"
       },
       "interaction_hygiene": {
         "has_handler": true,
         "handler_nonempty": true,
         "reaches_api_or_nav": true,
+        "nav_targets": [],
+        "hrefs": [],
         "violation": false,
         "confidence": "MEDIUM"
       },
+      "error_sink_calls": [],
       "confidence": "MEDIUM"
     },
     "MemberAnnouncementFeed": {
@@ -10895,9 +12407,17 @@
         "has_handler": true,
         "handler_nonempty": true,
         "reaches_api_or_nav": false,
+        "nav_targets": [],
+        "hrefs": [
+          "/org/$orgSlug/announcements/$announcementId"
+        ],
+        "href_attrs": [
+          "to"
+        ],
         "violation": false,
         "confidence": "MEDIUM"
       },
+      "error_sink_calls": [],
       "confidence": "MEDIUM"
     },
     "MemberProfilePage": {
@@ -10915,6 +12435,7 @@
       ],
       "loading_state_hygiene": null,
       "interaction_hygiene": null,
+      "error_sink_calls": [],
       "confidence": "MEDIUM"
     },
     "MemberDocumentDetailPage": {
@@ -10951,9 +12472,17 @@
         "has_handler": true,
         "handler_nonempty": false,
         "reaches_api_or_nav": false,
+        "nav_targets": [],
+        "hrefs": [
+          "/org/$orgSlug/documents"
+        ],
+        "href_attrs": [
+          "to"
+        ],
         "violation": false,
         "confidence": "MEDIUM"
       },
+      "error_sink_calls": [],
       "confidence": "MEDIUM"
     },
     "MemberDocumentsPage": {
@@ -10971,6 +12500,7 @@
       ],
       "loading_state_hygiene": null,
       "interaction_hygiene": null,
+      "error_sink_calls": [],
       "confidence": "MEDIUM"
     },
     "MemberElectionsPage": {
@@ -10988,6 +12518,7 @@
       ],
       "loading_state_hygiene": null,
       "interaction_hygiene": null,
+      "error_sink_calls": [],
       "confidence": "MEDIUM"
     },
     "EventDetail": {
@@ -11011,19 +12542,22 @@
       ],
       "loading_state_hygiene": {
         "has_skeleton": true,
-        "has_error_branch": false,
+        "has_error_branch": true,
         "has_timeout": false,
         "has_exemption": false,
-        "violation": true,
+        "violation": false,
         "confidence": "MEDIUM"
       },
       "interaction_hygiene": {
         "has_handler": true,
         "handler_nonempty": true,
         "reaches_api_or_nav": true,
+        "nav_targets": [],
+        "hrefs": [],
         "violation": false,
         "confidence": "MEDIUM"
       },
+      "error_sink_calls": [],
       "confidence": "MEDIUM"
     },
     "OrgEvents": {
@@ -11056,9 +12590,12 @@
         "has_handler": true,
         "handler_nonempty": true,
         "reaches_api_or_nav": true,
+        "nav_targets": [],
+        "hrefs": [],
         "violation": false,
         "confidence": "MEDIUM"
       },
+      "error_sink_calls": [],
       "confidence": "MEDIUM"
     },
     "GovernancePage": {
@@ -11085,19 +12622,22 @@
       ],
       "loading_state_hygiene": {
         "has_skeleton": true,
-        "has_error_branch": false,
+        "has_error_branch": true,
         "has_timeout": false,
         "has_exemption": false,
-        "violation": true,
+        "violation": false,
         "confidence": "MEDIUM"
       },
       "interaction_hygiene": {
         "has_handler": true,
         "handler_nonempty": false,
         "reaches_api_or_nav": false,
+        "nav_targets": [],
+        "hrefs": [],
         "violation": false,
         "confidence": "MEDIUM"
       },
+      "error_sink_calls": [],
       "confidence": "MEDIUM"
     },
     "MessagesIndexPage": {
@@ -11123,9 +12663,12 @@
         "has_handler": true,
         "handler_nonempty": true,
         "reaches_api_or_nav": false,
+        "nav_targets": [],
+        "hrefs": [],
         "violation": false,
         "confidence": "MEDIUM"
       },
+      "error_sink_calls": [],
       "confidence": "MEDIUM"
     },
     "ApplicationsPage": {
@@ -11143,6 +12686,7 @@
       ],
       "loading_state_hygiene": null,
       "interaction_hygiene": null,
+      "error_sink_calls": [],
       "confidence": "MEDIUM"
     },
     "OfficerCertificates": {
@@ -11170,9 +12714,34 @@
         "has_handler": true,
         "handler_nonempty": true,
         "reaches_api_or_nav": true,
+        "nav_targets": [],
+        "hrefs": [],
         "violation": false,
         "confidence": "MEDIUM"
       },
+      "error_sink_calls": [
+        {
+          "sink": "toast.error",
+          "arg_literal": null,
+          "generic": false,
+          "file": "apps/memberry/src/routes/_authenticated/org/$orgSlug/officer/certificates.tsx",
+          "line": 34
+        },
+        {
+          "sink": "toast.error",
+          "arg_literal": "Certificate not found",
+          "generic": false,
+          "file": "apps/memberry/src/routes/_authenticated/org/$orgSlug/officer/certificates.tsx",
+          "line": 40
+        },
+        {
+          "sink": "toast.error",
+          "arg_literal": "Fill in all required fields",
+          "generic": false,
+          "file": "apps/memberry/src/routes/_authenticated/org/$orgSlug/officer/certificates.tsx",
+          "line": 46
+        }
+      ],
       "confidence": "MEDIUM"
     },
     "OfficerCompliance": {
@@ -11200,9 +12769,20 @@
         "has_handler": true,
         "handler_nonempty": true,
         "reaches_api_or_nav": true,
+        "nav_targets": [],
+        "hrefs": [],
         "violation": false,
         "confidence": "MEDIUM"
       },
+      "error_sink_calls": [
+        {
+          "sink": "toast.error",
+          "arg_literal": null,
+          "generic": false,
+          "file": "apps/memberry/src/routes/_authenticated/org/$orgSlug/officer/compliance.tsx",
+          "line": 36
+        }
+      ],
       "confidence": "MEDIUM"
     },
     "OfficerDashboardPage": {
@@ -11220,6 +12800,7 @@
       ],
       "loading_state_hygiene": null,
       "interaction_hygiene": null,
+      "error_sink_calls": [],
       "confidence": "MEDIUM"
     },
     "OfficersPage": {
@@ -11237,6 +12818,7 @@
       ],
       "loading_state_hygiene": null,
       "interaction_hygiene": null,
+      "error_sink_calls": [],
       "confidence": "MEDIUM"
     },
     "TrainingDetail": {
@@ -11260,19 +12842,22 @@
       ],
       "loading_state_hygiene": {
         "has_skeleton": true,
-        "has_error_branch": false,
+        "has_error_branch": true,
         "has_timeout": false,
         "has_exemption": false,
-        "violation": true,
+        "violation": false,
         "confidence": "MEDIUM"
       },
       "interaction_hygiene": {
         "has_handler": true,
         "handler_nonempty": true,
         "reaches_api_or_nav": true,
+        "nav_targets": [],
+        "hrefs": [],
         "violation": false,
         "confidence": "MEDIUM"
       },
+      "error_sink_calls": [],
       "confidence": "MEDIUM"
     },
     "OrgTraining": {
@@ -11295,19 +12880,27 @@
       ],
       "loading_state_hygiene": {
         "has_skeleton": true,
-        "has_error_branch": false,
+        "has_error_branch": true,
         "has_timeout": false,
         "has_exemption": false,
-        "violation": true,
+        "violation": false,
         "confidence": "MEDIUM"
       },
       "interaction_hygiene": {
         "has_handler": true,
         "handler_nonempty": false,
         "reaches_api_or_nav": false,
+        "nav_targets": [],
+        "hrefs": [
+          "/org/$orgSlug/training/$trainingId"
+        ],
+        "href_attrs": [
+          "to"
+        ],
         "violation": false,
         "confidence": "MEDIUM"
       },
+      "error_sink_calls": [],
       "confidence": "MEDIUM"
     },
     "MemberElectionDetailPage": {
@@ -11325,6 +12918,7 @@
       ],
       "loading_state_hygiene": null,
       "interaction_hygiene": null,
+      "error_sink_calls": [],
       "confidence": "MEDIUM"
     },
     "VotePage": {
@@ -11342,6 +12936,7 @@
       ],
       "loading_state_hygiene": null,
       "interaction_hygiene": null,
+      "error_sink_calls": [],
       "confidence": "MEDIUM"
     },
     "DmIndexPage": {
@@ -11364,6 +12959,7 @@
       ],
       "loading_state_hygiene": null,
       "interaction_hygiene": null,
+      "error_sink_calls": [],
       "confidence": "MEDIUM"
     },
     "AnnouncementDetailPage": {
@@ -11381,19 +12977,42 @@
       ],
       "loading_state_hygiene": {
         "has_skeleton": true,
-        "has_error_branch": false,
+        "has_error_branch": true,
         "has_timeout": false,
         "has_exemption": false,
-        "violation": true,
+        "violation": false,
         "confidence": "MEDIUM"
       },
       "interaction_hygiene": {
         "has_handler": true,
         "handler_nonempty": true,
         "reaches_api_or_nav": true,
+        "nav_targets": [],
+        "hrefs": [
+          "/org/$orgSlug/officer/communications/new"
+        ],
+        "href_attrs": [
+          "to"
+        ],
         "violation": false,
         "confidence": "MEDIUM"
       },
+      "error_sink_calls": [
+        {
+          "sink": "toast.error",
+          "arg_literal": null,
+          "generic": false,
+          "file": "apps/memberry/src/routes/_authenticated/org/$orgSlug/officer/communications/$announcementId.tsx",
+          "line": 48
+        },
+        {
+          "sink": "toast.error",
+          "arg_literal": null,
+          "generic": false,
+          "file": "apps/memberry/src/routes/_authenticated/org/$orgSlug/officer/communications/$announcementId.tsx",
+          "line": 57
+        }
+      ],
       "confidence": "MEDIUM"
     },
     "AnalyticsDashboardPage": {
@@ -11411,13 +13030,14 @@
       ],
       "loading_state_hygiene": {
         "has_skeleton": true,
-        "has_error_branch": false,
+        "has_error_branch": true,
         "has_timeout": false,
         "has_exemption": false,
-        "violation": true,
+        "violation": false,
         "confidence": "MEDIUM"
       },
       "interaction_hygiene": null,
+      "error_sink_calls": [],
       "confidence": "MEDIUM"
     },
     "OfficerCommunications": {
@@ -11438,9 +13058,17 @@
         "has_handler": true,
         "handler_nonempty": false,
         "reaches_api_or_nav": false,
+        "nav_targets": [],
+        "hrefs": [
+          "/org/$orgSlug/officer/communications/new"
+        ],
+        "href_attrs": [
+          "to"
+        ],
         "violation": false,
         "confidence": "MEDIUM"
       },
+      "error_sink_calls": [],
       "confidence": "MEDIUM"
     },
     "NewAnnouncementPage": {
@@ -11458,6 +13086,7 @@
       ],
       "loading_state_hygiene": null,
       "interaction_hygiene": null,
+      "error_sink_calls": [],
       "confidence": "MEDIUM"
     },
     "SentHistoryPage": {
@@ -11475,13 +13104,14 @@
       ],
       "loading_state_hygiene": {
         "has_skeleton": true,
-        "has_error_branch": false,
+        "has_error_branch": true,
         "has_timeout": false,
         "has_exemption": false,
-        "violation": true,
+        "violation": false,
         "confidence": "MEDIUM"
       },
       "interaction_hygiene": null,
+      "error_sink_calls": [],
       "confidence": "MEDIUM"
     },
     "DocumentDetail": {
@@ -11508,19 +13138,30 @@
       ],
       "loading_state_hygiene": {
         "has_skeleton": true,
-        "has_error_branch": false,
+        "has_error_branch": true,
         "has_timeout": false,
         "has_exemption": false,
-        "violation": true,
+        "violation": false,
         "confidence": "MEDIUM"
       },
       "interaction_hygiene": {
         "has_handler": true,
         "handler_nonempty": true,
         "reaches_api_or_nav": true,
+        "nav_targets": [],
+        "hrefs": [],
         "violation": false,
         "confidence": "MEDIUM"
       },
+      "error_sink_calls": [
+        {
+          "sink": "toast.error",
+          "arg_literal": null,
+          "generic": false,
+          "file": "apps/memberry/src/routes/_authenticated/org/$orgSlug/officer/documents/$documentId.tsx",
+          "line": 433
+        }
+      ],
       "confidence": "MEDIUM"
     },
     "OfficerDocuments": {
@@ -11538,6 +13179,7 @@
       ],
       "loading_state_hygiene": null,
       "interaction_hygiene": null,
+      "error_sink_calls": [],
       "confidence": "MEDIUM"
     },
     "ElectionDetailLayout": {
@@ -11555,6 +13197,7 @@
       ],
       "loading_state_hygiene": null,
       "interaction_hygiene": null,
+      "error_sink_calls": [],
       "confidence": "MEDIUM"
     },
     "OfficerElections": {
@@ -11575,9 +13218,17 @@
         "has_handler": true,
         "handler_nonempty": false,
         "reaches_api_or_nav": false,
+        "nav_targets": [],
+        "hrefs": [
+          "/org/$orgSlug/officer/elections/new"
+        ],
+        "href_attrs": [
+          "to"
+        ],
         "violation": false,
         "confidence": "MEDIUM"
       },
+      "error_sink_calls": [],
       "confidence": "MEDIUM"
     },
     "NewElection": {
@@ -11598,9 +13249,12 @@
         "has_handler": true,
         "handler_nonempty": true,
         "reaches_api_or_nav": true,
+        "nav_targets": [],
+        "hrefs": [],
         "violation": false,
         "confidence": "MEDIUM"
       },
+      "error_sink_calls": [],
       "confidence": "MEDIUM"
     },
     "OfficerEvents": {
@@ -11621,9 +13275,17 @@
         "has_handler": true,
         "handler_nonempty": false,
         "reaches_api_or_nav": false,
+        "nav_targets": [],
+        "hrefs": [
+          "/org/$orgSlug/officer/events/new"
+        ],
+        "href_attrs": [
+          "to"
+        ],
         "violation": false,
         "confidence": "MEDIUM"
       },
+      "error_sink_calls": [],
       "confidence": "MEDIUM"
     },
     "NewEvent": {
@@ -11644,9 +13306,12 @@
         "has_handler": true,
         "handler_nonempty": true,
         "reaches_api_or_nav": true,
+        "nav_targets": [],
+        "hrefs": [],
         "violation": false,
         "confidence": "MEDIUM"
       },
+      "error_sink_calls": [],
       "confidence": "MEDIUM"
     },
     "FinancesAssessmentsPage": {
@@ -11664,6 +13329,7 @@
       ],
       "loading_state_hygiene": null,
       "interaction_hygiene": null,
+      "error_sink_calls": [],
       "confidence": "MEDIUM"
     },
     "DuesSchedulePage": {
@@ -11681,6 +13347,7 @@
       ],
       "loading_state_hygiene": null,
       "interaction_hygiene": null,
+      "error_sink_calls": [],
       "confidence": "MEDIUM"
     },
     "FundsPage": {
@@ -11711,19 +13378,30 @@
       ],
       "loading_state_hygiene": {
         "has_skeleton": true,
-        "has_error_branch": false,
+        "has_error_branch": true,
         "has_timeout": false,
         "has_exemption": false,
-        "violation": true,
+        "violation": false,
         "confidence": "MEDIUM"
       },
       "interaction_hygiene": {
         "has_handler": true,
         "handler_nonempty": true,
         "reaches_api_or_nav": true,
+        "nav_targets": [],
+        "hrefs": [],
         "violation": false,
         "confidence": "MEDIUM"
       },
+      "error_sink_calls": [
+        {
+          "sink": "toast.error",
+          "arg_literal": "Failed to save",
+          "generic": false,
+          "file": "apps/memberry/src/routes/_authenticated/org/$orgSlug/officer/finances/funds.tsx",
+          "line": 74
+        }
+      ],
       "confidence": "MEDIUM"
     },
     "FinancesOverviewPage": {
@@ -11753,6 +13431,7 @@
         "confidence": "MEDIUM"
       },
       "interaction_hygiene": null,
+      "error_sink_calls": [],
       "confidence": "MEDIUM"
     },
     "InvoicesPage": {
@@ -11798,9 +13477,34 @@
         "has_handler": true,
         "handler_nonempty": true,
         "reaches_api_or_nav": true,
+        "nav_targets": [],
+        "hrefs": [],
         "violation": false,
         "confidence": "MEDIUM"
       },
+      "error_sink_calls": [
+        {
+          "sink": "toast.error",
+          "arg_literal": "Failed to mark invoice as paid",
+          "generic": false,
+          "file": "apps/memberry/src/routes/_authenticated/org/$orgSlug/officer/finances/invoices/index.tsx",
+          "line": 119
+        },
+        {
+          "sink": "toast.error",
+          "arg_literal": "Failed to update invoice",
+          "generic": false,
+          "file": "apps/memberry/src/routes/_authenticated/org/$orgSlug/officer/finances/invoices/index.tsx",
+          "line": 125
+        },
+        {
+          "sink": "toast.error",
+          "arg_literal": "Failed to generate invoices",
+          "generic": false,
+          "file": "apps/memberry/src/routes/_authenticated/org/$orgSlug/officer/finances/invoices/index.tsx",
+          "line": 135
+        }
+      ],
       "confidence": "MEDIUM"
     },
     "FinancialMembersPage": {
@@ -11841,9 +13545,17 @@
         "has_handler": true,
         "handler_nonempty": true,
         "reaches_api_or_nav": true,
+        "nav_targets": [],
+        "hrefs": [
+          "/org/$orgSlug/officer/finances/members/$memberId"
+        ],
+        "href_attrs": [
+          "to"
+        ],
         "violation": false,
         "confidence": "MEDIUM"
       },
+      "error_sink_calls": [],
       "confidence": "MEDIUM"
     },
     "InstitutionalMembershipDetailPage": {
@@ -11880,9 +13592,20 @@
         "has_handler": true,
         "handler_nonempty": true,
         "reaches_api_or_nav": true,
+        "nav_targets": [],
+        "hrefs": [],
         "violation": false,
         "confidence": "MEDIUM"
       },
+      "error_sink_calls": [
+        {
+          "sink": "toast.error",
+          "arg_literal": null,
+          "generic": false,
+          "file": "apps/memberry/src/routes/_authenticated/org/$orgSlug/officer/institutional-memberships/$institutionalMembershipId.tsx",
+          "line": 58
+        }
+      ],
       "confidence": "MEDIUM"
     },
     "InstitutionalMembershipsPage": {
@@ -11903,9 +13626,17 @@
         "has_handler": true,
         "handler_nonempty": false,
         "reaches_api_or_nav": false,
+        "nav_targets": [],
+        "hrefs": [
+          "/org/$orgSlug/officer/institutional-memberships/new"
+        ],
+        "href_attrs": [
+          "to"
+        ],
         "violation": false,
         "confidence": "MEDIUM"
       },
+      "error_sink_calls": [],
       "confidence": "MEDIUM"
     },
     "NewInstitutionalMembershipPage": {
@@ -11926,9 +13657,12 @@
         "has_handler": true,
         "handler_nonempty": true,
         "reaches_api_or_nav": true,
+        "nav_targets": [],
+        "hrefs": [],
         "violation": false,
         "confidence": "MEDIUM"
       },
+      "error_sink_calls": [],
       "confidence": "MEDIUM"
     },
     "OfficerMessagesPage": {
@@ -11954,9 +13688,12 @@
         "has_handler": true,
         "handler_nonempty": true,
         "reaches_api_or_nav": true,
+        "nav_targets": [],
+        "hrefs": [],
         "violation": false,
         "confidence": "MEDIUM"
       },
+      "error_sink_calls": [],
       "confidence": "MEDIUM"
     },
     "PaymentDetailPage": {
@@ -11979,13 +13716,14 @@
       ],
       "loading_state_hygiene": {
         "has_skeleton": true,
-        "has_error_branch": false,
+        "has_error_branch": true,
         "has_timeout": false,
         "has_exemption": false,
-        "violation": true,
+        "violation": false,
         "confidence": "MEDIUM"
       },
       "interaction_hygiene": null,
+      "error_sink_calls": [],
       "confidence": "MEDIUM"
     },
     "OfficerPaymentsPage": {
@@ -12018,9 +13756,25 @@
         "has_handler": true,
         "handler_nonempty": true,
         "reaches_api_or_nav": true,
+        "nav_targets": [],
+        "hrefs": [
+          "/org/$orgSlug/officer/payments/new"
+        ],
+        "href_attrs": [
+          "to"
+        ],
         "violation": false,
         "confidence": "MEDIUM"
       },
+      "error_sink_calls": [
+        {
+          "sink": "toast.error",
+          "arg_literal": "Failed to send reminders",
+          "generic": false,
+          "file": "apps/memberry/src/routes/_authenticated/org/$orgSlug/officer/payments/index.tsx",
+          "line": 32
+        }
+      ],
       "confidence": "MEDIUM"
     },
     "RecordPaymentPage": {
@@ -12038,6 +13792,7 @@
       ],
       "loading_state_hygiene": null,
       "interaction_hygiene": null,
+      "error_sink_calls": [],
       "confidence": "MEDIUM"
     },
     "CreditReport": {
@@ -12055,19 +13810,22 @@
       ],
       "loading_state_hygiene": {
         "has_skeleton": true,
-        "has_error_branch": false,
+        "has_error_branch": true,
         "has_timeout": false,
         "has_exemption": false,
-        "violation": true,
+        "violation": false,
         "confidence": "MEDIUM"
       },
       "interaction_hygiene": {
         "has_handler": true,
         "handler_nonempty": true,
         "reaches_api_or_nav": true,
+        "nav_targets": [],
+        "hrefs": [],
         "violation": false,
         "confidence": "MEDIUM"
       },
+      "error_sink_calls": [],
       "confidence": "MEDIUM"
     },
     "FinancialReportsPage": {
@@ -12100,9 +13858,12 @@
         "has_handler": true,
         "handler_nonempty": true,
         "reaches_api_or_nav": true,
+        "nav_targets": [],
+        "hrefs": [],
         "violation": false,
         "confidence": "MEDIUM"
       },
+      "error_sink_calls": [],
       "confidence": "MEDIUM"
     },
     "OfficerReviews": {
@@ -12127,6 +13888,7 @@
         "confidence": "MEDIUM"
       },
       "interaction_hygiene": null,
+      "error_sink_calls": [],
       "confidence": "MEDIUM"
     },
     "RosterImportPage": {
@@ -12152,9 +13914,34 @@
         "has_handler": true,
         "handler_nonempty": true,
         "reaches_api_or_nav": true,
+        "nav_targets": [],
+        "hrefs": [],
         "violation": false,
         "confidence": "MEDIUM"
       },
+      "error_sink_calls": [
+        {
+          "sink": "toast.error",
+          "arg_literal": "No data rows found in CSV",
+          "generic": false,
+          "file": "apps/memberry/src/routes/_authenticated/org/$orgSlug/officer/roster/import.tsx",
+          "line": 115
+        },
+        {
+          "sink": "toast.error",
+          "arg_literal": "Please upload a CSV file",
+          "generic": false,
+          "file": "apps/memberry/src/routes/_authenticated/org/$orgSlug/officer/roster/import.tsx",
+          "line": 127
+        },
+        {
+          "sink": "toast.error",
+          "arg_literal": null,
+          "generic": false,
+          "file": "apps/memberry/src/routes/_authenticated/org/$orgSlug/officer/roster/import.tsx",
+          "line": 164
+        }
+      ],
       "confidence": "MEDIUM"
     },
     "RosterPage": {
@@ -12180,9 +13967,12 @@
         "has_handler": true,
         "handler_nonempty": true,
         "reaches_api_or_nav": true,
+        "nav_targets": [],
+        "hrefs": [],
         "violation": false,
         "confidence": "MEDIUM"
       },
+      "error_sink_calls": [],
       "confidence": "MEDIUM"
     },
     "ChaptersSettingsPage": {
@@ -12200,6 +13990,7 @@
       ],
       "loading_state_hygiene": null,
       "interaction_hygiene": null,
+      "error_sink_calls": [],
       "confidence": "MEDIUM"
     },
     "CpdSettings": {
@@ -12217,19 +14008,30 @@
       ],
       "loading_state_hygiene": {
         "has_skeleton": true,
-        "has_error_branch": false,
+        "has_error_branch": true,
         "has_timeout": false,
         "has_exemption": false,
-        "violation": true,
+        "violation": false,
         "confidence": "MEDIUM"
       },
       "interaction_hygiene": {
         "has_handler": true,
         "handler_nonempty": true,
         "reaches_api_or_nav": true,
+        "nav_targets": [],
+        "hrefs": [],
         "violation": false,
         "confidence": "MEDIUM"
       },
+      "error_sink_calls": [
+        {
+          "sink": "toast.error",
+          "arg_literal": null,
+          "generic": false,
+          "file": "apps/memberry/src/routes/_authenticated/org/$orgSlug/officer/settings/cpd.tsx",
+          "line": 49
+        }
+      ],
       "confidence": "MEDIUM"
     },
     "GatewaySettingsPage": {
@@ -12247,6 +14049,7 @@
       ],
       "loading_state_hygiene": null,
       "interaction_hygiene": null,
+      "error_sink_calls": [],
       "confidence": "MEDIUM"
     },
     "CategoriesPage": {
@@ -12264,6 +14067,7 @@
       ],
       "loading_state_hygiene": null,
       "interaction_hygiene": null,
+      "error_sink_calls": [],
       "confidence": "MEDIUM"
     },
     "OrgSettingsPage": {
@@ -12281,6 +14085,7 @@
       ],
       "loading_state_hygiene": null,
       "interaction_hygiene": null,
+      "error_sink_calls": [],
       "confidence": "MEDIUM"
     },
     "ProvidersPage": {
@@ -12308,9 +14113,34 @@
         "has_handler": true,
         "handler_nonempty": true,
         "reaches_api_or_nav": true,
+        "nav_targets": [],
+        "hrefs": [],
         "violation": false,
         "confidence": "MEDIUM"
       },
+      "error_sink_calls": [
+        {
+          "sink": "toast.error",
+          "arg_literal": "Failed to create provider",
+          "generic": false,
+          "file": "apps/memberry/src/routes/_authenticated/org/$orgSlug/officer/settings/providers.tsx",
+          "line": 96
+        },
+        {
+          "sink": "toast.error",
+          "arg_literal": "Failed to update provider",
+          "generic": false,
+          "file": "apps/memberry/src/routes/_authenticated/org/$orgSlug/officer/settings/providers.tsx",
+          "line": 110
+        },
+        {
+          "sink": "toast.error",
+          "arg_literal": "Failed to delete provider",
+          "generic": false,
+          "file": "apps/memberry/src/routes/_authenticated/org/$orgSlug/officer/settings/providers.tsx",
+          "line": 120
+        }
+      ],
       "confidence": "MEDIUM"
     },
     "OfficerSurveys": {
@@ -12331,9 +14161,17 @@
         "has_handler": true,
         "handler_nonempty": false,
         "reaches_api_or_nav": false,
+        "nav_targets": [],
+        "hrefs": [
+          "/org/$orgSlug/officer/surveys/new"
+        ],
+        "href_attrs": [
+          "to"
+        ],
         "violation": false,
         "confidence": "MEDIUM"
       },
+      "error_sink_calls": [],
       "confidence": "MEDIUM"
     },
     "NewSurveyPage": {
@@ -12354,9 +14192,12 @@
         "has_handler": true,
         "handler_nonempty": true,
         "reaches_api_or_nav": true,
+        "nav_targets": [],
+        "hrefs": [],
         "violation": false,
         "confidence": "MEDIUM"
       },
+      "error_sink_calls": [],
       "confidence": "MEDIUM"
     },
     "OfficerTraining": {
@@ -12377,9 +14218,17 @@
         "has_handler": true,
         "handler_nonempty": false,
         "reaches_api_or_nav": false,
+        "nav_targets": [],
+        "hrefs": [
+          "/org/$orgSlug/officer/training/new"
+        ],
+        "href_attrs": [
+          "to"
+        ],
         "violation": false,
         "confidence": "MEDIUM"
       },
+      "error_sink_calls": [],
       "confidence": "MEDIUM"
     },
     "NewTraining": {
@@ -12397,6 +14246,7 @@
       ],
       "loading_state_hygiene": null,
       "interaction_hygiene": null,
+      "error_sink_calls": [],
       "confidence": "MEDIUM"
     },
     "TemplateListPage": {
@@ -12417,9 +14267,12 @@
         "has_handler": true,
         "handler_nonempty": true,
         "reaches_api_or_nav": true,
+        "nav_targets": [],
+        "hrefs": [],
         "violation": false,
         "confidence": "MEDIUM"
       },
+      "error_sink_calls": [],
       "confidence": "MEDIUM"
     },
     "NewTemplatePage": {
@@ -12440,9 +14293,12 @@
         "has_handler": true,
         "handler_nonempty": true,
         "reaches_api_or_nav": true,
+        "nav_targets": [],
+        "hrefs": [],
         "violation": false,
         "confidence": "MEDIUM"
       },
+      "error_sink_calls": [],
       "confidence": "MEDIUM"
     },
     "EditElection": {
@@ -12465,19 +14321,22 @@
       ],
       "loading_state_hygiene": {
         "has_skeleton": true,
-        "has_error_branch": false,
+        "has_error_branch": true,
         "has_timeout": false,
         "has_exemption": false,
-        "violation": true,
+        "violation": false,
         "confidence": "MEDIUM"
       },
       "interaction_hygiene": {
         "has_handler": true,
         "handler_nonempty": true,
         "reaches_api_or_nav": true,
+        "nav_targets": [],
+        "hrefs": [],
         "violation": false,
         "confidence": "MEDIUM"
       },
+      "error_sink_calls": [],
       "confidence": "MEDIUM"
     },
     "EventAttendance": {
@@ -12505,7 +14364,7 @@
       "loading_state_hygiene": {
         "has_skeleton": true,
         "has_error_branch": true,
-        "has_timeout": true,
+        "has_timeout": false,
         "has_exemption": false,
         "violation": false,
         "confidence": "MEDIUM"
@@ -12514,9 +14373,27 @@
         "has_handler": true,
         "handler_nonempty": true,
         "reaches_api_or_nav": true,
+        "nav_targets": [],
+        "hrefs": [],
         "violation": false,
         "confidence": "MEDIUM"
       },
+      "error_sink_calls": [
+        {
+          "sink": "toast.error",
+          "arg_literal": null,
+          "generic": false,
+          "file": "apps/memberry/src/routes/_authenticated/org/$orgSlug/officer/events/$eventId/attendance.tsx",
+          "line": 73
+        },
+        {
+          "sink": "toast.error",
+          "arg_literal": "QR code not found in registration list",
+          "generic": false,
+          "file": "apps/memberry/src/routes/_authenticated/org/$orgSlug/officer/events/$eventId/attendance.tsx",
+          "line": 93
+        }
+      ],
       "confidence": "MEDIUM"
     },
     "InvoiceDetailPage": {
@@ -12543,19 +14420,35 @@
       ],
       "loading_state_hygiene": {
         "has_skeleton": true,
-        "has_error_branch": false,
+        "has_error_branch": true,
         "has_timeout": false,
         "has_exemption": false,
-        "violation": true,
+        "violation": false,
         "confidence": "MEDIUM"
       },
       "interaction_hygiene": {
         "has_handler": true,
         "handler_nonempty": true,
         "reaches_api_or_nav": true,
+        "nav_targets": [],
+        "hrefs": [
+          "/org/$orgSlug/officer/finances/members/$memberId"
+        ],
+        "href_attrs": [
+          "to"
+        ],
         "violation": false,
         "confidence": "MEDIUM"
       },
+      "error_sink_calls": [
+        {
+          "sink": "toast.error",
+          "arg_literal": "Failed to mark invoice as paid",
+          "generic": false,
+          "file": "apps/memberry/src/routes/_authenticated/org/$orgSlug/officer/finances/invoices/$invoiceId.tsx",
+          "line": 45
+        }
+      ],
       "confidence": "MEDIUM"
     },
     "MemberFinancialDetailPage": {
@@ -12583,9 +14476,12 @@
         "has_handler": true,
         "handler_nonempty": true,
         "reaches_api_or_nav": false,
+        "nav_targets": [],
+        "hrefs": [],
         "violation": false,
         "confidence": "MEDIUM"
       },
+      "error_sink_calls": [],
       "confidence": "MEDIUM"
     },
     "TrainingAttendance": {
@@ -12622,9 +14518,27 @@
         "has_handler": true,
         "handler_nonempty": true,
         "reaches_api_or_nav": true,
+        "nav_targets": [],
+        "hrefs": [],
         "violation": false,
         "confidence": "MEDIUM"
       },
+      "error_sink_calls": [
+        {
+          "sink": "toast.warning",
+          "arg_literal": "Already checked in",
+          "generic": false,
+          "file": "apps/memberry/src/routes/_authenticated/org/$orgSlug/officer/training/$trainingId/attendance.tsx",
+          "line": 46
+        },
+        {
+          "sink": "toast.error",
+          "arg_literal": null,
+          "generic": false,
+          "file": "apps/memberry/src/routes/_authenticated/org/$orgSlug/officer/training/$trainingId/attendance.tsx",
+          "line": 48
+        }
+      ],
       "confidence": "MEDIUM"
     }
   }

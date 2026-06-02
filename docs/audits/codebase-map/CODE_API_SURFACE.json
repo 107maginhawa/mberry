@@ -1,5 +1,5 @@
 {
-  "version": 5,
+  "version": 6,
   "endpoints": {
     "GET /csrf-token": {
       "method": "GET",
@@ -482,11 +482,13 @@
       "response_shape": {},
       "module": "handlers/platformadmin",
       "confidence": "HIGH",
-      "consumer_count": 0,
-      "consumers": [],
+      "consumer_count": 1,
+      "consumers": [
+        "apps/admin"
+      ],
       "is_phantom": false,
       "deprecation_signals": {
-        "single_consumer": false,
+        "single_consumer": true,
         "has_todo_fixme": false,
         "deprecated_annotation": false,
         "last_modified_days_ago": 0
@@ -656,11 +658,13 @@
       "response_shape": {},
       "module": "handlers/platformadmin",
       "confidence": "HIGH",
-      "consumer_count": 0,
-      "consumers": [],
+      "consumer_count": 1,
+      "consumers": [
+        "apps/admin"
+      ],
       "is_phantom": false,
       "deprecation_signals": {
-        "single_consumer": false,
+        "single_consumer": true,
         "has_todo_fixme": false,
         "deprecated_annotation": false,
         "last_modified_days_ago": 0
@@ -1869,11 +1873,13 @@
       "response_shape": {},
       "module": "handlers/association:member",
       "confidence": "HIGH",
-      "consumer_count": 0,
-      "consumers": [],
+      "consumer_count": 1,
+      "consumers": [
+        "apps/memberry"
+      ],
       "is_phantom": false,
       "deprecation_signals": {
-        "single_consumer": false,
+        "single_consumer": true,
         "has_todo_fixme": false,
         "deprecated_annotation": false,
         "last_modified_days_ago": 0
@@ -2721,6 +2727,29 @@
       "path": "/association/member/credits/manual",
       "handler_file": "services/api-ts/src/handlers/association:member/awardManualCredit.ts",
       "handler_function": "awardManualCredit",
+      "auth_required": true,
+      "auth_middleware": "authMiddleware",
+      "request_shape": {},
+      "response_shape": {},
+      "module": "handlers/association:member",
+      "confidence": "HIGH",
+      "consumer_count": 1,
+      "consumers": [
+        "apps/memberry"
+      ],
+      "is_phantom": false,
+      "deprecation_signals": {
+        "single_consumer": true,
+        "has_todo_fixme": false,
+        "deprecated_annotation": false,
+        "last_modified_days_ago": 0
+      }
+    },
+    "POST /association/member/credits/void-event": {
+      "method": "POST",
+      "path": "/association/member/credits/void-event",
+      "handler_file": "services/api-ts/src/handlers/association:member/voidCreditEntry.ts",
+      "handler_function": "voidCreditEntry",
       "auth_required": true,
       "auth_middleware": "authMiddleware",
       "request_shape": {},
@@ -9685,121 +9714,6 @@
       "consumer_count": 0,
       "consumers": [],
       "is_phantom": false,
-      "deprecation_signals": {
-        "single_consumer": false,
-        "has_todo_fixme": false,
-        "deprecated_annotation": false,
-        "last_modified_days_ago": 0
-      }
-    },
-    "GET /api/admin/national-dashboard/:associationId": {
-      "method": "GET",
-      "path": "/api/admin/national-dashboard/:associationId",
-      "handler_file": "",
-      "handler_function": "",
-      "auth_required": null,
-      "auth_middleware": null,
-      "request_shape": {},
-      "response_shape": {},
-      "module": "unknown",
-      "confidence": "LOW",
-      "consumer_count": 1,
-      "consumers": [
-        "apps/admin"
-      ],
-      "is_phantom": true,
-      "deprecation_signals": {
-        "single_consumer": false,
-        "has_todo_fixme": false,
-        "deprecated_annotation": false,
-        "last_modified_days_ago": 0
-      }
-    },
-    "POST /api/admin/organizations/:organizationId/transition": {
-      "method": "POST",
-      "path": "/api/admin/organizations/:organizationId/transition",
-      "handler_file": "",
-      "handler_function": "",
-      "auth_required": null,
-      "auth_middleware": null,
-      "request_shape": {},
-      "response_shape": {},
-      "module": "unknown",
-      "confidence": "LOW",
-      "consumer_count": 1,
-      "consumers": [
-        "apps/admin"
-      ],
-      "is_phantom": true,
-      "deprecation_signals": {
-        "single_consumer": false,
-        "has_todo_fixme": false,
-        "deprecated_annotation": false,
-        "last_modified_days_ago": 0
-      }
-    },
-    "POST /api/storage/files": {
-      "method": "POST",
-      "path": "/api/storage/files",
-      "handler_file": "",
-      "handler_function": "",
-      "auth_required": null,
-      "auth_middleware": null,
-      "request_shape": {},
-      "response_shape": {},
-      "module": "unknown",
-      "confidence": "LOW",
-      "consumer_count": 1,
-      "consumers": [
-        "apps/memberry"
-      ],
-      "is_phantom": true,
-      "deprecation_signals": {
-        "single_consumer": false,
-        "has_todo_fixme": false,
-        "deprecated_annotation": false,
-        "last_modified_days_ago": 0
-      }
-    },
-    "POST /api/association/member/credits/void-event": {
-      "method": "POST",
-      "path": "/api/association/member/credits/void-event",
-      "handler_file": "",
-      "handler_function": "",
-      "auth_required": null,
-      "auth_middleware": null,
-      "request_shape": {},
-      "response_shape": {},
-      "module": "unknown",
-      "confidence": "LOW",
-      "consumer_count": 1,
-      "consumers": [
-        "apps/memberry"
-      ],
-      "is_phantom": true,
-      "deprecation_signals": {
-        "single_consumer": false,
-        "has_todo_fixme": false,
-        "deprecated_annotation": false,
-        "last_modified_days_ago": 0
-      }
-    },
-    "POST /api/association/member/applications/bulk-approve": {
-      "method": "POST",
-      "path": "/api/association/member/applications/bulk-approve",
-      "handler_file": "",
-      "handler_function": "",
-      "auth_required": null,
-      "auth_middleware": null,
-      "request_shape": {},
-      "response_shape": {},
-      "module": "unknown",
-      "confidence": "LOW",
-      "consumer_count": 1,
-      "consumers": [
-        "apps/memberry"
-      ],
-      "is_phantom": true,
       "deprecation_signals": {
         "single_consumer": false,
         "has_todo_fixme": false,

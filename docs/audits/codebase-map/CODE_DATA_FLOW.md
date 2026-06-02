@@ -3,15 +3,15 @@
 <!-- oli:regen:code-data-flow:begin -->
 | Component | Props From | Events To | Store Reads | Store Writes | API Calls |
 |---|---|---|---|---|---|
-| `AlertDialogHeader` | AccountSettingsPage, ActiveBookingCard, ConfirmDialog | — | — | — | — |
-| `AlertDialogFooter` | AccountSettingsPage, ActiveBookingCard, ConfirmDialog | — | — | — | — |
+| `AlertDialogHeader` | AccountSettingsPage, ActiveBookingCard, ConfirmDialog, ProvidersPage | — | — | — | — |
+| `AlertDialogFooter` | AccountSettingsPage, ActiveBookingCard, ConfirmDialog, ProvidersPage | — | — | — | — |
 | `Badge` | AnalyticsDashboardPage, AudiencePicker, BookingList, CategoryEditor, ConnectionStatus, FinancialMembersPage, GatewaySetup, HostDirectory, InstitutionalMembershipDetailPage, InstitutionalMembershipTable, JoinPage, MemberDetail, MemberFinancialDetailPage, MemberTable, MyIdCard, OrgIconRail, OrgPickerSheet, PaymentDetailPage, PendingProofsList, ReportResults, SeatManagementPanel, SentHistoryPage, SpecialAssessmentsList, TemplateForm, TemplateList, VerifyCertificatePage, VerifyCredentialPage | — | — | — | — |
-| `Calendar` | AssociationDetailPage, ConfirmPage, DashboardPage, DatePicker, DateRangePicker, DateTimePicker, DiscoverEvents, DocumentDetail, DuesStatusCard, EventCard, EventDetail, HostDirectory, MyCalendar, MyEvents, OrgEvents, OrgHome, OrgSettingsForm, PersonalInfoForm, PublicEventPage, QuickActions, TrainingCard, TrainingDetail | — | — | — | — |
+| `Calendar` | AssociationDetailPage, ConfirmPage, DashboardPage, DatePicker, DateRangePicker, DateTimePicker, DiscoverEvents, DocumentDetail, DuesStatusCard, EventCard, EventDetail, EventList, HostDirectory, MyCalendar, MyEvents, OrgEvents, OrgHome, OrgSettingsForm, PersonalInfoForm, PublicEventPage, QuickActions, TrainingCard, TrainingDetail | — | — | — | — |
 | `CalendarDayButton` | — | — | — | — | — |
 | `CommandDialog` | — | — | — | — | — |
 | `CommandShortcut` | — | — | — | — | — |
-| `DialogHeader` | CategoryEditor, CreateChannelDialog, GatewaySetup, ImageCropperDialog, InstitutionalMembershipDetailPage, MemberDetail, MyOrganizationsPage, OfficerManagement, RecordPaymentForm, RefundForm, SeatManagementPanel, SpecialAssessmentsList, SurveyBuilder | — | — | — | — |
-| `DialogFooter` | CategoryEditor, CreateChannelDialog, GatewaySetup, ImageCropperDialog, InstitutionalMembershipDetailPage, MemberDetail, MyOrganizationsPage, OfficerManagement, RecordPaymentForm, RefundForm, SeatManagementPanel, SpecialAssessmentsList | — | — | — | — |
+| `DialogHeader` | CategoryEditor, CreateChannelDialog, GatewaySetup, ImageCropperDialog, InstitutionalMembershipDetailPage, MemberDetail, MyOrganizationsPage, NomineePickerDialog, OfficerManagement, ProvidersPage, PublicOrgProfile, RecordPaymentForm, RefundForm, SeatManagementPanel, SelfNominationDialog, SpecialAssessmentsList, SurveyBuilder, VotingBallot | — | — | — | — |
+| `DialogFooter` | CategoryEditor, CreateChannelDialog, GatewaySetup, ImageCropperDialog, InstitutionalMembershipDetailPage, MemberDetail, MyOrganizationsPage, OfficerManagement, RecordPaymentForm, RefundForm, SeatManagementPanel, SelfNominationDialog, SpecialAssessmentsList, VotingBallot | — | — | — | — |
 | `DropdownMenuShortcut` | — | — | — | — | — |
 | `FormField` | AddressForm, ContactInfoForm, PersonalInfoForm, PreferencesForm, RecordPaymentForm | — | — | — | — |
 | `useFormField` | — | — | — | — | — |
@@ -81,12 +81,12 @@
 | `DatePicker` | CreditLog, FinancialReportsPage, OrgSettingsForm, RecordPaymentForm | CreditLog, FinancialReportsPage, OrgSettingsForm, RecordPaymentForm | — | — | — |
 | `DateTimePicker` | ComposeForm, ElectionForm, EventForm, SurveyBuilder, TrainingForm | ComposeForm, ElectionForm, EventForm, SurveyBuilder, TrainingForm | — | — | — |
 | `DateRangePicker` | — | — | — | — | — |
-| `EmptyState` | AnnouncementDetailPage, ApplicationList, CertificateList, ChannelList, CreditBreakdown, CreditReport, DashboardPage, DirectorySearch, DiscoverEvents, DmIndexPage, DmList, DuesInvoiceList, EventAttendance, FinancialMembersPage, InvoicesPage, MemberAnnouncementFeed, MemberAnnouncementPage, MemberDashboard, MemberDuesPage, MessagesIndexPage, MyCredits, MyEvents, MyIdCard, MyOrganizationsPage, MyProfilePage, MySurveys, MyTraining, NotificationInbox, OfficerManagement, OfficerMessagesPage, OfficerReviews, OrgAnnouncements, OrgEvents, OrgHome, OrgTraining, PaymentHistoryTable, PendingProofsList, ProvidersPage, PublicEventPage, TemplateList, TrainingAttendance, TrustDirectory | — | — | — | — |
+| `EmptyState` | AnnouncementDetailPage, ApplicationList, CertificateList, ChannelList, CreditBreakdown, CreditReport, DashboardPage, DirectorySearch, DiscoverEvents, DmIndexPage, DmList, DuesInvoiceList, EventAttendance, EventList, FinancialMembersPage, GovernancePage, InvoicesPage, MemberAnnouncementFeed, MemberAnnouncementPage, MemberDashboard, MemberDuesPage, MemberTable, MessagesIndexPage, MyCredits, MyEvents, MyIdCard, MyOrganizationsPage, MyProfilePage, MySurveys, MyTraining, NotificationInbox, OfficerManagement, OfficerMessagesPage, OfficerReviews, OrgAnnouncements, OrgEvents, OrgHome, OrgTraining, PaymentHistoryTable, PendingProofsList, ProvidersPage, PublicEventPage, ReportResults, TemplateList, TrainingAttendance, TrainingList, TrustDirectory | — | — | — | — |
 | `PageHeader` | AnalyticsDashboardPage, AnnouncementDetailPage, ApplicationsPage, CategoriesPage, CertificateDetail, ChaptersSettingsPage, CpdSettings, CreditLog, CreditReport, DashboardPage, DataExportPage, DirectoryPage, DiscoverEvents, DmIndexPage, DocumentDetail, DuesSchedulePage, EditElection, ElectionDetailLayout, EventAttendance, EventDetail, FinancesAssessmentsPage, FinancesOverviewPage, FinancialMembersPage, FinancialReportsPage, FundsPage, GatewaySettingsPage, GovernancePage, InstitutionalMembershipDetailPage, InstitutionalMembershipsPage, InvoiceDetailPage, InvoicesPage, MemberAnnouncementFeed, MemberAnnouncementPage, MemberDetail, MemberDocumentDetailPage, MemberDocumentsPage, MemberDuesPage, MemberElectionDetailPage, MemberElectionsPage, MemberFinancialDetailPage, MemberProfilePage, MembersDirectoryPage, MessagesIndexPage, MyCalendar, MyCertificates, MyCpdDashboard, MyCredits, MyEvents, MyIdCard, MyNotificationsPage, MyOrganizationsPage, MyPaymentsPage, MyProfilePage, MySettingsPage, MySurveys, MyTraining, NewAnnouncementPage, NewElection, NewEvent, NewInstitutionalMembershipPage, NewSurveyPage, NewTemplatePage, NewTraining, NotificationsPage, OfficerCertificates, OfficerCommunications, OfficerCompliance, OfficerDashboard, OfficerDocuments, OfficerElections, OfficerEvents, OfficerMessagesPage, OfficerPaymentsPage, OfficerReviews, OfficersPage, OfficerSurveys, OfficerTraining, OrgEvents, OrgHome, OrgSettingsPage, OrgTraining, PaymentDetailPage, ProvidersPage, PublicEventPage, RecordPaymentPage, RosterImportPage, RosterPage, SentHistoryPage, SurveyDetailPage, TemplateListPage, TrainingAttendance, TrainingDetail, VotePage | — | — | — | — |
 | `ListSkeleton` | AnalyticsDashboardPage, AnnouncementDetailPage, ApplicationList, EventAttendance, MemberAnnouncementPage, MemberProfile, MyOrganizationsPage, NotificationInbox, OrgHome, PendingProofsList, SentHistoryPage, TrainingAttendance, TrainingDetail | — | — | — | — |
 | `ProfileSkeleton` | MemberDetail, MyProfilePage | — | — | — | — |
 | `StatCard` | CommunicationsBroadcasts, EventList, PostEventActions | — | — | — | — |
-| `StatusBadge` | ElectionList, EventDetail, MemberProfile, MembershipList, MyOrganizationsPage, MyProfilePage, SurveyList | — | — | — | — |
+| `StatusBadge` | ElectionDetail, ElectionList, EventDetail, MemberElectionDetail, MemberProfile, MembershipList, MyOrganizationsPage, MyProfilePage, MyTraining, SurveyList | — | — | — | — |
 | `AuthPage` | — | — | — | — | — |
 | `DiscoverEvents` | — | — | — | — | — |
 | `PublicEventPage` | — | — | — | — | — |
@@ -197,7 +197,7 @@
 | `PaymentHistoryTable` | MyPaymentsPage, OfficerPaymentsPage | — | — | — | — |
 | `PaymentScheduleTimeline` | MemberDuesPage | — | — | — | — |
 | `PendingProofsList` | OfficerPaymentsPage | — | — | — | — |
-| `ProofUploadForm` | MemberDuesPage | — | — | — | POST /api/storage/files |
+| `ProofUploadForm` | MemberDuesPage | — | — | — | — |
 | `RecentActivityFeed` | FinancesOverviewPage | — | — | — | — |
 | `RecordPaymentForm` | RecordPaymentPage | — | — | — | — |
 | `RefundForm` | PaymentDetailPage | — | — | — | — |
@@ -221,7 +221,7 @@
 | `EventForm` | EventDetail, NewEvent | EventDetail, NewEvent | — | — | — |
 | `EventList` | OfficerEvents | — | — | — | — |
 | `EventTimeline` | — | — | — | — | — |
-| `PostEventActions` | — | — | — | — | POST /api/association/member/credits/void-event |
+| `PostEventActions` | — | — | — | — | — |
 | `ApplicationList` | ApplicationsPage | — | — | — | POST /api/association/member/applications/bulk-approve |
 | `CategoryEditor` | CategoriesPage | — | — | — | — |
 | `CredentialList` | MemberDetail | — | — | — | — |

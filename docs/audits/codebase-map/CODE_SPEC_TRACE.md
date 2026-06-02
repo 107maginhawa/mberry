@@ -1,7 +1,7 @@
 # Code Spec Trace
 
 <!-- oli:regen:code-spec-trace:begin -->
-Spec: `specs/api/dist/openapi/openapi.json` · Matched: 448 · Spec-only: 0 · Code-only: 1 · Auth-drift: 0
+Spec: `specs/api/dist/openapi/openapi.json` · Matched: 449 · Spec-only: 0 · Code-only: 1 · Auth-drift: 0
 
 | Operation | operationId | Roles | Backend | Status | Drift |
 |---|---|---|---|---|---|
@@ -323,6 +323,7 @@ Spec: `specs/api/dist/openapi/openapi.json` · Matched: 448 · Spec-only: 0 · C
 | `POST /association/member/credentials/public-verify` | `verifyCredentialPublic` | — | `verifyCredentialPublic` | matched |  |
 | `POST /association/member/credentials/verify` | `verifyDigitalCredentialAuthenticated` | association:admin, association:member | `verifyDigitalCredentialAuthenticated` | matched |  |
 | `POST /association/member/credits/manual` | `awardManualCredit` | association:admin, association:staff | `awardManualCredit` | matched |  |
+| `POST /association/member/credits/void-event` | `voidCreditEntry` | association:admin, association:staff | `voidCreditEntry` | matched |  |
 | `POST /association/member/directory/profiles` | `createDirectoryProfile` | association:member:owner, association:admin | `createDirectoryProfile` | matched |  |
 | `POST /association/member/dues-configs` | `createDuesConfig` | association:admin | `createDuesConfig` | matched |  |
 | `POST /association/member/dues-gateway/:organizationId/test` | `testDuesGatewayConnection` | association:admin | `testDuesGatewayConnection` | matched |  |
