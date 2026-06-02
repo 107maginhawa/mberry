@@ -1,9 +1,11 @@
 // oli-execute: error-handled-inline -- consumed by /officer/elections route.
 import { useQuery } from '@tanstack/react-query'
 import { Link, useParams } from '@tanstack/react-router'
-import { Vote, Users, CheckCircle2, Clock, FileText, Ban, ChevronRight } from 'lucide-react'
+import { Vote, ChevronRight, Clock, FileText, CheckCircle2 } from 'lucide-react'
 import { Skeleton } from '@monobase/ui'
 import { listElectionsOptions } from '@monobase/sdk-ts/generated/@tanstack/react-query.gen'
+import { StatusBadge as CanonicalStatusBadge, type StatusBadgeVariant } from '@/components/patterns/status-badge'
+import { ELECTION_STATUS_VARIANT, ELECTION_STATUS_LABELS, type ElectionStatus } from '../lib/election-status'
 
 // The elections API returns DB rows with different fields than the OpenAPI Election type.
 // This local interface reflects the actual shape returned by the handler.
@@ -21,36 +23,32 @@ interface ElectionListProps {
   orgId: string
 }
 
-const STATUS_CONFIG: Record<string, { label: string; color: string; icon: React.ElementType }> = {
-  draft: { label: 'Draft', color: 'bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400', icon: FileText },
-  nominationsOpen: { label: 'Nominations Open', color: 'bg-[var(--color-info-bg)] text-[var(--color-info)]', icon: Users },
-  votingOpen: { label: 'Voting Open', color: 'bg-[var(--color-success-bg)] text-[var(--color-success)]', icon: Vote },
-  awaitingConfirmation: { label: 'Awaiting Confirmation', color: 'bg-[var(--color-warning-bg)] text-[var(--color-warning)]', icon: Clock },
-  published: { label: 'Results Published', color: 'bg-emerald-100 text-emerald-800', icon: CheckCircle2 },
-  cancelled: { label: 'Cancelled', color: 'bg-[var(--color-error-bg)] text-[var(--color-error)]', icon: Ban },
+const TYPE_VARIANT: Record<string, StatusBadgeVariant> = {
+  officer: 'accent',
+  bylaw: 'warning',
 }
 
-const TYPE_CONFIG: Record<string, { label: string; color: string }> = {
-  officer: { label: 'Officer', color: 'bg-purple-100 text-purple-800' },
-  bylaw: { label: 'Bylaw', color: 'bg-orange-100 text-orange-800' },
+const TYPE_LABEL: Record<string, string> = {
+  officer: 'Officer',
+  bylaw: 'Bylaw',
 }
 
 function StatusBadge({ status }: { status: string }) {
-  const config = STATUS_CONFIG[status] ?? { label: status, color: 'bg-[var(--color-surface-warm)] text-[var(--color-muted)]', icon: FileText }
+  const variant = ELECTION_STATUS_VARIANT[status as ElectionStatus] ?? 'muted'
+  const label = ELECTION_STATUS_LABELS[status as ElectionStatus] ?? status
   return (
-    <span className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium ${config.color}`}>
-      {status === 'votingOpen' && <config.icon className="w-3 h-3" />}
-      {config.label}
-    </span>
+    <CanonicalStatusBadge variant={variant}>
+      {status === 'votingOpen' && <Vote className="w-3 h-3" />}
+      {label}
+    </CanonicalStatusBadge>
   )
 }
 
 function TypeBadge({ type }: { type: string }) {
-  const config = TYPE_CONFIG[type] ?? { label: type, color: 'bg-[var(--color-surface-warm)] text-[var(--color-muted)]' }
   return (
-    <span className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium ${config.color}`}>
-      {config.label}
-    </span>
+    <CanonicalStatusBadge variant={TYPE_VARIANT[type] ?? 'muted'}>
+      {TYPE_LABEL[type] ?? type}
+    </CanonicalStatusBadge>
   )
 }
 

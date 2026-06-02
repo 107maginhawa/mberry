@@ -17,11 +17,12 @@ import type { Options } from '@monobase/sdk-ts/generated/sdk.gen'
 import { NomineePickerDialog } from './nominee-picker-dialog'
 import { ElectionTimeline } from './election-timeline'
 import {
-  ELECTION_STATUS_COLORS,
+  ELECTION_STATUS_VARIANT,
   ELECTION_STATUS_LABELS,
   STATUS_TRANSITIONS,
   type ElectionStatus,
 } from '../lib/election-status'
+import { StatusBadge, type StatusBadgeVariant } from '@/components/patterns/status-badge'
 
 /** Runtime election shape from API (SDK Election type has Date fields; runtime uses strings + extra fields) */
 interface RuntimeElection {
@@ -52,11 +53,11 @@ interface ElectionDetailProps {
   orgId: string
 }
 
-const NOMINEE_STATUS_COLORS: Record<string, string> = {
-  nominated: 'bg-[var(--color-surface-warm)] text-[var(--color-muted)]',
-  accepted: 'bg-[var(--color-info-bg)] text-[var(--color-info)]',
-  declined: 'bg-[var(--color-error-bg)] text-[var(--color-error)]',
-  elected: 'bg-emerald-100 text-emerald-800',
+const NOMINEE_VARIANT: Record<string, StatusBadgeVariant> = {
+  nominated: 'muted',
+  accepted: 'info',
+  declined: 'error',
+  elected: 'success',
 }
 
 function formatDate(iso: string | null | undefined) {
@@ -174,9 +175,9 @@ export function ElectionDetail({ electionId, orgId }: ElectionDetailProps) {
       <div className="flex items-start justify-between gap-4">
         <div>
           <div className="flex items-center gap-2 mb-2">
-            <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${ELECTION_STATUS_COLORS[electionStatus] ?? ''}`}>
+            <StatusBadge variant={ELECTION_STATUS_VARIANT[electionStatus] ?? 'muted'}>
               {ELECTION_STATUS_LABELS[electionStatus] ?? electionStatus}
-            </span>
+            </StatusBadge>
             <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-[var(--color-surface-warm)] text-[var(--color-muted)] capitalize">
               {election.type}
             </span>
@@ -328,9 +329,9 @@ export function ElectionDetail({ electionId, orgId }: ElectionDetailProps) {
                               <div className="flex items-center gap-2">
                                 {isWinner && <Trophy className="w-4 h-4 text-emerald-600 shrink-0" />}
                                 <p className="text-sm font-medium truncate">{(nominee as any).personName ?? nominee.personId}</p>
-                                <span className={`inline-flex items-center px-1.5 py-0.5 rounded text-xs font-medium ${NOMINEE_STATUS_COLORS[nominee.status] ?? ''}`}>
+                                <StatusBadge variant={NOMINEE_VARIANT[nominee.status] ?? 'muted'}>
                                   {nominee.status}
-                                </span>
+                                </StatusBadge>
                               </div>
                               {showTallies && totalPositionVotes > 0 && (
                                 <div className="mt-1.5 flex items-center gap-2">

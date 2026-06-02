@@ -8,6 +8,8 @@ import { getElectionOptions } from '@monobase/sdk-ts/generated/@tanstack/react-q
 import { api } from '@/lib/api'
 import { ElectionTimeline } from './election-timeline'
 import { SelfNominationDialog } from './self-nomination-dialog'
+import { StatusBadge, type StatusBadgeVariant } from '@/components/patterns/status-badge'
+import { ELECTION_STATUS_VARIANT, type ElectionStatus } from '../lib/election-status'
 
 /** Runtime election shape from API (SDK Election type has Date fields; runtime uses strings + extra fields) */
 interface RuntimeElection {
@@ -38,13 +40,6 @@ interface MemberElectionDetailProps {
   userId?: string
 }
 
-const STATUS_COLORS: Record<string, string> = {
-  nominationsOpen: 'bg-[var(--color-info-bg)] text-[var(--color-info)]',
-  votingOpen: 'bg-[var(--color-success-bg)] text-[var(--color-success)]',
-  awaitingConfirmation: 'bg-[var(--color-warning-bg)] text-[var(--color-warning)]',
-  published: 'bg-emerald-100 text-emerald-800',
-}
-
 const STATUS_LABELS: Record<string, string> = {
   nominationsOpen: 'Nominations Open',
   votingOpen: 'Voting Open',
@@ -52,11 +47,11 @@ const STATUS_LABELS: Record<string, string> = {
   published: 'Results Published',
 }
 
-const NOMINEE_STATUS_COLORS: Record<string, string> = {
-  nominated: 'bg-[var(--color-surface-warm)] text-[var(--color-muted)]',
-  accepted: 'bg-[var(--color-info-bg)] text-[var(--color-info)]',
-  declined: 'bg-[var(--color-error-bg)] text-[var(--color-error)]',
-  elected: 'bg-emerald-100 text-emerald-800',
+const NOMINEE_VARIANT: Record<string, StatusBadgeVariant> = {
+  nominated: 'muted',
+  accepted: 'info',
+  declined: 'error',
+  elected: 'success',
 }
 
 function formatDate(iso: string | null | undefined) {
@@ -152,9 +147,9 @@ export function MemberElectionDetail({ electionId, orgId, userId }: MemberElecti
       {/* Header */}
       <div>
         <div className="flex items-center gap-2 mb-2">
-          <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${STATUS_COLORS[election.status] ?? 'bg-[var(--color-surface-warm)] text-[var(--color-muted)]'}`}>
+          <StatusBadge variant={ELECTION_STATUS_VARIANT[election.status as ElectionStatus] ?? 'muted'}>
             {STATUS_LABELS[election.status] ?? election.status}
-          </span>
+          </StatusBadge>
           <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-[var(--color-surface-warm)] text-[var(--color-muted)] capitalize">
             {election.type}
           </span>
@@ -318,9 +313,9 @@ export function MemberElectionDetail({ electionId, orgId, userId }: MemberElecti
                                 {isWinner && <Trophy className="w-4 h-4 text-emerald-600 shrink-0" />}
                                 {isMyVote && !isWinner && <CheckCircle2 className="w-4 h-4 text-[var(--color-primary)] shrink-0" />}
                                 <p className="text-sm font-medium truncate">{(nominee as any).personName ?? nominee.personId}</p>
-                                <span className={`inline-flex items-center px-1.5 py-0.5 rounded text-xs font-medium ${NOMINEE_STATUS_COLORS[nominee.status] ?? ''}`}>
+                                <StatusBadge variant={NOMINEE_VARIANT[nominee.status] ?? 'muted'}>
                                   {nominee.status}
-                                </span>
+                                </StatusBadge>
                                 {isMyVote && (
                                   <span className="text-xs text-[var(--color-primary)] font-medium">Your vote</span>
                                 )}

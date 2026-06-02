@@ -12,25 +12,26 @@ import { GlassCard } from '@/components/motion/glass-card'
 import { CountUp } from '@/components/motion/count-up'
 import { StaggerGrid, StaggerItem } from '@/components/motion/stagger-grid'
 import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from '@monobase/ui'
+import { StatusBadge, type StatusBadgeVariant } from '@/components/patterns/status-badge'
 
 export const Route = createFileRoute('/_authenticated/my/training')({
   component: MyTraining,
 })
 
-const STATUS_STYLES: Record<string, string> = {
-  enrolled: 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400',
-  pending_approval: 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400',
-  pending_payment: 'bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400',
-  waitlisted: 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400',
-  rejected: 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400',
-  cancelled: 'bg-gray-100 text-gray-500 dark:bg-gray-800/30 dark:text-gray-400',
+const ENROLLMENT_VARIANT: Record<string, StatusBadgeVariant> = {
+  enrolled: 'success',
+  pending_approval: 'warning',
+  pending_payment: 'warning',
+  waitlisted: 'info',
+  rejected: 'error',
+  cancelled: 'muted',
 }
 
-const TRAINING_STATUS_STYLES: Record<string, string> = {
-  draft: 'bg-gray-100 text-gray-700 dark:bg-gray-800/30 dark:text-gray-400',
-  published: 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400',
-  cancelled: 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400',
-  pending_approval: 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400',
+const TRAINING_VARIANT: Record<string, StatusBadgeVariant> = {
+  draft: 'muted',
+  published: 'success',
+  cancelled: 'error',
+  pending_approval: 'warning',
 }
 
 function formatDate(iso: string | null | undefined) {
@@ -162,14 +163,14 @@ function MyTraining() {
                     )}
                   </TableCell>
                   <TableCell className="px-4 py-3">
-                    <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${STATUS_STYLES[item.enrollment.status] ?? 'bg-gray-100 text-gray-700'}`}>
+                    <StatusBadge variant={ENROLLMENT_VARIANT[item.enrollment.status] ?? 'muted'}>
                       {item.enrollment.status.replace('_', ' ')}
-                    </span>
+                    </StatusBadge>
                   </TableCell>
                   <TableCell className="px-4 py-3">
-                    <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${TRAINING_STATUS_STYLES[item.training.status] ?? 'bg-gray-100 text-gray-700'}`}>
+                    <StatusBadge variant={TRAINING_VARIANT[item.training.status] ?? 'muted'}>
                       {item.training.status.replace('_', ' ')}
-                    </span>
+                    </StatusBadge>
                   </TableCell>
                 </TableRow>
               ))}

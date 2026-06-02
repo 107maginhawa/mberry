@@ -1,9 +1,20 @@
 import type { ElectionStatus } from '@monobase/sdk-ts/generated/types.gen'
 import { Clock, FileText, Users, Vote, CheckCircle2, XCircle } from 'lucide-react'
 import type { LucideIcon } from 'lucide-react'
+import type { StatusBadgeVariant } from '@/components/patterns/status-badge'
 
 export type { ElectionStatus }
 
+export const ELECTION_STATUS_VARIANT: Record<ElectionStatus, StatusBadgeVariant> = {
+  draft: 'muted',
+  nominationsOpen: 'info',
+  votingOpen: 'success',
+  awaitingConfirmation: 'warning',
+  published: 'muted',
+  cancelled: 'error',
+}
+
+/** @deprecated use ELECTION_STATUS_VARIANT + StatusBadge */
 export const ELECTION_STATUS_COLORS: Record<ElectionStatus, string> = {
   draft: 'bg-gray-100 text-gray-800',
   nominationsOpen: 'bg-[var(--color-info-bg)] text-[var(--color-info)]',
