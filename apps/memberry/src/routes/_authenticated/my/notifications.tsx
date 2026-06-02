@@ -1,4 +1,5 @@
 import { createFileRoute } from '@tanstack/react-router'
+import { PageContainer } from '@monobase/ui'
 import { NotificationInbox } from '@/features/notifications/components/notification-inbox'
 import { PageHeader } from '@/components/patterns/page-header'
 
@@ -8,7 +9,7 @@ export const Route = createFileRoute('/_authenticated/my/notifications')({
 
 function NotificationsPage() {
   return (
-    <div className="max-w-3xl mx-auto">
+    <PageContainer width="default">
       <PageHeader
         title="Notifications"
         subtitle="Stay up to date with your organizations"
@@ -18,6 +19,6 @@ function NotificationsPage() {
         ]}
       />
       <NotificationInbox />
-    </div>
+    </PageContainer>
   )
 }

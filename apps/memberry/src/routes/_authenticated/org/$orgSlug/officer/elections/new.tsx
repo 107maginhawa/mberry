@@ -1,4 +1,5 @@
 import { createFileRoute, useNavigate } from '@tanstack/react-router'
+import { PageContainer } from '@monobase/ui'
 import { ElectionForm } from '@/features/elections/components/election-form'
 import { PageHeader } from '@/components/patterns/page-header'
 import { GlassCard } from '@/components/motion/glass-card'
@@ -13,7 +14,7 @@ function NewElection() {
   const navigate = useNavigate()
 
   return (
-    <div className="max-w-3xl mx-auto space-y-6">
+    <PageContainer width="default" className="space-y-6">
       <PageHeader
         title="New Election"
         subtitle="Set up an election or bylaw vote"
@@ -41,6 +42,6 @@ function NewElection() {
           }}
         />
       </GlassCard>
-    </div>
+    </PageContainer>
   )
 }

@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { createFileRoute, Link } from '@tanstack/react-router'
 import { useQuery } from '@tanstack/react-query'
-import { Input } from '@monobase/ui'
+import { Input, PageContainer } from '@monobase/ui'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@monobase/ui'
 import { Calendar, MapPin, DollarSign, Award, Search } from 'lucide-react'
 import { GlassCard } from '@/components/motion/glass-card'
@@ -50,7 +50,7 @@ function DiscoverEvents() {
   const events = (data as any)?.data ?? []
 
   return (
-    <div className="space-y-6 p-6 max-w-6xl mx-auto">
+    <PageContainer width="wide" className="space-y-6 py-6">
       <PageHeader
         title="Discover Events"
         subtitle="Public events across all organizations"
@@ -132,7 +132,7 @@ function DiscoverEvents() {
           ))}
         </StaggerGrid>
       )}
-    </div>
+    </PageContainer>
   )
 }
 

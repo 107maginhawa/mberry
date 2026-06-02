@@ -1,4 +1,5 @@
 import { createFileRoute } from '@tanstack/react-router'
+import { PageContainer } from '@monobase/ui'
 import { VotingBallot } from '@/features/elections/components/voting-ballot'
 import { PageHeader } from '@/components/patterns/page-header'
 import { GlassCard } from '@/components/motion/glass-card'
@@ -14,7 +15,7 @@ function VotePage() {
   const { user } = Route.useRouteContext() as { user?: { id: string } }
 
   return (
-    <div className="max-w-3xl mx-auto space-y-6">
+    <PageContainer width="default" className="space-y-6">
       <PageHeader
         title="Cast Your Vote"
         breadcrumbs={[
@@ -27,6 +28,6 @@ function VotePage() {
       <GlassCard className="p-6">
         <VotingBallot electionId={electionId} orgId={orgId} userId={user?.id} />
       </GlassCard>
-    </div>
+    </PageContainer>
   )
 }

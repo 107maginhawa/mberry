@@ -8,7 +8,7 @@ import { toast } from 'sonner'
 import { Button } from '@monobase/ui'
 import { Label } from '@monobase/ui'
 import { Textarea } from '@monobase/ui'
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@monobase/ui'
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, PageContainer } from '@monobase/ui'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@monobase/ui'
 import { api, ApiError } from '@/lib/api'
 import type { ApiErrorBody } from '@/types/api'
@@ -152,7 +152,7 @@ function PublicOrgProfile() {
 
   return (
     <div className="min-h-screen bg-background p-4">
-      <div className="max-w-2xl mx-auto space-y-6 mt-8">
+      <PageContainer width="narrow" className="space-y-6 mt-8">
         <div className="border rounded-lg bg-card overflow-hidden">
           <div className="bg-primary p-8 text-primary-foreground">
             <h1 className="text-h2">{org.name}</h1>
@@ -206,7 +206,7 @@ function PublicOrgProfile() {
         <div className="text-center text-xs text-[var(--color-muted)]">
           Powered by Memberry
         </div>
-      </div>
+      </PageContainer>
 
       {/* Apply to Join dialog */}
       <Dialog open={applyOpen} onOpenChange={(open) => { if (!open && !submitting) setApplyOpen(false) }}>

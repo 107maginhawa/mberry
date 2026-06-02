@@ -3,7 +3,7 @@
 // heuristic misses the destructured rename.
 import { createFileRoute, useNavigate } from '@tanstack/react-router'
 import { useQuery } from '@tanstack/react-query'
-import { Skeleton } from '@monobase/ui'
+import { Skeleton, PageContainer } from '@monobase/ui'
 import { getElectionOptions } from '@monobase/sdk-ts/generated/@tanstack/react-query.gen'
 import { ElectionForm } from '@/features/elections/components/election-form'
 import { PageHeader } from '@/components/patterns/page-header'
@@ -52,7 +52,7 @@ function EditElection() {
 
   if (isLoading) {
     return (
-      <div className="max-w-3xl mx-auto space-y-6">
+      <PageContainer width="default" className="space-y-6">
         <PageHeader
           title="Edit Election"
           breadcrumbs={[
@@ -67,13 +67,13 @@ function EditElection() {
             <Skeleton className="h-48 rounded-lg" />
           </div>
         </GlassCard>
-      </div>
+      </PageContainer>
     )
   }
 
   if (error || !election) {
     return (
-      <div className="max-w-3xl mx-auto space-y-6">
+      <PageContainer width="default" className="space-y-6">
         <PageHeader
           title="Edit Election"
           breadcrumbs={[
@@ -85,7 +85,7 @@ function EditElection() {
         <GlassCard className="p-6">
           <div className="p-6 text-center text-[var(--color-error)]">Failed to load election</div>
         </GlassCard>
-      </div>
+      </PageContainer>
     )
   }
 
@@ -108,7 +108,7 @@ function EditElection() {
   }
 
   return (
-    <div className="max-w-3xl mx-auto space-y-6">
+    <PageContainer width="default" className="space-y-6">
       <PageHeader
         title="Edit Election"
         subtitle={election.title}
@@ -138,6 +138,6 @@ function EditElection() {
           }}
         />
       </GlassCard>
-    </div>
+    </PageContainer>
   )
 }

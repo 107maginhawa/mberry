@@ -1,4 +1,5 @@
 import { createFileRoute, useNavigate } from '@tanstack/react-router'
+import { PageContainer } from '@monobase/ui'
 import { PageHeader } from '@/components/patterns/page-header'
 import { GlassCard } from '@/components/motion/glass-card'
 import { EventForm } from '@/features/events/components/event-form'
@@ -13,7 +14,7 @@ function NewEvent() {
   const navigate = useNavigate()
 
   return (
-    <div className="max-w-3xl mx-auto space-y-6">
+    <PageContainer width="default" className="space-y-6">
       <PageHeader
         title="Create Event"
         subtitle="Fill in the details for your new event"
@@ -41,6 +42,6 @@ function NewEvent() {
           }}
         />
       </GlassCard>
-    </div>
+    </PageContainer>
   )
 }

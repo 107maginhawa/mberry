@@ -1,7 +1,7 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { useQuery } from '@tanstack/react-query'
 import { listDuesInvoicesOptions, listDuesPaymentsOptions } from '@monobase/sdk-ts/generated/react-query'
-import { Button, Skeleton } from '@monobase/ui'
+import { Button, Skeleton, PageContainer } from '@monobase/ui'
 import { formatCents } from '@/features/dues/lib/money'
 import { ProofUploadForm } from '@/features/dues/components/proof-upload-form'
 import { DuesStatusCard } from '@/features/dues/components/dues-status-card'
@@ -161,7 +161,7 @@ function MemberDuesPage() {
   }
 
   return (
-    <div className="space-y-8 max-w-3xl mx-auto">
+    <PageContainer width="default" className="space-y-8">
       <PageHeader
         title="My Dues"
         subtitle="View your dues and submit payment proof for renewal"
@@ -424,6 +424,6 @@ function MemberDuesPage() {
           description="Your payment records will appear here once you've made a dues payment."
         />
       )}
-    </div>
+    </PageContainer>
   )
 }

@@ -1,6 +1,6 @@
 import { createFileRoute, Link } from '@tanstack/react-router'
 import { useQuery } from '@tanstack/react-query'
-import { Button } from '@monobase/ui'
+import { Button, PageContainer } from '@monobase/ui'
 import { Calendar, MapPin, Clock, Award, DollarSign, Users } from 'lucide-react'
 import { GlassCard } from '@/components/motion/glass-card'
 import { PageHeader } from '@/components/patterns/page-header'
@@ -43,17 +43,17 @@ function PublicEventPage() {
 
   if (isLoading) {
     return (
-      <div className="max-w-3xl mx-auto p-6 space-y-6">
+      <PageContainer width="default" className="py-6 space-y-6">
         <div className="h-64 rounded-xl bg-[var(--color-surface-elevated-hover)] animate-shimmer" />
         <div className="h-8 w-2/3 rounded bg-[var(--color-surface-elevated-hover)] animate-shimmer" />
         <div className="h-4 w-1/2 rounded bg-[var(--color-surface-elevated-hover)] animate-shimmer" />
-      </div>
+      </PageContainer>
     )
   }
 
   if (error || !event) {
     return (
-      <div className="max-w-3xl mx-auto p-6">
+      <PageContainer width="default" className="py-6">
         <GlassCard className="p-8">
           <EmptyState
             icon={<Calendar className="w-8 h-8" />}
@@ -61,7 +61,7 @@ function PublicEventPage() {
             description="This event may have been removed or is not yet published."
           />
         </GlassCard>
-      </div>
+      </PageContainer>
     )
   }
 
@@ -70,7 +70,7 @@ function PublicEventPage() {
   const isCompleted = event.status === 'completed'
 
   return (
-    <div className="max-w-3xl mx-auto p-6 space-y-6">
+    <PageContainer width="default" className="py-6 space-y-6">
       {/* Completed banner */}
       {isCompleted && (
         <div className="p-3 rounded-md bg-[var(--color-surface-warm)] text-[var(--color-muted)] text-sm text-center font-medium">
@@ -188,6 +188,6 @@ function PublicEventPage() {
           </div>
         </GlassCard>
       )}
-    </div>
+    </PageContainer>
   )
 }
