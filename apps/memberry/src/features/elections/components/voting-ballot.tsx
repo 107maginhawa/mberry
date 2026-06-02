@@ -99,8 +99,8 @@ export function VotingBallot({ electionId, orgId, userId }: VotingBallotProps) {
   const myBallots = userId ? allBallots.filter((b) => b.voterId === userId) : allBallots
   const hasVoted = myBallots.length > 0
 
-  // Guard: not voting_open
-  if (election.status !== 'voting_open') {
+  // Guard: not votingOpen
+  if (election.status !== 'votingOpen') {
     return (
       <div className="text-center space-y-4 py-8">
         <AlertCircle className="w-10 h-10 text-[var(--color-muted)] mx-auto" />

@@ -39,16 +39,16 @@ interface MemberElectionDetailProps {
 }
 
 const STATUS_COLORS: Record<string, string> = {
-  nominations_open: 'bg-[var(--color-info-bg)] text-[var(--color-info)]',
-  voting_open: 'bg-[var(--color-success-bg)] text-[var(--color-success)]',
-  awaiting_confirmation: 'bg-[var(--color-warning-bg)] text-[var(--color-warning)]',
+  nominationsOpen: 'bg-[var(--color-info-bg)] text-[var(--color-info)]',
+  votingOpen: 'bg-[var(--color-success-bg)] text-[var(--color-success)]',
+  awaitingConfirmation: 'bg-[var(--color-warning-bg)] text-[var(--color-warning)]',
   published: 'bg-emerald-100 text-emerald-800',
 }
 
 const STATUS_LABELS: Record<string, string> = {
-  nominations_open: 'Nominations Open',
-  voting_open: 'Voting Open',
-  awaiting_confirmation: 'Awaiting Results',
+  nominationsOpen: 'Nominations Open',
+  votingOpen: 'Voting Open',
+  awaitingConfirmation: 'Awaiting Results',
   published: 'Results Published',
 }
 
@@ -101,7 +101,7 @@ export function MemberElectionDetail({ electionId, orgId, userId }: MemberElecti
   )
   const nominees: any[] = election.nominees ?? []
   const tallies: { positionId: string; nomineeId: string; count: number }[] = election.tallies ?? []
-  const showTallies = election.status === 'awaiting_confirmation' || election.status === 'published'
+  const showTallies = election.status === 'awaitingConfirmation' || election.status === 'published'
   const totalVoters = election.voterCount ?? 0
 
   // Determine if current user has voted
@@ -109,8 +109,8 @@ export function MemberElectionDetail({ electionId, orgId, userId }: MemberElecti
   const myBallots = userId ? allBallots.filter((b: any) => b.voterId === userId) : allBallots
   const hasVoted = myBallots.length > 0
 
-  const isVotingOpen = election.status === 'voting_open'
-  const isNominationsOpen = election.status === 'nominationsOpen' || election.status === 'nominations_open'
+  const isVotingOpen = election.status === 'votingOpen'
+  const isNominationsOpen = election.status === 'nominationsOpen'
 
   // Find the earliest ballot timestamp for the voted-at time
   const earliestBallot = myBallots.reduce((earliest: any, b: any) => {

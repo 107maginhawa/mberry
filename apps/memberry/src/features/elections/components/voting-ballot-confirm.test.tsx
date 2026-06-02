@@ -42,7 +42,7 @@ const mockApi = api as { get: ReturnType<typeof vi.fn> }
 const ELECTION_DATA = {
   data: {
     title: '2025 Board Election',
-    status: 'voting_open',
+    status: 'votingOpen',
     positions: [
       { id: 'pos-1', title: 'President', sortOrder: 1 },
       { id: 'pos-2', title: 'Secretary', sortOrder: 2 },

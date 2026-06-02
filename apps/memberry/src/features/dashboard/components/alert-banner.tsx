@@ -92,11 +92,11 @@ export function AlertBanner({ memberships, invoices, elections }: AlertBannerPro
 
   // Check active elections — where voting is actually open
   const activeElections = elections.filter((e) => {
-    if (e.status !== 'active' && e.status !== 'voting_open') return false
+    if (e.status !== 'active' && e.status !== 'votingOpen') return false
     const votingStart = e.votingStart ? new Date(e.votingStart) : null
     const votingEnd = e.votingEnd ? new Date(e.votingEnd) : null
-    // For voting_open status, trust the status even without date range
-    if (e.status === 'voting_open') return true
+    // For votingOpen status, trust the status even without date range
+    if (e.status === 'votingOpen') return true
     return votingStart && votingEnd && votingStart <= now && votingEnd > now
   })
   const topElection = activeElections[0]

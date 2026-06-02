@@ -148,7 +148,7 @@ describe('ElectionDetail', () => {
         Promise.resolve({
             id: 'elec-1',
             title: 'Election',
-            status: 'nominations_open',
+            status: 'nominationsOpen',
             type: 'officer',
             votingMode: 'online',
             positions: [{ id: 'pos-1', title: 'President', sortOrder: 0 }],

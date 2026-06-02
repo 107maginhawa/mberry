@@ -16,6 +16,12 @@ import type { OpenElectionNominationsData, OpenElectionVotingData, CertifyElecti
 import type { Options } from '@monobase/sdk-ts/generated/sdk.gen'
 import { NomineePickerDialog } from './nominee-picker-dialog'
 import { ElectionTimeline } from './election-timeline'
+import {
+  ELECTION_STATUS_COLORS,
+  ELECTION_STATUS_LABELS,
+  STATUS_TRANSITIONS,
+  type ElectionStatus,
+} from '../lib/election-status'
 
 /** Runtime election shape from API (SDK Election type has Date fields; runtime uses strings + extra fields) */
 interface RuntimeElection {
@@ -46,39 +52,11 @@ interface ElectionDetailProps {
   orgId: string
 }
 
-const STATUS_COLORS: Record<string, string> = {
-  draft: 'bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400',
-  nominations_open: 'bg-[var(--color-info-bg)] text-[var(--color-info)]',
-  voting_open: 'bg-[var(--color-success-bg)] text-[var(--color-success)]',
-  awaiting_confirmation: 'bg-[var(--color-warning-bg)] text-[var(--color-warning)]',
-  published: 'bg-emerald-100 text-emerald-800',
-  cancelled: 'bg-[var(--color-error-bg)] text-[var(--color-error)]',
-}
-
-const STATUS_LABELS: Record<string, string> = {
-  draft: 'Draft',
-  nominations_open: 'Nominations Open',
-  voting_open: 'Voting Open',
-  awaiting_confirmation: 'Awaiting Confirmation',
-  published: 'Results Published',
-  cancelled: 'Cancelled',
-}
-
 const NOMINEE_STATUS_COLORS: Record<string, string> = {
   nominated: 'bg-[var(--color-surface-warm)] text-[var(--color-muted)]',
   accepted: 'bg-[var(--color-info-bg)] text-[var(--color-info)]',
   declined: 'bg-[var(--color-error-bg)] text-[var(--color-error)]',
   elected: 'bg-emerald-100 text-emerald-800',
-}
-
-// Status transition map: current status → next action
-const NEXT_ACTION: Record<string, { label: string; nextStatus: string } | null> = {
-  draft: { label: 'Open Nominations', nextStatus: 'nominations_open' },
-  nominations_open: { label: 'Open Voting', nextStatus: 'voting_open' },
-  voting_open: { label: 'Close Voting', nextStatus: 'awaiting_confirmation' },
-  awaiting_confirmation: { label: 'Publish Results', nextStatus: 'published' },
-  published: null,
-  cancelled: null,
 }
 
 function formatDate(iso: string | null | undefined) {
@@ -124,10 +102,10 @@ export function ElectionDetail({ electionId, orgId }: ElectionDetailProps) {
     onError: onStatusError,
   })
 
-  function handleStatusAdvance(nextStatus: string) {
+  function handleStatusAdvance(nextStatus: ElectionStatus) {
     const electionPath = { path: { electionId } }
-    if (nextStatus === 'nominations_open') nominationsMutation.mutate(electionPath as Options<OpenElectionNominationsData>)
-    else if (nextStatus === 'voting_open') votingMutation.mutate(electionPath as Options<OpenElectionVotingData>)
+    if (nextStatus === 'nominationsOpen') nominationsMutation.mutate(electionPath as Options<OpenElectionNominationsData>)
+    else if (nextStatus === 'votingOpen') votingMutation.mutate(electionPath as Options<OpenElectionVotingData>)
     else certifyMut.mutate(electionPath as Options<CertifyElectionData>)
   }
 
@@ -162,15 +140,16 @@ export function ElectionDetail({ electionId, orgId }: ElectionDetailProps) {
 
   // SDK Election type has Date fields; runtime response has string dates + extra fields — use local RuntimeElection
   const election = data as unknown as RuntimeElection
-  const nextAction = NEXT_ACTION[election.status as string]
+  const electionStatus = election.status as ElectionStatus
+  const nextAction = STATUS_TRANSITIONS[electionStatus] ?? null
   const rawPositions: any[] = election.positions ?? []
   const positions: { id: string; title: string; sortOrder: number }[] = rawPositions.map((p: any, i: number) =>
     typeof p === 'string' ? { id: p, title: p, sortOrder: i } : { id: p.id ?? p, title: p.title ?? p.id ?? `Position ${i + 1}`, sortOrder: p.sortOrder ?? i },
   )
   const nominees: any[] = election.nominees ?? []
   const tallies: { positionId: string; nomineeId: string; count: number }[] = election.tallies ?? []
-  const showTallies = election.status === 'awaiting_confirmation' || election.status === 'published'
-  const canManageNominees = election.status === 'draft' || election.status === 'nominations_open'
+  const showTallies = electionStatus === 'awaitingConfirmation' || electionStatus === 'published'
+  const canManageNominees = electionStatus === 'draft' || electionStatus === 'nominationsOpen'
 
   function getNomineesForPosition(positionId: string) {
     return nominees.filter((n) => n.positionId === positionId)
@@ -195,8 +174,8 @@ export function ElectionDetail({ electionId, orgId }: ElectionDetailProps) {
       <div className="flex items-start justify-between gap-4">
         <div>
           <div className="flex items-center gap-2 mb-2">
-            <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${STATUS_COLORS[election.status] ?? ''}`}>
-              {STATUS_LABELS[election.status] ?? election.status}
+            <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${ELECTION_STATUS_COLORS[electionStatus] ?? ''}`}>
+              {ELECTION_STATUS_LABELS[electionStatus] ?? electionStatus}
             </span>
             <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-[var(--color-surface-warm)] text-[var(--color-muted)] capitalize">
               {election.type}
