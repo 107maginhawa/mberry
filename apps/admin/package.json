@@ -38,7 +38,7 @@
   "devDependencies": {
     "@monobase/eslint-config": "workspace:*",
     "@monobase/typescript-config": "workspace:*",
-    "@playwright/test": "^1.59.1",
+    "@playwright/test": "1.58.2",
     "@tanstack/router-plugin": "^1.132.0",
     "@testing-library/jest-dom": "^6.9.1",
     "@testing-library/react": "^16.3.0",

@@ -1,0 +1,10 @@
+{
+  "name": "vitest",
+  "version": "99.99.99",
+  "private": true,
+  "type": "module",
+  "main": "./index.js",
+  "exports": {
+    ".": "./index.js"
+  }
+}
