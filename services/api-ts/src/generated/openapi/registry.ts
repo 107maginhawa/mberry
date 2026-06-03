@@ -396,6 +396,7 @@ import { joinVideoCall } from '../../handlers/comms/joinVideoCall';
 import { leaveVideoCall } from '../../handlers/comms/leaveVideoCall';
 import { updateVideoCallParticipant } from '../../handlers/comms/updateVideoCallParticipant';
 import { getIceServers } from '../../handlers/comms/getIceServers';
+import { searchChatMessages } from '../../handlers/comms/searchChatMessages';
 import { listEmailQueueItems } from '../../handlers/email/listEmailQueueItems';
 import { getEmailQueueItem } from '../../handlers/email/getEmailQueueItem';
 import { cancelEmailQueueItem } from '../../handlers/email/cancelEmailQueueItem';
@@ -875,6 +876,7 @@ export const registry = {
   leaveVideoCall,
   updateVideoCallParticipant,
   getIceServers,
+  searchChatMessages,
 
   // Email handlers
   listEmailQueueItems,

@@ -3731,6 +3731,15 @@ export const ChatMessageListResponseSchema = z.object({
 })
 });
 
+export const ChatMessageSearchResultSchema = z.object({
+  id: z.string().uuid(),
+  message: z.string(),
+  sender: z.string().uuid(),
+  chatRoom: z.string().uuid(),
+  roomName: z.string().optional(),
+  timestamp: z.string()
+});
+
 export const ChatMessageUpdateSchema = z.object({
   id: z.string().uuid().optional(),
   version: z.number().int().optional(),
@@ -14058,6 +14067,15 @@ export type UpdateVideoCallParticipantBody = z.infer<typeof UpdateVideoCallParti
 export const UpdateVideoCallParticipantResponse = CallParticipantSchema;
 
 export const GetIceServersResponse = IceServersResponseSchema;
+
+export const SearchChatMessagesQuery = z.object({
+  q: z.string(),
+});
+export type SearchChatMessagesQuery = z.infer<typeof SearchChatMessagesQuery>;
+
+export const SearchChatMessagesResponse = z.object({
+  data: z.array(ChatMessageSearchResultSchema)
+});
 
 export const GetAnnouncementParams = z.object({
   id: UUIDSchema,

@@ -2510,6 +2510,13 @@ export function registerRoutes(app: Hono<{ Variables: Variables }>) {
     registry.getIceServers as unknown as Handler
   );
 
+  // searchChatMessages
+  app.get('/comms/messages/search',
+    authMiddleware({ roles: ["user"] }),
+    zValidator('query', validators.SearchChatMessagesQuery, validationErrorHandler),
+    registry.searchChatMessages as unknown as Handler
+  );
+
   // getAnnouncement
   app.get('/communications/announcements/detail/:id',
     authMiddleware({ roles: ["association:member"] }),

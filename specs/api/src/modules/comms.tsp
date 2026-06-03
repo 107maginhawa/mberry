@@ -339,6 +339,27 @@ model CreateChatRoomRequest {
   upsert?: boolean = false;
 }
 
+@doc("Search result row for message search across user's accessible rooms")
+model ChatMessageSearchResult {
+  @doc("Message ID")
+  id: UUID;
+
+  @doc("Message text content (truncated to 200 chars)")
+  message: string;
+
+  @doc("Sender person ID")
+  sender: UUID;
+
+  @doc("Chat room ID")
+  chatRoom: UUID;
+
+  @doc("Chat room display name (if available)")
+  roomName?: string;
+
+  @doc("Message timestamp (ISO 8601)")
+  timestamp: string;
+}
+
 // ============================================================================
 // API ENDPOINTS
 // ============================================================================
@@ -415,6 +436,19 @@ namespace CommsModule {
       | ApiUnauthorizedResponse
       | ApiNotFoundResponse
       | ApiForbiddenResponse;
+
+    @doc("Search messages across all chat rooms the authenticated user participates in. Returns up to 50 most-recent matches.")
+    @operationId("searchChatMessages")
+    @get
+    @route("/messages/search")
+    @useAuth(bearerAuth)
+    @extension("x-security-required-roles", #["user"])
+    searchChatMessages(
+      @doc("Search query (case-insensitive substring match on message text). Minimum 2 characters.")
+      @query q: string,
+    ): ApiOkResponse<{ data: ChatMessageSearchResult[] }>
+      | ApiBadRequestResponse
+      | ApiUnauthorizedResponse;
 
     @doc("Send message (text or start video call). Requires participation in room.")
     @operationId("sendChatMessage")
