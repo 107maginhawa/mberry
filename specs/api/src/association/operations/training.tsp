@@ -627,6 +627,24 @@ model CreditHistoryEntry {
   createdAt?: utcDateTime;
 }
 
+@doc("Public credit-entry view for peer profile display")
+model MemberPeerCreditEntry {
+  @doc("CE credits awarded")
+  credits: float64;
+
+  @doc("Activity title (event/course/publication name)")
+  courseTitle?: string;
+
+  @doc("Date credit was earned (ISO 8601 date)")
+  earnedAt?: string;
+}
+
+@doc("Response wrapper for peer credit list")
+model MemberPeerCreditsResponse {
+  @doc("List of public credit entries")
+  data: MemberPeerCreditEntry[];
+}
+
 @doc("Full credit summary for the authenticated user")
 model MyCreditsResponse {
   @doc("Total credits earned")
@@ -1528,6 +1546,27 @@ namespace Association.Operations.Training {
       @query organizationId?: string
     ): ApiOkResponse<{ data: MyCreditsResponse }>
       | ApiUnauthorizedResponse;
+  }
+
+  /**
+   * Peer-view credit list — display another member's earned credits on a
+   * directory profile page. Returns only public fields (credits earned,
+   * activity name, date). Members in the same org can read each other's
+   * earned credits.
+   * Route: /association/member/credits
+   */
+  @useAuth(bearerAuth)
+  interface MemberPeerCreditsManagement {
+    @doc("List a member's earned CPD credits for peer-profile display. Returns public fields only.")
+    @operationId("listMemberCreditsForPeer")
+    @get
+    @extension("x-security-required-roles", #["association:member"])
+    listMemberCreditsForPeer(
+      @query personId: string
+    ): ApiOkResponse<MemberPeerCreditsResponse>
+      | ApiBadRequestResponse
+      | ApiUnauthorizedResponse
+      | ApiForbiddenResponse;
   }
 
   /**

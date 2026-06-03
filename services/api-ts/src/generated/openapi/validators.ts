@@ -7250,6 +7250,16 @@ export const MeetingMinutesUpdateSchema = z.object({
 
 export const MeetingStatusSchema = z.enum(["scheduled", "inProgress", "completed", "cancelled"]);
 
+export const MemberPeerCreditEntrySchema = z.object({
+  credits: z.number(),
+  courseTitle: z.string().optional(),
+  earnedAt: z.string().optional()
+});
+
+export const MemberPeerCreditsResponseSchema = z.object({
+  data: z.array(MemberPeerCreditEntrySchema)
+});
+
 export const MemberStatusBreakdownSchema = z.object({
   active: z.number().int(),
   grace: z.number().int(),
@@ -12102,6 +12112,13 @@ export const RevokeDigitalCredentialBody = RevokeCredentialRequestSchema;
 export type RevokeDigitalCredentialBody = z.infer<typeof RevokeDigitalCredentialBody>;
 
 export const RevokeDigitalCredentialResponse = DigitalCredentialSchema;
+
+export const ListMemberCreditsForPeerQuery = z.object({
+  personId: z.string(),
+});
+export type ListMemberCreditsForPeerQuery = z.infer<typeof ListMemberCreditsForPeerQuery>;
+
+export const ListMemberCreditsForPeerResponse = MemberPeerCreditsResponseSchema;
 
 export const AdjustCreditEntryBody = AdjustCreditRequestSchema;
 export type AdjustCreditEntryBody = z.infer<typeof AdjustCreditEntryBody>;

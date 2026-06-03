@@ -593,6 +593,14 @@ namespace MonobaseAPI {
   interface PersonMyCreditsManagement extends Association.Operations.Training.MyCreditsManagement {}
 
   // =========================================================================
+  // Association Domain — Member Peer Credits (directory profile view)
+  // =========================================================================
+
+  @tag("Association:Member")
+  @route("/association/member/credits")
+  interface AssocMemberPeerCreditsManagement extends Association.Operations.Training.MemberPeerCreditsManagement {}
+
+  // =========================================================================
   // Association Domain — Compliance Reporting
   // =========================================================================
 

@@ -920,6 +920,13 @@ export function registerRoutes(app: Hono<{ Variables: Variables }>) {
     registry.revokeDigitalCredential as unknown as Handler
   );
 
+  // listMemberCreditsForPeer
+  app.get('/association/member/credits',
+    authMiddleware({ roles: ["association:member"] }),
+    zValidator('query', validators.ListMemberCreditsForPeerQuery, validationErrorHandler),
+    registry.listMemberCreditsForPeer as unknown as Handler
+  );
+
   // adjustCreditEntry
   app.post('/association/member/credits/adjust',
     authMiddleware({ roles: ["association:admin", "association:staff"] }),
