@@ -311,6 +311,13 @@ import { bulkIssueCertificates } from '../../handlers/association:member/bulkIss
 import { verifyCertificatePublic } from '../../handlers/association:member/verifyCertificatePublic';
 import { getCreditCompliance } from '../../handlers/association:member/getCreditCompliance';
 import { listOfficerTermsSummary } from '../../handlers/association:member/listOfficerTermsSummary';
+import { getDuesMemberSummary } from '../../handlers/dues/getDuesMemberSummary';
+import { getDuesMetrics } from '../../handlers/dues/getDuesMetrics';
+import { getDuesDashboard } from '../../handlers/dues/getDuesDashboard';
+import { sendPaymentLink } from '../../handlers/dues/sendPaymentLink';
+import { downloadReceipt } from '../../handlers/dues/downloadReceipt';
+import { checkoutPaymentToken } from '../../handlers/dues/checkoutPaymentToken';
+import { validatePaymentToken } from '../../handlers/dues/validatePaymentToken';
 import { createMessageTemplate } from '../../handlers/communication/createMessageTemplate';
 import { searchMessageTemplates } from '../../handlers/communication/searchMessageTemplates';
 import { getMessageTemplate } from '../../handlers/communication/getMessageTemplate';
@@ -389,11 +396,6 @@ import { joinVideoCall } from '../../handlers/comms/joinVideoCall';
 import { leaveVideoCall } from '../../handlers/comms/leaveVideoCall';
 import { updateVideoCallParticipant } from '../../handlers/comms/updateVideoCallParticipant';
 import { getIceServers } from '../../handlers/comms/getIceServers';
-import { getDuesDashboard } from '../../handlers/dues/getDuesDashboard';
-import { sendPaymentLink } from '../../handlers/dues/sendPaymentLink';
-import { downloadReceipt } from '../../handlers/dues/downloadReceipt';
-import { checkoutPaymentToken } from '../../handlers/dues/checkoutPaymentToken';
-import { validatePaymentToken } from '../../handlers/dues/validatePaymentToken';
 import { listEmailQueueItems } from '../../handlers/email/listEmailQueueItems';
 import { getEmailQueueItem } from '../../handlers/email/getEmailQueueItem';
 import { cancelEmailQueueItem } from '../../handlers/email/cancelEmailQueueItem';
@@ -777,6 +779,15 @@ export const registry = {
   getCreditCompliance,
   listOfficerTermsSummary,
 
+  // Dues handlers
+  getDuesMemberSummary,
+  getDuesMetrics,
+  getDuesDashboard,
+  sendPaymentLink,
+  downloadReceipt,
+  checkoutPaymentToken,
+  validatePaymentToken,
+
   // Communication handlers
   createMessageTemplate,
   searchMessageTemplates,
@@ -864,13 +875,6 @@ export const registry = {
   leaveVideoCall,
   updateVideoCallParticipant,
   getIceServers,
-
-  // Dues handlers
-  getDuesDashboard,
-  sendPaymentLink,
-  downloadReceipt,
-  checkoutPaymentToken,
-  validatePaymentToken,
 
   // Email handlers
   listEmailQueueItems,

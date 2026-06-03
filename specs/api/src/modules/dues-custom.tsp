@@ -87,6 +87,135 @@ model SendPaymentLinkResponse {
 // Dues Dashboard Models
 // ---------------------------------------------------------------------------
 
+@doc("Trailing collection rate per window, integer 0-100")
+model DuesTrailingRates {
+  @doc("Last 30 days collection rate (0-100)")
+  days30: int32;
+
+  @doc("Last 90 days collection rate (0-100)")
+  days90: int32;
+
+  @doc("Last 365 days collection rate (0-100)")
+  days365: int32;
+}
+
+@doc("Monthly breakdown row")
+model DuesMonthlyBreakdownRow {
+  @doc("ISO month YYYY-MM")
+  month: string;
+
+  @doc("Collected amount in minor units")
+  collected: int32;
+
+  @doc("Outstanding amount in minor units")
+  outstanding: int32;
+}
+
+@doc("Member status distribution from invoice statuses")
+model DuesStatusDistribution {
+  @doc("Active (paid) count")
+  active: int32;
+
+  @doc("Due soon (generated/sent) count")
+  dueSoon: int32;
+
+  @doc("Overdue count")
+  overdue: int32;
+
+  @doc("Lapsed (voided) count")
+  lapsed: int32;
+}
+
+@doc("Top unpaid member row")
+model DuesTopUnpaidRow {
+  @doc("Person ID")
+  personId: string;
+
+  @doc("Member display name")
+  name?: string;
+
+  @doc("Total unpaid amount in minor units")
+  unpaidAmount: int32;
+}
+
+@doc("Treasurer dues metrics — trailing rates + monthly breakdown + status distribution + top unpaid")
+model DuesTreasurerMetrics {
+  @doc("Trailing collection rates")
+  trailingRates: DuesTrailingRates;
+
+  @doc("Monthly breakdown (last 12 months)")
+  monthlyBreakdown: DuesMonthlyBreakdownRow[];
+
+  @doc("Status distribution snapshot")
+  statusDistribution: DuesStatusDistribution;
+
+  @doc("Top unpaid members (up to 10)")
+  topUnpaid: DuesTopUnpaidRow[];
+}
+
+@doc("Invoice row in member summary (loose-typed; full invoice schema lives in DuesInvoice)")
+model DuesMemberSummaryInvoice {
+  @doc("Invoice ID")
+  id: string;
+
+  @doc("Invoice status")
+  status: string;
+
+  @doc("Total amount in minor units (decimal-as-string from DB)")
+  totalAmount: string;
+
+  @doc("Generated at (ISO 8601)")
+  generatedAt: string;
+
+  @doc("Due date (ISO 8601)")
+  dueDate?: string;
+}
+
+@doc("Payment row in member summary")
+model DuesMemberSummaryPayment {
+  @doc("Payment ID")
+  id: string;
+
+  @doc("Payment status")
+  status: string;
+
+  @doc("Amount in minor units")
+  amount: int64;
+
+  @doc("Paid at (ISO 8601)")
+  paidAt?: string;
+
+  @doc("Payment method")
+  method?: string;
+}
+
+@doc("Membership status timeline entry")
+model DuesMemberStatusTimelineEntry {
+  @doc("Previous status")
+  fromStatus?: string;
+
+  @doc("New status")
+  toStatus: string;
+
+  @doc("Changed at (ISO 8601)")
+  changedAt: string;
+}
+
+@doc("Per-member financial summary — invoices, payments, balance, status timeline")
+model DuesMemberSummary {
+  @doc("All invoices for this member")
+  invoices: DuesMemberSummaryInvoice[];
+
+  @doc("All payments for this member (up to 100)")
+  payments: DuesMemberSummaryPayment[];
+
+  @doc("Computed balance = sum of unpaid invoice amounts")
+  balance: float64;
+
+  @doc("Membership status timeline")
+  statusTimeline: DuesMemberStatusTimelineEntry[];
+}
+
 @doc("Aggregated dues dashboard statistics for an organisation")
 model DuesDashboardData {
   @doc("Total revenue collected in the current period")
@@ -126,6 +255,35 @@ namespace DuesCustomModule {
     ): ApiOkResponse<{ data: DuesDashboardData }>
       | ApiUnauthorizedResponse
       | ApiForbiddenResponse;
+  }
+
+  @doc("Treasurer dues metrics + per-member financial summary endpoints (TREASURER/PRESIDENT only).")
+  interface DuesMetricsManagement {
+    @doc("Treasurer metrics: trailing collection rates (30/90/365d), monthly breakdown (12mo), status distribution, top unpaid (10).")
+    @operationId("getDuesMetrics")
+    @get
+    @route("/association/member/dues-metrics/{organizationId}")
+    @useAuth(bearerAuth)
+    @extension("x-security-required-roles", #["association:admin"])
+    getDuesMetrics(
+      @path organizationId: UUID
+    ): ApiOkResponse<{ data: DuesTreasurerMetrics }>
+      | ApiUnauthorizedResponse
+      | ApiForbiddenResponse;
+
+    @doc("Per-member financial detail: invoices, payments, computed balance, status timeline.")
+    @operationId("getDuesMemberSummary")
+    @get
+    @route("/association/member/dues-member-summary/{organizationId}/{personId}")
+    @useAuth(bearerAuth)
+    @extension("x-security-required-roles", #["association:admin"])
+    getDuesMemberSummary(
+      @path organizationId: UUID,
+      @path personId: UUID
+    ): ApiOkResponse<{ data: DuesMemberSummary }>
+      | ApiUnauthorizedResponse
+      | ApiForbiddenResponse
+      | ApiNotFoundResponse;
   }
 
   @doc("Public one-tap payment token endpoints — no auth required. Members click payment links from email.")

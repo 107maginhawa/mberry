@@ -666,6 +666,9 @@ namespace MonobaseAPI {
   interface DuesCustomManagement extends DuesCustomModule.DuesCustomManagement {}
 
   @tag("Dues")
+  interface DuesMetricsManagement extends DuesCustomModule.DuesMetricsManagement {}
+
+  @tag("Dues")
   interface PaymentTokenEndpoints extends DuesCustomModule.PaymentTokenEndpoints {}
 
   @tag("Dues")

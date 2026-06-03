@@ -168,9 +168,6 @@ import { getOrgDashboard } from '@/handlers/association:member/getOrgDashboard';
 // Void credit entry — S-G1-07 phantom #4 (hand-wired, handler self-enforces officer position)
 import { voidCreditEntry } from '@/handlers/association:member/voidCreditEntry';
 
-// Dues member summary — S-G1-07 phantom #8 (hand-wired, handler self-enforces officer position)
-import { getDuesMemberSummary } from '@/handlers/association:member/getDuesMemberSummary';
-
 // Subscription system (UJ-M03) — pricing tier management and org subscriptions
 import { listPricingTiers } from '@/handlers/platformadmin/listPricingTiers';
 import { createPricingTier } from '@/handlers/platformadmin/createPricingTier';
@@ -562,20 +559,6 @@ export function createApp(config: Config): App {
     authMiddleware(),
     orgContextMiddleware(),
     voidCreditEntry as unknown as Handler,
-  );
-
-  // @hand-wired reason="per-member dues financial summary for officers, handler self-enforces TREASURER/PRESIDENT" wave="S-G1-07"
-  const duesMemberSummaryParams = zValidator(
-    'param',
-    z.object({ organizationId: z.string().uuid(), personId: z.string().uuid() }),
-    validationErrorHandler,
-  );
-  app.get(
-    '/association/member/dues-member-summary/:organizationId/:personId',
-    duesMemberSummaryParams,
-    authMiddleware(),
-    orgContextMiddleware(),
-    getDuesMemberSummary as unknown as Handler,
   );
 
   // @hand-wired reason="admin pricing tier CRUD, not in TypeSpec" wave="UJ-M03"

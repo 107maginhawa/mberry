@@ -1107,6 +1107,20 @@ export function registerRoutes(app: Hono<{ Variables: Variables }>) {
     registry.markDuesInvoicePaid as unknown as Handler
   );
 
+  // getDuesMemberSummary
+  app.get('/association/member/dues-member-summary/:organizationId/:personId',
+    authMiddleware({ roles: ["association:admin"] }),
+    zValidator('param', validators.GetDuesMemberSummaryParams, validationErrorHandler),
+    registry.getDuesMemberSummary as unknown as Handler
+  );
+
+  // getDuesMetrics
+  app.get('/association/member/dues-metrics/:organizationId',
+    authMiddleware({ roles: ["association:admin"] }),
+    zValidator('param', validators.GetDuesMetricsParams, validationErrorHandler),
+    registry.getDuesMetrics as unknown as Handler
+  );
+
   // listDuesPayments
   app.get('/association/member/dues-payments',
     authMiddleware({ roles: ["association:admin", "association:member"] }),

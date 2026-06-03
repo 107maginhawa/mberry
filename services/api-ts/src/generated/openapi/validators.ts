@@ -5310,6 +5310,41 @@ export const DuesInvoiceUpdateSchema = z.object({
   paymentId: z.string().optional()
 });
 
+export const DuesMemberStatusTimelineEntrySchema = z.object({
+  fromStatus: z.string().optional(),
+  toStatus: z.string(),
+  changedAt: z.string()
+});
+
+export const DuesMemberSummaryInvoiceSchema = z.object({
+  id: z.string(),
+  status: z.string(),
+  totalAmount: z.string(),
+  generatedAt: z.string(),
+  dueDate: z.string().optional()
+});
+
+export const DuesMemberSummaryPaymentSchema = z.object({
+  id: z.string(),
+  status: z.string(),
+  amount: z.number().int(),
+  paidAt: z.string().optional(),
+  method: z.string().optional()
+});
+
+export const DuesMemberSummarySchema = z.object({
+  invoices: z.array(DuesMemberSummaryInvoiceSchema),
+  payments: z.array(DuesMemberSummaryPaymentSchema),
+  balance: z.number(),
+  statusTimeline: z.array(DuesMemberStatusTimelineEntrySchema)
+});
+
+export const DuesMonthlyBreakdownRowSchema = z.object({
+  month: z.string(),
+  collected: z.number().int(),
+  outstanding: z.number().int()
+});
+
 export const DuesPaymentSchema = z.object({
   id: z.string().uuid(),
   version: z.number().int(),
@@ -5457,6 +5492,41 @@ export const DuesReportSummarySchema = z.object({
 });
 
 export const DuesReportTypeSchema = z.enum(["collection", "fund_breakdown", "dues_status", "aging"]);
+
+export const DuesStatusDistributionSchema = z.object({
+  active: z.number().int(),
+  dueSoon: z.number().int(),
+  overdue: z.number().int(),
+  lapsed: z.number().int()
+});
+
+export const DuesTopUnpaidRowSchema = z.object({
+  personId: z.string(),
+  name: z.string().optional(),
+  unpaidAmount: z.number().int()
+});
+
+export const DuesTrailingRatesSchema = z.object({
+  days30: z.number().int(),
+  days90: z.number().int(),
+  days365: z.number().int()
+});
+
+export const DuesTreasurerMetricsSchema = z.object({
+  trailingRates: z.object({
+  days30: z.number().int(),
+  days90: z.number().int(),
+  days365: z.number().int()
+}),
+  monthlyBreakdown: z.array(DuesMonthlyBreakdownRowSchema),
+  statusDistribution: z.object({
+  active: z.number().int(),
+  dueSoon: z.number().int(),
+  overdue: z.number().int(),
+  lapsed: z.number().int()
+}),
+  topUnpaid: z.array(DuesTopUnpaidRowSchema)
+});
 
 export const DunningChannelSchema = z.enum(["email", "sms", "letter"]);
 
@@ -12239,6 +12309,25 @@ export const MarkDuesInvoicePaidBody = MarkInvoicePaidRequestSchema;
 export type MarkDuesInvoicePaidBody = z.infer<typeof MarkDuesInvoicePaidBody>;
 
 export const MarkDuesInvoicePaidResponse = DuesInvoiceSchema;
+
+export const GetDuesMemberSummaryParams = z.object({
+  organizationId: UUIDSchema,
+  personId: UUIDSchema,
+});
+export type GetDuesMemberSummaryParams = z.infer<typeof GetDuesMemberSummaryParams>;
+
+export const GetDuesMemberSummaryResponse = z.object({
+  data: DuesMemberSummarySchema
+});
+
+export const GetDuesMetricsParams = z.object({
+  organizationId: UUIDSchema,
+});
+export type GetDuesMetricsParams = z.infer<typeof GetDuesMetricsParams>;
+
+export const GetDuesMetricsResponse = z.object({
+  data: DuesTreasurerMetricsSchema
+});
 
 export const ListDuesPaymentsQuery = z.object({
   offset: z.coerce.number().int().gte(0).lte(2147483647).optional(),
