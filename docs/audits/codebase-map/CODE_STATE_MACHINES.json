@@ -133,6 +133,22 @@
       "confidence": "HIGH"
     },
     {
+      "id": "fsm:billing-frequency",
+      "name": "billing_frequency",
+      "source_file": "services/api-ts/src/handlers/dues/repos/dues-payments.schema.ts",
+      "source_line": 22,
+      "module": "handlers/dues",
+      "detection_method": "drizzle_enum",
+      "states": [
+        "annual",
+        "semi-annual",
+        "quarterly"
+      ],
+      "transitions": [],
+      "spec_match": null,
+      "confidence": "MEDIUM"
+    },
+    {
       "id": "fsm:booking-event-status",
       "name": "booking_event_status",
       "source_file": "services/api-ts/src/handlers/booking/repos/booking.schema.ts",
@@ -1193,6 +1209,7 @@
       "fsm:assessment-status",
       "fsm:assessment-target-status",
       "fsm:audit-retention-status",
+      "fsm:billing-frequency",
       "fsm:booking-event-status",
       "fsm:booking-status",
       "fsm:breach-status",
@@ -1257,8 +1274,6 @@
       "fsm:detail-tab",
       "fsm:sort-by"
     ],
-    "spec_only": [
-      "billing_frequency"
-    ]
+    "spec_only": []
   }
 }

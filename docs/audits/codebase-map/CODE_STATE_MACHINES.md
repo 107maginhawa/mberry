@@ -11,6 +11,7 @@
 | `fsm:assessment-target-status` | pending / paid | 0 | drizzle_enum | MEDIUM |
 | `fsm:audit-retention-status` | active / archived / pending-purge | 0 | drizzle_enum | MEDIUM |
 | `fsm:billing-frequency` | annual / semi-annual / quarterly | 0 | useState_union | HIGH |
+| `fsm:billing-frequency` | annual / semi-annual / quarterly | 0 | drizzle_enum | MEDIUM |
 | `fsm:booking-event-status` | draft / active / paused / archived | 0 | drizzle_enum | MEDIUM |
 | `fsm:booking-status` | pending / confirmed / rejected / cancelled / completed / no_show_client / no_show_host | 0 | drizzle_enum | MEDIUM |
 | `fsm:breach-status` | reported / investigating / notified / resolved | 0 | drizzle_enum | MEDIUM |
