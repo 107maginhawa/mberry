@@ -62,7 +62,7 @@ export function MemberDashboard() {
   const events = useQuery<OrgEvent[]>({
     queryKey: ['my-events'],
     queryFn: async () => {
-      const json = await api.get<any>('/api/events/my')
+      const json = await api.get<any>('/api/association/event-lifecycle/my')
       return json.data ?? []
     },
     retry: false,
@@ -71,7 +71,7 @@ export function MemberDashboard() {
   const trainings = useQuery<Training[]>({
     queryKey: ['my-trainings'],
     queryFn: async () => {
-      const json = await api.get<any>('/api/training/my')
+      const json = await api.get<any>('/api/association/training-lifecycle/my')
       return json.data ?? []
     },
     retry: false,
@@ -80,7 +80,7 @@ export function MemberDashboard() {
   const notifications = useQuery<Notification[]>({
     queryKey: ['my-notifications'],
     queryFn: async () => {
-      const json = await api.get<any>('/api/notifications/my?limit=3')
+      const json = await api.get<any>('/api/notifs?limit=3')
       return json.data ?? []
     },
     retry: false,

@@ -75,7 +75,7 @@ export function NotificationPreferences({ orgId, personId }: PreferencesProps) {
     queryKey: ['notification-preferences', personId],
     queryFn: () =>
       api.get<{ data: any[] }>(
-        `/api/communications/subscriptions/person?personId=${personId}`
+        `/api/association/person-subscriptions?personId=${personId}`
       ),
     enabled: !!personId,
   })

@@ -26,7 +26,7 @@ export function CredentialList({ personId, orgId }: CredentialListProps) {
     queryKey: ['member-licenses', personId, orgId],
     queryFn: async () => {
       const res = await api.get<any>(
-        `/api/association/member/professional-licenses?personId=${personId}`,
+        `/api/association/member/licenses?personId=${personId}`,
         { headers: { 'x-org-id': orgId } } as any,
       )
       return (res?.data ?? res ?? []) as License[]

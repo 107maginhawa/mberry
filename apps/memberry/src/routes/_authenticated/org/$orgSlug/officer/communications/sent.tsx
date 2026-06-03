@@ -36,7 +36,7 @@ function SentHistoryPage() {
     queryKey: ['announcements-sent', orgId],
     queryFn: () =>
       api.get<{ data: SentAnnouncement[]; total: number }>(
-        `/api/communications/announcements?organizationId=${orgId}&status=sent`,
+        `/api/communications/announcements/${orgId}?status=sent`,
       ),
   })
 

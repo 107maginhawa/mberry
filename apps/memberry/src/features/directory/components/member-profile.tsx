@@ -31,7 +31,7 @@ export function MemberProfile({ personId, orgId, orgSlug }: MemberProfileProps) 
     queryKey: ['directory-profile', orgId, personId],
     queryFn: async () => {
       const data = await api.get<any>(
-        `/api/association/member/directory/${personId}/public`,
+        `/api/association/member/directory/search/${personId}/public`,
       )
       return data
     },

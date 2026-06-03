@@ -24,7 +24,7 @@ function VerifyCertificatePage() {
 
   const { data, isLoading, error } = useQuery({
     queryKey: ['verify-certificate', certificateNumber],
-    queryFn: () => api.get<{ data: VerificationData }>(`/api/public/verify/${certificateNumber}`),
+    queryFn: () => api.get<{ data: VerificationData }>(`/api/certificates/verify/${certificateNumber}`),
   })
 
   if (isLoading) {

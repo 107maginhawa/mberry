@@ -30,9 +30,9 @@ const FUTURE_DATE = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(
 function setupDefaultMocks() {
   mockApi.get.mockImplementation((path: string) => {
     if (path.includes('/memberships')) return Promise.resolve({ data: [] })
-    if (path.includes('/events/my')) return Promise.resolve({ data: [] })
-    if (path.includes('/training/my')) return Promise.resolve({ data: [] })
-    if (path.includes('/notifications/my')) return Promise.resolve({ data: [] })
+    if (path.includes('/event-lifecycle/my')) return Promise.resolve({ data: [] })
+    if (path.includes('/training-lifecycle/my')) return Promise.resolve({ data: [] })
+    if (path.includes('/notifs')) return Promise.resolve({ data: [] })
     if (path.includes('/officer-role')) return Promise.resolve({ data: { isOfficer: false } })
     return Promise.resolve({ data: [] })
   })
@@ -55,9 +55,9 @@ describe('MemberDashboard', () => {
     // Return a never-resolving promise to keep loading state
     mockApi.get.mockImplementation((path: string) => {
       if (path.includes('/memberships')) return new Promise(() => {})
-      if (path.includes('/events/my')) return Promise.resolve({ data: [] })
-      if (path.includes('/training/my')) return Promise.resolve({ data: [] })
-      if (path.includes('/notifications/my')) return Promise.resolve({ data: [] })
+      if (path.includes('/event-lifecycle/my')) return Promise.resolve({ data: [] })
+      if (path.includes('/training-lifecycle/my')) return Promise.resolve({ data: [] })
+      if (path.includes('/notifs')) return Promise.resolve({ data: [] })
       return Promise.resolve({ data: [] })
     })
 
@@ -116,7 +116,7 @@ describe('MemberDashboard', () => {
     const futureDate = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString()
 
     mockApi.get.mockImplementation((path: string) => {
-      if (path.includes('/events/my')) {
+      if (path.includes('/event-lifecycle/my')) {
         return Promise.resolve({
           data: [
             { id: 'evt-1', title: 'Annual Dental Congress 2025', startDate: futureDate, orgName: 'PDA', orgId: 'org-1' },
@@ -125,8 +125,8 @@ describe('MemberDashboard', () => {
         })
       }
       if (path.includes('/memberships')) return Promise.resolve({ data: [] })
-      if (path.includes('/training/my')) return Promise.resolve({ data: [] })
-      if (path.includes('/notifications/my')) return Promise.resolve({ data: [] })
+      if (path.includes('/training-lifecycle/my')) return Promise.resolve({ data: [] })
+      if (path.includes('/notifs')) return Promise.resolve({ data: [] })
       return Promise.resolve({ data: [] })
     })
 
@@ -141,7 +141,7 @@ describe('MemberDashboard', () => {
 
   test('renders notifications with unread visual distinction', async () => {
     mockApi.get.mockImplementation((path: string) => {
-      if (path.includes('/notifications/my')) {
+      if (path.includes('/notifs')) {
         return Promise.resolve({
           data: [
             { id: 'notif-1', title: 'Your dues are due soon', createdAt: new Date().toISOString(), read: false, category: 'dues' },
@@ -150,8 +150,8 @@ describe('MemberDashboard', () => {
         })
       }
       if (path.includes('/memberships')) return Promise.resolve({ data: [] })
-      if (path.includes('/events/my')) return Promise.resolve({ data: [] })
-      if (path.includes('/training/my')) return Promise.resolve({ data: [] })
+      if (path.includes('/event-lifecycle/my')) return Promise.resolve({ data: [] })
+      if (path.includes('/training-lifecycle/my')) return Promise.resolve({ data: [] })
       return Promise.resolve({ data: [] })
     })
 
