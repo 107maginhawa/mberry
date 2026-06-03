@@ -1640,11 +1640,13 @@
       "response_shape": {},
       "module": "handlers/association:member",
       "confidence": "HIGH",
-      "consumer_count": 0,
-      "consumers": [],
+      "consumer_count": 1,
+      "consumers": [
+        "apps/memberry"
+      ],
       "is_phantom": false,
       "deprecation_signals": {
-        "single_consumer": false,
+        "single_consumer": true,
         "has_todo_fixme": false,
         "deprecated_annotation": false,
         "last_modified_days_ago": 0
@@ -1829,11 +1831,13 @@
       "response_shape": {},
       "module": "handlers/association:member",
       "confidence": "HIGH",
-      "consumer_count": 0,
-      "consumers": [],
+      "consumer_count": 1,
+      "consumers": [
+        "apps/memberry"
+      ],
       "is_phantom": false,
       "deprecation_signals": {
-        "single_consumer": false,
+        "single_consumer": true,
         "has_todo_fixme": false,
         "deprecated_annotation": false,
         "last_modified_days_ago": 0
@@ -2028,11 +2032,13 @@
       "response_shape": {},
       "module": "handlers/association:member",
       "confidence": "HIGH",
-      "consumer_count": 0,
-      "consumers": [],
+      "consumer_count": 1,
+      "consumers": [
+        "apps/memberry"
+      ],
       "is_phantom": false,
       "deprecation_signals": {
-        "single_consumer": false,
+        "single_consumer": true,
         "has_todo_fixme": false,
         "deprecated_annotation": false,
         "last_modified_days_ago": 0
@@ -2800,11 +2806,13 @@
       "response_shape": {},
       "module": "handlers/association:member",
       "confidence": "HIGH",
-      "consumer_count": 0,
-      "consumers": [],
+      "consumer_count": 1,
+      "consumers": [
+        "apps/memberry"
+      ],
       "is_phantom": false,
       "deprecation_signals": {
-        "single_consumer": false,
+        "single_consumer": true,
         "has_todo_fixme": false,
         "deprecated_annotation": false,
         "last_modified_days_ago": 0
@@ -2972,11 +2980,13 @@
       "response_shape": {},
       "module": "handlers/association:member",
       "confidence": "HIGH",
-      "consumer_count": 0,
-      "consumers": [],
+      "consumer_count": 1,
+      "consumers": [
+        "apps/memberry"
+      ],
       "is_phantom": false,
       "deprecation_signals": {
-        "single_consumer": false,
+        "single_consumer": true,
         "has_todo_fixme": false,
         "deprecated_annotation": false,
         "last_modified_days_ago": 0
@@ -4161,11 +4171,13 @@
       "response_shape": {},
       "module": "handlers/association:member",
       "confidence": "HIGH",
-      "consumer_count": 0,
-      "consumers": [],
+      "consumer_count": 1,
+      "consumers": [
+        "apps/memberry"
+      ],
       "is_phantom": false,
       "deprecation_signals": {
-        "single_consumer": false,
+        "single_consumer": true,
         "has_todo_fixme": false,
         "deprecated_annotation": false,
         "last_modified_days_ago": 0
@@ -4528,11 +4540,13 @@
       "response_shape": {},
       "module": "handlers/association:member",
       "confidence": "HIGH",
-      "consumer_count": 0,
-      "consumers": [],
+      "consumer_count": 1,
+      "consumers": [
+        "apps/memberry"
+      ],
       "is_phantom": false,
       "deprecation_signals": {
-        "single_consumer": false,
+        "single_consumer": true,
         "has_todo_fixme": false,
         "deprecated_annotation": false,
         "last_modified_days_ago": 0
@@ -4591,11 +4605,13 @@
       "response_shape": {},
       "module": "handlers/association:member",
       "confidence": "HIGH",
-      "consumer_count": 0,
-      "consumers": [],
+      "consumer_count": 1,
+      "consumers": [
+        "apps/memberry"
+      ],
       "is_phantom": false,
       "deprecation_signals": {
-        "single_consumer": false,
+        "single_consumer": true,
         "has_todo_fixme": false,
         "deprecated_annotation": false,
         "last_modified_days_ago": 0
@@ -4978,11 +4994,13 @@
       "response_shape": {},
       "module": "handlers/association:member",
       "confidence": "HIGH",
-      "consumer_count": 0,
-      "consumers": [],
+      "consumer_count": 1,
+      "consumers": [
+        "apps/memberry"
+      ],
       "is_phantom": false,
       "deprecation_signals": {
-        "single_consumer": false,
+        "single_consumer": true,
         "has_todo_fixme": false,
         "deprecated_annotation": false,
         "last_modified_days_ago": 0
@@ -4999,11 +5017,13 @@
       "response_shape": {},
       "module": "handlers/association:member",
       "confidence": "HIGH",
-      "consumer_count": 0,
-      "consumers": [],
+      "consumer_count": 1,
+      "consumers": [
+        "apps/memberry"
+      ],
       "is_phantom": false,
       "deprecation_signals": {
-        "single_consumer": false,
+        "single_consumer": true,
         "has_todo_fixme": false,
         "deprecated_annotation": false,
         "last_modified_days_ago": 0
@@ -5020,11 +5040,13 @@
       "response_shape": {},
       "module": "handlers/association:member",
       "confidence": "HIGH",
-      "consumer_count": 0,
-      "consumers": [],
+      "consumer_count": 1,
+      "consumers": [
+        "apps/memberry"
+      ],
       "is_phantom": false,
       "deprecation_signals": {
-        "single_consumer": false,
+        "single_consumer": true,
         "has_todo_fixme": false,
         "deprecated_annotation": false,
         "last_modified_days_ago": 0
@@ -5041,11 +5063,13 @@
       "response_shape": {},
       "module": "handlers/association:member",
       "confidence": "HIGH",
-      "consumer_count": 0,
-      "consumers": [],
+      "consumer_count": 1,
+      "consumers": [
+        "apps/memberry"
+      ],
       "is_phantom": false,
       "deprecation_signals": {
-        "single_consumer": false,
+        "single_consumer": true,
         "has_todo_fixme": false,
         "deprecated_annotation": false,
         "last_modified_days_ago": 0
@@ -5083,11 +5107,13 @@
       "response_shape": {},
       "module": "handlers/association:member",
       "confidence": "HIGH",
-      "consumer_count": 0,
-      "consumers": [],
+      "consumer_count": 1,
+      "consumers": [
+        "apps/memberry"
+      ],
       "is_phantom": false,
       "deprecation_signals": {
-        "single_consumer": false,
+        "single_consumer": true,
         "has_todo_fixme": false,
         "deprecated_annotation": false,
         "last_modified_days_ago": 0
@@ -5125,11 +5151,13 @@
       "response_shape": {},
       "module": "handlers/association:member",
       "confidence": "HIGH",
-      "consumer_count": 0,
-      "consumers": [],
+      "consumer_count": 1,
+      "consumers": [
+        "apps/memberry"
+      ],
       "is_phantom": false,
       "deprecation_signals": {
-        "single_consumer": false,
+        "single_consumer": true,
         "has_todo_fixme": false,
         "deprecated_annotation": false,
         "last_modified_days_ago": 0
@@ -5209,11 +5237,13 @@
       "response_shape": {},
       "module": "handlers/communication",
       "confidence": "HIGH",
-      "consumer_count": 0,
-      "consumers": [],
+      "consumer_count": 1,
+      "consumers": [
+        "apps/memberry"
+      ],
       "is_phantom": false,
       "deprecation_signals": {
-        "single_consumer": false,
+        "single_consumer": true,
         "has_todo_fixme": false,
         "deprecated_annotation": false,
         "last_modified_days_ago": 0
@@ -5230,11 +5260,13 @@
       "response_shape": {},
       "module": "handlers/communication",
       "confidence": "HIGH",
-      "consumer_count": 0,
-      "consumers": [],
+      "consumer_count": 1,
+      "consumers": [
+        "apps/memberry"
+      ],
       "is_phantom": false,
       "deprecation_signals": {
-        "single_consumer": false,
+        "single_consumer": true,
         "has_todo_fixme": false,
         "deprecated_annotation": false,
         "last_modified_days_ago": 0
@@ -5528,11 +5560,13 @@
       "response_shape": {},
       "module": "handlers/communication",
       "confidence": "HIGH",
-      "consumer_count": 0,
-      "consumers": [],
+      "consumer_count": 1,
+      "consumers": [
+        "apps/memberry"
+      ],
       "is_phantom": false,
       "deprecation_signals": {
-        "single_consumer": false,
+        "single_consumer": true,
         "has_todo_fixme": false,
         "deprecated_annotation": false,
         "last_modified_days_ago": 0
@@ -7398,11 +7432,13 @@
       "response_shape": {},
       "module": "handlers/communication",
       "confidence": "HIGH",
-      "consumer_count": 0,
-      "consumers": [],
+      "consumer_count": 1,
+      "consumers": [
+        "apps/memberry"
+      ],
       "is_phantom": false,
       "deprecation_signals": {
-        "single_consumer": false,
+        "single_consumer": true,
         "has_todo_fixme": false,
         "deprecated_annotation": false,
         "last_modified_days_ago": 0
@@ -7568,11 +7604,13 @@
       "response_shape": {},
       "module": "handlers/communication",
       "confidence": "HIGH",
-      "consumer_count": 0,
-      "consumers": [],
+      "consumer_count": 1,
+      "consumers": [
+        "apps/memberry"
+      ],
       "is_phantom": false,
       "deprecation_signals": {
-        "single_consumer": false,
+        "single_consumer": true,
         "has_todo_fixme": false,
         "deprecated_annotation": false,
         "last_modified_days_ago": 0
@@ -7589,11 +7627,13 @@
       "response_shape": {},
       "module": "handlers/communication",
       "confidence": "HIGH",
-      "consumer_count": 0,
-      "consumers": [],
+      "consumer_count": 1,
+      "consumers": [
+        "apps/memberry"
+      ],
       "is_phantom": false,
       "deprecation_signals": {
-        "single_consumer": false,
+        "single_consumer": true,
         "has_todo_fixme": false,
         "deprecated_annotation": false,
         "last_modified_days_ago": 0
@@ -7610,11 +7650,13 @@
       "response_shape": {},
       "module": "handlers/communication",
       "confidence": "HIGH",
-      "consumer_count": 0,
-      "consumers": [],
+      "consumer_count": 1,
+      "consumers": [
+        "apps/memberry"
+      ],
       "is_phantom": false,
       "deprecation_signals": {
-        "single_consumer": false,
+        "single_consumer": true,
         "has_todo_fixme": false,
         "deprecated_annotation": false,
         "last_modified_days_ago": 0
@@ -8198,11 +8240,13 @@
       "response_shape": {},
       "module": "handlers/notifs",
       "confidence": "HIGH",
-      "consumer_count": 0,
-      "consumers": [],
+      "consumer_count": 1,
+      "consumers": [
+        "apps/memberry"
+      ],
       "is_phantom": false,
       "deprecation_signals": {
-        "single_consumer": false,
+        "single_consumer": true,
         "has_todo_fixme": false,
         "deprecated_annotation": false,
         "last_modified_days_ago": 0
@@ -8219,11 +8263,13 @@
       "response_shape": {},
       "module": "handlers/notifs",
       "confidence": "HIGH",
-      "consumer_count": 0,
-      "consumers": [],
+      "consumer_count": 1,
+      "consumers": [
+        "apps/memberry"
+      ],
       "is_phantom": false,
       "deprecation_signals": {
-        "single_consumer": false,
+        "single_consumer": true,
         "has_todo_fixme": false,
         "deprecated_annotation": false,
         "last_modified_days_ago": 0
@@ -8580,11 +8626,13 @@
       "response_shape": {},
       "module": "handlers/person",
       "confidence": "HIGH",
-      "consumer_count": 0,
-      "consumers": [],
+      "consumer_count": 1,
+      "consumers": [
+        "apps/memberry"
+      ],
       "is_phantom": false,
       "deprecation_signals": {
-        "single_consumer": false,
+        "single_consumer": true,
         "has_todo_fixme": false,
         "deprecated_annotation": false,
         "last_modified_days_ago": 0
@@ -8601,11 +8649,13 @@
       "response_shape": {},
       "module": "handlers/person",
       "confidence": "HIGH",
-      "consumer_count": 0,
-      "consumers": [],
+      "consumer_count": 1,
+      "consumers": [
+        "apps/memberry"
+      ],
       "is_phantom": false,
       "deprecation_signals": {
-        "single_consumer": false,
+        "single_consumer": true,
         "has_todo_fixme": false,
         "deprecated_annotation": false,
         "last_modified_days_ago": 0
@@ -8622,11 +8672,13 @@
       "response_shape": {},
       "module": "handlers/person",
       "confidence": "HIGH",
-      "consumer_count": 0,
-      "consumers": [],
+      "consumer_count": 1,
+      "consumers": [
+        "apps/memberry"
+      ],
       "is_phantom": false,
       "deprecation_signals": {
-        "single_consumer": false,
+        "single_consumer": true,
         "has_todo_fixme": false,
         "deprecated_annotation": false,
         "last_modified_days_ago": 0
@@ -8643,11 +8695,13 @@
       "response_shape": {},
       "module": "handlers/person",
       "confidence": "HIGH",
-      "consumer_count": 0,
-      "consumers": [],
+      "consumer_count": 1,
+      "consumers": [
+        "apps/memberry"
+      ],
       "is_phantom": false,
       "deprecation_signals": {
-        "single_consumer": false,
+        "single_consumer": true,
         "has_todo_fixme": false,
         "deprecated_annotation": false,
         "last_modified_days_ago": 0
@@ -8710,11 +8764,13 @@
       "response_shape": {},
       "module": "handlers/person",
       "confidence": "HIGH",
-      "consumer_count": 0,
-      "consumers": [],
+      "consumer_count": 1,
+      "consumers": [
+        "apps/memberry"
+      ],
       "is_phantom": false,
       "deprecation_signals": {
-        "single_consumer": false,
+        "single_consumer": true,
         "has_todo_fixme": false,
         "deprecated_annotation": false,
         "last_modified_days_ago": 0
@@ -9142,11 +9198,13 @@
       "response_shape": {},
       "module": "handlers/reviews",
       "confidence": "HIGH",
-      "consumer_count": 0,
-      "consumers": [],
+      "consumer_count": 1,
+      "consumers": [
+        "apps/memberry"
+      ],
       "is_phantom": false,
       "deprecation_signals": {
-        "single_consumer": false,
+        "single_consumer": true,
         "has_todo_fixme": false,
         "deprecated_annotation": false,
         "last_modified_days_ago": 0
@@ -9375,11 +9433,13 @@
       "response_shape": {},
       "module": "handlers/surveys",
       "confidence": "HIGH",
-      "consumer_count": 0,
-      "consumers": [],
+      "consumer_count": 1,
+      "consumers": [
+        "apps/memberry"
+      ],
       "is_phantom": false,
       "deprecation_signals": {
-        "single_consumer": false,
+        "single_consumer": true,
         "has_todo_fixme": false,
         "deprecated_annotation": false,
         "last_modified_days_ago": 0
@@ -9735,6 +9795,1386 @@
       "consumer_count": 0,
       "consumers": [],
       "is_phantom": false,
+      "deprecation_signals": {
+        "single_consumer": false,
+        "has_todo_fixme": false,
+        "deprecated_annotation": false,
+        "last_modified_days_ago": 0
+      }
+    },
+    "GET /communications/announcements/:firstOrgId": {
+      "method": "GET",
+      "path": "/communications/announcements/:firstOrgId",
+      "handler_file": "",
+      "handler_function": "",
+      "auth_required": null,
+      "auth_middleware": null,
+      "request_shape": {},
+      "response_shape": {},
+      "module": "unknown",
+      "confidence": "LOW",
+      "consumer_count": 1,
+      "consumers": [
+        "apps/memberry"
+      ],
+      "is_phantom": true,
+      "deprecation_signals": {
+        "single_consumer": false,
+        "has_todo_fixme": false,
+        "deprecated_annotation": false,
+        "last_modified_days_ago": 0
+      }
+    },
+    "GET /credit-compliance/:firstOrgId": {
+      "method": "GET",
+      "path": "/credit-compliance/:firstOrgId",
+      "handler_file": "",
+      "handler_function": "",
+      "auth_required": null,
+      "auth_middleware": null,
+      "request_shape": {},
+      "response_shape": {},
+      "module": "unknown",
+      "confidence": "LOW",
+      "consumer_count": 1,
+      "consumers": [
+        "apps/memberry"
+      ],
+      "is_phantom": true,
+      "deprecation_signals": {
+        "single_consumer": false,
+        "has_todo_fixme": false,
+        "deprecated_annotation": false,
+        "last_modified_days_ago": 0
+      }
+    },
+    "POST /notifs/:id/read": {
+      "method": "POST",
+      "path": "/notifs/:id/read",
+      "handler_file": "",
+      "handler_function": "",
+      "auth_required": null,
+      "auth_middleware": null,
+      "request_shape": {},
+      "response_shape": {},
+      "module": "unknown",
+      "confidence": "LOW",
+      "consumer_count": 1,
+      "consumers": [
+        "apps/memberry"
+      ],
+      "is_phantom": true,
+      "deprecation_signals": {
+        "single_consumer": false,
+        "has_todo_fixme": false,
+        "deprecated_annotation": false,
+        "last_modified_days_ago": 0
+      }
+    },
+    "GET /persons/me/officer-role/:orgId": {
+      "method": "GET",
+      "path": "/persons/me/officer-role/:orgId",
+      "handler_file": "",
+      "handler_function": "",
+      "auth_required": null,
+      "auth_middleware": null,
+      "request_shape": {},
+      "response_shape": {},
+      "module": "unknown",
+      "confidence": "LOW",
+      "consumer_count": 1,
+      "consumers": [
+        "apps/memberry"
+      ],
+      "is_phantom": true,
+      "deprecation_signals": {
+        "single_consumer": false,
+        "has_todo_fixme": false,
+        "deprecated_annotation": false,
+        "last_modified_days_ago": 0
+      }
+    },
+    "GET /public/orgs*": {
+      "method": "GET",
+      "path": "/public/orgs*",
+      "handler_file": "",
+      "handler_function": "",
+      "auth_required": null,
+      "auth_middleware": null,
+      "request_shape": {},
+      "response_shape": {},
+      "module": "unknown",
+      "confidence": "LOW",
+      "consumer_count": 1,
+      "consumers": [
+        "apps/memberry"
+      ],
+      "is_phantom": true,
+      "deprecation_signals": {
+        "single_consumer": false,
+        "has_todo_fixme": false,
+        "deprecated_annotation": false,
+        "last_modified_days_ago": 0
+      }
+    },
+    "GET /public/org/*": {
+      "method": "GET",
+      "path": "/public/org/*",
+      "handler_file": "",
+      "handler_function": "",
+      "auth_required": null,
+      "auth_middleware": null,
+      "request_shape": {},
+      "response_shape": {},
+      "module": "unknown",
+      "confidence": "LOW",
+      "consumer_count": 1,
+      "consumers": [
+        "apps/memberry"
+      ],
+      "is_phantom": true,
+      "deprecation_signals": {
+        "single_consumer": false,
+        "has_todo_fixme": false,
+        "deprecated_annotation": false,
+        "last_modified_days_ago": 0
+      }
+    },
+    "GET /persons/me": {
+      "method": "GET",
+      "path": "/persons/me",
+      "handler_file": "",
+      "handler_function": "",
+      "auth_required": null,
+      "auth_middleware": null,
+      "request_shape": {},
+      "response_shape": {},
+      "module": "unknown",
+      "confidence": "LOW",
+      "consumer_count": 1,
+      "consumers": [
+        "apps/memberry"
+      ],
+      "is_phantom": true,
+      "deprecation_signals": {
+        "single_consumer": false,
+        "has_todo_fixme": false,
+        "deprecated_annotation": false,
+        "last_modified_days_ago": 0
+      }
+    },
+    "GET /pay/*/validate": {
+      "method": "GET",
+      "path": "/pay/*/validate",
+      "handler_file": "",
+      "handler_function": "",
+      "auth_required": null,
+      "auth_middleware": null,
+      "request_shape": {},
+      "response_shape": {},
+      "module": "unknown",
+      "confidence": "LOW",
+      "consumer_count": 1,
+      "consumers": [
+        "apps/memberry"
+      ],
+      "is_phantom": true,
+      "deprecation_signals": {
+        "single_consumer": false,
+        "has_todo_fixme": false,
+        "deprecated_annotation": false,
+        "last_modified_days_ago": 0
+      }
+    },
+    "POST /pay/*/checkout": {
+      "method": "POST",
+      "path": "/pay/*/checkout",
+      "handler_file": "",
+      "handler_function": "",
+      "auth_required": null,
+      "auth_middleware": null,
+      "request_shape": {},
+      "response_shape": {},
+      "module": "unknown",
+      "confidence": "LOW",
+      "consumer_count": 1,
+      "consumers": [
+        "apps/memberry"
+      ],
+      "is_phantom": true,
+      "deprecation_signals": {
+        "single_consumer": false,
+        "has_todo_fixme": false,
+        "deprecated_annotation": false,
+        "last_modified_days_ago": 0
+      }
+    },
+    "GET /public/verify/:certificateNumber": {
+      "method": "GET",
+      "path": "/public/verify/:certificateNumber",
+      "handler_file": "",
+      "handler_function": "",
+      "auth_required": null,
+      "auth_middleware": null,
+      "request_shape": {},
+      "response_shape": {},
+      "module": "unknown",
+      "confidence": "LOW",
+      "consumer_count": 1,
+      "consumers": [
+        "apps/memberry"
+      ],
+      "is_phantom": true,
+      "deprecation_signals": {
+        "single_consumer": false,
+        "has_todo_fixme": false,
+        "deprecated_annotation": false,
+        "last_modified_days_ago": 0
+      }
+    },
+    "GET /association/member/credentials/lookup/*": {
+      "method": "GET",
+      "path": "/association/member/credentials/lookup/*",
+      "handler_file": "",
+      "handler_function": "",
+      "auth_required": null,
+      "auth_middleware": null,
+      "request_shape": {},
+      "response_shape": {},
+      "module": "unknown",
+      "confidence": "LOW",
+      "consumer_count": 1,
+      "consumers": [
+        "apps/memberry"
+      ],
+      "is_phantom": true,
+      "deprecation_signals": {
+        "single_consumer": false,
+        "has_todo_fixme": false,
+        "deprecated_annotation": false,
+        "last_modified_days_ago": 0
+      }
+    },
+    "GET /verify/*": {
+      "method": "GET",
+      "path": "/verify/*",
+      "handler_file": "",
+      "handler_function": "",
+      "auth_required": null,
+      "auth_middleware": null,
+      "request_shape": {},
+      "response_shape": {},
+      "module": "unknown",
+      "confidence": "LOW",
+      "consumer_count": 1,
+      "consumers": [
+        "apps/memberry"
+      ],
+      "is_phantom": true,
+      "deprecation_signals": {
+        "single_consumer": false,
+        "has_todo_fixme": false,
+        "deprecated_annotation": false,
+        "last_modified_days_ago": 0
+      }
+    },
+    "POST /persons/me/export": {
+      "method": "POST",
+      "path": "/persons/me/export",
+      "handler_file": "",
+      "handler_function": "",
+      "auth_required": null,
+      "auth_middleware": null,
+      "request_shape": {},
+      "response_shape": {},
+      "module": "unknown",
+      "confidence": "LOW",
+      "consumer_count": 1,
+      "consumers": [
+        "apps/memberry"
+      ],
+      "is_phantom": true,
+      "deprecation_signals": {
+        "single_consumer": false,
+        "has_todo_fixme": false,
+        "deprecated_annotation": false,
+        "last_modified_days_ago": 0
+      }
+    },
+    "GET /membership/members/:orgId": {
+      "method": "GET",
+      "path": "/membership/members/:orgId",
+      "handler_file": "",
+      "handler_function": "",
+      "auth_required": null,
+      "auth_middleware": null,
+      "request_shape": {},
+      "response_shape": {},
+      "module": "unknown",
+      "confidence": "LOW",
+      "consumer_count": 1,
+      "consumers": [
+        "apps/memberry"
+      ],
+      "is_phantom": true,
+      "deprecation_signals": {
+        "single_consumer": false,
+        "has_todo_fixme": false,
+        "deprecated_annotation": false,
+        "last_modified_days_ago": 0
+      }
+    },
+    "GET /membership/applications/:orgId": {
+      "method": "GET",
+      "path": "/membership/applications/:orgId",
+      "handler_file": "",
+      "handler_function": "",
+      "auth_required": null,
+      "auth_middleware": null,
+      "request_shape": {},
+      "response_shape": {},
+      "module": "unknown",
+      "confidence": "LOW",
+      "consumer_count": 1,
+      "consumers": [
+        "apps/memberry"
+      ],
+      "is_phantom": true,
+      "deprecation_signals": {
+        "single_consumer": false,
+        "has_todo_fixme": false,
+        "deprecated_annotation": false,
+        "last_modified_days_ago": 0
+      }
+    },
+    "GET /dues/dashboard/:orgId": {
+      "method": "GET",
+      "path": "/dues/dashboard/:orgId",
+      "handler_file": "",
+      "handler_function": "",
+      "auth_required": null,
+      "auth_middleware": null,
+      "request_shape": {},
+      "response_shape": {},
+      "module": "unknown",
+      "confidence": "LOW",
+      "consumer_count": 1,
+      "consumers": [
+        "apps/memberry"
+      ],
+      "is_phantom": true,
+      "deprecation_signals": {
+        "single_consumer": false,
+        "has_todo_fixme": false,
+        "deprecated_annotation": false,
+        "last_modified_days_ago": 0
+      }
+    },
+    "PUT /membership/org-profile/:orgId": {
+      "method": "PUT",
+      "path": "/membership/org-profile/:orgId",
+      "handler_file": "",
+      "handler_function": "",
+      "auth_required": null,
+      "auth_middleware": null,
+      "request_shape": {},
+      "response_shape": {},
+      "module": "unknown",
+      "confidence": "LOW",
+      "consumer_count": 1,
+      "consumers": [
+        "apps/memberry"
+      ],
+      "is_phantom": true,
+      "deprecation_signals": {
+        "single_consumer": false,
+        "has_todo_fixme": false,
+        "deprecated_annotation": false,
+        "last_modified_days_ago": 0
+      }
+    },
+    "GET /comms/messages/search": {
+      "method": "GET",
+      "path": "/comms/messages/search",
+      "handler_file": "",
+      "handler_function": "",
+      "auth_required": null,
+      "auth_middleware": null,
+      "request_shape": {},
+      "response_shape": {},
+      "module": "unknown",
+      "confidence": "LOW",
+      "consumer_count": 1,
+      "consumers": [
+        "apps/memberry"
+      ],
+      "is_phantom": true,
+      "deprecation_signals": {
+        "single_consumer": false,
+        "has_todo_fixme": false,
+        "deprecated_annotation": false,
+        "last_modified_days_ago": 0
+      }
+    },
+    "GET /communications/announcements/:orgId": {
+      "method": "GET",
+      "path": "/communications/announcements/:orgId",
+      "handler_file": "",
+      "handler_function": "",
+      "auth_required": null,
+      "auth_middleware": null,
+      "request_shape": {},
+      "response_shape": {},
+      "module": "unknown",
+      "confidence": "LOW",
+      "consumer_count": 1,
+      "consumers": [
+        "apps/memberry"
+      ],
+      "is_phantom": true,
+      "deprecation_signals": {
+        "single_consumer": false,
+        "has_todo_fixme": false,
+        "deprecated_annotation": false,
+        "last_modified_days_ago": 0
+      }
+    },
+    "POST /communications/announcements/:orgId": {
+      "method": "POST",
+      "path": "/communications/announcements/:orgId",
+      "handler_file": "",
+      "handler_function": "",
+      "auth_required": null,
+      "auth_middleware": null,
+      "request_shape": {},
+      "response_shape": {},
+      "module": "unknown",
+      "confidence": "LOW",
+      "consumer_count": 1,
+      "consumers": [
+        "apps/memberry"
+      ],
+      "is_phantom": true,
+      "deprecation_signals": {
+        "single_consumer": false,
+        "has_todo_fixme": false,
+        "deprecated_annotation": false,
+        "last_modified_days_ago": 0
+      }
+    },
+    "GET /communications/subscriptions/person": {
+      "method": "GET",
+      "path": "/communications/subscriptions/person",
+      "handler_file": "",
+      "handler_function": "",
+      "auth_required": null,
+      "auth_middleware": null,
+      "request_shape": {},
+      "response_shape": {},
+      "module": "unknown",
+      "confidence": "LOW",
+      "consumer_count": 1,
+      "consumers": [
+        "apps/memberry"
+      ],
+      "is_phantom": true,
+      "deprecation_signals": {
+        "single_consumer": false,
+        "has_todo_fixme": false,
+        "deprecated_annotation": false,
+        "last_modified_days_ago": 0
+      }
+    },
+    "PATCH /association/message-templates/:id": {
+      "method": "PATCH",
+      "path": "/association/message-templates/:id",
+      "handler_file": "",
+      "handler_function": "",
+      "auth_required": null,
+      "auth_middleware": null,
+      "request_shape": {},
+      "response_shape": {},
+      "module": "unknown",
+      "confidence": "LOW",
+      "consumer_count": 1,
+      "consumers": [
+        "apps/memberry"
+      ],
+      "is_phantom": true,
+      "deprecation_signals": {
+        "single_consumer": false,
+        "has_todo_fixme": false,
+        "deprecated_annotation": false,
+        "last_modified_days_ago": 0
+      }
+    },
+    "DELETE /association/message-templates/:id": {
+      "method": "DELETE",
+      "path": "/association/message-templates/:id",
+      "handler_file": "",
+      "handler_function": "",
+      "auth_required": null,
+      "auth_middleware": null,
+      "request_shape": {},
+      "response_shape": {},
+      "module": "unknown",
+      "confidence": "LOW",
+      "consumer_count": 1,
+      "consumers": [
+        "apps/memberry"
+      ],
+      "is_phantom": true,
+      "deprecation_signals": {
+        "single_consumer": false,
+        "has_todo_fixme": false,
+        "deprecated_annotation": false,
+        "last_modified_days_ago": 0
+      }
+    },
+    "GET /events/my": {
+      "method": "GET",
+      "path": "/events/my",
+      "handler_file": "",
+      "handler_function": "",
+      "auth_required": null,
+      "auth_middleware": null,
+      "request_shape": {},
+      "response_shape": {},
+      "module": "unknown",
+      "confidence": "LOW",
+      "consumer_count": 1,
+      "consumers": [
+        "apps/memberry"
+      ],
+      "is_phantom": true,
+      "deprecation_signals": {
+        "single_consumer": false,
+        "has_todo_fixme": false,
+        "deprecated_annotation": false,
+        "last_modified_days_ago": 0
+      }
+    },
+    "GET /training/my": {
+      "method": "GET",
+      "path": "/training/my",
+      "handler_file": "",
+      "handler_function": "",
+      "auth_required": null,
+      "auth_middleware": null,
+      "request_shape": {},
+      "response_shape": {},
+      "module": "unknown",
+      "confidence": "LOW",
+      "consumer_count": 1,
+      "consumers": [
+        "apps/memberry"
+      ],
+      "is_phantom": true,
+      "deprecation_signals": {
+        "single_consumer": false,
+        "has_todo_fixme": false,
+        "deprecated_annotation": false,
+        "last_modified_days_ago": 0
+      }
+    },
+    "GET /notifications/my": {
+      "method": "GET",
+      "path": "/notifications/my",
+      "handler_file": "",
+      "handler_function": "",
+      "auth_required": null,
+      "auth_middleware": null,
+      "request_shape": {},
+      "response_shape": {},
+      "module": "unknown",
+      "confidence": "LOW",
+      "consumer_count": 1,
+      "consumers": [
+        "apps/memberry"
+      ],
+      "is_phantom": true,
+      "deprecation_signals": {
+        "single_consumer": false,
+        "has_todo_fixme": false,
+        "deprecated_annotation": false,
+        "last_modified_days_ago": 0
+      }
+    },
+    "GET /association/member/directory/:personId/public": {
+      "method": "GET",
+      "path": "/association/member/directory/:personId/public",
+      "handler_file": "",
+      "handler_function": "",
+      "auth_required": null,
+      "auth_middleware": null,
+      "request_shape": {},
+      "response_shape": {},
+      "module": "unknown",
+      "confidence": "LOW",
+      "consumer_count": 1,
+      "consumers": [
+        "apps/memberry"
+      ],
+      "is_phantom": true,
+      "deprecation_signals": {
+        "single_consumer": false,
+        "has_todo_fixme": false,
+        "deprecated_annotation": false,
+        "last_modified_days_ago": 0
+      }
+    },
+    "GET /association/member/credits": {
+      "method": "GET",
+      "path": "/association/member/credits",
+      "handler_file": "",
+      "handler_function": "",
+      "auth_required": null,
+      "auth_middleware": null,
+      "request_shape": {},
+      "response_shape": {},
+      "module": "unknown",
+      "confidence": "LOW",
+      "consumer_count": 1,
+      "consumers": [
+        "apps/memberry"
+      ],
+      "is_phantom": true,
+      "deprecation_signals": {
+        "single_consumer": false,
+        "has_todo_fixme": false,
+        "deprecated_annotation": false,
+        "last_modified_days_ago": 0
+      }
+    },
+    "GET /association/member/chapters": {
+      "method": "GET",
+      "path": "/association/member/chapters",
+      "handler_file": "",
+      "handler_function": "",
+      "auth_required": null,
+      "auth_middleware": null,
+      "request_shape": {},
+      "response_shape": {},
+      "module": "unknown",
+      "confidence": "LOW",
+      "consumer_count": 1,
+      "consumers": [
+        "apps/memberry"
+      ],
+      "is_phantom": true,
+      "deprecation_signals": {
+        "single_consumer": false,
+        "has_todo_fixme": false,
+        "deprecated_annotation": false,
+        "last_modified_days_ago": 0
+      }
+    },
+    "GET /association/member/professional-licenses": {
+      "method": "GET",
+      "path": "/association/member/professional-licenses",
+      "handler_file": "",
+      "handler_function": "",
+      "auth_required": null,
+      "auth_middleware": null,
+      "request_shape": {},
+      "response_shape": {},
+      "module": "unknown",
+      "confidence": "LOW",
+      "consumer_count": 1,
+      "consumers": [
+        "apps/memberry"
+      ],
+      "is_phantom": true,
+      "deprecation_signals": {
+        "single_consumer": false,
+        "has_todo_fixme": false,
+        "deprecated_annotation": false,
+        "last_modified_days_ago": 0
+      }
+    },
+    "POST /surveys/:id/responses": {
+      "method": "POST",
+      "path": "/surveys/:id/responses",
+      "handler_file": "",
+      "handler_function": "",
+      "auth_required": null,
+      "auth_middleware": null,
+      "request_shape": {},
+      "response_shape": {},
+      "module": "unknown",
+      "confidence": "LOW",
+      "consumer_count": 1,
+      "consumers": [
+        "apps/memberry"
+      ],
+      "is_phantom": true,
+      "deprecation_signals": {
+        "single_consumer": false,
+        "has_todo_fixme": false,
+        "deprecated_annotation": false,
+        "last_modified_days_ago": 0
+      }
+    },
+    "GET /surveys": {
+      "method": "GET",
+      "path": "/surveys",
+      "handler_file": "",
+      "handler_function": "",
+      "auth_required": null,
+      "auth_middleware": null,
+      "request_shape": {},
+      "response_shape": {},
+      "module": "unknown",
+      "confidence": "LOW",
+      "consumer_count": 1,
+      "consumers": [
+        "apps/memberry"
+      ],
+      "is_phantom": true,
+      "deprecation_signals": {
+        "single_consumer": false,
+        "has_todo_fixme": false,
+        "deprecated_annotation": false,
+        "last_modified_days_ago": 0
+      }
+    },
+    "GET /surveys/:surveyId": {
+      "method": "GET",
+      "path": "/surveys/:surveyId",
+      "handler_file": "",
+      "handler_function": "",
+      "auth_required": null,
+      "auth_middleware": null,
+      "request_shape": {},
+      "response_shape": {},
+      "module": "unknown",
+      "confidence": "LOW",
+      "consumer_count": 1,
+      "consumers": [
+        "apps/memberry"
+      ],
+      "is_phantom": true,
+      "deprecation_signals": {
+        "single_consumer": false,
+        "has_todo_fixme": false,
+        "deprecated_annotation": false,
+        "last_modified_days_ago": 0
+      }
+    },
+    "POST /surveys/:surveyId/responses": {
+      "method": "POST",
+      "path": "/surveys/:surveyId/responses",
+      "handler_file": "",
+      "handler_function": "",
+      "auth_required": null,
+      "auth_middleware": null,
+      "request_shape": {},
+      "response_shape": {},
+      "module": "unknown",
+      "confidence": "LOW",
+      "consumer_count": 1,
+      "consumers": [
+        "apps/memberry"
+      ],
+      "is_phantom": true,
+      "deprecation_signals": {
+        "single_consumer": false,
+        "has_todo_fixme": false,
+        "deprecated_annotation": false,
+        "last_modified_days_ago": 0
+      }
+    },
+    "POST /surveys": {
+      "method": "POST",
+      "path": "/surveys",
+      "handler_file": "",
+      "handler_function": "",
+      "auth_required": null,
+      "auth_middleware": null,
+      "request_shape": {},
+      "response_shape": {},
+      "module": "unknown",
+      "confidence": "LOW",
+      "consumer_count": 1,
+      "consumers": [
+        "apps/memberry"
+      ],
+      "is_phantom": true,
+      "deprecation_signals": {
+        "single_consumer": false,
+        "has_todo_fixme": false,
+        "deprecated_annotation": false,
+        "last_modified_days_ago": 0
+      }
+    },
+    "PATCH /surveys/:id": {
+      "method": "PATCH",
+      "path": "/surveys/:id",
+      "handler_file": "",
+      "handler_function": "",
+      "auth_required": null,
+      "auth_middleware": null,
+      "request_shape": {},
+      "response_shape": {},
+      "module": "unknown",
+      "confidence": "LOW",
+      "consumer_count": 1,
+      "consumers": [
+        "apps/memberry"
+      ],
+      "is_phantom": true,
+      "deprecation_signals": {
+        "single_consumer": false,
+        "has_todo_fixme": false,
+        "deprecated_annotation": false,
+        "last_modified_days_ago": 0
+      }
+    },
+    "DELETE /surveys/:id": {
+      "method": "DELETE",
+      "path": "/surveys/:id",
+      "handler_file": "",
+      "handler_function": "",
+      "auth_required": null,
+      "auth_middleware": null,
+      "request_shape": {},
+      "response_shape": {},
+      "module": "unknown",
+      "confidence": "LOW",
+      "consumer_count": 1,
+      "consumers": [
+        "apps/memberry"
+      ],
+      "is_phantom": true,
+      "deprecation_signals": {
+        "single_consumer": false,
+        "has_todo_fixme": false,
+        "deprecated_annotation": false,
+        "last_modified_days_ago": 0
+      }
+    },
+    "POST /surveys/:id/clone": {
+      "method": "POST",
+      "path": "/surveys/:id/clone",
+      "handler_file": "",
+      "handler_function": "",
+      "auth_required": null,
+      "auth_middleware": null,
+      "request_shape": {},
+      "response_shape": {},
+      "module": "unknown",
+      "confidence": "LOW",
+      "consumer_count": 1,
+      "consumers": [
+        "apps/memberry"
+      ],
+      "is_phantom": true,
+      "deprecation_signals": {
+        "single_consumer": false,
+        "has_todo_fixme": false,
+        "deprecated_annotation": false,
+        "last_modified_days_ago": 0
+      }
+    },
+    "GET /surveys/:surveyId/responses": {
+      "method": "GET",
+      "path": "/surveys/:surveyId/responses",
+      "handler_file": "",
+      "handler_function": "",
+      "auth_required": null,
+      "auth_middleware": null,
+      "request_shape": {},
+      "response_shape": {},
+      "module": "unknown",
+      "confidence": "LOW",
+      "consumer_count": 1,
+      "consumers": [
+        "apps/memberry"
+      ],
+      "is_phantom": true,
+      "deprecation_signals": {
+        "single_consumer": false,
+        "has_todo_fixme": false,
+        "deprecated_annotation": false,
+        "last_modified_days_ago": 0
+      }
+    },
+    "PATCH /association/member/directory/profiles/:id": {
+      "method": "PATCH",
+      "path": "/association/member/directory/profiles/:id",
+      "handler_file": "",
+      "handler_function": "",
+      "auth_required": null,
+      "auth_middleware": null,
+      "request_shape": {},
+      "response_shape": {},
+      "module": "unknown",
+      "confidence": "LOW",
+      "consumer_count": 1,
+      "consumers": [
+        "apps/memberry"
+      ],
+      "is_phantom": true,
+      "deprecation_signals": {
+        "single_consumer": false,
+        "has_todo_fixme": false,
+        "deprecated_annotation": false,
+        "last_modified_days_ago": 0
+      }
+    },
+    "GET /association/member/aging-buckets/:orgId": {
+      "method": "GET",
+      "path": "/association/member/aging-buckets/:orgId",
+      "handler_file": "",
+      "handler_function": "",
+      "auth_required": null,
+      "auth_middleware": null,
+      "request_shape": {},
+      "response_shape": {},
+      "module": "unknown",
+      "confidence": "LOW",
+      "consumer_count": 1,
+      "consumers": [
+        "apps/memberry"
+      ],
+      "is_phantom": true,
+      "deprecation_signals": {
+        "single_consumer": false,
+        "has_todo_fixme": false,
+        "deprecated_annotation": false,
+        "last_modified_days_ago": 0
+      }
+    },
+    "GET /communications/announcements/detail/:announcementId": {
+      "method": "GET",
+      "path": "/communications/announcements/detail/:announcementId",
+      "handler_file": "",
+      "handler_function": "",
+      "auth_required": null,
+      "auth_middleware": null,
+      "request_shape": {},
+      "response_shape": {},
+      "module": "unknown",
+      "confidence": "LOW",
+      "consumer_count": 1,
+      "consumers": [
+        "apps/memberry"
+      ],
+      "is_phantom": true,
+      "deprecation_signals": {
+        "single_consumer": false,
+        "has_todo_fixme": false,
+        "deprecated_annotation": false,
+        "last_modified_days_ago": 0
+      }
+    },
+    "GET /certificates/verify/*": {
+      "method": "GET",
+      "path": "/certificates/verify/*",
+      "handler_file": "",
+      "handler_function": "",
+      "auth_required": null,
+      "auth_middleware": null,
+      "request_shape": {},
+      "response_shape": {},
+      "module": "unknown",
+      "confidence": "LOW",
+      "consumer_count": 1,
+      "consumers": [
+        "apps/memberry"
+      ],
+      "is_phantom": true,
+      "deprecation_signals": {
+        "single_consumer": false,
+        "has_todo_fixme": false,
+        "deprecated_annotation": false,
+        "last_modified_days_ago": 0
+      }
+    },
+    "GET /association/member/compliance/:orgId*": {
+      "method": "GET",
+      "path": "/association/member/compliance/:orgId*",
+      "handler_file": "",
+      "handler_function": "",
+      "auth_required": null,
+      "auth_middleware": null,
+      "request_shape": {},
+      "response_shape": {},
+      "module": "unknown",
+      "confidence": "LOW",
+      "consumer_count": 1,
+      "consumers": [
+        "apps/memberry"
+      ],
+      "is_phantom": true,
+      "deprecation_signals": {
+        "single_consumer": false,
+        "has_todo_fixme": false,
+        "deprecated_annotation": false,
+        "last_modified_days_ago": 0
+      }
+    },
+    "POST /association/member/compliance/:orgId/refresh": {
+      "method": "POST",
+      "path": "/association/member/compliance/:orgId/refresh",
+      "handler_file": "",
+      "handler_function": "",
+      "auth_required": null,
+      "auth_middleware": null,
+      "request_shape": {},
+      "response_shape": {},
+      "module": "unknown",
+      "confidence": "LOW",
+      "consumer_count": 1,
+      "consumers": [
+        "apps/memberry"
+      ],
+      "is_phantom": true,
+      "deprecation_signals": {
+        "single_consumer": false,
+        "has_todo_fixme": false,
+        "deprecated_annotation": false,
+        "last_modified_days_ago": 0
+      }
+    },
+    "POST /communications/announcements/:announcementId/publish": {
+      "method": "POST",
+      "path": "/communications/announcements/:announcementId/publish",
+      "handler_file": "",
+      "handler_function": "",
+      "auth_required": null,
+      "auth_middleware": null,
+      "request_shape": {},
+      "response_shape": {},
+      "module": "unknown",
+      "confidence": "LOW",
+      "consumer_count": 1,
+      "consumers": [
+        "apps/memberry"
+      ],
+      "is_phantom": true,
+      "deprecation_signals": {
+        "single_consumer": false,
+        "has_todo_fixme": false,
+        "deprecated_annotation": false,
+        "last_modified_days_ago": 0
+      }
+    },
+    "POST /communications/announcements/:announcementId/archive": {
+      "method": "POST",
+      "path": "/communications/announcements/:announcementId/archive",
+      "handler_file": "",
+      "handler_function": "",
+      "auth_required": null,
+      "auth_middleware": null,
+      "request_shape": {},
+      "response_shape": {},
+      "module": "unknown",
+      "confidence": "LOW",
+      "consumer_count": 1,
+      "consumers": [
+        "apps/memberry"
+      ],
+      "is_phantom": true,
+      "deprecation_signals": {
+        "single_consumer": false,
+        "has_todo_fixme": false,
+        "deprecated_annotation": false,
+        "last_modified_days_ago": 0
+      }
+    },
+    "DELETE /communications/announcements/:announcementId": {
+      "method": "DELETE",
+      "path": "/communications/announcements/:announcementId",
+      "handler_file": "",
+      "handler_function": "",
+      "auth_required": null,
+      "auth_middleware": null,
+      "request_shape": {},
+      "response_shape": {},
+      "module": "unknown",
+      "confidence": "LOW",
+      "consumer_count": 1,
+      "consumers": [
+        "apps/memberry"
+      ],
+      "is_phantom": true,
+      "deprecation_signals": {
+        "single_consumer": false,
+        "has_todo_fixme": false,
+        "deprecated_annotation": false,
+        "last_modified_days_ago": 0
+      }
+    },
+    "GET /communications/announcements/detail/:edit": {
+      "method": "GET",
+      "path": "/communications/announcements/detail/:edit",
+      "handler_file": "",
+      "handler_function": "",
+      "auth_required": null,
+      "auth_middleware": null,
+      "request_shape": {},
+      "response_shape": {},
+      "module": "unknown",
+      "confidence": "LOW",
+      "consumer_count": 1,
+      "consumers": [
+        "apps/memberry"
+      ],
+      "is_phantom": true,
+      "deprecation_signals": {
+        "single_consumer": false,
+        "has_todo_fixme": false,
+        "deprecated_annotation": false,
+        "last_modified_days_ago": 0
+      }
+    },
+    "GET /communications/announcements": {
+      "method": "GET",
+      "path": "/communications/announcements",
+      "handler_file": "",
+      "handler_function": "",
+      "auth_required": null,
+      "auth_middleware": null,
+      "request_shape": {},
+      "response_shape": {},
+      "module": "unknown",
+      "confidence": "LOW",
+      "consumer_count": 1,
+      "consumers": [
+        "apps/memberry"
+      ],
+      "is_phantom": true,
+      "deprecation_signals": {
+        "single_consumer": false,
+        "has_todo_fixme": false,
+        "deprecated_annotation": false,
+        "last_modified_days_ago": 0
+      }
+    },
+    "GET /association/member/dues-metrics/:orgId": {
+      "method": "GET",
+      "path": "/association/member/dues-metrics/:orgId",
+      "handler_file": "",
+      "handler_function": "",
+      "auth_required": null,
+      "auth_middleware": null,
+      "request_shape": {},
+      "response_shape": {},
+      "module": "unknown",
+      "confidence": "LOW",
+      "consumer_count": 1,
+      "consumers": [
+        "apps/memberry"
+      ],
+      "is_phantom": true,
+      "deprecation_signals": {
+        "single_consumer": false,
+        "has_todo_fixme": false,
+        "deprecated_annotation": false,
+        "last_modified_days_ago": 0
+      }
+    },
+    "GET /credit-compliance/:orgId": {
+      "method": "GET",
+      "path": "/credit-compliance/:orgId",
+      "handler_file": "",
+      "handler_function": "",
+      "auth_required": null,
+      "auth_middleware": null,
+      "request_shape": {},
+      "response_shape": {},
+      "module": "unknown",
+      "confidence": "LOW",
+      "consumer_count": 1,
+      "consumers": [
+        "apps/memberry"
+      ],
+      "is_phantom": true,
+      "deprecation_signals": {
+        "single_consumer": false,
+        "has_todo_fixme": false,
+        "deprecated_annotation": false,
+        "last_modified_days_ago": 0
+      }
+    },
+    "GET /association/member/cpd-config/:orgId": {
+      "method": "GET",
+      "path": "/association/member/cpd-config/:orgId",
+      "handler_file": "",
+      "handler_function": "",
+      "auth_required": null,
+      "auth_middleware": null,
+      "request_shape": {},
+      "response_shape": {},
+      "module": "unknown",
+      "confidence": "LOW",
+      "consumer_count": 1,
+      "consumers": [
+        "apps/memberry"
+      ],
+      "is_phantom": true,
+      "deprecation_signals": {
+        "single_consumer": false,
+        "has_todo_fixme": false,
+        "deprecated_annotation": false,
+        "last_modified_days_ago": 0
+      }
+    },
+    "PATCH /association/member/cpd-config/:orgId": {
+      "method": "PATCH",
+      "path": "/association/member/cpd-config/:orgId",
+      "handler_file": "",
+      "handler_function": "",
+      "auth_required": null,
+      "auth_middleware": null,
+      "request_shape": {},
+      "response_shape": {},
+      "module": "unknown",
+      "confidence": "LOW",
+      "consumer_count": 1,
+      "consumers": [
+        "apps/memberry"
+      ],
+      "is_phantom": true,
+      "deprecation_signals": {
+        "single_consumer": false,
+        "has_todo_fixme": false,
+        "deprecated_annotation": false,
+        "last_modified_days_ago": 0
+      }
+    },
+    "GET /accredited-providers/:orgId": {
+      "method": "GET",
+      "path": "/accredited-providers/:orgId",
+      "handler_file": "",
+      "handler_function": "",
+      "auth_required": null,
+      "auth_middleware": null,
+      "request_shape": {},
+      "response_shape": {},
+      "module": "unknown",
+      "confidence": "LOW",
+      "consumer_count": 1,
+      "consumers": [
+        "apps/memberry"
+      ],
+      "is_phantom": true,
+      "deprecation_signals": {
+        "single_consumer": false,
+        "has_todo_fixme": false,
+        "deprecated_annotation": false,
+        "last_modified_days_ago": 0
+      }
+    },
+    "POST /accredited-providers/:orgId": {
+      "method": "POST",
+      "path": "/accredited-providers/:orgId",
+      "handler_file": "",
+      "handler_function": "",
+      "auth_required": null,
+      "auth_middleware": null,
+      "request_shape": {},
+      "response_shape": {},
+      "module": "unknown",
+      "confidence": "LOW",
+      "consumer_count": 1,
+      "consumers": [
+        "apps/memberry"
+      ],
+      "is_phantom": true,
+      "deprecation_signals": {
+        "single_consumer": false,
+        "has_todo_fixme": false,
+        "deprecated_annotation": false,
+        "last_modified_days_ago": 0
+      }
+    },
+    "PATCH /accredited-providers/:orgId/:id": {
+      "method": "PATCH",
+      "path": "/accredited-providers/:orgId/:id",
+      "handler_file": "",
+      "handler_function": "",
+      "auth_required": null,
+      "auth_middleware": null,
+      "request_shape": {},
+      "response_shape": {},
+      "module": "unknown",
+      "confidence": "LOW",
+      "consumer_count": 1,
+      "consumers": [
+        "apps/memberry"
+      ],
+      "is_phantom": true,
+      "deprecation_signals": {
+        "single_consumer": false,
+        "has_todo_fixme": false,
+        "deprecated_annotation": false,
+        "last_modified_days_ago": 0
+      }
+    },
+    "DELETE /accredited-providers/:orgId/:id": {
+      "method": "DELETE",
+      "path": "/accredited-providers/:orgId/:id",
+      "handler_file": "",
+      "handler_function": "",
+      "auth_required": null,
+      "auth_middleware": null,
+      "request_shape": {},
+      "response_shape": {},
+      "module": "unknown",
+      "confidence": "LOW",
+      "consumer_count": 1,
+      "consumers": [
+        "apps/memberry"
+      ],
+      "is_phantom": true,
+      "deprecation_signals": {
+        "single_consumer": false,
+        "has_todo_fixme": false,
+        "deprecated_annotation": false,
+        "last_modified_days_ago": 0
+      }
+    },
+    "GET /communications/templates/:edit": {
+      "method": "GET",
+      "path": "/communications/templates/:edit",
+      "handler_file": "",
+      "handler_function": "",
+      "auth_required": null,
+      "auth_middleware": null,
+      "request_shape": {},
+      "response_shape": {},
+      "module": "unknown",
+      "confidence": "LOW",
+      "consumer_count": 1,
+      "consumers": [
+        "apps/memberry"
+      ],
+      "is_phantom": true,
+      "deprecation_signals": {
+        "single_consumer": false,
+        "has_todo_fixme": false,
+        "deprecated_annotation": false,
+        "last_modified_days_ago": 0
+      }
+    },
+    "GET /association/member/dues-member-summary/:orgId/:memberId": {
+      "method": "GET",
+      "path": "/association/member/dues-member-summary/:orgId/:memberId",
+      "handler_file": "",
+      "handler_function": "",
+      "auth_required": null,
+      "auth_middleware": null,
+      "request_shape": {},
+      "response_shape": {},
+      "module": "unknown",
+      "confidence": "LOW",
+      "consumer_count": 1,
+      "consumers": [
+        "apps/memberry"
+      ],
+      "is_phantom": true,
       "deprecation_signals": {
         "single_consumer": false,
         "has_todo_fixme": false,

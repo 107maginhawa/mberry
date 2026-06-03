@@ -479,11 +479,31 @@
         },
         {
           "method": "GET",
+          "endpoint": "/persons/me/memberships"
+        },
+        {
+          "method": "GET",
           "endpoint": "/association/event-lifecycle/my"
         },
         {
           "method": "GET",
+          "endpoint": "/persons/me/credit-summary"
+        },
+        {
+          "method": "GET",
+          "endpoint": "/association/member/dues-invoices"
+        },
+        {
+          "method": "GET",
           "endpoint": "/association/member/elections"
+        },
+        {
+          "method": "GET",
+          "endpoint": "/communications/announcements/:firstOrgId"
+        },
+        {
+          "method": "GET",
+          "endpoint": "/credit-compliance/:firstOrgId"
         }
       ],
       "routes_used_in": [
@@ -635,7 +655,20 @@
       ],
       "slots": [],
       "state_access": [],
-      "api_calls": [],
+      "api_calls": [
+        {
+          "method": "GET",
+          "endpoint": "/notifs"
+        },
+        {
+          "method": "POST",
+          "endpoint": "/notifs/:id/read"
+        },
+        {
+          "method": "POST",
+          "endpoint": "/notifs/read-all"
+        }
+      ],
       "routes_used_in": [],
       "loading_state_hygiene": {
         "has_skeleton": false,
@@ -746,7 +779,12 @@
       "events_out": [],
       "slots": [],
       "state_access": [],
-      "api_calls": [],
+      "api_calls": [
+        {
+          "method": "GET",
+          "endpoint": "/persons/me/memberships"
+        }
+      ],
       "routes_used_in": [],
       "loading_state_hygiene": null,
       "interaction_hygiene": null,
@@ -762,7 +800,12 @@
       "events_out": [],
       "slots": [],
       "state_access": [],
-      "api_calls": [],
+      "api_calls": [
+        {
+          "method": "GET",
+          "endpoint": "/persons/me/memberships"
+        }
+      ],
       "routes_used_in": [],
       "loading_state_hygiene": null,
       "interaction_hygiene": null,
@@ -826,6 +869,10 @@
         {
           "method": "GET",
           "endpoint": "/public/org/:slug"
+        },
+        {
+          "method": "GET",
+          "endpoint": "/persons/me/officer-role/:orgId"
         }
       ],
       "routes_used_in": [],
@@ -882,7 +929,12 @@
       "events_out": [],
       "slots": [],
       "state_access": [],
-      "api_calls": [],
+      "api_calls": [
+        {
+          "method": "GET",
+          "endpoint": "/persons/me/officer-role/:organizationId"
+        }
+      ],
       "routes_used_in": [
         "/_authenticated"
       ],
@@ -913,7 +965,12 @@
       "events_out": [],
       "slots": [],
       "state_access": [],
-      "api_calls": [],
+      "api_calls": [
+        {
+          "method": "GET",
+          "endpoint": "/public/orgs*"
+        }
+      ],
       "routes_used_in": [
         "/join"
       ],
@@ -1603,7 +1660,12 @@
       "events_out": [],
       "slots": [],
       "state_access": [],
-      "api_calls": [],
+      "api_calls": [
+        {
+          "method": "GET",
+          "endpoint": "/notifs"
+        }
+      ],
       "routes_used_in": [],
       "loading_state_hygiene": null,
       "interaction_hygiene": {
@@ -2728,7 +2790,24 @@
       "events_out": [],
       "slots": [],
       "state_access": [],
-      "api_calls": [],
+      "api_calls": [
+        {
+          "method": "GET",
+          "endpoint": "/public/org/*"
+        },
+        {
+          "method": "GET",
+          "endpoint": "/persons/me"
+        },
+        {
+          "method": "GET",
+          "endpoint": "/association/member/tiers"
+        },
+        {
+          "method": "POST",
+          "endpoint": "/association/member/applications"
+        }
+      ],
       "routes_used_in": [
         "/org/$slug"
       ],
@@ -2797,7 +2876,16 @@
       "events_out": [],
       "slots": [],
       "state_access": [],
-      "api_calls": [],
+      "api_calls": [
+        {
+          "method": "GET",
+          "endpoint": "/pay/*/validate"
+        },
+        {
+          "method": "POST",
+          "endpoint": "/pay/*/checkout"
+        }
+      ],
       "routes_used_in": [
         "/pay/$token"
       ],
@@ -2830,7 +2918,12 @@
       "events_out": [],
       "slots": [],
       "state_access": [],
-      "api_calls": [],
+      "api_calls": [
+        {
+          "method": "GET",
+          "endpoint": "/public/verify/:certificateNumber"
+        }
+      ],
       "routes_used_in": [
         "/verify/$certificateNumber"
       ],
@@ -2863,7 +2956,12 @@
       "events_out": [],
       "slots": [],
       "state_access": [],
-      "api_calls": [],
+      "api_calls": [
+        {
+          "method": "GET",
+          "endpoint": "/association/member/credentials/lookup/*"
+        }
+      ],
       "routes_used_in": [
         "/verify/$credentialNumber"
       ],
@@ -2896,7 +2994,12 @@
       "events_out": [],
       "slots": [],
       "state_access": [],
-      "api_calls": [],
+      "api_calls": [
+        {
+          "method": "GET",
+          "endpoint": "/verify/*"
+        }
+      ],
       "routes_used_in": [
         "/verify/$token"
       ],
@@ -3225,7 +3328,12 @@
       "events_out": [],
       "slots": [],
       "state_access": [],
-      "api_calls": [],
+      "api_calls": [
+        {
+          "method": "POST",
+          "endpoint": "/persons/me/export"
+        }
+      ],
       "routes_used_in": [],
       "loading_state_hygiene": null,
       "interaction_hygiene": {
@@ -3272,6 +3380,18 @@
       "slots": [],
       "state_access": [],
       "api_calls": [
+        {
+          "method": "GET",
+          "endpoint": "/membership/members/:orgId"
+        },
+        {
+          "method": "GET",
+          "endpoint": "/membership/applications/:orgId"
+        },
+        {
+          "method": "GET",
+          "endpoint": "/dues/dashboard/:orgId"
+        },
         {
           "method": "GET",
           "endpoint": "/association/member/elections"
@@ -3322,7 +3442,16 @@
       "events_out": [],
       "slots": [],
       "state_access": [],
-      "api_calls": [],
+      "api_calls": [
+        {
+          "method": "GET",
+          "endpoint": "/association/member/officer-terms"
+        },
+        {
+          "method": "DELETE",
+          "endpoint": "/association/member/officer-terms/:termId"
+        }
+      ],
       "routes_used_in": [],
       "loading_state_hygiene": {
         "has_skeleton": false,
@@ -3368,7 +3497,12 @@
       "events_out": [],
       "slots": [],
       "state_access": [],
-      "api_calls": [],
+      "api_calls": [
+        {
+          "method": "PUT",
+          "endpoint": "/membership/org-profile/:orgId"
+        }
+      ],
       "routes_used_in": [],
       "loading_state_hygiene": {
         "has_skeleton": true,
@@ -4624,7 +4758,12 @@
       ],
       "slots": [],
       "state_access": [],
-      "api_calls": [],
+      "api_calls": [
+        {
+          "method": "GET",
+          "endpoint": "/comms/messages/search"
+        }
+      ],
       "routes_used_in": [],
       "loading_state_hygiene": {
         "has_skeleton": false,
@@ -5292,7 +5431,12 @@
       "events_out": [],
       "slots": [],
       "state_access": [],
-      "api_calls": [],
+      "api_calls": [
+        {
+          "method": "GET",
+          "endpoint": "/communications/announcements/:orgId"
+        }
+      ],
       "routes_used_in": [],
       "loading_state_hygiene": {
         "has_skeleton": true,
@@ -5352,7 +5496,24 @@
       ],
       "slots": [],
       "state_access": [],
-      "api_calls": [],
+      "api_calls": [
+        {
+          "method": "GET",
+          "endpoint": "/association/member/roster"
+        },
+        {
+          "method": "GET",
+          "endpoint": "/communications/segments"
+        },
+        {
+          "method": "POST",
+          "endpoint": "/communications/segments"
+        },
+        {
+          "method": "DELETE",
+          "endpoint": "/communications/segments/:id"
+        }
+      ],
       "routes_used_in": [],
       "loading_state_hygiene": {
         "has_skeleton": false,
@@ -5411,7 +5572,16 @@
       "events_out": [],
       "slots": [],
       "state_access": [],
-      "api_calls": [],
+      "api_calls": [
+        {
+          "method": "PATCH",
+          "endpoint": "/communications/announcements/:id"
+        },
+        {
+          "method": "POST",
+          "endpoint": "/communications/announcements/:orgId"
+        }
+      ],
       "routes_used_in": [],
       "loading_state_hygiene": {
         "has_skeleton": false,
@@ -5496,7 +5666,16 @@
       "events_out": [],
       "slots": [],
       "state_access": [],
-      "api_calls": [],
+      "api_calls": [
+        {
+          "method": "GET",
+          "endpoint": "/communications/subscriptions/person"
+        },
+        {
+          "method": "POST",
+          "endpoint": "/association/person-subscriptions/bulk-update"
+        }
+      ],
       "routes_used_in": [],
       "loading_state_hygiene": {
         "has_skeleton": false,
@@ -5559,7 +5738,16 @@
       ],
       "slots": [],
       "state_access": [],
-      "api_calls": [],
+      "api_calls": [
+        {
+          "method": "PATCH",
+          "endpoint": "/association/message-templates/:id"
+        },
+        {
+          "method": "POST",
+          "endpoint": "/association/message-templates"
+        }
+      ],
       "routes_used_in": [],
       "loading_state_hygiene": {
         "has_skeleton": false,
@@ -5626,7 +5814,16 @@
       ],
       "slots": [],
       "state_access": [],
-      "api_calls": [],
+      "api_calls": [
+        {
+          "method": "GET",
+          "endpoint": "/association/message-templates"
+        },
+        {
+          "method": "DELETE",
+          "endpoint": "/association/message-templates/:id"
+        }
+      ],
       "routes_used_in": [],
       "loading_state_hygiene": {
         "has_skeleton": true,
@@ -5982,7 +6179,24 @@
       "events_out": [],
       "slots": [],
       "state_access": [],
-      "api_calls": [],
+      "api_calls": [
+        {
+          "method": "GET",
+          "endpoint": "/persons/me/memberships"
+        },
+        {
+          "method": "GET",
+          "endpoint": "/events/my"
+        },
+        {
+          "method": "GET",
+          "endpoint": "/training/my"
+        },
+        {
+          "method": "GET",
+          "endpoint": "/notifications/my"
+        }
+      ],
       "routes_used_in": [],
       "loading_state_hygiene": {
         "has_skeleton": false,
@@ -6199,7 +6413,24 @@
       "events_out": [],
       "slots": [],
       "state_access": [],
-      "api_calls": [],
+      "api_calls": [
+        {
+          "method": "GET",
+          "endpoint": "/association/member/directory/:personId/public"
+        },
+        {
+          "method": "GET",
+          "endpoint": "/association/member/directory/search"
+        },
+        {
+          "method": "GET",
+          "endpoint": "/association/member/licenses"
+        },
+        {
+          "method": "GET",
+          "endpoint": "/association/member/credits"
+        }
+      ],
       "routes_used_in": [],
       "loading_state_hygiene": {
         "has_skeleton": false,
@@ -6294,6 +6525,10 @@
         {
           "method": "GET",
           "endpoint": "/association/member/directory/search"
+        },
+        {
+          "method": "GET",
+          "endpoint": "/association/member/chapters"
         }
       ],
       "routes_used_in": [],
@@ -7760,7 +7995,28 @@
       "events_out": [],
       "slots": [],
       "state_access": [],
-      "api_calls": [],
+      "api_calls": [
+        {
+          "method": "GET",
+          "endpoint": "/association/member/special-assessments/:orgId"
+        },
+        {
+          "method": "POST",
+          "endpoint": "/association/member/special-assessments"
+        },
+        {
+          "method": "PUT",
+          "endpoint": "/association/member/special-assessments/:id"
+        },
+        {
+          "method": "DELETE",
+          "endpoint": "/association/member/special-assessments/:id"
+        },
+        {
+          "method": "POST",
+          "endpoint": "/association/member/special-assessments/:id/apply"
+        }
+      ],
       "routes_used_in": [],
       "loading_state_hygiene": {
         "has_skeleton": true,
@@ -8191,6 +8447,10 @@
         {
           "method": "GET",
           "endpoint": "/association/member/elections/:electionId"
+        },
+        {
+          "method": "GET",
+          "endpoint": "/association/member/ballots"
         }
       ],
       "routes_used_in": [],
@@ -8489,6 +8749,10 @@
         {
           "method": "GET",
           "endpoint": "/association/member/elections/:electionId"
+        },
+        {
+          "method": "GET",
+          "endpoint": "/association/member/ballots"
         },
         {
           "method": "POST",
@@ -9193,7 +9457,12 @@
       "events_out": [],
       "slots": [],
       "state_access": [],
-      "api_calls": [],
+      "api_calls": [
+        {
+          "method": "GET",
+          "endpoint": "/association/member/professional-licenses"
+        }
+      ],
       "routes_used_in": [],
       "loading_state_hygiene": {
         "has_skeleton": false,
@@ -9632,7 +9901,20 @@
       "events_out": [],
       "slots": [],
       "state_access": [],
-      "api_calls": [],
+      "api_calls": [
+        {
+          "method": "GET",
+          "endpoint": "/notifs"
+        },
+        {
+          "method": "POST",
+          "endpoint": "/notifs/read-all"
+        },
+        {
+          "method": "POST",
+          "endpoint": "/notifs/:id/read"
+        }
+      ],
       "routes_used_in": [],
       "loading_state_hygiene": {
         "has_skeleton": false,
@@ -10135,7 +10417,12 @@
       ],
       "slots": [],
       "state_access": [],
-      "api_calls": [],
+      "api_calls": [
+        {
+          "method": "POST",
+          "endpoint": "/surveys/:id/responses"
+        }
+      ],
       "routes_used_in": [],
       "loading_state_hygiene": null,
       "interaction_hygiene": {
@@ -10167,7 +10454,12 @@
       "events_out": [],
       "slots": [],
       "state_access": [],
-      "api_calls": [],
+      "api_calls": [
+        {
+          "method": "GET",
+          "endpoint": "/surveys"
+        }
+      ],
       "routes_used_in": [],
       "loading_state_hygiene": null,
       "interaction_hygiene": null,
@@ -10190,7 +10482,12 @@
       "events_out": [],
       "slots": [],
       "state_access": [],
-      "api_calls": [],
+      "api_calls": [
+        {
+          "method": "GET",
+          "endpoint": "/surveys/analytics/nps-trends"
+        }
+      ],
       "routes_used_in": [],
       "loading_state_hygiene": {
         "has_skeleton": true,
@@ -10232,7 +10529,16 @@
       "events_out": [],
       "slots": [],
       "state_access": [],
-      "api_calls": [],
+      "api_calls": [
+        {
+          "method": "GET",
+          "endpoint": "/surveys/:surveyId"
+        },
+        {
+          "method": "POST",
+          "endpoint": "/surveys/:surveyId/responses"
+        }
+      ],
       "routes_used_in": [],
       "loading_state_hygiene": {
         "has_skeleton": false,
@@ -10363,7 +10669,12 @@
       ],
       "slots": [],
       "state_access": [],
-      "api_calls": [],
+      "api_calls": [
+        {
+          "method": "POST",
+          "endpoint": "/surveys"
+        }
+      ],
       "routes_used_in": [],
       "loading_state_hygiene": {
         "has_skeleton": false,
@@ -10426,7 +10737,12 @@
       ],
       "slots": [],
       "state_access": [],
-      "api_calls": [],
+      "api_calls": [
+        {
+          "method": "POST",
+          "endpoint": "/surveys/:id/responses"
+        }
+      ],
       "routes_used_in": [],
       "loading_state_hygiene": null,
       "interaction_hygiene": {
@@ -10458,7 +10774,24 @@
       "events_out": [],
       "slots": [],
       "state_access": [],
-      "api_calls": [],
+      "api_calls": [
+        {
+          "method": "GET",
+          "endpoint": "/surveys"
+        },
+        {
+          "method": "PATCH",
+          "endpoint": "/surveys/:id"
+        },
+        {
+          "method": "DELETE",
+          "endpoint": "/surveys/:id"
+        },
+        {
+          "method": "POST",
+          "endpoint": "/surveys/:id/clone"
+        }
+      ],
       "routes_used_in": [],
       "loading_state_hygiene": {
         "has_skeleton": true,
@@ -10536,7 +10869,16 @@
       "events_out": [],
       "slots": [],
       "state_access": [],
-      "api_calls": [],
+      "api_calls": [
+        {
+          "method": "GET",
+          "endpoint": "/surveys/:surveyId"
+        },
+        {
+          "method": "GET",
+          "endpoint": "/surveys/:surveyId/responses"
+        }
+      ],
       "routes_used_in": [],
       "loading_state_hygiene": {
         "has_skeleton": true,
@@ -10613,7 +10955,12 @@
       "events_out": [],
       "slots": [],
       "state_access": [],
-      "api_calls": [],
+      "api_calls": [
+        {
+          "method": "GET",
+          "endpoint": "/surveys"
+        }
+      ],
       "routes_used_in": [],
       "loading_state_hygiene": null,
       "interaction_hygiene": null,
@@ -11008,7 +11355,16 @@
       "events_out": [],
       "slots": [],
       "state_access": [],
-      "api_calls": [],
+      "api_calls": [
+        {
+          "method": "GET",
+          "endpoint": "/persons/me"
+        },
+        {
+          "method": "GET",
+          "endpoint": "/persons/me/memberships"
+        }
+      ],
       "routes_used_in": [
         "/_authenticated/my/id-card"
       ],
@@ -11059,7 +11415,24 @@
       "events_out": [],
       "slots": [],
       "state_access": [],
-      "api_calls": [],
+      "api_calls": [
+        {
+          "method": "GET",
+          "endpoint": "/persons/me/memberships"
+        },
+        {
+          "method": "POST",
+          "endpoint": "/association/member/memberships/:membershipId/terminate"
+        },
+        {
+          "method": "GET",
+          "endpoint": "/persons/me"
+        },
+        {
+          "method": "POST",
+          "endpoint": "/association/member/affiliation-transfers"
+        }
+      ],
       "routes_used_in": [
         "/_authenticated/my/organizations"
       ],
@@ -11154,6 +11527,26 @@
         {
           "method": "POST",
           "endpoint": "/persons"
+        },
+        {
+          "method": "GET",
+          "endpoint": "/persons/me/memberships"
+        },
+        {
+          "method": "GET",
+          "endpoint": "/association/member/directory/search"
+        },
+        {
+          "method": "PATCH",
+          "endpoint": "/association/member/directory/profiles/:id"
+        },
+        {
+          "method": "POST",
+          "endpoint": "/association/member/directory/profiles"
+        },
+        {
+          "method": "GET",
+          "endpoint": "/association/member/licenses"
         },
         {
           "method": "PATCH",
@@ -11997,7 +12390,16 @@
       "events_out": [],
       "slots": [],
       "state_access": [],
-      "api_calls": [],
+      "api_calls": [
+        {
+          "method": "GET",
+          "endpoint": "/persons/me/credit-summary"
+        },
+        {
+          "method": "GET",
+          "endpoint": "/persons/me/credit-entries"
+        }
+      ],
       "routes_used_in": [
         "/_authenticated/my/credits/"
       ],
@@ -12035,7 +12437,12 @@
       "events_out": [],
       "slots": [],
       "state_access": [],
-      "api_calls": [],
+      "api_calls": [
+        {
+          "method": "POST",
+          "endpoint": "/persons/me/credit-entries"
+        }
+      ],
       "routes_used_in": [
         "/_authenticated/my/credits/log"
       ],
@@ -12152,11 +12559,23 @@
       "api_calls": [
         {
           "method": "GET",
+          "endpoint": "/persons/me/memberships"
+        },
+        {
+          "method": "GET",
+          "endpoint": "/association/member/dues-configs"
+        },
+        {
+          "method": "GET",
           "endpoint": "/association/member/dues-invoices"
         },
         {
           "method": "GET",
           "endpoint": "/association/member/dues-payments"
+        },
+        {
+          "method": "GET",
+          "endpoint": "/association/member/aging-buckets/:orgId"
         }
       ],
       "routes_used_in": [
@@ -12258,7 +12677,12 @@
       "events_out": [],
       "slots": [],
       "state_access": [],
-      "api_calls": [],
+      "api_calls": [
+        {
+          "method": "GET",
+          "endpoint": "/persons/me/credits"
+        }
+      ],
       "routes_used_in": [
         "/_authenticated/org/$orgSlug/my-cpd"
       ],
@@ -12358,7 +12782,12 @@
       "events_out": [],
       "slots": [],
       "state_access": [],
-      "api_calls": [],
+      "api_calls": [
+        {
+          "method": "GET",
+          "endpoint": "/communications/announcements/detail/:announcementId"
+        }
+      ],
       "routes_used_in": [
         "/_authenticated/org/$orgSlug/announcements/$announcementId"
       ],
@@ -12391,7 +12820,12 @@
       "events_out": [],
       "slots": [],
       "state_access": [],
-      "api_calls": [],
+      "api_calls": [
+        {
+          "method": "GET",
+          "endpoint": "/communications/announcements/:orgId"
+        }
+      ],
       "routes_used_in": [
         "/_authenticated/org/$orgSlug/announcements/"
       ],
@@ -12698,7 +13132,16 @@
       "events_out": [],
       "slots": [],
       "state_access": [],
-      "api_calls": [],
+      "api_calls": [
+        {
+          "method": "POST",
+          "endpoint": "/certificates/bulk-issue"
+        },
+        {
+          "method": "GET",
+          "endpoint": "/certificates/verify/*"
+        }
+      ],
       "routes_used_in": [
         "/_authenticated/org/$orgSlug/officer/certificates"
       ],
@@ -12753,7 +13196,16 @@
       "events_out": [],
       "slots": [],
       "state_access": [],
-      "api_calls": [],
+      "api_calls": [
+        {
+          "method": "GET",
+          "endpoint": "/association/member/compliance/:orgId*"
+        },
+        {
+          "method": "POST",
+          "endpoint": "/association/member/compliance/:orgId/refresh"
+        }
+      ],
       "routes_used_in": [
         "/_authenticated/org/$orgSlug/officer/compliance"
       ],
@@ -12971,7 +13423,24 @@
       "events_out": [],
       "slots": [],
       "state_access": [],
-      "api_calls": [],
+      "api_calls": [
+        {
+          "method": "GET",
+          "endpoint": "/communications/announcements/detail/:announcementId"
+        },
+        {
+          "method": "POST",
+          "endpoint": "/communications/announcements/:announcementId/publish"
+        },
+        {
+          "method": "POST",
+          "endpoint": "/communications/announcements/:announcementId/archive"
+        },
+        {
+          "method": "DELETE",
+          "endpoint": "/communications/announcements/:announcementId"
+        }
+      ],
       "routes_used_in": [
         "/_authenticated/org/$orgSlug/officer/communications/$announcementId"
       ],
@@ -13024,7 +13493,12 @@
       "events_out": [],
       "slots": [],
       "state_access": [],
-      "api_calls": [],
+      "api_calls": [
+        {
+          "method": "GET",
+          "endpoint": "/communications/announcements/:orgId"
+        }
+      ],
       "routes_used_in": [
         "/_authenticated/org/$orgSlug/officer/communications/analytics"
       ],
@@ -13080,7 +13554,12 @@
       "events_out": [],
       "slots": [],
       "state_access": [],
-      "api_calls": [],
+      "api_calls": [
+        {
+          "method": "GET",
+          "endpoint": "/communications/announcements/detail/:edit"
+        }
+      ],
       "routes_used_in": [
         "/_authenticated/org/$orgSlug/officer/communications/new"
       ],
@@ -13098,7 +13577,12 @@
       "events_out": [],
       "slots": [],
       "state_access": [],
-      "api_calls": [],
+      "api_calls": [
+        {
+          "method": "GET",
+          "endpoint": "/communications/announcements"
+        }
+      ],
       "routes_used_in": [
         "/_authenticated/org/$orgSlug/officer/communications/sent"
       ],
@@ -13417,6 +13901,10 @@
         {
           "method": "GET",
           "endpoint": "/association/member/dues-reporting/:organizationId/dashboard"
+        },
+        {
+          "method": "GET",
+          "endpoint": "/association/member/dues-metrics/:orgId"
         }
       ],
       "routes_used_in": [
@@ -13804,7 +14292,12 @@
       "events_out": [],
       "slots": [],
       "state_access": [],
-      "api_calls": [],
+      "api_calls": [
+        {
+          "method": "GET",
+          "endpoint": "/credit-compliance/:orgId"
+        }
+      ],
       "routes_used_in": [
         "/_authenticated/org/$orgSlug/officer/reports/credits"
       ],
@@ -13875,7 +14368,12 @@
       "events_out": [],
       "slots": [],
       "state_access": [],
-      "api_calls": [],
+      "api_calls": [
+        {
+          "method": "GET",
+          "endpoint": "/reviews/"
+        }
+      ],
       "routes_used_in": [
         "/_authenticated/org/$orgSlug/officer/reviews/"
       ],
@@ -14002,7 +14500,16 @@
       "events_out": [],
       "slots": [],
       "state_access": [],
-      "api_calls": [],
+      "api_calls": [
+        {
+          "method": "GET",
+          "endpoint": "/association/member/cpd-config/:orgId"
+        },
+        {
+          "method": "PATCH",
+          "endpoint": "/association/member/cpd-config/:orgId"
+        }
+      ],
       "routes_used_in": [
         "/_authenticated/org/$orgSlug/officer/settings/cpd"
       ],
@@ -14097,7 +14604,24 @@
       "events_out": [],
       "slots": [],
       "state_access": [],
-      "api_calls": [],
+      "api_calls": [
+        {
+          "method": "GET",
+          "endpoint": "/accredited-providers/:orgId"
+        },
+        {
+          "method": "POST",
+          "endpoint": "/accredited-providers/:orgId"
+        },
+        {
+          "method": "PATCH",
+          "endpoint": "/accredited-providers/:orgId/:id"
+        },
+        {
+          "method": "DELETE",
+          "endpoint": "/accredited-providers/:orgId/:id"
+        }
+      ],
       "routes_used_in": [
         "/_authenticated/org/$orgSlug/officer/settings/providers"
       ],
@@ -14284,7 +14808,12 @@
       "events_out": [],
       "slots": [],
       "state_access": [],
-      "api_calls": [],
+      "api_calls": [
+        {
+          "method": "GET",
+          "endpoint": "/communications/templates/:edit"
+        }
+      ],
       "routes_used_in": [
         "/_authenticated/org/$orgSlug/officer/communications/templates/new"
       ],
@@ -14460,7 +14989,12 @@
       "events_out": [],
       "slots": [],
       "state_access": [],
-      "api_calls": [],
+      "api_calls": [
+        {
+          "method": "GET",
+          "endpoint": "/association/member/dues-member-summary/:orgId/:memberId"
+        }
+      ],
       "routes_used_in": [
         "/_authenticated/org/$orgSlug/officer/finances/members/$memberId"
       ],

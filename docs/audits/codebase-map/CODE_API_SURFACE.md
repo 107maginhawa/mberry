@@ -78,7 +78,7 @@
 | `POST /association/events/:eventId/publish` | `publishEvent` | true | 0 |  | HIGH |
 | `GET /association/events/:eventId/waitlist` | `listWaitlistEntries` | true | 0 |  | HIGH |
 | `POST /association/events/:eventId/waitlist/:entryId/promote` | `promoteWaitlistEntry` | true | 0 |  | HIGH |
-| `POST /association/member/affiliation-transfers` | `createAffiliationTransfer` | true | 0 |  | HIGH |
+| `POST /association/member/affiliation-transfers` | `createAffiliationTransfer` | true | 1 |  | HIGH |
 | `GET /association/member/affiliation-transfers` | `listAffiliationTransfers` | true | 0 |  | HIGH |
 | `GET /association/member/affiliation-transfers/:transferId` | `getAffiliationTransfer` | true | 0 |  | HIGH |
 | `POST /association/member/affiliation-transfers/:transferId/approve-source` | `approveTransferBySource` | true | 0 |  | HIGH |
@@ -87,7 +87,7 @@
 | `POST /association/member/affiliation-transfers/:transferId/deny` | `denyAffiliationTransfer` | true | 0 |  | HIGH |
 | `GET /association/member/aging-buckets/:organizationId` | `getAgingBucket` | true | 0 |  | HIGH |
 | `POST /association/member/aging-buckets/:organizationId/recalculate` | `recalculateAgingBucket` | true | 0 |  | HIGH |
-| `POST /association/member/applications` | `createMembershipApplication` | true | 0 |  | HIGH |
+| `POST /association/member/applications` | `createMembershipApplication` | true | 1 |  | HIGH |
 | `GET /association/member/applications` | `listMembershipApplications` | true | 1 |  | HIGH |
 | `POST /association/member/applications/bulk-approve` | `bulkApproveMembershipApplications` | true | 1 |  | HIGH |
 | `GET /association/member/applications/:applicationId` | `getMembershipApplication` | true | 0 |  | HIGH |
@@ -96,7 +96,7 @@
 | `POST /association/member/applications/:applicationId/approve` | `approveMembershipApplication` | true | 1 |  | HIGH |
 | `POST /association/member/applications/:applicationId/deny` | `denyMembershipApplication` | true | 1 |  | HIGH |
 | `POST /association/member/ballots` | `castBallot` | true | 1 |  | HIGH |
-| `GET /association/member/ballots` | `listBallots` | true | 0 |  | HIGH |
+| `GET /association/member/ballots` | `listBallots` | true | 1 |  | HIGH |
 | `POST /association/member/candidates` | `createCandidate` | true | 1 |  | HIGH |
 | `GET /association/member/candidates` | `listCandidates` | true | 0 |  | HIGH |
 | `GET /association/member/candidates/:candidateId` | `getCandidate` | true | 0 |  | HIGH |
@@ -132,7 +132,7 @@
 | `POST /association/member/credits/adjust` | `adjustCreditEntry` | true | 0 |  | HIGH |
 | `POST /association/member/credits/manual` | `awardManualCredit` | true | 1 |  | HIGH |
 | `POST /association/member/credits/void-event` | `voidCreditEntry` | true | 1 |  | HIGH |
-| `POST /association/member/directory/profiles` | `createDirectoryProfile` | true | 0 |  | HIGH |
+| `POST /association/member/directory/profiles` | `createDirectoryProfile` | true | 1 |  | HIGH |
 | `GET /association/member/directory/profiles` | `listDirectoryProfiles` | true | 0 |  | HIGH |
 | `GET /association/member/directory/profiles/:profileId` | `getDirectoryProfile` | true | 0 |  | HIGH |
 | `PATCH /association/member/directory/profiles/:profileId` | `updateDirectoryProfile` | true | 0 |  | HIGH |
@@ -140,7 +140,7 @@
 | `GET /association/member/directory/search` | `searchDirectory` | true | 1 |  | HIGH |
 | `GET /association/member/directory/search/:personId/public` | `getPublicDirectoryProfile` | true | 0 |  | HIGH |
 | `POST /association/member/dues-configs` | `createDuesConfig` | true | 1 |  | HIGH |
-| `GET /association/member/dues-configs` | `listDuesConfigs` | true | 0 |  | HIGH |
+| `GET /association/member/dues-configs` | `listDuesConfigs` | true | 1 |  | HIGH |
 | `GET /association/member/dues-configs/:duesConfigId` | `getDuesConfig` | true | 1 |  | HIGH |
 | `PATCH /association/member/dues-configs/:duesConfigId` | `updateDuesConfig` | true | 1 |  | HIGH |
 | `DELETE /association/member/dues-configs/:duesConfigId` | `deleteDuesConfig` | true | 0 |  | HIGH |
@@ -193,7 +193,7 @@
 | `GET /association/member/license-renewal-alerts` | `listLicenseRenewalAlerts` | true | 0 |  | HIGH |
 | `POST /association/member/license-renewal-alerts/:alertId/acknowledge` | `acknowledgeLicenseRenewalAlert` | true | 0 |  | HIGH |
 | `POST /association/member/licenses` | `createProfessionalLicense` | true | 0 |  | HIGH |
-| `GET /association/member/licenses` | `listProfessionalLicenses` | true | 0 |  | HIGH |
+| `GET /association/member/licenses` | `listProfessionalLicenses` | true | 1 |  | HIGH |
 | `GET /association/member/licenses/:licenseId` | `getProfessionalLicense` | true | 0 |  | HIGH |
 | `PATCH /association/member/licenses/:licenseId` | `updateProfessionalLicense` | true | 0 |  | HIGH |
 | `DELETE /association/member/licenses/:licenseId` | `deleteProfessionalLicense` | true | 0 |  | HIGH |
@@ -210,10 +210,10 @@
 | `POST /association/member/memberships/:membershipId/resign` | `resignMembership` | true | 0 |  | HIGH |
 | `POST /association/member/memberships/:membershipId/terminate` | `terminateMembership` | true | 1 |  | HIGH |
 | `POST /association/member/officer-terms` | `createOfficerTerm` | true | 0 |  | HIGH |
-| `GET /association/member/officer-terms` | `listOfficerTerms` | true | 0 |  | HIGH |
+| `GET /association/member/officer-terms` | `listOfficerTerms` | true | 1 |  | HIGH |
 | `GET /association/member/officer-terms/:termId` | `getOfficerTerm` | true | 0 |  | HIGH |
 | `PATCH /association/member/officer-terms/:termId` | `updateOfficerTerm` | true | 0 |  | HIGH |
-| `DELETE /association/member/officer-terms/:termId` | `deleteOfficerTerm` | true | 0 |  | HIGH |
+| `DELETE /association/member/officer-terms/:termId` | `deleteOfficerTerm` | true | 1 |  | HIGH |
 | `GET /association/member/org-profile/:organizationId` | `getOrganizationProfile` | true | 0 |  | HIGH |
 | `PUT /association/member/org-profile/:organizationId` | `updateOrganizationProfile` | true | 0 |  | HIGH |
 | `POST /association/member/positions` | `createPosition` | true | 0 |  | HIGH |
@@ -231,19 +231,19 @@
 | `GET /association/member/royalty-splits/:royaltySplitId` | `getRoyaltySplit` | true | 0 |  | HIGH |
 | `PATCH /association/member/royalty-splits/:royaltySplitId` | `updateRoyaltySplit` | true | 0 |  | HIGH |
 | `DELETE /association/member/royalty-splits/:royaltySplitId` | `deleteRoyaltySplit` | true | 0 |  | HIGH |
-| `POST /association/member/special-assessments` | `createSpecialAssessment` | true | 0 |  | HIGH |
-| `PUT /association/member/special-assessments/:id` | `updateSpecialAssessment` | true | 0 |  | HIGH |
-| `DELETE /association/member/special-assessments/:id` | `deleteSpecialAssessment` | true | 0 |  | HIGH |
-| `POST /association/member/special-assessments/:id/apply` | `applySpecialAssessment` | true | 0 |  | HIGH |
+| `POST /association/member/special-assessments` | `createSpecialAssessment` | true | 1 |  | HIGH |
+| `PUT /association/member/special-assessments/:id` | `updateSpecialAssessment` | true | 1 |  | HIGH |
+| `DELETE /association/member/special-assessments/:id` | `deleteSpecialAssessment` | true | 1 |  | HIGH |
+| `POST /association/member/special-assessments/:id/apply` | `applySpecialAssessment` | true | 1 |  | HIGH |
 | `GET /association/member/special-assessments/:id/collection` | `getSpecialAssessmentCollection` | true | 0 |  | HIGH |
-| `GET /association/member/special-assessments/:orgId` | `listSpecialAssessments` | true | 0 |  | HIGH |
+| `GET /association/member/special-assessments/:orgId` | `listSpecialAssessments` | true | 1 |  | HIGH |
 | `POST /association/member/tiers` | `createMembershipTier` | true | 0 |  | HIGH |
-| `GET /association/member/tiers` | `listMembershipTiers` | true | 0 |  | HIGH |
+| `GET /association/member/tiers` | `listMembershipTiers` | true | 1 |  | HIGH |
 | `GET /association/member/tiers/:tierId` | `getMembershipTier` | true | 0 |  | HIGH |
 | `PATCH /association/member/tiers/:tierId` | `updateMembershipTier` | true | 0 |  | HIGH |
 | `DELETE /association/member/tiers/:tierId` | `deleteMembershipTier` | true | 0 |  | HIGH |
-| `POST /association/message-templates` | `createMessageTemplate` | true | 0 |  | HIGH |
-| `GET /association/message-templates` | `searchMessageTemplates` | true | 0 |  | HIGH |
+| `POST /association/message-templates` | `createMessageTemplate` | true | 1 |  | HIGH |
+| `GET /association/message-templates` | `searchMessageTemplates` | true | 1 |  | HIGH |
 | `GET /association/message-templates/:templateId` | `getMessageTemplate` | true | 0 |  | HIGH |
 | `PATCH /association/message-templates/:templateId` | `updateMessageTemplate` | true | 0 |  | HIGH |
 | `DELETE /association/message-templates/:templateId` | `deleteMessageTemplate` | true | 0 |  | HIGH |
@@ -257,7 +257,7 @@
 | `POST /association/messages/:messageId/schedule` | `scheduleMessage` | true | 0 |  | HIGH |
 | `POST /association/messages/:messageId/send` | `sendMessage` | true | 1 |  | HIGH |
 | `GET /association/person-subscriptions` | `listPersonSubscriptions` | true | 0 |  | HIGH |
-| `POST /association/person-subscriptions/bulk-update` | `bulkUpdatePersonSubscriptions` | true | 0 |  | HIGH |
+| `POST /association/person-subscriptions/bulk-update` | `bulkUpdatePersonSubscriptions` | true | 1 |  | HIGH |
 | `PATCH /association/person-subscriptions/:subscriptionId` | `updatePersonSubscription` | true | 0 |  | HIGH |
 | `POST /association/subscription-topics` | `createSubscriptionTopic` | true | 0 |  | HIGH |
 | `GET /association/subscription-topics/:topicId` | `getSubscriptionTopic` | true | 0 |  | HIGH |
@@ -343,7 +343,7 @@
 | `PATCH /comms/chat-rooms/:room/video-call/participant` | `updateVideoCallParticipant` | true | 0 |  | HIGH |
 | `GET /comms/ice-servers` | `getIceServers` | true | 1 |  | HIGH |
 | `GET /communications/announcements/detail/:id` | `getAnnouncement` | true | 0 |  | HIGH |
-| `PATCH /communications/announcements/:id` | `updateAnnouncement` | true | 0 |  | HIGH |
+| `PATCH /communications/announcements/:id` | `updateAnnouncement` | true | 1 |  | HIGH |
 | `DELETE /communications/announcements/:id` | `deleteAnnouncement` | true | 0 |  | HIGH |
 | `POST /communications/announcements/:id/archive` | `archiveAnnouncement` | true | 0 |  | HIGH |
 | `POST /communications/announcements/:id/publish` | `publishAnnouncement` | true | 0 |  | HIGH |
@@ -351,9 +351,9 @@
 | `GET /communications/announcements/:id/stats` | `getAnnouncementStats` | true | 0 |  | HIGH |
 | `GET /communications/announcements/:organizationId` | `listAnnouncements` | true | 1 |  | HIGH |
 | `POST /communications/announcements/:organizationId` | `createAnnouncement` | true | 0 |  | HIGH |
-| `POST /communications/segments` | `createSavedSegment` | true | 0 |  | HIGH |
-| `GET /communications/segments` | `listSavedSegments` | true | 0 |  | HIGH |
-| `DELETE /communications/segments/:id` | `deleteSavedSegment` | true | 0 |  | HIGH |
+| `POST /communications/segments` | `createSavedSegment` | true | 1 |  | HIGH |
+| `GET /communications/segments` | `listSavedSegments` | true | 1 |  | HIGH |
+| `DELETE /communications/segments/:id` | `deleteSavedSegment` | true | 1 |  | HIGH |
 | `POST /creatives` | `createCreative` | true | 0 |  | HIGH |
 | `POST /creatives/:creativeId/report` | `reportAd` | true | 0 |  | HIGH |
 | `POST /creatives/:creativeId/review` | `reviewCreative` | true | 0 |  | HIGH |
@@ -381,8 +381,8 @@
 | `GET /membership/members/:organizationId` | `listOrgMembers` | true | 0 |  | HIGH |
 | `GET /membership/org-profile/:organizationId` | `getOrgProfile` | true | 0 |  | HIGH |
 | `PUT /membership/org-profile/:organizationId` | `updateOrgProfile` | true | 0 |  | HIGH |
-| `GET /notifs` | `listNotifications` | true | 0 |  | HIGH |
-| `POST /notifs/read-all` | `markAllNotificationsAsRead` | true | 0 |  | HIGH |
+| `GET /notifs` | `listNotifications` | true | 1 |  | HIGH |
+| `POST /notifs/read-all` | `markAllNotificationsAsRead` | true | 1 |  | HIGH |
 | `GET /notifs/:notif` | `getNotification` | true | 0 |  | HIGH |
 | `POST /notifs/:notif/read` | `markNotificationAsRead` | true | 0 |  | HIGH |
 | `GET /officer-terms/:organizationId` | `listOfficerTermsSummary` | true | 0 |  | HIGH |
@@ -399,13 +399,13 @@
 | `GET /persons` | `listPersons` | true | 0 |  | HIGH |
 | `PATCH /persons/me` | `updateMyProfile` | true | 0 |  | HIGH |
 | `POST /persons/me/cancel-delete` | `cancelMyAccountDeletion` | true | 1 |  | HIGH |
-| `POST /persons/me/credit-entries` | `createMyCreditEntry` | true | 0 |  | HIGH |
-| `GET /persons/me/credit-entries` | `listMyCreditEntries` | true | 0 |  | HIGH |
-| `GET /persons/me/credit-summary` | `getMyCreditSummary` | true | 0 |  | HIGH |
-| `GET /persons/me/credits` | `getMyCredits` | true | 0 |  | HIGH |
+| `POST /persons/me/credit-entries` | `createMyCreditEntry` | true | 1 |  | HIGH |
+| `GET /persons/me/credit-entries` | `listMyCreditEntries` | true | 1 |  | HIGH |
+| `GET /persons/me/credit-summary` | `getMyCreditSummary` | true | 1 |  | HIGH |
+| `GET /persons/me/credits` | `getMyCredits` | true | 1 |  | HIGH |
 | `POST /persons/me/delete` | `requestMyAccountDeletion` | true | 1 |  | HIGH |
 | `GET /persons/me/export` | `exportMyData` | true | 1 |  | HIGH |
-| `GET /persons/me/memberships` | `getMyMemberships` | true | 0 |  | HIGH |
+| `GET /persons/me/memberships` | `getMyMemberships` | true | 1 |  | HIGH |
 | `GET /persons/me/notification-preferences` | `getMyNotificationPreferences` | true | 0 |  | HIGH |
 | `PATCH /persons/me/notification-preferences` | `updateMyNotificationPreferences` | true | 0 |  | HIGH |
 | `GET /persons/me/officer-role/:organizationId` | `getMyOfficerRole` | true | 1 |  | HIGH |
@@ -425,7 +425,7 @@
 | `GET /public/orgs` | `listPublicOrgs` | ? | 0 |  | HIGH |
 | `POST /read-all` | `markAllNotificationsRead` | true | 0 |  | HIGH |
 | `POST /reviews/` | `createReview` | true | 0 |  | HIGH |
-| `GET /reviews/` | `listReviews` | true | 0 |  | HIGH |
+| `GET /reviews/` | `listReviews` | true | 1 |  | HIGH |
 | `GET /reviews/:review` | `getReview` | true | 0 |  | HIGH |
 | `DELETE /reviews/:review` | `deleteReview` | true | 0 |  | HIGH |
 | `GET /storage/files` | `listFiles` | true | 0 |  | HIGH |
@@ -436,7 +436,7 @@
 | `GET /storage/files/:file/download` | `getFileDownload` | true | 0 |  | HIGH |
 | `POST /surveys/` | `createSurvey` | true | 0 |  | HIGH |
 | `GET /surveys/` | `listSurveys` | true | 1 |  | HIGH |
-| `GET /surveys/analytics/nps-trends` | `getNpsTrends` | true | 0 |  | HIGH |
+| `GET /surveys/analytics/nps-trends` | `getNpsTrends` | true | 1 |  | HIGH |
 | `DELETE /surveys/my-responses` | `deleteMemberResponses` | true | 0 |  | HIGH |
 | `GET /surveys/:survey` | `getSurvey` | true | 0 |  | HIGH |
 | `PATCH /surveys/:survey` | `updateSurvey` | true | 0 |  | HIGH |
@@ -454,4 +454,64 @@
 | `GET /vendors/:vendorId` | `getVendor` | true | 0 |  | HIGH |
 | `PATCH /vendors/:vendorId` | `updateVendor` | true | 0 |  | HIGH |
 | `POST /vendors/:vendorId/verify` | `verifyVendor` | true | 0 |  | HIGH |
+| `GET /communications/announcements/:firstOrgId` | — | ? | 1 | ⚠️ | LOW |
+| `GET /credit-compliance/:firstOrgId` | — | ? | 1 | ⚠️ | LOW |
+| `POST /notifs/:id/read` | — | ? | 1 | ⚠️ | LOW |
+| `GET /persons/me/officer-role/:orgId` | — | ? | 1 | ⚠️ | LOW |
+| `GET /public/orgs*` | — | ? | 1 | ⚠️ | LOW |
+| `GET /public/org/*` | — | ? | 1 | ⚠️ | LOW |
+| `GET /persons/me` | — | ? | 1 | ⚠️ | LOW |
+| `GET /pay/*/validate` | — | ? | 1 | ⚠️ | LOW |
+| `POST /pay/*/checkout` | — | ? | 1 | ⚠️ | LOW |
+| `GET /public/verify/:certificateNumber` | — | ? | 1 | ⚠️ | LOW |
+| `GET /association/member/credentials/lookup/*` | — | ? | 1 | ⚠️ | LOW |
+| `GET /verify/*` | — | ? | 1 | ⚠️ | LOW |
+| `POST /persons/me/export` | — | ? | 1 | ⚠️ | LOW |
+| `GET /membership/members/:orgId` | — | ? | 1 | ⚠️ | LOW |
+| `GET /membership/applications/:orgId` | — | ? | 1 | ⚠️ | LOW |
+| `GET /dues/dashboard/:orgId` | — | ? | 1 | ⚠️ | LOW |
+| `PUT /membership/org-profile/:orgId` | — | ? | 1 | ⚠️ | LOW |
+| `GET /comms/messages/search` | — | ? | 1 | ⚠️ | LOW |
+| `GET /communications/announcements/:orgId` | — | ? | 1 | ⚠️ | LOW |
+| `POST /communications/announcements/:orgId` | — | ? | 1 | ⚠️ | LOW |
+| `GET /communications/subscriptions/person` | — | ? | 1 | ⚠️ | LOW |
+| `PATCH /association/message-templates/:id` | — | ? | 1 | ⚠️ | LOW |
+| `DELETE /association/message-templates/:id` | — | ? | 1 | ⚠️ | LOW |
+| `GET /events/my` | — | ? | 1 | ⚠️ | LOW |
+| `GET /training/my` | — | ? | 1 | ⚠️ | LOW |
+| `GET /notifications/my` | — | ? | 1 | ⚠️ | LOW |
+| `GET /association/member/directory/:personId/public` | — | ? | 1 | ⚠️ | LOW |
+| `GET /association/member/credits` | — | ? | 1 | ⚠️ | LOW |
+| `GET /association/member/chapters` | — | ? | 1 | ⚠️ | LOW |
+| `GET /association/member/professional-licenses` | — | ? | 1 | ⚠️ | LOW |
+| `POST /surveys/:id/responses` | — | ? | 1 | ⚠️ | LOW |
+| `GET /surveys` | — | ? | 1 | ⚠️ | LOW |
+| `GET /surveys/:surveyId` | — | ? | 1 | ⚠️ | LOW |
+| `POST /surveys/:surveyId/responses` | — | ? | 1 | ⚠️ | LOW |
+| `POST /surveys` | — | ? | 1 | ⚠️ | LOW |
+| `PATCH /surveys/:id` | — | ? | 1 | ⚠️ | LOW |
+| `DELETE /surveys/:id` | — | ? | 1 | ⚠️ | LOW |
+| `POST /surveys/:id/clone` | — | ? | 1 | ⚠️ | LOW |
+| `GET /surveys/:surveyId/responses` | — | ? | 1 | ⚠️ | LOW |
+| `PATCH /association/member/directory/profiles/:id` | — | ? | 1 | ⚠️ | LOW |
+| `GET /association/member/aging-buckets/:orgId` | — | ? | 1 | ⚠️ | LOW |
+| `GET /communications/announcements/detail/:announcementId` | — | ? | 1 | ⚠️ | LOW |
+| `GET /certificates/verify/*` | — | ? | 1 | ⚠️ | LOW |
+| `GET /association/member/compliance/:orgId*` | — | ? | 1 | ⚠️ | LOW |
+| `POST /association/member/compliance/:orgId/refresh` | — | ? | 1 | ⚠️ | LOW |
+| `POST /communications/announcements/:announcementId/publish` | — | ? | 1 | ⚠️ | LOW |
+| `POST /communications/announcements/:announcementId/archive` | — | ? | 1 | ⚠️ | LOW |
+| `DELETE /communications/announcements/:announcementId` | — | ? | 1 | ⚠️ | LOW |
+| `GET /communications/announcements/detail/:edit` | — | ? | 1 | ⚠️ | LOW |
+| `GET /communications/announcements` | — | ? | 1 | ⚠️ | LOW |
+| `GET /association/member/dues-metrics/:orgId` | — | ? | 1 | ⚠️ | LOW |
+| `GET /credit-compliance/:orgId` | — | ? | 1 | ⚠️ | LOW |
+| `GET /association/member/cpd-config/:orgId` | — | ? | 1 | ⚠️ | LOW |
+| `PATCH /association/member/cpd-config/:orgId` | — | ? | 1 | ⚠️ | LOW |
+| `GET /accredited-providers/:orgId` | — | ? | 1 | ⚠️ | LOW |
+| `POST /accredited-providers/:orgId` | — | ? | 1 | ⚠️ | LOW |
+| `PATCH /accredited-providers/:orgId/:id` | — | ? | 1 | ⚠️ | LOW |
+| `DELETE /accredited-providers/:orgId/:id` | — | ? | 1 | ⚠️ | LOW |
+| `GET /communications/templates/:edit` | — | ? | 1 | ⚠️ | LOW |
+| `GET /association/member/dues-member-summary/:orgId/:memberId` | — | ? | 1 | ⚠️ | LOW |
 <!-- oli:regen:code-api-surface:end -->
