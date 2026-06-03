@@ -50,17 +50,18 @@ Defer to a fresh `/gsd-phase` cycle: each row needs `/typespec` → `bun run bui
 | RES-13 | `GET /association/member/dues-metrics/:orgId` | **hand-wired BE exists** (`handlers/association:member/getDuesMetrics.ts`, `app.ts:574`) | wrap existing hand-wired in TypeSpec OR document as approved hand-wired exception | `dues` / `association:member` |
 | RES-15 | `GET /association/member/dues-member-summary/:orgId/:memberId` | **hand-wired BE exists** (`handlers/association:member/getDuesMemberSummary.ts`) | wrap in TypeSpec OR document as approved hand-wired | `dues` / `association:member` |
 
-## Bucket C — Engine-polish artifact (3)
+## Bucket C — Engine-polish artifact (3) — FILED UPSTREAM 2026-06-03
 
-These are extractor false positives from `@oli/engine`; no codebase fix needed. Carry as backlog.
+These are extractor false positives from `@oli/engine`; no codebase fix needed.
+**Status:** filed upstream at `~/Desktop/oli-engine/BACKLOG.md` (entries `E1-RES-02/14/16`). Carry as P3 in TRACE_REPORT until engine fix lands.
 
-| ID | Phantom signature | Why FP | Backlog entry |
+| ID | Phantom signature | Why FP | Upstream entry |
 |---|---|---|---|
-| RES-02 | `GET /verify/*` (wildcard) | engine confused TanStack FE route `routes/verify/$certificateNumber.tsx` path with API call extraction | engine: skip FE route files when building `consumer_count` |
-| RES-14 | `GET /communications/templates/:edit` | template literal `${edit}` where `edit` is a variable — engine treated `edit` as literal segment name | engine: param-anon fallback should fire on identifiers not just `id`/`uuid`/etc. |
-| RES-16 | `GET /public/orgs*` (wildcard) | engine extracted wildcard from `${qs ? '?'+qs : ''}` query-string suffix | engine: distinguish query suffix from path wildcard |
+| RES-02 | `GET /verify/*` (wildcard) | engine confused TanStack FE route `routes/verify/$certificateNumber.tsx` path with API call extraction | `BACKLOG.md` § Extractor false positives — `E1-RES-02` |
+| RES-14 | `GET /communications/templates/:edit` | template literal `${edit}` where `edit` is a variable — engine treated `edit` as literal segment name | `BACKLOG.md` § Extractor false positives — `E1-RES-14` |
+| RES-16 | `GET /public/orgs*` (wildcard) | engine extracted wildcard from `${qs ? '?'+qs : ''}` query-string suffix | `BACKLOG.md` § Extractor false positives — `E1-RES-16` |
 
-→ File against `@oli/engine` issue tracker (see `project_oli_engine` memory). Carry as `WARN-WITH-REAL-FINDINGS` in `/oli-check`.
+Companion filing — `TR-PHANTOM-ENGINE-FP × 4` (`/persons/me`, `/persons/me/export`, `/surveys`, `/surveys`) filed at the same time under `BACKLOG.md` § Phantom-detector literal-vs-pattern boundary FPs (`E2-PERSONS-ME`, `E2-PERSONS-ME-EXPORT`, `E2-SURVEYS-LIST`, `E2-SURVEYS-CREATE`). Cross-ref `docs/audits/CHECK_LEARNINGS.md` row 43.
 
 ## Execution Plan
 

@@ -3,10 +3,10 @@
 ---
 oli-version: "1.0"
 based-on:
-  - docs/trace/TRACE_REPORT.md (rev 8, map@96eb61e3)
+  - docs/trace/TRACE_REPORT.md (rev 9, map@96eb61e3 — doc-only edits since rev 8)
   - docs/audits/codebase-map/.map-meta.json (v6, sha 96eb61e3)
-  - docs/audits/PHANTOM_TRIAGE.md
-last-modified: 2026-06-03T23:30:00Z
+  - docs/audits/PHANTOM_TRIAGE.md (Bucket C status: filed-upstream)
+last-modified: 2026-06-03T23:55:00Z
 last-modified-by: oli-check
 ---
 
@@ -24,9 +24,9 @@ last-modified-by: oli-check
 
 ## GATE VERDICT
 
-`GATE: PASS-WITH-ROADMAP-DEFER`
+`GATE: PASS`
 
-Driver: 0 P0, 0 actionable P1 (only WF-U1 roadmap-defer remains — non-actionable by project policy per CHECK_LEARNINGS row 46 / 49). 0 `✗ gap`. All Bucket B + ZA + BR-42 overload findings cleared this session.
+Driver: 0 P0, 0 P1, 0 actionable P2, 0 actionable P3. Rev 9 cleared P3 backlog: WF-U1 ratchet-cleared P1→P3 (MASTER_PRD §238 + §158 Phase 2 citation); TR-CODEONLY-CSRF annotated accepted-exempt; TR-PHANTOM-ENGINE-FP × 4 + Bucket C × 3 filed upstream at `~/Desktop/oli-engine/BACKLOG.md`; TR-API-CONTRACTS-DOC-DRIFT partial-cleared (m10/m11 prose normalized, m01-m04 Better-Auth-managed carried).
 
 ## Triage — Fix-First Ranking
 
@@ -43,7 +43,7 @@ Driver: 0 P0, 0 actionable P1 (only WF-U1 roadmap-defer remains — non-actionab
 
 | Dimension | Verdict | Report | report_age | Key findings | unverified |
 |---|---|---|---|---|---|
-| Traceability | PASS-WITH-ROADMAP-DEFER | `docs/trace/TRACE_REPORT.md` (rev 8) | current (map@96eb61e3) | 0 P0 / 1 P1 (0 actionable) / 0 P2 / 9 P3 | 0 |
+| Traceability | PASS | `docs/trace/TRACE_REPORT.md` (rev 9) | current (map@96eb61e3, doc-only edits since) | 0 P0 / 0 P1 / 0 P2 / 9 P3 (0 actionable; all accepted-exempt / filed-upstream / deferred-future-scope / partial-cleared / carried) | 0 |
 
 Other dimensions: not run (isolated `--traceability` invocation).
 
@@ -63,9 +63,9 @@ Other dimensions: not run (isolated `--traceability` invocation).
 | m10-credit-tracking | ✓ |
 | m11-documents-credentials | ✓ |
 | m12-elections-governance | ✓ |
-| m13-professional-feed | ✓ (WF-U1 roadmap-defer) |
+| m13-professional-feed | ✓ (WF-U1 ratchet-cleared → P3 deferred-future-scope, MASTER_PRD §238) |
 | m14-national-dashboard | ✓ |
-| m15-job-board | ✓ (WF-U1 roadmap-defer) |
+| m15-job-board | ✓ (WF-U1 ratchet-cleared → P3 deferred-future-scope, MASTER_PRD §238) |
 | m16-nps-reviews | ✓ |
 | m17-content-library | ✓ |
 | m18-surveys-polls | ✓ |
@@ -78,13 +78,14 @@ No `✗ gap`. All 22 modules traced. ZA-01 + ZA-02 cleared (m20/m22 now anchored
 
 ## Overall
 
-**Worst verdict**: PASS-WITH-ROADMAP-DEFER. Pipeline unblocked.
+**Worst verdict**: PASS. Pipeline fully unblocked.
 
 **Actionable P1 drop trajectory**:
 - rev 5 (2026-05-31): 6 P1
 - rev 6 (2026-06-03 early): 16 P1 (engine detection-surface expansion, not regression)
 - rev 7 (2026-06-03 mid, post Bucket A): 8 actionable P1 ✓
-- **rev 8 (2026-06-03 late, post Bucket B + ZA + BR-42): 0 actionable P1 ✓✓**
+- rev 8 (2026-06-03 late, post Bucket B + ZA + BR-42): 0 actionable P1 ✓✓
+- **rev 9 (2026-06-03 night, P3 backlog triage): 0 raw P1 ✓✓✓ (WF-U1 ratchet-cleared)**
 
 Session delivered 8 atomic commits clearing 8 actionable P1 findings:
 
@@ -100,8 +101,10 @@ Session delivered 8 atomic commits clearing 8 actionable P1 findings:
 
 ## What's Next
 
-Pipeline unblocked. Remaining backlog:
-- WF-U1 (m13/m15) — pending ROADMAP build; non-actionable until roadmap features ship.
-- 9 P3 (TR-CODEONLY-CSRF + 4 engine-FP + 3 Bucket C + 1 doc-drift) — engine-polish backlog, no project action.
+Pipeline fully unblocked. Remaining 9 P3 are all terminal:
+- **accepted-deferred** × 1: WF-U1 (m13/m15) — MASTER_PRD §238 Phase 2 post-pilot.
+- **accepted-exempt** × 1: TR-CODEONLY-CSRF — bootstrap endpoint, annotated `oli-trace-accept="code-only"` at `app.ts:268`.
+- **filed-upstream** × 7: 4 phantom-engine-FP + 3 Bucket C extractor-FP → `~/Desktop/oli-engine/BACKLOG.md`.
+- **partial-cleared / carried**: TR-API-CONTRACTS-DOC-DRIFT — m10/m11 prose normalized this rev; m01-m04 Better-Auth-managed prose carried (reconciliation cost > benefit).
 
-Ready for `/ship` or next phase work.
+No project action remaining. Ready for `/ship` or next phase work.
