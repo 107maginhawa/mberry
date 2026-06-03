@@ -213,6 +213,56 @@ Each endpoint is anchored to ≥1 WF (workflow) and/or BR (business rule) for tr
 | SMTP (external) | Default email provider |
 | OneSignal (external) | Multi-channel provider option |
 
+## 10b. Acceptance Criteria
+
+### AC-M22-001: Suppression List Drops Delivery
+**Given** a recipient email is present on the suppression list with status `active`
+**When** a queue item targeting that recipient is processed
+**Then** the queue item transitions to `suppressed`, no SMTP/Postmark call is made, and an `EmailSent` event is NOT emitted
+**Anchors:** WF-124 (Process Queue), BR-52 (M22-R1)
+
+### AC-M22-002: Inactive Template Rejected at Enqueue
+**Given** a template with status `draft` or `archived`
+**When** an enqueue request references that template
+**Then** the API rejects with 400 `TEMPLATE_INACTIVE` and no queue item is created
+**Anchors:** WF-123 (Enqueue Email), BR-53 (M22-R2)
+
+### AC-M22-003: Max Retries Marks Queue Item Failed
+**Given** a queue item that has reached `max_retries` (default 3)
+**When** the next retry attempt fails
+**Then** the queue item transitions to `failed`, an `EmailFailed` event is emitted, and no further retries are scheduled
+**Anchors:** WF-127 (Retry Failed Delivery), BR-54 (M22-R3)
+
+### AC-M22-004: Hard Bounce Auto-Suppresses Address
+**Given** the provider webhook reports a hard bounce for recipient X
+**When** the bounce is processed
+**Then** an entry is added to the suppression list with reason `hard_bounce` and an `EmailBounced` event is emitted
+**Anchors:** WF-125 (Handle Bounce), BR-55 (M22-R4)
+
+### AC-M22-005: Complaint Auto-Suppresses Address
+**Given** the provider webhook reports a complaint for recipient X
+**When** the complaint is processed
+**Then** an entry is added to the suppression list with reason `complaint` and an `EmailComplaint` event is emitted
+**Anchors:** WF-126 (Handle Complaint), BR-56 (M22-R5)
+
+### AC-M22-006: Transactional Bypasses Marketing Suppression
+**Given** recipient email X has a suppression entry with category `marketing`
+**When** a queue item with `category: transactional` targets recipient X
+**Then** the queue item is delivered normally (suppression does NOT block) and `EmailSent` is emitted
+**Anchors:** WF-124, BR-57 (M22-R6)
+
+### AC-M22-007: Required Variables Validated Before Enqueue
+**Given** a template declaring required variable `firstName`
+**When** an enqueue request omits `firstName` from the variables map
+**Then** the API rejects with 400 `MISSING_REQUIRED_VARIABLES` and no queue item is created
+**Anchors:** WF-123, BR-58 (M22-R7)
+
+### AC-M22-008: Cancellation Captures Audit Trail
+**Given** a queue item in status `pending`
+**When** an admin cancels the queue item with reason "duplicate"
+**Then** the queue item transitions to `cancelled`, persists `cancelled_by`, `cancellation_reason`, and `cancelled_at`
+**Anchors:** WF-127, BR-59 (M22-R8)
+
 ## 11. AI Instructions
 
 When implementing this module:

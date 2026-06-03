@@ -231,6 +231,80 @@ Each endpoint anchors to one or more spec IDs (BR-* business rules from §4, WF-
 | person (M02) | Provider and client identity via person.id |
 | communications (M07) | Booking confirmation/cancellation notifications |
 
+## 10b. Acceptance Criteria
+
+### AC-M20-001: Slot Double-Booking Prevention
+**Given** a slot with status `booked` or `blocked`
+**When** a client attempts to create a booking for that slot
+**Then** the API returns 409 Conflict with code `SLOT_UNAVAILABLE` and no booking is created
+**Anchors:** WF-117 (Browse & Book), BR-69 (M20-R2)
+
+### AC-M20-002: Minimum Booking Window Enforcement
+**Given** a booking event with `min_booking_minutes = 120`
+**When** a client books a slot starting within 90 minutes of now
+**Then** the API rejects with 400 `BOOKING_TOO_SOON` and no booking is created
+**Anchors:** WF-117, BR-70 (M20-R3)
+
+### AC-M20-003: Maximum Advance Booking Cap
+**Given** a booking event with `max_booking_days = 30`
+**When** a client books a slot 45 days in the future
+**Then** the API rejects with 400 `BOOKING_TOO_FAR` and no booking is created
+**Anchors:** WF-117, BR-71 (M20-R4)
+
+### AC-M20-004: Cancellation Releases Slot
+**Given** a confirmed booking on slot S
+**When** the client cancels the booking
+**Then** slot S transitions to `available` and is bookable by another client
+**Anchors:** WF-119 (Cancel Booking), BR-73 (M20-R6)
+
+### AC-M20-005: Inactive Event Rejects New Bookings
+**Given** a booking event with status `paused` or `archived`
+**When** a client attempts to book any slot on that event
+**Then** the API rejects with 400 `EVENT_INACTIVE` and no booking is created
+**Anchors:** WF-117, BR-68 (M20-R1)
+
+### AC-M20-006: Schedule Exception Blocks Generated Slots
+**Given** a booking event with a schedule exception covering 2026-08-01
+**When** slot generation runs for 2026-08-01
+**Then** all slots on that date are created with status `blocked`
+**Anchors:** WF-116 (Manage Schedule Exceptions), BR-72 (M20-R5), WF-113 (Slot Generation)
+
+### AC-M20-007: Buffer Time Prevents Slot Overlap
+**Given** a booking event with `buffer_minutes = 15`
+**When** slot generation runs
+**Then** consecutive generated slots are separated by ≥ 15 minutes (no back-to-back without buffer)
+**Anchors:** WF-113, BR-74 (M20-R7)
+
+### AC-M20-008: Date-Range Validation on Event Create
+**Given** a create-event request with `effective_to` < `effective_from`
+**When** the request is validated
+**Then** the API rejects with 400 `INVALID_DATE_RANGE` and no event is created
+**Anchors:** WF-115 (Create Booking Event), BR-75 (M20-R8)
+
+### AC-M20-009: max_booking_days Bounds Check
+**Given** a create-event request with `max_booking_days = 400`
+**When** the request is validated
+**Then** the API rejects with 400 `INVALID_BOUND` (must be 0–365) and no event is created
+**Anchors:** WF-115, BR-76 (M20-R9)
+
+### AC-M20-010: Confirmation Timer Auto-Rejects Pending Bookings
+**Given** a booking in status `pending` with `confirmation_deadline` in the past
+**When** the confirmation timer job runs
+**Then** the booking transitions to `rejected` and the slot returns to `available`
+**Anchors:** WF-118 (Confirm/Reject Booking), WF-114 (Booking Confirmation Timer)
+
+### AC-M20-011: No-Show Flag Persisted
+**Given** a confirmed booking whose appointment time has passed
+**When** the provider marks the booking as no-show
+**Then** the booking record's `no_show` flag is `true` and the no-show actor + timestamp are recorded
+**Anchors:** WF-120 (Mark No-Show)
+
+### AC-M20-012: List My Bookings Filters by Actor Role
+**Given** an authenticated user with both client and provider roles
+**When** they call `GET /booking/my-bookings`
+**Then** the response returns the union of bookings where the user is client OR provider, ordered by start_time desc
+**Anchors:** WF-121 (List My Bookings)
+
 ## 11. AI Instructions
 
 When implementing this module:
