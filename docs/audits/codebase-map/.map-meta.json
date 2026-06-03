@@ -1,7 +1,7 @@
 {
   "version": 6,
-  "timestamp": "2026-06-03T05:20:18.664Z",
-  "git_sha": "3fad7c2fdf6d85ed45e123f0f9b8036b476de130",
+  "timestamp": "2026-06-03T05:28:27.050Z",
+  "git_sha": "2331bd9fe70ab599e331c0410a8b70d6430d85f1",
   "file_count": 1408,
   "frameworks": [
     "generic",
@@ -12,30 +12,30 @@
   "phase_timings": {
     "structural": 47,
     "module-map": 8,
-    "react": 5874,
-    "hono": 511,
-    "tanstack": 856,
-    "tanstack-mutations": 456,
-    "empty-vs-fail": 194,
-    "terminology": 2,
+    "react": 5746,
+    "hono": 470,
+    "tanstack": 797,
+    "tanstack-mutations": 434,
+    "empty-vs-fail": 186,
+    "terminology": 1,
     "data-model": 22,
-    "state-machines": 378,
-    "behavior": 330,
-    "data-flow": 186,
-    "api-usage": 0,
-    "spec-trace": 12
+    "state-machines": 373,
+    "behavior": 325,
+    "data-flow": 196,
+    "api-usage": 1,
+    "spec-trace": 14
   },
   "artifact_hashes": {
     "CODE_MODULE_MAP": "29c5f1646355015220b246cedc6c6ce434b98d4f62b3f5843a73f17a5d55c712",
     "CODE_COMPONENT_REGISTRY": "745d7775255c42a9edad0ff04561c38c91461d6d2421a237aa33a0353b71b82b",
     "CODE_ROUTE_MAP": "a6d92f117a1c2fa7bb3d3b5b149308359348a7735d6c47474c36a9d02180f30c",
     "CODE_DATA_FLOW": "acb33f429ad62f64b8565439d45791167570a11ff3a48c82de8a2359605a0867",
-    "CODE_API_SURFACE": "080ff525d7420a0ac4d19a2e43455e21a8e983c0b734f890df56492e1bcceea2",
+    "CODE_API_SURFACE": "754e69651d624efa76f7122a6e3da2e29c5adbbe637f8598266b74d9447aa7d5",
     "CODE_IMPORT_GRAPH": "c9bb126b52c8c012fbf52648b592d7ee7afac7ff8b3876f0767d9f5fc0bded2a",
     "CODE_TERMINOLOGY_MAP": "eff17e9546b3226ceaed9dbe3557aabd1d6e216b2845b06cf73b797e1a2a8e79",
     "CODE_STATE_MACHINES": "f9853943de048433511599dbbb0612f67c55e8975592fc21a5f17e87519b7755",
     "CODE_DATA_MODEL": "b7094ce2d8d027a4cb330189b264f46d1e10c442fcf6e177a69c1fed87a7136d",
-    "CODE_SPEC_TRACE": "4f1d6f3d21abee80d2eec5a37bf205509ad735d719b17857673183b928faf786",
+    "CODE_SPEC_TRACE": "1f528de3a75079d3c5576fa0243352705a3702c1ad8da50e8bba744da98fe460",
     "CODE_MUTATIONS": "f9415353dea4e722f70e23ae54ca1618029ba67ad8cc8b1ca440487227d44f0a"
   },
   "source_hashes": {

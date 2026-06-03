@@ -15,7 +15,9 @@
         "handler_function": "deleteOrgAccreditedProvider",
         "module": "handlers/association:operations"
       },
-      "consumers": [],
+      "consumers": [
+        "apps/memberry"
+      ],
       "status": "matched",
       "auth_drift": false
     },
@@ -457,7 +459,9 @@
         "handler_function": "deleteMessageTemplate",
         "module": "handlers/communication"
       },
-      "consumers": [],
+      "consumers": [
+        "apps/memberry"
+      ],
       "status": "matched",
       "auth_drift": false
     },
@@ -617,7 +621,9 @@
         "handler_function": "deleteAnnouncement",
         "module": "handlers/communication"
       },
-      "consumers": [],
+      "consumers": [
+        "apps/memberry"
+      ],
       "status": "matched",
       "auth_drift": false
     },
@@ -703,7 +709,9 @@
         "handler_function": "deleteSurvey",
         "module": "handlers/surveys"
       },
-      "consumers": [],
+      "consumers": [
+        "apps/memberry"
+      ],
       "status": "matched",
       "auth_drift": false
     },
@@ -736,7 +744,9 @@
         "handler_function": "listOrgAccreditedProviders",
         "module": "handlers/association:operations"
       },
-      "consumers": [],
+      "consumers": [
+        "apps/memberry"
+      ],
       "status": "matched",
       "auth_drift": false
     },
@@ -1308,7 +1318,9 @@
         "handler_function": "getAgingBucket",
         "module": "handlers/association:member"
       },
-      "consumers": [],
+      "consumers": [
+        "apps/memberry"
+      ],
       "status": "matched",
       "auth_drift": false
     },
@@ -1484,7 +1496,9 @@
         "handler_function": "getComplianceReport",
         "module": "handlers/association:member"
       },
-      "consumers": [],
+      "consumers": [
+        "apps/memberry"
+      ],
       "status": "matched",
       "auth_drift": false
     },
@@ -1582,7 +1596,9 @@
         "handler_function": "lookupCredentialPublic",
         "module": "handlers/association:member"
       },
-      "consumers": [],
+      "consumers": [
+        "apps/memberry"
+      ],
       "status": "matched",
       "auth_drift": false
     },
@@ -2850,7 +2866,9 @@
         "handler_function": "verifyCertificatePublic",
         "module": "handlers/association:member"
       },
-      "consumers": [],
+      "consumers": [
+        "apps/memberry"
+      ],
       "status": "matched",
       "auth_drift": false
     },
@@ -2970,7 +2988,9 @@
         "handler_function": "getAnnouncement",
         "module": "handlers/communication"
       },
-      "consumers": [],
+      "consumers": [
+        "apps/memberry"
+      ],
       "status": "matched",
       "auth_drift": false
     },
@@ -3005,7 +3025,9 @@
         "handler_function": "getCreditCompliance",
         "module": "handlers/association:member"
       },
-      "consumers": [],
+      "consumers": [
+        "apps/memberry"
+      ],
       "status": "matched",
       "auth_drift": false
     },
@@ -3021,7 +3043,9 @@
         "handler_function": "getDuesDashboard",
         "module": "handlers/dues"
       },
-      "consumers": [],
+      "consumers": [
+        "apps/memberry"
+      ],
       "status": "matched",
       "auth_drift": false
     },
@@ -3161,7 +3185,9 @@
         "handler_function": "listOrgApplications",
         "module": "handlers/membership"
       },
-      "consumers": [],
+      "consumers": [
+        "apps/memberry"
+      ],
       "status": "matched",
       "auth_drift": false
     },
@@ -3177,7 +3203,9 @@
         "handler_function": "listOrgMembers",
         "module": "handlers/membership"
       },
-      "consumers": [],
+      "consumers": [
+        "apps/memberry"
+      ],
       "status": "matched",
       "auth_drift": false
     },
@@ -3291,7 +3319,9 @@
         "handler_function": "validatePaymentToken",
         "module": "handlers/dues"
       },
-      "consumers": [],
+      "consumers": [
+        "apps/memberry"
+      ],
       "status": "matched",
       "auth_drift": false
     },
@@ -3694,7 +3724,9 @@
         "handler_function": "getSurvey",
         "module": "handlers/surveys"
       },
-      "consumers": [],
+      "consumers": [
+        "apps/memberry"
+      ],
       "status": "matched",
       "auth_drift": false
     },
@@ -3745,7 +3777,9 @@
         "handler_function": "listSurveyResponses",
         "module": "handlers/surveys"
       },
-      "consumers": [],
+      "consumers": [
+        "apps/memberry"
+      ],
       "status": "matched",
       "auth_drift": false
     },
@@ -3813,7 +3847,9 @@
         "handler_function": "updateOrgAccreditedProvider",
         "module": "handlers/association:operations"
       },
-      "consumers": [],
+      "consumers": [
+        "apps/memberry"
+      ],
       "status": "matched",
       "auth_drift": false
     },
@@ -4011,7 +4047,9 @@
         "handler_function": "updateOrgCpdConfig",
         "module": "handlers/association:member"
       },
-      "consumers": [],
+      "consumers": [
+        "apps/memberry"
+      ],
       "status": "matched",
       "auth_drift": false
     },
@@ -4060,7 +4098,9 @@
         "handler_function": "updateDirectoryProfile",
         "module": "handlers/association:member"
       },
-      "consumers": [],
+      "consumers": [
+        "apps/memberry"
+      ],
       "status": "matched",
       "auth_drift": false
     },
@@ -4261,7 +4301,9 @@
         "handler_function": "updateMessageTemplate",
         "module": "handlers/communication"
       },
-      "consumers": [],
+      "consumers": [
+        "apps/memberry"
+      ],
       "status": "matched",
       "auth_drift": false
     },
@@ -4564,7 +4606,9 @@
         "handler_function": "updateSurvey",
         "module": "handlers/surveys"
       },
-      "consumers": [],
+      "consumers": [
+        "apps/memberry"
+      ],
       "status": "matched",
       "auth_drift": false
     },
@@ -4598,7 +4642,9 @@
         "handler_function": "createOrgAccreditedProvider",
         "module": "handlers/association:operations"
       },
-      "consumers": [],
+      "consumers": [
+        "apps/memberry"
+      ],
       "status": "matched",
       "auth_drift": false
     },
@@ -5295,7 +5341,9 @@
         "handler_function": "refreshCompliance",
         "module": "handlers/association:member"
       },
-      "consumers": [],
+      "consumers": [
+        "apps/memberry"
+      ],
       "status": "matched",
       "auth_drift": false
     },
@@ -6835,7 +6883,9 @@
         "handler_function": "archiveAnnouncement",
         "module": "handlers/communication"
       },
-      "consumers": [],
+      "consumers": [
+        "apps/memberry"
+      ],
       "status": "matched",
       "auth_drift": false
     },
@@ -6851,7 +6901,9 @@
         "handler_function": "publishAnnouncement",
         "module": "handlers/communication"
       },
-      "consumers": [],
+      "consumers": [
+        "apps/memberry"
+      ],
       "status": "matched",
       "auth_drift": false
     },
@@ -6883,7 +6935,9 @@
         "handler_function": "createAnnouncement",
         "module": "handlers/communication"
       },
-      "consumers": [],
+      "consumers": [
+        "apps/memberry"
+      ],
       "status": "matched",
       "auth_drift": false
     },
@@ -7108,7 +7162,9 @@
         "handler_function": "markNotificationAsRead",
         "module": "handlers/notifs"
       },
-      "consumers": [],
+      "consumers": [
+        "apps/memberry"
+      ],
       "status": "matched",
       "auth_drift": false
     },
@@ -7207,7 +7263,9 @@
         "handler_function": "checkoutPaymentToken",
         "module": "handlers/dues"
       },
-      "consumers": [],
+      "consumers": [
+        "apps/memberry"
+      ],
       "status": "matched",
       "auth_drift": false
     },
@@ -7394,7 +7452,9 @@
         "handler_function": "cloneSurvey",
         "module": "handlers/surveys"
       },
-      "consumers": [],
+      "consumers": [
+        "apps/memberry"
+      ],
       "status": "matched",
       "auth_drift": false
     },
@@ -7444,7 +7504,9 @@
         "handler_function": "submitSurveyResponse",
         "module": "handlers/surveys"
       },
-      "consumers": [],
+      "consumers": [
+        "apps/memberry"
+      ],
       "status": "matched",
       "auth_drift": false
     },
@@ -7615,7 +7677,9 @@
         "handler_function": "updateOrgProfile",
         "module": "handlers/membership"
       },
-      "consumers": [],
+      "consumers": [
+        "apps/memberry"
+      ],
       "status": "matched",
       "auth_drift": false
     },
