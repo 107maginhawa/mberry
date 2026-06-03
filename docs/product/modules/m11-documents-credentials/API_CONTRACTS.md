@@ -656,11 +656,11 @@ Binary PDF with member name, training title, date, credits earned, org branding,
 
 | Endpoint | Event Emitted | Payload |
 |----------|--------------|---------|
-| GET /my/id-card | `CredentialGenerated` | `{ personId, type: "card", documentId }` |
-| GET /my/certificates/:id/download | `CredentialGenerated` | `{ personId, type: "certificate", documentId }` |
-| GET /verify/:token | `VerificationRequested` | `{ token, valid, timestamp }` |
-| POST /orgs/:id/documents | `DocumentUploaded` | `{ documentId, orgId, uploadedBy }` |
-| POST .../versions | `DocumentUploaded` | `{ documentId, orgId, uploadedBy }` |
+| POST /association/member/credentials/issue | `CredentialGenerated` | `{ personId, type: "card", credentialId }` |
+| GET /association/member/certificates/{certificateId} | `CredentialGenerated` | `{ personId, type: "certificate", documentId }` |
+| GET /certificates/verify/{certificateNumber} | `VerificationRequested` | `{ certificateNumber, valid, timestamp }` |
+| POST /association/documents | `DocumentUploaded` | `{ documentId, orgId, uploadedBy }` |
+| POST /association/documents/{documentId}/versions | `DocumentUploaded` | `{ documentId, orgId, uploadedBy }` |
 
 ---
 

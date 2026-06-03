@@ -357,8 +357,8 @@ Binary file containing all credit entries for the specified cycle, including act
 
 | Endpoint | Event Emitted | Payload |
 |----------|--------------|---------|
-| POST /credits/manual | `CreditAwarded` | `{ personId, creditValue, source: "MANUAL", organizationId }` |
-| POST /credits/adjust | `CreditAdjusted` | `{ personId, adjustedBy, value, reason }` |
+| POST /association/member/credits/manual | `CreditAwarded` | `{ personId, creditValue, source: "MANUAL", organizationId }` |
+| POST /association/member/credits/adjust | `CreditAdjusted` | `{ personId, adjustedBy, value, reason }` |
 
 ---
 
