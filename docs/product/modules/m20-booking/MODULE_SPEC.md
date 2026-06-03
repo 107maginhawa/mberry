@@ -338,4 +338,4 @@ When implementing this module:
 | Version | Date | Author | Summary |
 |---------|------|--------|---------|
 | 1.0 | 2026-05-29 | Claude | Initial spec from existing codebase (Wave 8 coverage) |
-| 1.1 | 2026-06-02 | Claude | Added spec-ID anchors to all 19 API endpoints: assigned BR-68..BR-77 (global aliases of M20-R1..R10; BR-52..BR-66 were claimed by parallel m21/m22 fixes for TR-P1-002/003, BR-67 by BR-42 split for TR-P1-004), allocated WF-115..WF-121 for the 7 user-facing workflows, and added a Spec-IDs column to §8. Resolves TR-P1-001 from TRACEABILITY_REPORT.md. |
+| 1.1 | 2026-06-02 | Claude | Added spec-ID anchors to all 19 API endpoints: assigned BR-68..BR-77 (global aliases of M20-R1..R10; BR-52..BR-66 were claimed by parallel m21/m22 fixes for TR-P1-002/003, BR-67 by the M09-overload split for TR-P1-004), allocated WF-115..WF-121 for the 7 user-facing workflows, and added a Spec-IDs column to §8. Resolves TR-P1-001 from TRACEABILITY_REPORT.md. |
