@@ -129,6 +129,7 @@
 | `PATCH /association/member/credentials/:credentialId` | `updateDigitalCredential` | true | 0 |  | HIGH |
 | `DELETE /association/member/credentials/:credentialId` | `deleteDigitalCredential` | true | 0 |  | HIGH |
 | `POST /association/member/credentials/:credentialId/revoke` | `revokeDigitalCredential` | true | 0 |  | HIGH |
+| `POST /association/member/credits/adjust` | `adjustCreditEntry` | true | 0 |  | HIGH |
 | `POST /association/member/credits/manual` | `awardManualCredit` | true | 1 |  | HIGH |
 | `POST /association/member/credits/void-event` | `voidCreditEntry` | true | 1 |  | HIGH |
 | `POST /association/member/directory/profiles` | `createDirectoryProfile` | true | 0 |  | HIGH |

@@ -14,9 +14,9 @@ based-on:
   - docs/audits/UI_JOURNEY_AUDIT.md
   - docs/audits/RUNTIME_EXEC_REPORT.md
   - docs/audits/SEED_COHERENCE_REPORT.md
-last-modified: 2026-06-03T00:00:00Z
-last-modified-by: oli-check (Wave 61 delta — 3 vertical-TDD slices shipped resolving AC-M10-005, AC-M18-004, AC-M18-006 escalated orphans)
-run-id: 2026-06-03T00:00
+last-modified: 2026-06-03T08:00:00Z
+last-modified-by: oli-check (Wave 61 re-verify — post auto-rescan; map promoted FRESH; floor cleared; GATE: PASS)
+run-id: 2026-06-03T08:00
 flags: ["--auto"]
 ---
 
@@ -26,12 +26,14 @@ flags: ["--auto"]
 
 | Field | Value |
 |-------|-------|
-| Producer | `engine` (oli-engine via /Users/elad-mini/Desktop/oli-engine/dist/cli.js) |
-| Map version | v6 |
-| MAP-FRESHNESS | **FRESH** — `map@d8d777b1` vs `HEAD@d8d777b1` (carried from 2026-06-02 18:55 rescan; no new commits since) |
-| `fields_unavailable` | `[]` |
+| Producer | `engine` (oli-engine; `.map-meta.json provenance.producer = engine`, version 0.1.0) |
+| Map version | v6 (mode=full, 1407 files, frameworks=[generic, hono, react]) |
+| Map snapshot | `map@80312e6e` (per `.map-meta.json git_sha`; timestamp 2026-06-02T23:50:06Z) |
+| HEAD | `HEAD@80312e6e` (0 commits delta) |
+| MAP-FRESHNESS | **FRESH** — `--check-fresh` reports `map@80312e6 vs HEAD@80312e6`; map matches HEAD; dirty working-tree files match recorded scan hashes. Wave 61 source delta (adjustCreditEntry handler + 16 tests, surveys re-edit + 5 tests, surveys poll inline + 4 tests, training.tsp + 1 op) now ingested. `file_count` 1406→1407, `CODE_SPEC_TRACE.ops` 449→450. |
+| `fields_unavailable` | `[]` (engine v6 emits all contract-v6 fields) |
 | `confidence_threshold` | MEDIUM (.oli/config.json) |
-| `unverified` (cross-dimension roll-up) | 68 state-machine nodes (engine SM `spec_comparison` empty) + terminology layer (glossary not engine-ingested) + 57 FE data-hook consumers (engine SDK-resolver blind spot) — reported separately, excluded from scores per R1 |
+| `unverified` (cross-dimension roll-up) | 68 state-machine nodes (engine SM `spec_comparison` empty) + terminology layer (glossary not engine-ingested) + 57 FE data-hook consumers (engine SDK-resolver blind spot). Reported separately, excluded from scores per R1. **Wave 61 surfaces now IN-GRAPH** — no new unverified introduced this run. |
 
 **THESIS IN FORCE** — graph-anchored static signal valid for code-dimension verdicts this run. R1-strict escalation does NOT apply (no degrade).
 
@@ -39,11 +41,14 @@ flags: ["--auto"]
 
 **GATE: PASS**
 
-**Drivers cleared since 2026-06-02 18:55 (Wave 57 re-aggregate):**
-- `SC-P1-001` (seed-coherence) — **RESOLVED in HEAD**. `docs/product/SEED_MANIFEST.md` Entity Inventory now reads "117 of 122 non-auth tables receive direct or API-mediated inserts (95.9%); 4 intentionally empty in dev (booking/institutional_membership/seat_allocation/email_suppression); 1 (membership_application) runtime-created by Better-Auth signup".
-- `SC-P1-002` (seed-coherence) — **RESOLVED in HEAD**. `services/api-ts/src/seed/layer-4-cross-module.ts` adds three `.insert(...)` blocks: `dunningTemplates` (5 stages, L400 in `seedDunningEventsAndAudit`), `billingConfigs` (1 stripe test-mode row, L321 in `seedBilling`), `documentVersions` (1 v1 per seeded document, L186 in `seedDocuments`). Each idempotent (existence-check guard).
-- `J-ORPHAN-MODULE-ROLLUP` (journeys, UI_JOURNEY_AUDIT) — **RATCHET-CLEARED (Wave 57)**. M13/M15/M16/M17 zero-UI orphans demoted P1→P3-KNOWN-DEFERRED per MASTER_PRD v3.0 roadmap (post-v1.0 milestone descope). `docs/audits/UI_JOURNEY_AUDIT.md` verdict promoted WARN → PASS.
-- `EM-M13-future01` (enforcement) — **RATCHET-CLEARED (Wave 57)**. Sibling future-scope drivers EM-M15/M16/M17-future01 also demoted P1→P3. `docs/audits/enforce/.baseline.json` modules.m13/15/16/17 now `P1: 0`, `status: DEFERRED-FUTURE-SCOPE`, with `p1_corrected` citing MASTER_PRD v3.0 deferral. Baseline bumped 51→52. `ENFORCEMENT_REPORT.md` total P1 6→2 (m18/m19 carried).
+**Drivers cleared this run:**
+- `TRUST-STALE-OVERLAP` — **RESOLVED via auto-rescan**. `node ~/Desktop/oli-engine/dist/cli.js scan . --write` executed at HEAD `80312e6e`; `--check-fresh` confirms FRESH. R1-strict WARN-WITH-PROOF floor lifted.
+
+**Substantive driver inventory (unchanged from 2026-06-02 18:55 baseline + Wave 61 resolutions):**
+- 0 P0 across all 9 dimensions.
+- 1 P1 carried: `m19-committee-management` enforcement-side `EM-M19-future01` — KNOWN-future, in-scope per MASTER_PRD v3.0 Add-on Phase 3, not yet built; not a regression.
+- 0 new P0/P1 surfaced by Wave 61 (3 vertical-TDD slices add logic + tests; api-ts suite green 6033 pass / 0 fail; typecheck clean across 5 workspaces).
+- 3 escalated AC-orphans RESOLVED with file:line evidence in `docs/trace/TRACE_REPORT.md` (AC-M10-005, AC-M18-004, AC-M18-006).
 
 Without `--strict` the run does not hard-exit; matrix and verdict still written.
 
@@ -51,28 +56,25 @@ Without `--strict` the run does not hard-exit; matrix and verdict still written.
 
 ✓ No actionable P0/P1 findings. Pipeline unblocked.
 
-Remaining items after Wave 59 (all P3 advisory or pre-cleared):
-- ~~13 P2 consistency stub API_CONTRACTS~~ — RESOLVED Wave 58
-- ~~17 P2 traceability AC orphans~~ — **FULLY RESOLVED** Wave 59 + 61: 8 tagged + 1 TypeSpec-enforced + 3 vertical-TDD slices shipped Wave 61 (AC-M10-005 `adjustCreditEntry`, AC-M18-004 response re-edit via `updateResponseAnswers`, AC-M18-006 inline `pollResults`). One residual VERIFIED-MISSING-LOGIC item rolled into m19-committee-management future scope (already covered as `m19 P1 future-scope` driver below).
-- ~~19 P2 compliance~~ — Wave 59 cleared CMP-P2-009 (m17 deferred per Wave 57) + CMP-P2-010 (m18 dismissSurveyResponse.test.ts exists); 17 carried (none gate-blocking)
-- ~~m18 P1 future-scope~~ — Wave 59 mass RESOLVED-stale (built end-to-end; prior 2026-05-28 report dated before implementation; baseline P1 1→0)
-- **m19 P1** carried — confirmed in-scope per MASTER_PRD v3.0 Add-on Phase 3 (NOT in descope list, unlike m13/m15/m16/m17). Build is separate milestone, not housekeeping.
-- Confidence L2=6.0 raw cap — engine SDK-resolver gap (upstream tooling). Wave 58 audit-extrapolated lift 6.0→8.2 applied; root fix waits for engine v7+.
-- ~~3 escalated AC-orphans (AC-M10-005, AC-M18-004, AC-M18-006)~~ — **DELIVERED Wave 61**. 3 vertical-TDD slices shipped on `main`; full api-ts suite green (6033 pass). See Wave 61 RESOLVED block below.
+Carried (informational only, no rank change since 2026-06-02 18:55):
+- `EM-M19-future01` (enforcement, P1, KNOWN-future) — build deferred to MASTER_PRD v3.0 Add-on Phase 3 milestone.
+- `Confidence L2=6.0 raw cap` (engine SDK-resolver blind spot, upstream tooling) — Wave 58 audit-extrapolated lift to 8.2 holds; root fix waits for engine v7+.
+- `UI consistency Genesis KNOWN set` (1 P0 contrast + 301 P1, classified KNOWN at genesis baseline) — non-blocking per genesis policy.
+- `RUNTIME_EXEC ER-P1 locator flake` (Playwright detached, NOT app defect; 2026-05-31 prior run) — re-run advised, doesn't block.
 
 ## Run Context
 
-| Dimension | Verdict | Report | Key findings | unverified |
-|-----------|---------|--------|--------------|------------|
-| Consistency | PASS | docs/product/CONSISTENCY_REPORT.md (Pass 3 — Wave 58 verify-first re-triage) | 0 P0/P1, 0 P2 (all 13 stub-API_CONTRACTS RESOLVED-FALSE-POSITIVE in Pass 3; backtick-wrapped path regex bug, files 299-831 lines populated), 4 P3; regulated `--auto` defers Stage 2 sign-offs | 5 [INFERRED] + 22 [VERIFY] tags carried |
-| Traceability | PASS | docs/trace/TRACE_REPORT.md (Wave 59 AC-orphan triage applied) | 0 P0, 0 P1, ~8 P2 (Wave 59: 8 AC orphans tagged + 1 validator-resolved + 3 escalated VERIFIED-MISSING-LOGIC: AC-M10-005/AC-M18-004/AC-M18-006 → next milestone) | 0 |
-| Discovery | PASS | docs/audits/codebase-map/ (engine v6, rescanned 2026-06-02 18:55) | 31 module roots, 1406 files, 449 ops in CODE_SPEC_TRACE; map FRESH | 0 |
-| Compliance | PASS | docs/audits/COMPLIANCE_REPORT.md (Wave 59 P2 cleanup applied) | 0 P0, 0 P1, 17 P2 (Wave 59 cleared CMP-P2-009 m17-deferred + CMP-P2-010 m18-test-exists), 13 P3; 9.4/10; 449 ops matched, 0 auth_drift, 0 spec_only | 68 SM + terminology layer |
-| Confidence | PASS-with-footnote | docs/audits/CONFIDENCE_REPORT.md (Wave 58 unresolved-consumer triage appended to §5.5) | L1=8.85, L2=6.0 raw cap → **8.2 audit-extrapolated** (Wave 58: 4/7 named unresolved verified genuinely-no-endpoint; extrapolated 29/57 → adjusted density 0.822 > 0.70 threshold), L3=8.80, L4=8.75; ship-readiness 6.6 (conservative floor); avg 8.4 audit-extrapolated | 57 data-hook consumers (28 estimated engine-blind, 29 estimated genuinely-no-endpoint) |
-| Enforcement | PASS | docs/audits/ENFORCEMENT_REPORT.md (Wave 57 ratchet-clear + Wave 59 m18 mass RESOLVED-stale) + ENFORCEMENT_COVERAGE.md + UI_CONSISTENCY_REPORT.md | Coverage 82% (0 P0/P1, 3 P2 RESOLVED post anchor-add, 4 P3); Module compliance 0 P0, **1 P1** KNOWN-future (m19 only — confirmed in-scope per MASTER_PRD v3.0 Add-on Phase 3, not yet built); m18 cleared Wave 59 (built end-to-end, 22 handlers + 13 tests, prior report stale); UI consistency GENESIS — 1 P0 + 301 P1 classified KNOWN, non-blocking per genesis policy | 0 |
-| Journeys | PASS | docs/audits/JOURNEY_COVERAGE_REPORT.md (2026-06-02 static re-run) + UI_JOURNEY_AUDIT.md (Wave 57 ratchet-clear) | Static: 0 P0, 0 P1, 1 P2 (J-MY-NO-ON-ERROR notification idempotent low-stakes), 7 P3; Audit: 0 P1 (J-ORPHAN-001 ratchet-cleared to P3-KNOWN-DEFERRED), 4 P2 missing error-branch on 36 components (6 member/shared), 4 P3 partial-coverage + orphan-deferred | 0 |
-| Runtime | SKIP-with-prior | docs/audits/RUNTIME_EXEC_REPORT.md (2026-05-31 prior tier-3 live; `--auto` did NOT include `--live` this run) | Tier-1 boot-smoke not executed this run. Tier-2 RUNTIME_TEST_PLAN.md absent. Tier-3 carried-prior: 0 app-origin P0/P1; 1 ER-P1 runner-flake (Playwright detached, not app defect); 21 P3 unresolved-param skips | n/a |
-| Seed Coherence | **PASS** | docs/audits/SEED_COHERENCE_REPORT.md (Wave 57 re-aggregate; manifest+code aligned) | 0 P0, **0 P1** (SC-P1-001+SC-P1-002 both RESOLVED in HEAD), 1 P2 platform_admin count drift, 3 P3 | 0 |
+| Dimension | Verdict | Report | Key findings (delta from prior) | unverified |
+|-----------|---------|--------|----------------------------------|------------|
+| Consistency | PASS | docs/product/CONSISTENCY_REPORT.md (Wave 58 Pass 3) | 0 P0/P1; 0 P2 actionable; 4 P3. Wave 61 added 1 TypeSpec op + 1 model + 1 interface to training.tsp — passes spec-gate by construction. | 5 [INFERRED] + 22 [VERIFY] tags carried |
+| Traceability | PASS | docs/trace/TRACE_REPORT.md (rev 5 + Wave 61 RESOLVED block) | **Wave 61 delta: 3 escalated VERIFIED-MISSING-LOGIC orphans → 0** (AC-M10-005, AC-M18-004, AC-M18-006 RESOLVED). Net P2 actionable orphans = 0. Carried: m20/m21/m22 zero-anchor cleared Wave 58; TR-OVERLOAD-BR-42 P1 rename pending. Now graph-anchored (Wave 61 file:line claims ingested by fresh map). | 0 |
+| Discovery | PASS | docs/audits/codebase-map/ (engine v6, map@80312e6e) | 1407 files, 450 ops in CODE_SPEC_TRACE, 31 module roots. Fresh rescan ingested `adjustCreditEntry` handler + surveys edits. 0 engine findings. | 0 |
+| Compliance | PASS | docs/audits/COMPLIANCE_REPORT.md (Wave 59 P2 cleanup) | 0 P0, 0 P1, 17 P2 carried, 13 P3; 9.4/10; spec_only=0, auth_drift=0. Wave 61 +1 spec op + 1 handler maintains balance; consistent against fresh map. | 68 SM + terminology layer |
+| Confidence | PASS-with-footnote | docs/audits/CONFIDENCE_REPORT.md (Wave 58 §5.5 audit-extrapolated) | L1=8.85, L2=8.2 (audit-extrapolated from raw 6.0 cap), L3=8.80, L4=8.75; avg 8.4. **Empirical: 6033 api-ts tests pass, 0 fail; typecheck clean across 5 workspaces.** Wave 61 added 25 tagged tests (16 + 5 + 4). | 57 data-hook consumers (28 estimated engine-blind, 29 estimated genuinely-no-endpoint) |
+| Enforcement | PASS | docs/audits/ENFORCEMENT_REPORT.md (Wave 57 ratchet-clear + Wave 59 m18 RESOLVED-stale) + ENFORCEMENT_COVERAGE.md + UI_CONSISTENCY_REPORT.md | Coverage 82%; 0 P0; **1 P1** (m19 KNOWN-future, sole carried driver). Wave 61 vertical-TDD slices further harden m18 (re-edit + poll inline). m13/m15/m16/m17 ratchet-cleared to DEFERRED-FUTURE-SCOPE. UI consistency GENESIS WARN — 1 P0 + 301 P1 KNOWN, non-blocking. | 0 |
+| Journeys | PASS | docs/audits/JOURNEY_COVERAGE_REPORT.md + UI_JOURNEY_AUDIT.md (Wave 57 ratchet-clear) | 0 P0, 0 P1; static cross-check 17 client paths × 307 OpenAPI paths → 0 phantoms. No Wave 61 UI surface changes (handler-only delta). | 0 |
+| Runtime | WARN (carried) | docs/audits/RUNTIME_EXEC_REPORT.md (2026-05-31 tier-3 live; not re-run this `--auto` cycle) | 0 app-origin P0/P1; 1 ER-P1 = runner Playwright locator flake (advisory re-run); 21 P3 unresolved-param skips. **Wave 61's new `/association/member/credits/adjust` route NOT yet exercised by tier-3** — fresh map now provides static coverage; `--live` recommended next opportunity. | n/a |
+| Seed Coherence | PASS | docs/audits/SEED_COHERENCE_REPORT.md (Wave 57 re-aggregate) | 0 P0, 0 P1 (SC-P1-001/002 RESOLVED in HEAD, carried); 1 P2 platform_admin count drift; 3 P3. No Wave 61 seed delta. | 0 |
 
 ## Coverage Matrix
 
@@ -98,55 +100,50 @@ Rows = 22 modules from `docs/product/modules/`. Columns = applicable dimensions 
 | m16-advertising | ✓ | ✓ | ✓ | ✓ | ⊘ no-code | ✓ (DEFERRED-FUTURE-SCOPE) | ⊘ no-ui (deferred) | ⊘ no-ui | ✓ |
 | m17-marketplace | ✓ | ✓ | ✓ | ✓ | ⊘ no-code | ✓ (DEFERRED-FUTURE-SCOPE) | ⊘ no-ui (deferred) | ⊘ no-ui | ✓ |
 | m18-surveys-polls | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ⊘ no-live | ✓ |
-| m19-committee-management | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ⊘ no-live | ✓ |
+| m19-committee-management | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ (P1 carried — sole driver) | ✓ | ⊘ no-live | ✓ |
 | m20-booking | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ⊘ no-live | ✓ |
 | m21-billing | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ⊘ no-live | ✓ |
 | m22-email | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ⊘ no-ui | ⊘ no-ui | ✓ |
 
-**Uncovered modules:** none — 0 ✗ gaps. All ⊘ cells are legitimately absent inputs (future-scope unbuilt per MASTER_PRD v3.0 roadmap, backend-only with no UI surface, or `--auto`-skipped live runtime tier).
+**Uncovered modules:** none — 0 ✗ gaps. m10/m18 `(stale-verify)` annotations from prior run lifted by fresh map. Runtime `⊘ no-live` reflects `--auto` skipping tier-3 by default.
 
 ## Overall
 
-**Worst dimension verdict:** PASS-with-footnote (Wave 58 cleared WARN drivers; Wave 59 cleared all addressable P3 housekeeping; Wave 61 delivered the 3 escalated AC-orphan vertical-TDD slices (AC-M10-005 / AC-M18-004 / AC-M18-006) on `main`. Remaining: m19 future-scope P1 (KNOWN, in-scope per MASTER_PRD Add-on Phase 3) only). Floor: `GATE: PASS`.
+**Worst dimension verdict:** PASS-with-footnote on Confidence (L2 raw cap, audit-extrapolated to 8.2); WARN carried on Runtime (Playwright runner flake, not app defect; pre-Wave 61 snapshot). All other dimensions PASS.
 
-**Trust-banner escalation (R1-strict):** NOT triggered. THESIS IN FORCE this run — fresh map + clean producer + 0 fields_unavailable.
+**Overall verdict:** **PASS**. THESIS IN FORCE — no R1-strict escalation. Substantive dimension verdicts equivalent to 2026-06-02 18:55 PASS baseline plus 3 Wave 61 AC-orphan resolutions, now graph-anchored.
 
-## Delta vs Prior Run (2026-06-02 18:55 → 2026-06-02 19:45)
+**User-prompt expectations confirmed:**
+1. **GATE: PASS** — yes, on dimension verdicts AND on the overall verdict.
+2. **No new P0/P1 surfaced** — confirmed (0 new, 1 carried = m19 only).
+3. **3 AC orphans confirmed RESOLVED, not just demoted** — confirmed with file:line evidence in `docs/trace/TRACE_REPORT.md`:
+   - `AC-M10-005` → `services/api-ts/src/handlers/association:member/adjustCreditEntry.ts:11` (officer-position enforcement + reason ≥10-char) + `adjustCreditEntry.test.ts:1` (16 tagged tests) + TypeSpec `CreditAdjustmentManagement` interface in `specs/api/src/association/operations/training.tsp`.
+   - `AC-M18-004` → `services/api-ts/src/handlers/surveys/submitSurveyResponse.ts:62` (branches on `settings.allowReedit` + existing response) + `survey.schema.ts:53` (`SurveySettings.allowReedit`) + `survey.repo.ts:303` (`updateResponseAnswers`) + 5 tagged tests.
+   - `AC-M18-006` → `services/api-ts/src/handlers/surveys/submitSurveyResponse.ts:15` (`aggregatePollResults` helper) + L101/L143 branches + 4 tagged tests.
+4. **m19 remains sole carried P1 driver** — confirmed (per `docs/audits/enforce/.baseline.json`: m19 `P1: 1` only; m13/m15/m16/m17 `P1: 0 DEFERRED-FUTURE-SCOPE`; m18 `P1: 0 BUILT-RESOLVED-STALE`).
 
-**RESOLVED in Wave 57 (this morning):**
-- `SC-P1-001` + `SC-P1-002` (seed-coherence, both P1) — verified RESOLVED in HEAD. Manifest count corrected to 117/122; layer-4 inserts present at L186/L321/L400. SEED_COHERENCE_REPORT.md updated; verdict promoted FAIL → PASS.
-- `J-ORPHAN-MODULE-ROLLUP` (journeys, P1) — RATCHET-CLEARED to P3-KNOWN-DEFERRED per MASTER_PRD v3.0 roadmap. UI_JOURNEY_AUDIT.md verdict WARN → PASS.
-- `EM-M13-future01` + sibling `EM-M15/M16/M17-future01` (enforcement, 4 × P1) — RATCHET-CLEARED to P3 advisory. `.baseline.json` modules updated with `status: DEFERRED-FUTURE-SCOPE` + `p1_corrected` notes; baseline v51→v52. `ENFORCEMENT_REPORT.md` total P1 6→2.
+## Delta vs Prior Run (2026-06-03T07:30 → 2026-06-03T08:00)
 
-**RESOLVED in Wave 58 (this run):**
-- `Consistency D2-1..D2-13` (13 × P2 stub-API_CONTRACTS) — verify-first re-triage found all 13 API_CONTRACTS.md files fully populated (299-831 lines, 5-17 detailed `#### METHOD \`/path\`` endpoint blocks each). Pass 2 regex `(GET\|POST\|...)\s+/` had a false-negative bug on backtick-wrapped paths. CONSISTENCY_REPORT Pass 3 reclassifies all 13 as RESOLVED-FALSE-POSITIVE. Dimension verdict WARN→PASS.
-- `Confidence L2 cap (6.0)` (engine SDK-resolver gap) — hand-audited 7 named unresolved consumers (top of `CONFIDENCE_REPORT.md §5.5`): 4 are genuinely-no-endpoint (router shell, auth-layout, sdk-provider, verify-email-via-better-auth), 3 are engine-resolver-blind. Conservative extrapolation: ~29 of 57 unresolved are no-endpoint → adjusted fe_be_edge_density = 129/157 = 0.822 > 0.70 → cap lifts to 8.2. CONFIDENCE_REPORT §5.5 appended with Unresolved Consumer Triage block. Dimension verdict WARN → PASS-with-footnote.
+**Source commits since prior CHECK_SUMMARY:** none (HEAD unchanged at `80312e6e`).
 
-**NEW this run:** None.
+**Aggregator action this run:** auto-invoked `node ~/Desktop/oli-engine/dist/cli.js scan . --write` to clear the WARN-WITH-PROOF floor identified in the 07:30 run.
 
-**RESOLVED in Wave 59 (this run):**
-- **Traceability AC-orphans** (12 P2 → 0 actionable): 8 tagged (`recordDuesPayment.test.ts`, `training-enrollment.test.ts`, `verifyCertificatePublic.test.ts`, `publishTraining.test.ts`, `creditIssue.test.ts`, `getSurveyAnalytics.test.ts`); 1 validator-enforced (`AC-M09-004` via TypeSpec `enum TrainingType`); 3 escalated VERIFIED-MISSING-LOGIC (`AC-M10-005` no `adjustCreditEntry` handler; `AC-M18-004` no re-edit path; `AC-M18-006` no poll inline) — tracked for next milestone, not Wave 59 scope.
-- **Compliance P2** (19 → 17): CMP-P2-009 (m17 test-density) RESOLVED-stale per Wave 57 deferral; CMP-P2-010 (m18 dismiss BE-unit-test missing) RESOLVED-stale per `dismissSurveyResponse.test.ts` (138 lines, full coverage).
-- **Enforcement P1** (2 → 1): m18-surveys-polls mass RESOLVED-stale (entire 2026-05-28 enforce report dated before implementation; live module ships 22 handlers + 13 tests + 10 TypeSpec ops registry-wired). m19-committee-management carried (in-scope per MASTER_PRD v3.0 Add-on Phase 3).
+**Map delta (post-rescan):**
+- `map@9fe97bfa` (2026-06-02T16:00:07Z, 1406 files, 449 ops) → `map@80312e6e` (2026-06-02T23:50:06Z, 1407 files, 450 ops).
+- Artifacts rewritten: `CODE_MODULE_MAP`, `CODE_API_SURFACE`, `CODE_DATA_MODEL`, `CODE_SPEC_TRACE`, `.map-meta.json`. Component registry / route map / data flow / state machines / import graph / mutations / terminology unchanged (Wave 61 didn't touch their surfaces).
+- 0 engine findings.
 
-**SURFACED for next-milestone work (not Wave 59 scope):**
-- ~~3 vertical-TDD slices~~ — **DELIVERED Wave 61** (see below).
-- m19-committee-management build (when prioritized per MASTER_PRD Phase 3).
+**Trust-banner delta:**
+- Prior run (07:30): `STALE-OVERLAP map@9fe97bfa vs HEAD@80312e6e` → THESIS NOT FULLY IN FORCE → R1-strict floor WARN-WITH-PROOF.
+- This run (08:00): `FRESH map@80312e6 vs HEAD@80312e6` → THESIS IN FORCE → GATE: PASS.
 
-**RESOLVED in Wave 61 (vertical-TDD slices, post-Wave 60 GATE: PASS):**
-- **`AC-M10-005`** (Mandatory adjustment reason, M10-R4) — new handler `services/api-ts/src/handlers/association:member/adjustCreditEntry.ts` (officer-position self-enforced; rejects missing/empty/<10-char reason with 400; allows signed creditAmount for award/deduction; emits `credit.adjusted`; refreshes `compliance_standings` view). TypeSpec `CreditAdjustmentManagement` interface + `AdjustCreditRequest` model added to `specs/api/src/association/operations/training.tsp`; auto-wired `POST /association/member/credits/adjust` via codegen. 16 tests tagged `[AC-M10-005]`.
-- **`AC-M18-004`** (Response re-edit, M18-R3) — `submitSurveyResponse.ts` now branches on `settings.allowReedit` + existing response → calls new `SurveyResponseRepository.updateResponseAnswers`, returns 200. `SurveySettings.allowReedit?: boolean` added. M18-R1 deadline check still gates both paths. 5 tests tagged `[AC-M18-004]`.
-- **`AC-M18-006`** (Instant poll inline results, M18-R4 / WF-103) — new `aggregatePollResults` helper in `submitSurveyResponse.ts`; when `surveyType === 'poll'` the submit (201) and re-edit (200) response bodies include `pollResults: [{ questionId, counts, total }]` computed across all completed responses (scalar + multi_choice array values both supported). 4 tests tagged `[AC-M18-006]`.
-
-**Verification:** full api-ts test suite green (6033 pass, 0 fail) post-slice. Three atomic commits on `main`. `TRACE_REPORT.md` AC-orphan rows promoted RESOLVED with file:line evidence. No baseline / P-count shifts on `.baseline.json` (P2 advisory orphans were not gate drivers).
+**Substantive delta:** none. All dimension verdicts equivalent. Promotion is checker-trust only.
 
 ## What's Next
 
-1. **Optional, no longer gate-blocking:**
-   - 13 P2 consistency (stub API_CONTRACTS for m20/m21/m22)
-   - AC-orphan tagging (M06/M09/M10/M18 — tag existing tests with [AC-MXX-NNN])
-   - 19 P2 compliance (test-density m17/m18 < 30% — pre-user-testing acceptable; defer if user-testing-bound)
-   - engine SDK-resolver L2 cap (tooling limitation, not project defect)
-2. **Tier-3 live runtime backstop:** re-run `/oli-check --runtime --live` for empirical confirmation; current run skipped tier-3 (`--auto` without `--live`).
-3. **Future scope:** when M13/M15/M16/M17 are reactivated (post-v1.0 milestone per MASTER_PRD v3.0), revisit ratchet-clear classification; scaffold member entry routes; promote orphan-deferred back to in-scope.
-4. **After future fixes:** `/oli-check --auto` to re-verify; add `--strict` to hard-exit on any new P0/P1.
+1. **Commit refreshed map artifacts** — `git add docs/audits/codebase-map/ docs/audits/CHECK_SUMMARY.md docs/audits/CHECK_LEARNINGS.md && git commit -m "chore(audit): rescan codebase map at 80312e6e — clears Wave 61 STALE-OVERLAP"`.
+2. **Carried (no priority change):**
+   - `EM-M19-future01` P1 — build m19-committee-management when MASTER_PRD v3.0 Add-on Phase 3 milestone kicks off.
+   - Engine v7+ upgrade — unlocks SM `spec_comparison` + SDK-resolver fields (clears L2 cap, reduces `unverified` bucket).
+3. **Optional empirical reinforcement:** `/oli-check --runtime --live` to exercise `POST /association/member/credits/adjust` + surveys re-edit/poll paths under a real browser; cleanup the 2026-05-31 Playwright flake while at it.
+4. **Re-verify cadence:** `/oli-check --auto` after each Wave to maintain FRESH map + PASS gate. Add `--strict` for unattended/CI runs.

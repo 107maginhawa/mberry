@@ -6,7 +6,7 @@
 | `apps/admin` | react | 48 | MEDIUM |
 | `apps/memberry` | react | 443 | MEDIUM |
 | `handlers/advertising` | generic | 11 | LOW |
-| `handlers/association:member` | hono | 246 | MEDIUM |
+| `handlers/association:member` | hono | 247 | MEDIUM |
 | `handlers/association:operations` | hono | 80 | MEDIUM |
 | `handlers/audit` | generic | 4 | LOW |
 | `handlers/billing` | generic | 18 | LOW |

@@ -2722,6 +2722,27 @@
         "last_modified_days_ago": 0
       }
     },
+    "POST /association/member/credits/adjust": {
+      "method": "POST",
+      "path": "/association/member/credits/adjust",
+      "handler_file": "services/api-ts/src/handlers/association:member/adjustCreditEntry.ts",
+      "handler_function": "adjustCreditEntry",
+      "auth_required": true,
+      "auth_middleware": "authMiddleware",
+      "request_shape": {},
+      "response_shape": {},
+      "module": "handlers/association:member",
+      "confidence": "HIGH",
+      "consumer_count": 0,
+      "consumers": [],
+      "is_phantom": false,
+      "deprecation_signals": {
+        "single_consumer": false,
+        "has_todo_fixme": false,
+        "deprecated_annotation": false,
+        "last_modified_days_ago": 0
+      }
+    },
     "POST /association/member/credits/manual": {
       "method": "POST",
       "path": "/association/member/credits/manual",

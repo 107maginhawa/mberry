@@ -5337,6 +5337,23 @@
       "auth_drift": false
     },
     {
+      "operation_id": "adjustCreditEntry",
+      "method": "POST",
+      "path": "/association/member/credits/adjust",
+      "required_roles": [
+        "association:admin",
+        "association:staff"
+      ],
+      "backend": {
+        "handler_file": "services/api-ts/src/handlers/association:member/adjustCreditEntry.ts",
+        "handler_function": "adjustCreditEntry",
+        "module": "handlers/association:member"
+      },
+      "consumers": [],
+      "status": "matched",
+      "auth_drift": false
+    },
+    {
       "operation_id": "awardManualCredit",
       "method": "POST",
       "path": "/association/member/credits/manual",
@@ -7878,6 +7895,7 @@
       "POST /association/member/credentials/issue",
       "POST /association/member/credentials/public-verify",
       "POST /association/member/credentials/verify",
+      "POST /association/member/credits/adjust",
       "POST /association/member/credits/manual",
       "POST /association/member/credits/void-event",
       "POST /association/member/directory/profiles",
