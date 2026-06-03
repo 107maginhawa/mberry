@@ -60,7 +60,7 @@ Support: `seed/client.ts` (`SeedClient` API wrapper — `signUp`/`signIn`/`creat
 | person (members) | 31 across statuses | Layer 2 `seedMember` | `MEMBERS` array | factory |
 | person (applicants) | 2 (1 pending, 1 rejected) | Layer 2 `seedApplicant` | `APPLICANTS` array | factory |
 | person (missing-role users) | VP, board-member, staff, platform support/viewer | Layer 2 `seedMissingRoles` | ROLE_PERMISSION_MATRIX | workflow |
-| platform_admin | 4 (real auth uuid) | Layer 2 `seedMissingRoles` + Layer 7 platform | ROLE_PERMISSION_MATRIX | workflow |
+| platform_admin | 3 (real auth uuid) | Layer 2 `seedPresident` (Maria as `super`) + Layer 2 `seedMissingRoles` (`support-admin@` as `support`, `viewer-admin@` as `analyst`) | ROLE_PERMISSION_MATRIX | workflow |
 | event + event_registration | multi-state | Layer 3 `seedEvents` + Layer 5 `seedEventsGapFill` | WORKFLOW_MAP §5.3/5.4 | workflow |
 | course / training + enrollment | multi-state | Layer 3 `seedTraining` + Layer 5 `seedTrainingGapFill` | WORKFLOW_MAP §5.5/5.6 | workflow |
 | election + nomination + vote | multi-state | Layer 3 `seedElections` | WORKFLOW_MAP §5.7 | workflow |
@@ -187,7 +187,7 @@ The earlier blocker (the seed died at Phase 5 on `training.visibility column doe
 1. **Phase 31 `seedMissingRoles` (fatal):** inserted `platform_admin.userId = ''` → `invalid input syntax for type uuid`, aborting the whole run before Layer 7. Fixed in `layer-2-users.ts` — platform admins now sign up a real auth user and use its uuid.
 2. **Phase 36 `seedMiscCoverage` (non-fatal):** one `schedule_exception` fixture had `start === end`, violating `CHECK (end_datetime > start_datetime)`. Fixed in `layer-7-misc.ts` (`daysFromNow(7)→daysFromNow(8)`).
 
-**Result:** `bun run db:seed` runs end-to-end to the `SEED COMPLETE` banner. All Layer 7 tables populated (spot-check: feed_post=6, support_ticket=4, feature_flag=6, advertiser=2, ad_campaign=3, ad_creative=3, payment_token=3, data_export=3, affiliation_transfer=3, royalty_split=3, disciplinary_action=3, transition_checklist=6, onboarding_state=2, dues_reminder_log=4, chapter_snapshot=2, document_tag=5, schedule_exception=3, platform_admin=4, message_template=4, email_queue=5).
+**Result:** `bun run db:seed` runs end-to-end to the `SEED COMPLETE` banner. All Layer 7 tables populated (spot-check: feed_post=6, support_ticket=4, feature_flag=6, advertiser=2, ad_campaign=3, ad_creative=3, payment_token=3, data_export=3, affiliation_transfer=3, royalty_split=3, disciplinary_action=3, transition_checklist=6, onboarding_state=2, dues_reminder_log=4, chapter_snapshot=2, document_tag=5, schedule_exception=3, platform_admin=3, message_template=4, email_queue=5).
 
 **Residual non-fatal errors (pre-existing gap-fill code, Phases 23–30 — NOT Layer 7, do not abort):** `payment→invoice linking`, `chat room members` / `room type update` (both trace to the `chat_room_id` column 0051 couldn't add against the partial chat feature), `credit backfill`, `certificate backfill`, `election state coverage`. Each is try/catch-isolated. Worth a separate cleanup pass but non-blocking.
 

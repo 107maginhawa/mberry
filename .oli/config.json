@@ -35,5 +35,8 @@
   "spec_sources": [
     "specs/api/dist/openapi/openapi.json"
   ],
-  "plugins": ["react"]
+  "plugins": ["react"],
+  "engine": {
+    "binary_path": "/Users/elad-mini/Desktop/oli-engine/dist/cli.js"
+  }
 }
