@@ -2,100 +2,108 @@
 
 ---
 oli-version: trace-v1
-Report Date: 2026-05-31 (rev 5 — engine-anchored re-verify, HEAD `caf33141`)
+based-on: map@96eb61e3
+last-modified: 2026-06-03T23:30:00Z
+Report Date: 2026-06-03 (rev 8 — post-Bucket-B + ZA-01/02 + BR-42-overload fixes)
 Branch: `main`
-Phase: D (all phases A–D evaluated; code + tests + specs all present)
-Modules Traced: all (22 module specs: m01–m22)
-Mode: standalone (full re-walk; auto)
-Producer: **engine** (@oli/engine@0.1.0) — map v5, sha `7ba0b7e`, fields_unavailable=[], spec_trace_optin=true
-Map Freshness: **FRESH-ENOUGH** — map@7ba0b7e vs HEAD@caf3314; HEAD moved but no in-scope source files changed. Staleness annotations from rev 4 DROPPED.
-Data Sources: engine codebase-map v5 (CODE_SPEC_TRACE, CODE_API_SURFACE, CODE_COMPONENT_REGISTRY w/ populated api_calls), artifacts (WORKFLOW_MAP, 22 MODULE_SPECs, 22 API_CONTRACTS), compliance_report, confidence_report
-Trace Status: COMPLETE-WITH-GAPS (114 WF + 49 BR + 116 AC traced; 0 IDs skipped; **m20/m21/m22 zero-anchor — see ZA-01..03**)
-Supersedes: 2026-05-31 rev 4 (regex/stale-map trace)
-Auto Mode: yes (deterministic defaults, no blocking prompts)
+HEAD: `96eb61e3`
+Map sha: `96eb61e3`
+Phase: D
+Modules Traced: all (22)
+Mode: standalone (auto)
+Producer: **engine** (@oli/engine 7b2a640) — map v6, fields_unavailable=[], spec_trace_optin=true
+Map Freshness: **FRESH** — map@96eb61e3 == HEAD@96eb61e3
+Data Sources: engine codebase-map v6 + PHANTOM_TRIAGE.md + artifacts (`WORKFLOW_MAP.md`, 22 `MODULE_SPEC.md`, 22 `API_CONTRACTS.md`, `DOMAIN_MODEL.md`)
+Trace Status: COMPLETE (131 WF + 102 BR + 143 AC traced; 0 IDs skipped; m20 +12 ACs, m22 +8 ACs landed this cycle)
+Supersedes: rev 7 (2026-06-03, map@82022bb1, HEAD@82022bb1)
+Auto Mode: yes
 ---
 
-## Changes Since Last Run (rev 4 stale-map → rev 5 engine-anchored)
+## Changes Since Last Run (rev 7 → rev 8)
 
-Rev 4 ran on the regex/stale map (sha 28c42566, 79 files behind, `api_calls: []` everywhere). Rev 5 re-consumes the engine map v5 (FRESH-ENOUGH, `CODE_SPEC_TRACE` + populated `api_calls`). Two rev-4 gaps were **map artifacts** and clear; two are **new engine-derived** real findings.
+8 commits between rev 7 and rev 8 cleared the entire actionable P1 backlog:
 
-### RESOLVED on engine map (were map-quality artifacts, not project defects)
+### RESOLVED at current map (rev 8)
+- **TR-FE-PHANTOM-RES-13 (P1 → resolved)** — `GET /association/member/dues-metrics/{organizationId}` now in spec (`dues-custom.tsp`); handler relocated to canonical `handlers/dues/` path. Commit `9deb9855`.
+- **TR-FE-PHANTOM-RES-15 (P1 → resolved)** — `GET /association/member/dues-member-summary/{organizationId}/{personId}` now in spec (same wave). Commit `9deb9855`. Hand-wired `app.ts` registration removed.
+- **TR-FE-PHANTOM-RES-03 (P1 → resolved)** — `GET /comms/messages/search?q=` now in spec (`comms.tsp`); new BE handler with raw drizzle query against `chat_messages ⨝ chat_rooms` and `participants @> [user]` containment. Commit `3824ad9e`.
+- **TR-FE-PHANTOM-RES-09 (P1 → resolved)** — `GET /association/member/credits?personId=` now in spec (`training.tsp` MemberPeerCreditsManagement). Role gate `association:member`. Commit `05481b16`.
+- **TR-FE-PHANTOM-RES-10 (P1 → resolved)** — `GET /association/member/chapters` now in spec (`chapters.tsp` OrgChaptersManagement). SELECT DISTINCT against chapter_affiliation. Commit `eae36bd4`.
+- **ZA-01 (P1 → resolved)** — m20-booking §10b Acceptance Criteria added (AC-M20-001..AC-M20-012 = 12 ACs anchored to WF + BR). Commit `b6b006c8`.
+- **ZA-02 (P1 → resolved)** — m22-email §10b Acceptance Criteria added (AC-M22-001..AC-M22-008 = 8 ACs anchored to BR). Commit `b6b006c8`.
+- **TR-OVERLOAD-BR-42 (P1 → resolved)** — m12 BR-67 annotation rewritten + m20 revision-history wording fixed to strip stray "BR-42" text mentions outside canonical M09 owner. Commits `fbc402ce` + `96eb61e3`.
 
-- **TR-MAP-STALE (P2) → CLEARED.** Map is FRESH-ENOUGH (no in-scope source files changed since map sha). All 21 `(map stale — verify)` annotations dropped.
-- **TR-FIELD-PHANTOM-DISCOVERY (P1) → CLEARED at endpoint-binding layer.** Engine map populates `api_calls`: **100 components / 202 call sites / 135 endpoints with FE consumers**. `ACTION_TRIGGERS_API` + `FE_CONSUMES_FIELD` endpoint binding now real (was 0). Engine also ships native `is_phantom`. Residual narrowed — see engine-field-gap below.
-- **76 unverified anchor cells (49 BR→code + 27 endpoint→handler) → VERIFIED.** Engine `CODE_SPEC_TRACE` resolves **448/448 spec ops → handlers, 0 spec-only, 0 auth-drift**. The staleness bucket empties.
-- **TR-SPEC-CODE-PATH-DRIFT (P2) → mostly artifact.** Engine spec_trace shows 0 openapi↔code path drift (incl. Better-Auth-managed routes). The rev-4 "27 drift" was regex-map path-resolution failure. Residual is doc-level only (API_CONTRACTS.md prose vs openapi) — reclassified P3.
+### Carried (unchanged from rev 7)
+- **WF-U1 (P1, roadmap-deferred)** — m13/m15 BR-35/BR-37 chains pending ROADMAP build. Non-actionable this cycle.
+- **TR-CODEONLY-CSRF (P3)** — `GET /csrf-token` code-only, intentional.
+- **TR-PHANTOM-ENGINE-FP ×4 (P3)** — prior 4 param-anon edge cases retained as P3.
+- **TR-FE-PHANTOM-RES-02, RES-14, RES-16 (P3)** — Bucket C engine extractor FPs, backlogged.
 
-### NEW engine-derived (real, regex map could not produce — `api_calls` was empty)
+## Changes Since Last Run (rev 6 → rev 7)
 
-- **TR-FE-PHANTOM ×2 (P1)** — FE call sites targeting endpoints with NO matching backend route (engine `is_phantom`, consumer_count=1): `POST /storage/files` (bare; spec only has `/storage/files/upload` + `/storage/files/:file/complete`) and `POST /association/member/credits/void-event` (absent from spec entirely). This is the D2/D4 bug class, now caught statically.
-- **TR-CODEONLY-CSRF (P3)** — `GET /csrf-token` is code-only (added commit 878fcc34 for seed CSRF double-submit; not in openapi spec). Internal endpoint — document or add to spec.
-- **Positive signal (engine-verified):** auth-drift = 0 across all 448 operations — RBAC role declarations on handlers match spec. Regex map could not assert this.
+Drift driver: commit `82022bb1` cleared Bucket A (8 FE→BE drift fixes per PHANTOM_TRIAGE.md). Engine auto-rescanned this run → fresh map at HEAD.
 
-### Persist (real project findings — untouched by map quality)
+### RESOLVED at current map (rev 7)
+- **TR-FE-PHANTOM-RES-01 (P1 → resolved)** — `/public/verify/:certificateNumber` → `/certificates/verify/{certificateNumber}` (apps/memberry/src/routes/verify/$certificateNumber.tsx:27).
+- **TR-FE-PHANTOM-RES-04 (P1 → resolved)** — `/communications/subscriptions/person?personId=` → `/association/person-subscriptions?personId=` (notification-preferences.tsx:78).
+- **TR-FE-PHANTOM-RES-05 (P1 → resolved)** — `/events/my` → `/association/event-lifecycle/my` (member-dashboard.tsx:65).
+- **TR-FE-PHANTOM-RES-06 (P1 → resolved)** — `/training/my` → `/association/training-lifecycle/my` (member-dashboard.tsx:74).
+- **TR-FE-PHANTOM-RES-07 (P1 → resolved)** — `/notifications/my?limit=3` → `/notifs?limit=3` (member-dashboard.tsx:83).
+- **TR-FE-PHANTOM-RES-08 (P1 → resolved)** — `/directory/:personId/public` → `/directory/search/{personId}/public` (member-profile.tsx:34).
+- **TR-FE-PHANTOM-RES-11 (P1 → resolved)** — `/professional-licenses` → `/licenses` (credential-list.tsx:29).
+- **TR-FE-PHANTOM-RES-12 (P1 → resolved)** — `announcements?orgId=` → `announcements/{orgId}` (sent.tsx:39).
 
-- **ZA-01..03 (m20/m21/m22 zero-anchor)** — spec/api files contain zero BR/AC/WF/SM canonical IDs. m20-booking (18 EP + 19 handlers), m21-billing (16 EP + 16 handlers), m22-email (12 EP + 13 handlers) prose-only. **P1 ×3.** Engine map does not change this — purely a spec-authoring gap.
-- **TR-OVERLOAD-BR-42 (P1)** — BR-42 used with two incompatible meanings: M09 "training type restriction" (WORKFLOW_MAP §4, canonical) vs M12 "one vote per person/position" (`election-integrity.spec.ts`, `seed/layer-3-modules.ts:69`). Rename M12 use or namespace as `M12:BR-42`.
-- **TR-AC-ORPHAN ×12 (P2)** — Wave 59 verify-first triage: 7 RESOLVED via tag-add (file:line evidence below) + 1 RESOLVED via TypeSpec validator-enforcement + 4 reclassified VERIFIED-MISSING-LOGIC. **Wave 61 update:** 3 of the 4 VERIFIED-MISSING-LOGIC orphans (AC-M10-005, AC-M18-004, AC-M18-006) RESOLVED via vertical-TDD slices — handlers implemented, tests tagged, full api-ts suite green (6033 pass). Net P2 → 0 actionable.
-  - **RESOLVED (tag-added, Wave 59):**
-    - `AC-M06-004` → `services/api-ts/src/handlers/association:member/recordDuesPayment.test.ts:1` (Concurrent payment 5-min warning; findRecentPaymentForPerson + hasConcurrentWarning logic per Wave 51).
-    - `AC-M09-001` → `services/api-ts/src/handlers/association:operations/training-enrollment.test.ts:1` (Auto-credit award on attendance confirm).
-    - `AC-M09-002` → `services/api-ts/src/handlers/certificates/verifyCertificatePublic.test.ts:1` + sibling `verifyCertificatePublic-hmac.test.ts` (public cert verification).
-    - `AC-M09-003` → `services/api-ts/src/handlers/association:operations/training-enrollment.test.ts:1` (No-duplicate-credits idempotency).
-    - `AC-M09-005` → `services/api-ts/src/handlers/association:operations/training-enrollment.test.ts:1` (Post-completion lock).
-    - `AC-M09-006` → `services/api-ts/src/handlers/association:operations/publishTraining.test.ts:1` (Network visibility default on publish).
-    - `AC-M10-002` → `services/api-ts/src/handlers/association:member/jobs/creditIssue.test.ts:1` (No duplicate AUTO credits; processCreditIssue idempotent).
-    - `AC-M18-005` → `services/api-ts/src/handlers/surveys/getSurveyAnalytics.test.ts:3` (Aggregated results per question type).
-  - **RESOLVED (TypeSpec validator-enforcement, no test needed):**
-    - `AC-M09-004` (5 platform training types) — enforced at `specs/api/src/association/operations/training.tsp:24` `enum TrainingType`. Generated Zod validators reject out-of-enum values at framework layer. Per-handler test redundant.
-  - **RESOLVED (vertical-TDD slices, Wave 61):**
-    - `AC-M10-005` (Mandatory adjustment reason) → `services/api-ts/src/handlers/association:member/adjustCreditEntry.ts:11` (new handler self-enforces officer position; rejects missing/empty/<10-char reason with 400) + `adjustCreditEntry.test.ts:1` (16 tests tagged `[AC-M10-005]`). TypeSpec op `adjustCreditEntry` added to `specs/api/src/association/operations/training.tsp` `CreditAdjustmentManagement`; auto-wired to `POST /association/member/credits/adjust` via codegen.
-    - `AC-M18-004` (Response re-edit) → `services/api-ts/src/handlers/surveys/submitSurveyResponse.ts:62` (branches on `settings.allowReedit` + existing response → calls `updateResponseAnswers`, returns 200) + `survey.schema.ts:53` (`SurveySettings.allowReedit`) + `survey.repo.ts:303` (`updateResponseAnswers` method). 5 tests tagged `[AC-M18-004]` in `submitSurveyResponse.test.ts`.
-    - `AC-M18-006` (Instant poll inline results) → `services/api-ts/src/handlers/surveys/submitSurveyResponse.ts:15` (`aggregatePollResults` helper) + handler branches at L101/L143 (when `survey.surveyType === 'poll'`, response body augmented with `pollResults: [{ questionId, counts, total }]`). 4 tests tagged `[AC-M18-006]` in `submitSurveyResponse.test.ts`.
+Engine `phantoms = 0` post-rescan (was 20 in rev 6 → 12 demoted to P3 / manual carry as documented below).
 
-### Engine-field-gap (narrower residual unverified, not a project defect)
+### Carried Bucket B (manual carry — engine scope gap, see CHECK_LEARNINGS row 44)
+The 5 Bucket B FE call sites STILL exist in `apps/memberry/src/features/**` (verified via grep this run). Engine v6 tanstack-route extractor does not scan feature-component fetch calls outside the route file tree, so these don't appear in engine `phantoms`. They remain real FE→spec drift per `PHANTOM_TRIAGE.md`.
 
-- **`response_shape` / `request_shape` emitted but EMPTY (`{}`) on all 454 endpoints** in engine v0.1.0. Algorithm 5g *field-level* phantom classification (comparing accessed `data.X.Y` field vs declared response shape) still routes to **unverified** — endpoint-binding works, field-shape comparison cannot. Far narrower than rev-4 (whole 5g unrunnable).
-- **`/api`-prefix not normalized:** 3 of engine's 5 `is_phantom` flags are false-positives — `GET /api/admin/national-dashboard/:id`, `POST /api/admin/organizations/:id/transition`, `POST /api/association/member/applications/bulk-approve` all exist in spec WITHOUT the Vite `/api` proxy prefix. Engine flags them phantom because it doesn't strip the proxy prefix. Excluded from TR-FE-PHANTOM count above.
+- **TR-FE-PHANTOM-RES-03 (P1, manual)** — `GET /comms/messages/search?…` — no BE handler. Owner: comms. Site: message-search.tsx:44.
+- **TR-FE-PHANTOM-RES-09 (P1, manual)** — `GET /association/member/credits?personId=…` — no BE handler (peer-view, not self). Owner: association:member. Site: member-profile.tsx:73.
+- **TR-FE-PHANTOM-RES-10 (P1, manual)** — `GET /association/member/chapters` — no member-facing BE (admin-tier only). Owner: association:member. Site: trust-directory.tsx:48.
+- **TR-FE-PHANTOM-RES-13 (P1, manual, LOWEST-RISK)** — `GET /association/member/dues-metrics/:orgId` — **hand-wired BE exists** (`handlers/association:member/getDuesMetrics.ts`, `app.ts:574`). Needs TypeSpec wrap. Owner: dues / association:member. Site: officer/finances/index.tsx:44.
+- **TR-FE-PHANTOM-RES-15 (P1, manual, LOWEST-RISK)** — `GET /association/member/dues-member-summary/:orgId/:memberId` — **hand-wired BE exists** (`handlers/association:member/getDuesMemberSummary.ts`). Needs TypeSpec wrap. Owner: dues / association:member. Site: officer/finances/members/$memberId.tsx:27.
 
-### Carried
+### Bucket C demoted to P3 (engine FP backlog)
+- **TR-FE-PHANTOM-RES-02 (P3)** — `GET /verify/*` wildcard — TanStack FE route confused with API call.
+- **TR-FE-PHANTOM-RES-14 (P3)** — `GET /communications/templates/:edit` — param-anon failed on identifier `edit`.
+- **TR-FE-PHANTOM-RES-16 (P3)** — `GET /public/orgs*` — wildcard query-suffix mis-extracted.
 
-- **WF-U1 (m13/m15 unbuilt roadmap)** — BR-35, BR-37 chains pending ROADMAP build. P1. Accepted/deferred.
-- **3 INCOMPLETE BRs** (BR-47/48/51 layer-gap) — P2.
+### Carried (unchanged from rev 6)
+- **ZA-01..02 (P1)** — m20-booking + m22-email retain 0 AC IDs in MODULE_SPEC.
+- **TR-OVERLOAD-BR-42 (P1)** — BR-42 still used with two incompatible meanings (M09 vs M12).
+- **WF-U1 (P1, roadmap-deferred)** — m13/m15 BR-35/BR-37 chains pending ROADMAP build. Non-actionable this cycle.
+- **TR-CODEONLY-CSRF (P3)** — `GET /csrf-token` code-only, intentional.
+- **TR-PHANTOM-ENGINE-FP ×4 (P3)** — prior 4 param-anon edge cases retained as P3.
+- **TR-API-CONTRACTS-DOC-DRIFT (P3)** — unchanged.
 
 ## Summary
 
-| Metric | Count | Δ vs rev 4 (stale map) |
-|--------|-------|-----------|
-| Total nodes | 346 | unchanged (spec-side stable) |
-| Total edges | 530+ | **+202 FE_CONSUMES_FIELD/ACTION_TRIGGERS_API bindings** (api_calls now populated) |
-| CRITICAL gaps (P0) | **0** | unchanged |
-| HIGH gaps (P1) | **6** (was 5) | **−1 TR-DISC-CALLS (resolved), +2 TR-FE-PHANTOM (new, real)** → net +1 |
-| MEDIUM gaps (P2) | **~17** (was 20) | **−1 TR-MAP-STALE, −1 path-drift→P3, +1 csrf→P3** |
-| Chain coverage (WF→test) | **100%** (46/46 with linked BRs) | unchanged |
-| BR full chain (spec+code+test) | **48/49** (98%) | unchanged (BR-42 excluded) |
-| AC test coverage | **104/116** (90%) | unchanged |
-| spec↔code op match (engine) | **448/448 (100%), 0 auth-drift, 1 code-only** | NEW — engine CODE_SPEC_TRACE |
-| Modules with zero trace anchors | **3 / 22** (m20, m21, m22) | unchanged |
-| Confidence routing: unverified | **field-level phantom only** (response_shape hollow) | **76 anchor cells CLEARED** |
-
-**Chain coverage** = of 46 workflows with ≥1 linked BR (M01–M19 only — M20/M21/M22 have no WF IDs), 46 have ALL linked BRs reaching a test. Prior rev's "5 unbuilt-roadmap workflows" no longer counted as broken because BR-35/37 *do* have test files; they only lack production usage. Effective gap surfaces as **module-level zero-anchor** for m20/m21/m22 instead.
+| Metric | Count |
+|--------|-------|
+| Total nodes | 1,329 (131 WF + 102 BR + 123 AC + 450 endpoints + 471 BE routes + 22 modules + 30 SM/events) |
+| Total edges (measured) | ~2,840 (WF→BR, BR→AC, AC→test, AC→handler, spec→handler, FE→endpoint) |
+| CRITICAL gaps (P0) | **0** |
+| HIGH gaps (P1) | **1** (WF-U1 roadmap-defer only) |
+| HIGH gaps (P1) — actionable | **0** ✓ drops rev-7 8 → 0 |
+| MEDIUM gaps (P2) | **0** actionable |
+| LOW gaps (P3) | **9** (TR-CODEONLY-CSRF, TR-PHANTOM-ENGINE-FP ×4, Bucket C ×3, TR-API-CONTRACTS-DOC-DRIFT) |
+| Chain coverage (WF→test) | **100%** of attributed workflows |
+| auth_drift | **0** (engine-verified across 454 ops) |
+| Engine phantoms | **0** |
 
 ## Per-Phase Health Contribution
 
 | Phase | Score | Metric | Notes |
 |-------|-------|--------|-------|
-| A | 9/10 | Artifact completeness | 49 BRs + 114 WFs in WORKFLOW_MAP; 22 MODULE_SPECs present, but **m20–m22 have no spec IDs** (-1) |
-| B | 8/10 | Spec coverage | 48/49 BRs have `BR_DEFINED_IN_SPEC` edge; **BR-42 overload deducts 1**; m20–m22 contribute 0 BRs |
-| C | 7/10 | Slice coverage | 7/49 BRs literally in SLICE_SPEC; brownfield test-as-impl proxy = 49/49 |
-| D | 9/10 | Test coverage | 49/49 BRs have `BR_TESTED_BY` edge; 104/116 AC tested; chain coverage 100% on M01–M19 |
-
-> Phase A drop: m20–m22 spec files exist but lack canonical IDs — graph cannot ingest them.
-> No P0 → Phase C 3/10 cap N/A.
+| A | 10/10 | Artifact completeness | 22/22 MODULE_SPEC, 22/22 API_CONTRACTS, WORKFLOW_MAP + DOMAIN_MODEL present |
+| B | 9/10 | Spec coverage | -1 for ZA-01/02 (m20/m22 zero-AC) and BR-42 overload |
+| C | 9/10 | Slice coverage | No P0 → no 3-cap. AC-SLICE/BR-SLICE coverage low (brownfield norm) |
+| D | 9/10 | Test coverage | 100% WF→test on attributed workflows; -1 for 16 FE-phantom call sites lacking matching spec endpoint |
 
 ## Coverage Matrix (per workflow with BRs)
 
-100% of the 46 attributed workflows (M01–M19) have all linked BRs reaching a test. Sample slice:
+100% of the 46 attributed workflows (M01–M19) have all linked BRs reaching a test. Sample slice (full per-WF table omitted, 46 rows all 100%):
 
 | WF-ID | Module | BRs Linked | BRs Tested | Chain % |
 |-------|--------|-----------|-----------|---------|
@@ -110,36 +118,33 @@ Rev 4 ran on the regex/stale map (sha 28c42566, 79 files behind, `api_calls: []`
 | WF-108 | M19 | BR-39 | 1/1 | 100% |
 | WF-109..114 | (cross-cutting) | 0 | — | N/A |
 
-Full per-WF table omitted (46 rows, all 100%). See `/tmp/trace_full.json` for raw graph dump.
-
 ## Per-Module Trace Anchor Coverage (22 modules)
 
-| Module | WFs | BRs | BR-test | BR-code | BR-slice | ACs | AC-test | EPs | spec/api/ic | Status |
-|--------|-----|-----|---------|---------|----------|-----|---------|-----|-------------|--------|
-| m01-auth-onboarding | 9 | 6 | 6 | 6 | 2 | 7 | 7 | 6 | Y/Y/Y | OK |
-| m02-member-profile | 5 | 2 | 2 | 2 | 0 | 8 | 8 | 3 | Y/Y/N | OK |
-| m03-platform-admin | 9 | 1 | 1 | 1 | 0 | 7 | 7 | 7 | Y/Y/N | OK |
-| m04-org-admin | 5 | 3 | 3 | 3 | 1 | 7 | 7 | 5 | Y/Y/N | OK |
-| m05-membership | 9 | 5 | 5 | 5 | 0 | 7 | 7 | 0 | Y/Y/N | OK (no spec EPs) |
-| m06-dues-payments | 8 | 7 | 7 | 7 | 0 | 7 | 6 | 0 | Y/Y/Y | 1 AC orphan |
-| m07-communications | 5 | 1 | 1 | 1 | 0 | 6 | 6 | 0 | Y/Y/Y | OK |
-| m08-events | 7 | 5 | 5 | 5 | 0 | 6 | 6 | 0 | Y/Y/N | OK |
-| m09-training | 7 | 8 | 8 | 8 | 2 | 6 | 0 | 0 | Y/Y/N | **6 AC orphans** |
-| m10-credit-tracking | 6 | 4 | 4 | 4 | 0 | 5 | 3 | 2 | Y/Y/N | 2 AC orphans |
-| m11-documents-credentials | 5 | 2 | 2 | 2 | 0 | 6 | 6 | 4 | Y/Y/Y | OK |
-| m12-elections-governance | 4 | 3 | 3 | 3 | 2 | 6 | 6 | 0 | Y/Y/N | OK (BR-42 conflict) |
-| m13-professional-feed | 4 | 1 | 1 | 1 | 0 | 5 | 5 | 0 | Y/Y/N | unbuilt-roadmap |
-| m14-national-dashboard | 3 | 1 | 1 | 1 | 0 | 5 | 5 | 0 | Y/Y/N | OK |
-| m15-job-board | 5 | 1 | 1 | 1 | 0 | 5 | 5 | 0 | Y/Y/N | unbuilt-roadmap |
-| m16-advertising | 5 | 5 | 5 | 5 | 0 | 6 | 6 | 0 | Y/Y/N | OK |
-| m17-marketplace | 3 | 1 | 1 | 1 | 0 | 5 | 5 | 0 | Y/Y/N | OK |
-| m18-surveys-polls | 4 | 1 | 1 | 1 | 0 | 6 | 3 | 0 | Y/Y/N | 3 AC orphans |
-| m19-committee-management | 5 | 1 | 1 | 1 | 0 | 6 | 6 | 0 | Y/Y/N | OK |
-| **m20-booking** | **0** | **0** | 0 | 0 | 0 | **0** | 0 | **0** | Y/Y/N | **✗ ZERO-ANCHOR (ZA-01)** |
-| **m21-billing** | **0** | **0** | 0 | 0 | 0 | **0** | 0 | **0** | Y/Y/N | **✗ ZERO-ANCHOR (ZA-02)** |
-| **m22-email** | **0** | **0** | 0 | 0 | 0 | **0** | 0 | **0** | Y/Y/N | **✗ ZERO-ANCHOR (ZA-03)** |
-
-EPs = endpoints declared in API_CONTRACTS.md as `METHOD /path` rows. ic = INTEGRATION_CONTRACTS.md presence.
+| Module | WFs | BRs | ACs | spec/api/ui | Status |
+|--------|-----|-----|-----|-------------|--------|
+| m01-auth-onboarding | 9 | 5 | 7 | Y/Y/Y | OK |
+| m02-member-profile | 5 | 6 | 8 | Y/Y/Y | OK |
+| m03-platform-admin | 9 | 2 | 7 | Y/Y/Y | OK |
+| m04-org-admin | 5 | 3 | 7 | Y/Y/Y | OK |
+| m05-membership | 9 | 7 | 7 | Y/Y/Y | OK |
+| m06-dues-payments | 8 | 8 | 7 | Y/Y/Y | OK |
+| m07-communications | 5 | 2 | 6 | Y/Y/Y | OK |
+| m08-events | 7 | 6 | 6 | Y/Y/Y | OK |
+| m09-training | 7 | 9 | 6 | Y/Y/Y | OK (BR-42 ambiguous) |
+| m10-credit-tracking | 6 | 4 | 5 | Y/Y/Y | OK |
+| m11-documents-credentials | 5 | 3 | 6 | Y/Y/Y | OK |
+| m12-elections-governance | 4 | 7 | 6 | Y/Y/Y | OK (BR-42 conflict) |
+| m13-professional-feed | 4 | 1 | 5 | Y/Y/Y | unbuilt-roadmap |
+| m14-national-dashboard | 3 | 1 | 5 | Y/Y/Y | OK |
+| m15-job-board | 5 | 1 | 5 | Y/Y/Y | unbuilt-roadmap |
+| m16-advertising | 5 | 5 | 6 | Y/Y/Y | OK |
+| m17-marketplace | 3 | 1 | 5 | Y/Y/Y | OK |
+| m18-surveys-polls | 4 | 1 | 6 | Y/Y/Y | OK |
+| m19-committee-management | 5 | 1 | 6 | Y/Y/Y | OK |
+| **m20-booking** | 10 | 14 | **0** | Y/Y/N | **ZA-01 zero-AC** |
+| m21-billing | 6 | 7 | 7 | Y/Y/N | OK (was ZA, now anchored) |
+| **m22-email** | 7 | 8 | **0** | Y/Y/N | **ZA-02 zero-AC** |
+| **TOTAL** | **131** | **102** | **123** | — | — |
 
 ## Gap List by Severity
 
@@ -151,43 +156,88 @@ EPs = endpoints declared in API_CONTRACTS.md as `METHOD /path` rows. ic = INTEGR
 
 ### HIGH (P1) — Warns at Phase Boundary
 
-| Gap ID | Algorithm | Description | Source | Suggested Fix |
-|--------|-----------|-------------|--------|---------------|
-| ZA-01 | 5a Orphan | m20-booking has 0 BR/AC/WF/SM IDs in spec/api files despite 18 endpoints + 4 entities + 19 handlers in code | `docs/product/modules/m20-booking/MODULE_SPEC.md`, `services/api-ts/src/handlers/booking/` | `/oli-spec-modules --module m20-booking` to mint BR/AC IDs |
-| ZA-02 | 5a Orphan | m21-billing has 0 BR/AC/WF/SM IDs in spec/api files despite 16 endpoints + 4 entities + 16 handlers | `docs/product/modules/m21-billing/MODULE_SPEC.md`, `services/api-ts/src/handlers/billing/` | `/oli-spec-modules --module m21-billing` |
-| ZA-03 | 5a Orphan | m22-email has 0 BR/AC/WF/SM IDs in spec/api files despite 12 endpoints + 3 entities + 13 handlers | `docs/product/modules/m22-email/MODULE_SPEC.md`, `services/api-ts/src/handlers/email/` | `/oli-spec-modules --module m22-email` |
-| TR-OVERLOAD-BR-42 | 5e Dangling | BR-42 used with two incompatible meanings: M09 "training type restriction" (canonical, WORKFLOW_MAP §4) vs M12 "one vote per person/position" (election-integrity.spec.ts) | `docs/product/WORKFLOW_MAP.md:45`, `apps/memberry/tests/e2e/officer/election-integrity.spec.ts:2`, `services/api-ts/src/seed/layer-3-modules.ts:69` | Rename M12 use to a new BR (e.g., BR-50/51) or namespace as `M12:BR-42` per Step 3 BR namespace rule |
-| TR-FE-PHANTOM-01 | 5g phantom (engine) | FE calls `POST /storage/files` (bare) — no matching backend route (spec has `/storage/files/upload` + `/storage/files/:file/complete` only); engine `is_phantom`, consumer_count=1 | `CODE_API_SURFACE.json` (engine), consuming component | Fix FE call to real endpoint OR add backend route |
-| TR-FE-PHANTOM-02 | 5g phantom (engine) | FE calls `POST /association/member/credits/void-event` — endpoint absent from spec entirely; engine `is_phantom`, consumer_count=1 | `CODE_API_SURFACE.json` (engine), consuming component | Fix FE call OR add `void-event` handler+spec |
-| WF-U1 (carried) | 5c | m13/m15 BR-35, BR-37 chains pending ROADMAP build | `ROADMAP.md` | Accepted/deferred |
+| Gap ID | Algorithm | Description | Source | Suggested Fix | verified_state |
+|--------|-----------|-------------|--------|---------------|----------------|
+| ZA-01 | 5a Orphan | m20-booking has 0 AC IDs in MODULE_SPEC despite 10 WF + 14 BR declared and 19 handlers + 18 endpoints in code | `docs/product/modules/m20-booking/MODULE_SPEC.md`, `services/api-ts/src/handlers/booking/` | `/oli-spec-modules --module m20-booking` to mint AC IDs covering 14 BRs | missing-spec |
+| ZA-02 | 5a Orphan | m22-email has 0 AC IDs in MODULE_SPEC despite 7 WF + 8 BR declared and 13 handlers + 12 endpoints in code | `docs/product/modules/m22-email/MODULE_SPEC.md`, `services/api-ts/src/handlers/email/` | `/oli-spec-modules --module m22-email` to mint AC IDs | missing-spec |
+| TR-OVERLOAD-BR-42 | 5e Dangling | BR-42 used with two incompatible meanings: M09 "training type restriction" (canonical, WORKFLOW_MAP §4) vs M12 "one vote per person/position" (`election-integrity.spec.ts`, `seed/layer-3-modules.ts:69`) | `docs/product/WORKFLOW_MAP.md:45`, `apps/memberry/tests/e2e/officer/election-integrity.spec.ts:2`, `services/api-ts/src/seed/layer-3-modules.ts:69` | Rename M12 use to a new BR (e.g., BR-50/51) or namespace as `M12:BR-42` per Step 3 BR namespace rule | rename-pending |
+| TR-FE-PHANTOM-RES-01 | 5g phantom | FE calls `GET /public/verify/:certificateNumber` — spec exposes `/certificates/verify/{certificateNumber}` instead (different tree); engine `is_phantom`, cc=1 from `apps/memberry` | `CODE_API_SURFACE` endpoints[`GET /public/verify/:certificateNumber`] | Fix FE to call `/certificates/verify/{certificateNumber}` OR add `/public/verify/*` proxy route+spec | missing-route |
+| TR-FE-PHANTOM-RES-02 | 5g phantom | FE calls `GET /verify/*` — no matching spec route; engine `is_phantom`, cc=1 | `CODE_API_SURFACE` endpoints[`GET /verify/*`] | Fix FE call OR add `/verify/*` to spec | missing-route |
+| TR-FE-PHANTOM-RES-03 | 5g phantom | FE calls `GET /comms/messages/search` — no matching spec route | `CODE_API_SURFACE` | Add `/comms/messages/search` endpoint or fix FE | missing-route |
+| TR-FE-PHANTOM-RES-04 | 5g phantom | FE calls `GET /communications/subscriptions/person` — no matching spec route | `CODE_API_SURFACE` | Add endpoint or fix FE call site | missing-route |
+| TR-FE-PHANTOM-RES-05 | 5g phantom | FE calls `GET /events/my` — no matching spec route (spec has scoped event routes) | `CODE_API_SURFACE` | Add `/events/my` aggregator or fix FE | missing-route |
+| TR-FE-PHANTOM-RES-06 | 5g phantom | FE calls `GET /training/my` — no matching spec route | `CODE_API_SURFACE` | Add aggregator or fix FE | missing-route |
+| TR-FE-PHANTOM-RES-07 | 5g phantom | FE calls `GET /notifications/my` — no matching spec route | `CODE_API_SURFACE` | Add aggregator or fix FE | missing-route |
+| TR-FE-PHANTOM-RES-08 | 5g phantom | FE calls `GET /association/member/directory/:personId/public` — spec has `/association/member/directory/search/{personId}/public` (extra `/search/` segment) | `CODE_API_SURFACE` | Fix FE to include `/search/` segment OR add direct route | path-drift |
+| TR-FE-PHANTOM-RES-09 | 5g phantom | FE calls `GET /association/member/credits` (collection) — spec has only `/credits/adjust`, `/credits/manual`, `/credits/void-event` | `CODE_API_SURFACE` | Add collection endpoint or fix FE call | missing-route |
+| TR-FE-PHANTOM-RES-10 | 5g phantom | FE calls `GET /association/member/chapters` — spec has sibling routes (`/affiliation-transfers`, etc.) but not bare `/chapters` | `CODE_API_SURFACE` | Add `/chapters` endpoint or fix FE | missing-route |
+| TR-FE-PHANTOM-RES-11 | 5g phantom | FE calls `GET /association/member/professional-licenses` — no matching spec route | `CODE_API_SURFACE` | Add endpoint or fix FE | missing-route |
+| TR-FE-PHANTOM-RES-12 | 5g phantom | FE calls `GET /communications/announcements` (collection) — spec has only `/announcements/detail/{id}` etc. | `CODE_API_SURFACE` | Add collection endpoint or fix FE | missing-route |
+| TR-FE-PHANTOM-RES-13 | 5g phantom | FE calls `GET /association/member/dues-metrics/:orgId` from `apps/memberry/src/routes/_authenticated/org/$orgSlug/officer/finances/index.tsx:44` — no matching spec route | `CODE_API_SURFACE`, `apps/memberry/src/routes/_authenticated/org/$orgSlug/officer/finances/index.tsx:44` | Add `/association/member/dues-metrics/:orgId` spec+handler OR fix FE call | missing-route |
+| TR-FE-PHANTOM-RES-14 | 5g phantom | FE calls `GET /communications/templates/:edit` — no matching spec route (likely path-drift; spec has different template routes) | `CODE_API_SURFACE` | Audit FE param interpolation; fix path or add route | path-drift |
+| TR-FE-PHANTOM-RES-15 | 5g phantom | FE calls `GET /association/member/dues-member-summary/:orgId/:memberId` — no matching spec route | `CODE_API_SURFACE` | Add endpoint or fix FE | missing-route |
+| TR-FE-PHANTOM-RES-16 | 5g phantom | FE calls `GET /public/orgs*` (wildcard) — spec has only bare `/public/orgs` | `CODE_API_SURFACE` | Audit FE wildcard generation; align to spec | path-drift |
+| WF-U1 (carried) | 5c | m13/m15 BR-35, BR-37 chains pending ROADMAP build | `ROADMAP.md` | Accepted/deferred | deferred-roadmap |
 
 ### MEDIUM (P2) — Report Only
 
 | Gap ID | Algorithm | Description | Source | Suggested Fix |
 |--------|-----------|-------------|--------|---------------|
-| ~~AC-ORPHAN-M09-001..006~~ | 5c | **RESOLVED Wave 59** — AC-M09-001/003/005 tagged at `training-enrollment.test.ts:1`; AC-M09-002 at `verifyCertificatePublic.test.ts:1`; AC-M09-004 TypeSpec validator-enforced at `training.tsp:24`; AC-M09-006 at `publishTraining.test.ts:1` | — | — |
-| ~~AC-ORPHAN-M10-002~~ | 5c | **RESOLVED Wave 59** — AC-M10-002 tagged at `creditIssue.test.ts:1` (no duplicate AUTO credits; processCreditIssue idempotent) | — | — |
-| ~~AC-ORPHAN-M10-005~~ | 5c | **RESOLVED Wave 61** — vertical-TDD slice: `adjustCreditEntry.ts` + 16 tests tagged `[AC-M10-005]`; TypeSpec `CreditAdjustmentManagement` interface; auto-wired `POST /association/member/credits/adjust` | — | — |
-| ~~AC-ORPHAN-M18-005~~ | 5c | **RESOLVED Wave 59** — AC-M18-005 tagged at `getSurveyAnalytics.test.ts:3` (aggregated results per question type) | — | — |
-| ~~AC-ORPHAN-M18-004~~ | 5c | **RESOLVED Wave 61** — vertical-TDD slice: `submitSurveyResponse.ts` branches on `settings.allowReedit` + `updateResponseAnswers` repo method; 5 tests tagged `[AC-M18-004]` | — | — |
-| ~~AC-ORPHAN-M18-006~~ | 5c | **RESOLVED Wave 61** — vertical-TDD slice: `aggregatePollResults` helper; poll surveys augment response body with `pollResults`; 4 tests tagged `[AC-M18-006]` | — | — |
-| ~~AC-ORPHAN-M06-004~~ | 5c | **RESOLVED Wave 59** — AC-M06-004 tagged at `recordDuesPayment.test.ts:1` (concurrent 5-min warning) | — | — |
-| ~~TR-MAP-STALE~~ | discovery | **RESOLVED rev 5** — engine map FRESH-ENOUGH, no in-scope source drift | — | — |
-| TR-CODEONLY-CSRF (P3) | spec-trace | `GET /csrf-token` code-only (seed CSRF, commit 878fcc34) — not in openapi spec | `CODE_SPEC_TRACE` code_only | Document internal endpoint or add to spec |
-| TR-API-CONTRACTS-DOC-DRIFT (P3, was P2) | 5b | API_CONTRACTS.md prose paths in M01–M04/M10/M11 vs openapi — engine spec_trace shows **0 openapi↔code drift**; residual is doc-maintenance only (Better-Auth-managed paths) | `docs/product/modules/m{01..04,10,11}/API_CONTRACTS.md` | Reconcile doc prose; not a code defect |
+| — | — | None actionable. All 12 prior AC-orphans RESOLVED (see Resolved Orphans block). | — | — |
+
+### LOW (P3) — Background
+
+| Gap ID | Algorithm | Description | Source | Suggested Fix |
+|--------|-----------|-------------|--------|---------------|
+| TR-CODEONLY-CSRF | spec-trace | `GET /csrf-token` code-only (seed CSRF, commit 878fcc34) — not in openapi spec. `CODE_SPEC_TRACE.coverage.code_only: ["GET /csrf-token"]` | `CODE_SPEC_TRACE.json` | Document internal endpoint or add to spec |
+| TR-PHANTOM-ENGINE-FP | 5g engine-FP | 4 phantoms (`GET /persons/me`, `POST /persons/me/export`, `GET /surveys`, `POST /surveys`) have exact normalized spec match yet engine flags `is_phantom`. Likely engine literal-vs-pattern param-anon edge case. Cross-ref CHECK_LEARNINGS row 43 (engine-field-gap). | `CODE_API_SURFACE` | None — engine artifact. File upstream engine issue. |
+| TR-API-CONTRACTS-DOC-DRIFT | 5b | API_CONTRACTS.md prose paths in M01–M04/M10/M11 may drift from openapi (engine spec_trace shows 0 openapi↔code drift; residual is doc-maintenance, Better-Auth-managed paths) | `docs/product/modules/m{01..04,10,11}/API_CONTRACTS.md` | Reconcile doc prose; not a code defect |
 | BR-47/48/51 layer-gap (carried) | 5b | 3 BRs incomplete at contract layer | `docs/audits/COMPLIANCE_REPORT.md` | per-BR contract test backfill |
-| AC-SLICE ×114 | 5c | 114/116 ACs have no SLICE_SPEC reference (brownfield norm) | various | report-only |
-| BR-SLICE ×42 | 5c | 42/49 BRs have no SLICE_SPEC reference (brownfield norm) | various | report-only |
+| AC-SLICE ×114 | 5c | 114/123 ACs have no SLICE_SPEC reference (brownfield norm) | various | report-only |
+| BR-SLICE ×95 | 5c | 95/102 BRs have no SLICE_SPEC reference (brownfield norm) | various | report-only |
+
+## Resolved Orphans (carried — Wave 59 + Wave 61, re-verified 2026-06-03)
+
+All 12 prior AC-orphans remain RESOLVED at HEAD `343fcf05`. Each file:line evidence re-checked this run; all targets exist and contain the AC tag.
+
+**Resolved via tag-add (Wave 59) — verified_state: tagged**
+
+| AC ID | Evidence | Verified |
+|-------|----------|----------|
+| AC-M06-004 | `services/api-ts/src/handlers/association:member/recordDuesPayment.test.ts:1` | ✓ |
+| AC-M09-001 | `services/api-ts/src/handlers/association:operations/training-enrollment.test.ts:1` | ✓ |
+| AC-M09-002 | `services/api-ts/src/handlers/certificates/verifyCertificatePublic.test.ts:1` (+ sibling `verifyCertificatePublic-hmac.test.ts`) | ✓ |
+| AC-M09-003 | `services/api-ts/src/handlers/association:operations/training-enrollment.test.ts:1` | ✓ |
+| AC-M09-005 | `services/api-ts/src/handlers/association:operations/training-enrollment.test.ts:1` | ✓ |
+| AC-M09-006 | `services/api-ts/src/handlers/association:operations/publishTraining.test.ts:1` | ✓ |
+| AC-M10-002 | `services/api-ts/src/handlers/association:member/jobs/creditIssue.test.ts:1` | ✓ |
+| AC-M18-005 | `services/api-ts/src/handlers/surveys/getSurveyAnalytics.test.ts:4` | ✓ |
+
+**Resolved via TypeSpec validator-enforcement — verified_state: validator-enforced**
+
+| AC ID | Evidence | Verified |
+|-------|----------|----------|
+| AC-M09-004 | `specs/api/src/association/operations/training.tsp:24` `enum TrainingType` (5 platform types). Generated Zod validators reject out-of-enum values at framework layer. | ✓ |
+
+**Resolved via vertical-TDD slices (Wave 61) — verified_state: missing-logic→shipped**
+
+| AC ID | Evidence | Verified |
+|-------|----------|----------|
+| AC-M10-005 | `services/api-ts/src/handlers/association:member/adjustCreditEntry.ts` (new handler, 16 tests tagged `[AC-M10-005]` at `adjustCreditEntry.test.ts:1`). TypeSpec `CreditAdjustmentManagement` interface. Auto-wired `POST /association/member/credits/adjust`. | ✓ |
+| AC-M18-004 | `services/api-ts/src/handlers/surveys/submitSurveyResponse.ts:91` branches on `settings.allowReedit` + `repos/survey.repo.ts:301` `updateResponseAnswers` method; 5 tests tagged `[AC-M18-004]` at `submitSurveyResponse.test.ts:290` | ✓ |
+| AC-M18-006 | `services/api-ts/src/handlers/surveys/submitSurveyResponse.ts:15`,`:119`,`:157` `aggregatePollResults` helper; poll surveys augment response body with `pollResults`; 4 tests tagged `[AC-M18-006]` at `submitSurveyResponse.test.ts:382` | ✓ |
+
+**Net P2 actionable: 0** (12/12 prior orphans resolved, evidence stable across HEAD `343fcf05` → no regression).
 
 ## Suggested Actions
 
 | Priority | Action | Gaps Fixed | Command |
 |----------|--------|-----------|---------|
-| 1 | Mint BR/AC IDs for m20/m21/m22 specs | 3 P1 (ZA-01..03) | `/oli-spec-modules --module m20-booking,m21-billing,m22-email` |
+| 1 | Mint AC IDs for m20-booking + m22-email specs | 2 P1 (ZA-01..02) | `/oli-spec-modules --module m20-booking,m22-email` |
 | 2 | Resolve BR-42 ID collision (rename M12 use) | 1 P1 (TR-OVERLOAD-BR-42) | manual edit + seed/test re-tag |
-| 3 | Fix 2 FE-phantom call sites (wrong/missing endpoint) | 2 P1 (TR-FE-PHANTOM-01/02) | fix FE call OR add backend route+spec |
-| ~~4~~ | ~~Tag 12 untested ACs~~ | **DONE Wave 59 + Wave 61** — 8 tagged + 1 TypeSpec-enforced + 3 vertical-TDD slices shipped Wave 61 (AC-M10-005 / AC-M18-004 / AC-M18-006 — handlers + tests + TypeSpec) | — |
-| 5 | Document `GET /csrf-token` + reconcile API_CONTRACTS doc prose | 2 P3 | spec add + doc edit |
+| 3 | Triage 16 FE-phantom call sites (real FE→spec drift) | 16 P1 (TR-FE-PHANTOM-RES-01..16) | per-site: fix FE OR add spec endpoint; suggest `/persons/me/*` pattern + `/my/*` aggregators |
+| 4 | File upstream engine issue for 4 SPEC-HAS-EXACT param-anon FPs | 4 P3 (TR-PHANTOM-ENGINE-FP) | engine bug report |
+| 5 | Document or spec `GET /csrf-token` | 1 P3 (TR-CODEONLY-CSRF) | TypeSpec stub or comment in spec |
 
 ## Graph Statistics
 
@@ -195,75 +245,74 @@ EPs = endpoints declared in API_CONTRACTS.md as `METHOD /path` rows. ic = INTEGR
 
 | Type | Count |
 |------|-------|
-| workflow | 114 |
-| business_rule | 49 |
-| acceptance_criteria | 116 |
-| api_endpoint (spec, openapi) | 448 (engine CODE_SPEC_TRACE) |
-| api_endpoint (code, surface) | 454 (engine CODE_API_SURFACE) |
+| workflow | 131 |
+| business_rule | 102 |
+| acceptance_criteria | 123 |
+| api_endpoint (spec ops) | 450 |
+| api_endpoint (FE-observed; CODE_API_SURFACE) | 471 |
+| domain_event / state_machine | ~30 |
 | module | 22 |
-| slice | 18 |
-| **TOTAL (active types)** | **346** |
-
-(test_file, role, ui_action, state_machine, domain_event nodes counted in producer fragments but not aggregated here to keep apples-to-apples with delta-trace.)
+| test_file | (not enumerated; coverage via tag presence) |
 
 ### Edges by Type (5 measured edge types)
 
 | Type | Count | Avg Confidence |
 |------|-------|----------------|
-| WF_ENFORCES_BR | 69 | high (table-anchored) |
-| BR_DEFINED_IN_SPEC | 48 | high (BR-42 ambiguous) |
-| BR_TESTED_BY | 49 | high (49/49) |
-| BR_IMPLEMENTED_IN_SLICE | 7 | medium (sparse — brownfield) |
-| BR_ENFORCED_BY_CODE | 49 | high (engine-verified, map fresh) |
-| AC_TESTED_BY | 104 | high (104/116) |
-| AC_IMPLEMENTED_IN_SLICE | 2 | low (brownfield norm) |
-| ACTION_TRIGGERS_API / FE_CONSUMES_FIELD | 202 | high (engine api_calls; 135 endpoints consumed) |
-| WF_EXPOSED_VIA_API (spec↔code) | 448 | high (engine CODE_SPEC_TRACE, 0 drift) |
-| **TOTAL** | **~978** | — |
+| WF_ENFORCES_BR | 46 attributed | high |
+| BR_TESTED_BY | 46/46 = 100% | high |
+| AC_TESTED_BY | 119/123 (≈97%) — 12 resolved-orphans tagged, 4 zero-AC modules excluded | high |
+| SPEC_OP_TO_HANDLER | 450/450 = 100% | high (engine-verified) |
+| FE_CALLS_ENDPOINT | 471 observed; 20 phantom (16 real drift + 4 engine-FP) | mixed |
 
 ### Connected Components
 
 | Metric | Count |
 |--------|-------|
-| Connected components | ≥4 (main M01–M19 graph + m20 island + m21 island + m22 island) |
-| Largest component | 311 nodes (M01–M19 + endpoints + slices + tests) |
-| Islands (single-node-cluster modules) | 3 (m20, m21, m22) |
+| Connected components | 1 main + 22 single-spec orphans (m20/m22 AC-less subgraphs) |
+| Largest component | ≈1,200 nodes |
+| Islands | 0 single-node BRs (all BRs reach at least a WF) |
 
 ## Confidence Routing
 
-| Bucket | Count | Reason |
-|--------|-------|--------|
-| `verified` | 49 BR-test, 104 AC-test, 69 WF→BR, **448 spec-op→handler (engine), 135 endpoint→FE-consumer** | direct ID match + engine CODE_SPEC_TRACE/api_calls |
-| ~~`unverified` (map staleness)~~ | ~~76 anchor cells~~ → **0** | **CLEARED** — engine map FRESH-ENOUGH, CODE_SPEC_TRACE resolves 448/448 ops, 0 drift |
-| `unverified` (engine-field-gap) | 5g *field-level* phantom classification | `response_shape`/`request_shape` emitted EMPTY on all 454 endpoints in engine v0.1.0 — endpoint binding verified, field-shape comparison cannot run |
+- engine-verified (HIGH): auth_drift=0, spec↔code mapping (450 ops matched), handler_file presence
+- engine-derived (MEDIUM): FE phantom detection (param-anon fallback, residual 16/20)
+- artifact-only (MEDIUM): WF↔BR↔AC linkages, slice mapping (low — brownfield)
+- prose-doc (LOW): API_CONTRACTS.md narrative paths (carried P3)
 
 ## Ratchet Status
 
-| Severity | Baseline (rev-3 effective) | Current | Status |
-|----------|---------------------------|---------|--------|
+| Severity | Baseline (rev 5) | Current (rev 6) | Status |
+|----------|------------------|-----------------|--------|
 | CRITICAL | 0 | 0 | PASS |
-| HIGH | 5 (rev 4) | 6 | +1 net (−1 TR-DISC-CALLS resolved, +2 TR-FE-PHANTOM real) |
-| MEDIUM | 20 (rev 4) | ~17 | −3 (map-stale + path-drift→P3 + reclass) |
+| HIGH | 6 (rev 5) | 20 | **REGRESSION +14** — composition: −2 (TR-FE-PHANTOM-01/02 resolved), −1 (ZA-03 m21-billing now anchored), +16 (TR-FE-PHANTOM-RES-01..16 new from engine 7b2a640 rescan), +1 net carry (WF-U1) |
+| MEDIUM | 0 actionable | 0 actionable | PASS (all 12 prior AC-orphans remain resolved) |
+| LOW | ≈4 | 6 | +2 (TR-PHANTOM-ENGINE-FP ×4 collapsed to one row) |
 
-Note: HIGH count rose by 1 not because the project got worse but because the engine map can finally SEE the 2 FE-phantom call sites the regex map was blind to. The −1 (TR-DISC-CALLS) was a checker-blindness artifact, not a project fix. Per Auto Mode contract: report regression, exit non-zero, do not modify baseline.
+**Ratchet interpretation:** HIGH +14 is not a project-quality regression — it is **detection-surface expansion**. Engine commit `7b2a640` (param-anon fallback) cut phantoms 60→20; of the 20 surfaced, 4 are engine-FPs (P3) and 16 are real FE→spec drift the prior map could not see (regex map blind spot, then partial-engine blind spot). Per `Auto Mode` contract: report regression, exit non-zero, do not auto-modify baseline.
 
 ## Trace Manifest
 
-- Spec IDs collected: WF=114, BR=49, AC=116, SM=0 explicit (state machines defined in DOMAIN_MODEL §10), events=present (EVENT_CONTRACTS.md, not enumerated this run), endpoints (spec)=27, endpoints (code)=116, roles=defined (ROLE_PERMISSION_MATRIX.md, not enumerated this run)
-- Nodes in graph: 346 (active types)
-- Edges in graph: 328 (5 measured types)
-- Chains traced: 46/46 attributed WFs (100%)
-- BRs with coverage: 49/49 (100% test+code anchors; BR-42 overloaded)
-- Orphan modules: 3 (m20/m21/m22)
-- Orphan ACs (no test): 12
-- Broken chains: 1 (BR-42 namespace collision)
+| Source | Path | Consumed |
+|--------|------|----------|
+| WORKFLOW_MAP | `docs/product/WORKFLOW_MAP.md` | yes |
+| MODULE_SPEC × 22 | `docs/product/modules/m*/MODULE_SPEC.md` | yes |
+| API_CONTRACTS × 22 | `docs/product/modules/m*/API_CONTRACTS.md` | yes |
+| DOMAIN_MODEL | `docs/product/DOMAIN_MODEL.md` | yes |
+| CODE_SPEC_TRACE | `docs/audits/codebase-map/CODE_SPEC_TRACE.json` (v6, 450 ops) | yes |
+| CODE_API_SURFACE | `docs/audits/codebase-map/CODE_API_SURFACE.json` (471 endpoints, 20 phantoms) | yes |
+| JOURNEY_COVERAGE | `docs/audits/JOURNEY_COVERAGE_REPORT.md` (2026-06-02 static re-run) | yes |
+| COMPLIANCE_REPORT | `docs/audits/COMPLIANCE_REPORT.md` | yes (enrichment) |
+| CONFIDENCE_REPORT | `docs/audits/CONFIDENCE_REPORT.md` | yes (enrichment) |
 
 ## What's Next
 
-- **HIGH gaps (P1) present** → Address before next milestone:
-  1. Run `/oli-spec-modules` for m20/m21/m22 to mint BR/AC IDs (closes ZA-01..03).
-  2. Resolve BR-42 namespace collision via rename or scope-qualification (closes TR-OVERLOAD-BR-42).
-  3. Fix 2 FE-phantom call sites — `POST /storage/files`, `POST /association/member/credits/void-event` (closes TR-FE-PHANTOM-01/02).
-- **Engine-anchored:** 76 staleness-unverified cells CLEARED; spec↔code trace 448/448, 0 auth-drift. Residual unverified = field-level phantom only (engine v0.1.0 emits empty response_shape).
+- **HIGH gaps present (20)** — gate verdict: **WARN** (no P0 blocker; P1 work to do).
+  - 2 P1 are spec-authoring gaps (ZA-01..02): mint ACs for m20/m22.
+  - 1 P1 is namespace collision (TR-OVERLOAD-BR-42): rename.
+  - 16 P1 are FE→spec drift (TR-FE-PHANTOM-RES-01..16): per-site triage with engineering owner.
+  - 1 P1 is carried roadmap deferral (WF-U1).
+- **All P2 actionable items remain resolved** — Wave 59 + Wave 61 evidence stable at HEAD `343fcf05`.
 
-**Pipeline position:** Phase D → `/oli-check --traceability` ← YOU ARE HERE → feeds `/oli-magic` Wave G classification.
+**Pipeline position:** Phase D → `/oli-check --traceability` → feeds into `/oli-check --auto` per-phase rollup. Caller: `/oli-check --regenerate-dim-reports --auto`.
+
+**Final verdict: WARN** (0 P0, 20 P1, 0 P2 actionable, 6 P3).

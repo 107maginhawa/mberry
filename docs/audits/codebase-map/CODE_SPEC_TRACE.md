@@ -1,7 +1,14 @@
+---
+based-on: map@2331bd9f
+last-modified: 2026-06-03T20:30:00Z
+engine-version: 7b2a640
+map-version: 6
+---
+
 # Code Spec Trace
 
 <!-- oli:regen:code-spec-trace:begin -->
-Spec: `specs/api/dist/openapi/openapi.json` · Matched: 450 · Spec-only: 0 · Code-only: 1 · Auth-drift: 0
+Spec: `specs/api/dist/openapi/openapi.json` · Matched: 455 · Spec-only: 0 · Code-only: 1 · Auth-drift: 0
 
 | Operation | operationId | Roles | Backend | Status | Drift |
 |---|---|---|---|---|---|
@@ -92,6 +99,7 @@ Spec: `specs/api/dist/openapi/openapi.json` · Matched: 450 · Spec-only: 0 · C
 | `GET /association/member/certificates/:certificateId` | `getCertificate` | association:member | `getCertificate` | matched |  |
 | `GET /association/member/chapter-affiliations` | `listChapterAffiliations` | association:admin, chapter:officer | `listChapterAffiliations` | matched |  |
 | `GET /association/member/chapter-affiliations/:affiliationId` | `getChapterAffiliation` | association:admin, association:member:owner | `getChapterAffiliation` | matched |  |
+| `GET /association/member/chapters` | `listOrgChapters` | association:member | `listOrgChapters` | matched |  |
 | `GET /association/member/compliance/:organizationId` | `getComplianceReport` | association:admin, association:staff | `getComplianceReport` | matched |  |
 | `GET /association/member/cpd-config/:organizationId` | `getOrgCpdConfig` | association:admin, association:staff | `getOrgCpdConfig` | matched |  |
 | `GET /association/member/credential-templates` | `listCredentialTemplates` | association:admin | `listCredentialTemplates` | matched |  |
@@ -99,6 +107,7 @@ Spec: `specs/api/dist/openapi/openapi.json` · Matched: 450 · Spec-only: 0 · C
 | `GET /association/member/credentials` | `listDigitalCredentials` | association:admin | `listDigitalCredentials` | matched |  |
 | `GET /association/member/credentials/:credentialId` | `getDigitalCredential` | association:admin, association:member:owner | `getDigitalCredential` | matched |  |
 | `GET /association/member/credentials/lookup/:credentialNumber` | `lookupCredentialPublic` | — | `lookupCredentialPublic` | matched |  |
+| `GET /association/member/credits` | `listMemberCreditsForPeer` | association:member | `listMemberCreditsForPeer` | matched |  |
 | `GET /association/member/directory/profiles` | `listDirectoryProfiles` | association:admin | `listDirectoryProfiles` | matched |  |
 | `GET /association/member/directory/profiles/:profileId` | `getDirectoryProfile` | association:member:owner, association:admin | `getDirectoryProfile` | matched |  |
 | `GET /association/member/directory/search` | `searchDirectory` | association:member, association:admin | `searchDirectory` | matched |  |
@@ -108,6 +117,8 @@ Spec: `specs/api/dist/openapi/openapi.json` · Matched: 450 · Spec-only: 0 · C
 | `GET /association/member/dues-gateway/:organizationId` | `getDuesGatewayConfig` | association:admin | `getDuesGatewayConfig` | matched |  |
 | `GET /association/member/dues-invoices` | `listDuesInvoices` | association:admin, association:member | `listDuesInvoices` | matched |  |
 | `GET /association/member/dues-invoices/:invoiceId` | `getDuesInvoice` | association:admin, association:member:owner | `getDuesInvoice` | matched |  |
+| `GET /association/member/dues-member-summary/:organizationId/:personId` | `getDuesMemberSummary` | association:admin | `getDuesMemberSummary` | matched |  |
+| `GET /association/member/dues-metrics/:organizationId` | `getDuesMetrics` | association:admin | `getDuesMetrics` | matched |  |
 | `GET /association/member/dues-payments` | `listDuesPayments` | association:admin, association:member | `listDuesPayments` | matched |  |
 | `GET /association/member/dues-payments/:paymentId` | `getDuesPayment` | association:admin, association:member | `getDuesPayment` | matched |  |
 | `GET /association/member/dues-payments/pending-proofs` | `listPendingProofs` | association:admin | `listPendingProofs` | matched |  |
@@ -175,6 +186,7 @@ Spec: `specs/api/dist/openapi/openapi.json` · Matched: 450 · Spec-only: 0 · C
 | `GET /comms/chat-rooms/:room` | `getChatRoom` | user | `getChatRoom` | matched |  |
 | `GET /comms/chat-rooms/:room/messages` | `getChatMessages` | user | `getChatMessages` | matched |  |
 | `GET /comms/ice-servers` | `getIceServers` | user | `getIceServers` | matched |  |
+| `GET /comms/messages/search` | `searchChatMessages` | user | `searchChatMessages` | matched |  |
 | `GET /communications/announcements/:id/stats` | `getAnnouncementStats` | association:member | `getAnnouncementStats` | matched |  |
 | `GET /communications/announcements/:organizationId` | `listAnnouncements` | association:member | `listAnnouncements` | matched |  |
 | `GET /communications/announcements/detail/:id` | `getAnnouncement` | association:member | `getAnnouncement` | matched |  |

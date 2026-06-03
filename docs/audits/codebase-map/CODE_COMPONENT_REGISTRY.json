@@ -2921,7 +2921,7 @@
       "api_calls": [
         {
           "method": "GET",
-          "endpoint": "/public/verify/:certificateNumber"
+          "endpoint": "/certificates/verify/:certificateNumber"
         }
       ],
       "routes_used_in": [
@@ -5669,7 +5669,7 @@
       "api_calls": [
         {
           "method": "GET",
-          "endpoint": "/communications/subscriptions/person"
+          "endpoint": "/association/person-subscriptions"
         },
         {
           "method": "POST",
@@ -6186,15 +6186,15 @@
         },
         {
           "method": "GET",
-          "endpoint": "/events/my"
+          "endpoint": "/association/event-lifecycle/my"
         },
         {
           "method": "GET",
-          "endpoint": "/training/my"
+          "endpoint": "/association/training-lifecycle/my"
         },
         {
           "method": "GET",
-          "endpoint": "/notifications/my"
+          "endpoint": "/notifs"
         }
       ],
       "routes_used_in": [],
@@ -6416,7 +6416,7 @@
       "api_calls": [
         {
           "method": "GET",
-          "endpoint": "/association/member/directory/:personId/public"
+          "endpoint": "/association/member/directory/search/:personId/public"
         },
         {
           "method": "GET",
@@ -9460,7 +9460,7 @@
       "api_calls": [
         {
           "method": "GET",
-          "endpoint": "/association/member/professional-licenses"
+          "endpoint": "/association/member/licenses"
         }
       ],
       "routes_used_in": [],
@@ -13580,7 +13580,7 @@
       "api_calls": [
         {
           "method": "GET",
-          "endpoint": "/communications/announcements"
+          "endpoint": "/communications/announcements/:orgId"
         }
       ],
       "routes_used_in": [

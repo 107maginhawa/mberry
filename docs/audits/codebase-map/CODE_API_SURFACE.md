@@ -1,3 +1,10 @@
+---
+based-on: map@2331bd9f
+last-modified: 2026-06-03T20:30:00Z
+engine-version: 7b2a640
+map-version: 6
+---
+
 # Code API Surface
 
 <!-- oli:regen:code-api-surface:begin -->
@@ -111,6 +118,7 @@
 | `PATCH /association/member/chapter-affiliations/:affiliationId` | `updateChapterAffiliation` | true | 0 |  | HIGH |
 | `DELETE /association/member/chapter-affiliations/:affiliationId` | `deleteChapterAffiliation` | true | 0 |  | HIGH |
 | `POST /association/member/chapter-affiliations/:affiliationId/set-primary` | `setPrimaryChapterAffiliation` | true | 0 |  | HIGH |
+| `GET /association/member/chapters` | `listOrgChapters` | true | 1 |  | HIGH |
 | `GET /association/member/compliance/:organizationId` | `getComplianceReport` | true | 1 |  | HIGH |
 | `POST /association/member/compliance/:organizationId/refresh` | `refreshCompliance` | true | 1 |  | HIGH |
 | `GET /association/member/cpd-config/:organizationId` | `getOrgCpdConfig` | true | 1 |  | HIGH |
@@ -129,6 +137,7 @@
 | `PATCH /association/member/credentials/:credentialId` | `updateDigitalCredential` | true | 0 |  | HIGH |
 | `DELETE /association/member/credentials/:credentialId` | `deleteDigitalCredential` | true | 0 |  | HIGH |
 | `POST /association/member/credentials/:credentialId/revoke` | `revokeDigitalCredential` | true | 0 |  | HIGH |
+| `GET /association/member/credits` | `listMemberCreditsForPeer` | true | 1 |  | HIGH |
 | `POST /association/member/credits/adjust` | `adjustCreditEntry` | true | 0 |  | HIGH |
 | `POST /association/member/credits/manual` | `awardManualCredit` | true | 1 |  | HIGH |
 | `POST /association/member/credits/void-event` | `voidCreditEntry` | true | 1 |  | HIGH |
@@ -138,7 +147,7 @@
 | `PATCH /association/member/directory/profiles/:profileId` | `updateDirectoryProfile` | true | 1 |  | HIGH |
 | `DELETE /association/member/directory/profiles/:profileId` | `deleteDirectoryProfile` | true | 0 |  | HIGH |
 | `GET /association/member/directory/search` | `searchDirectory` | true | 1 |  | HIGH |
-| `GET /association/member/directory/search/:personId/public` | `getPublicDirectoryProfile` | true | 0 |  | HIGH |
+| `GET /association/member/directory/search/:personId/public` | `getPublicDirectoryProfile` | true | 1 |  | HIGH |
 | `POST /association/member/dues-configs` | `createDuesConfig` | true | 1 |  | HIGH |
 | `GET /association/member/dues-configs` | `listDuesConfigs` | true | 1 |  | HIGH |
 | `GET /association/member/dues-configs/:duesConfigId` | `getDuesConfig` | true | 1 |  | HIGH |
@@ -155,6 +164,8 @@
 | `PATCH /association/member/dues-invoices/:invoiceId` | `updateDuesInvoice` | true | 1 |  | HIGH |
 | `DELETE /association/member/dues-invoices/:invoiceId` | `deleteDuesInvoice` | true | 0 |  | HIGH |
 | `POST /association/member/dues-invoices/:invoiceId/mark-paid` | `markDuesInvoicePaid` | true | 1 |  | HIGH |
+| `GET /association/member/dues-member-summary/:organizationId/:personId` | `getDuesMemberSummary` | true | 1 |  | HIGH |
+| `GET /association/member/dues-metrics/:organizationId` | `getDuesMetrics` | true | 1 |  | HIGH |
 | `GET /association/member/dues-payments` | `listDuesPayments` | true | 1 |  | HIGH |
 | `POST /association/member/dues-payments` | `recordDuesPayment` | true | 1 |  | HIGH |
 | `GET /association/member/dues-payments/pending-proofs` | `listPendingProofs` | true | 1 |  | HIGH |
@@ -256,7 +267,7 @@
 | `POST /association/messages/:messageId/cancel` | `cancelMessage` | true | 0 |  | HIGH |
 | `POST /association/messages/:messageId/schedule` | `scheduleMessage` | true | 0 |  | HIGH |
 | `POST /association/messages/:messageId/send` | `sendMessage` | true | 1 |  | HIGH |
-| `GET /association/person-subscriptions` | `listPersonSubscriptions` | true | 0 |  | HIGH |
+| `GET /association/person-subscriptions` | `listPersonSubscriptions` | true | 1 |  | HIGH |
 | `POST /association/person-subscriptions/bulk-update` | `bulkUpdatePersonSubscriptions` | true | 1 |  | HIGH |
 | `PATCH /association/person-subscriptions/:subscriptionId` | `updatePersonSubscription` | true | 0 |  | HIGH |
 | `POST /association/subscription-topics` | `createSubscriptionTopic` | true | 0 |  | HIGH |
@@ -342,6 +353,7 @@
 | `POST /comms/chat-rooms/:room/video-call/leave` | `leaveVideoCall` | true | 1 |  | HIGH |
 | `PATCH /comms/chat-rooms/:room/video-call/participant` | `updateVideoCallParticipant` | true | 0 |  | HIGH |
 | `GET /comms/ice-servers` | `getIceServers` | true | 1 |  | HIGH |
+| `GET /comms/messages/search` | `searchChatMessages` | true | 1 |  | HIGH |
 | `GET /communications/announcements/detail/:id` | `getAnnouncement` | true | 1 |  | HIGH |
 | `PATCH /communications/announcements/:id` | `updateAnnouncement` | true | 1 |  | HIGH |
 | `DELETE /communications/announcements/:id` | `deleteAnnouncement` | true | 1 |  | HIGH |
@@ -456,22 +468,9 @@
 | `POST /vendors/:vendorId/verify` | `verifyVendor` | true | 0 |  | HIGH |
 | `GET /public/orgs*` | — | ? | 1 | ⚠️ | LOW |
 | `GET /persons/me` | — | ? | 1 | ⚠️ | LOW |
-| `GET /public/verify/:certificateNumber` | — | ? | 1 | ⚠️ | LOW |
 | `GET /verify/*` | — | ? | 1 | ⚠️ | LOW |
 | `POST /persons/me/export` | — | ? | 1 | ⚠️ | LOW |
-| `GET /comms/messages/search` | — | ? | 1 | ⚠️ | LOW |
-| `GET /communications/subscriptions/person` | — | ? | 1 | ⚠️ | LOW |
-| `GET /events/my` | — | ? | 1 | ⚠️ | LOW |
-| `GET /training/my` | — | ? | 1 | ⚠️ | LOW |
-| `GET /notifications/my` | — | ? | 1 | ⚠️ | LOW |
-| `GET /association/member/directory/:personId/public` | — | ? | 1 | ⚠️ | LOW |
-| `GET /association/member/credits` | — | ? | 1 | ⚠️ | LOW |
-| `GET /association/member/chapters` | — | ? | 1 | ⚠️ | LOW |
-| `GET /association/member/professional-licenses` | — | ? | 1 | ⚠️ | LOW |
 | `GET /surveys` | — | ? | 1 | ⚠️ | LOW |
 | `POST /surveys` | — | ? | 1 | ⚠️ | LOW |
-| `GET /communications/announcements` | — | ? | 1 | ⚠️ | LOW |
-| `GET /association/member/dues-metrics/:orgId` | — | ? | 1 | ⚠️ | LOW |
 | `GET /communications/templates/:edit` | — | ? | 1 | ⚠️ | LOW |
-| `GET /association/member/dues-member-summary/:orgId/:memberId` | — | ? | 1 | ⚠️ | LOW |
 <!-- oli:regen:code-api-surface:end -->

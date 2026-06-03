@@ -1,21 +1,29 @@
+---
+based-on: map@2331bd9f
+last-modified: 2026-06-03T20:30:00Z
+engine-version: 7b2a640
+map-version: 6
+---
+
 # Code Module Map
 
 <!-- oli:regen:code-module-map:begin -->
 | Module | Framework | Files | Confidence |
 |---|---|---|---|
 | `apps/admin` | react | 48 | MEDIUM |
-| `apps/memberry` | react | 443 | MEDIUM |
+| `apps/memberry` | react | 438 | MEDIUM |
 | `handlers/advertising` | generic | 11 | LOW |
-| `handlers/association:member` | hono | 247 | MEDIUM |
+| `handlers/association:member` | hono | 248 | MEDIUM |
 | `handlers/association:operations` | hono | 80 | MEDIUM |
 | `handlers/audit` | generic | 4 | LOW |
 | `handlers/billing` | generic | 18 | LOW |
 | `handlers/booking` | hono | 32 | MEDIUM |
 | `handlers/certificates` | hono | 11 | MEDIUM |
-| `handlers/comms` | hono | 16 | MEDIUM |
+| `handlers/comms` | hono | 17 | MEDIUM |
 | `handlers/communication` | hono | 53 | MEDIUM |
+| `handlers/default` | generic | 1 | LOW |
 | `handlers/documents` | hono | 18 | MEDIUM |
-| `handlers/dues` | hono | 17 | MEDIUM |
+| `handlers/dues` | hono | 19 | MEDIUM |
 | `handlers/elections` | hono | 11 | MEDIUM |
 | `handlers/email` | hono | 23 | MEDIUM |
 | `handlers/events` | hono | 18 | MEDIUM |

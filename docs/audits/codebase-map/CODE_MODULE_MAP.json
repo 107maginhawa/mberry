@@ -18,7 +18,7 @@
       "framework": "react",
       "entry_points": [],
       "public_exports": [],
-      "file_count": 443,
+      "file_count": 438,
       "has_spec": false,
       "spec_path": null,
       "confidence": "MEDIUM"
@@ -40,7 +40,7 @@
       "framework": "hono",
       "entry_points": [],
       "public_exports": [],
-      "file_count": 247,
+      "file_count": 248,
       "has_spec": false,
       "spec_path": null,
       "confidence": "MEDIUM"
@@ -106,7 +106,7 @@
       "framework": "hono",
       "entry_points": [],
       "public_exports": [],
-      "file_count": 16,
+      "file_count": 17,
       "has_spec": false,
       "spec_path": null,
       "confidence": "MEDIUM"
@@ -121,6 +121,17 @@
       "has_spec": false,
       "spec_path": null,
       "confidence": "MEDIUM"
+    },
+    "handlers/default": {
+      "name": "handlers/default",
+      "source_path": "services/api-ts/src/handlers/default",
+      "framework": "generic",
+      "entry_points": [],
+      "public_exports": [],
+      "file_count": 1,
+      "has_spec": false,
+      "spec_path": null,
+      "confidence": "LOW"
     },
     "handlers/documents": {
       "name": "handlers/documents",
@@ -139,7 +150,7 @@
       "framework": "hono",
       "entry_points": [],
       "public_exports": [],
-      "file_count": 17,
+      "file_count": 19,
       "has_spec": false,
       "spec_path": null,
       "confidence": "MEDIUM"

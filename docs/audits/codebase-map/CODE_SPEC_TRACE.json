@@ -1484,6 +1484,24 @@
       "auth_drift": false
     },
     {
+      "operation_id": "listOrgChapters",
+      "method": "GET",
+      "path": "/association/member/chapters",
+      "required_roles": [
+        "association:member"
+      ],
+      "backend": {
+        "handler_file": "services/api-ts/src/handlers/default/listOrgChapters.ts",
+        "handler_function": "listOrgChapters",
+        "module": "handlers/default"
+      },
+      "consumers": [
+        "apps/memberry"
+      ],
+      "status": "matched",
+      "auth_drift": false
+    },
+    {
       "operation_id": "getComplianceReport",
       "method": "GET",
       "path": "/association/member/compliance/:organizationId",
@@ -1603,6 +1621,24 @@
       "auth_drift": false
     },
     {
+      "operation_id": "listMemberCreditsForPeer",
+      "method": "GET",
+      "path": "/association/member/credits",
+      "required_roles": [
+        "association:member"
+      ],
+      "backend": {
+        "handler_file": "services/api-ts/src/handlers/association:member/listMemberCreditsForPeer.ts",
+        "handler_function": "listMemberCreditsForPeer",
+        "module": "handlers/association:member"
+      },
+      "consumers": [
+        "apps/memberry"
+      ],
+      "status": "matched",
+      "auth_drift": false
+    },
+    {
       "operation_id": "listDirectoryProfiles",
       "method": "GET",
       "path": "/association/member/directory/profiles",
@@ -1664,7 +1700,9 @@
         "handler_function": "getPublicDirectoryProfile",
         "module": "handlers/association:member"
       },
-      "consumers": [],
+      "consumers": [
+        "apps/memberry"
+      ],
       "status": "matched",
       "auth_drift": false
     },
@@ -1753,6 +1791,42 @@
         "handler_file": "services/api-ts/src/handlers/association:member/getDuesInvoice.ts",
         "handler_function": "getDuesInvoice",
         "module": "handlers/association:member"
+      },
+      "consumers": [
+        "apps/memberry"
+      ],
+      "status": "matched",
+      "auth_drift": false
+    },
+    {
+      "operation_id": "getDuesMemberSummary",
+      "method": "GET",
+      "path": "/association/member/dues-member-summary/:organizationId/:personId",
+      "required_roles": [
+        "association:admin"
+      ],
+      "backend": {
+        "handler_file": "services/api-ts/src/handlers/dues/getDuesMemberSummary.ts",
+        "handler_function": "getDuesMemberSummary",
+        "module": "handlers/dues"
+      },
+      "consumers": [
+        "apps/memberry"
+      ],
+      "status": "matched",
+      "auth_drift": false
+    },
+    {
+      "operation_id": "getDuesMetrics",
+      "method": "GET",
+      "path": "/association/member/dues-metrics/:organizationId",
+      "required_roles": [
+        "association:admin"
+      ],
+      "backend": {
+        "handler_file": "services/api-ts/src/handlers/dues/getDuesMetrics.ts",
+        "handler_function": "getDuesMetrics",
+        "module": "handlers/dues"
       },
       "consumers": [
         "apps/memberry"
@@ -2428,7 +2502,9 @@
         "handler_function": "listPersonSubscriptions",
         "module": "handlers/communication"
       },
-      "consumers": [],
+      "consumers": [
+        "apps/memberry"
+      ],
       "status": "matched",
       "auth_drift": false
     },
@@ -2934,6 +3010,24 @@
       "backend": {
         "handler_file": "services/api-ts/src/handlers/comms/getIceServers.ts",
         "handler_function": "getIceServers",
+        "module": "handlers/comms"
+      },
+      "consumers": [
+        "apps/memberry"
+      ],
+      "status": "matched",
+      "auth_drift": false
+    },
+    {
+      "operation_id": "searchChatMessages",
+      "method": "GET",
+      "path": "/comms/messages/search",
+      "required_roles": [
+        "user"
+      ],
+      "backend": {
+        "handler_file": "services/api-ts/src/handlers/comms/searchChatMessages.ts",
+        "handler_function": "searchChatMessages",
         "module": "handlers/comms"
       },
       "consumers": [
@@ -7789,6 +7883,7 @@
       "GET /association/member/certificates/:certificateId",
       "GET /association/member/chapter-affiliations",
       "GET /association/member/chapter-affiliations/:affiliationId",
+      "GET /association/member/chapters",
       "GET /association/member/compliance/:organizationId",
       "GET /association/member/cpd-config/:organizationId",
       "GET /association/member/credential-templates",
@@ -7796,6 +7891,7 @@
       "GET /association/member/credentials",
       "GET /association/member/credentials/:credentialId",
       "GET /association/member/credentials/lookup/:credentialNumber",
+      "GET /association/member/credits",
       "GET /association/member/directory/profiles",
       "GET /association/member/directory/profiles/:profileId",
       "GET /association/member/directory/search",
@@ -7805,6 +7901,8 @@
       "GET /association/member/dues-gateway/:organizationId",
       "GET /association/member/dues-invoices",
       "GET /association/member/dues-invoices/:invoiceId",
+      "GET /association/member/dues-member-summary/:organizationId/:personId",
+      "GET /association/member/dues-metrics/:organizationId",
       "GET /association/member/dues-payments",
       "GET /association/member/dues-payments/:paymentId",
       "GET /association/member/dues-payments/pending-proofs",
@@ -7872,6 +7970,7 @@
       "GET /comms/chat-rooms/:room",
       "GET /comms/chat-rooms/:room/messages",
       "GET /comms/ice-servers",
+      "GET /comms/messages/search",
       "GET /communications/announcements/:id/stats",
       "GET /communications/announcements/:organizationId",
       "GET /communications/announcements/detail/:id",
