@@ -40,9 +40,13 @@ export const config: OliRuntimeConfig = {
   // Playwright runs with cwd = apps/memberry; maps + results live at repo root.
   mapsDir: "../../docs/audits/codebase-map",
   resultsOut: "../../docs/audits/runtime/runtime-exec-results.json",
-  contractVersion: 5,
+  contractVersion: 6,
 
-  skeletonCeilingMs: 5000,
+  // Memberry's data hooks settle fast (TanStack Query w/ generated SDK +
+  // local-network postgres). A 2s ceiling catches the infinite-skeleton class
+  // (query stuck pending, error swallowed silently) without false-failing on
+  // a legitimate slow first-paint.
+  skeletonCeilingMs: 2000,
   skeletonSelectors:
     '[aria-busy="true"], .skeleton, [data-loading="true"], [data-testid$="-skeleton"], [data-testid$="-loader"]',
   loadingTextSource: "\\b(loading|saving|fetching|please wait)\\b",
@@ -66,7 +70,25 @@ export const config: OliRuntimeConfig = {
     authView: "sign-in",
   },
 
-  denyRoutes: [],
+  // Auth flows the runner can't navigate post-sign-in (would either bounce to a
+  // post-login redirect or invalidate the seeded session). Public marketing
+  // routes are still walked.
+  denyRoutes: [
+    '/auth/sign-in',
+    '/auth/sign-up',
+    '/auth/forgot-password',
+    '/auth/reset-password',
+    '/auth/verify-email',
+    '/auth/verify-email-better-auth',
+    '/auth/sign-out',
+    '/auth/email-otp',
+    '/auth/two-factor',
+    '/auth/recovery-code',
+    '/auth/$authView',
+    '/join/$inviteToken',
+    '/verify-email',
+    '/oauth-callback',
+  ],
   maxTargets: 500,
   navLinkCheck: true,
 };

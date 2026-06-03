@@ -1,4 +1,4 @@
-// contractVersion: 5
+// contractVersion: 6
 /**
  * oli-runtime-loop.spec.ts — the OLI runtime execution loop (data-driven).
  *
