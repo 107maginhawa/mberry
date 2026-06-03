@@ -265,6 +265,7 @@ export function createApp(config: Config): App {
   // CSRF token endpoint — issues double-submit token cookie + JSON body.
   // Must be registered BEFORE the token-enforcement middleware below so it
   // can answer requests that don't yet have a token.
+  // @hand-wired reason="bootstrap endpoint for double-submit CSRF token; consumed by SDK provider before any TypeSpec route resolves" wave="by-design" oli-trace-accept="code-only"
   registerCsrfTokenEndpoint(app);
 
   // CSRF defense-in-depth: double-submit cookie pattern.
