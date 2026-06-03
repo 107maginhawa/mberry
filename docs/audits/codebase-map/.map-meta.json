@@ -1,7 +1,7 @@
 {
   "version": 6,
-  "timestamp": "2026-06-03T05:01:04.265Z",
-  "git_sha": "ce01801fbdede6b79be4876b8979132e1f620c9c",
+  "timestamp": "2026-06-03T05:14:08.444Z",
+  "git_sha": "f854873cbc26f7e283e60e2590ccd30d67f4275d",
   "file_count": 1408,
   "frameworks": [
     "generic",
@@ -10,20 +10,20 @@
   ],
   "mode": "full",
   "phase_timings": {
-    "structural": 53,
+    "structural": 45,
     "module-map": 9,
-    "react": 5290,
-    "hono": 526,
-    "tanstack": 878,
-    "tanstack-mutations": 470,
-    "empty-vs-fail": 203,
+    "react": 5496,
+    "hono": 460,
+    "tanstack": 785,
+    "tanstack-mutations": 428,
+    "empty-vs-fail": 185,
     "terminology": 2,
-    "data-model": 25,
-    "state-machines": 433,
-    "behavior": 431,
-    "data-flow": 198,
+    "data-model": 21,
+    "state-machines": 369,
+    "behavior": 315,
+    "data-flow": 176,
     "api-usage": 1,
-    "spec-trace": 10
+    "spec-trace": 14
   },
   "artifact_hashes": {
     "CODE_MODULE_MAP": "29c5f1646355015220b246cedc6c6ce434b98d4f62b3f5843a73f17a5d55c712",
@@ -33,7 +33,7 @@
     "CODE_API_SURFACE": "080ff525d7420a0ac4d19a2e43455e21a8e983c0b734f890df56492e1bcceea2",
     "CODE_IMPORT_GRAPH": "c9bb126b52c8c012fbf52648b592d7ee7afac7ff8b3876f0767d9f5fc0bded2a",
     "CODE_TERMINOLOGY_MAP": "eff17e9546b3226ceaed9dbe3557aabd1d6e216b2845b06cf73b797e1a2a8e79",
-    "CODE_STATE_MACHINES": "1e83da4d435fde1b7152e0f31ad95e4446a4c664de235445778f7e76b23daef2",
+    "CODE_STATE_MACHINES": "75f58b72268a34b66e9c5885416fd82b2aca9549d7c528dbcd8bb9283886913d",
     "CODE_DATA_MODEL": "b7094ce2d8d027a4cb330189b264f46d1e10c442fcf6e177a69c1fed87a7136d",
     "CODE_SPEC_TRACE": "4f1d6f3d21abee80d2eec5a37bf205509ad735d719b17857673183b928faf786",
     "CODE_MUTATIONS": "f9415353dea4e722f70e23ae54ca1618029ba67ad8cc8b1ca440487227d44f0a"

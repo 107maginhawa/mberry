@@ -1821,3 +1821,57 @@ These entities have status enums but no `VALID_TRANSITIONS` map in code — tran
 | `email_queue` | `email_queue_status` | pending, processing, sent, failed, cancelled | `email/repos/email.schema.ts` |
 | `invitation_token` | `invite_status` | pending, claimed, expired, revoked | `invite/repos/invite.schema.ts` |
 | `affiliation_transfer` | `transfer_status` | requested, pendingSourceApproval, pendingTargetApproval, approved, denied, completed, cancelled | `association:member/repos/chapters.schema.ts` |
+| `provider` | `accredited_provider_status` | active, suspended, expired | `association:operations/repos/accredited-provider.schema.ts` |
+| `affiliation` | `affiliation_status` | active, transferred, withdrawn | `association:member/repos/chapters.schema.ts` |
+| `announcement` | `announcement_status` | draft, scheduled, sent, scheduledFailed, archived | `communication/repos/communication.schema.ts` |
+| `application` | `application_status` | submitted, underReview, approved, denied, waitlisted | `association:member/repos/membership.schema.ts` |
+| `assessment` | `assessment_status` | draft, active, closed | `association:member/repos/special-assessments.schema.ts` |
+| `assessmentTarget` | `assessment_target_status` | pending, paid | `association:member/repos/special-assessments.schema.ts` |
+| `auditRetention` | `audit_retention_status` | active, archived, pending-purge | `audit/repos/audit.schema.ts` |
+| `billingFrequency` | `billing_frequency` | annual, semi-annual, quarterly | `dues/repos/dues-payments.schema.ts` |
+| `bookingEvent` | `booking_event_status` | draft, active, paused, archived | `booking/repos/booking.schema.ts` |
+| `breach` | `breach_status` | reported, investigating, notified, resolved | `platformadmin/repos/platform-admin.schema.ts` |
+| `campaign` | `campaign_status` | draft, pending_review, active, paused, completed, rejected | `advertising/repos/advertising.schema.ts` |
+| `certificate` | `certificate_status` | issued, revoked | `certificates/repos/certificates.schema.ts` |
+| `chatRoom` | `chat_room_status` | active, archived | `comms/repos/comms.schema.ts` |
+| `committee` | `committee_status` | active, completed | `association:operations/repos/committee.schema.ts` |
+| `committeeTask` | `committee_task_status` | pending, in_progress, completed, cancelled | `association:operations/repos/committee-task.schema.ts` |
+| `course` | `course_status` | draft, published, archived | `association:operations/repos/training.schema.ts` |
+| `creative` | `creative_status` | pending, approved, rejected | `advertising/repos/advertising.schema.ts` |
+| `credential` | `credential_status` | active, suspended, revoked, expired | `association:member/repos/credentials.schema.ts` |
+| `credentialTemplate` | `credential_template_status` | active, retired | `association:member/repos/credentials.schema.ts` |
+| `credit` | `credit_status` | active, voided, disputed | `association:member/repos/credits.schema.ts` |
+| `verification` | `credit_verification_status` | pending, verified, rejected | `association:member/repos/credits.schema.ts` |
+| `dataExport` | `data_export_status` | requested, processing, ready, failed, expired | `person/repos/data-export.schema.ts` |
+| `delivery` | `delivery_status` | pending, sent, delivered, failed, bounced | `communication/repos/communication.schema.ts` |
+| `document` | `document_status` | draft, published, archived | `documents/repos/documents.schema.ts` |
+| `duesConfig` | `dues_config_status` | active, retired | `dues/repos/dues.schema.ts` |
+| `duesInvoice` | `dues_invoice_status` | generated, sent, paid, overdue, cancelled, writtenOff | `dues/repos/dues.schema.ts` |
+| `dunningDelivery` | `dunning_delivery_status` | pending, sent, delivered, failed | `association:member/repos/dunning.schema.ts` |
+| `dunningTemplate` | `dunning_template_status` | active, inactive | `association:member/repos/dunning.schema.ts` |
+| `enrollment` | `enrollment_status` | enrolled, completed, cancelled, noShow | `association:operations/repos/training.schema.ts` |
+| `feedPost` | `feed_post_status` | published, draft, flagged, removed | `communication/repos/feed-post.schema.ts` |
+| `file` | `file_status` | uploading, processing, available, failed | `storage/repos/file.schema.ts` |
+| `invoice` | `invoice_status` | draft, open, paid, void, uncollectible | `billing/repos/billing.schema.ts` |
+| `jobApplication` | `job_application_status` | applied, screening, interviewed, offered, hired, rejected, withdrawn | `jobs/repos/jobs.schema.ts` |
+| `jobPosting` | `job_posting_status` | draft, active, filled, expired, closed | `jobs/repos/jobs.schema.ts` |
+| `license` | `license_status` | active, expired, suspended, revoked, pending | `association:member/repos/credentials.schema.ts` |
+| `listing` | `listing_status` | draft, active, archived | `marketplace/repos/marketplace.schema.ts` |
+| `message` | `message_status` | draft, scheduled, sending, sent, cancelled, failed | `communication/repos/communication.schema.ts` |
+| `nominee` | `nominee_status` | nominated, accepted, declined, elected | `elections/repos/elections.schema.ts` |
+| `order` | `order_status` | pending, confirmed, fulfilled, cancelled, refunded | `marketplace/repos/marketplace.schema.ts` |
+| `payment` | `payment_status` | pending, requires_capture, processing, succeeded, failed, canceled | `billing/repos/billing.schema.ts` |
+| `registration` | `registration_status` | confirmed, waitlisted, cancelled, refunded, noShow | `association:operations/repos/events.schema.ts` |
+| `renewalAlert` | `renewal_alert_status` | pending, sent, acknowledged, dismissed | `association:member/repos/credentials.schema.ts` |
+| `seatAllocation` | `seat_allocation_status` | active, revoked | `association:member/repos/institutional-membership.schema.ts` |
+| `slot` | `slot_status` | available, booked, blocked | `booking/repos/booking.schema.ts` |
+| `subscription` | `subscription_status` | trial, active, past_due, cancelled, expired | `platformadmin/repos/platform-admin.schema.ts` |
+| `survey` | `survey_status` | draft, active, closed | `communication/repos/survey.schema.ts` |
+| `template` | `template_status` | draft, active, archived | `email/repos/email.schema.ts` |
+| `term` | `term_status` | upcoming, active, completed, resigned, removed | `association:member/repos/governance.schema.ts` |
+| `ticket` | `ticket_status` | open, in_progress, waiting_customer, resolved, closed | `platformadmin/repos/platform-admin.schema.ts` |
+| `tier` | `tier_status` | active, retired | `association:member/repos/membership.schema.ts` |
+| `transitionChecklist` | `transition_checklist_status` | pending, completed | `association:member/repos/governance.schema.ts` |
+| `vendor` | `vendor_status` | pending, verified, suspended, rejected | `marketplace/repos/marketplace.schema.ts` |
+| `videoCall` | `video_call_status` | starting, active, ended, cancelled | `comms/repos/comms.schema.ts` |
+| `webhookRetry` | `webhook_retry_status` | processing, completed, pending_retry, dead_letter | `dues/repos/dues-payments.schema.ts` |
