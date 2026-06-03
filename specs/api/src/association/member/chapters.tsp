@@ -198,6 +198,23 @@ model RoyaltySplitUpdateRequest {
   effectiveDate?: plainDate;
 }
 
+@doc("Org-scope chapter row for member directory filters (distinct chapters in current org)")
+model OrgChapterRow {
+  @doc("Chapter row ID (same as chapterId)")
+  id: string;
+
+  @doc("Chapter organization ID")
+  chapterId: string;
+
+  @doc("Chapter display name (from organizations table)")
+  chapterName?: string;
+}
+
+@doc("Response wrapper for org chapter list")
+model OrgChaptersResponse {
+  data: OrgChapterRow[];
+}
+
 // ---------------------------------------------------------------------------
 // Interfaces
 // ---------------------------------------------------------------------------
@@ -283,6 +300,18 @@ namespace Association.Member.Chapters {
     ): ApiOkResponse<ChapterAffiliation>
       | ApiNotFoundResponse
       | ApiConflictResponse
+      | ApiForbiddenResponse;
+  }
+
+  @doc("Member-facing chapter list — distinct chapters in the current org, used by directory profile/filter UI.")
+  interface OrgChaptersManagement {
+    @doc("List distinct chapters for the current org. Member-tier read-only.")
+    @operationId("listOrgChapters")
+    @get
+    @useAuth(bearerAuth)
+    @extension("x-security-required-roles", #["association:member"])
+    listOrgChapters(): ApiOkResponse<OrgChaptersResponse>
+      | ApiUnauthorizedResponse
       | ApiForbiddenResponse;
   }
 

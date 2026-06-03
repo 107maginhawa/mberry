@@ -312,6 +312,7 @@ import { bulkIssueCertificates } from '../../handlers/association:member/bulkIss
 import { verifyCertificatePublic } from '../../handlers/association:member/verifyCertificatePublic';
 import { getCreditCompliance } from '../../handlers/association:member/getCreditCompliance';
 import { listOfficerTermsSummary } from '../../handlers/association:member/listOfficerTermsSummary';
+import { listOrgChapters } from '../../handlers/default/listOrgChapters';
 import { getDuesMemberSummary } from '../../handlers/dues/getDuesMemberSummary';
 import { getDuesMetrics } from '../../handlers/dues/getDuesMetrics';
 import { getDuesDashboard } from '../../handlers/dues/getDuesDashboard';
@@ -781,6 +782,9 @@ export const registry = {
   verifyCertificatePublic,
   getCreditCompliance,
   listOfficerTermsSummary,
+
+  // Default handlers
+  listOrgChapters,
 
   // Dues handlers
   getDuesMemberSummary,

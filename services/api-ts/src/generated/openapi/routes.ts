@@ -791,6 +791,12 @@ export function registerRoutes(app: Hono<{ Variables: Variables }>) {
     registry.setPrimaryChapterAffiliation as unknown as Handler
   );
 
+  // listOrgChapters
+  app.get('/association/member/chapters',
+    authMiddleware({ roles: ["association:member"] }),
+    registry.listOrgChapters as unknown as Handler
+  );
+
   // getComplianceReport
   app.get('/association/member/compliance/:organizationId',
     authMiddleware({ roles: ["association:admin", "association:staff"] }),

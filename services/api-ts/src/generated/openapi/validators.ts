@@ -8115,6 +8115,16 @@ export const OrgAccreditedProviderUpdateRequestSchema = z.object({
   expiryDate: z.union([z.string().datetime().transform((str) => new Date(str)), z.null()]).optional()
 });
 
+export const OrgChapterRowSchema = z.object({
+  id: z.string(),
+  chapterId: z.string(),
+  chapterName: z.string().optional()
+});
+
+export const OrgChaptersResponseSchema = z.object({
+  data: z.array(OrgChapterRowSchema)
+});
+
 export const OrgCpdConfigSchema = z.object({
   id: z.string().uuid(),
   version: z.number().int(),
@@ -11952,6 +11962,8 @@ export const SetPrimaryChapterAffiliationParams = z.object({
 export type SetPrimaryChapterAffiliationParams = z.infer<typeof SetPrimaryChapterAffiliationParams>;
 
 export const SetPrimaryChapterAffiliationResponse = ChapterAffiliationSchema;
+
+export const ListOrgChaptersResponse = OrgChaptersResponseSchema;
 
 export const GetComplianceReportParams = z.object({
   organizationId: z.string(),

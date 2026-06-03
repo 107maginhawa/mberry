@@ -360,6 +360,9 @@ namespace MonobaseAPI {
   @route("/association/member/chapter-affiliations")
   interface AssocChapterAffiliationManagement extends Association.Member.Chapters.ChapterAffiliationManagement {}
 
+  @route("/association/member/chapters")
+  interface AssocOrgChaptersManagement extends Association.Member.Chapters.OrgChaptersManagement {}
+
   @tag("Association:Member")
   @route("/association/member/affiliation-transfers")
   interface AssocAffiliationTransferManagement extends Association.Member.Chapters.AffiliationTransferManagement {}
