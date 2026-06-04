@@ -135,15 +135,7 @@ export function ElectionDetail({ electionId, orgId }: ElectionDetailProps) {
     )
   }
 
-  if (isError) {
-    return (
-      <div role="alert" className="p-4 rounded-lg bg-[var(--color-error-bg)] text-[var(--color-error)] text-sm">
-        Unable to load election details. Please try refreshing the page.
-      </div>
-    )
-  }
-
-  if (error || !data) {
+  if (isError || error || !data) {
     return <div role="alert" aria-live="polite" className="p-6 text-center text-[var(--color-error)]">Failed to load election</div>
   }
 

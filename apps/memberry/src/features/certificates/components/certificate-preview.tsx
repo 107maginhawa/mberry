@@ -31,21 +31,15 @@ export function CertificatePreview({ certificateId }: CertificatePreviewProps) {
     )
   }
 
-  if (isError) {
+  if (isError || !cert?.id) {
     return (
-      <div role="alert" className="max-w-2xl p-4 rounded-lg bg-[var(--color-error-bg)] text-[var(--color-error)] text-sm">
-        Unable to load certificate. Please try refreshing the page.
+      <div role="alert">
+        <GlassCard className="max-w-2xl p-8 text-center">
+          <p className="text-sm text-[var(--color-muted)]">
+            Certificate not found or you do not have permission to view it.
+          </p>
+        </GlassCard>
       </div>
-    )
-  }
-
-  if (!cert?.id) {
-    return (
-      <GlassCard className="max-w-2xl p-8 text-center">
-        <p className="text-sm text-[var(--color-muted)]">
-          Certificate not found or you do not have permission to view it.
-        </p>
-      </GlassCard>
     )
   }
 

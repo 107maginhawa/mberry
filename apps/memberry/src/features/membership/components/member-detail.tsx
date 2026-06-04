@@ -149,15 +149,7 @@ export function MemberDetail({ orgId, memberId }: MemberDetailProps) {
     )
   }
 
-  if (isError) {
-    return (
-      <div role="alert" className="p-4 rounded-lg bg-[var(--color-error-bg)] text-[var(--color-error)] text-sm max-w-3xl">
-        Unable to load member detail. Please try refreshing the page.
-      </div>
-    )
-  }
-
-  if (error || !data) {
+  if (isError || error || !data) {
     return (
       <div className="p-6">
         <Alert variant="destructive">
