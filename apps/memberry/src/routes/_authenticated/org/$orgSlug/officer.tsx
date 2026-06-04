@@ -1,4 +1,3 @@
-// ui-c-exempt: full-height-layout — officer-shell layout root
 import { useEffect } from "react"
 import { createFileRoute, Outlet, useLocation } from "@tanstack/react-router"
 import { requireOrgOfficer, type AuthContext, type OfficerContext } from "@/utils/guards"

@@ -65,6 +65,43 @@ type Hit = { file: string; line: number; rule: string; detail: string }
 const hits: Hit[] = []
 const layoutP = [/\/__root\.tsx$/, /\/_authenticated\.tsx$/, /\.layout\.tsx$/, /\/route\.tsx$/]
 
+// INTENTIONAL-EXEMPT route list — mirrors docs/audits/PATTERNS.lock.md "INTENTIONAL-EXEMPT routes".
+// Routes here are by-design no-PageShell (own chrome / auth / public). Update both when adding/removing entries.
+const INTENTIONAL_EXEMPT_ROUTES = new Set([
+  // Auth-flow
+  'apps/memberry/src/routes/auth/$authView.tsx',
+  'apps/memberry/src/routes/verify-email.tsx',
+  // Landing-page
+  'apps/memberry/src/routes/index.tsx',
+  // Onboarding-step
+  'apps/memberry/src/routes/onboarding.tsx',
+  'apps/memberry/src/routes/join.tsx',
+  'apps/memberry/src/routes/invite/$token.tsx',
+  // Public-verify
+  'apps/memberry/src/routes/pay/$token.tsx',
+  'apps/memberry/src/routes/verify/$token.tsx',
+  'apps/memberry/src/routes/verify/$certificateNumber.tsx',
+  'apps/memberry/src/routes/verify/$credentialNumber.tsx',
+  'apps/memberry/src/routes/org/$slug.tsx',
+  'apps/memberry/src/routes/events/$eventSlug.tsx',
+  // Full-height-layout (officer + bookings shells own their chrome)
+  'apps/memberry/src/routes/_authenticated/org/$orgSlug/officer.tsx',
+  'apps/memberry/src/routes/_authenticated/org/$orgSlug/officer/dashboard.tsx',
+  'apps/memberry/src/routes/_authenticated/org/$orgSlug/officer/roster.tsx',
+  'apps/memberry/src/routes/_authenticated/org/$orgSlug/officer/roster/$memberId.tsx',
+  'apps/memberry/src/routes/_authenticated/org/$orgSlug/officer/communications.tsx',
+  'apps/memberry/src/routes/_authenticated/org/$orgSlug/officer/payments.tsx',
+  'apps/memberry/src/routes/_authenticated/org/$orgSlug/officer/dues/assessments.tsx',
+  'apps/memberry/src/routes/_authenticated/org/$orgSlug/officer/dues/member.$memberId.tsx',
+  'apps/memberry/src/routes/_authenticated/org/$orgSlug/officer/dues/treasurer.tsx',
+  'apps/memberry/src/routes/_authenticated/org/$orgSlug/officer/settings/funds.tsx',
+  'apps/memberry/src/routes/_authenticated/org/$orgSlug/officer/settings/dues.tsx',
+  'apps/memberry/src/routes/_authenticated/my/bookings/index.tsx',
+  'apps/memberry/src/routes/_authenticated/my/bookings/$bookingId.tsx',
+  'apps/memberry/src/routes/_authenticated/my/bookings/host.$personId.tsx',
+  'apps/memberry/src/routes/_authenticated/my/bookings/host.$personId.$slotId.tsx',
+])
+
 const files = await getFiles()
 if (files.length === 0) process.exit(0)
 
@@ -112,6 +149,7 @@ for (const file of files) {
   // Detector 4: PageShell-missing (only for .tsx under routes/)
   if (/apps\/(memberry|admin)\/src\/routes\//.test(file)) {
     if (layoutP.some((p) => p.test(file))) continue
+    if (INTENTIONAL_EXEMPT_ROUTES.has(file)) continue
     if (!/<PageShell\b|import.*PageShell/.test(src) && !fileHeaderExempt(file)) {
       hits.push({ file, line: 1, rule: 'pageshell-missing', detail: 'route without PageShell or exempt annotation' })
     }

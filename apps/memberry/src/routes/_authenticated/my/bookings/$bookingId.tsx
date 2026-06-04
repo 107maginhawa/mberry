@@ -1,4 +1,3 @@
-// ui-c-exempt: full-height-layout — booking detail inside bookings shell
 import { createFileRoute, useNavigate } from '@tanstack/react-router'
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'

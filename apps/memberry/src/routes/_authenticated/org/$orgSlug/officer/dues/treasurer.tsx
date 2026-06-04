@@ -1,4 +1,3 @@
-// ui-c-exempt: full-height-layout — officer dues-treasurer inside officer-shell
 import { createFileRoute, redirect } from '@tanstack/react-router'
 
 export const Route = createFileRoute('/_authenticated/org/$orgSlug/officer/dues/treasurer')({
