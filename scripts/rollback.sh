@@ -104,8 +104,8 @@ git worktree add "$TMPDIR" "$TARGET_SHA" --detach 2>/dev/null
 (
   cd "$TMPDIR"
   bun install --frozen-lockfile
-  bun --filter @monobase/api-spec run build
-  bun --filter @monobase/api-ts run generate
+  bun run --filter @monobase/api-spec build
+  bun run --filter @monobase/api-ts generate
 
   if [[ "$ENV" == "production" ]]; then
     PROJECT_SUFFIX="production"
