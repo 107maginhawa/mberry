@@ -3,19 +3,7 @@ import { screen, waitFor } from '@testing-library/react'
 import { renderWithProviders } from '@/test/utils'
 import { DuesInvoiceList } from './dues-invoice-list'
 
-// Mock @monobase/ui
-vi.mock('@monobase/ui', () => ({
-  Button: ({ children, onClick, disabled, className, ...props }: any) => (
-    <button onClick={onClick} disabled={disabled} className={className} {...props}>{children}</button>
-  ),
-  Skeleton: ({ className }: any) => <div data-testid="skeleton" className={className} />,
-  Table: ({ children, className }: any) => <table className={className}>{children}</table>,
-  TableHeader: ({ children }: any) => <thead>{children}</thead>,
-  TableBody: ({ children }: any) => <tbody>{children}</tbody>,
-  TableRow: ({ children, className }: any) => <tr className={className}>{children}</tr>,
-  TableHead: ({ children, className }: any) => <th className={className}>{children}</th>,
-  TableCell: ({ children, className }: any) => <td className={className}>{children}</td>,
-}))
+// @monobase/ui rendered as real components against happy-dom.
 
 // Mock EmptyState
 vi.mock('@/components/patterns/empty-state', () => ({

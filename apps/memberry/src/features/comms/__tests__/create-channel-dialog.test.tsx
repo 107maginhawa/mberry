@@ -5,24 +5,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { CreateChannelDialog } from '../components/create-channel-dialog'
 import { ChannelList } from '../components/channel-list'
 
-vi.mock('@monobase/ui', () => ({
-  Dialog: ({ children, open }: any) => open ? <div role="dialog">{children}</div> : null,
-  DialogContent: ({ children }: any) => <div>{children}</div>,
-  DialogHeader: ({ children }: any) => <div>{children}</div>,
-  DialogTitle: ({ children }: any) => <h2>{children}</h2>,
-  DialogFooter: ({ children }: any) => <div>{children}</div>,
-  Button: ({ children, onClick, disabled, ...props }: any) => (
-    <button onClick={onClick} disabled={disabled} {...props}>{children}</button>
-  ),
-  Input: ({ value, onChange, ...props }: any) => (
-    <input value={value} onChange={onChange} {...props} />
-  ),
-  Textarea: ({ value, onChange, ...props }: any) => (
-    <textarea value={value} onChange={onChange} {...props} />
-  ),
-  Label: ({ children, ...props }: any) => <label {...props}>{children}</label>,
-  Skeleton: ({ className }: any) => <div className={className} />,
-}))
+// @monobase/ui rendered as real components against happy-dom.
 
 vi.mock('@/components/motion/glass-card', () => ({
   GlassCard: ({ children, className }: any) => <div className={className}>{children}</div>,

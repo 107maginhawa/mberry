@@ -3,35 +3,13 @@ import { screen, waitFor } from '@testing-library/react'
 import { renderWithProviders } from '@/test/utils'
 import { TrainingList } from './training-list'
 
-vi.mock('@tanstack/react-router', () => ({
-  Link: ({ children, to, params, className }: any) => {
-    const href = to?.replace('$orgSlug', params?.orgSlug || '').replace('$trainingId', params?.trainingId || '')
-    return <a href={href} className={className}>{children}</a>
-  },
-  useNavigate: () => vi.fn(),
-  useParams: () => ({ orgSlug: 'test-org' }),
-}))
+// Router (Link, useParams, useNavigate) provided by global mock in test-setup-root.ts.
+// @monobase/ui rendered as real components against happy-dom.
 
 vi.mock('@/components/patterns/confirm-dialog', () => ({
   ConfirmDialog: ({ children, onConfirm, title }: any) => (
     <div data-testid="confirm-dialog"><span>{title}</span><button onClick={onConfirm}>Confirm</button>{children}</div>
   ),
-}))
-
-vi.mock('@monobase/ui', () => ({
-  Button: ({ children, onClick, disabled, className, ...props }: any) => (
-    <button onClick={onClick} disabled={disabled} className={className} {...props}>{children}</button>
-  ),
-  Input: ({ value, onChange, placeholder, className, ...props }: any) => (
-    <input value={value} onChange={onChange} placeholder={placeholder} className={className} {...props} />
-  ),
-  Select: ({ children, value, onValueChange }: any) => (
-    <div data-testid="select" data-value={value}>{children}</div>
-  ),
-  SelectContent: ({ children }: any) => <div>{children}</div>,
-  SelectItem: ({ children, value }: any) => <div data-value={value}>{children}</div>,
-  SelectTrigger: ({ children, className }: any) => <div className={className}>{children}</div>,
-  SelectValue: ({ placeholder }: any) => <span>{placeholder}</span>,
 }))
 
 // [Tier-F] removed local SDK mock; using global stub in test-setup-root.ts
@@ -51,6 +29,7 @@ function setupMocks() {
 
 describe('TrainingList', () => {
   beforeEach(() => {
+    ;(globalThis as any).__routerParams = { orgSlug: 'test-org' }
     vi.clearAllMocks()
     setupMocks()
   })

@@ -5,27 +5,8 @@ import { renderWithProviders } from '@/test/utils'
 import { DocumentLibrary } from './document-library'
 
 // [Tier-F] removed local SDK mock; using global stub in test-setup-root.ts
-vi.mock('@monobase/ui', () => ({
-  Skeleton: ({ className }: any) => <div className={className} data-testid="skeleton" />,
-  Button: ({ children, onClick, variant, size, disabled, ...props }: any) => (
-    <button onClick={onClick} disabled={disabled} {...props}>{children}</button>
-  ),
-  Input: ({ placeholder, value, onChange, className, ...props }: any) => (
-    <input placeholder={placeholder} value={value} onChange={onChange} className={className} {...props} />
-  ),
-  Select: ({ children, value, onValueChange }: any) => <div data-value={value}>{children}</div>,
-  SelectContent: ({ children }: any) => <div>{children}</div>,
-  SelectItem: ({ children, value }: any) => <div data-value={value}>{children}</div>,
-  SelectTrigger: ({ children, className }: any) => <div className={className}>{children}</div>,
-  SelectValue: ({ placeholder }: any) => <span>{placeholder}</span>,
-}))
-
-vi.mock('@tanstack/react-router', () => ({
-  Link: ({ children, to, ...props }: any) => (
-    <a href={typeof to === 'string' ? to : '#'} {...props}>{children}</a>
-  ),
-  useParams: () => ({ orgSlug: 'test-org' }),
-}))
+// Router (Link, useParams) provided by global mock in test-setup-root.ts.
+// @monobase/ui rendered as real components against happy-dom.
 
 vi.mock('@/components/motion/glass-card', () => ({
   GlassCard: ({ children, className }: any) => <div className={className}>{children}</div>,
@@ -83,6 +64,7 @@ const publishedDoc = {
 
 describe('Document Publish Action', () => {
   beforeEach(() => {
+    ;(globalThis as any).__routerParams = { orgSlug: 'test-org' }
     vi.clearAllMocks()
   })
 

@@ -2,14 +2,7 @@ import { describe, test, expect, vi, afterEach, beforeEach } from '@/test/vitest
 import { render, screen, cleanup } from '@testing-library/react'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import type { ReactNode } from 'react'
-
-// Stub TanStack Router's <Link> so we don't need a full RouterProvider.
-// The component only uses Link's children/className visually.
-vi.mock('@tanstack/react-router', () => ({
-  Link: ({ children, className }: { children: ReactNode; className?: string }) => (
-    <a className={className}>{children}</a>
-  ),
-}))
+// Router (Link, useParams) provided by global mock in test-setup-root.ts.
 
 import { HostDirectory } from './host-directory'
 import { listBookingEventsQueryKey } from '@monobase/sdk-ts/generated/react-query'

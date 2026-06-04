@@ -1,17 +1,14 @@
-import { describe, test, expect, vi } from '@/test/vitest-shim'
+import { describe, test, expect, vi, beforeEach } from '@/test/vitest-shim'
 import { screen } from '@testing-library/react'
 import { renderWithProviders } from '@/test/utils'
 import { QuickActions } from './quick-actions'
 
-// Mock @tanstack/react-router
-vi.mock('@tanstack/react-router', () => ({
-  Link: ({ children, to, params }: { children: React.ReactNode; to: string; params?: Record<string, string> }) => (
-    <a href={String(to)} data-params={JSON.stringify(params)}>{children}</a>
-  ),
-  useParams: () => ({ orgSlug: 'test-org' }),
-}))
+// Router (Link, useParams) provided by global mock in test-setup-root.ts.
 
 describe('QuickActions', () => {
+  beforeEach(() => {
+    ;(globalThis as any).__routerParams = { orgSlug: 'test-org' }
+  })
   test('renders all 6 action buttons', () => {
     renderWithProviders(<QuickActions />)
 

@@ -4,13 +4,7 @@ import userEvent from '@testing-library/user-event'
 import { renderWithProviders } from '@/test/utils'
 import { MemberTable } from './member-table'
 
-// Mock @tanstack/react-router
-vi.mock('@tanstack/react-router', () => ({
-  Link: ({ children, to, params }: { children: React.ReactNode; to: string; params?: Record<string, string> }) => (
-    <a href={to}>{children}</a>
-  ),
-  useParams: () => ({ orgSlug: 'test-org' }),
-}))
+// Router (Link, useParams) provided by global mock in test-setup-root.ts.
 
 // Mock SDK generated options
 // [Tier-F] removed local SDK mock; using global stub in test-setup-root.ts
@@ -74,6 +68,7 @@ function setupDefaultMocks(members = MOCK_MEMBERS, pagination = { totalCount: me
 
 describe('MemberTable', () => {
   beforeEach(() => {
+    ;(globalThis as any).__routerParams = { orgSlug: 'test-org' }
     vi.clearAllMocks()
   })
 

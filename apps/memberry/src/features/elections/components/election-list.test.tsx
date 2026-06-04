@@ -4,24 +4,15 @@ import { renderWithProviders } from '@/test/utils'
 import { ElectionList } from './election-list'
 
 // [Tier-F] removed local SDK mock; using global stub in test-setup-root.ts
-vi.mock('@monobase/ui', () => ({
-  Skeleton: ({ className }: any) => <div className={className} data-testid="skeleton" />,
-}))
-
-vi.mock('@tanstack/react-router', () => ({
-  Link: ({ children, to, params, ...props }: any) => (
-    <a href={to?.replace('$orgSlug', params?.orgSlug).replace('$electionId', params?.electionId)} {...props}>
-      {children}
-    </a>
-  ),
-  useParams: () => ({ orgSlug: 'test-org' }),
-}))
+// Router (Link, useParams) provided by global mock in test-setup-root.ts.
+// @monobase/ui rendered as real components against happy-dom.
 
 import { listElectionsOptions } from '@monobase/sdk-ts/generated/react-query'
 const mockListOptions = listElectionsOptions as ReturnType<typeof vi.fn>
 
 describe('ElectionList', () => {
   beforeEach(() => {
+    ;(globalThis as any).__routerParams = { orgSlug: 'test-org' }
     vi.clearAllMocks()
   })
 

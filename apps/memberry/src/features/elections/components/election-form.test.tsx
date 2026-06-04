@@ -5,15 +5,7 @@ import { renderWithProviders } from '@/test/utils'
 import { ElectionForm } from './election-form'
 
 // [Tier-F] removed local SDK mock; using global stub in test-setup-root.ts
-vi.mock('@monobase/ui', () => ({
-  Input: (props: any) => <input {...props} />,
-  Label: ({ children, ...props }: any) => <label {...props}>{children}</label>,
-  Button: ({ children, onClick, type, disabled, variant, className }: any) => (
-    <button onClick={onClick} type={type ?? 'button'} disabled={disabled} className={className} data-variant={variant}>
-      {children}
-    </button>
-  ),
-}))
+// @monobase/ui rendered as real components against happy-dom.
 
 import {
   createElectionMutation,

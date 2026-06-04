@@ -3,12 +3,7 @@ import { screen } from '@testing-library/react'
 import { renderWithProviders } from '@/test/utils'
 import { AlertBanner } from './alert-banner'
 
-// Mock @tanstack/react-router
-vi.mock('@tanstack/react-router', () => ({
-  Link: ({ children, to, params }: { children: React.ReactNode; to: string; params?: Record<string, string> }) => (
-    <a href={String(to)} data-params={JSON.stringify(params)}>{children}</a>
-  ),
-}))
+// Router (Link) provided by global mock in test-setup-root.ts.
 
 const emptyProps = { memberships: [], invoices: [], elections: [] }
 

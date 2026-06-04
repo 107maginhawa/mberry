@@ -8,20 +8,7 @@ vi.mock('sonner', () => ({
   toast: { success: vi.fn(), error: vi.fn() },
 }))
 
-// Mock @monobase/ui
-vi.mock('@monobase/ui', () => ({
-  Button: ({ children, onClick, disabled, ...props }: any) => (
-    <button onClick={onClick} disabled={disabled} {...props}>{children}</button>
-  ),
-  Input: ({ value, onChange, placeholder, type, ...props }: any) => (
-    <input value={value} onChange={onChange} placeholder={placeholder} type={type} {...props} />
-  ),
-  Textarea: ({ value, onChange, placeholder, rows, ...props }: any) => (
-    <textarea value={value} onChange={onChange} placeholder={placeholder} rows={rows} {...props} />
-  ),
-  Label: ({ children, className }: any) => <label className={className}>{children}</label>,
-  Skeleton: ({ className }: any) => <div data-testid="skeleton" className={className} />,
-}))
+// @monobase/ui rendered as real components against happy-dom.
 
 // Mock api
 vi.mock('@/lib/api', () => ({

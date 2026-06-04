@@ -3,10 +3,8 @@ import { screen } from '@testing-library/react'
 import { renderWithProviders } from '@/test/utils'
 import { TrainingForm } from './training-form'
 
-vi.mock('@tanstack/react-router', () => ({
-  useNavigate: () => vi.fn(),
-  useParams: () => ({ orgSlug: 'test-org' }),
-}))
+// Router (useNavigate, useParams) provided by global mock in test-setup-root.ts.
+// @monobase/ui rendered as real components against happy-dom.
 
 vi.mock('@/components/patterns/date-picker', () => ({
   DateTimePicker: ({ value, onChange, ...rest }: any) => (
@@ -14,34 +12,9 @@ vi.mock('@/components/patterns/date-picker', () => ({
   ),
 }))
 
-vi.mock('@monobase/ui', () => ({
-  Button: ({ children, onClick, disabled, type, ...props }: any) => (
-    <button onClick={onClick} disabled={disabled} type={type} {...props}>{children}</button>
-  ),
-  Input: ({ value, onChange, placeholder, type, ...props }: any) => (
-    <input value={value} onChange={onChange} placeholder={placeholder} type={type} {...props} />
-  ),
-  Label: ({ children }: any) => <label>{children}</label>,
-  Textarea: ({ value, onChange, placeholder, rows, ...props }: any) => (
-    <textarea value={value} onChange={onChange} placeholder={placeholder} rows={rows} {...props} />
-  ),
-  // Render Select as a native select with a hidden input for display value detection
-  Select: ({ children, value, onValueChange }: any) => (
-    <div data-testid="select" data-value={value}>
-      <input type="hidden" data-select-value={value} />
-      {children}
-    </div>
-  ),
-  SelectContent: ({ children }: any) => <div data-testid="select-content">{children}</div>,
-  SelectItem: ({ children, value }: any) => (
-    <div data-testid="select-item" data-value={value} role="option">{children}</div>
-  ),
-  SelectTrigger: ({ children }: any) => <div data-testid="select-trigger">{children}</div>,
-  SelectValue: ({ placeholder }: any) => <span>{placeholder}</span>,
-}))
-
 describe('TrainingForm', () => {
   beforeEach(() => {
+    ;(globalThis as any).__routerParams = { orgSlug: 'test-org' }
     vi.clearAllMocks()
   })
 

@@ -4,31 +4,8 @@ import { renderWithProviders } from '@/test/utils'
 import { DocumentBrowser } from './document-browser'
 
 // [Tier-F] removed local SDK mock; using global stub in test-setup-root.ts
-vi.mock('@monobase/ui', () => ({
-  Skeleton: ({ className }: any) => <div className={className} data-testid="skeleton" />,
-  Input: ({ placeholder, value, onChange, className, ...props }: any) => (
-    <input placeholder={placeholder} value={value} onChange={onChange} className={className} {...props} />
-  ),
-  Tabs: ({ children, value, onValueChange }: any) => (
-    <div data-value={value}>{children}</div>
-  ),
-  TabsList: ({ children, className }: any) => <div className={className}>{children}</div>,
-  TabsTrigger: ({ children, value, className }: any) => (
-    <button data-value={value} className={className}>{children}</button>
-  ),
-}))
-
-vi.mock('@tanstack/react-router', () => ({
-  Link: ({ children, to, params, ...props }: any) => {
-    const href = typeof to === 'string'
-      ? to
-        .replace('$orgSlug', params?.orgSlug ?? 'test-org')
-        .replace('$documentId', params?.documentId ?? '')
-      : '#'
-    return <a href={href} {...props}>{children}</a>
-  },
-  useParams: () => ({ orgSlug: 'test-org' }),
-}))
+// Router (Link, useParams) provided by global mock in test-setup-root.ts.
+// @monobase/ui rendered as real components against happy-dom.
 
 import { searchDocumentsOptions } from '@monobase/sdk-ts/generated/react-query'
 const mockSearchOptions = searchDocumentsOptions as ReturnType<typeof vi.fn>
@@ -60,6 +37,7 @@ const makeDoc = (overrides: Partial<{
 
 describe('DocumentBrowser', () => {
   beforeEach(() => {
+    ;(globalThis as any).__routerParams = { orgSlug: 'test-org' }
     vi.clearAllMocks()
   })
 

@@ -3,12 +3,7 @@ import { screen } from '@testing-library/react'
 import { renderWithProviders } from '@/test/utils'
 import { CreditBreakdown } from './credit-breakdown'
 
-// Mock @tanstack/react-router
-vi.mock('@tanstack/react-router', () => ({
-  Link: ({ children, to }: { children: React.ReactNode; to: string }) => (
-    <a href={String(to)}>{children}</a>
-  ),
-}))
+// Router (Link) provided by global mock in test-setup-root.ts.
 
 // Mock framer-motion (used by CountUp)
 vi.mock('framer-motion', () => ({

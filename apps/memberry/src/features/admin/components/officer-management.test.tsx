@@ -8,32 +8,7 @@ vi.mock('sonner', () => ({
   toast: { success: vi.fn(), error: vi.fn() },
 }))
 
-// Mock @monobase/ui
-vi.mock('@monobase/ui', () => ({
-  Button: ({ children, onClick, disabled, ...props }: any) => (
-    <button onClick={onClick} disabled={disabled} {...props}>{children}</button>
-  ),
-  Input: ({ value, onChange, placeholder, ...props }: any) => (
-    <input value={value} onChange={onChange} placeholder={placeholder} {...props} />
-  ),
-  Label: ({ children }: any) => <label>{children}</label>,
-  Select: ({ children }: any) => <div data-testid="select">{children}</div>,
-  SelectContent: ({ children }: any) => <div>{children}</div>,
-  SelectItem: ({ children, value }: any) => <option value={value}>{children}</option>,
-  SelectTrigger: ({ children }: any) => <div>{children}</div>,
-  SelectValue: ({ placeholder }: any) => <span>{placeholder}</span>,
-  Dialog: ({ children, open }: any) => open ? <div data-testid="dialog">{children}</div> : null,
-  DialogContent: ({ children }: any) => <div>{children}</div>,
-  DialogHeader: ({ children }: any) => <div>{children}</div>,
-  DialogTitle: ({ children }: any) => <h2>{children}</h2>,
-  DialogFooter: ({ children }: any) => <div>{children}</div>,
-  Table: ({ children, className }: any) => <table className={className}>{children}</table>,
-  TableHeader: ({ children, className }: any) => <thead className={className}>{children}</thead>,
-  TableBody: ({ children }: any) => <tbody>{children}</tbody>,
-  TableRow: ({ children, className }: any) => <tr className={className}>{children}</tr>,
-  TableHead: ({ children, className }: any) => <th className={className}>{children}</th>,
-  TableCell: ({ children, className, colSpan }: any) => <td className={className} colSpan={colSpan}>{children}</td>,
-}))
+// @monobase/ui rendered as real components against happy-dom.
 
 // Mock motion/pattern components
 vi.mock('@/components/motion/glass-card', () => ({

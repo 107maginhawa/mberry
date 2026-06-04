@@ -4,9 +4,7 @@ import { renderWithProviders } from '@/test/utils'
 import { DuesSetupChecklist } from './dues-setup-checklist'
 
 // [Tier-F] removed local SDK mock; using global stub in test-setup-root.ts
-vi.mock('@tanstack/react-router', () => ({
-  Link: ({ children, ...props }: any) => <a href={props.to}>{children}</a>,
-}))
+// Router (Link, useParams) provided by global mock in test-setup-root.ts.
 
 vi.mock('@/components/motion/glass-card', () => ({
   GlassCard: ({ children, className, ...props }: any) => <div className={className} {...props}>{children}</div>,
@@ -43,6 +41,7 @@ function setupMocks(overrides: {
 
 describe('DuesSetupChecklist', () => {
   beforeEach(() => {
+    ;(globalThis as any).__routerParams = { orgSlug: 'test-org' }
     vi.clearAllMocks()
   })
 

@@ -12,23 +12,11 @@ vi.mock('./nominee-picker-dialog', () => ({
   ),
 }))
 
-vi.mock('@tanstack/react-router', () => ({
-  Link: ({ children, to, params, className }: any) => {
-    const href = to?.replace('$orgSlug', params?.orgSlug || '').replace('$electionId', params?.electionId || '')
-    return <a href={href} className={className}>{children}</a>
-  },
-  useParams: () => ({ orgSlug: 'test-org' }),
-}))
+// Router (Link, useParams) provided by global mock in test-setup-root.ts.
+// @monobase/ui rendered as real components against happy-dom.
 
 vi.mock('sonner', () => ({
   toast: { success: vi.fn(), error: vi.fn() },
-}))
-
-vi.mock('@monobase/ui', () => ({
-  Skeleton: ({ className }: any) => <div className={className} data-testid="skeleton" />,
-  Button: ({ children, onClick, disabled, ...props }: any) => (
-    <button onClick={onClick} disabled={disabled} {...props}>{children}</button>
-  ),
 }))
 
 import {
@@ -54,6 +42,7 @@ function setupMutations() {
 
 describe('ElectionDetail', () => {
   beforeEach(() => {
+    ;(globalThis as any).__routerParams = { orgSlug: 'test-org' }
     vi.clearAllMocks()
     setupMutations()
   })

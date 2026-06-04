@@ -4,45 +4,14 @@ import { renderWithProviders } from '@/test/utils'
 import { OrgPickerSheet } from './org-picker-sheet'
 import type { OrgMembership } from '@/hooks/useMyOrgs'
 
-// Mock @tanstack/react-router
-const mockNavigate = vi.fn()
-vi.mock('@tanstack/react-router', () => ({
-  useNavigate: () => mockNavigate,
-  Link: ({ children, to }: { children: React.ReactNode; to: string }) => (
-    <a href={String(to)}>{children}</a>
-  ),
-}))
+// Router (Link, useNavigate) provided by global mock in test-setup-root.ts.
+// @monobase/ui rendered as real components against happy-dom.
 
 // Mock avatar component
 vi.mock('@/components/patterns/avatar-initials', () => ({
   AvatarInitials: ({ name }: { name: string }) => (
     <div data-testid="avatar">{name}</div>
   ),
-}))
-
-// Mock @monobase/ui — Sheet must gate on `open` prop
-vi.mock('@monobase/ui', () => ({
-  Sheet: ({ children, open }: { children: React.ReactNode; open: boolean }) =>
-    open ? <div data-testid="sheet">{children}</div> : null,
-  SheetContent: ({ children }: { children: React.ReactNode }) => (
-    <div data-testid="sheet-content">{children}</div>
-  ),
-  SheetHeader: ({ children }: { children: React.ReactNode }) => (
-    <div>{children}</div>
-  ),
-  SheetTitle: ({ children }: { children: React.ReactNode }) => (
-    <h2>{children}</h2>
-  ),
-  Badge: ({ children }: { children: React.ReactNode }) => (
-    <span data-testid="badge">{children}</span>
-  ),
-  Button: ({
-    children,
-    onClick,
-  }: {
-    children: React.ReactNode
-    onClick?: () => void
-  }) => <button onClick={onClick}>{children}</button>,
 }))
 
 function makeOrg(overrides: Partial<OrgMembership> = {}): OrgMembership {

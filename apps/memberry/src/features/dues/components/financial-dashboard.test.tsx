@@ -19,10 +19,8 @@ vi.mock('@/components/motion/stagger-grid', () => ({
   StaggerItem: ({ children }: any) => <div>{children}</div>,
 }))
 
-vi.mock('@tanstack/react-router', () => ({
-  Link: ({ children, ...props }: any) => <a href={props.to}>{children}</a>,
-  useParams: () => ({ orgSlug: 'test-org' }),
-}))
+// Router (Link, useParams) provided by global mock in test-setup-root.ts;
+// __routerParams set per test in beforeEach.
 
 import { getDuesFinancialDashboardOptions } from '@monobase/sdk-ts/generated/react-query'
 
@@ -30,6 +28,7 @@ const mockGetDashboard = getDuesFinancialDashboardOptions as ReturnType<typeof v
 
 describe('FinancialDashboard', () => {
   beforeEach(() => {
+    ;(globalThis as any).__routerParams = { orgSlug: 'test-org' }
     vi.clearAllMocks()
   })
 

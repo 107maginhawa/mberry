@@ -3,13 +3,7 @@ import { screen, waitFor } from '@testing-library/react'
 import { renderWithProviders } from '@/test/utils'
 import { MemberDetail } from './member-detail'
 
-// Mock @tanstack/react-router
-vi.mock('@tanstack/react-router', () => ({
-  Link: ({ children, to }: { children: React.ReactNode; to: string }) => (
-    <a href={to}>{children}</a>
-  ),
-  useParams: () => ({ orgSlug: 'test-org' }),
-}))
+// Router (Link, useParams) provided by global mock in test-setup-root.ts.
 
 // Mock sonner
 vi.mock('sonner', () => ({
@@ -73,6 +67,7 @@ const MOCK_ACTIVE_MEMBER = {
 
 describe('MemberDetail', () => {
   beforeEach(() => {
+    ;(globalThis as any).__routerParams = { orgSlug: 'test-org' }
     vi.clearAllMocks()
     setupMutationMocks()
   })

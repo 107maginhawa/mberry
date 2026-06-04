@@ -4,13 +4,7 @@ import { renderWithProviders } from '@/test/utils'
 import { AttendanceView } from './attendance-view'
 
 // [Tier-F] removed local SDK mock; using global stub in test-setup-root.ts
-vi.mock('@monobase/ui', () => ({
-  Input: (props: any) => <input {...props} />,
-  Skeleton: ({ className }: any) => <div className={className} data-testid="skeleton" />,
-  Button: ({ children, onClick, disabled, ...props }: any) => (
-    <button onClick={onClick} disabled={disabled} {...props}>{children}</button>
-  ),
-}))
+// @monobase/ui rendered as real components against happy-dom.
 
 import {
   listCustomEventAttendanceOptions,

@@ -8,9 +8,7 @@ import { DirectorySearch } from './directory-search'
 import { searchDirectoryOptions } from '@monobase/sdk-ts/generated/react-query'
 const mockSearchDirectory = searchDirectoryOptions as ReturnType<typeof vi.fn>
 
-vi.mock('@monobase/ui', () => ({
-  Input: (props: any) => <input {...props} />,
-}))
+// @monobase/ui rendered as real components against happy-dom.
 
 // Mock components
 vi.mock('@/components/motion/glass-card', () => ({

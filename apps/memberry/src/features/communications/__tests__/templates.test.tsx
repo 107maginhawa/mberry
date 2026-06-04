@@ -5,43 +5,8 @@ import { renderWithProviders } from '@/test/utils'
 import { TemplateForm } from '../components/template-form'
 import { TemplatePreview } from '../components/template-preview'
 
-// Mock @tanstack/react-router
-const mockNavigate = vi.hoisted(() => vi.fn())
-vi.mock('@tanstack/react-router', () => ({
-  useNavigate: () => mockNavigate,
-  Link: ({ children, ...rest }: any) => <a {...rest}>{children}</a>,
-}))
-
-// Mock @monobase/ui
-vi.mock('@monobase/ui', () => ({
-  Input: ({ children, ...rest }: any) => <input {...rest} />,
-  Label: ({ children, htmlFor }: any) => <label htmlFor={htmlFor}>{children}</label>,
-  Textarea: ({ children, ...rest }: any) => <textarea {...rest} />,
-  Switch: ({ checked, onCheckedChange }: any) => (
-    <button
-      role="switch"
-      aria-checked={checked}
-      onClick={() => onCheckedChange(!checked)}
-    >
-      {checked ? 'ON' : 'OFF'}
-    </button>
-  ),
-  Button: ({ children, onClick, type, disabled, variant, className }: any) => (
-    <button onClick={onClick} type={type} disabled={disabled} className={className} data-variant={variant}>
-      {children}
-    </button>
-  ),
-  Badge: ({ children, variant, className }: any) => (
-    <span data-variant={variant} className={className}>{children}</span>
-  ),
-  Select: ({ children, value, onValueChange }: any) => <div data-testid="select-root">{children}</div>,
-  SelectTrigger: ({ children, ...rest }: any) => <button data-testid="select-trigger" {...rest}>{children}</button>,
-  SelectContent: ({ children }: any) => <div data-testid="select-content">{children}</div>,
-  SelectItem: ({ children, value, ...rest }: any) => (
-    <option value={value} {...rest}>{children}</option>
-  ),
-  SelectValue: ({ placeholder }: any) => <span>{placeholder}</span>,
-}))
+// Router (Link, useNavigate) provided by global mock in test-setup-root.ts.
+// @monobase/ui rendered as real components against happy-dom.
 
 // Mock sonner
 vi.mock('sonner', () => ({

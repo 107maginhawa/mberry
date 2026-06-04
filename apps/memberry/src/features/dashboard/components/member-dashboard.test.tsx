@@ -3,12 +3,7 @@ import { screen, waitFor } from '@testing-library/react'
 import { renderWithProviders } from '@/test/utils'
 import { MemberDashboard } from './member-dashboard'
 
-// Mock @tanstack/react-router
-vi.mock('@tanstack/react-router', () => ({
-  Link: ({ children, to }: { children: React.ReactNode; to: string }) => (
-    <a href={String(to)}>{children}</a>
-  ),
-}))
+// Router (Link) provided by global mock in test-setup-root.ts.
 
 // Mock @/lib/api
 vi.mock('@/lib/api', () => ({

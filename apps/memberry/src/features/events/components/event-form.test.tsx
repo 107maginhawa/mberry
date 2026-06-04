@@ -4,30 +4,7 @@ import { renderWithProviders } from '@/test/utils'
 import { EventForm } from './event-form'
 
 // [Tier-F] removed local SDK mock; using global stub in test-setup-root.ts
-vi.mock('@monobase/ui', () => ({
-  Input: ({ children, ...props }: any) => <input {...props} />,
-  Label: ({ children, ...props }: any) => <label {...props}>{children}</label>,
-  Textarea: ({ children, ...props }: any) => <textarea {...props} />,
-  Button: ({ children, onClick, type, disabled, variant, className }: any) => (
-    <button onClick={onClick} type={type ?? 'button'} disabled={disabled} className={className} data-variant={variant}>
-      {children}
-    </button>
-  ),
-  Switch: ({ checked, onCheckedChange, id, ...props }: any) => (
-    <button role="switch" id={id} aria-checked={checked} onClick={() => onCheckedChange?.(!checked)} {...props}>
-      {checked ? 'ON' : 'OFF'}
-    </button>
-  ),
-  Select: ({ children, value, onValueChange }: any) => (
-    <select value={value} onChange={(e) => onValueChange(e.target.value)}>
-      {children}
-    </select>
-  ),
-  SelectTrigger: ({ children, id, className }: any) => <button id={id} type="button" className={className}>{children}</button>,
-  SelectValue: ({ placeholder }: any) => <span>{placeholder}</span>,
-  SelectContent: ({ children }: any) => <>{children}</>,
-  SelectItem: ({ children, value }: any) => <option value={value}>{children}</option>,
-}))
+// @monobase/ui rendered as real components against happy-dom.
 
 vi.mock('@/components/patterns/date-picker', () => ({
   DateTimePicker: ({ value, onChange, ...rest }: any) => (

@@ -3,13 +3,7 @@ import { screen, waitFor } from '@testing-library/react'
 import { renderWithProviders } from '@/test/utils'
 import { OfficerDashboard } from './officer-dashboard'
 
-// Mock @tanstack/react-router
-vi.mock('@tanstack/react-router', () => ({
-  Link: ({ children, to }: { children: React.ReactNode; to: string }) => (
-    <a href={String(to)}>{children}</a>
-  ),
-  useParams: () => ({ orgSlug: 'test-org' }),
-}))
+// Router (Link, useParams) provided by global mock in test-setup-root.ts.
 
 // Mock session for greeting
 vi.mock('@monobase/sdk-ts/react/hooks/use-auth', () => ({
@@ -82,6 +76,7 @@ function setupApiResponses(overrides: {
 
 describe('OfficerDashboard', () => {
   beforeEach(() => {
+    ;(globalThis as any).__routerParams = { orgSlug: 'test-org' }
     vi.clearAllMocks()
   })
 

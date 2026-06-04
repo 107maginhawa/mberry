@@ -4,12 +4,7 @@ import { renderWithProviders } from '@/test/utils'
 import { ActionWidget, CreditRing } from './action-widget'
 import { Award } from 'lucide-react'
 
-// Mock @tanstack/react-router
-vi.mock('@tanstack/react-router', () => ({
-  Link: ({ children, to, params }: { children: React.ReactNode; to: string; params?: Record<string, string> }) => (
-    <a href={String(to)} data-params={JSON.stringify(params)}>{children}</a>
-  ),
-}))
+// Router (Link) provided by global mock in test-setup-root.ts.
 
 describe('ActionWidget', () => {
   const defaultProps = {

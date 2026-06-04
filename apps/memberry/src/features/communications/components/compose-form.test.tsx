@@ -4,34 +4,8 @@ import userEvent from '@testing-library/user-event'
 import { renderWithProviders } from '@/test/utils'
 import { ComposeForm } from './compose-form'
 
-// Mock @tanstack/react-router
-const mockNavigate = vi.fn()
-vi.mock('@tanstack/react-router', () => ({
-  useNavigate: () => mockNavigate,
-  useParams: () => ({ orgSlug: 'test-org' }),
-}))
-
-// Mock @monobase/ui
-vi.mock('@monobase/ui', () => ({
-  Input: ({ children, ...rest }: any) => <input {...rest} />,
-  Label: ({ children, htmlFor }: any) => <label htmlFor={htmlFor}>{children}</label>,
-  Textarea: ({ children, ...rest }: any) => <textarea {...rest} />,
-  Switch: ({ checked, onCheckedChange }: any) => (
-    <button
-      role="switch"
-      aria-checked={checked}
-      onClick={() => onCheckedChange(!checked)}
-      data-testid="switch"
-    >
-      {checked ? 'ON' : 'OFF'}
-    </button>
-  ),
-  Button: ({ children, onClick, type, disabled, variant, className }: any) => (
-    <button onClick={onClick} type={type} disabled={disabled} className={className} data-variant={variant}>
-      {children}
-    </button>
-  ),
-}))
+// Router (useNavigate, useParams) provided by global mock in test-setup-root.ts.
+// @monobase/ui rendered as real components against happy-dom.
 
 // Mock date-picker
 vi.mock('@/components/patterns/date-picker', () => ({
@@ -50,6 +24,7 @@ vi.mock('@/lib/api', () => ({
 
 describe('ComposeForm', () => {
   beforeEach(() => {
+    ;(globalThis as any).__routerParams = { orgSlug: 'test-org' }
     vi.clearAllMocks()
   })
 

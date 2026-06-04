@@ -3,22 +3,8 @@ import { screen, waitFor } from '@testing-library/react'
 import { renderWithProviders } from '@/test/utils'
 import { AnnouncementList } from './announcement-list'
 
-// Mock @monobase/ui
-vi.mock('@monobase/ui', () => ({
-  Skeleton: ({ className }: any) => <div data-testid="skeleton" className={className} />,
-  Input: ({ value, onChange, placeholder, className }: any) => (
-    <input value={value} onChange={onChange} placeholder={placeholder} className={className} />
-  ),
-  Button: ({ children, onClick, disabled, ...props }: any) => (
-    <button onClick={onClick} disabled={disabled} {...props}>{children}</button>
-  ),
-}))
-
-// Mock @tanstack/react-router
-vi.mock('@tanstack/react-router', () => ({
-  Link: ({ children, to, ...rest }: any) => <a href={String(to)} {...rest}>{children}</a>,
-  useParams: () => ({ orgSlug: 'test-org' }),
-}))
+// Router (Link, useParams) provided by global mock in test-setup-root.ts.
+// @monobase/ui rendered as real components against happy-dom.
 
 // Mock api
 vi.mock('@/lib/api', () => ({
@@ -32,6 +18,7 @@ const mockApiGet = api.get as ReturnType<typeof vi.fn>
 
 describe('AnnouncementList', () => {
   beforeEach(() => {
+    ;(globalThis as any).__routerParams = { orgSlug: 'test-org' }
     vi.clearAllMocks()
   })
 

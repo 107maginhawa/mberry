@@ -5,18 +5,7 @@ import { renderWithProviders } from '@/test/utils'
 import { NotificationPreferences } from '../components/notification-preferences'
 import { AnnouncementContent } from '../components/announcement-content'
 
-// Mock @monobase/ui Switch so role="switch" renders in happy-dom
-vi.mock('@monobase/ui', async (importOriginal) => {
-  const actual = await importOriginal() as any
-  return {
-    ...actual,
-    Switch: ({ checked, onCheckedChange, id, ...props }: any) => (
-      <button role="switch" id={id} aria-checked={!!checked} onClick={() => onCheckedChange?.(!checked)} {...props}>
-        {checked ? 'ON' : 'OFF'}
-      </button>
-    ),
-  }
-})
+// @monobase/ui rendered as real components against happy-dom.
 
 // Mock api module
 vi.mock('@/lib/api', () => ({

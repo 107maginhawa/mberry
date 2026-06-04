@@ -7,11 +7,7 @@ vi.mock('@/components/motion/glass-card', () => ({
   GlassCard: ({ children, className }: any) => <div className={className}>{children}</div>,
 }))
 
-vi.mock('@monobase/ui', () => ({
-  Button: ({ children, onClick, ...props }: any) => <button onClick={onClick} {...props}>{children}</button>,
-  Input: ({ onChange, value, ...props }: any) => <input value={value} onChange={onChange} {...props} />,
-  Textarea: ({ onChange, value, ...props }: any) => <textarea value={value} onChange={onChange} {...props} />,
-}))
+// @monobase/ui rendered as real components against happy-dom.
 
 describe('TemplateSplitEditor', () => {
   test('AC-001: renders split layout with editor and preview panes', () => {

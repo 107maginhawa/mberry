@@ -3,12 +3,7 @@ import { screen } from '@testing-library/react'
 import { renderWithProviders } from '@/test/utils'
 import { OrgAnnouncements } from './org-announcements'
 
-// Mock @tanstack/react-router (unused but may be transitive)
-vi.mock('@tanstack/react-router', () => ({
-  Link: ({ children, to }: { children: React.ReactNode; to: string }) => (
-    <a href={String(to)}>{children}</a>
-  ),
-}))
+// Router (Link) provided by global mock in test-setup-root.ts.
 
 describe('OrgAnnouncements', () => {
   test('renders Org News heading', () => {

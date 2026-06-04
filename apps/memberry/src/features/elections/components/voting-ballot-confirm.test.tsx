@@ -12,22 +12,8 @@ vi.mock('@/lib/api', () => ({
   api: { get: vi.fn() },
 }))
 
-vi.mock('@monobase/ui', () => ({
-  Button: ({ children, onClick, disabled, variant }: any) => (
-    <button onClick={onClick} disabled={disabled} data-variant={variant}>{children}</button>
-  ),
-  Skeleton: ({ className }: any) => <div className={className} data-testid="skeleton" />,
-  Dialog: ({ children, open }: any) => (open ? <div role="dialog">{children}</div> : null),
-  DialogContent: ({ children, className }: any) => <div className={className}>{children}</div>,
-  DialogHeader: ({ children }: any) => <div>{children}</div>,
-  DialogTitle: ({ children }: any) => <h2>{children}</h2>,
-  DialogFooter: ({ children }: any) => <div>{children}</div>,
-}))
-
-vi.mock('@tanstack/react-router', () => ({
-  useNavigate: () => vi.fn(),
-  useParams: () => ({ orgSlug: 'test-org' }),
-}))
+// Router (useNavigate, useParams) provided by global mock in test-setup-root.ts.
+// @monobase/ui rendered as real components against happy-dom.
 
 vi.mock('sonner', () => ({
   toast: { success: vi.fn(), error: vi.fn() },
@@ -58,6 +44,7 @@ const ELECTION_DATA = {
 
 describe('VotingBallot — confirm dialog', () => {
   beforeEach(() => {
+    ;(globalThis as any).__routerParams = { orgSlug: 'test-org' }
     vi.clearAllMocks()
     mockGetElectionOptions.mockReturnValue({
       queryKey: ['election', 'elec-1'],

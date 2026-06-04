@@ -4,30 +4,8 @@ import { renderWithProviders } from '@/test/utils'
 import { EventList } from './event-list'
 
 // [Tier-F] removed local SDK mock; using global stub in test-setup-root.ts
-vi.mock('@monobase/ui', () => ({
-  Input: (props: any) => <input {...props} />,
-  Skeleton: ({ className }: any) => <div className={className} data-testid="skeleton" />,
-  Button: ({ children, onClick, disabled, ...props }: any) => (
-    <button onClick={onClick} disabled={disabled} {...props}>{children}</button>
-  ),
-  Select: ({ children, value, onValueChange: _onValueChange }: any) => (
-    <div data-testid="select" data-value={value}>{children}</div>
-  ),
-  SelectContent: ({ children }: any) => <div>{children}</div>,
-  SelectItem: ({ children, value }: any) => <div data-value={value}>{children}</div>,
-  SelectTrigger: ({ children }: any) => <div>{children}</div>,
-  SelectValue: ({ placeholder }: any) => <span>{placeholder}</span>,
-  DropdownMenu: ({ children }: any) => <div>{children}</div>,
-  DropdownMenuTrigger: ({ children }: any) => <div>{children}</div>,
-  DropdownMenuContent: ({ children }: any) => <div>{children}</div>,
-  DropdownMenuItem: ({ children, onClick }: any) => <div onClick={onClick}>{children}</div>,
-}))
-
-vi.mock('@tanstack/react-router', () => ({
-  useNavigate: () => vi.fn(),
-  useParams: () => ({ orgSlug: 'test-org' }),
-  Link: ({ children, to, className }: any) => <a href={String(to)} className={className}>{children}</a>,
-}))
+// Router (Link, useParams, useNavigate) provided by global mock in test-setup-root.ts.
+// @monobase/ui rendered as real components against happy-dom.
 
 vi.mock('./event-calendar', () => ({
   EventCalendar: () => <div data-testid="event-calendar" />,
@@ -57,6 +35,7 @@ const mockCancelMutation = cancelEventMutation as ReturnType<typeof vi.fn>
 
 describe('EventList', () => {
   beforeEach(() => {
+    ;(globalThis as any).__routerParams = { orgSlug: 'test-org' }
     vi.clearAllMocks()
     mockCancelMutation.mockReturnValue({ mutationFn: vi.fn().mockResolvedValue({}) })
   })

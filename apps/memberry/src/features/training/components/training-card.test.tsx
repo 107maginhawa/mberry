@@ -4,10 +4,7 @@ import userEvent from '@testing-library/user-event'
 import { renderWithProviders } from '@/test/utils'
 import { TrainingCard } from './training-card'
 
-vi.mock('@tanstack/react-router', () => ({
-  Link: ({ children, to, ...rest }: any) => <a href={String(to)} {...rest}>{children}</a>,
-  useParams: () => ({ orgSlug: 'test-org' }),
-}))
+// Router (Link, useParams) provided by global mock in test-setup-root.ts.
 
 describe('TrainingCard', () => {
   const baseTraining = {
@@ -24,6 +21,7 @@ describe('TrainingCard', () => {
   }
 
   beforeEach(() => {
+    ;(globalThis as any).__routerParams = { orgSlug: 'test-org' }
     vi.clearAllMocks()
   })
 

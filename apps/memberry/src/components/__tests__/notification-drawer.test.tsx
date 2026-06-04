@@ -8,18 +8,7 @@ import { NotificationDrawer } from '../notification-drawer'
 const mockNavigate = vi.fn()
 ;(globalThis as any).__routerNavigate = mockNavigate
 
-// Mock @monobase/ui
-vi.mock('@monobase/ui', () => ({
-  Button: ({ children, onClick, disabled, className, title }: any) => (
-    <button onClick={onClick} disabled={disabled} className={className} title={title}>
-      {children}
-    </button>
-  ),
-  Sheet: ({ children, open }: any) => open ? <div data-testid="sheet">{children}</div> : null,
-  SheetContent: ({ children }: any) => <div data-testid="sheet-content">{children}</div>,
-  SheetHeader: ({ children, className }: any) => <div className={className}>{children}</div>,
-  SheetTitle: ({ children, className }: any) => <h2 className={className}>{children}</h2>,
-}))
+// @monobase/ui rendered as real components against happy-dom.
 
 // Mock lucide-react icons
 vi.mock('lucide-react', () => ({

@@ -9,15 +9,7 @@ import { DeliveryFunnel } from '../components/delivery-funnel'
 // Mocks
 // ---------------------------------------------------------------------------
 
-vi.mock('@monobase/ui', () => ({
-  Badge: ({ children, ...props }: any) => <span {...props}>{children}</span>,
-  Label: ({ children, ...props }: any) => <label {...props}>{children}</label>,
-  Button: ({ children, onClick, disabled, ...props }: any) => (
-    <button onClick={onClick} disabled={disabled} {...props}>
-      {children}
-    </button>
-  ),
-}))
+// @monobase/ui rendered as real components against happy-dom.
 
 vi.mock('@/components/patterns/page-header', () => ({
   PageHeader: ({ title, subtitle }: any) => (

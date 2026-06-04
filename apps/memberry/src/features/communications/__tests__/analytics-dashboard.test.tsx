@@ -5,9 +5,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { DeliveryFunnel } from '../components/delivery-funnel'
 
 // Mocks
-vi.mock('@monobase/ui', () => ({
-  Badge: ({ children, ...props }: any) => <span {...props}>{children}</span>,
-}))
+// @monobase/ui rendered as real components against happy-dom.
 
 vi.mock('@/components/patterns/page-header', () => ({
   PageHeader: ({ title }: any) => <h1>{title}</h1>,
@@ -30,10 +28,7 @@ vi.mock('@/lib/api', () => ({
   api: { get: (...args: any[]) => mockGet(...args) },
 }))
 
-vi.mock('@tanstack/react-router', () => ({
-  createFileRoute: () => ({ component: undefined }),
-  Link: ({ children }: any) => <span>{children}</span>,
-}))
+// Router (Link, createFileRoute) provided by global mock in test-setup-root.ts.
 
 function wrapper({ children }: { children: React.ReactNode }) {
   const qc = new QueryClient({ defaultOptions: { queries: { retry: false } } })
