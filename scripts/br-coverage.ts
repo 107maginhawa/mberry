@@ -72,6 +72,12 @@ const KNOWN_INCOMPLETE: Set<string> = new Set([
            // the comparator, not observable at the wire layer. Backend test
            // in middleware/auth.test.ts asserts crypto.timingSafeEqual is the
            // primitive and that near-miss tokens reject identically.
+  "BR-42", // Training Type Restricted to Platform-Defined Types: enforced at
+           // request-validation layer via Zod enum on
+           // TrainingCreateRequestSchema. Backend test in
+           // createTraining.test.ts exercises every valid type + unknown +
+           // missing. Contract/E2E would only re-test the Zod enum reach
+           // (always 400 VALIDATION_ERROR) — no additional coverage gained.
 ]);
 
 // ── Coverage derivation ──────────────────────────────────
