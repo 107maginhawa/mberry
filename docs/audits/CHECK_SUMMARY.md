@@ -36,9 +36,9 @@ last-modified-by: /oli-check --auto fresh (regen 4 dims, carry 6)
 
 ## GATE VERDICT
 
-`GATE: WARN-WITH-REAL-FINDINGS` (reclassified 2026-06-04T04:00 after first-principles investigation)
+`GATE: WARN-WITH-REAL-FINDINGS` (reclassified 2026-06-04T04:00, demoted further to CNF-P1-001 at T05:30 after bulk-cleanup landed)
 
-**Driver:** **CNF-P0-001** (Confidence dim, **pre-existing-unmasked** class — NOT regression). 53 memberry FE component-test failures (was 56; R1 fix `c7fad68d` cleared 3 formatCents tests).
+**Driver:** **CNF-P1-001** (Confidence dim, **pre-existing-unmasked + platform-constraint-bounded** class). 40 memberry FE component-test failures (was 56 at session start; 16 cleared via R1 mock leak fix `c7fad68d` + OrgProvider rewrite `7bb872a7` + EventCard cleanup `6e33704d` + bulk vi.mock + Skeleton default testid `bd7c4eaf`). Remaining 40 fails bounded by Bun mock-isolation limit (tests in `*-list.test.tsx` mock sibling card/form components, polluting process-global module registry for those components' own test files).
 
 **Reclassification rationale:** Initial Confidence subagent attributed CNF-P0-001 to commit `9fbcb497` (RoundActionButton primitive refactor). Investigation proves false:
 - Prior cycle (sha `3f0dae76`) ran 6048 tests / 0 fail
@@ -92,7 +92,7 @@ Pipeline UNBLOCKED for ship of non-test changes. Test-suite repair tracked as 6 
 | Traceability | PASS | `docs/trace/TRACE_REPORT.md` (rev 10) | hours-old (carry, inputs unchanged) | 0/0/0/9 P3 terminal (no spec or route delta to invalidate) | 0 |
 | Discovery | PASS | `docs/audits/codebase-map/CODE_MODULE_MAP.md` | current (map@64b96139) | 1420 files (+9), 32 modules, frameworks [generic, hono, react] | 0 |
 | Compliance | PASS (9.5/10) | `docs/audits/COMPLIANCE_REPORT.md` + `.json` | hours-old (carry, api_surface + spec_trace unchanged) | 0 P0, 0 P1; spec-trace 455/455; auth_drift=[]; code_only=[]; spec_only=[] | 3 |
-| Confidence | **WARN (8.55/10)** | `docs/audits/CONFIDENCE_REPORT.md` | current (map@64b96139) | **CNF-P0-001 NEW** (56 memberry test failures, REGRESSION); 6712 pass / 56 fail / 6891 total; §4.5 0/136; §5.5 0.9427 | 9 |
+| Confidence | **WARN (CNF-P1-001)** | `docs/audits/CONFIDENCE_REPORT.md` | current (map@bd7c4eaf) | **CNF-P1-001 demoted** (40 memberry test failures, pre-existing-unmasked + Bun mock-isolation bounded); 6733 pass / 40 fail / 6886 total; pass-rate 0.9942; §4.5 0/136; §5.5 0.9427 | 9 |
 | Enforcement | PASS | `docs/audits/ENFORCEMENT_REPORT.md` + `.json` + COVERAGE | current (map@64b96139) | 0 P0, 1 P1 EM-M19-future01 KNOWN-future CARRIED; baseline v58 holds; 52 P2 / 51 P3 actionable | 0 |
 | Journeys | PASS | `docs/audits/JOURNEY_COVERAGE_REPORT.md` | hours-old (carry, route map unchanged) | 151 routes; 0/0/0/4 P3 KNOWN-DEFERRED | 0 |
 | Runtime | PASS (Tier-3 promoted, 2026-06-03 snapshot) | `docs/audits/RUNTIME_EXEC_REPORT.md` | days-old (Tier-3 evidence carry per row 18 remediation b) | 0 ER-P0 / 0 ER-P1; 1 P2 informational | 0 |

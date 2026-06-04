@@ -1,31 +1,34 @@
-<!-- oli:confidence-report v1.7 | based-on: map@64b96139a21933afc750d90d3f76992d180fec54 | last-modified: 2026-06-04T11:00:00Z | last-modified-by: /oli-check confidence (subagent re-execution) | dimension: confidence | supersedes: rev 9 (map@3f0dae76) | method: engine-map v6 graph signals (§4.5 loading-hygiene, §5.5 fe-be density via sdk_op_edges) + static assertion/mock/flake/data scans + §6.5 SUT-binding + §6.6 probe-skip + TDD-proof inventory + compliance behavior inventory | trigger: post-rebaseline-007 dim re-run -->
+<!-- oli:confidence-report v1.7 | based-on: map@bd7c4eaf4cbc8d9fcd4b0e8917a7d3d430a7eeb2 | last-modified: 2026-06-04T05:30:00Z | last-modified-by: /oli-check confidence (post-bulk-cleanup re-execution) | dimension: confidence | supersedes: rev 10 (map@64b96139) | method: engine-map v6 graph signals (§4.5 loading-hygiene, §5.5 fe-be density via sdk_op_edges) + static assertion/mock/flake/data scans + §6.5 SUT-binding + §6.6 probe-skip + TDD-proof inventory + compliance behavior inventory | trigger: post-bulk-vi.mock-cleanup dim re-run -->
 
 # Confidence Stack Report
 
-**Date:** 2026-06-04 (rev 10 — confidence dim re-execution against map@64b96139)
+**Date:** 2026-06-04 (rev 11 — confidence dim re-execution against map@bd7c4eaf)
 **Team size:** small
 **Layers audited:** 1-4 (static analysis)
 **Layers deferred:** 5-6 (require CI/CD/runtime evidence)
 **Prior audits used:** docs/audits/COMPLIANCE_REPORT.md (51 BRs, 428-endpoint permission inventory), docs/audits/EXISTING_CODEBASE_ADOPTION_AUDIT.md, docs/product/EVENT_CONTRACTS.md (40 events), docs/product/modules/*/API_CONTRACTS.md (10 modules)
-**Supersedes:** rev 9 (map@3f0dae76)
+**Supersedes:** rev 10 (map@64b96139)
 
-## VERDICT: WARN
+## VERDICT: WARN (CNF-P1-001 — test-suite repair backlog)
 
-**Reason:** Backend + admin + sdk suites green (6198 pass / 0 fail). Memberry FE component suite regressed: **56 fail / 514 pass / 570 total** — fallout from Step-3 `RoundActionButton` primitive refactor (9fbcb497) and 12 redundant route-annotation removals (87c7b57d). Failures are deterministic UI-text/role/label assertion mismatches plus one `ApiError` re-export break in `apps/memberry/src/lib/api.ts`. No infra failure (test-infra fix 082557f4 confirmed working — root `bunfig.toml` preload loads happy-dom + jest-dom matchers; per-app `test` scripts route through root and pass for admin/sdk).
+**Reason:** Backend + admin + sdk suites green (6311 pass / 0 fail). Memberry FE component suite still WARN at **535 pass / 40 fail / 575 total** (pass-rate 0.9304 within memberry; aggregate pass-rate **0.9942**). Reframe vs rev 10: original CNF-P0-001 P0 attribution to commit `9fbcb497` (RoundActionButton) was wrong — first-principles investigation in commit `79edb9dd` proved the 56 fails were test-scope expansion from test-infra fix `082557f4` (720 newly-executed tests routed through root preload). 16 of the 56 fails cleared this session (R1 mock-leak fix `c7fad68d` + OrgProvider rewrite `7bb872a7` + EventCard cleanup `6e33704d` + bulk vi.mock + Skeleton testid `bd7c4eaf`). Remaining **40 fails are bounded by Bun mock-isolation limit**: tests in `*-list.test.tsx` files mock their sibling card/form components (e.g. `event-list.test` mocks `./event-card`), which pollutes the process-global module registry for those components' own test files. Per CHECK_LEARNINGS row 49 surface_class rule: `pre-existing-unmasked` + `platform-constraint-bounded` → demote CNF-P0-001 → **CNF-P1-001** (non-gate-blocking; tracked-as-debt). Fundamental fix needs per-file process isolation (test harness config) OR rewrite the sibling-mock pattern (large refactor) — deferred as separate phase.
 
 ## Run Context
 
-- **Codebase map:** `map@64b96139` (engine v0.1.0, registry version present, FRESH per `/oli-check` map-staleness gate; 1420 files, frameworks: generic/hono/react).
-- **Git HEAD:** `64b96139` (`chore(audit): rebaseline-007 — post-Tier-F polish (annotations 22→15; test-infra fixed)`).
+- **Codebase map:** `map@bd7c4eaf` (engine v0.1.0, FRESH; auto-rescanned this cycle; fields_unavailable: []).
+- **Git HEAD:** `bd7c4eaf` (`fix(test): bulk vi.mock cleanup + Skeleton default testid`).
+- **Commits since prior cycle (map@64b96139):** 7 — R1 mock leak fix, audit reclassification, OTel + uuid + esbuild CVE clearance, OrgProvider rewrite, EventCard cleanup, antipattern doc, bulk vi.mock cleanup + Skeleton testid.
 - **Test runs (this cycle):**
-  - Backend: `cd services/api-ts && bun test` → **6048 pass / 0 fail / 93 skip / 20 todo / 12489 expect() calls / 6161 tests / 548 files / 18.91s**
-  - Admin: `bun test apps/admin/src` (via root preload) → **57 pass / 0 fail / 159 expect() / 57 tests / 12 files / 388ms**
-  - Memberry: `bun test apps/memberry/src` (via root preload) → **514 pass / 56 fail / 2 errors / 1217 expect() / 570 tests / 97 files / 23.14s**
-  - SDK: `bun test packages/sdk-ts/src` → **93 pass / 0 fail / 145 expect() / 93 tests / 5 files / 154ms**
-  - **Aggregate: 6712 pass / 56 fail / 6891 tests** (pass-rate 0.9919). All 56 fails localized to `apps/memberry/src/**/__tests__/*.test.tsx` — no backend, admin, or sdk regressions.
-- **Typecheck:** not re-run this cycle.
-- **Engine signal lift:** `CODE_IMPORT_GRAPH.sdk_op_edges[]` present (242 wire-level edges / 151 distinct operations / 115 source files; identical to rev 9 — no FE→BE topology change).
-- **§5.5 cap LIFTED** — density 0.9427 ≥ 0.90 threshold, no Layer-2 cap. Raw L2 = 9 stands.
+  - Backend: `cd services/api-ts && bun test` → **6048 pass / 0 fail / 93 skip / 20 todo / 12489 expect() / 6161 tests / 548 files / 18.85s**
+  - Admin: `cd apps/admin && bun run test` → **57 pass / 0 fail / 159 expect() / 57 tests / 12 files / 404ms**
+  - Memberry: `cd apps/memberry && bun run test` → **535 pass / 40 fail / 1 error / 1146 expect() / 575 tests / 97 files / 17.49s**
+  - SDK: `cd packages/sdk-ts && bun test` → **93 pass / 0 fail / 145 expect() / 93 tests / 5 files / 26ms**
+  - **Aggregate: 6733 pass / 40 fail / 6886 tests** (pass-rate **0.9942**, +21 pass / -16 fail vs rev 10). All 40 fails localized to `apps/memberry/src/**/__tests__/*.test.tsx` — no backend, admin, or sdk regressions.
+- **Typecheck:** PASS all 5 workspaces (pre-commit hook gate on every commit this session).
+- **bun audit:** 0 vulnerabilities (5 CVEs cleared via commit `35232c7c`).
+- **Engine signal:** `CODE_IMPORT_GRAPH.sdk_op_edges[]` = **242 edges / 151 distinct ops** (unchanged from rev 10 — no FE→BE topology change).
+- **§4.5 loading-state hygiene:** **0 violations** across 136 components carrying the field (363 total components in registry).
+- **§5.5 fe_be_edge_density:** **0.9427** (cap LIFTED, ≥ 0.90 threshold; no Layer-2 cap). Raw L2 = 9 stands.
 
 ## Trust Banner (R1 — provenance + confidence-to-gate)
 
