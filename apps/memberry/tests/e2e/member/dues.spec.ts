@@ -1,15 +1,13 @@
 import { test, expect } from '../helpers/test-fixture'
-import { signIn } from '../helpers/auth'
 import { SEED_MEMBER_EMAIL, TEST_PASSWORD } from '../helpers/test-config'
+import { authStateFile } from '../helpers/auth-state'
 
+
+test.use({ storageState: authStateFile('member') })
 const ORG_ID = 'ed8e3a96-8126-4341-be42-e6eb7940c562'
 
 test.describe('Member Dues (/org/$orgId/dues)', () => {
-  test.beforeEach(async ({ page }) => {
-    await signIn(page, SEED_MEMBER_EMAIL, TEST_PASSWORD)
-  })
-
-  test('shows My Dues heading', async ({ page }) => {
+test('shows My Dues heading', async ({ page }) => {
     await page.goto(`/org/${ORG_ID}/dues`)
     await expect(page.getByRole('heading', { name: 'My Dues', level: 1 })).toBeVisible({ timeout: 10000 })
   })

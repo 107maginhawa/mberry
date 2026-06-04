@@ -1,15 +1,13 @@
 import { test, expect } from './helpers/test-fixture'
-import { signIn } from './helpers/auth'
 import { SEED_OFFICER_EMAIL, TEST_PASSWORD } from './helpers/test-config'
+import { authStateFile } from './helpers/auth-state'
 
+
+test.use({ storageState: authStateFile('officer') })
 const ORG_ID = 'ed8e3a96-8126-4341-be42-e6eb7940c562'
 
 test.describe('Feedback: Officer Surveys', () => {
-  test.beforeEach(async ({ page }) => {
-    await signIn(page, SEED_OFFICER_EMAIL, TEST_PASSWORD)
-  })
-
-  test('surveys page loads without error', async ({ page }) => {
+test('surveys page loads without error', async ({ page }) => {
     await page.goto(`/org/${ORG_ID}/officer/surveys`)
     // Should NOT show error state
     await expect(page.getByText('Failed to load surveys')).not.toBeVisible()

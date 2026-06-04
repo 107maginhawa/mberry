@@ -1,16 +1,14 @@
 // Business Rules: [BR-02] [BR-04] [BR-05] [BR-10] [BR-30] [BR-31]
 import { test, expect } from '../helpers/test-fixture'
-import { signIn } from '../helpers/auth'
 import { SEED_OFFICER_EMAIL, TEST_PASSWORD } from '../helpers/test-config'
+import { authStateFile } from '../helpers/auth-state'
 
+
+test.use({ storageState: authStateFile('officer') })
 const ORG_ID = 'ed8e3a96-8126-4341-be42-e6eb7940c562'
 
 test.describe('Officer Settings — Dues Config', () => {
-  test.beforeEach(async ({ page }) => {
-    await signIn(page, SEED_OFFICER_EMAIL, TEST_PASSWORD)
-  })
-
-  test('dues config page shows form with amount field', async ({ page }) => {
+test('dues config page shows form with amount field', async ({ page }) => {
     await page.goto(`/org/${ORG_ID}/officer/settings/dues`)
     await expect(
       page.getByRole('heading', { name: /dues configuration/i }),
@@ -23,11 +21,7 @@ test.describe('Officer Settings — Dues Config', () => {
 })
 
 test.describe('Officer Settings — Fund Allocation', () => {
-  test.beforeEach(async ({ page }) => {
-    await signIn(page, SEED_OFFICER_EMAIL, TEST_PASSWORD)
-  })
-
-  test('fund allocation page shows 3 funds totaling 100%', async ({ page }) => {
+test('fund allocation page shows 3 funds totaling 100%', async ({ page }) => {
     await page.goto(`/org/${ORG_ID}/officer/settings/funds`)
     await expect(
       page.getByRole('heading', { name: /fund allocation/i }),
@@ -54,11 +48,7 @@ test.describe('Officer Settings — Fund Allocation', () => {
 })
 
 test.describe('Officer Settings — Membership Categories', () => {
-  test.beforeEach(async ({ page }) => {
-    await signIn(page, SEED_OFFICER_EMAIL, TEST_PASSWORD)
-  })
-
-  test('membership categories page renders', async ({ page }) => {
+test('membership categories page renders', async ({ page }) => {
     await page.goto(`/org/${ORG_ID}/officer/settings/membership-categories`)
     // Page should render with heading or category content
     const hasHeading = await page.getByRole('heading').first().isVisible().catch(() => false)
@@ -69,11 +59,7 @@ test.describe('Officer Settings — Membership Categories', () => {
 })
 
 test.describe('Officer Settings — Chapters', () => {
-  test.beforeEach(async ({ page }) => {
-    await signIn(page, SEED_OFFICER_EMAIL, TEST_PASSWORD)
-  })
-
-  test('chapters page shows empty state', async ({ page }) => {
+test('chapters page shows empty state', async ({ page }) => {
     await page.goto(`/org/${ORG_ID}/officer/settings/chapters`)
     const hasEmptyState = await page.getByText(/no chapter|empty|none|get started|add.*chapter/i).first().isVisible().catch(() => false)
     const hasHeading = await page.getByRole('heading', { name: /chapters?|affiliations?/i }).first().isVisible().catch(() => false)
@@ -82,11 +68,7 @@ test.describe('Officer Settings — Chapters', () => {
 })
 
 test.describe('Officer Settings — Admin Features', () => {
-  test.beforeEach(async ({ page }) => {
-    await signIn(page, SEED_OFFICER_EMAIL, TEST_PASSWORD)
-  })
-
-  test('[BR-10] admin features page renders', async ({ page }) => {
+test('[BR-10] admin features page renders', async ({ page }) => {
     // Just verify the settings area is accessible for officers
     await page.goto(`/org/${ORG_ID}/officer/settings/org`)
     const hasContent = await page.locator('main').isVisible()
@@ -95,11 +77,7 @@ test.describe('Officer Settings — Admin Features', () => {
 })
 
 test.describe('Officer Settings — Gateway', () => {
-  test.beforeEach(async ({ page }) => {
-    await signIn(page, SEED_OFFICER_EMAIL, TEST_PASSWORD)
-  })
-
-  test('[BR-31] settings page renders gateway section', async ({ page }) => {
+test('[BR-31] settings page renders gateway section', async ({ page }) => {
     await page.goto(`/org/${ORG_ID}/officer/settings/gateway`)
     // Gateway configuration UI should render — heading, form, or empty state
     const hasHeading = await page.getByRole('heading', { name: /gateway|payment|stripe/i }).first().isVisible().catch(() => false)

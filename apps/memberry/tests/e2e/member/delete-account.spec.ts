@@ -1,11 +1,12 @@
 // M-25: Account deletion
 // Verifies the delete account flow in Settings > General > Danger Zone
 import { test, expect } from '../helpers/test-fixture'
-import { signInAsMember } from '../helpers/auth'
+import { authStateFile } from '../helpers/auth-state'
 
+
+test.use({ storageState: authStateFile('member') })
 test.describe('M-25: Delete Account', () => {
   test.beforeEach(async ({ page }) => {
-    await signInAsMember(page)
     await page.goto('/my/settings')
   })
 

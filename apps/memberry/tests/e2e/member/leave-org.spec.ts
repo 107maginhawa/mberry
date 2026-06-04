@@ -1,11 +1,12 @@
 // M-27: Voluntary organization departure
 // Verifies the "Leave" button, confirmation dialog, and termination flow
 import { test, expect } from '../helpers/test-fixture'
-import { signInAsMember } from '../helpers/auth'
+import { authStateFile } from '../helpers/auth-state'
 
+
+test.use({ storageState: authStateFile('member') })
 test.describe('M-27: Leave Organization', () => {
   test.beforeEach(async ({ page }) => {
-    await signInAsMember(page)
     await page.goto('/my/organizations')
   })
 

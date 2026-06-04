@@ -1,16 +1,14 @@
 // Business Rules: [BR-04] [BR-05] [BR-06] [BR-08] [BR-32]
 import { test, expect } from '../helpers/test-fixture'
-import { signIn } from '../helpers/auth'
 import { SEED_OFFICER_EMAIL, TEST_PASSWORD } from '../helpers/test-config'
+import { authStateFile } from '../helpers/auth-state'
 
+
+test.use({ storageState: authStateFile('officer') })
 const ORG_ID = 'ed8e3a96-8126-4341-be42-e6eb7940c562'
 
 test.describe('Officer Payments', () => {
-  test.beforeEach(async ({ page }) => {
-    await signIn(page, SEED_OFFICER_EMAIL, TEST_PASSWORD)
-  })
-
-  test('heading "Dues & Payments" is visible', async ({ page }) => {
+test('heading "Dues & Payments" is visible', async ({ page }) => {
     await page.goto(`/org/${ORG_ID}/officer/payments`)
     await expect(
       page.getByRole('heading', { name: /dues.*payments?|payments?/i }).first()

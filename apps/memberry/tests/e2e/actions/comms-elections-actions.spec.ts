@@ -4,15 +4,14 @@ import { expectVisibleAfterReload, expectVisibleOnPage } from '../helpers/persis
 import { signIn } from '../helpers/auth'
 import { cleanupAnnouncements } from '../helpers/fixtures'
 import { SEED_OFFICER_EMAIL, TEST_PASSWORD } from '../helpers/test-config'
+import { authStateFile } from '../helpers/auth-state'
 
+
+test.use({ storageState: authStateFile('officer') })
 const ORG_ID = 'ed8e3a96-8126-4341-be42-e6eb7940c562'
 
 test.describe('Communications Actions', () => {
-  test.beforeEach(async ({ page }) => {
-    await signIn(page, SEED_OFFICER_EMAIL, TEST_PASSWORD)
-  })
-
-  test('announcement list shows real announcements', async ({ page }) => {
+test('announcement list shows real announcements', async ({ page }) => {
     await page.goto(`/org/${ORG_ID}/officer/communications`)
 
     await expect(
@@ -75,11 +74,7 @@ test.describe('Communications Actions', () => {
 })
 
 test.describe('Elections Actions', () => {
-  test.beforeEach(async ({ page }) => {
-    await signIn(page, SEED_OFFICER_EMAIL, TEST_PASSWORD)
-  })
-
-  test('elections list shows elections', async ({ page }) => {
+test('elections list shows elections', async ({ page }) => {
     await page.goto(`/org/${ORG_ID}/officer/elections`)
 
     await expect(page.getByText(/Elections/i).first()).toBeVisible({ timeout: 10000 })

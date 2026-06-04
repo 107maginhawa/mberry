@@ -1,19 +1,16 @@
 // Business Rules: [BR-15] [BR-27]
 // Upgraded from heading-only to behavioral (Phase 31)
 import { test, expect } from '../helpers/test-fixture'
-import { signIn } from '../helpers/auth'
 import { SEED_MEMBER_EMAIL, TEST_PASSWORD } from '../helpers/test-config'
+import { authStateFile } from '../helpers/auth-state'
 
+
+test.use({ storageState: authStateFile('member') })
 const MEMBER_EMAIL = SEED_MEMBER_EMAIL
 const MEMBER_PASSWORD = TEST_PASSWORD
 
 test.describe('Member Events (/my/events)', () => {
-  test.beforeEach(async ({ page }) => {
-    await signIn(page, MEMBER_EMAIL, MEMBER_PASSWORD)
-    await page.goto('/my/events')
-  })
-
-  test('shows heading and stat cards with numeric values', async ({ page }) => {
+test('shows heading and stat cards with numeric values', async ({ page }) => {
     await expect(
       page.getByRole('heading', { name: 'My Events' }),
     ).toBeVisible({ timeout: 10000 })

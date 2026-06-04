@@ -1,13 +1,11 @@
 import { test, expect } from './helpers/test-fixture'
-import { signIn } from './helpers/auth'
 import { SEED_MEMBER_EMAIL, TEST_PASSWORD } from './helpers/test-config'
+import { authStateFile } from './helpers/auth-state'
 
+
+test.use({ storageState: authStateFile('member') })
 test.describe('Feedback: Member Surveys', () => {
-  test.beforeEach(async ({ page }) => {
-    await signIn(page, SEED_MEMBER_EMAIL, TEST_PASSWORD)
-  })
-
-  test('my surveys page loads without error', async ({ page }) => {
+test('my surveys page loads without error', async ({ page }) => {
     await page.goto('/my/surveys')
     // Should NOT show error state
     await expect(page.getByText('Failed to load surveys')).not.toBeVisible()

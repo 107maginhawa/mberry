@@ -1,17 +1,15 @@
 // Action-Contract Tests: Officers + Admin
 import { test, expect } from '../helpers/test-fixture'
 import { expectVisibleAfterReload, expectVisibleOnPage } from '../helpers/persistence'
-import { signIn } from '../helpers/auth'
 import { SEED_OFFICER_EMAIL, TEST_PASSWORD } from '../helpers/test-config'
+import { authStateFile } from '../helpers/auth-state'
 
+
+test.use({ storageState: authStateFile('officer') })
 const ORG_ID = 'ed8e3a96-8126-4341-be42-e6eb7940c562'
 
 test.describe('Officer Management Actions', () => {
-  test.beforeEach(async ({ page }) => {
-    await signIn(page, SEED_OFFICER_EMAIL, TEST_PASSWORD)
-  })
-
-  test('officers page shows real officer names and positions', async ({ page }) => {
+test('officers page shows real officer names and positions', async ({ page }) => {
     await page.goto(`/org/${ORG_ID}/officer/officers`)
 
     await expect(page.getByText(/Officer Management/i)).toBeVisible({ timeout: 10000 })

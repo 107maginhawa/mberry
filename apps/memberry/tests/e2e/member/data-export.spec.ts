@@ -1,16 +1,14 @@
 import { test, expect } from '../helpers/test-fixture'
-import { signIn } from '../helpers/auth'
 import { SEED_MEMBER_EMAIL, TEST_PASSWORD } from '../helpers/test-config'
+import { authStateFile } from '../helpers/auth-state'
 
+
+test.use({ storageState: authStateFile('member') })
 const MEMBER_EMAIL = SEED_MEMBER_EMAIL
 const MEMBER_PASSWORD = TEST_PASSWORD
 
 test.describe('Data Export (/settings/account)', () => {
-  test.beforeEach(async ({ page }) => {
-    await signIn(page, MEMBER_EMAIL, MEMBER_PASSWORD)
-  })
-
-  test('shows "Export My Data" card', async ({ page }) => {
+test('shows "Export My Data" card', async ({ page }) => {
     await page.goto('/settings/account')
     await expect(
       page.getByRole('heading', { name: /export my data/i }),

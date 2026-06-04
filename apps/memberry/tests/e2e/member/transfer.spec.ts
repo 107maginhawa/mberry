@@ -1,11 +1,12 @@
 // M-16: Transfer membership between organizations
 // Verifies the transfer dialog UI, input validation, and form submission
 import { test, expect } from '../helpers/test-fixture'
-import { signInAsMember } from '../helpers/auth'
+import { authStateFile } from '../helpers/auth-state'
 
+
+test.use({ storageState: authStateFile('member') })
 test.describe('M-16: Transfer Membership', () => {
   test.beforeEach(async ({ page }) => {
-    await signInAsMember(page)
     await page.goto('/my/organizations')
   })
 

@@ -50,6 +50,20 @@ const ROLE_MAP: Record<string, 'officer' | 'member' | 'treasurer' | 'secretary' 
   signInAsSociety: 'society',
 }
 
+// `signIn(page, SEED_X_EMAIL, ...)` → role lookup. Maps the email-constant
+// name (NOT the value) to a role. Same source of truth as helpers/auth.ts.
+const RAW_SIGNIN_EMAIL_TO_ROLE: Record<string, 'officer' | 'member' | 'treasurer' | 'secretary' | 'society' | 'idor'> = {
+  SEED_OFFICER_EMAIL: 'officer',
+  SEED_MEMBER_EMAIL: 'member',
+  SEED_TREASURER_EMAIL: 'treasurer',
+  SEED_SECRETARY_EMAIL: 'secretary',
+  SEED_SOCIETY_EMAIL: 'society',
+  SEED_IDOR_EMAIL: 'idor',
+  // Common per-file aliases of the same constants
+  MEMBER_EMAIL: 'member',
+  OFFICER_EMAIL: 'officer',
+}
+
 interface FileResult {
   rel: string
   migrated: boolean
@@ -73,18 +87,45 @@ function migrateFileContent(content: string, relPath: string): { changed: boolea
   if (!match) return { changed: false, output: content, skipReason: 'no test.beforeEach found' }
 
   const body = match[2]!.trim()
-  // Body must be exactly: `await signInAs<X>(page)` — single statement.
-  const singleCallRe = /^await\s+(signInAs\w+)\s*\(\s*page\s*\)\s*;?\s*$/
-  const callMatch = singleCallRe.exec(body)
-  if (!callMatch) return { changed: false, output: content, skipReason: 'beforeEach has extra setup beyond signInAs<X>' }
 
-  const fnName = callMatch[1]!
-  const role = ROLE_MAP[fnName]
-  if (!role) return { changed: false, output: content, skipReason: `unknown helper ${fnName}` }
+  // Variant A: single `await signInAs<X>(page)` call
+  const singleHelperRe = /^await\s+(signInAs\w+)\s*\(\s*page\s*\)\s*;?\s*$/
+  // Variant B: single `await signIn(page, SEED_X_EMAIL, ...)` call
+  const singleRawRe = /^await\s+signIn\s*\(\s*page\s*,\s*(\w+)\s*,/
+  // Variant C: signIn (raw or helper) + a single `await page.goto(...)` afterward
+  const helperPlusGotoRe = /^await\s+(signInAs\w+)\s*\(\s*page\s*\)\s*;?\s*\n\s*(await\s+page\.goto\([^)]+\)\s*;?)\s*$/s
+  const rawPlusGotoRe = /^await\s+signIn\s*\(\s*page\s*,\s*(\w+)\s*,[^)]+\)\s*;?\s*\n\s*(await\s+page\.goto\([^)]+\)\s*;?)\s*$/s
+
+  let fnName: string | null = null
+  let emailConst: string | null = null
+  let preservedTail: string | null = null
+
+  let m
+  if ((m = singleHelperRe.exec(body))) {
+    fnName = m[1]!
+  } else if ((m = singleRawRe.exec(body))) {
+    emailConst = m[1]!
+  } else if ((m = helperPlusGotoRe.exec(body))) {
+    fnName = m[1]!
+    preservedTail = m[2]!
+  } else if ((m = rawPlusGotoRe.exec(body))) {
+    emailConst = m[1]!
+    preservedTail = m[2]!
+  } else {
+    return { changed: false, output: content, skipReason: 'beforeEach has extra setup beyond signInAs<X>' }
+  }
+
+  const role: string | undefined = fnName
+    ? ROLE_MAP[fnName]
+    : RAW_SIGNIN_EMAIL_TO_ROLE[emailConst!]
+  if (!role) return { changed: false, output: content, skipReason: `unknown auth call (${fnName ?? emailConst})` }
 
   // Don't migrate if multiple personas signed in across the file
-  const otherPersonaCalls = Object.keys(ROLE_MAP).filter((n) => n !== fnName)
-  const switchesPersona = otherPersonaCalls.some((n) => new RegExp(`\\b${n}\\s*\\(`).test(content))
+  const otherHelperNames = Object.keys(ROLE_MAP).filter((n) => n !== fnName)
+  const otherEmailNames = Object.keys(RAW_SIGNIN_EMAIL_TO_ROLE).filter((n) => n !== emailConst)
+  const switchesPersona =
+    otherHelperNames.some((n) => new RegExp(`\\b${n}\\s*\\(`).test(content)) ||
+    otherEmailNames.some((n) => new RegExp(`\\bsignIn\\s*\\(\\s*page\\s*,\\s*${n}\\b`).test(content))
   if (switchesPersona) return { changed: false, output: content, skipReason: 'file switches between personas' }
 
   // Compute the relative import path from this spec to tests/e2e/helpers/auth-state.ts.
@@ -97,23 +138,63 @@ function migrateFileContent(content: string, relPath: string): { changed: boolea
 
   let next = content
 
-  // 1. Remove the beforeEach block (handles a leading blank line too)
-  next = next.replace(new RegExp(`\\n?\\s*${beforeEachRe.source}\\s*`, 's'), '\n')
+  // 1. Replace the beforeEach block. If a goto was preserved, rebuild a
+  //    minimal beforeEach that does just the navigation; else strip entirely.
+  if (preservedTail) {
+    next = next.replace(beforeEachRe, `test.beforeEach(async ({ page }) => {\n    ${preservedTail}\n  })`)
+  } else {
+    next = next.replace(new RegExp(`\\n?\\s*${beforeEachRe.source}\\s*`, 's'), '\n')
+  }
 
-  // 2. Remove the import of the signIn helper (if it was the only import from auth)
-  next = next.replace(
-    new RegExp(`import\\s*\\{\\s*${fnName}\\s*\\}\\s*from\\s*['"][^'"]*helpers\\/auth['"];?\\n`),
-    '',
-  )
-  // 3. Or remove just the symbol from a multi-import
-  next = next.replace(
-    new RegExp(`(import\\s*\\{[^}]*?)\\b${fnName}\\s*,\\s*`),
-    '$1',
-  )
-  next = next.replace(
-    new RegExp(`(import\\s*\\{[^}]*?),\\s*${fnName}\\b([^}]*\\})`),
-    '$1$2',
-  )
+  // 2. Remove the auth-helper import that is no longer used.
+  //    fnName-style imports: `signInAsX` from '../helpers/auth'
+  //    raw-signin imports:  `signIn` from '../helpers/auth' — only if no other
+  //                         usage of signIn remains in the file.
+  const removedSymbol = fnName ?? 'signIn'
+  const stillUsed = new RegExp(`\\b${removedSymbol}\\s*\\(`).test(next.replace(beforeEachRe, ''))
+  if (!stillUsed) {
+    // single-import line removal
+    next = next.replace(
+      new RegExp(`import\\s*\\{\\s*${removedSymbol}\\s*\\}\\s*from\\s*['"][^'"]*helpers\\/auth['"];?\\n`),
+      '',
+    )
+    // multi-import: drop the symbol
+    next = next.replace(
+      new RegExp(`(import\\s*\\{[^}]*?)\\b${removedSymbol}\\s*,\\s*`),
+      '$1',
+    )
+    next = next.replace(
+      new RegExp(`(import\\s*\\{[^}]*?),\\s*${removedSymbol}\\b([^}]*\\})`),
+      '$1$2',
+    )
+  }
+
+  // 3. Remove the SEED_X_EMAIL + TEST_PASSWORD imports if no other usage
+  //    remains. Conservative — only touch test-config imports.
+  if (emailConst) {
+    const stillUsedEmail = new RegExp(`\\b${emailConst}\\b`).test(next.replace(beforeEachRe, ''))
+    if (!stillUsedEmail) {
+      next = next.replace(
+        new RegExp(`(import\\s*\\{[^}]*?)\\b${emailConst}\\s*,\\s*`),
+        '$1',
+      )
+      next = next.replace(
+        new RegExp(`(import\\s*\\{[^}]*?),\\s*${emailConst}\\b([^}]*\\})`),
+        '$1$2',
+      )
+    }
+    const stillUsesPassword = /\bTEST_PASSWORD\b/.test(next.replace(beforeEachRe, ''))
+    if (!stillUsesPassword) {
+      next = next.replace(
+        new RegExp(`(import\\s*\\{[^}]*?)\\bTEST_PASSWORD\\s*,\\s*`),
+        '$1',
+      )
+      next = next.replace(
+        new RegExp(`(import\\s*\\{[^}]*?),\\s*TEST_PASSWORD\\b([^}]*\\})`),
+        '$1$2',
+      )
+    }
+  }
 
   // 4. Insert `test.use({ storageState: authStateFile('<role>') })` after the existing imports.
   //    Also add the authStateFile import if not present.

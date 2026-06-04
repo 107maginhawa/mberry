@@ -2,19 +2,17 @@
 // Tests actual button clicks, API requests, and UI state changes
 import { test, expect } from '../helpers/test-fixture'
 import { expectVisibleAfterReload, expectVisibleOnPage } from '../helpers/persistence'
-import { signIn } from '../helpers/auth'
 import { SEED_OFFICER_EMAIL, TEST_PASSWORD } from '../helpers/test-config'
+import { authStateFile } from '../helpers/auth-state'
 
+
+test.use({ storageState: authStateFile('officer') })
 const ORG_ID = 'ed8e3a96-8126-4341-be42-e6eb7940c562'
 const OFFICER_EMAIL = SEED_OFFICER_EMAIL
 const OFFICER_PASSWORD = TEST_PASSWORD
 
 test.describe('Membership Actions', () => {
-  test.beforeEach(async ({ page }) => {
-    await signIn(page, OFFICER_EMAIL, OFFICER_PASSWORD)
-  })
-
-  test('roster shows real member data with computed status values', async ({ page }) => {
+test('roster shows real member data with computed status values', async ({ page }) => {
     await page.goto(`/org/${ORG_ID}/officer/roster`)
 
     // Must show actual names, not "undefined" or dashes

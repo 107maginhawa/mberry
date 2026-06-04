@@ -1,15 +1,13 @@
 // Action-Contract Tests: Profile, Settings, Notifications, Credits
 import { test, expect } from '../helpers/test-fixture'
 import { expectVisibleAfterReload, expectVisibleOnPage } from '../helpers/persistence'
-import { signIn } from '../helpers/auth'
 import { SEED_OFFICER_EMAIL, TEST_PASSWORD } from '../helpers/test-config'
+import { authStateFile } from '../helpers/auth-state'
 
+
+test.use({ storageState: authStateFile('officer') })
 test.describe('Profile Actions', () => {
-  test.beforeEach(async ({ page }) => {
-    await signIn(page, SEED_OFFICER_EMAIL, TEST_PASSWORD)
-  })
-
-  test('edit profile → change specialization → save → persists on reload', async ({ page }) => {
+test('edit profile → change specialization → save → persists on reload', async ({ page }) => {
     await page.goto('/my/profile')
     await expect(page.getByRole('button', { name: /Edit Profile/i })).toBeVisible({ timeout: 10000 })
 

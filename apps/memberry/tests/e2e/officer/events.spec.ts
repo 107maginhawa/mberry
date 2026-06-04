@@ -1,16 +1,14 @@
 // Business Rules: [BR-15] [BR-16] [BR-17] [BR-27]
 import { test, expect } from '../helpers/test-fixture'
-import { signIn } from '../helpers/auth'
 import { SEED_OFFICER_EMAIL, TEST_PASSWORD } from '../helpers/test-config'
+import { authStateFile } from '../helpers/auth-state'
 
+
+test.use({ storageState: authStateFile('officer') })
 const ORG_ID = 'ed8e3a96-8126-4341-be42-e6eb7940c562'
 
 test.describe('Officer Events', () => {
-  test.beforeEach(async ({ page }) => {
-    await signIn(page, SEED_OFFICER_EMAIL, TEST_PASSWORD)
-  })
-
-  test('events page shows heading and stat cards', async ({ page }) => {
+test('events page shows heading and stat cards', async ({ page }) => {
     await page.goto(`/org/${ORG_ID}/officer/events`)
     await expect(
       page.getByRole('heading', { name: 'Events', level: 1 }),

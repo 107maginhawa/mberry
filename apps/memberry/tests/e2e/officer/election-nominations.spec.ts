@@ -7,17 +7,15 @@
 // UI coverage (this file): officer nomination flow, status-gated "Add" button, dialog presence
 
 import { test, expect } from '../helpers/test-fixture'
-import { signIn } from '../helpers/auth'
 import { SEED_OFFICER_EMAIL, TEST_PASSWORD, API_BASE } from '../helpers/test-config'
+import { authStateFile } from '../helpers/auth-state'
 
+
+test.use({ storageState: authStateFile('officer') })
 const ORG_ID = 'ed8e3a96-8126-4341-be42-e6eb7940c562'
 
 test.describe('BR-34: Nomination Eligibility', () => {
-  test.beforeEach(async ({ page }) => {
-    await signIn(page, SEED_OFFICER_EMAIL, TEST_PASSWORD)
-  })
-
-  test('unauthenticated nomination request returns 401', async ({ page }) => {
+test('unauthenticated nomination request returns 401', async ({ page }) => {
     const response = await page.evaluate(async ({ orgId, apiBase }) => {
       const res = await fetch(`${apiBase}/association/elections/nominations/eligibility?organizationId=${orgId}`)
       return { status: res.status }

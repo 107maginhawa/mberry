@@ -1,18 +1,16 @@
 import { test, expect } from '../helpers/test-fixture'
-import { signIn } from '../helpers/auth'
 import { SEED_OFFICER_EMAIL, TEST_PASSWORD, API_BASE } from '../helpers/test-config'
+import { authStateFile } from '../helpers/auth-state'
 
+
+test.use({ storageState: authStateFile('officer') })
 const ORG_ID = 'ed8e3a96-8126-4341-be42-e6eb7940c562'
 
 // Backend coverage: unit tests in br-39.committee-dissolution.test.ts
 // E2E stubs below define user-facing scenarios for when module M19 is built.
 
 test.describe('BR-39: Committee Dissolution', () => {
-  test.beforeEach(async ({ page }) => {
-    await signIn(page, SEED_OFFICER_EMAIL, TEST_PASSWORD)
-  })
-
-  test('unauthenticated request returns 401', async ({ page }) => {
+test('unauthenticated request returns 401', async ({ page }) => {
     const response = await page.evaluate(async ({ orgId }) => {
       const res = await fetch(`${API_BASE}/association/committees/dissolution?organizationId=${orgId}`)
       return { status: res.status }
