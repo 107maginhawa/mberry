@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { GlassCard } from '@/components/motion/glass-card'
-import { Button } from '@monobase/ui'
+import { Button, RoundActionButton } from '@monobase/ui'
 import { Mic, MicOff, Video, VideoOff, Phone } from 'lucide-react'
 import { VideoTile } from './video-tile'
 import { useMediaStream } from '../hooks/use-media-stream'
@@ -52,26 +52,22 @@ export function VideoLobby({ roomName, participants = [], onJoin, onCancel }: Vi
 
         {/* Audio/Video toggles */}
         <div className="flex items-center justify-center gap-4">
-          {/* ui-c-exempt: interactive-emphasis — video-lobby control 48px round */}
-          <Button
+          <RoundActionButton
             variant={audioEnabled ? 'secondary' : 'destructive'}
-            size="lg"
-            className="rounded-full h-12 w-12"
+            size="md"
             onClick={toggleMic}
             aria-label={audioEnabled ? 'Mute microphone' : 'Unmute microphone'}
           >
             {audioEnabled ? <Mic className="h-5 w-5" /> : <MicOff className="h-5 w-5" />}
-          </Button>
-          {/* ui-c-exempt: interactive-emphasis — video-lobby control 48px round */}
-          <Button
+          </RoundActionButton>
+          <RoundActionButton
             variant={videoEnabled ? 'secondary' : 'destructive'}
-            size="lg"
-            className="rounded-full h-12 w-12"
+            size="md"
             onClick={toggleCamera}
             aria-label={videoEnabled ? 'Turn off camera' : 'Turn on camera'}
           >
             {videoEnabled ? <Video className="h-5 w-5" /> : <VideoOff className="h-5 w-5" />}
-          </Button>
+          </RoundActionButton>
         </div>
 
         {/* Participants already in call */}

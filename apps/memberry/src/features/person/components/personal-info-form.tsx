@@ -4,7 +4,7 @@ import { zodResolver } from '@/lib/zod-resolver'
 import { CalendarIcon, Camera, Loader2, X } from 'lucide-react'
 import { format, isAfter, isBefore } from 'date-fns'
 import { formatDate } from '@/lib/format-date'
-import { Button } from '@monobase/ui'
+import { Button, RoundActionButton } from '@monobase/ui'
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@monobase/ui'
 import { Input } from '@monobase/ui'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@monobase/ui'
@@ -220,12 +220,10 @@ export function PersonalInfoForm({
                   </AvatarFallback>
                 </Avatar>
                 <div className="absolute -bottom-2 -right-2 flex gap-1">
-                  {/* ui-c-exempt: interactive-emphasis — avatar-edit affordance, round secondary 32px */}
-                  <Button
+                  <RoundActionButton
                     type="button"
-                    size="icon"
+                    size="sm"
                     variant="secondary"
-                    className="h-8 w-8 rounded-full"
                     onClick={handleAvatarClick}
                     disabled={isUploadingAvatar}
                   >
@@ -234,19 +232,17 @@ export function PersonalInfoForm({
                     ) : (
                       <Camera className="h-4 w-4" />
                     )}
-                  </Button>
+                  </RoundActionButton>
                   {(avatarUrl || selectedFile || avatarValue) && (
-                    // ui-c-exempt: interactive-emphasis — avatar-remove affordance 32px round destructive
-                    <Button
+                    <RoundActionButton
                       type="button"
-                      size="icon"
+                      size="sm"
                       variant="destructive"
-                      className="h-8 w-8 rounded-full"
                       onClick={handleRemoveAvatar}
                       disabled={isUploadingAvatar}
                     >
                       <X className="h-4 w-4" />
-                    </Button>
+                    </RoundActionButton>
                   )}
                 </div>
               </div>

@@ -4,7 +4,7 @@
  */
 
 import { Mic, MicOff, Video, VideoOff, PhoneOff, Monitor, MonitorOff } from 'lucide-react'
-import { Button } from '@monobase/ui'
+import { RoundActionButton } from '@monobase/ui'
 import { cn } from '@/lib/utils'
 
 interface CallControlsProps {
@@ -33,11 +33,9 @@ export function CallControls({
   return (
     <div className={cn('flex items-center justify-center gap-4', className)}>
       {/* Microphone Toggle */}
-      {/* ui-c-exempt: interactive-emphasis — video-call control 56px round */}
-      <Button
+      <RoundActionButton
         variant={audioEnabled ? 'secondary' : 'destructive'}
         size="lg"
-        className="rounded-full h-14 w-14"
         onClick={onToggleMic}
         title={audioEnabled ? 'Mute microphone' : 'Unmute microphone'}
       >
@@ -46,14 +44,12 @@ export function CallControls({
         ) : (
           <MicOff className="h-6 w-6" />
         )}
-      </Button>
+      </RoundActionButton>
 
       {/* Camera Toggle */}
-      {/* ui-c-exempt: interactive-emphasis — video-call control 56px round */}
-      <Button
+      <RoundActionButton
         variant={videoEnabled ? 'secondary' : 'destructive'}
         size="lg"
-        className="rounded-full h-14 w-14"
         onClick={onToggleCamera}
         title={videoEnabled ? 'Turn off camera' : 'Turn on camera'}
       >
@@ -62,14 +58,12 @@ export function CallControls({
         ) : (
           <VideoOff className="h-6 w-6" />
         )}
-      </Button>
+      </RoundActionButton>
 
       {/* Screen Share Toggle */}
-      {/* ui-c-exempt: interactive-emphasis — video-call control 56px round */}
-      <Button
+      <RoundActionButton
         variant={isScreenSharing ? 'default' : 'secondary'}
         size="lg"
-        className="rounded-full h-14 w-14"
         onClick={isScreenSharing ? onStopScreenShare : onStartScreenShare}
         title={isScreenSharing ? 'Stop screen sharing' : 'Start screen sharing'}
       >
@@ -78,19 +72,19 @@ export function CallControls({
         ) : (
           <MonitorOff className="h-6 w-6" />
         )}
-      </Button>
+      </RoundActionButton>
 
       {/* End Call */}
-      {/* ui-c-exempt: interactive-emphasis — end-call control 56px round destructive */}
-      <Button
+      {/* ui-c-exempt: methodology-carry — end-call destructive emphasis brand red */}
+      <RoundActionButton
         variant="destructive"
         size="lg"
-        className="rounded-full h-14 w-14 bg-red-600 hover:bg-red-700"
+        className="bg-red-600 hover:bg-red-700"
         onClick={onEndCall}
         title="End call"
       >
         <PhoneOff className="h-6 w-6" />
-      </Button>
+      </RoundActionButton>
     </div>
   )
 }
