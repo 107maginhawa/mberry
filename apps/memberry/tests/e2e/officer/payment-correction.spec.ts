@@ -1,6 +1,6 @@
 // CT-9: Payment correction
 import { test, expect } from '../helpers/test-fixture'
-import { authStateFile } from '../auth.setup'
+import { authStateFile } from '../helpers/auth-state'
 
 
 test.use({ storageState: authStateFile('treasurer') })

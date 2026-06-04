@@ -1,6 +1,6 @@
 // M-19: Payment gateway unavailable fallback
 import { test, expect } from '../helpers/test-fixture'
-import { authStateFile } from '../auth.setup'
+import { authStateFile } from '../helpers/auth-state'
 
 
 test.use({ storageState: authStateFile('member') })

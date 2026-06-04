@@ -12,7 +12,7 @@
 
 import { test as setup, expect } from '@playwright/test'
 import { mkdirSync } from 'node:fs'
-import { join, dirname } from 'node:path'
+import { dirname } from 'node:path'
 import {
   TEST_PASSWORD,
   SEED_OFFICER_EMAIL,
@@ -22,21 +22,13 @@ import {
   SEED_SOCIETY_EMAIL,
   SEED_IDOR_EMAIL,
 } from './helpers/test-config'
+import { AUTH_DIR, AUTH_STATE_FILES } from './helpers/auth-state'
 
-const AUTH_DIR = join(__dirname, '..', '..', '.auth')
+// Persona auth-state file paths live in helpers/auth-state.ts (separate
+// module) because Playwright forbids spec files from importing test
+// files. This file has setup() calls and is a test file.
+const STATE_FILES = AUTH_STATE_FILES
 mkdirSync(AUTH_DIR, { recursive: true })
-
-const STATE_FILES = {
-  officer: join(AUTH_DIR, 'officer.json'),
-  member: join(AUTH_DIR, 'member.json'),
-  treasurer: join(AUTH_DIR, 'treasurer.json'),
-  secretary: join(AUTH_DIR, 'secretary.json'),
-  society: join(AUTH_DIR, 'society.json'),
-  idor: join(AUTH_DIR, 'idor.json'),
-} as const
-
-export type AuthRole = keyof typeof STATE_FILES
-export const authStateFile = (role: AuthRole): string => STATE_FILES[role]
 
 async function signInAndSave(page: import('@playwright/test').Page, email: string, storagePath: string) {
   await page.goto('/auth/sign-in')

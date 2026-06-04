@@ -87,9 +87,11 @@ function migrateFileContent(content: string, relPath: string): { changed: boolea
   const switchesPersona = otherPersonaCalls.some((n) => new RegExp(`\\b${n}\\s*\\(`).test(content))
   if (switchesPersona) return { changed: false, output: content, skipReason: 'file switches between personas' }
 
-  // Compute the relative import path from this spec to tests/e2e/auth.setup.ts
+  // Compute the relative import path from this spec to tests/e2e/helpers/auth-state.ts.
+  // (Importing from auth.setup.ts directly is forbidden — that file has setup()
+  // calls and Playwright treats it as a test file.)
   const specDir = dirname(join(targetDir, relPath))
-  const setupAbs = join(targetDir, 'auth.setup.ts')
+  const setupAbs = join(targetDir, 'helpers/auth-state.ts')
   let relImport = relative(specDir, setupAbs).replace(/\.ts$/, '')
   if (!relImport.startsWith('.')) relImport = './' + relImport
 

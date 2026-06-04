@@ -1,6 +1,6 @@
 // SO-2: Manage training enrollments
 import { test, expect } from '../helpers/test-fixture'
-import { authStateFile } from '../auth.setup'
+import { authStateFile } from '../helpers/auth-state'
 
 
 test.use({ storageState: authStateFile('society') })

@@ -2,7 +2,7 @@
 // Covers: SO-1 through SO-14 — training programs, cross-chapter credits, society analytics
 // Weakest persona at 21% coverage — this test significantly improves it.
 import { test, expect } from '../helpers/test-fixture'
-import { authStateFile } from '../auth.setup'
+import { authStateFile } from '../helpers/auth-state'
 
 
 test.use({ storageState: authStateFile('society') })

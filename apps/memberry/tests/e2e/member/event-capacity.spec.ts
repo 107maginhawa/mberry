@@ -1,6 +1,6 @@
 // BR-27: Event capacity and registration limits
 import { test, expect } from '../helpers/test-fixture'
-import { authStateFile } from '../auth.setup'
+import { authStateFile } from '../helpers/auth-state'
 
 
 test.use({ storageState: authStateFile('member') })

@@ -1,6 +1,6 @@
 // CT-2: Batch dues reminders
 import { test, expect } from '../helpers/test-fixture'
-import { authStateFile } from '../auth.setup'
+import { authStateFile } from '../helpers/auth-state'
 
 
 test.use({ storageState: authStateFile('treasurer') })

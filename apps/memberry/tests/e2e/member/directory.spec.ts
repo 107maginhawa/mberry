@@ -1,7 +1,7 @@
 // M-10: Browse member directory
 // Verifies directory search page renders, search works, and member cards display
 import { test, expect } from '../helpers/test-fixture'
-import { authStateFile } from '../auth.setup'
+import { authStateFile } from '../helpers/auth-state'
 
 
 test.use({ storageState: authStateFile('member') })

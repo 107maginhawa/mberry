@@ -1,7 +1,7 @@
 // Persona P3: Chapter Treasurer (Juan Cruz)
 // Covers: CT-1 through CT-11 — payment recording, dues config, financial reports
 import { test, expect } from '../helpers/test-fixture'
-import { authStateFile } from '../auth.setup'
+import { authStateFile } from '../helpers/auth-state'
 
 
 test.use({ storageState: authStateFile('treasurer') })
