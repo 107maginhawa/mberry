@@ -33,6 +33,9 @@
     --sidebar-accent-foreground: 270 10% 90%;
     --sidebar-border: 270 16% 25%;
     --sidebar-ring: 270 60% 65%;
+
+    /* Admin chrome — exact brand hex (NOT an HSL theme token; single source). */
+    --color-admin-chrome: #2D2635;
   }
 
   .dark {
