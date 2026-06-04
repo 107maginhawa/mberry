@@ -20,39 +20,8 @@ Content-Type: application/json
   "name": "Checkin Tester"
 }
 HTTP 200
-
-
-POST {{api}}/persons
-Origin: {{origin}}
-x-csrf-token: {{csrf_token}}
-Content-Type: application/json
-{
-  "firstName": "Checkin",
-  "lastName": "Tester",
-  "languagesSpoken": ["en"],
-  "timezone": "America/New_York"
-}
-HTTP 201
 [Captures]
-person_id: jsonpath "$.id"
-
-
-# 0b. Create event + registration for check-in.
-POST {{api}}/association/events
-Origin: {{origin}}
-x-csrf-token: {{csrf_token}}
-Content-Type: application/json
-x-org-id: ed8e3a96-8126-4341-be42-e6eb7940c562
-{
-  "title": "Checkin Test Event {{suffix}}",
-  "description": "Event for check-in tests",
-  "startDate": "2026-08-15T09:00:00Z",
-  "endDate": "2026-08-15T17:00:00Z"
-}
-HTTP 201
-[Captures]
-event_id: jsonpath "$.id"
-
+person_id: jsonpath "$.user.id"
 
 POST {{api}}/association/events/registrations
 Origin: {{origin}}

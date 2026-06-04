@@ -23,43 +23,8 @@ Content-Type: application/json
   "name": "Search Host"
 }
 HTTP 200
-
-
-POST {{api}}/persons
-Origin: {{origin}}
-x-csrf-token: {{csrf_token}}
-Content-Type: application/json
-{
-  "firstName": "Search",
-  "lastName": "Host",
-  "languagesSpoken": ["en"],
-  "timezone": "America/New_York"
-}
-HTTP 201
-
-
-# Seed: three active events with distinct titles + tag sets.
-POST {{api}}/booking/events
-Origin: {{origin}}
-x-csrf-token: {{csrf_token}}
-Content-Type: application/json
-{
-  "title": "Yoga consult {{suffix}}",
-  "description": "Beginner-friendly stretching",
-  "keywords": ["wellness", "stretching"],
-  "tags": ["yoga", "wellness"],
-  "timezone": "America/New_York",
-  "locationTypes": ["video"],
-  "maxBookingDays": 30,
-  "minBookingMinutes": 60,
-  "status": "active",
-  "effectiveFrom": "2026-01-01T00:00:00Z",
-  "dailyConfigs": {
-    "mon": { "enabled": true, "timeBlocks": [{ "startTime": "09:00", "endTime": "12:00", "slotDuration": 30 }] }
-  }
-}
-HTTP 201
-
+[Captures]
+person_id: jsonpath "$.user.id"
 
 POST {{api}}/booking/events
 Origin: {{origin}}

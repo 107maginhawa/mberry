@@ -21,20 +21,8 @@ Content-Type: application/json
   "name": "Edge Host"
 }
 HTTP 200
-
-
-POST {{api}}/persons
-Origin: {{origin}}
-x-csrf-token: {{csrf_token}}
-Content-Type: application/json
-{
-  "firstName": "Edge",
-  "lastName": "Host",
-  "languagesSpoken": ["en"],
-  "timezone": "America/New_York"
-}
-HTTP 201
-
+[Captures]
+person_id: jsonpath "$.user.id"
 
 POST {{api}}/booking/events
 Origin: {{origin}}
@@ -76,20 +64,8 @@ Content-Type: application/json
   "name": "Edge Client"
 }
 HTTP 200
-
-
-POST {{api}}/persons
-Origin: {{origin}}
-x-csrf-token: {{csrf_token}}
-Content-Type: application/json
-{
-  "firstName": "Edge",
-  "lastName": "Client",
-  "languagesSpoken": ["en"],
-  "timezone": "America/New_York"
-}
-HTTP 201
-
+[Captures]
+person_id: jsonpath "$.user.id"
 
 POST {{api}}/booking/bookings
 Origin: {{origin}}

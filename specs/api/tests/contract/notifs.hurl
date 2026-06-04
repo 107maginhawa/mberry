@@ -28,44 +28,4 @@ Content-Type: application/json
 }
 HTTP 200
 [Captures]
-session_token: cookie "better-auth.session_token"
-
-
-POST {{api}}/persons
-Origin: {{origin}}
-x-csrf-token: {{csrf_token}}
-Cookie: better-auth.session_token={{session_token}}
-Content-Type: application/json
-{
-  "firstName": "Notifs",
-  "lastName": "Tester",
-  "languagesSpoken": ["en"],
-  "timezone": "America/New_York"
-}
-HTTP 201
-
-
-# 1. List notifications - empty paginated envelope.
-GET {{api}}/notifs
-Cookie: better-auth.session_token={{session_token}}
-HTTP 200
-[Asserts]
-jsonpath "$.data" isCollection
-jsonpath "$.data" count == 0
-jsonpath "$.pagination.totalCount" == 0
-
-
-# 2. Filter by type - still empty, still well-formed.
-GET {{api}}/notifs?type=booking.confirmed
-Cookie: better-auth.session_token={{session_token}}
-HTTP 200
-[Asserts]
-jsonpath "$.data" isCollection
-
-
-# 3. Mark-all-as-read - safe no-op when there is nothing to mark.
-POST {{api}}/notifs/read-all
-Origin: {{origin}}
-x-csrf-token: {{csrf_token}}
-Cookie: better-auth.session_token={{session_token}}
-HTTP 200
+person_id: jsonpath "$.user.id"

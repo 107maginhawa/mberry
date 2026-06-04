@@ -25,22 +25,8 @@ Content-Type: application/json
   "name": "Merchant"
 }
 HTTP 200
-
-
-POST {{api}}/persons
-Origin: {{origin}}
-x-csrf-token: {{csrf_token}}
-Content-Type: application/json
-{
-  "firstName": "Merchant",
-  "lastName": "Person",
-  "languagesSpoken": ["en"],
-  "timezone": "America/New_York"
-}
-HTTP 201
 [Captures]
-merchant_person_id: jsonpath "$.id"
-
+person_id: jsonpath "$.user.id"
 
 POST {{api}}/billing/merchant-accounts
 Origin: {{origin}}
@@ -92,34 +78,8 @@ Content-Type: application/json
   "name": "Customer"
 }
 HTTP 200
-
-
-POST {{api}}/persons
-Origin: {{origin}}
-x-csrf-token: {{csrf_token}}
-Content-Type: application/json
-{
-  "firstName": "Customer",
-  "lastName": "Person",
-  "languagesSpoken": ["en"],
-  "timezone": "America/New_York"
-}
-HTTP 201
 [Captures]
-customer_person_id: jsonpath "$.id"
-
-
-# 4. Sign back in as merchant to create the invoice.
-POST {{api}}/auth/sign-in/email
-Origin: {{origin}}
-x-csrf-token: {{csrf_token}}
-Content-Type: application/json
-{
-  "email": "merch-{{suffix}}@example.org",
-  "password": "Sup3rSecret!ContractTest"
-}
-HTTP 200
-
+person_id: jsonpath "$.user.id"
 
 POST {{api}}/billing/invoices
 Origin: {{origin}}

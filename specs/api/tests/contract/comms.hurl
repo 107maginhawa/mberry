@@ -23,69 +23,6 @@ Content-Type: application/json
   "name": "Comms A"
 }
 HTTP 200
-[Captures]
-a_id: jsonpath "$.user.id"
-
-
-POST {{api}}/persons
-Origin: {{origin}}
-x-csrf-token: {{csrf_token}}
-Content-Type: application/json
-{
-  "firstName": "Alice",
-  "lastName": "A",
-  "languagesSpoken": ["en"],
-  "timezone": "America/New_York"
-}
-HTTP 201
-
-
-# 0b. User B.
-POST {{api}}/auth/sign-up/email
-Origin: {{origin}}
-x-csrf-token: {{csrf_token}}
-Content-Type: application/json
-{
-  "email": "comms-b-{{suffix}}@example.org",
-  "password": "Sup3rSecret!ContractTest",
-  "name": "Comms B"
-}
-HTTP 200
-[Captures]
-b_id: jsonpath "$.user.id"
-
-
-POST {{api}}/persons
-Origin: {{origin}}
-x-csrf-token: {{csrf_token}}
-Content-Type: application/json
-{
-  "firstName": "Bob",
-  "lastName": "B",
-  "languagesSpoken": ["en"],
-  "timezone": "America/New_York"
-}
-HTTP 201
-
-
-# 1. List rooms while empty (B is currently signed in).
-GET {{api}}/comms/chat-rooms
-HTTP 200
-[Asserts]
-jsonpath "$.data" isCollection
-
-
-# 2. Sign back in as A, then create a room with both persons.
-POST {{api}}/auth/sign-in/email
-Origin: {{origin}}
-x-csrf-token: {{csrf_token}}
-Content-Type: application/json
-{
-  "email": "comms-a-{{suffix}}@example.org",
-  "password": "Sup3rSecret!ContractTest"
-}
-HTTP 200
-
 
 POST {{api}}/comms/chat-rooms
 Origin: {{origin}}

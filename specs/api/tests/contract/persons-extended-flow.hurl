@@ -24,27 +24,7 @@ Content-Type: application/json
 }
 HTTP 200
 [Captures]
-session_token: cookie "better-auth.session_token"
-
-
-POST {{api}}/persons
-Origin: {{origin}}
-x-csrf-token: {{csrf_token}}
-Cookie: better-auth.session_token={{session_token}}
-Content-Type: application/json
-{
-  "firstName": "Extended",
-  "lastName": "Tester",
-  "dateOfBirth": "1985-03-20",
-  "languagesSpoken": ["en"],
-  "timezone": "America/New_York"
-}
-HTTP 201
-[Captures]
-person_id: jsonpath "$.id"
-
-
-# ── 1. List all persons ──────────────────────────────────────
+person_id: jsonpath "$.user.id"
 
 GET {{api}}/persons
 Cookie: better-auth.session_token={{session_token}}

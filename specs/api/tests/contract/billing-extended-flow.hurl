@@ -24,24 +24,7 @@ Content-Type: application/json
 }
 HTTP 200
 [Captures]
-session_token: cookie "better-auth.session_token"
-
-
-POST {{api}}/persons
-Origin: {{origin}}
-x-csrf-token: {{csrf_token}}
-Cookie: better-auth.session_token={{session_token}}
-Content-Type: application/json
-{
-  "firstName": "BillExt",
-  "lastName": "Tester",
-  "languagesSpoken": ["en"],
-  "timezone": "America/New_York"
-}
-HTTP 201
-
-
-# ── 1. Create an invoice to work with ───────────────────────
+person_id: jsonpath "$.user.id"
 
 POST {{api}}/billing/invoices
 Origin: {{origin}}

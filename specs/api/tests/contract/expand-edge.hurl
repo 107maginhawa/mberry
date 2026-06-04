@@ -22,21 +22,7 @@ Content-Type: application/json
 }
 HTTP 200
 [Captures]
-user_id: jsonpath "$.user.id"
-
-
-POST {{api}}/persons
-Origin: {{origin}}
-x-csrf-token: {{csrf_token}}
-Content-Type: application/json
-{
-  "firstName": "Expand",
-  "lastName": "Edge",
-  "languagesSpoken": ["en"],
-  "timezone": "America/New_York"
-}
-HTTP 201
-
+person_id: jsonpath "$.user.id"
 
 POST {{api}}/booking/events
 Origin: {{origin}}

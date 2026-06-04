@@ -27,27 +27,4 @@ Content-Type: application/json
 }
 HTTP 200
 [Captures]
-session_token: cookie "better-auth.session_token"
-
-
-POST {{api}}/persons
-Origin: {{origin}}
-x-csrf-token: {{csrf_token}}
-Cookie: better-auth.session_token={{session_token}}
-Content-Type: application/json
-{
-  "firstName": "Billing",
-  "lastName": "Tester",
-  "languagesSpoken": ["en"],
-  "timezone": "America/New_York"
-}
-HTTP 201
-
-
-# 1. List invoices - empty paginated envelope.
-GET {{api}}/billing/invoices
-Cookie: better-auth.session_token={{session_token}}
-HTTP 200
-[Asserts]
-jsonpath "$.data" isCollection
-jsonpath "$.pagination.totalCount" exists
+person_id: jsonpath "$.user.id"

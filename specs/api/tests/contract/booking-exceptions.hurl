@@ -21,20 +21,8 @@ Content-Type: application/json
   "name": "Exception Host"
 }
 HTTP 200
-
-
-POST {{api}}/persons
-Origin: {{origin}}
-x-csrf-token: {{csrf_token}}
-Content-Type: application/json
-{
-  "firstName": "Exception",
-  "lastName": "Host",
-  "languagesSpoken": ["en"],
-  "timezone": "America/New_York"
-}
-HTTP 201
-
+[Captures]
+person_id: jsonpath "$.user.id"
 
 POST {{api}}/booking/events
 Origin: {{origin}}

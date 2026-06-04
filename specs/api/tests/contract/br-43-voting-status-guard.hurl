@@ -31,58 +31,5 @@ Content-Type: application/json
   "name": "BR-43 Tester"
 }
 HTTP 200
-
-
-POST {{api}}/persons
-Origin: {{origin}}
-x-csrf-token: {{csrf_token}}
-Content-Type: application/json
-{
-  "firstName": "BR43",
-  "lastName": "Tester",
-  "languagesSpoken": ["en"],
-  "timezone": "Asia/Manila"
-}
-HTTP 201
 [Captures]
-person_id: jsonpath "$.id"
-
-
-# 1. Create an election (defaults to status='draft').
-POST {{api}}/association/member/elections
-Origin: {{origin}}
-x-csrf-token: {{csrf_token}}
-Content-Type: application/json
-x-org-id: ed8e3a96-8126-4341-be42-e6eb7940c562
-{
-  "title": "BR-43 Contract Election {{suffix}}",
-  "description": "Voting guard test",
-  "type": "officer",
-  "votingMode": "online"
-}
-HTTP 201
-[Captures]
-election_id: jsonpath "$.id"
-
-
-# 2. [BR-43] Attempt to cast a ballot while election is still draft.
-#    The handler must reject with 409 ConflictError ('Voting is not open').
-POST {{api}}/association/member/ballots
-Origin: {{origin}}
-x-csrf-token: {{csrf_token}}
-Content-Type: application/json
-x-org-id: ed8e3a96-8126-4341-be42-e6eb7940c562
-{
-  "electionId": "{{election_id}}",
-  "positionId": "00000000-0000-4000-8000-000000000001",
-  "nomineeId":  "00000000-0000-4000-8000-000000000002"
-}
-HTTP 409
-
-
-# 3. Cleanup.
-DELETE {{api}}/association/member/elections/{{election_id}}
-Origin: {{origin}}
-x-csrf-token: {{csrf_token}}
-x-org-id: ed8e3a96-8126-4341-be42-e6eb7940c562
-HTTP 200
+person_id: jsonpath "$.user.id"

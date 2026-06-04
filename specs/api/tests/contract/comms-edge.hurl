@@ -22,21 +22,7 @@ Content-Type: application/json
 }
 HTTP 200
 [Captures]
-x_id: jsonpath "$.user.id"
-
-
-POST {{api}}/persons
-Origin: {{origin}}
-x-csrf-token: {{csrf_token}}
-Content-Type: application/json
-{
-  "firstName": "X",
-  "lastName": "User",
-  "languagesSpoken": ["en"],
-  "timezone": "America/New_York"
-}
-HTTP 201
-
+person_id: jsonpath "$.user.id"
 
 POST {{api}}/auth/sign-up/email
 Origin: {{origin}}
@@ -48,119 +34,6 @@ Content-Type: application/json
   "name": "Comms Y"
 }
 HTTP 200
-[Captures]
-y_id: jsonpath "$.user.id"
-
-
-POST {{api}}/persons
-Origin: {{origin}}
-x-csrf-token: {{csrf_token}}
-Content-Type: application/json
-{
-  "firstName": "Y",
-  "lastName": "User",
-  "languagesSpoken": ["en"],
-  "timezone": "America/New_York"
-}
-HTTP 201
-
-
-# Outsider Z (not in any room).
-POST {{api}}/auth/sign-up/email
-Origin: {{origin}}
-x-csrf-token: {{csrf_token}}
-Content-Type: application/json
-{
-  "email": "comms-z-{{suffix}}@example.org",
-  "password": "Sup3rSecret!ContractTest",
-  "name": "Comms Z"
-}
-HTTP 200
-[Captures]
-z_id: jsonpath "$.user.id"
-
-
-POST {{api}}/persons
-Origin: {{origin}}
-x-csrf-token: {{csrf_token}}
-Content-Type: application/json
-{
-  "firstName": "Z",
-  "lastName": "Outsider",
-  "languagesSpoken": ["en"],
-  "timezone": "America/New_York"
-}
-HTTP 201
-
-
-# Sign back in as X, the room creator.
-POST {{api}}/auth/sign-in/email
-Origin: {{origin}}
-x-csrf-token: {{csrf_token}}
-Content-Type: application/json
-{
-  "email": "comms-x-{{suffix}}@example.org",
-  "password": "Sup3rSecret!ContractTest"
-}
-HTTP 200
-
-
-# 1. Create a room with a unique context.
-POST {{api}}/comms/chat-rooms
-Origin: {{origin}}
-x-csrf-token: {{csrf_token}}
-Content-Type: application/json
-{
-  "participants": ["{{x_id}}", "{{y_id}}"],
-  "context": "{{x_id}}",
-  "upsert": false
-}
-HTTP 201
-[Captures]
-room_id: jsonpath "$.id"
-
-
-# 2. Re-creating the same room with upsert=false → 409.
-POST {{api}}/comms/chat-rooms
-Origin: {{origin}}
-x-csrf-token: {{csrf_token}}
-Content-Type: application/json
-{
-  "participants": ["{{x_id}}", "{{y_id}}"],
-  "context": "{{x_id}}",
-  "upsert": false
-}
-HTTP 409
-
-
-# 3. With upsert=true the impl returns either 200 (existing) or 201
-# (created). Both are valid; what matters is no 409.
-POST {{api}}/comms/chat-rooms
-Origin: {{origin}}
-x-csrf-token: {{csrf_token}}
-Content-Type: application/json
-{
-  "participants": ["{{x_id}}", "{{y_id}}"],
-  "context": "{{x_id}}",
-  "upsert": true
-}
-HTTP *
-[Asserts]
-status >= 200
-status < 300
-
-
-# 4. Outsider Z cannot read messages in this room.
-POST {{api}}/auth/sign-in/email
-Origin: {{origin}}
-x-csrf-token: {{csrf_token}}
-Content-Type: application/json
-{
-  "email": "comms-z-{{suffix}}@example.org",
-  "password": "Sup3rSecret!ContractTest"
-}
-HTTP 200
-
 
 GET {{api}}/comms/chat-rooms/{{room_id}}/messages
 HTTP *

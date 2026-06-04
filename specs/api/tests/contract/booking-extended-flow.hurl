@@ -23,22 +23,8 @@ Content-Type: application/json
   "name": "BookExt Host"
 }
 HTTP 200
-
-
-POST {{api}}/persons
-Origin: {{origin}}
-x-csrf-token: {{csrf_token}}
-Content-Type: application/json
-{
-  "firstName": "BookExtHost",
-  "lastName": "Tester",
-  "languagesSpoken": ["en"],
-  "timezone": "America/New_York"
-}
-HTTP 201
-
-
-# ── 1. Create event ─────────────────────────────────────────
+[Captures]
+person_id: jsonpath "$.user.id"
 
 POST {{api}}/booking/events
 Origin: {{origin}}
@@ -93,20 +79,8 @@ Content-Type: application/json
   "name": "BookExt Client"
 }
 HTTP 200
-
-
-POST {{api}}/persons
-Origin: {{origin}}
-x-csrf-token: {{csrf_token}}
-Content-Type: application/json
-{
-  "firstName": "BookExtClient",
-  "lastName": "Tester",
-  "languagesSpoken": ["en"],
-  "timezone": "America/New_York"
-}
-HTTP 201
-
+[Captures]
+person_id: jsonpath "$.user.id"
 
 POST {{api}}/booking/bookings
 Origin: {{origin}}

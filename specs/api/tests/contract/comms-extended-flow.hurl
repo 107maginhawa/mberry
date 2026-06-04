@@ -24,21 +24,7 @@ Content-Type: application/json
 }
 HTTP 200
 [Captures]
-a_id: jsonpath "$.user.id"
-
-
-POST {{api}}/persons
-Origin: {{origin}}
-x-csrf-token: {{csrf_token}}
-Content-Type: application/json
-{
-  "firstName": "CommsExtA",
-  "lastName": "Tester",
-  "languagesSpoken": ["en"],
-  "timezone": "America/New_York"
-}
-HTTP 201
-
+person_id: jsonpath "$.user.id"
 
 POST {{api}}/auth/sign-up/email
 Origin: {{origin}}
@@ -51,33 +37,7 @@ Content-Type: application/json
 }
 HTTP 200
 [Captures]
-b_id: jsonpath "$.user.id"
-
-
-POST {{api}}/persons
-Origin: {{origin}}
-x-csrf-token: {{csrf_token}}
-Content-Type: application/json
-{
-  "firstName": "CommsExtB",
-  "lastName": "Tester",
-  "languagesSpoken": ["en"],
-  "timezone": "America/New_York"
-}
-HTTP 201
-
-
-# Sign back in as A to create room
-POST {{api}}/auth/sign-in/email
-Origin: {{origin}}
-x-csrf-token: {{csrf_token}}
-Content-Type: application/json
-{
-  "email": "comms-ext-a-{{suffix}}@example.org",
-  "password": "Sup3rSecret!ContractTest"
-}
-HTTP 200
-
+person_id: jsonpath "$.user.id"
 
 POST {{api}}/comms/chat-rooms
 Origin: {{origin}}

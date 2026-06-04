@@ -30,24 +30,7 @@ Content-Type: application/json
 }
 HTTP 200
 [Captures]
-session_token: cookie "better-auth.session_token"
-
-
-POST {{api}}/persons
-Origin: {{origin}}
-x-csrf-token: {{csrf_token}}
-Cookie: better-auth.session_token={{session_token}}
-Content-Type: application/json
-{
-  "firstName": "ReadAll",
-  "lastName": "Tester",
-  "languagesSpoken": ["en"],
-  "timezone": "America/New_York"
-}
-HTTP 201
-
-
-# ── 2. Mark all as read (no-op on empty) ────────────────────
+person_id: jsonpath "$.user.id"
 
 POST {{api}}/read-all
 Origin: {{origin}}

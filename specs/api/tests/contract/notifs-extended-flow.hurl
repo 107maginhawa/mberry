@@ -25,24 +25,7 @@ Content-Type: application/json
 }
 HTTP 200
 [Captures]
-session_token: cookie "better-auth.session_token"
-
-
-POST {{api}}/persons
-Origin: {{origin}}
-x-csrf-token: {{csrf_token}}
-Cookie: better-auth.session_token={{session_token}}
-Content-Type: application/json
-{
-  "firstName": "NotifsExt",
-  "lastName": "Tester",
-  "languagesSpoken": ["en"],
-  "timezone": "America/New_York"
-}
-HTTP 201
-
-
-# ── 1. Unauthenticated → 401 ────────────────────────────────
+person_id: jsonpath "$.user.id"
 
 GET {{api}}/notifs/00000000-0000-0000-0000-000000000000
 HTTP 401

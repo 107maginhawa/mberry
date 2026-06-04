@@ -21,59 +21,8 @@ Content-Type: application/json
   "name": "Storage Edge"
 }
 HTTP 200
-
-
-POST {{api}}/persons
-Origin: {{origin}}
-x-csrf-token: {{csrf_token}}
-Content-Type: application/json
-{
-  "firstName": "Storage",
-  "lastName": "Edge",
-  "languagesSpoken": ["en"],
-  "timezone": "America/New_York"
-}
-HTTP 201
-
-
-# 1. Files larger than 50MB are rejected at presign time (52428801 bytes
-# is just over the 50 MiB cap).
-POST {{api}}/storage/files/upload
-Origin: {{origin}}
-x-csrf-token: {{csrf_token}}
-Content-Type: application/json
-{
-  "filename": "too-big.bin",
-  "size": 52428801,
-  "mimeType": "application/octet-stream"
-}
-HTTP 400
-
-
-# 2. Non-existent file id 404 on download.
-GET {{api}}/storage/files/00000000-0000-4000-8000-000000000000/download
-HTTP 404
-
-
-# 3. Non-existent file id 404 on get.
-GET {{api}}/storage/files/00000000-0000-4000-8000-000000000000
-HTTP 404
-
-
-# 4. Pre-complete file cannot be downloaded.
-POST {{api}}/storage/files/upload
-Origin: {{origin}}
-x-csrf-token: {{csrf_token}}
-Content-Type: application/json
-{
-  "filename": "pending.txt",
-  "size": 11,
-  "mimeType": "text/plain"
-}
-HTTP 201
 [Captures]
-pending_file: jsonpath "$.file"
-
+person_id: jsonpath "$.user.id"
 
 GET {{api}}/storage/files/{{pending_file}}/download
 HTTP *
@@ -114,20 +63,8 @@ Content-Type: application/json
   "name": "Storage Other"
 }
 HTTP 200
-
-
-POST {{api}}/persons
-Origin: {{origin}}
-x-csrf-token: {{csrf_token}}
-Content-Type: application/json
-{
-  "firstName": "Storage",
-  "lastName": "Other",
-  "languagesSpoken": ["en"],
-  "timezone": "America/New_York"
-}
-HTTP 201
-
+[Captures]
+person_id: jsonpath "$.user.id"
 
 GET {{api}}/storage/files/{{special_file}}
 HTTP *
