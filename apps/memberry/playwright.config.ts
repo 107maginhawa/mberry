@@ -6,10 +6,15 @@ export default defineConfig({
   testIgnore: ['**/stubs/**'],
 
   maxFailures: process.env.CI ? 0 : 1,
-  fullyParallel: false,
+  // Enabled after the storageState setup project (auth.setup.ts) eliminated
+  // per-test UI sign-ins. Read-only specs (the bulk of the suite) parallelize
+  // safely. Specs that mutate shared SEED_* state and aren't yet using fresh
+  // signUp users can opt out via `test.describe.configure({ mode: 'serial' })`.
+  fullyParallel: true,
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 1 : 0,
-  workers: 1,
+  // Conservative default — 4 workers in CI, 2 locally. Bump after a clean run.
+  workers: process.env.CI ? 4 : 2,
 
   reporter: process.env.CI
     ? [['json', { outputFile: 'test-results.json' }], ['github']]
