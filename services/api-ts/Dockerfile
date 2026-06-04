@@ -13,6 +13,7 @@ WORKDIR /specs
 # Copy specs source (assumes build from monorepo root)
 COPY specs/api/package.json ./
 COPY specs/api/src ./src/
+COPY specs/api/scripts ./scripts/
 COPY specs/api/tspconfig.yaml ./
 
 # Install spec dependencies and build using bun (faster than npm)
