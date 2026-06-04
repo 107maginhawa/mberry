@@ -16,10 +16,10 @@ based-on:
   - docs/audits/SEED_COHERENCE_REPORT.md
   - docs/audits/UI_CONSISTENCY_REPORT.md (Phase-D Tier-E convergence rebaseline-005, mode ACTIVE, PASS)
   - docs/audits/PATTERNS.lock.md (oli-version 1.1 — Tier-F detector regex relaxed: 26|28|30|36|44 only; canonical scale + EmptyState 32/40/48 + nav 18/22)
-  - docs/audits/TIER-F-BACKLOG.md (5/5 candidates LANDED in rebaseline-006)
-  - docs/audits/enforce/.baseline.json (v57, phase-d-rebaseline-006)
-last-modified: 2026-06-04T01:30:00Z
-last-modified-by: Tier-F backlog clearance (5/5 codification refactors landed)
+  - docs/audits/TIER-F-BACKLOG.md (5/5 candidates LANDED in rebaseline-006; post-Tier-F polish landed in rebaseline-007)
+  - docs/audits/enforce/.baseline.json (v58, phase-d-rebaseline-007)
+last-modified: 2026-06-04T02:30:00Z
+last-modified-by: Post-Tier-F polish (annotations 22→15; test-infra fixed)
 ---
 
 ## TRUST STATUS
@@ -74,7 +74,7 @@ Phase-D Tier-D + Tier-E rebaseline complete. ALL prior carries cleared or rebase
 | Journeys | PASS | `docs/audits/JOURNEY_COVERAGE_REPORT.md` | current | 151 routes; 0/0/0/4 P3 KNOWN-DEFERRED | 0 |
 | Runtime | PASS (Tier-3 promoted) | `docs/audits/RUNTIME_EXEC_REPORT.md` | current | 0 ER-P0 / 0 ER-P1; 1 P2 informational | 0 |
 | Seed Coherence | PASS | `docs/audits/SEED_COHERENCE_REPORT.md` | current | STATIC; 117/122 manifest match | 0 |
-| **UI Consistency** | **PASS** (CONVERGED + Tier-F clean) | `docs/audits/UI_CONSISTENCY_REPORT.md` | current (Tier-F rebaseline v57) | mode=ACTIVE; new pin v57 `phase-d-rebaseline-006`; **P0 0; P1 0**; annotations 93→34 (59 codified via primitives/tokens/scale); detector regex relaxed (26\|28\|30\|36\|44); 0 REGRESSION; 0 NEW-DEBT; ratchet HARDENED | 0 |
+| **UI Consistency** | **PASS** (Tier-F + polish) | `docs/audits/UI_CONSISTENCY_REPORT.md` | current (rebaseline v58) | mode=ACTIVE; new pin v58 `phase-d-rebaseline-007`; **P0 0; P1 0**; annotations **93→15** (84% reduction across Tier-D/E/F + polish); detector regex unchanged from rebaseline-006; 0 REGRESSION; 0 NEW-DEBT; ratchet HARDENED | 0 |
 
 **UI-C VERDICT CONVERGED.** Tier-E convergence loop (iter 2 of max 3) drove P1 floor 61→0 via Button variant codemods (4 sites) + 93 annotations + new PATTERNS.lock.md detector spec + pre-commit hook. **Zero NEW-DEBT, zero regression.** Ratchet HARDENED — `scripts/ui-consistency-check.sh` (wired into `.husky/pre-commit`) actively blocks any NEW unannotated detector match in staged files. Residual: 2 aggregate-metric advisories (typography 0.13 + spacing 0.88) kept INFORMATIONAL for trending only.
 
@@ -114,10 +114,11 @@ Phase-D Tier-D + Tier-E rebaseline complete. ALL prior carries cleared or rebase
 **Worst-dim verdict:** **PASS** (all 10 dims PASS).
 **Gate:** **PASS**. Zero actionable P0/P1. Floor: P0=0, P1=1 KNOWN-future (m19).
 
-**Phase-D Tier-D + Tier-E + Tier-F outcome:**
-- **10/10 dims PASS** (UI-C promoted WARN→PASS Tier-D, CONVERGED Tier-E, codified Tier-F)
-- UI-C: P1 92→61 (Tier-D) → **0** (Tier-E full converge); annotations 93→34 (Tier-F: 59 cleared via primitives/tokens/scale codification); 0 regression; 0 NEW-DEBT; ratchet HARDENED via pre-commit hook; new floor pinned (v57 `phase-d-rebaseline-006`)
+**Phase-D Tier-D + Tier-E + Tier-F + polish outcome:**
+- **10/10 dims PASS** (UI-C promoted WARN→PASS Tier-D, CONVERGED Tier-E, codified Tier-F, polished post-Tier-F)
+- UI-C: P1 92→61 (Tier-D) → **0** (Tier-E full converge); annotations 93→34 (Tier-F: primitives/tokens/scale codification) → **15** (polish: redundant route annotations cleared + RoundActionButton primitive); 0 regression; 0 NEW-DEBT; ratchet HARDENED via pre-commit hook; new floor pinned (v58 `phase-d-rebaseline-007`)
 - Tier-F deliverables: NavIcon primitive, MenuItem primitive, admin-chrome CSS var token, EmptyState size scale codification, INTENTIONAL-EXEMPT route allowlist enforced in detector
+- Post-Tier-F polish: 12 redundant route inline annotations removed (covered by central list), test-infra fixed (admin 0p→57p; memberry 131p→514p via root preload routing), RoundActionButton primitive for 32/48/56px round controls (8 sites migrated)
 - PageShell coverage 78%→82.4% (122/149 routes; remaining 27 INTENTIONAL-EXEMPT special-layout, all annotated)
 - 93/93 detector matches annotated via `// ui-c-exempt:` (100%); PATTERNS.lock.md is canonical detector spec
 - Multi-persona e2e auth scaffold (signInAsOfficer + signInAsAdmin) — unblocks Runtime admin/officer skips for future cycles
