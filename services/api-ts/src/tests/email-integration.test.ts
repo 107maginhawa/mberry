@@ -26,7 +26,10 @@ const API_URL = process.env['API_URL'] || 'http://localhost:7213';
 let adminClient: ApiClient;
 let memberClient: ApiClient;
 
-// Wrapper that adds x-org-id header to all requests (required by orgContextMiddleware)
+// Wrapper that adds x-org-id header to all requests (required by orgContextMiddleware).
+// Mirrors the CSRF token onto unsafe methods so the double-submit middleware
+// passes (see middleware/csrf-token.ts).
+const UNSAFE_METHODS = new Set(['POST', 'PUT', 'PATCH', 'DELETE']);
 function withOrgContext(client: ApiClient, orgId: string): ApiClient {
   const wrap = (method: string) => (path: string, body?: unknown): Promise<Response> => {
     const headers: Record<string, string> = {
@@ -34,6 +37,7 @@ function withOrgContext(client: ApiClient, orgId: string): ApiClient {
       'x-org-id': orgId,
     };
     if (body !== undefined) headers['Content-Type'] = 'application/json';
+    if (UNSAFE_METHODS.has(method)) headers['x-csrf-token'] = client.csrfToken;
     return fetch(`${API_URL}${path}`, {
       method,
       headers,
