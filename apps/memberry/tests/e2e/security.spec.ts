@@ -38,7 +38,7 @@ test.describe('Security Flows', () => {
     await page.getByLabel('Email', { exact: true }).fill('nonexistent@test.com')
     const passwordInput = page.getByLabel('Password', { exact: true })
     await passwordInput.click()
-    await passwordInput.pressSequentially('WrongPass123!', { delay: 10 })
+    await passwordInput.fill('WrongPass123!')
 
     const submit = page.getByRole('button', { name: /login|sign in/i })
     await submit.click()

@@ -32,7 +32,7 @@ export async function signUp(page: Page) {
 
   const passwordInput = page.getByLabel('Password', { exact: true })
   await passwordInput.click()
-  await passwordInput.pressSequentially(password, { delay: 10 })
+  await passwordInput.fill(password)
 
   // Capture the signup API response
   const signupResponse = page.waitForResponse(
@@ -97,7 +97,7 @@ export async function signUpForOnboarding(page: Page) {
 
   const passwordInput = page.getByLabel('Password', { exact: true })
   await passwordInput.click()
-  await passwordInput.pressSequentially(password, { delay: 10 })
+  await passwordInput.fill(password)
 
   const signupResponse = page.waitForResponse(
     (resp) => resp.url().includes('/auth/sign-up') && resp.request().method() === 'POST',
@@ -166,7 +166,7 @@ export async function signIn(page: Page, email: string, password: string) {
 
   const passwordInput = page.getByLabel('Password', { exact: true })
   await passwordInput.click()
-  await passwordInput.pressSequentially(password, { delay: 10 })
+  await passwordInput.fill(password)
 
   const loginResponse = page.waitForResponse(
     (resp) => resp.url().includes('/auth/sign-in') && resp.request().method() === 'POST',

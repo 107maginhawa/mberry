@@ -47,7 +47,7 @@ test.describe('BR-25: OTP Registration', () => {
 
     const passwordInput = page.getByLabel('Password', { exact: true })
     await passwordInput.click()
-    await passwordInput.pressSequentially('TestPass123!', { delay: 10 })
+    await passwordInput.fill('TestPass123!')
 
     await page.getByRole('button', { name: /create|sign up|register/i }).click()
     await page.waitForTimeout(5000)

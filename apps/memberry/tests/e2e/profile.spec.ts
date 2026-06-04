@@ -28,7 +28,7 @@ test.describe('Profile page (/my/profile)', () => {
     await page.getByLabel('Email', { exact: true }).fill(freshEmail)
     const pw = page.getByLabel('Password', { exact: true })
     await pw.click()
-    await pw.pressSequentially(TEST_PASSWORD, { delay: 10 })
+    await pw.fill(TEST_PASSWORD)
     await page.getByRole('button', { name: /create an account/i }).click()
     await page.waitForTimeout(3000)
 

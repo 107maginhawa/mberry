@@ -26,7 +26,7 @@ test.describe('Sign-up flow', () => {
     await nameInput.fill('Test Signup User')
     await emailInput.fill(email)
     await passwordInput.click()
-    await passwordInput.pressSequentially(TEST_PASSWORD, { delay: 10 })
+    await passwordInput.fill(TEST_PASSWORD)
 
     // Submit
     const submit = page.getByRole('button', { name: /create an account/i })
@@ -50,7 +50,7 @@ test.describe('Sign-up flow', () => {
     await page.getByLabel('Email', { exact: true }).fill(email)
     const pw = page.getByLabel('Password', { exact: true })
     await pw.click()
-    await pw.pressSequentially(TEST_PASSWORD, { delay: 10 })
+    await pw.fill(TEST_PASSWORD)
     await page.getByRole('button', { name: /create an account/i }).click()
     await page.waitForTimeout(3000)
 
@@ -62,7 +62,7 @@ test.describe('Sign-up flow', () => {
     await page.getByLabel('Email', { exact: true }).fill(email)
     const pw2 = page.getByLabel('Password', { exact: true })
     await pw2.click()
-    await pw2.pressSequentially(TEST_PASSWORD, { delay: 10 })
+    await pw2.fill(TEST_PASSWORD)
     await page.getByRole('button', { name: /create an account/i }).click()
 
     // Should show an error — user already exists
@@ -86,7 +86,7 @@ test.describe('Sign-in flow', () => {
     await page.getByLabel('Email', { exact: true }).fill(testEmail)
     const pw = page.getByLabel('Password', { exact: true })
     await pw.click()
-    await pw.pressSequentially(testPassword, { delay: 10 })
+    await pw.fill(testPassword)
     await page.getByRole('button', { name: /create an account/i }).click()
     await page.waitForTimeout(3000)
     await page.close()
@@ -99,7 +99,7 @@ test.describe('Sign-in flow', () => {
     await page.getByLabel('Email', { exact: true }).fill(testEmail)
     const pw = page.getByLabel('Password', { exact: true })
     await pw.click()
-    await pw.pressSequentially(testPassword, { delay: 10 })
+    await pw.fill(testPassword)
 
     const submit = page.getByRole('button', { name: /login|sign in/i })
     await submit.click()
@@ -123,7 +123,7 @@ test.describe('Sign-in flow', () => {
     await page.getByLabel('Email', { exact: true }).fill(testEmail)
     const pw = page.getByLabel('Password', { exact: true })
     await pw.click()
-    await pw.pressSequentially('WrongPassword99!', { delay: 10 })
+    await pw.fill('WrongPassword99!')
 
     await page.getByRole('button', { name: /login|sign in/i }).click()
     await page.waitForTimeout(3000)
