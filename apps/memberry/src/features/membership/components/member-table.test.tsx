@@ -151,15 +151,17 @@ describe('MemberTable', () => {
 
     renderWithProviders(<MemberTable orgId="org-1" />)
 
+    // Tab labels overlap with member-row status badges ("Active", "Lapsed"),
+    // so disambiguate via role="tab".
     await waitFor(() => {
-      expect(screen.getByText('All')).toBeInTheDocument()
+      expect(screen.getByRole('tab', { name: 'All' })).toBeInTheDocument()
     })
 
-    expect(screen.getByText('Active')).toBeInTheDocument()
-    expect(screen.getByText('Grace')).toBeInTheDocument()
-    expect(screen.getByText('Lapsed')).toBeInTheDocument()
-    expect(screen.getByText('Suspended')).toBeInTheDocument()
-    expect(screen.getByText('Pending')).toBeInTheDocument()
+    expect(screen.getByRole('tab', { name: 'Active' })).toBeInTheDocument()
+    expect(screen.getByRole('tab', { name: 'Grace' })).toBeInTheDocument()
+    expect(screen.getByRole('tab', { name: 'Lapsed' })).toBeInTheDocument()
+    expect(screen.getByRole('tab', { name: 'Suspended' })).toBeInTheDocument()
+    expect(screen.getByRole('tab', { name: 'Pending' })).toBeInTheDocument()
   })
 
   test('renders search input with correct placeholder', async () => {
