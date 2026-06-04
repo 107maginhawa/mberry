@@ -356,6 +356,22 @@ jobs:
       - run: bun install --frozen-lockfile
       - name: BR coverage regression check
         run: bun run scripts/br-coverage.ts --ci
+      - name: CSRF injection drift check
+        # Fails if any .hurl scenario lost its CSRF preamble or x-csrf-token / Origin header.
+        run: bun scripts/audit/inject-csrf-into-hurl.ts --check
+      - name: Coverage matrix (BR + Flow + Route)
+        # Regenerates docs/audits/COVERAGE_MATRIX.md and .audits/coverage-matrix.json.
+        # Currently informational — does not fail the build (per HEALTH_CHECK_PROGRESS plan
+        # P2.4). Promote --gate to hard-fail once backfill closes the route/flow gaps.
+        run: bun scripts/audit/coverage-matrix.ts --gate
+      - name: Upload coverage matrix
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-matrix
+          path: |
+            docs/audits/COVERAGE_MATRIX.md
+            .audits/coverage-matrix.json
 
   unit-tests:
     runs-on: ubuntu-latest
