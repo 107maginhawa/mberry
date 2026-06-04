@@ -41,8 +41,6 @@ jobs:
   e2e:
     runs-on: ubuntu-latest
     timeout-minutes: 30
-    env:
-      TZ: UTC
     services:
       postgres:
         image: postgres:16-alpine
@@ -64,6 +62,7 @@ jobs:
           --health-cmd "curl -fsS http://localhost:9000/minio/health/live"
           --health-interval 5s --health-timeout 5s --health-retries 10
     env:
+      TZ: UTC
       DATABASE_URL: postgresql://postgres:password@localhost:5432/monobase
       PORT: 7213
       API_URL: http://localhost:7213
