@@ -48,7 +48,8 @@
     "csstype": "3.2.3",
     "@playwright/test": "1.58.2",
     "playwright": "1.58.2",
-    "playwright-core": "1.58.2"
+    "playwright-core": "1.58.2",
+    "esbuild": "^0.28.0"
   },
   "devDependencies": {
     "@rollup/rollup-darwin-arm64": "^4.52.3",
@@ -57,5 +58,8 @@
     "lint-staged": "^16.4.0",
     "react-hook-form": "^7.75.0",
     "turbo": "^2.3.3"
+  },
+  "dependencies": {
+    "esbuild": "^0.28.0"
   }
 }
