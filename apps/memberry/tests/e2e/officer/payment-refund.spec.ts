@@ -11,15 +11,11 @@ test.describe('CT-7: Payment Refund', () => {
 
   test('payments page loads with history table', async ({ page }) => {
     await page.goto(`/org/${ORG_ID}/officer/payments`)
-    await page.waitForLoadState('networkidle')
-
     await expect(page.getByText('Dues & Payments')).toBeVisible({ timeout: 10000 })
   })
 
   test('payment detail page shows receipt and status', async ({ page }) => {
     await page.goto(`/org/${ORG_ID}/officer/payments`)
-    await page.waitForLoadState('networkidle')
-
     // Click first payment row to go to detail
     const paymentLink = page.locator('a[href*="/officer/payments/"]:not([href*="/new"])').first()
     const hasPayments = await paymentLink.isVisible({ timeout: 10000 }).catch(() => false)
@@ -36,8 +32,6 @@ test.describe('CT-7: Payment Refund', () => {
 
   test('completed payment shows refund form', async ({ page }) => {
     await page.goto(`/org/${ORG_ID}/officer/payments`)
-    await page.waitForLoadState('networkidle')
-
     const paymentLink = page.locator('a[href*="/officer/payments/"]:not([href*="/new"])').first()
     const hasPayments = await paymentLink.isVisible({ timeout: 10000 }).catch(() => false)
 
@@ -57,8 +51,6 @@ test.describe('CT-7: Payment Refund', () => {
 
   test('payment detail has back navigation', async ({ page }) => {
     await page.goto(`/org/${ORG_ID}/officer/payments`)
-    await page.waitForLoadState('networkidle')
-
     const paymentLink = page.locator('a[href*="/officer/payments/"]:not([href*="/new"])').first()
     const hasPayments = await paymentLink.isVisible({ timeout: 10000 }).catch(() => false)
 

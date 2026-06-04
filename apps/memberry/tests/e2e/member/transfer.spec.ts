@@ -7,7 +7,6 @@ test.describe('M-16: Transfer Membership', () => {
   test.beforeEach(async ({ page }) => {
     await signInAsMember(page)
     await page.goto('/my/organizations')
-    await page.waitForLoadState('networkidle')
   })
 
   test('transfer button is visible for active memberships', async ({ page }) => {

@@ -7,7 +7,6 @@ test.describe('Security Flows', () => {
   test('unauthenticated user cannot access member dashboard', async ({ page }) => {
     await page.context().clearCookies()
     await page.goto('/my/dashboard')
-    await page.waitForLoadState('networkidle')
     await page.waitForTimeout(2000)
     expect(page.url()).toContain('/auth/')
   })
@@ -15,7 +14,6 @@ test.describe('Security Flows', () => {
   test('unauthenticated user cannot access settings', async ({ page }) => {
     await page.context().clearCookies()
     await page.goto('/my/settings')
-    await page.waitForLoadState('networkidle')
     await page.waitForTimeout(2000)
     expect(page.url()).toContain('/auth/')
   })
@@ -23,7 +21,6 @@ test.describe('Security Flows', () => {
   test('authenticated user can access protected routes', async ({ page }) => {
     await signIn(page, SEED_OFFICER_EMAIL, TEST_PASSWORD)
     await page.goto('/my/dashboard')
-    await page.waitForLoadState('networkidle')
     // Should NOT redirect to auth
     expect(page.url()).not.toContain('/auth/')
     // Dashboard should show some content
@@ -33,8 +30,6 @@ test.describe('Security Flows', () => {
 
   test('error case — invalid credentials show error', async ({ page }) => {
     await page.goto('/auth/sign-in')
-    await page.waitForLoadState('networkidle')
-
     await page.getByLabel('Email', { exact: true }).fill('nonexistent@test.com')
     const passwordInput = page.getByLabel('Password', { exact: true })
     await passwordInput.click()

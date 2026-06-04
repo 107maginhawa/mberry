@@ -13,24 +13,18 @@ test.describe('P5 Society Officer Journey', () => {
 
   test('SO-1: society officer accesses officer dashboard', async ({ page }) => {
     await page.goto(`/org/${ORG_ID}/officer/dashboard`)
-    await page.waitForLoadState('networkidle')
-
     const hasDashboard = await page.getByText(/dashboard|overview/i).first().isVisible({ timeout: 10000 }).catch(() => false)
     expect(hasDashboard).toBeTruthy()
   })
 
   test('SO-2: society officer can view training management', async ({ page }) => {
     await page.goto(`/org/${ORG_ID}/officer/training`)
-    await page.waitForLoadState('networkidle')
-
     const hasTraining = await page.getByText(/training|workshop|seminar|program/i).first().isVisible({ timeout: 10000 }).catch(() => false)
     expect(hasTraining).toBeTruthy()
   })
 
   test('SO-3: society officer sees create training option', async ({ page }) => {
     await page.goto(`/org/${ORG_ID}/officer/training`)
-    await page.waitForLoadState('networkidle')
-
     const createBtn = page.getByRole('button', { name: /create|new.*training|add/i }).first()
       .or(page.getByRole('link', { name: /create|new.*training|add/i }).first())
     const hasCreate = await createBtn.isVisible({ timeout: 10000 }).catch(() => false)
@@ -39,8 +33,6 @@ test.describe('P5 Society Officer Journey', () => {
 
   test('SO-4: society officer can view training analytics', async ({ page }) => {
     await page.goto(`/org/${ORG_ID}/officer/training`)
-    await page.waitForLoadState('networkidle')
-
     // Should see completion stats or enrollment counts
     const hasStats = await page.getByText(/complete|enroll|attend|participant|stat/i).first().isVisible({ timeout: 10000 }).catch(() => false)
     const hasTraining = await page.getByText(/training/i).first().isVisible({ timeout: 10000 }).catch(() => false)
@@ -50,8 +42,6 @@ test.describe('P5 Society Officer Journey', () => {
   test('SO-5: society officer can view credit reports', async ({ page }) => {
     // Navigate to credits/reports section
     await page.goto(`/org/${ORG_ID}/officer/dashboard`)
-    await page.waitForLoadState('networkidle')
-
     // Look for credits or CPD link in navigation
     const creditLink = page.getByRole('link', { name: /credit|CPD|report/i }).first()
     const hasLink = await creditLink.isVisible({ timeout: 10000 }).catch(() => false)
@@ -65,16 +55,12 @@ test.describe('P5 Society Officer Journey', () => {
 
   test('SO-6: society officer can view events', async ({ page }) => {
     await page.goto(`/org/${ORG_ID}/officer/events`)
-    await page.waitForLoadState('networkidle')
-
     const hasEvents = await page.getByText(/event|activity|convention/i).first().isVisible({ timeout: 10000 }).catch(() => false)
     expect(hasEvents).toBeTruthy()
   })
 
   test('SO-7: society officer sees training detail', async ({ page }) => {
     await page.goto(`/org/${ORG_ID}/officer/training`)
-    await page.waitForLoadState('networkidle')
-
     // Click into a training to see detail
     const trainingLink = page.locator(`a[href*="/training/"]`).first()
     const hasLink = await trainingLink.isVisible({ timeout: 10000 }).catch(() => false)
@@ -93,8 +79,6 @@ test.describe('P5 Society Officer Journey', () => {
 
   test('SO-8: society officer sidebar shows relevant sections', async ({ page }) => {
     await page.goto(`/org/${ORG_ID}/officer/dashboard`)
-    await page.waitForLoadState('networkidle')
-
     // Society officer should see Activities and Documents nav
     const activityNav = await page.getByText(/activit|training|event/i).first().isVisible({ timeout: 10000 }).catch(() => false)
     expect(activityNav).toBeTruthy()
@@ -103,27 +87,23 @@ test.describe('P5 Society Officer Journey', () => {
   test('full journey: dashboard → training → events → back', async ({ page }) => {
     await test.step('dashboard', async () => {
       await page.goto(`/org/${ORG_ID}/officer/dashboard`)
-      await page.waitForLoadState('networkidle')
       await expect(page).toHaveURL(/officer/)
     })
 
     await test.step('training management', async () => {
       await page.goto(`/org/${ORG_ID}/officer/training`)
-      await page.waitForLoadState('networkidle')
       const hasTraining = await page.getByText(/training/i).first().isVisible({ timeout: 10000 }).catch(() => false)
       expect(hasTraining).toBeTruthy()
     })
 
     await test.step('events', async () => {
       await page.goto(`/org/${ORG_ID}/officer/events`)
-      await page.waitForLoadState('networkidle')
       const hasEvents = await page.getByText(/event/i).first().isVisible({ timeout: 10000 }).catch(() => false)
       expect(hasEvents).toBeTruthy()
     })
 
     await test.step('back to dashboard', async () => {
       await page.goto(`/org/${ORG_ID}/officer/dashboard`)
-      await page.waitForLoadState('networkidle')
       await expect(page).toHaveURL(/officer/)
     })
   })

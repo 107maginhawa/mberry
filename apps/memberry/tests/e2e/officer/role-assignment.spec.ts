@@ -11,8 +11,6 @@ test.describe('BR-09: Role Assignment', () => {
 
   test('officers page loads with officer list', async ({ page }) => {
     await page.goto(`/org/${ORG_ID}/officer/officers`)
-    await page.waitForLoadState('networkidle')
-
     // Should show officers or heading
     const hasContent = await page.getByText(/officer|role|position/i).first().isVisible({ timeout: 10000 }).catch(() => false)
     expect(hasContent).toBeTruthy()
@@ -20,8 +18,6 @@ test.describe('BR-09: Role Assignment', () => {
 
   test('officers page shows existing officer assignments', async ({ page }) => {
     await page.goto(`/org/${ORG_ID}/officer/officers`)
-    await page.waitForLoadState('networkidle')
-
     // Should display officer names or roles
     const pageText = await page.locator('body').textContent()
     expect(pageText).not.toContain('undefined undefined')
@@ -33,8 +29,6 @@ test.describe('BR-09: Role Assignment', () => {
 
   test('officers page renders without errors', async ({ page }) => {
     await page.goto(`/org/${ORG_ID}/officer/officers`)
-    await page.waitForLoadState('networkidle')
-
     const pageText = await page.locator('body').textContent()
     expect(pageText).not.toContain('Something went wrong')
     expect(pageText).not.toContain('Error')

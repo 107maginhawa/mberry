@@ -7,7 +7,6 @@ test.describe('M-25: Delete Account', () => {
   test.beforeEach(async ({ page }) => {
     await signInAsMember(page)
     await page.goto('/my/settings')
-    await page.waitForLoadState('networkidle')
   })
 
   test('settings page shows Danger Zone with Delete Account button', async ({ page }) => {

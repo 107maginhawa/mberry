@@ -11,8 +11,6 @@ test.describe('Officer Dashboard', () => {
 
   test('dashboard renders with content', async ({ page }) => {
     await page.goto(`/org/${ORG_ID}/officer/dashboard`)
-    await page.waitForLoadState('networkidle')
-
     const dashboard = page.locator('main')
     await expect(dashboard).toBeVisible({ timeout: 10000 })
 
@@ -23,8 +21,6 @@ test.describe('Officer Dashboard', () => {
 
   test('metrics strip shows member counts or activity summary', async ({ page }) => {
     await page.goto(`/org/${ORG_ID}/officer/dashboard`)
-    await page.waitForLoadState('networkidle')
-
     const hasMembers = await page.getByText(/members?/i).first().isVisible().catch(() => false)
     const hasTotal = await page.getByText(/total|active|pending|collection/i).first().isVisible().catch(() => false)
     expect(hasMembers || hasTotal).toBeTruthy()
@@ -32,8 +28,6 @@ test.describe('Officer Dashboard', () => {
 
   test('can navigate to officer roster via URL', async ({ page }) => {
     await page.goto(`/org/${ORG_ID}/officer/roster`)
-    await page.waitForLoadState('networkidle')
-
     await expect(
       page.getByRole('heading', { name: /member roster/i }),
     ).toBeVisible({ timeout: 10000 })

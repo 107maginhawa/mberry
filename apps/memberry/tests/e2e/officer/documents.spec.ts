@@ -12,8 +12,6 @@ test.describe('Officer Documents', () => {
 
   test('documents list renders heading', async ({ page }) => {
     await page.goto(`/org/${ORG_ID}/officer/documents`)
-    await page.waitForLoadState('networkidle')
-
     await expect(
       page.getByRole('heading', { name: /documents?/i }).first()
     ).toBeVisible({ timeout: 10000 })
@@ -21,8 +19,6 @@ test.describe('Officer Documents', () => {
 
   test('shows document categories or tabs', async ({ page }) => {
     await page.goto(`/org/${ORG_ID}/officer/documents`)
-    await page.waitForLoadState('networkidle')
-
     // Categories/tabs may render as tab list, nav links, or filter buttons
     const hasTabs = await page.getByRole('tab').first().isVisible({ timeout: 5000 }).catch(() => false)
     const hasCategories = await page.getByText(/all|bylaws|policies|forms|announcements/i).first().isVisible({ timeout: 5000 }).catch(() => false)
@@ -31,8 +27,6 @@ test.describe('Officer Documents', () => {
 
   test('upload button is visible for officers', async ({ page }) => {
     await page.goto(`/org/${ORG_ID}/officer/documents`)
-    await page.waitForLoadState('networkidle')
-
     const uploadBtn = page
       .getByRole('button', { name: /upload|add document|new document/i })
       .or(page.getByRole('link', { name: /upload|add document|new document/i }))
@@ -42,8 +36,6 @@ test.describe('Officer Documents', () => {
 
   test('can navigate to document detail', async ({ page }) => {
     await page.goto(`/org/${ORG_ID}/officer/documents`)
-    await page.waitForLoadState('networkidle')
-
     // Click the first document link/row in the list
     const firstDoc = page
       .getByRole('link', { name: /.+/ })
@@ -64,8 +56,6 @@ test.describe('Officer Documents', () => {
 
   test('shows document status badges (draft/published/archived)', async ({ page }) => {
     await page.goto(`/org/${ORG_ID}/officer/documents`)
-    await page.waitForLoadState('networkidle')
-
     const hasDraft = await page.getByText(/^draft$/i).first().isVisible({ timeout: 5000 }).catch(() => false)
     const hasPublished = await page.getByText(/^published$/i).first().isVisible({ timeout: 5000 }).catch(() => false)
     const hasArchived = await page.getByText(/^archived$/i).first().isVisible({ timeout: 5000 }).catch(() => false)
@@ -77,8 +67,6 @@ test.describe('Officer Documents', () => {
 
   test('search input is functional', async ({ page }) => {
     await page.goto(`/org/${ORG_ID}/officer/documents`)
-    await page.waitForLoadState('networkidle')
-
     const searchInput = page
       .getByRole('searchbox')
       .or(page.getByPlaceholder(/search/i))

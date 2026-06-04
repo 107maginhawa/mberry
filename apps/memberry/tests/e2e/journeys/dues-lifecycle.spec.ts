@@ -14,8 +14,6 @@ test.describe('Dues lifecycle: officer manages dues, member views payments', () 
     test('officer sees existing dues configuration', async ({ page }) => {
       await signIn(page, OFFICER_EMAIL, OFFICER_PASSWORD)
       await page.goto(`/org/${ORG_ID}/officer/settings/dues`)
-      await page.waitForLoadState('networkidle')
-
       await expect(
         page.getByRole('heading', { name: /dues configuration/i }),
       ).toBeVisible({ timeout: 10000 })
@@ -34,8 +32,6 @@ test.describe('Dues lifecycle: officer manages dues, member views payments', () 
     test('officer views payments dashboard with collection metrics', async ({ page }) => {
       await signIn(page, OFFICER_EMAIL, OFFICER_PASSWORD)
       await page.goto(`/org/${ORG_ID}/officer/payments`)
-      await page.waitForLoadState('networkidle')
-
       await expect(
         page.getByRole('heading', { name: /dues & payments/i }),
       ).toBeVisible({ timeout: 10000 })
@@ -49,8 +45,6 @@ test.describe('Dues lifecycle: officer manages dues, member views payments', () 
     test('officer can access record payment page', async ({ page }) => {
       await signIn(page, OFFICER_EMAIL, OFFICER_PASSWORD)
       await page.goto(`/org/${ORG_ID}/officer/payments`)
-      await page.waitForLoadState('networkidle')
-
       // Record Payment is a link containing a button
       await expect(
         page.getByRole('link', { name: /record payment/i }),
@@ -62,8 +56,6 @@ test.describe('Dues lifecycle: officer manages dues, member views payments', () 
     test('member views their payment history page', async ({ page }) => {
       await signIn(page, MEMBER_EMAIL, MEMBER_PASSWORD)
       await page.goto('/my/payments')
-      await page.waitForLoadState('networkidle')
-
       await expect(
         page.getByRole('heading', { name: 'My Payments' }),
       ).toBeVisible({ timeout: 10000 })
@@ -77,8 +69,6 @@ test.describe('Dues lifecycle: officer manages dues, member views payments', () 
     test('officer sees seeded funds on funds settings page', async ({ page }) => {
       await signIn(page, OFFICER_EMAIL, OFFICER_PASSWORD)
       await page.goto(`/org/${ORG_ID}/officer/settings/funds`)
-      await page.waitForLoadState('networkidle')
-
       await expect(
         page.getByRole('heading', { name: /fund allocation/i }),
       ).toBeVisible({ timeout: 10000 })

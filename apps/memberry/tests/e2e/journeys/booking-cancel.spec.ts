@@ -8,8 +8,6 @@ test.describe('Booking cancellation', () => {
     test('member can navigate to a booking and see cancel option', async ({ page }) => {
       await signInAsMember(page)
       await page.goto('/my/bookings')
-      await page.waitForLoadState('networkidle')
-
       await page.getByRole('tab', { name: /my bookings/i }).click()
       await page.waitForLoadState('networkidle')
 
@@ -44,8 +42,6 @@ test.describe('Booking cancellation', () => {
     test('cancel confirmation dialog appears on cancel click', async ({ page }) => {
       await signInAsMember(page)
       await page.goto('/my/bookings')
-      await page.waitForLoadState('networkidle')
-
       await page.getByRole('tab', { name: /my bookings/i }).click()
       await page.waitForLoadState('networkidle')
 
@@ -82,8 +78,6 @@ test.describe('Booking cancellation', () => {
     test('dismissing cancel dialog keeps booking unchanged', async ({ page }) => {
       await signInAsMember(page)
       await page.goto('/my/bookings')
-      await page.waitForLoadState('networkidle')
-
       await page.getByRole('tab', { name: /my bookings/i }).click()
       await page.waitForLoadState('networkidle')
 
@@ -121,8 +115,6 @@ test.describe('Booking cancellation', () => {
     test('confirming cancellation changes booking status to cancelled', async ({ page }) => {
       await signInAsMember(page)
       await page.goto('/my/bookings')
-      await page.waitForLoadState('networkidle')
-
       await page.getByRole('tab', { name: /my bookings/i }).click()
       await page.waitForLoadState('networkidle')
 
@@ -159,8 +151,6 @@ test.describe('Booking cancellation', () => {
     test('cancelled booking shows cancellation info', async ({ page }) => {
       await signInAsMember(page)
       await page.goto('/my/bookings')
-      await page.waitForLoadState('networkidle')
-
       await page.getByRole('tab', { name: /my bookings/i }).click()
       await page.waitForLoadState('networkidle')
 
@@ -185,8 +175,6 @@ test.describe('Booking cancellation', () => {
     test('officer views cancelled bookings too', async ({ page }) => {
       await signInAsOfficer(page)
       await page.goto('/my/bookings')
-      await page.waitForLoadState('networkidle')
-
       await page.getByRole('tab', { name: /my bookings/i }).click()
       await page.waitForLoadState('networkidle')
 

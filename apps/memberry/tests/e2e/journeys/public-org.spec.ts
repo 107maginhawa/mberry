@@ -7,8 +7,6 @@ test.describe('Public Org Page', () => {
     await page.context().clearCookies()
 
     await page.goto('/org/pda-metro-manila')
-    await page.waitForLoadState('networkidle')
-
     // Should NOT redirect to auth
     expect(page.url()).not.toContain('/auth/')
 

@@ -11,8 +11,6 @@ test.describe('BR-17: Training Completion', () => {
 
   test('training detail shows attendance tab when trainings exist', async ({ page }) => {
     await page.goto(`/org/${ORG_ID}/officer/training`)
-    await page.waitForLoadState('networkidle')
-
     const trainingLink = page.locator('a[href*="/officer/training/"]:not([href*="/new"]):not([href$="/training"])').first()
     const hasTrainings = await trainingLink.isVisible({ timeout: 10000 }).catch(() => false)
 
@@ -30,8 +28,6 @@ test.describe('BR-17: Training Completion', () => {
 
   test('training detail shows enrollment info', async ({ page }) => {
     await page.goto(`/org/${ORG_ID}/officer/training`)
-    await page.waitForLoadState('networkidle')
-
     const trainingLink = page.locator('a[href*="/officer/training/"]:not([href*="/new"]):not([href$="/training"])').first()
     const hasTrainings = await trainingLink.isVisible({ timeout: 10000 }).catch(() => false)
 
@@ -48,8 +44,6 @@ test.describe('BR-17: Training Completion', () => {
 
   test('training list page shows trainings or create button', async ({ page }) => {
     await page.goto(`/org/${ORG_ID}/officer/training`)
-    await page.waitForLoadState('networkidle')
-
     // Should show either training list or create new training option
     const hasContent = await page.getByText(/training|create|new/i).first().isVisible({ timeout: 10000 }).catch(() => false)
     expect(hasContent).toBeTruthy()

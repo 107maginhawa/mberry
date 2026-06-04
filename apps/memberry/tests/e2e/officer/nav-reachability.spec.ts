@@ -12,8 +12,6 @@ test.describe('Officer Navigation Reachability', () => {
 
   test('officer dashboard shows officer sidebar with all sections', async ({ page }) => {
     await page.goto(`/org/${ORG_ID}/officer/dashboard`)
-    await page.waitForLoadState('networkidle')
-
     // Verify officer sidebar sections exist
     const sidebar = page.locator('aside')
     await expect(sidebar).toBeVisible({ timeout: 10000 })
@@ -28,8 +26,6 @@ test.describe('Officer Navigation Reachability', () => {
 
   test('officer sidebar nav items link to correct routes', async ({ page }) => {
     await page.goto(`/org/${ORG_ID}/officer/dashboard`)
-    await page.waitForLoadState('networkidle')
-
     const sidebar = page.locator('aside nav')
 
     // Verify key nav items exist and have correct hrefs
@@ -55,8 +51,6 @@ test.describe('Officer Navigation Reachability', () => {
 
   test('clicking Roster in sidebar navigates to roster page', async ({ page }) => {
     await page.goto(`/org/${ORG_ID}/officer/dashboard`)
-    await page.waitForLoadState('networkidle')
-
     await page.locator('aside nav').getByRole('link', { name: 'Roster', exact: true }).click()
     await page.waitForLoadState('networkidle')
 
@@ -66,8 +60,6 @@ test.describe('Officer Navigation Reachability', () => {
 
   test('clicking Events in sidebar navigates to events page', async ({ page }) => {
     await page.goto(`/org/${ORG_ID}/officer/dashboard`)
-    await page.waitForLoadState('networkidle')
-
     await page.locator('aside nav').getByRole('link', { name: 'Events', exact: true }).click()
     await page.waitForLoadState('networkidle')
 
@@ -76,8 +68,6 @@ test.describe('Officer Navigation Reachability', () => {
 
   test('officer sidebar shows user name and role', async ({ page }) => {
     await page.goto(`/org/${ORG_ID}/officer/dashboard`)
-    await page.waitForLoadState('networkidle')
-
     const sidebar = page.locator('aside')
     // User name should be visible (Maria Santos or similar)
     const hasName = await sidebar.getByText(/Maria|Santos/i).first().isVisible().catch(() => false)
@@ -88,8 +78,6 @@ test.describe('Officer Navigation Reachability', () => {
 
   test('member dashboard shows member sidebar, not officer sidebar', async ({ page }) => {
     await page.goto('/dashboard')
-    await page.waitForLoadState('networkidle')
-
     const sidebar = page.locator('aside')
     await expect(sidebar).toBeVisible({ timeout: 10000 })
 

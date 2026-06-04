@@ -12,8 +12,6 @@ test.describe('Mobile: Member Dashboard', () => {
 
   test('dashboard renders without horizontal overflow', async ({ page }) => {
     await page.goto('/dashboard')
-    await page.waitForLoadState('networkidle')
-
     // Verify page loaded
     await expect(page.locator('body')).toBeVisible()
 
@@ -26,8 +24,6 @@ test.describe('Mobile: Member Dashboard', () => {
 
   test('member organizations page is usable at mobile width', async ({ page }) => {
     await page.goto('/my/organizations')
-    await page.waitForLoadState('networkidle')
-
     // Verify content loads
     await expect(page.locator('body')).toBeVisible()
 
@@ -40,8 +36,6 @@ test.describe('Mobile: Member Dashboard', () => {
 
   test('member events page renders at mobile width', async ({ page }) => {
     await page.goto('/my/events')
-    await page.waitForLoadState('networkidle')
-
     await expect(page.locator('body')).toBeVisible()
 
     const hasOverflow = await page.evaluate(() => {
@@ -58,8 +52,6 @@ test.describe('Mobile: Officer Navigation', () => {
 
   test('officer dashboard loads without horizontal overflow', async ({ page }) => {
     await page.goto(`/org/${ORG_ID}/officer/dashboard`)
-    await page.waitForLoadState('networkidle')
-
     await expect(page.locator('body')).toBeVisible()
 
     const hasOverflow = await page.evaluate(() => {
@@ -70,8 +62,6 @@ test.describe('Mobile: Officer Navigation', () => {
 
   test('officer roster page renders at mobile width', async ({ page }) => {
     await page.goto(`/org/${ORG_ID}/officer/roster`)
-    await page.waitForLoadState('networkidle')
-
     await expect(page.locator('body')).toBeVisible()
 
     const hasOverflow = await page.evaluate(() => {
@@ -82,8 +72,6 @@ test.describe('Mobile: Officer Navigation', () => {
 
   test('officer events page renders at mobile width', async ({ page }) => {
     await page.goto(`/org/${ORG_ID}/officer/events`)
-    await page.waitForLoadState('networkidle')
-
     await expect(page.locator('body')).toBeVisible()
 
     const hasOverflow = await page.evaluate(() => {
@@ -97,8 +85,6 @@ test.describe('Mobile: Dues & Payments', () => {
   test('dues page renders without overflow for treasurer', async ({ page }) => {
     await signInAsTreasurer(page)
     await page.goto(`/org/${ORG_ID}/officer/payments`)
-    await page.waitForLoadState('networkidle')
-
     await expect(page.locator('body')).toBeVisible()
 
     const hasOverflow = await page.evaluate(() => {
@@ -110,8 +96,6 @@ test.describe('Mobile: Dues & Payments', () => {
   test('payment form page is usable at mobile width', async ({ page }) => {
     await signInAsTreasurer(page)
     await page.goto(`/org/${ORG_ID}/officer/payments/new`)
-    await page.waitForLoadState('networkidle')
-
     await expect(page.locator('body')).toBeVisible()
 
     // Check no horizontal overflow
@@ -138,8 +122,6 @@ test.describe('Mobile: Member Org Page', () => {
   test('org home page renders at mobile width', async ({ page }) => {
     await signInAsMember(page)
     await page.goto(`/org/pda-metro-manila`)
-    await page.waitForLoadState('networkidle')
-
     await expect(page.locator('body')).toBeVisible()
 
     const hasOverflow = await page.evaluate(() => {

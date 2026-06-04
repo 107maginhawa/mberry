@@ -12,8 +12,6 @@ test.beforeAll(async () => {
 test.describe('BR-25: OTP Registration', () => {
   test('signup page is accessible', async ({ page }) => {
     await page.goto('/auth/sign-up')
-    await page.waitForLoadState('networkidle')
-
     // Should show signup form
     const hasForm = await page.getByRole('button', { name: /create|sign up|register/i }).isVisible({ timeout: 10000 }).catch(() => false)
     expect(hasForm).toBeTruthy()
@@ -21,8 +19,6 @@ test.describe('BR-25: OTP Registration', () => {
 
   test('signup requires name, email, and password', async ({ page }) => {
     await page.goto('/auth/sign-up')
-    await page.waitForLoadState('networkidle')
-
     // All required fields should be present
     const hasName = await page.getByLabel(/name/i).isVisible({ timeout: 10000 }).catch(() => false)
     const hasEmail = await page.getByLabel(/email/i).isVisible({ timeout: 5000 }).catch(() => false)
@@ -40,8 +36,6 @@ test.describe('BR-25: OTP Registration', () => {
     const email = `otp-test-${timestamp}@memberry.ph`
 
     await page.goto('/auth/sign-up')
-    await page.waitForLoadState('networkidle')
-
     await page.getByLabel('Name', { exact: true }).fill(`OTP Test ${timestamp}`)
     await page.getByLabel('Email', { exact: true }).fill(email)
 

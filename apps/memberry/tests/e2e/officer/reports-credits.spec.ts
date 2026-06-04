@@ -11,8 +11,6 @@ test.describe('Credit Compliance Report', () => {
 
   test('report page loads with heading and summary cards', async ({ page }) => {
     await page.goto(`/org/${ORG_ID}/officer/reports/credits`)
-    await page.waitForLoadState('networkidle')
-
     await expect(
       page.getByRole('heading', { name: /credit compliance report/i }),
     ).toBeVisible({ timeout: 10000 })
@@ -24,8 +22,6 @@ test.describe('Credit Compliance Report', () => {
 
   test('filter buttons update the member table', async ({ page }) => {
     await page.goto(`/org/${ORG_ID}/officer/reports/credits`)
-    await page.waitForLoadState('networkidle')
-
     // Table should be visible
     const table = page.locator('table')
     await expect(table).toBeVisible({ timeout: 10000 })
@@ -42,8 +38,6 @@ test.describe('Credit Compliance Report', () => {
 
   test('no NaN or Infinity visible in progress bars', async ({ page }) => {
     await page.goto(`/org/${ORG_ID}/officer/reports/credits`)
-    await page.waitForLoadState('networkidle')
-
     // Check that no NaN or Infinity text appears on the page
     const pageText = await page.locator('body').textContent()
     expect(pageText).not.toContain('NaN')

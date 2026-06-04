@@ -11,15 +11,11 @@ test.describe('Member Dues (/org/$orgId/dues)', () => {
 
   test('shows My Dues heading', async ({ page }) => {
     await page.goto(`/org/${ORG_ID}/dues`)
-    await page.waitForLoadState('networkidle')
-
     await expect(page.getByRole('heading', { name: 'My Dues', level: 1 })).toBeVisible({ timeout: 10000 })
   })
 
   test('shows dues status', async ({ page }) => {
     await page.goto(`/org/${ORG_ID}/dues`)
-    await page.waitForLoadState('networkidle')
-
     const payDues = page.getByText('Pay Dues')
     const allPaid = page.getByText('All Dues Paid')
     const periodEnded = page.getByText('Membership Period Ended')
@@ -33,8 +29,6 @@ test.describe('Member Dues (/org/$orgId/dues)', () => {
 
   test('shows payment proof upload or paid status', async ({ page }) => {
     await page.goto(`/org/${ORG_ID}/dues`)
-    await page.waitForLoadState('networkidle')
-
     const proofUpload = page.getByText('Upload your GCash screenshot')
     const allPaid = page.getByText('All Dues Paid')
     const periodEnded = page.getByText('Membership Period Ended')

@@ -12,8 +12,6 @@ test.describe('Officer Detail Pages', () => {
 
   test('roster member detail page loads', async ({ page }) => {
     await page.goto(`/org/${ORG_ID}/officer/roster/${FAKE_ID}`)
-    await page.waitForLoadState('networkidle')
-
     const hasContent = await page.locator('h1, h2, [role="heading"]').first().isVisible().catch(() => false)
     const hasEmptyState = await page.getByText(/not found|no data|does not exist/i).first().isVisible().catch(() => false)
     expect(hasContent || hasEmptyState).toBeTruthy()
@@ -21,8 +19,6 @@ test.describe('Officer Detail Pages', () => {
 
   test('event detail page loads', async ({ page }) => {
     await page.goto(`/org/${ORG_ID}/officer/events/${FAKE_ID}`)
-    await page.waitForLoadState('networkidle')
-
     const hasContent = await page.locator('h1, h2, [role="heading"]').first().isVisible().catch(() => false)
     const hasEmptyState = await page.getByText(/not found|no data|does not exist/i).first().isVisible().catch(() => false)
     expect(hasContent || hasEmptyState).toBeTruthy()
@@ -30,8 +26,6 @@ test.describe('Officer Detail Pages', () => {
 
   test('election detail page loads', async ({ page }) => {
     await page.goto(`/org/${ORG_ID}/officer/elections/${FAKE_ID}`)
-    await page.waitForLoadState('networkidle')
-
     const hasContent = await page.locator('h1, h2, [role="heading"]').first().isVisible().catch(() => false)
     const hasEmptyState = await page.getByText(/not found|no data|does not exist/i).first().isVisible().catch(() => false)
     expect(hasContent || hasEmptyState).toBeTruthy()
@@ -39,8 +33,6 @@ test.describe('Officer Detail Pages', () => {
 
   test('communication detail page loads', async ({ page }) => {
     await page.goto(`/org/${ORG_ID}/officer/communications/${FAKE_ID}`)
-    await page.waitForLoadState('networkidle')
-
     const hasContent = await page.locator('h1, h2, [role="heading"]').first().isVisible().catch(() => false)
     const hasEmptyState = await page.getByText(/not found|no data|does not exist/i).first().isVisible().catch(() => false)
     expect(hasContent || hasEmptyState).toBeTruthy()
@@ -48,8 +40,6 @@ test.describe('Officer Detail Pages', () => {
 
   test('payment detail page loads', async ({ page }) => {
     await page.goto(`/org/${ORG_ID}/officer/payments/${FAKE_ID}`)
-    await page.waitForLoadState('networkidle')
-
     const hasContent = await page.locator('h1, h2, [role="heading"]').first().isVisible().catch(() => false)
     const hasEmptyState = await page.getByText(/not found|no data|does not exist/i).first().isVisible().catch(() => false)
     expect(hasContent || hasEmptyState).toBeTruthy()
@@ -57,8 +47,6 @@ test.describe('Officer Detail Pages', () => {
 
   test('event attendance page loads', async ({ page }) => {
     await page.goto(`/org/${ORG_ID}/officer/events/${FAKE_ID}/attendance`)
-    await page.waitForLoadState('networkidle')
-
     const hasContent = await page.locator('h1, h2, [role="heading"]').first().isVisible().catch(() => false)
     const hasEmptyState = await page.getByText(/not found|no data|does not exist/i).first().isVisible().catch(() => false)
     expect(hasContent || hasEmptyState).toBeTruthy()

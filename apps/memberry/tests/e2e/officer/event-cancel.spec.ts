@@ -13,8 +13,6 @@ test.describe('Officer Event Cancellation', () => {
 
   test('event detail page shows status badge and action buttons', async ({ page }) => {
     await page.goto(`/org/${ORG_ID}/officer/events`)
-    await page.waitForLoadState('networkidle')
-
     // Navigate to a seeded event detail
     await page.getByRole('link', { name: /General Assembly/i }).click()
     await page.waitForLoadState('networkidle')
@@ -33,8 +31,6 @@ test.describe('Officer Event Cancellation', () => {
 
   test('event detail shows Duplicate and Edit buttons for active events', async ({ page }) => {
     await page.goto(`/org/${ORG_ID}/officer/events`)
-    await page.waitForLoadState('networkidle')
-
     await page.getByRole('link', { name: /General Assembly/i }).click()
     await page.waitForLoadState('networkidle')
 
@@ -52,8 +48,6 @@ test.describe('Officer Event Cancellation', () => {
 
   test('event detail has tabs: Details, Registered, Check-in', async ({ page }) => {
     await page.goto(`/org/${ORG_ID}/officer/events`)
-    await page.waitForLoadState('networkidle')
-
     await page.getByRole('link', { name: /General Assembly/i }).click()
     await page.waitForLoadState('networkidle')
 
@@ -73,8 +67,6 @@ test.describe('Officer Event Cancellation', () => {
 
   test('switching to Registered tab shows registrations or empty state', async ({ page }) => {
     await page.goto(`/org/${ORG_ID}/officer/events`)
-    await page.waitForLoadState('networkidle')
-
     await page.getByRole('link', { name: /General Assembly/i }).click()
     await page.waitForLoadState('networkidle')
 
@@ -91,8 +83,6 @@ test.describe('Officer Event Cancellation', () => {
   test('cancelled event hides Edit button', async ({ page }) => {
     // Navigate to events list and look for a cancelled event
     await page.goto(`/org/${ORG_ID}/officer/events`)
-    await page.waitForLoadState('networkidle')
-
     // Navigate to Dental Mission (second seeded event)
     const missionLink = page.getByRole('link', { name: /Dental Mission/i }).first()
     const hasMission = await missionLink.isVisible({ timeout: 10000 }).catch(() => false)
@@ -115,8 +105,6 @@ test.describe('Officer Event Cancellation', () => {
 
   test('event detail page shows event information (date, location, registration count)', async ({ page }) => {
     await page.goto(`/org/${ORG_ID}/officer/events`)
-    await page.waitForLoadState('networkidle')
-
     await page.getByRole('link', { name: /General Assembly/i }).click()
     await page.waitForLoadState('networkidle')
 

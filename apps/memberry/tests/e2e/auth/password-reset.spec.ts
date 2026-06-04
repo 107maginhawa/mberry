@@ -12,8 +12,6 @@ test.beforeAll(async () => {
 test.describe('M-13: Password Reset', () => {
   test('forgot password page is accessible', async ({ page }) => {
     await page.goto('/auth/forgot-password')
-    await page.waitForLoadState('networkidle')
-
     // Better-auth-ui renders the forgot password form
     const hasEmailInput = await page.getByLabel(/email/i).isVisible({ timeout: 10000 }).catch(() => false)
     const hasForm = await page.locator('form').isVisible({ timeout: 5000 }).catch(() => false)
@@ -22,8 +20,6 @@ test.describe('M-13: Password Reset', () => {
 
   test('forgot password form accepts email', async ({ page }) => {
     await page.goto('/auth/forgot-password')
-    await page.waitForLoadState('networkidle')
-
     const emailInput = page.getByLabel(/email/i)
     const hasInput = await emailInput.isVisible({ timeout: 10000 }).catch(() => false)
 
@@ -43,8 +39,6 @@ test.describe('M-13: Password Reset', () => {
     await deleteAllMessages()
 
     await page.goto('/auth/forgot-password')
-    await page.waitForLoadState('networkidle')
-
     const emailInput = page.getByLabel(/email/i)
     await emailInput.fill('test@memberry.ph')
 
@@ -67,8 +61,6 @@ test.describe('M-13: Password Reset', () => {
     await deleteAllMessages()
 
     await page.goto('/auth/forgot-password')
-    await page.waitForLoadState('networkidle')
-
     await page.getByLabel(/email/i).fill('test@memberry.ph')
     await page.getByRole('button', { name: /reset|send|submit/i }).first().click()
     await page.waitForTimeout(3000)
@@ -79,8 +71,6 @@ test.describe('M-13: Password Reset', () => {
 
     if (resetLink) {
       await page.goto(resetLink)
-      await page.waitForLoadState('networkidle')
-
       // Should show new password form
       const hasPasswordField = await page.getByLabel(/password/i).first().isVisible({ timeout: 10000 }).catch(() => false)
       expect(hasPasswordField).toBeTruthy()

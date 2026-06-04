@@ -12,16 +12,12 @@ test.describe('P3 Treasurer Journey', () => {
 
   test('CT-1: treasurer accesses officer dashboard', async ({ page }) => {
     await page.goto(`/org/${ORG_ID}/officer/dashboard`)
-    await page.waitForLoadState('networkidle')
-
     const hasDashboard = await page.getByText(/dashboard|overview|metric/i).first().isVisible({ timeout: 10000 }).catch(() => false)
     expect(hasDashboard).toBeTruthy()
   })
 
   test('CT-2: treasurer views payment list with real data', async ({ page }) => {
     await page.goto(`/org/${ORG_ID}/officer/payments`)
-    await page.waitForLoadState('networkidle')
-
     // Should see payments with amounts and member names
     const hasPayments = await page.getByText(/payment|₱|amount|member/i).first().isVisible({ timeout: 10000 }).catch(() => false)
     expect(hasPayments).toBeTruthy()
@@ -29,8 +25,6 @@ test.describe('P3 Treasurer Journey', () => {
 
   test('CT-3: treasurer can access payments page with action buttons', async ({ page }) => {
     await page.goto(`/org/${ORG_ID}/officer/payments`)
-    await page.waitForLoadState('networkidle')
-
     // Should see payment data and some action button (Record, Add, New, etc.)
     const hasPaymentContent = await page.getByText(/payment|amount|member|₱/i).first().isVisible({ timeout: 10000 }).catch(() => false)
     const hasBtn = await page.getByRole('button').first().isVisible({ timeout: 5000 }).catch(() => false)
@@ -40,32 +34,24 @@ test.describe('P3 Treasurer Journey', () => {
 
   test('CT-4: treasurer can access dues configuration', async ({ page }) => {
     await page.goto(`/org/${ORG_ID}/officer/settings/dues`)
-    await page.waitForLoadState('networkidle')
-
     const hasDuesConfig = await page.getByText(/dues.*config|amount|billing.*cycle|period/i).first().isVisible({ timeout: 10000 }).catch(() => false)
     expect(hasDuesConfig).toBeTruthy()
   })
 
   test('CT-5: treasurer can view fund allocation', async ({ page }) => {
     await page.goto(`/org/${ORG_ID}/officer/settings/funds`)
-    await page.waitForLoadState('networkidle')
-
     const hasFunds = await page.getByText(/fund|allocation|percent|chapter|national/i).first().isVisible({ timeout: 10000 }).catch(() => false)
     expect(hasFunds).toBeTruthy()
   })
 
   test('CT-6: treasurer can access financial reports', async ({ page }) => {
     await page.goto(`/org/${ORG_ID}/officer/settings/reports`)
-    await page.waitForLoadState('networkidle')
-
     const hasReports = await page.getByText(/report|collection|revenue|financial/i).first().isVisible({ timeout: 10000 }).catch(() => false)
     expect(hasReports).toBeTruthy()
   })
 
   test('CT-7: treasurer can view payment corrections', async ({ page }) => {
     await page.goto(`/org/${ORG_ID}/officer/payments`)
-    await page.waitForLoadState('networkidle')
-
     // Payment list should show correction/refund options or history
     const hasPaymentActions = await page.getByText(/payment|history|status/i).first().isVisible({ timeout: 10000 }).catch(() => false)
     expect(hasPaymentActions).toBeTruthy()
@@ -73,8 +59,6 @@ test.describe('P3 Treasurer Journey', () => {
 
   test('CT-8: treasurer sidebar shows finance navigation', async ({ page }) => {
     await page.goto(`/org/${ORG_ID}/officer/dashboard`)
-    await page.waitForLoadState('networkidle')
-
     // Treasurer should see finance-related nav items
     const financeNav = page.getByText(/finance|payment|dues|fund/i)
     const count = await financeNav.count()
@@ -84,25 +68,21 @@ test.describe('P3 Treasurer Journey', () => {
   test('full journey: dashboard → payments → config → reports', async ({ page }) => {
     await test.step('officer dashboard', async () => {
       await page.goto(`/org/${ORG_ID}/officer/dashboard`)
-      await page.waitForLoadState('networkidle')
       await expect(page).toHaveURL(/officer/)
     })
 
     await test.step('payments', async () => {
       await page.goto(`/org/${ORG_ID}/officer/payments`)
-      await page.waitForLoadState('networkidle')
       await expect(page).toHaveURL(/payments/)
     })
 
     await test.step('dues config', async () => {
       await page.goto(`/org/${ORG_ID}/officer/settings/dues`)
-      await page.waitForLoadState('networkidle')
       await expect(page).toHaveURL(/settings/)
     })
 
     await test.step('financial reports', async () => {
       await page.goto(`/org/${ORG_ID}/officer/settings/reports`)
-      await page.waitForLoadState('networkidle')
       await expect(page).toHaveURL(/settings/)
     })
   })

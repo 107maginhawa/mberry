@@ -8,23 +8,18 @@ test.describe('BR-26: Session Management', () => {
 
     // Navigate to multiple pages — session should persist
     await page.goto('/my/profile')
-    await page.waitForLoadState('networkidle')
     await expect(page).not.toHaveURL(/\/auth\/sign-in/)
 
     await page.goto('/my/settings')
-    await page.waitForLoadState('networkidle')
     await expect(page).not.toHaveURL(/\/auth\/sign-in/)
 
     await page.goto('/my/credits')
-    await page.waitForLoadState('networkidle')
     await expect(page).not.toHaveURL(/\/auth\/sign-in/)
   })
 
   test('security settings page accessible', async ({ page }) => {
     await signInAsMember(page)
     await page.goto('/my/settings')
-    await page.waitForLoadState('networkidle')
-
     // Security tab must exist — core settings feature
     const securityTab = page.getByRole('tab', { name: /security/i })
     await expect(securityTab).toBeVisible({ timeout: 10000 })
@@ -39,7 +34,6 @@ test.describe('BR-26: Session Management', () => {
   test('unauthenticated access redirects to sign-in', async ({ page }) => {
     // Don't sign in — access protected route directly
     await page.goto('/my/profile')
-    await page.waitForLoadState('networkidle')
     await page.waitForTimeout(3000)
 
     // Should redirect to auth page

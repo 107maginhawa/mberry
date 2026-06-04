@@ -11,8 +11,6 @@ test.describe('CT-9: Payment Correction', () => {
 
   test('payment detail shows all payment fields', async ({ page }) => {
     await page.goto(`/org/${ORG_ID}/officer/payments`)
-    await page.waitForLoadState('networkidle')
-
     const paymentLink = page.locator('a[href*="/officer/payments/"]:not([href*="/new"])').first()
     const hasPayments = await paymentLink.isVisible({ timeout: 10000 }).catch(() => false)
 
@@ -28,8 +26,6 @@ test.describe('CT-9: Payment Correction', () => {
 
   test('payment detail shows fund allocations when present', async ({ page }) => {
     await page.goto(`/org/${ORG_ID}/officer/payments`)
-    await page.waitForLoadState('networkidle')
-
     const paymentLink = page.locator('a[href*="/officer/payments/"]:not([href*="/new"])').first()
     const hasPayments = await paymentLink.isVisible({ timeout: 10000 }).catch(() => false)
 

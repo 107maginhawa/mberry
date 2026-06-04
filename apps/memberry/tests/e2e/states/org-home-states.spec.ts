@@ -24,8 +24,6 @@ test.describe('Org Home — Interaction States', () => {
   test('success: shows Organization Home heading with sections', async ({ page }) => {
     await signIn(page, SEED_MEMBER_EMAIL, TEST_PASSWORD)
     await page.goto(`/org/${ORG_ID}/home`)
-    await page.waitForLoadState('networkidle')
-
     await expect(
       page.getByRole('heading', { name: 'Organization Home' }),
     ).toBeVisible({ timeout: 10000 })
@@ -40,8 +38,6 @@ test.describe('Org Home — Interaction States', () => {
   test('success: View All links navigate to correct sections', async ({ page }) => {
     await signIn(page, SEED_MEMBER_EMAIL, TEST_PASSWORD)
     await page.goto(`/org/${ORG_ID}/home`)
-    await page.waitForLoadState('networkidle')
-
     const viewAllLinks = page.getByRole('link', { name: /view all/i })
     const count = await viewAllLinks.count()
     expect(count).toBeGreaterThanOrEqual(1)
@@ -49,8 +45,6 @@ test.describe('Org Home — Interaction States', () => {
 
   test('permission-error: unauthenticated user redirects to sign-in', async ({ page }) => {
     await page.goto(`/org/${ORG_ID}/home`)
-    await page.waitForLoadState('networkidle')
-
     const isOnSignIn = page.url().includes('/auth/sign-in')
     const hasAuthPrompt = await page.getByText(/sign in|log in/i).first().isVisible().catch(() => false)
 
@@ -62,8 +56,6 @@ test.describe('Org Home — Interaction States', () => {
 
     const fakeOrgId = '00000000-0000-0000-0000-000000000000'
     await page.goto(`/org/${fakeOrgId}/home`)
-    await page.waitForLoadState('networkidle')
-
     const hasError = await page.getByText(/not found|error|no access|not a member/i).first().isVisible().catch(() => false)
     const redirected = !page.url().includes(fakeOrgId)
     expect(hasError || redirected).toBeTruthy()
@@ -72,8 +64,6 @@ test.describe('Org Home — Interaction States', () => {
   test('a11y: baseline accessibility check passes', async ({ page }) => {
     await signIn(page, SEED_MEMBER_EMAIL, TEST_PASSWORD)
     await page.goto(`/org/${ORG_ID}/home`)
-    await page.waitForLoadState('networkidle')
-
     await expectNoA11yViolations(page, {
       exclude: ['[data-radix-popper-content-wrapper]'],
     })

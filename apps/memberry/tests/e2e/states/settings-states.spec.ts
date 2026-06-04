@@ -24,8 +24,6 @@ test.describe('Settings — Interaction States', () => {
   test('success: dues config form renders with populated amount field', async ({ page }) => {
     await signIn(page, SEED_OFFICER_EMAIL, TEST_PASSWORD)
     await page.goto(`/org/${ORG_ID}/officer/settings/dues`)
-    await page.waitForLoadState('networkidle')
-
     await expect(
       page.getByRole('heading', { name: /dues configuration/i }),
     ).toBeVisible({ timeout: 10000 })
@@ -38,8 +36,6 @@ test.describe('Settings — Interaction States', () => {
   test('success: fund allocation page shows 3 funds totaling 100%', async ({ page }) => {
     await signIn(page, SEED_OFFICER_EMAIL, TEST_PASSWORD)
     await page.goto(`/org/${ORG_ID}/officer/settings/funds`)
-    await page.waitForLoadState('networkidle')
-
     await expect(
       page.getByRole('heading', { name: /fund allocation/i }),
     ).toBeVisible({ timeout: 10000 })
@@ -53,8 +49,6 @@ test.describe('Settings — Interaction States', () => {
   test('validation-error: dues config rejects invalid amount', async ({ page }) => {
     await signIn(page, SEED_OFFICER_EMAIL, TEST_PASSWORD)
     await page.goto(`/org/${ORG_ID}/officer/settings/dues`)
-    await page.waitForLoadState('networkidle')
-
     const amountInput = page.getByRole('spinbutton').first()
     const hasAmount = await amountInput.isVisible().catch(() => false)
 
@@ -81,8 +75,6 @@ test.describe('Settings — Interaction States', () => {
   test('permission-error: regular member cannot access officer settings', async ({ page }) => {
     await signIn(page, SEED_MEMBER_EMAIL, TEST_PASSWORD)
     await page.goto(`/org/${ORG_ID}/officer/settings/dues`)
-    await page.waitForLoadState('networkidle')
-
     const isRedirected = !page.url().includes('/officer/settings')
     const hasForbidden = await page.getByText(/forbidden|access denied|not authorized|officers only/i).first().isVisible().catch(() => false)
 
@@ -92,8 +84,6 @@ test.describe('Settings — Interaction States', () => {
   test('a11y: baseline accessibility check passes on dues config', async ({ page }) => {
     await signIn(page, SEED_OFFICER_EMAIL, TEST_PASSWORD)
     await page.goto(`/org/${ORG_ID}/officer/settings/dues`)
-    await page.waitForLoadState('networkidle')
-
     await expectNoA11yViolations(page, {
       exclude: ['[data-radix-popper-content-wrapper]'],
     })

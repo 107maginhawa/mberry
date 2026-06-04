@@ -11,8 +11,6 @@ test.describe('Feedback: Officer Reviews', () => {
 
   test('reviews page loads without error', async ({ page }) => {
     await page.goto(`/org/${ORG_ID}/officer/reviews`)
-    await page.waitForLoadState('networkidle')
-
     // Should NOT show error state
     await expect(page.getByText('Failed to load reviews')).not.toBeVisible()
 
@@ -22,8 +20,6 @@ test.describe('Feedback: Officer Reviews', () => {
 
   test('page subtitle renders (no crash)', async ({ page }) => {
     await page.goto(`/org/${ORG_ID}/officer/reviews`)
-    await page.waitForLoadState('networkidle')
-
     // Subtitle always renders regardless of data state
     await expect(
       page.getByText('Member feedback and NPS scores'),
@@ -39,8 +35,6 @@ test.describe('Feedback: Officer Reviews', () => {
     })
 
     await page.goto(`/org/${ORG_ID}/officer/reviews`)
-    await page.waitForLoadState('networkidle')
-
     expect(apiErrors).toEqual([])
   })
 })

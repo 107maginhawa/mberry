@@ -11,8 +11,6 @@ test.describe('Officer Certificate Management', () => {
 
   test('certificate management page renders with heading', async ({ page }) => {
     await page.goto(`/org/${ORG_ID}/officer/certificates`)
-    await page.waitForLoadState('networkidle')
-
     await expect(
       page.getByText(/certificate management/i).first(),
     ).toBeVisible({ timeout: 10000 })
@@ -20,8 +18,6 @@ test.describe('Officer Certificate Management', () => {
 
   test('shows bulk issue section with required fields', async ({ page }) => {
     await page.goto(`/org/${ORG_ID}/officer/certificates`)
-    await page.waitForLoadState('networkidle')
-
     await expect(
       page.getByText(/bulk issue certificates/i),
     ).toBeVisible({ timeout: 10000 })
@@ -42,8 +38,6 @@ test.describe('Officer Certificate Management', () => {
 
   test('shows verify certificate section', async ({ page }) => {
     await page.goto(`/org/${ORG_ID}/officer/certificates`)
-    await page.waitForLoadState('networkidle')
-
     await expect(
       page.getByText(/verify certificate/i),
     ).toBeVisible({ timeout: 10000 })
@@ -59,8 +53,6 @@ test.describe('Officer Certificate Management', () => {
 
   test('issue button shows validation error when fields are empty', async ({ page }) => {
     await page.goto(`/org/${ORG_ID}/officer/certificates`)
-    await page.waitForLoadState('networkidle')
-
     // Click issue without filling required fields
     await page.getByRole('button', { name: /issue certificates/i }).click()
 
@@ -72,8 +64,6 @@ test.describe('Officer Certificate Management', () => {
 
   test('can fill bulk issue form fields', async ({ page }) => {
     await page.goto(`/org/${ORG_ID}/officer/certificates`)
-    await page.waitForLoadState('networkidle')
-
     // Fill in training title
     const titleInput = page.getByPlaceholder(/annual dental conference/i)
     await expect(titleInput).toBeVisible({ timeout: 10000 })
@@ -97,8 +87,6 @@ test.describe('Officer Certificate Management', () => {
 
   test('verify with invalid certificate number shows error', async ({ page }) => {
     await page.goto(`/org/${ORG_ID}/officer/certificates`)
-    await page.waitForLoadState('networkidle')
-
     const certInput = page.getByPlaceholder(/PDA-2026-0001/i)
     await expect(certInput).toBeVisible({ timeout: 10000 })
     await certInput.fill('INVALID-CERT-999')

@@ -37,8 +37,6 @@ test.describe('Dashboard — Interaction States', () => {
   test('success: shows greeting and org card with real data', async ({ page }) => {
     await signIn(page, MEMBER_EMAIL, MEMBER_PASSWORD)
     await page.goto('/dashboard')
-    await page.waitForLoadState('networkidle')
-
     // Time-based greeting
     const greeting = page.getByText(/good (morning|afternoon|evening)/i)
     await expect(greeting).toBeVisible({ timeout: 10000 })
@@ -56,16 +54,12 @@ test.describe('Dashboard — Interaction States', () => {
   test('success: Your Organizations section lists at least one org', async ({ page }) => {
     await signIn(page, MEMBER_EMAIL, MEMBER_PASSWORD)
     await page.goto('/dashboard')
-    await page.waitForLoadState('networkidle')
-
     await expect(page.getByText('Your Organizations')).toBeVisible({ timeout: 10000 })
   })
 
   test('disabled: credit progress shows correct numeric values', async ({ page }) => {
     await signIn(page, MEMBER_EMAIL, MEMBER_PASSWORD)
     await page.goto('/dashboard')
-    await page.waitForLoadState('networkidle')
-
     // Credit progress section should show numeric credit values
     await expect(page.getByText('Credit Progress')).toBeVisible({ timeout: 10000 })
 
@@ -82,8 +76,6 @@ test.describe('Dashboard — Interaction States', () => {
   test('permission-error: unauthenticated user redirects to sign-in', async ({ page }) => {
     // Go directly without signing in
     await page.goto('/dashboard')
-    await page.waitForLoadState('networkidle')
-
     // Should redirect to sign-in or show auth prompt
     const isOnSignIn = page.url().includes('/auth/sign-in')
     const hasSignInForm = await page.getByLabel('Email', { exact: true }).isVisible().catch(() => false)
@@ -95,8 +87,6 @@ test.describe('Dashboard — Interaction States', () => {
   test('a11y: baseline accessibility check passes', async ({ page }) => {
     await signIn(page, MEMBER_EMAIL, MEMBER_PASSWORD)
     await page.goto('/dashboard')
-    await page.waitForLoadState('networkidle')
-
     await expectNoA11yViolations(page, {
       // Exclude third-party widgets that may have known issues
       exclude: ['[data-radix-popper-content-wrapper]'],

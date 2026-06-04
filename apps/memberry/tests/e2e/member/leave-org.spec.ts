@@ -7,7 +7,6 @@ test.describe('M-27: Leave Organization', () => {
   test.beforeEach(async ({ page }) => {
     await signInAsMember(page)
     await page.goto('/my/organizations')
-    await page.waitForLoadState('networkidle')
   })
 
   test('Leave button is visible for active memberships', async ({ page }) => {

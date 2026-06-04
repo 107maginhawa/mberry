@@ -3,8 +3,6 @@ import { test, expect } from '../helpers/test-fixture'
 test.describe('Discover Events (/discover/events) — Public', () => {
   test('page loads without authentication', async ({ page }) => {
     await page.goto('/discover/events')
-    await page.waitForLoadState('networkidle')
-
     await expect(
       page.getByText(/discover events/i).first(),
     ).toBeVisible({ timeout: 10000 })
@@ -12,8 +10,6 @@ test.describe('Discover Events (/discover/events) — Public', () => {
 
   test('shows search input', async ({ page }) => {
     await page.goto('/discover/events')
-    await page.waitForLoadState('networkidle')
-
     await expect(
       page.getByPlaceholder(/search events/i),
     ).toBeVisible({ timeout: 10000 })
@@ -21,8 +17,6 @@ test.describe('Discover Events (/discover/events) — Public', () => {
 
   test('shows event type filter dropdown', async ({ page }) => {
     await page.goto('/discover/events')
-    await page.waitForLoadState('networkidle')
-
     // Event type select should have options like Seminar, Social, etc.
     const typeSelect = page.getByText(/all types/i).first()
     await expect(typeSelect).toBeVisible({ timeout: 10000 })
@@ -30,8 +24,6 @@ test.describe('Discover Events (/discover/events) — Public', () => {
 
   test('shows pricing filter dropdown', async ({ page }) => {
     await page.goto('/discover/events')
-    await page.waitForLoadState('networkidle')
-
     // Pricing filter with Free/Paid options
     const pricingTrigger = page.getByRole('combobox').last()
     const hasPricing = await pricingTrigger.isVisible({ timeout: 5000 }).catch(() => false)
@@ -50,8 +42,6 @@ test.describe('Discover Events (/discover/events) — Public', () => {
 
   test('displays events or empty state', async ({ page }) => {
     await page.goto('/discover/events')
-    await page.waitForLoadState('networkidle')
-
     // Either event cards or an empty state message
     const hasEvents = await page.getByText(/CPD|PHP|Free/i).first().isVisible({ timeout: 5000 }).catch(() => false)
     const hasEmpty = await page.getByText(/no public events found/i).isVisible({ timeout: 5000 }).catch(() => false)
@@ -64,8 +54,6 @@ test.describe('Discover Events (/discover/events) — Public', () => {
 
   test('search input filters events', async ({ page }) => {
     await page.goto('/discover/events')
-    await page.waitForLoadState('networkidle')
-
     const searchInput = page.getByPlaceholder(/search events/i)
     await expect(searchInput).toBeVisible({ timeout: 10000 })
 
@@ -81,8 +69,6 @@ test.describe('Discover Events (/discover/events) — Public', () => {
 
   test('event cards show date and pricing info', async ({ page }) => {
     await page.goto('/discover/events')
-    await page.waitForLoadState('networkidle')
-
     // If events exist, verify card structure
     const eventCards = page.locator('a[href*="/events/"]')
     const cardCount = await eventCards.count()

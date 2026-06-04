@@ -24,8 +24,6 @@ test.describe('Events — Interaction States', () => {
   test('success: org home shows Upcoming Events section with content', async ({ page }) => {
     await signIn(page, SEED_MEMBER_EMAIL, TEST_PASSWORD)
     await page.goto(`/org/${ORG_ID}/home`)
-    await page.waitForLoadState('networkidle')
-
     await expect(page.getByText('Upcoming Events').first()).toBeVisible({ timeout: 10000 })
 
     // Should have a View All link
@@ -35,8 +33,6 @@ test.describe('Events — Interaction States', () => {
   test('empty: no upcoming events shows appropriate message', async ({ page }) => {
     await signIn(page, SEED_MEMBER_EMAIL, TEST_PASSWORD)
     await page.goto(`/org/${ORG_ID}/home`)
-    await page.waitForLoadState('networkidle')
-
     // Events section is present
     await expect(page.getByText('Upcoming Events').first()).toBeVisible({ timeout: 10000 })
 
@@ -53,8 +49,6 @@ test.describe('Events — Interaction States', () => {
 
   test('permission-error: unauthenticated user cannot access org events', async ({ page }) => {
     await page.goto(`/org/${ORG_ID}/home`)
-    await page.waitForLoadState('networkidle')
-
     const isOnSignIn = page.url().includes('/auth/sign-in')
     const hasAuthPrompt = await page.getByText(/sign in|log in/i).first().isVisible().catch(() => false)
 
@@ -66,8 +60,6 @@ test.describe('Events — Interaction States', () => {
 
     const fakeOrgId = '00000000-0000-0000-0000-000000000000'
     await page.goto(`/org/${fakeOrgId}/home`)
-    await page.waitForLoadState('networkidle')
-
     const hasError = await page.getByText(/not found|error|no access|not a member/i).first().isVisible().catch(() => false)
     const redirected = !page.url().includes(fakeOrgId)
     expect(hasError || redirected).toBeTruthy()
@@ -76,8 +68,6 @@ test.describe('Events — Interaction States', () => {
   test('a11y: baseline accessibility check passes', async ({ page }) => {
     await signIn(page, SEED_MEMBER_EMAIL, TEST_PASSWORD)
     await page.goto(`/org/${ORG_ID}/home`)
-    await page.waitForLoadState('networkidle')
-
     await expectNoA11yViolations(page, {
       exclude: ['[data-radix-popper-content-wrapper]'],
     })

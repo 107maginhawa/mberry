@@ -19,7 +19,6 @@ test.describe('Directory Onboarding: signup → join org → directory profile',
 
       await test.step('profile page loads without crashing', async () => {
         await page.goto('/my/profile')
-        await page.waitForLoadState('networkidle')
         await page.waitForTimeout(2000)
 
         // Should show profile heading — person record was created by signUp helper
@@ -50,8 +49,6 @@ test.describe('Directory Onboarding: signup → join org → directory profile',
 
       await test.step('visit the org public page', async () => {
         await page.goto(`/org/${ORG_SLUG}`)
-        await page.waitForLoadState('networkidle')
-
         // Org page should render with the org name
         const hasOrgName = await page
           .getByText(/PDA Metro Manila/i)
@@ -82,7 +79,6 @@ test.describe('Directory Onboarding: signup → join org → directory profile',
 
       await test.step('navigate to officer applications', async () => {
         await page.goto(`/org/${ORG_ID}/officer/applications`)
-        await page.waitForLoadState('networkidle')
         await expect(page).toHaveURL(/applications/)
       })
 
@@ -106,7 +102,6 @@ test.describe('Directory Onboarding: signup → join org → directory profile',
 
       await test.step('navigate to member directory', async () => {
         await page.goto(`/org/${ORG_ID}/members`)
-        await page.waitForLoadState('networkidle')
       })
 
       await test.step('directory loads with search and member cards', async () => {
@@ -191,8 +186,6 @@ test.describe('Directory Onboarding: signup → join org → directory profile',
 
       await test.step('search directory for the new member', async () => {
         await page.goto(`/org/${ORG_ID}/members`)
-        await page.waitForLoadState('networkidle')
-
         const searchInput = page.getByPlaceholder(/search members/i)
         await expect(searchInput).toBeVisible({ timeout: 10000 })
 
@@ -232,8 +225,6 @@ test.describe('Directory Onboarding: signup → join org → directory profile',
 
       await test.step('3. user profile page is accessible', async () => {
         await page.goto('/my/profile')
-        await page.waitForLoadState('networkidle')
-
         const hasProfile = await page
           .getByRole('heading', { name: /profile/i })
           .isVisible({ timeout: 10000 })
@@ -243,8 +234,6 @@ test.describe('Directory Onboarding: signup → join org → directory profile',
 
       await test.step('4. user can view org public page', async () => {
         await page.goto(`/org/${ORG_SLUG}`)
-        await page.waitForLoadState('networkidle')
-
         const hasOrgContent = await page
           .getByText(/PDA Metro Manila/i)
           .first()
@@ -305,8 +294,6 @@ test.describe('Directory Onboarding: signup → join org → directory profile',
 
       await test.step('7. member directory shows the new member', async () => {
         await page.goto(`/org/${ORG_ID}/members`)
-        await page.waitForLoadState('networkidle')
-
         // Directory page should load without errors
         const searchInput = page.getByPlaceholder(/search members/i)
         const hasSearch = await searchInput.isVisible({ timeout: 10000 }).catch(() => false)

@@ -11,8 +11,6 @@ test.describe('CT-3: Payment Reconciliation', () => {
 
   test('payments page shows financial dashboard with data', async ({ page }) => {
     await page.goto(`/org/${ORG_ID}/officer/payments`)
-    await page.waitForLoadState('networkidle')
-
     // Heading must exist
     await expect(page.getByText('Dues & Payments')).toBeVisible({ timeout: 10000 })
 
@@ -24,8 +22,6 @@ test.describe('CT-3: Payment Reconciliation', () => {
 
   test('payment history table renders with structure', async ({ page }) => {
     await page.goto(`/org/${ORG_ID}/officer/payments`)
-    await page.waitForLoadState('networkidle')
-
     // Table must render with headers or empty state message — not broken rendering
     const pageText = await page.locator('body').textContent()
     expect(pageText).not.toContain('undefined undefined')
@@ -38,8 +34,6 @@ test.describe('CT-3: Payment Reconciliation', () => {
 
   test('financial report page loads with content', async ({ page }) => {
     await page.goto(`/org/${ORG_ID}/officer/reports/financial`)
-    await page.waitForLoadState('networkidle')
-
     // Must show financial report content, not just shell
     await expect(page.getByText(/financial|report|revenue|summary/i).first()).toBeVisible({ timeout: 10000 })
   })

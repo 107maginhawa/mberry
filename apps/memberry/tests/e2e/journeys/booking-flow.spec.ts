@@ -10,8 +10,6 @@ test.describe('Booking flow: client books a session', () => {
 
   test('bookings page loads with tabs and heading', async ({ page }) => {
     await page.goto('/my/bookings')
-    await page.waitForLoadState('networkidle')
-
     await expect(
       page.getByRole('heading', { name: /bookings/i }),
     ).toBeVisible({ timeout: 10000 })
@@ -27,8 +25,6 @@ test.describe('Booking flow: client books a session', () => {
 
   test('host directory shows hosts or empty state', async ({ page }) => {
     await page.goto('/my/bookings')
-    await page.waitForLoadState('networkidle')
-
     // "Find a host" tab is default
     const findTab = page.getByRole('tab', { name: /find a host/i })
     await expect(findTab).toBeVisible({ timeout: 10000 })
@@ -44,8 +40,6 @@ test.describe('Booking flow: client books a session', () => {
 
   test('clicking a host card navigates to host profile', async ({ page }) => {
     await page.goto('/my/bookings')
-    await page.waitForLoadState('networkidle')
-
     // If there are host cards in the directory, click the first one
     const hostLink = page.locator('a[href*="/my/bookings/host/"]').first()
     const hasHosts = await hostLink.isVisible({ timeout: 8000 }).catch(() => false)
@@ -68,8 +62,6 @@ test.describe('Booking flow: client books a session', () => {
 
   test('host profile shows available time slots or empty state', async ({ page }) => {
     await page.goto('/my/bookings')
-    await page.waitForLoadState('networkidle')
-
     const hostLink = page.locator('a[href*="/my/bookings/host/"]').first()
     const hasHosts = await hostLink.isVisible({ timeout: 8000 }).catch(() => false)
 
@@ -92,8 +84,6 @@ test.describe('Booking flow: client books a session', () => {
 
   test('"My bookings" tab shows booking list or empty state', async ({ page }) => {
     await page.goto('/my/bookings')
-    await page.waitForLoadState('networkidle')
-
     // Switch to "My bookings" tab
     const myBookingsTab = page.getByRole('tab', { name: /my bookings/i })
     await myBookingsTab.click()
@@ -110,8 +100,6 @@ test.describe('Booking flow: client books a session', () => {
 
   test('booking list items show status and date info', async ({ page }) => {
     await page.goto('/my/bookings')
-    await page.waitForLoadState('networkidle')
-
     // Switch to "My bookings" tab
     await page.getByRole('tab', { name: /my bookings/i }).click()
     await page.waitForLoadState('networkidle')
@@ -135,8 +123,6 @@ test.describe('Booking flow: client books a session', () => {
 
   test('clicking a booking navigates to booking detail', async ({ page }) => {
     await page.goto('/my/bookings')
-    await page.waitForLoadState('networkidle')
-
     await page.getByRole('tab', { name: /my bookings/i }).click()
     await page.waitForLoadState('networkidle')
 
@@ -162,8 +148,6 @@ test.describe('Booking flow: client books a session', () => {
 
   test('booking detail shows status-specific content', async ({ page }) => {
     await page.goto('/my/bookings')
-    await page.waitForLoadState('networkidle')
-
     await page.getByRole('tab', { name: /my bookings/i }).click()
     await page.waitForLoadState('networkidle')
 

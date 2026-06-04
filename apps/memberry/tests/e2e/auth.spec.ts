@@ -15,8 +15,6 @@ test.describe('Sign-up flow', () => {
     const email = `signup-${Date.now()}@test.com`
 
     await page.goto('/auth/sign-up')
-    await page.waitForLoadState('networkidle')
-
     // Form should be visible
     const nameInput = page.getByLabel('Name', { exact: true })
     const emailInput = page.getByLabel('Email', { exact: true })
@@ -45,7 +43,6 @@ test.describe('Sign-up flow', () => {
 
     // First sign-up
     await page.goto('/auth/sign-up')
-    await page.waitForLoadState('networkidle')
     await page.getByLabel('Name', { exact: true }).fill('First User')
     await page.getByLabel('Email', { exact: true }).fill(email)
     const pw = page.getByLabel('Password', { exact: true })
@@ -57,7 +54,6 @@ test.describe('Sign-up flow', () => {
     // Clear cookies and try same email
     await page.context().clearCookies()
     await page.goto('/auth/sign-up')
-    await page.waitForLoadState('networkidle')
     await page.getByLabel('Name', { exact: true }).fill('Second User')
     await page.getByLabel('Email', { exact: true }).fill(email)
     const pw2 = page.getByLabel('Password', { exact: true })
@@ -81,7 +77,6 @@ test.describe('Sign-in flow', () => {
     testEmail = `signin-${Date.now()}@test.com`
     const page = await browser.newPage()
     await page.goto('/auth/sign-up')
-    await page.waitForLoadState('networkidle')
     await page.getByLabel('Name', { exact: true }).fill('Sign In Test')
     await page.getByLabel('Email', { exact: true }).fill(testEmail)
     const pw = page.getByLabel('Password', { exact: true })
@@ -94,8 +89,6 @@ test.describe('Sign-in flow', () => {
 
   test('A2: sign in with valid creds → dashboard with sidebar', async ({ page }) => {
     await page.goto('/auth/sign-in')
-    await page.waitForLoadState('networkidle')
-
     await page.getByLabel('Email', { exact: true }).fill(testEmail)
     const pw = page.getByLabel('Password', { exact: true })
     await pw.click()
@@ -118,8 +111,6 @@ test.describe('Sign-in flow', () => {
 
   test('A2: sign in with wrong password → error message', async ({ page }) => {
     await page.goto('/auth/sign-in')
-    await page.waitForLoadState('networkidle')
-
     await page.getByLabel('Email', { exact: true }).fill(testEmail)
     const pw = page.getByLabel('Password', { exact: true })
     await pw.click()
@@ -139,7 +130,6 @@ test.describe('Sign-in flow', () => {
     await page.context().clearCookies()
 
     await page.goto('/my/profile')
-    await page.waitForLoadState('networkidle')
     await page.waitForTimeout(2000)
 
     // Should be redirected to sign-in
@@ -151,8 +141,6 @@ test.describe('Auth guard', () => {
   test('A2: public route /org/pda-metro-manila works without auth', async ({ page }) => {
     await page.context().clearCookies()
     await page.goto('/org/pda-metro-manila')
-    await page.waitForLoadState('networkidle')
-
     // Should show org profile, NOT redirect to sign-in
     await expect(page.getByText('PDA Metro Manila Chapter')).toBeVisible()
     expect(page.url()).not.toContain('/auth/')
@@ -161,7 +149,6 @@ test.describe('Auth guard', () => {
   test('A2: root / redirects unauthenticated to sign-in', async ({ page }) => {
     await page.context().clearCookies()
     await page.goto('/')
-    await page.waitForLoadState('networkidle')
     await page.waitForTimeout(2000)
 
     expect(page.url()).toContain('/auth/sign-in')
@@ -172,7 +159,6 @@ test.describe('Multi-org & Invitations', () => {
   test('[BR-21] dashboard shows organization membership cards', async ({ page }) => {
     await signIn(page, SEED_OFFICER_EMAIL, TEST_PASSWORD)
     await page.goto('/dashboard')
-    await page.waitForLoadState('networkidle')
     // Member should see at least one org card
     const hasOrgSection = await page.getByText(/organizations/i).first().isVisible().catch(() => false)
     expect(hasOrgSection).toBeTruthy()
@@ -181,14 +167,12 @@ test.describe('Multi-org & Invitations', () => {
   test('[BR-24] expired invite page shows message', async ({ page }) => {
     // Visit invite with fake token — should show expired/invalid message, not crash
     await page.goto('/invite/expired-test-token')
-    await page.waitForLoadState('networkidle')
     const hasContent = await page.locator('main, body').first().isVisible()
     expect(hasContent).toBeTruthy()
   })
 
   test('[BR-25] sign-up form renders with email field', async ({ page }) => {
     await page.goto('/auth/sign-up')
-    await page.waitForLoadState('networkidle')
     const hasEmail = await page.getByLabel(/email/i).first().isVisible().catch(() => false)
     expect(hasEmail).toBeTruthy()
   })

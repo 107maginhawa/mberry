@@ -12,8 +12,6 @@ test.describe('Officer Events', () => {
 
   test('events page shows heading and stat cards', async ({ page }) => {
     await page.goto(`/org/${ORG_ID}/officer/events`)
-    await page.waitForLoadState('networkidle')
-
     await expect(
       page.getByRole('heading', { name: 'Events', level: 1 }),
     ).toBeVisible({ timeout: 10000 })
@@ -23,8 +21,6 @@ test.describe('Officer Events', () => {
 
   test('events list shows seeded events as links', async ({ page }) => {
     await page.goto(`/org/${ORG_ID}/officer/events`)
-    await page.waitForLoadState('networkidle')
-
     // Events are rendered as links with heading text
     await expect(
       page.getByRole('link', { name: /General Assembly/i }),
@@ -37,8 +33,6 @@ test.describe('Officer Events', () => {
 
   test('Create Event button is visible', async ({ page }) => {
     await page.goto(`/org/${ORG_ID}/officer/events`)
-    await page.waitForLoadState('networkidle')
-
     await expect(
       page.getByRole('link', { name: /create event/i })
         .or(page.getByRole('button', { name: /create event/i })),
@@ -47,8 +41,6 @@ test.describe('Officer Events', () => {
 
   test('can navigate to event detail page', async ({ page }) => {
     await page.goto(`/org/${ORG_ID}/officer/events`)
-    await page.waitForLoadState('networkidle')
-
     // Click on event link
     await page.getByRole('link', { name: /General Assembly/i }).click()
     await page.waitForLoadState('networkidle')
@@ -58,8 +50,6 @@ test.describe('Officer Events', () => {
 
   test('event detail shows event information', async ({ page }) => {
     await page.goto(`/org/${ORG_ID}/officer/events`)
-    await page.waitForLoadState('networkidle')
-
     await page.getByRole('link', { name: /General Assembly/i }).click()
     await page.waitForLoadState('networkidle')
 
@@ -72,8 +62,6 @@ test.describe('Officer Events', () => {
 
   test('[BR-16] new event form renders', async ({ page }) => {
     await page.goto(`/org/${ORG_ID}/officer/events/new`)
-    await page.waitForLoadState('networkidle')
-
     // Verify the create event page renders (visibility field is a future addition)
     const hasForm = await page.locator('form, [role="form"], input, button[type="submit"]').first().isVisible().catch(() => false)
     const hasHeading = await page.getByRole('heading').first().isVisible().catch(() => false)
@@ -83,8 +71,6 @@ test.describe('Officer Events', () => {
   test('[BR-17] attendance page renders check-in list', async ({ page }) => {
     // Navigate to a seeded event first
     await page.goto(`/org/${ORG_ID}/officer/events`)
-    await page.waitForLoadState('networkidle')
-
     await page.getByRole('link', { name: /General Assembly/i }).click()
     await page.waitForLoadState('networkidle')
 

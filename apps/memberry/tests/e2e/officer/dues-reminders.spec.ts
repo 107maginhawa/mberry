@@ -11,15 +11,11 @@ test.describe('CT-2: Dues Reminders', () => {
 
   test('Send Reminders button is visible on payments page', async ({ page }) => {
     await page.goto(`/org/${ORG_ID}/officer/payments`)
-    await page.waitForLoadState('networkidle')
-
     await expect(page.getByRole('button', { name: /send reminders/i })).toBeVisible({ timeout: 10000 })
   })
 
   test('clicking Send Reminders triggers API call', async ({ page }) => {
     await page.goto(`/org/${ORG_ID}/officer/payments`)
-    await page.waitForLoadState('networkidle')
-
     const sendBtn = page.getByRole('button', { name: /send reminders/i })
     await expect(sendBtn).toBeVisible({ timeout: 10000 })
 
@@ -39,8 +35,6 @@ test.describe('CT-2: Dues Reminders', () => {
 
   test('Send Reminders shows toast on completion', async ({ page }) => {
     await page.goto(`/org/${ORG_ID}/officer/payments`)
-    await page.waitForLoadState('networkidle')
-
     const sendBtn = page.getByRole('button', { name: /send reminders/i })
     await expect(sendBtn).toBeVisible({ timeout: 10000 })
 

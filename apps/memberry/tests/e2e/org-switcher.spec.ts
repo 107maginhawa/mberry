@@ -17,7 +17,6 @@ import { signInAsMember } from './helpers/auth'
 async function signInAndGo(page: import('@playwright/test').Page, path = '/') {
   await signInAsMember(page)
   await page.goto(path)
-  await page.waitForLoadState('networkidle')
 }
 
 test.describe('Org Switcher', () => {

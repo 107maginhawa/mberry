@@ -26,7 +26,6 @@ test.describe('Member cannot access officer routes', () => {
   test('member cannot access officer dashboard', async ({ page }) => {
     await signIn(page, SEED_MEMBER_EMAIL, TEST_PASSWORD)
     await page.goto(`/org/${ORG_ID}/officer`)
-    await page.waitForLoadState('networkidle')
     await page.waitForTimeout(2000)
 
     const url = page.url()
@@ -46,7 +45,6 @@ test.describe('Member cannot access officer routes', () => {
   test('member cannot access officer members page', async ({ page }) => {
     await signIn(page, SEED_MEMBER_EMAIL, TEST_PASSWORD)
     await page.goto(`/org/${ORG_ID}/officer/members`)
-    await page.waitForLoadState('networkidle')
     await page.waitForTimeout(2000)
 
     const url = page.url()
@@ -65,7 +63,6 @@ test.describe('Member cannot access officer routes', () => {
   test('member cannot access officer finances page', async ({ page }) => {
     await signIn(page, SEED_MEMBER_EMAIL, TEST_PASSWORD)
     await page.goto(`/org/${ORG_ID}/officer/finances`)
-    await page.waitForLoadState('networkidle')
     await page.waitForTimeout(2000)
 
     const url = page.url()
@@ -85,7 +82,6 @@ test.describe('Member cannot access officer routes', () => {
   test('member cannot access officer events page', async ({ page }) => {
     await signIn(page, SEED_MEMBER_EMAIL, TEST_PASSWORD)
     await page.goto(`/org/${ORG_ID}/officer/events`)
-    await page.waitForLoadState('networkidle')
     await page.waitForTimeout(2000)
 
     const url = page.url()
@@ -107,7 +103,6 @@ test.describe('Member cannot access officer routes', () => {
   test('member cannot access officer communications page', async ({ page }) => {
     await signIn(page, SEED_MEMBER_EMAIL, TEST_PASSWORD)
     await page.goto(`/org/${ORG_ID}/officer/communications`)
-    await page.waitForLoadState('networkidle')
     await page.waitForTimeout(2000)
 
     const url = page.url()
@@ -129,7 +124,6 @@ test.describe('Member cannot access officer routes', () => {
   test('member cannot access officer settings page', async ({ page }) => {
     await signIn(page, SEED_MEMBER_EMAIL, TEST_PASSWORD)
     await page.goto(`/org/${ORG_ID}/officer/settings`)
-    await page.waitForLoadState('networkidle')
     await page.waitForTimeout(2000)
 
     const url = page.url()

@@ -24,8 +24,6 @@ test.describe('Officer Dashboard — Interaction States', () => {
   test('success: shows dashboard with metrics and org name', async ({ page }) => {
     await signIn(page, SEED_OFFICER_EMAIL, TEST_PASSWORD)
     await page.goto(`/org/${ORG_ID}/officer/dashboard`)
-    await page.waitForLoadState('networkidle')
-
     // Dashboard or welcome content
     const hasGreeting = await page.getByText(/dashboard|welcome|good\s(morning|afternoon|evening)|overview/i).first().isVisible().catch(() => false)
     const hasOrgName = await page.getByText(/PDA Metro Manila/i).first().isVisible().catch(() => false)
@@ -40,8 +38,6 @@ test.describe('Officer Dashboard — Interaction States', () => {
   test('permission-error: regular member cannot access officer dashboard', async ({ page }) => {
     await signIn(page, SEED_MEMBER_EMAIL, TEST_PASSWORD)
     await page.goto(`/org/${ORG_ID}/officer/dashboard`)
-    await page.waitForLoadState('networkidle')
-
     // Should be redirected or see access denied
     const isRedirected = !page.url().includes('/officer/dashboard')
     const hasForbidden = await page.getByText(/forbidden|access denied|not authorized|officers only/i).first().isVisible().catch(() => false)
@@ -55,8 +51,6 @@ test.describe('Officer Dashboard — Interaction States', () => {
 
     const fakeOrgId = '00000000-0000-0000-0000-000000000000'
     await page.goto(`/org/${fakeOrgId}/officer/dashboard`)
-    await page.waitForLoadState('networkidle')
-
     const hasError = await page.getByText(/not found|error|no access/i).first().isVisible().catch(() => false)
     const redirected = !page.url().includes(fakeOrgId)
     expect(hasError || redirected).toBeTruthy()
@@ -65,8 +59,6 @@ test.describe('Officer Dashboard — Interaction States', () => {
   test('disabled: navigation links are correctly scoped to officer role', async ({ page }) => {
     await signIn(page, SEED_OFFICER_EMAIL, TEST_PASSWORD)
     await page.goto(`/org/${ORG_ID}/officer/dashboard`)
-    await page.waitForLoadState('networkidle')
-
     // Officer nav should include roster, communications, settings links
     const rosterLink = page.getByRole('link', { name: /roster/i }).first()
     const hasRoster = await rosterLink.isVisible().catch(() => false)
@@ -81,8 +73,6 @@ test.describe('Officer Dashboard — Interaction States', () => {
   test('a11y: baseline accessibility check passes', async ({ page }) => {
     await signIn(page, SEED_OFFICER_EMAIL, TEST_PASSWORD)
     await page.goto(`/org/${ORG_ID}/officer/dashboard`)
-    await page.waitForLoadState('networkidle')
-
     await expectNoA11yViolations(page, {
       exclude: ['[data-radix-popper-content-wrapper]'],
     })

@@ -12,8 +12,6 @@ test.describe('Officer Payments', () => {
 
   test('heading "Dues & Payments" is visible', async ({ page }) => {
     await page.goto(`/org/${ORG_ID}/officer/payments`)
-    await page.waitForLoadState('networkidle')
-
     await expect(
       page.getByRole('heading', { name: /dues.*payments?|payments?/i }).first()
     ).toBeVisible({ timeout: 10000 })
@@ -21,8 +19,6 @@ test.describe('Officer Payments', () => {
 
   test('shows metric cards: Collection Rate, Total Collected, Outstanding', async ({ page }) => {
     await page.goto(`/org/${ORG_ID}/officer/payments`)
-    await page.waitForLoadState('networkidle')
-
     await expect(
       page.getByText(/collection rate/i).first()
     ).toBeVisible({ timeout: 10000 })
@@ -38,8 +34,6 @@ test.describe('Officer Payments', () => {
 
   test('shows Pending metric', async ({ page }) => {
     await page.goto(`/org/${ORG_ID}/officer/payments`)
-    await page.waitForLoadState('networkidle')
-
     await expect(
       page.getByText(/pending/i).first()
     ).toBeVisible({ timeout: 10000 })
@@ -47,8 +41,6 @@ test.describe('Officer Payments', () => {
 
   test('Record Payment button or link is visible', async ({ page }) => {
     await page.goto(`/org/${ORG_ID}/officer/payments`)
-    await page.waitForLoadState('networkidle')
-
     const recordBtn = page.getByRole('link', { name: /record payment/i })
       .or(page.getByRole('button', { name: /record payment/i }))
       .first()
@@ -57,8 +49,6 @@ test.describe('Officer Payments', () => {
 
   test('can navigate to record payment page', async ({ page }) => {
     await page.goto(`/org/${ORG_ID}/officer/payments`)
-    await page.waitForLoadState('networkidle')
-
     const recordBtn = page.getByRole('link', { name: /record payment/i })
       .or(page.getByRole('button', { name: /record payment/i }))
       .first()
@@ -70,7 +60,6 @@ test.describe('Officer Payments', () => {
 
   test('[BR-32] payment history page loads', async ({ page }) => {
     await page.goto(`/org/${ORG_ID}/officer/payments`)
-    await page.waitForLoadState('networkidle')
     const hasTable = await page.locator('table, [role="table"]').first().isVisible().catch(() => false)
     const hasHeading = await page.getByRole('heading').first().isVisible().catch(() => false)
     expect(hasTable || hasHeading).toBeTruthy()

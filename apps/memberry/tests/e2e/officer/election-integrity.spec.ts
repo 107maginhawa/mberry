@@ -15,7 +15,6 @@ test.describe('[BR-67, BR-44, BR-50] Election Integrity', () => {
 
     await test.step('navigate to new election form', async () => {
       await page.goto(`/org/${ORG_ID}/officer/elections/new`)
-      await page.waitForLoadState('networkidle')
     })
 
     await test.step('form renders with required fields', async () => {
@@ -29,8 +28,6 @@ test.describe('[BR-67, BR-44, BR-50] Election Integrity', () => {
   test('[BR-50] election form enforces date ordering', async ({ page }) => {
     await signInAsOfficer(page)
     await page.goto(`/org/${ORG_ID}/officer/elections/new`)
-    await page.waitForLoadState('networkidle')
-
     // Look for date fields (nomination start, voting start, voting end)
     const dateInputs = page.locator('input[type="date"], input[type="datetime-local"]')
     const dateCount = await dateInputs.count()
@@ -60,8 +57,6 @@ test.describe('[BR-67, BR-44, BR-50] Election Integrity', () => {
   test('election list shows seeded elections with correct status', async ({ page }) => {
     await signInAsOfficer(page)
     await page.goto(`/org/${ORG_ID}/officer/elections`)
-    await page.waitForLoadState('networkidle')
-
     // Should show seeded elections
     const hasElections = await page.getByText(/election/i).first().isVisible({ timeout: 10000 }).catch(() => false)
     expect(hasElections).toBeTruthy()
@@ -74,8 +69,6 @@ test.describe('[BR-67, BR-44, BR-50] Election Integrity', () => {
   test('member can view election and see vote button when open', async ({ page }) => {
     await signInAsMember(page)
     await page.goto(`/org/${ORG_ID}/elections`)
-    await page.waitForLoadState('networkidle')
-
     // Member should see election list
     const hasElections = await page.getByText(/election/i).first().isVisible({ timeout: 10000 }).catch(() => false)
     expect(hasElections).toBeTruthy()
@@ -86,8 +79,6 @@ test.describe('[BR-67, BR-44, BR-50] Election Integrity', () => {
 
     // Navigate to elections list first
     await page.goto(`/org/${ORG_ID}/elections`)
-    await page.waitForLoadState('networkidle')
-
     // Find an election link and click it
     const electionLink = page.locator(`a[href*="/elections/"]`).first()
     const hasLink = await electionLink.isVisible({ timeout: 10000 }).catch(() => false)
@@ -106,8 +97,6 @@ test.describe('[BR-67, BR-44, BR-50] Election Integrity', () => {
   test('[BR-44] published election shows results with winner indicators', async ({ page }) => {
     await signInAsOfficer(page)
     await page.goto(`/org/${ORG_ID}/officer/elections`)
-    await page.waitForLoadState('networkidle')
-
     // Look for the published (completed) election
     const publishedLink = page.getByText(/2025.*election/i).first()
     const hasPublished = await publishedLink.isVisible({ timeout: 10000 }).catch(() => false)
@@ -127,8 +116,6 @@ test.describe('[BR-67, BR-44, BR-50] Election Integrity', () => {
     // Cross-org isolation check for BR-44
     await signInAsOfficer(page)
     await page.goto(`/org/${ORG_ID}/officer/elections`)
-    await page.waitForLoadState('networkidle')
-
     // Should NOT see elections from other orgs (Cebu chapter)
     const hasCebu = await page.getByText(/cebu/i).first().isVisible({ timeout: 3000 }).catch(() => false)
     expect(hasCebu).toBeFalsy()

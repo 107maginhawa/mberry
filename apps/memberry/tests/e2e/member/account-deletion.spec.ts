@@ -12,8 +12,6 @@ test.describe('Account Deletion (/settings/account)', () => {
 
   test('shows Delete Account card with destructive border', async ({ page }) => {
     await page.goto('/settings/account')
-    await page.waitForLoadState('networkidle')
-
     await expect(
       page.getByRole('heading', { name: /delete account/i }),
     ).toBeVisible({ timeout: 10000 })
@@ -25,8 +23,6 @@ test.describe('Account Deletion (/settings/account)', () => {
 
   test('shows "Request Account Deletion" button', async ({ page }) => {
     await page.goto('/settings/account')
-    await page.waitForLoadState('networkidle')
-
     await expect(
       page.getByRole('button', { name: /request account deletion/i }),
     ).toBeVisible({ timeout: 10000 })
@@ -34,8 +30,6 @@ test.describe('Account Deletion (/settings/account)', () => {
 
   test('clicking deletion button opens confirmation dialog', async ({ page }) => {
     await page.goto('/settings/account')
-    await page.waitForLoadState('networkidle')
-
     await page.getByRole('button', { name: /request account deletion/i }).click()
 
     // Confirmation dialog should appear
@@ -59,8 +53,6 @@ test.describe('Account Deletion (/settings/account)', () => {
 
   test('cancelling the confirmation dialog closes it', async ({ page }) => {
     await page.goto('/settings/account')
-    await page.waitForLoadState('networkidle')
-
     await page.getByRole('button', { name: /request account deletion/i }).click()
 
     await expect(
@@ -78,8 +70,6 @@ test.describe('Account Deletion (/settings/account)', () => {
 
   test('deletion description mentions 30-day grace period', async ({ page }) => {
     await page.goto('/settings/account')
-    await page.waitForLoadState('networkidle')
-
     await expect(
       page.getByText(/30-day grace period/i),
     ).toBeVisible({ timeout: 10000 })

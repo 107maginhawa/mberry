@@ -13,8 +13,6 @@ test.describe('Member Event Registration Cancellation', () => {
 
   test('org events page lists published events', async ({ page }) => {
     await page.goto(`/org/${ORG_ID}/events`)
-    await page.waitForLoadState('networkidle')
-
     // Page header
     await expect(
       page.getByRole('heading', { name: /events/i }),
@@ -28,8 +26,6 @@ test.describe('Member Event Registration Cancellation', () => {
 
   test('event detail page shows event info and registration action', async ({ page }) => {
     await page.goto(`/org/${ORG_ID}/events`)
-    await page.waitForLoadState('networkidle')
-
     // Find and click on an event card/link
     const eventLink = page.locator('a[href*="/events/"]').first()
     const hasEvent = await eventLink.isVisible({ timeout: 10000 }).catch(() => false)
@@ -58,8 +54,6 @@ test.describe('Member Event Registration Cancellation', () => {
 
   test('registered member sees Cancel Registration button', async ({ page }) => {
     await page.goto(`/org/${ORG_ID}/events`)
-    await page.waitForLoadState('networkidle')
-
     // Navigate to an event the member may be registered for
     const eventLink = page.locator('a[href*="/events/"]').first()
     const hasEvent = await eventLink.isVisible({ timeout: 10000 }).catch(() => false)
@@ -91,8 +85,6 @@ test.describe('Member Event Registration Cancellation', () => {
 
   test('unregistered member can see Register button with capacity info', async ({ page }) => {
     await page.goto(`/org/${ORG_ID}/events`)
-    await page.waitForLoadState('networkidle')
-
     const eventLink = page.locator('a[href*="/events/"]').first()
     const hasEvent = await eventLink.isVisible({ timeout: 10000 }).catch(() => false)
 
@@ -121,8 +113,6 @@ test.describe('Member Event Registration Cancellation', () => {
 
   test('event detail shows price badge (Free or PHP amount)', async ({ page }) => {
     await page.goto(`/org/${ORG_ID}/events`)
-    await page.waitForLoadState('networkidle')
-
     const eventLink = page.locator('a[href*="/events/"]').first()
     const hasEvent = await eventLink.isVisible({ timeout: 10000 }).catch(() => false)
 

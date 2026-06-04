@@ -4,8 +4,6 @@ test.describe('Public Payment Page (/pay/$token)', () => {
   test('shows invalid state for bad token', async ({ page, allowApiFailures }) => {
     allowApiFailures.push(/pay/)
     await page.goto('/pay/invalid-test-token')
-    await page.waitForLoadState('networkidle')
-
     // Should show error state — "Payment Link Invalid" heading
     await expect(
       page.getByText(/payment link invalid|invalid payment|error/i).first()

@@ -14,8 +14,6 @@ test.describe('Journey: Event Registration → Payment', () => {
 
     await test.step('browse events', async () => {
       await page.goto('/my/events')
-      await page.waitForLoadState('networkidle')
-
       const hasEvents = await page.getByText(/event|activity|convention|seminar/i).first().isVisible({ timeout: 10000 }).catch(() => false)
       expect(hasEvents).toBeTruthy()
     })
@@ -24,8 +22,6 @@ test.describe('Journey: Event Registration → Payment', () => {
   test('event detail shows registration and payment info', async ({ page }) => {
     await signInAsMember(page)
     await page.goto(`/org/${ORG_ID}/events`)
-    await page.waitForLoadState('networkidle')
-
     // Click on first event
     const eventLink = page.locator(`a[href*="/events/"]`).first()
     const hasEvent = await eventLink.isVisible({ timeout: 10000 }).catch(() => false)
@@ -48,7 +44,6 @@ test.describe('Journey: Event Registration → Payment', () => {
 
     await test.step('navigate to officer events', async () => {
       await page.goto(`/org/${ORG_ID}/officer/events`)
-      await page.waitForLoadState('networkidle')
     })
 
     await test.step('events list shows attendance data', async () => {
@@ -61,7 +56,6 @@ test.describe('Journey: Event Registration → Payment', () => {
     await test.step('sign in and list events', async () => {
       await signInAsMember(page)
       await page.goto(`/org/${ORG_ID}/events`)
-      await page.waitForLoadState('networkidle')
     })
 
     await test.step('select an event', async () => {
@@ -76,7 +70,6 @@ test.describe('Journey: Event Registration → Payment', () => {
 
     await test.step('check payments page after', async () => {
       await page.goto('/my/payments')
-      await page.waitForLoadState('networkidle')
       const hasPayments = await page.getByText(/payment|transaction|history/i).first().isVisible({ timeout: 10000 }).catch(() => false)
       expect(hasPayments).toBeTruthy()
     })

@@ -56,8 +56,6 @@ test.describe('Communications Actions', () => {
 
   test('announcement detail shows content and action buttons', async ({ page }) => {
     await page.goto(`/org/${ORG_ID}/officer/communications`)
-    await page.waitForLoadState('networkidle')
-
     // Click first announcement in list
     const link = page.locator('.divide-y a').first()
     await expect(link).toBeVisible({ timeout: 10000 })

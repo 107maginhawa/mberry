@@ -11,16 +11,12 @@ test.describe('SO-3: Training Completion Flow', () => {
 
   test('member training page shows available trainings', async ({ page }) => {
     await page.goto(`/org/${ORG_ID}/training`)
-    await page.waitForLoadState('networkidle')
-
     const hasContent = await page.getByText(/training|course|seminar|no training/i).first().isVisible({ timeout: 10000 }).catch(() => false)
     expect(hasContent).toBeTruthy()
   })
 
   test('member can view training detail with enroll button', async ({ page }) => {
     await page.goto(`/org/${ORG_ID}/training`)
-    await page.waitForLoadState('networkidle')
-
     const trainingLink = page.locator('a[href*="/training/"]:not([href*="/new"]):not([href$="/training"])').first()
     const hasTrainings = await trainingLink.isVisible({ timeout: 10000 }).catch(() => false)
 
@@ -40,8 +36,6 @@ test.describe('SO-3: Training Completion Flow', () => {
 
   test('my training page shows enrolled trainings', async ({ page }) => {
     await page.goto('/my/training')
-    await page.waitForLoadState('networkidle')
-
     const hasContent = await page.getByText(/training|enrolled|completed|no training/i).first().isVisible({ timeout: 10000 }).catch(() => false)
     expect(hasContent).toBeTruthy()
   })

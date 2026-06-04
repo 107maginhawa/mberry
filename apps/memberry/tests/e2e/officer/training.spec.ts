@@ -12,8 +12,6 @@ test.describe('Officer Training', () => {
 
   test('training list shows seeded training Advanced Endodontics', async ({ page }) => {
     await page.goto(`/org/${ORG_ID}/officer/training`)
-    await page.waitForLoadState('networkidle')
-
     await expect(
       page.getByText(/advanced endodontics/i).first()
     ).toBeVisible({ timeout: 10000 })
@@ -21,8 +19,6 @@ test.describe('Officer Training', () => {
 
   test('training list shows seeded training Infection Control', async ({ page }) => {
     await page.goto(`/org/${ORG_ID}/officer/training`)
-    await page.waitForLoadState('networkidle')
-
     await expect(
       page.getByText(/infection control/i).first()
     ).toBeVisible({ timeout: 10000 })
@@ -30,8 +26,6 @@ test.describe('Officer Training', () => {
 
   test('Create Training button is visible', async ({ page }) => {
     await page.goto(`/org/${ORG_ID}/officer/training`)
-    await page.waitForLoadState('networkidle')
-
     const createBtn = page.getByRole('link', { name: /create training|new training|add training/i })
       .or(page.getByRole('button', { name: /create training|new training|add training/i }))
       .first()
@@ -40,8 +34,6 @@ test.describe('Officer Training', () => {
 
   test('can navigate to training detail', async ({ page }) => {
     await page.goto(`/org/${ORG_ID}/officer/training`)
-    await page.waitForLoadState('networkidle')
-
     // Click on first training
     const trainingLink = page.getByText(/advanced endodontics/i).first()
     await expect(trainingLink).toBeVisible({ timeout: 10000 })

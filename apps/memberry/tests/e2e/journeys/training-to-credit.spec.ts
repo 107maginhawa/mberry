@@ -14,7 +14,6 @@ test.describe('Journey: Training → Attendance → Credit Award', () => {
 
     await test.step('navigate to training management', async () => {
       await page.goto(`/org/${ORG_ID}/officer/training`)
-      await page.waitForLoadState('networkidle')
     })
 
     await test.step('training list shows seeded trainings', async () => {
@@ -31,7 +30,6 @@ test.describe('Journey: Training → Attendance → Credit Award', () => {
 
     await test.step('navigate to training page', async () => {
       await page.goto('/my/training')
-      await page.waitForLoadState('networkidle')
     })
 
     await test.step('training page shows available programs', async () => {
@@ -47,7 +45,6 @@ test.describe('Journey: Training → Attendance → Credit Award', () => {
 
     await test.step('check credits page', async () => {
       await page.goto('/my/credits')
-      await page.waitForLoadState('networkidle')
       await expect(page).toHaveURL(/\/my\/credits/)
     })
 
@@ -65,7 +62,6 @@ test.describe('Journey: Training → Attendance → Credit Award', () => {
 
     await test.step('navigate to certificates', async () => {
       await page.goto('/my/certificates')
-      await page.waitForLoadState('networkidle')
     })
 
     await test.step('certificates page renders', async () => {
@@ -79,7 +75,6 @@ test.describe('Journey: Training → Attendance → Credit Award', () => {
     await test.step('sign in and browse training', async () => {
       await signInAsMember(page)
       await page.goto('/my/training')
-      await page.waitForLoadState('networkidle')
     })
 
     await test.step('verify training programs visible', async () => {
@@ -89,14 +84,12 @@ test.describe('Journey: Training → Attendance → Credit Award', () => {
 
     await test.step('check credits earned', async () => {
       await page.goto('/my/credits')
-      await page.waitForLoadState('networkidle')
       const hasCredits = await page.getByText(/credit|CPD|total/i).first().isVisible({ timeout: 10000 }).catch(() => false)
       expect(hasCredits).toBeTruthy()
     })
 
     await test.step('check certificates', async () => {
       await page.goto('/my/certificates')
-      await page.waitForLoadState('networkidle')
       await expect(page).toHaveURL(/\/my\/certificates/)
     })
   })
@@ -108,7 +101,6 @@ test.describe('Journey: Training → Attendance → Credit Award', () => {
 
     await test.step('access training management', async () => {
       await page.goto(`/org/${ORG_ID}/officer/training`)
-      await page.waitForLoadState('networkidle')
     })
 
     await test.step('training management accessible', async () => {

@@ -12,8 +12,6 @@ test.describe('Officer Elections', () => {
 
   test('elections list renders heading', async ({ page }) => {
     await page.goto(`/org/${ORG_ID}/officer/elections`)
-    await page.waitForLoadState('networkidle')
-
     await expect(
       page.getByRole('heading', { name: /elections?/i }).first()
     ).toBeVisible({ timeout: 10000 })
@@ -21,8 +19,6 @@ test.describe('Officer Elections', () => {
 
   test('shows seeded election 2026 Officer Election', async ({ page }) => {
     await page.goto(`/org/${ORG_ID}/officer/elections`)
-    await page.waitForLoadState('networkidle')
-
     await expect(
       page.getByText(/2026 officer election/i).first()
     ).toBeVisible({ timeout: 10000 })
@@ -30,8 +26,6 @@ test.describe('Officer Elections', () => {
 
   test('Create Election button is visible', async ({ page }) => {
     await page.goto(`/org/${ORG_ID}/officer/elections`)
-    await page.waitForLoadState('networkidle')
-
     const createBtn = page.getByRole('link', { name: /create election|new election/i })
       .or(page.getByRole('button', { name: /create election|new election/i }))
       .first()
@@ -40,8 +34,6 @@ test.describe('Officer Elections', () => {
 
   test('can navigate to election detail showing positions', async ({ page }) => {
     await page.goto(`/org/${ORG_ID}/officer/elections`)
-    await page.waitForLoadState('networkidle')
-
     // Click on the seeded election
     const electionLink = page.getByText(/2026 officer election/i).first()
     await expect(electionLink).toBeVisible({ timeout: 10000 })
@@ -59,8 +51,6 @@ test.describe('Officer Elections', () => {
 
   test('BR-33: election detail shows valid status (Draft/Open/Closed)', async ({ page }) => {
     await page.goto(`/org/${ORG_ID}/officer/elections`)
-    await page.waitForLoadState('networkidle')
-
     const electionLink = page.getByText(/2026 officer election/i).first()
     await expect(electionLink).toBeVisible({ timeout: 10000 })
     await electionLink.click()
@@ -73,8 +63,6 @@ test.describe('Officer Elections', () => {
 
   test('BR-33: election detail shows position count', async ({ page }) => {
     await page.goto(`/org/${ORG_ID}/officer/elections`)
-    await page.waitForLoadState('networkidle')
-
     const electionLink = page.getByText(/2026 officer election/i).first()
     await expect(electionLink).toBeVisible({ timeout: 10000 })
     await electionLink.click()
@@ -87,8 +75,6 @@ test.describe('Officer Elections', () => {
 
   test('BR-33: election integrity — status restricts voting actions', async ({ page }) => {
     await page.goto(`/org/${ORG_ID}/officer/elections`)
-    await page.waitForLoadState('networkidle')
-
     const electionLink = page.getByText(/2026 officer election/i).first()
     await expect(electionLink).toBeVisible({ timeout: 10000 })
     await electionLink.click()

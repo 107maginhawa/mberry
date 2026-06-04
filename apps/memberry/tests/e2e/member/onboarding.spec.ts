@@ -16,15 +16,12 @@ test.describe('Member Onboarding (/onboarding)', () => {
 
   test('shows step 1 heading', async ({ page }) => {
     await page.goto('/onboarding')
-    await page.waitForLoadState('networkidle')
-
     await expect(page.getByText('Step 1 of 2: Personal Information')).toBeVisible({ timeout: 10000 })
     await expect(page.getByText('Tell us about yourself')).toBeVisible()
   })
 
   test('shows form fields for personal info', async ({ page }) => {
     await page.goto('/onboarding')
-    await page.waitForLoadState('networkidle')
     await expect(page.getByText('Step 1 of 2')).toBeVisible({ timeout: 10000 })
 
     // Required fields — use exact: false to match "First Name *" etc.
@@ -40,7 +37,6 @@ test.describe('Member Onboarding (/onboarding)', () => {
 
   test('can navigate to step 2 after filling required fields', async ({ page }) => {
     await page.goto('/onboarding')
-    await page.waitForLoadState('networkidle')
     await expect(page.getByText('Step 1 of 2')).toBeVisible({ timeout: 10000 })
 
     await fillDobAndAdvance(page)
@@ -50,7 +46,6 @@ test.describe('Member Onboarding (/onboarding)', () => {
 
   test('can go back from step 2 to step 1', async ({ page }) => {
     await page.goto('/onboarding')
-    await page.waitForLoadState('networkidle')
     await expect(page.getByText('Step 1 of 2')).toBeVisible({ timeout: 10000 })
 
     await fillDobAndAdvance(page)
@@ -62,7 +57,6 @@ test.describe('Member Onboarding (/onboarding)', () => {
 
   test('skip button on step 2 navigates to dashboard', async ({ page }) => {
     await page.goto('/onboarding')
-    await page.waitForLoadState('networkidle')
     await expect(page.getByText('Step 1 of 2')).toBeVisible({ timeout: 10000 })
 
     await fillDobAndAdvance(page)

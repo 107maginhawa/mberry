@@ -15,8 +15,6 @@ test.describe('[BR-49] Grace Period Access', () => {
     // and verify the dashboard loads with real data
     await signInAsMember(page)
     await page.goto('/dashboard')
-    await page.waitForLoadState('networkidle')
-
     // Dashboard should load — not redirect to login or show access denied
     await expect(page).toHaveURL(/dashboard/)
     await expect(page.getByRole('heading').first()).toBeVisible({ timeout: 10000 })
@@ -25,8 +23,6 @@ test.describe('[BR-49] Grace Period Access', () => {
   test('member with active status can access org pages', async ({ page }) => {
     await signInAsMember(page)
     await page.goto(`/org/${ORG_ID}/home`)
-    await page.waitForLoadState('networkidle')
-
     // Org home should render, not show access denied
     await expect(page).toHaveURL(new RegExp(`/org/${ORG_ID}`))
     // Should see org content (name, sections, etc.)
@@ -37,8 +33,6 @@ test.describe('[BR-49] Grace Period Access', () => {
   test('member can access events page', async ({ page }) => {
     await signInAsMember(page)
     await page.goto('/my/events')
-    await page.waitForLoadState('networkidle')
-
     // Events page loads — should see event list or empty state, not access denied
     await expect(page).toHaveURL(/\/my\/events/)
     const hasContent = await page.getByText(/event|activities|no.*upcoming/i).first().isVisible({ timeout: 10000 }).catch(() => false)
@@ -48,8 +42,6 @@ test.describe('[BR-49] Grace Period Access', () => {
   test('member can access training page', async ({ page }) => {
     await signInAsMember(page)
     await page.goto('/my/training')
-    await page.waitForLoadState('networkidle')
-
     await expect(page).toHaveURL(/\/my\/training/)
     const hasContent = await page.getByText(/training|course|no.*training/i).first().isVisible({ timeout: 10000 }).catch(() => false)
     expect(hasContent).toBeTruthy()
@@ -58,8 +50,6 @@ test.describe('[BR-49] Grace Period Access', () => {
   test('member can access credits page', async ({ page }) => {
     await signInAsMember(page)
     await page.goto('/my/credits')
-    await page.waitForLoadState('networkidle')
-
     await expect(page).toHaveURL(/\/my\/credits/)
     // Credits page should show credit balance or summary
     const hasContent = await page.getByText(/credit|CPD|hours|balance|0/i).first().isVisible({ timeout: 10000 }).catch(() => false)
@@ -69,8 +59,6 @@ test.describe('[BR-49] Grace Period Access', () => {
   test('member can access payments page', async ({ page }) => {
     await signInAsMember(page)
     await page.goto('/my/payments')
-    await page.waitForLoadState('networkidle')
-
     await expect(page).toHaveURL(/\/my\/payments/)
     // Payments page should show payment list or empty state
     const hasContent = await page.getByText(/payment|No Payments Found/i).first().isVisible({ timeout: 10000 }).catch(() => false)
@@ -80,8 +68,6 @@ test.describe('[BR-49] Grace Period Access', () => {
   test('member status badge shows on organizations page', async ({ page }) => {
     await signInAsMember(page)
     await page.goto('/my/organizations')
-    await page.waitForLoadState('networkidle')
-
     // Should display membership status (Active, Grace, etc.)
     const hasStatus = await page.getByText(/Active|Grace|Lapsed|Pending/i).first().isVisible({ timeout: 10000 }).catch(() => false)
     expect(hasStatus).toBeTruthy()
@@ -91,8 +77,6 @@ test.describe('[BR-49] Grace Period Access', () => {
     // Sign in and verify all sidebar navigation items are accessible
     await signInAsMember(page)
     await page.goto('/dashboard')
-    await page.waitForLoadState('networkidle')
-
     // Sidebar should show navigation links for: Home, Activities, Credits, Profile
     // These should be clickable for both Active and Grace members
     const navLinks = page.locator('nav a, aside a').filter({ hasText: /home|activit|credit|profile/i })
@@ -104,8 +88,6 @@ test.describe('[BR-49] Grace Period Access', () => {
     // Cross-org isolation: member should only see data for their org
     await signInAsMember(page)
     await page.goto(`/org/${ORG_ID}/members`)
-    await page.waitForLoadState('networkidle')
-
     // Should see member directory for this org
     await expect(page).toHaveURL(new RegExp(`/org/${ORG_ID}`))
     // Should have at least one member listed

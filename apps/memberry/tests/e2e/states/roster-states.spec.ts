@@ -24,8 +24,6 @@ test.describe('Roster — Interaction States', () => {
   test('success: shows Member Roster heading with member data', async ({ page }) => {
     await signIn(page, SEED_OFFICER_EMAIL, TEST_PASSWORD)
     await page.goto(`/org/${ORG_ID}/officer/roster`)
-    await page.waitForLoadState('networkidle')
-
     await expect(
       page.getByRole('heading', { name: /member roster/i }),
     ).toBeVisible({ timeout: 10000 })
@@ -42,8 +40,6 @@ test.describe('Roster — Interaction States', () => {
   test('permission-error: regular member cannot access roster', async ({ page }) => {
     await signIn(page, SEED_MEMBER_EMAIL, TEST_PASSWORD)
     await page.goto(`/org/${ORG_ID}/officer/roster`)
-    await page.waitForLoadState('networkidle')
-
     const isRedirected = !page.url().includes('/officer/roster')
     const hasForbidden = await page.getByText(/forbidden|access denied|not authorized|officers only/i).first().isVisible().catch(() => false)
 
@@ -53,8 +49,6 @@ test.describe('Roster — Interaction States', () => {
   test('empty: roster with search filter shows no results message', async ({ page }) => {
     await signIn(page, SEED_OFFICER_EMAIL, TEST_PASSWORD)
     await page.goto(`/org/${ORG_ID}/officer/roster`)
-    await page.waitForLoadState('networkidle')
-
     // If there's a search/filter input, type a nonsense query
     const searchInput = page.getByPlaceholder(/search|filter/i).first()
     const hasSearch = await searchInput.isVisible().catch(() => false)
@@ -77,8 +71,6 @@ test.describe('Roster — Interaction States', () => {
   test('disabled: action buttons respect officer permissions', async ({ page }) => {
     await signIn(page, SEED_OFFICER_EMAIL, TEST_PASSWORD)
     await page.goto(`/org/${ORG_ID}/officer/roster`)
-    await page.waitForLoadState('networkidle')
-
     // Officer should have action capabilities (export, invite, etc.)
     const actionButton = page.getByRole('button', { name: /export|invite|add|import/i }).first()
     const hasAction = await actionButton.isVisible().catch(() => false)
@@ -94,8 +86,6 @@ test.describe('Roster — Interaction States', () => {
   test('a11y: baseline accessibility check passes', async ({ page }) => {
     await signIn(page, SEED_OFFICER_EMAIL, TEST_PASSWORD)
     await page.goto(`/org/${ORG_ID}/officer/roster`)
-    await page.waitForLoadState('networkidle')
-
     await expectNoA11yViolations(page, {
       exclude: ['[data-radix-popper-content-wrapper]'],
     })

@@ -29,8 +29,6 @@ test.describe('Dues — Interaction States', () => {
   test('success: shows My Dues heading and dues status', async ({ page }) => {
     await signIn(page, SEED_MEMBER_EMAIL, TEST_PASSWORD)
     await page.goto(`/org/${ORG_ID}/dues`)
-    await page.waitForLoadState('networkidle')
-
     await expect(page.getByRole('heading', { name: 'My Dues', level: 1 })).toBeVisible({ timeout: 10000 })
 
     // Should show one of: Pay Dues, All Dues Paid, or Membership Period Ended
@@ -49,8 +47,6 @@ test.describe('Dues — Interaction States', () => {
   test('validation-error: payment proof upload rejects without file', async ({ page }) => {
     await signIn(page, SEED_MEMBER_EMAIL, TEST_PASSWORD)
     await page.goto(`/org/${ORG_ID}/dues`)
-    await page.waitForLoadState('networkidle')
-
     // If there's a Pay Dues button/upload area, try submitting without file
     const payButton = page.getByRole('button', { name: /pay|submit|upload/i }).first()
     const isPayVisible = await payButton.isVisible().catch(() => false)
@@ -74,8 +70,6 @@ test.describe('Dues — Interaction States', () => {
 
     const fakeOrgId = '00000000-0000-0000-0000-000000000000'
     await page.goto(`/org/${fakeOrgId}/dues`)
-    await page.waitForLoadState('networkidle')
-
     // Should show error, not found, or redirect
     const hasError = await page.getByText(/not found|forbidden|error|no access|not a member/i).first().isVisible().catch(() => false)
     const redirected = !page.url().includes(fakeOrgId)
@@ -85,8 +79,6 @@ test.describe('Dues — Interaction States', () => {
   test('disabled: payment button disabled when dues already paid', async ({ page }) => {
     await signIn(page, SEED_MEMBER_EMAIL, TEST_PASSWORD)
     await page.goto(`/org/${ORG_ID}/dues`)
-    await page.waitForLoadState('networkidle')
-
     const allPaid = await page.getByText('All Dues Paid').isVisible().catch(() => false)
 
     if (allPaid) {
@@ -110,8 +102,6 @@ test.describe('Dues — Interaction States', () => {
   test('a11y: baseline accessibility check passes', async ({ page }) => {
     await signIn(page, SEED_MEMBER_EMAIL, TEST_PASSWORD)
     await page.goto(`/org/${ORG_ID}/dues`)
-    await page.waitForLoadState('networkidle')
-
     await expectNoA11yViolations(page, {
       exclude: ['[data-radix-popper-content-wrapper]'],
     })

@@ -11,15 +11,11 @@ test.describe('BR-07: Payment & Expiry', () => {
 
   test('Record Payment page loads with form', async ({ page }) => {
     await page.goto(`/org/${ORG_ID}/officer/payments/new`)
-    await page.waitForLoadState('networkidle')
-
     await expect(page.getByRole('heading', { name: 'Record Payment' })).toBeVisible({ timeout: 10000 })
   })
 
   test('payment page has Record Payment button linking to form', async ({ page }) => {
     await page.goto(`/org/${ORG_ID}/officer/payments`)
-    await page.waitForLoadState('networkidle')
-
     const recordBtn = page.getByRole('link', { name: /record payment/i })
     await expect(recordBtn).toBeVisible({ timeout: 10000 })
 
@@ -30,8 +26,6 @@ test.describe('BR-07: Payment & Expiry', () => {
 
   test('financial dashboard shows summary data', async ({ page }) => {
     await page.goto(`/org/${ORG_ID}/officer/payments`)
-    await page.waitForLoadState('networkidle')
-
     // Financial dashboard should render with data or placeholders
     await expect(page.getByText('Dues & Payments')).toBeVisible({ timeout: 10000 })
 

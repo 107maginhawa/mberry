@@ -12,8 +12,6 @@ test.describe('Journey: Training Lifecycle (create -> enroll -> complete -> cred
       await signInAsOfficer(page)
 
       await page.goto(`/org/${ORG_ID}/officer/training/new`)
-      await page.waitForLoadState('networkidle')
-
       // Page header
       await expect(
         page.getByRole('heading', { name: /create training/i }),
@@ -36,8 +34,6 @@ test.describe('Journey: Training Lifecycle (create -> enroll -> complete -> cred
       await signInAsOfficer(page)
 
       await page.goto(`/org/${ORG_ID}/officer/training/new`)
-      await page.waitForLoadState('networkidle')
-
       await expect(
         page.getByRole('button', { name: /save draft/i }),
       ).toBeVisible({ timeout: 10000 })
@@ -51,8 +47,6 @@ test.describe('Journey: Training Lifecycle (create -> enroll -> complete -> cred
       await signInAsOfficer(page)
 
       await page.goto(`/org/${ORG_ID}/officer/training/new`)
-      await page.waitForLoadState('networkidle')
-
       // Without title and start date, buttons should be disabled
       const saveDraft = page.getByRole('button', { name: /save draft/i })
       const publish = page.getByRole('button', { name: /publish/i })
@@ -65,8 +59,6 @@ test.describe('Journey: Training Lifecycle (create -> enroll -> complete -> cred
       await signInAsOfficer(page)
 
       await page.goto(`/org/${ORG_ID}/officer/training/new`)
-      await page.waitForLoadState('networkidle')
-
       // Fill title
       const titleInput = page.getByPlaceholder('Training title')
       await titleInput.fill('E2E Test Training Session')
@@ -93,8 +85,6 @@ test.describe('Journey: Training Lifecycle (create -> enroll -> complete -> cred
       await signInAsOfficer(page)
 
       await page.goto(`/org/${ORG_ID}/officer/training`)
-      await page.waitForLoadState('networkidle')
-
       // Navigate to a seeded training
       const trainingLink = page.getByText(/advanced endodontics/i).first()
       await expect(trainingLink).toBeVisible({ timeout: 10000 })
@@ -115,8 +105,6 @@ test.describe('Journey: Training Lifecycle (create -> enroll -> complete -> cred
       await signInAsOfficer(page)
 
       await page.goto(`/org/${ORG_ID}/officer/training`)
-      await page.waitForLoadState('networkidle')
-
       await page.getByText(/advanced endodontics/i).first().click()
       await page.waitForLoadState('networkidle')
 
@@ -130,8 +118,6 @@ test.describe('Journey: Training Lifecycle (create -> enroll -> complete -> cred
       await signInAsOfficer(page)
 
       await page.goto(`/org/${ORG_ID}/officer/training`)
-      await page.waitForLoadState('networkidle')
-
       await page.getByText(/advanced endodontics/i).first().click()
       await page.waitForLoadState('networkidle')
 
@@ -148,8 +134,6 @@ test.describe('Journey: Training Lifecycle (create -> enroll -> complete -> cred
       await signInAsOfficer(page)
 
       await page.goto(`/org/${ORG_ID}/officer/training`)
-      await page.waitForLoadState('networkidle')
-
       await page.getByText(/advanced endodontics/i).first().click()
       await page.waitForLoadState('networkidle')
 
@@ -169,8 +153,6 @@ test.describe('Journey: Training Lifecycle (create -> enroll -> complete -> cred
       await signInAsMember(page)
 
       await page.goto(`/org/${ORG_ID}/training`)
-      await page.waitForLoadState('networkidle')
-
       // Page header
       await expect(
         page.getByRole('heading', { name: /training/i }),
@@ -186,8 +168,6 @@ test.describe('Journey: Training Lifecycle (create -> enroll -> complete -> cred
       await signInAsMember(page)
 
       await page.goto(`/org/${ORG_ID}/training`)
-      await page.waitForLoadState('networkidle')
-
       // Click on a training card
       const trainingLink = page.locator('a[href*="/training/"]').first()
       const hasTraining = await trainingLink.isVisible({ timeout: 10000 }).catch(() => false)
@@ -215,8 +195,6 @@ test.describe('Journey: Training Lifecycle (create -> enroll -> complete -> cred
       await signInAsMember(page)
 
       await page.goto(`/org/${ORG_ID}/training`)
-      await page.waitForLoadState('networkidle')
-
       const trainingLink = page.locator('a[href*="/training/"]').first()
       const hasTraining = await trainingLink.isVisible({ timeout: 10000 }).catch(() => false)
 
@@ -240,8 +218,6 @@ test.describe('Journey: Training Lifecycle (create -> enroll -> complete -> cred
       await signInAsMember(page)
 
       await page.goto('/my/credits')
-      await page.waitForLoadState('networkidle')
-
       await expect(page).toHaveURL(/\/my\/credits/)
 
       // Credits page should show credit-related content
@@ -253,8 +229,6 @@ test.describe('Journey: Training Lifecycle (create -> enroll -> complete -> cred
       await signInAsMember(page)
 
       await page.goto(`/org/${ORG_ID}/my-cpd`)
-      await page.waitForLoadState('networkidle')
-
       // CPD page should show progress or credit-related content
       const hasContent = await page.locator('main, [role="main"], h1, h2').first().isVisible({ timeout: 10000 }).catch(() => false)
       expect(hasContent).toBeTruthy()

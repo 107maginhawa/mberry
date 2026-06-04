@@ -12,8 +12,6 @@ test.describe('Data Export (/settings/account)', () => {
 
   test('shows "Export My Data" card', async ({ page }) => {
     await page.goto('/settings/account')
-    await page.waitForLoadState('networkidle')
-
     await expect(
       page.getByRole('heading', { name: /export my data/i }),
     ).toBeVisible({ timeout: 10000 })
@@ -25,8 +23,6 @@ test.describe('Data Export (/settings/account)', () => {
 
   test('shows "Download My Data" button', async ({ page }) => {
     await page.goto('/settings/account')
-    await page.waitForLoadState('networkidle')
-
     await expect(
       page.getByRole('button', { name: /download my data/i }),
     ).toBeVisible({ timeout: 10000 })
@@ -34,8 +30,6 @@ test.describe('Data Export (/settings/account)', () => {
 
   test('clicking export triggers download and shows success toast', async ({ page }) => {
     await page.goto('/settings/account')
-    await page.waitForLoadState('networkidle')
-
     // Listen for download event
     const downloadPromise = page.waitForEvent('download', { timeout: 15000 }).catch(() => null)
 
@@ -60,8 +54,6 @@ test.describe('Data Export (/settings/account)', () => {
 
   test('export description mentions data categories', async ({ page }) => {
     await page.goto('/settings/account')
-    await page.waitForLoadState('networkidle')
-
     // Description should mention the types of data included
     await expect(
       page.getByText(/profile|memberships|payments|training|certificates|events/i),

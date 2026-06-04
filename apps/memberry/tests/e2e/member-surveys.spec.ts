@@ -9,8 +9,6 @@ test.describe('Feedback: Member Surveys', () => {
 
   test('my surveys page loads without error', async ({ page }) => {
     await page.goto('/my/surveys')
-    await page.waitForLoadState('networkidle')
-
     // Should NOT show error state
     await expect(page.getByText('Failed to load surveys')).not.toBeVisible()
 
@@ -20,8 +18,6 @@ test.describe('Feedback: Member Surveys', () => {
 
   test('page subtitle renders (no crash)', async ({ page }) => {
     await page.goto('/my/surveys')
-    await page.waitForLoadState('networkidle')
-
     // Subtitle always renders regardless of data state
     await expect(
       page.getByText('Share your feedback and see past responses'),

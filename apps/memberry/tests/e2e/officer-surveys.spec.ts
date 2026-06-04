@@ -11,8 +11,6 @@ test.describe('Feedback: Officer Surveys', () => {
 
   test('surveys page loads without error', async ({ page }) => {
     await page.goto(`/org/${ORG_ID}/officer/surveys`)
-    await page.waitForLoadState('networkidle')
-
     // Should NOT show error state
     await expect(page.getByText('Failed to load surveys')).not.toBeVisible()
 
@@ -22,8 +20,6 @@ test.describe('Feedback: Officer Surveys', () => {
 
   test('survey stats cards render', async ({ page }) => {
     await page.goto(`/org/${ORG_ID}/officer/surveys`)
-    await page.waitForLoadState('networkidle')
-
     // Stats row renders with labeled cards (use exact match to avoid tab collisions)
     await expect(page.getByText('Total', { exact: true })).toBeVisible()
     await expect(page.getByText('Drafts', { exact: true })).toBeVisible()
@@ -31,8 +27,6 @@ test.describe('Feedback: Officer Surveys', () => {
 
   test('tab filters are clickable', async ({ page }) => {
     await page.goto(`/org/${ORG_ID}/officer/surveys`)
-    await page.waitForLoadState('networkidle')
-
     // Tab bar renders with filter tabs
     const allTab = page.getByRole('tab', { name: /All/i })
     const draftTab = page.getByRole('tab', { name: /Draft/i })
@@ -51,8 +45,6 @@ test.describe('Feedback: Officer Surveys', () => {
 
   test('New Survey button navigates to creation page', async ({ page }) => {
     await page.goto(`/org/${ORG_ID}/officer/surveys`)
-    await page.waitForLoadState('networkidle')
-
     const newBtn = page.getByRole('link', { name: /New Survey/i })
     await expect(newBtn).toBeVisible()
     await newBtn.click()

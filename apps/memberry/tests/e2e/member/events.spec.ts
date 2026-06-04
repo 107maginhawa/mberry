@@ -11,7 +11,6 @@ test.describe('Member Events (/my/events)', () => {
   test.beforeEach(async ({ page }) => {
     await signIn(page, MEMBER_EMAIL, MEMBER_PASSWORD)
     await page.goto('/my/events')
-    await page.waitForLoadState('networkidle')
   })
 
   test('shows heading and stat cards with numeric values', async ({ page }) => {

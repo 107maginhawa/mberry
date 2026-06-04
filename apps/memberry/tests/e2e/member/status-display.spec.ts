@@ -10,8 +10,6 @@ test.describe('M-24: Member Status Display', () => {
   test('organizations page shows membership status badge', async ({ page }) => {
     await signInAsMember(page)
     await page.goto('/my/organizations')
-    await page.waitForLoadState('networkidle')
-
     // Should display at least one organization with a status badge
     const statusBadge = page.locator('[class*="status"], [data-testid*="status"]').first()
     const hasStatusText = await page.getByText(/Active|Grace|Lapsed|Pending/i).first().isVisible({ timeout: 10000 }).catch(() => false)
@@ -22,8 +20,6 @@ test.describe('M-24: Member Status Display', () => {
     // Upgraded from soft assertion to behavioral (Phase 31)
     await signInAsMember(page)
     await page.goto('/my/organizations')
-    await page.waitForLoadState('networkidle')
-
     // Active members MUST see Active badge
     await expect(page.getByText('Active').first()).toBeVisible({ timeout: 10000 })
 
@@ -38,8 +34,6 @@ test.describe('M-24: Member Status Display', () => {
   test('organizations page shows dues expiry date when available', async ({ page }) => {
     await signInAsMember(page)
     await page.goto('/my/organizations')
-    await page.waitForLoadState('networkidle')
-
     // Should show organization name and link to org home
     await expect(page.getByText(/Philippine Dental Association|PDA/i).first()).toBeVisible({ timeout: 10000 })
   })
@@ -47,8 +41,6 @@ test.describe('M-24: Member Status Display', () => {
   test('membership card links to org page', async ({ page }) => {
     await signInAsMember(page)
     await page.goto('/my/organizations')
-    await page.waitForLoadState('networkidle')
-
     // Click on an organization card
     const orgLink = page.locator(`a[href*="/org/"]`).first()
     await expect(orgLink).toBeVisible({ timeout: 10000 })

@@ -8,8 +8,6 @@ test.describe('Training Browse (/org/$orgId/training)', () => {
   test('training index shows heading and table structure', async ({ page }) => {
     await signIn(page, SEED_MEMBER_EMAIL, TEST_PASSWORD)
     await page.goto(`/org/${ORG_ID}/training`)
-    await page.waitForLoadState('networkidle')
-
     // Heading may be "Training & Courses" or similar
     const hasHeading = await page.getByText(/training/i).first().isVisible({ timeout: 10000 }).catch(() => false)
     expect(hasHeading).toBeTruthy()
@@ -43,8 +41,6 @@ test.describe('Training Browse (/org/$orgId/training)', () => {
     test.skip(!trainingId, 'No published trainings in seed data — seed training data first')
 
     await page.goto(`/org/${ORG_ID}/training/${trainingId}`)
-    await page.waitForLoadState('networkidle')
-
     // Should show training title (not error state)
     const hasTitle = await page.locator('h1').first().isVisible().catch(() => false)
     const hasError = await page

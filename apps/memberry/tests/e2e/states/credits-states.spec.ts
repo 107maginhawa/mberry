@@ -25,8 +25,6 @@ test.describe('Credits — Interaction States', () => {
   test('success: credit progress shows numeric values and progress indicator', async ({ page }) => {
     await signIn(page, MEMBER_EMAIL, MEMBER_PASSWORD)
     await page.goto('/dashboard')
-    await page.waitForLoadState('networkidle')
-
     await expect(page.getByText('Credit Progress')).toBeVisible({ timeout: 10000 })
 
     // Should display credit numbers (earned/required)
@@ -47,8 +45,6 @@ test.describe('Credits — Interaction States', () => {
   test('success: my training page shows CPE Credits stat card', async ({ page }) => {
     await signIn(page, MEMBER_EMAIL, MEMBER_PASSWORD)
     await page.goto('/my/training')
-    await page.waitForLoadState('networkidle')
-
     await expect(page.getByText('CPE Credits', { exact: true })).toBeVisible({ timeout: 10000 })
 
     // The CPE Credits card should have a numeric value
@@ -59,8 +55,6 @@ test.describe('Credits — Interaction States', () => {
   test('empty: new member shows zero credits state', async ({ page }) => {
     await signIn(page, MEMBER_EMAIL, MEMBER_PASSWORD)
     await page.goto('/dashboard')
-    await page.waitForLoadState('networkidle')
-
     await expect(page.getByText('Credit Progress')).toBeVisible({ timeout: 10000 })
 
     // Credit display should show some form of numeric data (even 0)
@@ -70,8 +64,6 @@ test.describe('Credits — Interaction States', () => {
 
   test('permission-error: unauthenticated user cannot see credits', async ({ page }) => {
     await page.goto('/dashboard')
-    await page.waitForLoadState('networkidle')
-
     const isOnSignIn = page.url().includes('/auth/sign-in')
     const hasAuthPrompt = await page.getByText(/sign in|log in/i).first().isVisible().catch(() => false)
 
@@ -81,8 +73,6 @@ test.describe('Credits — Interaction States', () => {
   test('a11y: baseline accessibility check passes on credit progress', async ({ page }) => {
     await signIn(page, MEMBER_EMAIL, MEMBER_PASSWORD)
     await page.goto('/dashboard')
-    await page.waitForLoadState('networkidle')
-
     await expectNoA11yViolations(page, {
       exclude: ['[data-radix-popper-content-wrapper]'],
     })

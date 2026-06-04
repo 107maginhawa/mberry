@@ -11,16 +11,12 @@ test.describe('CO-05: Event Check-in', () => {
 
   test('officer events page loads', async ({ page }) => {
     await page.goto(`/org/${ORG_ID}/officer/events`)
-    await page.waitForLoadState('networkidle')
-
     const hasContent = await page.getByText(/event/i).first().isVisible({ timeout: 10000 }).catch(() => false)
     expect(hasContent).toBeTruthy()
   })
 
   test('event detail has attendance link', async ({ page }) => {
     await page.goto(`/org/${ORG_ID}/officer/events`)
-    await page.waitForLoadState('networkidle')
-
     const eventLink = page.locator('a[href*="/officer/events/"]:not([href*="/new"])').first()
     const hasEvents = await eventLink.isVisible({ timeout: 10000 }).catch(() => false)
 
@@ -36,8 +32,6 @@ test.describe('CO-05: Event Check-in', () => {
 
   test('event attendance page shows registration list', async ({ page }) => {
     await page.goto(`/org/${ORG_ID}/officer/events`)
-    await page.waitForLoadState('networkidle')
-
     const eventLink = page.locator('a[href*="/officer/events/"]:not([href*="/new"])').first()
     const hasEvents = await eventLink.isVisible({ timeout: 10000 }).catch(() => false)
 
@@ -45,8 +39,6 @@ test.describe('CO-05: Event Check-in', () => {
       const href = await eventLink.getAttribute('href')
       if (href) {
         await page.goto(`${href}/attendance`)
-        await page.waitForLoadState('networkidle')
-
         // Should show attendance page or error
         const hasPage = await page.getByText(/attendance|present|check-in/i).first().isVisible({ timeout: 10000 }).catch(() => false)
         expect(hasPage).toBeTruthy()

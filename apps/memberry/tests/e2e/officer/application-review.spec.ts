@@ -11,15 +11,11 @@ test.describe('CO-07: Application Review', () => {
 
   test('applications page loads with heading', async ({ page }) => {
     await page.goto(`/org/${ORG_ID}/officer/applications`)
-    await page.waitForLoadState('networkidle')
-
     await expect(page.getByText('Membership Applications')).toBeVisible({ timeout: 10000 })
   })
 
   test('applications list renders without errors', async ({ page }) => {
     await page.goto(`/org/${ORG_ID}/officer/applications`)
-    await page.waitForLoadState('networkidle')
-
     // Should show either applications or an empty state — no crash
     const hasContent = await page.locator('body').textContent()
     expect(hasContent).not.toContain('undefined undefined')
@@ -31,8 +27,6 @@ test.describe('CO-07: Application Review', () => {
 
   test('page is accessible from officer nav', async ({ page }) => {
     await page.goto(`/org/${ORG_ID}/officer/dashboard`)
-    await page.waitForLoadState('networkidle')
-
     // Navigate to applications via sidebar/nav
     const appLink = page.locator('a[href*="applications"]').first()
     const visible = await appLink.isVisible({ timeout: 5000 }).catch(() => false)

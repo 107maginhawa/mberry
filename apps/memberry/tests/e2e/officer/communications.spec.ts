@@ -14,8 +14,6 @@ test.describe('Officer Communications', () => {
 
   test('communications list renders heading', async ({ page }) => {
     await page.goto(`/org/${ORG_ID}/officer/communications`)
-    await page.waitForLoadState('networkidle')
-
     await expect(
       page.getByRole('heading', { name: /communications?|announcements?/i }).first()
     ).toBeVisible({ timeout: 10000 })
@@ -23,8 +21,6 @@ test.describe('Officer Communications', () => {
 
   test('shows announcements in list', async ({ page }) => {
     await page.goto(`/org/${ORG_ID}/officer/communications`)
-    await page.waitForLoadState('networkidle')
-
     // At least one announcement should be visible (seeded or test-created)
     const rows = page.locator('.divide-y a')
     await expect(rows.first()).toBeVisible({ timeout: 10000 })
@@ -32,8 +28,6 @@ test.describe('Officer Communications', () => {
 
   test('New Message button is visible', async ({ page }) => {
     await page.goto(`/org/${ORG_ID}/officer/communications`)
-    await page.waitForLoadState('networkidle')
-
     const newBtn = page.getByRole('link', { name: /new (message|announcement)|create (message|announcement)/i })
       .or(page.getByRole('button', { name: /new (message|announcement)|create (message|announcement)/i }))
       .first()
@@ -42,8 +36,6 @@ test.describe('Officer Communications', () => {
 
   test('can navigate to new announcement form', async ({ page }) => {
     await page.goto(`/org/${ORG_ID}/officer/communications`)
-    await page.waitForLoadState('networkidle')
-
     const newBtn = page.getByRole('link', { name: /new (message|announcement)|create (message|announcement)/i })
       .or(page.getByRole('button', { name: /new (message|announcement)|create (message|announcement)/i }))
       .first()
@@ -55,8 +47,6 @@ test.describe('Officer Communications', () => {
 
   test('stats cards show real data', async ({ page }) => {
     await page.goto(`/org/${ORG_ID}/officer/communications`)
-    await page.waitForLoadState('networkidle')
-
     // Stats cards should render with actual values (not just "0" or hardcoded text)
     await expect(page.getByText('Total Sent')).toBeVisible({ timeout: 10000 })
     await expect(page.getByText('Total', { exact: true })).toBeVisible()
@@ -65,8 +55,6 @@ test.describe('Officer Communications', () => {
 
   test('status badges show readable text, not raw enum', async ({ page }) => {
     await page.goto(`/org/${ORG_ID}/officer/communications`)
-    await page.waitForLoadState('networkidle')
-
     // Wait for announcements to load
     await expect(page.locator('[class*="rounded-md"][class*="font-medium"]').first()).toBeVisible({ timeout: 10000 })
 
@@ -106,7 +94,6 @@ test.describe('Officer Communications', () => {
 
     // Navigate to detail by clicking on it in the list
     await page.goto(`/org/${ORG_ID}/officer/communications`)
-    await page.waitForLoadState('networkidle')
     const annLink = page.getByText(title).first()
     await expect(annLink).toBeVisible({ timeout: 10000 })
     await annLink.click()
@@ -127,8 +114,6 @@ test.describe('Officer Communications', () => {
   test('published announcement shows archive button on detail', async ({ page }) => {
     // After the publish test above, the published E2E announcement should have an Archive button
     await page.goto(`/org/${ORG_ID}/officer/communications`)
-    await page.waitForLoadState('networkidle')
-
     // Click Sent tab to find published announcements
     const sentTab = page.getByRole('button', { name: /^Sent$/i })
     if (await sentTab.isVisible({ timeout: 3000 }).catch(() => false)) {
@@ -150,8 +135,6 @@ test.describe('Officer Communications', () => {
 
   test('detail page shows metadata and back link', async ({ page }) => {
     await page.goto(`/org/${ORG_ID}/officer/communications`)
-    await page.waitForLoadState('networkidle')
-
     // Click an announcement row — rows are <a> inside the list with truncated title
     const annRow = page.locator('.divide-y a[href*="/communications/"]').first()
     await expect(annRow).toBeVisible({ timeout: 10000 })

@@ -14,7 +14,6 @@ test.describe('Journey: Election → Officer Transition', () => {
 
     await test.step('navigate to elections', async () => {
       await page.goto(`/org/${ORG_ID}/officer/elections`)
-      await page.waitForLoadState('networkidle')
     })
 
     await test.step('elections list shows multiple elections with statuses', async () => {
@@ -35,7 +34,6 @@ test.describe('Journey: Election → Officer Transition', () => {
 
     await test.step('navigate to elections', async () => {
       await page.goto(`/org/${ORG_ID}/elections`)
-      await page.waitForLoadState('networkidle')
     })
 
     await test.step('elections visible to member', async () => {
@@ -64,7 +62,6 @@ test.describe('Journey: Election → Officer Transition', () => {
 
     await test.step('navigate to officers page', async () => {
       await page.goto(`/org/${ORG_ID}/officer/officers`)
-      await page.waitForLoadState('networkidle')
     })
 
     await test.step('officers page shows current officers with positions', async () => {
@@ -82,7 +79,6 @@ test.describe('Journey: Election → Officer Transition', () => {
     await test.step('sign in and view elections', async () => {
       await signInAsOfficer(page)
       await page.goto(`/org/${ORG_ID}/officer/elections`)
-      await page.waitForLoadState('networkidle')
     })
 
     await test.step('view election detail', async () => {
@@ -93,14 +89,12 @@ test.describe('Journey: Election → Officer Transition', () => {
 
     await test.step('check officers page', async () => {
       await page.goto(`/org/${ORG_ID}/officer/officers`)
-      await page.waitForLoadState('networkidle')
       const hasOfficers = await page.getByText(/officer|president/i).first().isVisible({ timeout: 10000 }).catch(() => false)
       expect(hasOfficers).toBeTruthy()
     })
 
     await test.step('check org settings', async () => {
       await page.goto(`/org/${ORG_ID}/officer/settings`)
-      await page.waitForLoadState('networkidle')
       // Settings page should render with any content (tabs, forms, headings)
       const hasContent = await page.locator('main, [role="main"], form, h1, h2, [role="tablist"]').first().isVisible({ timeout: 10000 }).catch(() => false)
       expect(hasContent).toBeTruthy()

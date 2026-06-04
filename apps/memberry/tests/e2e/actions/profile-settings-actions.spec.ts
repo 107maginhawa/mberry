@@ -41,7 +41,6 @@ test.describe('Profile Actions', () => {
 
   test('notifications page works — shows content or empty state', async ({ page }) => {
     await page.goto('/my/notifications')
-    await page.waitForLoadState('networkidle')
     await expect(page.getByRole('heading', { name: /Notifications/i })).toBeVisible({ timeout: 10000 })
 
     // Should show either notifications or "No notifications" — not a crash

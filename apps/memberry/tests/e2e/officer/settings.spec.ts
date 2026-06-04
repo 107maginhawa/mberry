@@ -12,8 +12,6 @@ test.describe('Officer Settings — Dues Config', () => {
 
   test('dues config page shows form with amount field', async ({ page }) => {
     await page.goto(`/org/${ORG_ID}/officer/settings/dues`)
-    await page.waitForLoadState('networkidle')
-
     await expect(
       page.getByRole('heading', { name: /dues configuration/i }),
     ).toBeVisible({ timeout: 10000 })
@@ -31,8 +29,6 @@ test.describe('Officer Settings — Fund Allocation', () => {
 
   test('fund allocation page shows 3 funds totaling 100%', async ({ page }) => {
     await page.goto(`/org/${ORG_ID}/officer/settings/funds`)
-    await page.waitForLoadState('networkidle')
-
     await expect(
       page.getByRole('heading', { name: /fund allocation/i }),
     ).toBeVisible({ timeout: 10000 })
@@ -64,8 +60,6 @@ test.describe('Officer Settings — Membership Categories', () => {
 
   test('membership categories page renders', async ({ page }) => {
     await page.goto(`/org/${ORG_ID}/officer/settings/membership-categories`)
-    await page.waitForLoadState('networkidle')
-
     // Page should render with heading or category content
     const hasHeading = await page.getByRole('heading').first().isVisible().catch(() => false)
     const hasCategories = await page.getByText(/regular|associate|life|honorary/i).first().isVisible().catch(() => false)
@@ -81,8 +75,6 @@ test.describe('Officer Settings — Chapters', () => {
 
   test('chapters page shows empty state', async ({ page }) => {
     await page.goto(`/org/${ORG_ID}/officer/settings/chapters`)
-    await page.waitForLoadState('networkidle')
-
     const hasEmptyState = await page.getByText(/no chapter|empty|none|get started|add.*chapter/i).first().isVisible().catch(() => false)
     const hasHeading = await page.getByRole('heading', { name: /chapters?|affiliations?/i }).first().isVisible().catch(() => false)
     expect(hasEmptyState || hasHeading).toBeTruthy()
@@ -97,7 +89,6 @@ test.describe('Officer Settings — Admin Features', () => {
   test('[BR-10] admin features page renders', async ({ page }) => {
     // Just verify the settings area is accessible for officers
     await page.goto(`/org/${ORG_ID}/officer/settings/org`)
-    await page.waitForLoadState('networkidle')
     const hasContent = await page.locator('main').isVisible()
     expect(hasContent).toBeTruthy()
   })
@@ -110,8 +101,6 @@ test.describe('Officer Settings — Gateway', () => {
 
   test('[BR-31] settings page renders gateway section', async ({ page }) => {
     await page.goto(`/org/${ORG_ID}/officer/settings/gateway`)
-    await page.waitForLoadState('networkidle')
-
     // Gateway configuration UI should render — heading, form, or empty state
     const hasHeading = await page.getByRole('heading', { name: /gateway|payment|stripe/i }).first().isVisible().catch(() => false)
     const hasForm = await page.getByText(/gateway|payment.*method|stripe|connect/i).first().isVisible().catch(() => false)

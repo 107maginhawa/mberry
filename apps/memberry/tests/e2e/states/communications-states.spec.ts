@@ -24,8 +24,6 @@ test.describe('Communications — Interaction States', () => {
   test('success: shows communications heading and announcement list', async ({ page }) => {
     await signIn(page, SEED_OFFICER_EMAIL, TEST_PASSWORD)
     await page.goto(`/org/${ORG_ID}/officer/communications`)
-    await page.waitForLoadState('networkidle')
-
     await expect(
       page.getByRole('heading', { name: /communications?|announcements?/i }).first(),
     ).toBeVisible({ timeout: 10000 })
@@ -40,8 +38,6 @@ test.describe('Communications — Interaction States', () => {
   test('permission-error: regular member cannot access officer communications', async ({ page }) => {
     await signIn(page, SEED_MEMBER_EMAIL, TEST_PASSWORD)
     await page.goto(`/org/${ORG_ID}/officer/communications`)
-    await page.waitForLoadState('networkidle')
-
     const isRedirected = !page.url().includes('/officer/communications')
     const hasForbidden = await page.getByText(/forbidden|access denied|not authorized|officers only/i).first().isVisible().catch(() => false)
 
@@ -51,8 +47,6 @@ test.describe('Communications — Interaction States', () => {
   test('empty: communications list shows empty state when no announcements', async ({ page }) => {
     await signIn(page, SEED_OFFICER_EMAIL, TEST_PASSWORD)
     await page.goto(`/org/${ORG_ID}/officer/communications`)
-    await page.waitForLoadState('networkidle')
-
     // Either announcements are listed or empty state shown
     const rows = page.locator('.divide-y a, [class*="announcement"], [class*="card"]')
     const hasRows = await rows.first().isVisible().catch(() => false)
@@ -69,8 +63,6 @@ test.describe('Communications — Interaction States', () => {
   test('confirmation: new announcement form requires content before sending', async ({ page }) => {
     await signIn(page, SEED_OFFICER_EMAIL, TEST_PASSWORD)
     await page.goto(`/org/${ORG_ID}/officer/communications`)
-    await page.waitForLoadState('networkidle')
-
     // Click New Message button
     const newBtn = page.getByRole('link', { name: /new (message|announcement)|create (message|announcement)/i })
       .or(page.getByRole('button', { name: /new (message|announcement)|create (message|announcement)/i }))
@@ -102,8 +94,6 @@ test.describe('Communications — Interaction States', () => {
   test('a11y: baseline accessibility check passes', async ({ page }) => {
     await signIn(page, SEED_OFFICER_EMAIL, TEST_PASSWORD)
     await page.goto(`/org/${ORG_ID}/officer/communications`)
-    await page.waitForLoadState('networkidle')
-
     await expectNoA11yViolations(page, {
       exclude: ['[data-radix-popper-content-wrapper]'],
     })

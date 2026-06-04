@@ -10,8 +10,6 @@ test.describe('Wave 4α: Communications — Officer Compose + Notification Drawe
 
     // Navigate to compose page
     await page.goto(`/org/${ORG_SLUG}/officer/communications/new`)
-    await page.waitForLoadState('networkidle')
-
     // Fill in title
     const titleInput = page.getByPlaceholder('Announcement title')
     await expect(titleInput).toBeVisible({ timeout: 10000 })
@@ -42,8 +40,6 @@ test.describe('Wave 4α: Communications — Officer Compose + Notification Drawe
 
     // Navigate to sent history
     await page.goto(`/org/${ORG_SLUG}/officer/communications/sent`)
-    await page.waitForLoadState('networkidle')
-
     // Verify announcement appears in sent list
     await expect(page.getByText('E2E Test Announcement')).toBeVisible({ timeout: 10000 })
   })

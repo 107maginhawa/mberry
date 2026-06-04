@@ -12,8 +12,6 @@ test.describe('M-10: Member Directory', () => {
 
   test('directory page loads with search input', async ({ page }) => {
     await page.goto(`/org/${ORG_ID}/members`)
-    await page.waitForLoadState('networkidle')
-
     // Search input should be visible
     const searchInput = page.getByPlaceholder(/search members/i)
     await expect(searchInput).toBeVisible({ timeout: 10000 })
@@ -21,8 +19,6 @@ test.describe('M-10: Member Directory', () => {
 
   test('search returns member cards with names', async ({ page }) => {
     await page.goto(`/org/${ORG_ID}/members`)
-    await page.waitForLoadState('networkidle')
-
     const searchInput = page.getByPlaceholder(/search members/i)
     await expect(searchInput).toBeVisible({ timeout: 10000 })
 
@@ -44,8 +40,6 @@ test.describe('M-10: Member Directory', () => {
 
   test('empty search shows no errors', async ({ page }) => {
     await page.goto(`/org/${ORG_ID}/members`)
-    await page.waitForLoadState('networkidle')
-
     // Page should load without errors even with no search query
     const hasError = await page.getByText(/search failed/i).isVisible({ timeout: 3000 }).catch(() => false)
     expect(hasError).toBe(false)
@@ -53,8 +47,6 @@ test.describe('M-10: Member Directory', () => {
 
   test('page renders without undefined values', async ({ page }) => {
     await page.goto(`/org/${ORG_ID}/members`)
-    await page.waitForLoadState('networkidle')
-
     const pageContent = await page.textContent('body')
     expect(pageContent).not.toContain('undefined undefined')
   })

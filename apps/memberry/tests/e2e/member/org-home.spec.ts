@@ -11,8 +11,6 @@ test.describe('Org Home (/org/$orgId/home)', () => {
 
   test('shows Organization Home heading', async ({ page }) => {
     await page.goto(`/org/${ORG_ID}/home`)
-    await page.waitForLoadState('networkidle')
-
     await expect(
       page.getByRole('heading', { name: 'Organization Home' }),
     ).toBeVisible({ timeout: 10000 })
@@ -20,8 +18,6 @@ test.describe('Org Home (/org/$orgId/home)', () => {
 
   test('shows Recent Announcements section', async ({ page }) => {
     await page.goto(`/org/${ORG_ID}/home`)
-    await page.waitForLoadState('networkidle')
-
     await expect(
       page.getByText('Recent Announcements').first(),
     ).toBeVisible({ timeout: 10000 })
@@ -29,8 +25,6 @@ test.describe('Org Home (/org/$orgId/home)', () => {
 
   test('shows Upcoming Events section', async ({ page }) => {
     await page.goto(`/org/${ORG_ID}/home`)
-    await page.waitForLoadState('networkidle')
-
     await expect(
       page.getByText('Upcoming Events').first(),
     ).toBeVisible({ timeout: 10000 })
@@ -38,8 +32,6 @@ test.describe('Org Home (/org/$orgId/home)', () => {
 
   test('has View all events link', async ({ page }) => {
     await page.goto(`/org/${ORG_ID}/home`)
-    await page.waitForLoadState('networkidle')
-
     await expect(
       page.getByRole('link', { name: /view all/i }).first(),
     ).toBeVisible({ timeout: 10000 })
