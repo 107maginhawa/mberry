@@ -1,3 +1,12 @@
+# CSRF preamble — fetches token + sets cookie for state-changing requests.
+# Auto-injected by scripts/audit/inject-csrf-into-hurl.ts (idempotent).
+GET {{api}}/csrf-token
+HTTP 200
+[Captures]
+csrf_token: jsonpath "$.token"
+
+
+
 # Extended person endpoints not covered by person-lifecycle.hurl.
 # Covers /persons list, /persons/me/* preferences, credits, privacy,
 # memberships, officer role, export, and deletion flow.
@@ -5,6 +14,8 @@
 # ── 0. Sign up and create person ─────────────────────────────
 
 POST {{api}}/auth/sign-up/email
+Origin: {{origin}}
+x-csrf-token: {{csrf_token}}
 Content-Type: application/json
 {
   "email": "person-ext-{{suffix}}@example.org",
@@ -17,6 +28,8 @@ session_token: cookie "better-auth.session_token"
 
 
 POST {{api}}/persons
+Origin: {{origin}}
+x-csrf-token: {{csrf_token}}
 Cookie: better-auth.session_token={{session_token}}
 Content-Type: application/json
 {
@@ -44,6 +57,8 @@ status < 300
 # ── 2. Update self via /me ────────────────────────────────────
 
 PATCH {{api}}/persons/me
+Origin: {{origin}}
+x-csrf-token: {{csrf_token}}
 Cookie: better-auth.session_token={{session_token}}
 Content-Type: application/json
 {
@@ -78,6 +93,8 @@ status < 300
 # ── 5. Add credit entry ─────────────────────────────────────
 
 POST {{api}}/persons/me/credit-entries
+Origin: {{origin}}
+x-csrf-token: {{csrf_token}}
 Cookie: better-auth.session_token={{session_token}}
 Content-Type: application/json
 {
@@ -124,6 +141,8 @@ status < 300
 # ── 9. Update notification preferences ──────────────────────
 
 PATCH {{api}}/persons/me/notification-preferences
+Origin: {{origin}}
+x-csrf-token: {{csrf_token}}
 Cookie: better-auth.session_token={{session_token}}
 Content-Type: application/json
 {
@@ -149,6 +168,8 @@ status < 300
 # ── 11. Update privacy settings ─────────────────────────────
 
 PATCH {{api}}/persons/me/privacy
+Origin: {{origin}}
+x-csrf-token: {{csrf_token}}
 Cookie: better-auth.session_token={{session_token}}
 Content-Type: application/json
 {
@@ -173,6 +194,8 @@ status < 404
 # ── 13. Request account deletion ─────────────────────────────
 
 POST {{api}}/persons/me/delete
+Origin: {{origin}}
+x-csrf-token: {{csrf_token}}
 Cookie: better-auth.session_token={{session_token}}
 HTTP *
 [Asserts]
@@ -183,6 +206,8 @@ status < 300
 # ── 14. Cancel account deletion ──────────────────────────────
 
 POST {{api}}/persons/me/cancel-delete
+Origin: {{origin}}
+x-csrf-token: {{csrf_token}}
 Cookie: better-auth.session_token={{session_token}}
 HTTP *
 [Asserts]

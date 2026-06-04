@@ -1,3 +1,12 @@
+# CSRF preamble — fetches token + sets cookie for state-changing requests.
+# Auto-injected by scripts/audit/inject-csrf-into-hurl.ts (idempotent).
+GET {{api}}/csrf-token
+HTTP 200
+[Captures]
+csrf_token: jsonpath "$.token"
+
+
+
 # Extended email endpoints not covered by email.hurl.
 # Covers single queue item, cancel, retry, and template test send.
 # Uses admin credentials since email is admin-only.
@@ -5,6 +14,8 @@
 # ── Auth: sign in as admin ───────────────────────────────────
 
 POST {{api}}/auth/sign-in/email
+Origin: {{origin}}
+x-csrf-token: {{csrf_token}}
 Content-Type: application/json
 {
   "email": "{{admin_email}}",
@@ -16,6 +27,8 @@ HTTP 200
 # ── 1. Create a template to test with ───────────────────────
 
 POST {{api}}/email/templates
+Origin: {{origin}}
+x-csrf-token: {{csrf_token}}
 Content-Type: application/json
 {
   "name": "Ext email template {{suffix}}",
@@ -33,6 +46,8 @@ template_id: jsonpath "$.id"
 # ── 2. Test template send ───────────────────────────────────
 
 POST {{api}}/email/templates/{{template_id}}/test
+Origin: {{origin}}
+x-csrf-token: {{csrf_token}}
 Content-Type: application/json
 {
   "to": "test-recipient-{{suffix}}@example.org"
@@ -71,6 +86,8 @@ HTTP *
 # Uses a placeholder UUID; real run needs a queued item.
 
 POST {{api}}/email/queue/00000000-0000-0000-0000-000000000000/cancel
+Origin: {{origin}}
+x-csrf-token: {{csrf_token}}
 Content-Type: application/json
 {}
 HTTP *
@@ -79,6 +96,8 @@ HTTP *
 # ── 6. Retry a queue item ───────────────────────────────────
 
 POST {{api}}/email/queue/00000000-0000-0000-0000-000000000000/retry
+Origin: {{origin}}
+x-csrf-token: {{csrf_token}}
 Content-Type: application/json
 {}
 HTTP *

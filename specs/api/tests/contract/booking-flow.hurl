@@ -1,3 +1,12 @@
+# CSRF preamble — fetches token + sets cookie for state-changing requests.
+# Auto-injected by scripts/audit/inject-csrf-into-hurl.ts (idempotent).
+GET {{api}}/csrf-token
+HTTP 200
+[Captures]
+csrf_token: jsonpath "$.token"
+
+
+
 # End-to-end booking flow: a host publishes an active event, a client
 # books an open slot, the host confirms, then the client cancels. Slots
 # are auto-generated from the event's dailyConfigs as soon as it goes
@@ -6,6 +15,8 @@
 
 # 0. Create the host.
 POST {{api}}/auth/sign-up/email
+Origin: {{origin}}
+x-csrf-token: {{csrf_token}}
 Content-Type: application/json
 {
   "email": "flow-host-{{suffix}}@example.org",
@@ -16,6 +27,8 @@ HTTP 200
 
 
 POST {{api}}/persons
+Origin: {{origin}}
+x-csrf-token: {{csrf_token}}
 Content-Type: application/json
 {
   "firstName": "Booking",
@@ -28,6 +41,8 @@ HTTP 201
 
 # 1. Create an active booking event so slots are generated.
 POST {{api}}/booking/events
+Origin: {{origin}}
+x-csrf-token: {{csrf_token}}
 Content-Type: application/json
 {
   "title": "30-min consult",
@@ -61,6 +76,8 @@ jsonpath "$" isCollection
 
 # 3. Switch to a client user (jar now holds client session).
 POST {{api}}/auth/sign-up/email
+Origin: {{origin}}
+x-csrf-token: {{csrf_token}}
 Content-Type: application/json
 {
   "email": "flow-client-{{suffix}}@example.org",
@@ -71,6 +88,8 @@ HTTP 200
 
 
 POST {{api}}/persons
+Origin: {{origin}}
+x-csrf-token: {{csrf_token}}
 Content-Type: application/json
 {
   "firstName": "Booking",
@@ -83,6 +102,8 @@ HTTP 201
 
 # 4. Book the slot as the client.
 POST {{api}}/booking/bookings
+Origin: {{origin}}
+x-csrf-token: {{csrf_token}}
 Content-Type: application/json
 {
   "slot": "{{slot_id}}",
@@ -106,6 +127,8 @@ jsonpath "$.pagination.totalCount" >= 1
 
 # 6. Switch back to the host to confirm.
 POST {{api}}/auth/sign-in/email
+Origin: {{origin}}
+x-csrf-token: {{csrf_token}}
 Content-Type: application/json
 {
   "email": "flow-host-{{suffix}}@example.org",
@@ -115,6 +138,8 @@ HTTP 200
 
 
 POST {{api}}/booking/bookings/{{booking_id}}/confirm
+Origin: {{origin}}
+x-csrf-token: {{csrf_token}}
 Content-Type: application/json
 { "reason": "Confirmed by host" }
 HTTP 200
@@ -124,6 +149,8 @@ jsonpath "$.status" == "confirmed"
 
 # 7. Switch back to client to cancel.
 POST {{api}}/auth/sign-in/email
+Origin: {{origin}}
+x-csrf-token: {{csrf_token}}
 Content-Type: application/json
 {
   "email": "flow-client-{{suffix}}@example.org",
@@ -133,6 +160,8 @@ HTTP 200
 
 
 POST {{api}}/booking/bookings/{{booking_id}}/cancel
+Origin: {{origin}}
+x-csrf-token: {{csrf_token}}
 Content-Type: application/json
 { "reason": "Schedule conflict" }
 HTTP 200

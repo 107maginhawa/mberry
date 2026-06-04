@@ -35,6 +35,10 @@ const apiUrl = process.env.API_URL ?? 'http://localhost:7213'
 const mailpitApi = process.env.MAILPIT_API ?? 'http://localhost:8025'
 const adminEmail = process.env.CONTRACT_ADMIN_EMAIL ?? 'admin@contract-tests.local'
 const adminPassword = process.env.CONTRACT_ADMIN_PASSWORD ?? 'AdminContractTest!1'
+// Origin header value injected into every state-changing scenario request.
+// Must match an entry in the impl's CORS_ORIGINS env (hono/csrf rejects mismatches).
+// Default mirrors the memberry frontend dev origin, which is always in the dev CORS list.
+const contractOrigin = process.env.CONTRACT_ORIGIN ?? 'http://localhost:3004'
 
 const contractDir = join(import.meta.dir, '..', 'specs', 'api', 'tests', 'contract')
 
@@ -76,9 +80,14 @@ if (probe.error || probe.status !== 0) {
  * scoped to an admin role, which we inject as {{admin_token}}.
  */
 async function ensureAdminSession(): Promise<string | null> {
+  // hono/csrf requires Origin on state-changing requests; Better-Auth sign-up is mounted
+  // behind that middleware so we send Origin explicitly here too (Node fetch does not
+  // populate it for same-host calls).
+  const authHeaders = { 'Content-Type': 'application/json', Origin: contractOrigin } as const
+
   const signUp = await fetch(`${apiUrl}/auth/sign-up/email`, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    headers: authHeaders,
     body: JSON.stringify({ email: adminEmail, password: adminPassword, name: 'Contract Admin' }),
   })
 
@@ -88,7 +97,7 @@ async function ensureAdminSession(): Promise<string | null> {
 
   const signIn = await fetch(`${apiUrl}/auth/sign-in/email`, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    headers: authHeaders,
     body: JSON.stringify({ email: adminEmail, password: adminPassword }),
   })
 
@@ -137,9 +146,14 @@ if (warnings.length > 0) {
 }
 console.log()
 
+// `timestamp` mirrors `suffix` for legacy scenarios that referenced {{timestamp}}.
+// `origin` value is injected into every state-changing request by inject-csrf-into-hurl.ts
+// so hono/csrf origin verification passes.
 const variables = [
   '--variable', `api=${apiUrl}`,
   '--variable', `suffix=${suffix}`,
+  '--variable', `timestamp=${suffix}`,
+  '--variable', `origin=${contractOrigin}`,
   '--variable', `mailpit_api=${mailpitApi}`,
   '--variable', `admin_email=${adminEmail}`,
   '--variable', `admin_password=${adminPassword}`,

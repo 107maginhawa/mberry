@@ -1,3 +1,12 @@
+# CSRF preamble — fetches token + sets cookie for state-changing requests.
+# Auto-injected by scripts/audit/inject-csrf-into-hurl.ts (idempotent).
+GET {{api}}/csrf-token
+HTTP 200
+[Captures]
+csrf_token: jsonpath "$.token"
+
+
+
 # Business Rules: [BR-43]
 # Voting Only When Election Status Is votingOpen
 #
@@ -13,6 +22,8 @@
 
 # 0. Auth setup.
 POST {{api}}/auth/sign-up/email
+Origin: {{origin}}
+x-csrf-token: {{csrf_token}}
 Content-Type: application/json
 {
   "email": "br43-voting-{{suffix}}@example.org",
@@ -23,6 +34,8 @@ HTTP 200
 
 
 POST {{api}}/persons
+Origin: {{origin}}
+x-csrf-token: {{csrf_token}}
 Content-Type: application/json
 {
   "firstName": "BR43",
@@ -37,6 +50,8 @@ person_id: jsonpath "$.id"
 
 # 1. Create an election (defaults to status='draft').
 POST {{api}}/association/member/elections
+Origin: {{origin}}
+x-csrf-token: {{csrf_token}}
 Content-Type: application/json
 x-org-id: ed8e3a96-8126-4341-be42-e6eb7940c562
 {
@@ -53,6 +68,8 @@ election_id: jsonpath "$.id"
 # 2. [BR-43] Attempt to cast a ballot while election is still draft.
 #    The handler must reject with 409 ConflictError ('Voting is not open').
 POST {{api}}/association/member/ballots
+Origin: {{origin}}
+x-csrf-token: {{csrf_token}}
 Content-Type: application/json
 x-org-id: ed8e3a96-8126-4341-be42-e6eb7940c562
 {
@@ -65,5 +82,7 @@ HTTP 409
 
 # 3. Cleanup.
 DELETE {{api}}/association/member/elections/{{election_id}}
+Origin: {{origin}}
+x-csrf-token: {{csrf_token}}
 x-org-id: ed8e3a96-8126-4341-be42-e6eb7940c562
 HTTP 200

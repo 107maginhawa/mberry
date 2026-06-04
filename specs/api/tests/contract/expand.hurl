@@ -1,9 +1,20 @@
+# CSRF preamble — fetches token + sets cookie for state-changing requests.
+# Auto-injected by scripts/audit/inject-csrf-into-hurl.ts (idempotent).
+GET {{api}}/csrf-token
+HTTP 200
+[Captures]
+csrf_token: jsonpath "$.token"
+
+
+
 # Auto-expand contract: a field carrying x-expandable-field returns the
 # id by default and the full object when listed in ?expand=. The booking
 # event's `owner` field is a stable target (it points at a Person via
 # getPerson). Validates the wire shape is the same across implementations.
 
 POST {{api}}/auth/sign-up/email
+Origin: {{origin}}
+x-csrf-token: {{csrf_token}}
 Content-Type: application/json
 {
   "email": "expand-{{suffix}}@example.org",
@@ -17,6 +28,8 @@ user_id: jsonpath "$.user.id"
 
 
 POST {{api}}/persons
+Origin: {{origin}}
+x-csrf-token: {{csrf_token}}
 Cookie: better-auth.session_token={{session_token}}
 Content-Type: application/json
 {
@@ -29,6 +42,8 @@ HTTP 201
 
 
 POST {{api}}/booking/events
+Origin: {{origin}}
+x-csrf-token: {{csrf_token}}
 Cookie: better-auth.session_token={{session_token}}
 Content-Type: application/json
 {

@@ -1,8 +1,19 @@
+# CSRF preamble — fetches token + sets cookie for state-changing requests.
+# Auto-injected by scripts/audit/inject-csrf-into-hurl.ts (idempotent).
+GET {{api}}/csrf-token
+HTTP 200
+[Captures]
+csrf_token: jsonpath "$.token"
+
+
+
 # Association training courses CRUD flow: course CRUD, course enrollment CRUD,
 # progress logging, and quiz attempts.
 
 # 0. Auth setup — sign up + create person.
 POST {{api}}/auth/sign-up/email
+Origin: {{origin}}
+x-csrf-token: {{csrf_token}}
 Content-Type: application/json
 {
   "email": "assoc-courses-{{suffix}}@example.org",
@@ -13,6 +24,8 @@ HTTP 200
 
 
 POST {{api}}/persons
+Origin: {{origin}}
+x-csrf-token: {{csrf_token}}
 Content-Type: application/json
 {
   "firstName": "Courses",
@@ -29,6 +42,8 @@ person_id: jsonpath "$.id"
 
 # 1. CREATE course.
 POST {{api}}/association/training/courses
+Origin: {{origin}}
+x-csrf-token: {{csrf_token}}
 Content-Type: application/json
 x-org-id: ed8e3a96-8126-4341-be42-e6eb7940c562
 {
@@ -56,6 +71,8 @@ HTTP 200
 
 # 4. UPDATE course.
 PATCH {{api}}/association/training/courses/{{course_id}}
+Origin: {{origin}}
+x-csrf-token: {{csrf_token}}
 Content-Type: application/json
 x-org-id: ed8e3a96-8126-4341-be42-e6eb7940c562
 {
@@ -68,6 +85,8 @@ HTTP 200
 
 # 5. CREATE course enrollment.
 POST {{api}}/association/training/courses/enrollments
+Origin: {{origin}}
+x-csrf-token: {{csrf_token}}
 Content-Type: application/json
 x-org-id: ed8e3a96-8126-4341-be42-e6eb7940c562
 {
@@ -93,6 +112,8 @@ HTTP 200
 
 # 8. UPDATE course enrollment.
 PATCH {{api}}/association/training/courses/enrollments/{{enrollment_id}}
+Origin: {{origin}}
+x-csrf-token: {{csrf_token}}
 Content-Type: application/json
 x-org-id: ed8e3a96-8126-4341-be42-e6eb7940c562
 {
@@ -103,6 +124,8 @@ HTTP 200
 
 # 9. Log progress for enrollment.
 POST {{api}}/association/training/courses/enrollments/{{enrollment_id}}/progress
+Origin: {{origin}}
+x-csrf-token: {{csrf_token}}
 Content-Type: application/json
 x-org-id: ed8e3a96-8126-4341-be42-e6eb7940c562
 {
@@ -114,6 +137,8 @@ HTTP 200
 
 # 10. DELETE course enrollment.
 DELETE {{api}}/association/training/courses/enrollments/{{enrollment_id}}
+Origin: {{origin}}
+x-csrf-token: {{csrf_token}}
 x-org-id: ed8e3a96-8126-4341-be42-e6eb7940c562
 HTTP 200
 
@@ -122,6 +147,8 @@ HTTP 200
 
 # 11. Submit quiz attempt.
 POST {{api}}/association/training/courses/quiz-attempts
+Origin: {{origin}}
+x-csrf-token: {{csrf_token}}
 Content-Type: application/json
 x-org-id: ed8e3a96-8126-4341-be42-e6eb7940c562
 {
@@ -144,6 +171,8 @@ HTTP 200
 
 # 13. DELETE course.
 DELETE {{api}}/association/training/courses/{{course_id}}
+Origin: {{origin}}
+x-csrf-token: {{csrf_token}}
 x-org-id: ed8e3a96-8126-4341-be42-e6eb7940c562
 HTTP 200
 

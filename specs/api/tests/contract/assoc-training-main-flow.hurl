@@ -1,8 +1,19 @@
+# CSRF preamble — fetches token + sets cookie for state-changing requests.
+# Auto-injected by scripts/audit/inject-csrf-into-hurl.ts (idempotent).
+GET {{api}}/csrf-token
+HTTP 200
+[Captures]
+csrf_token: jsonpath "$.token"
+
+
+
 # Association training CRUD flow: create, list, get, update,
 # publish, then delete.
 
 # 0. Auth setup — sign up + create person.
 POST {{api}}/auth/sign-up/email
+Origin: {{origin}}
+x-csrf-token: {{csrf_token}}
 Content-Type: application/json
 {
   "email": "assoc-train-{{suffix}}@example.org",
@@ -13,6 +24,8 @@ HTTP 200
 
 
 POST {{api}}/persons
+Origin: {{origin}}
+x-csrf-token: {{csrf_token}}
 Content-Type: application/json
 {
   "firstName": "Training",
@@ -27,6 +40,8 @@ person_id: jsonpath "$.id"
 
 # 1. CREATE training.
 POST {{api}}/association/training
+Origin: {{origin}}
+x-csrf-token: {{csrf_token}}
 Content-Type: application/json
 x-org-id: ed8e3a96-8126-4341-be42-e6eb7940c562
 {
@@ -55,6 +70,8 @@ HTTP 200
 
 # 4. UPDATE training.
 PATCH {{api}}/association/training/{{training_id}}
+Origin: {{origin}}
+x-csrf-token: {{csrf_token}}
 Content-Type: application/json
 x-org-id: ed8e3a96-8126-4341-be42-e6eb7940c562
 {
@@ -65,6 +82,8 @@ HTTP 200
 
 # 5. Publish training.
 POST {{api}}/association/training/{{training_id}}/publish
+Origin: {{origin}}
+x-csrf-token: {{csrf_token}}
 Content-Type: application/json
 x-org-id: ed8e3a96-8126-4341-be42-e6eb7940c562
 {}
@@ -73,6 +92,8 @@ HTTP 200
 
 # 6. DELETE training.
 DELETE {{api}}/association/training/{{training_id}}
+Origin: {{origin}}
+x-csrf-token: {{csrf_token}}
 x-org-id: ed8e3a96-8126-4341-be42-e6eb7940c562
 HTTP 200
 

@@ -1,8 +1,19 @@
+# CSRF preamble — fetches token + sets cookie for state-changing requests.
+# Auto-injected by scripts/audit/inject-csrf-into-hurl.ts (idempotent).
+GET {{api}}/csrf-token
+HTTP 200
+[Captures]
+csrf_token: jsonpath "$.token"
+
+
+
 # Association applications CRUD flow: create, list, get, update,
 # approve/deny actions, then delete.
 
 # 0. Auth setup — sign up + create person.
 POST {{api}}/auth/sign-up/email
+Origin: {{origin}}
+x-csrf-token: {{csrf_token}}
 Content-Type: application/json
 {
   "email": "assoc-app-{{suffix}}@example.org",
@@ -13,6 +24,8 @@ HTTP 200
 
 
 POST {{api}}/persons
+Origin: {{origin}}
+x-csrf-token: {{csrf_token}}
 Content-Type: application/json
 {
   "firstName": "Application",
@@ -27,6 +40,8 @@ person_id: jsonpath "$.id"
 
 # 1. CREATE application.
 POST {{api}}/association/member/applications
+Origin: {{origin}}
+x-csrf-token: {{csrf_token}}
 Content-Type: application/json
 x-org-id: ed8e3a96-8126-4341-be42-e6eb7940c562
 {
@@ -52,6 +67,8 @@ HTTP 200
 
 # 4. UPDATE application.
 PATCH {{api}}/association/member/applications/{{application_id}}
+Origin: {{origin}}
+x-csrf-token: {{csrf_token}}
 Content-Type: application/json
 x-org-id: ed8e3a96-8126-4341-be42-e6eb7940c562
 {
@@ -62,6 +79,8 @@ HTTP 200
 
 # 5. Approve application.
 POST {{api}}/association/member/applications/{{application_id}}/approve
+Origin: {{origin}}
+x-csrf-token: {{csrf_token}}
 Content-Type: application/json
 x-org-id: ed8e3a96-8126-4341-be42-e6eb7940c562
 {}
@@ -70,6 +89,8 @@ HTTP 200
 
 # 6. Create another application to test deny.
 POST {{api}}/association/member/applications
+Origin: {{origin}}
+x-csrf-token: {{csrf_token}}
 Content-Type: application/json
 x-org-id: ed8e3a96-8126-4341-be42-e6eb7940c562
 {
@@ -83,6 +104,8 @@ application_id_2: jsonpath "$.id"
 
 # 7. Deny application.
 POST {{api}}/association/member/applications/{{application_id_2}}/deny
+Origin: {{origin}}
+x-csrf-token: {{csrf_token}}
 Content-Type: application/json
 x-org-id: ed8e3a96-8126-4341-be42-e6eb7940c562
 {
@@ -93,6 +116,8 @@ HTTP 200
 
 # 8. DELETE application.
 DELETE {{api}}/association/member/applications/{{application_id}}
+Origin: {{origin}}
+x-csrf-token: {{csrf_token}}
 x-org-id: ed8e3a96-8126-4341-be42-e6eb7940c562
 HTTP 200
 

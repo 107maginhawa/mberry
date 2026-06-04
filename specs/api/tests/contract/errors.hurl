@@ -1,3 +1,12 @@
+# CSRF preamble — fetches token + sets cookie for state-changing requests.
+# Auto-injected by scripts/audit/inject-csrf-into-hurl.ts (idempotent).
+GET {{api}}/csrf-token
+HTTP 200
+[Captures]
+csrf_token: jsonpath "$.token"
+
+
+
 # Error envelope contract. Every 4xx/5xx response carries a stable
 # JSON body shape: code, message, statusCode, timestamp, requestId,
 # path, method. 400 responses additionally carry fieldErrors[]. Clients
@@ -5,6 +14,8 @@
 
 # 1. Validation error on POST /persons with empty body.
 POST {{api}}/auth/sign-up/email
+Origin: {{origin}}
+x-csrf-token: {{csrf_token}}
 Content-Type: application/json
 {
   "email": "errors-{{suffix}}@example.org",
@@ -15,6 +26,8 @@ HTTP 200
 
 
 POST {{api}}/persons
+Origin: {{origin}}
+x-csrf-token: {{csrf_token}}
 Content-Type: application/json
 {}
 HTTP 400
@@ -43,6 +56,8 @@ jsonpath "$.statusCode" == 404
 # (Use a hop that the auth middleware rejects pre-routing — sign out
 # clears the cookie jar.)
 POST {{api}}/auth/sign-out
+Origin: {{origin}}
+x-csrf-token: {{csrf_token}}
 HTTP 200
 
 

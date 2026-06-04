@@ -1,8 +1,19 @@
+# CSRF preamble — fetches token + sets cookie for state-changing requests.
+# Auto-injected by scripts/audit/inject-csrf-into-hurl.ts (idempotent).
+GET {{api}}/csrf-token
+HTTP 200
+[Captures]
+csrf_token: jsonpath "$.token"
+
+
+
 # Association memberships CRUD flow: create, list, get, update,
 # action endpoints (reinstate, renew, terminate), then delete.
 
 # 0. Auth setup — sign up + create person.
 POST {{api}}/auth/sign-up/email
+Origin: {{origin}}
+x-csrf-token: {{csrf_token}}
 Content-Type: application/json
 {
   "email": "assoc-member-{{suffix}}@example.org",
@@ -13,6 +24,8 @@ HTTP 200
 
 
 POST {{api}}/persons
+Origin: {{origin}}
+x-csrf-token: {{csrf_token}}
 Content-Type: application/json
 {
   "firstName": "Membership",
@@ -27,6 +40,8 @@ person_id: jsonpath "$.id"
 
 # 1. CREATE membership.
 POST {{api}}/association/member/memberships
+Origin: {{origin}}
+x-csrf-token: {{csrf_token}}
 Content-Type: application/json
 x-org-id: ed8e3a96-8126-4341-be42-e6eb7940c562
 {
@@ -52,6 +67,8 @@ HTTP 200
 
 # 4. UPDATE membership.
 PATCH {{api}}/association/member/memberships/{{membership_id}}
+Origin: {{origin}}
+x-csrf-token: {{csrf_token}}
 Content-Type: application/json
 x-org-id: ed8e3a96-8126-4341-be42-e6eb7940c562
 {
@@ -62,6 +79,8 @@ HTTP 200
 
 # 5. Reinstate membership.
 POST {{api}}/association/member/memberships/{{membership_id}}/reinstate
+Origin: {{origin}}
+x-csrf-token: {{csrf_token}}
 Content-Type: application/json
 x-org-id: ed8e3a96-8126-4341-be42-e6eb7940c562
 {}
@@ -70,6 +89,8 @@ HTTP 200
 
 # 6. Renew membership.
 POST {{api}}/association/member/memberships/{{membership_id}}/renew
+Origin: {{origin}}
+x-csrf-token: {{csrf_token}}
 Content-Type: application/json
 x-org-id: ed8e3a96-8126-4341-be42-e6eb7940c562
 {}
@@ -78,6 +99,8 @@ HTTP 200
 
 # 7. Terminate membership.
 POST {{api}}/association/member/memberships/{{membership_id}}/terminate
+Origin: {{origin}}
+x-csrf-token: {{csrf_token}}
 Content-Type: application/json
 x-org-id: ed8e3a96-8126-4341-be42-e6eb7940c562
 {
@@ -88,6 +111,8 @@ HTTP 200
 
 # 8. DELETE membership.
 DELETE {{api}}/association/member/memberships/{{membership_id}}
+Origin: {{origin}}
+x-csrf-token: {{csrf_token}}
 x-org-id: ed8e3a96-8126-4341-be42-e6eb7940c562
 HTTP 200
 

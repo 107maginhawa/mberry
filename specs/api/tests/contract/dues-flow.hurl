@@ -1,3 +1,12 @@
+# CSRF preamble — fetches token + sets cookie for state-changing requests.
+# Auto-injected by scripts/audit/inject-csrf-into-hurl.ts (idempotent).
+GET {{api}}/csrf-token
+HTTP 200
+[Captures]
+csrf_token: jsonpath "$.token"
+
+
+
 # Business Rules: [BR-02] [BR-04] [BR-05] [BR-06] [BR-07] [BR-08] [BR-30] [BR-32]
 # Dues module contract test: officer configures dues, creates funds,
 # records a payment, views dashboard, and generates a report.
@@ -8,6 +17,8 @@
 # ── Auth: sign in as officer ───────────────────────────────
 
 POST {{api}}/auth/sign-in/email
+Origin: {{origin}}
+x-csrf-token: {{csrf_token}}
 Content-Type: application/json
 {
   "email": "test@memberry.ph",
@@ -19,12 +30,16 @@ HTTP 200
 # ── 0. Unauthenticated access → 401 ───────────────────────
 
 POST {{api}}/auth/sign-out
+Origin: {{origin}}
+x-csrf-token: {{csrf_token}}
 HTTP 200
 
 GET {{api}}/association/member/dues-configs
 HTTP 401
 
 POST {{api}}/association/member/dues-payments
+Origin: {{origin}}
+x-csrf-token: {{csrf_token}}
 Content-Type: application/json
 {}
 HTTP 401
@@ -32,6 +47,8 @@ HTTP 401
 # ── Re-authenticate ────────────────────────────────────────
 
 POST {{api}}/auth/sign-in/email
+Origin: {{origin}}
+x-csrf-token: {{csrf_token}}
 Content-Type: application/json
 {
   "email": "test@memberry.ph",
@@ -49,6 +66,8 @@ HTTP 200
 # ── 2. Create dues config ─────────────────────────────────
 
 POST {{api}}/association/member/dues-configs
+Origin: {{origin}}
+x-csrf-token: {{csrf_token}}
 Content-Type: application/json
 {
   "defaultAmount": 150000,
@@ -89,6 +108,8 @@ HTTP 200
 # Verify endpoint exists and doesn't 500 on a missing payment.
 
 POST {{api}}/association/member/dues-payments/00000000-0000-0000-0000-000000000000/refund
+Origin: {{origin}}
+x-csrf-token: {{csrf_token}}
 Content-Type: application/json
 {
   "amount": 100,

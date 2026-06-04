@@ -1,3 +1,12 @@
+# CSRF preamble — fetches token + sets cookie for state-changing requests.
+# Auto-injected by scripts/audit/inject-csrf-into-hurl.ts (idempotent).
+GET {{api}}/csrf-token
+HTTP 200
+[Captures]
+csrf_token: jsonpath "$.token"
+
+
+
 # Extended comms endpoints not covered by comms.hurl.
 # Covers single room GET, ICE servers, and video call operations.
 # Video/WebRTC endpoints require infrastructure and use HTTP * assertions.
@@ -5,6 +14,8 @@
 # ── Auth: two users to create a room ─────────────────────────
 
 POST {{api}}/auth/sign-up/email
+Origin: {{origin}}
+x-csrf-token: {{csrf_token}}
 Content-Type: application/json
 {
   "email": "comms-ext-a-{{suffix}}@example.org",
@@ -17,6 +28,8 @@ a_id: jsonpath "$.user.id"
 
 
 POST {{api}}/persons
+Origin: {{origin}}
+x-csrf-token: {{csrf_token}}
 Content-Type: application/json
 {
   "firstName": "CommsExtA",
@@ -28,6 +41,8 @@ HTTP 201
 
 
 POST {{api}}/auth/sign-up/email
+Origin: {{origin}}
+x-csrf-token: {{csrf_token}}
 Content-Type: application/json
 {
   "email": "comms-ext-b-{{suffix}}@example.org",
@@ -40,6 +55,8 @@ b_id: jsonpath "$.user.id"
 
 
 POST {{api}}/persons
+Origin: {{origin}}
+x-csrf-token: {{csrf_token}}
 Content-Type: application/json
 {
   "firstName": "CommsExtB",
@@ -52,6 +69,8 @@ HTTP 201
 
 # Sign back in as A to create room
 POST {{api}}/auth/sign-in/email
+Origin: {{origin}}
+x-csrf-token: {{csrf_token}}
 Content-Type: application/json
 {
   "email": "comms-ext-a-{{suffix}}@example.org",
@@ -61,6 +80,8 @@ HTTP 200
 
 
 POST {{api}}/comms/chat-rooms
+Origin: {{origin}}
+x-csrf-token: {{csrf_token}}
 Content-Type: application/json
 {
   "participants": ["{{a_id}}", "{{b_id}}"],
@@ -94,6 +115,8 @@ HTTP *
 # PREREQUISITE: Requires WebRTC infrastructure
 
 PATCH {{api}}/comms/chat-rooms/{{room_id}}/video-call/participant
+Origin: {{origin}}
+x-csrf-token: {{csrf_token}}
 Content-Type: application/json
 {
   "audioEnabled": true,
@@ -106,6 +129,8 @@ HTTP *
 # PREREQUISITE: Requires WebRTC infrastructure
 
 POST {{api}}/comms/chat-rooms/{{room_id}}/video-call/join
+Origin: {{origin}}
+x-csrf-token: {{csrf_token}}
 Content-Type: application/json
 {}
 HTTP *
@@ -115,6 +140,8 @@ HTTP *
 # PREREQUISITE: Requires WebRTC infrastructure
 
 POST {{api}}/comms/chat-rooms/{{room_id}}/video-call/leave
+Origin: {{origin}}
+x-csrf-token: {{csrf_token}}
 Content-Type: application/json
 {}
 HTTP *
@@ -124,6 +151,8 @@ HTTP *
 # PREREQUISITE: Requires WebRTC infrastructure
 
 POST {{api}}/comms/chat-rooms/{{room_id}}/video-call/end
+Origin: {{origin}}
+x-csrf-token: {{csrf_token}}
 Content-Type: application/json
 {}
 HTTP *

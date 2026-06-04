@@ -1,3 +1,12 @@
+# CSRF preamble — fetches token + sets cookie for state-changing requests.
+# Auto-injected by scripts/audit/inject-csrf-into-hurl.ts (idempotent).
+GET {{api}}/csrf-token
+HTTP 200
+[Captures]
+csrf_token: jsonpath "$.token"
+
+
+
 # Billing lifecycle against stripe-mock: a merchant creates an account,
 # drafts and finalizes an invoice, voids it. Pay/capture/refund are
 # tested at the boundary (provider-not-onboarded → 422) because
@@ -7,6 +16,8 @@
 
 # 0. Merchant signup + person + merchant account.
 POST {{api}}/auth/sign-up/email
+Origin: {{origin}}
+x-csrf-token: {{csrf_token}}
 Content-Type: application/json
 {
   "email": "merch-{{suffix}}@example.org",
@@ -17,6 +28,8 @@ HTTP 200
 
 
 POST {{api}}/persons
+Origin: {{origin}}
+x-csrf-token: {{csrf_token}}
 Content-Type: application/json
 {
   "firstName": "Merchant",
@@ -30,6 +43,8 @@ merchant_person_id: jsonpath "$.id"
 
 
 POST {{api}}/billing/merchant-accounts
+Origin: {{origin}}
+x-csrf-token: {{csrf_token}}
 Content-Type: application/json
 {
   "refreshUrl": "https://example.com/refresh",
@@ -54,6 +69,8 @@ jsonpath "$.metadata.stripeAccountStatus" == "pending"
 
 # 2. Re-onboarding link generation works.
 POST {{api}}/billing/merchant-accounts/{{merchant_account_id}}/onboard
+Origin: {{origin}}
+x-csrf-token: {{csrf_token}}
 Content-Type: application/json
 {
   "refreshUrl": "https://example.com/refresh",
@@ -66,6 +83,8 @@ jsonpath "$.onboardingUrl" exists
 
 # 3. Customer signup + person (cookie jar now holds customer session).
 POST {{api}}/auth/sign-up/email
+Origin: {{origin}}
+x-csrf-token: {{csrf_token}}
 Content-Type: application/json
 {
   "email": "cust-{{suffix}}@example.org",
@@ -76,6 +95,8 @@ HTTP 200
 
 
 POST {{api}}/persons
+Origin: {{origin}}
+x-csrf-token: {{csrf_token}}
 Content-Type: application/json
 {
   "firstName": "Customer",
@@ -90,6 +111,8 @@ customer_person_id: jsonpath "$.id"
 
 # 4. Sign back in as merchant to create the invoice.
 POST {{api}}/auth/sign-in/email
+Origin: {{origin}}
+x-csrf-token: {{csrf_token}}
 Content-Type: application/json
 {
   "email": "merch-{{suffix}}@example.org",
@@ -99,6 +122,8 @@ HTTP 200
 
 
 POST {{api}}/billing/invoices
+Origin: {{origin}}
+x-csrf-token: {{csrf_token}}
 Content-Type: application/json
 {
   "customer": "{{customer_person_id}}",
@@ -119,6 +144,8 @@ jsonpath "$.currency" == "USD"
 
 # 5. Finalize the invoice → status 'open'.
 POST {{api}}/billing/invoices/{{invoice_id}}/finalize
+Origin: {{origin}}
+x-csrf-token: {{csrf_token}}
 Content-Type: application/json
 {}
 HTTP 200
@@ -130,6 +157,8 @@ jsonpath "$.status" == "open"
 # onboarding hasn't completed (stripe-mock doesn't simulate webhooks).
 # Asserts the impl enforces the readiness boundary.
 POST {{api}}/auth/sign-in/email
+Origin: {{origin}}
+x-csrf-token: {{csrf_token}}
 Content-Type: application/json
 {
   "email": "cust-{{suffix}}@example.org",
@@ -139,6 +168,8 @@ HTTP 200
 
 
 POST {{api}}/billing/invoices/{{invoice_id}}/pay
+Origin: {{origin}}
+x-csrf-token: {{csrf_token}}
 Content-Type: application/json
 {}
 HTTP 422
@@ -150,6 +181,8 @@ jsonpath "$.code" == "PROVIDER_BILLING_INCOMPLETE"
 # (void is only valid for authorized-but-uncaptured payments; an open
 # invoice without an associated PaymentIntent uses uncollectible to close.)
 POST {{api}}/auth/sign-in/email
+Origin: {{origin}}
+x-csrf-token: {{csrf_token}}
 Content-Type: application/json
 {
   "email": "merch-{{suffix}}@example.org",
@@ -159,6 +192,8 @@ HTTP 200
 
 
 POST {{api}}/billing/invoices/{{invoice_id}}/mark-uncollectible
+Origin: {{origin}}
+x-csrf-token: {{csrf_token}}
 Content-Type: application/json
 {}
 HTTP 200

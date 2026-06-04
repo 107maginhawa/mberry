@@ -1,3 +1,12 @@
+# CSRF preamble — fetches token + sets cookie for state-changing requests.
+# Auto-injected by scripts/audit/inject-csrf-into-hurl.ts (idempotent).
+GET {{api}}/csrf-token
+HTTP 200
+[Captures]
+csrf_token: jsonpath "$.token"
+
+
+
 # Extended notification endpoints not covered by notifs.hurl.
 # Covers GET single notification and mark single as read.
 # Uses a placeholder notif ID since no notifications exist for
@@ -6,6 +15,8 @@
 # ── Auth ─────────────────────────────────────────────────────
 
 POST {{api}}/auth/sign-up/email
+Origin: {{origin}}
+x-csrf-token: {{csrf_token}}
 Content-Type: application/json
 {
   "email": "notifs-ext-{{suffix}}@example.org",
@@ -18,6 +29,8 @@ session_token: cookie "better-auth.session_token"
 
 
 POST {{api}}/persons
+Origin: {{origin}}
+x-csrf-token: {{csrf_token}}
 Cookie: better-auth.session_token={{session_token}}
 Content-Type: application/json
 {
@@ -48,6 +61,8 @@ status <= 404
 # ── 3. Mark single notification as read (non-existent) ──────
 
 POST {{api}}/notifs/00000000-0000-0000-0000-000000000000/read
+Origin: {{origin}}
+x-csrf-token: {{csrf_token}}
 Cookie: better-auth.session_token={{session_token}}
 Content-Type: application/json
 {}

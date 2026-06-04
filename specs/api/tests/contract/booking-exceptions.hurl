@@ -1,8 +1,19 @@
+# CSRF preamble — fetches token + sets cookie for state-changing requests.
+# Auto-injected by scripts/audit/inject-csrf-into-hurl.ts (idempotent).
+GET {{api}}/csrf-token
+HTTP 200
+[Captures]
+csrf_token: jsonpath "$.token"
+
+
+
 # Schedule exceptions on a booking event: single block, weekly recurring,
 # list/get/delete. Exceptions express "this event is unavailable during
 # windows X" and propagate into the slot generator.
 
 POST {{api}}/auth/sign-up/email
+Origin: {{origin}}
+x-csrf-token: {{csrf_token}}
 Content-Type: application/json
 {
   "email": "exc-host-{{suffix}}@example.org",
@@ -13,6 +24,8 @@ HTTP 200
 
 
 POST {{api}}/persons
+Origin: {{origin}}
+x-csrf-token: {{csrf_token}}
 Content-Type: application/json
 {
   "firstName": "Exception",
@@ -24,6 +37,8 @@ HTTP 201
 
 
 POST {{api}}/booking/events
+Origin: {{origin}}
+x-csrf-token: {{csrf_token}}
 Content-Type: application/json
 {
   "title": "Event with exceptions {{suffix}}",
@@ -45,6 +60,8 @@ event_id: jsonpath "$.id"
 
 # 1. Single one-off block.
 POST {{api}}/booking/events/{{event_id}}/exceptions
+Origin: {{origin}}
+x-csrf-token: {{csrf_token}}
 Content-Type: application/json
 {
   "startDatetime": "2026-06-01T13:00:00Z",
@@ -61,6 +78,8 @@ jsonpath "$.recurring" == false
 
 # 2. Weekly recurring block (every Monday 12:00-13:00 ET).
 POST {{api}}/booking/events/{{event_id}}/exceptions
+Origin: {{origin}}
+x-csrf-token: {{csrf_token}}
 Content-Type: application/json
 {
   "startDatetime": "2026-06-01T16:00:00Z",
@@ -83,6 +102,8 @@ jsonpath "$.recurrencePattern.type" == "weekly"
 
 # 3. Monthly recurring block on the 15th of each month.
 POST {{api}}/booking/events/{{event_id}}/exceptions
+Origin: {{origin}}
+x-csrf-token: {{csrf_token}}
 Content-Type: application/json
 {
   "startDatetime": "2026-06-15T15:00:00Z",
@@ -116,6 +137,8 @@ jsonpath "$.reason" == "Conference"
 
 # 6. Delete the weekly exception.
 DELETE {{api}}/booking/events/{{event_id}}/exceptions/{{weekly_exception_id}}
+Origin: {{origin}}
+x-csrf-token: {{csrf_token}}
 HTTP 204
 
 

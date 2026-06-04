@@ -1,3 +1,12 @@
+# CSRF preamble — fetches token + sets cookie for state-changing requests.
+# Auto-injected by scripts/audit/inject-csrf-into-hurl.ts (idempotent).
+GET {{api}}/csrf-token
+HTTP 200
+[Captures]
+csrf_token: jsonpath "$.token"
+
+
+
 # CORS smoke: prove the impl honours an allow-list. Each impl is free
 # to ship its own deeper CORS unit tests; the contract guarantee is
 # only that allowed origins get echoed in Access-Control-Allow-Origin

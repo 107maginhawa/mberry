@@ -1,8 +1,19 @@
+# CSRF preamble — fetches token + sets cookie for state-changing requests.
+# Auto-injected by scripts/audit/inject-csrf-into-hurl.ts (idempotent).
+GET {{api}}/csrf-token
+HTTP 200
+[Captures]
+csrf_token: jsonpath "$.token"
+
+
+
 # Association institutional memberships CRUD flow: create, list, get, update, delete,
 # add seat, list seats, revoke seat.
 
 # 0. Auth setup — sign up + create person.
 POST {{api}}/auth/sign-up/email
+Origin: {{origin}}
+x-csrf-token: {{csrf_token}}
 Content-Type: application/json
 {
   "email": "assoc-inst-{{suffix}}@example.org",
@@ -13,6 +24,8 @@ HTTP 200
 
 
 POST {{api}}/persons
+Origin: {{origin}}
+x-csrf-token: {{csrf_token}}
 Content-Type: application/json
 {
   "firstName": "Institutional",
@@ -27,6 +40,8 @@ person_id: jsonpath "$.id"
 
 # 1. CREATE institutional membership.
 POST {{api}}/association/member/institutional-memberships
+Origin: {{origin}}
+x-csrf-token: {{csrf_token}}
 Content-Type: application/json
 x-org-id: ed8e3a96-8126-4341-be42-e6eb7940c562
 {
@@ -52,6 +67,8 @@ HTTP 200
 
 # 4. UPDATE institutional membership.
 PATCH {{api}}/association/member/institutional-memberships/{{inst_id}}
+Origin: {{origin}}
+x-csrf-token: {{csrf_token}}
 Content-Type: application/json
 x-org-id: ed8e3a96-8126-4341-be42-e6eb7940c562
 {
@@ -62,6 +79,8 @@ HTTP 200
 
 # 5. Add seat allocation.
 POST {{api}}/association/member/institutional-memberships/{{inst_id}}/seats
+Origin: {{origin}}
+x-csrf-token: {{csrf_token}}
 Content-Type: application/json
 x-org-id: ed8e3a96-8126-4341-be42-e6eb7940c562
 {
@@ -80,6 +99,8 @@ HTTP 200
 
 # 7. Revoke seat allocation.
 POST {{api}}/association/member/institutional-memberships/{{inst_id}}/seats/{{seat_id}}/revoke
+Origin: {{origin}}
+x-csrf-token: {{csrf_token}}
 Content-Type: application/json
 x-org-id: ed8e3a96-8126-4341-be42-e6eb7940c562
 {}
@@ -88,6 +109,8 @@ HTTP 200
 
 # 8. DELETE institutional membership.
 DELETE {{api}}/association/member/institutional-memberships/{{inst_id}}
+Origin: {{origin}}
+x-csrf-token: {{csrf_token}}
 x-org-id: ed8e3a96-8126-4341-be42-e6eb7940c562
 HTTP 200
 

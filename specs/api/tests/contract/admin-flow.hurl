@@ -1,3 +1,12 @@
+# CSRF preamble — fetches token + sets cookie for state-changing requests.
+# Auto-injected by scripts/audit/inject-csrf-into-hurl.ts (idempotent).
+GET {{api}}/csrf-token
+HTTP 200
+[Captures]
+csrf_token: jsonpath "$.token"
+
+
+
 # Platform admin flow: organizations, associations, admins, feature flags.
 # Uses runner-injected {{admin_email}} and {{admin_password}}.
 
@@ -10,6 +19,8 @@ HTTP 401
 # ── 1. Sign in as admin ─────────────────────────────────────
 
 POST {{api}}/auth/sign-in/email
+Origin: {{origin}}
+x-csrf-token: {{csrf_token}}
 Content-Type: application/json
 {
   "email": "{{admin_email}}",
@@ -30,6 +41,8 @@ HTTP 200
 # ── 3. Create organization ──────────────────────────────────
 
 POST {{api}}/admin/organizations
+Origin: {{origin}}
+x-csrf-token: {{csrf_token}}
 Cookie: better-auth.session_token={{admin_cookie}}
 Content-Type: application/json
 {
@@ -66,6 +79,8 @@ jsonpath "$.id" == "{{org_id}}"
 # ── 6. Update organization ──────────────────────────────────
 
 PATCH {{api}}/admin/organizations/{{org_id}}
+Origin: {{origin}}
+x-csrf-token: {{csrf_token}}
 Cookie: better-auth.session_token={{admin_cookie}}
 Content-Type: application/json
 {
@@ -77,6 +92,8 @@ HTTP 200
 # ── 7. Transition organization ──────────────────────────────
 
 POST {{api}}/admin/organizations/{{org_id}}/transition
+Origin: {{origin}}
+x-csrf-token: {{csrf_token}}
 Cookie: better-auth.session_token={{admin_cookie}}
 Content-Type: application/json
 {
@@ -91,6 +108,8 @@ status < 400
 # ── 8. Create association ───────────────────────────────────
 
 POST {{api}}/admin/associations
+Origin: {{origin}}
+x-csrf-token: {{csrf_token}}
 Cookie: better-auth.session_token={{admin_cookie}}
 Content-Type: application/json
 {
@@ -124,6 +143,8 @@ HTTP 200
 # ── 11. Update association ──────────────────────────────────
 
 PATCH {{api}}/admin/associations/{{assoc_id}}
+Origin: {{origin}}
+x-csrf-token: {{csrf_token}}
 Cookie: better-auth.session_token={{admin_cookie}}
 Content-Type: application/json
 {
@@ -135,6 +156,8 @@ HTTP 200
 # ── 12. Create admin user ───────────────────────────────────
 
 POST {{api}}/admin/admins
+Origin: {{origin}}
+x-csrf-token: {{csrf_token}}
 Cookie: better-auth.session_token={{admin_cookie}}
 Content-Type: application/json
 {
@@ -161,6 +184,8 @@ jsonpath "$.data" isCollection
 # ── 14. Update admin ────────────────────────────────────────
 
 PATCH {{api}}/admin/admins/{{new_admin_id}}
+Origin: {{origin}}
+x-csrf-token: {{csrf_token}}
 Cookie: better-auth.session_token={{admin_cookie}}
 Content-Type: application/json
 {
@@ -175,6 +200,8 @@ status < 300
 # ── 15. Delete admin ────────────────────────────────────────
 
 DELETE {{api}}/admin/admins/{{new_admin_id}}
+Origin: {{origin}}
+x-csrf-token: {{csrf_token}}
 Cookie: better-auth.session_token={{admin_cookie}}
 HTTP *
 [Asserts]
@@ -185,6 +212,8 @@ status < 300
 # ── 16. Create feature flag ─────────────────────────────────
 
 POST {{api}}/admin/feature-flags
+Origin: {{origin}}
+x-csrf-token: {{csrf_token}}
 Cookie: better-auth.session_token={{admin_cookie}}
 Content-Type: application/json
 {
@@ -211,6 +240,8 @@ jsonpath "$.data" isCollection
 # ── 18. Delete feature flag ─────────────────────────────────
 
 DELETE {{api}}/admin/feature-flags/{{flag_id}}
+Origin: {{origin}}
+x-csrf-token: {{csrf_token}}
 Cookie: better-auth.session_token={{admin_cookie}}
 HTTP *
 [Asserts]
@@ -221,6 +252,8 @@ status < 300
 # ── 19. Delete association (cleanup) ────────────────────────
 
 DELETE {{api}}/admin/associations/{{assoc_id}}
+Origin: {{origin}}
+x-csrf-token: {{csrf_token}}
 Cookie: better-auth.session_token={{admin_cookie}}
 HTTP *
 [Asserts]

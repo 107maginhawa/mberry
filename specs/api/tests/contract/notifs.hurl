@@ -1,3 +1,12 @@
+# CSRF preamble — fetches token + sets cookie for state-changing requests.
+# Auto-injected by scripts/audit/inject-csrf-into-hurl.ts (idempotent).
+GET {{api}}/csrf-token
+HTTP 200
+[Captures]
+csrf_token: jsonpath "$.token"
+
+
+
 # Notification list + mark-all-as-read on a brand new user (no notifications).
 # The list endpoint should accept the request, return an empty paginated
 # envelope, and survive mark-all-as-read as a no-op.
@@ -9,6 +18,8 @@ HTTP 401
 
 
 POST {{api}}/auth/sign-up/email
+Origin: {{origin}}
+x-csrf-token: {{csrf_token}}
 Content-Type: application/json
 {
   "email": "notifs-{{suffix}}@example.org",
@@ -21,6 +32,8 @@ session_token: cookie "better-auth.session_token"
 
 
 POST {{api}}/persons
+Origin: {{origin}}
+x-csrf-token: {{csrf_token}}
 Cookie: better-auth.session_token={{session_token}}
 Content-Type: application/json
 {
@@ -52,5 +65,7 @@ jsonpath "$.data" isCollection
 
 # 3. Mark-all-as-read - safe no-op when there is nothing to mark.
 POST {{api}}/notifs/read-all
+Origin: {{origin}}
+x-csrf-token: {{csrf_token}}
 Cookie: better-auth.session_token={{session_token}}
 HTTP 200

@@ -1,3 +1,12 @@
+# CSRF preamble — fetches token + sets cookie for state-changing requests.
+# Auto-injected by scripts/audit/inject-csrf-into-hurl.ts (idempotent).
+GET {{api}}/csrf-token
+HTTP 200
+[Captures]
+csrf_token: jsonpath "$.token"
+
+
+
 # Booking-event discovery: text search across title/description/keywords,
 # tag filtering with both CSV (OR) and repeated-param (AND) semantics,
 # and combined filters. Asserts that the impl honours the documented
@@ -5,6 +14,8 @@
 # in booking-event.hurl.
 
 POST {{api}}/auth/sign-up/email
+Origin: {{origin}}
+x-csrf-token: {{csrf_token}}
 Content-Type: application/json
 {
   "email": "search-host-{{suffix}}@example.org",
@@ -15,6 +26,8 @@ HTTP 200
 
 
 POST {{api}}/persons
+Origin: {{origin}}
+x-csrf-token: {{csrf_token}}
 Content-Type: application/json
 {
   "firstName": "Search",
@@ -27,6 +40,8 @@ HTTP 201
 
 # Seed: three active events with distinct titles + tag sets.
 POST {{api}}/booking/events
+Origin: {{origin}}
+x-csrf-token: {{csrf_token}}
 Content-Type: application/json
 {
   "title": "Yoga consult {{suffix}}",
@@ -47,6 +62,8 @@ HTTP 201
 
 
 POST {{api}}/booking/events
+Origin: {{origin}}
+x-csrf-token: {{csrf_token}}
 Content-Type: application/json
 {
   "title": "Pilates intro {{suffix}}",
@@ -67,6 +84,8 @@ HTTP 201
 
 
 POST {{api}}/booking/events
+Origin: {{origin}}
+x-csrf-token: {{csrf_token}}
 Content-Type: application/json
 {
   "title": "Mindfulness session {{suffix}}",

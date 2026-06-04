@@ -1,8 +1,19 @@
+# CSRF preamble — fetches token + sets cookie for state-changing requests.
+# Auto-injected by scripts/audit/inject-csrf-into-hurl.ts (idempotent).
+GET {{api}}/csrf-token
+HTTP 200
+[Captures]
+csrf_token: jsonpath "$.token"
+
+
+
 # Person profile lifecycle: sign-up -> create person -> read -> update.
 # Asserts the response shape of the Person model is what the OpenAPI says.
 
 # 1. Sign up
 POST {{api}}/auth/sign-up/email
+Origin: {{origin}}
+x-csrf-token: {{csrf_token}}
 Content-Type: application/json
 {
   "email": "person-{{suffix}}@example.org",
@@ -17,6 +28,8 @@ user_id: jsonpath "$.user.id"
 
 # 2. Create the person profile
 POST {{api}}/persons
+Origin: {{origin}}
+x-csrf-token: {{csrf_token}}
 Cookie: better-auth.session_token={{session_token}}
 Content-Type: application/json
 {
@@ -46,6 +59,8 @@ jsonpath "$.firstName" == "Ada"
 
 # 4. Patch it
 PATCH {{api}}/persons/{{person_id}}
+Origin: {{origin}}
+x-csrf-token: {{csrf_token}}
 Cookie: better-auth.session_token={{session_token}}
 Content-Type: application/json
 {

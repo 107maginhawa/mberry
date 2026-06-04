@@ -1,3 +1,12 @@
+# CSRF preamble — fetches token + sets cookie for state-changing requests.
+# Auto-injected by scripts/audit/inject-csrf-into-hurl.ts (idempotent).
+GET {{api}}/csrf-token
+HTTP 200
+[Captures]
+csrf_token: jsonpath "$.token"
+
+
+
 # Business Rules: [BR-15] [BR-16] [BR-17] [BR-27]
 # Events module contract test: officer creates event, member registers,
 # officer checks in member, lists attendance.
@@ -7,6 +16,8 @@
 # ── Auth: sign in as officer ───────────────────────────────
 
 POST {{api}}/auth/sign-in/email
+Origin: {{origin}}
+x-csrf-token: {{csrf_token}}
 Content-Type: application/json
 {
   "email": "test@memberry.ph",
@@ -18,12 +29,16 @@ HTTP 200
 # ── 0. Unauth → 401 ───────────────────────────────────────
 
 POST {{api}}/auth/sign-out
+Origin: {{origin}}
+x-csrf-token: {{csrf_token}}
 HTTP 200
 
 GET {{api}}/association/events
 HTTP 401
 
 POST {{api}}/auth/sign-in/email
+Origin: {{origin}}
+x-csrf-token: {{csrf_token}}
 Content-Type: application/json
 {
   "email": "test@memberry.ph",
@@ -43,6 +58,8 @@ jsonpath "$.data" isCollection
 # ── 2. Create event ────────────────────────────────────────
 
 POST {{api}}/association/events
+Origin: {{origin}}
+x-csrf-token: {{csrf_token}}
 Content-Type: application/json
 {
   "title": "Contract Test Event {{suffix}}",
@@ -73,6 +90,8 @@ HTTP 200
 # POST without a valid event ID should return 404 or 400, not 500
 
 POST {{api}}/association/event-lifecycle/00000000-0000-0000-0000-000000000000/check-in
+Origin: {{origin}}
+x-csrf-token: {{csrf_token}}
 Content-Type: application/json
 {}
 HTTP *

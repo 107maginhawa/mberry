@@ -1,8 +1,19 @@
+# CSRF preamble — fetches token + sets cookie for state-changing requests.
+# Auto-injected by scripts/audit/inject-csrf-into-hurl.ts (idempotent).
+GET {{api}}/csrf-token
+HTTP 200
+[Captures]
+csrf_token: jsonpath "$.token"
+
+
+
 # Auto-expand edge cases: invalid field name is graceful (no 500),
 # whitespace is tolerated, multiple fields can be expanded together,
 # excessively deep expand chains are rejected.
 
 POST {{api}}/auth/sign-up/email
+Origin: {{origin}}
+x-csrf-token: {{csrf_token}}
 Content-Type: application/json
 {
   "email": "expand-edge-{{suffix}}@example.org",
@@ -15,6 +26,8 @@ user_id: jsonpath "$.user.id"
 
 
 POST {{api}}/persons
+Origin: {{origin}}
+x-csrf-token: {{csrf_token}}
 Content-Type: application/json
 {
   "firstName": "Expand",
@@ -26,6 +39,8 @@ HTTP 201
 
 
 POST {{api}}/booking/events
+Origin: {{origin}}
+x-csrf-token: {{csrf_token}}
 Content-Type: application/json
 {
   "title": "Expand edge fixture {{suffix}}",

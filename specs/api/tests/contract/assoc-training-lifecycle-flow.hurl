@@ -1,8 +1,19 @@
+# CSRF preamble — fetches token + sets cookie for state-changing requests.
+# Auto-injected by scripts/audit/inject-csrf-into-hurl.ts (idempotent).
+GET {{api}}/csrf-token
+HTTP 200
+[Captures]
+csrf_token: jsonpath "$.token"
+
+
+
 # Association training lifecycle flow: my trainings, enrollments,
 # cancel, check-in, complete, enroll.
 
 # 0. Auth setup — sign up + create person.
 POST {{api}}/auth/sign-up/email
+Origin: {{origin}}
+x-csrf-token: {{csrf_token}}
 Content-Type: application/json
 {
   "email": "assoc-trainlife-{{suffix}}@example.org",
@@ -13,6 +24,8 @@ HTTP 200
 
 
 POST {{api}}/persons
+Origin: {{origin}}
+x-csrf-token: {{csrf_token}}
 Content-Type: application/json
 {
   "firstName": "TrainLife",
@@ -27,6 +40,8 @@ person_id: jsonpath "$.id"
 
 # 0b. Create a training for lifecycle tests.
 POST {{api}}/association/training
+Origin: {{origin}}
+x-csrf-token: {{csrf_token}}
 Content-Type: application/json
 x-org-id: ed8e3a96-8126-4341-be42-e6eb7940c562
 {
@@ -48,6 +63,8 @@ HTTP 200
 
 # 2. Enroll in training.
 POST {{api}}/association/training-lifecycle/{{training_id}}/enroll
+Origin: {{origin}}
+x-csrf-token: {{csrf_token}}
 Content-Type: application/json
 x-org-id: ed8e3a96-8126-4341-be42-e6eb7940c562
 {}
@@ -62,6 +79,8 @@ HTTP 200
 
 # 4. Check in to training.
 POST {{api}}/association/training-lifecycle/{{training_id}}/check-in
+Origin: {{origin}}
+x-csrf-token: {{csrf_token}}
 Content-Type: application/json
 x-org-id: ed8e3a96-8126-4341-be42-e6eb7940c562
 {}
@@ -70,6 +89,8 @@ HTTP 200
 
 # 5. Complete training.
 POST {{api}}/association/training-lifecycle/{{training_id}}/complete
+Origin: {{origin}}
+x-csrf-token: {{csrf_token}}
 Content-Type: application/json
 x-org-id: ed8e3a96-8126-4341-be42-e6eb7940c562
 {}
@@ -78,6 +99,8 @@ HTTP 200
 
 # 6. Cancel training.
 POST {{api}}/association/training-lifecycle/{{training_id}}/cancel
+Origin: {{origin}}
+x-csrf-token: {{csrf_token}}
 Content-Type: application/json
 x-org-id: ed8e3a96-8126-4341-be42-e6eb7940c562
 {}

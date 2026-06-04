@@ -1,3 +1,12 @@
+# CSRF preamble — fetches token + sets cookie for state-changing requests.
+# Auto-injected by scripts/audit/inject-csrf-into-hurl.ts (idempotent).
+GET {{api}}/csrf-token
+HTTP 200
+[Captures]
+csrf_token: jsonpath "$.token"
+
+
+
 # Business Rules: [BR-50]
 # Election Date Ordering DB Constraints
 #
@@ -15,6 +24,8 @@
 
 # 0. Auth setup.
 POST {{api}}/auth/sign-up/email
+Origin: {{origin}}
+x-csrf-token: {{csrf_token}}
 Content-Type: application/json
 {
   "email": "br50-dates-{{suffix}}@example.org",
@@ -25,6 +36,8 @@ HTTP 200
 
 
 POST {{api}}/persons
+Origin: {{origin}}
+x-csrf-token: {{csrf_token}}
 Content-Type: application/json
 {
   "firstName": "BR50",
@@ -37,6 +50,8 @@ HTTP 201
 
 # 1. Create an election (draft).
 POST {{api}}/association/member/elections
+Origin: {{origin}}
+x-csrf-token: {{csrf_token}}
 Content-Type: application/json
 x-org-id: ed8e3a96-8126-4341-be42-e6eb7940c562
 {
@@ -53,6 +68,8 @@ election_id: jsonpath "$.id"
 # 2. [BR-50] Attempt to set nominations_close BEFORE nominations_open.
 #    DB CHECK 'election_nominations_date_order' must reject.
 PATCH {{api}}/association/member/elections/{{election_id}}
+Origin: {{origin}}
+x-csrf-token: {{csrf_token}}
 Content-Type: application/json
 x-org-id: ed8e3a96-8126-4341-be42-e6eb7940c562
 {
@@ -65,6 +82,8 @@ HTTP 400
 # 3. [BR-50] Attempt to set voting_close BEFORE voting_open.
 #    DB CHECK 'election_voting_date_order' must reject.
 PATCH {{api}}/association/member/elections/{{election_id}}
+Origin: {{origin}}
+x-csrf-token: {{csrf_token}}
 Content-Type: application/json
 x-org-id: ed8e3a96-8126-4341-be42-e6eb7940c562
 {
@@ -77,6 +96,8 @@ HTTP 400
 # 4. [BR-50] Attempt to set voting_open BEFORE nominations_close.
 #    DB CHECK 'election_nominations_before_voting' must reject.
 PATCH {{api}}/association/member/elections/{{election_id}}
+Origin: {{origin}}
+x-csrf-token: {{csrf_token}}
 Content-Type: application/json
 x-org-id: ed8e3a96-8126-4341-be42-e6eb7940c562
 {
@@ -90,6 +111,8 @@ HTTP 400
 
 # 5. Positive control: a well-ordered date set succeeds.
 PATCH {{api}}/association/member/elections/{{election_id}}
+Origin: {{origin}}
+x-csrf-token: {{csrf_token}}
 Content-Type: application/json
 x-org-id: ed8e3a96-8126-4341-be42-e6eb7940c562
 {
@@ -103,5 +126,7 @@ HTTP 200
 
 # 6. Cleanup.
 DELETE {{api}}/association/member/elections/{{election_id}}
+Origin: {{origin}}
+x-csrf-token: {{csrf_token}}
 x-org-id: ed8e3a96-8126-4341-be42-e6eb7940c562
 HTTP 200

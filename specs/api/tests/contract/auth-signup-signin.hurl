@@ -1,3 +1,12 @@
+# CSRF preamble — fetches token + sets cookie for state-changing requests.
+# Auto-injected by scripts/audit/inject-csrf-into-hurl.ts (idempotent).
+GET {{api}}/csrf-token
+HTTP 200
+[Captures]
+csrf_token: jsonpath "$.token"
+
+
+
 # Business Rules: [BR-21] [BR-25] [BR-26]
 # Sign-up + sign-in lifecycle (Better-Auth).
 # Validates: account creation, session token issuance, get-session round-trip,
@@ -6,6 +15,8 @@
 
 # 1. Create a new account
 POST {{api}}/auth/sign-up/email
+Origin: {{origin}}
+x-csrf-token: {{csrf_token}}
 Content-Type: application/json
 {
   "email": "ct-{{suffix}}@example.org",
@@ -32,12 +43,16 @@ jsonpath "$.user.email" == "{{created_user_email}}"
 
 # 3. Sign out
 POST {{api}}/auth/sign-out
+Origin: {{origin}}
+x-csrf-token: {{csrf_token}}
 Cookie: better-auth.session_token={{session_token}}
 HTTP 200
 
 
 # 4. [BR-25] OTP send endpoint exists (does not 500)
 POST {{api}}/auth/email-otp/send-verification-otp
+Origin: {{origin}}
+x-csrf-token: {{csrf_token}}
 Content-Type: application/json
 {
   "email": "ct-{{suffix}}@example.org",

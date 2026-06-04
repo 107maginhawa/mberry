@@ -1,3 +1,12 @@
+# CSRF preamble — fetches token + sets cookie for state-changing requests.
+# Auto-injected by scripts/audit/inject-csrf-into-hurl.ts (idempotent).
+GET {{api}}/csrf-token
+HTTP 200
+[Captures]
+csrf_token: jsonpath "$.token"
+
+
+
 # Audit side effects: create + update operations on resources must emit
 # audit log entries that an admin can read back via /audit/logs. The
 # original e2e suite asserted this behavior; the contract guarantee is
@@ -5,6 +14,8 @@
 
 # 1. Sign up a regular user (target whose actions we want to audit).
 POST {{api}}/auth/sign-up/email
+Origin: {{origin}}
+x-csrf-token: {{csrf_token}}
 Content-Type: application/json
 {
   "email": "audit-target-{{suffix}}@example.org",
@@ -18,6 +29,8 @@ target_id: jsonpath "$.user.id"
 
 # 2. Create a person profile - this should emit a 'create' audit entry.
 POST {{api}}/persons
+Origin: {{origin}}
+x-csrf-token: {{csrf_token}}
 Content-Type: application/json
 {
   "firstName": "Audit",
@@ -32,6 +45,8 @@ person_id: jsonpath "$.id"
 
 # 3. Update the person - this should emit an 'update' audit entry.
 PATCH {{api}}/persons/{{person_id}}
+Origin: {{origin}}
+x-csrf-token: {{csrf_token}}
 Content-Type: application/json
 {
   "lastName": "Target Updated"
@@ -41,6 +56,8 @@ HTTP 200
 
 # 4. Switch to admin and query the audit log for entries about this person.
 POST {{api}}/auth/sign-in/email
+Origin: {{origin}}
+x-csrf-token: {{csrf_token}}
 Content-Type: application/json
 {
   "email": "{{admin_email}}",

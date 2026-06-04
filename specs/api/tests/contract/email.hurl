@@ -1,3 +1,12 @@
+# CSRF preamble — fetches token + sets cookie for state-changing requests.
+# Auto-injected by scripts/audit/inject-csrf-into-hurl.ts (idempotent).
+GET {{api}}/csrf-token
+HTTP 200
+[Captures]
+csrf_token: jsonpath "$.token"
+
+
+
 # Email module: auth gate for non-admins, then full happy-path admin
 # coverage on templates + queue. The runner-injected {{admin_email}} +
 # {{admin_password}} let scenarios sign in as admin without juggling
@@ -11,6 +20,8 @@ HTTP 401
 # 2. Regular signed-up user → 403 (lacks admin role). Cookie jar holds
 # the new user's session after sign-up.
 POST {{api}}/auth/sign-up/email
+Origin: {{origin}}
+x-csrf-token: {{csrf_token}}
 Content-Type: application/json
 {
   "email": "email-{{suffix}}@example.org",
@@ -27,6 +38,8 @@ HTTP 403
 # 3. Sign in as the seeded admin so the cookie jar holds the admin's
 # session for the rest of the scenario.
 POST {{api}}/auth/sign-in/email
+Origin: {{origin}}
+x-csrf-token: {{csrf_token}}
 Content-Type: application/json
 {
   "email": "{{admin_email}}",
@@ -46,6 +59,8 @@ jsonpath "$.pagination.totalCount" >= 1
 
 # 5. Admin creates a custom template.
 POST {{api}}/email/templates
+Origin: {{origin}}
+x-csrf-token: {{csrf_token}}
 Content-Type: application/json
 {
   "name": "Contract suite custom template {{suffix}}",
@@ -71,6 +86,8 @@ jsonpath "$.id" == "{{template_id}}"
 
 # 7. Admin updates description.
 PATCH {{api}}/email/templates/{{template_id}}
+Origin: {{origin}}
+x-csrf-token: {{csrf_token}}
 Content-Type: application/json
 {
   "description": "Updated by contract suite"

@@ -1,7 +1,18 @@
+# CSRF preamble — fetches token + sets cookie for state-changing requests.
+# Auto-injected by scripts/audit/inject-csrf-into-hurl.ts (idempotent).
+GET {{api}}/csrf-token
+HTTP 200
+[Captures]
+csrf_token: jsonpath "$.token"
+
+
+
 # Association dues configs CRUD flow: create, list, get, update, delete.
 
 # 0. Auth setup — sign up + create person.
 POST {{api}}/auth/sign-up/email
+Origin: {{origin}}
+x-csrf-token: {{csrf_token}}
 Content-Type: application/json
 {
   "email": "dues-cfg-{{suffix}}@example.org",
@@ -12,6 +23,8 @@ HTTP 200
 
 
 POST {{api}}/persons
+Origin: {{origin}}
+x-csrf-token: {{csrf_token}}
 Content-Type: application/json
 {
   "firstName": "DuesConfig",
@@ -24,6 +37,8 @@ HTTP 201
 
 # 1. CREATE dues config.
 POST {{api}}/association/member/dues-configs
+Origin: {{origin}}
+x-csrf-token: {{csrf_token}}
 Content-Type: application/json
 x-org-id: ed8e3a96-8126-4341-be42-e6eb7940c562
 {
@@ -51,6 +66,8 @@ HTTP 200
 
 # 4. UPDATE dues config.
 PATCH {{api}}/association/member/dues-configs/{{dues_config_id}}
+Origin: {{origin}}
+x-csrf-token: {{csrf_token}}
 Content-Type: application/json
 x-org-id: ed8e3a96-8126-4341-be42-e6eb7940c562
 {
@@ -61,6 +78,8 @@ HTTP 200
 
 # 5. DELETE dues config.
 DELETE {{api}}/association/member/dues-configs/{{dues_config_id}}
+Origin: {{origin}}
+x-csrf-token: {{csrf_token}}
 x-org-id: ed8e3a96-8126-4341-be42-e6eb7940c562
 HTTP 200
 

@@ -1,3 +1,12 @@
+# CSRF preamble — fetches token + sets cookie for state-changing requests.
+# Auto-injected by scripts/audit/inject-csrf-into-hurl.ts (idempotent).
+GET {{api}}/csrf-token
+HTTP 200
+[Captures]
+csrf_token: jsonpath "$.token"
+
+
+
 # Reviews lifecycle: a reviewer creates a review of another person,
 # lists their own reviews, fetches the review back, and deletes it.
 # Also asserts that self-reviews are rejected.
@@ -8,6 +17,8 @@
 
 # 0. Create reviewer (latest cookie in jar = reviewer).
 POST {{api}}/auth/sign-up/email
+Origin: {{origin}}
+x-csrf-token: {{csrf_token}}
 Content-Type: application/json
 {
   "email": "reviewer-{{suffix}}@example.org",
@@ -20,6 +31,8 @@ reviewer_id: jsonpath "$.user.id"
 
 
 POST {{api}}/persons
+Origin: {{origin}}
+x-csrf-token: {{csrf_token}}
 Content-Type: application/json
 {
   "firstName": "Reviewer",
@@ -33,6 +46,8 @@ HTTP 201
 # 1. Self-review is rejected (reviewedEntity == authenticated reviewer).
 # Done BEFORE the reviewee sign-up so the active session is the reviewer.
 POST {{api}}/reviews/
+Origin: {{origin}}
+x-csrf-token: {{csrf_token}}
 Content-Type: application/json
 {
   "context": "{{reviewer_id}}",
@@ -45,6 +60,8 @@ HTTP 400
 
 # 2. Sign up the person being reviewed (jar now holds reviewee).
 POST {{api}}/auth/sign-up/email
+Origin: {{origin}}
+x-csrf-token: {{csrf_token}}
 Content-Type: application/json
 {
   "email": "reviewee-{{suffix}}@example.org",
@@ -57,6 +74,8 @@ reviewee_id: jsonpath "$.user.id"
 
 
 POST {{api}}/persons
+Origin: {{origin}}
+x-csrf-token: {{csrf_token}}
 Content-Type: application/json
 {
   "firstName": "Reviewee",
@@ -69,6 +88,8 @@ HTTP 201
 
 # 3. Sign back in as the reviewer so the jar holds their session again.
 POST {{api}}/auth/sign-in/email
+Origin: {{origin}}
+x-csrf-token: {{csrf_token}}
 Content-Type: application/json
 {
   "email": "reviewer-{{suffix}}@example.org",
@@ -79,6 +100,8 @@ HTTP 200
 
 # 4. Create a valid review of the reviewee.
 POST {{api}}/reviews/
+Origin: {{origin}}
+x-csrf-token: {{csrf_token}}
 Content-Type: application/json
 {
   "context": "{{reviewee_id}}",
@@ -113,4 +136,6 @@ jsonpath "$.pagination.totalCount" >= 1
 
 # 7. Delete it.
 DELETE {{api}}/reviews/{{review_id}}
+Origin: {{origin}}
+x-csrf-token: {{csrf_token}}
 HTTP 204

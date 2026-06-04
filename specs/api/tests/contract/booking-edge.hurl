@@ -1,8 +1,19 @@
+# CSRF preamble — fetches token + sets cookie for state-changing requests.
+# Auto-injected by scripts/audit/inject-csrf-into-hurl.ts (idempotent).
+GET {{api}}/csrf-token
+HTTP 200
+[Captures]
+csrf_token: jsonpath "$.token"
+
+
+
 # Booking lifecycle alternative paths: reject, no-show, double-booking
 # conflict. Complements booking-flow.hurl which covers confirm/cancel.
 
 # 0. Host setup.
 POST {{api}}/auth/sign-up/email
+Origin: {{origin}}
+x-csrf-token: {{csrf_token}}
 Content-Type: application/json
 {
   "email": "edge-host-{{suffix}}@example.org",
@@ -13,6 +24,8 @@ HTTP 200
 
 
 POST {{api}}/persons
+Origin: {{origin}}
+x-csrf-token: {{csrf_token}}
 Content-Type: application/json
 {
   "firstName": "Edge",
@@ -24,6 +37,8 @@ HTTP 201
 
 
 POST {{api}}/booking/events
+Origin: {{origin}}
+x-csrf-token: {{csrf_token}}
 Content-Type: application/json
 {
   "title": "Edge cases {{suffix}}",
@@ -52,6 +67,8 @@ slot_id_2: jsonpath "$[1].id"
 
 # 1. Client A books and the host rejects.
 POST {{api}}/auth/sign-up/email
+Origin: {{origin}}
+x-csrf-token: {{csrf_token}}
 Content-Type: application/json
 {
   "email": "edge-client-{{suffix}}@example.org",
@@ -62,6 +79,8 @@ HTTP 200
 
 
 POST {{api}}/persons
+Origin: {{origin}}
+x-csrf-token: {{csrf_token}}
 Content-Type: application/json
 {
   "firstName": "Edge",
@@ -73,6 +92,8 @@ HTTP 201
 
 
 POST {{api}}/booking/bookings
+Origin: {{origin}}
+x-csrf-token: {{csrf_token}}
 Content-Type: application/json
 {
   "slot": "{{slot_id}}",
@@ -86,6 +107,8 @@ booking_a_id: jsonpath "$.id"
 
 # 2. Booking the same slot a second time conflicts.
 POST {{api}}/booking/bookings
+Origin: {{origin}}
+x-csrf-token: {{csrf_token}}
 Content-Type: application/json
 {
   "slot": "{{slot_id}}",
@@ -98,6 +121,8 @@ HTTP 409
 # 3. Invalid / non-existent slot UUID is a 4xx (impl picks 400 for
 # malformed shape, 404 for not-found UUID).
 POST {{api}}/booking/bookings
+Origin: {{origin}}
+x-csrf-token: {{csrf_token}}
 Content-Type: application/json
 {
   "slot": "not-a-uuid",
@@ -108,6 +133,8 @@ HTTP 400
 
 
 POST {{api}}/booking/bookings
+Origin: {{origin}}
+x-csrf-token: {{csrf_token}}
 Content-Type: application/json
 {
   "slot": "00000000-0000-4000-8000-000000000000",
@@ -119,6 +146,8 @@ HTTP 404
 
 # 4. Switch to host and reject the first booking.
 POST {{api}}/auth/sign-in/email
+Origin: {{origin}}
+x-csrf-token: {{csrf_token}}
 Content-Type: application/json
 {
   "email": "edge-host-{{suffix}}@example.org",
@@ -128,6 +157,8 @@ HTTP 200
 
 
 POST {{api}}/booking/bookings/{{booking_a_id}}/reject
+Origin: {{origin}}
+x-csrf-token: {{csrf_token}}
 Content-Type: application/json
 { "reason": "Schedule conflict on host side" }
 HTTP 200
@@ -138,6 +169,8 @@ jsonpath "$.status" == "rejected"
 # 5. Client books the second slot, host confirms, then host marks
 # no-show.
 POST {{api}}/auth/sign-in/email
+Origin: {{origin}}
+x-csrf-token: {{csrf_token}}
 Content-Type: application/json
 {
   "email": "edge-client-{{suffix}}@example.org",
@@ -147,6 +180,8 @@ HTTP 200
 
 
 POST {{api}}/booking/bookings
+Origin: {{origin}}
+x-csrf-token: {{csrf_token}}
 Content-Type: application/json
 {
   "slot": "{{slot_id_2}}",
@@ -159,6 +194,8 @@ booking_b_id: jsonpath "$.id"
 
 
 POST {{api}}/auth/sign-in/email
+Origin: {{origin}}
+x-csrf-token: {{csrf_token}}
 Content-Type: application/json
 {
   "email": "edge-host-{{suffix}}@example.org",
@@ -168,6 +205,8 @@ HTTP 200
 
 
 POST {{api}}/booking/bookings/{{booking_b_id}}/confirm
+Origin: {{origin}}
+x-csrf-token: {{csrf_token}}
 Content-Type: application/json
 { "reason": "Confirmed" }
 HTTP 200
@@ -177,6 +216,8 @@ HTTP 200
 # scheduled time has actually passed). The booking is in the future,
 # so the impl rejects with 422 — that's the boundary we're asserting.
 POST {{api}}/booking/bookings/{{booking_b_id}}/no-show
+Origin: {{origin}}
+x-csrf-token: {{csrf_token}}
 Content-Type: application/json
 { "reason": "Client didn't show up" }
 HTTP 422
