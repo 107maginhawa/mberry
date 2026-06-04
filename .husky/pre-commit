@@ -1,2 +1,3 @@
 bun run typecheck
 bunx lint-staged
+./scripts/ui-consistency-check.sh --staged

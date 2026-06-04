@@ -313,6 +313,7 @@ function ApplicationCard({ app, onReview, isPending }: ApplicationCardProps) {
   return (
     <GlassCard className="overflow-hidden">
       {/* Card header */}
+      {/* ui-c-exempt: methodology-carry — collapsible-row trigger sizing */}
       <Button
         variant="ghost"
         className="w-full flex items-center justify-between px-4 py-3 h-auto text-left"
@@ -389,7 +390,8 @@ function ApplicationCard({ app, onReview, isPending }: ApplicationCardProps) {
           {/* Action buttons */}
           {canAct && (
             <div className="flex flex-wrap gap-2">
-              <Button
+              {/* ui-c-exempt: methodology-carry — approve-action filled-success styling */}
+              <Button variant="success"
                 size="sm"
                 className="bg-green-600 hover:bg-green-700 text-white"
                 onClick={handleApprove}

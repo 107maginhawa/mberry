@@ -1,6 +1,7 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { RequireRole } from '@/lib/role-gate'
 import { Card, CardContent, CardHeader, CardTitle } from '@monobase/ui'
+import { PageShell } from '@/components/patterns/page-shell'
 import { Mail, CheckCircle, AlertTriangle, XCircle } from 'lucide-react'
 
 export const Route = createFileRoute('/communications/email')({
@@ -36,14 +37,12 @@ function StatusCard({ title, value, status, icon: Icon }: { title: string; value
 function EmailHealth() {
   return (
     <RequireRole allowed={['super', 'support', 'analyst']}>
-      <div className="space-y-6">
-        <div>
-          <h1 className="text-2xl font-bold">Email Health</h1>
-          <p className="text-sm text-muted-foreground">
-            Monitor email delivery, bounce rates, and suppressions
-          </p>
-        </div>
-
+      <PageShell
+        title="Email Health"
+        subtitle="Monitor email delivery, bounce rates, and suppressions"
+        maxWidth="full"
+      >
+        <div className="space-y-6">
         {/* Health stats */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
           <StatusCard title="Sent (24h)" value="1,847" status="healthy" icon={Mail} />
@@ -90,7 +89,8 @@ function EmailHealth() {
             </p>
           </CardContent>
         </Card>
-      </div>
+        </div>
+      </PageShell>
     </RequireRole>
   )
 }

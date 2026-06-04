@@ -1,7 +1,7 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { useQuery } from '@tanstack/react-query'
 import { Badge } from '@monobase/ui'
-import { PageHeader } from '@/components/patterns/page-header'
+import { PageShell } from '@/components/patterns/page-shell'
 import { GlassCard } from '@/components/motion/glass-card'
 import { ListSkeleton } from '@/components/patterns/skeleton-loader'
 import { useOrg } from '@/hooks/useOrg'
@@ -43,17 +43,15 @@ function SentHistoryPage() {
   const announcements = data?.data ?? []
 
   return (
-    <div className="space-y-6">
-      <PageHeader
-        title="Sent History"
-        subtitle="View delivery stats for sent announcements"
-        breadcrumbs={[
-          { label: 'Officer', href: `/org/${orgSlug}/officer/dashboard` },
-          { label: 'Communications', href: `/org/${orgSlug}/officer/communications` },
-          { label: 'Sent' },
-        ]}
-      />
-
+    <PageShell
+      title="Sent History"
+      subtitle="View delivery stats for sent announcements"
+      breadcrumbs={[
+        { label: 'Officer', href: `/org/${orgSlug}/officer/dashboard` },
+        { label: 'Communications', href: `/org/${orgSlug}/officer/communications` },
+        { label: 'Sent' },
+      ]}
+    >
       {isLoading ? (
         <ListSkeleton />
       ) : isError ? (
@@ -123,6 +121,6 @@ function SentHistoryPage() {
           </table>
         </div>
       )}
-    </div>
+    </PageShell>
   )
 }

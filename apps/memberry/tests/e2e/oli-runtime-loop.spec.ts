@@ -85,9 +85,19 @@ function hrefResolves(pathname: string): boolean {
 // Build the target matrix
 // --------------------------------------------------------------------------
 type Target =
-  | { kind: "page-load"; id: string; route: string; nav: string }
-  | { kind: "nav-links"; id: string; route: string; nav: string }
-  | { kind: "data-surface"; id: string; route: string; nav: string; opener: string; surface: string; label: string };
+  | { kind: "page-load"; id: string; route: string; nav: string; module?: string }
+  | { kind: "nav-links"; id: string; route: string; nav: string; module?: string }
+  | { kind: "data-surface"; id: string; route: string; nav: string; opener: string; surface: string; label: string; module?: string };
+
+/**
+ * Routes tagged `module: "apps/admin"` in CODE_ROUTE_MAP live on a different
+ * origin (config.adminBaseURL, port 3003). Rewrite the nav path to an absolute
+ * URL so page.goto() bypasses the context's baseURL (memberry, port 3004).
+ */
+function resolveNavURL(nav: string, module: string | undefined): string {
+  if (module === "apps/admin") return `${config.adminBaseURL}${nav}`;
+  return nav;
+}
 
 function buildMatrix(params: Record<string, string>): { targets: Target[]; skipped: string[] } {
   const targets: Target[] = [];
@@ -103,8 +113,9 @@ function buildMatrix(params: Record<string, string>): { targets: Target[]; skipp
       skipped.push(`page-load ${routeKey} (unresolved param)`);
       continue;
     }
-    targets.push({ kind: "page-load", id: routeKey, route: routeKey, nav });
-    if (config.navLinkCheck) targets.push({ kind: "nav-links", id: routeKey, route: routeKey, nav });
+    const navUrl = resolveNavURL(nav, r.module);
+    targets.push({ kind: "page-load", id: routeKey, route: routeKey, nav: navUrl, module: r.module });
+    if (config.navLinkCheck) targets.push({ kind: "nav-links", id: routeKey, route: routeKey, nav: navUrl, module: r.module });
   }
 
   // data-surface bindings (config-pinned; the map's loading_state_hygiene set is
@@ -209,6 +220,14 @@ async function skeletonCleared(scope: Page | Frame): Promise<boolean> {
 // `.extend()` worker fixture's test instance at module scope.)
 // --------------------------------------------------------------------------
 async function authenticate(browser: Browser): Promise<{ storageState: any; params: Record<string, string> }> {
+  // Prefer multi-persona discovery (member + officer + admin) when the adapter
+  // implements setupAll() — this fills officer-only ($invoiceId/$paymentId/
+  // $memberId) and admin-only ($associationId/$organizationId/$personId-admin)
+  // params that the legacy member-only walk leaves ⊘ skipped.
+  if (authAdapter.setupAll) {
+    const res = await authAdapter.setupAll(browser);
+    return { storageState: res.storageState, params: { ...config.paramFixtures, ...res.paramFixtures } };
+  }
   const ctx = await browser.newContext({ baseURL: config.baseURL });
   const page = await ctx.newPage();
   const res = await authAdapter.setup(page);

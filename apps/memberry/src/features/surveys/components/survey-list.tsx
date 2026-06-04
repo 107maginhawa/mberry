@@ -229,6 +229,7 @@ export function SurveyList() {
                   <div className="absolute right-0 top-8 z-10 w-40 bg-popover border rounded-lg shadow-md py-1 text-sm">
                     {survey.status === 'draft' && (
                       <>
+                        {/* ui-c-exempt: menu-item-exempt — survey dropdown menu item */}
                         <Button
                           className="w-full text-left px-3 py-1.5 hover:bg-[var(--color-surface-warm)] flex items-center gap-2"
                           onClick={() => {
@@ -247,6 +248,7 @@ export function SurveyList() {
                         >
                           Edit
                         </Link>
+                        {/* ui-c-exempt: menu-item-exempt — survey dropdown menu item */}
                         <Button
                           className="w-full text-left px-3 py-1.5 hover:bg-[var(--color-surface-warm)]"
                           onClick={() => {
@@ -256,6 +258,7 @@ export function SurveyList() {
                         >
                           Publish
                         </Button>
+                        {/* ui-c-exempt: menu-item-exempt — survey dropdown menu item */}
                         <Button
                           className="w-full text-left px-3 py-1.5 hover:bg-[var(--color-surface-warm)] text-[var(--color-error)]"
                           onClick={() => {
@@ -269,6 +272,7 @@ export function SurveyList() {
                     )}
                     {survey.status === 'active' && (
                       <>
+                        {/* ui-c-exempt: menu-item-exempt — survey dropdown menu item */}
                         <Button
                           className="w-full text-left px-3 py-1.5 hover:bg-[var(--color-surface-warm)] flex items-center gap-2"
                           onClick={() => {
@@ -287,6 +291,7 @@ export function SurveyList() {
                         >
                           View Results
                         </Link>
+                        {/* ui-c-exempt: menu-item-exempt — survey dropdown menu item */}
                         <Button
                           className="w-full text-left px-3 py-1.5 hover:bg-[var(--color-surface-warm)]"
                           onClick={() => {
@@ -300,6 +305,7 @@ export function SurveyList() {
                     )}
                     {survey.status === 'closed' && (
                       <>
+                        {/* ui-c-exempt: menu-item-exempt — survey dropdown menu item */}
                         <Button
                           className="w-full text-left px-3 py-1.5 hover:bg-[var(--color-surface-warm)] flex items-center gap-2"
                           onClick={() => {

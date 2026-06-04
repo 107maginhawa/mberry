@@ -1,4 +1,4 @@
-import { describe, test, expect, vi, afterEach, beforeEach } from 'vitest'
+import { describe, test, expect, vi, afterEach, beforeEach } from '@/test/vitest-shim'
 import { render, screen, cleanup } from '@testing-library/react'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import type { ReactNode } from 'react'

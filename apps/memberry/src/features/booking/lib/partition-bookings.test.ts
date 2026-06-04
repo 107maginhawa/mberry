@@ -1,4 +1,4 @@
-import { describe, expect, test } from 'vitest'
+import { describe, expect, test } from 'bun:test'
 import type { Booking } from '@monobase/sdk-ts/generated/types.gen'
 import { partitionBookings } from './partition-bookings'
 

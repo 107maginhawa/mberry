@@ -6,7 +6,7 @@ import { Calendar, MapPin, Users, Award, Edit2 } from 'lucide-react'
 import { TrainingForm } from '@/features/training/components/training-form'
 import { CompletionTable } from '@/features/training/components/completion-table'
 import { getTrainingOptions } from '@monobase/sdk-ts/generated/react-query'
-import { PageHeader } from '@/components/patterns/page-header'
+import { PageShell } from '@/components/patterns/page-shell'
 import { GlassCard } from '@/components/motion/glass-card'
 import { ListSkeleton } from '@/components/patterns/skeleton-loader'
 import { useOrg } from '@/hooks/useOrg'
@@ -66,28 +66,37 @@ function TrainingDetail() {
   // SDK GetTraining returns unknown; runtime response may wrap in .data
   const training = ((data as RuntimeTraining | undefined)?.data ?? data) as RuntimeTraining | undefined
 
+  const trainingBreadcrumbs = [
+    { label: 'Officer', href: `/org/${orgSlug}/officer/dashboard` },
+    { label: 'Training', href: `/org/${orgSlug}/officer/training` },
+  ]
+
   if (isLoading) {
     return (
-      <div className="space-y-4">
-        <div className="h-8 w-48 bg-[var(--color-surface-warm)] rounded animate-pulse" />
-        <ListSkeleton rows={4} />
-      </div>
+      <PageShell title="Training" breadcrumbs={trainingBreadcrumbs}>
+        <div className="space-y-4">
+          <div className="h-8 w-48 bg-[var(--color-surface-warm)] rounded animate-pulse" />
+          <ListSkeleton rows={4} />
+        </div>
+      </PageShell>
     )
   }
 
   if (isError) {
     return (
-      <div role="alert" className="p-4 rounded-lg bg-[var(--color-error-bg)] text-[var(--color-error)] text-sm">
-        Unable to load training detail. Please try refreshing the page.
-      </div>
+      <PageShell title="Training" breadcrumbs={trainingBreadcrumbs}>
+        <div role="alert" className="p-4 rounded-lg bg-[var(--color-error-bg)] text-[var(--color-error)] text-sm">
+          Unable to load training detail. Please try refreshing the page.
+        </div>
+      </PageShell>
     )
   }
 
   if (error || !training) {
     return (
-      <div>
+      <PageShell title="Training" breadcrumbs={trainingBreadcrumbs}>
         <p className="text-[var(--color-error)]">Failed to load training.</p>
-      </div>
+      </PageShell>
     )
   }
 
@@ -98,24 +107,19 @@ function TrainingDetail() {
   ]
 
   return (
-    <div className="space-y-6">
-      <PageHeader
-        title={training.title ?? ''}
-        breadcrumbs={[
-          { label: 'Officer', href: `/org/${orgSlug}/officer/dashboard` },
-          { label: 'Training', href: `/org/${orgSlug}/officer/training` },
-          { label: training.title ?? '' },
-        ]}
-        actions={
-          <Button
-            variant="outline"
-            onClick={() => setTab('edit')}
-          >
-            <Edit2 className="w-4 h-4 mr-1.5" /> Edit
-          </Button>
-        }
-      />
-
+    <PageShell
+      title={training.title ?? ''}
+      breadcrumbs={[...trainingBreadcrumbs, { label: training.title ?? '' }]}
+      actions={
+        <Button
+          variant="outline"
+          onClick={() => setTab('edit')}
+        >
+          <Edit2 className="w-4 h-4 mr-1.5" /> Edit
+        </Button>
+      }
+    >
+      <div className="space-y-6">
       {/* Badges */}
       <div className="flex flex-wrap gap-2">
         <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-[var(--color-primary)]/10 text-[var(--color-primary)]">
@@ -211,6 +215,7 @@ function TrainingDetail() {
       {tab === 'edit' && (
         <TrainingForm orgId={orgId} trainingId={trainingId} initial={training} />
       )}
-    </div>
+      </div>
+    </PageShell>
   )
 }

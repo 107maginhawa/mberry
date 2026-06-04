@@ -335,10 +335,12 @@ describe('getNextBookableTime', () => {
 
 describe('batchGenerateSlots', () => {
   test('generates slots for multiple events', async () => {
-    const monday = new Date('2026-06-01T00:00:00.000Z');
+    // Use a future Monday so events whose effectiveFrom is today() still cover
+    // the requested window. futureMonday() returns the next Monday after today.
+    const monday = futureMonday();
     const events = [
-      makeEvent({ id: 'e-1', owner: 'o-1' }),
-      makeEvent({ id: 'e-2', owner: 'o-2' }),
+      makeEvent({ id: 'e-1', owner: 'o-1', effectiveFrom: monday }),
+      makeEvent({ id: 'e-2', owner: 'o-2', effectiveFrom: monday }),
     ];
 
     const slots = await batchGenerateSlots(events, { start: monday, end: addDays(monday, 2) }, new Map());

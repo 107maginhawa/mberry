@@ -12,6 +12,7 @@ import {
   TableHead,
   TableCell,
 } from '@monobase/ui'
+import { PageShell } from '@/components/patterns/page-shell'
 import { RequireRole } from '@/lib/role-gate'
 import { ErrorState } from '@/components/skeletons'
 
@@ -72,17 +73,11 @@ function CommitteesPage() {
   const activeCount = allCommittees.filter((c) => c.status === 'active').length
 
   return (
-    <div className="p-8">
-      <div className="flex items-center gap-3 mb-8">
-        <Users2 className="w-6 h-6 text-muted-foreground" />
-        <div>
-          <h1 className="text-h1 text-foreground">Committees</h1>
-          <p className="text-sm text-muted-foreground mt-1">
-            Cross-org committee overview
-          </p>
-        </div>
-      </div>
-
+    <PageShell
+      title="Committees"
+      subtitle="Cross-org committee overview"
+      maxWidth="full"
+    >
       {/* Stats */}
       <div className="grid grid-cols-3 gap-6 mb-6">
         <div className="rounded-lg border bg-card p-4">
@@ -197,6 +192,6 @@ function CommitteesPage() {
           </Button>
         </div>
       )}
-    </div>
+    </PageShell>
   )
 }

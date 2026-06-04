@@ -1,4 +1,4 @@
-import { describe, test, expect, vi, beforeEach } from 'vitest'
+import { describe, test, expect, vi, beforeEach } from '@/test/vitest-shim'
 import { screen, waitFor } from '@testing-library/react'
 import { renderWithProviders } from '@/test/utils'
 import { MemberDetail } from './member-detail'
@@ -32,16 +32,7 @@ vi.mock('@/components/patterns/skeleton-loader', () => ({
 }))
 
 // Mock SDK generated hooks
-vi.mock('@monobase/sdk-ts/generated/react-query', () => ({
-  getRosterMemberOptions: vi.fn(),
-  getRosterMemberQueryKey: vi.fn(() => ['roster-member']),
-  updateRosterMemberMutation: vi.fn(),
-  listRosterMembersQueryKey: vi.fn(() => ['roster-members']),
-  listMembershipCategoriesOptions: vi.fn(),
-  reinstateMembershipMutation: vi.fn(),
-  terminateMembershipMutation: vi.fn(),
-}))
-
+// [Tier-F] removed local SDK mock; using global stub in test-setup-root.ts
 import {
   getRosterMemberOptions,
   updateRosterMemberMutation,

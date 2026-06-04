@@ -1,5 +1,5 @@
 import { useQuery } from '@tanstack/react-query'
-import { listMembershipsOptions } from '@monobase/sdk-ts/generated/@tanstack/react-query.gen'
+import { listMembershipsOptions } from '@monobase/sdk-ts/generated/react-query'
 import { Button, Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from '@monobase/ui'
 import { getStatusLabel, getStatusColor, isRenewable, type MembershipStatus } from '../lib/membership-status'
 

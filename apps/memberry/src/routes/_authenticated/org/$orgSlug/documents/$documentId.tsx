@@ -17,8 +17,8 @@ import { Button, Skeleton } from '@monobase/ui'
 import {
   getDocumentOptions,
   listDocumentVersionsOptions,
-} from '@monobase/sdk-ts/generated/@tanstack/react-query.gen'
-import { PageHeader } from '@/components/patterns/page-header'
+} from '@monobase/sdk-ts/generated/react-query'
+import { PageShell } from '@/components/patterns/page-shell'
 import { GlassCard } from '@/components/motion/glass-card'
 import { useOrg } from '@/hooks/useOrg'
 
@@ -86,99 +86,101 @@ function MemberDocumentDetailPage() {
 
   if (isLoading) {
     return (
-      <div className="space-y-6">
-        <PageHeader
-          title="Document"
-          breadcrumbs={[
-            { label: 'Organization' },
-            { label: 'Documents', href: `/org/${orgSlug}/documents` },
-            { label: 'Loading...' },
-          ]}
-        />
-        <GlassCard className="p-6">
-          <div className="space-y-4">
-            <Skeleton className="h-8 w-2/3" />
-            <Skeleton className="h-4 w-1/3" />
-            <Skeleton className="h-32 w-full" />
-          </div>
-        </GlassCard>
-      </div>
+      <PageShell
+        title="Document"
+        breadcrumbs={[
+          { label: 'Organization' },
+          { label: 'Documents', href: `/org/${orgSlug}/documents` },
+          { label: 'Loading...' },
+        ]}
+      >
+        <div className="space-y-6">
+          <GlassCard className="p-6">
+            <div className="space-y-4">
+              <Skeleton className="h-8 w-2/3" />
+              <Skeleton className="h-4 w-1/3" />
+              <Skeleton className="h-32 w-full" />
+            </div>
+          </GlassCard>
+        </div>
+      </PageShell>
     )
   }
 
   if (error) {
     return (
-      <div className="space-y-6">
-        <PageHeader
-          title="Document"
-          breadcrumbs={[
-            { label: 'Organization' },
-            { label: 'Documents', href: `/org/${orgSlug}/documents` },
-            { label: 'Error' },
-          ]}
-        />
-        <GlassCard className="p-6">
-          <div className="text-center py-12">
-            <FileText className="w-10 h-10 text-[var(--color-error)] mx-auto mb-3" />
-            <p className="font-medium text-[var(--color-error)]">Failed to load document</p>
-            <Link
-              to="/org/$orgSlug/documents"
-              params={{ orgSlug }}
-              className="inline-flex items-center gap-1 text-sm text-[var(--color-primary)] mt-4 hover:underline"
-            >
-              <ArrowLeft className="w-4 h-4" />
-              Back to Documents
-            </Link>
-          </div>
-        </GlassCard>
-      </div>
+      <PageShell
+        title="Document"
+        breadcrumbs={[
+          { label: 'Organization' },
+          { label: 'Documents', href: `/org/${orgSlug}/documents` },
+          { label: 'Error' },
+        ]}
+      >
+        <div className="space-y-6">
+          <GlassCard className="p-6">
+            <div className="text-center py-12">
+              <FileText className="w-10 h-10 text-[var(--color-error)] mx-auto mb-3" />
+              <p className="font-medium text-[var(--color-error)]">Failed to load document</p>
+              <Link
+                to="/org/$orgSlug/documents"
+                params={{ orgSlug }}
+                className="inline-flex items-center gap-1 text-sm text-[var(--color-primary)] mt-4 hover:underline"
+              >
+                <ArrowLeft className="w-4 h-4" />
+                Back to Documents
+              </Link>
+            </div>
+          </GlassCard>
+        </div>
+      </PageShell>
     )
   }
 
   // Access denied for officers-only / restricted documents
   if (!isAccessible) {
     return (
-      <div className="space-y-6">
-        <PageHeader
-          title="Document"
-          breadcrumbs={[
-            { label: 'Organization' },
-            { label: 'Documents', href: `/org/${orgSlug}/documents` },
-            { label: 'Access Denied' },
-          ]}
-        />
-        <GlassCard className="p-6">
-          <div className="text-center py-16">
-            <ShieldAlert className="w-12 h-12 text-[var(--color-warning)] mx-auto mb-4" />
-            <p className="text-lg font-semibold">You don't have access to this document</p>
-            <p className="text-sm text-[var(--color-muted)] mt-2">
-              This document is restricted to authorized personnel only.
-            </p>
-            <Link
-              to="/org/$orgSlug/documents"
-              params={{ orgSlug }}
-              className="inline-flex items-center gap-1 text-sm text-[var(--color-primary)] mt-6 hover:underline"
-            >
-              <ArrowLeft className="w-4 h-4" />
-              Back to Documents
-            </Link>
-          </div>
-        </GlassCard>
-      </div>
+      <PageShell
+        title="Document"
+        breadcrumbs={[
+          { label: 'Organization' },
+          { label: 'Documents', href: `/org/${orgSlug}/documents` },
+          { label: 'Access Denied' },
+        ]}
+      >
+        <div className="space-y-6">
+          <GlassCard className="p-6">
+            <div className="text-center py-16">
+              <ShieldAlert className="w-12 h-12 text-[var(--color-warning)] mx-auto mb-4" />
+              <p className="text-lg font-semibold">You don't have access to this document</p>
+              <p className="text-sm text-[var(--color-muted)] mt-2">
+                This document is restricted to authorized personnel only.
+              </p>
+              <Link
+                to="/org/$orgSlug/documents"
+                params={{ orgSlug }}
+                className="inline-flex items-center gap-1 text-sm text-[var(--color-primary)] mt-6 hover:underline"
+              >
+                <ArrowLeft className="w-4 h-4" />
+                Back to Documents
+              </Link>
+            </div>
+          </GlassCard>
+        </div>
+      </PageShell>
     )
   }
 
   return (
-    <div className="space-y-6">
-      <PageHeader
-        title={doc.title}
-        breadcrumbs={[
-          { label: 'Organization' },
-          { label: 'Documents', href: `/org/${orgSlug}/documents` },
-          { label: doc.title },
-        ]}
-      />
-
+    <PageShell
+      title={doc.title}
+      breadcrumbs={[
+        { label: 'Organization' },
+        { label: 'Documents', href: `/org/${orgSlug}/documents` },
+        { label: doc.title },
+      ]}
+    >
+      <div className="space-y-6">
       {/* Document metadata + download */}
       <GlassCard className="p-6">
         <div className="flex flex-col sm:flex-row sm:items-start gap-4">
@@ -236,7 +238,7 @@ function MemberDocumentDetailPage() {
               href={`/api/documents/${documentId}/download`}
               download={doc.fileName}
             >
-              <Button className="gap-2">
+              <Button>
                 <Download className="w-4 h-4" />
                 Download
               </Button>
@@ -295,6 +297,7 @@ function MemberDocumentDetailPage() {
           </div>
         )}
       </GlassCard>
-    </div>
+      </div>
+    </PageShell>
   )
 }

@@ -1,4 +1,4 @@
-import { describe, test, expect, vi, beforeEach } from 'vitest'
+import { describe, test, expect, vi, beforeEach } from '@/test/vitest-shim'
 import { screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { renderWithProviders } from '@/test/utils'
@@ -38,13 +38,7 @@ vi.mock('@/components/patterns/avatar-initials', () => ({
 }))
 
 // Mock SDK generated hooks
-vi.mock('@monobase/sdk-ts/generated/react-query', () => ({
-  listMembershipApplicationsOptions: vi.fn(),
-  listMembershipApplicationsQueryKey: vi.fn(() => ['applications']),
-  approveMembershipApplicationMutation: vi.fn(),
-  denyMembershipApplicationMutation: vi.fn(),
-}))
-
+// [Tier-F] removed local SDK mock; using global stub in test-setup-root.ts
 import {
   listMembershipApplicationsOptions,
   approveMembershipApplicationMutation,

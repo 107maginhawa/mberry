@@ -124,6 +124,7 @@ export function PollCard({ surveyId, compact, refreshInterval = 5000 }: PollCard
           }
 
           return (
+            // ui-c-exempt: methodology-carry — poll-option selectable button styling
             <Button
               key={option.label}
               variant={selectedOption === option.label ? 'outline' : 'ghost'}

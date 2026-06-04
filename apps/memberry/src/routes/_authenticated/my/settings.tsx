@@ -5,7 +5,7 @@ import { Button, Input, Switch, Tabs, TabsContent, TabsList, TabsTrigger } from 
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@monobase/ui'
 import { Label } from '@monobase/ui'
 import { ChangePasswordCard, TwoFactorCard, PasskeysCard, SessionsCard } from '@daveyplate/better-auth-ui'
-import { PageHeader } from '@/components/patterns/page-header'
+import { PageShell } from '@/components/patterns/page-shell'
 import { GlassCard } from '@/components/motion/glass-card'
 import { ListSkeleton } from '@/components/patterns/skeleton-loader'
 import { api } from '@/lib/api'
@@ -35,8 +35,8 @@ const PRIVACY_FIELDS = [
 
 function MySettingsPage() {
   return (
-    <div className="max-w-[600px]">
-      <PageHeader title="Settings" subtitle="Manage your account preferences" />
+    <PageShell title="Settings" subtitle="Manage your account preferences">
+      <div className="max-w-[600px]">
       <Tabs defaultValue="general">
         <TabsList className="mb-6">
           <TabsTrigger value="general">General</TabsTrigger>
@@ -57,7 +57,8 @@ function MySettingsPage() {
           <NotificationPreferencesSection />
         </TabsContent>
       </Tabs>
-    </div>
+      </div>
+    </PageShell>
   )
 }
 

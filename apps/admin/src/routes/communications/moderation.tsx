@@ -1,6 +1,7 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { RequireRole } from '@/lib/role-gate'
 import { Card, CardContent, CardHeader, CardTitle, Button } from '@monobase/ui'
+import { PageShell } from '@/components/patterns/page-shell'
 import { ShieldAlert, Check, AlertTriangle, Trash2 } from 'lucide-react'
 
 export const Route = createFileRoute('/communications/moderation')({
@@ -26,14 +27,12 @@ function ModerationQueue() {
 
   return (
     <RequireRole allowed={['super', 'support']}>
-      <div className="space-y-6">
-        <div>
-          <h1 className="text-2xl font-bold">Moderation Queue</h1>
-          <p className="text-sm text-muted-foreground">
-            Review reported content across all organizations
-          </p>
-        </div>
-
+      <PageShell
+        title="Moderation Queue"
+        subtitle="Review reported content across all organizations"
+        maxWidth="full"
+      >
+        <div className="space-y-6">
         {/* Filter tabs */}
         <div className="flex gap-2">
           <Button variant="secondary" size="sm">All</Button>
@@ -87,7 +86,8 @@ function ModerationQueue() {
             ))}
           </div>
         )}
-      </div>
+        </div>
+      </PageShell>
     </RequireRole>
   )
 }

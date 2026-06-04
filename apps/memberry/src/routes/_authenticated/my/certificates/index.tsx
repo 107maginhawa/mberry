@@ -1,5 +1,5 @@
 import { createFileRoute } from '@tanstack/react-router'
-import { PageHeader } from '@/components/patterns/page-header'
+import { PageShell } from '@/components/patterns/page-shell'
 import { CertificateList } from '@/features/certificates/components/certificate-list'
 
 export const Route = createFileRoute('/_authenticated/my/certificates/')({
@@ -8,12 +8,13 @@ export const Route = createFileRoute('/_authenticated/my/certificates/')({
 
 function MyCertificates() {
   return (
-    <div className="space-y-6">
-      <PageHeader
-        title="My Certificates"
-        subtitle="Training certificates and credentials issued to you"
-      />
-      <CertificateList />
-    </div>
+    <PageShell
+      title="My Certificates"
+      subtitle="Training certificates and credentials issued to you"
+    >
+      <div className="space-y-6">
+        <CertificateList />
+      </div>
+    </PageShell>
   )
 }

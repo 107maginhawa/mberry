@@ -7,7 +7,7 @@ import { Label } from '@monobase/ui'
 import { DatePicker } from '@/components/patterns/date-picker'
 import { ReportSelector } from '@/features/dues/components/report-selector'
 import { ReportResults } from '@/features/dues/components/report-results'
-import { PageHeader } from '@/components/patterns/page-header'
+import { PageShell } from '@/components/patterns/page-shell'
 import { GlassCard } from '@/components/motion/glass-card'
 import { useOrg } from '@/hooks/useOrg'
 
@@ -42,17 +42,16 @@ function FinancialReportsPage() {
   const dateError = fromDate && toDate ? new Date(fromDate) > new Date(toDate) : false
 
   return (
-    <div className="space-y-6">
-      <PageHeader
-        title="Financial Reports"
-        subtitle="Generate and view dues collection reports"
-        breadcrumbs={[
-          { label: 'Officer', href: `/org/${orgSlug}/officer/dashboard` },
-          { label: 'Reports' },
-          { label: 'Financial' },
-        ]}
-      />
-
+    <PageShell
+      title="Financial Reports"
+      subtitle="Generate and view dues collection reports"
+      breadcrumbs={[
+        { label: 'Officer', href: `/org/${orgSlug}/officer/dashboard` },
+        { label: 'Reports' },
+        { label: 'Financial' },
+      ]}
+    >
+      <div className="space-y-6">
       <GlassCard className="p-5">
         <ReportSelector selected={selectedType} onSelect={(type) => { setSelectedType(type); setShouldFetch(false) }} />
       </GlassCard>
@@ -90,6 +89,7 @@ function FinancialReportsPage() {
         summary={reportData?.summary ?? null}
         isLoading={isLoading && shouldFetch}
       />
-    </div>
+      </div>
+    </PageShell>
   )
 }

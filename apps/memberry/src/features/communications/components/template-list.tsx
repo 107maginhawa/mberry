@@ -71,6 +71,7 @@ export function TemplateList({ orgId, onEdit, onNew }: TemplateListProps) {
 
   if (templates.length === 0) {
     return (
+      // ui-c-exempt: empty-state-emphasis — no-templates EmptyState
       <EmptyState
         icon={<FileText size={32} />}
         headline="No templates yet"
@@ -122,6 +123,7 @@ export function TemplateList({ orgId, onEdit, onNew }: TemplateListProps) {
                   <td className="px-4 py-3 text-right">
                     <div className="flex items-center justify-end gap-1">
                       {onEdit && (
+                        // ui-c-exempt: methodology-carry — row-action icon 32px
                         <Button
                           type="button"
                           variant="ghost"
@@ -132,6 +134,7 @@ export function TemplateList({ orgId, onEdit, onNew }: TemplateListProps) {
                           <Pencil size={14} />
                         </Button>
                       )}
+                      {/* ui-c-exempt: methodology-carry — icon action 32px destructive */}
                       <Button
                         type="button"
                         variant="ghost"

@@ -140,7 +140,7 @@ export function OfficerManagement({ orgId }: OfficerManagementProps) {
                 >
                   <TableCell className="px-5 py-3.5">
                     <span className="inline-flex items-center gap-1.5">
-                      <Shield size={13} className="text-[var(--color-primary)] shrink-0" />
+                      <Shield size={12} className="text-[var(--color-primary)] shrink-0" />
                       <span className="font-semibold">{o.role}</span>
                     </span>
                   </TableCell>

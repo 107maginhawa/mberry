@@ -13,6 +13,7 @@ import {
   Shield,
 } from 'lucide-react'
 import { Button } from '@monobase/ui'
+import { PageShell } from '@/components/patterns/page-shell'
 import {
   listAssociationsOptions,
   listOrganizationsOptions,
@@ -20,7 +21,7 @@ import {
   listFeatureFlagsOptions,
   searchEventsOptions,
   listAuditLogsOptions,
-} from '@monobase/sdk-ts/generated/@tanstack/react-query.gen'
+} from '@monobase/sdk-ts/generated/react-query'
 
 export const Route = createFileRoute('/')({
   component: DashboardPage,
@@ -78,21 +79,16 @@ function DashboardPage() {
   }>
 
   return (
-    <div className="p-8">
-      <div className="flex items-center gap-3 mb-8">
-        <LayoutDashboard className="w-6 h-6 text-muted-foreground" />
-        <h1 className="text-h1 text-foreground">
-          Platform Dashboard
-        </h1>
-      </div>
-
-      <div className="mb-6">
+    <PageShell
+      title="Platform Dashboard"
+      maxWidth="full"
+      actions={
         <Button variant="outline" size="sm" onClick={() => window.location.reload()}>
           <RefreshCw className="w-4 h-4 mr-2" />
           Refresh
         </Button>
-      </div>
-
+      }
+    >
       {/* Platform Health KPIs */}
       <div className="mb-8">
         <h2 className="text-h2 text-foreground mb-4">Platform Health</h2>
@@ -182,6 +178,6 @@ function DashboardPage() {
           </div>
         </div>
       </div>
-    </div>
+    </PageShell>
   )
 }

@@ -4,7 +4,7 @@ import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { toast } from 'sonner'
 import { api, ApiError } from '@/lib/api'
 import type { ApiErrorBody } from '@/types/api'
-import { PageHeader } from '@/components/patterns/page-header'
+import { PageShell } from '@/components/patterns/page-shell'
 import { StatusBadge } from '@/components/patterns/status-badge'
 import { AvatarInitials } from '@/components/patterns/avatar-initials'
 import { EmptyState } from '@/components/patterns/empty-state'
@@ -66,23 +66,23 @@ function MyOrganizationsPage() {
   }
 
   return (
-    <div className="max-w-[720px]">
-      <PageHeader
-        title="Organizations"
-        subtitle="Your memberships across all organizations"
-        actions={
-          <Button
-            variant="outline"
-            onClick={() => toast.info('Organization discovery coming soon')}
-          >
-            Find Organizations
-          </Button>
-        }
-      />
-
+    <PageShell
+      title="Organizations"
+      subtitle="Your memberships across all organizations"
+      actions={
+        <Button
+          variant="outline"
+          onClick={() => toast.info('Organization discovery coming soon')}
+        >
+          Find Organizations
+        </Button>
+      }
+    >
+      <div className="max-w-[720px]">
       {loading ? (
         <ListSkeleton rows={3} />
       ) : !memberships.length ? (
+        // ui-c-exempt: empty-state-emphasis — no-orgs EmptyState
         <EmptyState
           icon={<Building2 size={40} />}
           headline="No memberships yet"
@@ -228,6 +228,7 @@ function MyOrganizationsPage() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
-    </div>
+      </div>
+    </PageShell>
   )
 }

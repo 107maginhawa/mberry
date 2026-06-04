@@ -24,7 +24,7 @@ import {
   listElectionsOptions,
   searchDocumentsOptions,
   searchEventsOptions,
-} from '@monobase/sdk-ts/generated/@tanstack/react-query.gen'
+} from '@monobase/sdk-ts/generated/react-query'
 import { DashboardKpiCard } from './dashboard/dashboard-kpi-card'
 import { ModuleSummaryCard } from './dashboard/module-summary-card'
 import { ActionQueue, type ActionItem } from './dashboard/action-queue'
@@ -149,6 +149,8 @@ export function OfficerDashboard({ orgId }: OfficerDashboardProps) {
           subtitle="Welcome to your association dashboard"
         />
         <div className="flex flex-col items-center justify-center py-16 px-4 text-center">
+          {/* oli-ui: exempt-icon-size — hero illustration */}
+          {/* ui-c-exempt: empty-state-emphasis — no-officers empty hero icon */}
           <Users size={48} className="text-[var(--color-primary-lighter)] mb-4" />
           <h3 className="text-h3 text-[var(--color-primary)]">Get started with your association</h3>
           <p className="text-sm text-[var(--color-muted)] mt-2 max-w-[400px]">
@@ -180,7 +182,7 @@ export function OfficerDashboard({ orgId }: OfficerDashboardProps) {
   if ((m?.graceCount ?? 0) > 0) {
     actionItems.push({
       id: 'grace-members',
-      icon: <UserMinus size={18} className="text-[var(--color-error)]" />,
+      icon: <UserMinus size={20} className="text-[var(--color-error)]" />,
       title: `${m!.graceCount} member${m!.graceCount !== 1 ? 's' : ''} in grace period`,
       description: 'These members are at risk of lapsing — act now',
       href: `/org/${orgSlug}/officer/roster?status=grace`,
@@ -193,7 +195,7 @@ export function OfficerDashboard({ orgId }: OfficerDashboardProps) {
   if (collectionRate > 0 && collectionRate < 50) {
     actionItems.push({
       id: 'critical-collection',
-      icon: <TrendingUp size={18} className="text-[var(--color-error)]" />,
+      icon: <TrendingUp size={20} className="text-[var(--color-error)]" />,
       title: `Collection rate is ${collectionRate}%`,
       description: 'Critical — review outstanding dues immediately',
       href: `/org/${orgSlug}/officer/payments`,
@@ -206,7 +208,7 @@ export function OfficerDashboard({ orgId }: OfficerDashboardProps) {
   if ((m?.expiringIn30Days ?? 0) > 0) {
     actionItems.push({
       id: 'expiring-dues',
-      icon: <Bell size={18} className="text-[var(--color-warning)]" />,
+      icon: <Bell size={20} className="text-[var(--color-warning)]" />,
       title: `${m!.expiringIn30Days} member${m!.expiringIn30Days !== 1 ? 's' : ''} with expiring dues`,
       description: 'Send renewal reminders before they lapse',
       href: `/org/${orgSlug}/officer/roster?status=active&expiring=30`,
@@ -219,7 +221,7 @@ export function OfficerDashboard({ orgId }: OfficerDashboardProps) {
   if ((applications.data?.pendingCount ?? 0) > 0) {
     actionItems.push({
       id: 'pending-apps',
-      icon: <ClipboardList size={18} className="text-[var(--color-warning)]" />,
+      icon: <ClipboardList size={20} className="text-[var(--color-warning)]" />,
       title: `${applications.data!.pendingCount} pending application${applications.data!.pendingCount !== 1 ? 's' : ''}`,
       description: 'Review and approve membership applications',
       href: `/org/${orgSlug}/officer/applications`,
@@ -232,7 +234,7 @@ export function OfficerDashboard({ orgId }: OfficerDashboardProps) {
   if (collectionRate >= 50 && collectionRate < 70) {
     actionItems.push({
       id: 'low-collection',
-      icon: <TrendingUp size={18} className="text-[var(--color-warning)]" />,
+      icon: <TrendingUp size={20} className="text-[var(--color-warning)]" />,
       title: `Collection rate is ${collectionRate}%`,
       description: 'Review outstanding dues and follow up with members',
       href: `/org/${orgSlug}/officer/payments`,
@@ -246,7 +248,7 @@ export function OfficerDashboard({ orgId }: OfficerDashboardProps) {
   if (nominationsOpen.length > 0) {
     actionItems.push({
       id: 'nominations-open',
-      icon: <Vote size={18} className="text-[var(--color-warning)]" />,
+      icon: <Vote size={20} className="text-[var(--color-warning)]" />,
       title: `${nominationsOpen.length} election${nominationsOpen.length !== 1 ? 's' : ''} accepting nominations`,
       description: 'Review nominations before voting begins',
       href: `/org/${orgSlug}/officer/elections`,
@@ -260,7 +262,7 @@ export function OfficerDashboard({ orgId }: OfficerDashboardProps) {
   if (votingOpen.length > 0) {
     actionItems.push({
       id: 'voting-open',
-      icon: <Vote size={18} className="text-[var(--color-info)]" />,
+      icon: <Vote size={20} className="text-[var(--color-info)]" />,
       title: `${votingOpen.length} election${votingOpen.length !== 1 ? 's' : ''} in voting`,
       description: 'Voting is active — monitor participation',
       href: `/org/${orgSlug}/officer/elections`,
@@ -273,7 +275,7 @@ export function OfficerDashboard({ orgId }: OfficerDashboardProps) {
   if (draftDocumentsCount > 0) {
     actionItems.push({
       id: 'draft-docs',
-      icon: <FileText size={18} className="text-[var(--color-info)]" />,
+      icon: <FileText size={20} className="text-[var(--color-info)]" />,
       title: `${draftDocumentsCount} draft document${draftDocumentsCount !== 1 ? 's' : ''} unpublished`,
       description: 'Review and publish when ready',
       href: `/org/${orgSlug}/officer/documents`,

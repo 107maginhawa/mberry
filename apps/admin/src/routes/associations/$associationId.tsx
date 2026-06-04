@@ -1,7 +1,8 @@
 import { createFileRoute, Link } from '@tanstack/react-router'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
-import { Building2, ArrowLeft, Pencil, Plus, Trash2, X, Users, TrendingUp, GraduationCap, Calendar, BarChart3 } from 'lucide-react'
+import { Building2, Pencil, Plus, Trash2, X, Users, TrendingUp, GraduationCap, Calendar, BarChart3 } from 'lucide-react'
 import { Button, Input, Label, Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from '@monobase/ui'
+import { PageShell } from '@/components/patterns/page-shell'
 import { toast } from 'sonner'
 import { useState } from 'react'
 import { useNavigate } from '@tanstack/react-router'
@@ -16,7 +17,7 @@ import {
   createOrganizationMutation,
   searchEventsOptions,
   searchCoursesOptions,
-} from '@monobase/sdk-ts/generated/@tanstack/react-query.gen'
+} from '@monobase/sdk-ts/generated/react-query'
 
 export const Route = createFileRoute('/associations/$associationId')({
   component: AssociationDetailPage,
@@ -179,15 +180,53 @@ function AssociationDetailPage() {
   }
 
   return (
-    <div className="p-8">
-      <Link
-        to="/associations"
-        className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground mb-4"
-      >
-        <ArrowLeft className="w-4 h-4" />
-        Back to Associations
-      </Link>
-
+    <PageShell
+      title={association?.name ?? 'Association'}
+      breadcrumbs={[
+        { label: 'Associations', href: '/associations' },
+        { label: association?.name ?? associationId },
+      ]}
+      maxWidth="full"
+      subtitle={
+        association ? (
+          <>
+            ID: {associationId}
+            {association.status && (
+              <span
+                className={`ml-3 inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium ${
+                  association.status === 'active'
+                    ? 'bg-green-100 text-green-700'
+                    : association.status === 'pending'
+                      ? 'bg-yellow-100 text-yellow-700'
+                      : 'bg-gray-100 text-gray-700'
+                }`}
+              >
+                {association.status}
+              </span>
+            )}
+            {createdDate && (
+              <span className="ml-3">
+                Since {new Date(createdDate).toLocaleDateString('en-PH', { month: 'short', year: 'numeric' })}
+              </span>
+            )}
+          </>
+        ) : undefined
+      }
+      actions={
+        association ? (
+          <>
+            <Button variant="outline" onClick={startEdit}>
+              <Pencil className="w-4 h-4" />
+              Edit Association
+            </Button>
+            <Button variant="destructive" onClick={() => setConfirmDelete(true)}>
+              <Trash2 className="w-4 h-4" />
+              Delete
+            </Button>
+          </>
+        ) : undefined
+      }
+    >
       {error && (
         <div className="rounded-lg border border-red-300 bg-red-50 p-4 mb-4 text-red-700 text-sm">
           {error instanceof Error ? error.message : 'Failed to load association'}
@@ -216,42 +255,6 @@ function AssociationDetailPage() {
         </div>
       ) : (
         <>
-          <div className="flex items-center justify-between mb-8">
-            <div className="flex items-center gap-3">
-              <Building2 className="w-6 h-6 text-muted-foreground" />
-              <div>
-                <h1 className="text-h1 text-foreground">
-                  {association.name}
-                </h1>
-                <p className="text-sm text-muted-foreground mt-1">
-                  ID: {associationId}
-                  {association.status && (
-                    <span className={`ml-3 inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium ${
-                      association.status === 'active' ? 'bg-green-100 text-green-700'
-                        : association.status === 'pending' ? 'bg-yellow-100 text-yellow-700'
-                        : 'bg-gray-100 text-gray-700'
-                    }`}>
-                      {association.status}
-                    </span>
-                  )}
-                  {createdDate && (
-                    <span className="ml-3">Since {new Date(createdDate).toLocaleDateString('en-PH', { month: 'short', year: 'numeric' })}</span>
-                  )}
-                </p>
-              </div>
-            </div>
-            <div className="flex items-center gap-2">
-              <Button variant="outline" onClick={startEdit}>
-                <Pencil className="w-4 h-4" />
-                Edit Association
-              </Button>
-              <Button variant="destructive" onClick={() => setConfirmDelete(true)}>
-                <Trash2 className="w-4 h-4" />
-                Delete
-              </Button>
-            </div>
-          </div>
-
           {/* Chapter Health KPI Cards */}
           <div className="grid grid-cols-4 gap-4 mb-6">
             <div className="rounded-lg border bg-card p-4">
@@ -579,6 +582,6 @@ function AssociationDetailPage() {
           </div>
         </>
       )}
-    </div>
+    </PageShell>
   )
 }

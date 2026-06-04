@@ -1,8 +1,8 @@
 import { createFileRoute, Link } from '@tanstack/react-router'
 import { useQuery } from '@tanstack/react-query'
 import { ClipboardList, Clock, CheckCircle2, ChevronRight } from 'lucide-react'
-import { listSurveysOptions } from '@monobase/sdk-ts/generated/@tanstack/react-query.gen'
-import { PageHeader } from '@/components/patterns/page-header'
+import { listSurveysOptions } from '@monobase/sdk-ts/generated/react-query'
+import { PageShell } from '@/components/patterns/page-shell'
 import { EmptyState } from '@/components/patterns/empty-state'
 import { GlassCard } from '@/components/motion/glass-card'
 import { StaggerGrid, StaggerItem } from '@/components/motion/stagger-grid'
@@ -57,12 +57,11 @@ function MySurveys() {
   const completed = allSurveys.filter((s) => s.myResponseStatus === 'completed')
 
   return (
-    <div className="space-y-6">
-      <PageHeader
-        title="My Surveys"
-        subtitle="Share your feedback and see past responses"
-      />
-
+    <PageShell
+      title="My Surveys"
+      subtitle="Share your feedback and see past responses"
+    >
+      <div className="space-y-6">
       {isLoading ? (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {Array.from({ length: 3 }).map((_, i) => (
@@ -187,6 +186,7 @@ function MySurveys() {
           )}
         </>
       )}
-    </div>
+      </div>
+    </PageShell>
   )
 }

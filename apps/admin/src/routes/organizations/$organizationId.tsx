@@ -1,11 +1,12 @@
-import { createFileRoute, Link } from '@tanstack/react-router'
+import { createFileRoute } from '@tanstack/react-router'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
-import { Building, ArrowLeft, Pencil, Play, Pause, Archive } from 'lucide-react'
+import { Pencil, Play, Pause, Archive } from 'lucide-react'
 import { Button, Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from '@monobase/ui'
 import { toast } from 'sonner'
-import { getOrganizationOptions } from '@monobase/sdk-ts/generated/@tanstack/react-query.gen'
+import { getOrganizationOptions } from '@monobase/sdk-ts/generated/react-query'
 import { CSRF_HEADER, readCsrfCookie } from '@monobase/sdk-ts/csrf'
 import { ErrorState } from '@/components/skeletons'
+import { PageShell } from '@/components/patterns/page-shell'
 
 export const Route = createFileRoute('/organizations/$organizationId')({
   component: OrganizationDetailPage,
@@ -41,9 +42,13 @@ function OrganizationDetailPage() {
 
   if (isError) {
     return (
-      <div className="p-8 max-w-2xl">
+      <PageShell
+        title="Organization"
+        breadcrumbs={[{ label: 'Organizations', href: '/organizations' }, { label: 'Error' }]}
+        maxWidth="full"
+      >
         <ErrorState message="Could not load organization" onRetry={() => refetch()} />
-      </div>
+      </PageShell>
     )
   }
   // Cast to local interface — SDK type doesn't include extended fields (members, associationName)
@@ -74,39 +79,29 @@ function OrganizationDetailPage() {
   }
 
   return (
-    <div className="p-8">
-      <Link
-        to="/organizations"
-        className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground mb-4"
-      >
-        <ArrowLeft className="w-4 h-4" />
-        Back to Organizations
-      </Link>
-
+    <PageShell
+      title={org?.name ?? 'Organization'}
+      breadcrumbs={[
+        { label: 'Organizations', href: '/organizations' },
+        { label: org?.name ?? organizationId },
+      ]}
+      subtitle={org ? `ID: ${organizationId}` : undefined}
+      maxWidth="full"
+      actions={
+        org ? (
+          <Button variant="outline">
+            <Pencil className="w-4 h-4" />
+            Edit Organization
+          </Button>
+        ) : undefined
+      }
+    >
       {isLoading ? (
         <div className="text-muted-foreground animate-pulse">Loading organization...</div>
       ) : !org ? (
         <div className="text-muted-foreground">Organization not found.</div>
       ) : (
         <>
-          <div className="flex items-center justify-between mb-8">
-            <div className="flex items-center gap-3">
-              <Building className="w-6 h-6 text-muted-foreground" />
-              <div>
-                <h1 className="text-h1 text-foreground">
-                  {org.name}
-                </h1>
-                <p className="text-sm text-muted-foreground mt-1">
-                  ID: {organizationId}
-                </p>
-              </div>
-            </div>
-            <Button variant="outline">
-              <Pencil className="w-4 h-4" />
-              Edit Organization
-            </Button>
-          </div>
-
           {/* Detail Card */}
           <div className="rounded-lg border bg-card p-6 mb-8">
             <h2 className="text-h2 mb-4">Details</h2>
@@ -154,11 +149,11 @@ function OrganizationDetailPage() {
           <div className="rounded-lg border bg-card p-6 mb-8">
             <h2 className="text-h2 mb-4">Lifecycle Controls</h2>
             <div className="flex items-center gap-3">
-              <Button className="bg-green-600 hover:bg-green-700" onClick={() => transitionOrgStatus('active')}>
+              <Button variant="success" onClick={() => transitionOrgStatus('active')}>
                 <Play className="w-4 h-4" />
                 Activate
               </Button>
-              <Button className="bg-yellow-600 hover:bg-yellow-700" onClick={() => transitionOrgStatus('suspended')}>
+              <Button variant="warning" onClick={() => transitionOrgStatus('suspended')}>
                 <Pause className="w-4 h-4" />
                 Suspend
               </Button>
@@ -213,6 +208,6 @@ function OrganizationDetailPage() {
           </div>
         </>
       )}
-    </div>
+    </PageShell>
   )
 }

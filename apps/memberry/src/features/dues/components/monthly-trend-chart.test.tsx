@@ -1,4 +1,4 @@
-import { describe, test, expect } from 'vitest'
+import { describe, test, expect } from 'bun:test'
 import { render, screen } from '@testing-library/react'
 import { MonthlyTrendChart } from './monthly-trend-chart'
 

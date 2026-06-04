@@ -8,7 +8,7 @@ import {
   listCustomTrainingEnrollmentsOptions,
   listCustomTrainingEnrollmentsQueryKey,
   completeCustomTrainingMutation,
-} from '@monobase/sdk-ts/generated/@tanstack/react-query.gen'
+} from '@monobase/sdk-ts/generated/react-query'
 import type { TrainingEnrollment, TrainingEnrollmentCompleteRequest } from '@monobase/sdk-ts/generated/types.gen'
 
 /**

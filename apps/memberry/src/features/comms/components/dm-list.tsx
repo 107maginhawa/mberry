@@ -71,10 +71,9 @@ export function DmList({ activeRoomId, onSelectRoom, onNewDm, myPersonId }: DmLi
         {onNewDm && (
           <Button
             variant="ghost"
-            size="icon"
+            size="icon-xs"
             onClick={onNewDm}
             aria-label="New direct message"
-            className="h-7 w-7"
           >
             <Plus className="h-4 w-4" />
           </Button>

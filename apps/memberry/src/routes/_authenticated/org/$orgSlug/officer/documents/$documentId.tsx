@@ -2,7 +2,7 @@ import { useState, useCallback, useRef } from 'react'
 import { createFileRoute } from '@tanstack/react-router'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { toast } from 'sonner'
-import { PageHeader } from '@/components/patterns/page-header'
+import { PageShell } from '@/components/patterns/page-shell'
 import { GlassCard } from '@/components/motion/glass-card'
 import { EmptyState } from '@/components/patterns/empty-state'
 import { TableSkeleton } from '@/components/patterns/skeleton-loader'
@@ -446,37 +446,69 @@ function DocumentDetail() {
     })
   }, [newAccessLevel, doc, documentId, orgId, doUpdate])
 
-  return (
-    <div className="space-y-6">
-      {isLoading ? (
+  if (isLoading) {
+    return (
+      <PageShell
+        title="Document"
+        breadcrumbs={[
+          { label: 'Officer', href: `/org/${orgSlug}/officer/dashboard` },
+          { label: 'Documents', href: `/org/${orgSlug}/officer/documents` },
+        ]}
+      >
         <div className="space-y-3">
           <TableSkeleton rows={3} cols={1} />
         </div>
-      ) : isError ? (
+      </PageShell>
+    )
+  }
+
+  if (isError) {
+    return (
+      <PageShell
+        title="Document"
+        breadcrumbs={[
+          { label: 'Officer', href: `/org/${orgSlug}/officer/dashboard` },
+          { label: 'Documents', href: `/org/${orgSlug}/officer/documents` },
+        ]}
+      >
         <div role="alert" className="p-4 rounded-lg bg-[var(--color-error-bg)] text-[var(--color-error)] text-sm">
           Unable to load document. Please try refreshing the page.
         </div>
-      ) : error || !doc ? (
-        <div className="p-6 text-center text-[var(--color-error)]">Failed to load document</div>
-      ) : (
-        <>
-          {/* Header */}
-          <PageHeader
-            title={doc.title}
-            breadcrumbs={[
-              { label: 'Officer', href: `/org/${orgSlug}/officer/dashboard` },
-              { label: 'Documents', href: `/org/${orgSlug}/officer/documents` },
-              { label: doc.title },
-            ]}
-            actions={
-              <div className="flex items-center gap-3">
-                <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${STATUS_COLORS[doc.status ?? 'draft'] ?? ''}`}>
-                  {doc.status ?? 'draft'}
-                </span>
-              </div>
-            }
-          />
+      </PageShell>
+    )
+  }
 
+  if (error || !doc) {
+    return (
+      <PageShell
+        title="Document"
+        breadcrumbs={[
+          { label: 'Officer', href: `/org/${orgSlug}/officer/dashboard` },
+          { label: 'Documents', href: `/org/${orgSlug}/officer/documents` },
+        ]}
+      >
+        <div className="p-6 text-center text-[var(--color-error)]">Failed to load document</div>
+      </PageShell>
+    )
+  }
+
+  return (
+    <PageShell
+      title={doc.title}
+      breadcrumbs={[
+        { label: 'Officer', href: `/org/${orgSlug}/officer/dashboard` },
+        { label: 'Documents', href: `/org/${orgSlug}/officer/documents` },
+        { label: doc.title },
+      ]}
+      actions={
+        <div className="flex items-center gap-3">
+          <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${STATUS_COLORS[doc.status ?? 'draft'] ?? ''}`}>
+            {doc.status ?? 'draft'}
+          </span>
+        </div>
+      }
+    >
+      <div className="space-y-6">
           {/* Tabs */}
           <div className="flex gap-1 border-b border-[var(--color-border-light)]">
             {TABS.map((t) => {
@@ -639,8 +671,7 @@ function DocumentDetail() {
           {tab === 'access_log' && (
             <AccessLogTab documentId={documentId} orgId={orgId} />
           )}
-        </>
-      )}
-    </div>
+      </div>
+    </PageShell>
   )
 }

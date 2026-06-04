@@ -1,14 +1,9 @@
-import { describe, test, expect, vi, beforeEach } from 'vitest'
+import { describe, test, expect, vi, beforeEach } from '@/test/vitest-shim'
 import { screen, waitFor } from '@testing-library/react'
 import { renderWithProviders } from '@/test/utils'
 import { EventList } from './event-list'
 
-vi.mock('@monobase/sdk-ts/generated/@tanstack/react-query.gen', () => ({
-  searchEventsOptions: vi.fn(),
-  searchEventsQueryKey: vi.fn(() => ['events']),
-  cancelEventMutation: vi.fn(),
-}))
-
+// [Tier-F] removed local SDK mock; using global stub in test-setup-root.ts
 vi.mock('@monobase/ui', () => ({
   Input: (props: any) => <input {...props} />,
   Skeleton: ({ className }: any) => <div className={className} data-testid="skeleton" />,
@@ -55,7 +50,7 @@ vi.mock('./event-card', () => ({
 import {
   searchEventsOptions,
   cancelEventMutation,
-} from '@monobase/sdk-ts/generated/@tanstack/react-query.gen'
+} from '@monobase/sdk-ts/generated/react-query'
 
 const mockSearchOptions = searchEventsOptions as ReturnType<typeof vi.fn>
 const mockCancelMutation = cancelEventMutation as ReturnType<typeof vi.fn>

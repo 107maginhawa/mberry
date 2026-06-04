@@ -6,7 +6,7 @@ import { Button } from '@monobase/ui'
 import { Checkbox } from '@monobase/ui'
 import { Loader2, Users, UserCheck } from 'lucide-react'
 import { listCustomTrainingEnrollmentsOptions, checkInCustomTrainingMutation } from '@monobase/sdk-ts/generated/react-query'
-import { PageHeader } from '@/components/patterns/page-header'
+import { PageShell } from '@/components/patterns/page-shell'
 import { GlassCard } from '@/components/motion/glass-card'
 import { EmptyState } from '@/components/patterns/empty-state'
 import { ListSkeleton } from '@/components/patterns/skeleton-loader'
@@ -56,27 +56,25 @@ function TrainingAttendance() {
   ).length
 
   return (
-    <div className="space-y-6">
-      <PageHeader
-        title="Training Attendance"
-        subtitle="Mark members as present for this training session"
-        breadcrumbs={[
-          { label: 'Officer', href: `/org/${orgSlug}/officer/dashboard` },
-          { label: 'Training', href: `/org/${orgSlug}/officer/training` },
-          { label: 'Attendance' },
-        ]}
-        actions={
-          <GlassCard className="px-3 py-2">
-            <div className="flex items-center gap-2">
-              <UserCheck className="w-4 h-4 text-[var(--color-muted)]" />
-              <span className="text-sm font-medium">
-                {presentCount} / {enrollments.length} present
-              </span>
-            </div>
-          </GlassCard>
-        }
-      />
-
+    <PageShell
+      title="Training Attendance"
+      subtitle="Mark members as present for this training session"
+      breadcrumbs={[
+        { label: 'Officer', href: `/org/${orgSlug}/officer/dashboard` },
+        { label: 'Training', href: `/org/${orgSlug}/officer/training` },
+        { label: 'Attendance' },
+      ]}
+      actions={
+        <GlassCard className="px-3 py-2">
+          <div className="flex items-center gap-2">
+            <UserCheck className="w-4 h-4 text-[var(--color-muted)]" />
+            <span className="text-sm font-medium">
+              {presentCount} / {enrollments.length} present
+            </span>
+          </div>
+        </GlassCard>
+      }
+    >
       {isLoading ? (
         <ListSkeleton rows={5} />
       ) : error ? (
@@ -147,6 +145,6 @@ function TrainingAttendance() {
           </div>
         </GlassCard>
       )}
-    </div>
+    </PageShell>
   )
 }

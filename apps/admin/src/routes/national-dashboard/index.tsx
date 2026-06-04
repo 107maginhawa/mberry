@@ -21,8 +21,9 @@ import {
   TableHead,
   TableCell,
 } from '@monobase/ui'
+import { PageShell } from '@/components/patterns/page-shell'
 import { RequireRole } from '@/lib/role-gate'
-import { listAssociationsOptions } from '@monobase/sdk-ts/generated/@tanstack/react-query.gen'
+import { listAssociationsOptions } from '@monobase/sdk-ts/generated/react-query'
 
 export const Route = createFileRoute('/national-dashboard/')({
   component: () => (
@@ -157,17 +158,11 @@ function NationalDashboardPage() {
   }
 
   return (
-    <div className="p-8">
-      <div className="flex items-center justify-between gap-3 mb-8">
-        <div className="flex items-center gap-3">
-          <BarChart3 className="w-6 h-6 text-muted-foreground" />
-          <div>
-            <h1 className="text-h1 text-foreground">National Dashboard</h1>
-            <p className="text-sm text-muted-foreground mt-1">
-              Cross-chapter comparison metrics for national associations
-            </p>
-          </div>
-        </div>
+    <PageShell
+      title="National Dashboard"
+      subtitle="Cross-chapter comparison metrics for national associations"
+      maxWidth="full"
+      actions={
         <Button
           variant="outline"
           size="sm"
@@ -177,8 +172,8 @@ function NationalDashboardPage() {
           <Download size={14} className="mr-1.5" />
           Export CSV
         </Button>
-      </div>
-
+      }
+    >
       {/* Filters */}
       <div className="flex items-center gap-4 mb-8">
         <div className="w-[300px]">
@@ -340,6 +335,6 @@ function NationalDashboardPage() {
           <p className="text-xs mt-1">Snapshots are generated monthly. Try selecting a different month.</p>
         </div>
       )}
-    </div>
+    </PageShell>
   )
 }

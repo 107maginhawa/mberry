@@ -7,11 +7,11 @@ import { Calendar, Search } from 'lucide-react'
 import { EventCard } from '@/features/events/components/event-card'
 import { GlassCard } from '@/components/motion/glass-card'
 import { StaggerGrid, StaggerItem } from '@/components/motion/stagger-grid'
-import { PageHeader } from '@/components/patterns/page-header'
+import { PageShell } from '@/components/patterns/page-shell'
 import { EmptyState } from '@/components/patterns/empty-state'
 import {
   searchEventsOptions,
-} from '@monobase/sdk-ts/generated/@tanstack/react-query.gen'
+} from '@monobase/sdk-ts/generated/react-query'
 import type { Event, EventStatus, EventType } from '@monobase/sdk-ts/generated/types.gen'
 import type { ApiListResponse } from '@/types/api'
 import { useOrg } from '@/hooks/useOrg'
@@ -58,12 +58,11 @@ function OrgEvents() {
   })
 
   return (
-    <div className="space-y-6 p-6">
-      <PageHeader
-        title="Events"
-        subtitle="Browse and register for upcoming events"
-      />
-
+    <PageShell
+      title="Events"
+      subtitle="Browse and register for upcoming events"
+    >
+      <div className="space-y-6">
       {/* Filters */}
       <div className="flex flex-col sm:flex-row gap-3 items-start sm:items-center">
         <Select value={typeFilter} onValueChange={setTypeFilter}>
@@ -124,6 +123,7 @@ function OrgEvents() {
           ))}
         </StaggerGrid>
       )}
-    </div>
+      </div>
+    </PageShell>
   )
 }

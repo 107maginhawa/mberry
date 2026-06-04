@@ -4,8 +4,8 @@ import {
   getPersonOptions,
   listMyCustomEventsOptions,
   listElectionsOptions,
-} from '@monobase/sdk-ts/generated/@tanstack/react-query.gen'
-import { PageHeader } from '@/components/patterns/page-header'
+} from '@monobase/sdk-ts/generated/react-query'
+import { PageShell } from '@/components/patterns/page-shell'
 import { StatusBadge } from '@/components/patterns/status-badge'
 import { AvatarInitials } from '@/components/patterns/avatar-initials'
 import { EmptyState } from '@/components/patterns/empty-state'
@@ -195,17 +195,16 @@ function DashboardPage() {
         : undefined
 
   return (
-    <div className="space-y-6">
+    <PageShell
+      title={`${getGreeting()}, ${displayName}`}
+      subtitle="Your membership health at a glance"
+    >
+      <div className="space-y-6">
       {/* Alert Banner */}
       <AlertBanner
         memberships={memberships}
         invoices={invoices}
         elections={elections}
-      />
-
-      <PageHeader
-        title={`${getGreeting()}, ${displayName}`}
-        subtitle="Your membership health at a glance"
       />
 
       {/* Onboarding prompt */}
@@ -285,6 +284,7 @@ function DashboardPage() {
             action={{ label: 'View credits', to: '/my/credits' }}
           >
             <div className="flex items-center gap-3">
+              {/* ui-c-exempt: custom-component-prop — CreditRing size prop is component scalar, not Icon */}
               <CreditRing earned={myEarned} required={myRequired || myEarned} size={44} />
               <div>
                 <p className="text-xl font-bold font-display text-[var(--color-primary)]" style={{ fontVariantNumeric: 'tabular-nums' }}>
@@ -346,7 +346,8 @@ function DashboardPage() {
           />
         </StaggerItem>
       </StaggerGrid>
-    </div>
+      </div>
+    </PageShell>
   )
 }
 

@@ -1,16 +1,16 @@
 import { useState } from 'react'
 import { createFileRoute, Link } from '@tanstack/react-router'
 import { useQuery } from '@tanstack/react-query'
-import { Input, PageContainer } from '@monobase/ui'
+import { Input } from '@monobase/ui'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@monobase/ui'
 import { Calendar, MapPin, DollarSign, Award, Search } from 'lucide-react'
 import { GlassCard } from '@/components/motion/glass-card'
 import { StaggerGrid, StaggerItem } from '@/components/motion/stagger-grid'
-import { PageHeader } from '@/components/patterns/page-header'
+import { PageShell } from '@/components/patterns/page-shell'
 import { EmptyState } from '@/components/patterns/empty-state'
 import {
   listPublicEventsOptions,
-} from '@monobase/sdk-ts/generated/@tanstack/react-query.gen'
+} from '@monobase/sdk-ts/generated/react-query'
 
 export const Route = createFileRoute('/discover/events')({
   component: DiscoverEvents,
@@ -50,12 +50,12 @@ function DiscoverEvents() {
   const events = (data as any)?.data ?? []
 
   return (
-    <PageContainer width="wide" className="space-y-6 py-6">
-      <PageHeader
-        title="Discover Events"
-        subtitle="Public events across all organizations"
-      />
-
+    <PageShell
+      title="Discover Events"
+      subtitle="Public events across all organizations"
+      maxWidth="wide"
+    >
+      <div className="space-y-6">
       {/* Filter bar */}
       <GlassCard className="p-4">
         <div className="flex flex-wrap gap-3">
@@ -132,7 +132,8 @@ function DiscoverEvents() {
           ))}
         </StaggerGrid>
       )}
-    </PageContainer>
+      </div>
+    </PageShell>
   )
 }
 

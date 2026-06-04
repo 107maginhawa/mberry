@@ -21,6 +21,7 @@ export function ReportResults({ type, data, summary, isLoading }: ReportResultsP
 
   if (!data) {
     return (
+      // ui-c-exempt: empty-state-emphasis — empty-results EmptyState
       <EmptyState
         icon={<FileBarChart2 size={36} />}
         headline="No report generated yet"
@@ -31,6 +32,7 @@ export function ReportResults({ type, data, summary, isLoading }: ReportResultsP
 
   if (data.length === 0) {
     return (
+      // ui-c-exempt: empty-state-emphasis — empty results EmptyState
       <EmptyState
         icon={<Inbox size={36} />}
         headline="No data found"

@@ -22,17 +22,17 @@ const RATE_LIMIT_HOURS = 24
 
 const STATUS_CONFIG: Record<ExportStatus, { icon: React.ReactNode; className: string; label: string }> = {
   Processing: {
-    icon: <Clock size={13} />,
+    icon: <Clock size={12} />,
     className: 'text-[var(--color-warning)] bg-[var(--color-warning-bg)]',
     label: 'Processing',
   },
   Ready: {
-    icon: <CheckCircle size={13} />,
+    icon: <CheckCircle size={12} />,
     className: 'text-[var(--color-success)] bg-[var(--color-success-bg)]',
     label: 'Ready',
   },
   Expired: {
-    icon: <AlertCircle size={13} />,
+    icon: <AlertCircle size={12} />,
     className: 'text-[var(--color-muted)] bg-[var(--color-border-light)]',
     label: 'Expired',
   },
@@ -128,7 +128,7 @@ export function DataExport() {
           disabled={isRequesting || rateLimited}
           className="gap-2"
         >
-          <Download size={15} />
+          <Download size={16} />
           {isRequesting
             ? 'Requesting…'
             : rateLimited
@@ -184,7 +184,7 @@ export function DataExport() {
                             href={e.downloadUrl}
                             className="text-sm font-semibold text-[var(--color-primary)] hover:underline inline-flex items-center gap-1"
                           >
-                            <Download size={13} />
+                            <Download size={12} />
                             Download
                           </a>
                         ) : null}

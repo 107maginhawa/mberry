@@ -1,12 +1,9 @@
-import { describe, test, expect, vi, beforeEach } from 'vitest'
+import { describe, test, expect, vi, beforeEach } from '@/test/vitest-shim'
 import { screen, waitFor, fireEvent } from '@testing-library/react'
 import { renderWithProviders } from '@/test/utils'
 import { VotingBallot } from './voting-ballot'
 
-vi.mock('@monobase/sdk-ts/generated/@tanstack/react-query.gen', () => ({
-  getElectionOptions: vi.fn(),
-}))
-
+// [Tier-F] removed local SDK mock; using global stub in test-setup-root.ts
 vi.mock('@monobase/sdk-ts/generated/sdk.gen', () => ({
   castBallot: vi.fn(),
 }))
@@ -36,7 +33,7 @@ vi.mock('sonner', () => ({
   toast: { success: vi.fn(), error: vi.fn() },
 }))
 
-import { getElectionOptions } from '@monobase/sdk-ts/generated/@tanstack/react-query.gen'
+import { getElectionOptions } from '@monobase/sdk-ts/generated/react-query'
 import { castBallot } from '@monobase/sdk-ts/generated/sdk.gen'
 import { api } from '@/lib/api'
 

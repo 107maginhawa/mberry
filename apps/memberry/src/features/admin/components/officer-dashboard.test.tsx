@@ -1,4 +1,4 @@
-import { describe, test, expect, vi, beforeEach } from 'vitest'
+import { describe, test, expect, vi, beforeEach } from '@/test/vitest-shim'
 import { screen, waitFor } from '@testing-library/react'
 import { renderWithProviders } from '@/test/utils'
 import { OfficerDashboard } from './officer-dashboard'
@@ -17,21 +17,7 @@ vi.mock('@monobase/sdk-ts/react/hooks/use-auth', () => ({
 }))
 
 // Mock SDK query options
-vi.mock('@monobase/sdk-ts/generated/@tanstack/react-query.gen', () => ({
-  listElectionsOptions: vi.fn(() => ({
-    queryKey: ['elections'],
-    queryFn: () => Promise.resolve({ data: [] }),
-  })),
-  searchDocumentsOptions: vi.fn(() => ({
-    queryKey: ['documents'],
-    queryFn: () => Promise.resolve({ data: [] }),
-  })),
-  searchEventsOptions: vi.fn(() => ({
-    queryKey: ['events'],
-    queryFn: () => Promise.resolve({ data: [] }),
-  })),
-}))
-
+// [Tier-F] removed local SDK mock; using global stub in test-setup-root.ts
 // Mock motion/pattern components
 vi.mock('@/components/patterns/skeleton-loader', () => ({
   CardSkeleton: () => <div data-testid="card-skeleton">Loading...</div>,

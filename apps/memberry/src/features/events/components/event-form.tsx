@@ -14,7 +14,7 @@ import {
   createEventMutation,
   updateEventMutation,
   searchEventsQueryKey,
-} from '@monobase/sdk-ts/generated/@tanstack/react-query.gen'
+} from '@monobase/sdk-ts/generated/react-query'
 import type { EventType, CpdActivityType } from '@monobase/sdk-ts/generated/types.gen'
 
 const eventSchema = z.object({

@@ -1,3 +1,4 @@
+// ui-c-exempt: full-height-layout — bookings shell has own chrome
 import { createFileRoute } from '@tanstack/react-router'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@monobase/ui'
 import { HostDirectory } from '@/features/booking/components/host-directory'

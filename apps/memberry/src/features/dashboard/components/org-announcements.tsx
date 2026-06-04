@@ -24,7 +24,7 @@ export function OrgAnnouncements({ announcements, orgNames, isError }: OrgAnnoun
   return (
     <GlassCard className="p-5">
       <div className="flex items-center gap-2 mb-4">
-        <Megaphone size={18} className="text-[var(--color-muted)]" aria-hidden="true" />
+        <Megaphone size={20} className="text-[var(--color-muted)]" aria-hidden="true" />
         <h3 className="text-h4">Org News</h3>
       </div>
 

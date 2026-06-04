@@ -1,4 +1,4 @@
-import { describe, test, expect, vi, beforeEach } from 'vitest'
+import { describe, test, expect, vi, beforeEach } from '@/test/vitest-shim'
 import { screen, waitFor } from '@testing-library/react'
 import { renderWithProviders } from '@/test/utils'
 import { CertificateList } from './certificate-list'
@@ -13,11 +13,8 @@ vi.mock('@tanstack/react-router', () => ({
 }))
 
 // Mock SDK hooks
-vi.mock('@monobase/sdk-ts/generated/@tanstack/react-query.gen', () => ({
-  listMyCertificatesOptions: vi.fn(),
-}))
-
-import { listMyCertificatesOptions } from '@monobase/sdk-ts/generated/@tanstack/react-query.gen'
+// [Tier-F] removed local SDK mock; using global stub in test-setup-root.ts
+import { listMyCertificatesOptions } from '@monobase/sdk-ts/generated/react-query'
 const mockListCerts = listMyCertificatesOptions as ReturnType<typeof vi.fn>
 
 // Mock useOrgContext

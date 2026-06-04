@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { createFileRoute } from '@tanstack/react-router'
 import { useQuery } from '@tanstack/react-query'
 import { getPersonOptions } from '@monobase/sdk-ts/generated/react-query'
-import { PageHeader } from '@/components/patterns/page-header'
+import { PageShell } from '@/components/patterns/page-shell'
 import { DmList } from '@/features/comms/components/dm-list'
 import { ChatView } from '@/features/comms/components/chat-view'
 import { EmptyState } from '@/components/patterns/empty-state'
@@ -24,17 +24,14 @@ function DmIndexPage() {
   const myPersonId = person.data?.id ?? ''
 
   return (
-    <div className="flex-1 flex flex-col overflow-hidden">
-      <div className="px-6 pt-6">
-        <PageHeader
-          title="Direct Messages"
-          breadcrumbs={[
-            { label: 'Messages', href: `/org/${orgSlug}/messages` },
-            { label: 'Direct Messages' },
-          ]}
-        />
-      </div>
-      <div className="flex-1 flex gap-4 p-6 pt-2 overflow-hidden">
+    <PageShell
+      title="Direct Messages"
+      breadcrumbs={[
+        { label: 'Messages', href: `/org/${orgSlug}/messages` },
+        { label: 'Direct Messages' },
+      ]}
+    >
+      <div className="flex-1 flex gap-4 overflow-hidden">
         {/* DM list sidebar */}
         <div className="w-64 flex-shrink-0 overflow-y-auto hidden md:block">
           <DmList
@@ -63,6 +60,6 @@ function DmIndexPage() {
           )}
         </div>
       </div>
-    </div>
+    </PageShell>
   )
 }

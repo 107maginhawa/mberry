@@ -1,4 +1,4 @@
-import { describe, test, expect, vi, beforeEach } from 'vitest'
+import { describe, test, expect, vi, beforeEach } from '@/test/vitest-shim'
 import { screen, waitFor } from '@testing-library/react'
 import { renderWithProviders } from '@/test/utils'
 import { TrainingList } from './training-list'
@@ -34,16 +34,11 @@ vi.mock('@monobase/ui', () => ({
   SelectValue: ({ placeholder }: any) => <span>{placeholder}</span>,
 }))
 
-vi.mock('@monobase/sdk-ts/generated/@tanstack/react-query.gen', () => ({
-  searchTrainingsOptions: vi.fn(),
-  searchTrainingsQueryKey: vi.fn(() => ['trainings']),
-  cancelCustomTrainingMutation: vi.fn(),
-}))
-
+// [Tier-F] removed local SDK mock; using global stub in test-setup-root.ts
 import {
   searchTrainingsOptions,
   cancelCustomTrainingMutation,
-} from '@monobase/sdk-ts/generated/@tanstack/react-query.gen'
+} from '@monobase/sdk-ts/generated/react-query'
 
 const mockSearchOptions = searchTrainingsOptions as ReturnType<typeof vi.fn>
 const mockCancelMutation = cancelCustomTrainingMutation as ReturnType<typeof vi.fn>

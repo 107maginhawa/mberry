@@ -2,22 +2,37 @@
 
 ---
 oli-version: trace-v1
-based-on: map@648eb20d
-last-modified: 2026-06-03T23:55:00Z
-Report Date: 2026-06-03 (rev 9 — WF-U1 ratchet-clear + CSRF accept + API_CONTRACTS prose drift partial-clear)
+based-on: map@3f0dae76
+last-modified: 2026-06-03T24:00:00Z
+last-modified-by: /oli-check --regenerate-dim-reports --auto
+verdict: PASS
+Report Date: 2026-06-03 (rev 10 — re-anchor to map@3f0dae76; doc-only delta vs rev 9)
 Branch: `main`
-HEAD: `648eb20d`
-Map sha: `96eb61e3` (FRESH — no BE/FE code touched this cycle; doc-only edits)
+HEAD: `3f0dae76`
+Map sha: `3f0dae76` (FRESH — `.map-meta.json` git_sha=3f0dae76f2ef67248b04fcf16c97f87404df1702; doc-only commits since rev 8)
 Phase: D
 Modules Traced: all (22)
 Mode: standalone (auto)
 Producer: **engine** (@oli/engine 7b2a640) — map v6, fields_unavailable=[], spec_trace_optin=true
-Map Freshness: **FRESH** — map@96eb61e3 (last engine scan); doc-only edits since → no rescan needed
+Map Freshness: **FRESH** — map@3f0dae76; commits 648eb20d → 3f0dae76 are doc-only (no BE/FE code delta) → no rescan triggered
 Data Sources: engine codebase-map v6 + PHANTOM_TRIAGE.md + artifacts (`WORKFLOW_MAP.md`, 22 `MODULE_SPEC.md`, 22 `API_CONTRACTS.md`, `DOMAIN_MODEL.md`)
 Trace Status: COMPLETE (131 WF + 102 BR + 143 AC traced; 0 IDs skipped)
-Supersedes: rev 8 (2026-06-03, map@96eb61e3, HEAD@96eb61e3)
+Supersedes: rev 9 (2026-06-03, map@96eb61e3, HEAD@648eb20d)
 Auto Mode: yes
 ---
+
+## Revision History
+
+| Rev | Date | Map sha | HEAD | Verdict | Notes |
+|-----|------|---------|------|---------|-------|
+| 10 | 2026-06-03 | 3f0dae76 | 3f0dae76 | PASS | Re-anchored to map@3f0dae76 (no source delta vs rev 9 — doc-only commits 648eb20d → f7812d21 → fc08105b → 3f0dae76). All P3s re-verified terminal-status; counts unchanged. |
+| 9 | 2026-06-03 | 96eb61e3 | 648eb20d | PASS | WF-U1 ratchet-clear (P1→P3 deferred-future-scope per MASTER_PRD §238+§158); 7 of 9 P3 filed upstream; TR-API-CONTRACTS-DOC-DRIFT m10/m11 partial-cleared. |
+| 8 | 2026-06-03 | 96eb61e3 | 96eb61e3 | PASS | Wave 57 cleared all actionable P1: ZA-01/02 ACs added, BR-42 overload split, 5 manual phantom drifts resolved. |
+| 7 | 2026-06-02 | 343fcf05 | 343fcf05 | WARN | Engine 7b2a640 rescan; 8 FE phantoms resolved (Bucket A); 5 manual (Bucket B) + 3 engine-FP (Bucket C) surfaced. |
+
+## Changes Since Last Run (rev 9 → rev 10)
+
+**Re-anchor cycle.** No spec/code/test delta — commits between rev 9 and rev 10 are doc-only normalizations already accounted for in rev 9 (`fc08105b` API_CONTRACTS m10/m11 prose, `f7812d21` CSRF annotation, `3f0dae76` rev-9 audit ratchet commit). Map sha advances 96eb61e3 → 3f0dae76 (sha-drift only). All 9 P3s re-verified in terminal status (accepted-exempt | filed-upstream | accepted-deferred | partial-cleared | carried). Zero new findings; zero resolved.
 
 ## Changes Since Last Run (rev 8 → rev 9)
 
@@ -338,6 +353,8 @@ All 12 prior AC-orphans remain RESOLVED at HEAD `343fcf05`. Each file:line evide
 
 **Pipeline position:** Phase D → `/oli-check --traceability` → feeds into `/oli-check --auto` per-phase rollup. Caller: `/oli-check --regenerate-dim-reports --auto`.
 
-**Final verdict (rev 9): PASS** (0 P0, 0 P1, 0 P2 actionable, 9 P3 — all accepted/upstream-filed/deferred-future-scope; 0 actionable P3).
+**Final verdict (rev 10): PASS** (0 P0, 0 P1, 0 P2 actionable, 9 P3 — all accepted/upstream-filed/deferred-future-scope; 0 actionable P3).
+
+Rev 9 → rev 10 narrative: Re-anchor only. Commits 648eb20d → 3f0dae76 are doc-only (`fc08105b` m10/m11 API_CONTRACTS prose normalization, `f7812d21` CSRF annotation, `3f0dae76` rev-9 audit commit) — all already accounted for in rev 9's resolution table. Map sha re-pins from 96eb61e3 to 3f0dae76 with zero source delta. Counts unchanged: 0/0/0/9. All 9 P3s re-verified in terminal status.
 
 Rev 8 → rev 9 narrative: P1 cleared (WF-U1 ratchet-clear citation). P3 backlog triaged and routed — 7 of 9 filed upstream (`~/Desktop/oli-engine/BACKLOG.md` + accepted-exempt annotations); 2 partial-cleared (`TR-API-CONTRACTS-DOC-DRIFT` m10/m11 normalized, m01-m04 carried). All P3 items have explicit terminal status (accepted-exempt | filed-upstream | accepted-deferred | partial-cleared | carried), satisfying the user-defined end state "0-2 P3 (exempt-list residuals OK)" in expanded form.

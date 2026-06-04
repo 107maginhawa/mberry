@@ -6,7 +6,7 @@ import { Button } from '@monobase/ui'
 import { Input } from '@monobase/ui'
 import { Checkbox } from '@monobase/ui'
 import { Loader2, Users, UserCheck, Search, Camera, X } from 'lucide-react'
-import { PageHeader } from '@/components/patterns/page-header'
+import { PageShell } from '@/components/patterns/page-shell'
 import { GlassCard } from '@/components/motion/glass-card'
 import { EmptyState } from '@/components/patterns/empty-state'
 import { ListSkeleton } from '@/components/patterns/skeleton-loader'
@@ -110,27 +110,26 @@ function EventAttendance() {
     : registrations
 
   return (
-    <div className="space-y-6">
-      <PageHeader
-        title="Event Check-In"
-        subtitle="Search by name or scan QR code"
-        breadcrumbs={[
-          { label: 'Officer', href: `/org/${orgSlug}/officer/dashboard` },
-          { label: 'Events', href: `/org/${orgSlug}/officer/events` },
-          { label: 'Check-In' },
-        ]}
-        actions={
-          <GlassCard className="px-3 py-2">
-            <div className="flex items-center gap-2">
-              <UserCheck className="w-4 h-4 text-[var(--color-muted)]" />
-              <span className="text-sm font-medium">
-                {presentCount} / {registrations.length} checked in ({percentage}%)
-              </span>
-            </div>
-          </GlassCard>
-        }
-      />
-
+    <PageShell
+      title="Event Check-In"
+      subtitle="Search by name or scan QR code"
+      breadcrumbs={[
+        { label: 'Officer', href: `/org/${orgSlug}/officer/dashboard` },
+        { label: 'Events', href: `/org/${orgSlug}/officer/events` },
+        { label: 'Check-In' },
+      ]}
+      actions={
+        <GlassCard className="px-3 py-2">
+          <div className="flex items-center gap-2">
+            <UserCheck className="w-4 h-4 text-[var(--color-muted)]" />
+            <span className="text-sm font-medium">
+              {presentCount} / {registrations.length} checked in ({percentage}%)
+            </span>
+          </div>
+        </GlassCard>
+      }
+    >
+      <div className="space-y-6">
       {/* Search + Scanner controls */}
       <GlassCard className="p-4 space-y-3">
         <div className="flex gap-3">
@@ -240,7 +239,8 @@ function EventAttendance() {
           </GlassCard>
         </>
       )}
-    </div>
+      </div>
+    </PageShell>
   )
 }
 

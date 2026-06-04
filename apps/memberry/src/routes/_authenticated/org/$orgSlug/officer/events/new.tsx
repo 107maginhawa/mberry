@@ -1,6 +1,5 @@
 import { createFileRoute, useNavigate } from '@tanstack/react-router'
-import { PageContainer } from '@monobase/ui'
-import { PageHeader } from '@/components/patterns/page-header'
+import { PageShell } from '@/components/patterns/page-shell'
 import { GlassCard } from '@/components/motion/glass-card'
 import { EventForm } from '@/features/events/components/event-form'
 import { useOrg } from '@/hooks/useOrg'
@@ -14,17 +13,15 @@ function NewEvent() {
   const navigate = useNavigate()
 
   return (
-    <PageContainer width="default" className="space-y-6">
-      <PageHeader
-        title="Create Event"
-        subtitle="Fill in the details for your new event"
-        breadcrumbs={[
-          { label: 'Officer', href: `/org/${orgSlug}/officer/dashboard` },
-          { label: 'Events', href: `/org/${orgSlug}/officer/events` },
-          { label: 'New' },
-        ]}
-      />
-
+    <PageShell
+      title="Create Event"
+      subtitle="Fill in the details for your new event"
+      breadcrumbs={[
+        { label: 'Officer', href: `/org/${orgSlug}/officer/dashboard` },
+        { label: 'Events', href: `/org/${orgSlug}/officer/events` },
+        { label: 'New' },
+      ]}
+    >
       <GlassCard className="p-6">
         <EventForm
           orgId={orgId}
@@ -42,6 +39,6 @@ function NewEvent() {
           }}
         />
       </GlassCard>
-    </PageContainer>
+    </PageShell>
   )
 }

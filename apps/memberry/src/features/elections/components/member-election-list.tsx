@@ -5,7 +5,7 @@ import { Link, useParams } from '@tanstack/react-router'
 import { Vote, Users, CheckCircle2, Clock, ChevronRight } from 'lucide-react'
 import { Skeleton } from '@monobase/ui'
 import { Tabs, TabsList, TabsTrigger } from '@monobase/ui'
-import { listElectionsOptions } from '@monobase/sdk-ts/generated/@tanstack/react-query.gen'
+import { listElectionsOptions } from '@monobase/sdk-ts/generated/react-query'
 
 interface MemberElectionListProps {
   orgId: string

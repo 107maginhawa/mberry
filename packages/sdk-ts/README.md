@@ -86,7 +86,7 @@ const { data: bookings } = await listBookings({ query: { status: 'confirmed' }, 
 
 ```tsx
 import { useQuery } from '@tanstack/react-query'
-import { listNotificationsOptions } from '@monobase/sdk-ts/generated/@tanstack/react-query.gen'
+import { listNotificationsOptions } from '@monobase/sdk-ts/generated/react-query'
 
 function Bell() {
   const { data } = useQuery({
@@ -101,7 +101,7 @@ function Bell() {
 
 ```tsx
 import { useMutation } from '@tanstack/react-query'
-import { createPersonMutation } from '@monobase/sdk-ts/generated/@tanstack/react-query.gen'
+import { createPersonMutation } from '@monobase/sdk-ts/generated/react-query'
 
 const create = useMutation({
   ...createPersonMutation(),
@@ -122,7 +122,7 @@ const create = useMutation({
 import {
   markNotificationAsReadMutation,
   listNotificationsQueryKey,
-} from '@monobase/sdk-ts/generated/@tanstack/react-query.gen'
+} from '@monobase/sdk-ts/generated/react-query'
 import { useOptimisticMutation } from '@monobase/sdk-ts/react/use-optimistic-mutation'
 
 const markRead = useOptimisticMutation(markNotificationAsReadMutation(), {

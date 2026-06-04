@@ -21,9 +21,10 @@ import {
   TableHead,
   TableCell,
 } from '@monobase/ui'
+import { PageShell } from '@/components/patterns/page-shell'
 import { RequireRole } from '@/lib/role-gate'
 import { ErrorState } from '@/components/skeletons'
-import { searchEventsOptions, listOrganizationsOptions, listCustomEventRegistrationsOptions } from '@monobase/sdk-ts/generated/@tanstack/react-query.gen'
+import { searchEventsOptions, listOrganizationsOptions, listCustomEventRegistrationsOptions } from '@monobase/sdk-ts/generated/react-query'
 
 export const Route = createFileRoute('/events/')({
   component: () => (
@@ -83,9 +84,9 @@ function EventsPage() {
 
   if (isError) {
     return (
-      <div className="p-8 max-w-2xl">
+      <PageShell title="Events" maxWidth="full">
         <ErrorState message="Could not load events" onRetry={() => refetch()} />
-      </div>
+      </PageShell>
     )
   }
 
@@ -93,17 +94,11 @@ function EventsPage() {
   const hasMore = events.length === PAGE_SIZE
 
   return (
-    <div className="p-8">
-      <div className="flex items-center gap-3 mb-8">
-        <Calendar className="w-6 h-6 text-muted-foreground" />
-        <div>
-          <h1 className="text-h1 text-foreground">Events</h1>
-          <p className="text-sm text-muted-foreground mt-1">
-            Cross-org event overview for platform support
-          </p>
-        </div>
-      </div>
-
+    <PageShell
+      title="Events"
+      subtitle="Cross-org event overview for platform support"
+      maxWidth="full"
+    >
       {/* Filters */}
       <div className="flex items-center gap-4 mb-6">
         <div className="relative flex-1 max-w-sm">
@@ -350,7 +345,7 @@ function EventsPage() {
           )}
         </SheetContent>
       </Sheet>
-    </div>
+    </PageShell>
   )
 
 interface AdminRegItem {

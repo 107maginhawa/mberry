@@ -1,14 +1,9 @@
-import { describe, test, expect, vi, beforeEach } from 'vitest'
+import { describe, test, expect, vi, beforeEach } from '@/test/vitest-shim'
 import { screen, waitFor } from '@testing-library/react'
 import { renderWithProviders } from '@/test/utils'
 import { DuesSetupChecklist } from './dues-setup-checklist'
 
-vi.mock('@monobase/sdk-ts/generated/react-query', () => ({
-  getDuesConfigOptions: vi.fn(),
-  getDuesGatewayConfigOptions: vi.fn(),
-  listDuesFundsOptions: vi.fn(),
-}))
-
+// [Tier-F] removed local SDK mock; using global stub in test-setup-root.ts
 vi.mock('@tanstack/react-router', () => ({
   Link: ({ children, ...props }: any) => <a href={props.to}>{children}</a>,
 }))

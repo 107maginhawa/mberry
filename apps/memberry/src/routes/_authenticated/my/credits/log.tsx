@@ -8,7 +8,7 @@ import { Label } from '@monobase/ui'
 import { DatePicker } from '@/components/patterns/date-picker'
 import { toast } from 'sonner'
 import { api } from '@/lib/api'
-import { PageHeader } from '@/components/patterns/page-header'
+import { PageShell } from '@/components/patterns/page-shell'
 import { GlassCard } from '@/components/motion/glass-card'
 
 export const Route = createFileRoute('/_authenticated/my/credits/log')({
@@ -66,16 +66,15 @@ function CreditLog() {
   }
 
   return (
-    <div className="space-y-6">
-      <PageHeader
-        title="Log Manual Credit"
-        subtitle="Self-report CPD credits from external activities (BR-13: no officer approval required)"
-        breadcrumbs={[
-          { label: 'Credits', href: '/my/credits' },
-          { label: 'Log Manual Credit' },
-        ]}
-      />
-
+    <PageShell
+      title="Log Manual Credit"
+      subtitle="Self-report CPD credits from external activities (BR-13: no officer approval required)"
+      breadcrumbs={[
+        { label: 'Credits', href: '/my/credits' },
+        { label: 'Log Manual Credit' },
+      ]}
+    >
+      <div className="space-y-6">
       <GlassCard className="p-6 max-w-lg">
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
           <div className="space-y-1.5">
@@ -143,6 +142,7 @@ function CreditLog() {
           </Button>
         </form>
       </GlassCard>
-    </div>
+      </div>
+    </PageShell>
   )
 }

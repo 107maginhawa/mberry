@@ -1,7 +1,7 @@
 import { createFileRoute, useNavigate } from '@tanstack/react-router'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { api } from '@/lib/api'
-import { PageHeader } from '@/components/patterns/page-header'
+import { PageShell } from '@/components/patterns/page-shell'
 import { GlassCard } from '@/components/motion/glass-card'
 import { TemplateForm } from '@/features/communications/components/template-form'
 import { useOrg } from '@/hooks/useOrg'
@@ -53,24 +53,23 @@ function NewTemplatePage() {
     : undefined
 
   return (
-    <div className="space-y-6">
-      <PageHeader
-        title={edit ? 'Edit Template' : 'New Template'}
-        subtitle={
-          edit
-            ? 'Update your message template'
-            : 'Create a reusable message template with merge fields'
-        }
-        breadcrumbs={[
-          { label: 'Officer', href: `/org/${orgSlug}/officer/dashboard` },
-          { label: 'Communications', href: `/org/${orgSlug}/officer/communications` },
-          {
-            label: 'Templates',
-            href: `/org/${orgSlug}/officer/communications/templates`,
-          },
-          { label: edit ? 'Edit' : 'New' },
-        ]}
-      />
+    <PageShell
+      title={edit ? 'Edit Template' : 'New Template'}
+      subtitle={
+        edit
+          ? 'Update your message template'
+          : 'Create a reusable message template with merge fields'
+      }
+      breadcrumbs={[
+        { label: 'Officer', href: `/org/${orgSlug}/officer/dashboard` },
+        { label: 'Communications', href: `/org/${orgSlug}/officer/communications` },
+        {
+          label: 'Templates',
+          href: `/org/${orgSlug}/officer/communications/templates`,
+        },
+        { label: edit ? 'Edit' : 'New' },
+      ]}
+    >
       <GlassCard className="p-6">
         <TemplateForm
           orgId={orgId}
@@ -83,6 +82,6 @@ function NewTemplatePage() {
           }}
         />
       </GlassCard>
-    </div>
+    </PageShell>
   )
 }

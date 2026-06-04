@@ -1,3 +1,4 @@
+// ui-c-exempt: auth-flow — email verification standalone shell
 import { createFileRoute, Navigate } from '@tanstack/react-router'
 import { useState } from 'react'
 import { Button } from '@monobase/ui'
@@ -8,6 +9,7 @@ import { composeGuards, requireAuth, requireNotEmailVerified } from '@/utils/gua
 import { useAuthClient } from '@monobase/sdk-ts/react/auth'
 import { toast } from 'sonner'
 
+// oli-ui: exempt-pageshell — pre-auth verification card with custom centered chrome
 export const Route = createFileRoute('/verify-email')({
   beforeLoad: composeGuards(requireAuth, requireNotEmailVerified),
   component: VerifyEmailPage,

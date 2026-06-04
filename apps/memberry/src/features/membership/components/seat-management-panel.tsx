@@ -6,7 +6,7 @@ import {
   getInstitutionalMembershipQueryKey,
   allocateSeatMutation,
   revokeSeatMutation,
-} from '@monobase/sdk-ts/generated/@tanstack/react-query.gen'
+} from '@monobase/sdk-ts/generated/react-query'
 import { toast } from 'sonner'
 import { Button } from '@monobase/ui'
 import { Input } from '@monobase/ui'
@@ -189,8 +189,7 @@ export function SeatManagementPanel({
                     {seat.status === 'active' && (
                       <Button
                         variant="outline"
-                        size="sm"
-                        className="text-xs h-7"
+                        size="xs"
                         onClick={() => setRevokeId(seat.id)}
                       >
                         Revoke

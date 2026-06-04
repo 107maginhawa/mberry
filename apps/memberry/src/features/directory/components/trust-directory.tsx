@@ -1,6 +1,6 @@
 import { useState, useMemo } from 'react'
 import { useQuery } from '@tanstack/react-query'
-import { searchDirectoryOptions } from '@monobase/sdk-ts/generated/@tanstack/react-query.gen'
+import { searchDirectoryOptions } from '@monobase/sdk-ts/generated/react-query'
 import { Button } from '@monobase/ui'
 import { Users, Search } from 'lucide-react'
 import { Input } from '@monobase/ui'

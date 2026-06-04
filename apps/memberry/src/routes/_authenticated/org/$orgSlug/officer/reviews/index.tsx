@@ -5,7 +5,7 @@ import { createFileRoute } from '@tanstack/react-router'
 import { useQuery } from '@tanstack/react-query'
 import { Star, MessageSquare } from 'lucide-react'
 import { Skeleton } from '@monobase/ui'
-import { PageHeader } from '@/components/patterns/page-header'
+import { PageShell } from '@/components/patterns/page-shell'
 import { EmptyState } from '@/components/patterns/empty-state'
 import { useOrg } from '@/hooks/useOrg'
 import { api } from '@/lib/api'
@@ -61,16 +61,14 @@ function OfficerReviews() {
   const reviews = data?.data ?? []
 
   return (
-    <div className="space-y-6">
-      <PageHeader
-        title="Reviews"
-        subtitle="Member feedback and NPS scores"
-        breadcrumbs={[
-          { label: 'Officer', href: `/org/${orgSlug}/officer/dashboard` },
-          { label: 'Reviews' },
-        ]}
-      />
-
+    <PageShell
+      title="Reviews"
+      subtitle="Member feedback and NPS scores"
+      breadcrumbs={[
+        { label: 'Officer', href: `/org/${orgSlug}/officer/dashboard` },
+        { label: 'Reviews' },
+      ]}
+    >
       {isLoading ? (
         <div className="space-y-3">
           {Array.from({ length: 4 }).map((_, i) => (
@@ -121,6 +119,6 @@ function OfficerReviews() {
           })}
         </div>
       )}
-    </div>
+    </PageShell>
   )
 }

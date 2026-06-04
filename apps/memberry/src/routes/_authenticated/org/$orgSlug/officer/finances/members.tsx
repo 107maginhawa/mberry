@@ -7,7 +7,7 @@ import {
   listDuesInvoicesOptions,
 } from '@monobase/sdk-ts/generated/react-query'
 import type { MembershipStatus, DuesInvoice } from '@monobase/sdk-ts/generated/types.gen'
-import { PageHeader } from '@/components/patterns/page-header'
+import { PageShell } from '@/components/patterns/page-shell'
 import { GlassCard } from '@/components/motion/glass-card'
 import { EmptyState } from '@/components/patterns/empty-state'
 import { ErrorState } from '@/components/patterns/error-state'
@@ -111,9 +111,19 @@ function FinancialMembersPage() {
 
   if (rosterDataQuery.isError) {
     return (
-      <div className="p-6 max-w-2xl">
-        <ErrorState message="Could not load member finances" onRetry={() => rosterDataQuery.refetch()} />
-      </div>
+      <PageShell
+        title="Members"
+        subtitle="Financial view of all members"
+        breadcrumbs={[
+          { label: 'Officer', href: `/org/${orgSlug}/officer/dashboard` },
+          { label: 'Finances', href: `/org/${orgSlug}/officer/finances` },
+          { label: 'Members' },
+        ]}
+      >
+        <div className="p-6 max-w-2xl">
+          <ErrorState message="Could not load member finances" onRetry={() => rosterDataQuery.refetch()} />
+        </div>
+      </PageShell>
     )
   }
 
@@ -142,17 +152,15 @@ function FinancialMembersPage() {
   }
 
   return (
-    <div className="space-y-5">
-      <PageHeader
-        title="Members"
-        subtitle="Financial view of all members"
-        breadcrumbs={[
-          { label: 'Officer', href: `/org/${orgSlug}/officer/dashboard` },
-          { label: 'Finances', href: `/org/${orgSlug}/officer/finances` },
-          { label: 'Members' },
-        ]}
-      />
-
+    <PageShell
+      title="Members"
+      subtitle="Financial view of all members"
+      breadcrumbs={[
+        { label: 'Officer', href: `/org/${orgSlug}/officer/dashboard` },
+        { label: 'Finances', href: `/org/${orgSlug}/officer/finances` },
+        { label: 'Members' },
+      ]}
+    >
       <GlassCard className="p-5">
         {/* Filter bar */}
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:flex-wrap mb-4">
@@ -312,6 +320,6 @@ function FinancialMembersPage() {
           </div>
         )}
       </GlassCard>
-    </div>
+    </PageShell>
   )
 }

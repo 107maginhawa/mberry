@@ -58,6 +58,7 @@ map-version: 6
 | `useOptimisticMutation` | packages/sdk-ts | hook | 0 | — | MEDIUM |
 | `useDirtyPatch` | packages/sdk-ts | hook | 0 | — | MEDIUM |
 | `useDirtyValues` | packages/sdk-ts | hook | 0 | — | MEDIUM |
+| `PageShell` | apps/memberry | component | 0 | — | MEDIUM |
 | `AssociationDetailPage` | apps/admin | component | 0 | ✅ paired | MEDIUM |
 | `AssociationsPage` | apps/admin | component | 0 | ✅ paired | MEDIUM |
 | `EmailHealth` | apps/admin | component | 0 | — | MEDIUM |

@@ -294,6 +294,7 @@ export function MemberDetail({ orgId, memberId }: MemberDetailProps) {
             </Link>
           </Button>
           {canReinstate && (
+            // ui-c-exempt: methodology-carry — soft-success outline reinstate action
             <Button
               variant="outline"
               size="sm"

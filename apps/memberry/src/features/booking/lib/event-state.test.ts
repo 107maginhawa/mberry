@@ -1,4 +1,4 @@
-import { describe, expect, test } from 'vitest'
+import { describe, expect, test } from 'bun:test'
 import type { BookingEvent } from '@monobase/sdk-ts/generated/types.gen'
 import {
   DAY_KEYS,

@@ -1,6 +1,6 @@
 import { createFileRoute, useNavigate } from '@tanstack/react-router'
 import { InstitutionalMembershipForm } from '@/features/membership/components/institutional-membership-form'
-import { PageHeader } from '@/components/patterns/page-header'
+import { PageShell } from '@/components/patterns/page-shell'
 import { useOrg } from '@/hooks/useOrg'
 
 export const Route = createFileRoute('/_authenticated/org/$orgSlug/officer/institutional-memberships/new')({
@@ -20,16 +20,15 @@ function NewInstitutionalMembershipPage() {
   }
 
   return (
-    <div className="space-y-6">
-      <PageHeader
-        title="New Institutional Membership"
-        subtitle="Create a new organizational membership with seat allocation"
-        breadcrumbs={[
-          { label: 'Officer', href: `/org/${orgSlug}/officer/dashboard` },
-          { label: 'Institutions', href: `/org/${orgSlug}/officer/institutional-memberships` },
-          { label: 'New' },
-        ]}
-      />
+    <PageShell
+      title="New Institutional Membership"
+      subtitle="Create a new organizational membership with seat allocation"
+      breadcrumbs={[
+        { label: 'Officer', href: `/org/${orgSlug}/officer/dashboard` },
+        { label: 'Institutions', href: `/org/${orgSlug}/officer/institutional-memberships` },
+        { label: 'New' },
+      ]}
+    >
       <div className="max-w-2xl">
         <InstitutionalMembershipForm
           orgId={orgId}
@@ -37,6 +36,6 @@ function NewInstitutionalMembershipPage() {
           onCancel={handleCancel}
         />
       </div>
-    </div>
+    </PageShell>
   )
 }

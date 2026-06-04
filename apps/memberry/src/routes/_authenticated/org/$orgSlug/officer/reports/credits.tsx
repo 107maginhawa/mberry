@@ -2,7 +2,7 @@ import { createFileRoute } from '@tanstack/react-router'
 import { useQuery } from '@tanstack/react-query'
 import { api } from '@/lib/api'
 import { useState } from 'react'
-import { PageHeader } from '@/components/patterns/page-header'
+import { PageShell } from '@/components/patterns/page-shell'
 import { GlassCard } from '@/components/motion/glass-card'
 import { CountUp } from '@/components/motion/count-up'
 import { StaggerGrid, StaggerItem } from '@/components/motion/stagger-grid'
@@ -34,55 +34,42 @@ function CreditReport() {
   const allMembers: any[] = data?.data ?? []
   const members = filter === 'all' ? allMembers : allMembers.filter((m: any) => m.compliance_status === filter)
 
+  const creditsBreadcrumbs = [
+    { label: 'Officer', href: `/org/${orgSlug}/officer/dashboard` },
+    { label: 'Reports' },
+    { label: 'Credits' },
+  ]
+
   if (isLoading) {
     return (
-      <div className="space-y-6">
-        <PageHeader
-          title="Credit Compliance Report"
-          breadcrumbs={[
-            { label: 'Officer', href: `/org/${orgSlug}/officer/dashboard` },
-            { label: 'Reports' },
-            { label: 'Credits' },
-          ]}
-        />
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-          {[1, 2, 3, 4].map(i => <CardSkeleton key={i} />)}
+      <PageShell title="Credit Compliance Report" breadcrumbs={creditsBreadcrumbs}>
+        <div className="space-y-6">
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+            {[1, 2, 3, 4].map(i => <CardSkeleton key={i} />)}
+          </div>
+          <TableSkeleton />
         </div>
-        <TableSkeleton />
-      </div>
+      </PageShell>
     )
   }
 
   if (isError) {
     return (
-      <div className="space-y-6">
-        <PageHeader
-          title="Credit Compliance Report"
-          breadcrumbs={[
-            { label: 'Officer', href: `/org/${orgSlug}/officer/dashboard` },
-            { label: 'Reports' },
-            { label: 'Credits' },
-          ]}
-        />
+      <PageShell title="Credit Compliance Report" breadcrumbs={creditsBreadcrumbs}>
         <div role="alert" className="p-4 rounded-lg bg-[var(--color-error-bg)] text-[var(--color-error)] text-sm">
           Unable to load credit compliance report. Please try refreshing the page.
         </div>
-      </div>
+      </PageShell>
     )
   }
 
   return (
-    <div className="space-y-6">
-      <PageHeader
-        title="Credit Compliance Report"
-        subtitle={`Member CPD credit status — ${summary.requiredCredits} credits required per cycle`}
-        breadcrumbs={[
-          { label: 'Officer', href: `/org/${orgSlug}/officer/dashboard` },
-          { label: 'Reports' },
-          { label: 'Credits' },
-        ]}
-      />
-
+    <PageShell
+      title="Credit Compliance Report"
+      subtitle={`Member CPD credit status — ${summary.requiredCredits} credits required per cycle`}
+      breadcrumbs={creditsBreadcrumbs}
+    >
+      <div className="space-y-6">
       {/* Summary cards */}
       <StaggerGrid className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         <StaggerItem>
@@ -192,6 +179,7 @@ function CreditReport() {
           {filter !== 'all' && ` (filtered: ${STATUS_BADGE[filter]?.label ?? filter})`}
         </p>
       )}
-    </div>
+      </div>
+    </PageShell>
   )
 }

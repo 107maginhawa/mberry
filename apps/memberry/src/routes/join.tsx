@@ -1,3 +1,4 @@
+// ui-c-exempt: onboarding-step — public join flow
 import { createFileRoute, useNavigate } from '@tanstack/react-router'
 import { useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
@@ -5,6 +6,7 @@ import { Input, Badge, Skeleton, Button } from '@monobase/ui'
 import { api } from '@/lib/api'
 import { ErrorState } from '@/components/patterns/error-state'
 
+// oli-ui: exempt-pageshell — pre-auth discovery page with centered hero chrome
 export const Route = createFileRoute('/join')({
   component: JoinPage,
 })

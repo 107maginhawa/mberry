@@ -16,6 +16,12 @@ Generated from 37 Drizzle ORM schema files + spec review additions. Source of tr
 All tables inherit 6 base entity fields from `core/database.schema.ts`:
 `id` (uuid PK), `createdAt`, `updatedAt`, `version` (optimistic locking), `createdBy`, `updatedBy`.
 
+> **Footnote — count reconciliation (C-3):** The 104/93 figures above are the documented Drizzle-managed surface (`services/api-ts/src/handlers/**/repos/*.schema.ts`). The engine codebase-map (CODE_DATA_MODEL v6) reports a higher total (~131 tables, ~122 enums) because it includes:
+> - Better-Auth managed tables (`user`, `account`, `session`, `verification`, `passkey`, `apikey`, `jwks`, `organization`, `member`, `invitation`, `oauthApplication`, `oauthAccessToken`, `oauthConsent`, `rateLimit`, `subscription`, `twoFactor`, …) — authored at `services/api-ts/src/generated/better-auth/schema.ts`, governed by the Better-Auth library spec, NOT this domain-model document.
+> - Internal junction/audit tables emitted by Drizzle that don't surface as first-class domain entities.
+>
+> Net: documented domain surface = **104 tables + 93 enums** (Drizzle-managed, business-domain entities). Engine-emitted superset = **~131 tables + ~122 enums** (incl. Better-Auth + Drizzle internals). The delta is by design and tracked at the Compliance dim (CMP-P3-012 informational).
+
 ---
 
 ## 1. Identity & Auth
@@ -378,6 +384,13 @@ _None — person is the root identity aggregate._
 **Wave 2b `credit_entry` extensions:** source_type (credit_source_type enum), source_id (uuid), cpd_activity_type (cpd_activity_type enum), attestation (jsonb), status (credit_status enum, default 'active'), voided_reason (varchar 500). Unique constraint: `(source_type, source_id, person_id)`.
 
 **Wave 2b `certificate` extensions:** template_id (varchar 100), signing_officer_id (uuid), credit_hours (integer), cpd_activity_type (cpd_activity_type enum), status (certificate_status enum, default 'issued'), pdf_url (varchar 500), revoked_at (timestamp), revoked_reason (varchar 500).
+
+> **Footnote — credit field naming (C-7 reconciliation):** Three entities carry a credit-value field with intentionally different names. They are NOT synonymous and the names are kept distinct on purpose:
+> - `training.creditAmount` (M09) — the credit value assigned to a training session at definition time. Source field, set by the training author.
+> - `credit_entry.creditValue` (M10) — the credit value recorded on an individual ledger entry. Authoritative running record (sum across entries = member's compliance position).
+> - `certificate.credit_hours` (M11) — the credit-hours value displayed on the generated certificate artifact (snapshot at issuance). Decoupled from the live ledger so revocation/edit upstream doesn't retroactively mutate issued certificates.
+>
+> Cross-module events (`TrainingCompleted`, `CreditAwarded`) carry `creditValue` because the event payload normalizes to the M10 authoritative field name. Audit (C-7) flagged this as "three names for one concept" via surface-grep; per-entity inspection confirms three different concepts. Resolved-by-design — no rename.
 
 #### Enums
 
@@ -1875,3 +1888,18 @@ These entities have status enums but no `VALID_TRANSITIONS` map in code — tran
 | `vendor` | `vendor_status` | pending, verified, suspended, rejected | `marketplace/repos/marketplace.schema.ts` |
 | `videoCall` | `video_call_status` | starting, active, ended, cancelled | `comms/repos/comms.schema.ts` |
 | `webhookRetry` | `webhook_retry_status` | processing, completed, pending_retry, dead_letter | `dues/repos/dues-payments.schema.ts` |
+
+#### Excluded from FSM scope (UI-state enums, not domain status)
+
+The following enums appear in code (`fsm:*`) but are intentionally **excluded** from this table — they describe UI presentation state, not domain object lifecycle:
+
+| Enum ID | Reason | Owner |
+|---------|--------|-------|
+| `fsm:detail-tab` | UI tab selector (active tab on member-detail / org-detail / etc.) — presentation state, not domain status | Frontend route components |
+| `fsm:sort-by` | UI sort-order selector on list pages — presentation state, not domain status | Frontend list components |
+
+These are reported by the engine map as `spec_comparison.code_only` and routed to the Compliance dim's `unverified` bucket (informational, never score-affecting per R1 trust contract).
+
+#### Engine matcher edge cases (acknowledged)
+
+- `billing_frequency` row is authored above (entity `billingFrequency`) but the engine matcher requires a `_status` suffix on the enum identifier (`fsm:billing-frequency` ≠ `*_status`). Filed upstream at `~/Desktop/oli-engine/BACKLOG.md` as the `_status`-suffix matcher edge case. Until upstream lands, this row contributes 1 to the `unverified` bucket.

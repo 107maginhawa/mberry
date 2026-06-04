@@ -13,7 +13,7 @@ import { UserPlus } from 'lucide-react'
 import { useQuery } from '@tanstack/react-query'
 import { api } from '@/lib/api'
 import { addRosterMemberMutation, getOrgCpdConfigOptions } from '@monobase/sdk-ts/generated/react-query'
-import { PageHeader } from '@/components/patterns/page-header'
+import { PageShell } from '@/components/patterns/page-shell'
 import { useOrg } from '@/hooks/useOrg'
 
 const STATUS_MAP: Record<string, string> = {
@@ -43,24 +43,25 @@ function RosterPage() {
   const { data: cpdConfig } = useQuery(getOrgCpdConfigOptions({ path: { organizationId: orgId } }))
 
   return (
-    <div className="space-y-6">
-      <PageHeader
-        title="Member Roster"
-        subtitle="View and manage organization members"
-        breadcrumbs={[
-          { label: 'Officer', href: `/org/${orgSlug}/officer/dashboard` },
-          { label: 'Roster' },
-        ]}
-        actions={
-          <Button size="sm" onClick={() => setShowAdd(true)}>
-            <UserPlus size={14} className="mr-1.5" />
-            Add Member
-          </Button>
-        }
-      />
-      <MemberTable orgId={orgId} initialStatus={initialStatus} expiringDays={expiring} requiredCredits={cpdConfig?.data?.requiredCredits} />
-      <AddMemberDialog open={showAdd} onClose={() => setShowAdd(false)} orgId={orgId} />
-    </div>
+    <PageShell
+      title="Member Roster"
+      subtitle="View and manage organization members"
+      breadcrumbs={[
+        { label: 'Officer', href: `/org/${orgSlug}/officer/dashboard` },
+        { label: 'Roster' },
+      ]}
+      actions={
+        <Button size="sm" onClick={() => setShowAdd(true)}>
+          <UserPlus size={14} className="mr-1.5" />
+          Add Member
+        </Button>
+      }
+    >
+      <div className="space-y-6">
+        <MemberTable orgId={orgId} initialStatus={initialStatus} expiringDays={expiring} requiredCredits={cpdConfig?.data?.requiredCredits} />
+        <AddMemberDialog open={showAdd} onClose={() => setShowAdd(false)} orgId={orgId} />
+      </div>
+    </PageShell>
   )
 }
 

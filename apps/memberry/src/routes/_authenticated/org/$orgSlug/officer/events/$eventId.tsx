@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { createFileRoute, useNavigate } from '@tanstack/react-router'
 import { useQuery } from '@tanstack/react-query'
 import { type ColumnDef } from '@tanstack/react-table'
-import { PageHeader } from '@/components/patterns/page-header'
+import { PageShell } from '@/components/patterns/page-shell'
 import { GlassCard } from '@/components/motion/glass-card'
 import { EmptyState } from '@/components/patterns/empty-state'
 import { DataTable } from '@/components/patterns/data-table'
@@ -203,65 +203,81 @@ function EventDetail() {
   )
   const event = data as unknown as RuntimeEvent | undefined
 
-  return (
-    <div className="space-y-6">
-      {isLoading ? (
+  const baseBreadcrumbs = [
+    { label: 'Officer', href: `/org/${orgSlug}/officer/dashboard` },
+    { label: 'Events', href: `/org/${orgSlug}/officer/events` },
+  ]
+
+  if (isLoading) {
+    return (
+      <PageShell title="Event" breadcrumbs={baseBreadcrumbs}>
         <div className="space-y-3">
           <TableSkeleton rows={3} cols={1} />
         </div>
-      ) : isError ? (
+      </PageShell>
+    )
+  }
+
+  if (isError) {
+    return (
+      <PageShell title="Event" breadcrumbs={baseBreadcrumbs}>
         <div role="alert" className="p-4 rounded-lg bg-[var(--color-error-bg)] text-[var(--color-error)] text-sm">
           Unable to load event details. Please try refreshing the page.
         </div>
-      ) : error || !event ? (
-        <div className="p-6 text-center text-[var(--color-error)]">Failed to load event</div>
-      ) : (
-        <>
-          <PageHeader
-            title={event.title}
-            breadcrumbs={[
-              { label: 'Officer', href: `/org/${orgSlug}/officer/dashboard` },
-              { label: 'Events', href: `/org/${orgSlug}/officer/events` },
-              { label: event.title },
-            ]}
-            actions={
-              <div className="flex items-center gap-3">
-                <StatusBadge status={event.status as any} />
-                <Button
-                  variant="outline"
-                  onClick={() => {
-                    navigate({
-                      to: '/org/$orgSlug/officer/events/new',
-                      params: { orgSlug },
-                      state: {
-                        duplicateFrom: {
-                          title: `${event.title} (Copy)`,
-                          eventType: event.eventType,
-                          description: event.description,
-                          location: event.location,
-                          registrationFee: event.registrationFee ? Number(event.registrationFee) / 100 : 0,
-                          capacity: event.capacity ? Number(event.capacity) : undefined,
-                          visibility: event.visibility,
-                        },
-                      } as any,
-                    })
-                  }}
-                >
-                  <Copy className="w-4 h-4 mr-1.5" />
-                  Duplicate
-                </Button>
-                {!editMode && event.status !== 'cancelled' && (
-                  <Button
-                    variant="outline"
-                    onClick={() => { setEditMode(true); setTab('details') }}
-                  >
-                    Edit
-                  </Button>
-                )}
-              </div>
-            }
-          />
+      </PageShell>
+    )
+  }
 
+  if (error || !event) {
+    return (
+      <PageShell title="Event" breadcrumbs={baseBreadcrumbs}>
+        <div className="p-6 text-center text-[var(--color-error)]">Failed to load event</div>
+      </PageShell>
+    )
+  }
+
+  return (
+    <PageShell
+      title={event.title}
+      breadcrumbs={[...baseBreadcrumbs, { label: event.title }]}
+      actions={
+        <div className="flex items-center gap-3">
+          <StatusBadge status={event.status as any} />
+          <Button
+            variant="outline"
+            onClick={() => {
+              navigate({
+                to: '/org/$orgSlug/officer/events/new',
+                params: { orgSlug },
+                state: {
+                  duplicateFrom: {
+                    title: `${event.title} (Copy)`,
+                    eventType: event.eventType,
+                    description: event.description,
+                    location: event.location,
+                    registrationFee: event.registrationFee ? Number(event.registrationFee) / 100 : 0,
+                    capacity: event.capacity ? Number(event.capacity) : undefined,
+                    visibility: event.visibility,
+                  },
+                } as any,
+              })
+            }}
+          >
+            <Copy className="w-4 h-4 mr-1.5" />
+            Duplicate
+          </Button>
+          {!editMode && event.status !== 'cancelled' && (
+            <Button
+              variant="outline"
+              onClick={() => { setEditMode(true); setTab('details') }}
+            >
+              Edit
+            </Button>
+          )}
+        </div>
+      }
+    >
+      <div className="space-y-6">
           <div role="tablist" aria-label="Event sections" className="flex gap-1 border-b border-[var(--color-border-light)]">
             {TABS.map((t) => (
               <Button
@@ -363,8 +379,7 @@ function EventDetail() {
               <AttendanceView eventId={eventId} />
             </div>
           )}
-        </>
-      )}
-    </div>
+      </div>
+    </PageShell>
   )
 }

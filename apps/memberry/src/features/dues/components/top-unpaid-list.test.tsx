@@ -1,4 +1,4 @@
-import { describe, test, expect, vi } from 'vitest'
+import { describe, test, expect, vi } from '@/test/vitest-shim'
 import { render, screen, fireEvent } from '@testing-library/react'
 import { TopUnpaidList } from './top-unpaid-list'
 

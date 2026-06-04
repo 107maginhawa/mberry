@@ -1,16 +1,9 @@
-import { describe, test, expect, vi, beforeEach } from 'vitest'
+import { describe, test, expect, vi, beforeEach } from '@/test/vitest-shim'
 import { screen, waitFor } from '@testing-library/react'
 import { renderWithProviders } from '@/test/utils'
 import { GatewaySetup } from './gateway-setup'
 
-vi.mock('@monobase/sdk-ts/generated/react-query', () => ({
-  getDuesGatewayConfigOptions: vi.fn(),
-  getDuesGatewayConfigQueryKey: vi.fn(() => ['dues', 'gateway']),
-  upsertDuesGatewayConfigMutation: vi.fn(() => ({ mutationFn: vi.fn().mockResolvedValue({}) })),
-  testDuesGatewayConnectionMutation: vi.fn(() => ({ mutationFn: vi.fn().mockResolvedValue({ success: true }) })),
-  disconnectDuesGatewayMutation: vi.fn(() => ({ mutationFn: vi.fn().mockResolvedValue({}) })),
-}))
-
+// [Tier-F] removed local SDK mock; using global stub in test-setup-root.ts
 vi.mock('sonner', () => ({
   toast: { success: vi.fn(), error: vi.fn() },
 }))

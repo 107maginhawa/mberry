@@ -6,7 +6,7 @@ import { toast } from 'sonner'
 import { Upload, FileText, Check, AlertTriangle, Loader2 } from 'lucide-react'
 import { importRosterMembersMutation } from '@monobase/sdk-ts/generated/react-query'
 import { ApiError } from '@/lib/api'
-import { PageHeader } from '@/components/patterns/page-header'
+import { PageShell } from '@/components/patterns/page-shell'
 import { GlassCard } from '@/components/motion/glass-card'
 import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from '@monobase/ui'
 
@@ -168,20 +168,20 @@ function RosterImportPage() {
   }
 
   return (
-    <div className="space-y-6">
-      <PageHeader
-        title="Import Roster"
-        subtitle="Upload a CSV file to add members in bulk"
-        breadcrumbs={[
-          { label: 'Officer', href: `/org/${orgSlug}/officer/dashboard` },
-          { label: 'Roster', href: `/org/${orgSlug}/officer/roster` },
-          { label: 'Import' },
-        ]}
-      />
-
+    <PageShell
+      title="Import Roster"
+      subtitle="Upload a CSV file to add members in bulk"
+      breadcrumbs={[
+        { label: 'Officer', href: `/org/${orgSlug}/officer/dashboard` },
+        { label: 'Roster', href: `/org/${orgSlug}/officer/roster` },
+        { label: 'Import' },
+      ]}
+    >
+      <div className="space-y-6">
       {/* Result banner */}
       {result && (
         <div className="flex items-center gap-3 p-4 rounded-[12px] bg-[var(--color-success-bg)] border border-[var(--color-success)]/20">
+          {/* ui-c-exempt: nav-icon — stepper checkmark glyph */}
           <Check size={18} className="text-[var(--color-success)] shrink-0" />
           <p className="text-sm text-[var(--color-success)]">
             Successfully imported {result.imported} members
@@ -198,6 +198,7 @@ function RosterImportPage() {
             className="border-2 border-dashed border-[var(--color-border)] rounded-[12px] p-12 text-center hover:border-[var(--color-primary)] hover:bg-[var(--color-primary-subtle)] transition-colors cursor-pointer"
             onClick={() => document.getElementById('csv-input')?.click()}
           >
+            {/* ui-c-exempt: empty-state-emphasis — drag-drop hero glyph */}
             <Upload size={32} className="mx-auto mb-3 text-[var(--color-muted)]" />
             <p className="text-sm font-medium text-[var(--color-text)]">
               Drop CSV file here or click to browse
@@ -289,6 +290,7 @@ function RosterImportPage() {
           </div>
         </div>
       )}
-    </div>
+      </div>
+    </PageShell>
   )
 }

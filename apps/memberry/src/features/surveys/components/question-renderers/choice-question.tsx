@@ -54,7 +54,7 @@ export function ChoiceQuestion({
           >
             <span className="flex-1">{option}</span>
             {selected && (
-              <Check size={18} className="text-[var(--color-primary)] shrink-0" />
+              <Check size={20} className="text-[var(--color-primary)] shrink-0" />
             )}
           </Button>
         )

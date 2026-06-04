@@ -145,6 +145,7 @@ function RootComponent() {
     <MobileGate />
     <div className="hidden lg:flex h-screen">
       {/* Sidebar */}
+      {/* ui-c-exempt: brand-color-system — admin chrome dark purple #2D2635 (single source) */}
       <aside
         className="flex flex-col w-[260px] min-w-[260px] bg-[#2D2635] text-white"
       >

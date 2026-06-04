@@ -69,6 +69,7 @@ export function TrainingCard({ training, orgId, onCancel, onDuplicate }: Trainin
                   Edit
                 </a>
                 {training.status !== 'cancelled' && (
+                  // ui-c-exempt: menu-item-exempt — custom dropdown menu item
                   <Button
                     variant="ghost"
                     className="w-full justify-start px-3 py-1.5 text-[var(--color-error)]"
@@ -77,6 +78,7 @@ export function TrainingCard({ training, orgId, onCancel, onDuplicate }: Trainin
                     Cancel
                   </Button>
                 )}
+                {/* ui-c-exempt: menu-item-exempt — custom dropdown menu item */}
                 <Button
                   variant="ghost"
                   className="w-full justify-start px-3 py-1.5"

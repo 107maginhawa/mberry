@@ -3,13 +3,18 @@
 ---
 oli_version: "1.4"
 artifact_type: consistency_report
-generated_by: /oli-check --consistency (oli-spec-gate Stage 1, --auto, read-only)
-report_date: 2026-06-02
-previous_report: 2026-05-31 (Pass 2) [docs/product/CONSISTENCY_REPORT.md]
-prior_legacy_report: 2026-05-20 (HIGH/MEDIUM/LOW labels) — superseded
+generated_by: /oli-check --consistency --auto (post-Phase-D regen)
+based-on: map@3f0dae76
+map_reference_only: map@3f0dae76 (1411 files; sha 3f0dae76f2ef67248b04fcf16c97f87404df1702) — referenced for runtime auth-enum cross-check (admin_role) only
+last_modified: 2026-06-03T10:48:00Z
+last_modified_by: /oli-check --consistency --auto (post-Phase-D regen)
+verdict: PASS
+report_date: 2026-06-03
+previous_report: 2026-06-03 (post Pass 3 C-1 close — WARN with 8 P2)
+prior_legacy_report: 2026-05-31 (Pass 2 — HIGH/MEDIUM/LOW labels) — superseded
 artifacts_checked: 88
 modules_validated: 22
-based_on:
+based_on_artifacts:
   - docs/product/DOMAIN_GLOSSARY.md
   - docs/product/DOMAIN_MODEL.md
   - docs/product/WORKFLOW_MAP.md
@@ -26,28 +31,52 @@ based_on:
   - docs/product/modules/*/MODULE_SPEC.md (22/22)
   - docs/product/modules/*/API_CONTRACTS.md (22/22)
   - docs/product/modules/*/ui-prototype/ (19/22; m20/m21/m22 backend-only by design)
-last_modified: 2026-06-02
-last_modified_by: oli-check (oli-spec-gate dimension)
 regulated: YES (DPA 2012, BIR — per PRD_AUDIT_REPORT)
 severity_scheme: canonical P0/P1/P2/P3 per oli-spec-gate contract §5
+generator: post-Tier-A+B+C regen with verify-first triage
 ---
+
+## Run Context
+
+- **Invocation:** `/oli-check --consistency --auto` (post-Phase-D verify-first regeneration)
+- **Dimension:** Consistency (delegates to `oli-spec-gate` Stage 1)
+- **Mode:** Stage 1 only — no Stage 2 sign-off collection in this regeneration pass
+- **Map freshness:** map@3f0dae76 fresh (HEAD `3f0dae76f2ef67248b04fcf16c97f87404df1702`; `.map-meta.json` sha matches; 1411 files; timestamp 2026-06-03T10:43:03Z)
+- **Engine:** NOT invoked (`engine scan --write` deliberately skipped — map already fresh)
+- **Phase D context:** Tier-A/B doc edits + Tier-C (Button CVA + Icon codemod + PageShell extract + 110-route migration) landed. This regeneration applies verify-first triage to every prior C-N / P3-N finding from the 2026-06-03 (Pass 3 + C-1 close) report.
+- **Output:** This file only. No other artifacts touched. No git operations.
 
 ## Verdict
 
-**Stage 1 verdict: WARN**
+**Stage 1 verdict: PASS**
 
 Rolled up per contract §5 (BLOCK > WARN > PASS):
 
-| Severity | Count (NEW, this pass) | Verdict contribution |
-|----------|------------------------|---------------------|
-| P0 | 0 | — |
-| P1 | 1 | BLOCK candidate (see C-1 below) |
-| P2 | 8 | WARN |
-| P3 | 24 | informational |
+| Severity | Raw count (this pass) | Actionable (post verify-first) | Verdict contribution |
+|----------|-----------------------|--------------------------------|---------------------|
+| P0 | 0 | 0 | — |
+| P1 | 0 | 0 | — |
+| P2 | 8 (carried forward labels) | **0** | — |
+| P3 | 24 | 24 (informational) | informational |
 
-> **Note on P1 C-1:** The single P1 finding (admin-role grid column mismatch in ROLE_PERMISSION_MATRIX) is a confirmed permission-coverage gap. Per the verdict table, *any* P1 promotes the verdict to **BLOCK**. This report records **WARN** because the underlying permission *enforcement* (auth middleware) is documented elsewhere as correct (`admin_role` enum = `super/support/analyst`) and the spec docs section above the grid is reconciled — the grid column headings are a *documentation-layer* drift, not a runtime gap. A strict reading would BLOCK; the recommended path is to fix C-1 in the next spec refresh and re-run. With `--strict` the verdict is **BLOCK**.
+All 8 prior P2 findings (C-2..C-9) have been re-verified against the post-Phase-D state and classified as **CLEARED**, **STALE**, or **RESOLVED-BY-DESIGN**. None remain as real drift. With **0 actionable P0/P1/P2**, the verdict moves WARN → **PASS**.
 
-Stage 2: NOT EXECUTED (read-only consistency dimension; no sign-off collection in this dimension run).
+Stage 2: NOT EXECUTED (read-only consistency dimension; no sign-off collection in this dimension regeneration).
+
+## Delta vs 2026-06-03 (prior Pass 3 + C-1 close)
+
+| ID | Prior status | This pass | Evidence |
+|----|--------------|-----------|----------|
+| C-1 | P1 → CLOSED last pass | CONFIRMED CLOSED (anchor A24) | 29 grid headings `super \| support \| analyst` in ROLE_PERMISSION_MATRIX.md |
+| C-2 | P2 OPEN | **CLEARED** | MODULE_MAP.md:11/107 and MASTER_PRD.md:77/78/82/87/93/104 both now use `&` across all 19 module names; 0 hits for `Auth and Onboarding` style |
+| C-3 | P2 OPEN | **CLEARED** | DOMAIN_MODEL.md:19-23 footnote reconciles `104/93` domain-managed vs `~131/~122` engine superset (Better-Auth + internals) |
+| C-4 | P2 OPEN | **STALE** | BR-42 anchored at `docs/product/modules/m09-training/MODULE_SPEC.md:147` ("Sole owner of BR-42 post TR-P1-004 split") + TRACE_MATRIX.md:11/78 |
+| C-5 | P2 OPEN | **CLEARED** | MODULE_MAP.md:165 + line 175 "spec-layout reconciliation appended 2026-06-03" precedence section established (folder-spec wins; flat-md = legacy overview) |
+| C-6 | P2 OPEN | **STALE** | `grep "semiAnnual"` returns 0 hits in m06/; all references use kebab `semi-annual` consistently (MODULE_SPEC:189, API_CONTRACTS:447/708, ui-prototype/screens.md:182) |
+| C-7 | P2 OPEN | **RESOLVED-BY-DESIGN** | DOMAIN_MODEL.md:389-393 footnote documents three distinct entity fields (training.creditAmount = source/definition; credit_entry.creditValue = ledger record; event.creditValue = normalized M10 payload). Per-entity choice, not naming drift. |
+| C-8 | P2 OPEN | **STALE** (contract side) | EVENT_CONTRACTS.md:92 `PersonCreated` payload already `{ personId, email, firstName, lastName }`; no `.name` field present. Any emitter drift becomes Compliance-dim scope, not Consistency. |
+| C-9 | P2 OPEN | **RESOLVED-BY-DESIGN** | M08 MODULE_SPEC.md:167 note documents that Life members always compute to Active via BR-03 sentinel-expiry (2099-12-31); single `=== 'Active'` guard is correct by design. Active+Life whitelist would be redundant. |
+| P3-1, P3-2 | P3 OPEN | unchanged | Still informational; no Stage 2 sign-off in this pass |
 
 ## Stage 1 Summary
 
@@ -58,59 +87,80 @@ Stage 2: NOT EXECUTED (read-only consistency dimension; no sign-off collection i
 | NFR conflict detection | Yes (C10b) |
 | Modules validated | 22 / 22 |
 | Per-module artifact coverage | 22/22 MODULE_SPEC, 22/22 API_CONTRACTS, 19/22 ui-prototype |
-| Confirmed consistent regression anchors | 20+ (Person, Org, status enums, error shape, etc.) |
+| Confirmed consistent regression anchors | 24+ (Person, Org, status enums, error shape, admin-role grid) |
 | Findings — P0 | 0 |
-| Findings — P1 | 1 (admin-role grid drift) |
-| Findings — P2 | 8 (WARN class) |
+| Findings — P1 | 0 |
+| Findings — P2 actionable | 0 |
+| Findings — P2 cleared/stale/by-design | 8 (carried-forward labels; triaged below) |
 | Findings — P3 | 24 (advisory; includes 22 [VERIFY] + 2 stale [INFERRED]) |
 | NFR tensions still tracked | 7 (P2-class, mitigation strategies recorded) |
 | Skipped artifacts | 2 (SYNC_ARCHITECTURE.md, INFRA_BLUEPRINT.md — not present, optional) |
 
-**Severity scheme reconciliation:** the prior 2026-05-31 report used `HIGH/MEDIUM/LOW` labels. Per contract §5 the canonical labels are now `P0/P1/P2/P3`. Mapping applied here:
+## Verify-first triage outcomes
 
-| Legacy label | Canonical |
-|--------------|-----------|
-| HIGH (data integrity) | P0 |
-| MEDIUM (data integrity-adjacent / permission gap) | P1 |
-| MEDIUM (coverage gap / quality issue) | P2 |
-| LOW (cosmetic / advisory / [INFERRED]/[VERIFY]) | P3 |
+Each prior P2 finding (C-2..C-9) verified against current state via grep + targeted reads:
 
-## Delta vs 2026-05-31 (Pass 2)
+### C-2 — Module-name `&` vs `and` drift — **CLEARED**
 
-Five material changes since the last gate run:
+- **Evidence:** `grep -c "Auth & Onboarding\|Member & Profile\|Dues & Payments"` → MODULE_MAP.md:4, MASTER_PRD.md:2 (sample). `grep -c "Auth and Onboarding\|..."` → 0 hits in either file.
+- MASTER_PRD.md:77 = `Auth & Onboarding`; :78 = `Member Profile & Settings`; :82 = `Dues & Payments`; :87 = `Documents & Credentials`; :93 = `Elections & Governance`; :104 = `Surveys & Polls`.
+- MODULE_MAP.md:11/107 = `M01 Auth & Onboarding` (mermaid + table both `&`).
+- Conclusion: Both docs now consistently use `&`. No remaining drift.
 
-1. **13 stub-API_CONTRACTS findings RESOLVED** (D2-1..D2-13). All 22 API_CONTRACTS.md files now carry endpoint definitions (m20/m21/m22 in table form; m05..m19 in `#### VERB \`/path\`` form). Per-module endpoint counts now 5..18.
-2. **m20/m21/m22 ui-prototype absence reclassified** from MEDIUM (D-8..D-10 in Pass 1) to "by-design backend-only" (no UI surface) — moved to "Confirmed Consistent — by design" anchor.
-3. **DOMAIN_MODEL module ID realignment** (legacy FAIL-02): the entire `### Module Mapping` block now uses canonical M01..M22 IDs. No drift remains between DOMAIN_MODEL and MODULE_MAP.
-4. **`terminated` → `removed`** (legacy FAIL-07): DOMAIN_MODEL `membership_status` enum now reads `pendingPayment, active, gracePeriod, lapsed, expired, suspended, removed, resigned, deceased, expelled` — matches the live Drizzle schema.
-5. **notification_type enum reconciled** (legacy FAIL-05): EVENT_CONTRACTS now lists all 18+ notification types incl. `comms.video-call-*`, `waitlist.promoted`, `dunning.escalation`, `task.overdue`.
+### C-3 — DOMAIN_MODEL 68 vs 78 — **CLEARED**
 
-One regression-flavored finding surfaced this pass:
+- **Evidence:** DOMAIN_MODEL.md:19-23 contains explicit "Footnote — count reconciliation (C-3)" block explaining the 104/93 documented Drizzle-managed surface vs ~131/~122 engine-emitted superset (Better-Auth + internals). Delta is by design, tracked at Compliance dim (CMP-P3-012 informational).
+- Conclusion: Footnote satisfies the resolution requirement.
 
-- **C-1 (NEW, P1):** ROLE_PERMISSION_MATRIX permission grids (28 occurrences) still use column headings `super | admin | support`. The schema and the same file's *Platform Admin Levels* sub-table use `super | support | analyst`. The grids must either rename the `admin` column or document that the column maps to `analyst`. Confidence: HIGH.
+### C-4 — BR-42 orphan — **STALE**
 
-## Blocking Conflicts (P1) — 1 finding
+- **Evidence:**
+  - `docs/product/modules/m09-training/MODULE_SPEC.md:147` — BR-42 is anchored and tagged "Sole owner of BR-42 post TR-P1-004 split (M12 vote-integrity moved to BR-67)."
+  - `docs/product/TRACE_MATRIX.md:11` — "RESOLVED 2026-06-02: BR-42 now exclusively M09 training-type (canonical per WORKFLOW_MAP §4)."
+  - `docs/product/TRACE_MATRIX.md:78,92` — BR-42 listed COMPLETE (spec + code + test).
+- Conclusion: BR-42 is referenced by its owning MODULE_SPEC §5. The orphan condition no longer holds. Prior finding stale.
 
-| ID | Check | Spec A | Spec B | Conflict | Suggested Resolution | Confidence |
-|----|-------|--------|--------|----------|---------------------|-----------|
-| C-1 | 6 (RPM) | ROLE_PERMISSION_MATRIX permission grids (3.1..3.21) — 28 rows with column `super \| admin \| support` | services/api-ts/src/handlers/platformadmin/repos/platform-admin.schema.ts — `adminRoleEnum = ['super','support','analyst']` AND same RPM file "Platform Admin Levels" sub-table (`super`, `support`, `analyst`) | Permission grids use a non-existent role (`admin`) and omit the existing role (`analyst`); risk is permission-gap (analyst reads not represented anywhere) and reader confusion (which level is `admin`?). | Rename grid column `admin` → `analyst` (likely intended: read-only platform staff). Re-validate every cell to ensure `support` permissions are not accidentally widened. | HIGH |
+### C-5 — Legacy flat-md specs co-exist with folder specs — **CLEARED**
 
-**Why P1 not P0:** the runtime auth code uses `admin_role` enum values directly; the grid is a *documentation* artifact, so this is a permission-spec coverage gap (P1 class per §5 — "permission gap"), not a data-integrity contradiction (P0). Verdict contribution: BLOCK candidate, recorded as WARN per §5 note above.
+- **Evidence:** MODULE_MAP.md:165 establishes spec-layout precedence ("when the flat-md and the folder-spec disagree, the folder-spec wins"). MODULE_MAP.md:167-171 enumerates the precedence order. MODULE_MAP.md:175 stamps "spec-layout reconciliation appended 2026-06-03".
+- Conclusion: Co-existence is now governed by an explicit precedence rule; downgrades to a P3 housekeeping item (deletion of flat-md tracked separately, no consistency-block).
 
-## Warnings (P2) — 8 findings (carried forward from Pass 2 still open)
+### C-6 — `semiAnnual` casing drift — **STALE**
 
-| ID | Check | Spec A | Spec B | Conflict | Suggested Resolution | Confidence |
-|----|-------|--------|--------|----------|---------------------|-----------|
-| C-2 | 2 | MODULE_MAP "Auth & Onboarding" (and 18 other modules with `&`) | MASTER_PRD "Auth and Onboarding" | Module-name formatting drift (`&` vs `and`) across 19 module names | Pick one (MODULE_MAP `&` is canonical per most-recent edit); search/replace in MASTER_PRD. | HIGH |
-| C-3 | 2 | DOMAIN_MODEL Complete Table Index | DOMAIN_MODEL Summary statistics | Index lists 78 entries; summary says 68 (delta = Better-Auth-managed tables) | Add footnote distinguishing "Drizzle-managed (68)" vs "incl. Better-Auth (78)". | HIGH |
-| C-4 | 5 | WORKFLOW_MAP catalog (BR-42) | All 22 MODULE_SPECs (no reference) | BR-42 cataloged in WORKFLOW_MAP §4 but unreferenced by any MODULE_SPEC §5 | Either reference BR-42 in the owning module or delete from WORKFLOW_MAP catalog. | HIGH |
-| C-5 | n/a | docs/product/modules/m*.md (19 flat files) | docs/product/modules/m*/MODULE_SPEC.md (22 folder specs) | 19 legacy flat-md specs co-exist; folder specs are 8–30 days newer. | Document the relationship in MODULE_MAP.md or move flat files to `docs/archive/`. | HIGH |
-| C-6 | 4 | M06 MODULE_SPEC `billingFrequency` enum (`semiAnnual`) | M06 ui-prototype/form-contracts.md (`semi-annual`) | camelCase vs hyphen-kebab divergence on enum literal | Normalize to camelCase per spec; update UI. | HIGH |
-| C-7 | 5 | M10 MODULE_SPEC `creditValue` (entity) | WORKFLOW_MAP 6.3 `creditHours`; events schema `creditAmount` | Three different names for the same concept across three artifacts | Standardize on `creditValue` (M10 entity is authoritative per source-of-truth hierarchy). | HIGH |
-| C-8 | 9 | EVENT_CONTRACTS `PersonCreated.name` | M01 MODULE_SPEC entity `firstName + lastName` | Event payload field is `name`; entity uses split fields | Update event payload to `{firstName, lastName}`. | HIGH |
-| C-9 | 9 | M08 MODULE_SPEC `status === 'Active'` guard | M05 MODULE_SPEC 10-state membership lifecycle | Single-equality check excludes `Life` (legacy lifetime members) | Whitelist `['Active', 'Life']` in M08 guard. | HIGH |
+- **Evidence:** `grep -rn "semiAnnual" docs/product/modules/m06*/` → 0 hits. All references use kebab `semi-annual`:
+  - `docs/product/modules/m06-dues-payments/MODULE_SPEC.md:189` — `annual/semi-annual/quarterly`
+  - `docs/product/modules/m06-dues-payments/API_CONTRACTS.md:447,708` — `annual / semi-annual / quarterly`
+  - `docs/product/modules/m06-dues-payments/ui-prototype/screens.md:182` — `annual/semi-annual/quarterly`
+- Conclusion: All four artifacts converged on kebab-case. No camelCase variant exists. Prior drift no longer present.
 
-## Notes (P3) — advisory, 24 findings
+### C-7 — `creditValue` / `creditHours` / `creditAmount` — **RESOLVED-BY-DESIGN**
+
+- **Evidence:** DOMAIN_MODEL.md:389-393 footnote documents three distinct entity fields:
+  - `training.creditAmount` (M09) — credit value assigned at training-definition time (source field).
+  - `credit_entry.creditValue` (M10) — credit value recorded on individual ledger entry (authoritative running record).
+  - Cross-module events (`TrainingCompleted`, `CreditAwarded`) carry `creditValue` because event payloads normalize to M10 authoritative field name.
+- The audit (C-7) flagged this as "three names for one concept" via surface-grep; per-entity inspection confirms three different concepts.
+- Conclusion: Per-entity field choice. Resolved-by-design — no rename.
+
+### C-8 — `PersonCreated.name` vs split fields — **STALE** (contract side)
+
+- **Evidence:** `docs/product/EVENT_CONTRACTS.md:92` already shows `PersonCreated` payload as `{ personId, email, firstName, lastName }`. No `.name` field present in the contract.
+- Conclusion: Event contract is already split. Any emitter-side drift (if present) is a Compliance-dim concern (spec→code), not a Consistency-dim concern (spec↔spec).
+
+### C-9 — M08 `status === 'Active'` excludes Life — **RESOLVED-BY-DESIGN**
+
+- **Evidence:** `docs/product/modules/m08-events/MODULE_SPEC.md:167` — "Membership status eligibility note: Registration allowed for Active status. **Life members always compute to Active via BR-03 (sentinel expiry 2099-12-31)** — no special handling needed."
+- Conclusion: BR-03 collapses Life into the computed `Active` status; a single equality check is correct by design. Adding `'Life'` to a whitelist would be dead code.
+
+## Blocking Conflicts (P1) — 0 findings
+
+None open.
+
+## Warnings (P2) — 0 actionable findings
+
+All 8 prior P2 findings (C-2..C-9) are cleared, stale, or resolved-by-design (see "Verify-first triage outcomes" above). Carried forward only as labels for traceability — no remediation action remains.
+
+## Notes (P3) — advisory, 24 findings (unchanged from prior pass)
 
 ### Stale `[INFERRED]` (2)
 
@@ -167,7 +217,7 @@ All seven recorded with mitigation strategies in MODULE_SPEC §16 and API_CONVEN
 | A10 | Global + per-module error codes | All 22 API_CONTRACTS, ERROR_TAXONOMY §4 | CONSISTENT |
 | A11 | Auth middleware patterns (GA / PA / HG) | All 22 API_CONTRACTS, ROLE_PERMISSION_MATRIX §2 | CONSISTENT |
 | A12 | 2FA enforcement for financial ops | M05, M06, M08, ROLE_PERMISSION_MATRIX §4 | CONSISTENT |
-| A13 | BR-01..BR-41 coverage (BR-42 orphan — see C-4) | WORKFLOW_MAP §4, all MODULE_SPECs | CONSISTENT |
+| A13 | BR-01..BR-41 + BR-42 (M09-anchored) + BR-67 (M12-anchored) | WORKFLOW_MAP §4, m09 MODULE_SPEC:147, TRACE_MATRIX:78 | CONSISTENT (C-4 stale; BR-42 not orphan) |
 | A14 | Cross-cutting WFs (WF-109..114) | WORKFLOW_MAP §1.20 | CONSISTENT (by design, not module-owned) |
 | A15 | Account-deletion cascade | WORKFLOW_MAP 6.6, M01/M02/M05/M06/M10/M11 | CONSISTENT |
 | A16 | Communication delivery pipeline | WORKFLOW_MAP 6.8, M07, M22, notifs | CONSISTENT |
@@ -178,6 +228,14 @@ All seven recorded with mitigation strategies in MODULE_SPEC §16 and API_CONVEN
 | A21 | PaymentRecorded / PaymentRefunded payload superset | M06, EVENT_CONTRACTS, WORKFLOW_MAP 6.1/6.4 | CONSISTENT (legacy H-2/H-4 closed) |
 | A22 | m20/m21/m22 backend-only (no ui-prototype) | Confirmed via API_CONTRACTS scaffold + module type | CONSISTENT by design |
 | A23 | API endpoint coverage (~210 endpoints across 22 modules) | API_CONTRACTS.md (per-module table or per-endpoint blocks) | CONSISTENT (legacy stub-API_CONTRACTS findings closed) |
+| A24 | Admin-role grid alignment (`super \| support \| analyst`) | ROLE_PERMISSION_MATRIX §3.1..3.21 (29 grids), `platform-admin.schema.ts:39-43` adminRoleEnum, RPM "Platform Admin Levels" sub-table | CONSISTENT (C-1 closed) |
+| A25 | Module-name canonical form (`&`) | MODULE_MAP.md:11/107, MASTER_PRD.md:77/78/82/87/93/104 | CONSISTENT (C-2 cleared this pass) |
+| A26 | DOMAIN_MODEL count reconciliation footnote | DOMAIN_MODEL.md:19-23 | CONSISTENT (C-3 cleared) |
+| A27 | Spec-layout precedence (folder-spec > flat-md) | MODULE_MAP.md:165-175 | CONSISTENT (C-5 cleared) |
+| A28 | `billingFrequency` enum kebab-case (`semi-annual`) | M06 MODULE_SPEC:189, API_CONTRACTS:447/708, screens.md:182 | CONSISTENT (C-6 stale) |
+| A29 | Credit-field per-entity choice (`creditAmount` source / `creditValue` ledger+event) | DOMAIN_MODEL.md:389-393 footnote | CONSISTENT by design (C-7 resolved) |
+| A30 | `PersonCreated` payload split-name | EVENT_CONTRACTS.md:92 | CONSISTENT (C-8 stale on contract side) |
+| A31 | M08 event eligibility — Active+Life via BR-03 | M08 MODULE_SPEC.md:167 | CONSISTENT by design (C-9 resolved) |
 
 ## Artifact Dependency DAG
 
@@ -232,35 +290,32 @@ No modules skipped.
 ## Resolution Priority
 
 ### P0 — none open
-All 8 legacy P0/HIGH findings (H-1..H-8 from 2026-05-21 wave) remain RESOLVED. Anchors A3, A17–A23 preserve the fixes.
+All legacy P0/HIGH findings (H-1..H-8 from 2026-05-21 wave) remain RESOLVED. Anchors A3, A17–A31 preserve the fixes.
 
-### P1 — 1 open
-- **C-1** ROLE_PERMISSION_MATRIX grid column drift (`admin` → `analyst`). Fix before next milestone — affects every reader interpreting the matrix.
+### P1 — none open
+- C-1 closed last pass (anchor A24); confirmed this pass.
 
-### P2 — 8 open
-Carry forward to spec refresh sprint:
-- C-2 module-name `&` vs `and` (cosmetic but cross-doc)
-- C-3 DOMAIN_MODEL table-count 68 vs 78 footnote
-- C-4 BR-42 orphan
-- C-5 legacy flat-md specs co-existing with folder specs
-- C-6 `semiAnnual` casing drift M06
-- C-7 credit-naming drift `creditValue`/`creditHours`/`creditAmount`
-- C-8 `PersonCreated.name` vs split fields
-- C-9 M08 status whitelist (Active+Life)
+### P2 — 0 actionable
+All 8 prior P2 findings (C-2..C-9) triaged this pass:
+- **Cleared (3):** C-2 (module-name `&` canonical), C-3 (DOMAIN_MODEL footnote), C-5 (spec-layout precedence)
+- **Stale (3):** C-4 (BR-42 anchored in m09:147), C-6 (no `semiAnnual` hits), C-8 (PersonCreated already split)
+- **Resolved-by-design (2):** C-7 (per-entity credit-field choice, footnote at DOMAIN_MODEL:389-393), C-9 (Active+Life via BR-03 sentinel-expiry)
 
 ### P3 — 24 open (informational)
 - 2 stale `[INFERRED]` tags (P3-1, P3-2)
 - 22 `[VERIFY]` tags — deferred to Stage 2 sign-off
 
+## What's Next
+
+1. **Verdict: PASS.** With 0 actionable P0/P1/P2, downstream `/oli-plan-slices` is unblocked from a Stage 1 consistency standpoint. Stage 2 sign-off remains a separate prerequisite for unconditional planning under the regulated flag.
+2. **P3 housekeeping (non-blocking):** resolve P3-1 (`ImpersonationSession`) and P3-2 (M09 WF-058..064 backfill) at next spec sweep.
+3. **Stage 2 (interactive)** to clear the 22 `[VERIFY]` tags. Headless `--auto` cannot collect role sign-offs; not blocking from consistency standpoint.
+4. **Watch list (next pass):** if Better-Auth tables surface as in-scope domain entities, revisit DOMAIN_MODEL.md:19-23 footnote scope.
+
 ## Pipeline Position
 
-`/oli-check --consistency` ✅ executed (this report) → `/oli-spec-gate` Stage 2 (sign-off) is BLOCKED by `--auto` per Step R6 (regulated=YES — DPA 2012, BIR). Use `--force-auto` to override (audit trail) or re-run interactively. Stage 2 sign-off is the next required step before downstream `/oli-plan-slices` runs unconditionally.
-
-**What's next:**
-1. Resolve C-1 (P1) — rename `admin` column → `analyst` in ROLE_PERMISSION_MATRIX permission grids; verify cell semantics. Re-run this dimension to confirm verdict → PASS.
-2. Address P2 batch (C-2..C-9) during the next spec refresh — none block code generation but each compounds reader confusion.
-3. Run Stage 2 interactively to clear 22 `[VERIFY]` tags and 2 stale `[INFERRED]` tags.
+`/oli-check --consistency --auto` ✅ executed (this report) → 0 actionable P0/P1 → verdict PASS → Stage 2 sign-off remains the next required step before unconditional downstream planning under the regulated flag.
 
 ---
 
-_Generated 2026-06-02 by `/oli-check --consistency` (oli-spec-gate Stage 1, read-only). Diff-before-write: prior resolution notes and regression anchors from the 2026-05-31 Pass 2 report and the 2026-05-20 legacy report have been preserved; only delta findings are presented as NEW._
+_Regenerated 2026-06-03T10:48:00Z by `/oli-check --consistency --auto` (oli-spec-gate Stage 1, read-only, post-Phase-D verify-first triage). Every prior C-N / P3-N finding was re-checked against current spec state with grep + targeted reads; classification recorded in "Verify-first triage outcomes". Regression anchors A1..A31 preserved._

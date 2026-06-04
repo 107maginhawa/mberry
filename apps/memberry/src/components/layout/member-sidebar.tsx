@@ -163,6 +163,7 @@ export function MemberSidebar({ userEmail, isOfficer }: MemberSidebarProps) {
                 }}
                 activeOptions={{ exact: false }}
               >
+                {/* ui-c-exempt: nav-icon — sidebar entry icon */}
                 <Icon size={18} className="shrink-0" />
                 {label}
               </Link>
@@ -183,6 +184,7 @@ export function MemberSidebar({ userEmail, isOfficer }: MemberSidebarProps) {
               }}
               activeOptions={{ exact: false }}
             >
+              {/* ui-c-exempt: nav-icon — sidebar officer-dashboard icon */}
               <Shield size={18} className="shrink-0" />
               Officer Dashboard
             </Link>
@@ -197,6 +199,7 @@ export function MemberSidebar({ userEmail, isOfficer }: MemberSidebarProps) {
               to="/dashboard"
               className="flex items-center gap-2.5 px-5 py-2.5 text-sm text-[var(--color-muted)] hover:text-[var(--color-text)] hover:bg-[var(--color-surface-warm)] transition-colors duration-150"
             >
+              {/* ui-c-exempt: nav-icon — sidebar back-arrow icon */}
               <ArrowLeft size={18} className="shrink-0" />
               Back to Personal
             </Link>

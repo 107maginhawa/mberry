@@ -4,7 +4,7 @@
  */
 
 import { createFileRoute } from '@tanstack/react-router'
-import { PageHeader } from '@/components/patterns/page-header'
+import { PageShell } from '@/components/patterns/page-shell'
 import { NotificationPreferences } from '@/features/communications/components/notification-preferences'
 import { useOrgContext } from '@/hooks/useOrgContext'
 
@@ -19,17 +19,17 @@ function MyNotificationsPage() {
   const personId = 'me'
 
   return (
-    <div className="space-y-6 max-w-3xl">
-      <PageHeader
-        title="Notification Preferences"
-        subtitle="Choose how you want to be notified for each category"
-      />
-
-      {orgId ? (
-        <NotificationPreferences orgId={orgId} personId={personId} />
-      ) : (
-        <p className="text-[14px] text-[var(--color-muted)]">Loading...</p>
-      )}
-    </div>
+    <PageShell
+      title="Notification Preferences"
+      subtitle="Choose how you want to be notified for each category"
+    >
+      <div className="space-y-6 max-w-3xl">
+        {orgId ? (
+          <NotificationPreferences orgId={orgId} personId={personId} />
+        ) : (
+          <p className="text-[14px] text-[var(--color-muted)]">Loading...</p>
+        )}
+      </div>
+    </PageShell>
   )
 }

@@ -2,7 +2,7 @@ import { createFileRoute } from '@tanstack/react-router'
 import { useQuery } from '@tanstack/react-query'
 import { ComposeForm } from '@/features/communications/components/compose-form'
 import { api } from '@/lib/api'
-import { PageHeader } from '@/components/patterns/page-header'
+import { PageShell } from '@/components/patterns/page-shell'
 import { GlassCard } from '@/components/motion/glass-card'
 import { useOrg } from '@/hooks/useOrg'
 
@@ -36,19 +36,18 @@ function NewAnnouncementPage() {
   } : undefined
 
   return (
-    <div className="space-y-6">
-      <PageHeader
-        title={edit ? 'Edit Announcement' : 'New Announcement'}
-        subtitle={edit ? 'Update your draft announcement' : 'Compose and send a message to your members'}
-        breadcrumbs={[
-          { label: 'Officer', href: `/org/${orgSlug}/officer/dashboard` },
-          { label: 'Communications', href: `/org/${orgSlug}/officer/communications` },
-          { label: edit ? 'Edit' : 'New' },
-        ]}
-      />
+    <PageShell
+      title={edit ? 'Edit Announcement' : 'New Announcement'}
+      subtitle={edit ? 'Update your draft announcement' : 'Compose and send a message to your members'}
+      breadcrumbs={[
+        { label: 'Officer', href: `/org/${orgSlug}/officer/dashboard` },
+        { label: 'Communications', href: `/org/${orgSlug}/officer/communications` },
+        { label: edit ? 'Edit' : 'New' },
+      ]}
+    >
       <GlassCard className="p-6">
         <ComposeForm orgId={orgId} existingAnnouncement={existingAnnouncement} />
       </GlassCard>
-    </div>
+    </PageShell>
   )
 }

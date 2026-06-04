@@ -1,8 +1,9 @@
-import { createFileRoute, Link } from '@tanstack/react-router'
+import { createFileRoute } from '@tanstack/react-router'
 import { useQuery } from '@tanstack/react-query'
-import { getPersonOptions } from '@monobase/sdk-ts/generated/@tanstack/react-query.gen'
-import { ArrowLeft, Mail, Phone, Globe, MapPin } from 'lucide-react'
+import { getPersonOptions } from '@monobase/sdk-ts/generated/react-query'
+import { Mail, Phone, Globe, MapPin } from 'lucide-react'
 import { Button } from '@monobase/ui'
+import { PageShell } from '@/components/patterns/page-shell'
 import { RequireRole } from '@/lib/role-gate'
 
 export const Route = createFileRoute('/members/$personId')({
@@ -30,26 +31,29 @@ function MemberDetailContent({ personId }: { personId: string }) {
 
   if (isLoading) {
     return (
-      <div className="p-8">
+      <PageShell
+        title="Loading…"
+        breadcrumbs={[{ label: 'Members', href: '/members' }, { label: '…' }]}
+      >
         <div className="animate-pulse space-y-4">
           <div className="h-4 w-32 bg-muted rounded" />
           <div className="h-8 w-64 bg-muted rounded" />
           <div className="h-40 w-full bg-muted rounded" />
         </div>
-      </div>
+      </PageShell>
     )
   }
 
   if (isError || !person) {
     return (
-      <div className="p-8">
-        <Link to="/members" className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground mb-6">
-          <ArrowLeft className="w-4 h-4" /> Back to Members
-        </Link>
+      <PageShell
+        title="Member not found"
+        breadcrumbs={[{ label: 'Members', href: '/members' }, { label: 'Not found' }]}
+      >
         <div className="rounded-lg border bg-card p-8 text-center">
           <p className="text-muted-foreground">Person not found or access denied.</p>
         </div>
-      </div>
+      </PageShell>
     )
   }
 
@@ -57,39 +61,27 @@ function MemberDetailContent({ personId }: { personId: string }) {
   const fullName = [p.firstName, p.middleName, p.lastName].filter(Boolean).join(' ')
 
   return (
-    <div className="p-8">
-      {/* Back link */}
-      <Link
-        to="/members"
-        className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground mb-6"
-        data-testid="back-link"
-      >
-        <ArrowLeft className="w-4 h-4" /> Back to Members
-      </Link>
-
-      {/* Header */}
-      <div className="flex items-center gap-4 mb-8">
-        <div className="w-14 h-14 rounded-full bg-purple-500/20 flex items-center justify-center text-lg font-bold text-purple-400">
-          {(p.firstName || '?')[0]}
-        </div>
-        <div>
-          <h1 className="text-h1 text-foreground" data-testid="member-name">{fullName}</h1>
-          <div className="flex items-center gap-4 mt-1 text-sm text-muted-foreground">
-            {p.contactInfo?.email && (
-              <span className="flex items-center gap-1">
-                <Mail className="w-3.5 h-3.5" /> {p.contactInfo.email}
-              </span>
-            )}
-            {p.licenseNumber && (
-              <span>License: {p.licenseNumber}</span>
-            )}
-          </div>
-        </div>
-      </div>
-
+    <PageShell
+      title={<span data-testid="member-name">{fullName}</span>}
+      breadcrumbs={[
+        { label: 'Members', href: '/members' },
+        { label: fullName || 'Member' },
+      ]}
+      maxWidth="full"
+      subtitle={
+        <span className="flex items-center gap-4 text-sm text-muted-foreground">
+          {p.contactInfo?.email && (
+            <span className="flex items-center gap-1">
+              <Mail className="w-3.5 h-3.5" /> {p.contactInfo.email}
+            </span>
+          )}
+          {p.licenseNumber && <span>License: {p.licenseNumber}</span>}
+        </span>
+      }
+    >
       {/* Tabs */}
       <TabView person={p} />
-    </div>
+    </PageShell>
   )
 }
 

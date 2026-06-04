@@ -85,6 +85,7 @@ export function MemberHeader({ userName }: MemberHeaderProps) {
             {hasMultipleOrgs ? (
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
+                  {/* ui-c-exempt: methodology-carry — status pill rendered as Button (clickable badge) */}
                   <Button
                     variant="ghost"
                     className="group inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium bg-[var(--color-surface-warm)] border border-[var(--color-border-light)] text-[var(--color-text)] hover:bg-[var(--color-surface-warm)]"
@@ -166,6 +167,7 @@ export function MemberHeader({ userName }: MemberHeaderProps) {
           aria-label="Notifications"
           className="relative p-1.5 rounded-full hover:bg-white/10 md:hover:bg-[var(--color-surface-warm)] transition-colors"
         >
+          {/* ui-c-exempt: nav-icon — header bell icon */}
           <Bell size={18} />
           {notifCount > 0 && (
             <span className="absolute -top-0.5 -right-0.5 min-w-[16px] h-4 flex items-center justify-center rounded-full bg-[var(--color-error)] text-white text-[0.625rem] font-bold px-1">

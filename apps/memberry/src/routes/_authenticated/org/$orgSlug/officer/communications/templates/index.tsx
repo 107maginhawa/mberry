@@ -1,5 +1,5 @@
 import { createFileRoute, useNavigate } from '@tanstack/react-router'
-import { PageHeader } from '@/components/patterns/page-header'
+import { PageShell } from '@/components/patterns/page-shell'
 import { TemplateList } from '@/features/communications/components/template-list'
 import { Button } from '@monobase/ui'
 import { Plus } from 'lucide-react'
@@ -16,22 +16,21 @@ function TemplateListPage() {
   const navigate = useNavigate()
 
   return (
-    <div className="space-y-6">
-      <PageHeader
-        title="Message Templates"
-        subtitle="Create and manage reusable message templates"
-        breadcrumbs={[
-          { label: 'Officer', href: `/org/${orgSlug}/officer/dashboard` },
-          { label: 'Communications', href: `/org/${orgSlug}/officer/communications` },
-          { label: 'Templates' },
-        ]}
-        actions={
-          <Button onClick={() => navigate({ to: `/org/${orgSlug}/officer/communications/templates/new` })}>
-            <Plus size={16} className="mr-1.5" />
-            New Template
-          </Button>
-        }
-      />
+    <PageShell
+      title="Message Templates"
+      subtitle="Create and manage reusable message templates"
+      breadcrumbs={[
+        { label: 'Officer', href: `/org/${orgSlug}/officer/dashboard` },
+        { label: 'Communications', href: `/org/${orgSlug}/officer/communications` },
+        { label: 'Templates' },
+      ]}
+      actions={
+        <Button onClick={() => navigate({ to: `/org/${orgSlug}/officer/communications/templates/new` })}>
+          <Plus size={16} className="mr-1.5" />
+          New Template
+        </Button>
+      }
+    >
       <TemplateList
         orgId={orgId}
         onEdit={(id) =>
@@ -42,6 +41,6 @@ function TemplateListPage() {
         }
         onNew={() => navigate({ to: `/org/${orgSlug}/officer/communications/templates/new` })}
       />
-    </div>
+    </PageShell>
   )
 }

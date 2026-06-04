@@ -158,4 +158,18 @@ graph TD
 
 ---
 
-*Generated 2026-05-13. Source of truth: `docs/product/modules/README.md`.*
+## Spec File Layout (C-5 reconciliation)
+
+Each module's authoritative spec lives at `docs/product/modules/<id>/MODULE_SPEC.md` (22 folder-specs, one per active or future module). Sibling files in the same folder (`API_CONTRACTS.md`, `NAVIGATION_MAP.md`, per-WF `slices/*.md`) extend the spec by concern.
+
+The 19 `docs/product/modules/m*.md` flat files are **legacy / overview pointers** retained for short-link convenience and downstream consumers that haven't migrated to the folder format. They are NOT the source of truth — when the flat-md and the folder-spec disagree, the **folder-spec wins**. Migration to delete the flat files is tracked as a P3 housekeeping item (no blocker; OK to keep both during the transition window).
+
+Order of precedence when consumers must pick one artifact:
+1. `docs/product/modules/<id>/MODULE_SPEC.md` (canonical)
+2. `docs/product/modules/<id>/API_CONTRACTS.md` (wire-level)
+3. `docs/product/modules/<id>/NAVIGATION_MAP.md` (frontend)
+4. `docs/product/modules/m<id>.md` (legacy overview — read-only summary)
+
+---
+
+*Generated 2026-05-13; spec-layout reconciliation appended 2026-06-03. Source of truth: `docs/product/modules/README.md`.*

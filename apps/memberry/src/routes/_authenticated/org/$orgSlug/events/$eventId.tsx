@@ -6,7 +6,7 @@ import { Calendar, MapPin, Users, Clock, Loader2, Award, CalendarPlus, DollarSig
 import { toast } from 'sonner'
 import { GlassCard } from '@/components/motion/glass-card'
 import { CountUp } from '@/components/motion/count-up'
-import { PageHeader } from '@/components/patterns/page-header'
+import { PageShell } from '@/components/patterns/page-shell'
 import { EmptyState } from '@/components/patterns/empty-state'
 import {
   getEventOptions,
@@ -16,7 +16,7 @@ import {
   cancelEventRegistrationMutation,
   listMyCustomEventsOptions,
   listMyCustomEventsQueryKey,
-} from '@monobase/sdk-ts/generated/@tanstack/react-query.gen'
+} from '@monobase/sdk-ts/generated/react-query'
 import { useOrg } from '@/hooks/useOrg'
 import { downloadIcsFile } from '@/features/events/utils/generate-ics'
 
@@ -119,32 +119,36 @@ function EventDetail() {
 
   if (isLoading) {
     return (
-      <div className="space-y-6 p-6 max-w-3xl">
-        <div className="h-8 w-2/3 rounded-[8px] bg-[var(--color-surface-elevated-hover)] animate-shimmer" />
-        <div className="h-4 w-1/2 rounded-[8px] bg-[var(--color-surface-elevated-hover)] animate-shimmer" />
-        <GlassCard className="p-5 space-y-4">
-          <div className="grid gap-3 sm:grid-cols-2">
-            {Array.from({ length: 4 }).map((_, i) => (
-              <div key={i} className="h-12 rounded-[8px] bg-[var(--color-surface-elevated-hover)] animate-shimmer" />
-            ))}
-          </div>
-        </GlassCard>
-        <div className="h-12 w-40 rounded-[8px] bg-[var(--color-surface-elevated-hover)] animate-shimmer" />
-      </div>
+      <PageShell title="Event">
+        <div className="space-y-6 max-w-3xl">
+          <div className="h-8 w-2/3 rounded-[8px] bg-[var(--color-surface-elevated-hover)] animate-shimmer" />
+          <div className="h-4 w-1/2 rounded-[8px] bg-[var(--color-surface-elevated-hover)] animate-shimmer" />
+          <GlassCard className="p-5 space-y-4">
+            <div className="grid gap-3 sm:grid-cols-2">
+              {Array.from({ length: 4 }).map((_, i) => (
+                <div key={i} className="h-12 rounded-[8px] bg-[var(--color-surface-elevated-hover)] animate-shimmer" />
+              ))}
+            </div>
+          </GlassCard>
+          <div className="h-12 w-40 rounded-[8px] bg-[var(--color-surface-elevated-hover)] animate-shimmer" />
+        </div>
+      </PageShell>
     )
   }
 
   if (error || !event) {
     return (
-      <div className="p-6 max-w-3xl">
-        <GlassCard className="p-6">
-          <EmptyState
-            icon={<Calendar className="w-8 h-8" />}
-            headline="Failed to load event"
-            description="Something went wrong. Please try again."
-          />
-        </GlassCard>
-      </div>
+      <PageShell title="Event">
+        <div className="max-w-3xl">
+          <GlassCard className="p-6">
+            <EmptyState
+              icon={<Calendar className="w-8 h-8" />}
+              headline="Failed to load event"
+              description="Something went wrong. Please try again."
+            />
+          </GlassCard>
+        </div>
+      </PageShell>
     )
   }
 
@@ -158,7 +162,15 @@ function EventDetail() {
     : null
 
   return (
-    <div className="space-y-6 p-6 max-w-3xl">
+    <PageShell
+      title={event.title ?? 'Event'}
+      subtitle={event.status ? `Status: ${event.status}` : undefined}
+      breadcrumbs={[
+        { label: 'Events', href: `/org/${orgSlug}/events` },
+        { label: event.title ?? 'Event' },
+      ]}
+    >
+      <div className="space-y-6 max-w-3xl">
       {/* Cover image hero */}
       {(event as any).coverImageUrl && (
         <div className="relative h-48 sm:h-64 rounded-xl overflow-hidden">
@@ -169,15 +181,6 @@ function EventDetail() {
           />
         </div>
       )}
-
-      <PageHeader
-        title={event.title ?? 'Event'}
-        subtitle={event.status ? `Status: ${event.status}` : undefined}
-        breadcrumbs={[
-          { label: 'Events', href: `/org/${orgSlug}/events` },
-          { label: event.title ?? 'Event' },
-        ]}
-      />
 
       {/* Badges row */}
       <div className="flex flex-wrap gap-2">
@@ -340,6 +343,7 @@ function EventDetail() {
           </>
         )}
       </div>
-    </div>
+      </div>
+    </PageShell>
   )
 }

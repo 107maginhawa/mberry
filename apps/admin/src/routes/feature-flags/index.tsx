@@ -4,13 +4,14 @@ import { ToggleLeft, Plus, Trash2, X } from 'lucide-react'
 import { Button, Input, Label, Select, SelectContent, SelectItem, SelectTrigger, SelectValue, Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from '@monobase/ui'
 import { useState } from 'react'
 import { toast } from 'sonner'
+import { PageShell } from '@/components/patterns/page-shell'
 import { RequireRole } from '@/lib/role-gate'
 import {
   listFeatureFlagsOptions,
   listFeatureFlagsQueryKey,
   setFeatureFlagMutation,
   deleteFeatureFlagMutation,
-} from '@monobase/sdk-ts/generated/@tanstack/react-query.gen'
+} from '@monobase/sdk-ts/generated/react-query'
 
 export const Route = createFileRoute('/feature-flags/')({
   component: () => (
@@ -161,26 +162,17 @@ function FeatureFlagsPage() {
   })
 
   return (
-    <div className="p-8">
-      <div className="flex items-center justify-between mb-8">
-        <div className="flex items-center gap-3">
-          <ToggleLeft className="w-6 h-6 text-muted-foreground" />
-          <div>
-            <h1 className="text-h1 text-foreground">
-              Feature Flags
-            </h1>
-            <p className="text-sm text-muted-foreground mt-1">
-              Module x target matrix &mdash; control which modules are enabled per
-              scope
-            </p>
-          </div>
-        </div>
+    <PageShell
+      title="Feature Flags"
+      subtitle="Module x target matrix — control which modules are enabled per scope"
+      maxWidth="full"
+      actions={
         <Button onClick={() => setDialogOpen(true)}>
           <Plus className="w-4 h-4" />
           Create Flag
         </Button>
-      </div>
-
+      }
+    >
       {isError && (
         <p role="alert" aria-live="polite" className="text-sm text-red-500 mb-4">Error: {error instanceof Error ? error.message : 'Failed to load feature flags'}</p>
       )}
@@ -252,6 +244,6 @@ function FeatureFlagsPage() {
       </div>
 
       <CreateFlagDialog open={dialogOpen} onClose={() => setDialogOpen(false)} />
-    </div>
+    </PageShell>
   )
 }

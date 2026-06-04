@@ -1,14 +1,11 @@
-import { describe, test, expect, vi, beforeEach } from 'vitest'
+import { describe, test, expect, vi, beforeEach } from '@/test/vitest-shim'
 import { screen, waitFor } from '@testing-library/react'
 import { renderWithProviders } from '@/test/utils'
 import { AffiliationList } from './affiliation-list'
 
 // Mock the SDK generated hooks
-vi.mock('@monobase/sdk-ts/generated/@tanstack/react-query.gen', () => ({
-  listChapterAffiliationsOptions: vi.fn(),
-}))
-
-import { listChapterAffiliationsOptions } from '@monobase/sdk-ts/generated/@tanstack/react-query.gen'
+// [Tier-F] removed local SDK mock; using global stub in test-setup-root.ts
+import { listChapterAffiliationsOptions } from '@monobase/sdk-ts/generated/react-query'
 
 const mockListChapterAffiliationsOptions = listChapterAffiliationsOptions as ReturnType<typeof vi.fn>
 

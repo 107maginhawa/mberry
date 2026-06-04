@@ -1,16 +1,10 @@
-import { describe, test, expect, vi, beforeEach } from 'vitest'
+import { describe, test, expect, vi, beforeEach } from '@/test/vitest-shim'
 import { screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { renderWithProviders } from '@/test/utils'
 import { ElectionForm } from './election-form'
 
-vi.mock('@monobase/sdk-ts/generated/@tanstack/react-query.gen', () => ({
-  createElectionMutation: vi.fn(),
-  updateElectionMutation: vi.fn(),
-  listElectionsQueryKey: vi.fn(() => ['elections']),
-  getElectionOptions: vi.fn(() => ({ queryKey: ['election'], queryFn: vi.fn() })),
-}))
-
+// [Tier-F] removed local SDK mock; using global stub in test-setup-root.ts
 vi.mock('@monobase/ui', () => ({
   Input: (props: any) => <input {...props} />,
   Label: ({ children, ...props }: any) => <label {...props}>{children}</label>,
@@ -24,7 +18,7 @@ vi.mock('@monobase/ui', () => ({
 import {
   createElectionMutation,
   updateElectionMutation,
-} from '@monobase/sdk-ts/generated/@tanstack/react-query.gen'
+} from '@monobase/sdk-ts/generated/react-query'
 const mockCreateMutation = createElectionMutation as ReturnType<typeof vi.fn>
 const mockUpdateMutation = updateElectionMutation as ReturnType<typeof vi.fn>
 

@@ -1,14 +1,10 @@
-import { describe, test, expect, vi, beforeEach } from 'vitest'
+import { describe, test, expect, vi, beforeEach } from '@/test/vitest-shim'
 import { screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { renderWithProviders } from '@/test/utils'
 import { RefundForm } from './refund-form'
 
-vi.mock('@monobase/sdk-ts/generated/react-query', () => ({
-  refundDuesPaymentMutation: vi.fn(() => ({ mutationFn: vi.fn().mockResolvedValue({}) })),
-  getDuesPaymentQueryKey: vi.fn(() => ['dues', 'payment']),
-}))
-
+// [Tier-F] removed local SDK mock; using global stub in test-setup-root.ts
 vi.mock('sonner', () => ({
   toast: { success: vi.fn(), error: vi.fn() },
 }))

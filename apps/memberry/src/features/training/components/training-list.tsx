@@ -12,7 +12,7 @@ import {
   searchTrainingsOptions,
   searchTrainingsQueryKey,
   cancelCustomTrainingMutation,
-} from '@monobase/sdk-ts/generated/@tanstack/react-query.gen'
+} from '@monobase/sdk-ts/generated/react-query'
 import type { Training, TrainingStatus, TrainingType } from '@monobase/sdk-ts/generated/types.gen'
 
 /** Server returns enrollment count as an aggregated field not present in the base Training type. */
@@ -192,6 +192,7 @@ export function TrainingList({ orgId }: TrainingListProps) {
           ))}
         </div>
       ) : trainings.length === 0 ? (
+        // ui-c-exempt: empty-state-emphasis — no-training EmptyState
         <EmptyState
           icon={<BookOpen size={40} />}
           headline="No trainings found"

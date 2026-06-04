@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from '@tanstack/react-router'
-import { PageHeader } from '@/components/patterns/page-header'
+import { PageShell } from '@/components/patterns/page-shell'
 import { useOrg } from '@/hooks/useOrg'
 import { SurveyList } from '@/features/surveys/components/survey-list'
 
@@ -11,26 +11,24 @@ function OfficerSurveys() {
   const { orgSlug } = useOrg()
 
   return (
-    <div className="space-y-6">
-      <PageHeader
-        title="Surveys"
-        subtitle="Create and manage member surveys"
-        breadcrumbs={[
-          { label: 'Officer', href: `/org/${orgSlug}/officer/dashboard` },
-          { label: 'Surveys' },
-        ]}
-        actions={
-          <Link
-            to="/org/$orgSlug/officer/surveys/new"
-            params={{ orgSlug }}
-            className="px-4 py-2 bg-[var(--color-primary)] text-white rounded-[8px] text-sm font-medium hover:bg-[var(--color-primary-mid)]"
-          >
-            New Survey
-          </Link>
-        }
-      />
-
+    <PageShell
+      title="Surveys"
+      subtitle="Create and manage member surveys"
+      breadcrumbs={[
+        { label: 'Officer', href: `/org/${orgSlug}/officer/dashboard` },
+        { label: 'Surveys' },
+      ]}
+      actions={
+        <Link
+          to="/org/$orgSlug/officer/surveys/new"
+          params={{ orgSlug }}
+          className="px-4 py-2 bg-[var(--color-primary)] text-white rounded-[8px] text-sm font-medium hover:bg-[var(--color-primary-mid)]"
+        >
+          New Survey
+        </Link>
+      }
+    >
       <SurveyList />
-    </div>
+    </PageShell>
   )
 }

@@ -1,7 +1,7 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { RefreshCw, Users, CheckCircle, AlertTriangle, XCircle } from 'lucide-react'
-import { PageHeader } from '@/components/patterns/page-header'
+import { PageShell } from '@/components/patterns/page-shell'
 import { GlassCard } from '@/components/motion/glass-card'
 import { CardSkeleton } from '@/components/patterns/skeleton-loader'
 import { ErrorState } from '@/components/patterns/error-state'
@@ -49,34 +49,32 @@ function OfficerCompliance() {
 
   if (isLoading) {
     return (
-      <div className="space-y-6">
-        <PageHeader title="Compliance Dashboard" subtitle="Monitor member CPD compliance" />
+      <PageShell title="Compliance Dashboard" subtitle="Monitor member CPD compliance">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
           <CardSkeleton /><CardSkeleton /><CardSkeleton /><CardSkeleton />
         </div>
-      </div>
+      </PageShell>
     )
   }
 
   const summary = report?.summary ?? { totalMembers: 0, compliant: 0, atRisk: 0, nonCompliant: 0, complianceRate: 0 }
 
   return (
-    <div className="space-y-6">
-      <PageHeader
-        title="Compliance Dashboard"
-        subtitle="Monitor member CPD compliance"
-        actions={
-          <Button
-            onClick={() => refreshMutation.mutate()}
-            disabled={refreshMutation.isPending}
-            size="sm"
-          >
-            <RefreshCw className={`w-4 h-4 ${refreshMutation.isPending ? 'animate-spin' : ''}`} />
-            Refresh
-          </Button>
-        }
-      />
-
+    <PageShell
+      title="Compliance Dashboard"
+      subtitle="Monitor member CPD compliance"
+      actions={
+        <Button
+          onClick={() => refreshMutation.mutate()}
+          disabled={refreshMutation.isPending}
+          size="sm"
+        >
+          <RefreshCw className={`w-4 h-4 ${refreshMutation.isPending ? 'animate-spin' : ''}`} />
+          Refresh
+        </Button>
+      }
+    >
+      <div className="space-y-6">
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
         <GlassCard className="p-5">
           <div className="flex items-center gap-3">
@@ -176,6 +174,7 @@ function OfficerCompliance() {
           <p className="text-sm text-[var(--color-muted)]">No compliance data available. Credits need to be recorded first.</p>
         )}
       </GlassCard>
-    </div>
+      </div>
+    </PageShell>
   )
 }

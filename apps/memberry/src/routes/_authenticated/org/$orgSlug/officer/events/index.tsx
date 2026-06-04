@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from '@tanstack/react-router'
-import { PageHeader } from '@/components/patterns/page-header'
+import { PageShell } from '@/components/patterns/page-shell'
 import { EventList } from '@/features/events/components/event-list'
 import { useOrg } from '@/hooks/useOrg'
 
@@ -11,26 +11,24 @@ function OfficerEvents() {
   const { orgId, orgSlug } = useOrg()
 
   return (
-    <div className="space-y-6">
-      <PageHeader
-        title="Events"
-        subtitle="Manage organization events and registrations"
-        breadcrumbs={[
-          { label: 'Officer', href: `/org/${orgSlug}/officer/dashboard` },
-          { label: 'Events' },
-        ]}
-        actions={
-          <Link
-            to="/org/$orgSlug/officer/events/new"
-            params={{ orgSlug }}
-            className="px-4 py-2 bg-[var(--color-primary)] text-white rounded-[8px] text-sm font-medium hover:bg-[var(--color-primary-mid)]"
-          >
-            Create Event
-          </Link>
-        }
-      />
-
+    <PageShell
+      title="Events"
+      subtitle="Manage organization events and registrations"
+      breadcrumbs={[
+        { label: 'Officer', href: `/org/${orgSlug}/officer/dashboard` },
+        { label: 'Events' },
+      ]}
+      actions={
+        <Link
+          to="/org/$orgSlug/officer/events/new"
+          params={{ orgSlug }}
+          className="px-4 py-2 bg-[var(--color-primary)] text-white rounded-[8px] text-sm font-medium hover:bg-[var(--color-primary-mid)]"
+        >
+          Create Event
+        </Link>
+      }
+    >
       <EventList orgId={orgId} />
-    </div>
+    </PageShell>
   )
 }

@@ -15,6 +15,7 @@ export function ListSkeleton({ rows = 5 }: { rows?: number }) {
     <div className="space-y-3">
       {Array.from({ length: rows }).map((_, i) => (
         <div key={i} className="flex items-center gap-3">
+          {/* ui-c-exempt: skeleton-placeholder — avatar bone 34px */}
           <Bone className="h-[34px] w-[34px] !rounded-full shrink-0" />
           <div className="flex-1 space-y-2">
             <Bone className="h-3.5" style={{ width: `${60 + (i % 3) * 15}%` }} />
@@ -39,6 +40,7 @@ export function CardSkeleton() {
 export function ProfileSkeleton() {
   return (
     <div className="flex flex-col items-center gap-4">
+      {/* ui-c-exempt: skeleton-placeholder — avatar bone 120px */}
       <Bone className="h-[120px] w-[120px] !rounded-full" />
       <Bone className="h-5 w-[200px]" />
       <Bone className="h-4 w-[150px]" />

@@ -2,7 +2,7 @@ import { createFileRoute } from '@tanstack/react-router'
 import { useQuery } from '@tanstack/react-query'
 import { getDuesFinancialDashboardOptions } from '@monobase/sdk-ts/generated/react-query'
 import type { FinancialDashboard, GetDuesFinancialDashboardData } from '@monobase/sdk-ts/generated/types.gen'
-import { PageHeader } from '@/components/patterns/page-header'
+import { PageShell } from '@/components/patterns/page-shell'
 import { useOrg } from '@/hooks/useOrg'
 import { TrendingUp, Banknote, AlertCircle } from 'lucide-react'
 import { MetricCard, MetricCardSkeleton } from '@/features/dues/components/metric-card'
@@ -56,16 +56,15 @@ function FinancesOverviewPage() {
   const monthlyData: MonthlyData[] = metricsData?.monthlyBreakdown ?? []
 
   return (
-    <div className="space-y-5">
-      <PageHeader
-        title="Finances Overview"
-        subtitle="Collection metrics, trends, and recent activity"
-        breadcrumbs={[
-          { label: 'Officer', href: `/org/${orgSlug}/officer/dashboard` },
-          { label: 'Finances' },
-        ]}
-      />
-
+    <PageShell
+      title="Finances Overview"
+      subtitle="Collection metrics, trends, and recent activity"
+      breadcrumbs={[
+        { label: 'Officer', href: `/org/${orgSlug}/officer/dashboard` },
+        { label: 'Finances' },
+      ]}
+    >
+      <div className="space-y-5">
       {/* Metric cards */}
       {dashLoading ? (
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -137,6 +136,7 @@ function FinancesOverviewPage() {
 
       {/* Recent activity */}
       <RecentActivityFeed orgId={orgId} orgSlug={orgSlug} />
-    </div>
+      </div>
+    </PageShell>
   )
 }

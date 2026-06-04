@@ -1,4 +1,4 @@
-import { describe, test, expect, vi } from 'vitest'
+import { describe, test, expect, vi } from '@/test/vitest-shim'
 import { screen, within } from '@testing-library/react'
 import { renderWithProviders } from '@/test/utils'
 import { ArrearsBreakdown } from './arrears-breakdown'

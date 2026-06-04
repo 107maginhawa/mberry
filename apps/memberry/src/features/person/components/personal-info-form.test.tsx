@@ -1,4 +1,4 @@
-import { describe, test, expect, afterEach } from 'vitest'
+import { describe, test, expect, afterEach } from 'bun:test'
 import { render, screen, cleanup, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { PersonalInfoForm } from './personal-info-form'

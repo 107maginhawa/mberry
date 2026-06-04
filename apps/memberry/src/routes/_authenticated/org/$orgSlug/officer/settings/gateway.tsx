@@ -1,6 +1,6 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { GatewaySetup } from '@/features/dues/components/gateway-setup'
-import { PageHeader } from '@/components/patterns/page-header'
+import { PageShell } from '@/components/patterns/page-shell'
 import { GlassCard } from '@/components/motion/glass-card'
 import { useOrg } from '@/hooks/useOrg'
 
@@ -14,18 +14,19 @@ function GatewaySettingsPage() {
   // Desktop only — gateway config should not be done on mobile
   const isMobile = typeof window !== 'undefined' && window.innerWidth < 768
 
+  const gatewayBreadcrumbs = [
+    { label: 'Officer', href: `/org/${orgSlug}/officer/dashboard` },
+    { label: 'Settings' },
+    { label: 'Gateway' },
+  ]
+
   if (isMobile) {
     return (
-      <div className="space-y-6">
-        <PageHeader
-          title="Payment Gateway"
-          subtitle="Configure payment processing"
-          breadcrumbs={[
-            { label: 'Officer', href: `/org/${orgSlug}/officer/dashboard` },
-            { label: 'Settings' },
-            { label: 'Gateway' },
-          ]}
-        />
+      <PageShell
+        title="Payment Gateway"
+        subtitle="Configure payment processing"
+        breadcrumbs={gatewayBreadcrumbs}
+      >
         <GlassCard className="p-6 text-center">
           <h2 className="text-h3 mb-2">Desktop Only</h2>
           <p className="text-sm text-[var(--color-muted)]">
@@ -33,24 +34,19 @@ function GatewaySettingsPage() {
             gateway settings.
           </p>
         </GlassCard>
-      </div>
+      </PageShell>
     )
   }
 
   return (
-    <div className="space-y-6">
-      <PageHeader
-        title="Payment Gateway"
-        subtitle="Configure payment processing"
-        breadcrumbs={[
-          { label: 'Officer', href: `/org/${orgSlug}/officer/dashboard` },
-          { label: 'Settings' },
-          { label: 'Gateway' },
-        ]}
-      />
+    <PageShell
+      title="Payment Gateway"
+      subtitle="Configure payment processing"
+      breadcrumbs={gatewayBreadcrumbs}
+    >
       <GlassCard className="p-6">
         <GatewaySetup orgId={orgId} />
       </GlassCard>
-    </div>
+    </PageShell>
   )
 }

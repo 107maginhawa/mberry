@@ -1,7 +1,7 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { useMutation } from '@tanstack/react-query'
 import { FileText, Send } from 'lucide-react'
-import { PageHeader } from '@/components/patterns/page-header'
+import { PageShell } from '@/components/patterns/page-shell'
 import { GlassCard } from '@/components/motion/glass-card'
 import { useOrg } from '@/hooks/useOrg'
 import { api } from '@/lib/api'
@@ -57,9 +57,7 @@ function OfficerCertificates() {
   }
 
   return (
-    <div className="space-y-6">
-      <PageHeader title="Certificate Management" subtitle="Issue and verify certificates" />
-
+    <PageShell title="Certificate Management" subtitle="Issue and verify certificates">
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <GlassCard className="p-5">
           <h3 className="font-semibold mb-4 flex items-center gap-2">
@@ -161,6 +159,6 @@ function OfficerCertificates() {
           </div>
         </GlassCard>
       </div>
-    </div>
+    </PageShell>
   )
 }

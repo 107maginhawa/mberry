@@ -25,7 +25,7 @@ export function YesNoQuestion({ value, onChange }: YesNoQuestionProps) {
               : 'bg-[var(--color-surface-elevated)] border-2 border-[var(--color-surface-border-glass)] text-[var(--color-text)] hover:border-[var(--color-success)]'
           }`}
       >
-        <ThumbsUp size={22} />
+        <ThumbsUp size={24} />
         Yes
       </Button>
       <Button
@@ -38,7 +38,7 @@ export function YesNoQuestion({ value, onChange }: YesNoQuestionProps) {
               : 'bg-[var(--color-surface-elevated)] border-2 border-[var(--color-surface-border-glass)] text-[var(--color-text)] hover:border-[var(--color-error)]'
           }`}
       >
-        <ThumbsDown size={22} />
+        <ThumbsDown size={24} />
         No
       </Button>
     </div>

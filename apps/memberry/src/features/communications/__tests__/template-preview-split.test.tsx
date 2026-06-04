@@ -1,4 +1,4 @@
-import { describe, test, expect, vi } from 'vitest'
+import { describe, test, expect, vi } from '@/test/vitest-shim'
 import { render, screen, fireEvent } from '@testing-library/react'
 // SUT — static first-party import (Confidence scanner reads top-of-file)
 import { TemplateSplitEditor } from '../components/template-split-editor'

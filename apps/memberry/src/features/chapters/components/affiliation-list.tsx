@@ -1,5 +1,5 @@
 import { useQuery } from '@tanstack/react-query'
-import { listChapterAffiliationsOptions } from '@monobase/sdk-ts/generated/@tanstack/react-query.gen'
+import { listChapterAffiliationsOptions } from '@monobase/sdk-ts/generated/react-query'
 import type { ChapterAffiliation } from '@monobase/sdk-ts/generated/types.gen'
 import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from '@monobase/ui'
 

@@ -9,6 +9,7 @@ import { getBookingEventOptions } from '@monobase/sdk-ts/generated/react-query'
 import { SdkError } from '@monobase/sdk-ts/client'
 import { BookingEventEditor } from '@/features/booking/components/booking-event-editor'
 import { Loader2 } from 'lucide-react'
+import { PageShell } from '@/components/patterns/page-shell'
 
 export const Route = createFileRoute('/_authenticated/my/schedule')({
   component: SchedulePage,
@@ -28,33 +29,31 @@ function SchedulePage() {
   const notFound = error instanceof SdkError && error.status === 404
   const existing = notFound ? null : data ?? null
 
+  const subtitle = "Publish your weekly availability so other members can book sessions with you."
+
   if (isPending) {
     return (
-      <div className="flex items-center justify-center p-12">
-        <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
-      </div>
+      <PageShell title="Schedule" subtitle={subtitle}>
+        <div className="flex items-center justify-center p-12">
+          <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+        </div>
+      </PageShell>
     )
   }
 
   if (error && !notFound) {
     return (
-      <div className="p-6">
+      <PageShell title="Schedule" subtitle={subtitle}>
         <p className="text-sm text-destructive">
           Could not load your schedule: {error instanceof Error ? error.message : 'unknown error'}
         </p>
-      </div>
+      </PageShell>
     )
   }
 
   return (
-    <div className="flex flex-col gap-6 max-w-3xl">
-      <div>
-        <h1 className="text-h1">Schedule</h1>
-        <p className="text-muted-foreground">
-          Publish your weekly availability so other members can book sessions with you.
-        </p>
-      </div>
+    <PageShell title="Schedule" subtitle={subtitle}>
       <BookingEventEditor existing={existing} />
-    </div>
+    </PageShell>
   )
 }

@@ -1,4 +1,4 @@
-import { describe, it, expect } from 'vitest'
+import { describe, it, expect } from 'bun:test'
 import { renderWithProviders, screen } from '@/test/utils'
 import { TrustBadges, type TrustSignals } from './trust-badges'
 

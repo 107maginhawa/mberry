@@ -1535,6 +1535,853 @@
       "store_writes": [],
       "api_calls": []
     },
+    "PageShell": {
+      "props_received_from": [
+        {
+          "parent": "AccountSettingsPage",
+          "props": [
+            "subtitle",
+            "title"
+          ]
+        },
+        {
+          "parent": "AnalyticsDashboardPage",
+          "props": [
+            "breadcrumbs",
+            "subtitle",
+            "title"
+          ]
+        },
+        {
+          "parent": "AnnouncementDetailPage",
+          "props": [
+            "breadcrumbs",
+            "title"
+          ]
+        },
+        {
+          "parent": "ApplicationsPage",
+          "props": [
+            "breadcrumbs",
+            "subtitle",
+            "title"
+          ]
+        },
+        {
+          "parent": "AssociationDetailPage",
+          "props": [
+            "actions",
+            "breadcrumbs",
+            "maxWidth",
+            "subtitle",
+            "title"
+          ]
+        },
+        {
+          "parent": "AssociationsPage",
+          "props": [
+            "actions",
+            "maxWidth",
+            "subtitle",
+            "title"
+          ]
+        },
+        {
+          "parent": "BillingPage",
+          "props": [
+            "subtitle",
+            "title"
+          ]
+        },
+        {
+          "parent": "CategoriesPage",
+          "props": [
+            "breadcrumbs",
+            "subtitle",
+            "title"
+          ]
+        },
+        {
+          "parent": "CertificateDetail",
+          "props": [
+            "breadcrumbs",
+            "title"
+          ]
+        },
+        {
+          "parent": "ChaptersSettingsPage",
+          "props": [
+            "breadcrumbs",
+            "subtitle",
+            "title"
+          ]
+        },
+        {
+          "parent": "CommunicationsBroadcasts",
+          "props": [
+            "maxWidth",
+            "subtitle",
+            "title"
+          ]
+        },
+        {
+          "parent": "CompliancePage",
+          "props": [
+            "subtitle",
+            "title"
+          ]
+        },
+        {
+          "parent": "CpdSettings",
+          "props": [
+            "actions",
+            "subtitle",
+            "title"
+          ]
+        },
+        {
+          "parent": "CreditLog",
+          "props": [
+            "breadcrumbs",
+            "subtitle",
+            "title"
+          ]
+        },
+        {
+          "parent": "CreditReport",
+          "props": [
+            "breadcrumbs",
+            "subtitle",
+            "title"
+          ]
+        },
+        {
+          "parent": "DashboardPage",
+          "props": [
+            "subtitle",
+            "title"
+          ]
+        },
+        {
+          "parent": "DataExportPage",
+          "props": [
+            "breadcrumbs",
+            "maxWidth",
+            "subtitle",
+            "title"
+          ]
+        },
+        {
+          "parent": "DirectoryPage",
+          "props": [
+            "breadcrumbs",
+            "maxWidth",
+            "subtitle",
+            "title"
+          ]
+        },
+        {
+          "parent": "DiscoverEvents",
+          "props": [
+            "maxWidth",
+            "subtitle",
+            "title"
+          ]
+        },
+        {
+          "parent": "DmIndexPage",
+          "props": [
+            "breadcrumbs",
+            "title"
+          ]
+        },
+        {
+          "parent": "DocumentDetail",
+          "props": [
+            "actions",
+            "breadcrumbs",
+            "title"
+          ]
+        },
+        {
+          "parent": "DuesSchedulePage",
+          "props": [
+            "breadcrumbs",
+            "subtitle",
+            "title"
+          ]
+        },
+        {
+          "parent": "EditElection",
+          "props": [
+            "breadcrumbs",
+            "subtitle",
+            "title"
+          ]
+        },
+        {
+          "parent": "ElectionDetailLayout",
+          "props": [
+            "breadcrumbs",
+            "title"
+          ]
+        },
+        {
+          "parent": "EmailHealth",
+          "props": [
+            "maxWidth",
+            "subtitle",
+            "title"
+          ]
+        },
+        {
+          "parent": "EventAttendance",
+          "props": [
+            "actions",
+            "breadcrumbs",
+            "subtitle",
+            "title"
+          ]
+        },
+        {
+          "parent": "EventDetail",
+          "props": [
+            "actions",
+            "breadcrumbs",
+            "title"
+          ]
+        },
+        {
+          "parent": "FinancesAssessmentsPage",
+          "props": [
+            "breadcrumbs",
+            "subtitle",
+            "title"
+          ]
+        },
+        {
+          "parent": "FinancesOverviewPage",
+          "props": [
+            "breadcrumbs",
+            "subtitle",
+            "title"
+          ]
+        },
+        {
+          "parent": "FinancialMembersPage",
+          "props": [
+            "breadcrumbs",
+            "subtitle",
+            "title"
+          ]
+        },
+        {
+          "parent": "FinancialReportsPage",
+          "props": [
+            "breadcrumbs",
+            "subtitle",
+            "title"
+          ]
+        },
+        {
+          "parent": "FundsPage",
+          "props": [
+            "actions",
+            "breadcrumbs",
+            "subtitle",
+            "title"
+          ]
+        },
+        {
+          "parent": "GatewaySettingsPage",
+          "props": [
+            "breadcrumbs",
+            "subtitle",
+            "title"
+          ]
+        },
+        {
+          "parent": "GovernancePage",
+          "props": [
+            "breadcrumbs",
+            "subtitle",
+            "title"
+          ]
+        },
+        {
+          "parent": "InstitutionalMembershipDetailPage",
+          "props": [
+            "actions",
+            "breadcrumbs",
+            "subtitle",
+            "title"
+          ]
+        },
+        {
+          "parent": "InstitutionalMembershipsPage",
+          "props": [
+            "actions",
+            "breadcrumbs",
+            "subtitle",
+            "title"
+          ]
+        },
+        {
+          "parent": "InvoiceDetailPage",
+          "props": [
+            "actions",
+            "breadcrumbs",
+            "title"
+          ]
+        },
+        {
+          "parent": "InvoicesPage",
+          "props": [
+            "actions",
+            "breadcrumbs",
+            "subtitle",
+            "title"
+          ]
+        },
+        {
+          "parent": "MemberAnnouncementFeed",
+          "props": [
+            "breadcrumbs",
+            "subtitle",
+            "title"
+          ]
+        },
+        {
+          "parent": "MemberAnnouncementPage",
+          "props": [
+            "actions",
+            "title"
+          ]
+        },
+        {
+          "parent": "MemberDocumentDetailPage",
+          "props": [
+            "breadcrumbs",
+            "title"
+          ]
+        },
+        {
+          "parent": "MemberDocumentsPage",
+          "props": [
+            "breadcrumbs",
+            "subtitle",
+            "title"
+          ]
+        },
+        {
+          "parent": "MemberDuesPage",
+          "props": [
+            "breadcrumbs",
+            "maxWidth",
+            "subtitle",
+            "title"
+          ]
+        },
+        {
+          "parent": "MemberElectionDetailPage",
+          "props": [
+            "breadcrumbs",
+            "title"
+          ]
+        },
+        {
+          "parent": "MemberElectionsPage",
+          "props": [
+            "breadcrumbs",
+            "subtitle",
+            "title"
+          ]
+        },
+        {
+          "parent": "MemberFinancialDetailPage",
+          "props": [
+            "breadcrumbs",
+            "title"
+          ]
+        },
+        {
+          "parent": "MemberProfilePage",
+          "props": [
+            "breadcrumbs",
+            "subtitle",
+            "title"
+          ]
+        },
+        {
+          "parent": "MembersDirectoryPage",
+          "props": [
+            "breadcrumbs",
+            "subtitle",
+            "title"
+          ]
+        },
+        {
+          "parent": "MembersPage",
+          "props": [
+            "maxWidth",
+            "subtitle",
+            "title"
+          ]
+        },
+        {
+          "parent": "MessagesIndexPage",
+          "props": [
+            "title"
+          ]
+        },
+        {
+          "parent": "ModerationQueue",
+          "props": [
+            "maxWidth",
+            "subtitle",
+            "title"
+          ]
+        },
+        {
+          "parent": "MyCalendar",
+          "props": [
+            "breadcrumbs",
+            "subtitle",
+            "title"
+          ]
+        },
+        {
+          "parent": "MyCertificates",
+          "props": [
+            "subtitle",
+            "title"
+          ]
+        },
+        {
+          "parent": "MyCpdDashboard",
+          "props": [
+            "subtitle",
+            "title"
+          ]
+        },
+        {
+          "parent": "MyCredits",
+          "props": [
+            "actions",
+            "subtitle",
+            "title"
+          ]
+        },
+        {
+          "parent": "MyEvents",
+          "props": [
+            "subtitle",
+            "title"
+          ]
+        },
+        {
+          "parent": "MyIdCard",
+          "props": [
+            "breadcrumbs",
+            "subtitle",
+            "title"
+          ]
+        },
+        {
+          "parent": "MyNotificationsPage",
+          "props": [
+            "subtitle",
+            "title"
+          ]
+        },
+        {
+          "parent": "MyOrganizationsPage",
+          "props": [
+            "actions",
+            "subtitle",
+            "title"
+          ]
+        },
+        {
+          "parent": "MyPaymentsPage",
+          "props": [
+            "breadcrumbs",
+            "maxWidth",
+            "subtitle",
+            "title"
+          ]
+        },
+        {
+          "parent": "MyProfilePage",
+          "props": [
+            "actions",
+            "subtitle",
+            "title"
+          ]
+        },
+        {
+          "parent": "MySettingsPage",
+          "props": [
+            "subtitle",
+            "title"
+          ]
+        },
+        {
+          "parent": "MySurveys",
+          "props": [
+            "subtitle",
+            "title"
+          ]
+        },
+        {
+          "parent": "MyTraining",
+          "props": [
+            "subtitle",
+            "title"
+          ]
+        },
+        {
+          "parent": "NewAnnouncementPage",
+          "props": [
+            "breadcrumbs",
+            "subtitle",
+            "title"
+          ]
+        },
+        {
+          "parent": "NewElection",
+          "props": [
+            "breadcrumbs",
+            "subtitle",
+            "title"
+          ]
+        },
+        {
+          "parent": "NewEvent",
+          "props": [
+            "breadcrumbs",
+            "subtitle",
+            "title"
+          ]
+        },
+        {
+          "parent": "NewInstitutionalMembershipPage",
+          "props": [
+            "breadcrumbs",
+            "subtitle",
+            "title"
+          ]
+        },
+        {
+          "parent": "NewSurveyPage",
+          "props": [
+            "breadcrumbs",
+            "subtitle",
+            "title"
+          ]
+        },
+        {
+          "parent": "NewTemplatePage",
+          "props": [
+            "breadcrumbs",
+            "subtitle",
+            "title"
+          ]
+        },
+        {
+          "parent": "NewTraining",
+          "props": [
+            "breadcrumbs",
+            "subtitle",
+            "title"
+          ]
+        },
+        {
+          "parent": "NotificationsPage",
+          "props": [
+            "breadcrumbs",
+            "subtitle",
+            "title"
+          ]
+        },
+        {
+          "parent": "OfficerCertificates",
+          "props": [
+            "subtitle",
+            "title"
+          ]
+        },
+        {
+          "parent": "OfficerCommunications",
+          "props": [
+            "actions",
+            "breadcrumbs",
+            "subtitle",
+            "title"
+          ]
+        },
+        {
+          "parent": "OfficerCompliance",
+          "props": [
+            "actions",
+            "subtitle",
+            "title"
+          ]
+        },
+        {
+          "parent": "OfficerDocuments",
+          "props": [
+            "breadcrumbs",
+            "subtitle",
+            "title"
+          ]
+        },
+        {
+          "parent": "OfficerElections",
+          "props": [
+            "actions",
+            "breadcrumbs",
+            "subtitle",
+            "title"
+          ]
+        },
+        {
+          "parent": "OfficerEvents",
+          "props": [
+            "actions",
+            "breadcrumbs",
+            "subtitle",
+            "title"
+          ]
+        },
+        {
+          "parent": "OfficerMessagesPage",
+          "props": [
+            "actions",
+            "maxWidth",
+            "spacing",
+            "title"
+          ]
+        },
+        {
+          "parent": "OfficerPaymentsPage",
+          "props": [
+            "actions",
+            "breadcrumbs",
+            "subtitle",
+            "title"
+          ]
+        },
+        {
+          "parent": "OfficerReviews",
+          "props": [
+            "breadcrumbs",
+            "subtitle",
+            "title"
+          ]
+        },
+        {
+          "parent": "OfficersPage",
+          "props": [
+            "breadcrumbs",
+            "subtitle",
+            "title"
+          ]
+        },
+        {
+          "parent": "OfficerSurveys",
+          "props": [
+            "actions",
+            "breadcrumbs",
+            "subtitle",
+            "title"
+          ]
+        },
+        {
+          "parent": "OfficerTraining",
+          "props": [
+            "actions",
+            "breadcrumbs",
+            "subtitle",
+            "title"
+          ]
+        },
+        {
+          "parent": "OrganizationDetailPage",
+          "props": [
+            "actions",
+            "breadcrumbs",
+            "maxWidth",
+            "subtitle",
+            "title"
+          ]
+        },
+        {
+          "parent": "OrganizationsPage",
+          "props": [
+            "actions",
+            "maxWidth",
+            "subtitle",
+            "title"
+          ]
+        },
+        {
+          "parent": "OrgEvents",
+          "props": [
+            "subtitle",
+            "title"
+          ]
+        },
+        {
+          "parent": "OrgHome",
+          "props": [
+            "breadcrumbs",
+            "subtitle",
+            "title"
+          ]
+        },
+        {
+          "parent": "OrgSettingsPage",
+          "props": [
+            "breadcrumbs",
+            "subtitle",
+            "title"
+          ]
+        },
+        {
+          "parent": "OrgTraining",
+          "props": [
+            "subtitle",
+            "title"
+          ]
+        },
+        {
+          "parent": "PaymentDetailPage",
+          "props": [
+            "actions",
+            "breadcrumbs",
+            "title"
+          ]
+        },
+        {
+          "parent": "PlatformTemplates",
+          "props": [
+            "actions",
+            "maxWidth",
+            "subtitle",
+            "title"
+          ]
+        },
+        {
+          "parent": "ProvidersPage",
+          "props": [
+            "actions",
+            "breadcrumbs",
+            "subtitle",
+            "title"
+          ]
+        },
+        {
+          "parent": "RecordPaymentPage",
+          "props": [
+            "breadcrumbs",
+            "subtitle",
+            "title"
+          ]
+        },
+        {
+          "parent": "RosterImportPage",
+          "props": [
+            "breadcrumbs",
+            "subtitle",
+            "title"
+          ]
+        },
+        {
+          "parent": "RosterPage",
+          "props": [
+            "actions",
+            "breadcrumbs",
+            "subtitle",
+            "title"
+          ]
+        },
+        {
+          "parent": "SchedulePage",
+          "props": [
+            "subtitle",
+            "title"
+          ]
+        },
+        {
+          "parent": "SecuritySettingsPage",
+          "props": [
+            "subtitle",
+            "title"
+          ]
+        },
+        {
+          "parent": "SentHistoryPage",
+          "props": [
+            "breadcrumbs",
+            "subtitle",
+            "title"
+          ]
+        },
+        {
+          "parent": "SurveyDetailPage",
+          "props": [
+            "breadcrumbs",
+            "subtitle",
+            "title"
+          ]
+        },
+        {
+          "parent": "TemplateListPage",
+          "props": [
+            "actions",
+            "breadcrumbs",
+            "subtitle",
+            "title"
+          ]
+        },
+        {
+          "parent": "TrainingAttendance",
+          "props": [
+            "actions",
+            "breadcrumbs",
+            "subtitle",
+            "title"
+          ]
+        },
+        {
+          "parent": "TrainingDetail",
+          "props": [
+            "actions",
+            "breadcrumbs",
+            "title"
+          ]
+        },
+        {
+          "parent": "VerificationsPage",
+          "props": [
+            "subtitle",
+            "title"
+          ]
+        },
+        {
+          "parent": "VotePage",
+          "props": [
+            "breadcrumbs",
+            "title"
+          ]
+        }
+      ],
+      "events_emitted_to": [],
+      "store_reads": [],
+      "store_writes": [],
+      "api_calls": []
+    },
     "AssociationDetailPage": {
       "props_received_from": [],
       "events_emitted_to": [],
@@ -3360,522 +4207,9 @@
     "PageHeader": {
       "props_received_from": [
         {
-          "parent": "AnalyticsDashboardPage",
-          "props": [
-            "breadcrumbs",
-            "subtitle",
-            "title"
-          ]
-        },
-        {
-          "parent": "AnnouncementDetailPage",
-          "props": [
-            "breadcrumbs",
-            "title"
-          ]
-        },
-        {
-          "parent": "ApplicationsPage",
-          "props": [
-            "breadcrumbs",
-            "subtitle",
-            "title"
-          ]
-        },
-        {
-          "parent": "CategoriesPage",
-          "props": [
-            "breadcrumbs",
-            "subtitle",
-            "title"
-          ]
-        },
-        {
-          "parent": "CertificateDetail",
-          "props": [
-            "breadcrumbs",
-            "title"
-          ]
-        },
-        {
-          "parent": "ChaptersSettingsPage",
-          "props": [
-            "breadcrumbs",
-            "subtitle",
-            "title"
-          ]
-        },
-        {
-          "parent": "CpdSettings",
-          "props": [
-            "actions",
-            "subtitle",
-            "title"
-          ]
-        },
-        {
-          "parent": "CreditLog",
-          "props": [
-            "breadcrumbs",
-            "subtitle",
-            "title"
-          ]
-        },
-        {
-          "parent": "CreditReport",
-          "props": [
-            "breadcrumbs",
-            "subtitle",
-            "title"
-          ]
-        },
-        {
-          "parent": "DashboardPage",
-          "props": [
-            "subtitle",
-            "title"
-          ]
-        },
-        {
-          "parent": "DataExportPage",
-          "props": [
-            "breadcrumbs",
-            "subtitle",
-            "title"
-          ]
-        },
-        {
-          "parent": "DirectoryPage",
-          "props": [
-            "breadcrumbs",
-            "subtitle",
-            "title"
-          ]
-        },
-        {
-          "parent": "DiscoverEvents",
-          "props": [
-            "subtitle",
-            "title"
-          ]
-        },
-        {
-          "parent": "DmIndexPage",
-          "props": [
-            "breadcrumbs",
-            "title"
-          ]
-        },
-        {
-          "parent": "DocumentDetail",
-          "props": [
-            "actions",
-            "breadcrumbs",
-            "title"
-          ]
-        },
-        {
-          "parent": "DuesSchedulePage",
-          "props": [
-            "breadcrumbs",
-            "subtitle",
-            "title"
-          ]
-        },
-        {
-          "parent": "EditElection",
-          "props": [
-            "breadcrumbs",
-            "subtitle",
-            "title"
-          ]
-        },
-        {
-          "parent": "ElectionDetailLayout",
-          "props": [
-            "breadcrumbs",
-            "title"
-          ]
-        },
-        {
-          "parent": "EventAttendance",
-          "props": [
-            "actions",
-            "breadcrumbs",
-            "subtitle",
-            "title"
-          ]
-        },
-        {
-          "parent": "EventDetail",
-          "props": [
-            "actions",
-            "breadcrumbs",
-            "title"
-          ]
-        },
-        {
-          "parent": "FinancesAssessmentsPage",
-          "props": [
-            "breadcrumbs",
-            "subtitle",
-            "title"
-          ]
-        },
-        {
-          "parent": "FinancesOverviewPage",
-          "props": [
-            "breadcrumbs",
-            "subtitle",
-            "title"
-          ]
-        },
-        {
-          "parent": "FinancialMembersPage",
-          "props": [
-            "breadcrumbs",
-            "subtitle",
-            "title"
-          ]
-        },
-        {
-          "parent": "FinancialReportsPage",
-          "props": [
-            "breadcrumbs",
-            "subtitle",
-            "title"
-          ]
-        },
-        {
-          "parent": "FundsPage",
-          "props": [
-            "actions",
-            "breadcrumbs",
-            "subtitle",
-            "title"
-          ]
-        },
-        {
-          "parent": "GatewaySettingsPage",
-          "props": [
-            "breadcrumbs",
-            "subtitle",
-            "title"
-          ]
-        },
-        {
-          "parent": "GovernancePage",
-          "props": [
-            "breadcrumbs",
-            "subtitle",
-            "title"
-          ]
-        },
-        {
-          "parent": "InstitutionalMembershipDetailPage",
-          "props": [
-            "actions",
-            "breadcrumbs",
-            "subtitle",
-            "title"
-          ]
-        },
-        {
-          "parent": "InstitutionalMembershipsPage",
-          "props": [
-            "actions",
-            "breadcrumbs",
-            "subtitle",
-            "title"
-          ]
-        },
-        {
-          "parent": "InvoiceDetailPage",
-          "props": [
-            "actions",
-            "breadcrumbs",
-            "title"
-          ]
-        },
-        {
-          "parent": "InvoicesPage",
-          "props": [
-            "actions",
-            "breadcrumbs",
-            "subtitle",
-            "title"
-          ]
-        },
-        {
-          "parent": "MemberAnnouncementFeed",
-          "props": [
-            "breadcrumbs",
-            "subtitle",
-            "title"
-          ]
-        },
-        {
-          "parent": "MemberAnnouncementPage",
-          "props": [
-            "title"
-          ]
-        },
-        {
           "parent": "MemberDetail",
           "props": [
             "breadcrumbs",
-            "title"
-          ]
-        },
-        {
-          "parent": "MemberDocumentDetailPage",
-          "props": [
-            "breadcrumbs",
-            "title"
-          ]
-        },
-        {
-          "parent": "MemberDocumentsPage",
-          "props": [
-            "breadcrumbs",
-            "subtitle",
-            "title"
-          ]
-        },
-        {
-          "parent": "MemberDuesPage",
-          "props": [
-            "breadcrumbs",
-            "subtitle",
-            "title"
-          ]
-        },
-        {
-          "parent": "MemberElectionDetailPage",
-          "props": [
-            "breadcrumbs",
-            "title"
-          ]
-        },
-        {
-          "parent": "MemberElectionsPage",
-          "props": [
-            "breadcrumbs",
-            "subtitle",
-            "title"
-          ]
-        },
-        {
-          "parent": "MemberFinancialDetailPage",
-          "props": [
-            "breadcrumbs",
-            "title"
-          ]
-        },
-        {
-          "parent": "MemberProfilePage",
-          "props": [
-            "breadcrumbs",
-            "subtitle",
-            "title"
-          ]
-        },
-        {
-          "parent": "MembersDirectoryPage",
-          "props": [
-            "breadcrumbs",
-            "subtitle",
-            "title"
-          ]
-        },
-        {
-          "parent": "MessagesIndexPage",
-          "props": [
-            "title"
-          ]
-        },
-        {
-          "parent": "MyCalendar",
-          "props": [
-            "breadcrumbs",
-            "subtitle",
-            "title"
-          ]
-        },
-        {
-          "parent": "MyCertificates",
-          "props": [
-            "subtitle",
-            "title"
-          ]
-        },
-        {
-          "parent": "MyCpdDashboard",
-          "props": [
-            "subtitle",
-            "title"
-          ]
-        },
-        {
-          "parent": "MyCredits",
-          "props": [
-            "actions",
-            "subtitle",
-            "title"
-          ]
-        },
-        {
-          "parent": "MyEvents",
-          "props": [
-            "subtitle",
-            "title"
-          ]
-        },
-        {
-          "parent": "MyIdCard",
-          "props": [
-            "breadcrumbs",
-            "subtitle",
-            "title"
-          ]
-        },
-        {
-          "parent": "MyNotificationsPage",
-          "props": [
-            "subtitle",
-            "title"
-          ]
-        },
-        {
-          "parent": "MyOrganizationsPage",
-          "props": [
-            "actions",
-            "subtitle",
-            "title"
-          ]
-        },
-        {
-          "parent": "MyPaymentsPage",
-          "props": [
-            "breadcrumbs",
-            "subtitle",
-            "title"
-          ]
-        },
-        {
-          "parent": "MyProfilePage",
-          "props": [
-            "actions",
-            "subtitle",
-            "title"
-          ]
-        },
-        {
-          "parent": "MySettingsPage",
-          "props": [
-            "subtitle",
-            "title"
-          ]
-        },
-        {
-          "parent": "MySurveys",
-          "props": [
-            "subtitle",
-            "title"
-          ]
-        },
-        {
-          "parent": "MyTraining",
-          "props": [
-            "subtitle",
-            "title"
-          ]
-        },
-        {
-          "parent": "NewAnnouncementPage",
-          "props": [
-            "breadcrumbs",
-            "subtitle",
-            "title"
-          ]
-        },
-        {
-          "parent": "NewElection",
-          "props": [
-            "breadcrumbs",
-            "subtitle",
-            "title"
-          ]
-        },
-        {
-          "parent": "NewEvent",
-          "props": [
-            "breadcrumbs",
-            "subtitle",
-            "title"
-          ]
-        },
-        {
-          "parent": "NewInstitutionalMembershipPage",
-          "props": [
-            "breadcrumbs",
-            "subtitle",
-            "title"
-          ]
-        },
-        {
-          "parent": "NewSurveyPage",
-          "props": [
-            "breadcrumbs",
-            "subtitle",
-            "title"
-          ]
-        },
-        {
-          "parent": "NewTemplatePage",
-          "props": [
-            "breadcrumbs",
-            "subtitle",
-            "title"
-          ]
-        },
-        {
-          "parent": "NewTraining",
-          "props": [
-            "breadcrumbs",
-            "subtitle",
-            "title"
-          ]
-        },
-        {
-          "parent": "NotificationsPage",
-          "props": [
-            "breadcrumbs",
-            "subtitle",
-            "title"
-          ]
-        },
-        {
-          "parent": "OfficerCertificates",
-          "props": [
-            "subtitle",
-            "title"
-          ]
-        },
-        {
-          "parent": "OfficerCommunications",
-          "props": [
-            "actions",
-            "breadcrumbs",
-            "subtitle",
-            "title"
-          ]
-        },
-        {
-          "parent": "OfficerCompliance",
-          "props": [
-            "actions",
-            "subtitle",
             "title"
           ]
         },
@@ -3887,205 +4221,8 @@
           ]
         },
         {
-          "parent": "OfficerDocuments",
-          "props": [
-            "breadcrumbs",
-            "subtitle",
-            "title"
-          ]
-        },
-        {
-          "parent": "OfficerElections",
-          "props": [
-            "actions",
-            "breadcrumbs",
-            "subtitle",
-            "title"
-          ]
-        },
-        {
-          "parent": "OfficerEvents",
-          "props": [
-            "actions",
-            "breadcrumbs",
-            "subtitle",
-            "title"
-          ]
-        },
-        {
-          "parent": "OfficerMessagesPage",
-          "props": [
-            "actions",
-            "title"
-          ]
-        },
-        {
-          "parent": "OfficerPaymentsPage",
-          "props": [
-            "actions",
-            "breadcrumbs",
-            "subtitle",
-            "title"
-          ]
-        },
-        {
-          "parent": "OfficerReviews",
-          "props": [
-            "breadcrumbs",
-            "subtitle",
-            "title"
-          ]
-        },
-        {
-          "parent": "OfficersPage",
-          "props": [
-            "breadcrumbs",
-            "subtitle",
-            "title"
-          ]
-        },
-        {
-          "parent": "OfficerSurveys",
-          "props": [
-            "actions",
-            "breadcrumbs",
-            "subtitle",
-            "title"
-          ]
-        },
-        {
-          "parent": "OfficerTraining",
-          "props": [
-            "actions",
-            "breadcrumbs",
-            "subtitle",
-            "title"
-          ]
-        },
-        {
-          "parent": "OrgEvents",
-          "props": [
-            "subtitle",
-            "title"
-          ]
-        },
-        {
-          "parent": "OrgHome",
-          "props": [
-            "breadcrumbs",
-            "subtitle",
-            "title"
-          ]
-        },
-        {
-          "parent": "OrgSettingsPage",
-          "props": [
-            "breadcrumbs",
-            "subtitle",
-            "title"
-          ]
-        },
-        {
-          "parent": "OrgTraining",
-          "props": [
-            "subtitle",
-            "title"
-          ]
-        },
-        {
-          "parent": "PaymentDetailPage",
-          "props": [
-            "actions",
-            "breadcrumbs",
-            "title"
-          ]
-        },
-        {
-          "parent": "ProvidersPage",
-          "props": [
-            "actions",
-            "breadcrumbs",
-            "subtitle",
-            "title"
-          ]
-        },
-        {
           "parent": "PublicEventPage",
           "props": [
-            "title"
-          ]
-        },
-        {
-          "parent": "RecordPaymentPage",
-          "props": [
-            "breadcrumbs",
-            "subtitle",
-            "title"
-          ]
-        },
-        {
-          "parent": "RosterImportPage",
-          "props": [
-            "breadcrumbs",
-            "subtitle",
-            "title"
-          ]
-        },
-        {
-          "parent": "RosterPage",
-          "props": [
-            "actions",
-            "breadcrumbs",
-            "subtitle",
-            "title"
-          ]
-        },
-        {
-          "parent": "SentHistoryPage",
-          "props": [
-            "breadcrumbs",
-            "subtitle",
-            "title"
-          ]
-        },
-        {
-          "parent": "SurveyDetailPage",
-          "props": [
-            "breadcrumbs",
-            "subtitle",
-            "title"
-          ]
-        },
-        {
-          "parent": "TemplateListPage",
-          "props": [
-            "actions",
-            "breadcrumbs",
-            "subtitle",
-            "title"
-          ]
-        },
-        {
-          "parent": "TrainingAttendance",
-          "props": [
-            "actions",
-            "breadcrumbs",
-            "subtitle",
-            "title"
-          ]
-        },
-        {
-          "parent": "TrainingDetail",
-          "props": [
-            "actions",
-            "breadcrumbs",
-            "title"
-          ]
-        },
-        {
-          "parent": "VotePage",
-          "props": [
-            "breadcrumbs",
             "title"
           ]
         }

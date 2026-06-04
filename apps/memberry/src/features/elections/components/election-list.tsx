@@ -3,7 +3,7 @@ import { useQuery } from '@tanstack/react-query'
 import { Link, useParams } from '@tanstack/react-router'
 import { Vote, ChevronRight, Clock, FileText, CheckCircle2 } from 'lucide-react'
 import { Skeleton } from '@monobase/ui'
-import { listElectionsOptions } from '@monobase/sdk-ts/generated/@tanstack/react-query.gen'
+import { listElectionsOptions } from '@monobase/sdk-ts/generated/react-query'
 import { StatusBadge as CanonicalStatusBadge, type StatusBadgeVariant } from '@/components/patterns/status-badge'
 import { ELECTION_STATUS_VARIANT, ELECTION_STATUS_LABELS, type ElectionStatus } from '../lib/election-status'
 

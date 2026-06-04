@@ -41,12 +41,12 @@ function mapApiNotification(raw: any): Notification {
 const CATEGORIES: NotifCategory[] = ['All', 'Announcements', 'Payments', 'Events', 'Training', 'System']
 
 const CATEGORY_ICONS: Record<NotifCategory, React.ReactNode> = {
-  All: <Bell size={13} />,
-  Announcements: <Megaphone size={13} />,
-  Payments: <CreditCard size={13} />,
-  Events: <Calendar size={13} />,
-  Training: <BookOpen size={13} />,
-  System: <Settings size={13} />,
+  All: <Bell size={12} />,
+  Announcements: <Megaphone size={12} />,
+  Payments: <CreditCard size={12} />,
+  Events: <Calendar size={12} />,
+  Training: <BookOpen size={12} />,
+  System: <Settings size={12} />,
 }
 
 function getDateGroup(date: Date): string {
@@ -161,6 +161,7 @@ export function NotificationInbox() {
 
       {/* Notification list */}
       {grouped.length === 0 ? (
+        // ui-c-exempt: empty-state-emphasis — inbox-empty EmptyState
         <EmptyState
           icon={<Bell size={40} />}
           headline={notifications.length === 0 ? 'No notifications yet' : 'No notifications in this category'}

@@ -21,7 +21,7 @@ import {
   AlertDialogTitle,
 } from '@monobase/ui'
 import { DatePicker } from '@/components/patterns/date-picker'
-import { PageHeader } from '@/components/patterns/page-header'
+import { PageShell } from '@/components/patterns/page-shell'
 import { GlassCard } from '@/components/motion/glass-card'
 import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from '@monobase/ui'
 import { EmptyState } from '@/components/patterns/empty-state'
@@ -122,60 +122,45 @@ function ProvidersPage() {
 
   const isSubmitting = createMutation.isPending || editMutation.isPending
 
+  const providersBreadcrumbs = [
+    { label: 'Officer', href: `/org/${orgSlug}/officer/dashboard` },
+    { label: 'Settings' },
+    { label: 'Providers' },
+  ]
+
   if (isLoading) {
     return (
-      <div className="space-y-6">
-        <PageHeader
-          title="Accredited Providers"
-          breadcrumbs={[
-            { label: 'Officer', href: `/org/${orgSlug}/officer/dashboard` },
-            { label: 'Settings' },
-            { label: 'Providers' },
-          ]}
-        />
+      <PageShell title="Accredited Providers" breadcrumbs={providersBreadcrumbs}>
         <TableSkeleton />
-      </div>
+      </PageShell>
     )
   }
 
   if (error) {
     return (
-      <div className="space-y-6">
-        <PageHeader
-          title="Accredited Providers"
-          breadcrumbs={[
-            { label: 'Officer', href: `/org/${orgSlug}/officer/dashboard` },
-            { label: 'Settings' },
-            { label: 'Providers' },
-          ]}
-        />
+      <PageShell title="Accredited Providers" breadcrumbs={providersBreadcrumbs}>
         <GlassCard className="p-8">
           <EmptyState
             headline="Failed to load providers"
             description="There was an error loading accredited providers. Please try again."
           />
         </GlassCard>
-      </div>
+      </PageShell>
     )
   }
 
   return (
-    <div className="space-y-6">
-      <PageHeader
-        title="Accredited Providers"
-        subtitle="Manage PRC-accredited CPD providers for your organization"
-        breadcrumbs={[
-          { label: 'Officer', href: `/org/${orgSlug}/officer/dashboard` },
-          { label: 'Settings' },
-          { label: 'Providers' },
-        ]}
-        actions={
-          <Button onClick={() => setShowCreateDialog(true)}>
-            New Provider
-          </Button>
-        }
-      />
-
+    <PageShell
+      title="Accredited Providers"
+      subtitle="Manage PRC-accredited CPD providers for your organization"
+      breadcrumbs={providersBreadcrumbs}
+      actions={
+        <Button onClick={() => setShowCreateDialog(true)}>
+          New Provider
+        </Button>
+      }
+    >
+      <div className="space-y-6">
       <GlassCard>
         <Table className="text-sm">
           <TableHeader className="bg-[var(--color-surface-warm)]">
@@ -314,7 +299,8 @@ function ProvidersPage() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
-    </div>
+      </div>
+    </PageShell>
   )
 }
 

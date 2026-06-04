@@ -8,9 +8,9 @@ import {
   markDuesInvoicePaidMutation,
   updateDuesInvoiceMutation,
   generateDuesInvoicesForOrgMutation,
-} from '@monobase/sdk-ts/generated/@tanstack/react-query.gen'
+} from '@monobase/sdk-ts/generated/react-query'
 import type { DuesInvoice } from '@monobase/sdk-ts/generated/types.gen'
-import { PageHeader } from '@/components/patterns/page-header'
+import { PageShell } from '@/components/patterns/page-shell'
 import { GlassCard } from '@/components/motion/glass-card'
 import { EmptyState } from '@/components/patterns/empty-state'
 import { DuesStatusBadge } from '@/features/dues/components/dues-status-badge'
@@ -210,30 +210,27 @@ function InvoicesPage() {
 
   if (error) {
     return (
-      <div className="space-y-6">
-        <PageHeader title="Invoices" breadcrumbs={[{ label: 'Officer' }, { label: 'Finances', href: `/org/${orgSlug}/officer/finances` }, { label: 'Invoices' }]} />
+      <PageShell title="Invoices" breadcrumbs={[{ label: 'Officer' }, { label: 'Finances', href: `/org/${orgSlug}/officer/finances` }, { label: 'Invoices' }]}>
         <div role="alert" className="p-6 text-center text-[var(--color-error)]">Failed to load invoices</div>
-      </div>
+      </PageShell>
     )
   }
 
   return (
-    <div className="space-y-5">
-      <PageHeader
-        title="Invoices"
-        subtitle="Track and manage dues invoices"
-        breadcrumbs={[
-          { label: 'Officer', href: `/org/${orgSlug}/officer/dashboard` },
-          { label: 'Finances', href: `/org/${orgSlug}/officer/finances` },
-          { label: 'Invoices' },
-        ]}
-        actions={
-          <Button size="sm" onClick={handleGenerateInvoices} disabled={genInvoicesMut.isPending}>
-            <Plus className="h-4 w-4 mr-1.5" /> {genInvoicesMut.isPending ? 'Generating...' : 'Generate Invoices'}
-          </Button>
-        }
-      />
-
+    <PageShell
+      title="Invoices"
+      subtitle="Track and manage dues invoices"
+      breadcrumbs={[
+        { label: 'Officer', href: `/org/${orgSlug}/officer/dashboard` },
+        { label: 'Finances', href: `/org/${orgSlug}/officer/finances` },
+        { label: 'Invoices' },
+      ]}
+      actions={
+        <Button size="sm" onClick={handleGenerateInvoices} disabled={genInvoicesMut.isPending}>
+          <Plus className="h-4 w-4 mr-1.5" /> {genInvoicesMut.isPending ? 'Generating...' : 'Generate Invoices'}
+        </Button>
+      }
+    >
       <GlassCard className="p-5">
         {/* Tab filters */}
         <div className="flex flex-wrap items-center gap-1 mb-4">
@@ -343,7 +340,7 @@ function InvoicesPage() {
                       {['generated', 'sent', 'overdue'].includes(inv.status) && (
                         <DropdownMenu>
                           <DropdownMenuTrigger asChild>
-                            <Button variant="ghost" size="sm" className="h-7 w-7 p-0">
+                            <Button variant="ghost" size="icon-xs">
                               <MoreHorizontal className="h-4 w-4" />
                             </Button>
                           </DropdownMenuTrigger>
@@ -415,6 +412,6 @@ function InvoicesPage() {
           </div>
         )}
       </GlassCard>
-    </div>
+    </PageShell>
   )
 }

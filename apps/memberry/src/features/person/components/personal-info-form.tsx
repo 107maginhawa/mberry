@@ -220,6 +220,7 @@ export function PersonalInfoForm({
                   </AvatarFallback>
                 </Avatar>
                 <div className="absolute -bottom-2 -right-2 flex gap-1">
+                  {/* ui-c-exempt: interactive-emphasis — avatar-edit affordance, round secondary 32px */}
                   <Button
                     type="button"
                     size="icon"
@@ -235,6 +236,7 @@ export function PersonalInfoForm({
                     )}
                   </Button>
                   {(avatarUrl || selectedFile || avatarValue) && (
+                    // ui-c-exempt: interactive-emphasis — avatar-remove affordance 32px round destructive
                     <Button
                       type="button"
                       size="icon"

@@ -1,14 +1,11 @@
-import { describe, test, expect, vi, beforeEach } from 'vitest'
+import { describe, test, expect, vi, beforeEach } from '@/test/vitest-shim'
 import { screen, waitFor } from '@testing-library/react'
 import { renderWithProviders } from '@/test/utils'
 import { DirectorySearch } from './directory-search'
 
 // Mock SDK hooks
-vi.mock('@monobase/sdk-ts/generated/@tanstack/react-query.gen', () => ({
-  searchDirectoryOptions: vi.fn(),
-}))
-
-import { searchDirectoryOptions } from '@monobase/sdk-ts/generated/@tanstack/react-query.gen'
+// [Tier-F] removed local SDK mock; using global stub in test-setup-root.ts
+import { searchDirectoryOptions } from '@monobase/sdk-ts/generated/react-query'
 const mockSearchDirectory = searchDirectoryOptions as ReturnType<typeof vi.fn>
 
 vi.mock('@monobase/ui', () => ({

@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { createFileRoute, useNavigate } from '@tanstack/react-router'
-import { PageHeader } from '@/components/patterns/page-header'
+import { PageShell } from '@/components/patterns/page-shell'
 import { useOrg } from '@/hooks/useOrg'
 import { SurveyBuilder } from '@/features/surveys/components/survey-builder'
 import { SurveyTemplates, type SurveyTemplate } from '@/features/surveys/components/survey-templates'
@@ -16,17 +16,15 @@ function NewSurveyPage() {
   const [showBuilder, setShowBuilder] = useState(false)
 
   return (
-    <div className="space-y-6">
-      <PageHeader
-        title="New Survey"
-        subtitle="Create a survey for your members"
-        breadcrumbs={[
-          { label: 'Officer', href: `/org/${orgSlug}/officer/dashboard` },
-          { label: 'Surveys', href: `/org/${orgSlug}/officer/surveys` },
-          { label: 'New' },
-        ]}
-      />
-
+    <PageShell
+      title="New Survey"
+      subtitle="Create a survey for your members"
+      breadcrumbs={[
+        { label: 'Officer', href: `/org/${orgSlug}/officer/dashboard` },
+        { label: 'Surveys', href: `/org/${orgSlug}/officer/surveys` },
+        { label: 'New' },
+      ]}
+    >
       {!showBuilder ? (
         <SurveyTemplates
           onSelect={(template) => {
@@ -66,6 +64,6 @@ function NewSurveyPage() {
           />
         </div>
       )}
-    </div>
+    </PageShell>
   )
 }

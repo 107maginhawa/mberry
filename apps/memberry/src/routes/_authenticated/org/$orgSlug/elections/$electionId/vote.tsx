@@ -1,7 +1,6 @@
 import { createFileRoute } from '@tanstack/react-router'
-import { PageContainer } from '@monobase/ui'
 import { VotingBallot } from '@/features/elections/components/voting-ballot'
-import { PageHeader } from '@/components/patterns/page-header'
+import { PageShell } from '@/components/patterns/page-shell'
 import { GlassCard } from '@/components/motion/glass-card'
 import { useOrg } from '@/hooks/useOrg'
 
@@ -15,19 +14,19 @@ function VotePage() {
   const { user } = Route.useRouteContext() as { user?: { id: string } }
 
   return (
-    <PageContainer width="default" className="space-y-6">
-      <PageHeader
-        title="Cast Your Vote"
-        breadcrumbs={[
-          { label: 'Organization' },
-          { label: 'Elections', href: `/org/${orgSlug}/elections` },
-          { label: 'Vote' },
-        ]}
-      />
-
-      <GlassCard className="p-6">
-        <VotingBallot electionId={electionId} orgId={orgId} userId={user?.id} />
-      </GlassCard>
-    </PageContainer>
+    <PageShell
+      title="Cast Your Vote"
+      breadcrumbs={[
+        { label: 'Organization' },
+        { label: 'Elections', href: `/org/${orgSlug}/elections` },
+        { label: 'Vote' },
+      ]}
+    >
+      <div className="space-y-6">
+        <GlassCard className="p-6">
+          <VotingBallot electionId={electionId} orgId={orgId} userId={user?.id} />
+        </GlassCard>
+      </div>
+    </PageShell>
   )
 }

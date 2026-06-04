@@ -8,7 +8,7 @@ import { listRosterMembersOptions } from '@monobase/sdk-ts/generated/react-query
 import {
   createCandidateMutation,
   getElectionOptions,
-} from '@monobase/sdk-ts/generated/@tanstack/react-query.gen'
+} from '@monobase/sdk-ts/generated/react-query'
 
 interface NomineePickerDialogProps {
   orgId: string

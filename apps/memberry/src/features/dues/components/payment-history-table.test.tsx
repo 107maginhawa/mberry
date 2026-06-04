@@ -1,12 +1,9 @@
-import { describe, test, expect, vi, beforeEach } from 'vitest'
+import { describe, test, expect, vi, beforeEach } from '@/test/vitest-shim'
 import { screen, waitFor } from '@testing-library/react'
 import { renderWithProviders } from '@/test/utils'
 import { PaymentHistoryTable } from './payment-history-table'
 
-vi.mock('@monobase/sdk-ts/generated/react-query', () => ({
-  listDuesPaymentsOptions: vi.fn(),
-}))
-
+// [Tier-F] removed local SDK mock; using global stub in test-setup-root.ts
 vi.mock('@/components/patterns/empty-state', () => ({
   EmptyState: ({ headline, description }: any) => (
     <div>

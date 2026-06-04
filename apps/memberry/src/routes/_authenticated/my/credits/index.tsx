@@ -1,7 +1,7 @@
 import { createFileRoute, Link, useNavigate } from '@tanstack/react-router'
 import { useQuery } from '@tanstack/react-query'
 import { api } from '@/lib/api'
-import { PageHeader } from '@/components/patterns/page-header'
+import { PageShell } from '@/components/patterns/page-shell'
 import { EmptyState } from '@/components/patterns/empty-state'
 import { CardSkeleton, TableSkeleton } from '@/components/patterns/skeleton-loader'
 import { GlassCard } from '@/components/motion/glass-card'
@@ -50,27 +50,29 @@ function MyCredits() {
 
   if (hasError && !loading) {
     return (
-      <div className="space-y-6">
-        <PageHeader title="CPD Credits" subtitle="Your professional development credit summary across all organizations" />
-        <div role="alert" className="p-4 rounded-lg bg-[var(--color-error-bg)] text-[var(--color-error)] text-sm">
-          Unable to load credit data. Please try refreshing the page.
+      <PageShell title="CPD Credits" subtitle="Your professional development credit summary across all organizations">
+        <div className="space-y-6">
+          <div role="alert" className="p-4 rounded-lg bg-[var(--color-error-bg)] text-[var(--color-error)] text-sm">
+            Unable to load credit data. Please try refreshing the page.
+          </div>
         </div>
-      </div>
+      </PageShell>
     )
   }
 
   if (loading) {
     return (
-      <div className="space-y-6">
-        <PageHeader title="CPD Credits" subtitle="Your professional development credit summary across all organizations" />
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          <CardSkeleton />
-          <CardSkeleton />
-          <CardSkeleton />
-          <CardSkeleton />
+      <PageShell title="CPD Credits" subtitle="Your professional development credit summary across all organizations">
+        <div className="space-y-6">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            <CardSkeleton />
+            <CardSkeleton />
+            <CardSkeleton />
+            <CardSkeleton />
+          </div>
+          <TableSkeleton rows={4} cols={4} />
         </div>
-        <TableSkeleton rows={4} cols={4} />
-      </div>
+      </PageShell>
     )
   }
 
@@ -82,20 +84,19 @@ function MyCredits() {
   ]
 
   return (
-    <div className="space-y-6">
-      <PageHeader
-        title="CPD Credits"
-        subtitle="Your professional development credit summary across all organizations"
-        actions={
-          <Link
-            to="/my/credits/log"
-            className="px-[16px] py-[8px] rounded-[8px] bg-[var(--color-primary)] text-white text-sm font-semibold hover:bg-[var(--color-primary-mid)] transition-colors"
-          >
-            Log Manual Credit
-          </Link>
-        }
-      />
-
+    <PageShell
+      title="CPD Credits"
+      subtitle="Your professional development credit summary across all organizations"
+      actions={
+        <Link
+          to="/my/credits/log"
+          className="px-[16px] py-[8px] rounded-[8px] bg-[var(--color-primary)] text-white text-sm font-semibold hover:bg-[var(--color-primary-mid)] transition-colors"
+        >
+          Log Manual Credit
+        </Link>
+      }
+    >
+      <div className="space-y-6">
       <StaggerGrid className="grid grid-cols-2 md:grid-cols-4 gap-4">
         {stats.map((s) => (
           <StaggerItem key={s.label}>
@@ -114,6 +115,7 @@ function MyCredits() {
       </div>
 
       {entries.length === 0 ? (
+        // ui-c-exempt: empty-state-emphasis — no-credits EmptyState
         <EmptyState
           icon={<Award size={32} />}
           headline="No credits earned yet"
@@ -146,6 +148,7 @@ function MyCredits() {
           </Table>
         </GlassCard>
       )}
-    </div>
+      </div>
+    </PageShell>
   )
 }

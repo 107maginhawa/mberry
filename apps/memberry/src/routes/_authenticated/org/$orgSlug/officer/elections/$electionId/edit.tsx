@@ -1,9 +1,9 @@
 import { createFileRoute, useNavigate } from '@tanstack/react-router'
 import { useQuery } from '@tanstack/react-query'
-import { Skeleton, PageContainer } from '@monobase/ui'
-import { getElectionOptions } from '@monobase/sdk-ts/generated/@tanstack/react-query.gen'
+import { Skeleton } from '@monobase/ui'
+import { getElectionOptions } from '@monobase/sdk-ts/generated/react-query'
 import { ElectionForm } from '@/features/elections/components/election-form'
-import { PageHeader } from '@/components/patterns/page-header'
+import { PageShell } from '@/components/patterns/page-shell'
 import { GlassCard } from '@/components/motion/glass-card'
 import { useOrg } from '@/hooks/useOrg'
 
@@ -49,58 +49,55 @@ function EditElection() {
 
   if (isError) {
     return (
-      <PageContainer width="default" className="space-y-6">
-        <PageHeader
-          title="Edit Election"
-          breadcrumbs={[
-            { label: 'Officer', href: `/org/${orgSlug}/officer/dashboard` },
-            { label: 'Elections', href: `/org/${orgSlug}/officer/elections` },
-            { label: 'Edit' },
-          ]}
-        />
+      <PageShell
+        title="Edit Election"
+        breadcrumbs={[
+          { label: 'Officer', href: `/org/${orgSlug}/officer/dashboard` },
+          { label: 'Elections', href: `/org/${orgSlug}/officer/elections` },
+          { label: 'Edit' },
+        ]}
+      >
         <div role="alert" className="p-4 rounded-lg bg-[var(--color-error-bg)] text-[var(--color-error)] text-sm">
           Unable to load election for editing. Please try refreshing the page.
         </div>
-      </PageContainer>
+      </PageShell>
     )
   }
 
   if (isLoading) {
     return (
-      <PageContainer width="default" className="space-y-6">
-        <PageHeader
-          title="Edit Election"
-          breadcrumbs={[
-            { label: 'Officer', href: `/org/${orgSlug}/officer/dashboard` },
-            { label: 'Elections', href: `/org/${orgSlug}/officer/elections` },
-            { label: 'Edit' },
-          ]}
-        />
+      <PageShell
+        title="Edit Election"
+        breadcrumbs={[
+          { label: 'Officer', href: `/org/${orgSlug}/officer/dashboard` },
+          { label: 'Elections', href: `/org/${orgSlug}/officer/elections` },
+          { label: 'Edit' },
+        ]}
+      >
         <GlassCard className="p-6">
           <div className="space-y-4">
             <Skeleton className="h-8 w-64" />
             <Skeleton className="h-48 rounded-lg" />
           </div>
         </GlassCard>
-      </PageContainer>
+      </PageShell>
     )
   }
 
   if (error || !election) {
     return (
-      <PageContainer width="default" className="space-y-6">
-        <PageHeader
-          title="Edit Election"
-          breadcrumbs={[
-            { label: 'Officer', href: `/org/${orgSlug}/officer/dashboard` },
-            { label: 'Elections', href: `/org/${orgSlug}/officer/elections` },
-            { label: 'Edit' },
-          ]}
-        />
+      <PageShell
+        title="Edit Election"
+        breadcrumbs={[
+          { label: 'Officer', href: `/org/${orgSlug}/officer/dashboard` },
+          { label: 'Elections', href: `/org/${orgSlug}/officer/elections` },
+          { label: 'Edit' },
+        ]}
+      >
         <GlassCard className="p-6">
           <div className="p-6 text-center text-[var(--color-error)]">Failed to load election</div>
         </GlassCard>
-      </PageContainer>
+      </PageShell>
     )
   }
 
@@ -123,17 +120,15 @@ function EditElection() {
   }
 
   return (
-    <PageContainer width="default" className="space-y-6">
-      <PageHeader
-        title="Edit Election"
-        subtitle={election.title}
-        breadcrumbs={[
-          { label: 'Officer', href: `/org/${orgSlug}/officer/dashboard` },
-          { label: 'Elections', href: `/org/${orgSlug}/officer/elections` },
-          { label: 'Edit' },
-        ]}
-      />
-
+    <PageShell
+      title="Edit Election"
+      subtitle={election.title}
+      breadcrumbs={[
+        { label: 'Officer', href: `/org/${orgSlug}/officer/dashboard` },
+        { label: 'Elections', href: `/org/${orgSlug}/officer/elections` },
+        { label: 'Edit' },
+      ]}
+    >
       <GlassCard className="p-6">
         <ElectionForm
           orgId={orgId}
@@ -153,6 +148,6 @@ function EditElection() {
           }}
         />
       </GlassCard>
-    </PageContainer>
+    </PageShell>
   )
 }

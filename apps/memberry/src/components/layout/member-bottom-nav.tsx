@@ -34,6 +34,7 @@ export function MemberBottomNav() {
           activeProps={{ className: "flex flex-col items-center justify-center gap-[3px] min-w-[44px] min-h-[44px] text-[var(--color-primary)]" }}
           activeOptions={{ exact: false }}
         >
+          {/* ui-c-exempt: nav-icon — bottom-nav entry icon 22px */}
           <Icon size={22} />
           <span className="text-xs font-medium">{label}</span>
         </Link>

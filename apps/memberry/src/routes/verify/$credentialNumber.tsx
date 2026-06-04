@@ -1,3 +1,4 @@
+// ui-c-exempt: public-verify — public credential verification
 // oli-execute: error-handled-inline
 // `error || !data` renders explicit "could not verify credential" branch.
 import { createFileRoute } from '@tanstack/react-router'
@@ -5,6 +6,7 @@ import { useQuery } from '@tanstack/react-query'
 import { Badge, Button } from '@monobase/ui'
 import { api } from '@/lib/api'
 
+// oli-ui: exempt-pageshell — public credential-verification micro-page; centered single-card result
 export const Route = createFileRoute('/verify/$credentialNumber')({
   component: VerifyCredentialPage,
 })

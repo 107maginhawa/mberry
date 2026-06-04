@@ -1,3 +1,4 @@
+// ui-c-exempt: full-height-layout — officer-shell layout root
 import { useEffect } from "react"
 import { createFileRoute, Outlet, useLocation } from "@tanstack/react-router"
 import { requireOrgOfficer, type AuthContext, type OfficerContext } from "@/utils/guards"
@@ -5,6 +6,7 @@ import { OfficerSidebar } from "@/components/layout/officer-sidebar"
 import { OfficerMobileNav } from "@/components/layout/officer-mobile-nav"
 import { ErrorBoundary } from "@/components/patterns/error-boundary"
 
+// oli-ui: exempt-pageshell — layout-shell route renders OfficerSidebar + Outlet, no page content
 export const Route = createFileRoute("/_authenticated/org/$orgSlug/officer")({
   beforeLoad: requireOrgOfficer,
   component: OfficerLayout,

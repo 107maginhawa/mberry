@@ -1,3 +1,4 @@
+// ui-c-exempt: onboarding-step — multi-step onboarding wizard owns shell
 import { createFileRoute, useNavigate, useRouter } from '@tanstack/react-router'
 import { useState, useEffect } from 'react'
 import { useQueryClient } from '@tanstack/react-query'
@@ -48,6 +49,7 @@ function normalizeGender(value: string | undefined): PersonCreateRequest['gender
   return VALID_GENDERS.includes(value as never) ? (value as PersonCreateRequest['gender']) : undefined
 }
 
+// oli-ui: exempt-pageshell — pre-auth onboarding wizard with custom branded chrome
 export const Route = createFileRoute('/onboarding')({
   beforeLoad: composeGuards(requireAuth, requireEmailVerified, requireNoPerson),
   component: OnboardingPage,

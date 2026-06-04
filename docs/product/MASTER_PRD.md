@@ -74,23 +74,23 @@ Each association onboarded adds members to the verified professional network. Ph
 
 | # | Module | Priority | Monetization | Wave | Key Capabilities | Dependencies |
 |---|--------|----------|-------------|------|------------------|--------------|
-| M01 | Auth and Onboarding | P0 | Free | 1 | Registration, login, OTP, invitation claim, account setup | None |
-| M02 | Member Profile and Settings | P0 | Free | 1 | Profile edit, privacy controls, license number, multi-org | M01 |
+| M01 | Auth & Onboarding | P0 | Free | 1 | Registration, login, OTP, invitation claim, account setup | None |
+| M02 | Member Profile & Settings | P0 | Free | 1 | Profile edit, privacy controls, license number, multi-org | M01 |
 | M03 | Platform Administration | P0 | Internal | 1 | Org provisioning, subscriptions, feature flags, impersonation | M01 |
 | M04 | Organization Admin | P0 | Standard | 1 | Org dashboard, officer management, public page, referrals | M01, M03 |
 | M05 | Membership | P0 | Standard | 1 | Applications, approvals, roster, status computation, transfers | M01, M04 |
-| M06 | Dues and Payments | P0 | Standard | 1 | Dues config, payment recording, fund allocation, reminders | M01, M04, M05 |
+| M06 | Dues & Payments | P0 | Standard | 1 | Dues config, payment recording, fund allocation, reminders | M01, M04, M05 |
 | M07 | Communications | P0 | Standard | 2 | Announcements, templates, email queue, push notifications | M01, M04, M05 |
 | M08 | Events | P1 | Premium | 2 | Event CRUD, registration, attendance, QR check-in | M05, M06, M07 |
 | M09 | Training | P0 | Premium | 2 | Course management, enrollment, completion, auto-credit award | M05, M06, M07, M10 |
 | M10 | Credit Tracking | P0 | Premium | 3 | Credit cycles, auto/manual entries, cross-org aggregation | M05, M09 |
-| M11 | Documents and Credentials | P1 | Premium | 3 | ID cards, certificates, receipts (PDF generation) | M05, M09, M10 |
+| M11 | Documents & Credentials | P1 | Premium | 3 | ID cards, certificates, receipts (PDF generation) | M05, M09, M10 |
 
 ### Phase 2: Professional Identity (5 Modules)
 
 | # | Module | Monetization | Key Capabilities | Dependencies |
 |---|--------|-------------|------------------|--------------|
-| M12 | Elections and Governance | Add-on | Nominations, voting, ballot integrity, results | M04, M05, M07 |
+| M12 | Elections & Governance | Add-on | Nominations, voting, ballot integrity, results | M04, M05, M07 |
 | M13 | Professional Feed | Add-on | Content posting, moderation, discovery | M01, M02, M05 |
 | M14 | National Dashboard | Add-on | Cross-chapter analytics, rollups, benchmarking | M04, M05, M06, M10 |
 | M15 | Job Board | Add-on | Job postings, applications, expiry | M01, M02, M05 |
@@ -101,7 +101,7 @@ Each association onboarded adds members to the verified professional network. Ph
 | # | Module | Monetization | Key Capabilities | Dependencies |
 |---|--------|-------------|------------------|--------------|
 | M17 | Marketplace | Add-on | EMR, supply procurement, insurance integrations | M01, M02, M05 |
-| M18 | Surveys and Polls | Add-on | Member feedback, data collection, anonymity controls | M04, M05, M07 |
+| M18 | Surveys & Polls | Add-on | Member feedback, data collection, anonymity controls | M04, M05, M07 |
 | M19 | Committee Management | Add-on | Committee CRUD, membership, dissolution rules | M04, M05 |
 
 ### Monetization Tiers

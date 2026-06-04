@@ -6,7 +6,7 @@ import { Button, Skeleton, Dialog, DialogContent, DialogHeader, DialogTitle, Dia
 import { toast } from 'sonner'
 import {
   getElectionOptions,
-} from '@monobase/sdk-ts/generated/@tanstack/react-query.gen'
+} from '@monobase/sdk-ts/generated/react-query'
 import { castBallot } from '@monobase/sdk-ts/generated/sdk.gen'
 import { api } from '@/lib/api'
 

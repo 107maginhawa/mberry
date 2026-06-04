@@ -1,17 +1,9 @@
-import { describe, test, expect, vi, beforeEach } from 'vitest'
+import { describe, test, expect, vi, beforeEach } from '@/test/vitest-shim'
 import { screen, waitFor } from '@testing-library/react'
 import { renderWithProviders } from '@/test/utils'
 import { DocumentLibrary } from './document-library'
 
-vi.mock('@monobase/sdk-ts/generated/react-query', () => ({
-  searchDocumentsOptions: vi.fn(),
-  searchDocumentsQueryKey: vi.fn(() => ['documents']),
-  createDocumentMutation: vi.fn(() => ({})),
-  archiveDocumentMutation: vi.fn(() => ({})),
-  updateDocumentMutation: vi.fn(() => ({})),
-  deleteDocumentMutation: vi.fn(() => ({})),
-}))
-
+// [Tier-F] removed local SDK mock; using global stub in test-setup-root.ts
 vi.mock('@monobase/ui', () => ({
   Skeleton: ({ className }: any) => <div className={className} data-testid="skeleton" />,
   Button: ({ children, onClick, variant, size, disabled, ...props }: any) => (

@@ -33,6 +33,7 @@ export function CallControls({
   return (
     <div className={cn('flex items-center justify-center gap-4', className)}>
       {/* Microphone Toggle */}
+      {/* ui-c-exempt: interactive-emphasis — video-call control 56px round */}
       <Button
         variant={audioEnabled ? 'secondary' : 'destructive'}
         size="lg"
@@ -48,6 +49,7 @@ export function CallControls({
       </Button>
 
       {/* Camera Toggle */}
+      {/* ui-c-exempt: interactive-emphasis — video-call control 56px round */}
       <Button
         variant={videoEnabled ? 'secondary' : 'destructive'}
         size="lg"
@@ -63,6 +65,7 @@ export function CallControls({
       </Button>
 
       {/* Screen Share Toggle */}
+      {/* ui-c-exempt: interactive-emphasis — video-call control 56px round */}
       <Button
         variant={isScreenSharing ? 'default' : 'secondary'}
         size="lg"
@@ -78,6 +81,7 @@ export function CallControls({
       </Button>
 
       {/* End Call */}
+      {/* ui-c-exempt: interactive-emphasis — end-call control 56px round destructive */}
       <Button
         variant="destructive"
         size="lg"

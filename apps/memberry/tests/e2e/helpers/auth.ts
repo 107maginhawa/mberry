@@ -220,3 +220,16 @@ export async function signInAsSecretary(page: Page) {
 export async function signInAsSociety(page: Page) {
   await signIn(page, SEED_SOCIETY_EMAIL, TEST_PASSWORD)
 }
+
+/**
+ * Sign in as the seeded platform super-admin.
+ *
+ * Note: the seeded "President" (test@memberry.ph) is granted the
+ * platform_admin (role: 'super') row in layer-2-users.ts and a multi-role
+ * user.role string of 'admin,platform_admin,association:admin,…'. So the
+ * same auth user serves both /admin/* (platform) and association-officer
+ * paths. Kept as a separate helper so callers can express intent.
+ */
+export async function signInAsAdmin(page: Page) {
+  await signIn(page, SEED_OFFICER_EMAIL, TEST_PASSWORD)
+}

@@ -1,7 +1,7 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { Settings } from 'lucide-react'
-import { PageHeader } from '@/components/patterns/page-header'
+import { PageShell } from '@/components/patterns/page-shell'
 import { GlassCard } from '@/components/motion/glass-card'
 import { CardSkeleton } from '@/components/patterns/skeleton-loader'
 import { useOrg } from '@/hooks/useOrg'
@@ -62,31 +62,28 @@ function CpdSettings() {
 
   if (isLoading) {
     return (
-      <div className="space-y-6">
-        <PageHeader title="CPD Settings" subtitle="Configure credit requirements and cycles" />
+      <PageShell title="CPD Settings" subtitle="Configure credit requirements and cycles">
         <CardSkeleton />
-      </div>
+      </PageShell>
     )
   }
 
   if (isError) {
     return (
-      <div className="space-y-6">
-        <PageHeader title="CPD Settings" subtitle="Configure credit requirements and cycles" />
+      <PageShell title="CPD Settings" subtitle="Configure credit requirements and cycles">
         <div role="alert" className="p-4 rounded-lg bg-[var(--color-error-bg)] text-[var(--color-error)] text-sm">
           Unable to load CPD configuration. Please try refreshing the page.
         </div>
-      </div>
+      </PageShell>
     )
   }
 
   return (
-    <div className="space-y-6">
-      <PageHeader
-        title="CPD Settings"
-        subtitle="Configure credit requirements and cycles"
-        actions={<Settings className="w-5 h-5 text-[var(--color-muted)]" />}
-      />
+    <PageShell
+      title="CPD Settings"
+      subtitle="Configure credit requirements and cycles"
+      actions={<Settings className="w-5 h-5 text-[var(--color-muted)]" />}
+    >
 
       <GlassCard className="p-5 max-w-xl">
         <div className="space-y-5">
@@ -156,6 +153,6 @@ function CpdSettings() {
           </Button>
         </div>
       </GlassCard>
-    </div>
+    </PageShell>
   )
 }

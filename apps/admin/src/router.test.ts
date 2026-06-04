@@ -1,4 +1,4 @@
-import { describe, test, expect } from 'vitest'
+import { describe, test, expect } from 'bun:test'
 import type { AdminUser, RouterContext } from './router'
 
 describe('Router types', () => {

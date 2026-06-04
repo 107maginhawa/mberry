@@ -169,6 +169,7 @@ export function NpsModal({ survey, onDismiss, onComplete }: NpsModalProps) {
                   >
                     Dismiss
                   </Button>
+                  {/* ui-c-exempt: methodology-carry — NPS scale button micro-padding override */}
                   <Button
                     size="sm"
                     onClick={handleSubmit}

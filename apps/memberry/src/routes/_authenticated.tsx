@@ -12,6 +12,7 @@ import { useSpringTransition } from "@/components/motion/use-spring-transition"
 import { useMyOrgs } from "@/hooks/useMyOrgs"
 import { api } from "@/lib/api"
 
+// oli-ui: exempt-pageshell — layout-shell route renders MemberHeader + Outlet, no page content of its own
 export const Route = createFileRoute("/_authenticated")({
   beforeLoad: requireAuth,
   component: AuthenticatedLayout,

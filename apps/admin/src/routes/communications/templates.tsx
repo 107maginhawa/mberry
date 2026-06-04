@@ -1,6 +1,7 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { RequireRole } from '@/lib/role-gate'
 import { Card, CardContent, CardHeader, CardTitle, Button } from '@monobase/ui'
+import { PageShell } from '@/components/patterns/page-shell'
 import { FileText, Plus } from 'lucide-react'
 
 export const Route = createFileRoute('/communications/templates')({
@@ -10,19 +11,17 @@ export const Route = createFileRoute('/communications/templates')({
 function PlatformTemplates() {
   return (
     <RequireRole allowed={['super']}>
-      <div className="space-y-6">
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-2xl font-bold">Platform Templates</h1>
-            <p className="text-sm text-muted-foreground">
-              Manage templates available to all organizations
-            </p>
-          </div>
+      <PageShell
+        title="Platform Templates"
+        subtitle="Manage templates available to all organizations"
+        maxWidth="full"
+        actions={
           <Button>
             <Plus className="h-4 w-4 mr-2" /> New Template
           </Button>
-        </div>
-
+        }
+      >
+        <div className="space-y-6">
         {/* Template categories */}
         <div className="flex gap-2">
           <Button variant="secondary" size="sm">All</Button>
@@ -40,7 +39,8 @@ function PlatformTemplates() {
             </p>
           </CardContent>
         </Card>
-      </div>
+        </div>
+      </PageShell>
     </RequireRole>
   )
 }

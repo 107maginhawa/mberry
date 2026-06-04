@@ -4,8 +4,9 @@ import { UserCog, Search, AlertTriangle, X } from 'lucide-react'
 import { useState } from 'react'
 import { toast } from 'sonner'
 import { Button, Input, Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from '@monobase/ui'
+import { PageShell } from '@/components/patterns/page-shell'
 import { RequireRole } from '@/lib/role-gate'
-import { listOrganizationsOptions } from '@monobase/sdk-ts/generated/@tanstack/react-query.gen'
+import { listOrganizationsOptions } from '@monobase/sdk-ts/generated/react-query'
 import { startImpersonation as startImpersonationApi, endImpersonation as endImpersonationApi } from '@monobase/sdk-ts/generated/sdk.gen'
 
 export const Route = createFileRoute('/impersonate/')({
@@ -92,19 +93,11 @@ function ImpersonatePage() {
   })
 
   return (
-    <div className="p-8">
-      <div className="flex items-center gap-3 mb-8">
-        <UserCog className="w-6 h-6 text-muted-foreground" />
-        <div>
-          <h1 className="text-h1 text-foreground">
-            Impersonate User
-          </h1>
-          <p className="text-sm text-muted-foreground mt-1">
-            Start an impersonation session to debug user issues
-          </p>
-        </div>
-      </div>
-
+    <PageShell
+      title="Impersonate User"
+      subtitle="Start an impersonation session to debug user issues"
+      maxWidth="full"
+    >
       {/* Warning Banner */}
       <div className="flex items-start gap-3 p-4 rounded-lg border border-yellow-500/30 bg-yellow-500/5 mb-6">
         <AlertTriangle className="w-5 h-5 text-yellow-600 mt-0.5 shrink-0" />
@@ -209,6 +202,6 @@ function ImpersonatePage() {
           </TableBody>
         </Table>
       </div>
-    </div>
+    </PageShell>
   )
 }

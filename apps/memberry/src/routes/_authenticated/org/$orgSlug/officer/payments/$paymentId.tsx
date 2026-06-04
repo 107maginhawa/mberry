@@ -5,7 +5,7 @@ import { Badge } from '@monobase/ui'
 import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from '@monobase/ui'
 import { formatCents } from '@/features/dues/lib/money'
 import { RefundForm } from '@/features/dues/components/refund-form'
-import { PageHeader } from '@/components/patterns/page-header'
+import { PageShell } from '@/components/patterns/page-shell'
 import { GlassCard } from '@/components/motion/glass-card'
 import { CardSkeleton } from '@/components/patterns/skeleton-loader'
 import { useOrg } from '@/hooks/useOrg'
@@ -36,15 +36,34 @@ function PaymentDetailPage() {
     select: (d: any) => d?.data ?? d,
   })
 
-  if (isLoading) return <div className="p-6 space-y-4"><CardSkeleton /><CardSkeleton /><CardSkeleton /></div>
-  if (isError) {
+  const paymentBreadcrumbs = [
+    { label: 'Officer', href: `/org/${orgSlug}/officer/dashboard` },
+    { label: 'Payments', href: `/org/${orgSlug}/officer/payments` },
+  ]
+
+  if (isLoading) {
     return (
-      <div role="alert" className="p-6 m-6 rounded-lg bg-[var(--color-error-bg)] text-[var(--color-error)] text-sm">
-        Unable to load payment detail. Please try refreshing the page.
-      </div>
+      <PageShell title="Payment" breadcrumbs={paymentBreadcrumbs}>
+        <div className="space-y-4"><CardSkeleton /><CardSkeleton /><CardSkeleton /></div>
+      </PageShell>
     )
   }
-  if (error || !data) return <div className="p-6 text-[var(--color-error)]">Payment not found.</div>
+  if (isError) {
+    return (
+      <PageShell title="Payment" breadcrumbs={paymentBreadcrumbs}>
+        <div role="alert" className="p-6 rounded-lg bg-[var(--color-error-bg)] text-[var(--color-error)] text-sm">
+          Unable to load payment detail. Please try refreshing the page.
+        </div>
+      </PageShell>
+    )
+  }
+  if (error || !data) {
+    return (
+      <PageShell title="Payment" breadcrumbs={paymentBreadcrumbs}>
+        <div className="p-6 text-[var(--color-error)]">Payment not found.</div>
+      </PageShell>
+    )
+  }
 
   const payment = data
   const allocations = payment.fundAllocations ?? []
@@ -53,17 +72,12 @@ function PaymentDetailPage() {
   const maxRefundable = Number(payment.amount) - Number(payment.refundedAmount)
 
   return (
-    <div className="space-y-6 max-w-3xl">
-      <PageHeader
-        title={payment.receiptNumber}
-        breadcrumbs={[
-          { label: 'Officer', href: `/org/${orgSlug}/officer/dashboard` },
-          { label: 'Payments', href: `/org/${orgSlug}/officer/payments` },
-          { label: payment.receiptNumber },
-        ]}
-        actions={<Badge className={STATUS_COLORS[payment.status] ?? ''}>{payment.status}</Badge>}
-      />
-
+    <PageShell
+      title={payment.receiptNumber}
+      breadcrumbs={[...paymentBreadcrumbs, { label: payment.receiptNumber }]}
+      actions={<Badge className={STATUS_COLORS[payment.status] ?? ''}>{payment.status}</Badge>}
+    >
+      <div className="space-y-6 max-w-3xl">
       <GlassCard className="p-5">
         <div className="grid grid-cols-2 gap-4 text-sm">
           <div><span className="text-[var(--color-muted)]">Amount:</span> <span className="font-mono font-medium">{formatCents(payment.amount, payment.currency)}</span></div>
@@ -109,6 +123,7 @@ function PaymentDetailPage() {
       {payment.status === 'refunded' && (
         <p className="text-sm text-[var(--color-muted)]">This payment has been fully refunded.</p>
       )}
-    </div>
+      </div>
+    </PageShell>
   )
 }

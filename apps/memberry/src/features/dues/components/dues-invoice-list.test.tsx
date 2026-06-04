@@ -1,4 +1,4 @@
-import { describe, test, expect, vi, beforeEach } from 'vitest'
+import { describe, test, expect, vi, beforeEach } from '@/test/vitest-shim'
 import { screen, waitFor } from '@testing-library/react'
 import { renderWithProviders } from '@/test/utils'
 import { DuesInvoiceList } from './dues-invoice-list'
@@ -28,16 +28,11 @@ vi.mock('@/components/patterns/empty-state', () => ({
 }))
 
 // Mock the SDK generated hooks
-vi.mock('@monobase/sdk-ts/generated/@tanstack/react-query.gen', () => ({
-  listDuesInvoicesOptions: vi.fn(),
-  listDuesInvoicesQueryKey: vi.fn(() => ['dues', 'invoices']),
-  markDuesInvoicePaidMutation: vi.fn(),
-}))
-
+// [Tier-F] removed local SDK mock; using global stub in test-setup-root.ts
 import {
   listDuesInvoicesOptions,
   markDuesInvoicePaidMutation,
-} from '@monobase/sdk-ts/generated/@tanstack/react-query.gen'
+} from '@monobase/sdk-ts/generated/react-query'
 
 const mockListDuesInvoicesOptions = listDuesInvoicesOptions as ReturnType<typeof vi.fn>
 const mockMarkDuesInvoicePaidMutation = markDuesInvoicePaidMutation as ReturnType<typeof vi.fn>

@@ -4,9 +4,9 @@ import {
   getDuesInvoiceOptions,
   markDuesInvoicePaidMutation,
   listDuesInvoicesQueryKey,
-} from '@monobase/sdk-ts/generated/@tanstack/react-query.gen'
+} from '@monobase/sdk-ts/generated/react-query'
 import type { DuesInvoice } from '@monobase/sdk-ts/generated/types.gen'
-import { PageHeader } from '@/components/patterns/page-header'
+import { PageShell } from '@/components/patterns/page-shell'
 import { GlassCard } from '@/components/motion/glass-card'
 import { DuesStatusBadge } from '@/features/dues/components/dues-status-badge'
 import { formatCents } from '@/features/dues/lib/money'
@@ -45,41 +45,43 @@ function InvoiceDetailPage() {
     onError: (err) => toast.error('Failed to mark invoice as paid', { description: extractErrorMessage(err, 'Please try again.') }),
   })
 
+  const invoiceBreadcrumbs = [
+    { label: 'Officer', href: `/org/${orgSlug}/officer/dashboard` },
+    { label: 'Finances', href: `/org/${orgSlug}/officer/finances` },
+    { label: 'Invoices', href: `/org/${orgSlug}/officer/finances/invoices` },
+  ]
+
   if (isLoading) {
     return (
-      <div className="space-y-6">
-        <Skeleton className="h-8 w-48" />
-        <div className="flex gap-6">
-          <Skeleton className="h-64 flex-1" />
-          <Skeleton className="h-64 w-[280px]" />
+      <PageShell title="Invoice" breadcrumbs={invoiceBreadcrumbs}>
+        <div className="space-y-6">
+          <Skeleton className="h-8 w-48" />
+          <div className="flex gap-6">
+            <Skeleton className="h-64 flex-1" />
+            <Skeleton className="h-64 w-[280px]" />
+          </div>
         </div>
-      </div>
+      </PageShell>
     )
   }
 
   if (isError) {
     return (
-      <div role="alert" className="p-4 rounded-lg bg-[var(--color-error-bg)] text-[var(--color-error)] text-sm">
-        Unable to load invoice detail. Please try refreshing the page.
-      </div>
+      <PageShell title="Invoice" breadcrumbs={invoiceBreadcrumbs}>
+        <div role="alert" className="p-4 rounded-lg bg-[var(--color-error-bg)] text-[var(--color-error)] text-sm">
+          Unable to load invoice detail. Please try refreshing the page.
+        </div>
+      </PageShell>
     )
   }
 
   if (error || !invoice) {
     return (
-      <div className="space-y-6">
-        <PageHeader
-          title="Invoice Not Found"
-          breadcrumbs={[
-            { label: 'Officer', href: `/org/${orgSlug}/officer/dashboard` },
-            { label: 'Finances', href: `/org/${orgSlug}/officer/finances` },
-            { label: 'Invoices', href: `/org/${orgSlug}/officer/finances/invoices` },
-          ]}
-        />
+      <PageShell title="Invoice Not Found" breadcrumbs={invoiceBreadcrumbs}>
         <div className="text-center py-12 text-[var(--color-muted)]">
           Invoice not found or you don't have permission to view it.
         </div>
-      </div>
+      </PageShell>
     )
   }
 
@@ -95,42 +97,35 @@ function InvoiceDetailPage() {
   }
 
   return (
-    <div className="space-y-5">
-      <PageHeader
-        title={invoice.invoiceNumber}
-        breadcrumbs={[
-          { label: 'Officer', href: `/org/${orgSlug}/officer/dashboard` },
-          { label: 'Finances', href: `/org/${orgSlug}/officer/finances` },
-          { label: 'Invoices', href: `/org/${orgSlug}/officer/finances/invoices` },
-          { label: invoice.invoiceNumber },
-        ]}
-        actions={
-          isActionable ? (
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="outline" size="sm">
-                  <MoreHorizontal className="h-4 w-4 mr-1.5" /> Actions
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end">
-                <DropdownMenuItem onClick={handleMarkPaid} disabled={markPaidMut.isPending}>
-                  <CheckCircle className="h-4 w-4 mr-2" /> Mark Paid
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => toast.info('Send invoice coming soon')}>
-                  <Send className="h-4 w-4 mr-2" /> Send to Member
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => toast.info('Void invoice coming soon')}>
-                  <XCircle className="h-4 w-4 mr-2" /> Void Invoice
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => toast.info('PDF download coming soon')}>
-                  <FileDown className="h-4 w-4 mr-2" /> Download PDF
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
-          ) : undefined
-        }
-      />
-
+    <PageShell
+      title={invoice.invoiceNumber}
+      breadcrumbs={[...invoiceBreadcrumbs, { label: invoice.invoiceNumber }]}
+      actions={
+        isActionable ? (
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="outline" size="sm">
+                <MoreHorizontal className="h-4 w-4 mr-1.5" /> Actions
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuItem onClick={handleMarkPaid} disabled={markPaidMut.isPending}>
+                <CheckCircle className="h-4 w-4 mr-2" /> Mark Paid
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => toast.info('Send invoice coming soon')}>
+                <Send className="h-4 w-4 mr-2" /> Send to Member
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => toast.info('Void invoice coming soon')}>
+                <XCircle className="h-4 w-4 mr-2" /> Void Invoice
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => toast.info('PDF download coming soon')}>
+                <FileDown className="h-4 w-4 mr-2" /> Download PDF
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        ) : undefined
+      }
+    >
       <div className="flex flex-col lg:flex-row gap-5">
         {/* Main content */}
         <div className="flex-1 space-y-5 min-w-0">
@@ -248,6 +243,6 @@ function InvoiceDetailPage() {
           </GlassCard>
         </div>
       </div>
-    </div>
+    </PageShell>
   )
 }

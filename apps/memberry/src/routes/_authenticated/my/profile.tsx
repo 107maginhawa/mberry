@@ -1,13 +1,13 @@
 import { createFileRoute, Link } from '@tanstack/react-router'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
-import { getPersonOptions, updatePersonMutation, createPersonMutation } from '@monobase/sdk-ts/generated/@tanstack/react-query.gen'
+import { getPersonOptions, updatePersonMutation, createPersonMutation } from '@monobase/sdk-ts/generated/react-query'
 import { formatPersonName, formatLicenseDisplay } from '@/features/profile/lib/profile-display'
 import { zodResolver } from '@/lib/zod-resolver'
 import { useState, useEffect } from 'react'
 import { useForm } from 'react-hook-form'
 import { z } from 'zod'
 import { toast } from 'sonner'
-import { PageHeader } from '@/components/patterns/page-header'
+import { PageShell } from '@/components/patterns/page-shell'
 import { AvatarInitials } from '@/components/patterns/avatar-initials'
 import { StatusBadge } from '@/components/patterns/status-badge'
 import { ProfileSkeleton } from '@/components/patterns/skeleton-loader'
@@ -132,14 +132,14 @@ function MyProfilePage() {
 
   if (isError || !person) {
     return (
-      <div>
-        <PageHeader title="Profile" />
+      <PageShell title="Profile">
+        {/* ui-c-exempt: empty-state-emphasis — no-profile EmptyState */}
         <EmptyState
           icon={<UserCircle size={40} />}
           headline="No profile found"
           description="Complete onboarding to create your professional profile."
         />
-      </div>
+      </PageShell>
     )
   }
 
@@ -150,17 +150,15 @@ function MyProfilePage() {
   }
 
   return (
-    <div>
-      <PageHeader
-        title="Profile"
-        subtitle="Your professional identity"
-        actions={
-          <Button onClick={() => setEditing(true)}>
-            Edit Profile
-          </Button>
-        }
-      />
-
+    <PageShell
+      title="Profile"
+      subtitle="Your professional identity"
+      actions={
+        <Button onClick={() => setEditing(true)}>
+          Edit Profile
+        </Button>
+      }
+    >
       <div className="flex flex-col md:flex-row gap-6">
         <div className="md:w-1/3 flex flex-col items-center md:items-start">
           <div data-testid="profile-avatar">
@@ -266,6 +264,7 @@ function MyProfilePage() {
           <GlassCard className="p-5">
             <div className="flex items-center justify-between mb-3">
               <h3 className="text-h4 flex items-center gap-2">
+                {/* ui-c-exempt: nav-icon — profile section label icon */}
                 <Globe size={18} /> Directory Profile
               </h3>
               <Button
@@ -337,6 +336,7 @@ function MyProfilePage() {
           <GlassCard className="p-5">
             <div className="flex items-center justify-between mb-3">
               <h3 className="text-h4 flex items-center gap-2">
+                {/* ui-c-exempt: nav-icon — profile section label icon */}
                 <Award size={18} /> Professional Licenses
               </h3>
             </div>
@@ -368,21 +368,25 @@ function MyProfilePage() {
           {/* Quick Links */}
           <div className="grid grid-cols-2 gap-3">
             <Link to="/my/settings" className="flex items-center gap-2 rounded-[12px] border border-[var(--color-surface-border-glass)] bg-[var(--color-surface-elevated)] backdrop-blur-[var(--surface-blur)] p-4 hover:bg-[var(--color-surface-elevated-hover)] hover:shadow-soft transition-all text-sm font-semibold">
+              {/* ui-c-exempt: nav-icon — profile section label icon */}
               <Shield size={18} className="text-[var(--color-muted)]" /> Privacy
             </Link>
             <Link to="/settings/security" className="flex items-center gap-2 rounded-[12px] border border-[var(--color-surface-border-glass)] bg-[var(--color-surface-elevated)] backdrop-blur-[var(--surface-blur)] p-4 hover:bg-[var(--color-surface-elevated-hover)] hover:shadow-soft transition-all text-sm font-semibold">
+              {/* ui-c-exempt: nav-icon — profile section label icon */}
               <Lock size={18} className="text-[var(--color-muted)]" /> Security
             </Link>
             <Link to="/my/id-card" className="flex items-center gap-2 rounded-[12px] border border-[var(--color-surface-border-glass)] bg-[var(--color-surface-elevated)] backdrop-blur-[var(--surface-blur)] p-4 hover:bg-[var(--color-surface-elevated-hover)] hover:shadow-soft transition-all text-sm font-semibold">
+              {/* ui-c-exempt: nav-icon — profile section label icon */}
               <CreditCard size={18} className="text-[var(--color-muted)]" /> ID Card
             </Link>
             <Link to="/my/data-export" className="flex items-center gap-2 rounded-[12px] border border-[var(--color-surface-border-glass)] bg-[var(--color-surface-elevated)] backdrop-blur-[var(--surface-blur)] p-4 hover:bg-[var(--color-surface-elevated-hover)] hover:shadow-soft transition-all text-sm font-semibold">
+              {/* ui-c-exempt: nav-icon — profile section label icon */}
               <Download size={18} className="text-[var(--color-muted)]" /> Data Export
             </Link>
           </div>
         </div>
       </div>
-    </div>
+    </PageShell>
   )
 }
 
@@ -488,12 +492,10 @@ function ProfileEditForm({
   }
 
   return (
-    <div>
-      <PageHeader
-        title="Edit Profile"
-        actions={<Button variant="outline" onClick={onCancel}>Cancel</Button>}
-      />
-
+    <PageShell
+      title="Edit Profile"
+      actions={<Button variant="outline" onClick={onCancel}>Cancel</Button>}
+    >
       {error && (
         <div role="alert" className="rounded-[8px] border border-[var(--color-error)] bg-[var(--color-error-bg)] text-[var(--color-error)] p-3 text-sm mb-4">
           {error}
@@ -571,6 +573,6 @@ function ProfileEditForm({
           </Button>
         </div>
       </form>
-    </div>
+    </PageShell>
   )
 }

@@ -6,7 +6,7 @@ import { Skeleton, Badge } from '@monobase/ui'
 import { Button } from '@monobase/ui'
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@monobase/ui'
 import { GlassCard } from '@/components/motion/glass-card'
-import { PageHeader } from '@/components/patterns/page-header'
+import { PageShell } from '@/components/patterns/page-shell'
 import { ErrorState } from '@/components/patterns/error-state'
 import { DuesStatusBadge } from '@/features/dues/components/dues-status-badge'
 import { formatCents } from '@/features/dues/lib/money'
@@ -28,23 +28,33 @@ function MemberFinancialDetailPage() {
     enabled: !!orgId && !!memberId,
   })
 
+  const memberFinanceBreadcrumbs = [
+    { label: 'Officer', href: `/org/${orgSlug}/officer/dashboard` },
+    { label: 'Finances', href: `/org/${orgSlug}/officer/finances` },
+    { label: 'Members', href: `/org/${orgSlug}/officer/finances/members` },
+  ]
+
   if (isError) {
     return (
-      <div className="p-6 max-w-2xl">
-        <ErrorState message="Could not load member finances" onRetry={() => refetch()} />
-      </div>
+      <PageShell title="Member" breadcrumbs={memberFinanceBreadcrumbs}>
+        <div className="p-6 max-w-2xl">
+          <ErrorState message="Could not load member finances" onRetry={() => refetch()} />
+        </div>
+      </PageShell>
     )
   }
 
   if (isLoading) {
     return (
-      <div className="space-y-6">
-        <Skeleton className="h-8 w-48" />
-        <div className="flex gap-6">
-          <Skeleton className="h-96 w-[280px] shrink-0" />
-          <Skeleton className="h-96 flex-1" />
+      <PageShell title="Member" breadcrumbs={memberFinanceBreadcrumbs}>
+        <div className="space-y-6">
+          <Skeleton className="h-8 w-48" />
+          <div className="flex gap-6">
+            <Skeleton className="h-96 w-[280px] shrink-0" />
+            <Skeleton className="h-96 flex-1" />
+          </div>
         </div>
-      </div>
+      </PageShell>
     )
   }
 
@@ -70,17 +80,10 @@ function MemberFinancialDetailPage() {
   const assessments = summary?.assessments ?? []
 
   return (
-    <div className="space-y-5">
-      <PageHeader
-        title={name}
-        breadcrumbs={[
-          { label: 'Officer', href: `/org/${orgSlug}/officer/dashboard` },
-          { label: 'Finances', href: `/org/${orgSlug}/officer/finances` },
-          { label: 'Members', href: `/org/${orgSlug}/officer/finances/members` },
-          { label: name },
-        ]}
-      />
-
+    <PageShell
+      title={name}
+      breadcrumbs={[...memberFinanceBreadcrumbs, { label: name }]}
+    >
       <div className="flex flex-col lg:flex-row gap-5">
         {/* Sidebar */}
         <div className="w-full lg:w-[280px] shrink-0 space-y-4">
@@ -110,7 +113,7 @@ function MemberFinancialDetailPage() {
               <p className="text-sm font-medium">Actions</p>
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" size="sm" className="h-7 w-7 p-0">
+                  <Button variant="ghost" size="icon-xs">
                     <MoreHorizontal className="h-4 w-4" />
                   </Button>
                 </DropdownMenuTrigger>
@@ -263,6 +266,6 @@ function MemberFinancialDetailPage() {
           )}
         </div>
       </div>
-    </div>
+    </PageShell>
   )
 }

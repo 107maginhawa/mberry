@@ -33,6 +33,7 @@ import { buildPatch } from '@monobase/sdk-ts/utils/patch'
 import { useFileUpload } from '@monobase/sdk-ts/flows'
 import type { PersonUpdateRequest } from '@monobase/sdk-ts/generated/types.gen'
 import { toast } from 'sonner'
+import { PageShell } from '@/components/patterns/page-shell'
 
 // Deletion fields are stored in the DB but not yet exposed in TypeSpec — cast until spec is updated
 type PersonWithDeletion = {
@@ -129,18 +130,16 @@ function AccountSettingsPage() {
   }
 
   if (isLoadingPerson) {
-    return <div className="p-6">Loading...</div>
+    return (
+      <PageShell title="Account Settings" subtitle="Manage your personal information and preferences">
+        <div>Loading...</div>
+      </PageShell>
+    )
   }
 
   return (
-    <div className="flex flex-col gap-6 max-w-4xl">
-      <div>
-        <h1 className="text-h1">Account Settings</h1>
-        <p className="text-muted-foreground">
-          Manage your personal information and preferences
-        </p>
-      </div>
-
+    <PageShell title="Account Settings" subtitle="Manage your personal information and preferences">
+      <div className="flex flex-col gap-6">
       <Card>
         <CardHeader>
           <CardTitle>Personal Information</CardTitle>
@@ -265,6 +264,7 @@ function AccountSettingsPage() {
           )}
         </CardContent>
       </Card>
-    </div>
+      </div>
+    </PageShell>
   )
 }

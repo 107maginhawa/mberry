@@ -1,6 +1,6 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { DocumentBrowser } from '@/features/documents/components/document-browser'
-import { PageHeader } from '@/components/patterns/page-header'
+import { PageShell } from '@/components/patterns/page-shell'
 import { GlassCard } from '@/components/motion/glass-card'
 import { useOrg } from '@/hooks/useOrg'
 
@@ -12,19 +12,19 @@ function MemberDocumentsPage() {
   const { orgId } = useOrg()
 
   return (
-    <div className="space-y-6">
-      <PageHeader
-        title="Documents"
-        subtitle="Browse organization documents, bylaws, and forms"
-        breadcrumbs={[
-          { label: 'Organization' },
-          { label: 'Documents' },
-        ]}
-      />
-
-      <GlassCard className="p-6">
-        <DocumentBrowser orgId={orgId} />
-      </GlassCard>
-    </div>
+    <PageShell
+      title="Documents"
+      subtitle="Browse organization documents, bylaws, and forms"
+      breadcrumbs={[
+        { label: 'Organization' },
+        { label: 'Documents' },
+      ]}
+    >
+      <div className="space-y-6">
+        <GlassCard className="p-6">
+          <DocumentBrowser orgId={orgId} />
+        </GlassCard>
+      </div>
+    </PageShell>
   )
 }

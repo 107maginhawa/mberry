@@ -20,6 +20,14 @@ export interface DataSurfaceBinding {
 
 export interface OliRuntimeConfig {
   baseURL: string;
+  /**
+   * Admin app origin. Memberry product app runs on 3004; admin ops dashboard
+   * runs on 3003 (apps/admin/vite.config.ts → server.port=3003). Routes in
+   * CODE_ROUTE_MAP tagged `module: "apps/admin"` (e.g. /associations/$associationId,
+   * /organizations/$organizationId, /members/$personId) must be navigated
+   * against this origin.
+   */
+  adminBaseURL: string;
   mapsDir: string;
   resultsOut: string;
   contractVersion: number;
@@ -37,6 +45,9 @@ export interface OliRuntimeConfig {
 
 export const config: OliRuntimeConfig = {
   baseURL: "http://localhost:3004",
+  // TODO: confirm admin baseURL — apps/admin/vite.config.ts pins port 3003 in
+  // dev; CI / staging may proxy this behind a different host.
+  adminBaseURL: "http://localhost:3003",
   // Playwright runs with cwd = apps/memberry; maps + results live at repo root.
   mapsDir: "../../docs/audits/codebase-map",
   resultsOut: "../../docs/audits/runtime/runtime-exec-results.json",

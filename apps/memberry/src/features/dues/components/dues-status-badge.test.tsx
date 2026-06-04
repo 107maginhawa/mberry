@@ -1,4 +1,4 @@
-import { describe, test, expect } from 'vitest'
+import { describe, test, expect } from 'bun:test'
 import { screen } from '@testing-library/react'
 import { renderWithProviders } from '@/test/utils'
 import { DuesStatusBadge } from './dues-status-badge'

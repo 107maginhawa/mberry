@@ -1,5 +1,5 @@
 import { createFileRoute } from '@tanstack/react-router'
-import { PageHeader } from '@/components/patterns/page-header'
+import { PageShell } from '@/components/patterns/page-shell'
 import { useOrg } from '@/hooks/useOrg'
 import { SurveyResults } from '@/features/surveys/components/survey-results'
 
@@ -12,18 +12,16 @@ function SurveyDetailPage() {
   const { surveyId } = Route.useParams()
 
   return (
-    <div className="space-y-6">
-      <PageHeader
-        title="Survey Results"
-        subtitle="View responses and analytics"
-        breadcrumbs={[
-          { label: 'Officer', href: `/org/${orgSlug}/officer/dashboard` },
-          { label: 'Surveys', href: `/org/${orgSlug}/officer/surveys` },
-          { label: 'Results' },
-        ]}
-      />
-
+    <PageShell
+      title="Survey Results"
+      subtitle="View responses and analytics"
+      breadcrumbs={[
+        { label: 'Officer', href: `/org/${orgSlug}/officer/dashboard` },
+        { label: 'Surveys', href: `/org/${orgSlug}/officer/surveys` },
+        { label: 'Results' },
+      ]}
+    >
       <SurveyResults orgId={orgId} surveyId={surveyId} />
-    </div>
+    </PageShell>
   )
 }

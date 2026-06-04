@@ -1,6 +1,6 @@
 import { useQuery } from '@tanstack/react-query'
 import { toast } from 'sonner'
-import { getCertificateOptions } from '@monobase/sdk-ts/generated/@tanstack/react-query.gen'
+import { getCertificateOptions } from '@monobase/sdk-ts/generated/react-query'
 import type { Certificate } from '@monobase/sdk-ts/generated/types.gen'
 import { Button } from '@monobase/ui'
 import { GlassCard } from '@/components/motion/glass-card'

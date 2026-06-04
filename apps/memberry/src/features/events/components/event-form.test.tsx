@@ -1,14 +1,9 @@
-import { describe, test, expect, vi, beforeEach } from 'vitest'
+import { describe, test, expect, vi, beforeEach } from '@/test/vitest-shim'
 import { screen } from '@testing-library/react'
 import { renderWithProviders } from '@/test/utils'
 import { EventForm } from './event-form'
 
-vi.mock('@monobase/sdk-ts/generated/@tanstack/react-query.gen', () => ({
-  createEventMutation: vi.fn(),
-  updateEventMutation: vi.fn(),
-  searchEventsQueryKey: vi.fn(() => ['events']),
-}))
-
+// [Tier-F] removed local SDK mock; using global stub in test-setup-root.ts
 vi.mock('@monobase/ui', () => ({
   Input: ({ children, ...props }: any) => <input {...props} />,
   Label: ({ children, ...props }: any) => <label {...props}>{children}</label>,
@@ -43,7 +38,7 @@ vi.mock('@/components/patterns/date-picker', () => ({
 import {
   createEventMutation,
   updateEventMutation,
-} from '@monobase/sdk-ts/generated/@tanstack/react-query.gen'
+} from '@monobase/sdk-ts/generated/react-query'
 
 const mockCreateMutation = createEventMutation as ReturnType<typeof vi.fn>
 const mockUpdateMutation = updateEventMutation as ReturnType<typeof vi.fn>

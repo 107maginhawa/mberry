@@ -8,7 +8,7 @@ import { useQuery } from '@tanstack/react-query'
 import { ArrowLeft } from 'lucide-react'
 import { Button } from '@monobase/ui'
 import { api } from '@/lib/api'
-import { PageHeader } from '@/components/patterns/page-header'
+import { PageShell } from '@/components/patterns/page-shell'
 import { EmptyState } from '@/components/patterns/empty-state'
 import { ListSkeleton } from '@/components/patterns/skeleton-loader'
 import { AnnouncementContent } from '@/features/communications/components/announcement-content'
@@ -66,8 +66,9 @@ function MemberAnnouncementPage() {
   }
 
   return (
-    <div className="space-y-6 max-w-3xl">
-      <div className="flex items-center gap-3">
+    <PageShell
+      title={ann.title}
+      actions={
         <Button
           variant="ghost"
           size="sm"
@@ -77,15 +78,15 @@ function MemberAnnouncementPage() {
           <ArrowLeft size={16} />
           Back
         </Button>
+      }
+    >
+      <div className="space-y-6 max-w-3xl">
+        <AnnouncementContent
+          announcement={ann}
+          showActions={false}
+          showStats={false}
+        />
       </div>
-
-      <PageHeader title={ann.title} />
-
-      <AnnouncementContent
-        announcement={ann}
-        showActions={false}
-        showStats={false}
-      />
-    </div>
+    </PageShell>
   )
 }

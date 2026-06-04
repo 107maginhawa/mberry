@@ -12,9 +12,10 @@ import {
   TableHead,
   TableCell,
 } from '@monobase/ui'
+import { PageShell } from '@/components/patterns/page-shell'
 import { RequireRole } from '@/lib/role-gate'
 import { ErrorState } from '@/components/skeletons'
-import { searchCoursesOptions } from '@monobase/sdk-ts/generated/@tanstack/react-query.gen'
+import { searchCoursesOptions } from '@monobase/sdk-ts/generated/react-query'
 
 export const Route = createFileRoute('/training/')({
   component: () => (
@@ -56,9 +57,9 @@ function TrainingPage() {
 
   if (isError) {
     return (
-      <div className="p-8 max-w-2xl">
+      <PageShell title="Training & Courses" maxWidth="full">
         <ErrorState message="Could not load training" onRetry={() => refetch()} />
-      </div>
+      </PageShell>
     )
   }
 
@@ -66,17 +67,11 @@ function TrainingPage() {
   const hasMore = courses.length === PAGE_SIZE
 
   return (
-    <div className="p-8">
-      <div className="flex items-center gap-3 mb-8">
-        <GraduationCap className="w-6 h-6 text-muted-foreground" />
-        <div>
-          <h1 className="text-h1 text-foreground">Training &amp; Courses</h1>
-          <p className="text-sm text-muted-foreground mt-1">
-            Cross-org training and course overview
-          </p>
-        </div>
-      </div>
-
+    <PageShell
+      title="Training & Courses"
+      subtitle="Cross-org training and course overview"
+      maxWidth="full"
+    >
       {/* Search */}
       <div className="flex items-center gap-4 mb-6">
         <div className="relative flex-1 max-w-sm">
@@ -195,6 +190,6 @@ function TrainingPage() {
           </Button>
         </div>
       )}
-    </div>
+    </PageShell>
   )
 }

@@ -4,7 +4,7 @@ import {
   listDuesInvoicesOptions,
   listDuesInvoicesQueryKey,
   markDuesInvoicePaidMutation,
-} from '@monobase/sdk-ts/generated/@tanstack/react-query.gen'
+} from '@monobase/sdk-ts/generated/react-query'
 import type { DuesInvoice } from '@monobase/sdk-ts/generated/types.gen'
 import { FileText } from 'lucide-react'
 import { Button, Skeleton } from '@monobase/ui'

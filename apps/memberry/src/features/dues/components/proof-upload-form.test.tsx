@@ -1,12 +1,9 @@
-import { describe, test, expect, vi, beforeEach } from 'vitest'
+import { describe, test, expect, vi, beforeEach } from '@/test/vitest-shim'
 import { screen } from '@testing-library/react'
 import { renderWithProviders } from '@/test/utils'
 import { ProofUploadForm } from './proof-upload-form'
 
-vi.mock('@monobase/sdk-ts/generated/react-query', () => ({
-  submitPaymentProofMutation: vi.fn(() => ({ mutationFn: vi.fn().mockResolvedValue({}) })),
-}))
-
+// [Tier-F] removed local SDK mock; using global stub in test-setup-root.ts
 vi.mock('sonner', () => ({
   toast: { success: vi.fn(), error: vi.fn() },
 }))

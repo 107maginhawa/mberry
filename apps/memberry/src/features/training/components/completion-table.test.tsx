@@ -1,18 +1,13 @@
-import { describe, test, expect, vi, beforeEach } from 'vitest'
+import { describe, test, expect, vi, beforeEach } from '@/test/vitest-shim'
 import { screen, waitFor } from '@testing-library/react'
 import { renderWithProviders } from '@/test/utils'
 import { CompletionTable } from './completion-table'
 
-vi.mock('@monobase/sdk-ts/generated/@tanstack/react-query.gen', () => ({
-  listCustomTrainingEnrollmentsOptions: vi.fn(),
-  listCustomTrainingEnrollmentsQueryKey: vi.fn(() => ['training', 'enrollments']),
-  completeCustomTrainingMutation: vi.fn(),
-}))
-
+// [Tier-F] removed local SDK mock; using global stub in test-setup-root.ts
 import {
   listCustomTrainingEnrollmentsOptions,
   completeCustomTrainingMutation,
-} from '@monobase/sdk-ts/generated/@tanstack/react-query.gen'
+} from '@monobase/sdk-ts/generated/react-query'
 
 const mockListOptions = listCustomTrainingEnrollmentsOptions as ReturnType<typeof vi.fn>
 const mockCompleteMutation = completeCustomTrainingMutation as ReturnType<typeof vi.fn>

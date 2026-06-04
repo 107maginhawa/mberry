@@ -52,6 +52,7 @@ export function VideoLobby({ roomName, participants = [], onJoin, onCancel }: Vi
 
         {/* Audio/Video toggles */}
         <div className="flex items-center justify-center gap-4">
+          {/* ui-c-exempt: interactive-emphasis — video-lobby control 48px round */}
           <Button
             variant={audioEnabled ? 'secondary' : 'destructive'}
             size="lg"
@@ -61,6 +62,7 @@ export function VideoLobby({ roomName, participants = [], onJoin, onCancel }: Vi
           >
             {audioEnabled ? <Mic className="h-5 w-5" /> : <MicOff className="h-5 w-5" />}
           </Button>
+          {/* ui-c-exempt: interactive-emphasis — video-lobby control 48px round */}
           <Button
             variant={videoEnabled ? 'secondary' : 'destructive'}
             size="lg"

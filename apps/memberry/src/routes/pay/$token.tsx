@@ -1,3 +1,4 @@
+// ui-c-exempt: public-verify — public pay-by-token, no auth
 // oli-execute: error-handled-inline
 // `error` is the merge of pay-mutation error + fetch error; renders explicit
 // branch. Gate heuristic misses the destructured rename `error: fetchError`.
@@ -7,6 +8,7 @@ import { useState } from 'react'
 import { Button } from '@monobase/ui'
 import { api } from '@/lib/api'
 
+// oli-ui: exempt-pageshell — public invoice-payment micro-page; centered single-card flow
 export const Route = createFileRoute('/pay/$token')({
   component: PublicPaymentPage,
 })

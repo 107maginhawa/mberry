@@ -1,4 +1,4 @@
-import { describe, test, expect, vi } from 'vitest'
+import { describe, test, expect, vi } from '@/test/vitest-shim'
 import { render, screen } from '@testing-library/react'
 import { renderWithProviders, MOCK_SUPER_ADMIN, MOCK_SUPPORT_ADMIN, MOCK_ANALYST_ADMIN } from '@/test/utils'
 import { RequireRole, useAdminUser, ROUTE_ROLES } from './role-gate'

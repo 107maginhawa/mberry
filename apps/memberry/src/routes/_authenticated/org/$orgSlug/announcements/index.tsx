@@ -1,6 +1,6 @@
 import { createFileRoute, Link } from '@tanstack/react-router'
 import { useQuery } from '@tanstack/react-query'
-import { PageHeader } from '@/components/patterns/page-header'
+import { PageShell } from '@/components/patterns/page-shell'
 import { GlassCard } from '@/components/motion/glass-card'
 import { EmptyState } from '@/components/patterns/empty-state'
 import { ErrorState } from '@/components/patterns/error-state'
@@ -37,16 +37,15 @@ function MemberAnnouncementFeed() {
   const announcements = data?.data ?? []
 
   return (
-    <div className="space-y-6">
-      <PageHeader
-        title="Announcements"
-        subtitle="Updates from your association"
-        breadcrumbs={[
-          { label: 'Home', href: `/org/${orgSlug}` },
-          { label: 'Announcements' },
-        ]}
-      />
-
+    <PageShell
+      title="Announcements"
+      subtitle="Updates from your association"
+      breadcrumbs={[
+        { label: 'Home', href: `/org/${orgSlug}` },
+        { label: 'Announcements' },
+      ]}
+    >
+      <div className="space-y-6">
       {isError ? (
         <ErrorState message="Could not load announcements" onRetry={() => refetch()} />
       ) : isLoading ? (
@@ -95,6 +94,7 @@ function MemberAnnouncementFeed() {
           ))}
         </div>
       )}
-    </div>
+      </div>
+    </PageShell>
   )
 }

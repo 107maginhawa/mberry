@@ -4,6 +4,7 @@ import { OrgProvider } from '@/providers/OrgProvider'
 
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
 
+// oli-ui: exempt-pageshell — layout-shell route wraps Outlet in OrgProvider, no page content
 export const Route = createFileRoute('/_authenticated/org/$orgSlug')({
   beforeLoad: async ({ params, location }) => {
     // UUID in URL → resolve to slug and 301 redirect

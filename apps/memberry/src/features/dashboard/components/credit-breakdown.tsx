@@ -18,7 +18,7 @@ export function CreditBreakdown({ totalCredits, requiredCredits, isError }: Cred
     <GlassCard className="p-5">
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center gap-2">
-          <Award size={18} className="text-[var(--color-muted)]" aria-hidden="true" />
+          <Award size={20} className="text-[var(--color-muted)]" aria-hidden="true" />
           <h3 className="text-h4">Credit Progress</h3>
         </div>
         <Link to="/my/credits" className="text-xs font-semibold text-[var(--color-primary)] hover:underline">
@@ -36,6 +36,7 @@ export function CreditBreakdown({ totalCredits, requiredCredits, isError }: Cred
       ) : (
         <div>
           <div className="flex items-center gap-4 mb-4">
+            {/* oli-ui: exempt-icon-size — hero illustration (CreditRing data viz) */}
             <CreditRing earned={totalCredits} required={requiredCredits || totalCredits} size={64} />
             <div>
               <p className="text-2xl font-bold font-display text-[var(--color-primary)]" style={{ fontVariantNumeric: 'tabular-nums' }}>
@@ -59,7 +60,7 @@ export function CreditBreakdown({ totalCredits, requiredCredits, isError }: Cred
             to="/my/training"
             className="flex items-center gap-1.5 text-xs font-semibold text-[var(--color-primary)] hover:underline"
           >
-            <BookOpen size={13} aria-hidden="true" />
+            <BookOpen size={12} aria-hidden="true" />
             Earn more credits
           </Link>
         </div>

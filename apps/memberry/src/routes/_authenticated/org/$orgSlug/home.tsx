@@ -3,7 +3,7 @@ import { useQuery } from '@tanstack/react-query'
 import { searchEventsOptions, listAnnouncementsOptions } from '@monobase/sdk-ts/generated/react-query'
 import { Megaphone, Calendar, MapPin, ArrowRight } from 'lucide-react'
 import { useOrg } from '@/hooks/useOrg'
-import { PageHeader } from '@/components/patterns/page-header'
+import { PageShell } from '@/components/patterns/page-shell'
 import { GlassCard } from '@/components/motion/glass-card'
 import { EmptyState } from '@/components/patterns/empty-state'
 import { ListSkeleton } from '@/components/patterns/skeleton-loader'
@@ -38,16 +38,15 @@ function OrgHome() {
   const eventItems = events?.data ?? []
 
   return (
-    <div className="space-y-8">
-      <PageHeader
-        title="Organization Home"
-        subtitle="Latest updates and upcoming events"
-        breadcrumbs={[
-          { label: 'Organization' },
-          { label: 'Home' },
-        ]}
-      />
-
+    <PageShell
+      title="Organization Home"
+      subtitle="Latest updates and upcoming events"
+      breadcrumbs={[
+        { label: 'Organization' },
+        { label: 'Home' },
+      ]}
+    >
+      <div className="space-y-8">
       {/* Recent Announcements */}
       <section className="space-y-4">
         <h2 className="text-h4 flex items-center gap-2">
@@ -159,6 +158,7 @@ function OrgHome() {
           </StaggerGrid>
         )}
       </section>
-    </div>
+      </div>
+    </PageShell>
   )
 }

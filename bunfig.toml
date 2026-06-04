@@ -1,3 +1,8 @@
+[test]
+# Skip Playwright E2E specs at load time (bun has no testPathIgnorePatterns;
+# the preload installs a Bun plugin that no-ops `tests/e2e/*.spec.ts` files).
+preload = ["./test-setup-root.ts"]
+
 [install]
 # Use isolated mode (pnpm-style) for strict dependency isolation
 linker = "isolated"

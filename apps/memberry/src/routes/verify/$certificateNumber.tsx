@@ -1,3 +1,4 @@
+// ui-c-exempt: public-verify — public certificate verification
 // oli-execute: error-handled-inline
 // `error` renders explicit "Could not verify certificate" branch.
 import { createFileRoute } from '@tanstack/react-router'
@@ -5,6 +6,7 @@ import { useQuery } from '@tanstack/react-query'
 import { Badge, Button } from '@monobase/ui'
 import { api } from '@/lib/api'
 
+// oli-ui: exempt-pageshell — public certificate-verification micro-page; centered single-card result
 export const Route = createFileRoute('/verify/$certificateNumber')({
   component: VerifyCertificatePage,
 })

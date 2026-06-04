@@ -1,6 +1,6 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { AffiliationList } from '@/features/chapters/components/affiliation-list'
-import { PageHeader } from '@/components/patterns/page-header'
+import { PageShell } from '@/components/patterns/page-shell'
 import { GlassCard } from '@/components/motion/glass-card'
 import { useOrg } from '@/hooks/useOrg'
 
@@ -12,19 +12,18 @@ function ChaptersSettingsPage() {
   const { orgId, orgSlug } = useOrg()
 
   return (
-    <div className="space-y-6">
-      <PageHeader
-        title="Chapter Affiliations"
-        subtitle="Manage chapter relationships"
-        breadcrumbs={[
-          { label: 'Officer', href: `/org/${orgSlug}/officer/dashboard` },
-          { label: 'Settings' },
-          { label: 'Chapters' },
-        ]}
-      />
+    <PageShell
+      title="Chapter Affiliations"
+      subtitle="Manage chapter relationships"
+      breadcrumbs={[
+        { label: 'Officer', href: `/org/${orgSlug}/officer/dashboard` },
+        { label: 'Settings' },
+        { label: 'Chapters' },
+      ]}
+    >
       <GlassCard className="p-6">
         <AffiliationList orgId={orgId} tenantId={orgId} />
       </GlassCard>
-    </div>
+    </PageShell>
   )
 }

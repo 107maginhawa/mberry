@@ -2,13 +2,14 @@ import { createFileRoute, Link } from '@tanstack/react-router'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { Building2, Plus, X } from 'lucide-react'
 import { Button, Input, Label, Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from '@monobase/ui'
+import { PageShell } from '@/components/patterns/page-shell'
 import { toast } from 'sonner'
 import { useState } from 'react'
 import {
   listAssociationsOptions,
   listAssociationsQueryKey,
   createAssociationMutation,
-} from '@monobase/sdk-ts/generated/@tanstack/react-query.gen'
+} from '@monobase/sdk-ts/generated/react-query'
 
 export const Route = createFileRoute('/associations/')({
   component: AssociationsPage,
@@ -130,25 +131,17 @@ function AssociationsPage() {
   const pendingCount = associations.filter((a) => a.status === 'pending').length
 
   return (
-    <div className="p-8">
-      <div className="flex items-center justify-between mb-8">
-        <div className="flex items-center gap-3">
-          <Building2 className="w-6 h-6 text-muted-foreground" />
-          <div>
-            <h1 className="text-h1 text-foreground">
-              Associations
-            </h1>
-            <p className="text-sm text-muted-foreground mt-1">
-              Manage healthcare associations across the platform
-            </p>
-          </div>
-        </div>
+    <PageShell
+      title="Associations"
+      subtitle="Manage healthcare associations across the platform"
+      maxWidth="full"
+      actions={
         <Button onClick={() => setDialogOpen(true)}>
           <Plus className="w-4 h-4" />
           Create Association
         </Button>
-      </div>
-
+      }
+    >
       {/* Stats */}
       <div className="grid grid-cols-3 gap-6 mb-8">
         <div className="rounded-lg border bg-card p-6">
@@ -247,6 +240,6 @@ function AssociationsPage() {
       </div>
 
       <CreateAssociationDialog open={dialogOpen} onClose={() => setDialogOpen(false)} />
-    </div>
+    </PageShell>
   )
 }

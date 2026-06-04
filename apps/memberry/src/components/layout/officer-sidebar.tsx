@@ -182,6 +182,7 @@ export function OfficerSidebar({ orgName, userEmail, userName, role, positions }
                 }}
                 activeOptions={{ exact: false }}
               >
+                {/* ui-c-exempt: nav-icon — sidebar entry icon */}
                 <Icon size={18} className="shrink-0 opacity-70" />
                 <span className="hidden lg:inline">{label}</span>
               </Link>

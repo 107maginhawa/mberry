@@ -13,7 +13,7 @@ import {
   createTrainingMutation,
   updateTrainingMutation,
   searchTrainingsQueryKey,
-} from '@monobase/sdk-ts/generated/@tanstack/react-query.gen'
+} from '@monobase/sdk-ts/generated/react-query'
 
 interface TrainingFormProps {
   orgId: string

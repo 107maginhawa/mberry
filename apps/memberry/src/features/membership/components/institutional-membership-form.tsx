@@ -10,7 +10,7 @@ import {
   createInstitutionalMembershipMutation,
   updateInstitutionalMembershipMutation,
   listInstitutionalMembershipsQueryKey,
-} from '@monobase/sdk-ts/generated/@tanstack/react-query.gen'
+} from '@monobase/sdk-ts/generated/react-query'
 import type { InstitutionalMembership } from '@monobase/sdk-ts/generated/types.gen'
 
 const institutionalMembershipSchema = z.object({

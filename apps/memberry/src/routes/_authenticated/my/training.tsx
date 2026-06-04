@@ -5,7 +5,7 @@ import { listMyCustomTrainingsOptions, searchTrainingsOptions } from '@monobase/
 import type { ApiListResponse } from '@/types/api'
 import { useOrgContext } from '@/hooks/useOrgContext'
 import { useMyOrgs } from '@/hooks/useMyOrgs'
-import { PageHeader } from '@/components/patterns/page-header'
+import { PageShell } from '@/components/patterns/page-shell'
 import { EmptyState } from '@/components/patterns/empty-state'
 import { CardSkeleton, TableSkeleton } from '@/components/patterns/skeleton-loader'
 import { GlassCard } from '@/components/motion/glass-card'
@@ -77,12 +77,11 @@ function MyTraining() {
   ]
 
   return (
-    <div className="space-y-6">
-      <PageHeader
-        title="My Training"
-        subtitle="Training sessions and courses you're enrolled in"
-      />
-
+    <PageShell
+      title="My Training"
+      subtitle="Training sessions and courses you're enrolled in"
+    >
+      <div className="space-y-6">
       {/* Stats */}
       <StaggerGrid className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         {statCards.map((s) => (
@@ -117,6 +116,7 @@ function MyTraining() {
           Unable to load your training. Please try refreshing the page.
         </div>
       ) : items.length === 0 ? (
+        // ui-c-exempt: empty-state-emphasis — no-training EmptyState
         <EmptyState
           icon={<BookOpen size={32} />}
           headline="No training sessions yet"
@@ -205,6 +205,7 @@ function MyTraining() {
           </StaggerGrid>
         </section>
       )}
-    </div>
+      </div>
+    </PageShell>
   )
 }

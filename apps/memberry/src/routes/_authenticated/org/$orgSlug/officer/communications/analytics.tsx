@@ -1,7 +1,7 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { useQuery } from '@tanstack/react-query'
 import { Badge } from '@monobase/ui'
-import { PageHeader } from '@/components/patterns/page-header'
+import { PageShell } from '@/components/patterns/page-shell'
 import { GlassCard } from '@/components/motion/glass-card'
 import { ListSkeleton } from '@/components/patterns/skeleton-loader'
 import { DeliveryFunnel } from '@/features/communications/components/delivery-funnel'
@@ -65,20 +65,19 @@ function AnalyticsDashboardPage() {
   )
 
   return (
-    <div className="space-y-6">
-      <PageHeader
-        title="Communications Analytics"
-        subtitle="Delivery stats and performance metrics"
-        breadcrumbs={[
-          { label: 'Officer', href: `/org/${orgSlug}/officer/dashboard` },
-          {
-            label: 'Communications',
-            href: `/org/${orgSlug}/officer/communications`,
-          },
-          { label: 'Analytics' },
-        ]}
-      />
-
+    <PageShell
+      title="Communications Analytics"
+      subtitle="Delivery stats and performance metrics"
+      breadcrumbs={[
+        { label: 'Officer', href: `/org/${orgSlug}/officer/dashboard` },
+        {
+          label: 'Communications',
+          href: `/org/${orgSlug}/officer/communications`,
+        },
+        { label: 'Analytics' },
+      ]}
+    >
+      <div className="space-y-6">
       {/* KPI Cards */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         <GlassCard className="p-5">
@@ -211,6 +210,7 @@ function AnalyticsDashboardPage() {
           </div>
         </GlassCard>
       )}
-    </div>
+      </div>
+    </PageShell>
   )
 }

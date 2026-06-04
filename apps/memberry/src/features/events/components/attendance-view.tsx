@@ -7,7 +7,7 @@ import {
   listCustomEventAttendanceOptions,
   listCustomEventAttendanceQueryKey,
   checkInCustomEventMutation,
-} from '@monobase/sdk-ts/generated/@tanstack/react-query.gen'
+} from '@monobase/sdk-ts/generated/react-query'
 import type { CheckIn, CheckInCreateRequest } from '@monobase/sdk-ts/generated/types.gen'
 
 /**

@@ -10,6 +10,7 @@ import { MerchantAccountSetup } from '@/features/billing/components/merchant-acc
 import { Button } from '@monobase/ui'
 import { AlertCircle } from 'lucide-react'
 import { useEffect, useState } from 'react'
+import { PageShell } from '@/components/patterns/page-shell'
 
 export const Route = createFileRoute('/_authenticated/my/billing')({
   component: BillingPage,
@@ -62,15 +63,11 @@ function BillingPage() {
 
   const transportFailed = accountQuery.isError && !isNotFound
 
+  const subtitle = "Connect a Stripe account if you want to charge for your sessions."
+
   if (transportFailed || stalled) {
     return (
-      <div className="flex flex-col gap-6 max-w-3xl">
-        <div>
-          <h1 className="text-h1">Billing</h1>
-          <p className="text-muted-foreground">
-            Connect a Stripe account if you want to charge for your sessions.
-          </p>
-        </div>
+      <PageShell title="Billing" subtitle={subtitle}>
         <div role="alert" className="rounded-lg border border-destructive/40 bg-destructive/5 p-6 flex flex-col gap-3">
           <div className="flex items-center gap-2 text-destructive">
             <AlertCircle className="h-5 w-5" />
@@ -98,18 +95,12 @@ function BillingPage() {
             </Button>
           </div>
         </div>
-      </div>
+      </PageShell>
     )
   }
 
   return (
-    <div className="flex flex-col gap-6 max-w-3xl">
-      <div>
-        <h1 className="text-h1">Billing</h1>
-        <p className="text-muted-foreground">
-          Connect a Stripe account if you want to charge for your sessions.
-        </p>
-      </div>
+    <PageShell title="Billing" subtitle={subtitle}>
       <MerchantAccountSetup
         account={account ? { id: account.id, metadata: account.metadata as { onboardingStartedAt?: string } | undefined } : null}
         status={status}
@@ -121,6 +112,6 @@ function BillingPage() {
         onSubmit={() => navigate({ to: '/dashboard' })}
         onSkip={() => navigate({ to: '/dashboard' })}
       />
-    </div>
+    </PageShell>
   )
 }

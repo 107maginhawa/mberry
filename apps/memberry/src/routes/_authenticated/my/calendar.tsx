@@ -1,8 +1,8 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { useQuery } from '@tanstack/react-query'
-import { PageHeader } from '@/components/patterns/page-header'
+import { PageShell } from '@/components/patterns/page-shell'
 import { EventCalendar } from '@/features/events/components/event-calendar'
-import { listMyCustomEventsOptions } from '@monobase/sdk-ts/generated/@tanstack/react-query.gen'
+import { listMyCustomEventsOptions } from '@monobase/sdk-ts/generated/react-query'
 import { Calendar } from 'lucide-react'
 
 export const Route = createFileRoute('/_authenticated/my/calendar')({
@@ -44,13 +44,12 @@ function MyCalendar() {
   })
 
   return (
-    <div className="space-y-6">
-      <PageHeader
-        title="My Calendar"
-        subtitle="Your registered events at a glance"
-        breadcrumbs={[{ label: 'My Calendar' }]}
-      />
-
+    <PageShell
+      title="My Calendar"
+      subtitle="Your registered events at a glance"
+      breadcrumbs={[{ label: 'My Calendar' }]}
+    >
+      <div className="space-y-6">
       {isLoading ? (
         <div className="h-96 rounded-lg bg-[var(--color-surface-elevated-hover)] animate-shimmer" />
       ) : events.length === 0 ? (
@@ -61,6 +60,7 @@ function MyCalendar() {
       ) : (
         <EventCalendar events={events} linkBase="/my/events" />
       )}
-    </div>
+      </div>
+    </PageShell>
   )
 }

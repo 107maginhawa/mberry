@@ -1,12 +1,9 @@
-import { describe, test, expect, vi, beforeEach } from 'vitest'
+import { describe, test, expect, vi, beforeEach } from '@/test/vitest-shim'
 import { screen, waitFor } from '@testing-library/react'
 import { renderWithProviders } from '@/test/utils'
 import { FinancialDashboard } from './financial-dashboard'
 
-vi.mock('@monobase/sdk-ts/generated/react-query', () => ({
-  getDuesFinancialDashboardOptions: vi.fn(),
-}))
-
+// [Tier-F] removed local SDK mock; using global stub in test-setup-root.ts
 vi.mock('@/components/motion/glass-card', () => ({
   GlassCard: ({ children, className }: any) => <div className={className}>{children}</div>,
 }))

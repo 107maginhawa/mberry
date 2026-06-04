@@ -1,4 +1,4 @@
-import { describe, it, expect } from 'vitest'
+import { describe, it, expect } from 'bun:test'
 import { act } from '@testing-library/react'
 import { renderWithProviders, screen } from '@/test/utils'
 import { StandingMeter, type StandingMeterProps } from './standing-meter'

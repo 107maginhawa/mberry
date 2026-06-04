@@ -1,7 +1,6 @@
 import { createFileRoute } from '@tanstack/react-router'
-import { PageContainer } from '@monobase/ui'
 import { NotificationInbox } from '@/features/notifications/components/notification-inbox'
-import { PageHeader } from '@/components/patterns/page-header'
+import { PageShell } from '@/components/patterns/page-shell'
 
 export const Route = createFileRoute('/_authenticated/my/notifications')({
   component: NotificationsPage,
@@ -9,16 +8,15 @@ export const Route = createFileRoute('/_authenticated/my/notifications')({
 
 function NotificationsPage() {
   return (
-    <PageContainer width="default">
-      <PageHeader
-        title="Notifications"
-        subtitle="Stay up to date with your organizations"
-        breadcrumbs={[
-          { label: 'Home', href: '/dashboard' },
-          { label: 'Notifications' },
-        ]}
-      />
+    <PageShell
+      title="Notifications"
+      subtitle="Stay up to date with your organizations"
+      breadcrumbs={[
+        { label: 'Home', href: '/dashboard' },
+        { label: 'Notifications' },
+      ]}
+    >
       <NotificationInbox />
-    </PageContainer>
+    </PageShell>
   )
 }

@@ -1,3 +1,4 @@
+// ui-c-exempt: landing-page — public landing root
 import { createFileRoute, redirect } from '@tanstack/react-router'
 import type { RouterContext } from '@/router'
 

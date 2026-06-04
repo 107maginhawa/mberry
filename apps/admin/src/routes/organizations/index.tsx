@@ -2,8 +2,9 @@ import { createFileRoute, Link } from '@tanstack/react-router'
 import { useQuery } from '@tanstack/react-query'
 import { Building, Plus } from 'lucide-react'
 import { Button, Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from '@monobase/ui'
-import { listOrganizationsOptions } from '@monobase/sdk-ts/generated/@tanstack/react-query.gen'
+import { listOrganizationsOptions } from '@monobase/sdk-ts/generated/react-query'
 import { ErrorState } from '@/components/skeletons'
+import { PageShell } from '@/components/patterns/page-shell'
 
 export const Route = createFileRoute('/organizations/')({
   component: OrganizationsPage,
@@ -28,9 +29,9 @@ function OrganizationsPage() {
 
   if (isError) {
     return (
-      <div className="p-8 max-w-2xl">
+      <PageShell title="Organizations" maxWidth="full">
         <ErrorState message="Could not load organizations" onRetry={() => refetch()} />
-      </div>
+      </PageShell>
     )
   }
 
@@ -41,25 +42,17 @@ function OrganizationsPage() {
   const suspendedCount = organizations.filter((o) => o.status === 'suspended').length
 
   return (
-    <div className="p-8">
-      <div className="flex items-center justify-between mb-8">
-        <div className="flex items-center gap-3">
-          <Building className="w-6 h-6 text-muted-foreground" />
-          <div>
-            <h1 className="text-h1 text-foreground">
-              Organizations
-            </h1>
-            <p className="text-sm text-muted-foreground mt-1">
-              View and manage all organizations across associations
-            </p>
-          </div>
-        </div>
+    <PageShell
+      title="Organizations"
+      subtitle="View and manage all organizations across associations"
+      maxWidth="full"
+      actions={
         <Button>
           <Plus className="w-4 h-4" />
           Create Organization
         </Button>
-      </div>
-
+      }
+    >
       {/* Stats */}
       <div className="grid grid-cols-3 gap-6 mb-8">
         <div className="rounded-lg border bg-card p-6">
@@ -147,6 +140,6 @@ function OrganizationsPage() {
           </TableBody>
         </Table>
       </div>
-    </div>
+    </PageShell>
   )
 }

@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
-import { searchDirectoryOptions } from '@monobase/sdk-ts/generated/@tanstack/react-query.gen'
+import { searchDirectoryOptions } from '@monobase/sdk-ts/generated/react-query'
 import type { DirectoryProfile } from '@monobase/sdk-ts/generated/types.gen'
 import { Users } from 'lucide-react'
 import { Input } from '@monobase/ui'

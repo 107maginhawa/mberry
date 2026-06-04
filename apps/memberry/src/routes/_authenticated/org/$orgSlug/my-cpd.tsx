@@ -1,7 +1,7 @@
 import { createFileRoute, Link } from '@tanstack/react-router'
 import { useQuery } from '@tanstack/react-query'
 import { Award, TrendingUp, AlertTriangle, CheckCircle } from 'lucide-react'
-import { PageHeader } from '@/components/patterns/page-header'
+import { PageShell } from '@/components/patterns/page-shell'
 import { GlassCard } from '@/components/motion/glass-card'
 import { CardSkeleton } from '@/components/patterns/skeleton-loader'
 import { useOrg } from '@/hooks/useOrg'
@@ -24,25 +24,27 @@ function MyCpdDashboard() {
 
   if (isLoading) {
     return (
-      <div className="space-y-6">
-        <PageHeader title="My CPD Credits" subtitle="Track your continuing professional development" />
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <CardSkeleton />
-          <CardSkeleton />
-          <CardSkeleton />
+      <PageShell title="My CPD Credits" subtitle="Track your continuing professional development">
+        <div className="space-y-6">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <CardSkeleton />
+            <CardSkeleton />
+            <CardSkeleton />
+          </div>
         </div>
-      </div>
+      </PageShell>
     )
   }
 
   if (error) {
     return (
-      <div className="space-y-6">
-        <PageHeader title="My CPD Credits" subtitle="Track your continuing professional development" />
-        <div role="alert" className="p-4 rounded-lg bg-[var(--color-error-bg)] text-[var(--color-error)] text-sm">
-          Unable to load your CPD credits. Please try refreshing the page.
+      <PageShell title="My CPD Credits" subtitle="Track your continuing professional development">
+        <div className="space-y-6">
+          <div role="alert" className="p-4 rounded-lg bg-[var(--color-error-bg)] text-[var(--color-error)] text-sm">
+            Unable to load your CPD credits. Please try refreshing the page.
+          </div>
         </div>
-      </div>
+      </PageShell>
     )
   }
 
@@ -51,9 +53,8 @@ function MyCpdDashboard() {
   const StatusIcon = compliancePercent >= 100 ? CheckCircle : compliancePercent >= 60 ? TrendingUp : AlertTriangle
 
   return (
-    <div className="space-y-6">
-      <PageHeader title="My CPD Credits" subtitle="Track your continuing professional development" />
-
+    <PageShell title="My CPD Credits" subtitle="Track your continuing professional development">
+      <div className="space-y-6">
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <GlassCard className="p-5">
           <div className="flex items-center justify-between">
@@ -136,6 +137,7 @@ function MyCpdDashboard() {
           Browse Events
         </Link>
       </div>
-    </div>
+      </div>
+    </PageShell>
   )
 }

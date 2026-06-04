@@ -5,7 +5,7 @@ import { Badge, Button } from '@monobase/ui'
 import { getStatusLabel } from '@/features/membership/lib/membership-status'
 import type { MembershipStatus } from '@/features/membership/lib/membership-status'
 import { api } from '@/lib/api'
-import { PageHeader } from '@/components/patterns/page-header'
+import { PageShell } from '@/components/patterns/page-shell'
 import { GlassCard } from '@/components/motion/glass-card'
 import { EmptyState } from '@/components/patterns/empty-state'
 import { CardSkeleton } from '@/components/patterns/skeleton-loader'
@@ -88,16 +88,14 @@ function MyIdCard() {
   }
 
   return (
-    <div>
-      <PageHeader
-        title="Digital ID Card"
-        subtitle="Your verified member identification card"
-        breadcrumbs={[
-          { label: 'Home', href: '/dashboard' },
-          { label: 'ID Card' },
-        ]}
-      />
-
+    <PageShell
+      title="Digital ID Card"
+      subtitle="Your verified member identification card"
+      breadcrumbs={[
+        { label: 'Home', href: '/dashboard' },
+        { label: 'ID Card' },
+      ]}
+    >
       {isLoading ? (
         <IdCardSkeleton />
       ) : isError ? (
@@ -105,6 +103,7 @@ function MyIdCard() {
           Unable to load your ID card. Please try refreshing the page.
         </div>
       ) : !membership ? (
+        // ui-c-exempt: empty-state-emphasis — no-id-card EmptyState
         <EmptyState
           icon={<CreditCard size={40} />}
           headline="No ID card available"
@@ -158,6 +157,6 @@ function MyIdCard() {
           </div>
         </div>
       )}
-    </div>
+    </PageShell>
   )
 }

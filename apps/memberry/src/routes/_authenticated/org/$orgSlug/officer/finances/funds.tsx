@@ -12,7 +12,7 @@ import { Skeleton } from '@monobase/ui'
 import { Alert, AlertDescription } from '@monobase/ui'
 import { toast } from 'sonner'
 import { FundAllocationEditor } from '@/features/dues/components/fund-allocation-editor'
-import { PageHeader } from '@/components/patterns/page-header'
+import { PageShell } from '@/components/patterns/page-shell'
 import { GlassCard } from '@/components/motion/glass-card'
 import { CountUp } from '@/components/motion/count-up'
 import { StaggerGrid, StaggerItem } from '@/components/motion/stagger-grid'
@@ -78,46 +78,51 @@ function FundsPage() {
   const total = funds.reduce((sum, f) => sum + (parseFloat(f.percentage) || 0), 0)
   const isValid = Math.abs(total - 100) < 0.001
 
+  const fundsBreadcrumbs = [
+    { label: 'Officer', href: `/org/${orgSlug}/officer/dashboard` },
+    { label: 'Finances', href: `/org/${orgSlug}/officer/finances` },
+    { label: 'Funds' },
+  ]
+
   if (isLoading) {
     return (
-      <div className="space-y-6">
-        <Skeleton className="h-8 w-48" />
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <Skeleton className="h-28 rounded-xl" />
-          <Skeleton className="h-28 rounded-xl" />
-          <Skeleton className="h-28 rounded-xl" />
+      <PageShell title="Funds" subtitle="Fund accounting — how dues are distributed" breadcrumbs={fundsBreadcrumbs}>
+        <div className="space-y-6">
+          <Skeleton className="h-8 w-48" />
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <Skeleton className="h-28 rounded-xl" />
+            <Skeleton className="h-28 rounded-xl" />
+            <Skeleton className="h-28 rounded-xl" />
+          </div>
         </div>
-      </div>
+      </PageShell>
     )
   }
 
   if (isError) {
     return (
-      <div role="alert" className="p-4 rounded-lg bg-[var(--color-error-bg)] text-[var(--color-error)] text-sm">
-        Unable to load fund data. Please try refreshing the page.
-      </div>
+      <PageShell title="Funds" subtitle="Fund accounting — how dues are distributed" breadcrumbs={fundsBreadcrumbs}>
+        <div role="alert" className="p-4 rounded-lg bg-[var(--color-error-bg)] text-[var(--color-error)] text-sm">
+          Unable to load fund data. Please try refreshing the page.
+        </div>
+      </PageShell>
     )
   }
 
   const hasFunds = fundsData && fundsData.length > 0
 
   return (
-    <div className="space-y-5">
-      <PageHeader
-        title="Funds"
-        subtitle="Fund accounting — how dues are distributed"
-        breadcrumbs={[
-          { label: 'Officer', href: `/org/${orgSlug}/officer/dashboard` },
-          { label: 'Finances', href: `/org/${orgSlug}/officer/finances` },
-          { label: 'Funds' },
-        ]}
-        actions={
-          <Button variant="outline" size="sm" onClick={() => setShowEditor(!showEditor)}>
-            <Settings className="h-4 w-4 mr-1.5" /> Edit Rules
-          </Button>
-        }
-      />
-
+    <PageShell
+      title="Funds"
+      subtitle="Fund accounting — how dues are distributed"
+      breadcrumbs={fundsBreadcrumbs}
+      actions={
+        <Button variant="outline" size="sm" onClick={() => setShowEditor(!showEditor)}>
+          <Settings className="h-4 w-4 mr-1.5" /> Edit Rules
+        </Button>
+      }
+    >
+      <div className="space-y-5">
       {/* Fund balance cards */}
       {hasFunds ? (
         <StaggerGrid className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -206,6 +211,7 @@ function FundsPage() {
           </div>
         </GlassCard>
       )}
-    </div>
+      </div>
+    </PageShell>
   )
 }

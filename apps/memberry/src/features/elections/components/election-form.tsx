@@ -12,7 +12,7 @@ import {
   updateElectionMutation,
   listElectionsQueryKey,
   getElectionOptions,
-} from '@monobase/sdk-ts/generated/@tanstack/react-query.gen'
+} from '@monobase/sdk-ts/generated/react-query'
 import type { ElectionCreateRequest, ElectionType } from '@monobase/sdk-ts/generated/types.gen'
 
 const electionBasicsSchema = z.object({

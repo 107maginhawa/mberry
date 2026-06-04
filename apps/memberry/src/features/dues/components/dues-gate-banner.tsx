@@ -31,7 +31,7 @@ export function DuesGateBanner({ standing, orgSlug, feature, daysOverdue }: Dues
         <p className="text-sm text-amber-800 font-medium">{message}</p>
         <div className="mt-2">
           <Link to={`/org/${orgSlug}/dues` as any}>
-            <Button variant="outline" size="sm" className="text-amber-800 border-amber-300">
+            <Button variant="warning" size="sm">
               Pay Dues Now
             </Button>
           </Link>

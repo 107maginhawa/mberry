@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { createFileRoute, Link } from '@tanstack/react-router'
 import { useQuery } from '@tanstack/react-query'
 import { getPersonOptions } from '@monobase/sdk-ts/generated/react-query'
-import { PageHeader } from '@/components/patterns/page-header'
+import { PageShell } from '@/components/patterns/page-shell'
 import { ChannelList } from '@/features/comms/components/channel-list'
 import { ChatView } from '@/features/comms/components/chat-view'
 import { EmptyState } from '@/components/patterns/empty-state'
@@ -25,11 +25,8 @@ function MessagesIndexPage() {
   const myPersonId = person.data?.id ?? ''
 
   return (
-    <div className="flex-1 flex flex-col overflow-hidden">
-      <div className="px-6 pt-6">
-        <PageHeader title="Messages" />
-      </div>
-      <div className="flex-1 flex gap-4 p-6 pt-2 overflow-hidden">
+    <PageShell title="Messages">
+      <div className="flex-1 flex gap-4 overflow-hidden">
         {/* Sidebar: channels + DM link */}
         <div className="w-64 flex-shrink-0 overflow-y-auto hidden md:flex md:flex-col gap-3">
           <ChannelList
@@ -63,6 +60,6 @@ function MessagesIndexPage() {
           )}
         </div>
       </div>
-    </div>
+    </PageShell>
   )
 }

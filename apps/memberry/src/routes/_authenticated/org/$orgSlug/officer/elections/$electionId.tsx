@@ -1,6 +1,6 @@
 import { createFileRoute, Outlet, useMatch } from '@tanstack/react-router'
 import { ElectionDetail } from '@/features/elections/components/election-detail'
-import { PageHeader } from '@/components/patterns/page-header'
+import { PageShell } from '@/components/patterns/page-shell'
 import { GlassCard } from '@/components/motion/glass-card'
 import { useOrg } from '@/hooks/useOrg'
 
@@ -25,19 +25,17 @@ function ElectionDetailLayout() {
 
   // Otherwise render the detail page
   return (
-    <div className="space-y-6">
-      <PageHeader
-        title="Election Details"
-        breadcrumbs={[
-          { label: 'Officer', href: `/org/${orgSlug}/officer/dashboard` },
-          { label: 'Elections', href: `/org/${orgSlug}/officer/elections` },
-          { label: 'Details' },
-        ]}
-      />
-
+    <PageShell
+      title="Election Details"
+      breadcrumbs={[
+        { label: 'Officer', href: `/org/${orgSlug}/officer/dashboard` },
+        { label: 'Elections', href: `/org/${orgSlug}/officer/elections` },
+        { label: 'Details' },
+      ]}
+    >
       <GlassCard className="p-6">
         <ElectionDetail electionId={electionId} orgId={orgId} />
       </GlassCard>
-    </div>
+    </PageShell>
   )
 }

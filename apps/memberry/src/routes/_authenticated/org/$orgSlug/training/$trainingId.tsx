@@ -8,7 +8,7 @@ import {
   enrollInCustomTrainingMutation,
   listMyCustomTrainingsOptions,
 } from '@monobase/sdk-ts/generated/react-query'
-import { PageHeader } from '@/components/patterns/page-header'
+import { PageShell } from '@/components/patterns/page-shell'
 import { CardSkeleton } from '@/components/patterns/skeleton-loader'
 import { GlassCard } from '@/components/motion/glass-card'
 import { CountUp } from '@/components/motion/count-up'
@@ -84,34 +84,36 @@ function TrainingDetail() {
 
   if (isLoading) {
     return (
-      <div className="space-y-6 max-w-3xl">
-        <PageHeader
-          title=""
-          breadcrumbs={[
-            { label: 'Training', href: `/org/${orgSlug}/training` },
-            { label: 'Loading...' },
-          ]}
-        />
-        <CardSkeleton />
-        <CardSkeleton />
-      </div>
+      <PageShell
+        title=""
+        breadcrumbs={[
+          { label: 'Training', href: `/org/${orgSlug}/training` },
+          { label: 'Loading...' },
+        ]}
+      >
+        <div className="space-y-6 max-w-3xl">
+          <CardSkeleton />
+          <CardSkeleton />
+        </div>
+      </PageShell>
     )
   }
 
   if (error || !training) {
     return (
-      <div className="space-y-6 max-w-3xl">
-        <PageHeader
-          title="Training Not Found"
-          breadcrumbs={[
-            { label: 'Training', href: `/org/${orgSlug}/training` },
-            { label: 'Error' },
-          ]}
-        />
-        <GlassCard className="p-8 text-center">
-          <p className="text-sm text-[var(--color-muted)]">Failed to load training details.</p>
-        </GlassCard>
-      </div>
+      <PageShell
+        title="Training Not Found"
+        breadcrumbs={[
+          { label: 'Training', href: `/org/${orgSlug}/training` },
+          { label: 'Error' },
+        ]}
+      >
+        <div className="space-y-6 max-w-3xl">
+          <GlassCard className="p-8 text-center">
+            <p className="text-sm text-[var(--color-muted)]">Failed to load training details.</p>
+          </GlassCard>
+        </div>
+      </PageShell>
     )
   }
 
@@ -119,29 +121,28 @@ function TrainingDetail() {
   const fee = training.fee ?? training.price
 
   return (
-    <div className="space-y-6 max-w-3xl">
-      <PageHeader
-        title={training.title ?? ''}
-        breadcrumbs={[
-          { label: 'Training', href: `/org/${orgSlug}/training` },
-          { label: training.title ?? '' },
-        ]}
-        actions={
-          <div className="flex items-center gap-2 flex-wrap">
-            {training.status && (
-              <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400">
-                {training.status}
-              </span>
-            )}
-            {training.type && (
-              <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-[var(--color-surface-warm)] text-[var(--color-muted)] capitalize">
-                {training.type.replace('_', ' ')}
-              </span>
-            )}
-          </div>
-        }
-      />
-
+    <PageShell
+      title={training.title ?? ''}
+      breadcrumbs={[
+        { label: 'Training', href: `/org/${orgSlug}/training` },
+        { label: training.title ?? '' },
+      ]}
+      actions={
+        <div className="flex items-center gap-2 flex-wrap">
+          {training.status && (
+            <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400">
+              {training.status}
+            </span>
+          )}
+          {training.type && (
+            <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-[var(--color-surface-warm)] text-[var(--color-muted)] capitalize">
+              {training.type.replace('_', ' ')}
+            </span>
+          )}
+        </div>
+      }
+    >
+      <div className="space-y-6 max-w-3xl">
       {/* Details card */}
       <GlassCard className="p-5 space-y-4">
         <div className="grid gap-3 sm:grid-cols-2">
@@ -226,6 +227,7 @@ function TrainingDetail() {
           </Button>
         )}
       </div>
-    </div>
+      </div>
+    </PageShell>
   )
 }

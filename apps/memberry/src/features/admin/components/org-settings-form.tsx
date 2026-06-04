@@ -164,7 +164,7 @@ export function OrgSettingsForm({ orgId }: OrgSettingsFormProps) {
         {/* Logo URL */}
         <div className="md:col-span-2 space-y-1.5">
           <Label className="flex items-center gap-1.5">
-            <Image size={13} className="text-[var(--color-muted)]" />
+            <Image size={12} className="text-[var(--color-muted)]" />
             Logo URL
           </Label>
           {isEditing ? (
@@ -212,7 +212,7 @@ export function OrgSettingsForm({ orgId }: OrgSettingsFormProps) {
         {/* Contact Email */}
         <div className="space-y-1.5">
           <Label className="flex items-center gap-1.5">
-            <Mail size={13} className="text-[var(--color-muted)]" />
+            <Mail size={12} className="text-[var(--color-muted)]" />
             Contact Email
           </Label>
           {isEditing ? (
@@ -230,7 +230,7 @@ export function OrgSettingsForm({ orgId }: OrgSettingsFormProps) {
         {/* Phone */}
         <div className="space-y-1.5">
           <Label className="flex items-center gap-1.5">
-            <Phone size={13} className="text-[var(--color-muted)]" />
+            <Phone size={12} className="text-[var(--color-muted)]" />
             Phone
           </Label>
           {isEditing ? (
@@ -247,7 +247,7 @@ export function OrgSettingsForm({ orgId }: OrgSettingsFormProps) {
         {/* Address */}
         <div className="md:col-span-2 space-y-1.5">
           <Label className="flex items-center gap-1.5">
-            <MapPin size={13} className="text-[var(--color-muted)]" />
+            <MapPin size={12} className="text-[var(--color-muted)]" />
             Address
           </Label>
           {isEditing ? (
@@ -264,7 +264,7 @@ export function OrgSettingsForm({ orgId }: OrgSettingsFormProps) {
         {/* Website */}
         <div className="space-y-1.5">
           <Label className="flex items-center gap-1.5">
-            <Globe size={13} className="text-[var(--color-muted)]" />
+            <Globe size={12} className="text-[var(--color-muted)]" />
             Website
           </Label>
           {isEditing ? (
@@ -291,7 +291,7 @@ export function OrgSettingsForm({ orgId }: OrgSettingsFormProps) {
         {/* Founding Date */}
         <div className="space-y-1.5">
           <Label className="flex items-center gap-1.5">
-            <Calendar size={13} className="text-[var(--color-muted)]" />
+            <Calendar size={12} className="text-[var(--color-muted)]" />
             Founding Date
           </Label>
           {isEditing ? (

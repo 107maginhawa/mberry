@@ -2,7 +2,7 @@ import { createFileRoute, Link } from '@tanstack/react-router'
 import { useQuery } from '@tanstack/react-query'
 import { searchTrainingsOptions } from '@monobase/sdk-ts/generated/react-query'
 import { Award, BookOpen } from 'lucide-react'
-import { PageHeader } from '@/components/patterns/page-header'
+import { PageShell } from '@/components/patterns/page-shell'
 import { EmptyState } from '@/components/patterns/empty-state'
 import { CardSkeleton } from '@/components/patterns/skeleton-loader'
 import { GlassCard } from '@/components/motion/glass-card'
@@ -29,12 +29,11 @@ function OrgTraining() {
   const trainings = (data?.data ?? []) as unknown[]
 
   return (
-    <div className="space-y-6">
-      <PageHeader
-        title="Training & Courses"
-        subtitle="Browse and enroll in training sessions"
-      />
-
+    <PageShell
+      title="Training & Courses"
+      subtitle="Browse and enroll in training sessions"
+    >
+      <div className="space-y-6">
       {isLoading ? (
         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
           <CardSkeleton />
@@ -47,6 +46,7 @@ function OrgTraining() {
           Unable to load training. Please try refreshing the page.
         </div>
       ) : trainings.length === 0 ? (
+        // ui-c-exempt: empty-state-emphasis — no-training EmptyState
         <EmptyState
           icon={<BookOpen size={32} />}
           headline="No training sessions available"
@@ -82,6 +82,7 @@ function OrgTraining() {
           ))}
         </StaggerGrid>
       )}
-    </div>
+      </div>
+    </PageShell>
   )
 }

@@ -7,8 +7,9 @@ import { PageHeader } from '@/components/patterns/page-header'
 import { EmptyState } from '@/components/patterns/empty-state'
 import {
   getPublicEventOptions,
-} from '@monobase/sdk-ts/generated/@tanstack/react-query.gen'
+} from '@monobase/sdk-ts/generated/react-query'
 
+// ui-c-exempt: public-verify — public event hero page with cover image; PageShell title would conflict with hero design
 export const Route = createFileRoute('/events/$eventSlug')({
   component: PublicEventPage,
 })

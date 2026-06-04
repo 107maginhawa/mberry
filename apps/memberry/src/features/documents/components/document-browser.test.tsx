@@ -1,12 +1,9 @@
-import { describe, test, expect, vi, beforeEach } from 'vitest'
+import { describe, test, expect, vi, beforeEach } from '@/test/vitest-shim'
 import { screen, waitFor } from '@testing-library/react'
 import { renderWithProviders } from '@/test/utils'
 import { DocumentBrowser } from './document-browser'
 
-vi.mock('@monobase/sdk-ts/generated/@tanstack/react-query.gen', () => ({
-  searchDocumentsOptions: vi.fn(),
-}))
-
+// [Tier-F] removed local SDK mock; using global stub in test-setup-root.ts
 vi.mock('@monobase/ui', () => ({
   Skeleton: ({ className }: any) => <div className={className} data-testid="skeleton" />,
   Input: ({ placeholder, value, onChange, className, ...props }: any) => (
@@ -33,7 +30,7 @@ vi.mock('@tanstack/react-router', () => ({
   useParams: () => ({ orgSlug: 'test-org' }),
 }))
 
-import { searchDocumentsOptions } from '@monobase/sdk-ts/generated/@tanstack/react-query.gen'
+import { searchDocumentsOptions } from '@monobase/sdk-ts/generated/react-query'
 const mockSearchOptions = searchDocumentsOptions as ReturnType<typeof vi.fn>
 
 const makeDoc = (overrides: Partial<{

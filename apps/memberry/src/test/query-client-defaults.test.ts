@@ -1,4 +1,4 @@
-import { describe, test, expect } from 'vitest'
+import { describe, test, expect } from 'bun:test'
 import { createDefaultQueryClient } from '@monobase/sdk-ts/react/provider'
 
 /**
@@ -35,14 +35,13 @@ describe('QueryClient defaults (regression guard)', () => {
   })
 
   test('main.tsx imports createDefaultQueryClient (static check)', async () => {
-    // Read main.tsx source to verify it uses createDefaultQueryClient, not bare QueryClient
-    const mainSource = await import.meta.glob('/src/main.tsx', { query: '?raw', eager: true })
-    const source = Object.values(mainSource)[0] as any
-    const code = typeof source === 'string' ? source : source?.default ?? ''
-
-    if (code) {
-      expect(code).toContain('createDefaultQueryClient')
-      expect(code).not.toMatch(/new QueryClient\(\s*\)/)
-    }
+    // Read main.tsx source to verify it uses createDefaultQueryClient, not bare QueryClient.
+    // Use Node fs (works under both Vite and bun:test).
+    const fs = await import('node:fs')
+    const path = await import('node:path')
+    const mainPath = path.resolve(import.meta.dirname ?? __dirname, '..', 'main.tsx')
+    const code = fs.readFileSync(mainPath, 'utf8')
+    expect(code).toContain('createDefaultQueryClient')
+    expect(code).not.toMatch(/new QueryClient\(\s*\)/)
   })
 })

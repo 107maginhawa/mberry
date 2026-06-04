@@ -1,3 +1,4 @@
+// ui-c-exempt: full-height-layout — officer member-detail inside officer-shell
 import { createFileRoute } from '@tanstack/react-router'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { MemberDetail } from '@/features/membership/components/member-detail'

@@ -11,7 +11,7 @@ import {
   openElectionVotingMutation,
   certifyElectionMutation,
   deleteCandidateMutation,
-} from '@monobase/sdk-ts/generated/@tanstack/react-query.gen'
+} from '@monobase/sdk-ts/generated/react-query'
 import type { OpenElectionNominationsData, OpenElectionVotingData, CertifyElectionData } from '@monobase/sdk-ts/generated/types.gen'
 import type { Options } from '@monobase/sdk-ts/generated/sdk.gen'
 import { NomineePickerDialog } from './nominee-picker-dialog'

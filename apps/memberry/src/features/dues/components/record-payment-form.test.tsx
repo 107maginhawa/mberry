@@ -1,20 +1,9 @@
-import { describe, test, expect, vi, beforeEach } from 'vitest'
+import { describe, test, expect, vi, beforeEach } from '@/test/vitest-shim'
 import { screen, waitFor } from '@testing-library/react'
 import { renderWithProviders } from '@/test/utils'
 import { RecordPaymentForm } from './record-payment-form'
 
-vi.mock('@monobase/sdk-ts/generated/react-query', () => ({
-  listDuesFundsOptions: vi.fn(() => ({
-    queryKey: ['dues', 'funds'],
-    queryFn: () => Promise.resolve({ data: [] }),
-  })),
-  listRosterMembersOptions: vi.fn(() => ({
-    queryKey: ['roster', 'members'],
-    queryFn: () => Promise.resolve({ data: [] }),
-  })),
-  recordDuesPaymentMutation: vi.fn(() => ({ mutationFn: vi.fn().mockResolvedValue({}) })),
-}))
-
+// [Tier-F] removed local SDK mock; using global stub in test-setup-root.ts
 vi.mock('sonner', () => ({
   toast: { success: vi.fn(), error: vi.fn() },
 }))

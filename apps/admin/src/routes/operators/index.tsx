@@ -4,13 +4,14 @@ import { ShieldCheck, Plus, Trash2, X } from 'lucide-react'
 import { useState } from 'react'
 import { toast } from 'sonner'
 import { Button, Input, Label, Select, SelectContent, SelectItem, SelectTrigger, SelectValue, Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from '@monobase/ui'
+import { PageShell } from '@/components/patterns/page-shell'
 import { RequireRole } from '@/lib/role-gate'
 import {
   listAdminsOptions,
   listAdminsQueryKey,
   inviteAdminMutation,
   revokeAdminMutation,
-} from '@monobase/sdk-ts/generated/@tanstack/react-query.gen'
+} from '@monobase/sdk-ts/generated/react-query'
 
 export const Route = createFileRoute('/operators/')({
   component: () => (
@@ -136,25 +137,17 @@ function OperatorsPage() {
   })
 
   return (
-    <div className="p-8">
-      <div className="flex items-center justify-between mb-8">
-        <div className="flex items-center gap-3">
-          <ShieldCheck className="w-6 h-6 text-muted-foreground" />
-          <div>
-            <h1 className="text-h1 text-foreground">
-              Operators
-            </h1>
-            <p className="text-sm text-muted-foreground mt-1">
-              Manage platform administrators and their roles
-            </p>
-          </div>
-        </div>
+    <PageShell
+      title="Operators"
+      subtitle="Manage platform administrators and their roles"
+      maxWidth="full"
+      actions={
         <Button onClick={() => setDialogOpen(true)}>
           <Plus className="w-4 h-4" />
           Invite Operator
         </Button>
-      </div>
-
+      }
+    >
       {isError && (
         <p role="alert" aria-live="polite" className="text-sm text-red-500 mb-4">Error: {error instanceof Error ? error.message : 'Failed to load operators'}</p>
       )}
@@ -237,6 +230,6 @@ function OperatorsPage() {
       </div>
 
       <InviteDialog open={dialogOpen} onClose={() => setDialogOpen(false)} />
-    </div>
+    </PageShell>
   )
 }

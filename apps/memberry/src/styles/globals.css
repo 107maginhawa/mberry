@@ -29,7 +29,7 @@
     --color-surface-warm: #FDF9F3;
     --color-text: #2D2635;
     --color-text-secondary: #554B60;
-    --color-muted: #9E8890;
+    --color-muted: #73656D; /* darkened from #9E8890 for WCAG AA 4.5:1 on --card (5.61:1) */
     --color-border: #E4D8DC;
     --color-border-light: #EDE5E8;
     --color-success: #5A8A6B;
@@ -144,7 +144,7 @@
     --color-surface-warm: #302A36;
     --color-text: #F0E8EC;
     --color-text-secondary: #C8B4BC;
-    --color-muted: #8A7E88;
+    --color-muted: #A89AA0; /* lightened from #8A7E88 for WCAG AA 4.5:1 on --card (5.07:1) */
     --color-border: #3D3644;
     --color-border-light: #342E3A;
     --color-success: #6BA87E;

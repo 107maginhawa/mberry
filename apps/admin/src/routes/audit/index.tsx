@@ -3,8 +3,9 @@ import { useQuery } from '@tanstack/react-query'
 import { Shield, RefreshCw } from 'lucide-react'
 import { useState } from 'react'
 import { Button, Input, Select, SelectContent, SelectItem, SelectTrigger, SelectValue, Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from '@monobase/ui'
+import { PageShell } from '@/components/patterns/page-shell'
 import { RequireRole } from '@/lib/role-gate'
-import { listAuditLogsOptions } from '@monobase/sdk-ts/generated/@tanstack/react-query.gen'
+import { listAuditLogsOptions } from '@monobase/sdk-ts/generated/react-query'
 import type { AuditAction } from '@monobase/sdk-ts/generated/types.gen'
 
 export const Route = createFileRoute('/audit/')({
@@ -45,18 +46,11 @@ function AuditPage() {
   const totalPages = Math.ceil(total / LIMIT)
 
   return (
-    <div className="p-8">
-      {/* Page header */}
-      <div className="flex items-center gap-3 mb-8">
-        <Shield className="w-6 h-6 text-muted-foreground" />
-        <div>
-          <h1 className="text-h1 text-foreground">Audit Log</h1>
-          <p className="text-sm text-muted-foreground mt-1">
-            View and filter audit events across all modules
-          </p>
-        </div>
-      </div>
-
+    <PageShell
+      title="Audit Log"
+      subtitle="View and filter audit events across all modules"
+      maxWidth="full"
+    >
       {/* Filter row */}
       <div className="flex flex-wrap items-center gap-3 mb-6">
         {/* Action select */}
@@ -219,6 +213,6 @@ function AuditPage() {
           Next
         </Button>
       </div>
-    </div>
+    </PageShell>
   )
 }

@@ -15,7 +15,7 @@ import {
   File,
 } from 'lucide-react'
 import { Button, Input, Skeleton, Tabs, TabsList, TabsTrigger } from '@monobase/ui'
-import { searchDocumentsOptions } from '@monobase/sdk-ts/generated/@tanstack/react-query.gen'
+import { searchDocumentsOptions } from '@monobase/sdk-ts/generated/react-query'
 
 interface DocumentBrowserProps {
   orgId: string

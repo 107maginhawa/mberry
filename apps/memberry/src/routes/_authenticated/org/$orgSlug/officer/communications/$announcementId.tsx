@@ -3,7 +3,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { toast } from 'sonner'
 import { Button } from '@monobase/ui'
 import { api } from '@/lib/api'
-import { PageHeader } from '@/components/patterns/page-header'
+import { PageShell } from '@/components/patterns/page-shell'
 import { GlassCard } from '@/components/motion/glass-card'
 import { EmptyState } from '@/components/patterns/empty-state'
 import { ListSkeleton } from '@/components/patterns/skeleton-loader'
@@ -88,16 +88,15 @@ function AnnouncementDetailPage() {
   }
 
   return (
-    <div className="space-y-6 max-w-3xl">
-      <PageHeader
-        title={ann.title}
-        breadcrumbs={[
-          { label: 'Officer', href: `/org/${orgSlug}/officer/dashboard` },
-          { label: 'Communications', href: `/org/${orgSlug}/officer/communications` },
-          { label: 'Details' },
-        ]}
-      />
-
+    <PageShell
+      title={ann.title}
+      breadcrumbs={[
+        { label: 'Officer', href: `/org/${orgSlug}/officer/dashboard` },
+        { label: 'Communications', href: `/org/${orgSlug}/officer/communications` },
+        { label: 'Details' },
+      ]}
+    >
+      <div className="space-y-6 max-w-3xl">
       {/* Status bar */}
       <div className="flex items-center gap-3 text-sm text-[var(--color-muted)]">
         <span className={`inline-flex items-center px-2 py-0.5 rounded-md text-xs font-medium ${STATUS_BADGE[ann.status] ?? ''}`}>
@@ -213,6 +212,7 @@ function AnnouncementDetailPage() {
           </Button>
         )}
       </div>
-    </div>
+      </div>
+    </PageShell>
   )
 }

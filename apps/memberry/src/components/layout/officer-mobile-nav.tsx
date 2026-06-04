@@ -93,6 +93,7 @@ export function OfficerMobileNav({ orgName, userName, role, positions }: Officer
           {orgName || 'Organization'}
         </span>
         <Link to="/my/notifications" className="p-1.5 rounded-lg hover:bg-white/10 transition-colors">
+          {/* ui-c-exempt: nav-icon — header bell icon */}
           <Bell size={18} />
         </Link>
       </header>
@@ -133,6 +134,7 @@ export function OfficerMobileNav({ orgName, userName, role, positions }: Officer
                     }}
                     activeOptions={{ exact: false }}
                   >
+                    {/* ui-c-exempt: nav-icon — mobile nav entry icon */}
                     <Icon size={18} />
                     {label}
                   </Link>

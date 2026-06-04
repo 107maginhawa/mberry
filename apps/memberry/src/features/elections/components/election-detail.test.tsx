@@ -1,17 +1,9 @@
-import { describe, test, expect, vi, beforeEach } from 'vitest'
+import { describe, test, expect, vi, beforeEach } from '@/test/vitest-shim'
 import { screen, waitFor } from '@testing-library/react'
 import { renderWithProviders } from '@/test/utils'
 import { ElectionDetail } from './election-detail'
 
-vi.mock('@monobase/sdk-ts/generated/@tanstack/react-query.gen', () => ({
-  getElectionOptions: vi.fn(),
-  listElectionsQueryKey: vi.fn(() => ['elections']),
-  openElectionNominationsMutation: vi.fn(),
-  openElectionVotingMutation: vi.fn(),
-  certifyElectionMutation: vi.fn(),
-  deleteCandidateMutation: vi.fn(),
-}))
-
+// [Tier-F] removed local SDK mock; using global stub in test-setup-root.ts
 vi.mock('./nominee-picker-dialog', () => ({
   NomineePickerDialog: ({ onClose }: any) => (
     <div data-testid="nominee-picker-dialog">
@@ -45,7 +37,7 @@ import {
   openElectionVotingMutation,
   certifyElectionMutation,
   deleteCandidateMutation,
-} from '@monobase/sdk-ts/generated/@tanstack/react-query.gen'
+} from '@monobase/sdk-ts/generated/react-query'
 
 const mockGetElection = getElectionOptions as ReturnType<typeof vi.fn>
 const mockNominations = openElectionNominationsMutation as ReturnType<typeof vi.fn>

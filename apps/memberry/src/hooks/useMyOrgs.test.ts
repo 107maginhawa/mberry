@@ -1,26 +1,22 @@
-import { describe, test, expect, vi, beforeEach } from 'vitest'
+/* eslint-disable @typescript-eslint/no-explicit-any */
+import { describe, test, expect, beforeEach, mock } from 'bun:test'
 import { renderHook, waitFor } from '@testing-library/react'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import React from 'react'
 
-// Mock @/lib/api
-vi.mock('@/lib/api', () => ({
+let _apiGetImpl: (...args: any[]) => Promise<any> = async () => ({ data: [] })
+
+mock.module('@/lib/api', () => ({
   api: {
-    get: vi.fn(),
+    get: (...args: any[]) => _apiGetImpl(...args),
   },
 }))
 
-// Mock @tanstack/react-router
-vi.mock('@tanstack/react-router', () => ({
-  useLocation: vi.fn(),
-}))
+function setPathname(pathname: string) {
+  ;(globalThis as any).__routerLocation = { pathname }
+}
 
-import { api } from '@/lib/api'
-import { useLocation } from '@tanstack/react-router'
-import { useMyOrgs } from './useMyOrgs'
-
-const mockApiGet = api.get as ReturnType<typeof vi.fn>
-const mockUseLocation = useLocation as ReturnType<typeof vi.fn>
+const { useMyOrgs } = await import('./useMyOrgs')
 
 function createWrapper() {
   const queryClient = new QueryClient({
@@ -34,25 +30,22 @@ function createWrapper() {
 
 describe('useMyOrgs', () => {
   beforeEach(() => {
-    vi.clearAllMocks()
-    mockUseLocation.mockReturnValue({ pathname: '/' })
+    setPathname('/')
+    _apiGetImpl = async () => ({ data: [] })
   })
 
   test('returns empty array when no memberships', async () => {
-    mockApiGet.mockResolvedValue({ data: [] })
-
+    _apiGetImpl = async () => ({ data: [] })
     const { result } = renderHook(() => useMyOrgs(), { wrapper: createWrapper() })
-
     await waitFor(() => {
       expect(result.current.isLoading).toBe(false)
     })
-
     expect(result.current.orgs).toEqual([])
     expect(result.current.error).toBeNull()
   })
 
   test('maps API response to OrgMembership shape', async () => {
-    mockApiGet.mockResolvedValue({
+    _apiGetImpl = async () => ({
       data: [
         {
           id: 'm-1',
@@ -80,7 +73,6 @@ describe('useMyOrgs', () => {
     })
 
     const { result } = renderHook(() => useMyOrgs(), { wrapper: createWrapper() })
-
     await waitFor(() => {
       expect(result.current.isLoading).toBe(false)
     })
@@ -97,7 +89,6 @@ describe('useMyOrgs', () => {
       startDate: '2025-01-01',
       duesExpiryDate: '2026-01-01',
     })
-    // Verify fallbacks: empty orgName/orgSlug stay '', empty status falls back to 'active'
     expect(result.current.orgs[1]).toEqual({
       id: 'm-2',
       organizationId: 'org-2',
@@ -112,40 +103,31 @@ describe('useMyOrgs', () => {
   })
 
   test('detects active org from URL', async () => {
-    mockUseLocation.mockReturnValue({ pathname: '/org/test-slug/home' })
-    mockApiGet.mockResolvedValue({ data: [] })
-
+    setPathname('/org/test-slug/home')
+    _apiGetImpl = async () => ({ data: [] })
     const { result } = renderHook(() => useMyOrgs(), { wrapper: createWrapper() })
-
     await waitFor(() => {
       expect(result.current.isLoading).toBe(false)
     })
-
     expect(result.current.activeOrgSlug).toBe('test-slug')
   })
 
   test('returns null activeOrgSlug when not on org route', async () => {
-    mockUseLocation.mockReturnValue({ pathname: '/my/events' })
-    mockApiGet.mockResolvedValue({ data: [] })
-
+    setPathname('/my/events')
+    _apiGetImpl = async () => ({ data: [] })
     const { result } = renderHook(() => useMyOrgs(), { wrapper: createWrapper() })
-
     await waitFor(() => {
       expect(result.current.isLoading).toBe(false)
     })
-
     expect(result.current.activeOrgSlug).toBeNull()
   })
 
   test('exposes error state on fetch failure', async () => {
-    mockApiGet.mockRejectedValue(new Error('Network error'))
-
+    _apiGetImpl = async () => { throw new Error('Network error') }
     const { result } = renderHook(() => useMyOrgs(), { wrapper: createWrapper() })
-
     await waitFor(() => {
       expect(result.current.isLoading).toBe(false)
     })
-
     expect(result.current.error).toBeTruthy()
     expect(result.current.orgs).toEqual([])
   })

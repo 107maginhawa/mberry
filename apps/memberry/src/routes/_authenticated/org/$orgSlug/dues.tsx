@@ -1,7 +1,8 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { useQuery } from '@tanstack/react-query'
 import { listDuesInvoicesOptions, listDuesPaymentsOptions } from '@monobase/sdk-ts/generated/react-query'
-import { Button, Skeleton, PageContainer } from '@monobase/ui'
+import { Button, Skeleton } from '@monobase/ui'
+import { PageShell } from '@/components/patterns/page-shell'
 import { formatCents } from '@/features/dues/lib/money'
 import { ProofUploadForm } from '@/features/dues/components/proof-upload-form'
 import { DuesStatusCard } from '@/features/dues/components/dues-status-card'
@@ -14,7 +15,6 @@ import { buildPaymentCsv, downloadCsv } from '@/features/dues/lib/csv-export'
 import { api } from '@/lib/api'
 import { CreditCard, CheckCircle, AlertTriangle, Info, Building, Receipt, Download } from 'lucide-react'
 import { useOrg } from '@/hooks/useOrg'
-import { PageHeader } from '@/components/patterns/page-header'
 import { ErrorState } from '@/components/patterns/error-state'
 import { GlassCard } from '@/components/motion/glass-card'
 import { CountUp } from '@/components/motion/count-up'
@@ -161,16 +161,16 @@ function MemberDuesPage() {
   }
 
   return (
-    <PageContainer width="default" className="space-y-8">
-      <PageHeader
-        title="My Dues"
-        subtitle="View your dues and submit payment proof for renewal"
-        breadcrumbs={[
-          { label: 'Organization', href: `/org/${orgSlug}` },
-          { label: 'Dues' },
-        ]}
-      />
-
+    <PageShell
+      title="My Dues"
+      subtitle="View your dues and submit payment proof for renewal"
+      breadcrumbs={[
+        { label: 'Organization', href: `/org/${orgSlug}` },
+        { label: 'Dues' },
+      ]}
+      maxWidth="default"
+    >
+      <div className="space-y-8">
       {/* Dues Status Summary Card */}
       {duesStatus && (
         <DuesStatusCard
@@ -424,6 +424,7 @@ function MemberDuesPage() {
           description="Your payment records will appear here once you've made a dues payment."
         />
       )}
-    </PageContainer>
+      </div>
+    </PageShell>
   )
 }

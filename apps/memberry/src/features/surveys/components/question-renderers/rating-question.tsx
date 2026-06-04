@@ -34,6 +34,7 @@ export function RatingQuestion({ value, onChange, maxStars = 5 }: RatingQuestion
             className="p-1 transition-transform hover:scale-110 focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)]"
             aria-label={`${starValue} star${starValue > 1 ? 's' : ''}`}
           >
+            {/* ui-c-exempt: interactive-emphasis — rating-star scale */}
             <Star
               size={36}
               className={`transition-colors ${

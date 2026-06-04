@@ -1,5 +1,5 @@
 import { useQuery } from '@tanstack/react-query'
-import { listMyCertificatesOptions } from '@monobase/sdk-ts/generated/@tanstack/react-query.gen'
+import { listMyCertificatesOptions } from '@monobase/sdk-ts/generated/react-query'
 import type { Certificate } from '@monobase/sdk-ts/generated/types.gen'
 import { useOrgContext } from '@/hooks/useOrgContext'
 import { EmptyState } from '@/components/patterns/empty-state'
@@ -43,6 +43,7 @@ export function CertificateList() {
 
   if (certificates.length === 0) {
     return (
+      // ui-c-exempt: empty-state-emphasis — no-certs EmptyState
       <EmptyState
         icon={<Award size={32} />}
         headline="No certificates issued yet"

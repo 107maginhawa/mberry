@@ -9,7 +9,7 @@ import { SurveyFlow } from '@/features/surveys/components/survey-flow'
 import type { Survey } from '@/features/surveys/components/survey-flow'
 import { GlassCard } from '@/components/motion/glass-card'
 import { EmptyState } from '@/components/patterns/empty-state'
-import { PageHeader } from '@/components/patterns/page-header'
+import { PageShell } from '@/components/patterns/page-shell'
 
 export const Route = createFileRoute('/_authenticated/my/surveys/$surveyId')({
   component: SurveyDetailPage,
@@ -28,6 +28,7 @@ function SurveyDetailPage() {
   if (isLoading) {
     return (
       <div className="flex items-center justify-center min-h-[60vh]">
+        {/* ui-c-exempt: interactive-emphasis — survey loading spinner emphasis */}
         <Loader2 size={32} className="animate-spin text-[var(--color-primary)]" />
       </div>
     )
@@ -35,43 +36,45 @@ function SurveyDetailPage() {
 
   if (error || !data) {
     return (
-      <div className="space-y-6">
-        <PageHeader
-          title="Survey"
-          breadcrumbs={[
-            { label: 'My Surveys', href: '/my/surveys' },
-            { label: 'Survey' },
-          ]}
-        />
-        <GlassCard className="p-6">
-          <EmptyState
-            headline="Survey not found"
-            description="This survey may have been removed or is no longer available."
-          />
-        </GlassCard>
-      </div>
+      <PageShell
+        title="Survey"
+        breadcrumbs={[
+          { label: 'My Surveys', href: '/my/surveys' },
+          { label: 'Survey' },
+        ]}
+      >
+        <div className="space-y-6">
+          <GlassCard className="p-6">
+            <EmptyState
+              headline="Survey not found"
+              description="This survey may have been removed or is no longer available."
+            />
+          </GlassCard>
+        </div>
+      </PageShell>
     )
   }
 
   return (
-    <div className="space-y-6">
-      <PageHeader
-        title={data.title}
-        subtitle={data.description}
-        breadcrumbs={[
-          { label: 'My Surveys', href: '/my/surveys' },
-          { label: data.title },
-        ]}
-      />
-      <SurveyFlow
-        survey={data}
-        onComplete={() => {
-          // Navigate back to list after a brief delay for the completion animation
-          setTimeout(() => {
-            navigate({ to: '/my/surveys' })
-          }, 2500)
-        }}
-      />
-    </div>
+    <PageShell
+      title={data.title}
+      subtitle={data.description}
+      breadcrumbs={[
+        { label: 'My Surveys', href: '/my/surveys' },
+        { label: data.title },
+      ]}
+    >
+      <div className="space-y-6">
+        <SurveyFlow
+          survey={data}
+          onComplete={() => {
+            // Navigate back to list after a brief delay for the completion animation
+            setTimeout(() => {
+              navigate({ to: '/my/surveys' })
+            }, 2500)
+          }}
+        />
+      </div>
+    </PageShell>
   )
 }

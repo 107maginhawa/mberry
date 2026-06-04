@@ -262,7 +262,7 @@ function MembershipCard({ membership: m }: { membership: Membership }) {
             to={`/org/${m.orgId}/officer/dashboard` as any /* eslint-disable-line @typescript-eslint/no-explicit-any */}
             className="inline-flex items-center gap-1.5 text-sm font-semibold text-[var(--color-primary)] border border-[var(--color-primary)] hover:bg-[var(--color-primary)] hover:text-white px-4 py-1.5 rounded-[8px] transition-colors"
           >
-            <Shield size={13} />
+            <Shield size={12} />
             {officerRole} Dashboard
           </Link>
         )}
@@ -271,7 +271,7 @@ function MembershipCard({ membership: m }: { membership: Membership }) {
             to="/my/payments"
             className="inline-flex items-center gap-1.5 text-sm font-semibold text-white bg-[var(--color-primary)] hover:bg-[var(--color-primary-mid)] px-4 py-1.5 rounded-[8px] transition-colors"
           >
-            <CreditCard size={13} />
+            <CreditCard size={12} />
             Pay Dues
           </Link>
         )}
@@ -300,7 +300,7 @@ function SectionHeading({
           to={linkTo as any /* eslint-disable-line @typescript-eslint/no-explicit-any */}
           className="flex items-center gap-0.5 text-xs font-semibold text-[var(--color-primary)] hover:underline"
         >
-          View all <ChevronRight size={13} />
+          View all <ChevronRight size={12} />
         </Link>
       )}
     </div>

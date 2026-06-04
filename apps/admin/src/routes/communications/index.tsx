@@ -1,6 +1,7 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { RequireRole } from '@/lib/role-gate'
 import { Card, CardContent, CardHeader, CardTitle } from '@monobase/ui'
+import { PageShell } from '@/components/patterns/page-shell'
 import { Radio, Mail, ShieldAlert, Send } from 'lucide-react'
 
 export const Route = createFileRoute('/communications/')({
@@ -27,12 +28,12 @@ function StatCard({ title, value, trend, icon: Icon }: { title: string; value: s
 function CommunicationsBroadcasts() {
   return (
     <RequireRole allowed={['super', 'support']}>
-      <div className="space-y-6">
-        <div>
-          <h1 className="text-2xl font-bold">Platform Broadcasts</h1>
-          <p className="text-sm text-muted-foreground">Send communications to all organizations</p>
-        </div>
-
+      <PageShell
+        title="Platform Broadcasts"
+        subtitle="Send communications to all organizations"
+        maxWidth="full"
+      >
+        <div className="space-y-6">
         {/* Stats */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
           <StatCard title="Broadcasts Sent" value="34" trend="This month" icon={Send} />
@@ -63,7 +64,8 @@ function CommunicationsBroadcasts() {
             <p className="text-sm text-muted-foreground">No broadcasts sent yet.</p>
           </CardContent>
         </Card>
-      </div>
+        </div>
+      </PageShell>
     </RequireRole>
   )
 }

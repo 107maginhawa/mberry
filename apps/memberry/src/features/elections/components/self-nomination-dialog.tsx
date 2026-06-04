@@ -5,7 +5,7 @@ import { toast } from 'sonner'
 import {
   createCandidateMutation,
   getElectionOptions,
-} from '@monobase/sdk-ts/generated/@tanstack/react-query.gen'
+} from '@monobase/sdk-ts/generated/react-query'
 
 interface SelfNominationDialogProps {
   electionId: string

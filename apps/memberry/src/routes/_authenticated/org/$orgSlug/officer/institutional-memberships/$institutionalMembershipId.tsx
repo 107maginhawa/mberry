@@ -6,7 +6,7 @@ import { Skeleton } from '@monobase/ui'
 import { Button } from '@monobase/ui'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@monobase/ui'
 import { Badge } from '@monobase/ui'
-import { PageHeader } from '@/components/patterns/page-header'
+import { PageShell } from '@/components/patterns/page-shell'
 import { InstitutionalMembershipForm } from '@/features/membership/components/institutional-membership-form'
 import { SeatManagementPanel } from '@/features/membership/components/seat-management-panel'
 import { useOrg } from '@/hooks/useOrg'
@@ -15,7 +15,7 @@ import {
   getInstitutionalMembershipOptions,
   deleteInstitutionalMembershipMutation,
   listInstitutionalMembershipsQueryKey,
-} from '@monobase/sdk-ts/generated/@tanstack/react-query.gen'
+} from '@monobase/sdk-ts/generated/react-query'
 
 export const Route = createFileRoute(
   '/_authenticated/org/$orgSlug/officer/institutional-memberships/$institutionalMembershipId'
@@ -65,51 +65,55 @@ function InstitutionalMembershipDetailPage() {
     await deleteMut.mutateAsync({ path: { institutionalMembershipId } })
   }
 
+  const imBreadcrumbs = [
+    { label: 'Officer', href: `/org/${orgSlug}/officer/dashboard` },
+    { label: 'Institutions', href: `/org/${orgSlug}/officer/institutional-memberships` },
+  ]
+
   if (isLoading) {
     return (
-      <div className="space-y-6">
-        <Skeleton className="h-16 w-full" />
-        <Skeleton className="h-64 w-full" />
-      </div>
+      <PageShell title="Institutional Membership" breadcrumbs={imBreadcrumbs}>
+        <div className="space-y-6">
+          <Skeleton className="h-16 w-full" />
+          <Skeleton className="h-64 w-full" />
+        </div>
+      </PageShell>
     )
   }
 
   if (error || !membership) {
     return (
-      <div role="alert" className="p-10 text-center text-[var(--color-error)]">
-        {error ? 'Failed to load institutional membership.' : 'Membership not found.'}
-      </div>
+      <PageShell title="Institutional Membership" breadcrumbs={imBreadcrumbs}>
+        <div role="alert" className="p-10 text-center text-[var(--color-error)]">
+          {error ? 'Failed to load institutional membership.' : 'Membership not found.'}
+        </div>
+      </PageShell>
     )
   }
 
   const statusBadge = STATUS_BADGE[membership.status] ?? { label: membership.status, className: 'bg-gray-100 text-gray-600' }
 
   return (
-    <div className="space-y-8">
-      <PageHeader
-        title="Institutional Membership"
-        subtitle={`${membership.tierId} · ${membership.usedSeats}/${membership.totalSeats} seats`}
-        breadcrumbs={[
-          { label: 'Officer', href: `/org/${orgSlug}/officer/dashboard` },
-          { label: 'Institutions', href: `/org/${orgSlug}/officer/institutional-memberships` },
-          { label: 'Detail' },
-        ]}
-        actions={
-          <div className="flex items-center gap-2">
-            <Badge className={statusBadge.className}>{statusBadge.label}</Badge>
-            <Button
-              size="sm"
-              variant="outline"
-              className="text-[var(--color-error)] border-[var(--color-error)] hover:bg-[var(--color-error-bg)]"
-              onClick={() => setShowDelete(true)}
-            >
-              <Trash2 size={14} className="mr-1.5" />
-              Delete
-            </Button>
-          </div>
-        }
-      />
-
+    <PageShell
+      title="Institutional Membership"
+      subtitle={`${membership.tierId} · ${membership.usedSeats}/${membership.totalSeats} seats`}
+      breadcrumbs={[...imBreadcrumbs, { label: 'Detail' }]}
+      actions={
+        <div className="flex items-center gap-2">
+          <Badge className={statusBadge.className}>{statusBadge.label}</Badge>
+          <Button
+            size="sm"
+            variant="outline"
+            className="text-[var(--color-error)] border-[var(--color-error)] hover:bg-[var(--color-error-bg)]"
+            onClick={() => setShowDelete(true)}
+          >
+            <Trash2 size={14} className="mr-1.5" />
+            Delete
+          </Button>
+        </div>
+      }
+    >
+      <div className="space-y-8">
       {/* Edit form */}
       <div className="max-w-2xl">
         <div className="mb-4">
@@ -161,6 +165,7 @@ function InstitutionalMembershipDetailPage() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
-    </div>
+      </div>
+    </PageShell>
   )
 }

@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { createFileRoute } from '@tanstack/react-router'
 import { useQuery } from '@tanstack/react-query'
 import { getPersonOptions } from '@monobase/sdk-ts/generated/react-query'
-import { PageHeader } from '@/components/patterns/page-header'
+import { PageShell } from '@/components/patterns/page-shell'
 import { ChannelList } from '@/features/comms/components/channel-list'
 import { ChatView } from '@/features/comms/components/chat-view'
 import { CreateChannelDialog } from '@/features/comms/components/create-channel-dialog'
@@ -26,18 +26,22 @@ function OfficerMessagesPage() {
 
   const myPersonId = person.data?.id ?? ''
 
+  // PageShell migration: messages route uses a full-height chat layout; PageShell
+  // wraps the title row while the chat body retains its own flex layout below.
   return (
     <div className="flex-1 flex flex-col overflow-hidden">
-      <div className="px-6 pt-6">
-        <PageHeader
-          title="Channels"
-          actions={
-            <Button onClick={() => setShowCreateDialog(true)} size="sm">
-              <Plus className="h-4 w-4 mr-1" /> Create Channel
-            </Button>
-          }
-        />
-      </div>
+      <PageShell
+        title="Channels"
+        maxWidth="full"
+        spacing="compact"
+        actions={
+          <Button onClick={() => setShowCreateDialog(true)} size="sm">
+            <Plus className="h-4 w-4 mr-1" /> Create Channel
+          </Button>
+        }
+      >
+        <></>
+      </PageShell>
       <div className="flex-1 flex gap-4 p-6 pt-2 overflow-hidden">
         {/* Channel list sidebar */}
         <div className="w-64 flex-shrink-0 overflow-y-auto">

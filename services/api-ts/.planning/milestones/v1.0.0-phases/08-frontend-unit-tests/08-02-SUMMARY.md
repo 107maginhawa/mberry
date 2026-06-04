@@ -54,7 +54,7 @@ Mocking strategy: `vi.mock('@/lib/api')` with per-path returns, `vi.mock('@tanst
 - Mark Paid presence: "sent" invoice has button, "paid" invoice does not
 - Overdue invoices: "overdue" status also shows "Mark Paid" button
 
-Mocking strategy: `vi.mock('@monobase/sdk-ts/generated/@tanstack/react-query.gen')` returning objects with queryKey/queryFn.
+Mocking strategy: `vi.mock('@monobase/sdk-ts/generated/react-query')` returning objects with queryKey/queryFn.
 
 **Commit:** `1ebca88`
 

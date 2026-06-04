@@ -11,7 +11,7 @@ import {
   searchEventsOptions,
   searchEventsQueryKey,
   cancelEventMutation,
-} from '@monobase/sdk-ts/generated/@tanstack/react-query.gen'
+} from '@monobase/sdk-ts/generated/react-query'
 import type { Event, EventStatus, EventType } from '@monobase/sdk-ts/generated/types.gen'
 import { ConfirmDialog } from '@/components/patterns/confirm-dialog'
 import { EmptyState } from '@/components/patterns/empty-state'
@@ -162,6 +162,7 @@ export function EventList({ orgId }: EventListProps) {
           ))}
         </div>
       ) : events.length === 0 ? (
+        // ui-c-exempt: empty-state-emphasis — no-events EmptyState
         <EmptyState
           icon={<Calendar size={40} />}
           headline={

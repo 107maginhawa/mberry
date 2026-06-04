@@ -1,7 +1,7 @@
 import { createFileRoute, Link } from '@tanstack/react-router'
 import { useQuery } from '@tanstack/react-query'
 import { Vote, FileText, ChevronRight } from 'lucide-react'
-import { PageHeader } from '@/components/patterns/page-header'
+import { PageShell } from '@/components/patterns/page-shell'
 import { GlassCard } from '@/components/motion/glass-card'
 import { CountUp } from '@/components/motion/count-up'
 import { CardSkeleton } from '@/components/patterns/skeleton-loader'
@@ -11,7 +11,7 @@ import { useOrg } from '@/hooks/useOrg'
 import {
   listElectionsOptions,
   searchDocumentsOptions,
-} from '@monobase/sdk-ts/generated/@tanstack/react-query.gen'
+} from '@monobase/sdk-ts/generated/react-query'
 
 export const Route = createFileRoute('/_authenticated/org/$orgSlug/governance/')({
   component: GovernancePage,
@@ -41,16 +41,15 @@ function GovernancePage() {
   const error = elections.error || documents.error
 
   return (
-    <div className="space-y-6">
-      <PageHeader
-        title="Governance"
-        subtitle="Your governance hub"
-        breadcrumbs={[
-          { label: 'Organization' },
-          { label: 'Governance' },
-        ]}
-      />
-
+    <PageShell
+      title="Governance"
+      subtitle="Your governance hub"
+      breadcrumbs={[
+        { label: 'Organization' },
+        { label: 'Governance' },
+      ]}
+    >
+      <div className="space-y-6">
       {error ? (
         <div role="alert" className="p-4 rounded-lg bg-[var(--color-error-bg)] text-[var(--color-error)] text-sm">
           Unable to load governance data. Please try refreshing the page.
@@ -103,6 +102,7 @@ function GovernancePage() {
             <CardSkeleton />
           </div>
         ) : activeElections.length === 0 ? (
+          // ui-c-exempt: empty-state-emphasis — no-elections EmptyState
           <EmptyState
             icon={<Vote size={32} />}
             headline="No active elections"
@@ -145,6 +145,7 @@ function GovernancePage() {
             {Array.from({ length: 3 }).map((_, i) => <CardSkeleton key={i} />)}
           </div>
         ) : allDocuments.length === 0 ? (
+          // ui-c-exempt: empty-state-emphasis — no-decisions EmptyState
           <EmptyState
             icon={<FileText size={32} />}
             headline="No documents published yet"
@@ -175,6 +176,7 @@ function GovernancePage() {
       </section>
         </>
       )}
-    </div>
+      </div>
+    </PageShell>
   )
 }

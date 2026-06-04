@@ -1,8 +1,10 @@
+// ui-c-exempt: public-verify — public verification by token
 import { createFileRoute } from '@tanstack/react-router'
 import { useQuery } from '@tanstack/react-query'
 import { api, ApiError } from '@/lib/api'
 import type { ApiErrorBody } from '@/types/api'
 
+// oli-ui: exempt-pageshell — public credential-verification micro-page; centered single-card result
 export const Route = createFileRoute('/verify/$token')({
   component: PublicVerification,
 })

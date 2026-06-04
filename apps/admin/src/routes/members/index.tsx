@@ -19,8 +19,9 @@ import { useState, useMemo } from 'react'
 import {
   listOrganizationsOptions,
   listRosterMembersOptions,
-} from '@monobase/sdk-ts/generated/@tanstack/react-query.gen'
+} from '@monobase/sdk-ts/generated/react-query'
 import type { RosterMember } from '@monobase/sdk-ts/generated/types.gen'
+import { PageShell } from '@/components/patterns/page-shell'
 
 // API returns RosterMember enriched with person fields via server JOIN
 // These fields are not in the base RosterMember type
@@ -101,17 +102,11 @@ function MembersPage() {
     : allMembers
 
   return (
-    <div className="p-8">
-      <div className="flex items-center gap-3 mb-8">
-        <Users className="w-6 h-6 text-muted-foreground" />
-        <div>
-          <h1 className="text-h1 text-foreground">Members</h1>
-          <p className="text-sm text-muted-foreground mt-1">
-            Search and manage platform members across all organizations
-          </p>
-        </div>
-      </div>
-
+    <PageShell
+      title="Members"
+      subtitle="Search and manage platform members across all organizations"
+      maxWidth="full"
+    >
       {/* Search + Org Filter */}
       <div className="flex items-center gap-4 mb-6">
         <div className="relative flex-1 max-w-sm">
@@ -213,6 +208,6 @@ function MembersPage() {
           </TableBody>
         </Table>
       </div>
-    </div>
+    </PageShell>
   )
 }

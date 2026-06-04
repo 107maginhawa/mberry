@@ -1,14 +1,12 @@
-import { describe, test, expect, vi, beforeEach } from 'vitest'
+import { describe, test, expect, vi, beforeEach } from '@/test/vitest-shim'
 import { screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { renderWithProviders } from '@/test/utils'
 import { NotificationDrawer } from '../notification-drawer'
 
-// Mock @tanstack/react-router
+// Mock @tanstack/react-router via global router stub override
 const mockNavigate = vi.fn()
-vi.mock('@tanstack/react-router', () => ({
-  useNavigate: () => mockNavigate,
-}))
+;(globalThis as any).__routerNavigate = mockNavigate
 
 // Mock @monobase/ui
 vi.mock('@monobase/ui', () => ({

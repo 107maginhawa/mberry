@@ -1,6 +1,8 @@
+// ui-c-exempt: auth-flow — sign-in/up shell, no app chrome
 import { createFileRoute } from '@tanstack/react-router'
 import { AuthView } from '@daveyplate/better-auth-ui'
 
+// oli-ui: exempt-pageshell — pre-auth flow uses better-auth-ui's own chrome
 export const Route = createFileRoute('/auth/$authView')({
   component: AuthPage,
 })

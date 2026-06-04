@@ -1,4 +1,4 @@
-import { describe, test, expect, vi } from 'vitest'
+import { describe, test, expect, vi } from '@/test/vitest-shim'
 import { render, screen, fireEvent, waitFor } from '@testing-library/react'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 // SUT — first-party imports (static, so Confidence scanner detects SUT binding)
@@ -38,16 +38,7 @@ vi.mock('@/components/patterns/empty-state', () => ({
   ),
 }))
 
-vi.mock('@monobase/sdk-ts/generated/react-query', () => ({
-  createChatRoomMutation: () => ({
-    mutationFn: vi.fn(),
-  }),
-  listChatRoomsOptions: () => ({
-    queryKey: ['chat-rooms'],
-    queryFn: () => ({ data: [] }),
-  }),
-}))
-
+// [Tier-F] removed local SDK mock; using global stub in test-setup-root.ts
 vi.mock('../hooks/use-unread-counts', () => ({
   useUnreadCounts: () => ({
     hasUnread: () => false,

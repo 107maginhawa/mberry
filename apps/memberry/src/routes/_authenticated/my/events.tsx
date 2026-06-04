@@ -8,12 +8,12 @@ import {
   listMyCustomEventsOptions,
   listMyCustomEventsQueryKey,
   cancelEventRegistrationMutation,
-} from '@monobase/sdk-ts/generated/@tanstack/react-query.gen'
+} from '@monobase/sdk-ts/generated/react-query'
 import { GlassCard } from '@/components/motion/glass-card'
 import type { ApiListResponse } from '@/types/api'
 import { CountUp } from '@/components/motion/count-up'
 import { StaggerGrid, StaggerItem } from '@/components/motion/stagger-grid'
-import { PageHeader } from '@/components/patterns/page-header'
+import { PageShell } from '@/components/patterns/page-shell'
 import { EmptyState } from '@/components/patterns/empty-state'
 
 export const Route = createFileRoute('/_authenticated/my/events')({
@@ -132,6 +132,7 @@ function EventRegistrationCard({ item }: { item: { registration: any; event: any
           <span className="text-body-sm text-[var(--color-muted)]">
             {registration.status === 'waitlisted' ? 'On waitlist' : 'You\'re registered'}
           </span>
+          {/* ui-c-exempt: methodology-carry — outlined destructive (cancel registration) 28px */}
           <Button
             variant="outline"
             size="sm"
@@ -186,12 +187,11 @@ function MyEvents() {
   const displayed = showPast ? allItems : upcoming
 
   return (
-    <div className="space-y-6 p-6">
-      <PageHeader
-        title="My Events"
-        subtitle="Events you're registered for across all organizations"
-      />
-
+    <PageShell
+      title="My Events"
+      subtitle="Events you're registered for across all organizations"
+    >
+      <div className="space-y-6">
       {/* Stats */}
       <div className="grid grid-cols-2 gap-4">
         <GlassCard className="p-4">
@@ -267,6 +267,7 @@ function MyEvents() {
           ))}
         </StaggerGrid>
       )}
-    </div>
+      </div>
+    </PageShell>
   )
 }

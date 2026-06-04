@@ -419,7 +419,7 @@
       "id": "fsm:detail-tab",
       "name": "detailTab",
       "source_file": "apps/admin/src/routes/events/index.tsx",
-      "source_line": 67,
+      "source_line": 68,
       "module": "apps/admin",
       "detection_method": "useState_union",
       "states": [
@@ -431,19 +431,19 @@
           "from": "*",
           "to": "details",
           "trigger": "EventsPage",
-          "site": "apps/admin/src/routes/events/index.tsx:252"
+          "site": "apps/admin/src/routes/events/index.tsx:247"
         },
         {
           "from": "*",
           "to": "details",
           "trigger": "EventsPage",
-          "site": "apps/admin/src/routes/events/index.tsx:275"
+          "site": "apps/admin/src/routes/events/index.tsx:270"
         },
         {
           "from": "*",
           "to": "registrations",
           "trigger": "EventsPage",
-          "site": "apps/admin/src/routes/events/index.tsx:285"
+          "site": "apps/admin/src/routes/events/index.tsx:280"
         }
       ],
       "spec_match": null,

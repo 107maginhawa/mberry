@@ -16,6 +16,7 @@ import {
   TableHead,
   TableCell,
 } from '@monobase/ui'
+import { PageShell } from '@/components/patterns/page-shell'
 import { RequireRole } from '@/lib/role-gate'
 import { ErrorState } from '@/components/skeletons'
 
@@ -96,9 +97,9 @@ function SurveysPage() {
 
   if (isError) {
     return (
-      <div className="p-8 max-w-2xl">
+      <PageShell title="Surveys" maxWidth="full">
         <ErrorState message="Could not load surveys" onRetry={() => refetch()} />
-      </div>
+      </PageShell>
     )
   }
 
@@ -115,21 +116,16 @@ function SurveysPage() {
   ]
 
   return (
-    <div className="p-8">
-      {/* Header */}
-      <div className="flex items-center gap-3 mb-8">
-        <ClipboardList className="w-6 h-6 text-muted-foreground" />
-        <div>
-          <h1 className="text-2xl font-bold text-foreground">Surveys</h1>
-          <p className="text-sm text-muted-foreground mt-1">
-            Cross-organization survey analytics and monitoring
-          </p>
-        </div>
-        <Button variant="outline" size="icon" className="ml-auto" onClick={() => refetch()}>
+    <PageShell
+      title="Surveys"
+      subtitle="Cross-organization survey analytics and monitoring"
+      maxWidth="full"
+      actions={
+        <Button variant="outline" size="icon" onClick={() => refetch()}>
           <RefreshCw className="w-4 h-4" />
         </Button>
-      </div>
-
+      }
+    >
       {/* Stats */}
       <div className="grid grid-cols-4 gap-4 mb-6">
         {statCards.map((s) => (
@@ -264,6 +260,6 @@ function SurveysPage() {
           </Button>
         </div>
       )}
-    </div>
+    </PageShell>
   )
 }

@@ -1,4 +1,4 @@
-import { describe, test, expect, vi } from 'vitest'
+import { describe, test, expect, vi } from 'bun:test'
 import { screen } from '@testing-library/react'
 import { renderWithProviders } from '@/test/utils'
 import { ReportResults } from './report-results'

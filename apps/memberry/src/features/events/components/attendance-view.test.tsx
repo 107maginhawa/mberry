@@ -1,14 +1,9 @@
-import { describe, test, expect, vi, beforeEach } from 'vitest'
+import { describe, test, expect, vi, beforeEach } from '@/test/vitest-shim'
 import { screen, waitFor } from '@testing-library/react'
 import { renderWithProviders } from '@/test/utils'
 import { AttendanceView } from './attendance-view'
 
-vi.mock('@monobase/sdk-ts/generated/@tanstack/react-query.gen', () => ({
-  listCustomEventAttendanceOptions: vi.fn(),
-  listCustomEventAttendanceQueryKey: vi.fn(() => ['event', 'attendance']),
-  checkInCustomEventMutation: vi.fn(),
-}))
-
+// [Tier-F] removed local SDK mock; using global stub in test-setup-root.ts
 vi.mock('@monobase/ui', () => ({
   Input: (props: any) => <input {...props} />,
   Skeleton: ({ className }: any) => <div className={className} data-testid="skeleton" />,
@@ -20,7 +15,7 @@ vi.mock('@monobase/ui', () => ({
 import {
   listCustomEventAttendanceOptions,
   checkInCustomEventMutation,
-} from '@monobase/sdk-ts/generated/@tanstack/react-query.gen'
+} from '@monobase/sdk-ts/generated/react-query'
 
 const mockListOptions = listCustomEventAttendanceOptions as ReturnType<typeof vi.fn>
 const mockCheckInMutation = checkInCustomEventMutation as ReturnType<typeof vi.fn>

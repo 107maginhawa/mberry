@@ -1,4 +1,4 @@
-import { describe, test, expect, vi, afterEach } from 'vitest'
+import { describe, test, expect, vi, afterEach } from '@/test/vitest-shim'
 import { computeBillingDates, formatBillingSchedule } from './billing-dates'
 
 describe('computeBillingDates', () => {

@@ -1,6 +1,7 @@
 ---
-based-on: map@2331bd9f
-last-modified: 2026-06-03T20:30:00Z
+based-on: map@3f0dae76
+last-modified: 2026-06-03T21:00:00Z
+last-modified-by: /oli-check --regenerate-dim-reports --auto
 engine-version: 7b2a640
 map-version: 6
 ---
@@ -10,8 +11,8 @@ map-version: 6
 <!-- oli:regen:code-module-map:begin -->
 | Module | Framework | Files | Confidence |
 |---|---|---|---|
-| `apps/admin` | react | 48 | MEDIUM |
-| `apps/memberry` | react | 438 | MEDIUM |
+| `apps/admin` | react | 49 | MEDIUM |
+| `apps/memberry` | react | 439 | MEDIUM |
 | `handlers/advertising` | generic | 11 | LOW |
 | `handlers/association:member` | hono | 248 | MEDIUM |
 | `handlers/association:operations` | hono | 80 | MEDIUM |
@@ -40,6 +41,6 @@ map-version: 6
 | `handlers/surveys` | generic | 20 | LOW |
 | `packages/eslint-config` | generic | 3 | LOW |
 | `packages/sdk-ts` | react | 17 | MEDIUM |
-| `packages/ui` | react | 32 | MEDIUM |
+| `packages/ui` | react | 33 | MEDIUM |
 | `specs/api` | generic | 3 | LOW |
 <!-- oli:regen:code-module-map:end -->
