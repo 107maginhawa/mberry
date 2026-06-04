@@ -38,7 +38,13 @@ last-modified-by: /oli-check --auto fresh (regen 4 dims, carry 6)
 
 `GATE: WARN-WITH-REAL-FINDINGS` (reclassified 2026-06-04T04:00, demoted further to CNF-P1-001 at T05:30 after bulk-cleanup landed)
 
-**Driver:** **CNF-P1-001** (Confidence dim, **fixture-debt** class — Bun mock-isolation root cause RESOLVED). 18 memberry FE component-test failures (was 56 at session start; 38 cleared this session: R1 mock leak `c7fad68d` + OrgProvider rewrite `7bb872a7` + EventCard cleanup `6e33704d` + bulk vi.mock + Skeleton testid `bd7c4eaf` + per-file isolation harness `43d22f65`). Per-file isolation harness landed in `apps/memberry/scripts/test-isolated.ts` — splits 97 test files into 54 clean (batch) + 43 polluter (own process each). Remaining 18 fails are real test-fixture issues, NOT mock pollution: Radix Select/Sheet portals don't render in happy-dom (~6 fails), QueryClient cache-priming doesn't survive `renderWithProviders` fresh-client (~10 fails), 2 act() warnings.
+**Driver:** **CNF-P1-001** (Confidence dim, **fixture-debt residual** class). 6 memberry FE component-test failures (was 56 at session start; **50 cleared this session**: R1 mock leak `c7fad68d` + OrgProvider rewrite `7bb872a7` + EventCard cleanup `6e33704d` + bulk vi.mock + Skeleton testid `bd7c4eaf` + per-file isolation harness `43d22f65` + SDK stub queryKey fix `bacfe3d0` + Radix portal stubs `aa51a95d` + Link param substitution `7c4eeaf2`). Remaining 6 fails:
+- 3 `"shows error state when query fails"` (CertificatePreview, ElectionDetail, MemberDetail) — queryFn rejects but error doesn't propagate to component within waitFor 1000ms in Bun + happy-dom
+- 1 ComposeForm filter selection (data-variant attribute on Button not updating)
+- 1 EventForm pre-fills (getAllByDisplayValue expects 2 matches; real Radix Select doesn't produce `<select>` element)
+- 1 MemberTable renders all 6 status tabs
+
+These are deep per-component test rewrites (each needs custom test-fixture work). Non-gate-blocking. Pipeline UNBLOCKED.
 
 **Reclassification rationale:** Initial Confidence subagent attributed CNF-P0-001 to commit `9fbcb497` (RoundActionButton primitive refactor). Investigation proves false:
 - Prior cycle (sha `3f0dae76`) ran 6048 tests / 0 fail
@@ -92,7 +98,7 @@ Pipeline UNBLOCKED for ship of non-test changes. Test-suite repair tracked as 6 
 | Traceability | PASS | `docs/trace/TRACE_REPORT.md` (rev 10) | hours-old (carry, inputs unchanged) | 0/0/0/9 P3 terminal (no spec or route delta to invalidate) | 0 |
 | Discovery | PASS | `docs/audits/codebase-map/CODE_MODULE_MAP.md` | current (map@64b96139) | 1420 files (+9), 32 modules, frameworks [generic, hono, react] | 0 |
 | Compliance | PASS (9.5/10) | `docs/audits/COMPLIANCE_REPORT.md` + `.json` | hours-old (carry, api_surface + spec_trace unchanged) | 0 P0, 0 P1; spec-trace 455/455; auth_drift=[]; code_only=[]; spec_only=[] | 3 |
-| Confidence | **WARN (CNF-P1-001)** | `docs/audits/CONFIDENCE_REPORT.md` | current (map@43d22f65) | **CNF-P1-001 fixture-debt** (18 memberry test failures; Bun mock-isolation root cause RESOLVED via per-file harness `43d22f65`); 6813 pass / 18 fail / 6944 total; pass-rate **0.9974**; §4.5 0/136; §5.5 0.9427 | 9 |
+| Confidence | **WARN (CNF-P1-001)** | `docs/audits/CONFIDENCE_REPORT.md` | current (map@7c4eeaf2) | **CNF-P1-001 fixture-debt residual** (6 memberry test failures; 50 cleared this session); 6825 pass / 6 fail / 6944 total; pass-rate **0.9991**; §4.5 0/136; §5.5 0.9427 | 9 |
 | Enforcement | PASS | `docs/audits/ENFORCEMENT_REPORT.md` + `.json` + COVERAGE | current (map@64b96139) | 0 P0, 1 P1 EM-M19-future01 KNOWN-future CARRIED; baseline v58 holds; 52 P2 / 51 P3 actionable | 0 |
 | Journeys | PASS | `docs/audits/JOURNEY_COVERAGE_REPORT.md` | hours-old (carry, route map unchanged) | 151 routes; 0/0/0/4 P3 KNOWN-DEFERRED | 0 |
 | Runtime | PASS (Tier-3 promoted, 2026-06-03 snapshot) | `docs/audits/RUNTIME_EXEC_REPORT.md` | days-old (Tier-3 evidence carry per row 18 remediation b) | 0 ER-P0 / 0 ER-P1; 1 P2 informational | 0 |
