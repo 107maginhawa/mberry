@@ -21,9 +21,22 @@
 - `scripts/run-contract-tests.ts` — admin preflight sends `Origin`; injects `{{origin}}` (default `http://localhost:3004`) and `{{timestamp}}` (mirrors `{{suffix}}`) globally.
 - Re-run: `Succeeded files: 8 (8.1%)` (was 6). The cascade is unblocked but 91 files still fail on **spec drift** (next section).
 
+## Resolved (continued)
+
+### R1. 67 × HTTP 409 on POST /persons — fixed (commit 7a7a1466)
+- `scripts/audit/migrate-person-autocreate.ts` — idempotent migrator. Drops POST /persons blocks expecting 201 immediately after sign-up; hoists `[Captures] person_id: jsonpath "$.user.id"` onto the sign-up response. POST /persons blocks expecting 4xx (validation tests in `errors.hurl` and `person-validation.hurl`) preserved by `httpStatus === 201` gate.
+- Mass-applied to 71 redundant blocks across 64 files; second-pass picked up 4 multi-actor leftovers.
+- Pre-script audit confirmed zero specs reference downstream `person.firstName/lastName/email/...` so capturing `user.id` is semantically equivalent.
+- Result: contract 8/99 → 54/99 (+46 files).
+
+### R2 (partial). 18 × sign-in 401 — fixed (commit 3005e7af)
+- Root cause: contract specs hardcoded `password: "Test1234!"` for the seeded president `test@memberry.ph`, but `seed/helpers.ts:9` defines `PASSWORD = 'TestPass123!'`. 18 files affected.
+- Mass-replaced `Test1234!` → `TestPass123!` across all .hurl files.
+- Result: contract 54/99 → 61/99 (+7 files).
+
 ## Outstanding — needs per-spec triage
 
-### R1. 67 × HTTP 409 on POST /persons after sign-up
+### R1-residual. 67 × HTTP 409 on POST /persons after sign-up (HISTORICAL — see above for fix)
 **Root cause confirmed:** `services/api-ts/src/core/auth.ts:194-213` — Better-Auth `user.create.after` hook auto-creates a person row (`personRepo.createOne({ id: user.id, … })`). Intentional behavior: "Auto-create person record so profile/dashboard work immediately."
 
 `createPerson` handler (POST /persons) refuses with 409 `User already has a person profile` because the auto-created row already exists.
@@ -73,21 +86,36 @@ Baseline run reached test 57 of 662 before timeout. Failure cluster:
 
 Phase 2 backlog. Deferred until Phase 1.3 closeout.
 
-## Suite Status Snapshot (post-fixes so far)
+## Suite Status Snapshot (current)
 
-| Suite | Before | After Phase 1.3 partial |
+| Suite | Baseline | Now | Δ |
+|---|---|---|---|
+| `bun run typecheck` | ✅ 5/5 | ✅ 5/5 | — |
+| BE unit | ✅ 6057/6057 | ✅ unchanged | — |
+| BE integration | ✅ 23/23 | ✅ unchanged | — |
+| FE memberry vitest | ✅ 633/633 | ✅ unchanged | — |
+| FE admin vitest | ✅ 57/57 | ✅ unchanged | — |
+| `lint:no-skips` | ❌ 14 violations | ✅ clean | +14 cleared |
+| `lint:shallow` | ❌ 1 violation | ✅ clean | +1 cleared |
+| Hurl contract | ❌ 6/99 pass | ⚠️ **61/99 pass (61.6%)** | **+55 files** |
+| E2E memberry | ❌ (killed at 57/662) | not re-run | — |
+| E2E admin | ⏸ not run | ⏸ not run | — |
+| `bun run test:br` | ⚠️ 42/77 COMPLETE | unchanged | — |
+
+## Outstanding contract residuals (38 files)
+
+Histogram by failure type (post-3005e7af):
+
+| Type | Count | Recommended approach |
 |---|---|---|
-| `bun run typecheck` | ✅ 5/5 | ✅ 5/5 |
-| BE unit | ✅ 6057/6057 | ✅ unchanged |
-| BE integration | ✅ 23/23 | ✅ unchanged |
-| FE memberry vitest | ✅ 633/633 | ✅ unchanged |
-| FE admin vitest | ✅ 57/57 | ✅ unchanged |
-| `lint:no-skips` | ❌ 14 violations | ✅ clean |
-| `lint:shallow` | ❌ 1 violation | ✅ clean |
-| Hurl contract | ❌ 6/99 pass | ⚠️ 8/99 pass (CSRF cascade fixed; 91 still on spec drift) |
-| E2E memberry | ❌ (timeout at 57/662) | not re-run |
-| E2E admin | ⏸ not run | ⏸ not run |
-| `bun run test:br` | ⚠️ 42/77 COMPLETE | unchanged |
+| HTTP 403 (auth context) | 16 | Per-spec: add `Cookie: better-auth.session_token={{admin_token}}` to officer-endpoint requests. The runner already captures `{{admin_token}}` from preflight; specs aren't using it. Mass-edit risky (would break auth-boundary tests that intentionally check 403). |
+| Undefined variable | 11 | Cascade from earlier 403/409 — once the upstream request status mismatches, [Captures] doesn't fire, so `{{booking_id}}` / `{{room_id}}` / `{{send_message_id}}` are unset. Fix the upstreams; these clear automatically. |
+| HTTP 409 | 3 | Multi-actor leftovers — scenarios with three+ sign-ups where the migrator missed a tertiary POST /persons. Add to migrator or hand-edit. |
+| HTTP 404 | 3 | Resources missing (seeded org-scoped data dependent on test order). Per-spec. |
+| HTTP 500 | 1 | `billing-lifecycle.hurl:39` POST /billing/merchant-accounts — actual server bug or missing config (Stripe Connect not wired in dev?). Investigate handler. |
+| HTTP 405 | 1 | Method not allowed — wrong verb in spec or route renamed. |
+| Assert failure | 2 | Body shape changed (e.g., `jsonpath "$.field" exists` no longer matches). Per-spec. |
+| Mailpit empty | 1 | auth-verification.hurl — verification email never sent OR Better-Auth not configured for Mailpit SMTP in dev. R3 root-cause needed. |
 
 ## Recommended Next Session Scope (small → large)
 
