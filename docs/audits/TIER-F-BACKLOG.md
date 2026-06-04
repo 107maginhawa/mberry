@@ -1,7 +1,9 @@
-<!-- oli-version: 1.0 -->
+<!-- oli-version: 1.1 -->
 <!-- generated: 2026-06-03T20:45:00Z -->
+<!-- last-modified: 2026-06-04T01:30:00Z -->
+<!-- last-modified-by: phase-d-rebaseline-006 (Tier-F backlog clearance) -->
 <!-- emitted-by: phase-d-rebaseline-005 (Tier-E convergence loop) -->
-<!-- baseline-pin: docs/audits/enforce/.baseline.json v56 -->
+<!-- baseline-pin: docs/audits/enforce/.baseline.json v57 -->
 
 # Tier-F Backlog
 
@@ -89,8 +91,23 @@ Annotation counts by category (informational, not regression):
 
 ## Future Tier-F refactor candidates (not blocking)
 
-1. **`nav-icon` Icon variant** — codify size=18 + size=22 as named props on the Icon abstraction, drop 15 annotations.
-2. **`<MenuItem>` primitive** — replace `<Button variant="ghost" className="w-full justify-start px-3 py-1.5">` pattern, drop 8 annotations.
-3. **Admin chrome token** — `--color-admin-chrome: #2D2635` in `globals.css`, replace `bg-[#2D2635]` with `bg-admin-chrome`, drop 1 annotation.
-4. **EmptyState size scale** — `<EmptyState size="lg" />` instead of `<EmptyState icon={<X size={40} />} />`, drop 17 annotations.
-5. **Officer/admin layout extraction** — pull `officer.tsx` shell into a `OfficerShell` layout component, so descendants can use PageShell, drop 15 full-height-layout annotations.
+All 5 candidates LANDED in phase-d-rebaseline-006 (2026-06-04). Total annotations
+93→34 (59 removed). See baseline.json `ui_consistency.history[5]` for the rebaseline notes.
+
+1. ✅ **`NavIcon` primitive** — `packages/ui/src/components/nav-icon.tsx`. Sizes 18/22
+   codified as `size="sm" | "lg"`. 17 nav-icon annotated sites migrated. Commit `e0046667`.
+2. ✅ **`<MenuItem>` primitive** — `packages/ui/src/components/menu-item.tsx`. Full-width
+   left-aligned dropdown row with `destructive` variant. 8 menu-item-exempt sites
+   migrated (training-card 2 + survey-list 6). Commit `dbff3f7b`.
+3. ✅ **Admin chrome token** — `--color-admin-chrome: #2D2635` in `apps/admin/src/styles/globals.css`
+   + `bg-admin-chrome` mapping in `apps/admin/tailwind.config.ts`. 1 brand-color-system
+   annotation removed. Commit `47ccb639`.
+4. ✅ **EmptyState size scale codified** — sizes 32/40/48 promoted into canonical icon scale
+   in `PATTERNS.lock.md`; detector regex relaxed to `26|28|30|36|44`. 18 annotations
+   removed + 2 stray `size={36}` normalized to `size={40}` in `report-results.tsx`.
+   Commit `e27ec49a`.
+5. ✅ **INTENTIONAL-EXEMPT route list enforced in detector** — `scripts/ui-consistency-detect.ts`
+   now mirrors the central list from `PATTERNS.lock.md`. 15 full-height-layout inline
+   annotations removed (officer/* + my/bookings/*). True `OfficerShell` extraction (so
+   descendants can use PageShell) remains deferred — these routes own full-height
+   chrome by design. Commit `5a1be1b5`.

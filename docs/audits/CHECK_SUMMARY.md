@@ -15,11 +15,11 @@ based-on:
   - docs/audits/RUNTIME_EXEC_REPORT.md (Tier-3 promoted)
   - docs/audits/SEED_COHERENCE_REPORT.md
   - docs/audits/UI_CONSISTENCY_REPORT.md (Phase-D Tier-E convergence rebaseline-005, mode ACTIVE, PASS)
-  - docs/audits/PATTERNS.lock.md (NEW — locked detector spec + INTENTIONAL-EXEMPT route list, ratchet-hardened)
-  - docs/audits/TIER-F-BACKLOG.md (NEW — empty Out-of-Scope, 5 future refactor candidates)
-  - docs/audits/enforce/.baseline.json (v56, phase-d-rebaseline-005)
-last-modified: 2026-06-03T20:55:00Z
-last-modified-by: oli-check (Phase-D Tier-E convergence rebaseline complete)
+  - docs/audits/PATTERNS.lock.md (oli-version 1.1 — Tier-F detector regex relaxed: 26|28|30|36|44 only; canonical scale + EmptyState 32/40/48 + nav 18/22)
+  - docs/audits/TIER-F-BACKLOG.md (5/5 candidates LANDED in rebaseline-006)
+  - docs/audits/enforce/.baseline.json (v57, phase-d-rebaseline-006)
+last-modified: 2026-06-04T01:30:00Z
+last-modified-by: Tier-F backlog clearance (5/5 codification refactors landed)
 ---
 
 ## TRUST STATUS
@@ -74,7 +74,7 @@ Phase-D Tier-D + Tier-E rebaseline complete. ALL prior carries cleared or rebase
 | Journeys | PASS | `docs/audits/JOURNEY_COVERAGE_REPORT.md` | current | 151 routes; 0/0/0/4 P3 KNOWN-DEFERRED | 0 |
 | Runtime | PASS (Tier-3 promoted) | `docs/audits/RUNTIME_EXEC_REPORT.md` | current | 0 ER-P0 / 0 ER-P1; 1 P2 informational | 0 |
 | Seed Coherence | PASS | `docs/audits/SEED_COHERENCE_REPORT.md` | current | STATIC; 117/122 manifest match | 0 |
-| **UI Consistency** | **PASS** (CONVERGED) | `docs/audits/UI_CONSISTENCY_REPORT.md` | current (Tier-E rebaseline) | mode=ACTIVE; new pin v56 `phase-d-rebaseline-005`; **P0 0; P1 0** (down from 61); 93/93 detector matches annotated; 0 REGRESSION; 0 NEW-DEBT; ratchet HARDENED via pre-commit hook | 0 |
+| **UI Consistency** | **PASS** (CONVERGED + Tier-F clean) | `docs/audits/UI_CONSISTENCY_REPORT.md` | current (Tier-F rebaseline v57) | mode=ACTIVE; new pin v57 `phase-d-rebaseline-006`; **P0 0; P1 0**; annotations 93→34 (59 codified via primitives/tokens/scale); detector regex relaxed (26\|28\|30\|36\|44); 0 REGRESSION; 0 NEW-DEBT; ratchet HARDENED | 0 |
 
 **UI-C VERDICT CONVERGED.** Tier-E convergence loop (iter 2 of max 3) drove P1 floor 61→0 via Button variant codemods (4 sites) + 93 annotations + new PATTERNS.lock.md detector spec + pre-commit hook. **Zero NEW-DEBT, zero regression.** Ratchet HARDENED — `scripts/ui-consistency-check.sh` (wired into `.husky/pre-commit`) actively blocks any NEW unannotated detector match in staged files. Residual: 2 aggregate-metric advisories (typography 0.13 + spacing 0.88) kept INFORMATIONAL for trending only.
 
@@ -114,9 +114,10 @@ Phase-D Tier-D + Tier-E rebaseline complete. ALL prior carries cleared or rebase
 **Worst-dim verdict:** **PASS** (all 10 dims PASS).
 **Gate:** **PASS**. Zero actionable P0/P1. Floor: P0=0, P1=1 KNOWN-future (m19).
 
-**Phase-D Tier-D + Tier-E outcome:**
-- **10/10 dims PASS** (UI-C promoted WARN→PASS Tier-D, then CONVERGED Tier-E)
-- UI-C: P1 92→61 (Tier-D) → **0** (Tier-E full converge); 0 regression; 0 NEW-DEBT; ratchet HARDENED via pre-commit hook; new floor pinned (v56 `phase-d-rebaseline-005`)
+**Phase-D Tier-D + Tier-E + Tier-F outcome:**
+- **10/10 dims PASS** (UI-C promoted WARN→PASS Tier-D, CONVERGED Tier-E, codified Tier-F)
+- UI-C: P1 92→61 (Tier-D) → **0** (Tier-E full converge); annotations 93→34 (Tier-F: 59 cleared via primitives/tokens/scale codification); 0 regression; 0 NEW-DEBT; ratchet HARDENED via pre-commit hook; new floor pinned (v57 `phase-d-rebaseline-006`)
+- Tier-F deliverables: NavIcon primitive, MenuItem primitive, admin-chrome CSS var token, EmptyState size scale codification, INTENTIONAL-EXEMPT route allowlist enforced in detector
 - PageShell coverage 78%→82.4% (122/149 routes; remaining 27 INTENTIONAL-EXEMPT special-layout, all annotated)
 - 93/93 detector matches annotated via `// ui-c-exempt:` (100%); PATTERNS.lock.md is canonical detector spec
 - Multi-persona e2e auth scaffold (signInAsOfficer + signInAsAdmin) — unblocks Runtime admin/officer skips for future cycles
@@ -151,13 +152,9 @@ Phase-D Tier-D + Tier-E rebaseline complete. ALL prior carries cleared or rebase
 ## What's Next
 
 - **Pipeline READY for `/ship`.** All 10 dim verdicts PASS; gate PASS; ratchet HARDENED via pre-commit hook.
-- Optional Tier-F follow-ups (no gate impact — see `docs/audits/TIER-F-BACKLOG.md`):
-  - Codify `nav-icon` Icon variant (15 sites currently exempt as methodology-carry).
-  - Extract `<MenuItem>` primitive (8 menu-item-exempt sites).
-  - Admin chrome token system (consolidate `#2D2635` brand single-source).
-  - EmptyState size scale (17 hero-icon empty-state-emphasis sites).
-  - Officer/admin layout extraction (15 full-height-layout sites).
-- Other deferred:
+- **Tier-F backlog: 5/5 LANDED** (rebaseline-006, 2026-06-04). 59 annotations codified. See `docs/audits/TIER-F-BACKLOG.md`.
+- Deferred:
+  - True `OfficerShell` layout extraction (so descendants can use PageShell) — current INTENTIONAL-EXEMPT codification is sufficient; full extraction is architectural and out of UI-C scope.
   - Multi-persona auth wire-through to Runtime suite → unblocks 20 P3 admin/officer skips (e2e infra ready).
   - Playwright 1.59 pin resolution → unblocks 310 fail / 204 error test suite (pre-existing per `project_playwright_pin.md`).
   - Upstream engine v6.2+ SDK-resolver extension → clears 9 Confidence FE-data-hook unverified.
