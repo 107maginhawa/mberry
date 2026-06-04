@@ -1,15 +1,13 @@
 // BR-27: Event capacity and registration limits
 import { test, expect } from '../helpers/test-fixture'
-import { signInAsMember } from '../helpers/auth'
+import { authStateFile } from '../auth.setup'
 
+
+test.use({ storageState: authStateFile('member') })
 const ORG_ID = 'ed8e3a96-8126-4341-be42-e6eb7940c562'
 
 test.describe('BR-27: Event Capacity', () => {
-  test.beforeEach(async ({ page }) => {
-    await signInAsMember(page)
-  })
-
-  test('event list page loads', async ({ page }) => {
+test('event list page loads', async ({ page }) => {
     await page.goto(`/org/${ORG_ID}/events`)
     // Should show events or empty state
     const hasContent = await page.getByText(/event|upcoming|no events/i).first().isVisible({ timeout: 10000 }).catch(() => false)

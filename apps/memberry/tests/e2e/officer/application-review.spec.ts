@@ -1,15 +1,13 @@
 // CO-07: Application review — view pending, approve/deny
 import { test, expect } from '../helpers/test-fixture'
-import { signInAsOfficer } from '../helpers/auth'
+import { authStateFile } from '../auth.setup'
 
+
+test.use({ storageState: authStateFile('officer') })
 const ORG_ID = 'ed8e3a96-8126-4341-be42-e6eb7940c562'
 
 test.describe('CO-07: Application Review', () => {
-  test.beforeEach(async ({ page }) => {
-    await signInAsOfficer(page)
-  })
-
-  test('applications page loads with heading', async ({ page }) => {
+test('applications page loads with heading', async ({ page }) => {
     await page.goto(`/org/${ORG_ID}/officer/applications`)
     await expect(page.getByText('Membership Applications')).toBeVisible({ timeout: 10000 })
   })

@@ -1,13 +1,11 @@
 // BR-12: Credit carry-over
 import { test, expect } from '../helpers/test-fixture'
-import { signInAsMember } from '../helpers/auth'
+import { authStateFile } from '../auth.setup'
 
+
+test.use({ storageState: authStateFile('member') })
 test.describe('BR-12: Credit Carry-Over', () => {
-  test.beforeEach(async ({ page }) => {
-    await signInAsMember(page)
-  })
-
-  test('credits page loads and shows credit data', async ({ page }) => {
+test('credits page loads and shows credit data', async ({ page }) => {
     await page.goto('/my/credits')
     // Should show credits page with data or empty state
     const hasContent = await page.getByText(/credits|CPD|earned|required/i).first().isVisible({ timeout: 10000 }).catch(() => false)

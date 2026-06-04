@@ -1,15 +1,13 @@
 // SO-3: Training completion — member view
 import { test, expect } from '../helpers/test-fixture'
-import { signInAsMember } from '../helpers/auth'
+import { authStateFile } from '../auth.setup'
 
+
+test.use({ storageState: authStateFile('member') })
 const ORG_ID = 'ed8e3a96-8126-4341-be42-e6eb7940c562'
 
 test.describe('SO-3: Training Completion Flow', () => {
-  test.beforeEach(async ({ page }) => {
-    await signInAsMember(page)
-  })
-
-  test('member training page shows available trainings', async ({ page }) => {
+test('member training page shows available trainings', async ({ page }) => {
     await page.goto(`/org/${ORG_ID}/training`)
     const hasContent = await page.getByText(/training|course|seminar|no training/i).first().isVisible({ timeout: 10000 }).catch(() => false)
     expect(hasContent).toBeTruthy()

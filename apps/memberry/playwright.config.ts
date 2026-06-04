@@ -53,10 +53,19 @@ export default defineConfig({
   ],
 
   projects: [
+    // Setup project signs each persona in once and saves cookies to .auth/<role>.json.
+    // Specs opt in via `test.use({ storageState: authStateFile('member') })` from
+    // tests/e2e/auth.setup.ts. See docs/audits/E2E_TIMEOUT_ROOT_CAUSE.md §6.
+    {
+      name: 'setup',
+      testMatch: /auth\.setup\.ts$/,
+      testIgnore: [],
+    },
     {
       name: 'chromium',
       use: { ...devices['Desktop Chrome'] },
-      testIgnore: ['**/mobile/**'],
+      testIgnore: ['**/mobile/**', '**/auth.setup.ts'],
+      dependencies: ['setup'],
     },
     {
       name: 'mobile',
@@ -67,6 +76,7 @@ export default defineConfig({
         hasTouch: true,
       },
       testMatch: '**/mobile/**',
+      dependencies: ['setup'],
     },
   ],
 })

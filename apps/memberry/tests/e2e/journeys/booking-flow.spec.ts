@@ -1,14 +1,12 @@
 // Business Rules: [BR-9] Booking module
 // E2E: Client books a session via host directory
 import { test, expect } from '../helpers/test-fixture'
-import { signInAsMember } from '../helpers/auth'
+import { authStateFile } from '../auth.setup'
 
+
+test.use({ storageState: authStateFile('member') })
 test.describe('Booking flow: client books a session', () => {
-  test.beforeEach(async ({ page }) => {
-    await signInAsMember(page)
-  })
-
-  test('bookings page loads with tabs and heading', async ({ page }) => {
+test('bookings page loads with tabs and heading', async ({ page }) => {
     await page.goto('/my/bookings')
     await expect(
       page.getByRole('heading', { name: /bookings/i }),

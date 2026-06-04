@@ -1,15 +1,13 @@
 // CT-7 / BR-08: Payment refund flow
 import { test, expect } from '../helpers/test-fixture'
-import { signInAsTreasurer } from '../helpers/auth'
+import { authStateFile } from '../auth.setup'
 
+
+test.use({ storageState: authStateFile('treasurer') })
 const ORG_ID = 'ed8e3a96-8126-4341-be42-e6eb7940c562'
 
 test.describe('CT-7: Payment Refund', () => {
-  test.beforeEach(async ({ page }) => {
-    await signInAsTreasurer(page)
-  })
-
-  test('payments page loads with history table', async ({ page }) => {
+test('payments page loads with history table', async ({ page }) => {
     await page.goto(`/org/${ORG_ID}/officer/payments`)
     await expect(page.getByText('Dues & Payments')).toBeVisible({ timeout: 10000 })
   })

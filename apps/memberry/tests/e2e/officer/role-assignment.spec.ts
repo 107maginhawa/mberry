@@ -1,15 +1,13 @@
 // BR-09: Officer role assignment
 import { test, expect } from '../helpers/test-fixture'
-import { signInAsOfficer } from '../helpers/auth'
+import { authStateFile } from '../auth.setup'
 
+
+test.use({ storageState: authStateFile('officer') })
 const ORG_ID = 'ed8e3a96-8126-4341-be42-e6eb7940c562'
 
 test.describe('BR-09: Role Assignment', () => {
-  test.beforeEach(async ({ page }) => {
-    await signInAsOfficer(page)
-  })
-
-  test('officers page loads with officer list', async ({ page }) => {
+test('officers page loads with officer list', async ({ page }) => {
     await page.goto(`/org/${ORG_ID}/officer/officers`)
     // Should show officers or heading
     const hasContent = await page.getByText(/officer|role|position/i).first().isVisible({ timeout: 10000 }).catch(() => false)

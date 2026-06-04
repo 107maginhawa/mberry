@@ -1,15 +1,13 @@
 // BR-07: Payment recording extends dues expiry
 import { test, expect } from '../helpers/test-fixture'
-import { signInAsTreasurer } from '../helpers/auth'
+import { authStateFile } from '../auth.setup'
 
+
+test.use({ storageState: authStateFile('treasurer') })
 const ORG_ID = 'ed8e3a96-8126-4341-be42-e6eb7940c562'
 
 test.describe('BR-07: Payment & Expiry', () => {
-  test.beforeEach(async ({ page }) => {
-    await signInAsTreasurer(page)
-  })
-
-  test('Record Payment page loads with form', async ({ page }) => {
+test('Record Payment page loads with form', async ({ page }) => {
     await page.goto(`/org/${ORG_ID}/officer/payments/new`)
     await expect(page.getByRole('heading', { name: 'Record Payment' })).toBeVisible({ timeout: 10000 })
   })

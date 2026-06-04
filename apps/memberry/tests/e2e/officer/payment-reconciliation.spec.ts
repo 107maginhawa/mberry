@@ -1,15 +1,13 @@
 // CT-3: Payment reconciliation — test payment list as reconciliation view
 import { test, expect } from '../helpers/test-fixture'
-import { signInAsTreasurer } from '../helpers/auth'
+import { authStateFile } from '../auth.setup'
 
+
+test.use({ storageState: authStateFile('treasurer') })
 const ORG_ID = 'ed8e3a96-8126-4341-be42-e6eb7940c562'
 
 test.describe('CT-3: Payment Reconciliation', () => {
-  test.beforeEach(async ({ page }) => {
-    await signInAsTreasurer(page)
-  })
-
-  test('payments page shows financial dashboard with data', async ({ page }) => {
+test('payments page shows financial dashboard with data', async ({ page }) => {
     await page.goto(`/org/${ORG_ID}/officer/payments`)
     // Heading must exist
     await expect(page.getByText('Dues & Payments')).toBeVisible({ timeout: 10000 })

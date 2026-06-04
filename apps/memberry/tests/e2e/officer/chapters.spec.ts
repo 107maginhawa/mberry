@@ -1,15 +1,13 @@
 // CO-11: Chapter affiliations
 import { test, expect } from '../helpers/test-fixture'
-import { signInAsOfficer } from '../helpers/auth'
+import { authStateFile } from '../auth.setup'
 
+
+test.use({ storageState: authStateFile('officer') })
 const ORG_ID = 'ed8e3a96-8126-4341-be42-e6eb7940c562'
 
 test.describe('CO-11: Chapter Affiliations', () => {
-  test.beforeEach(async ({ page }) => {
-    await signInAsOfficer(page)
-  })
-
-  test('chapters settings page loads', async ({ page }) => {
+test('chapters settings page loads', async ({ page }) => {
     await page.goto(`/org/${ORG_ID}/officer/settings/chapters`)
     await expect(page.getByRole('heading', { name: 'Chapter Affiliations' })).toBeVisible({ timeout: 10000 })
   })

@@ -1,15 +1,13 @@
 // CT-9: Payment correction
 import { test, expect } from '../helpers/test-fixture'
-import { signInAsTreasurer } from '../helpers/auth'
+import { authStateFile } from '../auth.setup'
 
+
+test.use({ storageState: authStateFile('treasurer') })
 const ORG_ID = 'ed8e3a96-8126-4341-be42-e6eb7940c562'
 
 test.describe('CT-9: Payment Correction', () => {
-  test.beforeEach(async ({ page }) => {
-    await signInAsTreasurer(page)
-  })
-
-  test('payment detail shows all payment fields', async ({ page }) => {
+test('payment detail shows all payment fields', async ({ page }) => {
     await page.goto(`/org/${ORG_ID}/officer/payments`)
     const paymentLink = page.locator('a[href*="/officer/payments/"]:not([href*="/new"])').first()
     const hasPayments = await paymentLink.isVisible({ timeout: 10000 }).catch(() => false)

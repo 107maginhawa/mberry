@@ -1,15 +1,13 @@
 // BR-17: Training attendance confirmation — mark completed, verify credit
 import { test, expect } from '../helpers/test-fixture'
-import { signInAsSociety } from '../helpers/auth'
+import { authStateFile } from '../auth.setup'
 
+
+test.use({ storageState: authStateFile('society') })
 const ORG_ID = 'ed8e3a96-8126-4341-be42-e6eb7940c562'
 
 test.describe('BR-17: Training Completion', () => {
-  test.beforeEach(async ({ page }) => {
-    await signInAsSociety(page)
-  })
-
-  test('training detail shows attendance tab when trainings exist', async ({ page }) => {
+test('training detail shows attendance tab when trainings exist', async ({ page }) => {
     await page.goto(`/org/${ORG_ID}/officer/training`)
     const trainingLink = page.locator('a[href*="/officer/training/"]:not([href*="/new"]):not([href$="/training"])').first()
     const hasTrainings = await trainingLink.isVisible({ timeout: 10000 }).catch(() => false)

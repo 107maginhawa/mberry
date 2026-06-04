@@ -1,16 +1,14 @@
 // Persona P4: Chapter Secretary (Ana Reyes)
 // Covers: CS-1 through CS-13 — roster, member import, events, communications
 import { test, expect } from '../helpers/test-fixture'
-import { signInAsSecretary } from '../helpers/auth'
+import { authStateFile } from '../auth.setup'
 
+
+test.use({ storageState: authStateFile('secretary') })
 const ORG_ID = 'ed8e3a96-8126-4341-be42-e6eb7940c562'
 
 test.describe('P4 Secretary Journey', () => {
-  test.beforeEach(async ({ page }) => {
-    await signInAsSecretary(page)
-  })
-
-  test('CS-1: secretary accesses officer dashboard', async ({ page }) => {
+test('CS-1: secretary accesses officer dashboard', async ({ page }) => {
     await page.goto(`/org/${ORG_ID}/officer/dashboard`)
     const hasDashboard = await page.getByText(/dashboard|overview/i).first().isVisible({ timeout: 10000 }).catch(() => false)
     expect(hasDashboard).toBeTruthy()

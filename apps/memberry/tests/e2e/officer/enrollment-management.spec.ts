@@ -1,15 +1,13 @@
 // SO-2: Manage training enrollments
 import { test, expect } from '../helpers/test-fixture'
-import { signInAsSociety } from '../helpers/auth'
+import { authStateFile } from '../auth.setup'
 
+
+test.use({ storageState: authStateFile('society') })
 const ORG_ID = 'ed8e3a96-8126-4341-be42-e6eb7940c562'
 
 test.describe('SO-2: Enrollment Management', () => {
-  test.beforeEach(async ({ page }) => {
-    await signInAsSociety(page)
-  })
-
-  test('training list page loads', async ({ page }) => {
+test('training list page loads', async ({ page }) => {
     await page.goto(`/org/${ORG_ID}/officer/training`)
     // Should show training list or empty state
     const hasHeading = await page.getByText(/training|programs/i).first().isVisible({ timeout: 10000 }).catch(() => false)

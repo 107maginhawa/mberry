@@ -1,16 +1,14 @@
 // Persona P3: Chapter Treasurer (Juan Cruz)
 // Covers: CT-1 through CT-11 — payment recording, dues config, financial reports
 import { test, expect } from '../helpers/test-fixture'
-import { signInAsTreasurer } from '../helpers/auth'
+import { authStateFile } from '../auth.setup'
 
+
+test.use({ storageState: authStateFile('treasurer') })
 const ORG_ID = 'ed8e3a96-8126-4341-be42-e6eb7940c562'
 
 test.describe('P3 Treasurer Journey', () => {
-  test.beforeEach(async ({ page }) => {
-    await signInAsTreasurer(page)
-  })
-
-  test('CT-1: treasurer accesses officer dashboard', async ({ page }) => {
+test('CT-1: treasurer accesses officer dashboard', async ({ page }) => {
     await page.goto(`/org/${ORG_ID}/officer/dashboard`)
     const hasDashboard = await page.getByText(/dashboard|overview|metric/i).first().isVisible({ timeout: 10000 }).catch(() => false)
     expect(hasDashboard).toBeTruthy()

@@ -1,16 +1,14 @@
 // M-10: Browse member directory
 // Verifies directory search page renders, search works, and member cards display
 import { test, expect } from '../helpers/test-fixture'
-import { signInAsMember } from '../helpers/auth'
+import { authStateFile } from '../auth.setup'
 
+
+test.use({ storageState: authStateFile('member') })
 const ORG_ID = 'ed8e3a96-8126-4341-be42-e6eb7940c562'
 
 test.describe('M-10: Member Directory', () => {
-  test.beforeEach(async ({ page }) => {
-    await signInAsMember(page)
-  })
-
-  test('directory page loads with search input', async ({ page }) => {
+test('directory page loads with search input', async ({ page }) => {
     await page.goto(`/org/${ORG_ID}/members`)
     // Search input should be visible
     const searchInput = page.getByPlaceholder(/search members/i)

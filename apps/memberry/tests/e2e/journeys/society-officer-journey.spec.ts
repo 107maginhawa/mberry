@@ -2,16 +2,14 @@
 // Covers: SO-1 through SO-14 — training programs, cross-chapter credits, society analytics
 // Weakest persona at 21% coverage — this test significantly improves it.
 import { test, expect } from '../helpers/test-fixture'
-import { signInAsSociety } from '../helpers/auth'
+import { authStateFile } from '../auth.setup'
 
+
+test.use({ storageState: authStateFile('society') })
 const ORG_ID = 'ed8e3a96-8126-4341-be42-e6eb7940c562'
 
 test.describe('P5 Society Officer Journey', () => {
-  test.beforeEach(async ({ page }) => {
-    await signInAsSociety(page)
-  })
-
-  test('SO-1: society officer accesses officer dashboard', async ({ page }) => {
+test('SO-1: society officer accesses officer dashboard', async ({ page }) => {
     await page.goto(`/org/${ORG_ID}/officer/dashboard`)
     const hasDashboard = await page.getByText(/dashboard|overview/i).first().isVisible({ timeout: 10000 }).catch(() => false)
     expect(hasDashboard).toBeTruthy()
