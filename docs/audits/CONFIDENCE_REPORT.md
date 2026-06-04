@@ -1,29 +1,34 @@
-<!-- oli:confidence-report v1.7 | based-on: map@bd7c4eaf4cbc8d9fcd4b0e8917a7d3d430a7eeb2 | last-modified: 2026-06-04T05:30:00Z | last-modified-by: /oli-check confidence (post-bulk-cleanup re-execution) | dimension: confidence | supersedes: rev 10 (map@64b96139) | method: engine-map v6 graph signals (§4.5 loading-hygiene, §5.5 fe-be density via sdk_op_edges) + static assertion/mock/flake/data scans + §6.5 SUT-binding + §6.6 probe-skip + TDD-proof inventory + compliance behavior inventory | trigger: post-bulk-vi.mock-cleanup dim re-run -->
+<!-- oli:confidence-report v1.7 | based-on: map@43d22f65a068d0feae484362d303f507bb8f335d | last-modified: 2026-06-04T06:00:00Z | last-modified-by: /oli-check confidence (post-isolation-harness re-execution) | dimension: confidence | supersedes: rev 11 (map@bd7c4eaf) | method: engine-map v6 graph signals (§4.5 loading-hygiene, §5.5 fe-be density via sdk_op_edges) + static assertion/mock/flake/data scans + §6.5 SUT-binding + §6.6 probe-skip + TDD-proof inventory + compliance behavior inventory | trigger: post-per-file-isolation-harness dim re-run -->
 
 # Confidence Stack Report
 
-**Date:** 2026-06-04 (rev 11 — confidence dim re-execution against map@bd7c4eaf)
+**Date:** 2026-06-04 (rev 12 — confidence dim re-execution against map@43d22f65)
 **Team size:** small
 **Layers audited:** 1-4 (static analysis)
 **Layers deferred:** 5-6 (require CI/CD/runtime evidence)
 **Prior audits used:** docs/audits/COMPLIANCE_REPORT.md (51 BRs, 428-endpoint permission inventory), docs/audits/EXISTING_CODEBASE_ADOPTION_AUDIT.md, docs/product/EVENT_CONTRACTS.md (40 events), docs/product/modules/*/API_CONTRACTS.md (10 modules)
 **Supersedes:** rev 10 (map@64b96139)
 
-## VERDICT: WARN (CNF-P1-001 — test-suite repair backlog)
+## VERDICT: WARN (CNF-P1-001 — fixture-debt residual)
 
-**Reason:** Backend + admin + sdk suites green (6311 pass / 0 fail). Memberry FE component suite still WARN at **535 pass / 40 fail / 575 total** (pass-rate 0.9304 within memberry; aggregate pass-rate **0.9942**). Reframe vs rev 10: original CNF-P0-001 P0 attribution to commit `9fbcb497` (RoundActionButton) was wrong — first-principles investigation in commit `79edb9dd` proved the 56 fails were test-scope expansion from test-infra fix `082557f4` (720 newly-executed tests routed through root preload). 16 of the 56 fails cleared this session (R1 mock-leak fix `c7fad68d` + OrgProvider rewrite `7bb872a7` + EventCard cleanup `6e33704d` + bulk vi.mock + Skeleton testid `bd7c4eaf`). Remaining **40 fails are bounded by Bun mock-isolation limit**: tests in `*-list.test.tsx` files mock their sibling card/form components (e.g. `event-list.test` mocks `./event-card`), which pollutes the process-global module registry for those components' own test files. Per CHECK_LEARNINGS row 49 surface_class rule: `pre-existing-unmasked` + `platform-constraint-bounded` → demote CNF-P0-001 → **CNF-P1-001** (non-gate-blocking; tracked-as-debt). Fundamental fix needs per-file process isolation (test harness config) OR rewrite the sibling-mock pattern (large refactor) — deferred as separate phase.
+**Reason:** Backend + admin + sdk suites green (6198 pass / 0 fail). Memberry FE component suite at **615 pass / 18 fail / 633 total** (pass-rate **0.9716** within memberry; aggregate pass-rate **0.9974**). **Bun mock-isolation root cause RESOLVED** this rev: `apps/memberry/scripts/test-isolated.ts` (commit `43d22f65`) splits 97 test files into 54 clean (batch) + 43 polluter (own process each); 22 fails cleared by isolation alone. Reframe vs rev 11: CNF-P1-001 demoted again — surface_class moves from `platform-constraint-bounded` to **fixture-debt** (real test-fixture issues now exposed, not mock pollution). Remaining 18 fails distribute as:
+- ~6 Radix Select / Sheet / Dialog portal not rendering in happy-dom (TrainingForm×2, EventForm×1, compose×1, NotificationDrawer×2)
+- ~10 QueryClient cache-priming pattern doesn't survive `renderWithProviders` fresh-client (BookingList×2, HostDirectory×2, ChatThread×2, MemberTable×1, CertificateList×1, CertificatePreview×1, MemberDetail×1, DuesStatusCard×1, election-detail×1)
+- 2 act() warnings (BookingList "AddressForm not wrapped in act"; ChatThread "Select not wrapped in act")
+
+Fix path per-test/per-component slice (Phase 2, not in this session): (a) extend `apps/memberry/src/test/utils.tsx` with portal-bypass for Radix; (b) extend `renderWithProviders` to accept pre-seeded queryClient or expose `setQueryData` helper; (c) wrap state-updating effects in act().
 
 ## Run Context
 
-- **Codebase map:** `map@bd7c4eaf` (engine v0.1.0, FRESH; auto-rescanned this cycle; fields_unavailable: []).
-- **Git HEAD:** `bd7c4eaf` (`fix(test): bulk vi.mock cleanup + Skeleton default testid`).
-- **Commits since prior cycle (map@64b96139):** 7 — R1 mock leak fix, audit reclassification, OTel + uuid + esbuild CVE clearance, OrgProvider rewrite, EventCard cleanup, antipattern doc, bulk vi.mock cleanup + Skeleton testid.
+- **Codebase map:** `map@43d22f65` (engine v0.1.0, FRESH; auto-rescanned this cycle; fields_unavailable: []).
+- **Git HEAD:** `43d22f65` (`test(memberry): per-file isolation for sibling-mock polluters`).
+- **Commits since prior cycle (map@bd7c4eaf):** 1 — per-file isolation harness.
 - **Test runs (this cycle):**
   - Backend: `cd services/api-ts && bun test` → **6048 pass / 0 fail / 93 skip / 20 todo / 12489 expect() / 6161 tests / 548 files / 18.85s**
   - Admin: `cd apps/admin && bun run test` → **57 pass / 0 fail / 159 expect() / 57 tests / 12 files / 404ms**
-  - Memberry: `cd apps/memberry && bun run test` → **535 pass / 40 fail / 1 error / 1146 expect() / 575 tests / 97 files / 17.49s**
+  - Memberry: `cd apps/memberry && bun run test` (via per-file isolation harness) → **615 pass / 18 fail / 633 tests / 97 files / 25.05s wall**
   - SDK: `cd packages/sdk-ts && bun test` → **93 pass / 0 fail / 145 expect() / 93 tests / 5 files / 26ms**
-  - **Aggregate: 6733 pass / 40 fail / 6886 tests** (pass-rate **0.9942**, +21 pass / -16 fail vs rev 10). All 40 fails localized to `apps/memberry/src/**/__tests__/*.test.tsx` — no backend, admin, or sdk regressions.
+  - **Aggregate: 6813 pass / 18 fail / 6944 tests** (pass-rate **0.9974**, +80 pass / -22 fail vs rev 11). All 18 fails localized to `apps/memberry/src/**/__tests__/*.test.tsx` — no backend, admin, or sdk regressions.
 - **Typecheck:** PASS all 5 workspaces (pre-commit hook gate on every commit this session).
 - **bun audit:** 0 vulnerabilities (5 CVEs cleared via commit `35232c7c`).
 - **Engine signal:** `CODE_IMPORT_GRAPH.sdk_op_edges[]` = **242 edges / 151 distinct ops** (unchanged from rev 10 — no FE→BE topology change).

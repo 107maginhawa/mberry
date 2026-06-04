@@ -12,7 +12,7 @@ map-version: 6
 | Module | Framework | Files | Confidence |
 |---|---|---|---|
 | `apps/admin` | react | 50 | MEDIUM |
-| `apps/memberry` | react | 440 | MEDIUM |
+| `apps/memberry` | react | 441 | MEDIUM |
 | `handlers/advertising` | generic | 11 | LOW |
 | `handlers/association:member` | hono | 248 | MEDIUM |
 | `handlers/association:operations` | hono | 80 | MEDIUM |
