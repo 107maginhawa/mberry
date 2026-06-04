@@ -84,14 +84,23 @@ Verify: grep `packages/sdk-ts/src` for `csrf-token` reuse. If missing, add a tra
 
 ## Recommended fix sequence (effort-ordered)
 
-1. **(30 min)** Drop `pressSequentially` `delay: 10` in `signUp` / `signIn`. Use `.fill()`. Quick 27s win.
-2. **(1-2h)** Storage-state setup project. Sign in each SEED_* persona once at suite start; save to `.auth/<role>.json`. Update `signInAsX` helpers to be no-ops when `storageState` is already loaded (or remove `beforeEach` signIn altogether). Expected: 8-14 min wall-time saved.
-3. **(2-3h)** Replace `waitForLoadState('networkidle')` calls with element-presence waits. Use grep to find all occurrences. Verify each replacement on the actual page.
-4. **(1h)** Verify SDK transport mirrors CSRF cookie → header. If missing, add it (transport interceptor in `packages/sdk-ts/src/client`). This should clear the 403 cascade independently.
-5. **(2-4h)** Set `workers: 2` then `workers: 4` in CI; flush out test-isolation bugs that surface. Each spec that mutates shared seed-user state must move to fresh `signUp` users.
-6. **(optional)** Split mobile project to its own opt-in script.
+1. ~~**(30 min)** Drop `pressSequentially` `delay: 10` in `signUp` / `signIn`. Use `.fill()`. Quick 27s win.~~ ✅ commit `213b1ce8` — 12 occurrences across 6 files, typecheck clean.
+2. ~~**(1-2h)** Auth helper fast-path — drop `waitForTimeout(2000)` + trailing `waitForLoadState('networkidle')` in `signIn`/`signUp`, replace with explicit URL wait covering both happy path and verify-email gate. Also dropped the redundant POST /persons block (sign-up auto-creates).~~ ✅ commit `68cc76c4` — auth.spec.ts 95s → 58.9s (-38%).
+3. ~~**(2-3h)** Mass-strip 513 redundant post-`goto` `networkidle` waits across 105 spec files via `scripts/audit/strip-redundant-waits.ts` (idempotent, only strips when directly preceded by `goto`).~~ ✅ commit `4dd36e89` — auth.spec.ts 58.9s → 53.0s (-10% additional).
+4. ~~**(1h)** SDK transport CSRF mirror.~~ ✅ verified already in place — `packages/sdk-ts/src/csrf.ts`, `transport.ts:55`, `react/provider.tsx:161-171` interceptor + `:184` `seedCsrfToken` on mount. No action needed.
+5. **(2-4h, deferred)** `workers: 4` + `fullyParallel: true`. Needs per-spec audit: specs that mutate shared `SEED_*` users (officer/member) race in parallel. Move mutation specs to fresh `signUp` users first; read-only specs are safe to parallelize as-is.
+6. **(1-2h, deferred)** Storage-state setup project — sign each persona in once, save `.auth/<role>.json`, declare `test.use({ storageState })` per spec. Eliminates ~166 UI sign-in round-trips. Largest single remaining win.
 
-After step 5, projected wall time: **~25 min** (4× speedup × 75% slower-baseline reduction).
+## Measured impact (this session)
+
+| Stage | auth.spec.ts wall | per-test |
+|---|---|---|
+| Baseline | ~95s projected (9.5s/test from prior 57/540s) | 9.5s |
+| After fix 1+2 (commits 213b1ce8 + 68cc76c4) | 58.9s | 5.9s |
+| After fix 3 (commit 4dd36e89) | 53.0s | 5.3s |
+| **Cumulative reduction** | **-44%** | — |
+
+Projection for full memberry E2E (598 tests): **~95 min → ~50 min** based on this ratio. With fix 5 (workers=4): **~13 min** target. With fix 6 (storageState): floor near **~8 min**.
 
 ## Next test action
 
