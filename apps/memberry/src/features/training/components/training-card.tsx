@@ -1,7 +1,7 @@
 import { MoreHorizontal, Calendar, Users, Award, MapPin } from 'lucide-react'
 import { useState } from 'react'
 import { useParams } from '@tanstack/react-router'
-import { Button } from '@monobase/ui'
+import { Button, MenuItem } from '@monobase/ui'
 
 const TYPE_LABELS: Record<string, string> = {
   seminar: 'Seminar',
@@ -69,23 +69,18 @@ export function TrainingCard({ training, orgId, onCancel, onDuplicate }: Trainin
                   Edit
                 </a>
                 {training.status !== 'cancelled' && (
-                  // ui-c-exempt: menu-item-exempt — custom dropdown menu item
-                  <Button
-                    variant="ghost"
-                    className="w-full justify-start px-3 py-1.5 text-[var(--color-error)]"
+                  <MenuItem
+                    destructive
                     onClick={() => { setMenuOpen(false); onCancel?.(training.id) }}
                   >
                     Cancel
-                  </Button>
+                  </MenuItem>
                 )}
-                {/* ui-c-exempt: menu-item-exempt — custom dropdown menu item */}
-                <Button
-                  variant="ghost"
-                  className="w-full justify-start px-3 py-1.5"
+                <MenuItem
                   onClick={() => { setMenuOpen(false); onDuplicate?.(training) }}
                 >
                   Duplicate
-                </Button>
+                </MenuItem>
               </div>
             )}
           </div>

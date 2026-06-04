@@ -14,8 +14,7 @@ import {
   Users,
   Copy,
 } from 'lucide-react'
-import { Skeleton, Tabs, TabsList, TabsTrigger } from '@monobase/ui'
-import { Button } from '@monobase/ui'
+import { Skeleton, Tabs, TabsList, TabsTrigger, MenuItem, Button } from '@monobase/ui'
 import { useOrg } from '@/hooks/useOrg'
 import { api } from '@/lib/api'
 import { toast } from 'sonner'
@@ -229,17 +228,13 @@ export function SurveyList() {
                   <div className="absolute right-0 top-8 z-10 w-40 bg-popover border rounded-lg shadow-md py-1 text-sm">
                     {survey.status === 'draft' && (
                       <>
-                        {/* ui-c-exempt: menu-item-exempt — survey dropdown menu item */}
-                        <Button
-                          className="w-full text-left px-3 py-1.5 hover:bg-[var(--color-surface-warm)] flex items-center gap-2"
-                          onClick={() => {
+                        <MenuItem className="flex items-center gap-2" onClick={() => {
                             setMenuOpenId(null)
                             cloneMut.mutate(survey.id)
-                          }}
-                        >
+                          }}>
                           <Copy className="w-3.5 h-3.5" />
                           Duplicate
-                        </Button>
+                        </MenuItem>
                         <Link
                           to="/org/$orgSlug/officer/surveys/$surveyId"
                           params={{ orgSlug, surveyId: survey.id }}
@@ -248,41 +243,29 @@ export function SurveyList() {
                         >
                           Edit
                         </Link>
-                        {/* ui-c-exempt: menu-item-exempt — survey dropdown menu item */}
-                        <Button
-                          className="w-full text-left px-3 py-1.5 hover:bg-[var(--color-surface-warm)]"
-                          onClick={() => {
+                        <MenuItem onClick={() => {
                             setMenuOpenId(null)
                             publishMut.mutate(survey.id)
-                          }}
-                        >
+                          }}>
                           Publish
-                        </Button>
-                        {/* ui-c-exempt: menu-item-exempt — survey dropdown menu item */}
-                        <Button
-                          className="w-full text-left px-3 py-1.5 hover:bg-[var(--color-surface-warm)] text-[var(--color-error)]"
-                          onClick={() => {
+                        </MenuItem>
+                        <MenuItem destructive onClick={() => {
                             setMenuOpenId(null)
                             deleteMut.mutate(survey.id)
-                          }}
-                        >
+                          }}>
                           Delete
-                        </Button>
+                        </MenuItem>
                       </>
                     )}
                     {survey.status === 'active' && (
                       <>
-                        {/* ui-c-exempt: menu-item-exempt — survey dropdown menu item */}
-                        <Button
-                          className="w-full text-left px-3 py-1.5 hover:bg-[var(--color-surface-warm)] flex items-center gap-2"
-                          onClick={() => {
+                        <MenuItem className="flex items-center gap-2" onClick={() => {
                             setMenuOpenId(null)
                             cloneMut.mutate(survey.id)
-                          }}
-                        >
+                          }}>
                           <Copy className="w-3.5 h-3.5" />
                           Duplicate
-                        </Button>
+                        </MenuItem>
                         <Link
                           to="/org/$orgSlug/officer/surveys/$surveyId"
                           params={{ orgSlug, surveyId: survey.id }}
@@ -291,31 +274,23 @@ export function SurveyList() {
                         >
                           View Results
                         </Link>
-                        {/* ui-c-exempt: menu-item-exempt — survey dropdown menu item */}
-                        <Button
-                          className="w-full text-left px-3 py-1.5 hover:bg-[var(--color-surface-warm)]"
-                          onClick={() => {
+                        <MenuItem onClick={() => {
                             setMenuOpenId(null)
                             closeMut.mutate(survey.id)
-                          }}
-                        >
+                          }}>
                           Close Survey
-                        </Button>
+                        </MenuItem>
                       </>
                     )}
                     {survey.status === 'closed' && (
                       <>
-                        {/* ui-c-exempt: menu-item-exempt — survey dropdown menu item */}
-                        <Button
-                          className="w-full text-left px-3 py-1.5 hover:bg-[var(--color-surface-warm)] flex items-center gap-2"
-                          onClick={() => {
+                        <MenuItem className="flex items-center gap-2" onClick={() => {
                             setMenuOpenId(null)
                             cloneMut.mutate(survey.id)
-                          }}
-                        >
+                          }}>
                           <Copy className="w-3.5 h-3.5" />
                           Duplicate
-                        </Button>
+                        </MenuItem>
                         <Link
                           to="/org/$orgSlug/officer/surveys/$surveyId"
                           params={{ orgSlug, surveyId: survey.id }}
