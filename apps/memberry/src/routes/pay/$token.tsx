@@ -1,4 +1,3 @@
-// ui-c-exempt: public-verify — public pay-by-token, no auth
 // oli-execute: error-handled-inline
 // `error` is the merge of pay-mutation error + fetch error; renders explicit
 // branch. Gate heuristic misses the destructured rename `error: fetchError`.

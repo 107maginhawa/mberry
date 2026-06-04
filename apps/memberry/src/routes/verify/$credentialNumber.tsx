@@ -1,4 +1,3 @@
-// ui-c-exempt: public-verify — public credential verification
 // oli-execute: error-handled-inline
 // `error || !data` renders explicit "could not verify credential" branch.
 import { createFileRoute } from '@tanstack/react-router'

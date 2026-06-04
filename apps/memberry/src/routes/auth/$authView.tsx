@@ -1,4 +1,3 @@
-// ui-c-exempt: auth-flow — sign-in/up shell, no app chrome
 import { createFileRoute } from '@tanstack/react-router'
 import { AuthView } from '@daveyplate/better-auth-ui'
 

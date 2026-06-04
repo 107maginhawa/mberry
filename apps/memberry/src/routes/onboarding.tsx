@@ -1,4 +1,3 @@
-// ui-c-exempt: onboarding-step — multi-step onboarding wizard owns shell
 import { createFileRoute, useNavigate, useRouter } from '@tanstack/react-router'
 import { useState, useEffect } from 'react'
 import { useQueryClient } from '@tanstack/react-query'

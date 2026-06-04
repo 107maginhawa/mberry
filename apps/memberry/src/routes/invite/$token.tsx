@@ -1,4 +1,3 @@
-// ui-c-exempt: onboarding-step — token-based invite acceptance
 // oli-execute: error-handled-inline
 // `error` is local state set on accept/redeem failure; renders explicit
 // branch at ~L68. Skeleton only shown while `sessionPending`, which uses

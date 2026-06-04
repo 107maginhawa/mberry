@@ -13,7 +13,6 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { api, ApiError } from '@/lib/api'
 import type { ApiErrorBody } from '@/types/api'
 
-// ui-c-exempt: public-verify — public org profile with hero banner + apply CTA; PageShell title would conflict with hero
 export const Route = createFileRoute('/org/$slug')({
   component: PublicOrgProfile,
 })

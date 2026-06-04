@@ -1,4 +1,3 @@
-// ui-c-exempt: auth-flow — email verification standalone shell
 import { createFileRoute, Navigate } from '@tanstack/react-router'
 import { useState } from 'react'
 import { Button } from '@monobase/ui'

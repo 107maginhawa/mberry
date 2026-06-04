@@ -1,4 +1,3 @@
-// ui-c-exempt: public-verify — public certificate verification
 // oli-execute: error-handled-inline
 // `error` renders explicit "Could not verify certificate" branch.
 import { createFileRoute } from '@tanstack/react-router'

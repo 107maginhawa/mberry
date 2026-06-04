@@ -1,4 +1,3 @@
-// ui-c-exempt: onboarding-step — public join flow
 import { createFileRoute, useNavigate } from '@tanstack/react-router'
 import { useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
