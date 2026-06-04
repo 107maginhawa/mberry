@@ -22,6 +22,9 @@
  *   test.skip(!mailpitUp, 'Mailpit not running')  ← OK
  *   test.skip()                                    ← BANNED
  *
+ * Per-line escape hatch (use sparingly, e.g. integration gates):
+ *   const d = API_AVAILABLE ? describe : describe.skip; // allow-skip: <reason>
+ *
  * Exit 0 = clean, Exit 1 = skips found.
  */
 
@@ -76,6 +79,8 @@ for (const globPattern of TEST_GLOBS) {
 
     for (let i = 0; i < lines.length; i++) {
       const line = lines[i];
+      // Per-line escape hatch — must include a reason after `allow-skip:`.
+      if (/\/\/\s*allow-skip\s*:\s*\S/.test(line)) continue;
       for (const { pattern, check } of SKIP_PATTERNS) {
         if (pattern.test(line)) {
           // If there's a check function, only flag if it returns true

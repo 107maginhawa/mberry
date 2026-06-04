@@ -192,10 +192,7 @@ test.describe('Journey: Training Lifecycle (create -> enroll -> complete -> cred
       const trainingLink = page.locator('a[href*="/training/"]').first()
       const hasTraining = await trainingLink.isVisible({ timeout: 10000 }).catch(() => false)
 
-      if (!hasTraining) {
-        test.skip()
-        return
-      }
+      test.skip(!hasTraining, 'No published trainings seeded — requires training fixture')
 
       await trainingLink.click()
       await page.waitForLoadState('networkidle')
@@ -223,10 +220,7 @@ test.describe('Journey: Training Lifecycle (create -> enroll -> complete -> cred
       const trainingLink = page.locator('a[href*="/training/"]').first()
       const hasTraining = await trainingLink.isVisible({ timeout: 10000 }).catch(() => false)
 
-      if (!hasTraining) {
-        test.skip()
-        return
-      }
+      test.skip(!hasTraining, 'No published trainings seeded — requires training fixture')
 
       await trainingLink.click()
       await page.waitForLoadState('networkidle')

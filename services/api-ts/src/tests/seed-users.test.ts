@@ -7,7 +7,7 @@ import { API_AVAILABLE } from './helpers/api-available';
 // These tests run in CI with full API stack, skip in unit-test-only mode.
 
 // INFRA: requires live API server on port 7213 with seed data
-const d = API_AVAILABLE ? describe : describe.skip;
+const d = API_AVAILABLE ? describe : describe.skip; // allow-skip: integration gate — runs only when live API on $API_URL
 
 const ALL_USERS = [
   'test@memberry.ph',

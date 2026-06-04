@@ -34,11 +34,7 @@ test.describe('Member Event Registration Cancellation', () => {
     const eventLink = page.locator('a[href*="/events/"]').first()
     const hasEvent = await eventLink.isVisible({ timeout: 10000 }).catch(() => false)
 
-    if (!hasEvent) {
-      // No published events — skip gracefully
-      test.skip()
-      return
-    }
+    test.skip(!hasEvent, 'No published events seeded — requires event fixture')
 
     await eventLink.click()
     await page.waitForLoadState('networkidle')
@@ -68,10 +64,7 @@ test.describe('Member Event Registration Cancellation', () => {
     const eventLink = page.locator('a[href*="/events/"]').first()
     const hasEvent = await eventLink.isVisible({ timeout: 10000 }).catch(() => false)
 
-    if (!hasEvent) {
-      test.skip()
-      return
-    }
+    test.skip(!hasEvent, 'No published events seeded — requires event fixture')
 
     await eventLink.click()
     await page.waitForLoadState('networkidle')
@@ -103,10 +96,7 @@ test.describe('Member Event Registration Cancellation', () => {
     const eventLink = page.locator('a[href*="/events/"]').first()
     const hasEvent = await eventLink.isVisible({ timeout: 10000 }).catch(() => false)
 
-    if (!hasEvent) {
-      test.skip()
-      return
-    }
+    test.skip(!hasEvent, 'No published events seeded — requires event fixture')
 
     await eventLink.click()
     await page.waitForLoadState('networkidle')
@@ -136,10 +126,7 @@ test.describe('Member Event Registration Cancellation', () => {
     const eventLink = page.locator('a[href*="/events/"]').first()
     const hasEvent = await eventLink.isVisible({ timeout: 10000 }).catch(() => false)
 
-    if (!hasEvent) {
-      test.skip()
-      return
-    }
+    test.skip(!hasEvent, 'No published events seeded — requires event fixture')
 
     await eventLink.click()
     await page.waitForLoadState('networkidle')
