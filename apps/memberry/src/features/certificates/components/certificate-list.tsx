@@ -43,7 +43,6 @@ export function CertificateList() {
 
   if (certificates.length === 0) {
     return (
-      // ui-c-exempt: empty-state-emphasis — no-certs EmptyState
       <EmptyState
         icon={<Award size={32} />}
         headline="No certificates issued yet"

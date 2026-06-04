@@ -162,7 +162,6 @@ export function EventList({ orgId }: EventListProps) {
           ))}
         </div>
       ) : events.length === 0 ? (
-        // ui-c-exempt: empty-state-emphasis — no-events EmptyState
         <EmptyState
           icon={<Calendar size={40} />}
           headline={

@@ -82,7 +82,6 @@ function MyOrganizationsPage() {
       {loading ? (
         <ListSkeleton rows={3} />
       ) : !memberships.length ? (
-        // ui-c-exempt: empty-state-emphasis — no-orgs EmptyState
         <EmptyState
           icon={<Building2 size={40} />}
           headline="No memberships yet"

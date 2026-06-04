@@ -150,7 +150,6 @@ export function OfficerDashboard({ orgId }: OfficerDashboardProps) {
         />
         <div className="flex flex-col items-center justify-center py-16 px-4 text-center">
           {/* oli-ui: exempt-icon-size — hero illustration */}
-          {/* ui-c-exempt: empty-state-emphasis — no-officers empty hero icon */}
           <Users size={48} className="text-[var(--color-primary-lighter)] mb-4" />
           <h3 className="text-h3 text-[var(--color-primary)]">Get started with your association</h3>
           <p className="text-sm text-[var(--color-muted)] mt-2 max-w-[400px]">

@@ -227,7 +227,6 @@ export function MemberTable({ orgId, initialStatus, expiringDays, requiredCredit
         ) : error ? (
           <div role="alert" aria-live="polite" className="p-10 text-center text-[var(--color-error)]">Failed to load members. Please try again.</div>
         ) : members.length === 0 ? (
-          // ui-c-exempt: empty-state-emphasis — no-members EmptyState
           <EmptyState
             icon={<Users size={40} />}
             headline={debouncedSearch ? `No members match "${debouncedSearch}"` : 'No members yet'}

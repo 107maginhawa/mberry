@@ -115,7 +115,6 @@ function MyCredits() {
       </div>
 
       {entries.length === 0 ? (
-        // ui-c-exempt: empty-state-emphasis — no-credits EmptyState
         <EmptyState
           icon={<Award size={32} />}
           headline="No credits earned yet"

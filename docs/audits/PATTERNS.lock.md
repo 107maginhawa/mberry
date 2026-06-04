@@ -1,7 +1,9 @@
-<!-- oli-version: 1.0 -->
+<!-- oli-version: 1.1 -->
 <!-- generated: 2026-06-03T20:30:00Z -->
-<!-- pinned-by: phase-d-rebaseline-005 (Tier-E convergence) -->
-<!-- baseline-pin: docs/audits/enforce/.baseline.json v56 -->
+<!-- last-modified: 2026-06-04T01:00:00Z -->
+<!-- pinned-by: phase-d-rebaseline-006 (Tier-F EmptyState + OfficerShell codification) -->
+<!-- baseline-pin: docs/audits/enforce/.baseline.json v57 -->
+<!-- previous-baseline: v56 phase-d-rebaseline-005 -->
 <!-- mode: LOCKED — these are the canonical detection patterns for the UI-consistency ratchet -->
 
 # UI Consistency Pattern Lock
@@ -71,7 +73,7 @@ Then split the className value into whitespace tokens and flag any token matchin
 
 **Pattern A — JSX `size` prop:**
 ```
-<\w+\s+[^>]*\bsize=\{(18|22|26|28|30|32|36|40|44|48)\}
+<\w+\s+[^>]*\bsize=\{(26|28|30|36|44)\}
 ```
 **Pattern B — className container sizing:**
 ```
@@ -79,7 +81,9 @@ className=(?:"|`)[^"`]*\bh-\[\d+(?:\.\d+)?px\]\s+w-\[\d+(?:\.\d+)?px\]
 ```
 
 **Canonical icon scale (`size={N}` allowed without annotation):**
-- 12, 14, 16, 20, 24
+- 12, 14, 16, 20, 24 — body / inline / button icons
+- 18, 22 — navigation icons (sidebar / header / bottom-nav); use `<NavIcon icon={...} size="sm"|"lg" />` from `@monobase/ui`
+- 32, 40, 48 — EmptyState hero icons (`empty-state-emphasis` codified into scale by Tier-F)
 
 Anything outside the canonical scale **must** carry an `ui-c-exempt: <category>` annotation on the line above OR within 5 lines above (so JSX context comments work).
 

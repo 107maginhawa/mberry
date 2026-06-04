@@ -103,7 +103,6 @@ function MyIdCard() {
           Unable to load your ID card. Please try refreshing the page.
         </div>
       ) : !membership ? (
-        // ui-c-exempt: empty-state-emphasis — no-id-card EmptyState
         <EmptyState
           icon={<CreditCard size={40} />}
           headline="No ID card available"

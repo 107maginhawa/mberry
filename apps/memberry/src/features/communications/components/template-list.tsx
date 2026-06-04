@@ -71,7 +71,6 @@ export function TemplateList({ orgId, onEdit, onNew }: TemplateListProps) {
 
   if (templates.length === 0) {
     return (
-      // ui-c-exempt: empty-state-emphasis — no-templates EmptyState
       <EmptyState
         icon={<FileText size={32} />}
         headline="No templates yet"

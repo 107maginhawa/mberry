@@ -133,7 +133,6 @@ function MyProfilePage() {
   if (isError || !person) {
     return (
       <PageShell title="Profile">
-        {/* ui-c-exempt: empty-state-emphasis — no-profile EmptyState */}
         <EmptyState
           icon={<UserCircle size={40} />}
           headline="No profile found"

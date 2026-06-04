@@ -21,9 +21,8 @@ export function ReportResults({ type, data, summary, isLoading }: ReportResultsP
 
   if (!data) {
     return (
-      // ui-c-exempt: empty-state-emphasis — empty-results EmptyState
       <EmptyState
-        icon={<FileBarChart2 size={36} />}
+        icon={<FileBarChart2 size={40} />}
         headline="No report generated yet"
         description="Select a report type and click Generate."
       />
@@ -32,9 +31,8 @@ export function ReportResults({ type, data, summary, isLoading }: ReportResultsP
 
   if (data.length === 0) {
     return (
-      // ui-c-exempt: empty-state-emphasis — empty results EmptyState
       <EmptyState
-        icon={<Inbox size={36} />}
+        icon={<Inbox size={40} />}
         headline="No data found"
         description="Try a different period or relax your filters."
       />

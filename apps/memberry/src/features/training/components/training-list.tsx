@@ -192,7 +192,6 @@ export function TrainingList({ orgId }: TrainingListProps) {
           ))}
         </div>
       ) : trainings.length === 0 ? (
-        // ui-c-exempt: empty-state-emphasis — no-training EmptyState
         <EmptyState
           icon={<BookOpen size={40} />}
           headline="No trainings found"

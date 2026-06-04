@@ -102,7 +102,6 @@ function GovernancePage() {
             <CardSkeleton />
           </div>
         ) : activeElections.length === 0 ? (
-          // ui-c-exempt: empty-state-emphasis — no-elections EmptyState
           <EmptyState
             icon={<Vote size={32} />}
             headline="No active elections"
@@ -145,7 +144,6 @@ function GovernancePage() {
             {Array.from({ length: 3 }).map((_, i) => <CardSkeleton key={i} />)}
           </div>
         ) : allDocuments.length === 0 ? (
-          // ui-c-exempt: empty-state-emphasis — no-decisions EmptyState
           <EmptyState
             icon={<FileText size={32} />}
             headline="No documents published yet"

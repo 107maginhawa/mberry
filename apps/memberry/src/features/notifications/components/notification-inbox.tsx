@@ -161,7 +161,6 @@ export function NotificationInbox() {
 
       {/* Notification list */}
       {grouped.length === 0 ? (
-        // ui-c-exempt: empty-state-emphasis — inbox-empty EmptyState
         <EmptyState
           icon={<Bell size={40} />}
           headline={notifications.length === 0 ? 'No notifications yet' : 'No notifications in this category'}

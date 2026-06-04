@@ -88,7 +88,8 @@ for (const file of files) {
   }
 
   // Detector 2A: Icon arbitrary size={N}
-  const iconRe = /<\w+\s+[^>]*\bsize=\{(18|22|26|28|30|32|36|40|44|48)\}/g
+  // Canonical scale (no annotation needed): 12, 14, 16, 18, 20, 22, 24 (nav/body), 32, 40, 48 (EmptyState hero — Tier-F codified)
+  const iconRe = /<\w+\s+[^>]*\bsize=\{(26|28|30|36|44)\}/g
   while ((m = iconRe.exec(src)) !== null) {
     const line = src.slice(0, m.index).split('\n').length
     if (!hasExemptNear(file, line)) hits.push({ file, line, rule: 'icon-arbitrary-size', detail: `size={${m[1]}}` })

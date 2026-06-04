@@ -46,7 +46,6 @@ function OrgTraining() {
           Unable to load training. Please try refreshing the page.
         </div>
       ) : trainings.length === 0 ? (
-        // ui-c-exempt: empty-state-emphasis — no-training EmptyState
         <EmptyState
           icon={<BookOpen size={32} />}
           headline="No training sessions available"

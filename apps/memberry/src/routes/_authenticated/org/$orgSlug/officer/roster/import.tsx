@@ -196,7 +196,6 @@ function RosterImportPage() {
             className="border-2 border-dashed border-[var(--color-border)] rounded-[12px] p-12 text-center hover:border-[var(--color-primary)] hover:bg-[var(--color-primary-subtle)] transition-colors cursor-pointer"
             onClick={() => document.getElementById('csv-input')?.click()}
           >
-            {/* ui-c-exempt: empty-state-emphasis — drag-drop hero glyph */}
             <Upload size={32} className="mx-auto mb-3 text-[var(--color-muted)]" />
             <p className="text-sm font-medium text-[var(--color-text)]">
               Drop CSV file here or click to browse

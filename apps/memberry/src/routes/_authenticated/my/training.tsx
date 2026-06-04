@@ -116,7 +116,6 @@ function MyTraining() {
           Unable to load your training. Please try refreshing the page.
         </div>
       ) : items.length === 0 ? (
-        // ui-c-exempt: empty-state-emphasis — no-training EmptyState
         <EmptyState
           icon={<BookOpen size={32} />}
           headline="No training sessions yet"
