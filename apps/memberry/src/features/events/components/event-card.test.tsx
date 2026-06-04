@@ -4,24 +4,11 @@ import userEvent from '@testing-library/user-event'
 import { renderWithProviders } from '@/test/utils'
 import { EventCard } from './event-card'
 
-vi.mock('@/components/motion/glass-card', () => ({
-  GlassCard: ({ children, className }: any) => <div className={className}>{children}</div>,
-}))
-
-vi.mock('@tanstack/react-router', () => ({
-  Link: ({ children, to, className }: any) => <a href={String(to)} className={className}>{children}</a>,
-  useParams: () => ({ orgSlug: 'test-org' }),
-}))
-
-vi.mock('@monobase/ui', () => ({
-  Button: ({ children, onClick, disabled, className, 'aria-label': ariaLabel, ...props }: any) => (
-    <button onClick={onClick} disabled={disabled} className={className} aria-label={ariaLabel} {...props}>{children}</button>
-  ),
-  DropdownMenu: ({ children }: any) => <div>{children}</div>,
-  DropdownMenuTrigger: ({ children, asChild }: any) => <div>{children}</div>,
-  DropdownMenuContent: ({ children }: any) => <div>{children}</div>,
-  DropdownMenuItem: ({ children, onClick }: any) => <div onClick={onClick}>{children}</div>,
-}))
+// Router (Link, useParams) provided by test-setup-root.ts global mock —
+// drives useParams via globalThis.__routerParams. @monobase/ui Button +
+// DropdownMenu render as real components against happy-dom; do not vi.mock
+// either at file scope (Bun mock.module is process-global and pollutes
+// every downstream test importing the same module).
 
 describe('EventCard', () => {
   const baseEvent = {
@@ -36,6 +23,7 @@ describe('EventCard', () => {
   }
 
   beforeEach(() => {
+    ;(globalThis as any).__routerParams = { orgSlug: 'test-org' }
     vi.clearAllMocks()
   })
 
