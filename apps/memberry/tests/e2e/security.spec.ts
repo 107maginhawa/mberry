@@ -1,3 +1,4 @@
+// WF-007 — Session Management
 // Business Rules: Security flow coverage for Phase 5 hardening
 import { test, expect } from './helpers/test-fixture'
 import { signIn } from './helpers/auth'

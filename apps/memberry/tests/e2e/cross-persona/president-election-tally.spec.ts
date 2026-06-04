@@ -1,3 +1,4 @@
+// WF-080 — Election Lifecycle
 /**
  * Cross-persona: President starts an election; members vote;
  *                secretary tallies the results; certification flows

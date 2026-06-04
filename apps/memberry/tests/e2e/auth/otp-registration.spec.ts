@@ -1,3 +1,4 @@
+// WF-001 — Self-Registration: name, email, license, password + OTP verification
 // BR-25: OTP registration flow
 // Tests email verification during signup
 import { test, expect } from '../helpers/test-fixture'

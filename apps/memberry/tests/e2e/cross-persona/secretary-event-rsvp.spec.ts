@@ -1,3 +1,4 @@
+// WF-049 — Event Registration
 /**
  * Cross-persona: Secretary creates and publishes an event; member RSVPs to it;
  *                president views the roster and sees the member.

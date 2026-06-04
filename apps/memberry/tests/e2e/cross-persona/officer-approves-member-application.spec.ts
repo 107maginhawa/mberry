@@ -1,3 +1,4 @@
+// WF-024 — Application Approval
 /**
  * Cross-persona: Society officer approves a pending member application;
  *                that applicant then signs in as a member and sees

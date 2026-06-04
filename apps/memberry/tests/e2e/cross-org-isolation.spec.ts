@@ -1,3 +1,4 @@
+// WF-019 — User Impersonation
 // Cross-org isolation (IDOR) E2E tests
 // Verifies officers from one organization cannot access another org's data
 // through the full browser stack. Backend IDOR protection from Phase 12-04.

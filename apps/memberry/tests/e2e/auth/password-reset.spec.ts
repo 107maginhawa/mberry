@@ -1,3 +1,4 @@
+// WF-003 — Login: email/password or magic link authentication
 // M-13: Password reset flow
 // Requires Mailpit running (docker compose up mailpit)
 import { test, expect } from '../helpers/test-fixture'

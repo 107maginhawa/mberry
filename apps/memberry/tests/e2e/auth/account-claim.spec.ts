@@ -1,3 +1,4 @@
+// WF-002 — Account Claim: imported member claims pre-populated account via token + OTP
 // M-2 / BR-24: Account claim via invitation
 import { test, expect } from '../helpers/test-fixture'
 
