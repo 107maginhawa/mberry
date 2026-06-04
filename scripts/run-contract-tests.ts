@@ -39,6 +39,10 @@ const adminPassword = process.env.CONTRACT_ADMIN_PASSWORD ?? 'AdminContractTest!
 // Must match an entry in the impl's CORS_ORIGINS env (hono/csrf rejects mismatches).
 // Default mirrors the memberry frontend dev origin, which is always in the dev CORS list.
 const contractOrigin = process.env.CONTRACT_ORIGIN ?? 'http://localhost:3004'
+// Seeded org id — every org-scoped endpoint needs an x-org-id header that resolves
+// to a real organization the admin user belongs to. The seed module creates this
+// org on every run; if the seed changes, override via CONTRACT_ORG_ID.
+const contractOrgId = process.env.CONTRACT_ORG_ID ?? 'ed8e3a96-8126-4341-be42-e6eb7940c562'
 
 const contractDir = join(import.meta.dir, '..', 'specs', 'api', 'tests', 'contract')
 
@@ -154,6 +158,7 @@ const variables = [
   '--variable', `suffix=${suffix}`,
   '--variable', `timestamp=${suffix}`,
   '--variable', `origin=${contractOrigin}`,
+  '--variable', `org_id=${contractOrgId}`,
   '--variable', `mailpit_api=${mailpitApi}`,
   '--variable', `admin_email=${adminEmail}`,
   '--variable', `admin_password=${adminPassword}`,
