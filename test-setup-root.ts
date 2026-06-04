@@ -112,8 +112,18 @@ _bunMock.module('@tanstack/react-router', () => {
     useRouteContext: () => ({}),
     useMatch: () => ({}),
     useLoaderData: () => undefined,
-    Link: ({ children, to, ...props }: any) =>
-      React.createElement('a', { href: String(to ?? ''), ...props }, children),
+    Link: ({ children, to, params, ...props }: any) => {
+      // Substitute $param placeholders from `params` prop so test assertions on
+      // resolved hrefs (e.g. /my/certificates/cert-1) work with TanStack Router
+      // path tokens (e.g. /my/certificates/$certificateId).
+      let href = String(to ?? '');
+      if (params && typeof params === 'object') {
+        for (const [k, v] of Object.entries(params)) {
+          href = href.replace(new RegExp('\\$' + k + '(?=/|$)', 'g'), String(v));
+        }
+      }
+      return React.createElement('a', { href, ...props }, children);
+    },
   };
 });
 

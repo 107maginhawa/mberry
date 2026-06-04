@@ -45,14 +45,14 @@ describe('QuickActions', () => {
     renderWithProviders(<QuickActions duesOrgSlug="org-abc" />)
 
     const payDuesLink = screen.getByText('Pay Dues').closest('a')
-    expect(payDuesLink).toHaveAttribute('href', '/org/$orgSlug/dues')
+    expect(payDuesLink).toHaveAttribute('href', '/org/org-abc/dues')
   })
 
   test('links to org-specific events route when eventsOrgSlug provided', () => {
     renderWithProviders(<QuickActions eventsOrgSlug="org-evt-1" />)
 
     const eventsLink = screen.getByText('Events').closest('a')
-    expect(eventsLink).toHaveAttribute('href', '/org/$orgSlug/events')
+    expect(eventsLink).toHaveAttribute('href', '/org/org-evt-1/events')
   })
 
   test('links to /my/events when no eventsOrgSlug', () => {
