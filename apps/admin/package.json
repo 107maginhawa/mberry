@@ -8,8 +8,8 @@
     "build": "vite build",
     "preview": "vite preview",
     "typecheck": "tsc --noEmit",
-    "test": "bash ../../scripts/with-esbuild-wasm.sh vitest run",
-    "test:watch": "bash ../../scripts/with-esbuild-wasm.sh vitest",
+    "test": "cd ../.. && bun test apps/admin/src",
+    "test:watch": "cd ../.. && bun test --watch apps/admin/src",
     "test:e2e": "bunx playwright test",
     "lint": "eslint src"
   },
