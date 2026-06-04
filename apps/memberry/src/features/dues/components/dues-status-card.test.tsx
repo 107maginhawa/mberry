@@ -94,6 +94,6 @@ describe('DuesStatusCard', () => {
       />
     )
 
-    expect(screen.getByText('₱1500.00')).toBeInTheDocument()
+    expect(screen.getByText('₱1,500.00')).toBeInTheDocument()
   })
 })

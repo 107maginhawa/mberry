@@ -8,7 +8,18 @@ import { NotificationDrawer } from '../notification-drawer'
 const mockNavigate = vi.fn()
 ;(globalThis as any).__routerNavigate = mockNavigate
 
-// @monobase/ui rendered as real components against happy-dom.
+// Radix Sheet/Dialog portals don't render inline under happy-dom; stub
+// @monobase/ui Sheet primitives to flat divs so SheetContent assertions
+// resolve. Per-test isolation keeps mock scoped to this file.
+vi.mock('@monobase/ui', () => ({
+  Button: ({ children, onClick, disabled, type, variant, ...props }: any) => (
+    <button type={type} onClick={onClick} disabled={disabled} {...props}>{children}</button>
+  ),
+  Sheet: ({ children, open }: any) => (open ? <div data-testid="sheet">{children}</div> : null),
+  SheetContent: ({ children }: any) => <div data-testid="sheet-content">{children}</div>,
+  SheetHeader: ({ children }: any) => <div>{children}</div>,
+  SheetTitle: ({ children }: any) => <h2>{children}</h2>,
+}))
 
 // Mock lucide-react icons
 vi.mock('lucide-react', () => ({

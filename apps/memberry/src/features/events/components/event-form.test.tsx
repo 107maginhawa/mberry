@@ -3,13 +3,37 @@ import { screen } from '@testing-library/react'
 import { renderWithProviders } from '@/test/utils'
 import { EventForm } from './event-form'
 
-// [Tier-F] removed local SDK mock; using global stub in test-setup-root.ts
-// @monobase/ui rendered as real components against happy-dom.
+// [Tier-F] removed local SDK mock; using global stub in test-setup-root.ts.
+// Per-test isolation (apps/memberry/scripts/test-isolated.ts) keeps vi.mock
+// pollution scoped to this file.
 
 vi.mock('@/components/patterns/date-picker', () => ({
   DateTimePicker: ({ value, onChange, ...rest }: any) => (
     <input data-testid="datetime-picker" type="text" value={value ?? ''} onChange={(e: any) => onChange?.(e.target.value)} {...rest} />
   ),
+}))
+
+// Radix Select* don't render inline under happy-dom; stub @monobase/ui to
+// flat Select primitives that emit role="option" so visibility-selector
+// assertions resolve.
+vi.mock('@monobase/ui', () => ({
+  Button: ({ children, onClick, disabled, type, variant, className, ...props }: any) => (
+    <button type={type} onClick={onClick} disabled={disabled} className={className} {...props}>{children}</button>
+  ),
+  Input: ({ id, type, value, onChange, ...props }: any) => (
+    <input id={id} type={type ?? 'text'} value={value ?? ''} onChange={onChange} {...props} />
+  ),
+  Label: ({ htmlFor, children }: any) => <label htmlFor={htmlFor}>{children}</label>,
+  Textarea: ({ id, value, onChange, ...props }: any) => (
+    <textarea id={id} value={value ?? ''} onChange={onChange} {...props} />
+  ),
+  Select: ({ children, value, onValueChange, defaultValue, ...props }: any) => (
+    <div data-testid="select" data-value={value ?? defaultValue ?? ''} {...props}>{children}</div>
+  ),
+  SelectContent: ({ children }: any) => <div data-testid="select-content">{children}</div>,
+  SelectItem: ({ children, value }: any) => <div role="option" data-value={value}>{children}</div>,
+  SelectTrigger: ({ children, ...props }: any) => <button data-testid="select-trigger" {...props}>{children}</button>,
+  SelectValue: ({ placeholder }: any) => <span>{placeholder}</span>,
 }))
 
 import {

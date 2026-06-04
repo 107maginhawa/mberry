@@ -4,12 +4,40 @@ import { renderWithProviders } from '@/test/utils'
 import { TrainingForm } from './training-form'
 
 // Router (useNavigate, useParams) provided by global mock in test-setup-root.ts.
-// @monobase/ui rendered as real components against happy-dom.
+// Per-test isolation (apps/memberry/scripts/test-isolated.ts) means this file
+// runs in its own bun:test process; vi.mock pollution stays scoped here.
 
 vi.mock('@/components/patterns/date-picker', () => ({
   DateTimePicker: ({ value, onChange, ...rest }: any) => (
     <input data-testid="datetime-picker" type="text" value={value ?? ''} onChange={(e: any) => onChange?.(e.target.value)} {...rest} />
   ),
+}))
+
+// Stub Radix Select* — happy-dom doesn't render Radix popper content inline.
+// Test asserts on `role="option"` elements; provide a flat stub that emits
+// role="option" per SelectItem child. Mock at @monobase/ui level — covers
+// Button/Input/Label/Textarea pass-through to keep TrainingForm rendering.
+vi.mock('@monobase/ui', () => ({
+  Button: ({ children, onClick, disabled, type, variant, className, ...props }: any) => (
+    <button type={type} onClick={onClick} disabled={disabled} className={className} {...props}>{children}</button>
+  ),
+  Input: ({ id, type, value, onChange, ...props }: any) => (
+    <input id={id} type={type ?? 'text'} value={value ?? ''} onChange={onChange} {...props} />
+  ),
+  Label: ({ htmlFor, children }: any) => <label htmlFor={htmlFor}>{children}</label>,
+  Textarea: ({ id, value, onChange, ...props }: any) => (
+    <textarea id={id} value={value ?? ''} onChange={onChange} {...props} />
+  ),
+  Select: ({ children, value, onValueChange, defaultValue, ...props }: any) => {
+    const v = value ?? defaultValue ?? ''
+    return (
+      <select data-testid="select" data-value={v} value={v} onChange={(e) => onValueChange?.(e.target.value)} {...props}>{children}</select>
+    )
+  },
+  SelectContent: ({ children }: any) => <>{children}</>,
+  SelectItem: ({ children, value }: any) => <option role="option" value={value}>{children}</option>,
+  SelectTrigger: ({ children, ...props }: any) => <span data-testid="select-trigger" {...props}>{children}</span>,
+  SelectValue: ({ placeholder }: any) => <span>{placeholder}</span>,
 }))
 
 describe('TrainingForm', () => {
