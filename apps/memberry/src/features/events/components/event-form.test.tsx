@@ -20,13 +20,13 @@ vi.mock('@monobase/ui', () => ({
   Button: ({ children, onClick, disabled, type, variant, className, ...props }: any) => (
     <button type={type} onClick={onClick} disabled={disabled} className={className} {...props}>{children}</button>
   ),
-  Input: ({ id, type, value, onChange, ...props }: any) => (
-    <input id={id} type={type ?? 'text'} value={value ?? ''} onChange={onChange} {...props} />
+  // Pass register()'s props through unchanged so RHF can attach its ref
+  // (uncontrolled mode). Forcing value={value ?? ''} froze inputs empty.
+  Input: ({ type, ...props }: any) => (
+    <input type={type ?? 'text'} {...props} />
   ),
   Label: ({ htmlFor, children }: any) => <label htmlFor={htmlFor}>{children}</label>,
-  Textarea: ({ id, value, onChange, ...props }: any) => (
-    <textarea id={id} value={value ?? ''} onChange={onChange} {...props} />
-  ),
+  Textarea: ({ ...props }: any) => <textarea {...props} />,
   Select: ({ children, value, onValueChange, defaultValue, ...props }: any) => (
     <div data-testid="select" data-value={value ?? defaultValue ?? ''} {...props}>{children}</div>
   ),
@@ -113,8 +113,14 @@ describe('EventForm', () => {
 
     renderWithProviders(<EventForm orgId="org-1" event={event} />)
 
-    // "Board Meeting" appears in both the title input and the eventType select
-    expect(screen.getAllByDisplayValue('Board Meeting')).toHaveLength(2)
+    // Title input has value "Board Meeting"; eventType Select carries
+    // 'board_meeting' on its wrapper data-value (no native <select> in
+    // happy-dom, so display-value match is on inputs only).
+    expect(screen.getByDisplayValue('Board Meeting')).toBeInTheDocument()
+    const eventTypeSelect = screen.getAllByTestId('select').find(
+      (el) => el.getAttribute('data-value') === 'board_meeting'
+    )
+    expect(eventTypeSelect).toBeTruthy()
     expect(screen.getByDisplayValue('Monthly board meeting')).toBeInTheDocument()
     expect(screen.getByDisplayValue('Conference Room A')).toBeInTheDocument()
     // Fee is divided by 100: 5000 / 100 = 50
