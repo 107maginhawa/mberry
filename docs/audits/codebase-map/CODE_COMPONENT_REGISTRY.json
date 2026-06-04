@@ -1,294 +1,6 @@
 {
   "version": 6,
   "components": {
-    "AlertDialogHeader": {
-      "name": "AlertDialogHeader",
-      "file_path": "packages/ui/src/components/alert-dialog.tsx",
-      "module": "packages/ui",
-      "type": "component",
-      "props_in": [],
-      "events_out": [],
-      "slots": [],
-      "state_access": [],
-      "api_calls": [],
-      "routes_used_in": [],
-      "loading_state_hygiene": null,
-      "interaction_hygiene": null,
-      "error_sink_calls": [],
-      "confidence": "MEDIUM"
-    },
-    "AlertDialogFooter": {
-      "name": "AlertDialogFooter",
-      "file_path": "packages/ui/src/components/alert-dialog.tsx",
-      "module": "packages/ui",
-      "type": "component",
-      "props_in": [],
-      "events_out": [],
-      "slots": [],
-      "state_access": [],
-      "api_calls": [],
-      "routes_used_in": [],
-      "loading_state_hygiene": null,
-      "interaction_hygiene": null,
-      "error_sink_calls": [],
-      "confidence": "MEDIUM"
-    },
-    "Badge": {
-      "name": "Badge",
-      "file_path": "packages/ui/src/components/badge.tsx",
-      "module": "packages/ui",
-      "type": "component",
-      "props_in": [],
-      "events_out": [],
-      "slots": [],
-      "state_access": [],
-      "api_calls": [],
-      "routes_used_in": [],
-      "loading_state_hygiene": null,
-      "interaction_hygiene": null,
-      "error_sink_calls": [],
-      "confidence": "MEDIUM"
-    },
-    "Calendar": {
-      "name": "Calendar",
-      "file_path": "packages/ui/src/components/calendar.tsx",
-      "module": "packages/ui",
-      "type": "component",
-      "props_in": [],
-      "events_out": [],
-      "slots": [],
-      "state_access": [],
-      "api_calls": [],
-      "routes_used_in": [],
-      "loading_state_hygiene": null,
-      "interaction_hygiene": null,
-      "error_sink_calls": [],
-      "confidence": "MEDIUM"
-    },
-    "CalendarDayButton": {
-      "name": "CalendarDayButton",
-      "file_path": "packages/ui/src/components/calendar.tsx",
-      "module": "packages/ui",
-      "type": "component",
-      "props_in": [],
-      "events_out": [],
-      "slots": [],
-      "state_access": [],
-      "api_calls": [],
-      "routes_used_in": [],
-      "loading_state_hygiene": null,
-      "interaction_hygiene": null,
-      "error_sink_calls": [],
-      "confidence": "MEDIUM"
-    },
-    "CommandDialog": {
-      "name": "CommandDialog",
-      "file_path": "packages/ui/src/components/command.tsx",
-      "module": "packages/ui",
-      "type": "component",
-      "props_in": [],
-      "events_out": [],
-      "slots": [],
-      "state_access": [],
-      "api_calls": [],
-      "routes_used_in": [],
-      "loading_state_hygiene": null,
-      "interaction_hygiene": null,
-      "error_sink_calls": [],
-      "confidence": "MEDIUM"
-    },
-    "CommandShortcut": {
-      "name": "CommandShortcut",
-      "file_path": "packages/ui/src/components/command.tsx",
-      "module": "packages/ui",
-      "type": "component",
-      "props_in": [],
-      "events_out": [],
-      "slots": [],
-      "state_access": [],
-      "api_calls": [],
-      "routes_used_in": [],
-      "loading_state_hygiene": null,
-      "interaction_hygiene": null,
-      "error_sink_calls": [],
-      "confidence": "MEDIUM"
-    },
-    "DialogHeader": {
-      "name": "DialogHeader",
-      "file_path": "packages/ui/src/components/dialog.tsx",
-      "module": "packages/ui",
-      "type": "component",
-      "props_in": [],
-      "events_out": [],
-      "slots": [],
-      "state_access": [],
-      "api_calls": [],
-      "routes_used_in": [],
-      "loading_state_hygiene": null,
-      "interaction_hygiene": null,
-      "error_sink_calls": [],
-      "confidence": "MEDIUM"
-    },
-    "DialogFooter": {
-      "name": "DialogFooter",
-      "file_path": "packages/ui/src/components/dialog.tsx",
-      "module": "packages/ui",
-      "type": "component",
-      "props_in": [],
-      "events_out": [],
-      "slots": [],
-      "state_access": [],
-      "api_calls": [],
-      "routes_used_in": [],
-      "loading_state_hygiene": null,
-      "interaction_hygiene": null,
-      "error_sink_calls": [],
-      "confidence": "MEDIUM"
-    },
-    "DropdownMenuShortcut": {
-      "name": "DropdownMenuShortcut",
-      "file_path": "packages/ui/src/components/dropdown-menu.tsx",
-      "module": "packages/ui",
-      "type": "component",
-      "props_in": [],
-      "events_out": [],
-      "slots": [],
-      "state_access": [],
-      "api_calls": [],
-      "routes_used_in": [],
-      "loading_state_hygiene": null,
-      "interaction_hygiene": null,
-      "error_sink_calls": [],
-      "confidence": "MEDIUM"
-    },
-    "FormField": {
-      "name": "FormField",
-      "file_path": "apps/memberry/src/components/patterns/form-field.tsx",
-      "module": "apps/memberry",
-      "type": "component",
-      "props_in": [
-        {
-          "name": "name",
-          "type": "string",
-          "required": true,
-          "default": null
-        },
-        {
-          "name": "label",
-          "type": "string",
-          "required": true,
-          "default": null
-        },
-        {
-          "name": "required",
-          "type": "boolean",
-          "required": false,
-          "default": null
-        },
-        {
-          "name": "description",
-          "type": "string",
-          "required": false,
-          "default": null
-        },
-        {
-          "name": "error",
-          "type": "FieldError",
-          "required": false,
-          "default": null
-        },
-        {
-          "name": "className",
-          "type": "string",
-          "required": false,
-          "default": null
-        },
-        {
-          "name": "children",
-          "type": "React.ReactNode",
-          "required": true,
-          "default": null
-        }
-      ],
-      "events_out": [],
-      "slots": [
-        {
-          "name": "children",
-          "scoped": false
-        }
-      ],
-      "state_access": [],
-      "api_calls": [],
-      "routes_used_in": [],
-      "loading_state_hygiene": null,
-      "interaction_hygiene": null,
-      "error_sink_calls": [],
-      "confidence": "MEDIUM"
-    },
-    "useFormField": {
-      "name": "useFormField",
-      "file_path": "packages/ui/src/components/form.tsx",
-      "module": "packages/ui",
-      "type": "hook",
-      "props_in": [],
-      "events_out": [],
-      "slots": [],
-      "state_access": [],
-      "api_calls": [],
-      "routes_used_in": [],
-      "loading_state_hygiene": null,
-      "interaction_hygiene": null,
-      "error_sink_calls": [],
-      "confidence": "MEDIUM"
-    },
-    "SheetHeader": {
-      "name": "SheetHeader",
-      "file_path": "packages/ui/src/components/sheet.tsx",
-      "module": "packages/ui",
-      "type": "component",
-      "props_in": [],
-      "events_out": [],
-      "slots": [],
-      "state_access": [],
-      "api_calls": [],
-      "routes_used_in": [],
-      "loading_state_hygiene": null,
-      "interaction_hygiene": null,
-      "error_sink_calls": [],
-      "confidence": "MEDIUM"
-    },
-    "SheetFooter": {
-      "name": "SheetFooter",
-      "file_path": "packages/ui/src/components/sheet.tsx",
-      "module": "packages/ui",
-      "type": "component",
-      "props_in": [],
-      "events_out": [],
-      "slots": [],
-      "state_access": [],
-      "api_calls": [],
-      "routes_used_in": [],
-      "loading_state_hygiene": null,
-      "interaction_hygiene": null,
-      "error_sink_calls": [],
-      "confidence": "MEDIUM"
-    },
-    "Skeleton": {
-      "name": "Skeleton",
-      "file_path": "packages/ui/src/components/skeleton.tsx",
-      "module": "packages/ui",
-      "type": "component",
-      "props_in": [],
-      "events_out": [],
-      "slots": [],
-      "state_access": [],
-      "api_calls": [],
-      "routes_used_in": [],
-      "loading_state_hygiene": null,
-      "interaction_hygiene": null,
-      "error_sink_calls": [],
-      "confidence": "MEDIUM"
-    },
     "CardSkeleton": {
       "name": "CardSkeleton",
       "file_path": "apps/memberry/src/components/patterns/skeleton-loader.tsx",
@@ -1197,6 +909,411 @@
       "file_path": "packages/sdk-ts/src/utils/patch.ts",
       "module": "packages/sdk-ts",
       "type": "hook",
+      "props_in": [],
+      "events_out": [],
+      "slots": [],
+      "state_access": [],
+      "api_calls": [],
+      "routes_used_in": [],
+      "loading_state_hygiene": null,
+      "interaction_hygiene": null,
+      "error_sink_calls": [],
+      "confidence": "MEDIUM"
+    },
+    "AlertDialogHeader": {
+      "name": "AlertDialogHeader",
+      "file_path": "packages/ui/src/components/alert-dialog.tsx",
+      "module": "packages/ui",
+      "type": "component",
+      "props_in": [],
+      "events_out": [],
+      "slots": [],
+      "state_access": [],
+      "api_calls": [],
+      "routes_used_in": [],
+      "loading_state_hygiene": null,
+      "interaction_hygiene": null,
+      "error_sink_calls": [],
+      "confidence": "MEDIUM"
+    },
+    "AlertDialogFooter": {
+      "name": "AlertDialogFooter",
+      "file_path": "packages/ui/src/components/alert-dialog.tsx",
+      "module": "packages/ui",
+      "type": "component",
+      "props_in": [],
+      "events_out": [],
+      "slots": [],
+      "state_access": [],
+      "api_calls": [],
+      "routes_used_in": [],
+      "loading_state_hygiene": null,
+      "interaction_hygiene": null,
+      "error_sink_calls": [],
+      "confidence": "MEDIUM"
+    },
+    "Badge": {
+      "name": "Badge",
+      "file_path": "packages/ui/src/components/badge.tsx",
+      "module": "packages/ui",
+      "type": "component",
+      "props_in": [],
+      "events_out": [],
+      "slots": [],
+      "state_access": [],
+      "api_calls": [],
+      "routes_used_in": [],
+      "loading_state_hygiene": null,
+      "interaction_hygiene": null,
+      "error_sink_calls": [],
+      "confidence": "MEDIUM"
+    },
+    "Calendar": {
+      "name": "Calendar",
+      "file_path": "packages/ui/src/components/calendar.tsx",
+      "module": "packages/ui",
+      "type": "component",
+      "props_in": [],
+      "events_out": [],
+      "slots": [],
+      "state_access": [],
+      "api_calls": [],
+      "routes_used_in": [],
+      "loading_state_hygiene": null,
+      "interaction_hygiene": null,
+      "error_sink_calls": [],
+      "confidence": "MEDIUM"
+    },
+    "CalendarDayButton": {
+      "name": "CalendarDayButton",
+      "file_path": "packages/ui/src/components/calendar.tsx",
+      "module": "packages/ui",
+      "type": "component",
+      "props_in": [],
+      "events_out": [],
+      "slots": [],
+      "state_access": [],
+      "api_calls": [],
+      "routes_used_in": [],
+      "loading_state_hygiene": null,
+      "interaction_hygiene": null,
+      "error_sink_calls": [],
+      "confidence": "MEDIUM"
+    },
+    "CommandDialog": {
+      "name": "CommandDialog",
+      "file_path": "packages/ui/src/components/command.tsx",
+      "module": "packages/ui",
+      "type": "component",
+      "props_in": [],
+      "events_out": [],
+      "slots": [],
+      "state_access": [],
+      "api_calls": [],
+      "routes_used_in": [],
+      "loading_state_hygiene": null,
+      "interaction_hygiene": null,
+      "error_sink_calls": [],
+      "confidence": "MEDIUM"
+    },
+    "CommandShortcut": {
+      "name": "CommandShortcut",
+      "file_path": "packages/ui/src/components/command.tsx",
+      "module": "packages/ui",
+      "type": "component",
+      "props_in": [],
+      "events_out": [],
+      "slots": [],
+      "state_access": [],
+      "api_calls": [],
+      "routes_used_in": [],
+      "loading_state_hygiene": null,
+      "interaction_hygiene": null,
+      "error_sink_calls": [],
+      "confidence": "MEDIUM"
+    },
+    "DialogHeader": {
+      "name": "DialogHeader",
+      "file_path": "packages/ui/src/components/dialog.tsx",
+      "module": "packages/ui",
+      "type": "component",
+      "props_in": [],
+      "events_out": [],
+      "slots": [],
+      "state_access": [],
+      "api_calls": [],
+      "routes_used_in": [],
+      "loading_state_hygiene": null,
+      "interaction_hygiene": null,
+      "error_sink_calls": [],
+      "confidence": "MEDIUM"
+    },
+    "DialogFooter": {
+      "name": "DialogFooter",
+      "file_path": "packages/ui/src/components/dialog.tsx",
+      "module": "packages/ui",
+      "type": "component",
+      "props_in": [],
+      "events_out": [],
+      "slots": [],
+      "state_access": [],
+      "api_calls": [],
+      "routes_used_in": [],
+      "loading_state_hygiene": null,
+      "interaction_hygiene": null,
+      "error_sink_calls": [],
+      "confidence": "MEDIUM"
+    },
+    "DropdownMenuShortcut": {
+      "name": "DropdownMenuShortcut",
+      "file_path": "packages/ui/src/components/dropdown-menu.tsx",
+      "module": "packages/ui",
+      "type": "component",
+      "props_in": [],
+      "events_out": [],
+      "slots": [],
+      "state_access": [],
+      "api_calls": [],
+      "routes_used_in": [],
+      "loading_state_hygiene": null,
+      "interaction_hygiene": null,
+      "error_sink_calls": [],
+      "confidence": "MEDIUM"
+    },
+    "FormField": {
+      "name": "FormField",
+      "file_path": "apps/memberry/src/components/patterns/form-field.tsx",
+      "module": "apps/memberry",
+      "type": "component",
+      "props_in": [
+        {
+          "name": "name",
+          "type": "string",
+          "required": true,
+          "default": null
+        },
+        {
+          "name": "label",
+          "type": "string",
+          "required": true,
+          "default": null
+        },
+        {
+          "name": "required",
+          "type": "boolean",
+          "required": false,
+          "default": null
+        },
+        {
+          "name": "description",
+          "type": "string",
+          "required": false,
+          "default": null
+        },
+        {
+          "name": "error",
+          "type": "FieldError",
+          "required": false,
+          "default": null
+        },
+        {
+          "name": "className",
+          "type": "string",
+          "required": false,
+          "default": null
+        },
+        {
+          "name": "children",
+          "type": "React.ReactNode",
+          "required": true,
+          "default": null
+        }
+      ],
+      "events_out": [],
+      "slots": [
+        {
+          "name": "children",
+          "scoped": false
+        }
+      ],
+      "state_access": [],
+      "api_calls": [],
+      "routes_used_in": [],
+      "loading_state_hygiene": null,
+      "interaction_hygiene": null,
+      "error_sink_calls": [],
+      "confidence": "MEDIUM"
+    },
+    "useFormField": {
+      "name": "useFormField",
+      "file_path": "packages/ui/src/components/form.tsx",
+      "module": "packages/ui",
+      "type": "hook",
+      "props_in": [],
+      "events_out": [],
+      "slots": [],
+      "state_access": [],
+      "api_calls": [],
+      "routes_used_in": [],
+      "loading_state_hygiene": null,
+      "interaction_hygiene": null,
+      "error_sink_calls": [],
+      "confidence": "MEDIUM"
+    },
+    "MenuItem": {
+      "name": "MenuItem",
+      "file_path": "packages/ui/src/components/menu-item.tsx",
+      "module": "packages/ui",
+      "type": "component",
+      "props_in": [
+        {
+          "name": "children",
+          "type": "ReactNode",
+          "required": true,
+          "default": null
+        },
+        {
+          "name": "destructive",
+          "type": "boolean",
+          "required": false,
+          "default": null
+        }
+      ],
+      "events_out": [],
+      "slots": [
+        {
+          "name": "children",
+          "scoped": false
+        }
+      ],
+      "state_access": [],
+      "api_calls": [],
+      "routes_used_in": [],
+      "loading_state_hygiene": null,
+      "interaction_hygiene": {
+        "has_handler": true,
+        "handler_nonempty": false,
+        "reaches_api_or_nav": false,
+        "nav_targets": [],
+        "hrefs": [],
+        "violation": false,
+        "confidence": "MEDIUM"
+      },
+      "error_sink_calls": [],
+      "confidence": "MEDIUM"
+    },
+    "NavIcon": {
+      "name": "NavIcon",
+      "file_path": "packages/ui/src/components/nav-icon.tsx",
+      "module": "packages/ui",
+      "type": "component",
+      "props_in": [
+        {
+          "name": "icon",
+          "type": "IconLike",
+          "required": true,
+          "default": null
+        },
+        {
+          "name": "size",
+          "type": "NavIconSize",
+          "required": false,
+          "default": null
+        },
+        {
+          "name": "className",
+          "type": "string",
+          "required": false,
+          "default": null
+        },
+        {
+          "name": "'aria-hidden'",
+          "type": "boolean",
+          "required": false,
+          "default": null
+        }
+      ],
+      "events_out": [],
+      "slots": [],
+      "state_access": [],
+      "api_calls": [],
+      "routes_used_in": [],
+      "loading_state_hygiene": null,
+      "interaction_hygiene": null,
+      "error_sink_calls": [],
+      "confidence": "MEDIUM"
+    },
+    "RoundActionButton": {
+      "name": "RoundActionButton",
+      "file_path": "packages/ui/src/components/round-action-button.tsx",
+      "module": "packages/ui",
+      "type": "component",
+      "props_in": [
+        {
+          "name": "size",
+          "type": "RoundSize",
+          "required": false,
+          "default": null
+        },
+        {
+          "name": "children",
+          "type": "ReactNode",
+          "required": true,
+          "default": null
+        }
+      ],
+      "events_out": [],
+      "slots": [
+        {
+          "name": "children",
+          "scoped": false
+        }
+      ],
+      "state_access": [],
+      "api_calls": [],
+      "routes_used_in": [],
+      "loading_state_hygiene": null,
+      "interaction_hygiene": null,
+      "error_sink_calls": [],
+      "confidence": "MEDIUM"
+    },
+    "SheetHeader": {
+      "name": "SheetHeader",
+      "file_path": "packages/ui/src/components/sheet.tsx",
+      "module": "packages/ui",
+      "type": "component",
+      "props_in": [],
+      "events_out": [],
+      "slots": [],
+      "state_access": [],
+      "api_calls": [],
+      "routes_used_in": [],
+      "loading_state_hygiene": null,
+      "interaction_hygiene": null,
+      "error_sink_calls": [],
+      "confidence": "MEDIUM"
+    },
+    "SheetFooter": {
+      "name": "SheetFooter",
+      "file_path": "packages/ui/src/components/sheet.tsx",
+      "module": "packages/ui",
+      "type": "component",
+      "props_in": [],
+      "events_out": [],
+      "slots": [],
+      "state_access": [],
+      "api_calls": [],
+      "routes_used_in": [],
+      "loading_state_hygiene": null,
+      "interaction_hygiene": null,
+      "error_sink_calls": [],
+      "confidence": "MEDIUM"
+    },
+    "Skeleton": {
+      "name": "Skeleton",
+      "file_path": "packages/ui/src/components/skeleton.tsx",
+      "module": "packages/ui",
+      "type": "component",
       "props_in": [],
       "events_out": [],
       "slots": [],
@@ -2843,35 +2960,35 @@
           "arg_literal": "Please select a membership tier",
           "generic": false,
           "file": "apps/memberry/src/routes/org/$slug.tsx",
-          "line": 94
+          "line": 93
         },
         {
           "sink": "toast.error",
           "arg_literal": "Could not identify your account. Please sign in again.",
           "generic": false,
           "file": "apps/memberry/src/routes/org/$slug.tsx",
-          "line": 98
+          "line": 97
         },
         {
           "sink": "toast.error",
           "arg_literal": "You already have a pending application for this organization.",
           "generic": false,
           "file": "apps/memberry/src/routes/org/$slug.tsx",
-          "line": 122
+          "line": 121
         },
         {
           "sink": "toast.error",
           "arg_literal": null,
           "generic": false,
           "file": "apps/memberry/src/routes/org/$slug.tsx",
-          "line": 126
+          "line": 125
         },
         {
           "sink": "toast.error",
           "arg_literal": "Something went wrong. Please try again.",
           "generic": false,
           "file": "apps/memberry/src/routes/org/$slug.tsx",
-          "line": 128
+          "line": 127
         }
       ],
       "confidence": "MEDIUM"
@@ -10830,28 +10947,28 @@
           "arg_literal": "Failed to publish survey",
           "generic": false,
           "file": "apps/memberry/src/features/surveys/components/survey-list.tsx",
-          "line": 103
+          "line": 102
         },
         {
           "sink": "toast.error",
           "arg_literal": "Failed to close survey",
           "generic": false,
           "file": "apps/memberry/src/features/surveys/components/survey-list.tsx",
-          "line": 112
+          "line": 111
         },
         {
           "sink": "toast.error",
           "arg_literal": "Failed to delete survey",
           "generic": false,
           "file": "apps/memberry/src/features/surveys/components/survey-list.tsx",
-          "line": 121
+          "line": 120
         },
         {
           "sink": "toast.error",
           "arg_literal": "Failed to duplicate survey",
           "generic": false,
           "file": "apps/memberry/src/features/surveys/components/survey-list.tsx",
-          "line": 130
+          "line": 129
         }
       ],
       "confidence": "MEDIUM"

@@ -460,7 +460,7 @@
       "has_catch": false,
       "has_call_site_handler": false,
       "file": "apps/memberry/src/features/surveys/components/survey-list.tsx",
-      "line": 97,
+      "line": 96,
       "confidence": "MEDIUM"
     },
     {
@@ -471,7 +471,7 @@
       "has_catch": false,
       "has_call_site_handler": false,
       "file": "apps/memberry/src/features/surveys/components/survey-list.tsx",
-      "line": 106,
+      "line": 105,
       "confidence": "MEDIUM"
     },
     {
@@ -482,7 +482,7 @@
       "has_catch": false,
       "has_call_site_handler": false,
       "file": "apps/memberry/src/features/surveys/components/survey-list.tsx",
-      "line": 115,
+      "line": 114,
       "confidence": "MEDIUM"
     },
     {
@@ -493,7 +493,7 @@
       "has_catch": false,
       "has_call_site_handler": false,
       "file": "apps/memberry/src/features/surveys/components/survey-list.tsx",
-      "line": 124,
+      "line": 123,
       "confidence": "MEDIUM"
     },
     {

@@ -7,7 +7,7 @@
       "framework": "react",
       "entry_points": [],
       "public_exports": [],
-      "file_count": 49,
+      "file_count": 50,
       "has_spec": false,
       "spec_path": null,
       "confidence": "MEDIUM"
@@ -18,7 +18,7 @@
       "framework": "react",
       "entry_points": [],
       "public_exports": [],
-      "file_count": 439,
+      "file_count": 440,
       "has_spec": false,
       "spec_path": null,
       "confidence": "MEDIUM"
@@ -337,10 +337,23 @@
       "framework": "react",
       "entry_points": [],
       "public_exports": [],
-      "file_count": 33,
+      "file_count": 36,
       "has_spec": false,
       "spec_path": null,
       "confidence": "MEDIUM"
+    },
+    "packages/vitest-test-shim": {
+      "name": "packages/vitest-test-shim",
+      "source_path": "packages/vitest-test-shim",
+      "framework": "generic",
+      "entry_points": [
+        "packages/vitest-test-shim/index.js"
+      ],
+      "public_exports": [],
+      "file_count": 1,
+      "has_spec": false,
+      "spec_path": null,
+      "confidence": "LOW"
     },
     "specs/api": {
       "name": "specs/api",

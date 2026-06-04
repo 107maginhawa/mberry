@@ -10,21 +10,6 @@ map-version: 6
 <!-- oli:regen:code-component-registry:begin -->
 | Component | Module | Type | Props | Loading Hygiene | Confidence |
 |---|---|---|---|---|---|
-| `AlertDialogHeader` | packages/ui | component | 0 | — | MEDIUM |
-| `AlertDialogFooter` | packages/ui | component | 0 | — | MEDIUM |
-| `Badge` | packages/ui | component | 0 | — | MEDIUM |
-| `Calendar` | packages/ui | component | 0 | — | MEDIUM |
-| `CalendarDayButton` | packages/ui | component | 0 | — | MEDIUM |
-| `CommandDialog` | packages/ui | component | 0 | — | MEDIUM |
-| `CommandShortcut` | packages/ui | component | 0 | — | MEDIUM |
-| `DialogHeader` | packages/ui | component | 0 | — | MEDIUM |
-| `DialogFooter` | packages/ui | component | 0 | — | MEDIUM |
-| `DropdownMenuShortcut` | packages/ui | component | 0 | — | MEDIUM |
-| `FormField` | apps/memberry | component | 7 | — | MEDIUM |
-| `useFormField` | packages/ui | hook | 0 | — | MEDIUM |
-| `SheetHeader` | packages/ui | component | 0 | — | MEDIUM |
-| `SheetFooter` | packages/ui | component | 0 | — | MEDIUM |
-| `Skeleton` | packages/ui | component | 0 | — | MEDIUM |
 | `CardSkeleton` | apps/memberry | component | 0 | — | MEDIUM |
 | `TableSkeleton` | apps/memberry | component | 2 | — | MEDIUM |
 | `StatCardSkeleton` | apps/admin | component | 0 | — | MEDIUM |
@@ -58,6 +43,24 @@ map-version: 6
 | `useOptimisticMutation` | packages/sdk-ts | hook | 0 | — | MEDIUM |
 | `useDirtyPatch` | packages/sdk-ts | hook | 0 | — | MEDIUM |
 | `useDirtyValues` | packages/sdk-ts | hook | 0 | — | MEDIUM |
+| `AlertDialogHeader` | packages/ui | component | 0 | — | MEDIUM |
+| `AlertDialogFooter` | packages/ui | component | 0 | — | MEDIUM |
+| `Badge` | packages/ui | component | 0 | — | MEDIUM |
+| `Calendar` | packages/ui | component | 0 | — | MEDIUM |
+| `CalendarDayButton` | packages/ui | component | 0 | — | MEDIUM |
+| `CommandDialog` | packages/ui | component | 0 | — | MEDIUM |
+| `CommandShortcut` | packages/ui | component | 0 | — | MEDIUM |
+| `DialogHeader` | packages/ui | component | 0 | — | MEDIUM |
+| `DialogFooter` | packages/ui | component | 0 | — | MEDIUM |
+| `DropdownMenuShortcut` | packages/ui | component | 0 | — | MEDIUM |
+| `FormField` | apps/memberry | component | 7 | — | MEDIUM |
+| `useFormField` | packages/ui | hook | 0 | — | MEDIUM |
+| `MenuItem` | packages/ui | component | 2 | — | MEDIUM |
+| `NavIcon` | packages/ui | component | 4 | — | MEDIUM |
+| `RoundActionButton` | packages/ui | component | 2 | — | MEDIUM |
+| `SheetHeader` | packages/ui | component | 0 | — | MEDIUM |
+| `SheetFooter` | packages/ui | component | 0 | — | MEDIUM |
+| `Skeleton` | packages/ui | component | 0 | — | MEDIUM |
 | `PageShell` | apps/memberry | component | 0 | — | MEDIUM |
 | `AssociationDetailPage` | apps/admin | component | 0 | ✅ paired | MEDIUM |
 | `AssociationsPage` | apps/admin | component | 0 | ✅ paired | MEDIUM |

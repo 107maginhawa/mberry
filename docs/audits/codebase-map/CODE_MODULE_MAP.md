@@ -11,8 +11,8 @@ map-version: 6
 <!-- oli:regen:code-module-map:begin -->
 | Module | Framework | Files | Confidence |
 |---|---|---|---|
-| `apps/admin` | react | 49 | MEDIUM |
-| `apps/memberry` | react | 439 | MEDIUM |
+| `apps/admin` | react | 50 | MEDIUM |
+| `apps/memberry` | react | 440 | MEDIUM |
 | `handlers/advertising` | generic | 11 | LOW |
 | `handlers/association:member` | hono | 248 | MEDIUM |
 | `handlers/association:operations` | hono | 80 | MEDIUM |
@@ -41,6 +41,7 @@ map-version: 6
 | `handlers/surveys` | generic | 20 | LOW |
 | `packages/eslint-config` | generic | 3 | LOW |
 | `packages/sdk-ts` | react | 17 | MEDIUM |
-| `packages/ui` | react | 33 | MEDIUM |
+| `packages/ui` | react | 36 | MEDIUM |
+| `packages/vitest-test-shim` | generic | 1 | LOW |
 | `specs/api` | generic | 3 | LOW |
 <!-- oli:regen:code-module-map:end -->

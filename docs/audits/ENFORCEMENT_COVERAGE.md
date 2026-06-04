@@ -1,18 +1,18 @@
 <!-- oli-version: 1.1 -->
-<!-- based-on: map@3f0dae76 -->
-<!-- based-on-detail: docs/product/modules/m*/MODULE_SPEC.md, docs/product/MODULE_MAP.md, docs/audits/codebase-map (v6 @ 3f0dae76) -->
-<!-- generated: 2026-06-03T21:15:00Z -->
-<!-- last-modified: 2026-06-03T21:15:00Z -->
-<!-- last-modified-by: /oli-check --regenerate-dim-reports --auto (Wave 60 rev2: re-anchor vs map@3f0dae76; doc-only delta since prior rewrite) -->
-<!-- code-map-sha: 3f0dae76f2ef67248b04fcf16c97f87404df1702 -->
-<!-- map freshness: FRESH (HEAD 3f0dae76 matches map git_sha; map captured 2026-06-03T08:13:02Z) -->
+<!-- based-on: map@64b96139a21933afc750d90d3f76992d180fec54 -->
+<!-- based-on-detail: docs/product/modules/m*/MODULE_SPEC.md, docs/product/MODULE_MAP.md, docs/audits/codebase-map (v6 @ 64b96139), docs/audits/enforce/.baseline.json (v58 phase-d-rebaseline-007) -->
+<!-- generated: 2026-06-04T03:00:00Z -->
+<!-- last-modified: 2026-06-04T03:00:00Z -->
+<!-- last-modified-by: /oli-check --enforcement --auto (re-execute against fresh map@64b96139; no source mutation since baseline v58 pin) -->
+<!-- code-map-sha: 64b96139a21933afc750d90d3f76992d180fec54 -->
+<!-- map freshness: FRESH (HEAD 64b96139 matches map git_sha) -->
 
 # Enforcement Coverage Report — Memberry
 
-**Generated:** 2026-06-03T21:15:00Z
-**Auditor:** `/oli-check --enforcement coverage.md` (oli-engine v6 @ 3f0dae76)
+**Generated:** 2026-06-04T03:00:00Z
+**Auditor:** `/oli-check --enforcement coverage.md` (oli-engine v6 @ 64b96139)
 **Scope:** 22 modules — 13 in-scope production (m01–m12 + m14), 1 BUILT-RESOLVED-STALE (m18), 3 backend-only DEGRADE (m20/m21/m22), 4 DEFERRED-FUTURE-SCOPE (m13/m15/m16/m17), 1 KNOWN-future CARRIED (m19)
-**Previous audit:** 2026-06-02 (v53 baseline; Wave 57/58/59 applied)
+**Previous audit:** 2026-06-03 (v58 baseline `phase-d-rebaseline-007`; Wave 57/58/59 + 60/61/62 UI-C tiers applied)
 
 ---
 
@@ -21,11 +21,12 @@
 | Field | Value |
 |-------|-------|
 | Sub-check | `~/.claude/skills/oli-check/dimensions/enforcement/coverage.md` (Phase 0) |
-| HEAD | 3f0dae76 |
-| Map SHA | 3f0dae76 (1408 files) |
+| HEAD | 64b96139 |
+| Map SHA | 64b96139 |
 | Map freshness | FRESH (HEAD == map sha) |
 | Module count | 22 |
 | Computation | Spec-depth + spec-breadth + cross-reference integrity (per `coverage.md` §2–§5) |
+| Drift vs map | none — 5 commits since baseline v58 pin (`9fbcb497`→`64b96139`) touch UI primitives, test-infra preload routing, and audit chores; `specs/api/src/` + `services/api-ts/src/handlers/` business logic untouched |
 
 ---
 
@@ -36,7 +37,7 @@
 - **Backend-only zero-anchor modules:** 3 (m20-booking, m21-billing, m22-email) — code present, spec lacks BR/AC/WF/SM anchors; score capped at 7.0 per DEGRADE policy
 - **Future-scope module stubs (DEFERRED-FUTURE-SCOPE, Wave 57 ratchet-clear):** 4 — m13, m15, m16, m17 (descoped in MASTER_PRD v3.0)
 - **KNOWN-future CARRIED:** 1 — m19-committee-management (Add-on Phase 3, in-scope per MASTER_PRD v3.0 roadmap but not yet built — sole P1 driver `EM-M19-future01`)
-- **Weighted score:** **82%** — unchanged vs v53 (no source mutation since baseline)
+- **Weighted score:** **82%** — unchanged vs v58 (no source mutation under handlers/specs since baseline pin)
 
 ---
 
@@ -116,7 +117,7 @@
 | Zero-anchor DEGRADE (m20/m21/m22 at 75%) | 3 | 75% | weighted −0.6 pt | −0.6 |
 | **Overall** | | | | **82.0%** |
 
-> Score unchanged vs v53 — no source mutation since baseline. m18 promotion from future-scope drag to in-scope subtotal was applied in v53 (Wave 59) and carries forward.
+> Score unchanged vs v58 — no source mutation in handler/spec dirs since baseline pin. m18 promotion from future-scope drag to in-scope subtotal was applied in v53 (Wave 59) and carries forward through v58.
 
 ---
 
