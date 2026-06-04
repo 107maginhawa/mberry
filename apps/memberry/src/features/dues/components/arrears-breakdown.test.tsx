@@ -3,14 +3,6 @@ import { screen, within } from '@testing-library/react'
 import { renderWithProviders } from '@/test/utils'
 import { ArrearsBreakdown } from './arrears-breakdown'
 
-// Mock formatCents
-vi.mock('@/features/dues/lib/money', () => ({
-  formatCents: (amount: number, currency: string) => {
-    const symbol = currency === 'PHP' ? '₱' : currency === 'USD' ? '$' : `${currency} `
-    return `${symbol}${(amount / 100).toFixed(2)}`
-  },
-}))
-
 // Mock GlassCard to pass through
 vi.mock('@/components/motion/glass-card', () => ({
   GlassCard: ({ children, className }: any) => <div className={className}>{children}</div>,
