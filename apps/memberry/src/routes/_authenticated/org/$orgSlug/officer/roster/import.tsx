@@ -1,7 +1,7 @@
 import { useState, useCallback } from 'react'
 import { createFileRoute, Link } from '@tanstack/react-router'
 import { useOrg } from '@/hooks/useOrg'
-import { Button, Input } from '@monobase/ui'
+import { Button, Input, NavIcon } from '@monobase/ui'
 import { toast } from 'sonner'
 import { Upload, FileText, Check, AlertTriangle, Loader2 } from 'lucide-react'
 import { importRosterMembersMutation } from '@monobase/sdk-ts/generated/react-query'
@@ -180,9 +180,7 @@ function RosterImportPage() {
       <div className="space-y-6">
       {/* Result banner */}
       {result && (
-        <div className="flex items-center gap-3 p-4 rounded-[12px] bg-[var(--color-success-bg)] border border-[var(--color-success)]/20">
-          {/* ui-c-exempt: nav-icon — stepper checkmark glyph */}
-          <Check size={18} className="text-[var(--color-success)] shrink-0" />
+        <div className="flex items-center gap-3 p-4 rounded-[12px] bg-[var(--color-success-bg)] border border-[var(--color-success)]/20">          <NavIcon icon={Check} className="text-[var(--color-success)]" />
           <p className="text-sm text-[var(--color-success)]">
             Successfully imported {result.imported} members
           </p>

@@ -1,4 +1,5 @@
 import { Link, useParams } from "@tanstack/react-router"
+import { NavIcon } from '@monobase/ui'
 import { POSITION_NAV_CONFIG } from "@/config/position-nav"
 import {
   LayoutDashboard,
@@ -181,9 +182,7 @@ export function OfficerSidebar({ orgName, userEmail, userName, role, positions }
                     "flex items-center justify-center lg:justify-start gap-2.5 px-0 lg:px-6 py-2.5 text-sm text-white font-semibold bg-white/[0.12] border-l-[3px] border-[var(--color-cream)] lg:pl-[21px]",
                 }}
                 activeOptions={{ exact: false }}
-              >
-                {/* ui-c-exempt: nav-icon — sidebar entry icon */}
-                <Icon size={18} className="shrink-0 opacity-70" />
+              >                <NavIcon icon={Icon} className="opacity-70" />
                 <span className="hidden lg:inline">{label}</span>
               </Link>
             ))}

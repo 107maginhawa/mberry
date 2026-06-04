@@ -1,4 +1,5 @@
 import { Link, useParams } from "@tanstack/react-router"
+import { NavIcon } from '@monobase/ui'
 import { Home, MessageSquare, Calendar, Award, User, Receipt, Landmark } from "lucide-react"
 
 const PERSONAL_NAV = [
@@ -33,9 +34,7 @@ export function MemberBottomNav() {
           className="flex flex-col items-center justify-center gap-[3px] min-w-[44px] min-h-[44px] text-[var(--color-muted)]"
           activeProps={{ className: "flex flex-col items-center justify-center gap-[3px] min-w-[44px] min-h-[44px] text-[var(--color-primary)]" }}
           activeOptions={{ exact: false }}
-        >
-          {/* ui-c-exempt: nav-icon — bottom-nav entry icon 22px */}
-          <Icon size={22} />
+        >          <NavIcon icon={Icon} size="lg" />
           <span className="text-xs font-medium">{label}</span>
         </Link>
       ))}

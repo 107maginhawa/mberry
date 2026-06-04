@@ -1,4 +1,5 @@
 import { Link, useParams } from "@tanstack/react-router"
+import { NavIcon } from '@monobase/ui'
 import {
   Home,
   MessageSquare,
@@ -162,9 +163,7 @@ export function MemberSidebar({ userEmail, isOfficer }: MemberSidebarProps) {
                     "flex items-center gap-2.5 px-5 py-2.5 text-sm text-[var(--color-primary)] font-semibold border-l-[3px] border-[var(--color-primary)] pl-[calc(1.25rem-3px)]",
                 }}
                 activeOptions={{ exact: false }}
-              >
-                {/* ui-c-exempt: nav-icon — sidebar entry icon */}
-                <Icon size={18} className="shrink-0" />
+              >                <NavIcon icon={Icon} />
                 {label}
               </Link>
             ))}
@@ -183,9 +182,7 @@ export function MemberSidebar({ userEmail, isOfficer }: MemberSidebarProps) {
                   "flex items-center gap-2.5 px-5 py-2.5 text-sm text-[var(--color-primary)] font-semibold border-l-[3px] border-[var(--color-primary)] pl-[calc(1.25rem-3px)]",
               }}
               activeOptions={{ exact: false }}
-            >
-              {/* ui-c-exempt: nav-icon — sidebar officer-dashboard icon */}
-              <Shield size={18} className="shrink-0" />
+            >              <NavIcon icon={Shield} />
               Officer Dashboard
             </Link>
           </>
@@ -198,9 +195,7 @@ export function MemberSidebar({ userEmail, isOfficer }: MemberSidebarProps) {
             <Link
               to="/dashboard"
               className="flex items-center gap-2.5 px-5 py-2.5 text-sm text-[var(--color-muted)] hover:text-[var(--color-text)] hover:bg-[var(--color-surface-warm)] transition-colors duration-150"
-            >
-              {/* ui-c-exempt: nav-icon — sidebar back-arrow icon */}
-              <ArrowLeft size={18} className="shrink-0" />
+            >              <NavIcon icon={ArrowLeft} />
               Back to Personal
             </Link>
           </>

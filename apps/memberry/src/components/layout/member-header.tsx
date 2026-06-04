@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { Link, useNavigate } from '@tanstack/react-router'
 import { useQuery } from '@tanstack/react-query'
-import { Button, DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator } from '@monobase/ui'
+import { Button, DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator, NavIcon } from '@monobase/ui'
 import { Bell, ChevronDown } from 'lucide-react'
 import { api } from '@/lib/api'
 import { AvatarInitials } from '@/components/patterns/avatar-initials'
@@ -166,9 +166,7 @@ export function MemberHeader({ userName }: MemberHeaderProps) {
           to="/my/notifications"
           aria-label="Notifications"
           className="relative p-1.5 rounded-full hover:bg-white/10 md:hover:bg-[var(--color-surface-warm)] transition-colors"
-        >
-          {/* ui-c-exempt: nav-icon — header bell icon */}
-          <Bell size={18} />
+        >          <NavIcon icon={Bell} />
           {notifCount > 0 && (
             <span className="absolute -top-0.5 -right-0.5 min-w-[16px] h-4 flex items-center justify-center rounded-full bg-[var(--color-error)] text-white text-[0.625rem] font-bold px-1">
               {notifCount}

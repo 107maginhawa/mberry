@@ -12,7 +12,7 @@ import { AvatarInitials } from '@/components/patterns/avatar-initials'
 import { StatusBadge } from '@/components/patterns/status-badge'
 import { ProfileSkeleton } from '@/components/patterns/skeleton-loader'
 import { EmptyState } from '@/components/patterns/empty-state'
-import { Button, Input, Label, Textarea } from '@monobase/ui'
+import { Button, Input, Label, Textarea, NavIcon } from '@monobase/ui'
 import { Shield, Lock, CreditCard, Download, UserCircle, Eye, EyeOff, Globe, Award, ShieldCheck, Plus } from 'lucide-react'
 import { api } from '@/lib/api'
 import { GlassCard } from '@/components/motion/glass-card'
@@ -263,9 +263,7 @@ function MyProfilePage() {
           {/* Directory Profile */}
           <GlassCard className="p-5">
             <div className="flex items-center justify-between mb-3">
-              <h3 className="text-h4 flex items-center gap-2">
-                {/* ui-c-exempt: nav-icon — profile section label icon */}
-                <Globe size={18} /> Directory Profile
+              <h3 className="text-h4 flex items-center gap-2">                <NavIcon icon={Globe} /> Directory Profile
               </h3>
               <Button
                 variant="ghost"
@@ -335,9 +333,7 @@ function MyProfilePage() {
           {/* Professional Licenses */}
           <GlassCard className="p-5">
             <div className="flex items-center justify-between mb-3">
-              <h3 className="text-h4 flex items-center gap-2">
-                {/* ui-c-exempt: nav-icon — profile section label icon */}
-                <Award size={18} /> Professional Licenses
+              <h3 className="text-h4 flex items-center gap-2">                <NavIcon icon={Award} /> Professional Licenses
               </h3>
             </div>
             {myLicenses.length > 0 ? (
@@ -367,21 +363,13 @@ function MyProfilePage() {
 
           {/* Quick Links */}
           <div className="grid grid-cols-2 gap-3">
-            <Link to="/my/settings" className="flex items-center gap-2 rounded-[12px] border border-[var(--color-surface-border-glass)] bg-[var(--color-surface-elevated)] backdrop-blur-[var(--surface-blur)] p-4 hover:bg-[var(--color-surface-elevated-hover)] hover:shadow-soft transition-all text-sm font-semibold">
-              {/* ui-c-exempt: nav-icon — profile section label icon */}
-              <Shield size={18} className="text-[var(--color-muted)]" /> Privacy
+            <Link to="/my/settings" className="flex items-center gap-2 rounded-[12px] border border-[var(--color-surface-border-glass)] bg-[var(--color-surface-elevated)] backdrop-blur-[var(--surface-blur)] p-4 hover:bg-[var(--color-surface-elevated-hover)] hover:shadow-soft transition-all text-sm font-semibold">              <NavIcon icon={Shield} className="text-[var(--color-muted)]" /> Privacy
             </Link>
-            <Link to="/settings/security" className="flex items-center gap-2 rounded-[12px] border border-[var(--color-surface-border-glass)] bg-[var(--color-surface-elevated)] backdrop-blur-[var(--surface-blur)] p-4 hover:bg-[var(--color-surface-elevated-hover)] hover:shadow-soft transition-all text-sm font-semibold">
-              {/* ui-c-exempt: nav-icon — profile section label icon */}
-              <Lock size={18} className="text-[var(--color-muted)]" /> Security
+            <Link to="/settings/security" className="flex items-center gap-2 rounded-[12px] border border-[var(--color-surface-border-glass)] bg-[var(--color-surface-elevated)] backdrop-blur-[var(--surface-blur)] p-4 hover:bg-[var(--color-surface-elevated-hover)] hover:shadow-soft transition-all text-sm font-semibold">              <NavIcon icon={Lock} className="text-[var(--color-muted)]" /> Security
             </Link>
-            <Link to="/my/id-card" className="flex items-center gap-2 rounded-[12px] border border-[var(--color-surface-border-glass)] bg-[var(--color-surface-elevated)] backdrop-blur-[var(--surface-blur)] p-4 hover:bg-[var(--color-surface-elevated-hover)] hover:shadow-soft transition-all text-sm font-semibold">
-              {/* ui-c-exempt: nav-icon — profile section label icon */}
-              <CreditCard size={18} className="text-[var(--color-muted)]" /> ID Card
+            <Link to="/my/id-card" className="flex items-center gap-2 rounded-[12px] border border-[var(--color-surface-border-glass)] bg-[var(--color-surface-elevated)] backdrop-blur-[var(--surface-blur)] p-4 hover:bg-[var(--color-surface-elevated-hover)] hover:shadow-soft transition-all text-sm font-semibold">              <NavIcon icon={CreditCard} className="text-[var(--color-muted)]" /> ID Card
             </Link>
-            <Link to="/my/data-export" className="flex items-center gap-2 rounded-[12px] border border-[var(--color-surface-border-glass)] bg-[var(--color-surface-elevated)] backdrop-blur-[var(--surface-blur)] p-4 hover:bg-[var(--color-surface-elevated-hover)] hover:shadow-soft transition-all text-sm font-semibold">
-              {/* ui-c-exempt: nav-icon — profile section label icon */}
-              <Download size={18} className="text-[var(--color-muted)]" /> Data Export
+            <Link to="/my/data-export" className="flex items-center gap-2 rounded-[12px] border border-[var(--color-surface-border-glass)] bg-[var(--color-surface-elevated)] backdrop-blur-[var(--surface-blur)] p-4 hover:bg-[var(--color-surface-elevated-hover)] hover:shadow-soft transition-all text-sm font-semibold">              <NavIcon icon={Download} className="text-[var(--color-muted)]" /> Data Export
             </Link>
           </div>
         </div>

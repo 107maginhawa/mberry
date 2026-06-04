@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { Link, useParams } from '@tanstack/react-router'
-import { Button, Sheet, SheetContent, SheetHeader, SheetTitle } from '@monobase/ui'
+import { Button, Sheet, SheetContent, SheetHeader, SheetTitle, NavIcon } from '@monobase/ui'
 import { POSITION_NAV_CONFIG } from '@/config/position-nav'
 import {
   Menu, Bell,
@@ -92,9 +92,7 @@ export function OfficerMobileNav({ orgName, userName, role, positions }: Officer
         <span className="text-sm font-semibold truncate max-w-[200px]">
           {orgName || 'Organization'}
         </span>
-        <Link to="/my/notifications" className="p-1.5 rounded-lg hover:bg-white/10 transition-colors">
-          {/* ui-c-exempt: nav-icon — header bell icon */}
-          <Bell size={18} />
+        <Link to="/my/notifications" className="p-1.5 rounded-lg hover:bg-white/10 transition-colors">          <NavIcon icon={Bell} />
         </Link>
       </header>
 
@@ -133,9 +131,7 @@ export function OfficerMobileNav({ orgName, userName, role, positions }: Officer
                       className: 'flex items-center gap-2.5 px-5 py-2.5 text-sm text-white font-semibold bg-white/[0.12] border-l-[3px] border-[var(--color-cream)] pl-[17px]',
                     }}
                     activeOptions={{ exact: false }}
-                  >
-                    {/* ui-c-exempt: nav-icon — mobile nav entry icon */}
-                    <Icon size={18} />
+                  >                    <NavIcon icon={Icon} />
                     {label}
                   </Link>
                 ))}

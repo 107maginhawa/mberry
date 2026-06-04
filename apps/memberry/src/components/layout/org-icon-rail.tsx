@@ -8,14 +8,7 @@
 
 import { Link, useNavigate } from '@tanstack/react-router'
 import { Plus } from 'lucide-react'
-import {
-  Button,
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-  Badge,
-} from '@monobase/ui'
+import { Button, Tooltip, TooltipContent, TooltipProvider, TooltipTrigger, Badge, NavIcon } from '@monobase/ui'
 import { AvatarInitials } from '@/components/patterns/avatar-initials'
 import { useMyOrgs, type OrgMembership } from '@/hooks/useMyOrgs'
 
@@ -50,9 +43,7 @@ export function OrgIconRail({ officerOrgIds }: OrgIconRailProps) {
           to={"/my/organizations" as "/"}
           className="flex items-center justify-center w-[34px] h-[34px] rounded-[12px] border-2 border-dashed border-[var(--color-border-light)] text-[var(--color-muted)] hover:border-[var(--color-primary)] hover:text-[var(--color-primary)] transition-colors"
           aria-label="Join an organization"
-        >
-          {/* ui-c-exempt: nav-icon — org-rail add icon */}
-          <Plus size={18} />
+        >          <NavIcon icon={Plus} />
         </Link>
       </aside>
     )
@@ -117,9 +108,7 @@ export function OrgIconRail({ officerOrgIds }: OrgIconRailProps) {
                 to={"/my/organizations" as "/"}
                 className="flex items-center justify-center w-[34px] h-[34px] rounded-[12px] border-2 border-dashed border-[var(--color-border-light)] text-[var(--color-muted)] hover:border-[var(--color-primary)] hover:text-[var(--color-primary)] transition-colors"
                 aria-label="Join another organization"
-              >
-                {/* ui-c-exempt: nav-icon — org-rail add icon (tooltip variant) */}
-                <Plus size={18} />
+              >                <NavIcon icon={Plus} />
               </Link>
             </TooltipTrigger>
             <TooltipContent side="right">Join another org</TooltipContent>
