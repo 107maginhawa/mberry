@@ -26,17 +26,30 @@ const stubs: string[] = [
   '',
   "import { jest } from 'bun:test';",
   '',
-  'function makeStub() {',
-  '  return jest.fn((..._args: any[]) => ({',
-  "    queryKey: ['__sdk_stub__'],",
-  '    queryFn: async () => ({ data: [], items: [], pagination: { totalCount: 0 } }),',
-  '    mutationFn: async () => ({}),',
-  '  }));',
+  'function makeStub(name: string) {',
+  '  // Mirror the real @hey-api/openapi-ts generator shape:',
+  '  //   *QueryKey(input)    → queryKey ARRAY  (e.g. ["listBookings", {query: ...}])',
+  '  //   *Options(input)     → options OBJECT  ({ queryKey, queryFn })',
+  '  //   *Mutation()         → options OBJECT  ({ mutationFn })',
+  '  // Tests prime cache via qc.setQueryData(xxxQueryKey(input), data); components',
+  '  // useQuery(xxxOptions(input)) read from the same key.',
+  '  const isQueryKey = /(?:InfiniteQueryKey|QueryKey)$/.test(name);',
+  '  const isMutation = /Mutation$/.test(name);',
+  '  const base = name.replace(/(InfiniteOptions|InfiniteQueryKey|Options|QueryKey|Mutation)$/, "");',
+  '  return jest.fn((...args: any[]) => {',
+  '    const queryKey = [base, ...args];',
+  '    if (isQueryKey) return queryKey;',
+  '    if (isMutation) return { mutationFn: async () => ({}) };',
+  '    return {',
+  '      queryKey,',
+  '      queryFn: async () => ({ data: [], items: [], pagination: { totalCount: 0 } }),',
+  '    };',
+  '  });',
   '}',
   '',
 ];
 for (const name of Array.from(exports).sort()) {
-  stubs.push(`export const ${name} = makeStub();`);
+  stubs.push(`export const ${name} = makeStub('${name}');`);
 }
 stubs.push('');
 writeFileSync(OUT, stubs.join('\n'));
