@@ -25,22 +25,12 @@ Content-Type: application/json
 HTTP 200
 [Captures]
 target_id: jsonpath "$.user.id"
+person_id: jsonpath "$.user.id"
 
 
-# 2. Create a person profile - this should emit a 'create' audit entry.
-POST {{api}}/persons
-Origin: {{origin}}
-x-csrf-token: {{csrf_token}}
-Content-Type: application/json
-{
-  "firstName": "Audit",
-  "lastName": "Target",
-  "languagesSpoken": ["en"],
-  "timezone": "America/New_York"
-}
-HTTP 201
-[Captures]
-person_id: jsonpath "$.id"
+# 2. Person profile is auto-created by the Better-Auth user.create.after
+# hook (auth.ts:194) — emits the same 'create' audit entry the explicit
+# POST /persons used to. {{person_id}} = user.id (1:1).
 
 
 # 3. Update the person - this should emit an 'update' audit entry.
