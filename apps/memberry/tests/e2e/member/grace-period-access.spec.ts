@@ -2,11 +2,43 @@
 // Members in GRACE status should retain ACTIVE-level access to all app features.
 // Grace period = configurable (default 30 days) after dues expiry.
 import { test, expect } from '../helpers/test-fixture'
-import { signInAsMember } from '../helpers/auth'
+import { signIn, signInAsMember } from '../helpers/auth'
+import { TEST_PASSWORD } from '../helpers/test-config'
 
 const ORG_ID = 'ed8e3a96-8126-4341-be42-e6eb7940c562'
 
 test.describe('[BR-49] Grace Period Access', () => {
+  test('T5 officer roster Grace tab shows seeded grace-period members', async ({ page, browser }) => {
+    // Real-UI promotion: drive the officer Roster page Grace status tab
+    // and assert it renders at least one row of seeded grace-period
+    // members (seed creates 3 — Jose Co, Valeria Chua, Ricardo Go).
+    // Asserts the cross-layer DB→roster→UI contract that the status
+    // enum gracePeriod surfaces correctly in the filter chips + table.
+    const ctx = await browser.newContext({
+      storageState: (await import('../helpers/auth-state')).authStateFile('officer'),
+    })
+    const officerPage = await ctx.newPage()
+    try {
+      await officerPage.goto('/org/pda-metro-manila/officer/roster')
+      await expect(
+        officerPage.getByRole('heading', { name: /roster|members/i, level: 1 }).first(),
+      ).toBeVisible({ timeout: 15000 })
+
+      // Activate the Grace filter tab. The MemberTable renders a tab list
+      // with a "Grace" option that filters the table to status=gracePeriod.
+      await officerPage.getByRole('tab', { name: /^grace$/i }).click()
+
+      // After filter resolves, the table renders 1+ rows — assert by
+      // checking a "Grace Period" badge label appears at least once.
+      await expect(
+        officerPage.getByText(/grace period/i).first(),
+      ).toBeVisible({ timeout: 15000 })
+    } finally {
+      await ctx.close()
+    }
+  })
+
+
   // The seeded DB has members in various statuses including grace.
   // A grace-period member should still access all member features.
 
