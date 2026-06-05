@@ -172,9 +172,15 @@ const variables = [
   ...(adminToken ? ['--variable', `admin_token=${adminToken}`] : []),
 ]
 
+// Serialize execution (--jobs=1). Hurl 8.x defaults to 10 parallel workers,
+// which causes flaky session-related failures: many specs sign in as the
+// shared seed_officer/admin, and Better-Auth's "invalidate all sessions on
+// role change" middleware (auth.ts:217) can clear an in-flight worker's
+// session when another worker signs in concurrently. Serial run-time is
+// ~30s for 99 files; cheap insurance for repeatable green.
 const child = spawn(
   'hurl',
-  ['--test', ...variables, ...files],
+  ['--test', '--jobs', '1', ...variables, ...files],
   { stdio: 'inherit' },
 )
 
