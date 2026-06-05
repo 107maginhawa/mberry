@@ -11,14 +11,13 @@ csrf_token: jsonpath "$.token"
 # conflict. Complements booking-flow.hurl which covers confirm/cancel.
 
 # 0. Host setup.
-POST {{api}}/auth/sign-up/email
+POST {{api}}/auth/sign-in/email
 Origin: {{origin}}
 x-csrf-token: {{csrf_token}}
 Content-Type: application/json
 {
-  "email": "edge-host-{{suffix}}@example.org",
-  "password": "Sup3rSecret!ContractTest",
-  "name": "Edge Host"
+  "email": "{{seed_officer_email}}",
+  "password": "{{seed_officer_password}}"
 }
 HTTP 200
 [Captures]

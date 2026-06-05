@@ -147,8 +147,8 @@ function rewriteFile(content: string, filename: string): { changed: boolean; out
     `POST {{api}}/auth/sign-in/email\n` +
     `${headerBlock}\n` +
     `{\n` +
-    `  "email": "{{admin_email}}",\n` +
-    `  "password": "{{admin_password}}"\n` +
+    `  "email": "{{seed_officer_email}}",\n` +
+    `  "password": "{{seed_officer_password}}"\n` +
     `}\n` +
     `HTTP 200\n` +
     `[Captures]\n` +

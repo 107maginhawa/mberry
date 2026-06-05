@@ -11,19 +11,17 @@ csrf_token: jsonpath "$.token"
 # whitespace is tolerated, multiple fields can be expanded together,
 # excessively deep expand chains are rejected.
 
-POST {{api}}/auth/sign-up/email
+POST {{api}}/auth/sign-in/email
 Origin: {{origin}}
 x-csrf-token: {{csrf_token}}
 Content-Type: application/json
 {
-  "email": "expand-edge-{{suffix}}@example.org",
-  "password": "Sup3rSecret!ContractTest",
-  "name": "Expand Edge"
+  "email": "{{seed_officer_email}}",
+  "password": "{{seed_officer_password}}"
 }
 HTTP 200
 [Captures]
 person_id: jsonpath "$.user.id"
-
 POST {{api}}/booking/events
 Origin: {{origin}}
 x-csrf-token: {{csrf_token}}

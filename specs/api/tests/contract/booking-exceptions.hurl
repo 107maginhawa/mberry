@@ -11,19 +11,17 @@ csrf_token: jsonpath "$.token"
 # list/get/delete. Exceptions express "this event is unavailable during
 # windows X" and propagate into the slot generator.
 
-POST {{api}}/auth/sign-up/email
+POST {{api}}/auth/sign-in/email
 Origin: {{origin}}
 x-csrf-token: {{csrf_token}}
 Content-Type: application/json
 {
-  "email": "exc-host-{{suffix}}@example.org",
-  "password": "Sup3rSecret!ContractTest",
-  "name": "Exception Host"
+  "email": "{{seed_officer_email}}",
+  "password": "{{seed_officer_password}}"
 }
 HTTP 200
 [Captures]
 person_id: jsonpath "$.user.id"
-
 POST {{api}}/booking/events
 Origin: {{origin}}
 x-csrf-token: {{csrf_token}}

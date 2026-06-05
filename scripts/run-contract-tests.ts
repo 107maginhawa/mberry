@@ -43,6 +43,11 @@ const contractOrigin = process.env.CONTRACT_ORIGIN ?? 'http://localhost:3004'
 // to a real organization the admin user belongs to. The seed module creates this
 // org on every run; if the seed changes, override via CONTRACT_ORG_ID.
 const contractOrgId = process.env.CONTRACT_ORG_ID ?? 'ed8e3a96-8126-4341-be42-e6eb7940c562'
+// Seeded president user — IS a member of contractOrgId and holds officer roles
+// (vs `admin_email` which is a fresh sign-up auto-promoted to platform-admin but
+// not a member of any org). Officer-scoped tests use this account.
+const seedOfficerEmail = process.env.CONTRACT_SEED_OFFICER_EMAIL ?? 'test@memberry.ph'
+const seedOfficerPassword = process.env.CONTRACT_SEED_OFFICER_PASSWORD ?? 'TestPass123!'
 
 const contractDir = join(import.meta.dir, '..', 'specs', 'api', 'tests', 'contract')
 
@@ -162,6 +167,8 @@ const variables = [
   '--variable', `mailpit_api=${mailpitApi}`,
   '--variable', `admin_email=${adminEmail}`,
   '--variable', `admin_password=${adminPassword}`,
+  '--variable', `seed_officer_email=${seedOfficerEmail}`,
+  '--variable', `seed_officer_password=${seedOfficerPassword}`,
   ...(adminToken ? ['--variable', `admin_token=${adminToken}`] : []),
 ]
 

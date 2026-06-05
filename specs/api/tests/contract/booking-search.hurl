@@ -13,19 +13,17 @@ csrf_token: jsonpath "$.token"
 # query-param shape — separate from the simple list pagination smoke
 # in booking-event.hurl.
 
-POST {{api}}/auth/sign-up/email
+POST {{api}}/auth/sign-in/email
 Origin: {{origin}}
 x-csrf-token: {{csrf_token}}
 Content-Type: application/json
 {
-  "email": "search-host-{{suffix}}@example.org",
-  "password": "Sup3rSecret!ContractTest",
-  "name": "Search Host"
+  "email": "{{seed_officer_email}}",
+  "password": "{{seed_officer_password}}"
 }
 HTTP 200
 [Captures]
 person_id: jsonpath "$.user.id"
-
 POST {{api}}/booking/events
 Origin: {{origin}}
 x-csrf-token: {{csrf_token}}

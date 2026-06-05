@@ -11,16 +11,15 @@ csrf_token: jsonpath "$.token"
 # Covers DELETE event, GET single booking, GET single slot.
 # Creates an event + booking first to get IDs.
 
-# ── 0. Create host ───────────────────────────────────────────
+# ── 0. Sign in as seeded officer (org member with booking-event create) ──
 
-POST {{api}}/auth/sign-up/email
+POST {{api}}/auth/sign-in/email
 Origin: {{origin}}
 x-csrf-token: {{csrf_token}}
 Content-Type: application/json
 {
-  "email": "book-ext-host-{{suffix}}@example.org",
-  "password": "Sup3rSecret!ContractTest",
-  "name": "BookExt Host"
+  "email": "{{seed_officer_email}}",
+  "password": "{{seed_officer_password}}"
 }
 HTTP 200
 [Captures]

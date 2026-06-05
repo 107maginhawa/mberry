@@ -12,19 +12,17 @@ csrf_token: jsonpath "$.token"
 # event's `owner` field is a stable target (it points at a Person via
 # getPerson). Validates the wire shape is the same across implementations.
 
-POST {{api}}/auth/sign-up/email
+POST {{api}}/auth/sign-in/email
 Origin: {{origin}}
 x-csrf-token: {{csrf_token}}
 Content-Type: application/json
 {
-  "email": "expand-{{suffix}}@example.org",
-  "password": "Sup3rSecret!ContractTest",
-  "name": "Expand Tester"
+  "email": "{{seed_officer_email}}",
+  "password": "{{seed_officer_password}}"
 }
 HTTP 200
 [Captures]
 person_id: jsonpath "$.user.id"
-
 POST {{api}}/booking/events
 Origin: {{origin}}
 x-csrf-token: {{csrf_token}}
