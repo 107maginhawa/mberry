@@ -1,16 +1,18 @@
 import { test, expect } from './helpers/test-fixture'
 import { signInAsSecretary, signInAsMember } from './helpers/auth'
 import { apiFetch } from './helpers/api-fetch'
-
-// Seeded org slug; matches services/api-ts/src/seed/layer-1-foundation.ts.
-const ORG_SLUG = 'pda-metro-manila'
+import { withIsolatedFixture } from './helpers/isolated-fixture'
 
 test.describe('Wave 4α: Communications — Officer Compose + Notification Drawer', () => {
+  // F3: fresh org per run — announcement create/publish would otherwise
+  // poison officer/communications list assertions in parallel workers.
+  const fx = withIsolatedFixture(test, { memberCount: 1 })
+
   test('officer compose → select filters → send → appears in sent history', async ({ page }) => {
     await signInAsSecretary(page)
 
-    // Navigate to compose page
-    await page.goto(`/org/${ORG_SLUG}/officer/communications/new`)
+    // Navigate to compose page on the freshly-isolated org.
+    await page.goto(`/org/${fx().slug}/officer/communications/new`)
     // Fill in title
     const titleInput = page.getByPlaceholder('Announcement title')
     await expect(titleInput).toBeVisible({ timeout: 10000 })
@@ -37,7 +39,7 @@ test.describe('Wave 4α: Communications — Officer Compose + Notification Drawe
     await sendResp
 
     // Navigate to sent history
-    await page.goto(`/org/${ORG_SLUG}/officer/communications/sent`)
+    await page.goto(`/org/${fx().slug}/officer/communications/sent`)
     // Verify announcement appears in sent list
     await expect(page.getByText('E2E Test Announcement')).toBeVisible({ timeout: 10000 })
   })

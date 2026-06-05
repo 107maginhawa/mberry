@@ -16,14 +16,19 @@ import { test, expect } from '@playwright/test'
 import { authStateFile } from '../helpers/auth-state'
 import { apiFetch } from '../helpers/api-fetch'
 import { signIn } from '../helpers/auth'
+import { withIsolatedFixture } from '../helpers/isolated-fixture'
 import { SEED_MEMBER_EMAIL, TEST_PASSWORD } from '../helpers/test-config'
-
-const ORG_ID = 'ed8e3a96-8126-4341-be42-e6eb7940c562'
 
 test.describe.configure({ mode: 'serial' })
 
 test.describe('cross-persona: president runs election → members vote → secretary tallies', () => {
+  // F3: fresh org per run — election mutations (vote, transition status)
+  // would otherwise poison readers across parallel specs.
+  const fx = withIsolatedFixture(test, { memberCount: 1 })
+
   test('elections list visible + consistent across three actors', async ({ browser }) => {
+    const ORG_ID = fx().orgId
+
     // ---- President / officer context ----
     const presidentCtx = await browser.newContext({
       storageState: authStateFile('officer'),

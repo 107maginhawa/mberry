@@ -15,15 +15,19 @@ import { test, expect } from '@playwright/test'
 import { authStateFile } from '../helpers/auth-state'
 import { apiFetch } from '../helpers/api-fetch'
 import { signIn } from '../helpers/auth'
+import { withIsolatedFixture } from '../helpers/isolated-fixture'
 import { SEED_MEMBER_EMAIL, TEST_PASSWORD } from '../helpers/test-config'
-
-const ORG_ID = 'ed8e3a96-8126-4341-be42-e6eb7940c562'
 
 test.describe.configure({ mode: 'serial' })
 
 test.describe('cross-persona: secretary creates event → member RSVPs → officer sees roster', () => {
+  // F3: spin up a fresh org per run so event creation doesn't poison
+  // other event-list specs running in parallel workers.
+  const fx = withIsolatedFixture(test, { memberCount: 1 })
+
   test('three-actor flow: event create → register → list', async ({ browser }) => {
     const uniqueSuffix = Date.now().toString(36)
+    const ORG_ID = fx().orgId
 
     // ---- 1. Secretary creates event ----
     const secretaryCtx = await browser.newContext({
