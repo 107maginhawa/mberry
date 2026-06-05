@@ -64,7 +64,7 @@ test.describe('Officer navigation journey', () => {
 test.describe('Public and auth guard navigation', () => {
   test('public org profile page accessible without auth', async ({ page }) => {
     await page.context().clearCookies()
-    await page.goto('/org/pda-metro-manila')
+    await page.goto('/join/pda-metro-manila')
     await expect(page.getByText(/pda metro manila/i)).toBeVisible({ timeout: 10000 })
     expect(page.url()).not.toContain('/auth/')
   })

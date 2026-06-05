@@ -6,7 +6,7 @@ import { api } from '@/lib/api'
 import { ErrorState } from '@/components/patterns/error-state'
 
 // oli-ui: exempt-pageshell — pre-auth discovery page with centered hero chrome
-export const Route = createFileRoute('/join')({
+export const Route = createFileRoute('/join/')({
   component: JoinPage,
 })
 
@@ -56,7 +56,7 @@ function JoinPage() {
 
   function handleOrgClick(org: PublicOrg) {
     if (org.slug) {
-      navigate({ to: '/org/$slug', params: { slug: org.slug } })
+      navigate({ to: '/join/$slug', params: { slug: org.slug } })
     }
   }
 

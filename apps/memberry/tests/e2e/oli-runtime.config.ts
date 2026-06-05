@@ -74,7 +74,7 @@ export const config: OliRuntimeConfig = {
 
   // orgSlug is the dominant param across /_authenticated/org/$orgSlug/* routes.
   // pda-metro-manila is the seeded NCR chapter (layer-1-foundation.ts) the seed
-  // member belongs to. `slug` covers the public /org/$slug route.
+  // member belongs to. `slug` covers the public /join/$slug route.
   paramFixtures: {
     orgSlug: "pda-metro-manila",
     slug: "pda-metro-manila",

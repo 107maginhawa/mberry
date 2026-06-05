@@ -71,52 +71,32 @@ test.describe('Golden Path — does the app work? (UI-driven)', () => {
     expect(applicantPage.url()).not.toContain('/auth/sign-up')
   })
 
-  test('2. Applicant submits application (API — UI /org/$slug routing has a known product bug)', async () => {
-    // KNOWN PRODUCT GAP: routes/org/$slug.tsx (public) and
-    // routes/_authenticated/org/$orgSlug (auth-gated) both claim the
-    // same path pattern; TanStack resolves to the authenticated
-    // variant first, so an authenticated visitor lands on /auth/sign-in
-    // instead of the public Apply page (see auth.spec.ts fixme on
-    // line 142). Until that resolution is fixed, drive the apply step
-    // via API — the UI surface is verified separately in directory-
-    // onboarding.spec.ts once the routing bug is patched.
-    await applicantPage.goto('/dashboard')
-    const me = await apiFetch<{ id?: string; data?: { id?: string } }>(
-      applicantPage,
-      '/persons/me',
-    )
-    const personId = (me.data?.id ?? me.data?.data?.id) as string
-    expect(personId).toMatch(/^[0-9a-f-]{36}$/)
-    const tiers = await apiFetch<{ data?: Array<{ id: string }> }>(
-      applicantPage,
-      `/public/org/${fx().orgId}/tiers`,
-    )
-    const tierId = tiers.data?.data?.[0]?.id
-    expect(tierId, 'isolated org has tier').toBeTruthy()
-    const submit = await apiFetch<{ id?: string; data?: { id?: string } }>(
-      applicantPage,
-      '/association/member/applications',
-      {
-        method: 'POST',
-        orgId: fx().orgId,
-        body: {
-          personId,
-          organizationId: fx().orgId,
-          tierId,
-          applicationDate: new Date().toISOString().split('T')[0],
-        },
-      },
-    )
-    expect(submit.status, `apply got ${submit.status} body ${JSON.stringify(submit.data).slice(0, 200)}`).toBeLessThan(300)
-    // Sanity: confirm the row landed under the isolated org.
-    const list = await apiFetch<{
-      data?: Array<{ id: string; personId: string }>
-    }>(applicantPage, `/membership/applications/${fx().orgId}?status=submitted`, {
-      orgId: fx().orgId,
+  test('2. Applicant opens /join/$slug, clicks Apply, submits dialog', async () => {
+    await applicantPage.goto(`/join/${fx().slug}`)
+    await expect(
+      applicantPage.getByRole('button', { name: /apply to join/i }),
+    ).toBeVisible({ timeout: 15000 })
+
+    await applicantPage.getByRole('button', { name: /apply to join/i }).click()
+
+    // Apply dialog
+    await expect(
+      applicantPage.getByRole('dialog').getByText(/apply to join/i),
+    ).toBeVisible({ timeout: 10000 })
+
+    // Single-tier orgs auto-select; multi-tier requires picking.
+    const tierSelect = applicantPage.getByRole('combobox').first()
+    if (await tierSelect.isVisible().catch(() => false)) {
+      await tierSelect.click()
+      await applicantPage.getByRole('option').first().click()
+    }
+
+    await applicantPage.getByRole('button', { name: /submit application/i }).click()
+
+    // Success toast + dialog closes
+    await expect(applicantPage.getByText(/application submitted/i)).toBeVisible({
+      timeout: 15000,
     })
-    // The applicant can't read this list (not officer); accept any
-    // non-5xx and rely on Phase 3 officer-side read for proof.
-    expect(list.status).toBeLessThan(500)
   })
 
   test('3. Officer approves the application (API — guard cache flake makes UI here unreliable)', async ({

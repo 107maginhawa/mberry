@@ -51,10 +51,8 @@ test.describe('Directory Onboarding: signup → join org → directory profile',
       await signIn(page, newUserEmail, newUserPassword)
 
       await test.step('visit the org page', async () => {
-        // Authenticated visitors get routed through /_authenticated/org/$orgSlug,
-        // which mounts OrgProvider + Outlet. The bare /org/$slug has no index
-        // route inside the authenticated layout, so we land on /home instead
-        // (the canonical entry-point for an org-scoped member view).
+        // Auth org layout has no index — /home is the canonical entry-point
+        // for an org-scoped member view.
         await page.goto(`/org/${ORG_SLUG}/home`)
         // /home renders <h1>Organization Home</h1> via PageShell once
         // OrgProvider resolves the slug. The org's display name isn't shown
@@ -242,10 +240,8 @@ test.describe('Directory Onboarding: signup → join org → directory profile',
       })
 
       await test.step('4. user can view org page', async () => {
-        // Same routing constraint as the join-org flow above — bare /org/$slug
-        // for authenticated visitors lands on the authenticated layout outlet
-        // which has no index page. Visit /home explicitly and assert the page
-        // title (org display name isn't surfaced on /home).
+        // Auth org layout has no index; visit /home explicitly. Org display
+        // name isn't surfaced on /home — assert page title instead.
         await page.goto(`/org/${ORG_SLUG}/home`)
         await expect(
           page.getByRole('heading', { name: /organization home/i, level: 1 }),

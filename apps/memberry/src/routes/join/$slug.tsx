@@ -13,7 +13,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { api, ApiError } from '@/lib/api'
 import type { ApiErrorBody } from '@/types/api'
 
-export const Route = createFileRoute('/org/$slug')({
+export const Route = createFileRoute('/join/$slug')({
   component: PublicOrgProfile,
 })
 
@@ -68,7 +68,7 @@ function PublicOrgProfile() {
         setAuthChecked(true)
       } catch {
         // Not logged in — redirect to sign-in
-        window.location.href = `/auth/sign-in?redirect=/org/${encodeURIComponent(slug)}`
+        window.location.href = `/auth/sign-in?redirect=/join/${encodeURIComponent(slug)}`
         return
       }
     }
@@ -77,7 +77,7 @@ function PublicOrgProfile() {
     setApplyOpen(true)
     setTiersLoading(true)
     try {
-      const data: any = await api.get('/api/association/member/tiers', { 'x-org-id': org.id })
+      const data: any = await api.get(`/api/public/org/${encodeURIComponent(org.id)}/tiers`)
       const tierList = data?.data ?? []
       setTiers(tierList)
       if (tierList.length === 1) setSelectedTierId(tierList[0].id)
@@ -114,7 +114,7 @@ function PublicOrgProfile() {
     } catch (err) {
       if (err instanceof ApiError) {
         if (err.status === 401) {
-          window.location.href = `/auth/sign-in?redirect=/org/${encodeURIComponent(slug)}`
+          window.location.href = `/auth/sign-in?redirect=/join/${encodeURIComponent(slug)}`
           return
         }
         if (err.status === 409) {

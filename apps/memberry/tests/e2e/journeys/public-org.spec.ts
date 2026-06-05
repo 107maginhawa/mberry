@@ -7,7 +7,7 @@ test.describe('Public Org Page', () => {
     // Clear cookies to ensure no auth session
     await page.context().clearCookies()
 
-    await page.goto('/org/pda-metro-manila')
+    await page.goto('/join/pda-metro-manila')
     // Should NOT redirect to auth
     expect(page.url()).not.toContain('/auth/')
 

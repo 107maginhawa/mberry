@@ -121,7 +121,7 @@ test.describe('Mobile: Dues & Payments', () => {
 test.describe('Mobile: Member Org Page', () => {
   test('org home page renders at mobile width', async ({ page }) => {
     await signInAsMember(page)
-    await page.goto(`/org/pda-metro-manila`)
+    await page.goto(`/org/pda-metro-manila/home`)
     await expect(page.locator('body')).toBeVisible()
 
     const hasOverflow = await page.evaluate(() => {

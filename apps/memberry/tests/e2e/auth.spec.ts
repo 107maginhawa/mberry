@@ -143,24 +143,12 @@ test.describe('Sign-in flow', () => {
 })
 
 test.describe('Auth guard', () => {
-  test.fixme(
-    'A2: public route /org/pda-metro-manila works without auth',
-    async ({ page }) => {
-      // KNOWN PRODUCT ISSUE: a public route exists at routes/org/$slug.tsx,
-      // but routes/_authenticated/org/$orgSlug/route.tsx claims the same path
-      // pattern. The generated TanStack route tree resolves to the
-      // authenticated variant first, so guests get bounced to /auth/sign-in
-      // (with a `redirect=/org/...` param) instead of rendering PublicOrgProfile.
-      //
-      // Re-enable once routes/org/$slug.tsx wins resolution (e.g. rename the
-      // authenticated path to /_authenticated/orgs/$orgSlug, or wire an
-      // explicit public-org slug list at __root.tsx beforeLoad).
-      await page.context().clearCookies()
-      await page.goto('/org/pda-metro-manila')
-      await expect(page.getByText('Philippine Dental Association')).toBeVisible({ timeout: 15000 })
-      expect(page.url()).not.toContain('/auth/')
-    },
-  )
+  test('A2: public route /join/pda-metro-manila works without auth', async ({ page }) => {
+    await page.context().clearCookies()
+    await page.goto('/join/pda-metro-manila')
+    await expect(page.getByText('Philippine Dental Association')).toBeVisible({ timeout: 15000 })
+    expect(page.url()).not.toContain('/auth/')
+  })
 
   test('A2: root / redirects unauthenticated to sign-in', async ({ page }) => {
     await page.context().clearCookies()
