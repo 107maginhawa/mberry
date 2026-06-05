@@ -51,6 +51,44 @@ test('event form: publish blocked with empty title', async ({ page }) => {
     await expect(submitBtn).toBeDisabled()
   })
 
+  test('T5 payment form: blocked invalid → enabled valid → submit opens dialog', async ({ page }) => {
+    // Real-UI promotion: assert the form's invalid → valid transition in
+    // a single test. Step 1: only amount, no member → submit disabled.
+    // Step 2: pick a member from the combobox → submit enables. Step 3:
+    // click submit → confirm dialog opens. Proves the full form
+    // validation pipeline drives the right UI state.
+    await page.goto('/org/pda-metro-manila/officer/payments/new')
+    await expect(
+      page.getByRole('heading', { name: /Record Payment/i, level: 1 }),
+    ).toBeVisible({ timeout: 15000 })
+
+    // Phase 1: only amount filled → submit blocked.
+    await page.getByRole('spinbutton', { name: /amount/i }).fill('1500')
+    const submitBtn = page.getByRole('button', { name: /^Record Payment$/i })
+    await expect(submitBtn).toBeDisabled()
+
+    // Phase 2: pick a member from the combobox.
+    await page.getByRole('combobox').first().click()
+    const searchInput = page.getByPlaceholder(/type to search members/i)
+    await expect(searchInput).toBeVisible({ timeout: 5000 })
+    await searchInput.fill('PDA')
+    const firstOption = page.getByRole('option').first()
+    await expect(firstOption).toBeVisible({ timeout: 10000 })
+    await firstOption.click()
+    await expect(submitBtn).toBeEnabled({ timeout: 5000 })
+
+    // Phase 3: pick payment method then submit → confirm dialog opens.
+    // (paymentMethod is required by the form's zod schema for the
+    // dialog branch to fire.)
+    await page.locator('button:has-text("Select method")').first().click()
+    await page.getByRole('option').filter({ hasText: /^cash$/i }).first().click()
+
+    await submitBtn.click()
+    await expect(
+      page.getByRole('dialog').getByText(/record payment of/i),
+    ).toBeVisible({ timeout: 10000 })
+  })
+
   test('credit log: submit blocked with empty activity name', async ({ page }) => {
     await page.goto('/my/credits/log')
     await expect(page.getByText(/Log Manual Credit|Credit Log/i)).toBeVisible({ timeout: 10000 })
