@@ -5,6 +5,10 @@ export default defineConfig({
   testMatch: '**/*.spec.ts',
   testIgnore: ['**/stubs/**'],
 
+  // Restore mutated seed rows (org name, association) before any worker
+  // spawns. See tests/e2e/global-setup.ts + services/api-ts/src/seed/reset-mutated.ts.
+  globalSetup: './tests/e2e/global-setup.ts',
+
   maxFailures: process.env.CI ? 0 : 1,
   // Enabled after the storageState setup project (auth.setup.ts) eliminated
   // per-test UI sign-ins. Read-only specs (the bulk of the suite) parallelize
