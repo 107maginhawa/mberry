@@ -27,11 +27,27 @@ export interface IsolatedFixture {
   slug: string
   tierId?: string
   personIds: string[]
+  /**
+   * person.id of the seeded officer granted a President officer-term on
+   * the new org. Returned only when `officerEmail` resolves to an
+   * existing better-auth user (default 'test@memberry.ph' → seeded
+   * president). Use this id when a spec needs to assert "the officer
+   * persona shows up on the new org's leadership list".
+   */
+  officerPersonId?: string
+  positionId?: string
 }
 
 export interface IsolatedFixtureOptions {
   /** Number of members to seed into the fresh org (default 3). */
   memberCount?: number
+  /**
+   * Seeded user email to elevate to officer on the new org (default:
+   * 'test@memberry.ph' — the seeded president whose storageState file
+   * is `.auth/officer.json`). Pass `null` to skip officer-term creation
+   * entirely (use for specs that test the "no officer" path).
+   */
+  officerEmail?: string | null
 }
 
 /**
@@ -41,12 +57,18 @@ export interface IsolatedFixtureOptions {
 export async function createIsolatedFixture(
   opts: IsolatedFixtureOptions = {},
 ): Promise<IsolatedFixture> {
+  const payload: Record<string, unknown> = {
+    memberCount: opts.memberCount ?? 3,
+  }
+  // Only forward officerEmail when caller specified it (including null
+  // to opt out). Undefined means "use server default".
+  if (opts.officerEmail !== undefined) {
+    payload['officerEmail'] = opts.officerEmail
+  }
   const res = await fetch(`${API_BASE}/test/isolated-fixture`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      memberCount: opts.memberCount ?? 3,
-    }),
+    body: JSON.stringify(payload),
   })
   if (!res.ok) {
     throw new Error(

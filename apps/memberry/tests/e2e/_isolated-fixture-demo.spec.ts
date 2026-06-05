@@ -19,7 +19,7 @@ import {
 } from './helpers/isolated-fixture'
 
 test.describe('G10: isolated-fixture helper', () => {
-  test('createIsolatedFixture returns orgId + tierId + personIds', async () => {
+  test('createIsolatedFixture returns orgId + tierId + personIds + officer term', async () => {
     const fx = await createIsolatedFixture({ memberCount: 2 })
     try {
       expect(fx.orgId).toMatch(/^[0-9a-f-]{36}$/)
@@ -29,6 +29,21 @@ test.describe('G10: isolated-fixture helper', () => {
       for (const id of fx.personIds) {
         expect(id).toMatch(/^[0-9a-f-]{36}$/)
       }
+      // F2: officer term defaults to seeded president 'test@memberry.ph'
+      expect(fx.officerPersonId, 'seeded officer linked to new org').toMatch(/^[0-9a-f-]{36}$/)
+      expect(fx.positionId, 'position row created').toMatch(/^[0-9a-f-]{36}$/)
+    } finally {
+      await deleteIsolatedFixture(fx.orgId)
+    }
+  })
+
+  test('createIsolatedFixture skips officer term when officerEmail=null', async () => {
+    const fx = await createIsolatedFixture({ memberCount: 0, officerEmail: null })
+    try {
+      expect(fx.orgId).toMatch(/^[0-9a-f-]{36}$/)
+      expect(fx.personIds).toHaveLength(0)
+      expect(fx.officerPersonId).toBeFalsy()
+      expect(fx.positionId).toBeFalsy()
     } finally {
       await deleteIsolatedFixture(fx.orgId)
     }
