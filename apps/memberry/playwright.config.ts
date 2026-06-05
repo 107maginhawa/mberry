@@ -17,8 +17,11 @@ export default defineConfig({
   fullyParallel: true,
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 1 : 0,
-  // Conservative default — 4 workers in CI, 2 locally. Bump after a clean run.
-  workers: process.env.CI ? 4 : 2,
+  // Workers=2 in CI is a temporary mitigation for parallel test contamination
+  // (multiple specs mutate the same seeded org/event/member rows). Bump back
+  // to 4 once G10 (per-test seed isolation via /test/seed-isolated endpoint)
+  // lands. See docs/audits/E2E_REMEDIATION_FINAL.md §Parallel contamination.
+  workers: process.env.CI ? 2 : 2,
 
   reporter: process.env.CI
     ? [['json', { outputFile: 'test-results.json' }], ['github']]
