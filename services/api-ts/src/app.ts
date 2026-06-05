@@ -312,6 +312,19 @@ export function createApp(config: Config): App {
   // @hand-wired reason="public discovery, not in TypeSpec" wave="pre-migration"
   app.get('/public/orgs', listPublicOrgs as unknown as Handler);
 
+  // @hand-wired reason="prospective applicants must see tiers before they're members" wave="G12"
+  // /association/member/tiers requires association:member role — applicants
+  // by definition don't have it. Mirror the tier-list handler here under
+  // /public/* so the apply dialog can populate.
+  app.get('/public/org/:orgId/tiers', async (c) => {
+    const { orgId } = c.req.param();
+    const db = c.get('database') as DatabaseInstance;
+    const { membershipTiers } = await import('@/handlers/association:member/repos/membership.schema');
+    const { eq } = await import('drizzle-orm');
+    const rows = await db.select().from(membershipTiers).where(eq(membershipTiers.organizationId, orgId));
+    return c.json({ data: rows });
+  });
+
   // @hand-wired reason="HTML og:meta for social crawlers, not REST" wave="by-design"
   const slugParam = zValidator('param', z.object({ slug: z.string().min(1).max(512) }), validationErrorHandler);
   app.get('/og/events/:slug', slugParam, serveEventOgMeta as unknown as Handler);
