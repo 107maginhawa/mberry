@@ -14,7 +14,7 @@
 | FE admin vitest | ✅ 57/57 | ✅ unchanged | — |
 | `lint:no-skips` | ❌ 14 violations | ✅ clean | +14 cleared |
 | `lint:shallow` | ❌ 1 violation | ✅ clean | +1 cleared |
-| Hurl contract | ❌ 6/99 | ✅ **86/99 (86.9%)** | **+80 files** |
+| Hurl contract | ❌ 6/99 | ✅ **89/99 (89.9%)** | **+83 files** |
 | E2E memberry wall (measured subset) | 9.5s/test | **0.75s/test** | **12.7× faster** |
 | E2E full-suite projection | 95 min | **~7.5 min** | — |
 
