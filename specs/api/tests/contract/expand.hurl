@@ -54,9 +54,12 @@ jsonpath "$.owner" == "{{person_id}}"
 
 
 # 2. With expand=owner, owner is the full Person object inline.
+# Spec previously asserted owner.firstName == "Expand" from a stale fresh-
+# signup pattern. After the auth pivot to seed_officer, owner.firstName
+# matches the seeded president — just assert the field exists.
 GET {{api}}/booking/events/{{event_id}}?expand=owner
 x-org-id: {{org_id}}
 HTTP 200
 [Asserts]
 jsonpath "$.owner.id" == "{{person_id}}"
-jsonpath "$.owner.firstName" == "Expand"
+jsonpath "$.owner.firstName" exists

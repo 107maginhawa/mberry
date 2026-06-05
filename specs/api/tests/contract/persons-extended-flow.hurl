@@ -11,16 +11,15 @@ csrf_token: jsonpath "$.token"
 # Covers /persons list, /persons/me/* preferences, credits, privacy,
 # memberships, officer role, export, and deletion flow.
 
-# ── 0. Sign up and create person ─────────────────────────────
+# ── 0. Sign in as seeded officer (GET /persons requires admin/officer) ──
 
-POST {{api}}/auth/sign-up/email
+POST {{api}}/auth/sign-in/email
 Origin: {{origin}}
 x-csrf-token: {{csrf_token}}
 Content-Type: application/json
 {
-  "email": "person-ext-{{suffix}}@example.org",
-  "password": "Sup3rSecret!ContractTest",
-  "name": "Person Extended"
+  "email": "{{seed_officer_email}}",
+  "password": "{{seed_officer_password}}"
 }
 HTTP 200
 [Captures]

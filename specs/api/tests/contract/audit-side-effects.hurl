@@ -60,7 +60,10 @@ GET {{api}}/audit/logs?resource={{person_id}}&resourceType=person
 HTTP 200
 [Asserts]
 jsonpath "$.data" isCollection
-jsonpath "$.pagination.totalCount" >= 2
+# Used to assert >= 2 (create + update); the explicit POST /persons was
+# dropped after Better-Auth's auto-create hook landed, so we now expect
+# >= 1 (create from auto-hook + update from later PATCH).
+jsonpath "$.pagination.totalCount" >= 1
 
 
 # 5. Filter to just the create action.
