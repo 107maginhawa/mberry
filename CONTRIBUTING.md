@@ -129,6 +129,23 @@ Run `bun --filter '*' lint` from the repo root to lint every workspace.
 - `src/features/` - larger feature modules (booking, billing, comms, person)
 - Each app owns this tree; nothing is shared across apps except the SDK.
 
+### Sanity check — does the app work?
+
+One spec, one command, ~18 seconds. The single source of truth for
+end-to-end app health:
+
+```bash
+cd apps/memberry
+CI=1 bunx playwright test _golden-path.spec.ts --workers=1 --reporter=line
+```
+
+Green = the 8 most critical user journeys (signup → apply → approve →
+member → CPD log → treasurer payment → officer roster → announcement
+→ sign-out/in) all work. Run this before every release, after every
+auth/middleware/router change, and whenever someone asks "is the app
+broken?". See `docs/audits/SANITY_CHECK.md` for the per-step breakdown
+and how to extend it.
+
 ### Contract testing
 
 The Hurl suite under `specs/api/tests/contract/` is the source of truth
