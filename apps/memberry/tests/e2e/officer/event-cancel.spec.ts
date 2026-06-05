@@ -12,8 +12,13 @@ test.describe('Officer Event Cancellation', () => {
 test('event detail page shows status badge and action buttons', async ({ page }) => {
     await page.goto(`/org/${ORG_ID}/officer/events`)
     // Navigate to a seeded event detail
-    await page.getByRole('link', { name: /General Assembly/i }).click()
-    await page.waitForLoadState('networkidle')
+    // Pick any event detail link (excludes the /new create link).
+    await page
+      .locator('a[href*="/officer/events/"]')
+      .and(page.locator('a:not([href$="/new"])'))
+      .first()
+      .click()
+    await expect(page).toHaveURL(/\/officer\/events\/[^/]+/, { timeout: 10000 })
 
     // Verify we're on the detail page
     expect(page.url()).toContain('/officer/events/')
@@ -29,8 +34,13 @@ test('event detail page shows status badge and action buttons', async ({ page })
 
   test('event detail shows Duplicate and Edit buttons for active events', async ({ page }) => {
     await page.goto(`/org/${ORG_ID}/officer/events`)
-    await page.getByRole('link', { name: /General Assembly/i }).click()
-    await page.waitForLoadState('networkidle')
+    // Pick any event detail link (excludes the /new create link).
+    await page
+      .locator('a[href*="/officer/events/"]')
+      .and(page.locator('a:not([href$="/new"])'))
+      .first()
+      .click()
+    await expect(page).toHaveURL(/\/officer\/events\/[^/]+/, { timeout: 10000 })
 
     // Duplicate button should always be visible
     await expect(
@@ -46,8 +56,13 @@ test('event detail page shows status badge and action buttons', async ({ page })
 
   test('event detail has tabs: Details, Registered, Check-in', async ({ page }) => {
     await page.goto(`/org/${ORG_ID}/officer/events`)
-    await page.getByRole('link', { name: /General Assembly/i }).click()
-    await page.waitForLoadState('networkidle')
+    // Pick any event detail link (excludes the /new create link).
+    await page
+      .locator('a[href*="/officer/events/"]')
+      .and(page.locator('a:not([href$="/new"])'))
+      .first()
+      .click()
+    await expect(page).toHaveURL(/\/officer\/events\/[^/]+/, { timeout: 10000 })
 
     // Verify all three tabs exist
     await expect(
@@ -65,8 +80,13 @@ test('event detail page shows status badge and action buttons', async ({ page })
 
   test('switching to Registered tab shows registrations or empty state', async ({ page }) => {
     await page.goto(`/org/${ORG_ID}/officer/events`)
-    await page.getByRole('link', { name: /General Assembly/i }).click()
-    await page.waitForLoadState('networkidle')
+    // Pick any event detail link (excludes the /new create link).
+    await page
+      .locator('a[href*="/officer/events/"]')
+      .and(page.locator('a:not([href$="/new"])'))
+      .first()
+      .click()
+    await expect(page).toHaveURL(/\/officer\/events\/[^/]+/, { timeout: 10000 })
 
     // Click Registered tab
     await page.getByRole('tab', { name: /registered/i }).click()
@@ -103,8 +123,13 @@ test('event detail page shows status badge and action buttons', async ({ page })
 
   test('event detail page shows event information (date, location, registration count)', async ({ page }) => {
     await page.goto(`/org/${ORG_ID}/officer/events`)
-    await page.getByRole('link', { name: /General Assembly/i }).click()
-    await page.waitForLoadState('networkidle')
+    // Pick any event detail link (excludes the /new create link).
+    await page
+      .locator('a[href*="/officer/events/"]')
+      .and(page.locator('a:not([href$="/new"])'))
+      .first()
+      .click()
+    await expect(page).toHaveURL(/\/officer\/events\/[^/]+/, { timeout: 10000 })
 
     // Details tab is default — should show date, location, registration info
     const hasStart = await page.getByText(/start/i).first().isVisible({ timeout: 10000 }).catch(() => false)
