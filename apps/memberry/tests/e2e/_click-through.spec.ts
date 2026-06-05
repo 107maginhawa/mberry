@@ -23,21 +23,28 @@ const ORG_ID = process.env['SEED_ORG_ID'] ?? 'ed8e3a96-8126-4341-be42-e6eb7940c5
 const BLANK_PAGE_TIMEOUT = 3000
 
 async function isBlank(page: import('@playwright/test').Page): Promise<boolean> {
-  // Page is "blank" if there's no <main>/<h1>/role=main content AND no explicit
-  // empty-state ("nothing here", "no items", "empty") text visible.
-  const hasMain = await page
-    .locator('main, [role="main"], h1')
-    .first()
-    .isVisible({ timeout: BLANK_PAGE_TIMEOUT })
-    .catch(() => false)
-  if (hasMain) return false
-
-  const hasEmptyState = await page
-    .getByText(/no .* yet|nothing here|empty|no items|no data/i)
-    .first()
-    .isVisible({ timeout: BLANK_PAGE_TIMEOUT })
-    .catch(() => false)
-  return !hasEmptyState
+  // Page is "blank" if there's no <main>/<h1>/role=main content AND no
+  // explicit empty-state visible after the SPA has had a chance to hydrate.
+  // Use waitFor (which actually polls) instead of isVisible({timeout})
+  // (which is a one-shot check that races SPA mount).
+  try {
+    await page
+      .locator('main, [role="main"], h1')
+      .first()
+      .waitFor({ state: 'visible', timeout: BLANK_PAGE_TIMEOUT })
+    return false
+  } catch {
+    // Fall through to empty-state probe.
+  }
+  try {
+    await page
+      .getByText(/no .* yet|nothing here|empty|no items|no data/i)
+      .first()
+      .waitFor({ state: 'visible', timeout: BLANK_PAGE_TIMEOUT })
+    return false
+  } catch {
+    return true
+  }
 }
 
 async function clickThrough(page: import('@playwright/test').Page, entryRoute: string) {
