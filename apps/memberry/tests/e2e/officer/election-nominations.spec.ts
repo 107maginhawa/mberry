@@ -15,6 +15,10 @@ import { apiFetch } from '../helpers/api-fetch'
 test.use({ storageState: authStateFile('officer') })
 const ORG_ID = 'ed8e3a96-8126-4341-be42-e6eb7940c562'
 
+// F4: serial mode — reads the seeded 2026 election. Other specs that
+// mutate election state (vote, transition status) would otherwise race
+// this read inside a parallel worker pool.
+test.describe.configure({ mode: 'serial' })
 test.describe('BR-34: Nomination Eligibility', () => {
 test('unauthenticated nomination request returns 401', async ({ page, context }) => {
     // Land on the SPA so the in-page fetch carries http://localhost:3004 as
@@ -40,7 +44,8 @@ test('unauthenticated nomination request returns 401', async ({ page, context })
 
     await page.goto(`/org/${ORG_ID}/officer/elections`)
     // Navigate into the seeded 2026 draft election
-    const electionLink = page.getByText(/2026.*election|election.*2026/i).first()
+    // Pick any election detail link — seeded 2026 title may be mutated.
+    const electionLink = page.locator('a[href*="/officer/elections/"]').first()
     await expect(electionLink).toBeVisible({ timeout: 10000 })
     await electionLink.click()
     await page.waitForLoadState('networkidle')
@@ -77,7 +82,8 @@ test('unauthenticated nomination request returns 401', async ({ page, context })
     // This E2E test covers the UI nomination flow entry point and dialog presence.
 
     await page.goto(`/org/${ORG_ID}/officer/elections`)
-    const electionLink = page.getByText(/2026.*election|election.*2026/i).first()
+    // Pick any election detail link — seeded 2026 title may be mutated.
+    const electionLink = page.locator('a[href*="/officer/elections/"]').first()
     await expect(electionLink).toBeVisible({ timeout: 10000 })
     await electionLink.click()
     await page.waitForLoadState('networkidle')
@@ -131,7 +137,8 @@ test('unauthenticated nomination request returns 401', async ({ page, context })
     //   - nomination-eligibility-e2e.test.ts: "eligible member can be nominated after opening nominations"
 
     await page.goto(`/org/${ORG_ID}/officer/elections`)
-    const electionLink = page.getByText(/2026.*election|election.*2026/i).first()
+    // Pick any election detail link — seeded 2026 title may be mutated.
+    const electionLink = page.locator('a[href*="/officer/elections/"]').first()
     await expect(electionLink).toBeVisible({ timeout: 10000 })
     await electionLink.click()
     await page.waitForLoadState('networkidle')
