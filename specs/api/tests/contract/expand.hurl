@@ -50,7 +50,7 @@ GET {{api}}/booking/events/{{event_id}}
 x-org-id: {{org_id}}
 HTTP 200
 [Asserts]
-jsonpath "$.owner" == "{{user_id}}"
+jsonpath "$.owner" == "{{person_id}}"
 
 
 # 2. With expand=owner, owner is the full Person object inline.
@@ -58,5 +58,5 @@ GET {{api}}/booking/events/{{event_id}}?expand=owner
 x-org-id: {{org_id}}
 HTTP 200
 [Asserts]
-jsonpath "$.owner.id" == "{{user_id}}"
+jsonpath "$.owner.id" == "{{person_id}}"
 jsonpath "$.owner.firstName" == "Expand"

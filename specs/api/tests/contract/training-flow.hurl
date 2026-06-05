@@ -76,7 +76,7 @@ x-org-id: {{org_id}}
 }
 HTTP 201
 [Captures]
-training_id: jsonpath "$.data.id"
+training_id: jsonpath "$.id"
 
 
 # ── Get training ──────────────────────────────────────────

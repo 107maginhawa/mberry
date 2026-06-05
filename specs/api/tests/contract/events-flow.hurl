@@ -77,7 +77,7 @@ x-org-id: {{org_id}}
 }
 HTTP 201
 [Captures]
-event_id: jsonpath "$.data.id"
+event_id: jsonpath "$.id"
 
 
 # ── 3. Get event ───────────────────────────────────────────

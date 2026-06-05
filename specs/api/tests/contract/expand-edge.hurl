@@ -51,7 +51,7 @@ x-org-id: {{org_id}}
 HTTP 200
 [Asserts]
 jsonpath "$.id" == "{{event_id}}"
-jsonpath "$.owner" == "{{user_id}}"
+jsonpath "$.owner" == "{{person_id}}"
 
 
 # 2. Empty expand parameter is tolerated.
@@ -59,7 +59,7 @@ GET {{api}}/booking/events/{{event_id}}?expand=
 x-org-id: {{org_id}}
 HTTP 200
 [Asserts]
-jsonpath "$.owner" == "{{user_id}}"
+jsonpath "$.owner" == "{{person_id}}"
 
 
 # 3. Whitespace around field names is trimmed.
@@ -67,7 +67,7 @@ GET {{api}}/booking/events/{{event_id}}?expand=%20owner%20
 x-org-id: {{org_id}}
 HTTP 200
 [Asserts]
-jsonpath "$.owner.id" == "{{user_id}}"
+jsonpath "$.owner.id" == "{{person_id}}"
 
 
 # 4. Multiple expandable fields can be requested in one CSV. The booking
@@ -76,4 +76,4 @@ GET {{api}}/booking/events/{{event_id}}?expand=owner,owner
 x-org-id: {{org_id}}
 HTTP 200
 [Asserts]
-jsonpath "$.owner.id" == "{{user_id}}"
+jsonpath "$.owner.id" == "{{person_id}}"
