@@ -60,15 +60,54 @@ if (!existsSync(contractDir)) {
 const suffix = `${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 8)}`
 
 // Discover .hurl files
-const files = readdirSync(contractDir)
+const allFiles = readdirSync(contractDir)
   .filter((f) => f.endsWith('.hurl'))
   .sort()
   .map((f) => join(contractDir, f))
 
-if (files.length === 0) {
+if (allFiles.length === 0) {
   console.error('No .hurl files found in', contractDir)
   process.exit(1)
 }
+
+// Infrastructure preflight — skip specs that need external services not running.
+// Mailpit serves SMTP capture for auth-* scenarios; stripe-mock is required by
+// billing-lifecycle. When the service isn't reachable, skipping with a clear
+// log is more useful than a 15s connection-refused fail.
+const mailpitSpecs = new Set(['auth-password-reset.hurl', 'auth-verification.hurl'])
+const stripeSpecs = new Set(['billing-extended-flow.hurl', 'billing-lifecycle.hurl'])
+
+async function reachable(url: string, timeoutMs = 1000): Promise<boolean> {
+  try {
+    const ctrl = new AbortController()
+    const t = setTimeout(() => ctrl.abort(), timeoutMs)
+    await fetch(url, { signal: ctrl.signal }).catch(() => null)
+    clearTimeout(t)
+    return true
+  } catch {
+    return false
+  }
+}
+
+const mailpitUp = await reachable(mailpitApi).then((ok) =>
+  ok ? fetch(mailpitApi, { signal: AbortSignal.timeout(500) }).then(() => true).catch(() => false) : false,
+)
+const stripeMockUrl = process.env.STRIPE_API_BASE ?? 'http://localhost:12111'
+const stripeUp = process.env.STRIPE_SECRET_KEY != null && (await reachable(stripeMockUrl))
+
+const skipped: Array<{ file: string; reason: string }> = []
+const files = allFiles.filter((f) => {
+  const base = f.split('/').pop()!
+  if (mailpitSpecs.has(base) && !mailpitUp) {
+    skipped.push({ file: base, reason: `mailpit unreachable at ${mailpitApi}` })
+    return false
+  }
+  if (stripeSpecs.has(base) && !stripeUp) {
+    skipped.push({ file: base, reason: `stripe-mock or STRIPE_SECRET_KEY not configured` })
+    return false
+  }
+  return true
+})
 
 // Sanity-check hurl is installed
 const probe = spawnSync('hurl', ['--version'], { stdio: 'ignore' })
@@ -150,6 +189,10 @@ console.log(`→ ${files.length} contract scenario(s) against ${apiUrl}`)
 console.log(`  suffix=${suffix}`)
 console.log(`  admin_token=${adminToken ? `(captured for ${adminEmail})` : '(unavailable)'}`)
 console.log(`  mailpit_api=${mailpitApi}`)
+if (skipped.length > 0) {
+  console.log(`  skipped=${skipped.length} (infra prerequisite missing)`)
+  for (const s of skipped) console.log(`    ⤬ ${s.file}: ${s.reason}`)
+}
 if (warnings.length > 0) {
   for (const w of warnings) console.warn(`  ⚠ ${w}`)
 }
