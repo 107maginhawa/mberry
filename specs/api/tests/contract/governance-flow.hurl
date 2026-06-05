@@ -47,8 +47,11 @@ HTTP 200
 
 
 # ── 1. List officer terms ─────────────────────────────────
+# Response shape: `{ items: [...], total, page, … }` — paginated list
+# envelope used across listing endpoints. Spec previously asserted
+# `$.data isCollection` from an earlier wire shape; updated to `$.items`.
 
-GET {{api}}/association/member/officer-terms?organizationId=ed8e3a96-8126-4341-be42-e6eb7940c562
+GET {{api}}/association/member/officer-terms?organizationId={{org_id}}
 HTTP 200
 [Asserts]
-jsonpath "$.data" isCollection
+jsonpath "$.items" isCollection
