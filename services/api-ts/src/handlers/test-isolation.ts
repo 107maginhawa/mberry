@@ -139,36 +139,62 @@ export async function createIsolatedFixture(ctx: Context): Promise<Response> {
   // person.id via their better-auth user row (user.id == person.id for
   // users created by the better-auth user.create.after hook), then
   // INSERT a chapter-level position + active officer_term on the new org.
+  //
+  // Also grant officer terms to the other seeded leadership personas
+  // (treasurer, secretary, society) so any storageState-backed test can
+  // navigate to /officer/* on the isolated org without redirecting to
+  // /dashboard. Each gets its own position row.
   let officerPersonId: string | undefined;
   let positionId: string | undefined;
   if (tier && officerEmail) {
-    const [officerUser] = await db
-      .select({ id: userTable.id })
-      .from(userTable)
-      .where(eq(userTable.email, officerEmail))
-      .limit(1);
-    if (officerUser) {
-      officerPersonId = officerUser.id;
+    const sharedOfficerEmails = [
+      officerEmail,
+      'treasurer@memberry.ph',
+      'secretary@memberry.ph',
+      'society@memberry.ph',
+    ];
+    let sortOrder = 1;
+    for (const email of sharedOfficerEmails) {
+      const [officerUser] = await db
+        .select({ id: userTable.id })
+        .from(userTable)
+        .where(eq(userTable.email, email))
+        .limit(1);
+      if (!officerUser) continue;
+      const positionTitle =
+        email === officerEmail
+          ? 'President'
+          : email === 'treasurer@memberry.ph'
+            ? 'Treasurer'
+            : email === 'secretary@memberry.ph'
+              ? 'Secretary'
+              : 'Society Officer';
       const [pos] = await db
         .insert(positions)
         .values({
           organizationId: org.id,
-          title: 'President',
+          title: positionTitle,
           level: 'chapter',
           termLengthMonths: 12,
-          sortOrder: 1,
+          sortOrder,
         })
         .returning({ id: positions.id });
+      sortOrder += 1;
       if (pos) {
-        positionId = pos.id;
         await db.insert(officerTerms).values({
           positionId: pos.id,
-          personId: officerPersonId,
+          personId: officerUser.id,
           organizationId: org.id,
           status: 'active',
           startDate: TERM_START,
           endDate: TERM_END,
         });
+        // Return the default-officer's ids in the response for backward
+        // compatibility with callers that read officerPersonId/positionId.
+        if (email === officerEmail) {
+          officerPersonId = officerUser.id;
+          positionId = pos.id;
+        }
       }
     }
   }
