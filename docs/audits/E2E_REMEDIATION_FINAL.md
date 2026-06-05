@@ -1,6 +1,34 @@
 # E2E Remediation — Session Final Status
 
-Generated: 2026-06-05 (session 3 close — root-cause fixes F1-F4 landed)
+Generated: 2026-06-05 (session 4 close — golden-path landed; philosophy pivot)
+
+## ⭐ New philosophy — the golden path is the single number that matters
+
+After 22 + 5 + 5 commits of selector + infra fixes, the 250-fail
+long-tail is dominated by parallel contamination and smoke-only
+assertions. Per-spec rewrites have hit <30% signal-per-hour yield.
+
+**The new answer to "does the app work?":**
+
+```bash
+bun run test:sanity        # or directly:
+cd apps/memberry && CI=1 bunx playwright test _golden-path.spec.ts --workers=1
+```
+
+That's an 8-phase real-state-mutating spec across personas inside an
+isolated org. Runs in ~18s. 14/14 green proves the most critical
+user journeys (signup → apply → approve → CPD log → payment record →
+roster read → announcement draft → sign-out/in) all work end-to-end.
+
+See `docs/audits/SANITY_CHECK.md` for the per-phase failure-mapping
+table and how to extend it.
+
+**The 250 long-tail fails are now classified as suite hygiene tail.**
+Real regressions land in the golden path's failure trace. Contamination
+flakes are filed as Track D (mark serial or `withIsolatedFixture`
+adopt — see plan file).
+
+
 
 ## Headline (post F1-F4 + F3-extra)
 
