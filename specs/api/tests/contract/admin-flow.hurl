@@ -8,7 +8,7 @@ csrf_token: jsonpath "$.token"
 
 
 # Platform admin flow: organizations, associations, admins, feature flags.
-# Uses runner-injected {{admin_email}} and {{admin_password}}.
+# Uses runner-injected {{seed_officer_email}} and {{seed_officer_password}}.
 
 # ── 0. Anonymous → 401 ──────────────────────────────────────
 
@@ -23,8 +23,8 @@ Origin: {{origin}}
 x-csrf-token: {{csrf_token}}
 Content-Type: application/json
 {
-  "email": "{{admin_email}}",
-  "password": "{{admin_password}}"
+  "email": "{{seed_officer_email}}",
+  "password": "{{seed_officer_password}}"
 }
 HTTP 200
 [Captures]

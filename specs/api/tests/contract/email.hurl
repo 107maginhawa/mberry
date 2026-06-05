@@ -8,8 +8,8 @@ csrf_token: jsonpath "$.token"
 
 
 # Email module: auth gate for non-admins, then full happy-path admin
-# coverage on templates + queue. The runner-injected {{admin_email}} +
-# {{admin_password}} let scenarios sign in as admin without juggling
+# coverage on templates + queue. The runner-injected {{seed_officer_email}} +
+# {{seed_officer_password}} let scenarios sign in as admin without juggling
 # cookie headers.
 
 # 1. Anonymous → 401.
@@ -44,8 +44,8 @@ Origin: {{origin}}
 x-csrf-token: {{csrf_token}}
 Content-Type: application/json
 {
-  "email": "{{admin_email}}",
-  "password": "{{admin_password}}"
+  "email": "{{seed_officer_email}}",
+  "password": "{{seed_officer_password}}"
 }
 HTTP 200
 
