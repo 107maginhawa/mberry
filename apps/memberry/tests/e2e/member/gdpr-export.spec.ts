@@ -14,12 +14,17 @@
  */
 
 import { test, expect } from '../helpers/test-fixture'
-import { authStateFile } from '../helpers/auth-state'
+import { signUp } from '../helpers/auth'
 
-test.use({ storageState: authStateFile('member') })
+test.describe.configure({ mode: 'serial' })
 
 test.describe('T3 — Data export request appears in Previous Exports', () => {
   test('member requests export, sees Ready row + Download link', async ({ page }) => {
+    // Fresh user so the server-side 24h rate-limit (BR M2-R4 in
+    // exportMyData.ts) is guaranteed clean — running against the seeded
+    // member would intermittently 429 across consecutive runs.
+    await signUp(page)
+
     // Clear the localStorage rate-limit sentinel before the page mounts
     // so this spec is deterministic regardless of prior runs.
     await page.addInitScript(() => {
