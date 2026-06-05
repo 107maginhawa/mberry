@@ -75,7 +75,7 @@ x-org-id: {{org_id}}
 }
 HTTP 201
 [Captures]
-election_id: jsonpath "$.id"
+election_id: jsonpath "$.data.id"
 
 
 # ── Get election ──────────────────────────────────────────
