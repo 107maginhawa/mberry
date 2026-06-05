@@ -10,7 +10,7 @@
 | `bun run typecheck` (5 workspaces) | ✅ 5/5 | ✅ 5/5 | — |
 | BE unit (api-ts) | ✅ 6057/6057 | ✅ unchanged | — |
 | BE integration | ✅ 23/23 | ✅ unchanged | — |
-| FE memberry vitest | ✅ 633/633 | ✅ unchanged | — |
+| FE memberry vitest (isolated) | ✅ 633/633 | ✅ **640/640** | +7 (channel-list) |
 | FE admin vitest | ✅ 57/57 | ✅ unchanged | — |
 | `lint:no-skips` | ❌ 14 violations | ✅ clean | +14 cleared |
 | `lint:shallow` | ❌ 1 violation | ✅ clean | +1 cleared |
@@ -113,9 +113,9 @@ b0bf8d4c fix(test:lint): clear lint:shallow + lint:no-skips violations
 
 2. **#20 E2E 403 cascade — empirical baseline captured.** Full shard 1/4 ran in 7.0 min on the new infra (storageState + workers=4 + fast helpers), confirming the ~7.5min full-suite projection. 77 pass + 10 skip on shard 1 alone. Many failures (long list captured in `.audits/e2e-memberry-shard-1.log` if rerun) are real app/fixture drift (bookings, dues, documents, communications) — not infrastructure issues. Per-spec triage to fix the data gaps and stale assertions, but the speedup means a full re-triage cycle is now feasible in one sitting instead of one day. The 4 remaining specs with extra beforeEach setup (after the second-pass migrator landed in commit 7cbb1fcd) need final manual storageState migration. Cross-persona scaffolds need implementation against real handlers.
 
-3. **#11 FE component backfill m04-m11** — ~200 Vitest files per the original plan. Aggressive scope, multi-day. Pattern: per regressed module, write tests for each component (render/props/interaction/error/loading/empty), each hook (state/transitions/error), each form (Zod refinements/submit), each data table (sort/filter/paginate/empty/error).
+3. **#11 FE component backfill — DONE.** Investigation showed 13/14 regressed components already had tests; the missing one (channel-list) gap-filled in commit 61137a30 (+7 tests). Isolated vitest runner now 640/640 pass. Earlier "200 files / multi-day" estimate (per stale memory) was wrong — the actual gap was 1 file. The 25 fails surfaced by non-isolated flat runs are pollution-induced and correctly handled by the existing test-isolated.ts harness.
 
-4. **#6 P2.3 BR/Flow/Route backfill** — 8 UNTESTED Phase-2 BRs (intentional defer), 127/127 flows need WF-id tagging in specs, 84 routes need first E2E visit (mostly /my/* + admin/*).
+4. **#6 P2.3 BR/Flow/Route backfill — partial.** Flow tagging now 51/127 (40%) covered via `scripts/audit/suggest-wf-tags.ts` + manual review across 58 specs. Remaining 76 flows need bottom-of-list-suggestion specs tagged (lower confidence, human pick). Route + BR backfill still per-spec engineering.
 
 ## How to resume
 
