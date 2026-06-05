@@ -11,33 +11,25 @@ csrf_token: jsonpath "$.token"
 # Covers single room GET, ICE servers, and video call operations.
 # Video/WebRTC endpoints require infrastructure and use HTTP * assertions.
 
-# ── Auth: two users to create a room ─────────────────────────
+# ── Auth: sign in as seeded officer, capture a second person id ──
 
-POST {{api}}/auth/sign-up/email
+POST {{api}}/auth/sign-in/email
 Origin: {{origin}}
 x-csrf-token: {{csrf_token}}
 Content-Type: application/json
 {
-  "email": "comms-ext-a-{{suffix}}@example.org",
-  "password": "Sup3rSecret!ContractTest",
-  "name": "CommsExt A"
+  "email": "{{seed_officer_email}}",
+  "password": "{{seed_officer_password}}"
 }
 HTTP 200
 [Captures]
-person_id: jsonpath "$.user.id"
+a_id: jsonpath "$.user.id"
 
-POST {{api}}/auth/sign-up/email
-Origin: {{origin}}
-x-csrf-token: {{csrf_token}}
-Content-Type: application/json
-{
-  "email": "comms-ext-b-{{suffix}}@example.org",
-  "password": "Sup3rSecret!ContractTest",
-  "name": "CommsExt B"
-}
+GET {{api}}/persons
+x-org-id: {{org_id}}
 HTTP 200
 [Captures]
-person_id: jsonpath "$.user.id"
+b_id: jsonpath "$.data[1].id"
 
 POST {{api}}/comms/chat-rooms
 Origin: {{origin}}
@@ -45,8 +37,8 @@ x-csrf-token: {{csrf_token}}
 Content-Type: application/json
 x-org-id: {{org_id}}
 {
-  "participants": ["{{a_id}}", "{{b_id}}"],
-  "context": "{{a_id}}"
+  "context": "{{org_id}}",
+  "participants": ["{{a_id}}", "{{b_id}}"]
 }
 HTTP *
 [Captures]

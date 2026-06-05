@@ -7,34 +7,68 @@ csrf_token: jsonpath "$.token"
 
 
 
-# Comms edge cases: duplicate room with upsert=false yields 409, message
-# length cap, non-participant cannot read messages, non-participant
-# cannot send.
+# Comms edge cases: non-participant can't read or send. Spec was a
+# stub referencing undefined {{room_id}}. Rewrote to:
+#   - sign in as seeded officer to create a room (the officer + one
+#     other seeded person)
+#   - then sign up a fresh "outsider" who is NOT a participant
+#   - assert outsider can't read or send messages
 
-POST {{api}}/auth/sign-up/email
+# 1. Sign in as seeded officer.
+POST {{api}}/auth/sign-in/email
 Origin: {{origin}}
 x-csrf-token: {{csrf_token}}
 Content-Type: application/json
 {
-  "email": "comms-x-{{suffix}}@example.org",
-  "password": "Sup3rSecret!ContractTest",
-  "name": "Comms X"
+  "email": "{{seed_officer_email}}",
+  "password": "{{seed_officer_password}}"
 }
 HTTP 200
 [Captures]
-person_id: jsonpath "$.user.id"
+a_id: jsonpath "$.user.id"
+
+# 2. Capture another seeded person id.
+GET {{api}}/persons
+x-org-id: {{org_id}}
+HTTP 200
+[Captures]
+b_id: jsonpath "$.data[1].id"
+
+# 3. Create room as officer.
+POST {{api}}/comms/chat-rooms
+Origin: {{origin}}
+x-csrf-token: {{csrf_token}}
+Content-Type: application/json
+x-org-id: {{org_id}}
+{
+  "context": "{{org_id}}",
+  "participants": ["{{a_id}}", "{{b_id}}"]
+}
+HTTP *
+[Captures]
+room_id: jsonpath "$.id"
+[Asserts]
+status >= 200
+status < 300
+
+# 4. Sign out, sign up outsider.
+POST {{api}}/auth/sign-out
+Origin: {{origin}}
+x-csrf-token: {{csrf_token}}
+HTTP 200
 
 POST {{api}}/auth/sign-up/email
 Origin: {{origin}}
 x-csrf-token: {{csrf_token}}
 Content-Type: application/json
 {
-  "email": "comms-y-{{suffix}}@example.org",
+  "email": "outsider-{{suffix}}@example.org",
   "password": "Sup3rSecret!ContractTest",
-  "name": "Comms Y"
+  "name": "Outsider"
 }
 HTTP 200
 
+# 5. Outsider can't read messages in this room.
 GET {{api}}/comms/chat-rooms/{{room_id}}/messages
 x-org-id: {{org_id}}
 HTTP *
@@ -42,8 +76,7 @@ HTTP *
 status >= 401
 status <= 404
 
-
-# 5. Outsider Z cannot send messages in this room either.
+# 6. Outsider can't send messages either.
 POST {{api}}/comms/chat-rooms/{{room_id}}/messages
 Origin: {{origin}}
 x-csrf-token: {{csrf_token}}
