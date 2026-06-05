@@ -249,7 +249,7 @@ GET {{api}}/admin/feature-flags
 Cookie: better-auth.session_token={{admin_cookie}}
 HTTP 200
 [Asserts]
-jsonpath "$.data" isCollection
+jsonpath "$" isCollection
 
 
 # ── 18. Delete feature flag ─────────────────────────────────

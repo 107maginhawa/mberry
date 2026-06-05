@@ -85,9 +85,24 @@ status >= 200
 status < 300
 
 
-# ── 5. Delete announcement ──────────────────────────────────
+# ── 5. Delete announcement (must target a draft) ────────────
+# Step 4 archived the working announcement and DELETE is restricted to
+# `draft` status (BusinessLogicError ANNOUNCEMENT_NOT_DRAFT). Create a
+# fresh draft just to exercise DELETE.
 
-DELETE {{api}}/communications/announcements/{{announcement_id}}
+POST {{api}}/communications/announcements/ed8e3a96-8126-4341-be42-e6eb7940c562
+Origin: {{origin}}
+x-csrf-token: {{csrf_token}}
+Content-Type: application/json
+{
+  "title": "Deletable Draft {{suffix}}",
+  "content": "Created to exercise DELETE."
+}
+HTTP 201
+[Captures]
+draft_id: jsonpath "$.data.id"
+
+DELETE {{api}}/communications/announcements/{{draft_id}}
 Origin: {{origin}}
 x-csrf-token: {{csrf_token}}
 x-org-id: {{org_id}}
