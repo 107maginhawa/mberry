@@ -9,25 +9,32 @@ csrf_token: jsonpath "$.token"
 
 # Association event check-ins flow: list and create check-ins.
 
-# 0. Auth setup — sign up + create person.
-POST {{api}}/auth/sign-up/email
+# 0. Auth as seeded officer — has officer role for the seeded org.
+POST {{api}}/auth/sign-in/email
 Origin: {{origin}}
 x-csrf-token: {{csrf_token}}
 Content-Type: application/json
 {
-  "email": "assoc-checkin-{{suffix}}@example.org",
-  "password": "Sup3rSecret!ContractTest",
-  "name": "Checkin Tester"
+  "email": "{{seed_officer_email}}",
+  "password": "{{seed_officer_password}}"
 }
 HTTP 200
 [Captures]
 person_id: jsonpath "$.user.id"
 
+# Capture a seeded *published* event id — registrations endpoint refuses
+# events in draft/completed/cancelled with EVENT_NOT_PUBLISHED.
+GET {{api}}/association/events?organizationId={{org_id}}&status=published
+x-org-id: {{org_id}}
+HTTP 200
+[Captures]
+event_id: jsonpath "$.data[0].id"
+
 POST {{api}}/association/events/registrations
 Origin: {{origin}}
 x-csrf-token: {{csrf_token}}
 Content-Type: application/json
-x-org-id: ed8e3a96-8126-4341-be42-e6eb7940c562
+x-org-id: {{org_id}}
 {
   "eventId": "{{event_id}}",
   "personId": "{{person_id}}"
