@@ -29,7 +29,6 @@ person_id: jsonpath "$.user.id"
 POST {{api}}/billing/invoices
 Origin: {{origin}}
 x-csrf-token: {{csrf_token}}
-Cookie: better-auth.session_token={{session_token}}
 Content-Type: application/json
 {
   "description": "Contract test invoice {{suffix}}",
@@ -47,7 +46,6 @@ status < 300
 # ── 2. Get single invoice ───────────────────────────────────
 
 GET {{api}}/billing/invoices/{{invoice_id}}
-Cookie: better-auth.session_token={{session_token}}
 HTTP *
 [Asserts]
 status >= 200
@@ -59,7 +57,6 @@ status < 300
 PATCH {{api}}/billing/invoices/{{invoice_id}}
 Origin: {{origin}}
 x-csrf-token: {{csrf_token}}
-Cookie: better-auth.session_token={{session_token}}
 Content-Type: application/json
 {
   "description": "Updated contract test invoice {{suffix}}"
@@ -76,7 +73,6 @@ status < 300
 POST {{api}}/billing/invoices/{{invoice_id}}/capture
 Origin: {{origin}}
 x-csrf-token: {{csrf_token}}
-Cookie: better-auth.session_token={{session_token}}
 Content-Type: application/json
 {}
 HTTP *
@@ -88,7 +84,6 @@ HTTP *
 POST {{api}}/billing/invoices/{{invoice_id}}/refund
 Origin: {{origin}}
 x-csrf-token: {{csrf_token}}
-Cookie: better-auth.session_token={{session_token}}
 Content-Type: application/json
 {}
 HTTP *
@@ -99,7 +94,6 @@ HTTP *
 POST {{api}}/billing/invoices/{{invoice_id}}/void
 Origin: {{origin}}
 x-csrf-token: {{csrf_token}}
-Cookie: better-auth.session_token={{session_token}}
 Content-Type: application/json
 {}
 HTTP *
@@ -110,7 +104,6 @@ HTTP *
 DELETE {{api}}/billing/invoices/{{invoice_id}}
 Origin: {{origin}}
 x-csrf-token: {{csrf_token}}
-Cookie: better-auth.session_token={{session_token}}
 HTTP *
 
 
@@ -121,7 +114,6 @@ HTTP *
 POST {{api}}/billing/merchant-accounts/00000000-0000-0000-0000-000000000000/dashboard
 Origin: {{origin}}
 x-csrf-token: {{csrf_token}}
-Cookie: better-auth.session_token={{session_token}}
 Content-Type: application/json
 {}
 HTTP *

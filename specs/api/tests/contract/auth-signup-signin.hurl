@@ -35,7 +35,6 @@ jsonpath "$.token" exists
 
 # 2. Read back the session via cookie
 GET {{api}}/auth/get-session
-Cookie: better-auth.session_token={{session_token}}
 HTTP 200
 [Asserts]
 jsonpath "$.user.email" == "{{created_user_email}}"
@@ -45,7 +44,6 @@ jsonpath "$.user.email" == "{{created_user_email}}"
 POST {{api}}/auth/sign-out
 Origin: {{origin}}
 x-csrf-token: {{csrf_token}}
-Cookie: better-auth.session_token={{session_token}}
 HTTP 200
 
 

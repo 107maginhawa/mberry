@@ -28,7 +28,6 @@ person_id: jsonpath "$.user.id"
 POST {{api}}/booking/events
 Origin: {{origin}}
 x-csrf-token: {{csrf_token}}
-Cookie: better-auth.session_token={{session_token}}
 Content-Type: application/json
 {
   "title": "Expand fixture",
@@ -49,7 +48,6 @@ event_id: jsonpath "$.id"
 
 # 1. Without expand, owner is the person id.
 GET {{api}}/booking/events/{{event_id}}
-Cookie: better-auth.session_token={{session_token}}
 HTTP 200
 [Asserts]
 jsonpath "$.owner" == "{{user_id}}"
@@ -57,7 +55,6 @@ jsonpath "$.owner" == "{{user_id}}"
 
 # 2. With expand=owner, owner is the full Person object inline.
 GET {{api}}/booking/events/{{event_id}}?expand=owner
-Cookie: better-auth.session_token={{session_token}}
 HTTP 200
 [Asserts]
 jsonpath "$.owner.id" == "{{user_id}}"

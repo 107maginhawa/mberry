@@ -27,7 +27,6 @@ HTTP 200
 person_id: jsonpath "$.user.id"
 
 GET {{api}}/persons
-Cookie: better-auth.session_token={{session_token}}
 HTTP *
 [Asserts]
 status >= 200
@@ -39,7 +38,6 @@ status < 300
 PATCH {{api}}/persons/me
 Origin: {{origin}}
 x-csrf-token: {{csrf_token}}
-Cookie: better-auth.session_token={{session_token}}
 Content-Type: application/json
 {
   "firstName": "ExtUpdated"
@@ -53,7 +51,6 @@ status < 300
 # ── 3. Credit summary ────────────────────────────────────────
 
 GET {{api}}/persons/me/credit-summary
-Cookie: better-auth.session_token={{session_token}}
 HTTP *
 [Asserts]
 status >= 200
@@ -63,7 +60,6 @@ status < 300
 # ── 4. Credit entries list ───────────────────────────────────
 
 GET {{api}}/persons/me/credit-entries
-Cookie: better-auth.session_token={{session_token}}
 HTTP *
 [Asserts]
 status >= 200
@@ -75,7 +71,6 @@ status < 300
 POST {{api}}/persons/me/credit-entries
 Origin: {{origin}}
 x-csrf-token: {{csrf_token}}
-Cookie: better-auth.session_token={{session_token}}
 Content-Type: application/json
 {
   "title": "Contract Test Credit {{suffix}}",
@@ -91,7 +86,6 @@ status < 300
 # ── 6. Export my data ────────────────────────────────────────
 
 GET {{api}}/persons/me/export
-Cookie: better-auth.session_token={{session_token}}
 HTTP *
 [Asserts]
 status >= 200
@@ -101,7 +95,6 @@ status < 300
 # ── 7. My memberships ───────────────────────────────────────
 
 GET {{api}}/persons/me/memberships
-Cookie: better-auth.session_token={{session_token}}
 HTTP *
 [Asserts]
 status >= 200
@@ -111,7 +104,6 @@ status < 300
 # ── 8. Get notification preferences ─────────────────────────
 
 GET {{api}}/persons/me/notification-preferences
-Cookie: better-auth.session_token={{session_token}}
 HTTP *
 [Asserts]
 status >= 200
@@ -123,7 +115,6 @@ status < 300
 PATCH {{api}}/persons/me/notification-preferences
 Origin: {{origin}}
 x-csrf-token: {{csrf_token}}
-Cookie: better-auth.session_token={{session_token}}
 Content-Type: application/json
 {
   "emailEnabled": true,
@@ -138,7 +129,6 @@ status < 300
 # ── 10. Get privacy settings ────────────────────────────────
 
 GET {{api}}/persons/me/privacy
-Cookie: better-auth.session_token={{session_token}}
 HTTP *
 [Asserts]
 status >= 200
@@ -150,7 +140,6 @@ status < 300
 PATCH {{api}}/persons/me/privacy
 Origin: {{origin}}
 x-csrf-token: {{csrf_token}}
-Cookie: better-auth.session_token={{session_token}}
 Content-Type: application/json
 {
   "profileVisibility": "members"
@@ -164,7 +153,6 @@ status < 300
 # ── 12. Check officer role for org ───────────────────────────
 
 GET {{api}}/persons/me/officer-role/ed8e3a96-8126-4341-be42-e6eb7940c562
-Cookie: better-auth.session_token={{session_token}}
 HTTP *
 [Asserts]
 status >= 200
@@ -176,7 +164,6 @@ status < 404
 POST {{api}}/persons/me/delete
 Origin: {{origin}}
 x-csrf-token: {{csrf_token}}
-Cookie: better-auth.session_token={{session_token}}
 HTTP *
 [Asserts]
 status >= 200
@@ -188,7 +175,6 @@ status < 300
 POST {{api}}/persons/me/cancel-delete
 Origin: {{origin}}
 x-csrf-token: {{csrf_token}}
-Cookie: better-auth.session_token={{session_token}}
 HTTP *
 [Asserts]
 status >= 200

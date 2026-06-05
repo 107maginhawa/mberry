@@ -11,7 +11,7 @@ csrf_token: jsonpath "$.token"
 
 # ── 0. Unauthenticated → 401 ────────────────────────────────
 
-POST {{api}}/read-all
+POST {{api}}/notifs/read-all
 Origin: {{origin}}
 x-csrf-token: {{csrf_token}}
 HTTP 401
@@ -32,10 +32,9 @@ HTTP 200
 [Captures]
 person_id: jsonpath "$.user.id"
 
-POST {{api}}/read-all
+POST {{api}}/notifs/read-all
 Origin: {{origin}}
 x-csrf-token: {{csrf_token}}
-Cookie: better-auth.session_token={{session_token}}
 HTTP *
 [Asserts]
 status >= 200

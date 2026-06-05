@@ -40,7 +40,6 @@ person_id: jsonpath "$.user.id"
 # ── 2. Get single notification (non-existent → 404) ─────────
 
 GET {{api}}/notifs/00000000-0000-0000-0000-000000000000
-Cookie: better-auth.session_token={{session_token}}
 HTTP *
 [Asserts]
 status >= 200
@@ -52,7 +51,6 @@ status <= 404
 POST {{api}}/notifs/00000000-0000-0000-0000-000000000000/read
 Origin: {{origin}}
 x-csrf-token: {{csrf_token}}
-Cookie: better-auth.session_token={{session_token}}
 Content-Type: application/json
 {}
 HTTP *

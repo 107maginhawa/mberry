@@ -30,7 +30,6 @@ user_id: jsonpath "$.user.id"
 POST {{api}}/persons
 Origin: {{origin}}
 x-csrf-token: {{csrf_token}}
-Cookie: better-auth.session_token={{session_token}}
 Content-Type: application/json
 {
   "firstName": "Ada",
@@ -50,7 +49,6 @@ jsonpath "$.lastName" == "Lovelace"
 
 # 3. Read it back
 GET {{api}}/persons/{{person_id}}
-Cookie: better-auth.session_token={{session_token}}
 HTTP 200
 [Asserts]
 jsonpath "$.id" == "{{person_id}}"
@@ -61,7 +59,6 @@ jsonpath "$.firstName" == "Ada"
 PATCH {{api}}/persons/{{person_id}}
 Origin: {{origin}}
 x-csrf-token: {{csrf_token}}
-Cookie: better-auth.session_token={{session_token}}
 Content-Type: application/json
 {
   "firstName": "Augusta"

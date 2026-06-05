@@ -33,5 +33,4 @@ session_token: cookie "better-auth.session_token"
 
 # 2. Authenticated but non-admin user must be forbidden.
 GET {{api}}/audit/logs
-Cookie: better-auth.session_token={{session_token}}
 HTTP 403
