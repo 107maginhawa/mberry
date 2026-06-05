@@ -116,8 +116,8 @@ Origin: {{origin}}
 x-csrf-token: {{csrf_token}}
 Content-Type: application/json
 {
-  "email": "book-ext-host-{{suffix}}@example.org",
-  "password": "Sup3rSecret!ContractTest"
+  "email": "{{seed_officer_email}}",
+  "password": "{{seed_officer_password}}"
 }
 HTTP 200
 

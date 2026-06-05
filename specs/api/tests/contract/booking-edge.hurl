@@ -125,14 +125,15 @@ x-org-id: {{org_id}}
 HTTP 404
 
 
-# 4. Switch to host and reject the first booking.
+# 4. Switch back to host and reject the first booking.
+# Host is the seeded officer (signed in at top of spec).
 POST {{api}}/auth/sign-in/email
 Origin: {{origin}}
 x-csrf-token: {{csrf_token}}
 Content-Type: application/json
 {
-  "email": "edge-host-{{suffix}}@example.org",
-  "password": "Sup3rSecret!ContractTest"
+  "email": "{{seed_officer_email}}",
+  "password": "{{seed_officer_password}}"
 }
 HTTP 200
 
@@ -181,8 +182,8 @@ Origin: {{origin}}
 x-csrf-token: {{csrf_token}}
 Content-Type: application/json
 {
-  "email": "edge-host-{{suffix}}@example.org",
-  "password": "Sup3rSecret!ContractTest"
+  "email": "{{seed_officer_email}}",
+  "password": "{{seed_officer_password}}"
 }
 HTTP 200
 
