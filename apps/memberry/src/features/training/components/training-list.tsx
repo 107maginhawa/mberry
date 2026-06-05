@@ -173,7 +173,7 @@ export function TrainingList({ orgId }: TrainingListProps) {
           />
         </div>
         <Select value={typeFilter} onValueChange={setTypeFilter}>
-          <SelectTrigger className="text-sm w-[160px]">
+          <SelectTrigger className="text-sm w-[160px]" aria-label="Filter trainings by type">
             <SelectValue placeholder="All Types" />
           </SelectTrigger>
           <SelectContent>

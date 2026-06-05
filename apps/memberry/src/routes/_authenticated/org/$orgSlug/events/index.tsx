@@ -66,7 +66,7 @@ function OrgEvents() {
       {/* Filters */}
       <div className="flex flex-col sm:flex-row gap-3 items-start sm:items-center">
         <Select value={typeFilter} onValueChange={setTypeFilter}>
-          <SelectTrigger className="h-9 w-[160px]">
+          <SelectTrigger className="h-9 w-[160px]" aria-label="Filter events by type">
             <SelectValue placeholder="All Types" />
           </SelectTrigger>
           <SelectContent>

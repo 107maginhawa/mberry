@@ -32,7 +32,7 @@ export function DirectoryFilters({ filters, onChange, specialties, chapters = []
           Specialty
         </Label>
         <Select value={filters.specialty || 'all'} onValueChange={(v) => update('specialty', v)}>
-          <SelectTrigger className="w-full">
+          <SelectTrigger className="w-full" aria-label="Specialty">
             <SelectValue placeholder="All specialties" />
           </SelectTrigger>
           <SelectContent>
@@ -50,7 +50,7 @@ export function DirectoryFilters({ filters, onChange, specialties, chapters = []
             Chapter
           </Label>
           <Select value={filters.chapter || 'all'} onValueChange={(v) => update('chapter', v)}>
-            <SelectTrigger className="w-full">
+            <SelectTrigger className="w-full" aria-label="Chapter">
               <SelectValue placeholder="All chapters" />
             </SelectTrigger>
             <SelectContent>
@@ -68,7 +68,7 @@ export function DirectoryFilters({ filters, onChange, specialties, chapters = []
           Dues Status
         </Label>
         <Select value={filters.duesStatus || 'all'} onValueChange={(v) => update('duesStatus', v)}>
-          <SelectTrigger className="w-full">
+          <SelectTrigger className="w-full" aria-label="Dues status">
             <SelectValue placeholder="All statuses" />
           </SelectTrigger>
           <SelectContent>

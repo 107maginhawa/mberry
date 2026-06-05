@@ -54,6 +54,11 @@ async function scan(page: import('@playwright/test').Page, route: string) {
   await page.goto(route)
   // Let any auth-driven redirect settle before scanning.
   await expect(page).toHaveURL(/.*/, { timeout: 5000 })
+  // SPA's query/state rendering ticks need a beat — without this axe
+  // sometimes scans a skeleton state with low-contrast placeholders
+  // ("Could not load …" alert that appears before retry succeeds).
+  await page.waitForLoadState('domcontentloaded')
+  await page.waitForTimeout(1500)
   const results = await new AxeBuilder({ page })
     .withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa'])
     .analyze()
