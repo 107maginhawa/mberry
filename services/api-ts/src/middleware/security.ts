@@ -30,8 +30,11 @@ export function createCorsMiddleware(config: Config, logger?: Logger) {
     origin: originValidator,
     credentials: config.cors.credentials,
     allowMethods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
-    // When adding custom headers, add to BOTH allowHeaders AND exposeHeaders
-    allowHeaders: ['Content-Type', 'Authorization', 'X-Request-ID', 'X-API-Key', 'X-Org-ID'],
+    // When adding custom headers, add to BOTH allowHeaders AND exposeHeaders.
+    // x-csrf-token is paired with the better-auth.csrf_token cookie by
+    // middleware/csrf.ts; preflight OPTIONS must list it so cross-origin
+    // browser fetches (SPA → API) survive the CORS check.
+    allowHeaders: ['Content-Type', 'Authorization', 'X-Request-ID', 'X-API-Key', 'X-Org-ID', 'X-CSRF-Token'],
     exposeHeaders: ['X-Request-ID'],
     maxAge: 600,
   };

@@ -138,6 +138,7 @@ describe('createCorsMiddleware', () => {
     expect(Array.isArray(dataArg.allowHeaders)).toBe(true);
     expect(dataArg.allowHeaders).toContain('Authorization');
     expect(dataArg.allowHeaders).toContain('Content-Type');
+    expect(dataArg.allowHeaders).toContain('X-CSRF-Token');
   });
 
   it('reflects corsSettings flags from config in the debug log', () => {

@@ -11,6 +11,14 @@ test.use({ storageState: authStateFile('idor') })
 const API_BASE = process.env.API_BASE_URL ?? 'http://localhost:7213'
 const ORG_A_ID = 'ed8e3a96-8126-4341-be42-e6eb7940c562' // pda-metro-manila
 
+// Cross-origin fetch from `page.evaluate(() => fetch(API))` runs with
+// Origin: null when the page hasn't navigated anywhere, and hono/cors
+// rejects null-origin preflights. Land on the SPA first so subsequent
+// fetches inherit the http://localhost:3004 origin that CORS_ORIGINS allows.
+test.beforeEach(async ({ page }) => {
+  await page.goto('/dashboard')
+})
+
 test.describe('Cross-Org Isolation (IDOR Prevention)', () => {
 test('org B officer cannot view org A roster', async ({ page }) => {
     const status = await page.evaluate(
