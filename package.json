@@ -25,6 +25,7 @@
     "lint:shallow": "bun scripts/lint-shallow-tests.ts",
     "rollback": "bash scripts/rollback.sh",
     "test:contract": "bun scripts/run-contract-tests.ts",
+    "test:contract:full": "docker compose up -d mailpit stripe-mock --wait && bun scripts/run-contract-tests.ts",
     "test:br": "bun run scripts/br-coverage.ts",
     "test:contract:fuzz": "bun scripts/run-schemathesis.ts",
     "prepare": "husky",

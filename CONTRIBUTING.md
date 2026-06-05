@@ -139,9 +139,18 @@ for API behavior — implementation-agnostic, runs in seconds, used by CI:
 cd services/api-ts && bun dev
 
 # In another
-bun run test:contract              # 22 scenarios in ~5s
+bun run test:contract              # 95/99 scenarios; ~7s
+bun run test:contract:full         # boots mailpit + stripe-mock first → all 99
 bun run test:contract:fuzz         # Schemathesis property-based fuzz
 ```
+
+The plain `test:contract` cleanly skips 4 specs whose preconditions
+need external services that aren't always running locally
+(`auth-password-reset`, `auth-verification` need mailpit on :8025;
+`billing-extended-flow`, `billing-lifecycle` need stripe-mock on
+:12111 + `STRIPE_SECRET_KEY`). `test:contract:full` boots those via
+`docker compose up -d mailpit stripe-mock --wait` and then runs the
+suite — use it when you need the full 99/99 sign-off locally.
 
 See `specs/api/tests/contract/COVERAGE.md` for what is checked vs
 deferred, and `specs/api/IMPLEMENTING.md` to add a sibling impl in
