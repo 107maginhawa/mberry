@@ -65,9 +65,12 @@ x-csrf-token: {{csrf_token}}
 Content-Type: application/json
 x-org-id: {{org_id}}
 {
+  "organizationId": "{{org_id}}",
   "title": "Contract Test Event {{suffix}}",
   "description": "Test event",
   "location": "Test Venue",
+  "eventType": "seminar",
+  "creditBearing": false,
   "startDate": "2026-12-01T09:00:00Z",
   "endDate": "2026-12-01T17:00:00Z",
   "capacity": 50

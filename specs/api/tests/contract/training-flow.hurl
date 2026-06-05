@@ -63,9 +63,11 @@ x-csrf-token: {{csrf_token}}
 Content-Type: application/json
 x-org-id: {{org_id}}
 {
+  "organizationId": "{{org_id}}",
   "title": "Contract Test Training {{suffix}}",
   "description": "Test training session",
   "location": "Online",
+  "type": "seminar",
   "startDate": "2026-12-15T09:00:00Z",
   "endDate": "2026-12-15T17:00:00Z",
   "capacity": 30,

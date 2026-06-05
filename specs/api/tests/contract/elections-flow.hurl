@@ -63,13 +63,15 @@ x-csrf-token: {{csrf_token}}
 Content-Type: application/json
 x-org-id: {{org_id}}
 {
+  "organizationId": "{{org_id}}",
   "title": "Contract Test Election {{suffix}}",
   "description": "Board election",
+  "type": "officer",
   "nominationStart": "2026-11-01T00:00:00Z",
   "nominationEnd": "2026-11-15T00:00:00Z",
   "votingStart": "2026-11-16T00:00:00Z",
   "votingEnd": "2026-11-30T00:00:00Z",
-  "positions": 3
+  "positions": []
 }
 HTTP 201
 [Captures]
