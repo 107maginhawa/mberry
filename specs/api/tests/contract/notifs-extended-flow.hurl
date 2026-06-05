@@ -12,6 +12,15 @@ csrf_token: jsonpath "$.token"
 # Uses a placeholder notif ID since no notifications exist for
 # a new user — expects 404, validating the route exists.
 
+# ── 1. Unauthenticated → 401 ────────────────────────────────
+# This GET must run BEFORE sign-up — once a session cookie lands in the
+# per-file Hurl jar, the request authenticates and 404 is returned for
+# the missing notif id (auth-then-not-found), not 401 (no-auth).
+
+GET {{api}}/notifs/00000000-0000-0000-0000-000000000000
+HTTP 401
+
+
 # ── Auth ─────────────────────────────────────────────────────
 
 POST {{api}}/auth/sign-up/email
@@ -26,9 +35,6 @@ Content-Type: application/json
 HTTP 200
 [Captures]
 person_id: jsonpath "$.user.id"
-
-GET {{api}}/notifs/00000000-0000-0000-0000-000000000000
-HTTP 401
 
 
 # ── 2. Get single notification (non-existent → 404) ─────────

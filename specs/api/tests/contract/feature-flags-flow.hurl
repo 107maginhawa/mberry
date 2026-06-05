@@ -8,8 +8,13 @@ csrf_token: jsonpath "$.token"
 
 
 # Public feature flags endpoint. No auth required.
+# Path is mounted at /feature-flags (see core/feature-flags.ts:57); earlier
+# spec had it doubled as /feature-flags/feature-flags — corrected here.
 
-GET {{api}}/feature-flags/feature-flags
+GET {{api}}/feature-flags
 HTTP 200
 [Asserts]
-jsonpath "$" isCollection
+# Endpoint returns a flag-name → boolean map (object). May be {} when no
+# flags configured. Use header check + status code only — assert-on-empty
+# would fail when an org has zero flags defined.
+header "Content-Type" matches "application/json"

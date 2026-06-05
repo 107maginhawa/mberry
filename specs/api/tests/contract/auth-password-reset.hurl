@@ -30,7 +30,9 @@ HTTP 200
 
 
 # 2. Request a password reset.
-POST {{api}}/auth/forget-password
+# Better-Auth exposes this as /auth/request-password-reset; the legacy
+# /auth/forget-password is a different (404) route in the current build.
+POST {{api}}/auth/request-password-reset
 Origin: {{origin}}
 x-csrf-token: {{csrf_token}}
 Content-Type: application/json

@@ -60,8 +60,13 @@ HTTP 200
 
 
 # ── 1. List categories ─────────────────────────────────────
+# Route registry mounts GET /association/member/membership-categories (no
+# path param — org context comes from the x-org-id header). The
+# `/:organizationId` suffix is the PUT/upsert path. Spec previously misused
+# the upsert path for the list call → 405 Method Not Allowed.
 
-GET {{api}}/association/member/membership-categories/ed8e3a96-8126-4341-be42-e6eb7940c562
+GET {{api}}/association/member/membership-categories?organizationId={{org_id}}
+x-org-id: {{org_id}}
 HTTP 200
 [Asserts]
 jsonpath "$.data" isCollection
