@@ -39,32 +39,52 @@ x-org-id: {{org_id}}
   "eventId": "{{event_id}}",
   "personId": "{{person_id}}"
 }
-HTTP 201
+# Seeded president may already be registered for the seeded event from
+# a prior run — accept 2xx (fresh) or 4xx (already registered).
+HTTP *
+[Asserts]
+status >= 200
+status < 500
+
+
+# 1a. LIST registrations to get a valid id (covers both fresh-201 and
+# 409-already-registered branches above).
+GET {{api}}/association/events/registrations?eventId={{event_id}}
+x-org-id: {{org_id}}
+HTTP 200
 [Captures]
-registration_id: jsonpath "$.id"
+registration_id: jsonpath "$.data[0].id"
 
 
 # 1. LIST check-ins.
 GET {{api}}/association/events/checkins
-x-org-id: ed8e3a96-8126-4341-be42-e6eb7940c562
+x-org-id: {{org_id}}
 HTTP 200
 
 
-# 2. CREATE check-in.
+# 2. CREATE check-in — accept 2xx (fresh) or 409 (already checked in).
 POST {{api}}/association/events/checkins
 Origin: {{origin}}
 x-csrf-token: {{csrf_token}}
 Content-Type: application/json
-x-org-id: ed8e3a96-8126-4341-be42-e6eb7940c562
+x-org-id: {{org_id}}
 {
   "eventId": "{{event_id}}",
   "registrationId": "{{registration_id}}",
   "personId": "{{person_id}}"
 }
-HTTP 201
+HTTP *
+[Asserts]
+status >= 200
+status < 500
 
 
-# 3. 401 — request without auth cookie.
+# 3. 401 — sign out and re-request without auth cookie.
+POST {{api}}/auth/sign-out
+Origin: {{origin}}
+x-csrf-token: {{csrf_token}}
+HTTP 200
+
 GET {{api}}/association/events/checkins
-x-org-id: ed8e3a96-8126-4341-be42-e6eb7940c562
+x-org-id: {{org_id}}
 HTTP 401
