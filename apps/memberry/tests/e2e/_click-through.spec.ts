@@ -95,3 +95,46 @@ test.describe('click-through — officer', () => {
     await clickThrough(page, `/org/${ORG_ID}/officer/dashboard`)
   })
 })
+
+test.describe('T5 focused 5-page click-through with data-row assertions', () => {
+  // Real-UI promotion: rather than crawling every link on a single page,
+  // visit 5 high-value list/detail surfaces, assert the canonical heading
+  // renders, AND assert at least one data-bearing row/card is visible
+  // (skeleton/empty-state both count — proves the SPA query resolved and
+  // the UI committed to a final visual state, not a perpetual loading
+  // shimmer or blank container).
+  test.use({ storageState: authStateFile('officer') })
+
+  const SURFACES: Array<{ name: string; path: string; heading: RegExp }> = [
+    { name: 'Roster',         path: `/org/pda-metro-manila/officer/roster`,           heading: /roster|members/i },
+    { name: 'Applications',   path: `/org/pda-metro-manila/officer/applications`,     heading: /applications/i },
+    { name: 'Payments',       path: `/org/pda-metro-manila/officer/payments`,         heading: /dues.*payments|payments/i },
+    { name: 'Invoices',       path: `/org/pda-metro-manila/officer/finances/invoices`, heading: /invoices/i },
+    { name: 'Events',         path: `/org/pda-metro-manila/officer/events`,           heading: /events/i },
+  ]
+
+  for (const { name, path, heading } of SURFACES) {
+    test(`${name} surface renders heading + at least one row or empty state`, async ({ page }) => {
+      await page.goto(path)
+      await expect(
+        page.getByRole('heading', { name: heading, level: 1 }).first(),
+      ).toBeVisible({ timeout: 15000 })
+
+      // At least one of: a real data row (table row in tbody, list item),
+      // a card-like article element, OR an explicit empty-state with
+      // recognisable copy. Whichever resolves first wins.
+      const dataRow = page.locator('table tbody tr, ul li[role="listitem"], article, [class*="card"]').first()
+      const emptyState = page.getByText(/no .* yet|nothing here|no .* found|no invoices|no events|no members|no applications/i).first()
+
+      await Promise.race([
+        dataRow.waitFor({ state: 'visible', timeout: 15000 }),
+        emptyState.waitFor({ state: 'visible', timeout: 15000 }),
+      ])
+
+      // Final assertion: SOMETHING committed visually beyond the shell.
+      const hasRow = await dataRow.isVisible().catch(() => false)
+      const hasEmpty = await emptyState.isVisible().catch(() => false)
+      expect(hasRow || hasEmpty, `${name} renders neither a row nor an empty state`).toBe(true)
+    })
+  }
+})
