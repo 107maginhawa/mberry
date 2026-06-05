@@ -24,6 +24,22 @@ HTTP 200
 [Captures]
 person_id: jsonpath "$.user.id"
 
+
+# Create a file (status=uploading until binary is PUT), then try to
+# download it — should 4xx because not yet uploaded.
+POST {{api}}/storage/files/upload
+Origin: {{origin}}
+x-csrf-token: {{csrf_token}}
+Content-Type: application/json
+{
+  "filename": "pending-edge-{{suffix}}.pdf",
+  "size": 100,
+  "mimeType": "application/pdf"
+}
+HTTP 201
+[Captures]
+pending_file: jsonpath "$.file"
+
 GET {{api}}/storage/files/{{pending_file}}/download
 HTTP *
 [Asserts]

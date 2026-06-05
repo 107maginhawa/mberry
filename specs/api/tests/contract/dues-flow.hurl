@@ -135,6 +135,10 @@ status < 500
 
 
 # ── 9. [BR-32] Financial dashboard (retention verification) ──
+# Identical to step 5 above. Re-verify the dashboard still responds
+# after the refund + gateway calls (BR-32 = "financial records survive
+# unrelated mutations").
 
 GET {{api}}/dues/dashboard/ed8e3a96-8126-4341-be42-e6eb7940c562
+x-org-id: {{org_id}}
 HTTP 200
