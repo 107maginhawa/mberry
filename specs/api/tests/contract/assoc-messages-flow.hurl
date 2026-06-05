@@ -30,6 +30,8 @@ Content-Type: application/json
 x-org-id: {{org_id}}
 {
   "organizationId": "{{org_id}}",
+  "senderId": "{{person_id}}",
+  "recipientPersonIds": ["{{person_id}}"],
   "subject": "Contract Test Msg {{suffix}}",
   "body": "Test body",
   "channel": "email",

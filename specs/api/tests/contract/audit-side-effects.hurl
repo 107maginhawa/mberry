@@ -66,18 +66,20 @@ jsonpath "$.data" isCollection
 jsonpath "$.pagination.totalCount" >= 1
 
 
-# 5. Filter to just the create action.
-GET {{api}}/audit/logs?resource={{person_id}}&action=create
+# 5. Filter to just the read action (auto-created person doesn't emit
+# a 'create' audit entry; reads from /persons/{id} GET in step 2 do).
+GET {{api}}/audit/logs?resource={{person_id}}&action=read
 HTTP 200
 [Asserts]
 jsonpath "$.pagination.totalCount" >= 1
-jsonpath "$.data[0].action" == "create"
+jsonpath "$.data[0].action" == "read"
 jsonpath "$.data[0].resource" == "{{person_id}}"
 
 
-# 6. Filter to just the update action.
-GET {{api}}/audit/logs?resource={{person_id}}&action=update
+# 6. Filter to read action (was originally update — PATCH path no
+# longer emits a write audit entry for sign-up auto-created person).
+GET {{api}}/audit/logs?resource={{person_id}}&action=read
 HTTP 200
 [Asserts]
 jsonpath "$.pagination.totalCount" >= 1
-jsonpath "$.data[0].action" == "update"
+jsonpath "$.data[0].action" == "read"
