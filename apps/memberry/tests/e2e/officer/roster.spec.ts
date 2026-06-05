@@ -18,9 +18,14 @@ test('heading "Member Roster" is visible', async ({ page }) => {
 
   test('shows member table with columns', async ({ page }) => {
     await page.goto(`/org/${ORG_ID}/officer/roster`)
-    // Table headers visible
-    await expect(page.getByText('Name')).toBeVisible({ timeout: 10000 })
-    await expect(page.getByText('Status')).toBeVisible({ timeout: 10000 })
+    // Scope to columnheader role — "Status" also appears in filter pills
+    // and member-row badges, triggering strict-mode collisions.
+    await expect(
+      page.getByRole('columnheader', { name: /name/i }).first(),
+    ).toBeVisible({ timeout: 10000 })
+    await expect(
+      page.getByRole('columnheader', { name: /status/i }).first(),
+    ).toBeVisible({ timeout: 10000 })
   })
 
   test('shows member rows with status badges', async ({ page }) => {
@@ -46,9 +51,13 @@ test('heading "Member Roster" is visible', async ({ page }) => {
 
   test('[BR-23] roster search accepts text input', async ({ page }) => {
     await page.goto(`/org/${ORG_ID}/officer/roster`)
-    // Search input should be present
-    const hasSearch = await page.getByPlaceholder(/search/i).first().isVisible().catch(() => false)
-    const hasInput = await page.locator('input[type="text"], input[type="search"]').first().isVisible().catch(() => false)
-    expect(hasSearch || hasInput).toBeTruthy()
+    // Use toBeVisible (polls) — isVisible() is a single check that
+    // races SPA hydration.
+    await expect(
+      page
+        .getByPlaceholder(/search/i)
+        .or(page.locator('input[type="text"], input[type="search"]'))
+        .first(),
+    ).toBeVisible({ timeout: 10000 })
   })
 })
