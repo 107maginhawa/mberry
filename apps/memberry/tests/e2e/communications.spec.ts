@@ -2,7 +2,8 @@ import { test, expect } from './helpers/test-fixture'
 import { signInAsSecretary, signInAsMember } from './helpers/auth'
 import { apiFetch } from './helpers/api-fetch'
 
-const ORG_SLUG = 'test-org'
+// Seeded org slug; matches services/api-ts/src/seed/layer-1-foundation.ts.
+const ORG_SLUG = 'pda-metro-manila'
 
 test.describe('Wave 4α: Communications — Officer Compose + Notification Drawer', () => {
   test('officer compose → select filters → send → appears in sent history', async ({ page }) => {
@@ -23,20 +24,17 @@ test.describe('Wave 4α: Communications — Officer Compose + Notification Drawe
     const sendBtn = page.getByRole('button', { name: /send now/i })
     await expect(sendBtn).toBeEnabled()
 
-    // Click Send Now — should show confirmation
-    await sendBtn.click()
-
-    // Confirm the send
-    const confirmBtn = page.getByRole('button', { name: /confirm send/i })
-    await expect(confirmBtn).toBeVisible({ timeout: 5000 })
-    await confirmBtn.click()
-
-    // Wait for send API to complete
-    await page.waitForResponse(
-      (resp) => resp.url().includes('/api/communications/announcements') && resp.request().method() === 'POST',
+    // Send Now currently submits immediately (no confirm dialog). If the
+    // confirm step returns later, restore the `getByRole('button', { name:
+    // /confirm send/i })` click here.
+    const sendResp = page.waitForResponse(
+      (resp) =>
+        resp.url().includes('/api/communications/announcements') &&
+        resp.request().method() === 'POST',
       { timeout: 10000 },
     ).catch(() => null)
-    await page.waitForLoadState('networkidle')
+    await sendBtn.click()
+    await sendResp
 
     // Navigate to sent history
     await page.goto(`/org/${ORG_SLUG}/officer/communications/sent`)
@@ -44,7 +42,14 @@ test.describe('Wave 4α: Communications — Officer Compose + Notification Drawe
     await expect(page.getByText('E2E Test Announcement')).toBeVisible({ timeout: 10000 })
   })
 
-  test('member opens notification drawer → sees categorized notifications → clicks action link', async ({ page }) => {
+  test.fixme('member opens notification drawer → sees categorized notifications → clicks action link', async ({ page }) => {
+    // OBSOLETE UX: notification bell was redesigned from a slide-out drawer
+    // into a link that routes to /my/notifications (a full page). The
+    // assertions below all targeted the drawer.
+    //
+    // To re-activate: rewrite to navigate to /my/notifications, then assert
+    // the same category tabs + notification rows there. Until then keeping
+    // the body so the rewrite is targeted.
     await signInAsMember(page)
 
     // Wait for header to load
@@ -85,7 +90,10 @@ test.describe('Wave 4α: Communications — Officer Compose + Notification Drawe
     }
   })
 
-  test('mark all read → badge clears', async ({ page }) => {
+  test.fixme('mark all read → badge clears', async ({ page }) => {
+    // OBSOLETE UX: bell→drawer pattern replaced with /my/notifications full
+    // page. Mark-all-read button moved to that page. Rewrite alongside the
+    // notification-drawer test above.
     await signInAsMember(page)
     await page.waitForLoadState('networkidle')
 
