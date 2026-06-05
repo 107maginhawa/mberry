@@ -32,6 +32,7 @@ x-csrf-token: {{csrf_token}}
 HTTP 200
 
 GET {{api}}/association/member/elections
+x-org-id: {{org_id}}
 HTTP 401
 
 POST {{api}}/auth/sign-in/email
@@ -48,6 +49,7 @@ HTTP 200
 # ── List elections ────────────────────────────────────────
 
 GET {{api}}/association/member/elections
+x-org-id: {{org_id}}
 HTTP 200
 [Asserts]
 jsonpath "$.data" isCollection
@@ -59,6 +61,7 @@ POST {{api}}/association/member/elections
 Origin: {{origin}}
 x-csrf-token: {{csrf_token}}
 Content-Type: application/json
+x-org-id: {{org_id}}
 {
   "title": "Contract Test Election {{suffix}}",
   "description": "Board election",
@@ -76,4 +79,5 @@ election_id: jsonpath "$.data.id"
 # ── Get election ──────────────────────────────────────────
 
 GET {{api}}/association/member/elections/{{election_id}}
+x-org-id: {{org_id}}
 HTTP 200

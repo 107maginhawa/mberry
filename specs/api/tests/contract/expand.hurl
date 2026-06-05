@@ -29,6 +29,7 @@ POST {{api}}/booking/events
 Origin: {{origin}}
 x-csrf-token: {{csrf_token}}
 Content-Type: application/json
+x-org-id: {{org_id}}
 {
   "title": "Expand fixture",
   "timezone": "America/New_York",
@@ -48,6 +49,7 @@ event_id: jsonpath "$.id"
 
 # 1. Without expand, owner is the person id.
 GET {{api}}/booking/events/{{event_id}}
+x-org-id: {{org_id}}
 HTTP 200
 [Asserts]
 jsonpath "$.owner" == "{{user_id}}"
@@ -55,6 +57,7 @@ jsonpath "$.owner" == "{{user_id}}"
 
 # 2. With expand=owner, owner is the full Person object inline.
 GET {{api}}/booking/events/{{event_id}}?expand=owner
+x-org-id: {{org_id}}
 HTTP 200
 [Asserts]
 jsonpath "$.owner.id" == "{{user_id}}"

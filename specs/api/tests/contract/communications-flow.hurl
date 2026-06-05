@@ -70,4 +70,5 @@ announcement_id: jsonpath "$.data.id"
 # ── Get announcement ──────────────────────────────────────
 
 GET {{api}}/communications/announcements/detail/{{announcement_id}}
+x-org-id: {{org_id}}
 HTTP 200

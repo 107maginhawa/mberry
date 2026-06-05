@@ -30,6 +30,7 @@ POST {{api}}/booking/events
 Origin: {{origin}}
 x-csrf-token: {{csrf_token}}
 Content-Type: application/json
+x-org-id: {{org_id}}
 {
   "title": "Ext booking event {{suffix}}",
   "timezone": "America/New_York",
@@ -51,6 +52,7 @@ event_id: jsonpath "$.id"
 # ── 2. Get slots to capture a slot ID ────────────────────────
 
 GET {{api}}/booking/events/{{event_id}}/slots?status=available
+x-org-id: {{org_id}}
 HTTP 200
 [Captures]
 slot_id: jsonpath "$[0].id"
@@ -61,6 +63,7 @@ jsonpath "$" isCollection
 # ── 3. Get single slot ──────────────────────────────────────
 
 GET {{api}}/booking/slots/{{slot_id}}
+x-org-id: {{org_id}}
 HTTP *
 [Asserts]
 status >= 200
@@ -86,6 +89,7 @@ POST {{api}}/booking/bookings
 Origin: {{origin}}
 x-csrf-token: {{csrf_token}}
 Content-Type: application/json
+x-org-id: {{org_id}}
 {
   "slot": "{{slot_id}}",
   "locationType": "video",
@@ -99,6 +103,7 @@ booking_id: jsonpath "$.id"
 # ── 5. Get single booking ───────────────────────────────────
 
 GET {{api}}/booking/bookings/{{booking_id}}
+x-org-id: {{org_id}}
 HTTP *
 [Asserts]
 status >= 200
@@ -121,6 +126,7 @@ HTTP 200
 DELETE {{api}}/booking/events/{{event_id}}
 Origin: {{origin}}
 x-csrf-token: {{csrf_token}}
+x-org-id: {{org_id}}
 HTTP *
 [Asserts]
 status >= 200

@@ -35,6 +35,7 @@ x-csrf-token: {{csrf_token}}
 HTTP 200
 
 GET {{api}}/association/training
+x-org-id: {{org_id}}
 HTTP 401
 
 POST {{api}}/auth/sign-in/email
@@ -51,6 +52,7 @@ HTTP 200
 # ── 1. List trainings (credits are awarded on completion) ──
 
 GET {{api}}/association/training
+x-org-id: {{org_id}}
 HTTP 200
 [Asserts]
 jsonpath "$.data" isCollection
@@ -59,4 +61,5 @@ jsonpath "$.data" isCollection
 # ── 2. My events (events can also award attendance credits) ─
 
 GET {{api}}/association/event-lifecycle/my
+x-org-id: {{org_id}}
 HTTP 200

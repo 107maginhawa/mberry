@@ -43,6 +43,7 @@ POST {{api}}/comms/chat-rooms
 Origin: {{origin}}
 x-csrf-token: {{csrf_token}}
 Content-Type: application/json
+x-org-id: {{org_id}}
 {
   "participants": ["{{a_id}}", "{{b_id}}"],
   "context": "{{a_id}}"
@@ -58,6 +59,7 @@ status < 300
 # ── 1. Get single room ──────────────────────────────────────
 
 GET {{api}}/comms/chat-rooms/{{room_id}}
+x-org-id: {{org_id}}
 HTTP *
 [Asserts]
 status >= 200
@@ -68,6 +70,7 @@ status < 300
 # PREREQUISITE: Requires TURN server config
 
 GET {{api}}/comms/ice-servers
+x-org-id: {{org_id}}
 HTTP *
 
 
@@ -78,6 +81,7 @@ PATCH {{api}}/comms/chat-rooms/{{room_id}}/video-call/participant
 Origin: {{origin}}
 x-csrf-token: {{csrf_token}}
 Content-Type: application/json
+x-org-id: {{org_id}}
 {
   "audioEnabled": true,
   "videoEnabled": false
@@ -92,6 +96,7 @@ POST {{api}}/comms/chat-rooms/{{room_id}}/video-call/join
 Origin: {{origin}}
 x-csrf-token: {{csrf_token}}
 Content-Type: application/json
+x-org-id: {{org_id}}
 {}
 HTTP *
 
@@ -103,6 +108,7 @@ POST {{api}}/comms/chat-rooms/{{room_id}}/video-call/leave
 Origin: {{origin}}
 x-csrf-token: {{csrf_token}}
 Content-Type: application/json
+x-org-id: {{org_id}}
 {}
 HTTP *
 
@@ -114,5 +120,6 @@ POST {{api}}/comms/chat-rooms/{{room_id}}/video-call/end
 Origin: {{origin}}
 x-csrf-token: {{csrf_token}}
 Content-Type: application/json
+x-org-id: {{org_id}}
 {}
 HTTP *

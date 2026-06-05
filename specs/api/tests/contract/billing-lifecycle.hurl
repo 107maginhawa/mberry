@@ -32,6 +32,7 @@ POST {{api}}/billing/merchant-accounts
 Origin: {{origin}}
 x-csrf-token: {{csrf_token}}
 Content-Type: application/json
+x-org-id: {{org_id}}
 {
   "refreshUrl": "https://example.com/refresh",
   "returnUrl": "https://example.com/return"
@@ -47,6 +48,7 @@ jsonpath "$.metadata.onboardingComplete" == false
 
 # 1. Get merchant account back; status is 'pending' until Stripe webhook.
 GET {{api}}/billing/merchant-accounts/{{merchant_account_id}}
+x-org-id: {{org_id}}
 HTTP 200
 [Asserts]
 jsonpath "$.id" == "{{merchant_account_id}}"
@@ -58,6 +60,7 @@ POST {{api}}/billing/merchant-accounts/{{merchant_account_id}}/onboard
 Origin: {{origin}}
 x-csrf-token: {{csrf_token}}
 Content-Type: application/json
+x-org-id: {{org_id}}
 {
   "refreshUrl": "https://example.com/refresh",
   "returnUrl": "https://example.com/return"
@@ -85,6 +88,7 @@ POST {{api}}/billing/invoices
 Origin: {{origin}}
 x-csrf-token: {{csrf_token}}
 Content-Type: application/json
+x-org-id: {{org_id}}
 {
   "customer": "{{customer_person_id}}",
   "merchant": "{{merchant_person_id}}",
@@ -107,6 +111,7 @@ POST {{api}}/billing/invoices/{{invoice_id}}/finalize
 Origin: {{origin}}
 x-csrf-token: {{csrf_token}}
 Content-Type: application/json
+x-org-id: {{org_id}}
 {}
 HTTP 200
 [Asserts]
@@ -131,6 +136,7 @@ POST {{api}}/billing/invoices/{{invoice_id}}/pay
 Origin: {{origin}}
 x-csrf-token: {{csrf_token}}
 Content-Type: application/json
+x-org-id: {{org_id}}
 {}
 HTTP 422
 [Asserts]
@@ -155,6 +161,7 @@ POST {{api}}/billing/invoices/{{invoice_id}}/mark-uncollectible
 Origin: {{origin}}
 x-csrf-token: {{csrf_token}}
 Content-Type: application/json
+x-org-id: {{org_id}}
 {}
 HTTP 200
 [Asserts]
@@ -163,6 +170,7 @@ jsonpath "$.status" == "uncollectible"
 
 # 8. List invoices includes the closed one.
 GET {{api}}/billing/invoices
+x-org-id: {{org_id}}
 HTTP 200
 [Asserts]
 jsonpath "$.data" isCollection

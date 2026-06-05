@@ -46,6 +46,7 @@ PATCH {{api}}/communications/announcements/{{announcement_id}}
 Origin: {{origin}}
 x-csrf-token: {{csrf_token}}
 Content-Type: application/json
+x-org-id: {{org_id}}
 {
   "title": "Updated Announcement {{suffix}}",
   "content": "Updated content for contract test."
@@ -62,6 +63,7 @@ POST {{api}}/communications/announcements/{{announcement_id}}/publish
 Origin: {{origin}}
 x-csrf-token: {{csrf_token}}
 Content-Type: application/json
+x-org-id: {{org_id}}
 {}
 HTTP *
 [Asserts]
@@ -75,6 +77,7 @@ POST {{api}}/communications/announcements/{{announcement_id}}/archive
 Origin: {{origin}}
 x-csrf-token: {{csrf_token}}
 Content-Type: application/json
+x-org-id: {{org_id}}
 {}
 HTTP *
 [Asserts]
@@ -87,6 +90,7 @@ status < 300
 DELETE {{api}}/communications/announcements/{{announcement_id}}
 Origin: {{origin}}
 x-csrf-token: {{csrf_token}}
+x-org-id: {{org_id}}
 HTTP *
 [Asserts]
 status >= 200

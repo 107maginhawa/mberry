@@ -29,6 +29,7 @@ POST {{api}}/booking/bookings/{{booking_id}}/confirm
 Origin: {{origin}}
 x-csrf-token: {{csrf_token}}
 Content-Type: application/json
+x-org-id: {{org_id}}
 { "reason": "Confirmed by host" }
 HTTP 200
 [Asserts]
@@ -51,6 +52,7 @@ POST {{api}}/booking/bookings/{{booking_id}}/cancel
 Origin: {{origin}}
 x-csrf-token: {{csrf_token}}
 Content-Type: application/json
+x-org-id: {{org_id}}
 { "reason": "Schedule conflict" }
 HTTP 200
 [Asserts]

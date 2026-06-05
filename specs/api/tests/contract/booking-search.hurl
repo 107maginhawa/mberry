@@ -30,6 +30,7 @@ POST {{api}}/booking/events
 Origin: {{origin}}
 x-csrf-token: {{csrf_token}}
 Content-Type: application/json
+x-org-id: {{org_id}}
 {
   "title": "Pilates intro {{suffix}}",
   "description": "Core strength fundamentals",
@@ -52,6 +53,7 @@ POST {{api}}/booking/events
 Origin: {{origin}}
 x-csrf-token: {{csrf_token}}
 Content-Type: application/json
+x-org-id: {{org_id}}
 {
   "title": "Mindfulness session {{suffix}}",
   "description": "Yoga-adjacent mindfulness practice",
@@ -72,6 +74,7 @@ HTTP 201
 
 # 1. Free-text search by title token (suffix is unique to this run).
 GET {{api}}/booking/events?q=Yoga%20consult%20{{suffix}}
+x-org-id: {{org_id}}
 HTTP 200
 [Asserts]
 jsonpath "$.data" isCollection
@@ -81,6 +84,7 @@ jsonpath "$.pagination.totalCount" >= 1
 # 2. Free-text search across description (Yoga also appears in the
 # Mindfulness event's description).
 GET {{api}}/booking/events?q=Yoga
+x-org-id: {{org_id}}
 HTTP 200
 [Asserts]
 jsonpath "$.pagination.totalCount" >= 2
@@ -88,6 +92,7 @@ jsonpath "$.pagination.totalCount" >= 2
 
 # 3. No results for a guaranteed-unique nonsense token.
 GET {{api}}/booking/events?q=xyzzy{{suffix}}
+x-org-id: {{org_id}}
 HTTP 200
 [Asserts]
 jsonpath "$.pagination.totalCount" == 0
@@ -96,6 +101,7 @@ jsonpath "$.pagination.totalCount" == 0
 # 4. CSV tag filter = OR. yoga,pilates should match all three seeded
 # events.
 GET {{api}}/booking/events?tags=yoga,pilates&q={{suffix}}
+x-org-id: {{org_id}}
 HTTP 200
 [Asserts]
 jsonpath "$.pagination.totalCount" >= 3
@@ -104,6 +110,7 @@ jsonpath "$.pagination.totalCount" >= 3
 # 5. Repeated tags = AND. Only the Mindfulness event has both yoga AND
 # fitness.
 GET {{api}}/booking/events?tags=yoga&tags=fitness&q={{suffix}}
+x-org-id: {{org_id}}
 HTTP 200
 [Asserts]
 jsonpath "$.pagination.totalCount" == 1
@@ -111,6 +118,7 @@ jsonpath "$.pagination.totalCount" == 1
 
 # 6. AND with a tag no event has produces empty.
 GET {{api}}/booking/events?tags=yoga&tags=ballet&q={{suffix}}
+x-org-id: {{org_id}}
 HTTP 200
 [Asserts]
 jsonpath "$.pagination.totalCount" == 0
@@ -122,6 +130,7 @@ jsonpath "$.pagination.totalCount" == 0
 # tag set or the two filters union — the contract just requires the
 # matching event to appear.
 GET {{api}}/booking/events?q=Mindfulness&tags=yoga&tags=fitness
+x-org-id: {{org_id}}
 HTTP 200
 [Asserts]
 jsonpath "$.pagination.totalCount" >= 1

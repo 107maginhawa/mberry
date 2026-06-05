@@ -31,6 +31,7 @@ x-csrf-token: {{csrf_token}}
 HTTP 200
 
 GET {{api}}/association/member/certificates
+x-org-id: {{org_id}}
 HTTP 401
 
 POST {{api}}/auth/sign-in/email
@@ -47,4 +48,5 @@ HTTP 200
 # ── List my certificates ──────────────────────────────────
 
 GET {{api}}/association/member/certificates
+x-org-id: {{org_id}}
 HTTP 200

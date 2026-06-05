@@ -13,6 +13,7 @@ csrf_token: jsonpath "$.token"
 # is intentionally out of scope for the contract suite.
 
 GET {{api}}/billing/invoices
+x-org-id: {{org_id}}
 HTTP 401
 
 

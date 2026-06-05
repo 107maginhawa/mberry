@@ -28,6 +28,7 @@ POST {{api}}/booking/events
 Origin: {{origin}}
 x-csrf-token: {{csrf_token}}
 Content-Type: application/json
+x-org-id: {{org_id}}
 {
   "title": "Event with exceptions {{suffix}}",
   "timezone": "America/New_York",
@@ -51,6 +52,7 @@ POST {{api}}/booking/events/{{event_id}}/exceptions
 Origin: {{origin}}
 x-csrf-token: {{csrf_token}}
 Content-Type: application/json
+x-org-id: {{org_id}}
 {
   "startDatetime": "2026-06-01T13:00:00Z",
   "endDatetime": "2026-06-01T15:00:00Z",
@@ -69,6 +71,7 @@ POST {{api}}/booking/events/{{event_id}}/exceptions
 Origin: {{origin}}
 x-csrf-token: {{csrf_token}}
 Content-Type: application/json
+x-org-id: {{org_id}}
 {
   "startDatetime": "2026-06-01T16:00:00Z",
   "endDatetime": "2026-06-01T17:00:00Z",
@@ -93,6 +96,7 @@ POST {{api}}/booking/events/{{event_id}}/exceptions
 Origin: {{origin}}
 x-csrf-token: {{csrf_token}}
 Content-Type: application/json
+x-org-id: {{org_id}}
 {
   "startDatetime": "2026-06-15T15:00:00Z",
   "endDatetime": "2026-06-15T16:00:00Z",
@@ -109,6 +113,7 @@ HTTP 201
 
 # 4. List exceptions; should include all three.
 GET {{api}}/booking/events/{{event_id}}/exceptions
+x-org-id: {{org_id}}
 HTTP 200
 [Asserts]
 jsonpath "$.data" isCollection
@@ -117,6 +122,7 @@ jsonpath "$.pagination.totalCount" >= 3
 
 # 5. Get single exception by id.
 GET {{api}}/booking/events/{{event_id}}/exceptions/{{single_exception_id}}
+x-org-id: {{org_id}}
 HTTP 200
 [Asserts]
 jsonpath "$.id" == "{{single_exception_id}}"
@@ -127,11 +133,13 @@ jsonpath "$.reason" == "Conference"
 DELETE {{api}}/booking/events/{{event_id}}/exceptions/{{weekly_exception_id}}
 Origin: {{origin}}
 x-csrf-token: {{csrf_token}}
+x-org-id: {{org_id}}
 HTTP 204
 
 
 # 7. After deletion, total drops by one.
 GET {{api}}/booking/events/{{event_id}}/exceptions
+x-org-id: {{org_id}}
 HTTP 200
 [Asserts]
 jsonpath "$.pagination.totalCount" >= 2

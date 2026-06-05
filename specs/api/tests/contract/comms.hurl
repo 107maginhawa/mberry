@@ -28,6 +28,7 @@ POST {{api}}/comms/chat-rooms
 Origin: {{origin}}
 x-csrf-token: {{csrf_token}}
 Content-Type: application/json
+x-org-id: {{org_id}}
 {
   "participants": ["{{a_id}}", "{{b_id}}"],
   "context": "{{a_id}}"
@@ -45,6 +46,7 @@ POST {{api}}/comms/chat-rooms/{{room_id}}/messages
 Origin: {{origin}}
 x-csrf-token: {{csrf_token}}
 Content-Type: application/json
+x-org-id: {{org_id}}
 {
   "messageType": "text",
   "message": "Hello, Bob"
@@ -65,6 +67,7 @@ HTTP 200
 
 
 GET {{api}}/comms/chat-rooms/{{room_id}}/messages
+x-org-id: {{org_id}}
 HTTP 200
 [Asserts]
 jsonpath "$.data" isCollection

@@ -47,6 +47,7 @@ status < 500
 
 # Dues configs (officer-only)
 GET {{api}}/association/member/dues-configs
+x-org-id: {{org_id}}
 HTTP 403
 
 # ORPHANED: /dues/funds/{orgId} has no spec equivalent
@@ -62,6 +63,7 @@ POST {{api}}/association/events
 Origin: {{origin}}
 x-csrf-token: {{csrf_token}}
 Content-Type: application/json
+x-org-id: {{org_id}}
 {
   "title": "Unauthorized Event",
   "startDate": "2026-08-01T00:00:00Z",
@@ -78,6 +80,7 @@ POST {{api}}/association/training
 Origin: {{origin}}
 x-csrf-token: {{csrf_token}}
 Content-Type: application/json
+x-org-id: {{org_id}}
 {
   "title": "Unauthorized Training",
   "startDate": "2026-08-01T00:00:00Z",
@@ -90,6 +93,7 @@ POST {{api}}/association/member/elections
 Origin: {{origin}}
 x-csrf-token: {{csrf_token}}
 Content-Type: application/json
+x-org-id: {{org_id}}
 {
   "title": "Unauthorized Election"
 }
@@ -121,6 +125,7 @@ HTTP 200
 
 # Officer should get 200 on same endpoints
 GET {{api}}/association/member/dues-configs
+x-org-id: {{org_id}}
 HTTP 200
 
 GET {{api}}/dues/dashboard/ed8e3a96-8126-4341-be42-e6eb7940c562

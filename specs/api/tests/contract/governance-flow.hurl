@@ -33,6 +33,7 @@ x-csrf-token: {{csrf_token}}
 HTTP 200
 
 GET {{api}}/association/member/officer-terms?organizationId=ed8e3a96-8126-4341-be42-e6eb7940c562
+x-org-id: {{org_id}}
 HTTP 401
 
 POST {{api}}/auth/sign-in/email
@@ -52,6 +53,7 @@ HTTP 200
 # `$.data isCollection` from an earlier wire shape; updated to `$.items`.
 
 GET {{api}}/association/member/officer-terms?organizationId={{org_id}}
+x-org-id: {{org_id}}
 HTTP 200
 [Asserts]
 jsonpath "$.items" isCollection

@@ -30,6 +30,7 @@ POST {{api}}/email/templates
 Origin: {{origin}}
 x-csrf-token: {{csrf_token}}
 Content-Type: application/json
+x-org-id: {{org_id}}
 {
   "name": "Ext email template {{suffix}}",
   "description": "For extended contract tests",
@@ -49,6 +50,7 @@ POST {{api}}/email/templates/{{template_id}}/test
 Origin: {{origin}}
 x-csrf-token: {{csrf_token}}
 Content-Type: application/json
+x-org-id: {{org_id}}
 {
   "to": "test-recipient-{{suffix}}@example.org"
 }
@@ -61,6 +63,7 @@ status < 500
 # ── 3. List queue to find an item ────────────────────────────
 
 GET {{api}}/email/queue
+x-org-id: {{org_id}}
 HTTP 200
 [Asserts]
 jsonpath "$.data" isCollection
@@ -70,6 +73,7 @@ jsonpath "$.data" isCollection
 # If queue is empty this may 404 — that's acceptable.
 
 GET {{api}}/email/queue?status=pending
+x-org-id: {{org_id}}
 HTTP 200
 [Captures]
 queue_item_count: jsonpath "$.pagination.totalCount"

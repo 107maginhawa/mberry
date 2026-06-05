@@ -36,6 +36,7 @@ Content-Type: application/json
 HTTP 200
 
 GET {{api}}/comms/chat-rooms/{{room_id}}/messages
+x-org-id: {{org_id}}
 HTTP *
 [Asserts]
 status >= 401
@@ -47,6 +48,7 @@ POST {{api}}/comms/chat-rooms/{{room_id}}/messages
 Origin: {{origin}}
 x-csrf-token: {{csrf_token}}
 Content-Type: application/json
+x-org-id: {{org_id}}
 {
   "messageType": "text",
   "message": "I'm an outsider"

@@ -28,6 +28,7 @@ POST {{api}}/booking/events
 Origin: {{origin}}
 x-csrf-token: {{csrf_token}}
 Content-Type: application/json
+x-org-id: {{org_id}}
 {
   "title": "Edge cases {{suffix}}",
   "timezone": "America/New_York",
@@ -47,6 +48,7 @@ event_id: jsonpath "$.id"
 
 
 GET {{api}}/booking/events/{{event_id}}/slots?status=available
+x-org-id: {{org_id}}
 HTTP 200
 [Captures]
 slot_id: jsonpath "$[0].id"
@@ -71,6 +73,7 @@ POST {{api}}/booking/bookings
 Origin: {{origin}}
 x-csrf-token: {{csrf_token}}
 Content-Type: application/json
+x-org-id: {{org_id}}
 {
   "slot": "{{slot_id}}",
   "locationType": "video",
@@ -86,6 +89,7 @@ POST {{api}}/booking/bookings
 Origin: {{origin}}
 x-csrf-token: {{csrf_token}}
 Content-Type: application/json
+x-org-id: {{org_id}}
 {
   "slot": "{{slot_id}}",
   "locationType": "video",
@@ -100,6 +104,7 @@ POST {{api}}/booking/bookings
 Origin: {{origin}}
 x-csrf-token: {{csrf_token}}
 Content-Type: application/json
+x-org-id: {{org_id}}
 {
   "slot": "not-a-uuid",
   "locationType": "video",
@@ -112,6 +117,7 @@ POST {{api}}/booking/bookings
 Origin: {{origin}}
 x-csrf-token: {{csrf_token}}
 Content-Type: application/json
+x-org-id: {{org_id}}
 {
   "slot": "00000000-0000-4000-8000-000000000000",
   "locationType": "video",
@@ -136,6 +142,7 @@ POST {{api}}/booking/bookings/{{booking_a_id}}/reject
 Origin: {{origin}}
 x-csrf-token: {{csrf_token}}
 Content-Type: application/json
+x-org-id: {{org_id}}
 { "reason": "Schedule conflict on host side" }
 HTTP 200
 [Asserts]
@@ -159,6 +166,7 @@ POST {{api}}/booking/bookings
 Origin: {{origin}}
 x-csrf-token: {{csrf_token}}
 Content-Type: application/json
+x-org-id: {{org_id}}
 {
   "slot": "{{slot_id_2}}",
   "locationType": "video",
@@ -184,6 +192,7 @@ POST {{api}}/booking/bookings/{{booking_b_id}}/confirm
 Origin: {{origin}}
 x-csrf-token: {{csrf_token}}
 Content-Type: application/json
+x-org-id: {{org_id}}
 { "reason": "Confirmed" }
 HTTP 200
 
@@ -195,5 +204,6 @@ POST {{api}}/booking/bookings/{{booking_b_id}}/no-show
 Origin: {{origin}}
 x-csrf-token: {{csrf_token}}
 Content-Type: application/json
+x-org-id: {{org_id}}
 { "reason": "Client didn't show up" }
 HTTP 422

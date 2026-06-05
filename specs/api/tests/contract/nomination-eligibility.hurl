@@ -26,4 +26,5 @@ csrf_token: jsonpath "$.token"
 
 # Validate auth on the elections list endpoint instead
 GET {{api}}/association/member/elections
+x-org-id: {{org_id}}
 HTTP 401

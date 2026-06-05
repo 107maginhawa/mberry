@@ -34,6 +34,7 @@ x-csrf-token: {{csrf_token}}
 HTTP 200
 
 GET {{api}}/association/events
+x-org-id: {{org_id}}
 HTTP 401
 
 POST {{api}}/auth/sign-in/email
@@ -50,6 +51,7 @@ HTTP 200
 # ── 1. List events ─────────────────────────────────────────
 
 GET {{api}}/association/events
+x-org-id: {{org_id}}
 HTTP 200
 [Asserts]
 jsonpath "$.data" isCollection
@@ -61,6 +63,7 @@ POST {{api}}/association/events
 Origin: {{origin}}
 x-csrf-token: {{csrf_token}}
 Content-Type: application/json
+x-org-id: {{org_id}}
 {
   "title": "Contract Test Event {{suffix}}",
   "description": "Test event",
@@ -77,12 +80,14 @@ event_id: jsonpath "$.data.id"
 # ── 3. Get event ───────────────────────────────────────────
 
 GET {{api}}/association/events/{{event_id}}
+x-org-id: {{org_id}}
 HTTP 200
 
 
 # ── 4. My events (member view) ─────────────────────────────
 
 GET {{api}}/association/event-lifecycle/my
+x-org-id: {{org_id}}
 HTTP 200
 
 
@@ -103,4 +108,5 @@ status < 500
 # Use the event created in step 2
 
 GET {{api}}/association/event-lifecycle/{{event_id}}/attendance
+x-org-id: {{org_id}}
 HTTP 200

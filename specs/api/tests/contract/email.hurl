@@ -14,6 +14,7 @@ csrf_token: jsonpath "$.token"
 
 # 1. Anonymous → 401.
 GET {{api}}/email/templates
+x-org-id: {{org_id}}
 HTTP 401
 
 
@@ -32,6 +33,7 @@ HTTP 200
 
 
 GET {{api}}/email/templates
+x-org-id: {{org_id}}
 HTTP 403
 
 
@@ -51,6 +53,7 @@ HTTP 200
 # 4. Admin lists templates - the impl auto-initializes system templates
 # at startup (auth.email-verify, auth.password-reset, etc.).
 GET {{api}}/email/templates
+x-org-id: {{org_id}}
 HTTP 200
 [Asserts]
 jsonpath "$.data" isCollection
@@ -62,6 +65,7 @@ POST {{api}}/email/templates
 Origin: {{origin}}
 x-csrf-token: {{csrf_token}}
 Content-Type: application/json
+x-org-id: {{org_id}}
 {
   "name": "Contract suite custom template {{suffix}}",
   "description": "Created by the contract suite",
@@ -79,6 +83,7 @@ jsonpath "$.name" matches "{{suffix}}"
 
 # 6. Admin reads the template back.
 GET {{api}}/email/templates/{{template_id}}
+x-org-id: {{org_id}}
 HTTP 200
 [Asserts]
 jsonpath "$.id" == "{{template_id}}"
@@ -89,6 +94,7 @@ PATCH {{api}}/email/templates/{{template_id}}
 Origin: {{origin}}
 x-csrf-token: {{csrf_token}}
 Content-Type: application/json
+x-org-id: {{org_id}}
 {
   "description": "Updated by contract suite"
 }
@@ -99,6 +105,7 @@ jsonpath "$.description" == "Updated by contract suite"
 
 # 8. Admin lists email queue (just verify shape).
 GET {{api}}/email/queue
+x-org-id: {{org_id}}
 HTTP 200
 [Asserts]
 jsonpath "$.data" isCollection
@@ -107,6 +114,7 @@ jsonpath "$.pagination.totalCount" exists
 
 # 9. Filter queue by status.
 GET {{api}}/email/queue?status=sent
+x-org-id: {{org_id}}
 HTTP 200
 [Asserts]
 jsonpath "$.data" isCollection

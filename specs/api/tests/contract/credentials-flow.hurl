@@ -34,6 +34,7 @@ x-csrf-token: {{csrf_token}}
 HTTP 200
 
 GET {{api}}/association/member/credential-templates
+x-org-id: {{org_id}}
 HTTP 401
 
 POST {{api}}/auth/sign-in/email
@@ -50,6 +51,7 @@ HTTP 200
 # ── 1. List credential templates ──────────────────────────
 
 GET {{api}}/association/member/credential-templates
+x-org-id: {{org_id}}
 HTTP 200
 [Asserts]
 jsonpath "$.data" isCollection
@@ -58,6 +60,7 @@ jsonpath "$.data" isCollection
 # ── 2. List digital credentials ───────────────────────────
 
 GET {{api}}/association/member/credentials
+x-org-id: {{org_id}}
 HTTP 200
 [Asserts]
 jsonpath "$.data" isCollection

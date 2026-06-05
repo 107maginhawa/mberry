@@ -35,12 +35,14 @@ x-csrf-token: {{csrf_token}}
 HTTP 200
 
 GET {{api}}/association/member/dues-configs
+x-org-id: {{org_id}}
 HTTP 401
 
 POST {{api}}/association/member/dues-payments
 Origin: {{origin}}
 x-csrf-token: {{csrf_token}}
 Content-Type: application/json
+x-org-id: {{org_id}}
 {}
 HTTP 401
 
@@ -60,6 +62,7 @@ HTTP 200
 # ── 1. List dues configs ──────────────────────────────────
 
 GET {{api}}/association/member/dues-configs
+x-org-id: {{org_id}}
 HTTP 200
 
 
@@ -69,6 +72,7 @@ POST {{api}}/association/member/dues-configs
 Origin: {{origin}}
 x-csrf-token: {{csrf_token}}
 Content-Type: application/json
+x-org-id: {{org_id}}
 {
   "defaultAmount": 150000,
   "currency": "PHP",
@@ -89,6 +93,7 @@ status < 500
 # ── 4. List payments ──────────────────────────────────────
 
 GET {{api}}/association/member/dues-payments
+x-org-id: {{org_id}}
 HTTP 200
 
 
@@ -101,6 +106,7 @@ HTTP 200
 # ── 6. Verify dues configs list (BR-02) ──────────────────
 
 GET {{api}}/association/member/dues-configs
+x-org-id: {{org_id}}
 HTTP 200
 
 

@@ -30,6 +30,7 @@ POST {{api}}/billing/invoices
 Origin: {{origin}}
 x-csrf-token: {{csrf_token}}
 Content-Type: application/json
+x-org-id: {{org_id}}
 {
   "description": "Contract test invoice {{suffix}}",
   "amount": 5000,
@@ -46,6 +47,7 @@ status < 300
 # ── 2. Get single invoice ───────────────────────────────────
 
 GET {{api}}/billing/invoices/{{invoice_id}}
+x-org-id: {{org_id}}
 HTTP *
 [Asserts]
 status >= 200
@@ -58,6 +60,7 @@ PATCH {{api}}/billing/invoices/{{invoice_id}}
 Origin: {{origin}}
 x-csrf-token: {{csrf_token}}
 Content-Type: application/json
+x-org-id: {{org_id}}
 {
   "description": "Updated contract test invoice {{suffix}}"
 }
@@ -74,6 +77,7 @@ POST {{api}}/billing/invoices/{{invoice_id}}/capture
 Origin: {{origin}}
 x-csrf-token: {{csrf_token}}
 Content-Type: application/json
+x-org-id: {{org_id}}
 {}
 HTTP *
 
@@ -85,6 +89,7 @@ POST {{api}}/billing/invoices/{{invoice_id}}/refund
 Origin: {{origin}}
 x-csrf-token: {{csrf_token}}
 Content-Type: application/json
+x-org-id: {{org_id}}
 {}
 HTTP *
 
@@ -95,6 +100,7 @@ POST {{api}}/billing/invoices/{{invoice_id}}/void
 Origin: {{origin}}
 x-csrf-token: {{csrf_token}}
 Content-Type: application/json
+x-org-id: {{org_id}}
 {}
 HTTP *
 
@@ -104,6 +110,7 @@ HTTP *
 DELETE {{api}}/billing/invoices/{{invoice_id}}
 Origin: {{origin}}
 x-csrf-token: {{csrf_token}}
+x-org-id: {{org_id}}
 HTTP *
 
 
@@ -126,6 +133,7 @@ POST {{api}}/billing/webhooks/stripe
 Origin: {{origin}}
 x-csrf-token: {{csrf_token}}
 Content-Type: application/json
+x-org-id: {{org_id}}
 {
   "type": "invoice.paid",
   "data": { "object": {} }

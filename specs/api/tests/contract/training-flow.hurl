@@ -32,6 +32,7 @@ x-csrf-token: {{csrf_token}}
 HTTP 200
 
 GET {{api}}/association/training
+x-org-id: {{org_id}}
 HTTP 401
 
 POST {{api}}/auth/sign-in/email
@@ -48,6 +49,7 @@ HTTP 200
 # ── List trainings ────────────────────────────────────────
 
 GET {{api}}/association/training
+x-org-id: {{org_id}}
 HTTP 200
 [Asserts]
 jsonpath "$.data" isCollection
@@ -59,6 +61,7 @@ POST {{api}}/association/training
 Origin: {{origin}}
 x-csrf-token: {{csrf_token}}
 Content-Type: application/json
+x-org-id: {{org_id}}
 {
   "title": "Contract Test Training {{suffix}}",
   "description": "Test training session",
@@ -77,10 +80,12 @@ training_id: jsonpath "$.data.id"
 # ── Get training ──────────────────────────────────────────
 
 GET {{api}}/association/training/{{training_id}}
+x-org-id: {{org_id}}
 HTTP 200
 
 
 # ── My trainings ──────────────────────────────────────────
 
 GET {{api}}/association/training-lifecycle/my
+x-org-id: {{org_id}}
 HTTP 200
