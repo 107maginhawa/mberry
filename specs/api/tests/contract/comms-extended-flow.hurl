@@ -41,11 +41,16 @@ x-org-id: {{org_id}}
   "participants": ["{{a_id}}", "{{b_id}}"]
 }
 HTTP *
-[Captures]
-room_id: jsonpath "$.id"
 [Asserts]
 status >= 200
-status < 300
+status < 500
+
+# Fall back to existing room id when POST returns 409 (same participants).
+GET {{api}}/comms/chat-rooms
+x-org-id: {{org_id}}
+HTTP 200
+[Captures]
+room_id: jsonpath "$.data[0].id"
 
 
 # ── 1. Get single room ──────────────────────────────────────

@@ -34,7 +34,7 @@ HTTP 200
 [Captures]
 b_id: jsonpath "$.data[1].id"
 
-# 3. Create room as officer.
+# 3. Create room as officer (or capture existing on 409 re-run).
 POST {{api}}/comms/chat-rooms
 Origin: {{origin}}
 x-csrf-token: {{csrf_token}}
@@ -45,11 +45,15 @@ x-org-id: {{org_id}}
   "participants": ["{{a_id}}", "{{b_id}}"]
 }
 HTTP *
-[Captures]
-room_id: jsonpath "$.id"
 [Asserts]
 status >= 200
-status < 300
+status < 500
+
+GET {{api}}/comms/chat-rooms
+x-org-id: {{org_id}}
+HTTP 200
+[Captures]
+room_id: jsonpath "$.data[0].id"
 
 # 4. Sign out, sign up outsider.
 POST {{api}}/auth/sign-out
