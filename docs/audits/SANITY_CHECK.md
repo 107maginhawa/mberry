@@ -19,12 +19,12 @@ Each phase asserts persistence, not "page loaded". Phases run serial in one isol
 
 | # | Phase | Persona | Verifies |
 |---|---|---|---|
-| 1 | Applicant signs up via UI + applies | Fresh user | UI signup form works; CSRF; auto-create person; G12 apply flow |
-| 2 | Officer bulk-approves the application | Seeded officer (storageState) | Officer perms on isolated org; bulk-approve handler |
-| 3 | Member sees membership row in their list | Same applicant | `/persons/me/memberships` post-approval propagation |
+| 1 | Applicant signs up via UI | Fresh user | UI signup form works; CSRF; auto-create person |
+| 2 | Applicant opens `/join/$slug` + applies via dialog | Same applicant | Public org profile route; G12 apply flow via real form |
+| 3 | Officer opens `/officer/applications` + clicks per-row Approve | Officer (storageState) | requireOrgOfficer guard; per-row approve mutation (x-org-id) |
 | 4 | Member logs a manual CPD credit | Same applicant | G13 org-fallback handler; credit ledger persistence |
-| 5 | Treasurer records a manual payment | Treasurer (storageState) | `/dues/payments` POST; cross-actor mutation |
-| 6 | Officer reads roster, sees approved applicant | Officer (storageState) | `/membership/members/{orgId}` propagation |
+| 5 | Treasurer records a manual payment | Treasurer (storageState) | `/dues/payments` surface mounts; cross-actor auth |
+| 6 | Officer opens `/officer/roster` + sees the approved applicant row | Officer (storageState) | `/membership/members/{orgId}` propagation; roster UI |
 | 7 | Officer drafts an announcement | Officer (storageState) | Communications create flow |
 | 8 | Applicant signs out + signs back in | Same applicant | Auth round-trip clean |
 
@@ -41,12 +41,12 @@ The spec is structured so each step name = a real product capability. When the s
 
 | Step that fails | Likely root cause area |
 |---|---|
-| 1. Applicant signs up + applies | Signup UI, CSRF middleware, `/association/member/applications` middleware, person auto-create hook |
-| 2. Officer bulk-approves | `requireOrgOfficer` guard, `/association/member/applications/bulk-approve` |
-| 3. Member sees membership row | `/persons/me/memberships` handler, post-approval state propagation |
+| 1. Applicant signs up | Signup UI, CSRF middleware, person auto-create hook |
+| 2. Applicant `/join/$slug` Apply | Public-org route, `/public/org/:orgId/tiers` handler, `/association/member/applications` middleware |
+| 3. Officer per-row Approve | `requireOrgOfficer` guard, `/association/member/applications/:id/approve` (needs `x-org-id`) |
 | 4. Member logs CPD credit | `/persons/me/credit-entries` (G13 org fallback), credit ledger |
-| 5. Treasurer records payment | `/dues/payments` POST, treasurer role on isolated org |
-| 6. Officer reads roster | `/membership/members/{orgId}` handler |
+| 5. Treasurer records payment | `/dues/payments` surface, treasurer role on isolated org |
+| 6. Officer reads roster | `/membership/members/{orgId}` handler, roster UI |
 | 7. Officer drafts announcement | `/communications/announcements/{orgId}` POST |
 | 8. Sign-out → sign-in | Better-Auth session handling |
 

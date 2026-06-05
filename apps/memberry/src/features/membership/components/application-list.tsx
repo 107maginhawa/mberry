@@ -147,19 +147,20 @@ export function ApplicationList({ orgId }: ApplicationListProps) {
     },
   })
 
+  const orgHeaders = { 'x-org-id': orgId } as const
   const reviewMutation = {
     mutate: ({ appId, status, reason }: { appId: string; status: string; reason?: string }) => {
       if (status === 'approved') {
-        approveMutation.mutate({ path: { applicationId: appId } })
+        approveMutation.mutate({ path: { applicationId: appId }, headers: orgHeaders })
       } else if (status === 'denied') {
-        denyMutation.mutate({ path: { applicationId: appId }, body: { denialReason: reason ?? '' } })
+        denyMutation.mutate({ path: { applicationId: appId }, body: { denialReason: reason ?? '' }, headers: orgHeaders })
       }
     },
     mutateAsync: async ({ appId, status, reason }: { appId: string; status: string; reason?: string }) => {
       if (status === 'approved') {
-        return approveMutation.mutateAsync({ path: { applicationId: appId } })
+        return approveMutation.mutateAsync({ path: { applicationId: appId }, headers: orgHeaders })
       } else {
-        return denyMutation.mutateAsync({ path: { applicationId: appId }, body: { denialReason: reason ?? '' } })
+        return denyMutation.mutateAsync({ path: { applicationId: appId }, body: { denialReason: reason ?? '' }, headers: orgHeaders })
       }
     },
     isPending: approveMutation.isPending || denyMutation.isPending,

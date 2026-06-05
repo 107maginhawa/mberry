@@ -99,42 +99,42 @@ test.describe('Golden Path — does the app work? (UI-driven)', () => {
     })
   })
 
-  test('3. Officer approves the application (API — guard cache flake makes UI here unreliable)', async ({
+  test('3. Officer opens /officer/applications, clicks Approve on the new application row', async ({
     browser,
   }) => {
-    // KNOWN FLAKE: requireOrgOfficer's queryClient.ensureQueryData
-    // occasionally redirects the officer to /dashboard on a freshly-
-    // created isolated org under parallel pressure, despite the F1
-    // staleTime: Infinity fix and the F2 officer-term insert. Direct
-    // API verification confirms the officer-role row exists (see
-    // SANITY_CHECK.md). The UI approve flow is covered by the
-    // production specs that read the seeded pda-metro-manila org.
     const officerCtx = await browser.newContext({
       storageState: authStateFile('officer'),
     })
     const officerPage = await officerCtx.newPage()
-    await officerPage.goto('/dashboard')
+    await officerPage.goto(`/org/${fx().slug}/officer/applications`)
 
-    // Fetch the pending application id.
-    const pending = await apiFetch<{
-      data?: Array<{ id: string; personId: string }>
-    }>(officerPage, `/membership/applications/${fx().orgId}?status=submitted`, {
-      orgId: fx().orgId,
-    })
-    const apps = pending.data?.data ?? []
-    const applicantApp = apps[0]
-    expect(applicantApp, 'one pending application landed on isolated org').toBeTruthy()
+    // Wait for the applicant's row to render.
+    await expect(
+      officerPage.getByRole('heading', { name: /applications/i }).first(),
+    ).toBeVisible({ timeout: 15000 })
 
-    const approve = await apiFetch(
-      officerPage,
-      '/association/member/applications/bulk-approve',
-      {
-        method: 'POST',
-        orgId: fx().orgId,
-        body: { applicationIds: [applicantApp!.id] },
-      },
+    // Each application row is a collapsible button; expand the applicant's
+    // row to reveal the per-row Approve action. Match on the unique
+    // timestamp suffix of the signed-up name (e.g. "Test User <ts>").
+    const uniqueTag = applicantName.split(' ').at(-1) ?? applicantName
+    const rowToggle = officerPage.getByRole('button').filter({ hasText: uniqueTag }).first()
+    await expect(rowToggle).toBeVisible({ timeout: 15000 })
+    await rowToggle.click()
+
+    const approveBtn = officerPage.getByRole('button', { name: /approve/i }).filter({ hasNotText: /selected|denied|rejected/i }).first()
+    await expect(approveBtn).toBeVisible({ timeout: 10000 })
+
+    const approveReq = officerPage.waitForResponse(
+      (r) => r.url().includes('/applications/') && r.url().endsWith('/approve'),
+      { timeout: 20000 },
     )
-    expect(approve.status).toBeLessThan(300)
+    await approveBtn.click()
+    const approveResp = await approveReq
+    expect(approveResp.status(), `approve POST got ${approveResp.status()}`).toBeLessThan(300)
+
+    await expect(officerPage.getByText(/application approved/i).first())
+      .toBeVisible({ timeout: 10000 })
+
     await officerCtx.close()
   })
 
@@ -202,26 +202,25 @@ test.describe('Golden Path — does the app work? (UI-driven)', () => {
     await treasurerCtx.close()
   })
 
-  test('6. Officer reads roster via API + sees approved applicant', async ({ browser }) => {
-    // Same guard-cache flake as Phase 3 — UI roster page redirects to
-    // /dashboard intermittently on the fresh isolated org. Verify
-    // cross-actor propagation via API.
+  test('6. Officer opens /officer/roster + sees the approved applicant in the row list', async ({
+    browser,
+  }) => {
     const officerCtx = await browser.newContext({
       storageState: authStateFile('officer'),
     })
     const officerPage = await officerCtx.newPage()
-    await officerPage.goto('/dashboard')
+    await officerPage.goto(`/org/${fx().slug}/officer/roster`)
 
-    const roster = await apiFetch<{
-      data?: Array<{ personId: string; firstName?: string; lastName?: string }>
-    }>(officerPage, `/membership/members/${fx().orgId}`, { orgId: fx().orgId })
-    const list = roster.data?.data ?? []
-    expect(list.length, 'roster has at least one member post-approval').toBeGreaterThan(0)
-    // The applicant we approved has a unique signup name — find them.
-    const ours = list.find((m) =>
-      `${m.firstName ?? ''} ${m.lastName ?? ''}`.includes(applicantName.split(' ')[1] ?? ''),
-    )
-    expect(ours, 'approved applicant is present on officer roster').toBeTruthy()
+    await expect(
+      officerPage.getByRole('heading', { name: /roster|members/i }).first(),
+    ).toBeVisible({ timeout: 15000 })
+
+    // The applicant we just approved should appear in the table — match
+    // on their unique sign-up surname (second token of applicantName).
+    const surname = applicantName.split(' ')[1] ?? applicantName
+    await expect(officerPage.getByText(surname).first())
+      .toBeVisible({ timeout: 15000 })
+
     await officerCtx.close()
   })
 
