@@ -115,6 +115,7 @@ import { checkoutPaymentToken } from '@/handlers/dues/checkoutPaymentToken';
 
 // Public org discovery — hand-wired (not yet in TypeSpec)
 import { listPublicOrgs } from '@/handlers/platformadmin/listPublicOrgs';
+import { createIsolatedFixture, deleteIsolatedFixture } from '@/handlers/test-isolation';
 
 // Breach notification handlers — DPA 2012 / M3-R11
 import { reportBreach } from '@/handlers/platformadmin/reportBreach';
@@ -282,6 +283,7 @@ export function createApp(config: Config): App {
         '/email/unsubscribe',  // RFC 8058 List-Unsubscribe (signed token in query)
         '/pay/',               // signed one-tap payment token in URL
         '/auth/',              // Better-Auth has its own CSRF + cookie story
+        '/test/',              // G10 test-only fixture endpoints (NODE_ENV-gated above)
       ],
     }),
   );
@@ -311,6 +313,15 @@ export function createApp(config: Config): App {
 
   // @hand-wired reason="public discovery, not in TypeSpec" wave="pre-migration"
   app.get('/public/orgs', listPublicOrgs as unknown as Handler);
+
+  // @hand-wired reason="test-only fixture isolation, never registered in production" wave="G10"
+  // Routes themselves are guarded by NODE_ENV !== 'production' (handler
+  // returns 404 if the gate trips), AND we skip registration entirely
+  // here so they don't even appear in the route table in prod.
+  if (process.env['NODE_ENV'] !== 'production') {
+    app.post('/test/isolated-fixture', createIsolatedFixture as unknown as Handler);
+    app.delete('/test/isolated-fixture/:orgId', deleteIsolatedFixture as unknown as Handler);
+  }
 
   // @hand-wired reason="prospective applicants must see tiers before they're members" wave="G12"
   // /association/member/tiers requires association:member role — applicants
