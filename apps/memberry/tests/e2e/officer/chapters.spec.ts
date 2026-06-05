@@ -1,3 +1,4 @@
+// WF-027 — Chapter Management: org admin creates + manages chapters
 // CO-11: Chapter affiliations
 import { test, expect } from '../helpers/test-fixture'
 import { authStateFile } from '../helpers/auth-state'

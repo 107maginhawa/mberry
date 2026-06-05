@@ -1,3 +1,4 @@
+// WF-011 — Account Deletion: request, 30-day grace, cascade via person.deletionProcessor
 import { test, expect } from '../helpers/test-fixture'
 import { SEED_MEMBER_EMAIL, TEST_PASSWORD } from '../helpers/test-config'
 import { authStateFile } from '../helpers/auth-state'

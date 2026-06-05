@@ -1,3 +1,4 @@
+// WF-053 — My Events: member upcoming + past events list
 // Business Rules: [BR-15] [BR-27]
 // Upgraded from heading-only to behavioral (Phase 31)
 import { test, expect } from '../helpers/test-fixture'

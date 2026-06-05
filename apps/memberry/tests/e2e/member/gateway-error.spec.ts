@@ -1,3 +1,4 @@
+// WF-038 — Pay Dues Online: gateway error path
 // M-19: Payment gateway unavailable fallback
 import { test, expect } from '../helpers/test-fixture'
 import { authStateFile } from '../helpers/auth-state'

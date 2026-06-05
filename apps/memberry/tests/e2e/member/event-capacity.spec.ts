@@ -1,3 +1,4 @@
+// WF-052 — Event Registration: member registers, waitlist if full
 // BR-27: Event capacity and registration limits
 import { test, expect } from '../helpers/test-fixture'
 import { authStateFile } from '../helpers/auth-state'

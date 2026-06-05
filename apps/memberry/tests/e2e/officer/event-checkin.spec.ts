@@ -1,3 +1,4 @@
+// WF-055 — Events Dashboard: event list, upcoming/past, attendance stats
 // CO-05: Event check-in (manual attendance)
 import { test, expect } from '../helpers/test-fixture'
 import { authStateFile } from '../helpers/auth-state'

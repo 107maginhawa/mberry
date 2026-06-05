@@ -1,3 +1,4 @@
+// WF-058 — Training Lifecycle: create, publish, enroll, complete
 // P1 E2E Gap: Training lifecycle journey
 // Officer creates training -> member browses & enrolls -> officer views attendance -> member checks credits
 import { test, expect } from '../helpers/test-fixture'

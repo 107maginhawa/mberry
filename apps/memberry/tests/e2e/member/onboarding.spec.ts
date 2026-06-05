@@ -1,3 +1,4 @@
+// WF-004 — Member Onboarding: required profile, license, payment
 import { test, expect } from '../helpers/test-fixture'
 import { signUpForOnboarding } from '../helpers/auth'
 

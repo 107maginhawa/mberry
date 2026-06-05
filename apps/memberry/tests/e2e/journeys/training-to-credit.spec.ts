@@ -1,3 +1,4 @@
+// WF-074 — Certificate Download: member downloads training certificates
 // Cross-Module Flow 6.3: Training Attendance → Credit Award
 // Covers: M09 (training) → M10 (credits) → M11 (certificates)
 // Officer creates training, member enrolls, attendance confirmed, credits awarded.

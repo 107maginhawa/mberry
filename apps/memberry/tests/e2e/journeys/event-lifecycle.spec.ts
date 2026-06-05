@@ -1,3 +1,4 @@
+// WF-050 — Event Lifecycle: create, publish, register, complete
 // Business Rules: [BR-15] [BR-27]
 import { test, expect } from '../helpers/test-fixture'
 import { signIn } from '../helpers/auth'

@@ -1,3 +1,4 @@
+// WF-026 — Secretary Operations: minutes, attendance, comms
 // Persona P4: Chapter Secretary (Ana Reyes)
 // Covers: CS-1 through CS-13 — roster, member import, events, communications
 import { test, expect } from '../helpers/test-fixture'

@@ -1,3 +1,4 @@
+// WF-119 — Cancel Booking: client cancels confirmed booking
 // Business Rules: [BR-9] Booking module
 // E2E: Booking cancellation flow
 import { test, expect } from '../helpers/test-fixture'

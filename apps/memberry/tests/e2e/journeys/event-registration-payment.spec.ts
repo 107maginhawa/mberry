@@ -1,3 +1,4 @@
+// WF-052 — Event Registration: member registers, waitlist if full
 // Cross-Module Flow 6.4: Event Registration with Payment
 // Covers: M08 (events) → M06 (payments)
 // Focus: payment portion — event creation covered by event-lifecycle.spec.ts

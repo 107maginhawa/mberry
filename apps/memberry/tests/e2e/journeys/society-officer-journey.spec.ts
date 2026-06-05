@@ -1,3 +1,4 @@
+// WF-022 — Society Officer Operations: cross-chapter admin
 // Persona P5: Society Officer (Carlos Diaz)
 // Covers: SO-1 through SO-14 — training programs, cross-chapter credits, society analytics
 // Weakest persona at 21% coverage — this test significantly improves it.

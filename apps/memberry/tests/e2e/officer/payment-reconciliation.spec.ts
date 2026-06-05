@@ -1,3 +1,4 @@
+// WF-043 — Financial Dashboard: collection rates, payment history, fund reports
 // CT-3: Payment reconciliation — test payment list as reconciliation view
 import { test, expect } from '../helpers/test-fixture'
 import { authStateFile } from '../helpers/auth-state'

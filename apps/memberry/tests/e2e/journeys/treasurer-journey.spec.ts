@@ -1,3 +1,4 @@
+// WF-044 — Manual Payment Recording: treasurer records offline payment
 // Persona P3: Chapter Treasurer (Juan Cruz)
 // Covers: CT-1 through CT-11 — payment recording, dues config, financial reports
 import { test, expect } from '../helpers/test-fixture'

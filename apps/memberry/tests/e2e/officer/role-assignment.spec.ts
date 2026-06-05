@@ -1,3 +1,4 @@
+// WF-025 — Officer Role Assignment: assign positions to members
 // BR-09: Officer role assignment
 import { test, expect } from '../helpers/test-fixture'
 import { authStateFile } from '../helpers/auth-state'

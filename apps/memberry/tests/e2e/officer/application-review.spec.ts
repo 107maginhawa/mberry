@@ -1,3 +1,4 @@
+// WF-024 — Application Approval: officer reviews + approves pending
 // CO-07: Application review — view pending, approve/deny
 import { test, expect } from '../helpers/test-fixture'
 import { authStateFile } from '../helpers/auth-state'

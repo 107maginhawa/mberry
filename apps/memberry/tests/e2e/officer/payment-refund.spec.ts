@@ -1,3 +1,4 @@
+// WF-045 — Payment Receipt Generation: auto-generate receipt on completed payment
 // CT-7 / BR-08: Payment refund flow
 import { test, expect } from '../helpers/test-fixture'
 import { authStateFile } from '../helpers/auth-state'

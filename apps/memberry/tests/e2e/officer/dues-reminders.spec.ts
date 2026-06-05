@@ -1,3 +1,4 @@
+// WF-039 — Dues Reminders: scheduled email/notifs to overdue members
 // CT-2: Batch dues reminders
 import { test, expect } from '../helpers/test-fixture'
 import { authStateFile } from '../helpers/auth-state'

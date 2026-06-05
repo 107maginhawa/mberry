@@ -1,3 +1,4 @@
+// WF-043 — Financial Dashboard: collection rates, payment history, fund reports
 // BR-07: Payment recording extends dues expiry
 import { test, expect } from '../helpers/test-fixture'
 import { authStateFile } from '../helpers/auth-state'

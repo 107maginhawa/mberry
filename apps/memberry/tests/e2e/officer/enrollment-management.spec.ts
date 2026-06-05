@@ -1,3 +1,4 @@
+// WF-059 — Training Enrollment: register with capacity management
 // SO-2: Manage training enrollments
 import { test, expect } from '../helpers/test-fixture'
 import { authStateFile } from '../helpers/auth-state'

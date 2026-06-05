@@ -1,3 +1,4 @@
+// WF-030 — Member Roster: list, search, filter, bulk actions
 // Business Rules: [BR-01] [BR-03] [BR-22] [BR-23]
 import { test, expect } from '../helpers/test-fixture'
 import { SEED_OFFICER_EMAIL, TEST_PASSWORD } from '../helpers/test-config'

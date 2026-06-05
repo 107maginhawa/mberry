@@ -1,3 +1,4 @@
+// WF-032 — Membership Status Computation: derived from dues_expiry_date
 // M-24: Member status transition experience
 // Verifies status badges (Active/grace/lapsed) display correctly on /my/organizations
 // and that "Pay Dues" button appears for grace/lapsed members

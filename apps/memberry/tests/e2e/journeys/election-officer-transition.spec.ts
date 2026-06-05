@@ -1,3 +1,4 @@
+// WF-082 — Officer Transition: post-election handoff
 // Cross-Module Flow 6.5: Election → Officer Transition
 // Covers: M12 (elections) → M04 (org admin) → Notifications
 // Election creation, nomination, voting, certification, new officer assignment.

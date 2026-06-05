@@ -1,3 +1,4 @@
+// WF-046 — Communication Dashboard: announcement list, drafts, scheduled
 // Cross-Module Flow 6.8: Communication Delivery Pipeline
 // Covers: M07 (communications) → Email Queue → Notification Service
 // Officer creates announcement → delivery to members → track status

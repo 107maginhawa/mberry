@@ -1,3 +1,4 @@
+// WF-118 — Confirm/Reject Booking: provider accepts or declines pending bookings
 // Business Rules: [BR-9] Booking module
 // E2E: Host confirms/rejects booking requests
 import { test, expect } from '../helpers/test-fixture'

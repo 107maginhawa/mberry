@@ -1,3 +1,4 @@
+// WF-130 — Pay Invoice: member processes payment via Stripe Payment Intent
 import { test, expect } from '../helpers/test-fixture'
 
 test.describe('Public Payment Page (/pay/$token)', () => {
