@@ -14,7 +14,7 @@
 | FE admin vitest | ✅ 57/57 | ✅ unchanged | — |
 | `lint:no-skips` | ❌ 14 violations | ✅ clean | +14 cleared |
 | `lint:shallow` | ❌ 1 violation | ✅ clean | +1 cleared |
-| Hurl contract | ❌ 6/99 | ⚠️ 61/99 (61.6%) | **+55 files** |
+| Hurl contract | ❌ 6/99 | ⚠️ **66/99 (66.7%)** | **+60 files** |
 | E2E memberry wall (measured subset) | 9.5s/test | **0.75s/test** | **12.7× faster** |
 | E2E full-suite projection | 95 min | **~7.5 min** | — |
 
@@ -109,7 +109,7 @@ b0bf8d4c fix(test:lint): clear lint:shallow + lint:no-skips violations
 
 ## Remaining work (per-spec engineering — not automatable)
 
-1. **#18 contract residuals (38 .hurl files)** — Confirmed root cause of the 16 × 403: state-changing requests after fresh sign-up need OFFICER context, but fresh users aren't org members. Attempted mass-fix via `scripts/audit/inject-admin-session-into-officer-actions.ts` failed — Hurl's `[Cookies]` section APPENDS to the per-file jar instead of overwriting, so the fresh user's session-token still wins. Per-spec rewrite required: replace `POST /auth/sign-up/email` with `POST /auth/sign-in/email` as admin (test@memberry.ph / TestPass123!). Test-design judgment per spec — not safely mechanizable. Other residuals: 11 undefined-variable (cascade clears with the 403 fix), 3 × 409 multi-actor leftover, 1 × 500 real billing handler bug, 1 mailpit empty, 1 × 405 wrong-verb spec.
+1. **#18 contract residuals (33 .hurl files)** — hand-fixed 7 specs end-of-session: feature-flags (path), notifs-extended-flow (cookie-jar order), membership-flow (PUT body + 201), auth-password-reset (Better-Auth endpoint rename), read-all-flow (path), governance-flow (response shape), + sweep of dead `{{session_token}}` Cookie lines across 7 specs. Took 65/99 → 66/99 + cleared all 405/404/400 status code drift. **Remaining 33 fails:** 17 × 403 (fresh-user-no-org auth cascade), 7 × undefined-var (cascading from upstream 403s), 3 × 409 (multi-actor person auto-create leftovers), 1 × 500 (missing `STRIPE_SECRET_KEY` env — config not spec), 2 × HTTP-connection (mailpit needs Docker daemon restart), 2 × assert-fail (also 403 cascade). The 17 × 403 + 7 × undef-var + 2 × assert-fail = 26 specs share one root cause: fresh-user sign-up has no org membership, so officer endpoints 403. Two automated attempts failed (Hurl cookie-jar appends; body schemas also drifted). Per-spec rewrite required.
 
 2. **#20 E2E 403 cascade — empirical baseline captured.** Full shard 1/4 ran in 7.0 min on the new infra (storageState + workers=4 + fast helpers), confirming the ~7.5min full-suite projection. 77 pass + 10 skip on shard 1 alone. Many failures (long list captured in `.audits/e2e-memberry-shard-1.log` if rerun) are real app/fixture drift (bookings, dues, documents, communications) — not infrastructure issues. Per-spec triage to fix the data gaps and stale assertions, but the speedup means a full re-triage cycle is now feasible in one sitting instead of one day. The 4 remaining specs with extra beforeEach setup (after the second-pass migrator landed in commit 7cbb1fcd) need final manual storageState migration. Cross-persona scaffolds need implementation against real handlers.
 
