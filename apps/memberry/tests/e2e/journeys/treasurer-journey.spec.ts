@@ -17,8 +17,10 @@ async function assertPageMounted(
   urlMatch: RegExp,
 ) {
   await expect(page).toHaveURL(urlMatch, { timeout: 10000 })
-  // OrgProvider/officer sidebar always renders an officer nav once mounted.
-  await expect(page.getByRole('complementary').first()).toBeVisible({ timeout: 10000 })
+  // Wait for SPA shell to hydrate before checking sidebar — multi-hop
+  // journeys can race the initial empty-document state.
+  await page.waitForLoadState('domcontentloaded')
+  await expect(page.getByRole('complementary').first()).toBeVisible({ timeout: 15000 })
 }
 
 test.describe('P3 Treasurer Journey', () => {

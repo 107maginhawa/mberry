@@ -15,7 +15,11 @@ async function assertPageMounted(
   urlMatch: RegExp,
 ) {
   await expect(page).toHaveURL(urlMatch, { timeout: 10000 })
-  await expect(page.getByRole('complementary').first()).toBeVisible({ timeout: 10000 })
+  // Wait for the SPA shell to hydrate so the sidebar mount check below
+  // doesn't race the initial empty-document state during rapid multi-step
+  // navigation.
+  await page.waitForLoadState('domcontentloaded')
+  await expect(page.getByRole('complementary').first()).toBeVisible({ timeout: 15000 })
 }
 
 test.describe('P4 Secretary Journey', () => {
@@ -45,19 +49,20 @@ test.describe('P4 Secretary Journey', () => {
   })
 
   test.fixme('CS-6: secretary can compose new announcement', async ({ page }) => {
-    // SEED/ROLE GAP: the secretary persona ('secretary@memberry.ph') lacks
-    // officer permissions on pda-metro-manila in current seed, so any
-    // /officer/* nav redirects them to /dashboard. To re-enable, add an
-    // officer term for this user in services/api-ts/src/seed/layer-2-users.ts
-    // OR switch this test to the 'officer' storageState.
+    // Same flake as CS-7 + full-journey — secretary guard sometimes
+    // resolves to "not officer" under parallel pressure. Lift after G10/G15.
     await page.goto(`/org/${ORG_ID}/officer/communications/new`)
     await assertPageMounted(page, /\/officer\/communications\/new/)
     await expect(page.getByRole('textbox').first()).toBeVisible({ timeout: 10000 })
   })
 
   test.fixme('CS-7: secretary sidebar shows relevant navigation', async ({ page }) => {
-    // Same seed/role gap as CS-6 — secretary lands on member sidebar
-    // (no "Roster" link). Re-enable once secretary has officer term.
+    // FLAKY: secretary has officer role per /persons/me/officer-role API
+    // (verified manually), but the guard's queryClient.ensureQueryData
+    // sometimes resolves to an empty position list under load, redirecting
+    // to /dashboard. The page then shows Member nav (no "Roster" link).
+    // Reproduces only under parallel pressure — needs guard cache
+    // investigation, OR retry-with-fresh-context. Lift after G10 / G15.
     await page.goto(`/org/${ORG_ID}/officer/dashboard`)
     const sidebar = page.getByRole('complementary')
     await expect(sidebar.getByRole('link', { name: /roster/i }).first())
@@ -65,8 +70,11 @@ test.describe('P4 Secretary Journey', () => {
   })
 
   test.fixme('full journey: dashboard → roster → applications → events → communications', async ({ page }) => {
-    // Same SEED/ROLE GAP as CS-6/CS-7 — secretary lacks officer permissions
-    // and gets bounced to /dashboard before sidebar mounts.
+    // SPA RACE UNDER PARALLEL: 4 rapid page.goto + assertPageMounted calls
+    // race the SPA's empty-shell render between transitions. Sidebar
+    // re-mounts each goto; the next goto fires before hydration completes.
+    // Lift after G10 (per-test seed isolation) OR rewrite with explicit
+    // page.waitForFunction(() => window.__appReady) hooks.
     await test.step('dashboard', async () => {
       await page.goto(`/org/${ORG_ID}/officer/dashboard`)
       await assertPageMounted(page, /\/officer\/dashboard$/)

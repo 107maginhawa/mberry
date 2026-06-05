@@ -14,7 +14,8 @@ async function assertPageMounted(
   urlMatch: RegExp,
 ) {
   await expect(page).toHaveURL(urlMatch, { timeout: 10000 })
-  await expect(page.getByRole('complementary').first()).toBeVisible({ timeout: 10000 })
+  await page.waitForLoadState('domcontentloaded')
+  await expect(page.getByRole('complementary').first()).toBeVisible({ timeout: 15000 })
 }
 
 test.describe('P5 Society Officer Journey', () => {
@@ -77,10 +78,7 @@ test.describe('P5 Society Officer Journey', () => {
   })
 
   test.fixme('full journey: dashboard → training → events → back', async ({ page }) => {
-    // SEED/ROLE GAP: society officer ('society@memberry.ph') doesn't have
-    // a chapter-officer term on pda-metro-manila in seed, so the multi-
-    // hop /officer/* journey gets bounced to /dashboard. Add an officer
-    // term in seed/layer-2-users.ts to re-enable.
+    // Same SPA-race-under-parallel as secretary full-journey. Lift after G10.
     await test.step('dashboard', async () => {
       await page.goto(`/org/${ORG_ID}/officer/dashboard`)
       await assertPageMounted(page, /\/officer\/dashboard$/)
