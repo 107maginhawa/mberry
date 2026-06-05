@@ -72,9 +72,9 @@ export function TrainingForm({ orgId, initial, trainingId }: TrainingFormProps) 
         description: form.description || undefined,
       }
       if (isEdit && trainingId) {
-        return updateMut.mutateAsync({ path: { trainingId }, body: payload } as any)
+        return updateMut.mutateAsync({ path: { trainingId }, body: payload, headers: { 'x-org-id': orgId } } as any)
       } else {
-        return createMut.mutateAsync({ body: payload } as any)
+        return createMut.mutateAsync({ body: payload, headers: { 'x-org-id': orgId } } as any)
       }
     },
     onSuccess: (data: any) => {

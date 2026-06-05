@@ -60,7 +60,7 @@ function TrainingDetail() {
   const [tab, setTab] = useState<Tab>('details')
 
   const { data, isLoading, isError, error } = useQuery(
-    getTrainingOptions({ path: { trainingId } })
+    getTrainingOptions({ path: { trainingId }, headers: { 'x-org-id': orgId } })
   )
 
   // SDK GetTraining returns unknown; runtime response may wrap in .data
