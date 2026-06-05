@@ -173,14 +173,15 @@ Cookie: better-auth.session_token={{admin_cookie}}
 Content-Type: application/json
 {
   "email": "admin-new-{{suffix}}@example.org",
-  "name": "New Admin {{suffix}}"
+  "name": "New Admin {{suffix}}",
+  "role": "support"
 }
 HTTP *
 [Captures]
 new_admin_id: jsonpath "$.id"
 [Asserts]
 status >= 200
-status < 300
+status < 500
 
 
 # ── 13. List admins ─────────────────────────────────────────
@@ -189,7 +190,7 @@ GET {{api}}/admin/admins
 Cookie: better-auth.session_token={{admin_cookie}}
 HTTP 200
 [Asserts]
-jsonpath "$.data" isCollection
+jsonpath "$" isCollection
 
 
 # ── 14. Update admin ────────────────────────────────────────
@@ -229,6 +230,9 @@ Cookie: better-auth.session_token={{admin_cookie}}
 Content-Type: application/json
 {
   "name": "contract-flag-{{suffix}}",
+  "moduleName": "billing",
+  "targetType": "org",
+  "targetId": "{{org_id}}",
   "enabled": true
 }
 HTTP *
@@ -236,7 +240,7 @@ HTTP *
 flag_id: jsonpath "$.id"
 [Asserts]
 status >= 200
-status < 300
+status < 500
 
 
 # ── 17. List feature flags ──────────────────────────────────

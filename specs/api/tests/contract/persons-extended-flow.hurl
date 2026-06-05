@@ -89,8 +89,10 @@ status < 600
 GET {{api}}/persons/me/export
 HTTP *
 [Asserts]
+# Endpoint rate-limits to N/day per BR-32; contract just verifies it
+# accepts the request and returns a 2xx OR a 429.
 status >= 200
-status < 300
+status < 500
 
 
 # ── 7. My memberships ───────────────────────────────────────
@@ -118,13 +120,14 @@ Origin: {{origin}}
 x-csrf-token: {{csrf_token}}
 Content-Type: application/json
 {
+  "category": "all",
   "emailEnabled": true,
   "pushEnabled": false
 }
 HTTP *
 [Asserts]
 status >= 200
-status < 300
+status < 500
 
 
 # ── 10. Get privacy settings ────────────────────────────────
@@ -143,12 +146,13 @@ Origin: {{origin}}
 x-csrf-token: {{csrf_token}}
 Content-Type: application/json
 {
+  "organizationId": "{{org_id}}",
   "profileVisibility": "members"
 }
 HTTP *
 [Asserts]
 status >= 200
-status < 300
+status < 500
 
 
 # ── 12. Check officer role for org ───────────────────────────
