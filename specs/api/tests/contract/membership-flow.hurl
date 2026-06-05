@@ -73,17 +73,20 @@ jsonpath "$.data" isCollection
 
 
 # ── 2. Upsert a new category ──────────────────────────────
+# Handler validator requires applicableTiers (Zod schema). Server responds
+# 201 on upsert-create; was previously documented as 200.
 
-PUT {{api}}/association/member/membership-categories/ed8e3a96-8126-4341-be42-e6eb7940c562
+PUT {{api}}/association/member/membership-categories/{{org_id}}
 Origin: {{origin}}
 x-csrf-token: {{csrf_token}}
 Content-Type: application/json
 {
   "name": "Contract Test Category {{suffix}}",
   "duesAmount": 50000,
-  "billingCycle": "annual"
+  "billingCycle": "annual",
+  "applicableTiers": ["regular"]
 }
-HTTP 200
+HTTP 201
 
 
 # ── 3. List members ────────────────────────────────────────
