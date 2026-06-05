@@ -40,6 +40,14 @@ HTTP 200
 
 # ── 3. Create organization ──────────────────────────────────
 
+# Capture a seeded association id — orgs MUST belong to an association.
+GET {{api}}/admin/associations
+Cookie: better-auth.session_token={{admin_cookie}}
+HTTP 200
+[Captures]
+association_id: jsonpath "$.data[0].id"
+
+
 POST {{api}}/admin/organizations
 Origin: {{origin}}
 x-csrf-token: {{csrf_token}}
@@ -48,7 +56,8 @@ Content-Type: application/json
 {
   "name": "Contract Org {{suffix}}",
   "slug": "contract-org-{{suffix}}",
-  "type": "association"
+  "associationId": "{{association_id}}",
+  "orgType": "chapter"
 }
 HTTP *
 [Captures]
@@ -114,7 +123,9 @@ Cookie: better-auth.session_token={{admin_cookie}}
 Content-Type: application/json
 {
   "name": "Contract Assoc {{suffix}}",
-  "organizationId": "{{org_id}}"
+  "slug": "contract-assoc-{{suffix}}",
+  "country": "PH",
+  "currency": "PHP"
 }
 HTTP *
 [Captures]
