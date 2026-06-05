@@ -1,6 +1,6 @@
 import { test, expect } from './helpers/test-fixture'
 import { signInAsSecretary, signInAsMember } from './helpers/auth'
-import { API_BASE } from './helpers/test-config'
+import { apiFetch } from './helpers/api-fetch'
 
 const ORG_SLUG = 'test-org'
 
@@ -89,20 +89,18 @@ test.describe('Wave 4α: Communications — Officer Compose + Notification Drawe
     await signInAsMember(page)
     await page.waitForLoadState('networkidle')
 
-    // Seed a test notification via API so we have something unread
-    await page.evaluate(async ({ apiBase }) => {
-      await fetch(`${apiBase}/notifs`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        credentials: 'include',
-        body: JSON.stringify({
-          type: 'system',
-          channel: 'in-app',
-          title: 'E2E Mark-Read Test',
-          message: 'Notification to test mark-all-read flow',
-        }),
-      })
-    }, { apiBase: API_BASE })
+    // Seed a test notification via API so we have something unread.
+    // apiFetch attaches x-csrf-token + Origin so the POST survives the
+    // hono/csrf middleware that landed after this spec was written.
+    await apiFetch(page, '/notifs', {
+      method: 'POST',
+      body: {
+        type: 'system',
+        channel: 'in-app',
+        title: 'E2E Mark-Read Test',
+        message: 'Notification to test mark-all-read flow',
+      },
+    })
 
     // Reload to pick up the new notification count
     await page.reload()

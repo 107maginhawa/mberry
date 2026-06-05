@@ -9,17 +9,23 @@
 import { test, expect } from '../helpers/test-fixture'
 import { SEED_OFFICER_EMAIL, TEST_PASSWORD, API_BASE } from '../helpers/test-config'
 import { authStateFile } from '../helpers/auth-state'
+import { apiFetch } from '../helpers/api-fetch'
 
 
 test.use({ storageState: authStateFile('officer') })
 const ORG_ID = 'ed8e3a96-8126-4341-be42-e6eb7940c562'
 
 test.describe('BR-34: Nomination Eligibility', () => {
-test('unauthenticated nomination request returns 401', async ({ page }) => {
-    const response = await page.evaluate(async ({ orgId, apiBase }) => {
-      const res = await fetch(`${apiBase}/association/elections/nominations/eligibility?organizationId=${orgId}`)
-      return { status: res.status }
-    }, { orgId: ORG_ID, apiBase: API_BASE })
+test('unauthenticated nomination request returns 401', async ({ page, context }) => {
+    // Land on the SPA so the in-page fetch carries http://localhost:3004 as
+    // Origin (CORS_ORIGINS allows it). Then clear cookies so the actual
+    // eligibility request is genuinely unauthenticated.
+    await page.goto('/auth/sign-in')
+    await context.clearCookies()
+    const response = await apiFetch(
+      page,
+      `/association/elections/nominations/eligibility?organizationId=${ORG_ID}`,
+    )
     expect(response.status).toBe(401)
   })
 
