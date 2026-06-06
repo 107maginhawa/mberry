@@ -78,8 +78,8 @@ import { impersonationResolver, impersonationWriteBlock } from '@/middleware/imp
 // PRC Accredited Providers — MIGRATED to generated routes (association:operations).
 // Training lifecycle — MIGRATED to generated routes (completeCustomTraining, publishTraining).
 
-// Elections: deleteElection legacy path hand-wired (not in TypeSpec)
-import { deleteElection } from '@/handlers/elections/deleteElection';
+// Elections: deleteElection — MIGRATED to generated routes (Phase 35,
+// /association/member/elections/{electionId}).
 
 // Email: hand-wired for middleware ordering reasons.
 // - unsubscribeEmail: MUST be registered BEFORE /email/* auth middleware (RFC 8058 public access)
@@ -523,8 +523,10 @@ export function createApp(config: Config): App {
 
   // updateNomineeStatus — MIGRATED to TypeSpec as updateCandidateStatus
   // (POST /association/member/candidates/{candidateId}/status). Wave 12.
-  // @hand-wired reason="elections deleteElection legacy path, TypeSpec deferred" wave="pre-migration"
-  app.delete('/association/member/elections/:id', uuidIdParam, authMiddleware(), deleteElection as unknown as Handler);
+  // deleteElection — MIGRATED to TypeSpec
+  // (DELETE /association/member/elections/{electionId}). Spec allows deleting
+  // draft OR cancelled elections; implementation in
+  // handlers/association:member/deleteElection.ts.
 
   // @hand-wired reason="ID card + bulk certificate issue, not in TypeSpec" wave="Wave-2b"
   const orgIdShortParam = zValidator('param', z.object({ orgId: z.string().uuid() }), validationErrorHandler);
