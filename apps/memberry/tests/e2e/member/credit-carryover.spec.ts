@@ -2,12 +2,17 @@
 // BR-12: Credit carry-over
 import { test, expect } from '../helpers/test-fixture'
 import { authStateFile } from '../helpers/auth-state'
+import { captureAnyApiSuccess } from '../helpers/real-flow'
 
 
 test.use({ storageState: authStateFile('member') })
 test.describe('BR-12: Credit Carry-Over', () => {
 test('credits page loads and shows credit data', async ({ page }) => {
+    const respP = captureAnyApiSuccess(page)
     await page.goto('/my/credits')
+    const resp = await respP
+    expect(resp?.status()).toBe(200)
+    expect(resp?.ok()).toBe(true)
     // Should show credits page with data or empty state
     const hasContent = await page.getByText(/credits|CPD|earned|required/i).first().isVisible({ timeout: 10000 }).catch(() => false)
     expect(hasContent).toBeTruthy()
