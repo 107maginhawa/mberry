@@ -1,9 +1,8 @@
-import type { ValidatedContext } from '@/types/app';
+import type { ValidatedContext, AuditEventEntry } from '@/types/app';
 import type { DatabaseInstance } from '@/core/database';
 import { NotFoundError, BusinessLogicError } from '@/core/errors';
 import type { RegisterForCustomEventParams } from '@/generated/openapi/validators';
 import { EventRepository, EventRegistrationRepository, WaitlistEntryRepository } from './repos/events.repo';
-import { auditAction } from '@/utils/audit';
 
 /**
  * registerForCustomEvent
@@ -28,6 +27,9 @@ export async function registerForCustomEvent(
   const regRepo = new EventRegistrationRepository(db, logger);
   const waitlistRepo = new WaitlistEntryRepository(db, logger);
 
+  const auditEvents: AuditEventEntry[] = [];
+  ctx.set('auditEvents', auditEvents);
+
   const event = await eventRepo.findOneById(params.eventId);
   if (!event) throw new NotFoundError('Event not found');
 
@@ -46,10 +48,10 @@ export async function registerForCustomEvent(
         organizationId: orgId,
       });
 
-      await auditAction(ctx, {
+      auditEvents.push({
         action: 'create',
         resourceType: 'waitlist-entry',
-        resourceId: entry.id,
+        resource: entry.id,
         description: 'Auto-waitlisted due to capacity',
       });
 
@@ -64,10 +66,10 @@ export async function registerForCustomEvent(
     organizationId: orgId,
   });
 
-  await auditAction(ctx, {
+  auditEvents.push({
     action: 'create',
     resourceType: 'event-registration',
-    resourceId: registration.id,
+    resource: registration.id,
     description: 'Registered for event',
   });
 

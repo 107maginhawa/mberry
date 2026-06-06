@@ -840,6 +840,7 @@ namespace Association.Operations.Events {
     @post
     @route("/{eventId}/register")
     @extension("x-security-required-roles", #["association:member"])
+    @extension("x-audit", #{ action: "create", resourceType: "event-registration" })
     registerForCustomEvent(
       @path eventId: string
     ): ApiCreatedResponse<EventRegistration>

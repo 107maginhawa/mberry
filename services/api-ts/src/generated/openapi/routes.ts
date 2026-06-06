@@ -438,6 +438,7 @@ export function registerRoutes(app: Hono<{ Variables: Variables }>) {
   // registerForCustomEvent
   app.post('/association/event-lifecycle/:eventId/register',
     authMiddleware({ roles: ["association:member"] }),
+    createPerRouteAuditMiddleware({ action: "create", resourceType: "event-registration" }),
     zValidator('param', validators.RegisterForCustomEventParams, validationErrorHandler),
     registry.registerForCustomEvent as unknown as Handler
   );
