@@ -18,6 +18,7 @@ import { authStateFile } from '../helpers/auth-state'
 import { apiFetch } from '../helpers/api-fetch'
 import { signIn } from '../helpers/auth'
 import { SEED_MEMBER_EMAIL, TEST_PASSWORD } from '../helpers/test-config'
+import { captureAnyApiSuccess } from '../helpers/real-flow'
 
 test.describe.configure({ mode: 'serial' })
 
@@ -28,7 +29,11 @@ test.describe('cross-persona: admin suspends org → member sees lockout', () =>
       storageState: authStateFile('officer'),
     })
     const adminPage = await adminCtx.newPage()
+    const adminHydration = captureAnyApiSuccess(adminPage)
     await adminPage.goto('/dashboard')
+    const adminResp = await adminHydration
+    expect(adminResp?.status()).toBe(200)
+    expect(adminResp?.ok()).toBe(true)
 
     const orgRead = await apiFetch<{
       status?: string
