@@ -1,13 +1,18 @@
 // WF-028 — Org Public Page: URL-friendly public profile
 // Business Rules: [BR-29]
 import { test, expect } from '../helpers/test-fixture'
+import { captureAnyApiSuccess } from '../helpers/real-flow'
 
 test.describe('Public Org Page', () => {
   test('[BR-29] public org page loads without auth', async ({ page }) => {
     // Clear cookies to ensure no auth session
     await page.context().clearCookies()
 
+    const respP = captureAnyApiSuccess(page)
     await page.goto('/join/pda-metro-manila')
+    const resp = await respP
+    expect(resp?.status()).toBe(200)
+    expect(resp?.ok()).toBe(true)
     // Should NOT redirect to auth
     expect(page.url()).not.toContain('/auth/')
 
