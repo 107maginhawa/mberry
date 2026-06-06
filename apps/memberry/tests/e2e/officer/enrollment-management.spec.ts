@@ -2,6 +2,7 @@
 // SO-2: Manage training enrollments
 import { test, expect } from '../helpers/test-fixture'
 import { authStateFile } from '../helpers/auth-state'
+import { captureRouteHydration } from '../helpers/real-flow'
 
 
 test.use({ storageState: authStateFile('society') })
@@ -9,10 +10,14 @@ const ORG_ID = 'ed8e3a96-8126-4341-be42-e6eb7940c562'
 
 test.describe('SO-2: Enrollment Management', () => {
 test('training list page loads', async ({ page }) => {
+    const respP = captureRouteHydration(page, /\/training/)
     await page.goto(`/org/${ORG_ID}/officer/training`)
     // Should show training list or empty state
     const hasHeading = await page.getByText(/training|programs/i).first().isVisible({ timeout: 10000 }).catch(() => false)
     expect(hasHeading).toBeTruthy()
+    const resp = await respP
+    expect(resp?.status()).toBe(200)
+    expect(resp?.ok()).toBe(true)
   })
 
   test('training detail has attendance tab when trainings exist', async ({ page }) => {
