@@ -52,7 +52,7 @@ Plan: `~/.claude/plans/so-is-our-codebase-hidden-dream.md`
 | 3.5 (dead-code prune) | ✅ 3 orphans deleted; module candidates kept |
 | 4 (contract coverage) | partial — gap tool + surveys scaffold; 87-scenario sweep handed off |
 | 4.5 (observability) | partial — top 3 fixed + D-03 PII fix; 17-handler sweep handed off |
-| 5 (maps) | partial — regen + 3 specs; 5-module backfill handed off; archive prune pending user approval |
+| 5 (maps) | ✅ complete — regen + 3 specs; 5-module backfill handed off; 283-file archive pruned (267 MD + 16 non-md) |
 | 5.5 (mega-module decision) | ✅ rebuild plan handed off |
 | 6 (lint + allowlist) | ✅ complete (elections already in TypeSpec) |
 | 6.5 (ADRs) | ✅ 10 ADRs (2 with TBD rationale) |
