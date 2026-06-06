@@ -102,7 +102,26 @@ Authentication is handled by Better-Auth (integrated, not a separate module).
 The Person module is the central PII safeguard for user data.
 
 ### Consent Management
-Consent management is planned but **not yet implemented** in the database schema. No JSONB consent fields exist on the Person model currently. See `docs/audits/EXISTING_CODEBASE_ADOPTION_AUDIT.md` §7 for current Person table structure.
+Consent management is planned but **not yet implemented** in the database schema. No JSONB consent fields exist on the Person model currently. See `docs/_archive/oli/audits/EXISTING_CODEBASE_ADOPTION_AUDIT.md` §7 for current Person table structure.
+
+### Handler verb conventions
+
+| Verb prefix | When to use |
+|---|---|
+| `get*` | Read a single resource by id (`getMembership`). |
+| `list*` | List resources (`listMemberships`, optional filters). |
+| `create*` | Create a brand new resource. **Default** when in doubt. |
+| `update*` | Mutate an existing resource (PATCH semantics). |
+| `delete*` | Remove a resource. |
+| `upsert*` | Idempotent create-or-update (e.g., `upsertDuesFunds`). |
+| `bulk*` | Operate on many at once (`bulkRecordPayments`). |
+| `mark*` | Flip a state field (`markDuesInvoicePaid`). Lighter than `update*`. |
+| `cancel*` / `complete*` / `approve*` / `deny*` / `revoke*` / `confirm*` / `cast*` / `certify*` | State-machine transitions where the verb names the transition (`cancelEvent`, `castBallot`). |
+| `add*` | **Restricted.** Use only for appending into an existing parent (`addRosterMember`, `addTicketComment`) — not for top-level resource creation. Prefer `create*` for new resources. |
+| `register*` | **Restricted to user-action semantics** where "register" is the domain term (`registerForEvent`). Otherwise prefer `create*Registration`. |
+| `submit*` | **Restricted to user-submission semantics** where "submit" is the domain term (`submitPaymentProof`, `submitSurveyResponse`). Otherwise prefer `create*`. |
+
+Do not introduce `new*` / `make*` / `do*` / `process*` prefixes. Resolve such drift to one of the verbs above. Frontend hook names follow `useGet*`, `useList*`, `useCreate*`, etc., generated from the corresponding operation id.
 
 ### API-First Development
 Always follow this workflow:
