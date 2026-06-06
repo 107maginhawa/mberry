@@ -164,7 +164,37 @@ status >= 200
 status < 404
 
 
-# ── 13. Request account deletion ─────────────────────────────
+# ── 13. Switch to a fresh non-officer account for the deletion flow ──
+# The deletion handler blocks (422 SOLE_OFFICER) when the caller is the
+# sole active officer in any org. The seeded officer used above hits
+# that block, which would mask the contract on the happy path. Sign up
+# a brand-new user — they own no officer terms and no dues payments —
+# so steps 14 + 15 exercise the real lifecycle.
+
+POST {{api}}/auth/sign-up/email
+Origin: {{origin}}
+x-csrf-token: {{csrf_token}}
+Content-Type: application/json
+{
+  "email": "self-delete-{{suffix}}@example.org",
+  "password": "Sup3rSecret!ContractTest",
+  "name": "Self Delete Tester"
+}
+HTTP 200
+
+
+POST {{api}}/auth/sign-in/email
+Origin: {{origin}}
+x-csrf-token: {{csrf_token}}
+Content-Type: application/json
+{
+  "email": "self-delete-{{suffix}}@example.org",
+  "password": "Sup3rSecret!ContractTest"
+}
+HTTP 200
+
+
+# ── 14. Request account deletion ─────────────────────────────
 
 POST {{api}}/persons/me/delete
 Origin: {{origin}}
@@ -175,7 +205,7 @@ status >= 200
 status < 300
 
 
-# ── 14. Cancel account deletion ──────────────────────────────
+# ── 15. Cancel account deletion ──────────────────────────────
 
 POST {{api}}/persons/me/cancel-delete
 Origin: {{origin}}
