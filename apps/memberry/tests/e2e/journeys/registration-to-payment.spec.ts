@@ -3,6 +3,7 @@
 // Focus: signup-to-approved segment. Payment verification via page presence (not re-testing full recording).
 import { test, expect } from '../helpers/test-fixture'
 import { signUp, signInAsOfficer, signInAsMember } from '../helpers/auth'
+import { captureRouteHydration } from '../helpers/real-flow'
 
 const ORG_ID = 'ed8e3a96-8126-4341-be42-e6eb7940c562'
 
@@ -45,7 +46,11 @@ test.describe('Journey: Registration → Membership → Payment', () => {
     })
 
     await test.step('navigate to payments', async () => {
+      const respP = captureRouteHydration(page, /\/dues-invoices|\/payments/)
       await page.goto('/my/payments')
+      const resp = await respP
+      expect(resp?.status()).toBe(200)
+      expect(resp?.ok()).toBe(true)
       await expect(page).toHaveURL(/\/my\/payments/)
     })
 
