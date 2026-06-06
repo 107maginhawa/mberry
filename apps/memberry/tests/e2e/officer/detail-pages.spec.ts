@@ -1,5 +1,6 @@
 import { test, expect } from '../helpers/test-fixture'
 import { authStateFile } from '../helpers/auth-state'
+import { captureAnyApiSuccess } from '../helpers/real-flow'
 
 
 test.use({ storageState: authStateFile('officer') })
@@ -11,9 +12,18 @@ const FAKE_ID = '00000000-0000-0000-0000-000000000000'
  * not-found banner, or sidebar) when handed a non-existent ID — never
  * a blank screen. Use waitFor (polls) instead of isVisible({timeout})
  * which is a one-shot check.
+ *
+ * W2 real-flow upgrade: capture any API GET so we prove the shell
+ * hydrated through at least one backend call before the detail lookup
+ * 404s (the FAKE_ID won't resolve, but /persons/me + sidebar queries
+ * still fire). The 404-on-detail itself is expected and surfaces via
+ * the not-found banner that assertReachable already tolerates.
  */
 async function assertReachable(page: import('@playwright/test').Page, route: string) {
+  const respP = captureAnyApiSuccess(page)
   await page.goto(route)
+  const resp = await respP
+  expect(resp?.ok()).toBe(true)
   await expect(page.getByRole('complementary').first())
     .toBeVisible({ timeout: 10000 })
   // Either content (any heading) OR a not-found state must render.
