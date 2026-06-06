@@ -17,7 +17,6 @@ import type { Session } from '@/types/auth';
 import { MerchantAccountRepository } from './repos/billing.repo';
 import type { MerchantMetadata } from './repos/billing.schema';
 import { PersonRepository } from '../person/repos/person.repo';
-import { auditAction } from '@/utils/audit';
 
 /**
  * onboardMerchantAccount
@@ -212,18 +211,13 @@ export async function onboardMerchantAccount(
       status: accountStatus.status
     }, 'Merchant account onboarding URL generated');
 
-    await auditAction(ctx, {
-      action: 'update',
-      resourceType: 'merchant-account',
-      resourceId: merchantAccountId,
-      description: `Merchant onboarding URL generated for account ${merchantAccountId}`,
-      eventSubType: 'financial.merchant-onboarded',
-      details: {
+    ctx.set('auditResourceId', merchantAccountId);
+    ctx.set('auditDescription', `Merchant onboarding URL generated for account ${merchantAccountId}`);
+    ctx.set('auditDetails', {
         stripeAccountId,
         onboardingComplete: accountStatus.onboardingComplete,
         accountStatus: accountStatus.status,
-      },
-    });
+      });
 
     // Format response to match TypeSpec OnboardingResponse model
     return ctx.json({

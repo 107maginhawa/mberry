@@ -10,7 +10,6 @@ import type { InvoiceMetadata, MerchantMetadata } from './repos/billing.schema';
 import { subscriptions } from '@/handlers/platformadmin/repos/platform-admin.schema';
 import { eq } from 'drizzle-orm';
 import type Stripe from 'stripe';
-import { auditAction } from '@/utils/audit';
 
 /**
  * handleStripeWebhook
@@ -143,18 +142,13 @@ export async function handleStripeWebhook(
       'Webhook event processed successfully'
     );
 
-    await auditAction(ctx, {
-      action: 'update',
-      resourceType: 'stripe-webhook',
-      resourceId: event.id,
-      description: `Stripe webhook processed: ${event.type}`,
-      eventSubType: 'financial.webhook-processed',
-      details: {
+    ctx.set('auditResourceId', event.id);
+    ctx.set('auditDescription', `Stripe webhook processed: ${event.type}`);
+    ctx.set('auditDetails', {
         stripeEventType: event.type,
         stripeEventId: event.id,
         livemode: event.livemode,
-      },
-    });
+      });
 
     // Return 200 to acknowledge receipt
     return ctx.json({ received: true }, 200);

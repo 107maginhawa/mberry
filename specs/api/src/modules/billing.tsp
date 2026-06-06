@@ -421,6 +421,7 @@ namespace BillingModule {
     @post
     @route("/invoices")
     @useAuth(bearerAuth)
+    @extension("x-audit", #{ action: "create", resourceType: "invoice", eventSubType: "financial.invoice-created" })
     createInvoice(
       @body request: CreateInvoiceRequest
     ): ApiCreatedResponse<Invoice>
@@ -445,6 +446,7 @@ namespace BillingModule {
     @patch(#{implicitOptionality: true})
     @route("/invoices/{invoice}")
     @useAuth(bearerAuth)
+    @extension("x-audit", #{ action: "update", resourceType: "invoice", eventSubType: "financial.invoice-updated" })
     updateInvoice(
       @path invoice: UUID,
       @body request: UpdateInvoiceRequest
@@ -458,6 +460,7 @@ namespace BillingModule {
     @delete
     @route("/invoices/{invoice}")
     @useAuth(bearerAuth)
+    @extension("x-audit", #{ action: "delete", resourceType: "invoice", eventSubType: "financial.invoice-deleted" })
     deleteInvoice(
       @path invoice: UUID
     ): ApiNoContentResponse
@@ -484,6 +487,7 @@ namespace BillingModule {
     @post
     @route("/invoices/{invoice}/finalize")
     @useAuth(bearerAuth)
+    @extension("x-audit", #{ action: "finalize", resourceType: "invoice", eventSubType: "financial.invoice-finalized" })
     finalizeInvoice(
       @path invoice: UUID
     ): ApiOkResponse<Invoice>
@@ -496,6 +500,7 @@ namespace BillingModule {
     @post
     @route("/invoices/{invoice}/void")
     @useAuth(bearerAuth)
+    @extension("x-audit", #{ action: "delete", resourceType: "invoice", eventSubType: "financial.invoice-voided" })
     voidInvoice(
       @path invoice: UUID
     ): ApiOkResponse<Invoice>
@@ -508,6 +513,7 @@ namespace BillingModule {
     @post
     @route("/invoices/{invoice}/mark-uncollectible")
     @useAuth(bearerAuth)
+    @extension("x-audit", #{ action: "update", resourceType: "invoice", eventSubType: "financial.invoice-uncollectible" })
     markInvoiceUncollectible(
       @path invoice: UUID
     ): ApiOkResponse<Invoice>
@@ -525,6 +531,7 @@ namespace BillingModule {
     @post
     @route("/invoices/{invoice}/pay")
     @useAuth(bearerAuth)
+    @extension("x-audit", #{ action: "create", resourceType: "payment-intent", eventSubType: "financial.payment-recorded" })
     payInvoice(
       @path invoice: UUID,
       @body request: PaymentRequest
@@ -538,6 +545,7 @@ namespace BillingModule {
     @post
     @route("/invoices/{invoice}/capture")
     @useAuth(bearerAuth)
+    @extension("x-audit", #{ action: "capture", resourceType: "invoice", eventSubType: "financial.payment-captured" })
     captureInvoicePayment(
       @path invoice: UUID
     ): ApiOkResponse<Invoice>
@@ -550,6 +558,7 @@ namespace BillingModule {
     @post
     @route("/invoices/{invoice}/refund")
     @useAuth(bearerAuth)
+    @extension("x-audit", #{ action: "create", resourceType: "refund", eventSubType: "financial.payment-reversed" })
     refundInvoicePayment(
       @path invoice: UUID,
       @body request: RefundRequest
@@ -562,6 +571,7 @@ namespace BillingModule {
     @operationId("handleStripeWebhook")
     @post
     @route("/webhooks/stripe")
+    @extension("x-audit", #{ action: "update", resourceType: "stripe-webhook", eventSubType: "financial.webhook-processed" })
     handleStripeWebhook(
       // Stripe signs webhooks as `t=<timestamp>,v1=<hex>` (with optional
       // legacy v0 entries). The pattern keeps the spec aligned with what
@@ -583,6 +593,7 @@ namespace BillingModule {
     @post
     @route("/merchant-accounts")
     @useAuth(bearerAuth)
+    @extension("x-audit", #{ action: "create", resourceType: "merchant-account", eventSubType: "financial.merchant-account-created" })
     createMerchantAccount(
       @body request: CreateMerchantAccountRequest
     ): ApiCreatedResponse<MerchantAccount>
@@ -607,6 +618,7 @@ namespace BillingModule {
     @post
     @route("/merchant-accounts/{merchantAccount}/onboard")
     @useAuth(bearerAuth)
+    @extension("x-audit", #{ action: "update", resourceType: "merchant-account", eventSubType: "financial.merchant-onboarded" })
     onboardMerchantAccount(
       @path merchantAccount: UUID,
       @body request: OnboardingRequest
@@ -620,6 +632,7 @@ namespace BillingModule {
     @post
     @route("/merchant-accounts/{merchantAccount}/dashboard")
     @useAuth(bearerAuth)
+    @extension("x-audit", #{ action: "read", resourceType: "merchant-account", eventType: "data-access", eventSubType: "financial.merchant-dashboard-accessed" })
     getMerchantDashboard(
       @path @doc("Merchant Account ID (UUID) or 'me' for current user's account") merchantAccount: UUID | "me"
     ): ApiOkResponse<DashboardResponse>

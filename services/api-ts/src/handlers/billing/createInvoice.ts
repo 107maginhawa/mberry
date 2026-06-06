@@ -18,7 +18,6 @@ import { InvoiceRepository } from './repos/billing.repo';
 import { PersonRepository } from '../person/repos/person.repo';
 // Customer and merchant are both persons in monobase
 import type { CreateInvoiceRequest } from './repos/billing.schema';
-import { auditAction } from '@/utils/audit';
 
 /**
  * createInvoice
@@ -157,14 +156,9 @@ export async function createInvoice(
     total: invoiceWithLineItems.total
   }, 'Invoice created successfully');
 
-  await auditAction(ctx, {
-    action: 'create',
-    resourceType: 'invoice',
-    resourceId: invoiceWithLineItems.id,
-    description: `Invoice ${invoiceWithLineItems.invoiceNumber} created: ${currency} ${total}`,
-    eventSubType: 'financial.invoice-created',
-    details: { invoiceNumber: invoiceWithLineItems.invoiceNumber, customer, merchant, total },
-  });
+  ctx.set('auditResourceId', invoiceWithLineItems.id);
+  ctx.set('auditDescription', `Invoice ${invoiceWithLineItems.invoiceNumber} created: ${currency} ${total}`);
+  ctx.set('auditDetails', { invoiceNumber: invoiceWithLineItems.invoiceNumber, customer, merchant, total });
 
   // Return response matching TypeSpec Invoice model structure
   return ctx.json({

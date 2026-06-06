@@ -14,7 +14,6 @@ import type { ValidatedContext } from '@/types/app';
 import type { FinalizeInvoiceParams } from '@/generated/openapi/validators';
 import type { Session } from '@/types/auth';
 import { InvoiceRepository } from './repos/billing.repo';
-import { auditAction } from '@/utils/audit';
 
 /**
  * finalizeInvoice
@@ -99,20 +98,15 @@ export async function finalizeInvoice(
     status: finalizedInvoice.status
   }, 'Invoice finalized successfully');
 
-  await auditAction(ctx, {
-    action: 'finalize',
-    resourceType: 'invoice',
-    resourceId: invoiceId,
-    description: `Invoice ${finalizedInvoice.invoiceNumber} finalized (${finalizedInvoice.total} ${finalizedInvoice.currency})`,
-    eventSubType: 'financial.invoice-finalized',
-    details: {
+  ctx.set('auditResourceId', invoiceId);
+  ctx.set('auditDescription', `Invoice ${finalizedInvoice.invoiceNumber} finalized (${finalizedInvoice.total} ${finalizedInvoice.currency})`);
+  ctx.set('auditDetails', {
       invoiceNumber: finalizedInvoice.invoiceNumber,
       total: finalizedInvoice.total,
       currency: finalizedInvoice.currency,
       customerId: finalizedInvoice.customer,
       merchantId: finalizedInvoice.merchant,
-    },
-  });
+    });
 
   // Format response to match TypeSpec Invoice model
   const response = {

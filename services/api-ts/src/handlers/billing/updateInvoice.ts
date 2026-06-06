@@ -15,7 +15,6 @@ import type { ValidatedContext } from '@/types/app';
 import type { UpdateInvoiceBody, UpdateInvoiceParams } from '@/generated/openapi/validators';
 import type { Session } from '@/types/auth';
 import { InvoiceRepository } from './repos/billing.repo';
-import { auditAction } from '@/utils/audit';
 
 /**
  * updateInvoice
@@ -142,19 +141,14 @@ export async function updateInvoice(
     newAmount: (updatedInvoice as Record<string, unknown>)['amount']
   }, 'Invoice updated successfully');
 
-  await auditAction(ctx, {
-    action: 'update',
-    resourceType: 'invoice',
-    resourceId: invoiceId,
-    description: `Invoice ${updatedInvoice.invoiceNumber} updated (fields: ${Object.keys(updateData).join(', ')})`,
-    eventSubType: 'financial.invoice-updated',
-    details: {
+  ctx.set('auditResourceId', invoiceId);
+  ctx.set('auditDescription', `Invoice ${updatedInvoice.invoiceNumber} updated (fields: ${Object.keys(updateData).join(', ')})`);
+  ctx.set('auditDetails', {
       invoiceNumber: updatedInvoice.invoiceNumber,
       changedFields: Object.keys(updateData),
       total: updatedInvoice.total,
       currency: updatedInvoice.currency,
-    },
-  });
+    });
 
   // Fetch updated invoice with line items for complete response
   const invoiceWithLineItems = await invoiceRepo.findOneWithLineItems(invoiceId);

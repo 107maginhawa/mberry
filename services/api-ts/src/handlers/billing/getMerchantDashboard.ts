@@ -12,7 +12,6 @@ import type { Session } from '@/types/auth';
 import type { BillingService } from '@/core/billing';
 import { MerchantAccountRepository } from './repos/billing.repo';
 import { addMinutes } from 'date-fns';
-import { auditAction } from '@/utils/audit';
 
 /**
  * getMerchantDashboard
@@ -111,19 +110,13 @@ export async function getMerchantDashboard(
     accountStatus: accountStatus.status
   }, 'Merchant dashboard link generated successfully');
 
-  await auditAction(ctx, {
-    action: 'read',
-    resourceType: 'merchant-account',
-    resourceId: merchantAccountId,
-    description: `Merchant dashboard accessed for account ${merchantAccountId}`,
-    eventSubType: 'financial.merchant-dashboard-accessed',
-    eventType: 'data-access',
-    details: {
+  ctx.set('auditResourceId', merchantAccountId);
+  ctx.set('auditDescription', `Merchant dashboard accessed for account ${merchantAccountId}`);
+  ctx.set('auditDetails', {
       stripeAccountId,
       accountStatus: accountStatus.status,
       personId: merchantAccount.person,
-    },
-  });
+    });
 
   // Calculate expiration time (Stripe dashboard links expire in 5 minutes)
   const expiresAt = addMinutes(new Date(), 5);

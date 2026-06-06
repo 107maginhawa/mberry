@@ -11,7 +11,6 @@ import type { Session } from '@/types/auth';
 import { InvoiceRepository, MerchantAccountRepository } from './repos/billing.repo';
 import type { InvoiceMetadata, MerchantMetadata } from './repos/billing.schema';
 import { PersonRepository } from '../person/repos/person.repo';
-import { auditAction } from '@/utils/audit';
 
 /**
  * voidInvoice
@@ -166,14 +165,9 @@ export async function voidInvoice(
       'Invoice voided successfully'
     );
 
-    await auditAction(ctx, {
-      action: 'delete',
-      resourceType: 'invoice',
-      resourceId: invoiceId,
-      description: `Invoice voided: ${invoice.invoiceNumber ?? invoiceId}`,
-      eventSubType: 'financial.invoice-voided',
-      details: { invoiceId, total: invoice.total },
-    });
+    ctx.set('auditResourceId', invoiceId);
+    ctx.set('auditDescription', `Invoice voided: ${invoice.invoiceNumber ?? invoiceId}`);
+    ctx.set('auditDetails', { invoiceId, total: invoice.total });
 
     // Fetch the updated invoice to return
     const updatedInvoice = await invoiceRepo.findOneById(invoiceId);

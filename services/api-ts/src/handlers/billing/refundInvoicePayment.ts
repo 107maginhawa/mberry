@@ -11,7 +11,6 @@ import type { Session } from '@/types/auth';
 import { InvoiceRepository, MerchantAccountRepository } from './repos/billing.repo';
 import type { InvoiceMetadata, MerchantMetadata } from './repos/billing.schema';
 import { PersonRepository } from '../person/repos/person.repo';
-import { auditAction } from '@/utils/audit';
 
 /**
  * refundInvoicePayment
@@ -181,14 +180,9 @@ export async function refundInvoicePayment(
       'Refund created successfully for invoice'
     );
 
-    await auditAction(ctx, {
-      action: 'create',
-      resourceType: 'refund',
-      resourceId: refundResult.refundId,
-      description: `Refund ${isFullRefund ? 'full' : 'partial'} for invoice ${invoiceId}: ${refundAmountDecimal}`,
-      eventSubType: 'financial.payment-reversed',
-      details: { invoiceId, refundAmount: refundAmountCents, reason, isFullRefund },
-    });
+    ctx.set('auditResourceId', refundResult.refundId);
+    ctx.set('auditDescription', `Refund ${isFullRefund ? 'full' : 'partial'} for invoice ${invoiceId}: ${refundAmountDecimal}`);
+    ctx.set('auditDetails', { invoiceId, refundAmount: refundAmountCents, reason, isFullRefund });
 
     // Return the response as defined in TypeSpec
     return ctx.json({

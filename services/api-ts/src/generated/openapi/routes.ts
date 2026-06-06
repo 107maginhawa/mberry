@@ -2177,6 +2177,7 @@ export function registerRoutes(app: Hono<{ Variables: Variables }>) {
   // createInvoice
   app.post('/billing/invoices',
     authMiddleware(),
+    createPerRouteAuditMiddleware({ action: "create", resourceType: "invoice", eventSubType: "financial.invoice-created" }),
     zValidator('json', validators.CreateInvoiceBody, validationErrorHandler),
     createExpandMiddleware("Invoice"),
     registry.createInvoice as unknown as Handler
@@ -2201,6 +2202,7 @@ export function registerRoutes(app: Hono<{ Variables: Variables }>) {
   // updateInvoice
   app.patch('/billing/invoices/:invoice',
     authMiddleware(),
+    createPerRouteAuditMiddleware({ action: "update", resourceType: "invoice", eventSubType: "financial.invoice-updated" }),
     zValidator('param', validators.UpdateInvoiceParams, validationErrorHandler),
     zValidator('json', validators.UpdateInvoiceBody, validationErrorHandler),
     createExpandMiddleware("Invoice"),
@@ -2210,6 +2212,7 @@ export function registerRoutes(app: Hono<{ Variables: Variables }>) {
   // deleteInvoice
   app.delete('/billing/invoices/:invoice',
     authMiddleware(),
+    createPerRouteAuditMiddleware({ action: "delete", resourceType: "invoice", eventSubType: "financial.invoice-deleted" }),
     zValidator('param', validators.DeleteInvoiceParams, validationErrorHandler),
     registry.deleteInvoice as unknown as Handler
   );
@@ -2217,6 +2220,7 @@ export function registerRoutes(app: Hono<{ Variables: Variables }>) {
   // captureInvoicePayment
   app.post('/billing/invoices/:invoice/capture',
     authMiddleware(),
+    createPerRouteAuditMiddleware({ action: "capture", resourceType: "invoice", eventSubType: "financial.payment-captured" }),
     zValidator('param', validators.CaptureInvoicePaymentParams, validationErrorHandler),
     createExpandMiddleware("Invoice"),
     registry.captureInvoicePayment as unknown as Handler
@@ -2225,6 +2229,7 @@ export function registerRoutes(app: Hono<{ Variables: Variables }>) {
   // finalizeInvoice
   app.post('/billing/invoices/:invoice/finalize',
     authMiddleware(),
+    createPerRouteAuditMiddleware({ action: "finalize", resourceType: "invoice", eventSubType: "financial.invoice-finalized" }),
     zValidator('param', validators.FinalizeInvoiceParams, validationErrorHandler),
     createExpandMiddleware("Invoice"),
     registry.finalizeInvoice as unknown as Handler
@@ -2233,6 +2238,7 @@ export function registerRoutes(app: Hono<{ Variables: Variables }>) {
   // markInvoiceUncollectible
   app.post('/billing/invoices/:invoice/mark-uncollectible',
     authMiddleware(),
+    createPerRouteAuditMiddleware({ action: "update", resourceType: "invoice", eventSubType: "financial.invoice-uncollectible" }),
     zValidator('param', validators.MarkInvoiceUncollectibleParams, validationErrorHandler),
     createExpandMiddleware("Invoice"),
     registry.markInvoiceUncollectible as unknown as Handler
@@ -2241,6 +2247,7 @@ export function registerRoutes(app: Hono<{ Variables: Variables }>) {
   // payInvoice
   app.post('/billing/invoices/:invoice/pay',
     authMiddleware(),
+    createPerRouteAuditMiddleware({ action: "create", resourceType: "payment-intent", eventSubType: "financial.payment-recorded" }),
     zValidator('param', validators.PayInvoiceParams, validationErrorHandler),
     zValidator('json', validators.PayInvoiceBody, validationErrorHandler),
     registry.payInvoice as unknown as Handler
@@ -2249,6 +2256,7 @@ export function registerRoutes(app: Hono<{ Variables: Variables }>) {
   // refundInvoicePayment
   app.post('/billing/invoices/:invoice/refund',
     authMiddleware(),
+    createPerRouteAuditMiddleware({ action: "create", resourceType: "refund", eventSubType: "financial.payment-reversed" }),
     zValidator('param', validators.RefundInvoicePaymentParams, validationErrorHandler),
     zValidator('json', validators.RefundInvoicePaymentBody, validationErrorHandler),
     registry.refundInvoicePayment as unknown as Handler
@@ -2257,6 +2265,7 @@ export function registerRoutes(app: Hono<{ Variables: Variables }>) {
   // voidInvoice
   app.post('/billing/invoices/:invoice/void',
     authMiddleware(),
+    createPerRouteAuditMiddleware({ action: "delete", resourceType: "invoice", eventSubType: "financial.invoice-voided" }),
     zValidator('param', validators.VoidInvoiceParams, validationErrorHandler),
     createExpandMiddleware("Invoice"),
     registry.voidInvoice as unknown as Handler
@@ -2265,6 +2274,7 @@ export function registerRoutes(app: Hono<{ Variables: Variables }>) {
   // createMerchantAccount
   app.post('/billing/merchant-accounts',
     authMiddleware(),
+    createPerRouteAuditMiddleware({ action: "create", resourceType: "merchant-account", eventSubType: "financial.merchant-account-created" }),
     zValidator('json', validators.CreateMerchantAccountBody, validationErrorHandler),
     createExpandMiddleware("MerchantAccount"),
     registry.createMerchantAccount as unknown as Handler
@@ -2282,6 +2292,7 @@ export function registerRoutes(app: Hono<{ Variables: Variables }>) {
   // getMerchantDashboard
   app.post('/billing/merchant-accounts/:merchantAccount/dashboard',
     authMiddleware(),
+    createPerRouteAuditMiddleware({ action: "read", resourceType: "merchant-account", eventSubType: "financial.merchant-dashboard-accessed", eventType: "data-access" }),
     zValidator('param', validators.GetMerchantDashboardParams, validationErrorHandler),
     registry.getMerchantDashboard as unknown as Handler
   );
@@ -2289,6 +2300,7 @@ export function registerRoutes(app: Hono<{ Variables: Variables }>) {
   // onboardMerchantAccount
   app.post('/billing/merchant-accounts/:merchantAccount/onboard',
     authMiddleware(),
+    createPerRouteAuditMiddleware({ action: "update", resourceType: "merchant-account", eventSubType: "financial.merchant-onboarded" }),
     zValidator('param', validators.OnboardMerchantAccountParams, validationErrorHandler),
     zValidator('json', validators.OnboardMerchantAccountBody, validationErrorHandler),
     registry.onboardMerchantAccount as unknown as Handler
@@ -2296,6 +2308,7 @@ export function registerRoutes(app: Hono<{ Variables: Variables }>) {
 
   // handleStripeWebhook
   app.post('/billing/webhooks/stripe',
+    createPerRouteAuditMiddleware({ action: "update", resourceType: "stripe-webhook", eventSubType: "financial.webhook-processed" }),
     zValidator('json', validators.HandleStripeWebhookBody, validationErrorHandler),
     registry.handleStripeWebhook as unknown as Handler
   );
