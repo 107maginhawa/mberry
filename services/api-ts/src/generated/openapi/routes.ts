@@ -2948,6 +2948,7 @@ export function registerRoutes(app: Hono<{ Variables: Variables }>) {
   // claimInvite
   app.post('/invite/claim/:token',
     authMiddleware(),
+    createPerRouteAuditMiddleware({ action: "complete", resourceType: "invitation" }),
     zValidator('param', validators.ClaimInviteParams, validationErrorHandler),
     registry.claimInvite as unknown as Handler
   );

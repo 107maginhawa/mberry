@@ -1,11 +1,10 @@
-import type { ValidatedContext } from '@/types/app';
+import type { ValidatedContext, AuditEventEntry } from '@/types/app';
 import type { DatabaseInstance } from '@/core/database';
 import { ConflictError, NotFoundError, ValidationError, BusinessLogicError } from '@/core/errors';
 import { InviteRepository } from './repos/invite.repo';
 import { MembershipRepository } from '../membership/repos/membership.repo';
 import { OrganizationRepository } from '../platformadmin/repos/platform-admin.repo';
 import { hashToken, isExpired } from './utils/token';
-import { auditAction } from '@/utils/audit';
 import { domainEvents } from '@/core/domain-events';
 
 /**
@@ -50,13 +49,18 @@ export async function claimInvite(
     throw new BusinessLogicError('This invitation has expired', 'INVITE_EXPIRED');
   }
 
+  // Audit trail: array reference shared with per-route audit middleware so
+  // pre-throw entries persist if a later step throws.
+  const auditEvents: AuditEventEntry[] = [];
+  ctx.set('auditEvents', auditEvents);
+
   // Mark as claimed
   const claimed = await inviteRepo.markClaimed(invite.id);
 
-  await auditAction(ctx, {
+  auditEvents.push({
     action: 'complete',
     resourceType: 'invitation',
-    resourceId: invite.id,
+    resource: invite.id,
     description: `Invitation claimed by user ${user.id} for org ${invite.organizationId}`,
   });
 
@@ -96,10 +100,10 @@ export async function claimInvite(
     updatedBy: user.id,
   });
 
-  await auditAction(ctx, {
+  auditEvents.push({
     action: 'create',
     resourceType: 'membership',
-    resourceId: membership.id,
+    resource: membership.id,
     description: `Membership created for user ${user.id} in org ${invite.organizationId} via invite claim`,
   });
 

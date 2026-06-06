@@ -319,6 +319,7 @@ namespace InviteModule {
     @post
     @route("/invite/claim/{token}")
     @useAuth(bearerAuth)
+    @extension("x-audit", #{ action: "complete", resourceType: "invitation" })
     claimInvite(
       @path token: string
     ): ApiOkResponse<ClaimInviteResponse>
