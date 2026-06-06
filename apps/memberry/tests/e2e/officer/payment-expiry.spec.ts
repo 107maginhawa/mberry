@@ -2,15 +2,21 @@
 // BR-07: Payment recording extends dues expiry
 import { test, expect } from '../helpers/test-fixture'
 import { authStateFile } from '../helpers/auth-state'
+import { captureAnyApiSuccess, captureRouteHydration } from '../helpers/real-flow'
 
 
 test.use({ storageState: authStateFile('treasurer') })
 const ORG_ID = 'ed8e3a96-8126-4341-be42-e6eb7940c562'
+const PAYMENTS = /\/(payments|dues-invoices)/
 
 test.describe('BR-07: Payment & Expiry', () => {
 test('Record Payment page loads with form', async ({ page }) => {
+    const respP = captureAnyApiSuccess(page)
     await page.goto(`/org/${ORG_ID}/officer/payments/new`)
     await expect(page.getByRole('heading', { name: 'Record Payment' })).toBeVisible({ timeout: 10000 })
+    const resp = await respP
+    expect(resp?.status()).toBe(200)
+    expect(resp?.ok()).toBe(true)
   })
 
   test('payment page has Record Payment button linking to form', async ({ page }) => {
@@ -24,9 +30,12 @@ test('Record Payment page loads with form', async ({ page }) => {
   })
 
   test('financial dashboard shows summary data', async ({ page }) => {
+    const respP = captureRouteHydration(page, PAYMENTS)
     await page.goto(`/org/${ORG_ID}/officer/payments`)
     // Financial dashboard should render with data or placeholders
     await expect(page.getByText('Dues & Payments')).toBeVisible({ timeout: 10000 })
+    const resp = await respP
+    expect(resp?.ok()).toBe(true)
 
     // Dashboard shows financial metrics (revenue, outstanding, etc)
     const pageText = await page.locator('body').textContent()
