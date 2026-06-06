@@ -4,7 +4,6 @@ import { UnauthorizedError, NotFoundError } from '@/core/errors';
 import type { DatabaseInstance } from '@/core/database';
 import type { UpdateRosterMemberBody, UpdateRosterMemberParams } from '@/generated/openapi/validators';
 import { MembershipRepository } from './repos/membership.repo';
-import { auditAction } from '@/utils/audit';
 
 /**
  * updateRosterMember
@@ -29,12 +28,8 @@ export async function updateRosterMember(
 
   const updated = await repo.updateOneById(params.memberId, body as Partial<Membership>);
 
-  await auditAction(ctx, {
-    action: 'update',
-    resourceType: 'roster-member',
-    resourceId: params.memberId,
-    description: 'Roster member updated',
-  });
+  ctx.set('auditResourceId', params.memberId);
+  ctx.set('auditDescription', 'Roster member updated');
 
   return ctx.json(updated, 200);
 }

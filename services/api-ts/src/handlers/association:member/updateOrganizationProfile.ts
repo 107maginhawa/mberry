@@ -4,7 +4,6 @@ import type { DatabaseInstance } from '@/core/database';
 import type { UpdateOrganizationProfileBody, UpdateOrganizationProfileParams } from '@/generated/openapi/validators';
 import { eq } from 'drizzle-orm';
 import { organizations } from '@/handlers/platformadmin/repos/platform-admin.schema';
-import { auditAction } from '@/utils/audit';
 import { requirePosition } from '@/utils/officer-check';
 import { POSITION_TITLES } from '@/utils/position-titles';
 import { domainEvents } from '@/core/domain-events';
@@ -55,12 +54,8 @@ export async function updateOrganizationProfile(
     .where(eq(organizations.id, params.organizationId))
     .returning();
 
-  await auditAction(ctx, {
-    action: 'update',
-    resourceType: 'organization-profile',
-    resourceId: params.organizationId,
-    description: 'Organization profile updated',
-  });
+  ctx.set('auditResourceId', params.organizationId);
+  ctx.set('auditDescription', 'Organization profile updated');
 
   domainEvents.emit('org.settings.updated', {
     organizationId: params.organizationId,

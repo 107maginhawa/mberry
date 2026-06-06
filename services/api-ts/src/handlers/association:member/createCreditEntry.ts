@@ -3,7 +3,6 @@ import type { DatabaseInstance } from '@/core/database';
 import { ValidationError } from '@/core/errors';
 import { CreditEntryRepository } from './repos/credits.repo';
 import { getCycleForDate } from './utils/credit-cycle';
-import { auditAction } from '@/utils/audit';
 
 /**
  * createCreditEntry
@@ -71,12 +70,8 @@ export async function createCreditEntry(
     // verificationStatus defaults to 'pending' via schema default (T-22-06: never accept from client)
   });
 
-  await auditAction(ctx, {
-    action: 'create',
-    resourceType: 'credit-entry',
-    resourceId: entry.id,
-    description: `Manual credit entry: ${body.activityName} (${body.creditAmount} credits)`,
-  });
+  ctx.set('auditResourceId', entry.id);
+  ctx.set('auditDescription', `Manual credit entry: ${body.activityName} (${body.creditAmount} credits)`);
 
   return ctx.json(entry, 201);
 }

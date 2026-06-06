@@ -2,7 +2,6 @@ import type { ValidatedContext } from '@/types/app';
 import type { DatabaseInstance } from '@/core/database';
 import { PayMongoAdapter } from './utils/paymongo.adapter';
 import { DuesInvoiceRepository } from './repos/dues.repo';
-import { auditAction } from '@/utils/audit';
 
 /**
  * handlePaymentWebhook
@@ -54,13 +53,9 @@ export async function handlePaymentWebhook(
   if (event.status === 'paid') {
     await invoiceRepo.markPaid(invoice.id, invoice.version, event.gatewayEventId, new Date());
 
-    await auditAction(ctx, {
-      action: 'mark-paid',
-      resourceType: 'dues-invoice',
-      resourceId: invoice.id,
-      description: `Online payment via PayMongo: ${event.gatewayEventId}`,
-      details: { gatewayEventId: event.gatewayEventId, amount: event.amount },
-    });
+    ctx.set('auditResourceId', invoice.id);
+    ctx.set('auditDescription', `Online payment via PayMongo: ${event.gatewayEventId}`);
+    ctx.set('auditDetails', { gatewayEventId: event.gatewayEventId, amount: event.amount });
   }
 
   return ctx.json({ received: true, action: event.status === 'paid' ? 'processed' : 'noted' });

@@ -3,7 +3,6 @@ import type { DatabaseInstance } from '@/core/database';
 import type { DeleteCredentialTemplateParams } from '@/generated/openapi/validators';
 import { UnauthorizedError, NotFoundError } from '@/core/errors';
 import { CredentialTemplateRepository } from './repos/credentials.repo';
-import { auditAction } from '@/utils/audit';
 
 /**
  * deleteCredentialTemplate
@@ -26,12 +25,8 @@ export async function deleteCredentialTemplate(
 
   await repo.deleteOneById(templateId);
 
-  await auditAction(ctx, {
-    action: 'delete',
-    resourceType: 'credential-template',
-    resourceId: templateId,
-    description: 'Credential template deleted',
-  });
+  ctx.set('auditResourceId', templateId);
+  ctx.set('auditDescription', 'Credential template deleted');
 
   return ctx.body(null, 204);
 }

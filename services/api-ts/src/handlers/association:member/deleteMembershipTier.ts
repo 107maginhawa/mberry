@@ -3,7 +3,6 @@ import type { DatabaseInstance } from '@/core/database';
 import { NotFoundError, UnauthorizedError } from '@/core/errors';
 import type { DeleteMembershipTierParams } from '@/generated/openapi/validators';
 import { MembershipTierRepository } from './repos/membership.repo';
-import { auditAction } from '@/utils/audit';
 
 /**
  * deleteMembershipTier
@@ -26,12 +25,8 @@ export async function deleteMembershipTier(
 
   await repo.deleteOneById(tierId, session.user.id);
 
-  await auditAction(ctx, {
-    action: 'delete',
-    resourceType: 'membership-tier',
-    resourceId: tierId,
-    description: 'Membership tier deleted',
-  });
+  ctx.set('auditResourceId', tierId);
+  ctx.set('auditDescription', 'Membership tier deleted');
 
   return ctx.body(null, 204);
 }

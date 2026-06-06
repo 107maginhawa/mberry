@@ -2,7 +2,6 @@ import type { ValidatedContext } from '@/types/app';
 import type { DatabaseInstance } from '@/core/database';
 import { NotFoundError, ConflictError } from '@/core/errors';
 import { DuesInvoiceRepository } from './repos/dues.repo';
-import { auditAction } from '@/utils/audit';
 
 /**
  * recordManualPayment
@@ -37,13 +36,9 @@ export async function recordManualPayment(
   const paymentRef = body.reference || `manual-${Date.now()}`;
   await invoiceRepo.markPaid(invoice.id, invoice.version, paymentRef, new Date());
 
-  await auditAction(ctx, {
-    action: 'mark-paid',
-    resourceType: 'dues-invoice',
-    resourceId: invoice.id,
-    description: `Manual payment recorded: ${body.paymentMethod || 'manual'}, ref: ${paymentRef}`,
-    details: { method: body.paymentMethod, reference: paymentRef },
-  });
+  ctx.set('auditResourceId', invoice.id);
+  ctx.set('auditDescription', `Manual payment recorded: ${body.paymentMethod || 'manual'}, ref: ${paymentRef}`);
+  ctx.set('auditDetails', { method: body.paymentMethod, reference: paymentRef });
 
   return ctx.json({ paid: true, invoiceId: invoice.id });
 }

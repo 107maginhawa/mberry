@@ -3,7 +3,6 @@ import type { DatabaseInstance } from '@/core/database';
 import type { CreateChapterAffiliationBody } from '@/generated/openapi/validators';
 import { UnauthorizedError } from '@/core/errors';
 import { ChapterAffiliationRepository } from './repos/chapters.repo';
-import { auditAction } from '@/utils/audit';
 
 /**
  * createChapterAffiliation
@@ -34,12 +33,8 @@ export async function createChapterAffiliation(
     status: 'active',
   });
 
-  await auditAction(ctx, {
-    action: 'create',
-    resourceType: 'chapter-affiliation',
-    resourceId: affiliation.id,
-    description: 'Chapter affiliation created',
-  });
+  ctx.set('auditResourceId', affiliation.id);
+  ctx.set('auditDescription', 'Chapter affiliation created');
 
   return ctx.json(affiliation, 201);
 }

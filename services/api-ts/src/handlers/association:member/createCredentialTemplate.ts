@@ -3,7 +3,6 @@ import type { DatabaseInstance } from '@/core/database';
 import type { CreateCredentialTemplateBody } from '@/generated/openapi/validators';
 import { UnauthorizedError } from '@/core/errors';
 import { CredentialTemplateRepository } from './repos/credentials.repo';
-import { auditAction } from '@/utils/audit';
 
 /**
  * createCredentialTemplate
@@ -34,12 +33,8 @@ export async function createCredentialTemplate(
     status: body.status ?? 'active',
   });
 
-  await auditAction(ctx, {
-    action: 'create',
-    resourceType: 'credential-template',
-    resourceId: template.id,
-    description: `Credential template "${body.name}" created`,
-  });
+  ctx.set('auditResourceId', template.id);
+  ctx.set('auditDescription', `Credential template "${body.name}" created`);
 
   return ctx.json(template, 201);
 }

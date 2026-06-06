@@ -3,7 +3,6 @@ import type { DatabaseInstance } from '@/core/database';
 import { ForbiddenError } from '@/core/errors';
 import { OfficerTermRepository, PositionRepository } from './repos/governance.repo';
 import { PlatformAdminRepository } from '@/handlers/platformadmin/repos/platform-admin.repo';
-import { auditAction } from '@/utils/audit';
 import { requirePosition } from '@/utils/officer-check';
 import { POSITION_TITLES } from '@/utils/position-titles';
 import { domainEvents } from '@/core/domain-events';
@@ -77,14 +76,9 @@ export async function createOfficerTerm(
     notes: body.notes || null,
   });
 
-  await auditAction(ctx, {
-    action: 'create',
-    resourceType: 'officer-term',
-    resourceId: term.id,
-    description: 'Officer term created',
-    details: { positionId: body.positionId, personId: body.personId },
-    eventSubType: 'governance.officer-appointed',
-  });
+  ctx.set('auditResourceId', term.id);
+  ctx.set('auditDescription', 'Officer term created');
+  ctx.set('auditDetails', { positionId: body.positionId, personId: body.personId });
 
   domainEvents.emit('officer.assigned', {
     termId: term.id,

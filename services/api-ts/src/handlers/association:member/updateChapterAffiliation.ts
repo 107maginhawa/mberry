@@ -4,7 +4,6 @@ import type { UpdateChapterAffiliationBody, UpdateChapterAffiliationParams } fro
 import { UnauthorizedError, NotFoundError } from '@/core/errors';
 import { ChapterAffiliationRepository } from './repos/chapters.repo';
 import type { ChapterAffiliation } from './repos/chapters.schema';
-import { auditAction } from '@/utils/audit';
 
 /**
  * updateChapterAffiliation
@@ -28,12 +27,8 @@ export async function updateChapterAffiliation(
 
   const updated = await repo.updateOneById(affiliationId, body as Partial<ChapterAffiliation>);
 
-  await auditAction(ctx, {
-    action: 'update',
-    resourceType: 'chapter-affiliation',
-    resourceId: affiliationId,
-    description: 'Chapter affiliation updated',
-  });
+  ctx.set('auditResourceId', affiliationId);
+  ctx.set('auditDescription', 'Chapter affiliation updated');
 
   return ctx.json(updated, 200);
 }

@@ -3,7 +3,6 @@ import type { DatabaseInstance } from '@/core/database';
 import type { ApproveTransferBySourceBody, ApproveTransferBySourceParams } from '@/generated/openapi/validators';
 import { UnauthorizedError, NotFoundError, BusinessLogicError } from '@/core/errors';
 import { AffiliationTransferRepository } from './repos/chapters.repo';
-import { auditAction } from '@/utils/audit';
 
 /**
  * approveTransferBySource
@@ -44,12 +43,8 @@ export async function approveTransferBySource(
 
   const updated = await repo.updateOneById(transferId, updateData);
 
-  await auditAction(ctx, {
-    action: 'update',
-    resourceType: 'affiliation-transfer',
-    resourceId: transferId,
-    description: 'Affiliation transfer approved by source',
-  });
+  ctx.set('auditResourceId', transferId);
+  ctx.set('auditDescription', 'Affiliation transfer approved by source');
 
   return ctx.json(updated, 200);
 }

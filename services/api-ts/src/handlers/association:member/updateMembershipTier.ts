@@ -4,7 +4,6 @@ import { NotFoundError, UnauthorizedError } from '@/core/errors';
 import type { UpdateMembershipTierBody, UpdateMembershipTierParams } from '@/generated/openapi/validators';
 import { MembershipTierRepository } from './repos/membership.repo';
 import type { MembershipTier } from './repos/membership.schema';
-import { auditAction } from '@/utils/audit';
 
 /**
  * updateMembershipTier
@@ -28,12 +27,8 @@ export async function updateMembershipTier(
 
   const updated = await repo.updateOneById(tierId, body as Partial<MembershipTier>);
 
-  await auditAction(ctx, {
-    action: 'update',
-    resourceType: 'membership-tier',
-    resourceId: tierId,
-    description: 'Membership tier updated',
-  });
+  ctx.set('auditResourceId', tierId);
+  ctx.set('auditDescription', 'Membership tier updated');
 
   return ctx.json(updated, 200);
 }

@@ -2,7 +2,6 @@ import type { ValidatedContext } from '@/types/app';
 import type { DatabaseInstance } from '@/core/database';
 import type { CreateProfessionalLicenseBody } from '@/generated/openapi/validators';
 import { ProfessionalLicenseRepository } from './repos/credits.repo';
-import { auditAction } from '@/utils/audit';
 
 /**
  * createProfessionalLicense
@@ -37,12 +36,8 @@ export async function createProfessionalLicense(
     documentRef: body.documentRef,
   });
 
-  await auditAction(ctx, {
-    action: 'create',
-    resourceType: 'professional-license',
-    resourceId: license.id,
-    description: 'Professional license created',
-  });
+  ctx.set('auditResourceId', license.id);
+  ctx.set('auditDescription', 'Professional license created');
 
   return ctx.json(license, 201);
 }

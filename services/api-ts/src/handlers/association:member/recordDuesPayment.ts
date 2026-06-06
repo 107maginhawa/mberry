@@ -7,7 +7,6 @@ import type { DuesPayment } from './repos/dues-payments.schema';
 import { DuesInvoiceRepository } from './repos/dues.repo';
 import { formatReceiptNumber } from './utils/receipt-number';
 import { settlePayment } from './utils/settle-payment';
-import { auditAction } from '@/utils/audit';
 import { requirePosition } from '@/utils/officer-check';
 import { POSITION_TITLES } from '@/utils/position-titles';
 
@@ -111,13 +110,8 @@ export async function recordDuesPayment(
     return { payment: pay, settlement: settle };
   });
 
-  await auditAction(ctx, {
-    action: 'create',
-    resourceType: 'dues-payment',
-    resourceId: payment.id,
-    description: 'Dues payment recorded',
-    eventSubType: 'financial.payment-recorded',
-  });
+  ctx.set('auditResourceId', payment.id);
+  ctx.set('auditDescription', 'Dues payment recorded');
 
   return ctx.json({
     ...payment,

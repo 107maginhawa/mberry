@@ -1,7 +1,6 @@
 import type { ValidatedContext } from '@/types/app';
 import type { DatabaseInstance } from '@/core/database';
 import { PositionRepository } from './repos/governance.repo';
-import { auditAction } from '@/utils/audit';
 import { requirePosition } from '@/utils/officer-check';
 import { POSITION_TITLES } from '@/utils/position-titles';
 
@@ -38,12 +37,8 @@ export async function createPosition(
     sortOrder: body.sortOrder ?? 0,
   });
 
-  await auditAction(ctx, {
-    action: 'create',
-    resourceType: 'position',
-    resourceId: position.id,
-    description: 'Position created',
-  });
+  ctx.set('auditResourceId', position.id);
+  ctx.set('auditDescription', 'Position created');
 
   return ctx.json(position, 201);
 }

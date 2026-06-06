@@ -5,7 +5,6 @@ import type { CastBallotBody } from '@/generated/openapi/validators';
 import { ElectionsRepository } from '../elections/repos/elections.repo';
 import { MembershipRepository } from './repos/membership.repo';
 import { withComputedStatus } from './utils/membership-status-middleware';
-import { auditAction } from '@/utils/audit';
 
 /**
  * castBallot
@@ -87,14 +86,9 @@ export async function castBallot(
     organizationId: election.organizationId,
   });
 
-  await auditAction(ctx, {
-    action: 'create',
-    resourceType: 'election-vote',
-    resourceId: vote.id,
-    description: `Ballot cast in election ${body.electionId}`,
-    details: { electionId: body.electionId, positionId: body.positionId },
-    eventSubType: 'governance.vote-cast',
-  });
+  ctx.set('auditResourceId', vote.id);
+  ctx.set('auditDescription', `Ballot cast in election ${body.electionId}`);
+  ctx.set('auditDetails', { electionId: body.electionId, positionId: body.positionId });
 
   return ctx.json({ data: vote }, 201);
 }

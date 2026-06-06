@@ -5,7 +5,6 @@ import type { SubmitPaymentProofBody } from '@/generated/openapi/validators';
 import { DuesRepository } from './repos/dues-payments.repo';
 import { DuesInvoiceRepository } from './repos/dues.repo';
 import { formatReceiptNumber } from './utils/receipt-number';
-import { auditAction } from '@/utils/audit';
 
 const ALLOWED_MIME_TYPES = ['image/jpeg', 'image/png', 'application/pdf'];
 
@@ -83,12 +82,8 @@ export async function submitPaymentProof(
     updatedBy: personId,
   });
 
-  await auditAction(ctx, {
-    action: 'create',
-    resourceType: 'dues-payment-proof',
-    resourceId: payment.id,
-    description: 'Payment proof submitted for review',
-  });
+  ctx.set('auditResourceId', payment.id);
+  ctx.set('auditDescription', 'Payment proof submitted for review');
 
   return ctx.json({
     ...payment,

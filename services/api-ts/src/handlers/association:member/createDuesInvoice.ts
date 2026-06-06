@@ -6,7 +6,6 @@ import { POSITION_TITLES } from '@/utils/position-titles';
 import type { CreateDuesInvoiceBody } from '@/generated/openapi/validators';
 import { DuesInvoiceRepository } from './repos/dues.repo';
 import { domainEvents } from '@/core/domain-events';
-import { auditAction } from '@/utils/audit';
 import { orgScopedPersonIds } from '@/core/org-scoped-persons';
 import { inArray, eq, and } from 'drizzle-orm';
 import { persons } from '@/handlers/person/repos/person.schema';
@@ -64,13 +63,8 @@ export async function createDuesInvoice(
     status: 'generated',
   });
 
-  await auditAction(ctx, {
-    action: 'create',
-    resourceType: 'dues-invoice',
-    resourceId: invoice.id,
-    description: 'Dues invoice created',
-    eventSubType: 'financial.invoice-created',
-  });
+  ctx.set('auditResourceId', invoice.id);
+  ctx.set('auditDescription', 'Dues invoice created');
 
   domainEvents.emit('dues.invoice.generated', {
     invoiceId: invoice.id,

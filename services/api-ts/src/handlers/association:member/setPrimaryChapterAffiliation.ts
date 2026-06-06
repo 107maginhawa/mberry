@@ -3,7 +3,6 @@ import type { DatabaseInstance } from '@/core/database';
 import type { SetPrimaryChapterAffiliationParams } from '@/generated/openapi/validators';
 import { UnauthorizedError } from '@/core/errors';
 import { ChapterAffiliationRepository } from './repos/chapters.repo';
-import { auditAction } from '@/utils/audit';
 
 /**
  * setPrimaryChapterAffiliation
@@ -26,12 +25,8 @@ export async function setPrimaryChapterAffiliation(
 
   const updated = await repo.setPrimary(affiliationId, orgId);
 
-  await auditAction(ctx, {
-    action: 'update',
-    resourceType: 'chapter-affiliation',
-    resourceId: affiliationId,
-    description: 'Primary chapter affiliation set',
-  });
+  ctx.set('auditResourceId', affiliationId);
+  ctx.set('auditDescription', 'Primary chapter affiliation set');
 
   return ctx.json(updated, 200);
 }

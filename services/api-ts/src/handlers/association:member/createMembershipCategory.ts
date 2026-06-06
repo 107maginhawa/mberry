@@ -1,7 +1,6 @@
 import type { ValidatedContext } from '@/types/app';
 import type { DatabaseInstance } from '@/core/database';
 import { MembershipCategoryRepository } from './repos/membership.repo';
-import { auditAction } from '@/utils/audit';
 
 /**
  * createMembershipCategory
@@ -31,12 +30,8 @@ export async function createMembershipCategory(
     createdBy: user.id,
   });
 
-  await auditAction(ctx, {
-    action: 'create',
-    resourceType: 'membership-category',
-    resourceId: category.id,
-    description: `Membership category "${body.name}" created`,
-  });
+  ctx.set('auditResourceId', category.id);
+  ctx.set('auditDescription', `Membership category "${body.name}" created`);
 
   return ctx.json(category, 201);
 }

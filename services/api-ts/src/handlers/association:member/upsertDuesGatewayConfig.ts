@@ -4,7 +4,6 @@ import { eq } from 'drizzle-orm';
 import { UnauthorizedError } from '@/core/errors';
 import type { UpsertDuesGatewayConfigBody, UpsertDuesGatewayConfigParams } from '@/generated/openapi/validators';
 import { duesGatewayConfigs } from './repos/dues-payments.schema';
-import { auditAction } from '@/utils/audit';
 
 /**
  * upsertDuesGatewayConfig
@@ -31,12 +30,8 @@ export async function upsertDuesGatewayConfig(
     })
     .returning();
 
-  await auditAction(ctx, {
-    action: 'update',
-    resourceType: 'dues-gateway',
-    resourceId: organizationId,
-    description: 'Payment gateway configuration updated',
-  });
+  ctx.set('auditResourceId', organizationId);
+  ctx.set('auditDescription', 'Payment gateway configuration updated');
 
   return ctx.json(result, 200);
 }

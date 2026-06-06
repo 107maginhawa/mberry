@@ -3,7 +3,6 @@ import type { DatabaseInstance } from '@/core/database';
 import { NotFoundError, UnauthorizedError } from '@/core/errors';
 import type { DeleteMembershipApplicationParams } from '@/generated/openapi/validators';
 import { MembershipApplicationRepository } from './repos/membership.repo';
-import { auditAction } from '@/utils/audit';
 
 /**
  * deleteMembershipApplication
@@ -26,12 +25,8 @@ export async function deleteMembershipApplication(
 
   await repo.deleteOneById(applicationId, session.user.id);
 
-  await auditAction(ctx, {
-    action: 'delete',
-    resourceType: 'membership-application',
-    resourceId: applicationId,
-    description: 'Membership application deleted',
-  });
+  ctx.set('auditResourceId', applicationId);
+  ctx.set('auditDescription', 'Membership application deleted');
 
   return ctx.body(null, 204);
 }

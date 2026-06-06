@@ -7,7 +7,6 @@ import { assertValidTransition } from '@/utils/status-transitions';
 import { INVOICE_VALID_TRANSITIONS } from './utils/status-transitions';
 import type { DeleteDuesInvoiceParams } from '@/generated/openapi/validators';
 import { DuesInvoiceRepository } from './repos/dues.repo';
-import { auditAction } from '@/utils/audit';
 
 /**
  * deleteDuesInvoice
@@ -46,12 +45,8 @@ export async function deleteDuesInvoice(
     updatedBy: session.user.id,
   } as Partial<typeof existing>);
 
-  await auditAction(ctx, {
-    action: 'delete',
-    resourceType: 'dues-invoice',
-    resourceId: invoiceId,
-    description: 'Dues invoice soft-deleted (cancelled) — BR-32 7-year retention',
-  });
+  ctx.set('auditResourceId', invoiceId);
+  ctx.set('auditDescription', 'Dues invoice soft-deleted (cancelled) — BR-32 7-year retention');
 
   return new Response(null, { status: 204 });
 }

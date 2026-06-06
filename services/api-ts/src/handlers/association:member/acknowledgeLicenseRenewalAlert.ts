@@ -4,7 +4,6 @@ import { NotFoundError, ConflictError } from '@/core/errors';
 import type { AcknowledgeLicenseRenewalAlertParams } from '@/generated/openapi/validators';
 import { LicenseRenewalAlertRepository } from './repos/credits.repo';
 import type { LicenseRenewalAlert } from './repos/credentials.schema';
-import { auditAction } from '@/utils/audit';
 
 /**
  * acknowledgeLicenseRenewalAlert
@@ -37,12 +36,8 @@ export async function acknowledgeLicenseRenewalAlert(
     status: 'acknowledged',
   } as Partial<LicenseRenewalAlert>);
 
-  await auditAction(ctx, {
-    action: 'update',
-    resourceType: 'license-renewal-alert',
-    resourceId: alertId,
-    description: 'License renewal alert acknowledged',
-  });
+  ctx.set('auditResourceId', alertId);
+  ctx.set('auditDescription', 'License renewal alert acknowledged');
 
   return ctx.json(updated, 200);
 }

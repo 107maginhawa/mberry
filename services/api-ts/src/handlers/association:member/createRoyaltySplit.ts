@@ -3,7 +3,6 @@ import type { DatabaseInstance } from '@/core/database';
 import type { CreateRoyaltySplitBody } from '@/generated/openapi/validators';
 import { UnauthorizedError, BusinessLogicError } from '@/core/errors';
 import { RoyaltySplitRepository } from './repos/chapters.repo';
-import { auditAction } from '@/utils/audit';
 
 /**
  * createRoyaltySplit
@@ -45,12 +44,8 @@ export async function createRoyaltySplit(
     effectiveDate: body.effectiveDate,
   });
 
-  await auditAction(ctx, {
-    action: 'create',
-    resourceType: 'royalty-split',
-    resourceId: royaltySplit.id,
-    description: 'Royalty split created',
-  });
+  ctx.set('auditResourceId', royaltySplit.id);
+  ctx.set('auditDescription', 'Royalty split created');
 
   return ctx.json(royaltySplit, 201);
 }

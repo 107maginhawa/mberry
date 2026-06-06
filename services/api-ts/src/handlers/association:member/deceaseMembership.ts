@@ -9,7 +9,6 @@ import type { Membership } from './repos/membership.schema';
 import { duesInvoices } from './repos/dues.schema';
 import { INVOICE_VALID_TRANSITIONS } from './utils/status-transitions';
 import { isValidTransition } from '@/utils/status-transitions';
-import { auditAction } from '@/utils/audit';
 import { domainEvents } from '@/core/domain-events';
 import { eq, and, inArray } from 'drizzle-orm';
 
@@ -76,13 +75,8 @@ export async function deceaseMembership(
       );
   });
 
-  await auditAction(ctx, {
-    action: 'deceased',
-    resourceType: 'membership',
-    resourceId: membershipId,
-    description: `Membership marked deceased (date of death: ${body.dateOfDeath})${body.terminationReason ? `: ${body.terminationReason}` : ''}`,
-    eventSubType: 'membership.member-deceased',
-  });
+  ctx.set('auditResourceId', membershipId);
+  ctx.set('auditDescription', `Membership marked deceased (date of death: ${body.dateOfDeath})${body.terminationReason ? `: ${body.terminationReason}` : ''}`);
 
   // Cross-module visibility: marking deceased is a terminal status change.
   domainEvents.emit('membership.status.changed', {

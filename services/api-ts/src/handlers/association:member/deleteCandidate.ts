@@ -4,7 +4,6 @@ import { UnauthorizedError, NotFoundError } from '@/core/errors';
 import type { DeleteCandidateParams } from '@/generated/openapi/validators';
 import { electionNominees } from '../elections/repos/elections.schema';
 import { eq } from 'drizzle-orm';
-import { auditAction } from '@/utils/audit';
 import { requireOfficerTerm } from '@/utils/officer-check';
 
 /**
@@ -35,12 +34,8 @@ export async function deleteCandidate(
 
   await db.delete(electionNominees).where(eq(electionNominees.id, params.candidateId));
 
-  await auditAction(ctx, {
-    action: 'delete',
-    resourceType: 'election-nominee',
-    resourceId: params.candidateId,
-    description: 'Nominee removed from election',
-  });
+  ctx.set('auditResourceId', params.candidateId);
+  ctx.set('auditDescription', 'Nominee removed from election');
 
   return ctx.json({ success: true }, 200);
 }

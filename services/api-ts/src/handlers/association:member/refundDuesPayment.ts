@@ -5,7 +5,6 @@ import type { RefundDuesPaymentBody, RefundDuesPaymentParams } from '@/generated
 import { DuesRepository } from './repos/dues-payments.repo';
 import { membershipLifecycle } from './utils/membership-lifecycle';
 import { domainEvents } from '@/core/domain-events';
-import { auditAction } from '@/utils/audit';
 import { requirePosition } from '@/utils/officer-check';
 import { POSITION_TITLES } from '@/utils/position-titles';
 
@@ -72,13 +71,8 @@ export async function refundDuesPayment(
     return updatedPayment;
   });
 
-  await auditAction(ctx, {
-    action: 'update',
-    resourceType: 'dues-payment',
-    resourceId: paymentId,
-    description: `Payment ${isFullRefund ? 'fully' : 'partially'} refunded`,
-    eventSubType: 'financial.payment-reversed',
-  });
+  ctx.set('auditResourceId', paymentId);
+  ctx.set('auditDescription', `Payment ${isFullRefund ? 'fully' : 'partially'} refunded`);
 
   domainEvents.emit('dues.payment.refunded', {
     paymentId,

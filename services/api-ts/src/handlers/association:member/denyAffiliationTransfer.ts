@@ -4,7 +4,6 @@ import type { DenyAffiliationTransferBody, DenyAffiliationTransferParams } from 
 import { UnauthorizedError, NotFoundError, BusinessLogicError } from '@/core/errors';
 import { AffiliationTransferRepository } from './repos/chapters.repo';
 import type { AffiliationTransfer } from './repos/chapters.schema';
-import { auditAction } from '@/utils/audit';
 
 /**
  * denyAffiliationTransfer
@@ -36,12 +35,8 @@ export async function denyAffiliationTransfer(
     status: 'denied',
   } as Partial<AffiliationTransfer>);
 
-  await auditAction(ctx, {
-    action: 'deny',
-    resourceType: 'affiliation-transfer',
-    resourceId: transferId,
-    description: 'Affiliation transfer denied',
-  });
+  ctx.set('auditResourceId', transferId);
+  ctx.set('auditDescription', 'Affiliation transfer denied');
 
   return ctx.json(updated, 200);
 }

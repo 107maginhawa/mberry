@@ -3,7 +3,6 @@ import type { DatabaseInstance } from '@/core/database';
 import type { CreateDirectoryProfileBody } from '@/generated/openapi/validators';
 import { UnauthorizedError } from '@/core/errors';
 import { DirectoryProfileRepository } from './repos/directory.repo';
-import { auditAction } from '@/utils/audit';
 
 /**
  * createDirectoryProfile
@@ -42,12 +41,8 @@ export async function createDirectoryProfile(
     visibility: body.visibility ?? 'hidden',
   });
 
-  await auditAction(ctx, {
-    action: 'create',
-    resourceType: 'directory-profile',
-    resourceId: profile.id,
-    description: 'Directory profile created',
-  });
+  ctx.set('auditResourceId', profile.id);
+  ctx.set('auditDescription', 'Directory profile created');
 
   return ctx.json(profile, 201);
 }

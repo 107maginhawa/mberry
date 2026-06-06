@@ -5,7 +5,6 @@ import type { ConfirmPaymentProofBody, ConfirmPaymentProofParams } from '@/gener
 import { DuesRepository } from './repos/dues-payments.repo';
 import type { DuesPayment } from './repos/dues-payments.schema';
 import { settlePayment } from './utils/settle-payment';
-import { auditAction } from '@/utils/audit';
 import { requirePosition } from '@/utils/officer-check';
 import { POSITION_TITLES } from '@/utils/position-titles';
 
@@ -82,12 +81,8 @@ export async function confirmPaymentProof(
     }
   }
 
-  await auditAction(ctx, {
-    action: 'approve',
-    resourceType: 'dues-payment-proof',
-    resourceId: payment.id,
-    description: 'Payment proof confirmed by officer',
-  });
+  ctx.set('auditResourceId', payment.id);
+  ctx.set('auditDescription', 'Payment proof confirmed by officer');
 
   return ctx.json({
     ...updatedPayment,

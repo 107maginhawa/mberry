@@ -6,7 +6,6 @@ import { POSITION_TITLES } from '@/utils/position-titles';
 import type { UpdateDuesInvoiceBody, UpdateDuesInvoiceParams } from '@/generated/openapi/validators';
 import { DuesInvoiceRepository } from './repos/dues.repo';
 import type { DuesInvoice } from './repos/dues.schema';
-import { auditAction } from '@/utils/audit';
 
 /**
  * updateDuesInvoice
@@ -35,12 +34,8 @@ export async function updateDuesInvoice(
 
   const updated = await repo.updateOneById(invoiceId, body as Partial<DuesInvoice>);
 
-  await auditAction(ctx, {
-    action: 'update',
-    resourceType: 'dues-invoice',
-    resourceId: invoiceId,
-    description: 'Dues invoice updated',
-  });
+  ctx.set('auditResourceId', invoiceId);
+  ctx.set('auditDescription', 'Dues invoice updated');
 
   return ctx.json(updated, 200);
 }

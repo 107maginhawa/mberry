@@ -3,7 +3,6 @@ import type { DatabaseInstance } from '@/core/database';
 import type { CreateAffiliationTransferBody } from '@/generated/openapi/validators';
 import { UnauthorizedError } from '@/core/errors';
 import { AffiliationTransferRepository } from './repos/chapters.repo';
-import { auditAction } from '@/utils/audit';
 
 /**
  * createAffiliationTransfer
@@ -35,12 +34,8 @@ export async function createAffiliationTransfer(
     status: 'requested',
   });
 
-  await auditAction(ctx, {
-    action: 'create',
-    resourceType: 'affiliation-transfer',
-    resourceId: transfer.id,
-    description: 'Affiliation transfer requested',
-  });
+  ctx.set('auditResourceId', transfer.id);
+  ctx.set('auditDescription', 'Affiliation transfer requested');
 
   return ctx.json(transfer, 201);
 }

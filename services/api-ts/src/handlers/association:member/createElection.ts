@@ -4,7 +4,6 @@ import { UnauthorizedError } from '@/core/errors';
 import type { CreateElectionBody } from '@/generated/openapi/validators';
 import { ElectionsRepository } from '../elections/repos/elections.repo';
 import type { NewElection } from '../elections/repos/elections.schema';
-import { auditAction } from '@/utils/audit';
 import { requirePosition } from '@/utils/officer-check';
 import { POSITION_TITLES } from '@/utils/position-titles';
 import { domainEvents } from '@/core/domain-events';
@@ -57,13 +56,8 @@ export async function createElection(
     updatedBy: user.id,
   } as NewElection);
 
-  await auditAction(ctx, {
-    action: 'create',
-    resourceType: 'election',
-    resourceId: election.id,
-    description: `Election created: ${election.title}`,
-    eventSubType: 'governance.election-created',
-  });
+  ctx.set('auditResourceId', election.id);
+  ctx.set('auditDescription', `Election created: ${election.title}`);
 
   domainEvents.emit('election.created', {
     electionId: election.id,

@@ -4,7 +4,6 @@ import type { DatabaseInstance } from '@/core/database';
 import { NotFoundError } from '@/core/errors';
 import type { UpdateProfessionalLicenseBody, UpdateProfessionalLicenseParams } from '@/generated/openapi/validators';
 import { ProfessionalLicenseRepository } from './repos/credits.repo';
-import { auditAction } from '@/utils/audit';
 
 /**
  * updateProfessionalLicense
@@ -32,12 +31,8 @@ export async function updateProfessionalLicense(
 
   const updated = await repo.updateOneById(licenseId, body as Partial<ProfessionalLicense>);
 
-  await auditAction(ctx, {
-    action: 'update',
-    resourceType: 'professional-license',
-    resourceId: licenseId,
-    description: 'Professional license updated',
-  });
+  ctx.set('auditResourceId', licenseId);
+  ctx.set('auditDescription', 'Professional license updated');
 
   return ctx.json(updated, 200);
 }

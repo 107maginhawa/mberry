@@ -4,7 +4,6 @@ import type { CompleteAffiliationTransferParams } from '@/generated/openapi/vali
 import { UnauthorizedError, NotFoundError, BusinessLogicError } from '@/core/errors';
 import { ChapterAffiliationRepository, AffiliationTransferRepository } from './repos/chapters.repo';
 import type { AffiliationTransfer, ChapterAffiliation } from './repos/chapters.schema';
-import { auditAction } from '@/utils/audit';
 
 /**
  * completeAffiliationTransfer
@@ -65,12 +64,8 @@ export async function completeAffiliationTransfer(
     status: 'active',
   });
 
-  await auditAction(ctx, {
-    action: 'complete',
-    resourceType: 'affiliation-transfer',
-    resourceId: transferId,
-    description: 'Affiliation transfer completed',
-  });
+  ctx.set('auditResourceId', transferId);
+  ctx.set('auditDescription', 'Affiliation transfer completed');
 
   return ctx.json(updatedTransfer, 200);
 }

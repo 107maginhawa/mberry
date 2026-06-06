@@ -4,7 +4,6 @@ import { eq } from 'drizzle-orm';
 import { UnauthorizedError } from '@/core/errors';
 import type { DisconnectDuesGatewayParams } from '@/generated/openapi/validators';
 import { duesGatewayConfigs } from './repos/dues-payments.schema';
-import { auditAction } from '@/utils/audit';
 
 /**
  * disconnectDuesGateway
@@ -25,12 +24,8 @@ export async function disconnectDuesGateway(
     .delete(duesGatewayConfigs)
     .where(eq(duesGatewayConfigs.organizationId, organizationId));
 
-  await auditAction(ctx, {
-    action: 'delete',
-    resourceType: 'dues-gateway',
-    resourceId: organizationId,
-    description: 'Payment gateway disconnected',
-  });
+  ctx.set('auditResourceId', organizationId);
+  ctx.set('auditDescription', 'Payment gateway disconnected');
 
   return new Response(null, { status: 204 });
 }

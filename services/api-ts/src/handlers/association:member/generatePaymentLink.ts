@@ -3,7 +3,6 @@ import type { DatabaseInstance } from '@/core/database';
 import { NotFoundError } from '@/core/errors';
 import { DuesInvoiceRepository } from './repos/dues.repo';
 import { createPaymentToken } from './utils/payment-token';
-import { auditAction } from '@/utils/audit';
 
 /**
  * generatePaymentLink
@@ -40,12 +39,8 @@ export async function generatePaymentLink(
   const expiresAt = new Date();
   expiresAt.setDate(expiresAt.getDate() + 30);
 
-  await auditAction(ctx, {
-    action: 'create',
-    resourceType: 'payment-link',
-    resourceId: invoice.id,
-    description: `Payment link generated for invoice ${invoice.id}`,
-  });
+  ctx.set('auditResourceId', invoice.id);
+  ctx.set('auditDescription', `Payment link generated for invoice ${invoice.id}`);
 
   return ctx.json({
     token,

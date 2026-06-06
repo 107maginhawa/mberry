@@ -3,7 +3,6 @@ import type { DatabaseInstance } from '@/core/database';
 import { NotFoundError } from '@/core/errors';
 import type { DeleteProfessionalLicenseParams } from '@/generated/openapi/validators';
 import { ProfessionalLicenseRepository } from './repos/credits.repo';
-import { auditAction } from '@/utils/audit';
 
 /**
  * deleteProfessionalLicense
@@ -30,12 +29,8 @@ export async function deleteProfessionalLicense(
 
   await repo.deleteOneById(licenseId, user.id);
 
-  await auditAction(ctx, {
-    action: 'delete',
-    resourceType: 'professional-license',
-    resourceId: licenseId,
-    description: 'Professional license deleted',
-  });
+  ctx.set('auditResourceId', licenseId);
+  ctx.set('auditDescription', 'Professional license deleted');
 
   return new Response(null, { status: 204 });
 }

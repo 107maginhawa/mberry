@@ -5,7 +5,6 @@ import { NotFoundError, UnauthorizedError, BusinessLogicError } from '@/core/err
 import type { ReinstateMembershipParams } from '@/generated/openapi/validators';
 import { MembershipRepository } from './repos/membership.repo';
 import { withComputedStatus, persistWithComputedStatus } from './utils/membership-status-middleware';
-import { auditAction } from '@/utils/audit';
 
 /**
  * reinstateMembership
@@ -43,13 +42,8 @@ export async function reinstateMembership(
   // Clear removalReason (non-status field — separate update)
   await repo.updateOneById(membershipId, { removalReason: null } as Partial<Membership>);
 
-  await auditAction(ctx, {
-    action: 'reinstate',
-    resourceType: 'membership',
-    resourceId: membershipId,
-    description: 'Membership reinstated',
-    eventSubType: 'membership.member-reinstated',
-  });
+  ctx.set('auditResourceId', membershipId);
+  ctx.set('auditDescription', 'Membership reinstated');
 
   return ctx.json(updated, 200);
 }

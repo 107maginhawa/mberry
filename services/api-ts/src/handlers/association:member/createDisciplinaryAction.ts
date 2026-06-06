@@ -1,7 +1,6 @@
 import type { ValidatedContext } from '@/types/app';
 import type { DatabaseInstance } from '@/core/database';
 import { DisciplinaryActionRepository } from './repos/governance.repo';
-import { auditAction } from '@/utils/audit';
 import { requirePosition } from '@/utils/officer-check';
 import { POSITION_TITLES } from '@/utils/position-titles';
 import { domainEvents } from '@/core/domain-events';
@@ -49,13 +48,9 @@ export async function createDisciplinaryAction(
     notes: body.notes || null,
   });
 
-  await auditAction(ctx, {
-    action: 'create',
-    resourceType: 'disciplinary-action',
-    resourceId: action.id,
-    description: `Disciplinary action (${body.actionType}) issued`,
-    details: { targetPersonId: body.targetPersonId, actionType: body.actionType },
-  });
+  ctx.set('auditResourceId', action.id);
+  ctx.set('auditDescription', `Disciplinary action (${body.actionType}) issued`);
+  ctx.set('auditDetails', { targetPersonId: body.targetPersonId, actionType: body.actionType });
 
   if (body.actionType === 'suspension') {
     domainEvents.emit('member.suspended', {

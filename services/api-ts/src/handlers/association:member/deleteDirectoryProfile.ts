@@ -3,7 +3,6 @@ import type { DatabaseInstance } from '@/core/database';
 import type { DeleteDirectoryProfileParams } from '@/generated/openapi/validators';
 import { UnauthorizedError, NotFoundError } from '@/core/errors';
 import { DirectoryProfileRepository } from './repos/directory.repo';
-import { auditAction } from '@/utils/audit';
 
 /**
  * deleteDirectoryProfile
@@ -26,12 +25,8 @@ export async function deleteDirectoryProfile(
 
   await repo.deleteOneById(profileId);
 
-  await auditAction(ctx, {
-    action: 'delete',
-    resourceType: 'directory-profile',
-    resourceId: profileId,
-    description: 'Directory profile deleted',
-  });
+  ctx.set('auditResourceId', profileId);
+  ctx.set('auditDescription', 'Directory profile deleted');
 
   return ctx.body(null, 204);
 }

@@ -4,7 +4,6 @@ import type { DatabaseInstance } from '@/core/database';
 import type { UpdateRoyaltySplitBody, UpdateRoyaltySplitParams } from '@/generated/openapi/validators';
 import { UnauthorizedError, NotFoundError, BusinessLogicError } from '@/core/errors';
 import { RoyaltySplitRepository } from './repos/chapters.repo';
-import { auditAction } from '@/utils/audit';
 
 /**
  * updateRoyaltySplit
@@ -40,12 +39,8 @@ export async function updateRoyaltySplit(
 
   const updated = await repo.updateOneById(royaltySplitId, body as Partial<RoyaltySplit>);
 
-  await auditAction(ctx, {
-    action: 'update',
-    resourceType: 'royalty-split',
-    resourceId: royaltySplitId,
-    description: 'Royalty split updated',
-  });
+  ctx.set('auditResourceId', royaltySplitId);
+  ctx.set('auditDescription', 'Royalty split updated');
 
   return ctx.json(updated, 200);
 }

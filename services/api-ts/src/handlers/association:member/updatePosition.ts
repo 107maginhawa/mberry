@@ -2,7 +2,6 @@ import type { ValidatedContext } from '@/types/app';
 import type { DatabaseInstance } from '@/core/database';
 import { NotFoundError } from '@/core/errors';
 import { PositionRepository } from './repos/governance.repo';
-import { auditAction } from '@/utils/audit';
 
 /**
  * updatePosition
@@ -32,12 +31,8 @@ export async function updatePosition(
 
   const updated = await repo.update(positionId, body);
 
-  await auditAction(ctx, {
-    action: 'update',
-    resourceType: 'position',
-    resourceId: positionId,
-    description: 'Position updated',
-  });
+  ctx.set('auditResourceId', positionId);
+  ctx.set('auditDescription', 'Position updated');
 
   return ctx.json(updated);
 }

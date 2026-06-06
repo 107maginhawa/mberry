@@ -4,7 +4,6 @@ import type { DatabaseInstance } from '@/core/database';
 import type { ImportRosterMembersBody } from '@/generated/openapi/validators';
 import { MembershipRepository } from './repos/membership.repo';
 import type { NewMembership } from './repos/membership.schema';
-import { auditAction } from '@/utils/audit';
 import { requirePosition } from '@/utils/officer-check';
 import { POSITION_TITLES } from '@/utils/position-titles';
 import { domainEvents } from '@/core/domain-events';
@@ -46,12 +45,8 @@ export async function importRosterMembers(
     }
   }
 
-  await auditAction(ctx, {
-    action: 'create',
-    resourceType: 'roster-import',
-    resourceId: orgId,
-    description: `Roster import: ${imported} imported, ${failed} failed`,
-  });
+  ctx.set('auditResourceId', orgId);
+  ctx.set('auditDescription', `Roster import: ${imported} imported, ${failed} failed`);
 
   // Cross-module visibility: imported members need welcome/onboarding follow-up.
   if (imported > 0) {

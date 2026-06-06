@@ -3,7 +3,6 @@ import type { BetterAuthInternalApi } from '@/types/auth';
 import type { DatabaseInstance } from '@/core/database';
 import { NotFoundError, BusinessLogicError } from '@/core/errors';
 import { OfficerTermRepository } from './repos/governance.repo';
-import { auditAction } from '@/utils/audit';
 import { requirePosition } from '@/utils/officer-check';
 import { POSITION_TITLES } from '@/utils/position-titles';
 import { isValidTermTransition, termTransitionError } from './utils/status-transitions';
@@ -50,13 +49,9 @@ export async function updateOfficerTerm(
 
   const updated = await repo.update(termId, body);
 
-  await auditAction(ctx, {
-    action: 'update',
-    resourceType: 'officer-term',
-    resourceId: termId,
-    description: 'Officer term updated',
-    details: { previousState: { status: existing.status, notes: existing.notes, endDate: existing.endDate }, changes: body },
-  });
+  ctx.set('auditResourceId', termId);
+  ctx.set('auditDescription', 'Officer term updated');
+  ctx.set('auditDetails', { previousState: { status: existing.status, notes: existing.notes, endDate: existing.endDate }, changes: body });
 
   // P1-4: Invalidate affected user's sessions so they re-authenticate with updated role
   try {

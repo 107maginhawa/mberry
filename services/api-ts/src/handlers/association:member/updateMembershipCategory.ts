@@ -2,7 +2,6 @@ import type { ValidatedContext } from '@/types/app';
 import type { DatabaseInstance } from '@/core/database';
 import { NotFoundError } from '@/core/errors';
 import { MembershipCategoryRepository } from './repos/membership.repo';
-import { auditAction } from '@/utils/audit';
 
 /**
  * updateMembershipCategory
@@ -36,12 +35,8 @@ export async function updateMembershipCategory(
     updatedBy: user.id,
   });
 
-  await auditAction(ctx, {
-    action: 'update',
-    resourceType: 'membership-category',
-    resourceId: id,
-    description: `Membership category updated`,
-  });
+  ctx.set('auditResourceId', id);
+  ctx.set('auditDescription', `Membership category updated`);
 
   return ctx.json(updated);
 }

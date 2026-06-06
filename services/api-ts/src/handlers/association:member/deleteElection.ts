@@ -5,7 +5,6 @@ import type { DeleteElectionParams } from '@/generated/openapi/validators';
 import { ElectionsRepository } from '../elections/repos/elections.repo';
 import { elections } from '../elections/repos/elections.schema';
 import { eq } from 'drizzle-orm';
-import { auditAction } from '@/utils/audit';
 import { requireOfficerTerm } from '@/utils/officer-check';
 import { domainEvents } from '@/core/domain-events';
 
@@ -46,12 +45,8 @@ export async function deleteElection(
 
   await db.delete(elections).where(eq(elections.id, params.electionId));
 
-  await auditAction(ctx, {
-    action: 'delete',
-    resourceType: 'election',
-    resourceId: params.electionId,
-    description: `Election deleted: ${existing.title}`,
-  });
+  ctx.set('auditResourceId', params.electionId);
+  ctx.set('auditDescription', `Election deleted: ${existing.title}`);
 
   domainEvents.emit('election.deleted', {
     electionId: params.electionId,

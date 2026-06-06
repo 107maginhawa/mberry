@@ -241,6 +241,7 @@ namespace Association.Member.Directory {
     @post
     @useAuth(bearerAuth)
     @extension("x-security-required-roles", #["association:member:owner", "association:admin"])
+    @extension("x-audit", #{ action: "create", resourceType: "directory-profile" })
     createDirectoryProfile(
       @body body: DirectoryProfileCreateRequest
     ): ApiCreatedResponse<DirectoryProfile>
@@ -280,6 +281,7 @@ namespace Association.Member.Directory {
     @route("/{profileId}")
     @useAuth(bearerAuth)
     @extension("x-security-required-roles", #["association:member:owner", "association:admin"])
+    @extension("x-audit", #{ action: "update", resourceType: "directory-profile" })
     updateDirectoryProfile(
       @path profileId: string,
       @body updates: DirectoryProfileUpdateRequest
@@ -294,6 +296,7 @@ namespace Association.Member.Directory {
     @route("/{profileId}")
     @useAuth(bearerAuth)
     @extension("x-security-required-roles", #["association:member:owner", "association:admin"])
+    @extension("x-audit", #{ action: "delete", resourceType: "directory-profile" })
     deleteDirectoryProfile(
       @path profileId: string
     ): ApiNoContentResponse

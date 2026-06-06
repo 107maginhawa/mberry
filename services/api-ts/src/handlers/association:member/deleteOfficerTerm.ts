@@ -3,7 +3,6 @@ import type { BetterAuthInternalApi } from '@/types/auth';
 import type { DatabaseInstance } from '@/core/database';
 import { NotFoundError } from '@/core/errors';
 import { OfficerTermRepository } from './repos/governance.repo';
-import { auditAction } from '@/utils/audit';
 import { requirePosition } from '@/utils/officer-check';
 import { POSITION_TITLES } from '@/utils/position-titles';
 import { domainEvents } from '@/core/domain-events';
@@ -40,12 +39,8 @@ export async function deleteOfficerTerm(
 
   await repo.delete(termId);
 
-  await auditAction(ctx, {
-    action: 'delete',
-    resourceType: 'officer-term',
-    resourceId: termId,
-    description: 'Officer term deleted',
-  });
+  ctx.set('auditResourceId', termId);
+  ctx.set('auditDescription', 'Officer term deleted');
 
   domainEvents.emit('officer.removed', {
     termId,

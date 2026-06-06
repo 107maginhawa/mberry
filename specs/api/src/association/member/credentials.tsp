@@ -365,6 +365,7 @@ namespace Association.Member.Credentials {
     @post
     @useAuth(bearerAuth)
     @extension("x-security-required-roles", #["association:admin"])
+    @extension("x-audit", #{ action: "create", resourceType: "credential-template" })
     createCredentialTemplate(
       @body body: CredentialTemplateCreateRequest
     ): ApiCreatedResponse<CredentialTemplate>
@@ -404,6 +405,7 @@ namespace Association.Member.Credentials {
     @route("/{templateId}")
     @useAuth(bearerAuth)
     @extension("x-security-required-roles", #["association:admin"])
+    @extension("x-audit", #{ action: "update", resourceType: "credential-template" })
     updateCredentialTemplate(
       @path templateId: string,
       @body updates: CredentialTemplateUpdateRequest
@@ -418,6 +420,7 @@ namespace Association.Member.Credentials {
     @route("/{templateId}")
     @useAuth(bearerAuth)
     @extension("x-security-required-roles", #["association:admin"])
+    @extension("x-audit", #{ action: "delete", resourceType: "credential-template" })
     deleteCredentialTemplate(
       @path templateId: string
     ): ApiNoContentResponse
@@ -434,6 +437,7 @@ namespace Association.Member.Credentials {
     @route("/issue")
     @useAuth(bearerAuth)
     @extension("x-security-required-roles", #["association:admin"])
+    @extension("x-audit", #{ action: "create", resourceType: "digital-credential" })
     issueDigitalCredential(
       @body body: IssueCredentialRequest
     ): ApiCreatedResponse<DigitalCredential>
@@ -475,6 +479,7 @@ namespace Association.Member.Credentials {
     @route("/{credentialId}")
     @useAuth(bearerAuth)
     @extension("x-security-required-roles", #["association:admin"])
+    @extension("x-audit", #{ action: "update", resourceType: "digital-credential" })
     updateDigitalCredential(
       @path credentialId: string,
       @body updates: IssueCredentialRequest
@@ -489,6 +494,7 @@ namespace Association.Member.Credentials {
     @route("/{credentialId}")
     @useAuth(bearerAuth)
     @extension("x-security-required-roles", #["association:admin"])
+    @extension("x-audit", #{ action: "delete", resourceType: "digital-credential" })
     deleteDigitalCredential(
       @path credentialId: string
     ): ApiNoContentResponse
@@ -502,6 +508,7 @@ namespace Association.Member.Credentials {
     @route("/{credentialId}/revoke")
     @useAuth(bearerAuth)
     @extension("x-security-required-roles", #["association:admin"])
+    @extension("x-audit", #{ action: "update", resourceType: "digital-credential" })
     revokeDigitalCredential(
       @path credentialId: string,
       @body body: RevokeCredentialRequest
@@ -586,6 +593,7 @@ namespace Association.Member.Credentials {
     @post
     @useAuth(bearerAuth)
     @extension("x-security-required-roles", #["association:admin", "association:member:owner"])
+    @extension("x-audit", #{ action: "create", resourceType: "professional-license" })
     createProfessionalLicense(
       @body body: ProfessionalLicenseCreateRequest
     ): ApiCreatedResponse<ProfessionalLicense>
@@ -628,6 +636,7 @@ namespace Association.Member.Credentials {
     @route("/{licenseId}")
     @useAuth(bearerAuth)
     @extension("x-security-required-roles", #["association:admin"])
+    @extension("x-audit", #{ action: "update", resourceType: "professional-license" })
     updateProfessionalLicense(
       @path licenseId: string,
       @body updates: ProfessionalLicenseUpdateRequest
@@ -642,6 +651,7 @@ namespace Association.Member.Credentials {
     @route("/{licenseId}")
     @useAuth(bearerAuth)
     @extension("x-security-required-roles", #["association:admin"])
+    @extension("x-audit", #{ action: "delete", resourceType: "professional-license" })
     deleteProfessionalLicense(
       @path licenseId: string
     ): ApiNoContentResponse
@@ -671,6 +681,7 @@ namespace Association.Member.Credentials {
     @route("/{alertId}/acknowledge")
     @useAuth(bearerAuth)
     @extension("x-security-required-roles", #["association:admin", "association:member:owner"])
+    @extension("x-audit", #{ action: "update", resourceType: "license-renewal-alert" })
     acknowledgeLicenseRenewalAlert(
       @path alertId: string
     ): ApiOkResponse<LicenseRenewalAlert>

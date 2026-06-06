@@ -4,7 +4,6 @@ import { UnauthorizedError } from '@/core/errors';
 import type { BulkApproveMembershipApplicationsBody } from '@/generated/openapi/validators';
 import { MembershipApplicationRepository, MembershipRepository } from './repos/membership.repo';
 import type { MembershipApplication, NewMembership } from './repos/membership.schema';
-import { auditAction } from '@/utils/audit';
 import { requirePosition } from '@/utils/officer-check';
 import { POSITION_TITLES } from '@/utils/position-titles';
 
@@ -103,12 +102,8 @@ export async function bulkApproveMembershipApplications(
   }
 
   // Audit summary — one entry for the entire bulk operation
-  await auditAction(ctx, {
-    action: 'approve',
-    resourceType: 'membership-application',
-    resourceId: 'bulk',
-    description: `Bulk approved ${succeeded.length} application(s), ${failed.length} failed`,
-  });
+  ctx.set('auditResourceId', 'bulk');
+  ctx.set('auditDescription', `Bulk approved ${succeeded.length} application(s), ${failed.length} failed`);
 
   return ctx.json({ succeeded, failed }, 200);
 }

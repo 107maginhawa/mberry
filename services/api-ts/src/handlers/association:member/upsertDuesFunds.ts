@@ -3,7 +3,6 @@ import type { DatabaseInstance } from '@/core/database';
 import { UnauthorizedError } from '@/core/errors';
 import type { UpsertDuesFundsBody, UpsertDuesFundsParams } from '@/generated/openapi/validators';
 import { DuesRepository } from './repos/dues-payments.repo';
-import { auditAction } from '@/utils/audit';
 
 /**
  * upsertDuesFunds
@@ -25,12 +24,8 @@ export async function upsertDuesFunds(
   await repo.replaceFunds(organizationId, (body as Record<string, unknown>)['funds'] as { name: string; percentage: string; sortOrder: number }[] ?? []);
   const data = await repo.listFunds(organizationId);
 
-  await auditAction(ctx, {
-    action: 'update',
-    resourceType: 'dues-funds',
-    resourceId: organizationId,
-    description: 'Dues fund allocation updated',
-  });
+  ctx.set('auditResourceId', organizationId);
+  ctx.set('auditDescription', 'Dues fund allocation updated');
 
   return ctx.json({ data }, 200);
 }

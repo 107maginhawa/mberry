@@ -9,7 +9,6 @@ import { withComputedStatus } from './utils/membership-status-middleware';
 import { duesInvoices } from './repos/dues.schema';
 import { INVOICE_VALID_TRANSITIONS } from './utils/status-transitions';
 import { isValidTransition } from '@/utils/status-transitions';
-import { auditAction } from '@/utils/audit';
 import { domainEvents } from '@/core/domain-events';
 import { eq, and, inArray } from 'drizzle-orm';
 
@@ -76,13 +75,8 @@ export async function resignMembership(
       );
   });
 
-  await auditAction(ctx, {
-    action: 'resign',
-    resourceType: 'membership',
-    resourceId: membershipId,
-    description: `Membership resigned${body.terminationReason ? `: ${body.terminationReason}` : ''}`,
-    eventSubType: 'governance.officer-resigned',
-  });
+  ctx.set('auditResourceId', membershipId);
+  ctx.set('auditDescription', `Membership resigned${body.terminationReason ? `: ${body.terminationReason}` : ''}`);
 
   // Cross-module visibility: a resignation is a terminal status change.
   domainEvents.emit('membership.status.changed', {

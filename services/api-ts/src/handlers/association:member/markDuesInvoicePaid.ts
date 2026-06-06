@@ -6,7 +6,6 @@ import { POSITION_TITLES } from '@/utils/position-titles';
 import type { MarkDuesInvoicePaidBody, MarkDuesInvoicePaidParams } from '@/generated/openapi/validators';
 import { DuesInvoiceRepository } from './repos/dues.repo';
 import { membershipLifecycle } from './utils/membership-lifecycle';
-import { auditAction } from '@/utils/audit';
 
 /**
  * markDuesInvoicePaid
@@ -59,13 +58,8 @@ export async function markDuesInvoicePaid(
     return marked;
   });
 
-  await auditAction(ctx, {
-    action: 'mark-paid',
-    resourceType: 'dues-invoice',
-    resourceId: invoiceId,
-    description: 'Dues invoice marked as paid',
-    eventSubType: 'financial.dues-collected',
-  });
+  ctx.set('auditResourceId', invoiceId);
+  ctx.set('auditDescription', 'Dues invoice marked as paid');
 
   return ctx.json(updatedInvoice, 200);
 }

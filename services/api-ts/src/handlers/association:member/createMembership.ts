@@ -4,7 +4,6 @@ import type { JobScheduler } from '@/core/jobs';
 import { NotFoundError, UnauthorizedError, ConflictError, BusinessLogicError } from '@/core/errors';
 import type { CreateMembershipBody } from '@/generated/openapi/validators';
 import { MembershipTierRepository, MembershipRepository } from './repos/membership.repo';
-import { auditAction } from '@/utils/audit';
 import { requirePosition } from '@/utils/officer-check';
 import { POSITION_TITLES } from '@/utils/position-titles';
 
@@ -60,12 +59,8 @@ export async function createMembership(
     note: body.note ?? null,
   });
 
-  await auditAction(ctx, {
-    action: 'create',
-    resourceType: 'membership',
-    resourceId: membership.id,
-    description: 'Membership created',
-  });
+  ctx.set('auditResourceId', membership.id);
+  ctx.set('auditDescription', 'Membership created');
 
   // Trigger directory profile auto-populate (Wave 3a)
   try {

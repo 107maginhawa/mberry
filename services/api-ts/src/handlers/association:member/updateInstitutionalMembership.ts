@@ -3,7 +3,6 @@ import type { DatabaseInstance } from '@/core/database';
 import { NotFoundError, BusinessLogicError } from '@/core/errors';
 import type { UpdateInstitutionalMembershipBody, UpdateInstitutionalMembershipParams } from '@/generated/openapi/validators';
 import { InstitutionalMembershipRepository } from './repos/institutional-membership.repo';
-import { auditAction } from '@/utils/audit';
 import { requirePosition } from '@/utils/officer-check';
 import { POSITION_TITLES } from '@/utils/position-titles';
 
@@ -41,12 +40,8 @@ export async function updateInstitutionalMembership(
     updatedAt: new Date(),
   });
 
-  await auditAction(ctx, {
-    action: 'update',
-    resourceType: 'institutionalMembership',
-    resourceId: params.institutionalMembershipId,
-    description: 'Institutional membership updated',
-  });
+  ctx.set('auditResourceId', params.institutionalMembershipId);
+  ctx.set('auditDescription', 'Institutional membership updated');
 
   return ctx.json(updated, 200);
 }

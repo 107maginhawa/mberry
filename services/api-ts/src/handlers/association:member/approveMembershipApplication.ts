@@ -4,7 +4,6 @@ import { NotFoundError, UnauthorizedError, BusinessLogicError } from '@/core/err
 import type { ApproveMembershipApplicationParams } from '@/generated/openapi/validators';
 import { MembershipApplicationRepository, MembershipRepository } from './repos/membership.repo';
 import type { MembershipApplication, NewMembership } from './repos/membership.schema';
-import { auditAction } from '@/utils/audit';
 import { requirePosition } from '@/utils/officer-check';
 import { POSITION_TITLES } from '@/utils/position-titles';
 
@@ -71,13 +70,8 @@ export async function approveMembershipApplication(
     return updated;
   });
 
-  await auditAction(ctx, {
-    action: 'approve',
-    resourceType: 'membership-application',
-    resourceId: applicationId,
-    description: 'Membership application approved',
-    eventSubType: 'membership.member-approved',
-  });
+  ctx.set('auditResourceId', applicationId);
+  ctx.set('auditDescription', 'Membership application approved');
 
   return ctx.json(updatedApplication, 200);
 }

@@ -4,7 +4,6 @@ import type { DatabaseInstance } from '@/core/database';
 import type { UpdateCredentialTemplateBody, UpdateCredentialTemplateParams } from '@/generated/openapi/validators';
 import { UnauthorizedError, NotFoundError, ForbiddenError } from '@/core/errors';
 import { CredentialTemplateRepository } from './repos/credentials.repo';
-import { auditAction } from '@/utils/audit';
 
 /**
  * updateCredentialTemplate
@@ -34,12 +33,8 @@ export async function updateCredentialTemplate(
 
   const updated = await repo.updateOneById(templateId, body as Partial<CredentialTemplate>);
 
-  await auditAction(ctx, {
-    action: 'update',
-    resourceType: 'credential-template',
-    resourceId: templateId,
-    description: `Credential template updated${orgId ? ` (org: ${orgId})` : ''}`,
-  });
+  ctx.set('auditResourceId', templateId);
+  ctx.set('auditDescription', `Credential template updated${orgId ? ` (org: ${orgId})` : ''}`);
 
   return ctx.json(updated, 200);
 }

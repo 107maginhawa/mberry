@@ -564,6 +564,7 @@ namespace Association.Member.Ethics {
     @post
     @useAuth(bearerAuth)
     @extension("x-security-required-roles", #["association:admin"])
+    @extension("x-audit", #{ action: "create", resourceType: "disciplinary-action" })
     createDisciplinaryAction(
       @body body: DisciplinaryActionRequest
     ): ApiCreatedResponse<DisciplinaryAction>

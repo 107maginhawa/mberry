@@ -3,7 +3,6 @@ import type { DatabaseInstance } from '@/core/database';
 import { DuesRepository } from './repos/dues-payments.repo';
 import { formatReceiptNumber } from './utils/receipt-number';
 import { settlePayment } from './utils/settle-payment';
-import { auditAction } from '@/utils/audit';
 
 /**
  * bulkRecordPayments (Slice 044)
@@ -150,14 +149,9 @@ export async function bulkRecordPayments(
   const errorCount = results.filter(r => r.status === 'error').length;
 
   if (successCount > 0) {
-    await auditAction(ctx, {
-      action: 'create',
-      resourceType: 'bulk-payment',
-      resourceId: `batch-${Date.now()}`,
-      description: `Bulk payment recorded: ${successCount} success, ${errorCount} errors`,
-      eventSubType: 'financial.payment-recorded',
-      details: { successCount, errorCount, total: body.payments.length },
-    });
+    ctx.set('auditResourceId', `batch-${Date.now()}`);
+    ctx.set('auditDescription', `Bulk payment recorded: ${successCount} success, ${errorCount} errors`);
+    ctx.set('auditDetails', { successCount, errorCount, total: body.payments.length });
   }
 
   return ctx.json({

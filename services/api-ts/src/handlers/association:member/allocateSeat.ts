@@ -3,7 +3,6 @@ import type { DatabaseInstance } from '@/core/database';
 import { NotFoundError, ConflictError, BusinessLogicError } from '@/core/errors';
 import type { AllocateSeatBody, AllocateSeatParams } from '@/generated/openapi/validators';
 import { InstitutionalMembershipRepository, SeatAllocationRepository } from './repos/institutional-membership.repo';
-import { auditAction } from '@/utils/audit';
 import { requirePosition } from '@/utils/officer-check';
 import { POSITION_TITLES } from '@/utils/position-titles';
 
@@ -56,12 +55,8 @@ export async function allocateSeat(
     status: 'active',
   });
 
-  await auditAction(ctx, {
-    action: 'create',
-    resourceType: 'seat_allocation',
-    resourceId: seat.id,
-    description: `Seat allocated to person ${body.personId}`,
-  });
+  ctx.set('auditResourceId', seat.id);
+  ctx.set('auditDescription', `Seat allocated to person ${body.personId}`);
 
   return ctx.json(seat, 201);
 }

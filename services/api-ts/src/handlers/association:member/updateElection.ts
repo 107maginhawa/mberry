@@ -3,7 +3,6 @@ import type { DatabaseInstance } from '@/core/database';
 import { UnauthorizedError, NotFoundError } from '@/core/errors';
 import type { UpdateElectionBody, UpdateElectionParams } from '@/generated/openapi/validators';
 import { ElectionsRepository } from '../elections/repos/elections.repo';
-import { auditAction } from '@/utils/audit';
 import { requireOfficerTerm } from '@/utils/officer-check';
 
 /**
@@ -44,12 +43,8 @@ export async function updateElection(
 
   const updated = await repo.update(params.electionId, updateData);
 
-  await auditAction(ctx, {
-    action: 'update',
-    resourceType: 'election',
-    resourceId: updated.id,
-    description: `Election updated: ${updated.title}`,
-  });
+  ctx.set('auditResourceId', updated.id);
+  ctx.set('auditDescription', `Election updated: ${updated.title}`);
 
   return ctx.json({ data: updated }, 200);
 }

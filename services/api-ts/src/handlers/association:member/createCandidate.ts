@@ -5,7 +5,6 @@ import type { CreateCandidateBody } from '@/generated/openapi/validators';
 import { ElectionsRepository } from '../elections/repos/elections.repo';
 import { MembershipRepository } from './repos/membership.repo';
 import { computeMembershipStatus } from './utils/compute-membership-status';
-import { auditAction } from '@/utils/audit';
 import { domainEvents } from '@/core/domain-events';
 
 /**
@@ -74,13 +73,9 @@ export async function createCandidate(
     organizationId: election.organizationId,
   });
 
-  await auditAction(ctx, {
-    action: 'create',
-    resourceType: 'election-nominee',
-    resourceId: nominee.id,
-    description: `Nominee added to election ${body.electionId}`,
-    details: { positionId: body.positionId, personId: body.personId },
-  });
+  ctx.set('auditResourceId', nominee.id);
+  ctx.set('auditDescription', `Nominee added to election ${body.electionId}`);
+  ctx.set('auditDetails', { positionId: body.positionId, personId: body.personId });
 
   domainEvents.emit('nomination.submitted', {
     nomineeId: nominee.id,

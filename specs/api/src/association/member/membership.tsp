@@ -730,6 +730,7 @@ namespace Association.Member.Membership {
     @post
     @useAuth(bearerAuth)
     @extension("x-security-required-roles", #["association:admin"])
+    @extension("x-audit", #{ action: "create", resourceType: "membership-tier" })
     createMembershipTier(
       @body body: MembershipTierCreateRequest
     ): ApiCreatedResponse<MembershipTier>
@@ -768,6 +769,7 @@ namespace Association.Member.Membership {
     @route("/{tierId}")
     @useAuth(bearerAuth)
     @extension("x-security-required-roles", #["association:admin"])
+    @extension("x-audit", #{ action: "update", resourceType: "membership-tier" })
     updateMembershipTier(
       @path tierId: string,
       @body updates: MembershipTierUpdateRequest
@@ -782,6 +784,7 @@ namespace Association.Member.Membership {
     @route("/{tierId}")
     @useAuth(bearerAuth)
     @extension("x-security-required-roles", #["association:admin"])
+    @extension("x-audit", #{ action: "delete", resourceType: "membership-tier" })
     deleteMembershipTier(
       @path tierId: string
     ): ApiNoContentResponse
@@ -797,6 +800,7 @@ namespace Association.Member.Membership {
     @post
     @useAuth(bearerAuth)
     @extension("x-security-required-roles", #["association:admin"])
+    @extension("x-audit", #{ action: "create", resourceType: "membership" })
     createMembership(
       @body body: MembershipCreateRequest
     ): ApiCreatedResponse<Membership>
@@ -838,6 +842,7 @@ namespace Association.Member.Membership {
     @route("/{membershipId}")
     @useAuth(bearerAuth)
     @extension("x-security-required-roles", #["association:admin"])
+    @extension("x-audit", #{ action: "update", resourceType: "membership" })
     updateMembership(
       @path membershipId: string,
       @body updates: MembershipUpdateRequest
@@ -852,6 +857,7 @@ namespace Association.Member.Membership {
     @route("/{membershipId}")
     @useAuth(bearerAuth)
     @extension("x-security-required-roles", #["association:admin"])
+    @extension("x-audit", #{ action: "delete", resourceType: "membership" })
     deleteMembership(
       @path membershipId: string
     ): ApiNoContentResponse
@@ -865,6 +871,7 @@ namespace Association.Member.Membership {
     @route("/{membershipId}/renew")
     @useAuth(bearerAuth)
     @extension("x-security-required-roles", #["association:admin"])
+    @extension("x-audit", #{ action: "renew", resourceType: "membership" })
     renewMembership(
       @path membershipId: string
     ): ApiOkResponse<Membership>
@@ -878,6 +885,7 @@ namespace Association.Member.Membership {
     @route("/{membershipId}/terminate")
     @useAuth(bearerAuth)
     @extension("x-security-required-roles", #["association:admin"])
+    @extension("x-audit", #{ action: "terminate", resourceType: "membership" })
     terminateMembership(
       @path membershipId: string,
       @body body: MembershipTerminateRequest
@@ -893,6 +901,7 @@ namespace Association.Member.Membership {
     @route("/{membershipId}/resign")
     @useAuth(bearerAuth)
     @extension("x-security-required-roles", #["association:admin"])
+    @extension("x-audit", #{ action: "resign", resourceType: "membership" })
     resignMembership(
       @path membershipId: string,
       @body body: MembershipResignRequest
@@ -908,6 +917,7 @@ namespace Association.Member.Membership {
     @route("/{membershipId}/deceased")
     @useAuth(bearerAuth)
     @extension("x-security-required-roles", #["association:admin"])
+    @extension("x-audit", #{ action: "deceased", resourceType: "membership" })
     deceaseMembership(
       @path membershipId: string,
       @body body: MembershipDeceasedRequest
@@ -923,6 +933,7 @@ namespace Association.Member.Membership {
     @route("/{membershipId}/reinstate")
     @useAuth(bearerAuth)
     @extension("x-security-required-roles", #["association:admin"])
+    @extension("x-audit", #{ action: "reinstate", resourceType: "membership" })
     reinstateMembership(
       @path membershipId: string
     ): ApiOkResponse<Membership>
@@ -938,6 +949,7 @@ namespace Association.Member.Membership {
     @post
     @useAuth(bearerAuth)
     @extension("x-security-required-roles", #["user"])
+    @extension("x-audit", #{ action: "create", resourceType: "membership-application" })
     createMembershipApplication(
       @body body: MembershipApplicationCreateRequest
     ): ApiCreatedResponse<MembershipApplication>
@@ -977,6 +989,7 @@ namespace Association.Member.Membership {
     @route("/{applicationId}")
     @useAuth(bearerAuth)
     @extension("x-security-required-roles", #["association:admin"])
+    @extension("x-audit", #{ action: "update", resourceType: "membership-application" })
     updateMembershipApplication(
       @path applicationId: string,
       @body updates: MembershipApplicationCreateRequest
@@ -991,6 +1004,7 @@ namespace Association.Member.Membership {
     @route("/{applicationId}")
     @useAuth(bearerAuth)
     @extension("x-security-required-roles", #["association:admin"])
+    @extension("x-audit", #{ action: "delete", resourceType: "membership-application" })
     deleteMembershipApplication(
       @path applicationId: string
     ): ApiNoContentResponse
@@ -1003,6 +1017,7 @@ namespace Association.Member.Membership {
     @route("/{applicationId}/approve")
     @useAuth(bearerAuth)
     @extension("x-security-required-roles", #["association:admin"])
+    @extension("x-audit", #{ action: "approve", resourceType: "membership-application" })
     approveMembershipApplication(
       @path applicationId: string
     ): ApiOkResponse<MembershipApplication>
@@ -1016,6 +1031,7 @@ namespace Association.Member.Membership {
     @route("/{applicationId}/deny")
     @useAuth(bearerAuth)
     @extension("x-security-required-roles", #["association:admin"])
+    @extension("x-audit", #{ action: "deny", resourceType: "membership-application" })
     denyMembershipApplication(
       @path applicationId: string,
       @body body: MembershipApplicationDenyRequest
@@ -1031,6 +1047,7 @@ namespace Association.Member.Membership {
     @route("/bulk-approve")
     @useAuth(bearerAuth)
     @extension("x-security-required-roles", #["association:admin"])
+    @extension("x-audit", #{ action: "approve", resourceType: "membership-application" })
     bulkApproveMembershipApplications(
       @body body: BulkApproveApplicationsRequest
     ): ApiOkResponse<BulkApproveApplicationsResponse>
@@ -1046,6 +1063,7 @@ namespace Association.Member.Membership {
     @post
     @useAuth(bearerAuth)
     @extension("x-security-required-roles", #["association:admin"])
+    @extension("x-audit", #{ action: "create", resourceType: "institutionalMembership" })
     createInstitutionalMembership(
       @body body: InstitutionalMembershipCreateRequest
     ): ApiCreatedResponse<InstitutionalMembership>
@@ -1086,6 +1104,7 @@ namespace Association.Member.Membership {
     @route("/{institutionalMembershipId}")
     @useAuth(bearerAuth)
     @extension("x-security-required-roles", #["association:admin"])
+    @extension("x-audit", #{ action: "update", resourceType: "institutionalMembership" })
     updateInstitutionalMembership(
       @path institutionalMembershipId: string,
       @body updates: InstitutionalMembershipCreateRequest
@@ -1100,6 +1119,7 @@ namespace Association.Member.Membership {
     @route("/{institutionalMembershipId}")
     @useAuth(bearerAuth)
     @extension("x-security-required-roles", #["association:admin"])
+    @extension("x-audit", #{ action: "delete", resourceType: "institutionalMembership" })
     deleteInstitutionalMembership(
       @path institutionalMembershipId: string
     ): ApiNoContentResponse
@@ -1115,6 +1135,7 @@ namespace Association.Member.Membership {
     @post
     @useAuth(bearerAuth)
     @extension("x-security-required-roles", #["association:admin", "institution:admin"])
+    @extension("x-audit", #{ action: "create", resourceType: "seat_allocation" })
     allocateSeat(
       @path institutionalMembershipId: string,
       @body body: SeatAllocationRequest
@@ -1130,6 +1151,7 @@ namespace Association.Member.Membership {
     @route("/{seatAllocationId}/revoke")
     @useAuth(bearerAuth)
     @extension("x-security-required-roles", #["association:admin", "institution:admin"])
+    @extension("x-audit", #{ action: "update", resourceType: "seat_allocation" })
     revokeSeat(
       @path institutionalMembershipId: string,
       @path seatAllocationId: string
@@ -1190,6 +1212,7 @@ namespace Association.Member.Membership {
     @post
     @useAuth(bearerAuth)
     @extension("x-security-required-roles", #["association:admin"])
+    @extension("x-audit", #{ action: "create", resourceType: "roster-member" })
     addRosterMember(
       @body body: AddMemberRequest
     ): ApiCreatedResponse<RosterMember>
@@ -1204,6 +1227,7 @@ namespace Association.Member.Membership {
     @route("/{memberId}")
     @useAuth(bearerAuth)
     @extension("x-security-required-roles", #["association:admin"])
+    @extension("x-audit", #{ action: "update", resourceType: "roster-member" })
     updateRosterMember(
       @path memberId: string,
       @body body: UpdateMemberRequest
@@ -1218,6 +1242,7 @@ namespace Association.Member.Membership {
     @route("/import")
     @useAuth(bearerAuth)
     @extension("x-security-required-roles", #["association:admin"])
+    @extension("x-audit", #{ action: "create", resourceType: "roster-import" })
     importRosterMembers(
       @body body: ImportMembersRequest
     ): ApiOkResponse<ImportResult>
@@ -1276,6 +1301,7 @@ namespace Association.Member.Membership {
     @route("/{organizationId}")
     @useAuth(bearerAuth)
     @extension("x-security-required-roles", #["association:admin"])
+    @extension("x-audit", #{ action: "update", resourceType: "organization-profile" })
     updateOrganizationProfile(
       @path organizationId: string,
       @body body: UpdateOrgProfileRequest

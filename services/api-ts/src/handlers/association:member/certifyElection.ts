@@ -4,7 +4,6 @@ import { UnauthorizedError, NotFoundError, ForbiddenError, BusinessLogicError } 
 import type { CertifyElectionParams } from '@/generated/openapi/validators';
 import { ElectionsRepository } from '../elections/repos/elections.repo';
 import { OfficerTermRepository } from './repos/governance.repo';
-import { auditAction } from '@/utils/audit';
 import { domainEvents } from '@/core/domain-events';
 
 /**
@@ -90,14 +89,9 @@ export async function certifyElection(
     publishedAt: new Date(),
   });
 
-  await auditAction(ctx, {
-    action: 'update',
-    resourceType: 'election',
-    resourceId: updated.id,
-    description: `Election certified and published: ${updated.title}`,
-    details: { voterCount, tallies, winners },
-    eventSubType: 'governance.election-closed',
-  });
+  ctx.set('auditResourceId', updated.id);
+  ctx.set('auditDescription', `Election certified and published: ${updated.title}`);
+  ctx.set('auditDetails', { voterCount, tallies, winners });
 
   domainEvents.emit('election.published', {
     electionId: updated.id,

@@ -3,7 +3,6 @@ import type { DatabaseInstance } from '@/core/database';
 import { NotFoundError, BusinessLogicError } from '@/core/errors';
 import type { CreateInstitutionalMembershipBody } from '@/generated/openapi/validators';
 import { InstitutionalMembershipRepository } from './repos/institutional-membership.repo';
-import { auditAction } from '@/utils/audit';
 import { requirePosition } from '@/utils/officer-check';
 import { POSITION_TITLES } from '@/utils/position-titles';
 
@@ -46,12 +45,8 @@ export async function createInstitutionalMembership(
     status: 'pendingPayment',
   });
 
-  await auditAction(ctx, {
-    action: 'create',
-    resourceType: 'institutionalMembership',
-    resourceId: membership.id,
-    description: 'Institutional membership created',
-  });
+  ctx.set('auditResourceId', membership.id);
+  ctx.set('auditDescription', 'Institutional membership created');
 
   return ctx.json(membership, 201);
 }

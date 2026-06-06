@@ -835,6 +835,7 @@ namespace Association.Member.Certification {
     @post
     @useAuth(bearerAuth)
     @extension("x-security-required-roles", #["association:admin"])
+    @extension("x-audit", #{ action: "create", resourceType: "credit-entry" })
     createCreditEntry(
       @body body: CreditEntryCreateRequest
     ): ApiCreatedResponse<CreditEntry>

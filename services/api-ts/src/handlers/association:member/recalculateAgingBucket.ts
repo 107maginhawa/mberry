@@ -1,7 +1,6 @@
 import type { ValidatedContext } from '@/types/app';
 import { UnauthorizedError } from '@/core/errors';
 import type { RecalculateAgingBucketParams } from '@/generated/openapi/validators';
-import { auditAction } from '@/utils/audit';
 
 /**
  * recalculateAgingBucket
@@ -17,12 +16,8 @@ export async function recalculateAgingBucket(
 
   const { organizationId } = ctx.req.valid('param');
 
-  await auditAction(ctx, {
-    action: 'update',
-    resourceType: 'aging-bucket',
-    resourceId: organizationId,
-    description: 'Aging bucket recalculated',
-  });
+  ctx.set('auditResourceId', organizationId);
+  ctx.set('auditDescription', 'Aging bucket recalculated');
 
   // Implementation-Status: STUB — aging bucket recalculation deferred to v1.2.0
   // Deferred: query overdue invoices, bucket by age, upsert aging snapshot

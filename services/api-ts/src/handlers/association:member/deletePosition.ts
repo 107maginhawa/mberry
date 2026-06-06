@@ -2,7 +2,6 @@ import type { ValidatedContext } from '@/types/app';
 import type { DatabaseInstance } from '@/core/database';
 import { NotFoundError } from '@/core/errors';
 import { PositionRepository } from './repos/governance.repo';
-import { auditAction } from '@/utils/audit';
 
 /**
  * deletePosition
@@ -31,12 +30,8 @@ export async function deletePosition(
 
   await repo.delete(positionId);
 
-  await auditAction(ctx, {
-    action: 'delete',
-    resourceType: 'position',
-    resourceId: positionId,
-    description: 'Position deleted',
-  });
+  ctx.set('auditResourceId', positionId);
+  ctx.set('auditDescription', 'Position deleted');
 
   return ctx.json({ success: true });
 }

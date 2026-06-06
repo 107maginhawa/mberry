@@ -4,7 +4,6 @@ import type { DatabaseInstance } from '@/core/database';
 import { UnauthorizedError, NotFoundError } from '@/core/errors';
 import type { UpdateDuesConfigBody, UpdateDuesConfigParams } from '@/generated/openapi/validators';
 import { DuesConfigRepository } from './repos/dues.repo';
-import { auditAction } from '@/utils/audit';
 
 /**
  * updateDuesConfig
@@ -28,12 +27,8 @@ export async function updateDuesConfig(
 
   const updated = await repo.updateOneById(duesConfigId, body as Partial<DuesConfig>);
 
-  await auditAction(ctx, {
-    action: 'update',
-    resourceType: 'dues-config',
-    resourceId: duesConfigId,
-    description: 'Dues config updated',
-  });
+  ctx.set('auditResourceId', duesConfigId);
+  ctx.set('auditDescription', 'Dues config updated');
 
   return ctx.json(updated, 200);
 }

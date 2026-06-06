@@ -7,7 +7,6 @@ import type { DigitalCredential } from './repos/credentials.schema';
 import { MembershipRepository } from './repos/membership.repo';
 import { withComputedStatus } from './utils/membership-status-middleware';
 import { createCredentialToken } from './utils/credential-token';
-import { auditAction } from '@/utils/audit';
 
 /**
  * issueDigitalCredential
@@ -93,13 +92,8 @@ export async function issueDigitalCredential(
     verificationUrl,
   } as Partial<DigitalCredential>);
 
-  await auditAction(ctx, {
-    action: 'create',
-    resourceType: 'digital-credential',
-    resourceId: credential.id,
-    description: `Digital credential "${body.credentialNumber}" issued for person ${body.personId}`,
-    eventSubType: 'content.certificate-generated',
-  });
+  ctx.set('auditResourceId', credential.id);
+  ctx.set('auditDescription', `Digital credential "${body.credentialNumber}" issued for person ${body.personId}`);
 
   return ctx.json(updated, 201);
 }

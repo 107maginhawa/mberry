@@ -5,7 +5,6 @@ import type { JobScheduler } from '@/core/jobs';
 import type { AddRosterMemberBody } from '@/generated/openapi/validators';
 import { MembershipRepository } from './repos/membership.repo';
 import type { NewMembership } from './repos/membership.schema';
-import { auditAction } from '@/utils/audit';
 import { requirePosition } from '@/utils/officer-check';
 import { POSITION_TITLES } from '@/utils/position-titles';
 
@@ -32,12 +31,8 @@ export async function addRosterMember(
 
   const member = await repo.createOne({ ...body, organizationId: orgId } as NewMembership);
 
-  await auditAction(ctx, {
-    action: 'create',
-    resourceType: 'roster-member',
-    resourceId: member.id,
-    description: 'Roster member added',
-  });
+  ctx.set('auditResourceId', member.id);
+  ctx.set('auditDescription', 'Roster member added');
 
   // Trigger directory profile auto-populate (Wave 3a)
   try {

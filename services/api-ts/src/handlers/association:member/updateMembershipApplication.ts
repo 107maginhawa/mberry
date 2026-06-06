@@ -4,7 +4,6 @@ import type { DatabaseInstance } from '@/core/database';
 import { NotFoundError, UnauthorizedError } from '@/core/errors';
 import type { UpdateMembershipApplicationBody, UpdateMembershipApplicationParams } from '@/generated/openapi/validators';
 import { MembershipApplicationRepository } from './repos/membership.repo';
-import { auditAction } from '@/utils/audit';
 
 /**
  * updateMembershipApplication
@@ -28,12 +27,8 @@ export async function updateMembershipApplication(
 
   const updated = await repo.updateOneById(applicationId, body as Partial<MembershipApplication>);
 
-  await auditAction(ctx, {
-    action: 'update',
-    resourceType: 'membership-application',
-    resourceId: applicationId,
-    description: 'Membership application updated',
-  });
+  ctx.set('auditResourceId', applicationId);
+  ctx.set('auditDescription', 'Membership application updated');
 
   return ctx.json(updated, 200);
 }

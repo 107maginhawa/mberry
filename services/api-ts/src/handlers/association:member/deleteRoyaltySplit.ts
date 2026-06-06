@@ -3,7 +3,6 @@ import type { DatabaseInstance } from '@/core/database';
 import type { DeleteRoyaltySplitParams } from '@/generated/openapi/validators';
 import { UnauthorizedError, NotFoundError } from '@/core/errors';
 import { RoyaltySplitRepository } from './repos/chapters.repo';
-import { auditAction } from '@/utils/audit';
 
 /**
  * deleteRoyaltySplit
@@ -26,12 +25,8 @@ export async function deleteRoyaltySplit(
 
   await repo.deleteOneById(royaltySplitId);
 
-  await auditAction(ctx, {
-    action: 'delete',
-    resourceType: 'royalty-split',
-    resourceId: royaltySplitId,
-    description: 'Royalty split deleted',
-  });
+  ctx.set('auditResourceId', royaltySplitId);
+  ctx.set('auditDescription', 'Royalty split deleted');
 
   return ctx.body(null, 204);
 }

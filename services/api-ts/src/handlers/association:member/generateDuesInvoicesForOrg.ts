@@ -3,7 +3,6 @@ import type { DatabaseInstance } from '@/core/database';
 import { UnauthorizedError, ForbiddenError } from '@/core/errors';
 import type { GenerateDuesInvoicesForOrgBody } from '@/generated/openapi/validators';
 import { domainEvents } from '@/core/domain-events';
-import { auditAction } from '@/utils/audit';
 import { requirePosition } from '@/utils/officer-check';
 import { POSITION_TITLES } from '@/utils/position-titles';
 import { eq, and } from 'drizzle-orm';
@@ -37,12 +36,8 @@ export async function generateDuesInvoicesForOrg(
   const db = ctx.get('database') as DatabaseInstance;
   const logger = ctx.get('logger');
 
-  await auditAction(ctx, {
-    action: 'create',
-    resourceType: 'dues-invoice',
-    resourceId: orgId,
-    description: 'Bulk dues invoice generation triggered',
-  });
+  ctx.set('auditResourceId', orgId);
+  ctx.set('auditDescription', 'Bulk dues invoice generation triggered');
 
   // 1. Get dues config for the organization
   const [config] = await db

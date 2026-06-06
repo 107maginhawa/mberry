@@ -3,7 +3,6 @@ import type { DatabaseInstance } from '@/core/database';
 import { NotFoundError, BusinessLogicError } from '@/core/errors';
 import type { RevokeSeatParams } from '@/generated/openapi/validators';
 import { InstitutionalMembershipRepository, SeatAllocationRepository } from './repos/institutional-membership.repo';
-import { auditAction } from '@/utils/audit';
 import { requirePosition } from '@/utils/officer-check';
 import { POSITION_TITLES } from '@/utils/position-titles';
 
@@ -53,12 +52,8 @@ export async function revokeSeat(
   // Decrement used seats on the institutional membership
   await instRepo.decrementUsedSeats(params.institutionalMembershipId);
 
-  await auditAction(ctx, {
-    action: 'update',
-    resourceType: 'seat_allocation',
-    resourceId: params.seatAllocationId,
-    description: `Seat revoked by ${user.id}`,
-  });
+  ctx.set('auditResourceId', params.seatAllocationId);
+  ctx.set('auditDescription', `Seat revoked by ${user.id}`);
 
   return ctx.json(revoked, 200);
 }

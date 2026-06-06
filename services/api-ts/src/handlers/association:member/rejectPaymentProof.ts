@@ -5,7 +5,6 @@ import type { RejectPaymentProofBody, RejectPaymentProofParams } from '@/generat
 import { DuesRepository } from './repos/dues-payments.repo';
 import type { DuesPayment } from './repos/dues-payments.schema';
 import { domainEvents } from '@/core/domain-events';
-import { auditAction } from '@/utils/audit';
 import { requirePosition } from '@/utils/officer-check';
 import { POSITION_TITLES } from '@/utils/position-titles';
 
@@ -55,12 +54,8 @@ export async function rejectPaymentProof(
     recordedBy: session.user.id,
   } as Partial<DuesPayment>, session.user.id);
 
-  await auditAction(ctx, {
-    action: 'deny',
-    resourceType: 'dues-payment-proof',
-    resourceId: payment.id,
-    description: `Payment proof rejected: ${body.reason}`,
-  });
+  ctx.set('auditResourceId', payment.id);
+  ctx.set('auditDescription', `Payment proof rejected: ${body.reason}`);
 
   domainEvents.emit('dues.payment.proof.rejected', {
     paymentId: payment.id,

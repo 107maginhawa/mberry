@@ -3,7 +3,6 @@ import type { DatabaseInstance } from '@/core/database';
 import type { DeleteDigitalCredentialParams } from '@/generated/openapi/validators';
 import { UnauthorizedError, NotFoundError } from '@/core/errors';
 import { DigitalCredentialRepository } from './repos/credentials.repo';
-import { auditAction } from '@/utils/audit';
 
 /**
  * deleteDigitalCredential
@@ -26,12 +25,8 @@ export async function deleteDigitalCredential(
 
   await repo.deleteOneById(credentialId);
 
-  await auditAction(ctx, {
-    action: 'delete',
-    resourceType: 'digital-credential',
-    resourceId: credentialId,
-    description: 'Digital credential deleted',
-  });
+  ctx.set('auditResourceId', credentialId);
+  ctx.set('auditDescription', 'Digital credential deleted');
 
   return ctx.body(null, 204);
 }

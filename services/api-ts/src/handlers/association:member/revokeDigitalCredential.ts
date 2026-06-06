@@ -4,7 +4,6 @@ import type { DatabaseInstance } from '@/core/database';
 import type { RevokeDigitalCredentialBody, RevokeDigitalCredentialParams } from '@/generated/openapi/validators';
 import { UnauthorizedError, NotFoundError, BusinessLogicError } from '@/core/errors';
 import { DigitalCredentialRepository } from './repos/credentials.repo';
-import { auditAction } from '@/utils/audit';
 
 /**
  * revokeDigitalCredential
@@ -39,12 +38,8 @@ export async function revokeDigitalCredential(
     revocationReason: body.reason,
   } as Partial<DigitalCredential>);
 
-  await auditAction(ctx, {
-    action: 'update',
-    resourceType: 'digital-credential',
-    resourceId: credentialId,
-    description: `Digital credential revoked: ${body.reason}`,
-  });
+  ctx.set('auditResourceId', credentialId);
+  ctx.set('auditDescription', `Digital credential revoked: ${body.reason}`);
 
   return ctx.json(updated, 200);
 }

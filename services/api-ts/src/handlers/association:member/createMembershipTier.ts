@@ -4,7 +4,6 @@ import type { DatabaseInstance } from '@/core/database';
 import { ConflictError } from '@/core/errors';
 import { MembershipTierRepository } from './repos/membership.repo';
 import type { MembershipTier } from './repos/membership.schema';
-import { auditAction } from '@/utils/audit';
 
 /**
  * createMembershipTier
@@ -45,12 +44,8 @@ export async function createMembershipTier(
     createdBy: user.id,
   });
 
-  await auditAction(ctx, {
-    action: 'create',
-    resourceType: 'membership-tier',
-    resourceId: tier.id,
-    description: 'Membership tier created',
-  });
+  ctx.set('auditResourceId', tier.id);
+  ctx.set('auditDescription', 'Membership tier created');
 
   return ctx.json(tier, 201);
 }

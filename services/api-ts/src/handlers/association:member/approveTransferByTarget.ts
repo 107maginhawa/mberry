@@ -3,7 +3,6 @@ import type { DatabaseInstance } from '@/core/database';
 import type { ApproveTransferByTargetBody, ApproveTransferByTargetParams } from '@/generated/openapi/validators';
 import { UnauthorizedError, NotFoundError, BusinessLogicError } from '@/core/errors';
 import { AffiliationTransferRepository } from './repos/chapters.repo';
-import { auditAction } from '@/utils/audit';
 
 /**
  * approveTransferByTarget
@@ -44,12 +43,8 @@ export async function approveTransferByTarget(
 
   const updated = await repo.updateOneById(transferId, updateData);
 
-  await auditAction(ctx, {
-    action: 'update',
-    resourceType: 'affiliation-transfer',
-    resourceId: transferId,
-    description: 'Affiliation transfer approved by target',
-  });
+  ctx.set('auditResourceId', transferId);
+  ctx.set('auditDescription', 'Affiliation transfer approved by target');
 
   return ctx.json(updated, 200);
 }

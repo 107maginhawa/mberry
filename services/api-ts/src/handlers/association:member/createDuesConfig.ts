@@ -3,7 +3,6 @@ import type { DatabaseInstance } from '@/core/database';
 import type { CreateDuesConfigBody } from '@/generated/openapi/validators';
 import { UnauthorizedError } from '@/core/errors';
 import { DuesConfigRepository } from './repos/dues.repo';
-import { auditAction } from '@/utils/audit';
 import { requirePosition } from '@/utils/officer-check';
 import { POSITION_TITLES } from '@/utils/position-titles';
 
@@ -41,12 +40,8 @@ export async function createDuesConfig(
     status: body.status ?? 'active',
   });
 
-  await auditAction(ctx, {
-    action: 'create',
-    resourceType: 'dues-config',
-    resourceId: config.id,
-    description: 'Dues config created',
-  });
+  ctx.set('auditResourceId', config.id);
+  ctx.set('auditDescription', 'Dues config created');
 
   return ctx.json(config, 201);
 }

@@ -4,7 +4,6 @@ import type { DatabaseInstance } from '@/core/database';
 import type { UpdateDigitalCredentialBody, UpdateDigitalCredentialParams } from '@/generated/openapi/validators';
 import { UnauthorizedError, NotFoundError } from '@/core/errors';
 import { DigitalCredentialRepository } from './repos/credentials.repo';
-import { auditAction } from '@/utils/audit';
 
 /**
  * updateDigitalCredential
@@ -28,12 +27,8 @@ export async function updateDigitalCredential(
 
   const updated = await repo.updateOneById(credentialId, body as Partial<DigitalCredential>);
 
-  await auditAction(ctx, {
-    action: 'update',
-    resourceType: 'digital-credential',
-    resourceId: credentialId,
-    description: 'Digital credential updated',
-  });
+  ctx.set('auditResourceId', credentialId);
+  ctx.set('auditDescription', 'Digital credential updated');
 
   return ctx.json(updated, 200);
 }

@@ -3,7 +3,6 @@ import type { DatabaseInstance } from '@/core/database';
 import type { DeleteChapterAffiliationParams } from '@/generated/openapi/validators';
 import { UnauthorizedError, NotFoundError } from '@/core/errors';
 import { ChapterAffiliationRepository } from './repos/chapters.repo';
-import { auditAction } from '@/utils/audit';
 
 /**
  * deleteChapterAffiliation
@@ -26,12 +25,8 @@ export async function deleteChapterAffiliation(
 
   await repo.deleteOneById(affiliationId);
 
-  await auditAction(ctx, {
-    action: 'delete',
-    resourceType: 'chapter-affiliation',
-    resourceId: affiliationId,
-    description: 'Chapter affiliation deleted',
-  });
+  ctx.set('auditResourceId', affiliationId);
+  ctx.set('auditDescription', 'Chapter affiliation deleted');
 
   return ctx.body(null, 204);
 }

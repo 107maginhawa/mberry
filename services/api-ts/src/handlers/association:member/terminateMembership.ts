@@ -6,7 +6,6 @@ import { NotFoundError, UnauthorizedError, BusinessLogicError } from '@/core/err
 import type { TerminateMembershipBody, TerminateMembershipParams } from '@/generated/openapi/validators';
 import { MembershipRepository } from './repos/membership.repo';
 import { withComputedStatus } from './utils/membership-status-middleware';
-import { auditAction } from '@/utils/audit';
 import { assertValidTransition } from '@/utils/status-transitions';
 import { MEMBERSHIP_VALID_TRANSITIONS } from './utils/status-transitions';
 
@@ -45,13 +44,8 @@ export async function terminateMembership(
     removalReason: body.terminationReason ?? null,
   } as Partial<Membership>);
 
-  await auditAction(ctx, {
-    action: 'terminate',
-    resourceType: 'membership',
-    resourceId: membershipId,
-    description: 'Membership removed',
-    eventSubType: 'membership.member-terminated',
-  });
+  ctx.set('auditResourceId', membershipId);
+  ctx.set('auditDescription', 'Membership removed');
 
   // P1-4: Invalidate removed member's sessions so they can't access org resources
   try {

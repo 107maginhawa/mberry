@@ -4,7 +4,6 @@ import { NotFoundError, UnauthorizedError, BusinessLogicError } from '@/core/err
 import type { DenyMembershipApplicationBody, DenyMembershipApplicationParams } from '@/generated/openapi/validators';
 import { MembershipApplicationRepository } from './repos/membership.repo';
 import type { MembershipApplication } from './repos/membership.schema';
-import { auditAction } from '@/utils/audit';
 import { requirePosition } from '@/utils/officer-check';
 import { POSITION_TITLES } from '@/utils/position-titles';
 
@@ -46,13 +45,8 @@ export async function denyMembershipApplication(
     denialReason: body.denialReason ?? null,
   } as Partial<MembershipApplication>);
 
-  await auditAction(ctx, {
-    action: 'deny',
-    resourceType: 'membership-application',
-    resourceId: applicationId,
-    description: 'Membership application denied',
-    eventSubType: 'membership.member-denied',
-  });
+  ctx.set('auditResourceId', applicationId);
+  ctx.set('auditDescription', 'Membership application denied');
 
   return ctx.json(updated, 200);
 }

@@ -4,7 +4,6 @@ import type { DatabaseInstance } from '@/core/database';
 import type { UpdateDirectoryProfileBody, UpdateDirectoryProfileParams } from '@/generated/openapi/validators';
 import { UnauthorizedError, NotFoundError } from '@/core/errors';
 import { DirectoryProfileRepository } from './repos/directory.repo';
-import { auditAction } from '@/utils/audit';
 
 /**
  * updateDirectoryProfile
@@ -31,12 +30,8 @@ export async function updateDirectoryProfile(
     lastUpdatedAt: new Date(),
   } as Partial<DirectoryProfile>);
 
-  await auditAction(ctx, {
-    action: 'update',
-    resourceType: 'directory-profile',
-    resourceId: profileId,
-    description: 'Directory profile updated',
-  });
+  ctx.set('auditResourceId', profileId);
+  ctx.set('auditDescription', 'Directory profile updated');
 
   return ctx.json(updated, 200);
 }

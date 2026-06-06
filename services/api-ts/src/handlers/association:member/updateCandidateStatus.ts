@@ -9,7 +9,6 @@ import {
 import type { UpdateCandidateStatusBody, UpdateCandidateStatusParams } from '@/generated/openapi/validators';
 import { ElectionsRepository } from '../elections/repos/elections.repo';
 import { OfficerTermRepository } from './repos/governance.repo';
-import { auditAction } from '@/utils/audit';
 
 const VALID_NOMINEE_TRANSITIONS: Record<string, string[]> = {
   nominated: ['accepted', 'declined'],
@@ -69,13 +68,9 @@ export async function updateCandidateStatus(
 
   const updated = await repo.updateNomineeStatus(params.candidateId, newStatus);
 
-  await auditAction(ctx, {
-    action: 'update',
-    resourceType: 'election-nominee',
-    resourceId: params.candidateId,
-    description: `Candidate status changed to ${newStatus}`,
-    details: { electionId: election.id, fromStatus: nominee.status, toStatus: newStatus },
-  });
+  ctx.set('auditResourceId', params.candidateId);
+  ctx.set('auditDescription', `Candidate status changed to ${newStatus}`);
+  ctx.set('auditDetails', { electionId: election.id, fromStatus: nominee.status, toStatus: newStatus });
 
   return ctx.json({ data: updated }, 200);
 }

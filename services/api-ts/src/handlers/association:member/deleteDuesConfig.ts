@@ -3,7 +3,6 @@ import type { DatabaseInstance } from '@/core/database';
 import { UnauthorizedError, NotFoundError } from '@/core/errors';
 import type { DeleteDuesConfigParams } from '@/generated/openapi/validators';
 import { DuesConfigRepository } from './repos/dues.repo';
-import { auditAction } from '@/utils/audit';
 
 /**
  * deleteDuesConfig
@@ -26,12 +25,8 @@ export async function deleteDuesConfig(
 
   await repo.deleteOneById(duesConfigId);
 
-  await auditAction(ctx, {
-    action: 'delete',
-    resourceType: 'dues-config',
-    resourceId: duesConfigId,
-    description: 'Dues config deleted',
-  });
+  ctx.set('auditResourceId', duesConfigId);
+  ctx.set('auditDescription', 'Dues config deleted');
 
   return new Response(null, { status: 204 });
 }

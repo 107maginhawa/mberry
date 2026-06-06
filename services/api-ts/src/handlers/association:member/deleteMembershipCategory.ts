@@ -2,7 +2,6 @@ import type { ValidatedContext } from '@/types/app';
 import type { DatabaseInstance } from '@/core/database';
 import { NotFoundError, ConflictError } from '@/core/errors';
 import { MembershipCategoryRepository } from './repos/membership.repo';
-import { auditAction } from '@/utils/audit';
 
 /**
  * deleteMembershipCategory
@@ -38,12 +37,8 @@ export async function deleteMembershipCategory(
 
   await repo.deleteOneById(id);
 
-  await auditAction(ctx, {
-    action: 'delete',
-    resourceType: 'membership-category',
-    resourceId: id,
-    description: `Membership category "${existing.name}" deleted`,
-  });
+  ctx.set('auditResourceId', id);
+  ctx.set('auditDescription', `Membership category "${existing.name}" deleted`);
 
   return ctx.json({ deleted: true }, 200);
 }

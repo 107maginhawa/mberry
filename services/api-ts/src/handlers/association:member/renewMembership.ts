@@ -5,7 +5,6 @@ import type { RenewMembershipParams } from '@/generated/openapi/validators';
 import { MembershipRepository } from './repos/membership.repo';
 import { withComputedStatus, persistWithComputedStatus } from './utils/membership-status-middleware';
 import type { Membership } from './repos/membership.schema';
-import { auditAction } from '@/utils/audit';
 
 /**
  * renewMembership
@@ -44,13 +43,8 @@ export async function renewMembership(
     duesExpiryDate: newExpiryDate,
   });
 
-  await auditAction(ctx, {
-    action: 'renew',
-    resourceType: 'membership',
-    resourceId: membershipId,
-    description: 'Membership renewed',
-    eventSubType: 'membership.member-renewed',
-  });
+  ctx.set('auditResourceId', membershipId);
+  ctx.set('auditDescription', 'Membership renewed');
 
   return ctx.json(updated, 200);
 }
