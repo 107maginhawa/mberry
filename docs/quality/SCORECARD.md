@@ -7,7 +7,7 @@ Plan: `~/.claude/plans/so-is-our-codebase-hidden-dream.md`
 | Axis | Score | Target | Owner |
 |---|---|---|---|
 | Cleanliness | 8.5/10 (per audit) | 10/10 | W6 |
-| Dead code | 3 confirmed orphans + module candidates pending SDK trace | 0 | W3.5 |
+| Dead code | 3 orphans deleted; module investigation complete — all 3 candidates KEEP (2 KEEP-AND-SPEC, 1 KEEP-AS-IS) | 0 | W3.5 |
 | Unit coverage | coverage-gate.ts wrapper live; per-module thresholds set (platformadmin 40%, others 60–75%); 10 characterization tests added | ≥70% per module → 80% by W7 | W7 (tighten) |
 | Contract coverage | 32% (99 Hurl vs 312 OpenAPI paths) | ≥60% | W4 |
 | E2E real-flow depth | ~33% (auth + billing selector-only) of 144 specs | 100% | W2 |
@@ -40,4 +40,5 @@ Plan: `~/.claude/plans/so-is-our-codebase-hidden-dream.md`
 | 2 | complete |
 | 2.5 | complete |
 | 3 | complete (coverage gate wrapper + 10 characterization tests) |
-| 3.5–7 | pending |
+| 3.5 | in progress — orphans deleted, module candidates investigated (all 3 KEEP), awaiting user sign-off |
+| 4–7 | pending |
