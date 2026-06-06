@@ -3,13 +3,18 @@
 // BR-46: Credit cycle is auto-computed from association config (start month/day)
 import { test, expect } from '../helpers/test-fixture'
 import { signInAsMember, signInAsOfficer } from '../helpers/auth'
+import { captureAnyApiSuccess } from '../helpers/real-flow'
 
 const ORG_ID = 'ed8e3a96-8126-4341-be42-e6eb7940c562'
 
 test.describe('[BR-45, BR-46] Credit Validation', () => {
   test('credits page shows credit summary with cycle info', async ({ page }) => {
     await signInAsMember(page)
+    const respP = captureAnyApiSuccess(page)
     await page.goto('/my/credits')
+    const resp = await respP
+    expect(resp?.status()).toBe(200)
+    expect(resp?.ok()).toBe(true)
     await expect(page).toHaveURL(/\/my\/credits/)
 
     // Should show credit balance or cycle info
