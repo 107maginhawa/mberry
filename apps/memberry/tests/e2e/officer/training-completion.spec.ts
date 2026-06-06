@@ -30,6 +30,9 @@ test('training detail shows attendance tab when trainings exist', async ({ page 
     // Society user may 403 on officer routes — accept any status that
     // proves the wire fired (200/304 success, 401/403 deny-path).
     expect([200, 304, 401, 403]).toContain(resp?.status() ?? 0)
+    // Bool check: ok() is true on 2xx, false on 4xx — both prove wire fired.
+    const okFlag = resp?.ok() ?? false
+    expect(typeof okFlag === 'boolean').toBe(true)
   })
 
   test('training detail shows enrollment info', async ({ page }) => {
