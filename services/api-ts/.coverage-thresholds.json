@@ -1,0 +1,6 @@
+{
+  "src/handlers/person": { "line": 75, "function": 70 },
+  "src/handlers/billing": { "line": 75, "function": 70 },
+  "src/handlers/platformadmin": { "line": 40, "function": 40 },
+  "src/handlers/communication": { "line": 60, "function": 55 }
+}
