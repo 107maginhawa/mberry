@@ -3,7 +3,6 @@ import { UnauthorizedError, NotFoundError, ForbiddenError, BusinessLogicError } 
 import { DuesRepository } from './repos/dues-payments.repo';
 import type { DuesPayment } from './repos/dues-payments.schema';
 import { OfficerTermRepository } from '../association:member/repos/governance.repo';
-import { auditAction } from '@/utils/audit';
 import type { Session } from '@/types/auth';
 
 const RECEIPT_ELIGIBLE_STATUSES = ['completed', 'confirmed'];
@@ -77,12 +76,8 @@ export async function downloadReceipt(ctx: Context): Promise<Response> {
 
   const html = renderReceiptHtml(payment);
 
-  await auditAction(ctx, {
-    action: 'create',
-    resourceType: 'payment_receipt',
-    resourceId: paymentId,
-    description: `Receipt downloaded for payment ${payment.receiptNumber}`,
-  });
+  ctx.set('auditResourceId', paymentId);
+  ctx.set('auditDescription', `Receipt downloaded for payment ${payment.receiptNumber}`);
 
   return ctx.json({
     receiptNumber: payment.receiptNumber,

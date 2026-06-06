@@ -1126,6 +1126,7 @@ export function registerRoutes(app: Hono<{ Variables: Variables }>) {
   // getDuesMemberSummary
   app.get('/association/member/dues-member-summary/:organizationId/:personId',
     authMiddleware({ roles: ["association:admin"] }),
+    requirePositionMiddleware({ titles: ["Treasurer", "President"] }),
     zValidator('param', validators.GetDuesMemberSummaryParams, validationErrorHandler),
     registry.getDuesMemberSummary as unknown as Handler
   );
@@ -1133,6 +1134,7 @@ export function registerRoutes(app: Hono<{ Variables: Variables }>) {
   // getDuesMetrics
   app.get('/association/member/dues-metrics/:organizationId',
     authMiddleware({ roles: ["association:admin"] }),
+    requirePositionMiddleware({ titles: ["Treasurer", "President"] }),
     zValidator('param', validators.GetDuesMetricsParams, validationErrorHandler),
     registry.getDuesMetrics as unknown as Handler
   );
@@ -2655,6 +2657,7 @@ export function registerRoutes(app: Hono<{ Variables: Variables }>) {
   // getDuesDashboard
   app.get('/dues/dashboard/:organizationId',
     authMiddleware({ roles: ["association:admin"] }),
+    requirePositionMiddleware({ titles: ["Treasurer", "President"] }),
     zValidator('param', validators.GetDuesDashboardParams, validationErrorHandler),
     registry.getDuesDashboard as unknown as Handler
   );
@@ -2892,6 +2895,7 @@ export function registerRoutes(app: Hono<{ Variables: Variables }>) {
   // sendPaymentLink
   app.post('/org/:organizationId/payments/send-link',
     authMiddleware({ roles: ["association:admin", "association:staff"] }),
+    requireOfficerMiddleware(),
     zValidator('param', validators.SendPaymentLinkParams, validationErrorHandler),
     zValidator('json', validators.SendPaymentLinkBody, validationErrorHandler),
     registry.sendPaymentLink as unknown as Handler
@@ -2900,6 +2904,7 @@ export function registerRoutes(app: Hono<{ Variables: Variables }>) {
   // downloadReceipt
   app.get('/org/:organizationId/payments/:paymentId/receipt',
     authMiddleware({ roles: ["association:member"] }),
+    createPerRouteAuditMiddleware({ action: "read", resourceType: "payment_receipt", eventType: "data-access" }),
     zValidator('param', validators.DownloadReceiptParams, validationErrorHandler),
     registry.downloadReceipt as unknown as Handler
   );

@@ -8,10 +8,9 @@
  */
 
 import type { ValidatedContext } from '@/types/app';
-import { UnauthorizedError, ForbiddenError } from '@/core/errors';
+import { UnauthorizedError } from '@/core/errors';
 import { PaymentTokenRepository } from './repos/payment-token.repo';
 import { DuesRepository } from '../association:member/repos/dues-payments.repo';
-import { OfficerTermRepository } from '../association:member/repos/governance.repo';
 import {
   generatePaymentToken,
   defaultPaymentTokenExpiry,
@@ -27,18 +26,12 @@ export async function sendPaymentLink(
   const session = ctx.get('session');
   if (!session) throw new UnauthorizedError();
 
-  const orgId = ctx.get('organizationId');
+  const orgId = ctx.get('organizationId') ?? ctx.req.param('organizationId');
   if (!orgId) {
     return ctx.json({ error: 'Organization context required' }, 403);
   }
 
-  // P0: Verify caller is an officer (treasurer, president, admin)
   const db = ctx.get('database');
-  const officerRepo = new OfficerTermRepository(db);
-  const terms = await officerRepo.findActiveByPersonAndOrg(user.id, orgId);
-  if (terms.length === 0) {
-    throw new ForbiddenError('Officer access required to send payment links');
-  }
 
   const body = await ctx.req.json();
   const { personId, amount: providedAmount, invoiceId } = body as {

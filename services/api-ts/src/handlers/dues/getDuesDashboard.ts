@@ -3,8 +3,6 @@ import type { DatabaseInstance } from '@/core/database';
 import { UnauthorizedError } from '@/core/errors';
 import type { GetDuesDashboardParams } from '@/generated/openapi/validators';
 import { DuesRepository } from '@/handlers/association:member/repos/dues-payments.repo';
-import { requirePosition } from '@/utils/officer-check';
-import { POSITION_TITLES } from '@/utils/position-titles';
 
 /**
  * getDuesDashboard
@@ -27,11 +25,6 @@ export async function getDuesDashboard(
   const db = ctx.get('database') as DatabaseInstance;
   const params = ctx.req.valid('param');
   const orgId = params.organizationId;
-
-  // Set orgId for requirePosition (route is not under /association/*, no org-context middleware)
-  ctx.set('organizationId', orgId);
-  const denied = await requirePosition(ctx, [POSITION_TITLES.TREASURER, POSITION_TITLES.PRESIDENT]);
-  if (denied) return denied;
 
   const repo = new DuesRepository(db);
   const [stats, memberCount] = await Promise.all([

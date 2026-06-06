@@ -250,6 +250,7 @@ namespace DuesCustomModule {
     @route("/dues/dashboard/{organizationId}")
     @useAuth(bearerAuth)
     @extension("x-security-required-roles", #["association:admin"])
+    @extension("x-require-position", #["Treasurer", "President"])
     getDuesDashboard(
       @path @doc("Organisation ID") organizationId: UUID
     ): ApiOkResponse<{ data: DuesDashboardData }>
@@ -265,6 +266,7 @@ namespace DuesCustomModule {
     @route("/association/member/dues-metrics/{organizationId}")
     @useAuth(bearerAuth)
     @extension("x-security-required-roles", #["association:admin"])
+    @extension("x-require-position", #["Treasurer", "President"])
     getDuesMetrics(
       @path organizationId: UUID
     ): ApiOkResponse<{ data: DuesTreasurerMetrics }>
@@ -277,6 +279,7 @@ namespace DuesCustomModule {
     @route("/association/member/dues-member-summary/{organizationId}/{personId}")
     @useAuth(bearerAuth)
     @extension("x-security-required-roles", #["association:admin"])
+    @extension("x-require-position", #["Treasurer", "President"])
     getDuesMemberSummary(
       @path organizationId: UUID,
       @path personId: UUID
@@ -318,6 +321,7 @@ namespace DuesCustomModule {
     @route("/org/{organizationId}/payments/{paymentId}/receipt")
     @useAuth(bearerAuth)
     @extension("x-security-required-roles", #["association:member"])
+    @extension("x-audit", #{ action: "read", resourceType: "payment_receipt", eventType: "data-access" })
     downloadReceipt(
       @path organizationId: UUID,
       @path paymentId: UUID,
@@ -339,6 +343,7 @@ namespace DuesCustomModule {
     @route("/org/{organizationId}/payments/send-link")
     @useAuth(bearerAuth)
     @extension("x-security-required-roles", #["association:admin", "association:staff"])
+    @extension("x-require-officer", true)
     sendPaymentLink(
       @path organizationId: string,
       @body body: SendPaymentLinkRequest,
