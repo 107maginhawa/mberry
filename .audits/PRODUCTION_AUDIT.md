@@ -205,6 +205,25 @@ Mega-module split plan must define data ownership without breaking these joins.
 
 ---
 
+## Execution log
+
+### P0.1 — resolved 18 of 20 split-brain pairs (commit 0cf8c37e..)
+- Deleted 16 dead handlers + 13 paired tests (-2563 LOC) — each independently verified absent from generated registry + app.ts.
+- Restored 2 false positives flagged as duplicates that are real impls behind one-line re-export shims in the TypeSpec namespace:
+  - `certificates/bulkIssueCertificates.ts` (shimmed via `association:member/bulkIssueCertificates.ts`)
+  - `association:operations/getCommittee.ts` (shimmed via `platformadmin/getCommittee.ts`)
+- 2 pairs deferred (both register but coexist functionally):
+  - **deleteElection** — `elections/deleteElection.ts` hand-wired in `app.ts:527` overrides the `association:member/deleteElection.ts` TypeSpec route at the same path; both physically exist but Hono's later-binding-wins means only the hand-wired one serves. Follow-up: pick one path, retire other.
+  - **verifyCertificatePublic** — TypeSpec route uses the namespace shim `association:member/verifyCertificatePublic.ts` (one-line re-export) → impl in `certificates/verifyCertificatePublic.ts`; `app.ts:349` hand-wires the same impl at a friendlier `/certificates/verify/:certificateNumber` path. Dual-routing, single impl, no conflict.
+
+### P0.2 — done (commit 0cf8c37e)
+Deleted `specs/api/src/modules/patient.tsp` + `provider.tsp` orphan healthcare TSPs. Regenerated validators.ts.
+
+### P0.3 — done (commit 528b3e77)
+Deleted older `notifs/markAllNotificationsRead.ts` + test + `notifs-custom.tsp`. Kept `markAllNotificationsAsRead.ts`. Updated shared notifs handler test.
+
+---
+
 ## Consolidated Production-Readiness Punch List
 
 ### P0 — Block ship
