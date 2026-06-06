@@ -2,7 +2,6 @@ import type { ValidatedContext } from '@/types/app';
 import type { DatabaseInstance } from '@/core/database';
 import type { CreateEventBody } from '@/generated/openapi/validators';
 import { EventRepository } from './repos/events.repo';
-import { auditAction } from '@/utils/audit';
 import { requirePosition } from '@/utils/officer-check';
 import { POSITION_TITLES } from '@/utils/position-titles';
 
@@ -41,13 +40,8 @@ export async function createEvent(
     status: 'draft',
   });
 
-  await auditAction(ctx, {
-    action: 'create',
-    resourceType: 'event',
-    resourceId: event.id,
-    description: 'Event created',
-    eventSubType: 'association.event-created',
-  });
+  ctx.set('auditResourceId', event.id);
+  ctx.set('auditDescription', 'Event created');
 
   return ctx.json(event, 201);
 }

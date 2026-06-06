@@ -899,6 +899,7 @@ namespace Association.Member.Governance {
     @post
     @useAuth(bearerAuth)
     @extension("x-security-required-roles", #["association:admin"])
+    @extension("x-audit", #{ action: "create", resourceType: "committee" })
     createCommittee(@body body: CommitteeRequest): ApiCreatedResponse<Committee> | ApiBadRequestResponse | ApiUnauthorizedResponse | ApiForbiddenResponse;
 
     @doc("Get a committee by ID.")
@@ -922,6 +923,7 @@ namespace Association.Member.Governance {
     @route("/{committeeId}")
     @useAuth(bearerAuth)
     @extension("x-security-required-roles", #["association:admin"])
+    @extension("x-audit", #{ action: "update", resourceType: "committee" })
     updateCommittee(@path committeeId: string, @body updates: CommitteeRequest): ApiOkResponse<Committee> | ApiBadRequestResponse | ApiNotFoundResponse | ApiForbiddenResponse;
 
     @doc("Delete a committee.")

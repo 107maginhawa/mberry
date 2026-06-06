@@ -5,7 +5,6 @@ import type { CancelEventRegistrationParams } from '@/generated/openapi/validato
 import { NotFoundError, BusinessLogicError } from '@/core/errors';
 import { EventRegistrationRepository, WaitlistEntryRepository, EventRepository } from './repos/events.repo';
 import { domainEvents } from '@/core/domain-events';
-import { auditAction } from '@/utils/audit';
 import { notifyLateCancellation } from '@/handlers/notifs/notification-triggers';
 
 /**
@@ -63,13 +62,8 @@ export async function cancelEventRegistration(
     }
   }
 
-  await auditAction(ctx, {
-    action: 'update',
-    resourceType: 'event-registration',
-    resourceId: cancelled.id,
-    description: 'Event registration cancelled',
-    eventSubType: 'association.booking-cancelled',
-  });
+  ctx.set('auditResourceId', cancelled.id);
+  ctx.set('auditDescription', 'Event registration cancelled');
 
   // GAP-006: Notify organizers of late cancellation (within 24h of event)
   const notifService = ctx.get('notifs') as NotificationService;

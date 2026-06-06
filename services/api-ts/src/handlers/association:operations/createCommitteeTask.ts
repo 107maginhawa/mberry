@@ -2,7 +2,6 @@ import type { Context } from 'hono';
 import { CommitteeRepository } from './repos/committee.repo';
 import { CommitteeTaskRepository } from './repos/committee-task.repo';
 import { NotFoundError, BusinessLogicError } from '@/core/errors';
-import { auditAction } from '@/utils/audit';
 import type { Session } from '@/types/auth';
 
 export async function createCommitteeTask(ctx: Context): Promise<Response> {
@@ -40,12 +39,8 @@ export async function createCommitteeTask(ctx: Context): Promise<Response> {
     updatedBy: session.user.id,
   });
 
-  await auditAction(ctx, {
-    action: 'create',
-    resourceType: 'committee_task',
-    resourceId: task.id,
-    description: `Created task: ${task.title}`,
-  });
+  ctx.set('auditResourceId', task.id);
+  ctx.set('auditDescription', `Created task: ${task.title}`);
 
   return ctx.json({ data: task }, 201);
 }

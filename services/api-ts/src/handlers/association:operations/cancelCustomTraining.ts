@@ -4,7 +4,6 @@ import { NotFoundError, BusinessLogicError } from '@/core/errors';
 import type { CancelCustomTrainingQuery, CancelCustomTrainingParams } from '@/generated/openapi/validators';
 import { TrainingRepository, TrainingEnrollmentRepository } from './repos/training.repo';
 import { domainEvents } from '@/core/domain-events';
-import { auditAction } from '@/utils/audit';
 import { requirePosition } from '@/utils/officer-check';
 import { POSITION_TITLES } from '@/utils/position-titles';
 
@@ -58,12 +57,8 @@ export async function cancelCustomTraining(
     cancelledBy: user.id,
   }).catch(() => {});
 
-  await auditAction(ctx, {
-    action: 'update',
-    resourceType: 'training-enrollment',
-    resourceId: enrollment.id,
-    description: 'Training enrollment cancelled',
-  });
+  ctx.set('auditResourceId', enrollment.id);
+  ctx.set('auditDescription', 'Training enrollment cancelled');
 
   return ctx.json(updated, 200);
 }

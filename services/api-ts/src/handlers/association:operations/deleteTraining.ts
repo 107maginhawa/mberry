@@ -3,7 +3,6 @@ import type { DatabaseInstance } from '@/core/database';
 import type { DeleteTrainingParams } from '@/generated/openapi/validators';
 import { NotFoundError } from '@/core/errors';
 import { TrainingRepository } from './repos/training.repo';
-import { auditAction } from '@/utils/audit';
 import { requirePosition } from '@/utils/officer-check';
 import { POSITION_TITLES } from '@/utils/position-titles';
 
@@ -32,12 +31,8 @@ export async function deleteTraining(
 
   await repo.deleteOneById(params.trainingId, user.id);
 
-  await auditAction(ctx, {
-    action: 'delete',
-    resourceType: 'training',
-    resourceId: params.trainingId,
-    description: 'Training deleted',
-  });
+  ctx.set('auditResourceId', params.trainingId);
+  ctx.set('auditDescription', 'Training deleted');
 
   return ctx.json({ success: true }, 200);
 }

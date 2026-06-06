@@ -3,7 +3,6 @@ import type { DatabaseInstance } from '@/core/database';
 import type { UpdateTrainingBody, UpdateTrainingParams } from '@/generated/openapi/validators';
 import { NotFoundError } from '@/core/errors';
 import { TrainingRepository } from './repos/training.repo';
-import { auditAction } from '@/utils/audit';
 import { requirePosition } from '@/utils/officer-check';
 import { POSITION_TITLES } from '@/utils/position-titles';
 
@@ -38,12 +37,8 @@ export async function updateTraining(
 
   const updated = await repo.updateOneById(params.trainingId, updates);
 
-  await auditAction(ctx, {
-    action: 'update',
-    resourceType: 'training',
-    resourceId: updated.id,
-    description: 'Training updated',
-  });
+  ctx.set('auditResourceId', updated.id);
+  ctx.set('auditDescription', 'Training updated');
 
   return ctx.json(updated, 200);
 }

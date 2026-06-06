@@ -3,7 +3,6 @@ import type { DatabaseInstance } from '@/core/database';
 import type { DeleteCourseEnrollmentParams } from '@/generated/openapi/validators';
 import { NotFoundError } from '@/core/errors';
 import { CourseEnrollmentRepository } from './repos/training.repo';
-import { auditAction } from '@/utils/audit';
 import { requirePosition } from '@/utils/officer-check';
 import { POSITION_TITLES } from '@/utils/position-titles';
 
@@ -32,12 +31,8 @@ export async function deleteCourseEnrollment(
 
   await repo.deleteOneById(params.enrollmentId, user.id);
 
-  await auditAction(ctx, {
-    action: 'delete',
-    resourceType: 'course-enrollment',
-    resourceId: params.enrollmentId,
-    description: 'Course enrollment deleted',
-  });
+  ctx.set('auditResourceId', params.enrollmentId);
+  ctx.set('auditDescription', 'Course enrollment deleted');
 
   return ctx.json({ success: true }, 200);
 }

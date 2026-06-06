@@ -4,7 +4,6 @@ import type { PublishEventParams } from '@/generated/openapi/validators';
 import { NotFoundError, BusinessLogicError } from '@/core/errors';
 import { EventRepository } from './repos/events.repo';
 import { domainEvents } from '@/core/domain-events';
-import { auditAction } from '@/utils/audit';
 import { requirePosition } from '@/utils/officer-check';
 import { POSITION_TITLES } from '@/utils/position-titles';
 
@@ -60,12 +59,8 @@ export async function publishEvent(
     publishedBy: user.id,
   }).catch(() => {});
 
-  await auditAction(ctx, {
-    action: 'update',
-    resourceType: 'event',
-    resourceId: published.id,
-    description: 'Event published',
-  });
+  ctx.set('auditResourceId', published.id);
+  ctx.set('auditDescription', 'Event published');
 
   return ctx.json(published, 200);
 }

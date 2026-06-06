@@ -3,7 +3,6 @@ import type { DatabaseInstance } from '@/core/database';
 import type { UpdateTrainingEnrollmentBody, UpdateTrainingEnrollmentParams } from '@/generated/openapi/validators';
 import { NotFoundError, BusinessLogicError } from '@/core/errors';
 import { TrainingRepository, TrainingEnrollmentRepository } from './repos/training.repo';
-import { auditAction } from '@/utils/audit';
 import { requirePosition } from '@/utils/officer-check';
 import { POSITION_TITLES } from '@/utils/position-titles';
 import { assertValidTransition, TRAINING_ENROLLMENT_VALID_TRANSITIONS } from '@/utils/status-transitions';
@@ -55,12 +54,8 @@ export async function updateTrainingEnrollment(
 
   const updated = await repo.updateOneById(params.enrollmentId, body as Record<string, unknown>);
 
-  await auditAction(ctx, {
-    action: 'update',
-    resourceType: 'training-enrollment',
-    resourceId: updated.id,
-    description: 'Training enrollment updated',
-  });
+  ctx.set('auditResourceId', updated.id);
+  ctx.set('auditDescription', 'Training enrollment updated');
 
   return ctx.json(updated, 200);
 }

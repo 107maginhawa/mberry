@@ -4,7 +4,6 @@ import type { CancelEventParams } from '@/generated/openapi/validators';
 import { NotFoundError, BusinessLogicError } from '@/core/errors';
 import { EventRepository } from './repos/events.repo';
 import { domainEvents } from '@/core/domain-events';
-import { auditAction } from '@/utils/audit';
 import { requirePosition } from '@/utils/officer-check';
 import { POSITION_TITLES } from '@/utils/position-titles';
 
@@ -37,13 +36,8 @@ export async function cancelEvent(
 
   const cancelled = await repo.cancel(params.eventId);
 
-  await auditAction(ctx, {
-    action: 'update',
-    resourceType: 'event',
-    resourceId: cancelled.id,
-    description: 'Event cancelled',
-    eventSubType: 'association.event-cancelled',
-  });
+  ctx.set('auditResourceId', cancelled.id);
+  ctx.set('auditDescription', 'Event cancelled');
 
   domainEvents.emit('event.cancelled', {
     eventId: cancelled.id,

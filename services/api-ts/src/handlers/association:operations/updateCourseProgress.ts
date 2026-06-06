@@ -3,7 +3,6 @@ import type { DatabaseInstance } from '@/core/database';
 import type { UpdateCourseProgressBody, UpdateCourseProgressParams } from '@/generated/openapi/validators';
 import { NotFoundError, BusinessLogicError } from '@/core/errors';
 import { CourseEnrollmentRepository } from './repos/training.repo';
-import { auditAction } from '@/utils/audit';
 import { requirePosition } from '@/utils/officer-check';
 import { POSITION_TITLES } from '@/utils/position-titles';
 
@@ -47,12 +46,8 @@ export async function updateCourseProgress(
 
   const updated = await repo.updateOneById(enrollment.id, updates);
 
-  await auditAction(ctx, {
-    action: 'update',
-    resourceType: 'course-enrollment',
-    resourceId: updated.id,
-    description: `Course progress updated to ${updates['progress']}%`,
-  });
+  ctx.set('auditResourceId', updated.id);
+  ctx.set('auditDescription', `Course progress updated to ${updates['progress']}%`);
 
   return ctx.json(updated, 200);
 }

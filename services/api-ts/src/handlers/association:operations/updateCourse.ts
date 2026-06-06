@@ -3,7 +3,6 @@ import type { DatabaseInstance } from '@/core/database';
 import type { UpdateCourseBody, UpdateCourseParams } from '@/generated/openapi/validators';
 import { NotFoundError } from '@/core/errors';
 import { CourseRepository } from './repos/training.repo';
-import { auditAction } from '@/utils/audit';
 import { requirePosition } from '@/utils/officer-check';
 import { POSITION_TITLES } from '@/utils/position-titles';
 
@@ -33,12 +32,8 @@ export async function updateCourse(
 
   const updated = await repo.updateOneById(params.courseId, body as Record<string, unknown>);
 
-  await auditAction(ctx, {
-    action: 'update',
-    resourceType: 'course',
-    resourceId: updated.id,
-    description: 'Course updated',
-  });
+  ctx.set('auditResourceId', updated.id);
+  ctx.set('auditDescription', 'Course updated');
 
   return ctx.json(updated, 200);
 }

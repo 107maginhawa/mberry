@@ -3,7 +3,6 @@ import type { DatabaseInstance } from '@/core/database';
 import type { DeleteEventParams } from '@/generated/openapi/validators';
 import { NotFoundError } from '@/core/errors';
 import { EventRepository } from './repos/events.repo';
-import { auditAction } from '@/utils/audit';
 import { requirePosition } from '@/utils/officer-check';
 import { POSITION_TITLES } from '@/utils/position-titles';
 
@@ -32,12 +31,8 @@ export async function deleteEvent(
 
   await repo.deleteOneById(params.eventId, user.id);
 
-  await auditAction(ctx, {
-    action: 'delete',
-    resourceType: 'event',
-    resourceId: params.eventId,
-    description: 'Event deleted',
-  });
+  ctx.set('auditResourceId', params.eventId);
+  ctx.set('auditDescription', 'Event deleted');
 
   return ctx.json({ success: true }, 200);
 }

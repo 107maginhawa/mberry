@@ -3,7 +3,6 @@ import type { DatabaseInstance } from '@/core/database';
 import type { UpdateEventBody, UpdateEventParams } from '@/generated/openapi/validators';
 import { NotFoundError } from '@/core/errors';
 import { EventRepository } from './repos/events.repo';
-import { auditAction } from '@/utils/audit';
 import { requirePosition } from '@/utils/officer-check';
 import { POSITION_TITLES } from '@/utils/position-titles';
 
@@ -38,12 +37,8 @@ export async function updateEvent(
 
   const updated = await repo.updateOneById(params.eventId, updates);
 
-  await auditAction(ctx, {
-    action: 'update',
-    resourceType: 'event',
-    resourceId: updated.id,
-    description: 'Event updated',
-  });
+  ctx.set('auditResourceId', updated.id);
+  ctx.set('auditDescription', 'Event updated');
 
   return ctx.json(updated, 200);
 }

@@ -3,7 +3,6 @@ import type { DatabaseInstance } from '@/core/database';
 import { NotFoundError, BusinessLogicError } from '@/core/errors';
 import { EventRepository } from './repos/events.repo';
 import { domainEvents } from '@/core/domain-events';
-import { auditAction } from '@/utils/audit';
 import { requirePosition } from '@/utils/officer-check';
 import { POSITION_TITLES } from '@/utils/position-titles';
 
@@ -41,13 +40,8 @@ export async function completeEvent(ctx: HandlerContext): Promise<Response> {
     completedBy: user.id,
   }).catch(() => {});
 
-  await auditAction(ctx, {
-    action: 'update',
-    resourceType: 'event',
-    resourceId: completed.id,
-    description: 'Event completed',
-    eventSubType: 'association.event-completed',
-  });
+  ctx.set('auditResourceId', completed.id);
+  ctx.set('auditDescription', 'Event completed');
 
   return ctx.json(completed, 200);
 }

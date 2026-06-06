@@ -6,7 +6,6 @@ import { TrainingEnrollmentRepository, TrainingRepository } from './repos/traini
 import { CreditEntryRepository } from '../association:member/repos/credits.repo';
 import { getCycleForDate } from '../association:member/utils/credit-cycle';
 import { domainEvents } from '@/core/domain-events';
-import { auditAction } from '@/utils/audit';
 import { requirePosition } from '@/utils/officer-check';
 import { POSITION_TITLES } from '@/utils/position-titles';
 import { assertValidTransition, TRAINING_ENROLLMENT_VALID_TRANSITIONS } from '@/utils/status-transitions';
@@ -105,14 +104,9 @@ export async function completeTrainingEnrollment(
       .catch(() => {});
   }
 
-  await auditAction(ctx, {
-    action: 'complete',
-    resourceType: 'training-enrollment',
-    resourceId: completed.id,
-    description: 'Training enrollment completed',
-    details: creditAwarded ? { creditAwarded } : undefined,
-    eventSubType: 'training.training-completed',
-  });
+  ctx.set('auditResourceId', completed.id);
+  ctx.set('auditDescription', 'Training enrollment completed');
+  ctx.set('auditDetails', { creditAwarded });
 
   return ctx.json({ ...completed, creditAwarded }, 200);
 }

@@ -4,7 +4,6 @@ import type { CreateCheckInBody } from '@/generated/openapi/validators';
 import { NotFoundError, BusinessLogicError } from '@/core/errors';
 import { EventRepository, CheckInRepository } from './repos/events.repo';
 import { verifyQrToken } from './utils/qr-checkin';
-import { auditAction } from '@/utils/audit';
 import { requirePosition } from '@/utils/officer-check';
 import { POSITION_TITLES } from '@/utils/position-titles';
 
@@ -71,12 +70,8 @@ export async function createCheckIn(
     organizationId: orgId,
   });
 
-  await auditAction(ctx, {
-    action: 'create',
-    resourceType: 'check-in',
-    resourceId: checkIn.id,
-    description: `Check-in via ${method}`,
-  });
+  ctx.set('auditResourceId', checkIn.id);
+  ctx.set('auditDescription', `Check-in via ${method}`);
 
   return ctx.json(checkIn, 201);
 }

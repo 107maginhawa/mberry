@@ -421,6 +421,7 @@ export function registerRoutes(app: Hono<{ Variables: Variables }>) {
   // checkInCustomEvent
   app.post('/association/event-lifecycle/:eventId/check-in',
     authMiddleware({ roles: ["association:admin", "association:staff"] }),
+    createPerRouteAuditMiddleware({ action: "create", resourceType: "check-in" }),
     zValidator('param', validators.CheckInCustomEventParams, validationErrorHandler),
     zValidator('json', validators.CheckInCustomEventBody, validationErrorHandler),
     registry.checkInCustomEvent as unknown as Handler
@@ -429,6 +430,7 @@ export function registerRoutes(app: Hono<{ Variables: Variables }>) {
   // completeEvent
   app.post('/association/event-lifecycle/:eventId/complete',
     authMiddleware({ roles: ["association:admin", "association:staff"] }),
+    createPerRouteAuditMiddleware({ action: "update", resourceType: "event" }),
     zValidator('param', validators.CompleteEventParams, validationErrorHandler),
     registry.completeEvent as unknown as Handler
   );
@@ -458,6 +460,7 @@ export function registerRoutes(app: Hono<{ Variables: Variables }>) {
   // createEvent
   app.post('/association/events',
     authMiddleware({ roles: ["association:admin", "association:staff"] }),
+    createPerRouteAuditMiddleware({ action: "create", resourceType: "event" }),
     zValidator('json', validators.CreateEventBody, validationErrorHandler),
     registry.createEvent as unknown as Handler
   );
@@ -472,6 +475,7 @@ export function registerRoutes(app: Hono<{ Variables: Variables }>) {
   // createCheckIn
   app.post('/association/events/checkins',
     authMiddleware({ roles: ["association:admin", "association:staff"] }),
+    createPerRouteAuditMiddleware({ action: "create", resourceType: "check-in" }),
     zValidator('json', validators.CreateCheckInBody, validationErrorHandler),
     registry.createCheckIn as unknown as Handler
   );
@@ -507,6 +511,7 @@ export function registerRoutes(app: Hono<{ Variables: Variables }>) {
   // updateEventRegistration
   app.patch('/association/events/registrations/:registrationId',
     authMiddleware({ roles: ["association:admin", "association:staff"] }),
+    createPerRouteAuditMiddleware({ action: "update", resourceType: "event-registration" }),
     zValidator('param', validators.UpdateEventRegistrationParams, validationErrorHandler),
     zValidator('json', validators.UpdateEventRegistrationBody, validationErrorHandler),
     registry.updateEventRegistration as unknown as Handler
@@ -515,6 +520,7 @@ export function registerRoutes(app: Hono<{ Variables: Variables }>) {
   // deleteEventRegistration
   app.delete('/association/events/registrations/:registrationId',
     authMiddleware({ roles: ["association:admin"] }),
+    createPerRouteAuditMiddleware({ action: "delete", resourceType: "event-registration" }),
     zValidator('param', validators.DeleteEventRegistrationParams, validationErrorHandler),
     registry.deleteEventRegistration as unknown as Handler
   );
@@ -522,6 +528,7 @@ export function registerRoutes(app: Hono<{ Variables: Variables }>) {
   // cancelEventRegistration
   app.post('/association/events/registrations/:registrationId/cancel',
     authMiddleware({ roles: ["association:admin", "association:staff", "association:member:owner"] }),
+    createPerRouteAuditMiddleware({ action: "update", resourceType: "event-registration" }),
     zValidator('param', validators.CancelEventRegistrationParams, validationErrorHandler),
     registry.cancelEventRegistration as unknown as Handler
   );
@@ -529,6 +536,7 @@ export function registerRoutes(app: Hono<{ Variables: Variables }>) {
   // refundEventRegistration
   app.post('/association/events/registrations/:registrationId/refund',
     authMiddleware({ roles: ["association:admin", "association:staff"] }),
+    createPerRouteAuditMiddleware({ action: "update", resourceType: "event-registration" }),
     zValidator('param', validators.RefundEventRegistrationParams, validationErrorHandler),
     registry.refundEventRegistration as unknown as Handler
   );
@@ -543,6 +551,7 @@ export function registerRoutes(app: Hono<{ Variables: Variables }>) {
   // updateEvent
   app.patch('/association/events/:eventId',
     authMiddleware({ roles: ["association:admin", "association:staff"] }),
+    createPerRouteAuditMiddleware({ action: "update", resourceType: "event" }),
     zValidator('param', validators.UpdateEventParams, validationErrorHandler),
     zValidator('json', validators.UpdateEventBody, validationErrorHandler),
     registry.updateEvent as unknown as Handler
@@ -551,6 +560,7 @@ export function registerRoutes(app: Hono<{ Variables: Variables }>) {
   // deleteEvent
   app.delete('/association/events/:eventId',
     authMiddleware({ roles: ["association:admin"] }),
+    createPerRouteAuditMiddleware({ action: "delete", resourceType: "event" }),
     zValidator('param', validators.DeleteEventParams, validationErrorHandler),
     registry.deleteEvent as unknown as Handler
   );
@@ -558,6 +568,7 @@ export function registerRoutes(app: Hono<{ Variables: Variables }>) {
   // cancelEvent
   app.post('/association/events/:eventId/cancel',
     authMiddleware({ roles: ["association:admin", "association:staff"] }),
+    createPerRouteAuditMiddleware({ action: "update", resourceType: "event" }),
     zValidator('param', validators.CancelEventParams, validationErrorHandler),
     registry.cancelEvent as unknown as Handler
   );
@@ -565,6 +576,7 @@ export function registerRoutes(app: Hono<{ Variables: Variables }>) {
   // publishEvent
   app.post('/association/events/:eventId/publish',
     authMiddleware({ roles: ["association:admin", "association:staff"] }),
+    createPerRouteAuditMiddleware({ action: "update", resourceType: "event" }),
     zValidator('param', validators.PublishEventParams, validationErrorHandler),
     registry.publishEvent as unknown as Handler
   );
@@ -580,6 +592,7 @@ export function registerRoutes(app: Hono<{ Variables: Variables }>) {
   // promoteWaitlistEntry
   app.post('/association/events/:eventId/waitlist/:entryId/promote',
     authMiddleware({ roles: ["association:admin", "association:staff"] }),
+    createPerRouteAuditMiddleware({ action: "update", resourceType: "waitlist-entry" }),
     zValidator('param', validators.PromoteWaitlistEntryParams, validationErrorHandler),
     registry.promoteWaitlistEntry as unknown as Handler
   );
@@ -1973,6 +1986,7 @@ export function registerRoutes(app: Hono<{ Variables: Variables }>) {
   // createTraining
   app.post('/association/training',
     authMiddleware({ roles: ["association:admin", "association:staff"] }),
+    createPerRouteAuditMiddleware({ action: "create", resourceType: "training" }),
     zValidator('json', validators.CreateTrainingBody, validationErrorHandler),
     registry.createTraining as unknown as Handler
   );
@@ -1994,6 +2008,7 @@ export function registerRoutes(app: Hono<{ Variables: Variables }>) {
   // cancelCustomTraining
   app.post('/association/training-lifecycle/:trainingId/cancel',
     authMiddleware({ roles: ["association:admin", "association:staff"] }),
+    createPerRouteAuditMiddleware({ action: "update", resourceType: "training-enrollment" }),
     zValidator('param', validators.CancelCustomTrainingParams, validationErrorHandler),
     zValidator('query', validators.CancelCustomTrainingQuery, validationErrorHandler),
     registry.cancelCustomTraining as unknown as Handler
@@ -2002,6 +2017,7 @@ export function registerRoutes(app: Hono<{ Variables: Variables }>) {
   // checkInCustomTraining
   app.post('/association/training-lifecycle/:trainingId/check-in',
     authMiddleware({ roles: ["association:admin", "association:staff"] }),
+    createPerRouteAuditMiddleware({ action: "update", resourceType: "training-enrollment" }),
     zValidator('param', validators.CheckInCustomTrainingParams, validationErrorHandler),
     zValidator('query', validators.CheckInCustomTrainingQuery, validationErrorHandler),
     registry.checkInCustomTraining as unknown as Handler
@@ -2010,6 +2026,7 @@ export function registerRoutes(app: Hono<{ Variables: Variables }>) {
   // completeCustomTraining
   app.post('/association/training-lifecycle/:trainingId/complete',
     authMiddleware({ roles: ["association:admin", "association:staff"] }),
+    createPerRouteAuditMiddleware({ action: "update", resourceType: "training-enrollment" }),
     zValidator('param', validators.CompleteCustomTrainingParams, validationErrorHandler),
     zValidator('query', validators.CompleteCustomTrainingQuery, validationErrorHandler),
     zValidator('json', validators.CompleteCustomTrainingBody, validationErrorHandler),
@@ -2019,6 +2036,7 @@ export function registerRoutes(app: Hono<{ Variables: Variables }>) {
   // enrollInCustomTraining
   app.post('/association/training-lifecycle/:trainingId/enroll',
     authMiddleware({ roles: ["association:member"] }),
+    createPerRouteAuditMiddleware({ action: "create", resourceType: "training-enrollment" }),
     zValidator('param', validators.EnrollInCustomTrainingParams, validationErrorHandler),
     zValidator('query', validators.EnrollInCustomTrainingQuery, validationErrorHandler),
     registry.enrollInCustomTraining as unknown as Handler
@@ -2035,6 +2053,7 @@ export function registerRoutes(app: Hono<{ Variables: Variables }>) {
   // createCourse
   app.post('/association/training/courses',
     authMiddleware({ roles: ["association:admin", "association:staff"] }),
+    createPerRouteAuditMiddleware({ action: "create", resourceType: "course" }),
     zValidator('json', validators.CreateCourseBody, validationErrorHandler),
     registry.createCourse as unknown as Handler
   );
@@ -2049,6 +2068,7 @@ export function registerRoutes(app: Hono<{ Variables: Variables }>) {
   // createCourseEnrollment
   app.post('/association/training/courses/enrollments',
     authMiddleware({ roles: ["association:admin", "association:staff", "association:member:owner"] }),
+    createPerRouteAuditMiddleware({ action: "create", resourceType: "course-enrollment" }),
     zValidator('json', validators.CreateCourseEnrollmentBody, validationErrorHandler),
     registry.createCourseEnrollment as unknown as Handler
   );
@@ -2070,6 +2090,7 @@ export function registerRoutes(app: Hono<{ Variables: Variables }>) {
   // updateCourseEnrollment
   app.patch('/association/training/courses/enrollments/:enrollmentId',
     authMiddleware({ roles: ["association:admin", "association:staff"] }),
+    createPerRouteAuditMiddleware({ action: "update", resourceType: "course-enrollment" }),
     zValidator('param', validators.UpdateCourseEnrollmentParams, validationErrorHandler),
     zValidator('json', validators.UpdateCourseEnrollmentBody, validationErrorHandler),
     registry.updateCourseEnrollment as unknown as Handler
@@ -2078,6 +2099,7 @@ export function registerRoutes(app: Hono<{ Variables: Variables }>) {
   // deleteCourseEnrollment
   app.delete('/association/training/courses/enrollments/:enrollmentId',
     authMiddleware({ roles: ["association:admin"] }),
+    createPerRouteAuditMiddleware({ action: "delete", resourceType: "course-enrollment" }),
     zValidator('param', validators.DeleteCourseEnrollmentParams, validationErrorHandler),
     registry.deleteCourseEnrollment as unknown as Handler
   );
@@ -2085,6 +2107,7 @@ export function registerRoutes(app: Hono<{ Variables: Variables }>) {
   // updateCourseProgress
   app.post('/association/training/courses/enrollments/:enrollmentId/progress',
     authMiddleware({ roles: ["association:admin", "association:staff", "association:member:owner"] }),
+    createPerRouteAuditMiddleware({ action: "update", resourceType: "course-enrollment" }),
     zValidator('param', validators.UpdateCourseProgressParams, validationErrorHandler),
     zValidator('json', validators.UpdateCourseProgressBody, validationErrorHandler),
     registry.updateCourseProgress as unknown as Handler
@@ -2093,6 +2116,7 @@ export function registerRoutes(app: Hono<{ Variables: Variables }>) {
   // createQuizAttempt
   app.post('/association/training/courses/quiz-attempts',
     authMiddleware({ roles: ["association:member:owner"] }),
+    createPerRouteAuditMiddleware({ action: "create", resourceType: "quiz-attempt" }),
     zValidator('json', validators.CreateQuizAttemptBody, validationErrorHandler),
     registry.createQuizAttempt as unknown as Handler
   );
@@ -2114,6 +2138,7 @@ export function registerRoutes(app: Hono<{ Variables: Variables }>) {
   // updateCourse
   app.patch('/association/training/courses/:courseId',
     authMiddleware({ roles: ["association:admin", "association:staff"] }),
+    createPerRouteAuditMiddleware({ action: "update", resourceType: "course" }),
     zValidator('param', validators.UpdateCourseParams, validationErrorHandler),
     zValidator('json', validators.UpdateCourseBody, validationErrorHandler),
     registry.updateCourse as unknown as Handler
@@ -2122,6 +2147,7 @@ export function registerRoutes(app: Hono<{ Variables: Variables }>) {
   // deleteCourse
   app.delete('/association/training/courses/:courseId',
     authMiddleware({ roles: ["association:admin"] }),
+    createPerRouteAuditMiddleware({ action: "delete", resourceType: "course" }),
     zValidator('param', validators.DeleteCourseParams, validationErrorHandler),
     registry.deleteCourse as unknown as Handler
   );
@@ -2129,6 +2155,7 @@ export function registerRoutes(app: Hono<{ Variables: Variables }>) {
   // createTrainingEnrollment
   app.post('/association/training/enrollments',
     authMiddleware({ roles: ["association:admin", "association:staff", "association:member:owner"] }),
+    createPerRouteAuditMiddleware({ action: "create", resourceType: "training-enrollment" }),
     zValidator('json', validators.CreateTrainingEnrollmentBody, validationErrorHandler),
     registry.createTrainingEnrollment as unknown as Handler
   );
@@ -2150,6 +2177,7 @@ export function registerRoutes(app: Hono<{ Variables: Variables }>) {
   // updateTrainingEnrollment
   app.patch('/association/training/enrollments/:enrollmentId',
     authMiddleware({ roles: ["association:admin", "association:staff"] }),
+    createPerRouteAuditMiddleware({ action: "update", resourceType: "training-enrollment" }),
     zValidator('param', validators.UpdateTrainingEnrollmentParams, validationErrorHandler),
     zValidator('json', validators.UpdateTrainingEnrollmentBody, validationErrorHandler),
     registry.updateTrainingEnrollment as unknown as Handler
@@ -2158,6 +2186,7 @@ export function registerRoutes(app: Hono<{ Variables: Variables }>) {
   // deleteTrainingEnrollment
   app.delete('/association/training/enrollments/:enrollmentId',
     authMiddleware({ roles: ["association:admin"] }),
+    createPerRouteAuditMiddleware({ action: "delete", resourceType: "training-enrollment" }),
     zValidator('param', validators.DeleteTrainingEnrollmentParams, validationErrorHandler),
     registry.deleteTrainingEnrollment as unknown as Handler
   );
@@ -2165,6 +2194,7 @@ export function registerRoutes(app: Hono<{ Variables: Variables }>) {
   // completeTrainingEnrollment
   app.post('/association/training/enrollments/:enrollmentId/complete',
     authMiddleware({ roles: ["association:admin", "association:staff"] }),
+    createPerRouteAuditMiddleware({ action: "complete", resourceType: "training-enrollment" }),
     zValidator('param', validators.CompleteTrainingEnrollmentParams, validationErrorHandler),
     zValidator('json', validators.CompleteTrainingEnrollmentBody, validationErrorHandler),
     registry.completeTrainingEnrollment as unknown as Handler
@@ -2180,6 +2210,7 @@ export function registerRoutes(app: Hono<{ Variables: Variables }>) {
   // updateTraining
   app.patch('/association/training/:trainingId',
     authMiddleware({ roles: ["association:admin", "association:staff"] }),
+    createPerRouteAuditMiddleware({ action: "update", resourceType: "training" }),
     zValidator('param', validators.UpdateTrainingParams, validationErrorHandler),
     zValidator('json', validators.UpdateTrainingBody, validationErrorHandler),
     registry.updateTraining as unknown as Handler
@@ -2188,6 +2219,7 @@ export function registerRoutes(app: Hono<{ Variables: Variables }>) {
   // deleteTraining
   app.delete('/association/training/:trainingId',
     authMiddleware({ roles: ["association:admin"] }),
+    createPerRouteAuditMiddleware({ action: "delete", resourceType: "training" }),
     zValidator('param', validators.DeleteTrainingParams, validationErrorHandler),
     registry.deleteTraining as unknown as Handler
   );
@@ -2195,6 +2227,7 @@ export function registerRoutes(app: Hono<{ Variables: Variables }>) {
   // publishTraining
   app.post('/association/training/:trainingId/publish',
     authMiddleware({ roles: ["association:admin", "association:staff"] }),
+    createPerRouteAuditMiddleware({ action: "update", resourceType: "training" }),
     zValidator('param', validators.PublishTrainingParams, validationErrorHandler),
     registry.publishTraining as unknown as Handler
   );

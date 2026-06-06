@@ -4,7 +4,6 @@ import { NotFoundError, BusinessLogicError } from '@/core/errors';
 import type { CompleteCustomTrainingBody, CompleteCustomTrainingQuery, CompleteCustomTrainingParams } from '@/generated/openapi/validators';
 import { TrainingRepository, TrainingEnrollmentRepository } from './repos/training.repo';
 import { domainEvents } from '@/core/domain-events';
-import { auditAction } from '@/utils/audit';
 import { requirePosition } from '@/utils/officer-check';
 import { POSITION_TITLES } from '@/utils/position-titles';
 
@@ -58,12 +57,8 @@ export async function completeCustomTraining(
     completedBy: user.id,
   }).catch(() => {});
 
-  await auditAction(ctx, {
-    action: 'update',
-    resourceType: 'training-enrollment',
-    resourceId: enrollment.id,
-    description: 'Training enrollment marked as completed',
-  });
+  ctx.set('auditResourceId', enrollment.id);
+  ctx.set('auditDescription', 'Training enrollment marked as completed');
 
   return ctx.json(updated, 200);
 }

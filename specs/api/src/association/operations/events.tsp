@@ -564,6 +564,7 @@ namespace Association.Operations.Events {
     @operationId("createEvent")
     @post
     @extension("x-security-required-roles", #["association:admin", "association:staff"])
+    @extension("x-audit", #{ action: "create", resourceType: "event" })
     createEvent(
       @body body: EventCreateRequest
     ): ApiCreatedResponse<Event>
@@ -589,6 +590,7 @@ namespace Association.Operations.Events {
     @patch(#{implicitOptionality: true})
     @route("/{eventId}")
     @extension("x-security-required-roles", #["association:admin", "association:staff"])
+    @extension("x-audit", #{ action: "update", resourceType: "event" })
     updateEvent(
       @path eventId: string,
       @body updates: EventUpdateRequest
@@ -603,6 +605,7 @@ namespace Association.Operations.Events {
     @delete
     @route("/{eventId}")
     @extension("x-security-required-roles", #["association:admin"])
+    @extension("x-audit", #{ action: "delete", resourceType: "event" })
     deleteEvent(
       @path eventId: string
     ): ApiNoContentResponse
@@ -625,6 +628,7 @@ namespace Association.Operations.Events {
     @post
     @route("/{eventId}/publish")
     @extension("x-security-required-roles", #["association:admin", "association:staff"])
+    @extension("x-audit", #{ action: "update", resourceType: "event" })
     publishEvent(
       @path eventId: string
     ): ApiOkResponse<Event>
@@ -638,6 +642,7 @@ namespace Association.Operations.Events {
     @post
     @route("/{eventId}/cancel")
     @extension("x-security-required-roles", #["association:admin", "association:staff"])
+    @extension("x-audit", #{ action: "update", resourceType: "event" })
     cancelEvent(
       @path eventId: string
     ): ApiOkResponse<Event>
@@ -682,6 +687,7 @@ namespace Association.Operations.Events {
     @patch(#{implicitOptionality: true})
     @route("/registrations/{registrationId}")
     @extension("x-security-required-roles", #["association:admin", "association:staff"])
+    @extension("x-audit", #{ action: "update", resourceType: "event-registration" })
     updateEventRegistration(
       @path registrationId: string,
       @body updates: Record<unknown>
@@ -696,6 +702,7 @@ namespace Association.Operations.Events {
     @delete
     @route("/registrations/{registrationId}")
     @extension("x-security-required-roles", #["association:admin"])
+    @extension("x-audit", #{ action: "delete", resourceType: "event-registration" })
     deleteEventRegistration(
       @path registrationId: string
     ): ApiNoContentResponse
@@ -719,6 +726,7 @@ namespace Association.Operations.Events {
     @post
     @route("/registrations/{registrationId}/cancel")
     @extension("x-security-required-roles", #["association:admin", "association:staff", "association:member:owner"])
+    @extension("x-audit", #{ action: "update", resourceType: "event-registration" })
     cancelEventRegistration(
       @path registrationId: string
     ): ApiOkResponse<EventRegistration>
@@ -732,6 +740,7 @@ namespace Association.Operations.Events {
     @post
     @route("/registrations/{registrationId}/refund")
     @extension("x-security-required-roles", #["association:admin", "association:staff"])
+    @extension("x-audit", #{ action: "update", resourceType: "event-registration" })
     refundEventRegistration(
       @path registrationId: string
     ): ApiOkResponse<EventRegistration>
@@ -764,6 +773,7 @@ namespace Association.Operations.Events {
     @post
     @route("/{eventId}/waitlist/{entryId}/promote")
     @extension("x-security-required-roles", #["association:admin", "association:staff"])
+    @extension("x-audit", #{ action: "update", resourceType: "waitlist-entry" })
     promoteWaitlistEntry(
       @path eventId: string,
       @path entryId: string
@@ -785,6 +795,7 @@ namespace Association.Operations.Events {
     @post
     @route("/checkins")
     @extension("x-security-required-roles", #["association:admin", "association:staff"])
+    @extension("x-audit", #{ action: "create", resourceType: "check-in" })
     createCheckIn(
       @body body: CheckInCreateRequest
     ): ApiCreatedResponse<CheckIn>
@@ -861,6 +872,7 @@ namespace Association.Operations.Events {
     @post
     @route("/{eventId}/check-in")
     @extension("x-security-required-roles", #["association:admin", "association:staff"])
+    @extension("x-audit", #{ action: "create", resourceType: "check-in" })
     checkInCustomEvent(
       @path eventId: string,
       @body body: CheckInCreateRequest
@@ -902,6 +914,7 @@ namespace Association.Operations.Events {
     @post
     @route("/{eventId}/complete")
     @extension("x-security-required-roles", #["association:admin", "association:staff"])
+    @extension("x-audit", #{ action: "update", resourceType: "event" })
     completeEvent(
       @path eventId: string,
     ): ApiOkResponse<Event>

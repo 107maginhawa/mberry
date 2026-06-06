@@ -3,7 +3,6 @@ import type { DatabaseInstance } from '@/core/database';
 import type { CreateQuizAttemptBody } from '@/generated/openapi/validators';
 import { NotFoundError } from '@/core/errors';
 import { CourseRepository, QuizAttemptRepository } from './repos/training.repo';
-import { auditAction } from '@/utils/audit';
 
 /**
  * createQuizAttempt
@@ -53,12 +52,8 @@ export async function createQuizAttempt(
     organizationId: orgId,
   });
 
-  await auditAction(ctx, {
-    action: 'create',
-    resourceType: 'quiz-attempt',
-    resourceId: attempt.id,
-    description: `Quiz attempt: ${score}/${maxScore} (${passed ? 'passed' : 'failed'})`,
-  });
+  ctx.set('auditResourceId', attempt.id);
+  ctx.set('auditDescription', `Quiz attempt: ${score}/${maxScore} (${passed ? 'passed' : 'failed'})`);
 
   return ctx.json(attempt, 201);
 }

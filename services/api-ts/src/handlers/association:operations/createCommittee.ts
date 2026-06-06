@@ -1,6 +1,5 @@
 import type { Context } from 'hono';
 import { CommitteeRepository } from './repos/committee.repo';
-import { auditAction } from '@/utils/audit';
 import type { Session } from '@/types/auth';
 
 export async function createCommittee(ctx: Context): Promise<Response> {
@@ -24,12 +23,8 @@ export async function createCommittee(ctx: Context): Promise<Response> {
     updatedBy: session.user.id,
   });
 
-  await auditAction(ctx, {
-    action: 'create',
-    resourceType: 'committee',
-    resourceId: committee.id,
-    description: `Created committee: ${committee.name}`,
-  });
+  ctx.set('auditResourceId', committee.id);
+  ctx.set('auditDescription', `Created committee: ${committee.name}`);
 
   return ctx.json({ data: committee }, 201);
 }

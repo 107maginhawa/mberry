@@ -3,7 +3,6 @@ import type { DatabaseInstance } from '@/core/database';
 import type { RefundEventRegistrationParams } from '@/generated/openapi/validators';
 import { NotFoundError, BusinessLogicError } from '@/core/errors';
 import { EventRegistrationRepository } from './repos/events.repo';
-import { auditAction } from '@/utils/audit';
 import { requirePosition } from '@/utils/officer-check';
 import { POSITION_TITLES } from '@/utils/position-titles';
 
@@ -39,12 +38,8 @@ export async function refundEventRegistration(
     refundedAt: new Date(),
   } as Record<string, unknown>);
 
-  await auditAction(ctx, {
-    action: 'update',
-    resourceType: 'event-registration',
-    resourceId: refunded.id,
-    description: 'Event registration refunded',
-  });
+  ctx.set('auditResourceId', refunded.id);
+  ctx.set('auditDescription', 'Event registration refunded');
 
   return ctx.json(refunded, 200);
 }

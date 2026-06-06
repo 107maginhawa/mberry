@@ -4,7 +4,6 @@ import type { NotificationService } from '@/core/notifs';
 import type { PromoteWaitlistEntryParams } from '@/generated/openapi/validators';
 import { NotFoundError } from '@/core/errors';
 import { WaitlistEntryRepository, EventRegistrationRepository, EventRepository } from './repos/events.repo';
-import { auditAction } from '@/utils/audit';
 import { requirePosition } from '@/utils/officer-check';
 import { POSITION_TITLES } from '@/utils/position-titles';
 import { notifyWaitlistPromotion } from '@/handlers/notifs/notification-triggers';
@@ -50,12 +49,8 @@ export async function promoteWaitlistEntry(
     organizationId: orgId,
   });
 
-  await auditAction(ctx, {
-    action: 'update',
-    resourceType: 'waitlist-entry',
-    resourceId: entry.id,
-    description: 'Waitlist entry promoted to confirmed registration',
-  });
+  ctx.set('auditResourceId', entry.id);
+  ctx.set('auditDescription', 'Waitlist entry promoted to confirmed registration');
 
   // GAP-003: Notify promoted member
   const notifService = ctx.get('notifs') as NotificationService;

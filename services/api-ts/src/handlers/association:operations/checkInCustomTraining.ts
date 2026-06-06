@@ -3,7 +3,6 @@ import type { DatabaseInstance } from '@/core/database';
 import { NotFoundError, BusinessLogicError } from '@/core/errors';
 import type { CheckInCustomTrainingQuery, CheckInCustomTrainingParams } from '@/generated/openapi/validators';
 import { TrainingRepository, TrainingEnrollmentRepository } from './repos/training.repo';
-import { auditAction } from '@/utils/audit';
 import { requirePosition } from '@/utils/officer-check';
 import { POSITION_TITLES } from '@/utils/position-titles';
 
@@ -42,12 +41,8 @@ export async function checkInCustomTraining(
     throw new BusinessLogicError('Enrollment is cancelled', 'ENROLLMENT_CANCELLED');
   }
 
-  await auditAction(ctx, {
-    action: 'update',
-    resourceType: 'training-enrollment',
-    resourceId: enrollment.id,
-    description: 'Checked in for training session',
-  });
+  ctx.set('auditResourceId', enrollment.id);
+  ctx.set('auditDescription', 'Checked in for training session');
 
   return ctx.json(enrollment, 200);
 }

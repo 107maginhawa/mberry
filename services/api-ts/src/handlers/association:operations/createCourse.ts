@@ -2,7 +2,6 @@ import type { ValidatedContext } from '@/types/app';
 import type { DatabaseInstance } from '@/core/database';
 import type { CreateCourseBody } from '@/generated/openapi/validators';
 import { CourseRepository } from './repos/training.repo';
-import { auditAction } from '@/utils/audit';
 import { requirePosition } from '@/utils/officer-check';
 import { POSITION_TITLES } from '@/utils/position-titles';
 
@@ -40,12 +39,8 @@ export async function createCourse(
     status: 'draft',
   });
 
-  await auditAction(ctx, {
-    action: 'create',
-    resourceType: 'course',
-    resourceId: course.id,
-    description: 'Course created',
-  });
+  ctx.set('auditResourceId', course.id);
+  ctx.set('auditDescription', 'Course created');
 
   return ctx.json(course, 201);
 }
