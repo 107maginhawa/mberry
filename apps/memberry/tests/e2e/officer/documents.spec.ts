@@ -2,6 +2,7 @@
 import { test, expect } from '../helpers/test-fixture'
 import { SEED_OFFICER_EMAIL, TEST_PASSWORD } from '../helpers/test-config'
 import { authStateFile } from '../helpers/auth-state'
+import { captureRouteHydration } from '../helpers/real-flow'
 
 
 test.use({ storageState: authStateFile('officer') })
@@ -18,10 +19,14 @@ const ORG_ID = 'ed8e3a96-8126-4341-be42-e6eb7940c562'
 // button — they need re-derivation against the new component.
 test.describe('Officer Documents', () => {
 test('documents list renders heading', async ({ page }) => {
+    const respP = captureRouteHydration(page, /\/documents/)
     await page.goto(`/org/${ORG_ID}/documents`)
     await expect(
       page.getByRole('heading', { name: /^documents$/i, level: 1 })
     ).toBeVisible({ timeout: 10000 })
+    const resp = await respP
+    expect(resp?.status()).toBe(200)
+    expect(resp?.ok()).toBe(true)
   })
 
   test('shows document categories or tabs', async ({ page }) => {
