@@ -3,14 +3,26 @@
 import { test, expect } from '../helpers/test-fixture'
 import { SEED_MEMBER_EMAIL, TEST_PASSWORD } from '../helpers/test-config'
 import { authStateFile } from '../helpers/auth-state'
+import { captureRouteHydration } from '../helpers/real-flow'
 
+// W2 real-flow upgrade: /org/$ORG/events hydrates via the
+// event-lifecycle endpoint (or /persons/me on the auth shell).
+// Capturing that proves the backend returned data, not just that
+// the heading rendered.
+const EVENTS_OR_PERSON = /\/(event-lifecycle|events|persons\/me)(?:[/?]|$)/
 
 test.use({ storageState: authStateFile('member') })
 const ORG_ID = 'ed8e3a96-8126-4341-be42-e6eb7940c562'
 
 test.describe('Member Event Registration Cancellation', () => {
 test('org events page lists published events', async ({ page }) => {
+    const respP = captureRouteHydration(page, EVENTS_OR_PERSON)
     await page.goto(`/org/${ORG_ID}/events`)
+
+    const resp = await respP
+    expect(resp?.status()).toBe(200)
+    expect(resp?.ok()).toBe(true)
+
     // Page header
     await expect(
       page.getByRole('heading', { name: /events/i }),
