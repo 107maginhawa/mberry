@@ -3,6 +3,7 @@ import { test, expect } from '../helpers/test-fixture'
 import { expectVisibleAfterReload, expectVisibleOnPage } from '../helpers/persistence'
 import { SEED_OFFICER_EMAIL, TEST_PASSWORD } from '../helpers/test-config'
 import { authStateFile } from '../helpers/auth-state'
+import { captureAnyApiSuccess } from '../helpers/real-flow'
 
 
 test.use({ storageState: authStateFile('officer') })
@@ -10,7 +11,11 @@ const ORG_ID = 'ed8e3a96-8126-4341-be42-e6eb7940c562'
 
 test.describe('Officer Management Actions', () => {
 test('officers page shows real officer names and positions', async ({ page }) => {
+    const respP = captureAnyApiSuccess(page)
     await page.goto(`/org/${ORG_ID}/officer/officers`)
+    const resp = await respP
+    expect(resp?.status()).toBe(200)
+    expect(resp?.ok()).toBe(true)
 
     await expect(page.getByText(/Officer Management/i)).toBeVisible({ timeout: 10000 })
     // Should show real officer names from seed
