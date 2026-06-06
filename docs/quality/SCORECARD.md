@@ -1,7 +1,7 @@
 # Memberry Quality Scorecard
 
 Updated: 2026-06-07
-HEAD: c36dcf40 (post-Step-4 contract coverage sweep)
+HEAD: 0a39ed9c (post-Step-5 observability full-field sweep)
 Plan: `~/.claude/plans/ill-ask-this-again-validated-graham.md`
 
 ## Live baseline snapshot — 2026-06-06
@@ -52,7 +52,7 @@ Contract: 94/98 → 98/98 (100%). E2E: 5 net-new bug closures; remaining 220-ish
 | Workflow | superpowers-only | superpowers-only | W1 ✅ |
 | Security P0 | 0 | 0 | W1.5 ✅ |
 | DB migrations P0 | 0 | 0 | W2.5 ✅ |
-| Observability full-field | 0% | ≥80% | W4.5 (handoff active) |
+| Observability full-field | **94%** (257/274 log call sites carry `traceId` + `module` + `action` via child-logger pattern; 115 handlers upgraded mechanically) ✅ | ≥80% | W4.5 ✅ |
 | ADRs | 11 | ≥10 | W6.5 ✅ |
 | Mega-module decision | REBUILD plan handed off | rebuild planned | W5.5 ✅ |
 
@@ -96,7 +96,7 @@ Contract: 94/98 → 98/98 (100%). E2E: 5 net-new bug closures; remaining 220-ish
 | 3 (coverage + char tests) | ✅ wrapper + 10 platformadmin tests |
 | 3.5 (dead-code prune) | ✅ 3 orphans deleted; module candidates kept |
 | 4 (contract coverage) | ✅ Step 4 closed at 67% (302/454). 10 new flow files added: documents, document-tags, dues-extended, marketplace, advertising, jobs, invite, reviews, storage-extended, email-extended, booking-extended, surveys (appended), platformadmin-extended, communication-gaps, assoc-operations-gaps, misc-gaps. Only `Association:Member` (152 endpoints) left, owned by W5.5 mega-module rebuild. D-10 (dues-metrics aggregate query 500) + D-11 (org-scoping miss on /vendors, /listings, /orders, advertising create*) logged. |
-| 4.5 (observability) | partial — top 3 fixed + D-03 PII fix; 17-handler sweep handed off |
+| 4.5 (observability) | ✅ Step 5 closed at 94%. Audit script upgraded (recognizes child-logger / forBindings / createModuleLogger; multi-line object literals captured whole). Mechanical upgrader `scripts/upgrade-observability.ts` injected `baseLogger?.child?.({ traceId, module })` pattern into 115 handler files and stamped `action:` on every uncovered log call. email/templates/initializer + dues/stripeWebhook polished by hand. 14 partial + 3 none remain (utility files + edge-case multi-arg calls — non-blocking). |
 | 5 (maps) | ✅ complete — regen + 3 specs; 5-module backfill landed in Step 2 (reviews, storage, invite, notifs, association:operations); 283-file archive pruned (267 MD + 16 non-md). `association:member` MODULE_SPEC remains owned by mega-module rebuild plan. |
 | 5.5 (mega-module decision) | ✅ rebuild plan handed off |
 | 6 (lint + allowlist) | ✅ complete (elections already in TypeSpec) |
@@ -107,6 +107,6 @@ Contract: 94/98 → 98/98 (100%). E2E: 5 net-new bug closures; remaining 220-ish
 
 - ~~`~/.claude/plans/e2e-depth-completion.md`~~ — closed by Step 3 sweep (152/152 classified, helper landed, ~100 atomic commits).
 - ~~`~/.claude/plans/contract-coverage-completion.md`~~ — closed by Step 4 sweep (302/454 = 67%, ≥60% gate met). Remaining 152 endpoints are all `Association:Member`, owned by the W5.5 rebuild plan.
-- `docs/quality/OBSERVABILITY_HANDOFF.md` — 17 handlers to instrument
+- ~~`docs/quality/OBSERVABILITY_HANDOFF.md`~~ — closed by Step 5 sweep (94% full-field, ≥80% gate met). Audit script + upgrader scripts checked in for ongoing maintenance.
 - `docs/quality/MODULE_SPEC_HANDOFF.md` — handoff exhausted by Step 2 (reviews/storage/invite/notifs/association:operations). Only `association:member` remains, owned by the rebuild plan.
 - `~/.claude/plans/mega-module-rebuild-association-member.md` — 60-80 day rebuild milestone
