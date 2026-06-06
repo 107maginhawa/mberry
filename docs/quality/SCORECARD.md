@@ -44,7 +44,7 @@ Contract: 94/98 → 98/98 (100%). E2E: 5 net-new bug closures; remaining 220-ish
 | Contract coverage | 32% | ≥60% | W4 |
 | E2E pass rate | 387/621 runnable (62%) — 234 fail mostly W2 debt | 100% | W2 (handoff active) |
 | E2E real-flow | 36/152 | 100% | W2 (handoff active) |
-| MODULE_SPEC | 3 | full coverage | W5 |
+| MODULE_SPEC | 8 short-format + 22 long-format = 30 total; 5 backfilled in Step 2 (reviews, storage, invite, notifs, association:operations); `association:member` deferred to rebuild plan per handoff | full coverage | W5 |
 | OLI map freshness | -1 days | < 7 days | W5 ✅ |
 | TypeSpec | 59 .tsp files | 100% live routes | W6 ✅ |
 | Hand-wired allowlist | YAML-gated | YAML-gated | W6 ✅ |
@@ -89,7 +89,7 @@ Contract: 94/98 → 98/98 (100%). E2E: 5 net-new bug closures; remaining 220-ish
 | 3.5 (dead-code prune) | ✅ 3 orphans deleted; module candidates kept |
 | 4 (contract coverage) | partial — gap tool + surveys scaffold; 87-scenario sweep handed off |
 | 4.5 (observability) | partial — top 3 fixed + D-03 PII fix; 17-handler sweep handed off |
-| 5 (maps) | ✅ complete — regen + 3 specs; 5-module backfill handed off; 283-file archive pruned (267 MD + 16 non-md) |
+| 5 (maps) | ✅ complete — regen + 3 specs; 5-module backfill landed in Step 2 (reviews, storage, invite, notifs, association:operations); 283-file archive pruned (267 MD + 16 non-md). `association:member` MODULE_SPEC remains owned by mega-module rebuild plan. |
 | 5.5 (mega-module decision) | ✅ rebuild plan handed off |
 | 6 (lint + allowlist) | ✅ complete (elections already in TypeSpec) |
 | 6.5 (ADRs) | ✅ 10 ADRs (2 with TBD rationale) |
@@ -100,5 +100,5 @@ Contract: 94/98 → 98/98 (100%). E2E: 5 net-new bug closures; remaining 220-ish
 - `~/.claude/plans/e2e-depth-completion.md` — 114 specs to upgrade or exempt
 - `~/.claude/plans/contract-coverage-completion.md` — ~87 Hurl scenarios to reach 60%
 - `docs/quality/OBSERVABILITY_HANDOFF.md` — 17 handlers to instrument
-- `docs/quality/MODULE_SPEC_HANDOFF.md` — 5 specs to backfill
+- `docs/quality/MODULE_SPEC_HANDOFF.md` — handoff exhausted by Step 2 (reviews/storage/invite/notifs/association:operations). Only `association:member` remains, owned by the rebuild plan.
 - `~/.claude/plans/mega-module-rebuild-association-member.md` — 60-80 day rebuild milestone

@@ -1,11 +1,18 @@
 # MODULE_SPEC Handoff — Remaining Backfill
 
+> **Status:** All Step-2 short-format specs landed. Only `association:member` remains, and it is intentionally deferred to the mega-module rebuild plan (Wave-5.5 follow-on). No new manual backfill work is queued here.
+
 Modules still missing a `docs/product/MODULE_SPEC.<module>.md`. Use `docs/quality/MODULE_SPEC_TEMPLATE.md` for each. Estimated effort: ~30 min/spec.
 
-**Completed (this wave)**:
+**Completed**:
 - `audit` → `docs/product/MODULE_SPEC.audit.md`
 - `marketplace` → `docs/product/MODULE_SPEC.marketplace.md`
 - `dues` → `docs/product/MODULE_SPEC.dues.md`
+- `reviews` → `docs/product/MODULE_SPEC.reviews.md` (Step 2, 2026-06-06)
+- `storage` → `docs/product/MODULE_SPEC.storage.md` (Step 2, 2026-06-06)
+- `invite` → `docs/product/MODULE_SPEC.invite.md` (Step 2, 2026-06-06)
+- `notifs` → `docs/product/MODULE_SPEC.notifs.md` (Step 2, 2026-06-06)
+- `association:operations` → `docs/product/MODULE_SPEC.association_operations.md` (Step 2, 2026-06-06)
 
 ---
 
