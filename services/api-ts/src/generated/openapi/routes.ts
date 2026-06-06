@@ -13,6 +13,7 @@ import { registry } from './registry';
 import { authMiddleware } from '@/middleware/auth';
 import { validationErrorHandler } from '@/middleware/validation';
 import { createExpandMiddleware } from '@/middleware/expand';
+import { createPerRouteAuditMiddleware } from '@/middleware/per-route-audit';
 
 export function registerRoutes(app: Hono<{ Variables: Variables }>) {
   // listOrgAccreditedProviders

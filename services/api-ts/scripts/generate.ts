@@ -492,6 +492,7 @@ async function generateRoutes(paths: Record<string, PathItem>, spec: any) {
     "import { authMiddleware } from '@/middleware/auth';",
     "import { validationErrorHandler } from '@/middleware/validation';",
     "import { createExpandMiddleware } from '@/middleware/expand';",
+    "import { createPerRouteAuditMiddleware } from '@/middleware/per-route-audit';",
     '',
     'export function registerRoutes(app: Hono<{ Variables: Variables }>) {',
   ];
@@ -532,7 +533,25 @@ async function generateRoutes(paths: Record<string, PathItem>, spec: any) {
           routes.push('    authMiddleware(),');
         }
       }
-      
+
+      // P1.5: per-route audit middleware (after-middleware, runs after handler).
+      // Driven by `@extension("x-audit", #{ action, resourceType, eventSubType?, eventType? })`
+      // in TypeSpec. Registered as a before-middleware in the chain so its
+      // `await next()` wraps validators + handler; the actual logging fires
+      // post-handler when status < 400.
+      const auditMeta = (operation as any)['x-audit'] as
+        | { action: string; resourceType: string; eventSubType?: string; eventType?: string }
+        | undefined;
+      if (auditMeta) {
+        const parts = [
+          `action: "${auditMeta.action}"`,
+          `resourceType: "${auditMeta.resourceType}"`,
+        ];
+        if (auditMeta.eventSubType) parts.push(`eventSubType: "${auditMeta.eventSubType}"`);
+        if (auditMeta.eventType) parts.push(`eventType: "${auditMeta.eventType}"`);
+        routes.push(`    createPerRouteAuditMiddleware({ ${parts.join(', ')} }),`);
+      }
+
       // Add validators
       const pathParams = operation.parameters?.map((p: any) => resolveParameter(p, spec)).filter((p: any) => p.in === 'path');
       if (pathParams?.length) {
