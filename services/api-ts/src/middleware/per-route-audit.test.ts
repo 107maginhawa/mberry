@@ -198,4 +198,92 @@ describe('createPerRouteAuditMiddleware', () => {
     const [req] = logEvent.mock.calls[0] as [Record<string, unknown>];
     expect(req.eventType).toBe('data-access');
   });
+
+  describe('multi-event mode (ctx.set auditEvents)', () => {
+    it('emits one log per entry when handler sets auditEvents array', async () => {
+      const logEvent = makeLogEvent();
+      const ctx = makeCtx({
+        method: 'POST',
+        status: 201,
+        audit: makeAudit(logEvent),
+        preset: {
+          auditEvents: [
+            {
+              action: 'complete',
+              resourceType: 'invitation',
+              resource: 'inv-1',
+              description: 'Invitation claimed',
+            },
+            {
+              action: 'create',
+              resourceType: 'membership',
+              resource: 'mem-1',
+              description: 'Membership created via invite claim',
+              details: { source: 'invite' },
+            },
+          ],
+        },
+      });
+
+      await runMiddleware(ctx, { action: 'create', resourceType: 'invitation' });
+
+      expect(logEvent).toHaveBeenCalledTimes(2);
+      const first = (logEvent.mock.calls[0] as [Record<string, unknown>])[0];
+      const second = (logEvent.mock.calls[1] as [Record<string, unknown>])[0];
+      expect(first.action).toBe('complete');
+      expect(first.resource).toBe('inv-1');
+      expect(second.action).toBe('create');
+      expect(second.resourceType).toBe('membership');
+      expect(second.details).toEqual({ source: 'invite' });
+    });
+
+    it('multi-event entries inherit category + ip + ua from request context', async () => {
+      const logEvent = makeLogEvent();
+      const ctx = makeCtx({
+        method: 'POST',
+        status: 201,
+        audit: makeAudit(logEvent),
+        headers: { 'x-forwarded-for': '198.51.100.1', 'user-agent': 'mw-test/1.0' },
+        preset: {
+          auditEvents: [
+            { action: 'create', resourceType: 'a', resource: 'a-1' },
+          ],
+        },
+      });
+
+      await runMiddleware(ctx, { action: 'create', resourceType: 'x' });
+
+      const [req] = logEvent.mock.calls[0] as [Record<string, unknown>];
+      expect(req.ipAddress).toBe('198.51.100.1');
+      expect(req.userAgent).toBe('mw-test/1.0');
+      expect(req.user).toBe('user-1');
+      expect(req.outcome).toBe('success');
+    });
+
+    it('empty auditEvents array suppresses logging (no fallback)', async () => {
+      const logEvent = makeLogEvent();
+      const ctx = makeCtx({
+        method: 'POST',
+        status: 201,
+        audit: makeAudit(logEvent),
+        preset: { auditEvents: [] },
+      });
+      await runMiddleware(ctx, { action: 'create', resourceType: 'x' });
+      expect(logEvent).not.toHaveBeenCalled();
+    });
+
+    it('multi-event mode skips when response status >= 400', async () => {
+      const logEvent = makeLogEvent();
+      const ctx = makeCtx({
+        method: 'POST',
+        status: 422,
+        audit: makeAudit(logEvent),
+        preset: {
+          auditEvents: [{ action: 'create', resourceType: 'x', resource: 'x-1' }],
+        },
+      });
+      await runMiddleware(ctx, { action: 'create', resourceType: 'x' });
+      expect(logEvent).not.toHaveBeenCalled();
+    });
+  });
 });
