@@ -4,13 +4,25 @@
 // and that "Pay Dues" button appears for grace/lapsed members
 import { test, expect } from '../helpers/test-fixture'
 import { signInAsMember, signInAsOfficer } from '../helpers/auth'
+import { captureRouteHydration } from '../helpers/real-flow'
+
+// W2 real-flow upgrade: /my/organizations hydrates via /memberships
+// or /persons/me. Capturing that proves the backend returned data,
+// not just that the status badge rendered.
+const MEMBERSHIPS_OR_PERSON = /\/(memberships|persons\/me)(?:[/?]|$)/
 
 const ORG_ID = 'ed8e3a96-8126-4341-be42-e6eb7940c562'
 
 test.describe('M-24: Member Status Display', () => {
   test('organizations page shows membership status badge', async ({ page }) => {
     await signInAsMember(page)
+    const respP = captureRouteHydration(page, MEMBERSHIPS_OR_PERSON)
     await page.goto('/my/organizations')
+
+    const resp = await respP
+    expect(resp?.status()).toBe(200)
+    expect(resp?.ok()).toBe(true)
+
     // Should display at least one organization with a status badge
     const statusBadge = page.locator('[class*="status"], [data-testid*="status"]').first()
     const hasStatusText = await page.getByText(/Active|Grace|Lapsed|Pending/i).first().isVisible({ timeout: 10000 }).catch(() => false)
