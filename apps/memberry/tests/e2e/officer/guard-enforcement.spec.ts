@@ -1,3 +1,4 @@
+// @selector-only-ok: route-guard redirect tests — asserts URL location post-redirect, no data hydration to capture
 // Business Rules: [BR-09]
 import { test, expect } from '../helpers/test-fixture'
 import { signUp } from '../helpers/auth'
