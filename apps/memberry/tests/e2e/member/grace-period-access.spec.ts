@@ -4,6 +4,12 @@
 import { test, expect } from '../helpers/test-fixture'
 import { signIn, signInAsMember } from '../helpers/auth'
 import { TEST_PASSWORD } from '../helpers/test-config'
+import { captureRouteHydration } from '../helpers/real-flow'
+
+// W2 real-flow upgrade: every authenticated member route hydrates via
+// GET /persons/me. Capturing that on the dashboard mount proves the
+// grace-period member's auth shell actually got data back.
+const PERSON_ME = /\/persons\/me(?:[/?]|$)/
 
 const ORG_ID = 'ed8e3a96-8126-4341-be42-e6eb7940c562'
 
@@ -46,7 +52,13 @@ test.describe('[BR-49] Grace Period Access', () => {
     // Sign in as regular member (who may be active)
     // and verify the dashboard loads with real data
     await signInAsMember(page)
+    const respP = captureRouteHydration(page, PERSON_ME)
     await page.goto('/dashboard')
+
+    const resp = await respP
+    expect(resp?.status()).toBe(200)
+    expect(resp?.ok()).toBe(true)
+
     // Dashboard should load — not redirect to login or show access denied
     await expect(page).toHaveURL(/dashboard/)
     await expect(page.getByRole('heading').first()).toBeVisible({ timeout: 10000 })
