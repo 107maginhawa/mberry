@@ -536,17 +536,46 @@ async function generateRoutes(paths: Record<string, PathItem>, spec: any) {
         }
       }
 
-      // P1.5: position / officer authorization (before-middleware).
-      // `x-require-position` (array) → requirePositionMiddleware({ titles })
-      // `x-require-officer` (true)   → requireOfficerMiddleware()
-      // Position takes precedence — emit only one when both are present.
-      const requiredPositions = (operation as any)['x-require-position'] as string[] | undefined;
-      const requiresOfficer = (operation as any)['x-require-officer'] === true;
-      if (requiredPositions?.length) {
-        const titlesArr = requiredPositions.map(t => `"${t}"`).join(', ');
-        routes.push(`    requirePositionMiddleware({ titles: [${titlesArr}] }),`);
-      } else if (requiresOfficer) {
-        routes.push('    requireOfficerMiddleware(),');
+      // P1.5: parse position / officer extensions. Both support two shapes:
+      //   path mode:  x-require-officer: true            | x-require-position: ["Treasurer", ...]
+      //   body mode:  x-require-officer: { from: "body.orgId" }
+      //               x-require-position: { titles: [...], from: "body.orgId" }
+      // Path mode emits BEFORE validators. Body mode emits AFTER the json
+      // zValidator so the middleware can read ctx.req.valid('json').
+      const rawPosition = (operation as any)['x-require-position'];
+      const rawOfficer = (operation as any)['x-require-officer'];
+
+      let positionPath: string | undefined;
+      let positionBody: string | undefined;
+      if (Array.isArray(rawPosition) && rawPosition.length > 0) {
+        positionPath = `requirePositionMiddleware({ titles: [${rawPosition.map((t: string) => `"${t}"`).join(', ')}] })`;
+      } else if (rawPosition && typeof rawPosition === 'object' && Array.isArray(rawPosition.titles) && rawPosition.titles.length > 0) {
+        const titlesArr = rawPosition.titles.map((t: string) => `"${t}"`).join(', ');
+        const bodyField = typeof rawPosition.from === 'string' && rawPosition.from.startsWith('body.')
+          ? rawPosition.from.slice('body.'.length)
+          : 'orgId';
+        const parts = [
+          `titles: [${titlesArr}]`,
+          `orgIdFrom: "body"`,
+          `bodyField: "${bodyField}"`,
+        ];
+        positionBody = `requirePositionMiddleware({ ${parts.join(', ')} })`;
+      }
+
+      let officerPath: string | undefined;
+      let officerBody: string | undefined;
+      if (rawOfficer === true) {
+        officerPath = 'requireOfficerMiddleware()';
+      } else if (rawOfficer && typeof rawOfficer === 'object' && typeof rawOfficer.from === 'string' && rawOfficer.from.startsWith('body.')) {
+        const bodyField = rawOfficer.from.slice('body.'.length);
+        officerBody = `requireOfficerMiddleware({ orgIdFrom: "body", bodyField: "${bodyField}" })`;
+      }
+
+      // Path-mode authZ runs BEFORE validators. Position takes precedence.
+      if (positionPath) {
+        routes.push(`    ${positionPath},`);
+      } else if (officerPath) {
+        routes.push(`    ${officerPath},`);
       }
 
       // P1.5: per-route audit middleware (after-middleware, runs after handler).
@@ -580,6 +609,13 @@ async function generateRoutes(paths: Record<string, PathItem>, spec: any) {
 
       if (operation.requestBody) {
         routes.push(`    zValidator('json', validators.${capitalize(operation.operationId)}Body, validationErrorHandler),`);
+      }
+
+      // Body-mode authZ runs AFTER the json validator. Position takes precedence.
+      if (positionBody) {
+        routes.push(`    ${positionBody},`);
+      } else if (officerBody) {
+        routes.push(`    ${officerBody},`);
       }
 
       // Check if operation supports expand
