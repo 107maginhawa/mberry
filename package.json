@@ -36,7 +36,8 @@
     "test:registry": "bun run testing/registry/report.ts",
     "test:inventory": "bun run testing/scripts/generate-endpoint-inventory.ts && bun run testing/scripts/generate-screen-inventory.ts && bun run testing/scripts/generate-component-inventory.ts",
     "typecheck": "bun run --filter '*' typecheck",
-    "lint": "bun run --filter '*' lint"
+    "lint": "bun run --filter '*' lint",
+    "update:scorecard": "bun run scripts/update-scorecard.ts"
   },
   "lint-staged": {
     "services/api-ts/**/*.{ts,tsx}": ["services/api-ts/node_modules/.bin/eslint --fix --quiet --config services/api-ts/eslint.config.js"],
