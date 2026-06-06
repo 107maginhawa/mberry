@@ -24,7 +24,9 @@ export async function createPricingTier(ctx: Context): Promise<Response> {
 	}
 
 	const db = ctx.get("database") as DatabaseInstance;
-	const logger = ctx.get("logger");
+	const baseLogger = ctx.get('logger');
+	const traceId = ctx.get('requestId');
+	const logger = baseLogger?.child?.({ traceId, module: 'platformadmin' }) ?? baseLogger;
 
 	const body = await ctx.req.json();
 	const {
@@ -78,7 +80,7 @@ export async function createPricingTier(ctx: Context): Promise<Response> {
 		return ctx.json({ error: "Failed to create pricing tier" }, 500);
 	}
 
-	logger.info({ tierId: tier.id, slug: tier.slug }, "Pricing tier created");
+	logger.info({ action: 'createPricingTier.1', tierId: tier.id, slug: tier.slug }, "Pricing tier created");
 
 	return ctx.json({ data: tier }, 201);
 }

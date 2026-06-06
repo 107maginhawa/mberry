@@ -28,7 +28,9 @@ export async function markInvoiceUncollectible(
   ctx: ValidatedContext<never, never, MarkInvoiceUncollectibleParams>
 ): Promise<Response> {
   const database = ctx.get('database');
-  const logger = ctx.get('logger');
+  const baseLogger = ctx.get('logger');
+  const traceId = ctx.get('requestId');
+  const logger = baseLogger?.child?.({ traceId, module: 'billing' }) ?? baseLogger;
 
   // Get authenticated session (guaranteed by middleware)
   const session = ctx.get('session') as Session;
@@ -38,7 +40,7 @@ export async function markInvoiceUncollectible(
   const params = ctx.req.valid('param');
   const invoiceId = params.invoice;
 
-  logger.info({ invoiceId, userId: user.id }, 'Marking invoice as uncollectible');
+  logger.info({ action: 'markInvoiceUncollectible.1', invoiceId, userId: user.id }, 'Marking invoice as uncollectible');
 
   // Create repository instances
   const invoiceRepo = new InvoiceRepository(database, logger);
@@ -91,7 +93,7 @@ export async function markInvoiceUncollectible(
   // Deferred: uncollectible cleanup pipeline — billing v2
   // Cancel pending payment intents, update accounting, send notifications, create audit log
 
-  logger.info({
+  logger.info({ action: 'markInvoiceUncollectible.2',
     invoiceId,
     invoiceNumber: updatedInvoice.invoiceNumber,
     merchantId: updatedInvoice.merchant,

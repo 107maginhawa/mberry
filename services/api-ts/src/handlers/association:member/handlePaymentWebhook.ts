@@ -31,7 +31,9 @@ export async function handlePaymentWebhook(
   }
 
   const db = ctx.get('database') as DatabaseInstance;
-  const logger = ctx.get('logger');
+  const baseLogger = ctx.get('logger');
+  const traceId = ctx.get('requestId');
+  const logger = baseLogger?.child?.({ traceId, module: 'association:member' }) ?? baseLogger;
   const invoiceRepo = new DuesInvoiceRepository(db, logger);
 
   const invoiceId = event.metadata['duesInvoiceId'];
@@ -41,7 +43,7 @@ export async function handlePaymentWebhook(
 
   const invoice = await invoiceRepo.findOneById(invoiceId);
   if (!invoice) {
-    logger?.warn({ invoiceId, eventId: event.gatewayEventId }, 'Webhook for unknown invoice');
+    logger?.warn({ action: 'handlePaymentWebhook.1', invoiceId, eventId: event.gatewayEventId }, 'Webhook for unknown invoice');
     return ctx.json({ received: true, action: 'unknown_invoice' });
   }
 

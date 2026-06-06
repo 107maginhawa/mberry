@@ -97,8 +97,10 @@ export async function resignMembership(
       });
     }
   } catch (err) {
-    const logger = ctx.get('logger');
-    logger?.warn({ error: err, personId: membership.personId }, 'Failed to revoke sessions after membership resignation');
+    const baseLogger = ctx.get('logger');
+    const traceId = ctx.get('requestId');
+    const logger = baseLogger?.child?.({ traceId, module: 'association:member' }) ?? baseLogger;
+    logger?.warn({ action: 'resignMembership.1', error: err, personId: membership.personId }, 'Failed to revoke sessions after membership resignation');
   }
 
   return ctx.json(updated, 200);

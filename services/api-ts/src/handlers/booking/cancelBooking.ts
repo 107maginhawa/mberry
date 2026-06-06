@@ -35,7 +35,9 @@ export async function cancelBooking(
   
   // Get dependencies from context
   const db = ctx.get('database') as DatabaseInstance;
-  const logger = ctx.get('logger');
+  const baseLogger = ctx.get('logger');
+  const traceId = ctx.get('requestId');
+  const logger = baseLogger?.child?.({ traceId, module: 'booking' }) ?? baseLogger;
   const auth = ctx.get('auth');
   const organizationId = ctx.get('organizationId') as string;
   const notificationService = ctx.get('notifs') as NotificationService;
@@ -143,7 +145,7 @@ export async function cancelBooking(
       cancelledAt: cancelledBooking.cancelledAt,
     });
 
-    logger?.info({
+    logger?.info({ action: 'cancelBooking.2',
       bookingId: cancelledBooking.id,
       cancelledBy: userType,
       cancelledById: user.id,

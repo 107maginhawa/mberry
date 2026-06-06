@@ -27,7 +27,9 @@ export async function createMembership(
 
   const body = ctx.req.valid('json');
   const db = ctx.get('database') as DatabaseInstance;
-  const logger = ctx.get('logger');
+  const baseLogger = ctx.get('logger');
+  const traceId = ctx.get('requestId');
+  const logger = baseLogger?.child?.({ traceId, module: 'association:member' }) ?? baseLogger;
   const tierRepo = new MembershipTierRepository(db, logger);
   const membershipRepo = new MembershipRepository(db, logger);
 
@@ -70,7 +72,7 @@ export async function createMembership(
     }
   } catch (error) {
     const logger = ctx.get('logger');
-    logger?.warn({ error, personId: body.personId }, 'Failed to trigger directory auto-populate');
+    logger?.warn({ action: 'createMembership.1', error, personId: body.personId }, 'Failed to trigger directory auto-populate');
   }
 
   return ctx.json(membership, 201);

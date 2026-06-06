@@ -25,7 +25,9 @@ export async function getMerchantDashboard(
   ctx: ValidatedContext<never, never, GetMerchantDashboardParams>
 ): Promise<Response> {
   const database = ctx.get('database');
-  const logger = ctx.get('logger');
+  const baseLogger = ctx.get('logger');
+  const traceId = ctx.get('requestId');
+  const logger = baseLogger?.child?.({ traceId, module: 'billing' }) ?? baseLogger;
   const billing = ctx.get('billing') as BillingService;
 
   // Get authenticated session (guaranteed by middleware)
@@ -40,7 +42,7 @@ export async function getMerchantDashboard(
   const params = ctx.req.valid('param');
   let merchantAccountId = params.merchantAccount;
 
-  logger.debug({ merchantAccountId, userId: user.id }, 'Generating merchant dashboard link');
+  logger.debug({ action: 'getMerchantDashboard.1', merchantAccountId, userId: user.id }, 'Generating merchant dashboard link');
 
   // Create repository instance
   const merchantAccountRepo = new MerchantAccountRepository(database, logger);
@@ -103,7 +105,7 @@ export async function getMerchantDashboard(
     );
   }
 
-  logger.info({
+  logger.info({ action: 'getMerchantDashboard.2',
     merchantAccountId,
     personId: merchantAccount.person,
     stripeAccountId,

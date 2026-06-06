@@ -29,7 +29,9 @@ export async function deleteOfficerTerm(
 
   const { termId } = ctx.req.valid('param');
   const db = ctx.get('database') as DatabaseInstance;
-  const logger = ctx.get('logger');
+  const baseLogger = ctx.get('logger');
+  const traceId = ctx.get('requestId');
+  const logger = baseLogger?.child?.({ traceId, module: 'association:member' }) ?? baseLogger;
   const repo = new OfficerTermRepository(db, logger);
 
   const existing = await repo.findById(termId);
@@ -58,10 +60,10 @@ export async function deleteOfficerTerm(
         body: { userId: existing.personId },
         headers: ctx.req.raw.headers,
       });
-      logger?.info({ personId: existing.personId, termId }, 'Sessions revoked after officer term deletion');
+      logger?.info({ action: 'deleteOfficerTerm.1', personId: existing.personId, termId }, 'Sessions revoked after officer term deletion');
     }
   } catch (err) {
-    logger?.warn({ error: err, personId: existing.personId }, 'Failed to revoke sessions after officer term deletion');
+    logger?.warn({ action: 'deleteOfficerTerm.2', error: err, personId: existing.personId }, 'Failed to revoke sessions after officer term deletion');
   }
 
   return ctx.json({ success: true });

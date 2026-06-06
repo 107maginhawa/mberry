@@ -34,7 +34,9 @@ export async function createSubscriptionCheckout(
 	if (denied) return denied;
 
 	const db = ctx.get("database") as DatabaseInstance;
-	const logger = ctx.get("logger");
+	const baseLogger = ctx.get('logger');
+	const traceId = ctx.get('requestId');
+	const logger = baseLogger?.child?.({ traceId, module: 'association:member' }) ?? baseLogger;
 	const billing = ctx.get("billing");
 
 	const body = await ctx.req.json();
@@ -120,7 +122,7 @@ export async function createSubscriptionCheckout(
 			},
 		});
 		stripeCustomerId = customer.id;
-		logger.info({ stripeCustomerId, orgId }, "Stripe customer created for org");
+		logger.info({ action: 'createSubscriptionCheckout.1', stripeCustomerId, orgId }, "Stripe customer created for org");
 	}
 
 	// Determine price amount in cents
@@ -181,7 +183,7 @@ export async function createSubscriptionCheckout(
 	}
 
 	logger.info(
-		{ orgId, tierId, cycle, checkoutUrl: checkoutSession.url },
+		{ action: 'createSubscriptionCheckout.2', orgId, tierId, cycle, checkoutUrl: checkoutSession.url },
 		"Subscription checkout session created",
 	);
 

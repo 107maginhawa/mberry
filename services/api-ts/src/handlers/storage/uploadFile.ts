@@ -77,7 +77,9 @@ export async function uploadFile(
 
   // Get dependencies from context (injected by middleware)
   const storage = ctx.get('storage') as StorageProvider;
-  const logger = ctx.get('logger');
+  const baseLogger = ctx.get('logger');
+  const traceId = ctx.get('requestId');
+  const logger = baseLogger?.child?.({ traceId, module: 'storage' }) ?? baseLogger;
   const db = ctx.get('database') as DatabaseInstance;
   const repo = new StorageFileRepository(db, logger);
 
@@ -116,9 +118,9 @@ export async function uploadFile(
     fileCreated = true;
     
     // Generate presigned upload URL
-    logger?.debug({ fileId, mimeType: body.mimeType }, 'Generating presigned upload URL');
+    logger?.debug({ action: 'uploadFile.1', fileId, mimeType: body.mimeType }, 'Generating presigned upload URL');
     const uploadUrl = await storage.generateUploadUrl(fileId, body.mimeType);
-    logger?.debug({ fileId, uploadUrl }, 'Generated presigned upload URL');
+    logger?.debug({ action: 'uploadFile.2', fileId, uploadUrl }, 'Generated presigned upload URL');
 
     // Calculate expiry time (5 minutes from now)
     const expiresAt = addMinutes(new Date(), 5);
@@ -131,7 +133,7 @@ export async function uploadFile(
       expiresAt,
     };
     
-    logger?.info({ fileId, filename: body.filename, size: body.size }, 'File upload initiated');
+    logger?.info({ action: 'uploadFile.3', fileId, filename: body.filename, size: body.size }, 'File upload initiated');
     
     return ctx.json(response, 201);
   } catch (error) {
@@ -140,7 +142,7 @@ export async function uploadFile(
       try {
         await repo.deleteOneById(fileId);
       } catch (cleanupError) {
-        logger?.error({ error: cleanupError, fileId }, 'Failed to clean up database record');
+        logger?.error({ action: 'uploadFile.4', error: cleanupError, fileId }, 'Failed to clean up database record');
       }
     }
     

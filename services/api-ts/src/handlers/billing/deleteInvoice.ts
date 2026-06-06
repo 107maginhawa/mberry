@@ -27,7 +27,9 @@ export async function deleteInvoice(
   ctx: ValidatedContext<never, never, DeleteInvoiceParams>
 ): Promise<Response> {
   const database = ctx.get('database');
-  const logger = ctx.get('logger');
+  const baseLogger = ctx.get('logger');
+  const traceId = ctx.get('requestId');
+  const logger = baseLogger?.child?.({ traceId, module: 'billing' }) ?? baseLogger;
 
   // Get authenticated session (guaranteed by middleware)
   const session = ctx.get('session') as Session;
@@ -37,7 +39,7 @@ export async function deleteInvoice(
   const params = ctx.req.valid('param');
   const invoiceId = params.invoice;
 
-  logger.info({ invoiceId, userId: user.id }, 'Deleting invoice');
+  logger.info({ action: 'deleteInvoice.1', invoiceId, userId: user.id }, 'Deleting invoice');
 
   // Create repository instance
   const invoiceRepo = new InvoiceRepository(database, logger);
@@ -72,7 +74,7 @@ export async function deleteInvoice(
   // Perform hard delete
   await invoiceRepo.deleteOneById(invoiceId);
 
-  logger.info({
+  logger.info({ action: 'deleteInvoice.2',
     invoiceId,
     invoiceNumber: invoice.invoiceNumber,
     merchantId: invoice.merchant,

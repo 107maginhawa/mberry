@@ -42,7 +42,9 @@ export async function updatePerson(
   
   // Get dependencies from context
   const db = ctx.get('database') as DatabaseInstance;
-  const logger = ctx.get('logger');
+  const baseLogger = ctx.get('logger');
+  const traceId = ctx.get('requestId');
+  const logger = baseLogger?.child?.({ traceId, module: 'person' }) ?? baseLogger;
   
   // Instantiate repository
   const repo = new PersonRepository(db, logger);
@@ -118,7 +120,7 @@ export async function updatePerson(
         userAgent: ctx.req.header('user-agent')
       });
     } catch (error) {
-      logger?.error({ error, personId }, 'Failed to log audit event for person update');
+      logger?.error({ action: 'updatePerson.1', error, personId }, 'Failed to log audit event for person update');
     }
   }
 

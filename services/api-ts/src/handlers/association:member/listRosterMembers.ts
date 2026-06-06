@@ -52,8 +52,10 @@ export async function listRosterMembers(
       offset,
     });
   } catch (err: unknown) {
-    const logger = ctx.get('logger');
-    logger?.error({ err, organizationId: query.organizationId }, 'Roster query failed');
+    const baseLogger = ctx.get('logger');
+    const traceId = ctx.get('requestId');
+    const logger = baseLogger?.child?.({ traceId, module: 'association:member' }) ?? baseLogger;
+    logger?.error({ action: 'listRosterMembers.1', err, organizationId: query.organizationId }, 'Roster query failed');
     return ctx.json({ error: 'Failed to load roster' }, 500);
   }
 

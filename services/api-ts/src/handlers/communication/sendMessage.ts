@@ -31,7 +31,9 @@ export async function sendMessage(
 
   const params = ctx.req.valid('param');
   const db = ctx.get('database') as DatabaseInstance;
-  const logger = ctx.get('logger');
+  const baseLogger = ctx.get('logger');
+  const traceId = ctx.get('requestId');
+  const logger = baseLogger?.child?.({ traceId, module: 'communication' }) ?? baseLogger;
   const repo = new MessageRepository(db, logger);
 
   const existing = await repo.findById(params.messageId);
@@ -76,7 +78,7 @@ export async function sendMessage(
         updatedBy: user.id,
       });
       logger?.info(
-        { messageId: params.messageId, suppressed: suppressedIds.size, remaining: filtered.length },
+        { action: 'sendMessage.1', messageId: params.messageId, suppressed: suppressedIds.size, remaining: filtered.length },
         'Filtered suppressed recipients from message',
       );
     }

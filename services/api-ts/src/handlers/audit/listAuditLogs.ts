@@ -55,7 +55,9 @@ export async function listAuditLogs(
   
   // Get dependencies from context
   const db = ctx.get('database') as DatabaseInstance;
-  const logger = ctx.get('logger');
+  const baseLogger = ctx.get('logger');
+  const traceId = ctx.get('requestId');
+  const logger = baseLogger?.child?.({ traceId, module: 'audit' }) ?? baseLogger;
   
   // Instantiate repository
   const repo = new AuditRepository(db, logger);
@@ -96,7 +98,7 @@ export async function listAuditLogs(
   }, user.id);
   
   // Log successful query
-  logger?.info({
+  logger?.info({ action: 'listAuditLogs.1',
     userId: user.id,
     filters,
     resultCount: auditLogs.length,

@@ -24,7 +24,9 @@ export async function listInvoices(
   ctx: ValidatedContext<never, ListInvoicesQuery, never>
 ): Promise<Response> {
   const database = ctx.get('database');
-  const logger = ctx.get('logger');
+  const baseLogger = ctx.get('logger');
+  const traceId = ctx.get('requestId');
+  const logger = baseLogger?.child?.({ traceId, module: 'billing' }) ?? baseLogger;
 
   // Get authenticated session (guaranteed by middleware)
   const session = ctx.get('session') as Session;
@@ -33,7 +35,7 @@ export async function listInvoices(
   // Extract and parse query parameters
   const query = ctx.req.valid('query');
 
-  logger.debug({
+  logger.debug({ action: 'listInvoices.1',
     userId: user.id,
     filters: {
       customer: query.customer,
@@ -137,7 +139,7 @@ export async function listInvoices(
     updatedAt: invoice.updatedAt.toISOString()
   }));
 
-  logger.info({
+  logger.info({ action: 'listInvoices.2',
     userId: user.id,
     filters,
     pagination: { limit, offset },

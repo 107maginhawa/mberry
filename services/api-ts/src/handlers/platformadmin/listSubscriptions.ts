@@ -29,7 +29,9 @@ export async function listSubscriptions(ctx: Context): Promise<Response> {
 	if (!admin) return ctx.json({ error: "Platform admin access required" }, 403);
 
 	const db = ctx.get("database") as DatabaseInstance;
-	const logger = ctx.get("logger");
+	const baseLogger = ctx.get('logger');
+	const traceId = ctx.get('requestId');
+	const logger = baseLogger?.child?.({ traceId, module: 'platformadmin' }) ?? baseLogger;
 
 	const statusFilter = ctx.req.query("status");
 	const tierIdFilter = ctx.req.query("tierId");
@@ -93,7 +95,7 @@ export async function listSubscriptions(ctx: Context): Promise<Response> {
 	});
 
 	logger.info(
-		{ count: data.length, statusFilter, tierIdFilter },
+		{ action: 'listSubscriptions.1', count: data.length, statusFilter, tierIdFilter },
 		"Listed subscriptions",
 	);
 

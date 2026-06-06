@@ -31,7 +31,9 @@ export async function createInvoice(
   ctx: ValidatedContext<CreateInvoiceBody, never, never>
 ): Promise<Response> {
   const database = ctx.get('database');
-  const logger = ctx.get('logger');
+  const baseLogger = ctx.get('logger');
+  const traceId = ctx.get('requestId');
+  const logger = baseLogger?.child?.({ traceId, module: 'billing' }) ?? baseLogger;
 
   // Get authenticated session (guaranteed by middleware)
   const session = ctx.get('session') as Session;
@@ -54,7 +56,7 @@ export async function createInvoice(
   // Multi-tenant scoping (P0-7)
   const organizationId = ctx.get('organizationId') as string;
 
-  logger.info({
+  logger.info({ action: 'createInvoice.1',
     customer,
     merchant,
     context,
@@ -148,7 +150,7 @@ export async function createInvoice(
     processedLineItems
   );
 
-  logger.info({
+  logger.info({ action: 'createInvoice.2',
     invoiceId: invoiceWithLineItems.id,
     invoiceNumber: invoiceWithLineItems.invoiceNumber,
     merchant,

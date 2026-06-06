@@ -25,7 +25,9 @@ export async function completeFileUpload(
   
   // Get dependencies from context
   const storage = ctx.get('storage') as StorageProvider;
-  const logger = ctx.get('logger');
+  const baseLogger = ctx.get('logger');
+  const traceId = ctx.get('requestId');
+  const logger = baseLogger?.child?.({ traceId, module: 'storage' }) ?? baseLogger;
   const db = ctx.get('database') as DatabaseInstance;
   const repo = new StorageFileRepository(db, logger);
   
@@ -68,7 +70,7 @@ export async function completeFileUpload(
   // For now, immediately mark as available
   const finalFile = await repo.updateOneStatusById(fileId, 'available');
   
-  logger?.info({ fileId, filename: finalFile.filename }, 'File upload completed');
+  logger?.info({ action: 'completeFileUpload.1', fileId, filename: finalFile.filename }, 'File upload completed');
   
   // Return complete file metadata
   return ctx.json(finalFile, 200);

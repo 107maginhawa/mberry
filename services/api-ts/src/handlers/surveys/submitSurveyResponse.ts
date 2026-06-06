@@ -59,7 +59,9 @@ export async function submitSurveyResponse(
 
   const userId = session.user.id;
   const db = ctx.get('database') as DatabaseInstance;
-  const logger = ctx.get('logger');
+  const baseLogger = ctx.get('logger');
+  const traceId = ctx.get('requestId');
+  const logger = baseLogger?.child?.({ traceId, module: 'surveys' }) ?? baseLogger;
   const organizationId = ctx.get('organizationId') as string;
 
   const surveyId = ctx.req.param('survey')!;
@@ -116,7 +118,7 @@ export async function submitSurveyResponse(
         });
       } catch (err) {
         logger?.warn(
-          { err, surveyId },
+          { action: 'submitSurveyResponse.1', err, surveyId },
           'survey.aggregateAnalytics trigger failed; analytics will be computed on demand',
         );
       }
@@ -163,7 +165,7 @@ export async function submitSurveyResponse(
       });
     } catch (err) {
       logger?.warn(
-        { err, surveyId },
+        { action: 'submitSurveyResponse.3', err, surveyId },
         'survey.aggregateAnalytics trigger failed; analytics will be computed on demand',
       );
     }

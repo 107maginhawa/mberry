@@ -34,7 +34,9 @@ export async function generateDuesInvoicesForOrg(
   if (body.organizationId !== orgId) throw new ForbiddenError();
 
   const db = ctx.get('database') as DatabaseInstance;
-  const logger = ctx.get('logger');
+  const baseLogger = ctx.get('logger');
+  const traceId = ctx.get('requestId');
+  const logger = baseLogger?.child?.({ traceId, module: 'association:member' }) ?? baseLogger;
 
   ctx.set('auditResourceId', orgId);
   ctx.set('auditDescription', 'Bulk dues invoice generation triggered');
@@ -140,7 +142,7 @@ export async function generateDuesInvoicesForOrg(
 
   // 3. Trigger reminder processing for this org (fire-and-forget)
   processDuesReminders({ db, logger }).catch((err: any) => {
-    logger?.error({ msg: 'Background reminder processing failed', err });
+    logger?.error({ action: 'generateDuesInvoicesForOrg.1', msg: 'Background reminder processing failed', err });
   });
 
   // 4. Return response matching DuesInvoiceListResponseSchema

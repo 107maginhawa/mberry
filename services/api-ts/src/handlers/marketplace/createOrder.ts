@@ -20,7 +20,9 @@ export async function createOrder(ctx: ValidatedContext<any, never, never>): Pro
 
   const body = ctx.req.valid('json');
   const db = ctx.get('database') as DatabaseInstance;
-  const logger = ctx.get('logger');
+  const baseLogger = ctx.get('logger');
+  const traceId = ctx.get('requestId');
+  const logger = baseLogger?.child?.({ traceId, module: 'marketplace' }) ?? baseLogger;
   const organizationId = ctx.get('organizationId') as string;
 
   if (!body.listingId) throw new ValidationError('listingId is required');

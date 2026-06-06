@@ -26,7 +26,9 @@ export async function addRosterMember(
   const body = ctx.req.valid('json');
   const orgId = ctx.get('organizationId') as string;
   const db = ctx.get('database') as DatabaseInstance;
-  const logger = ctx.get('logger');
+  const baseLogger = ctx.get('logger');
+  const traceId = ctx.get('requestId');
+  const logger = baseLogger?.child?.({ traceId, module: 'association:member' }) ?? baseLogger;
   const repo = new MembershipRepository(db, logger);
 
   const member = await repo.createOne({ ...body, organizationId: orgId } as NewMembership);
@@ -41,7 +43,7 @@ export async function addRosterMember(
       await jobs.trigger('directory.autoPopulate', { personId: body.personId, organizationId: orgId });
     }
   } catch (error) {
-    logger?.warn({ error, personId: body.personId }, 'Failed to trigger directory auto-populate');
+    logger?.warn({ action: 'addRosterMember.1', error, personId: body.personId }, 'Failed to trigger directory auto-populate');
   }
 
   return ctx.json(member, 201);

@@ -29,7 +29,9 @@ export async function closeSurvey(
 
   const userId = session.user.id;
   const db = ctx.get('database') as DatabaseInstance;
-  const logger = ctx.get('logger');
+  const baseLogger = ctx.get('logger');
+  const traceId = ctx.get('requestId');
+  const logger = baseLogger?.child?.({ traceId, module: 'surveys' }) ?? baseLogger;
   const organizationId = ctx.get('organizationId') as string;
 
   // Officer/admin gate

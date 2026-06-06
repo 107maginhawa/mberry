@@ -30,7 +30,9 @@ export async function updateOfficerTerm(
   const { termId } = ctx.req.valid('param');
   const body = ctx.req.valid('json');
   const db = ctx.get('database') as DatabaseInstance;
-  const logger = ctx.get('logger');
+  const baseLogger = ctx.get('logger');
+  const traceId = ctx.get('requestId');
+  const logger = baseLogger?.child?.({ traceId, module: 'association:member' }) ?? baseLogger;
   const repo = new OfficerTermRepository(db, logger);
 
   const existing = await repo.findById(termId);
@@ -61,10 +63,10 @@ export async function updateOfficerTerm(
         body: { userId: existing.personId },
         headers: ctx.req.raw.headers,
       });
-      logger?.info({ personId: existing.personId, termId }, 'Sessions revoked after officer term update');
+      logger?.info({ action: 'updateOfficerTerm.1', personId: existing.personId, termId }, 'Sessions revoked after officer term update');
     }
   } catch (err) {
-    logger?.warn({ error: err, personId: existing.personId }, 'Failed to revoke sessions after officer term update');
+    logger?.warn({ action: 'updateOfficerTerm.2', error: err, personId: existing.personId }, 'Failed to revoke sessions after officer term update');
   }
 
   return ctx.json(updated);

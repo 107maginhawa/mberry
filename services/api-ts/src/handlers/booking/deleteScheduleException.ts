@@ -28,7 +28,9 @@ export async function deleteScheduleException(
 
   // Get dependencies from context
   const db = ctx.get('database') as DatabaseInstance;
-  const logger = ctx.get('logger');
+  const baseLogger = ctx.get('logger');
+  const traceId = ctx.get('requestId');
+  const logger = baseLogger?.child?.({ traceId, module: 'booking' }) ?? baseLogger;
 
   // Instantiate repository
   const repo = new ScheduleExceptionRepository(db, logger);

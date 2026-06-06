@@ -23,7 +23,9 @@ export async function getInvoice(
   ctx: ValidatedContext<never, GetInvoiceQuery, GetInvoiceParams>
 ): Promise<Response> {
   const database = ctx.get('database');
-  const logger = ctx.get('logger');
+  const baseLogger = ctx.get('logger');
+  const traceId = ctx.get('requestId');
+  const logger = baseLogger?.child?.({ traceId, module: 'billing' }) ?? baseLogger;
 
   // Get authenticated session (guaranteed by middleware)
   const session = ctx.get('session') as Session;
@@ -35,7 +37,7 @@ export async function getInvoice(
 
   const invoiceId = params.invoice;
 
-  logger.debug({ invoiceId, userId: user.id }, 'Getting invoice');
+  logger.debug({ action: 'getInvoice.1', invoiceId, userId: user.id }, 'Getting invoice');
 
   // Create repository instance
   const invoiceRepo = new InvoiceRepository(database, logger);
@@ -59,7 +61,7 @@ export async function getInvoice(
     throw new ForbiddenError('You can only access invoices where you are the merchant or customer');
   }
 
-  logger.info({
+  logger.info({ action: 'getInvoice.2',
     invoiceId,
     invoiceNumber: invoice.invoiceNumber,
     merchantId: invoice.merchant,

@@ -29,7 +29,9 @@ export async function updateTicketStatus(ctx: Context): Promise<Response> {
   if (!admin) return ctx.json({ error: 'Platform admin access required' }, 403);
 
   const db = ctx.get('database') as DatabaseInstance;
-  const logger = ctx.get('logger');
+  const baseLogger = ctx.get('logger');
+  const traceId = ctx.get('requestId');
+  const logger = baseLogger?.child?.({ traceId, module: 'platformadmin' }) ?? baseLogger;
   const ticketId = ctx.req.param('id') as string;
   const userId: string = admin.userId;
 
@@ -75,7 +77,7 @@ export async function updateTicketStatus(ctx: Context): Promise<Response> {
     .where(eq(supportTickets.id, ticketId))
     .returning();
 
-  logger.info({ ticketId, oldStatus: ticket.status, newStatus: status }, 'Ticket status updated');
+  logger.info({ action: 'updateTicketStatus.1', ticketId, oldStatus: ticket.status, newStatus: status }, 'Ticket status updated');
 
   return ctx.json({ data: updated });
 }

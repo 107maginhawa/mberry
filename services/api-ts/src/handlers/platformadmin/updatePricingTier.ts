@@ -27,7 +27,9 @@ export async function updatePricingTier(ctx: Context): Promise<Response> {
 	}
 
 	const db = ctx.get("database") as DatabaseInstance;
-	const logger = ctx.get("logger");
+	const baseLogger = ctx.get('logger');
+	const traceId = ctx.get('requestId');
+	const logger = baseLogger?.child?.({ traceId, module: 'platformadmin' }) ?? baseLogger;
 	const tierId = ctx.req.param("tierId");
 
 	if (!tierId) {
@@ -80,7 +82,7 @@ export async function updatePricingTier(ctx: Context): Promise<Response> {
 		.returning();
 
 	logger.info(
-		{
+		{ action: 'updatePricingTier.1',
 			tierId,
 			priceChanged: monthlyPrice !== undefined || annualPrice !== undefined,
 		},

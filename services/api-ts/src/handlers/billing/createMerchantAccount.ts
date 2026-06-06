@@ -31,7 +31,9 @@ export async function createMerchantAccount(
   ctx: ValidatedContext<CreateMerchantAccountBody, never, never>
 ): Promise<Response> {
   const database = ctx.get('database');
-  const logger = ctx.get('logger');
+  const baseLogger = ctx.get('logger');
+  const traceId = ctx.get('requestId');
+  const logger = baseLogger?.child?.({ traceId, module: 'billing' }) ?? baseLogger;
   const billing = ctx.get('billing');
 
   // Get authenticated session (guaranteed by middleware)
@@ -46,7 +48,7 @@ export async function createMerchantAccount(
   // Multi-tenant scoping (P0-7)
   const organizationId = ctx.get('organizationId') as string;
 
-  logger.info({ personId, userId: user.id, organizationId }, 'Creating merchant account for person');
+  logger.info({ action: 'createMerchantAccount.1', personId, userId: user.id, organizationId }, 'Creating merchant account for person');
 
   // Create repository instances
   const merchantAccountRepo = new MerchantAccountRepository(database, logger);
@@ -70,20 +72,20 @@ export async function createMerchantAccount(
   // Extract email from contactInfo JSONB field (optional - Stripe collects during onboarding)
   const email = person.contactInfo?.email;
   if (!email) {
-    logger.warn({ personId }, 'Person missing email - will be collected during Stripe onboarding');
+    logger.warn({ action: 'createMerchantAccount.2', personId }, 'Person missing email - will be collected during Stripe onboarding');
   }
 
   // Extract country from primaryAddress JSONB field (optional - Stripe collects during onboarding)
   const country = person.primaryAddress?.country;
   if (!country || country.length !== 2) {
-    logger.warn({ personId, country }, 'Person missing valid country code - will be collected during Stripe onboarding');
+    logger.warn({ action: 'createMerchantAccount.3', personId, country }, 'Person missing valid country code - will be collected during Stripe onboarding');
   }
   
   // Check if person already has a merchant account
   const existingAccount = await merchantAccountRepo.findByPerson(personId);
   if (existingAccount) {
     const metadata = existingAccount.metadata as MerchantMetadata;
-    logger.warn({ personId, existingAccountId: metadata?.stripeAccountId },
+    logger.warn({ action: 'createMerchantAccount.4', personId, existingAccountId: metadata?.stripeAccountId },
       'Person already has a merchant account');
 
     throw new ConflictError('Person already has a merchant account');
@@ -93,7 +95,7 @@ export async function createMerchantAccount(
   const businessType = 'individual'; // Default for individual persons
 
   try {
-    logger.info({ personId, email, country }, 'Creating Stripe Connect account');
+    logger.info({ action: 'createMerchantAccount.5', personId, email, country }, 'Creating Stripe Connect account');
 
     const connectAccount = await billing.createConnectAccount({
       email: email || undefined, // Pass if available, undefined if not
@@ -128,7 +130,7 @@ export async function createMerchantAccount(
       }
     });
     
-    logger.info({
+    logger.info({ action: 'createMerchantAccount.6',
       personId,
       merchantAccountId: merchantAccount.id,
       stripeAccountId: connectAccount.accountId,
@@ -154,7 +156,7 @@ export async function createMerchantAccount(
     }, 201);
     
   } catch (error) {
-    logger.error({
+    logger.error({ action: 'createMerchantAccount.7',
       error,
       personId,
       email,

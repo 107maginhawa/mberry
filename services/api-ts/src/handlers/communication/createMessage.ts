@@ -25,7 +25,9 @@ export async function createMessage(
 
   const body = ctx.req.valid('json');
   const db = ctx.get('database') as DatabaseInstance;
-  const logger = ctx.get('logger');
+  const baseLogger = ctx.get('logger');
+  const traceId = ctx.get('requestId');
+  const logger = baseLogger?.child?.({ traceId, module: 'communication' }) ?? baseLogger;
   const repo = new MessageRepository(db, logger);
 
   // BR-28: deduplicate recipients who already received same channel today
@@ -36,7 +38,7 @@ export async function createMessage(
   const dedupedRecipients: MessageRecipient[] = [];
   for (const personId of body.recipientPersonIds) {
     if (dupPersonIds.has(personId)) {
-      logger?.info({ personId, channel: body.channel }, 'BR-28: skipping duplicate recipient');
+      logger?.info({ action: 'createMessage.1', personId, channel: body.channel }, 'BR-28: skipping duplicate recipient');
       continue;
     }
     dedupedRecipients.push({ personId, deliveryStatus: 'pending' });

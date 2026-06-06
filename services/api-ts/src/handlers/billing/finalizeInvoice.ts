@@ -27,7 +27,9 @@ export async function finalizeInvoice(
   ctx: ValidatedContext<never, never, FinalizeInvoiceParams>
 ): Promise<Response> {
   const database = ctx.get('database');
-  const logger = ctx.get('logger');
+  const baseLogger = ctx.get('logger');
+  const traceId = ctx.get('requestId');
+  const logger = baseLogger?.child?.({ traceId, module: 'billing' }) ?? baseLogger;
 
   // Get authenticated session (guaranteed by middleware)
   const session = ctx.get('session') as Session;
@@ -37,7 +39,7 @@ export async function finalizeInvoice(
   const params = ctx.req.valid('param');
   const invoiceId = params.invoice;
 
-  logger.info({ invoiceId, userId: user.id }, 'Finalizing invoice');
+  logger.info({ action: 'finalizeInvoice.1', invoiceId, userId: user.id }, 'Finalizing invoice');
 
   // Create repository instance
   const invoiceRepo = new InvoiceRepository(database, logger);
@@ -89,7 +91,7 @@ export async function finalizeInvoice(
     });
   }
 
-  logger.info({
+  logger.info({ action: 'finalizeInvoice.2',
     invoiceId,
     invoiceNumber: finalizedInvoice.invoiceNumber,
     merchantId: finalizedInvoice.merchant,

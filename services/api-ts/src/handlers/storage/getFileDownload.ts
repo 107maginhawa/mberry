@@ -35,7 +35,9 @@ export async function getFileDownload(
   
   // Get dependencies from context
   const storage = ctx.get('storage') as StorageProvider;
-  const logger = ctx.get('logger');
+  const baseLogger = ctx.get('logger');
+  const traceId = ctx.get('requestId');
+  const logger = baseLogger?.child?.({ traceId, module: 'storage' }) ?? baseLogger;
   const db = ctx.get('database') as DatabaseInstance;
   const auth = ctx.get('auth');
   const repo = new StorageFileRepository(db, logger);

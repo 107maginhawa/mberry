@@ -42,7 +42,9 @@ export async function listFiles(
   filters['organizationId'] = ctx.get('organizationId') as string;
 
   // Get dependencies from context
-  const logger = ctx.get('logger');
+  const baseLogger = ctx.get('logger');
+  const traceId = ctx.get('requestId');
+  const logger = baseLogger?.child?.({ traceId, module: 'storage' }) ?? baseLogger;
   const db = ctx.get('database') as DatabaseInstance;
   const auth = ctx.get('auth');
   const audit = ctx.get('audit');
@@ -82,7 +84,7 @@ export async function listFiles(
         userAgent: 'API-Server'
       });
     } catch (error) {
-      logger?.error({ error, userId: user.id }, 'Failed to log file listing access');
+      logger?.error({ action: 'listFiles.1', error, userId: user.id }, 'Failed to log file listing access');
     }
   }
   

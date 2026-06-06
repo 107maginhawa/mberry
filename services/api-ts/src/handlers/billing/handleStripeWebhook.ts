@@ -137,7 +137,7 @@ export async function handleStripeWebhook(
 
       default:
         logger.info(
-          { eventType: event.type, eventId: event.id }, 
+          { action: 'handleStripeWebhook.4', eventType: event.type, eventId: event.id }, 
           'Unhandled webhook event type - ignoring'
         );
         break;

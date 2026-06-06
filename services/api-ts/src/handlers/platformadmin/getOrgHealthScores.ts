@@ -36,7 +36,9 @@ export async function getOrgHealthScores(
   if (!admin) return ctx.json({ error: 'Platform admin access required' }, 403);
 
   const db = ctx.get('database') as DatabaseInstance;
-  const logger = ctx.get('logger');
+  const baseLogger = ctx.get('logger');
+  const traceId = ctx.get('requestId');
+  const logger = baseLogger?.child?.({ traceId, module: 'platformadmin' }) ?? baseLogger;
 
   const url = new URL(ctx.req.url);
   const limit = Math.min(Number(url.searchParams.get('limit') ?? 20), 100);
@@ -109,7 +111,7 @@ export async function getOrgHealthScores(
       },
     }, 200);
   } catch (error) {
-    logger?.error({ error }, 'Failed to compute org health scores');
+    logger?.error({ action: 'getOrgHealthScores.1', error }, 'Failed to compute org health scores');
     return ctx.json({ error: 'Failed to compute org health scores' }, 500);
   }
 }

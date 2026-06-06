@@ -20,7 +20,9 @@ export async function reviewCreative(ctx: ValidatedContext<any, never, any>): Pr
   const { creativeId } = ctx.req.valid('param');
   const body = ctx.req.valid('json');
   const db = ctx.get('database') as DatabaseInstance;
-  const logger = ctx.get('logger');
+  const baseLogger = ctx.get('logger');
+  const traceId = ctx.get('requestId');
+  const logger = baseLogger?.child?.({ traceId, module: 'advertising' }) ?? baseLogger;
 
   if (!body.decision || !['approved', 'rejected'].includes(body.decision)) {
     throw new ValidationError('decision must be "approved" or "rejected"');

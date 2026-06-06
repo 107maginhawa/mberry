@@ -20,7 +20,9 @@ export async function reportBreach(ctx: Context): Promise<Response> {
   if (!admin) return ctx.json({ error: 'Platform admin access required' }, 403);
 
   const db = ctx.get('database') as DatabaseInstance;
-  const logger = ctx.get('logger');
+  const baseLogger = ctx.get('logger');
+  const traceId = ctx.get('requestId');
+  const logger = baseLogger?.child?.({ traceId, module: 'platformadmin' }) ?? baseLogger;
 
   const body = await ctx.req.json();
   const { organizationId, discoveredAt, description, affectedRecordsCount, dataCategories } = body;
@@ -68,7 +70,7 @@ export async function reportBreach(ctx: Context): Promise<Response> {
     description: breach.description,
   });
 
-  logger.info({ breachId: breach.id, hoursRemaining }, 'Breach incident reported');
+  logger.info({ action: 'reportBreach.1', breachId: breach.id, hoursRemaining }, 'Breach incident reported');
 
   return ctx.json({ data: breach, hoursRemaining: Math.max(0, hoursRemaining) }, 201);
 }

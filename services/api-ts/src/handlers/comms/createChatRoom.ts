@@ -55,7 +55,9 @@ export async function createChatRoom(
 
   // Get dependencies from context for authorization check
   const db = ctx.get('database') as DatabaseInstance;
-  const logger = ctx.get('logger');
+  const baseLogger = ctx.get('logger');
+  const traceId = ctx.get('requestId');
+  const logger = baseLogger?.child?.({ traceId, module: 'comms' }) ?? baseLogger;
 
   // Multi-tenant scoping (P0-7)
   const organizationId = ctx.get('organizationId') as string;

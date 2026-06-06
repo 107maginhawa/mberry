@@ -97,8 +97,10 @@ export async function deceaseMembership(
       });
     }
   } catch (err) {
-    const logger = ctx.get('logger');
-    logger?.warn({ error: err, personId: membership.personId }, 'Failed to revoke sessions after marking membership deceased');
+    const baseLogger = ctx.get('logger');
+    const traceId = ctx.get('requestId');
+    const logger = baseLogger?.child?.({ traceId, module: 'association:member' }) ?? baseLogger;
+    logger?.warn({ action: 'deceaseMembership.1', error: err, personId: membership.personId }, 'Failed to revoke sessions after marking membership deceased');
   }
 
   return ctx.json(updated, 200);

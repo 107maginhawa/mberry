@@ -24,7 +24,9 @@ export async function voidInvoice(
   ctx: ValidatedContext<never, never, VoidInvoiceParams>
 ): Promise<Response> {
   const database = ctx.get('database');
-  const logger = ctx.get('logger');
+  const baseLogger = ctx.get('logger');
+  const traceId = ctx.get('requestId');
+  const logger = baseLogger?.child?.({ traceId, module: 'billing' }) ?? baseLogger;
   const billing = ctx.get('billing');
   
   // Get authenticated session (guaranteed by middleware)
@@ -35,7 +37,7 @@ export async function voidInvoice(
 
   const invoiceId = params.invoice;
 
-  logger.info({ invoiceId }, 'Voiding invoice');
+  logger.info({ action: 'voidInvoice.1', invoiceId }, 'Voiding invoice');
   
   // Create repository instances
   const invoiceRepo = new InvoiceRepository(database, logger);
@@ -157,7 +159,7 @@ export async function voidInvoice(
     });
 
     logger.info(
-      {
+      { action: 'voidInvoice.2',
         invoiceId,
         paymentIntentId: stripePaymentIntentId,
         total: invoice.total
@@ -222,7 +224,7 @@ export async function voidInvoice(
     }, 200);
     
   } catch (error) {
-    logger.error({ error, invoiceId }, 'Failed to void invoice');
+    logger.error({ action: 'voidInvoice.3', error, invoiceId }, 'Failed to void invoice');
     
     if (error instanceof ValidationError || error instanceof ConflictError || error instanceof BusinessLogicError) {
       throw error;

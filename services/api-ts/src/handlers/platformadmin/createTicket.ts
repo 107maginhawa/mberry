@@ -36,7 +36,9 @@ export async function createTicket(ctx: Context): Promise<Response> {
   if (!session) return ctx.json({ error: 'Unauthorized' }, 401);
 
   const db = ctx.get('database') as DatabaseInstance;
-  const logger = ctx.get('logger');
+  const baseLogger = ctx.get('logger');
+  const traceId = ctx.get('requestId');
+  const logger = baseLogger?.child?.({ traceId, module: 'platformadmin' }) ?? baseLogger;
 
   const body = await ctx.req.json();
   const { subject, description, category, priority, organizationId } = body;
@@ -87,7 +89,7 @@ export async function createTicket(ctx: Context): Promise<Response> {
     subject: ticket.subject,
   });
 
-  logger.info({ ticketId: ticket.id, priority: ticket.priority }, 'Support ticket created');
+  logger.info({ action: 'createTicket.1', ticketId: ticket.id, priority: ticket.priority }, 'Support ticket created');
 
   return ctx.json({ data: ticket }, 201);
 }

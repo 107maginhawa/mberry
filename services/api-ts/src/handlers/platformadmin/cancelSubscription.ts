@@ -21,7 +21,9 @@ export async function cancelSubscription(ctx: Context): Promise<Response> {
 	if (!admin) return ctx.json({ error: "Platform admin access required" }, 403);
 
 	const db = ctx.get("database") as DatabaseInstance;
-	const logger = ctx.get("logger");
+	const baseLogger = ctx.get('logger');
+	const traceId = ctx.get('requestId');
+	const logger = baseLogger?.child?.({ traceId, module: 'platformadmin' }) ?? baseLogger;
 	const id = ctx.req.param("id");
 
 	const [existing] = await db
@@ -66,7 +68,7 @@ export async function cancelSubscription(ctx: Context): Promise<Response> {
 	});
 
 	logger.info(
-		{ subscriptionId: id, organizationId: existing.organizationId, reason },
+		{ action: 'cancelSubscription.1', subscriptionId: id, organizationId: existing.organizationId, reason },
 		"Subscription cancelled by admin",
 	);
 

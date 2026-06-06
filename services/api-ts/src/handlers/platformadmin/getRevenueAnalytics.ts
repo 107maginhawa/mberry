@@ -27,7 +27,9 @@ export async function getRevenueAnalytics(
   if (!admin) return ctx.json({ error: 'Platform admin access required' }, 403);
 
   const db = ctx.get('database') as DatabaseInstance;
-  const logger = ctx.get('logger');
+  const baseLogger = ctx.get('logger');
+  const traceId = ctx.get('requestId');
+  const logger = baseLogger?.child?.({ traceId, module: 'platformadmin' }) ?? baseLogger;
 
   // Parse optional date range filters
   const url = new URL(ctx.req.url);
@@ -85,7 +87,7 @@ export async function getRevenueAnalytics(
       },
     }, 200);
   } catch (error) {
-    logger?.error({ error }, 'Failed to compute revenue analytics');
+    logger?.error({ action: 'getRevenueAnalytics.1', error }, 'Failed to compute revenue analytics');
     return ctx.json({ error: 'Failed to compute revenue analytics' }, 500);
   }
 }

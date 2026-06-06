@@ -20,7 +20,9 @@ export async function updateVendor(ctx: ValidatedContext<any, never, any>): Prom
   const { vendorId } = ctx.req.valid('param');
   const body = ctx.req.valid('json');
   const db = ctx.get('database') as DatabaseInstance;
-  const logger = ctx.get('logger');
+  const baseLogger = ctx.get('logger');
+  const traceId = ctx.get('requestId');
+  const logger = baseLogger?.child?.({ traceId, module: 'marketplace' }) ?? baseLogger;
 
   const repo = new VendorRepository(db, logger);
 

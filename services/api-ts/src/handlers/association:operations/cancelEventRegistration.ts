@@ -21,7 +21,9 @@ export async function cancelEventRegistration(
 
   const params = ctx.req.valid('param');
   const db = ctx.get('database') as DatabaseInstance;
-  const logger = ctx.get('logger');
+  const baseLogger = ctx.get('logger');
+  const traceId = ctx.get('requestId');
+  const logger = baseLogger?.child?.({ traceId, module: 'association:operations' }) ?? baseLogger;
   const repo = new EventRegistrationRepository(db, logger);
 
   const existing = await repo.findOneById(params.registrationId);
@@ -58,7 +60,7 @@ export async function cancelEventRegistration(
         });
       }
     } catch (err) {
-      logger?.warn({ error: err, eventId: existing.eventId }, 'Failed to promote waitlist entry after cancellation');
+      logger?.warn({ action: 'cancelEventRegistration.1', error: err, eventId: existing.eventId }, 'Failed to promote waitlist entry after cancellation');
     }
   }
 
@@ -89,12 +91,12 @@ export async function cancelEventRegistration(
               eventStartsAt: event.startDate,
             });
           } else {
-            logger?.warn({ eventId: existing.eventId }, 'Skipping late-cancellation notification: event has no createdBy organizer');
+            logger?.warn({ action: 'cancelEventRegistration.2', eventId: existing.eventId }, 'Skipping late-cancellation notification: event has no createdBy organizer');
           }
         }
       }
     } catch (err) {
-      logger?.warn({ error: err, eventId: existing.eventId }, 'Failed to send late cancellation notification');
+      logger?.warn({ action: 'cancelEventRegistration.3', error: err, eventId: existing.eventId }, 'Failed to send late cancellation notification');
     }
   }
 

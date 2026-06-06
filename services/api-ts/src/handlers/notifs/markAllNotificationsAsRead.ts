@@ -23,7 +23,9 @@ export async function markAllNotificationsAsRead(
   
   // Get dependencies from context
   const db = ctx.get('database') as DatabaseInstance;
-  const logger = ctx.get('logger');
+  const baseLogger = ctx.get('logger');
+  const traceId = ctx.get('requestId');
+  const logger = baseLogger?.child?.({ traceId, module: 'notifs' }) ?? baseLogger;
   const userId = user.id; // Get user's person ID
   
   // Instantiate repositories

@@ -43,13 +43,15 @@ function stripeEventToWebhookEvent(event: {
 export async function stripeWebhookHandler(
   c: Context<{ Variables: Variables }>,
 ): Promise<Response> {
-  const logger = c.get('logger');
+  const baseLogger = c.get('logger');
+  const traceId = c.get('requestId');
+  const logger = baseLogger?.child?.({ traceId, module: 'dues' }) ?? baseLogger;
   const billing = c.get('billing');
   const db = c.get('database');
 
   const signature = c.req.header('stripe-signature');
   if (!signature) {
-    logger.warn('Missing stripe-signature header');
+    logger.warn({ action: 'stripeWebhook.missingSignature' }, 'Missing stripe-signature header');
     return c.json({ error: 'Missing stripe-signature header' }, 400);
   }
 
@@ -57,7 +59,7 @@ export async function stripeWebhookHandler(
   try {
     rawBody = await c.req.text();
   } catch {
-    logger.error('Failed to read webhook request body');
+    logger.error({ action: 'stripeWebhook.readBodyFailed' }, 'Failed to read webhook request body');
     return c.json({ error: 'Failed to read request body' }, 400);
   }
 
@@ -65,11 +67,11 @@ export async function stripeWebhookHandler(
   try {
     stripeEvent = await billing.verifyWebhookSignature(rawBody, signature) as unknown as typeof stripeEvent;
   } catch (err) {
-    logger.warn({ error: err instanceof Error ? err.message : String(err) }, 'Invalid Stripe webhook signature');
+    logger.warn({ action: 'stripeWebhook.invalidSignature', error: err instanceof Error ? err.message : String(err) }, 'Invalid Stripe webhook signature');
     return c.json({ error: 'Invalid signature' }, 400);
   }
 
-  logger.info({ eventId: stripeEvent.id, eventType: stripeEvent.type }, 'Received Stripe webhook');
+  logger.info({ action: 'stripeWebhook.received', eventId: stripeEvent.id, eventType: stripeEvent.type }, 'Received Stripe webhook');
 
   const webhookEvent = stripeEventToWebhookEvent(stripeEvent);
   const processPayment = createProcessPayment(billing, db, logger);

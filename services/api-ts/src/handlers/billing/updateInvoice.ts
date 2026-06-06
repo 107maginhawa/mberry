@@ -28,7 +28,9 @@ export async function updateInvoice(
   ctx: ValidatedContext<UpdateInvoiceBody, never, UpdateInvoiceParams>
 ): Promise<Response> {
   const database = ctx.get('database');
-  const logger = ctx.get('logger');
+  const baseLogger = ctx.get('logger');
+  const traceId = ctx.get('requestId');
+  const logger = baseLogger?.child?.({ traceId, module: 'billing' }) ?? baseLogger;
 
   // Get authenticated session (guaranteed by middleware)
   const session = ctx.get('session') as Session;
@@ -40,7 +42,7 @@ export async function updateInvoice(
 
   const invoiceId = params.invoice;
 
-  logger.info({
+  logger.info({ action: 'updateInvoice.1',
     invoiceId,
     userId: user.id,
     updateFields: Object.keys(body)
@@ -134,7 +136,7 @@ export async function updateInvoice(
   // Update invoice
   const updatedInvoice = await invoiceRepo.updateOneById(invoiceId, updateData);
 
-  logger.info({
+  logger.info({ action: 'updateInvoice.2',
     invoiceId,
     invoiceNumber: updatedInvoice.invoiceNumber,
     changes: Object.keys(updateData),

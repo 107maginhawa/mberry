@@ -38,7 +38,9 @@ export async function leaveVideoCall(
   
   // Get dependencies from context
   const db = ctx.get('database') as DatabaseInstance;
-  const logger = ctx.get('logger');
+  const baseLogger = ctx.get('logger');
+  const traceId = ctx.get('requestId');
+  const logger = baseLogger?.child?.({ traceId, module: 'comms' }) ?? baseLogger;
   const organizationId = ctx.get('organizationId') as string;
 
   // Authorization uses Person ID directly (no profile lookups needed)

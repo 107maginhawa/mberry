@@ -32,7 +32,9 @@ export async function upgradeSubscription(
 	if (denied) return denied;
 
 	const db = ctx.get("database") as DatabaseInstance;
-	const logger = ctx.get("logger");
+	const baseLogger = ctx.get('logger');
+	const traceId = ctx.get('requestId');
+	const logger = baseLogger?.child?.({ traceId, module: 'association:member' }) ?? baseLogger;
 	const user = ctx.get("user")!;
 
 	const body = await ctx.req.json();
@@ -109,7 +111,7 @@ export async function upgradeSubscription(
 	});
 
 	logger.info(
-		{
+		{ action: 'upgradeSubscription.1',
 			subscriptionId: current.id,
 			orgId,
 			fromTierId,

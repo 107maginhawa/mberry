@@ -27,7 +27,9 @@ export async function getMerchantAccount(
   const isInternalExpand = ctx.get('isInternalExpand');
 
   const database = ctx.get('database');
-  const logger = ctx.get('logger');
+  const baseLogger = ctx.get('logger');
+  const traceId = ctx.get('requestId');
+  const logger = baseLogger?.child?.({ traceId, module: 'billing' }) ?? baseLogger;
 
   // Get authenticated user (may be undefined for internal expand requests)
   const user = ctx.get('user') as User | undefined;
@@ -37,7 +39,7 @@ export async function getMerchantAccount(
 
   let merchantAccountId = params.merchantAccount;
 
-  logger.debug({ merchantAccountId, userId: user?.id, isInternalExpand }, 'Getting merchant account');
+  logger.debug({ action: 'getMerchantAccount.1', merchantAccountId, userId: user?.id, isInternalExpand }, 'Getting merchant account');
 
   // Create repository instance
   const merchantAccountRepo = new MerchantAccountRepository(database, logger);
@@ -84,7 +86,7 @@ export async function getMerchantAccount(
     }
   }
 
-  logger.info({
+  logger.info({ action: 'getMerchantAccount.2',
     merchantAccountId,
     personId: merchantAccount.person,
     metadata: merchantAccount.metadata,
