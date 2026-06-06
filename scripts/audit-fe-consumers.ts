@@ -23,7 +23,7 @@ for (const app of APPS) {
     let hits = 0;
     for (const f of files) {
       const src = readFileSync(f, 'utf8');
-      const r = new RegExp(`\\b${mod}\\b`, 'g');
+      const r = new RegExp(`\\b${mod}\\b`, 'gi');
       hits += (src.match(r) ?? []).length;
     }
     matrix[mod] = matrix[mod] ?? {};
