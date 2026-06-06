@@ -3,7 +3,6 @@ import type { DatabaseInstance } from '@/core/database';
 import type { InviteAdminBody } from '@/generated/openapi/validators';
 import { ConflictError } from '@/core/errors';
 import { PlatformAdminRepository } from './repos/platform-admin.repo';
-import { auditAction } from '@/utils/audit';
 import { domainEvents } from '@/core/domain-events';
 
 /**
@@ -43,12 +42,8 @@ export async function inviteAdmin(
     role: body.role,
   });
 
-  await auditAction(ctx, {
-    action: 'create',
-    resourceType: 'platform-admin',
-    resourceId: admin.id,
-    description: `Platform admin "${admin.name}" (${admin.role}) invited`,
-  });
+  ctx.set('auditResourceId', admin.id);
+  ctx.set('auditDescription', `Platform admin "${admin.name}" (${admin.role}) invited`);
 
   // [EM-M03-d1e2f3a4] Emit spec-declared AdminInvited event so the invite
   // email can be delivered by a downstream consumer (WF-022 step 2).

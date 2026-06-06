@@ -3,7 +3,6 @@ import type { DatabaseInstance } from '@/core/database';
 import type { UpdateAssociationBody, UpdateAssociationParams } from '@/generated/openapi/validators';
 import { NotFoundError } from '@/core/errors';
 import { AssociationRepository } from './repos/platform-admin.repo';
-import { auditAction } from '@/utils/audit';
 
 /**
  * updateAssociation
@@ -30,12 +29,8 @@ export async function updateAssociation(
 
   const updated = await repo.update(associationId, body);
 
-  await auditAction(ctx, {
-    action: 'update',
-    resourceType: 'association',
-    resourceId: associationId,
-    description: `Association "${existing.name}" updated`,
-  });
+  ctx.set('auditResourceId', associationId);
+  ctx.set('auditDescription', `Association "${existing.name}" updated`);
 
   return ctx.json(updated, 200);
 }

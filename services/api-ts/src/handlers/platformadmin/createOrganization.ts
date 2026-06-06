@@ -3,7 +3,6 @@ import type { DatabaseInstance } from '@/core/database';
 import type { CreateOrganizationBody } from '@/generated/openapi/validators';
 import { ConflictError, NotFoundError, ValidationError } from '@/core/errors';
 import { OrganizationRepository, AssociationRepository } from './repos/platform-admin.repo';
-import { auditAction } from '@/utils/audit';
 import { domainEvents } from '@/core/domain-events';
 import { generateSlug, ensureUniqueSlug } from './utils/slug';
 
@@ -63,12 +62,8 @@ export async function createOrganization(
     trialEndDate: trialEndDate ?? null,
   });
 
-  await auditAction(ctx, {
-    action: 'create',
-    resourceType: 'organization',
-    resourceId: org.id,
-    description: `Organization "${org.name}" created in association "${association.name}"`,
-  });
+  ctx.set('auditResourceId', org.id);
+  ctx.set('auditDescription', `Organization "${org.name}" created in association "${association.name}"`);
 
   // [EM-M03-d1e2f3a4] Emit spec-declared OrganizationCreated event.
   domainEvents

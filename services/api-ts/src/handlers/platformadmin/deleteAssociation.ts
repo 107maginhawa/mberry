@@ -3,7 +3,6 @@ import type { DatabaseInstance } from '@/core/database';
 import type { DeleteAssociationParams } from '@/generated/openapi/validators';
 import { NotFoundError, ConflictError } from '@/core/errors';
 import { AssociationRepository, OrganizationRepository } from './repos/platform-admin.repo';
-import { auditAction } from '@/utils/audit';
 
 /**
  * deleteAssociation
@@ -42,12 +41,8 @@ export async function deleteAssociation(
 
   await repo.delete(associationId);
 
-  await auditAction(ctx, {
-    action: 'delete',
-    resourceType: 'association',
-    resourceId: associationId,
-    description: `Association "${existing.name}" deleted`,
-  });
+  ctx.set('auditResourceId', associationId);
+  ctx.set('auditDescription', `Association "${existing.name}" deleted`);
 
   return ctx.body(null, 204);
 }

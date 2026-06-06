@@ -379,6 +379,7 @@ namespace PlatformAdminCustomModule {
     @route("/admin/national-dashboard/{associationId}")
     @useAuth(bearerAuth)
     @extension("x-security-required-roles", #["platform_admin", "national_officer"])
+    @extension("x-audit", #{ action: "create", resourceType: "national_dashboard_view" })
     getNationalDashboard(
       @path associationId: string,
       @doc("Snapshot month in YYYY-MM format (defaults to current month)")
@@ -394,6 +395,7 @@ namespace PlatformAdminCustomModule {
     @route("/admin/national/chapters")
     @useAuth(bearerAuth)
     @extension("x-security-required-roles", #["platform_admin", "national_officer"])
+    @extension("x-audit", #{ action: "read", resourceType: "national_chapter_comparison", eventType: "data-access" })
     listNationalChapters(
       @doc("Association to query. Required for platform admins; inferred from grant for national officers")
       @query associationId?: string,
@@ -416,6 +418,7 @@ namespace PlatformAdminCustomModule {
     @route("/admin/national/chapters/{organizationId}")
     @useAuth(bearerAuth)
     @extension("x-security-required-roles", #["platform_admin", "national_officer"])
+    @extension("x-audit", #{ action: "read", resourceType: "national_chapter_detail", eventType: "data-access" })
     getNationalChapterDetail(
       @path organizationId: string,
       @doc("Association the chapter belongs to. Required for platform admins; inferred from grant for national officers")
@@ -433,6 +436,7 @@ namespace PlatformAdminCustomModule {
     @route("/admin/national/platform")
     @useAuth(bearerAuth)
     @extension("x-security-required-roles", #["platform_admin"])
+    @extension("x-audit", #{ action: "read", resourceType: "platform_summary", eventType: "data-access" })
     getPlatformSummary(
       @doc("Snapshot month in YYYY-MM format (defaults to current month)")
       @query snapshotMonth?: string,

@@ -3,7 +3,6 @@ import type { DatabaseInstance } from '@/core/database';
 import type { TransitionOrgStatusBody, TransitionOrgStatusParams } from '@/generated/openapi/validators';
 import { NotFoundError, BusinessLogicError } from '@/core/errors';
 import { OrganizationRepository } from './repos/platform-admin.repo';
-import { auditAction } from '@/utils/audit';
 import { domainEvents } from '@/core/domain-events';
 
 // [EM-M03-c7d8e9f0] trial -> cancelled (trial expired, no conversion) is a
@@ -64,12 +63,8 @@ export async function transitionOrgStatus(
 
   const updated = await repo.update(organizationId, { status: targetStatus });
 
-  await auditAction(ctx, {
-    action: 'update',
-    resourceType: 'organization',
-    resourceId: organizationId,
-    description: `Organization status transitioned from "${currentStatus}" to "${targetStatus}"`,
-  });
+  ctx.set('auditResourceId', organizationId);
+  ctx.set('auditDescription', `Organization status transitioned from "${currentStatus}" to "${targetStatus}"`);
 
   // [EM-M03-d1e2f3a4] Emit the spec-declared OrgStatusTransitioned event so
   // cross-module consumers (M04/M05) can react to lifecycle changes.

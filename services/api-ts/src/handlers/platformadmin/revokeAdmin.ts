@@ -3,7 +3,6 @@ import type { DatabaseInstance } from '@/core/database';
 import type { RevokeAdminParams } from '@/generated/openapi/validators';
 import { NotFoundError, BusinessLogicError } from '@/core/errors';
 import { PlatformAdminRepository } from './repos/platform-admin.repo';
-import { auditAction } from '@/utils/audit';
 
 /**
  * revokeAdmin
@@ -46,12 +45,8 @@ export async function revokeAdmin(
 
   await repo.delete(adminId);
 
-  await auditAction(ctx, {
-    action: 'delete',
-    resourceType: 'platform-admin',
-    resourceId: adminId,
-    description: `Platform admin "${admin.name}" (${admin.role}) revoked`,
-  });
+  ctx.set('auditResourceId', adminId);
+  ctx.set('auditDescription', `Platform admin "${admin.name}" (${admin.role}) revoked`);
 
   return ctx.body(null, 204);
 }

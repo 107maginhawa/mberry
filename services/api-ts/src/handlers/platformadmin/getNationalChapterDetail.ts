@@ -3,7 +3,6 @@ import type { DatabaseInstance } from '@/core/database';
 import { UnauthorizedError, NotFoundError } from '@/core/errors';
 import type { GetNationalChapterDetailQuery, GetNationalChapterDetailParams } from '@/generated/openapi/validators';
 import { DashboardRepository } from './repos/dashboard.repo';
-import { auditAction } from '@/utils/audit';
 import {
   resolveAssociationAccess,
   isSuppressed,
@@ -52,13 +51,9 @@ export async function getNationalChapterDetail(
   const compliant = Math.round(cpdRate * snapshot.totalMembers);
   const totalCollected = Number(snapshot.totalCollected ?? 0);
 
-  await auditAction(ctx, {
-    action: 'read',
-    resourceType: 'national_chapter_detail',
-    resourceId: organizationId,
-    description: `Chapter drill-down viewed for ${organizationId} (${snapshotMonth})`,
-    details: { associationId, snapshotMonth },
-  });
+  ctx.set('auditResourceId', organizationId);
+  ctx.set('auditDescription', `Chapter drill-down viewed for ${organizationId} (${snapshotMonth})`);
+  ctx.set('auditDetails', { associationId, snapshotMonth });
 
   return ctx.json(
     {

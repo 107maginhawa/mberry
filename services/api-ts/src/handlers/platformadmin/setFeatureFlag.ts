@@ -2,7 +2,6 @@ import type { ValidatedContext } from '@/types/app';
 import type { DatabaseInstance } from '@/core/database';
 import type { SetFeatureFlagBody } from '@/generated/openapi/validators';
 import { FeatureFlagRepository } from './repos/platform-admin.repo';
-import { auditAction } from '@/utils/audit';
 import { domainEvents } from '@/core/domain-events';
 import { BusinessLogicError } from '@/core/errors';
 
@@ -37,12 +36,8 @@ export async function setFeatureFlag(
     enabled: body.enabled,
   });
 
-  await auditAction(ctx, {
-    action: 'update',
-    resourceType: 'feature-flag',
-    resourceId: flag.id,
-    description: `Feature flag "${body.moduleName}" ${body.enabled ? 'enabled' : 'disabled'} for ${body.targetType}:${body.targetId}`,
-  });
+  ctx.set('auditResourceId', flag.id);
+  ctx.set('auditDescription', `Feature flag "${body.moduleName}" ${body.enabled ? 'enabled' : 'disabled'} for ${body.targetType}:${body.targetId}`);
 
   // [EM-M03-d1e2f3a4] Emit spec-declared FeatureFlagChanged event.
   domainEvents

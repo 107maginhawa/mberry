@@ -3,7 +3,6 @@ import type { DatabaseInstance } from '@/core/database';
 import { UnauthorizedError } from '@/core/errors';
 import type { ListNationalChaptersQuery } from '@/generated/openapi/validators';
 import { DashboardRepository } from './repos/dashboard.repo';
-import { auditAction } from '@/utils/audit';
 import {
   resolveAssociationAccess,
   isSuppressed,
@@ -92,13 +91,9 @@ export async function listNationalChapters(
   const page = rows.slice(offset, offset + limit);
   const hasMore = offset + limit < total;
 
-  await auditAction(ctx, {
-    action: 'read',
-    resourceType: 'national_chapter_comparison',
-    resourceId: associationId,
-    description: `National chapter comparison viewed for association ${associationId} (${snapshotMonth})`,
-    details: { snapshotMonth, returned: page.length, total },
-  });
+  ctx.set('auditResourceId', associationId);
+  ctx.set('auditDescription', `National chapter comparison viewed for association ${associationId} (${snapshotMonth})`);
+  ctx.set('auditDetails', { snapshotMonth, returned: page.length, total });
 
   return ctx.json(
     {

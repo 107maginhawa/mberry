@@ -4,7 +4,6 @@ import type { DatabaseInstance } from '@/core/database';
 import type { EndImpersonationParams } from '@/generated/openapi/validators';
 import { NotFoundError } from '@/core/errors';
 import { ImpersonationSessionRepository } from './repos/platform-admin.repo';
-import { auditAction } from '@/utils/audit';
 import { domainEvents } from '@/core/domain-events';
 
 /**
@@ -34,13 +33,8 @@ export async function endImpersonation(
   // Clear the impersonation cookie
   deleteCookie(ctx, 'memberry-imp-token', { path: '/' });
 
-  await auditAction(ctx, {
-    action: 'update',
-    resourceType: 'impersonation-session',
-    resourceId: sessionId,
-    description: `Impersonation session ended for target user ${impSession.targetUserId}`,
-    eventSubType: 'authentication.impersonation-ended',
-  });
+  ctx.set('auditResourceId', sessionId);
+  ctx.set('auditDescription', `Impersonation session ended for target user ${impSession.targetUserId}`);
 
   // [EM-M03-d1e2f3a4] Emit spec-declared ImpersonationEnded event.
   domainEvents

@@ -52,6 +52,7 @@ export function registerRoutes(app: Hono<{ Variables: Variables }>) {
   // inviteAdmin
   app.post('/admin/admins',
     authMiddleware(),
+    createPerRouteAuditMiddleware({ action: "create", resourceType: "platform-admin" }),
     zValidator('json', validators.InviteAdminBody, validationErrorHandler),
     registry.inviteAdmin as unknown as Handler
   );
@@ -65,6 +66,7 @@ export function registerRoutes(app: Hono<{ Variables: Variables }>) {
   // updateAdmin
   app.patch('/admin/admins/:adminId',
     authMiddleware(),
+    createPerRouteAuditMiddleware({ action: "update", resourceType: "platform-admin" }),
     zValidator('param', validators.UpdateAdminParams, validationErrorHandler),
     zValidator('json', validators.UpdateAdminBody, validationErrorHandler),
     registry.updateAdmin as unknown as Handler
@@ -73,6 +75,7 @@ export function registerRoutes(app: Hono<{ Variables: Variables }>) {
   // revokeAdmin
   app.delete('/admin/admins/:adminId',
     authMiddleware(),
+    createPerRouteAuditMiddleware({ action: "delete", resourceType: "platform-admin" }),
     zValidator('param', validators.RevokeAdminParams, validationErrorHandler),
     registry.revokeAdmin as unknown as Handler
   );
@@ -80,6 +83,7 @@ export function registerRoutes(app: Hono<{ Variables: Variables }>) {
   // createAssociation
   app.post('/admin/associations',
     authMiddleware(),
+    createPerRouteAuditMiddleware({ action: "create", resourceType: "association" }),
     zValidator('json', validators.CreateAssociationBody, validationErrorHandler),
     registry.createAssociation as unknown as Handler
   );
@@ -101,6 +105,7 @@ export function registerRoutes(app: Hono<{ Variables: Variables }>) {
   // updateAssociation
   app.patch('/admin/associations/:associationId',
     authMiddleware(),
+    createPerRouteAuditMiddleware({ action: "update", resourceType: "association" }),
     zValidator('param', validators.UpdateAssociationParams, validationErrorHandler),
     zValidator('json', validators.UpdateAssociationBody, validationErrorHandler),
     registry.updateAssociation as unknown as Handler
@@ -109,6 +114,7 @@ export function registerRoutes(app: Hono<{ Variables: Variables }>) {
   // deleteAssociation
   app.delete('/admin/associations/:associationId',
     authMiddleware(),
+    createPerRouteAuditMiddleware({ action: "delete", resourceType: "association" }),
     zValidator('param', validators.DeleteAssociationParams, validationErrorHandler),
     registry.deleteAssociation as unknown as Handler
   );
@@ -130,6 +136,7 @@ export function registerRoutes(app: Hono<{ Variables: Variables }>) {
   // setFeatureFlag
   app.post('/admin/feature-flags',
     authMiddleware(),
+    createPerRouteAuditMiddleware({ action: "update", resourceType: "feature-flag" }),
     zValidator('json', validators.SetFeatureFlagBody, validationErrorHandler),
     registry.setFeatureFlag as unknown as Handler
   );
@@ -144,6 +151,7 @@ export function registerRoutes(app: Hono<{ Variables: Variables }>) {
   // deleteFeatureFlag
   app.delete('/admin/feature-flags/:flagId',
     authMiddleware(),
+    createPerRouteAuditMiddleware({ action: "delete", resourceType: "feature-flag" }),
     zValidator('param', validators.DeleteFeatureFlagParams, validationErrorHandler),
     registry.deleteFeatureFlag as unknown as Handler
   );
@@ -151,6 +159,7 @@ export function registerRoutes(app: Hono<{ Variables: Variables }>) {
   // startImpersonation
   app.post('/admin/impersonate',
     authMiddleware(),
+    createPerRouteAuditMiddleware({ action: "create", resourceType: "impersonation-session", eventSubType: "authentication.impersonation-started" }),
     zValidator('json', validators.StartImpersonationBody, validationErrorHandler),
     registry.startImpersonation as unknown as Handler
   );
@@ -158,6 +167,7 @@ export function registerRoutes(app: Hono<{ Variables: Variables }>) {
   // endImpersonation
   app.post('/admin/impersonate/:sessionId/end',
     authMiddleware(),
+    createPerRouteAuditMiddleware({ action: "update", resourceType: "impersonation-session", eventSubType: "authentication.impersonation-ended" }),
     zValidator('param', validators.EndImpersonationParams, validationErrorHandler),
     registry.endImpersonation as unknown as Handler
   );
@@ -171,6 +181,7 @@ export function registerRoutes(app: Hono<{ Variables: Variables }>) {
   // getNationalDashboard
   app.get('/admin/national-dashboard/:associationId',
     authMiddleware({ roles: ["platform_admin", "national_officer"] }),
+    createPerRouteAuditMiddleware({ action: "create", resourceType: "national_dashboard_view" }),
     zValidator('param', validators.GetNationalDashboardParams, validationErrorHandler),
     zValidator('query', validators.GetNationalDashboardQuery, validationErrorHandler),
     registry.getNationalDashboard as unknown as Handler
@@ -179,6 +190,7 @@ export function registerRoutes(app: Hono<{ Variables: Variables }>) {
   // listNationalChapters
   app.get('/admin/national/chapters',
     authMiddleware({ roles: ["platform_admin", "national_officer"] }),
+    createPerRouteAuditMiddleware({ action: "read", resourceType: "national_chapter_comparison", eventType: "data-access" }),
     zValidator('query', validators.ListNationalChaptersQuery, validationErrorHandler),
     registry.listNationalChapters as unknown as Handler
   );
@@ -186,6 +198,7 @@ export function registerRoutes(app: Hono<{ Variables: Variables }>) {
   // getNationalChapterDetail
   app.get('/admin/national/chapters/:organizationId',
     authMiddleware({ roles: ["platform_admin", "national_officer"] }),
+    createPerRouteAuditMiddleware({ action: "read", resourceType: "national_chapter_detail", eventType: "data-access" }),
     zValidator('param', validators.GetNationalChapterDetailParams, validationErrorHandler),
     zValidator('query', validators.GetNationalChapterDetailQuery, validationErrorHandler),
     registry.getNationalChapterDetail as unknown as Handler
@@ -194,6 +207,7 @@ export function registerRoutes(app: Hono<{ Variables: Variables }>) {
   // getPlatformSummary
   app.get('/admin/national/platform',
     authMiddleware({ roles: ["platform_admin"] }),
+    createPerRouteAuditMiddleware({ action: "read", resourceType: "platform_summary", eventType: "data-access" }),
     zValidator('query', validators.GetPlatformSummaryQuery, validationErrorHandler),
     registry.getPlatformSummary as unknown as Handler
   );
@@ -201,6 +215,7 @@ export function registerRoutes(app: Hono<{ Variables: Variables }>) {
   // createOrganization
   app.post('/admin/organizations',
     authMiddleware(),
+    createPerRouteAuditMiddleware({ action: "create", resourceType: "organization" }),
     zValidator('json', validators.CreateOrganizationBody, validationErrorHandler),
     registry.createOrganization as unknown as Handler
   );
@@ -222,6 +237,7 @@ export function registerRoutes(app: Hono<{ Variables: Variables }>) {
   // updateOrganization
   app.patch('/admin/organizations/:organizationId',
     authMiddleware(),
+    createPerRouteAuditMiddleware({ action: "update", resourceType: "organization" }),
     zValidator('param', validators.UpdateOrganizationParams, validationErrorHandler),
     zValidator('json', validators.UpdateOrganizationBody, validationErrorHandler),
     registry.updateOrganization as unknown as Handler
@@ -230,6 +246,7 @@ export function registerRoutes(app: Hono<{ Variables: Variables }>) {
   // transitionOrgStatus
   app.post('/admin/organizations/:organizationId/transition',
     authMiddleware(),
+    createPerRouteAuditMiddleware({ action: "update", resourceType: "organization" }),
     zValidator('param', validators.TransitionOrgStatusParams, validationErrorHandler),
     zValidator('json', validators.TransitionOrgStatusBody, validationErrorHandler),
     registry.transitionOrgStatus as unknown as Handler

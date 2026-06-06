@@ -177,6 +177,7 @@ namespace PlatformAdminModule {
     @operationId("createAssociation")
     @post
     @useAuth(bearerAuth)
+    @extension("x-audit", #{ action: "create", resourceType: "association" })
     createAssociation(@body body: AssociationRequest): ApiCreatedResponse<Association> | ApiBadRequestResponse | ApiUnauthorizedResponse | ApiForbiddenResponse;
 
     @doc("Get an association by ID")
@@ -197,6 +198,7 @@ namespace PlatformAdminModule {
     @patch(#{implicitOptionality: true})
     @route("/{associationId}")
     @useAuth(bearerAuth)
+    @extension("x-audit", #{ action: "update", resourceType: "association" })
     updateAssociation(@path associationId: string, @body updates: AssociationRequest): ApiOkResponse<Association> | ApiNotFoundResponse | ApiBadRequestResponse;
 
     @doc("Delete an association")
@@ -204,6 +206,7 @@ namespace PlatformAdminModule {
     @delete
     @route("/{associationId}")
     @useAuth(bearerAuth)
+    @extension("x-audit", #{ action: "delete", resourceType: "association" })
     deleteAssociation(@path associationId: string): ApiNoContentResponse | ApiNotFoundResponse | ApiConflictResponse;
   }
 
@@ -213,6 +216,7 @@ namespace PlatformAdminModule {
     @operationId("createOrganization")
     @post
     @useAuth(bearerAuth)
+    @extension("x-audit", #{ action: "create", resourceType: "organization" })
     createOrganization(@body body: OrganizationRequest): ApiCreatedResponse<Organization> | ApiBadRequestResponse | ApiUnauthorizedResponse;
 
     @doc("Get an organization by ID")
@@ -233,6 +237,7 @@ namespace PlatformAdminModule {
     @patch(#{implicitOptionality: true})
     @route("/{organizationId}")
     @useAuth(bearerAuth)
+    @extension("x-audit", #{ action: "update", resourceType: "organization" })
     updateOrganization(@path organizationId: string, @body updates: OrganizationRequest): ApiOkResponse<Organization> | ApiNotFoundResponse | ApiBadRequestResponse;
 
     @doc("Transition org lifecycle status")
@@ -240,6 +245,7 @@ namespace PlatformAdminModule {
     @post
     @route("/{organizationId}/transition")
     @useAuth(bearerAuth)
+    @extension("x-audit", #{ action: "update", resourceType: "organization" })
     transitionOrgStatus(@path organizationId: string, @body body: { status: OrgLifecycleStatus }): ApiOkResponse<Organization> | ApiNotFoundResponse | ApiBadRequestResponse;
   }
 
@@ -249,6 +255,7 @@ namespace PlatformAdminModule {
     @operationId("setFeatureFlag")
     @post
     @useAuth(bearerAuth)
+    @extension("x-audit", #{ action: "update", resourceType: "feature-flag" })
     setFeatureFlag(@body body: FeatureFlagRequest): ApiOkResponse<FeatureFlagConfig> | ApiBadRequestResponse | ApiUnauthorizedResponse;
 
     @doc("List feature flags for a target")
@@ -262,6 +269,7 @@ namespace PlatformAdminModule {
     @delete
     @route("/{flagId}")
     @useAuth(bearerAuth)
+    @extension("x-audit", #{ action: "delete", resourceType: "feature-flag" })
     deleteFeatureFlag(@path flagId: string): ApiNoContentResponse | ApiNotFoundResponse;
   }
 
@@ -271,6 +279,7 @@ namespace PlatformAdminModule {
     @operationId("startImpersonation")
     @post
     @useAuth(bearerAuth)
+    @extension("x-audit", #{ action: "create", resourceType: "impersonation-session", eventSubType: "authentication.impersonation-started" })
     startImpersonation(@body body: { targetUserId: string; targetOrgId?: string }): ApiCreatedResponse<ImpersonationSession> | ApiBadRequestResponse | ApiUnauthorizedResponse | ApiForbiddenResponse;
 
     @doc("End an active impersonation session")
@@ -278,6 +287,7 @@ namespace PlatformAdminModule {
     @post
     @route("/{sessionId}/end")
     @useAuth(bearerAuth)
+    @extension("x-audit", #{ action: "update", resourceType: "impersonation-session", eventSubType: "authentication.impersonation-ended" })
     endImpersonation(@path sessionId: string): ApiOkResponse<ImpersonationSession> | ApiNotFoundResponse;
   }
 
@@ -287,6 +297,7 @@ namespace PlatformAdminModule {
     @operationId("inviteAdmin")
     @post
     @useAuth(bearerAuth)
+    @extension("x-audit", #{ action: "create", resourceType: "platform-admin" })
     inviteAdmin(@body body: PlatformAdminRequest): ApiCreatedResponse<PlatformAdmin> | ApiBadRequestResponse | ApiConflictResponse | ApiUnauthorizedResponse;
 
     @doc("List platform admins")
@@ -300,6 +311,7 @@ namespace PlatformAdminModule {
     @patch(#{implicitOptionality: true})
     @route("/{adminId}")
     @useAuth(bearerAuth)
+    @extension("x-audit", #{ action: "update", resourceType: "platform-admin" })
     updateAdmin(@path adminId: string, @body updates: PlatformAdminRequest): ApiOkResponse<PlatformAdmin> | ApiNotFoundResponse | ApiBadRequestResponse;
 
     @doc("Revoke admin access")
@@ -307,6 +319,7 @@ namespace PlatformAdminModule {
     @delete
     @route("/{adminId}")
     @useAuth(bearerAuth)
+    @extension("x-audit", #{ action: "delete", resourceType: "platform-admin" })
     revokeAdmin(@path adminId: string): ApiNoContentResponse | ApiNotFoundResponse | ApiConflictResponse;
   }
 }

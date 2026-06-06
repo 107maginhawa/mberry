@@ -5,7 +5,6 @@ import type { DatabaseInstance } from '@/core/database';
 import type { StartImpersonationBody } from '@/generated/openapi/validators';
 import { ForbiddenError } from '@/core/errors';
 import { PlatformAdminRepository, ImpersonationSessionRepository } from './repos/platform-admin.repo';
-import { auditAction } from '@/utils/audit';
 import { domainEvents } from '@/core/domain-events';
 
 /** Only super and support roles may impersonate. */
@@ -67,14 +66,9 @@ export async function startImpersonation(
     maxAge: 30 * 60, // 30 minutes, matches session expiry
   });
 
-  await auditAction(ctx, {
-    action: 'create',
-    resourceType: 'impersonation-session',
-    resourceId: impSession.id,
-    description: `Admin ${admin.name} started impersonating user ${body.targetUserId}`,
-    details: { adminId: user.id, targetUserId: body.targetUserId },
-    eventSubType: 'authentication.impersonation-started',
-  });
+  ctx.set('auditResourceId', impSession.id);
+  ctx.set('auditDescription', `Admin ${admin.name} started impersonating user ${body.targetUserId}`);
+  ctx.set('auditDetails', { adminId: user.id, targetUserId: body.targetUserId });
 
   // [EM-M03-d1e2f3a4] Emit spec-declared ImpersonationStarted event.
   domainEvents
