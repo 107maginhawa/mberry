@@ -2815,6 +2815,7 @@ export function registerRoutes(app: Hono<{ Variables: Variables }>) {
   // updateOrgProfile
   app.put('/membership/org-profile/:organizationId',
     authMiddleware({ roles: ["association:admin"] }),
+    requirePositionMiddleware({ titles: ["President"] }),
     zValidator('param', validators.UpdateOrgProfileParams, validationErrorHandler),
     zValidator('json', validators.UpdateOrgProfileBody, validationErrorHandler),
     registry.updateOrgProfile as unknown as Handler

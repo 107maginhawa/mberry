@@ -40,17 +40,9 @@ describe('updateOrgProfile', () => {
     expect((res as any).body.data.name).toBe('PDA Updated');
   });
 
-  test('returns 403 for non-president officer', async () => {
-    stubRepo(OfficerTermRepository, { findActiveByPersonAndOrg: async () => [] });
+  // 403 for non-president officer is now enforced by requirePositionMiddleware
+  // at the route level — see middleware/require-position.test.ts.
 
-    const ctx = makeCtx({
-      _params: { organizationId: 'org-1' },
-      _body: { name: 'Updated' },
-    });
-
-    const res = await updateOrgProfile(ctx as any);
-    expect(res.status).toBe(403);
-  });
 
   test('throws NotFoundError when org does not exist', async () => {
     stubRepo(OfficerTermRepository, { findActiveByPersonAndOrg: async () => [{ id: 'term-1', positionTitle: 'President' }] });
