@@ -822,6 +822,7 @@ namespace Association.Member.Governance {
     @route("/{candidateId}")
     @useAuth(bearerAuth)
     @extension("x-security-required-roles", #["association:admin"])
+    @extension("x-audit", #{ action: "update", resourceType: "election-nominee" })
     updateCandidate(@path candidateId: string, @body updates: CandidateRequest): ApiOkResponse<Candidate> | ApiBadRequestResponse | ApiNotFoundResponse | ApiForbiddenResponse;
 
     @doc("Delete a candidate record.")

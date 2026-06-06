@@ -775,6 +775,7 @@ export function registerRoutes(app: Hono<{ Variables: Variables }>) {
   // updateCandidate
   app.patch('/association/member/candidates/:candidateId',
     authMiddleware({ roles: ["association:admin"] }),
+    createPerRouteAuditMiddleware({ action: "update", resourceType: "election-nominee" }),
     zValidator('param', validators.UpdateCandidateParams, validationErrorHandler),
     zValidator('json', validators.UpdateCandidateBody, validationErrorHandler),
     registry.updateCandidate as unknown as Handler

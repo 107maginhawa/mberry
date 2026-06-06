@@ -1,11 +1,10 @@
-import type { ValidatedContext } from '@/types/app';
+import type { ValidatedContext, AuditEventEntry } from '@/types/app';
 import type { DatabaseInstance } from '@/core/database';
 import { UnauthorizedError, NotFoundError } from '@/core/errors';
 import type { UpdateCandidateBody, UpdateCandidateParams } from '@/generated/openapi/validators';
 import { ElectionsRepository } from '../elections/repos/elections.repo';
 import { electionNominees } from '../elections/repos/elections.schema';
 import { eq } from 'drizzle-orm';
-import { auditAction } from '@/utils/audit';
 import { requireOfficerTerm } from '@/utils/officer-check';
 
 /**
@@ -38,14 +37,17 @@ export async function updateCandidate(
   const repo = new ElectionsRepository(db);
   const bodyRecord = body as Record<string, unknown>;
 
+  const auditEvents: AuditEventEntry[] = [];
+  ctx.set('auditEvents', auditEvents);
+
   // Use updateNomineeStatus if status is being updated
   if (bodyRecord['status']) {
     const updated = await repo.updateNomineeStatus(params.candidateId, bodyRecord['status'] as string);
 
-    await auditAction(ctx, {
+    auditEvents.push({
       action: 'update',
       resourceType: 'election-nominee',
-      resourceId: params.candidateId,
+      resource: params.candidateId,
       description: `Nominee status updated to ${bodyRecord['status'] as string}`,
     });
 
@@ -59,10 +61,10 @@ export async function updateCandidate(
     .where(eq(electionNominees.id, params.candidateId))
     .returning();
 
-  await auditAction(ctx, {
+  auditEvents.push({
     action: 'update',
     resourceType: 'election-nominee',
-    resourceId: params.candidateId,
+    resource: params.candidateId,
     description: 'Nominee updated',
   });
 
