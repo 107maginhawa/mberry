@@ -4,6 +4,7 @@
 // BR-50: Election date ordering — nomination_start < voting_start < voting_end
 import { test, expect } from '../helpers/test-fixture'
 import { signInAsOfficer, signInAsMember } from '../helpers/auth'
+import { captureAnyApiSuccess } from '../helpers/real-flow'
 
 const ORG_ID = 'ed8e3a96-8126-4341-be42-e6eb7940c562'
 
@@ -13,9 +14,13 @@ test.describe('[BR-67, BR-44, BR-50] Election Integrity', () => {
       await signInAsOfficer(page)
     })
 
+    const respP = captureAnyApiSuccess(page)
     await test.step('navigate to new election form', async () => {
       await page.goto(`/org/${ORG_ID}/officer/elections/new`)
     })
+    const resp = await respP
+    expect(resp?.status()).toBe(200)
+    expect(resp?.ok()).toBe(true)
 
     await test.step('form renders with required fields', async () => {
       // Election form should have title, dates, positions
