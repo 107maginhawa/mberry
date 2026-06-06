@@ -490,6 +490,7 @@ export function registerRoutes(app: Hono<{ Variables: Variables }>) {
   // createEventRegistration
   app.post('/association/events/registrations',
     authMiddleware({ roles: ["association:admin", "association:staff", "association:member:owner"] }),
+    createPerRouteAuditMiddleware({ action: "create", resourceType: "event-registration" }),
     zValidator('json', validators.CreateEventRegistrationBody, validationErrorHandler),
     registry.createEventRegistration as unknown as Handler
   );

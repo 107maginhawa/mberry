@@ -662,6 +662,7 @@ namespace Association.Operations.Events {
     @post
     @route("/registrations")
     @extension("x-security-required-roles", #["association:admin", "association:staff", "association:member:owner"])
+    @extension("x-audit", #{ action: "create", resourceType: "event-registration" })
     createEventRegistration(
       @body body: EventRegistrationCreateRequest
     ): ApiCreatedResponse<EventRegistration>
