@@ -3,6 +3,7 @@
 // Tests email verification during signup
 import { test, expect } from '../helpers/test-fixture'
 import { isMailpitAvailable } from '../helpers/mailpit'
+import { captureAnyApiSuccess } from '../helpers/real-flow'
 
 let mailpitUp = false
 
@@ -12,7 +13,11 @@ test.beforeAll(async () => {
 
 test.describe('BR-25: OTP Registration', () => {
   test('signup page is accessible', async ({ page }) => {
+    const respP = captureAnyApiSuccess(page)
     await page.goto('/auth/sign-up')
+    const resp = await respP
+    expect(resp?.status()).toBe(200)
+    expect(resp?.ok()).toBe(true)
     // Should show signup form
     const hasForm = await page.getByRole('button', { name: /create|sign up|register/i }).isVisible({ timeout: 10000 }).catch(() => false)
     expect(hasForm).toBeTruthy()
