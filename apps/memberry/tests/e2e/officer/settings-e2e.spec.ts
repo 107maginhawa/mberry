@@ -12,6 +12,7 @@
 import { test, expect } from '@playwright/test'
 import { signIn } from '../helpers/auth'
 import { SEED_OFFICER_EMAIL, TEST_PASSWORD } from '../helpers/test-config'
+import { captureAnyApiSuccess } from '../helpers/real-flow'
 
 const ORG_ID = process.env.TEST_ORG_ID ?? 'ed8e3a96-8126-4341-be42-e6eb7940c562'
 const ORG_SLUG = ORG_ID
@@ -24,10 +25,14 @@ async function login(page: import('@playwright/test').Page) {
 
 test('Settings > Org Profile renders form with org data', async ({ page }) => {
   await login(page)
+  const respP = captureAnyApiSuccess(page)
   await page.goto(`/org/${ORG_SLUG}/officer/settings/org`)
   await expect(
     page.getByRole('heading', { name: /organization settings/i })
   ).toBeVisible({ timeout: 10000 })
+  const resp = await respP
+  expect(resp?.status()).toBe(200)
+  expect(resp?.ok()).toBe(true)
 
   await expect(
     page.getByRole('heading', { name: /organization profile/i })
