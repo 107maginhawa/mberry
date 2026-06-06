@@ -1,8 +1,13 @@
 import { test, expect } from '../helpers/test-fixture'
+import { captureAnyApiSuccess } from '../helpers/real-flow'
 
 test.describe('Discover Events (/discover/events) — Public', () => {
   test('page loads without authentication', async ({ page }) => {
+    const respP = captureAnyApiSuccess(page)
     await page.goto('/discover/events')
+    const resp = await respP
+    expect(resp?.status()).toBe(200)
+    expect(resp?.ok()).toBe(true)
     await expect(
       page.getByText(/discover events/i).first(),
     ).toBeVisible({ timeout: 10000 })
