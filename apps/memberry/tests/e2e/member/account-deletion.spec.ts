@@ -2,7 +2,13 @@
 import { test, expect } from '../helpers/test-fixture'
 import { SEED_MEMBER_EMAIL, TEST_PASSWORD } from '../helpers/test-config'
 import { authStateFile } from '../helpers/auth-state'
+import { captureRouteHydration } from '../helpers/real-flow'
 
+// W2 real-flow upgrade: /settings/account mounts a settings shell that
+// hydrates the signed-in person via GET /persons/me. Capturing that
+// response proves the wire actually returned data, not just that the
+// settings shell rendered.
+const PERSON_ME = /\/persons\/me(?:[/?]|$)/
 
 test.use({ storageState: authStateFile('member') })
 const MEMBER_EMAIL = SEED_MEMBER_EMAIL
@@ -10,7 +16,13 @@ const MEMBER_PASSWORD = TEST_PASSWORD
 
 test.describe('Account Deletion (/settings/account)', () => {
 test('shows Delete Account card with destructive border', async ({ page }) => {
+    const personRespP = captureRouteHydration(page, PERSON_ME)
     await page.goto('/settings/account')
+
+    const personResp = await personRespP
+    expect(personResp?.status()).toBe(200)
+    expect(personResp?.ok()).toBe(true)
+
     await expect(
       page.getByRole('heading', { name: /delete account/i }),
     ).toBeVisible({ timeout: 10000 })
