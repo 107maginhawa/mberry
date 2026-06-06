@@ -285,5 +285,61 @@ describe('createPerRouteAuditMiddleware', () => {
       await runMiddleware(ctx, { action: 'create', resourceType: 'x' });
       expect(logEvent).not.toHaveBeenCalled();
     });
+
+    it('logs already-pushed events when handler throws after pushing', async () => {
+      const logEvent = makeLogEvent();
+      const events = [
+        { action: 'complete' as const, resourceType: 'invitation', resource: 'inv-1' },
+      ];
+      const ctx = makeCtx({
+        method: 'POST',
+        status: 500,
+        audit: makeAudit(logEvent),
+        preset: { auditEvents: events },
+      });
+      const { error } = await runMiddleware(
+        ctx,
+        { action: 'create', resourceType: 'x' },
+        async () => { throw new Error('handler boom'); },
+      );
+      expect(error).toBeInstanceOf(Error);
+      expect(error?.message).toBe('handler boom');
+      expect(logEvent).toHaveBeenCalledTimes(1);
+      const [req] = logEvent.mock.calls[0] as [Record<string, unknown>];
+      expect(req.resource).toBe('inv-1');
+    });
+
+    it('logs no events when handler throws before pushing any', async () => {
+      const logEvent = makeLogEvent();
+      const ctx = makeCtx({
+        method: 'POST',
+        status: 500,
+        audit: makeAudit(logEvent),
+      });
+      const { error } = await runMiddleware(
+        ctx,
+        { action: 'create', resourceType: 'x' },
+        async () => { throw new Error('boom'); },
+      );
+      expect(error).toBeInstanceOf(Error);
+      expect(logEvent).not.toHaveBeenCalled();
+    });
+
+    it('single-event mode skips on handler throw (no inadvertent partial log)', async () => {
+      const logEvent = makeLogEvent();
+      const ctx = makeCtx({
+        method: 'POST',
+        status: 200,
+        audit: makeAudit(logEvent),
+        preset: { auditResourceId: 'res-1' },
+      });
+      const { error } = await runMiddleware(
+        ctx,
+        { action: 'create', resourceType: 'x' },
+        async () => { throw new Error('mid-handler'); },
+      );
+      expect(error).toBeInstanceOf(Error);
+      expect(logEvent).not.toHaveBeenCalled();
+    });
   });
 });
