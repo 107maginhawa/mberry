@@ -10,6 +10,13 @@
 #
 # Total: 52 non-test routes (54 total; 2 are /test/isolated-fixture test-only routes).
 # Test routes are omitted below — they are guarded by NODE_ENV !== 'production'.
+#
+# ELECTIONS MODULE NOTE (Task 6.3 verification):
+#   governance.tsp covers all election operations (99+ matches: ElectionStatus, castVote,
+#   updateCandidateStatus, deleteElection, createNominee, etc.) via generated routes.
+#   The stale comment in app.ts line 498 ("m12 elections/: entirely hand-wired") is
+#   superseded by app.ts lines 524–529 confirming full migration (Wave 12 + Phase 35).
+#   No election routes appear in this allowlist — that is correct.
 
 routes:
   # Public discovery
