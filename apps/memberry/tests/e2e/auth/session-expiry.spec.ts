@@ -2,8 +2,22 @@
 // Verifies: unauthenticated users are redirected, expired sessions handled gracefully
 import { test, expect } from '../helpers/test-fixture'
 import { signInAsMember } from '../helpers/auth'
+import { captureAnyApiSuccess } from '../helpers/real-flow'
 
 test.describe('Session Expiry & Auth Guards', () => {
+  test('authenticated user maintains session across navigation', async ({ page }) => {
+    await signInAsMember(page)
+    const respP = captureAnyApiSuccess(page)
+    await page.goto('/dashboard')
+    const resp = await respP
+    expect(resp?.status()).toBe(200)
+    expect(resp?.ok()).toBe(true)
+    await page.goto('/my/credits')
+    await expect(page).toHaveURL(/\/my\/credits/)
+    const hasSignIn = await page.getByRole('button', { name: /login|sign in/i }).first().isVisible({ timeout: 3000 }).catch(() => false)
+    expect(hasSignIn).toBeFalsy()
+  })
+
   test('unauthenticated user redirected to sign-in from protected route', async ({ page }) => {
     // Navigate directly to a protected route without signing in
     await page.goto('/dashboard')
@@ -20,18 +34,6 @@ test.describe('Session Expiry & Auth Guards', () => {
     const ORG_ID = 'ed8e3a96-8126-4341-be42-e6eb7940c562'
     await page.goto(`/org/${ORG_ID}/officer/dashboard`)
     await expect(page).toHaveURL(/\/auth\/sign-in|\/auth\//, { timeout: 15000 })
-  })
-
-  test('authenticated user maintains session across navigation', async ({ page }) => {
-    await signInAsMember(page)
-    await page.goto('/dashboard')
-    // Navigate to another protected route
-    await page.goto('/my/credits')
-    // Should still be on credits page, not redirected to auth
-    await expect(page).toHaveURL(/\/my\/credits/)
-    // Should not see sign-in form
-    const hasSignIn = await page.getByRole('button', { name: /login|sign in/i }).first().isVisible({ timeout: 3000 }).catch(() => false)
-    expect(hasSignIn).toBeFalsy()
   })
 
   test('session persists after page reload', async ({ page }) => {
