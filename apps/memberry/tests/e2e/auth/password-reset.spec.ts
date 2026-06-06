@@ -3,6 +3,7 @@
 // Requires Mailpit running (docker compose up mailpit)
 import { test, expect } from '../helpers/test-fixture'
 import { isMailpitAvailable, waitForMessage, extractLinksFromMessage, deleteAllMessages } from '../helpers/mailpit'
+import { captureAnyApiSuccess } from '../helpers/real-flow'
 
 let mailpitUp = false
 
@@ -12,7 +13,11 @@ test.beforeAll(async () => {
 
 test.describe('M-13: Password Reset', () => {
   test('forgot password page is accessible', async ({ page }) => {
+    const respP = captureAnyApiSuccess(page)
     await page.goto('/auth/forgot-password')
+    const resp = await respP
+    expect(resp?.status()).toBe(200)
+    expect(resp?.ok()).toBe(true)
     // Better-auth-ui renders the forgot password form
     const hasEmailInput = await page.getByLabel(/email/i).isVisible({ timeout: 10000 }).catch(() => false)
     const hasForm = await page.locator('form').isVisible({ timeout: 5000 }).catch(() => false)
