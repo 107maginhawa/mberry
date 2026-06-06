@@ -369,6 +369,7 @@ export function registerRoutes(app: Hono<{ Variables: Variables }>) {
   // getDocumentAccessLog
   app.get('/association/documents/:documentId/access-log',
     authMiddleware({ roles: ["admin", "coordinator"] }),
+    requireOfficerMiddleware(),
     zValidator('param', validators.GetDocumentAccessLogParams, validationErrorHandler),
     zValidator('query', validators.GetDocumentAccessLogQuery, validationErrorHandler),
     registry.getDocumentAccessLog as unknown as Handler
@@ -2657,6 +2658,7 @@ export function registerRoutes(app: Hono<{ Variables: Variables }>) {
   app.post('/certificates/bulk-issue',
     authMiddleware({ roles: ["association:admin", "association:staff"] }),
     zValidator('json', validators.BulkIssueCertificatesBody, validationErrorHandler),
+    requirePositionMiddleware({ titles: ["President", "Secretary"], orgIdFrom: "body", bodyField: "organizationId" }),
     registry.bulkIssueCertificates as unknown as Handler
   );
 
@@ -2773,6 +2775,7 @@ export function registerRoutes(app: Hono<{ Variables: Variables }>) {
   // archiveAnnouncement
   app.post('/communications/announcements/:id/archive',
     authMiddleware({ roles: ["association:officer"] }),
+    requirePositionMiddleware({ titles: ["President", "Secretary"] }),
     createPerRouteAuditMiddleware({ action: "update", resourceType: "announcement", eventSubType: "content.announcement-archived" }),
     zValidator('param', validators.ArchiveAnnouncementParams, validationErrorHandler),
     registry.archiveAnnouncement as unknown as Handler
@@ -2781,6 +2784,7 @@ export function registerRoutes(app: Hono<{ Variables: Variables }>) {
   // publishAnnouncement
   app.post('/communications/announcements/:id/publish',
     authMiddleware({ roles: ["association:officer"] }),
+    requirePositionMiddleware({ titles: ["President", "Secretary"] }),
     createPerRouteAuditMiddleware({ action: "update", resourceType: "announcement", eventSubType: "content.announcement-published" }),
     zValidator('param', validators.PublishAnnouncementParams, validationErrorHandler),
     registry.publishAnnouncement as unknown as Handler

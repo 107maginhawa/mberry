@@ -48,23 +48,8 @@ describe('publishAnnouncement', () => {
   });
 
   // ─── M7: Officer role enforcement ───────────────────────
-  test('returns 403 when user has no officer term', async () => {
-    stubRepo(OfficerTermRepository, {
-      findActiveByPersonAndOrg: async () => [],
-    });
-    const ctx = makeCtx({ _params: { id: 'ann-1' } });
-    const res = await publishAnnouncement(ctx as any);
-    expect(res.status).toBe(403);
-  });
-
-  test('returns 403 when user is officer but not president/secretary', async () => {
-    stubRepo(OfficerTermRepository, {
-      findActiveByPersonAndOrg: async () => [{ positionTitle: 'Treasurer' }],
-    });
-    const ctx = makeCtx({ _params: { id: 'ann-1' } });
-    const res = await publishAnnouncement(ctx as any);
-    expect(res.status).toBe(403);
-  });
+  // 403 cases removed — gate moved to requirePositionMiddleware
+  // (covered by src/middleware/require-position.test.ts).
 
   test('allows secretary to publish', async () => {
     stubRepo(OfficerTermRepository, {

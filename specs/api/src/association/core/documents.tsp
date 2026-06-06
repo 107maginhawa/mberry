@@ -350,6 +350,7 @@ namespace DocumentManagement {
     @route("/{documentId}/access-log")
     @useAuth(bearerAuth)
     @extension("x-security-required-roles", #["admin", "coordinator"])
+    @extension("x-require-officer", true)
     getDocumentAccessLog(
       @path documentId: string,
       ...OffsetPaginationParams

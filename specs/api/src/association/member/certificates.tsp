@@ -190,6 +190,7 @@ namespace Association.Member.Certificates {
     @route("/bulk-issue")
     @useAuth(bearerAuth)
     @extension("x-security-required-roles", #["association:admin", "association:staff"])
+    @extension("x-require-position", #{ titles: #["President", "Secretary"], from: "body.organizationId" })
     bulkIssueCertificates(
       @body body: BulkIssueCertificatesRequest,
     ): {

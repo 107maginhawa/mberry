@@ -237,6 +237,7 @@ namespace Association.Operations.Announcements {
     @route("/communications/announcements/{id}/publish")
     @useAuth(bearerAuth)
     @extension("x-security-required-roles", #["association:officer"])
+    @extension("x-require-position", #["President", "Secretary"])
     @extension("x-audit", #{ action: "update", resourceType: "announcement", eventSubType: "content.announcement-published" })
     publishAnnouncement(
       @path id: UUID
@@ -251,6 +252,7 @@ namespace Association.Operations.Announcements {
     @route("/communications/announcements/{id}/archive")
     @useAuth(bearerAuth)
     @extension("x-security-required-roles", #["association:officer"])
+    @extension("x-require-position", #["President", "Secretary"])
     @extension("x-audit", #{ action: "update", resourceType: "announcement", eventSubType: "content.announcement-archived" })
     archiveAnnouncement(
       @path id: UUID

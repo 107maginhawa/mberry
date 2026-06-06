@@ -3,7 +3,6 @@ import type { DatabaseInstance } from '@/core/database';
 import type { GetDocumentAccessLogQuery, GetDocumentAccessLogParams } from '@/generated/openapi/validators';
 import { UnauthorizedError, NotFoundError, ForbiddenError } from '@/core/errors';
 import { DocumentRepository, DocumentAccessLogRepository } from './repos/documents.repo';
-import { requireOfficerTerm } from '@/core/auth/officer-checks';
 
 /**
  * getDocumentAccessLog
@@ -18,10 +17,6 @@ export async function getDocumentAccessLog(
 ): Promise<Response> {
   const user = ctx.get('user');
   if (!user) return ctx.json({ error: 'Unauthorized' }, 401);
-
-  // P0-02: Officer/admin restriction — access logs are compliance data
-  const denied = await requireOfficerTerm(ctx);
-  if (denied) return denied;
 
   const params = ctx.req.valid('param');
   const query = ctx.req.valid('query');

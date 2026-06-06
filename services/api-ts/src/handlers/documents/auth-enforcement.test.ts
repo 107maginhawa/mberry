@@ -86,18 +86,8 @@ describe('P0-01: getDocument org-scope check', () => {
 // ─── P0-02: getDocumentAccessLog officer restriction ────
 
 describe('P0-02: getDocumentAccessLog officer restriction', () => {
-  test('returns 403 for non-officer members', async () => {
-    stubDocRepoWith(docInOrg);
-    stubAccessLog();
-    stubOfficerDenied();
-    const ctx = makeCtx({
-      organizationId: 'tenant-1',
-      _params: { documentId: 'doc-1' },
-      _query: {},
-    });
-    const res = await getDocumentAccessLog(ctx);
-    expect(res.status).toBe(403);
-  });
+  // 403-for-non-officer test removed — gate moved to requireOfficerMiddleware
+  // (covered by src/middleware/require-officer.test.ts).
 
   test('returns 200 for officers', async () => {
     stubDocRepoWith(docInOrg);
