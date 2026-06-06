@@ -11,6 +11,7 @@ import {
   TEST_PASSWORD,
   API_BASE,
 } from './helpers/test-config'
+import { captureAnyApiSuccess } from './helpers/real-flow'
 
 const ORG_ID = 'ed8e3a96-8126-4341-be42-e6eb7940c562'
 
@@ -24,7 +25,11 @@ test.describe('Member cannot access officer routes', () => {
   })
 
   test('member cannot access officer dashboard', async ({ page }) => {
+    const respP = captureAnyApiSuccess(page)
     await signIn(page, SEED_MEMBER_EMAIL, TEST_PASSWORD)
+    const resp = await respP
+    expect(resp?.status()).toBe(200)
+    expect(resp?.ok()).toBe(true)
     await page.goto(`/org/${ORG_ID}/officer`)
     await page.waitForTimeout(2000)
 
