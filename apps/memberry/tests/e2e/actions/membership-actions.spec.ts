@@ -2,6 +2,7 @@
 // Tests actual button clicks, API requests, and UI state changes
 import { test, expect } from '../helpers/test-fixture'
 import { authStateFile } from '../helpers/auth-state'
+import { captureAnyApiSuccess } from '../helpers/real-flow'
 
 
 test.use({ storageState: authStateFile('officer') })
@@ -25,7 +26,11 @@ const STATUS_REGEX = /(active|suspended|lapsed|grace.?period|terminated|pending)
 
 test.describe('Membership Actions', () => {
   test('roster shows real member data with computed status values', async ({ page }) => {
+    const respP = captureAnyApiSuccess(page)
     await page.goto(`/org/${ORG_ID}/officer/roster`)
+    const resp = await respP
+    expect(resp?.status()).toBe(200)
+    expect(resp?.ok()).toBe(true)
 
     // At least one member row link must render.
     await expect(firstMemberLink(page)).toBeVisible({ timeout: 10000 })
