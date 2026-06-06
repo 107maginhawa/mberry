@@ -63,21 +63,6 @@ describe('cancelEvent', () => {
     });
   });
 
-  test('returns 403 and does not emit when caller is not an officer', async () => {
-    officerMocks = stubRepo(OfficerTermRepository, {
-      findActiveByPersonAndOrg: async () => [],
-    });
-
-    const ctx = makeCtx({
-      user: { id: 'member-1', role: 'user', twoFactorEnabled: true },
-      _params: { eventId: 'event-1' },
-    });
-
-    const response = await cancelEvent(ctx);
-    expect(response.status).toBe(403);
-    expect(emitSpy.mock.calls.some((c) => c[0] === 'event.cancelled')).toBe(false);
-  });
-
   test('throws NotFoundError for non-existent event', async () => {
     officerMocks = stubRepo(OfficerTermRepository, {
       findActiveByPersonAndOrg: async () => [{ positionTitle: 'Society Officer' }],

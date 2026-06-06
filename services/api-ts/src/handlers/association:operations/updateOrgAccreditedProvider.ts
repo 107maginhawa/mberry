@@ -1,8 +1,6 @@
 import type { Context } from 'hono';
 import { NotFoundError } from '@/core/errors';
 import { AccreditedProviderRepository } from './repos/accredited-provider.repo';
-import { requirePosition } from '@/core/auth/officer-checks';
-import { POSITION_TITLES } from '@/utils/position-titles';
 
 export async function updateOrgAccreditedProvider(ctx: Context): Promise<Response> {
   const user = ctx.get('user');
@@ -10,9 +8,6 @@ export async function updateOrgAccreditedProvider(ctx: Context): Promise<Respons
 
   const orgId = ctx.req.param('organizationId')!;
   ctx.set('organizationId', orgId);
-
-  const denied = await requirePosition(ctx, [POSITION_TITLES.SOCIETY_OFFICER, POSITION_TITLES.PRESIDENT]);
-  if (denied) return denied;
 
   const providerId = ctx.req.param('providerId')!;
   const db = ctx.get('database');

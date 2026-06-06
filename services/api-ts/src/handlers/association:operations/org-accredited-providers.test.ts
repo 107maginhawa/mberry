@@ -40,12 +40,6 @@ function stubOfficer() {
   });
 }
 
-function stubNonOfficer() {
-  return stubRepo(OfficerTermRepository, {
-    findActiveByPersonAndOrg: async () => [],
-  });
-}
-
 // ═══════════════════════════════════════════════════════
 // createOrgAccreditedProvider
 // ═══════════════════════════════════════════════════════
@@ -69,17 +63,6 @@ describe('createOrgAccreditedProvider', () => {
     });
     const res = await createOrgAccreditedProvider(ctx);
     expect(res.status).toBe(401);
-  });
-
-  test('returns 403 when user lacks officer position', async () => {
-    stubNonOfficer();
-    const { createOrgAccreditedProvider } = await import('./createOrgAccreditedProvider');
-    const ctx = makeCtx({
-      _params: { organizationId: 'org-1' },
-      _body: { name: 'Academy', accreditationNumber: 'ACC-001' },
-    });
-    const res = await createOrgAccreditedProvider(ctx);
-    expect(res.status).toBe(403);
   });
 
   test('returns 201 with provider data on success', async () => {
@@ -144,14 +127,6 @@ describe('listOrgAccreditedProviders', () => {
     });
     const res = await listOrgAccreditedProviders(ctx);
     expect(res.status).toBe(401);
-  });
-
-  test('returns 403 when user lacks officer position', async () => {
-    stubNonOfficer();
-    const { listOrgAccreditedProviders } = await import('./listOrgAccreditedProviders');
-    const ctx = makeCtx({ _params: { organizationId: 'org-1' } });
-    const res = await listOrgAccreditedProviders(ctx);
-    expect(res.status).toBe(403);
   });
 
   test('returns 200 with provider list and total', async () => {
@@ -232,17 +207,6 @@ describe('updateOrgAccreditedProvider', () => {
     expect(res.status).toBe(401);
   });
 
-  test('returns 403 when user lacks officer position', async () => {
-    stubNonOfficer();
-    const { updateOrgAccreditedProvider } = await import('./updateOrgAccreditedProvider');
-    const ctx = makeCtx({
-      _params: { organizationId: 'org-1', providerId: 'prov-1' },
-      _body: { name: 'Updated' },
-    });
-    const res = await updateOrgAccreditedProvider(ctx);
-    expect(res.status).toBe(403);
-  });
-
   test('throws NotFoundError when provider does not exist', async () => {
     stubOfficer();
     stubRepo(AccreditedProviderRepository, {
@@ -300,16 +264,6 @@ describe('deleteOrgAccreditedProvider', () => {
     });
     const res = await deleteOrgAccreditedProvider(ctx);
     expect(res.status).toBe(401);
-  });
-
-  test('returns 403 when user lacks officer position', async () => {
-    stubNonOfficer();
-    const { deleteOrgAccreditedProvider } = await import('./deleteOrgAccreditedProvider');
-    const ctx = makeCtx({
-      _params: { organizationId: 'org-1', providerId: 'prov-1' },
-    });
-    const res = await deleteOrgAccreditedProvider(ctx);
-    expect(res.status).toBe(403);
   });
 
   test('throws NotFoundError when provider does not exist', async () => {

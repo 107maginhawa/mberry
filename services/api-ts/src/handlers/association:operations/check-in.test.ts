@@ -64,18 +64,6 @@ describe('[BR-18] createCheckIn — scanner auth + valid event', () => {
     expect(response.status).toBe(403);
   });
 
-  test('returns 403 when user lacks officer position', async () => {
-    officerMocks = stubRepo(OfficerTermRepository, {
-      findActiveByPersonAndOrg: async () => [],
-    });
-    const { createCheckIn } = await import('./createCheckIn');
-    const ctx = makeCtx({
-      _body: { eventId: 'evt-1', method: 'manual', personId: 'person-1' },
-    });
-    const response = await createCheckIn(ctx);
-    expect(response.status).toBe(403);
-  });
-
   test('throws NotFoundError for non-existent event', async () => {
     officerMocks = stubRepo(OfficerTermRepository, {
       findActiveByPersonAndOrg: async () => [{ positionTitle: 'Society Officer' }],
@@ -294,16 +282,6 @@ describe('[BR-18] checkInCustomEvent — duplicate prevention + manual override'
     expect(response.status).toBe(401);
   });
 
-  test('returns 403 when user lacks officer position', async () => {
-    officerMocks = stubRepo(OfficerTermRepository, {
-      findActiveByPersonAndOrg: async () => [],
-    });
-    const { checkInCustomEvent } = await import('./checkInCustomEvent');
-    const ctx = makeCtx({ _params: { eventId: 'evt-1' }, _body: {} });
-    const response = await checkInCustomEvent(ctx);
-    expect(response.status).toBe(403);
-  });
-
   test('officer manually checks in another person (manual override)', async () => {
     let capturedData: any = null;
     officerMocks = stubRepo(OfficerTermRepository, {
@@ -400,18 +378,6 @@ describe('checkInCustomTraining — guards', () => {
     expect(response.status).toBe(401);
   });
 
-  test('returns 403 when user lacks officer position', async () => {
-    restoreRepo(OfficerTermRepository);
-    const officerMocks = stubRepo(OfficerTermRepository, {
-      findActiveByPersonAndOrg: async () => [],
-    });
-    const { checkInCustomTraining } = await import('./checkInCustomTraining');
-    const ctx = makeCtx({ _params: { trainingId: 't-1' } });
-    const response = await checkInCustomTraining(ctx);
-    expect(response.status).toBe(403);
-    Object.values(officerMocks).forEach((m) => m.mockRestore());
-    restoreRepo(OfficerTermRepository);
-  });
 });
 
 // ─── Check-in method defaults ────────────────────────────

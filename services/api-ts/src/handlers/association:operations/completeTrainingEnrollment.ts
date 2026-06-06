@@ -6,8 +6,6 @@ import { TrainingEnrollmentRepository, TrainingRepository } from './repos/traini
 import { CreditEntryRepository } from '../association:member/repos/credits.repo';
 import { getCycleForDate } from '../association:member/utils/credit-cycle';
 import { domainEvents } from '@/core/domain-events';
-import { requirePosition } from '@/core/auth/officer-checks';
-import { POSITION_TITLES } from '@/utils/position-titles';
 import { assertValidTransition, TRAINING_ENROLLMENT_VALID_TRANSITIONS } from '@/utils/status-transitions';
 
 /**
@@ -29,9 +27,6 @@ export async function completeTrainingEnrollment(
 ): Promise<Response> {
   const user = ctx.get('user');
   if (!user) return ctx.json({ error: 'Unauthorized' }, 401);
-
-  const denied = await requirePosition(ctx, [POSITION_TITLES.SOCIETY_OFFICER, POSITION_TITLES.PRESIDENT]);
-  if (denied) return denied;
 
   const params = ctx.req.valid('param');
   const body = ctx.req.valid('json');

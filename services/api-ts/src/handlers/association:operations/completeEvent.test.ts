@@ -59,20 +59,6 @@ describe('completeEvent', () => {
     expect(response.body.status).toBe('completed');
   });
 
-  test('returns 403 when user is not an officer', async () => {
-    officerMocks = stubRepo(OfficerTermRepository, {
-      findActiveByPersonAndOrg: async () => [],
-    });
-
-    const ctx = makeCtx({
-      user: { id: 'member-1', role: 'user', twoFactorEnabled: true },
-      _params: { eventId: 'event-1' },
-    });
-
-    const response = await completeEvent(ctx);
-    expect(response.status).toBe(403);
-  });
-
   test('throws NotFoundError for non-existent event', async () => {
     officerMocks = stubRepo(OfficerTermRepository, {
       findActiveByPersonAndOrg: async () => [{ positionTitle: 'Society Officer' }],

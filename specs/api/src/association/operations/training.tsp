@@ -960,6 +960,7 @@ namespace Association.Operations.Training {
     @operationId("createTraining")
     @post
     @extension("x-security-required-roles", #["association:admin", "association:staff"])
+    @extension("x-require-position", #["Society Officer", "President"])
     @extension("x-audit", #{ action: "create", resourceType: "training" })
     createTraining(
       @body body: TrainingCreateRequest
@@ -986,6 +987,7 @@ namespace Association.Operations.Training {
     @patch(#{implicitOptionality: true})
     @route("/{trainingId}")
     @extension("x-security-required-roles", #["association:admin", "association:staff"])
+    @extension("x-require-position", #["Society Officer", "President"])
     @extension("x-audit", #{ action: "update", resourceType: "training" })
     updateTraining(
       @path trainingId: string,
@@ -1001,6 +1003,7 @@ namespace Association.Operations.Training {
     @delete
     @route("/{trainingId}")
     @extension("x-security-required-roles", #["association:admin"])
+    @extension("x-require-position", #["Society Officer", "President"])
     @extension("x-audit", #{ action: "delete", resourceType: "training" })
     deleteTraining(
       @path trainingId: string
@@ -1024,6 +1027,7 @@ namespace Association.Operations.Training {
     @post
     @route("/{trainingId}/publish")
     @extension("x-security-required-roles", #["association:admin", "association:staff"])
+    @extension("x-require-position", #["Society Officer", "President"])
     @extension("x-audit", #{ action: "update", resourceType: "training" })
     publishTraining(
       @path trainingId: string
@@ -1070,6 +1074,7 @@ namespace Association.Operations.Training {
     @patch(#{implicitOptionality: true})
     @route("/enrollments/{enrollmentId}")
     @extension("x-security-required-roles", #["association:admin", "association:staff"])
+    @extension("x-require-position", #["Society Officer", "President"])
     @extension("x-audit", #{ action: "update", resourceType: "training-enrollment" })
     updateTrainingEnrollment(
       @path enrollmentId: string,
@@ -1085,6 +1090,7 @@ namespace Association.Operations.Training {
     @delete
     @route("/enrollments/{enrollmentId}")
     @extension("x-security-required-roles", #["association:admin"])
+    @extension("x-require-position", #["Society Officer", "President"])
     @extension("x-audit", #{ action: "delete", resourceType: "training-enrollment" })
     deleteTrainingEnrollment(
       @path enrollmentId: string
@@ -1109,6 +1115,7 @@ namespace Association.Operations.Training {
     @post
     @route("/enrollments/{enrollmentId}/complete")
     @extension("x-security-required-roles", #["association:admin", "association:staff"])
+    @extension("x-require-position", #["Society Officer", "President"])
     @extension("x-audit", #{ action: "complete", resourceType: "training-enrollment" })
     completeTrainingEnrollment(
       @path enrollmentId: string,
@@ -1131,6 +1138,7 @@ namespace Association.Operations.Training {
     @post
     @route("/courses")
     @extension("x-security-required-roles", #["association:admin", "association:staff"])
+    @extension("x-require-position", #["Society Officer", "President"])
     @extension("x-audit", #{ action: "create", resourceType: "course" })
     createCourse(
       @body body: CourseCreateRequest
@@ -1156,6 +1164,7 @@ namespace Association.Operations.Training {
     @patch(#{implicitOptionality: true})
     @route("/courses/{courseId}")
     @extension("x-security-required-roles", #["association:admin", "association:staff"])
+    @extension("x-require-position", #["Society Officer", "President"])
     @extension("x-audit", #{ action: "update", resourceType: "course" })
     updateCourse(
       @path courseId: string,
@@ -1171,6 +1180,7 @@ namespace Association.Operations.Training {
     @delete
     @route("/courses/{courseId}")
     @extension("x-security-required-roles", #["association:admin"])
+    @extension("x-require-position", #["Society Officer", "President"])
     @extension("x-audit", #{ action: "delete", resourceType: "course" })
     deleteCourse(
       @path courseId: string
@@ -1227,6 +1237,7 @@ namespace Association.Operations.Training {
     @patch(#{implicitOptionality: true})
     @route("/courses/enrollments/{enrollmentId}")
     @extension("x-security-required-roles", #["association:admin", "association:staff"])
+    @extension("x-require-position", #["Society Officer", "President"])
     @extension("x-audit", #{ action: "update", resourceType: "course-enrollment" })
     updateCourseEnrollment(
       @path enrollmentId: string,
@@ -1242,6 +1253,7 @@ namespace Association.Operations.Training {
     @delete
     @route("/courses/enrollments/{enrollmentId}")
     @extension("x-security-required-roles", #["association:admin"])
+    @extension("x-require-position", #["Society Officer", "President"])
     @extension("x-audit", #{ action: "delete", resourceType: "course-enrollment" })
     deleteCourseEnrollment(
       @path enrollmentId: string
@@ -1266,6 +1278,7 @@ namespace Association.Operations.Training {
     @post
     @route("/courses/enrollments/{enrollmentId}/progress")
     @extension("x-security-required-roles", #["association:admin", "association:staff", "association:member:owner"])
+    @extension("x-require-position", #["Society Officer", "President"])
     @extension("x-audit", #{ action: "update", resourceType: "course-enrollment" })
     updateCourseProgress(
       @path enrollmentId: string,
@@ -1346,6 +1359,7 @@ namespace Association.Operations.Training {
     @post
     @route("/{trainingId}/cancel")
     @extension("x-security-required-roles", #["association:admin", "association:staff"])
+    @extension("x-require-position", #["Society Officer", "President"])
     @extension("x-audit", #{ action: "update", resourceType: "training-enrollment" })
     cancelCustomTraining(
       @path trainingId: string,
@@ -1361,6 +1375,7 @@ namespace Association.Operations.Training {
     @post
     @route("/{trainingId}/complete")
     @extension("x-security-required-roles", #["association:admin", "association:staff"])
+    @extension("x-require-position", #["Society Officer", "President"])
     @extension("x-audit", #{ action: "update", resourceType: "training-enrollment" })
     completeCustomTraining(
       @path trainingId: string,
@@ -1378,6 +1393,7 @@ namespace Association.Operations.Training {
     @post
     @route("/{trainingId}/check-in")
     @extension("x-security-required-roles", #["association:admin", "association:staff"])
+    @extension("x-require-position", #["Society Officer", "President"])
     @extension("x-audit", #{ action: "update", resourceType: "training-enrollment" })
     checkInCustomTraining(
       @path trainingId: string,
@@ -1415,6 +1431,7 @@ namespace Association.Operations.Training {
     @get
     @route("/{organizationId}")
     @extension("x-security-required-roles", #["association:admin", "association:staff"])
+    @extension("x-require-position", #["Society Officer", "President"])
     listOrgAccreditedProviders(
       @path organizationId: string,
       @query status?: AccreditedProviderStatus
@@ -1427,6 +1444,7 @@ namespace Association.Operations.Training {
     @post
     @route("/{organizationId}")
     @extension("x-security-required-roles", #["association:admin", "association:staff"])
+    @extension("x-require-position", #["Society Officer", "President"])
     createOrgAccreditedProvider(
       @path organizationId: string,
       @body body: OrgAccreditedProviderCreateRequest
@@ -1440,6 +1458,7 @@ namespace Association.Operations.Training {
     @patch(#{implicitOptionality: true})
     @route("/{organizationId}/{providerId}")
     @extension("x-security-required-roles", #["association:admin", "association:staff"])
+    @extension("x-require-position", #["Society Officer", "President"])
     updateOrgAccreditedProvider(
       @path organizationId: string,
       @path providerId: string,
@@ -1455,6 +1474,7 @@ namespace Association.Operations.Training {
     @delete
     @route("/{organizationId}/{providerId}")
     @extension("x-security-required-roles", #["association:admin", "association:staff"])
+    @extension("x-require-position", #["Society Officer", "President"])
     deleteOrgAccreditedProvider(
       @path organizationId: string,
       @path providerId: string

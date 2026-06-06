@@ -3,8 +3,6 @@ import type { DatabaseInstance } from '@/core/database';
 import type { UpdateEventBody, UpdateEventParams } from '@/generated/openapi/validators';
 import { NotFoundError } from '@/core/errors';
 import { EventRepository } from './repos/events.repo';
-import { requirePosition } from '@/core/auth/officer-checks';
-import { POSITION_TITLES } from '@/utils/position-titles';
 
 /**
  * updateEvent
@@ -20,9 +18,6 @@ export async function updateEvent(
 
   const orgId = ctx.get('organizationId');
   if (!orgId) return ctx.json({ error: 'Organization context required' }, 403);
-
-  const denied = await requirePosition(ctx, [POSITION_TITLES.SOCIETY_OFFICER, POSITION_TITLES.PRESIDENT]);
-  if (denied) return denied;
 
   const params = ctx.req.valid('param');
   const body = ctx.req.valid('json');

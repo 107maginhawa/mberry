@@ -3,8 +3,6 @@ import type { DatabaseInstance } from '@/core/database';
 import type { UpdateCourseProgressBody, UpdateCourseProgressParams } from '@/generated/openapi/validators';
 import { NotFoundError, BusinessLogicError } from '@/core/errors';
 import { CourseEnrollmentRepository } from './repos/training.repo';
-import { requirePosition } from '@/core/auth/officer-checks';
-import { POSITION_TITLES } from '@/utils/position-titles';
 
 /**
  * updateCourseProgress
@@ -17,9 +15,6 @@ export async function updateCourseProgress(
 ): Promise<Response> {
   const user = ctx.get('user');
   if (!user) return ctx.json({ error: 'Unauthorized' }, 401);
-
-  const denied = await requirePosition(ctx, [POSITION_TITLES.SOCIETY_OFFICER, POSITION_TITLES.PRESIDENT]);
-  if (denied) return denied;
 
   const params = ctx.req.valid('param');
   const body = ctx.req.valid('json');

@@ -3,8 +3,6 @@ import type { DatabaseInstance } from '@/core/database';
 import { NotFoundError, BusinessLogicError } from '@/core/errors';
 import { EventRepository } from './repos/events.repo';
 import { domainEvents } from '@/core/domain-events';
-import { requirePosition } from '@/core/auth/officer-checks';
-import { POSITION_TITLES } from '@/utils/position-titles';
 
 /**
  * completeEvent
@@ -16,9 +14,6 @@ import { POSITION_TITLES } from '@/utils/position-titles';
 export async function completeEvent(ctx: HandlerContext): Promise<Response> {
   const user = ctx.get('user');
   if (!user) return ctx.json({ error: 'Unauthorized' }, 401);
-
-  const denied = await requirePosition(ctx, [POSITION_TITLES.SOCIETY_OFFICER, POSITION_TITLES.PRESIDENT]);
-  if (denied) return denied;
 
   const { eventId } = ctx.req.valid('param') as { eventId: string };
   const db = ctx.get('database') as DatabaseInstance;

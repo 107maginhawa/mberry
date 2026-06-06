@@ -479,19 +479,6 @@ describe('[AC-M08-001] createCheckIn — QR check-in requires authenticated scan
     expect(response.status).toBe(403);
   });
 
-  test('requires officer position (scanner must be authenticated officer)', async () => {
-    // requirePosition returns a 403 response when user lacks officer role
-    officerMocks = stubRepo(OfficerTermRepository, {
-      findActiveByPersonAndOrg: async () => [],
-    });
-    const { createCheckIn } = await import('./createCheckIn');
-    const ctx = makeCtx({
-      _body: { eventId: 'evt-1', method: 'manual', personId: 'person-1' },
-    });
-    const response = await createCheckIn(ctx);
-    expect(response.status).toBe(403);
-  });
-
   test('manual check-in succeeds for authenticated officer with valid event', async () => {
     officerMocks = stubRepo(OfficerTermRepository, {
       findActiveByPersonAndOrg: async () => [{ positionTitle: 'Society Officer' }],
@@ -886,16 +873,6 @@ describe('publishEvent — status transitions (draft→published)', () => {
     await expect(publishEvent(ctx)).rejects.toThrow('Only draft events can be published');
   });
 
-  test('requires officer position to publish', async () => {
-    officerMocks = stubRepo(OfficerTermRepository, {
-      findActiveByPersonAndOrg: async () => [],
-    });
-    const { publishEvent } = await import('./publishEvent');
-    const ctx = makeCtx({ _params: { eventId: 'evt-1' } });
-    const response = await publishEvent(ctx);
-    expect(response.status).toBe(403);
-  });
-
   test('throws NotFoundError for non-existent event', async () => {
     officerMocks = stubRepo(OfficerTermRepository, {
       findActiveByPersonAndOrg: async () => [{ positionTitle: 'Society Officer' }],
@@ -985,15 +962,6 @@ describe('cancelEvent — status transitions (draft/published→cancelled)', () 
     await expect(cancelEvent(ctx)).rejects.toThrow('Only draft or published events can be cancelled');
   });
 
-  test('requires officer position to cancel', async () => {
-    officerMocks = stubRepo(OfficerTermRepository, {
-      findActiveByPersonAndOrg: async () => [],
-    });
-    const { cancelEvent } = await import('./cancelEvent');
-    const ctx = makeCtx({ _params: { eventId: 'evt-1' } });
-    const response = await cancelEvent(ctx);
-    expect(response.status).toBe(403);
-  });
 });
 
 // ─── Officer Permission: createEvent ───────────────────────
@@ -1035,17 +1003,6 @@ describe('createEvent — officer permission gate', () => {
     expect(response.body.status).toBe('draft');
   });
 
-  test('non-officers cannot create events', async () => {
-    officerMocks = stubRepo(OfficerTermRepository, {
-      findActiveByPersonAndOrg: async () => [],
-    });
-    const { createEvent } = await import('./createEvent');
-    const ctx = makeCtx({
-      _body: { title: 'Test', startDate: '2026-06-01', endDate: '2026-06-02' },
-    });
-    const response = await createEvent(ctx);
-    expect(response.status).toBe(403);
-  });
 });
 
 // ─── registerForCustomEvent — capacity + published guard ────

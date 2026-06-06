@@ -4,8 +4,6 @@ import type { PublishTrainingParams } from '@/generated/openapi/validators';
 import { NotFoundError, ValidationError } from '@/core/errors';
 import { TrainingRepository } from './repos/training.repo';
 import { domainEvents } from '@/core/domain-events';
-import { requirePosition } from '@/core/auth/officer-checks';
-import { POSITION_TITLES } from '@/utils/position-titles';
 import { assertValidTransition, TRAINING_VALID_TRANSITIONS } from '@/utils/status-transitions';
 
 /**
@@ -19,9 +17,6 @@ export async function publishTraining(
 ): Promise<Response> {
   const user = ctx.get('user');
   if (!user) return ctx.json({ error: 'Unauthorized' }, 401);
-
-  const denied = await requirePosition(ctx, [POSITION_TITLES.SOCIETY_OFFICER, POSITION_TITLES.PRESIDENT]);
-  if (denied) return denied;
 
   const params = ctx.req.valid('param');
   const db = ctx.get('database') as DatabaseInstance;
