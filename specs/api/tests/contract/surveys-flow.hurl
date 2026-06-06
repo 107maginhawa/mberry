@@ -220,3 +220,66 @@ x-csrf-token: {{csrf_token}}
 Cookie: better-auth.session_token={{officer_cookie}}
 x-org-id: ed8e3a96-8126-4341-be42-e6eb7940c562
 HTTP 204
+
+# ── 9. Admin survey list (super-admin endpoint) ───────────────────────────────
+
+GET {{api}}/admin/surveys/
+Cookie: better-auth.session_token={{officer_cookie}}
+x-org-id: ed8e3a96-8126-4341-be42-e6eb7940c562
+HTTP *
+[Asserts]
+status toString matches "^(200|403)$"
+
+# ── 10. NPS trend analytics ───────────────────────────────────────────────────
+
+GET {{api}}/surveys/analytics/nps-trends
+Cookie: better-auth.session_token={{officer_cookie}}
+x-org-id: ed8e3a96-8126-4341-be42-e6eb7940c562
+HTTP *
+[Asserts]
+status toString matches "^(200|403)$"
+
+# ── 11. Delete my responses (member-side action) ──────────────────────────────
+
+DELETE {{api}}/surveys/my-responses
+Origin: {{origin}}
+x-csrf-token: {{csrf_token}}
+Cookie: better-auth.session_token={{officer_cookie}}
+x-org-id: ed8e3a96-8126-4341-be42-e6eb7940c562
+HTTP *
+[Asserts]
+status toString matches "^(200|204|404)$"
+
+# ── 12. List responses for a synthetic survey ─────────────────────────────────
+
+GET {{api}}/surveys/00000000-0000-4000-8000-000000000000/responses
+Cookie: better-auth.session_token={{officer_cookie}}
+x-org-id: ed8e3a96-8126-4341-be42-e6eb7940c562
+HTTP *
+[Asserts]
+status toString matches "^(200|403|404)$"
+
+# ── 13. Export responses for a synthetic survey ───────────────────────────────
+
+GET {{api}}/surveys/00000000-0000-4000-8000-000000000000/export
+Cookie: better-auth.session_token={{officer_cookie}}
+x-org-id: ed8e3a96-8126-4341-be42-e6eb7940c562
+HTTP *
+[Asserts]
+status toString matches "^(200|403|404)$"
+
+# ── 14. Dismiss a synthetic response ──────────────────────────────────────────
+
+POST {{api}}/surveys/00000000-0000-4000-8000-000000000000/responses/dismiss
+Origin: {{origin}}
+x-csrf-token: {{csrf_token}}
+Cookie: better-auth.session_token={{officer_cookie}}
+x-org-id: ed8e3a96-8126-4341-be42-e6eb7940c562
+Content-Type: application/json
+{
+  "responseId": "00000000-0000-4000-8000-000000000000",
+  "reason": "test"
+}
+HTTP *
+[Asserts]
+status toString matches "^(200|400|404|422)$"
