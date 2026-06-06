@@ -130,3 +130,27 @@ HTTP *
 [Asserts]
 status >= 200
 status < 300
+
+
+# ── 7. List bookings (officer view) ─────────────────────────
+
+GET {{api}}/booking/bookings
+x-org-id: {{org_id}}
+HTTP *
+[Asserts]
+status toString matches "^(200|403)$"
+
+
+# ── 8. Patch a booking event (synthetic id) ─────────────────
+
+PATCH {{api}}/booking/events/00000000-0000-4000-8000-000000000000
+Origin: {{origin}}
+x-csrf-token: {{csrf_token}}
+x-org-id: {{org_id}}
+Content-Type: application/json
+{
+  "title": "Updated event title"
+}
+HTTP *
+[Asserts]
+status toString matches "^(200|400|404|500)$"

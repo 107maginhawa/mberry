@@ -105,3 +105,33 @@ x-csrf-token: {{csrf_token}}
 Content-Type: application/json
 {}
 HTTP *
+
+
+# ── 7. List email suppressions (admin) ──────────────────────
+
+GET {{api}}/email/suppressions
+x-org-id: {{org_id}}
+HTTP *
+[Asserts]
+status toString matches "^(200|403)$"
+
+
+# ── 8. RFC 8058 list-unsubscribe link click (public GET) ────
+
+GET {{api}}/email/unsubscribe?token=synthetic-contract-test-token-{{suffix}}
+HTTP *
+[Asserts]
+status toString matches "^(200|400|404)$"
+
+
+# ── 9. RFC 8058 one-click unsubscribe POST (public) ─────────
+
+POST {{api}}/email/unsubscribe
+Origin: {{origin}}
+Content-Type: application/json
+{
+  "token": "synthetic-contract-test-token-{{suffix}}"
+}
+HTTP *
+[Asserts]
+status toString matches "^(200|400|404|422)$"
