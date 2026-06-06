@@ -11,11 +11,16 @@
 // real page contract (page-title heading + bottom-nav landmark).
 import { test, expect } from '../helpers/test-fixture'
 import { signInAsMember } from '../helpers/auth'
+import { captureAnyApiSuccess } from '../helpers/real-flow'
 
 test.describe('Mobile: Profile & Settings', () => {
   test('profile page renders correctly on mobile', async ({ page }) => {
     await signInAsMember(page)
+    const respP = captureAnyApiSuccess(page)
     await page.goto('/my/profile')
+    const resp = await respP
+    expect(resp?.status()).toBe(200)
+    expect(resp?.ok()).toBe(true)
     await expect(page.getByRole('heading', { name: /profile/i, level: 1 })).toBeVisible({ timeout: 10000 })
   })
 
