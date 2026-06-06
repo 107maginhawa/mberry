@@ -1,3 +1,4 @@
+// @selector-only-ok: visual regression baselines — pixel-diff snapshots, no data-flow assertions
 /**
  * Visual regression baselines — Playwright `toHaveScreenshot` per key route.
  *
