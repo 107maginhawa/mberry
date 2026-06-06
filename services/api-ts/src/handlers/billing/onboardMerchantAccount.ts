@@ -30,8 +30,12 @@ export async function onboardMerchantAccount(
   ctx: ValidatedContext<OnboardMerchantAccountBody, never, OnboardMerchantAccountParams>
 ): Promise<Response> {
   const database = ctx.get('database');
-  const logger = ctx.get('logger');
+  const baseLogger = ctx.get('logger');
   const billing = ctx.get('billing');
+  const traceId = ctx.get('requestId');
+
+  // Child logger carries traceId + module on every call in this handler
+  const logger = baseLogger?.child?.({ traceId, module: 'billing' }) ?? baseLogger;
 
   // Get authenticated session (guaranteed by middleware)
   const session = ctx.get('session') as Session;
@@ -45,7 +49,7 @@ export async function onboardMerchantAccount(
   const body = ctx.req.valid('json');
   const { refreshUrl, returnUrl } = body;
 
-  logger.info({ merchantAccountId, userId: user.id, refreshUrl, returnUrl }, 'Getting merchant account onboarding URL');
+  logger?.info({ action: 'onboardMerchantAccount.start', merchantAccountId, userId: user.id }, 'Getting merchant account onboarding URL');
 
   // Create repository instance
   const merchantAccountRepo = new MerchantAccountRepository(database, logger);
@@ -81,9 +85,10 @@ export async function onboardMerchantAccount(
 
     // Handle missing Stripe account (imported accounts or misconfiguration)
     if (!stripeAccountId) {
-      logger.warn({
+      logger?.warn({
+        action: 'onboardMerchantAccount.missingStripeAccount',
         merchantAccountId,
-        personId: merchantAccount.person
+        personId: merchantAccount.person,
       }, 'Merchant account missing Stripe account - creating one now');
 
       // Get person data for Stripe account creation
@@ -101,19 +106,20 @@ export async function onboardMerchantAccount(
       // Extract email from contactInfo JSONB field (optional - Stripe collects during onboarding)
       const email = person.contactInfo?.email;
       if (!email) {
-        logger.warn({
+        logger?.warn({
+          action: 'onboardMerchantAccount.missingEmail',
           personId: merchantAccount.person,
-          merchantAccountId
+          merchantAccountId,
         }, 'Person missing email - will be collected during Stripe onboarding');
       }
 
       // Extract country from primaryAddress JSONB field (optional - Stripe collects during onboarding)
       const country = person.primaryAddress?.country;
       if (!country || country.length !== 2) {
-        logger.warn({
+        logger?.warn({
+          action: 'onboardMerchantAccount.missingCountry',
           personId: merchantAccount.person,
           merchantAccountId,
-          country
         }, 'Person missing valid country code - will be collected during Stripe onboarding');
       }
 
@@ -150,14 +156,15 @@ export async function onboardMerchantAccount(
 
       stripeAccountId = connectAccount.accountId;
 
-      logger.info({
+      logger?.info({
+        action: 'onboardMerchantAccount.stripeAccountCreated',
         merchantAccountId,
-        stripeAccountId
+        stripeAccountId,
       }, 'Created Stripe account for existing merchant account');
     }
 
     // Proactively check current account status from Stripe
-    logger.info({ stripeAccountId }, 'Checking Stripe account status');
+    logger?.info({ action: 'onboardMerchantAccount.checkingStatus', merchantAccountId, stripeAccountId }, 'Checking Stripe account status');
     const accountStatus = await billing.getConnectAccountStatus(stripeAccountId);
 
     // Update metadata with latest status from Stripe
@@ -176,10 +183,11 @@ export async function onboardMerchantAccount(
 
     // Check if already onboarded
     if (accountStatus.onboardingComplete) {
-      logger.info({
+      logger?.info({
+        action: 'onboardMerchantAccount.alreadyOnboarded',
         merchantAccountId,
         stripeAccountId,
-        status: accountStatus.status
+        status: accountStatus.status,
       }, 'Merchant account already onboarded - returning dashboard URL');
 
       // Return dashboard URL instead of onboarding URL if available
@@ -204,11 +212,12 @@ export async function onboardMerchantAccount(
       returnUrl
     );
 
-    logger.info({
+    logger?.info({
+      action: 'onboardMerchantAccount.urlGenerated',
       merchantAccountId,
       stripeAccountId,
       onboardingComplete: accountStatus.onboardingComplete,
-      status: accountStatus.status
+      status: accountStatus.status,
     }, 'Merchant account onboarding URL generated');
 
     ctx.set('auditResourceId', merchantAccountId);
@@ -231,9 +240,10 @@ export async function onboardMerchantAccount(
     }, 200);
 
   } catch (error) {
-    logger.error({
+    logger?.error({
+      action: 'onboardMerchantAccount.error',
       error,
-      merchantAccountId
+      merchantAccountId,
     }, 'Failed to generate merchant onboarding URL');
 
     // Check if error is due to missing Stripe configuration
