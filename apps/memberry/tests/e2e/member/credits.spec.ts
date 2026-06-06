@@ -2,6 +2,13 @@
 import { test, expect } from '../helpers/test-fixture'
 import { signIn } from '../helpers/auth'
 import { SEED_MEMBER_EMAIL, TEST_PASSWORD } from '../helpers/test-config'
+import { captureRouteHydration } from '../helpers/real-flow'
+
+// W2 real-flow upgrade: /my/credits hydrates via GET /persons/me
+// (auth shell) and a credit-summary endpoint. We capture whichever
+// fires first so the spec proves the backend returned data, not just
+// that the stat-card labels rendered.
+const CREDIT_OR_PERSON = /\/(credit|persons\/me)(?:[/?]|$)/
 
 const MEMBER_EMAIL = SEED_MEMBER_EMAIL
 const MEMBER_PASSWORD = TEST_PASSWORD
@@ -9,7 +16,13 @@ const MEMBER_PASSWORD = TEST_PASSWORD
 test.describe('Member Credits (/my/credits)', () => {
   test('credits page shows summary cards', async ({ page }) => {
     await signIn(page, MEMBER_EMAIL, MEMBER_PASSWORD)
+    const respP = captureRouteHydration(page, CREDIT_OR_PERSON)
     await page.goto('/my/credits')
+
+    const resp = await respP
+    expect(resp?.status()).toBe(200)
+    expect(resp?.ok()).toBe(true)
+
     // Stat card labels (use exact to avoid matching "No credits earned yet" etc.)
     await expect(page.getByText('Earned', { exact: true })).toBeVisible({ timeout: 10000 })
     await expect(page.getByText('Required', { exact: true })).toBeVisible({ timeout: 10000 })
