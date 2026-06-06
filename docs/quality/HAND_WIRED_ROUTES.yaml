@@ -1,0 +1,119 @@
+# Routes intentionally hand-wired in services/api-ts/src/app.ts.
+# Allowed reasons:
+#   - middleware-ordering   (custom chain that the TypeSpec generator can't express)
+#   - public-unauth         (intentionally outside auth middleware)
+#   - legacy-deferred       (TypeSpec migration explicitly deferred — link ROADMAP)
+#   - pii-custom-auth       (PII endpoints with handler-specific authorization branching)
+#   - public-webhook        (third-party webhook callback; verifies own signature)
+#
+# CI script: scripts/check-hand-wired-routes.ts diffs this file against app.ts.
+#
+# Total: 52 non-test routes (54 total; 2 are /test/isolated-fixture test-only routes).
+# Test routes are omitted below — they are guarded by NODE_ENV !== 'production'.
+
+routes:
+  # Public discovery
+  - { method: GET,    path: "/public/orgs",                                                    reason: public-unauth,       owner: association,         note: "public org discovery before auth" }
+  - { method: GET,    path: "/public/org/:orgId/tiers",                                        reason: public-unauth,       owner: association:member,  note: "applicants must see tiers before membership" }
+
+  # OG meta / social crawlers
+  - { method: GET,    path: "/og/events/:slug",                                                reason: public-unauth,       owner: events,              note: "HTML og:meta for social crawlers, not REST" }
+
+  # Public credential/certificate lookups
+  - { method: GET,    path: "/association/member/credentials/lookup/:credentialNumber",        reason: public-unauth,       owner: association:member,  note: "public credential lookup, no auth by design" }
+  - { method: GET,    path: "/certificates/verify/:certificateNumber",                         reason: public-unauth,       owner: certificates,        note: "public certificate verification, no auth by design" }
+
+  # DPA breach notification (admin-only)
+  - { method: POST,   path: "/admin/breaches",                                                 reason: middleware-ordering, owner: platformadmin,       note: "DPA 2012 breach notification, admin-only" }
+  - { method: GET,    path: "/admin/breaches",                                                 reason: middleware-ordering, owner: platformadmin,       note: "DPA 2012 breach notification, admin-only" }
+  - { method: PUT,    path: "/admin/breaches/:id",                                             reason: middleware-ordering, owner: platformadmin,       note: "DPA 2012 breach notification, admin-only" }
+
+  # Support ticket SLA system
+  - { method: POST,   path: "/support/tickets",                                                reason: legacy-deferred,     owner: platformadmin,       note: "support ticket SLA system, not in TypeSpec" }
+  - { method: GET,    path: "/admin/tickets",                                                  reason: legacy-deferred,     owner: platformadmin,       note: "support ticket SLA system, not in TypeSpec" }
+  - { method: GET,    path: "/admin/tickets/:id",                                              reason: legacy-deferred,     owner: platformadmin,       note: "support ticket SLA system, not in TypeSpec" }
+  - { method: PUT,    path: "/admin/tickets/:id",                                              reason: legacy-deferred,     owner: platformadmin,       note: "support ticket SLA system, not in TypeSpec" }
+  - { method: POST,   path: "/admin/tickets/:id/comments",                                    reason: legacy-deferred,     owner: platformadmin,       note: "support ticket SLA system, not in TypeSpec" }
+
+  # Payment token (must precede auth middleware)
+  - { method: GET,    path: "/pay/:token/validate",                                            reason: middleware-ordering, owner: dues,                note: "public payment token, must precede auth middleware" }
+  - { method: POST,   path: "/pay/:token/checkout",                                            reason: middleware-ordering, owner: dues,                note: "public payment token, must precede auth middleware" }
+
+  # Stripe webhook (must precede auth middleware)
+  - { method: POST,   path: "/webhooks/stripe",                                                reason: public-webhook,      owner: billing,             note: "Stripe webhook, must precede auth middleware" }
+
+  # RFC 8058 unsubscribe (must precede /email/* auth)
+  - { method: GET,    path: "/email/unsubscribe",                                              reason: middleware-ordering, owner: email,               note: "RFC 8058 unsubscribe, must precede /email/* auth" }
+  - { method: POST,   path: "/email/unsubscribe",                                              reason: middleware-ordering, owner: email,               note: "RFC 8058 unsubscribe, must precede /email/* auth" }
+
+  # Email suppressions (middleware ordering with /email/* auth)
+  - { method: GET,    path: "/email/suppressions",                                             reason: middleware-ordering, owner: email,               note: "suppression list, middleware ordering with /email/* auth" }
+
+  # Receipt PDF download
+  - { method: GET,    path: "/org/:organizationId/payments/:paymentId/receipt",               reason: legacy-deferred,     owner: dues,                note: "receipt PDF download, not in TypeSpec" }
+
+  # Document byte download
+  - { method: GET,    path: "/documents/:documentId/download",                                 reason: middleware-ordering, owner: documents,           note: "browser GET cannot send x-org-id; self-enforces membership" }
+
+  # National dashboard export
+  - { method: POST,   path: "/admin/national-dashboard/:associationId/export",                reason: legacy-deferred,     owner: platformadmin,       note: "national dashboard CSV/JSON export, admin-only" }
+
+  # ID card
+  - { method: GET,    path: "/persons/me/id-card/:orgId",                                     reason: legacy-deferred,     owner: person,              note: "ID card, not in TypeSpec" }
+  - { method: GET,    path: "/persons/me/id-card/:orgId/pdf",                                 reason: legacy-deferred,     owner: person,              note: "ID card PDF, not in TypeSpec" }
+
+  # Certificate PDF
+  - { method: GET,    path: "/certificates/:id/pdf",                                           reason: legacy-deferred,     owner: certificates,        note: "WF-074 certificate PDF download, handler exists but not in TypeSpec" }
+
+  # Credit transcript
+  - { method: GET,    path: "/persons/me/credit-transcript",                                  reason: legacy-deferred,     owner: association:member,  note: "WF-070 cross-org credit transcript export, inline query schema not in TypeSpec" }
+  - { method: GET,    path: "/persons/me/credit-transcript/pdf",                              reason: legacy-deferred,     owner: association:member,  note: "WF-070 credit transcript PDF export" }
+
+  # Data export (DPA async flow)
+  - { method: POST,   path: "/persons/me/data-export",                                        reason: pii-custom-auth,     owner: person,              note: "WF-014 async DPA data export, inline schema not in TypeSpec" }
+  - { method: GET,    path: "/persons/me/data-export/:id",                                    reason: pii-custom-auth,     owner: person,              note: "WF-014 data export status poll" }
+  - { method: GET,    path: "/persons/me/data-export/:id/download",                           reason: pii-custom-auth,     owner: person,              note: "WF-014 data export download" }
+
+  # Officer transition checklist
+  - { method: POST,   path: "/association/member/org/:organizationId/officers/:termId/transition", reason: legacy-deferred, owner: association:member, note: "officer transition checklist handover, not in TypeSpec" }
+
+  # Org dashboard
+  - { method: GET,    path: "/association/member/org/:organizationId/dashboard",              reason: legacy-deferred,     owner: association:member,  note: "org-wide dashboard, not in TypeSpec" }
+
+  # Bulk void credit awards
+  - { method: POST,   path: "/association/member/credits/void-event",                         reason: legacy-deferred,     owner: association:member,  note: "bulk-void manual credit awards by activityName" }
+
+  # Admin pricing tier CRUD
+  - { method: GET,    path: "/admin/pricing",                                                  reason: legacy-deferred,     owner: platformadmin,       note: "admin pricing tier CRUD, not in TypeSpec" }
+  - { method: POST,   path: "/admin/pricing",                                                  reason: legacy-deferred,     owner: platformadmin,       note: "admin pricing tier CRUD, not in TypeSpec" }
+  - { method: PUT,    path: "/admin/pricing/:tierId",                                          reason: legacy-deferred,     owner: platformadmin,       note: "admin pricing tier CRUD, not in TypeSpec" }
+
+  # Admin subscription management
+  - { method: GET,    path: "/admin/subscriptions",                                            reason: legacy-deferred,     owner: platformadmin,       note: "admin subscription management, not in TypeSpec" }
+  - { method: GET,    path: "/admin/subscriptions/:id",                                        reason: legacy-deferred,     owner: platformadmin,       note: "admin subscription management, not in TypeSpec" }
+  - { method: PUT,    path: "/admin/subscriptions/:id/cancel",                                reason: legacy-deferred,     owner: platformadmin,       note: "admin subscription management, not in TypeSpec" }
+
+  # Platform revenue/health analytics
+  - { method: GET,    path: "/admin/analytics/revenue",                                        reason: legacy-deferred,     owner: platformadmin,       note: "platform revenue analytics, not in TypeSpec" }
+  - { method: GET,    path: "/admin/analytics/health",                                         reason: legacy-deferred,     owner: platformadmin,       note: "platform org health scores, not in TypeSpec" }
+
+  # Org-facing subscription routes
+  - { method: GET,    path: "/association/member/org/:organizationId/subscription",           reason: legacy-deferred,     owner: association:member,  note: "org-facing subscription, not in TypeSpec" }
+  - { method: POST,   path: "/association/member/org/:organizationId/subscription/upgrade",   reason: legacy-deferred,     owner: association:member,  note: "subscription upgrade, not in TypeSpec" }
+  - { method: POST,   path: "/association/member/org/:organizationId/subscription/checkout",  reason: legacy-deferred,     owner: association:member,  note: "subscription checkout, not in TypeSpec" }
+
+  # Announcement scheduling + stats
+  - { method: POST,   path: "/communications/announcements/:id/schedule",                     reason: legacy-deferred,     owner: communication,       note: "announcement scheduling, not in TypeSpec" }
+  - { method: GET,    path: "/communications/announcements/:id/stats",                        reason: legacy-deferred,     owner: communication,       note: "announcement stats, not in TypeSpec" }
+
+  # Event registration cancel
+  - { method: DELETE, path: "/org/:orgId/events/:eventId/register/:registrationId",           reason: legacy-deferred,     owner: events,              note: "event registration cancel, org-scoped path per API_CONTRACTS" }
+
+  # Survey export/clone/analytics
+  - { method: GET,    path: "/surveys/:survey/export",                                         reason: legacy-deferred,     owner: surveys,             note: "survey export, not in TypeSpec" }
+  - { method: POST,   path: "/surveys/:survey/clone",                                          reason: legacy-deferred,     owner: surveys,             note: "survey clone, not in TypeSpec" }
+  - { method: GET,    path: "/surveys/analytics/nps-trends",                                  reason: legacy-deferred,     owner: surveys,             note: "NPS trends analytics, not in TypeSpec" }
+  - { method: DELETE, path: "/surveys/my-responses",                                           reason: legacy-deferred,     owner: surveys,             note: "member survey response deletion, not in TypeSpec" }
+
+  # Admin survey dashboard
+  - { method: GET,    path: "/admin/surveys",                                                  reason: legacy-deferred,     owner: platformadmin,       note: "admin survey dashboard, platform admin only" }
