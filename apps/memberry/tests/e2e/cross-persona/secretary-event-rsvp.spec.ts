@@ -17,6 +17,7 @@ import { apiFetch } from '../helpers/api-fetch'
 import { signIn } from '../helpers/auth'
 import { withIsolatedFixture } from '../helpers/isolated-fixture'
 import { SEED_MEMBER_EMAIL, TEST_PASSWORD } from '../helpers/test-config'
+import { captureAnyApiSuccess } from '../helpers/real-flow'
 
 test.describe.configure({ mode: 'serial' })
 
@@ -34,7 +35,11 @@ test.describe('cross-persona: secretary creates event → member RSVPs → offic
       storageState: authStateFile('secretary'),
     })
     const secretaryPage = await secretaryCtx.newPage()
+    const secretaryHydration = captureAnyApiSuccess(secretaryPage)
     await secretaryPage.goto('/dashboard')
+    const secretaryResp = await secretaryHydration
+    expect(secretaryResp?.status()).toBe(200)
+    expect(secretaryResp?.ok()).toBe(true)
 
     const createRes = await apiFetch<{ id?: string; data?: { id?: string } }>(
       secretaryPage,
