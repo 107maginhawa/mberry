@@ -2,10 +2,12 @@
 // Business Rules: [BR-15] [BR-16] [BR-17] [BR-27]
 import { test, expect } from '../helpers/test-fixture'
 import { authStateFile } from '../helpers/auth-state'
+import { captureRouteHydration } from '../helpers/real-flow'
 
 
 test.use({ storageState: authStateFile('officer') })
 const ORG_ID = 'ed8e3a96-8126-4341-be42-e6eb7940c562'
+const EVENTS = /\/(event-lifecycle|events)/
 
 /**
  * Find the first event card link on the officer events page. Events render
@@ -24,10 +26,14 @@ function firstEventLink(page: import('@playwright/test').Page) {
 
 test.describe('Officer Events', () => {
   test('events page shows heading and stat cards', async ({ page }) => {
+    const respP = captureRouteHydration(page, EVENTS)
     await page.goto(`/org/${ORG_ID}/officer/events`)
     await expect(
       page.getByRole('heading', { name: 'Events', level: 1 }),
     ).toBeVisible({ timeout: 10000 })
+    const resp = await respP
+    expect(resp?.status()).toBe(200)
+    expect(resp?.ok()).toBe(true)
   })
 
   test('events list shows at least one event link', async ({ page }) => {
