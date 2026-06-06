@@ -9,6 +9,7 @@ import {
 import { SurveyRepository, SurveyResponseRepository, type SurveyResponseFilters } from './repos/survey.repo';
 import { OfficerTermRepository } from '../association:member/repos/governance.repo';
 import { buildPaginationMeta } from '@/utils/query';
+import { hasRole } from '@/utils/auth';
 
 const ANONYMOUS_UUID = '00000000-0000-0000-0000-000000000000';
 
@@ -35,7 +36,7 @@ export async function listSurveyResponses(
   const organizationId = ctx.get('organizationId') as string;
 
   // Officer/admin gate
-  if (session.user.role !== 'admin') {
+  if (!hasRole(session.user, 'admin')) {
     const officerRepo = new OfficerTermRepository(db, logger);
     const terms = await officerRepo.findActiveByPersonAndOrg(userId, organizationId);
     if (terms.length === 0) {

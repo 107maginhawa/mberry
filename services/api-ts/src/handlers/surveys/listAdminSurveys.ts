@@ -3,6 +3,7 @@ import type { DatabaseInstance } from '@/core/database';
 import { UnauthorizedError, ForbiddenError } from '@/core/errors';
 import { surveys } from './repos/survey.schema';
 import { eq, count, sql, type SQL, and } from 'drizzle-orm';
+import { hasRole } from '@/utils/auth';
 
 /**
  * listAdminSurveys
@@ -20,7 +21,7 @@ export async function listAdminSurveys(
     throw new UnauthorizedError();
   }
 
-  if (session.user.role !== 'admin') {
+  if (!hasRole(session.user, 'admin')) {
     throw new ForbiddenError('Platform admin access required');
   }
 

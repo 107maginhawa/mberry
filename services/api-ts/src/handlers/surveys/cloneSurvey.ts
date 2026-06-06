@@ -16,6 +16,7 @@ import {
 } from '@/core/errors';
 import { SurveyRepository } from './repos/survey.repo';
 import { OfficerTermRepository } from '../association:member/repos/governance.repo';
+import { hasRole } from '@/utils/auth';
 
 export async function cloneSurvey(
   ctx: ValidatedContext<never, never, never>
@@ -31,7 +32,7 @@ export async function cloneSurvey(
   const organizationId = ctx.get('organizationId') as string;
 
   // Officer/admin gate
-  if (session.user.role !== 'admin') {
+  if (!hasRole(session.user, 'admin')) {
     const officerRepo = new OfficerTermRepository(db, logger);
     const terms = await officerRepo.findActiveByPersonAndOrg(userId, organizationId);
     if (terms.length === 0) {

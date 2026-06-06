@@ -451,7 +451,7 @@ export function createApp(config: Config): App {
   // Fail-open org-context for non-association routes that optionally use organizationId.
   // No auth override — per-route auth in generated routes stays as-is.
   // Skips silently when no user or no org context (webhooks, public discovery, etc.)
-  for (const prefix of ['/billing/*', '/booking/*', '/comms/*', '/communications/*', '/storage/*', '/reviews/*', '/audit/*', '/persons/*']) {
+  for (const prefix of ['/billing/*', '/booking/*', '/comms/*', '/communications/*', '/storage/*', '/reviews/*', '/audit/*', '/persons/*', '/surveys/*']) {
     // Auth must run first so orgContextOptionalMiddleware sees the user.
     // authMiddleware is idempotent — per-route auth still enforces role checks.
     app.use(prefix, authMiddleware({ required: false }));

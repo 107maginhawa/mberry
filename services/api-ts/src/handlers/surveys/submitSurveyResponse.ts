@@ -102,12 +102,24 @@ export async function submitSurveyResponse(
       userId,
     );
 
+    // Best-effort analytics aggregation. The `survey.aggregateAnalytics`
+    // job is not registered (see handlers/surveys/jobs/index.ts) — analytics
+    // are currently computed on-demand by getSurveyAnalytics. Until the
+    // job lands, swallow the trigger error so a re-edit doesn't fail the
+    // primary write.
     const jobsScheduler = ctx.get('jobs') as JobScheduler | undefined;
     if (jobsScheduler) {
-      await jobsScheduler.trigger('survey.aggregateAnalytics', {
-        surveyId,
-        organizationId,
-      });
+      try {
+        await jobsScheduler.trigger('survey.aggregateAnalytics', {
+          surveyId,
+          organizationId,
+        });
+      } catch (err) {
+        logger?.warn(
+          { err, surveyId },
+          'survey.aggregateAnalytics trigger failed; analytics will be computed on demand',
+        );
+      }
     }
 
     logger?.info({
@@ -139,13 +151,22 @@ export async function submitSurveyResponse(
     updatedBy: userId,
   });
 
-  // Trigger analytics aggregation job
+  // Best-effort analytics aggregation. See update path above for context —
+  // `survey.aggregateAnalytics` is not currently registered, so swallow
+  // trigger errors and let getSurveyAnalytics compute on demand.
   const jobs = ctx.get('jobs') as JobScheduler | undefined;
   if (jobs) {
-    await jobs.trigger('survey.aggregateAnalytics', {
-      surveyId,
-      organizationId,
-    });
+    try {
+      await jobs.trigger('survey.aggregateAnalytics', {
+        surveyId,
+        organizationId,
+      });
+    } catch (err) {
+      logger?.warn(
+        { err, surveyId },
+        'survey.aggregateAnalytics trigger failed; analytics will be computed on demand',
+      );
+    }
   }
 
   logger?.info({

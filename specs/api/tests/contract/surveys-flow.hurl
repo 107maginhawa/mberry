@@ -85,7 +85,7 @@ Content-Type: application/json
   "surveyType": "satisfaction",
   "questions": [
     {
-      "id": "11111111-1111-1111-1111-111111111111",
+      "id": "11111111-1111-4111-8111-111111111111",
       "type": "rating",
       "text": "Rate your overall satisfaction (1-5)",
       "required": true,
@@ -93,7 +93,7 @@ Content-Type: application/json
       "scale": { "min": 1, "max": 5 }
     },
     {
-      "id": "22222222-2222-2222-2222-222222222222",
+      "id": "22222222-2222-4222-8222-222222222222",
       "type": "text",
       "text": "Any additional comments?",
       "required": false,
@@ -163,11 +163,11 @@ Content-Type: application/json
 {
   "answers": [
     {
-      "questionId": "11111111-1111-1111-1111-111111111111",
+      "questionId": "11111111-1111-4111-8111-111111111111",
       "value": 4
     },
     {
-      "questionId": "22222222-2222-2222-2222-222222222222",
+      "questionId": "22222222-2222-4222-8222-222222222222",
       "value": "Great events this year."
     }
   ]

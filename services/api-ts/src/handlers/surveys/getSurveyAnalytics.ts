@@ -9,6 +9,7 @@ import {
 import { SurveyRepository, SurveyResponseRepository } from './repos/survey.repo';
 import { OfficerTermRepository } from '../association:member/repos/governance.repo';
 import { computeAnalytics } from './utils/computeAnalytics';
+import { hasRole } from '@/utils/auth';
 
 /**
  * getSurveyAnalytics
@@ -33,7 +34,7 @@ export async function getSurveyAnalytics(
   const organizationId = ctx.get('organizationId') as string;
 
   // Officer/admin gate
-  if (session.user.role !== 'admin') {
+  if (!hasRole(session.user, 'admin')) {
     const officerRepo = new OfficerTermRepository(db, logger);
     const terms = await officerRepo.findActiveByPersonAndOrg(userId, organizationId);
     if (terms.length === 0) {
@@ -49,14 +50,16 @@ export async function getSurveyAnalytics(
     throw new NotFoundError('Survey not found');
   }
 
-  // Return cached snapshot if available
+  // Analytics responses are scoped to a survey; callers identify the
+  // result by surveyId. Both the cached-snapshot and on-the-fly paths
+  // return the bare analytics shape from computeAnalytics, so attach
+  // surveyId here.
   if (survey.analyticsSnapshot) {
-    return ctx.json(survey.analyticsSnapshot, 200);
+    return ctx.json({ surveyId, ...survey.analyticsSnapshot }, 200);
   }
 
-  // Compute on-the-fly
   const responseRepo = new SurveyResponseRepository(db, logger);
   const analytics = await computeAnalytics(survey, responseRepo);
 
-  return ctx.json(analytics, 200);
+  return ctx.json({ surveyId, ...analytics }, 200);
 }
