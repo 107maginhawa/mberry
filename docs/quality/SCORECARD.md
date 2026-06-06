@@ -27,7 +27,17 @@ Plan: `~/.claude/plans/so-is-our-codebase-hidden-dream.md`
 
 (Populated when characterization tests reveal behavior bugs.)
 
-See `docs/quality/SCORECARD.md` for the prior defect log (D-01, D-02, D-03).
+### Fixed
+
+| ID | Handler | Severity | Description | Fixed in |
+|---|---|---|---|---|
+| D-01 | `platformadmin/getOrgHealthScores` | P1 (security) | No platformAdmin guard — any authenticated user could read PII analytics across all orgs | feature/codebase-hardening |
+| D-02 | `platformadmin/getRevenueAnalytics` | P1 (security) | No platformAdmin guard — any authenticated user could read cross-org revenue analytics | feature/codebase-hardening |
+| D-03 | `platformadmin` (observability) | P2 | PII fields logged in plain text in several handlers | W4.5 |
+
+### Open
+
+(none)
 
 ## Wave status
 
