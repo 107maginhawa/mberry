@@ -222,6 +222,15 @@ Deleted `specs/api/src/modules/patient.tsp` + `provider.tsp` orphan healthcare T
 ### P0.3 — done (commit 528b3e77)
 Deleted older `notifs/markAllNotificationsRead.ts` + test + `notifs-custom.tsp`. Kept `markAllNotificationsAsRead.ts`. Updated shared notifs handler test.
 
+### P2.12 — closed as false positive
+
+Step 1's claim that m13-professional-feed and m15-job-board are "orphan specs with no code" was wrong. Both have implementations:
+
+- **m13-professional-feed** — handlers live in `services/api-ts/src/handlers/communication/` (createFeedPost, deleteFeedPost, getFeedPost, muteAuthor, repos/feed-post.repo.ts + schema), plus tests `m13.professional-feed.test.ts`.
+- **m15-job-board** — handlers live in `services/api-ts/src/handlers/jobs/`, full TypeSpec in `specs/api/src/modules/jobs.tsp`, acceptance test `events/ac-m15.job-board.test.ts`. Per `jobs.tsp` header: *Route mounting is deferred — handler implementations exist but are not currently wired into app.ts. See ROADMAP.md for activation plan.*
+
+Lesson: the audit assumed module slug = code directory name. It isn't always — these modules live under different dir names because the spec rollout predates the code split.
+
 ---
 
 ## Consolidated Production-Readiness Punch List
