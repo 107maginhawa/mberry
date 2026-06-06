@@ -2,15 +2,23 @@
 // Verifies the "Leave" button, confirmation dialog, and termination flow
 import { test, expect } from '../helpers/test-fixture'
 import { authStateFile } from '../helpers/auth-state'
+import { captureRouteHydration } from '../helpers/real-flow'
 
+// W2 real-flow upgrade: /my/organizations hydrates via GET /memberships
+// (or /persons/me on the auth shell). Capturing that proves the
+// backend returned data, not just that the Active badge rendered.
+const MEMBERSHIPS_OR_PERSON = /\/(memberships|persons\/me)(?:[/?]|$)/
 
 test.use({ storageState: authStateFile('member') })
 test.describe('M-27: Leave Organization', () => {
-  test.beforeEach(async ({ page }) => {
-    await page.goto('/my/organizations')
-  })
-
   test('Leave button is visible for active memberships', async ({ page }) => {
+    const respP = captureRouteHydration(page, MEMBERSHIPS_OR_PERSON)
+    await page.goto('/my/organizations')
+
+    const resp = await respP
+    expect(resp?.status()).toBe(200)
+    expect(resp?.ok()).toBe(true)
+
     // Wait for memberships to load
     await expect(page.getByText('Active').first()).toBeVisible({ timeout: 10000 })
 
@@ -18,6 +26,11 @@ test.describe('M-27: Leave Organization', () => {
     const leaveBtn = page.getByRole('button', { name: /leave/i }).first()
     await expect(leaveBtn).toBeVisible()
   })
+
+  test.describe('with organizations preloaded', () => {
+    test.beforeEach(async ({ page }) => {
+      await page.goto('/my/organizations')
+    })
 
   test('clicking Leave opens confirmation dialog', async ({ page }) => {
     await expect(page.getByText('Active').first()).toBeVisible({ timeout: 10000 })
@@ -58,4 +71,5 @@ test.describe('M-27: Leave Organization', () => {
 
   // Note: We don't test actual leave confirmation to avoid destroying test data
   // The API call (POST /memberships/:id/terminate) is tested in contract tests
+  })
 })
