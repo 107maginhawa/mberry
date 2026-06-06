@@ -3,6 +3,13 @@
 import { test, expect } from '../helpers/test-fixture'
 import { signIn } from '../helpers/auth'
 import { SEED_MEMBER_EMAIL, TEST_PASSWORD } from '../helpers/test-config'
+import { captureRouteHydration } from '../helpers/real-flow'
+
+// W2 real-flow upgrade: /my/certificates hydrates via either the
+// certificates API or /persons/me. We assert at least one of those
+// GETs returned 200 so the spec verifies the backend wire, not just
+// the rendered heading.
+const CERT_OR_PERSON = /\/(certificates|persons\/me)(?:[/?]|$)/
 
 const MEMBER_EMAIL = SEED_MEMBER_EMAIL
 const MEMBER_PASSWORD = TEST_PASSWORD
@@ -10,7 +17,13 @@ const MEMBER_PASSWORD = TEST_PASSWORD
 test.describe('Member Certificates (/my/certificates)', () => {
   test('shows "My Certificates" heading', async ({ page }) => {
     await signIn(page, MEMBER_EMAIL, MEMBER_PASSWORD)
+    const respP = captureRouteHydration(page, CERT_OR_PERSON)
     await page.goto('/my/certificates')
+
+    const resp = await respP
+    expect(resp?.status()).toBe(200)
+    expect(resp?.ok()).toBe(true)
+
     await expect(
       page.getByRole('heading', { name: 'My Certificates' }),
     ).toBeVisible({ timeout: 10000 })
