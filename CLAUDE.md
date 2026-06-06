@@ -42,52 +42,59 @@ workspace.
 
 ## Business Domain Modules
 
-The API service has **25 handler directories** under `services/api-ts/src/handlers/`. ~58% have matching TypeSpec definitions; the remainder use hand-wired routes or are dark (no OpenAPI).
+The API service has **26 handler directories** under `services/api-ts/src/handlers/` (counts below exclude `*.test.ts` files; numbers may drift — re-run `find services/api-ts/src/handlers/<mod> -maxdepth 1 -name '*.ts' -not -name '*.test.ts' | wc -l` for the latest). Most route through TypeSpec-generated routes; a small set remains hand-wired in `services/api-ts/src/app.ts` for middleware-ordering or legacy reasons.
 
 **Core Identity**:
-1. **person** — Central PII hub (25 handlers, TypeSpec)
+1. **person** — Central PII hub (~27 handlers)
 
-**Association**:
-2. **association:member** — Mega-module: membership, chapters, officers, positions (157 handlers, TypeSpec)
-3. **association:operations** — Analytics, cross-chapter rollups (54 handlers, TypeSpec)
+**Association** (mega-module domain — split deferred, see ROADMAP):
+2. **association:member** — Membership, chapters, officers, positions, credits, credentials, elections, committees (~193 handlers). Owns spec content for m05-membership, m10-credit-tracking, m11-documents-credentials, m12-elections-governance, m19-committee-management.
+3. **association:operations** — Analytics, training, events under association umbrella (~69 handlers).
 
 **Platform**:
-4. **platformadmin** — Admin-tier operations (21 handlers, TypeSpec)
+4. **platformadmin** — Admin-tier operations (~45 handlers).
 
-**Membership**:
-5. **membership** — Applications, approvals, tiers (12 handlers, hand-wired)
-6. **dues** — Invoicing, payments, funds (15 handlers, hand-wired)
-7. **invite** — Org invitations (3 handlers, TypeSpec)
+**Membership** (legacy standalone, mostly migrated; some hand-wired):
+5. **membership** — Applications, approvals, tiers (~15 handlers).
+6. **dues** — Invoicing, payments, funds (~8 handlers).
+7. **invite** — Org invitations (~4 handlers).
 
 **Billing**:
-8. **billing** — Stripe Connect integration (16 handlers, TypeSpec)
+8. **billing** — Stripe Connect integration (~16 handlers).
 
 **Events/Training**:
-9. **booking** — Time-based scheduling (19 handlers, TypeSpec)
-10. **events** — Event management (11 handlers, TypeSpec)
-11. **training** — CPD/CE credit tracking (10 handlers, hand-wired)
-12. **elections** — Voting and nominations (6 handlers, hand-wired)
+9. **booking** — Time-based scheduling (~19 handlers).
+10. **events** — Event management (~11 handlers).
+11. **elections** — Voting endpoints not yet migrated to TypeSpec (~5 handlers, hand-wired for deleteElection legacy path).
 
-**Communications**:
-13. **communication** — Templates, queuing (28 handlers, TypeSpec)
-14. **communications** — Announcements (8 handlers, hand-wired)
-15. **comms** — WebSocket: video, chat (11 handlers, TypeSpec)
+**Note**: there is no `training/` handler directory — training/CPD lifecycle lives inside `association:member/` (CreditService, ProfessionalLicense, credit entries) and partly in `association:operations/`.
+
+**Communications** (2 by-design bounded contexts):
+12. **communication** — Templates, message queue, announcements, person subscriptions, saved segments (~43 handlers).
+13. **comms** — Real-time WebSocket video calls, chat rooms, DMs (~13 handlers).
+
+**Note**: there is no `communications/` (with `s`) handler directory — older docs called it out, but org announcements ended up inside `communication/`.
 
 **Content**:
-16. **documents** — Document management with access-log tracking (15 handlers, TypeSpec)
-17. **certificates** — Certificate generation (3 handlers, TypeSpec)
-18. **storage** — File upload/download via S3/MinIO (6 handlers, TypeSpec)
-19. **reviews** — NPS review system (4 handlers, TypeSpec)
+14. **documents** — Document management with access-log tracking (~16 handlers).
+15. **certificates** — Certificate generation (~5 handlers; some impls re-exported from `association:member/`).
+16. **storage** — File upload/download via S3/MinIO (~6 handlers).
+17. **reviews** — NPS review system (~4 handlers).
+
+**Marketplace**:
+18. **marketplace** — Vendor + offers marketplace (~9 handlers).
+19. **advertising** — Sponsored placement (~7 handlers).
 
 **Compliance**:
-20. **audit** — Compliance logging (1 handler, TypeSpec)
-21. **email** — Transactional email queue (9 handlers, TypeSpec)
-22. **notifs** — Multi-channel notifications via OneSignal (5 handlers, mixed)
+20. **audit** — Compliance logging (~1 handler).
+21. **email** — Transactional email queue (~13 handlers).
+22. **notifs** — Multi-channel notifications via OneSignal (~5 handlers).
+23. **surveys** — Surveys + polls (~16 handlers).
+24. **jobs** — Background job registry (~7 handlers).
+25. **onboarding** — Onboarding flow (~2 handlers).
+26. **default** — Default route landing (~1 handler).
 
-**Note**: Authentication is handled by Better-Auth (integrated, not a separate module). Three communication-related modules exist by design — separate bounded contexts, no functional overlap:
-- `comms` — Real-time: WebSocket video calls, chat rooms, DMs (11 handlers)
-- `communication` — Async messaging: templates, message queue, person subscriptions, saved segments (28 handlers)
-- `communications` — Org announcements: draft/schedule/send announcements to members (8 handlers)
+Authentication is handled by Better-Auth (integrated, not a separate module).
 
 ## Key Architectural Patterns
 
@@ -296,8 +303,8 @@ All apps share the same API and SDK.
 
 All P0/P1 risks resolved (gate satisfied 2026-05-12). Planned work tracked in [ROADMAP.md](./ROADMAP.md).
 
-- P1-11 (association:member mega-module split) deferred to v1.2.0 — split plan at `.planning/deferred/14-mega-module-split/SPLIT-PLAN.md`
-- 9 by-design hand-wired routes remain (middleware ordering); all 24 pre-migration routes migrated to TypeSpec (Phase 35)
+- P1-11 (association:member mega-module split) deferred — original plan sized for 157 files, current count is ~193 (post-Phase-35 cleanup); see `.planning/deferred/14-mega-module-split/SPLIT-PLAN.md` and re-scope before execution. See `.audits/PRODUCTION_AUDIT.md` for module ownership notes.
+- Phase 35 migrated all 24 pre-migration routes to TypeSpec. A small number of routes remain hand-wired in `app.ts` by design (middleware ordering, public unauthenticated paths, or migrations explicitly deferred for complex governance flows like `deleteElection`).
 
 ## Development Protocol
 
