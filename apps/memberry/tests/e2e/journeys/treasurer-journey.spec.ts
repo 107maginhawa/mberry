@@ -4,6 +4,7 @@
 import { test, expect } from '../helpers/test-fixture'
 import { authStateFile } from '../helpers/auth-state'
 import { withIsolatedFixture } from '../helpers/isolated-fixture'
+import { captureRouteHydration } from '../helpers/real-flow'
 
 
 test.use({ storageState: authStateFile('treasurer') })
@@ -95,7 +96,11 @@ test.describe('P3 Treasurer Journey', () => {
   })
 
 test('CT-1: treasurer accesses officer dashboard', async ({ page }) => {
+    const respP = captureRouteHydration(page, '/persons/me')
     await page.goto(`/org/${ORG_ID}/officer/dashboard`)
+    const resp = await respP
+    expect(resp?.status()).toBe(200)
+    expect(resp?.ok()).toBe(true)
     await assertPageMounted(page, /\/officer\/dashboard$/)
   })
 
