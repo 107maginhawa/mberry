@@ -3,12 +3,17 @@
 // E2E: Booking cancellation flow
 import { test, expect } from '../helpers/test-fixture'
 import { signInAsMember, signInAsOfficer } from '../helpers/auth'
+import { captureRouteHydration } from '../helpers/real-flow'
 
 test.describe('Booking cancellation', () => {
   test.describe('Member cancels a booking', () => {
     test('member can navigate to a booking and see cancel option', async ({ page }) => {
       await signInAsMember(page)
+      const respP = captureRouteHydration(page, '/bookings')
       await page.goto('/my/bookings')
+      const resp = await respP
+      expect(resp?.status()).toBe(200)
+      expect(resp?.ok()).toBe(true)
       await page.getByRole('tab', { name: /my bookings/i }).click()
       await page.waitForLoadState('networkidle')
 
