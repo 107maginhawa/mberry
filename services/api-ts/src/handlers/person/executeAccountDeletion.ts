@@ -59,11 +59,10 @@ export async function executeAccountDeletion(
   // Kill sessions first — before PII is scrubbed
   await db.delete(schema.session).where(eq(schema.session.userId, personId));
 
-  // Cascade deletion across all modules (flow 6.6)
-  const cascadeResult = await executeCascadeDeletion({ db, personId, logger });
-  if (cascadeResult.errors > 0) {
-    logger?.warn({ personId, cascadeErrors: cascadeResult.errors }, 'Cascade completed with errors');
-  }
+  // Cascade deletion across all modules (flow 6.6) — fire-and-forget event
+  // emit. Per-module subscribers in core/domain-event-consumers.ts run their
+  // own try/catch + logging; we no longer aggregate per-step outcomes here.
+  await executeCascadeDeletion({ db, personId, logger });
 
   // Anonymize PII — keep the record but scrub all personal data
   await repo.updateOneById(personId, {
