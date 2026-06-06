@@ -2747,6 +2747,7 @@ export function registerRoutes(app: Hono<{ Variables: Variables }>) {
   // bulkImportMembers
   app.post('/invitations/bulk-import',
     authMiddleware({ roles: ["officer"] }),
+    createPerRouteAuditMiddleware({ action: "create", resourceType: "invitation" }),
     zValidator('json', validators.BulkImportMembersBody, validationErrorHandler),
     registry.bulkImportMembers as unknown as Handler
   );
@@ -2754,6 +2755,7 @@ export function registerRoutes(app: Hono<{ Variables: Variables }>) {
   // createInvite
   app.post('/invite',
     authMiddleware({ roles: ["officer"] }),
+    createPerRouteAuditMiddleware({ action: "create", resourceType: "invitation" }),
     zValidator('json', validators.CreateInviteBody, validationErrorHandler),
     registry.createInvite as unknown as Handler
   );
