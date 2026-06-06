@@ -23,6 +23,7 @@ async function assertReachable(page: import('@playwright/test').Page, route: str
   const respP = captureAnyApiSuccess(page)
   await page.goto(route)
   const resp = await respP
+  expect(resp?.status()).toBeLessThan(400)
   expect(resp?.ok()).toBe(true)
   await expect(page.getByRole('complementary').first())
     .toBeVisible({ timeout: 10000 })
