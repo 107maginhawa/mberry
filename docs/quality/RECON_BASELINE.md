@@ -68,3 +68,24 @@ HEAD: d24d98ba5aab0f47487a5fe38bade91ce768e48e
 - **Wave 3.0 (coverage threshold spike)**: Use wrapper script (no native bunfig threshold key in Bun 1.2.21)
 - **Wave 2 (E2E depth)**: 144 *.spec.ts files confirmed in apps/memberry/tests/e2e/, 8 in apps/admin. Prior "130+ passing" memory claim is consistent. Wave 2 scope: deepen coverage quality, not bootstrap from zero.
 - **KG staleness**: 59 commits — re-index before any Wave 5 map work (`/oli-check` or equivalent)
+
+## Residual caveats (known limitations)
+
+1. **FE matrix is name-string-only.** Apps consuming the API via generated SDK
+   hooks (`useGetPerson`, `useListMemberships`) will NOT register hits unless
+   the handler dir name appears verbatim in source. Wave 3.5 module-delete
+   protocol REQUIRES manual SDK trace for any candidate.
+
+2. **Audit module hit count (admin: 35) is JS-regex `\b<name>\b` (case-insensitive),
+   which differs from shell `rg \b<name>\b`** in word-boundary semantics around
+   camelCase and punctuation. The figure is directionally correct (audit IS
+   heavily referenced in admin) but not exactly comparable to grep output.
+
+3. **`platformadmin` shows 0 matrix hits despite `rg` reporting 1 hit** — inherent
+   limitation, not a script bug. The single `rg` hit is in
+   `apps/admin/src/lib/role-gate.test.tsx` where the string appears as
+   `isPlatformAdmin` (embedded mid-word with `is` prefix). JS `\b` word-boundary
+   correctly returns 0 matches because no boundary exists between `is` and
+   `platformadmin` — both are word characters. The matrix count (0) is accurate
+   for standalone name-string matching; the module still requires manual SDK
+   trace before any delete decision.
