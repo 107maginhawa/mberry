@@ -1,7 +1,7 @@
 import type { Context } from 'hono';
 import { FeedPostRepository } from './repos/feed-post.repo';
 import type { Session } from '@/types/auth';
-import { auditAction } from '@/utils/audit';
+import { auditAction } from '@/core/audit/audit-action';
 
 export async function deleteFeedPost(ctx: Context): Promise<Response> {
   const db = ctx.get('database');

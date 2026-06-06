@@ -4,7 +4,7 @@ import { SubscriptionTopicRepository } from './repos/communication.repo';
 import { OfficerTermRepository } from '../association:member/repos/governance.repo';
 import { createSubscriptionTopic } from './createSubscriptionTopic';
 
-mock.module('@/utils/audit', () => ({ auditAction: async () => {} }));
+mock.module('@/core/audit/audit-action', () => ({ auditAction: async () => {} }));
 
 describe('createSubscriptionTopic', () => {
   beforeEach(() => {

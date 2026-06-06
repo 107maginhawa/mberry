@@ -4,7 +4,7 @@ import { CommunicationsRepository } from './repos/communication.repo';
 import { OfficerTermRepository } from '../association:member/repos/governance.repo';
 import { archiveAnnouncement } from './archiveAnnouncement';
 
-mock.module('@/utils/audit', () => ({ auditAction: async () => {} }));
+mock.module('@/core/audit/audit-action', () => ({ auditAction: async () => {} }));
 
 // archiveAnnouncement calls requirePosition → OfficerTermRepository
 stubRepo(OfficerTermRepository, { findActiveByPersonAndOrg: async () => [{ positionTitle: 'President' }] });

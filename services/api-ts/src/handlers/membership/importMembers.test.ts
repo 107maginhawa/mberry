@@ -10,7 +10,7 @@ import { DuesConfigRepository } from '../association:member/repos/dues.repo';
 // Capture audit calls via our own module mock — bun mock.module is process-global,
 // so other test files may no-op @/utils/audit; install our capturing version here.
 const auditCalls: any[] = [];
-mock.module('@/utils/audit', () => ({
+mock.module('@/core/audit/audit-action', () => ({
   auditAction: async (_ctx: any, opts: any) => { auditCalls.push(opts); },
 }));
 

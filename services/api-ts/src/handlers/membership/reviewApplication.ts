@@ -3,7 +3,7 @@ import { MembershipRepository } from './repos/membership.repo';
 import { DuesConfigRepository } from '../association:member/repos/dues.repo';
 import type { Session } from '@/types/auth';
 import { domainEvents } from '@/core/domain-events';
-import { auditAction } from '@/utils/audit';
+import { auditAction } from '@/core/audit/audit-action';
 
 export async function reviewApplication(ctx: Context): Promise<Response> {
   const db = ctx.get('database');

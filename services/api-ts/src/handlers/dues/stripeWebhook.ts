@@ -10,7 +10,7 @@ import type { Context } from 'hono';
 import type { Variables } from '@/types/app';
 import { handleIncomingWebhook, type WebhookEvent } from './jobs/webhookRetryProcessor';
 import { createProcessPayment } from './jobs/processStripePayment';
-import { auditAction } from '@/utils/audit';
+import { auditAction } from '@/core/audit/audit-action';
 
 /**
  * Map a Stripe event to our internal WebhookEvent shape.

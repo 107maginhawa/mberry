@@ -6,7 +6,7 @@ import { CreditEntryRepository } from '@/handlers/association:member/repos/credi
 import { domainEvents } from '@/core/domain-events';
 import { requestDataExport } from './requestDataExport';
 
-mock.module('@/utils/audit', () => ({ auditAction: async () => {} }));
+mock.module('@/core/audit/audit-action', () => ({ auditAction: async () => {} }));
 
 // Thenable Drizzle query stub: chain methods return self; awaiting it (or
 // calling .limit()) resolves to the provided rows.

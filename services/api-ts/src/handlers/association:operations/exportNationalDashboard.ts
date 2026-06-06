@@ -2,7 +2,7 @@ import type { Context } from 'hono';
 import { UnauthorizedError } from '@/core/errors';
 import type { DatabaseInstance } from '@/core/database';
 import { DashboardRepository } from '../platformadmin/repos/dashboard.repo';
-import { auditAction } from '@/utils/audit';
+import { auditAction } from '@/core/audit/audit-action';
 import { escapeCsvValue } from '@/utils/sanitize';
 import { domainEvents } from '@/core/domain-events';
 import type { Session } from '@/types/auth';

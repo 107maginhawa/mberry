@@ -2,7 +2,7 @@ import type { ValidatedContext } from '@/types/app';
 import type { DatabaseInstance } from '@/core/database';
 import { CertificatesRepository } from './repos/certificates.repo';
 import { NotFoundError, ForbiddenError } from '@/core/errors';
-import { auditAction } from '@/utils/audit';
+import { auditAction } from '@/core/audit/audit-action';
 import {
   renderCertificatePdf,
   validateTemplateData,

@@ -2,7 +2,7 @@ import type { Context } from 'hono';
 import { ConflictError, ForbiddenError } from '@/core/errors';
 import { MembershipRepository } from './repos/membership.repo';
 import { OfficerTermRepository } from '../association:member/repos/governance.repo';
-import { auditAction } from '@/utils/audit';
+import { auditAction } from '@/core/audit/audit-action';
 import type { Session } from '@/types/auth';
 
 export async function addMember(ctx: Context): Promise<Response> {

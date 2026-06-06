@@ -8,7 +8,7 @@ import { CreditEntryRepository } from '@/handlers/association:member/repos/credi
 import { duesPayments } from '@/handlers/association:member/repos/dues-payments.schema';
 import { dataExports } from './repos/data-export.schema';
 import { domainEvents } from '@/core/domain-events';
-import { auditAction } from '@/utils/audit';
+import { auditAction } from '@/core/audit/audit-action';
 
 const EXPORT_TTL_MS = 7 * 24 * 60 * 60 * 1000;
 const RATE_WINDOW_MS = 24 * 60 * 60 * 1000;

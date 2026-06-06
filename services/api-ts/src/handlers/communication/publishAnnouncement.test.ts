@@ -4,7 +4,7 @@ import { CommunicationsRepository } from './repos/communication.repo';
 import { OfficerTermRepository } from '../association:member/repos/governance.repo';
 import { publishAnnouncement } from './publishAnnouncement';
 
-mock.module('@/utils/audit', () => ({ auditAction: async () => {} }));
+mock.module('@/core/audit/audit-action', () => ({ auditAction: async () => {} }));
 
 // Default officer stub: user is President (authorized)
 function stubOfficerAsPresident() {

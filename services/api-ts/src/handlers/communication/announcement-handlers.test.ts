@@ -4,7 +4,7 @@ import { CommunicationsRepository } from './repos/communication.repo';
 import { OfficerTermRepository } from '../association:member/repos/governance.repo';
 
 // Mock audit
-mock.module('@/utils/audit', () => ({
+mock.module('@/core/audit/audit-action', () => ({
   auditAction: async () => {},
 }));
 

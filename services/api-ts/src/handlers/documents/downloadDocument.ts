@@ -5,7 +5,7 @@ import type { Session } from '@/types/auth';
 import { UnauthorizedError, NotFoundError, ForbiddenError } from '@/core/errors';
 import { getMembershipPort, getPlatformAdminPort } from '@/core/ports';
 import { DocumentRepository } from './repos/documents.repo';
-import { auditAction } from '@/utils/audit';
+import { auditAction } from '@/core/audit/audit-action';
 
 /**
  * downloadDocument

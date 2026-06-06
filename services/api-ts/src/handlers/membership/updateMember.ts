@@ -6,7 +6,7 @@ import { MembershipRepository } from './repos/membership.repo';
 import { persistWithComputedStatus } from '../association:member/utils/membership-status-middleware';
 import type { DatabaseInstance } from '@/core/database';
 import type { Session } from '@/types/auth';
-import { auditAction } from '@/utils/audit';
+import { auditAction } from '@/core/audit/audit-action';
 import { assertValidTransition } from '@/utils/status-transitions';
 import { MEMBERSHIP_VALID_TRANSITIONS } from '@/handlers/association:member/utils/status-transitions';
 

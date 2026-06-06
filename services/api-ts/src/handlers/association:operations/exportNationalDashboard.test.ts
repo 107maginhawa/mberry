@@ -13,7 +13,7 @@ import { describe, test, expect, beforeEach, afterEach, mock } from 'bun:test';
 import { makeCtx, stubRepo, restoreRepo } from '@/test-utils/make-ctx';
 import { DashboardRepository } from '../platformadmin/repos/dashboard.repo';
 
-mock.module('@/utils/audit', () => ({ auditAction: async () => {} }));
+mock.module('@/core/audit/audit-action', () => ({ auditAction: async () => {} }));
 
 // ─── Fixtures ───────────────────────────────────────────
 

@@ -14,7 +14,7 @@
 import type { Context } from 'hono';
 import type { DatabaseInstance } from '@/core/database';
 import { sql } from 'drizzle-orm';
-import { auditAction } from '@/utils/audit';
+import { auditAction } from '@/core/audit/audit-action';
 import type { Session } from '@/types/auth';
 
 interface OrgHealth {

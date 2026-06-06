@@ -6,7 +6,7 @@
  */
 
 import type { BaseContext } from '@/types/app';
-import type { AuditEventSubType } from './audit-events';
+import type { AuditEventSubType } from '@/utils/audit-events';
 
 interface AuditActionOpts {
   action: 'create' | 'update' | 'delete' | 'approve' | 'deny' | 'renew' | 'terminate' | 'reinstate' | 'mark-paid' | 'complete' | 'transfer' | 'resign' | 'deceased' | 'read' | 'export' | 'capture' | 'finalize';

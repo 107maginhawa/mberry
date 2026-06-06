@@ -4,7 +4,7 @@ import { ElectionsRepository } from './repos/elections.repo';
 import { requirePosition } from '@/utils/officer-check';
 import { POSITION_TITLES } from '@/utils/position-titles';
 import { domainEvents } from '@/core/domain-events';
-import { auditAction } from '@/utils/audit';
+import { auditAction } from '@/core/audit/audit-action';
 import { assertValidTransition, ELECTION_VALID_TRANSITIONS } from '@/utils/status-transitions';
 
 export async function updateElectionStatus(ctx: Context): Promise<Response> {

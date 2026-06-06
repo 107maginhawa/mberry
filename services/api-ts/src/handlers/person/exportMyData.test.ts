@@ -5,10 +5,10 @@ import { MembershipRepository } from '@/handlers/association:member/repos/member
 import { CreditEntryRepository } from '@/handlers/association:member/repos/credits.repo';
 
 // Bun's mock.module is process-global and persists across files; several sibling
-// person tests mock '@/utils/audit' to a no-op. Install our own capturing mock so
+// person tests mock '@/core/audit/audit-action' to a no-op. Install our own capturing mock so
 // the [AL-DATA] assertion is deterministic regardless of sibling execution order.
 const auditCalls: any[] = [];
-mock.module('@/utils/audit', () => ({
+mock.module('@/core/audit/audit-action', () => ({
   auditAction: async (_ctx: any, opts: any) => { auditCalls.push(opts); },
 }));
 

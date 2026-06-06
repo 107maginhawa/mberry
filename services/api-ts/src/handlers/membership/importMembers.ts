@@ -6,7 +6,7 @@ import { persons } from '../person/repos/person.schema';
 import type { Session } from '@/types/auth';
 import { requirePosition } from '@/utils/officer-check';
 import { POSITION_TITLES } from '@/utils/position-titles';
-import { auditAction } from '@/utils/audit';
+import { auditAction } from '@/core/audit/audit-action';
 import { importMemberRowSchema, importMembersSchema, normalizeLicense, type ImportMemberRow } from './import-types';
 
 // Re-export shared types/schemas for backward compatibility

@@ -14,7 +14,7 @@ import { DuesRepository } from './repos/dues-payments.repo';
 import { OfficerTermRepository } from '../association:member/repos/governance.repo';
 import { BusinessLogicError } from '@/core/errors';
 
-mock.module('@/utils/audit', () => ({ auditAction: async () => {} }));
+mock.module('@/core/audit/audit-action', () => ({ auditAction: async () => {} }));
 
 // ─── Fixtures ───────────────────────────────────────────
 
