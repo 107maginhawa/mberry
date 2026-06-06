@@ -1,0 +1,22 @@
+name: Migration Checklist
+
+on:
+  pull_request:
+    paths:
+      - 'services/api-ts/src/handlers/**/*.schema.ts'
+      - 'services/api-ts/src/generated/migrations/**'
+
+jobs:
+  checklist:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Verify checklist reference
+        env:
+          PR_BODY: ${{ github.event.pull_request.body }}
+        run: |
+          if echo "$PR_BODY" | grep -q "MIGRATION_SAFETY_CHECKLIST.md"; then
+            echo "Migration checklist referenced. OK."
+          else
+            echo "::error::This PR touches schema/migration files but doesn't reference docs/security/MIGRATION_SAFETY_CHECKLIST.md in the description."
+            exit 1
+          fi
