@@ -4,6 +4,7 @@
 // Focus: payment portion — event creation covered by event-lifecycle.spec.ts
 import { test, expect } from '../helpers/test-fixture'
 import { signInAsMember, signInAsOfficer } from '../helpers/auth'
+import { captureAnyApiSuccess } from '../helpers/real-flow'
 
 const ORG_ID = 'ed8e3a96-8126-4341-be42-e6eb7940c562'
 
@@ -14,7 +15,11 @@ test.describe('Journey: Event Registration → Payment', () => {
     })
 
     await test.step('browse events', async () => {
+      const respP = captureAnyApiSuccess(page)
       await page.goto('/my/events')
+      const resp = await respP
+      expect(resp?.status()).toBe(200)
+      expect(resp?.ok()).toBe(true)
       const hasEvents = await page.getByText(/event|activity|convention|seminar/i).first().isVisible({ timeout: 10000 }).catch(() => false)
       expect(hasEvents).toBeTruthy()
     })
