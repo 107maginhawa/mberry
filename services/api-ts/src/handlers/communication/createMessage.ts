@@ -3,7 +3,6 @@ import type { DatabaseInstance } from '@/core/database';
 import type { CreateMessageBody } from '@/generated/openapi/validators';
 import type { MessageRecipient } from './repos/communication.schema';
 import { MessageRepository } from './repos/communication.repo';
-import { auditAction } from '@/utils/audit';
 import { domainEvents } from '@/core/domain-events';
 
 /**
@@ -64,12 +63,8 @@ export async function createMessage(
     recipientCount: dedupedRecipients.length,
   });
 
-  await auditAction(ctx, {
-    action: 'create',
-    resourceType: 'message',
-    resourceId: message.id,
-    description: `Message created (${dedupedRecipients.length} recipients, ${body.recipientPersonIds.length - dedupedRecipients.length} deduplicated)`,
-  });
+  ctx.set('auditResourceId', message.id);
+  ctx.set('auditDescription', `Message created (${dedupedRecipients.length} recipients, ${body.recipientPersonIds.length - dedupedRecipients.length} deduplicated)`);
 
   return ctx.json(message, 201);
 }

@@ -25,14 +25,10 @@ describe('createAnnouncement', () => {
     await expect(createAnnouncement(ctx as any)).rejects.toThrow('Unauthorized');
   });
 
-  test('returns 403 when caller holds no qualifying officer position', async () => {
-    stubRepo(OfficerTermRepository, {
-      findActiveByPersonAndOrg: async () => [],
-    });
-    const ctx = makeCtx({ _params: { organizationId: 'org-1' }, _body: { title: 'Test', body: 'Hello' } });
-    const res = await createAnnouncement(ctx as any);
-    expect(res.status).toBe(403);
-  });
+  // 403 for non-president/non-secretary is now enforced by
+  // requirePositionMiddleware(President, Secretary) at the route level —
+  // see middleware/require-position.test.ts.
+
 
   test('returns 201 on happy path for president', async () => {
     stubRepo(CommunicationsRepository, {

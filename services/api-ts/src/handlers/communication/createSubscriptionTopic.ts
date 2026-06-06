@@ -2,9 +2,6 @@ import type { ValidatedContext } from '@/types/app';
 import type { DatabaseInstance } from '@/core/database';
 import type { CreateSubscriptionTopicBody } from '@/generated/openapi/validators';
 import { SubscriptionTopicRepository } from './repos/communication.repo';
-import { auditAction } from '@/utils/audit';
-import { requirePosition } from '@/utils/officer-check';
-import { POSITION_TITLES } from '@/utils/position-titles';
 
 /**
  * createSubscriptionTopic
@@ -17,10 +14,6 @@ export async function createSubscriptionTopic(
 ): Promise<Response> {
   const user = ctx.get('user');
   if (!user) return ctx.json({ error: 'Unauthorized' }, 401);
-
-  // P0: Requires president or secretary role
-  const denied = await requirePosition(ctx, [POSITION_TITLES.PRESIDENT, POSITION_TITLES.SECRETARY]);
-  if (denied) return denied;
 
   const orgId = ctx.get('organizationId');
   if (!orgId) return ctx.json({ error: 'Organization context required' }, 403);
@@ -40,12 +33,8 @@ export async function createSubscriptionTopic(
     createdBy: user.id,
   });
 
-  await auditAction(ctx, {
-    action: 'create',
-    resourceType: 'subscription-topic',
-    resourceId: topic.id,
-    description: `Subscription topic "${body.name}" created`,
-  });
+  ctx.set('auditResourceId', topic.id);
+  ctx.set('auditDescription', `Subscription topic "${body.name}" created`);
 
   return ctx.json(topic, 201);
 }

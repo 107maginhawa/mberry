@@ -2,7 +2,6 @@ import type { ValidatedContext } from '@/types/app';
 import type { DatabaseInstance } from '@/core/database';
 import type { BulkUpdatePersonSubscriptionsBody } from '@/generated/openapi/validators';
 import { PersonSubscriptionRepository } from './repos/communication.repo';
-import { auditAction } from '@/utils/audit';
 
 /**
  * bulkUpdatePersonSubscriptions
@@ -36,12 +35,8 @@ export async function bulkUpdatePersonSubscriptions(
     }))
   );
 
-  await auditAction(ctx, {
-    action: 'update',
-    resourceType: 'person-subscription',
-    resourceId: user.id,
-    description: `Bulk updated ${body.updates.length} person subscriptions`,
-  });
+  ctx.set('auditResourceId', user.id);
+  ctx.set('auditDescription', `Bulk updated ${body.updates.length} person subscriptions`);
 
   return ctx.json(results, 200);
 }

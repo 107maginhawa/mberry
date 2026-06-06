@@ -3,7 +3,6 @@ import { UnauthorizedError, NotFoundError, BusinessLogicError } from '@/core/err
 import type { DatabaseInstance } from '@/core/database';
 import type { UpdateAnnouncementBody, UpdateAnnouncementParams } from '@/generated/openapi/validators';
 import { CommunicationsRepository } from './repos/communication.repo';
-import { auditAction } from '@/utils/audit';
 
 /**
  * updateAnnouncement
@@ -31,13 +30,9 @@ export async function updateAnnouncement(
 
   const updated = await repo.update(params.id, body as Record<string, unknown>);
 
-  await auditAction(ctx, {
-    action: 'update',
-    resourceType: 'announcement',
-    resourceId: params.id,
-    description: `Updated announcement`,
-    details: { fields: Object.keys(body) },
-  });
+  ctx.set('auditResourceId', params.id);
+  ctx.set('auditDescription', `Updated announcement`);
+  ctx.set('auditDetails', { fields: Object.keys(body) });
 
   return ctx.json({ data: updated }, 200);
 }

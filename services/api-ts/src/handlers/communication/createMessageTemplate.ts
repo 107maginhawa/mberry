@@ -2,7 +2,6 @@ import type { ValidatedContext } from '@/types/app';
 import type { DatabaseInstance } from '@/core/database';
 import type { CreateMessageTemplateBody } from '@/generated/openapi/validators';
 import { MessageTemplateRepository } from './repos/communication.repo';
-import { auditAction } from '@/utils/audit';
 
 /**
  * createMessageTemplate
@@ -37,12 +36,8 @@ export async function createMessageTemplate(
     createdBy: user.id,
   });
 
-  await auditAction(ctx, {
-    action: 'create',
-    resourceType: 'message-template',
-    resourceId: template.id,
-    description: `Message template "${body.name}" created`,
-  });
+  ctx.set('auditResourceId', template.id);
+  ctx.set('auditDescription', `Message template "${body.name}" created`);
 
   return ctx.json(template, 201);
 }

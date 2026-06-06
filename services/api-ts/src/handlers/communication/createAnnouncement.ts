@@ -4,10 +4,7 @@ import type { DatabaseInstance } from '@/core/database';
 import type { CreateAnnouncementBody, CreateAnnouncementParams } from '@/generated/openapi/validators';
 import type { NewAnnouncement } from './repos/communication.schema';
 import { CommunicationsRepository } from './repos/communication.repo';
-import { auditAction } from '@/utils/audit';
 import { domainEvents } from '@/core/domain-events';
-import { requirePosition } from '@/utils/officer-check';
-import { POSITION_TITLES } from '@/utils/position-titles';
 
 /**
  * createAnnouncement
@@ -20,10 +17,6 @@ export async function createAnnouncement(
 ): Promise<Response> {
   const session = ctx.get('session');
   if (!session) throw new UnauthorizedError();
-
-  // M7: Only president/secretary can author announcements (matches publish/schedule).
-  const denied = await requirePosition(ctx, [POSITION_TITLES.PRESIDENT, POSITION_TITLES.SECRETARY]);
-  if (denied) return denied;
 
   const params = ctx.req.valid('param');
   const body = ctx.req.valid('json');
@@ -45,13 +38,9 @@ export async function createAnnouncement(
     title: announcement.title,
   });
 
-  await auditAction(ctx, {
-    action: 'create',
-    resourceType: 'announcement',
-    resourceId: announcement.id,
-    description: `Created announcement: ${announcement.title}`,
-    details: { orgId: params.organizationId },
-  });
+  ctx.set('auditResourceId', announcement.id);
+  ctx.set('auditDescription', `Created announcement: ${announcement.title}`);
+  ctx.set('auditDetails', { orgId: params.organizationId });
 
   return ctx.json({ data: announcement }, 201);
 }

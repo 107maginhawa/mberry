@@ -3,7 +3,6 @@ import { UnauthorizedError, NotFoundError, BusinessLogicError } from '@/core/err
 import { CommunicationsRepository } from './repos/communication.repo';
 import { requirePosition } from '@/utils/officer-check';
 import { POSITION_TITLES } from '@/utils/position-titles';
-import { auditAction } from '@/utils/audit';
 import { domainEvents } from '@/core/domain-events';
 import type { Session } from '@/types/auth';
 
@@ -41,12 +40,8 @@ export async function scheduleAnnouncement(ctx: Context): Promise<Response> {
     scheduledAt: scheduledAt.toISOString(),
   });
 
-  await auditAction(ctx, {
-    action: 'update',
-    resourceType: 'announcement',
-    resourceId: id,
-    description: `Scheduled announcement for ${scheduledAt.toISOString()}`,
-  });
+  ctx.set('auditResourceId', id);
+  ctx.set('auditDescription', `Scheduled announcement for ${scheduledAt.toISOString()}`);
 
   return ctx.json({ data: updated }, 200);
 }

@@ -3,7 +3,6 @@ import type { DatabaseInstance } from '@/core/database';
 import type { SendMessageParams } from '@/generated/openapi/validators';
 import { NotFoundError, BusinessLogicError } from '@/core/errors';
 import { MessageRepository } from './repos/communication.repo';
-import { auditAction } from '@/utils/audit';
 import { domainEvents } from '@/core/domain-events';
 import { memberships } from '@/handlers/association:member/repos/membership.schema';
 import { eq, inArray, and } from 'drizzle-orm';
@@ -104,13 +103,8 @@ export async function sendMessage(
     recipientCount: (updated?.recipients as MessageRecipient[] | null)?.length ?? 0,
   });
 
-  await auditAction(ctx, {
-    action: 'update',
-    resourceType: 'message',
-    resourceId: params.messageId,
-    description: 'Message sent',
-    eventSubType: 'communication.email-sent',
-  });
+  ctx.set('auditResourceId', params.messageId);
+  ctx.set('auditDescription', 'Message sent');
 
   return ctx.json(updated, 200);
 }

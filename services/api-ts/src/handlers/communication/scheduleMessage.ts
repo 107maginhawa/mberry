@@ -3,7 +3,6 @@ import type { DatabaseInstance } from '@/core/database';
 import type { ScheduleMessageBody, ScheduleMessageParams } from '@/generated/openapi/validators';
 import { NotFoundError, BusinessLogicError } from '@/core/errors';
 import { MessageRepository } from './repos/communication.repo';
-import { auditAction } from '@/utils/audit';
 import { domainEvents } from '@/core/domain-events';
 
 /**
@@ -63,12 +62,8 @@ export async function scheduleMessage(
     scheduledAt: scheduledAt.toISOString(),
   });
 
-  await auditAction(ctx, {
-    action: 'update',
-    resourceType: 'message',
-    resourceId: params.messageId,
-    description: `Message scheduled for ${scheduledAt.toISOString()}`,
-  });
+  ctx.set('auditResourceId', params.messageId);
+  ctx.set('auditDescription', `Message scheduled for ${scheduledAt.toISOString()}`);
 
   return ctx.json(updated, 200);
 }

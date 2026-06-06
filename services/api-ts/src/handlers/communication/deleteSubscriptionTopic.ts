@@ -3,7 +3,6 @@ import type { DatabaseInstance } from '@/core/database';
 import type { DeleteSubscriptionTopicParams } from '@/generated/openapi/validators';
 import { NotFoundError } from '@/core/errors';
 import { SubscriptionTopicRepository } from './repos/communication.repo';
-import { auditAction } from '@/utils/audit';
 
 /**
  * deleteSubscriptionTopic
@@ -32,12 +31,8 @@ export async function deleteSubscriptionTopic(
 
   await repo.delete(params.topicId);
 
-  await auditAction(ctx, {
-    action: 'delete',
-    resourceType: 'subscription-topic',
-    resourceId: params.topicId,
-    description: `Subscription topic "${existing.name}" deleted`,
-  });
+  ctx.set('auditResourceId', params.topicId);
+  ctx.set('auditDescription', `Subscription topic "${existing.name}" deleted`);
 
   return ctx.body(null, 204);
 }

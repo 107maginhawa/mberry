@@ -3,7 +3,6 @@ import type { DatabaseInstance } from '@/core/database';
 import type { CancelMessageParams } from '@/generated/openapi/validators';
 import { NotFoundError, BusinessLogicError } from '@/core/errors';
 import { MessageRepository } from './repos/communication.repo';
-import { auditAction } from '@/utils/audit';
 import { domainEvents } from '@/core/domain-events';
 
 /**
@@ -52,12 +51,8 @@ export async function cancelMessage(
     previousStatus: existing.status,
   });
 
-  await auditAction(ctx, {
-    action: 'update',
-    resourceType: 'message',
-    resourceId: params.messageId,
-    description: `Message cancelled (was ${existing.status})`,
-  });
+  ctx.set('auditResourceId', params.messageId);
+  ctx.set('auditDescription', `Message cancelled (was ${existing.status})`);
 
   return ctx.json(updated, 200);
 }
