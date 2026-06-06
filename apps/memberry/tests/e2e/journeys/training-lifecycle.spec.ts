@@ -4,6 +4,7 @@
 import { test, expect } from '../helpers/test-fixture'
 import { signIn, signInAsOfficer, signInAsMember } from '../helpers/auth'
 import { SEED_OFFICER_EMAIL, SEED_MEMBER_EMAIL, TEST_PASSWORD } from '../helpers/test-config'
+import { captureRouteHydration } from '../helpers/real-flow'
 
 const ORG_ID = 'ed8e3a96-8126-4341-be42-e6eb7940c562'
 
@@ -12,7 +13,11 @@ test.describe('Journey: Training Lifecycle (create -> enroll -> complete -> cred
     test('officer can access create training page with form fields', async ({ page }) => {
       await signInAsOfficer(page)
 
+      const respP = captureRouteHydration(page, '/persons/me')
       await page.goto(`/org/${ORG_ID}/officer/training/new`)
+      const resp = await respP
+      expect(resp?.status()).toBe(200)
+      expect(resp?.ok()).toBe(true)
       // Page header
       await expect(
         page.getByRole('heading', { name: /create training/i }),
