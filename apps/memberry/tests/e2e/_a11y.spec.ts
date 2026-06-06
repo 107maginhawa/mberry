@@ -1,3 +1,4 @@
+// @selector-only-ok: axe-core a11y audit — asserts WCAG violations, no data-flow capture
 /**
  * Accessibility audit — axe-core scans of every routable page.
  *
