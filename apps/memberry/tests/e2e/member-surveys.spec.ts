@@ -2,12 +2,17 @@
 import { test, expect } from './helpers/test-fixture'
 import { SEED_MEMBER_EMAIL, TEST_PASSWORD } from './helpers/test-config'
 import { authStateFile } from './helpers/auth-state'
+import { captureAnyApiSuccess } from './helpers/real-flow'
 
 
 test.use({ storageState: authStateFile('member') })
 test.describe('Feedback: Member Surveys', () => {
 test('my surveys page loads without error', async ({ page }) => {
+    const respP = captureAnyApiSuccess(page)
     await page.goto('/my/surveys')
+    const resp = await respP
+    expect(resp?.status()).toBe(200)
+    expect(resp?.ok()).toBe(true)
     // Should NOT show error state
     await expect(page.getByText('Failed to load surveys')).not.toBeVisible()
 
