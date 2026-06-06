@@ -10,7 +10,7 @@ import { Link, useNavigate } from '@tanstack/react-router'
 import { Plus } from 'lucide-react'
 import { Button, Tooltip, TooltipContent, TooltipProvider, TooltipTrigger, Badge, NavIcon } from '@monobase/ui'
 import { AvatarInitials } from '@/components/patterns/avatar-initials'
-import { useMyOrgs, type OrgMembership } from '@/hooks/useMyOrgs'
+import { useMyOrgs, type OrgMembership } from '@/hooks/use-my-orgs'
 
 const ROLE_LABEL: Record<string, string> = {
   active: 'Member',

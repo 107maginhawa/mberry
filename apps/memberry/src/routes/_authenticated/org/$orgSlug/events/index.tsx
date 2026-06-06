@@ -14,7 +14,7 @@ import {
 } from '@monobase/sdk-ts/generated/react-query'
 import type { Event, EventStatus, EventType } from '@monobase/sdk-ts/generated/types.gen'
 import type { ApiListResponse } from '@/types/api'
-import { useOrg } from '@/hooks/useOrg'
+import { useOrg } from '@/hooks/use-org'
 
 export const Route = createFileRoute('/_authenticated/org/$orgSlug/events/')({
   component: OrgEvents,

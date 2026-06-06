@@ -6,7 +6,7 @@ import { EmptyState } from '@/components/patterns/empty-state'
 import { ErrorState } from '@/components/patterns/error-state'
 import { Skeleton } from '@monobase/ui'
 import { Megaphone } from 'lucide-react'
-import { useOrg } from '@/hooks/useOrg'
+import { useOrg } from '@/hooks/use-org'
 import { api } from '@/lib/api'
 
 export const Route = createFileRoute('/_authenticated/org/$orgSlug/announcements/')({

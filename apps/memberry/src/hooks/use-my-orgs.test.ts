@@ -16,7 +16,7 @@ function setPathname(pathname: string) {
   ;(globalThis as any).__routerLocation = { pathname }
 }
 
-const { useMyOrgs } = await import('./useMyOrgs')
+const { useMyOrgs } = await import('./use-my-orgs')
 
 function createWrapper() {
   const queryClient = new QueryClient({

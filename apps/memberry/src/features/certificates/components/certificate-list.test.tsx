@@ -11,7 +11,7 @@ import { listMyCertificatesOptions } from '@monobase/sdk-ts/generated/react-quer
 const mockListCerts = listMyCertificatesOptions as ReturnType<typeof vi.fn>
 
 // Mock useOrgContext
-vi.mock('@/hooks/useOrgContext', () => ({
+vi.mock('@/hooks/use-org-context', () => ({
   useOrgContext: vi.fn(() => ({ orgId: 'org-1', source: 'url' })),
 }))
 

@@ -11,7 +11,7 @@ import { GlassCard } from '@/components/motion/glass-card'
 import { EmptyState } from '@/components/patterns/empty-state'
 import { ListSkeleton } from '@/components/patterns/skeleton-loader'
 import { listCustomEventRegistrationsOptions, listCustomEventRegistrationsQueryKey, checkInCustomEventMutation } from '@monobase/sdk-ts/generated/react-query'
-import { useOrg } from '@/hooks/useOrg'
+import { useOrg } from '@/hooks/use-org'
 
 export const Route = createFileRoute(
   '/_authenticated/org/$orgSlug/officer/events/$eventId/attendance',

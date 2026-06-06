@@ -1,6 +1,6 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { PaymentHistoryTable } from '@/features/dues/components/payment-history-table'
-import { useOrgContext } from '@/hooks/useOrgContext'
+import { useOrgContext } from '@/hooks/use-org-context'
 import { PageShell } from '@/components/patterns/page-shell'
 import { GlassCard } from '@/components/motion/glass-card'
 

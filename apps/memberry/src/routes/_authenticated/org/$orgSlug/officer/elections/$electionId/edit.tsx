@@ -5,7 +5,7 @@ import { getElectionOptions } from '@monobase/sdk-ts/generated/react-query'
 import { ElectionForm } from '@/features/elections/components/election-form'
 import { PageShell } from '@/components/patterns/page-shell'
 import { GlassCard } from '@/components/motion/glass-card'
-import { useOrg } from '@/hooks/useOrg'
+import { useOrg } from '@/hooks/use-org'
 
 /** Runtime election shape from API (SDK Election type has Date fields; runtime uses strings + extra fields) */
 interface RuntimeElection {

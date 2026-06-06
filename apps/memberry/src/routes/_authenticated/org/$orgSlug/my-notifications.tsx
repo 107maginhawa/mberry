@@ -6,7 +6,7 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { PageShell } from '@/components/patterns/page-shell'
 import { NotificationPreferences } from '@/features/communications/components/notification-preferences'
-import { useOrgContext } from '@/hooks/useOrgContext'
+import { useOrgContext } from '@/hooks/use-org-context'
 
 export const Route = createFileRoute('/_authenticated/org/$orgSlug/my-notifications')({
   component: MyNotificationsPage,

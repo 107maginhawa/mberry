@@ -7,7 +7,7 @@ import { Star, MessageSquare } from 'lucide-react'
 import { Skeleton } from '@monobase/ui'
 import { PageShell } from '@/components/patterns/page-shell'
 import { EmptyState } from '@/components/patterns/empty-state'
-import { useOrg } from '@/hooks/useOrg'
+import { useOrg } from '@/hooks/use-org'
 import { api } from '@/lib/api'
 
 export const Route = createFileRoute(

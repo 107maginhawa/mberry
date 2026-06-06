@@ -28,7 +28,7 @@ import { EmptyState } from '@/components/patterns/empty-state'
 import { TableSkeleton } from '@/components/patterns/skeleton-loader'
 import { toast } from 'sonner'
 import { extractErrorMessage } from '@/utils/error'
-import { useOrg } from '@/hooks/useOrg'
+import { useOrg } from '@/hooks/use-org'
 
 export const Route = createFileRoute('/_authenticated/org/$orgSlug/officer/settings/providers')({
   component: ProvidersPage,

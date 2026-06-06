@@ -6,7 +6,7 @@ import { Bell, ChevronDown } from 'lucide-react'
 import { api } from '@/lib/api'
 import { AvatarInitials } from '@/components/patterns/avatar-initials'
 import { OrgPickerSheet } from '@/components/layout/org-picker-sheet'
-import { useMyOrgs } from '@/hooks/useMyOrgs'
+import { useMyOrgs } from '@/hooks/use-my-orgs'
 
 interface MemberHeaderProps {
   userName?: string

@@ -1,7 +1,7 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { MemberDetail } from '@/features/membership/components/member-detail'
-import { useOrg } from '@/hooks/useOrg'
+import { useOrg } from '@/hooks/use-org'
 import { useSession } from '@monobase/sdk-ts/react/hooks/use-auth'
 import { api } from '@/lib/api'
 import { GlassCard } from '@/components/motion/glass-card'

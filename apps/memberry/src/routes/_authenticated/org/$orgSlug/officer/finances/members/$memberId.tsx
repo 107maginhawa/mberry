@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from '@tanstack/react-router'
-import { useOrg } from '@/hooks/useOrg'
+import { useOrg } from '@/hooks/use-org'
 import { useQuery } from '@tanstack/react-query'
 import { api } from '@/lib/api'
 import { Skeleton, Badge } from '@monobase/ui'

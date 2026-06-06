@@ -19,7 +19,7 @@ vi.mock('@/components/patterns/skeleton-loader', () => ({
   ListSkeleton: () => <div data-testid="loading">Loading...</div>,
 }))
 
-vi.mock('@/hooks/useOrg', () => ({
+vi.mock('@/hooks/use-org', () => ({
   useOrg: () => ({ orgId: 'org-test', orgSlug: 'test-org' }),
 }))
 

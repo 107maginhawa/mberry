@@ -9,7 +9,7 @@ import { StaggerGrid, StaggerItem } from '@/components/motion/stagger-grid'
 import { EmptyState } from '@/components/patterns/empty-state'
 import { TableSkeleton, CardSkeleton } from '@/components/patterns/skeleton-loader'
 import { Button, Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from '@monobase/ui'
-import { useOrg } from '@/hooks/useOrg'
+import { useOrg } from '@/hooks/use-org'
 
 export const Route = createFileRoute('/_authenticated/org/$orgSlug/officer/reports/credits')({
   component: CreditReport,

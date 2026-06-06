@@ -1,6 +1,6 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { Suspense, lazy } from 'react'
-import { useOrg } from '@/hooks/useOrg'
+import { useOrg } from '@/hooks/use-org'
 import { PageShell } from '@/components/patterns/page-shell'
 import { Skeleton } from '@monobase/ui'
 

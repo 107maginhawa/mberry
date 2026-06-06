@@ -1,7 +1,7 @@
 import { Link } from '@tanstack/react-router'
 import { AlertTriangle } from 'lucide-react'
 import { Button } from '@monobase/ui'
-import type { FinancialStanding } from '@/hooks/useFinancialStanding'
+import type { FinancialStanding } from '@/hooks/use-financial-standing'
 
 interface DuesGateBannerProps {
   standing: FinancialStanding

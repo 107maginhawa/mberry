@@ -9,7 +9,7 @@ import { ReportSelector } from '@/features/dues/components/report-selector'
 import { ReportResults } from '@/features/dues/components/report-results'
 import { PageShell } from '@/components/patterns/page-shell'
 import { GlassCard } from '@/components/motion/glass-card'
-import { useOrg } from '@/hooks/useOrg'
+import { useOrg } from '@/hooks/use-org'
 
 export const Route = createFileRoute('/_authenticated/org/$orgSlug/officer/reports/financial')({
   component: FinancialReportsPage,

@@ -17,7 +17,7 @@ import {
   listMyCustomEventsOptions,
   listMyCustomEventsQueryKey,
 } from '@monobase/sdk-ts/generated/react-query'
-import { useOrg } from '@/hooks/useOrg'
+import { useOrg } from '@/hooks/use-org'
 import { downloadIcsFile } from '@/features/events/utils/generate-ics'
 
 export const Route = createFileRoute('/_authenticated/org/$orgSlug/events/$eventId')({

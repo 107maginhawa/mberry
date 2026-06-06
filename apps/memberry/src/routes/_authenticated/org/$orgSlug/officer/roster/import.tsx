@@ -1,6 +1,6 @@
 import { useState, useCallback } from 'react'
 import { createFileRoute, Link } from '@tanstack/react-router'
-import { useOrg } from '@/hooks/useOrg'
+import { useOrg } from '@/hooks/use-org'
 import { Button, Input, NavIcon } from '@monobase/ui'
 import { toast } from 'sonner'
 import { Upload, FileText, Check, AlertTriangle, Loader2 } from 'lucide-react'

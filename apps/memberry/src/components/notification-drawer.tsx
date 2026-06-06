@@ -24,7 +24,7 @@ import {
   Settings2,
 } from 'lucide-react'
 import { api } from '@/lib/api'
-import { useOrgContext } from '@/hooks/useOrgContext'
+import { useOrgContext } from '@/hooks/use-org-context'
 
 // ---------------------------------------------------------------------------
 // Types

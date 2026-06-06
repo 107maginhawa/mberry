@@ -13,7 +13,7 @@ import { AttendanceView } from '@/features/events/components/attendance-view'
 import { Calendar, MapPin, Users, Clock, Copy, Download } from 'lucide-react'
 import { Button } from '@monobase/ui'
 import { getEventOptions, listCustomEventRegistrationsOptions } from '@monobase/sdk-ts/generated/react-query'
-import { useOrg } from '@/hooks/useOrg'
+import { useOrg } from '@/hooks/use-org'
 
 /** Runtime event shape from API */
 interface RuntimeEvent {
