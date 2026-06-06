@@ -4,6 +4,7 @@
 // Weakest persona at 21% coverage — this test significantly improves it.
 import { test, expect } from '../helpers/test-fixture'
 import { authStateFile } from '../helpers/auth-state'
+import { captureRouteHydration } from '../helpers/real-flow'
 
 
 test.use({ storageState: authStateFile('society') })
@@ -20,7 +21,11 @@ async function assertPageMounted(
 
 test.describe('P5 Society Officer Journey', () => {
   test('SO-1: society officer accesses officer dashboard', async ({ page }) => {
+    const respP = captureRouteHydration(page, '/persons/me')
     await page.goto(`/org/${ORG_ID}/officer/dashboard`)
+    const resp = await respP
+    expect(resp?.status()).toBe(200)
+    expect(resp?.ok()).toBe(true)
     await assertPageMounted(page, /\/officer\/dashboard$/)
   })
 
