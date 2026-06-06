@@ -2,6 +2,7 @@
 // CO-07: Application review — view pending, approve/deny
 import { test, expect } from '../helpers/test-fixture'
 import { authStateFile } from '../helpers/auth-state'
+import { captureRouteHydration, captureAnyApiSuccess } from '../helpers/real-flow'
 
 
 test.use({ storageState: authStateFile('officer') })
@@ -9,11 +10,16 @@ const ORG_ID = 'ed8e3a96-8126-4341-be42-e6eb7940c562'
 
 test.describe('CO-07: Application Review', () => {
 test('applications page loads with heading', async ({ page }) => {
+    const respP = captureRouteHydration(page, /\/(memberships|applications)/)
     await page.goto(`/org/${ORG_ID}/officer/applications`)
     await expect(page.getByText('Membership Applications')).toBeVisible({ timeout: 10000 })
+    const resp = await respP
+    expect(resp?.status()).toBe(200)
+    expect(resp?.ok()).toBe(true)
   })
 
   test('applications list renders without errors', async ({ page }) => {
+    const respP = captureAnyApiSuccess(page)
     await page.goto(`/org/${ORG_ID}/officer/applications`)
     // Should show either applications or an empty state — no crash
     const hasContent = await page.locator('body').textContent()
@@ -22,6 +28,8 @@ test('applications page loads with heading', async ({ page }) => {
     // Check for either application items or empty state message
     const hasApps = await page.getByText(/pending|approved|denied|no applications/i).first().isVisible({ timeout: 10000 }).catch(() => false)
     expect(hasApps).toBeTruthy()
+    const resp = await respP
+    expect(resp?.ok()).toBe(true)
   })
 
   test('page is accessible from officer nav', async ({ page }) => {
