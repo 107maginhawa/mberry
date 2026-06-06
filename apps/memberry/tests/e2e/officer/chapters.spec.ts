@@ -2,6 +2,7 @@
 // CO-11: Chapter affiliations
 import { test, expect } from '../helpers/test-fixture'
 import { authStateFile } from '../helpers/auth-state'
+import { captureRouteHydration } from '../helpers/real-flow'
 
 
 test.use({ storageState: authStateFile('officer') })
@@ -9,15 +10,22 @@ const ORG_ID = 'ed8e3a96-8126-4341-be42-e6eb7940c562'
 
 test.describe('CO-11: Chapter Affiliations', () => {
 test('chapters settings page loads', async ({ page }) => {
+    const respP = captureRouteHydration(page, /\/chapters/)
     await page.goto(`/org/${ORG_ID}/officer/settings/chapters`)
     await expect(page.getByRole('heading', { name: 'Chapter Affiliations' })).toBeVisible({ timeout: 10000 })
+    const resp = await respP
+    expect(resp?.status()).toBe(200)
+    expect(resp?.ok()).toBe(true)
   })
 
   test('affiliation list renders without errors', async ({ page }) => {
+    const respP = captureRouteHydration(page, /\/chapters/)
     await page.goto(`/org/${ORG_ID}/officer/settings/chapters`)
     const pageText = await page.locator('body').textContent()
     expect(pageText).not.toContain('undefined undefined')
     expect(pageText).not.toContain('Something went wrong')
+    const resp = await respP
+    expect(resp?.ok()).toBe(true)
   })
 
   test('chapters page accessible from officer settings nav', async ({ page }) => {
