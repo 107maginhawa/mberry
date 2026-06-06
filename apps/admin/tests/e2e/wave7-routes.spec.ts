@@ -1,9 +1,22 @@
 import { test, expect } from '@playwright/test'
 import { signInAndNavigate } from './helpers/auth'
 
+function captureAnyApiSuccess(page: import('@playwright/test').Page, timeout = 20000) {
+  return page
+    .waitForResponse(
+      (r) => r.url().includes('/api/') && r.request().method() === 'GET' && r.status() < 400,
+      { timeout },
+    )
+    .catch(() => null)
+}
+
 test.describe('Wave 7: New admin routes load correctly', () => {
   test('national-dashboard page loads with association selector', async ({ page }) => {
+    const respP = captureAnyApiSuccess(page)
     await signInAndNavigate(page, '/national-dashboard')
+    const resp = await respP
+    expect(resp?.status()).toBe(200)
+    expect(resp?.ok()).toBe(true)
     await page.waitForLoadState('networkidle')
 
     // Heading visible
