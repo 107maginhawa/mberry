@@ -139,6 +139,22 @@ Generator (`services/api-ts/scripts/generate.ts`) reads these extensions and emi
 
 The legacy utilities `utils/audit.ts` and `utils/officer-check.ts` are gone. The thin `auditAction()` wrapper now lives at `core/audit/audit-action.ts` — hand-wired routes in `app.ts` that opt out of the generated registry call it directly. `requireOfficerTerm` / `requirePosition` moved to `core/auth/officer-checks.ts` — they remain the inline call path for handlers whose authorization depends on runtime branches (e.g. tiered self-vs-officer access, dynamic title selection) that can't be expressed as a static `@extension` on the operation.
 
+### Domain-event cascades (P1.6)
+
+Cross-module side effects of a person-scoped action travel through the
+domain event bus, not inline orchestrators. `handlers/person/accountDeletionCascade.ts`
+is now a 46-LOC wrapper that emits `'person.deleted'` and returns
+`{ emitted: true, personId, emittedAt }`. The 19 cleanup steps live as
+9 subscribers in `core/domain-event-consumers.ts`, grouped by module
+owner: `association:member` (memberships, status history, credits,
+governance, directory, dunning, credentials, chapters, dues payments),
+`association:operations` (events + training), `elections`,
+`certificates`, `communication`, `documents`, `invite`, `billing`, and
+`person` (notification prefs + privacy settings). Subscribers are
+fire-and-forget — each owns its try/catch + structured log. To add a
+new module's cleanup, add a `domainEvents.on('person.deleted', ...)`
+block in `domain-event-consumers.ts` with the schema imports it needs.
+
 ### API-First Development
 Always follow this workflow:
 1. Define APIs in TypeSpec (`specs/api/src/modules/`)
