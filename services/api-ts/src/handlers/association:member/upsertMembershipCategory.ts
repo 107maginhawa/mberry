@@ -1,10 +1,9 @@
-import type { ValidatedContext } from '@/types/app';
+import type { ValidatedContext, AuditEventEntry } from '@/types/app';
 import type { MembershipCategory, NewMembershipCategory } from './repos/membership.schema';
 import { UnauthorizedError } from '@/core/errors';
 import type { DatabaseInstance } from '@/core/database';
 import type { UpsertMembershipCategoryBody, UpsertMembershipCategoryParams } from '@/generated/openapi/validators';
 import { MembershipCategoryRepository } from './repos/membership.repo';
-import { auditAction } from '@/utils/audit';
 
 /**
  * upsertMembershipCategory
@@ -26,18 +25,21 @@ export async function upsertMembershipCategory(
 
   const bodyRecord = body as Record<string, unknown>;
   const isUpdate = !!bodyRecord['id'];
-  let result;
 
+  const auditEvents: AuditEventEntry[] = [];
+  ctx.set('auditEvents', auditEvents);
+
+  let result;
   if (isUpdate) {
     result = await repo.updateOneById(bodyRecord['id'] as string, body as Partial<MembershipCategory>);
   } else {
     result = await repo.createOne({ ...body, organizationId: params.organizationId } as NewMembershipCategory);
   }
 
-  await auditAction(ctx, {
+  auditEvents.push({
     action: isUpdate ? 'update' : 'create',
     resourceType: 'membership-category',
-    resourceId: (result as Record<string, unknown>)['id'] as string,
+    resource: (result as Record<string, unknown>)['id'] as string,
     description: `Membership category ${isUpdate ? 'updated' : 'created'}`,
   });
 

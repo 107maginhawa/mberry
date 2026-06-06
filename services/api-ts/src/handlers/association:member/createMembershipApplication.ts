@@ -3,7 +3,6 @@ import type { DatabaseInstance } from '@/core/database';
 import { NotFoundError, UnauthorizedError, ConflictError } from '@/core/errors';
 import type { CreateMembershipApplicationBody } from '@/generated/openapi/validators';
 import { MembershipTierRepository, MembershipApplicationRepository } from './repos/membership.repo';
-import { auditAction } from '@/utils/audit';
 
 /**
  * createMembershipApplication
@@ -48,13 +47,8 @@ export async function createMembershipApplication(
     status: 'submitted',
   });
 
-  await auditAction(ctx, {
-    action: 'create',
-    resourceType: 'membership-application',
-    resourceId: application.id,
-    description: 'Membership application created',
-    eventSubType: 'membership.application-submitted',
-  });
+  ctx.set('auditResourceId', application.id);
+  ctx.set('auditDescription', 'Membership application created');
 
   return ctx.json(application, 201);
 }

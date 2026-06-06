@@ -949,7 +949,7 @@ namespace Association.Member.Membership {
     @post
     @useAuth(bearerAuth)
     @extension("x-security-required-roles", #["user"])
-    @extension("x-audit", #{ action: "create", resourceType: "membership-application" })
+    @extension("x-audit", #{ action: "create", resourceType: "membership-application", eventSubType: "membership.application-submitted" })
     createMembershipApplication(
       @body body: MembershipApplicationCreateRequest
     ): ApiCreatedResponse<MembershipApplication>
@@ -1271,6 +1271,7 @@ namespace Association.Member.Membership {
     @route("/{organizationId}")
     @useAuth(bearerAuth)
     @extension("x-security-required-roles", #["association:admin"])
+    @extension("x-audit", #{ action: "update", resourceType: "membership-category" })
     upsertMembershipCategory(
       @path organizationId: string,
       @body body: UpsertCategoryRequest

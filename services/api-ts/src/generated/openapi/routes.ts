@@ -674,7 +674,7 @@ export function registerRoutes(app: Hono<{ Variables: Variables }>) {
   // createMembershipApplication
   app.post('/association/member/applications',
     authMiddleware({ roles: ["user"] }),
-    createPerRouteAuditMiddleware({ action: "create", resourceType: "membership-application" }),
+    createPerRouteAuditMiddleware({ action: "create", resourceType: "membership-application", eventSubType: "membership.application-submitted" }),
     zValidator('json', validators.CreateMembershipApplicationBody, validationErrorHandler),
     registry.createMembershipApplication as unknown as Handler
   );
@@ -1560,6 +1560,7 @@ export function registerRoutes(app: Hono<{ Variables: Variables }>) {
   // upsertMembershipCategory
   app.put('/association/member/membership-categories/:organizationId',
     authMiddleware({ roles: ["association:admin"] }),
+    createPerRouteAuditMiddleware({ action: "update", resourceType: "membership-category" }),
     zValidator('param', validators.UpsertMembershipCategoryParams, validationErrorHandler),
     zValidator('json', validators.UpsertMembershipCategoryBody, validationErrorHandler),
     registry.upsertMembershipCategory as unknown as Handler
