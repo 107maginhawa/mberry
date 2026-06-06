@@ -6,6 +6,42 @@
 import { test, expect } from './helpers/test-fixture'
 import { signInAsOfficer } from './helpers/auth'
 
+test.describe('Billing page — API response assertions', () => {
+  test('merchant-account GET returns valid response shape (200 or 404)', async ({ page }) => {
+    // Real-flow assertion: the /my/billing page fires GET /api/billing/merchant-accounts/me
+    // on mount. We intercept it and assert the response status + body shape.
+    // Requires backend running at API_BASE (default http://localhost:7213).
+    await signInAsOfficer(page)
+
+    // Register waitForResponse BEFORE navigating so we don't miss it
+    const merchantAccountResponseP = page.waitForResponse(
+      (resp) =>
+        resp.url().includes('/billing/merchant-accounts/me') && resp.request().method() === 'GET',
+      { timeout: 20000 },
+    )
+
+    await page.goto('/my/billing')
+
+    const merchantAccountResponse = await merchantAccountResponseP
+
+    // Data assertion 1: status must be 200 (account exists) or 404 (no account yet — expected for new officer)
+    const status = merchantAccountResponse.status()
+    expect([200, 404]).toContain(status)
+
+    // Data assertion 2: response body must be a valid JSON object
+    const body = await merchantAccountResponse.json().catch(() => null)
+    expect(body).not.toBeNull()
+
+    if (status === 200) {
+      // Account exists — must have id field
+      expect(typeof body?.id).toBe('string')
+    } else {
+      // 404 — Better-Auth API returns { error: { code, message } }
+      expect(body).toHaveProperty('error')
+    }
+  })
+})
+
 test.describe('Billing page — loading-state hygiene', () => {
   test('initial load resolves past skeleton within 5s', async ({ page }) => {
     await signInAsOfficer(page)
