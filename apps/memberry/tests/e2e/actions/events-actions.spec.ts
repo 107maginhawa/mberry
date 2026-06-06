@@ -1,6 +1,7 @@
 // Action-Contract Tests: Events Module
 import { test, expect } from '../helpers/test-fixture'
 import { authStateFile } from '../helpers/auth-state'
+import { captureAnyApiSuccess } from '../helpers/real-flow'
 
 
 test.use({ storageState: authStateFile('officer') })
@@ -15,7 +16,11 @@ function firstEventLink(page: import('@playwright/test').Page) {
 
 test.describe('Events Actions', () => {
   test('event list shows real event cards', async ({ page }) => {
+    const respP = captureAnyApiSuccess(page)
     await page.goto(`/org/${ORG_ID}/officer/events`)
+    const resp = await respP
+    expect(resp?.status()).toBe(200)
+    expect(resp?.ok()).toBe(true)
     // Don't pin to specific seeded titles (Gala/Convention/Assembly).
     await expect(firstEventLink(page)).toBeVisible({ timeout: 15000 })
   })
