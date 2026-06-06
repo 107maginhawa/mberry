@@ -17,6 +17,7 @@ import type { DatabaseInstance } from '@/core/database';
 import type { Logger } from '@/types/logger';
 import { EmailTemplateRepository } from '../repos/template.repo';
 import { EmailTemplateTags } from '../repos/email.schema';
+import { SYSTEM_ORG_ID } from '@/core/email-types';
 import { readFile } from 'fs/promises';
 import { join, dirname } from 'path';
 import { fileURLToPath } from 'url';
@@ -226,7 +227,7 @@ export async function initializeEmailTemplates(
       // Create template definition
       const templateDef: NewEmailTemplate = {
         name: metadata.name,
-        organizationId: organizationId || '00000000-0000-0000-0000-000000000000',
+        organizationId: organizationId || SYSTEM_ORG_ID,
         description: metadata.description,
         subject: metadata.subject,
         bodyHtml: html,

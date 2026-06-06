@@ -5,6 +5,27 @@
  */
 
 /**
+ * Sentinel UUID used as the `organizationId` for platform-system emails
+ * that originate outside any organization context — primarily
+ * better-auth signup verification and password reset, which run before
+ * the user has joined an org.
+ *
+ * `email_queue.organization_id` is `uuid NOT NULL` to enforce
+ * multi-tenant scoping for real org traffic; this constant lets system
+ * emails coexist with that invariant without making the column
+ * nullable (which would force every downstream guard — suppression
+ * lookup, membership lookup, bulk rate limiter — to handle null).
+ * The same sentinel is already used by the template seeder
+ * (handlers/email/templates/initializer.ts) for system templates,
+ * so org-scoped queries naturally pair platform queue rows with
+ * platform templates.
+ *
+ * NEVER reference this value from org-scoped code paths — it is not
+ * a real organization and will not appear in `organization` rows.
+ */
+export const SYSTEM_ORG_ID = '00000000-0000-0000-0000-000000000000';
+
+/**
  * Email template tags for identifying templates
  */
 export enum EmailTemplateTags {

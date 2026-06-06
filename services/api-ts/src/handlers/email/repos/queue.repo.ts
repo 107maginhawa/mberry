@@ -15,6 +15,7 @@ import {
 } from './email.schema';
 import { ValidationError, NotFoundError, BusinessLogicError } from '@/core/errors';
 import { assertValidTransition, EMAIL_QUEUE_VALID_TRANSITIONS } from '@/utils/status-transitions';
+import { SYSTEM_ORG_ID } from '@/core/email-types';
 import { v4 as uuidv4 } from 'uuid';
 import { subDays } from 'date-fns';
 
@@ -101,9 +102,21 @@ export class EmailQueueRepository extends DatabaseRepository<EmailQueueItem, New
 
     const emailId = uuidv4();
 
+    // Platform-system emails (better-auth signup verification + password
+    // reset) run before the user has joined any org and therefore arrive
+    // here without an `organizationId`. Fall back to the SYSTEM_ORG_ID
+    // sentinel so they satisfy `email_queue.organization_id NOT NULL`
+    // and naturally pair with the SYSTEM_ORG_ID-scoped templates seeded
+    // by handlers/email/templates/initializer.ts. Empty-string values
+    // would crash the insert (`invalid input syntax for type uuid: ""`).
+    const orgIdForRow =
+      request.organizationId && request.organizationId.length > 0
+        ? request.organizationId
+        : SYSTEM_ORG_ID;
+
     const queueItem = await this.createOne({
       id: emailId,
-      organizationId: request.organizationId ?? '',
+      organizationId: orgIdForRow,
       template: request.template || null,
       templateTags: request.templateTags || null,
       recipientEmail: request.recipient,

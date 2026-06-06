@@ -55,16 +55,27 @@ class SMTPProvider implements EmailProvider {
       );
     }
     
+    // Only configure SMTP AUTH when both user and pass are non-empty.
+    // Local dev (mailpit / MailHog / docker-compose) accepts unauthenticated
+    // sends; nodemailer offers SMTP AUTH PLAIN whenever `auth` is present,
+    // and PLAIN with empty creds is rejected ("Missing credentials for
+    // PLAIN") — silently failing every reset / verify email in tests.
+    const hasCreds =
+      this.config.auth.user.length > 0 && this.config.auth.pass.length > 0;
     this.transporter = nodemailer.createTransport({
       host: this.config.host,
       port: this.config.port,
       secure: this.config.secure,
-      auth: {
-        user: this.config.auth.user,
-        pass: this.config.auth.pass
-      }
+      ...(hasCreds
+        ? {
+            auth: {
+              user: this.config.auth.user,
+              pass: this.config.auth.pass,
+            },
+          }
+        : {}),
     });
-    
+
     return this.transporter;
   }
   
