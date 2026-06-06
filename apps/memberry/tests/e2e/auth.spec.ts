@@ -88,6 +88,43 @@ test.describe('Sign-in flow', () => {
     await page.close()
   })
 
+  test('A2-data: sign-in POST returns 200 with session + user in body', async ({ page }) => {
+    // Real-flow assertion: intercept the Better-Auth sign-in POST and verify
+    // response status + body shape (session token + user object).
+    // Requires backend running at API_BASE (default http://localhost:7213).
+    await page.goto('/auth/sign-in')
+    await expect(page.getByRole('button', { name: /login|sign in/i })).toBeVisible({ timeout: 10000 })
+
+    await page.getByLabel('Email', { exact: true }).fill(SEED_OFFICER_EMAIL)
+    await page.getByLabel('Password', { exact: true }).fill(TEST_PASSWORD)
+
+    // Register the waitForResponse BEFORE clicking submit
+    const signInResponseP = page.waitForResponse(
+      (resp) => resp.url().includes('/auth/sign-in') && resp.request().method() === 'POST',
+      { timeout: 15000 },
+    )
+
+    await page.getByRole('button', { name: /login|sign in/i }).click()
+
+    const signInResponse = await signInResponseP
+    // Data assertion 1: HTTP status must be 200
+    expect(signInResponse.status()).toBe(200)
+
+    // Data assertion 2: response body must contain a user object with an email field
+    const body = await signInResponse.json().catch(() => null)
+    expect(body).not.toBeNull()
+    // Better-Auth returns { token, user: { id, email, name, ... } } on sign-in
+    expect(body?.user?.email).toBe(SEED_OFFICER_EMAIL)
+
+    // Navigate to authenticated page and assert user identity in sidebar
+    await page.waitForURL(
+      (url) => !url.pathname.startsWith('/auth/') || url.pathname.startsWith('/auth/verify-email'),
+      { timeout: 10000 },
+    )
+    // User email must be visible in the UI — confirms session is active
+    await expect(page.getByText(SEED_OFFICER_EMAIL)).toBeVisible({ timeout: 10000 })
+  })
+
   test('A2: sign in with valid creds → dashboard with sidebar', async ({ page }) => {
     await page.goto('/auth/sign-in')
     await page.getByLabel('Email', { exact: true }).fill(testEmail)
