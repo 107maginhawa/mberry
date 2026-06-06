@@ -2,7 +2,7 @@
  * getRevenueAnalytics — characterization tests
  *
  * Path: GET /admin/analytics/revenue
- * Auth: session required (no explicit admin guard — DEFECT noted)
+ * Auth: platformAdmin guard required (D-02 fixed).
  * Uses db.execute(sql`...`) directly.
  */
 import { describe, test, expect } from 'bun:test';
@@ -10,6 +10,7 @@ import { makeCtx } from '@/test-utils/make-ctx';
 import { getRevenueAnalytics } from './getRevenueAnalytics';
 
 const FAKE_LOGGER = { info: () => {}, warn: () => {}, error: () => {}, debug: () => {} };
+const FAKE_PLATFORM_ADMIN = { userId: 'admin-1', role: 'super' };
 
 const fakeRevenueRow = {
   total_collected: '500000',
@@ -36,9 +37,23 @@ describe('getRevenueAnalytics (characterization)', () => {
     expect(res.status).toBe(401);
   });
 
-  test('returns 200 with revenue metrics for authenticated user', async () => {
+  // D-02 FIXED: guard now rejects non-platformAdmin users with 403
+  test('returns 403 for authenticated user without platformAdmin role', async () => {
     const ctx = makeRevenueCtx({
-      user: { id: 'user-1', role: 'platform_admin' },
+      user: { id: 'member-1', role: 'member' },
+      database: makeRevenueDb(fakeRevenueRow),
+      logger: FAKE_LOGGER,
+      // platformAdmin intentionally absent
+    });
+    const res = await getRevenueAnalytics(ctx);
+    expect(res.status).toBe(403);
+  });
+
+  // Positive case: platformAdmin CAN access
+  test('returns 200 with revenue metrics for platformAdmin user', async () => {
+    const ctx = makeRevenueCtx({
+      user: { id: 'admin-1', role: 'platform_admin' },
+      platformAdmin: FAKE_PLATFORM_ADMIN,
       database: makeRevenueDb(fakeRevenueRow),
       logger: FAKE_LOGGER,
     });
@@ -52,7 +67,8 @@ describe('getRevenueAnalytics (characterization)', () => {
 
   test('returns 200 with zero values when no payments found', async () => {
     const ctx = makeRevenueCtx({
-      user: { id: 'user-1', role: 'platform_admin' },
+      user: { id: 'admin-1', role: 'platform_admin' },
+      platformAdmin: FAKE_PLATFORM_ADMIN,
       database: makeRevenueDb({ total_collected: '0', paying_org_count: '0', avg_payment: '0' }),
       logger: FAKE_LOGGER,
     });
@@ -65,7 +81,8 @@ describe('getRevenueAnalytics (characterization)', () => {
 
   test('returns 500 on DB error', async () => {
     const ctx = makeRevenueCtx({
-      user: { id: 'user-1', role: 'platform_admin' },
+      user: { id: 'admin-1', role: 'platform_admin' },
+      platformAdmin: FAKE_PLATFORM_ADMIN,
       database: { execute: () => { throw new Error('DB error'); } },
       logger: FAKE_LOGGER,
     });
@@ -75,24 +92,13 @@ describe('getRevenueAnalytics (characterization)', () => {
 
   test('arr is 12x mrr', async () => {
     const ctx = makeRevenueCtx({
-      user: { id: 'user-1', role: 'platform_admin' },
+      user: { id: 'admin-1', role: 'platform_admin' },
+      platformAdmin: FAKE_PLATFORM_ADMIN,
       database: makeRevenueDb(fakeRevenueRow),
       logger: FAKE_LOGGER,
     });
     const res = await getRevenueAnalytics(ctx);
     const body = (res as any).body;
     expect(body?.data?.arr).toBe(body?.data?.mrr * 12);
-  });
-
-  // DEFECT: no explicit platform admin check — any authenticated user can access revenue analytics
-  // This is a potential access-control gap. Logged for Wave 1.5 review.
-  test.skip('DEFECT: returns 403 for non-admin user (currently returns 200)', async () => {
-    const ctx = makeRevenueCtx({
-      user: { id: 'member-1', role: 'member' },
-      database: makeRevenueDb(fakeRevenueRow),
-      logger: FAKE_LOGGER,
-    });
-    const res = await getRevenueAnalytics(ctx);
-    expect(res.status).toBe(403);
   });
 });
