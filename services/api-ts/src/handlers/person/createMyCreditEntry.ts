@@ -7,7 +7,6 @@ import { DocumentRepository } from '@/handlers/documents/repos/documents.repo';
 import { memberships } from '@/handlers/association:member/repos/membership.schema';
 import { and, eq, inArray } from 'drizzle-orm';
 import { domainEvents } from '@/core/domain-events';
-import { auditAction } from '@/utils/audit';
 
 // M10-R5: supporting documents must be PDF or image, max 5MB.
 const MAX_SUPPORTING_DOC_BYTES = 5 * 1024 * 1024;
@@ -108,12 +107,8 @@ export async function createMyCreditEntry(
     })
     .catch(() => {});
 
-  await auditAction(ctx, {
-    action: 'create',
-    resourceType: 'credit-entry',
-    resourceId: entry.id,
-    description: `Self-service credit entry: ${b['activityName']} (${b['creditAmount']} credits)`,
-  });
+  ctx.set('auditResourceId', entry.id);
+  ctx.set('auditDescription', `Self-service credit entry: ${b['activityName']} (${b['creditAmount']} credits)`);
 
   return ctx.json(entry, 201);
 }

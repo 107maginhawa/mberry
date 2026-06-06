@@ -2944,6 +2944,7 @@ export function registerRoutes(app: Hono<{ Variables: Variables }>) {
   // listPersons
   app.get('/persons',
     authMiddleware({ roles: ["admin", "support"] }),
+    createPerRouteAuditMiddleware({ action: "export", resourceType: "person", eventSubType: "data.bulk-export", eventType: "data-access" }),
     zValidator('query', validators.ListPersonsQuery, validationErrorHandler),
     registry.listPersons as unknown as Handler
   );
@@ -2951,6 +2952,7 @@ export function registerRoutes(app: Hono<{ Variables: Variables }>) {
   // updateMyProfile
   app.patch('/persons/me',
     authMiddleware({ roles: ["user"] }),
+    createPerRouteAuditMiddleware({ action: "update", resourceType: "person" }),
     zValidator('json', validators.UpdateMyProfileBody, validationErrorHandler),
     registry.updateMyProfile as unknown as Handler
   );
@@ -2958,12 +2960,14 @@ export function registerRoutes(app: Hono<{ Variables: Variables }>) {
   // cancelMyAccountDeletion
   app.post('/persons/me/cancel-delete',
     authMiddleware({ roles: ["user"] }),
+    createPerRouteAuditMiddleware({ action: "update", resourceType: "person" }),
     registry.cancelMyAccountDeletion as unknown as Handler
   );
 
   // createMyCreditEntry
   app.post('/persons/me/credit-entries',
     authMiddleware({ roles: ["user"] }),
+    createPerRouteAuditMiddleware({ action: "create", resourceType: "credit-entry" }),
     zValidator('json', validators.CreateMyCreditEntryBody, validationErrorHandler),
     registry.createMyCreditEntry as unknown as Handler
   );
@@ -2990,12 +2994,14 @@ export function registerRoutes(app: Hono<{ Variables: Variables }>) {
   // requestMyAccountDeletion
   app.post('/persons/me/delete',
     authMiddleware({ roles: ["user"] }),
+    createPerRouteAuditMiddleware({ action: "delete", resourceType: "person" }),
     registry.requestMyAccountDeletion as unknown as Handler
   );
 
   // exportMyData
   app.get('/persons/me/export',
     authMiddleware({ roles: ["user"] }),
+    createPerRouteAuditMiddleware({ action: "export", resourceType: "person", eventSubType: "data.bulk-export", eventType: "data-access" }),
     registry.exportMyData as unknown as Handler
   );
 
@@ -3014,6 +3020,7 @@ export function registerRoutes(app: Hono<{ Variables: Variables }>) {
   // updateMyNotificationPreferences
   app.patch('/persons/me/notification-preferences',
     authMiddleware({ roles: ["user"] }),
+    createPerRouteAuditMiddleware({ action: "update", resourceType: "notification-preferences" }),
     zValidator('json', validators.UpdateMyNotificationPreferencesBody, validationErrorHandler),
     registry.updateMyNotificationPreferences as unknown as Handler
   );
@@ -3035,6 +3042,7 @@ export function registerRoutes(app: Hono<{ Variables: Variables }>) {
   // updateMyPrivacySettings
   app.patch('/persons/me/privacy',
     authMiddleware({ roles: ["user"] }),
+    createPerRouteAuditMiddleware({ action: "update", resourceType: "privacy-settings" }),
     zValidator('json', validators.UpdateMyPrivacySettingsBody, validationErrorHandler),
     registry.updateMyPrivacySettings as unknown as Handler
   );
@@ -3042,6 +3050,7 @@ export function registerRoutes(app: Hono<{ Variables: Variables }>) {
   // getPerson
   app.get('/persons/:person',
     authMiddleware({ roles: ["admin", "support", "user:owner"] }),
+    createPerRouteAuditMiddleware({ action: "read", resourceType: "person", eventSubType: "data.pii-accessed", eventType: "data-access" }),
     zValidator('param', validators.GetPersonParams, validationErrorHandler),
     registry.getPerson as unknown as Handler
   );

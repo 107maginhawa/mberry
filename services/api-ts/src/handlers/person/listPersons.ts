@@ -9,7 +9,6 @@ import {
 } from '@/core/errors';
 import { PersonRepository } from './repos/person.repo';
 import { parsePagination, buildPaginationMeta, parseFilters, parseSort } from '@/utils/query';
-import { auditAction } from '@/utils/audit';
 
 /**
  * listPersons
@@ -56,16 +55,9 @@ export async function listPersons(
   // Build pagination metadata
   const paginationMeta = buildPaginationMeta(persons, totalCount, limit, offset);
   
-  // Structured audit for bulk PII export
-  await auditAction(ctx, {
-    action: 'export',
-    resourceType: 'person',
-    resourceId: `bulk-${Date.now()}`,
-    description: `Bulk person listing: ${persons.length} of ${totalCount} records`,
-    eventSubType: 'data.bulk-export',
-    eventType: 'data-access',
-    details: { filters, resultCount: persons.length, totalCount },
-  });
+  ctx.set('auditResourceId', `bulk-${Date.now()}`);
+  ctx.set('auditDescription', `Bulk person listing: ${persons.length} of ${totalCount} records`);
+  ctx.set('auditDetails', { filters, resultCount: persons.length, totalCount });
   
   // Return standardized paginated response
   return ctx.json({

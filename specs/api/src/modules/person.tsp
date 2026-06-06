@@ -137,6 +137,7 @@ namespace PersonModule {
     @route("/{person}")
     @useAuth(bearerAuth)
     @extension("x-security-required-roles", #["admin", "support", "user:owner"])
+    @extension("x-audit", #{ action: "read", resourceType: "person", eventType: "data-access", eventSubType: "data.pii-accessed" })
     getPerson(
       @path @doc("Person ID (UUID) or 'me' for current user's profile") person: UUID | "me"
     ): ApiOkResponse<Person>
@@ -164,6 +165,7 @@ namespace PersonModule {
     @get
     @useAuth(bearerAuth)
     @extension("x-security-required-roles", #["admin", "support"])
+    @extension("x-audit", #{ action: "export", resourceType: "person", eventType: "data-access", eventSubType: "data.bulk-export" })
     listPersons(
       ...PaginationQuery
     ): ApiOkResponse<PaginatedResponse<Person>>

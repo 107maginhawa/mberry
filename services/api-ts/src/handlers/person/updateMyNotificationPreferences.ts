@@ -4,7 +4,6 @@ import { UnauthorizedError, ValidationError } from '@/core/errors';
 import type { UpdateMyNotificationPreferencesBody } from '@/generated/openapi/validators';
 import { eq, and } from 'drizzle-orm';
 import { notificationPreferences, NOTIFICATION_CATEGORIES } from './repos/notification-preferences.schema';
-import { auditAction } from '@/utils/audit';
 
 /**
  * updateMyNotificationPreferences
@@ -57,13 +56,9 @@ export async function updateMyNotificationPreferences(
       .returning();
   }
 
-  await auditAction(ctx, {
-    action: 'update',
-    resourceType: 'notification-preferences',
-    resourceId: personId,
-    description: `Notification preference updated: ${b['category']}`,
-    details: { category: b['category'] as string },
-  });
+  ctx.set('auditResourceId', personId);
+  ctx.set('auditDescription', `Notification preference updated: ${b['category']}`);
+  ctx.set('auditDetails', { category: b['category'] as string });
 
   return ctx.json(row, existing ? 200 : 201);
 }

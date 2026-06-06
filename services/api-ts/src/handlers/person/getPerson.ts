@@ -9,7 +9,6 @@ import {
   BusinessLogicError
 } from '@/core/errors';
 import { PersonRepository } from './repos/person.repo';
-import { auditAction } from '@/utils/audit';
 
 /**
  * getPerson
@@ -66,16 +65,13 @@ export async function getPerson(
     }
   }
   
-  // Structured audit for PII access (skip internal expand — already authorized at parent level)
-  if (!isInternalExpand) {
-    await auditAction(ctx, {
-      action: 'read',
-      resourceType: 'person',
-      resourceId: person.id,
-      description: `PII accessed: person ${person.id}`,
-      eventSubType: 'data.pii-accessed',
-      eventType: 'data-access',
-    });
+  // Skip the per-route audit for internal expand requests (already authorized
+  // at the parent resource level). Empty auditEvents suppresses logging.
+  if (isInternalExpand) {
+    ctx.set('auditEvents', []);
+  } else {
+    ctx.set('auditResourceId', person.id);
+    ctx.set('auditDescription', `PII accessed: person ${person.id}`);
   }
   
   // Ensure dateOfBirth is serialized as ISO string for JSON response

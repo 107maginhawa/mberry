@@ -3,7 +3,6 @@ import type { DatabaseInstance } from '@/core/database';
 import { UnauthorizedError, NotFoundError } from '@/core/errors';
 import type { UpdateMyProfileBody } from '@/generated/openapi/validators';
 import { PersonRepository } from './repos/person.repo';
-import { auditAction } from '@/utils/audit';
 import { domainEvents } from '@/core/domain-events';
 
 /**
@@ -47,12 +46,8 @@ export async function updateMyProfile(
 
   const updated = await repo.updateOneById(personId, updateData as Record<string, unknown>);
 
-  await auditAction(ctx, {
-    action: 'update',
-    resourceType: 'person',
-    resourceId: personId,
-    description: 'Self-service profile update',
-  });
+  ctx.set('auditResourceId', personId);
+  ctx.set('auditDescription', 'Self-service profile update');
 
   // changedFields excludes the audit-only updatedBy marker
   const updatedFields = Object.keys(updateData).filter((k) => k !== 'updatedBy');

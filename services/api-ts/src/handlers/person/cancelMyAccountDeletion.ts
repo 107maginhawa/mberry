@@ -2,7 +2,6 @@ import type { BaseContext } from '@/types/app';
 import type { DatabaseInstance } from '@/core/database';
 import { UnauthorizedError, BusinessLogicError } from '@/core/errors';
 import { PersonRepository } from './repos/person.repo';
-import { auditAction } from '@/utils/audit';
 import { domainEvents } from '@/core/domain-events';
 
 /**
@@ -34,12 +33,8 @@ export async function cancelMyAccountDeletion(ctx: BaseContext): Promise<Respons
     updatedBy: personId,
   } as Partial<typeof person>);
 
-  await auditAction(ctx, {
-    action: 'update',
-    resourceType: 'person',
-    resourceId: personId,
-    description: 'Account deletion request cancelled',
-  });
+  ctx.set('auditResourceId', personId);
+  ctx.set('auditDescription', 'Account deletion request cancelled');
 
   domainEvents.emit('person.deletion.cancelled', { personId }).catch(() => {});
 
