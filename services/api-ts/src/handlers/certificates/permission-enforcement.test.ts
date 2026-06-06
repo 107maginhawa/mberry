@@ -4,9 +4,11 @@
  * Verifies:
  * - generateCertificatePdf: member cannot generate PDF for another member's certificate
  * - generateCertificatePdf: returns 401 without user
- * - getCertificate: owner-only access (ForbiddenError for non-owner)
  * - batchGenerateCertificates: returns 401 without user
  * - batchGenerateCertificates: cross-org cert filtered as error
+ *
+ * getCertificate owner-only coverage moved with the handler to
+ * association:member/getCertificate (deleted at 2579d9b7).
  */
 
 import { describe, test, expect, beforeEach, afterEach } from 'bun:test';
@@ -14,7 +16,6 @@ import { makeCtx, stubRepo, restoreRepo } from '@/test-utils/make-ctx';
 import { fakeCertificate } from '@/test-utils/factories';
 import { CertificatesRepository } from './repos/certificates.repo';
 import { OfficerTermRepository } from '../association:member/repos/governance.repo';
-import { getCertificate } from './getCertificate';
 import { generateCertificatePdf } from './generateCertificatePdf';
 import { batchGenerateCertificates } from './batchGenerateCertificates';
 import { ForbiddenError } from '@/core/errors';
@@ -103,38 +104,6 @@ describe('generateCertificatePdf — member cannot generate for others', () => {
 
     const res = await generateCertificatePdf(ctx);
     expect(res.status).toBe(401);
-  });
-});
-
-// ─── getCertificate: owner-only ────────────────────────
-
-describe('getCertificate — cross-user access blocked', () => {
-  test('throws ForbiddenError when cross-org non-owner accesses certificate', async () => {
-    stubRepo(CertificatesRepository, {
-      get: async () => crossOrgCert,
-    });
-
-    // user-1 in tenant-1 trying to access cert from other-org
-    const ctx = makeCtx({
-      organizationId: 'tenant-1',
-      _params: { id: 'cert-cross-org' },
-    });
-
-    await expect(getCertificate(ctx)).rejects.toBeInstanceOf(ForbiddenError);
-  });
-
-  test('allows owner to access their certificate', async () => {
-    stubRepo(CertificatesRepository, {
-      get: async () => ownedCert,
-    });
-
-    const ctx = makeCtx({
-      organizationId: 'tenant-1',
-      _params: { id: 'cert-1' },
-    });
-
-    const res = await getCertificate(ctx);
-    expect(res.status).toBe(200);
   });
 });
 

@@ -4,7 +4,6 @@
 import { describe, test, expect, afterEach, beforeEach } from 'bun:test';
 import { makeCtx, stubRepo, restoreRepo } from '@/test-utils/make-ctx';
 import { fakeCertificate as createFakeCertificate } from '@/test-utils/factories';
-import { getCertificate } from './getCertificate';
 import { listCertificates } from './listCertificates';
 import { CertificatesRepository } from './repos/certificates.repo';
 
@@ -41,29 +40,9 @@ describe('[FLOW-09] Certificate Retrieval', () => {
     if (mocks) Object.values(mocks).forEach((m) => m.mockRestore());
   });
 
-  test('getCertificate returns certificate by ID', async () => {
-    mocks = defaultStubs();
-
-    const ctx = makeCtx({ _params: { id: 'cert-1' }, user: { id: PERSON, role: 'user' } });
-    const response = await getCertificate(ctx);
-
-    expect(response.status).toBe(200);
-    expect(response.body.data.id).toBe('cert-1');
-    expect(response.body.data.personId).toBe(PERSON);
-  });
-
-  test('getCertificate throws NotFoundError for missing cert', async () => {
-    mocks = defaultStubs();
-
-    const ctx = makeCtx({ _params: { id: 'nonexistent' } });
-
-    try {
-      await getCertificate(ctx);
-      expect(true).toBe(false);
-    } catch (e: any) {
-      expect(e.message).toContain('not found');
-    }
-  });
+  // getCertificate tests removed — handler deleted at 2579d9b7. Live impl
+  // in association:member/getCertificate has its own coverage in
+  // association:member/getCertificate.test.ts.
 
   test('listCertificates returns certs for current user', async () => {
     let capturedPersonId: string | null = null;

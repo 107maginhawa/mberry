@@ -14,7 +14,6 @@
 import { describe, test, expect, beforeEach, afterEach } from 'bun:test';
 import { makeCtx, stubRepo, restoreRepo } from '@/test-utils/make-ctx';
 import { castVote } from './castVote';
-import { getElection } from './getElection';
 import { updateElectionStatus } from './updateElectionStatus';
 import { ElectionsRepository } from './repos/elections.repo';
 import { MembershipRepository } from '../association:member/repos/membership.repo';
@@ -267,88 +266,11 @@ describe('[BR-20] One Vote Per Position Per Member', () => {
 
 // ─── BR-33: Vote Anonymity & Results Visibility ────────
 
-describe('[BR-33] Vote Anonymity & Results Visibility', () => {
-  beforeEach(() => restoreRepo(ElectionsRepository));
-  afterEach(() => restoreRepo(ElectionsRepository));
-  // getElection doesn't use requirePosition or MembershipRepository — no extra stubs needed
-
-  test('getElection returns aggregate tallies, not individual voter info', async () => {
-    const tallies = [
-      { positionId: POSITION_A, nomineeId: NOMINEE_A, count: 15 },
-      { positionId: POSITION_A, nomineeId: NOMINEE_B, count: 10 },
-    ];
-
-    stubRepo(ElectionsRepository, {
-      get: async () => ({ ...baseElection, status: 'published', publishedAt: new Date() }),
-      listNominees: async () => [],
-      getVoterCount: async () => 25,
-      getVoteTallies: async () => tallies,
-    });
-
-    const ctx = makeCtx({ _params: { id: ELECTION_ID } });
-    const response = await getElection(ctx);
-    const data = response.body.data;
-
-    // Tallies are aggregate counts — no voter identities
-    expect(data.tallies).toHaveLength(2);
-    for (const tally of data.tallies) {
-      expect(tally).toHaveProperty('positionId');
-      expect(tally).toHaveProperty('nomineeId');
-      expect(tally).toHaveProperty('count');
-      // Must NOT contain voter identity
-      expect(tally).not.toHaveProperty('voterId');
-      expect(tally).not.toHaveProperty('voterIds');
-      expect(tally).not.toHaveProperty('voters');
-    }
-
-    // voterCount is aggregate — just a number
-    expect(typeof data.voterCount).toBe('number');
-  });
-
-  test('tallies hidden during votingOpen (BR-33: results not displayed until closed)', async () => {
-    stubRepo(ElectionsRepository, {
-      get: async () => ({ ...baseElection, status: 'votingOpen' }),
-      listNominees: async () => [],
-      getVoterCount: async () => 5,
-      getVoteTallies: async () => { throw new Error('should not be called during votingOpen'); },
-    });
-
-    const ctx = makeCtx({ _params: { id: ELECTION_ID } });
-    const response = await getElection(ctx);
-    expect(response.status).toBe(200);
-    expect(response.body.data.tallies).toEqual([]);
-  });
-
-  test('tallies hidden during nominationsOpen', async () => {
-    stubRepo(ElectionsRepository, {
-      get: async () => ({ ...baseElection, status: 'nominationsOpen' }),
-      listNominees: async () => [],
-      getVoterCount: async () => 0,
-      getVoteTallies: async () => { throw new Error('should not be called during nominationsOpen'); },
-    });
-
-    const ctx = makeCtx({ _params: { id: ELECTION_ID } });
-    const response = await getElection(ctx);
-    expect(response.status).toBe(200);
-    expect(response.body.data.tallies).toEqual([]);
-  });
-
-  test('tallies visible when status is awaitingConfirmation', async () => {
-    const tallies = [{ positionId: POSITION_A, nomineeId: NOMINEE_A, count: 8 }];
-
-    stubRepo(ElectionsRepository, {
-      get: async () => ({ ...baseElection, status: 'awaitingConfirmation' }),
-      listNominees: async () => [],
-      getVoterCount: async () => 8,
-      getVoteTallies: async () => tallies,
-    });
-
-    const ctx = makeCtx({ _params: { id: ELECTION_ID } });
-    const response = await getElection(ctx);
-    expect(response.body.data.tallies).toHaveLength(1);
-    expect(response.body.data.tallies[0].count).toBe(8);
-  });
-});
+// [BR-33] Vote Anonymity & Results Visibility block removed — exercised the
+// deleted elections/getElection (2579d9b7). Live successor at
+// association:member/getElection uses Hono ctx — shape-incompatible with
+// these stubs. BR-33 secret-ballot coverage lives in the successor's own
+// tests + br-33.election-integrity.test.ts.
 
 // ─── castVote Input Validation ──────────────────────────
 
