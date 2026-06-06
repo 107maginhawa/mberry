@@ -3,14 +3,25 @@
 import { test, expect } from '../helpers/test-fixture'
 import { SEED_MEMBER_EMAIL, TEST_PASSWORD } from '../helpers/test-config'
 import { authStateFile } from '../helpers/auth-state'
+import { captureRouteHydration } from '../helpers/real-flow'
 
+// W2 real-flow upgrade: the org documents browser hydrates via a GET
+// to /documents (or /persons/me on the auth shell). Capturing that
+// proves the wire returned data, not just that the heading rendered.
+const DOCS_OR_PERSON = /\/(documents|persons\/me)(?:[/?]|$)/
 
 test.use({ storageState: authStateFile('member') })
 const ORG_ID = 'ed8e3a96-8126-4341-be42-e6eb7940c562'
 
 test.describe('Member Documents', () => {
 test('documents browser renders heading', async ({ page }) => {
+    const respP = captureRouteHydration(page, DOCS_OR_PERSON)
     await page.goto(`/org/${ORG_ID}/documents`)
+
+    const resp = await respP
+    expect(resp?.status()).toBe(200)
+    expect(resp?.ok()).toBe(true)
+
     await expect(
       page.getByRole('heading', { name: /documents?/i }).first()
     ).toBeVisible({ timeout: 10000 })
