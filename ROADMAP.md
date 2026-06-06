@@ -1,5 +1,9 @@
 # Roadmap
 
+> **Active hardening plan:** `~/.claude/plans/so-is-our-codebase-hidden-dream.md`
+> (Waves 1–7). Deferred items below remain tracked; Wave 5.5 owns the
+> mega-module rebuild handoff.
+
 > Single source of truth for all planned work, structural refactors, and migration backlog.
 > Bugs are fixed immediately — they don't belong here. This file tracks only **planned work**.
 
