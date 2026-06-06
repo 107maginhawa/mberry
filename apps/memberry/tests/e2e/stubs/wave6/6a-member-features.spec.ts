@@ -1,3 +1,4 @@
+// @selector-only-ok: stub — Wave 6 features pending implementation; tests use test.fixme()
 // Wave 6A: Member features — NOT YET IMPLEMENTED
 // These tests define the RED phase specs for features that need to be built
 import { test, expect } from '../../helpers/test-fixture'

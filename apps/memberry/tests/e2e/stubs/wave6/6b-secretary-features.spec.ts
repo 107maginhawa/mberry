@@ -1,3 +1,4 @@
+// @selector-only-ok: stub — Wave 6 features pending implementation; tests use test.fixme()
 // Wave 6B: Secretary features — NOT YET IMPLEMENTED
 import { test, expect } from '../../helpers/test-fixture'
 

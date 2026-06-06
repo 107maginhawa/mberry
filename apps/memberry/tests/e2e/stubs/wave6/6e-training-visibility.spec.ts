@@ -1,3 +1,4 @@
+// @selector-only-ok: stub — Wave 6 features pending implementation; tests use test.fixme()
 // Wave 6E: Training visibility (BR-16) — NOT YET IMPLEMENTED
 // Backend: visibility field accepted but stripped in updateTraining.ts. No DB column.
 // Feature blocked until schema + handler + UI are built.
