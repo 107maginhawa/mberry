@@ -2,13 +2,20 @@ import { test, expect } from '../helpers/test-fixture'
 import { signIn } from '../helpers/auth'
 import { SEED_OFFICER_EMAIL, SEED_MEMBER_EMAIL, TEST_PASSWORD } from '../helpers/test-config'
 import { expectNoA11yViolations } from '../helpers/a11y'
+import { captureRouteHydration } from '../helpers/real-flow'
+
+// W2 real-flow upgrade: officer/dashboard hydrates via GET /persons/me
+// (officer identity + org membership context). Capture proves the wire
+// returned data, not just that the shell rendered.
 
 const ORG_ID = 'ed8e3a96-8126-4341-be42-e6eb7940c562'
+const PERSON_ME = '/persons/me'
 
 test.describe('Officer Dashboard — Interaction States', () => {
   test('loading: shows loading state before dashboard data arrives', async ({ page }) => {
     await signIn(page, SEED_OFFICER_EMAIL, TEST_PASSWORD)
 
+    const respP = captureRouteHydration(page, PERSON_ME)
     await page.goto(`/org/${ORG_ID}/officer/dashboard`, { waitUntil: 'commit' })
 
     const skeleton = page.locator('[class*="skeleton"], [class*="animate-pulse"]')
@@ -19,11 +26,21 @@ test.describe('Officer Dashboard — Interaction States', () => {
 
     await page.waitForLoadState('networkidle')
     await expect(page.locator('main')).toBeVisible({ timeout: 10000 })
+
+    const resp = await respP
+    expect(resp?.status()).toBe(200)
+    expect(resp?.ok()).toBe(true)
   })
 
   test('success: shows dashboard with metrics and org name', async ({ page }) => {
     await signIn(page, SEED_OFFICER_EMAIL, TEST_PASSWORD)
+    const respP = captureRouteHydration(page, PERSON_ME)
     await page.goto(`/org/${ORG_ID}/officer/dashboard`)
+
+    const resp = await respP
+    expect(resp?.status()).toBe(200)
+    expect(resp?.ok()).toBe(true)
+
     // Dashboard or welcome content
     const hasGreeting = await page.getByText(/dashboard|welcome|good\s(morning|afternoon|evening)|overview/i).first().isVisible().catch(() => false)
     const hasOrgName = await page.getByText(/PDA Metro Manila/i).first().isVisible().catch(() => false)
@@ -58,7 +75,13 @@ test.describe('Officer Dashboard — Interaction States', () => {
 
   test('disabled: navigation links are correctly scoped to officer role', async ({ page }) => {
     await signIn(page, SEED_OFFICER_EMAIL, TEST_PASSWORD)
+    const respP = captureRouteHydration(page, PERSON_ME)
     await page.goto(`/org/${ORG_ID}/officer/dashboard`)
+
+    const resp = await respP
+    expect(resp?.status()).toBe(200)
+    expect(resp?.ok()).toBe(true)
+
     // Officer nav should include roster, communications, settings links
     const rosterLink = page.getByRole('link', { name: /roster/i }).first()
     const hasRoster = await rosterLink.isVisible().catch(() => false)
