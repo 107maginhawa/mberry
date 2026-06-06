@@ -262,6 +262,7 @@ namespace DocumentManagement {
     @post
     @useAuth(bearerAuth)
     @extension("x-security-required-roles", #["admin", "coordinator", "member:owner"])
+    @extension("x-audit", #{ action: "create", resourceType: "document" })
     createDocument(
       @body body: DocumentCreateRequest
     ): ApiCreatedResponse<Document>
@@ -275,6 +276,7 @@ namespace DocumentManagement {
     @route("/{documentId}")
     @useAuth(bearerAuth)
     @extension("x-security-required-roles", #["admin", "coordinator", "member"])
+    @extension("x-audit", #{ action: "read", resourceType: "document", eventType: "data-access", eventSubType: "data.document-accessed" })
     getDocument(
       @path documentId: string
     ): ApiOkResponse<Document>
@@ -288,6 +290,8 @@ namespace DocumentManagement {
     @route("/{documentId}")
     @useAuth(bearerAuth)
     @extension("x-security-required-roles", #["admin", "coordinator", "member:owner"])
+    @extension("x-require-officer", true)
+    @extension("x-audit", #{ action: "update", resourceType: "document" })
     updateDocument(
       @path documentId: string,
       @body updates: DocumentUpdateRequest
@@ -303,6 +307,8 @@ namespace DocumentManagement {
     @route("/{documentId}")
     @useAuth(bearerAuth)
     @extension("x-security-required-roles", #["admin", "member:owner"])
+    @extension("x-require-position", #["President"])
+    @extension("x-audit", #{ action: "delete", resourceType: "document" })
     deleteDocument(
       @path documentId: string
     ): ApiNoContentResponse
@@ -328,6 +334,7 @@ namespace DocumentManagement {
     @route("/{documentId}/versions")
     @useAuth(bearerAuth)
     @extension("x-security-required-roles", #["admin", "coordinator", "member:owner"])
+    @extension("x-audit", #{ action: "create", resourceType: "document-version" })
     uploadNewDocumentVersion(
       @path documentId: string,
       @body body: DocumentNewVersionRequest
@@ -357,6 +364,8 @@ namespace DocumentManagement {
     @route("/{documentId}/archive")
     @useAuth(bearerAuth)
     @extension("x-security-required-roles", #["admin", "coordinator"])
+    @extension("x-require-officer", true)
+    @extension("x-audit", #{ action: "update", resourceType: "document" })
     archiveDocument(
       @path documentId: string
     ): ApiOkResponse<Document>
@@ -404,6 +413,7 @@ namespace DocumentTagManagement {
     @post
     @useAuth(bearerAuth)
     @extension("x-security-required-roles", #["admin", "coordinator"])
+    @extension("x-audit", #{ action: "create", resourceType: "document-tag" })
     createDocumentTag(
       @body body: DocumentTagCreateRequest
     ): ApiCreatedResponse<DocumentTag>
@@ -431,6 +441,7 @@ namespace DocumentTagManagement {
     @route("/{tagId}")
     @useAuth(bearerAuth)
     @extension("x-security-required-roles", #["admin", "coordinator"])
+    @extension("x-audit", #{ action: "update", resourceType: "document-tag" })
     updateDocumentTag(
       @path tagId: string,
       @body updates: DocumentTagUpdateRequest
@@ -446,6 +457,7 @@ namespace DocumentTagManagement {
     @route("/{tagId}")
     @useAuth(bearerAuth)
     @extension("x-security-required-roles", #["admin"])
+    @extension("x-audit", #{ action: "delete", resourceType: "document-tag" })
     deleteDocumentTag(
       @path tagId: string
     ): ApiNoContentResponse

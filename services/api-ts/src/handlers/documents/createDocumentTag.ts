@@ -3,7 +3,6 @@ import type { DatabaseInstance } from '@/core/database';
 import type { CreateDocumentTagBody } from '@/generated/openapi/validators';
 import { UnauthorizedError } from '@/core/errors';
 import { DocumentTagRepository } from './repos/documents.repo';
-import { auditAction } from '@/utils/audit';
 
 /**
  * createDocumentTag
@@ -31,12 +30,8 @@ export async function createDocumentTag(
     color: body.color ?? null,
   });
 
-  await auditAction(ctx, {
-    action: 'create',
-    resourceType: 'document-tag',
-    resourceId: tag.id,
-    description: `Document tag "${body.name}" created`,
-  });
+  ctx.set('auditResourceId', tag.id);
+  ctx.set('auditDescription', `Document tag "${body.name}" created`);
 
   return ctx.json(tag, 201);
 }

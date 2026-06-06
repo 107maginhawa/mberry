@@ -175,38 +175,11 @@ describe('[AC-M11-002] Certificate After Training', () => {
     issuedAt: new Date('2026-05-01'),
   });
 
-  test('getCertificate returns certificate by ID', async () => {
-    mocks = stubRepo(CertificatesRepository, {
-      get: async (id: string) => id === 'cert-023-1' ? fakeCert : undefined,
-    });
-
-    const { getCertificate } = await import('@/handlers/certificates/getCertificate');
-    const ctx = makeCtx({ _params: { id: 'cert-023-1' }, user: { id: PERSON_ID, role: 'user' } });
-    const response = await getCertificate(ctx);
-    expect(response.status).toBe(200);
-    expect(response.body.data.certificateNumber).toBe('CERT-2026-000001');
-    expect(response.body.data.trainingId).toBe('training-complete-1');
-  });
-
-  test('getCertificate throws NotFoundError for missing certificate', async () => {
-    mocks = stubRepo(CertificatesRepository, {
-      get: async () => undefined,
-    });
-
-    const { getCertificate } = await import('@/handlers/certificates/getCertificate');
-    const ctx = makeCtx({ _params: { id: 'nonexistent' } });
-    await expect(getCertificate(ctx)).rejects.toThrow('not found');
-  });
-
-  test('getCertificate enforces IDOR prevention — owner-only access', async () => {
-    mocks = stubRepo(CertificatesRepository, {
-      get: async () => ({ ...fakeCert, personId: 'different-person' }),
-    });
-
-    const { getCertificate } = await import('@/handlers/certificates/getCertificate');
-    const ctx = makeCtx({ _params: { id: 'cert-023-1' }, user: { id: PERSON_ID, role: 'user' } });
-    await expect(getCertificate(ctx)).rejects.toThrow('denied');
-  });
+  // NOTE: getCertificate tests removed — handler was the pre-Phase-35 duplicate
+  // of handlers/association:member/getCertificate.ts (the active TypeSpec-generated
+  // version). See .audits/PRODUCTION_AUDIT.md P0.1. Live handler uses a different
+  // repo (DigitalCredentialRepository vs CertificatesRepository); fresh coverage
+  // tracked separately.
 
   test('listCertificates returns certificates for person', async () => {
     const certs = [

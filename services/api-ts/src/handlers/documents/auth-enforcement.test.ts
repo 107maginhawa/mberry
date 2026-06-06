@@ -165,13 +165,8 @@ describe('P0-04: searchDocuments accessLevel enforcement', () => {
 // ─── P1: deleteDocument officer restriction ─────────────
 
 describe('P1: deleteDocument officer restriction', () => {
-  test('returns 403 for non-officer', async () => {
-    stubDocRepoWith(docInOrg);
-    stubOfficerDenied();
-    const ctx = makeCtx({ organizationId: 'tenant-1', _params: { documentId: 'doc-1' } });
-    const res = await deleteDocument(ctx);
-    expect(res.status).toBe(403);
-  });
+  // 403 for non-officer is now enforced by requirePositionMiddleware(President)
+  // at the route level — see middleware/require-position.test.ts.
 
   test('succeeds for officer in same org', async () => {
     stubDocRepoWith(docInOrg);
@@ -199,13 +194,8 @@ describe('P1: deleteDocument officer restriction', () => {
 // ─── P1: archiveDocument officer restriction ────────────
 
 describe('P1: archiveDocument officer restriction', () => {
-  test('returns 403 for non-officer', async () => {
-    stubDocRepoWith(docInOrg);
-    stubOfficerDenied();
-    const ctx = makeCtx({ organizationId: 'tenant-1', _params: { documentId: 'doc-1' } });
-    const res = await archiveDocument(ctx);
-    expect(res.status).toBe(403);
-  });
+  // 403 for non-officer is now enforced by requireOfficerMiddleware at the route
+  // level — see middleware/require-officer.test.ts.
 
   test('succeeds for officer in same org', async () => {
     stubDocRepoWith(docInOrg);
@@ -219,17 +209,8 @@ describe('P1: archiveDocument officer restriction', () => {
 // ─── P1: updateDocument officer restriction ─────────────
 
 describe('P1: updateDocument officer restriction', () => {
-  test('returns 403 for non-officer', async () => {
-    stubDocRepoWith(docInOrg);
-    stubOfficerDenied();
-    const ctx = makeCtx({
-      organizationId: 'tenant-1',
-      _params: { documentId: 'doc-1' },
-      _body: { title: 'Updated' },
-    });
-    const res = await updateDocument(ctx);
-    expect(res.status).toBe(403);
-  });
+  // 403 for non-officer is now enforced by requireOfficerMiddleware at the route
+  // level — see middleware/require-officer.test.ts.
 
   test('succeeds for officer in same org', async () => {
     stubDocRepoWith(docInOrg);

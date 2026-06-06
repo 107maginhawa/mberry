@@ -3,7 +3,6 @@ import type { DatabaseInstance } from '@/core/database';
 import type { UpdateDocumentTagBody, UpdateDocumentTagParams } from '@/generated/openapi/validators';
 import { UnauthorizedError, NotFoundError } from '@/core/errors';
 import { DocumentTagRepository } from './repos/documents.repo';
-import { auditAction } from '@/utils/audit';
 
 /**
  * updateDocumentTag
@@ -27,12 +26,8 @@ export async function updateDocumentTag(
 
   const updated = await repo.updateOneById(tagId, body as Record<string, unknown>);
 
-  await auditAction(ctx, {
-    action: 'update',
-    resourceType: 'document-tag',
-    resourceId: tagId,
-    description: 'Document tag updated',
-  });
+  ctx.set('auditResourceId', tagId);
+  ctx.set('auditDescription', 'Document tag updated');
 
   return ctx.json(updated, 200);
 }

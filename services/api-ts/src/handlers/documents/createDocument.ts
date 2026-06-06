@@ -3,7 +3,6 @@ import type { DatabaseInstance } from '@/core/database';
 import type { CreateDocumentBody } from '@/generated/openapi/validators';
 import { UnauthorizedError, ValidationError } from '@/core/errors';
 import { DocumentRepository } from './repos/documents.repo';
-import { auditAction } from '@/utils/audit';
 import { isBlockedDocumentFile } from '@/utils/sanitize';
 import { requireOfficerTerm } from '@/utils/officer-check';
 import { domainEvents } from '@/core/domain-events';
@@ -59,12 +58,8 @@ export async function createDocument(
     status: body.status ?? 'draft',
   });
 
-  await auditAction(ctx, {
-    action: 'create',
-    resourceType: 'document',
-    resourceId: document.id,
-    description: `Document "${body.title}" created`,
-  });
+  ctx.set('auditResourceId', document.id);
+  ctx.set('auditDescription', `Document "${body.title}" created`);
 
   // EM-M11-d1e34f90: emit DocumentUploaded domain event.
   domainEvents.emit('document.created', {

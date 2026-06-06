@@ -37,15 +37,9 @@ describe('deleteDocument', () => {
     expect(res.status).toBe(204);
   });
 
-  test('returns 403 for a non-president officer (Secretary)', async () => {
-    restoreRepo(OfficerTermRepository);
-    stubRepo(OfficerTermRepository, {
-      findActiveByPersonAndOrg: async () => [{ positionTitle: 'Secretary' }],
-    });
-    const ctx = makeCtx({ _params: { documentId: 'doc-1' } });
-    const res = await deleteDocument(ctx);
-    expect(res.status).toBe(403);
-  });
+  // 403 for non-president officer is now enforced by requirePositionMiddleware
+  // (President) at the route level — see middleware/require-position.test.ts.
+
 
   test('throws NotFoundError when document not found', async () => {
     restoreRepo(DocumentRepository);

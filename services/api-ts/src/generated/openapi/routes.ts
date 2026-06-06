@@ -267,6 +267,7 @@ export function registerRoutes(app: Hono<{ Variables: Variables }>) {
   // createDocumentTag
   app.post('/association/document-tags',
     authMiddleware({ roles: ["admin", "coordinator"] }),
+    createPerRouteAuditMiddleware({ action: "create", resourceType: "document-tag" }),
     zValidator('json', validators.CreateDocumentTagBody, validationErrorHandler),
     registry.createDocumentTag as unknown as Handler
   );
@@ -288,6 +289,7 @@ export function registerRoutes(app: Hono<{ Variables: Variables }>) {
   // updateDocumentTag
   app.patch('/association/document-tags/:tagId',
     authMiddleware({ roles: ["admin", "coordinator"] }),
+    createPerRouteAuditMiddleware({ action: "update", resourceType: "document-tag" }),
     zValidator('param', validators.UpdateDocumentTagParams, validationErrorHandler),
     zValidator('json', validators.UpdateDocumentTagBody, validationErrorHandler),
     registry.updateDocumentTag as unknown as Handler
@@ -296,6 +298,7 @@ export function registerRoutes(app: Hono<{ Variables: Variables }>) {
   // deleteDocumentTag
   app.delete('/association/document-tags/:tagId',
     authMiddleware({ roles: ["admin"] }),
+    createPerRouteAuditMiddleware({ action: "delete", resourceType: "document-tag" }),
     zValidator('param', validators.DeleteDocumentTagParams, validationErrorHandler),
     registry.deleteDocumentTag as unknown as Handler
   );
@@ -303,6 +306,7 @@ export function registerRoutes(app: Hono<{ Variables: Variables }>) {
   // createDocument
   app.post('/association/documents',
     authMiddleware({ roles: ["admin", "coordinator", "member:owner"] }),
+    createPerRouteAuditMiddleware({ action: "create", resourceType: "document" }),
     zValidator('json', validators.CreateDocumentBody, validationErrorHandler),
     registry.createDocument as unknown as Handler
   );
@@ -317,6 +321,7 @@ export function registerRoutes(app: Hono<{ Variables: Variables }>) {
   // getDocument
   app.get('/association/documents/:documentId',
     authMiddleware({ roles: ["admin", "coordinator", "member"] }),
+    createPerRouteAuditMiddleware({ action: "read", resourceType: "document", eventSubType: "data.document-accessed", eventType: "data-access" }),
     zValidator('param', validators.GetDocumentParams, validationErrorHandler),
     registry.getDocument as unknown as Handler
   );
@@ -324,6 +329,8 @@ export function registerRoutes(app: Hono<{ Variables: Variables }>) {
   // updateDocument
   app.patch('/association/documents/:documentId',
     authMiddleware({ roles: ["admin", "coordinator", "member:owner"] }),
+    requireOfficerMiddleware(),
+    createPerRouteAuditMiddleware({ action: "update", resourceType: "document" }),
     zValidator('param', validators.UpdateDocumentParams, validationErrorHandler),
     zValidator('json', validators.UpdateDocumentBody, validationErrorHandler),
     registry.updateDocument as unknown as Handler
@@ -332,6 +339,8 @@ export function registerRoutes(app: Hono<{ Variables: Variables }>) {
   // deleteDocument
   app.delete('/association/documents/:documentId',
     authMiddleware({ roles: ["admin", "member:owner"] }),
+    requirePositionMiddleware({ titles: ["President"] }),
+    createPerRouteAuditMiddleware({ action: "delete", resourceType: "document" }),
     zValidator('param', validators.DeleteDocumentParams, validationErrorHandler),
     registry.deleteDocument as unknown as Handler
   );
@@ -347,6 +356,8 @@ export function registerRoutes(app: Hono<{ Variables: Variables }>) {
   // archiveDocument
   app.post('/association/documents/:documentId/archive',
     authMiddleware({ roles: ["admin", "coordinator"] }),
+    requireOfficerMiddleware(),
+    createPerRouteAuditMiddleware({ action: "update", resourceType: "document" }),
     zValidator('param', validators.ArchiveDocumentParams, validationErrorHandler),
     registry.archiveDocument as unknown as Handler
   );
@@ -354,6 +365,7 @@ export function registerRoutes(app: Hono<{ Variables: Variables }>) {
   // uploadNewDocumentVersion
   app.post('/association/documents/:documentId/versions',
     authMiddleware({ roles: ["admin", "coordinator", "member:owner"] }),
+    createPerRouteAuditMiddleware({ action: "create", resourceType: "document-version" }),
     zValidator('param', validators.UploadNewDocumentVersionParams, validationErrorHandler),
     zValidator('json', validators.UploadNewDocumentVersionBody, validationErrorHandler),
     registry.uploadNewDocumentVersion as unknown as Handler
