@@ -67,5 +67,4 @@ describe('executeCascadeDeletion (emit-only)', () => {
     expect(subscriberResolved).toBe(true);
   });
 
-  test.skip('TODO: per-subscriber behavioral coverage — moved out from this file. Add tests under core/domain-event-consumers.test.ts for the 9 person.deleted subscribers', () => {});
 });
