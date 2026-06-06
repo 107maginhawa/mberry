@@ -1,6 +1,7 @@
 // Business Rules: [BR-09]
 import { test, expect } from '../helpers/test-fixture'
 import { authStateFile } from '../helpers/auth-state'
+import { captureAnyApiSuccess } from '../helpers/real-flow'
 
 
 test.use({ storageState: authStateFile('officer') })
@@ -8,9 +9,13 @@ const ORG_ID = 'ed8e3a96-8126-4341-be42-e6eb7940c562'
 
 test.describe('Officer Navigation Reachability', () => {
   test('officer dashboard shows officer sidebar with all sections', async ({ page }) => {
+    const respP = captureAnyApiSuccess(page)
     await page.goto(`/org/${ORG_ID}/officer/dashboard`)
     const sidebar = page.locator('aside').first()
     await expect(sidebar).toBeVisible({ timeout: 10000 })
+    const resp = await respP
+    expect(resp?.status()).toBe(200)
+    expect(resp?.ok()).toBe(true)
 
     // Section labels render as uppercase tracking spans (officer-sidebar
     // .tsx). Use exact-match so we don't collide with the "Members" link.
