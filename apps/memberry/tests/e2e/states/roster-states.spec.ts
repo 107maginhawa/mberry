@@ -2,13 +2,20 @@ import { test, expect } from '../helpers/test-fixture'
 import { signIn } from '../helpers/auth'
 import { SEED_OFFICER_EMAIL, SEED_MEMBER_EMAIL, TEST_PASSWORD } from '../helpers/test-config'
 import { expectNoA11yViolations } from '../helpers/a11y'
+import { captureRouteHydration } from '../helpers/real-flow'
+
+// W2 real-flow upgrade: officer/roster hydrates via GET /memberships
+// (listOrgMembers/listMemberships endpoint). Capture proves the wire
+// returned data.
 
 const ORG_ID = 'ed8e3a96-8126-4341-be42-e6eb7940c562'
+const MEMBERSHIPS = '/memberships'
 
 test.describe('Roster — Interaction States', () => {
   test('loading: shows loading state before roster data loads', async ({ page }) => {
     await signIn(page, SEED_OFFICER_EMAIL, TEST_PASSWORD)
 
+    const respP = captureRouteHydration(page, MEMBERSHIPS)
     await page.goto(`/org/${ORG_ID}/officer/roster`, { waitUntil: 'commit' })
 
     const skeleton = page.locator('[class*="skeleton"], [class*="animate-pulse"]')
@@ -19,11 +26,21 @@ test.describe('Roster — Interaction States', () => {
 
     await page.waitForLoadState('networkidle')
     await expect(page.locator('main')).toBeVisible({ timeout: 10000 })
+
+    const resp = await respP
+    expect(resp?.status()).toBe(200)
+    expect(resp?.ok()).toBe(true)
   })
 
   test('success: shows Member Roster heading with member data', async ({ page }) => {
     await signIn(page, SEED_OFFICER_EMAIL, TEST_PASSWORD)
+    const respP = captureRouteHydration(page, MEMBERSHIPS)
     await page.goto(`/org/${ORG_ID}/officer/roster`)
+
+    const resp = await respP
+    expect(resp?.status()).toBe(200)
+    expect(resp?.ok()).toBe(true)
+
     await expect(
       page.getByRole('heading', { name: /member roster/i }),
     ).toBeVisible({ timeout: 10000 })
@@ -48,7 +65,13 @@ test.describe('Roster — Interaction States', () => {
 
   test('empty: roster with search filter shows no results message', async ({ page }) => {
     await signIn(page, SEED_OFFICER_EMAIL, TEST_PASSWORD)
+    const respP = captureRouteHydration(page, MEMBERSHIPS)
     await page.goto(`/org/${ORG_ID}/officer/roster`)
+
+    const resp = await respP
+    expect(resp?.status()).toBe(200)
+    expect(resp?.ok()).toBe(true)
+
     // If there's a search/filter input, type a nonsense query
     const searchInput = page.getByPlaceholder(/search|filter/i).first()
     const hasSearch = await searchInput.isVisible().catch(() => false)
@@ -70,7 +93,13 @@ test.describe('Roster — Interaction States', () => {
 
   test('disabled: action buttons respect officer permissions', async ({ page }) => {
     await signIn(page, SEED_OFFICER_EMAIL, TEST_PASSWORD)
+    const respP = captureRouteHydration(page, MEMBERSHIPS)
     await page.goto(`/org/${ORG_ID}/officer/roster`)
+
+    const resp = await respP
+    expect(resp?.status()).toBe(200)
+    expect(resp?.ok()).toBe(true)
+
     // Officer should have action capabilities (export, invite, etc.)
     const actionButton = page.getByRole('button', { name: /export|invite|add|import/i }).first()
     const hasAction = await actionButton.isVisible().catch(() => false)
