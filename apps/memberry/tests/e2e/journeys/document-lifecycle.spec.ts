@@ -2,6 +2,7 @@
 import { test, expect } from '../helpers/test-fixture'
 import { SEED_OFFICER_EMAIL, TEST_PASSWORD } from '../helpers/test-config'
 import { authStateFile } from '../helpers/auth-state'
+import { captureRouteHydration } from '../helpers/real-flow'
 
 
 test.use({ storageState: authStateFile('officer') })
@@ -9,7 +10,11 @@ const ORG_ID = 'ed8e3a96-8126-4341-be42-e6eb7940c562'
 
 test.describe('Document Lifecycle (Officer Journey)', () => {
 test('officer can navigate to document library', async ({ page }) => {
+    const respP = captureRouteHydration(page, '/documents')
     await page.goto(`/org/${ORG_ID}/officer/documents`)
+    const resp = await respP
+    expect(resp?.status()).toBe(200)
+    expect(resp?.ok()).toBe(true)
     await expect(
       page.getByRole('heading', { name: /document library/i }).first(),
     ).toBeVisible({ timeout: 10000 })
