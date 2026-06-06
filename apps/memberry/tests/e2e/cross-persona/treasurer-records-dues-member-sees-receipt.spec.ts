@@ -20,6 +20,7 @@ import { authStateFile } from '../helpers/auth-state'
 import { apiFetch } from '../helpers/api-fetch'
 import { signIn } from '../helpers/auth'
 import { SEED_MEMBER_EMAIL, TEST_PASSWORD } from '../helpers/test-config'
+import { captureAnyApiSuccess } from '../helpers/real-flow'
 
 const ORG_ID = 'ed8e3a96-8126-4341-be42-e6eb7940c562'
 
@@ -32,7 +33,11 @@ test.describe('cross-persona: treasurer records dues, member sees receipt', () =
       storageState: authStateFile('treasurer'),
     })
     const treasurerPage = await treasurerCtx.newPage()
+    const treasurerHydration = captureAnyApiSuccess(treasurerPage)
     await treasurerPage.goto('/dashboard')
+    const treasurerResp = await treasurerHydration
+    expect(treasurerResp?.status()).toBe(200)
+    expect(treasurerResp?.ok()).toBe(true)
 
     // Resolve a member's personId via /membership/members/{orgId}. Roster
     // rows surface personId but not contactInfo.email, so pick any
