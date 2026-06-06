@@ -19,7 +19,7 @@ Plan: `~/.claude/plans/so-is-our-codebase-hidden-dream.md`
 | Workflow | GSD residue (12 refs CLAUDE.md, 2 keys .planning/config.json) | superpowers-only | W1 |
 | Security | unaudited | grep-clean + queue documented | W1.5 |
 | DB migrations | unaudited | expand-contract verified | W2.5 |
-| Observability | unaudited | consistent fields per Pino + correlation | W4.5 |
+| Observability | 0% full / 21% partial / 79% none (272 log sites, 586 files) — top-3 fixed, 17 queued | consistent fields per Pino + correlation | W4.5 handoff |
 | ADRs | none | ≥10 core decisions documented | W6.5 |
 | Mega-module | association:member 267 handlers, 27.7% test ratio | rebuild plan handed off | W5.5 |
 
@@ -29,6 +29,7 @@ Plan: `~/.claude/plans/so-is-our-codebase-hidden-dream.md`
 |---|---|---|---|---|
 | D-01 | `getOrgHealthScores` | No explicit platformAdmin guard — any authenticated user can access org health scores (PII analytics) | P2 access-control gap | W1.5 queue |
 | D-02 | `getRevenueAnalytics` | No explicit platformAdmin guard — any authenticated user can access revenue analytics | P2 access-control gap | W1.5 queue |
+| D-03 | `handleStripeWebhook` | `signature.substring(0,20)` was logged before signature verification — partial HMAC prefix leaks to log store | P2 security hygiene | W4.5 fixed |
 
 ## Wave status
 
