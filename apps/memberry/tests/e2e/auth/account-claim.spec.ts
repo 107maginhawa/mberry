@@ -1,3 +1,4 @@
+// @selector-only-ok: error-state spec — invalid/expired/claimed tokens by design return 4xx and surface UI errors; no successful hydration to capture
 // WF-002 — Account Claim: imported member claims pre-populated account via token + OTP
 // M-2 / BR-24: Account claim via invitation
 import { test, expect } from '../helpers/test-fixture'
