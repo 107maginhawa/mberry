@@ -3,6 +3,7 @@
 import { test, expect } from '../helpers/test-fixture'
 import { signIn } from '../helpers/auth'
 import { SEED_OFFICER_EMAIL, SEED_MEMBER_EMAIL, TEST_PASSWORD } from '../helpers/test-config'
+import { captureRouteHydration } from '../helpers/real-flow'
 
 const MEMBER_EMAIL = SEED_MEMBER_EMAIL
 const MEMBER_PASSWORD = TEST_PASSWORD
@@ -32,7 +33,11 @@ test.describe('Dues lifecycle: officer manages dues, member views payments', () 
 
     test('officer views payments dashboard with collection metrics', async ({ page }) => {
       await signIn(page, OFFICER_EMAIL, OFFICER_PASSWORD)
+      const respP = captureRouteHydration(page, '/dues-invoices')
       await page.goto(`/org/${ORG_ID}/officer/payments`)
+      const resp = await respP
+      expect(resp?.status()).toBe(200)
+      expect(resp?.ok()).toBe(true)
       await expect(
         page.getByRole('heading', { name: /dues & payments/i }),
       ).toBeVisible({ timeout: 10000 })
