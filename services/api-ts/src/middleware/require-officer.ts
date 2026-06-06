@@ -22,18 +22,30 @@ const PRIVILEGED_POSITIONS = new Set(['president', 'treasurer', 'secretary']);
 
 export interface RequireOfficerDeps {
   governancePort?: GovernancePort;
+  /**
+   * Where to read the organization id from. Default is `path` (reads
+   * `:organizationId` path param). When `body`, reads from
+   * `ctx.req.valid('json')[bodyField]` — the middleware must be
+   * registered AFTER the zValidator for the body. Generator handles
+   * emission order automatically.
+   */
+  orgIdFrom?: 'path' | 'body';
+  /** Body field to read when `orgIdFrom: 'body'`. Defaults to `orgId`. */
+  bodyField?: string;
 }
 
 export function requireOfficerMiddleware(deps: RequireOfficerDeps = {}) {
+  const orgIdFrom = deps.orgIdFrom ?? 'path';
+  const bodyField = deps.bodyField ?? 'orgId';
+
   return async (ctx: Context, next: Next) => {
     const user = ctx.get('user');
     if (!user) throw new ForbiddenError('Authentication required');
 
-    const orgId = ctx.req.param('organizationId') ?? ctx.get('organizationId');
+    const orgId = resolveOrgId(ctx, orgIdFrom, bodyField);
     if (!orgId) {
-      throw new ValidationError(
-        'Missing organization context — route must include :organizationId parameter',
-      );
+      const where = orgIdFrom === 'body' ? `body field "${bodyField}"` : ':organizationId path parameter';
+      throw new ValidationError(`Missing organization context — route must supply ${where}`);
     }
 
     const db = ctx.get('database');
@@ -57,4 +69,18 @@ export function requireOfficerMiddleware(deps: RequireOfficerDeps = {}) {
 
     return next();
   };
+}
+
+function resolveOrgId(ctx: Context, from: 'path' | 'body', bodyField: string): string | undefined {
+  if (from === 'body') {
+    let body: Record<string, unknown> | undefined;
+    try {
+      body = ctx.req.valid('json' as never) as Record<string, unknown> | undefined;
+    } catch {
+      body = undefined;
+    }
+    const value = body?.[bodyField];
+    return typeof value === 'string' ? value : undefined;
+  }
+  return ctx.req.param('organizationId') ?? (ctx.get('organizationId') as string | undefined);
 }

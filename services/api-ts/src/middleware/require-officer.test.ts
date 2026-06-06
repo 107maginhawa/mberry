@@ -94,4 +94,56 @@ describe('requireOfficerMiddleware', () => {
     );
     expect(called).toBe(true);
   });
+
+  describe('body-orgId source', () => {
+    function makeBodyCtx(orgIdInBody: string | undefined, overrides: Record<string, any> = {}) {
+      const vars: Record<string, any> = {
+        user: { id: 'user-1', twoFactorEnabled: true },
+        database: {},
+        ...overrides,
+      };
+      return {
+        get: (key: string) => vars[key],
+        set: (key: string, val: any) => { vars[key] = val; },
+        req: {
+          param: (_key: string) => undefined,
+          valid: (kind: string) => (kind === 'json' ? { orgId: orgIdInBody } : undefined),
+        },
+      } as any;
+    }
+
+    test('reads orgId from validated body when orgIdFrom: body', async () => {
+      const mw = requireOfficerMiddleware({
+        orgIdFrom: 'body',
+        bodyField: 'orgId',
+        governancePort: port(async () => [{ id: 't1', positionTitle: 'Member-at-Large' } as any]),
+      });
+      let called = false;
+      await mw(makeBodyCtx('org-from-body'), async () => { called = true; });
+      expect(called).toBe(true);
+    });
+
+    test('throws ValidationError when body field missing in body-mode', async () => {
+      const mw = requireOfficerMiddleware({
+        orgIdFrom: 'body',
+        bodyField: 'orgId',
+        governancePort: port(async () => []),
+      });
+      await expect(mw(makeBodyCtx(undefined), async () => {})).rejects.toThrow('Missing organization context');
+    });
+
+    test('passes orgId from body through to governance port lookup', async () => {
+      let capturedOrgId: string | undefined;
+      const mw = requireOfficerMiddleware({
+        orgIdFrom: 'body',
+        bodyField: 'orgId',
+        governancePort: port(async (_user, orgId) => {
+          capturedOrgId = orgId;
+          return [{ id: 't1', positionTitle: 'Member-at-Large' } as any];
+        }),
+      });
+      await mw(makeBodyCtx('org-xyz'), async () => {});
+      expect(capturedOrgId).toBe('org-xyz');
+    });
+  });
 });
