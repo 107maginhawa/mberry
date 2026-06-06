@@ -2,16 +2,22 @@
 // CT-3: Payment reconciliation — test payment list as reconciliation view
 import { test, expect } from '../helpers/test-fixture'
 import { authStateFile } from '../helpers/auth-state'
+import { captureRouteHydration } from '../helpers/real-flow'
 
 
 test.use({ storageState: authStateFile('treasurer') })
 const ORG_ID = 'ed8e3a96-8126-4341-be42-e6eb7940c562'
+const PAYMENTS = /\/(payments|dues-invoices)/
 
 test.describe('CT-3: Payment Reconciliation', () => {
 test('payments page shows financial dashboard with data', async ({ page }) => {
+    const respP = captureRouteHydration(page, PAYMENTS)
     await page.goto(`/org/${ORG_ID}/officer/payments`)
     // Heading must exist
     await expect(page.getByText('Dues & Payments')).toBeVisible({ timeout: 10000 })
+    const resp = await respP
+    expect(resp?.status()).toBe(200)
+    expect(resp?.ok()).toBe(true)
 
     // Dashboard must show financial data — amounts, member counts, or payment records
     await expect(
