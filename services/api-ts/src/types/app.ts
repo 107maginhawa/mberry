@@ -63,6 +63,11 @@ export type Variables = {
   internalServiceToken?: string;
   internalServiceTokens?: string[];
   isInternalExpand?: boolean;
+
+  // P1.5: per-route audit middleware dynamic slots
+  auditResourceId?: string;
+  auditDetails?: Record<string, unknown>;
+  auditDescription?: string;
 };
 
 /**
