@@ -7,7 +7,7 @@ import type { DuesPayment } from './repos/dues-payments.schema';
 import { DuesInvoiceRepository } from './repos/dues.repo';
 import { formatReceiptNumber } from './utils/receipt-number';
 import { settlePayment } from './utils/settle-payment';
-import { requirePosition } from '@/utils/officer-check';
+import { requirePosition } from '@/core/auth/officer-checks';
 import { POSITION_TITLES } from '@/utils/position-titles';
 
 /**

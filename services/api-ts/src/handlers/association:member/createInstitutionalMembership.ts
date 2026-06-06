@@ -3,7 +3,7 @@ import type { DatabaseInstance } from '@/core/database';
 import { NotFoundError, BusinessLogicError } from '@/core/errors';
 import type { CreateInstitutionalMembershipBody } from '@/generated/openapi/validators';
 import { InstitutionalMembershipRepository } from './repos/institutional-membership.repo';
-import { requirePosition } from '@/utils/officer-check';
+import { requirePosition } from '@/core/auth/officer-checks';
 import { POSITION_TITLES } from '@/utils/position-titles';
 
 /**

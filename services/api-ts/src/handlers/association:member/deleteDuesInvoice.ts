@@ -1,7 +1,7 @@
 import type { ValidatedContext } from '@/types/app';
 import type { DatabaseInstance } from '@/core/database';
 import { UnauthorizedError, NotFoundError, ForbiddenError } from '@/core/errors';
-import { requirePosition } from '@/utils/officer-check';
+import { requirePosition } from '@/core/auth/officer-checks';
 import { POSITION_TITLES } from '@/utils/position-titles';
 import { assertValidTransition } from '@/utils/status-transitions';
 import { INVOICE_VALID_TRANSITIONS } from './utils/status-transitions';

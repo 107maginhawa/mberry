@@ -3,7 +3,7 @@ import type { DatabaseInstance } from '@/core/database';
 import { NotFoundError, BusinessLogicError } from '@/core/errors';
 import type { CheckInCustomEventBody, CheckInCustomEventParams } from '@/generated/openapi/validators';
 import { EventRepository, CheckInRepository } from './repos/events.repo';
-import { requirePosition } from '@/utils/officer-check';
+import { requirePosition } from '@/core/auth/officer-checks';
 import { POSITION_TITLES } from '@/utils/position-titles';
 
 /**

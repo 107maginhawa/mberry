@@ -1,7 +1,7 @@
 import type { Context } from 'hono';
 import { UnauthorizedError, NotFoundError, BusinessLogicError } from '@/core/errors';
 import { CommunicationsRepository } from './repos/communication.repo';
-import { requirePosition } from '@/utils/officer-check';
+import { requirePosition } from '@/core/auth/officer-checks';
 import { POSITION_TITLES } from '@/utils/position-titles';
 import { domainEvents } from '@/core/domain-events';
 import type { Session } from '@/types/auth';

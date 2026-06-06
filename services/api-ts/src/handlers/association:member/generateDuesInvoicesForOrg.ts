@@ -3,7 +3,7 @@ import type { DatabaseInstance } from '@/core/database';
 import { UnauthorizedError, ForbiddenError } from '@/core/errors';
 import type { GenerateDuesInvoicesForOrgBody } from '@/generated/openapi/validators';
 import { domainEvents } from '@/core/domain-events';
-import { requirePosition } from '@/utils/officer-check';
+import { requirePosition } from '@/core/auth/officer-checks';
 import { POSITION_TITLES } from '@/utils/position-titles';
 import { eq, and } from 'drizzle-orm';
 import { duesInvoices, duesConfigs } from './repos/dues.schema';

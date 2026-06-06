@@ -4,7 +4,7 @@ import { UnauthorizedError, NotFoundError } from '@/core/errors';
 import type { DeleteCandidateParams } from '@/generated/openapi/validators';
 import { electionNominees } from '../elections/repos/elections.schema';
 import { eq } from 'drizzle-orm';
-import { requireOfficerTerm } from '@/utils/officer-check';
+import { requireOfficerTerm } from '@/core/auth/officer-checks';
 
 /**
  * deleteCandidate

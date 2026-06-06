@@ -4,7 +4,7 @@ import type { CreateCheckInBody } from '@/generated/openapi/validators';
 import { NotFoundError, BusinessLogicError } from '@/core/errors';
 import { EventRepository, CheckInRepository } from './repos/events.repo';
 import { verifyQrToken } from './utils/qr-checkin';
-import { requirePosition } from '@/utils/officer-check';
+import { requirePosition } from '@/core/auth/officer-checks';
 import { POSITION_TITLES } from '@/utils/position-titles';
 
 /**

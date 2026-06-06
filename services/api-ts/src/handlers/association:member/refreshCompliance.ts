@@ -2,7 +2,7 @@ import type { Context } from 'hono';
 import { UnauthorizedError } from '@/core/errors';
 import type { DatabaseInstance } from '@/core/database';
 import { ComplianceRepository } from './repos/compliance.repo';
-import { requirePosition } from '@/utils/officer-check';
+import { requirePosition } from '@/core/auth/officer-checks';
 import { POSITION_TITLES } from '@/utils/position-titles';
 
 export async function refreshCompliance(ctx: Context): Promise<Response> {

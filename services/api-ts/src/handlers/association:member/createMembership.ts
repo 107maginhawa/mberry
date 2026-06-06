@@ -4,7 +4,7 @@ import type { JobScheduler } from '@/core/jobs';
 import { NotFoundError, UnauthorizedError, ConflictError, BusinessLogicError } from '@/core/errors';
 import type { CreateMembershipBody } from '@/generated/openapi/validators';
 import { MembershipTierRepository, MembershipRepository } from './repos/membership.repo';
-import { requirePosition } from '@/utils/officer-check';
+import { requirePosition } from '@/core/auth/officer-checks';
 import { POSITION_TITLES } from '@/utils/position-titles';
 
 /**

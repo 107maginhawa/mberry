@@ -5,7 +5,7 @@ import type { UpdateCandidateBody, UpdateCandidateParams } from '@/generated/ope
 import { ElectionsRepository } from '../elections/repos/elections.repo';
 import { electionNominees } from '../elections/repos/elections.schema';
 import { eq } from 'drizzle-orm';
-import { requireOfficerTerm } from '@/utils/officer-check';
+import { requireOfficerTerm } from '@/core/auth/officer-checks';
 
 /**
  * updateCandidate

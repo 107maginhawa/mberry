@@ -3,7 +3,7 @@ import { eq } from 'drizzle-orm';
 import { UnauthorizedError } from '@/core/errors';
 import type { DatabaseInstance } from '@/core/database';
 import { orgCpdConfig } from './repos/credits.schema';
-import { requirePosition } from '@/utils/officer-check';
+import { requirePosition } from '@/core/auth/officer-checks';
 import { POSITION_TITLES } from '@/utils/position-titles';
 
 export async function getCpdConfig(ctx: Context): Promise<Response> {

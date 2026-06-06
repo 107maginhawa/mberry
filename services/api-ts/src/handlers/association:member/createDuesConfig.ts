@@ -3,7 +3,7 @@ import type { DatabaseInstance } from '@/core/database';
 import type { CreateDuesConfigBody } from '@/generated/openapi/validators';
 import { UnauthorizedError } from '@/core/errors';
 import { DuesConfigRepository } from './repos/dues.repo';
-import { requirePosition } from '@/utils/officer-check';
+import { requirePosition } from '@/core/auth/officer-checks';
 import { POSITION_TITLES } from '@/utils/position-titles';
 
 /**

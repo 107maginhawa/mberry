@@ -5,7 +5,7 @@ import type { JobScheduler } from '@/core/jobs';
 import { certificates } from './repos/certificates.schema';
 import { getNextCertificateNumber, reserveCertificateRange } from './utils/certificate-numbering';
 import { renderCertificateHtml, type CertificateTemplateData, type OrgBranding } from './utils/certificate-template';
-import { requirePosition } from '@/utils/officer-check';
+import { requirePosition } from '@/core/auth/officer-checks';
 import { POSITION_TITLES } from '@/utils/position-titles';
 
 interface BulkIssueBody { organizationId: string; personIds: string[]; trainingTitle: string; certificateType: 'attendance' | 'completion' | 'speaker'; cpdActivityType?: string; creditHours?: number; templateId?: string; signingOfficerId: string; orgCode: string; orgBranding?: Partial<OrgBranding>; signatoryName?: string; signatoryTitle?: string; }

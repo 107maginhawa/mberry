@@ -3,7 +3,7 @@ import { eq, and, inArray, sql } from 'drizzle-orm';
 import { UnauthorizedError, ValidationError, NotFoundError } from '@/core/errors';
 import type { DatabaseInstance } from '@/core/database';
 import { creditEntries } from './repos/credits.schema';
-import { requirePosition } from '@/utils/officer-check';
+import { requirePosition } from '@/core/auth/officer-checks';
 import { POSITION_TITLES } from '@/utils/position-titles';
 
 export async function voidCreditEntry(ctx: Context): Promise<Response> {

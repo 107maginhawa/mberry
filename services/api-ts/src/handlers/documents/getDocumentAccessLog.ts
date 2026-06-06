@@ -3,7 +3,7 @@ import type { DatabaseInstance } from '@/core/database';
 import type { GetDocumentAccessLogQuery, GetDocumentAccessLogParams } from '@/generated/openapi/validators';
 import { UnauthorizedError, NotFoundError, ForbiddenError } from '@/core/errors';
 import { DocumentRepository, DocumentAccessLogRepository } from './repos/documents.repo';
-import { requireOfficerTerm } from '@/utils/officer-check';
+import { requireOfficerTerm } from '@/core/auth/officer-checks';
 
 /**
  * getDocumentAccessLog

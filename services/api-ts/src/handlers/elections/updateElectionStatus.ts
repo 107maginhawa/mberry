@@ -1,7 +1,7 @@
 import type { Context } from 'hono';
 import { NotFoundError, BusinessLogicError, UnauthorizedError } from '@/core/errors';
 import { ElectionsRepository } from './repos/elections.repo';
-import { requirePosition } from '@/utils/officer-check';
+import { requirePosition } from '@/core/auth/officer-checks';
 import { POSITION_TITLES } from '@/utils/position-titles';
 import { domainEvents } from '@/core/domain-events';
 import { auditAction } from '@/core/audit/audit-action';

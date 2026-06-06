@@ -4,7 +4,7 @@ import type { DatabaseInstance } from '@/core/database';
 import type { PublishAnnouncementParams } from '@/generated/openapi/validators';
 import { CommunicationsRepository } from './repos/communication.repo';
 import { domainEvents } from '@/core/domain-events';
-import { requirePosition } from '@/utils/officer-check';
+import { requirePosition } from '@/core/auth/officer-checks';
 import { POSITION_TITLES } from '@/utils/position-titles';
 
 /**

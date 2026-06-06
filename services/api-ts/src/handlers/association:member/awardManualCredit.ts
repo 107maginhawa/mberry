@@ -4,7 +4,7 @@ import { UnauthorizedError, ValidationError, ConflictError } from '@/core/errors
 import type { DatabaseInstance } from '@/core/database';
 import { creditEntries, orgCpdConfig } from './repos/credits.schema';
 import { domainEvents } from '@/core/domain-events';
-import { requirePosition } from '@/utils/officer-check';
+import { requirePosition } from '@/core/auth/officer-checks';
 import { POSITION_TITLES } from '@/utils/position-titles';
 
 export async function awardManualCredit(ctx: Context): Promise<Response> {

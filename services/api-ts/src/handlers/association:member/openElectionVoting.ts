@@ -3,7 +3,7 @@ import type { DatabaseInstance } from '@/core/database';
 import { UnauthorizedError, NotFoundError, BusinessLogicError } from '@/core/errors';
 import type { OpenElectionVotingParams } from '@/generated/openapi/validators';
 import { ElectionsRepository } from '../elections/repos/elections.repo';
-import { requireOfficerTerm } from '@/utils/officer-check';
+import { requireOfficerTerm } from '@/core/auth/officer-checks';
 import { domainEvents } from '@/core/domain-events';
 
 /**

@@ -4,7 +4,7 @@ import { NotFoundError, UnauthorizedError, BusinessLogicError } from '@/core/err
 import type { ApproveMembershipApplicationParams } from '@/generated/openapi/validators';
 import { MembershipApplicationRepository, MembershipRepository } from './repos/membership.repo';
 import type { MembershipApplication, NewMembership } from './repos/membership.schema';
-import { requirePosition } from '@/utils/officer-check';
+import { requirePosition } from '@/core/auth/officer-checks';
 import { POSITION_TITLES } from '@/utils/position-titles';
 
 /**

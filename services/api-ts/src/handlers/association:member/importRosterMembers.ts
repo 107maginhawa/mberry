@@ -4,7 +4,7 @@ import type { DatabaseInstance } from '@/core/database';
 import type { ImportRosterMembersBody } from '@/generated/openapi/validators';
 import { MembershipRepository } from './repos/membership.repo';
 import type { NewMembership } from './repos/membership.schema';
-import { requirePosition } from '@/utils/officer-check';
+import { requirePosition } from '@/core/auth/officer-checks';
 import { POSITION_TITLES } from '@/utils/position-titles';
 import { domainEvents } from '@/core/domain-events';
 

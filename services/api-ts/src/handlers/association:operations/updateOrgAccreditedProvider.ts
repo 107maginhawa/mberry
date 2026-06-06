@@ -1,7 +1,7 @@
 import type { Context } from 'hono';
 import { NotFoundError } from '@/core/errors';
 import { AccreditedProviderRepository } from './repos/accredited-provider.repo';
-import { requirePosition } from '@/utils/officer-check';
+import { requirePosition } from '@/core/auth/officer-checks';
 import { POSITION_TITLES } from '@/utils/position-titles';
 
 export async function updateOrgAccreditedProvider(ctx: Context): Promise<Response> {

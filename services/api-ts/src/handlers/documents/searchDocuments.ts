@@ -3,7 +3,7 @@ import type { DatabaseInstance } from '@/core/database';
 import type { SearchDocumentsQuery } from '@/generated/openapi/validators';
 import { UnauthorizedError } from '@/core/errors';
 import { DocumentRepository } from './repos/documents.repo';
-import { requireOfficerTerm } from '@/utils/officer-check';
+import { requireOfficerTerm } from '@/core/auth/officer-checks';
 
 /**
  * searchDocuments

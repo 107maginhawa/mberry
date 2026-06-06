@@ -3,7 +3,7 @@ import type { DatabaseInstance } from '@/core/database';
 import type { DeleteCourseParams } from '@/generated/openapi/validators';
 import { NotFoundError } from '@/core/errors';
 import { CourseRepository } from './repos/training.repo';
-import { requirePosition } from '@/utils/officer-check';
+import { requirePosition } from '@/core/auth/officer-checks';
 import { POSITION_TITLES } from '@/utils/position-titles';
 
 /**

@@ -1,6 +1,6 @@
 import type { Context } from 'hono';
 import { AccreditedProviderRepository } from './repos/accredited-provider.repo';
-import { requirePosition } from '@/utils/officer-check';
+import { requirePosition } from '@/core/auth/officer-checks';
 import { POSITION_TITLES } from '@/utils/position-titles';
 
 export async function listOrgAccreditedProviders(ctx: Context): Promise<Response> {

@@ -4,7 +4,7 @@ import type { DatabaseInstance } from '@/core/database';
 import type { UpdateOrganizationProfileBody, UpdateOrganizationProfileParams } from '@/generated/openapi/validators';
 import { eq } from 'drizzle-orm';
 import { organizations } from '@/handlers/platformadmin/repos/platform-admin.schema';
-import { requirePosition } from '@/utils/officer-check';
+import { requirePosition } from '@/core/auth/officer-checks';
 import { POSITION_TITLES } from '@/utils/position-titles';
 import { domainEvents } from '@/core/domain-events';
 

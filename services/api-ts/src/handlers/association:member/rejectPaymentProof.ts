@@ -5,7 +5,7 @@ import type { RejectPaymentProofBody, RejectPaymentProofParams } from '@/generat
 import { DuesRepository } from './repos/dues-payments.repo';
 import type { DuesPayment } from './repos/dues-payments.schema';
 import { domainEvents } from '@/core/domain-events';
-import { requirePosition } from '@/utils/officer-check';
+import { requirePosition } from '@/core/auth/officer-checks';
 import { POSITION_TITLES } from '@/utils/position-titles';
 
 /**

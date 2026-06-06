@@ -5,7 +5,7 @@ import type { DeleteElectionParams } from '@/generated/openapi/validators';
 import { ElectionsRepository } from '../elections/repos/elections.repo';
 import { elections } from '../elections/repos/elections.schema';
 import { eq } from 'drizzle-orm';
-import { requireOfficerTerm } from '@/utils/officer-check';
+import { requireOfficerTerm } from '@/core/auth/officer-checks';
 import { domainEvents } from '@/core/domain-events';
 
 /**

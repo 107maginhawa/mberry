@@ -4,7 +4,7 @@ import type { CreateDocumentBody } from '@/generated/openapi/validators';
 import { UnauthorizedError, ValidationError } from '@/core/errors';
 import { DocumentRepository } from './repos/documents.repo';
 import { isBlockedDocumentFile } from '@/utils/sanitize';
-import { requireOfficerTerm } from '@/utils/officer-check';
+import { requireOfficerTerm } from '@/core/auth/officer-checks';
 import { domainEvents } from '@/core/domain-events';
 
 /**

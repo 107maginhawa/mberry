@@ -3,7 +3,7 @@ import { UnauthorizedError, NotFoundError, BusinessLogicError } from '@/core/err
 import type { DatabaseInstance } from '@/core/database';
 import type { ArchiveAnnouncementParams } from '@/generated/openapi/validators';
 import { CommunicationsRepository } from './repos/communication.repo';
-import { requirePosition } from '@/utils/officer-check';
+import { requirePosition } from '@/core/auth/officer-checks';
 import { POSITION_TITLES } from '@/utils/position-titles';
 
 /**

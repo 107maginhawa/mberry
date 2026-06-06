@@ -7,7 +7,7 @@ import {
   type CertificateTemplateData,
   type OrgBranding,
 } from './utils/certificate-template';
-import { requireOfficerTerm } from '@/utils/officer-check';
+import { requireOfficerTerm } from '@/core/auth/officer-checks';
 
 /**
  * batchGenerateCertificates

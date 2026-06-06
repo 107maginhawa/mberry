@@ -3,7 +3,7 @@ import type { DatabaseInstance } from '@/core/database';
 import type { UpdateTrainingEnrollmentBody, UpdateTrainingEnrollmentParams } from '@/generated/openapi/validators';
 import { NotFoundError, BusinessLogicError } from '@/core/errors';
 import { TrainingRepository, TrainingEnrollmentRepository } from './repos/training.repo';
-import { requirePosition } from '@/utils/officer-check';
+import { requirePosition } from '@/core/auth/officer-checks';
 import { POSITION_TITLES } from '@/utils/position-titles';
 import { assertValidTransition, TRAINING_ENROLLMENT_VALID_TRANSITIONS } from '@/utils/status-transitions';
 

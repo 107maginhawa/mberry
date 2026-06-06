@@ -18,7 +18,7 @@ import {
 	subscriptions,
 } from "@/handlers/platformadmin/repos/platform-admin.schema";
 import type { Variables } from "@/types/app";
-import { requireOfficerTerm } from "@/utils/officer-check";
+import { requireOfficerTerm } from "@/core/auth/officer-checks";
 
 export async function createSubscriptionCheckout(
 	ctx: Context<{ Variables: Variables }>,

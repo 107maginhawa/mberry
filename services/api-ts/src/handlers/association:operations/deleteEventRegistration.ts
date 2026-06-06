@@ -3,7 +3,7 @@ import type { DatabaseInstance } from '@/core/database';
 import type { DeleteEventRegistrationParams } from '@/generated/openapi/validators';
 import { NotFoundError } from '@/core/errors';
 import { EventRegistrationRepository } from './repos/events.repo';
-import { requirePosition } from '@/utils/officer-check';
+import { requirePosition } from '@/core/auth/officer-checks';
 import { POSITION_TITLES } from '@/utils/position-titles';
 
 /**

@@ -3,7 +3,7 @@ import type { DatabaseInstance } from '@/core/database';
 import { UnauthorizedError, ForbiddenError } from '@/core/errors';
 import type { ListDuesPaymentsQuery } from '@/generated/openapi/validators';
 import { DuesRepository } from './repos/dues-payments.repo';
-import { requireOfficerTerm } from '@/utils/officer-check';
+import { requireOfficerTerm } from '@/core/auth/officer-checks';
 
 /**
  * listDuesPayments
