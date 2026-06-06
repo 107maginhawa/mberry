@@ -47,6 +47,23 @@ Mega-module (~193 handlers). Spec will be produced as part of the `.planning/def
 
 ---
 
+## §10 AI Extension Checklist Status (Wave 6 verification)
+
+Two distinct MODULE_SPEC formats exist in this repo:
+
+**Short format** (`docs/product/MODULE_SPEC.<module>.md`) — uses template sections 1-10:
+- `MODULE_SPEC.audit.md` — §10 PRESENT
+- `MODULE_SPEC.dues.md` — §10 PRESENT
+- `MODULE_SPEC.marketplace.md` — §10 PRESENT
+- Pending modules (invite, notifs, reviews, storage, association:operations) — §10 will be included when written
+
+**Long format** (`docs/product/modules/m*/MODULE_SPEC.md`) — 22-section format with `## 20. AI Instructions`:
+- All 22 module specs use `## 20. AI Instructions` as their AI-extensibility section
+- §10 template section does not apply to this format
+- No backfill needed — all 22 are complete
+
+---
+
 ## How to pick up
 
 1. Choose a module from the list above.
