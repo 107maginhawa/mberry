@@ -2,12 +2,14 @@
  * getOrgHealthScores — characterization tests
  *
  * Path: GET /admin/analytics/health
- * Auth: session required (no explicit admin guard found — DEFECT potential)
+ * Auth: platformAdmin guard required (D-01 fixed).
  * Uses direct Drizzle queries (no repo class).
  */
 import { describe, test, expect } from 'bun:test';
 import { makeCtx } from '@/test-utils/make-ctx';
 import { getOrgHealthScores } from './getOrgHealthScores';
+
+const FAKE_PLATFORM_ADMIN = { userId: 'admin-1', role: 'super' };
 
 function makeHealthCtx(overrides: Record<string, any> = {}) {
   const ctx = makeCtx(overrides);
@@ -40,9 +42,21 @@ describe('getOrgHealthScores (characterization)', () => {
     expect(res.status).toBe(401);
   });
 
-  test('returns 200 with health data for authenticated user', async () => {
+  // D-01 FIXED: guard now rejects non-platformAdmin users with 403
+  test('returns 403 for authenticated user without platformAdmin role', async () => {
     const ctx = makeHealthCtx({
-      user: { id: 'user-1', role: 'platform_admin' },
+      user: { id: 'member-1', role: 'member' },
+      // platformAdmin intentionally absent
+    });
+    const res = await getOrgHealthScores(ctx);
+    expect(res.status).toBe(403);
+  });
+
+  // Positive case: platformAdmin CAN access
+  test('returns 200 with health data for platformAdmin user', async () => {
+    const ctx = makeHealthCtx({
+      user: { id: 'admin-1', role: 'platform_admin' },
+      platformAdmin: FAKE_PLATFORM_ADMIN,
       database: makeDbWithHealthRows([fakeOrgRow]),
     });
     const res = await getOrgHealthScores(ctx);
@@ -54,7 +68,8 @@ describe('getOrgHealthScores (characterization)', () => {
 
   test('returns 200 with empty data when no orgs', async () => {
     const ctx = makeHealthCtx({
-      user: { id: 'user-1', role: 'platform_admin' },
+      user: { id: 'admin-1', role: 'platform_admin' },
+      platformAdmin: FAKE_PLATFORM_ADMIN,
       database: makeDbWithHealthRows([]),
     });
     const res = await getOrgHealthScores(ctx);
@@ -66,7 +81,8 @@ describe('getOrgHealthScores (characterization)', () => {
     // Fill exactly limit=20 rows to trigger hasMore=true
     const rows = Array.from({ length: 20 }, (_, i) => ({ ...fakeOrgRow, organizationId: `org-${i}` }));
     const ctx = makeHealthCtx({
-      user: { id: 'user-1', role: 'platform_admin' },
+      user: { id: 'admin-1', role: 'platform_admin' },
+      platformAdmin: FAKE_PLATFORM_ADMIN,
       database: makeDbWithHealthRows(rows),
     });
     const res = await getOrgHealthScores(ctx);
@@ -81,21 +97,11 @@ describe('getOrgHealthScores (characterization)', () => {
       execute: () => { throw new Error('DB connection failed'); },
     };
     const ctx = makeHealthCtx({
-      user: { id: 'user-1', role: 'platform_admin' },
+      user: { id: 'admin-1', role: 'platform_admin' },
+      platformAdmin: FAKE_PLATFORM_ADMIN,
       database: badDb,
     });
     const res = await getOrgHealthScores(ctx);
     expect(res.status).toBe(500);
-  });
-
-  // DEFECT: no explicit platform admin check — any authenticated user can access health scores
-  // This is a potential access-control gap. Logged for Wave 1.5 review.
-  test.skip('DEFECT: returns 403 for non-admin user (currently returns 200)', async () => {
-    const ctx = makeHealthCtx({
-      user: { id: 'member-1', role: 'member' },
-      database: makeDbWithHealthRows([fakeOrgRow]),
-    });
-    const res = await getOrgHealthScores(ctx);
-    expect(res.status).toBe(403);
   });
 });

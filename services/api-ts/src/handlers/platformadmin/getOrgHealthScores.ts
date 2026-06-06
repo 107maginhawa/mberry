@@ -32,6 +32,9 @@ export async function getOrgHealthScores(
   const session = ctx.get('session') as Session;
   if (!session) return ctx.json({ error: 'Unauthorized' }, 401);
 
+  const admin = ctx.get('platformAdmin');
+  if (!admin) return ctx.json({ error: 'Platform admin access required' }, 403);
+
   const db = ctx.get('database') as DatabaseInstance;
   const logger = ctx.get('logger');
 
