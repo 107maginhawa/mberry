@@ -2,17 +2,23 @@
 import { test, expect } from '../helpers/test-fixture'
 import { SEED_OFFICER_EMAIL, TEST_PASSWORD } from '../helpers/test-config'
 import { authStateFile } from '../helpers/auth-state'
+import { captureRouteHydration } from '../helpers/real-flow'
 
 
 test.use({ storageState: authStateFile('officer') })
 const ORG_ID = 'ed8e3a96-8126-4341-be42-e6eb7940c562'
+const TRAINING = /\/(training|enrollments)/
 
 test.describe('Officer Training', () => {
 test('training list shows seeded training Advanced Endodontics', async ({ page }) => {
+    const respP = captureRouteHydration(page, TRAINING)
     await page.goto(`/org/${ORG_ID}/officer/training`)
     await expect(
       page.getByText(/advanced endodontics/i).first()
     ).toBeVisible({ timeout: 10000 })
+    const resp = await respP
+    expect(resp?.status()).toBe(200)
+    expect(resp?.ok()).toBe(true)
   })
 
   test('training list shows seeded training Infection Control', async ({ page }) => {
