@@ -1,3 +1,4 @@
+// @selector-only-ok: error-boundary spec — intercepts/forges API failures and asserts graceful UI; capturing a real-flow response would just match the forged 500
 // Error boundary tests — verify graceful degradation when API fails
 // Uses page.route() to intercept API and return 500
 import { test, expect } from './helpers/test-fixture'
