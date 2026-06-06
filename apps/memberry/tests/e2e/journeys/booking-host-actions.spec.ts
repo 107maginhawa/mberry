@@ -3,12 +3,17 @@
 // E2E: Host confirms/rejects booking requests
 import { test, expect } from '../helpers/test-fixture'
 import { signInAsOfficer, signInAsMember } from '../helpers/auth'
+import { captureRouteHydration } from '../helpers/real-flow'
 
 test.describe('Booking host actions: confirm and reject', () => {
   test.describe('Host views pending bookings', () => {
     test('officer can access bookings page', async ({ page }) => {
       await signInAsOfficer(page)
+      const respP = captureRouteHydration(page, '/bookings')
       await page.goto('/my/bookings')
+      const resp = await respP
+      expect(resp?.status()).toBe(200)
+      expect(resp?.ok()).toBe(true)
       await expect(
         page.getByRole('heading', { name: /bookings/i }),
       ).toBeVisible({ timeout: 10000 })
