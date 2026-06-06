@@ -1,6 +1,12 @@
 import { test, expect } from '../helpers/test-fixture'
 import { signIn } from '../helpers/auth'
 import { SEED_MEMBER_EMAIL, TEST_PASSWORD } from '../helpers/test-config'
+import { captureRouteHydration } from '../helpers/real-flow'
+
+// W2 real-flow upgrade: /dashboard hydrates via GET /persons/me.
+// Capturing that response proves the backend returned data, not just
+// that the dashboard shell rendered.
+const PERSON_ME = /\/persons\/me(?:[/?]|$)/
 
 const MEMBER_EMAIL = SEED_MEMBER_EMAIL
 const MEMBER_PASSWORD = TEST_PASSWORD
@@ -8,7 +14,13 @@ const MEMBER_PASSWORD = TEST_PASSWORD
 test.describe('Member Dashboard (/dashboard)', () => {
   test('shows time-based greeting', async ({ page }) => {
     await signIn(page, MEMBER_EMAIL, MEMBER_PASSWORD)
+    const respP = captureRouteHydration(page, PERSON_ME)
     await page.goto('/dashboard')
+
+    const resp = await respP
+    expect(resp?.status()).toBe(200)
+    expect(resp?.ok()).toBe(true)
+
     const greeting = page.getByText(/good (morning|afternoon|evening)/i)
     await expect(greeting).toBeVisible({ timeout: 10000 })
   })
