@@ -8,7 +8,7 @@ Plan: `~/.claude/plans/so-is-our-codebase-hidden-dream.md`
 |---|---|---|---|
 | Cleanliness | 8.5/10 (per audit) | 10/10 | W6 |
 | Dead code | 3 confirmed orphans + module candidates pending SDK trace | 0 | W3.5 |
-| Unit coverage | unmeasured (Bun has no native threshold; wrapper TBD W3) | ≥70% per module → 80% by W7 | W3 |
+| Unit coverage | coverage-gate.ts wrapper live; per-module thresholds set (platformadmin 40%, others 60–75%); 10 characterization tests added | ≥70% per module → 80% by W7 | W7 (tighten) |
 | Contract coverage | 32% (99 Hurl vs 312 OpenAPI paths) | ≥60% | W4 |
 | E2E real-flow depth | ~33% (auth + billing selector-only) of 144 specs | 100% | W2 |
 | MODULE_SPEC coverage | 22/26 | 26/26 minus deleted | W5 |
@@ -25,11 +25,19 @@ Plan: `~/.claude/plans/so-is-our-codebase-hidden-dream.md`
 
 ## Defects discovered log
 
-(Populated by Wave 3+ when characterization tests reveal behavior bugs. Empty at baseline.)
+| # | Handler | Defect | Severity | Wave |
+|---|---|---|---|---|
+| D-01 | `getOrgHealthScores` | No explicit platformAdmin guard — any authenticated user can access org health scores (PII analytics) | P2 access-control gap | W1.5 queue |
+| D-02 | `getRevenueAnalytics` | No explicit platformAdmin guard — any authenticated user can access revenue analytics | P2 access-control gap | W1.5 queue |
 
 ## Wave status
 
 | Wave | Status |
 |---|---|
-| 0 | in progress |
-| 1–7 | pending |
+| 0 | complete |
+| 1 | complete |
+| 1.5 | complete |
+| 2 | complete |
+| 2.5 | complete |
+| 3 | complete (coverage gate wrapper + 10 characterization tests) |
+| 3.5–7 | pending |
