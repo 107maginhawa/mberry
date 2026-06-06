@@ -493,6 +493,8 @@ async function generateRoutes(paths: Record<string, PathItem>, spec: any) {
     "import { validationErrorHandler } from '@/middleware/validation';",
     "import { createExpandMiddleware } from '@/middleware/expand';",
     "import { createPerRouteAuditMiddleware } from '@/middleware/per-route-audit';",
+    "import { requirePositionMiddleware } from '@/middleware/require-position';",
+    "import { requireOfficerMiddleware } from '@/middleware/require-officer';",
     '',
     'export function registerRoutes(app: Hono<{ Variables: Variables }>) {',
   ];
@@ -532,6 +534,19 @@ async function generateRoutes(paths: Record<string, PathItem>, spec: any) {
           // Required authentication without specific roles
           routes.push('    authMiddleware(),');
         }
+      }
+
+      // P1.5: position / officer authorization (before-middleware).
+      // `x-require-position` (array) → requirePositionMiddleware({ titles })
+      // `x-require-officer` (true)   → requireOfficerMiddleware()
+      // Position takes precedence — emit only one when both are present.
+      const requiredPositions = (operation as any)['x-require-position'] as string[] | undefined;
+      const requiresOfficer = (operation as any)['x-require-officer'] === true;
+      if (requiredPositions?.length) {
+        const titlesArr = requiredPositions.map(t => `"${t}"`).join(', ');
+        routes.push(`    requirePositionMiddleware({ titles: [${titlesArr}] }),`);
+      } else if (requiresOfficer) {
+        routes.push('    requireOfficerMiddleware(),');
       }
 
       // P1.5: per-route audit middleware (after-middleware, runs after handler).

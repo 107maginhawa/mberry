@@ -14,6 +14,8 @@ import { authMiddleware } from '@/middleware/auth';
 import { validationErrorHandler } from '@/middleware/validation';
 import { createExpandMiddleware } from '@/middleware/expand';
 import { createPerRouteAuditMiddleware } from '@/middleware/per-route-audit';
+import { requirePositionMiddleware } from '@/middleware/require-position';
+import { requireOfficerMiddleware } from '@/middleware/require-officer';
 
 export function registerRoutes(app: Hono<{ Variables: Variables }>) {
   // listOrgAccreditedProviders
