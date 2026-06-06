@@ -62,27 +62,107 @@ const errorSites: ErrorSite[] = [];
 const LOG_RE = /(logger|log|req\.log|ctx\.log)\s*\??\.(info|error|warn|debug)\s*\(([^)]*)/;
 const TYPED_ERROR_RE = /\bthrow\s+new\s+([A-Z]\w+(?:Error|Exception))\b/;
 
+// Detect child-logger / module-logger / forBindings constructs that bind
+// observability fields once at file scope. If a file establishes such a
+// binding, every log call below it inherits those fields — the per-call
+// regex below should treat them as present, otherwise we under-credit the
+// industry-standard pattern recommended in OBSERVABILITY_HANDOFF.md.
+// Match both `.child({...})` and `?.child?.({...})` chains.
+const CHILD_BIND_RE = /\??\.child\??\.?\s*\(\s*\{([^}]*)\}/;
+const FOR_BINDINGS_RE = /\??\.forBindings\??\.?\s*\(\s*\{([^}]*)\}/;
+const MODULE_LOGGER_RE = /createModuleLogger\s*\(\s*['"]([^'"]+)['"]/;
+
+function detectFileBindings(src: string): {
+  hasTraceId: boolean;
+  hasTenantId: boolean;
+  hasUserId: boolean;
+  hasModule: boolean;
+} {
+  const bindings = { hasTraceId: false, hasTenantId: false, hasUserId: false, hasModule: false };
+  const matchers = [CHILD_BIND_RE, FOR_BINDINGS_RE];
+  for (const re of matchers) {
+    const m = src.match(re);
+    if (!m) continue;
+    const inner = m[1];
+    if (/traceId|correlationId|requestId/.test(inner)) bindings.hasTraceId = true;
+    if (/tenantId|orgId|organizationId/.test(inner)) bindings.hasTenantId = true;
+    if (/userId|personId|actorId|hostId|clientId|actorPersonId/.test(inner)) bindings.hasUserId = true;
+    if (/module['":\s]/.test(inner)) bindings.hasModule = true;
+  }
+  // createModuleLogger('booking') binds module + (typically) traceId via host context
+  if (MODULE_LOGGER_RE.test(src)) bindings.hasModule = true;
+  return bindings;
+}
+
+// Walk forward from the index of the opening `{` of a log call's first arg
+// to find the matching `}`. Returns the substring between them so multi-line
+// object literals don't get truncated by the per-line LOG_RE.
+function captureLogObject(src: string, startBraceIdx: number): string {
+  let depth = 0;
+  let i = startBraceIdx;
+  while (i < src.length) {
+    const ch = src[i];
+    if (ch === '{') depth++;
+    else if (ch === '}') {
+      depth--;
+      if (depth === 0) return src.slice(startBraceIdx + 1, i);
+    }
+    i++;
+  }
+  return src.slice(startBraceIdx);
+}
+
+const LOG_RE_GLOBAL = /(logger|log|req\.log|ctx\.log)\s*\??\.(info|error|warn|debug)\s*\(/g;
+
 for (const f of walk(HANDLERS_ROOT)) {
   const src = readFileSync(f, 'utf8');
+  const fileBindings = detectFileBindings(src);
   const lines = src.split('\n');
-  for (let i = 0; i < lines.length; i++) {
-    const line = lines[i];
-    const m = line.match(LOG_RE);
-    if (m) {
-      const inner = m[3];
-      logCalls.push({
-        file: f,
-        line: i + 1,
-        level: m[2] as CallSite['level'],
-        hasTraceId: /traceId|correlationId|requestId/.test(inner),
-        hasTenantId: /tenantId|orgId|organizationId/.test(inner),
-        hasUserId: /userId|personId|actorId|hostId|clientId|actorPersonId/.test(inner),
-        hasModule: /module['":\s]/.test(inner),
-        hasAction: /action['":\s]|action_/.test(inner),
-        snippet: line.trim().slice(0, 140),
-      });
-    }
 
+  // Compute line numbers from offsets.
+  const lineStartOffsets: number[] = [0];
+  for (let i = 0; i < src.length; i++) if (src[i] === '\n') lineStartOffsets.push(i + 1);
+  function lineFromOffset(off: number): number {
+    let lo = 0, hi = lineStartOffsets.length - 1;
+    while (lo < hi) {
+      const mid = (lo + hi + 1) >> 1;
+      if (lineStartOffsets[mid]! <= off) lo = mid;
+      else hi = mid - 1;
+    }
+    return lo + 1;
+  }
+
+  // Capture every log call with its full first-arg body (multi-line aware).
+  let lm: RegExpExecArray | null;
+  LOG_RE_GLOBAL.lastIndex = 0;
+  while ((lm = LOG_RE_GLOBAL.exec(src)) !== null) {
+    const callStart = lm.index + lm[0].length;
+    // Find next non-whitespace char — expect `{` to read object literal.
+    let p = callStart;
+    while (p < src.length && /\s/.test(src[p]!)) p++;
+    let inner = '';
+    if (src[p] === '{') inner = captureLogObject(src, p);
+    else {
+      // First arg not a literal — fall back to line slice.
+      const line = lines[lineFromOffset(lm.index) - 1] || '';
+      inner = line.slice(line.indexOf('(') + 1);
+    }
+    logCalls.push({
+      file: f,
+      line: lineFromOffset(lm.index),
+      level: lm[2] as CallSite['level'],
+      hasTraceId: fileBindings.hasTraceId || /traceId|correlationId|requestId/.test(inner),
+      hasTenantId: fileBindings.hasTenantId || /tenantId|orgId|organizationId/.test(inner),
+      hasUserId: fileBindings.hasUserId || /\b(userId|personId|actorId|hostId|clientId|actorPersonId)\b/.test(inner),
+      hasModule: fileBindings.hasModule || /module['":\s]/.test(inner),
+      hasAction: /\baction\s*:/.test(inner),
+      snippet: (lines[lineFromOffset(lm.index) - 1] || '').trim().slice(0, 140),
+    });
+  }
+
+  // Error throw scan — still per-line; throws live on one line in practice.
+  for (let i = 0; i < lines.length; i++) {
+    const line = lines[i]!;
     if (/\bthrow\s+new\s+Error\b/.test(line)) {
       errorSites.push({ file: f, line: i + 1, pattern: 'throw new Error', snippet: line.trim().slice(0, 140) });
     } else if (/\bthrow\s+new\s+HTTPException\b/.test(line)) {
