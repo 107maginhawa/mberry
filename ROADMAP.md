@@ -107,6 +107,10 @@ Dynamic configuration per association/tier. Currently hardcoded values.
 
 ## Structural Refactors
 
+### Carry-forwards
+
+**`elections/updateElectionStatus`** — orphan handler. Implemented + tested (24 refs across 5 sibling tests asserting BR-33, transition guards, status-changed event, cancellation cascade) but unwired (no TypeSpec operation, not in `app.ts`). Per-transition successors (`openElectionVoting`, `openElectionNominations`, `certifyElection` in `association:member/`) cover the `votingOpen`/`published`/etc. branches; the `cancelled` branch has no wired path. Build a real `cancelElection` operation when product needs it, then retire `updateElectionStatus` + its dependent tests in one pass. Reference: F5 cleanup, commit 9cc394a5.
+
 ### Domain Module Decomposition
 
 The `association:member` handler directory contains ~211 handlers across 7 natural bounded contexts in a single flat directory. This is a structural refactor for DDD alignment — not a bug or debt.
