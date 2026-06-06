@@ -2,19 +2,32 @@
 // Verifies the delete account flow in Settings > General > Danger Zone
 import { test, expect } from '../helpers/test-fixture'
 import { authStateFile } from '../helpers/auth-state'
+import { captureRouteHydration } from '../helpers/real-flow'
 
+// W2 real-flow upgrade: /my/settings hydrates via GET /persons/me.
+// Capturing that proves the backend returned data, not just that the
+// settings shell rendered.
+const PERSON_ME = /\/persons\/me(?:[/?]|$)/
 
 test.use({ storageState: authStateFile('member') })
 test.describe('M-25: Delete Account', () => {
-  test.beforeEach(async ({ page }) => {
-    await page.goto('/my/settings')
-  })
-
   test('settings page shows Danger Zone with Delete Account button', async ({ page }) => {
+    const respP = captureRouteHydration(page, PERSON_ME)
+    await page.goto('/my/settings')
+
+    const resp = await respP
+    expect(resp?.status()).toBe(200)
+    expect(resp?.ok()).toBe(true)
+
     // General tab should be default
     await expect(page.getByText('Danger Zone')).toBeVisible({ timeout: 10000 })
     await expect(page.getByRole('button', { name: /delete account/i })).toBeVisible()
   })
+
+  test.describe('with settings preloaded', () => {
+    test.beforeEach(async ({ page }) => {
+      await page.goto('/my/settings')
+    })
 
   test('clicking Delete Account shows confirmation form', async ({ page }) => {
     await expect(page.getByRole('button', { name: /delete account/i })).toBeVisible({ timeout: 10000 })
@@ -63,5 +76,6 @@ test.describe('M-25: Delete Account', () => {
 
     await expect(page.getByText(/30-day grace period/i)).toBeVisible({ timeout: 5000 })
     await expect(page.getByText(/anonymized/i)).toBeVisible()
+  })
   })
 })
