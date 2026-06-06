@@ -1,0 +1,4243 @@
+{
+  "generatedAt": "2026-06-06T08:09:39.947Z",
+  "totals": {
+    "handlerFiles": 586,
+    "logCallSites": 272,
+    "full": 0,
+    "partial": 56,
+    "none": 216,
+    "errorSites": 1038,
+    "throwNewError": 2,
+    "throwHTTPException": 0,
+    "throwTyped": 1036
+  },
+  "worstOffenders": [
+    {
+      "file": "billing/handleStripeWebhook.ts",
+      "totalLogs": 54,
+      "full": 0,
+      "partial": 0,
+      "none": 54,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 3,
+      "score": 108
+    },
+    {
+      "file": "billing/onboardMerchantAccount.ts",
+      "totalLogs": 9,
+      "full": 0,
+      "partial": 1,
+      "none": 8,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 6,
+      "score": 16
+    },
+    {
+      "file": "email/templates/initializer.ts",
+      "totalLogs": 5,
+      "full": 0,
+      "partial": 0,
+      "none": 5,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 1,
+      "score": 10
+    },
+    {
+      "file": "billing/captureInvoicePayment.ts",
+      "totalLogs": 5,
+      "full": 0,
+      "partial": 0,
+      "none": 5,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 12,
+      "score": 10
+    },
+    {
+      "file": "dues/stripeWebhook.ts",
+      "totalLogs": 4,
+      "full": 0,
+      "partial": 0,
+      "none": 4,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 0,
+      "score": 8
+    },
+    {
+      "file": "booking/updateBookingEvent.ts",
+      "totalLogs": 4,
+      "full": 0,
+      "partial": 0,
+      "none": 4,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 1,
+      "score": 8
+    },
+    {
+      "file": "storage/uploadFile.ts",
+      "totalLogs": 4,
+      "full": 0,
+      "partial": 0,
+      "none": 4,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 5,
+      "score": 8
+    },
+    {
+      "file": "storage/getFile.ts",
+      "totalLogs": 5,
+      "full": 0,
+      "partial": 1,
+      "none": 4,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 4,
+      "score": 8
+    },
+    {
+      "file": "billing/payInvoice.ts",
+      "totalLogs": 5,
+      "full": 0,
+      "partial": 1,
+      "none": 4,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 8,
+      "score": 8
+    },
+    {
+      "file": "booking/confirmBooking.ts",
+      "totalLogs": 3,
+      "full": 0,
+      "partial": 0,
+      "none": 3,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 2,
+      "score": 6
+    },
+    {
+      "file": "booking/cancelBooking.ts",
+      "totalLogs": 3,
+      "full": 0,
+      "partial": 0,
+      "none": 3,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 4,
+      "score": 6
+    },
+    {
+      "file": "booking/utils/ownership.ts",
+      "totalLogs": 3,
+      "full": 0,
+      "partial": 0,
+      "none": 3,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 0,
+      "score": 6
+    },
+    {
+      "file": "booking/rejectBooking.ts",
+      "totalLogs": 3,
+      "full": 0,
+      "partial": 0,
+      "none": 3,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 3,
+      "score": 6
+    },
+    {
+      "file": "comms/sendChatMessage.ts",
+      "totalLogs": 3,
+      "full": 0,
+      "partial": 0,
+      "none": 3,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 10,
+      "score": 6
+    },
+    {
+      "file": "comms/leaveVideoCall.ts",
+      "totalLogs": 3,
+      "full": 0,
+      "partial": 0,
+      "none": 3,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 8,
+      "score": 6
+    },
+    {
+      "file": "association:operations/cancelEventRegistration.ts",
+      "totalLogs": 3,
+      "full": 0,
+      "partial": 0,
+      "none": 3,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 2,
+      "score": 6
+    },
+    {
+      "file": "billing/voidInvoice.ts",
+      "totalLogs": 3,
+      "full": 0,
+      "partial": 0,
+      "none": 3,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 13,
+      "score": 6
+    },
+    {
+      "file": "billing/refundInvoicePayment.ts",
+      "totalLogs": 3,
+      "full": 0,
+      "partial": 0,
+      "none": 3,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 11,
+      "score": 6
+    },
+    {
+      "file": "booking/createBookingEvent.ts",
+      "totalLogs": 2,
+      "full": 0,
+      "partial": 0,
+      "none": 2,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 1,
+      "score": 4
+    },
+    {
+      "file": "booking/listEventSlots.ts",
+      "totalLogs": 2,
+      "full": 0,
+      "partial": 0,
+      "none": 2,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 1,
+      "score": 4
+    }
+  ],
+  "allFiles": {
+    "services/api-ts/src/handlers/dues/stripeWebhook.ts": {
+      "totalLogs": 4,
+      "full": 0,
+      "partial": 0,
+      "none": 4,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 0
+    },
+    "services/api-ts/src/handlers/booking/getScheduleException.ts": {
+      "totalLogs": 1,
+      "full": 0,
+      "partial": 0,
+      "none": 1,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 2
+    },
+    "services/api-ts/src/handlers/booking/confirmBooking.ts": {
+      "totalLogs": 3,
+      "full": 0,
+      "partial": 0,
+      "none": 3,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 2
+    },
+    "services/api-ts/src/handlers/booking/cancelBooking.ts": {
+      "totalLogs": 3,
+      "full": 0,
+      "partial": 0,
+      "none": 3,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 4
+    },
+    "services/api-ts/src/handlers/booking/updateScheduleException.ts": {
+      "totalLogs": 1,
+      "full": 0,
+      "partial": 0,
+      "none": 1,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 0
+    },
+    "services/api-ts/src/handlers/booking/createBookingEvent.ts": {
+      "totalLogs": 2,
+      "full": 0,
+      "partial": 0,
+      "none": 2,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 1
+    },
+    "services/api-ts/src/handlers/booking/deleteScheduleException.ts": {
+      "totalLogs": 1,
+      "full": 0,
+      "partial": 0,
+      "none": 1,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 2
+    },
+    "services/api-ts/src/handlers/booking/createScheduleException.ts": {
+      "totalLogs": 1,
+      "full": 0,
+      "partial": 0,
+      "none": 1,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 2
+    },
+    "services/api-ts/src/handlers/booking/getBookingEvent.ts": {
+      "totalLogs": 1,
+      "full": 0,
+      "partial": 0,
+      "none": 1,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 4
+    },
+    "services/api-ts/src/handlers/booking/markNoShowBooking.ts": {
+      "totalLogs": 1,
+      "full": 0,
+      "partial": 0,
+      "none": 1,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 5
+    },
+    "services/api-ts/src/handlers/booking/utils/ownership.ts": {
+      "totalLogs": 3,
+      "full": 0,
+      "partial": 0,
+      "none": 3,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 0
+    },
+    "services/api-ts/src/handlers/booking/listEventSlots.ts": {
+      "totalLogs": 2,
+      "full": 0,
+      "partial": 0,
+      "none": 2,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 1
+    },
+    "services/api-ts/src/handlers/booking/listBookings.ts": {
+      "totalLogs": 1,
+      "full": 0,
+      "partial": 0,
+      "none": 1,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 2
+    },
+    "services/api-ts/src/handlers/booking/createBooking.ts": {
+      "totalLogs": 1,
+      "full": 0,
+      "partial": 0,
+      "none": 1,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 0
+    },
+    "services/api-ts/src/handlers/booking/getBooking.ts": {
+      "totalLogs": 1,
+      "full": 0,
+      "partial": 0,
+      "none": 1,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 2
+    },
+    "services/api-ts/src/handlers/booking/deleteBookingEvent.ts": {
+      "totalLogs": 1,
+      "full": 0,
+      "partial": 0,
+      "none": 1,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 3
+    },
+    "services/api-ts/src/handlers/booking/listScheduleExceptions.ts": {
+      "totalLogs": 1,
+      "full": 0,
+      "partial": 0,
+      "none": 1,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 1
+    },
+    "services/api-ts/src/handlers/booking/updateBookingEvent.ts": {
+      "totalLogs": 4,
+      "full": 0,
+      "partial": 0,
+      "none": 4,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 1
+    },
+    "services/api-ts/src/handlers/booking/rejectBooking.ts": {
+      "totalLogs": 3,
+      "full": 0,
+      "partial": 0,
+      "none": 3,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 3
+    },
+    "services/api-ts/src/handlers/person/executeAccountDeletion.ts": {
+      "totalLogs": 2,
+      "full": 0,
+      "partial": 1,
+      "none": 1,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 0
+    },
+    "services/api-ts/src/handlers/person/updatePerson.ts": {
+      "totalLogs": 2,
+      "full": 0,
+      "partial": 1,
+      "none": 1,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 2
+    },
+    "services/api-ts/src/handlers/person/createPerson.ts": {
+      "totalLogs": 2,
+      "full": 0,
+      "partial": 1,
+      "none": 1,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 1
+    },
+    "services/api-ts/src/handlers/person/requestDataExport.ts": {
+      "totalLogs": 1,
+      "full": 0,
+      "partial": 0,
+      "none": 1,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 1
+    },
+    "services/api-ts/src/handlers/marketplace/verifyVendor.ts": {
+      "totalLogs": 1,
+      "full": 0,
+      "partial": 1,
+      "none": 0,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 2
+    },
+    "services/api-ts/src/handlers/marketplace/fulfillOrder.ts": {
+      "totalLogs": 1,
+      "full": 0,
+      "partial": 1,
+      "none": 0,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 2
+    },
+    "services/api-ts/src/handlers/marketplace/createOrder.ts": {
+      "totalLogs": 1,
+      "full": 0,
+      "partial": 1,
+      "none": 0,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 5
+    },
+    "services/api-ts/src/handlers/marketplace/updateVendor.ts": {
+      "totalLogs": 1,
+      "full": 0,
+      "partial": 1,
+      "none": 0,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 2
+    },
+    "services/api-ts/src/handlers/marketplace/createListing.ts": {
+      "totalLogs": 1,
+      "full": 0,
+      "partial": 1,
+      "none": 0,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 6
+    },
+    "services/api-ts/src/handlers/marketplace/createVendor.ts": {
+      "totalLogs": 1,
+      "full": 0,
+      "partial": 1,
+      "none": 0,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 5
+    },
+    "services/api-ts/src/handlers/comms/joinVideoCall.ts": {
+      "totalLogs": 2,
+      "full": 0,
+      "partial": 0,
+      "none": 2,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 8
+    },
+    "services/api-ts/src/handlers/comms/sendChatMessage.ts": {
+      "totalLogs": 3,
+      "full": 0,
+      "partial": 0,
+      "none": 3,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 10
+    },
+    "services/api-ts/src/handlers/comms/endVideoCall.ts": {
+      "totalLogs": 2,
+      "full": 0,
+      "partial": 0,
+      "none": 2,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 7
+    },
+    "services/api-ts/src/handlers/comms/getChatRoom.ts": {
+      "totalLogs": 1,
+      "full": 0,
+      "partial": 0,
+      "none": 1,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 4
+    },
+    "services/api-ts/src/handlers/comms/getChatMessages.ts": {
+      "totalLogs": 1,
+      "full": 0,
+      "partial": 0,
+      "none": 1,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 4
+    },
+    "services/api-ts/src/handlers/comms/leaveVideoCall.ts": {
+      "totalLogs": 3,
+      "full": 0,
+      "partial": 0,
+      "none": 3,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 8
+    },
+    "services/api-ts/src/handlers/comms/listChatRooms.ts": {
+      "totalLogs": 1,
+      "full": 0,
+      "partial": 0,
+      "none": 1,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 1
+    },
+    "services/api-ts/src/handlers/comms/updateVideoCallParticipant.ts": {
+      "totalLogs": 1,
+      "full": 0,
+      "partial": 0,
+      "none": 1,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 11
+    },
+    "services/api-ts/src/handlers/comms/ws.chat-room.ts": {
+      "totalLogs": 8,
+      "full": 0,
+      "partial": 7,
+      "none": 1,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 0
+    },
+    "services/api-ts/src/handlers/comms/createChatRoom.ts": {
+      "totalLogs": 2,
+      "full": 0,
+      "partial": 0,
+      "none": 2,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 6
+    },
+    "services/api-ts/src/handlers/certificates/bulkIssueCertificates.ts": {
+      "totalLogs": 3,
+      "full": 0,
+      "partial": 2,
+      "none": 1,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 4
+    },
+    "services/api-ts/src/handlers/storage/deleteFile.ts": {
+      "totalLogs": 3,
+      "full": 0,
+      "partial": 1,
+      "none": 2,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 4
+    },
+    "services/api-ts/src/handlers/storage/completeFileUpload.ts": {
+      "totalLogs": 1,
+      "full": 0,
+      "partial": 0,
+      "none": 1,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 4
+    },
+    "services/api-ts/src/handlers/storage/getFileDownload.ts": {
+      "totalLogs": 1,
+      "full": 0,
+      "partial": 0,
+      "none": 1,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 4
+    },
+    "services/api-ts/src/handlers/storage/uploadFile.ts": {
+      "totalLogs": 4,
+      "full": 0,
+      "partial": 0,
+      "none": 4,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 5
+    },
+    "services/api-ts/src/handlers/storage/listFiles.ts": {
+      "totalLogs": 2,
+      "full": 0,
+      "partial": 1,
+      "none": 1,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 1
+    },
+    "services/api-ts/src/handlers/storage/getFile.ts": {
+      "totalLogs": 5,
+      "full": 0,
+      "partial": 1,
+      "none": 4,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 4
+    },
+    "services/api-ts/src/handlers/notifs/listNotifications.ts": {
+      "totalLogs": 1,
+      "full": 0,
+      "partial": 0,
+      "none": 1,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 0
+    },
+    "services/api-ts/src/handlers/notifs/markAllNotificationsAsRead.ts": {
+      "totalLogs": 1,
+      "full": 0,
+      "partial": 0,
+      "none": 1,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 0
+    },
+    "services/api-ts/src/handlers/notifs/getNotification.ts": {
+      "totalLogs": 1,
+      "full": 0,
+      "partial": 0,
+      "none": 1,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 1
+    },
+    "services/api-ts/src/handlers/notifs/markNotificationAsRead.ts": {
+      "totalLogs": 1,
+      "full": 0,
+      "partial": 0,
+      "none": 1,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 0
+    },
+    "services/api-ts/src/handlers/audit/listAuditLogs.ts": {
+      "totalLogs": 1,
+      "full": 0,
+      "partial": 0,
+      "none": 1,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 1
+    },
+    "services/api-ts/src/handlers/association:operations/cancelEventRegistration.ts": {
+      "totalLogs": 3,
+      "full": 0,
+      "partial": 0,
+      "none": 3,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 2
+    },
+    "services/api-ts/src/handlers/association:member/terminateMembership.ts": {
+      "totalLogs": 1,
+      "full": 0,
+      "partial": 1,
+      "none": 0,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 3
+    },
+    "services/api-ts/src/handlers/association:member/resignMembership.ts": {
+      "totalLogs": 1,
+      "full": 0,
+      "partial": 1,
+      "none": 0,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 3
+    },
+    "services/api-ts/src/handlers/association:member/createMembership.ts": {
+      "totalLogs": 1,
+      "full": 0,
+      "partial": 1,
+      "none": 0,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 3
+    },
+    "services/api-ts/src/handlers/association:member/deceaseMembership.ts": {
+      "totalLogs": 1,
+      "full": 0,
+      "partial": 1,
+      "none": 0,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 3
+    },
+    "services/api-ts/src/handlers/association:member/updateOfficerTerm.ts": {
+      "totalLogs": 2,
+      "full": 0,
+      "partial": 2,
+      "none": 0,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 2
+    },
+    "services/api-ts/src/handlers/association:member/upgradeSubscription.ts": {
+      "totalLogs": 1,
+      "full": 0,
+      "partial": 0,
+      "none": 1,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 3
+    },
+    "services/api-ts/src/handlers/association:member/generateDuesInvoicesForOrg.ts": {
+      "totalLogs": 1,
+      "full": 0,
+      "partial": 0,
+      "none": 1,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 2
+    },
+    "services/api-ts/src/handlers/association:member/listRosterMembers.ts": {
+      "totalLogs": 1,
+      "full": 0,
+      "partial": 0,
+      "none": 1,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 1
+    },
+    "services/api-ts/src/handlers/association:member/createSubscriptionCheckout.ts": {
+      "totalLogs": 2,
+      "full": 0,
+      "partial": 0,
+      "none": 2,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 2
+    },
+    "services/api-ts/src/handlers/association:member/addRosterMember.ts": {
+      "totalLogs": 1,
+      "full": 0,
+      "partial": 1,
+      "none": 0,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 1
+    },
+    "services/api-ts/src/handlers/association:member/handlePaymentWebhook.ts": {
+      "totalLogs": 1,
+      "full": 0,
+      "partial": 0,
+      "none": 1,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 0
+    },
+    "services/api-ts/src/handlers/association:member/deleteOfficerTerm.ts": {
+      "totalLogs": 2,
+      "full": 0,
+      "partial": 2,
+      "none": 0,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 1
+    },
+    "services/api-ts/src/handlers/advertising/setMemberOptOut.ts": {
+      "totalLogs": 1,
+      "full": 0,
+      "partial": 0,
+      "none": 1,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 1
+    },
+    "services/api-ts/src/handlers/advertising/createCreative.ts": {
+      "totalLogs": 1,
+      "full": 0,
+      "partial": 1,
+      "none": 0,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 5
+    },
+    "services/api-ts/src/handlers/advertising/createCampaign.ts": {
+      "totalLogs": 1,
+      "full": 0,
+      "partial": 1,
+      "none": 0,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 5
+    },
+    "services/api-ts/src/handlers/advertising/reviewCreative.ts": {
+      "totalLogs": 1,
+      "full": 0,
+      "partial": 0,
+      "none": 1,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 5
+    },
+    "services/api-ts/src/handlers/advertising/reportAd.ts": {
+      "totalLogs": 2,
+      "full": 0,
+      "partial": 0,
+      "none": 2,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 3
+    },
+    "services/api-ts/src/handlers/advertising/createAdvertiser.ts": {
+      "totalLogs": 1,
+      "full": 0,
+      "partial": 1,
+      "none": 0,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 3
+    },
+    "services/api-ts/src/handlers/surveys/deleteMemberResponses.ts": {
+      "totalLogs": 1,
+      "full": 0,
+      "partial": 0,
+      "none": 1,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 1
+    },
+    "services/api-ts/src/handlers/surveys/exportSurveyResponses.ts": {
+      "totalLogs": 2,
+      "full": 0,
+      "partial": 2,
+      "none": 0,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 3
+    },
+    "services/api-ts/src/handlers/surveys/submitSurveyResponse.ts": {
+      "totalLogs": 2,
+      "full": 0,
+      "partial": 0,
+      "none": 2,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 5
+    },
+    "services/api-ts/src/handlers/surveys/closeSurvey.ts": {
+      "totalLogs": 1,
+      "full": 0,
+      "partial": 1,
+      "none": 0,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 5
+    },
+    "services/api-ts/src/handlers/surveys/publishSurvey.ts": {
+      "totalLogs": 1,
+      "full": 0,
+      "partial": 1,
+      "none": 0,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 6
+    },
+    "services/api-ts/src/handlers/surveys/updateSurvey.ts": {
+      "totalLogs": 1,
+      "full": 0,
+      "partial": 1,
+      "none": 0,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 5
+    },
+    "services/api-ts/src/handlers/surveys/cloneSurvey.ts": {
+      "totalLogs": 1,
+      "full": 0,
+      "partial": 1,
+      "none": 0,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 3
+    },
+    "services/api-ts/src/handlers/surveys/dismissSurveyResponse.ts": {
+      "totalLogs": 1,
+      "full": 0,
+      "partial": 0,
+      "none": 1,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 2
+    },
+    "services/api-ts/src/handlers/surveys/deleteSurvey.ts": {
+      "totalLogs": 1,
+      "full": 0,
+      "partial": 1,
+      "none": 0,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 5
+    },
+    "services/api-ts/src/handlers/surveys/createSurvey.ts": {
+      "totalLogs": 1,
+      "full": 0,
+      "partial": 1,
+      "none": 0,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 2
+    },
+    "services/api-ts/src/handlers/documents/getDocumentAccessLog.ts": {
+      "totalLogs": 1,
+      "full": 0,
+      "partial": 0,
+      "none": 1,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 2
+    },
+    "services/api-ts/src/handlers/communication/createMessage.ts": {
+      "totalLogs": 1,
+      "full": 0,
+      "partial": 1,
+      "none": 0,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 0
+    },
+    "services/api-ts/src/handlers/communication/sendMessage.ts": {
+      "totalLogs": 1,
+      "full": 0,
+      "partial": 0,
+      "none": 1,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 3
+    },
+    "services/api-ts/src/handlers/events/checkIn.ts": {
+      "totalLogs": 1,
+      "full": 0,
+      "partial": 0,
+      "none": 1,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 4
+    },
+    "services/api-ts/src/handlers/email/unsubscribeEmail.ts": {
+      "totalLogs": 1,
+      "full": 0,
+      "partial": 1,
+      "none": 0,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 0
+    },
+    "services/api-ts/src/handlers/email/listEmailTemplates.ts": {
+      "totalLogs": 1,
+      "full": 0,
+      "partial": 0,
+      "none": 1,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 1
+    },
+    "services/api-ts/src/handlers/email/cancelEmailQueueItem.ts": {
+      "totalLogs": 1,
+      "full": 0,
+      "partial": 0,
+      "none": 1,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 3
+    },
+    "services/api-ts/src/handlers/email/getEmailQueueItem.ts": {
+      "totalLogs": 1,
+      "full": 0,
+      "partial": 0,
+      "none": 1,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 2
+    },
+    "services/api-ts/src/handlers/email/updateEmailTemplate.ts": {
+      "totalLogs": 1,
+      "full": 0,
+      "partial": 0,
+      "none": 1,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 2
+    },
+    "services/api-ts/src/handlers/email/listEmailQueueItems.ts": {
+      "totalLogs": 1,
+      "full": 0,
+      "partial": 0,
+      "none": 1,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 1
+    },
+    "services/api-ts/src/handlers/email/listEmailSuppressions.ts": {
+      "totalLogs": 1,
+      "full": 0,
+      "partial": 0,
+      "none": 1,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 1
+    },
+    "services/api-ts/src/handlers/email/templates/initializer.ts": {
+      "totalLogs": 5,
+      "full": 0,
+      "partial": 0,
+      "none": 5,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 1
+    },
+    "services/api-ts/src/handlers/email/testEmailTemplate.ts": {
+      "totalLogs": 1,
+      "full": 0,
+      "partial": 0,
+      "none": 1,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 4
+    },
+    "services/api-ts/src/handlers/email/retryEmailQueueItem.ts": {
+      "totalLogs": 1,
+      "full": 0,
+      "partial": 0,
+      "none": 1,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 1
+    },
+    "services/api-ts/src/handlers/email/getEmailTemplate.ts": {
+      "totalLogs": 1,
+      "full": 0,
+      "partial": 0,
+      "none": 1,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 2
+    },
+    "services/api-ts/src/handlers/email/createEmailTemplate.ts": {
+      "totalLogs": 1,
+      "full": 0,
+      "partial": 0,
+      "none": 1,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 2
+    },
+    "services/api-ts/src/handlers/billing/listInvoices.ts": {
+      "totalLogs": 2,
+      "full": 0,
+      "partial": 0,
+      "none": 2,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 1
+    },
+    "services/api-ts/src/handlers/billing/getInvoice.ts": {
+      "totalLogs": 2,
+      "full": 0,
+      "partial": 1,
+      "none": 1,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 2
+    },
+    "services/api-ts/src/handlers/billing/finalizeInvoice.ts": {
+      "totalLogs": 2,
+      "full": 0,
+      "partial": 1,
+      "none": 1,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 5
+    },
+    "services/api-ts/src/handlers/billing/payInvoice.ts": {
+      "totalLogs": 5,
+      "full": 0,
+      "partial": 1,
+      "none": 4,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 8
+    },
+    "services/api-ts/src/handlers/billing/createInvoice.ts": {
+      "totalLogs": 2,
+      "full": 0,
+      "partial": 0,
+      "none": 2,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 5
+    },
+    "services/api-ts/src/handlers/billing/updateInvoice.ts": {
+      "totalLogs": 2,
+      "full": 0,
+      "partial": 0,
+      "none": 2,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 4
+    },
+    "services/api-ts/src/handlers/billing/getMerchantAccount.ts": {
+      "totalLogs": 2,
+      "full": 0,
+      "partial": 1,
+      "none": 1,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 4
+    },
+    "services/api-ts/src/handlers/billing/captureInvoicePayment.ts": {
+      "totalLogs": 5,
+      "full": 0,
+      "partial": 0,
+      "none": 5,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 12
+    },
+    "services/api-ts/src/handlers/billing/createMerchantAccount.ts": {
+      "totalLogs": 7,
+      "full": 0,
+      "partial": 5,
+      "none": 2,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 4
+    },
+    "services/api-ts/src/handlers/billing/voidInvoice.ts": {
+      "totalLogs": 3,
+      "full": 0,
+      "partial": 0,
+      "none": 3,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 13
+    },
+    "services/api-ts/src/handlers/billing/onboardMerchantAccount.ts": {
+      "totalLogs": 9,
+      "full": 0,
+      "partial": 1,
+      "none": 8,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 6
+    },
+    "services/api-ts/src/handlers/billing/refundInvoicePayment.ts": {
+      "totalLogs": 3,
+      "full": 0,
+      "partial": 0,
+      "none": 3,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 11
+    },
+    "services/api-ts/src/handlers/billing/getMerchantDashboard.ts": {
+      "totalLogs": 2,
+      "full": 0,
+      "partial": 1,
+      "none": 1,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 7
+    },
+    "services/api-ts/src/handlers/billing/deleteInvoice.ts": {
+      "totalLogs": 2,
+      "full": 0,
+      "partial": 1,
+      "none": 1,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 3
+    },
+    "services/api-ts/src/handlers/billing/handleStripeWebhook.ts": {
+      "totalLogs": 54,
+      "full": 0,
+      "partial": 0,
+      "none": 54,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 3
+    },
+    "services/api-ts/src/handlers/billing/markInvoiceUncollectible.ts": {
+      "totalLogs": 2,
+      "full": 0,
+      "partial": 1,
+      "none": 1,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 5
+    },
+    "services/api-ts/src/handlers/reviews/createReview.ts": {
+      "totalLogs": 1,
+      "full": 0,
+      "partial": 0,
+      "none": 1,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 3
+    },
+    "services/api-ts/src/handlers/reviews/deleteReview.ts": {
+      "totalLogs": 1,
+      "full": 0,
+      "partial": 0,
+      "none": 1,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 3
+    },
+    "services/api-ts/src/handlers/platformadmin/getOrgHealthScores.ts": {
+      "totalLogs": 1,
+      "full": 0,
+      "partial": 0,
+      "none": 1,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 0
+    },
+    "services/api-ts/src/handlers/platformadmin/getRevenueAnalytics.ts": {
+      "totalLogs": 1,
+      "full": 0,
+      "partial": 0,
+      "none": 1,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 0
+    },
+    "services/api-ts/src/handlers/platformadmin/createPricingTier.ts": {
+      "totalLogs": 2,
+      "full": 0,
+      "partial": 0,
+      "none": 2,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 3
+    },
+    "services/api-ts/src/handlers/platformadmin/cancelSubscription.ts": {
+      "totalLogs": 1,
+      "full": 0,
+      "partial": 0,
+      "none": 1,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 1
+    },
+    "services/api-ts/src/handlers/platformadmin/reportBreach.ts": {
+      "totalLogs": 2,
+      "full": 0,
+      "partial": 0,
+      "none": 2,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 2
+    },
+    "services/api-ts/src/handlers/platformadmin/updatePricingTier.ts": {
+      "totalLogs": 1,
+      "full": 0,
+      "partial": 0,
+      "none": 1,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 1
+    },
+    "services/api-ts/src/handlers/platformadmin/updateTicketStatus.ts": {
+      "totalLogs": 1,
+      "full": 0,
+      "partial": 0,
+      "none": 1,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 1
+    },
+    "services/api-ts/src/handlers/platformadmin/listPricingTiers.ts": {
+      "totalLogs": 1,
+      "full": 0,
+      "partial": 0,
+      "none": 1,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 0
+    },
+    "services/api-ts/src/handlers/platformadmin/createTicket.ts": {
+      "totalLogs": 2,
+      "full": 0,
+      "partial": 0,
+      "none": 2,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 0
+    },
+    "services/api-ts/src/handlers/platformadmin/listSubscriptions.ts": {
+      "totalLogs": 1,
+      "full": 0,
+      "partial": 0,
+      "none": 1,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 0
+    },
+    "services/api-ts/src/handlers/dues/getDuesDashboard.ts": {
+      "totalLogs": 0,
+      "full": 0,
+      "partial": 0,
+      "none": 0,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 1
+    },
+    "services/api-ts/src/handlers/dues/getDuesMetrics.ts": {
+      "totalLogs": 0,
+      "full": 0,
+      "partial": 0,
+      "none": 0,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 2
+    },
+    "services/api-ts/src/handlers/dues/utils/payment-token.ts": {
+      "totalLogs": 0,
+      "full": 0,
+      "partial": 0,
+      "none": 0,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 1
+    },
+    "services/api-ts/src/handlers/dues/getDuesMemberSummary.ts": {
+      "totalLogs": 0,
+      "full": 0,
+      "partial": 0,
+      "none": 0,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 2
+    },
+    "services/api-ts/src/handlers/dues/downloadReceipt.ts": {
+      "totalLogs": 0,
+      "full": 0,
+      "partial": 0,
+      "none": 0,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 4
+    },
+    "services/api-ts/src/handlers/dues/sendPaymentLink.ts": {
+      "totalLogs": 0,
+      "full": 0,
+      "partial": 0,
+      "none": 0,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 2
+    },
+    "services/api-ts/src/handlers/booking/getTimeSlot.ts": {
+      "totalLogs": 0,
+      "full": 0,
+      "partial": 0,
+      "none": 0,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 1
+    },
+    "services/api-ts/src/handlers/booking/utils/authorization.ts": {
+      "totalLogs": 0,
+      "full": 0,
+      "partial": 0,
+      "none": 0,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 3
+    },
+    "services/api-ts/src/handlers/person/getMyMemberships.ts": {
+      "totalLogs": 0,
+      "full": 0,
+      "partial": 0,
+      "none": 0,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 1
+    },
+    "services/api-ts/src/handlers/person/createMyCreditEntry.ts": {
+      "totalLogs": 0,
+      "full": 0,
+      "partial": 0,
+      "none": 0,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 6
+    },
+    "services/api-ts/src/handlers/person/getDataExportDownload.ts": {
+      "totalLogs": 0,
+      "full": 0,
+      "partial": 0,
+      "none": 0,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 4
+    },
+    "services/api-ts/src/handlers/person/exportMyData.ts": {
+      "totalLogs": 0,
+      "full": 0,
+      "partial": 0,
+      "none": 0,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 1
+    },
+    "services/api-ts/src/handlers/person/getMyNotificationPreferences.ts": {
+      "totalLogs": 0,
+      "full": 0,
+      "partial": 0,
+      "none": 0,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 1
+    },
+    "services/api-ts/src/handlers/person/getMyIdCard.ts": {
+      "totalLogs": 0,
+      "full": 0,
+      "partial": 0,
+      "none": 0,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 2
+    },
+    "services/api-ts/src/handlers/person/getDataExportStatus.ts": {
+      "totalLogs": 0,
+      "full": 0,
+      "partial": 0,
+      "none": 0,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 2
+    },
+    "services/api-ts/src/handlers/person/getMyOfficerRole.ts": {
+      "totalLogs": 0,
+      "full": 0,
+      "partial": 0,
+      "none": 0,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 1
+    },
+    "services/api-ts/src/handlers/person/updateMyNotificationPreferences.ts": {
+      "totalLogs": 0,
+      "full": 0,
+      "partial": 0,
+      "none": 0,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 3
+    },
+    "services/api-ts/src/handlers/person/getMyCredits.ts": {
+      "totalLogs": 0,
+      "full": 0,
+      "partial": 0,
+      "none": 0,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 1
+    },
+    "services/api-ts/src/handlers/person/listMyCreditEntries.ts": {
+      "totalLogs": 0,
+      "full": 0,
+      "partial": 0,
+      "none": 0,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 1
+    },
+    "services/api-ts/src/handlers/person/updateMyProfile.ts": {
+      "totalLogs": 0,
+      "full": 0,
+      "partial": 0,
+      "none": 0,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 2
+    },
+    "services/api-ts/src/handlers/person/getPerson.ts": {
+      "totalLogs": 0,
+      "full": 0,
+      "partial": 0,
+      "none": 0,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 3
+    },
+    "services/api-ts/src/handlers/person/cancelMyAccountDeletion.ts": {
+      "totalLogs": 0,
+      "full": 0,
+      "partial": 0,
+      "none": 0,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 3
+    },
+    "services/api-ts/src/handlers/person/requestMyAccountDeletion.ts": {
+      "totalLogs": 0,
+      "full": 0,
+      "partial": 0,
+      "none": 0,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 5
+    },
+    "services/api-ts/src/handlers/person/getMyIdCardPdf.ts": {
+      "totalLogs": 0,
+      "full": 0,
+      "partial": 0,
+      "none": 0,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 2
+    },
+    "services/api-ts/src/handlers/person/getMyPrivacySettings.ts": {
+      "totalLogs": 0,
+      "full": 0,
+      "partial": 0,
+      "none": 0,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 1
+    },
+    "services/api-ts/src/handlers/person/updatePrivacySettings.ts": {
+      "totalLogs": 0,
+      "full": 0,
+      "partial": 0,
+      "none": 0,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 2
+    },
+    "services/api-ts/src/handlers/person/updateMyPrivacySettings.ts": {
+      "totalLogs": 0,
+      "full": 0,
+      "partial": 0,
+      "none": 0,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 3
+    },
+    "services/api-ts/src/handlers/person/updateNotificationPreferences.ts": {
+      "totalLogs": 0,
+      "full": 0,
+      "partial": 0,
+      "none": 0,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 2
+    },
+    "services/api-ts/src/handlers/person/getMyCreditSummary.ts": {
+      "totalLogs": 0,
+      "full": 0,
+      "partial": 0,
+      "none": 0,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 1
+    },
+    "services/api-ts/src/handlers/marketplace/getVendor.ts": {
+      "totalLogs": 0,
+      "full": 0,
+      "partial": 0,
+      "none": 0,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 2
+    },
+    "services/api-ts/src/handlers/marketplace/listVendors.ts": {
+      "totalLogs": 0,
+      "full": 0,
+      "partial": 0,
+      "none": 0,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 1
+    },
+    "services/api-ts/src/handlers/marketplace/listListings.ts": {
+      "totalLogs": 0,
+      "full": 0,
+      "partial": 0,
+      "none": 0,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 1
+    },
+    "services/api-ts/src/handlers/comms/searchChatMessages.ts": {
+      "totalLogs": 0,
+      "full": 0,
+      "partial": 0,
+      "none": 0,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 1
+    },
+    "services/api-ts/src/handlers/default/listOrgChapters.ts": {
+      "totalLogs": 0,
+      "full": 0,
+      "partial": 0,
+      "none": 0,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 2
+    },
+    "services/api-ts/src/handlers/certificates/verifyCertificatePublic.ts": {
+      "totalLogs": 0,
+      "full": 0,
+      "partial": 0,
+      "none": 0,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 1
+    },
+    "services/api-ts/src/handlers/certificates/generateCertificatePdf.ts": {
+      "totalLogs": 0,
+      "full": 0,
+      "partial": 0,
+      "none": 0,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 2
+    },
+    "services/api-ts/src/handlers/invite/createInvite.ts": {
+      "totalLogs": 0,
+      "full": 0,
+      "partial": 0,
+      "none": 0,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 2
+    },
+    "services/api-ts/src/handlers/invite/bulkImportMembers.ts": {
+      "totalLogs": 0,
+      "full": 0,
+      "partial": 0,
+      "none": 0,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 4
+    },
+    "services/api-ts/src/handlers/invite/claimInvite.ts": {
+      "totalLogs": 0,
+      "full": 0,
+      "partial": 0,
+      "none": 0,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 5
+    },
+    "services/api-ts/src/handlers/association:operations/getEventRegistration.ts": {
+      "totalLogs": 0,
+      "full": 0,
+      "partial": 0,
+      "none": 0,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 1
+    },
+    "services/api-ts/src/handlers/association:operations/exportNationalDashboard.ts": {
+      "totalLogs": 0,
+      "full": 0,
+      "partial": 0,
+      "none": 0,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 1
+    },
+    "services/api-ts/src/handlers/association:operations/getCourseEnrollment.ts": {
+      "totalLogs": 0,
+      "full": 0,
+      "partial": 0,
+      "none": 0,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 1
+    },
+    "services/api-ts/src/handlers/association:operations/deleteTraining.ts": {
+      "totalLogs": 0,
+      "full": 0,
+      "partial": 0,
+      "none": 0,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 1
+    },
+    "services/api-ts/src/handlers/association:operations/dissolveCommittee.ts": {
+      "totalLogs": 0,
+      "full": 0,
+      "partial": 0,
+      "none": 0,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 2
+    },
+    "services/api-ts/src/handlers/association:operations/updateEventRegistration.ts": {
+      "totalLogs": 0,
+      "full": 0,
+      "partial": 0,
+      "none": 0,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 1
+    },
+    "services/api-ts/src/handlers/association:operations/updateTraining.ts": {
+      "totalLogs": 0,
+      "full": 0,
+      "partial": 0,
+      "none": 0,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 1
+    },
+    "services/api-ts/src/handlers/association:operations/listCustomTrainingEnrollments.ts": {
+      "totalLogs": 0,
+      "full": 0,
+      "partial": 0,
+      "none": 0,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 1
+    },
+    "services/api-ts/src/handlers/association:operations/refundEventRegistration.ts": {
+      "totalLogs": 0,
+      "full": 0,
+      "partial": 0,
+      "none": 0,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 2
+    },
+    "services/api-ts/src/handlers/association:operations/deleteEventRegistration.ts": {
+      "totalLogs": 0,
+      "full": 0,
+      "partial": 0,
+      "none": 0,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 1
+    },
+    "services/api-ts/src/handlers/association:operations/completeEvent.ts": {
+      "totalLogs": 0,
+      "full": 0,
+      "partial": 0,
+      "none": 0,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 2
+    },
+    "services/api-ts/src/handlers/association:operations/getCommittee.ts": {
+      "totalLogs": 0,
+      "full": 0,
+      "partial": 0,
+      "none": 0,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 1
+    },
+    "services/api-ts/src/handlers/association:operations/publishEvent.ts": {
+      "totalLogs": 0,
+      "full": 0,
+      "partial": 0,
+      "none": 0,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 3
+    },
+    "services/api-ts/src/handlers/association:operations/updateOrgAccreditedProvider.ts": {
+      "totalLogs": 0,
+      "full": 0,
+      "partial": 0,
+      "none": 0,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 1
+    },
+    "services/api-ts/src/handlers/association:operations/registerForCustomEvent.ts": {
+      "totalLogs": 0,
+      "full": 0,
+      "partial": 0,
+      "none": 0,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 2
+    },
+    "services/api-ts/src/handlers/association:operations/completeCommitteeTask.ts": {
+      "totalLogs": 0,
+      "full": 0,
+      "partial": 0,
+      "none": 0,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 2
+    },
+    "services/api-ts/src/handlers/association:operations/listCustomEventRegistrations.ts": {
+      "totalLogs": 0,
+      "full": 0,
+      "partial": 0,
+      "none": 0,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 1
+    },
+    "services/api-ts/src/handlers/association:operations/createEventRegistration.ts": {
+      "totalLogs": 0,
+      "full": 0,
+      "partial": 0,
+      "none": 0,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 3
+    },
+    "services/api-ts/src/handlers/association:operations/updateCourseEnrollment.ts": {
+      "totalLogs": 0,
+      "full": 0,
+      "partial": 0,
+      "none": 0,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 1
+    },
+    "services/api-ts/src/handlers/association:operations/completeTrainingEnrollment.ts": {
+      "totalLogs": 0,
+      "full": 0,
+      "partial": 0,
+      "none": 0,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 1
+    },
+    "services/api-ts/src/handlers/association:operations/listCustomEventAttendance.ts": {
+      "totalLogs": 0,
+      "full": 0,
+      "partial": 0,
+      "none": 0,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 1
+    },
+    "services/api-ts/src/handlers/association:operations/getCourse.ts": {
+      "totalLogs": 0,
+      "full": 0,
+      "partial": 0,
+      "none": 0,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 1
+    },
+    "services/api-ts/src/handlers/association:operations/getEvent.ts": {
+      "totalLogs": 0,
+      "full": 0,
+      "partial": 0,
+      "none": 0,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 1
+    },
+    "services/api-ts/src/handlers/association:operations/completeCustomTraining.ts": {
+      "totalLogs": 0,
+      "full": 0,
+      "partial": 0,
+      "none": 0,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 4
+    },
+    "services/api-ts/src/handlers/association:operations/cancelEvent.ts": {
+      "totalLogs": 0,
+      "full": 0,
+      "partial": 0,
+      "none": 0,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 2
+    },
+    "services/api-ts/src/handlers/association:operations/promoteWaitlistEntry.ts": {
+      "totalLogs": 0,
+      "full": 0,
+      "partial": 0,
+      "none": 0,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 1
+    },
+    "services/api-ts/src/handlers/association:operations/deleteEvent.ts": {
+      "totalLogs": 0,
+      "full": 0,
+      "partial": 0,
+      "none": 0,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 1
+    },
+    "services/api-ts/src/handlers/association:operations/createCommitteeTask.ts": {
+      "totalLogs": 0,
+      "full": 0,
+      "partial": 0,
+      "none": 0,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 2
+    },
+    "services/api-ts/src/handlers/association:operations/getTraining.ts": {
+      "totalLogs": 0,
+      "full": 0,
+      "partial": 0,
+      "none": 0,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 3
+    },
+    "services/api-ts/src/handlers/association:operations/createTrainingEnrollment.ts": {
+      "totalLogs": 0,
+      "full": 0,
+      "partial": 0,
+      "none": 0,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 4
+    },
+    "services/api-ts/src/handlers/association:operations/updateTrainingEnrollment.ts": {
+      "totalLogs": 0,
+      "full": 0,
+      "partial": 0,
+      "none": 0,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 2
+    },
+    "services/api-ts/src/handlers/association:operations/registerAndPayForEvent.ts": {
+      "totalLogs": 0,
+      "full": 0,
+      "partial": 0,
+      "none": 0,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 6
+    },
+    "services/api-ts/src/handlers/association:operations/createQuizAttempt.ts": {
+      "totalLogs": 0,
+      "full": 0,
+      "partial": 0,
+      "none": 0,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 1
+    },
+    "services/api-ts/src/handlers/association:operations/updateCourse.ts": {
+      "totalLogs": 0,
+      "full": 0,
+      "partial": 0,
+      "none": 0,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 1
+    },
+    "services/api-ts/src/handlers/association:operations/checkInCustomEvent.ts": {
+      "totalLogs": 0,
+      "full": 0,
+      "partial": 0,
+      "none": 0,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 2
+    },
+    "services/api-ts/src/handlers/association:operations/deleteTrainingEnrollment.ts": {
+      "totalLogs": 0,
+      "full": 0,
+      "partial": 0,
+      "none": 0,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 2
+    },
+    "services/api-ts/src/handlers/association:operations/deleteOrgAccreditedProvider.ts": {
+      "totalLogs": 0,
+      "full": 0,
+      "partial": 0,
+      "none": 0,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 1
+    },
+    "services/api-ts/src/handlers/association:operations/checkInCustomTraining.ts": {
+      "totalLogs": 0,
+      "full": 0,
+      "partial": 0,
+      "none": 0,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 3
+    },
+    "services/api-ts/src/handlers/association:operations/getTrainingEnrollment.ts": {
+      "totalLogs": 0,
+      "full": 0,
+      "partial": 0,
+      "none": 0,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 1
+    },
+    "services/api-ts/src/handlers/association:operations/updateEvent.ts": {
+      "totalLogs": 0,
+      "full": 0,
+      "partial": 0,
+      "none": 0,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 1
+    },
+    "services/api-ts/src/handlers/association:operations/enrollInCustomTraining.ts": {
+      "totalLogs": 0,
+      "full": 0,
+      "partial": 0,
+      "none": 0,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 4
+    },
+    "services/api-ts/src/handlers/association:operations/updateCourseProgress.ts": {
+      "totalLogs": 0,
+      "full": 0,
+      "partial": 0,
+      "none": 0,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 2
+    },
+    "services/api-ts/src/handlers/association:operations/cancelCustomTraining.ts": {
+      "totalLogs": 0,
+      "full": 0,
+      "partial": 0,
+      "none": 0,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 4
+    },
+    "services/api-ts/src/handlers/association:operations/createCheckIn.ts": {
+      "totalLogs": 0,
+      "full": 0,
+      "partial": 0,
+      "none": 0,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 4
+    },
+    "services/api-ts/src/handlers/association:operations/updateCommitteeTask.ts": {
+      "totalLogs": 0,
+      "full": 0,
+      "partial": 0,
+      "none": 0,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 1
+    },
+    "services/api-ts/src/handlers/association:operations/deleteCourseEnrollment.ts": {
+      "totalLogs": 0,
+      "full": 0,
+      "partial": 0,
+      "none": 0,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 1
+    },
+    "services/api-ts/src/handlers/association:operations/updateCommittee.ts": {
+      "totalLogs": 0,
+      "full": 0,
+      "partial": 0,
+      "none": 0,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 2
+    },
+    "services/api-ts/src/handlers/association:operations/createCourseEnrollment.ts": {
+      "totalLogs": 0,
+      "full": 0,
+      "partial": 0,
+      "none": 0,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 1
+    },
+    "services/api-ts/src/handlers/association:operations/deleteCourse.ts": {
+      "totalLogs": 0,
+      "full": 0,
+      "partial": 0,
+      "none": 0,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 1
+    },
+    "services/api-ts/src/handlers/association:operations/publishTraining.ts": {
+      "totalLogs": 0,
+      "full": 0,
+      "partial": 0,
+      "none": 0,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 2
+    },
+    "services/api-ts/src/handlers/association:member/castBallot.ts": {
+      "totalLogs": 0,
+      "full": 0,
+      "partial": 0,
+      "none": 0,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 9
+    },
+    "services/api-ts/src/handlers/association:member/openElectionNominations.ts": {
+      "totalLogs": 0,
+      "full": 0,
+      "partial": 0,
+      "none": 0,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 3
+    },
+    "services/api-ts/src/handlers/association:member/reinstateMembership.ts": {
+      "totalLogs": 0,
+      "full": 0,
+      "partial": 0,
+      "none": 0,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 3
+    },
+    "services/api-ts/src/handlers/association:member/deleteDirectoryProfile.ts": {
+      "totalLogs": 0,
+      "full": 0,
+      "partial": 0,
+      "none": 0,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 2
+    },
+    "services/api-ts/src/handlers/association:member/getRoyaltySplit.ts": {
+      "totalLogs": 0,
+      "full": 0,
+      "partial": 0,
+      "none": 0,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 2
+    },
+    "services/api-ts/src/handlers/association:member/createMembershipApplication.ts": {
+      "totalLogs": 0,
+      "full": 0,
+      "partial": 0,
+      "none": 0,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 2
+    },
+    "services/api-ts/src/handlers/association:member/listPendingProofs.ts": {
+      "totalLogs": 0,
+      "full": 0,
+      "partial": 0,
+      "none": 0,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 1
+    },
+    "services/api-ts/src/handlers/association:member/revokeDigitalCredential.ts": {
+      "totalLogs": 0,
+      "full": 0,
+      "partial": 0,
+      "none": 0,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 2
+    },
+    "services/api-ts/src/handlers/association:member/completeAffiliationTransfer.ts": {
+      "totalLogs": 0,
+      "full": 0,
+      "partial": 0,
+      "none": 0,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 3
+    },
+    "services/api-ts/src/handlers/association:member/deleteDigitalCredential.ts": {
+      "totalLogs": 0,
+      "full": 0,
+      "partial": 0,
+      "none": 0,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 2
+    },
+    "services/api-ts/src/handlers/association:member/createDuesInvoice.ts": {
+      "totalLogs": 0,
+      "full": 0,
+      "partial": 0,
+      "none": 0,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 3
+    },
+    "services/api-ts/src/handlers/association:member/listElections.ts": {
+      "totalLogs": 0,
+      "full": 0,
+      "partial": 0,
+      "none": 0,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 1
+    },
+    "services/api-ts/src/handlers/association:member/disconnectDuesGateway.ts": {
+      "totalLogs": 0,
+      "full": 0,
+      "partial": 0,
+      "none": 0,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 1
+    },
+    "services/api-ts/src/handlers/association:member/searchDirectory.ts": {
+      "totalLogs": 0,
+      "full": 0,
+      "partial": 0,
+      "none": 0,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 1
+    },
+    "services/api-ts/src/handlers/association:member/listOfficerTermsSummary.ts": {
+      "totalLogs": 0,
+      "full": 0,
+      "partial": 0,
+      "none": 0,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 1
+    },
+    "services/api-ts/src/handlers/association:member/listDuesPayments.ts": {
+      "totalLogs": 0,
+      "full": 0,
+      "partial": 0,
+      "none": 0,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 2
+    },
+    "services/api-ts/src/handlers/association:member/updateCandidateStatus.ts": {
+      "totalLogs": 0,
+      "full": 0,
+      "partial": 0,
+      "none": 0,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 5
+    },
+    "services/api-ts/src/handlers/association:member/getPublicDirectoryProfile.ts": {
+      "totalLogs": 0,
+      "full": 0,
+      "partial": 0,
+      "none": 0,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 1
+    },
+    "services/api-ts/src/handlers/association:member/listDirectoryProfiles.ts": {
+      "totalLogs": 0,
+      "full": 0,
+      "partial": 0,
+      "none": 0,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 1
+    },
+    "services/api-ts/src/handlers/association:member/deleteMembershipTier.ts": {
+      "totalLogs": 0,
+      "full": 0,
+      "partial": 0,
+      "none": 0,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 2
+    },
+    "services/api-ts/src/handlers/association:member/updateCandidate.ts": {
+      "totalLogs": 0,
+      "full": 0,
+      "partial": 0,
+      "none": 0,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 2
+    },
+    "services/api-ts/src/handlers/association:member/upsertDuesGatewayConfig.ts": {
+      "totalLogs": 0,
+      "full": 0,
+      "partial": 0,
+      "none": 0,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 1
+    },
+    "services/api-ts/src/handlers/association:member/updateRosterMember.ts": {
+      "totalLogs": 0,
+      "full": 0,
+      "partial": 0,
+      "none": 0,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 2
+    },
+    "services/api-ts/src/handlers/association:member/refundDuesPayment.ts": {
+      "totalLogs": 0,
+      "full": 0,
+      "partial": 0,
+      "none": 0,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 3
+    },
+    "services/api-ts/src/handlers/association:member/getDuesGatewayConfig.ts": {
+      "totalLogs": 0,
+      "full": 0,
+      "partial": 0,
+      "none": 0,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 1
+    },
+    "services/api-ts/src/handlers/association:member/publishMyDirectoryProfile.ts": {
+      "totalLogs": 0,
+      "full": 0,
+      "partial": 0,
+      "none": 0,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 3
+    },
+    "services/api-ts/src/handlers/association:member/updateProfessionalLicense.ts": {
+      "totalLogs": 0,
+      "full": 0,
+      "partial": 0,
+      "none": 0,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 1
+    },
+    "services/api-ts/src/handlers/association:member/listMembershipTiers.ts": {
+      "totalLogs": 0,
+      "full": 0,
+      "partial": 0,
+      "none": 0,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 1
+    },
+    "services/api-ts/src/handlers/association:member/transitionOfficerTerm.ts": {
+      "totalLogs": 0,
+      "full": 0,
+      "partial": 0,
+      "none": 0,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 2
+    },
+    "services/api-ts/src/handlers/association:member/listCandidates.ts": {
+      "totalLogs": 0,
+      "full": 0,
+      "partial": 0,
+      "none": 0,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 1
+    },
+    "services/api-ts/src/handlers/association:member/getCreditCompliance.ts": {
+      "totalLogs": 0,
+      "full": 0,
+      "partial": 0,
+      "none": 0,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 1
+    },
+    "services/api-ts/src/handlers/association:member/createRoyaltySplit.ts": {
+      "totalLogs": 0,
+      "full": 0,
+      "partial": 0,
+      "none": 0,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 1
+    },
+    "services/api-ts/src/handlers/association:member/deleteCandidate.ts": {
+      "totalLogs": 0,
+      "full": 0,
+      "partial": 0,
+      "none": 0,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 2
+    },
+    "services/api-ts/src/handlers/association:member/getAffiliationTransfer.ts": {
+      "totalLogs": 0,
+      "full": 0,
+      "partial": 0,
+      "none": 0,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 2
+    },
+    "services/api-ts/src/handlers/association:member/updateDuesConfig.ts": {
+      "totalLogs": 0,
+      "full": 0,
+      "partial": 0,
+      "none": 0,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 2
+    },
+    "services/api-ts/src/handlers/association:member/updateDigitalCredential.ts": {
+      "totalLogs": 0,
+      "full": 0,
+      "partial": 0,
+      "none": 0,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 2
+    },
+    "services/api-ts/src/handlers/association:member/approveMembershipApplication.ts": {
+      "totalLogs": 0,
+      "full": 0,
+      "partial": 0,
+      "none": 0,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 3
+    },
+    "services/api-ts/src/handlers/association:member/getOfficerTerm.ts": {
+      "totalLogs": 0,
+      "full": 0,
+      "partial": 0,
+      "none": 0,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 1
+    },
+    "services/api-ts/src/handlers/association:member/upsertMembershipCategory.ts": {
+      "totalLogs": 0,
+      "full": 0,
+      "partial": 0,
+      "none": 0,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 1
+    },
+    "services/api-ts/src/handlers/association:member/listMemberCreditsForPeer.ts": {
+      "totalLogs": 0,
+      "full": 0,
+      "partial": 0,
+      "none": 0,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 2
+    },
+    "services/api-ts/src/handlers/association:member/createCandidate.ts": {
+      "totalLogs": 0,
+      "full": 0,
+      "partial": 0,
+      "none": 0,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 6
+    },
+    "services/api-ts/src/handlers/association:member/generatePaymentLink.ts": {
+      "totalLogs": 0,
+      "full": 0,
+      "partial": 0,
+      "none": 0,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 1
+    },
+    "services/api-ts/src/handlers/association:member/getCpdConfig.ts": {
+      "totalLogs": 0,
+      "full": 0,
+      "partial": 0,
+      "none": 0,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 1
+    },
+    "services/api-ts/src/handlers/association:member/getElection.ts": {
+      "totalLogs": 0,
+      "full": 0,
+      "partial": 0,
+      "none": 0,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 2
+    },
+    "services/api-ts/src/handlers/association:member/confirmPaymentProof.ts": {
+      "totalLogs": 0,
+      "full": 0,
+      "partial": 0,
+      "none": 0,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 4
+    },
+    "services/api-ts/src/handlers/association:member/deleteDuesInvoice.ts": {
+      "totalLogs": 0,
+      "full": 0,
+      "partial": 0,
+      "none": 0,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 3
+    },
+    "services/api-ts/src/handlers/association:member/deletePosition.ts": {
+      "totalLogs": 0,
+      "full": 0,
+      "partial": 0,
+      "none": 0,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 1
+    },
+    "services/api-ts/src/handlers/association:member/listChapterAffiliations.ts": {
+      "totalLogs": 0,
+      "full": 0,
+      "partial": 0,
+      "none": 0,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 1
+    },
+    "services/api-ts/src/handlers/association:member/updatePosition.ts": {
+      "totalLogs": 0,
+      "full": 0,
+      "partial": 0,
+      "none": 0,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 1
+    },
+    "services/api-ts/src/handlers/association:member/getDigitalCredential.ts": {
+      "totalLogs": 0,
+      "full": 0,
+      "partial": 0,
+      "none": 0,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 2
+    },
+    "services/api-ts/src/handlers/association:member/updateMembership.ts": {
+      "totalLogs": 0,
+      "full": 0,
+      "partial": 0,
+      "none": 0,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 2
+    },
+    "services/api-ts/src/handlers/association:member/testDuesGatewayConnection.ts": {
+      "totalLogs": 0,
+      "full": 0,
+      "partial": 0,
+      "none": 0,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 1
+    },
+    "services/api-ts/src/handlers/association:member/revokeSeat.ts": {
+      "totalLogs": 0,
+      "full": 0,
+      "partial": 0,
+      "none": 0,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 3
+    },
+    "services/api-ts/src/handlers/association:member/utils/credit-cycle.ts": {
+      "totalLogs": 0,
+      "full": 0,
+      "partial": 0,
+      "none": 0,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 1
+    },
+    "services/api-ts/src/handlers/association:member/utils/paymongo.adapter.ts": {
+      "totalLogs": 0,
+      "full": 0,
+      "partial": 0,
+      "none": 0,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 2
+    },
+    "services/api-ts/src/handlers/association:member/utils/membership-status-middleware.ts": {
+      "totalLogs": 0,
+      "full": 0,
+      "partial": 0,
+      "none": 0,
+      "rawErrors": 1,
+      "httpExceptions": 0,
+      "typedErrors": 0
+    },
+    "services/api-ts/src/handlers/association:member/updateMembershipApplication.ts": {
+      "totalLogs": 0,
+      "full": 0,
+      "partial": 0,
+      "none": 0,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 2
+    },
+    "services/api-ts/src/handlers/association:member/updateOrganizationProfile.ts": {
+      "totalLogs": 0,
+      "full": 0,
+      "partial": 0,
+      "none": 0,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 4
+    },
+    "services/api-ts/src/handlers/association:member/getInstitutionalMembership.ts": {
+      "totalLogs": 0,
+      "full": 0,
+      "partial": 0,
+      "none": 0,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 1
+    },
+    "services/api-ts/src/handlers/association:member/acknowledgeLicenseRenewalAlert.ts": {
+      "totalLogs": 0,
+      "full": 0,
+      "partial": 0,
+      "none": 0,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 2
+    },
+    "services/api-ts/src/handlers/association:member/listRoyaltySplits.ts": {
+      "totalLogs": 0,
+      "full": 0,
+      "partial": 0,
+      "none": 0,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 1
+    },
+    "services/api-ts/src/handlers/association:member/generatePaymentReceipt.ts": {
+      "totalLogs": 0,
+      "full": 0,
+      "partial": 0,
+      "none": 0,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 4
+    },
+    "services/api-ts/src/handlers/association:member/verifyDigitalCredentialAuthenticated.ts": {
+      "totalLogs": 0,
+      "full": 0,
+      "partial": 0,
+      "none": 0,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 1
+    },
+    "services/api-ts/src/handlers/association:member/generateDuesReport.ts": {
+      "totalLogs": 0,
+      "full": 0,
+      "partial": 0,
+      "none": 0,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 2
+    },
+    "services/api-ts/src/handlers/association:member/openElectionVoting.ts": {
+      "totalLogs": 0,
+      "full": 0,
+      "partial": 0,
+      "none": 0,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 5
+    },
+    "services/api-ts/src/handlers/association:member/adjustCreditEntry.ts": {
+      "totalLogs": 0,
+      "full": 0,
+      "partial": 0,
+      "none": 0,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 6
+    },
+    "services/api-ts/src/handlers/association:member/getComplianceReport.ts": {
+      "totalLogs": 0,
+      "full": 0,
+      "partial": 0,
+      "none": 0,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 1
+    },
+    "services/api-ts/src/handlers/association:member/getDuesConfig.ts": {
+      "totalLogs": 0,
+      "full": 0,
+      "partial": 0,
+      "none": 0,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 1
+    },
+    "services/api-ts/src/handlers/association:member/listCredentialTemplates.ts": {
+      "totalLogs": 0,
+      "full": 0,
+      "partial": 0,
+      "none": 0,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 1
+    },
+    "services/api-ts/src/handlers/association:member/updateRoyaltySplit.ts": {
+      "totalLogs": 0,
+      "full": 0,
+      "partial": 0,
+      "none": 0,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 3
+    },
+    "services/api-ts/src/handlers/association:member/updateDirectoryProfile.ts": {
+      "totalLogs": 0,
+      "full": 0,
+      "partial": 0,
+      "none": 0,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 2
+    },
+    "services/api-ts/src/handlers/association:member/getProfessionalLicense.ts": {
+      "totalLogs": 0,
+      "full": 0,
+      "partial": 0,
+      "none": 0,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 1
+    },
+    "services/api-ts/src/handlers/association:member/updateCredentialTemplate.ts": {
+      "totalLogs": 0,
+      "full": 0,
+      "partial": 0,
+      "none": 0,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 3
+    },
+    "services/api-ts/src/handlers/association:member/renewMembership.ts": {
+      "totalLogs": 0,
+      "full": 0,
+      "partial": 0,
+      "none": 0,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 3
+    },
+    "services/api-ts/src/handlers/association:member/createOfficerTerm.ts": {
+      "totalLogs": 0,
+      "full": 0,
+      "partial": 0,
+      "none": 0,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 1
+    },
+    "services/api-ts/src/handlers/association:member/getMySubscription.ts": {
+      "totalLogs": 0,
+      "full": 0,
+      "partial": 0,
+      "none": 0,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 1
+    },
+    "services/api-ts/src/handlers/association:member/getCandidate.ts": {
+      "totalLogs": 0,
+      "full": 0,
+      "partial": 0,
+      "none": 0,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 2
+    },
+    "services/api-ts/src/handlers/association:member/bulkApproveMembershipApplications.ts": {
+      "totalLogs": 0,
+      "full": 0,
+      "partial": 0,
+      "none": 0,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 1
+    },
+    "services/api-ts/src/handlers/association:member/setPrimaryChapterAffiliation.ts": {
+      "totalLogs": 0,
+      "full": 0,
+      "partial": 0,
+      "none": 0,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 1
+    },
+    "services/api-ts/src/handlers/association:member/listBallots.ts": {
+      "totalLogs": 0,
+      "full": 0,
+      "partial": 0,
+      "none": 0,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 1
+    },
+    "services/api-ts/src/handlers/association:member/awardManualCredit.ts": {
+      "totalLogs": 0,
+      "full": 0,
+      "partial": 0,
+      "none": 0,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 4
+    },
+    "services/api-ts/src/handlers/association:member/deleteProfessionalLicense.ts": {
+      "totalLogs": 0,
+      "full": 0,
+      "partial": 0,
+      "none": 0,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 1
+    },
+    "services/api-ts/src/handlers/association:member/denyMembershipApplication.ts": {
+      "totalLogs": 0,
+      "full": 0,
+      "partial": 0,
+      "none": 0,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 3
+    },
+    "services/api-ts/src/handlers/association:member/updateChapterAffiliation.ts": {
+      "totalLogs": 0,
+      "full": 0,
+      "partial": 0,
+      "none": 0,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 2
+    },
+    "services/api-ts/src/handlers/association:member/listMyCertificates.ts": {
+      "totalLogs": 0,
+      "full": 0,
+      "partial": 0,
+      "none": 0,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 1
+    },
+    "services/api-ts/src/handlers/association:member/getRosterMember.ts": {
+      "totalLogs": 0,
+      "full": 0,
+      "partial": 0,
+      "none": 0,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 2
+    },
+    "services/api-ts/src/handlers/association:member/recordDuesPayment.ts": {
+      "totalLogs": 0,
+      "full": 0,
+      "partial": 0,
+      "none": 0,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 4
+    },
+    "services/api-ts/src/handlers/association:member/markDuesInvoicePaid.ts": {
+      "totalLogs": 0,
+      "full": 0,
+      "partial": 0,
+      "none": 0,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 4
+    },
+    "services/api-ts/src/handlers/association:member/getMembershipCategory.ts": {
+      "totalLogs": 0,
+      "full": 0,
+      "partial": 0,
+      "none": 0,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 1
+    },
+    "services/api-ts/src/handlers/association:member/getMembership.ts": {
+      "totalLogs": 0,
+      "full": 0,
+      "partial": 0,
+      "none": 0,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 3
+    },
+    "services/api-ts/src/handlers/association:member/deleteMembershipCategory.ts": {
+      "totalLogs": 0,
+      "full": 0,
+      "partial": 0,
+      "none": 0,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 2
+    },
+    "services/api-ts/src/handlers/association:member/approveTransferByTarget.ts": {
+      "totalLogs": 0,
+      "full": 0,
+      "partial": 0,
+      "none": 0,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 2
+    },
+    "services/api-ts/src/handlers/association:member/listDigitalCredentials.ts": {
+      "totalLogs": 0,
+      "full": 0,
+      "partial": 0,
+      "none": 0,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 1
+    },
+    "services/api-ts/src/handlers/association:member/listMembershipApplications.ts": {
+      "totalLogs": 0,
+      "full": 0,
+      "partial": 0,
+      "none": 0,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 1
+    },
+    "services/api-ts/src/handlers/association:member/submitPaymentProof.ts": {
+      "totalLogs": 0,
+      "full": 0,
+      "partial": 0,
+      "none": 0,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 5
+    },
+    "services/api-ts/src/handlers/association:member/deleteRoyaltySplit.ts": {
+      "totalLogs": 0,
+      "full": 0,
+      "partial": 0,
+      "none": 0,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 2
+    },
+    "services/api-ts/src/handlers/association:member/updateMembershipTier.ts": {
+      "totalLogs": 0,
+      "full": 0,
+      "partial": 0,
+      "none": 0,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 2
+    },
+    "services/api-ts/src/handlers/association:member/updateDuesInvoice.ts": {
+      "totalLogs": 0,
+      "full": 0,
+      "partial": 0,
+      "none": 0,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 3
+    },
+    "services/api-ts/src/handlers/association:member/getDuesFinancialDashboard.ts": {
+      "totalLogs": 0,
+      "full": 0,
+      "partial": 0,
+      "none": 0,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 2
+    },
+    "services/api-ts/src/handlers/association:member/listDuesInvoices.ts": {
+      "totalLogs": 0,
+      "full": 0,
+      "partial": 0,
+      "none": 0,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 2
+    },
+    "services/api-ts/src/handlers/association:member/createCreditEntry.ts": {
+      "totalLogs": 0,
+      "full": 0,
+      "partial": 0,
+      "none": 0,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 1
+    },
+    "services/api-ts/src/handlers/association:member/listDuesConfigs.ts": {
+      "totalLogs": 0,
+      "full": 0,
+      "partial": 0,
+      "none": 0,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 1
+    },
+    "services/api-ts/src/handlers/association:member/getCertificate.ts": {
+      "totalLogs": 0,
+      "full": 0,
+      "partial": 0,
+      "none": 0,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 3
+    },
+    "services/api-ts/src/handlers/association:member/recalculateAgingBucket.ts": {
+      "totalLogs": 0,
+      "full": 0,
+      "partial": 0,
+      "none": 0,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 1
+    },
+    "services/api-ts/src/handlers/association:member/certifyElection.ts": {
+      "totalLogs": 0,
+      "full": 0,
+      "partial": 0,
+      "none": 0,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 5
+    },
+    "services/api-ts/src/handlers/association:member/updateElection.ts": {
+      "totalLogs": 0,
+      "full": 0,
+      "partial": 0,
+      "none": 0,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 2
+    },
+    "services/api-ts/src/handlers/association:member/rejectPaymentProof.ts": {
+      "totalLogs": 0,
+      "full": 0,
+      "partial": 0,
+      "none": 0,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 4
+    },
+    "services/api-ts/src/handlers/association:member/denyAffiliationTransfer.ts": {
+      "totalLogs": 0,
+      "full": 0,
+      "partial": 0,
+      "none": 0,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 3
+    },
+    "services/api-ts/src/handlers/association:member/importRosterMembers.ts": {
+      "totalLogs": 0,
+      "full": 0,
+      "partial": 0,
+      "none": 0,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 1
+    },
+    "services/api-ts/src/handlers/association:member/getOrganizationProfile.ts": {
+      "totalLogs": 0,
+      "full": 0,
+      "partial": 0,
+      "none": 0,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 2
+    },
+    "services/api-ts/src/handlers/association:member/issueDigitalCredential.ts": {
+      "totalLogs": 0,
+      "full": 0,
+      "partial": 0,
+      "none": 0,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 5
+    },
+    "services/api-ts/src/handlers/association:member/deleteInstitutionalMembership.ts": {
+      "totalLogs": 0,
+      "full": 0,
+      "partial": 0,
+      "none": 0,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 1
+    },
+    "services/api-ts/src/handlers/association:member/allocateSeat.ts": {
+      "totalLogs": 0,
+      "full": 0,
+      "partial": 0,
+      "none": 0,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 2
+    },
+    "services/api-ts/src/handlers/association:member/getMembershipApplication.ts": {
+      "totalLogs": 0,
+      "full": 0,
+      "partial": 0,
+      "none": 0,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 2
+    },
+    "services/api-ts/src/handlers/association:member/initiateOnlinePayment.ts": {
+      "totalLogs": 0,
+      "full": 0,
+      "partial": 0,
+      "none": 0,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 4
+    },
+    "services/api-ts/src/handlers/association:member/updateMembershipCategory.ts": {
+      "totalLogs": 0,
+      "full": 0,
+      "partial": 0,
+      "none": 0,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 1
+    },
+    "services/api-ts/src/handlers/association:member/deleteMembership.ts": {
+      "totalLogs": 0,
+      "full": 0,
+      "partial": 0,
+      "none": 0,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 2
+    },
+    "services/api-ts/src/handlers/association:member/getDirectoryProfile.ts": {
+      "totalLogs": 0,
+      "full": 0,
+      "partial": 0,
+      "none": 0,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 2
+    },
+    "services/api-ts/src/handlers/association:member/deleteCredentialTemplate.ts": {
+      "totalLogs": 0,
+      "full": 0,
+      "partial": 0,
+      "none": 0,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 2
+    },
+    "services/api-ts/src/handlers/association:member/upsertDuesFunds.ts": {
+      "totalLogs": 0,
+      "full": 0,
+      "partial": 0,
+      "none": 0,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 1
+    },
+    "services/api-ts/src/handlers/association:member/listSeatAllocations.ts": {
+      "totalLogs": 0,
+      "full": 0,
+      "partial": 0,
+      "none": 0,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 1
+    },
+    "services/api-ts/src/handlers/association:member/updateInstitutionalMembership.ts": {
+      "totalLogs": 0,
+      "full": 0,
+      "partial": 0,
+      "none": 0,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 2
+    },
+    "services/api-ts/src/handlers/association:member/voidCreditEntry.ts": {
+      "totalLogs": 0,
+      "full": 0,
+      "partial": 0,
+      "none": 0,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 4
+    },
+    "services/api-ts/src/handlers/association:member/approveTransferBySource.ts": {
+      "totalLogs": 0,
+      "full": 0,
+      "partial": 0,
+      "none": 0,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 2
+    },
+    "services/api-ts/src/handlers/association:member/deleteElection.ts": {
+      "totalLogs": 0,
+      "full": 0,
+      "partial": 0,
+      "none": 0,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 3
+    },
+    "services/api-ts/src/handlers/association:member/getOrgDashboard.ts": {
+      "totalLogs": 0,
+      "full": 0,
+      "partial": 0,
+      "none": 0,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 1
+    },
+    "services/api-ts/src/handlers/association:member/listDuesFunds.ts": {
+      "totalLogs": 0,
+      "full": 0,
+      "partial": 0,
+      "none": 0,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 1
+    },
+    "services/api-ts/src/handlers/association:member/getChapterAffiliation.ts": {
+      "totalLogs": 0,
+      "full": 0,
+      "partial": 0,
+      "none": 0,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 2
+    },
+    "services/api-ts/src/handlers/association:member/getDuesPayment.ts": {
+      "totalLogs": 0,
+      "full": 0,
+      "partial": 0,
+      "none": 0,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 4
+    },
+    "services/api-ts/src/handlers/association:member/createElection.ts": {
+      "totalLogs": 0,
+      "full": 0,
+      "partial": 0,
+      "none": 0,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 2
+    },
+    "services/api-ts/src/handlers/association:member/getPosition.ts": {
+      "totalLogs": 0,
+      "full": 0,
+      "partial": 0,
+      "none": 0,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 1
+    },
+    "services/api-ts/src/handlers/association:member/deleteChapterAffiliation.ts": {
+      "totalLogs": 0,
+      "full": 0,
+      "partial": 0,
+      "none": 0,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 2
+    },
+    "services/api-ts/src/handlers/association:member/getMembershipTier.ts": {
+      "totalLogs": 0,
+      "full": 0,
+      "partial": 0,
+      "none": 0,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 2
+    },
+    "services/api-ts/src/handlers/association:member/deleteDuesConfig.ts": {
+      "totalLogs": 0,
+      "full": 0,
+      "partial": 0,
+      "none": 0,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 2
+    },
+    "services/api-ts/src/handlers/association:member/deleteMembershipApplication.ts": {
+      "totalLogs": 0,
+      "full": 0,
+      "partial": 0,
+      "none": 0,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 2
+    },
+    "services/api-ts/src/handlers/association:member/listMemberships.ts": {
+      "totalLogs": 0,
+      "full": 0,
+      "partial": 0,
+      "none": 0,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 1
+    },
+    "services/api-ts/src/handlers/association:member/listAffiliationTransfers.ts": {
+      "totalLogs": 0,
+      "full": 0,
+      "partial": 0,
+      "none": 0,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 1
+    },
+    "services/api-ts/src/handlers/association:member/getCredentialTemplate.ts": {
+      "totalLogs": 0,
+      "full": 0,
+      "partial": 0,
+      "none": 0,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 2
+    },
+    "services/api-ts/src/handlers/association:member/getAgingBucket.ts": {
+      "totalLogs": 0,
+      "full": 0,
+      "partial": 0,
+      "none": 0,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 1
+    },
+    "services/api-ts/src/handlers/association:member/updateCpdConfig.ts": {
+      "totalLogs": 0,
+      "full": 0,
+      "partial": 0,
+      "none": 0,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 2
+    },
+    "services/api-ts/src/handlers/association:member/getDuesInvoice.ts": {
+      "totalLogs": 0,
+      "full": 0,
+      "partial": 0,
+      "none": 0,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 4
+    },
+    "services/api-ts/src/handlers/association:member/refreshCompliance.ts": {
+      "totalLogs": 0,
+      "full": 0,
+      "partial": 0,
+      "none": 0,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 1
+    },
+    "services/api-ts/src/handlers/association:member/createMembershipTier.ts": {
+      "totalLogs": 0,
+      "full": 0,
+      "partial": 0,
+      "none": 0,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 1
+    },
+    "services/api-ts/src/handlers/advertising/getAdForPlacement.ts": {
+      "totalLogs": 0,
+      "full": 0,
+      "partial": 0,
+      "none": 0,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 1
+    },
+    "services/api-ts/src/handlers/surveys/getNpsTrends.ts": {
+      "totalLogs": 0,
+      "full": 0,
+      "partial": 0,
+      "none": 0,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 2
+    },
+    "services/api-ts/src/handlers/surveys/listAdminSurveys.ts": {
+      "totalLogs": 0,
+      "full": 0,
+      "partial": 0,
+      "none": 0,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 2
+    },
+    "services/api-ts/src/handlers/surveys/listSurveyResponses.ts": {
+      "totalLogs": 0,
+      "full": 0,
+      "partial": 0,
+      "none": 0,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 3
+    },
+    "services/api-ts/src/handlers/surveys/getSurveyAnalytics.ts": {
+      "totalLogs": 0,
+      "full": 0,
+      "partial": 0,
+      "none": 0,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 3
+    },
+    "services/api-ts/src/handlers/surveys/getSurvey.ts": {
+      "totalLogs": 0,
+      "full": 0,
+      "partial": 0,
+      "none": 0,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 2
+    },
+    "services/api-ts/src/handlers/surveys/listSurveys.ts": {
+      "totalLogs": 0,
+      "full": 0,
+      "partial": 0,
+      "none": 0,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 1
+    },
+    "services/api-ts/src/handlers/documents/getDocumentVersion.ts": {
+      "totalLogs": 0,
+      "full": 0,
+      "partial": 0,
+      "none": 0,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 2
+    },
+    "services/api-ts/src/handlers/documents/deleteDocument.ts": {
+      "totalLogs": 0,
+      "full": 0,
+      "partial": 0,
+      "none": 0,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 3
+    },
+    "services/api-ts/src/handlers/documents/createDocument.ts": {
+      "totalLogs": 0,
+      "full": 0,
+      "partial": 0,
+      "none": 0,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 1
+    },
+    "services/api-ts/src/handlers/documents/uploadNewDocumentVersion.ts": {
+      "totalLogs": 0,
+      "full": 0,
+      "partial": 0,
+      "none": 0,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 3
+    },
+    "services/api-ts/src/handlers/documents/updateDocument.ts": {
+      "totalLogs": 0,
+      "full": 0,
+      "partial": 0,
+      "none": 0,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 4
+    },
+    "services/api-ts/src/handlers/documents/deleteDocumentTag.ts": {
+      "totalLogs": 0,
+      "full": 0,
+      "partial": 0,
+      "none": 0,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 2
+    },
+    "services/api-ts/src/handlers/documents/listDocumentTags.ts": {
+      "totalLogs": 0,
+      "full": 0,
+      "partial": 0,
+      "none": 0,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 1
+    },
+    "services/api-ts/src/handlers/documents/searchDocuments.ts": {
+      "totalLogs": 0,
+      "full": 0,
+      "partial": 0,
+      "none": 0,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 1
+    },
+    "services/api-ts/src/handlers/documents/downloadDocument.ts": {
+      "totalLogs": 0,
+      "full": 0,
+      "partial": 0,
+      "none": 0,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 3
+    },
+    "services/api-ts/src/handlers/documents/getDocumentTag.ts": {
+      "totalLogs": 0,
+      "full": 0,
+      "partial": 0,
+      "none": 0,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 2
+    },
+    "services/api-ts/src/handlers/documents/listDocumentVersions.ts": {
+      "totalLogs": 0,
+      "full": 0,
+      "partial": 0,
+      "none": 0,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 1
+    },
+    "services/api-ts/src/handlers/documents/getDocument.ts": {
+      "totalLogs": 0,
+      "full": 0,
+      "partial": 0,
+      "none": 0,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 3
+    },
+    "services/api-ts/src/handlers/documents/archiveDocument.ts": {
+      "totalLogs": 0,
+      "full": 0,
+      "partial": 0,
+      "none": 0,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 3
+    },
+    "services/api-ts/src/handlers/documents/updateDocumentTag.ts": {
+      "totalLogs": 0,
+      "full": 0,
+      "partial": 0,
+      "none": 0,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 2
+    },
+    "services/api-ts/src/handlers/communication/cancelMessage.ts": {
+      "totalLogs": 0,
+      "full": 0,
+      "partial": 0,
+      "none": 0,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 2
+    },
+    "services/api-ts/src/handlers/communication/getMessageTemplate.ts": {
+      "totalLogs": 0,
+      "full": 0,
+      "partial": 0,
+      "none": 0,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 1
+    },
+    "services/api-ts/src/handlers/communication/getAnnouncement.ts": {
+      "totalLogs": 0,
+      "full": 0,
+      "partial": 0,
+      "none": 0,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 2
+    },
+    "services/api-ts/src/handlers/communication/scheduleAnnouncement.ts": {
+      "totalLogs": 0,
+      "full": 0,
+      "partial": 0,
+      "none": 0,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 4
+    },
+    "services/api-ts/src/handlers/communication/getAnnouncementStats.ts": {
+      "totalLogs": 0,
+      "full": 0,
+      "partial": 0,
+      "none": 0,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 2
+    },
+    "services/api-ts/src/handlers/communication/updateMessageTemplate.ts": {
+      "totalLogs": 0,
+      "full": 0,
+      "partial": 0,
+      "none": 0,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 1
+    },
+    "services/api-ts/src/handlers/communication/deleteMessage.ts": {
+      "totalLogs": 0,
+      "full": 0,
+      "partial": 0,
+      "none": 0,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 1
+    },
+    "services/api-ts/src/handlers/communication/listAnnouncements.ts": {
+      "totalLogs": 0,
+      "full": 0,
+      "partial": 0,
+      "none": 0,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 1
+    },
+    "services/api-ts/src/handlers/communication/deleteMessageTemplate.ts": {
+      "totalLogs": 0,
+      "full": 0,
+      "partial": 0,
+      "none": 0,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 1
+    },
+    "services/api-ts/src/handlers/communication/previewMessageTemplate.ts": {
+      "totalLogs": 0,
+      "full": 0,
+      "partial": 0,
+      "none": 0,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 1
+    },
+    "services/api-ts/src/handlers/communication/createAnnouncement.ts": {
+      "totalLogs": 0,
+      "full": 0,
+      "partial": 0,
+      "none": 0,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 1
+    },
+    "services/api-ts/src/handlers/communication/deleteAnnouncement.ts": {
+      "totalLogs": 0,
+      "full": 0,
+      "partial": 0,
+      "none": 0,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 3
+    },
+    "services/api-ts/src/handlers/communication/getMessage.ts": {
+      "totalLogs": 0,
+      "full": 0,
+      "partial": 0,
+      "none": 0,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 1
+    },
+    "services/api-ts/src/handlers/communication/getSubscriptionTopic.ts": {
+      "totalLogs": 0,
+      "full": 0,
+      "partial": 0,
+      "none": 0,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 1
+    },
+    "services/api-ts/src/handlers/communication/publishAnnouncement.ts": {
+      "totalLogs": 0,
+      "full": 0,
+      "partial": 0,
+      "none": 0,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 3
+    },
+    "services/api-ts/src/handlers/communication/updateSubscriptionTopic.ts": {
+      "totalLogs": 0,
+      "full": 0,
+      "partial": 0,
+      "none": 0,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 1
+    },
+    "services/api-ts/src/handlers/communication/updateAnnouncement.ts": {
+      "totalLogs": 0,
+      "full": 0,
+      "partial": 0,
+      "none": 0,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 3
+    },
+    "services/api-ts/src/handlers/communication/scheduleMessage.ts": {
+      "totalLogs": 0,
+      "full": 0,
+      "partial": 0,
+      "none": 0,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 3
+    },
+    "services/api-ts/src/handlers/communication/deleteSubscriptionTopic.ts": {
+      "totalLogs": 0,
+      "full": 0,
+      "partial": 0,
+      "none": 0,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 1
+    },
+    "services/api-ts/src/handlers/communication/updateMessage.ts": {
+      "totalLogs": 0,
+      "full": 0,
+      "partial": 0,
+      "none": 0,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 2
+    },
+    "services/api-ts/src/handlers/communication/updatePersonSubscription.ts": {
+      "totalLogs": 0,
+      "full": 0,
+      "partial": 0,
+      "none": 0,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 1
+    },
+    "services/api-ts/src/handlers/communication/archiveAnnouncement.ts": {
+      "totalLogs": 0,
+      "full": 0,
+      "partial": 0,
+      "none": 0,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 3
+    },
+    "services/api-ts/src/handlers/events/listEvents.ts": {
+      "totalLogs": 0,
+      "full": 0,
+      "partial": 0,
+      "none": 0,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 1
+    },
+    "services/api-ts/src/handlers/events/listRegistrations.ts": {
+      "totalLogs": 0,
+      "full": 0,
+      "partial": 0,
+      "none": 0,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 3
+    },
+    "services/api-ts/src/handlers/events/bulkCreateEventSeries.ts": {
+      "totalLogs": 0,
+      "full": 0,
+      "partial": 0,
+      "none": 0,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 7
+    },
+    "services/api-ts/src/handlers/events/registerForEvent.ts": {
+      "totalLogs": 0,
+      "full": 0,
+      "partial": 0,
+      "none": 0,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 3
+    },
+    "services/api-ts/src/handlers/events/cancelRegistration.ts": {
+      "totalLogs": 0,
+      "full": 0,
+      "partial": 0,
+      "none": 0,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 6
+    },
+    "services/api-ts/src/handlers/events/listAttendance.ts": {
+      "totalLogs": 0,
+      "full": 0,
+      "partial": 0,
+      "none": 0,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 3
+    },
+    "services/api-ts/src/handlers/events/getPublicEvent.ts": {
+      "totalLogs": 0,
+      "full": 0,
+      "partial": 0,
+      "none": 0,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 2
+    },
+    "services/api-ts/src/handlers/email/utils/bulk-rate-limiter.ts": {
+      "totalLogs": 0,
+      "full": 0,
+      "partial": 0,
+      "none": 0,
+      "rawErrors": 1,
+      "httpExceptions": 0,
+      "typedErrors": 0
+    },
+    "services/api-ts/src/handlers/onboarding/getOnboardingState.ts": {
+      "totalLogs": 0,
+      "full": 0,
+      "partial": 0,
+      "none": 0,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 3
+    },
+    "services/api-ts/src/handlers/onboarding/updateOnboardingStep.ts": {
+      "totalLogs": 0,
+      "full": 0,
+      "partial": 0,
+      "none": 0,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 3
+    },
+    "services/api-ts/src/handlers/membership/getOrgProfile.ts": {
+      "totalLogs": 0,
+      "full": 0,
+      "partial": 0,
+      "none": 0,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 1
+    },
+    "services/api-ts/src/handlers/membership/listOrgApplications.ts": {
+      "totalLogs": 0,
+      "full": 0,
+      "partial": 0,
+      "none": 0,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 3
+    },
+    "services/api-ts/src/handlers/membership/listOrgMembers.ts": {
+      "totalLogs": 0,
+      "full": 0,
+      "partial": 0,
+      "none": 0,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 3
+    },
+    "services/api-ts/src/handlers/membership/addMember.ts": {
+      "totalLogs": 0,
+      "full": 0,
+      "partial": 0,
+      "none": 0,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 2
+    },
+    "services/api-ts/src/handlers/membership/getMember.ts": {
+      "totalLogs": 0,
+      "full": 0,
+      "partial": 0,
+      "none": 0,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 1
+    },
+    "services/api-ts/src/handlers/membership/updateOrgProfile.ts": {
+      "totalLogs": 0,
+      "full": 0,
+      "partial": 0,
+      "none": 0,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 1
+    },
+    "services/api-ts/src/handlers/membership/updateMember.ts": {
+      "totalLogs": 0,
+      "full": 0,
+      "partial": 0,
+      "none": 0,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 2
+    },
+    "services/api-ts/src/handlers/elections/updateNomineeStatus.ts": {
+      "totalLogs": 0,
+      "full": 0,
+      "partial": 0,
+      "none": 0,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 5
+    },
+    "services/api-ts/src/handlers/elections/updateElectionStatus.ts": {
+      "totalLogs": 0,
+      "full": 0,
+      "partial": 0,
+      "none": 0,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 3
+    },
+    "services/api-ts/src/handlers/elections/castVote.ts": {
+      "totalLogs": 0,
+      "full": 0,
+      "partial": 0,
+      "none": 0,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 7
+    },
+    "services/api-ts/src/handlers/elections/createNominee.ts": {
+      "totalLogs": 0,
+      "full": 0,
+      "partial": 0,
+      "none": 0,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 6
+    },
+    "services/api-ts/src/handlers/reviews/listReviews.ts": {
+      "totalLogs": 0,
+      "full": 0,
+      "partial": 0,
+      "none": 0,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 3
+    },
+    "services/api-ts/src/handlers/reviews/getReview.ts": {
+      "totalLogs": 0,
+      "full": 0,
+      "partial": 0,
+      "none": 0,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 3
+    },
+    "services/api-ts/src/handlers/platformadmin/getAdminRole.ts": {
+      "totalLogs": 0,
+      "full": 0,
+      "partial": 0,
+      "none": 0,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 1
+    },
+    "services/api-ts/src/handlers/platformadmin/updateOrganization.ts": {
+      "totalLogs": 0,
+      "full": 0,
+      "partial": 0,
+      "none": 0,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 1
+    },
+    "services/api-ts/src/handlers/platformadmin/transitionOrgStatus.ts": {
+      "totalLogs": 0,
+      "full": 0,
+      "partial": 0,
+      "none": 0,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 3
+    },
+    "services/api-ts/src/handlers/platformadmin/endImpersonation.ts": {
+      "totalLogs": 0,
+      "full": 0,
+      "partial": 0,
+      "none": 0,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 1
+    },
+    "services/api-ts/src/handlers/platformadmin/addTicketComment.ts": {
+      "totalLogs": 0,
+      "full": 0,
+      "partial": 0,
+      "none": 0,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 1
+    },
+    "services/api-ts/src/handlers/platformadmin/updateAssociation.ts": {
+      "totalLogs": 0,
+      "full": 0,
+      "partial": 0,
+      "none": 0,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 1
+    },
+    "services/api-ts/src/handlers/platformadmin/updateAdmin.ts": {
+      "totalLogs": 0,
+      "full": 0,
+      "partial": 0,
+      "none": 0,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 2
+    },
+    "services/api-ts/src/handlers/platformadmin/revokeAdmin.ts": {
+      "totalLogs": 0,
+      "full": 0,
+      "partial": 0,
+      "none": 0,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 2
+    },
+    "services/api-ts/src/handlers/platformadmin/startImpersonation.ts": {
+      "totalLogs": 0,
+      "full": 0,
+      "partial": 0,
+      "none": 0,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 2
+    },
+    "services/api-ts/src/handlers/platformadmin/getAssociation.ts": {
+      "totalLogs": 0,
+      "full": 0,
+      "partial": 0,
+      "none": 0,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 1
+    },
+    "services/api-ts/src/handlers/platformadmin/utils/national-access.ts": {
+      "totalLogs": 0,
+      "full": 0,
+      "partial": 0,
+      "none": 0,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 4
+    },
+    "services/api-ts/src/handlers/platformadmin/setFeatureFlag.ts": {
+      "totalLogs": 0,
+      "full": 0,
+      "partial": 0,
+      "none": 0,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 1
+    },
+    "services/api-ts/src/handlers/platformadmin/inviteAdmin.ts": {
+      "totalLogs": 0,
+      "full": 0,
+      "partial": 0,
+      "none": 0,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 1
+    },
+    "services/api-ts/src/handlers/platformadmin/getOrganization.ts": {
+      "totalLogs": 0,
+      "full": 0,
+      "partial": 0,
+      "none": 0,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 1
+    },
+    "services/api-ts/src/handlers/platformadmin/getPlatformSummary.ts": {
+      "totalLogs": 0,
+      "full": 0,
+      "partial": 0,
+      "none": 0,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 2
+    },
+    "services/api-ts/src/handlers/platformadmin/createAssociation.ts": {
+      "totalLogs": 0,
+      "full": 0,
+      "partial": 0,
+      "none": 0,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 1
+    },
+    "services/api-ts/src/handlers/platformadmin/updateBreachStatus.ts": {
+      "totalLogs": 0,
+      "full": 0,
+      "partial": 0,
+      "none": 0,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 3
+    },
+    "services/api-ts/src/handlers/platformadmin/deleteFeatureFlag.ts": {
+      "totalLogs": 0,
+      "full": 0,
+      "partial": 0,
+      "none": 0,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 1
+    },
+    "services/api-ts/src/handlers/platformadmin/deleteAssociation.ts": {
+      "totalLogs": 0,
+      "full": 0,
+      "partial": 0,
+      "none": 0,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 2
+    },
+    "services/api-ts/src/handlers/platformadmin/listNationalChapters.ts": {
+      "totalLogs": 0,
+      "full": 0,
+      "partial": 0,
+      "none": 0,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 1
+    },
+    "services/api-ts/src/handlers/platformadmin/getOrganizationBySlug.ts": {
+      "totalLogs": 0,
+      "full": 0,
+      "partial": 0,
+      "none": 0,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 2
+    },
+    "services/api-ts/src/handlers/platformadmin/createOrganization.ts": {
+      "totalLogs": 0,
+      "full": 0,
+      "partial": 0,
+      "none": 0,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 3
+    },
+    "services/api-ts/src/handlers/platformadmin/getNationalChapterDetail.ts": {
+      "totalLogs": 0,
+      "full": 0,
+      "partial": 0,
+      "none": 0,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 2
+    }
+  }
+}
