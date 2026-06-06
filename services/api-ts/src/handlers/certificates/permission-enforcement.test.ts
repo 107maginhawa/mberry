@@ -4,27 +4,19 @@
  * Verifies:
  * - generateCertificatePdf: member cannot generate PDF for another member's certificate
  * - generateCertificatePdf: returns 401 without user
- * - batchGenerateCertificates: returns 401 without user
- * - batchGenerateCertificates: cross-org cert filtered as error
  *
  * getCertificate owner-only coverage moved with the handler to
  * association:member/getCertificate (deleted at 2579d9b7).
+ * batchGenerateCertificates coverage removed with the handler — successor
+ * association:member/bulkIssueCertificates owns the bulk-issue surface.
  */
 
 import { describe, test, expect, beforeEach, afterEach } from 'bun:test';
 import { makeCtx, stubRepo, restoreRepo } from '@/test-utils/make-ctx';
 import { fakeCertificate } from '@/test-utils/factories';
 import { CertificatesRepository } from './repos/certificates.repo';
-import { OfficerTermRepository } from '../association:member/repos/governance.repo';
 import { generateCertificatePdf } from './generateCertificatePdf';
-import { batchGenerateCertificates } from './batchGenerateCertificates';
 import { ForbiddenError } from '@/core/errors';
-
-function stubOfficer(isOfficer: boolean) {
-  stubRepo(OfficerTermRepository, {
-    findActiveByPersonAndOrg: async () => isOfficer ? [{ id: 'term-1' }] : [],
-  });
-}
 
 // ─── Fixtures ───────────────────────────────────────────
 
@@ -38,12 +30,6 @@ const otherUserCert = fakeCertificate({
   organizationId: 'tenant-1',
   id: 'cert-other',
   certificateNumber: 'CERT-2026-0002',
-});
-const crossOrgCert = fakeCertificate({
-  personId: 'other-user',
-  organizationId: 'other-org',
-  id: 'cert-cross-org',
-  certificateNumber: 'CERT-2026-0003',
 });
 
 beforeEach(() => {
@@ -107,84 +93,5 @@ describe('generateCertificatePdf — member cannot generate for others', () => {
   });
 });
 
-// ─── batchGenerateCertificates: auth check ─────────────
-
-describe('batchGenerateCertificates — authentication', () => {
-  test('returns 401 without authenticated user', async () => {
-    const ctx = makeCtx({
-      user: null,
-      session: null,
-      organizationId: 'tenant-1',
-      _body: { certificateIds: ['cert-1'] },
-    });
-
-    const res = await batchGenerateCertificates(ctx);
-    expect(res.status).toBe(401);
-  });
-
-  test('returns 403 without organization context', async () => {
-    const ctx = makeCtx({
-      organizationId: null,
-      _body: {
-        certificateIds: ['cert-1'],
-        template: {
-          trainingTitle: 'Test',
-          organizationName: 'Org',
-          certificateType: 'attendance',
-        },
-      },
-    });
-
-    const res = await batchGenerateCertificates(ctx);
-    expect(res.status).toBe(403);
-  });
-
-  test('cross-org certificate is reported as error in batch results', async () => {
-    stubOfficer(true);
-    stubRepo(CertificatesRepository, {
-      getMany: async () => [crossOrgCert],
-    });
-
-    const ctx = makeCtx({
-      organizationId: 'tenant-1',
-      _body: {
-        certificateIds: ['cert-cross-org'],
-        template: {
-          trainingTitle: 'CPD Seminar',
-          organizationName: 'Dental Association',
-          certificateType: 'attendance',
-        },
-      },
-    });
-
-    const res = await batchGenerateCertificates(ctx);
-    expect(res.status).toBe(200);
-    // The cross-org cert should be reported as an error in results
-    expect(res.body.results[0].status).toBe('error');
-    expect(res.body.results[0].error).toContain('different organization');
-  });
-
-  test('same-org certificate succeeds in batch', async () => {
-    stubOfficer(true);
-    stubRepo(CertificatesRepository, {
-      getMany: async () => [ownedCert],
-    });
-
-    const ctx = makeCtx({
-      organizationId: 'tenant-1',
-      _body: {
-        certificateIds: ['cert-1'],
-        template: {
-          trainingTitle: 'CPD Seminar',
-          organizationName: 'Dental Association',
-          certificateType: 'attendance',
-        },
-      },
-    });
-
-    const res = await batchGenerateCertificates(ctx);
-    expect(res.status).toBe(200);
-    expect(res.body.results[0].status).toBe('success');
-    expect(res.body.summary.success).toBe(1);
-  });
-});
+// batchGenerateCertificates blocks removed with the handler — coverage moved
+// to association:member/bulkIssueCertificates tests.
