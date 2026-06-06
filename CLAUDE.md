@@ -137,7 +137,7 @@ Do NOT hand-call `auditAction()`, `requireOfficerTerm`, or `requirePosition` in 
 
 Generator (`services/api-ts/scripts/generate.ts`) reads these extensions and emits middleware in `routes.ts`. Chain order: `auth → position|officer (path mode) → audit → validators → position|officer (body mode) → handler`. Regenerate after editing TypeSpec: `cd specs/api && bun run build && cd ../../services/api-ts && bun run generate`.
 
-The legacy utilities `utils/audit.ts` and `utils/officer-check.ts` have been removed. Hand-wired routes in `app.ts` that opt out of the generated registry continue to use their own explicit middleware.
+The legacy utilities `utils/audit.ts` and `utils/officer-check.ts` are gone. The thin `auditAction()` wrapper now lives at `core/audit/audit-action.ts` — hand-wired routes in `app.ts` that opt out of the generated registry call it directly. `requireOfficerTerm` / `requirePosition` moved to `core/auth/officer-checks.ts` — they remain the inline call path for handlers whose authorization depends on runtime branches (e.g. tiered self-vs-officer access, dynamic title selection) that can't be expressed as a static `@extension` on the operation.
 
 ### API-First Development
 Always follow this workflow:
