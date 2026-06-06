@@ -2,7 +2,12 @@
 import { test, expect } from '../helpers/test-fixture'
 import { SEED_MEMBER_EMAIL, TEST_PASSWORD } from '../helpers/test-config'
 import { authStateFile } from '../helpers/auth-state'
+import { captureRouteHydration } from '../helpers/real-flow'
 
+// W2 real-flow upgrade: /settings/account hydrates via GET /persons/me.
+// Capturing that proves the backend returned data, not just that the
+// settings shell rendered.
+const PERSON_ME = /\/persons\/me(?:[/?]|$)/
 
 test.use({ storageState: authStateFile('member') })
 const MEMBER_EMAIL = SEED_MEMBER_EMAIL
@@ -10,7 +15,13 @@ const MEMBER_PASSWORD = TEST_PASSWORD
 
 test.describe('Data Export (/settings/account)', () => {
 test('shows "Export My Data" card', async ({ page }) => {
+    const respP = captureRouteHydration(page, PERSON_ME)
     await page.goto('/settings/account')
+
+    const resp = await respP
+    expect(resp?.status()).toBe(200)
+    expect(resp?.ok()).toBe(true)
+
     await expect(
       page.getByRole('heading', { name: /export my data/i }),
     ).toBeVisible({ timeout: 10000 })
