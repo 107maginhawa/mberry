@@ -89,3 +89,5 @@ HEAD: d24d98ba5aab0f47487a5fe38bade91ce768e48e
    `platformadmin` — both are word characters. The matrix count (0) is accurate
    for standalone name-string matching; the module still requires manual SDK
    trace before any delete decision.
+
+4. **Colon-namespaced module dirs (`association:member`, `association:operations`) produce approximate hit counts.** The JS `\b` word-boundary does not anchor cleanly around `:` (a non-word character), so the regex `\bassociation:member\b` splits into two boundaries — one before `association` and one after `member` — which may under- or over-count relative to a plain substring search. Manual SDK trace is required before any delete decision on these modules.

@@ -15,6 +15,10 @@ function walk(d: string): string[] {
   return out;
 }
 
+function escapeRegex(s: string): string {
+  return s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}
+
 const matrix: Record<string, Record<string, number>> = {};
 for (const app of APPS) {
   try { statSync(app); } catch { continue; }
@@ -22,8 +26,16 @@ for (const app of APPS) {
   for (const mod of HANDLER_DIRS) {
     let hits = 0;
     for (const f of files) {
-      const src = readFileSync(f, 'utf8');
-      const r = new RegExp(`\\b${mod}\\b`, 'gi');
+      // NOTE: colon-namespaced dirs (e.g. "association:member") won't boundary-match cleanly
+      // with \b because ':' is a non-word char — hit counts for those dirs are approximate.
+      let src: string;
+      try {
+        src = readFileSync(f, 'utf8');
+      } catch (err) {
+        console.error(`skip ${f}: ${(err as Error).message}`);
+        continue;
+      }
+      const r = new RegExp(`\\b${escapeRegex(mod)}\\b`, 'gi');
       hits += (src.match(r) ?? []).length;
     }
     matrix[mod] = matrix[mod] ?? {};
