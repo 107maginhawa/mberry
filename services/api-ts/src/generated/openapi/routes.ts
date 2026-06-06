@@ -3096,12 +3096,6 @@ export function registerRoutes(app: Hono<{ Variables: Variables }>) {
     registry.listPublicOrgs as unknown as Handler
   );
 
-  // markAllNotificationsRead
-  app.post('/read-all',
-    authMiddleware({ roles: ["user"] }),
-    registry.markAllNotificationsRead as unknown as Handler
-  );
-
   // createReview
   app.post('/reviews/',
     authMiddleware({ roles: ["user"] }),

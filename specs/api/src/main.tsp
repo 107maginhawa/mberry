@@ -14,7 +14,6 @@ import "./modules/person-custom.tsp";
 import "./modules/billing.tsp";
 import "./modules/audit.tsp";
 import "./modules/notifs.tsp";
-import "./modules/notifs-custom.tsp";
 import "./modules/comms.tsp";
 import "./modules/storage.tsp";
 import "./modules/email.tsp";
@@ -190,10 +189,6 @@ namespace MonobaseAPI {
   @route("/notifs")
   interface NotificationManagement extends Notifs.NotificationManagement {}
 
-  // Notification Custom (bulk read-all)
-  @tag("Notifs")
-  interface NotifsCustomManagement extends NotifsCustomModule.NotifsCustomManagement {}
-  
   // Comms Management
   @tag("Comms")
   @route("/comms")

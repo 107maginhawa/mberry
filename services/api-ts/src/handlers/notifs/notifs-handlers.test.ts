@@ -3,22 +3,14 @@
  *   - getNotification
  *   - listNotifications
  *   - markAllNotificationsAsRead
- *   - markAllNotificationsRead
  *
  * Pattern follows markNotificationAsRead.test.ts — local makeCtx + prototype stubs.
- *
- * NOTE on near-duplicate handlers:
- *   markAllNotificationsAsRead (POST /notifications/read-all) — ValidatedContext,
- *     accepts optional ?type= filter, returns { markedCount }.
- *   markAllNotificationsRead (POST /notifs/read-all) — BaseContext,
- *     explicit UnauthorizedError guard, no type filter, returns { success: true }.
  */
 
 import { describe, test, expect, mock, beforeEach } from 'bun:test';
 import { getNotification } from './getNotification';
 import { listNotifications } from './listNotifications';
 import { markAllNotificationsAsRead } from './markAllNotificationsAsRead';
-import { markAllNotificationsRead } from './markAllNotificationsRead';
 import { NotificationRepository } from './repos/notification.repo';
 import { PersonRepository } from '../person/repos/person.repo';
 import { NotFoundError, UnauthorizedError } from '@/core/errors';
@@ -158,32 +150,6 @@ function makeMarkAllAsReadCtx(opts: {
         if (target === 'query') return { type: opts.type };
         return {};
       },
-    },
-    json: (data: any, status: number) => {
-      captured = { data, status };
-      return new Response(JSON.stringify(data), { status });
-    },
-    _captured: () => captured,
-  };
-
-  return ctx as any;
-}
-
-/** Context for markAllNotificationsRead — BaseContext, no validated query */
-function makeMarkAllReadCtx(opts: { userId?: string | null; logger?: any } = {}) {
-  const userId = 'userId' in opts ? opts.userId : 'user-1';
-  const logger = opts.logger ?? { info: () => {} };
-
-  let captured: { data: any; status: number } = { data: null, status: 0 };
-
-  const ctx = {
-    get: (key: string) => {
-      const store: Record<string, any> = {
-        user: userId ? makeUser(userId) : null,
-        database: {},
-        logger,
-      };
-      return store[key];
     },
     json: (data: any, status: number) => {
       captured = { data, status };
@@ -384,46 +350,3 @@ describe('markAllNotificationsAsRead', () => {
   });
 });
 
-// ---------------------------------------------------------------------------
-// markAllNotificationsRead (POST /notifs/read-all — BaseContext)
-//
-// Key differences from markAllNotificationsAsRead:
-//   1. Uses BaseContext (no validated query) — no type filter
-//   2. Has explicit UnauthorizedError guard (checks `if (!user)`)
-//   3. Returns { success: true } instead of { markedCount }
-// ---------------------------------------------------------------------------
-
-describe('markAllNotificationsRead', () => {
-  let markAllAsRead: ReturnType<typeof mock>;
-
-  beforeEach(() => {
-    markAllAsRead = mock(async () => 3);
-    NotificationRepository.prototype.markAllAsRead = markAllAsRead as any;
-    PersonRepository.prototype.findOneById = mock(async () => null) as any;
-  });
-
-  test('returns 200 with success: true', async () => {
-    const ctx = makeMarkAllReadCtx();
-    await markAllNotificationsRead(ctx);
-
-    const { data, status } = ctx._captured();
-    expect(status).toBe(200);
-    expect(data.success).toBe(true);
-  });
-
-  test('throws UnauthorizedError when user is null (auth guard)', async () => {
-    const ctx = makeMarkAllReadCtx({ userId: null });
-    await expect(markAllNotificationsRead(ctx)).rejects.toBeInstanceOf(UnauthorizedError);
-  });
-
-  test('calls markAllAsRead with userId (no type filter)', async () => {
-    const ctx = makeMarkAllReadCtx({ userId: 'user-42' });
-    await markAllNotificationsRead(ctx);
-
-    expect(markAllAsRead).toHaveBeenCalledTimes(1);
-    const args = (markAllAsRead as ReturnType<typeof mock>).mock.calls[0];
-    expect(args[0]).toBe('user-42');
-    // No second argument (type) — unlike markAllNotificationsAsRead
-    expect(args.length).toBe(1);
-  });
-});

@@ -7064,10 +7064,6 @@ export const ManualCreditAwardResponseSchema = z.object({
   warning: z.string().optional()
 });
 
-export const MarkAllReadResponseSchema = z.object({
-  success: z.boolean()
-});
-
 export const MarkInvoicePaidRequestSchema = z.object({
   paymentId: z.string(),
   paidAt: z.string().datetime().transform((str) => new Date(str))
@@ -14649,8 +14645,6 @@ export const ListPublicOrgsQuery = z.object({
 export type ListPublicOrgsQuery = z.infer<typeof ListPublicOrgsQuery>;
 
 export const ListPublicOrgsResponse = PublicOrgListResponseSchema;
-
-export const MarkAllNotificationsReadResponse = MarkAllReadResponseSchema;
 
 export const CreateReviewBody = CreateReviewRequestSchema;
 export type CreateReviewBody = z.infer<typeof CreateReviewBody>;

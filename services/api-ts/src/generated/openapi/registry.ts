@@ -432,7 +432,6 @@ import { listNotifications } from '../../handlers/notifs/listNotifications';
 import { markAllNotificationsAsRead } from '../../handlers/notifs/markAllNotificationsAsRead';
 import { getNotification } from '../../handlers/notifs/getNotification';
 import { markNotificationAsRead } from '../../handlers/notifs/markNotificationAsRead';
-import { markAllNotificationsRead } from '../../handlers/notifs/markAllNotificationsRead';
 import { getOnboardingState } from '../../handlers/onboarding/getOnboardingState';
 import { updateOnboardingStep } from '../../handlers/onboarding/updateOnboardingStep';
 import { createPerson } from '../../handlers/person/createPerson';
@@ -926,7 +925,6 @@ export const registry = {
   markAllNotificationsAsRead,
   getNotification,
   markNotificationAsRead,
-  markAllNotificationsRead,
 
   // Onboarding handlers
   getOnboardingState,
