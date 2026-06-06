@@ -6243,8 +6243,6 @@ export const ExhibitorProfileUpdateSchema = z.object({
 
 export const ExhibitorStatusSchema = z.enum(["applied", "approved", "confirmed", "cancelled"]);
 
-export const FaxNumberSchema = z.string().regex(/^\+?[0-9\s\-\(\)\,\.ext]+$/).max(50);
-
 export const FieldErrorSchema = z.object({
   field: z.string(),
   value: z.unknown().optional(),
@@ -8264,50 +8262,6 @@ export const PairStatusSchema = z.enum(["proposed", "active", "completed", "diss
 
 export const PanelStatusSchema = z.enum(["formed", "deliberating", "decided"]);
 
-export const PatientSchema = z.object({
-  id: z.string().uuid(),
-  version: z.number().int(),
-  createdAt: z.string().datetime().transform((str) => new Date(str)),
-  createdBy: z.string().uuid().optional(),
-  updatedAt: z.string().datetime().transform((str) => new Date(str)),
-  updatedBy: z.string().uuid().optional(),
-  person: z.union([UUIDSchema, PersonSchema]),
-  primaryProvider: z.object({
-  name: z.string().min(1).max(100),
-  specialty: z.string().max(100).optional(),
-  phone: z.string().regex(/^\+[1-9]\d{1,14}$/).refine(val => validatePhoneNumber(val), { message: "Invalid phone number in E.164 format" }).optional(),
-  fax: z.string().regex(/^\+?[0-9\s\-\(\)\,\.ext]+$/).max(50).optional()
-}).optional(),
-  primaryPharmacy: z.object({
-  name: z.string().min(1).max(100),
-  address: z.string().max(500).optional(),
-  phone: z.string().regex(/^\+[1-9]\d{1,14}$/).refine(val => validatePhoneNumber(val), { message: "Invalid phone number in E.164 format" }).optional(),
-  fax: z.string().regex(/^\+?[0-9\s\-\(\)\,\.ext]+$/).max(50).optional()
-}).optional()
-});
-
-export const PatientUpdateSchema = z.object({
-  id: z.string().uuid().optional(),
-  version: z.number().int().optional(),
-  createdAt: z.string().datetime().transform((str) => new Date(str)).optional(),
-  createdBy: z.string().uuid().optional(),
-  updatedAt: z.string().datetime().transform((str) => new Date(str)).optional(),
-  updatedBy: z.string().uuid().optional(),
-  person: z.union([UUIDSchema, PersonUpdateSchema]).optional(),
-  primaryProvider: z.object({
-  name: z.string().min(1).max(100).optional(),
-  specialty: z.string().max(100).optional(),
-  phone: z.string().regex(/^\+[1-9]\d{1,14}$/).refine(val => validatePhoneNumber(val), { message: "Invalid phone number in E.164 format" }).optional(),
-  fax: z.string().regex(/^\+?[0-9\s\-\(\)\,\.ext]+$/).max(50).optional()
-}).optional(),
-  primaryPharmacy: z.object({
-  name: z.string().min(1).max(100).optional(),
-  address: z.string().max(500).optional(),
-  phone: z.string().regex(/^\+[1-9]\d{1,14}$/).refine(val => validatePhoneNumber(val), { message: "Invalid phone number in E.164 format" }).optional(),
-  fax: z.string().regex(/^\+?[0-9\s\-\(\)\,\.ext]+$/).max(50).optional()
-}).optional()
-});
-
 export const PaymentCheckoutResponseSchema = z.object({
   checkoutUrl: z.string()
 });
@@ -8476,20 +8430,6 @@ export const PersonUpdateRequestSchema = z.object({
   prcId: z.union([z.string().max(50), z.null()]).optional(),
   preferredLanguage: z.union([z.string().regex(/^[a-z]{2}$/).refine(val => validateLanguageCode(val), { message: "Invalid ISO 639-1 language code" }), z.null()]).optional(),
   bio: z.union([z.string().max(2000), z.null()]).optional()
-});
-
-export const PharmacyInfoSchema = z.object({
-  name: z.string().min(1).max(100),
-  address: z.string().max(500).optional(),
-  phone: z.string().regex(/^\+[1-9]\d{1,14}$/).refine(val => validatePhoneNumber(val), { message: "Invalid phone number in E.164 format" }).optional(),
-  fax: z.string().regex(/^\+?[0-9\s\-\(\)\,\.ext]+$/).max(50).optional()
-});
-
-export const PharmacyInfoUpdateSchema = z.object({
-  name: z.string().min(1).max(100).optional(),
-  address: z.string().max(500).optional(),
-  phone: z.string().regex(/^\+[1-9]\d{1,14}$/).refine(val => validatePhoneNumber(val), { message: "Invalid phone number in E.164 format" }).optional(),
-  fax: z.string().regex(/^\+?[0-9\s\-\(\)\,\.ext]+$/).max(50).optional()
 });
 
 export const PhoneNumberSchema = z.string().regex(/^\+[1-9]\d{1,14}$/).refine(val => validatePhoneNumber(val), { message: "Invalid phone number in E.164 format" });
@@ -8952,52 +8892,6 @@ export const ProspectUpdateSchema = z.object({
   assignedTo: z.string().optional(),
   notes: z.string().max(5000).optional(),
   convertedToMembershipId: z.string().optional()
-});
-
-export const ProviderSchema = z.object({
-  id: z.string().uuid(),
-  version: z.number().int(),
-  createdAt: z.string().datetime().transform((str) => new Date(str)),
-  createdBy: z.string().uuid().optional(),
-  updatedAt: z.string().datetime().transform((str) => new Date(str)),
-  updatedBy: z.string().uuid().optional(),
-  person: z.union([UUIDSchema, PersonSchema]),
-  providerType: z.enum(["pharmacist", "other"]),
-  yearsOfExperience: z.number().int().gte(0).lte(70).optional(),
-  biography: z.string().max(2000).optional(),
-  minorAilmentsSpecialties: z.array(z.string()).optional(),
-  minorAilmentsPracticeLocations: z.array(z.string()).optional()
-});
-
-export const ProviderInfoSchema = z.object({
-  name: z.string().min(1).max(100),
-  specialty: z.string().max(100).optional(),
-  phone: z.string().regex(/^\+[1-9]\d{1,14}$/).refine(val => validatePhoneNumber(val), { message: "Invalid phone number in E.164 format" }).optional(),
-  fax: z.string().regex(/^\+?[0-9\s\-\(\)\,\.ext]+$/).max(50).optional()
-});
-
-export const ProviderInfoUpdateSchema = z.object({
-  name: z.string().min(1).max(100).optional(),
-  specialty: z.string().max(100).optional(),
-  phone: z.string().regex(/^\+[1-9]\d{1,14}$/).refine(val => validatePhoneNumber(val), { message: "Invalid phone number in E.164 format" }).optional(),
-  fax: z.string().regex(/^\+?[0-9\s\-\(\)\,\.ext]+$/).max(50).optional()
-});
-
-export const ProviderTypeSchema = z.enum(["pharmacist", "other"]);
-
-export const ProviderUpdateSchema = z.object({
-  id: z.string().uuid().optional(),
-  version: z.number().int().optional(),
-  createdAt: z.string().datetime().transform((str) => new Date(str)).optional(),
-  createdBy: z.string().uuid().optional(),
-  updatedAt: z.string().datetime().transform((str) => new Date(str)).optional(),
-  updatedBy: z.string().uuid().optional(),
-  person: z.union([UUIDSchema, PersonUpdateSchema]).optional(),
-  providerType: z.enum(["pharmacist", "other"]).optional(),
-  yearsOfExperience: z.number().int().gte(0).lte(70).optional(),
-  biography: z.string().max(2000).optional(),
-  minorAilmentsSpecialties: z.array(z.string()).optional(),
-  minorAilmentsPracticeLocations: z.array(z.string()).optional()
 });
 
 export const PublicDirectoryProfileSchema = z.object({

@@ -21,10 +21,6 @@ import "./modules/email.tsp";
 import "./modules/booking.tsp";
 import "./modules/reviews.tsp";
 
-// Association domain modules
-import "./modules/patient.tsp";
-import "./modules/provider.tsp";
-
 // Platform administration
 import "./modules/platform-admin.tsp";
 import "./modules/platform-admin-custom.tsp";
