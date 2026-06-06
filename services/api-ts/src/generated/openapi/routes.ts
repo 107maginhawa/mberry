@@ -2862,7 +2862,9 @@ export function registerRoutes(app: Hono<{ Variables: Variables }>) {
   // updateOnboardingStep
   app.put('/onboarding/step',
     authMiddleware({ roles: ["user"] }),
+    createPerRouteAuditMiddleware({ action: "update", resourceType: "onboarding_state" }),
     zValidator('json', validators.UpdateOnboardingStepBody, validationErrorHandler),
+    requireOfficerMiddleware({ orgIdFrom: "body", bodyField: "orgId" }),
     registry.updateOnboardingStep as unknown as Handler
   );
 

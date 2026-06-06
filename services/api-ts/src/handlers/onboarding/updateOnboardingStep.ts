@@ -1,10 +1,8 @@
 import type { ValidatedContext } from '@/types/app';
 import type { DatabaseInstance } from '@/core/database';
-import { UnauthorizedError, ForbiddenError, BusinessLogicError } from '@/core/errors';
-import { OfficerTermRepository } from '@/handlers/association:member/repos/governance.repo';
+import { UnauthorizedError, BusinessLogicError } from '@/core/errors';
 import { OnboardingStateRepository } from './repos/onboarding.repo';
 import { domainEvents } from '@/core/domain-events';
-import { auditAction } from '@/utils/audit';
 import type { UpdateOnboardingStepBody } from '@/generated/openapi/validators';
 
 const TOTAL_STEPS = 5;
@@ -29,12 +27,6 @@ export async function updateOnboardingStep(
 
   const db = ctx.get('database') as DatabaseInstance;
   const logger = ctx.get('logger');
-
-  const officerRepo = new OfficerTermRepository(db);
-  const terms = await officerRepo.findActiveByPersonAndOrg(user.id, orgId);
-  if (terms.length === 0) {
-    throw new ForbiddenError('Officer access required for this organization');
-  }
 
   const repo = new OnboardingStateRepository(db, logger);
   let state = await repo.findByOrg(orgId);
@@ -87,12 +79,8 @@ export async function updateOnboardingStep(
 
   const nowComplete = completedAt != null;
 
-  await auditAction(ctx, {
-    action: 'update',
-    resourceType: 'onboarding_state',
-    resourceId: state.id,
-    description: `Onboarding step ${step} saved for organization ${orgId}`,
-  });
+  ctx.set('auditResourceId', state.id);
+  ctx.set('auditDescription', `Onboarding step ${step} saved for organization ${orgId}`);
 
   // Fire completion event once, on the transition into completed.
   if (nowComplete && !wasComplete) {

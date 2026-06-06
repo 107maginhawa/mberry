@@ -115,6 +115,8 @@ namespace OnboardingModule {
     @route("/onboarding/step")
     @useAuth(bearerAuth)
     @extension("x-security-required-roles", #["user"])
+    @extension("x-require-officer", #{ from: "body.orgId" })
+    @extension("x-audit", #{ action: "update", resourceType: "onboarding_state" })
     updateOnboardingStep(
       @body body: UpdateOnboardingStepRequest,
     ): ApiOkResponse<UpdateOnboardingStepResponse>
