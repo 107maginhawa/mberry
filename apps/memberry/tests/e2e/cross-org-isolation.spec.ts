@@ -5,6 +5,7 @@
 import { test, expect } from './helpers/test-fixture'
 import { SEED_IDOR_EMAIL, TEST_PASSWORD } from './helpers/test-config'
 import { authStateFile } from './helpers/auth-state'
+import { captureAnyApiSuccess } from './helpers/real-flow'
 
 
 test.use({ storageState: authStateFile('idor') })
@@ -16,7 +17,11 @@ const ORG_A_ID = 'ed8e3a96-8126-4341-be42-e6eb7940c562' // pda-metro-manila
 // rejects null-origin preflights. Land on the SPA first so subsequent
 // fetches inherit the http://localhost:3004 origin that CORS_ORIGINS allows.
 test.beforeEach(async ({ page }) => {
+  const respP = captureAnyApiSuccess(page)
   await page.goto('/dashboard')
+  const resp = await respP
+  expect(resp?.status()).toBe(200)
+  expect(resp?.ok()).toBe(true)
 })
 
 test.describe('Cross-Org Isolation (IDOR Prevention)', () => {
