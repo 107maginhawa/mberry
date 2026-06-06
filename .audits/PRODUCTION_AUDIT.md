@@ -242,7 +242,7 @@ Lesson: the audit assumed module slug = code directory name. It isn't always —
 
 ### P1 — Before scale
 4. Re-prioritize `association:member` split (now 248 files, 60% bigger than v1.2 plan)
-5. Move audit + officer-check to middleware (cuts 343 import sites)
+5. ~~Move audit + officer-check to middleware (cuts 343 import sites)~~ **Largely resolved 2026-06-06.** Per-route audit middleware (`@extension("x-audit", ...)`) + officer/position middleware (`@extension("x-require-officer", ...)` / `@extension("x-require-position", ...)`) wired through TypeSpec → generator → routes.ts. ~88% of `auditAction` hand-calls eliminated (231 → 27). Officer-check reduction smaller (~9%) because many sites are conditional, multi-event, or read orgId from non-path sources that don't fit the path-mode middleware. Legacy `utils/audit.ts` + `utils/officer-check.ts` retained for the remaining sites. See CLAUDE.md for the new pattern. Per-batch commits land throughout `main` between 26967b79..1d269f4f.
 6. Convert `accountDeletionCascade` to event-driven per-module subscribers
 7. Update CLAUDE.md (training absorbed, 248-not-157, communications dir absent)
 8. Audit `*-custom.tsp` purpose

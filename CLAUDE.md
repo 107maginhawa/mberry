@@ -123,6 +123,22 @@ Consent management is planned but **not yet implemented** in the database schema
 
 Do not introduce `new*` / `make*` / `do*` / `process*` prefixes. Resolve such drift to one of the verbs above. Frontend hook names follow `useGet*`, `useList*`, `useCreate*`, etc., generated from the corresponding operation id.
 
+### Audit + officer/position via TypeSpec extensions (P1.5)
+
+Do NOT hand-call `auditAction()`, `requireOfficerTerm`, or `requirePosition` in new TypeSpec-generated handlers. Declare on the operation via `@extension`:
+
+| Extension | Replaces | Shape |
+|---|---|---|
+| `@extension("x-audit", #{ action, resourceType, eventSubType?, eventType? })` | `await auditAction(ctx, {...})` | Per-route audit middleware composes the event after the handler returns. Skipped on 4xx/5xx. Handler may set `ctx.set('auditResourceId', id)` / `ctx.set('auditDescription', text)` / `ctx.set('auditDetails', obj)` for dynamic fields. For multiple events per request, set `ctx.set('auditEvents', AuditEventEntry[])`. |
+| `@extension("x-require-officer", true)` | `requireOfficerTerm(ctx)` + hand-rolled `OfficerTermRepository.findActiveByPersonAndOrg` "any term" checks | Path mode — middleware reads `:organizationId` path param. |
+| `@extension("x-require-officer", #{ from: "body.fieldName" })` | Same, but for routes where orgId arrives in the body | Body mode — emits after the json validator. |
+| `@extension("x-require-position", #["Treasurer", "President"])` | `requirePosition(ctx, [...])` | Title-filtered, case-insensitive, OR semantics. Enforces 2FA on privileged titles (President/Treasurer/Secretary) in production. |
+| `@extension("x-require-position", #{ titles: [...], from: "body.X" })` | Same, body-orgId variant | |
+
+Generator (`services/api-ts/scripts/generate.ts`) reads these extensions and emits middleware in `routes.ts`. Chain order: `auth → position|officer (path mode) → audit → validators → position|officer (body mode) → handler`. Regenerate after editing TypeSpec: `cd specs/api && bun run build && cd ../../services/api-ts && bun run generate`.
+
+The legacy utilities `utils/audit.ts` and `utils/officer-check.ts` have been removed. Hand-wired routes in `app.ts` that opt out of the generated registry continue to use their own explicit middleware.
+
 ### API-First Development
 Always follow this workflow:
 1. Define APIs in TypeSpec (`specs/api/src/modules/`)
