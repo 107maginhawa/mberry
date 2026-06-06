@@ -2,15 +2,23 @@
 // Verifies the transfer dialog UI, input validation, and form submission
 import { test, expect } from '../helpers/test-fixture'
 import { authStateFile } from '../helpers/auth-state'
+import { captureRouteHydration } from '../helpers/real-flow'
 
+// W2 real-flow upgrade: /my/organizations hydrates via /memberships
+// or /persons/me. Capturing that proves the backend returned data,
+// not just that the Active badge rendered.
+const MEMBERSHIPS_OR_PERSON = /\/(memberships|persons\/me)(?:[/?]|$)/
 
 test.use({ storageState: authStateFile('member') })
 test.describe('M-16: Transfer Membership', () => {
-  test.beforeEach(async ({ page }) => {
-    await page.goto('/my/organizations')
-  })
-
   test('transfer button is visible for active memberships', async ({ page }) => {
+    const respP = captureRouteHydration(page, MEMBERSHIPS_OR_PERSON)
+    await page.goto('/my/organizations')
+
+    const resp = await respP
+    expect(resp?.status()).toBe(200)
+    expect(resp?.ok()).toBe(true)
+
     const hasActive = await page.getByText('Active').first().isVisible({ timeout: 10000 }).catch(() => false)
     test.skip(!hasActive, 'No active membership found in seed data')
 
@@ -18,6 +26,11 @@ test.describe('M-16: Transfer Membership', () => {
     const transferBtn = page.getByLabel('Transfer membership').first()
     await expect(transferBtn).toBeVisible()
   })
+
+  test.describe('with organizations preloaded', () => {
+    test.beforeEach(async ({ page }) => {
+      await page.goto('/my/organizations')
+    })
 
   test('clicking transfer opens dialog with org ID input', async ({ page }) => {
     const hasActive = await page.getByText('Active').first().isVisible({ timeout: 10000 }).catch(() => false)
@@ -75,5 +88,6 @@ test.describe('M-16: Transfer Membership', () => {
 
     // Dialog should close
     await expect(page.getByText('Transfer Membership')).not.toBeVisible()
+  })
   })
 })
