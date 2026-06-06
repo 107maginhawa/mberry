@@ -1,3 +1,4 @@
+// @selector-only-ok: auth-guard spec — asserts unauthenticated requests are blocked, no data hydration to capture
 import { test, expect } from '@playwright/test'
 
 test.describe('Wave 7: New routes require admin auth', () => {
