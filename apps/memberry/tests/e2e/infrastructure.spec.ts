@@ -1,3 +1,4 @@
+// @selector-only-ok: helper/infrastructure smoke — exercises mailpit/clock/auth helpers, no app data hydration
 import { test, expect } from './helpers/test-fixture'
 import { isMailpitAvailable } from './helpers/mailpit'
 import { mockDate, getPageTime, daysFromNow, formatDate } from './helpers/clock'

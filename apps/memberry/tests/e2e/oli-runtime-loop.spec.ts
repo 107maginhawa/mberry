@@ -1,3 +1,4 @@
+// @selector-only-ok: data-driven OLI runtime audit loop — owns its own classification system, not a single-route data-flow spec
 // contractVersion: 6
 /**
  * oli-runtime-loop.spec.ts — the OLI runtime execution loop (data-driven).
