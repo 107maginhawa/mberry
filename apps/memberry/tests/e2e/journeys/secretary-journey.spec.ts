@@ -3,6 +3,7 @@
 // Covers: CS-1 through CS-13 — roster, member import, events, communications
 import { test, expect } from '../helpers/test-fixture'
 import { authStateFile } from '../helpers/auth-state'
+import { captureRouteHydration } from '../helpers/real-flow'
 
 
 test.use({ storageState: authStateFile('secretary') })
@@ -24,7 +25,11 @@ async function assertPageMounted(
 
 test.describe('P4 Secretary Journey', () => {
   test('CS-1: secretary accesses officer dashboard', async ({ page }) => {
+    const respP = captureRouteHydration(page, '/persons/me')
     await page.goto(`/org/${ORG_ID}/officer/dashboard`)
+    const resp = await respP
+    expect(resp?.status()).toBe(200)
+    expect(resp?.ok()).toBe(true)
     await assertPageMounted(page, /\/officer\/dashboard$/)
   })
 
