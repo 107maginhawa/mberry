@@ -387,7 +387,6 @@ Key routing rules:
 - Save progress → invoke /context-save
 - Resume context → invoke /context-restore
 
-<!-- GSD:project-start source:PROJECT.md -->
 ## Project
 
 **Memberry**
@@ -402,27 +401,19 @@ A generic healthcare Association Management System (AMS) built on the Monobase m
 - **Spec-first**: OpenAPI at `specs/api/dist/openapi/openapi.json` is single source of truth
 - **Module pattern**: Router → Validators → Handlers → Repositories (established, follow it)
 - **Test-first**: VERTICAL_TDD.md protocol — vertical slices per module, not horizontal layers
-<!-- GSD:project-end -->
 
-<!-- GSD:stack-start source:STACK.md -->
 ## Technology Stack
 
 Technology stack not yet documented. Will populate after codebase mapping or first phase.
-<!-- GSD:stack-end -->
 
-<!-- GSD:conventions-start source:CONVENTIONS.md -->
 ## Conventions
 
 Conventions not yet established. Will populate as patterns emerge during development.
-<!-- GSD:conventions-end -->
 
-<!-- GSD:architecture-start source:ARCHITECTURE.md -->
 ## Architecture
 
 Architecture not yet mapped. Follow existing patterns found in the codebase.
-<!-- GSD:architecture-end -->
 
-<!-- GSD:skills-start source:skills/ -->
 ## Project Skills
 
 | Skill | Description | Path |
@@ -447,24 +438,15 @@ Architecture not yet mapped. Follow existing patterns found in the codebase.
 | test-e2e | Run Playwright E2E tests for frontend apps. Use after implementing frontend features or before shipping UI changes. | `.claude/skills/test-e2e/SKILL.md` |
 | typecheck | Run TypeScript type checking across all workspaces (API service and frontend apps). Use before committing or when diagnosing type errors. | `.claude/skills/typecheck/SKILL.md` |
 | typespec | Author TypeSpec API definitions and run the full code generation pipeline (OpenAPI + types + routes + validators + handler stubs). Use when creating new API endpoints or modifying existing ones. | `.claude/skills/typespec/SKILL.md` |
-<!-- GSD:skills-end -->
 
-<!-- GSD:workflow-start source:GSD defaults -->
-## GSD Workflow Enforcement
+## Development Workflow
 
-Before using Edit, Write, or other file-changing tools, start work through a GSD command so planning artifacts and execution context stay in sync.
+See [docs/workflow/SUPERPOWERS_FLOW.md](./docs/workflow/SUPERPOWERS_FLOW.md)
+for the full skill chain and CI gates. Short version: use `/superpowers:*`
+skills for planning, debugging, and code review. There is no command gate
+before Edit/Write — trust comes from tests and skills.
 
-Use these entry points:
-- `/gsd-quick` for small fixes, doc updates, and ad-hoc tasks
-- `/gsd-debug` for investigation and bug fixing
-- `/gsd-execute-phase` for planned phase work
-
-Do not make direct repo edits outside a GSD workflow unless the user explicitly asks to bypass it.
-<!-- GSD:workflow-end -->
-
-<!-- GSD:profile-start -->
 ## Developer Profile
 
-> Profile not yet configured. Run `/gsd-profile-user` to generate your developer profile.
+> Profile not yet configured. Run `/profile-user` to generate your developer profile.
 > This section is managed by `generate-claude-profile` -- do not edit manually.
-<!-- GSD:profile-end -->
