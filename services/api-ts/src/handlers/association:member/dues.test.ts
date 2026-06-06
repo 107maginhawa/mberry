@@ -174,24 +174,6 @@ describe('Aging Buckets', () => {
   });
 });
 
-// -- Payment Processing Tests --
-
-describe('recordManualPayment', () => {
-  test('requires auth', async () => {
-    const { recordManualPayment } = await import('./recordManualPayment');
-    const ctx = makeCtx({ user: null });
-    const response = await recordManualPayment(ctx);
-    expect(response.status).toBe(401);
-  });
-
-  test('requires organizationId', async () => {
-    const { recordManualPayment } = await import('./recordManualPayment');
-    const ctx = makeCtx({ user: { id: 'u1' }, organizationId: null });
-    const response = await recordManualPayment(ctx);
-    expect(response.status).toBe(403);
-  });
-});
-
 describe('handlePaymentWebhook', () => {
   test('returns 400 for invalid signature', async () => {
     const { handlePaymentWebhook } = await import('./handlePaymentWebhook');

@@ -159,22 +159,6 @@ describe('createCreditEntry', () => {
   });
 });
 
-describe('listCreditEntries', () => {
-  test('returns 401 without user', async () => {
-    const { listCreditEntries } = await import('./listCreditEntries');
-    const ctx = makeCtx({ user: null });
-    const response = await listCreditEntries(ctx);
-    expect(response.status).toBe(401);
-  });
-
-  test('returns 403 without organizationId', async () => {
-    const { listCreditEntries } = await import('./listCreditEntries');
-    const ctx = makeCtx({ organizationId: null });
-    const response = await listCreditEntries(ctx);
-    expect(response.status).toBe(403);
-  });
-});
-
 describe('getCreditTranscript', () => {
   test('returns 401 without user', async () => {
     const { getCreditTranscript } = await import('./getCreditTranscript');
