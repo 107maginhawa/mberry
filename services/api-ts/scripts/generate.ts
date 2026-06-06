@@ -495,15 +495,9 @@ async function generateRoutes(paths: Record<string, PathItem>, spec: any) {
     "import { createPerRouteAuditMiddleware } from '@/middleware/per-route-audit';",
     "import { requirePositionMiddleware } from '@/middleware/require-position';",
     "import { requireOfficerMiddleware } from '@/middleware/require-officer';",
-    "import { requireOfficerForEntityMiddleware } from '@/middleware/require-officer-for-entity';",
-    "import { officerLoaders } from './officer-loaders';",
     '',
     'export function registerRoutes(app: Hono<{ Variables: Variables }>) {',
   ];
-
-  // P1.5 Bucket F: collect per-op loader imports for officer-loaders.ts.
-  const loaderImports = new Map<string, string>(); // module path → loader names CSV
-  const loaderEntries: string[] = [];
 
   for (const [path, methods] of Object.entries(paths)) {
     for (const [method, operation] of Object.entries(methods)) {
@@ -624,26 +618,6 @@ async function generateRoutes(paths: Record<string, PathItem>, spec: any) {
         routes.push(`    ${officerBody},`);
       }
 
-      // P1.5 Bucket F: entity-orgId officer check. Loader reads the validated
-      // path param and returns the entity's organization id; middleware then
-      // checks officer term for that org. Emits AFTER validators because the
-      // loader needs the param value.
-      const officerForEntity = (operation as any)['x-require-officer-for-entity'] as
-        | { idParam: string; loader: string; loaderFrom: string }
-        | undefined;
-      if (officerForEntity) {
-        const existing = loaderImports.get(officerForEntity.loaderFrom) ?? '';
-        const set = new Set(existing.split(',').filter(Boolean));
-        set.add(officerForEntity.loader);
-        loaderImports.set(officerForEntity.loaderFrom, [...set].join(','));
-        loaderEntries.push(
-          `  ${operation.operationId}: ${officerForEntity.loader},`,
-        );
-        routes.push(
-          `    requireOfficerForEntityMiddleware({ entityIdParam: "${officerForEntity.idParam}", loadOrgIdFromEntity: officerLoaders.${operation.operationId} }),`,
-        );
-      }
-
       // Check if operation supports expand
       const supportsExpand = hasExpandableResponse(operation, spec);
       const responseSchema = getResponseSchemaName(operation, spec);
@@ -664,21 +638,6 @@ async function generateRoutes(paths: Record<string, PathItem>, spec: any) {
 
   await writeFile(path.join(GENERATED_DIR, 'routes.ts'), DO_NOT_EDIT_HEADER + routes.join('\n'));
   console.log('   ✓ Generated routes.ts');
-
-  // P1.5 Bucket F: emit officer-loaders.ts mapping operationId → loader fn.
-  const loaderImportLines: string[] = [];
-  for (const [from, csv] of loaderImports) {
-    loaderImportLines.push(`import { ${csv.split(',').join(', ')} } from '${from}';`);
-  }
-  const loaderFile = [
-    ...loaderImportLines,
-    '',
-    'export const officerLoaders = {',
-    ...loaderEntries,
-    '} as const;',
-  ].join('\n');
-  await writeFile(path.join(GENERATED_DIR, 'officer-loaders.ts'), DO_NOT_EDIT_HEADER + loaderFile);
-  console.log('   ✓ Generated officer-loaders.ts');
 }
 
 async function generateRegistry(paths: Record<string, PathItem>) {
