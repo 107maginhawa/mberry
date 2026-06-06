@@ -1,0 +1,2865 @@
+{
+  "version": 6,
+  "edges": [
+    {
+      "from_module": "handlers/association:member",
+      "to_module": "handlers/association:operations",
+      "import_count": 1,
+      "files": [
+        "services/api-ts/src/handlers/association:member/repos/credits.schema.ts"
+      ],
+      "confidence": "HIGH"
+    },
+    {
+      "from_module": "handlers/association:member",
+      "to_module": "handlers/dues",
+      "import_count": 1,
+      "files": [
+        "services/api-ts/src/handlers/association:member/jobs/index.ts"
+      ],
+      "confidence": "HIGH"
+    },
+    {
+      "from_module": "handlers/association:member",
+      "to_module": "handlers/elections",
+      "import_count": 18,
+      "files": [
+        "services/api-ts/src/handlers/association:member/castBallot.ts",
+        "services/api-ts/src/handlers/association:member/certifyElection.ts",
+        "services/api-ts/src/handlers/association:member/createCandidate.ts",
+        "services/api-ts/src/handlers/association:member/createElection.ts",
+        "services/api-ts/src/handlers/association:member/deleteCandidate.ts",
+        "services/api-ts/src/handlers/association:member/deleteElection.ts",
+        "services/api-ts/src/handlers/association:member/getCandidate.ts",
+        "services/api-ts/src/handlers/association:member/getElection.ts",
+        "services/api-ts/src/handlers/association:member/listBallots.ts",
+        "services/api-ts/src/handlers/association:member/listCandidates.ts",
+        "services/api-ts/src/handlers/association:member/listElections.ts",
+        "services/api-ts/src/handlers/association:member/openElectionNominations.ts",
+        "services/api-ts/src/handlers/association:member/openElectionVoting.ts",
+        "services/api-ts/src/handlers/association:member/updateCandidate.ts",
+        "services/api-ts/src/handlers/association:member/updateCandidateStatus.ts",
+        "services/api-ts/src/handlers/association:member/updateElection.ts"
+      ],
+      "confidence": "HIGH"
+    },
+    {
+      "from_module": "handlers/association:member",
+      "to_module": "handlers/membership",
+      "import_count": 1,
+      "files": [
+        "services/api-ts/src/handlers/association:member/getCreditCompliance.ts"
+      ],
+      "confidence": "HIGH"
+    },
+    {
+      "from_module": "handlers/association:member",
+      "to_module": "handlers/person",
+      "import_count": 6,
+      "files": [
+        "services/api-ts/src/handlers/association:member/getDuesInvoice.ts",
+        "services/api-ts/src/handlers/association:member/listDuesInvoices.ts",
+        "services/api-ts/src/handlers/association:member/repos/dues-payment-status-history.schema.ts",
+        "services/api-ts/src/handlers/association:member/repos/membership.schema.ts",
+        "services/api-ts/src/handlers/association:member/repos/special-assessments.schema.ts",
+        "services/api-ts/src/handlers/association:member/repos/status-history.schema.ts"
+      ],
+      "confidence": "HIGH"
+    },
+    {
+      "from_module": "handlers/association:operations",
+      "to_module": "handlers/association:member",
+      "import_count": 2,
+      "files": [
+        "services/api-ts/src/handlers/association:operations/completeTrainingEnrollment.ts"
+      ],
+      "confidence": "HIGH"
+    },
+    {
+      "from_module": "handlers/association:operations",
+      "to_module": "handlers/platformadmin",
+      "import_count": 1,
+      "files": [
+        "services/api-ts/src/handlers/association:operations/exportNationalDashboard.ts"
+      ],
+      "confidence": "HIGH"
+    },
+    {
+      "from_module": "handlers/billing",
+      "to_module": "handlers/person",
+      "import_count": 10,
+      "files": [
+        "services/api-ts/src/handlers/billing/captureInvoicePayment.ts",
+        "services/api-ts/src/handlers/billing/createInvoice.ts",
+        "services/api-ts/src/handlers/billing/createMerchantAccount.ts",
+        "services/api-ts/src/handlers/billing/markInvoiceUncollectible.ts",
+        "services/api-ts/src/handlers/billing/onboardMerchantAccount.ts",
+        "services/api-ts/src/handlers/billing/payInvoice.ts",
+        "services/api-ts/src/handlers/billing/refundInvoicePayment.ts",
+        "services/api-ts/src/handlers/billing/repos/billing.repo.ts",
+        "services/api-ts/src/handlers/billing/repos/billing.schema.ts",
+        "services/api-ts/src/handlers/billing/voidInvoice.ts"
+      ],
+      "confidence": "HIGH"
+    },
+    {
+      "from_module": "handlers/booking",
+      "to_module": "handlers/billing",
+      "import_count": 1,
+      "files": [
+        "services/api-ts/src/handlers/booking/repos/booking.repo.ts"
+      ],
+      "confidence": "HIGH"
+    },
+    {
+      "from_module": "handlers/booking",
+      "to_module": "handlers/person",
+      "import_count": 4,
+      "files": [
+        "services/api-ts/src/handlers/booking/repos/booking.repo.ts",
+        "services/api-ts/src/handlers/booking/repos/booking.schema.ts",
+        "services/api-ts/src/handlers/booking/repos/bookingEvent.repo.ts",
+        "services/api-ts/src/handlers/booking/repos/timeSlot.repo.ts"
+      ],
+      "confidence": "HIGH"
+    },
+    {
+      "from_module": "handlers/certificates",
+      "to_module": "handlers/association:operations",
+      "import_count": 1,
+      "files": [
+        "services/api-ts/src/handlers/certificates/repos/certificates.schema.ts"
+      ],
+      "confidence": "HIGH"
+    },
+    {
+      "from_module": "handlers/certificates",
+      "to_module": "handlers/person",
+      "import_count": 1,
+      "files": [
+        "services/api-ts/src/handlers/certificates/repos/certificates.schema.ts"
+      ],
+      "confidence": "HIGH"
+    },
+    {
+      "from_module": "handlers/communication",
+      "to_module": "handlers/membership",
+      "import_count": 1,
+      "files": [
+        "services/api-ts/src/handlers/communication/jobs/announcementSend.ts"
+      ],
+      "confidence": "HIGH"
+    },
+    {
+      "from_module": "handlers/communication",
+      "to_module": "handlers/notifs",
+      "import_count": 1,
+      "files": [
+        "services/api-ts/src/handlers/communication/jobs/announcementSend.ts"
+      ],
+      "confidence": "HIGH"
+    },
+    {
+      "from_module": "handlers/communication",
+      "to_module": "handlers/person",
+      "import_count": 1,
+      "files": [
+        "services/api-ts/src/handlers/communication/repos/communication.schema.ts"
+      ],
+      "confidence": "HIGH"
+    },
+    {
+      "from_module": "handlers/dues",
+      "to_module": "handlers/association:member",
+      "import_count": 14,
+      "files": [
+        "services/api-ts/src/handlers/dues/checkoutPaymentToken.ts",
+        "services/api-ts/src/handlers/dues/downloadReceipt.ts",
+        "services/api-ts/src/handlers/dues/jobs/autoInvoiceGenerator.ts",
+        "services/api-ts/src/handlers/dues/jobs/processStripePayment.ts",
+        "services/api-ts/src/handlers/dues/jobs/reminderProcessor.ts",
+        "services/api-ts/src/handlers/dues/jobs/webhookRetryProcessor.ts",
+        "services/api-ts/src/handlers/dues/repos/dues-payments.repo.ts",
+        "services/api-ts/src/handlers/dues/repos/dues-payments.schema.ts",
+        "services/api-ts/src/handlers/dues/sendPaymentLink.ts"
+      ],
+      "confidence": "HIGH"
+    },
+    {
+      "from_module": "handlers/dues",
+      "to_module": "handlers/person",
+      "import_count": 4,
+      "files": [
+        "services/api-ts/src/handlers/dues/repos/dues-payments.repo.ts",
+        "services/api-ts/src/handlers/dues/repos/dues-payments.schema.ts",
+        "services/api-ts/src/handlers/dues/repos/payment-token.repo.ts",
+        "services/api-ts/src/handlers/dues/repos/payment-token.schema.ts"
+      ],
+      "confidence": "HIGH"
+    },
+    {
+      "from_module": "handlers/elections",
+      "to_module": "handlers/association:member",
+      "import_count": 5,
+      "files": [
+        "services/api-ts/src/handlers/elections/castVote.ts",
+        "services/api-ts/src/handlers/elections/createNominee.ts",
+        "services/api-ts/src/handlers/elections/repos/elections.schema.ts",
+        "services/api-ts/src/handlers/elections/updateNomineeStatus.ts"
+      ],
+      "confidence": "HIGH"
+    },
+    {
+      "from_module": "handlers/elections",
+      "to_module": "handlers/person",
+      "import_count": 1,
+      "files": [
+        "services/api-ts/src/handlers/elections/repos/elections.schema.ts"
+      ],
+      "confidence": "HIGH"
+    },
+    {
+      "from_module": "handlers/events",
+      "to_module": "handlers/association:member",
+      "import_count": 4,
+      "files": [
+        "services/api-ts/src/handlers/events/bulkCreateEventSeries.ts",
+        "services/api-ts/src/handlers/events/cancelRegistration.ts",
+        "services/api-ts/src/handlers/events/checkIn.ts",
+        "services/api-ts/src/handlers/events/utils/membership-check.ts"
+      ],
+      "confidence": "HIGH"
+    },
+    {
+      "from_module": "handlers/events",
+      "to_module": "handlers/association:operations",
+      "import_count": 1,
+      "files": [
+        "services/api-ts/src/handlers/events/repos/events.repo.ts"
+      ],
+      "confidence": "HIGH"
+    },
+    {
+      "from_module": "handlers/invite",
+      "to_module": "handlers/membership",
+      "import_count": 1,
+      "files": [
+        "services/api-ts/src/handlers/invite/claimInvite.ts"
+      ],
+      "confidence": "HIGH"
+    },
+    {
+      "from_module": "handlers/invite",
+      "to_module": "handlers/platformadmin",
+      "import_count": 1,
+      "files": [
+        "services/api-ts/src/handlers/invite/claimInvite.ts"
+      ],
+      "confidence": "HIGH"
+    },
+    {
+      "from_module": "handlers/membership",
+      "to_module": "handlers/association:member",
+      "import_count": 8,
+      "files": [
+        "services/api-ts/src/handlers/membership/addMember.ts",
+        "services/api-ts/src/handlers/membership/csvImport.ts",
+        "services/api-ts/src/handlers/membership/jobs/graceToLapsed.ts",
+        "services/api-ts/src/handlers/membership/repos/membership.repo.ts",
+        "services/api-ts/src/handlers/membership/reviewApplication.ts",
+        "services/api-ts/src/handlers/membership/updateMember.ts"
+      ],
+      "confidence": "HIGH"
+    },
+    {
+      "from_module": "handlers/membership",
+      "to_module": "handlers/dues",
+      "import_count": 1,
+      "files": [
+        "services/api-ts/src/handlers/membership/repos/membership.repo.ts"
+      ],
+      "confidence": "HIGH"
+    },
+    {
+      "from_module": "handlers/membership",
+      "to_module": "handlers/person",
+      "import_count": 2,
+      "files": [
+        "services/api-ts/src/handlers/membership/csvImport.ts",
+        "services/api-ts/src/handlers/membership/repos/membership.repo.ts"
+      ],
+      "confidence": "HIGH"
+    },
+    {
+      "from_module": "handlers/membership",
+      "to_module": "handlers/platformadmin",
+      "import_count": 2,
+      "files": [
+        "services/api-ts/src/handlers/membership/getOrgProfile.ts",
+        "services/api-ts/src/handlers/membership/updateOrgProfile.ts"
+      ],
+      "confidence": "HIGH"
+    },
+    {
+      "from_module": "handlers/notifs",
+      "to_module": "handlers/person",
+      "import_count": 4,
+      "files": [
+        "services/api-ts/src/handlers/notifs/getNotification.ts",
+        "services/api-ts/src/handlers/notifs/listNotifications.ts",
+        "services/api-ts/src/handlers/notifs/markAllNotificationsAsRead.ts",
+        "services/api-ts/src/handlers/notifs/markNotificationAsRead.ts"
+      ],
+      "confidence": "HIGH"
+    },
+    {
+      "from_module": "handlers/person",
+      "to_module": "handlers/association:member",
+      "import_count": 1,
+      "files": [
+        "services/api-ts/src/handlers/person/executeAccountDeletion.ts"
+      ],
+      "confidence": "HIGH"
+    },
+    {
+      "from_module": "handlers/reviews",
+      "to_module": "handlers/person",
+      "import_count": 1,
+      "files": [
+        "services/api-ts/src/handlers/reviews/repos/review.schema.ts"
+      ],
+      "confidence": "HIGH"
+    },
+    {
+      "from_module": "handlers/surveys",
+      "to_module": "handlers/association:member",
+      "import_count": 10,
+      "files": [
+        "services/api-ts/src/handlers/surveys/cloneSurvey.ts",
+        "services/api-ts/src/handlers/surveys/closeSurvey.ts",
+        "services/api-ts/src/handlers/surveys/createSurvey.ts",
+        "services/api-ts/src/handlers/surveys/deleteSurvey.ts",
+        "services/api-ts/src/handlers/surveys/exportSurveyResponses.ts",
+        "services/api-ts/src/handlers/surveys/getNpsTrends.ts",
+        "services/api-ts/src/handlers/surveys/getSurveyAnalytics.ts",
+        "services/api-ts/src/handlers/surveys/listSurveyResponses.ts",
+        "services/api-ts/src/handlers/surveys/publishSurvey.ts",
+        "services/api-ts/src/handlers/surveys/updateSurvey.ts"
+      ],
+      "confidence": "HIGH"
+    },
+    {
+      "from_module": "handlers/surveys",
+      "to_module": "handlers/person",
+      "import_count": 1,
+      "files": [
+        "services/api-ts/src/handlers/surveys/repos/survey.schema.ts"
+      ],
+      "confidence": "HIGH"
+    }
+  ],
+  "sdk_op_edges": [
+    {
+      "target_type": "openapi_operation",
+      "from_module": "apps/admin",
+      "from_file": "apps/admin/src/main.tsx",
+      "operation_id": "getAdminRole",
+      "method": "GET",
+      "endpoint": "/admin/me/role",
+      "call_count": 1,
+      "confidence": "HIGH"
+    },
+    {
+      "target_type": "openapi_operation",
+      "from_module": "apps/admin",
+      "from_file": "apps/admin/src/routes/associations/$associationId.tsx",
+      "operation_id": "createOrganization",
+      "method": "POST",
+      "endpoint": "/admin/organizations",
+      "call_count": 1,
+      "confidence": "HIGH"
+    },
+    {
+      "target_type": "openapi_operation",
+      "from_module": "apps/admin",
+      "from_file": "apps/admin/src/routes/associations/$associationId.tsx",
+      "operation_id": "deleteAssociation",
+      "method": "DELETE",
+      "endpoint": "/admin/associations/:associationId",
+      "call_count": 1,
+      "confidence": "HIGH"
+    },
+    {
+      "target_type": "openapi_operation",
+      "from_module": "apps/admin",
+      "from_file": "apps/admin/src/routes/associations/$associationId.tsx",
+      "operation_id": "getAssociation",
+      "method": "GET",
+      "endpoint": "/admin/associations/:associationId",
+      "call_count": 1,
+      "confidence": "HIGH"
+    },
+    {
+      "target_type": "openapi_operation",
+      "from_module": "apps/admin",
+      "from_file": "apps/admin/src/routes/associations/$associationId.tsx",
+      "operation_id": "listOrganizations",
+      "method": "GET",
+      "endpoint": "/admin/organizations",
+      "call_count": 1,
+      "confidence": "HIGH"
+    },
+    {
+      "target_type": "openapi_operation",
+      "from_module": "apps/admin",
+      "from_file": "apps/admin/src/routes/associations/$associationId.tsx",
+      "operation_id": "searchCourses",
+      "method": "GET",
+      "endpoint": "/association/training/courses",
+      "call_count": 1,
+      "confidence": "HIGH"
+    },
+    {
+      "target_type": "openapi_operation",
+      "from_module": "apps/admin",
+      "from_file": "apps/admin/src/routes/associations/$associationId.tsx",
+      "operation_id": "searchEvents",
+      "method": "GET",
+      "endpoint": "/association/events",
+      "call_count": 1,
+      "confidence": "HIGH"
+    },
+    {
+      "target_type": "openapi_operation",
+      "from_module": "apps/admin",
+      "from_file": "apps/admin/src/routes/associations/$associationId.tsx",
+      "operation_id": "updateAssociation",
+      "method": "PATCH",
+      "endpoint": "/admin/associations/:associationId",
+      "call_count": 1,
+      "confidence": "HIGH"
+    },
+    {
+      "target_type": "openapi_operation",
+      "from_module": "apps/admin",
+      "from_file": "apps/admin/src/routes/associations/index.tsx",
+      "operation_id": "createAssociation",
+      "method": "POST",
+      "endpoint": "/admin/associations",
+      "call_count": 1,
+      "confidence": "HIGH"
+    },
+    {
+      "target_type": "openapi_operation",
+      "from_module": "apps/admin",
+      "from_file": "apps/admin/src/routes/associations/index.tsx",
+      "operation_id": "listAssociations",
+      "method": "GET",
+      "endpoint": "/admin/associations",
+      "call_count": 1,
+      "confidence": "HIGH"
+    },
+    {
+      "target_type": "openapi_operation",
+      "from_module": "apps/admin",
+      "from_file": "apps/admin/src/routes/audit/index.tsx",
+      "operation_id": "listAuditLogs",
+      "method": "GET",
+      "endpoint": "/audit/logs",
+      "call_count": 1,
+      "confidence": "HIGH"
+    },
+    {
+      "target_type": "openapi_operation",
+      "from_module": "apps/admin",
+      "from_file": "apps/admin/src/routes/events/index.tsx",
+      "operation_id": "listCustomEventRegistrations",
+      "method": "GET",
+      "endpoint": "/association/event-lifecycle/:eventId/registrations",
+      "call_count": 1,
+      "confidence": "HIGH"
+    },
+    {
+      "target_type": "openapi_operation",
+      "from_module": "apps/admin",
+      "from_file": "apps/admin/src/routes/events/index.tsx",
+      "operation_id": "listOrganizations",
+      "method": "GET",
+      "endpoint": "/admin/organizations",
+      "call_count": 1,
+      "confidence": "HIGH"
+    },
+    {
+      "target_type": "openapi_operation",
+      "from_module": "apps/admin",
+      "from_file": "apps/admin/src/routes/events/index.tsx",
+      "operation_id": "searchEvents",
+      "method": "GET",
+      "endpoint": "/association/events",
+      "call_count": 1,
+      "confidence": "HIGH"
+    },
+    {
+      "target_type": "openapi_operation",
+      "from_module": "apps/admin",
+      "from_file": "apps/admin/src/routes/feature-flags/index.tsx",
+      "operation_id": "deleteFeatureFlag",
+      "method": "DELETE",
+      "endpoint": "/admin/feature-flags/:flagId",
+      "call_count": 1,
+      "confidence": "HIGH"
+    },
+    {
+      "target_type": "openapi_operation",
+      "from_module": "apps/admin",
+      "from_file": "apps/admin/src/routes/feature-flags/index.tsx",
+      "operation_id": "listFeatureFlags",
+      "method": "GET",
+      "endpoint": "/admin/feature-flags",
+      "call_count": 1,
+      "confidence": "HIGH"
+    },
+    {
+      "target_type": "openapi_operation",
+      "from_module": "apps/admin",
+      "from_file": "apps/admin/src/routes/feature-flags/index.tsx",
+      "operation_id": "setFeatureFlag",
+      "method": "POST",
+      "endpoint": "/admin/feature-flags",
+      "call_count": 1,
+      "confidence": "HIGH"
+    },
+    {
+      "target_type": "openapi_operation",
+      "from_module": "apps/admin",
+      "from_file": "apps/admin/src/routes/impersonate/index.tsx",
+      "operation_id": "endImpersonation",
+      "method": "POST",
+      "endpoint": "/admin/impersonate/:sessionId/end",
+      "call_count": 1,
+      "confidence": "HIGH"
+    },
+    {
+      "target_type": "openapi_operation",
+      "from_module": "apps/admin",
+      "from_file": "apps/admin/src/routes/impersonate/index.tsx",
+      "operation_id": "listOrganizations",
+      "method": "GET",
+      "endpoint": "/admin/organizations",
+      "call_count": 1,
+      "confidence": "HIGH"
+    },
+    {
+      "target_type": "openapi_operation",
+      "from_module": "apps/admin",
+      "from_file": "apps/admin/src/routes/impersonate/index.tsx",
+      "operation_id": "startImpersonation",
+      "method": "POST",
+      "endpoint": "/admin/impersonate",
+      "call_count": 1,
+      "confidence": "HIGH"
+    },
+    {
+      "target_type": "openapi_operation",
+      "from_module": "apps/admin",
+      "from_file": "apps/admin/src/routes/index.tsx",
+      "operation_id": "listAdmins",
+      "method": "GET",
+      "endpoint": "/admin/admins",
+      "call_count": 1,
+      "confidence": "HIGH"
+    },
+    {
+      "target_type": "openapi_operation",
+      "from_module": "apps/admin",
+      "from_file": "apps/admin/src/routes/index.tsx",
+      "operation_id": "listAssociations",
+      "method": "GET",
+      "endpoint": "/admin/associations",
+      "call_count": 1,
+      "confidence": "HIGH"
+    },
+    {
+      "target_type": "openapi_operation",
+      "from_module": "apps/admin",
+      "from_file": "apps/admin/src/routes/index.tsx",
+      "operation_id": "listAuditLogs",
+      "method": "GET",
+      "endpoint": "/audit/logs",
+      "call_count": 1,
+      "confidence": "HIGH"
+    },
+    {
+      "target_type": "openapi_operation",
+      "from_module": "apps/admin",
+      "from_file": "apps/admin/src/routes/index.tsx",
+      "operation_id": "listFeatureFlags",
+      "method": "GET",
+      "endpoint": "/admin/feature-flags",
+      "call_count": 1,
+      "confidence": "HIGH"
+    },
+    {
+      "target_type": "openapi_operation",
+      "from_module": "apps/admin",
+      "from_file": "apps/admin/src/routes/index.tsx",
+      "operation_id": "listOrganizations",
+      "method": "GET",
+      "endpoint": "/admin/organizations",
+      "call_count": 1,
+      "confidence": "HIGH"
+    },
+    {
+      "target_type": "openapi_operation",
+      "from_module": "apps/admin",
+      "from_file": "apps/admin/src/routes/index.tsx",
+      "operation_id": "searchEvents",
+      "method": "GET",
+      "endpoint": "/association/events",
+      "call_count": 1,
+      "confidence": "HIGH"
+    },
+    {
+      "target_type": "openapi_operation",
+      "from_module": "apps/admin",
+      "from_file": "apps/admin/src/routes/members/$personId.tsx",
+      "operation_id": "getPerson",
+      "method": "GET",
+      "endpoint": "/persons/:person",
+      "call_count": 1,
+      "confidence": "HIGH"
+    },
+    {
+      "target_type": "openapi_operation",
+      "from_module": "apps/admin",
+      "from_file": "apps/admin/src/routes/members/index.tsx",
+      "operation_id": "listOrganizations",
+      "method": "GET",
+      "endpoint": "/admin/organizations",
+      "call_count": 1,
+      "confidence": "HIGH"
+    },
+    {
+      "target_type": "openapi_operation",
+      "from_module": "apps/admin",
+      "from_file": "apps/admin/src/routes/members/index.tsx",
+      "operation_id": "listRosterMembers",
+      "method": "GET",
+      "endpoint": "/association/member/roster",
+      "call_count": 1,
+      "confidence": "HIGH"
+    },
+    {
+      "target_type": "openapi_operation",
+      "from_module": "apps/admin",
+      "from_file": "apps/admin/src/routes/national-dashboard/index.tsx",
+      "operation_id": "listAssociations",
+      "method": "GET",
+      "endpoint": "/admin/associations",
+      "call_count": 1,
+      "confidence": "HIGH"
+    },
+    {
+      "target_type": "openapi_operation",
+      "from_module": "apps/admin",
+      "from_file": "apps/admin/src/routes/operators/index.tsx",
+      "operation_id": "inviteAdmin",
+      "method": "POST",
+      "endpoint": "/admin/admins",
+      "call_count": 1,
+      "confidence": "HIGH"
+    },
+    {
+      "target_type": "openapi_operation",
+      "from_module": "apps/admin",
+      "from_file": "apps/admin/src/routes/operators/index.tsx",
+      "operation_id": "listAdmins",
+      "method": "GET",
+      "endpoint": "/admin/admins",
+      "call_count": 1,
+      "confidence": "HIGH"
+    },
+    {
+      "target_type": "openapi_operation",
+      "from_module": "apps/admin",
+      "from_file": "apps/admin/src/routes/operators/index.tsx",
+      "operation_id": "revokeAdmin",
+      "method": "DELETE",
+      "endpoint": "/admin/admins/:adminId",
+      "call_count": 1,
+      "confidence": "HIGH"
+    },
+    {
+      "target_type": "openapi_operation",
+      "from_module": "apps/admin",
+      "from_file": "apps/admin/src/routes/organizations/$organizationId.tsx",
+      "operation_id": "getOrganization",
+      "method": "GET",
+      "endpoint": "/admin/organizations/:organizationId",
+      "call_count": 2,
+      "confidence": "HIGH"
+    },
+    {
+      "target_type": "openapi_operation",
+      "from_module": "apps/admin",
+      "from_file": "apps/admin/src/routes/organizations/index.tsx",
+      "operation_id": "listOrganizations",
+      "method": "GET",
+      "endpoint": "/admin/organizations",
+      "call_count": 1,
+      "confidence": "HIGH"
+    },
+    {
+      "target_type": "openapi_operation",
+      "from_module": "apps/admin",
+      "from_file": "apps/admin/src/routes/training/index.tsx",
+      "operation_id": "searchCourses",
+      "method": "GET",
+      "endpoint": "/association/training/courses",
+      "call_count": 1,
+      "confidence": "HIGH"
+    },
+    {
+      "target_type": "openapi_operation",
+      "from_module": "apps/memberry",
+      "from_file": "apps/memberry/src/features/admin/components/officer-dashboard.tsx",
+      "operation_id": "listElections",
+      "method": "GET",
+      "endpoint": "/association/member/elections",
+      "call_count": 1,
+      "confidence": "HIGH"
+    },
+    {
+      "target_type": "openapi_operation",
+      "from_module": "apps/memberry",
+      "from_file": "apps/memberry/src/features/admin/components/officer-dashboard.tsx",
+      "operation_id": "searchDocuments",
+      "method": "GET",
+      "endpoint": "/association/documents",
+      "call_count": 1,
+      "confidence": "HIGH"
+    },
+    {
+      "target_type": "openapi_operation",
+      "from_module": "apps/memberry",
+      "from_file": "apps/memberry/src/features/admin/components/officer-dashboard.tsx",
+      "operation_id": "searchEvents",
+      "method": "GET",
+      "endpoint": "/association/events",
+      "call_count": 1,
+      "confidence": "HIGH"
+    },
+    {
+      "target_type": "openapi_operation",
+      "from_module": "apps/memberry",
+      "from_file": "apps/memberry/src/features/booking/components/booking-event-editor.tsx",
+      "operation_id": "createBookingEvent",
+      "method": "POST",
+      "endpoint": "/booking/events",
+      "call_count": 1,
+      "confidence": "HIGH"
+    },
+    {
+      "target_type": "openapi_operation",
+      "from_module": "apps/memberry",
+      "from_file": "apps/memberry/src/features/booking/components/booking-event-editor.tsx",
+      "operation_id": "updateBookingEvent",
+      "method": "PATCH",
+      "endpoint": "/booking/events/:event",
+      "call_count": 1,
+      "confidence": "HIGH"
+    },
+    {
+      "target_type": "openapi_operation",
+      "from_module": "apps/memberry",
+      "from_file": "apps/memberry/src/features/booking/components/booking-list.tsx",
+      "operation_id": "listBookings",
+      "method": "GET",
+      "endpoint": "/booking/bookings",
+      "call_count": 2,
+      "confidence": "HIGH"
+    },
+    {
+      "target_type": "openapi_operation",
+      "from_module": "apps/memberry",
+      "from_file": "apps/memberry/src/features/booking/components/host-directory.tsx",
+      "operation_id": "listBookingEvents",
+      "method": "GET",
+      "endpoint": "/booking/events",
+      "call_count": 1,
+      "confidence": "HIGH"
+    },
+    {
+      "target_type": "openapi_operation",
+      "from_module": "apps/memberry",
+      "from_file": "apps/memberry/src/features/certificates/components/certificate-list.tsx",
+      "operation_id": "listMyCertificates",
+      "method": "GET",
+      "endpoint": "/association/member/certificates",
+      "call_count": 1,
+      "confidence": "HIGH"
+    },
+    {
+      "target_type": "openapi_operation",
+      "from_module": "apps/memberry",
+      "from_file": "apps/memberry/src/features/certificates/components/certificate-preview.tsx",
+      "operation_id": "getCertificate",
+      "method": "GET",
+      "endpoint": "/association/member/certificates/:certificateId",
+      "call_count": 1,
+      "confidence": "HIGH"
+    },
+    {
+      "target_type": "openapi_operation",
+      "from_module": "apps/memberry",
+      "from_file": "apps/memberry/src/features/chapters/components/affiliation-list.tsx",
+      "operation_id": "listChapterAffiliations",
+      "method": "GET",
+      "endpoint": "/association/member/chapter-affiliations",
+      "call_count": 1,
+      "confidence": "HIGH"
+    },
+    {
+      "target_type": "openapi_operation",
+      "from_module": "apps/memberry",
+      "from_file": "apps/memberry/src/features/comms/components/channel-list.tsx",
+      "operation_id": "listChatRooms",
+      "method": "GET",
+      "endpoint": "/comms/chat-rooms",
+      "call_count": 1,
+      "confidence": "HIGH"
+    },
+    {
+      "target_type": "openapi_operation",
+      "from_module": "apps/memberry",
+      "from_file": "apps/memberry/src/features/comms/components/chat-thread.test.tsx",
+      "operation_id": "getChatMessages",
+      "method": "GET",
+      "endpoint": "/comms/chat-rooms/:room/messages",
+      "call_count": 1,
+      "confidence": "HIGH"
+    },
+    {
+      "target_type": "openapi_operation",
+      "from_module": "apps/memberry",
+      "from_file": "apps/memberry/src/features/comms/components/chat-thread.tsx",
+      "operation_id": "getChatMessages",
+      "method": "GET",
+      "endpoint": "/comms/chat-rooms/:room/messages",
+      "call_count": 1,
+      "confidence": "HIGH"
+    },
+    {
+      "target_type": "openapi_operation",
+      "from_module": "apps/memberry",
+      "from_file": "apps/memberry/src/features/comms/components/chat-thread.tsx",
+      "operation_id": "sendChatMessage",
+      "method": "POST",
+      "endpoint": "/comms/chat-rooms/:room/messages",
+      "call_count": 1,
+      "confidence": "HIGH"
+    },
+    {
+      "target_type": "openapi_operation",
+      "from_module": "apps/memberry",
+      "from_file": "apps/memberry/src/features/comms/components/chat-view.tsx",
+      "operation_id": "getChatMessages",
+      "method": "GET",
+      "endpoint": "/comms/chat-rooms/:room/messages",
+      "call_count": 1,
+      "confidence": "HIGH"
+    },
+    {
+      "target_type": "openapi_operation",
+      "from_module": "apps/memberry",
+      "from_file": "apps/memberry/src/features/comms/components/create-channel-dialog.tsx",
+      "operation_id": "createChatRoom",
+      "method": "POST",
+      "endpoint": "/comms/chat-rooms",
+      "call_count": 1,
+      "confidence": "HIGH"
+    },
+    {
+      "target_type": "openapi_operation",
+      "from_module": "apps/memberry",
+      "from_file": "apps/memberry/src/features/comms/components/dm-list.tsx",
+      "operation_id": "listChatRooms",
+      "method": "GET",
+      "endpoint": "/comms/chat-rooms",
+      "call_count": 1,
+      "confidence": "HIGH"
+    },
+    {
+      "target_type": "openapi_operation",
+      "from_module": "apps/memberry",
+      "from_file": "apps/memberry/src/features/comms/components/message-composer.tsx",
+      "operation_id": "sendChatMessage",
+      "method": "POST",
+      "endpoint": "/comms/chat-rooms/:room/messages",
+      "call_count": 1,
+      "confidence": "HIGH"
+    },
+    {
+      "target_type": "openapi_operation",
+      "from_module": "apps/memberry",
+      "from_file": "apps/memberry/src/features/comms/components/thread-panel.tsx",
+      "operation_id": "getChatMessages",
+      "method": "GET",
+      "endpoint": "/comms/chat-rooms/:room/messages",
+      "call_count": 1,
+      "confidence": "HIGH"
+    },
+    {
+      "target_type": "openapi_operation",
+      "from_module": "apps/memberry",
+      "from_file": "apps/memberry/src/features/comms/components/video-call-panel.tsx",
+      "operation_id": "getIceServers",
+      "method": "GET",
+      "endpoint": "/comms/ice-servers",
+      "call_count": 1,
+      "confidence": "HIGH"
+    },
+    {
+      "target_type": "openapi_operation",
+      "from_module": "apps/memberry",
+      "from_file": "apps/memberry/src/features/comms/components/video-call-panel.tsx",
+      "operation_id": "joinVideoCall",
+      "method": "POST",
+      "endpoint": "/comms/chat-rooms/:room/video-call/join",
+      "call_count": 1,
+      "confidence": "HIGH"
+    },
+    {
+      "target_type": "openapi_operation",
+      "from_module": "apps/memberry",
+      "from_file": "apps/memberry/src/features/comms/components/video-call-panel.tsx",
+      "operation_id": "leaveVideoCall",
+      "method": "POST",
+      "endpoint": "/comms/chat-rooms/:room/video-call/leave",
+      "call_count": 1,
+      "confidence": "HIGH"
+    },
+    {
+      "target_type": "openapi_operation",
+      "from_module": "apps/memberry",
+      "from_file": "apps/memberry/src/features/directory/components/directory-search.tsx",
+      "operation_id": "searchDirectory",
+      "method": "GET",
+      "endpoint": "/association/member/directory/search",
+      "call_count": 1,
+      "confidence": "HIGH"
+    },
+    {
+      "target_type": "openapi_operation",
+      "from_module": "apps/memberry",
+      "from_file": "apps/memberry/src/features/directory/components/trust-directory.tsx",
+      "operation_id": "searchDirectory",
+      "method": "GET",
+      "endpoint": "/association/member/directory/search",
+      "call_count": 1,
+      "confidence": "HIGH"
+    },
+    {
+      "target_type": "openapi_operation",
+      "from_module": "apps/memberry",
+      "from_file": "apps/memberry/src/features/documents/components/document-browser.tsx",
+      "operation_id": "searchDocuments",
+      "method": "GET",
+      "endpoint": "/association/documents",
+      "call_count": 2,
+      "confidence": "HIGH"
+    },
+    {
+      "target_type": "openapi_operation",
+      "from_module": "apps/memberry",
+      "from_file": "apps/memberry/src/features/documents/components/document-library.tsx",
+      "operation_id": "archiveDocument",
+      "method": "POST",
+      "endpoint": "/association/documents/:documentId/archive",
+      "call_count": 1,
+      "confidence": "HIGH"
+    },
+    {
+      "target_type": "openapi_operation",
+      "from_module": "apps/memberry",
+      "from_file": "apps/memberry/src/features/documents/components/document-library.tsx",
+      "operation_id": "createDocument",
+      "method": "POST",
+      "endpoint": "/association/documents",
+      "call_count": 1,
+      "confidence": "HIGH"
+    },
+    {
+      "target_type": "openapi_operation",
+      "from_module": "apps/memberry",
+      "from_file": "apps/memberry/src/features/documents/components/document-library.tsx",
+      "operation_id": "deleteDocument",
+      "method": "DELETE",
+      "endpoint": "/association/documents/:documentId",
+      "call_count": 1,
+      "confidence": "HIGH"
+    },
+    {
+      "target_type": "openapi_operation",
+      "from_module": "apps/memberry",
+      "from_file": "apps/memberry/src/features/documents/components/document-library.tsx",
+      "operation_id": "searchDocuments",
+      "method": "GET",
+      "endpoint": "/association/documents",
+      "call_count": 1,
+      "confidence": "HIGH"
+    },
+    {
+      "target_type": "openapi_operation",
+      "from_module": "apps/memberry",
+      "from_file": "apps/memberry/src/features/documents/components/document-library.tsx",
+      "operation_id": "updateDocument",
+      "method": "PATCH",
+      "endpoint": "/association/documents/:documentId",
+      "call_count": 1,
+      "confidence": "HIGH"
+    },
+    {
+      "target_type": "openapi_operation",
+      "from_module": "apps/memberry",
+      "from_file": "apps/memberry/src/features/dues/components/dues-config-form.tsx",
+      "operation_id": "createDuesConfig",
+      "method": "POST",
+      "endpoint": "/association/member/dues-configs",
+      "call_count": 1,
+      "confidence": "HIGH"
+    },
+    {
+      "target_type": "openapi_operation",
+      "from_module": "apps/memberry",
+      "from_file": "apps/memberry/src/features/dues/components/dues-config-form.tsx",
+      "operation_id": "getDuesConfig",
+      "method": "GET",
+      "endpoint": "/association/member/dues-configs/:duesConfigId",
+      "call_count": 1,
+      "confidence": "HIGH"
+    },
+    {
+      "target_type": "openapi_operation",
+      "from_module": "apps/memberry",
+      "from_file": "apps/memberry/src/features/dues/components/dues-config-form.tsx",
+      "operation_id": "updateDuesConfig",
+      "method": "PATCH",
+      "endpoint": "/association/member/dues-configs/:duesConfigId",
+      "call_count": 1,
+      "confidence": "HIGH"
+    },
+    {
+      "target_type": "openapi_operation",
+      "from_module": "apps/memberry",
+      "from_file": "apps/memberry/src/features/dues/components/dues-invoice-list.tsx",
+      "operation_id": "listDuesInvoices",
+      "method": "GET",
+      "endpoint": "/association/member/dues-invoices",
+      "call_count": 1,
+      "confidence": "HIGH"
+    },
+    {
+      "target_type": "openapi_operation",
+      "from_module": "apps/memberry",
+      "from_file": "apps/memberry/src/features/dues/components/dues-invoice-list.tsx",
+      "operation_id": "markDuesInvoicePaid",
+      "method": "POST",
+      "endpoint": "/association/member/dues-invoices/:invoiceId/mark-paid",
+      "call_count": 1,
+      "confidence": "HIGH"
+    },
+    {
+      "target_type": "openapi_operation",
+      "from_module": "apps/memberry",
+      "from_file": "apps/memberry/src/features/dues/components/dues-setup-checklist.tsx",
+      "operation_id": "getDuesConfig",
+      "method": "GET",
+      "endpoint": "/association/member/dues-configs/:duesConfigId",
+      "call_count": 1,
+      "confidence": "HIGH"
+    },
+    {
+      "target_type": "openapi_operation",
+      "from_module": "apps/memberry",
+      "from_file": "apps/memberry/src/features/dues/components/dues-setup-checklist.tsx",
+      "operation_id": "getDuesGatewayConfig",
+      "method": "GET",
+      "endpoint": "/association/member/dues-gateway/:organizationId",
+      "call_count": 1,
+      "confidence": "HIGH"
+    },
+    {
+      "target_type": "openapi_operation",
+      "from_module": "apps/memberry",
+      "from_file": "apps/memberry/src/features/dues/components/dues-setup-checklist.tsx",
+      "operation_id": "listDuesFunds",
+      "method": "GET",
+      "endpoint": "/association/member/dues-reporting",
+      "call_count": 1,
+      "confidence": "HIGH"
+    },
+    {
+      "target_type": "openapi_operation",
+      "from_module": "apps/memberry",
+      "from_file": "apps/memberry/src/features/dues/components/financial-dashboard.tsx",
+      "operation_id": "getDuesFinancialDashboard",
+      "method": "GET",
+      "endpoint": "/association/member/dues-reporting/:organizationId/dashboard",
+      "call_count": 1,
+      "confidence": "HIGH"
+    },
+    {
+      "target_type": "openapi_operation",
+      "from_module": "apps/memberry",
+      "from_file": "apps/memberry/src/features/dues/components/gateway-setup.tsx",
+      "operation_id": "disconnectDuesGateway",
+      "method": "DELETE",
+      "endpoint": "/association/member/dues-gateway/:organizationId",
+      "call_count": 1,
+      "confidence": "HIGH"
+    },
+    {
+      "target_type": "openapi_operation",
+      "from_module": "apps/memberry",
+      "from_file": "apps/memberry/src/features/dues/components/gateway-setup.tsx",
+      "operation_id": "getDuesGatewayConfig",
+      "method": "GET",
+      "endpoint": "/association/member/dues-gateway/:organizationId",
+      "call_count": 1,
+      "confidence": "HIGH"
+    },
+    {
+      "target_type": "openapi_operation",
+      "from_module": "apps/memberry",
+      "from_file": "apps/memberry/src/features/dues/components/gateway-setup.tsx",
+      "operation_id": "testDuesGatewayConnection",
+      "method": "POST",
+      "endpoint": "/association/member/dues-gateway/:organizationId/test",
+      "call_count": 1,
+      "confidence": "HIGH"
+    },
+    {
+      "target_type": "openapi_operation",
+      "from_module": "apps/memberry",
+      "from_file": "apps/memberry/src/features/dues/components/gateway-setup.tsx",
+      "operation_id": "upsertDuesGatewayConfig",
+      "method": "PUT",
+      "endpoint": "/association/member/dues-gateway/:organizationId",
+      "call_count": 1,
+      "confidence": "HIGH"
+    },
+    {
+      "target_type": "openapi_operation",
+      "from_module": "apps/memberry",
+      "from_file": "apps/memberry/src/features/dues/components/payment-history-table.tsx",
+      "operation_id": "listDuesPayments",
+      "method": "GET",
+      "endpoint": "/association/member/dues-payments",
+      "call_count": 1,
+      "confidence": "HIGH"
+    },
+    {
+      "target_type": "openapi_operation",
+      "from_module": "apps/memberry",
+      "from_file": "apps/memberry/src/features/dues/components/pending-proofs-list.tsx",
+      "operation_id": "confirmPaymentProof",
+      "method": "POST",
+      "endpoint": "/association/member/dues-payments/:paymentId/confirm",
+      "call_count": 1,
+      "confidence": "HIGH"
+    },
+    {
+      "target_type": "openapi_operation",
+      "from_module": "apps/memberry",
+      "from_file": "apps/memberry/src/features/dues/components/pending-proofs-list.tsx",
+      "operation_id": "listPendingProofs",
+      "method": "GET",
+      "endpoint": "/association/member/dues-payments/pending-proofs",
+      "call_count": 1,
+      "confidence": "HIGH"
+    },
+    {
+      "target_type": "openapi_operation",
+      "from_module": "apps/memberry",
+      "from_file": "apps/memberry/src/features/dues/components/pending-proofs-list.tsx",
+      "operation_id": "rejectPaymentProof",
+      "method": "POST",
+      "endpoint": "/association/member/dues-payments/:paymentId/reject",
+      "call_count": 1,
+      "confidence": "HIGH"
+    },
+    {
+      "target_type": "openapi_operation",
+      "from_module": "apps/memberry",
+      "from_file": "apps/memberry/src/features/dues/components/proof-upload-form.tsx",
+      "operation_id": "submitPaymentProof",
+      "method": "POST",
+      "endpoint": "/association/member/dues-payments/submit-proof",
+      "call_count": 1,
+      "confidence": "HIGH"
+    },
+    {
+      "target_type": "openapi_operation",
+      "from_module": "apps/memberry",
+      "from_file": "apps/memberry/src/features/dues/components/recent-activity-feed.tsx",
+      "operation_id": "listDuesPayments",
+      "method": "GET",
+      "endpoint": "/association/member/dues-payments",
+      "call_count": 1,
+      "confidence": "HIGH"
+    },
+    {
+      "target_type": "openapi_operation",
+      "from_module": "apps/memberry",
+      "from_file": "apps/memberry/src/features/dues/components/record-payment-form.tsx",
+      "operation_id": "listDuesFunds",
+      "method": "GET",
+      "endpoint": "/association/member/dues-reporting",
+      "call_count": 1,
+      "confidence": "HIGH"
+    },
+    {
+      "target_type": "openapi_operation",
+      "from_module": "apps/memberry",
+      "from_file": "apps/memberry/src/features/dues/components/record-payment-form.tsx",
+      "operation_id": "listRosterMembers",
+      "method": "GET",
+      "endpoint": "/association/member/roster",
+      "call_count": 1,
+      "confidence": "HIGH"
+    },
+    {
+      "target_type": "openapi_operation",
+      "from_module": "apps/memberry",
+      "from_file": "apps/memberry/src/features/dues/components/record-payment-form.tsx",
+      "operation_id": "recordDuesPayment",
+      "method": "POST",
+      "endpoint": "/association/member/dues-payments",
+      "call_count": 1,
+      "confidence": "HIGH"
+    },
+    {
+      "target_type": "openapi_operation",
+      "from_module": "apps/memberry",
+      "from_file": "apps/memberry/src/features/dues/components/refund-form.tsx",
+      "operation_id": "refundDuesPayment",
+      "method": "POST",
+      "endpoint": "/association/member/dues-payments/:paymentId/refund",
+      "call_count": 1,
+      "confidence": "HIGH"
+    },
+    {
+      "target_type": "openapi_operation",
+      "from_module": "apps/memberry",
+      "from_file": "apps/memberry/src/features/elections/components/election-detail.tsx",
+      "operation_id": "certifyElection",
+      "method": "POST",
+      "endpoint": "/association/member/elections/:electionId/certify",
+      "call_count": 1,
+      "confidence": "HIGH"
+    },
+    {
+      "target_type": "openapi_operation",
+      "from_module": "apps/memberry",
+      "from_file": "apps/memberry/src/features/elections/components/election-detail.tsx",
+      "operation_id": "deleteCandidate",
+      "method": "DELETE",
+      "endpoint": "/association/member/candidates/:candidateId",
+      "call_count": 1,
+      "confidence": "HIGH"
+    },
+    {
+      "target_type": "openapi_operation",
+      "from_module": "apps/memberry",
+      "from_file": "apps/memberry/src/features/elections/components/election-detail.tsx",
+      "operation_id": "getElection",
+      "method": "GET",
+      "endpoint": "/association/member/elections/:electionId",
+      "call_count": 3,
+      "confidence": "HIGH"
+    },
+    {
+      "target_type": "openapi_operation",
+      "from_module": "apps/memberry",
+      "from_file": "apps/memberry/src/features/elections/components/election-detail.tsx",
+      "operation_id": "openElectionNominations",
+      "method": "POST",
+      "endpoint": "/association/member/elections/:electionId/open-nominations",
+      "call_count": 1,
+      "confidence": "HIGH"
+    },
+    {
+      "target_type": "openapi_operation",
+      "from_module": "apps/memberry",
+      "from_file": "apps/memberry/src/features/elections/components/election-detail.tsx",
+      "operation_id": "openElectionVoting",
+      "method": "POST",
+      "endpoint": "/association/member/elections/:electionId/open-voting",
+      "call_count": 1,
+      "confidence": "HIGH"
+    },
+    {
+      "target_type": "openapi_operation",
+      "from_module": "apps/memberry",
+      "from_file": "apps/memberry/src/features/elections/components/election-form.tsx",
+      "operation_id": "createElection",
+      "method": "POST",
+      "endpoint": "/association/member/elections",
+      "call_count": 1,
+      "confidence": "HIGH"
+    },
+    {
+      "target_type": "openapi_operation",
+      "from_module": "apps/memberry",
+      "from_file": "apps/memberry/src/features/elections/components/election-form.tsx",
+      "operation_id": "getElection",
+      "method": "GET",
+      "endpoint": "/association/member/elections/:electionId",
+      "call_count": 1,
+      "confidence": "HIGH"
+    },
+    {
+      "target_type": "openapi_operation",
+      "from_module": "apps/memberry",
+      "from_file": "apps/memberry/src/features/elections/components/election-form.tsx",
+      "operation_id": "updateElection",
+      "method": "PATCH",
+      "endpoint": "/association/member/elections/:electionId",
+      "call_count": 1,
+      "confidence": "HIGH"
+    },
+    {
+      "target_type": "openapi_operation",
+      "from_module": "apps/memberry",
+      "from_file": "apps/memberry/src/features/elections/components/election-list.tsx",
+      "operation_id": "listElections",
+      "method": "GET",
+      "endpoint": "/association/member/elections",
+      "call_count": 1,
+      "confidence": "HIGH"
+    },
+    {
+      "target_type": "openapi_operation",
+      "from_module": "apps/memberry",
+      "from_file": "apps/memberry/src/features/elections/components/member-election-detail.tsx",
+      "operation_id": "getElection",
+      "method": "GET",
+      "endpoint": "/association/member/elections/:electionId",
+      "call_count": 1,
+      "confidence": "HIGH"
+    },
+    {
+      "target_type": "openapi_operation",
+      "from_module": "apps/memberry",
+      "from_file": "apps/memberry/src/features/elections/components/member-election-list.tsx",
+      "operation_id": "listElections",
+      "method": "GET",
+      "endpoint": "/association/member/elections",
+      "call_count": 1,
+      "confidence": "HIGH"
+    },
+    {
+      "target_type": "openapi_operation",
+      "from_module": "apps/memberry",
+      "from_file": "apps/memberry/src/features/elections/components/nominee-picker-dialog.tsx",
+      "operation_id": "createCandidate",
+      "method": "POST",
+      "endpoint": "/association/member/candidates",
+      "call_count": 1,
+      "confidence": "HIGH"
+    },
+    {
+      "target_type": "openapi_operation",
+      "from_module": "apps/memberry",
+      "from_file": "apps/memberry/src/features/elections/components/nominee-picker-dialog.tsx",
+      "operation_id": "getElection",
+      "method": "GET",
+      "endpoint": "/association/member/elections/:electionId",
+      "call_count": 1,
+      "confidence": "HIGH"
+    },
+    {
+      "target_type": "openapi_operation",
+      "from_module": "apps/memberry",
+      "from_file": "apps/memberry/src/features/elections/components/nominee-picker-dialog.tsx",
+      "operation_id": "listRosterMembers",
+      "method": "GET",
+      "endpoint": "/association/member/roster",
+      "call_count": 1,
+      "confidence": "HIGH"
+    },
+    {
+      "target_type": "openapi_operation",
+      "from_module": "apps/memberry",
+      "from_file": "apps/memberry/src/features/elections/components/self-nomination-dialog.tsx",
+      "operation_id": "createCandidate",
+      "method": "POST",
+      "endpoint": "/association/member/candidates",
+      "call_count": 1,
+      "confidence": "HIGH"
+    },
+    {
+      "target_type": "openapi_operation",
+      "from_module": "apps/memberry",
+      "from_file": "apps/memberry/src/features/elections/components/self-nomination-dialog.tsx",
+      "operation_id": "getElection",
+      "method": "GET",
+      "endpoint": "/association/member/elections/:electionId",
+      "call_count": 1,
+      "confidence": "HIGH"
+    },
+    {
+      "target_type": "openapi_operation",
+      "from_module": "apps/memberry",
+      "from_file": "apps/memberry/src/features/elections/components/voting-ballot.tsx",
+      "operation_id": "castBallot",
+      "method": "POST",
+      "endpoint": "/association/member/ballots",
+      "call_count": 1,
+      "confidence": "HIGH"
+    },
+    {
+      "target_type": "openapi_operation",
+      "from_module": "apps/memberry",
+      "from_file": "apps/memberry/src/features/elections/components/voting-ballot.tsx",
+      "operation_id": "getElection",
+      "method": "GET",
+      "endpoint": "/association/member/elections/:electionId",
+      "call_count": 2,
+      "confidence": "HIGH"
+    },
+    {
+      "target_type": "openapi_operation",
+      "from_module": "apps/memberry",
+      "from_file": "apps/memberry/src/features/events/components/attendance-view.tsx",
+      "operation_id": "checkInCustomEvent",
+      "method": "POST",
+      "endpoint": "/association/event-lifecycle/:eventId/check-in",
+      "call_count": 1,
+      "confidence": "HIGH"
+    },
+    {
+      "target_type": "openapi_operation",
+      "from_module": "apps/memberry",
+      "from_file": "apps/memberry/src/features/events/components/attendance-view.tsx",
+      "operation_id": "listCustomEventAttendance",
+      "method": "GET",
+      "endpoint": "/association/event-lifecycle/:eventId/attendance",
+      "call_count": 1,
+      "confidence": "HIGH"
+    },
+    {
+      "target_type": "openapi_operation",
+      "from_module": "apps/memberry",
+      "from_file": "apps/memberry/src/features/events/components/event-form.tsx",
+      "operation_id": "createEvent",
+      "method": "POST",
+      "endpoint": "/association/events",
+      "call_count": 1,
+      "confidence": "HIGH"
+    },
+    {
+      "target_type": "openapi_operation",
+      "from_module": "apps/memberry",
+      "from_file": "apps/memberry/src/features/events/components/event-form.tsx",
+      "operation_id": "updateEvent",
+      "method": "PATCH",
+      "endpoint": "/association/events/:eventId",
+      "call_count": 1,
+      "confidence": "HIGH"
+    },
+    {
+      "target_type": "openapi_operation",
+      "from_module": "apps/memberry",
+      "from_file": "apps/memberry/src/features/events/components/event-list.tsx",
+      "operation_id": "cancelEvent",
+      "method": "POST",
+      "endpoint": "/association/events/:eventId/cancel",
+      "call_count": 1,
+      "confidence": "HIGH"
+    },
+    {
+      "target_type": "openapi_operation",
+      "from_module": "apps/memberry",
+      "from_file": "apps/memberry/src/features/events/components/event-list.tsx",
+      "operation_id": "searchEvents",
+      "method": "GET",
+      "endpoint": "/association/events",
+      "call_count": 3,
+      "confidence": "HIGH"
+    },
+    {
+      "target_type": "openapi_operation",
+      "from_module": "apps/memberry",
+      "from_file": "apps/memberry/src/features/events/components/post-event-actions.tsx",
+      "operation_id": "awardManualCredit",
+      "method": "POST",
+      "endpoint": "/association/member/credits/manual",
+      "call_count": 1,
+      "confidence": "HIGH"
+    },
+    {
+      "target_type": "openapi_operation",
+      "from_module": "apps/memberry",
+      "from_file": "apps/memberry/src/features/events/components/post-event-actions.tsx",
+      "operation_id": "bulkIssueCertificates",
+      "method": "POST",
+      "endpoint": "/certificates/bulk-issue",
+      "call_count": 1,
+      "confidence": "HIGH"
+    },
+    {
+      "target_type": "openapi_operation",
+      "from_module": "apps/memberry",
+      "from_file": "apps/memberry/src/features/events/components/post-event-actions.tsx",
+      "operation_id": "completeEvent",
+      "method": "POST",
+      "endpoint": "/association/event-lifecycle/:eventId/complete",
+      "call_count": 1,
+      "confidence": "HIGH"
+    },
+    {
+      "target_type": "openapi_operation",
+      "from_module": "apps/memberry",
+      "from_file": "apps/memberry/src/features/events/components/post-event-actions.tsx",
+      "operation_id": "createMessage",
+      "method": "POST",
+      "endpoint": "/association/messages",
+      "call_count": 1,
+      "confidence": "HIGH"
+    },
+    {
+      "target_type": "openapi_operation",
+      "from_module": "apps/memberry",
+      "from_file": "apps/memberry/src/features/events/components/post-event-actions.tsx",
+      "operation_id": "getMyOfficerRole",
+      "method": "GET",
+      "endpoint": "/persons/me/officer-role/:organizationId",
+      "call_count": 1,
+      "confidence": "HIGH"
+    },
+    {
+      "target_type": "openapi_operation",
+      "from_module": "apps/memberry",
+      "from_file": "apps/memberry/src/features/events/components/post-event-actions.tsx",
+      "operation_id": "listCustomEventAttendance",
+      "method": "GET",
+      "endpoint": "/association/event-lifecycle/:eventId/attendance",
+      "call_count": 1,
+      "confidence": "HIGH"
+    },
+    {
+      "target_type": "openapi_operation",
+      "from_module": "apps/memberry",
+      "from_file": "apps/memberry/src/features/events/components/post-event-actions.tsx",
+      "operation_id": "sendMessage",
+      "method": "POST",
+      "endpoint": "/association/messages/:messageId/send",
+      "call_count": 1,
+      "confidence": "HIGH"
+    },
+    {
+      "target_type": "openapi_operation",
+      "from_module": "apps/memberry",
+      "from_file": "apps/memberry/src/features/events/components/post-event-actions.tsx",
+      "operation_id": "voidCreditEntry",
+      "method": "POST",
+      "endpoint": "/association/member/credits/void-event",
+      "call_count": 1,
+      "confidence": "HIGH"
+    },
+    {
+      "target_type": "openapi_operation",
+      "from_module": "apps/memberry",
+      "from_file": "apps/memberry/src/features/membership/components/application-list.tsx",
+      "operation_id": "approveMembershipApplication",
+      "method": "POST",
+      "endpoint": "/association/member/applications/:applicationId/approve",
+      "call_count": 1,
+      "confidence": "HIGH"
+    },
+    {
+      "target_type": "openapi_operation",
+      "from_module": "apps/memberry",
+      "from_file": "apps/memberry/src/features/membership/components/application-list.tsx",
+      "operation_id": "denyMembershipApplication",
+      "method": "POST",
+      "endpoint": "/association/member/applications/:applicationId/deny",
+      "call_count": 1,
+      "confidence": "HIGH"
+    },
+    {
+      "target_type": "openapi_operation",
+      "from_module": "apps/memberry",
+      "from_file": "apps/memberry/src/features/membership/components/application-list.tsx",
+      "operation_id": "listMembershipApplications",
+      "method": "GET",
+      "endpoint": "/association/member/applications",
+      "call_count": 1,
+      "confidence": "HIGH"
+    },
+    {
+      "target_type": "openapi_operation",
+      "from_module": "apps/memberry",
+      "from_file": "apps/memberry/src/features/membership/components/category-editor.tsx",
+      "operation_id": "listMembershipCategories",
+      "method": "GET",
+      "endpoint": "/association/member/membership-categories",
+      "call_count": 1,
+      "confidence": "HIGH"
+    },
+    {
+      "target_type": "openapi_operation",
+      "from_module": "apps/memberry",
+      "from_file": "apps/memberry/src/features/membership/components/category-editor.tsx",
+      "operation_id": "upsertMembershipCategory",
+      "method": "PUT",
+      "endpoint": "/association/member/membership-categories/:organizationId",
+      "call_count": 1,
+      "confidence": "HIGH"
+    },
+    {
+      "target_type": "openapi_operation",
+      "from_module": "apps/memberry",
+      "from_file": "apps/memberry/src/features/membership/components/institutional-membership-form.tsx",
+      "operation_id": "createInstitutionalMembership",
+      "method": "POST",
+      "endpoint": "/association/member/institutional-memberships",
+      "call_count": 1,
+      "confidence": "HIGH"
+    },
+    {
+      "target_type": "openapi_operation",
+      "from_module": "apps/memberry",
+      "from_file": "apps/memberry/src/features/membership/components/institutional-membership-form.tsx",
+      "operation_id": "updateInstitutionalMembership",
+      "method": "PATCH",
+      "endpoint": "/association/member/institutional-memberships/:institutionalMembershipId",
+      "call_count": 1,
+      "confidence": "HIGH"
+    },
+    {
+      "target_type": "openapi_operation",
+      "from_module": "apps/memberry",
+      "from_file": "apps/memberry/src/features/membership/components/institutional-membership-table.tsx",
+      "operation_id": "listInstitutionalMemberships",
+      "method": "GET",
+      "endpoint": "/association/member/institutional-memberships",
+      "call_count": 1,
+      "confidence": "HIGH"
+    },
+    {
+      "target_type": "openapi_operation",
+      "from_module": "apps/memberry",
+      "from_file": "apps/memberry/src/features/membership/components/member-detail.tsx",
+      "operation_id": "getRosterMember",
+      "method": "GET",
+      "endpoint": "/association/member/roster/:memberId",
+      "call_count": 1,
+      "confidence": "HIGH"
+    },
+    {
+      "target_type": "openapi_operation",
+      "from_module": "apps/memberry",
+      "from_file": "apps/memberry/src/features/membership/components/member-detail.tsx",
+      "operation_id": "listMembershipCategories",
+      "method": "GET",
+      "endpoint": "/association/member/membership-categories",
+      "call_count": 1,
+      "confidence": "HIGH"
+    },
+    {
+      "target_type": "openapi_operation",
+      "from_module": "apps/memberry",
+      "from_file": "apps/memberry/src/features/membership/components/member-detail.tsx",
+      "operation_id": "reinstateMembership",
+      "method": "POST",
+      "endpoint": "/association/member/memberships/:membershipId/reinstate",
+      "call_count": 1,
+      "confidence": "HIGH"
+    },
+    {
+      "target_type": "openapi_operation",
+      "from_module": "apps/memberry",
+      "from_file": "apps/memberry/src/features/membership/components/member-detail.tsx",
+      "operation_id": "terminateMembership",
+      "method": "POST",
+      "endpoint": "/association/member/memberships/:membershipId/terminate",
+      "call_count": 1,
+      "confidence": "HIGH"
+    },
+    {
+      "target_type": "openapi_operation",
+      "from_module": "apps/memberry",
+      "from_file": "apps/memberry/src/features/membership/components/member-detail.tsx",
+      "operation_id": "updateRosterMember",
+      "method": "PUT",
+      "endpoint": "/association/member/roster/:memberId",
+      "call_count": 1,
+      "confidence": "HIGH"
+    },
+    {
+      "target_type": "openapi_operation",
+      "from_module": "apps/memberry",
+      "from_file": "apps/memberry/src/features/membership/components/member-table.tsx",
+      "operation_id": "listMembershipCategories",
+      "method": "GET",
+      "endpoint": "/association/member/membership-categories",
+      "call_count": 1,
+      "confidence": "HIGH"
+    },
+    {
+      "target_type": "openapi_operation",
+      "from_module": "apps/memberry",
+      "from_file": "apps/memberry/src/features/membership/components/member-table.tsx",
+      "operation_id": "listRosterMembers",
+      "method": "GET",
+      "endpoint": "/association/member/roster",
+      "call_count": 1,
+      "confidence": "HIGH"
+    },
+    {
+      "target_type": "openapi_operation",
+      "from_module": "apps/memberry",
+      "from_file": "apps/memberry/src/features/membership/components/membership-list.tsx",
+      "operation_id": "listMemberships",
+      "method": "GET",
+      "endpoint": "/association/member/memberships",
+      "call_count": 1,
+      "confidence": "HIGH"
+    },
+    {
+      "target_type": "openapi_operation",
+      "from_module": "apps/memberry",
+      "from_file": "apps/memberry/src/features/membership/components/seat-management-panel.tsx",
+      "operation_id": "allocateSeat",
+      "method": "POST",
+      "endpoint": "/association/member/institutional-memberships/:institutionalMembershipId/seats",
+      "call_count": 1,
+      "confidence": "HIGH"
+    },
+    {
+      "target_type": "openapi_operation",
+      "from_module": "apps/memberry",
+      "from_file": "apps/memberry/src/features/membership/components/seat-management-panel.tsx",
+      "operation_id": "listSeatAllocations",
+      "method": "GET",
+      "endpoint": "/association/member/institutional-memberships/:institutionalMembershipId/seats",
+      "call_count": 1,
+      "confidence": "HIGH"
+    },
+    {
+      "target_type": "openapi_operation",
+      "from_module": "apps/memberry",
+      "from_file": "apps/memberry/src/features/membership/components/seat-management-panel.tsx",
+      "operation_id": "revokeSeat",
+      "method": "POST",
+      "endpoint": "/association/member/institutional-memberships/:institutionalMembershipId/seats/:seatAllocationId/revoke",
+      "call_count": 1,
+      "confidence": "HIGH"
+    },
+    {
+      "target_type": "openapi_operation",
+      "from_module": "apps/memberry",
+      "from_file": "apps/memberry/src/features/training/components/completion-table.tsx",
+      "operation_id": "completeCustomTraining",
+      "method": "POST",
+      "endpoint": "/association/training-lifecycle/:trainingId/complete",
+      "call_count": 2,
+      "confidence": "HIGH"
+    },
+    {
+      "target_type": "openapi_operation",
+      "from_module": "apps/memberry",
+      "from_file": "apps/memberry/src/features/training/components/completion-table.tsx",
+      "operation_id": "listCustomTrainingEnrollments",
+      "method": "GET",
+      "endpoint": "/association/training-lifecycle/:trainingId/enrollments",
+      "call_count": 1,
+      "confidence": "HIGH"
+    },
+    {
+      "target_type": "openapi_operation",
+      "from_module": "apps/memberry",
+      "from_file": "apps/memberry/src/features/training/components/training-form.tsx",
+      "operation_id": "createTraining",
+      "method": "POST",
+      "endpoint": "/association/training",
+      "call_count": 1,
+      "confidence": "HIGH"
+    },
+    {
+      "target_type": "openapi_operation",
+      "from_module": "apps/memberry",
+      "from_file": "apps/memberry/src/features/training/components/training-form.tsx",
+      "operation_id": "updateTraining",
+      "method": "PATCH",
+      "endpoint": "/association/training/:trainingId",
+      "call_count": 1,
+      "confidence": "HIGH"
+    },
+    {
+      "target_type": "openapi_operation",
+      "from_module": "apps/memberry",
+      "from_file": "apps/memberry/src/features/training/components/training-list.tsx",
+      "operation_id": "cancelCustomTraining",
+      "method": "POST",
+      "endpoint": "/association/training-lifecycle/:trainingId/cancel",
+      "call_count": 1,
+      "confidence": "HIGH"
+    },
+    {
+      "target_type": "openapi_operation",
+      "from_module": "apps/memberry",
+      "from_file": "apps/memberry/src/features/training/components/training-list.tsx",
+      "operation_id": "searchTrainings",
+      "method": "GET",
+      "endpoint": "/association/training",
+      "call_count": 3,
+      "confidence": "HIGH"
+    },
+    {
+      "target_type": "openapi_operation",
+      "from_module": "apps/memberry",
+      "from_file": "apps/memberry/src/providers/OrgProvider.tsx",
+      "operation_id": "getOrganizationBySlug",
+      "method": "GET",
+      "endpoint": "/public/org/:slug",
+      "call_count": 1,
+      "confidence": "HIGH"
+    },
+    {
+      "target_type": "openapi_operation",
+      "from_module": "apps/memberry",
+      "from_file": "apps/memberry/src/routes/_authenticated/dashboard.tsx",
+      "operation_id": "getPerson",
+      "method": "GET",
+      "endpoint": "/persons/:person",
+      "call_count": 1,
+      "confidence": "HIGH"
+    },
+    {
+      "target_type": "openapi_operation",
+      "from_module": "apps/memberry",
+      "from_file": "apps/memberry/src/routes/_authenticated/dashboard.tsx",
+      "operation_id": "listElections",
+      "method": "GET",
+      "endpoint": "/association/member/elections",
+      "call_count": 1,
+      "confidence": "HIGH"
+    },
+    {
+      "target_type": "openapi_operation",
+      "from_module": "apps/memberry",
+      "from_file": "apps/memberry/src/routes/_authenticated/dashboard.tsx",
+      "operation_id": "listMyCustomEvents",
+      "method": "GET",
+      "endpoint": "/association/event-lifecycle/my",
+      "call_count": 1,
+      "confidence": "HIGH"
+    },
+    {
+      "target_type": "openapi_operation",
+      "from_module": "apps/memberry",
+      "from_file": "apps/memberry/src/routes/_authenticated/my/billing.tsx",
+      "operation_id": "getMerchantAccount",
+      "method": "GET",
+      "endpoint": "/billing/merchant-accounts/:merchantAccount",
+      "call_count": 1,
+      "confidence": "HIGH"
+    },
+    {
+      "target_type": "openapi_operation",
+      "from_module": "apps/memberry",
+      "from_file": "apps/memberry/src/routes/_authenticated/my/bookings/$bookingId.tsx",
+      "operation_id": "cancelBooking",
+      "method": "POST",
+      "endpoint": "/booking/bookings/:booking/cancel",
+      "call_count": 1,
+      "confidence": "HIGH"
+    },
+    {
+      "target_type": "openapi_operation",
+      "from_module": "apps/memberry",
+      "from_file": "apps/memberry/src/routes/_authenticated/my/bookings/$bookingId.tsx",
+      "operation_id": "confirmBooking",
+      "method": "POST",
+      "endpoint": "/booking/bookings/:booking/confirm",
+      "call_count": 1,
+      "confidence": "HIGH"
+    },
+    {
+      "target_type": "openapi_operation",
+      "from_module": "apps/memberry",
+      "from_file": "apps/memberry/src/routes/_authenticated/my/bookings/$bookingId.tsx",
+      "operation_id": "createChatRoom",
+      "method": "POST",
+      "endpoint": "/comms/chat-rooms",
+      "call_count": 1,
+      "confidence": "HIGH"
+    },
+    {
+      "target_type": "openapi_operation",
+      "from_module": "apps/memberry",
+      "from_file": "apps/memberry/src/routes/_authenticated/my/bookings/$bookingId.tsx",
+      "operation_id": "getBooking",
+      "method": "GET",
+      "endpoint": "/booking/bookings/:booking",
+      "call_count": 1,
+      "confidence": "HIGH"
+    },
+    {
+      "target_type": "openapi_operation",
+      "from_module": "apps/memberry",
+      "from_file": "apps/memberry/src/routes/_authenticated/my/bookings/$bookingId.tsx",
+      "operation_id": "listChatRooms",
+      "method": "GET",
+      "endpoint": "/comms/chat-rooms",
+      "call_count": 1,
+      "confidence": "HIGH"
+    },
+    {
+      "target_type": "openapi_operation",
+      "from_module": "apps/memberry",
+      "from_file": "apps/memberry/src/routes/_authenticated/my/bookings/$bookingId.tsx",
+      "operation_id": "payInvoice",
+      "method": "POST",
+      "endpoint": "/billing/invoices/:invoice/pay",
+      "call_count": 1,
+      "confidence": "HIGH"
+    },
+    {
+      "target_type": "openapi_operation",
+      "from_module": "apps/memberry",
+      "from_file": "apps/memberry/src/routes/_authenticated/my/bookings/$bookingId.tsx",
+      "operation_id": "rejectBooking",
+      "method": "POST",
+      "endpoint": "/booking/bookings/:booking/reject",
+      "call_count": 1,
+      "confidence": "HIGH"
+    },
+    {
+      "target_type": "openapi_operation",
+      "from_module": "apps/memberry",
+      "from_file": "apps/memberry/src/routes/_authenticated/my/bookings/host.$personId.$slotId.tsx",
+      "operation_id": "createBooking",
+      "method": "POST",
+      "endpoint": "/booking/bookings",
+      "call_count": 1,
+      "confidence": "HIGH"
+    },
+    {
+      "target_type": "openapi_operation",
+      "from_module": "apps/memberry",
+      "from_file": "apps/memberry/src/routes/_authenticated/my/bookings/host.$personId.$slotId.tsx",
+      "operation_id": "getBookingEvent",
+      "method": "GET",
+      "endpoint": "/booking/events/:event",
+      "call_count": 1,
+      "confidence": "HIGH"
+    },
+    {
+      "target_type": "openapi_operation",
+      "from_module": "apps/memberry",
+      "from_file": "apps/memberry/src/routes/_authenticated/my/bookings/host.$personId.$slotId.tsx",
+      "operation_id": "getTimeSlot",
+      "method": "GET",
+      "endpoint": "/booking/slots/:slotId",
+      "call_count": 1,
+      "confidence": "HIGH"
+    },
+    {
+      "target_type": "openapi_operation",
+      "from_module": "apps/memberry",
+      "from_file": "apps/memberry/src/routes/_authenticated/my/bookings/host.$personId.tsx",
+      "operation_id": "getPerson",
+      "method": "GET",
+      "endpoint": "/persons/:person",
+      "call_count": 1,
+      "confidence": "HIGH"
+    },
+    {
+      "target_type": "openapi_operation",
+      "from_module": "apps/memberry",
+      "from_file": "apps/memberry/src/routes/_authenticated/my/bookings/host.$personId.tsx",
+      "operation_id": "listBookingEvents",
+      "method": "GET",
+      "endpoint": "/booking/events",
+      "call_count": 1,
+      "confidence": "HIGH"
+    },
+    {
+      "target_type": "openapi_operation",
+      "from_module": "apps/memberry",
+      "from_file": "apps/memberry/src/routes/_authenticated/my/bookings/host.$personId.tsx",
+      "operation_id": "listEventSlots",
+      "method": "GET",
+      "endpoint": "/booking/events/:event/slots",
+      "call_count": 1,
+      "confidence": "HIGH"
+    },
+    {
+      "target_type": "openapi_operation",
+      "from_module": "apps/memberry",
+      "from_file": "apps/memberry/src/routes/_authenticated/my/calendar.tsx",
+      "operation_id": "listMyCustomEvents",
+      "method": "GET",
+      "endpoint": "/association/event-lifecycle/my",
+      "call_count": 1,
+      "confidence": "HIGH"
+    },
+    {
+      "target_type": "openapi_operation",
+      "from_module": "apps/memberry",
+      "from_file": "apps/memberry/src/routes/_authenticated/my/events.tsx",
+      "operation_id": "cancelEventRegistration",
+      "method": "POST",
+      "endpoint": "/association/events/registrations/:registrationId/cancel",
+      "call_count": 1,
+      "confidence": "HIGH"
+    },
+    {
+      "target_type": "openapi_operation",
+      "from_module": "apps/memberry",
+      "from_file": "apps/memberry/src/routes/_authenticated/my/events.tsx",
+      "operation_id": "listMyCustomEvents",
+      "method": "GET",
+      "endpoint": "/association/event-lifecycle/my",
+      "call_count": 1,
+      "confidence": "HIGH"
+    },
+    {
+      "target_type": "openapi_operation",
+      "from_module": "apps/memberry",
+      "from_file": "apps/memberry/src/routes/_authenticated/my/profile.tsx",
+      "operation_id": "createPerson",
+      "method": "POST",
+      "endpoint": "/persons",
+      "call_count": 1,
+      "confidence": "HIGH"
+    },
+    {
+      "target_type": "openapi_operation",
+      "from_module": "apps/memberry",
+      "from_file": "apps/memberry/src/routes/_authenticated/my/profile.tsx",
+      "operation_id": "getPerson",
+      "method": "GET",
+      "endpoint": "/persons/:person",
+      "call_count": 3,
+      "confidence": "HIGH"
+    },
+    {
+      "target_type": "openapi_operation",
+      "from_module": "apps/memberry",
+      "from_file": "apps/memberry/src/routes/_authenticated/my/profile.tsx",
+      "operation_id": "updatePerson",
+      "method": "PATCH",
+      "endpoint": "/persons/:person",
+      "call_count": 1,
+      "confidence": "HIGH"
+    },
+    {
+      "target_type": "openapi_operation",
+      "from_module": "apps/memberry",
+      "from_file": "apps/memberry/src/routes/_authenticated/my/schedule.tsx",
+      "operation_id": "getBookingEvent",
+      "method": "GET",
+      "endpoint": "/booking/events/:event",
+      "call_count": 1,
+      "confidence": "HIGH"
+    },
+    {
+      "target_type": "openapi_operation",
+      "from_module": "apps/memberry",
+      "from_file": "apps/memberry/src/routes/_authenticated/my/surveys/index.tsx",
+      "operation_id": "listSurveys",
+      "method": "GET",
+      "endpoint": "/surveys/",
+      "call_count": 1,
+      "confidence": "HIGH"
+    },
+    {
+      "target_type": "openapi_operation",
+      "from_module": "apps/memberry",
+      "from_file": "apps/memberry/src/routes/_authenticated/my/training.tsx",
+      "operation_id": "listMyCustomTrainings",
+      "method": "GET",
+      "endpoint": "/association/training-lifecycle/my",
+      "call_count": 1,
+      "confidence": "HIGH"
+    },
+    {
+      "target_type": "openapi_operation",
+      "from_module": "apps/memberry",
+      "from_file": "apps/memberry/src/routes/_authenticated/my/training.tsx",
+      "operation_id": "searchTrainings",
+      "method": "GET",
+      "endpoint": "/association/training",
+      "call_count": 1,
+      "confidence": "HIGH"
+    },
+    {
+      "target_type": "openapi_operation",
+      "from_module": "apps/memberry",
+      "from_file": "apps/memberry/src/routes/_authenticated/org/$orgSlug/documents/$documentId.tsx",
+      "operation_id": "getDocument",
+      "method": "GET",
+      "endpoint": "/association/documents/:documentId",
+      "call_count": 1,
+      "confidence": "HIGH"
+    },
+    {
+      "target_type": "openapi_operation",
+      "from_module": "apps/memberry",
+      "from_file": "apps/memberry/src/routes/_authenticated/org/$orgSlug/documents/$documentId.tsx",
+      "operation_id": "listDocumentVersions",
+      "method": "GET",
+      "endpoint": "/association/documents/:documentId/versions",
+      "call_count": 1,
+      "confidence": "HIGH"
+    },
+    {
+      "target_type": "openapi_operation",
+      "from_module": "apps/memberry",
+      "from_file": "apps/memberry/src/routes/_authenticated/org/$orgSlug/dues.tsx",
+      "operation_id": "listDuesInvoices",
+      "method": "GET",
+      "endpoint": "/association/member/dues-invoices",
+      "call_count": 1,
+      "confidence": "HIGH"
+    },
+    {
+      "target_type": "openapi_operation",
+      "from_module": "apps/memberry",
+      "from_file": "apps/memberry/src/routes/_authenticated/org/$orgSlug/dues.tsx",
+      "operation_id": "listDuesPayments",
+      "method": "GET",
+      "endpoint": "/association/member/dues-payments",
+      "call_count": 1,
+      "confidence": "HIGH"
+    },
+    {
+      "target_type": "openapi_operation",
+      "from_module": "apps/memberry",
+      "from_file": "apps/memberry/src/routes/_authenticated/org/$orgSlug/events/$eventId.tsx",
+      "operation_id": "cancelEventRegistration",
+      "method": "POST",
+      "endpoint": "/association/events/registrations/:registrationId/cancel",
+      "call_count": 1,
+      "confidence": "HIGH"
+    },
+    {
+      "target_type": "openapi_operation",
+      "from_module": "apps/memberry",
+      "from_file": "apps/memberry/src/routes/_authenticated/org/$orgSlug/events/$eventId.tsx",
+      "operation_id": "getEvent",
+      "method": "GET",
+      "endpoint": "/association/events/:eventId",
+      "call_count": 1,
+      "confidence": "HIGH"
+    },
+    {
+      "target_type": "openapi_operation",
+      "from_module": "apps/memberry",
+      "from_file": "apps/memberry/src/routes/_authenticated/org/$orgSlug/events/$eventId.tsx",
+      "operation_id": "listMyCustomEvents",
+      "method": "GET",
+      "endpoint": "/association/event-lifecycle/my",
+      "call_count": 1,
+      "confidence": "HIGH"
+    },
+    {
+      "target_type": "openapi_operation",
+      "from_module": "apps/memberry",
+      "from_file": "apps/memberry/src/routes/_authenticated/org/$orgSlug/events/$eventId.tsx",
+      "operation_id": "registerAndPayForEvent",
+      "method": "POST",
+      "endpoint": "/association/event-lifecycle/:eventId/register-and-pay",
+      "call_count": 1,
+      "confidence": "HIGH"
+    },
+    {
+      "target_type": "openapi_operation",
+      "from_module": "apps/memberry",
+      "from_file": "apps/memberry/src/routes/_authenticated/org/$orgSlug/events/$eventId.tsx",
+      "operation_id": "registerForCustomEvent",
+      "method": "POST",
+      "endpoint": "/association/event-lifecycle/:eventId/register",
+      "call_count": 1,
+      "confidence": "HIGH"
+    },
+    {
+      "target_type": "openapi_operation",
+      "from_module": "apps/memberry",
+      "from_file": "apps/memberry/src/routes/_authenticated/org/$orgSlug/events/index.tsx",
+      "operation_id": "searchEvents",
+      "method": "GET",
+      "endpoint": "/association/events",
+      "call_count": 1,
+      "confidence": "HIGH"
+    },
+    {
+      "target_type": "openapi_operation",
+      "from_module": "apps/memberry",
+      "from_file": "apps/memberry/src/routes/_authenticated/org/$orgSlug/governance/index.tsx",
+      "operation_id": "listElections",
+      "method": "GET",
+      "endpoint": "/association/member/elections",
+      "call_count": 1,
+      "confidence": "HIGH"
+    },
+    {
+      "target_type": "openapi_operation",
+      "from_module": "apps/memberry",
+      "from_file": "apps/memberry/src/routes/_authenticated/org/$orgSlug/governance/index.tsx",
+      "operation_id": "searchDocuments",
+      "method": "GET",
+      "endpoint": "/association/documents",
+      "call_count": 1,
+      "confidence": "HIGH"
+    },
+    {
+      "target_type": "openapi_operation",
+      "from_module": "apps/memberry",
+      "from_file": "apps/memberry/src/routes/_authenticated/org/$orgSlug/home.tsx",
+      "operation_id": "listAnnouncements",
+      "method": "GET",
+      "endpoint": "/communications/announcements/:organizationId",
+      "call_count": 1,
+      "confidence": "HIGH"
+    },
+    {
+      "target_type": "openapi_operation",
+      "from_module": "apps/memberry",
+      "from_file": "apps/memberry/src/routes/_authenticated/org/$orgSlug/home.tsx",
+      "operation_id": "searchEvents",
+      "method": "GET",
+      "endpoint": "/association/events",
+      "call_count": 1,
+      "confidence": "HIGH"
+    },
+    {
+      "target_type": "openapi_operation",
+      "from_module": "apps/memberry",
+      "from_file": "apps/memberry/src/routes/_authenticated/org/$orgSlug/messages/dm/index.tsx",
+      "operation_id": "getPerson",
+      "method": "GET",
+      "endpoint": "/persons/:person",
+      "call_count": 1,
+      "confidence": "HIGH"
+    },
+    {
+      "target_type": "openapi_operation",
+      "from_module": "apps/memberry",
+      "from_file": "apps/memberry/src/routes/_authenticated/org/$orgSlug/messages/index.tsx",
+      "operation_id": "getPerson",
+      "method": "GET",
+      "endpoint": "/persons/:person",
+      "call_count": 1,
+      "confidence": "HIGH"
+    },
+    {
+      "target_type": "openapi_operation",
+      "from_module": "apps/memberry",
+      "from_file": "apps/memberry/src/routes/_authenticated/org/$orgSlug/officer/documents/$documentId.tsx",
+      "operation_id": "createDocumentTag",
+      "method": "POST",
+      "endpoint": "/association/document-tags",
+      "call_count": 1,
+      "confidence": "HIGH"
+    },
+    {
+      "target_type": "openapi_operation",
+      "from_module": "apps/memberry",
+      "from_file": "apps/memberry/src/routes/_authenticated/org/$orgSlug/officer/documents/$documentId.tsx",
+      "operation_id": "getDocument",
+      "method": "GET",
+      "endpoint": "/association/documents/:documentId",
+      "call_count": 1,
+      "confidence": "HIGH"
+    },
+    {
+      "target_type": "openapi_operation",
+      "from_module": "apps/memberry",
+      "from_file": "apps/memberry/src/routes/_authenticated/org/$orgSlug/officer/documents/$documentId.tsx",
+      "operation_id": "getDocumentAccessLog",
+      "method": "GET",
+      "endpoint": "/association/documents/:documentId/access-log",
+      "call_count": 1,
+      "confidence": "HIGH"
+    },
+    {
+      "target_type": "openapi_operation",
+      "from_module": "apps/memberry",
+      "from_file": "apps/memberry/src/routes/_authenticated/org/$orgSlug/officer/documents/$documentId.tsx",
+      "operation_id": "listDocumentTags",
+      "method": "GET",
+      "endpoint": "/association/document-tags",
+      "call_count": 1,
+      "confidence": "HIGH"
+    },
+    {
+      "target_type": "openapi_operation",
+      "from_module": "apps/memberry",
+      "from_file": "apps/memberry/src/routes/_authenticated/org/$orgSlug/officer/documents/$documentId.tsx",
+      "operation_id": "listDocumentVersions",
+      "method": "GET",
+      "endpoint": "/association/documents/:documentId/versions",
+      "call_count": 1,
+      "confidence": "HIGH"
+    },
+    {
+      "target_type": "openapi_operation",
+      "from_module": "apps/memberry",
+      "from_file": "apps/memberry/src/routes/_authenticated/org/$orgSlug/officer/documents/$documentId.tsx",
+      "operation_id": "updateDocument",
+      "method": "PATCH",
+      "endpoint": "/association/documents/:documentId",
+      "call_count": 1,
+      "confidence": "HIGH"
+    },
+    {
+      "target_type": "openapi_operation",
+      "from_module": "apps/memberry",
+      "from_file": "apps/memberry/src/routes/_authenticated/org/$orgSlug/officer/documents/$documentId.tsx",
+      "operation_id": "uploadNewDocumentVersion",
+      "method": "POST",
+      "endpoint": "/association/documents/:documentId/versions",
+      "call_count": 1,
+      "confidence": "HIGH"
+    },
+    {
+      "target_type": "openapi_operation",
+      "from_module": "apps/memberry",
+      "from_file": "apps/memberry/src/routes/_authenticated/org/$orgSlug/officer/elections/$electionId/edit.tsx",
+      "operation_id": "getElection",
+      "method": "GET",
+      "endpoint": "/association/member/elections/:electionId",
+      "call_count": 1,
+      "confidence": "HIGH"
+    },
+    {
+      "target_type": "openapi_operation",
+      "from_module": "apps/memberry",
+      "from_file": "apps/memberry/src/routes/_authenticated/org/$orgSlug/officer/events/$eventId.tsx",
+      "operation_id": "getEvent",
+      "method": "GET",
+      "endpoint": "/association/events/:eventId",
+      "call_count": 1,
+      "confidence": "HIGH"
+    },
+    {
+      "target_type": "openapi_operation",
+      "from_module": "apps/memberry",
+      "from_file": "apps/memberry/src/routes/_authenticated/org/$orgSlug/officer/events/$eventId.tsx",
+      "operation_id": "listCustomEventRegistrations",
+      "method": "GET",
+      "endpoint": "/association/event-lifecycle/:eventId/registrations",
+      "call_count": 1,
+      "confidence": "HIGH"
+    },
+    {
+      "target_type": "openapi_operation",
+      "from_module": "apps/memberry",
+      "from_file": "apps/memberry/src/routes/_authenticated/org/$orgSlug/officer/events/$eventId/attendance.tsx",
+      "operation_id": "checkInCustomEvent",
+      "method": "POST",
+      "endpoint": "/association/event-lifecycle/:eventId/check-in",
+      "call_count": 1,
+      "confidence": "HIGH"
+    },
+    {
+      "target_type": "openapi_operation",
+      "from_module": "apps/memberry",
+      "from_file": "apps/memberry/src/routes/_authenticated/org/$orgSlug/officer/events/$eventId/attendance.tsx",
+      "operation_id": "listCustomEventRegistrations",
+      "method": "GET",
+      "endpoint": "/association/event-lifecycle/:eventId/registrations",
+      "call_count": 1,
+      "confidence": "HIGH"
+    },
+    {
+      "target_type": "openapi_operation",
+      "from_module": "apps/memberry",
+      "from_file": "apps/memberry/src/routes/_authenticated/org/$orgSlug/officer/finances/funds.tsx",
+      "operation_id": "getDuesFinancialDashboard",
+      "method": "GET",
+      "endpoint": "/association/member/dues-reporting/:organizationId/dashboard",
+      "call_count": 1,
+      "confidence": "HIGH"
+    },
+    {
+      "target_type": "openapi_operation",
+      "from_module": "apps/memberry",
+      "from_file": "apps/memberry/src/routes/_authenticated/org/$orgSlug/officer/finances/funds.tsx",
+      "operation_id": "listDuesFunds",
+      "method": "GET",
+      "endpoint": "/association/member/dues-reporting",
+      "call_count": 1,
+      "confidence": "HIGH"
+    },
+    {
+      "target_type": "openapi_operation",
+      "from_module": "apps/memberry",
+      "from_file": "apps/memberry/src/routes/_authenticated/org/$orgSlug/officer/finances/funds.tsx",
+      "operation_id": "upsertDuesFunds",
+      "method": "PUT",
+      "endpoint": "/association/member/dues-reporting/:organizationId",
+      "call_count": 1,
+      "confidence": "HIGH"
+    },
+    {
+      "target_type": "openapi_operation",
+      "from_module": "apps/memberry",
+      "from_file": "apps/memberry/src/routes/_authenticated/org/$orgSlug/officer/finances/index.tsx",
+      "operation_id": "getDuesFinancialDashboard",
+      "method": "GET",
+      "endpoint": "/association/member/dues-reporting/:organizationId/dashboard",
+      "call_count": 1,
+      "confidence": "HIGH"
+    },
+    {
+      "target_type": "openapi_operation",
+      "from_module": "apps/memberry",
+      "from_file": "apps/memberry/src/routes/_authenticated/org/$orgSlug/officer/finances/invoices.tsx",
+      "operation_id": "listDuesInvoices",
+      "method": "GET",
+      "endpoint": "/association/member/dues-invoices",
+      "call_count": 1,
+      "confidence": "HIGH"
+    },
+    {
+      "target_type": "openapi_operation",
+      "from_module": "apps/memberry",
+      "from_file": "apps/memberry/src/routes/_authenticated/org/$orgSlug/officer/finances/invoices.tsx",
+      "operation_id": "markDuesInvoicePaid",
+      "method": "POST",
+      "endpoint": "/association/member/dues-invoices/:invoiceId/mark-paid",
+      "call_count": 1,
+      "confidence": "HIGH"
+    },
+    {
+      "target_type": "openapi_operation",
+      "from_module": "apps/memberry",
+      "from_file": "apps/memberry/src/routes/_authenticated/org/$orgSlug/officer/finances/invoices/$invoiceId.tsx",
+      "operation_id": "getDuesInvoice",
+      "method": "GET",
+      "endpoint": "/association/member/dues-invoices/:invoiceId",
+      "call_count": 1,
+      "confidence": "HIGH"
+    },
+    {
+      "target_type": "openapi_operation",
+      "from_module": "apps/memberry",
+      "from_file": "apps/memberry/src/routes/_authenticated/org/$orgSlug/officer/finances/invoices/$invoiceId.tsx",
+      "operation_id": "markDuesInvoicePaid",
+      "method": "POST",
+      "endpoint": "/association/member/dues-invoices/:invoiceId/mark-paid",
+      "call_count": 1,
+      "confidence": "HIGH"
+    },
+    {
+      "target_type": "openapi_operation",
+      "from_module": "apps/memberry",
+      "from_file": "apps/memberry/src/routes/_authenticated/org/$orgSlug/officer/finances/invoices/index.tsx",
+      "operation_id": "generateDuesInvoicesForOrg",
+      "method": "POST",
+      "endpoint": "/association/member/dues-invoices/generate",
+      "call_count": 1,
+      "confidence": "HIGH"
+    },
+    {
+      "target_type": "openapi_operation",
+      "from_module": "apps/memberry",
+      "from_file": "apps/memberry/src/routes/_authenticated/org/$orgSlug/officer/finances/invoices/index.tsx",
+      "operation_id": "listDuesInvoices",
+      "method": "GET",
+      "endpoint": "/association/member/dues-invoices",
+      "call_count": 1,
+      "confidence": "HIGH"
+    },
+    {
+      "target_type": "openapi_operation",
+      "from_module": "apps/memberry",
+      "from_file": "apps/memberry/src/routes/_authenticated/org/$orgSlug/officer/finances/invoices/index.tsx",
+      "operation_id": "markDuesInvoicePaid",
+      "method": "POST",
+      "endpoint": "/association/member/dues-invoices/:invoiceId/mark-paid",
+      "call_count": 1,
+      "confidence": "HIGH"
+    },
+    {
+      "target_type": "openapi_operation",
+      "from_module": "apps/memberry",
+      "from_file": "apps/memberry/src/routes/_authenticated/org/$orgSlug/officer/finances/invoices/index.tsx",
+      "operation_id": "updateDuesInvoice",
+      "method": "PATCH",
+      "endpoint": "/association/member/dues-invoices/:invoiceId",
+      "call_count": 1,
+      "confidence": "HIGH"
+    },
+    {
+      "target_type": "openapi_operation",
+      "from_module": "apps/memberry",
+      "from_file": "apps/memberry/src/routes/_authenticated/org/$orgSlug/officer/finances/members.tsx",
+      "operation_id": "listDuesInvoices",
+      "method": "GET",
+      "endpoint": "/association/member/dues-invoices",
+      "call_count": 1,
+      "confidence": "HIGH"
+    },
+    {
+      "target_type": "openapi_operation",
+      "from_module": "apps/memberry",
+      "from_file": "apps/memberry/src/routes/_authenticated/org/$orgSlug/officer/finances/members.tsx",
+      "operation_id": "listMembershipCategories",
+      "method": "GET",
+      "endpoint": "/association/member/membership-categories",
+      "call_count": 1,
+      "confidence": "HIGH"
+    },
+    {
+      "target_type": "openapi_operation",
+      "from_module": "apps/memberry",
+      "from_file": "apps/memberry/src/routes/_authenticated/org/$orgSlug/officer/finances/members.tsx",
+      "operation_id": "listRosterMembers",
+      "method": "GET",
+      "endpoint": "/association/member/roster",
+      "call_count": 1,
+      "confidence": "HIGH"
+    },
+    {
+      "target_type": "openapi_operation",
+      "from_module": "apps/memberry",
+      "from_file": "apps/memberry/src/routes/_authenticated/org/$orgSlug/officer/institutional-memberships/$institutionalMembershipId.tsx",
+      "operation_id": "deleteInstitutionalMembership",
+      "method": "DELETE",
+      "endpoint": "/association/member/institutional-memberships/:institutionalMembershipId",
+      "call_count": 1,
+      "confidence": "HIGH"
+    },
+    {
+      "target_type": "openapi_operation",
+      "from_module": "apps/memberry",
+      "from_file": "apps/memberry/src/routes/_authenticated/org/$orgSlug/officer/institutional-memberships/$institutionalMembershipId.tsx",
+      "operation_id": "getInstitutionalMembership",
+      "method": "GET",
+      "endpoint": "/association/member/institutional-memberships/:institutionalMembershipId",
+      "call_count": 1,
+      "confidence": "HIGH"
+    },
+    {
+      "target_type": "openapi_operation",
+      "from_module": "apps/memberry",
+      "from_file": "apps/memberry/src/routes/_authenticated/org/$orgSlug/officer/messages/index.tsx",
+      "operation_id": "getPerson",
+      "method": "GET",
+      "endpoint": "/persons/:person",
+      "call_count": 1,
+      "confidence": "HIGH"
+    },
+    {
+      "target_type": "openapi_operation",
+      "from_module": "apps/memberry",
+      "from_file": "apps/memberry/src/routes/_authenticated/org/$orgSlug/officer/payments/$paymentId.tsx",
+      "operation_id": "getDuesPayment",
+      "method": "GET",
+      "endpoint": "/association/member/dues-payments/:paymentId",
+      "call_count": 1,
+      "confidence": "HIGH"
+    },
+    {
+      "target_type": "openapi_operation",
+      "from_module": "apps/memberry",
+      "from_file": "apps/memberry/src/routes/_authenticated/org/$orgSlug/officer/payments/index.tsx",
+      "operation_id": "generateDuesInvoicesForOrg",
+      "method": "POST",
+      "endpoint": "/association/member/dues-invoices/generate",
+      "call_count": 1,
+      "confidence": "HIGH"
+    },
+    {
+      "target_type": "openapi_operation",
+      "from_module": "apps/memberry",
+      "from_file": "apps/memberry/src/routes/_authenticated/org/$orgSlug/officer/reports/financial.tsx",
+      "operation_id": "generateDuesReport",
+      "method": "GET",
+      "endpoint": "/association/member/dues-reporting/:organizationId/report",
+      "call_count": 1,
+      "confidence": "HIGH"
+    },
+    {
+      "target_type": "openapi_operation",
+      "from_module": "apps/memberry",
+      "from_file": "apps/memberry/src/routes/_authenticated/org/$orgSlug/officer/roster/import.tsx",
+      "operation_id": "importRosterMembers",
+      "method": "POST",
+      "endpoint": "/association/member/roster/import",
+      "call_count": 1,
+      "confidence": "HIGH"
+    },
+    {
+      "target_type": "openapi_operation",
+      "from_module": "apps/memberry",
+      "from_file": "apps/memberry/src/routes/_authenticated/org/$orgSlug/officer/roster/index.tsx",
+      "operation_id": "addRosterMember",
+      "method": "POST",
+      "endpoint": "/association/member/roster",
+      "call_count": 1,
+      "confidence": "HIGH"
+    },
+    {
+      "target_type": "openapi_operation",
+      "from_module": "apps/memberry",
+      "from_file": "apps/memberry/src/routes/_authenticated/org/$orgSlug/officer/roster/index.tsx",
+      "operation_id": "getOrgCpdConfig",
+      "method": "GET",
+      "endpoint": "/association/member/cpd-config/:organizationId",
+      "call_count": 1,
+      "confidence": "HIGH"
+    },
+    {
+      "target_type": "openapi_operation",
+      "from_module": "apps/memberry",
+      "from_file": "apps/memberry/src/routes/_authenticated/org/$orgSlug/officer/training/$trainingId.tsx",
+      "operation_id": "getTraining",
+      "method": "GET",
+      "endpoint": "/association/training/:trainingId",
+      "call_count": 1,
+      "confidence": "HIGH"
+    },
+    {
+      "target_type": "openapi_operation",
+      "from_module": "apps/memberry",
+      "from_file": "apps/memberry/src/routes/_authenticated/org/$orgSlug/officer/training/$trainingId/attendance.tsx",
+      "operation_id": "checkInCustomTraining",
+      "method": "POST",
+      "endpoint": "/association/training-lifecycle/:trainingId/check-in",
+      "call_count": 1,
+      "confidence": "HIGH"
+    },
+    {
+      "target_type": "openapi_operation",
+      "from_module": "apps/memberry",
+      "from_file": "apps/memberry/src/routes/_authenticated/org/$orgSlug/officer/training/$trainingId/attendance.tsx",
+      "operation_id": "listCustomTrainingEnrollments",
+      "method": "GET",
+      "endpoint": "/association/training-lifecycle/:trainingId/enrollments",
+      "call_count": 1,
+      "confidence": "HIGH"
+    },
+    {
+      "target_type": "openapi_operation",
+      "from_module": "apps/memberry",
+      "from_file": "apps/memberry/src/routes/_authenticated/org/$orgSlug/route.tsx",
+      "operation_id": "getOrganization",
+      "method": "GET",
+      "endpoint": "/admin/organizations/:organizationId",
+      "call_count": 1,
+      "confidence": "HIGH"
+    },
+    {
+      "target_type": "openapi_operation",
+      "from_module": "apps/memberry",
+      "from_file": "apps/memberry/src/routes/_authenticated/org/$orgSlug/training/$trainingId.tsx",
+      "operation_id": "enrollInCustomTraining",
+      "method": "POST",
+      "endpoint": "/association/training-lifecycle/:trainingId/enroll",
+      "call_count": 1,
+      "confidence": "HIGH"
+    },
+    {
+      "target_type": "openapi_operation",
+      "from_module": "apps/memberry",
+      "from_file": "apps/memberry/src/routes/_authenticated/org/$orgSlug/training/$trainingId.tsx",
+      "operation_id": "getTraining",
+      "method": "GET",
+      "endpoint": "/association/training/:trainingId",
+      "call_count": 1,
+      "confidence": "HIGH"
+    },
+    {
+      "target_type": "openapi_operation",
+      "from_module": "apps/memberry",
+      "from_file": "apps/memberry/src/routes/_authenticated/org/$orgSlug/training/$trainingId.tsx",
+      "operation_id": "listMyCustomTrainings",
+      "method": "GET",
+      "endpoint": "/association/training-lifecycle/my",
+      "call_count": 2,
+      "confidence": "HIGH"
+    },
+    {
+      "target_type": "openapi_operation",
+      "from_module": "apps/memberry",
+      "from_file": "apps/memberry/src/routes/_authenticated/org/$orgSlug/training/index.tsx",
+      "operation_id": "searchTrainings",
+      "method": "GET",
+      "endpoint": "/association/training",
+      "call_count": 1,
+      "confidence": "HIGH"
+    },
+    {
+      "target_type": "openapi_operation",
+      "from_module": "apps/memberry",
+      "from_file": "apps/memberry/src/routes/_authenticated/settings/account.tsx",
+      "operation_id": "cancelMyAccountDeletion",
+      "method": "POST",
+      "endpoint": "/persons/me/cancel-delete",
+      "call_count": 1,
+      "confidence": "HIGH"
+    },
+    {
+      "target_type": "openapi_operation",
+      "from_module": "apps/memberry",
+      "from_file": "apps/memberry/src/routes/_authenticated/settings/account.tsx",
+      "operation_id": "exportMyData",
+      "method": "GET",
+      "endpoint": "/persons/me/export",
+      "call_count": 1,
+      "confidence": "HIGH"
+    },
+    {
+      "target_type": "openapi_operation",
+      "from_module": "apps/memberry",
+      "from_file": "apps/memberry/src/routes/_authenticated/settings/account.tsx",
+      "operation_id": "getPerson",
+      "method": "GET",
+      "endpoint": "/persons/:person",
+      "call_count": 1,
+      "confidence": "HIGH"
+    },
+    {
+      "target_type": "openapi_operation",
+      "from_module": "apps/memberry",
+      "from_file": "apps/memberry/src/routes/_authenticated/settings/account.tsx",
+      "operation_id": "requestMyAccountDeletion",
+      "method": "POST",
+      "endpoint": "/persons/me/delete",
+      "call_count": 1,
+      "confidence": "HIGH"
+    },
+    {
+      "target_type": "openapi_operation",
+      "from_module": "apps/memberry",
+      "from_file": "apps/memberry/src/routes/_authenticated/settings/account.tsx",
+      "operation_id": "updatePerson",
+      "method": "PATCH",
+      "endpoint": "/persons/:person",
+      "call_count": 1,
+      "confidence": "HIGH"
+    },
+    {
+      "target_type": "openapi_operation",
+      "from_module": "apps/memberry",
+      "from_file": "apps/memberry/src/routes/discover/events.tsx",
+      "operation_id": "listPublicEvents",
+      "method": "GET",
+      "endpoint": "/public/events",
+      "call_count": 1,
+      "confidence": "HIGH"
+    },
+    {
+      "target_type": "openapi_operation",
+      "from_module": "apps/memberry",
+      "from_file": "apps/memberry/src/routes/events/$eventSlug.tsx",
+      "operation_id": "getPublicEvent",
+      "method": "GET",
+      "endpoint": "/public/events/:slug",
+      "call_count": 1,
+      "confidence": "HIGH"
+    },
+    {
+      "target_type": "openapi_operation",
+      "from_module": "apps/memberry",
+      "from_file": "apps/memberry/src/routes/onboarding.tsx",
+      "operation_id": "createPerson",
+      "method": "POST",
+      "endpoint": "/persons",
+      "call_count": 1,
+      "confidence": "HIGH"
+    }
+  ],
+  "circular_deps": [
+    [
+      "handlers/association:operations",
+      "handlers/dues",
+      "handlers/membership",
+      "handlers/person",
+      "handlers/elections",
+      "handlers/association:member"
+    ]
+  ],
+  "high_fan_in": [
+    {
+      "module": "handlers/membership",
+      "importers": 3
+    },
+    {
+      "module": "handlers/person",
+      "importers": 11
+    },
+    {
+      "module": "handlers/dues",
+      "importers": 2
+    },
+    {
+      "module": "handlers/association:operations",
+      "importers": 3
+    },
+    {
+      "module": "handlers/association:member",
+      "importers": 7
+    },
+    {
+      "module": "handlers/platformadmin",
+      "importers": 3
+    }
+  ],
+  "high_fan_out": [
+    {
+      "module": "handlers/association:member",
+      "imports": 5
+    },
+    {
+      "module": "handlers/association:operations",
+      "imports": 2
+    },
+    {
+      "module": "handlers/booking",
+      "imports": 2
+    },
+    {
+      "module": "handlers/certificates",
+      "imports": 2
+    },
+    {
+      "module": "handlers/communication",
+      "imports": 3
+    },
+    {
+      "module": "handlers/dues",
+      "imports": 2
+    },
+    {
+      "module": "handlers/elections",
+      "imports": 2
+    },
+    {
+      "module": "handlers/events",
+      "imports": 2
+    },
+    {
+      "module": "handlers/invite",
+      "imports": 2
+    },
+    {
+      "module": "handlers/membership",
+      "imports": 4
+    },
+    {
+      "module": "handlers/surveys",
+      "imports": 2
+    }
+  ]
+}

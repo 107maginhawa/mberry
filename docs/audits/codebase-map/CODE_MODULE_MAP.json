@@ -1,0 +1,370 @@
+{
+  "version": 6,
+  "modules": {
+    "apps/admin": {
+      "name": "apps/admin",
+      "source_path": "apps/admin",
+      "framework": "react",
+      "entry_points": [],
+      "public_exports": [],
+      "file_count": 50,
+      "has_spec": false,
+      "spec_path": null,
+      "confidence": "MEDIUM"
+    },
+    "apps/memberry": {
+      "name": "apps/memberry",
+      "source_path": "apps/memberry",
+      "framework": "react",
+      "entry_points": [],
+      "public_exports": [],
+      "file_count": 442,
+      "has_spec": false,
+      "spec_path": null,
+      "confidence": "MEDIUM"
+    },
+    "handlers/advertising": {
+      "name": "handlers/advertising",
+      "source_path": "services/api-ts/src/handlers/advertising",
+      "framework": "generic",
+      "entry_points": [],
+      "public_exports": [],
+      "file_count": 11,
+      "has_spec": false,
+      "spec_path": null,
+      "confidence": "LOW"
+    },
+    "handlers/association:member": {
+      "name": "handlers/association:member",
+      "source_path": "services/api-ts/src/handlers/association:member",
+      "framework": "hono",
+      "entry_points": [],
+      "public_exports": [],
+      "file_count": 241,
+      "has_spec": false,
+      "spec_path": null,
+      "confidence": "MEDIUM"
+    },
+    "handlers/association:operations": {
+      "name": "handlers/association:operations",
+      "source_path": "services/api-ts/src/handlers/association:operations",
+      "framework": "hono",
+      "entry_points": [],
+      "public_exports": [],
+      "file_count": 80,
+      "has_spec": false,
+      "spec_path": null,
+      "confidence": "MEDIUM"
+    },
+    "handlers/audit": {
+      "name": "handlers/audit",
+      "source_path": "services/api-ts/src/handlers/audit",
+      "framework": "generic",
+      "entry_points": [],
+      "public_exports": [],
+      "file_count": 4,
+      "has_spec": false,
+      "spec_path": null,
+      "confidence": "LOW"
+    },
+    "handlers/billing": {
+      "name": "handlers/billing",
+      "source_path": "services/api-ts/src/handlers/billing",
+      "framework": "generic",
+      "entry_points": [],
+      "public_exports": [],
+      "file_count": 18,
+      "has_spec": false,
+      "spec_path": null,
+      "confidence": "LOW"
+    },
+    "handlers/booking": {
+      "name": "handlers/booking",
+      "source_path": "services/api-ts/src/handlers/booking",
+      "framework": "hono",
+      "entry_points": [],
+      "public_exports": [],
+      "file_count": 32,
+      "has_spec": false,
+      "spec_path": null,
+      "confidence": "MEDIUM"
+    },
+    "handlers/certificates": {
+      "name": "handlers/certificates",
+      "source_path": "services/api-ts/src/handlers/certificates",
+      "framework": "hono",
+      "entry_points": [],
+      "public_exports": [],
+      "file_count": 9,
+      "has_spec": false,
+      "spec_path": null,
+      "confidence": "MEDIUM"
+    },
+    "handlers/comms": {
+      "name": "handlers/comms",
+      "source_path": "services/api-ts/src/handlers/comms",
+      "framework": "hono",
+      "entry_points": [],
+      "public_exports": [],
+      "file_count": 17,
+      "has_spec": false,
+      "spec_path": null,
+      "confidence": "MEDIUM"
+    },
+    "handlers/communication": {
+      "name": "handlers/communication",
+      "source_path": "services/api-ts/src/handlers/communication",
+      "framework": "hono",
+      "entry_points": [],
+      "public_exports": [],
+      "file_count": 50,
+      "has_spec": false,
+      "spec_path": null,
+      "confidence": "MEDIUM"
+    },
+    "handlers/default": {
+      "name": "handlers/default",
+      "source_path": "services/api-ts/src/handlers/default",
+      "framework": "generic",
+      "entry_points": [],
+      "public_exports": [],
+      "file_count": 1,
+      "has_spec": false,
+      "spec_path": null,
+      "confidence": "LOW"
+    },
+    "handlers/documents": {
+      "name": "handlers/documents",
+      "source_path": "services/api-ts/src/handlers/documents",
+      "framework": "hono",
+      "entry_points": [],
+      "public_exports": [],
+      "file_count": 18,
+      "has_spec": false,
+      "spec_path": null,
+      "confidence": "MEDIUM"
+    },
+    "handlers/dues": {
+      "name": "handlers/dues",
+      "source_path": "services/api-ts/src/handlers/dues",
+      "framework": "hono",
+      "entry_points": [],
+      "public_exports": [],
+      "file_count": 19,
+      "has_spec": false,
+      "spec_path": null,
+      "confidence": "MEDIUM"
+    },
+    "handlers/elections": {
+      "name": "handlers/elections",
+      "source_path": "services/api-ts/src/handlers/elections",
+      "framework": "hono",
+      "entry_points": [],
+      "public_exports": [],
+      "file_count": 6,
+      "has_spec": false,
+      "spec_path": null,
+      "confidence": "MEDIUM"
+    },
+    "handlers/email": {
+      "name": "handlers/email",
+      "source_path": "services/api-ts/src/handlers/email",
+      "framework": "hono",
+      "entry_points": [],
+      "public_exports": [],
+      "file_count": 23,
+      "has_spec": false,
+      "spec_path": null,
+      "confidence": "MEDIUM"
+    },
+    "handlers/events": {
+      "name": "handlers/events",
+      "source_path": "services/api-ts/src/handlers/events",
+      "framework": "hono",
+      "entry_points": [],
+      "public_exports": [],
+      "file_count": 14,
+      "has_spec": false,
+      "spec_path": null,
+      "confidence": "MEDIUM"
+    },
+    "handlers/invite": {
+      "name": "handlers/invite",
+      "source_path": "services/api-ts/src/handlers/invite",
+      "framework": "generic",
+      "entry_points": [],
+      "public_exports": [],
+      "file_count": 7,
+      "has_spec": false,
+      "spec_path": null,
+      "confidence": "LOW"
+    },
+    "handlers/jobs": {
+      "name": "handlers/jobs",
+      "source_path": "services/api-ts/src/handlers/jobs",
+      "framework": "hono",
+      "entry_points": [],
+      "public_exports": [],
+      "file_count": 9,
+      "has_spec": false,
+      "spec_path": null,
+      "confidence": "MEDIUM"
+    },
+    "handlers/marketplace": {
+      "name": "handlers/marketplace",
+      "source_path": "services/api-ts/src/handlers/marketplace",
+      "framework": "generic",
+      "entry_points": [],
+      "public_exports": [],
+      "file_count": 13,
+      "has_spec": false,
+      "spec_path": null,
+      "confidence": "LOW"
+    },
+    "handlers/membership": {
+      "name": "handlers/membership",
+      "source_path": "services/api-ts/src/handlers/membership",
+      "framework": "hono",
+      "entry_points": [],
+      "public_exports": [],
+      "file_count": 17,
+      "has_spec": false,
+      "spec_path": null,
+      "confidence": "MEDIUM"
+    },
+    "handlers/notifs": {
+      "name": "handlers/notifs",
+      "source_path": "services/api-ts/src/handlers/notifs",
+      "framework": "generic",
+      "entry_points": [],
+      "public_exports": [],
+      "file_count": 8,
+      "has_spec": false,
+      "spec_path": null,
+      "confidence": "LOW"
+    },
+    "handlers/onboarding": {
+      "name": "handlers/onboarding",
+      "source_path": "services/api-ts/src/handlers/onboarding",
+      "framework": "generic",
+      "entry_points": [],
+      "public_exports": [],
+      "file_count": 4,
+      "has_spec": false,
+      "spec_path": null,
+      "confidence": "LOW"
+    },
+    "handlers/person": {
+      "name": "handlers/person",
+      "source_path": "services/api-ts/src/handlers/person",
+      "framework": "hono",
+      "entry_points": [],
+      "public_exports": [],
+      "file_count": 35,
+      "has_spec": false,
+      "spec_path": null,
+      "confidence": "MEDIUM"
+    },
+    "handlers/platformadmin": {
+      "name": "handlers/platformadmin",
+      "source_path": "services/api-ts/src/handlers/platformadmin",
+      "framework": "hono",
+      "entry_points": [],
+      "public_exports": [],
+      "file_count": 56,
+      "has_spec": false,
+      "spec_path": null,
+      "confidence": "MEDIUM"
+    },
+    "handlers/reviews": {
+      "name": "handlers/reviews",
+      "source_path": "services/api-ts/src/handlers/reviews",
+      "framework": "generic",
+      "entry_points": [],
+      "public_exports": [],
+      "file_count": 6,
+      "has_spec": false,
+      "spec_path": null,
+      "confidence": "LOW"
+    },
+    "handlers/storage": {
+      "name": "handlers/storage",
+      "source_path": "services/api-ts/src/handlers/storage",
+      "framework": "generic",
+      "entry_points": [],
+      "public_exports": [],
+      "file_count": 8,
+      "has_spec": false,
+      "spec_path": null,
+      "confidence": "LOW"
+    },
+    "handlers/surveys": {
+      "name": "handlers/surveys",
+      "source_path": "services/api-ts/src/handlers/surveys",
+      "framework": "generic",
+      "entry_points": [],
+      "public_exports": [],
+      "file_count": 20,
+      "has_spec": false,
+      "spec_path": null,
+      "confidence": "LOW"
+    },
+    "packages/eslint-config": {
+      "name": "packages/eslint-config",
+      "source_path": "packages/eslint-config",
+      "framework": "generic",
+      "entry_points": [],
+      "public_exports": [],
+      "file_count": 3,
+      "has_spec": false,
+      "spec_path": null,
+      "confidence": "LOW"
+    },
+    "packages/sdk-ts": {
+      "name": "packages/sdk-ts",
+      "source_path": "packages/sdk-ts",
+      "framework": "react",
+      "entry_points": [],
+      "public_exports": [],
+      "file_count": 17,
+      "has_spec": false,
+      "spec_path": null,
+      "confidence": "MEDIUM"
+    },
+    "packages/ui": {
+      "name": "packages/ui",
+      "source_path": "packages/ui",
+      "framework": "react",
+      "entry_points": [],
+      "public_exports": [],
+      "file_count": 36,
+      "has_spec": false,
+      "spec_path": null,
+      "confidence": "MEDIUM"
+    },
+    "packages/vitest-test-shim": {
+      "name": "packages/vitest-test-shim",
+      "source_path": "packages/vitest-test-shim",
+      "framework": "generic",
+      "entry_points": [
+        "packages/vitest-test-shim/index.js"
+      ],
+      "public_exports": [],
+      "file_count": 1,
+      "has_spec": false,
+      "spec_path": null,
+      "confidence": "LOW"
+    },
+    "specs/api": {
+      "name": "specs/api",
+      "source_path": "specs/api",
+      "framework": "generic",
+      "entry_points": [],
+      "public_exports": [],
+      "file_count": 3,
+      "has_spec": false,
+      "spec_path": null,
+      "confidence": "LOW"
+    }
+  }
+}
