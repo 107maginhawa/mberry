@@ -3,6 +3,7 @@
 import { test, expect } from '../helpers/test-fixture'
 import { signIn } from '../helpers/auth'
 import { SEED_OFFICER_EMAIL, SEED_MEMBER_EMAIL, TEST_PASSWORD } from '../helpers/test-config'
+import { captureRouteHydration } from '../helpers/real-flow'
 
 const MEMBER_EMAIL = SEED_MEMBER_EMAIL
 const MEMBER_PASSWORD = TEST_PASSWORD
@@ -14,7 +15,11 @@ test.describe('Event lifecycle: officer manages events, member views registratio
   test.describe('Officer event management', () => {
     test('officer views events list with seeded events', async ({ page }) => {
       await signIn(page, OFFICER_EMAIL, OFFICER_PASSWORD)
+      const respP = captureRouteHydration(page, /\/events?(?:[/?]|$)/)
       await page.goto(`/org/${ORG_ID}/officer/events`)
+      const resp = await respP
+      expect(resp?.status()).toBe(200)
+      expect(resp?.ok()).toBe(true)
       await expect(
         page.getByRole('heading', { name: 'Events' }),
       ).toBeVisible({ timeout: 10000 })
