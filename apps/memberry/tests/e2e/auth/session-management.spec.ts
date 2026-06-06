@@ -1,13 +1,18 @@
 // BR-26: Session management
 import { test, expect } from '../helpers/test-fixture'
 import { signInAsMember } from '../helpers/auth'
+import { captureAnyApiSuccess } from '../helpers/real-flow'
 
 test.describe('BR-26: Session Management', () => {
   test('authenticated session persists across navigation', async ({ page }) => {
     await signInAsMember(page)
 
     // Navigate to multiple pages — session should persist
+    const respP = captureAnyApiSuccess(page)
     await page.goto('/my/profile')
+    const resp = await respP
+    expect(resp?.status()).toBe(200)
+    expect(resp?.ok()).toBe(true)
     await expect(page).not.toHaveURL(/\/auth\/sign-in/)
 
     await page.goto('/my/settings')
