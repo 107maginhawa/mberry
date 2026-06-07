@@ -5,12 +5,12 @@
 
 import type { JobScheduler, JobContext } from '@/core/jobs';
 import type { BillingService } from '@/core/billing';
-import { processDuesReminders } from './reminderProcessor';
-import { processWebhookRetry } from './webhookRetryProcessor';
+import { processDuesReminders } from '@/handlers/member/duesspecialassessments/jobs/reminderProcessor';
+import { processWebhookRetry } from '@/handlers/member/duesspecialassessments/jobs/webhookRetryProcessor';
 import { processCreditIssue } from './creditIssue';
 import { processComplianceThreshold } from './complianceThreshold';
 import { registerStatusRecomputeJob } from './statusRecomputeCron';
-import { createProcessPayment } from '../../dues/jobs/processStripePayment';
+import { createProcessPayment } from '@/handlers/member/duesspecialassessments/jobs/processStripePayment';
 
 export { registerStatusRecomputeJob };
 

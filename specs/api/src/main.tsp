@@ -299,35 +299,35 @@ namespace MonobaseAPI {
   // Association Domain — Dues
   // =========================================================================
 
-  @tag("Association:Member")
+  @tag("Member/DuesSpecialAssessments")
   @route("/association/member/dues-configs")
   interface AssocDuesConfigManagement extends Association.Member.Dues.DuesConfigManagement {}
 
-  @tag("Association:Member")
+  @tag("Member/DuesSpecialAssessments")
   @route("/association/member/dues-invoices")
   interface AssocDuesInvoiceManagement extends Association.Member.Dues.DuesInvoiceManagement {}
 
-  @tag("Association:Member")
+  @tag("Member/DuesSpecialAssessments")
   @route("/association/member/aging-buckets")
   interface AssocAgingBucketService extends Association.Member.Dues.AgingBucketService {}
 
-  @tag("Association:Member")
+  @tag("Member/DuesSpecialAssessments")
   @route("/association/member/dunning")
   interface AssocDunningManagement extends Association.Member.Dues.DunningManagement {}
 
-  @tag("Association:Member")
+  @tag("Member/DuesSpecialAssessments")
   @route("/association/member/dues-payments")
   interface AssocDuesPaymentManagement extends Association.Member.Dues.DuesPaymentManagement {}
 
-  @tag("Association:Member")
+  @tag("Member/DuesSpecialAssessments")
   @route("/association/member/dues-payments")
   interface AssocDuesPaymentProofManagement extends Association.Member.Dues.DuesPaymentProofManagement {}
 
-  @tag("Association:Member")
+  @tag("Member/DuesSpecialAssessments")
   @route("/association/member/dues-gateway")
   interface AssocDuesGatewayManagement extends Association.Member.Dues.DuesGatewayManagement {}
 
-  @tag("Association:Member")
+  @tag("Member/DuesSpecialAssessments")
   @route("/association/member/dues-reporting")
   interface AssocDuesReportingService extends Association.Member.Dues.DuesReportingService {}
 
@@ -335,7 +335,7 @@ namespace MonobaseAPI {
   // Association Domain — Special Assessments (one-time charges)
   // =========================================================================
 
-  @tag("Association:Member")
+  @tag("Member/DuesSpecialAssessments")
   @route("/association/member/special-assessments")
   interface AssocSpecialAssessmentManagement extends Association.Member.SpecialAssessments.SpecialAssessmentManagement {}
 
@@ -661,19 +661,19 @@ namespace MonobaseAPI {
   // Dues Custom (officer dashboard endpoint)
   // =========================================================================
 
-  @tag("Dues")
+  @tag("Member/DuesSpecialAssessments")
   interface DuesCustomManagement extends DuesCustomModule.DuesCustomManagement {}
 
-  @tag("Dues")
+  @tag("Member/DuesSpecialAssessments")
   interface DuesMetricsManagement extends DuesCustomModule.DuesMetricsManagement {}
 
-  @tag("Dues")
+  @tag("Member/DuesSpecialAssessments")
   interface PaymentTokenEndpoints extends DuesCustomModule.PaymentTokenEndpoints {}
 
-  @tag("Dues")
+  @tag("Member/DuesSpecialAssessments")
   interface PaymentLinkManagement extends DuesCustomModule.PaymentLinkManagement {}
 
-  @tag("Dues")
+  @tag("Member/DuesSpecialAssessments")
   interface ReceiptEndpoints extends DuesCustomModule.ReceiptEndpoints {}
 
   // =========================================================================

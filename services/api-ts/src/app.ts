@@ -92,12 +92,11 @@ import { listEmailSuppressions } from '@/handlers/email/listEmailSuppressions';
 import { scheduleAnnouncement } from '@/handlers/communication/scheduleAnnouncement';
 import { getAnnouncementStats } from '@/handlers/communication/getAnnouncementStats';
 
-// Dues: receipt download (hand-wired, Cycle 8)
-import { downloadReceipt } from '@/handlers/dues/downloadReceipt';
 // Documents: byte download (hand-wired, see handler header — browser GET, no x-org-id)
 import { downloadDocument } from '@/handlers/documents/downloadDocument';
 // Stripe webhook endpoint (hand-wired, must precede auth middleware)
-import { stripeWebhookHandler } from '@/handlers/dues/stripeWebhook';// National dashboard export (hand-wired, Cycle 8)
+import { stripeWebhookHandler } from '@/handlers/member/duesspecialassessments/stripeWebhook';
+// National dashboard export (hand-wired, Cycle 8)
 import { exportNationalDashboard } from '@/handlers/association:operations/exportNationalDashboard';
 
 // Survey extras — hand-wired (export returns CSV, clone is convenience endpoint)
@@ -108,10 +107,8 @@ import { listAdminSurveys } from '@/handlers/surveys/listAdminSurveys';
 import { deleteMemberResponses } from '@/handlers/surveys/deleteMemberResponses';
 
 // completeEvent now served via generated TypeSpec route (was hand-wired, duplicate removed)
-
-// One-tap payment token: public validate + checkout (sendPaymentLink now in generated routes)
-import { validatePaymentToken } from '@/handlers/dues/validatePaymentToken';
-import { checkoutPaymentToken } from '@/handlers/dues/checkoutPaymentToken';
+// validatePaymentToken / checkoutPaymentToken / downloadReceipt — migrated to generated routes
+// (Member/DuesSpecialAssessments cutover); hand-wired duplicates removed.
 
 // Public org discovery — hand-wired (not yet in TypeSpec)
 import { listPublicOrgs } from '@/handlers/platformadmin/listPublicOrgs';
@@ -388,11 +385,6 @@ export function createApp(config: Config): App {
   }).passthrough(), validationErrorHandler);
   app.post('/admin/tickets/:id/comments', uuidIdParam, ticketCommentBody, addTicketComment as unknown as Handler);
 
-  // @hand-wired reason="public payment token, must precede auth middleware" wave="by-design"
-  const paymentTokenParam = zValidator('param', z.object({ token: z.string().min(1).max(512) }), validationErrorHandler);
-  app.get('/pay/:token/validate', paymentTokenParam, validatePaymentToken as unknown as Handler);
-  app.post('/pay/:token/checkout', paymentTokenParam, checkoutPaymentToken as unknown as Handler);
-
   // @hand-wired reason="Stripe webhook, must precede auth middleware" wave="by-design"
   app.post('/webhooks/stripe', stripeWebhookHandler as unknown as Handler);
   // @hand-wired reason="RFC 8058 unsubscribe, must precede /email/* auth" wave="by-design"
@@ -493,10 +485,8 @@ export function createApp(config: Config): App {
   // (see generated/openapi/routes.ts)
 
   // sendPaymentLink — migrated to generated routes (Phase 35)
+  // downloadReceipt — migrated to generated routes (Member/DuesSpecialAssessments cutover)
   const orgIdParam = zValidator('param', z.object({ organizationId: z.string().uuid() }), validationErrorHandler);
-  // @hand-wired reason="receipt PDF download, not in TypeSpec" wave="Cycle-8"
-  const receiptParams = zValidator('param', z.object({ organizationId: z.string().uuid(), paymentId: z.string().uuid() }), validationErrorHandler);
-  app.get('/org/:organizationId/payments/:paymentId/receipt', receiptParams, authMiddleware(), downloadReceipt as unknown as Handler);
 
   // @hand-wired reason="document byte download, browser GET cannot send x-org-id; self-enforces membership" wave="oli-J-ORG-001"
   const documentIdParam = zValidator('param', z.object({ documentId: z.string().uuid() }), validationErrorHandler);

@@ -162,8 +162,56 @@ import { listRoyaltySplits } from '../../handlers/member/chapters/listRoyaltySpl
 import { getRoyaltySplit } from '../../handlers/member/chapters/getRoyaltySplit';
 import { updateRoyaltySplit } from '../../handlers/member/chapters/updateRoyaltySplit';
 import { deleteRoyaltySplit } from '../../handlers/member/chapters/deleteRoyaltySplit';
-import { getAgingBucket } from '../../handlers/association:member/getAgingBucket';
-import { recalculateAgingBucket } from '../../handlers/association:member/recalculateAgingBucket';
+import { getAgingBucket } from '../../handlers/member/duesspecialassessments/getAgingBucket';
+import { recalculateAgingBucket } from '../../handlers/member/duesspecialassessments/recalculateAgingBucket';
+import { createDuesConfig } from '../../handlers/member/duesspecialassessments/createDuesConfig';
+import { listDuesConfigs } from '../../handlers/member/duesspecialassessments/listDuesConfigs';
+import { getDuesConfig } from '../../handlers/member/duesspecialassessments/getDuesConfig';
+import { updateDuesConfig } from '../../handlers/member/duesspecialassessments/updateDuesConfig';
+import { deleteDuesConfig } from '../../handlers/member/duesspecialassessments/deleteDuesConfig';
+import { getDuesGatewayConfig } from '../../handlers/member/duesspecialassessments/getDuesGatewayConfig';
+import { upsertDuesGatewayConfig } from '../../handlers/member/duesspecialassessments/upsertDuesGatewayConfig';
+import { disconnectDuesGateway } from '../../handlers/member/duesspecialassessments/disconnectDuesGateway';
+import { testDuesGatewayConnection } from '../../handlers/member/duesspecialassessments/testDuesGatewayConnection';
+import { createDuesInvoice } from '../../handlers/member/duesspecialassessments/createDuesInvoice';
+import { listDuesInvoices } from '../../handlers/member/duesspecialassessments/listDuesInvoices';
+import { generateDuesInvoicesForOrg } from '../../handlers/member/duesspecialassessments/generateDuesInvoicesForOrg';
+import { getDuesInvoice } from '../../handlers/member/duesspecialassessments/getDuesInvoice';
+import { updateDuesInvoice } from '../../handlers/member/duesspecialassessments/updateDuesInvoice';
+import { deleteDuesInvoice } from '../../handlers/member/duesspecialassessments/deleteDuesInvoice';
+import { markDuesInvoicePaid } from '../../handlers/member/duesspecialassessments/markDuesInvoicePaid';
+import { getDuesMemberSummary } from '../../handlers/member/duesspecialassessments/getDuesMemberSummary';
+import { getDuesMetrics } from '../../handlers/member/duesspecialassessments/getDuesMetrics';
+import { listDuesPayments } from '../../handlers/member/duesspecialassessments/listDuesPayments';
+import { recordDuesPayment } from '../../handlers/member/duesspecialassessments/recordDuesPayment';
+import { listPendingProofs } from '../../handlers/member/duesspecialassessments/listPendingProofs';
+import { submitPaymentProof } from '../../handlers/member/duesspecialassessments/submitPaymentProof';
+import { getDuesPayment } from '../../handlers/member/duesspecialassessments/getDuesPayment';
+import { confirmPaymentProof } from '../../handlers/member/duesspecialassessments/confirmPaymentProof';
+import { refundDuesPayment } from '../../handlers/member/duesspecialassessments/refundDuesPayment';
+import { rejectPaymentProof } from '../../handlers/member/duesspecialassessments/rejectPaymentProof';
+import { listDuesFunds } from '../../handlers/member/duesspecialassessments/listDuesFunds';
+import { upsertDuesFunds } from '../../handlers/member/duesspecialassessments/upsertDuesFunds';
+import { getDuesFinancialDashboard } from '../../handlers/member/duesspecialassessments/getDuesFinancialDashboard';
+import { generateDuesReport } from '../../handlers/member/duesspecialassessments/generateDuesReport';
+import { listDunningEvents } from '../../handlers/member/duesspecialassessments/listDunningEvents';
+import { runDunning } from '../../handlers/member/duesspecialassessments/runDunning';
+import { createDunningTemplate } from '../../handlers/member/duesspecialassessments/createDunningTemplate';
+import { listDunningTemplates } from '../../handlers/member/duesspecialassessments/listDunningTemplates';
+import { getDunningTemplate } from '../../handlers/member/duesspecialassessments/getDunningTemplate';
+import { updateDunningTemplate } from '../../handlers/member/duesspecialassessments/updateDunningTemplate';
+import { deleteDunningTemplate } from '../../handlers/member/duesspecialassessments/deleteDunningTemplate';
+import { createSpecialAssessment } from '../../handlers/member/duesspecialassessments/createSpecialAssessment';
+import { updateSpecialAssessment } from '../../handlers/member/duesspecialassessments/updateSpecialAssessment';
+import { deleteSpecialAssessment } from '../../handlers/member/duesspecialassessments/deleteSpecialAssessment';
+import { applySpecialAssessment } from '../../handlers/member/duesspecialassessments/applySpecialAssessment';
+import { getSpecialAssessmentCollection } from '../../handlers/member/duesspecialassessments/getSpecialAssessmentCollection';
+import { listSpecialAssessments } from '../../handlers/member/duesspecialassessments/listSpecialAssessments';
+import { getDuesDashboard } from '../../handlers/member/duesspecialassessments/getDuesDashboard';
+import { sendPaymentLink } from '../../handlers/member/duesspecialassessments/sendPaymentLink';
+import { downloadReceipt } from '../../handlers/member/duesspecialassessments/downloadReceipt';
+import { checkoutPaymentToken } from '../../handlers/member/duesspecialassessments/checkoutPaymentToken';
+import { validatePaymentToken } from '../../handlers/member/duesspecialassessments/validatePaymentToken';
 import { createMembershipApplication } from '../../handlers/association:member/createMembershipApplication';
 import { listMembershipApplications } from '../../handlers/association:member/listMembershipApplications';
 import { bulkApproveMembershipApplications } from '../../handlers/association:member/bulkApproveMembershipApplications';
@@ -172,41 +220,6 @@ import { updateMembershipApplication } from '../../handlers/association:member/u
 import { deleteMembershipApplication } from '../../handlers/association:member/deleteMembershipApplication';
 import { approveMembershipApplication } from '../../handlers/association:member/approveMembershipApplication';
 import { denyMembershipApplication } from '../../handlers/association:member/denyMembershipApplication';
-import { createDuesConfig } from '../../handlers/association:member/createDuesConfig';
-import { listDuesConfigs } from '../../handlers/association:member/listDuesConfigs';
-import { getDuesConfig } from '../../handlers/association:member/getDuesConfig';
-import { updateDuesConfig } from '../../handlers/association:member/updateDuesConfig';
-import { deleteDuesConfig } from '../../handlers/association:member/deleteDuesConfig';
-import { getDuesGatewayConfig } from '../../handlers/association:member/getDuesGatewayConfig';
-import { upsertDuesGatewayConfig } from '../../handlers/association:member/upsertDuesGatewayConfig';
-import { disconnectDuesGateway } from '../../handlers/association:member/disconnectDuesGateway';
-import { testDuesGatewayConnection } from '../../handlers/association:member/testDuesGatewayConnection';
-import { createDuesInvoice } from '../../handlers/association:member/createDuesInvoice';
-import { listDuesInvoices } from '../../handlers/association:member/listDuesInvoices';
-import { generateDuesInvoicesForOrg } from '../../handlers/association:member/generateDuesInvoicesForOrg';
-import { getDuesInvoice } from '../../handlers/association:member/getDuesInvoice';
-import { updateDuesInvoice } from '../../handlers/association:member/updateDuesInvoice';
-import { deleteDuesInvoice } from '../../handlers/association:member/deleteDuesInvoice';
-import { markDuesInvoicePaid } from '../../handlers/association:member/markDuesInvoicePaid';
-import { listDuesPayments } from '../../handlers/association:member/listDuesPayments';
-import { recordDuesPayment } from '../../handlers/association:member/recordDuesPayment';
-import { listPendingProofs } from '../../handlers/association:member/listPendingProofs';
-import { submitPaymentProof } from '../../handlers/association:member/submitPaymentProof';
-import { getDuesPayment } from '../../handlers/association:member/getDuesPayment';
-import { confirmPaymentProof } from '../../handlers/association:member/confirmPaymentProof';
-import { refundDuesPayment } from '../../handlers/association:member/refundDuesPayment';
-import { rejectPaymentProof } from '../../handlers/association:member/rejectPaymentProof';
-import { listDuesFunds } from '../../handlers/association:member/listDuesFunds';
-import { upsertDuesFunds } from '../../handlers/association:member/upsertDuesFunds';
-import { getDuesFinancialDashboard } from '../../handlers/association:member/getDuesFinancialDashboard';
-import { generateDuesReport } from '../../handlers/association:member/generateDuesReport';
-import { listDunningEvents } from '../../handlers/association:member/listDunningEvents';
-import { runDunning } from '../../handlers/association:member/runDunning';
-import { createDunningTemplate } from '../../handlers/association:member/createDunningTemplate';
-import { listDunningTemplates } from '../../handlers/association:member/listDunningTemplates';
-import { getDunningTemplate } from '../../handlers/association:member/getDunningTemplate';
-import { updateDunningTemplate } from '../../handlers/association:member/updateDunningTemplate';
-import { deleteDunningTemplate } from '../../handlers/association:member/deleteDunningTemplate';
 import { createInstitutionalMembership } from '../../handlers/association:member/createInstitutionalMembership';
 import { listInstitutionalMemberships } from '../../handlers/association:member/listInstitutionalMemberships';
 import { getInstitutionalMembership } from '../../handlers/association:member/getInstitutionalMembership';
@@ -234,12 +247,6 @@ import { addRosterMember } from '../../handlers/association:member/addRosterMemb
 import { importRosterMembers } from '../../handlers/association:member/importRosterMembers';
 import { getRosterMember } from '../../handlers/association:member/getRosterMember';
 import { updateRosterMember } from '../../handlers/association:member/updateRosterMember';
-import { createSpecialAssessment } from '../../handlers/association:member/createSpecialAssessment';
-import { updateSpecialAssessment } from '../../handlers/association:member/updateSpecialAssessment';
-import { deleteSpecialAssessment } from '../../handlers/association:member/deleteSpecialAssessment';
-import { applySpecialAssessment } from '../../handlers/association:member/applySpecialAssessment';
-import { getSpecialAssessmentCollection } from '../../handlers/association:member/getSpecialAssessmentCollection';
-import { listSpecialAssessments } from '../../handlers/association:member/listSpecialAssessments';
 import { createMembershipTier } from '../../handlers/association:member/createMembershipTier';
 import { listMembershipTiers } from '../../handlers/association:member/listMembershipTiers';
 import { getMembershipTier } from '../../handlers/association:member/getMembershipTier';
@@ -313,13 +320,6 @@ import { updateDirectoryProfile } from '../../handlers/member/directory/updateDi
 import { deleteDirectoryProfile } from '../../handlers/member/directory/deleteDirectoryProfile';
 import { searchDirectory } from '../../handlers/member/directory/searchDirectory';
 import { getPublicDirectoryProfile } from '../../handlers/member/directory/getPublicDirectoryProfile';
-import { getDuesMemberSummary } from '../../handlers/dues/getDuesMemberSummary';
-import { getDuesMetrics } from '../../handlers/dues/getDuesMetrics';
-import { getDuesDashboard } from '../../handlers/dues/getDuesDashboard';
-import { sendPaymentLink } from '../../handlers/dues/sendPaymentLink';
-import { downloadReceipt } from '../../handlers/dues/downloadReceipt';
-import { checkoutPaymentToken } from '../../handlers/dues/checkoutPaymentToken';
-import { validatePaymentToken } from '../../handlers/dues/validatePaymentToken';
 import { createMessageTemplate } from '../../handlers/communication/createMessageTemplate';
 import { searchMessageTemplates } from '../../handlers/communication/searchMessageTemplates';
 import { getMessageTemplate } from '../../handlers/communication/getMessageTemplate';
@@ -632,17 +632,9 @@ export const registry = {
   updateRoyaltySplit,
   deleteRoyaltySplit,
 
-  // Association:member handlers
+  // Member/duesspecialassessments handlers
   getAgingBucket,
   recalculateAgingBucket,
-  createMembershipApplication,
-  listMembershipApplications,
-  bulkApproveMembershipApplications,
-  getMembershipApplication,
-  updateMembershipApplication,
-  deleteMembershipApplication,
-  approveMembershipApplication,
-  denyMembershipApplication,
   createDuesConfig,
   listDuesConfigs,
   getDuesConfig,
@@ -659,6 +651,8 @@ export const registry = {
   updateDuesInvoice,
   deleteDuesInvoice,
   markDuesInvoicePaid,
+  getDuesMemberSummary,
+  getDuesMetrics,
   listDuesPayments,
   recordDuesPayment,
   listPendingProofs,
@@ -678,6 +672,27 @@ export const registry = {
   getDunningTemplate,
   updateDunningTemplate,
   deleteDunningTemplate,
+  createSpecialAssessment,
+  updateSpecialAssessment,
+  deleteSpecialAssessment,
+  applySpecialAssessment,
+  getSpecialAssessmentCollection,
+  listSpecialAssessments,
+  getDuesDashboard,
+  sendPaymentLink,
+  downloadReceipt,
+  checkoutPaymentToken,
+  validatePaymentToken,
+
+  // Association:member handlers
+  createMembershipApplication,
+  listMembershipApplications,
+  bulkApproveMembershipApplications,
+  getMembershipApplication,
+  updateMembershipApplication,
+  deleteMembershipApplication,
+  approveMembershipApplication,
+  denyMembershipApplication,
   createInstitutionalMembership,
   listInstitutionalMemberships,
   getInstitutionalMembership,
@@ -705,12 +720,6 @@ export const registry = {
   importRosterMembers,
   getRosterMember,
   updateRosterMember,
-  createSpecialAssessment,
-  updateSpecialAssessment,
-  deleteSpecialAssessment,
-  applySpecialAssessment,
-  getSpecialAssessmentCollection,
-  listSpecialAssessments,
   createMembershipTier,
   listMembershipTiers,
   getMembershipTier,
@@ -794,15 +803,6 @@ export const registry = {
   deleteDirectoryProfile,
   searchDirectory,
   getPublicDirectoryProfile,
-
-  // Dues handlers
-  getDuesMemberSummary,
-  getDuesMetrics,
-  getDuesDashboard,
-  sendPaymentLink,
-  downloadReceipt,
-  checkoutPaymentToken,
-  validatePaymentToken,
 
   // Communication handlers
   createMessageTemplate,
