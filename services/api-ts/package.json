@@ -11,6 +11,7 @@
   },
   "scripts": {
     "dev": "bun src/index.ts",
+    "start": "bun src/index.ts",
     "build": "bun build --compile --minify --sourcemap --external ajv --external ajv-draft-04 src/index.ts --outfile dist/server",
     "generate": "bun scripts/generate.ts",
     "db:generate": "bash scripts/drizzle-wasm.sh generate",

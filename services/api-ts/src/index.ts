@@ -24,14 +24,6 @@ const config = parseConfig();
 const app = createApp(config);
 const log = app.logger.child({ module: 'main' });
 
-// Initialize all application components
-try {
-  await initializeApp(app, config);
-} catch (error) {
-  log.error({ error }, 'Failed to initialize application');
-  process.exit(1);
-}
-
 // Handle graceful shutdown
 let isShuttingDown = false;
 
@@ -58,7 +50,9 @@ async function handleShutdown(signal: string) {
 process.once('SIGTERM', () => handleShutdown('SIGTERM'));
 process.once('SIGINT', () => handleShutdown('SIGINT'));
 
-// Start the server with Bun.serve
+// Start serving HTTP first so the liveness probe (/livez) responds immediately —
+// independent of database, storage, or job-scheduler init. Readiness (/readyz)
+// stays unhealthy until initializeApp() resolves, which is the correct k8s split.
 const server = Bun.serve({
   hostname: config.server.host,
   port: config.server.port,
@@ -67,3 +61,10 @@ const server = Bun.serve({
 });
 
 log.info(`🚀 Server running on http://${server.hostname}:${server.port}`);
+
+// Initialize all application components in the background. Failures are logged
+// but do NOT exit the process — /readyz will report unhealthy and k8s will hold
+// traffic; /livez stays green so the pod isn't restart-looped.
+initializeApp(app, config).catch((error) => {
+  log.error({ error }, 'Failed to initialize application — /readyz will report unhealthy');
+});
