@@ -184,12 +184,54 @@ Contract suite total: 144 files (was 141 at baseline) → 100% pass at
 
 ## 7. Open follow-ups
 
+### 7.1 Legacy `handlers/membership/` 4 LIVE handlers — INTENTIONAL STAY (Wave 7 decision)
+
+`getOrgProfile`, `updateOrgProfile`, `listOrgMembers`, `listOrgApplications`
+back the **`/membership/*/{organizationId}` admin-tier URL surface**
+(routes.ts:3016/3024/3031/3038), distinct from the new
+`OrganizationProfileManagement` ops which route at
+`/association/member/org-profile/{organizationId}`. The two surfaces serve
+different consumers: legacy `/membership/*` for admin app, new
+`/association/member/org-profile/*` for member app. Migrating the legacy 4
+would force admin-app refactor + risk regression. Decision: **STAY at OLD
+path indefinitely** as the canonical admin-tier surface. Documented here
+to preserve context for future maintainers.
+
+### 7.2 `Association:Member` namespace — INTENTIONAL CROSS-DOMAIN LEFTOVER (Wave 7 decision)
+
+After Wave 7 closeout, `handlers/association:member/` retains:
+- 2 cross-domain handlers: `getOrgDashboard.ts` (M4-DASHBOARD,
+  reads dues+credits+governance), `transitionOfficerTerm.ts` (governance
+  M4-R3)
+- 3 cross-domain jobs at `jobs/`: `creditIssue`, `complianceThreshold`,
+  `directoryAutoPopulate` + registrar `index.ts`
+- 1 util at `utils/settle-payment.ts` (dues, consumes
+  membership-lifecycle) + ~10 single-domain utils not yet relocated
+  (dunning-escalation, gateway-adapter, payment-token, paymongo.adapter,
+  receipt-number, refund-validation, reminder-schedule, trust-signals,
+  credential-token, gateway-adapter)
+- All `repos/` (canonical schemas + repositories per § 4.2)
+- 3 cross-domain integration tests: `ac-m04.org-admin.test.ts`,
+  `membership.test.ts`, `officer-admin.test.ts` (cross-domain governance
+  + platformadmin coverage)
+- 1 unrouted handler: `createDisciplinaryAction.ts` (operationId defined
+  but no registry/route wire; consumed by officer-admin test only;
+  deferred TypeSpec authoring)
+
+**Decision: `association:member/` is NOT a sub-module dir.** Treat as
+a cross-domain leftover holding shared repos + utils + cross-domain
+handlers. Naming kept as-is for historical continuity and to avoid
+re-thrashing seed-layer import paths. Future "dissolve" wave can split
+the utils per domain if/when a single-domain cleanup project justifies
+the ripple.
+
+### 7.3 Other follow-ups
+
 | Item | Notes |
 | --- | --- |
-| 4 LIVE legacy handlers at `handlers/membership/` | `getOrgProfile`, `updateOrgProfile`, `listOrgMembers`, `listOrgApplications` back DIFFERENT operationIds than the new `getOrganizationProfile` / `updateOrganizationProfile`. Decide whether to dedupe (merge logic, kill one set) or rename in spec. Future cleanup wave. |
-| `Association:Member` namespace partial dissolution | `getOrgDashboard.ts` + `transitionOfficerTerm.ts` + 3 cross-domain jobs + repos/ + 1 util remain at OLD path. Dedicated "dissolve" wave to fully retire the namespace. |
 | 3 pre-existing unit test failures | `email/jobs/index.test.ts` (30000 vs 1000 env-flake), 2 others. Triage and either pin env-var defaults or amend tests. |
-| Contract coverage of `Member/Membership` | 38% covered (15/40 ops). Highest opportunity for future Hurl additions: roster CRUD + import flow, deny + bulk-approve, category lifecycle, terminate + decease paths. |
+| Contract coverage of `Member/Membership` | 38% covered (15/40 ops). Wave 8 target: 60%+ via 5 new Hurl files (roster-crud, application-deny-bulk, category-crud (post-Wave-7 dead-code cleanup uses only listMembershipCategories + upsertMembershipCategory), terminate-decease, tier-crud-deep). |
+| Contract coverage of `Member/DuesSpecialAssessments` | 32% covered (16/50 ops). Wave 8 target: 60%+ via 5 new Hurl files. |
 | Observability margin (94 % floor met by 0 %) | 17 partial-coverage handlers continue to risk dragging score below floor. Includes `member/membership/utils/membership-status-middleware.ts` (score=1). Triage. |
 | `fund-math` + `expiry-extension` cross-domain coupling | Dues test (`dues-config-handlers.test.ts`) imports `fund-math` from new membership path. Could be relocated to a `@/lib/finance` shared spot to break the cross-domain dependency. |
-| ROADMAP P1-11 closeout | This cutover closes the mega-module decomposition for the membership sub-domain. Update ROADMAP.md to mark P1-11 complete and document residual `association:member/` namespace cleanup as a separate item. |
+| ROADMAP P1-11 closeout | Wave 7 marks P1-11 complete. SPLIT-PLAN.md superseded by `member-*-cutover` tag series. |

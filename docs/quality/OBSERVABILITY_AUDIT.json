@@ -1,15 +1,15 @@
 {
-  "generatedAt": "2026-06-07T11:23:41.842Z",
+  "generatedAt": "2026-06-07T11:52:23.620Z",
   "totals": {
-    "handlerFiles": 575,
+    "handlerFiles": 570,
     "logCallSites": 274,
     "full": 257,
     "partial": 14,
     "none": 3,
-    "errorSites": 1034,
+    "errorSites": 1029,
     "throwNewError": 2,
     "throwHTTPException": 0,
-    "throwTyped": 1032
+    "throwTyped": 1027
   },
   "worstOffenders": [
     {
@@ -3384,15 +3384,6 @@
       "httpExceptions": 0,
       "typedErrors": 2
     },
-    "services/api-ts/src/handlers/association:member/listPendingProofs.ts": {
-      "totalLogs": 0,
-      "full": 0,
-      "partial": 0,
-      "none": 0,
-      "rawErrors": 0,
-      "httpExceptions": 0,
-      "typedErrors": 1
-    },
     "services/api-ts/src/handlers/association:member/transitionOfficerTerm.ts": {
       "totalLogs": 0,
       "full": 0,
@@ -3410,33 +3401,6 @@
       "rawErrors": 0,
       "httpExceptions": 0,
       "typedErrors": 2
-    },
-    "services/api-ts/src/handlers/association:member/getMembershipCategory.ts": {
-      "totalLogs": 0,
-      "full": 0,
-      "partial": 0,
-      "none": 0,
-      "rawErrors": 0,
-      "httpExceptions": 0,
-      "typedErrors": 1
-    },
-    "services/api-ts/src/handlers/association:member/deleteMembershipCategory.ts": {
-      "totalLogs": 0,
-      "full": 0,
-      "partial": 0,
-      "none": 0,
-      "rawErrors": 0,
-      "httpExceptions": 0,
-      "typedErrors": 2
-    },
-    "services/api-ts/src/handlers/association:member/updateMembershipCategory.ts": {
-      "totalLogs": 0,
-      "full": 0,
-      "partial": 0,
-      "none": 0,
-      "rawErrors": 0,
-      "httpExceptions": 0,
-      "typedErrors": 1
     },
     "services/api-ts/src/handlers/association:member/getOrgDashboard.ts": {
       "totalLogs": 0,
