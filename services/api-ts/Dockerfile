@@ -34,8 +34,13 @@ COPY --from=spec-builder /specs/package.json ./specs/api/
 
 # Copy API service files (assumes build from monorepo root)
 COPY services/api-ts/package.json ./
+# Rewrite workspace deps for standalone install:
+# - api-spec: redirect to the in-image specs build
+# - eslint-config / typescript-config: dev-only, strip lines so `bun install --production` doesn't try to resolve them
 RUN cat package.json | \
-    sed 's/"@monobase\/api-spec": "workspace:\*"/"@monobase\/api-spec": "file:specs\/api"/' > package.temp.json && \
+    sed 's/"@monobase\/api-spec": "workspace:\*"/"@monobase\/api-spec": "file:specs\/api"/' | \
+    sed '/"@monobase\/eslint-config": "workspace:\*",\?/d' | \
+    sed '/"@monobase\/typescript-config": "workspace:\*",\?/d' > package.temp.json && \
     mv package.temp.json package.json
 
 # Install dependencies

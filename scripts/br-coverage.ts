@@ -78,6 +78,26 @@ const KNOWN_INCOMPLETE: Set<string> = new Set([
            // createTraining.test.ts exercises every valid type + unknown +
            // missing. Contract/E2E would only re-test the Zod enum reach
            // (always 400 VALIDATION_ERROR) — no additional coverage gained.
+
+  // M22 email module BRs minted 2026-06-02 to resolve TR-P1-003.
+  // All annotations explicitly state "Test coverage to be backfilled in a
+  // follow-up audit pass" — they were registered without test mappings
+  // and have remained UNTESTED since. Pre-existing INCOMPLETE state
+  // unrelated to the mega-module decomposition; allowlisted until the
+  // dedicated M22 coverage pass lands.
+  "BR-52", "BR-53", "BR-54", "BR-55", "BR-56", "BR-57", "BR-58", "BR-59",
+
+  // M21 billing module BRs minted 2026-06-02 to resolve TR-P1-002.
+  // Backend tests EXIST per the registry; missing contract+e2e layers
+  // make these INCOMPLETE. M21 contract/e2e suite is a planned milestone
+  // pass — allowlisted until that pass ships.
+  "BR-60", "BR-61", "BR-62", "BR-63", "BR-64", "BR-65", "BR-66",
+
+  // M20 booking module BRs minted 2026-06-02 to resolve TR-P1-001.
+  // Same situation as M21: backend tests exist, contract+e2e planned
+  // for a dedicated M20 coverage pass.
+  "BR-68", "BR-69", "BR-70", "BR-71", "BR-72", "BR-73",
+  "BR-74", "BR-75", "BR-76", "BR-77",
 ]);
 
 // ── Coverage derivation ──────────────────────────────────

@@ -11,6 +11,7 @@ jobs:
     timeout-minutes: 10
     env:
       TZ: UTC
+      AUTH_SECRET: ci-codegen-secret-do-not-use-in-prod
     steps:
       - uses: actions/checkout@v4
       - uses: oven-sh/setup-bun@v2
@@ -52,15 +53,8 @@ jobs:
         options: >-
           --health-cmd "pg_isready -U postgres -d monobase"
           --health-interval 5s --health-timeout 5s --health-retries 10
-      minio:
-        image: minio/minio:latest
-        ports: ['9000:9000']
-        env:
-          MINIO_ROOT_USER: minioadmin
-          MINIO_ROOT_PASSWORD: minioadmin
-        options: >-
-          --health-cmd "curl -fsS http://localhost:9000/minio/health/live"
-          --health-interval 5s --health-timeout 5s --health-retries 10
+      # Minio cannot run as a `services:` entry: minio/minio requires
+      # `server <path>` and Actions cannot pass a CMD. Started as a step below.
     env:
       TZ: UTC
       DATABASE_URL: postgresql://postgres:password@localhost:5432/monobase
@@ -74,6 +68,29 @@ jobs:
       STORAGE_SECRET_ACCESS_KEY: minioadmin
     steps:
       - uses: actions/checkout@v4
+      - name: Start minio (server mode)
+        run: |
+          docker run -d --name minio \
+            -p 9000:9000 \
+            -e MINIO_ROOT_USER=minioadmin \
+            -e MINIO_ROOT_PASSWORD=minioadmin \
+            --health-cmd "curl -fsS http://localhost:9000/minio/health/live" \
+            --health-interval=5s --health-timeout=5s --health-retries=20 \
+            minio/minio:latest server /data
+          for i in $(seq 1 12); do
+            status=$(docker inspect --format='{{.State.Health.Status}}' minio 2>/dev/null || echo "starting")
+            echo "minio health: $status"
+            if [ "$status" = "healthy" ]; then break; fi
+            sleep 5
+          done
+          if [ "$(docker inspect --format='{{.State.Health.Status}}' minio)" != "healthy" ]; then
+            echo "minio did not become healthy in time" >&2
+            docker logs minio
+            exit 1
+          fi
+          docker run --rm --network host \
+            -e MC_HOST_local=http://minioadmin:minioadmin@localhost:9000 \
+            minio/mc mb --ignore-existing local/monobase-files
       - uses: oven-sh/setup-bun@v2
         with:
           bun-version: 1.2.21
@@ -196,6 +213,7 @@ jobs:
     timeout-minutes: 10
     env:
       VITE_API_URL: ""
+      AUTH_SECRET: ci-codegen-secret-do-not-use-in-prod
     steps:
       - uses: actions/checkout@v4
       - uses: oven-sh/setup-bun@v2
@@ -288,15 +306,7 @@ jobs:
         options: >-
           --health-cmd "pg_isready -U postgres -d monobase"
           --health-interval 5s --health-timeout 5s --health-retries 10
-      minio:
-        image: minio/minio:latest
-        ports: ['9000:9000']
-        env:
-          MINIO_ROOT_USER: minioadmin
-          MINIO_ROOT_PASSWORD: minioadmin
-        options: >-
-          --health-cmd "curl -fsS http://localhost:9000/minio/health/live"
-          --health-interval 5s --health-timeout 5s --health-retries 10
+      # Minio started as a step (see e2e job comment).
     env:
       DATABASE_URL: postgresql://postgres:password@localhost:5432/monobase
       PORT: 7213
@@ -309,6 +319,29 @@ jobs:
       STORAGE_SECRET_ACCESS_KEY: minioadmin
     steps:
       - uses: actions/checkout@v4
+      - name: Start minio (server mode)
+        run: |
+          docker run -d --name minio \
+            -p 9000:9000 \
+            -e MINIO_ROOT_USER=minioadmin \
+            -e MINIO_ROOT_PASSWORD=minioadmin \
+            --health-cmd "curl -fsS http://localhost:9000/minio/health/live" \
+            --health-interval=5s --health-timeout=5s --health-retries=20 \
+            minio/minio:latest server /data
+          for i in $(seq 1 12); do
+            status=$(docker inspect --format='{{.State.Health.Status}}' minio 2>/dev/null || echo "starting")
+            echo "minio health: $status"
+            if [ "$status" = "healthy" ]; then break; fi
+            sleep 5
+          done
+          if [ "$(docker inspect --format='{{.State.Health.Status}}' minio)" != "healthy" ]; then
+            echo "minio did not become healthy in time" >&2
+            docker logs minio
+            exit 1
+          fi
+          docker run --rm --network host \
+            -e MC_HOST_local=http://minioadmin:minioadmin@localhost:9000 \
+            minio/mc mb --ignore-existing local/monobase-files
       - uses: oven-sh/setup-bun@v2
         with:
           bun-version: 1.2.21
@@ -387,15 +420,7 @@ jobs:
         options: >-
           --health-cmd "pg_isready -U postgres -d monobase"
           --health-interval 5s --health-timeout 5s --health-retries 10
-      minio:
-        image: minio/minio:latest
-        ports: ['9000:9000']
-        env:
-          MINIO_ROOT_USER: minioadmin
-          MINIO_ROOT_PASSWORD: minioadmin
-        options: >-
-          --health-cmd "curl -fsS http://localhost:9000/minio/health/live"
-          --health-interval 5s --health-timeout 5s --health-retries 10
+      # Minio started as a step (see e2e job comment).
     env:
       DATABASE_URL: postgresql://postgres:password@localhost:5432/monobase
       PORT: 7213
@@ -408,6 +433,29 @@ jobs:
       STORAGE_SECRET_ACCESS_KEY: minioadmin
     steps:
       - uses: actions/checkout@v4
+      - name: Start minio (server mode)
+        run: |
+          docker run -d --name minio \
+            -p 9000:9000 \
+            -e MINIO_ROOT_USER=minioadmin \
+            -e MINIO_ROOT_PASSWORD=minioadmin \
+            --health-cmd "curl -fsS http://localhost:9000/minio/health/live" \
+            --health-interval=5s --health-timeout=5s --health-retries=20 \
+            minio/minio:latest server /data
+          for i in $(seq 1 12); do
+            status=$(docker inspect --format='{{.State.Health.Status}}' minio 2>/dev/null || echo "starting")
+            echo "minio health: $status"
+            if [ "$status" = "healthy" ]; then break; fi
+            sleep 5
+          done
+          if [ "$(docker inspect --format='{{.State.Health.Status}}' minio)" != "healthy" ]; then
+            echo "minio did not become healthy in time" >&2
+            docker logs minio
+            exit 1
+          fi
+          docker run --rm --network host \
+            -e MC_HOST_local=http://minioadmin:minioadmin@localhost:9000 \
+            minio/mc mb --ignore-existing local/monobase-files
       - uses: oven-sh/setup-bun@v2
         with:
           bun-version: 1.2.21

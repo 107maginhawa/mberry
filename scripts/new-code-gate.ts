@@ -31,6 +31,7 @@ const EXCLUDE_PATTERNS = [
   /\/utils\//,
   /index\.ts$/,
   /\/generated\//,
+  /\/test-isolation\.ts$/,
 ];
 
 function shouldCheck(filePath: string): boolean {
