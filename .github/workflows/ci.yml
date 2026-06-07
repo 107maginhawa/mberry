@@ -123,7 +123,7 @@ jobs:
           tail -200 /tmp/api.log
           exit 1
       - name: Seed database
-        run: cd services/api-ts && bun run db:seed-modules
+        run: cd services/api-ts && bun run db:seed
       - name: Start Memberry app
         run: |
           cd apps/memberry
@@ -377,7 +377,7 @@ jobs:
           tail -200 /tmp/api.log
           exit 1
       - name: Seed database
-        run: cd services/api-ts && bun run db:seed-modules
+        run: cd services/api-ts && bun run db:seed
       - name: Run contract tests
         run: bun run test:contract
       - name: API logs

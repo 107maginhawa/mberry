@@ -76,7 +76,7 @@ jobs:
           done
           echo "API never became ready"; tail -200 /tmp/api.log; exit 1
       - name: Seed database
-        run: cd services/api-ts && bun run db:seed-modules
+        run: cd services/api-ts && bun run db:seed
       - name: Start Memberry app
         run: |
           cd apps/memberry
