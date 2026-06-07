@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-06-07T05:04:11.923Z",
+  "generatedAt": "2026-06-07T05:44:22.338Z",
   "totals": {
     "handlerFiles": 586,
     "logCallSites": 274,
@@ -1791,6 +1791,69 @@
       "httpExceptions": 0,
       "typedErrors": 1
     },
+    "services/api-ts/src/handlers/member/directory/deleteDirectoryProfile.ts": {
+      "totalLogs": 0,
+      "full": 0,
+      "partial": 0,
+      "none": 0,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 2
+    },
+    "services/api-ts/src/handlers/member/directory/searchDirectory.ts": {
+      "totalLogs": 0,
+      "full": 0,
+      "partial": 0,
+      "none": 0,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 1
+    },
+    "services/api-ts/src/handlers/member/directory/getPublicDirectoryProfile.ts": {
+      "totalLogs": 0,
+      "full": 0,
+      "partial": 0,
+      "none": 0,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 1
+    },
+    "services/api-ts/src/handlers/member/directory/listDirectoryProfiles.ts": {
+      "totalLogs": 0,
+      "full": 0,
+      "partial": 0,
+      "none": 0,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 1
+    },
+    "services/api-ts/src/handlers/member/directory/publishMyDirectoryProfile.ts": {
+      "totalLogs": 0,
+      "full": 0,
+      "partial": 0,
+      "none": 0,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 3
+    },
+    "services/api-ts/src/handlers/member/directory/updateDirectoryProfile.ts": {
+      "totalLogs": 0,
+      "full": 0,
+      "partial": 0,
+      "none": 0,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 2
+    },
+    "services/api-ts/src/handlers/member/directory/getDirectoryProfile.ts": {
+      "totalLogs": 0,
+      "full": 0,
+      "partial": 0,
+      "none": 0,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 2
+    },
     "services/api-ts/src/handlers/member/governance/castBallot.ts": {
       "totalLogs": 0,
       "full": 0,
@@ -2628,15 +2691,6 @@
       "httpExceptions": 0,
       "typedErrors": 3
     },
-    "services/api-ts/src/handlers/association:member/deleteDirectoryProfile.ts": {
-      "totalLogs": 0,
-      "full": 0,
-      "partial": 0,
-      "none": 0,
-      "rawErrors": 0,
-      "httpExceptions": 0,
-      "typedErrors": 2
-    },
     "services/api-ts/src/handlers/association:member/createMembershipApplication.ts": {
       "totalLogs": 0,
       "full": 0,
@@ -2673,15 +2727,6 @@
       "httpExceptions": 0,
       "typedErrors": 1
     },
-    "services/api-ts/src/handlers/association:member/searchDirectory.ts": {
-      "totalLogs": 0,
-      "full": 0,
-      "partial": 0,
-      "none": 0,
-      "rawErrors": 0,
-      "httpExceptions": 0,
-      "typedErrors": 1
-    },
     "services/api-ts/src/handlers/association:member/listOfficerTermsSummary.ts": {
       "totalLogs": 0,
       "full": 0,
@@ -2699,24 +2744,6 @@
       "rawErrors": 0,
       "httpExceptions": 0,
       "typedErrors": 2
-    },
-    "services/api-ts/src/handlers/association:member/getPublicDirectoryProfile.ts": {
-      "totalLogs": 0,
-      "full": 0,
-      "partial": 0,
-      "none": 0,
-      "rawErrors": 0,
-      "httpExceptions": 0,
-      "typedErrors": 1
-    },
-    "services/api-ts/src/handlers/association:member/listDirectoryProfiles.ts": {
-      "totalLogs": 0,
-      "full": 0,
-      "partial": 0,
-      "none": 0,
-      "rawErrors": 0,
-      "httpExceptions": 0,
-      "typedErrors": 1
     },
     "services/api-ts/src/handlers/association:member/deleteMembershipTier.ts": {
       "totalLogs": 0,
@@ -2762,15 +2789,6 @@
       "rawErrors": 0,
       "httpExceptions": 0,
       "typedErrors": 1
-    },
-    "services/api-ts/src/handlers/association:member/publishMyDirectoryProfile.ts": {
-      "totalLogs": 0,
-      "full": 0,
-      "partial": 0,
-      "none": 0,
-      "rawErrors": 0,
-      "httpExceptions": 0,
-      "typedErrors": 3
     },
     "services/api-ts/src/handlers/association:member/listMembershipTiers.ts": {
       "totalLogs": 0,
@@ -2996,15 +3014,6 @@
       "rawErrors": 0,
       "httpExceptions": 0,
       "typedErrors": 1
-    },
-    "services/api-ts/src/handlers/association:member/updateDirectoryProfile.ts": {
-      "totalLogs": 0,
-      "full": 0,
-      "partial": 0,
-      "none": 0,
-      "rawErrors": 0,
-      "httpExceptions": 0,
-      "typedErrors": 2
     },
     "services/api-ts/src/handlers/association:member/renewMembership.ts": {
       "totalLogs": 0,
@@ -3277,15 +3286,6 @@
       "typedErrors": 1
     },
     "services/api-ts/src/handlers/association:member/deleteMembership.ts": {
-      "totalLogs": 0,
-      "full": 0,
-      "partial": 0,
-      "none": 0,
-      "rawErrors": 0,
-      "httpExceptions": 0,
-      "typedErrors": 2
-    },
-    "services/api-ts/src/handlers/association:member/getDirectoryProfile.ts": {
       "totalLogs": 0,
       "full": 0,
       "partial": 0,

@@ -2,7 +2,7 @@ import type { ValidatedContext } from '@/types/app';
 import type { DatabaseInstance } from '@/core/database';
 import type { GetPublicDirectoryProfileParams } from '@/generated/openapi/validators';
 import { NotFoundError } from '@/core/errors';
-import { DirectoryProfileRepository } from './repos/directory.repo';
+import { DirectoryProfileRepository } from '@/handlers/association:member/repos/directory.repo';
 
 /**
  * getPublicDirectoryProfile

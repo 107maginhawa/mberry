@@ -1,17 +1,17 @@
 {
-  "generatedAt": "2026-06-07T05:13:28.306Z",
+  "generatedAt": "2026-06-07T06:03:55.599Z",
   "totals": {
     "endpoints": 454,
-    "hurlFiles": 129,
-    "coveredCount": 359,
-    "uncoveredCount": 95,
-    "coveragePercent": 79
+    "hurlFiles": 134,
+    "coveredCount": 366,
+    "uncoveredCount": 88,
+    "coveragePercent": 81
   },
   "uncoveredByTag": [
     {
       "tag": "Association:Member",
-      "uncoveredCount": 92,
-      "totalCount": 104,
+      "uncoveredCount": 85,
+      "totalCount": 97,
       "coveredCount": 12,
       "coveragePercent": 12
     },
@@ -156,48 +156,6 @@
       "path": "/association/member/credits/void-event",
       "tag": "Association:Member",
       "operationId": "voidCreditEntry"
-    },
-    {
-      "method": "POST",
-      "path": "/association/member/directory/profiles",
-      "tag": "Association:Member",
-      "operationId": "createDirectoryProfile"
-    },
-    {
-      "method": "GET",
-      "path": "/association/member/directory/profiles",
-      "tag": "Association:Member",
-      "operationId": "listDirectoryProfiles"
-    },
-    {
-      "method": "GET",
-      "path": "/association/member/directory/profiles/{profileId}",
-      "tag": "Association:Member",
-      "operationId": "getDirectoryProfile"
-    },
-    {
-      "method": "PATCH",
-      "path": "/association/member/directory/profiles/{profileId}",
-      "tag": "Association:Member",
-      "operationId": "updateDirectoryProfile"
-    },
-    {
-      "method": "DELETE",
-      "path": "/association/member/directory/profiles/{profileId}",
-      "tag": "Association:Member",
-      "operationId": "deleteDirectoryProfile"
-    },
-    {
-      "method": "GET",
-      "path": "/association/member/directory/search",
-      "tag": "Association:Member",
-      "operationId": "searchDirectory"
-    },
-    {
-      "method": "GET",
-      "path": "/association/member/directory/search/{personId}/public",
-      "tag": "Association:Member",
-      "operationId": "getPublicDirectoryProfile"
     },
     {
       "method": "GET",

@@ -1,9 +1,9 @@
 import type { ValidatedContext } from '@/types/app';
-import type { DirectoryProfile } from './repos/directory.schema';
+import type { DirectoryProfile } from '@/handlers/association:member/repos/directory.schema';
 import type { DatabaseInstance } from '@/core/database';
 import type { UpdateDirectoryProfileBody, UpdateDirectoryProfileParams } from '@/generated/openapi/validators';
 import { UnauthorizedError, NotFoundError } from '@/core/errors';
-import { DirectoryProfileRepository } from './repos/directory.repo';
+import { DirectoryProfileRepository } from '@/handlers/association:member/repos/directory.repo';
 
 /**
  * updateDirectoryProfile

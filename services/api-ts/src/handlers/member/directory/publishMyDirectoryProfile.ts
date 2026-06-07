@@ -2,7 +2,7 @@ import type { ValidatedContext } from '@/types/app';
 import type { DatabaseInstance } from '@/core/database';
 import { UnauthorizedError, ValidationError } from '@/core/errors';
 import { eq, and } from 'drizzle-orm';
-import { directoryProfiles } from './repos/directory.schema';
+import { directoryProfiles } from '@/handlers/association:member/repos/directory.schema';
 import { persons } from '@/handlers/person/repos/person.schema';
 
 /**

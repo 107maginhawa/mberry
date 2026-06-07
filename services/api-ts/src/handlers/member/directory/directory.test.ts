@@ -10,7 +10,7 @@
 
 import { describe, test, expect, afterEach, mock } from 'bun:test';
 import { makeCtx, stubRepo, restoreRepo } from '@/test-utils/make-ctx';
-import { DirectoryProfileRepository } from './repos/directory.repo';
+import { DirectoryProfileRepository } from '@/handlers/association:member/repos/directory.repo';
 
 // Context-injected mock for batchLoadTrustSignals (avoids mock.module pollution)
 const mockBatchLoadTrustSignals = mock(async () => new Map());

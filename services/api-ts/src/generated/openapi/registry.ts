@@ -182,13 +182,6 @@ import { listMemberCreditsForPeer } from '../../handlers/association:member/list
 import { adjustCreditEntry } from '../../handlers/association:member/adjustCreditEntry';
 import { awardManualCredit } from '../../handlers/association:member/awardManualCredit';
 import { voidCreditEntry } from '../../handlers/association:member/voidCreditEntry';
-import { createDirectoryProfile } from '../../handlers/association:member/createDirectoryProfile';
-import { listDirectoryProfiles } from '../../handlers/association:member/listDirectoryProfiles';
-import { getDirectoryProfile } from '../../handlers/association:member/getDirectoryProfile';
-import { updateDirectoryProfile } from '../../handlers/association:member/updateDirectoryProfile';
-import { deleteDirectoryProfile } from '../../handlers/association:member/deleteDirectoryProfile';
-import { searchDirectory } from '../../handlers/association:member/searchDirectory';
-import { getPublicDirectoryProfile } from '../../handlers/association:member/getPublicDirectoryProfile';
 import { createDuesConfig } from '../../handlers/association:member/createDuesConfig';
 import { listDuesConfigs } from '../../handlers/association:member/listDuesConfigs';
 import { getDuesConfig } from '../../handlers/association:member/getDuesConfig';
@@ -313,6 +306,13 @@ import { listProfessionalLicenses } from '../../handlers/member/credentials/list
 import { getProfessionalLicense } from '../../handlers/member/credentials/getProfessionalLicense';
 import { updateProfessionalLicense } from '../../handlers/member/credentials/updateProfessionalLicense';
 import { deleteProfessionalLicense } from '../../handlers/member/credentials/deleteProfessionalLicense';
+import { createDirectoryProfile } from '../../handlers/member/directory/createDirectoryProfile';
+import { listDirectoryProfiles } from '../../handlers/member/directory/listDirectoryProfiles';
+import { getDirectoryProfile } from '../../handlers/member/directory/getDirectoryProfile';
+import { updateDirectoryProfile } from '../../handlers/member/directory/updateDirectoryProfile';
+import { deleteDirectoryProfile } from '../../handlers/member/directory/deleteDirectoryProfile';
+import { searchDirectory } from '../../handlers/member/directory/searchDirectory';
+import { getPublicDirectoryProfile } from '../../handlers/member/directory/getPublicDirectoryProfile';
 import { getDuesMemberSummary } from '../../handlers/dues/getDuesMemberSummary';
 import { getDuesMetrics } from '../../handlers/dues/getDuesMetrics';
 import { getDuesDashboard } from '../../handlers/dues/getDuesDashboard';
@@ -653,13 +653,6 @@ export const registry = {
   adjustCreditEntry,
   awardManualCredit,
   voidCreditEntry,
-  createDirectoryProfile,
-  listDirectoryProfiles,
-  getDirectoryProfile,
-  updateDirectoryProfile,
-  deleteDirectoryProfile,
-  searchDirectory,
-  getPublicDirectoryProfile,
   createDuesConfig,
   listDuesConfigs,
   getDuesConfig,
@@ -788,6 +781,15 @@ export const registry = {
   getProfessionalLicense,
   updateProfessionalLicense,
   deleteProfessionalLicense,
+
+  // Member/directory handlers
+  createDirectoryProfile,
+  listDirectoryProfiles,
+  getDirectoryProfile,
+  updateDirectoryProfile,
+  deleteDirectoryProfile,
+  searchDirectory,
+  getPublicDirectoryProfile,
 
   // Dues handlers
   getDuesMemberSummary,

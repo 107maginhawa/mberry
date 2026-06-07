@@ -407,11 +407,11 @@ namespace MonobaseAPI {
   // Association Domain — Directory
   // =========================================================================
 
-  @tag("Association:Member")
+  @tag("Member/Directory")
   @route("/association/member/directory/profiles")
   interface AssocDirectoryProfileManagement extends Association.Member.Directory.DirectoryProfileManagement {}
 
-  @tag("Association:Member")
+  @tag("Member/Directory")
   @route("/association/member/directory/search")
   interface AssocDirectorySearchService extends Association.Member.Directory.DirectorySearchService {}
 
