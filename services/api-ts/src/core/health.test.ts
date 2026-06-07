@@ -6,7 +6,7 @@
  * dependencies (DB, storage, jobs) are stubbed inline — no real connections.
  */
 
-import { describe, test, expect, mock } from 'bun:test';
+import { describe, test, expect, mock, afterAll } from 'bun:test';
 import { Hono } from 'hono';
 
 // Mock-Classification: APPROPRIATE — health check with external dependency probes
@@ -14,15 +14,20 @@ import { Hono } from 'hono';
 // Stub external modules before importing health.ts
 // ---------------------------------------------------------------------------
 
-// checkDatabaseConnection lives in @/core/database — stub it
+// Bun's `mock.module` is process-wide — to avoid leaking the stub into
+// other test files (e.g. database.test.ts that tests the real
+// `detectDialect`), import the real module, spread it, then override
+// only what this file needs, and restore the real module in afterAll.
+const realDatabase = await import('@/core/database');
+
 await mock.module('@/core/database', () => ({
+  ...realDatabase,
   checkDatabaseConnection: mock(async () => true),
-  createDatabase: mock(() => ({})),
-  closeDatabaseConnection: mock(async () => {}),
-  detectDialect: mock(() => 'postgresql'),
-  runMigrations: mock(async () => {}),
-  getDatabaseFromContext: mock(() => ({})),
 }));
+
+afterAll(async () => {
+  await mock.module('@/core/database', () => realDatabase);
+});
 
 // ---------------------------------------------------------------------------
 // Import after stubbing
