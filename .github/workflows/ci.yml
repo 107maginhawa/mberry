@@ -108,8 +108,11 @@ jobs:
           echo $! > /tmp/api.pid
       - name: Wait for API
         run: |
+          # /readyz returns 200 only after migrations + storage + jobs scheduler
+          # have all initialized — /livez returns 200 immediately and would race
+          # the seed step against in-flight migrations.
           for i in $(seq 1 60); do
-            curl -fsS "$API_URL/livez" && exit 0
+            curl -fsS "$API_URL/readyz" && exit 0
             sleep 1
           done
           echo "API never became ready"
@@ -362,8 +365,11 @@ jobs:
           echo $! > /tmp/api.pid
       - name: Wait for API
         run: |
+          # /readyz returns 200 only after migrations + storage + jobs scheduler
+          # have all initialized — /livez returns 200 immediately and would race
+          # the seed step against in-flight migrations.
           for i in $(seq 1 60); do
-            curl -fsS "$API_URL/livez" && exit 0
+            curl -fsS "$API_URL/readyz" && exit 0
             sleep 1
           done
           echo "API never became ready"
