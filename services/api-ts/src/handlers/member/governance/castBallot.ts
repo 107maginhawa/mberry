@@ -4,7 +4,7 @@ import { UnauthorizedError, NotFoundError, BusinessLogicError } from '@/core/err
 import type { CastBallotBody } from '@/generated/openapi/validators';
 import { ElectionsRepository } from '@/handlers/elections/repos/elections.repo';
 import { MembershipRepository } from '@/handlers/association:member/repos/membership.repo';
-import { withComputedStatus } from '@/handlers/association:member/utils/membership-status-middleware';
+import { withComputedStatus } from '@/handlers/member/membership/utils/membership-status-middleware';
 
 /**
  * castBallot

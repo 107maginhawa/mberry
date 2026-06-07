@@ -40,9 +40,9 @@ import { registerEmailJobs } from '@/handlers/email/jobs';
 import { registerNotifsJobs } from '@/handlers/notifs/jobs';
 import { registerAuditJobs } from '@/handlers/audit/jobs';
 import { registerBookingJobs } from '@/handlers/booking/jobs';
-import { registerDuesJobs, registerStatusRecomputeJob } from '@/handlers/association:member/jobs';
+import { registerDuesJobs } from '@/handlers/association:member/jobs';
 import { registerPersonJobs } from '@/handlers/person/jobs';
-import { registerMembershipJobs } from '@/handlers/membership/jobs';
+import { registerMembershipJobs, registerStatusRecomputeJob } from '@/handlers/member/membership/jobs';
 import { registerSurveyJobs } from '@/handlers/surveys/jobs';
 import { registerBreachJobs, registerTicketJobs, registerTrialExpiryMonitor, registerPastDueMonitor } from '@/handlers/platformadmin/jobs';
 import { registerDomainEventConsumers } from '@/core/domain-event-consumers';
@@ -170,9 +170,9 @@ import { getSubscription } from '@/handlers/platformadmin/getSubscription';
 import { cancelSubscription } from '@/handlers/platformadmin/cancelSubscription';
 import { getRevenueAnalytics } from '@/handlers/platformadmin/getRevenueAnalytics';
 import { getOrgHealthScores } from '@/handlers/platformadmin/getOrgHealthScores';
-import { getMySubscription } from '@/handlers/association:member/getMySubscription';
-import { upgradeSubscription } from '@/handlers/association:member/upgradeSubscription';
-import { createSubscriptionCheckout } from '@/handlers/association:member/createSubscriptionCheckout';
+import { getMySubscription } from '@/handlers/member/membership/subscription/getMySubscription';
+import { upgradeSubscription } from '@/handlers/member/membership/subscription/upgradeSubscription';
+import { createSubscriptionCheckout } from '@/handlers/member/membership/subscription/createSubscriptionCheckout';
 
 /**
  * Create and configure the Hono application with proper dependency injection

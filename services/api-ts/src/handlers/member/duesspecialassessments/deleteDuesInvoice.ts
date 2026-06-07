@@ -4,7 +4,7 @@ import { UnauthorizedError, NotFoundError, ForbiddenError } from '@/core/errors'
 import { requirePosition } from '@/core/auth/officer-checks';
 import { POSITION_TITLES } from '@/utils/position-titles';
 import { assertValidTransition } from '@/utils/status-transitions';
-import { INVOICE_VALID_TRANSITIONS } from '@/handlers/association:member/utils/status-transitions';
+import { INVOICE_VALID_TRANSITIONS } from '@/handlers/member/membership/utils/status-transitions';
 import type { DeleteDuesInvoiceParams } from '@/generated/openapi/validators';
 import { DuesInvoiceRepository } from '@/handlers/association:member/repos/dues.repo';
 

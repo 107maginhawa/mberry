@@ -6,7 +6,7 @@ import { memberships } from '@/handlers/association:member/repos/membership.sche
 import { persons } from '@/handlers/person/repos/person.schema';
 import { platformAdmins } from '@/handlers/platformadmin/repos/platform-admin.schema';
 import { eq, and, inArray } from 'drizzle-orm';
-import { computeMembershipStatus } from '@/handlers/association:member/utils/compute-membership-status';
+import { computeMembershipStatus } from '@/handlers/member/membership/utils/compute-membership-status';
 
 /**
  * listOrgMembers

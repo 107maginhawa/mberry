@@ -5,7 +5,7 @@ import { NotFoundError, BusinessLogicError } from '@/core/errors';
 import { OfficerTermRepository } from '@/handlers/association:member/repos/governance.repo';
 import { requirePosition } from '@/core/auth/officer-checks';
 import { POSITION_TITLES } from '@/utils/position-titles';
-import { isValidTermTransition, termTransitionError } from '@/handlers/association:member/utils/status-transitions';
+import { isValidTermTransition, termTransitionError } from '@/handlers/member/membership/utils/status-transitions';
 
 /**
  * updateOfficerTerm

@@ -3,7 +3,7 @@ import type { DatabaseInstance } from '@/core/database';
 import { UnauthorizedError, NotFoundError, BusinessLogicError } from '@/core/errors';
 import type { RefundDuesPaymentBody, RefundDuesPaymentParams } from '@/generated/openapi/validators';
 import { DuesRepository } from '@/handlers/association:member/repos/dues-payments.repo';
-import { membershipLifecycle } from '@/handlers/association:member/utils/membership-lifecycle';
+import { membershipLifecycle } from '@/handlers/member/membership/utils/membership-lifecycle';
 import { domainEvents } from '@/core/domain-events';
 import { requirePosition } from '@/core/auth/officer-checks';
 import { POSITION_TITLES } from '@/utils/position-titles';

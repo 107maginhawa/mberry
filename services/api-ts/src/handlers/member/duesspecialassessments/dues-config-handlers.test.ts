@@ -22,7 +22,7 @@ import {
   isWithinRetentionPeriod,
   FINANCIAL_RETENTION_YEARS,
   type FundSplit,
-} from '@/handlers/association:member/utils/fund-math';
+} from '@/handlers/member/membership/utils/fund-math';
 
 // ─── Factories ────────────────────────────────────────────
 

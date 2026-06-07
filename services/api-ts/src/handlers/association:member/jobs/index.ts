@@ -9,10 +9,7 @@ import { processDuesReminders } from '@/handlers/member/duesspecialassessments/j
 import { processWebhookRetry } from '@/handlers/member/duesspecialassessments/jobs/webhookRetryProcessor';
 import { processCreditIssue } from './creditIssue';
 import { processComplianceThreshold } from './complianceThreshold';
-import { registerStatusRecomputeJob } from './statusRecomputeCron';
 import { createProcessPayment } from '@/handlers/member/duesspecialassessments/jobs/processStripePayment';
-
-export { registerStatusRecomputeJob };
 
 /**
  * Register all dues module jobs with the scheduler

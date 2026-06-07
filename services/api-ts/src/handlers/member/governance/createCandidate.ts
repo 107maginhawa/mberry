@@ -4,7 +4,7 @@ import { UnauthorizedError, NotFoundError, BusinessLogicError } from '@/core/err
 import type { CreateCandidateBody } from '@/generated/openapi/validators';
 import { ElectionsRepository } from '@/handlers/elections/repos/elections.repo';
 import { MembershipRepository } from '@/handlers/association:member/repos/membership.repo';
-import { computeMembershipStatus } from '@/handlers/association:member/utils/compute-membership-status';
+import { computeMembershipStatus } from '@/handlers/member/membership/utils/compute-membership-status';
 import { domainEvents } from '@/core/domain-events';
 
 /**

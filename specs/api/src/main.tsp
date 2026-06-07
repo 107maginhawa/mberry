@@ -251,35 +251,35 @@ namespace MonobaseAPI {
   // Association Domain — Membership
   // =========================================================================
 
-  @tag("Association:Member")
+  @tag("Member/Membership")
   @route("/association/member/tiers")
   interface AssocMembershipTierManagement extends Association.Member.Membership.MembershipTierManagement {}
 
-  @tag("Association:Member")
+  @tag("Member/Membership")
   @route("/association/member/memberships")
   interface AssocMembershipManagement extends Association.Member.Membership.MembershipManagement {}
 
-  @tag("Association:Member")
+  @tag("Member/Membership")
   @route("/association/member/applications")
   interface AssocMembershipApplicationManagement extends Association.Member.Membership.MembershipApplicationManagement {}
 
-  @tag("Association:Member")
+  @tag("Member/Membership")
   @route("/association/member/institutional-memberships")
   interface AssocInstitutionalMembershipManagement extends Association.Member.Membership.InstitutionalMembershipManagement {}
 
-  @tag("Association:Member")
+  @tag("Member/Membership")
   @route("/association/member/institutional-memberships/{institutionalMembershipId}/seats")
   interface AssocSeatAllocationManagement extends Association.Member.Membership.SeatAllocationManagement {}
 
-  @tag("Association:Member")
+  @tag("Member/Membership")
   @route("/association/member/roster")
   interface AssocMemberRosterManagement extends Association.Member.Membership.MemberRosterManagement {}
 
-  @tag("Association:Member")
+  @tag("Member/Membership")
   @route("/association/member/membership-categories")
   interface AssocMembershipCategoryManagement extends Association.Member.Membership.MembershipCategoryManagement {}
 
-  @tag("Association:Member")
+  @tag("Member/Membership")
   @route("/association/member/org-profile")
   interface AssocOrganizationProfileManagement extends Association.Member.Membership.OrganizationProfileManagement {}
 

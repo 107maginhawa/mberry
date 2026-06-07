@@ -5,7 +5,7 @@ import { requirePosition } from '@/core/auth/officer-checks';
 import { POSITION_TITLES } from '@/utils/position-titles';
 import type { MarkDuesInvoicePaidBody, MarkDuesInvoicePaidParams } from '@/generated/openapi/validators';
 import { DuesInvoiceRepository } from '@/handlers/association:member/repos/dues.repo';
-import { membershipLifecycle } from '@/handlers/association:member/utils/membership-lifecycle';
+import { membershipLifecycle } from '@/handlers/member/membership/utils/membership-lifecycle';
 
 /**
  * markDuesInvoicePaid

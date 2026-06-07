@@ -212,46 +212,46 @@ import { sendPaymentLink } from '../../handlers/member/duesspecialassessments/se
 import { downloadReceipt } from '../../handlers/member/duesspecialassessments/downloadReceipt';
 import { checkoutPaymentToken } from '../../handlers/member/duesspecialassessments/checkoutPaymentToken';
 import { validatePaymentToken } from '../../handlers/member/duesspecialassessments/validatePaymentToken';
-import { createMembershipApplication } from '../../handlers/association:member/createMembershipApplication';
-import { listMembershipApplications } from '../../handlers/association:member/listMembershipApplications';
-import { bulkApproveMembershipApplications } from '../../handlers/association:member/bulkApproveMembershipApplications';
-import { getMembershipApplication } from '../../handlers/association:member/getMembershipApplication';
-import { updateMembershipApplication } from '../../handlers/association:member/updateMembershipApplication';
-import { deleteMembershipApplication } from '../../handlers/association:member/deleteMembershipApplication';
-import { approveMembershipApplication } from '../../handlers/association:member/approveMembershipApplication';
-import { denyMembershipApplication } from '../../handlers/association:member/denyMembershipApplication';
-import { createInstitutionalMembership } from '../../handlers/association:member/createInstitutionalMembership';
-import { listInstitutionalMemberships } from '../../handlers/association:member/listInstitutionalMemberships';
-import { getInstitutionalMembership } from '../../handlers/association:member/getInstitutionalMembership';
-import { updateInstitutionalMembership } from '../../handlers/association:member/updateInstitutionalMembership';
-import { deleteInstitutionalMembership } from '../../handlers/association:member/deleteInstitutionalMembership';
-import { allocateSeat } from '../../handlers/association:member/allocateSeat';
-import { listSeatAllocations } from '../../handlers/association:member/listSeatAllocations';
-import { revokeSeat } from '../../handlers/association:member/revokeSeat';
-import { listMembershipCategories } from '../../handlers/association:member/listMembershipCategories';
-import { upsertMembershipCategory } from '../../handlers/association:member/upsertMembershipCategory';
-import { createMembership } from '../../handlers/association:member/createMembership';
-import { listMemberships } from '../../handlers/association:member/listMemberships';
-import { getMembership } from '../../handlers/association:member/getMembership';
-import { updateMembership } from '../../handlers/association:member/updateMembership';
-import { deleteMembership } from '../../handlers/association:member/deleteMembership';
-import { deceaseMembership } from '../../handlers/association:member/deceaseMembership';
-import { reinstateMembership } from '../../handlers/association:member/reinstateMembership';
-import { renewMembership } from '../../handlers/association:member/renewMembership';
-import { resignMembership } from '../../handlers/association:member/resignMembership';
-import { terminateMembership } from '../../handlers/association:member/terminateMembership';
-import { getOrganizationProfile } from '../../handlers/association:member/getOrganizationProfile';
-import { updateOrganizationProfile } from '../../handlers/association:member/updateOrganizationProfile';
-import { listRosterMembers } from '../../handlers/association:member/listRosterMembers';
-import { addRosterMember } from '../../handlers/association:member/addRosterMember';
-import { importRosterMembers } from '../../handlers/association:member/importRosterMembers';
-import { getRosterMember } from '../../handlers/association:member/getRosterMember';
-import { updateRosterMember } from '../../handlers/association:member/updateRosterMember';
-import { createMembershipTier } from '../../handlers/association:member/createMembershipTier';
-import { listMembershipTiers } from '../../handlers/association:member/listMembershipTiers';
-import { getMembershipTier } from '../../handlers/association:member/getMembershipTier';
-import { updateMembershipTier } from '../../handlers/association:member/updateMembershipTier';
-import { deleteMembershipTier } from '../../handlers/association:member/deleteMembershipTier';
+import { createMembershipApplication } from '../../handlers/member/membership/createMembershipApplication';
+import { listMembershipApplications } from '../../handlers/member/membership/listMembershipApplications';
+import { bulkApproveMembershipApplications } from '../../handlers/member/membership/bulkApproveMembershipApplications';
+import { getMembershipApplication } from '../../handlers/member/membership/getMembershipApplication';
+import { updateMembershipApplication } from '../../handlers/member/membership/updateMembershipApplication';
+import { deleteMembershipApplication } from '../../handlers/member/membership/deleteMembershipApplication';
+import { approveMembershipApplication } from '../../handlers/member/membership/approveMembershipApplication';
+import { denyMembershipApplication } from '../../handlers/member/membership/denyMembershipApplication';
+import { createInstitutionalMembership } from '../../handlers/member/membership/createInstitutionalMembership';
+import { listInstitutionalMemberships } from '../../handlers/member/membership/listInstitutionalMemberships';
+import { getInstitutionalMembership } from '../../handlers/member/membership/getInstitutionalMembership';
+import { updateInstitutionalMembership } from '../../handlers/member/membership/updateInstitutionalMembership';
+import { deleteInstitutionalMembership } from '../../handlers/member/membership/deleteInstitutionalMembership';
+import { allocateSeat } from '../../handlers/member/membership/allocateSeat';
+import { listSeatAllocations } from '../../handlers/member/membership/listSeatAllocations';
+import { revokeSeat } from '../../handlers/member/membership/revokeSeat';
+import { listMembershipCategories } from '../../handlers/member/membership/listMembershipCategories';
+import { upsertMembershipCategory } from '../../handlers/member/membership/upsertMembershipCategory';
+import { createMembership } from '../../handlers/member/membership/createMembership';
+import { listMemberships } from '../../handlers/member/membership/listMemberships';
+import { getMembership } from '../../handlers/member/membership/getMembership';
+import { updateMembership } from '../../handlers/member/membership/updateMembership';
+import { deleteMembership } from '../../handlers/member/membership/deleteMembership';
+import { deceaseMembership } from '../../handlers/member/membership/deceaseMembership';
+import { reinstateMembership } from '../../handlers/member/membership/reinstateMembership';
+import { renewMembership } from '../../handlers/member/membership/renewMembership';
+import { resignMembership } from '../../handlers/member/membership/resignMembership';
+import { terminateMembership } from '../../handlers/member/membership/terminateMembership';
+import { getOrganizationProfile } from '../../handlers/member/membership/getOrganizationProfile';
+import { updateOrganizationProfile } from '../../handlers/member/membership/updateOrganizationProfile';
+import { listRosterMembers } from '../../handlers/member/membership/listRosterMembers';
+import { addRosterMember } from '../../handlers/member/membership/addRosterMember';
+import { importRosterMembers } from '../../handlers/member/membership/importRosterMembers';
+import { getRosterMember } from '../../handlers/member/membership/getRosterMember';
+import { updateRosterMember } from '../../handlers/member/membership/updateRosterMember';
+import { createMembershipTier } from '../../handlers/member/membership/createMembershipTier';
+import { listMembershipTiers } from '../../handlers/member/membership/listMembershipTiers';
+import { getMembershipTier } from '../../handlers/member/membership/getMembershipTier';
+import { updateMembershipTier } from '../../handlers/member/membership/updateMembershipTier';
+import { deleteMembershipTier } from '../../handlers/member/membership/deleteMembershipTier';
 import { castBallot } from '../../handlers/member/governance/castBallot';
 import { listBallots } from '../../handlers/member/governance/listBallots';
 import { createCandidate } from '../../handlers/member/governance/createCandidate';
@@ -684,7 +684,7 @@ export const registry = {
   checkoutPaymentToken,
   validatePaymentToken,
 
-  // Association:member handlers
+  // Member/membership handlers
   createMembershipApplication,
   listMembershipApplications,
   bulkApproveMembershipApplications,

@@ -5,7 +5,7 @@ import { UnauthorizedError, NotFoundError, ForbiddenError } from '@/core/errors'
 import { CredentialTemplateRepository, DigitalCredentialRepository } from '@/handlers/association:member/repos/credentials.repo';
 import type { DigitalCredential } from '@/handlers/association:member/repos/credentials.schema';
 import { MembershipRepository } from '@/handlers/association:member/repos/membership.repo';
-import { withComputedStatus } from '@/handlers/association:member/utils/membership-status-middleware';
+import { withComputedStatus } from '@/handlers/member/membership/utils/membership-status-middleware';
 import { createCredentialToken } from '@/handlers/association:member/utils/credential-token';
 
 /**
