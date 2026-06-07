@@ -490,6 +490,13 @@ DO $$ BEGIN
   END IF;
 END $$;--> statement-breakpoint
 DO $$ BEGIN
+  -- Fresh-DB fallback: event table created in 0007 has no tenant_id, so the
+  -- rename above is a no-op. Drizzle schema expects event_type, so add it.
+  IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='event' AND column_name='event_type')
+  THEN ALTER TABLE "event" ADD COLUMN "event_type" "event_type" DEFAULT 'other';
+  END IF;
+END $$;--> statement-breakpoint
+DO $$ BEGIN
   IF EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='course_enrollment' AND column_name='tenant_id')
      AND NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='course_enrollment' AND column_name='organization_id')
   THEN ALTER TABLE "course_enrollment" RENAME COLUMN "tenant_id" TO "organization_id";
@@ -593,6 +600,14 @@ DO $$ BEGIN
   IF EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='document' AND column_name='tenant_id')
      AND NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='document' AND column_name='file_name')
   THEN ALTER TABLE "document" RENAME COLUMN "tenant_id" TO "file_name";
+  END IF;
+END $$;--> statement-breakpoint
+DO $$ BEGIN
+  -- Fresh-DB fallback: 0014 dropped document.tenant_id, so the rename above is
+  -- a no-op. Drizzle schema requires file_name; add it with NOT NULL + default
+  -- so existing rows (if any) and inserts both succeed.
+  IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='document' AND column_name='file_name')
+  THEN ALTER TABLE "document" ADD COLUMN "file_name" varchar(300) NOT NULL DEFAULT '';
   END IF;
 END $$;--> statement-breakpoint
 DO $$ BEGIN
