@@ -28,7 +28,6 @@ routes:
 
   # Public credential/certificate lookups
   - { method: GET,    path: "/association/member/credentials/lookup/:credentialNumber",        reason: public-unauth,       owner: association:member,  note: "public credential lookup, no auth by design" }
-  - { method: GET,    path: "/certificates/verify/:certificateNumber",                         reason: public-unauth,       owner: certificates,        note: "public certificate verification, no auth by design" }
 
   # DPA breach notification (admin-only)
   - { method: POST,   path: "/admin/breaches",                                                 reason: middleware-ordering, owner: platformadmin,       note: "DPA 2012 breach notification, admin-only" }
@@ -43,8 +42,6 @@ routes:
   - { method: POST,   path: "/admin/tickets/:id/comments",                                    reason: legacy-deferred,     owner: platformadmin,       note: "support ticket SLA system, not in TypeSpec" }
 
   # Payment token (must precede auth middleware)
-  - { method: GET,    path: "/pay/:token/validate",                                            reason: middleware-ordering, owner: dues,                note: "public payment token, must precede auth middleware" }
-  - { method: POST,   path: "/pay/:token/checkout",                                            reason: middleware-ordering, owner: dues,                note: "public payment token, must precede auth middleware" }
 
   # Stripe webhook (must precede auth middleware)
   - { method: POST,   path: "/webhooks/stripe",                                                reason: public-webhook,      owner: billing,             note: "Stripe webhook, must precede auth middleware" }
@@ -57,7 +54,6 @@ routes:
   - { method: GET,    path: "/email/suppressions",                                             reason: middleware-ordering, owner: email,               note: "suppression list, middleware ordering with /email/* auth" }
 
   # Receipt PDF download
-  - { method: GET,    path: "/org/:organizationId/payments/:paymentId/receipt",               reason: legacy-deferred,     owner: dues,                note: "receipt PDF download, not in TypeSpec" }
 
   # Document byte download
   - { method: GET,    path: "/documents/:documentId/download",                                 reason: middleware-ordering, owner: documents,           note: "browser GET cannot send x-org-id; self-enforces membership" }
@@ -88,7 +84,6 @@ routes:
   - { method: GET,    path: "/association/member/org/:organizationId/dashboard",              reason: legacy-deferred,     owner: association:member,  note: "org-wide dashboard, not in TypeSpec" }
 
   # Bulk void credit awards
-  - { method: POST,   path: "/association/member/credits/void-event",                         reason: legacy-deferred,     owner: association:member,  note: "bulk-void manual credit awards by activityName" }
 
   # Admin pricing tier CRUD
   - { method: GET,    path: "/admin/pricing",                                                  reason: legacy-deferred,     owner: platformadmin,       note: "admin pricing tier CRUD, not in TypeSpec" }
