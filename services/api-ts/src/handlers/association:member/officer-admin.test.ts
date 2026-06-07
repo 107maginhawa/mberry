@@ -57,7 +57,7 @@ describe('[M4-R1] one officer per role per org', () => {
       create: async () => createdTerm,
     });
 
-    const { createOfficerTerm } = await import('./createOfficerTerm');
+    const { createOfficerTerm } = await import('@/handlers/member/governance/createOfficerTerm');
     const ctx = makeCtx({
       _body: {
         positionId: 'pos-1',
@@ -79,7 +79,7 @@ describe('[M4-R1] one officer per role per org', () => {
       create: async () => createdTerm,
     });
 
-    const { createOfficerTerm } = await import('./createOfficerTerm');
+    const { createOfficerTerm } = await import('@/handlers/member/governance/createOfficerTerm');
     const ctx = makeCtx({
       _body: {
         positionId: 'pos-2',
@@ -101,7 +101,7 @@ describe('[M4-R1] one officer per role per org', () => {
       create: async () => createdTerm,
     });
 
-    const { createOfficerTerm } = await import('./createOfficerTerm');
+    const { createOfficerTerm } = await import('@/handlers/member/governance/createOfficerTerm');
     const ctx = makeCtx({
       _body: {
         positionId: 'pos-1',
@@ -131,7 +131,7 @@ describe('[M4-R2] president-only authorization for role changes', () => {
       findActiveByPersonAndOrg: async () => [{ positionTitle: 'Secretary' }],
     });
 
-    const { createOfficerTerm } = await import('./createOfficerTerm');
+    const { createOfficerTerm } = await import('@/handlers/member/governance/createOfficerTerm');
     const ctx = makeCtx({
       _body: { positionId: 'pos-1', personId: 'person-2', startDate: '2025-01-01' },
     });
@@ -147,7 +147,7 @@ describe('[M4-R2] president-only authorization for role changes', () => {
       update: async (_id: string, data: any) => ({ ...existingTerm, ...data }),
     });
 
-    const { updateOfficerTerm } = await import('./updateOfficerTerm');
+    const { updateOfficerTerm } = await import('@/handlers/member/governance/updateOfficerTerm');
     const ctx = makeCtx({
       organizationId: 'org-1',
       _params: { termId: 'term-1' },
@@ -165,7 +165,7 @@ describe('[M4-R2] president-only authorization for role changes', () => {
       update: async (_id: string, data: any) => ({ ...existingTerm, ...data }),
     });
 
-    const { updateOfficerTerm } = await import('./updateOfficerTerm');
+    const { updateOfficerTerm } = await import('@/handlers/member/governance/updateOfficerTerm');
     const ctx = makeCtx({
       organizationId: 'org-1',
       _params: { termId: 'term-1' },
@@ -183,7 +183,7 @@ describe('[M4-R2] president-only authorization for role changes', () => {
       delete: async () => {},
     });
 
-    const { deleteOfficerTerm } = await import('./deleteOfficerTerm');
+    const { deleteOfficerTerm } = await import('@/handlers/member/governance/deleteOfficerTerm');
     const ctx = makeCtx({
       organizationId: 'org-1',
       _params: { termId: 'term-1' },
@@ -200,7 +200,7 @@ describe('[M4-R2] president-only authorization for role changes', () => {
       delete: async () => {},
     });
 
-    const { deleteOfficerTerm } = await import('./deleteOfficerTerm');
+    const { deleteOfficerTerm } = await import('@/handlers/member/governance/deleteOfficerTerm');
     const ctx = makeCtx({
       organizationId: 'org-1',
       _params: { termId: 'term-1' },
@@ -401,7 +401,7 @@ describe('[M4-R6] immutable audit trail', () => {
       create: async () => createdTerm,
     });
 
-    const { createOfficerTerm } = await import('./createOfficerTerm');
+    const { createOfficerTerm } = await import('@/handlers/member/governance/createOfficerTerm');
     const ctx = makeCtx({
       audit: null,
       _body: {
@@ -422,7 +422,7 @@ describe('[M4-R6] immutable audit trail', () => {
       update: async (_id: string, data: any) => ({ ...existingTerm, ...data }),
     });
 
-    const { updateOfficerTerm } = await import('./updateOfficerTerm');
+    const { updateOfficerTerm } = await import('@/handlers/member/governance/updateOfficerTerm');
     const ctx = makeCtx({
       organizationId: 'org-1',
       audit: null,
@@ -442,7 +442,7 @@ describe('[M4-R6] immutable audit trail', () => {
       delete: async () => {},
     });
 
-    const { deleteOfficerTerm } = await import('./deleteOfficerTerm');
+    const { deleteOfficerTerm } = await import('@/handlers/member/governance/deleteOfficerTerm');
     const ctx = makeCtx({
       organizationId: 'org-1',
       audit: null, // No audit service — should not crash
@@ -506,7 +506,7 @@ describe('[BR-09] officer creation audit includes assignment details', () => {
       create: async () => createdTerm,
     });
 
-    const { createOfficerTerm } = await import('./createOfficerTerm');
+    const { createOfficerTerm } = await import('@/handlers/member/governance/createOfficerTerm');
     const ctx = makeCtx({
       _body: {
         positionId: 'pos-1',

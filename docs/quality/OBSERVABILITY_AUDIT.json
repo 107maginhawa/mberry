@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-06-07T02:43:42.651Z",
+  "generatedAt": "2026-06-07T02:55:49.500Z",
   "totals": {
     "handlerFiles": 586,
     "logCallSites": 274,
@@ -495,6 +495,24 @@
       "httpExceptions": 0,
       "typedErrors": 5
     },
+    "services/api-ts/src/handlers/member/governance/updateOfficerTerm.ts": {
+      "totalLogs": 2,
+      "full": 2,
+      "partial": 0,
+      "none": 0,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 2
+    },
+    "services/api-ts/src/handlers/member/governance/deleteOfficerTerm.ts": {
+      "totalLogs": 2,
+      "full": 2,
+      "partial": 0,
+      "none": 0,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 1
+    },
     "services/api-ts/src/handlers/comms/joinVideoCall.ts": {
       "totalLogs": 2,
       "full": 2,
@@ -738,15 +756,6 @@
       "httpExceptions": 0,
       "typedErrors": 3
     },
-    "services/api-ts/src/handlers/association:member/updateOfficerTerm.ts": {
-      "totalLogs": 2,
-      "full": 2,
-      "partial": 0,
-      "none": 0,
-      "rawErrors": 0,
-      "httpExceptions": 0,
-      "typedErrors": 2
-    },
     "services/api-ts/src/handlers/association:member/upgradeSubscription.ts": {
       "totalLogs": 1,
       "full": 1,
@@ -800,15 +809,6 @@
       "rawErrors": 0,
       "httpExceptions": 0,
       "typedErrors": 0
-    },
-    "services/api-ts/src/handlers/association:member/deleteOfficerTerm.ts": {
-      "totalLogs": 2,
-      "full": 2,
-      "partial": 0,
-      "none": 0,
-      "rawErrors": 0,
-      "httpExceptions": 0,
-      "typedErrors": 1
     },
     "services/api-ts/src/handlers/advertising/setMemberOptOut.ts": {
       "totalLogs": 1,
@@ -1791,6 +1791,195 @@
       "httpExceptions": 0,
       "typedErrors": 1
     },
+    "services/api-ts/src/handlers/member/governance/castBallot.ts": {
+      "totalLogs": 0,
+      "full": 0,
+      "partial": 0,
+      "none": 0,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 9
+    },
+    "services/api-ts/src/handlers/member/governance/openElectionNominations.ts": {
+      "totalLogs": 0,
+      "full": 0,
+      "partial": 0,
+      "none": 0,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 3
+    },
+    "services/api-ts/src/handlers/member/governance/listElections.ts": {
+      "totalLogs": 0,
+      "full": 0,
+      "partial": 0,
+      "none": 0,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 1
+    },
+    "services/api-ts/src/handlers/member/governance/updateCandidateStatus.ts": {
+      "totalLogs": 0,
+      "full": 0,
+      "partial": 0,
+      "none": 0,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 5
+    },
+    "services/api-ts/src/handlers/member/governance/updateCandidate.ts": {
+      "totalLogs": 0,
+      "full": 0,
+      "partial": 0,
+      "none": 0,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 2
+    },
+    "services/api-ts/src/handlers/member/governance/listCandidates.ts": {
+      "totalLogs": 0,
+      "full": 0,
+      "partial": 0,
+      "none": 0,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 1
+    },
+    "services/api-ts/src/handlers/member/governance/deleteCandidate.ts": {
+      "totalLogs": 0,
+      "full": 0,
+      "partial": 0,
+      "none": 0,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 2
+    },
+    "services/api-ts/src/handlers/member/governance/getOfficerTerm.ts": {
+      "totalLogs": 0,
+      "full": 0,
+      "partial": 0,
+      "none": 0,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 1
+    },
+    "services/api-ts/src/handlers/member/governance/createCandidate.ts": {
+      "totalLogs": 0,
+      "full": 0,
+      "partial": 0,
+      "none": 0,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 6
+    },
+    "services/api-ts/src/handlers/member/governance/getElection.ts": {
+      "totalLogs": 0,
+      "full": 0,
+      "partial": 0,
+      "none": 0,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 2
+    },
+    "services/api-ts/src/handlers/member/governance/deletePosition.ts": {
+      "totalLogs": 0,
+      "full": 0,
+      "partial": 0,
+      "none": 0,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 1
+    },
+    "services/api-ts/src/handlers/member/governance/updatePosition.ts": {
+      "totalLogs": 0,
+      "full": 0,
+      "partial": 0,
+      "none": 0,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 1
+    },
+    "services/api-ts/src/handlers/member/governance/openElectionVoting.ts": {
+      "totalLogs": 0,
+      "full": 0,
+      "partial": 0,
+      "none": 0,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 5
+    },
+    "services/api-ts/src/handlers/member/governance/createOfficerTerm.ts": {
+      "totalLogs": 0,
+      "full": 0,
+      "partial": 0,
+      "none": 0,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 1
+    },
+    "services/api-ts/src/handlers/member/governance/getCandidate.ts": {
+      "totalLogs": 0,
+      "full": 0,
+      "partial": 0,
+      "none": 0,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 2
+    },
+    "services/api-ts/src/handlers/member/governance/listBallots.ts": {
+      "totalLogs": 0,
+      "full": 0,
+      "partial": 0,
+      "none": 0,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 1
+    },
+    "services/api-ts/src/handlers/member/governance/certifyElection.ts": {
+      "totalLogs": 0,
+      "full": 0,
+      "partial": 0,
+      "none": 0,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 5
+    },
+    "services/api-ts/src/handlers/member/governance/updateElection.ts": {
+      "totalLogs": 0,
+      "full": 0,
+      "partial": 0,
+      "none": 0,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 2
+    },
+    "services/api-ts/src/handlers/member/governance/deleteElection.ts": {
+      "totalLogs": 0,
+      "full": 0,
+      "partial": 0,
+      "none": 0,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 3
+    },
+    "services/api-ts/src/handlers/member/governance/createElection.ts": {
+      "totalLogs": 0,
+      "full": 0,
+      "partial": 0,
+      "none": 0,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 2
+    },
+    "services/api-ts/src/handlers/member/governance/getPosition.ts": {
+      "totalLogs": 0,
+      "full": 0,
+      "partial": 0,
+      "none": 0,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 1
+    },
     "services/api-ts/src/handlers/comms/searchChatMessages.ts": {
       "totalLogs": 0,
       "full": 0,
@@ -2295,24 +2484,6 @@
       "httpExceptions": 0,
       "typedErrors": 2
     },
-    "services/api-ts/src/handlers/association:member/castBallot.ts": {
-      "totalLogs": 0,
-      "full": 0,
-      "partial": 0,
-      "none": 0,
-      "rawErrors": 0,
-      "httpExceptions": 0,
-      "typedErrors": 9
-    },
-    "services/api-ts/src/handlers/association:member/openElectionNominations.ts": {
-      "totalLogs": 0,
-      "full": 0,
-      "partial": 0,
-      "none": 0,
-      "rawErrors": 0,
-      "httpExceptions": 0,
-      "typedErrors": 3
-    },
     "services/api-ts/src/handlers/association:member/reinstateMembership.ts": {
       "totalLogs": 0,
       "full": 0,
@@ -2376,15 +2547,6 @@
       "httpExceptions": 0,
       "typedErrors": 3
     },
-    "services/api-ts/src/handlers/association:member/listElections.ts": {
-      "totalLogs": 0,
-      "full": 0,
-      "partial": 0,
-      "none": 0,
-      "rawErrors": 0,
-      "httpExceptions": 0,
-      "typedErrors": 1
-    },
     "services/api-ts/src/handlers/association:member/disconnectDuesGateway.ts": {
       "totalLogs": 0,
       "full": 0,
@@ -2421,15 +2583,6 @@
       "httpExceptions": 0,
       "typedErrors": 2
     },
-    "services/api-ts/src/handlers/association:member/updateCandidateStatus.ts": {
-      "totalLogs": 0,
-      "full": 0,
-      "partial": 0,
-      "none": 0,
-      "rawErrors": 0,
-      "httpExceptions": 0,
-      "typedErrors": 5
-    },
     "services/api-ts/src/handlers/association:member/getPublicDirectoryProfile.ts": {
       "totalLogs": 0,
       "full": 0,
@@ -2449,15 +2602,6 @@
       "typedErrors": 1
     },
     "services/api-ts/src/handlers/association:member/deleteMembershipTier.ts": {
-      "totalLogs": 0,
-      "full": 0,
-      "partial": 0,
-      "none": 0,
-      "rawErrors": 0,
-      "httpExceptions": 0,
-      "typedErrors": 2
-    },
-    "services/api-ts/src/handlers/association:member/updateCandidate.ts": {
       "totalLogs": 0,
       "full": 0,
       "partial": 0,
@@ -2538,15 +2682,6 @@
       "httpExceptions": 0,
       "typedErrors": 2
     },
-    "services/api-ts/src/handlers/association:member/listCandidates.ts": {
-      "totalLogs": 0,
-      "full": 0,
-      "partial": 0,
-      "none": 0,
-      "rawErrors": 0,
-      "httpExceptions": 0,
-      "typedErrors": 1
-    },
     "services/api-ts/src/handlers/association:member/getCreditCompliance.ts": {
       "totalLogs": 0,
       "full": 0,
@@ -2555,15 +2690,6 @@
       "rawErrors": 0,
       "httpExceptions": 0,
       "typedErrors": 1
-    },
-    "services/api-ts/src/handlers/association:member/deleteCandidate.ts": {
-      "totalLogs": 0,
-      "full": 0,
-      "partial": 0,
-      "none": 0,
-      "rawErrors": 0,
-      "httpExceptions": 0,
-      "typedErrors": 2
     },
     "services/api-ts/src/handlers/association:member/updateDuesConfig.ts": {
       "totalLogs": 0,
@@ -2592,15 +2718,6 @@
       "httpExceptions": 0,
       "typedErrors": 3
     },
-    "services/api-ts/src/handlers/association:member/getOfficerTerm.ts": {
-      "totalLogs": 0,
-      "full": 0,
-      "partial": 0,
-      "none": 0,
-      "rawErrors": 0,
-      "httpExceptions": 0,
-      "typedErrors": 1
-    },
     "services/api-ts/src/handlers/association:member/upsertMembershipCategory.ts": {
       "totalLogs": 0,
       "full": 0,
@@ -2618,15 +2735,6 @@
       "rawErrors": 0,
       "httpExceptions": 0,
       "typedErrors": 2
-    },
-    "services/api-ts/src/handlers/association:member/createCandidate.ts": {
-      "totalLogs": 0,
-      "full": 0,
-      "partial": 0,
-      "none": 0,
-      "rawErrors": 0,
-      "httpExceptions": 0,
-      "typedErrors": 6
     },
     "services/api-ts/src/handlers/association:member/generatePaymentLink.ts": {
       "totalLogs": 0,
@@ -2646,15 +2754,6 @@
       "httpExceptions": 0,
       "typedErrors": 1
     },
-    "services/api-ts/src/handlers/association:member/getElection.ts": {
-      "totalLogs": 0,
-      "full": 0,
-      "partial": 0,
-      "none": 0,
-      "rawErrors": 0,
-      "httpExceptions": 0,
-      "typedErrors": 2
-    },
     "services/api-ts/src/handlers/association:member/confirmPaymentProof.ts": {
       "totalLogs": 0,
       "full": 0,
@@ -2672,24 +2771,6 @@
       "rawErrors": 0,
       "httpExceptions": 0,
       "typedErrors": 3
-    },
-    "services/api-ts/src/handlers/association:member/deletePosition.ts": {
-      "totalLogs": 0,
-      "full": 0,
-      "partial": 0,
-      "none": 0,
-      "rawErrors": 0,
-      "httpExceptions": 0,
-      "typedErrors": 1
-    },
-    "services/api-ts/src/handlers/association:member/updatePosition.ts": {
-      "totalLogs": 0,
-      "full": 0,
-      "partial": 0,
-      "none": 0,
-      "rawErrors": 0,
-      "httpExceptions": 0,
-      "typedErrors": 1
     },
     "services/api-ts/src/handlers/association:member/getDigitalCredential.ts": {
       "totalLogs": 0,
@@ -2817,15 +2898,6 @@
       "httpExceptions": 0,
       "typedErrors": 2
     },
-    "services/api-ts/src/handlers/association:member/openElectionVoting.ts": {
-      "totalLogs": 0,
-      "full": 0,
-      "partial": 0,
-      "none": 0,
-      "rawErrors": 0,
-      "httpExceptions": 0,
-      "typedErrors": 5
-    },
     "services/api-ts/src/handlers/association:member/adjustCreditEntry.ts": {
       "totalLogs": 0,
       "full": 0,
@@ -2898,15 +2970,6 @@
       "httpExceptions": 0,
       "typedErrors": 3
     },
-    "services/api-ts/src/handlers/association:member/createOfficerTerm.ts": {
-      "totalLogs": 0,
-      "full": 0,
-      "partial": 0,
-      "none": 0,
-      "rawErrors": 0,
-      "httpExceptions": 0,
-      "typedErrors": 1
-    },
     "services/api-ts/src/handlers/association:member/getMySubscription.ts": {
       "totalLogs": 0,
       "full": 0,
@@ -2916,25 +2979,7 @@
       "httpExceptions": 0,
       "typedErrors": 1
     },
-    "services/api-ts/src/handlers/association:member/getCandidate.ts": {
-      "totalLogs": 0,
-      "full": 0,
-      "partial": 0,
-      "none": 0,
-      "rawErrors": 0,
-      "httpExceptions": 0,
-      "typedErrors": 2
-    },
     "services/api-ts/src/handlers/association:member/bulkApproveMembershipApplications.ts": {
-      "totalLogs": 0,
-      "full": 0,
-      "partial": 0,
-      "none": 0,
-      "rawErrors": 0,
-      "httpExceptions": 0,
-      "typedErrors": 1
-    },
-    "services/api-ts/src/handlers/association:member/listBallots.ts": {
       "totalLogs": 0,
       "full": 0,
       "partial": 0,
@@ -3132,24 +3177,6 @@
       "httpExceptions": 0,
       "typedErrors": 1
     },
-    "services/api-ts/src/handlers/association:member/certifyElection.ts": {
-      "totalLogs": 0,
-      "full": 0,
-      "partial": 0,
-      "none": 0,
-      "rawErrors": 0,
-      "httpExceptions": 0,
-      "typedErrors": 5
-    },
-    "services/api-ts/src/handlers/association:member/updateElection.ts": {
-      "totalLogs": 0,
-      "full": 0,
-      "partial": 0,
-      "none": 0,
-      "rawErrors": 0,
-      "httpExceptions": 0,
-      "typedErrors": 2
-    },
     "services/api-ts/src/handlers/association:member/rejectPaymentProof.ts": {
       "totalLogs": 0,
       "full": 0,
@@ -3294,15 +3321,6 @@
       "httpExceptions": 0,
       "typedErrors": 4
     },
-    "services/api-ts/src/handlers/association:member/deleteElection.ts": {
-      "totalLogs": 0,
-      "full": 0,
-      "partial": 0,
-      "none": 0,
-      "rawErrors": 0,
-      "httpExceptions": 0,
-      "typedErrors": 3
-    },
     "services/api-ts/src/handlers/association:member/getOrgDashboard.ts": {
       "totalLogs": 0,
       "full": 0,
@@ -3329,24 +3347,6 @@
       "rawErrors": 0,
       "httpExceptions": 0,
       "typedErrors": 4
-    },
-    "services/api-ts/src/handlers/association:member/createElection.ts": {
-      "totalLogs": 0,
-      "full": 0,
-      "partial": 0,
-      "none": 0,
-      "rawErrors": 0,
-      "httpExceptions": 0,
-      "typedErrors": 2
-    },
-    "services/api-ts/src/handlers/association:member/getPosition.ts": {
-      "totalLogs": 0,
-      "full": 0,
-      "partial": 0,
-      "none": 0,
-      "rawErrors": 0,
-      "httpExceptions": 0,
-      "typedErrors": 1
     },
     "services/api-ts/src/handlers/association:member/getMembershipTier.ts": {
       "totalLogs": 0,

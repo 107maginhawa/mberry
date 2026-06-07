@@ -1,19 +1,19 @@
 {
-  "generatedAt": "2026-06-07T02:43:42.694Z",
+  "generatedAt": "2026-06-07T03:04:56.330Z",
   "totals": {
     "endpoints": 454,
-    "hurlFiles": 117,
-    "coveredCount": 321,
-    "uncoveredCount": 133,
-    "coveragePercent": 71
+    "hurlFiles": 123,
+    "coveredCount": 343,
+    "uncoveredCount": 111,
+    "coveragePercent": 76
   },
   "uncoveredByTag": [
     {
       "tag": "Association:Member",
-      "uncoveredCount": 133,
-      "totalCount": 151,
-      "coveredCount": 18,
-      "coveragePercent": 12
+      "uncoveredCount": 111,
+      "totalCount": 125,
+      "coveredCount": 14,
+      "coveragePercent": 11
     }
   ],
   "uncoveredEndpoints": [
@@ -76,54 +76,6 @@
       "path": "/association/member/applications/{applicationId}/deny",
       "tag": "Association:Member",
       "operationId": "denyMembershipApplication"
-    },
-    {
-      "method": "POST",
-      "path": "/association/member/ballots",
-      "tag": "Association:Member",
-      "operationId": "castBallot"
-    },
-    {
-      "method": "GET",
-      "path": "/association/member/ballots",
-      "tag": "Association:Member",
-      "operationId": "listBallots"
-    },
-    {
-      "method": "POST",
-      "path": "/association/member/candidates",
-      "tag": "Association:Member",
-      "operationId": "createCandidate"
-    },
-    {
-      "method": "GET",
-      "path": "/association/member/candidates",
-      "tag": "Association:Member",
-      "operationId": "listCandidates"
-    },
-    {
-      "method": "GET",
-      "path": "/association/member/candidates/{candidateId}",
-      "tag": "Association:Member",
-      "operationId": "getCandidate"
-    },
-    {
-      "method": "PATCH",
-      "path": "/association/member/candidates/{candidateId}",
-      "tag": "Association:Member",
-      "operationId": "updateCandidate"
-    },
-    {
-      "method": "DELETE",
-      "path": "/association/member/candidates/{candidateId}",
-      "tag": "Association:Member",
-      "operationId": "deleteCandidate"
-    },
-    {
-      "method": "POST",
-      "path": "/association/member/candidates/{candidateId}/status",
-      "tag": "Association:Member",
-      "operationId": "updateCandidateStatus"
     },
     {
       "method": "GET",
@@ -468,36 +420,6 @@
       "operationId": "deleteDunningTemplate"
     },
     {
-      "method": "PATCH",
-      "path": "/association/member/elections/{electionId}",
-      "tag": "Association:Member",
-      "operationId": "updateElection"
-    },
-    {
-      "method": "DELETE",
-      "path": "/association/member/elections/{electionId}",
-      "tag": "Association:Member",
-      "operationId": "deleteElection"
-    },
-    {
-      "method": "POST",
-      "path": "/association/member/elections/{electionId}/certify",
-      "tag": "Association:Member",
-      "operationId": "certifyElection"
-    },
-    {
-      "method": "POST",
-      "path": "/association/member/elections/{electionId}/open-nominations",
-      "tag": "Association:Member",
-      "operationId": "openElectionNominations"
-    },
-    {
-      "method": "POST",
-      "path": "/association/member/elections/{electionId}/open-voting",
-      "tag": "Association:Member",
-      "operationId": "openElectionVoting"
-    },
-    {
       "method": "POST",
       "path": "/association/member/institutional-memberships",
       "tag": "Association:Member",
@@ -642,30 +564,6 @@
       "operationId": "terminateMembership"
     },
     {
-      "method": "POST",
-      "path": "/association/member/officer-terms",
-      "tag": "Association:Member",
-      "operationId": "createOfficerTerm"
-    },
-    {
-      "method": "GET",
-      "path": "/association/member/officer-terms/{termId}",
-      "tag": "Association:Member",
-      "operationId": "getOfficerTerm"
-    },
-    {
-      "method": "PATCH",
-      "path": "/association/member/officer-terms/{termId}",
-      "tag": "Association:Member",
-      "operationId": "updateOfficerTerm"
-    },
-    {
-      "method": "DELETE",
-      "path": "/association/member/officer-terms/{termId}",
-      "tag": "Association:Member",
-      "operationId": "deleteOfficerTerm"
-    },
-    {
       "method": "GET",
       "path": "/association/member/org-profile/{organizationId}",
       "tag": "Association:Member",
@@ -676,36 +574,6 @@
       "path": "/association/member/org-profile/{organizationId}",
       "tag": "Association:Member",
       "operationId": "updateOrganizationProfile"
-    },
-    {
-      "method": "POST",
-      "path": "/association/member/positions",
-      "tag": "Association:Member",
-      "operationId": "createPosition"
-    },
-    {
-      "method": "GET",
-      "path": "/association/member/positions",
-      "tag": "Association:Member",
-      "operationId": "listPositions"
-    },
-    {
-      "method": "GET",
-      "path": "/association/member/positions/{positionId}",
-      "tag": "Association:Member",
-      "operationId": "getPosition"
-    },
-    {
-      "method": "PATCH",
-      "path": "/association/member/positions/{positionId}",
-      "tag": "Association:Member",
-      "operationId": "updatePosition"
-    },
-    {
-      "method": "DELETE",
-      "path": "/association/member/positions/{positionId}",
-      "tag": "Association:Member",
-      "operationId": "deletePosition"
     },
     {
       "method": "GET",

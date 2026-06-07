@@ -172,14 +172,6 @@ import { updateMembershipApplication } from '../../handlers/association:member/u
 import { deleteMembershipApplication } from '../../handlers/association:member/deleteMembershipApplication';
 import { approveMembershipApplication } from '../../handlers/association:member/approveMembershipApplication';
 import { denyMembershipApplication } from '../../handlers/association:member/denyMembershipApplication';
-import { castBallot } from '../../handlers/association:member/castBallot';
-import { listBallots } from '../../handlers/association:member/listBallots';
-import { createCandidate } from '../../handlers/association:member/createCandidate';
-import { listCandidates } from '../../handlers/association:member/listCandidates';
-import { getCandidate } from '../../handlers/association:member/getCandidate';
-import { updateCandidate } from '../../handlers/association:member/updateCandidate';
-import { deleteCandidate } from '../../handlers/association:member/deleteCandidate';
-import { updateCandidateStatus } from '../../handlers/association:member/updateCandidateStatus';
 import { listMyCertificates } from '../../handlers/association:member/listMyCertificates';
 import { getCertificate } from '../../handlers/association:member/getCertificate';
 import { getComplianceReport } from '../../handlers/association:member/getComplianceReport';
@@ -246,14 +238,6 @@ import { listDunningTemplates } from '../../handlers/association:member/listDunn
 import { getDunningTemplate } from '../../handlers/association:member/getDunningTemplate';
 import { updateDunningTemplate } from '../../handlers/association:member/updateDunningTemplate';
 import { deleteDunningTemplate } from '../../handlers/association:member/deleteDunningTemplate';
-import { createElection } from '../../handlers/association:member/createElection';
-import { listElections } from '../../handlers/association:member/listElections';
-import { getElection } from '../../handlers/association:member/getElection';
-import { updateElection } from '../../handlers/association:member/updateElection';
-import { deleteElection } from '../../handlers/association:member/deleteElection';
-import { certifyElection } from '../../handlers/association:member/certifyElection';
-import { openElectionNominations } from '../../handlers/association:member/openElectionNominations';
-import { openElectionVoting } from '../../handlers/association:member/openElectionVoting';
 import { createInstitutionalMembership } from '../../handlers/association:member/createInstitutionalMembership';
 import { listInstitutionalMemberships } from '../../handlers/association:member/listInstitutionalMemberships';
 import { getInstitutionalMembership } from '../../handlers/association:member/getInstitutionalMembership';
@@ -281,18 +265,8 @@ import { reinstateMembership } from '../../handlers/association:member/reinstate
 import { renewMembership } from '../../handlers/association:member/renewMembership';
 import { resignMembership } from '../../handlers/association:member/resignMembership';
 import { terminateMembership } from '../../handlers/association:member/terminateMembership';
-import { createOfficerTerm } from '../../handlers/association:member/createOfficerTerm';
-import { listOfficerTerms } from '../../handlers/association:member/listOfficerTerms';
-import { getOfficerTerm } from '../../handlers/association:member/getOfficerTerm';
-import { updateOfficerTerm } from '../../handlers/association:member/updateOfficerTerm';
-import { deleteOfficerTerm } from '../../handlers/association:member/deleteOfficerTerm';
 import { getOrganizationProfile } from '../../handlers/association:member/getOrganizationProfile';
 import { updateOrganizationProfile } from '../../handlers/association:member/updateOrganizationProfile';
-import { createPosition } from '../../handlers/association:member/createPosition';
-import { listPositions } from '../../handlers/association:member/listPositions';
-import { getPosition } from '../../handlers/association:member/getPosition';
-import { updatePosition } from '../../handlers/association:member/updatePosition';
-import { deletePosition } from '../../handlers/association:member/deletePosition';
 import { listRosterMembers } from '../../handlers/association:member/listRosterMembers';
 import { addRosterMember } from '../../handlers/association:member/addRosterMember';
 import { importRosterMembers } from '../../handlers/association:member/importRosterMembers';
@@ -313,6 +287,32 @@ import { bulkIssueCertificates } from '../../handlers/association:member/bulkIss
 import { verifyCertificatePublic } from '../../handlers/association:member/verifyCertificatePublic';
 import { getCreditCompliance } from '../../handlers/association:member/getCreditCompliance';
 import { listOfficerTermsSummary } from '../../handlers/association:member/listOfficerTermsSummary';
+import { castBallot } from '../../handlers/member/governance/castBallot';
+import { listBallots } from '../../handlers/member/governance/listBallots';
+import { createCandidate } from '../../handlers/member/governance/createCandidate';
+import { listCandidates } from '../../handlers/member/governance/listCandidates';
+import { getCandidate } from '../../handlers/member/governance/getCandidate';
+import { updateCandidate } from '../../handlers/member/governance/updateCandidate';
+import { deleteCandidate } from '../../handlers/member/governance/deleteCandidate';
+import { updateCandidateStatus } from '../../handlers/member/governance/updateCandidateStatus';
+import { createElection } from '../../handlers/member/governance/createElection';
+import { listElections } from '../../handlers/member/governance/listElections';
+import { getElection } from '../../handlers/member/governance/getElection';
+import { updateElection } from '../../handlers/member/governance/updateElection';
+import { deleteElection } from '../../handlers/member/governance/deleteElection';
+import { certifyElection } from '../../handlers/member/governance/certifyElection';
+import { openElectionNominations } from '../../handlers/member/governance/openElectionNominations';
+import { openElectionVoting } from '../../handlers/member/governance/openElectionVoting';
+import { createOfficerTerm } from '../../handlers/member/governance/createOfficerTerm';
+import { listOfficerTerms } from '../../handlers/member/governance/listOfficerTerms';
+import { getOfficerTerm } from '../../handlers/member/governance/getOfficerTerm';
+import { updateOfficerTerm } from '../../handlers/member/governance/updateOfficerTerm';
+import { deleteOfficerTerm } from '../../handlers/member/governance/deleteOfficerTerm';
+import { createPosition } from '../../handlers/member/governance/createPosition';
+import { listPositions } from '../../handlers/member/governance/listPositions';
+import { getPosition } from '../../handlers/member/governance/getPosition';
+import { updatePosition } from '../../handlers/member/governance/updatePosition';
+import { deletePosition } from '../../handlers/member/governance/deletePosition';
 import { getDuesMemberSummary } from '../../handlers/dues/getDuesMemberSummary';
 import { getDuesMetrics } from '../../handlers/dues/getDuesMetrics';
 import { getDuesDashboard } from '../../handlers/dues/getDuesDashboard';
@@ -643,14 +643,6 @@ export const registry = {
   deleteMembershipApplication,
   approveMembershipApplication,
   denyMembershipApplication,
-  castBallot,
-  listBallots,
-  createCandidate,
-  listCandidates,
-  getCandidate,
-  updateCandidate,
-  deleteCandidate,
-  updateCandidateStatus,
   listMyCertificates,
   getCertificate,
   getComplianceReport,
@@ -717,14 +709,6 @@ export const registry = {
   getDunningTemplate,
   updateDunningTemplate,
   deleteDunningTemplate,
-  createElection,
-  listElections,
-  getElection,
-  updateElection,
-  deleteElection,
-  certifyElection,
-  openElectionNominations,
-  openElectionVoting,
   createInstitutionalMembership,
   listInstitutionalMemberships,
   getInstitutionalMembership,
@@ -752,18 +736,8 @@ export const registry = {
   renewMembership,
   resignMembership,
   terminateMembership,
-  createOfficerTerm,
-  listOfficerTerms,
-  getOfficerTerm,
-  updateOfficerTerm,
-  deleteOfficerTerm,
   getOrganizationProfile,
   updateOrganizationProfile,
-  createPosition,
-  listPositions,
-  getPosition,
-  updatePosition,
-  deletePosition,
   listRosterMembers,
   addRosterMember,
   importRosterMembers,
@@ -784,6 +758,34 @@ export const registry = {
   verifyCertificatePublic,
   getCreditCompliance,
   listOfficerTermsSummary,
+
+  // Member/governance handlers
+  castBallot,
+  listBallots,
+  createCandidate,
+  listCandidates,
+  getCandidate,
+  updateCandidate,
+  deleteCandidate,
+  updateCandidateStatus,
+  createElection,
+  listElections,
+  getElection,
+  updateElection,
+  deleteElection,
+  certifyElection,
+  openElectionNominations,
+  openElectionVoting,
+  createOfficerTerm,
+  listOfficerTerms,
+  getOfficerTerm,
+  updateOfficerTerm,
+  deleteOfficerTerm,
+  createPosition,
+  listPositions,
+  getPosition,
+  updatePosition,
+  deletePosition,
 
   // Dues handlers
   getDuesMemberSummary,

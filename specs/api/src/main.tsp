@@ -363,11 +363,11 @@ namespace MonobaseAPI {
   // Association Domain — Governance (Positions & Officer Terms — Wave 1)
   // =========================================================================
 
-  @tag("Association:Member")
+  @tag("Member/Governance")
   @route("/association/member/positions")
   interface AssocPositionManagement extends Association.Member.Governance.PositionManagement {}
 
-  @tag("Association:Member")
+  @tag("Member/Governance")
   @route("/association/member/officer-terms")
   interface AssocOfficerTermManagement extends Association.Member.Governance.OfficerTermManagement {}
 
@@ -375,15 +375,15 @@ namespace MonobaseAPI {
   // Association Domain — Governance (Elections, Candidates & Ballots)
   // =========================================================================
 
-  @tag("Association:Member")
+  @tag("Member/Governance")
   @route("/association/member/elections")
   interface AssocElectionManagement extends Association.Member.Governance.ElectionManagement {}
 
-  @tag("Association:Member")
+  @tag("Member/Governance")
   @route("/association/member/candidates")
   interface AssocCandidateManagement extends Association.Member.Governance.CandidateManagement {}
 
-  @tag("Association:Member")
+  @tag("Member/Governance")
   @route("/association/member/ballots")
   interface AssocBallotManagement extends Association.Member.Governance.BallotManagement {}
 
