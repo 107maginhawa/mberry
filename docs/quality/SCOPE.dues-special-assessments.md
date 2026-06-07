@@ -439,14 +439,213 @@ Three explicit user sign-offs before Step Cr.1 begins:
 
 ---
 
-## §10 — Cr.1 pre-flight findings (pending)
+## §10 — Cr.1 pre-flight findings (resolved)
 
-To be appended after §5.A–§5.E run during Cr.1.
+### §10.A — Route order (zero hand-wired duplicates of generated routes)
+
+Hand-wired registrations in `app.ts`:
+- `app.ts:393` `GET /pay/:token/validate` → `validatePaymentToken`
+- `app.ts:394` `POST /pay/:token/checkout` → `checkoutPaymentToken`
+- `app.ts:397` `POST /webhooks/stripe` → `stripeWebhookHandler`
+- `app.ts:499` `GET /org/:organizationId/payments/:paymentId/receipt` → `downloadReceipt`
+
+Generated `/association/member/*` dues routes in `routes.ts`:
+- aging-buckets (2), dues-configs (5), dues-gateway (4), dues-invoices (7), dues-member-summary/metrics (2), dues-payments (8), dues-reporting (4), dunning (7), special-assessments (≥ 1) — total ≥ 40 routes across the 9 interfaces.
+
+**Verdict:** zero hand-wired duplicates of any `/association/member/*` generated path. §4.4 (no kill step) holds. The 4 hand-wired holdouts have no generated equivalent — §3.A relocation is the only action.
+
+### §10.B — Stripe-mock + env
+
+- `docker-compose.yml` declares `stripe-mock` service, image `stripe/stripe-mock:latest`, container `memberry-stripe-mock`, port `12111` (env-overridable via `STRIPE_MOCK_PORT`).
+- `core/config.ts:187-188` declares `STRIPE_SECRET_KEY` + `STRIPE_WEBHOOK_SECRET` as optional env vars.
+- `handlers/dues/` contains 19 .ts files: 4 hand-wired holdouts (stripeWebhook, validate/checkoutPaymentToken, downloadReceipt), 4 dashboard/metrics/summary handlers (`getDuesDashboard`, `getDuesMemberSummary`, `getDuesMetrics`, `sendPaymentLink`), 5 jobs (`autoInvoiceGenerator`, `index`, `processStripePayment`, `reminderProcessor`, `webhookRetryProcessor`), 1 util (`payment-token.ts`), 5 schema/repo files (`dues.schema`, `dues-payments.{schema,repo}`, `payment-token.{schema,repo}`).
+
+**Verdict:** stripe-mock infra confirmed. Cr.9 prereq `docker compose up -d stripe-mock` documented.
+
+### §10.C — Handler file inventory (corrected; initial Explore probe was wrong)
+
+The Cr.1 Explore probe's grep-on-imports filter returned 0 for Bucket A — direct `ls` confirms the actual numbers:
+
+**Bucket A — `handlers/association:member/` top-level (47 source + 25 test files):**
+
+47 source handlers covering: createDuesConfig, createDuesInvoice, createDunningTemplate, createSpecialAssessment, deleteDuesConfig, deleteDuesInvoice, deleteDunningTemplate, deleteSpecialAssessment, disconnectDuesGateway, applySpecialAssessment, confirmPaymentProof, generateDuesInvoicesForOrg, generateDuesReport, generatePaymentLink, generatePaymentReceipt, getAgingBucket, getDuesConfig, getDuesFinancialDashboard, getDuesGatewayConfig, getDuesInvoice, getDuesPayment, getDunningTemplate, getSpecialAssessmentCollection, handlePaymentWebhook, initiateOnlinePayment, listDuesConfigs, listDuesFunds, listDuesInvoices, listDuesPayments, listDunningEvents, listDunningTemplates, listSpecialAssessments, markDuesInvoicePaid, recalculateAgingBucket, recordDuesPayment, refundDuesPayment, rejectPaymentProof, runDunning, submitPaymentProof, testDuesGatewayConnection, updateDuesConfig, updateDuesInvoice, updateDunningTemplate, updateSpecialAssessment, upsertDuesFunds, upsertDuesGatewayConfig, validatePaymentLink.
+
+Plus 25 colocated test files (mix of per-handler `*.test.ts` and themed suites: `dues.test.ts`, `dues-config.test.ts`, `dues-mutation-auth.test.ts`, `dunning.test.ts`, `dunning-escalation.test.ts`).
+
+**Bucket B — `handlers/dues/` (19 files, mix of move + dedupe):**
+
+| File | Status | Action |
+| --- | --- | --- |
+| `stripeWebhook.ts` | hand-wired live | MOVE |
+| `validatePaymentToken.ts` | hand-wired live | MOVE |
+| `checkoutPaymentToken.ts` | hand-wired live | MOVE |
+| `downloadReceipt.ts` | hand-wired live | MOVE |
+| `getDuesDashboard.ts`, `getDuesMemberSummary.ts`, `getDuesMetrics.ts`, `sendPaymentLink.ts` | generated-route live | MOVE |
+| `utils/payment-token.ts` | live | MOVE |
+| `jobs/autoInvoiceGenerator.ts` | live (registered via `association:member/jobs/index.ts:13` indirectly? — verify at Cr.2) | MOVE |
+| `jobs/processStripePayment.ts` | live (imported by `stripeWebhook.ts:12` AND `association:member/jobs/index.ts:13`) | MOVE |
+| `jobs/reminderProcessor.ts` | **DEAD DUPLICATE** of `association:member/jobs/reminderProcessor.ts` (identical 242 LOC) | DELETE |
+| `jobs/webhookRetryProcessor.ts` | **DEAD DUPLICATE** of `association:member/jobs/webhookRetryProcessor.ts` (identical) | DELETE |
+| `jobs/index.ts` | **DEAD** (not loaded — live registrar is `association:member/jobs/index.ts` per `app.ts:43`) | DELETE |
+| `repos/dues.schema.ts`, `repos/dues-payments.{repo,schema}.ts`, `repos/payment-token.{repo,schema}.ts` | canonical schema/repo | STAY (per §4.2) |
+
+**Bucket C — `handlers/association:member/jobs/` (mixed dues + membership):**
+
+| File | Domain | Action |
+| --- | --- | --- |
+| `reminderProcessor.ts` (live, registered via `app.ts:43 → registerDuesJobs`) | dues | MOVE |
+| `webhookRetryProcessor.ts` (live) | dues | MOVE |
+| `index.ts` (exports `registerDuesJobs` + `registerStatusRecomputeJob`) | mixed | SPLIT — extract `registerDuesJobs` to new path; keep `registerStatusRecomputeJob` exporter at old path (membership decomposition handles it). |
+| `statusRecomputeCron.ts` | **membership** (BR-01 safety net per file header) | STAY |
+| Other jobs files (`creditIssue`, `complianceThreshold`, `directoryAutoPopulate`) | non-dues | STAY |
+
+**Bucket D — colocated tests:** 25 test files at `association:member/` top level matching dues patterns; move with their handlers.
+
+**Total cutover surface:** ~47 source handlers + 25 tests at `association:member/` (move) + 8 source handlers + utilities at `handlers/dues/` (move) + 2 source jobs at `association:member/jobs/` (move) + 3 dead duplicate files at `handlers/dues/jobs/` (delete) = ~85 file operations.
+
+### §10.D — UUID + unique-constraint catalog (top-5 Hurl gotchas)
+
+Confirmed from schema reads:
+
+| Table | PK type | Unique constraints | Hurl gotcha |
+| --- | --- | --- | --- |
+| `dues_org_config` | uuid | `dues_config_org_unique(organization_id)` | One config per org. |
+| `dues_payment` | uuid (PK) + **invoice_id varchar(255)** (FK) | `dues_payment_receipt_unique(receipt_number)` | **#1**: receipt_number is global-unique — per-`{{suffix}}` randomization required. |
+| `dues_gateway_config` | uuid | `dues_gateway_org_unique(organization_id)` | One gateway per org. |
+| `payment_token` | uuid | unique on `token_hash` (HMAC-SHA256) | **#2**: single-use tokens — fresh per scenario. |
+| `webhook_retry_log` | uuid | `webhook_retry_idempotency_unique(idempotency_key)` (varchar 255) | **#3**: Stripe event-id global-unique — fresh per Hurl run. |
+| `special_assessment` | uuid | — (cascade delete via `fund_id` FK to `dues_fund`) | **#4**: deleting a `dues_fund` cascades. |
+| `aging_bucket` | **varchar + date composite PK** | — | **#5**: NOT uuid; SELECT requires exact PK shape + date casts. |
+| `dunning_template` | uuid (PK) + **organization_id varchar(255)** | — | **#5b**: varchar org FK; Hurl needs raw org-id strings, not `{{newUuid}}` org binds. |
+| `dunning_event` | uuid (PK) + **membership_id, person_id, template_id all varchar(255)** | — | **#5c**: heavy varchar FK surface. |
+
+**Top-5 Hurl gotchas (for Cr.9 authoring):**
+1. `dues_payment.receipt_number` global-unique — per-`{{suffix}}` randomization.
+2. `payment_token.token_hash` single-use unique — fresh token per scenario.
+3. `webhook_retry_log.idempotency_key` unique — fresh Stripe event-id per Hurl run.
+4. `special_assessment.fund_id` cascade — don't delete shared fund mid-scenario.
+5. Composite-varchar PKs on aging_bucket + dunning_* — use seeded values, not `{{newUuid}}`.
+
+### §10.E — Person.* + domain-event-consumers cross-imports
+
+**Person.* TypeSpec surface:** zero `extends Association.Member.Dues.*` / `extends Association.Member.SpecialAssessments.*` in `person*.tsp` files. §2.C confirmed.
+
+**`core/domain-event-consumers.ts`:**
+- Line 43: imports `dunningEvents` from `@/handlers/association:member/repos/dunning.schema` (REPO — stays per §4.2)
+- Line 46: imports `duesPayments` from `@/handlers/association:member/repos/dues-payments.schema` (REPO shim — stays per §4.2; shim re-exports from `handlers/dues/repos/`)
+- Line 76: `domainEvents.on('dues.payment.recorded', ...)` → updates `membership.duesExpiryDate`
+- Line 116: `domainEvents.on('dues.payment.refunded', ...)` → sends refund notification
+- Line 141: `domainEvents.on('dues.invoice.generated', ...)` → sends invoice notification
+
+All three hooks consume REPOS at old paths — no handler imports — **zero path-rewrite required** in `domain-event-consumers.ts`.
+
+**`person/` handlers:** zero imports of dues handlers (clean boundary).
+
+**`seed/` imports of dues HANDLERS (not repos):** zero hits in the cross-handler grep. (Seed-layer repo imports stay per §4.2.)
+
+**Cr.6 import-rewrite scope (corrected):**
+- `app.ts:43` — `registerDuesJobs` from `@/handlers/association:member/jobs` → `@/handlers/member/dues-special-assessments/jobs`
+- `app.ts:96, 100, 113-114` — 4 hand-wired imports rewrite (already in §3.A)
+- `services/api-ts/src/generated/openapi/registry.ts` — auto-regenerated at Cr.2
+- One internal cross-import inside the moved set: `generateDuesInvoicesForOrg.ts:11` imports `./jobs/reminderProcessor` — both move together, stays as relative `./`.
+
+**Total external rewrite cost: 5 import lines in app.ts + registry auto-regen. Very small.**
+
+### Final verdict
+
+| Question | Answer | Notes |
+| --- | --- | --- |
+| Cr.2 retag safe? | **YES** | Per-interface edits on main.tsp:302-340 only. Sibling tags (credits 281-296, chapters 346-360, governance 366+) untouched. |
+| Cr.3 restore file list complete? | **YES** | 47 + 25 + 8 + 2 = ~82 files in scope; 3 dead duplicates to delete (not restore). |
+| Cr.6 rewrite scope manageable? | **YES** | 5 import-line edits in app.ts; zero in seed/, domain-events, person/. |
+| Cr.9 hurl gotchas documented? | **YES** | 5 documented (receipt unique, token hash, Stripe idempotency, fund cascade, varchar composite PKs). |
+| Any §4 decisions need amendment? | **YES — minor** | §4.3 handler structure amends to include `jobs/` subdir; new §4.6 added for dead-duplicate kills. |
+
+**Blockers: 0. Amendments below.**
 
 ---
 
 ## §11 — Net §4/§6 amendments (post-Cr.1)
 
-To be appended after Cr.1 findings resolve.
+### §11.A New §4.6 — Dead-duplicate kill list (added)
 
-On confirmation: proceed to Step Cr.1 (pre-flight §5.A through §5.E).
+Three files at `handlers/dues/jobs/` are dead duplicates (identical to live counterparts at `handlers/association:member/jobs/`):
+
+1. `handlers/dues/jobs/reminderProcessor.ts` (242 LOC, identical to `association:member/jobs/reminderProcessor.ts`)
+2. `handlers/dues/jobs/webhookRetryProcessor.ts` (identical to `association:member/jobs/webhookRetryProcessor.ts`)
+3. `handlers/dues/jobs/index.ts` (dead registrar — live registrar is `association:member/jobs/index.ts` per `app.ts:43`)
+
+**Decision:** delete all three at Cr.5 (cutover atomic). Move the LIVE counterparts (at `association:member/jobs/`) to new path. No functional change (Hono job scheduler dedupes by job-id anyway).
+
+### §11.B Amend §4.3 — handler subdir structure
+
+Add `jobs/` subdir to the new path:
+
+```
+handlers/member/dues-special-assessments/
+├── *.ts                           (47 dues + payment + receipt + dunning + aging handlers)
+├── stripeWebhook.ts               (hand-wired)
+├── validatePaymentToken.ts        (hand-wired)
+├── checkoutPaymentToken.ts        (hand-wired)
+├── downloadReceipt.ts             (hand-wired)
+├── getDuesDashboard.ts            (from handlers/dues/)
+├── getDuesMemberSummary.ts        (from handlers/dues/)
+├── getDuesMetrics.ts              (from handlers/dues/)
+├── sendPaymentLink.ts             (from handlers/dues/)
+├── jobs/
+│   ├── index.ts                   (registerDuesJobs only; statusRecomputeCron stays at OLD path)
+│   ├── reminderProcessor.ts       (from association:member/jobs/, NOT the duplicate at handlers/dues/jobs/)
+│   ├── webhookRetryProcessor.ts   (from association:member/jobs/)
+│   ├── autoInvoiceGenerator.ts    (from handlers/dues/jobs/)
+│   └── processStripePayment.ts    (from handlers/dues/jobs/)
+└── utils/
+    └── payment-token.ts
+```
+
+(SA handlers do NOT subdirectory under `special-assessments/` after pre-flight — only 6 files, sibling layout reads cleaner. Amend §4.3 to drop the SA sub-subdir.)
+
+### §11.C Amend §6 Cr.3 + Cr.4 + Cr.5
+
+**Cr.3 (restore at new path) — concrete file list:**
+- 47 source handlers + 25 tests from `handlers/association:member/` (matching dues domain — full list in §10.C Bucket A)
+- 4 hand-wired + 4 dashboard handlers + 1 util from `handlers/dues/`
+- 2 live jobs from `handlers/association:member/jobs/` (`reminderProcessor.ts`, `webhookRetryProcessor.ts`) — NOT their dead duplicates at `handlers/dues/jobs/`
+- 2 dues-only jobs from `handlers/dues/jobs/` (`autoInvoiceGenerator.ts`, `processStripePayment.ts`)
+- Split `handlers/association:member/jobs/index.ts`: extract `registerDuesJobs` to new path; rewrite OLD index to export only `registerStatusRecomputeJob`
+
+**Cr.4 — `git mv` utils + tests:**
+- `handlers/dues/utils/payment-token.ts` → new path
+- Move colocated `*.test.ts` files alongside their handlers (preserve git history)
+
+**Cr.5 — delete originals + dead duplicates:**
+- ~47 source + 25 tests at `handlers/association:member/` (after Cr.3 copies to new path)
+- 4 hand-wired + 4 dashboard at `handlers/dues/` (after Cr.3 copies)
+- 2 dues jobs at `handlers/dues/jobs/` (`autoInvoiceGenerator`, `processStripePayment`)
+- 2 dead duplicates: `handlers/dues/jobs/reminderProcessor.ts`, `handlers/dues/jobs/webhookRetryProcessor.ts`
+- 1 dead registrar: `handlers/dues/jobs/index.ts`
+- 2 live jobs at `handlers/association:member/jobs/` (after Cr.3 copies)
+- DO NOT delete `handlers/association:member/jobs/statusRecomputeCron.ts` (membership domain)
+
+### §11.D Amend §6 Cr.6 — import-rewrite grep updated
+
+```sh
+grep -rn '@/handlers/\(association:member\|dues\)/\(stripeWebhook\|validatePaymentToken\|checkoutPaymentToken\|downloadReceipt\|getDuesDashboard\|getDuesMemberSummary\|getDuesMetrics\|sendPaymentLink\|jobs/\(reminderProcessor\|webhookRetryProcessor\|autoInvoiceGenerator\|processStripePayment\|index\)\|<full-handler-list-from-§10C>\)' services/api-ts/src/ --include='*.ts'
+```
+
+Plus the specific `app.ts:43` rewrite (registerDuesJobs path).
+
+Expected post-Cr.6: zero hits. `repos/` paths, `domain-event-consumers.ts:43,46`, and `statusRecomputeCron` import path intentionally untouched.
+
+### §11.E Cr.7 reserved (no-op for dues — but used for jobs/index split)
+
+Cr.7 numbering retained per template. Action: split `association:member/jobs/index.ts` — leave `registerStatusRecomputeJob` exporter at OLD path, move `registerDuesJobs` exporter to new path. (This can also be done inside the Cr.2-Cr.7 atomic.)
+
+### §11.F Stripe-mock prereq locked
+
+Cr.9 must `docker compose up -d stripe-mock` BEFORE running Hurl scenarios that hit `/webhooks/stripe`. Document in scenario header.
+
+---
+
+**Cr.1 closed. Cr.2 (per-interface main.tsp retag + regen) is next.**
+
+On user confirmation of §9 checkpoint (scope + decisions + sequence) AND §10/§11 findings: proceed to Step Cr.2.
