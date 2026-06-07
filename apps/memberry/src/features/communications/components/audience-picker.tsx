@@ -120,6 +120,7 @@ export function AudiencePicker({ orgId, value, onChange }: AudiencePickerProps) 
       <div className="flex items-end gap-2">
         <div className="flex-1 space-y-1.5">
           <Label htmlFor="saved-segment" className="text-sm">Saved Segments</Label>
+          {/* eslint-disable-next-line no-restricted-syntax -- pre-existing pattern, refactor to @monobase/ui Select in follow-up */}
           <select
             id="saved-segment"
             data-testid="saved-segment-select"
@@ -170,6 +171,7 @@ export function AudiencePicker({ orgId, value, onChange }: AudiencePickerProps) 
         {/* Dues Status */}
         <div className="space-y-1.5">
           <Label htmlFor="dues-status" className="text-sm">Dues Status</Label>
+          {/* eslint-disable-next-line no-restricted-syntax -- pre-existing pattern, refactor to @monobase/ui Select in follow-up */}
           <select
             id="dues-status"
             value={value.duesStatus ?? ''}
@@ -187,6 +189,7 @@ export function AudiencePicker({ orgId, value, onChange }: AudiencePickerProps) 
         {/* Membership Tier */}
         <div className="space-y-1.5">
           <Label htmlFor="membership-tier" className="text-sm">Membership Tier</Label>
+          {/* eslint-disable-next-line no-restricted-syntax -- pre-existing pattern, refactor to @monobase/ui Select in follow-up */}
           <select
             id="membership-tier"
             value={value.membershipTier ?? ''}
@@ -204,6 +207,7 @@ export function AudiencePicker({ orgId, value, onChange }: AudiencePickerProps) 
         {/* CPD Compliance */}
         <div className="space-y-1.5">
           <Label htmlFor="cpd-compliant" className="text-sm">CPD Compliance</Label>
+          {/* eslint-disable-next-line no-restricted-syntax -- pre-existing pattern, refactor to @monobase/ui Select in follow-up */}
           <select
             id="cpd-compliant"
             value={value.cpdCompliant === undefined ? '' : String(value.cpdCompliant)}
@@ -222,6 +226,7 @@ export function AudiencePicker({ orgId, value, onChange }: AudiencePickerProps) 
         {/* Joined After */}
         <div className="space-y-1.5">
           <Label htmlFor="joined-after" className="text-sm">Joined After</Label>
+          {/* eslint-disable-next-line no-restricted-syntax -- pre-existing pattern, refactor to @monobase/ui Input in follow-up */}
           <input
             id="joined-after"
             type="date"
