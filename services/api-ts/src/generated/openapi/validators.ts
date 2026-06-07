@@ -158,79 +158,7 @@ export const AccountDeletionResponseSchema = z.object({
   gracePeriodDays: z.number().int()
 });
 
-export const AccreditationStatusSchema = z.enum(["applied", "approved", "probation", "suspended", "revoked", "expired"]);
-
-export const AccreditedProviderSchema = z.object({
-  id: z.string().uuid(),
-  version: z.number().int(),
-  createdAt: z.string().datetime().transform((str) => new Date(str)),
-  createdBy: z.string().uuid().optional(),
-  updatedAt: z.string().datetime().transform((str) => new Date(str)),
-  updatedBy: z.string().uuid().optional(),
-  organizationId: z.string(),
-  organizationName: z.string().min(1).max(200),
-  accreditationType: z.string().min(1).max(100),
-  approvedActivities: z.array(z.string()),
-  status: z.enum(["applied", "approved", "probation", "suspended", "revoked", "expired"]),
-  approvedDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).refine(val => { const parsed = new Date(val + "T00:00:00Z"); return !isNaN(parsed.getTime()) && parsed.toISOString().split("T")[0] === val; }, { message: "Invalid calendar date" }).optional(),
-  expirationDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).refine(val => { const parsed = new Date(val + "T00:00:00Z"); return !isNaN(parsed.getTime()) && parsed.toISOString().split("T")[0] === val; }, { message: "Invalid calendar date" }).optional(),
-  maxCreditsPerActivity: z.number().int().gte(1).optional()
-});
-
 export const AccreditedProviderStatusSchema = z.enum(["active", "suspended", "expired"]);
-
-export const AccreditedProviderUpdateSchema = z.object({
-  id: z.string().uuid().optional(),
-  version: z.number().int().optional(),
-  createdAt: z.string().datetime().transform((str) => new Date(str)).optional(),
-  createdBy: z.string().uuid().optional(),
-  updatedAt: z.string().datetime().transform((str) => new Date(str)).optional(),
-  updatedBy: z.string().uuid().optional(),
-  organizationId: z.string().optional(),
-  organizationName: z.string().min(1).max(200).optional(),
-  accreditationType: z.string().min(1).max(100).optional(),
-  approvedActivities: z.array(z.string()).optional(),
-  status: z.enum(["applied", "approved", "probation", "suspended", "revoked", "expired"]).optional(),
-  approvedDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).refine(val => { const parsed = new Date(val + "T00:00:00Z"); return !isNaN(parsed.getTime()) && parsed.toISOString().split("T")[0] === val; }, { message: "Invalid calendar date" }).optional(),
-  expirationDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).refine(val => { const parsed = new Date(val + "T00:00:00Z"); return !isNaN(parsed.getTime()) && parsed.toISOString().split("T")[0] === val; }, { message: "Invalid calendar date" }).optional(),
-  maxCreditsPerActivity: z.number().int().gte(1).optional()
-});
-
-export const ActionAlertSchema = z.object({
-  id: z.string().uuid(),
-  version: z.number().int(),
-  createdAt: z.string().datetime().transform((str) => new Date(str)),
-  createdBy: z.string().uuid().optional(),
-  updatedAt: z.string().datetime().transform((str) => new Date(str)),
-  updatedBy: z.string().uuid().optional(),
-  organizationId: z.string(),
-  issueId: z.string(),
-  title: z.string().min(1).max(200),
-  callToAction: z.string().min(1).max(5000),
-  targetAudience: z.string().max(1000).optional(),
-  sentAt: z.string().datetime().transform((str) => new Date(str)).optional(),
-  responsesCount: z.number().int().gte(0).optional(),
-  status: z.enum(["draft", "active", "closed"])
-});
-
-export const ActionAlertStatusSchema = z.enum(["draft", "active", "closed"]);
-
-export const ActionAlertUpdateSchema = z.object({
-  id: z.string().uuid().optional(),
-  version: z.number().int().optional(),
-  createdAt: z.string().datetime().transform((str) => new Date(str)).optional(),
-  createdBy: z.string().uuid().optional(),
-  updatedAt: z.string().datetime().transform((str) => new Date(str)).optional(),
-  updatedBy: z.string().uuid().optional(),
-  organizationId: z.string().optional(),
-  issueId: z.string().optional(),
-  title: z.string().min(1).max(200).optional(),
-  callToAction: z.string().min(1).max(5000).optional(),
-  targetAudience: z.string().max(1000).optional(),
-  sentAt: z.string().datetime().transform((str) => new Date(str)).optional(),
-  responsesCount: z.number().int().gte(0).optional(),
-  status: z.enum(["draft", "active", "closed"]).optional()
-});
 
 export const AdCampaignSchema = z.object({
   id: z.string().uuid(),
@@ -2090,8 +2018,6 @@ export const AssociationListResponseSchema = z.object({
 })
 });
 
-export const AttestationStatusSchema = z.enum(["submitted", "reviewed", "cleared", "flagged"]);
-
 export const SegmentRuleSchema = z.object({
   field: z.string().min(1).max(100),
   operator: z.string().min(1).max(50),
@@ -2322,124 +2248,6 @@ export const AutomationRuleUpdateSchema = z.object({
   priority: z.number().int().gte(1).optional(),
   maxChainDepth: z.number().int().gte(1).lte(10).optional(),
   ruleCreatedBy: z.string().optional()
-});
-
-export const AwardCycleSchema = z.enum(["annual", "biennial"]);
-
-export const AwardNominationSchema = z.object({
-  id: z.string().uuid(),
-  version: z.number().int(),
-  createdAt: z.string().datetime().transform((str) => new Date(str)),
-  createdBy: z.string().uuid().optional(),
-  updatedAt: z.string().datetime().transform((str) => new Date(str)),
-  updatedBy: z.string().uuid().optional(),
-  organizationId: z.string(),
-  programId: z.string(),
-  nomineeId: z.string(),
-  nominatedBy: z.string(),
-  nominatedAt: z.string().datetime().transform((str) => new Date(str)),
-  supportingStatement: z.string().max(10000).optional(),
-  status: z.enum(["submitted", "underReview", "shortlisted", "selected", "notSelected", "withdrawn"])
-});
-
-export const AwardNominationUpdateSchema = z.object({
-  id: z.string().uuid().optional(),
-  version: z.number().int().optional(),
-  createdAt: z.string().datetime().transform((str) => new Date(str)).optional(),
-  createdBy: z.string().uuid().optional(),
-  updatedAt: z.string().datetime().transform((str) => new Date(str)).optional(),
-  updatedBy: z.string().uuid().optional(),
-  organizationId: z.string().optional(),
-  programId: z.string().optional(),
-  nomineeId: z.string().optional(),
-  nominatedBy: z.string().optional(),
-  nominatedAt: z.string().datetime().transform((str) => new Date(str)).optional(),
-  supportingStatement: z.string().max(10000).optional(),
-  status: z.enum(["submitted", "underReview", "shortlisted", "selected", "notSelected", "withdrawn"]).optional()
-});
-
-export const AwardProgramSchema = z.object({
-  id: z.string().uuid(),
-  version: z.number().int(),
-  createdAt: z.string().datetime().transform((str) => new Date(str)),
-  createdBy: z.string().uuid().optional(),
-  updatedAt: z.string().datetime().transform((str) => new Date(str)),
-  updatedBy: z.string().uuid().optional(),
-  organizationId: z.string(),
-  name: z.string().min(1).max(150),
-  type: z.enum(["award", "scholarship", "fellowship", "grant"]),
-  description: z.string().max(5000).optional(),
-  eligibilityCriteria: z.string().max(5000).optional(),
-  nominationRequired: z.boolean(),
-  applicationRequired: z.boolean(),
-  maxRecipients: z.number().int().gte(1).optional(),
-  prizeAmount: z.number().int().gte(0).optional(),
-  currency: z.string().min(3).max(3).optional(),
-  cycle: z.enum(["annual", "biennial"]),
-  status: z.enum(["active", "suspended", "retired"])
-});
-
-export const AwardProgramStatusSchema = z.enum(["active", "suspended", "retired"]);
-
-export const AwardProgramTypeSchema = z.enum(["award", "scholarship", "fellowship", "grant"]);
-
-export const AwardProgramUpdateSchema = z.object({
-  id: z.string().uuid().optional(),
-  version: z.number().int().optional(),
-  createdAt: z.string().datetime().transform((str) => new Date(str)).optional(),
-  createdBy: z.string().uuid().optional(),
-  updatedAt: z.string().datetime().transform((str) => new Date(str)).optional(),
-  updatedBy: z.string().uuid().optional(),
-  organizationId: z.string().optional(),
-  name: z.string().min(1).max(150).optional(),
-  type: z.enum(["award", "scholarship", "fellowship", "grant"]).optional(),
-  description: z.string().max(5000).optional(),
-  eligibilityCriteria: z.string().max(5000).optional(),
-  nominationRequired: z.boolean().optional(),
-  applicationRequired: z.boolean().optional(),
-  maxRecipients: z.number().int().gte(1).optional(),
-  prizeAmount: z.number().int().gte(0).optional(),
-  currency: z.string().min(3).max(3).optional(),
-  cycle: z.enum(["annual", "biennial"]).optional(),
-  status: z.enum(["active", "suspended", "retired"]).optional()
-});
-
-export const AwardRecipientSchema = z.object({
-  id: z.string().uuid(),
-  version: z.number().int(),
-  createdAt: z.string().datetime().transform((str) => new Date(str)),
-  createdBy: z.string().uuid().optional(),
-  updatedAt: z.string().datetime().transform((str) => new Date(str)),
-  updatedBy: z.string().uuid().optional(),
-  organizationId: z.string(),
-  programId: z.string(),
-  nominationId: z.string().optional(),
-  personId: z.string(),
-  awardYear: z.number().int().gte(1900),
-  citation: z.string().max(5000).optional(),
-  presentedAt: z.string().datetime().transform((str) => new Date(str)).optional(),
-  presentedBy: z.string().optional(),
-  disbursementAmount: z.number().int().gte(0).optional(),
-  disbursementStatus: z.enum(["pending", "processed", "completed"]).optional()
-});
-
-export const AwardRecipientUpdateSchema = z.object({
-  id: z.string().uuid().optional(),
-  version: z.number().int().optional(),
-  createdAt: z.string().datetime().transform((str) => new Date(str)).optional(),
-  createdBy: z.string().uuid().optional(),
-  updatedAt: z.string().datetime().transform((str) => new Date(str)).optional(),
-  updatedBy: z.string().uuid().optional(),
-  organizationId: z.string().optional(),
-  programId: z.string().optional(),
-  nominationId: z.string().optional(),
-  personId: z.string().optional(),
-  awardYear: z.number().int().gte(1900).optional(),
-  citation: z.string().max(5000).optional(),
-  presentedAt: z.string().datetime().transform((str) => new Date(str)).optional(),
-  presentedBy: z.string().optional(),
-  disbursementAmount: z.number().int().gte(0).optional(),
-  disbursementStatus: z.enum(["pending", "processed", "completed"]).optional()
 });
 
 export const BallotSchema = z.object({
@@ -3202,45 +3010,6 @@ export const BulkIssueQueuedResponseSchema = z.object({
   message: z.string()
 });
 
-export const COIDisclosureSchema = z.object({
-  category: z.enum(["financial", "board", "vendor", "employment", "family", "other"]),
-  description: z.string().min(1).max(3000),
-  entityName: z.string().min(1).max(200),
-  mitigationPlan: z.string().max(3000).optional()
-});
-
-export const COIAttestationSchema = z.object({
-  id: z.string().uuid(),
-  version: z.number().int(),
-  createdAt: z.string().datetime().transform((str) => new Date(str)),
-  createdBy: z.string().uuid().optional(),
-  updatedAt: z.string().datetime().transform((str) => new Date(str)),
-  updatedBy: z.string().uuid().optional(),
-  organizationId: z.string(),
-  personId: z.string(),
-  attestationCycleId: z.string().optional(),
-  disclosures: z.array(COIDisclosureSchema),
-  attestedAt: z.string().datetime().transform((str) => new Date(str)),
-  status: z.enum(["submitted", "reviewed", "cleared", "flagged"])
-});
-
-export const COIAttestationUpdateSchema = z.object({
-  id: z.string().uuid().optional(),
-  version: z.number().int().optional(),
-  createdAt: z.string().datetime().transform((str) => new Date(str)).optional(),
-  createdBy: z.string().uuid().optional(),
-  updatedAt: z.string().datetime().transform((str) => new Date(str)).optional(),
-  updatedBy: z.string().uuid().optional(),
-  organizationId: z.string().optional(),
-  personId: z.string().optional(),
-  attestationCycleId: z.string().optional(),
-  disclosures: z.array(COIDisclosureSchema).optional(),
-  attestedAt: z.string().datetime().transform((str) => new Date(str)).optional(),
-  status: z.enum(["submitted", "reviewed", "cleared", "flagged"]).optional()
-});
-
-export const COIDisclosureCategorySchema = z.enum(["financial", "board", "vendor", "employment", "family", "other"]);
-
 export const CallParticipantSchema = z.object({
   user: z.string().uuid(),
   displayName: z.string().max(100),
@@ -3248,24 +3017,6 @@ export const CallParticipantSchema = z.object({
   leftAt: z.string().datetime().transform((str) => new Date(str)).optional(),
   audioEnabled: z.boolean(),
   videoEnabled: z.boolean()
-});
-
-export const CampaignSchema = z.object({
-  id: z.string().uuid(),
-  version: z.number().int(),
-  createdAt: z.string().datetime().transform((str) => new Date(str)),
-  createdBy: z.string().uuid().optional(),
-  updatedAt: z.string().datetime().transform((str) => new Date(str)),
-  updatedBy: z.string().uuid().optional(),
-  organizationId: z.string(),
-  name: z.string().min(1).max(150),
-  type: z.enum(["fundraising", "membershipDrive", "eventPromotion", "advocacy", "awareness"]),
-  goal: z.number().int().gte(0).optional(),
-  raised: z.number().int().gte(0).optional(),
-  startDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).refine(val => { const parsed = new Date(val + "T00:00:00Z"); return !isNaN(parsed.getTime()) && parsed.toISOString().split("T")[0] === val; }, { message: "Invalid calendar date" }),
-  endDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).refine(val => { const parsed = new Date(val + "T00:00:00Z"); return !isNaN(parsed.getTime()) && parsed.toISOString().split("T")[0] === val; }, { message: "Invalid calendar date" }).optional(),
-  status: z.enum(["draft", "active", "paused", "completed"]),
-  targetAudience: z.string().max(1000).optional()
 });
 
 export const CampaignSendRecordSchema = z.object({
@@ -3330,27 +3081,7 @@ export const CampaignSequenceUpdateSchema = z.object({
   condition: z.string().optional()
 });
 
-export const CampaignStatusSchema = z.enum(["draft", "active", "paused", "completed"]);
-
 export const CampaignTypeSchema = z.enum(["email", "sms", "multi_channel"]);
-
-export const CampaignUpdateSchema = z.object({
-  id: z.string().uuid().optional(),
-  version: z.number().int().optional(),
-  createdAt: z.string().datetime().transform((str) => new Date(str)).optional(),
-  createdBy: z.string().uuid().optional(),
-  updatedAt: z.string().datetime().transform((str) => new Date(str)).optional(),
-  updatedBy: z.string().uuid().optional(),
-  organizationId: z.string().optional(),
-  name: z.string().min(1).max(150).optional(),
-  type: z.enum(["fundraising", "membershipDrive", "eventPromotion", "advocacy", "awareness"]).optional(),
-  goal: z.number().int().gte(0).optional(),
-  raised: z.number().int().gte(0).optional(),
-  startDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).refine(val => { const parsed = new Date(val + "T00:00:00Z"); return !isNaN(parsed.getTime()) && parsed.toISOString().split("T")[0] === val; }, { message: "Invalid calendar date" }).optional(),
-  endDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).refine(val => { const parsed = new Date(val + "T00:00:00Z"); return !isNaN(parsed.getTime()) && parsed.toISOString().split("T")[0] === val; }, { message: "Invalid calendar date" }).optional(),
-  status: z.enum(["draft", "active", "paused", "completed"]).optional(),
-  targetAudience: z.string().max(1000).optional()
-});
 
 export const CancelDeletionResponseSchema = z.object({
   message: z.string()
@@ -3442,16 +3173,6 @@ export const CastBallotRequestSchema = z.object({
   proxyFor: z.string().optional()
 });
 
-export const CertProgramStatusSchema = z.enum(["active", "suspended", "retired"]);
-
-export const CertRequirementSchema = z.object({
-  type: z.enum(["exam", "training", "experience", "attestation"]),
-  description: z.string().min(1).max(1000),
-  required: z.boolean()
-});
-
-export const CertRequirementTypeSchema = z.enum(["exam", "training", "experience", "attestation"]);
-
 export const CertificateSchema = z.object({
   id: z.string().uuid(),
   version: z.number().int(),
@@ -3502,70 +3223,6 @@ export const CertificateVerificationResultSchema = z.object({
   creditHours: z.number().optional(),
   cpdActivityType: z.string().optional(),
   isValid: z.boolean()
-});
-
-export const CertificationEnrollmentSchema = z.object({
-  id: z.string().uuid(),
-  version: z.number().int(),
-  createdAt: z.string().datetime().transform((str) => new Date(str)),
-  createdBy: z.string().uuid().optional(),
-  updatedAt: z.string().datetime().transform((str) => new Date(str)),
-  updatedBy: z.string().uuid().optional(),
-  personId: z.string(),
-  programId: z.string(),
-  enrolledAt: z.string().datetime().transform((str) => new Date(str)),
-  status: z.enum(["enrolled", "inProgress", "examScheduled", "passed", "failed", "certified", "expired", "revoked"]),
-  certifiedAt: z.string().datetime().transform((str) => new Date(str)).optional(),
-  certificationNumber: z.string().max(100).optional(),
-  expiresAt: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).refine(val => { const parsed = new Date(val + "T00:00:00Z"); return !isNaN(parsed.getTime()) && parsed.toISOString().split("T")[0] === val; }, { message: "Invalid calendar date" }).optional()
-});
-
-export const CertificationEnrollmentUpdateSchema = z.object({
-  id: z.string().uuid().optional(),
-  version: z.number().int().optional(),
-  createdAt: z.string().datetime().transform((str) => new Date(str)).optional(),
-  createdBy: z.string().uuid().optional(),
-  updatedAt: z.string().datetime().transform((str) => new Date(str)).optional(),
-  updatedBy: z.string().uuid().optional(),
-  personId: z.string().optional(),
-  programId: z.string().optional(),
-  enrolledAt: z.string().datetime().transform((str) => new Date(str)).optional(),
-  status: z.enum(["enrolled", "inProgress", "examScheduled", "passed", "failed", "certified", "expired", "revoked"]).optional(),
-  certifiedAt: z.string().datetime().transform((str) => new Date(str)).optional(),
-  certificationNumber: z.string().max(100).optional(),
-  expiresAt: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).refine(val => { const parsed = new Date(val + "T00:00:00Z"); return !isNaN(parsed.getTime()) && parsed.toISOString().split("T")[0] === val; }, { message: "Invalid calendar date" }).optional()
-});
-
-export const CertificationProgramSchema = z.object({
-  id: z.string().uuid(),
-  version: z.number().int(),
-  createdAt: z.string().datetime().transform((str) => new Date(str)),
-  createdBy: z.string().uuid().optional(),
-  updatedAt: z.string().datetime().transform((str) => new Date(str)),
-  updatedBy: z.string().uuid().optional(),
-  name: z.string().min(1).max(150),
-  code: z.string().regex(/^[A-Z0-9_-]+$/).min(1).max(20),
-  description: z.string().max(5000).optional(),
-  requirements: z.array(CertRequirementSchema),
-  validityPeriod: z.number().int().gte(1),
-  recertificationRequired: z.boolean(),
-  status: z.enum(["active", "suspended", "retired"])
-});
-
-export const CertificationProgramUpdateSchema = z.object({
-  id: z.string().uuid().optional(),
-  version: z.number().int().optional(),
-  createdAt: z.string().datetime().transform((str) => new Date(str)).optional(),
-  createdBy: z.string().uuid().optional(),
-  updatedAt: z.string().datetime().transform((str) => new Date(str)).optional(),
-  updatedBy: z.string().uuid().optional(),
-  name: z.string().min(1).max(150).optional(),
-  code: z.string().regex(/^[A-Z0-9_-]+$/).min(1).max(20).optional(),
-  description: z.string().max(5000).optional(),
-  requirements: z.array(CertRequirementSchema).optional(),
-  validityPeriod: z.number().int().gte(1).optional(),
-  recertificationRequired: z.boolean().optional(),
-  status: z.enum(["active", "suspended", "retired"]).optional()
 });
 
 export const ChapterAffiliationSchema = z.object({
@@ -3999,10 +3656,6 @@ export const CommitteeUpdateSchema = z.object({
   maxMembers: z.number().int().gte(1).optional(),
   status: z.enum(["active", "suspended", "dissolved"]).optional()
 });
-
-export const ComplaintCategorySchema = z.enum(["professionalMisconduct", "codeViolation", "financialImpropriety", "conflictOfInterest", "discrimination", "harassment", "other"]);
-
-export const ComplaintStatusSchema = z.enum(["filed", "preliminaryReview", "investigation", "hearing", "decision", "appeal", "closed"]);
 
 export const ComplianceRefreshResultSchema = z.object({
   refreshed: z.boolean(),
@@ -4666,8 +4319,6 @@ export const CredentialVerificationLogUpdateSchema = z.object({
   result: z.enum(["valid", "expired", "revoked", "notFound"]).optional()
 });
 
-export const CreditActivityTypeSchema = z.enum(["event", "training", "conference", "selfStudy", "publication", "teaching", "other"]);
-
 export const CreditCategoryBreakdownSchema = z.object({
   general: z.number(),
   major: z.number(),
@@ -4691,78 +4342,6 @@ export const CreditComplianceReportSchema = z.object({
 })
 });
 
-export const CreditCycleSchema = z.object({
-  id: z.string().uuid(),
-  version: z.number().int(),
-  createdAt: z.string().datetime().transform((str) => new Date(str)),
-  createdBy: z.string().uuid().optional(),
-  updatedAt: z.string().datetime().transform((str) => new Date(str)),
-  updatedBy: z.string().uuid().optional(),
-  personId: z.string(),
-  startDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).refine(val => { const parsed = new Date(val + "T00:00:00Z"); return !isNaN(parsed.getTime()) && parsed.toISOString().split("T")[0] === val; }, { message: "Invalid calendar date" }),
-  endDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).refine(val => { const parsed = new Date(val + "T00:00:00Z"); return !isNaN(parsed.getTime()) && parsed.toISOString().split("T")[0] === val; }, { message: "Invalid calendar date" }),
-  requiredCredits: z.number().gte(0),
-  earnedCredits: z.number().gte(0),
-  carryOverCredits: z.number().gte(0).optional(),
-  status: z.enum(["active", "completed", "deficient", "grace"])
-});
-
-export const CreditCycleUpdateSchema = z.object({
-  id: z.string().uuid().optional(),
-  version: z.number().int().optional(),
-  createdAt: z.string().datetime().transform((str) => new Date(str)).optional(),
-  createdBy: z.string().uuid().optional(),
-  updatedAt: z.string().datetime().transform((str) => new Date(str)).optional(),
-  updatedBy: z.string().uuid().optional(),
-  personId: z.string().optional(),
-  startDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).refine(val => { const parsed = new Date(val + "T00:00:00Z"); return !isNaN(parsed.getTime()) && parsed.toISOString().split("T")[0] === val; }, { message: "Invalid calendar date" }).optional(),
-  endDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).refine(val => { const parsed = new Date(val + "T00:00:00Z"); return !isNaN(parsed.getTime()) && parsed.toISOString().split("T")[0] === val; }, { message: "Invalid calendar date" }).optional(),
-  requiredCredits: z.number().gte(0).optional(),
-  earnedCredits: z.number().gte(0).optional(),
-  carryOverCredits: z.number().gte(0).optional(),
-  status: z.enum(["active", "completed", "deficient", "grace"]).optional()
-});
-
-export const CreditEntrySchema = z.object({
-  id: z.string().uuid(),
-  version: z.number().int(),
-  createdAt: z.string().datetime().transform((str) => new Date(str)),
-  createdBy: z.string().uuid().optional(),
-  updatedAt: z.string().datetime().transform((str) => new Date(str)),
-  updatedBy: z.string().uuid().optional(),
-  personId: z.string(),
-  cycleId: z.string(),
-  activityType: z.enum(["event", "training", "conference", "selfStudy", "publication", "teaching", "other"]),
-  activityId: z.string().max(100).optional(),
-  activityName: z.string().min(1).max(200),
-  credits: z.number().gte(0),
-  provenance: z.enum(["auto", "manual"]),
-  earnedDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).refine(val => { const parsed = new Date(val + "T00:00:00Z"); return !isNaN(parsed.getTime()) && parsed.toISOString().split("T")[0] === val; }, { message: "Invalid calendar date" }),
-  awardedBy: z.string().max(100).optional(),
-  verifiedAt: z.string().datetime().transform((str) => new Date(str)).optional(),
-  category: z.string().max(100).optional()
-});
-
-export const CreditEntryUpdateSchema = z.object({
-  id: z.string().uuid().optional(),
-  version: z.number().int().optional(),
-  createdAt: z.string().datetime().transform((str) => new Date(str)).optional(),
-  createdBy: z.string().uuid().optional(),
-  updatedAt: z.string().datetime().transform((str) => new Date(str)).optional(),
-  updatedBy: z.string().uuid().optional(),
-  personId: z.string().optional(),
-  cycleId: z.string().optional(),
-  activityType: z.enum(["event", "training", "conference", "selfStudy", "publication", "teaching", "other"]).optional(),
-  activityId: z.string().max(100).optional(),
-  activityName: z.string().min(1).max(200).optional(),
-  credits: z.number().gte(0).optional(),
-  provenance: z.enum(["auto", "manual"]).optional(),
-  earnedDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).refine(val => { const parsed = new Date(val + "T00:00:00Z"); return !isNaN(parsed.getTime()) && parsed.toISOString().split("T")[0] === val; }, { message: "Invalid calendar date" }).optional(),
-  awardedBy: z.string().max(100).optional(),
-  verifiedAt: z.string().datetime().transform((str) => new Date(str)).optional(),
-  category: z.string().max(100).optional()
-});
-
 export const CreditHistoryEntrySchema = z.object({
   id: z.string(),
   activityName: z.string(),
@@ -4776,13 +4355,9 @@ export const CreditHistoryEntrySchema = z.object({
   createdAt: z.string().datetime().transform((str) => new Date(str)).optional()
 });
 
-export const CreditProvenanceSchema = z.enum(["auto", "manual"]);
-
 export const CurrencyAmountSchema = z.number().int().gte(0);
 
 export const CurrencyCodeSchema = z.string().regex(/^[A-Z]{3}$/);
-
-export const CycleStatusSchema = z.enum(["active", "completed", "deficient", "grace"]);
 
 export const DashboardResponseSchema = z.object({
   dashboardUrl: z.string().url(),
@@ -4984,46 +4559,6 @@ export const DirectorySearchIndexUpdateSchema = z.object({
   verified: z.boolean().optional()
 });
 
-export const DisbursementStatusSchema = z.enum(["pending", "processed", "completed"]);
-
-export const DisciplinaryActionSchema = z.object({
-  id: z.string().uuid(),
-  version: z.number().int(),
-  createdAt: z.string().datetime().transform((str) => new Date(str)),
-  createdBy: z.string().uuid().optional(),
-  updatedAt: z.string().datetime().transform((str) => new Date(str)),
-  updatedBy: z.string().uuid().optional(),
-  organizationId: z.string(),
-  complaintId: z.string(),
-  actionType: z.enum(["warning", "reprimand", "fine", "suspension", "expulsion", "probation", "mandatoryTraining", "none"]),
-  description: z.string().min(1).max(5000),
-  effectiveDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).refine(val => { const parsed = new Date(val + "T00:00:00Z"); return !isNaN(parsed.getTime()) && parsed.toISOString().split("T")[0] === val; }, { message: "Invalid calendar date" }),
-  endDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).refine(val => { const parsed = new Date(val + "T00:00:00Z"); return !isNaN(parsed.getTime()) && parsed.toISOString().split("T")[0] === val; }, { message: "Invalid calendar date" }).optional(),
-  imposedBy: z.string(),
-  status: z.enum(["imposed", "active", "completed", "appealed", "overturned"])
-});
-
-export const DisciplinaryActionStatusSchema = z.enum(["imposed", "active", "completed", "appealed", "overturned"]);
-
-export const DisciplinaryActionTypeSchema = z.enum(["warning", "reprimand", "fine", "suspension", "expulsion", "probation", "mandatoryTraining", "none"]);
-
-export const DisciplinaryActionUpdateSchema = z.object({
-  id: z.string().uuid().optional(),
-  version: z.number().int().optional(),
-  createdAt: z.string().datetime().transform((str) => new Date(str)).optional(),
-  createdBy: z.string().uuid().optional(),
-  updatedAt: z.string().datetime().transform((str) => new Date(str)).optional(),
-  updatedBy: z.string().uuid().optional(),
-  organizationId: z.string().optional(),
-  complaintId: z.string().optional(),
-  actionType: z.enum(["warning", "reprimand", "fine", "suspension", "expulsion", "probation", "mandatoryTraining", "none"]).optional(),
-  description: z.string().min(1).max(5000).optional(),
-  effectiveDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).refine(val => { const parsed = new Date(val + "T00:00:00Z"); return !isNaN(parsed.getTime()) && parsed.toISOString().split("T")[0] === val; }, { message: "Invalid calendar date" }).optional(),
-  endDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).refine(val => { const parsed = new Date(val + "T00:00:00Z"); return !isNaN(parsed.getTime()) && parsed.toISOString().split("T")[0] === val; }, { message: "Invalid calendar date" }).optional(),
-  imposedBy: z.string().optional(),
-  status: z.enum(["imposed", "active", "completed", "appealed", "overturned"]).optional()
-});
-
 export const DiscountTypeSchema = z.enum(["percentage", "fixed_amount", "free_item", "special_rate"]);
 
 export const DocumentAccessLogEntryListResponseSchema = z.object({
@@ -5081,52 +4616,6 @@ export const DocumentVersionListResponseSchema = z.object({
   hasPreviousPage: z.boolean()
 })
 });
-
-export const DonationSchema = z.object({
-  id: z.string().uuid(),
-  version: z.number().int(),
-  createdAt: z.string().datetime().transform((str) => new Date(str)),
-  createdBy: z.string().uuid().optional(),
-  updatedAt: z.string().datetime().transform((str) => new Date(str)),
-  updatedBy: z.string().uuid().optional(),
-  organizationId: z.string(),
-  donorId: z.string(),
-  donorType: z.enum(["individual", "organization"]),
-  campaignId: z.string().optional(),
-  amount: z.number().int().gte(0),
-  currency: z.string().min(3).max(3),
-  donationDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).refine(val => { const parsed = new Date(val + "T00:00:00Z"); return !isNaN(parsed.getTime()) && parsed.toISOString().split("T")[0] === val; }, { message: "Invalid calendar date" }),
-  type: z.enum(["oneTime", "recurring", "pledge", "inKind"]),
-  paymentId: z.string().optional(),
-  taxDeductible: z.boolean(),
-  receiptNumber: z.string().max(100).optional(),
-  anonymous: z.boolean()
-});
-
-export const DonationTypeSchema = z.enum(["oneTime", "recurring", "pledge", "inKind"]);
-
-export const DonationUpdateSchema = z.object({
-  id: z.string().uuid().optional(),
-  version: z.number().int().optional(),
-  createdAt: z.string().datetime().transform((str) => new Date(str)).optional(),
-  createdBy: z.string().uuid().optional(),
-  updatedAt: z.string().datetime().transform((str) => new Date(str)).optional(),
-  updatedBy: z.string().uuid().optional(),
-  organizationId: z.string().optional(),
-  donorId: z.string().optional(),
-  donorType: z.enum(["individual", "organization"]).optional(),
-  campaignId: z.string().optional(),
-  amount: z.number().int().gte(0).optional(),
-  currency: z.string().min(3).max(3).optional(),
-  donationDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).refine(val => { const parsed = new Date(val + "T00:00:00Z"); return !isNaN(parsed.getTime()) && parsed.toISOString().split("T")[0] === val; }, { message: "Invalid calendar date" }).optional(),
-  type: z.enum(["oneTime", "recurring", "pledge", "inKind"]).optional(),
-  paymentId: z.string().optional(),
-  taxDeductible: z.boolean().optional(),
-  receiptNumber: z.string().max(100).optional(),
-  anonymous: z.boolean().optional()
-});
-
-export const DonorTypeSchema = z.enum(["individual", "organization"]);
 
 export const FundAllocationSchema = z.object({
   fundName: z.string().min(1).max(100),
@@ -5897,8 +5386,6 @@ export const EmailTemplateUpdateSchema = z.object({
   status: z.enum(["draft", "active", "archived"]).optional()
 });
 
-export const EnrollmentStatusSchema = z.enum(["enrolled", "inProgress", "examScheduled", "passed", "failed", "certified", "expired", "revoked"]);
-
 export const ErrorDetailSchema = z.object({
   code: z.string(),
   message: z.string(),
@@ -5909,42 +5396,6 @@ export const ErrorDetailSchema = z.object({
   method: z.string(),
   statusCode: z.number().int(),
   helpUrl: z.string().url().optional()
-});
-
-export const EthicsComplaintSchema = z.object({
-  id: z.string().uuid(),
-  version: z.number().int(),
-  createdAt: z.string().datetime().transform((str) => new Date(str)),
-  createdBy: z.string().uuid().optional(),
-  updatedAt: z.string().datetime().transform((str) => new Date(str)),
-  updatedBy: z.string().uuid().optional(),
-  organizationId: z.string(),
-  complainantId: z.string().optional(),
-  respondentId: z.string(),
-  category: z.enum(["professionalMisconduct", "codeViolation", "financialImpropriety", "conflictOfInterest", "discrimination", "harassment", "other"]),
-  description: z.string().min(1).max(20000),
-  filedAt: z.string().datetime().transform((str) => new Date(str)),
-  status: z.enum(["filed", "preliminaryReview", "investigation", "hearing", "decision", "appeal", "closed"]),
-  assignedTo: z.string().optional(),
-  confidential: z.boolean()
-});
-
-export const EthicsComplaintUpdateSchema = z.object({
-  id: z.string().uuid().optional(),
-  version: z.number().int().optional(),
-  createdAt: z.string().datetime().transform((str) => new Date(str)).optional(),
-  createdBy: z.string().uuid().optional(),
-  updatedAt: z.string().datetime().transform((str) => new Date(str)).optional(),
-  updatedBy: z.string().uuid().optional(),
-  organizationId: z.string().optional(),
-  complainantId: z.string().optional(),
-  respondentId: z.string().optional(),
-  category: z.enum(["professionalMisconduct", "codeViolation", "financialImpropriety", "conflictOfInterest", "discrimination", "harassment", "other"]).optional(),
-  description: z.string().min(1).max(20000).optional(),
-  filedAt: z.string().datetime().transform((str) => new Date(str)).optional(),
-  status: z.enum(["filed", "preliminaryReview", "investigation", "hearing", "decision", "appeal", "closed"]).optional(),
-  assignedTo: z.string().optional(),
-  confidential: z.boolean().optional()
 });
 
 export const EventSchema = z.object({
@@ -6171,38 +5622,6 @@ export const EventUpdateRequestSchema = z.object({
 
 export const EventVisibilitySchema = z.enum(["internal", "network"]);
 
-export const ExamResultSchema = z.object({
-  id: z.string().uuid(),
-  version: z.number().int(),
-  createdAt: z.string().datetime().transform((str) => new Date(str)),
-  createdBy: z.string().uuid().optional(),
-  updatedAt: z.string().datetime().transform((str) => new Date(str)),
-  updatedBy: z.string().uuid().optional(),
-  enrollmentId: z.string(),
-  personId: z.string(),
-  examDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).refine(val => { const parsed = new Date(val + "T00:00:00Z"); return !isNaN(parsed.getTime()) && parsed.toISOString().split("T")[0] === val; }, { message: "Invalid calendar date" }),
-  score: z.number().gte(0).optional(),
-  passingScore: z.number().gte(0).optional(),
-  passed: z.boolean(),
-  attempts: z.number().int().gte(1)
-});
-
-export const ExamResultUpdateSchema = z.object({
-  id: z.string().uuid().optional(),
-  version: z.number().int().optional(),
-  createdAt: z.string().datetime().transform((str) => new Date(str)).optional(),
-  createdBy: z.string().uuid().optional(),
-  updatedAt: z.string().datetime().transform((str) => new Date(str)).optional(),
-  updatedBy: z.string().uuid().optional(),
-  enrollmentId: z.string().optional(),
-  personId: z.string().optional(),
-  examDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).refine(val => { const parsed = new Date(val + "T00:00:00Z"); return !isNaN(parsed.getTime()) && parsed.toISOString().split("T")[0] === val; }, { message: "Invalid calendar date" }).optional(),
-  score: z.number().gte(0).optional(),
-  passingScore: z.number().gte(0).optional(),
-  passed: z.boolean().optional(),
-  attempts: z.number().int().gte(1).optional()
-});
-
 export const ExhibitorProfileSchema = z.object({
   id: z.string().uuid(),
   version: z.number().int(),
@@ -6343,8 +5762,6 @@ export const FormResponsesUpdateSchema = z.object({
 }).optional()
 });
 
-export const FundraisingCampaignTypeSchema = z.enum(["fundraising", "membershipDrive", "eventPromotion", "advocacy", "awareness"]);
-
 export const GatewayConfigSchema = z.object({
   id: z.string().uuid(),
   version: z.number().int(),
@@ -6406,82 +5823,6 @@ export const GeoCoordinatesUpdateSchema = z.object({
   longitude: z.number().gte(-180).lte(180).optional(),
   accuracy: z.number().gte(0).optional()
 });
-
-export const GrantApplicantTypeSchema = z.enum(["individual", "organization"]);
-
-export const GrantApplicationSchema = z.object({
-  id: z.string().uuid(),
-  version: z.number().int(),
-  createdAt: z.string().datetime().transform((str) => new Date(str)),
-  createdBy: z.string().uuid().optional(),
-  updatedAt: z.string().datetime().transform((str) => new Date(str)),
-  updatedBy: z.string().uuid().optional(),
-  organizationId: z.string(),
-  programId: z.string(),
-  applicantId: z.string(),
-  applicantType: z.enum(["individual", "organization"]),
-  title: z.string().min(1).max(200),
-  abstract: z.string().min(1).max(5000),
-  proposedBudget: z.number().int().gte(0),
-  status: z.enum(["draft", "submitted", "underReview", "approved", "denied", "funded", "completed", "withdrawn"]),
-  submittedAt: z.string().datetime().transform((str) => new Date(str)).optional(),
-  reviewScore: z.number().gte(0).lte(100).optional(),
-  awardedAmount: z.number().int().gte(0).optional()
-});
-
-export const GrantApplicationUpdateSchema = z.object({
-  id: z.string().uuid().optional(),
-  version: z.number().int().optional(),
-  createdAt: z.string().datetime().transform((str) => new Date(str)).optional(),
-  createdBy: z.string().uuid().optional(),
-  updatedAt: z.string().datetime().transform((str) => new Date(str)).optional(),
-  updatedBy: z.string().uuid().optional(),
-  organizationId: z.string().optional(),
-  programId: z.string().optional(),
-  applicantId: z.string().optional(),
-  applicantType: z.enum(["individual", "organization"]).optional(),
-  title: z.string().min(1).max(200).optional(),
-  abstract: z.string().min(1).max(5000).optional(),
-  proposedBudget: z.number().int().gte(0).optional(),
-  status: z.enum(["draft", "submitted", "underReview", "approved", "denied", "funded", "completed", "withdrawn"]).optional(),
-  submittedAt: z.string().datetime().transform((str) => new Date(str)).optional(),
-  reviewScore: z.number().gte(0).lte(100).optional(),
-  awardedAmount: z.number().int().gte(0).optional()
-});
-
-export const GrantProgressReportSchema = z.object({
-  id: z.string().uuid(),
-  version: z.number().int(),
-  createdAt: z.string().datetime().transform((str) => new Date(str)),
-  createdBy: z.string().uuid().optional(),
-  updatedAt: z.string().datetime().transform((str) => new Date(str)),
-  updatedBy: z.string().uuid().optional(),
-  organizationId: z.string(),
-  grantApplicationId: z.string(),
-  reportingPeriod: z.string().min(1).max(100),
-  narrative: z.string().min(1).max(20000),
-  expenditures: z.number().int().gte(0),
-  milestones: z.array(z.string()).optional(),
-  status: z.enum(["submitted", "reviewed", "accepted", "revisionsRequested"])
-});
-
-export const GrantProgressReportUpdateSchema = z.object({
-  id: z.string().uuid().optional(),
-  version: z.number().int().optional(),
-  createdAt: z.string().datetime().transform((str) => new Date(str)).optional(),
-  createdBy: z.string().uuid().optional(),
-  updatedAt: z.string().datetime().transform((str) => new Date(str)).optional(),
-  updatedBy: z.string().uuid().optional(),
-  organizationId: z.string().optional(),
-  grantApplicationId: z.string().optional(),
-  reportingPeriod: z.string().min(1).max(100).optional(),
-  narrative: z.string().min(1).max(20000).optional(),
-  expenditures: z.number().int().gte(0).optional(),
-  milestones: z.array(z.string()).optional(),
-  status: z.enum(["submitted", "reviewed", "accepted", "revisionsRequested"]).optional()
-});
-
-export const GrantStatusSchema = z.enum(["draft", "submitted", "underReview", "approved", "denied", "funded", "completed", "withdrawn"]);
 
 export const HumanReviewGateSchema = z.object({
   id: z.string().uuid(),
@@ -6937,40 +6278,6 @@ export const LeaveVideoCallResponseSchema = z.object({
   message: z.string(),
   callStillActive: z.boolean(),
   remainingParticipants: z.number().int()
-});
-
-export const LegislativeIssueSchema = z.object({
-  id: z.string().uuid(),
-  version: z.number().int(),
-  createdAt: z.string().datetime().transform((str) => new Date(str)),
-  createdBy: z.string().uuid().optional(),
-  updatedAt: z.string().datetime().transform((str) => new Date(str)),
-  updatedBy: z.string().uuid().optional(),
-  organizationId: z.string(),
-  title: z.string().min(1).max(200),
-  description: z.string().min(1).max(10000),
-  status: z.enum(["active", "monitoring", "resolved", "archived"]),
-  jurisdiction: z.string().max(100).optional(),
-  issueDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).refine(val => { const parsed = new Date(val + "T00:00:00Z"); return !isNaN(parsed.getTime()) && parsed.toISOString().split("T")[0] === val; }, { message: "Invalid calendar date" }),
-  resolvedDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).refine(val => { const parsed = new Date(val + "T00:00:00Z"); return !isNaN(parsed.getTime()) && parsed.toISOString().split("T")[0] === val; }, { message: "Invalid calendar date" }).optional()
-});
-
-export const LegislativeIssueStatusSchema = z.enum(["active", "monitoring", "resolved", "archived"]);
-
-export const LegislativeIssueUpdateSchema = z.object({
-  id: z.string().uuid().optional(),
-  version: z.number().int().optional(),
-  createdAt: z.string().datetime().transform((str) => new Date(str)).optional(),
-  createdBy: z.string().uuid().optional(),
-  updatedAt: z.string().datetime().transform((str) => new Date(str)).optional(),
-  updatedBy: z.string().uuid().optional(),
-  organizationId: z.string().optional(),
-  title: z.string().min(1).max(200).optional(),
-  description: z.string().min(1).max(10000).optional(),
-  status: z.enum(["active", "monitoring", "resolved", "archived"]).optional(),
-  jurisdiction: z.string().max(100).optional(),
-  issueDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).refine(val => { const parsed = new Date(val + "T00:00:00Z"); return !isNaN(parsed.getTime()) && parsed.toISOString().split("T")[0] === val; }, { message: "Invalid calendar date" }).optional(),
-  resolvedDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).refine(val => { const parsed = new Date(val + "T00:00:00Z"); return !isNaN(parsed.getTime()) && parsed.toISOString().split("T")[0] === val; }, { message: "Invalid calendar date" }).optional()
 });
 
 export const LicenseRenewalAlertSchema = z.object({
@@ -7771,8 +7078,6 @@ export const NationalListMetaSchema = z.object({
   total: z.union([z.number().int(), z.null()])
 });
 
-export const NominationStatusSchema = z.enum(["submitted", "underReview", "shortlisted", "selected", "notSelected", "withdrawn"]);
-
 export const NotFoundErrorSchema = z.object({
   code: z.string(),
   message: z.string(),
@@ -8218,45 +7523,7 @@ export const OrganizationProfileSchema = z.object({
   foundingDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).refine(val => { const parsed = new Date(val + "T00:00:00Z"); return !isNaN(parsed.getTime()) && parsed.toISOString().split("T")[0] === val; }, { message: "Invalid calendar date" }).optional()
 });
 
-export const PACContributionSchema = z.object({
-  id: z.string().uuid(),
-  version: z.number().int(),
-  createdAt: z.string().datetime().transform((str) => new Date(str)),
-  createdBy: z.string().uuid().optional(),
-  updatedAt: z.string().datetime().transform((str) => new Date(str)),
-  updatedBy: z.string().uuid().optional(),
-  organizationId: z.string(),
-  contributorId: z.string(),
-  amount: z.number().int().gte(0),
-  contributionDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).refine(val => { const parsed = new Date(val + "T00:00:00Z"); return !isNaN(parsed.getTime()) && parsed.toISOString().split("T")[0] === val; }, { message: "Invalid calendar date" }),
-  employerName: z.string().max(200).optional(),
-  occupation: z.string().max(100).optional(),
-  status: z.enum(["received", "acknowledged", "reported"]),
-  reportingPeriod: z.string().max(50).optional()
-});
-
-export const PACContributionStatusSchema = z.enum(["received", "acknowledged", "reported"]);
-
-export const PACContributionUpdateSchema = z.object({
-  id: z.string().uuid().optional(),
-  version: z.number().int().optional(),
-  createdAt: z.string().datetime().transform((str) => new Date(str)).optional(),
-  createdBy: z.string().uuid().optional(),
-  updatedAt: z.string().datetime().transform((str) => new Date(str)).optional(),
-  updatedBy: z.string().uuid().optional(),
-  organizationId: z.string().optional(),
-  contributorId: z.string().optional(),
-  amount: z.number().int().gte(0).optional(),
-  contributionDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).refine(val => { const parsed = new Date(val + "T00:00:00Z"); return !isNaN(parsed.getTime()) && parsed.toISOString().split("T")[0] === val; }, { message: "Invalid calendar date" }).optional(),
-  employerName: z.string().max(200).optional(),
-  occupation: z.string().max(100).optional(),
-  status: z.enum(["received", "acknowledged", "reported"]).optional(),
-  reportingPeriod: z.string().max(50).optional()
-});
-
 export const PairStatusSchema = z.enum(["proposed", "active", "completed", "dissolved"]);
-
-export const PanelStatusSchema = z.enum(["formed", "deliberating", "decided"]);
 
 export const PaymentCheckoutResponseSchema = z.object({
   checkoutUrl: z.string()
@@ -8284,36 +7551,6 @@ export const PaymentTokenValidationSchema = z.object({
   dueDate: z.string().optional(),
   error: z.string().optional(),
   status: z.string().optional()
-});
-
-export const PeerReviewPanelSchema = z.object({
-  id: z.string().uuid(),
-  version: z.number().int(),
-  createdAt: z.string().datetime().transform((str) => new Date(str)),
-  createdBy: z.string().uuid().optional(),
-  updatedAt: z.string().datetime().transform((str) => new Date(str)),
-  updatedBy: z.string().uuid().optional(),
-  organizationId: z.string(),
-  complaintId: z.string(),
-  panelMembers: z.array(z.string()),
-  chairId: z.string(),
-  conveneDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).refine(val => { const parsed = new Date(val + "T00:00:00Z"); return !isNaN(parsed.getTime()) && parsed.toISOString().split("T")[0] === val; }, { message: "Invalid calendar date" }).optional(),
-  status: z.enum(["formed", "deliberating", "decided"])
-});
-
-export const PeerReviewPanelUpdateSchema = z.object({
-  id: z.string().uuid().optional(),
-  version: z.number().int().optional(),
-  createdAt: z.string().datetime().transform((str) => new Date(str)).optional(),
-  createdBy: z.string().uuid().optional(),
-  updatedAt: z.string().datetime().transform((str) => new Date(str)).optional(),
-  updatedBy: z.string().uuid().optional(),
-  organizationId: z.string().optional(),
-  complaintId: z.string().optional(),
-  panelMembers: z.array(z.string()).optional(),
-  chairId: z.string().optional(),
-  conveneDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).refine(val => { const parsed = new Date(val + "T00:00:00Z"); return !isNaN(parsed.getTime()) && parsed.toISOString().split("T")[0] === val; }, { message: "Invalid calendar date" }).optional(),
-  status: z.enum(["formed", "deliberating", "decided"]).optional()
 });
 
 export const PersonCreateRequestSchema = z.object({
@@ -8545,46 +7782,6 @@ export const PlatformSummaryListResponseSchema = z.object({
 })
 });
 
-export const PledgeSchema = z.object({
-  id: z.string().uuid(),
-  version: z.number().int(),
-  createdAt: z.string().datetime().transform((str) => new Date(str)),
-  createdBy: z.string().uuid().optional(),
-  updatedAt: z.string().datetime().transform((str) => new Date(str)),
-  updatedBy: z.string().uuid().optional(),
-  organizationId: z.string(),
-  donorId: z.string(),
-  campaignId: z.string().optional(),
-  totalAmount: z.number().int().gte(0),
-  paidAmount: z.number().int().gte(0),
-  frequency: z.enum(["monthly", "quarterly", "annual", "oneTime"]),
-  startDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).refine(val => { const parsed = new Date(val + "T00:00:00Z"); return !isNaN(parsed.getTime()) && parsed.toISOString().split("T")[0] === val; }, { message: "Invalid calendar date" }),
-  endDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).refine(val => { const parsed = new Date(val + "T00:00:00Z"); return !isNaN(parsed.getTime()) && parsed.toISOString().split("T")[0] === val; }, { message: "Invalid calendar date" }).optional(),
-  status: z.enum(["active", "completed", "defaulted", "cancelled"])
-});
-
-export const PledgeFrequencySchema = z.enum(["monthly", "quarterly", "annual", "oneTime"]);
-
-export const PledgeStatusSchema = z.enum(["active", "completed", "defaulted", "cancelled"]);
-
-export const PledgeUpdateSchema = z.object({
-  id: z.string().uuid().optional(),
-  version: z.number().int().optional(),
-  createdAt: z.string().datetime().transform((str) => new Date(str)).optional(),
-  createdBy: z.string().uuid().optional(),
-  updatedAt: z.string().datetime().transform((str) => new Date(str)).optional(),
-  updatedBy: z.string().uuid().optional(),
-  organizationId: z.string().optional(),
-  donorId: z.string().optional(),
-  campaignId: z.string().optional(),
-  totalAmount: z.number().int().gte(0).optional(),
-  paidAmount: z.number().int().gte(0).optional(),
-  frequency: z.enum(["monthly", "quarterly", "annual", "oneTime"]).optional(),
-  startDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).refine(val => { const parsed = new Date(val + "T00:00:00Z"); return !isNaN(parsed.getTime()) && parsed.toISOString().split("T")[0] === val; }, { message: "Invalid calendar date" }).optional(),
-  endDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).refine(val => { const parsed = new Date(val + "T00:00:00Z"); return !isNaN(parsed.getTime()) && parsed.toISOString().split("T")[0] === val; }, { message: "Invalid calendar date" }).optional(),
-  status: z.enum(["active", "completed", "defaulted", "cancelled"]).optional()
-});
-
 export const PortalInboxSchema = z.object({
   id: z.string().uuid(),
   version: z.number().int(),
@@ -8814,80 +8011,6 @@ export const ProfessionalLicenseUpdateRequestSchema = z.object({
   expirationDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).refine(val => { const parsed = new Date(val + "T00:00:00Z"); return !isNaN(parsed.getTime()) && parsed.toISOString().split("T")[0] === val; }, { message: "Invalid calendar date" }).optional(),
   status: LicenseStatusSchema.optional(),
   documentRef: z.union([z.string(), z.null()]).optional()
-});
-
-export const ProgressReportStatusSchema = z.enum(["submitted", "reviewed", "accepted", "revisionsRequested"]);
-
-export const ProspectSchema = z.object({
-  id: z.string().uuid(),
-  version: z.number().int(),
-  createdAt: z.string().datetime().transform((str) => new Date(str)),
-  createdBy: z.string().uuid().optional(),
-  updatedAt: z.string().datetime().transform((str) => new Date(str)),
-  updatedBy: z.string().uuid().optional(),
-  organizationId: z.string(),
-  name: z.string().min(1).max(200),
-  email: z.string().email().optional(),
-  phone: z.string().max(50).optional(),
-  source: z.enum(["referral", "website", "event", "marketing", "purchased"]),
-  status: z.enum(["new", "contacted", "qualified", "converted", "lost"]),
-  assignedTo: z.string().optional(),
-  notes: z.string().max(5000).optional(),
-  convertedToMembershipId: z.string().optional()
-});
-
-export const ProspectActivitySchema = z.object({
-  id: z.string().uuid(),
-  version: z.number().int(),
-  createdAt: z.string().datetime().transform((str) => new Date(str)),
-  createdBy: z.string().uuid().optional(),
-  updatedAt: z.string().datetime().transform((str) => new Date(str)),
-  updatedBy: z.string().uuid().optional(),
-  organizationId: z.string(),
-  prospectId: z.string(),
-  activityType: z.enum(["call", "email", "meeting", "event", "note"]),
-  description: z.string().min(1).max(5000),
-  performedBy: z.string(),
-  performedAt: z.string().datetime().transform((str) => new Date(str))
-});
-
-export const ProspectActivityTypeSchema = z.enum(["call", "email", "meeting", "event", "note"]);
-
-export const ProspectActivityUpdateSchema = z.object({
-  id: z.string().uuid().optional(),
-  version: z.number().int().optional(),
-  createdAt: z.string().datetime().transform((str) => new Date(str)).optional(),
-  createdBy: z.string().uuid().optional(),
-  updatedAt: z.string().datetime().transform((str) => new Date(str)).optional(),
-  updatedBy: z.string().uuid().optional(),
-  organizationId: z.string().optional(),
-  prospectId: z.string().optional(),
-  activityType: z.enum(["call", "email", "meeting", "event", "note"]).optional(),
-  description: z.string().min(1).max(5000).optional(),
-  performedBy: z.string().optional(),
-  performedAt: z.string().datetime().transform((str) => new Date(str)).optional()
-});
-
-export const ProspectSourceSchema = z.enum(["referral", "website", "event", "marketing", "purchased"]);
-
-export const ProspectStatusSchema = z.enum(["new", "contacted", "qualified", "converted", "lost"]);
-
-export const ProspectUpdateSchema = z.object({
-  id: z.string().uuid().optional(),
-  version: z.number().int().optional(),
-  createdAt: z.string().datetime().transform((str) => new Date(str)).optional(),
-  createdBy: z.string().uuid().optional(),
-  updatedAt: z.string().datetime().transform((str) => new Date(str)).optional(),
-  updatedBy: z.string().uuid().optional(),
-  organizationId: z.string().optional(),
-  name: z.string().min(1).max(200).optional(),
-  email: z.string().email().optional(),
-  phone: z.string().max(50).optional(),
-  source: z.enum(["referral", "website", "event", "marketing", "purchased"]).optional(),
-  status: z.enum(["new", "contacted", "qualified", "converted", "lost"]).optional(),
-  assignedTo: z.string().optional(),
-  notes: z.string().max(5000).optional(),
-  convertedToMembershipId: z.string().optional()
 });
 
 export const PublicDirectoryProfileSchema = z.object({
@@ -9417,42 +8540,6 @@ export const SIGMembershipUpdateSchema = z.object({
 export const SIGStatusSchema = z.enum(["proposed", "active", "dormant", "dissolved"]);
 
 export const SafeQueryStringSchema = z.string().regex(/^[^\u0000]*$/).max(500);
-
-export const SanctionRecordSchema = z.object({
-  id: z.string().uuid(),
-  version: z.number().int(),
-  createdAt: z.string().datetime().transform((str) => new Date(str)),
-  createdBy: z.string().uuid().optional(),
-  updatedAt: z.string().datetime().transform((str) => new Date(str)),
-  updatedBy: z.string().uuid().optional(),
-  organizationId: z.string(),
-  personId: z.string(),
-  actionId: z.string(),
-  sanctionType: z.string().min(1).max(100),
-  publiclyVisible: z.boolean(),
-  startDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).refine(val => { const parsed = new Date(val + "T00:00:00Z"); return !isNaN(parsed.getTime()) && parsed.toISOString().split("T")[0] === val; }, { message: "Invalid calendar date" }),
-  endDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).refine(val => { const parsed = new Date(val + "T00:00:00Z"); return !isNaN(parsed.getTime()) && parsed.toISOString().split("T")[0] === val; }, { message: "Invalid calendar date" }).optional(),
-  status: z.enum(["active", "expired", "overturned"])
-});
-
-export const SanctionRecordStatusSchema = z.enum(["active", "expired", "overturned"]);
-
-export const SanctionRecordUpdateSchema = z.object({
-  id: z.string().uuid().optional(),
-  version: z.number().int().optional(),
-  createdAt: z.string().datetime().transform((str) => new Date(str)).optional(),
-  createdBy: z.string().uuid().optional(),
-  updatedAt: z.string().datetime().transform((str) => new Date(str)).optional(),
-  updatedBy: z.string().uuid().optional(),
-  organizationId: z.string().optional(),
-  personId: z.string().optional(),
-  actionId: z.string().optional(),
-  sanctionType: z.string().min(1).max(100).optional(),
-  publiclyVisible: z.boolean().optional(),
-  startDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).refine(val => { const parsed = new Date(val + "T00:00:00Z"); return !isNaN(parsed.getTime()) && parsed.toISOString().split("T")[0] === val; }, { message: "Invalid calendar date" }).optional(),
-  endDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).refine(val => { const parsed = new Date(val + "T00:00:00Z"); return !isNaN(parsed.getTime()) && parsed.toISOString().split("T")[0] === val; }, { message: "Invalid calendar date" }).optional(),
-  status: z.enum(["active", "expired", "overturned"]).optional()
-});
 
 export const ScaleConfigSchema = z.object({
   min: z.number().int(),
@@ -10167,40 +9254,6 @@ export const TargetAudienceFilterSchema = z.object({
   tiers: z.array(z.string()).optional(),
   chapters: z.array(z.string()).optional(),
   committees: z.array(z.string()).optional()
-});
-
-export const TaxReceiptSchema = z.object({
-  id: z.string().uuid(),
-  version: z.number().int(),
-  createdAt: z.string().datetime().transform((str) => new Date(str)),
-  createdBy: z.string().uuid().optional(),
-  updatedAt: z.string().datetime().transform((str) => new Date(str)),
-  updatedBy: z.string().uuid().optional(),
-  organizationId: z.string(),
-  donationId: z.string().optional(),
-  donorId: z.string(),
-  receiptNumber: z.string().min(1).max(100),
-  fiscalYear: z.number().int().gte(2000),
-  amount: z.number().int().gte(0),
-  issuedAt: z.string().datetime().transform((str) => new Date(str)),
-  issuedBy: z.string()
-});
-
-export const TaxReceiptUpdateSchema = z.object({
-  id: z.string().uuid().optional(),
-  version: z.number().int().optional(),
-  createdAt: z.string().datetime().transform((str) => new Date(str)).optional(),
-  createdBy: z.string().uuid().optional(),
-  updatedAt: z.string().datetime().transform((str) => new Date(str)).optional(),
-  updatedBy: z.string().uuid().optional(),
-  organizationId: z.string().optional(),
-  donationId: z.string().optional(),
-  donorId: z.string().optional(),
-  receiptNumber: z.string().min(1).max(100).optional(),
-  fiscalYear: z.number().int().gte(2000).optional(),
-  amount: z.number().int().gte(0).optional(),
-  issuedAt: z.string().datetime().transform((str) => new Date(str)).optional(),
-  issuedBy: z.string().optional()
 });
 
 export const TestTemplateRequestSchema = z.object({

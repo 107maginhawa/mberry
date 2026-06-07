@@ -26,6 +26,7 @@
     "lint:e2e-depth": "bun run scripts/audit-e2e-depth.ts > /tmp/e2e-depth.json && bun run scripts/audit-e2e-depth-gate.ts",
     "lint:handler-verbs": "bun run scripts/lint-handler-verbs.ts",
     "check:hand-wired-routes": "bun run scripts/check-hand-wired-routes.ts",
+    "check:sdk-compat": "bun run scripts/check-sdk-compat.ts",
     "rollback": "bash scripts/rollback.sh",
     "test:sanity": "cd apps/memberry && CI=1 bunx playwright test _golden-path.spec.ts --workers=1 --reporter=line",
     "test:contract": "bun scripts/run-contract-tests.ts",
