@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-06-07T06:03:55.599Z",
+  "generatedAt": "2026-06-07T08:05:19.671Z",
   "totals": {
     "endpoints": 454,
     "hurlFiles": 134,
@@ -10,10 +10,17 @@
   "uncoveredByTag": [
     {
       "tag": "Association:Member",
-      "uncoveredCount": 85,
-      "totalCount": 97,
-      "coveredCount": 12,
+      "uncoveredCount": 82,
+      "totalCount": 93,
+      "coveredCount": 11,
       "coveragePercent": 12
+    },
+    {
+      "tag": "Member/Certificates",
+      "uncoveredCount": 3,
+      "totalCount": 4,
+      "coveredCount": 1,
+      "coveragePercent": 25
     },
     {
       "tag": "Member/Credentials",
@@ -94,7 +101,7 @@
     {
       "method": "GET",
       "path": "/association/member/certificates/{certificateId}",
-      "tag": "Association:Member",
+      "tag": "Member/Certificates",
       "operationId": "getCertificate"
     },
     {
@@ -550,13 +557,13 @@
     {
       "method": "POST",
       "path": "/certificates/bulk-issue",
-      "tag": "Association:Member",
+      "tag": "Member/Certificates",
       "operationId": "bulkIssueCertificates"
     },
     {
       "method": "GET",
       "path": "/certificates/verify/{certificateNumber}",
-      "tag": "Association:Member",
+      "tag": "Member/Certificates",
       "operationId": "verifyCertificatePublic"
     }
   ]
