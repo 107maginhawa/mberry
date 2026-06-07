@@ -35,7 +35,7 @@ import { creditEntries } from '@/handlers/association:member/repos/credits.schem
 import { electionNominees, electionVotes } from '@/handlers/elections/repos/elections.schema';
 import { officerTerms } from '@/handlers/association:member/repos/governance.schema';
 import { personSubscriptions } from '@/handlers/communication/repos/communication.schema';
-import { certificates } from '@/handlers/certificates/repos/certificates.schema';
+import { certificates } from '@/handlers/member/certificates/repos/certificates.schema';
 import { directoryProfiles } from '@/handlers/association:member/repos/directory.schema';
 import { notificationPreferences } from '@/handlers/person/repos/notification-preferences.schema';
 import { personPrivacySettings } from '@/handlers/person/repos/privacy-settings.schema';

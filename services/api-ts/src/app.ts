@@ -154,9 +154,8 @@ import { awardManualCredit } from '@/handlers/association:member/awardManualCred
 import { getComplianceReport } from '@/handlers/association:member/getComplianceReport';
 import { refreshCompliance } from '@/handlers/association:member/refreshCompliance';
 import { getMyCredits } from '@/handlers/person/getMyCredits';
-// bulkIssueCertificates — now in generated routes (Phase 35)
-import { verifyCertificatePublic } from '@/handlers/certificates/verifyCertificatePublic';
-import { generateCertificatePdf } from '@/handlers/certificates/generateCertificatePdf';
+// bulkIssueCertificates + verifyCertificatePublic — in generated routes
+import { generateCertificatePdf } from '@/handlers/member/certificates/generateCertificatePdf';
 
 // Special Assessments — now in generated routes (Phase 35)
 
@@ -343,10 +342,6 @@ export function createApp(config: Config): App {
   // @hand-wired reason="public credential lookup, no auth by design" wave="Wave-3a"
   const credentialNumberParam = zValidator('param', z.object({ credentialNumber: z.string().min(1).max(512) }), validationErrorHandler);
   app.get('/association/member/credentials/lookup/:credentialNumber', credentialNumberParam, lookupCredentialPublic as unknown as Handler);
-
-  // @hand-wired reason="public certificate verification, no auth by design" wave="Wave-2b"
-  const certificateNumberParam = zValidator('param', z.object({ certificateNumber: z.string().min(1).max(512) }), validationErrorHandler);
-  app.get('/certificates/verify/:certificateNumber', certificateNumberParam, verifyCertificatePublic as unknown as Handler);
 
   // Register auth routes
   registerAuthRoutes(app as App);

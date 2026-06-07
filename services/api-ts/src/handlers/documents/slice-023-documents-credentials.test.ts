@@ -13,7 +13,7 @@ import { makeCtx, stubRepo, restoreRepo } from '@/test-utils/make-ctx';
 import { fakeCertificate } from '@/test-utils/factories';
 import { generateQrToken, verifyQrToken } from '@/handlers/association:operations/utils/qr-checkin';
 import { createCredentialToken, verifyCredentialToken } from '@/handlers/association:member/utils/credential-token';
-import { CertificatesRepository } from '@/handlers/certificates/repos/certificates.repo';
+import { CertificatesRepository } from '@/handlers/member/certificates/repos/certificates.repo';
 
 // ─── Shared Fixtures ────────────────────────────────────
 
@@ -190,7 +190,7 @@ describe('[AC-M11-002] Certificate After Training', () => {
       listByPerson: async () => certs,
     });
 
-    const { listCertificates } = await import('@/handlers/certificates/listCertificates');
+    const { listCertificates } = await import('@/handlers/member/certificates/listCertificates');
     const ctx = makeCtx({});
     const response = await listCertificates(ctx);
     expect(response.status).toBe(200);
@@ -202,7 +202,7 @@ describe('[AC-M11-002] Certificate After Training', () => {
       listByPerson: async () => [],
     });
 
-    const { listCertificates } = await import('@/handlers/certificates/listCertificates');
+    const { listCertificates } = await import('@/handlers/member/certificates/listCertificates');
     const ctx = makeCtx({});
     const response = await listCertificates(ctx);
     expect(response.status).toBe(200);

@@ -2,7 +2,7 @@ import type { ValidatedContext } from '@/types/app';
 import type { DatabaseInstance } from '@/core/database';
 import { UnauthorizedError } from '@/core/errors';
 import type { ListMyCertificatesQuery } from '@/generated/openapi/validators';
-import { DigitalCredentialRepository } from './repos/credentials.repo';
+import { DigitalCredentialRepository } from '@/handlers/association:member/repos/credentials.repo';
 
 /**
  * listMyCertificates

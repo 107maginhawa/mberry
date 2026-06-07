@@ -391,15 +391,15 @@ namespace MonobaseAPI {
   // Association Domain — Certificates
   // =========================================================================
 
-  @tag("Association:Member")
+  @tag("Member/Certificates")
   @route("/association/member/certificates")
   interface AssocCertificateManagement extends Association.Member.Certificates.CertificateManagement {}
 
-  @tag("Association:Member")
+  @tag("Member/Certificates")
   @route("/certificates")
   interface CertificateVerificationService extends Association.Member.Certificates.CertificateVerificationService {}
 
-  @tag("Association:Member")
+  @tag("Member/Certificates")
   @route("/certificates")
   interface CertificateBulkIssuance extends Association.Member.Certificates.CertificateBulkIssuance {}
 

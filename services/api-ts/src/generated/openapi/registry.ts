@@ -172,8 +172,6 @@ import { updateMembershipApplication } from '../../handlers/association:member/u
 import { deleteMembershipApplication } from '../../handlers/association:member/deleteMembershipApplication';
 import { approveMembershipApplication } from '../../handlers/association:member/approveMembershipApplication';
 import { denyMembershipApplication } from '../../handlers/association:member/denyMembershipApplication';
-import { listMyCertificates } from '../../handlers/association:member/listMyCertificates';
-import { getCertificate } from '../../handlers/association:member/getCertificate';
 import { getComplianceReport } from '../../handlers/association:member/getComplianceReport';
 import { refreshCompliance } from '../../handlers/association:member/refreshCompliance';
 import { getOrgCpdConfig } from '../../handlers/association:member/getOrgCpdConfig';
@@ -255,8 +253,6 @@ import { listMembershipTiers } from '../../handlers/association:member/listMembe
 import { getMembershipTier } from '../../handlers/association:member/getMembershipTier';
 import { updateMembershipTier } from '../../handlers/association:member/updateMembershipTier';
 import { deleteMembershipTier } from '../../handlers/association:member/deleteMembershipTier';
-import { bulkIssueCertificates } from '../../handlers/association:member/bulkIssueCertificates';
-import { verifyCertificatePublic } from '../../handlers/association:member/verifyCertificatePublic';
 import { getCreditCompliance } from '../../handlers/association:member/getCreditCompliance';
 import { listOfficerTermsSummary } from '../../handlers/association:member/listOfficerTermsSummary';
 import { castBallot } from '../../handlers/member/governance/castBallot';
@@ -285,6 +281,10 @@ import { listPositions } from '../../handlers/member/governance/listPositions';
 import { getPosition } from '../../handlers/member/governance/getPosition';
 import { updatePosition } from '../../handlers/member/governance/updatePosition';
 import { deletePosition } from '../../handlers/member/governance/deletePosition';
+import { listMyCertificates } from '../../handlers/member/certificates/listMyCertificates';
+import { getCertificate } from '../../handlers/member/certificates/getCertificate';
+import { bulkIssueCertificates } from '../../handlers/member/certificates/bulkIssueCertificates';
+import { verifyCertificatePublic } from '../../handlers/member/certificates/verifyCertificatePublic';
 import { createCredentialTemplate } from '../../handlers/member/credentials/createCredentialTemplate';
 import { listCredentialTemplates } from '../../handlers/member/credentials/listCredentialTemplates';
 import { getCredentialTemplate } from '../../handlers/member/credentials/getCredentialTemplate';
@@ -643,8 +643,6 @@ export const registry = {
   deleteMembershipApplication,
   approveMembershipApplication,
   denyMembershipApplication,
-  listMyCertificates,
-  getCertificate,
   getComplianceReport,
   refreshCompliance,
   getOrgCpdConfig,
@@ -726,8 +724,6 @@ export const registry = {
   getMembershipTier,
   updateMembershipTier,
   deleteMembershipTier,
-  bulkIssueCertificates,
-  verifyCertificatePublic,
   getCreditCompliance,
   listOfficerTermsSummary,
 
@@ -758,6 +754,12 @@ export const registry = {
   getPosition,
   updatePosition,
   deletePosition,
+
+  // Member/certificates handlers
+  listMyCertificates,
+  getCertificate,
+  bulkIssueCertificates,
+  verifyCertificatePublic,
 
   // Member/credentials handlers
   createCredentialTemplate,

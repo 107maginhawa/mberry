@@ -2,8 +2,8 @@ import {
   pgTable, uuid, varchar, timestamp, integer, index, unique, pgEnum,
 } from 'drizzle-orm/pg-core';
 import { baseEntityFields } from '@/core/database.schema';
-import { persons } from '../../person/repos/person.schema';
-import { cpdActivityTypeEnum } from '../../association:operations/repos/events.schema';
+import { persons } from '@/handlers/person/repos/person.schema';
+import { cpdActivityTypeEnum } from '@/handlers/association:operations/repos/events.schema';
 
 export const certificateStatusEnum = pgEnum('certificate_status', ['issued', 'revoked']);
 
