@@ -616,6 +616,10 @@ ALTER TABLE "professional_license" ALTER COLUMN "created_at" SET DEFAULT now();-
 ALTER TABLE "professional_license" ALTER COLUMN "updated_at" SET DATA TYPE timestamp with time zone;--> statement-breakpoint
 ALTER TABLE "professional_license" ALTER COLUMN "updated_at" SET DEFAULT now();--> statement-breakpoint
 ALTER TABLE "professional_license" ALTER COLUMN "verified_at" SET DATA TYPE timestamp with time zone;--> statement-breakpoint
+-- compliance_standings MV (from 0046_wave2b_compliance_view) depends on credit_entry.updated_at.
+-- Postgres blocks ALTER COLUMN SET DATA TYPE on view-referenced columns, so drop the MV,
+-- run the credit_entry type changes, then recreate the MV verbatim from 0046.
+DROP MATERIALIZED VIEW IF EXISTS compliance_standings;--> statement-breakpoint
 ALTER TABLE "credit_entry" ALTER COLUMN "created_at" SET DATA TYPE timestamp with time zone;--> statement-breakpoint
 ALTER TABLE "credit_entry" ALTER COLUMN "created_at" SET DEFAULT now();--> statement-breakpoint
 ALTER TABLE "credit_entry" ALTER COLUMN "updated_at" SET DATA TYPE timestamp with time zone;--> statement-breakpoint
@@ -623,6 +627,18 @@ ALTER TABLE "credit_entry" ALTER COLUMN "updated_at" SET DEFAULT now();--> state
 ALTER TABLE "credit_entry" ALTER COLUMN "activity_date" SET DATA TYPE timestamp with time zone;--> statement-breakpoint
 ALTER TABLE "credit_entry" ALTER COLUMN "cycle_start" SET DATA TYPE timestamp with time zone;--> statement-breakpoint
 ALTER TABLE "credit_entry" ALTER COLUMN "cycle_end" SET DATA TYPE timestamp with time zone;--> statement-breakpoint
+CREATE MATERIALIZED VIEW IF NOT EXISTS compliance_standings AS
+SELECT ce.person_id,ce.organization_id,COALESCE(SUM(ce.credit_amount),0) AS total_credits,
+COALESCE(SUM(ce.credit_amount) FILTER (WHERE ce.category='General'),0) AS general_credits,
+COALESCE(SUM(ce.credit_amount) FILTER (WHERE ce.category='Major'),0) AS major_credits,
+COALESCE(SUM(ce.credit_amount) FILTER (WHERE ce.category='Self-Directed'),0) AS sdl_credits,
+COUNT(*) AS entry_count,COALESCE(occ.required_credits,60) AS required_credits,
+COALESCE(occ.sdl_cap_percent,40) AS sdl_cap_percent,
+CASE WHEN COALESCE(occ.required_credits,60)=0 THEN 100 ELSE LEAST(ROUND((COALESCE(SUM(ce.credit_amount),0)::numeric/COALESCE(occ.required_credits,60))*100,1),100) END AS compliance_percent,
+CASE WHEN COALESCE(SUM(ce.credit_amount),0)>=COALESCE(occ.required_credits,60) THEN 'compliant' WHEN COALESCE(SUM(ce.credit_amount),0)>=COALESCE(occ.required_credits,60)*0.6 THEN 'at_risk' ELSE 'non_compliant' END AS compliance_status,
+MAX(ce.updated_at) AS last_credit_at
+FROM credit_entry ce LEFT JOIN org_cpd_config occ ON occ.organization_id=ce.organization_id WHERE ce.status='active' GROUP BY ce.person_id,ce.organization_id,occ.required_credits,occ.sdl_cap_percent;--> statement-breakpoint
+CREATE UNIQUE INDEX IF NOT EXISTS idx_compliance_standings_pk ON compliance_standings (person_id,organization_id);--> statement-breakpoint
 ALTER TABLE "directory_profile" ALTER COLUMN "created_at" SET DATA TYPE timestamp with time zone;--> statement-breakpoint
 ALTER TABLE "directory_profile" ALTER COLUMN "created_at" SET DEFAULT now();--> statement-breakpoint
 ALTER TABLE "directory_profile" ALTER COLUMN "updated_at" SET DATA TYPE timestamp with time zone;--> statement-breakpoint
@@ -1042,25 +1058,25 @@ ALTER TABLE "person_privacy_setting" ADD COLUMN IF NOT EXISTS "dues_status_visib
 ALTER TABLE "person_privacy_setting" ADD COLUMN IF NOT EXISTS "ce_compliance_visible" boolean DEFAULT false NOT NULL;--> statement-breakpoint
 ALTER TABLE "association" ADD COLUMN IF NOT EXISTS "cycle_start_month" integer;--> statement-breakpoint
 ALTER TABLE "association" ADD COLUMN IF NOT EXISTS "cycle_start_day" integer;--> statement-breakpoint
-ALTER TABLE "ad_report" ADD CONSTRAINT "ad_report_creative_id_ad_creative_id_fk" FOREIGN KEY ("creative_id") REFERENCES "public"."ad_creative"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
-ALTER TABLE "ad_campaign" ADD CONSTRAINT "ad_campaign_advertiser_id_advertiser_id_fk" FOREIGN KEY ("advertiser_id") REFERENCES "public"."advertiser"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
-ALTER TABLE "ad_creative" ADD CONSTRAINT "ad_creative_campaign_id_ad_campaign_id_fk" FOREIGN KEY ("campaign_id") REFERENCES "public"."ad_campaign"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
-ALTER TABLE "webhook_retry_log" ADD CONSTRAINT "webhook_retry_log_organization_id_organization_id_fk" FOREIGN KEY ("organization_id") REFERENCES "public"."organization"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
-ALTER TABLE "transition_checklist" ADD CONSTRAINT "transition_checklist_officer_term_id_officer_term_id_fk" FOREIGN KEY ("officer_term_id") REFERENCES "public"."officer_term"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
-ALTER TABLE "special_assessment_target" ADD CONSTRAINT "special_assessment_target_assessment_id_special_assessment_id_fk" FOREIGN KEY ("assessment_id") REFERENCES "public"."special_assessment"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
-ALTER TABLE "special_assessment_target" ADD CONSTRAINT "special_assessment_target_person_id_person_id_fk" FOREIGN KEY ("person_id") REFERENCES "public"."person"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
-ALTER TABLE "special_assessment_target" ADD CONSTRAINT "special_assessment_target_invoice_id_dues_invoice_id_fk" FOREIGN KEY ("invoice_id") REFERENCES "public"."dues_invoice"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
-ALTER TABLE "special_assessment" ADD CONSTRAINT "special_assessment_organization_id_organization_id_fk" FOREIGN KEY ("organization_id") REFERENCES "public"."organization"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
-ALTER TABLE "special_assessment" ADD CONSTRAINT "special_assessment_fund_id_dues_fund_id_fk" FOREIGN KEY ("fund_id") REFERENCES "public"."dues_fund"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
-ALTER TABLE "survey_response" ADD CONSTRAINT "survey_response_survey_id_survey_id_fk" FOREIGN KEY ("survey_id") REFERENCES "public"."survey"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
-ALTER TABLE "survey_response" ADD CONSTRAINT "survey_response_responder_id_person_id_fk" FOREIGN KEY ("responder_id") REFERENCES "public"."person"("id") ON DELETE restrict ON UPDATE no action;--> statement-breakpoint
-ALTER TABLE "survey" ADD CONSTRAINT "survey_created_by_person_id_fk" FOREIGN KEY ("created_by") REFERENCES "public"."person"("id") ON DELETE restrict ON UPDATE no action;--> statement-breakpoint
-ALTER TABLE "payment_token" ADD CONSTRAINT "payment_token_person_id_person_id_fk" FOREIGN KEY ("person_id") REFERENCES "public"."person"("id") ON DELETE restrict ON UPDATE no action;--> statement-breakpoint
-ALTER TABLE "payment_token" ADD CONSTRAINT "payment_token_organization_id_organization_id_fk" FOREIGN KEY ("organization_id") REFERENCES "public"."organization"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
-ALTER TABLE "payment_token" ADD CONSTRAINT "payment_token_created_by_officer_person_id_fk" FOREIGN KEY ("created_by_officer") REFERENCES "public"."person"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
-ALTER TABLE "marketplace_listing" ADD CONSTRAINT "marketplace_listing_vendor_id_vendor_id_fk" FOREIGN KEY ("vendor_id") REFERENCES "public"."vendor"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
-ALTER TABLE "marketplace_order" ADD CONSTRAINT "marketplace_order_listing_id_marketplace_listing_id_fk" FOREIGN KEY ("listing_id") REFERENCES "public"."marketplace_listing"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
-ALTER TABLE "marketplace_order" ADD CONSTRAINT "marketplace_order_vendor_id_vendor_id_fk" FOREIGN KEY ("vendor_id") REFERENCES "public"."vendor"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
+DO $$ BEGIN ALTER TABLE "ad_report" ADD CONSTRAINT "ad_report_creative_id_ad_creative_id_fk" FOREIGN KEY ("creative_id") REFERENCES "public"."ad_creative"("id") ON DELETE no action ON UPDATE no action; EXCEPTION WHEN duplicate_object OR duplicate_table THEN null; END $$;--> statement-breakpoint
+DO $$ BEGIN ALTER TABLE "ad_campaign" ADD CONSTRAINT "ad_campaign_advertiser_id_advertiser_id_fk" FOREIGN KEY ("advertiser_id") REFERENCES "public"."advertiser"("id") ON DELETE cascade ON UPDATE no action; EXCEPTION WHEN duplicate_object OR duplicate_table THEN null; END $$;--> statement-breakpoint
+DO $$ BEGIN ALTER TABLE "ad_creative" ADD CONSTRAINT "ad_creative_campaign_id_ad_campaign_id_fk" FOREIGN KEY ("campaign_id") REFERENCES "public"."ad_campaign"("id") ON DELETE cascade ON UPDATE no action; EXCEPTION WHEN duplicate_object OR duplicate_table THEN null; END $$;--> statement-breakpoint
+DO $$ BEGIN ALTER TABLE "webhook_retry_log" ADD CONSTRAINT "webhook_retry_log_organization_id_organization_id_fk" FOREIGN KEY ("organization_id") REFERENCES "public"."organization"("id") ON DELETE no action ON UPDATE no action; EXCEPTION WHEN duplicate_object OR duplicate_table THEN null; END $$;--> statement-breakpoint
+DO $$ BEGIN ALTER TABLE "transition_checklist" ADD CONSTRAINT "transition_checklist_officer_term_id_officer_term_id_fk" FOREIGN KEY ("officer_term_id") REFERENCES "public"."officer_term"("id") ON DELETE no action ON UPDATE no action; EXCEPTION WHEN duplicate_object OR duplicate_table THEN null; END $$;--> statement-breakpoint
+DO $$ BEGIN ALTER TABLE "special_assessment_target" ADD CONSTRAINT "special_assessment_target_assessment_id_special_assessment_id_fk" FOREIGN KEY ("assessment_id") REFERENCES "public"."special_assessment"("id") ON DELETE cascade ON UPDATE no action; EXCEPTION WHEN duplicate_object OR duplicate_table THEN null; END $$;--> statement-breakpoint
+DO $$ BEGIN ALTER TABLE "special_assessment_target" ADD CONSTRAINT "special_assessment_target_person_id_person_id_fk" FOREIGN KEY ("person_id") REFERENCES "public"."person"("id") ON DELETE no action ON UPDATE no action; EXCEPTION WHEN duplicate_object OR duplicate_table THEN null; END $$;--> statement-breakpoint
+DO $$ BEGIN ALTER TABLE "special_assessment_target" ADD CONSTRAINT "special_assessment_target_invoice_id_dues_invoice_id_fk" FOREIGN KEY ("invoice_id") REFERENCES "public"."dues_invoice"("id") ON DELETE no action ON UPDATE no action; EXCEPTION WHEN duplicate_object OR duplicate_table THEN null; END $$;--> statement-breakpoint
+DO $$ BEGIN ALTER TABLE "special_assessment" ADD CONSTRAINT "special_assessment_organization_id_organization_id_fk" FOREIGN KEY ("organization_id") REFERENCES "public"."organization"("id") ON DELETE no action ON UPDATE no action; EXCEPTION WHEN duplicate_object OR duplicate_table THEN null; END $$;--> statement-breakpoint
+DO $$ BEGIN ALTER TABLE "special_assessment" ADD CONSTRAINT "special_assessment_fund_id_dues_fund_id_fk" FOREIGN KEY ("fund_id") REFERENCES "public"."dues_fund"("id") ON DELETE no action ON UPDATE no action; EXCEPTION WHEN duplicate_object OR duplicate_table THEN null; END $$;--> statement-breakpoint
+DO $$ BEGIN ALTER TABLE "survey_response" ADD CONSTRAINT "survey_response_survey_id_survey_id_fk" FOREIGN KEY ("survey_id") REFERENCES "public"."survey"("id") ON DELETE cascade ON UPDATE no action; EXCEPTION WHEN duplicate_object OR duplicate_table THEN null; END $$;--> statement-breakpoint
+DO $$ BEGIN ALTER TABLE "survey_response" ADD CONSTRAINT "survey_response_responder_id_person_id_fk" FOREIGN KEY ("responder_id") REFERENCES "public"."person"("id") ON DELETE restrict ON UPDATE no action; EXCEPTION WHEN duplicate_object OR duplicate_table THEN null; END $$;--> statement-breakpoint
+DO $$ BEGIN ALTER TABLE "survey" ADD CONSTRAINT "survey_created_by_person_id_fk" FOREIGN KEY ("created_by") REFERENCES "public"."person"("id") ON DELETE restrict ON UPDATE no action; EXCEPTION WHEN duplicate_object OR duplicate_table THEN null; END $$;--> statement-breakpoint
+DO $$ BEGIN ALTER TABLE "payment_token" ADD CONSTRAINT "payment_token_person_id_person_id_fk" FOREIGN KEY ("person_id") REFERENCES "public"."person"("id") ON DELETE restrict ON UPDATE no action; EXCEPTION WHEN duplicate_object OR duplicate_table THEN null; END $$;--> statement-breakpoint
+DO $$ BEGIN ALTER TABLE "payment_token" ADD CONSTRAINT "payment_token_organization_id_organization_id_fk" FOREIGN KEY ("organization_id") REFERENCES "public"."organization"("id") ON DELETE cascade ON UPDATE no action; EXCEPTION WHEN duplicate_object OR duplicate_table THEN null; END $$;--> statement-breakpoint
+DO $$ BEGIN ALTER TABLE "payment_token" ADD CONSTRAINT "payment_token_created_by_officer_person_id_fk" FOREIGN KEY ("created_by_officer") REFERENCES "public"."person"("id") ON DELETE no action ON UPDATE no action; EXCEPTION WHEN duplicate_object OR duplicate_table THEN null; END $$;--> statement-breakpoint
+DO $$ BEGIN ALTER TABLE "marketplace_listing" ADD CONSTRAINT "marketplace_listing_vendor_id_vendor_id_fk" FOREIGN KEY ("vendor_id") REFERENCES "public"."vendor"("id") ON DELETE cascade ON UPDATE no action; EXCEPTION WHEN duplicate_object OR duplicate_table THEN null; END $$;--> statement-breakpoint
+DO $$ BEGIN ALTER TABLE "marketplace_order" ADD CONSTRAINT "marketplace_order_listing_id_marketplace_listing_id_fk" FOREIGN KEY ("listing_id") REFERENCES "public"."marketplace_listing"("id") ON DELETE no action ON UPDATE no action; EXCEPTION WHEN duplicate_object OR duplicate_table THEN null; END $$;--> statement-breakpoint
+DO $$ BEGIN ALTER TABLE "marketplace_order" ADD CONSTRAINT "marketplace_order_vendor_id_vendor_id_fk" FOREIGN KEY ("vendor_id") REFERENCES "public"."vendor"("id") ON DELETE no action ON UPDATE no action; EXCEPTION WHEN duplicate_object OR duplicate_table THEN null; END $$;--> statement-breakpoint
 CREATE INDEX IF NOT EXISTS "ad_reports_creative_idx" ON "ad_report" USING btree ("creative_id");--> statement-breakpoint
 CREATE INDEX IF NOT EXISTS "advertisers_org_idx" ON "advertiser" USING btree ("organization_id");--> statement-breakpoint
 CREATE INDEX IF NOT EXISTS "campaigns_org_idx" ON "ad_campaign" USING btree ("organization_id");--> statement-breakpoint
@@ -1144,5 +1160,5 @@ CREATE INDEX IF NOT EXISTS "idx_event_slug" ON "event" USING btree ("event_slug"
 CREATE INDEX IF NOT EXISTS "certificate_status_idx" ON "certificate" USING btree ("status");--> statement-breakpoint
 ALTER TABLE "membership" DROP COLUMN "terminated_at";--> statement-breakpoint
 ALTER TABLE "membership" DROP COLUMN "termination_reason";--> statement-breakpoint
-ALTER TABLE "credit_entry" ADD CONSTRAINT "uq_credit_source_person" UNIQUE("source_type","source_id","person_id");--> statement-breakpoint
-ALTER TABLE "event" ADD CONSTRAINT "event_event_slug_unique" UNIQUE("event_slug");
+DO $$ BEGIN ALTER TABLE "credit_entry" ADD CONSTRAINT "uq_credit_source_person" UNIQUE("source_type","source_id","person_id"); EXCEPTION WHEN duplicate_object OR duplicate_table THEN null; END $$;--> statement-breakpoint
+DO $$ BEGIN ALTER TABLE "event" ADD CONSTRAINT "event_event_slug_unique" UNIQUE("event_slug"); EXCEPTION WHEN duplicate_object OR duplicate_table THEN null; END $$;

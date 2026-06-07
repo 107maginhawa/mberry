@@ -1,5 +1,5 @@
-CREATE TYPE "public"."breach_status" AS ENUM('reported', 'investigating', 'notified', 'resolved');--> statement-breakpoint
-CREATE TABLE "breach_incident" (
+DO $$ BEGIN CREATE TYPE "public"."breach_status" AS ENUM('reported', 'investigating', 'notified', 'resolved'); EXCEPTION WHEN duplicate_object THEN NULL; END $$;--> statement-breakpoint
+CREATE TABLE IF NOT EXISTS "breach_incident" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
 	"organization_id" uuid,
 	"reported_by" uuid NOT NULL,
@@ -18,5 +18,5 @@ CREATE TABLE "breach_incident" (
 	"updated_by" uuid NOT NULL
 );
 --> statement-breakpoint
-DROP INDEX "idx_event_parent";--> statement-breakpoint
-ALTER TABLE "event" DROP COLUMN "parent_event_id";
+DROP INDEX IF EXISTS "idx_event_parent";--> statement-breakpoint
+ALTER TABLE "event" DROP COLUMN IF EXISTS "parent_event_id";
