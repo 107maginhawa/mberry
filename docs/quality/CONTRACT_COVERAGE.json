@@ -1,26 +1,26 @@
 {
-  "generatedAt": "2026-06-07T08:05:19.671Z",
+  "generatedAt": "2026-06-07T09:50:12.240Z",
   "totals": {
     "endpoints": 454,
-    "hurlFiles": 134,
-    "coveredCount": 366,
-    "uncoveredCount": 88,
-    "coveragePercent": 81
+    "hurlFiles": 140,
+    "coveredCount": 372,
+    "uncoveredCount": 82,
+    "coveragePercent": 82
   },
   "uncoveredByTag": [
     {
       "tag": "Association:Member",
-      "uncoveredCount": 82,
-      "totalCount": 93,
-      "coveredCount": 11,
-      "coveragePercent": 12
+      "uncoveredCount": 74,
+      "totalCount": 83,
+      "coveredCount": 9,
+      "coveragePercent": 11
     },
     {
-      "tag": "Member/Certificates",
-      "uncoveredCount": 3,
-      "totalCount": 4,
-      "coveredCount": 1,
-      "coveragePercent": 25
+      "tag": "Member/Credits",
+      "uncoveredCount": 4,
+      "totalCount": 10,
+      "coveredCount": 6,
+      "coveragePercent": 60
     },
     {
       "tag": "Member/Credentials",
@@ -28,6 +28,13 @@
       "totalCount": 21,
       "coveredCount": 19,
       "coveragePercent": 90
+    },
+    {
+      "tag": "Member/Certificates",
+      "uncoveredCount": 1,
+      "totalCount": 4,
+      "coveredCount": 3,
+      "coveragePercent": 75
     },
     {
       "tag": "Member/Governance",
@@ -107,26 +114,14 @@
     {
       "method": "GET",
       "path": "/association/member/compliance/{organizationId}",
-      "tag": "Association:Member",
+      "tag": "Member/Credits",
       "operationId": "getComplianceReport"
     },
     {
       "method": "POST",
       "path": "/association/member/compliance/{organizationId}/refresh",
-      "tag": "Association:Member",
+      "tag": "Member/Credits",
       "operationId": "refreshCompliance"
-    },
-    {
-      "method": "GET",
-      "path": "/association/member/cpd-config/{organizationId}",
-      "tag": "Association:Member",
-      "operationId": "getOrgCpdConfig"
-    },
-    {
-      "method": "PATCH",
-      "path": "/association/member/cpd-config/{organizationId}",
-      "tag": "Association:Member",
-      "operationId": "updateOrgCpdConfig"
     },
     {
       "method": "POST",
@@ -143,26 +138,14 @@
     {
       "method": "GET",
       "path": "/association/member/credits",
-      "tag": "Association:Member",
+      "tag": "Member/Credits",
       "operationId": "listMemberCreditsForPeer"
     },
     {
       "method": "POST",
       "path": "/association/member/credits/adjust",
-      "tag": "Association:Member",
+      "tag": "Member/Credits",
       "operationId": "adjustCreditEntry"
-    },
-    {
-      "method": "POST",
-      "path": "/association/member/credits/manual",
-      "tag": "Association:Member",
-      "operationId": "awardManualCredit"
-    },
-    {
-      "method": "POST",
-      "path": "/association/member/credits/void-event",
-      "tag": "Association:Member",
-      "operationId": "voidCreditEntry"
     },
     {
       "method": "GET",
@@ -553,18 +536,6 @@
       "path": "/association/member/tiers/{tierId}",
       "tag": "Association:Member",
       "operationId": "deleteMembershipTier"
-    },
-    {
-      "method": "POST",
-      "path": "/certificates/bulk-issue",
-      "tag": "Member/Certificates",
-      "operationId": "bulkIssueCertificates"
-    },
-    {
-      "method": "GET",
-      "path": "/certificates/verify/{certificateNumber}",
-      "tag": "Member/Certificates",
-      "operationId": "verifyCertificatePublic"
     }
   ]
 }
