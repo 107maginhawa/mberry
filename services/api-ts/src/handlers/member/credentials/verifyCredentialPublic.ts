@@ -1,28 +1,27 @@
 import type { ValidatedContext } from '@/types/app';
 import type { DatabaseInstance } from '@/core/database';
-import type { VerifyDigitalCredentialAuthenticatedBody } from '@/generated/openapi/validators';
-import { UnauthorizedError } from '@/core/errors';
-import { DigitalCredentialRepository } from './repos/credentials.repo';
-import { verifyCredentialToken } from './utils/credential-token';
+import type { VerifyCredentialPublicBody } from '@/generated/openapi/validators';
+import { DigitalCredentialRepository } from '@/handlers/association:member/repos/credentials.repo';
+import { verifyCredentialToken } from '@/handlers/association:member/utils/credential-token';
 
 /**
- * verifyDigitalCredentialAuthenticated
+ * verifyCredentialPublic
  *
- * Path: POST /association/member/credentials/verify
- * OperationId: verifyDigitalCredentialAuthenticated
+ * Path: POST /association/member/credentials/public-verify
+ * OperationId: verifyCredentialPublic
  *
- * Authenticated version of credential verification. Same logic as public
- * but requires a session.
+ * PUBLIC endpoint -- NO auth required.
+ * Takes an HMAC token, verifies signature, returns credential status + member info.
  */
-export async function verifyDigitalCredentialAuthenticated(
-  ctx: ValidatedContext<VerifyDigitalCredentialAuthenticatedBody, never, never>
+export async function verifyCredentialPublic(
+  ctx: ValidatedContext<VerifyCredentialPublicBody, never, never>
 ): Promise<Response> {
-  const session = ctx.get('session');
-  if (!session) throw new UnauthorizedError();
+  // NO auth check -- this is a public endpoint
 
   const body = ctx.req.valid('json');
   const secret = process.env['CREDENTIAL_VERIFY_SECRET'] || 'dev-credential-verify-secret';
 
+  // Verify HMAC signature
   const payload = verifyCredentialToken(body.token, secret);
   if (!payload) {
     return ctx.json({
@@ -42,6 +41,7 @@ export async function verifyDigitalCredentialAuthenticated(
     }, 200);
   }
 
+  // Determine verification result based on credential status
   let result: 'valid' | 'expired' | 'revoked' | 'notFound';
   if (credential.status === 'revoked') {
     result = 'revoked';
@@ -50,6 +50,7 @@ export async function verifyDigitalCredentialAuthenticated(
   } else if (credential.status === 'active') {
     result = 'valid';
   } else {
+    // suspended or other
     result = 'revoked';
   }
 

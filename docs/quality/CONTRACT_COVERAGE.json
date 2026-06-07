@@ -1,19 +1,33 @@
 {
-  "generatedAt": "2026-06-07T03:04:56.330Z",
+  "generatedAt": "2026-06-07T05:13:28.306Z",
   "totals": {
     "endpoints": 454,
-    "hurlFiles": 123,
-    "coveredCount": 343,
-    "uncoveredCount": 111,
-    "coveragePercent": 76
+    "hurlFiles": 129,
+    "coveredCount": 359,
+    "uncoveredCount": 95,
+    "coveragePercent": 79
   },
   "uncoveredByTag": [
     {
       "tag": "Association:Member",
-      "uncoveredCount": 111,
-      "totalCount": 125,
-      "coveredCount": 14,
-      "coveragePercent": 11
+      "uncoveredCount": 92,
+      "totalCount": 104,
+      "coveredCount": 12,
+      "coveragePercent": 12
+    },
+    {
+      "tag": "Member/Credentials",
+      "uncoveredCount": 2,
+      "totalCount": 21,
+      "coveredCount": 19,
+      "coveragePercent": 90
+    },
+    {
+      "tag": "Member/Governance",
+      "uncoveredCount": 1,
+      "totalCount": 26,
+      "coveredCount": 25,
+      "coveragePercent": 96
     }
   ],
   "uncoveredEndpoints": [
@@ -109,75 +123,15 @@
     },
     {
       "method": "POST",
-      "path": "/association/member/credential-templates",
-      "tag": "Association:Member",
-      "operationId": "createCredentialTemplate"
-    },
-    {
-      "method": "GET",
-      "path": "/association/member/credential-templates/{templateId}",
-      "tag": "Association:Member",
-      "operationId": "getCredentialTemplate"
-    },
-    {
-      "method": "PATCH",
-      "path": "/association/member/credential-templates/{templateId}",
-      "tag": "Association:Member",
-      "operationId": "updateCredentialTemplate"
-    },
-    {
-      "method": "DELETE",
-      "path": "/association/member/credential-templates/{templateId}",
-      "tag": "Association:Member",
-      "operationId": "deleteCredentialTemplate"
-    },
-    {
-      "method": "POST",
-      "path": "/association/member/credentials/issue",
-      "tag": "Association:Member",
-      "operationId": "issueDigitalCredential"
-    },
-    {
-      "method": "GET",
-      "path": "/association/member/credentials/lookup/{credentialNumber}",
-      "tag": "Association:Member",
-      "operationId": "lookupCredentialPublic"
-    },
-    {
-      "method": "POST",
-      "path": "/association/member/credentials/public-verify",
-      "tag": "Association:Member",
-      "operationId": "verifyCredentialPublic"
-    },
-    {
-      "method": "POST",
       "path": "/association/member/credentials/verify",
-      "tag": "Association:Member",
+      "tag": "Member/Credentials",
       "operationId": "verifyDigitalCredentialAuthenticated"
     },
     {
-      "method": "GET",
-      "path": "/association/member/credentials/{credentialId}",
-      "tag": "Association:Member",
-      "operationId": "getDigitalCredential"
-    },
-    {
       "method": "PATCH",
       "path": "/association/member/credentials/{credentialId}",
-      "tag": "Association:Member",
+      "tag": "Member/Credentials",
       "operationId": "updateDigitalCredential"
-    },
-    {
-      "method": "DELETE",
-      "path": "/association/member/credentials/{credentialId}",
-      "tag": "Association:Member",
-      "operationId": "deleteDigitalCredential"
-    },
-    {
-      "method": "POST",
-      "path": "/association/member/credentials/{credentialId}/revoke",
-      "tag": "Association:Member",
-      "operationId": "revokeDigitalCredential"
     },
     {
       "method": "GET",
@@ -421,6 +375,12 @@
     },
     {
       "method": "POST",
+      "path": "/association/member/elections/{electionId}/certify",
+      "tag": "Member/Governance",
+      "operationId": "certifyElection"
+    },
+    {
+      "method": "POST",
       "path": "/association/member/institutional-memberships",
       "tag": "Association:Member",
       "operationId": "createInstitutionalMembership"
@@ -466,48 +426,6 @@
       "path": "/association/member/institutional-memberships/{institutionalMembershipId}/seats/{seatAllocationId}/revoke",
       "tag": "Association:Member",
       "operationId": "revokeSeat"
-    },
-    {
-      "method": "GET",
-      "path": "/association/member/license-renewal-alerts",
-      "tag": "Association:Member",
-      "operationId": "listLicenseRenewalAlerts"
-    },
-    {
-      "method": "POST",
-      "path": "/association/member/license-renewal-alerts/{alertId}/acknowledge",
-      "tag": "Association:Member",
-      "operationId": "acknowledgeLicenseRenewalAlert"
-    },
-    {
-      "method": "POST",
-      "path": "/association/member/licenses",
-      "tag": "Association:Member",
-      "operationId": "createProfessionalLicense"
-    },
-    {
-      "method": "GET",
-      "path": "/association/member/licenses",
-      "tag": "Association:Member",
-      "operationId": "listProfessionalLicenses"
-    },
-    {
-      "method": "GET",
-      "path": "/association/member/licenses/{licenseId}",
-      "tag": "Association:Member",
-      "operationId": "getProfessionalLicense"
-    },
-    {
-      "method": "PATCH",
-      "path": "/association/member/licenses/{licenseId}",
-      "tag": "Association:Member",
-      "operationId": "updateProfessionalLicense"
-    },
-    {
-      "method": "DELETE",
-      "path": "/association/member/licenses/{licenseId}",
-      "tag": "Association:Member",
-      "operationId": "deleteProfessionalLicense"
     },
     {
       "method": "POST",

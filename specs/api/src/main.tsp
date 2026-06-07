@@ -419,27 +419,27 @@ namespace MonobaseAPI {
   // Association Domain — Credentials
   // =========================================================================
 
-  @tag("Association:Member")
+  @tag("Member/Credentials")
   @route("/association/member/credential-templates")
   interface AssocCredentialTemplateManagement extends Association.Member.Credentials.CredentialTemplateManagement {}
 
-  @tag("Association:Member")
+  @tag("Member/Credentials")
   @route("/association/member/credentials")
   interface AssocDigitalCredentialManagement extends Association.Member.Credentials.DigitalCredentialManagement {}
 
-  @tag("Association:Member")
+  @tag("Member/Credentials")
   @route("/association/member/credentials/public-verify")
   interface AssocCredentialVerificationService extends Association.Member.Credentials.CredentialVerificationService {}
 
-  @tag("Association:Member")
+  @tag("Member/Credentials")
   @route("/association/member/credentials/lookup")
   interface AssocCredentialLookupService extends Association.Member.Credentials.CredentialLookupService {}
 
-  @tag("Association:Member")
+  @tag("Member/Credentials")
   @route("/association/member/licenses")
   interface AssocProfessionalLicenseManagement extends Association.Member.Credentials.ProfessionalLicenseManagement {}
 
-  @tag("Association:Member")
+  @tag("Member/Credentials")
   @route("/association/member/license-renewal-alerts")
   interface AssocLicenseRenewalAlertService extends Association.Member.Credentials.LicenseRenewalAlertService {}
 

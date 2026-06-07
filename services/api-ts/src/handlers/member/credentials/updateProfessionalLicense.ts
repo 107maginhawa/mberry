@@ -1,9 +1,9 @@
 import type { ValidatedContext } from '@/types/app';
-import type { ProfessionalLicense } from './repos/credentials.schema';
+import type { ProfessionalLicense } from '@/handlers/association:member/repos/credentials.schema';
 import type { DatabaseInstance } from '@/core/database';
 import { NotFoundError } from '@/core/errors';
 import type { UpdateProfessionalLicenseBody, UpdateProfessionalLicenseParams } from '@/generated/openapi/validators';
-import { ProfessionalLicenseRepository } from './repos/credits.repo';
+import { ProfessionalLicenseRepository } from '@/handlers/association:member/repos/credits.repo';
 
 /**
  * updateProfessionalLicense

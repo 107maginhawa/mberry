@@ -29,14 +29,14 @@ import {
 
 describe('createProfessionalLicense', () => {
   test('returns 401 without user', async () => {
-    const { createProfessionalLicense } = await import('./createProfessionalLicense');
+    const { createProfessionalLicense } = await import('@/handlers/member/credentials/createProfessionalLicense');
     const ctx = makeCtx({ user: null });
     const response = await createProfessionalLicense(ctx);
     expect(response.status).toBe(401);
   });
 
   test('returns 403 without organizationId', async () => {
-    const { createProfessionalLicense } = await import('./createProfessionalLicense');
+    const { createProfessionalLicense } = await import('@/handlers/member/credentials/createProfessionalLicense');
     const ctx = makeCtx({ organizationId: null });
     const response = await createProfessionalLicense(ctx);
     expect(response.status).toBe(403);
@@ -45,14 +45,14 @@ describe('createProfessionalLicense', () => {
 
 describe('getProfessionalLicense', () => {
   test('returns 401 without user', async () => {
-    const { getProfessionalLicense } = await import('./getProfessionalLicense');
+    const { getProfessionalLicense } = await import('@/handlers/member/credentials/getProfessionalLicense');
     const ctx = makeCtx({ user: null, _params: { licenseId: 'lic-1' } });
     const response = await getProfessionalLicense(ctx);
     expect(response.status).toBe(401);
   });
 
   test('returns 403 without organizationId', async () => {
-    const { getProfessionalLicense } = await import('./getProfessionalLicense');
+    const { getProfessionalLicense } = await import('@/handlers/member/credentials/getProfessionalLicense');
     const ctx = makeCtx({ organizationId: null, _params: { licenseId: 'lic-1' } });
     const response = await getProfessionalLicense(ctx);
     expect(response.status).toBe(403);
@@ -61,14 +61,14 @@ describe('getProfessionalLicense', () => {
 
 describe('listProfessionalLicenses', () => {
   test('returns 401 without user', async () => {
-    const { listProfessionalLicenses } = await import('./listProfessionalLicenses');
+    const { listProfessionalLicenses } = await import('@/handlers/member/credentials/listProfessionalLicenses');
     const ctx = makeCtx({ user: null });
     const response = await listProfessionalLicenses(ctx);
     expect(response.status).toBe(401);
   });
 
   test('returns 403 without organizationId', async () => {
-    const { listProfessionalLicenses } = await import('./listProfessionalLicenses');
+    const { listProfessionalLicenses } = await import('@/handlers/member/credentials/listProfessionalLicenses');
     const ctx = makeCtx({ organizationId: null });
     const response = await listProfessionalLicenses(ctx);
     expect(response.status).toBe(403);
@@ -77,14 +77,14 @@ describe('listProfessionalLicenses', () => {
 
 describe('updateProfessionalLicense', () => {
   test('returns 401 without user', async () => {
-    const { updateProfessionalLicense } = await import('./updateProfessionalLicense');
+    const { updateProfessionalLicense } = await import('@/handlers/member/credentials/updateProfessionalLicense');
     const ctx = makeCtx({ user: null, _params: { licenseId: 'lic-1' } });
     const response = await updateProfessionalLicense(ctx);
     expect(response.status).toBe(401);
   });
 
   test('returns 403 without organizationId', async () => {
-    const { updateProfessionalLicense } = await import('./updateProfessionalLicense');
+    const { updateProfessionalLicense } = await import('@/handlers/member/credentials/updateProfessionalLicense');
     const ctx = makeCtx({ organizationId: null, _params: { licenseId: 'lic-1' } });
     const response = await updateProfessionalLicense(ctx);
     expect(response.status).toBe(403);
@@ -93,14 +93,14 @@ describe('updateProfessionalLicense', () => {
 
 describe('deleteProfessionalLicense', () => {
   test('returns 401 without user', async () => {
-    const { deleteProfessionalLicense } = await import('./deleteProfessionalLicense');
+    const { deleteProfessionalLicense } = await import('@/handlers/member/credentials/deleteProfessionalLicense');
     const ctx = makeCtx({ user: null, _params: { licenseId: 'lic-1' } });
     const response = await deleteProfessionalLicense(ctx);
     expect(response.status).toBe(401);
   });
 
   test('returns 403 without organizationId', async () => {
-    const { deleteProfessionalLicense } = await import('./deleteProfessionalLicense');
+    const { deleteProfessionalLicense } = await import('@/handlers/member/credentials/deleteProfessionalLicense');
     const ctx = makeCtx({ organizationId: null, _params: { licenseId: 'lic-1' } });
     const response = await deleteProfessionalLicense(ctx);
     expect(response.status).toBe(403);
@@ -109,14 +109,14 @@ describe('deleteProfessionalLicense', () => {
 
 describe('listLicenseRenewalAlerts', () => {
   test('returns 401 without user', async () => {
-    const { listLicenseRenewalAlerts } = await import('./listLicenseRenewalAlerts');
+    const { listLicenseRenewalAlerts } = await import('@/handlers/member/credentials/listLicenseRenewalAlerts');
     const ctx = makeCtx({ user: null });
     const response = await listLicenseRenewalAlerts(ctx);
     expect(response.status).toBe(401);
   });
 
   test('returns 403 without organizationId', async () => {
-    const { listLicenseRenewalAlerts } = await import('./listLicenseRenewalAlerts');
+    const { listLicenseRenewalAlerts } = await import('@/handlers/member/credentials/listLicenseRenewalAlerts');
     const ctx = makeCtx({ organizationId: null });
     const response = await listLicenseRenewalAlerts(ctx);
     expect(response.status).toBe(403);
@@ -125,14 +125,14 @@ describe('listLicenseRenewalAlerts', () => {
 
 describe('acknowledgeLicenseRenewalAlert', () => {
   test('returns 401 without user', async () => {
-    const { acknowledgeLicenseRenewalAlert } = await import('./acknowledgeLicenseRenewalAlert');
+    const { acknowledgeLicenseRenewalAlert } = await import('@/handlers/member/credentials/acknowledgeLicenseRenewalAlert');
     const ctx = makeCtx({ user: null, _params: { alertId: 'alert-1' } });
     const response = await acknowledgeLicenseRenewalAlert(ctx);
     expect(response.status).toBe(401);
   });
 
   test('returns 403 without organizationId', async () => {
-    const { acknowledgeLicenseRenewalAlert } = await import('./acknowledgeLicenseRenewalAlert');
+    const { acknowledgeLicenseRenewalAlert } = await import('@/handlers/member/credentials/acknowledgeLicenseRenewalAlert');
     const ctx = makeCtx({ organizationId: null, _params: { alertId: 'alert-1' } });
     const response = await acknowledgeLicenseRenewalAlert(ctx);
     expect(response.status).toBe(403);

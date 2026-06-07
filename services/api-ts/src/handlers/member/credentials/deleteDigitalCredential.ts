@@ -2,7 +2,7 @@ import type { ValidatedContext } from '@/types/app';
 import type { DatabaseInstance } from '@/core/database';
 import type { DeleteDigitalCredentialParams } from '@/generated/openapi/validators';
 import { UnauthorizedError, NotFoundError } from '@/core/errors';
-import { DigitalCredentialRepository } from './repos/credentials.repo';
+import { DigitalCredentialRepository } from '@/handlers/association:member/repos/credentials.repo';
 
 /**
  * deleteDigitalCredential

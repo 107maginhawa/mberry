@@ -1,16 +1,16 @@
 import type { ValidatedContext } from '@/types/app';
 import type { DatabaseInstance } from '@/core/database';
-import type { ListProfessionalLicensesQuery } from '@/generated/openapi/validators';
-import { ProfessionalLicenseRepository } from './repos/credits.repo';
+import type { ListLicenseRenewalAlertsQuery } from '@/generated/openapi/validators';
+import { LicenseRenewalAlertRepository } from '@/handlers/association:member/repos/credits.repo';
 
 /**
- * listProfessionalLicenses
+ * listLicenseRenewalAlerts
  *
- * Path: GET /association/member/licenses
- * OperationId: listProfessionalLicenses
+ * Path: GET /association/member/license-renewal-alerts
+ * OperationId: listLicenseRenewalAlerts
  */
-export async function listProfessionalLicenses(
-  ctx: ValidatedContext<never, ListProfessionalLicensesQuery, never>
+export async function listLicenseRenewalAlerts(
+  ctx: ValidatedContext<never, ListLicenseRenewalAlertsQuery, never>
 ): Promise<Response> {
   const user = ctx.get('user');
   if (!user) return ctx.json({ error: 'Unauthorized' }, 401);
@@ -24,15 +24,14 @@ export async function listProfessionalLicenses(
 
   const db = ctx.get('database') as DatabaseInstance;
   const logger = ctx.get('logger');
-  const repo = new ProfessionalLicenseRepository(db, logger);
+  const repo = new LicenseRenewalAlertRepository(db, logger);
 
   const result = await repo.findManyWithPagination(
     {
       organizationId: orgId,
       personId: query.personId,
-      licenseType: query.licenseType,
+      licenseId: query.licenseId,
       status: query.status,
-      jurisdiction: query.jurisdiction,
     },
     { pagination: { offset, limit } },
   );

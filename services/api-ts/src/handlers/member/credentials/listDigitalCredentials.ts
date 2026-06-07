@@ -1,17 +1,17 @@
 import type { ValidatedContext } from '@/types/app';
 import type { DatabaseInstance } from '@/core/database';
-import type { ListCredentialTemplatesQuery } from '@/generated/openapi/validators';
+import type { ListDigitalCredentialsQuery } from '@/generated/openapi/validators';
 import { UnauthorizedError } from '@/core/errors';
-import { CredentialTemplateRepository } from './repos/credentials.repo';
+import { DigitalCredentialRepository } from '@/handlers/association:member/repos/credentials.repo';
 
 /**
- * listCredentialTemplates
+ * listDigitalCredentials
  *
- * Path: GET /association/member/credential-templates
- * OperationId: listCredentialTemplates
+ * Path: GET /association/member/credentials
+ * OperationId: listDigitalCredentials
  */
-export async function listCredentialTemplates(
-  ctx: ValidatedContext<never, ListCredentialTemplatesQuery, never>
+export async function listDigitalCredentials(
+  ctx: ValidatedContext<never, ListDigitalCredentialsQuery, never>
 ): Promise<Response> {
   const session = ctx.get('session');
   if (!session) throw new UnauthorizedError();
@@ -22,12 +22,13 @@ export async function listCredentialTemplates(
   const limit = Number(query.limit ?? 20);
 
   const db = ctx.get('database') as DatabaseInstance;
-  const repo = new CredentialTemplateRepository(db, ctx.get('logger'));
+  const repo = new DigitalCredentialRepository(db, ctx.get('logger'));
 
   const result = await repo.findManyWithPagination(
     {
       organizationId: orgId,
-      type: query.type,
+      personId: query.personId,
+      templateId: query.templateId,
       status: query.status,
       q: query.q,
     },

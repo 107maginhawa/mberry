@@ -1,27 +1,28 @@
 import type { ValidatedContext } from '@/types/app';
 import type { DatabaseInstance } from '@/core/database';
-import type { VerifyCredentialPublicBody } from '@/generated/openapi/validators';
-import { DigitalCredentialRepository } from './repos/credentials.repo';
-import { verifyCredentialToken } from './utils/credential-token';
+import type { VerifyDigitalCredentialAuthenticatedBody } from '@/generated/openapi/validators';
+import { UnauthorizedError } from '@/core/errors';
+import { DigitalCredentialRepository } from '@/handlers/association:member/repos/credentials.repo';
+import { verifyCredentialToken } from '@/handlers/association:member/utils/credential-token';
 
 /**
- * verifyCredentialPublic
+ * verifyDigitalCredentialAuthenticated
  *
- * Path: POST /association/member/credentials/public-verify
- * OperationId: verifyCredentialPublic
+ * Path: POST /association/member/credentials/verify
+ * OperationId: verifyDigitalCredentialAuthenticated
  *
- * PUBLIC endpoint -- NO auth required.
- * Takes an HMAC token, verifies signature, returns credential status + member info.
+ * Authenticated version of credential verification. Same logic as public
+ * but requires a session.
  */
-export async function verifyCredentialPublic(
-  ctx: ValidatedContext<VerifyCredentialPublicBody, never, never>
+export async function verifyDigitalCredentialAuthenticated(
+  ctx: ValidatedContext<VerifyDigitalCredentialAuthenticatedBody, never, never>
 ): Promise<Response> {
-  // NO auth check -- this is a public endpoint
+  const session = ctx.get('session');
+  if (!session) throw new UnauthorizedError();
 
   const body = ctx.req.valid('json');
   const secret = process.env['CREDENTIAL_VERIFY_SECRET'] || 'dev-credential-verify-secret';
 
-  // Verify HMAC signature
   const payload = verifyCredentialToken(body.token, secret);
   if (!payload) {
     return ctx.json({
@@ -41,7 +42,6 @@ export async function verifyCredentialPublic(
     }, 200);
   }
 
-  // Determine verification result based on credential status
   let result: 'valid' | 'expired' | 'revoked' | 'notFound';
   if (credential.status === 'revoked') {
     result = 'revoked';
@@ -50,7 +50,6 @@ export async function verifyCredentialPublic(
   } else if (credential.status === 'active') {
     result = 'valid';
   } else {
-    // suspended or other
     result = 'revoked';
   }
 

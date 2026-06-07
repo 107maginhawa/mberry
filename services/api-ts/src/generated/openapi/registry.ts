@@ -178,20 +178,6 @@ import { getComplianceReport } from '../../handlers/association:member/getCompli
 import { refreshCompliance } from '../../handlers/association:member/refreshCompliance';
 import { getOrgCpdConfig } from '../../handlers/association:member/getOrgCpdConfig';
 import { updateOrgCpdConfig } from '../../handlers/association:member/updateOrgCpdConfig';
-import { createCredentialTemplate } from '../../handlers/association:member/createCredentialTemplate';
-import { listCredentialTemplates } from '../../handlers/association:member/listCredentialTemplates';
-import { getCredentialTemplate } from '../../handlers/association:member/getCredentialTemplate';
-import { updateCredentialTemplate } from '../../handlers/association:member/updateCredentialTemplate';
-import { deleteCredentialTemplate } from '../../handlers/association:member/deleteCredentialTemplate';
-import { listDigitalCredentials } from '../../handlers/association:member/listDigitalCredentials';
-import { issueDigitalCredential } from '../../handlers/association:member/issueDigitalCredential';
-import { lookupCredentialPublic } from '../../handlers/association:member/lookupCredentialPublic';
-import { verifyCredentialPublic } from '../../handlers/association:member/verifyCredentialPublic';
-import { verifyDigitalCredentialAuthenticated } from '../../handlers/association:member/verifyDigitalCredentialAuthenticated';
-import { getDigitalCredential } from '../../handlers/association:member/getDigitalCredential';
-import { updateDigitalCredential } from '../../handlers/association:member/updateDigitalCredential';
-import { deleteDigitalCredential } from '../../handlers/association:member/deleteDigitalCredential';
-import { revokeDigitalCredential } from '../../handlers/association:member/revokeDigitalCredential';
 import { listMemberCreditsForPeer } from '../../handlers/association:member/listMemberCreditsForPeer';
 import { adjustCreditEntry } from '../../handlers/association:member/adjustCreditEntry';
 import { awardManualCredit } from '../../handlers/association:member/awardManualCredit';
@@ -246,13 +232,6 @@ import { deleteInstitutionalMembership } from '../../handlers/association:member
 import { allocateSeat } from '../../handlers/association:member/allocateSeat';
 import { listSeatAllocations } from '../../handlers/association:member/listSeatAllocations';
 import { revokeSeat } from '../../handlers/association:member/revokeSeat';
-import { listLicenseRenewalAlerts } from '../../handlers/association:member/listLicenseRenewalAlerts';
-import { acknowledgeLicenseRenewalAlert } from '../../handlers/association:member/acknowledgeLicenseRenewalAlert';
-import { createProfessionalLicense } from '../../handlers/association:member/createProfessionalLicense';
-import { listProfessionalLicenses } from '../../handlers/association:member/listProfessionalLicenses';
-import { getProfessionalLicense } from '../../handlers/association:member/getProfessionalLicense';
-import { updateProfessionalLicense } from '../../handlers/association:member/updateProfessionalLicense';
-import { deleteProfessionalLicense } from '../../handlers/association:member/deleteProfessionalLicense';
 import { listMembershipCategories } from '../../handlers/association:member/listMembershipCategories';
 import { upsertMembershipCategory } from '../../handlers/association:member/upsertMembershipCategory';
 import { createMembership } from '../../handlers/association:member/createMembership';
@@ -313,6 +292,27 @@ import { listPositions } from '../../handlers/member/governance/listPositions';
 import { getPosition } from '../../handlers/member/governance/getPosition';
 import { updatePosition } from '../../handlers/member/governance/updatePosition';
 import { deletePosition } from '../../handlers/member/governance/deletePosition';
+import { createCredentialTemplate } from '../../handlers/member/credentials/createCredentialTemplate';
+import { listCredentialTemplates } from '../../handlers/member/credentials/listCredentialTemplates';
+import { getCredentialTemplate } from '../../handlers/member/credentials/getCredentialTemplate';
+import { updateCredentialTemplate } from '../../handlers/member/credentials/updateCredentialTemplate';
+import { deleteCredentialTemplate } from '../../handlers/member/credentials/deleteCredentialTemplate';
+import { listDigitalCredentials } from '../../handlers/member/credentials/listDigitalCredentials';
+import { issueDigitalCredential } from '../../handlers/member/credentials/issueDigitalCredential';
+import { lookupCredentialPublic } from '../../handlers/member/credentials/lookupCredentialPublic';
+import { verifyCredentialPublic } from '../../handlers/member/credentials/verifyCredentialPublic';
+import { verifyDigitalCredentialAuthenticated } from '../../handlers/member/credentials/verifyDigitalCredentialAuthenticated';
+import { getDigitalCredential } from '../../handlers/member/credentials/getDigitalCredential';
+import { updateDigitalCredential } from '../../handlers/member/credentials/updateDigitalCredential';
+import { deleteDigitalCredential } from '../../handlers/member/credentials/deleteDigitalCredential';
+import { revokeDigitalCredential } from '../../handlers/member/credentials/revokeDigitalCredential';
+import { listLicenseRenewalAlerts } from '../../handlers/member/credentials/listLicenseRenewalAlerts';
+import { acknowledgeLicenseRenewalAlert } from '../../handlers/member/credentials/acknowledgeLicenseRenewalAlert';
+import { createProfessionalLicense } from '../../handlers/member/credentials/createProfessionalLicense';
+import { listProfessionalLicenses } from '../../handlers/member/credentials/listProfessionalLicenses';
+import { getProfessionalLicense } from '../../handlers/member/credentials/getProfessionalLicense';
+import { updateProfessionalLicense } from '../../handlers/member/credentials/updateProfessionalLicense';
+import { deleteProfessionalLicense } from '../../handlers/member/credentials/deleteProfessionalLicense';
 import { getDuesMemberSummary } from '../../handlers/dues/getDuesMemberSummary';
 import { getDuesMetrics } from '../../handlers/dues/getDuesMetrics';
 import { getDuesDashboard } from '../../handlers/dues/getDuesDashboard';
@@ -649,20 +649,6 @@ export const registry = {
   refreshCompliance,
   getOrgCpdConfig,
   updateOrgCpdConfig,
-  createCredentialTemplate,
-  listCredentialTemplates,
-  getCredentialTemplate,
-  updateCredentialTemplate,
-  deleteCredentialTemplate,
-  listDigitalCredentials,
-  issueDigitalCredential,
-  lookupCredentialPublic,
-  verifyCredentialPublic,
-  verifyDigitalCredentialAuthenticated,
-  getDigitalCredential,
-  updateDigitalCredential,
-  deleteDigitalCredential,
-  revokeDigitalCredential,
   listMemberCreditsForPeer,
   adjustCreditEntry,
   awardManualCredit,
@@ -717,13 +703,6 @@ export const registry = {
   allocateSeat,
   listSeatAllocations,
   revokeSeat,
-  listLicenseRenewalAlerts,
-  acknowledgeLicenseRenewalAlert,
-  createProfessionalLicense,
-  listProfessionalLicenses,
-  getProfessionalLicense,
-  updateProfessionalLicense,
-  deleteProfessionalLicense,
   listMembershipCategories,
   upsertMembershipCategory,
   createMembership,
@@ -786,6 +765,29 @@ export const registry = {
   getPosition,
   updatePosition,
   deletePosition,
+
+  // Member/credentials handlers
+  createCredentialTemplate,
+  listCredentialTemplates,
+  getCredentialTemplate,
+  updateCredentialTemplate,
+  deleteCredentialTemplate,
+  listDigitalCredentials,
+  issueDigitalCredential,
+  lookupCredentialPublic,
+  verifyCredentialPublic,
+  verifyDigitalCredentialAuthenticated,
+  getDigitalCredential,
+  updateDigitalCredential,
+  deleteDigitalCredential,
+  revokeDigitalCredential,
+  listLicenseRenewalAlerts,
+  acknowledgeLicenseRenewalAlert,
+  createProfessionalLicense,
+  listProfessionalLicenses,
+  getProfessionalLicense,
+  updateProfessionalLicense,
+  deleteProfessionalLicense,
 
   // Dues handlers
   getDuesMemberSummary,

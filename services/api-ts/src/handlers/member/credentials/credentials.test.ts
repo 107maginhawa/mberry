@@ -1,7 +1,7 @@
 // Business Rules: [BR-18] [BR-19]
 import { describe, test, expect } from 'bun:test';
 import { makeCtx } from '@/test-utils/make-ctx';
-import { createCredentialToken, verifyCredentialToken } from './utils/credential-token';
+import { createCredentialToken, verifyCredentialToken } from '@/handlers/association:member/utils/credential-token';
 
 /**
  * Credentials Module Tests

@@ -136,7 +136,7 @@ describe('[AC-M11-001] QR HMAC Authenticity', () => {
 
   describe('Public verification endpoint', () => {
     test('verifyCredentialPublic does not require authentication', async () => {
-      const { verifyCredentialPublic } = await import('@/handlers/association:member/verifyCredentialPublic');
+      const { verifyCredentialPublic } = await import('@/handlers/member/credentials/verifyCredentialPublic');
       // No session, no user — should NOT throw
       const ctx = makeCtx({ session: null, user: null, _body: { token: 'invalid-token' } });
       const response = await verifyCredentialPublic(ctx);
@@ -146,7 +146,7 @@ describe('[AC-M11-001] QR HMAC Authenticity', () => {
     });
 
     test('verifyDigitalCredentialAuthenticated throws without session', async () => {
-      const { verifyDigitalCredentialAuthenticated } = await import('@/handlers/association:member/verifyDigitalCredentialAuthenticated');
+      const { verifyDigitalCredentialAuthenticated } = await import('@/handlers/member/credentials/verifyDigitalCredentialAuthenticated');
       const ctx = makeCtx({ session: null, _body: { token: 'some-token' } });
       await expect(verifyDigitalCredentialAuthenticated(ctx)).rejects.toThrow();
     });

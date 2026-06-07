@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-06-07T02:55:49.500Z",
+  "generatedAt": "2026-06-07T05:04:11.923Z",
   "totals": {
     "handlerFiles": 586,
     "logCallSites": 274,
@@ -1980,6 +1980,141 @@
       "httpExceptions": 0,
       "typedErrors": 1
     },
+    "services/api-ts/src/handlers/member/credentials/revokeDigitalCredential.ts": {
+      "totalLogs": 0,
+      "full": 0,
+      "partial": 0,
+      "none": 0,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 2
+    },
+    "services/api-ts/src/handlers/member/credentials/deleteDigitalCredential.ts": {
+      "totalLogs": 0,
+      "full": 0,
+      "partial": 0,
+      "none": 0,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 2
+    },
+    "services/api-ts/src/handlers/member/credentials/updateProfessionalLicense.ts": {
+      "totalLogs": 0,
+      "full": 0,
+      "partial": 0,
+      "none": 0,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 1
+    },
+    "services/api-ts/src/handlers/member/credentials/updateDigitalCredential.ts": {
+      "totalLogs": 0,
+      "full": 0,
+      "partial": 0,
+      "none": 0,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 2
+    },
+    "services/api-ts/src/handlers/member/credentials/getDigitalCredential.ts": {
+      "totalLogs": 0,
+      "full": 0,
+      "partial": 0,
+      "none": 0,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 2
+    },
+    "services/api-ts/src/handlers/member/credentials/acknowledgeLicenseRenewalAlert.ts": {
+      "totalLogs": 0,
+      "full": 0,
+      "partial": 0,
+      "none": 0,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 2
+    },
+    "services/api-ts/src/handlers/member/credentials/verifyDigitalCredentialAuthenticated.ts": {
+      "totalLogs": 0,
+      "full": 0,
+      "partial": 0,
+      "none": 0,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 1
+    },
+    "services/api-ts/src/handlers/member/credentials/listCredentialTemplates.ts": {
+      "totalLogs": 0,
+      "full": 0,
+      "partial": 0,
+      "none": 0,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 1
+    },
+    "services/api-ts/src/handlers/member/credentials/getProfessionalLicense.ts": {
+      "totalLogs": 0,
+      "full": 0,
+      "partial": 0,
+      "none": 0,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 1
+    },
+    "services/api-ts/src/handlers/member/credentials/updateCredentialTemplate.ts": {
+      "totalLogs": 0,
+      "full": 0,
+      "partial": 0,
+      "none": 0,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 3
+    },
+    "services/api-ts/src/handlers/member/credentials/deleteProfessionalLicense.ts": {
+      "totalLogs": 0,
+      "full": 0,
+      "partial": 0,
+      "none": 0,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 1
+    },
+    "services/api-ts/src/handlers/member/credentials/listDigitalCredentials.ts": {
+      "totalLogs": 0,
+      "full": 0,
+      "partial": 0,
+      "none": 0,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 1
+    },
+    "services/api-ts/src/handlers/member/credentials/issueDigitalCredential.ts": {
+      "totalLogs": 0,
+      "full": 0,
+      "partial": 0,
+      "none": 0,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 5
+    },
+    "services/api-ts/src/handlers/member/credentials/deleteCredentialTemplate.ts": {
+      "totalLogs": 0,
+      "full": 0,
+      "partial": 0,
+      "none": 0,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 2
+    },
+    "services/api-ts/src/handlers/member/credentials/getCredentialTemplate.ts": {
+      "totalLogs": 0,
+      "full": 0,
+      "partial": 0,
+      "none": 0,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 2
+    },
     "services/api-ts/src/handlers/comms/searchChatMessages.ts": {
       "totalLogs": 0,
       "full": 0,
@@ -2520,24 +2655,6 @@
       "httpExceptions": 0,
       "typedErrors": 1
     },
-    "services/api-ts/src/handlers/association:member/revokeDigitalCredential.ts": {
-      "totalLogs": 0,
-      "full": 0,
-      "partial": 0,
-      "none": 0,
-      "rawErrors": 0,
-      "httpExceptions": 0,
-      "typedErrors": 2
-    },
-    "services/api-ts/src/handlers/association:member/deleteDigitalCredential.ts": {
-      "totalLogs": 0,
-      "full": 0,
-      "partial": 0,
-      "none": 0,
-      "rawErrors": 0,
-      "httpExceptions": 0,
-      "typedErrors": 2
-    },
     "services/api-ts/src/handlers/association:member/createDuesInvoice.ts": {
       "totalLogs": 0,
       "full": 0,
@@ -2655,15 +2772,6 @@
       "httpExceptions": 0,
       "typedErrors": 3
     },
-    "services/api-ts/src/handlers/association:member/updateProfessionalLicense.ts": {
-      "totalLogs": 0,
-      "full": 0,
-      "partial": 0,
-      "none": 0,
-      "rawErrors": 0,
-      "httpExceptions": 0,
-      "typedErrors": 1
-    },
     "services/api-ts/src/handlers/association:member/listMembershipTiers.ts": {
       "totalLogs": 0,
       "full": 0,
@@ -2692,15 +2800,6 @@
       "typedErrors": 1
     },
     "services/api-ts/src/handlers/association:member/updateDuesConfig.ts": {
-      "totalLogs": 0,
-      "full": 0,
-      "partial": 0,
-      "none": 0,
-      "rawErrors": 0,
-      "httpExceptions": 0,
-      "typedErrors": 2
-    },
-    "services/api-ts/src/handlers/association:member/updateDigitalCredential.ts": {
       "totalLogs": 0,
       "full": 0,
       "partial": 0,
@@ -2771,15 +2870,6 @@
       "rawErrors": 0,
       "httpExceptions": 0,
       "typedErrors": 3
-    },
-    "services/api-ts/src/handlers/association:member/getDigitalCredential.ts": {
-      "totalLogs": 0,
-      "full": 0,
-      "partial": 0,
-      "none": 0,
-      "rawErrors": 0,
-      "httpExceptions": 0,
-      "typedErrors": 2
     },
     "services/api-ts/src/handlers/association:member/updateMembership.ts": {
       "totalLogs": 0,
@@ -2862,15 +2952,6 @@
       "httpExceptions": 0,
       "typedErrors": 1
     },
-    "services/api-ts/src/handlers/association:member/acknowledgeLicenseRenewalAlert.ts": {
-      "totalLogs": 0,
-      "full": 0,
-      "partial": 0,
-      "none": 0,
-      "rawErrors": 0,
-      "httpExceptions": 0,
-      "typedErrors": 2
-    },
     "services/api-ts/src/handlers/association:member/generatePaymentReceipt.ts": {
       "totalLogs": 0,
       "full": 0,
@@ -2879,15 +2960,6 @@
       "rawErrors": 0,
       "httpExceptions": 0,
       "typedErrors": 4
-    },
-    "services/api-ts/src/handlers/association:member/verifyDigitalCredentialAuthenticated.ts": {
-      "totalLogs": 0,
-      "full": 0,
-      "partial": 0,
-      "none": 0,
-      "rawErrors": 0,
-      "httpExceptions": 0,
-      "typedErrors": 1
     },
     "services/api-ts/src/handlers/association:member/generateDuesReport.ts": {
       "totalLogs": 0,
@@ -2925,15 +2997,6 @@
       "httpExceptions": 0,
       "typedErrors": 1
     },
-    "services/api-ts/src/handlers/association:member/listCredentialTemplates.ts": {
-      "totalLogs": 0,
-      "full": 0,
-      "partial": 0,
-      "none": 0,
-      "rawErrors": 0,
-      "httpExceptions": 0,
-      "typedErrors": 1
-    },
     "services/api-ts/src/handlers/association:member/updateDirectoryProfile.ts": {
       "totalLogs": 0,
       "full": 0,
@@ -2942,24 +3005,6 @@
       "rawErrors": 0,
       "httpExceptions": 0,
       "typedErrors": 2
-    },
-    "services/api-ts/src/handlers/association:member/getProfessionalLicense.ts": {
-      "totalLogs": 0,
-      "full": 0,
-      "partial": 0,
-      "none": 0,
-      "rawErrors": 0,
-      "httpExceptions": 0,
-      "typedErrors": 1
-    },
-    "services/api-ts/src/handlers/association:member/updateCredentialTemplate.ts": {
-      "totalLogs": 0,
-      "full": 0,
-      "partial": 0,
-      "none": 0,
-      "rawErrors": 0,
-      "httpExceptions": 0,
-      "typedErrors": 3
     },
     "services/api-ts/src/handlers/association:member/renewMembership.ts": {
       "totalLogs": 0,
@@ -2996,15 +3041,6 @@
       "rawErrors": 0,
       "httpExceptions": 0,
       "typedErrors": 4
-    },
-    "services/api-ts/src/handlers/association:member/deleteProfessionalLicense.ts": {
-      "totalLogs": 0,
-      "full": 0,
-      "partial": 0,
-      "none": 0,
-      "rawErrors": 0,
-      "httpExceptions": 0,
-      "typedErrors": 1
     },
     "services/api-ts/src/handlers/association:member/denyMembershipApplication.ts": {
       "totalLogs": 0,
@@ -3077,15 +3113,6 @@
       "rawErrors": 0,
       "httpExceptions": 0,
       "typedErrors": 2
-    },
-    "services/api-ts/src/handlers/association:member/listDigitalCredentials.ts": {
-      "totalLogs": 0,
-      "full": 0,
-      "partial": 0,
-      "none": 0,
-      "rawErrors": 0,
-      "httpExceptions": 0,
-      "typedErrors": 1
     },
     "services/api-ts/src/handlers/association:member/listMembershipApplications.ts": {
       "totalLogs": 0,
@@ -3204,15 +3231,6 @@
       "httpExceptions": 0,
       "typedErrors": 2
     },
-    "services/api-ts/src/handlers/association:member/issueDigitalCredential.ts": {
-      "totalLogs": 0,
-      "full": 0,
-      "partial": 0,
-      "none": 0,
-      "rawErrors": 0,
-      "httpExceptions": 0,
-      "typedErrors": 5
-    },
     "services/api-ts/src/handlers/association:member/deleteInstitutionalMembership.ts": {
       "totalLogs": 0,
       "full": 0,
@@ -3268,15 +3286,6 @@
       "typedErrors": 2
     },
     "services/api-ts/src/handlers/association:member/getDirectoryProfile.ts": {
-      "totalLogs": 0,
-      "full": 0,
-      "partial": 0,
-      "none": 0,
-      "rawErrors": 0,
-      "httpExceptions": 0,
-      "typedErrors": 2
-    },
-    "services/api-ts/src/handlers/association:member/deleteCredentialTemplate.ts": {
       "totalLogs": 0,
       "full": 0,
       "partial": 0,
@@ -3383,15 +3392,6 @@
       "rawErrors": 0,
       "httpExceptions": 0,
       "typedErrors": 1
-    },
-    "services/api-ts/src/handlers/association:member/getCredentialTemplate.ts": {
-      "totalLogs": 0,
-      "full": 0,
-      "partial": 0,
-      "none": 0,
-      "rawErrors": 0,
-      "httpExceptions": 0,
-      "typedErrors": 2
     },
     "services/api-ts/src/handlers/association:member/getAgingBucket.ts": {
       "totalLogs": 0,

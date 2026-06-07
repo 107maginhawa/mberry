@@ -136,7 +136,7 @@ import { serveEventOgMeta } from '@/handlers/events/serveEventOgMeta';
 import { cancelRegistration } from '@/handlers/events/cancelRegistration';
 
 // Public credential lookup (Wave 3a — Trust Directory)
-import { lookupCredentialPublic } from '@/handlers/association:member/lookupCredentialPublic';
+import { lookupCredentialPublic } from '@/handlers/member/credentials/lookupCredentialPublic';
 
 // ID card — JSON + PDF download (UJ-M02)
 import { getMyIdCard } from '@/handlers/person/getMyIdCard';

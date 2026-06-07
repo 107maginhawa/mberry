@@ -1,9 +1,9 @@
 import type { ValidatedContext } from '@/types/app';
-import type { DigitalCredential } from './repos/credentials.schema';
+import type { DigitalCredential } from '@/handlers/association:member/repos/credentials.schema';
 import type { DatabaseInstance } from '@/core/database';
 import type { UpdateDigitalCredentialBody, UpdateDigitalCredentialParams } from '@/generated/openapi/validators';
 import { UnauthorizedError, NotFoundError } from '@/core/errors';
-import { DigitalCredentialRepository } from './repos/credentials.repo';
+import { DigitalCredentialRepository } from '@/handlers/association:member/repos/credentials.repo';
 
 /**
  * updateDigitalCredential

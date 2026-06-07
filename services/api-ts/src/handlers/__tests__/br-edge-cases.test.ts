@@ -14,7 +14,7 @@ import { PlatformAdminRepository, ImpersonationSessionRepository } from '../plat
 import { OfficerTermRepository } from '../association:member/repos/governance.repo';
 import { getOrganizationBySlug } from '../platformadmin/getOrganizationBySlug';
 import { OrganizationRepository, AssociationRepository } from '../platformadmin/repos/platform-admin.repo';
-import { issueDigitalCredential } from '../association:member/issueDigitalCredential';
+import { issueDigitalCredential } from '@/handlers/member/credentials/issueDigitalCredential';
 import { CredentialTemplateRepository, DigitalCredentialRepository } from '../association:member/repos/credentials.repo';
 import { MembershipRepository } from '../association:member/repos/membership.repo';
 import { MembershipRepository as CustomMembershipRepository } from '../membership/repos/membership.repo';

@@ -1,9 +1,9 @@
 import type { ValidatedContext } from '@/types/app';
-import type { CredentialTemplate } from './repos/credentials.schema';
+import type { CredentialTemplate } from '@/handlers/association:member/repos/credentials.schema';
 import type { DatabaseInstance } from '@/core/database';
 import type { UpdateCredentialTemplateBody, UpdateCredentialTemplateParams } from '@/generated/openapi/validators';
 import { UnauthorizedError, NotFoundError, ForbiddenError } from '@/core/errors';
-import { CredentialTemplateRepository } from './repos/credentials.repo';
+import { CredentialTemplateRepository } from '@/handlers/association:member/repos/credentials.repo';
 
 /**
  * updateCredentialTemplate

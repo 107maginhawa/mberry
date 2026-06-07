@@ -2,7 +2,7 @@ import type { ValidatedContext } from '@/types/app';
 import type { DatabaseInstance } from '@/core/database';
 import { NotFoundError } from '@/core/errors';
 import type { DeleteProfessionalLicenseParams } from '@/generated/openapi/validators';
-import { ProfessionalLicenseRepository } from './repos/credits.repo';
+import { ProfessionalLicenseRepository } from '@/handlers/association:member/repos/credits.repo';
 
 /**
  * deleteProfessionalLicense

@@ -1,10 +1,10 @@
 import type { HandlerContext } from '@/types/app';
 import type { DatabaseInstance } from '@/core/database';
 import { eq } from 'drizzle-orm';
-import { digitalCredentials } from './repos/credentials.schema';
-import { directoryProfiles } from './repos/directory.schema';
+import { digitalCredentials } from '@/handlers/association:member/repos/credentials.schema';
+import { directoryProfiles } from '@/handlers/association:member/repos/directory.schema';
 import { personPrivacySettings } from '@/handlers/person/repos/privacy-settings.schema';
-import { memberships } from './repos/membership.schema';
+import { memberships } from '@/handlers/association:member/repos/membership.schema';
 
 /**
  * lookupCredentialPublic

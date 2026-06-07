@@ -2,8 +2,8 @@ import type { ValidatedContext } from '@/types/app';
 import type { DatabaseInstance } from '@/core/database';
 import { NotFoundError, ConflictError } from '@/core/errors';
 import type { AcknowledgeLicenseRenewalAlertParams } from '@/generated/openapi/validators';
-import { LicenseRenewalAlertRepository } from './repos/credits.repo';
-import type { LicenseRenewalAlert } from './repos/credentials.schema';
+import { LicenseRenewalAlertRepository } from '@/handlers/association:member/repos/credits.repo';
+import type { LicenseRenewalAlert } from '@/handlers/association:member/repos/credentials.schema';
 
 /**
  * acknowledgeLicenseRenewalAlert
