@@ -30,10 +30,10 @@ DO $$ BEGIN CREATE TYPE "public"."vendor_category" AS ENUM('emr', 'supplies', 'i
 DO $$ BEGIN CREATE TYPE "public"."vendor_status" AS ENUM('pending', 'verified', 'suspended', 'rejected'); EXCEPTION WHEN duplicate_object THEN NULL; END $$;--> statement-breakpoint
 DO $$ BEGIN CREATE TYPE "public"."dashboard_output_format" AS ENUM('pdf', 'csv'); EXCEPTION WHEN duplicate_object THEN NULL; END $$;--> statement-breakpoint
 DO $$ BEGIN CREATE TYPE "public"."dashboard_report_type" AS ENUM('association_summary', 'dues_collection', 'cpd_compliance', 'activity'); EXCEPTION WHEN duplicate_object THEN NULL; END $$;--> statement-breakpoint
-ALTER TYPE "public"."notification_type" ADD VALUE 'waitlist.promoted';--> statement-breakpoint
-ALTER TYPE "public"."notification_type" ADD VALUE 'event.late-cancellation';--> statement-breakpoint
-ALTER TYPE "public"."notification_type" ADD VALUE 'dunning.escalation';--> statement-breakpoint
-ALTER TYPE "public"."notification_type" ADD VALUE 'task.overdue';--> statement-breakpoint
+ALTER TYPE "public"."notification_type" ADD VALUE IF NOT EXISTS 'waitlist.promoted';--> statement-breakpoint
+ALTER TYPE "public"."notification_type" ADD VALUE IF NOT EXISTS 'event.late-cancellation';--> statement-breakpoint
+ALTER TYPE "public"."notification_type" ADD VALUE IF NOT EXISTS 'dunning.escalation';--> statement-breakpoint
+ALTER TYPE "public"."notification_type" ADD VALUE IF NOT EXISTS 'task.overdue';--> statement-breakpoint
 CREATE TABLE IF NOT EXISTS "ad_report" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
 	"created_at" timestamp with time zone DEFAULT now() NOT NULL,
