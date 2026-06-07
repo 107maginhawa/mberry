@@ -2,7 +2,7 @@ import type { ValidatedContext } from '@/types/app';
 import type { DatabaseInstance } from '@/core/database';
 import type { CreateAffiliationTransferBody } from '@/generated/openapi/validators';
 import { UnauthorizedError } from '@/core/errors';
-import { AffiliationTransferRepository } from './repos/chapters.repo';
+import { AffiliationTransferRepository } from '@/handlers/association:member/repos/chapters.repo';
 
 /**
  * createAffiliationTransfer

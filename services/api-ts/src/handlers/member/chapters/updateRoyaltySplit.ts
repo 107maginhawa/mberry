@@ -1,9 +1,9 @@
 import type { ValidatedContext } from '@/types/app';
-import type { RoyaltySplit } from './repos/chapters.schema';
+import type { RoyaltySplit } from '@/handlers/association:member/repos/chapters.schema';
 import type { DatabaseInstance } from '@/core/database';
 import type { UpdateRoyaltySplitBody, UpdateRoyaltySplitParams } from '@/generated/openapi/validators';
 import { UnauthorizedError, NotFoundError, BusinessLogicError } from '@/core/errors';
-import { RoyaltySplitRepository } from './repos/chapters.repo';
+import { RoyaltySplitRepository } from '@/handlers/association:member/repos/chapters.repo';
 
 /**
  * updateRoyaltySplit

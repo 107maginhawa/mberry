@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-06-06T16:38:14.708Z",
+  "generatedAt": "2026-06-07T02:43:42.651Z",
   "totals": {
     "handlerFiles": 586,
     "logCallSites": 274,
@@ -1638,7 +1638,25 @@
       "httpExceptions": 0,
       "typedErrors": 1
     },
-    "services/api-ts/src/handlers/comms/searchChatMessages.ts": {
+    "services/api-ts/src/handlers/member/chapters/getRoyaltySplit.ts": {
+      "totalLogs": 0,
+      "full": 0,
+      "partial": 0,
+      "none": 0,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 2
+    },
+    "services/api-ts/src/handlers/member/chapters/completeAffiliationTransfer.ts": {
+      "totalLogs": 0,
+      "full": 0,
+      "partial": 0,
+      "none": 0,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 3
+    },
+    "services/api-ts/src/handlers/member/chapters/createRoyaltySplit.ts": {
       "totalLogs": 0,
       "full": 0,
       "partial": 0,
@@ -1647,7 +1665,7 @@
       "httpExceptions": 0,
       "typedErrors": 1
     },
-    "services/api-ts/src/handlers/default/listOrgChapters.ts": {
+    "services/api-ts/src/handlers/member/chapters/getAffiliationTransfer.ts": {
       "totalLogs": 0,
       "full": 0,
       "partial": 0,
@@ -1655,6 +1673,132 @@
       "rawErrors": 0,
       "httpExceptions": 0,
       "typedErrors": 2
+    },
+    "services/api-ts/src/handlers/member/chapters/listChapterAffiliations.ts": {
+      "totalLogs": 0,
+      "full": 0,
+      "partial": 0,
+      "none": 0,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 1
+    },
+    "services/api-ts/src/handlers/member/chapters/listRoyaltySplits.ts": {
+      "totalLogs": 0,
+      "full": 0,
+      "partial": 0,
+      "none": 0,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 1
+    },
+    "services/api-ts/src/handlers/member/chapters/updateRoyaltySplit.ts": {
+      "totalLogs": 0,
+      "full": 0,
+      "partial": 0,
+      "none": 0,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 3
+    },
+    "services/api-ts/src/handlers/member/chapters/setPrimaryChapterAffiliation.ts": {
+      "totalLogs": 0,
+      "full": 0,
+      "partial": 0,
+      "none": 0,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 1
+    },
+    "services/api-ts/src/handlers/member/chapters/listOrgChapters.ts": {
+      "totalLogs": 0,
+      "full": 0,
+      "partial": 0,
+      "none": 0,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 2
+    },
+    "services/api-ts/src/handlers/member/chapters/updateChapterAffiliation.ts": {
+      "totalLogs": 0,
+      "full": 0,
+      "partial": 0,
+      "none": 0,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 2
+    },
+    "services/api-ts/src/handlers/member/chapters/approveTransferByTarget.ts": {
+      "totalLogs": 0,
+      "full": 0,
+      "partial": 0,
+      "none": 0,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 2
+    },
+    "services/api-ts/src/handlers/member/chapters/deleteRoyaltySplit.ts": {
+      "totalLogs": 0,
+      "full": 0,
+      "partial": 0,
+      "none": 0,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 2
+    },
+    "services/api-ts/src/handlers/member/chapters/denyAffiliationTransfer.ts": {
+      "totalLogs": 0,
+      "full": 0,
+      "partial": 0,
+      "none": 0,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 3
+    },
+    "services/api-ts/src/handlers/member/chapters/approveTransferBySource.ts": {
+      "totalLogs": 0,
+      "full": 0,
+      "partial": 0,
+      "none": 0,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 2
+    },
+    "services/api-ts/src/handlers/member/chapters/getChapterAffiliation.ts": {
+      "totalLogs": 0,
+      "full": 0,
+      "partial": 0,
+      "none": 0,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 2
+    },
+    "services/api-ts/src/handlers/member/chapters/deleteChapterAffiliation.ts": {
+      "totalLogs": 0,
+      "full": 0,
+      "partial": 0,
+      "none": 0,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 2
+    },
+    "services/api-ts/src/handlers/member/chapters/listAffiliationTransfers.ts": {
+      "totalLogs": 0,
+      "full": 0,
+      "partial": 0,
+      "none": 0,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 1
+    },
+    "services/api-ts/src/handlers/comms/searchChatMessages.ts": {
+      "totalLogs": 0,
+      "full": 0,
+      "partial": 0,
+      "none": 0,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 1
     },
     "services/api-ts/src/handlers/certificates/verifyCertificatePublic.ts": {
       "totalLogs": 0,
@@ -2187,15 +2331,6 @@
       "httpExceptions": 0,
       "typedErrors": 2
     },
-    "services/api-ts/src/handlers/association:member/getRoyaltySplit.ts": {
-      "totalLogs": 0,
-      "full": 0,
-      "partial": 0,
-      "none": 0,
-      "rawErrors": 0,
-      "httpExceptions": 0,
-      "typedErrors": 2
-    },
     "services/api-ts/src/handlers/association:member/createMembershipApplication.ts": {
       "totalLogs": 0,
       "full": 0,
@@ -2222,15 +2357,6 @@
       "rawErrors": 0,
       "httpExceptions": 0,
       "typedErrors": 2
-    },
-    "services/api-ts/src/handlers/association:member/completeAffiliationTransfer.ts": {
-      "totalLogs": 0,
-      "full": 0,
-      "partial": 0,
-      "none": 0,
-      "rawErrors": 0,
-      "httpExceptions": 0,
-      "typedErrors": 3
     },
     "services/api-ts/src/handlers/association:member/deleteDigitalCredential.ts": {
       "totalLogs": 0,
@@ -2430,25 +2556,7 @@
       "httpExceptions": 0,
       "typedErrors": 1
     },
-    "services/api-ts/src/handlers/association:member/createRoyaltySplit.ts": {
-      "totalLogs": 0,
-      "full": 0,
-      "partial": 0,
-      "none": 0,
-      "rawErrors": 0,
-      "httpExceptions": 0,
-      "typedErrors": 1
-    },
     "services/api-ts/src/handlers/association:member/deleteCandidate.ts": {
-      "totalLogs": 0,
-      "full": 0,
-      "partial": 0,
-      "none": 0,
-      "rawErrors": 0,
-      "httpExceptions": 0,
-      "typedErrors": 2
-    },
-    "services/api-ts/src/handlers/association:member/getAffiliationTransfer.ts": {
       "totalLogs": 0,
       "full": 0,
       "partial": 0,
@@ -2574,15 +2682,6 @@
       "httpExceptions": 0,
       "typedErrors": 1
     },
-    "services/api-ts/src/handlers/association:member/listChapterAffiliations.ts": {
-      "totalLogs": 0,
-      "full": 0,
-      "partial": 0,
-      "none": 0,
-      "rawErrors": 0,
-      "httpExceptions": 0,
-      "typedErrors": 1
-    },
     "services/api-ts/src/handlers/association:member/updatePosition.ts": {
       "totalLogs": 0,
       "full": 0,
@@ -2691,15 +2790,6 @@
       "httpExceptions": 0,
       "typedErrors": 2
     },
-    "services/api-ts/src/handlers/association:member/listRoyaltySplits.ts": {
-      "totalLogs": 0,
-      "full": 0,
-      "partial": 0,
-      "none": 0,
-      "rawErrors": 0,
-      "httpExceptions": 0,
-      "typedErrors": 1
-    },
     "services/api-ts/src/handlers/association:member/generatePaymentReceipt.ts": {
       "totalLogs": 0,
       "full": 0,
@@ -2771,15 +2861,6 @@
       "rawErrors": 0,
       "httpExceptions": 0,
       "typedErrors": 1
-    },
-    "services/api-ts/src/handlers/association:member/updateRoyaltySplit.ts": {
-      "totalLogs": 0,
-      "full": 0,
-      "partial": 0,
-      "none": 0,
-      "rawErrors": 0,
-      "httpExceptions": 0,
-      "typedErrors": 3
     },
     "services/api-ts/src/handlers/association:member/updateDirectoryProfile.ts": {
       "totalLogs": 0,
@@ -2853,15 +2934,6 @@
       "httpExceptions": 0,
       "typedErrors": 1
     },
-    "services/api-ts/src/handlers/association:member/setPrimaryChapterAffiliation.ts": {
-      "totalLogs": 0,
-      "full": 0,
-      "partial": 0,
-      "none": 0,
-      "rawErrors": 0,
-      "httpExceptions": 0,
-      "typedErrors": 1
-    },
     "services/api-ts/src/handlers/association:member/listBallots.ts": {
       "totalLogs": 0,
       "full": 0,
@@ -2897,15 +2969,6 @@
       "rawErrors": 0,
       "httpExceptions": 0,
       "typedErrors": 3
-    },
-    "services/api-ts/src/handlers/association:member/updateChapterAffiliation.ts": {
-      "totalLogs": 0,
-      "full": 0,
-      "partial": 0,
-      "none": 0,
-      "rawErrors": 0,
-      "httpExceptions": 0,
-      "typedErrors": 2
     },
     "services/api-ts/src/handlers/association:member/listMyCertificates.ts": {
       "totalLogs": 0,
@@ -2970,15 +3033,6 @@
       "httpExceptions": 0,
       "typedErrors": 2
     },
-    "services/api-ts/src/handlers/association:member/approveTransferByTarget.ts": {
-      "totalLogs": 0,
-      "full": 0,
-      "partial": 0,
-      "none": 0,
-      "rawErrors": 0,
-      "httpExceptions": 0,
-      "typedErrors": 2
-    },
     "services/api-ts/src/handlers/association:member/listDigitalCredentials.ts": {
       "totalLogs": 0,
       "full": 0,
@@ -3005,15 +3059,6 @@
       "rawErrors": 0,
       "httpExceptions": 0,
       "typedErrors": 5
-    },
-    "services/api-ts/src/handlers/association:member/deleteRoyaltySplit.ts": {
-      "totalLogs": 0,
-      "full": 0,
-      "partial": 0,
-      "none": 0,
-      "rawErrors": 0,
-      "httpExceptions": 0,
-      "typedErrors": 2
     },
     "services/api-ts/src/handlers/association:member/updateMembershipTier.ts": {
       "totalLogs": 0,
@@ -3113,15 +3158,6 @@
       "rawErrors": 0,
       "httpExceptions": 0,
       "typedErrors": 4
-    },
-    "services/api-ts/src/handlers/association:member/denyAffiliationTransfer.ts": {
-      "totalLogs": 0,
-      "full": 0,
-      "partial": 0,
-      "none": 0,
-      "rawErrors": 0,
-      "httpExceptions": 0,
-      "typedErrors": 3
     },
     "services/api-ts/src/handlers/association:member/importRosterMembers.ts": {
       "totalLogs": 0,
@@ -3258,15 +3294,6 @@
       "httpExceptions": 0,
       "typedErrors": 4
     },
-    "services/api-ts/src/handlers/association:member/approveTransferBySource.ts": {
-      "totalLogs": 0,
-      "full": 0,
-      "partial": 0,
-      "none": 0,
-      "rawErrors": 0,
-      "httpExceptions": 0,
-      "typedErrors": 2
-    },
     "services/api-ts/src/handlers/association:member/deleteElection.ts": {
       "totalLogs": 0,
       "full": 0,
@@ -3294,15 +3321,6 @@
       "httpExceptions": 0,
       "typedErrors": 1
     },
-    "services/api-ts/src/handlers/association:member/getChapterAffiliation.ts": {
-      "totalLogs": 0,
-      "full": 0,
-      "partial": 0,
-      "none": 0,
-      "rawErrors": 0,
-      "httpExceptions": 0,
-      "typedErrors": 2
-    },
     "services/api-ts/src/handlers/association:member/getDuesPayment.ts": {
       "totalLogs": 0,
       "full": 0,
@@ -3329,15 +3347,6 @@
       "rawErrors": 0,
       "httpExceptions": 0,
       "typedErrors": 1
-    },
-    "services/api-ts/src/handlers/association:member/deleteChapterAffiliation.ts": {
-      "totalLogs": 0,
-      "full": 0,
-      "partial": 0,
-      "none": 0,
-      "rawErrors": 0,
-      "httpExceptions": 0,
-      "typedErrors": 2
     },
     "services/api-ts/src/handlers/association:member/getMembershipTier.ts": {
       "totalLogs": 0,
@@ -3367,15 +3376,6 @@
       "typedErrors": 2
     },
     "services/api-ts/src/handlers/association:member/listMemberships.ts": {
-      "totalLogs": 0,
-      "full": 0,
-      "partial": 0,
-      "none": 0,
-      "rawErrors": 0,
-      "httpExceptions": 0,
-      "typedErrors": 1
-    },
-    "services/api-ts/src/handlers/association:member/listAffiliationTransfers.ts": {
       "totalLogs": 0,
       "full": 0,
       "partial": 0,

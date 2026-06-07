@@ -1,6 +1,6 @@
 import { describe, test, expect, beforeEach } from 'bun:test';
 import { makeCtx, stubRepo, restoreRepo, makeUser } from '@/test-utils/make-ctx';
-import { AffiliationTransferRepository, ChapterAffiliationRepository } from './repos/chapters.repo';
+import { AffiliationTransferRepository, ChapterAffiliationRepository } from '@/handlers/association:member/repos/chapters.repo';
 
 // ─── Fixtures ───────────────────────────────────────────
 

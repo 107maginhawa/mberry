@@ -343,18 +343,19 @@ namespace MonobaseAPI {
   // Association Domain — Chapters
   // =========================================================================
 
-  @tag("Association:Member")
+  @tag("Member/Chapters")
   @route("/association/member/chapter-affiliations")
   interface AssocChapterAffiliationManagement extends Association.Member.Chapters.ChapterAffiliationManagement {}
 
+  @tag("Member/Chapters")
   @route("/association/member/chapters")
   interface AssocOrgChaptersManagement extends Association.Member.Chapters.OrgChaptersManagement {}
 
-  @tag("Association:Member")
+  @tag("Member/Chapters")
   @route("/association/member/affiliation-transfers")
   interface AssocAffiliationTransferManagement extends Association.Member.Chapters.AffiliationTransferManagement {}
 
-  @tag("Association:Member")
+  @tag("Member/Chapters")
   @route("/association/member/royalty-splits")
   interface AssocRoyaltySplitManagement extends Association.Member.Chapters.RoyaltySplitManagement {}
 

@@ -2,8 +2,8 @@ import type { ValidatedContext } from '@/types/app';
 import type { DatabaseInstance } from '@/core/database';
 import type { UpdateChapterAffiliationBody, UpdateChapterAffiliationParams } from '@/generated/openapi/validators';
 import { UnauthorizedError, NotFoundError } from '@/core/errors';
-import { ChapterAffiliationRepository } from './repos/chapters.repo';
-import type { ChapterAffiliation } from './repos/chapters.schema';
+import { ChapterAffiliationRepository } from '@/handlers/association:member/repos/chapters.repo';
+import type { ChapterAffiliation } from '@/handlers/association:member/repos/chapters.schema';
 
 /**
  * updateChapterAffiliation

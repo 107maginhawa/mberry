@@ -2,8 +2,8 @@ import type { ValidatedContext } from '@/types/app';
 import type { DatabaseInstance } from '@/core/database';
 import type { CompleteAffiliationTransferParams } from '@/generated/openapi/validators';
 import { UnauthorizedError, NotFoundError, BusinessLogicError } from '@/core/errors';
-import { ChapterAffiliationRepository, AffiliationTransferRepository } from './repos/chapters.repo';
-import type { AffiliationTransfer, ChapterAffiliation } from './repos/chapters.schema';
+import { ChapterAffiliationRepository, AffiliationTransferRepository } from '@/handlers/association:member/repos/chapters.repo';
+import type { AffiliationTransfer, ChapterAffiliation } from '@/handlers/association:member/repos/chapters.schema';
 
 /**
  * completeAffiliationTransfer

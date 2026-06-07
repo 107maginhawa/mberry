@@ -2,8 +2,8 @@ import type { ValidatedContext } from '@/types/app';
 import type { DatabaseInstance } from '@/core/database';
 import type { DenyAffiliationTransferBody, DenyAffiliationTransferParams } from '@/generated/openapi/validators';
 import { UnauthorizedError, NotFoundError, BusinessLogicError } from '@/core/errors';
-import { AffiliationTransferRepository } from './repos/chapters.repo';
-import type { AffiliationTransfer } from './repos/chapters.schema';
+import { AffiliationTransferRepository } from '@/handlers/association:member/repos/chapters.repo';
+import type { AffiliationTransfer } from '@/handlers/association:member/repos/chapters.schema';
 
 /**
  * denyAffiliationTransfer

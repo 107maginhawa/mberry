@@ -2,7 +2,7 @@ import type { ValidatedContext } from '@/types/app';
 import type { DatabaseInstance } from '@/core/database';
 import type { CreateRoyaltySplitBody } from '@/generated/openapi/validators';
 import { UnauthorizedError, BusinessLogicError } from '@/core/errors';
-import { RoyaltySplitRepository } from './repos/chapters.repo';
+import { RoyaltySplitRepository } from '@/handlers/association:member/repos/chapters.repo';
 
 /**
  * createRoyaltySplit

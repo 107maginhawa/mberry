@@ -143,13 +143,25 @@ import { archiveDocument } from '../../handlers/documents/archiveDocument';
 import { uploadNewDocumentVersion } from '../../handlers/documents/uploadNewDocumentVersion';
 import { listDocumentVersions } from '../../handlers/documents/listDocumentVersions';
 import { getDocumentVersion } from '../../handlers/documents/getDocumentVersion';
-import { createAffiliationTransfer } from '../../handlers/association:member/createAffiliationTransfer';
-import { listAffiliationTransfers } from '../../handlers/association:member/listAffiliationTransfers';
-import { getAffiliationTransfer } from '../../handlers/association:member/getAffiliationTransfer';
-import { approveTransferBySource } from '../../handlers/association:member/approveTransferBySource';
-import { approveTransferByTarget } from '../../handlers/association:member/approveTransferByTarget';
-import { completeAffiliationTransfer } from '../../handlers/association:member/completeAffiliationTransfer';
-import { denyAffiliationTransfer } from '../../handlers/association:member/denyAffiliationTransfer';
+import { createAffiliationTransfer } from '../../handlers/member/chapters/createAffiliationTransfer';
+import { listAffiliationTransfers } from '../../handlers/member/chapters/listAffiliationTransfers';
+import { getAffiliationTransfer } from '../../handlers/member/chapters/getAffiliationTransfer';
+import { approveTransferBySource } from '../../handlers/member/chapters/approveTransferBySource';
+import { approveTransferByTarget } from '../../handlers/member/chapters/approveTransferByTarget';
+import { completeAffiliationTransfer } from '../../handlers/member/chapters/completeAffiliationTransfer';
+import { denyAffiliationTransfer } from '../../handlers/member/chapters/denyAffiliationTransfer';
+import { createChapterAffiliation } from '../../handlers/member/chapters/createChapterAffiliation';
+import { listChapterAffiliations } from '../../handlers/member/chapters/listChapterAffiliations';
+import { getChapterAffiliation } from '../../handlers/member/chapters/getChapterAffiliation';
+import { updateChapterAffiliation } from '../../handlers/member/chapters/updateChapterAffiliation';
+import { deleteChapterAffiliation } from '../../handlers/member/chapters/deleteChapterAffiliation';
+import { setPrimaryChapterAffiliation } from '../../handlers/member/chapters/setPrimaryChapterAffiliation';
+import { listOrgChapters } from '../../handlers/member/chapters/listOrgChapters';
+import { createRoyaltySplit } from '../../handlers/member/chapters/createRoyaltySplit';
+import { listRoyaltySplits } from '../../handlers/member/chapters/listRoyaltySplits';
+import { getRoyaltySplit } from '../../handlers/member/chapters/getRoyaltySplit';
+import { updateRoyaltySplit } from '../../handlers/member/chapters/updateRoyaltySplit';
+import { deleteRoyaltySplit } from '../../handlers/member/chapters/deleteRoyaltySplit';
 import { getAgingBucket } from '../../handlers/association:member/getAgingBucket';
 import { recalculateAgingBucket } from '../../handlers/association:member/recalculateAgingBucket';
 import { createMembershipApplication } from '../../handlers/association:member/createMembershipApplication';
@@ -170,12 +182,6 @@ import { deleteCandidate } from '../../handlers/association:member/deleteCandida
 import { updateCandidateStatus } from '../../handlers/association:member/updateCandidateStatus';
 import { listMyCertificates } from '../../handlers/association:member/listMyCertificates';
 import { getCertificate } from '../../handlers/association:member/getCertificate';
-import { createChapterAffiliation } from '../../handlers/association:member/createChapterAffiliation';
-import { listChapterAffiliations } from '../../handlers/association:member/listChapterAffiliations';
-import { getChapterAffiliation } from '../../handlers/association:member/getChapterAffiliation';
-import { updateChapterAffiliation } from '../../handlers/association:member/updateChapterAffiliation';
-import { deleteChapterAffiliation } from '../../handlers/association:member/deleteChapterAffiliation';
-import { setPrimaryChapterAffiliation } from '../../handlers/association:member/setPrimaryChapterAffiliation';
 import { getComplianceReport } from '../../handlers/association:member/getComplianceReport';
 import { refreshCompliance } from '../../handlers/association:member/refreshCompliance';
 import { getOrgCpdConfig } from '../../handlers/association:member/getOrgCpdConfig';
@@ -292,11 +298,6 @@ import { addRosterMember } from '../../handlers/association:member/addRosterMemb
 import { importRosterMembers } from '../../handlers/association:member/importRosterMembers';
 import { getRosterMember } from '../../handlers/association:member/getRosterMember';
 import { updateRosterMember } from '../../handlers/association:member/updateRosterMember';
-import { createRoyaltySplit } from '../../handlers/association:member/createRoyaltySplit';
-import { listRoyaltySplits } from '../../handlers/association:member/listRoyaltySplits';
-import { getRoyaltySplit } from '../../handlers/association:member/getRoyaltySplit';
-import { updateRoyaltySplit } from '../../handlers/association:member/updateRoyaltySplit';
-import { deleteRoyaltySplit } from '../../handlers/association:member/deleteRoyaltySplit';
 import { createSpecialAssessment } from '../../handlers/association:member/createSpecialAssessment';
 import { updateSpecialAssessment } from '../../handlers/association:member/updateSpecialAssessment';
 import { deleteSpecialAssessment } from '../../handlers/association:member/deleteSpecialAssessment';
@@ -312,7 +313,6 @@ import { bulkIssueCertificates } from '../../handlers/association:member/bulkIss
 import { verifyCertificatePublic } from '../../handlers/association:member/verifyCertificatePublic';
 import { getCreditCompliance } from '../../handlers/association:member/getCreditCompliance';
 import { listOfficerTermsSummary } from '../../handlers/association:member/listOfficerTermsSummary';
-import { listOrgChapters } from '../../handlers/default/listOrgChapters';
 import { getDuesMemberSummary } from '../../handlers/dues/getDuesMemberSummary';
 import { getDuesMetrics } from '../../handlers/dues/getDuesMetrics';
 import { getDuesDashboard } from '../../handlers/dues/getDuesDashboard';
@@ -611,7 +611,7 @@ export const registry = {
   listDocumentVersions,
   getDocumentVersion,
 
-  // Association:member handlers
+  // Member/chapters handlers
   createAffiliationTransfer,
   listAffiliationTransfers,
   getAffiliationTransfer,
@@ -619,6 +619,20 @@ export const registry = {
   approveTransferByTarget,
   completeAffiliationTransfer,
   denyAffiliationTransfer,
+  createChapterAffiliation,
+  listChapterAffiliations,
+  getChapterAffiliation,
+  updateChapterAffiliation,
+  deleteChapterAffiliation,
+  setPrimaryChapterAffiliation,
+  listOrgChapters,
+  createRoyaltySplit,
+  listRoyaltySplits,
+  getRoyaltySplit,
+  updateRoyaltySplit,
+  deleteRoyaltySplit,
+
+  // Association:member handlers
   getAgingBucket,
   recalculateAgingBucket,
   createMembershipApplication,
@@ -639,12 +653,6 @@ export const registry = {
   updateCandidateStatus,
   listMyCertificates,
   getCertificate,
-  createChapterAffiliation,
-  listChapterAffiliations,
-  getChapterAffiliation,
-  updateChapterAffiliation,
-  deleteChapterAffiliation,
-  setPrimaryChapterAffiliation,
   getComplianceReport,
   refreshCompliance,
   getOrgCpdConfig,
@@ -761,11 +769,6 @@ export const registry = {
   importRosterMembers,
   getRosterMember,
   updateRosterMember,
-  createRoyaltySplit,
-  listRoyaltySplits,
-  getRoyaltySplit,
-  updateRoyaltySplit,
-  deleteRoyaltySplit,
   createSpecialAssessment,
   updateSpecialAssessment,
   deleteSpecialAssessment,
@@ -781,9 +784,6 @@ export const registry = {
   verifyCertificatePublic,
   getCreditCompliance,
   listOfficerTermsSummary,
-
-  // Default handlers
-  listOrgChapters,
 
   // Dues handlers
   getDuesMemberSummary,

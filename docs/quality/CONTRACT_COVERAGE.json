@@ -1,64 +1,22 @@
 {
-  "generatedAt": "2026-06-06T16:19:08.915Z",
+  "generatedAt": "2026-06-07T02:43:42.694Z",
   "totals": {
     "endpoints": 454,
-    "hurlFiles": 111,
-    "coveredCount": 302,
-    "uncoveredCount": 152,
-    "coveragePercent": 67
+    "hurlFiles": 117,
+    "coveredCount": 321,
+    "uncoveredCount": 133,
+    "coveragePercent": 71
   },
   "uncoveredByTag": [
     {
       "tag": "Association:Member",
-      "uncoveredCount": 152,
-      "totalCount": 169,
-      "coveredCount": 17,
-      "coveragePercent": 10
+      "uncoveredCount": 133,
+      "totalCount": 151,
+      "coveredCount": 18,
+      "coveragePercent": 12
     }
   ],
   "uncoveredEndpoints": [
-    {
-      "method": "POST",
-      "path": "/association/member/affiliation-transfers",
-      "tag": "Association:Member",
-      "operationId": "createAffiliationTransfer"
-    },
-    {
-      "method": "GET",
-      "path": "/association/member/affiliation-transfers",
-      "tag": "Association:Member",
-      "operationId": "listAffiliationTransfers"
-    },
-    {
-      "method": "GET",
-      "path": "/association/member/affiliation-transfers/{transferId}",
-      "tag": "Association:Member",
-      "operationId": "getAffiliationTransfer"
-    },
-    {
-      "method": "POST",
-      "path": "/association/member/affiliation-transfers/{transferId}/approve-source",
-      "tag": "Association:Member",
-      "operationId": "approveTransferBySource"
-    },
-    {
-      "method": "POST",
-      "path": "/association/member/affiliation-transfers/{transferId}/approve-target",
-      "tag": "Association:Member",
-      "operationId": "approveTransferByTarget"
-    },
-    {
-      "method": "POST",
-      "path": "/association/member/affiliation-transfers/{transferId}/complete",
-      "tag": "Association:Member",
-      "operationId": "completeAffiliationTransfer"
-    },
-    {
-      "method": "POST",
-      "path": "/association/member/affiliation-transfers/{transferId}/deny",
-      "tag": "Association:Member",
-      "operationId": "denyAffiliationTransfer"
-    },
     {
       "method": "GET",
       "path": "/association/member/aging-buckets/{organizationId}",
@@ -172,42 +130,6 @@
       "path": "/association/member/certificates/{certificateId}",
       "tag": "Association:Member",
       "operationId": "getCertificate"
-    },
-    {
-      "method": "POST",
-      "path": "/association/member/chapter-affiliations",
-      "tag": "Association:Member",
-      "operationId": "createChapterAffiliation"
-    },
-    {
-      "method": "GET",
-      "path": "/association/member/chapter-affiliations",
-      "tag": "Association:Member",
-      "operationId": "listChapterAffiliations"
-    },
-    {
-      "method": "GET",
-      "path": "/association/member/chapter-affiliations/{affiliationId}",
-      "tag": "Association:Member",
-      "operationId": "getChapterAffiliation"
-    },
-    {
-      "method": "PATCH",
-      "path": "/association/member/chapter-affiliations/{affiliationId}",
-      "tag": "Association:Member",
-      "operationId": "updateChapterAffiliation"
-    },
-    {
-      "method": "DELETE",
-      "path": "/association/member/chapter-affiliations/{affiliationId}",
-      "tag": "Association:Member",
-      "operationId": "deleteChapterAffiliation"
-    },
-    {
-      "method": "POST",
-      "path": "/association/member/chapter-affiliations/{affiliationId}/set-primary",
-      "tag": "Association:Member",
-      "operationId": "setPrimaryChapterAffiliation"
     },
     {
       "method": "GET",
@@ -673,12 +595,6 @@
     },
     {
       "method": "GET",
-      "path": "/association/member/memberships",
-      "tag": "Association:Member",
-      "operationId": "listMemberships"
-    },
-    {
-      "method": "GET",
       "path": "/association/member/memberships/{membershipId}",
       "tag": "Association:Member",
       "operationId": "getMembership"
@@ -820,36 +736,6 @@
       "path": "/association/member/roster/{memberId}",
       "tag": "Association:Member",
       "operationId": "updateRosterMember"
-    },
-    {
-      "method": "POST",
-      "path": "/association/member/royalty-splits",
-      "tag": "Association:Member",
-      "operationId": "createRoyaltySplit"
-    },
-    {
-      "method": "GET",
-      "path": "/association/member/royalty-splits",
-      "tag": "Association:Member",
-      "operationId": "listRoyaltySplits"
-    },
-    {
-      "method": "GET",
-      "path": "/association/member/royalty-splits/{royaltySplitId}",
-      "tag": "Association:Member",
-      "operationId": "getRoyaltySplit"
-    },
-    {
-      "method": "PATCH",
-      "path": "/association/member/royalty-splits/{royaltySplitId}",
-      "tag": "Association:Member",
-      "operationId": "updateRoyaltySplit"
-    },
-    {
-      "method": "DELETE",
-      "path": "/association/member/royalty-splits/{royaltySplitId}",
-      "tag": "Association:Member",
-      "operationId": "deleteRoyaltySplit"
     },
     {
       "method": "POST",

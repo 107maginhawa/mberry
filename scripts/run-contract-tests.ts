@@ -28,7 +28,7 @@
  */
 
 import { spawnSync, spawn } from 'child_process'
-import { readdirSync, existsSync } from 'fs'
+import { readdirSync, existsSync, statSync } from 'fs'
 import { join } from 'path'
 
 const apiUrl = process.env.API_URL ?? 'http://localhost:7213'
@@ -59,11 +59,23 @@ if (!existsSync(contractDir)) {
 // Suffix lets each run use unique fixture identifiers (emails, etc.)
 const suffix = `${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 8)}`
 
-// Discover .hurl files
-const allFiles = readdirSync(contractDir)
-  .filter((f) => f.endsWith('.hurl'))
-  .sort()
-  .map((f) => join(contractDir, f))
+// Discover .hurl files (recursive — supports module-scoped contract dirs like
+// `member/chapters/*.hurl` introduced by the Step 6 rebuild).
+function walkHurl(dir: string): string[] {
+  const out: string[] = []
+  for (const entry of readdirSync(dir)) {
+    const full = join(dir, entry)
+    const st = statSync(full)
+    if (st.isDirectory()) {
+      out.push(...walkHurl(full))
+    } else if (entry.endsWith('.hurl')) {
+      out.push(full)
+    }
+  }
+  return out
+}
+
+const allFiles = walkHurl(contractDir).sort()
 
 if (allFiles.length === 0) {
   console.error('No .hurl files found in', contractDir)

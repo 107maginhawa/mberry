@@ -2,7 +2,7 @@ import type { ValidatedContext } from '@/types/app';
 import type { DatabaseInstance } from '@/core/database';
 import type { GetChapterAffiliationParams } from '@/generated/openapi/validators';
 import { UnauthorizedError, NotFoundError } from '@/core/errors';
-import { ChapterAffiliationRepository } from './repos/chapters.repo';
+import { ChapterAffiliationRepository } from '@/handlers/association:member/repos/chapters.repo';
 
 /**
  * getChapterAffiliation
