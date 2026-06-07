@@ -19,7 +19,7 @@
     "test": "bun test src/**/*.test.ts",
     "test:unit": "bun test src/**/*.test.ts",
     "test:coverage": "bun test --coverage",
-    "test:coverage:gate": "cd .. && bun run scripts/coverage-gate.ts",
+    "test:coverage:gate": "cd ../.. && bun run scripts/coverage-gate.ts",
     "test:integration": "bun test src/tests/",
     "typecheck": "tsc --noEmit",
     "lint": "eslint src"
