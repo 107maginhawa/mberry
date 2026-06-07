@@ -554,18 +554,251 @@ Three explicit user sign-offs before Step Cr.1 begins:
 
 ---
 
-## § 10 — Cr.1 pre-flight findings (PENDING)
+## § 10 — Cr.1 pre-flight findings (resolved)
 
-Sections § 10.A through § 10.G appended after Cr.1 verifications run.
+### § 10.A — Legacy `handlers/membership/*.ts` wiring audit (PER-FILE)
+
+**FINDING (changes § 4.3):** 4 of 13 legacy handlers ARE wired in `generated/openapi/registry.ts` as TypeSpec-operation impls. The other 9 are dead code.
+
+**LIVE (wired in registry.ts L427-431 + invoked at L928-931, served at routes.ts:3016/3024/3031/3038):**
+
+| File | Wired as | Routes.ts ref | Action |
+| --- | --- | --- | --- |
+| `getOrgProfile.ts` | impl of `OrganizationProfileManagement.get` (org-profile fold-in interface) | 3031 | MOVE to `handlers/member/membership/` (NOT `legacy/`) — becomes canonical org-profile impl. |
+| `updateOrgProfile.ts` | impl of `OrganizationProfileManagement.update` | 3038 | MOVE to `handlers/member/membership/` — canonical impl. |
+| `listOrgMembers.ts` | impl of some membership listing op | 3024 | MOVE to `handlers/member/membership/` — canonical impl. Possible naming-overlap with `listMemberships`; rename deferred to follow-up. |
+| `listOrgApplications.ts` | impl of some application listing op | 3016 | MOVE to `handlers/member/membership/` — canonical impl. Possible overlap with `listMembershipApplications`; rename deferred. |
+
+**DEAD (zero consumers — registry.ts grep + cross-handler grep both return zero):**
+
+`addMember.ts`, `csvImport.ts`, `getMember.ts`, `listApplications.ts`, `listCategories.ts`, `listMembers.ts`, `reviewApplication.ts`, `updateMember.ts`, `upsertCategory.ts` (9 files + their colocated tests).
+
+**Action:** DELETE at Cr.5. Plus the colocated tests: addMember.test.ts, csvImport.test.ts, getMember.test.ts, listApplications.test.ts, listCategories.test.ts, listMembers.test.ts, reviewApplication.test.ts, updateMember.test.ts, upsertCategory.test.ts, + integration-style tests (ac-m05.membership.test.ts, br-21.multi-org.test.ts, br-39.committee-dissolution.test.ts, br-p2-gap.test.ts, flow-03.application-membership.test.ts, flow-08.addmember-defaults.test.ts, flow-10.membership-status-transitions.test.ts, import-types.ts).
+
+**Caveat:** these may have valuable test coverage that should migrate. Pre-Cr.5 check: confirm `bun test` baseline passes without these files. If any test references LIVE handlers (the 4 above) or shared schemas/repos, MOVE not DELETE.
+
+**§ 4.3 amendment:** the provisional `legacy/` subdir IS NOT NEEDED. The 4 live legacy handlers become canonical impls at `handlers/member/membership/` (flat, no subdir).
+
+### § 10.B — Route-order check (zero hand-wired duplicates confirmed)
+
+All 40+ `/association/member/<membership-domain>` route registrations live in `generated/openapi/routes.ts` (lines 692-1917). ZERO duplicate registrations in `app.ts` for any membership-domain path. ZERO orphan `/membership/*` or `/members/*` registrations in app.ts.
+
+**Verdict:** § 4.4 holds. No kill step needed for generated-vs-hand-wired duplicates.
+
+### § 10.C — Generated handler file inventory (corrected — Explore + initial probe undercounted)
+
+Full list of generated handlers at `handlers/association:member/` that MOVE to `handlers/member/membership/`:
+
+**Membership lifecycle (10):**
+createMembership, getMembership, listMemberships, updateMembership, deleteMembership,
+deceaseMembership, reinstateMembership, renewMembership, resignMembership, terminateMembership
+
+**Tier (5):**
+createMembershipTier, getMembershipTier, listMembershipTiers, updateMembershipTier, deleteMembershipTier
+
+**Application (8):**
+createMembershipApplication, getMembershipApplication, listMembershipApplications, updateMembershipApplication, deleteMembershipApplication, approveMembershipApplication, denyMembershipApplication, bulkApproveMembershipApplications
+
+**Institutional (5):**
+createInstitutionalMembership, getInstitutionalMembership, listInstitutionalMemberships, updateInstitutionalMembership, deleteInstitutionalMembership
+
+**Seat allocation (3):**
+allocateSeat, listSeatAllocations, revokeSeat
+
+**Category (5):**
+createMembershipCategory, getMembershipCategory, listMembershipCategories (per registry.ts:231), deleteMembershipCategory, updateMembershipCategory, upsertMembershipCategory
+
+**Roster (5):**
+addRosterMember, getRosterMember, importRosterMembers, listRosterMembers, updateRosterMember
+
+**Subscription (3 — hand-wired, MOVE with membership per § 10.D):**
+createSubscriptionCheckout, getMySubscription, upgradeSubscription
+
+**Total generated + hand-wired: ~44 source handlers.**
+
+Plus 4 legacy LIVE handlers (§ 10.A): getOrgProfile, updateOrgProfile, listOrgMembers, listOrgApplications.
+
+**Grand total: 48 source handlers move.** Plus 4 utils + statusRecomputeCron job + graceToLapsed job + 2 jobs registrars = ~55 source files. Plus colocated tests ≈ **120 file operations** (cutover atomic).
+
+**NOT moving (cross-domain, untouched):** getOrgDashboard (M4-DASHBOARD, cross-domain), transitionOfficerTerm (governance), creditIssue + complianceThreshold + directoryAutoPopulate (other domains' jobs at `association:member/jobs/`).
+
+### § 10.D — Subscription handler locations (3 to MOVE, 6 stay at platformadmin)
+
+| Handler | Current path | Disposition |
+| --- | --- | --- |
+| listPricingTiers, createPricingTier, updatePricingTier | `handlers/platformadmin/` | STAY at platformadmin (admin-tier, untouched). |
+| listSubscriptions, getSubscription, cancelSubscription | `handlers/platformadmin/` | STAY at platformadmin. |
+| getMySubscription, upgradeSubscription, createSubscriptionCheckout | `handlers/association:member/` | MOVE to `handlers/member/membership/subscription/` (sub-subdir for clarity — hand-wired side-cars). Imports at `app.ts:590-595` rewrite. |
+
+**§ 4.5 amendment:** subscription routes stay hand-wired BUT 3 handler files at `association:member/` MUST relocate (last cutover dissolves namespace). Sub-subdir `subscription/` makes their hand-wired status obvious.
+
+### § 10.E — `computeMembershipStatus` + sibling utils consumer ripple (LARGE)
+
+Consumers of any of (`compute-membership-status`, `computeMembershipStatus`, `membership-lifecycle`, `membership-status-middleware`, `status-transitions`) outside `association:member/utils/`:
+
+**Sibling membership handlers (move TOGETHER with utils, no rewrite needed — paths become relative `./utils/...`):**
+- deceaseMembership, reinstateMembership, renewMembership, resignMembership, terminateMembership
+- jobs/statusRecomputeCron.ts
+- repos/dues.repo.ts (`association:member/repos/dues.repo.ts` is the 3-LOC re-export shim per dues SCOPE § 4.2; consumer here is incidental)
+
+**Cross-domain consumers (rewrite ABSOLUTE import paths at Cr.6):**
+- `handlers/association:operations/{completeTrainingEnrollment, publishTraining, updateTrainingEnrollment}.ts`
+- `handlers/booking/{rejectBooking, repos/booking.repo}.ts`
+- `handlers/dues/repos/dues-payments.repo.ts` (canonical dues repo at OLD path, dues already cut over — verify path)
+- `handlers/elections/{castVote, updateElectionStatus}.ts`
+- `handlers/email/repos/queue.repo.ts`
+- `handlers/marketplace/{fulfillOrder, repos/vendor.repo, verifyVendor}.ts`
+- `handlers/member/credentials/issueDigitalCredential.ts`
+- `handlers/member/duesspecialassessments/{deleteDuesInvoice, markDuesInvoicePaid, refundDuesPayment}.ts`
+- `handlers/member/governance/{castBallot, createCandidate, updateOfficerTerm}.ts`
+
+**Legacy `handlers/membership/*.ts` (deletion candidates):** getMember.ts, listMembers.ts, listOrgMembers.ts, updateMember.ts. The 4 LIVE legacy handlers at § 10.A may have these imports — verify per-file at Cr.6.
+
+**Total rewrite count: ~20 cross-handler import lines + dozens within tests.** Heaviest Cr.6 step in any cutover so far. Mitigation: typecheck after Cr.6 surfaces missed rewrites immediately.
+
+**Legacy `handlers/membership/repos/membership.repo` consumers (REPO stays at OLD path per § 4.2 — ZERO rewrite needed):**
+- test-utils/preload-pristine.ts
+- core/ports/ports.test.ts
+- handlers/member/credits/getCreditCompliance.ts
+- handlers/association:member/{getRosterMember, listRosterMembers, listRosterMembers.test}.ts (these MOVE with membership, but the repo import path stays absolute @/handlers/membership/repos/)
+- handlers/events/{listRegistrations, listAttendance, auth-enforcement.test}.ts
+
+**Net: zero ripple from repo decision (§ 4.2 prevents thrash).**
+
+### § 10.F — Repo + schema location (confirmed clean, no hybrid)
+
+**`handlers/association:member/repos/` (membership domain, stays):**
+- membership.repo.ts (classes: MembershipTierRepository, MembershipRepository, MembershipApplicationRepository, MembershipCategoryRepository)
+- membership.schema.ts (tables: membershipTiers, memberships, membershipApplications, membershipCategories — no hybrid co-location)
+- institutional-membership.repo.ts (classes: InstitutionalMembershipRepository, SeatAllocationRepository)
+- institutional-membership.schema.ts (tables: institutionalMemberships, seatAllocations)
+
+**`handlers/membership/repos/` (legacy query-rich, stays per § 4.2):**
+- membership.repo.ts (query-rich JOIN/search per CLAUDE.md)
+- membership.repo.test.ts
+- membership.cross-module-sql.test.ts
+
+**No status-history schema seen at probed paths.** graceToLapsed.ts imports `status-history.schema` — verify at Cr.6 it's at `association:member/repos/` (likely; otherwise alternate path).
+
+**Verdict:** § 4.2 confirmed. All schema + repo files stay at OLD paths. Zero schema/repo movement.
+
+### § 10.G — Jobs registrar split + closeout
+
+**`handlers/association:member/jobs/index.ts` (current post-dues state):**
+- Imports dues processors from `@/handlers/member/duesspecialassessments/jobs/*` (already-cut-over absolute path)
+- Imports `creditIssue`, `complianceThreshold` from local `./` (stay)
+- Re-exports `registerStatusRecomputeJob` from `./statusRecomputeCron`
+- Exports `registerDuesJobs(scheduler, billing)` — registers dues + credits + certificate pipeline events
+
+**Closeout actions at Cr.6 + Cr.7:**
+- Remove `registerStatusRecomputeJob` re-export (Cr.5 deletes statusRecomputeCron.ts at OLD; Cr.3 creates at NEW).
+- Update `app.ts:43` to import `registerStatusRecomputeJob` from `@/handlers/member/membership/jobs` instead.
+- LEAVE `registerDuesJobs` registrar at `association:member/jobs/index.ts` — credits + certificate pipeline events live in its body. Cleaning up the registrar name is a future cleanup wave.
+
+**`handlers/membership/jobs/` (legacy, MOVES wholesale to membership):**
+- `graceToLapsed.ts` — moves to `handlers/member/membership/jobs/graceToLapsed.ts`. Schema imports rewrite to absolute (`@/handlers/association:member/repos/membership.schema` + `@/handlers/association:member/repos/status-history.schema`).
+- `graceToLapsed.test.ts` — moves alongside.
+- `index.ts` (exports `registerMembershipJobs(scheduler, notifs?)`) — moves to `handlers/member/membership/jobs/membership-registrar.ts` (renamed to avoid collision with the existing `index.ts` plan). OR fold into a new combined `index.ts` exporting BOTH `registerStatusRecomputeJob` + `registerMembershipJobs`.
+  
+  **Decision:** single new `index.ts` re-exports both registrars:
+  ```ts
+  export { registerStatusRecomputeJob } from './statusRecomputeCron';
+  export { registerMembershipJobs } from './membership-jobs-registrar';
+  ```
+  Keeps `app.ts:43 + 45` invocations at the same surface (both imports converge to `@/handlers/member/membership/jobs`).
+- `index.test.ts` — moves alongside.
+
+**§ 4.7 confirmed**, with concrete file structure decided.
+
+### § 10.H — UUID + unique constraint catalog (for Hurl scenarios)
+
+Per Explore § 10-11 + schema probe (membership.schema.ts + institutional-membership.schema.ts):
+
+| Table | PK type | Unique constraints | Hurl gotcha |
+| --- | --- | --- | --- |
+| `membership_tiers` | uuid | `membership_tier_org_code_idx(organizationId, code)` | Per-`{{suffix}}` random code. |
+| `memberships` | uuid | `membership_org_person_idx(organizationId, personId)` | Per-`{{suffix}}` random person OR pre-cleanup. |
+| `membership_applications` | uuid | (no unique seen — verify at Cr.9) | Likely org+person uniqueness on submit. |
+| `institutional_memberships` | uuid | (parent_org_idx, no unique) | None known. |
+| `seat_allocations` | uuid | unique `(institutional_membership_id, person_id)` | Per-`{{suffix}}` random person. |
+| `membership_categories` | uuid | likely `(organization_id, code)` unique — verify at Cr.9 | Per-`{{suffix}}` random code. |
+
+**Top Hurl gotchas:**
+1. `(organization_id, person_id)` unique on memberships — fresh person seed per `{{suffix}}`.
+2. `(institutional_membership_id, person_id)` unique on seat allocations — fresh person per seat.
+3. `(organization_id, code)` unique on tiers — `{{suffix}}` randomization.
+
+All PKs uuid (no varchar/uuid mismatch). `{{newUuid}}` safe everywhere except `person_id` FK (use seeded officer `test@memberry.ph`).
+
+### Final verdict
+
+| Question | Answer | Notes |
+| --- | --- | --- |
+| Cr.2 retag safe? | **YES** | 8 interfaces at main.tsp:254-284 only. Sibling tags (credits 290-296, dues 302-340, chapters 346-360, governance 366+) untouched. |
+| Exhaustive interface scan miss risk? | **MITIGATED** | All 8 `@tag("Association:Member")` are at main.tsp:254-284. Pre-Cr.2 re-grep confirms zero leftover under this tag elsewhere. |
+| Cr.3 restore file list complete? | **YES — 48 source handlers + 4 utils + 2 jobs + 4 legacy = ~58 source files** | Plus colocated tests ≈ 120 file operations. |
+| Cr.5 dead-code kill list complete? | **YES — 9 legacy handler files + colocated tests** | Caveat: confirm `bun test` baseline pre-Cr.5. |
+| Cr.6 rewrite scope manageable? | **YES — ~20 cross-handler import lines + app.ts:43,45** | Heaviest Cr.6 ever; typecheck post-Cr.6 catches gaps. |
+| Cr.9 hurl gotchas documented? | **YES — 3 unique constraints** | All uuid PKs, no varchar gotchas like dues. |
+| Any § 4 decisions need amendment? | **YES — 3 minor + § 4.3 retired `legacy/` subdir** | See § 11. |
+
+**Blockers: 0. Amendments below.**
 
 ---
 
-## § 11 — Amendments (PENDING)
+## § 11 — Net § 4/§ 6 amendments (post-Cr.1)
 
-Sections appended after Cr.1 surfaces deviations from § 4 decisions.
+### § 11.A § 4.3 amended — `legacy/` subdir retired
+
+The 4 LIVE legacy handlers (`getOrgProfile`, `updateOrgProfile`, `listOrgMembers`, `listOrgApplications`) at `handlers/membership/` become CANONICAL impls at `handlers/member/membership/` (flat, no `legacy/` subdir). Rename-vs-merge with overlapping ops (`listMemberships`/`listOrgMembers`) is a future cleanup wave — not bundled.
+
+The 9 DEAD legacy handlers are DELETED at Cr.5 (no relocation).
+
+### § 11.B New § 4.8 — Subscription sub-subdir
+
+`handlers/member/membership/subscription/` sub-subdir holds the 3 hand-wired subscription handlers (`getMySubscription`, `upgradeSubscription`, `createSubscriptionCheckout`). Makes hand-wired status visually distinct from generated peers.
+
+### § 11.C § 4.6 amended — jobs/index.ts shape
+
+New `handlers/member/membership/jobs/index.ts` re-exports BOTH registrars from one entry point:
+```ts
+export { registerStatusRecomputeJob } from './statusRecomputeCron';
+export { registerMembershipJobs } from './membership-jobs-registrar';
+```
+
+`app.ts:43 + 45` both rewrite to `@/handlers/member/membership/jobs` (one path).
+
+### § 11.D Cr.6 grep scope updated
+
+```sh
+grep -rn '@/handlers/\(association:member\|membership\)/' services/api-ts/src/ --include='*.ts' \
+  | grep -v 'repos/\|jobs/\(creditIssue\|complianceThreshold\|directoryAutoPopulate\)\|getOrgDashboard\|transitionOfficerTerm' \
+  | grep -v '\.test\.ts$'
+```
+
+Expected post-Cr.6: zero hits referencing moved files. Allowlist:
+- `@/handlers/association:member/repos/*` (per § 4.2, stay)
+- `@/handlers/membership/repos/*` (per § 4.2, stay)
+- `@/handlers/association:member/jobs/{creditIssue,complianceThreshold,directoryAutoPopulate}` (other domains)
+- `@/handlers/association:member/{getOrgDashboard,transitionOfficerTerm}` (cross-domain, stay)
+
+### § 11.E Cr.5 dead-code pre-flight check
+
+Before deleting the 9 dead legacy handler files + their tests:
+```sh
+cd services/api-ts && bun test 2>&1 | tail -10
+```
+Confirm baseline pass count. If any of the 9 test files references LIVE schemas/repos in a way that adds unique coverage, MOVE the test (skip handler), not DELETE. Default: DELETE all 9 source + tests.
+
+### § 11.F Last-cutover hygiene
+
+After Cr.7 + Cr.8 pass:
+- `handlers/association:member/` directory should hold only: `getOrgDashboard.ts`, `transitionOfficerTerm.ts`, `jobs/{creditIssue,complianceThreshold,directoryAutoPopulate,index}.ts`, `repos/*` (all). Confirm via `ls`.
+- `handlers/membership/` directory should hold only: `repos/*` (3 files). Confirm.
+- The `association:member` namespace IS NOT fully dissolved (governance + dashboard remain) — ROADMAP P1-11 close-out notes this. Future "dissolve" wave handles `getOrgDashboard` + `transitionOfficerTerm` + repo relocation + cron registry tidy.
 
 ---
 
-**Cr.0 closed. Cr.1 (pre-flight verifications per § 5.A through § 5.G) is next.**
+**Cr.1 closed. Cr.2 (per-interface main.tsp retag + regen) is next.**
 
-On user confirmation of § 9 checkpoint (scope + decisions + sequence): proceed to Step Cr.1.
+On user confirmation of § 10 findings + § 11 amendments: proceed to Step Cr.2.
