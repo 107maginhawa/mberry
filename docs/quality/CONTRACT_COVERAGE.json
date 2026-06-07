@@ -1,26 +1,26 @@
 {
-  "generatedAt": "2026-06-07T10:31:54.031Z",
+  "generatedAt": "2026-06-07T11:23:41.965Z",
   "totals": {
     "endpoints": 454,
-    "hurlFiles": 143,
-    "coveredCount": 375,
-    "uncoveredCount": 79,
-    "coveragePercent": 83
+    "hurlFiles": 146,
+    "coveredCount": 387,
+    "uncoveredCount": 67,
+    "coveragePercent": 85
   },
   "uncoveredByTag": [
-    {
-      "tag": "Association:Member",
-      "uncoveredCount": 37,
-      "totalCount": 40,
-      "coveredCount": 3,
-      "coveragePercent": 8
-    },
     {
       "tag": "Member/DuesSpecialAssessments",
       "uncoveredCount": 34,
       "totalCount": 50,
       "coveredCount": 16,
       "coveragePercent": 32
+    },
+    {
+      "tag": "Member/Membership",
+      "uncoveredCount": 25,
+      "totalCount": 40,
+      "coveredCount": 15,
+      "coveragePercent": 38
     },
     {
       "tag": "Member/Credits",
@@ -65,51 +65,33 @@
       "operationId": "recalculateAgingBucket"
     },
     {
-      "method": "POST",
-      "path": "/association/member/applications",
-      "tag": "Association:Member",
-      "operationId": "createMembershipApplication"
-    },
-    {
       "method": "GET",
       "path": "/association/member/applications",
-      "tag": "Association:Member",
+      "tag": "Member/Membership",
       "operationId": "listMembershipApplications"
     },
     {
       "method": "POST",
       "path": "/association/member/applications/bulk-approve",
-      "tag": "Association:Member",
+      "tag": "Member/Membership",
       "operationId": "bulkApproveMembershipApplications"
-    },
-    {
-      "method": "GET",
-      "path": "/association/member/applications/{applicationId}",
-      "tag": "Association:Member",
-      "operationId": "getMembershipApplication"
     },
     {
       "method": "PATCH",
       "path": "/association/member/applications/{applicationId}",
-      "tag": "Association:Member",
+      "tag": "Member/Membership",
       "operationId": "updateMembershipApplication"
     },
     {
       "method": "DELETE",
       "path": "/association/member/applications/{applicationId}",
-      "tag": "Association:Member",
+      "tag": "Member/Membership",
       "operationId": "deleteMembershipApplication"
     },
     {
       "method": "POST",
-      "path": "/association/member/applications/{applicationId}/approve",
-      "tag": "Association:Member",
-      "operationId": "approveMembershipApplication"
-    },
-    {
-      "method": "POST",
       "path": "/association/member/applications/{applicationId}/deny",
-      "tag": "Association:Member",
+      "tag": "Member/Membership",
       "operationId": "denyMembershipApplication"
     },
     {
@@ -335,147 +317,99 @@
       "operationId": "certifyElection"
     },
     {
-      "method": "POST",
-      "path": "/association/member/institutional-memberships",
-      "tag": "Association:Member",
-      "operationId": "createInstitutionalMembership"
-    },
-    {
       "method": "GET",
       "path": "/association/member/institutional-memberships",
-      "tag": "Association:Member",
+      "tag": "Member/Membership",
       "operationId": "listInstitutionalMemberships"
     },
     {
       "method": "GET",
       "path": "/association/member/institutional-memberships/{institutionalMembershipId}",
-      "tag": "Association:Member",
+      "tag": "Member/Membership",
       "operationId": "getInstitutionalMembership"
     },
     {
       "method": "PATCH",
       "path": "/association/member/institutional-memberships/{institutionalMembershipId}",
-      "tag": "Association:Member",
+      "tag": "Member/Membership",
       "operationId": "updateInstitutionalMembership"
     },
     {
       "method": "DELETE",
       "path": "/association/member/institutional-memberships/{institutionalMembershipId}",
-      "tag": "Association:Member",
+      "tag": "Member/Membership",
       "operationId": "deleteInstitutionalMembership"
-    },
-    {
-      "method": "POST",
-      "path": "/association/member/institutional-memberships/{institutionalMembershipId}/seats",
-      "tag": "Association:Member",
-      "operationId": "allocateSeat"
-    },
-    {
-      "method": "GET",
-      "path": "/association/member/institutional-memberships/{institutionalMembershipId}/seats",
-      "tag": "Association:Member",
-      "operationId": "listSeatAllocations"
-    },
-    {
-      "method": "POST",
-      "path": "/association/member/institutional-memberships/{institutionalMembershipId}/seats/{seatAllocationId}/revoke",
-      "tag": "Association:Member",
-      "operationId": "revokeSeat"
-    },
-    {
-      "method": "POST",
-      "path": "/association/member/memberships",
-      "tag": "Association:Member",
-      "operationId": "createMembership"
-    },
-    {
-      "method": "GET",
-      "path": "/association/member/memberships/{membershipId}",
-      "tag": "Association:Member",
-      "operationId": "getMembership"
     },
     {
       "method": "PATCH",
       "path": "/association/member/memberships/{membershipId}",
-      "tag": "Association:Member",
+      "tag": "Member/Membership",
       "operationId": "updateMembership"
     },
     {
       "method": "DELETE",
       "path": "/association/member/memberships/{membershipId}",
-      "tag": "Association:Member",
+      "tag": "Member/Membership",
       "operationId": "deleteMembership"
     },
     {
       "method": "POST",
       "path": "/association/member/memberships/{membershipId}/deceased",
-      "tag": "Association:Member",
+      "tag": "Member/Membership",
       "operationId": "deceaseMembership"
     },
     {
       "method": "POST",
-      "path": "/association/member/memberships/{membershipId}/reinstate",
-      "tag": "Association:Member",
-      "operationId": "reinstateMembership"
-    },
-    {
-      "method": "POST",
       "path": "/association/member/memberships/{membershipId}/renew",
-      "tag": "Association:Member",
+      "tag": "Member/Membership",
       "operationId": "renewMembership"
     },
     {
       "method": "POST",
-      "path": "/association/member/memberships/{membershipId}/resign",
-      "tag": "Association:Member",
-      "operationId": "resignMembership"
-    },
-    {
-      "method": "POST",
       "path": "/association/member/memberships/{membershipId}/terminate",
-      "tag": "Association:Member",
+      "tag": "Member/Membership",
       "operationId": "terminateMembership"
     },
     {
       "method": "GET",
       "path": "/association/member/org-profile/{organizationId}",
-      "tag": "Association:Member",
+      "tag": "Member/Membership",
       "operationId": "getOrganizationProfile"
     },
     {
       "method": "PUT",
       "path": "/association/member/org-profile/{organizationId}",
-      "tag": "Association:Member",
+      "tag": "Member/Membership",
       "operationId": "updateOrganizationProfile"
     },
     {
       "method": "GET",
       "path": "/association/member/roster",
-      "tag": "Association:Member",
+      "tag": "Member/Membership",
       "operationId": "listRosterMembers"
     },
     {
       "method": "POST",
       "path": "/association/member/roster",
-      "tag": "Association:Member",
+      "tag": "Member/Membership",
       "operationId": "addRosterMember"
     },
     {
       "method": "POST",
       "path": "/association/member/roster/import",
-      "tag": "Association:Member",
+      "tag": "Member/Membership",
       "operationId": "importRosterMembers"
     },
     {
       "method": "GET",
       "path": "/association/member/roster/{memberId}",
-      "tag": "Association:Member",
+      "tag": "Member/Membership",
       "operationId": "getRosterMember"
     },
     {
       "method": "PUT",
       "path": "/association/member/roster/{memberId}",
-      "tag": "Association:Member",
+      "tag": "Member/Membership",
       "operationId": "updateRosterMember"
     },
     {
@@ -499,31 +433,25 @@
     {
       "method": "POST",
       "path": "/association/member/tiers",
-      "tag": "Association:Member",
+      "tag": "Member/Membership",
       "operationId": "createMembershipTier"
     },
     {
       "method": "GET",
-      "path": "/association/member/tiers",
-      "tag": "Association:Member",
-      "operationId": "listMembershipTiers"
-    },
-    {
-      "method": "GET",
       "path": "/association/member/tiers/{tierId}",
-      "tag": "Association:Member",
+      "tag": "Member/Membership",
       "operationId": "getMembershipTier"
     },
     {
       "method": "PATCH",
       "path": "/association/member/tiers/{tierId}",
-      "tag": "Association:Member",
+      "tag": "Member/Membership",
       "operationId": "updateMembershipTier"
     },
     {
       "method": "DELETE",
       "path": "/association/member/tiers/{tierId}",
-      "tag": "Association:Member",
+      "tag": "Member/Membership",
       "operationId": "deleteMembershipTier"
     }
   ]

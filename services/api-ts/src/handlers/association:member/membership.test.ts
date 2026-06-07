@@ -1,7 +1,7 @@
 import { describe, test, expect } from 'bun:test';
 import { makeCtx } from '@/test-utils/make-ctx';
-import { createMembershipTier } from './createMembershipTier';
-import { getMembershipTier } from './getMembershipTier';
+import { createMembershipTier } from '@/handlers/member/membership/createMembershipTier';
+import { getMembershipTier } from '@/handlers/member/membership/getMembershipTier';
 import { BusinessLogicError } from '@/core/errors';
 
 // M02: getMyMemberships should return all memberships for the authenticated user
