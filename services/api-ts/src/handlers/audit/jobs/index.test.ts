@@ -5,9 +5,24 @@
  * calls archiveOldLogs() and purgeArchivedLogs(), and re-throws on failure.
  */
 
-import { describe, test, expect, mock } from 'bun:test';
+import { describe, test, expect, mock, spyOn, afterEach } from 'bun:test';
 import { registerAuditJobs } from './index';
 import type { JobScheduler, JobContext } from '@/core/jobs';
+import { AuditRepository } from '../repos/audit.repo';
+
+// Stub archiveOldLogs / purgeArchivedLogs on the real AuditRepository
+// prototype using spyOn rather than mock.module — the latter is
+// process-wide and would leak into audit.repo.test.ts via Bun's
+// shared module registry, replacing the real class with a stub that
+// lacks the methods under test there.
+let archiveSpy: ReturnType<typeof spyOn> | null = null;
+let purgeSpy: ReturnType<typeof spyOn> | null = null;
+afterEach(() => {
+  archiveSpy?.mockRestore();
+  purgeSpy?.mockRestore();
+  archiveSpy = null;
+  purgeSpy = null;
+});
 
 // Mock-Classification: APPROPRIATE — audit logging infrastructure boundary
 // Assertion-Style: EXISTENCE_CHECK — verifying middleware/context injection patterns
@@ -60,23 +75,17 @@ describe('registerAuditJobs', () => {
       }),
     } as any;
 
-    const mockArchive = mock(async () => 42);
-    const mockPurge = mock(async () => 3);
-
-    // Mock the dynamic import of AuditRepository
-    mock.module('../repos/audit.repo', () => ({
-      AuditRepository: class {
-        archiveOldLogs = mockArchive;
-        purgeArchivedLogs = mockPurge;
-      },
-    }));
+    archiveSpy = spyOn(AuditRepository.prototype, 'archiveOldLogs')
+      .mockResolvedValue(42);
+    purgeSpy = spyOn(AuditRepository.prototype, 'purgeArchivedLogs')
+      .mockResolvedValue(3);
 
     registerAuditJobs(scheduler);
     const context = makeContext();
     await capturedHandler!(context);
 
-    expect(mockArchive).toHaveBeenCalledWith(365);
-    expect(mockPurge).toHaveBeenCalledWith(2555);
+    expect(archiveSpy).toHaveBeenCalledWith(365);
+    expect(purgeSpy).toHaveBeenCalledWith(2555);
   });
 
   test('logs error and re-throws on failure', async () => {
@@ -89,12 +98,10 @@ describe('registerAuditJobs', () => {
 
     const boom = new Error('database connection lost');
 
-    mock.module('../repos/audit.repo', () => ({
-      AuditRepository: class {
-        archiveOldLogs = mock(async () => { throw boom; });
-        purgeArchivedLogs = mock(async () => 0);
-      },
-    }));
+    archiveSpy = spyOn(AuditRepository.prototype, 'archiveOldLogs')
+      .mockRejectedValue(boom);
+    purgeSpy = spyOn(AuditRepository.prototype, 'purgeArchivedLogs')
+      .mockResolvedValue(0);
 
     registerAuditJobs(scheduler);
     const context = makeContext();
@@ -115,12 +122,10 @@ describe('registerAuditJobs', () => {
       }),
     } as any;
 
-    mock.module('../repos/audit.repo', () => ({
-      AuditRepository: class {
-        archiveOldLogs = mock(async () => 0);
-        purgeArchivedLogs = mock(async () => 0);
-      },
-    }));
+    archiveSpy = spyOn(AuditRepository.prototype, 'archiveOldLogs')
+      .mockResolvedValue(0);
+    purgeSpy = spyOn(AuditRepository.prototype, 'purgeArchivedLogs')
+      .mockResolvedValue(0);
 
     registerAuditJobs(scheduler);
     const context = makeContext();
