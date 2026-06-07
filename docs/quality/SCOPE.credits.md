@@ -372,4 +372,83 @@ Three explicit user-sign-offs before Step Cr.1 begins:
 
 3. **Sequence** — §6's 10-step atomic execution with per-step typecheck + commit. Tag `member-credits-cutover` only on the cutover atomic; post-cutover hygiene commits stay untagged (cert pattern).
 
+---
+
+## §10 — Cr.1 pre-flight findings (resolved)
+
+### §10.A — Route order on `POST /association/member/credits/void-event`
+
+`app.ts:468` calls `registerOpenAPIRoutes(app, ...)`; the `HAND-WIRED ROUTES` section begins at `app.ts:471+`; the duplicate hand-wired `app.post('/association/member/credits/void-event', ...)` is at `app.ts:580`. Hono first-wins → **generated route wins**, hand-wired is dead code. §4.1 (kill hand-wired) is safe — zero runtime impact.
+
+### §10.B — `credits.repo.ts` class inventory
+
+Three classes in one file (`services/api-ts/src/handlers/association:member/repos/credits.repo.ts`):
+
+| Line | Class | Domain |
+| --- | --- | --- |
+| 35 | `CreditEntryRepository` | credits ✓ in scope |
+| 215 | `ProfessionalLicenseRepository` | credentials ✗ out of scope |
+| 264 | `LicenseRenewalAlertRepository` | credentials ✗ out of scope |
+
+The file imports `./credentials.schema` (same dir, also hybrid). **Decision: leave `credits.repo.ts` AND `credits.schema.ts` at the OLD path**; credit handlers at `handlers/member/credits/<name>.ts` cross-import via `@/handlers/association:member/repos/credits.{repo,schema}`. Mirrors the cert pattern (certs cross-imports from `credentials.repo` at the old path). Tech debt documented for a future credentials/credits repo split.
+
+**Amendment to §4.5:** the original §4.5 said "move all of these into `handlers/member/credits/` at the same relative paths." Override: move ONLY `services/credit.service.ts` + `utils/credit-cycle{,.test}.ts` to the new path. Keep `repos/credits.{repo,schema}.ts` at the old path.
+
+### §10.C — `uq_credit_source_person` Hurl idempotency plan
+
+Manual-credit writers consume `body.idempotencyKey`:
+- `adjustCreditEntry.ts:47` — `body.idempotencyKey ?? randomUUID()` (sourceId)
+- `awardManualCredit.ts:36` — `body.idempotencyKey` (sourceId, required)
+
+Hurl scenarios pass `"idempotencyKey": "{{suffix}}-<scenario>"` to keep `(sourceType, sourceId, personId)` unique per run.
+
+`createCreditEntry.ts` (service-helper, not registered) doesn't set sourceId — null safe under the unique constraint.
+
+Job-side `processCreditIssue` (`handlers/association:member/jobs/creditIssue.ts:42`) swallows the constraint via `err.code === '23505'` — Hurl indirectly testing event-driven credits won't see a 500.
+
+### §10.D — Operation inventory (11 ops across 8 interfaces)
+
+| # | Interface | OperationId | Handler file (current path) |
+| --- | --- | --- | --- |
+| 1 | `CreditComplianceManagement` | `getCreditCompliance` | `getCreditCompliance.ts` |
+| 2 | `OfficerTermsManagement` | `listOfficerTermsSummary` | `listOfficerTermsSummary.ts` |
+| 3 | `CpdConfigManagement` | `getOrgCpdConfig` | `getOrgCpdConfig.ts` |
+| 4 | `CpdConfigManagement` | `updateOrgCpdConfig` | `updateOrgCpdConfig.ts` |
+| 5 | `ManualCreditManagement` | `awardManualCredit` | `awardManualCredit.ts` |
+| 6 | `CreditAdjustmentManagement` | `adjustCreditEntry` | `adjustCreditEntry.ts` |
+| 7 | `EventCreditVoidManagement` | `voidCreditEntry` | `voidCreditEntry.ts` |
+| 8 | `MemberPeerCreditsManagement` | `listMemberCreditsForPeer` | `listMemberCreditsForPeer.ts` |
+| 9 | `ComplianceManagement` | `getComplianceReport` | `getComplianceReport.ts` |
+| 10 | `ComplianceManagement` | `refreshCompliance` | `refreshCompliance.ts` |
+| H1 | hand-wired | `getCreditTranscript` (WF-070) | `getCreditTranscript.ts` |
+| H2 | hand-wired | `getCreditTranscriptPdf` (WF-070) | `getCreditTranscriptPdf.ts` |
+
+**Potential dead handlers** (`getCpdConfig.ts`, `updateCpdConfig.ts` — sit alongside the `getOrgCpdConfig.ts` / `updateOrgCpdConfig.ts` pair). Confirm during Cr.3: if they have no registry references and no other importers, delete with the cutover (cert `listCertificates`-style decision — but here, dead means dead).
+
+### §10.E — `credits.test.ts` + `createCreditEntry.ts` scope
+
+`credits.test.ts` (871 LOC) has 20 `describe` blocks:
+- **7 credentials-domain**: `createProfessionalLicense`, `getProfessionalLicense`, `listProfessionalLicenses`, `updateProfessionalLicense`, `deleteProfessionalLicense`, `listLicenseRenewalAlerts`, `acknowledgeLicenseRenewalAlert`
+- **13 credits-domain**: `createCreditEntry`, `getCreditTranscript`, `[BR-11]` cycle (×2), `[BR-12]` carryover, `[BR-13]` auto-credits, `summarizeCycle`, `[PRC-03]` batch, `[BR-14]` cross-org, `[AC-M10-001]` transcript, `[AC-M10-001]` compliance, `[AC-M10-003]` excess carryover, `[AC-M10-004]` toggle independence
+
+`createCreditEntry.ts` (77 LOC) is consumed only by `credits.test.ts:148, 155` dynamic imports. No registry presence. Service-helper.
+
+**Decision (deferred split):** at Cr.3 + Cr.4, MOVE `credits.test.ts` AS-IS to `handlers/member/credits/`; MOVE `createCreditEntry.ts` with a marker comment matching cert's `listCertificates.ts` pattern ("service-helper, not a registered route"). Document the credentials describes inside `credits.test.ts` as cross-domain tech debt in the MODULE_SPEC; schedule the file split for when the credentials post-R3 test-path consolidation runs.
+
+---
+
+## §11 — Net §4/§6 amendments (post-Cr.1)
+
+- §4.5 → see §10.B amendment: schema + repo stay at OLD path; only `services/` + `utils/` move.
+- §6 Cr.4 → only `git mv` `services/credit.service.ts` + `utils/credit-cycle{,.test}.ts` (not `repos/`).
+- §6 Cr.5 → leave `repos/credits.{repo,schema}.ts` untouched at the OLD path.
+- §6 Cr.6 → grep verification updated:
+  ```sh
+  grep -rn '@/handlers/association:member/\(services/credit\|utils/credit\|getCreditTranscript\|listMemberCreditsForPeer\|adjustCreditEntry\|awardManualCredit\|voidCreditEntry\|getCreditCompliance\|listOfficerTermsSummary\|getOrgCpdConfig\|updateOrgCpdConfig\|getComplianceReport\|refreshCompliance\)' services/api-ts/src/ --include='*.ts'
+  ```
+  Should return zero hits. `repos/credits` import paths intentionally stay.
+- §6 Cr.3 → restore handler file list expanded to 11 generated ops + 2 hand-wired transcripts + 1 service-helper (`createCreditEntry`) + 1 test (`credits.test.ts`). Dead `getCpdConfig.ts` / `updateCpdConfig.ts` confirmed-or-deleted during this step.
+
+Cr.1 closed. Cr.2 (per-interface main.tsp retag + regen) is next.
+
 On confirmation: proceed to Step Cr.1 (pre-flight §5.A, §5.B, §5.C).
