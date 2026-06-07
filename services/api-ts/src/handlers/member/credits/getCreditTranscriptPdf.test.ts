@@ -11,7 +11,7 @@
 
 import { describe, test, expect, beforeEach, afterEach } from 'bun:test';
 import { makeCtx, stubRepo, restoreRepo } from '@/test-utils/make-ctx';
-import { CreditEntryRepository } from './repos/credits.repo';
+import { CreditEntryRepository } from '@/handlers/association:member/repos/credits.repo';
 import { getCreditTranscriptPdf } from './getCreditTranscriptPdf';
 
 // ─── Fixtures ───────────────────────────────────────────

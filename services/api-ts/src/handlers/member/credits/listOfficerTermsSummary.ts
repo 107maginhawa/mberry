@@ -2,7 +2,7 @@ import type { ValidatedContext } from '@/types/app';
 import type { DatabaseInstance } from '@/core/database';
 import { UnauthorizedError } from '@/core/errors';
 import type { ListOfficerTermsSummaryParams } from '@/generated/openapi/validators';
-import { OfficerTermRepository } from './repos/governance.repo';
+import { OfficerTermRepository } from '@/handlers/association:member/repos/governance.repo';
 
 /**
  * listOfficerTermsSummary

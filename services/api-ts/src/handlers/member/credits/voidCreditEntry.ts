@@ -2,7 +2,7 @@ import type { Context } from 'hono';
 import { eq, and, inArray, sql } from 'drizzle-orm';
 import { UnauthorizedError, ValidationError, NotFoundError } from '@/core/errors';
 import type { DatabaseInstance } from '@/core/database';
-import { creditEntries } from './repos/credits.schema';
+import { creditEntries } from '@/handlers/association:member/repos/credits.schema';
 import { requirePosition } from '@/core/auth/officer-checks';
 import { POSITION_TITLES } from '@/utils/position-titles';
 

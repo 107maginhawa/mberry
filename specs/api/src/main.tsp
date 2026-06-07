@@ -287,11 +287,11 @@ namespace MonobaseAPI {
   // Association Domain — CPD Credits (compliance report + officer terms)
   // =========================================================================
 
-  @tag("Association:Member")
+  @tag("Member/Credits")
   @route("/credit-compliance")
   interface CreditComplianceManagement extends Association.Member.Credits.CreditComplianceManagement {}
 
-  @tag("Association:Member")
+  @tag("Member/Credits")
   @route("/officer-terms")
   interface OfficerTermsManagement extends Association.Member.Credits.OfficerTermsManagement {}
 
@@ -547,7 +547,7 @@ namespace MonobaseAPI {
   // Association Domain — CPD Config
   // =========================================================================
 
-  @tag("Association:Member")
+  @tag("Member/Credits")
   @route("/association/member/cpd-config")
   interface AssocCpdConfigManagement extends Association.Operations.Training.CpdConfigManagement {}
 
@@ -555,7 +555,7 @@ namespace MonobaseAPI {
   // Association Domain — Manual Credit Award
   // =========================================================================
 
-  @tag("Association:Member")
+  @tag("Member/Credits")
   @route("/association/member/credits/manual")
   interface AssocManualCreditManagement extends Association.Operations.Training.ManualCreditManagement {}
 
@@ -563,7 +563,7 @@ namespace MonobaseAPI {
   // Association Domain — Credit Adjustment (officer award/deduct with reason)
   // =========================================================================
 
-  @tag("Association:Member")
+  @tag("Member/Credits")
   @route("/association/member/credits/adjust")
   interface AssocCreditAdjustmentManagement extends Association.Operations.Training.CreditAdjustmentManagement {}
 
@@ -571,7 +571,7 @@ namespace MonobaseAPI {
   // Association Domain — Event Credit Void (bulk revoke)
   // =========================================================================
 
-  @tag("Association:Member")
+  @tag("Member/Credits")
   @route("/association/member/credits/void-event")
   interface AssocEventCreditVoidManagement extends Association.Operations.Training.EventCreditVoidManagement {}
 
@@ -587,7 +587,7 @@ namespace MonobaseAPI {
   // Association Domain — Member Peer Credits (directory profile view)
   // =========================================================================
 
-  @tag("Association:Member")
+  @tag("Member/Credits")
   @route("/association/member/credits")
   interface AssocMemberPeerCreditsManagement extends Association.Operations.Training.MemberPeerCreditsManagement {}
 
@@ -595,7 +595,7 @@ namespace MonobaseAPI {
   // Association Domain — Compliance Reporting
   // =========================================================================
 
-  @tag("Association:Member")
+  @tag("Member/Credits")
   @route("/association/member/compliance")
   interface AssocComplianceManagement extends Association.Operations.Training.ComplianceManagement {}
 

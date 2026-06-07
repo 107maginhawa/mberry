@@ -1,7 +1,7 @@
 import { describe, test, expect, mock, beforeEach } from 'bun:test';
 
 const mockRefresh = mock(() => Promise.resolve());
-mock.module('./repos/compliance.repo', () => ({
+mock.module('@/handlers/association:member/repos/compliance.repo', () => ({
   ComplianceRepository: class {
     constructor(_db: any) {}
     refresh = mockRefresh;

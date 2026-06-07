@@ -9,7 +9,7 @@ const mockGetByOrganization = mock(() => Promise.resolve({
   total: 2,
 }));
 
-mock.module('./repos/compliance.repo', () => ({
+mock.module('@/handlers/association:member/repos/compliance.repo', () => ({
   ComplianceRepository: class {
     constructor(_db: any) {}
     getOrgSummary = mockGetOrgSummary;

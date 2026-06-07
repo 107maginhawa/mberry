@@ -172,14 +172,6 @@ import { updateMembershipApplication } from '../../handlers/association:member/u
 import { deleteMembershipApplication } from '../../handlers/association:member/deleteMembershipApplication';
 import { approveMembershipApplication } from '../../handlers/association:member/approveMembershipApplication';
 import { denyMembershipApplication } from '../../handlers/association:member/denyMembershipApplication';
-import { getComplianceReport } from '../../handlers/association:member/getComplianceReport';
-import { refreshCompliance } from '../../handlers/association:member/refreshCompliance';
-import { getOrgCpdConfig } from '../../handlers/association:member/getOrgCpdConfig';
-import { updateOrgCpdConfig } from '../../handlers/association:member/updateOrgCpdConfig';
-import { listMemberCreditsForPeer } from '../../handlers/association:member/listMemberCreditsForPeer';
-import { adjustCreditEntry } from '../../handlers/association:member/adjustCreditEntry';
-import { awardManualCredit } from '../../handlers/association:member/awardManualCredit';
-import { voidCreditEntry } from '../../handlers/association:member/voidCreditEntry';
 import { createDuesConfig } from '../../handlers/association:member/createDuesConfig';
 import { listDuesConfigs } from '../../handlers/association:member/listDuesConfigs';
 import { getDuesConfig } from '../../handlers/association:member/getDuesConfig';
@@ -253,8 +245,6 @@ import { listMembershipTiers } from '../../handlers/association:member/listMembe
 import { getMembershipTier } from '../../handlers/association:member/getMembershipTier';
 import { updateMembershipTier } from '../../handlers/association:member/updateMembershipTier';
 import { deleteMembershipTier } from '../../handlers/association:member/deleteMembershipTier';
-import { getCreditCompliance } from '../../handlers/association:member/getCreditCompliance';
-import { listOfficerTermsSummary } from '../../handlers/association:member/listOfficerTermsSummary';
 import { castBallot } from '../../handlers/member/governance/castBallot';
 import { listBallots } from '../../handlers/member/governance/listBallots';
 import { createCandidate } from '../../handlers/member/governance/createCandidate';
@@ -285,6 +275,16 @@ import { listMyCertificates } from '../../handlers/member/certificates/listMyCer
 import { getCertificate } from '../../handlers/member/certificates/getCertificate';
 import { bulkIssueCertificates } from '../../handlers/member/certificates/bulkIssueCertificates';
 import { verifyCertificatePublic } from '../../handlers/member/certificates/verifyCertificatePublic';
+import { getComplianceReport } from '../../handlers/member/credits/getComplianceReport';
+import { refreshCompliance } from '../../handlers/member/credits/refreshCompliance';
+import { getOrgCpdConfig } from '../../handlers/member/credits/getOrgCpdConfig';
+import { updateOrgCpdConfig } from '../../handlers/member/credits/updateOrgCpdConfig';
+import { listMemberCreditsForPeer } from '../../handlers/member/credits/listMemberCreditsForPeer';
+import { adjustCreditEntry } from '../../handlers/member/credits/adjustCreditEntry';
+import { awardManualCredit } from '../../handlers/member/credits/awardManualCredit';
+import { voidCreditEntry } from '../../handlers/member/credits/voidCreditEntry';
+import { getCreditCompliance } from '../../handlers/member/credits/getCreditCompliance';
+import { listOfficerTermsSummary } from '../../handlers/member/credits/listOfficerTermsSummary';
 import { createCredentialTemplate } from '../../handlers/member/credentials/createCredentialTemplate';
 import { listCredentialTemplates } from '../../handlers/member/credentials/listCredentialTemplates';
 import { getCredentialTemplate } from '../../handlers/member/credentials/getCredentialTemplate';
@@ -643,14 +643,6 @@ export const registry = {
   deleteMembershipApplication,
   approveMembershipApplication,
   denyMembershipApplication,
-  getComplianceReport,
-  refreshCompliance,
-  getOrgCpdConfig,
-  updateOrgCpdConfig,
-  listMemberCreditsForPeer,
-  adjustCreditEntry,
-  awardManualCredit,
-  voidCreditEntry,
   createDuesConfig,
   listDuesConfigs,
   getDuesConfig,
@@ -724,8 +716,6 @@ export const registry = {
   getMembershipTier,
   updateMembershipTier,
   deleteMembershipTier,
-  getCreditCompliance,
-  listOfficerTermsSummary,
 
   // Member/governance handlers
   castBallot,
@@ -760,6 +750,18 @@ export const registry = {
   getCertificate,
   bulkIssueCertificates,
   verifyCertificatePublic,
+
+  // Member/credits handlers
+  getComplianceReport,
+  refreshCompliance,
+  getOrgCpdConfig,
+  updateOrgCpdConfig,
+  listMemberCreditsForPeer,
+  adjustCreditEntry,
+  awardManualCredit,
+  voidCreditEntry,
+  getCreditCompliance,
+  listOfficerTermsSummary,
 
   // Member/credentials handlers
   createCredentialTemplate,

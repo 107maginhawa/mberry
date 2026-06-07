@@ -9,7 +9,7 @@
 
 import type { DatabaseInstance } from '@/core/database';
 import type { Logger } from '@/types/logger';
-import { CreditEntryRepository } from '../repos/credits.repo';
+import { CreditEntryRepository } from '@/handlers/association:member/repos/credits.repo';
 import { getCycleForDate } from '../utils/credit-cycle';
 
 interface CreateCreditEntryInput {

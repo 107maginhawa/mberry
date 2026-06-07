@@ -2,7 +2,7 @@ import type { BaseContext } from '@/types/app';
 import type { DatabaseInstance } from '@/core/database';
 import { UnauthorizedError } from '@/core/errors';
 import { CreditEntryRepository } from '@/handlers/association:member/repos/credits.repo';
-import { getCycleForDate } from '@/handlers/association:member/utils/credit-cycle';
+import { getCycleForDate } from '@/handlers/member/credits/utils/credit-cycle';
 import { memberships } from '@/handlers/association:member/repos/membership.schema';
 import { associations, organizations } from '@/handlers/platformadmin/repos/platform-admin.schema';
 import { eq } from 'drizzle-orm';

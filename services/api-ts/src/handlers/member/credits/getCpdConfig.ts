@@ -2,7 +2,7 @@ import type { Context } from 'hono';
 import { eq } from 'drizzle-orm';
 import { UnauthorizedError } from '@/core/errors';
 import type { DatabaseInstance } from '@/core/database';
-import { orgCpdConfig } from './repos/credits.schema';
+import { orgCpdConfig } from '@/handlers/association:member/repos/credits.schema';
 import { requirePosition } from '@/core/auth/officer-checks';
 import { POSITION_TITLES } from '@/utils/position-titles';
 

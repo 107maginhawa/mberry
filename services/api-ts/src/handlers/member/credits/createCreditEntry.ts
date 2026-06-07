@@ -1,7 +1,7 @@
 import type { ValidatedContext } from '@/types/app';
 import type { DatabaseInstance } from '@/core/database';
 import { ValidationError } from '@/core/errors';
-import { CreditEntryRepository } from './repos/credits.repo';
+import { CreditEntryRepository } from '@/handlers/association:member/repos/credits.repo';
 import { getCycleForDate } from './utils/credit-cycle';
 
 /**

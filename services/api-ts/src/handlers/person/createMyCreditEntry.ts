@@ -2,7 +2,7 @@ import type { ValidatedContext } from '@/types/app';
 import type { DatabaseInstance } from '@/core/database';
 import { UnauthorizedError, ValidationError } from '@/core/errors';
 import type { CreateMyCreditEntryBody } from '@/generated/openapi/validators';
-import { CreditService } from '@/handlers/association:member/services/credit.service';
+import { CreditService } from '@/handlers/member/credits/services/credit.service';
 import { DocumentRepository } from '@/handlers/documents/repos/documents.repo';
 import { memberships } from '@/handlers/association:member/repos/membership.schema';
 import { and, eq, inArray } from 'drizzle-orm';

@@ -2,11 +2,11 @@ import type { ValidatedContext } from '@/types/app';
 import type { DatabaseInstance } from '@/core/database';
 import { UnauthorizedError } from '@/core/errors';
 import type { GetCreditComplianceParams } from '@/generated/openapi/validators';
-import { CreditEntryRepository } from './repos/credits.repo';
+import { CreditEntryRepository } from '@/handlers/association:member/repos/credits.repo';
 import { getCycleForDate } from './utils/credit-cycle';
 import { requirePosition } from '@/core/auth/officer-checks';
 import { POSITION_TITLES } from '@/utils/position-titles';
-import { MembershipRepository } from '../membership/repos/membership.repo';
+import { MembershipRepository } from '@/handlers/membership/repos/membership.repo';
 
 /**
  * getCreditCompliance

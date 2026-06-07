@@ -141,18 +141,15 @@ import { lookupCredentialPublic } from '@/handlers/member/credentials/lookupCred
 // ID card — JSON + PDF download (UJ-M02)
 import { getMyIdCard } from '@/handlers/person/getMyIdCard';
 import { getMyIdCardPdf } from '@/handlers/person/getMyIdCardPdf';
-import { getCreditTranscript } from '@/handlers/association:member/getCreditTranscript';
-import { getCreditTranscriptPdf } from '@/handlers/association:member/getCreditTranscriptPdf';
+import { getCreditTranscript } from '@/handlers/member/credits/getCreditTranscript';
+import { getCreditTranscriptPdf } from '@/handlers/member/credits/getCreditTranscriptPdf';
 import { requestDataExport } from '@/handlers/person/requestDataExport';
 import { getDataExportStatus } from '@/handlers/person/getDataExportStatus';
 import { getDataExportDownload } from '@/handlers/person/getDataExportDownload';
 
 // Wave 2b: Credit pipeline, CPD config, compliance, certificates
-import { getCpdConfig } from '@/handlers/association:member/getCpdConfig';
-import { updateCpdConfig } from '@/handlers/association:member/updateCpdConfig';
-import { awardManualCredit } from '@/handlers/association:member/awardManualCredit';
-import { getComplianceReport } from '@/handlers/association:member/getComplianceReport';
-import { refreshCompliance } from '@/handlers/association:member/refreshCompliance';
+// getCpdConfig, updateCpdConfig, awardManualCredit, getComplianceReport, refreshCompliance —
+// migrated to generated routes (member-credits cutover); orphan imports removed.
 import { getMyCredits } from '@/handlers/person/getMyCredits';
 // bulkIssueCertificates + verifyCertificatePublic — in generated routes
 import { generateCertificatePdf } from '@/handlers/member/certificates/generateCertificatePdf';
@@ -165,8 +162,7 @@ import { transitionOfficerTerm } from '@/handlers/association:member/transitionO
 // Org-wide dashboard — M4-DASHBOARD AC-M04-005 (hand-wired, not in TypeSpec)
 import { getOrgDashboard } from '@/handlers/association:member/getOrgDashboard';
 
-// Void credit entry — S-G1-07 phantom #4 (hand-wired, handler self-enforces officer position)
-import { voidCreditEntry } from '@/handlers/association:member/voidCreditEntry';
+// voidCreditEntry — migrated to generated routes (member-credits cutover); hand-wired duplicate removed.
 
 // Subscription system (UJ-M03) — pricing tier management and org subscriptions
 import { listPricingTiers } from '@/handlers/platformadmin/listPricingTiers';
@@ -575,13 +571,8 @@ export function createApp(config: Config): App {
   // @hand-wired reason="org-wide dashboard, not in TypeSpec" wave="M4-DASHBOARD"
   app.get('/association/member/org/:organizationId/dashboard', orgIdParam, authMiddleware(), getOrgDashboard as unknown as Handler);
 
-  // @hand-wired reason="bulk-void manual credit awards by activityName, handler self-enforces officer position" wave="S-G1-07"
-  app.post(
-    '/association/member/credits/void-event',
-    authMiddleware(),
-    orgContextMiddleware(),
-    voidCreditEntry as unknown as Handler,
-  );
+  // void-event hand-wired duplicate killed by member-credits cutover (Cr.7).
+  // Generated route at routes.ts:1043 serves /association/member/credits/void-event.
 
   // @hand-wired reason="admin pricing tier CRUD, not in TypeSpec" wave="UJ-M03"
   const pricingBody = zValidator('json', z.object({

@@ -1,7 +1,7 @@
 // Business Rules: [BR-13]
 import { describe, test, expect, afterEach } from 'bun:test';
 import { makeCtx, stubRepo, restoreRepo } from '@/test-utils/make-ctx';
-import { CreditEntryRepository } from './repos/credits.repo';
+import { CreditEntryRepository } from '@/handlers/association:member/repos/credits.repo';
 import {
   getCycleForDate,
   getCycleForDateWithConfig,
@@ -516,7 +516,7 @@ describe('summarizeCycle', () => {
 describe('[PRC-03] sumCreditsByCategoryBatch', () => {
   test('returns empty map for empty personIds array', async () => {
     // Import the class directly for unit testing
-    const { CreditEntryRepository } = await import('./repos/credits.repo');
+    const { CreditEntryRepository } = await import('@/handlers/association:member/repos/credits.repo');
     // We cannot instantiate with a real DB here, so test the guard directly
     // by constructing a mock instance
     const repo = Object.create(CreditEntryRepository.prototype) as InstanceType<typeof CreditEntryRepository>;
@@ -861,7 +861,7 @@ describe('[AC-M10-004] Toggle independence', () => {
   });
 
   test('credit repo buildWhereConditions works without external state', async () => {
-    const { CreditEntryRepository } = await import('./repos/credits.repo');
+    const { CreditEntryRepository } = await import('@/handlers/association:member/repos/credits.repo');
     const repo = Object.create(CreditEntryRepository.prototype) as InstanceType<typeof CreditEntryRepository>;
 
     // buildWhereConditions should handle filters independently

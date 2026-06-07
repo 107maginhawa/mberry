@@ -1,7 +1,7 @@
 import { describe, test, expect } from 'bun:test';
 import { listMemberCreditsForPeer } from './listMemberCreditsForPeer';
 import { UnauthorizedError, ValidationError } from '@/core/errors';
-import { CreditEntryRepository } from './repos/credits.repo';
+import { CreditEntryRepository } from '@/handlers/association:member/repos/credits.repo';
 
 function stubRepo(returns: any[]) {
   const orig = (CreditEntryRepository.prototype as any).findMany;

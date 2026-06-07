@@ -3,8 +3,8 @@ import type { DatabaseInstance } from '@/core/database';
 import type { CompleteTrainingEnrollmentBody, CompleteTrainingEnrollmentParams } from '@/generated/openapi/validators';
 import { NotFoundError } from '@/core/errors';
 import { TrainingEnrollmentRepository, TrainingRepository } from './repos/training.repo';
-import { CreditEntryRepository } from '../association:member/repos/credits.repo';
-import { getCycleForDate } from '../association:member/utils/credit-cycle';
+import { CreditEntryRepository } from '@/handlers/association:member/repos/credits.repo';
+import { getCycleForDate } from '@/handlers/member/credits/utils/credit-cycle';
 import { domainEvents } from '@/core/domain-events';
 import { assertValidTransition, TRAINING_ENROLLMENT_VALID_TRANSITIONS } from '@/utils/status-transitions';
 
