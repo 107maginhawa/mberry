@@ -1,7 +1,7 @@
 {
-  "generatedAt": "2026-06-07T05:44:22.338Z",
+  "generatedAt": "2026-06-07T08:05:12.951Z",
   "totals": {
-    "handlerFiles": 586,
+    "handlerFiles": 584,
     "logCallSites": 274,
     "full": 257,
     "partial": 14,
@@ -35,7 +35,7 @@
       "score": 2
     },
     {
-      "file": "certificates/bulkIssueCertificates.ts",
+      "file": "member/certificates/bulkIssueCertificates.ts",
       "totalLogs": 3,
       "full": 0,
       "partial": 2,
@@ -495,6 +495,15 @@
       "httpExceptions": 0,
       "typedErrors": 5
     },
+    "services/api-ts/src/handlers/member/certificates/bulkIssueCertificates.ts": {
+      "totalLogs": 3,
+      "full": 0,
+      "partial": 2,
+      "none": 1,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 4
+    },
     "services/api-ts/src/handlers/member/governance/updateOfficerTerm.ts": {
       "totalLogs": 2,
       "full": 2,
@@ -602,15 +611,6 @@
       "rawErrors": 0,
       "httpExceptions": 0,
       "typedErrors": 6
-    },
-    "services/api-ts/src/handlers/certificates/bulkIssueCertificates.ts": {
-      "totalLogs": 3,
-      "full": 0,
-      "partial": 2,
-      "none": 1,
-      "rawErrors": 0,
-      "httpExceptions": 0,
-      "typedErrors": 4
     },
     "services/api-ts/src/handlers/storage/deleteFile.ts": {
       "totalLogs": 3,
@@ -1791,6 +1791,42 @@
       "httpExceptions": 0,
       "typedErrors": 1
     },
+    "services/api-ts/src/handlers/member/certificates/verifyCertificatePublic.ts": {
+      "totalLogs": 0,
+      "full": 0,
+      "partial": 0,
+      "none": 0,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 1
+    },
+    "services/api-ts/src/handlers/member/certificates/listMyCertificates.ts": {
+      "totalLogs": 0,
+      "full": 0,
+      "partial": 0,
+      "none": 0,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 1
+    },
+    "services/api-ts/src/handlers/member/certificates/getCertificate.ts": {
+      "totalLogs": 0,
+      "full": 0,
+      "partial": 0,
+      "none": 0,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 3
+    },
+    "services/api-ts/src/handlers/member/certificates/generateCertificatePdf.ts": {
+      "totalLogs": 0,
+      "full": 0,
+      "partial": 0,
+      "none": 0,
+      "rawErrors": 0,
+      "httpExceptions": 0,
+      "typedErrors": 2
+    },
     "services/api-ts/src/handlers/member/directory/deleteDirectoryProfile.ts": {
       "totalLogs": 0,
       "full": 0,
@@ -2186,24 +2222,6 @@
       "rawErrors": 0,
       "httpExceptions": 0,
       "typedErrors": 1
-    },
-    "services/api-ts/src/handlers/certificates/verifyCertificatePublic.ts": {
-      "totalLogs": 0,
-      "full": 0,
-      "partial": 0,
-      "none": 0,
-      "rawErrors": 0,
-      "httpExceptions": 0,
-      "typedErrors": 1
-    },
-    "services/api-ts/src/handlers/certificates/generateCertificatePdf.ts": {
-      "totalLogs": 0,
-      "full": 0,
-      "partial": 0,
-      "none": 0,
-      "rawErrors": 0,
-      "httpExceptions": 0,
-      "typedErrors": 2
     },
     "services/api-ts/src/handlers/invite/createInvite.ts": {
       "totalLogs": 0,
@@ -3060,15 +3078,6 @@
       "httpExceptions": 0,
       "typedErrors": 3
     },
-    "services/api-ts/src/handlers/association:member/listMyCertificates.ts": {
-      "totalLogs": 0,
-      "full": 0,
-      "partial": 0,
-      "none": 0,
-      "rawErrors": 0,
-      "httpExceptions": 0,
-      "typedErrors": 1
-    },
     "services/api-ts/src/handlers/association:member/getRosterMember.ts": {
       "totalLogs": 0,
       "full": 0,
@@ -3194,15 +3203,6 @@
       "rawErrors": 0,
       "httpExceptions": 0,
       "typedErrors": 1
-    },
-    "services/api-ts/src/handlers/association:member/getCertificate.ts": {
-      "totalLogs": 0,
-      "full": 0,
-      "partial": 0,
-      "none": 0,
-      "rawErrors": 0,
-      "httpExceptions": 0,
-      "typedErrors": 3
     },
     "services/api-ts/src/handlers/association:member/recalculateAgingBucket.ts": {
       "totalLogs": 0,
