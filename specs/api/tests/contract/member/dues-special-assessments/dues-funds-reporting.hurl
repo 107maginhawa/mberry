@@ -42,12 +42,7 @@ status >= 200
 status < 300
 
 
-# ── 2. upsertDuesFunds → endpoint reachable ───────────────────────────
-# NOTE: Pre-existing handler/spec drift discovered Wave 8: handler does
-# `values({...body, organizationId})` but body.funds[i].fundName doesn't
-# map to the `dues_fund.name` column; insert fails with NOT NULL violation.
-# Contract test covers route registration + auth; handler fix tracked
-# under "Open follow-ups" in MODULE_SPEC.
+# ── 2. upsertDuesFunds → 200 ──────────────────────────────────────────
 PUT {{api}}/association/member/dues-reporting/{{org_id}}
 Origin: {{origin}}
 x-csrf-token: {{csrf_token}}
@@ -60,10 +55,7 @@ Content-Type: application/json
     { "fundName": "Reserves {{suffix}}", "percentage": 40, "isLast": true }
   ]
 }
-HTTP *
-[Asserts]
-status >= 200
-status < 600
+HTTP 200
 
 
 # ── 3. listDuesFunds (post-upsert) → 200 ──────────────────────────────

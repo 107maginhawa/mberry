@@ -21,7 +21,13 @@ export async function upsertDuesFunds(
   const db = ctx.get('database') as DatabaseInstance;
   const repo = new DuesRepository(db);
 
-  await repo.replaceFunds(organizationId, (body as Record<string, unknown>)['funds'] as { name: string; percentage: string; sortOrder: number }[] ?? []);
+  const incoming = (body.funds ?? []) as Array<{ fundName: string; percentage: number; isLast: boolean }>;
+  const funds = incoming.map((f, i) => ({
+    name: f.fundName,
+    percentage: String(f.percentage),
+    sortOrder: i,
+  }));
+  await repo.replaceFunds(organizationId, funds);
   const data = await repo.listFunds(organizationId);
 
   ctx.set('auditResourceId', organizationId);

@@ -1,6 +1,5 @@
 import type { ValidatedContext } from '@/types/app';
 import type { DatabaseInstance } from '@/core/database';
-import { eq } from 'drizzle-orm';
 import { UnauthorizedError } from '@/core/errors';
 import type { UpsertDuesGatewayConfigBody, UpsertDuesGatewayConfigParams } from '@/generated/openapi/validators';
 import { duesGatewayConfigs } from '@/handlers/association:member/repos/dues-payments.schema';
@@ -21,12 +20,24 @@ export async function upsertDuesGatewayConfig(
   const body = ctx.req.valid('json');
   const db = ctx.get('database') as DatabaseInstance;
 
+  const insertRow = {
+    organizationId,
+    provider: body.provider,
+    publicKey: body.publicKey,
+    encryptedSecret: body.secretKey,
+  } as typeof duesGatewayConfigs.$inferInsert;
+
   const [result] = await db
     .insert(duesGatewayConfigs)
-    .values({ ...body, organizationId } as unknown as typeof duesGatewayConfigs.$inferInsert)
+    .values(insertRow)
     .onConflictDoUpdate({
       target: [duesGatewayConfigs.organizationId],
-      set: { ...body, updatedAt: new Date() } as Record<string, unknown>,
+      set: {
+        provider: body.provider,
+        publicKey: body.publicKey,
+        encryptedSecret: body.secretKey,
+        updatedAt: new Date(),
+      },
     })
     .returning();
 

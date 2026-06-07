@@ -34,12 +34,7 @@ HTTP 200
 officer_cookie: cookie "better-auth.session_token"
 
 
-# ── 1. upsertDuesGatewayConfig → endpoint reachable ───────────────────
-# NOTE: Pre-existing handler/spec drift discovered Wave 8: handler does
-# `values({...body, organizationId})` but body.secretKey doesn't map to
-# the `encrypted_secret` column; insert fails with NOT NULL violation.
-# Contract test covers route registration + auth; handler fix tracked
-# under "Open follow-ups" in MODULE_SPEC.
+# ── 1. upsertDuesGatewayConfig → 200 ──────────────────────────────────
 PUT {{api}}/association/member/dues-gateway/{{org_id}}
 Origin: {{origin}}
 x-csrf-token: {{csrf_token}}
@@ -51,10 +46,7 @@ Content-Type: application/json
   "publicKey": "pk_test_{{suffix}}",
   "secretKey": "sk_test_{{suffix}}"
 }
-HTTP *
-[Asserts]
-status >= 200
-status < 600
+HTTP 200
 
 
 # ── 2. getDuesGatewayConfig → 200 ─────────────────────────────────────
@@ -74,10 +66,7 @@ Cookie: better-auth.session_token={{officer_cookie}}
 x-org-id: {{org_id}}
 Content-Type: application/json
 {}
-HTTP *
-[Asserts]
-status >= 200
-status < 600
+HTTP 200
 
 
 # ── 4. disconnectDuesGateway → 200/204 ────────────────────────────────
