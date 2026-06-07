@@ -2,6 +2,7 @@ import { useState, useMemo } from 'react'
 import { Link, useParams } from '@tanstack/react-router'
 import { ChevronLeft, ChevronRight } from 'lucide-react'
 import { Button } from '@monobase/ui'
+import { cn } from '@/lib/utils'
 
 interface CalendarEvent {
   id: string
@@ -149,26 +150,34 @@ export function EventCalendar({ events, linkBase }: EventCalendarProps) {
           const todayCell = isToday(cellDate)
 
           return (
-            // eslint-disable-next-line no-restricted-syntax -- calendar-cell button uses custom hover/ring styling not yet covered by @monobase/ui Button; refactor in follow-up
-            <button
+            <Button
               key={day}
+              variant="ghost"
               onClick={() => setSelectedDay(cellDate)}
-              className={`bg-[var(--color-surface)] min-h-[80px] lg:min-h-[100px] p-1.5 text-left hover:bg-[var(--color-surface-warm)] transition-colors ${
-                isSelected ? 'ring-2 ring-inset ring-[var(--color-primary)]' : ''
-              }`}
+              className={cn(
+                // Strip Button's center-aligned pill defaults — calendar cells
+                // are top-left-aligned multi-line tiles with a custom min-height.
+                'h-auto min-h-[80px] lg:min-h-[100px] w-full p-1.5 rounded-none gap-0',
+                'flex flex-col items-start justify-start whitespace-normal text-left',
+                'bg-[var(--color-surface)] hover:bg-[var(--color-surface-warm)]',
+                isSelected && 'ring-2 ring-inset ring-[var(--color-primary)]',
+              )}
             >
-              <span className={`inline-flex items-center justify-center w-6 h-6 text-xs font-medium rounded-full ${
-                todayCell ? 'bg-[var(--color-primary)] text-white' : ''
-              }`}>
+              <span className={cn(
+                'inline-flex items-center justify-center w-6 h-6 text-xs font-medium rounded-full',
+                todayCell && 'bg-[var(--color-primary)] text-white',
+              )}>
                 {day}
               </span>
-              <div className="mt-1 space-y-0.5">
+              <div className="mt-1 space-y-0.5 w-full">
                 {dayEvents.slice(0, 3).map(ev => (
                   <div
                     key={ev.id}
-                    className={`text-[10px] leading-tight px-1 py-0.5 rounded truncate ${
-                      EVENT_TYPE_COLORS[ev.eventType ?? 'other'] ?? EVENT_TYPE_COLORS.other
-                    } text-white ${STATUS_TO_OPACITY[ev.status] ?? ''}`}
+                    className={cn(
+                      'text-[10px] leading-tight px-1 py-0.5 rounded truncate text-white',
+                      EVENT_TYPE_COLORS[ev.eventType ?? 'other'] ?? EVENT_TYPE_COLORS.other,
+                      STATUS_TO_OPACITY[ev.status] ?? '',
+                    )}
                     title={ev.title}
                   >
                     {ev.title}
@@ -178,7 +187,7 @@ export function EventCalendar({ events, linkBase }: EventCalendarProps) {
                   <div className="text-[10px] text-[var(--color-muted)] px-1">+{dayEvents.length - 3} more</div>
                 )}
               </div>
-            </button>
+            </Button>
           )
         })}
       </div>

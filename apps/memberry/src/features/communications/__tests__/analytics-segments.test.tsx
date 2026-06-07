@@ -9,7 +9,25 @@ import { DeliveryFunnel } from '../components/delivery-funnel'
 // Mocks
 // ---------------------------------------------------------------------------
 
-// @monobase/ui rendered as real components against happy-dom.
+// @monobase/ui replaced with native-element stubs so fireEvent.change works.
+// Radix Select needs pointer-event semantics happy-dom doesn't wire up, so we
+// substitute a real <select> element. Other primitives are passed through as
+// plain DOM equivalents — the test only cares about wire-level behavior.
+vi.mock('@monobase/ui', () => ({
+  Label: ({ children, ...props }: any) => <label {...props}>{children}</label>,
+  Badge: ({ children, ...props }: any) => <span {...props}>{children}</span>,
+  Button: ({ children, ...props }: any) => <button {...props}>{children}</button>,
+  Input: (props: any) => <input {...props} />,
+  Select: ({ children, value, onValueChange, ...props }: any) => (
+    <select {...props} value={value ?? ''} onChange={(e) => onValueChange?.(e.target.value)}>
+      {children}
+    </select>
+  ),
+  SelectTrigger: ({ children, id }: any) => <optgroup label="" id={id}>{children}</optgroup>,
+  SelectContent: ({ children }: any) => <>{children}</>,
+  SelectItem: ({ children, value }: any) => <option value={value}>{children}</option>,
+  SelectValue: ({ placeholder }: any) => <option value="">{placeholder}</option>,
+}))
 
 vi.mock('@/components/patterns/page-header', () => ({
   PageHeader: ({ title, subtitle }: any) => (

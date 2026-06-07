@@ -3,8 +3,14 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { Label } from '@monobase/ui'
 import { Badge } from '@monobase/ui'
 import { Button } from '@monobase/ui'
+import { Input } from '@monobase/ui'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@monobase/ui'
 import { api } from '@/lib/api'
 import { toast } from 'sonner'
+
+// Radix Select forbids empty-string values on SelectItem. Use a sentinel for
+// the "no filter" rows and translate to/from undefined at the props boundary.
+const NONE = '__none__'
 
 export interface SegmentFilters {
   chapterId?: string
@@ -32,6 +38,9 @@ const hasActiveFilters = (filters: SegmentFilters): boolean =>
 
 export function AudiencePicker({ orgId, value, onChange }: AudiencePickerProps) {
   const [debouncedFilters, setDebouncedFilters] = useState(value)
+  // Bumping this remounts the saved-segment Select so picking the same segment
+  // twice in a row still fires onValueChange.
+  const [savedSegmentKey, setSavedSegmentKey] = useState(0)
   const queryClient = useQueryClient()
 
   // Debounce filter changes for roster preview
@@ -120,23 +129,28 @@ export function AudiencePicker({ orgId, value, onChange }: AudiencePickerProps) 
       <div className="flex items-end gap-2">
         <div className="flex-1 space-y-1.5">
           <Label htmlFor="saved-segment" className="text-sm">Saved Segments</Label>
-          {/* eslint-disable-next-line no-restricted-syntax -- pre-existing pattern, refactor to @monobase/ui Select in follow-up */}
-          <select
-            id="saved-segment"
-            data-testid="saved-segment-select"
-            onChange={(e) => {
-              if (e.target.value) handleSelectSegment(e.target.value)
-              e.target.value = ''
+          {/* One-shot picker: applying a segment must NOT keep its id selected,
+              so the next pick of the same id still fires. Reset via savedSegmentKey. */}
+          <Select
+            key={savedSegmentKey}
+            value=""
+            onValueChange={(v) => {
+              if (v) handleSelectSegment(v)
+              setSavedSegmentKey((k) => k + 1)
             }}
-            className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+            data-testid="saved-segment-select"
           >
-            <option value="">Choose a saved segment...</option>
-            {savedSegments.map((seg) => (
-              <option key={seg.id} value={seg.id}>
-                {seg.name}
-              </option>
-            ))}
-          </select>
+            <SelectTrigger id="saved-segment" className="w-full">
+              <SelectValue placeholder="Choose a saved segment..." />
+            </SelectTrigger>
+            <SelectContent>
+              {savedSegments.map((seg) => (
+                <SelectItem key={seg.id} value={seg.id}>
+                  {seg.name}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         </div>
         {hasActiveFilters(value) && (
           <Button
@@ -171,68 +185,71 @@ export function AudiencePicker({ orgId, value, onChange }: AudiencePickerProps) 
         {/* Dues Status */}
         <div className="space-y-1.5">
           <Label htmlFor="dues-status" className="text-sm">Dues Status</Label>
-          {/* eslint-disable-next-line no-restricted-syntax -- pre-existing pattern, refactor to @monobase/ui Select in follow-up */}
-          <select
-            id="dues-status"
-            value={value.duesStatus ?? ''}
-            onChange={(e) => updateFilter('duesStatus', e.target.value)}
-            className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+          <Select
+            value={value.duesStatus ?? NONE}
+            onValueChange={(v) => updateFilter('duesStatus', v === NONE ? undefined : v)}
           >
-            <option value="">All statuses</option>
-            <option value="active">Active</option>
-            <option value="expired">Expired</option>
-            <option value="suspended">Suspended</option>
-            <option value="pending">Pending</option>
-          </select>
+            <SelectTrigger id="dues-status" className="w-full">
+              <SelectValue placeholder="All statuses" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value={NONE}>All statuses</SelectItem>
+              <SelectItem value="active">Active</SelectItem>
+              <SelectItem value="expired">Expired</SelectItem>
+              <SelectItem value="suspended">Suspended</SelectItem>
+              <SelectItem value="pending">Pending</SelectItem>
+            </SelectContent>
+          </Select>
         </div>
 
         {/* Membership Tier */}
         <div className="space-y-1.5">
           <Label htmlFor="membership-tier" className="text-sm">Membership Tier</Label>
-          {/* eslint-disable-next-line no-restricted-syntax -- pre-existing pattern, refactor to @monobase/ui Select in follow-up */}
-          <select
-            id="membership-tier"
-            value={value.membershipTier ?? ''}
-            onChange={(e) => updateFilter('membershipTier', e.target.value)}
-            className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+          <Select
+            value={value.membershipTier ?? NONE}
+            onValueChange={(v) => updateFilter('membershipTier', v === NONE ? undefined : v)}
           >
-            <option value="">All tiers</option>
-            <option value="regular">Regular</option>
-            <option value="associate">Associate</option>
-            <option value="fellow">Fellow</option>
-            <option value="honorary">Honorary</option>
-          </select>
+            <SelectTrigger id="membership-tier" className="w-full">
+              <SelectValue placeholder="All tiers" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value={NONE}>All tiers</SelectItem>
+              <SelectItem value="regular">Regular</SelectItem>
+              <SelectItem value="associate">Associate</SelectItem>
+              <SelectItem value="fellow">Fellow</SelectItem>
+              <SelectItem value="honorary">Honorary</SelectItem>
+            </SelectContent>
+          </Select>
         </div>
 
         {/* CPD Compliance */}
         <div className="space-y-1.5">
           <Label htmlFor="cpd-compliant" className="text-sm">CPD Compliance</Label>
-          {/* eslint-disable-next-line no-restricted-syntax -- pre-existing pattern, refactor to @monobase/ui Select in follow-up */}
-          <select
-            id="cpd-compliant"
-            value={value.cpdCompliant === undefined ? '' : String(value.cpdCompliant)}
-            onChange={(e) => {
-              const v = e.target.value
-              updateFilter('cpdCompliant', v === '' ? undefined : v === 'true')
+          <Select
+            value={value.cpdCompliant === undefined ? NONE : String(value.cpdCompliant)}
+            onValueChange={(v) => {
+              updateFilter('cpdCompliant', v === NONE ? undefined : v === 'true')
             }}
-            className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
           >
-            <option value="">Any</option>
-            <option value="true">Compliant</option>
-            <option value="false">Non-compliant</option>
-          </select>
+            <SelectTrigger id="cpd-compliant" className="w-full">
+              <SelectValue placeholder="Any" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value={NONE}>Any</SelectItem>
+              <SelectItem value="true">Compliant</SelectItem>
+              <SelectItem value="false">Non-compliant</SelectItem>
+            </SelectContent>
+          </Select>
         </div>
 
         {/* Joined After */}
         <div className="space-y-1.5">
           <Label htmlFor="joined-after" className="text-sm">Joined After</Label>
-          {/* eslint-disable-next-line no-restricted-syntax -- pre-existing pattern, refactor to @monobase/ui Input in follow-up */}
-          <input
+          <Input
             id="joined-after"
             type="date"
             value={value.joinedAfter ?? ''}
             onChange={(e) => updateFilter('joinedAfter', e.target.value)}
-            className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
           />
         </div>
       </div>
