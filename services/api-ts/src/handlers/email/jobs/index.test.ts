@@ -6,10 +6,18 @@
  * - email.cleanup (cron, daily at 4 AM)
  */
 
-import { describe, test, expect, mock } from 'bun:test';
+import { describe, test, expect, mock, afterAll } from 'bun:test';
 import { registerEmailJobs } from './index';
 import type { JobScheduler, JobContext } from '@/core/jobs';
 import type { EmailService } from '@/core/email';
+
+// Bun's `mock.module` is process-wide. Each test below stubs
+// ../repos/queue.repo with a minimal class — without restoration that
+// stub leaks into queue.repo.test.ts and breaks 75 unrelated tests.
+const realQueueRepo = await import('../repos/queue.repo');
+afterAll(async () => {
+  await mock.module('../repos/queue.repo', () => realQueueRepo);
+});
 
 // Mock-Classification: APPROPRIATE — job registration glue layer
 
