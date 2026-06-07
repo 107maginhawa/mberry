@@ -2,7 +2,7 @@ import { describe, test, expect, mock, beforeEach } from 'bun:test';
 import { UnauthorizedError, NotFoundError, ForbiddenError } from '@/core/errors';
 
 import { getCertificate } from './getCertificate';
-import { DigitalCredentialRepository } from './repos/credentials.repo';
+import { DigitalCredentialRepository } from '@/handlers/association:member/repos/credentials.repo';
 
 const OWNER_ID = 'person-1';
 const CERT_ID = 'cert-abc';
