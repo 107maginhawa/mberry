@@ -6,17 +6,23 @@
  * - email.cleanup (cron, daily at 4 AM)
  */
 
-import { describe, test, expect, mock, afterAll } from 'bun:test';
+import { describe, test, expect, mock, spyOn, afterEach } from 'bun:test';
 import { registerEmailJobs } from './index';
 import type { JobScheduler, JobContext } from '@/core/jobs';
 import type { EmailService } from '@/core/email';
+import { EmailQueueRepository } from '../repos/queue.repo';
 
-// Bun's `mock.module` is process-wide. Each test below stubs
-// ../repos/queue.repo with a minimal class — without restoration that
-// stub leaks into queue.repo.test.ts and breaks 75 unrelated tests.
-const realQueueRepo = await import('../repos/queue.repo');
-afterAll(async () => {
-  await mock.module('../repos/queue.repo', () => realQueueRepo);
+// Stub `cleanupOldEmails` on the real EmailQueueRepository prototype
+// using spyOn — this avoids `mock.module('../repos/queue.repo')` which
+// is process-wide and leaks across test files (notably into
+// queue.repo.test.ts, which dynamic-imports the same module from
+// registerEmailJobs at runtime and would observe the stub class).
+// Each test below installs + restores the spy locally; the afterEach
+// hook guarantees any test that throws still cleans up.
+let cleanupSpy: ReturnType<typeof spyOn> | null = null;
+afterEach(() => {
+  cleanupSpy?.mockRestore();
+  cleanupSpy = null;
 });
 
 // Mock-Classification: APPROPRIATE — job registration glue layer
@@ -97,19 +103,15 @@ describe('registerEmailJobs', () => {
       registerCron,
     } as any;
 
-    const mockCleanup = mock(async () => 5);
-    mock.module('../repos/queue.repo', () => ({
-      EmailQueueRepository: class {
-        cleanupOldEmails = mockCleanup;
-      },
-    }));
+    cleanupSpy = spyOn(EmailQueueRepository.prototype, 'cleanupOldEmails')
+      .mockResolvedValue(5);
 
     registerEmailJobs(scheduler, makeEmailService());
 
     const context = makeContext();
     await capturedHandler!(context);
 
-    expect(mockCleanup).toHaveBeenCalledWith(30);
+    expect(cleanupSpy).toHaveBeenCalledWith(30);
   });
 
   test('cleanup handler logs error and re-throws on failure', async () => {
@@ -122,11 +124,8 @@ describe('registerEmailJobs', () => {
       registerCron,
     } as any;
 
-    mock.module('../repos/queue.repo', () => ({
-      EmailQueueRepository: class {
-        cleanupOldEmails = mock(async () => { throw new Error('DB error'); });
-      },
-    }));
+    cleanupSpy = spyOn(EmailQueueRepository.prototype, 'cleanupOldEmails')
+      .mockRejectedValue(new Error('DB error'));
 
     registerEmailJobs(scheduler, makeEmailService());
 
@@ -146,11 +145,8 @@ describe('registerEmailJobs', () => {
       registerCron,
     } as any;
 
-    mock.module('../repos/queue.repo', () => ({
-      EmailQueueRepository: class {
-        cleanupOldEmails = mock(async () => 0);
-      },
-    }));
+    cleanupSpy = spyOn(EmailQueueRepository.prototype, 'cleanupOldEmails')
+      .mockResolvedValue(0);
 
     registerEmailJobs(scheduler, makeEmailService());
 
