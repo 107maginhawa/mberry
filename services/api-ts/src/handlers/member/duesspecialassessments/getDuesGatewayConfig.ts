@@ -22,5 +22,12 @@ export async function getDuesGatewayConfig(
 
   const config = await repo.getGatewayConfig(organizationId);
 
-  return ctx.json(config ?? {}, 200);
+  if (!config) {
+    return ctx.json({}, 200);
+  }
+
+  // Never echo the gateway secret (encrypted or plaintext) to any client —
+  // it's needed server-side only for outbound gateway calls.
+  const { encryptedSecret: _stripped, ...safe } = config;
+  return ctx.json(safe, 200);
 }

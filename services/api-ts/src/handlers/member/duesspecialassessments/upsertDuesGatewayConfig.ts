@@ -1,6 +1,8 @@
 import type { ValidatedContext } from '@/types/app';
 import type { DatabaseInstance } from '@/core/database';
+import type { Config } from '@/core/config';
 import { UnauthorizedError } from '@/core/errors';
+import { encryptCredential } from '@/core/gateway';
 import type { UpsertDuesGatewayConfigBody, UpsertDuesGatewayConfigParams } from '@/generated/openapi/validators';
 import { duesGatewayConfigs } from '@/handlers/association:member/repos/dues-payments.schema';
 
@@ -19,12 +21,15 @@ export async function upsertDuesGatewayConfig(
   const { organizationId } = ctx.req.valid('param');
   const body = ctx.req.valid('json');
   const db = ctx.get('database') as DatabaseInstance;
+  const config = ctx.get('config') as Config;
+
+  const ciphertext = encryptCredential(body.secretKey, config.auth.secret);
 
   const insertRow = {
     organizationId,
     provider: body.provider,
     publicKey: body.publicKey,
-    encryptedSecret: body.secretKey,
+    encryptedSecret: ciphertext,
   } as typeof duesGatewayConfigs.$inferInsert;
 
   const [result] = await db
@@ -35,7 +40,7 @@ export async function upsertDuesGatewayConfig(
       set: {
         provider: body.provider,
         publicKey: body.publicKey,
-        encryptedSecret: body.secretKey,
+        encryptedSecret: ciphertext,
         updatedAt: new Date(),
       },
     })
@@ -44,5 +49,12 @@ export async function upsertDuesGatewayConfig(
   ctx.set('auditResourceId', organizationId);
   ctx.set('auditDescription', 'Payment gateway configuration updated');
 
-  return ctx.json(result, 200);
+  if (!result) {
+    throw new Error('Failed to upsert dues gateway config');
+  }
+
+  // Never echo the secret (encrypted or plaintext) back to the client. The
+  // wire shape exposes only non-secret metadata.
+  const { encryptedSecret: _stripped, ...safe } = result;
+  return ctx.json(safe, 200);
 }
