@@ -18,7 +18,7 @@ import { getMyNotificationPreferences } from './getMyNotificationPreferences';
 import { updateMyNotificationPreferences } from './updateMyNotificationPreferences';
 import { getMyMemberships } from './getMyMemberships';
 
-mock.module('@/utils/audit', () => ({ auditAction: async () => {} }));
+mock.module('@/core/audit/audit-action', () => ({ auditAction: async () => {} }));
 
 // ---------------------------------------------------------------------------
 // AC-M02-001: Photo Upload

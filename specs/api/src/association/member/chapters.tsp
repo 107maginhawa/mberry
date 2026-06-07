@@ -227,6 +227,7 @@ namespace Association.Member.Chapters {
     @post
     @useAuth(bearerAuth)
     @extension("x-security-required-roles", #["association:admin"])
+    @extension("x-audit", #{ action: "create", resourceType: "chapter-affiliation" })
     createChapterAffiliation(
       @body body: ChapterAffiliationCreateRequest
     ): ApiCreatedResponse<ChapterAffiliation>
@@ -268,6 +269,7 @@ namespace Association.Member.Chapters {
     @route("/{affiliationId}")
     @useAuth(bearerAuth)
     @extension("x-security-required-roles", #["association:admin"])
+    @extension("x-audit", #{ action: "update", resourceType: "chapter-affiliation" })
     updateChapterAffiliation(
       @path affiliationId: string,
       @body updates: ChapterAffiliationUpdateRequest
@@ -282,6 +284,7 @@ namespace Association.Member.Chapters {
     @route("/{affiliationId}")
     @useAuth(bearerAuth)
     @extension("x-security-required-roles", #["association:admin"])
+    @extension("x-audit", #{ action: "delete", resourceType: "chapter-affiliation" })
     deleteChapterAffiliation(
       @path affiliationId: string
     ): ApiNoContentResponse
@@ -295,6 +298,7 @@ namespace Association.Member.Chapters {
     @route("/{affiliationId}/set-primary")
     @useAuth(bearerAuth)
     @extension("x-security-required-roles", #["association:admin"])
+    @extension("x-audit", #{ action: "update", resourceType: "chapter-affiliation" })
     setPrimaryChapterAffiliation(
       @path affiliationId: string
     ): ApiOkResponse<ChapterAffiliation>
@@ -322,6 +326,7 @@ namespace Association.Member.Chapters {
     @post
     @useAuth(bearerAuth)
     @extension("x-security-required-roles", #["association:member:owner", "association:admin"])
+    @extension("x-audit", #{ action: "create", resourceType: "affiliation-transfer" })
     createAffiliationTransfer(
       @body body: AffiliationTransferCreateRequest
     ): ApiCreatedResponse<AffiliationTransfer>
@@ -364,6 +369,7 @@ namespace Association.Member.Chapters {
     @route("/{transferId}/approve-source")
     @useAuth(bearerAuth)
     @extension("x-security-required-roles", #["association:admin", "chapter:officer"])
+    @extension("x-audit", #{ action: "update", resourceType: "affiliation-transfer" })
     approveTransferBySource(
       @path transferId: string,
       @body body: TransferDecisionRequest
@@ -379,6 +385,7 @@ namespace Association.Member.Chapters {
     @route("/{transferId}/approve-target")
     @useAuth(bearerAuth)
     @extension("x-security-required-roles", #["association:admin", "chapter:officer"])
+    @extension("x-audit", #{ action: "update", resourceType: "affiliation-transfer" })
     approveTransferByTarget(
       @path transferId: string,
       @body body: TransferDecisionRequest
@@ -394,6 +401,7 @@ namespace Association.Member.Chapters {
     @route("/{transferId}/deny")
     @useAuth(bearerAuth)
     @extension("x-security-required-roles", #["association:admin", "chapter:officer"])
+    @extension("x-audit", #{ action: "deny", resourceType: "affiliation-transfer" })
     denyAffiliationTransfer(
       @path transferId: string,
       @body body: TransferDecisionRequest
@@ -409,6 +417,7 @@ namespace Association.Member.Chapters {
     @route("/{transferId}/complete")
     @useAuth(bearerAuth)
     @extension("x-security-required-roles", #["association:admin"])
+    @extension("x-audit", #{ action: "complete", resourceType: "affiliation-transfer" })
     completeAffiliationTransfer(
       @path transferId: string
     ): ApiOkResponse<AffiliationTransfer>
@@ -424,6 +433,7 @@ namespace Association.Member.Chapters {
     @post
     @useAuth(bearerAuth)
     @extension("x-security-required-roles", #["association:admin"])
+    @extension("x-audit", #{ action: "create", resourceType: "royalty-split" })
     createRoyaltySplit(
       @body body: RoyaltySplitCreateRequest
     ): ApiCreatedResponse<RoyaltySplit>
@@ -464,6 +474,7 @@ namespace Association.Member.Chapters {
     @route("/{royaltySplitId}")
     @useAuth(bearerAuth)
     @extension("x-security-required-roles", #["association:admin"])
+    @extension("x-audit", #{ action: "update", resourceType: "royalty-split" })
     updateRoyaltySplit(
       @path royaltySplitId: string,
       @body updates: RoyaltySplitUpdateRequest
@@ -478,6 +489,7 @@ namespace Association.Member.Chapters {
     @route("/{royaltySplitId}")
     @useAuth(bearerAuth)
     @extension("x-security-required-roles", #["association:admin"])
+    @extension("x-audit", #{ action: "delete", resourceType: "royalty-split" })
     deleteRoyaltySplit(
       @path royaltySplitId: string
     ): ApiNoContentResponse

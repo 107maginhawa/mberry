@@ -1,3 +1,12 @@
+# CSRF preamble — fetches token + sets cookie for state-changing requests.
+# Auto-injected by scripts/audit/inject-csrf-into-hurl.ts (idempotent).
+GET {{api}}/csrf-token
+HTTP 200
+[Captures]
+csrf_token: jsonpath "$.token"
+
+
+
 # Business Rules: [BR-18] [BR-19]
 # Credentials module contract test: list credential templates and
 # digital credentials (ID cards).
@@ -7,10 +16,12 @@
 # ── Auth: sign in as officer ───────────────────────────────
 
 POST {{api}}/auth/sign-in/email
+Origin: {{origin}}
+x-csrf-token: {{csrf_token}}
 Content-Type: application/json
 {
   "email": "test@memberry.ph",
-  "password": "Test1234!"
+  "password": "TestPass123!"
 }
 HTTP 200
 
@@ -18,16 +29,21 @@ HTTP 200
 # ── 0. Unauth → 401 ───────────────────────────────────────
 
 POST {{api}}/auth/sign-out
+Origin: {{origin}}
+x-csrf-token: {{csrf_token}}
 HTTP 200
 
 GET {{api}}/association/member/credential-templates
+x-org-id: {{org_id}}
 HTTP 401
 
 POST {{api}}/auth/sign-in/email
+Origin: {{origin}}
+x-csrf-token: {{csrf_token}}
 Content-Type: application/json
 {
   "email": "test@memberry.ph",
-  "password": "Test1234!"
+  "password": "TestPass123!"
 }
 HTTP 200
 
@@ -35,6 +51,7 @@ HTTP 200
 # ── 1. List credential templates ──────────────────────────
 
 GET {{api}}/association/member/credential-templates
+x-org-id: {{org_id}}
 HTTP 200
 [Asserts]
 jsonpath "$.data" isCollection
@@ -43,6 +60,7 @@ jsonpath "$.data" isCollection
 # ── 2. List digital credentials ───────────────────────────
 
 GET {{api}}/association/member/credentials
+x-org-id: {{org_id}}
 HTTP 200
 [Asserts]
 jsonpath "$.data" isCollection

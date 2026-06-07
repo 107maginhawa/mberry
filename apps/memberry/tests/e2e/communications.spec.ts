@@ -1,17 +1,18 @@
 import { test, expect } from './helpers/test-fixture'
 import { signInAsSecretary, signInAsMember } from './helpers/auth'
-import { API_BASE } from './helpers/test-config'
-
-const ORG_SLUG = 'test-org'
+import { apiFetch } from './helpers/api-fetch'
+import { withIsolatedFixture } from './helpers/isolated-fixture'
 
 test.describe('Wave 4α: Communications — Officer Compose + Notification Drawer', () => {
+  // F3: fresh org per run — announcement create/publish would otherwise
+  // poison officer/communications list assertions in parallel workers.
+  const fx = withIsolatedFixture(test, { memberCount: 1 })
+
   test('officer compose → select filters → send → appears in sent history', async ({ page }) => {
     await signInAsSecretary(page)
 
-    // Navigate to compose page
-    await page.goto(`/org/${ORG_SLUG}/officer/communications/new`)
-    await page.waitForLoadState('networkidle')
-
+    // Navigate to compose page on the freshly-isolated org.
+    await page.goto(`/org/${fx().slug}/officer/communications/new`)
     // Fill in title
     const titleInput = page.getByPlaceholder('Announcement title')
     await expect(titleInput).toBeVisible({ timeout: 10000 })
@@ -25,30 +26,32 @@ test.describe('Wave 4α: Communications — Officer Compose + Notification Drawe
     const sendBtn = page.getByRole('button', { name: /send now/i })
     await expect(sendBtn).toBeEnabled()
 
-    // Click Send Now — should show confirmation
-    await sendBtn.click()
-
-    // Confirm the send
-    const confirmBtn = page.getByRole('button', { name: /confirm send/i })
-    await expect(confirmBtn).toBeVisible({ timeout: 5000 })
-    await confirmBtn.click()
-
-    // Wait for send API to complete
-    await page.waitForResponse(
-      (resp) => resp.url().includes('/api/communications/announcements') && resp.request().method() === 'POST',
+    // Send Now currently submits immediately (no confirm dialog). If the
+    // confirm step returns later, restore the `getByRole('button', { name:
+    // /confirm send/i })` click here.
+    const sendResp = page.waitForResponse(
+      (resp) =>
+        resp.url().includes('/api/communications/announcements') &&
+        resp.request().method() === 'POST',
       { timeout: 10000 },
     ).catch(() => null)
-    await page.waitForLoadState('networkidle')
+    await sendBtn.click()
+    await sendResp
 
     // Navigate to sent history
-    await page.goto(`/org/${ORG_SLUG}/officer/communications/sent`)
-    await page.waitForLoadState('networkidle')
-
+    await page.goto(`/org/${fx().slug}/officer/communications/sent`)
     // Verify announcement appears in sent list
     await expect(page.getByText('E2E Test Announcement')).toBeVisible({ timeout: 10000 })
   })
 
-  test('member opens notification drawer → sees categorized notifications → clicks action link', async ({ page }) => {
+  test.fixme('member opens notification drawer → sees categorized notifications → clicks action link', async ({ page }) => {
+    // OBSOLETE UX: notification bell was redesigned from a slide-out drawer
+    // into a link that routes to /my/notifications (a full page). The
+    // assertions below all targeted the drawer.
+    //
+    // To re-activate: rewrite to navigate to /my/notifications, then assert
+    // the same category tabs + notification rows there. Until then keeping
+    // the body so the rewrite is targeted.
     await signInAsMember(page)
 
     // Wait for header to load
@@ -89,24 +92,25 @@ test.describe('Wave 4α: Communications — Officer Compose + Notification Drawe
     }
   })
 
-  test('mark all read → badge clears', async ({ page }) => {
+  test.fixme('mark all read → badge clears', async ({ page }) => {
+    // OBSOLETE UX: bell→drawer pattern replaced with /my/notifications full
+    // page. Mark-all-read button moved to that page. Rewrite alongside the
+    // notification-drawer test above.
     await signInAsMember(page)
     await page.waitForLoadState('networkidle')
 
-    // Seed a test notification via API so we have something unread
-    await page.evaluate(async ({ apiBase }) => {
-      await fetch(`${apiBase}/notifs`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        credentials: 'include',
-        body: JSON.stringify({
-          type: 'system',
-          channel: 'in-app',
-          title: 'E2E Mark-Read Test',
-          message: 'Notification to test mark-all-read flow',
-        }),
-      })
-    }, { apiBase: API_BASE })
+    // Seed a test notification via API so we have something unread.
+    // apiFetch attaches x-csrf-token + Origin so the POST survives the
+    // hono/csrf middleware that landed after this spec was written.
+    await apiFetch(page, '/notifs', {
+      method: 'POST',
+      body: {
+        type: 'system',
+        channel: 'in-app',
+        title: 'E2E Mark-Read Test',
+        message: 'Notification to test mark-all-read flow',
+      },
+    })
 
     // Reload to pick up the new notification count
     await page.reload()

@@ -1,7 +1,6 @@
 import type { Context } from 'hono';
 import { CommitteeRepository } from './repos/committee.repo';
 import { NotFoundError, BusinessLogicError } from '@/core/errors';
-import { auditAction } from '@/utils/audit';
 import type { Session } from '@/types/auth';
 
 export async function dissolveCommittee(ctx: Context): Promise<Response> {
@@ -24,13 +23,9 @@ export async function dissolveCommittee(ctx: Context): Promise<Response> {
   // BR-39: dissolution retains all data read-only — repo.dissolve handles this
   const dissolved = await repo.dissolve(id, session.user.id, body.reason);
 
-  await auditAction(ctx, {
-    action: 'complete',
-    resourceType: 'committee',
-    resourceId: dissolved.id,
-    description: `Dissolved committee: ${dissolved.name}`,
-    details: { reason: body.reason },
-  });
+  ctx.set('auditResourceId', dissolved.id);
+  ctx.set('auditDescription', `Dissolved committee: ${dissolved.name}`);
+  ctx.set('auditDetails', { reason: body.reason });
 
   return ctx.json({ data: dissolved }, 200);
 }

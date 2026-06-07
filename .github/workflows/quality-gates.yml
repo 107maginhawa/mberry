@@ -1,0 +1,66 @@
+name: Quality Gates
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+
+jobs:
+  gates:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Install Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: 1.2.21
+
+      - name: Install
+        run: bun install --frozen-lockfile
+
+      - name: Build OpenAPI spec
+        run: bun run --filter @monobase/api-spec build
+
+      - name: Generate API codegen
+        env:
+          AUTH_SECRET: ci-codegen-secret-do-not-use-in-prod
+        run: bun run --filter @monobase/api-ts generate
+
+      - name: Typecheck
+        env:
+          AUTH_SECRET: ci-codegen-secret-do-not-use-in-prod
+        run: bun typecheck
+
+      - name: Handler verb lint (strict)
+        env:
+          LINT_HANDLER_VERBS_STRICT: 'true'
+        run: bun run lint:handler-verbs
+
+      - name: Hand-wired routes check
+        run: bun run check:hand-wired-routes
+
+      - name: E2E depth gate
+        run: bun run lint:e2e-depth
+        continue-on-error: true   # Until Wave 2 follow-on plan completes (114-spec sweep)
+
+      - name: Security quickscan
+        run: bun run scripts/security-quickscan.ts
+        continue-on-error: true   # P1+ queue allowed; warn-only. Flip false when queue cleared.
+
+      - name: Migration safety audit
+        run: bun run scripts/audit-migrations.ts
+
+      - name: Contract coverage report (info)
+        run: bun run scripts/contract-coverage-gap.ts
+
+      - name: Observability audit (info)
+        run: bun run scripts/audit-observability.ts
+
+      - name: API unit tests with coverage gate
+        run: bun run test:coverage:gate
+        working-directory: services/api-ts

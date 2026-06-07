@@ -3,7 +3,6 @@ import type { DatabaseInstance } from '@/core/database';
 import type { DeleteFeatureFlagParams } from '@/generated/openapi/validators';
 import { NotFoundError } from '@/core/errors';
 import { FeatureFlagRepository } from './repos/platform-admin.repo';
-import { auditAction } from '@/utils/audit';
 
 /**
  * deleteFeatureFlag
@@ -29,12 +28,8 @@ export async function deleteFeatureFlag(
 
   await repo.delete(flagId);
 
-  await auditAction(ctx, {
-    action: 'delete',
-    resourceType: 'feature-flag',
-    resourceId: flagId,
-    description: `Feature flag "${existing.moduleName}" deleted for ${existing.targetType}:${existing.targetId}`,
-  });
+  ctx.set('auditResourceId', flagId);
+  ctx.set('auditDescription', `Feature flag "${existing.moduleName}" deleted for ${existing.targetType}:${existing.targetId}`);
 
   return ctx.body(null, 204);
 }

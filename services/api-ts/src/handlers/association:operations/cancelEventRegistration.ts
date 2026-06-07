@@ -5,7 +5,6 @@ import type { CancelEventRegistrationParams } from '@/generated/openapi/validato
 import { NotFoundError, BusinessLogicError } from '@/core/errors';
 import { EventRegistrationRepository, WaitlistEntryRepository, EventRepository } from './repos/events.repo';
 import { domainEvents } from '@/core/domain-events';
-import { auditAction } from '@/utils/audit';
 import { notifyLateCancellation } from '@/handlers/notifs/notification-triggers';
 
 /**
@@ -22,7 +21,9 @@ export async function cancelEventRegistration(
 
   const params = ctx.req.valid('param');
   const db = ctx.get('database') as DatabaseInstance;
-  const logger = ctx.get('logger');
+  const baseLogger = ctx.get('logger');
+  const traceId = ctx.get('requestId');
+  const logger = baseLogger?.child?.({ traceId, module: 'association:operations' }) ?? baseLogger;
   const repo = new EventRegistrationRepository(db, logger);
 
   const existing = await repo.findOneById(params.registrationId);
@@ -59,17 +60,12 @@ export async function cancelEventRegistration(
         });
       }
     } catch (err) {
-      logger?.warn({ error: err, eventId: existing.eventId }, 'Failed to promote waitlist entry after cancellation');
+      logger?.warn({ action: 'cancelEventRegistration.1', error: err, eventId: existing.eventId }, 'Failed to promote waitlist entry after cancellation');
     }
   }
 
-  await auditAction(ctx, {
-    action: 'update',
-    resourceType: 'event-registration',
-    resourceId: cancelled.id,
-    description: 'Event registration cancelled',
-    eventSubType: 'association.booking-cancelled',
-  });
+  ctx.set('auditResourceId', cancelled.id);
+  ctx.set('auditDescription', 'Event registration cancelled');
 
   // GAP-006: Notify organizers of late cancellation (within 24h of event)
   const notifService = ctx.get('notifs') as NotificationService;
@@ -95,12 +91,12 @@ export async function cancelEventRegistration(
               eventStartsAt: event.startDate,
             });
           } else {
-            logger?.warn({ eventId: existing.eventId }, 'Skipping late-cancellation notification: event has no createdBy organizer');
+            logger?.warn({ action: 'cancelEventRegistration.2', eventId: existing.eventId }, 'Skipping late-cancellation notification: event has no createdBy organizer');
           }
         }
       }
     } catch (err) {
-      logger?.warn({ error: err, eventId: existing.eventId }, 'Failed to send late cancellation notification');
+      logger?.warn({ action: 'cancelEventRegistration.3', error: err, eventId: existing.eventId }, 'Failed to send late cancellation notification');
     }
   }
 

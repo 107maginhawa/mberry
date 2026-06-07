@@ -14,16 +14,11 @@ import "./modules/person-custom.tsp";
 import "./modules/billing.tsp";
 import "./modules/audit.tsp";
 import "./modules/notifs.tsp";
-import "./modules/notifs-custom.tsp";
 import "./modules/comms.tsp";
 import "./modules/storage.tsp";
 import "./modules/email.tsp";
 import "./modules/booking.tsp";
 import "./modules/reviews.tsp";
-
-// Association domain modules
-import "./modules/patient.tsp";
-import "./modules/provider.tsp";
 
 // Platform administration
 import "./modules/platform-admin.tsp";
@@ -71,10 +66,6 @@ import "./association/member/governance.tsp";
 import "./association/member/certificates.tsp";
 import "./association/member/directory.tsp";
 import "./association/member/credentials.tsp";
-import "./association/member/certification.tsp";
-import "./association/member/ethics.tsp";
-import "./association/member/awards.tsp";
-import "./association/member/fundraising.tsp";
 import "./association/member/special-assessments.tsp";
 import "./association/operations/events.tsp";
 import "./association/operations/training.tsp";
@@ -194,10 +185,6 @@ namespace MonobaseAPI {
   @route("/notifs")
   interface NotificationManagement extends Notifs.NotificationManagement {}
 
-  // Notification Custom (bulk read-all)
-  @tag("Notifs")
-  interface NotifsCustomManagement extends NotifsCustomModule.NotifsCustomManagement {}
-  
   // Comms Management
   @tag("Comms")
   @route("/comms")
@@ -264,35 +251,35 @@ namespace MonobaseAPI {
   // Association Domain — Membership
   // =========================================================================
 
-  @tag("Association:Member")
+  @tag("Member/Membership")
   @route("/association/member/tiers")
   interface AssocMembershipTierManagement extends Association.Member.Membership.MembershipTierManagement {}
 
-  @tag("Association:Member")
+  @tag("Member/Membership")
   @route("/association/member/memberships")
   interface AssocMembershipManagement extends Association.Member.Membership.MembershipManagement {}
 
-  @tag("Association:Member")
+  @tag("Member/Membership")
   @route("/association/member/applications")
   interface AssocMembershipApplicationManagement extends Association.Member.Membership.MembershipApplicationManagement {}
 
-  @tag("Association:Member")
+  @tag("Member/Membership")
   @route("/association/member/institutional-memberships")
   interface AssocInstitutionalMembershipManagement extends Association.Member.Membership.InstitutionalMembershipManagement {}
 
-  @tag("Association:Member")
+  @tag("Member/Membership")
   @route("/association/member/institutional-memberships/{institutionalMembershipId}/seats")
   interface AssocSeatAllocationManagement extends Association.Member.Membership.SeatAllocationManagement {}
 
-  @tag("Association:Member")
+  @tag("Member/Membership")
   @route("/association/member/roster")
   interface AssocMemberRosterManagement extends Association.Member.Membership.MemberRosterManagement {}
 
-  @tag("Association:Member")
+  @tag("Member/Membership")
   @route("/association/member/membership-categories")
   interface AssocMembershipCategoryManagement extends Association.Member.Membership.MembershipCategoryManagement {}
 
-  @tag("Association:Member")
+  @tag("Member/Membership")
   @route("/association/member/org-profile")
   interface AssocOrganizationProfileManagement extends Association.Member.Membership.OrganizationProfileManagement {}
 
@@ -300,11 +287,11 @@ namespace MonobaseAPI {
   // Association Domain — CPD Credits (compliance report + officer terms)
   // =========================================================================
 
-  @tag("Association:Member")
+  @tag("Member/Credits")
   @route("/credit-compliance")
   interface CreditComplianceManagement extends Association.Member.Credits.CreditComplianceManagement {}
 
-  @tag("Association:Member")
+  @tag("Member/Credits")
   @route("/officer-terms")
   interface OfficerTermsManagement extends Association.Member.Credits.OfficerTermsManagement {}
 
@@ -312,35 +299,35 @@ namespace MonobaseAPI {
   // Association Domain — Dues
   // =========================================================================
 
-  @tag("Association:Member")
+  @tag("Member/DuesSpecialAssessments")
   @route("/association/member/dues-configs")
   interface AssocDuesConfigManagement extends Association.Member.Dues.DuesConfigManagement {}
 
-  @tag("Association:Member")
+  @tag("Member/DuesSpecialAssessments")
   @route("/association/member/dues-invoices")
   interface AssocDuesInvoiceManagement extends Association.Member.Dues.DuesInvoiceManagement {}
 
-  @tag("Association:Member")
+  @tag("Member/DuesSpecialAssessments")
   @route("/association/member/aging-buckets")
   interface AssocAgingBucketService extends Association.Member.Dues.AgingBucketService {}
 
-  @tag("Association:Member")
+  @tag("Member/DuesSpecialAssessments")
   @route("/association/member/dunning")
   interface AssocDunningManagement extends Association.Member.Dues.DunningManagement {}
 
-  @tag("Association:Member")
+  @tag("Member/DuesSpecialAssessments")
   @route("/association/member/dues-payments")
   interface AssocDuesPaymentManagement extends Association.Member.Dues.DuesPaymentManagement {}
 
-  @tag("Association:Member")
+  @tag("Member/DuesSpecialAssessments")
   @route("/association/member/dues-payments")
   interface AssocDuesPaymentProofManagement extends Association.Member.Dues.DuesPaymentProofManagement {}
 
-  @tag("Association:Member")
+  @tag("Member/DuesSpecialAssessments")
   @route("/association/member/dues-gateway")
   interface AssocDuesGatewayManagement extends Association.Member.Dues.DuesGatewayManagement {}
 
-  @tag("Association:Member")
+  @tag("Member/DuesSpecialAssessments")
   @route("/association/member/dues-reporting")
   interface AssocDuesReportingService extends Association.Member.Dues.DuesReportingService {}
 
@@ -348,7 +335,7 @@ namespace MonobaseAPI {
   // Association Domain — Special Assessments (one-time charges)
   // =========================================================================
 
-  @tag("Association:Member")
+  @tag("Member/DuesSpecialAssessments")
   @route("/association/member/special-assessments")
   interface AssocSpecialAssessmentManagement extends Association.Member.SpecialAssessments.SpecialAssessmentManagement {}
 
@@ -356,18 +343,19 @@ namespace MonobaseAPI {
   // Association Domain — Chapters
   // =========================================================================
 
-  @tag("Association:Member")
+  @tag("Member/Chapters")
   @route("/association/member/chapter-affiliations")
   interface AssocChapterAffiliationManagement extends Association.Member.Chapters.ChapterAffiliationManagement {}
 
+  @tag("Member/Chapters")
   @route("/association/member/chapters")
   interface AssocOrgChaptersManagement extends Association.Member.Chapters.OrgChaptersManagement {}
 
-  @tag("Association:Member")
+  @tag("Member/Chapters")
   @route("/association/member/affiliation-transfers")
   interface AssocAffiliationTransferManagement extends Association.Member.Chapters.AffiliationTransferManagement {}
 
-  @tag("Association:Member")
+  @tag("Member/Chapters")
   @route("/association/member/royalty-splits")
   interface AssocRoyaltySplitManagement extends Association.Member.Chapters.RoyaltySplitManagement {}
 
@@ -375,11 +363,11 @@ namespace MonobaseAPI {
   // Association Domain — Governance (Positions & Officer Terms — Wave 1)
   // =========================================================================
 
-  @tag("Association:Member")
+  @tag("Member/Governance")
   @route("/association/member/positions")
   interface AssocPositionManagement extends Association.Member.Governance.PositionManagement {}
 
-  @tag("Association:Member")
+  @tag("Member/Governance")
   @route("/association/member/officer-terms")
   interface AssocOfficerTermManagement extends Association.Member.Governance.OfficerTermManagement {}
 
@@ -387,15 +375,15 @@ namespace MonobaseAPI {
   // Association Domain — Governance (Elections, Candidates & Ballots)
   // =========================================================================
 
-  @tag("Association:Member")
+  @tag("Member/Governance")
   @route("/association/member/elections")
   interface AssocElectionManagement extends Association.Member.Governance.ElectionManagement {}
 
-  @tag("Association:Member")
+  @tag("Member/Governance")
   @route("/association/member/candidates")
   interface AssocCandidateManagement extends Association.Member.Governance.CandidateManagement {}
 
-  @tag("Association:Member")
+  @tag("Member/Governance")
   @route("/association/member/ballots")
   interface AssocBallotManagement extends Association.Member.Governance.BallotManagement {}
 
@@ -403,15 +391,15 @@ namespace MonobaseAPI {
   // Association Domain — Certificates
   // =========================================================================
 
-  @tag("Association:Member")
+  @tag("Member/Certificates")
   @route("/association/member/certificates")
   interface AssocCertificateManagement extends Association.Member.Certificates.CertificateManagement {}
 
-  @tag("Association:Member")
+  @tag("Member/Certificates")
   @route("/certificates")
   interface CertificateVerificationService extends Association.Member.Certificates.CertificateVerificationService {}
 
-  @tag("Association:Member")
+  @tag("Member/Certificates")
   @route("/certificates")
   interface CertificateBulkIssuance extends Association.Member.Certificates.CertificateBulkIssuance {}
 
@@ -419,11 +407,11 @@ namespace MonobaseAPI {
   // Association Domain — Directory
   // =========================================================================
 
-  @tag("Association:Member")
+  @tag("Member/Directory")
   @route("/association/member/directory/profiles")
   interface AssocDirectoryProfileManagement extends Association.Member.Directory.DirectoryProfileManagement {}
 
-  @tag("Association:Member")
+  @tag("Member/Directory")
   @route("/association/member/directory/search")
   interface AssocDirectorySearchService extends Association.Member.Directory.DirectorySearchService {}
 
@@ -431,27 +419,27 @@ namespace MonobaseAPI {
   // Association Domain — Credentials
   // =========================================================================
 
-  @tag("Association:Member")
+  @tag("Member/Credentials")
   @route("/association/member/credential-templates")
   interface AssocCredentialTemplateManagement extends Association.Member.Credentials.CredentialTemplateManagement {}
 
-  @tag("Association:Member")
+  @tag("Member/Credentials")
   @route("/association/member/credentials")
   interface AssocDigitalCredentialManagement extends Association.Member.Credentials.DigitalCredentialManagement {}
 
-  @tag("Association:Member")
+  @tag("Member/Credentials")
   @route("/association/member/credentials/public-verify")
   interface AssocCredentialVerificationService extends Association.Member.Credentials.CredentialVerificationService {}
 
-  @tag("Association:Member")
+  @tag("Member/Credentials")
   @route("/association/member/credentials/lookup")
   interface AssocCredentialLookupService extends Association.Member.Credentials.CredentialLookupService {}
 
-  @tag("Association:Member")
+  @tag("Member/Credentials")
   @route("/association/member/licenses")
   interface AssocProfessionalLicenseManagement extends Association.Member.Credentials.ProfessionalLicenseManagement {}
 
-  @tag("Association:Member")
+  @tag("Member/Credentials")
   @route("/association/member/license-renewal-alerts")
   interface AssocLicenseRenewalAlertService extends Association.Member.Credentials.LicenseRenewalAlertService {}
 
@@ -559,7 +547,7 @@ namespace MonobaseAPI {
   // Association Domain — CPD Config
   // =========================================================================
 
-  @tag("Association:Member")
+  @tag("Member/Credits")
   @route("/association/member/cpd-config")
   interface AssocCpdConfigManagement extends Association.Operations.Training.CpdConfigManagement {}
 
@@ -567,7 +555,7 @@ namespace MonobaseAPI {
   // Association Domain — Manual Credit Award
   // =========================================================================
 
-  @tag("Association:Member")
+  @tag("Member/Credits")
   @route("/association/member/credits/manual")
   interface AssocManualCreditManagement extends Association.Operations.Training.ManualCreditManagement {}
 
@@ -575,7 +563,7 @@ namespace MonobaseAPI {
   // Association Domain — Credit Adjustment (officer award/deduct with reason)
   // =========================================================================
 
-  @tag("Association:Member")
+  @tag("Member/Credits")
   @route("/association/member/credits/adjust")
   interface AssocCreditAdjustmentManagement extends Association.Operations.Training.CreditAdjustmentManagement {}
 
@@ -583,7 +571,7 @@ namespace MonobaseAPI {
   // Association Domain — Event Credit Void (bulk revoke)
   // =========================================================================
 
-  @tag("Association:Member")
+  @tag("Member/Credits")
   @route("/association/member/credits/void-event")
   interface AssocEventCreditVoidManagement extends Association.Operations.Training.EventCreditVoidManagement {}
 
@@ -599,7 +587,7 @@ namespace MonobaseAPI {
   // Association Domain — Member Peer Credits (directory profile view)
   // =========================================================================
 
-  @tag("Association:Member")
+  @tag("Member/Credits")
   @route("/association/member/credits")
   interface AssocMemberPeerCreditsManagement extends Association.Operations.Training.MemberPeerCreditsManagement {}
 
@@ -607,7 +595,7 @@ namespace MonobaseAPI {
   // Association Domain — Compliance Reporting
   // =========================================================================
 
-  @tag("Association:Member")
+  @tag("Member/Credits")
   @route("/association/member/compliance")
   interface AssocComplianceManagement extends Association.Operations.Training.ComplianceManagement {}
 
@@ -673,19 +661,19 @@ namespace MonobaseAPI {
   // Dues Custom (officer dashboard endpoint)
   // =========================================================================
 
-  @tag("Dues")
+  @tag("Member/DuesSpecialAssessments")
   interface DuesCustomManagement extends DuesCustomModule.DuesCustomManagement {}
 
-  @tag("Dues")
+  @tag("Member/DuesSpecialAssessments")
   interface DuesMetricsManagement extends DuesCustomModule.DuesMetricsManagement {}
 
-  @tag("Dues")
+  @tag("Member/DuesSpecialAssessments")
   interface PaymentTokenEndpoints extends DuesCustomModule.PaymentTokenEndpoints {}
 
-  @tag("Dues")
+  @tag("Member/DuesSpecialAssessments")
   interface PaymentLinkManagement extends DuesCustomModule.PaymentLinkManagement {}
 
-  @tag("Dues")
+  @tag("Member/DuesSpecialAssessments")
   interface ReceiptEndpoints extends DuesCustomModule.ReceiptEndpoints {}
 
   // =========================================================================

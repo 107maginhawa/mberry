@@ -14,7 +14,7 @@
 import type { Context } from 'hono';
 import type { DatabaseInstance } from '@/core/database';
 import { sql } from 'drizzle-orm';
-import { auditAction } from '@/utils/audit';
+import { auditAction } from '@/core/audit/audit-action';
 import type { Session } from '@/types/auth';
 
 export async function getRevenueAnalytics(
@@ -23,8 +23,13 @@ export async function getRevenueAnalytics(
   const session = ctx.get('session') as Session;
   if (!session) return ctx.json({ error: 'Unauthorized' }, 401);
 
+  const admin = ctx.get('platformAdmin');
+  if (!admin) return ctx.json({ error: 'Platform admin access required' }, 403);
+
   const db = ctx.get('database') as DatabaseInstance;
-  const logger = ctx.get('logger');
+  const baseLogger = ctx.get('logger');
+  const traceId = ctx.get('requestId');
+  const logger = baseLogger?.child?.({ traceId, module: 'platformadmin' }) ?? baseLogger;
 
   // Parse optional date range filters
   const url = new URL(ctx.req.url);
@@ -82,7 +87,7 @@ export async function getRevenueAnalytics(
       },
     }, 200);
   } catch (error) {
-    logger?.error({ error }, 'Failed to compute revenue analytics');
+    logger?.error({ action: 'getRevenueAnalytics.1', error }, 'Failed to compute revenue analytics');
     return ctx.json({ error: 'Failed to compute revenue analytics' }, 500);
   }
 }

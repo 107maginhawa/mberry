@@ -48,7 +48,7 @@
     "typescript": "^5.9.2"
   },
   "scripts": {
-    "generate": "openapi-ts",
+    "generate": "openapi-ts && cd ../.. && bun run scripts/gen-sdk-test-stub.ts",
     "typecheck": "tsc --noEmit",
     "lint": "eslint src",
     "test": "bun test",

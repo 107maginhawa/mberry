@@ -3,9 +3,6 @@ import type { DatabaseInstance } from '@/core/database';
 import type { DeleteEventRegistrationParams } from '@/generated/openapi/validators';
 import { NotFoundError } from '@/core/errors';
 import { EventRegistrationRepository } from './repos/events.repo';
-import { auditAction } from '@/utils/audit';
-import { requirePosition } from '@/utils/officer-check';
-import { POSITION_TITLES } from '@/utils/position-titles';
 
 /**
  * deleteEventRegistration
@@ -19,9 +16,6 @@ export async function deleteEventRegistration(
   const user = ctx.get('user');
   if (!user) return ctx.json({ error: 'Unauthorized' }, 401);
 
-  const denied = await requirePosition(ctx, [POSITION_TITLES.SOCIETY_OFFICER, POSITION_TITLES.PRESIDENT]);
-  if (denied) return denied;
-
   const params = ctx.req.valid('param');
   const db = ctx.get('database') as DatabaseInstance;
   const logger = ctx.get('logger');
@@ -32,12 +26,8 @@ export async function deleteEventRegistration(
 
   await repo.deleteOneById(params.registrationId, user.id);
 
-  await auditAction(ctx, {
-    action: 'delete',
-    resourceType: 'event-registration',
-    resourceId: params.registrationId,
-    description: 'Event registration deleted',
-  });
+  ctx.set('auditResourceId', params.registrationId);
+  ctx.set('auditDescription', 'Event registration deleted');
 
   return ctx.json({ success: true }, 200);
 }

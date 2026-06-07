@@ -2,7 +2,7 @@ import { describe, test, expect, mock } from 'bun:test';
 import { makeCtx } from '@/test-utils/make-ctx';
 import { updateMyPrivacySettings } from './updateMyPrivacySettings';
 
-mock.module('@/utils/audit', () => ({ auditAction: async () => {} }));
+mock.module('@/core/audit/audit-action', () => ({ auditAction: async () => {} }));
 
 describe('updateMyPrivacySettings', () => {
   test('throws Unauthorized when unauthenticated', async () => {

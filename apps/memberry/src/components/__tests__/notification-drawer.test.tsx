@@ -33,7 +33,7 @@ vi.mock('lucide-react', () => ({
 }))
 
 // Mock useOrgContext
-vi.mock('@/hooks/useOrgContext', () => ({
+vi.mock('@/hooks/use-org-context', () => ({
   useOrgContext: () => ({ orgId: 'org-123' }),
 }))
 

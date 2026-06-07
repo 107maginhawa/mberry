@@ -1,10 +1,11 @@
+// @selector-only-ok: error-state spec — invalid/expired/claimed tokens by design return 4xx and surface UI errors; no successful hydration to capture
+// WF-002 — Account Claim: imported member claims pre-populated account via token + OTP
 // M-2 / BR-24: Account claim via invitation
 import { test, expect } from '../helpers/test-fixture'
 
 test.describe('M-2: Account Claim', () => {
   test('invite page with invalid token shows error', async ({ page }) => {
     await page.goto('/invite/invalid-token-12345')
-    await page.waitForLoadState('networkidle')
     await page.waitForTimeout(5000)
 
     // Invalid token must show error — not silently pass
@@ -13,7 +14,6 @@ test.describe('M-2: Account Claim', () => {
 
   test('invite page renders correct structure', async ({ page }) => {
     await page.goto('/invite/test-token')
-    await page.waitForLoadState('networkidle')
     await page.waitForTimeout(3000)
 
     // Page must render without crash
@@ -26,7 +26,6 @@ test.describe('M-2: Account Claim', () => {
 
   test('expired invite shows error state', async ({ page }) => {
     await page.goto('/invite/expired-token-test')
-    await page.waitForLoadState('networkidle')
     await page.waitForTimeout(5000)
 
     // Expired/invalid token must show error — never silently pass
@@ -35,7 +34,6 @@ test.describe('M-2: Account Claim', () => {
 
   test('already claimed invite shows error state', async ({ page }) => {
     await page.goto('/invite/already-claimed-test')
-    await page.waitForLoadState('networkidle')
     await page.waitForTimeout(5000)
 
     // Fake token must produce error — never silently pass

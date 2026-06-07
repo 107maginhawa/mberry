@@ -15,7 +15,7 @@ import {
   Copy,
 } from 'lucide-react'
 import { Skeleton, Tabs, TabsList, TabsTrigger, MenuItem, Button } from '@monobase/ui'
-import { useOrg } from '@/hooks/useOrg'
+import { useOrg } from '@/hooks/use-org'
 import { api } from '@/lib/api'
 import { toast } from 'sonner'
 

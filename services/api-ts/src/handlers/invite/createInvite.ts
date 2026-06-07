@@ -3,7 +3,6 @@ import type { DatabaseInstance } from '@/core/database';
 import { UnauthorizedError, ForbiddenError, ConflictError, ValidationError } from '@/core/errors';
 import { InviteRepository } from './repos/invite.repo';
 import { generateInviteToken, defaultExpiryDate } from './utils/token';
-import { auditAction } from '@/utils/audit';
 
 /**
  * createInvite
@@ -52,12 +51,8 @@ export async function createInvite(
     metadata: body.metadata || null,
   });
 
-  await auditAction(ctx, {
-    action: 'create',
-    resourceType: 'invitation',
-    resourceId: invite.id,
-    description: `Invitation created for ${email}`,
-  });
+  ctx.set('auditResourceId', invite.id);
+  ctx.set('auditDescription', `Invitation created for ${email}`);
 
   // Return the raw token (only time it's visible — not stored)
   return ctx.json({

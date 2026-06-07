@@ -1,8 +1,10 @@
+// WF-082 — Officer Transition: post-election handoff
 // Cross-Module Flow 6.5: Election → Officer Transition
 // Covers: M12 (elections) → M04 (org admin) → Notifications
 // Election creation, nomination, voting, certification, new officer assignment.
 import { test, expect } from '../helpers/test-fixture'
 import { signInAsOfficer, signInAsMember } from '../helpers/auth'
+import { captureAnyApiSuccess } from '../helpers/real-flow'
 
 const ORG_ID = 'ed8e3a96-8126-4341-be42-e6eb7940c562'
 
@@ -13,8 +15,11 @@ test.describe('Journey: Election → Officer Transition', () => {
     })
 
     await test.step('navigate to elections', async () => {
+      const respP = captureAnyApiSuccess(page)
       await page.goto(`/org/${ORG_ID}/officer/elections`)
-      await page.waitForLoadState('networkidle')
+      const resp = await respP
+      expect(resp?.status()).toBe(200)
+      expect(resp?.ok()).toBe(true)
     })
 
     await test.step('elections list shows multiple elections with statuses', async () => {
@@ -35,7 +40,6 @@ test.describe('Journey: Election → Officer Transition', () => {
 
     await test.step('navigate to elections', async () => {
       await page.goto(`/org/${ORG_ID}/elections`)
-      await page.waitForLoadState('networkidle')
     })
 
     await test.step('elections visible to member', async () => {
@@ -64,7 +68,6 @@ test.describe('Journey: Election → Officer Transition', () => {
 
     await test.step('navigate to officers page', async () => {
       await page.goto(`/org/${ORG_ID}/officer/officers`)
-      await page.waitForLoadState('networkidle')
     })
 
     await test.step('officers page shows current officers with positions', async () => {
@@ -82,7 +85,6 @@ test.describe('Journey: Election → Officer Transition', () => {
     await test.step('sign in and view elections', async () => {
       await signInAsOfficer(page)
       await page.goto(`/org/${ORG_ID}/officer/elections`)
-      await page.waitForLoadState('networkidle')
     })
 
     await test.step('view election detail', async () => {
@@ -93,14 +95,12 @@ test.describe('Journey: Election → Officer Transition', () => {
 
     await test.step('check officers page', async () => {
       await page.goto(`/org/${ORG_ID}/officer/officers`)
-      await page.waitForLoadState('networkidle')
       const hasOfficers = await page.getByText(/officer|president/i).first().isVisible({ timeout: 10000 }).catch(() => false)
       expect(hasOfficers).toBeTruthy()
     })
 
     await test.step('check org settings', async () => {
       await page.goto(`/org/${ORG_ID}/officer/settings`)
-      await page.waitForLoadState('networkidle')
       // Settings page should render with any content (tabs, forms, headings)
       const hasContent = await page.locator('main, [role="main"], form, h1, h2, [role="tablist"]').first().isVisible({ timeout: 10000 }).catch(() => false)
       expect(hasContent).toBeTruthy()

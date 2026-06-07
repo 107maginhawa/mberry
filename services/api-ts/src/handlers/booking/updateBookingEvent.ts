@@ -29,7 +29,9 @@ export async function updateBookingEvent(
 
   // Get dependencies from context
   const db = ctx.get('database') as DatabaseInstance;
-  const logger = ctx.get('logger');
+  const baseLogger = ctx.get('logger');
+  const traceId = ctx.get('requestId');
+  const logger = baseLogger?.child?.({ traceId, module: 'booking' }) ?? baseLogger;
 
   const repo = new BookingEventRepository(db, logger);
 
@@ -65,7 +67,7 @@ export async function updateBookingEvent(
 
     // If major changes were detected, regenerate slots immediately
     if (requiresSlotRegeneration) {
-      logger?.info({
+      logger?.info({ action: 'updateBookingEvent.2',
         eventId: updatedEvent.id,
         ownerId: updatedEvent.owner,
         changes
@@ -73,12 +75,12 @@ export async function updateBookingEvent(
 
       // Regenerate slots and let errors propagate to the client
       await regenerateEventSlots(db, updatedEvent.id);
-      logger?.info({ eventId: updatedEvent.id, ownerId: updatedEvent.owner }, 'Slots regenerated successfully');
+      logger?.info({ action: 'updateBookingEvent.3', eventId: updatedEvent.id, ownerId: updatedEvent.owner }, 'Slots regenerated successfully');
     }
 
     return ctx.json(updatedEvent);
   } catch (error) {
-    logger?.error({ error, eventId }, 'Failed to update booking event');
+    logger?.error({ action: 'updateBookingEvent.4', error, eventId }, 'Failed to update booking event');
     return ctx.json({ error: 'Failed to update booking event' }, 500);
   }
 }

@@ -1,0 +1,84 @@
+{
+  "scannedAt": "2026-06-06T07:02:41.311Z",
+  "summary": {
+    "p0": 0,
+    "p1": 2,
+    "p2": 3,
+    "p3": 4,
+    "total": 9
+  },
+  "findings": [
+    {
+      "id": "F1-001",
+      "dimension": "1. Raw SQL",
+      "severity": "P3",
+      "location": "109 occurrences across handlers (confirmed safe)",
+      "description": "109 raw sql`` tagged template usages in handlers. Manual review confirmed all interpolations are Drizzle bound parameters or schema column references. Notable: bookingEvent.repo.ts uses ${\"%\" + searchTerm + \"%\"} — JS string concat before Drizzle param binding. Safe (Drizzle parameterizes the result), but unusual.",
+      "recommendation": "Add lint rule (eslint-plugin-drizzle or custom AST rule) to block sql`` with string concatenation patterns in CI. Document safe vs unsafe patterns in CONTRIBUTING.md."
+    },
+    {
+      "id": "F2-001",
+      "dimension": "2. Cookie flags",
+      "severity": "P1",
+      "location": "services/api-ts/src/utils/cors.ts (determineCookieConfig)",
+      "description": "When CORS_ALLOW_LOCAL_NETWORK or CORS_ALLOW_TUNNELING is true (both default true in .env defaults), determineCookieConfig() sets sameSite=\"none\". If these defaults are not explicitly overridden in production, Better-Auth session cookies will have sameSite=none, weakening CSRF protection. The impersonation cookie is correctly hardcoded to sameSite=Strict (not affected).",
+      "recommendation": "Add a production guard in config.ts: if NODE_ENV=production and AUTH_COOKIE_SAMESITE is not set, emit a warning and default to \"lax\" regardless of CORS flags. Add to production deployment checklist: set CORS_STRICT=true, CORS_ALLOW_TUNNELING=false, AUTH_COOKIE_SAMESITE=lax."
+    },
+    {
+      "id": "F3-001",
+      "dimension": "3. JWT/Session",
+      "severity": "P2",
+      "location": "services/api-ts/src/core/config.ts:143",
+      "description": "Default session TTL is 24h (AUTH_SESSION_EXPIRES_IN defaults to 86400s). Better-Auth handles session management (no custom JWT). No explicit refresh-token rotation mechanism found beyond Better-Auth built-in. Long-lived sessions increase blast radius of stolen session tokens for privileged roles (platform admins, officers).",
+      "recommendation": "Reduce default session TTL to ≤8h (AUTH_SESSION_EXPIRES_IN=28800). Document recommended value in .env.example. Consider role-based TTL: shorter for platformAdmin, standard for members."
+    },
+    {
+      "id": "F4-002",
+      "dimension": "4. Rate limiting",
+      "severity": "P3",
+      "location": "services/api-ts/src/middleware/rate-limit.ts + app.ts:298",
+      "description": "Global rate limiter applied (app.use('*', createRateLimiter())). Sliding window: 30 writes/min, 120 reads/min per IP. Skips: /auth/* (Better-Auth handles), /health, /ready, test/development NODE_ENV. In-memory store — resets on process restart.",
+      "recommendation": "For multi-instance production deploy, replace in-memory Map buckets with Redis sliding window. Current single-process implementation is correct."
+    },
+    {
+      "id": "F5-001",
+      "dimension": "5. Secrets",
+      "severity": "P2",
+      "location": "dev environment / CI pipeline",
+      "description": "gitleaks not installed locally. No automated secret scanning on commits.",
+      "recommendation": "Install: brew install gitleaks. Add pre-commit hook: gitleaks protect --staged. Add CI step: gitleaks detect --no-git in contract.yml workflow."
+    },
+    {
+      "id": "F5-003",
+      "dimension": "5. Secrets",
+      "severity": "P3",
+      "location": ".github/workflows/contract.yml (CI fixtures only)",
+      "description": "No hardcoded secrets found in TypeScript source. CI workflow contains test fixture credentials (AUTH_SECRET=contract-test-secret-do-not-use-in-prod, minioadmin/minioadmin) — acceptable for ephemeral CI environments. These values are explicitly labeled and not used in production.",
+      "recommendation": "Set up gitleaks .gitleaks.toml allowlist for known CI fixture values to prevent false positives. Verify these fixture values were never used in a real production deployment."
+    },
+    {
+      "id": "F6-001",
+      "dimension": "6. CORS",
+      "severity": "P1",
+      "location": "services/api-ts/src/core/config.ts:133",
+      "description": "CORS_STRICT defaults to false. CORS_ALLOW_TUNNELING defaults to true. In production, if these env vars are not explicitly set, the API accepts requests from tunneling origins (*.ngrok.io, *.trycloudflare.com, *.loca.lt, *.localhost.run) with CORS_CREDENTIALS=true. This allows a malicious tunneling-hosted site to make credentialed cross-origin requests to the API.",
+      "recommendation": "Add production validation in config.ts: if NODE_ENV=production, warn and refuse to start (or emit stern log) if CORS_STRICT=false or CORS_ALLOW_TUNNELING=true. Required production env: CORS_STRICT=true, CORS_ALLOW_TUNNELING=false, CORS_ALLOW_LOCAL_NETWORK=false."
+    },
+    {
+      "id": "F6-002",
+      "dimension": "6. CORS",
+      "severity": "P2",
+      "location": "services/api-ts/src/utils/cors.ts:60",
+      "description": "Wildcard '*' is accepted as a valid entry in CORS origins list (corsConfig.origins.includes('*')). If CORS_ORIGINS env var is set to *, the API would allow any origin with credentials.",
+      "recommendation": "Add validation: if origins includes '*' and credentials is true, throw startup error. Wildcard + credentials is always misconfiguration."
+    },
+    {
+      "id": "F7-001",
+      "dimension": "7. File uploads",
+      "severity": "P3",
+      "location": "services/api-ts/src/handlers/storage/uploadFile.ts",
+      "description": "Upload handler has: MIME allowlist (SVG excluded), 50MB size limit, filename sanitization (strips path traversal, null bytes, control chars), SVG blocked in sanitize.ts. Architecture is presigned-URL: server validates metadata, client uploads directly to S3/MinIO. Server cannot inspect actual file bytes.",
+      "recommendation": "Consider adding a post-upload webhook or server-side step to verify magic bytes match declared MIME type for high-risk document categories. Current metadata-only validation is acceptable for a presigned-URL architecture but a determined attacker could upload mismatched content directly to S3."
+    }
+  ]
+}

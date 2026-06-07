@@ -76,16 +76,16 @@ describe('DomainEventBus', () => {
   });
 
   test('emitting unregistered event causes no error', async () => {
-    // No handlers registered — should complete silently
-    await bus.emit('dues.payment.recorded', {
-      paymentId: 'pay-1',
-      personId: 'person-1',
-      organizationId: 'org-1',
-      amount: 100,
-      newExpiryDate: null,
-    });
-    // If we reach here, the test passes
-    expect(true).toBe(true);
+    // No handlers registered — emit must resolve without throwing
+    await expect(
+      bus.emit('dues.payment.recorded', {
+        paymentId: 'pay-1',
+        personId: 'person-1',
+        organizationId: 'org-1',
+        amount: 100,
+        newExpiryDate: null,
+      }),
+    ).resolves.toBeUndefined();
   });
 
   test('off() removes a specific handler', async () => {

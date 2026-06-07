@@ -17,7 +17,9 @@ export async function createAdvertiser(ctx: ValidatedContext<any, never, never>)
 
   const body = ctx.req.valid('json');
   const db = ctx.get('database') as DatabaseInstance;
-  const logger = ctx.get('logger');
+  const baseLogger = ctx.get('logger');
+  const traceId = ctx.get('requestId');
+  const logger = baseLogger?.child?.({ traceId, module: 'advertising' }) ?? baseLogger;
   const organizationId = ctx.get('organizationId') as string;
 
   if (!body.companyName?.trim()) throw new ValidationError('Company name is required');

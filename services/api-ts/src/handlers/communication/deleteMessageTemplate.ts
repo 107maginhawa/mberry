@@ -3,7 +3,6 @@ import type { DatabaseInstance } from '@/core/database';
 import type { DeleteMessageTemplateParams } from '@/generated/openapi/validators';
 import { NotFoundError } from '@/core/errors';
 import { MessageTemplateRepository } from './repos/communication.repo';
-import { auditAction } from '@/utils/audit';
 
 /**
  * deleteMessageTemplate
@@ -32,12 +31,8 @@ export async function deleteMessageTemplate(
 
   await repo.delete(params.templateId);
 
-  await auditAction(ctx, {
-    action: 'delete',
-    resourceType: 'message-template',
-    resourceId: params.templateId,
-    description: `Message template "${existing.name}" deleted`,
-  });
+  ctx.set('auditResourceId', params.templateId);
+  ctx.set('auditDescription', `Message template "${existing.name}" deleted`);
 
   return ctx.body(null, 204);
 }

@@ -3,9 +3,6 @@ import type { DatabaseInstance } from '@/core/database';
 import type { DeleteDocumentParams } from '@/generated/openapi/validators';
 import { UnauthorizedError, NotFoundError, ForbiddenError } from '@/core/errors';
 import { DocumentRepository } from './repos/documents.repo';
-import { auditAction } from '@/utils/audit';
-import { requirePosition } from '@/utils/officer-check';
-import { POSITION_TITLES } from '@/utils/position-titles';
 
 /**
  * deleteDocument
@@ -18,11 +15,6 @@ export async function deleteDocument(
 ): Promise<Response> {
   const session = ctx.get('session');
   if (!session) throw new UnauthorizedError();
-
-  // [EM-M11-h5c78d34] Document deletion is president-only (spec: super/admin/president).
-  // requireOfficerTerm allowed any officer, which was over-permissive.
-  const denied = await requirePosition(ctx, [POSITION_TITLES.PRESIDENT]);
-  if (denied) return denied;
 
   const { documentId } = ctx.req.valid('param');
   const db = ctx.get('database') as DatabaseInstance;
@@ -39,12 +31,8 @@ export async function deleteDocument(
 
   await repo.deleteOneById(documentId);
 
-  await auditAction(ctx, {
-    action: 'delete',
-    resourceType: 'document',
-    resourceId: documentId,
-    description: 'Document deleted',
-  });
+  ctx.set('auditResourceId', documentId);
+  ctx.set('auditDescription', 'Document deleted');
 
   return ctx.body(null, 204);
 }

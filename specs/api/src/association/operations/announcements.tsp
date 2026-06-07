@@ -221,6 +221,8 @@ namespace Association.Operations.Announcements {
     @route("/communications/announcements/{organizationId}")
     @useAuth(bearerAuth)
     @extension("x-security-required-roles", #["association:officer"])
+    @extension("x-require-position", #["President", "Secretary"])
+    @extension("x-audit", #{ action: "create", resourceType: "announcement" })
     createAnnouncement(
       @path organizationId: UUID,
       @body body: AnnouncementCreateRequest
@@ -235,6 +237,8 @@ namespace Association.Operations.Announcements {
     @route("/communications/announcements/{id}/publish")
     @useAuth(bearerAuth)
     @extension("x-security-required-roles", #["association:officer"])
+    @extension("x-require-position", #["President", "Secretary"])
+    @extension("x-audit", #{ action: "update", resourceType: "announcement", eventSubType: "content.announcement-published" })
     publishAnnouncement(
       @path id: UUID
     ): ApiOkResponse<Announcement>
@@ -248,6 +252,8 @@ namespace Association.Operations.Announcements {
     @route("/communications/announcements/{id}/archive")
     @useAuth(bearerAuth)
     @extension("x-security-required-roles", #["association:officer"])
+    @extension("x-require-position", #["President", "Secretary"])
+    @extension("x-audit", #{ action: "update", resourceType: "announcement", eventSubType: "content.announcement-archived" })
     archiveAnnouncement(
       @path id: UUID
     ): ApiOkResponse<Announcement>
@@ -261,6 +267,7 @@ namespace Association.Operations.Announcements {
     @route("/communications/announcements/{id}")
     @useAuth(bearerAuth)
     @extension("x-security-required-roles", #["association:officer"])
+    @extension("x-audit", #{ action: "update", resourceType: "announcement" })
     updateAnnouncement(
       @path id: UUID,
       @body updates: AnnouncementUpdateRequest
@@ -276,6 +283,7 @@ namespace Association.Operations.Announcements {
     @route("/communications/announcements/{id}")
     @useAuth(bearerAuth)
     @extension("x-security-required-roles", #["association:officer"])
+    @extension("x-audit", #{ action: "delete", resourceType: "announcement" })
     deleteAnnouncement(
       @path id: UUID
     ): ApiNoContentResponse
@@ -289,6 +297,7 @@ namespace Association.Operations.Announcements {
     @route("/communications/announcements/{id}/schedule")
     @useAuth(bearerAuth)
     @extension("x-security-required-roles", #["association:officer"])
+    @extension("x-audit", #{ action: "update", resourceType: "announcement" })
     scheduleAnnouncement(
       @path id: UUID,
       @body body: AnnouncementScheduleRequest

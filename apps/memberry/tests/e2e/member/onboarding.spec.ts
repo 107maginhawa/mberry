@@ -1,5 +1,14 @@
+// WF-004 — Member Onboarding: required profile, license, payment
 import { test, expect } from '../helpers/test-fixture'
 import { signUpForOnboarding } from '../helpers/auth'
+import { captureAnyApiSuccess } from '../helpers/real-flow'
+
+// W2 real-flow upgrade: the onboarding step-1 mount fires at least one
+// authenticated API GET (session/onboarding state). Capturing any
+// successful API response proves the backend wire returned data, not
+// just that the step-1 heading rendered. We use captureAnyApiSuccess
+// because the exact endpoint depends on auth/session state for a
+// brand-new account, not a stable single resource.
 
 // Shared helper to fill DOB via calendar picker and advance to step 2
 async function fillDobAndAdvance(page: import('@playwright/test').Page) {
@@ -15,8 +24,12 @@ test.describe('Member Onboarding (/onboarding)', () => {
   })
 
   test('shows step 1 heading', async ({ page }) => {
+    const respP = captureAnyApiSuccess(page)
     await page.goto('/onboarding')
-    await page.waitForLoadState('networkidle')
+
+    const resp = await respP
+    expect(resp?.status()).toBe(200)
+    expect(resp?.ok()).toBe(true)
 
     await expect(page.getByText('Step 1 of 2: Personal Information')).toBeVisible({ timeout: 10000 })
     await expect(page.getByText('Tell us about yourself')).toBeVisible()
@@ -24,7 +37,6 @@ test.describe('Member Onboarding (/onboarding)', () => {
 
   test('shows form fields for personal info', async ({ page }) => {
     await page.goto('/onboarding')
-    await page.waitForLoadState('networkidle')
     await expect(page.getByText('Step 1 of 2')).toBeVisible({ timeout: 10000 })
 
     // Required fields — use exact: false to match "First Name *" etc.
@@ -40,7 +52,6 @@ test.describe('Member Onboarding (/onboarding)', () => {
 
   test('can navigate to step 2 after filling required fields', async ({ page }) => {
     await page.goto('/onboarding')
-    await page.waitForLoadState('networkidle')
     await expect(page.getByText('Step 1 of 2')).toBeVisible({ timeout: 10000 })
 
     await fillDobAndAdvance(page)
@@ -50,7 +61,6 @@ test.describe('Member Onboarding (/onboarding)', () => {
 
   test('can go back from step 2 to step 1', async ({ page }) => {
     await page.goto('/onboarding')
-    await page.waitForLoadState('networkidle')
     await expect(page.getByText('Step 1 of 2')).toBeVisible({ timeout: 10000 })
 
     await fillDobAndAdvance(page)
@@ -62,7 +72,6 @@ test.describe('Member Onboarding (/onboarding)', () => {
 
   test('skip button on step 2 navigates to dashboard', async ({ page }) => {
     await page.goto('/onboarding')
-    await page.waitForLoadState('networkidle')
     await expect(page.getByText('Step 1 of 2')).toBeVisible({ timeout: 10000 })
 
     await fillDobAndAdvance(page)

@@ -59,7 +59,9 @@ export async function submitSurveyResponse(
 
   const userId = session.user.id;
   const db = ctx.get('database') as DatabaseInstance;
-  const logger = ctx.get('logger');
+  const baseLogger = ctx.get('logger');
+  const traceId = ctx.get('requestId');
+  const logger = baseLogger?.child?.({ traceId, module: 'surveys' }) ?? baseLogger;
   const organizationId = ctx.get('organizationId') as string;
 
   const surveyId = ctx.req.param('survey')!;
@@ -102,12 +104,24 @@ export async function submitSurveyResponse(
       userId,
     );
 
+    // Best-effort analytics aggregation. The `survey.aggregateAnalytics`
+    // job is not registered (see handlers/surveys/jobs/index.ts) — analytics
+    // are currently computed on-demand by getSurveyAnalytics. Until the
+    // job lands, swallow the trigger error so a re-edit doesn't fail the
+    // primary write.
     const jobsScheduler = ctx.get('jobs') as JobScheduler | undefined;
     if (jobsScheduler) {
-      await jobsScheduler.trigger('survey.aggregateAnalytics', {
-        surveyId,
-        organizationId,
-      });
+      try {
+        await jobsScheduler.trigger('survey.aggregateAnalytics', {
+          surveyId,
+          organizationId,
+        });
+      } catch (err) {
+        logger?.warn(
+          { action: 'submitSurveyResponse.1', err, surveyId },
+          'survey.aggregateAnalytics trigger failed; analytics will be computed on demand',
+        );
+      }
     }
 
     logger?.info({
@@ -139,13 +153,22 @@ export async function submitSurveyResponse(
     updatedBy: userId,
   });
 
-  // Trigger analytics aggregation job
+  // Best-effort analytics aggregation. See update path above for context —
+  // `survey.aggregateAnalytics` is not currently registered, so swallow
+  // trigger errors and let getSurveyAnalytics compute on demand.
   const jobs = ctx.get('jobs') as JobScheduler | undefined;
   if (jobs) {
-    await jobs.trigger('survey.aggregateAnalytics', {
-      surveyId,
-      organizationId,
-    });
+    try {
+      await jobs.trigger('survey.aggregateAnalytics', {
+        surveyId,
+        organizationId,
+      });
+    } catch (err) {
+      logger?.warn(
+        { action: 'submitSurveyResponse.3', err, surveyId },
+        'survey.aggregateAnalytics trigger failed; analytics will be computed on demand',
+      );
+    }
   }
 
   logger?.info({

@@ -2,9 +2,6 @@ import type { ValidatedContext } from '@/types/app';
 import type { DatabaseInstance } from '@/core/database';
 import type { CreateCourseBody } from '@/generated/openapi/validators';
 import { CourseRepository } from './repos/training.repo';
-import { auditAction } from '@/utils/audit';
-import { requirePosition } from '@/utils/officer-check';
-import { POSITION_TITLES } from '@/utils/position-titles';
 
 /**
  * createCourse
@@ -24,9 +21,6 @@ export async function createCourse(
   const orgId = ctx.get('organizationId');
   if (!orgId) return ctx.json({ error: 'Organization context required' }, 403);
 
-  const denied = await requirePosition(ctx, [POSITION_TITLES.SOCIETY_OFFICER, POSITION_TITLES.PRESIDENT]);
-  if (denied) return denied;
-
   const body = ctx.req.valid('json');
   const db = ctx.get('database') as DatabaseInstance;
   const logger = ctx.get('logger');
@@ -40,12 +34,8 @@ export async function createCourse(
     status: 'draft',
   });
 
-  await auditAction(ctx, {
-    action: 'create',
-    resourceType: 'course',
-    resourceId: course.id,
-    description: 'Course created',
-  });
+  ctx.set('auditResourceId', course.id);
+  ctx.set('auditDescription', 'Course created');
 
   return ctx.json(course, 201);
 }

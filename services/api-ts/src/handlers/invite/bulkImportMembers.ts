@@ -5,7 +5,6 @@ import { UnauthorizedError, ForbiddenError, ValidationError } from '@/core/error
 import { OfficerTermRepository } from '@/handlers/association:member/repos/governance.repo';
 import { InviteRepository } from './repos/invite.repo';
 import { generateInviteToken, defaultExpiryDate } from './utils/token';
-import { auditAction } from '@/utils/audit';
 import type { BulkImportMembersBody } from '@/generated/openapi/validators';
 
 const EMAIL_RE = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
@@ -197,12 +196,8 @@ export async function bulkImportMembers(
     imported++;
   }
 
-  await auditAction(ctx, {
-    action: 'create',
-    resourceType: 'invitation',
-    resourceId: importId,
-    description: `Bulk import ${importId}: ${imported} invitations created for organization ${orgId}`,
-  });
+  ctx.set('auditResourceId', importId);
+  ctx.set('auditDescription', `Bulk import ${importId}: ${imported} invitations created for organization ${orgId}`);
 
   return ctx.json({
     mode: 'import',

@@ -1,7 +1,9 @@
+// WF-001 — Self-Registration: name, email, license, password + OTP verification
 // BR-25: OTP registration flow
 // Tests email verification during signup
 import { test, expect } from '../helpers/test-fixture'
 import { isMailpitAvailable } from '../helpers/mailpit'
+import { captureAnyApiSuccess } from '../helpers/real-flow'
 
 let mailpitUp = false
 
@@ -11,9 +13,11 @@ test.beforeAll(async () => {
 
 test.describe('BR-25: OTP Registration', () => {
   test('signup page is accessible', async ({ page }) => {
+    const respP = captureAnyApiSuccess(page)
     await page.goto('/auth/sign-up')
-    await page.waitForLoadState('networkidle')
-
+    const resp = await respP
+    expect(resp?.status()).toBe(200)
+    expect(resp?.ok()).toBe(true)
     // Should show signup form
     const hasForm = await page.getByRole('button', { name: /create|sign up|register/i }).isVisible({ timeout: 10000 }).catch(() => false)
     expect(hasForm).toBeTruthy()
@@ -21,8 +25,6 @@ test.describe('BR-25: OTP Registration', () => {
 
   test('signup requires name, email, and password', async ({ page }) => {
     await page.goto('/auth/sign-up')
-    await page.waitForLoadState('networkidle')
-
     // All required fields should be present
     const hasName = await page.getByLabel(/name/i).isVisible({ timeout: 10000 }).catch(() => false)
     const hasEmail = await page.getByLabel(/email/i).isVisible({ timeout: 5000 }).catch(() => false)
@@ -40,14 +42,12 @@ test.describe('BR-25: OTP Registration', () => {
     const email = `otp-test-${timestamp}@memberry.ph`
 
     await page.goto('/auth/sign-up')
-    await page.waitForLoadState('networkidle')
-
     await page.getByLabel('Name', { exact: true }).fill(`OTP Test ${timestamp}`)
     await page.getByLabel('Email', { exact: true }).fill(email)
 
     const passwordInput = page.getByLabel('Password', { exact: true })
     await passwordInput.click()
-    await passwordInput.pressSequentially('TestPass123!', { delay: 10 })
+    await passwordInput.fill('TestPass123!')
 
     await page.getByRole('button', { name: /create|sign up|register/i }).click()
     await page.waitForTimeout(5000)

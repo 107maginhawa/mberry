@@ -3,7 +3,6 @@ import type { DatabaseInstance } from '@/core/database';
 import type { UpdateMessageBody, UpdateMessageParams } from '@/generated/openapi/validators';
 import { NotFoundError, BusinessLogicError } from '@/core/errors';
 import { MessageRepository } from './repos/communication.repo';
-import { auditAction } from '@/utils/audit';
 
 /**
  * updateMessage
@@ -40,12 +39,8 @@ export async function updateMessage(
     updatedBy: user.id,
   });
 
-  await auditAction(ctx, {
-    action: 'update',
-    resourceType: 'message',
-    resourceId: params.messageId,
-    description: 'Message updated',
-  });
+  ctx.set('auditResourceId', params.messageId);
+  ctx.set('auditDescription', 'Message updated');
 
   return ctx.json(updated, 200);
 }

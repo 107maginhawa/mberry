@@ -12,8 +12,8 @@ import { NOW, daysAgo, daysFromNow, dateStr, ACTIVE_EXPIRY } from './helpers';
 
 // Schema imports — cross-module
 import { notifications } from '@/handlers/notifs/repos/notification.schema';
-import { certificates } from '@/handlers/certificates/repos/certificates.schema';
-import { orgCertificateSeq } from '@/handlers/certificates/repos/certificates.schema';
+import { certificates } from '@/handlers/member/certificates/repos/certificates.schema';
+import { orgCertificateSeq } from '@/handlers/member/certificates/repos/certificates.schema';
 import { documents, documentVersions, documentAccessLogs } from '@/handlers/documents/repos/documents.schema';
 import { chatRooms, chatMessages } from '@/handlers/comms/repos/comms.schema';
 import { invoices, invoiceLineItems, merchantAccounts, billingConfigs } from '@/handlers/billing/repos/billing.schema';

@@ -11,7 +11,6 @@ import type { Session } from '@/types/auth';
 import { InvoiceRepository, MerchantAccountRepository } from './repos/billing.repo';
 import type { InvoiceMetadata, MerchantMetadata } from './repos/billing.schema';
 import { PersonRepository } from '../person/repos/person.repo';
-import { auditAction } from '@/utils/audit';
 
 /**
  * voidInvoice
@@ -25,7 +24,9 @@ export async function voidInvoice(
   ctx: ValidatedContext<never, never, VoidInvoiceParams>
 ): Promise<Response> {
   const database = ctx.get('database');
-  const logger = ctx.get('logger');
+  const baseLogger = ctx.get('logger');
+  const traceId = ctx.get('requestId');
+  const logger = baseLogger?.child?.({ traceId, module: 'billing' }) ?? baseLogger;
   const billing = ctx.get('billing');
   
   // Get authenticated session (guaranteed by middleware)
@@ -36,7 +37,7 @@ export async function voidInvoice(
 
   const invoiceId = params.invoice;
 
-  logger.info({ invoiceId }, 'Voiding invoice');
+  logger.info({ action: 'voidInvoice.1', invoiceId }, 'Voiding invoice');
   
   // Create repository instances
   const invoiceRepo = new InvoiceRepository(database, logger);
@@ -158,7 +159,7 @@ export async function voidInvoice(
     });
 
     logger.info(
-      {
+      { action: 'voidInvoice.2',
         invoiceId,
         paymentIntentId: stripePaymentIntentId,
         total: invoice.total
@@ -166,14 +167,9 @@ export async function voidInvoice(
       'Invoice voided successfully'
     );
 
-    await auditAction(ctx, {
-      action: 'delete',
-      resourceType: 'invoice',
-      resourceId: invoiceId,
-      description: `Invoice voided: ${invoice.invoiceNumber ?? invoiceId}`,
-      eventSubType: 'financial.invoice-voided',
-      details: { invoiceId, total: invoice.total },
-    });
+    ctx.set('auditResourceId', invoiceId);
+    ctx.set('auditDescription', `Invoice voided: ${invoice.invoiceNumber ?? invoiceId}`);
+    ctx.set('auditDetails', { invoiceId, total: invoice.total });
 
     // Fetch the updated invoice to return
     const updatedInvoice = await invoiceRepo.findOneById(invoiceId);
@@ -228,7 +224,7 @@ export async function voidInvoice(
     }, 200);
     
   } catch (error) {
-    logger.error({ error, invoiceId }, 'Failed to void invoice');
+    logger.error({ action: 'voidInvoice.3', error, invoiceId }, 'Failed to void invoice');
     
     if (error instanceof ValidationError || error instanceof ConflictError || error instanceof BusinessLogicError) {
       throw error;

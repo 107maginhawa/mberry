@@ -26,7 +26,9 @@ export async function listEventSlots(
   
   // Get dependencies from context
   const db = ctx.get('database') as DatabaseInstance;
-  const logger = ctx.get('logger');
+  const baseLogger = ctx.get('logger');
+  const traceId = ctx.get('requestId');
+  const logger = baseLogger?.child?.({ traceId, module: 'booking' }) ?? baseLogger;
   
   // Verify event exists
   const eventRepo = new BookingEventRepository(db, logger);
@@ -47,7 +49,7 @@ export async function listEventSlots(
   const endTime = query.endTime || addDays(startTime, 7);
   const status = query.status || 'available'; // Default to available slots
   
-  logger?.info({ 
+  logger?.info({ action: 'listEventSlots.1', 
     eventId: params.event, 
     startTime, 
     endTime, 
@@ -61,7 +63,7 @@ export async function listEventSlots(
     timeRange: { start: startTime, end: endTime }
   });
   
-  logger?.info({ 
+  logger?.info({ action: 'listEventSlots.2', 
     eventId: params.event, 
     slotCount: slots.length 
   }, 'Event slots retrieved');

@@ -8,7 +8,7 @@ import type { DatabaseInstance } from '@/core/database';
 import { ConflictError, NotFoundError } from '@/core/errors';
 import { DatabaseRepository, type PaginationOptions } from '@/core/database.repo';
 import { assertValidTransition } from '@/utils/status-transitions';
-import { INVOICE_VALID_TRANSITIONS } from '../utils/status-transitions';
+import { INVOICE_VALID_TRANSITIONS } from '@/handlers/member/membership/utils/status-transitions';
 import {
   duesConfigs,
   duesInvoices,

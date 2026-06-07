@@ -1,3 +1,4 @@
+// @selector-only-ok: error-boundary spec — intercepts/forges API failures and asserts graceful UI; capturing a real-flow response would just match the forged 500
 // Error boundary tests — verify graceful degradation when API fails
 // Uses page.route() to intercept API and return 500
 import { test, expect } from './helpers/test-fixture'
@@ -25,8 +26,6 @@ test.describe('Error Boundaries', () => {
     })
 
     await page.goto('/dashboard')
-    await page.waitForLoadState('networkidle')
-
     // Page should render (not crash) — show error state, not blank screen
     const body = page.locator('body')
     const bodyText = await body.textContent()
@@ -40,8 +39,6 @@ test.describe('Error Boundaries', () => {
   test('org page shows error state for non-existent org', async ({ page }) => {
     await signInAsMember(page)
     await page.goto('/org/00000000-0000-0000-0000-000000000000/home')
-    await page.waitForLoadState('networkidle')
-
     // Should show error or redirect — not crash
     const hasError = await page.getByText(/not.*found|error|no.*org|unauthorized/i).first().isVisible({ timeout: 10000 }).catch(() => false)
     const redirectedAway = !page.url().includes('00000000-0000-0000-0000-000000000000')

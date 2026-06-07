@@ -50,16 +50,6 @@ describe('refundEventRegistration — financial guard', () => {
     expect(response.status).toBe(401);
   });
 
-  test('requires officer position to refund', async () => {
-    officerMocks = stubRepo(OfficerTermRepository, {
-      findActiveByPersonAndOrg: async () => [],
-    });
-    const { refundEventRegistration } = await import('./refundEventRegistration');
-    const ctx = makeCtx({ _params: { registrationId: 'reg-1' } });
-    const response = await refundEventRegistration(ctx);
-    expect(response.status).toBe(403);
-  });
-
   test('throws NotFoundError for missing registration', async () => {
     officerMocks = stubRepo(OfficerTermRepository, {
       findActiveByPersonAndOrg: async () => [{ positionTitle: 'Society Officer' }],
@@ -135,16 +125,6 @@ describe('publishTraining — lifecycle gate', () => {
     expect(response.status).toBe(401);
   });
 
-  test('requires officer position to publish', async () => {
-    officerMocks = stubRepo(OfficerTermRepository, {
-      findActiveByPersonAndOrg: async () => [],
-    });
-    const { publishTraining } = await import('./publishTraining');
-    const ctx = makeCtx({ _params: { trainingId: 'tr-1' } });
-    const response = await publishTraining(ctx);
-    expect(response.status).toBe(403);
-  });
-
   test('throws NotFoundError for missing training', async () => {
     officerMocks = stubRepo(OfficerTermRepository, {
       findActiveByPersonAndOrg: async () => [{ positionTitle: 'Society Officer' }],
@@ -212,16 +192,6 @@ describe('createTraining — officer-gated creation', () => {
     expect(response.status).toBe(403);
   });
 
-  test('non-officers cannot create trainings', async () => {
-    officerMocks = stubRepo(OfficerTermRepository, {
-      findActiveByPersonAndOrg: async () => [],
-    });
-    const { createTraining } = await import('./createTraining');
-    const ctx = makeCtx({ _body: { title: 'Test Training' } });
-    const response = await createTraining(ctx);
-    expect(response.status).toBe(403);
-  });
-
   test('officers create training with draft status', async () => {
     officerMocks = stubRepo(OfficerTermRepository, {
       findActiveByPersonAndOrg: async () => [{ positionTitle: 'Society Officer' }],
@@ -273,16 +243,6 @@ describe('createCourse — officer-gated creation', () => {
   test('returns 403 without organization context', async () => {
     const { createCourse } = await import('./createCourse');
     const ctx = makeCtx({ organizationId: null, _body: {} });
-    const response = await createCourse(ctx);
-    expect(response.status).toBe(403);
-  });
-
-  test('non-officers cannot create courses', async () => {
-    officerMocks = stubRepo(OfficerTermRepository, {
-      findActiveByPersonAndOrg: async () => [],
-    });
-    const { createCourse } = await import('./createCourse');
-    const ctx = makeCtx({ _body: { title: 'Anatomy 101', creditAmount: 2 } });
     const response = await createCourse(ctx);
     expect(response.status).toBe(403);
   });

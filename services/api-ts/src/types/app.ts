@@ -63,7 +63,40 @@ export type Variables = {
   internalServiceToken?: string;
   internalServiceTokens?: string[];
   isInternalExpand?: boolean;
+
+  // P1.5: per-route audit middleware dynamic slots
+  auditResourceId?: string;
+  auditDetails?: Record<string, unknown>;
+  auditDescription?: string;
+  /**
+   * Multi-event mode: when set, the per-route audit middleware emits one
+   * event per entry instead of composing a single event from the static
+   * route metadata + auditResourceId/auditDescription/auditDetails. Use
+   * this when a single request needs to log multiple distinct audit
+   * events (e.g., claimInvite logs both invitation-complete and
+   * membership-create). Static metadata is ignored when this is set.
+   */
+  auditEvents?: AuditEventEntry[];
 };
+
+/**
+ * Single audit entry consumed by per-route audit middleware in multi-event mode.
+ */
+export interface AuditEventEntry {
+  action:
+    | 'create' | 'update' | 'delete'
+    | 'approve' | 'deny' | 'renew'
+    | 'terminate' | 'reinstate' | 'mark-paid'
+    | 'complete' | 'transfer' | 'resign'
+    | 'deceased' | 'read' | 'export'
+    | 'capture' | 'finalize';
+  resourceType: string;
+  resource: string;
+  description?: string;
+  details?: Record<string, unknown>;
+  eventSubType?: string;
+  eventType?: 'data-modification' | 'data-access';
+}
 
 /**
  * Base context type for all handlers

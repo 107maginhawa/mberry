@@ -43,7 +43,7 @@ import { TimeSlotRepository } from '@/handlers/booking/repos/timeSlot.repo';
 import { ScheduleExceptionRepository } from '@/handlers/booking/repos/scheduleException.repo';
 
 // --- certificates repos ---
-import { CertificatesRepository } from '@/handlers/certificates/repos/certificates.repo';
+import { CertificatesRepository } from '@/handlers/member/certificates/repos/certificates.repo';
 
 // --- communication repos ---
 import { CommunicationsRepository, MessageRepository, MessageTemplateRepository, SubscriptionTopicRepository, PersonSubscriptionRepository } from '@/handlers/communication/repos/communication.repo';

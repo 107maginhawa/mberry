@@ -36,6 +36,18 @@ Microsoft TypeSpec is a language for defining APIs and generating OpenAPI specif
 
 ## Module Definition Workflow
 
+### File naming conventions
+
+| Filename pattern | Purpose |
+|---|---|
+| `src/modules/{domain}.tsp` | Standard module — auto-generated CRUD scaffolding for one resource (e.g., `person.tsp`, `booking.tsp`). |
+| `src/modules/{domain}-custom.tsp` | Extension endpoints for the same domain that fall outside the CRUD shape — officer dashboards (`dues-custom`, `membership-custom`), `/persons/me` self-service (`person-custom`), `/public/*` no-auth routes (`platform-admin-custom`). One namespace per file; the header docblock explains the route shape. |
+| `src/association/core/*.tsp` | Sub-modules of the `Association` domain that compose `association:member` and `association:operations` tags (e.g., `engagement.tsp`, `governance.tsp`). |
+| `src/association/integration/*.tsp` | External integration endpoints for the association domain (webhooks, automation). |
+| `src/common/*.tsp` | Shared models, errors, pagination, security definitions used across modules. |
+
+Update `src/main.tsp` to import any newly added module file and to expose its interfaces under the top-level service namespace.
+
 ### 1. Create Module File
 
 Modules are defined in `src/modules/{domain}.tsp`:

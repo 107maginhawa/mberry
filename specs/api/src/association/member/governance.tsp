@@ -681,6 +681,7 @@ namespace Association.Member.Governance {
     @post
     @useAuth(bearerAuth)
     @extension("x-security-required-roles", #["association:admin"])
+    @extension("x-audit", #{ action: "create", resourceType: "position" })
     createPosition(@body body: PositionRequest): ApiCreatedResponse<Position> | ApiBadRequestResponse | ApiUnauthorizedResponse | ApiForbiddenResponse;
 
     @doc("Get a position by ID.")
@@ -704,6 +705,7 @@ namespace Association.Member.Governance {
     @route("/{positionId}")
     @useAuth(bearerAuth)
     @extension("x-security-required-roles", #["association:admin"])
+    @extension("x-audit", #{ action: "update", resourceType: "position" })
     updatePosition(@path positionId: string, @body updates: PositionRequest): ApiOkResponse<Position> | ApiBadRequestResponse | ApiNotFoundResponse | ApiForbiddenResponse;
 
     @doc("Delete a position.")
@@ -712,6 +714,7 @@ namespace Association.Member.Governance {
     @route("/{positionId}")
     @useAuth(bearerAuth)
     @extension("x-security-required-roles", #["association:admin"])
+    @extension("x-audit", #{ action: "delete", resourceType: "position" })
     deletePosition(@path positionId: string): ApiNoContentResponse | ApiNotFoundResponse | ApiConflictResponse | ApiForbiddenResponse;
   }
 
@@ -723,6 +726,7 @@ namespace Association.Member.Governance {
     @post
     @useAuth(bearerAuth)
     @extension("x-security-required-roles", #["association:admin"])
+    @extension("x-audit", #{ action: "create", resourceType: "election" })
     createElection(@body body: ElectionCreateRequest): ApiCreatedResponse<Election> | ApiBadRequestResponse | ApiUnauthorizedResponse | ApiForbiddenResponse;
 
     @doc("Get an election by ID.")
@@ -746,6 +750,7 @@ namespace Association.Member.Governance {
     @route("/{electionId}")
     @useAuth(bearerAuth)
     @extension("x-security-required-roles", #["association:admin"])
+    @extension("x-audit", #{ action: "update", resourceType: "election" })
     updateElection(@path electionId: string, @body updates: ElectionCreateRequest): ApiOkResponse<Election> | ApiBadRequestResponse | ApiNotFoundResponse | ApiForbiddenResponse;
 
     @doc("Delete an election.")
@@ -754,6 +759,7 @@ namespace Association.Member.Governance {
     @route("/{electionId}")
     @useAuth(bearerAuth)
     @extension("x-security-required-roles", #["association:admin"])
+    @extension("x-audit", #{ action: "delete", resourceType: "election" })
     deleteElection(@path electionId: string): ApiNoContentResponse | ApiNotFoundResponse | ApiConflictResponse | ApiForbiddenResponse;
 
     @doc("Open the nomination period for an election.")
@@ -762,6 +768,7 @@ namespace Association.Member.Governance {
     @route("/{electionId}/open-nominations")
     @useAuth(bearerAuth)
     @extension("x-security-required-roles", #["association:admin"])
+    @extension("x-audit", #{ action: "update", resourceType: "election" })
     openElectionNominations(@path electionId: string): ApiOkResponse<Election> | ApiNotFoundResponse | ApiConflictResponse | ApiForbiddenResponse;
 
     @doc("Open the voting period for an election.")
@@ -770,6 +777,7 @@ namespace Association.Member.Governance {
     @route("/{electionId}/open-voting")
     @useAuth(bearerAuth)
     @extension("x-security-required-roles", #["association:admin"])
+    @extension("x-audit", #{ action: "update", resourceType: "election" })
     openElectionVoting(@path electionId: string): ApiOkResponse<Election> | ApiNotFoundResponse | ApiConflictResponse | ApiForbiddenResponse;
 
     @doc("Certify the results of an election after voting closes.")
@@ -778,6 +786,7 @@ namespace Association.Member.Governance {
     @route("/{electionId}/certify")
     @useAuth(bearerAuth)
     @extension("x-security-required-roles", #["association:admin"])
+    @extension("x-audit", #{ action: "update", resourceType: "election" })
     certifyElection(@path electionId: string): ApiOkResponse<Election> | ApiNotFoundResponse | ApiConflictResponse | ApiForbiddenResponse;
   }
 
@@ -789,6 +798,7 @@ namespace Association.Member.Governance {
     @post
     @useAuth(bearerAuth)
     @extension("x-security-required-roles", #["association:admin", "association:member"])
+    @extension("x-audit", #{ action: "create", resourceType: "election-nominee" })
     createCandidate(@body body: CandidateRequest): ApiCreatedResponse<Candidate> | ApiBadRequestResponse | ApiUnauthorizedResponse | ApiForbiddenResponse;
 
     @doc("Get a candidate by ID.")
@@ -812,6 +822,7 @@ namespace Association.Member.Governance {
     @route("/{candidateId}")
     @useAuth(bearerAuth)
     @extension("x-security-required-roles", #["association:admin"])
+    @extension("x-audit", #{ action: "update", resourceType: "election-nominee" })
     updateCandidate(@path candidateId: string, @body updates: CandidateRequest): ApiOkResponse<Candidate> | ApiBadRequestResponse | ApiNotFoundResponse | ApiForbiddenResponse;
 
     @doc("Delete a candidate record.")
@@ -820,6 +831,7 @@ namespace Association.Member.Governance {
     @route("/{candidateId}")
     @useAuth(bearerAuth)
     @extension("x-security-required-roles", #["association:admin"])
+    @extension("x-audit", #{ action: "delete", resourceType: "election-nominee" })
     deleteCandidate(@path candidateId: string): ApiNoContentResponse | ApiNotFoundResponse | ApiConflictResponse | ApiForbiddenResponse;
 
     @doc("Update a candidate/nominee's acceptance status (nominee accepts or declines, or an officer updates it).")
@@ -828,6 +840,7 @@ namespace Association.Member.Governance {
     @route("/{candidateId}/status")
     @useAuth(bearerAuth)
     @extension("x-security-required-roles", #["association:admin", "association:member"])
+    @extension("x-audit", #{ action: "update", resourceType: "election-nominee" })
     updateCandidateStatus(@path candidateId: string, @body body: CandidateStatusUpdateRequest): ApiOkResponse<Candidate> | ApiBadRequestResponse | ApiNotFoundResponse | ApiConflictResponse | ApiForbiddenResponse;
   }
 
@@ -839,6 +852,7 @@ namespace Association.Member.Governance {
     @post
     @useAuth(bearerAuth)
     @extension("x-security-required-roles", #["association:member"])
+    @extension("x-audit", #{ action: "create", resourceType: "election-vote" })
     castBallot(@body body: CastBallotRequest): ApiCreatedResponse<Ballot> | ApiBadRequestResponse | ApiUnauthorizedResponse | ApiForbiddenResponse | ApiConflictResponse;
 
     @doc("Search ballots (admin only — individual ballots are anonymized).")
@@ -857,6 +871,7 @@ namespace Association.Member.Governance {
     @post
     @useAuth(bearerAuth)
     @extension("x-security-required-roles", #["association:admin"])
+    @extension("x-audit", #{ action: "create", resourceType: "officer-term" })
     createOfficerTerm(@body body: OfficerTermRequest): ApiCreatedResponse<OfficerTerm> | ApiBadRequestResponse | ApiUnauthorizedResponse | ApiForbiddenResponse;
 
     @doc("Get an officer term by ID.")
@@ -880,6 +895,7 @@ namespace Association.Member.Governance {
     @route("/{termId}")
     @useAuth(bearerAuth)
     @extension("x-security-required-roles", #["association:admin"])
+    @extension("x-audit", #{ action: "update", resourceType: "officer-term" })
     updateOfficerTerm(@path termId: string, @body updates: OfficerTermRequest): ApiOkResponse<OfficerTerm> | ApiBadRequestResponse | ApiNotFoundResponse | ApiForbiddenResponse;
 
     @doc("Delete an officer term.")
@@ -888,6 +904,7 @@ namespace Association.Member.Governance {
     @route("/{termId}")
     @useAuth(bearerAuth)
     @extension("x-security-required-roles", #["association:admin"])
+    @extension("x-audit", #{ action: "delete", resourceType: "officer-term" })
     deleteOfficerTerm(@path termId: string): ApiNoContentResponse | ApiNotFoundResponse | ApiForbiddenResponse;
   }
 
@@ -899,6 +916,7 @@ namespace Association.Member.Governance {
     @post
     @useAuth(bearerAuth)
     @extension("x-security-required-roles", #["association:admin"])
+    @extension("x-audit", #{ action: "create", resourceType: "committee" })
     createCommittee(@body body: CommitteeRequest): ApiCreatedResponse<Committee> | ApiBadRequestResponse | ApiUnauthorizedResponse | ApiForbiddenResponse;
 
     @doc("Get a committee by ID.")
@@ -922,6 +940,7 @@ namespace Association.Member.Governance {
     @route("/{committeeId}")
     @useAuth(bearerAuth)
     @extension("x-security-required-roles", #["association:admin"])
+    @extension("x-audit", #{ action: "update", resourceType: "committee" })
     updateCommittee(@path committeeId: string, @body updates: CommitteeRequest): ApiOkResponse<Committee> | ApiBadRequestResponse | ApiNotFoundResponse | ApiForbiddenResponse;
 
     @doc("Delete a committee.")

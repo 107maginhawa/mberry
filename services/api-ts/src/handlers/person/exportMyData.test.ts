@@ -5,10 +5,10 @@ import { MembershipRepository } from '@/handlers/association:member/repos/member
 import { CreditEntryRepository } from '@/handlers/association:member/repos/credits.repo';
 
 // Bun's mock.module is process-global and persists across files; several sibling
-// person tests mock '@/utils/audit' to a no-op. Install our own capturing mock so
+// person tests mock '@/core/audit/audit-action' to a no-op. Install our own capturing mock so
 // the [AL-DATA] assertion is deterministic regardless of sibling execution order.
 const auditCalls: any[] = [];
-mock.module('@/utils/audit', () => ({
+mock.module('@/core/audit/audit-action', () => ({
   auditAction: async (_ctx: any, opts: any) => { auditCalls.push(opts); },
 }));
 
@@ -81,22 +81,12 @@ describe('exportMyData', () => {
     expect(res.status).toBe(200);
   });
 
-  test('[AL-DATA] audits the GDPR data export as a data-access event', async () => {
-    stubRepo(PersonRepository, { findOneById: async () => ({ id: 'user-1', firstName: 'Test' }) });
-    stubRepo(MembershipRepository, { findAllByPerson: async () => [] });
-    stubRepo(CreditEntryRepository, { findMany: async () => [] });
-
-    auditCalls.length = 0;
-    const ctx = makeCtx({ database: makeExportDb([]) });
-    await exportMyData(ctx);
-
-    expect(auditCalls.length).toBe(1);
-    expect(auditCalls[0].action).toBe('export');
-    expect(auditCalls[0].resourceType).toBe('person');
-    expect(auditCalls[0].resourceId).toBe('user-1');
-    expect(auditCalls[0].eventType).toBe('data-access');
-    expect(auditCalls[0].eventSubType).toBe('data.bulk-export');
-  });
+  // [AL-DATA] audit shape is now declared at the route level via
+  // @extension("x-audit", #{ action: "export", resourceType: "person",
+  // eventType: "data-access", eventSubType: "data.bulk-export" }) on
+  // exportMyData in person-custom.tsp. The handler only sets
+  // ctx.auditResourceId + ctx.auditDescription. Per-route audit emission
+  // is covered by middleware/per-route-audit.test.ts.
 
   test('[EF-M01] exported person excludes internal/system fields', async () => {
     stubRepo(PersonRepository, {

@@ -1,16 +1,27 @@
+// WF-032 — Membership Status Computation: derived from dues_expiry_date
 // M-24: Member status transition experience
 // Verifies status badges (Active/grace/lapsed) display correctly on /my/organizations
 // and that "Pay Dues" button appears for grace/lapsed members
 import { test, expect } from '../helpers/test-fixture'
 import { signInAsMember, signInAsOfficer } from '../helpers/auth'
+import { captureRouteHydration } from '../helpers/real-flow'
+
+// W2 real-flow upgrade: /my/organizations hydrates via /memberships
+// or /persons/me. Capturing that proves the backend returned data,
+// not just that the status badge rendered.
+const MEMBERSHIPS_OR_PERSON = /\/(memberships|persons\/me)(?:[/?]|$)/
 
 const ORG_ID = 'ed8e3a96-8126-4341-be42-e6eb7940c562'
 
 test.describe('M-24: Member Status Display', () => {
   test('organizations page shows membership status badge', async ({ page }) => {
     await signInAsMember(page)
+    const respP = captureRouteHydration(page, MEMBERSHIPS_OR_PERSON)
     await page.goto('/my/organizations')
-    await page.waitForLoadState('networkidle')
+
+    const resp = await respP
+    expect(resp?.status()).toBe(200)
+    expect(resp?.ok()).toBe(true)
 
     // Should display at least one organization with a status badge
     const statusBadge = page.locator('[class*="status"], [data-testid*="status"]').first()
@@ -22,8 +33,6 @@ test.describe('M-24: Member Status Display', () => {
     // Upgraded from soft assertion to behavioral (Phase 31)
     await signInAsMember(page)
     await page.goto('/my/organizations')
-    await page.waitForLoadState('networkidle')
-
     // Active members MUST see Active badge
     await expect(page.getByText('Active').first()).toBeVisible({ timeout: 10000 })
 
@@ -38,8 +47,6 @@ test.describe('M-24: Member Status Display', () => {
   test('organizations page shows dues expiry date when available', async ({ page }) => {
     await signInAsMember(page)
     await page.goto('/my/organizations')
-    await page.waitForLoadState('networkidle')
-
     // Should show organization name and link to org home
     await expect(page.getByText(/Philippine Dental Association|PDA/i).first()).toBeVisible({ timeout: 10000 })
   })
@@ -47,8 +54,6 @@ test.describe('M-24: Member Status Display', () => {
   test('membership card links to org page', async ({ page }) => {
     await signInAsMember(page)
     await page.goto('/my/organizations')
-    await page.waitForLoadState('networkidle')
-
     // Click on an organization card
     const orgLink = page.locator(`a[href*="/org/"]`).first()
     await expect(orgLink).toBeVisible({ timeout: 10000 })

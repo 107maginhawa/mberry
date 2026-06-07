@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { createFileRoute, useNavigate } from '@tanstack/react-router'
 import { PageShell } from '@/components/patterns/page-shell'
-import { useOrg } from '@/hooks/useOrg'
+import { useOrg } from '@/hooks/use-org'
 import { SurveyBuilder } from '@/features/surveys/components/survey-builder'
 import { SurveyTemplates, type SurveyTemplate } from '@/features/surveys/components/survey-templates'
 

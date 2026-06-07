@@ -78,3 +78,81 @@ describe('onboardMerchantAccount', () => {
     await expect(onboardMerchantAccount(ctx)).rejects.toBeInstanceOf(ForbiddenError);
   });
 });
+
+// ---------------------------------------------------------------------------
+// Observability: structured log fields (Wave 4.5)
+// ---------------------------------------------------------------------------
+
+describe('onboardMerchantAccount — observability: structured log fields', () => {
+  /**
+   * Make a capturing logger with .child() support (returns new logger with merged bindings).
+   */
+  function makeCapturingLogger(calls: any[]) {
+    function makeChild(inherited: Record<string, any>) {
+      return {
+        debug: (obj: any, msg?: string) => calls.push({ level: 'debug', ...inherited, ...obj, msg }),
+        info:  (obj: any, msg?: string) => calls.push({ level: 'info',  ...inherited, ...obj, msg }),
+        warn:  (obj: any, msg?: string) => calls.push({ level: 'warn',  ...inherited, ...obj, msg }),
+        error: (obj: any, msg?: string) => calls.push({ level: 'error', ...inherited, ...obj, msg }),
+        child: (bindings: Record<string, any>) => makeChild({ ...inherited, ...bindings }),
+      };
+    }
+    return makeChild({});
+  }
+
+  beforeEach(() => {
+    restoreRepo(MerchantAccountRepository);
+    restoreRepo(PersonRepository);
+    stubRepo(MerchantAccountRepository, {
+      findOneById: async () => fakeMerchantAccount,
+      updateOneById: async () => fakeMerchantAccount,
+    });
+    stubRepo(PersonRepository, { findOneById: async () => fakePerson });
+  });
+
+  afterEach(() => {
+    restoreRepo(MerchantAccountRepository);
+    restoreRepo(PersonRepository);
+  });
+
+  test('all log calls carry traceId and module fields', async () => {
+    const calls: any[] = [];
+    const ctx = makeCtx({
+      user: { id: MERCHANT_USER_ID, role: 'provider' },
+      session: { id: 's-1', userId: MERCHANT_USER_ID, user: { id: MERCHANT_USER_ID, role: 'provider' } },
+      logger: makeCapturingLogger(calls),
+      requestId: 'trace-obs-001',
+      billing: fakeBilling,
+      _params: { merchantAccount: MA_ID },
+      _body: { refreshUrl: 'https://app.com/refresh', returnUrl: 'https://app.com/return' },
+    });
+
+    await onboardMerchantAccount(ctx);
+
+    expect(calls.length).toBeGreaterThan(0);
+    for (const call of calls) {
+      expect(call.traceId).toBe('trace-obs-001');
+      expect(call.module).toBe('billing');
+    }
+  });
+
+  test('start log includes action field', async () => {
+    const calls: any[] = [];
+    const ctx = makeCtx({
+      user: { id: MERCHANT_USER_ID, role: 'provider' },
+      session: { id: 's-1', userId: MERCHANT_USER_ID, user: { id: MERCHANT_USER_ID, role: 'provider' } },
+      logger: makeCapturingLogger(calls),
+      requestId: 'trace-obs-002',
+      billing: fakeBilling,
+      _params: { merchantAccount: MA_ID },
+      _body: { refreshUrl: 'https://app.com/refresh', returnUrl: 'https://app.com/return' },
+    });
+
+    await onboardMerchantAccount(ctx);
+
+    const startLog = calls.find(c => c.action === 'onboardMerchantAccount.start');
+    expect(startLog).toBeDefined();
+    expect(startLog.merchantAccountId).toBe(MA_ID);
+    expect(startLog.userId).toBe(MERCHANT_USER_ID);
+  });
+});

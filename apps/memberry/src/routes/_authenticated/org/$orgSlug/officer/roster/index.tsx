@@ -14,7 +14,7 @@ import { useQuery } from '@tanstack/react-query'
 import { api } from '@/lib/api'
 import { addRosterMemberMutation, getOrgCpdConfigOptions } from '@monobase/sdk-ts/generated/react-query'
 import { PageShell } from '@/components/patterns/page-shell'
-import { useOrg } from '@/hooks/useOrg'
+import { useOrg } from '@/hooks/use-org'
 
 const STATUS_MAP: Record<string, string> = {
   active: 'active',

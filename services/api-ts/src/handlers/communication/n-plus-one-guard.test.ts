@@ -4,7 +4,6 @@
  * The original N+1 fixes shipped in commit 2e41b2cb (Wave G1 / pre-G2):
  *   - communication/bulkUpdatePersonSubscriptions → repo.bulkUpsert (1 query)
  *   - communication/createMessage → repo.findDuplicatesSentToday (1 query)
- *   - certificates/batchGenerateCertificates → repo.getMany (1 query)
  *
  * The cycle-3 audit listed these slices as still-open carry-forwards
  * because the audit ran before the fix was indexed. This test prevents
@@ -17,7 +16,6 @@ import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 
 const BASE = join(import.meta.dir);
-const CERT = join(import.meta.dir, '..', 'certificates');
 
 function read(p: string): string {
   return readFileSync(p, 'utf-8');
@@ -37,11 +35,6 @@ describe('S-C4-011 / S-C4-012: batched bulk operations stay batched', () => {
     expect(src).not.toContain('findDuplicateSentToday(');
   });
 
-  test('batchGenerateCertificates uses repo.getMany (not per-id repo.get)', () => {
-    const src = read(join(CERT, 'batchGenerateCertificates.ts'));
-    expect(src).toContain('repo.getMany');
-    // The fix builds a Map once outside the loop — verify nothing awaited
-    // inside the loop touches the cert repo (template rendering only).
-    expect(src).not.toMatch(/for\s*\([^)]*\)\s*\{[\s\S]*?await\s+repo\.get\(/);
-  });
+  // batchGenerateCertificates check removed — handler deleted as an
+  // unwired duplicate of association:member/bulkIssueCertificates.
 });

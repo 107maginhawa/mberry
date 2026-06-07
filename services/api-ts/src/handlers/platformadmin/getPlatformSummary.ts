@@ -3,7 +3,6 @@ import type { DatabaseInstance } from '@/core/database';
 import { UnauthorizedError, ForbiddenError } from '@/core/errors';
 import type { GetPlatformSummaryQuery } from '@/generated/openapi/validators';
 import { DashboardRepository } from './repos/dashboard.repo';
-import { auditAction } from '@/utils/audit';
 import { isPlatformAdmin, toCents, type SessionUser } from './utils/national-access';
 
 /**
@@ -80,13 +79,9 @@ export async function getPlatformSummary(
   const page = rows.slice(offset, offset + limit);
   const hasMore = offset + limit < total;
 
-  await auditAction(ctx, {
-    action: 'read',
-    resourceType: 'platform_summary',
-    resourceId: 'platform',
-    description: `Platform-wide summary viewed (${snapshotMonth})`,
-    details: { snapshotMonth, associations: total },
-  });
+  ctx.set('auditResourceId', 'platform');
+  ctx.set('auditDescription', `Platform-wide summary viewed (${snapshotMonth})`);
+  ctx.set('auditDetails', { snapshotMonth, associations: total });
 
   return ctx.json(
     {

@@ -1,7 +1,7 @@
 import { describe, test, expect } from 'bun:test';
 import { makeCtx } from '@/test-utils/make-ctx';
-import { createMembershipTier } from './createMembershipTier';
-import { getMembershipTier } from './getMembershipTier';
+import { createMembershipTier } from '@/handlers/member/membership/createMembershipTier';
+import { getMembershipTier } from '@/handlers/member/membership/getMembershipTier';
 import { BusinessLogicError } from '@/core/errors';
 
 // M02: getMyMemberships should return all memberships for the authenticated user
@@ -244,54 +244,8 @@ describe('Membership Application Workflow', () => {
 });
 
 // -- Membership Category Tests --
-
-describe('membershipCategory handlers', () => {
-  test('createMembershipCategory requires auth', async () => {
-    const { createMembershipCategory } = await import('./createMembershipCategory');
-    const ctx = makeCtx({ user: null });
-    const response = await createMembershipCategory(ctx);
-    expect(response.status).toBe(401);
-  });
-
-  test('createMembershipCategory requires organizationId', async () => {
-    const { createMembershipCategory } = await import('./createMembershipCategory');
-    const ctx = makeCtx({ user: { id: 'u1' }, organizationId: null });
-    const response = await createMembershipCategory(ctx);
-    expect(response.status).toBe(403);
-  });
-
-  test('listMembershipCategories requires auth', async () => {
-    const { listMembershipCategories } = await import('./listMembershipCategories');
-    const ctx = makeCtx({ user: null });
-    const response = await listMembershipCategories(ctx);
-    expect(response.status).toBe(401);
-  });
-
-  test('listMembershipCategories requires organizationId', async () => {
-    const { listMembershipCategories } = await import('./listMembershipCategories');
-    const ctx = makeCtx({ user: { id: 'u1' }, organizationId: null });
-    const response = await listMembershipCategories(ctx);
-    expect(response.status).toBe(403);
-  });
-
-  test('getMembershipCategory requires auth', async () => {
-    const { getMembershipCategory } = await import('./getMembershipCategory');
-    const ctx = makeCtx({ user: null });
-    const response = await getMembershipCategory(ctx);
-    expect(response.status).toBe(401);
-  });
-
-  test('deleteMembershipCategory requires auth', async () => {
-    const { deleteMembershipCategory } = await import('./deleteMembershipCategory');
-    const ctx = makeCtx({ user: null });
-    const response = await deleteMembershipCategory(ctx);
-    expect(response.status).toBe(401);
-  });
-
-  test('updateMembershipCategory requires auth', async () => {
-    const { updateMembershipCategory } = await import('./updateMembershipCategory');
-    const ctx = makeCtx({ user: null });
-    const response = await updateMembershipCategory(ctx);
-    expect(response.status).toBe(401);
-  });
-});
+// Obsolete after mega-module decomposition:
+// create/update merged into `upsertMembershipCategory.ts` (now under
+// handlers/member/membership/), and get/delete handlers were removed
+// entirely. Auth guards on the remaining list + upsert handlers are
+// exercised via Hurl contract scenarios and middleware/auth tests.

@@ -1,15 +1,18 @@
 import { describe, test, expect, afterEach } from 'bun:test';
 import { makeCtx, stubRepo } from '@/test-utils/make-ctx';
 import { fakeEvent as createFakeEvent } from '@/test-utils/factories';
-import { createEvent } from './createEvent';
-import { updateEvent } from './updateEvent';
-import { cancelEvent } from './cancelEvent';
 import { bulkCreateEventSeries } from './bulkCreateEventSeries';
 import { listAttendance } from './listAttendance';
 import { listRegistrations } from './listRegistrations';
 import { EventsRepository } from './repos/events.repo';
 import { OfficerTermRepository } from '../association:member/repos/governance.repo';
 import { MembershipRepository } from '@/handlers/membership/repos/membership.repo';
+
+// createEvent / updateEvent / cancelEvent tests removed — handlers deleted
+// at 2579d9b7. Successors live at association:operations/{createEvent,
+// updateEvent,cancelEvent}.ts with Hono ctx + EventRepository (singular) —
+// shape-incompatible with this file's stubs. Officer-denial coverage for
+// the live successors lives in association:operations tests.
 
 // ─── Fixtures ───────────────────────────────────────────
 
@@ -25,82 +28,6 @@ describe('Events auth enforcement — officer checks', () => {
 
   afterEach(() => {
     if (mocks) mocks.forEach(m => Object.values(m).forEach(v => v.mockRestore()));
-  });
-
-  test('createEvent returns 403 for non-officer', async () => {
-    mocks = [
-      stubRepo(OfficerTermRepository, {
-        findActiveByPersonAndOrg: async () => [],
-      }),
-      stubRepo(EventsRepository, {
-        create: async (data: any) => ({ ...fakeEvent, ...data }),
-        findBySlug: async () => undefined,
-      }),
-    ];
-
-    const ctx = makeCtx({
-      _params: { organizationId: 'org-1' },
-      _body: { title: 'Test', startDate: '2026-06-01', endDate: '2026-06-02' },
-    });
-
-    await expect(createEvent(ctx)).rejects.toThrow('Officer access required');
-  });
-
-  test('createEvent succeeds for officer', async () => {
-    mocks = [
-      stubRepo(OfficerTermRepository, {
-        findActiveByPersonAndOrg: async () => [{ id: 'term-1' }],
-      }),
-      stubRepo(EventsRepository, {
-        create: async (data: any) => ({ ...fakeEvent, ...data }),
-        findBySlug: async () => undefined,
-      }),
-    ];
-
-    const ctx = makeCtx({
-      _params: { organizationId: 'org-1' },
-      _body: { title: 'Test', startDate: '2026-06-01', endDate: '2026-06-02' },
-    });
-
-    const res = await createEvent(ctx);
-    expect(res.status).toBe(201);
-  });
-
-  test('updateEvent returns 403 for non-officer', async () => {
-    mocks = [
-      stubRepo(OfficerTermRepository, {
-        findActiveByPersonAndOrg: async () => [],
-      }),
-      stubRepo(EventsRepository, {
-        get: async () => fakeEvent,
-        update: async (id: string, data: any) => ({ ...fakeEvent, ...data }),
-      }),
-    ];
-
-    const ctx = makeCtx({
-      _params: { id: 'event-1' },
-      _body: { title: 'Updated' },
-    });
-
-    await expect(updateEvent(ctx)).rejects.toThrow('Officer access required');
-  });
-
-  test('cancelEvent returns 403 for non-officer', async () => {
-    mocks = [
-      stubRepo(OfficerTermRepository, {
-        findActiveByPersonAndOrg: async () => [],
-      }),
-      stubRepo(EventsRepository, {
-        get: async () => fakeEvent,
-        update: async (id: string, data: any) => ({ ...fakeEvent, ...data }),
-      }),
-    ];
-
-    const ctx = makeCtx({
-      _params: { id: 'event-1' },
-    });
-
-    await expect(cancelEvent(ctx)).rejects.toThrow('Officer access required');
   });
 
   test('bulkCreateEventSeries returns 403 for non-officer', async () => {

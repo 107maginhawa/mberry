@@ -11,7 +11,6 @@ import type { Session } from '@/types/auth';
 import { InvoiceRepository, MerchantAccountRepository } from './repos/billing.repo';
 import type { MerchantMetadata } from './repos/billing.schema';
 import { PersonRepository } from '../person/repos/person.repo';
-import { auditAction } from '@/utils/audit';
 // Customer and merchant are both persons in monobase
 
 /**
@@ -26,7 +25,9 @@ export async function payInvoice(
   ctx: ValidatedContext<PayInvoiceBody, never, PayInvoiceParams>
 ): Promise<Response> {
   const database = ctx.get('database');
-  const logger = ctx.get('logger');
+  const baseLogger = ctx.get('logger');
+  const traceId = ctx.get('requestId');
+  const logger = baseLogger?.child?.({ traceId, module: 'billing' }) ?? baseLogger;
   const billing = ctx.get('billing');
   
   // Get authenticated session (guaranteed by middleware)
@@ -48,7 +49,7 @@ export async function payInvoice(
     throw new ValidationError('Invalid payment method ID format. Expected format: pm_*');
   }
 
-  logger.info({ invoiceId, paymentMethod, hasReturnUrls: !!(successUrl && cancelUrl) }, 'Creating payment intent for invoice');
+  logger.info({ action: 'payInvoice.1', invoiceId, paymentMethod, hasReturnUrls: !!(successUrl && cancelUrl) }, 'Creating payment intent for invoice');
   
   // Create repository instances
   const invoiceRepo = new InvoiceRepository(database, logger);
@@ -68,7 +69,7 @@ export async function payInvoice(
 
   // Authorization check: patient:owner means the authenticated user must be the patient
   const user = session.user;
-  logger.info({ userId: user.id, invoiceCustomer: invoice.customer }, 'Authorization check starting');
+  logger.info({ action: 'payInvoice.2', userId: user.id, invoiceCustomer: invoice.customer }, 'Authorization check starting');
 
   const customerPerson = await personRepo.findOneById(invoice.customer);
   if (!customerPerson) {
@@ -79,7 +80,7 @@ export async function payInvoice(
     });
   }
 
-  logger.info({
+  logger.info({ action: 'payInvoice.3',
     customerId: invoice.customer,
     userId: user.id,
     match: invoice.customer === user.id
@@ -147,7 +148,7 @@ export async function payInvoice(
     });
     
     logger.info(
-      {
+      { action: 'payInvoice.4',
         invoiceId,
         paymentIntentId: paymentIntent.paymentIntentId,
         amount: amount,
@@ -157,14 +158,9 @@ export async function payInvoice(
       'Payment intent created successfully for invoice'
     );
 
-    await auditAction(ctx, {
-      action: 'create',
-      resourceType: 'payment-intent',
-      resourceId: paymentIntent.paymentIntentId,
-      description: `Payment intent created for invoice ${invoiceId}: ${currency} ${amount}`,
-      eventSubType: 'financial.payment-recorded',
-      details: { invoiceId, amount, currency },
-    });
+    ctx.set('auditResourceId', paymentIntent.paymentIntentId);
+    ctx.set('auditDescription', `Payment intent created for invoice ${invoiceId}: ${currency} ${amount}`);
+    ctx.set('auditDetails', { invoiceId, amount, currency });
 
     // Return the response as defined in TypeSpec
     // Use Stripe Checkout URL if available (when success/cancel URLs provided)
@@ -184,7 +180,7 @@ export async function payInvoice(
     }, 200);
     
   } catch (error) {
-    logger.error({ error, invoiceId, paymentMethod }, 'Failed to create payment intent');
+    logger.error({ action: 'payInvoice.5', error, invoiceId, paymentMethod }, 'Failed to create payment intent');
     
     if (error instanceof ValidationError || error instanceof ConflictError || error instanceof BusinessLogicError) {
       throw error;

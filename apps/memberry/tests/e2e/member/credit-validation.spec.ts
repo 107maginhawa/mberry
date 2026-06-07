@@ -3,15 +3,18 @@
 // BR-46: Credit cycle is auto-computed from association config (start month/day)
 import { test, expect } from '../helpers/test-fixture'
 import { signInAsMember, signInAsOfficer } from '../helpers/auth'
+import { captureAnyApiSuccess } from '../helpers/real-flow'
 
 const ORG_ID = 'ed8e3a96-8126-4341-be42-e6eb7940c562'
 
 test.describe('[BR-45, BR-46] Credit Validation', () => {
   test('credits page shows credit summary with cycle info', async ({ page }) => {
     await signInAsMember(page)
+    const respP = captureAnyApiSuccess(page)
     await page.goto('/my/credits')
-    await page.waitForLoadState('networkidle')
-
+    const resp = await respP
+    expect(resp?.status()).toBe(200)
+    expect(resp?.ok()).toBe(true)
     await expect(page).toHaveURL(/\/my\/credits/)
 
     // Should show credit balance or cycle info
@@ -22,8 +25,6 @@ test.describe('[BR-45, BR-46] Credit Validation', () => {
   test('credit log page shows entries with activity names', async ({ page }) => {
     await signInAsMember(page)
     await page.goto('/my/credits/log')
-    await page.waitForLoadState('networkidle')
-
     await expect(page).toHaveURL(/\/my\/credits\/log/)
 
     // Should show credit entries with activity names (seeded data has 3 entries)
@@ -36,8 +37,6 @@ test.describe('[BR-45, BR-46] Credit Validation', () => {
   test('[BR-45] credit entry form requires activity name', async ({ page }) => {
     await signInAsMember(page)
     await page.goto('/my/credits/log')
-    await page.waitForLoadState('networkidle')
-
     // Look for "Add Credit" or "Log Credit" button
     const addBtn = page.getByRole('button', { name: /add.*credit|log.*credit|new.*entry|manual/i }).first()
     const hasAddBtn = await addBtn.isVisible({ timeout: 10000 }).catch(() => false)
@@ -70,8 +69,6 @@ test.describe('[BR-45, BR-46] Credit Validation', () => {
   test('[BR-45] credit entry requires positive amount', async ({ page }) => {
     await signInAsMember(page)
     await page.goto('/my/credits/log')
-    await page.waitForLoadState('networkidle')
-
     const addBtn = page.getByRole('button', { name: /add.*credit|log.*credit|new.*entry|manual/i }).first()
     const hasAddBtn = await addBtn.isVisible({ timeout: 10000 }).catch(() => false)
 
@@ -100,8 +97,6 @@ test.describe('[BR-45, BR-46] Credit Validation', () => {
   test('[BR-46] credit cycle displays computed period', async ({ page }) => {
     await signInAsMember(page)
     await page.goto('/my/credits')
-    await page.waitForLoadState('networkidle')
-
     // The credit cycle should be auto-computed from association config
     // Look for cycle year or period display (e.g., "2025-2026", "Current Cycle", etc.)
     const hasCycleInfo = await page.getByText(/202[4-7]|cycle|period|year|current/i).first().isVisible({ timeout: 10000 }).catch(() => false)
@@ -111,8 +106,6 @@ test.describe('[BR-45, BR-46] Credit Validation', () => {
   test('officer can view credit reports for org', async ({ page }) => {
     await signInAsOfficer(page)
     await page.goto(`/org/${ORG_ID}/officer/dashboard`)
-    await page.waitForLoadState('networkidle')
-
     // Navigate to credits section if available
     const creditsLink = page.getByRole('link', { name: /credit|CPD/i }).first()
     const hasCreditsLink = await creditsLink.isVisible({ timeout: 10000 }).catch(() => false)

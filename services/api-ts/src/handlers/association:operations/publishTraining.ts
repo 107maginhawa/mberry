@@ -4,9 +4,6 @@ import type { PublishTrainingParams } from '@/generated/openapi/validators';
 import { NotFoundError, ValidationError } from '@/core/errors';
 import { TrainingRepository } from './repos/training.repo';
 import { domainEvents } from '@/core/domain-events';
-import { auditAction } from '@/utils/audit';
-import { requirePosition } from '@/utils/officer-check';
-import { POSITION_TITLES } from '@/utils/position-titles';
 import { assertValidTransition, TRAINING_VALID_TRANSITIONS } from '@/utils/status-transitions';
 
 /**
@@ -20,9 +17,6 @@ export async function publishTraining(
 ): Promise<Response> {
   const user = ctx.get('user');
   if (!user) return ctx.json({ error: 'Unauthorized' }, 401);
-
-  const denied = await requirePosition(ctx, [POSITION_TITLES.SOCIETY_OFFICER, POSITION_TITLES.PRESIDENT]);
-  if (denied) return denied;
 
   const params = ctx.req.valid('param');
   const db = ctx.get('database') as DatabaseInstance;
@@ -58,12 +52,8 @@ export async function publishTraining(
     publishedBy: user.id,
   }).catch(() => {});
 
-  await auditAction(ctx, {
-    action: 'update',
-    resourceType: 'training',
-    resourceId: published.id,
-    description: 'Training published',
-  });
+  ctx.set('auditResourceId', published.id);
+  ctx.set('auditDescription', 'Training published');
 
   return ctx.json(published, 200);
 }

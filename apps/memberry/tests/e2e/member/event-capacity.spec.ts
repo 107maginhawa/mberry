@@ -1,18 +1,20 @@
+// WF-052 — Event Registration: member registers, waitlist if full
 // BR-27: Event capacity and registration limits
 import { test, expect } from '../helpers/test-fixture'
-import { signInAsMember } from '../helpers/auth'
+import { authStateFile } from '../helpers/auth-state'
+import { captureAnyApiSuccess } from '../helpers/real-flow'
 
+
+test.use({ storageState: authStateFile('member') })
 const ORG_ID = 'ed8e3a96-8126-4341-be42-e6eb7940c562'
 
 test.describe('BR-27: Event Capacity', () => {
-  test.beforeEach(async ({ page }) => {
-    await signInAsMember(page)
-  })
-
-  test('event list page loads', async ({ page }) => {
+test('event list page loads', async ({ page }) => {
+    const respP = captureAnyApiSuccess(page)
     await page.goto(`/org/${ORG_ID}/events`)
-    await page.waitForLoadState('networkidle')
-
+    const resp = await respP
+    expect(resp?.status()).toBe(200)
+    expect(resp?.ok()).toBe(true)
     // Should show events or empty state
     const hasContent = await page.getByText(/event|upcoming|no events/i).first().isVisible({ timeout: 10000 }).catch(() => false)
     expect(hasContent).toBeTruthy()
@@ -20,8 +22,6 @@ test.describe('BR-27: Event Capacity', () => {
 
   test('event detail shows capacity info when available', async ({ page }) => {
     await page.goto(`/org/${ORG_ID}/events`)
-    await page.waitForLoadState('networkidle')
-
     const eventLink = page.locator('a[href*="/events/"]:not([href*="/new"])').first()
     const hasEvents = await eventLink.isVisible({ timeout: 10000 }).catch(() => false)
 
@@ -38,8 +38,6 @@ test.describe('BR-27: Event Capacity', () => {
 
   test('member events page shows registration status', async ({ page }) => {
     await page.goto('/my/events')
-    await page.waitForLoadState('networkidle')
-
     // Should show events or empty state
     const hasContent = await page.getByText(/event|registered|no events/i).first().isVisible({ timeout: 10000 }).catch(() => false)
     expect(hasContent).toBeTruthy()

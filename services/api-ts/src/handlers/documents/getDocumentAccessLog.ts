@@ -3,7 +3,6 @@ import type { DatabaseInstance } from '@/core/database';
 import type { GetDocumentAccessLogQuery, GetDocumentAccessLogParams } from '@/generated/openapi/validators';
 import { UnauthorizedError, NotFoundError, ForbiddenError } from '@/core/errors';
 import { DocumentRepository, DocumentAccessLogRepository } from './repos/documents.repo';
-import { requireOfficerTerm } from '@/utils/officer-check';
 
 /**
  * getDocumentAccessLog
@@ -19,17 +18,15 @@ export async function getDocumentAccessLog(
   const user = ctx.get('user');
   if (!user) return ctx.json({ error: 'Unauthorized' }, 401);
 
-  // P0-02: Officer/admin restriction — access logs are compliance data
-  const denied = await requireOfficerTerm(ctx);
-  if (denied) return denied;
-
   const params = ctx.req.valid('param');
   const query = ctx.req.valid('query');
   const offset = Number(query.offset ?? 0);
   const limit = Number(query.limit ?? 20);
 
   const db = ctx.get('database') as DatabaseInstance;
-  const logger = ctx.get('logger');
+  const baseLogger = ctx.get('logger');
+  const traceId = ctx.get('requestId');
+  const logger = baseLogger?.child?.({ traceId, module: 'documents' }) ?? baseLogger;
   const documentId = params.documentId;
 
   // Verify document exists and belongs to caller's org
@@ -56,7 +53,7 @@ export async function getDocumentAccessLog(
     });
   } catch {
     // Non-critical: don't fail the request if meta-logging fails
-    logger?.warn({ documentId }, 'Failed to record access log view');
+    logger?.warn({ action: 'getDocumentAccessLog.1', documentId }, 'Failed to record access log view');
   }
 
   const result = await accessLogRepo.findManyWithPagination(

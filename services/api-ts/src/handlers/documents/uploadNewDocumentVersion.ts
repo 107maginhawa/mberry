@@ -3,7 +3,6 @@ import type { DatabaseInstance } from '@/core/database';
 import type { UploadNewDocumentVersionBody, UploadNewDocumentVersionParams } from '@/generated/openapi/validators';
 import { UnauthorizedError, NotFoundError, ValidationError } from '@/core/errors';
 import { DocumentRepository, DocumentVersionRepository } from './repos/documents.repo';
-import { auditAction } from '@/utils/audit';
 import { isBlockedDocumentFile } from '@/utils/sanitize';
 import { domainEvents } from '@/core/domain-events';
 
@@ -61,12 +60,8 @@ export async function uploadNewDocumentVersion(
   // Update document's currentVersionId
   await docRepo.updateOneById(documentId, { currentVersionId: version.id });
 
-  await auditAction(ctx, {
-    action: 'create',
-    resourceType: 'document-version',
-    resourceId: version.id,
-    description: `Document version ${nextVersion} uploaded for document ${documentId}`,
-  });
+  ctx.set('auditResourceId', version.id);
+  ctx.set('auditDescription', `Document version ${nextVersion} uploaded for document ${documentId}`);
 
   // EM-M11-d1e34f90: emit DocumentUploaded domain event for new versions.
   domainEvents.emit('document.created', {

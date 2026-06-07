@@ -277,6 +277,7 @@ namespace InviteModule {
     @route("/invite")
     @useAuth(bearerAuth)
     @extension("x-security-required-roles", #["officer"])
+    @extension("x-audit", #{ action: "create", resourceType: "invitation" })
     createInvite(
       @body body: CreateInviteRequest
     ): ApiCreatedResponse<CreateInviteResponse>
@@ -291,6 +292,7 @@ namespace InviteModule {
     @route("/invitations/bulk-import")
     @useAuth(bearerAuth)
     @extension("x-security-required-roles", #["officer"])
+    @extension("x-audit", #{ action: "create", resourceType: "invitation" })
     bulkImportMembers(
       @body body: BulkImportRequest
     ): ApiOkResponse<BulkImportResponse>
@@ -317,6 +319,7 @@ namespace InviteModule {
     @post
     @route("/invite/claim/{token}")
     @useAuth(bearerAuth)
+    @extension("x-audit", #{ action: "complete", resourceType: "invitation" })
     claimInvite(
       @path token: string
     ): ApiOkResponse<ClaimInviteResponse>

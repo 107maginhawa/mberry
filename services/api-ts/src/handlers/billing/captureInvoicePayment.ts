@@ -11,7 +11,6 @@ import type { Session } from '@/types/auth';
 import { InvoiceRepository, MerchantAccountRepository } from './repos/billing.repo';
 import type { InvoiceMetadata, MerchantMetadata } from './repos/billing.schema';
 import { PersonRepository } from '../person/repos/person.repo';
-import { auditAction } from '@/utils/audit';
 
 /**
  * captureInvoicePayment
@@ -25,9 +24,13 @@ export async function captureInvoicePayment(
   ctx: ValidatedContext<never, never, CaptureInvoicePaymentParams>
 ): Promise<Response> {
   const database = ctx.get('database');
-  const logger = ctx.get('logger');
+  const baseLogger = ctx.get('logger');
   const billing = ctx.get('billing');
-  
+  const traceId = ctx.get('requestId');
+
+  // Child logger carries traceId + module on every call in this handler
+  const logger = baseLogger?.child?.({ traceId, module: 'billing' }) ?? baseLogger;
+
   // Get authenticated session (guaranteed by middleware)
   const session = ctx.get('session') as Session;
 
@@ -36,7 +39,7 @@ export async function captureInvoicePayment(
 
   const invoiceId = params.invoice;
 
-  logger.info({ invoiceId }, 'Capturing payment for invoice');
+  logger?.info({ action: 'captureInvoicePayment.start', invoiceId }, 'Capturing payment for invoice');
   
   // Create repository instances
   const invoiceRepo = new InvoiceRepository(database, logger);
@@ -64,20 +67,21 @@ export async function captureInvoicePayment(
     const authenticatedUserPerson = await personRepo.findOneById(user.id);
 
     if (!authenticatedUserPerson) {
-      logger.error({
+      logger?.error({
+        action: 'captureInvoicePayment.providerNotFound',
         userId: user.id,
-        userEmail: user.email,
-        invoiceMerchant: invoice.merchant
+        invoiceMerchant: invoice.merchant,
       }, 'Provider account not found for authenticated user during capture');
       throw new ForbiddenError('Provider account not found for authenticated user');
     }
 
     // Check if this provider is the merchant on the invoice
     if (authenticatedUserPerson.id !== invoice.merchant) {
-      logger.error({
+      logger?.error({
+        action: 'captureInvoicePayment.ownershipMismatch',
         userId: user.id,
         userProviderId: authenticatedUserPerson.id,
-        invoiceMerchant: invoice.merchant
+        invoiceMerchant: invoice.merchant,
       }, 'Provider ID mismatch - user does not own this invoice');
       throw new ForbiddenError('You can only capture payment for your own invoices');
     }
@@ -162,24 +166,21 @@ export async function captureInvoicePayment(
       metadata: updatedMetadata,
     });
     
-    logger.info(
+    logger?.info(
       {
+        action: 'captureInvoicePayment.captured',
         invoiceId,
         paymentIntentId: stripePaymentIntentId,
         chargeId: captureResult.chargeId,
         transferId: captureResult.transferId,
-        total: invoice.total
+        total: invoice.total,
       },
       'Payment captured successfully for invoice'
     );
 
-    await auditAction(ctx, {
-      action: 'capture',
-      resourceType: 'invoice',
-      resourceId: invoiceId,
-      description: `Payment captured for invoice ${invoice.invoiceNumber} (${invoice.total} ${invoice.currency})`,
-      eventSubType: 'financial.payment-captured',
-      details: {
+    ctx.set('auditResourceId', invoiceId);
+    ctx.set('auditDescription', `Payment captured for invoice ${invoice.invoiceNumber} (${invoice.total} ${invoice.currency})`);
+    ctx.set('auditDetails', {
         invoiceNumber: invoice.invoiceNumber,
         total: invoice.total,
         currency: invoice.currency,
@@ -187,8 +188,7 @@ export async function captureInvoicePayment(
         transferId: captureResult.transferId,
         customerId: invoice.customer,
         merchantId: invoice.merchant,
-      },
-    });
+      });
 
     // Fetch the updated invoice to return
     const updatedInvoice = await invoiceRepo.findOneById(invoiceId);
@@ -234,7 +234,7 @@ export async function captureInvoicePayment(
     }, 200);
     
   } catch (error) {
-    logger.error({ error, invoiceId }, 'Failed to capture payment');
+    logger?.error({ action: 'captureInvoicePayment.error', error, invoiceId }, 'Failed to capture payment');
     
     if (error instanceof ValidationError || error instanceof ConflictError || error instanceof BusinessLogicError) {
       throw error;

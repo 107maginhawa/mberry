@@ -1,3 +1,4 @@
+// WF-010 — View & Update Profile
 import { test, expect } from './helpers/test-fixture'
 import { signUp, signIn } from './helpers/auth'
 import { TEST_PASSWORD } from './helpers/test-config'
@@ -23,18 +24,16 @@ test.describe('Profile page (/my/profile)', () => {
     // Sign up a fresh user (no person record created by auth helper)
     const freshEmail = `noperson-${Date.now()}@test.com`
     await page.goto('/auth/sign-up')
-    await page.waitForLoadState('networkidle')
     await page.getByLabel('Name', { exact: true }).fill('No Person')
     await page.getByLabel('Email', { exact: true }).fill(freshEmail)
     const pw = page.getByLabel('Password', { exact: true })
     await pw.click()
-    await pw.pressSequentially(TEST_PASSWORD, { delay: 10 })
+    await pw.fill(TEST_PASSWORD)
     await page.getByRole('button', { name: /create an account/i }).click()
     await page.waitForTimeout(3000)
 
     // Navigate to profile — should show empty state, not crash
     await page.goto('/my/profile')
-    await page.waitForLoadState('networkidle')
     await page.waitForTimeout(2000)
 
     // Should show some content, not spinner forever
@@ -46,8 +45,6 @@ test.describe('Profile page (/my/profile)', () => {
   test('B2: edit → change specialization → save → returns to view mode', async ({ page }) => {
     await signIn(page, credentials.email, credentials.password)
     await page.goto('/my/profile')
-    await page.waitForLoadState('networkidle')
-
     // Enter edit mode
     await page.getByRole('button', { name: /edit profile/i }).click()
     await expect(page.getByText('Edit Profile')).toBeVisible()

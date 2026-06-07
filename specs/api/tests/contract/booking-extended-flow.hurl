@@ -1,34 +1,35 @@
+# CSRF preamble — fetches token + sets cookie for state-changing requests.
+# Auto-injected by scripts/audit/inject-csrf-into-hurl.ts (idempotent).
+GET {{api}}/csrf-token
+HTTP 200
+[Captures]
+csrf_token: jsonpath "$.token"
+
+
+
 # Extended booking endpoints not covered by booking-flow.hurl.
 # Covers DELETE event, GET single booking, GET single slot.
 # Creates an event + booking first to get IDs.
 
-# ── 0. Create host ───────────────────────────────────────────
+# ── 0. Sign in as seeded officer (org member with booking-event create) ──
 
-POST {{api}}/auth/sign-up/email
+POST {{api}}/auth/sign-in/email
+Origin: {{origin}}
+x-csrf-token: {{csrf_token}}
 Content-Type: application/json
 {
-  "email": "book-ext-host-{{suffix}}@example.org",
-  "password": "Sup3rSecret!ContractTest",
-  "name": "BookExt Host"
+  "email": "{{seed_officer_email}}",
+  "password": "{{seed_officer_password}}"
 }
 HTTP 200
-
-
-POST {{api}}/persons
-Content-Type: application/json
-{
-  "firstName": "BookExtHost",
-  "lastName": "Tester",
-  "languagesSpoken": ["en"],
-  "timezone": "America/New_York"
-}
-HTTP 201
-
-
-# ── 1. Create event ─────────────────────────────────────────
+[Captures]
+person_id: jsonpath "$.user.id"
 
 POST {{api}}/booking/events
+Origin: {{origin}}
+x-csrf-token: {{csrf_token}}
 Content-Type: application/json
+x-org-id: {{org_id}}
 {
   "title": "Ext booking event {{suffix}}",
   "timezone": "America/New_York",
@@ -50,6 +51,7 @@ event_id: jsonpath "$.id"
 # ── 2. Get slots to capture a slot ID ────────────────────────
 
 GET {{api}}/booking/events/{{event_id}}/slots?status=available
+x-org-id: {{org_id}}
 HTTP 200
 [Captures]
 slot_id: jsonpath "$[0].id"
@@ -60,6 +62,7 @@ jsonpath "$" isCollection
 # ── 3. Get single slot ──────────────────────────────────────
 
 GET {{api}}/booking/slots/{{slot_id}}
+x-org-id: {{org_id}}
 HTTP *
 [Asserts]
 status >= 200
@@ -69,6 +72,8 @@ status < 300
 # ── 4. Create a client and book ──────────────────────────────
 
 POST {{api}}/auth/sign-up/email
+Origin: {{origin}}
+x-csrf-token: {{csrf_token}}
 Content-Type: application/json
 {
   "email": "book-ext-client-{{suffix}}@example.org",
@@ -76,21 +81,14 @@ Content-Type: application/json
   "name": "BookExt Client"
 }
 HTTP 200
-
-
-POST {{api}}/persons
-Content-Type: application/json
-{
-  "firstName": "BookExtClient",
-  "lastName": "Tester",
-  "languagesSpoken": ["en"],
-  "timezone": "America/New_York"
-}
-HTTP 201
-
+[Captures]
+person_id: jsonpath "$.user.id"
 
 POST {{api}}/booking/bookings
+Origin: {{origin}}
+x-csrf-token: {{csrf_token}}
 Content-Type: application/json
+x-org-id: {{org_id}}
 {
   "slot": "{{slot_id}}",
   "locationType": "video",
@@ -104,6 +102,7 @@ booking_id: jsonpath "$.id"
 # ── 5. Get single booking ───────────────────────────────────
 
 GET {{api}}/booking/bookings/{{booking_id}}
+x-org-id: {{org_id}}
 HTTP *
 [Asserts]
 status >= 200
@@ -113,16 +112,45 @@ status < 300
 # ── 6. Switch back to host and delete event ──────────────────
 
 POST {{api}}/auth/sign-in/email
+Origin: {{origin}}
+x-csrf-token: {{csrf_token}}
 Content-Type: application/json
 {
-  "email": "book-ext-host-{{suffix}}@example.org",
-  "password": "Sup3rSecret!ContractTest"
+  "email": "{{seed_officer_email}}",
+  "password": "{{seed_officer_password}}"
 }
 HTTP 200
 
 
 DELETE {{api}}/booking/events/{{event_id}}
+Origin: {{origin}}
+x-csrf-token: {{csrf_token}}
+x-org-id: {{org_id}}
 HTTP *
 [Asserts]
 status >= 200
 status < 300
+
+
+# ── 7. List bookings (officer view) ─────────────────────────
+
+GET {{api}}/booking/bookings
+x-org-id: {{org_id}}
+HTTP *
+[Asserts]
+status toString matches "^(200|403)$"
+
+
+# ── 8. Patch a booking event (synthetic id) ─────────────────
+
+PATCH {{api}}/booking/events/00000000-0000-4000-8000-000000000000
+Origin: {{origin}}
+x-csrf-token: {{csrf_token}}
+x-org-id: {{org_id}}
+Content-Type: application/json
+{
+  "title": "Updated event title"
+}
+HTTP *
+[Asserts]
+status toString matches "^(200|400|404|500)$"

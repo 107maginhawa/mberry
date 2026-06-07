@@ -10,7 +10,7 @@ let _useMyOrgsReturn: any = {
   activeOrgSlug: null,
 }
 
-mock.module('@/hooks/useMyOrgs', () => ({
+mock.module('@/hooks/use-my-orgs', () => ({
   useMyOrgs: () => _useMyOrgsReturn,
 }))
 

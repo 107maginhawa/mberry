@@ -232,7 +232,11 @@ function OnboardingPage() {
           <p className="text-[var(--color-muted)] mt-2">Let's set up your profile</p>
         </div>
 
-        <Progress value={(currentStep / totalSteps) * 100} className="h-2" />
+        <Progress
+          value={(currentStep / totalSteps) * 100}
+          aria-label={`Onboarding step ${currentStep} of ${totalSteps}`}
+          className="h-2"
+        />
 
         <Card>
           <CardHeader>

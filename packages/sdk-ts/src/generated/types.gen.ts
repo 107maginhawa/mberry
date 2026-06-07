@@ -1041,6 +1041,40 @@ export type AddressUpdate = {
 };
 
 /**
+ * Request to record an officer credit adjustment (award or deduction). Mandatory reason — M10-R4 / AC-M10-005.
+ */
+export type AdjustCreditRequest = {
+    /**
+     * Person whose credit balance is being adjusted
+     */
+    personId: string;
+    /**
+     * Credit amount (positive to award, negative to deduct). Cannot be zero.
+     */
+    creditAmount: number;
+    /**
+     * Reason for the adjustment (minimum 10 characters, recorded in audit trail)
+     */
+    reason: string;
+    /**
+     * Optional idempotency key to prevent duplicate adjustments
+     */
+    idempotencyKey?: string;
+};
+
+/**
+ * Response from an officer credit adjustment
+ */
+export type AdjustCreditResponse = {
+    /**
+     * The created adjustment credit entry
+     */
+    data: {
+        [key: string]: unknown;
+    };
+};
+
+/**
  * Platform admin identity response
  */
 export type AdminRoleResponse = {
@@ -12040,6 +12074,36 @@ export type ChatMessageListResponse = {
 };
 
 /**
+ * Search result row for message search across user's accessible rooms
+ */
+export type ChatMessageSearchResult = {
+    /**
+     * Message ID
+     */
+    id: string;
+    /**
+     * Message text content (truncated to 200 chars)
+     */
+    message: string;
+    /**
+     * Sender person ID
+     */
+    sender: string;
+    /**
+     * Chat room ID
+     */
+    chatRoom: string;
+    /**
+     * Chat room display name (if available)
+     */
+    roomName?: string;
+    /**
+     * Message timestamp (ISO 8601)
+     */
+    timestamp: string;
+};
+
+/**
  * Immutable chat message with optional video call data
  */
 export type ChatMessageUpdate = {
@@ -17268,6 +17332,116 @@ export type DuesInvoiceUpdate = {
 };
 
 /**
+ * Membership status timeline entry
+ */
+export type DuesMemberStatusTimelineEntry = {
+    /**
+     * Previous status
+     */
+    fromStatus?: string;
+    /**
+     * New status
+     */
+    toStatus: string;
+    /**
+     * Changed at (ISO 8601)
+     */
+    changedAt: string;
+};
+
+/**
+ * Per-member financial summary — invoices, payments, balance, status timeline
+ */
+export type DuesMemberSummary = {
+    /**
+     * All invoices for this member
+     */
+    invoices: Array<DuesMemberSummaryInvoice>;
+    /**
+     * All payments for this member (up to 100)
+     */
+    payments: Array<DuesMemberSummaryPayment>;
+    /**
+     * Computed balance = sum of unpaid invoice amounts
+     */
+    balance: number;
+    /**
+     * Membership status timeline
+     */
+    statusTimeline: Array<DuesMemberStatusTimelineEntry>;
+};
+
+/**
+ * Invoice row in member summary (loose-typed; full invoice schema lives in DuesInvoice)
+ */
+export type DuesMemberSummaryInvoice = {
+    /**
+     * Invoice ID
+     */
+    id: string;
+    /**
+     * Invoice status
+     */
+    status: string;
+    /**
+     * Total amount in minor units (decimal-as-string from DB)
+     */
+    totalAmount: string;
+    /**
+     * Generated at (ISO 8601)
+     */
+    generatedAt: string;
+    /**
+     * Due date (ISO 8601)
+     */
+    dueDate?: string;
+};
+
+/**
+ * Payment row in member summary
+ */
+export type DuesMemberSummaryPayment = {
+    /**
+     * Payment ID
+     */
+    id: string;
+    /**
+     * Payment status
+     */
+    status: string;
+    /**
+     * Amount in minor units
+     */
+    amount: bigint;
+    /**
+     * Paid at (ISO 8601)
+     */
+    paidAt?: string;
+    /**
+     * Payment method
+     */
+    method?: string;
+};
+
+/**
+ * Monthly breakdown row
+ */
+export type DuesMonthlyBreakdownRow = {
+    /**
+     * ISO month YYYY-MM
+     */
+    month: string;
+    /**
+     * Collected amount in minor units
+     */
+    collected: number;
+    /**
+     * Outstanding amount in minor units
+     */
+    outstanding: number;
+};
+
+/**
  * A recorded dues payment from a member
  */
 export type DuesPayment = {
@@ -17777,6 +17951,116 @@ export type DuesReportSummary = {
 };
 
 export type DuesReportType = 'collection' | 'fund_breakdown' | 'dues_status' | 'aging';
+
+/**
+ * Member status distribution from invoice statuses
+ */
+export type DuesStatusDistribution = {
+    /**
+     * Active (paid) count
+     */
+    active: number;
+    /**
+     * Due soon (generated/sent) count
+     */
+    dueSoon: number;
+    /**
+     * Overdue count
+     */
+    overdue: number;
+    /**
+     * Lapsed (voided) count
+     */
+    lapsed: number;
+};
+
+/**
+ * Top unpaid member row
+ */
+export type DuesTopUnpaidRow = {
+    /**
+     * Person ID
+     */
+    personId: string;
+    /**
+     * Member display name
+     */
+    name?: string;
+    /**
+     * Total unpaid amount in minor units
+     */
+    unpaidAmount: number;
+};
+
+/**
+ * Trailing collection rate per window, integer 0-100
+ */
+export type DuesTrailingRates = {
+    /**
+     * Last 30 days collection rate (0-100)
+     */
+    days30: number;
+    /**
+     * Last 90 days collection rate (0-100)
+     */
+    days90: number;
+    /**
+     * Last 365 days collection rate (0-100)
+     */
+    days365: number;
+};
+
+/**
+ * Treasurer dues metrics — trailing rates + monthly breakdown + status distribution + top unpaid
+ */
+export type DuesTreasurerMetrics = {
+    /**
+     * Trailing collection rates
+     */
+    trailingRates: {
+        /**
+         * Last 30 days collection rate (0-100)
+         */
+        days30: number;
+        /**
+         * Last 90 days collection rate (0-100)
+         */
+        days90: number;
+        /**
+         * Last 365 days collection rate (0-100)
+         */
+        days365: number;
+    };
+    /**
+     * Monthly breakdown (last 12 months)
+     */
+    monthlyBreakdown: Array<DuesMonthlyBreakdownRow>;
+    /**
+     * Status distribution snapshot
+     */
+    statusDistribution: {
+        /**
+         * Active (paid) count
+         */
+        active: number;
+        /**
+         * Due soon (generated/sent) count
+         */
+        dueSoon: number;
+        /**
+         * Overdue count
+         */
+        overdue: number;
+        /**
+         * Lapsed (voided) count
+         */
+        lapsed: number;
+    };
+    /**
+     * Top unpaid members (up to 10)
+     */
+    topUnpaid: Array<DuesTopUnpaidRow>;
+};
 
 /**
  * Channel through which a dunning communication is delivered
@@ -23625,6 +23909,34 @@ export type MeetingMinutesUpdate = {
 export type MeetingStatus = 'scheduled' | 'inProgress' | 'completed' | 'cancelled';
 
 /**
+ * Public credit-entry view for peer profile display
+ */
+export type MemberPeerCreditEntry = {
+    /**
+     * CE credits awarded
+     */
+    credits: number;
+    /**
+     * Activity title (event/course/publication name)
+     */
+    courseTitle?: string;
+    /**
+     * Date credit was earned (ISO 8601 date)
+     */
+    earnedAt?: string;
+};
+
+/**
+ * Response wrapper for peer credit list
+ */
+export type MemberPeerCreditsResponse = {
+    /**
+     * List of public credit entries
+     */
+    data: Array<MemberPeerCreditEntry>;
+};
+
+/**
  * Member status distribution for a chapter drill-down
  */
 export type MemberStatusBreakdown = {
@@ -26484,6 +26796,31 @@ export type OrgAccreditedProviderUpdateRequest = {
      * Date when accreditation expires
      */
     expiryDate?: Date | null;
+};
+
+/**
+ * Org-scope chapter row for member directory filters (distinct chapters in current org)
+ */
+export type OrgChapterRow = {
+    /**
+     * Chapter row ID (same as chapterId)
+     */
+    id: string;
+    /**
+     * Chapter organization ID
+     */
+    chapterId: string;
+    /**
+     * Chapter display name (from organizations table)
+     */
+    chapterName?: string;
+};
+
+/**
+ * Response wrapper for org chapter list
+ */
+export type OrgChaptersResponse = {
+    data: Array<OrgChapterRow>;
 };
 
 /**
@@ -41315,6 +41652,35 @@ export type SetPrimaryChapterAffiliationResponses = {
 
 export type SetPrimaryChapterAffiliationResponse = SetPrimaryChapterAffiliationResponses[keyof SetPrimaryChapterAffiliationResponses];
 
+export type ListOrgChaptersData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/association/member/chapters';
+};
+
+export type ListOrgChaptersErrors = {
+    /**
+     * Unauthorized access response
+     */
+    401: AuthenticationError;
+    /**
+     * Forbidden access response
+     */
+    403: AuthorizationError;
+};
+
+export type ListOrgChaptersError = ListOrgChaptersErrors[keyof ListOrgChaptersErrors];
+
+export type ListOrgChaptersResponses = {
+    /**
+     * Success response with data
+     */
+    200: OrgChaptersResponse;
+};
+
+export type ListOrgChaptersResponse = ListOrgChaptersResponses[keyof ListOrgChaptersResponses];
+
 export type GetComplianceReportData = {
     body?: never;
     path: {
@@ -41962,6 +42328,78 @@ export type RevokeDigitalCredentialResponses = {
 };
 
 export type RevokeDigitalCredentialResponse = RevokeDigitalCredentialResponses[keyof RevokeDigitalCredentialResponses];
+
+export type ListMemberCreditsForPeerData = {
+    body?: never;
+    path?: never;
+    query: {
+        personId: string;
+    };
+    url: '/association/member/credits';
+};
+
+export type ListMemberCreditsForPeerErrors = {
+    /**
+     * Validation error response
+     */
+    400: ValidationError;
+    /**
+     * Unauthorized access response
+     */
+    401: AuthenticationError;
+    /**
+     * Forbidden access response
+     */
+    403: AuthorizationError;
+};
+
+export type ListMemberCreditsForPeerError = ListMemberCreditsForPeerErrors[keyof ListMemberCreditsForPeerErrors];
+
+export type ListMemberCreditsForPeerResponses = {
+    /**
+     * Success response with data
+     */
+    200: MemberPeerCreditsResponse;
+};
+
+export type ListMemberCreditsForPeerResponse = ListMemberCreditsForPeerResponses[keyof ListMemberCreditsForPeerResponses];
+
+export type AdjustCreditEntryData = {
+    body: AdjustCreditRequest;
+    path?: never;
+    query?: never;
+    url: '/association/member/credits/adjust';
+};
+
+export type AdjustCreditEntryErrors = {
+    /**
+     * Validation error response
+     */
+    400: ValidationError;
+    /**
+     * Unauthorized access response
+     */
+    401: AuthenticationError;
+    /**
+     * Forbidden access response
+     */
+    403: AuthorizationError;
+    /**
+     * Conflict response
+     */
+    409: ConflictError;
+};
+
+export type AdjustCreditEntryError = AdjustCreditEntryErrors[keyof AdjustCreditEntryErrors];
+
+export type AdjustCreditEntryResponses = {
+    /**
+     * Resource created response
+     */
+    201: AdjustCreditResponse;
+};
+
+export type AdjustCreditEntryResponse = AdjustCreditEntryResponses[keyof AdjustCreditEntryResponses];
 
 export type AwardManualCreditData = {
     body: ManualCreditAwardRequest;
@@ -42943,6 +43381,77 @@ export type MarkDuesInvoicePaidResponses = {
 };
 
 export type MarkDuesInvoicePaidResponse = MarkDuesInvoicePaidResponses[keyof MarkDuesInvoicePaidResponses];
+
+export type GetDuesMemberSummaryData = {
+    body?: never;
+    path: {
+        organizationId: Uuid;
+        personId: Uuid;
+    };
+    query?: never;
+    url: '/association/member/dues-member-summary/{organizationId}/{personId}';
+};
+
+export type GetDuesMemberSummaryErrors = {
+    /**
+     * Unauthorized access response
+     */
+    401: AuthenticationError;
+    /**
+     * Forbidden access response
+     */
+    403: AuthorizationError;
+    /**
+     * Resource not found response
+     */
+    404: NotFoundError;
+};
+
+export type GetDuesMemberSummaryError = GetDuesMemberSummaryErrors[keyof GetDuesMemberSummaryErrors];
+
+export type GetDuesMemberSummaryResponses = {
+    /**
+     * Success response with data
+     */
+    200: {
+        data: DuesMemberSummary;
+    };
+};
+
+export type GetDuesMemberSummaryResponse = GetDuesMemberSummaryResponses[keyof GetDuesMemberSummaryResponses];
+
+export type GetDuesMetricsData = {
+    body?: never;
+    path: {
+        organizationId: Uuid;
+    };
+    query?: never;
+    url: '/association/member/dues-metrics/{organizationId}';
+};
+
+export type GetDuesMetricsErrors = {
+    /**
+     * Unauthorized access response
+     */
+    401: AuthenticationError;
+    /**
+     * Forbidden access response
+     */
+    403: AuthorizationError;
+};
+
+export type GetDuesMetricsError = GetDuesMetricsErrors[keyof GetDuesMetricsErrors];
+
+export type GetDuesMetricsResponses = {
+    /**
+     * Success response with data
+     */
+    200: {
+        data: DuesTreasurerMetrics;
+    };
+};
+
+export type GetDuesMetricsResponse = GetDuesMetricsResponses[keyof GetDuesMetricsResponses];
 
 export type ListDuesPaymentsData = {
     body?: never;
@@ -50468,6 +50977,42 @@ export type GetIceServersResponses = {
 };
 
 export type GetIceServersResponse = GetIceServersResponses[keyof GetIceServersResponses];
+
+export type SearchChatMessagesData = {
+    body?: never;
+    path?: never;
+    query: {
+        /**
+         * Search query (case-insensitive substring match on message text). Minimum 2 characters.
+         */
+        q: string;
+    };
+    url: '/comms/messages/search';
+};
+
+export type SearchChatMessagesErrors = {
+    /**
+     * Validation error response
+     */
+    400: ValidationError;
+    /**
+     * Unauthorized access response
+     */
+    401: AuthenticationError;
+};
+
+export type SearchChatMessagesError = SearchChatMessagesErrors[keyof SearchChatMessagesErrors];
+
+export type SearchChatMessagesResponses = {
+    /**
+     * Success response with data
+     */
+    200: {
+        data: Array<ChatMessageSearchResult>;
+    };
+};
+
+export type SearchChatMessagesResponse = SearchChatMessagesResponses[keyof SearchChatMessagesResponses];
 
 export type GetAnnouncementData = {
     body?: never;

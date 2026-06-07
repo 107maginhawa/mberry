@@ -1,3 +1,12 @@
+# CSRF preamble — fetches token + sets cookie for state-changing requests.
+# Auto-injected by scripts/audit/inject-csrf-into-hurl.ts (idempotent).
+GET {{api}}/csrf-token
+HTTP 200
+[Captures]
+csrf_token: jsonpath "$.token"
+
+
+
 # Extended communications (announcements) endpoints not covered by
 # communications-flow.hurl. Covers update, delete, publish, archive.
 #
@@ -6,10 +15,12 @@
 # ── Auth ─────────────────────────────────────────────────────
 
 POST {{api}}/auth/sign-in/email
+Origin: {{origin}}
+x-csrf-token: {{csrf_token}}
 Content-Type: application/json
 {
   "email": "test@memberry.ph",
-  "password": "Test1234!"
+  "password": "TestPass123!"
 }
 HTTP 200
 
@@ -17,6 +28,8 @@ HTTP 200
 # ── 1. Create an announcement to work with ──────────────────
 
 POST {{api}}/communications/announcements/ed8e3a96-8126-4341-be42-e6eb7940c562
+Origin: {{origin}}
+x-csrf-token: {{csrf_token}}
 Content-Type: application/json
 {
   "title": "Extended Test Announcement {{suffix}}",
@@ -30,7 +43,10 @@ announcement_id: jsonpath "$.data.id"
 # ── 2. Update announcement ──────────────────────────────────
 
 PATCH {{api}}/communications/announcements/{{announcement_id}}
+Origin: {{origin}}
+x-csrf-token: {{csrf_token}}
 Content-Type: application/json
+x-org-id: {{org_id}}
 {
   "title": "Updated Announcement {{suffix}}",
   "content": "Updated content for contract test."
@@ -44,7 +60,10 @@ status < 300
 # ── 3. Publish announcement ─────────────────────────────────
 
 POST {{api}}/communications/announcements/{{announcement_id}}/publish
+Origin: {{origin}}
+x-csrf-token: {{csrf_token}}
 Content-Type: application/json
+x-org-id: {{org_id}}
 {}
 HTTP *
 [Asserts]
@@ -55,7 +74,10 @@ status < 300
 # ── 4. Archive announcement ─────────────────────────────────
 
 POST {{api}}/communications/announcements/{{announcement_id}}/archive
+Origin: {{origin}}
+x-csrf-token: {{csrf_token}}
 Content-Type: application/json
+x-org-id: {{org_id}}
 {}
 HTTP *
 [Asserts]
@@ -63,9 +85,27 @@ status >= 200
 status < 300
 
 
-# ── 5. Delete announcement ──────────────────────────────────
+# ── 5. Delete announcement (must target a draft) ────────────
+# Step 4 archived the working announcement and DELETE is restricted to
+# `draft` status (BusinessLogicError ANNOUNCEMENT_NOT_DRAFT). Create a
+# fresh draft just to exercise DELETE.
 
-DELETE {{api}}/communications/announcements/{{announcement_id}}
+POST {{api}}/communications/announcements/ed8e3a96-8126-4341-be42-e6eb7940c562
+Origin: {{origin}}
+x-csrf-token: {{csrf_token}}
+Content-Type: application/json
+{
+  "title": "Deletable Draft {{suffix}}",
+  "content": "Created to exercise DELETE."
+}
+HTTP 201
+[Captures]
+draft_id: jsonpath "$.data.id"
+
+DELETE {{api}}/communications/announcements/{{draft_id}}
+Origin: {{origin}}
+x-csrf-token: {{csrf_token}}
+x-org-id: {{org_id}}
 HTTP *
 [Asserts]
 status >= 200

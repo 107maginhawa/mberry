@@ -1,14 +1,7 @@
----
-based-on: map@2331bd9f
-last-modified: 2026-06-03T20:30:00Z
-engine-version: 7b2a640
-map-version: 6
----
-
 # Code Spec Trace
 
 <!-- oli:regen:code-spec-trace:begin -->
-Spec: `specs/api/dist/openapi/openapi.json` · Matched: 455 · Spec-only: 0 · Code-only: 1 · Auth-drift: 0
+Spec: `specs/api/dist/openapi/openapi.json` · Matched: 454 · Spec-only: 0 · Code-only: 1 · Auth-drift: 0
 
 | Operation | operationId | Roles | Backend | Status | Drift |
 |---|---|---|---|---|---|
@@ -447,7 +440,6 @@ Spec: `specs/api/dist/openapi/openapi.json` · Matched: 455 · Spec-only: 0 · C
 | `POST /persons/me/credit-entries` | `createMyCreditEntry` | user | `createMyCreditEntry` | matched |  |
 | `POST /persons/me/delete` | `requestMyAccountDeletion` | user | `requestMyAccountDeletion` | matched |  |
 | `POST /postings` | `createJobPosting` | association:admin, association:staff | `createJobPosting` | matched |  |
-| `POST /read-all` | `markAllNotificationsRead` | user | `markAllNotificationsRead` | matched |  |
 | `POST /reviews/` | `createReview` | user | `createReview` | matched |  |
 | `POST /storage/files/:file/complete` | `completeFileUpload` | user:owner | `completeFileUpload` | matched |  |
 | `POST /storage/files/upload` | `uploadFile` | user | `uploadFile` | matched |  |

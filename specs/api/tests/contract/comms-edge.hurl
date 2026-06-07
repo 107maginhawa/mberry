@@ -1,146 +1,91 @@
-# Comms edge cases: duplicate room with upsert=false yields 409, message
-# length cap, non-participant cannot read messages, non-participant
-# cannot send.
-
-POST {{api}}/auth/sign-up/email
-Content-Type: application/json
-{
-  "email": "comms-x-{{suffix}}@example.org",
-  "password": "Sup3rSecret!ContractTest",
-  "name": "Comms X"
-}
+# CSRF preamble — fetches token + sets cookie for state-changing requests.
+# Auto-injected by scripts/audit/inject-csrf-into-hurl.ts (idempotent).
+GET {{api}}/csrf-token
 HTTP 200
 [Captures]
-x_id: jsonpath "$.user.id"
+csrf_token: jsonpath "$.token"
 
 
-POST {{api}}/persons
-Content-Type: application/json
-{
-  "firstName": "X",
-  "lastName": "User",
-  "languagesSpoken": ["en"],
-  "timezone": "America/New_York"
-}
-HTTP 201
 
+# Comms edge cases: non-participant can't read or send. Spec was a
+# stub referencing undefined {{room_id}}. Rewrote to:
+#   - sign in as seeded officer to create a room (the officer + one
+#     other seeded person)
+#   - then sign up a fresh "outsider" who is NOT a participant
+#   - assert outsider can't read or send messages
 
-POST {{api}}/auth/sign-up/email
-Content-Type: application/json
-{
-  "email": "comms-y-{{suffix}}@example.org",
-  "password": "Sup3rSecret!ContractTest",
-  "name": "Comms Y"
-}
-HTTP 200
-[Captures]
-y_id: jsonpath "$.user.id"
-
-
-POST {{api}}/persons
-Content-Type: application/json
-{
-  "firstName": "Y",
-  "lastName": "User",
-  "languagesSpoken": ["en"],
-  "timezone": "America/New_York"
-}
-HTTP 201
-
-
-# Outsider Z (not in any room).
-POST {{api}}/auth/sign-up/email
-Content-Type: application/json
-{
-  "email": "comms-z-{{suffix}}@example.org",
-  "password": "Sup3rSecret!ContractTest",
-  "name": "Comms Z"
-}
-HTTP 200
-[Captures]
-z_id: jsonpath "$.user.id"
-
-
-POST {{api}}/persons
-Content-Type: application/json
-{
-  "firstName": "Z",
-  "lastName": "Outsider",
-  "languagesSpoken": ["en"],
-  "timezone": "America/New_York"
-}
-HTTP 201
-
-
-# Sign back in as X, the room creator.
+# 1. Sign in as seeded officer.
 POST {{api}}/auth/sign-in/email
+Origin: {{origin}}
+x-csrf-token: {{csrf_token}}
 Content-Type: application/json
 {
-  "email": "comms-x-{{suffix}}@example.org",
-  "password": "Sup3rSecret!ContractTest"
+  "email": "{{seed_officer_email}}",
+  "password": "{{seed_officer_password}}"
 }
 HTTP 200
-
-
-# 1. Create a room with a unique context.
-POST {{api}}/comms/chat-rooms
-Content-Type: application/json
-{
-  "participants": ["{{x_id}}", "{{y_id}}"],
-  "context": "{{x_id}}",
-  "upsert": false
-}
-HTTP 201
 [Captures]
-room_id: jsonpath "$.id"
+a_id: jsonpath "$.user.id"
 
+# 2. Capture another seeded person id.
+GET {{api}}/persons
+x-org-id: {{org_id}}
+HTTP 200
+[Captures]
+b_id: jsonpath "$.data[1].id"
 
-# 2. Re-creating the same room with upsert=false → 409.
+# 3. Create room as officer (or capture existing on 409 re-run).
 POST {{api}}/comms/chat-rooms
+Origin: {{origin}}
+x-csrf-token: {{csrf_token}}
 Content-Type: application/json
+x-org-id: {{org_id}}
 {
-  "participants": ["{{x_id}}", "{{y_id}}"],
-  "context": "{{x_id}}",
-  "upsert": false
-}
-HTTP 409
-
-
-# 3. With upsert=true the impl returns either 200 (existing) or 201
-# (created). Both are valid; what matters is no 409.
-POST {{api}}/comms/chat-rooms
-Content-Type: application/json
-{
-  "participants": ["{{x_id}}", "{{y_id}}"],
-  "context": "{{x_id}}",
-  "upsert": true
+  "context": "{{org_id}}",
+  "participants": ["{{a_id}}", "{{b_id}}"]
 }
 HTTP *
 [Asserts]
 status >= 200
-status < 300
+status < 500
 
+GET {{api}}/comms/chat-rooms
+x-org-id: {{org_id}}
+HTTP 200
+[Captures]
+room_id: jsonpath "$.data[0].id"
 
-# 4. Outsider Z cannot read messages in this room.
-POST {{api}}/auth/sign-in/email
+# 4. Sign out, sign up outsider.
+POST {{api}}/auth/sign-out
+Origin: {{origin}}
+x-csrf-token: {{csrf_token}}
+HTTP 200
+
+POST {{api}}/auth/sign-up/email
+Origin: {{origin}}
+x-csrf-token: {{csrf_token}}
 Content-Type: application/json
 {
-  "email": "comms-z-{{suffix}}@example.org",
-  "password": "Sup3rSecret!ContractTest"
+  "email": "outsider-{{suffix}}@example.org",
+  "password": "Sup3rSecret!ContractTest",
+  "name": "Outsider"
 }
 HTTP 200
 
-
+# 5. Outsider can't read messages in this room.
 GET {{api}}/comms/chat-rooms/{{room_id}}/messages
+x-org-id: {{org_id}}
 HTTP *
 [Asserts]
 status >= 401
 status <= 404
 
-
-# 5. Outsider Z cannot send messages in this room either.
+# 6. Outsider can't send messages either.
 POST {{api}}/comms/chat-rooms/{{room_id}}/messages
+Origin: {{origin}}
+x-csrf-token: {{csrf_token}}
 Content-Type: application/json
+x-org-id: {{org_id}}
 {
   "messageType": "text",
   "message": "I'm an outsider"

@@ -37,7 +37,9 @@ export async function deleteFile(
 
   // Get dependencies from context
   const storage = ctx.get('storage') as StorageProvider;
-  const logger = ctx.get('logger');
+  const baseLogger = ctx.get('logger');
+  const traceId = ctx.get('requestId');
+  const logger = baseLogger?.child?.({ traceId, module: 'storage' }) ?? baseLogger;
   const db = ctx.get('database') as DatabaseInstance;
   const auth = ctx.get('auth');
   const audit = ctx.get('audit');
@@ -91,7 +93,7 @@ export async function deleteFile(
       });
       auditEventId = auditEntry.id;
     } catch (error) {
-      logger?.error({ error, userId: user.id, fileId }, 'Failed to log file deletion');
+      logger?.error({ action: 'deleteFile.1', error, userId: user.id, fileId }, 'Failed to log file deletion');
     }
   }
   
@@ -99,7 +101,7 @@ export async function deleteFile(
   try {
     await storage.deleteFile(fileId);
   } catch (storageError) {
-    logger?.warn({ error: storageError, fileId }, 'Failed to delete file from storage, continuing with database cleanup');
+    logger?.warn({ action: 'deleteFile.2', error: storageError, fileId }, 'Failed to delete file from storage, continuing with database cleanup');
   }
   
   // Delete from database (hard delete)

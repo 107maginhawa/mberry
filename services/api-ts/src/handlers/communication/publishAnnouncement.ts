@@ -4,9 +4,6 @@ import type { DatabaseInstance } from '@/core/database';
 import type { PublishAnnouncementParams } from '@/generated/openapi/validators';
 import { CommunicationsRepository } from './repos/communication.repo';
 import { domainEvents } from '@/core/domain-events';
-import { auditAction } from '@/utils/audit';
-import { requirePosition } from '@/utils/officer-check';
-import { POSITION_TITLES } from '@/utils/position-titles';
 
 /**
  * publishAnnouncement
@@ -19,10 +16,6 @@ export async function publishAnnouncement(
 ): Promise<Response> {
   const session = ctx.get('session');
   if (!session) throw new UnauthorizedError();
-
-  // M7: Only president/secretary can publish announcements
-  const denied = await requirePosition(ctx, [POSITION_TITLES.PRESIDENT, POSITION_TITLES.SECRETARY]);
-  if (denied) return denied;
 
   const params = ctx.req.valid('param');
 
@@ -46,14 +39,9 @@ export async function publishAnnouncement(
     publishedBy: session.user.id,
   });
 
-  await auditAction(ctx, {
-    action: 'update',
-    resourceType: 'announcement',
-    resourceId: params.id,
-    description: `Published announcement`,
-    details: { transition: 'published' },
-    eventSubType: 'content.announcement-published',
-  });
+  ctx.set('auditResourceId', params.id);
+  ctx.set('auditDescription', `Published announcement`);
+  ctx.set('auditDetails', { transition: 'published' });
 
   return ctx.json({ data: published }, 200);
 }

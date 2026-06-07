@@ -3,7 +3,7 @@ import { PageShell } from '@/components/patterns/page-shell'
 import { TemplateList } from '@/features/communications/components/template-list'
 import { Button } from '@monobase/ui'
 import { Plus } from 'lucide-react'
-import { useOrg } from '@/hooks/useOrg'
+import { useOrg } from '@/hooks/use-org'
 
 export const Route = createFileRoute(
   '/_authenticated/org/$orgSlug/officer/communications/templates/',

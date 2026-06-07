@@ -1,0 +1,109 @@
+name: E2E Flake Tracking
+
+# Nightly job that runs the memberry E2E suite 3 times in a row with the
+# same DB seed and SHA. Specs that pass on some runs and fail on others
+# are flaky. Results land in docs/audits/E2E_FLAKE_LOG.md, which becomes
+# the worklist for root-cause fixes per memory rule
+# `feedback_root_cause_layers` — fix flakes, never paper over with retries.
+
+on:
+  schedule:
+    - cron: '0 7 * * *' # 07:00 UTC daily
+  workflow_dispatch:
+    inputs:
+      runs:
+        description: 'Number of repetitions per spec'
+        required: false
+        default: '3'
+
+jobs:
+  flake-detect:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: password
+          POSTGRES_DB: monobase
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd "pg_isready -U postgres -d monobase"
+          --health-interval 5s --health-timeout 5s --health-retries 10
+      minio:
+        image: minio/minio:latest
+        ports: ['9000:9000']
+        env:
+          MINIO_ROOT_USER: minioadmin
+          MINIO_ROOT_PASSWORD: minioadmin
+        options: >-
+          --health-cmd "curl -fsS http://localhost:9000/minio/health/live"
+          --health-interval 5s --health-timeout 5s --health-retries 10
+    env:
+      TZ: UTC
+      DATABASE_URL: postgresql://postgres:password@localhost:5432/monobase
+      PORT: 7213
+      API_URL: http://localhost:7213
+      AUTH_SECRET: contract-test-secret-do-not-use-in-prod
+      STORAGE_PROVIDER: minio
+      STORAGE_ENDPOINT: http://localhost:9000
+      STORAGE_BUCKET: monobase-files
+      STORAGE_ACCESS_KEY_ID: minioadmin
+      STORAGE_SECRET_ACCESS_KEY: minioadmin
+      RUNS: ${{ github.event.inputs.runs || '3' }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: 1.2.21
+      - run: bun install --frozen-lockfile
+      - name: Build OpenAPI spec
+        run: bun run --filter @monobase/api-spec build
+      - name: Generate API codegen
+        run: bun run --filter @monobase/api-ts generate
+      - name: Install Playwright browsers
+        run: cd apps/memberry && bunx playwright install --with-deps chromium
+      - name: Boot API
+        run: |
+          cd services/api-ts
+          bun dev > /tmp/api.log 2>&1 &
+      - name: Wait for API
+        run: |
+          for i in $(seq 1 60); do
+            curl -fsS "$API_URL/livez" && exit 0
+            sleep 1
+          done
+          echo "API never became ready"; tail -200 /tmp/api.log; exit 1
+      - name: Seed database
+        run: cd services/api-ts && bun run db:seed-modules
+      - name: Start Memberry app
+        run: |
+          cd apps/memberry
+          bun dev > /tmp/memberry.log 2>&1 &
+      - name: Wait for Memberry app
+        run: |
+          for i in $(seq 1 30); do
+            curl -fsS "http://localhost:3004" > /dev/null 2>&1 && exit 0
+            sleep 1
+          done
+          echo "Memberry app never became ready"; tail -100 /tmp/memberry.log; exit 1
+      - name: Run E2E N times (repeat-each)
+        # --repeat-each runs every test that-many times; --retries=0 prevents
+        # Playwright's own retry from hiding flakes.
+        run: |
+          cd apps/memberry
+          bun run test:e2e -- --repeat-each=$RUNS --retries=0 --reporter=json > /tmp/e2e-flake.json || true
+      - name: Generate flake log
+        # Parse the per-test results and write the worst-offender log to
+        # docs/audits/E2E_FLAKE_LOG.md. Any spec that passed >0 times AND
+        # failed >0 times is flaky.
+        run: bun scripts/audit/flake-log.ts /tmp/e2e-flake.json
+      - name: Upload flake log
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: e2e-flake-log
+          path: |
+            docs/audits/E2E_FLAKE_LOG.md
+            /tmp/e2e-flake.json

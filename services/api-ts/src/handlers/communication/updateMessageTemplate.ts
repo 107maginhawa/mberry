@@ -3,7 +3,6 @@ import type { DatabaseInstance } from '@/core/database';
 import type { UpdateMessageTemplateBody, UpdateMessageTemplateParams } from '@/generated/openapi/validators';
 import { NotFoundError } from '@/core/errors';
 import { MessageTemplateRepository } from './repos/communication.repo';
-import { auditAction } from '@/utils/audit';
 
 /**
  * updateMessageTemplate
@@ -36,12 +35,8 @@ export async function updateMessageTemplate(
     updatedBy: user.id,
   });
 
-  await auditAction(ctx, {
-    action: 'update',
-    resourceType: 'message-template',
-    resourceId: params.templateId,
-    description: `Message template "${existing.name}" updated`,
-  });
+  ctx.set('auditResourceId', params.templateId);
+  ctx.set('auditDescription', `Message template "${existing.name}" updated`);
 
   return ctx.json(updated, 200);
 }

@@ -1,18 +1,16 @@
 import { test, expect } from '../helpers/test-fixture'
-import { signIn } from '../helpers/auth'
 import { SEED_OFFICER_EMAIL, TEST_PASSWORD, API_BASE } from '../helpers/test-config'
+import { authStateFile } from '../helpers/auth-state'
 
+
+test.use({ storageState: authStateFile('officer') })
 const ORG_ID = 'ed8e3a96-8126-4341-be42-e6eb7940c562'
 
 // Backend coverage: 14 unit tests in br-37.job-posting-expiry.test.ts
 // E2E stubs below define user-facing scenarios for when module M15 is built.
 
 test.describe('BR-37: Job Posting Expiry', () => {
-  test.beforeEach(async ({ page }) => {
-    await signIn(page, SEED_OFFICER_EMAIL, TEST_PASSWORD)
-  })
-
-  test('unauthenticated request returns 401', async ({ page }) => {
+test('unauthenticated request returns 401', async ({ page }) => {
     const response = await page.evaluate(async ({ orgId }) => {
       const res = await fetch(`${API_BASE}/association/jobs/expired?organizationId=${orgId}`)
       return { status: res.status }

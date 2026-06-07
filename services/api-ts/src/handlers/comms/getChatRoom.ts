@@ -37,7 +37,9 @@ export async function getChatRoom(
   
   // Get dependencies from context
   const db = ctx.get('database') as DatabaseInstance;
-  const logger = ctx.get('logger');
+  const baseLogger = ctx.get('logger');
+  const traceId = ctx.get('requestId');
+  const logger = baseLogger?.child?.({ traceId, module: 'comms' }) ?? baseLogger;
 
   // Authorization uses Person ID directly (no profile lookups needed)
 

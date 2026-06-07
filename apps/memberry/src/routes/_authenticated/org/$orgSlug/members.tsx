@@ -1,7 +1,7 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { DirectorySearch } from '@/features/directory/components/directory-search'
 import { PageShell } from '@/components/patterns/page-shell'
-import { useOrg } from '@/hooks/useOrg'
+import { useOrg } from '@/hooks/use-org'
 
 export const Route = createFileRoute('/_authenticated/org/$orgSlug/members')({
   component: MembersDirectoryPage,

@@ -1,6 +1,6 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { PageShell } from '@/components/patterns/page-shell'
-import { useOrg } from '@/hooks/useOrg'
+import { useOrg } from '@/hooks/use-org'
 import { SurveyResults } from '@/features/surveys/components/survey-results'
 
 export const Route = createFileRoute('/_authenticated/org/$orgSlug/officer/surveys/$surveyId')({

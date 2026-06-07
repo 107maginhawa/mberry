@@ -129,6 +129,23 @@ Run `bun --filter '*' lint` from the repo root to lint every workspace.
 - `src/features/` - larger feature modules (booking, billing, comms, person)
 - Each app owns this tree; nothing is shared across apps except the SDK.
 
+### Sanity check — does the app work?
+
+One spec, one command, ~18 seconds. The single source of truth for
+end-to-end app health:
+
+```bash
+cd apps/memberry
+CI=1 bunx playwright test _golden-path.spec.ts --workers=1 --reporter=line
+```
+
+Green = the 8 most critical user journeys (signup → apply → approve →
+member → CPD log → treasurer payment → officer roster → announcement
+→ sign-out/in) all work. Run this before every release, after every
+auth/middleware/router change, and whenever someone asks "is the app
+broken?". See `docs/audits/SANITY_CHECK.md` for the per-step breakdown
+and how to extend it.
+
 ### Contract testing
 
 The Hurl suite under `specs/api/tests/contract/` is the source of truth
@@ -139,9 +156,18 @@ for API behavior — implementation-agnostic, runs in seconds, used by CI:
 cd services/api-ts && bun dev
 
 # In another
-bun run test:contract              # 22 scenarios in ~5s
+bun run test:contract              # 95/99 scenarios; ~7s
+bun run test:contract:full         # boots mailpit + stripe-mock first → all 99
 bun run test:contract:fuzz         # Schemathesis property-based fuzz
 ```
+
+The plain `test:contract` cleanly skips 4 specs whose preconditions
+need external services that aren't always running locally
+(`auth-password-reset`, `auth-verification` need mailpit on :8025;
+`billing-extended-flow`, `billing-lifecycle` need stripe-mock on
+:12111 + `STRIPE_SECRET_KEY`). `test:contract:full` boots those via
+`docker compose up -d mailpit stripe-mock --wait` and then runs the
+suite — use it when you need the full 99/99 sign-off locally.
 
 See `specs/api/tests/contract/COVERAGE.md` for what is checked vs
 deferred, and `specs/api/IMPLEMENTING.md` to add a sibling impl in

@@ -5,7 +5,7 @@ import { DocumentRepository } from '@/handlers/documents/repos/documents.repo';
 import { domainEvents } from '@/core/domain-events';
 import { createMyCreditEntry } from './createMyCreditEntry';
 
-mock.module('@/utils/audit', () => ({ auditAction: async () => {} }));
+mock.module('@/core/audit/audit-action', () => ({ auditAction: async () => {} }));
 
 describe('createMyCreditEntry', () => {
   beforeEach(() => { restoreRepo(CreditEntryRepository); restoreRepo(DocumentRepository); });

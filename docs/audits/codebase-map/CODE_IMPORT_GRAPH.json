@@ -171,7 +171,7 @@
     {
       "from_module": "handlers/dues",
       "to_module": "handlers/association:member",
-      "import_count": 15,
+      "import_count": 14,
       "files": [
         "services/api-ts/src/handlers/dues/checkoutPaymentToken.ts",
         "services/api-ts/src/handlers/dues/downloadReceipt.ts",
@@ -200,13 +200,10 @@
     {
       "from_module": "handlers/elections",
       "to_module": "handlers/association:member",
-      "import_count": 8,
+      "import_count": 5,
       "files": [
         "services/api-ts/src/handlers/elections/castVote.ts",
-        "services/api-ts/src/handlers/elections/certifyElection.ts",
-        "services/api-ts/src/handlers/elections/createElection.ts",
         "services/api-ts/src/handlers/elections/createNominee.ts",
-        "services/api-ts/src/handlers/elections/deleteElection.ts",
         "services/api-ts/src/handlers/elections/repos/elections.schema.ts",
         "services/api-ts/src/handlers/elections/updateNomineeStatus.ts"
       ],
@@ -215,9 +212,8 @@
     {
       "from_module": "handlers/elections",
       "to_module": "handlers/person",
-      "import_count": 2,
+      "import_count": 1,
       "files": [
-        "services/api-ts/src/handlers/elections/getElection.ts",
         "services/api-ts/src/handlers/elections/repos/elections.schema.ts"
       ],
       "confidence": "HIGH"
@@ -225,14 +221,11 @@
     {
       "from_module": "handlers/events",
       "to_module": "handlers/association:member",
-      "import_count": 7,
+      "import_count": 4,
       "files": [
         "services/api-ts/src/handlers/events/bulkCreateEventSeries.ts",
-        "services/api-ts/src/handlers/events/cancelEvent.ts",
         "services/api-ts/src/handlers/events/cancelRegistration.ts",
         "services/api-ts/src/handlers/events/checkIn.ts",
-        "services/api-ts/src/handlers/events/createEvent.ts",
-        "services/api-ts/src/handlers/events/updateEvent.ts",
         "services/api-ts/src/handlers/events/utils/membership-check.ts"
       ],
       "confidence": "HIGH"
@@ -240,19 +233,9 @@
     {
       "from_module": "handlers/events",
       "to_module": "handlers/association:operations",
-      "import_count": 2,
-      "files": [
-        "services/api-ts/src/handlers/events/cancelEvent.ts",
-        "services/api-ts/src/handlers/events/repos/events.repo.ts"
-      ],
-      "confidence": "HIGH"
-    },
-    {
-      "from_module": "handlers/events",
-      "to_module": "handlers/notifs",
       "import_count": 1,
       "files": [
-        "services/api-ts/src/handlers/events/cancelEvent.ts"
+        "services/api-ts/src/handlers/events/repos/events.repo.ts"
       ],
       "confidence": "HIGH"
     },
@@ -277,11 +260,10 @@
     {
       "from_module": "handlers/membership",
       "to_module": "handlers/association:member",
-      "import_count": 9,
+      "import_count": 8,
       "files": [
         "services/api-ts/src/handlers/membership/addMember.ts",
         "services/api-ts/src/handlers/membership/csvImport.ts",
-        "services/api-ts/src/handlers/membership/importMembers.ts",
         "services/api-ts/src/handlers/membership/jobs/graceToLapsed.ts",
         "services/api-ts/src/handlers/membership/repos/membership.repo.ts",
         "services/api-ts/src/handlers/membership/reviewApplication.ts",
@@ -301,10 +283,9 @@
     {
       "from_module": "handlers/membership",
       "to_module": "handlers/person",
-      "import_count": 3,
+      "import_count": 2,
       "files": [
         "services/api-ts/src/handlers/membership/csvImport.ts",
-        "services/api-ts/src/handlers/membership/importMembers.ts",
         "services/api-ts/src/handlers/membership/repos/membership.repo.ts"
       ],
       "confidence": "HIGH"
@@ -322,12 +303,11 @@
     {
       "from_module": "handlers/notifs",
       "to_module": "handlers/person",
-      "import_count": 5,
+      "import_count": 4,
       "files": [
         "services/api-ts/src/handlers/notifs/getNotification.ts",
         "services/api-ts/src/handlers/notifs/listNotifications.ts",
         "services/api-ts/src/handlers/notifs/markAllNotificationsAsRead.ts",
-        "services/api-ts/src/handlers/notifs/markAllNotificationsRead.ts",
         "services/api-ts/src/handlers/notifs/markNotificationAsRead.ts"
       ],
       "confidence": "HIGH"
@@ -335,73 +315,9 @@
     {
       "from_module": "handlers/person",
       "to_module": "handlers/association:member",
-      "import_count": 10,
+      "import_count": 1,
       "files": [
-        "services/api-ts/src/handlers/person/accountDeletionCascade.ts",
         "services/api-ts/src/handlers/person/executeAccountDeletion.ts"
-      ],
-      "confidence": "HIGH"
-    },
-    {
-      "from_module": "handlers/person",
-      "to_module": "handlers/association:operations",
-      "import_count": 2,
-      "files": [
-        "services/api-ts/src/handlers/person/accountDeletionCascade.ts"
-      ],
-      "confidence": "HIGH"
-    },
-    {
-      "from_module": "handlers/person",
-      "to_module": "handlers/billing",
-      "import_count": 1,
-      "files": [
-        "services/api-ts/src/handlers/person/accountDeletionCascade.ts"
-      ],
-      "confidence": "HIGH"
-    },
-    {
-      "from_module": "handlers/person",
-      "to_module": "handlers/certificates",
-      "import_count": 1,
-      "files": [
-        "services/api-ts/src/handlers/person/accountDeletionCascade.ts"
-      ],
-      "confidence": "HIGH"
-    },
-    {
-      "from_module": "handlers/person",
-      "to_module": "handlers/communication",
-      "import_count": 1,
-      "files": [
-        "services/api-ts/src/handlers/person/accountDeletionCascade.ts"
-      ],
-      "confidence": "HIGH"
-    },
-    {
-      "from_module": "handlers/person",
-      "to_module": "handlers/documents",
-      "import_count": 1,
-      "files": [
-        "services/api-ts/src/handlers/person/accountDeletionCascade.ts"
-      ],
-      "confidence": "HIGH"
-    },
-    {
-      "from_module": "handlers/person",
-      "to_module": "handlers/elections",
-      "import_count": 1,
-      "files": [
-        "services/api-ts/src/handlers/person/accountDeletionCascade.ts"
-      ],
-      "confidence": "HIGH"
-    },
-    {
-      "from_module": "handlers/person",
-      "to_module": "handlers/invite",
-      "import_count": 1,
-      "files": [
-        "services/api-ts/src/handlers/person/accountDeletionCascade.ts"
       ],
       "confidence": "HIGH"
     },
@@ -2866,24 +2782,15 @@
   ],
   "circular_deps": [
     [
-      "handlers/billing",
-      "handlers/invite",
-      "handlers/certificates",
-      "handlers/notifs",
+      "handlers/association:operations",
       "handlers/dues",
       "handlers/membership",
-      "handlers/communication",
-      "handlers/association:operations",
       "handlers/person",
       "handlers/elections",
       "handlers/association:member"
     ]
   ],
   "high_fan_in": [
-    {
-      "module": "handlers/elections",
-      "importers": 2
-    },
     {
       "module": "handlers/membership",
       "importers": 3
@@ -2898,7 +2805,7 @@
     },
     {
       "module": "handlers/association:operations",
-      "importers": 4
+      "importers": 3
     },
     {
       "module": "handlers/association:member",
@@ -2907,14 +2814,6 @@
     {
       "module": "handlers/platformadmin",
       "importers": 3
-    },
-    {
-      "module": "handlers/billing",
-      "importers": 2
-    },
-    {
-      "module": "handlers/notifs",
-      "importers": 2
     }
   ],
   "high_fan_out": [
@@ -2948,7 +2847,7 @@
     },
     {
       "module": "handlers/events",
-      "imports": 3
+      "imports": 2
     },
     {
       "module": "handlers/invite",
@@ -2957,10 +2856,6 @@
     {
       "module": "handlers/membership",
       "imports": 4
-    },
-    {
-      "module": "handlers/person",
-      "imports": 8
     },
     {
       "module": "handlers/surveys",

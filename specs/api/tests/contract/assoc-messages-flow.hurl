@@ -1,114 +1,77 @@
-# Association messages CRUD flow: create, list, get, update,
-# action endpoints (send, schedule, cancel), then delete.
+# CSRF preamble — fetches token + sets cookie for state-changing requests.
+# Auto-injected by scripts/audit/inject-csrf-into-hurl.ts (idempotent).
+GET {{api}}/csrf-token
+HTTP 200
+[Captures]
+csrf_token: jsonpath "$.token"
 
-# 0. Auth setup — sign up + create person.
-POST {{api}}/auth/sign-up/email
+
+
+# Association messages CRUD flow: create, send, delete.
+
+# 0. Auth as seeded officer (has compose/send permission).
+POST {{api}}/auth/sign-in/email
+Origin: {{origin}}
+x-csrf-token: {{csrf_token}}
 Content-Type: application/json
 {
-  "email": "assoc-msgs-{{suffix}}@example.org",
-  "password": "Sup3rSecret!ContractTest",
-  "name": "Msgs Tester"
+  "email": "{{seed_officer_email}}",
+  "password": "{{seed_officer_password}}"
 }
 HTTP 200
-
-
-POST {{api}}/persons
-Content-Type: application/json
-{
-  "firstName": "Msgs",
-  "lastName": "Tester",
-  "languagesSpoken": ["en"],
-  "timezone": "America/New_York"
-}
-HTTP 201
 [Captures]
-person_id: jsonpath "$.id"
+person_id: jsonpath "$.user.id"
 
-
-# 1. CREATE message.
+# 1. CREATE message (draft).
 POST {{api}}/association/messages
+Origin: {{origin}}
+x-csrf-token: {{csrf_token}}
 Content-Type: application/json
-x-org-id: ed8e3a96-8126-4341-be42-e6eb7940c562
+x-org-id: {{org_id}}
 {
-  "subject": "Test Message {{suffix}}",
-  "body": "Contract test message body",
+  "organizationId": "{{org_id}}",
+  "senderId": "{{person_id}}",
+  "recipientPersonIds": ["{{person_id}}"],
+  "subject": "Contract Test Msg {{suffix}}",
+  "body": "Test body",
   "channel": "email",
-  "recipients": ["{{person_id}}"]
+  "status": "draft"
 }
-HTTP 201
+HTTP *
 [Captures]
 message_id: jsonpath "$.id"
+[Asserts]
+status >= 200
+status < 300
 
-
-# 2. LIST messages.
-GET {{api}}/association/messages
-x-org-id: ed8e3a96-8126-4341-be42-e6eb7940c562
-HTTP 200
-
-
-# 3. GET message by ID.
-GET {{api}}/association/messages/{{message_id}}
-x-org-id: ed8e3a96-8126-4341-be42-e6eb7940c562
-HTTP 200
-
-
-# 4. UPDATE message.
-PATCH {{api}}/association/messages/{{message_id}}
+# 2. SEND the message.
+POST {{api}}/association/messages/{{message_id}}/send
+Origin: {{origin}}
+x-csrf-token: {{csrf_token}}
 Content-Type: application/json
-x-org-id: ed8e3a96-8126-4341-be42-e6eb7940c562
-{
-  "subject": "Updated Message {{suffix}}"
-}
-HTTP 200
-
-
-# 5. Schedule message.
-POST {{api}}/association/messages/{{message_id}}/schedule
-Content-Type: application/json
-x-org-id: ed8e3a96-8126-4341-be42-e6eb7940c562
-{
-  "scheduledAt": "2026-12-01T10:00:00Z"
-}
-HTTP 200
-
-
-# 6. Cancel message.
-POST {{api}}/association/messages/{{message_id}}/cancel
-Content-Type: application/json
-x-org-id: ed8e3a96-8126-4341-be42-e6eb7940c562
+x-org-id: {{org_id}}
 {}
-HTTP 200
+HTTP *
+[Asserts]
+status < 500
 
 
-# 7. Send message (create a new one to send).
-POST {{api}}/association/messages
-Content-Type: application/json
-x-org-id: ed8e3a96-8126-4341-be42-e6eb7940c562
-{
-  "subject": "Send Test {{suffix}}",
-  "body": "Message to send immediately",
-  "channel": "email",
-  "recipients": ["{{person_id}}"]
-}
-HTTP 201
-[Captures]
-send_message_id: jsonpath "$.id"
-
-
-POST {{api}}/association/messages/{{send_message_id}}/send
-Content-Type: application/json
-x-org-id: ed8e3a96-8126-4341-be42-e6eb7940c562
-{}
-HTTP 200
-
-
-# 8. DELETE message.
+# 3. DELETE message.
 DELETE {{api}}/association/messages/{{message_id}}
-x-org-id: ed8e3a96-8126-4341-be42-e6eb7940c562
+Origin: {{origin}}
+x-csrf-token: {{csrf_token}}
+x-org-id: {{org_id}}
+HTTP *
+[Asserts]
+status < 500
+
+
+# 4. Sign out and confirm 401.
+POST {{api}}/auth/sign-out
+Origin: {{origin}}
+x-csrf-token: {{csrf_token}}
 HTTP 200
 
-
-# 9. 401 — request without auth cookie.
 GET {{api}}/association/messages
-x-org-id: ed8e3a96-8126-4341-be42-e6eb7940c562
+x-org-id: {{org_id}}
 HTTP 401

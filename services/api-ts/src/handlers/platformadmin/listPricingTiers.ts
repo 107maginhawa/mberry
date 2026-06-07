@@ -19,7 +19,9 @@ export async function listPricingTiers(ctx: Context): Promise<Response> {
 	if (!admin) return ctx.json({ error: "Platform admin access required" }, 403);
 
 	const db = ctx.get("database") as DatabaseInstance;
-	const logger = ctx.get("logger");
+	const baseLogger = ctx.get('logger');
+	const traceId = ctx.get('requestId');
+	const logger = baseLogger?.child?.({ traceId, module: 'platformadmin' }) ?? baseLogger;
 
 	const tiers = await db
 		.select({
@@ -45,7 +47,7 @@ export async function listPricingTiers(ctx: Context): Promise<Response> {
 		.from(pricingTiers)
 		.orderBy(pricingTiers.sortOrder, pricingTiers.name);
 
-	logger.info({ count: tiers.length }, "Listed pricing tiers");
+	logger.info({ action: 'listPricingTiers.1', count: tiers.length }, "Listed pricing tiers");
 
 	return ctx.json({ data: tiers }, 200);
 }

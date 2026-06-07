@@ -52,7 +52,9 @@ export const config: WebSocketHandler = {
     const user = ctx.get('user') as User;
     const db = ctx.get('database') as DatabaseInstance;
     const wsService = ctx.get('ws');
-    const logger = ctx.get('logger');
+    const baseLogger = ctx.get('logger');
+    const traceId = ctx.get('requestId');
+    const logger = baseLogger?.child?.({ traceId, module: 'comms' }) ?? baseLogger;
 
     // Verify room exists and user is a participant
     const roomRepo = new ChatRoomRepository(db, logger);
@@ -62,7 +64,7 @@ export const config: WebSocketHandler = {
     // Check room exists
     const room = await roomRepo.findOneById(roomId);
     if (!room) {
-      logger.error({ roomId }, 'Chat room not found');
+      logger.error({ action: 'ws.chat-room.1', roomId }, 'Chat room not found');
       ws.send(JSON.stringify({ event: 'error', payload: { message: 'Chat room not found' } }));
       ws.close(1008, 'Room not found');
       return;
@@ -72,7 +74,7 @@ export const config: WebSocketHandler = {
     const isParticipant = room.participants.includes(user.id);
 
     if (!isParticipant) {
-      logger.error({ userId: user.id, roomId }, 'User is not a participant in chat room');
+      logger.error({ action: 'ws.chat-room.2', userId: user.id, roomId }, 'User is not a participant in chat room');
       ws.send(JSON.stringify({ event: 'error', payload: { message: 'Access denied: not a participant' } }));
       ws.close(1008, 'Not authorized');
       return;
@@ -98,7 +100,7 @@ export const config: WebSocketHandler = {
       timestamp: new Date().toISOString(),
     }, ws);
 
-    logger.info({ userId: user.id, roomId }, 'User connected to chat room WebSocket');
+    logger.info({ action: 'ws.chat-room.3', userId: user.id, roomId }, 'User connected to chat room WebSocket');
   },
 
   async onMessage(ctx: Context, ws: WSContext, message: any) {
@@ -109,7 +111,7 @@ export const config: WebSocketHandler = {
     const logger = ctx.get('logger');
 
     const wsId = (ws.raw as unknown as Record<string, unknown>)['__wsId']; // structural: Hono WebSocket internal
-    logger.debug({ userId: user.id, roomId, wsId, messageType: message.type }, 'Processing WebSocket message');
+    logger.debug({ action: 'ws.chat-room.4', userId: user.id, roomId, wsId, messageType: message.type }, 'Processing WebSocket message');
 
     const { type, data } = message as { type: MessageType; data: any };
     const channel = `chat-rooms/${roomId}`;
@@ -137,7 +139,7 @@ export const config: WebSocketHandler = {
         // Broadcast complete message object to all channel participants
         await wsService.publishToChannel(channel, 'chat.message', savedMessage);
 
-        logger.debug({ userId: user.id, roomId, messageId: savedMessage.id }, 'Chat message persisted and sent');
+        logger.debug({ action: 'ws.chat-room.5', userId: user.id, roomId, messageId: savedMessage.id }, 'Chat message persisted and sent');
         break;
       }
 
@@ -160,12 +162,12 @@ export const config: WebSocketHandler = {
         };
 
         await wsService.publishToChannel(channel, type, signalMessage, ws);
-        logger.debug({ userId: user.id, roomId, type }, 'Video signaling message relayed');
+        logger.debug({ action: 'ws.chat-room.6', userId: user.id, roomId, type }, 'Video signaling message relayed');
         break;
       }
 
       default:
-        logger.warn({ userId: user.id, roomId, type }, 'Unknown message type from chat room WebSocket');
+        logger.warn({ action: 'ws.chat-room.7', userId: user.id, roomId, type }, 'Unknown message type from chat room WebSocket');
     }
   },
 
@@ -185,6 +187,6 @@ export const config: WebSocketHandler = {
       timestamp: new Date().toISOString(),
     });
 
-    logger.info({ userId: user.id, roomId }, 'User disconnected from chat room WebSocket');
+    logger.info({ action: 'ws.chat-room.8', userId: user.id, roomId }, 'User disconnected from chat room WebSocket');
   },
 };

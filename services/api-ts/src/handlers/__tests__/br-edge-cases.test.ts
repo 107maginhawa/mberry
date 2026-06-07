@@ -11,12 +11,10 @@ import { describe, test, expect, afterEach } from 'bun:test';
 import { makeCtx, stubRepo } from '@/test-utils/make-ctx';
 import { startImpersonation } from '../platformadmin/startImpersonation';
 import { PlatformAdminRepository, ImpersonationSessionRepository } from '../platformadmin/repos/platform-admin.repo';
-import { updateEvent } from '../events/updateEvent';
-import { EventsRepository } from '../events/repos/events.repo';
 import { OfficerTermRepository } from '../association:member/repos/governance.repo';
 import { getOrganizationBySlug } from '../platformadmin/getOrganizationBySlug';
 import { OrganizationRepository, AssociationRepository } from '../platformadmin/repos/platform-admin.repo';
-import { issueDigitalCredential } from '../association:member/issueDigitalCredential';
+import { issueDigitalCredential } from '@/handlers/member/credentials/issueDigitalCredential';
 import { CredentialTemplateRepository, DigitalCredentialRepository } from '../association:member/repos/credentials.repo';
 import { MembershipRepository } from '../association:member/repos/membership.repo';
 import { MembershipRepository as CustomMembershipRepository } from '../membership/repos/membership.repo';
@@ -87,54 +85,9 @@ describe('[BR-10] Impersonation session includes impersonator ID in audit contex
 
 // ─── [BR-16] Visibility Change Warning ───────────────────
 
-describe('[BR-16] Changing visibility from network-wide to internal warns about external registrants', () => {
-  let mocks: ReturnType<typeof stubRepo>;
-  let memberMocks: ReturnType<typeof stubRepo>;
-  let officerMocks: ReturnType<typeof stubRepo>;
-
-  afterEach(() => {
-    if (mocks) Object.values(mocks).forEach((m) => m.mockRestore());
-    if (memberMocks) Object.values(memberMocks).forEach((m) => m.mockRestore());
-    if (officerMocks) Object.values(officerMocks).forEach((m) => m.mockRestore());
-  });
-
-  test('[BR-16] updateEvent persists visibility field', async () => {
-    // Visibility is now passed through to repo.update() (no longer stripped).
-    // updateEvent checks officer access via OfficerTermRepository.findActiveByPersonAndOrg (db.select)
-    officerMocks = stubRepo(OfficerTermRepository, {
-      findActiveByPersonAndOrg: async () => [{ positionTitle: 'President' }],
-    });
-    memberMocks = stubRepo(CustomMembershipRepository, {
-      getMember: async () => ({ id: 'mem-1', personId: 'user-1', orgId: 'org-1', status: 'active' }),
-    });
-    let capturedData: any = null;
-    mocks = stubRepo(EventsRepository, {
-      get: async () => ({
-        id: 'evt-1',
-        orgId: 'org-1',
-        title: 'Network Event',
-        status: 'published',
-        createdBy: 'user-1',
-        updatedBy: 'user-1',
-      }),
-      update: async (_id: string, data: any) => {
-        capturedData = data;
-        return { id: 'evt-1', ...data };
-      },
-    });
-
-    const ctx = makeCtx({
-      _params: { id: 'evt-1' },
-      _body: { visibility: 'internal' },
-    });
-
-    const response = await updateEvent(ctx);
-    expect(response.status).toBe(200);
-
-    // visibility is now persisted via ...rest spread
-    expect(capturedData.visibility).toBe('internal');
-  });
-});
+// [BR-16] visibility-flip block removed — exercised the deleted events/updateEvent
+// (2579d9b7). Live successor at association:operations/updateEvent uses Hono ctx
+// + EventRepository (singular) — incompatible with the old free-function shape.
 
 // ─── [BR-19] ID Card Generation Blocked for Lapsed/Suspended ─
 

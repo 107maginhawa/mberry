@@ -3,6 +3,7 @@
 // Focus: signup-to-approved segment. Payment verification via page presence (not re-testing full recording).
 import { test, expect } from '../helpers/test-fixture'
 import { signUp, signInAsOfficer, signInAsMember } from '../helpers/auth'
+import { captureRouteHydration } from '../helpers/real-flow'
 
 const ORG_ID = 'ed8e3a96-8126-4341-be42-e6eb7940c562'
 
@@ -29,7 +30,6 @@ test.describe('Journey: Registration → Membership → Payment', () => {
 
     await test.step('navigate to applications page', async () => {
       await page.goto(`/org/${ORG_ID}/officer/applications`)
-      await page.waitForLoadState('networkidle')
       await expect(page).toHaveURL(/applications/)
     })
 
@@ -46,8 +46,11 @@ test.describe('Journey: Registration → Membership → Payment', () => {
     })
 
     await test.step('navigate to payments', async () => {
+      const respP = captureRouteHydration(page, /\/dues-invoices|\/payments/)
       await page.goto('/my/payments')
-      await page.waitForLoadState('networkidle')
+      const resp = await respP
+      expect(resp?.status()).toBe(200)
+      expect(resp?.ok()).toBe(true)
       await expect(page).toHaveURL(/\/my\/payments/)
     })
 
@@ -61,8 +64,6 @@ test.describe('Journey: Registration → Membership → Payment', () => {
   test('member dues page shows payment options', async ({ page }) => {
     await signInAsMember(page)
     await page.goto(`/org/${ORG_ID}/dues`)
-    await page.waitForLoadState('networkidle')
-
     // Should see dues info — amount, status, or payment button
     const hasDuesContent = await page.getByText(/dues|payment|amount|pay|₱|\$/i).first().isVisible({ timeout: 10000 }).catch(() => false)
     expect(hasDuesContent).toBeTruthy()
@@ -72,7 +73,6 @@ test.describe('Journey: Registration → Membership → Payment', () => {
     await test.step('sign in and go to dashboard', async () => {
       await signInAsMember(page)
       await page.goto('/dashboard')
-      await page.waitForLoadState('networkidle')
     })
 
     await test.step('navigate to org home', async () => {
@@ -88,7 +88,6 @@ test.describe('Journey: Registration → Membership → Payment', () => {
 
     await test.step('navigate to member dues', async () => {
       await page.goto(`/org/${ORG_ID}/dues`)
-      await page.waitForLoadState('networkidle')
       await expect(page).toHaveURL(/dues/)
     })
 

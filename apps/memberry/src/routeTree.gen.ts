@@ -11,14 +11,14 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as VerifyEmailRouteImport } from './routes/verify-email'
 import { Route as OnboardingRouteImport } from './routes/onboarding'
-import { Route as JoinRouteImport } from './routes/join'
 import { Route as AuthenticatedRouteImport } from './routes/_authenticated'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as JoinIndexRouteImport } from './routes/join/index'
 import { Route as VerifyTokenRouteImport } from './routes/verify/$token'
 import { Route as VerifyCredentialNumberRouteImport } from './routes/verify/$credentialNumber'
 import { Route as VerifyCertificateNumberRouteImport } from './routes/verify/$certificateNumber'
 import { Route as PayTokenRouteImport } from './routes/pay/$token'
-import { Route as OrgSlugRouteImport } from './routes/org/$slug'
+import { Route as JoinSlugRouteImport } from './routes/join/$slug'
 import { Route as InviteTokenRouteImport } from './routes/invite/$token'
 import { Route as EventsEventSlugRouteImport } from './routes/events/$eventSlug'
 import { Route as DiscoverEventsRouteImport } from './routes/discover/events'
@@ -147,11 +147,6 @@ const OnboardingRoute = OnboardingRouteImport.update({
   path: '/onboarding',
   getParentRoute: () => rootRouteImport,
 } as any)
-const JoinRoute = JoinRouteImport.update({
-  id: '/join',
-  path: '/join',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const AuthenticatedRoute = AuthenticatedRouteImport.update({
   id: '/_authenticated',
   getParentRoute: () => rootRouteImport,
@@ -159,6 +154,11 @@ const AuthenticatedRoute = AuthenticatedRouteImport.update({
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const JoinIndexRoute = JoinIndexRouteImport.update({
+  id: '/join/',
+  path: '/join/',
   getParentRoute: () => rootRouteImport,
 } as any)
 const VerifyTokenRoute = VerifyTokenRouteImport.update({
@@ -181,9 +181,9 @@ const PayTokenRoute = PayTokenRouteImport.update({
   path: '/pay/$token',
   getParentRoute: () => rootRouteImport,
 } as any)
-const OrgSlugRoute = OrgSlugRouteImport.update({
-  id: '/org/$slug',
-  path: '/org/$slug',
+const JoinSlugRoute = JoinSlugRouteImport.update({
+  id: '/join/$slug',
+  path: '/join/$slug',
   getParentRoute: () => rootRouteImport,
 } as any)
 const InviteTokenRoute = InviteTokenRouteImport.update({
@@ -882,7 +882,6 @@ const AuthenticatedOrgOrgSlugOfficerCommunicationsTemplatesNewRoute =
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
-  '/join': typeof JoinRoute
   '/onboarding': typeof OnboardingRoute
   '/verify-email': typeof VerifyEmailRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
@@ -890,11 +889,12 @@ export interface FileRoutesByFullPath {
   '/discover/events': typeof DiscoverEventsRoute
   '/events/$eventSlug': typeof EventsEventSlugRoute
   '/invite/$token': typeof InviteTokenRoute
-  '/org/$slug': typeof OrgSlugRoute
+  '/join/$slug': typeof JoinSlugRoute
   '/pay/$token': typeof PayTokenRoute
   '/verify/$certificateNumber': typeof VerifyCertificateNumberRoute
   '/verify/$credentialNumber': typeof VerifyCredentialNumberRoute
   '/verify/$token': typeof VerifyTokenRoute
+  '/join/': typeof JoinIndexRoute
   '/org/$orgSlug': typeof AuthenticatedOrgOrgSlugRouteRouteWithChildren
   '/my/billing': typeof AuthenticatedMyBillingRoute
   '/my/calendar': typeof AuthenticatedMyCalendarRoute
@@ -1010,7 +1010,6 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
-  '/join': typeof JoinRoute
   '/onboarding': typeof OnboardingRoute
   '/verify-email': typeof VerifyEmailRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
@@ -1018,11 +1017,12 @@ export interface FileRoutesByTo {
   '/discover/events': typeof DiscoverEventsRoute
   '/events/$eventSlug': typeof EventsEventSlugRoute
   '/invite/$token': typeof InviteTokenRoute
-  '/org/$slug': typeof OrgSlugRoute
+  '/join/$slug': typeof JoinSlugRoute
   '/pay/$token': typeof PayTokenRoute
   '/verify/$certificateNumber': typeof VerifyCertificateNumberRoute
   '/verify/$credentialNumber': typeof VerifyCredentialNumberRoute
   '/verify/$token': typeof VerifyTokenRoute
+  '/join': typeof JoinIndexRoute
   '/org/$orgSlug': typeof AuthenticatedOrgOrgSlugRouteRouteWithChildren
   '/my/billing': typeof AuthenticatedMyBillingRoute
   '/my/calendar': typeof AuthenticatedMyCalendarRoute
@@ -1136,7 +1136,6 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/_authenticated': typeof AuthenticatedRouteWithChildren
-  '/join': typeof JoinRoute
   '/onboarding': typeof OnboardingRoute
   '/verify-email': typeof VerifyEmailRoute
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
@@ -1144,11 +1143,12 @@ export interface FileRoutesById {
   '/discover/events': typeof DiscoverEventsRoute
   '/events/$eventSlug': typeof EventsEventSlugRoute
   '/invite/$token': typeof InviteTokenRoute
-  '/org/$slug': typeof OrgSlugRoute
+  '/join/$slug': typeof JoinSlugRoute
   '/pay/$token': typeof PayTokenRoute
   '/verify/$certificateNumber': typeof VerifyCertificateNumberRoute
   '/verify/$credentialNumber': typeof VerifyCredentialNumberRoute
   '/verify/$token': typeof VerifyTokenRoute
+  '/join/': typeof JoinIndexRoute
   '/_authenticated/org/$orgSlug': typeof AuthenticatedOrgOrgSlugRouteRouteWithChildren
   '/_authenticated/my/billing': typeof AuthenticatedMyBillingRoute
   '/_authenticated/my/calendar': typeof AuthenticatedMyCalendarRoute
@@ -1266,7 +1266,6 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
-    | '/join'
     | '/onboarding'
     | '/verify-email'
     | '/dashboard'
@@ -1274,11 +1273,12 @@ export interface FileRouteTypes {
     | '/discover/events'
     | '/events/$eventSlug'
     | '/invite/$token'
-    | '/org/$slug'
+    | '/join/$slug'
     | '/pay/$token'
     | '/verify/$certificateNumber'
     | '/verify/$credentialNumber'
     | '/verify/$token'
+    | '/join/'
     | '/org/$orgSlug'
     | '/my/billing'
     | '/my/calendar'
@@ -1394,7 +1394,6 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
-    | '/join'
     | '/onboarding'
     | '/verify-email'
     | '/dashboard'
@@ -1402,11 +1401,12 @@ export interface FileRouteTypes {
     | '/discover/events'
     | '/events/$eventSlug'
     | '/invite/$token'
-    | '/org/$slug'
+    | '/join/$slug'
     | '/pay/$token'
     | '/verify/$certificateNumber'
     | '/verify/$credentialNumber'
     | '/verify/$token'
+    | '/join'
     | '/org/$orgSlug'
     | '/my/billing'
     | '/my/calendar'
@@ -1519,7 +1519,6 @@ export interface FileRouteTypes {
     | '__root__'
     | '/'
     | '/_authenticated'
-    | '/join'
     | '/onboarding'
     | '/verify-email'
     | '/_authenticated/dashboard'
@@ -1527,11 +1526,12 @@ export interface FileRouteTypes {
     | '/discover/events'
     | '/events/$eventSlug'
     | '/invite/$token'
-    | '/org/$slug'
+    | '/join/$slug'
     | '/pay/$token'
     | '/verify/$certificateNumber'
     | '/verify/$credentialNumber'
     | '/verify/$token'
+    | '/join/'
     | '/_authenticated/org/$orgSlug'
     | '/_authenticated/my/billing'
     | '/_authenticated/my/calendar'
@@ -1649,18 +1649,18 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AuthenticatedRoute: typeof AuthenticatedRouteWithChildren
-  JoinRoute: typeof JoinRoute
   OnboardingRoute: typeof OnboardingRoute
   VerifyEmailRoute: typeof VerifyEmailRoute
   AuthAuthViewRoute: typeof AuthAuthViewRoute
   DiscoverEventsRoute: typeof DiscoverEventsRoute
   EventsEventSlugRoute: typeof EventsEventSlugRoute
   InviteTokenRoute: typeof InviteTokenRoute
-  OrgSlugRoute: typeof OrgSlugRoute
+  JoinSlugRoute: typeof JoinSlugRoute
   PayTokenRoute: typeof PayTokenRoute
   VerifyCertificateNumberRoute: typeof VerifyCertificateNumberRoute
   VerifyCredentialNumberRoute: typeof VerifyCredentialNumberRoute
   VerifyTokenRoute: typeof VerifyTokenRoute
+  JoinIndexRoute: typeof JoinIndexRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -1679,13 +1679,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof OnboardingRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/join': {
-      id: '/join'
-      path: '/join'
-      fullPath: '/join'
-      preLoaderRoute: typeof JoinRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/_authenticated': {
       id: '/_authenticated'
       path: ''
@@ -1698,6 +1691,13 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/join/': {
+      id: '/join/'
+      path: '/join'
+      fullPath: '/join/'
+      preLoaderRoute: typeof JoinIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/verify/$token': {
@@ -1728,11 +1728,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PayTokenRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/org/$slug': {
-      id: '/org/$slug'
-      path: '/org/$slug'
-      fullPath: '/org/$slug'
-      preLoaderRoute: typeof OrgSlugRouteImport
+    '/join/$slug': {
+      id: '/join/$slug'
+      path: '/join/$slug'
+      fullPath: '/join/$slug'
+      preLoaderRoute: typeof JoinSlugRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/invite/$token': {
@@ -3027,18 +3027,18 @@ const AuthenticatedRouteWithChildren = AuthenticatedRoute._addFileChildren(
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AuthenticatedRoute: AuthenticatedRouteWithChildren,
-  JoinRoute: JoinRoute,
   OnboardingRoute: OnboardingRoute,
   VerifyEmailRoute: VerifyEmailRoute,
   AuthAuthViewRoute: AuthAuthViewRoute,
   DiscoverEventsRoute: DiscoverEventsRoute,
   EventsEventSlugRoute: EventsEventSlugRoute,
   InviteTokenRoute: InviteTokenRoute,
-  OrgSlugRoute: OrgSlugRoute,
+  JoinSlugRoute: JoinSlugRoute,
   PayTokenRoute: PayTokenRoute,
   VerifyCertificateNumberRoute: VerifyCertificateNumberRoute,
   VerifyCredentialNumberRoute: VerifyCredentialNumberRoute,
   VerifyTokenRoute: VerifyTokenRoute,
+  JoinIndexRoute: JoinIndexRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

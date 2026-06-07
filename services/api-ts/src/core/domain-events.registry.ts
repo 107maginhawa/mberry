@@ -32,6 +32,11 @@ export interface DomainEventMap {
     personId: string;
   };
 
+  'person.deleted': {
+    personId: string;
+    scheduledAt: string;
+  };
+
   'data-export.ready': {
     personId: string;
     exportId: string;

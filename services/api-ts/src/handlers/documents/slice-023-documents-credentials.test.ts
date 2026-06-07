@@ -13,7 +13,7 @@ import { makeCtx, stubRepo, restoreRepo } from '@/test-utils/make-ctx';
 import { fakeCertificate } from '@/test-utils/factories';
 import { generateQrToken, verifyQrToken } from '@/handlers/association:operations/utils/qr-checkin';
 import { createCredentialToken, verifyCredentialToken } from '@/handlers/association:member/utils/credential-token';
-import { CertificatesRepository } from '@/handlers/certificates/repos/certificates.repo';
+import { CertificatesRepository } from '@/handlers/member/certificates/repos/certificates.repo';
 
 // ─── Shared Fixtures ────────────────────────────────────
 
@@ -136,7 +136,7 @@ describe('[AC-M11-001] QR HMAC Authenticity', () => {
 
   describe('Public verification endpoint', () => {
     test('verifyCredentialPublic does not require authentication', async () => {
-      const { verifyCredentialPublic } = await import('@/handlers/association:member/verifyCredentialPublic');
+      const { verifyCredentialPublic } = await import('@/handlers/member/credentials/verifyCredentialPublic');
       // No session, no user — should NOT throw
       const ctx = makeCtx({ session: null, user: null, _body: { token: 'invalid-token' } });
       const response = await verifyCredentialPublic(ctx);
@@ -146,7 +146,7 @@ describe('[AC-M11-001] QR HMAC Authenticity', () => {
     });
 
     test('verifyDigitalCredentialAuthenticated throws without session', async () => {
-      const { verifyDigitalCredentialAuthenticated } = await import('@/handlers/association:member/verifyDigitalCredentialAuthenticated');
+      const { verifyDigitalCredentialAuthenticated } = await import('@/handlers/member/credentials/verifyDigitalCredentialAuthenticated');
       const ctx = makeCtx({ session: null, _body: { token: 'some-token' } });
       await expect(verifyDigitalCredentialAuthenticated(ctx)).rejects.toThrow();
     });
@@ -175,38 +175,11 @@ describe('[AC-M11-002] Certificate After Training', () => {
     issuedAt: new Date('2026-05-01'),
   });
 
-  test('getCertificate returns certificate by ID', async () => {
-    mocks = stubRepo(CertificatesRepository, {
-      get: async (id: string) => id === 'cert-023-1' ? fakeCert : undefined,
-    });
-
-    const { getCertificate } = await import('@/handlers/certificates/getCertificate');
-    const ctx = makeCtx({ _params: { id: 'cert-023-1' }, user: { id: PERSON_ID, role: 'user' } });
-    const response = await getCertificate(ctx);
-    expect(response.status).toBe(200);
-    expect(response.body.data.certificateNumber).toBe('CERT-2026-000001');
-    expect(response.body.data.trainingId).toBe('training-complete-1');
-  });
-
-  test('getCertificate throws NotFoundError for missing certificate', async () => {
-    mocks = stubRepo(CertificatesRepository, {
-      get: async () => undefined,
-    });
-
-    const { getCertificate } = await import('@/handlers/certificates/getCertificate');
-    const ctx = makeCtx({ _params: { id: 'nonexistent' } });
-    await expect(getCertificate(ctx)).rejects.toThrow('not found');
-  });
-
-  test('getCertificate enforces IDOR prevention — owner-only access', async () => {
-    mocks = stubRepo(CertificatesRepository, {
-      get: async () => ({ ...fakeCert, personId: 'different-person' }),
-    });
-
-    const { getCertificate } = await import('@/handlers/certificates/getCertificate');
-    const ctx = makeCtx({ _params: { id: 'cert-023-1' }, user: { id: PERSON_ID, role: 'user' } });
-    await expect(getCertificate(ctx)).rejects.toThrow('denied');
-  });
+  // NOTE: getCertificate tests removed — handler was the pre-Phase-35 duplicate
+  // of handlers/association:member/getCertificate.ts (the active TypeSpec-generated
+  // version). See .audits/PRODUCTION_AUDIT.md P0.1. Live handler uses a different
+  // repo (DigitalCredentialRepository vs CertificatesRepository); fresh coverage
+  // tracked separately.
 
   test('listCertificates returns certificates for person', async () => {
     const certs = [
@@ -217,7 +190,7 @@ describe('[AC-M11-002] Certificate After Training', () => {
       listByPerson: async () => certs,
     });
 
-    const { listCertificates } = await import('@/handlers/certificates/listCertificates');
+    const { listCertificates } = await import('@/handlers/member/certificates/listCertificates');
     const ctx = makeCtx({});
     const response = await listCertificates(ctx);
     expect(response.status).toBe(200);
@@ -229,7 +202,7 @@ describe('[AC-M11-002] Certificate After Training', () => {
       listByPerson: async () => [],
     });
 
-    const { listCertificates } = await import('@/handlers/certificates/listCertificates');
+    const { listCertificates } = await import('@/handlers/member/certificates/listCertificates');
     const ctx = makeCtx({});
     const response = await listCertificates(ctx);
     expect(response.status).toBe(200);

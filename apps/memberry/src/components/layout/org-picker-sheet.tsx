@@ -16,7 +16,7 @@ import {
   Badge,
 } from '@monobase/ui'
 import { AvatarInitials } from '@/components/patterns/avatar-initials'
-import type { OrgMembership } from '@/hooks/useMyOrgs'
+import type { OrgMembership } from '@/hooks/use-my-orgs'
 
 const STATUS_DOT: Record<string, string> = {
   active: 'bg-[var(--color-success)]',

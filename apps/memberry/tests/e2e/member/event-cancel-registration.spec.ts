@@ -1,19 +1,27 @@
 // P1 E2E Gap: Member cancels event registration
 // Tests member event detail page with registration/cancel flow
 import { test, expect } from '../helpers/test-fixture'
-import { signIn } from '../helpers/auth'
 import { SEED_MEMBER_EMAIL, TEST_PASSWORD } from '../helpers/test-config'
+import { authStateFile } from '../helpers/auth-state'
+import { captureRouteHydration } from '../helpers/real-flow'
 
+// W2 real-flow upgrade: /org/$ORG/events hydrates via the
+// event-lifecycle endpoint (or /persons/me on the auth shell).
+// Capturing that proves the backend returned data, not just that
+// the heading rendered.
+const EVENTS_OR_PERSON = /\/(event-lifecycle|events|persons\/me)(?:[/?]|$)/
+
+test.use({ storageState: authStateFile('member') })
 const ORG_ID = 'ed8e3a96-8126-4341-be42-e6eb7940c562'
 
 test.describe('Member Event Registration Cancellation', () => {
-  test.beforeEach(async ({ page }) => {
-    await signIn(page, SEED_MEMBER_EMAIL, TEST_PASSWORD)
-  })
-
-  test('org events page lists published events', async ({ page }) => {
+test('org events page lists published events', async ({ page }) => {
+    const respP = captureRouteHydration(page, EVENTS_OR_PERSON)
     await page.goto(`/org/${ORG_ID}/events`)
-    await page.waitForLoadState('networkidle')
+
+    const resp = await respP
+    expect(resp?.status()).toBe(200)
+    expect(resp?.ok()).toBe(true)
 
     // Page header
     await expect(
@@ -28,17 +36,11 @@ test.describe('Member Event Registration Cancellation', () => {
 
   test('event detail page shows event info and registration action', async ({ page }) => {
     await page.goto(`/org/${ORG_ID}/events`)
-    await page.waitForLoadState('networkidle')
-
     // Find and click on an event card/link
     const eventLink = page.locator('a[href*="/events/"]').first()
     const hasEvent = await eventLink.isVisible({ timeout: 10000 }).catch(() => false)
 
-    if (!hasEvent) {
-      // No published events — skip gracefully
-      test.skip()
-      return
-    }
+    test.skip(!hasEvent, 'No published events seeded — requires event fixture')
 
     await eventLink.click()
     await page.waitForLoadState('networkidle')
@@ -62,16 +64,11 @@ test.describe('Member Event Registration Cancellation', () => {
 
   test('registered member sees Cancel Registration button', async ({ page }) => {
     await page.goto(`/org/${ORG_ID}/events`)
-    await page.waitForLoadState('networkidle')
-
     // Navigate to an event the member may be registered for
     const eventLink = page.locator('a[href*="/events/"]').first()
     const hasEvent = await eventLink.isVisible({ timeout: 10000 }).catch(() => false)
 
-    if (!hasEvent) {
-      test.skip()
-      return
-    }
+    test.skip(!hasEvent, 'No published events seeded — requires event fixture')
 
     await eventLink.click()
     await page.waitForLoadState('networkidle')
@@ -98,15 +95,10 @@ test.describe('Member Event Registration Cancellation', () => {
 
   test('unregistered member can see Register button with capacity info', async ({ page }) => {
     await page.goto(`/org/${ORG_ID}/events`)
-    await page.waitForLoadState('networkidle')
-
     const eventLink = page.locator('a[href*="/events/"]').first()
     const hasEvent = await eventLink.isVisible({ timeout: 10000 }).catch(() => false)
 
-    if (!hasEvent) {
-      test.skip()
-      return
-    }
+    test.skip(!hasEvent, 'No published events seeded — requires event fixture')
 
     await eventLink.click()
     await page.waitForLoadState('networkidle')
@@ -131,15 +123,10 @@ test.describe('Member Event Registration Cancellation', () => {
 
   test('event detail shows price badge (Free or PHP amount)', async ({ page }) => {
     await page.goto(`/org/${ORG_ID}/events`)
-    await page.waitForLoadState('networkidle')
-
     const eventLink = page.locator('a[href*="/events/"]').first()
     const hasEvent = await eventLink.isVisible({ timeout: 10000 }).catch(() => false)
 
-    if (!hasEvent) {
-      test.skip()
-      return
-    }
+    test.skip(!hasEvent, 'No published events seeded — requires event fixture')
 
     await eventLink.click()
     await page.waitForLoadState('networkidle')

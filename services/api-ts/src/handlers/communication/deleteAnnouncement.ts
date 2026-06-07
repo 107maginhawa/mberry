@@ -3,7 +3,6 @@ import { UnauthorizedError, NotFoundError, BusinessLogicError } from '@/core/err
 import type { DatabaseInstance } from '@/core/database';
 import type { DeleteAnnouncementParams } from '@/generated/openapi/validators';
 import { CommunicationsRepository } from './repos/communication.repo';
-import { auditAction } from '@/utils/audit';
 
 /**
  * deleteAnnouncement
@@ -30,12 +29,8 @@ export async function deleteAnnouncement(
 
   await repo.delete(params.id);
 
-  await auditAction(ctx, {
-    action: 'delete',
-    resourceType: 'announcement',
-    resourceId: params.id,
-    description: `Deleted draft announcement`,
-  });
+  ctx.set('auditResourceId', params.id);
+  ctx.set('auditDescription', `Deleted draft announcement`);
 
   return ctx.json({ success: true }, 200);
 }

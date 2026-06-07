@@ -1,18 +1,27 @@
+// WF-011 — Account Deletion: request, 30-day grace, cascade via person.deletionProcessor
 import { test, expect } from '../helpers/test-fixture'
-import { signIn } from '../helpers/auth'
 import { SEED_MEMBER_EMAIL, TEST_PASSWORD } from '../helpers/test-config'
+import { authStateFile } from '../helpers/auth-state'
+import { captureRouteHydration } from '../helpers/real-flow'
 
+// W2 real-flow upgrade: /settings/account mounts a settings shell that
+// hydrates the signed-in person via GET /persons/me. Capturing that
+// response proves the wire actually returned data, not just that the
+// settings shell rendered.
+const PERSON_ME = /\/persons\/me(?:[/?]|$)/
+
+test.use({ storageState: authStateFile('member') })
 const MEMBER_EMAIL = SEED_MEMBER_EMAIL
 const MEMBER_PASSWORD = TEST_PASSWORD
 
 test.describe('Account Deletion (/settings/account)', () => {
-  test.beforeEach(async ({ page }) => {
-    await signIn(page, MEMBER_EMAIL, MEMBER_PASSWORD)
-  })
-
-  test('shows Delete Account card with destructive border', async ({ page }) => {
+test('shows Delete Account card with destructive border', async ({ page }) => {
+    const personRespP = captureRouteHydration(page, PERSON_ME)
     await page.goto('/settings/account')
-    await page.waitForLoadState('networkidle')
+
+    const personResp = await personRespP
+    expect(personResp?.status()).toBe(200)
+    expect(personResp?.ok()).toBe(true)
 
     await expect(
       page.getByRole('heading', { name: /delete account/i }),
@@ -25,8 +34,6 @@ test.describe('Account Deletion (/settings/account)', () => {
 
   test('shows "Request Account Deletion" button', async ({ page }) => {
     await page.goto('/settings/account')
-    await page.waitForLoadState('networkidle')
-
     await expect(
       page.getByRole('button', { name: /request account deletion/i }),
     ).toBeVisible({ timeout: 10000 })
@@ -34,8 +41,6 @@ test.describe('Account Deletion (/settings/account)', () => {
 
   test('clicking deletion button opens confirmation dialog', async ({ page }) => {
     await page.goto('/settings/account')
-    await page.waitForLoadState('networkidle')
-
     await page.getByRole('button', { name: /request account deletion/i }).click()
 
     // Confirmation dialog should appear
@@ -59,8 +64,6 @@ test.describe('Account Deletion (/settings/account)', () => {
 
   test('cancelling the confirmation dialog closes it', async ({ page }) => {
     await page.goto('/settings/account')
-    await page.waitForLoadState('networkidle')
-
     await page.getByRole('button', { name: /request account deletion/i }).click()
 
     await expect(
@@ -78,8 +81,6 @@ test.describe('Account Deletion (/settings/account)', () => {
 
   test('deletion description mentions 30-day grace period', async ({ page }) => {
     await page.goto('/settings/account')
-    await page.waitForLoadState('networkidle')
-
     await expect(
       page.getByText(/30-day grace period/i),
     ).toBeVisible({ timeout: 10000 })

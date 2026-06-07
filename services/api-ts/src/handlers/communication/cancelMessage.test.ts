@@ -3,7 +3,7 @@ import { makeCtx, stubRepo, restoreRepo } from '@/test-utils/make-ctx';
 import { MessageRepository } from './repos/communication.repo';
 import { cancelMessage } from './cancelMessage';
 
-mock.module('@/utils/audit', () => ({ auditAction: async () => {} }));
+mock.module('@/core/audit/audit-action', () => ({ auditAction: async () => {} }));
 
 describe('cancelMessage', () => {
   beforeEach(() => { restoreRepo(MessageRepository); });

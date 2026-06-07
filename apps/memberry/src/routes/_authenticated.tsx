@@ -9,7 +9,7 @@ import { OrgIconRail } from "@/components/layout/org-icon-rail"
 import { ErrorBoundary } from "@/components/patterns/error-boundary"
 import { AnimatePresence, motion } from "framer-motion"
 import { useSpringTransition } from "@/components/motion/use-spring-transition"
-import { useMyOrgs } from "@/hooks/useMyOrgs"
+import { useMyOrgs } from "@/hooks/use-my-orgs"
 import { api } from "@/lib/api"
 
 // oli-ui: exempt-pageshell — layout-shell route renders MemberHeader + Outlet, no page content of its own

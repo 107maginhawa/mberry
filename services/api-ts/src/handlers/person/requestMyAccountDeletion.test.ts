@@ -4,7 +4,7 @@ import { PersonRepository } from './repos/person.repo';
 import { domainEvents } from '@/core/domain-events';
 import { requestMyAccountDeletion } from './requestMyAccountDeletion';
 
-mock.module('@/utils/audit', () => ({ auditAction: async () => {} }));
+mock.module('@/core/audit/audit-action', () => ({ auditAction: async () => {} }));
 
 describe('requestMyAccountDeletion', () => {
   beforeEach(() => { restoreRepo(PersonRepository); });

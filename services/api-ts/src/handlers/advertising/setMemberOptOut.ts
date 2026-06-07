@@ -17,7 +17,9 @@ export async function setMemberOptOut(ctx: ValidatedContext<any, never, never>):
   if (!user?.id) throw new ValidationError('Valid user ID required');
 
   const body = ctx.req.valid('json');
-  const logger = ctx.get('logger');
+  const baseLogger = ctx.get('logger');
+  const traceId = ctx.get('requestId');
+  const logger = baseLogger?.child?.({ traceId, module: 'advertising' }) ?? baseLogger;
 
   const optOut = body.optOut !== false; // default true
 

@@ -51,7 +51,9 @@ export async function createEmailTemplate(
   
   // Get dependencies from context
   const db = ctx.get('database') as DatabaseInstance;
-  const logger = ctx.get('logger');
+  const baseLogger = ctx.get('logger');
+  const traceId = ctx.get('requestId');
+  const logger = baseLogger?.child?.({ traceId, module: 'email' }) ?? baseLogger;
   const organizationId = ctx.get('organizationId') as string;
 
   // Instantiate repository

@@ -14,7 +14,7 @@ import { API_AVAILABLE } from './helpers/api-available';
 // These tests run in CI with full API stack, skip in unit-test-only mode.
 
 const API_URL = process.env['API_URL'] || 'http://localhost:7213';
-const d = API_AVAILABLE ? describe : describe.skip;
+const d = API_AVAILABLE ? describe : describe.skip; // allow-skip: integration gate — runs only when live API on $API_URL
 
 d('Smoke: API server health', () => {
   test('GET /livez returns 200 with "ok"', async () => {

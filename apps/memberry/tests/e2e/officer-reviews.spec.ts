@@ -1,18 +1,20 @@
+// WF-040 — NPS Review Collection
 import { test, expect } from './helpers/test-fixture'
-import { signIn } from './helpers/auth'
 import { SEED_OFFICER_EMAIL, TEST_PASSWORD } from './helpers/test-config'
+import { authStateFile } from './helpers/auth-state'
+import { captureAnyApiSuccess } from './helpers/real-flow'
 
+
+test.use({ storageState: authStateFile('officer') })
 const ORG_ID = 'ed8e3a96-8126-4341-be42-e6eb7940c562'
 
 test.describe('Feedback: Officer Reviews', () => {
-  test.beforeEach(async ({ page }) => {
-    await signIn(page, SEED_OFFICER_EMAIL, TEST_PASSWORD)
-  })
-
-  test('reviews page loads without error', async ({ page }) => {
+test('reviews page loads without error', async ({ page }) => {
+    const respP = captureAnyApiSuccess(page)
     await page.goto(`/org/${ORG_ID}/officer/reviews`)
-    await page.waitForLoadState('networkidle')
-
+    const resp = await respP
+    expect(resp?.status()).toBe(200)
+    expect(resp?.ok()).toBe(true)
     // Should NOT show error state
     await expect(page.getByText('Failed to load reviews')).not.toBeVisible()
 
@@ -22,8 +24,6 @@ test.describe('Feedback: Officer Reviews', () => {
 
   test('page subtitle renders (no crash)', async ({ page }) => {
     await page.goto(`/org/${ORG_ID}/officer/reviews`)
-    await page.waitForLoadState('networkidle')
-
     // Subtitle always renders regardless of data state
     await expect(
       page.getByText('Member feedback and NPS scores'),
@@ -39,8 +39,6 @@ test.describe('Feedback: Officer Reviews', () => {
     })
 
     await page.goto(`/org/${ORG_ID}/officer/reviews`)
-    await page.waitForLoadState('networkidle')
-
     expect(apiErrors).toEqual([])
   })
 })

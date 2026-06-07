@@ -1,10 +1,9 @@
-import type { ValidatedContext } from '@/types/app';
+import type { ValidatedContext, AuditEventEntry } from '@/types/app';
 import type { DatabaseInstance } from '@/core/database';
 import type { CreateEventRegistrationBody } from '@/generated/openapi/validators';
 import { NotFoundError, BusinessLogicError, ConflictError } from '@/core/errors';
 import { EventRepository, EventRegistrationRepository, WaitlistEntryRepository } from './repos/events.repo';
 import { domainEvents } from '@/core/domain-events';
-import { auditAction } from '@/utils/audit';
 
 /**
  * createEventRegistration
@@ -36,6 +35,9 @@ export async function createEventRegistration(
   const eventId = body.eventId;
   const personId = body.personId || user.id;
 
+  const auditEvents: AuditEventEntry[] = [];
+  ctx.set('auditEvents', auditEvents);
+
   const event = await eventRepo.findOneById(eventId);
   if (!event) throw new NotFoundError('Event not found');
 
@@ -64,10 +66,10 @@ export async function createEventRegistration(
         organizationId: orgId,
       });
 
-      await auditAction(ctx, {
+      auditEvents.push({
         action: 'create',
         resourceType: 'waitlist-entry',
-        resourceId: entry.id,
+        resource: entry.id,
         description: 'Auto-waitlisted due to capacity',
         eventSubType: 'association.booking-created',
       });
@@ -90,10 +92,10 @@ export async function createEventRegistration(
     organizationId: orgId,
   });
 
-  await auditAction(ctx, {
+  auditEvents.push({
     action: 'create',
     resourceType: 'event-registration',
-    resourceId: registration.id,
+    resource: registration.id,
     description: 'Event registration created',
     eventSubType: 'association.booking-created',
   });

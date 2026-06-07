@@ -24,10 +24,10 @@
     "ruleClass": "p1-business",
     "tests": {
       "backend": [
-        "services/api-ts/src/handlers/association:member/dues.test.ts",
+        "services/api-ts/src/handlers/member/duesspecialassessments/dues.test.ts",
         "services/api-ts/src/handlers/events/registerForEvent.test.ts",
-        "services/api-ts/src/handlers/dues/dues-config.test.ts",
-        "services/api-ts/src/handlers/association:member/utils/compute-membership-status.test.ts"
+        "services/api-ts/src/handlers/member/duesspecialassessments/dues-config.test.ts",
+        "services/api-ts/src/handlers/member/membership/utils/compute-membership-status.test.ts"
       ],
       "contract": [
         "specs/api/tests/contract/dues-flow.hurl"
@@ -45,8 +45,12 @@
     "ruleClass": "p0-data",
     "tests": {
       "backend": [
-        "services/api-ts/src/handlers/membership/updateMember.test.ts",
-        "services/api-ts/src/handlers/membership/reviewApplication.test.ts"
+        "services/api-ts/src/handlers/member/membership/approveMembershipApplication.test.ts",
+        "services/api-ts/src/handlers/member/membership/denyMembershipApplication.test.ts",
+        "services/api-ts/src/handlers/member/membership/reinstateMembership.test.ts",
+        "services/api-ts/src/handlers/member/membership/terminateMembership.test.ts",
+        "services/api-ts/src/handlers/member/membership/resignMembership.test.ts",
+        "services/api-ts/src/handlers/member/membership/deceaseMembership.test.ts"
       ],
       "contract": [
         "specs/api/tests/contract/membership-flow.hurl"
@@ -64,8 +68,7 @@
     "ruleClass": "p1-business",
     "tests": {
       "backend": [
-        "services/api-ts/src/handlers/association:member/deleteMembershipCategory.test.ts",
-        "services/api-ts/src/handlers/dues/dues-config.test.ts"
+        "services/api-ts/src/handlers/member/duesspecialassessments/dues-config.test.ts"
       ],
       "contract": [
         "specs/api/tests/contract/dues-flow.hurl"
@@ -85,10 +88,10 @@
     "ruleClass": "p1-business",
     "tests": {
       "backend": [
-        "services/api-ts/src/handlers/dues/utils/fund-math.test.ts",
-        "services/api-ts/src/handlers/association:member/dues.test.ts",
-        "services/api-ts/src/handlers/dues/dues-config.test.ts",
-        "services/api-ts/src/handlers/association:member/utils/fund-math.test.ts"
+        "services/api-ts/src/handlers/member/membership/utils/fund-math.test.ts",
+        "services/api-ts/src/handlers/member/duesspecialassessments/dues.test.ts",
+        "services/api-ts/src/handlers/member/duesspecialassessments/dues-config.test.ts",
+        "services/api-ts/src/handlers/member/membership/utils/fund-math.test.ts"
       ],
       "contract": [
         "specs/api/tests/contract/dues-flow.hurl"
@@ -108,7 +111,7 @@
     "ruleClass": "p0-data",
     "tests": {
       "backend": [
-        "services/api-ts/src/handlers/dues/utils/settle-payment.test.ts"
+        "services/api-ts/src/handlers/association:member/utils/settle-payment.test.ts"
       ],
       "contract": [
         "specs/api/tests/contract/dues-flow.hurl"
@@ -127,9 +130,9 @@
     "ruleClass": "p0-data",
     "tests": {
       "backend": [
-        "services/api-ts/src/handlers/dues/utils/expiry-extension.test.ts",
-        "services/api-ts/src/handlers/dues/utils/settle-payment.test.ts",
-        "services/api-ts/src/handlers/association:member/dues.test.ts"
+        "services/api-ts/src/handlers/member/membership/utils/expiry-extension.test.ts",
+        "services/api-ts/src/handlers/association:member/utils/settle-payment.test.ts",
+        "services/api-ts/src/handlers/member/duesspecialassessments/dues.test.ts"
       ],
       "contract": [
         "specs/api/tests/contract/dues-flow.hurl"
@@ -147,7 +150,7 @@
     "ruleClass": "p0-data",
     "tests": {
       "backend": [
-        "services/api-ts/src/handlers/association:member/refundDuesPayment.test.ts",
+        "services/api-ts/src/handlers/member/duesspecialassessments/refundDuesPayment.test.ts",
         "services/api-ts/src/handlers/association:member/utils/refund-validation.test.ts"
       ],
       "contract": [
@@ -166,7 +169,7 @@
     "ruleClass": "p0-data",
     "tests": {
       "backend": [
-        "services/api-ts/src/handlers/association:member/governance.test.ts"
+        "services/api-ts/src/handlers/member/governance/governance.test.ts"
       ],
       "contract": [
         "specs/api/tests/contract/governance-flow.hurl"
@@ -202,7 +205,7 @@
     "ruleClass": "p1-business",
     "tests": {
       "backend": [
-        "services/api-ts/src/handlers/association:member/credits.test.ts"
+        "services/api-ts/src/handlers/member/credits/credits.test.ts"
       ],
       "contract": [
         "specs/api/tests/contract/credits-flow.hurl"
@@ -219,7 +222,7 @@
     "ruleClass": "p1-business",
     "tests": {
       "backend": [
-        "services/api-ts/src/handlers/association:member/credits.test.ts"
+        "services/api-ts/src/handlers/member/credits/credits.test.ts"
       ],
       "contract": [
         "specs/api/tests/contract/credits-flow.hurl"
@@ -236,7 +239,7 @@
     "ruleClass": "p1-business",
     "tests": {
       "backend": [
-        "services/api-ts/src/handlers/association:member/credits.test.ts",
+        "services/api-ts/src/handlers/member/credits/credits.test.ts",
         "services/api-ts/src/handlers/association:operations/training-enrollment.test.ts"
       ],
       "contract": [
@@ -256,7 +259,7 @@
     "ruleClass": "p1-business",
     "tests": {
       "backend": [
-        "services/api-ts/src/handlers/association:member/credits.test.ts"
+        "services/api-ts/src/handlers/member/credits/credits.test.ts"
       ],
       "contract": [
         "specs/api/tests/contract/credits-flow.hurl"
@@ -273,7 +276,7 @@
     "ruleClass": "p1-business",
     "tests": {
       "backend": [
-        "services/api-ts/src/handlers/events/createEvent.test.ts",
+        "services/api-ts/src/handlers/association:operations/events.test.ts",
         "services/api-ts/src/handlers/association:operations/training.test.ts",
         "services/api-ts/src/handlers/association:operations/financial-lifecycle.test.ts"
       ],
@@ -298,7 +301,6 @@
     "ruleClass": "p1-business",
     "tests": {
       "backend": [
-        "services/api-ts/src/handlers/membership/br-p2-gap.test.ts",
         "services/api-ts/src/handlers/__tests__/br-edge-cases.test.ts"
       ],
       "contract": [
@@ -334,7 +336,7 @@
     "ruleClass": "p1-business",
     "tests": {
       "backend": [
-        "services/api-ts/src/handlers/association:member/credentials.test.ts"
+        "services/api-ts/src/handlers/member/credentials/credentials.test.ts"
       ],
       "contract": [
         "specs/api/tests/contract/credentials-flow.hurl"
@@ -352,7 +354,7 @@
     "ruleClass": "p1-business",
     "tests": {
       "backend": [
-        "services/api-ts/src/handlers/association:member/credentials.test.ts",
+        "services/api-ts/src/handlers/member/credentials/credentials.test.ts",
         "services/api-ts/src/handlers/__tests__/br-edge-cases.test.ts"
       ],
       "contract": [
@@ -370,13 +372,17 @@
     "ruleClass": "p1-business",
     "tests": {
       "backend": [
-        "services/api-ts/src/handlers/certificates/listCertificates.test.ts",
-        "services/api-ts/src/handlers/certificates/getCertificate.test.ts",
-        "services/api-ts/src/handlers/certificates/repos/certificates.repo.test.ts",
+        "services/api-ts/src/handlers/member/certificates/listCertificates.test.ts",
+        "services/api-ts/src/handlers/member/certificates/getCertificate.test.ts",
+        "services/api-ts/src/handlers/member/certificates/repos/certificates.repo.test.ts",
         "services/api-ts/src/handlers/__tests__/br-edge-cases.test.ts"
       ],
       "contract": [
-        "specs/api/tests/contract/certificates-flow.hurl"
+        "specs/api/tests/contract/member/certificates/certificates-list-get.hurl",
+        "specs/api/tests/contract/member/certificates/certificates-public-verify.hurl",
+        "specs/api/tests/contract/member/certificates/certificates-verify-hmac.hurl",
+        "specs/api/tests/contract/member/certificates/certificates-verify-not-found.hurl",
+        "specs/api/tests/contract/member/certificates/certificates-bulk-issue.hurl"
       ],
       "e2e": [
         "apps/memberry/tests/e2e/member/certificates.spec.ts"
@@ -390,7 +396,8 @@
     "ruleClass": "p0-data",
     "tests": {
       "backend": [
-        "services/api-ts/src/handlers/membership/br-21.multi-org.test.ts"
+        "services/api-ts/src/handlers/member/membership/createMembership.test.ts",
+        "services/api-ts/src/handlers/__tests__/br-edge-cases.test.ts"
       ],
       "contract": [
         "specs/api/tests/contract/auth-signup-signin.hurl"
@@ -407,7 +414,7 @@
     "ruleClass": "p1-business",
     "tests": {
       "backend": [
-        "services/api-ts/src/handlers/membership/importMembers.test.ts"
+        "services/api-ts/src/handlers/member/membership/importRosterMembers.test.ts"
       ],
       "contract": [
         "specs/api/tests/contract/membership-flow.hurl"
@@ -424,7 +431,8 @@
     "ruleClass": "p1-business",
     "tests": {
       "backend": [
-        "services/api-ts/src/handlers/membership/br-p2-gap.test.ts"
+        "services/api-ts/src/handlers/member/membership/createMembership.test.ts",
+        "services/api-ts/src/handlers/__tests__/br-edge-cases.test.ts"
       ],
       "contract": [
         "specs/api/tests/contract/membership-flow.hurl"
@@ -458,7 +466,6 @@
     "ruleClass": "p0-auth",
     "tests": {
       "backend": [
-        "services/api-ts/src/handlers/membership/br-p2-gap.test.ts",
         "services/api-ts/src/handlers/__tests__/br-edge-cases.test.ts"
       ],
       "contract": [
@@ -476,7 +483,7 @@
     "ruleClass": "p0-auth",
     "tests": {
       "backend": [
-        "services/api-ts/src/handlers/membership/br-p2-gap.test.ts"
+        "services/api-ts/src/middleware/auth.test.ts"
       ],
       "contract": [
         "specs/api/tests/contract/auth-signup-signin.hurl"
@@ -514,8 +521,7 @@
     "ruleClass": "p1-business",
     "tests": {
       "backend": [
-        "services/api-ts/src/handlers/communication/communication.test.ts",
-        "services/api-ts/src/handlers/membership/br-p2-gap.test.ts"
+        "services/api-ts/src/handlers/communication/communication.test.ts"
       ],
       "contract": [
         "specs/api/tests/contract/communications-flow.hurl"
@@ -588,7 +594,6 @@
     "ruleClass": "p0-data",
     "tests": {
       "backend": [
-        "services/api-ts/src/handlers/membership/br-p2-gap.test.ts",
         "services/api-ts/src/handlers/person/jobs/deletionProcessor.test.ts"
       ],
       "contract": [
@@ -700,9 +705,7 @@
     "module": "M19",
     "ruleClass": "p2-deferred",
     "tests": {
-      "backend": [
-        "services/api-ts/src/handlers/membership/br-39.committee-dissolution.test.ts"
-      ],
+      "backend": [],
       "contract": [],
       "e2e": []
     },
@@ -797,7 +800,7 @@
     "ruleClass": "p1-business",
     "tests": {
       "backend": [
-        "services/api-ts/src/handlers/elections/certifyElection.test.ts"
+        "services/api-ts/src/handlers/member/governance/certifyElection.test.ts"
       ],
       "contract": [],
       "e2e": [
@@ -829,7 +832,7 @@
     "ruleClass": "p1-business",
     "tests": {
       "backend": [
-        "services/api-ts/src/handlers/association:member/utils/credit-cycle.test.ts"
+        "services/api-ts/src/handlers/member/credits/utils/credit-cycle.test.ts"
       ],
       "contract": [],
       "e2e": [
@@ -861,9 +864,7 @@
     "module": "M06",
     "ruleClass": "p1-business",
     "tests": {
-      "backend": [
-        "services/api-ts/src/handlers/dues/bulkRecordPayments.test.ts"
-      ],
+      "backend": [],
       "contract": [],
       "e2e": []
     },
@@ -893,7 +894,6 @@
     "ruleClass": "p0-data",
     "tests": {
       "backend": [
-        "services/api-ts/src/handlers/elections/createElection.test.ts",
         "services/api-ts/src/handlers/elections/elections-schema.test.ts"
       ],
       "contract": [

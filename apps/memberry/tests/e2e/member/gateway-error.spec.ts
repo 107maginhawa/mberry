@@ -1,16 +1,18 @@
+// WF-038 — Pay Dues Online: gateway error path
 // M-19: Payment gateway unavailable fallback
 import { test, expect } from '../helpers/test-fixture'
-import { signInAsMember } from '../helpers/auth'
+import { authStateFile } from '../helpers/auth-state'
+import { captureAnyApiSuccess } from '../helpers/real-flow'
 
+
+test.use({ storageState: authStateFile('member') })
 test.describe('M-19: Gateway Error Handling', () => {
-  test.beforeEach(async ({ page }) => {
-    await signInAsMember(page)
-  })
-
-  test('payments page loads without crash', async ({ page }) => {
+test('payments page loads without crash', async ({ page }) => {
+    const respP = captureAnyApiSuccess(page)
     await page.goto('/my/payments')
-    await page.waitForLoadState('networkidle')
-
+    const resp = await respP
+    expect(resp?.status()).toBe(200)
+    expect(resp?.ok()).toBe(true)
     // Should show payments page (may be empty)
     const pageText = await page.locator('body').textContent()
     expect(pageText).not.toContain('Something went wrong')
@@ -19,8 +21,6 @@ test.describe('M-19: Gateway Error Handling', () => {
 
   test('payments page shows payment history or empty state', async ({ page }) => {
     await page.goto('/my/payments')
-    await page.waitForLoadState('networkidle')
-
     const hasContent = await page.getByText(/payment|no payment|history/i).first().isVisible({ timeout: 10000 }).catch(() => false)
     expect(hasContent).toBeTruthy()
   })

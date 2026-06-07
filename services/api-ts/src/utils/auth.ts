@@ -57,6 +57,26 @@ export const ac = createAccessControl(accessControlStatements);
 export const permissionStatements = accessControlStatements;
 
 /**
+ * Synchronous role membership check.
+ *
+ * Better-auth stores `user.role` as a comma-separated string when the
+ * user holds multiple roles (e.g. "admin,platform_admin,association:officer").
+ * Direct equality checks like `user.role !== 'admin'` therefore return
+ * `true` for genuine admins who happen to also hold other roles, silently
+ * failing role gates inside handlers.
+ *
+ * Use this helper anywhere a handler needs to ask "is this user an X?"
+ * without the async / auth-instance overhead of `userHasRole`.
+ */
+export function hasRole(
+  user: { role?: string | null } | null | undefined,
+  role: string
+): boolean {
+  if (!user?.role) return false;
+  return user.role.split(',').some((r) => r.trim() === role);
+}
+
+/**
  * Check if a user has one or more roles
  * @param auth - Auth instance for future use cases
  * @param user - User object with optional role field

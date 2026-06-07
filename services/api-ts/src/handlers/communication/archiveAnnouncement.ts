@@ -3,9 +3,6 @@ import { UnauthorizedError, NotFoundError, BusinessLogicError } from '@/core/err
 import type { DatabaseInstance } from '@/core/database';
 import type { ArchiveAnnouncementParams } from '@/generated/openapi/validators';
 import { CommunicationsRepository } from './repos/communication.repo';
-import { auditAction } from '@/utils/audit';
-import { requirePosition } from '@/utils/officer-check';
-import { POSITION_TITLES } from '@/utils/position-titles';
 
 /**
  * archiveAnnouncement
@@ -18,10 +15,6 @@ export async function archiveAnnouncement(
 ): Promise<Response> {
   const session = ctx.get('session');
   if (!session) throw new UnauthorizedError();
-
-  // M7: Only president/secretary can archive announcements
-  const denied = await requirePosition(ctx, [POSITION_TITLES.PRESIDENT, POSITION_TITLES.SECRETARY]);
-  if (denied) return denied;
 
   const params = ctx.req.valid('param');
 
@@ -36,14 +29,9 @@ export async function archiveAnnouncement(
 
   const archived = await repo.updateStatus(params.id, 'archived');
 
-  await auditAction(ctx, {
-    action: 'update',
-    resourceType: 'announcement',
-    resourceId: params.id,
-    description: `Archived announcement`,
-    details: { transition: 'archived' },
-    eventSubType: 'content.announcement-archived',
-  });
+  ctx.set('auditResourceId', params.id);
+  ctx.set('auditDescription', `Archived announcement`);
+  ctx.set('auditDetails', { transition: 'archived' });
 
   return ctx.json({ data: archived }, 200);
 }

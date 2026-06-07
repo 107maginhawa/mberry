@@ -1,3 +1,4 @@
+// @selector-only-ok: route-guard redirect tests — asserts URL location post-redirect, no data hydration to capture
 // Business Rules: [BR-09]
 import { test, expect } from '../helpers/test-fixture'
 import { signUp } from '../helpers/auth'
@@ -11,7 +12,6 @@ test.describe('Officer Route Guard Enforcement', () => {
 
     // Try to navigate to officer dashboard
     await page.goto(`/org/${ORG_ID}/officer/dashboard`)
-    await page.waitForLoadState('networkidle')
     await page.waitForTimeout(2000)
 
     // Should NOT be on officer dashboard — guard should redirect to /dashboard
@@ -23,7 +23,6 @@ test.describe('Officer Route Guard Enforcement', () => {
     await signUp(page)
 
     await page.goto(`/org/${ORG_ID}/officer/roster`)
-    await page.waitForLoadState('networkidle')
     await page.waitForTimeout(2000)
 
     const url = page.url()
@@ -34,7 +33,6 @@ test.describe('Officer Route Guard Enforcement', () => {
     await signUp(page)
 
     await page.goto(`/org/${ORG_ID}/officer/settings/dues`)
-    await page.waitForLoadState('networkidle')
     await page.waitForTimeout(2000)
 
     const url = page.url()
@@ -44,7 +42,6 @@ test.describe('Officer Route Guard Enforcement', () => {
   test('unauthenticated user redirected to sign-in from officer route', async ({ page }) => {
     // No sign-in — go directly to officer route
     await page.goto(`/org/${ORG_ID}/officer/dashboard`)
-    await page.waitForLoadState('networkidle')
     await page.waitForTimeout(2000)
 
     // Should redirect to auth

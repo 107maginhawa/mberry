@@ -18,7 +18,7 @@ const SENT_MSG = {
 };
 
 // Mock audit
-mock.module('@/utils/audit', () => ({
+mock.module('@/core/audit/audit-action', () => ({
   auditAction: async () => {},
 }));
 

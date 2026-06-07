@@ -14,7 +14,6 @@ import type { ValidatedContext } from '@/types/app';
 import type { FinalizeInvoiceParams } from '@/generated/openapi/validators';
 import type { Session } from '@/types/auth';
 import { InvoiceRepository } from './repos/billing.repo';
-import { auditAction } from '@/utils/audit';
 
 /**
  * finalizeInvoice
@@ -28,7 +27,9 @@ export async function finalizeInvoice(
   ctx: ValidatedContext<never, never, FinalizeInvoiceParams>
 ): Promise<Response> {
   const database = ctx.get('database');
-  const logger = ctx.get('logger');
+  const baseLogger = ctx.get('logger');
+  const traceId = ctx.get('requestId');
+  const logger = baseLogger?.child?.({ traceId, module: 'billing' }) ?? baseLogger;
 
   // Get authenticated session (guaranteed by middleware)
   const session = ctx.get('session') as Session;
@@ -38,7 +39,7 @@ export async function finalizeInvoice(
   const params = ctx.req.valid('param');
   const invoiceId = params.invoice;
 
-  logger.info({ invoiceId, userId: user.id }, 'Finalizing invoice');
+  logger.info({ action: 'finalizeInvoice.1', invoiceId, userId: user.id }, 'Finalizing invoice');
 
   // Create repository instance
   const invoiceRepo = new InvoiceRepository(database, logger);
@@ -90,7 +91,7 @@ export async function finalizeInvoice(
     });
   }
 
-  logger.info({
+  logger.info({ action: 'finalizeInvoice.2',
     invoiceId,
     invoiceNumber: finalizedInvoice.invoiceNumber,
     merchantId: finalizedInvoice.merchant,
@@ -99,20 +100,15 @@ export async function finalizeInvoice(
     status: finalizedInvoice.status
   }, 'Invoice finalized successfully');
 
-  await auditAction(ctx, {
-    action: 'finalize',
-    resourceType: 'invoice',
-    resourceId: invoiceId,
-    description: `Invoice ${finalizedInvoice.invoiceNumber} finalized (${finalizedInvoice.total} ${finalizedInvoice.currency})`,
-    eventSubType: 'financial.invoice-finalized',
-    details: {
+  ctx.set('auditResourceId', invoiceId);
+  ctx.set('auditDescription', `Invoice ${finalizedInvoice.invoiceNumber} finalized (${finalizedInvoice.total} ${finalizedInvoice.currency})`);
+  ctx.set('auditDetails', {
       invoiceNumber: finalizedInvoice.invoiceNumber,
       total: finalizedInvoice.total,
       currency: finalizedInvoice.currency,
       customerId: finalizedInvoice.customer,
       merchantId: finalizedInvoice.merchant,
-    },
-  });
+    });
 
   // Format response to match TypeSpec Invoice model
   const response = {

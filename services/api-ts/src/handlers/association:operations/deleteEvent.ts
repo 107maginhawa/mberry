@@ -3,9 +3,6 @@ import type { DatabaseInstance } from '@/core/database';
 import type { DeleteEventParams } from '@/generated/openapi/validators';
 import { NotFoundError } from '@/core/errors';
 import { EventRepository } from './repos/events.repo';
-import { auditAction } from '@/utils/audit';
-import { requirePosition } from '@/utils/officer-check';
-import { POSITION_TITLES } from '@/utils/position-titles';
 
 /**
  * deleteEvent
@@ -19,9 +16,6 @@ export async function deleteEvent(
   const user = ctx.get('user');
   if (!user) return ctx.json({ error: 'Unauthorized' }, 401);
 
-  const denied = await requirePosition(ctx, [POSITION_TITLES.SOCIETY_OFFICER, POSITION_TITLES.PRESIDENT]);
-  if (denied) return denied;
-
   const params = ctx.req.valid('param');
   const db = ctx.get('database') as DatabaseInstance;
   const logger = ctx.get('logger');
@@ -32,12 +26,8 @@ export async function deleteEvent(
 
   await repo.deleteOneById(params.eventId, user.id);
 
-  await auditAction(ctx, {
-    action: 'delete',
-    resourceType: 'event',
-    resourceId: params.eventId,
-    description: 'Event deleted',
-  });
+  ctx.set('auditResourceId', params.eventId);
+  ctx.set('auditDescription', 'Event deleted');
 
   return ctx.json({ success: true }, 200);
 }

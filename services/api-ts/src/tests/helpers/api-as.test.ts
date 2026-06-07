@@ -5,7 +5,7 @@ import { API_AVAILABLE } from './api-available';
 // Test-Classification: INTEGRATION — requires live API server (API_AVAILABLE flag)
 // These tests run in CI with full API stack, skip in unit-test-only mode.
 
-const d = API_AVAILABLE ? describe : describe.skip;
+const d = API_AVAILABLE ? describe : describe.skip; // allow-skip: integration gate — runs only when live API on $API_URL
 
 d('apiAs', () => {
   test('returns authenticated client with HTTP methods', async () => {

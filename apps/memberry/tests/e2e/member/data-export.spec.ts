@@ -1,18 +1,26 @@
+// WF-014 — Data Export: GDPR-style personal data export
 import { test, expect } from '../helpers/test-fixture'
-import { signIn } from '../helpers/auth'
 import { SEED_MEMBER_EMAIL, TEST_PASSWORD } from '../helpers/test-config'
+import { authStateFile } from '../helpers/auth-state'
+import { captureRouteHydration } from '../helpers/real-flow'
 
+// W2 real-flow upgrade: /settings/account hydrates via GET /persons/me.
+// Capturing that proves the backend returned data, not just that the
+// settings shell rendered.
+const PERSON_ME = /\/persons\/me(?:[/?]|$)/
+
+test.use({ storageState: authStateFile('member') })
 const MEMBER_EMAIL = SEED_MEMBER_EMAIL
 const MEMBER_PASSWORD = TEST_PASSWORD
 
 test.describe('Data Export (/settings/account)', () => {
-  test.beforeEach(async ({ page }) => {
-    await signIn(page, MEMBER_EMAIL, MEMBER_PASSWORD)
-  })
-
-  test('shows "Export My Data" card', async ({ page }) => {
+test('shows "Export My Data" card', async ({ page }) => {
+    const respP = captureRouteHydration(page, PERSON_ME)
     await page.goto('/settings/account')
-    await page.waitForLoadState('networkidle')
+
+    const resp = await respP
+    expect(resp?.status()).toBe(200)
+    expect(resp?.ok()).toBe(true)
 
     await expect(
       page.getByRole('heading', { name: /export my data/i }),
@@ -25,8 +33,6 @@ test.describe('Data Export (/settings/account)', () => {
 
   test('shows "Download My Data" button', async ({ page }) => {
     await page.goto('/settings/account')
-    await page.waitForLoadState('networkidle')
-
     await expect(
       page.getByRole('button', { name: /download my data/i }),
     ).toBeVisible({ timeout: 10000 })
@@ -34,8 +40,6 @@ test.describe('Data Export (/settings/account)', () => {
 
   test('clicking export triggers download and shows success toast', async ({ page }) => {
     await page.goto('/settings/account')
-    await page.waitForLoadState('networkidle')
-
     // Listen for download event
     const downloadPromise = page.waitForEvent('download', { timeout: 15000 }).catch(() => null)
 
@@ -60,8 +64,6 @@ test.describe('Data Export (/settings/account)', () => {
 
   test('export description mentions data categories', async ({ page }) => {
     await page.goto('/settings/account')
-    await page.waitForLoadState('networkidle')
-
     // Description should mention the types of data included
     await expect(
       page.getByText(/profile|memberships|payments|training|certificates|events/i),

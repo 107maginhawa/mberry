@@ -3,8 +3,6 @@ import type { DatabaseInstance } from '@/core/database';
 import type { UpdateDocumentBody, UpdateDocumentParams } from '@/generated/openapi/validators';
 import { UnauthorizedError, NotFoundError, ForbiddenError, BusinessLogicError } from '@/core/errors';
 import { DocumentRepository } from './repos/documents.repo';
-import { auditAction } from '@/utils/audit';
-import { requireOfficerTerm } from '@/utils/officer-check';
 
 // [EM-M11-b4f29d18] Document status lifecycle: draft → published → archived.
 // Archived is terminal; published cannot revert to draft.
@@ -25,10 +23,6 @@ export async function updateDocument(
 ): Promise<Response> {
   const session = ctx.get('session');
   if (!session) throw new UnauthorizedError();
-
-  // P1: Officer/admin restriction for document updates
-  const denied = await requireOfficerTerm(ctx);
-  if (denied) return denied;
 
   const { documentId } = ctx.req.valid('param');
   const body = ctx.req.valid('json');
@@ -58,12 +52,8 @@ export async function updateDocument(
 
   const updated = await repo.updateOneById(documentId, body as Record<string, unknown>);
 
-  await auditAction(ctx, {
-    action: 'update',
-    resourceType: 'document',
-    resourceId: documentId,
-    description: 'Document updated',
-  });
+  ctx.set('auditResourceId', documentId);
+  ctx.set('auditDescription', 'Document updated');
 
   return ctx.json(updated, 200);
 }

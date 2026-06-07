@@ -1,10 +1,3 @@
----
-based-on: map@2331bd9f
-last-modified: 2026-06-03T20:30:00Z
-engine-version: 7b2a640
-map-version: 6
----
-
 # Code Component Registry
 
 <!-- oli:regen:code-component-registry:begin -->
@@ -24,17 +17,16 @@ map-version: 6
 | `useDetectCountry` | apps/memberry | hook | 0 | — | MEDIUM |
 | `useDetectLanguage` | apps/memberry | hook | 0 | — | MEDIUM |
 | `useDetectTimezone` | apps/memberry | hook | 0 | — | MEDIUM |
+| `useFinancialStanding` | apps/memberry | hook | 0 | — | MEDIUM |
 | `useFormatDate` | apps/memberry | hook | 0 | — | MEDIUM |
 | `useMutationFeedback` | apps/memberry | hook | 0 | — | MEDIUM |
-| `useFinancialStanding` | apps/memberry | hook | 0 | — | MEDIUM |
 | `useMyOrgs` | apps/memberry | hook | 0 | — | MEDIUM |
-| `useOrg` | apps/memberry | hook | 0 | — | MEDIUM |
 | `useOrgContext` | apps/memberry | hook | 0 | — | MEDIUM |
+| `useOrg` | apps/memberry | hook | 0 | — | MEDIUM |
 | `OrgProvider` | apps/memberry | component | 1 | ✅ paired | MEDIUM |
 | `useOrgProvider` | apps/memberry | hook | 0 | — | MEDIUM |
 | `useOrgProviderOptional` | apps/memberry | hook | 0 | — | MEDIUM |
 | `AuthenticatedLayout` | apps/memberry | component | 0 | — | MEDIUM |
-| `JoinPage` | apps/memberry | component | 0 | ✅ paired | MEDIUM |
 | `OnboardingPage` | apps/memberry | component | 0 | ✅ paired | MEDIUM |
 | `VerifyEmailPage` | apps/memberry | component | 0 | — | MEDIUM |
 | `useFileUpload` | packages/sdk-ts | hook | 0 | — | MEDIUM |
@@ -103,6 +95,7 @@ map-version: 6
 | `PublicEventPage` | apps/memberry | component | 0 | ✅ | MEDIUM |
 | `InvitePage` | apps/memberry | component | 0 | ✅ paired | MEDIUM |
 | `PublicOrgProfile` | apps/memberry | component | 0 | ✅ | MEDIUM |
+| `JoinPage` | apps/memberry | component | 0 | ✅ paired | MEDIUM |
 | `PublicPaymentPage` | apps/memberry | component | 0 | ✅ paired | MEDIUM |
 | `VerifyCertificatePage` | apps/memberry | component | 0 | ✅ paired | MEDIUM |
 | `VerifyCredentialPage` | apps/memberry | component | 0 | ✅ | MEDIUM |
@@ -140,7 +133,7 @@ map-version: 6
 | `BookingWidget` | apps/memberry | component | 5 | — | MEDIUM |
 | `HostDirectory` | apps/memberry | component | 0 | ✅ paired | MEDIUM |
 | `CertificateList` | apps/memberry | component | 0 | ✅ paired | MEDIUM |
-| `CertificatePreview` | apps/memberry | component | 1 | ✅ paired | MEDIUM |
+| `CertificatePreview` | apps/memberry | component | 1 | ⚠️ violation | MEDIUM |
 | `AffiliationList` | apps/memberry | component | 2 | ✅ paired | MEDIUM |
 | `CallControls` | apps/memberry | component | 9 | — | MEDIUM |
 | `ChannelList` | apps/memberry | component | 5 | ✅ paired | MEDIUM |
@@ -217,7 +210,7 @@ map-version: 6
 | `SpecialAssessmentsList` | apps/memberry | component | 1 | ✅ paired | MEDIUM |
 | `StatusDistributionChart` | apps/memberry | component | 1 | — | MEDIUM |
 | `TopUnpaidList` | apps/memberry | component | 3 | — | MEDIUM |
-| `ElectionDetail` | apps/memberry | component | 2 | ✅ paired | MEDIUM |
+| `ElectionDetail` | apps/memberry | component | 2 | ⚠️ violation | MEDIUM |
 | `ElectionForm` | apps/memberry | component | 5 | ✅ | MEDIUM |
 | `ElectionList` | apps/memberry | component | 1 | ✅ paired | MEDIUM |
 | `ElectionTimeline` | apps/memberry | component | 6 | — | MEDIUM |
@@ -238,7 +231,7 @@ map-version: 6
 | `CredentialList` | apps/memberry | component | 2 | ✅ | MEDIUM |
 | `InstitutionalMembershipForm` | apps/memberry | component | 4 | — | MEDIUM |
 | `InstitutionalMembershipTable` | apps/memberry | component | 1 | ✅ paired | MEDIUM |
-| `MemberDetail` | apps/memberry | component | 2 | ✅ paired | MEDIUM |
+| `MemberDetail` | apps/memberry | component | 2 | ⚠️ violation | MEDIUM |
 | `MemberTable` | apps/memberry | component | 4 | ✅ paired | MEDIUM |
 | `MembershipList` | apps/memberry | component | 2 | ✅ paired | MEDIUM |
 | `SeatManagementPanel` | apps/memberry | component | 4 | ✅ paired | MEDIUM |

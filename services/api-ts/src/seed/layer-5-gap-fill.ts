@@ -30,7 +30,7 @@ import { specialAssessments, specialAssessmentTargets } from '@/handlers/associa
 import { chatRooms, chatMessages, chatRoomMembers, chatMessageReactions } from '@/handlers/comms/repos/comms.schema';
 import { surveys as surveysTable, surveyResponses as surveyResponsesTable } from '@/handlers/surveys/repos/survey.schema';
 import { orgCpdConfig } from '@/handlers/association:member/repos/credits.schema';
-import { orgCertificateSeq } from '@/handlers/certificates/repos/certificates.schema';
+import { orgCertificateSeq } from '@/handlers/member/certificates/repos/certificates.schema';
 import { savedSegments } from '@/handlers/communication/repos/communication.schema';
 import { jobPostings, jobApplications } from '@/handlers/jobs/repos/jobs.schema';
 

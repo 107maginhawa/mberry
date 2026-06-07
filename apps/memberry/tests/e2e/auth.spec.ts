@@ -1,3 +1,4 @@
+// WF-003 — Login
 // Business Rules: [BR-21] [BR-24] [BR-25] [BR-26]
 import { test, expect } from './helpers/test-fixture'
 import { signIn } from './helpers/auth'
@@ -15,8 +16,6 @@ test.describe('Sign-up flow', () => {
     const email = `signup-${Date.now()}@test.com`
 
     await page.goto('/auth/sign-up')
-    await page.waitForLoadState('networkidle')
-
     // Form should be visible
     const nameInput = page.getByLabel('Name', { exact: true })
     const emailInput = page.getByLabel('Email', { exact: true })
@@ -26,7 +25,7 @@ test.describe('Sign-up flow', () => {
     await nameInput.fill('Test Signup User')
     await emailInput.fill(email)
     await passwordInput.click()
-    await passwordInput.pressSequentially(TEST_PASSWORD, { delay: 10 })
+    await passwordInput.fill(TEST_PASSWORD)
 
     // Submit
     const submit = page.getByRole('button', { name: /create an account/i })
@@ -45,24 +44,22 @@ test.describe('Sign-up flow', () => {
 
     // First sign-up
     await page.goto('/auth/sign-up')
-    await page.waitForLoadState('networkidle')
     await page.getByLabel('Name', { exact: true }).fill('First User')
     await page.getByLabel('Email', { exact: true }).fill(email)
     const pw = page.getByLabel('Password', { exact: true })
     await pw.click()
-    await pw.pressSequentially(TEST_PASSWORD, { delay: 10 })
+    await pw.fill(TEST_PASSWORD)
     await page.getByRole('button', { name: /create an account/i }).click()
     await page.waitForTimeout(3000)
 
     // Clear cookies and try same email
     await page.context().clearCookies()
     await page.goto('/auth/sign-up')
-    await page.waitForLoadState('networkidle')
     await page.getByLabel('Name', { exact: true }).fill('Second User')
     await page.getByLabel('Email', { exact: true }).fill(email)
     const pw2 = page.getByLabel('Password', { exact: true })
     await pw2.click()
-    await pw2.pressSequentially(TEST_PASSWORD, { delay: 10 })
+    await pw2.fill(TEST_PASSWORD)
     await page.getByRole('button', { name: /create an account/i }).click()
 
     // Should show an error — user already exists
@@ -81,25 +78,59 @@ test.describe('Sign-in flow', () => {
     testEmail = `signin-${Date.now()}@test.com`
     const page = await browser.newPage()
     await page.goto('/auth/sign-up')
-    await page.waitForLoadState('networkidle')
     await page.getByLabel('Name', { exact: true }).fill('Sign In Test')
     await page.getByLabel('Email', { exact: true }).fill(testEmail)
     const pw = page.getByLabel('Password', { exact: true })
     await pw.click()
-    await pw.pressSequentially(testPassword, { delay: 10 })
+    await pw.fill(testPassword)
     await page.getByRole('button', { name: /create an account/i }).click()
     await page.waitForTimeout(3000)
     await page.close()
   })
 
+  test('A2-data: sign-in POST returns 200 with session + user in body', async ({ page }) => {
+    // Real-flow assertion: intercept the Better-Auth sign-in POST and verify
+    // response status + body shape (session token + user object).
+    // Requires backend running at API_BASE (default http://localhost:7213).
+    await page.goto('/auth/sign-in')
+    await expect(page.getByRole('button', { name: /login|sign in/i })).toBeVisible({ timeout: 10000 })
+
+    await page.getByLabel('Email', { exact: true }).fill(SEED_OFFICER_EMAIL)
+    await page.getByLabel('Password', { exact: true }).fill(TEST_PASSWORD)
+
+    // Register the waitForResponse BEFORE clicking submit
+    const signInResponseP = page.waitForResponse(
+      (resp) => resp.url().includes('/auth/sign-in') && resp.request().method() === 'POST',
+      { timeout: 15000 },
+    )
+
+    await page.getByRole('button', { name: /login|sign in/i }).click()
+
+    const signInResponse = await signInResponseP
+    // Data assertion 1: HTTP status must be 200
+    expect(signInResponse.status()).toBe(200)
+
+    // Data assertion 2: response body must contain a user object with an email field
+    const body = await signInResponse.json().catch(() => null)
+    expect(body).not.toBeNull()
+    // Better-Auth returns { token, user: { id, email, name, ... } } on sign-in
+    expect(body?.user?.email).toBe(SEED_OFFICER_EMAIL)
+
+    // Navigate to authenticated page and assert user identity in sidebar
+    await page.waitForURL(
+      (url) => !url.pathname.startsWith('/auth/') || url.pathname.startsWith('/auth/verify-email'),
+      { timeout: 10000 },
+    )
+    // User email must be visible in the UI — confirms session is active
+    await expect(page.getByText(SEED_OFFICER_EMAIL)).toBeVisible({ timeout: 10000 })
+  })
+
   test('A2: sign in with valid creds → dashboard with sidebar', async ({ page }) => {
     await page.goto('/auth/sign-in')
-    await page.waitForLoadState('networkidle')
-
     await page.getByLabel('Email', { exact: true }).fill(testEmail)
     const pw = page.getByLabel('Password', { exact: true })
     await pw.click()
-    await pw.pressSequentially(testPassword, { delay: 10 })
+    await pw.fill(testPassword)
 
     const submit = page.getByRole('button', { name: /login|sign in/i })
     await submit.click()
@@ -107,10 +138,14 @@ test.describe('Sign-in flow', () => {
     // Should leave sign-in page
     await page.waitForURL((url) => !url.pathname.includes('/auth/'), { timeout: 15000 })
 
-    // Sidebar should be visible with nav links
-    await expect(page.getByRole('complementary').getByText('Memberry')).toBeVisible()
-    await expect(page.getByRole('link', { name: 'Home' })).toBeVisible()
-    await expect(page.getByRole('link', { name: 'Profile' })).toBeVisible()
+    // Sidebar should be visible with nav links. Brand is rendered as an
+    // <img alt="Memberry"> (logo file), not literal text — assert via alt.
+    // Scope nav-link queries to the sidebar (complementary role) — Home /
+    // Profile also appear in breadcrumbs and bottom-nav on smaller viewports.
+    const sidebar = page.getByRole('complementary')
+    await expect(sidebar.getByAltText('Memberry')).toBeVisible()
+    await expect(sidebar.getByRole('link', { name: 'Home' })).toBeVisible()
+    await expect(sidebar.getByRole('link', { name: 'Profile' })).toBeVisible()
 
     // User email should appear in sidebar
     await expect(page.getByText(testEmail)).toBeVisible()
@@ -118,12 +153,10 @@ test.describe('Sign-in flow', () => {
 
   test('A2: sign in with wrong password → error message', async ({ page }) => {
     await page.goto('/auth/sign-in')
-    await page.waitForLoadState('networkidle')
-
     await page.getByLabel('Email', { exact: true }).fill(testEmail)
     const pw = page.getByLabel('Password', { exact: true })
     await pw.click()
-    await pw.pressSequentially('WrongPassword99!', { delay: 10 })
+    await pw.fill('WrongPassword99!')
 
     await page.getByRole('button', { name: /login|sign in/i }).click()
     await page.waitForTimeout(3000)
@@ -139,7 +172,6 @@ test.describe('Sign-in flow', () => {
     await page.context().clearCookies()
 
     await page.goto('/my/profile')
-    await page.waitForLoadState('networkidle')
     await page.waitForTimeout(2000)
 
     // Should be redirected to sign-in
@@ -148,20 +180,16 @@ test.describe('Sign-in flow', () => {
 })
 
 test.describe('Auth guard', () => {
-  test('A2: public route /org/pda-metro-manila works without auth', async ({ page }) => {
+  test('A2: public route /join/pda-metro-manila works without auth', async ({ page }) => {
     await page.context().clearCookies()
-    await page.goto('/org/pda-metro-manila')
-    await page.waitForLoadState('networkidle')
-
-    // Should show org profile, NOT redirect to sign-in
-    await expect(page.getByText('PDA Metro Manila Chapter')).toBeVisible()
+    await page.goto('/join/pda-metro-manila')
+    await expect(page.getByText('Philippine Dental Association')).toBeVisible({ timeout: 15000 })
     expect(page.url()).not.toContain('/auth/')
   })
 
   test('A2: root / redirects unauthenticated to sign-in', async ({ page }) => {
     await page.context().clearCookies()
     await page.goto('/')
-    await page.waitForLoadState('networkidle')
     await page.waitForTimeout(2000)
 
     expect(page.url()).toContain('/auth/sign-in')
@@ -172,24 +200,25 @@ test.describe('Multi-org & Invitations', () => {
   test('[BR-21] dashboard shows organization membership cards', async ({ page }) => {
     await signIn(page, SEED_OFFICER_EMAIL, TEST_PASSWORD)
     await page.goto('/dashboard')
-    await page.waitForLoadState('networkidle')
-    // Member should see at least one org card
-    const hasOrgSection = await page.getByText(/organizations/i).first().isVisible().catch(() => false)
-    expect(hasOrgSection).toBeTruthy()
+    // Dashboard renders an h2 "Your Organizations" section (dashboard.tsx:228).
+    // Use heading-role + accessible name so we don't false-match on the word
+    // "organizations" appearing in other UI (nav links, footer, etc.).
+    await expect(
+      page.getByRole('heading', { name: /your organizations/i, level: 2 }),
+    ).toBeVisible({ timeout: 10000 })
   })
 
   test('[BR-24] expired invite page shows message', async ({ page }) => {
     // Visit invite with fake token — should show expired/invalid message, not crash
     await page.goto('/invite/expired-test-token')
-    await page.waitForLoadState('networkidle')
     const hasContent = await page.locator('main, body').first().isVisible()
     expect(hasContent).toBeTruthy()
   })
 
   test('[BR-25] sign-up form renders with email field', async ({ page }) => {
     await page.goto('/auth/sign-up')
-    await page.waitForLoadState('networkidle')
-    const hasEmail = await page.getByLabel(/email/i).first().isVisible().catch(() => false)
-    expect(hasEmail).toBeTruthy()
+    // better-auth-ui mounts the form async — use waitFor instead of an
+    // immediate isVisible() so we don't race the first paint.
+    await expect(page.getByLabel(/email/i).first()).toBeVisible({ timeout: 10000 })
   })
 })

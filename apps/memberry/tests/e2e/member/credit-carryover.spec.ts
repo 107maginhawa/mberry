@@ -1,16 +1,18 @@
+// WF-069 — Credit Cycle Management: configurable start date, excess carryover
 // BR-12: Credit carry-over
 import { test, expect } from '../helpers/test-fixture'
-import { signInAsMember } from '../helpers/auth'
+import { authStateFile } from '../helpers/auth-state'
+import { captureAnyApiSuccess } from '../helpers/real-flow'
 
+
+test.use({ storageState: authStateFile('member') })
 test.describe('BR-12: Credit Carry-Over', () => {
-  test.beforeEach(async ({ page }) => {
-    await signInAsMember(page)
-  })
-
-  test('credits page loads and shows credit data', async ({ page }) => {
+test('credits page loads and shows credit data', async ({ page }) => {
+    const respP = captureAnyApiSuccess(page)
     await page.goto('/my/credits')
-    await page.waitForLoadState('networkidle')
-
+    const resp = await respP
+    expect(resp?.status()).toBe(200)
+    expect(resp?.ok()).toBe(true)
     // Should show credits page with data or empty state
     const hasContent = await page.getByText(/credits|CPD|earned|required/i).first().isVisible({ timeout: 10000 }).catch(() => false)
     expect(hasContent).toBeTruthy()
@@ -18,8 +20,6 @@ test.describe('BR-12: Credit Carry-Over', () => {
 
   test('credits page shows cycle information', async ({ page }) => {
     await page.goto('/my/credits')
-    await page.waitForLoadState('networkidle')
-
     // Should display credit cycle info
     const pageText = await page.locator('body').textContent()
     expect(pageText).not.toContain('undefined undefined')
@@ -27,8 +27,6 @@ test.describe('BR-12: Credit Carry-Over', () => {
 
   test('credits log page accessible', async ({ page }) => {
     await page.goto('/my/credits/log')
-    await page.waitForLoadState('networkidle')
-
     // Log page should load without errors
     const hasContent = await page.locator('body').textContent()
     expect(hasContent).toBeTruthy()

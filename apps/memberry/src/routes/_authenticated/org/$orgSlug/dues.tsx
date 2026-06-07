@@ -14,7 +14,7 @@ import type { TimelinePeriod } from '@/features/dues/components/payment-schedule
 import { buildPaymentCsv, downloadCsv } from '@/features/dues/lib/csv-export'
 import { api } from '@/lib/api'
 import { CreditCard, CheckCircle, AlertTriangle, Info, Building, Receipt, Download } from 'lucide-react'
-import { useOrg } from '@/hooks/useOrg'
+import { useOrg } from '@/hooks/use-org'
 import { ErrorState } from '@/components/patterns/error-state'
 import { GlassCard } from '@/components/motion/glass-card'
 import { CountUp } from '@/components/motion/count-up'

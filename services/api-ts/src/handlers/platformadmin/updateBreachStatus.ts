@@ -13,7 +13,7 @@ import type { DatabaseInstance } from '@/core/database';
 import { eq } from 'drizzle-orm';
 import { NotFoundError, BusinessLogicError, ValidationError } from '@/core/errors';
 import { breachIncidents, type BreachIncident } from './repos/platform-admin.schema';
-import { auditAction } from '@/utils/audit';
+import { auditAction } from '@/core/audit/audit-action';
 
 const VALID_TRANSITIONS: Record<string, string> = {
   reported: 'investigating',

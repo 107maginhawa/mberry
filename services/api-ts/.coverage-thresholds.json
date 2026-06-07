@@ -1,0 +1,5 @@
+{
+  "_comment": "Conservative baselines 2026-06-06. Default=0 for ungated. Schema files have 0% fn (expected). Tighten in Wave 7 after schema files excluded.",
+  "src/handlers/person": { "line": 60, "function": 0 },
+  "src/handlers/billing": { "line": 40, "function": 0 }
+}

@@ -18,7 +18,7 @@
       "framework": "react",
       "entry_points": [],
       "public_exports": [],
-      "file_count": 441,
+      "file_count": 442,
       "has_spec": false,
       "spec_path": null,
       "confidence": "MEDIUM"
@@ -40,7 +40,7 @@
       "framework": "hono",
       "entry_points": [],
       "public_exports": [],
-      "file_count": 248,
+      "file_count": 241,
       "has_spec": false,
       "spec_path": null,
       "confidence": "MEDIUM"
@@ -95,7 +95,7 @@
       "framework": "hono",
       "entry_points": [],
       "public_exports": [],
-      "file_count": 11,
+      "file_count": 9,
       "has_spec": false,
       "spec_path": null,
       "confidence": "MEDIUM"
@@ -117,7 +117,7 @@
       "framework": "hono",
       "entry_points": [],
       "public_exports": [],
-      "file_count": 53,
+      "file_count": 50,
       "has_spec": false,
       "spec_path": null,
       "confidence": "MEDIUM"
@@ -161,7 +161,7 @@
       "framework": "hono",
       "entry_points": [],
       "public_exports": [],
-      "file_count": 11,
+      "file_count": 6,
       "has_spec": false,
       "spec_path": null,
       "confidence": "MEDIUM"
@@ -183,7 +183,7 @@
       "framework": "hono",
       "entry_points": [],
       "public_exports": [],
-      "file_count": 18,
+      "file_count": 14,
       "has_spec": false,
       "spec_path": null,
       "confidence": "MEDIUM"
@@ -227,7 +227,7 @@
       "framework": "hono",
       "entry_points": [],
       "public_exports": [],
-      "file_count": 18,
+      "file_count": 17,
       "has_spec": false,
       "spec_path": null,
       "confidence": "MEDIUM"
@@ -238,7 +238,7 @@
       "framework": "generic",
       "entry_points": [],
       "public_exports": [],
-      "file_count": 9,
+      "file_count": 8,
       "has_spec": false,
       "spec_path": null,
       "confidence": "LOW"

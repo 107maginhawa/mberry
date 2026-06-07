@@ -13,7 +13,7 @@ import { MessageTemplateRepository } from './repos/communication.repo';
 import { MessageRepository } from './repos/communication.repo';
 import { OfficerTermRepository } from '../association:member/repos/governance.repo';
 
-mock.module('@/utils/audit', () => ({ auditAction: async () => {} }));
+mock.module('@/core/audit/audit-action', () => ({ auditAction: async () => {} }));
 
 // Global stub: publishAnnouncement and archiveAnnouncement call requirePosition → OfficerTermRepository
 stubRepo(OfficerTermRepository, { findActiveByPersonAndOrg: async () => [{ positionTitle: 'President' }] });

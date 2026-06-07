@@ -40,9 +40,9 @@ import { registerEmailJobs } from '@/handlers/email/jobs';
 import { registerNotifsJobs } from '@/handlers/notifs/jobs';
 import { registerAuditJobs } from '@/handlers/audit/jobs';
 import { registerBookingJobs } from '@/handlers/booking/jobs';
-import { registerDuesJobs, registerStatusRecomputeJob } from '@/handlers/association:member/jobs';
+import { registerDuesJobs } from '@/handlers/association:member/jobs';
 import { registerPersonJobs } from '@/handlers/person/jobs';
-import { registerMembershipJobs } from '@/handlers/membership/jobs';
+import { registerMembershipJobs, registerStatusRecomputeJob } from '@/handlers/member/membership/jobs';
 import { registerSurveyJobs } from '@/handlers/surveys/jobs';
 import { registerBreachJobs, registerTicketJobs, registerTrialExpiryMonitor, registerPastDueMonitor } from '@/handlers/platformadmin/jobs';
 import { registerDomainEventConsumers } from '@/core/domain-event-consumers';
@@ -78,8 +78,8 @@ import { impersonationResolver, impersonationWriteBlock } from '@/middleware/imp
 // PRC Accredited Providers — MIGRATED to generated routes (association:operations).
 // Training lifecycle — MIGRATED to generated routes (completeCustomTraining, publishTraining).
 
-// Elections: deleteElection legacy path hand-wired (not in TypeSpec)
-import { deleteElection } from '@/handlers/elections/deleteElection';
+// Elections: deleteElection — MIGRATED to generated routes (Phase 35,
+// /association/member/elections/{electionId}).
 
 // Email: hand-wired for middleware ordering reasons.
 // - unsubscribeEmail: MUST be registered BEFORE /email/* auth middleware (RFC 8058 public access)
@@ -92,12 +92,11 @@ import { listEmailSuppressions } from '@/handlers/email/listEmailSuppressions';
 import { scheduleAnnouncement } from '@/handlers/communication/scheduleAnnouncement';
 import { getAnnouncementStats } from '@/handlers/communication/getAnnouncementStats';
 
-// Dues: receipt download (hand-wired, Cycle 8)
-import { downloadReceipt } from '@/handlers/dues/downloadReceipt';
 // Documents: byte download (hand-wired, see handler header — browser GET, no x-org-id)
 import { downloadDocument } from '@/handlers/documents/downloadDocument';
 // Stripe webhook endpoint (hand-wired, must precede auth middleware)
-import { stripeWebhookHandler } from '@/handlers/dues/stripeWebhook';// National dashboard export (hand-wired, Cycle 8)
+import { stripeWebhookHandler } from '@/handlers/member/duesspecialassessments/stripeWebhook';
+// National dashboard export (hand-wired, Cycle 8)
 import { exportNationalDashboard } from '@/handlers/association:operations/exportNationalDashboard';
 
 // Survey extras — hand-wired (export returns CSV, clone is convenience endpoint)
@@ -108,13 +107,12 @@ import { listAdminSurveys } from '@/handlers/surveys/listAdminSurveys';
 import { deleteMemberResponses } from '@/handlers/surveys/deleteMemberResponses';
 
 // completeEvent now served via generated TypeSpec route (was hand-wired, duplicate removed)
-
-// One-tap payment token: public validate + checkout (sendPaymentLink now in generated routes)
-import { validatePaymentToken } from '@/handlers/dues/validatePaymentToken';
-import { checkoutPaymentToken } from '@/handlers/dues/checkoutPaymentToken';
+// validatePaymentToken / checkoutPaymentToken / downloadReceipt — migrated to generated routes
+// (Member/DuesSpecialAssessments cutover); hand-wired duplicates removed.
 
 // Public org discovery — hand-wired (not yet in TypeSpec)
 import { listPublicOrgs } from '@/handlers/platformadmin/listPublicOrgs';
+import { createIsolatedFixture, deleteIsolatedFixture } from '@/handlers/test-isolation';
 
 // Breach notification handlers — DPA 2012 / M3-R11
 import { reportBreach } from '@/handlers/platformadmin/reportBreach';
@@ -135,27 +133,23 @@ import { serveEventOgMeta } from '@/handlers/events/serveEventOgMeta';
 import { cancelRegistration } from '@/handlers/events/cancelRegistration';
 
 // Public credential lookup (Wave 3a — Trust Directory)
-import { lookupCredentialPublic } from '@/handlers/association:member/lookupCredentialPublic';
+import { lookupCredentialPublic } from '@/handlers/member/credentials/lookupCredentialPublic';
 
 // ID card — JSON + PDF download (UJ-M02)
 import { getMyIdCard } from '@/handlers/person/getMyIdCard';
 import { getMyIdCardPdf } from '@/handlers/person/getMyIdCardPdf';
-import { getCreditTranscript } from '@/handlers/association:member/getCreditTranscript';
-import { getCreditTranscriptPdf } from '@/handlers/association:member/getCreditTranscriptPdf';
+import { getCreditTranscript } from '@/handlers/member/credits/getCreditTranscript';
+import { getCreditTranscriptPdf } from '@/handlers/member/credits/getCreditTranscriptPdf';
 import { requestDataExport } from '@/handlers/person/requestDataExport';
 import { getDataExportStatus } from '@/handlers/person/getDataExportStatus';
 import { getDataExportDownload } from '@/handlers/person/getDataExportDownload';
 
 // Wave 2b: Credit pipeline, CPD config, compliance, certificates
-import { getCpdConfig } from '@/handlers/association:member/getCpdConfig';
-import { updateCpdConfig } from '@/handlers/association:member/updateCpdConfig';
-import { awardManualCredit } from '@/handlers/association:member/awardManualCredit';
-import { getComplianceReport } from '@/handlers/association:member/getComplianceReport';
-import { refreshCompliance } from '@/handlers/association:member/refreshCompliance';
+// getCpdConfig, updateCpdConfig, awardManualCredit, getComplianceReport, refreshCompliance —
+// migrated to generated routes (member-credits cutover); orphan imports removed.
 import { getMyCredits } from '@/handlers/person/getMyCredits';
-// bulkIssueCertificates — now in generated routes (Phase 35)
-import { verifyCertificatePublic } from '@/handlers/certificates/verifyCertificatePublic';
-import { generateCertificatePdf } from '@/handlers/certificates/generateCertificatePdf';
+// bulkIssueCertificates + verifyCertificatePublic — in generated routes
+import { generateCertificatePdf } from '@/handlers/member/certificates/generateCertificatePdf';
 
 // Special Assessments — now in generated routes (Phase 35)
 
@@ -165,8 +159,7 @@ import { transitionOfficerTerm } from '@/handlers/association:member/transitionO
 // Org-wide dashboard — M4-DASHBOARD AC-M04-005 (hand-wired, not in TypeSpec)
 import { getOrgDashboard } from '@/handlers/association:member/getOrgDashboard';
 
-// Void credit entry — S-G1-07 phantom #4 (hand-wired, handler self-enforces officer position)
-import { voidCreditEntry } from '@/handlers/association:member/voidCreditEntry';
+// voidCreditEntry — migrated to generated routes (member-credits cutover); hand-wired duplicate removed.
 
 // Subscription system (UJ-M03) — pricing tier management and org subscriptions
 import { listPricingTiers } from '@/handlers/platformadmin/listPricingTiers';
@@ -177,9 +170,9 @@ import { getSubscription } from '@/handlers/platformadmin/getSubscription';
 import { cancelSubscription } from '@/handlers/platformadmin/cancelSubscription';
 import { getRevenueAnalytics } from '@/handlers/platformadmin/getRevenueAnalytics';
 import { getOrgHealthScores } from '@/handlers/platformadmin/getOrgHealthScores';
-import { getMySubscription } from '@/handlers/association:member/getMySubscription';
-import { upgradeSubscription } from '@/handlers/association:member/upgradeSubscription';
-import { createSubscriptionCheckout } from '@/handlers/association:member/createSubscriptionCheckout';
+import { getMySubscription } from '@/handlers/member/membership/subscription/getMySubscription';
+import { upgradeSubscription } from '@/handlers/member/membership/subscription/upgradeSubscription';
+import { createSubscriptionCheckout } from '@/handlers/member/membership/subscription/createSubscriptionCheckout';
 
 /**
  * Create and configure the Hono application with proper dependency injection
@@ -282,6 +275,7 @@ export function createApp(config: Config): App {
         '/email/unsubscribe',  // RFC 8058 List-Unsubscribe (signed token in query)
         '/pay/',               // signed one-tap payment token in URL
         '/auth/',              // Better-Auth has its own CSRF + cookie story
+        '/test/',              // G10 test-only fixture endpoints (NODE_ENV-gated above)
       ],
     }),
   );
@@ -312,6 +306,28 @@ export function createApp(config: Config): App {
   // @hand-wired reason="public discovery, not in TypeSpec" wave="pre-migration"
   app.get('/public/orgs', listPublicOrgs as unknown as Handler);
 
+  // @hand-wired reason="test-only fixture isolation, never registered in production" wave="G10"
+  // Routes themselves are guarded by NODE_ENV !== 'production' (handler
+  // returns 404 if the gate trips), AND we skip registration entirely
+  // here so they don't even appear in the route table in prod.
+  if (process.env['NODE_ENV'] !== 'production') {
+    app.post('/test/isolated-fixture', createIsolatedFixture as unknown as Handler);
+    app.delete('/test/isolated-fixture/:orgId', deleteIsolatedFixture as unknown as Handler);
+  }
+
+  // @hand-wired reason="prospective applicants must see tiers before they're members" wave="G12"
+  // /association/member/tiers requires association:member role — applicants
+  // by definition don't have it. Mirror the tier-list handler here under
+  // /public/* so the apply dialog can populate.
+  app.get('/public/org/:orgId/tiers', async (c) => {
+    const { orgId } = c.req.param();
+    const db = c.get('database') as DatabaseInstance;
+    const { membershipTiers } = await import('@/handlers/association:member/repos/membership.schema');
+    const { eq } = await import('drizzle-orm');
+    const rows = await db.select().from(membershipTiers).where(eq(membershipTiers.organizationId, orgId));
+    return c.json({ data: rows });
+  });
+
   // @hand-wired reason="HTML og:meta for social crawlers, not REST" wave="by-design"
   const slugParam = zValidator('param', z.object({ slug: z.string().min(1).max(512) }), validationErrorHandler);
   app.get('/og/events/:slug', slugParam, serveEventOgMeta as unknown as Handler);
@@ -319,10 +335,6 @@ export function createApp(config: Config): App {
   // @hand-wired reason="public credential lookup, no auth by design" wave="Wave-3a"
   const credentialNumberParam = zValidator('param', z.object({ credentialNumber: z.string().min(1).max(512) }), validationErrorHandler);
   app.get('/association/member/credentials/lookup/:credentialNumber', credentialNumberParam, lookupCredentialPublic as unknown as Handler);
-
-  // @hand-wired reason="public certificate verification, no auth by design" wave="Wave-2b"
-  const certificateNumberParam = zValidator('param', z.object({ certificateNumber: z.string().min(1).max(512) }), validationErrorHandler);
-  app.get('/certificates/verify/:certificateNumber', certificateNumberParam, verifyCertificatePublic as unknown as Handler);
 
   // Register auth routes
   registerAuthRoutes(app as App);
@@ -373,11 +385,6 @@ export function createApp(config: Config): App {
   }).passthrough(), validationErrorHandler);
   app.post('/admin/tickets/:id/comments', uuidIdParam, ticketCommentBody, addTicketComment as unknown as Handler);
 
-  // @hand-wired reason="public payment token, must precede auth middleware" wave="by-design"
-  const paymentTokenParam = zValidator('param', z.object({ token: z.string().min(1).max(512) }), validationErrorHandler);
-  app.get('/pay/:token/validate', paymentTokenParam, validatePaymentToken as unknown as Handler);
-  app.post('/pay/:token/checkout', paymentTokenParam, checkoutPaymentToken as unknown as Handler);
-
   // @hand-wired reason="Stripe webhook, must precede auth middleware" wave="by-design"
   app.post('/webhooks/stripe', stripeWebhookHandler as unknown as Handler);
   // @hand-wired reason="RFC 8058 unsubscribe, must precede /email/* auth" wave="by-design"
@@ -427,7 +434,7 @@ export function createApp(config: Config): App {
   // Fail-open org-context for non-association routes that optionally use organizationId.
   // No auth override — per-route auth in generated routes stays as-is.
   // Skips silently when no user or no org context (webhooks, public discovery, etc.)
-  for (const prefix of ['/billing/*', '/booking/*', '/comms/*', '/communications/*', '/storage/*', '/reviews/*', '/audit/*', '/persons/*']) {
+  for (const prefix of ['/billing/*', '/booking/*', '/comms/*', '/communications/*', '/storage/*', '/reviews/*', '/audit/*', '/persons/*', '/surveys/*']) {
     // Auth must run first so orgContextOptionalMiddleware sees the user.
     // authMiddleware is idempotent — per-route auth still enforces role checks.
     app.use(prefix, authMiddleware({ required: false }));
@@ -478,10 +485,8 @@ export function createApp(config: Config): App {
   // (see generated/openapi/routes.ts)
 
   // sendPaymentLink — migrated to generated routes (Phase 35)
+  // downloadReceipt — migrated to generated routes (Member/DuesSpecialAssessments cutover)
   const orgIdParam = zValidator('param', z.object({ organizationId: z.string().uuid() }), validationErrorHandler);
-  // @hand-wired reason="receipt PDF download, not in TypeSpec" wave="Cycle-8"
-  const receiptParams = zValidator('param', z.object({ organizationId: z.string().uuid(), paymentId: z.string().uuid() }), validationErrorHandler);
-  app.get('/org/:organizationId/payments/:paymentId/receipt', receiptParams, authMiddleware(), downloadReceipt as unknown as Handler);
 
   // @hand-wired reason="document byte download, browser GET cannot send x-org-id; self-enforces membership" wave="oli-J-ORG-001"
   const documentIdParam = zValidator('param', z.object({ documentId: z.string().uuid() }), validationErrorHandler);
@@ -499,8 +504,10 @@ export function createApp(config: Config): App {
 
   // updateNomineeStatus — MIGRATED to TypeSpec as updateCandidateStatus
   // (POST /association/member/candidates/{candidateId}/status). Wave 12.
-  // @hand-wired reason="elections deleteElection legacy path, TypeSpec deferred" wave="pre-migration"
-  app.delete('/association/member/elections/:id', uuidIdParam, authMiddleware(), deleteElection as unknown as Handler);
+  // deleteElection — MIGRATED to TypeSpec
+  // (DELETE /association/member/elections/{electionId}). Spec allows deleting
+  // draft OR cancelled elections; implementation in
+  // handlers/association:member/deleteElection.ts.
 
   // @hand-wired reason="ID card + bulk certificate issue, not in TypeSpec" wave="Wave-2b"
   const orgIdShortParam = zValidator('param', z.object({ orgId: z.string().uuid() }), validationErrorHandler);
@@ -554,13 +561,8 @@ export function createApp(config: Config): App {
   // @hand-wired reason="org-wide dashboard, not in TypeSpec" wave="M4-DASHBOARD"
   app.get('/association/member/org/:organizationId/dashboard', orgIdParam, authMiddleware(), getOrgDashboard as unknown as Handler);
 
-  // @hand-wired reason="bulk-void manual credit awards by activityName, handler self-enforces officer position" wave="S-G1-07"
-  app.post(
-    '/association/member/credits/void-event',
-    authMiddleware(),
-    orgContextMiddleware(),
-    voidCreditEntry as unknown as Handler,
-  );
+  // void-event hand-wired duplicate killed by member-credits cutover (Cr.7).
+  // Generated route at routes.ts:1043 serves /association/member/credits/void-event.
 
   // @hand-wired reason="admin pricing tier CRUD, not in TypeSpec" wave="UJ-M03"
   const pricingBody = zValidator('json', z.object({

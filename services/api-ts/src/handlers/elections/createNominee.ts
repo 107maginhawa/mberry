@@ -15,7 +15,7 @@ import { ElectionsRepository } from './repos/elections.repo';
 import { memberships } from '../association:member/repos/membership.schema';
 import { domainEvents } from '@/core/domain-events';
 import type { Session } from '@/types/auth';
-import { auditAction } from '@/utils/audit';
+import { auditAction } from '@/core/audit/audit-action';
 
 const createNomineeSchema = z.object({
   positionId: z.string().uuid('positionId must be a valid UUID'),

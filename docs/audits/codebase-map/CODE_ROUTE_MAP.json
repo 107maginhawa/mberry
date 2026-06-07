@@ -22,15 +22,6 @@
       "params": [],
       "module": "apps/memberry"
     },
-    "/join": {
-      "method": "*",
-      "page_component": "JoinPage",
-      "layout": null,
-      "middleware": [],
-      "auth_required": null,
-      "params": [],
-      "module": "apps/memberry"
-    },
     "/onboarding": {
       "method": "*",
       "page_component": "OnboardingPage",
@@ -293,7 +284,7 @@
       ],
       "module": "apps/memberry"
     },
-    "/org/$slug": {
+    "/join/$slug": {
       "method": "*",
       "page_component": "PublicOrgProfile",
       "layout": null,
@@ -302,6 +293,15 @@
       "params": [
         "slug"
       ],
+      "module": "apps/memberry"
+    },
+    "/join/": {
+      "method": "*",
+      "page_component": "JoinPage",
+      "layout": null,
+      "middleware": [],
+      "auth_required": null,
+      "params": [],
       "module": "apps/memberry"
     },
     "/pay/$token": {

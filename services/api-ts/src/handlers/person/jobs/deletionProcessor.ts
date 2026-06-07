@@ -63,11 +63,10 @@ export async function processDeletions(ctx: DeletionContext): Promise<DeletionRe
       // Kill sessions before PII scrub — T-19-05
       await db.delete(schema.session).where(eq(schema.session.userId, person.id));
 
-      // Cascade deletion across all modules (flow 6.6)
-      const cascadeResult = await executeCascadeDeletion({ db, personId: person.id, logger });
-      if (cascadeResult.errors > 0) {
-        logger?.warn({ personId: person.id, cascadeErrors: cascadeResult.errors }, 'Cascade completed with errors');
-      }
+      // Cascade deletion across all modules (flow 6.6) — fire-and-forget
+      // event emit. Per-module subscribers log their own failures; no
+      // aggregate outcome to inspect here.
+      await executeCascadeDeletion({ db, personId: person.id, logger });
 
       // Anonymize PII
       await db

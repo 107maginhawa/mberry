@@ -3,12 +3,9 @@ import type { DatabaseInstance } from '@/core/database';
 import type { CompleteTrainingEnrollmentBody, CompleteTrainingEnrollmentParams } from '@/generated/openapi/validators';
 import { NotFoundError } from '@/core/errors';
 import { TrainingEnrollmentRepository, TrainingRepository } from './repos/training.repo';
-import { CreditEntryRepository } from '../association:member/repos/credits.repo';
-import { getCycleForDate } from '../association:member/utils/credit-cycle';
+import { CreditEntryRepository } from '@/handlers/association:member/repos/credits.repo';
+import { getCycleForDate } from '@/handlers/member/credits/utils/credit-cycle';
 import { domainEvents } from '@/core/domain-events';
-import { auditAction } from '@/utils/audit';
-import { requirePosition } from '@/utils/officer-check';
-import { POSITION_TITLES } from '@/utils/position-titles';
 import { assertValidTransition, TRAINING_ENROLLMENT_VALID_TRANSITIONS } from '@/utils/status-transitions';
 
 /**
@@ -30,9 +27,6 @@ export async function completeTrainingEnrollment(
 ): Promise<Response> {
   const user = ctx.get('user');
   if (!user) return ctx.json({ error: 'Unauthorized' }, 401);
-
-  const denied = await requirePosition(ctx, [POSITION_TITLES.SOCIETY_OFFICER, POSITION_TITLES.PRESIDENT]);
-  if (denied) return denied;
 
   const params = ctx.req.valid('param');
   const body = ctx.req.valid('json');
@@ -105,14 +99,9 @@ export async function completeTrainingEnrollment(
       .catch(() => {});
   }
 
-  await auditAction(ctx, {
-    action: 'complete',
-    resourceType: 'training-enrollment',
-    resourceId: completed.id,
-    description: 'Training enrollment completed',
-    details: creditAwarded ? { creditAwarded } : undefined,
-    eventSubType: 'training.training-completed',
-  });
+  ctx.set('auditResourceId', completed.id);
+  ctx.set('auditDescription', 'Training enrollment completed');
+  ctx.set('auditDetails', { creditAwarded });
 
   return ctx.json({ ...completed, creditAwarded }, 200);
 }

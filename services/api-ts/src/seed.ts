@@ -27,7 +27,7 @@ import { persons } from './handlers/person/repos/person.schema';
 
 // Retained for main summary
 import { notifications } from './handlers/notifs/repos/notification.schema';
-import { certificates } from './handlers/certificates/repos/certificates.schema';
+import { certificates } from './handlers/member/certificates/repos/certificates.schema';
 import { documents } from './handlers/documents/repos/documents.schema';
 import { courses } from './handlers/association:operations/repos/training.schema';
 import { DATABASE_URL, API_URL } from './seed/helpers';

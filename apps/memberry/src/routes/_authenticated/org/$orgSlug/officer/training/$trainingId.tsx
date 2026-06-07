@@ -9,7 +9,7 @@ import { getTrainingOptions } from '@monobase/sdk-ts/generated/react-query'
 import { PageShell } from '@/components/patterns/page-shell'
 import { GlassCard } from '@/components/motion/glass-card'
 import { ListSkeleton } from '@/components/patterns/skeleton-loader'
-import { useOrg } from '@/hooks/useOrg'
+import { useOrg } from '@/hooks/use-org'
 
 /** Runtime training shape from API (SDK returns unknown for GetTraining) */
 interface RuntimeTraining {
@@ -60,7 +60,7 @@ function TrainingDetail() {
   const [tab, setTab] = useState<Tab>('details')
 
   const { data, isLoading, isError, error } = useQuery(
-    getTrainingOptions({ path: { trainingId } })
+    getTrainingOptions({ path: { trainingId }, headers: { 'x-org-id': orgId } })
   )
 
   // SDK GetTraining returns unknown; runtime response may wrap in .data

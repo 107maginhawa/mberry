@@ -2,7 +2,7 @@ import { describe, test, expect, vi, beforeEach } from '@/test/vitest-shim'
 import { screen } from '@testing-library/react'
 import { renderWithProviders } from '@/test/utils'
 import { OrgPickerSheet } from './org-picker-sheet'
-import type { OrgMembership } from '@/hooks/useMyOrgs'
+import type { OrgMembership } from '@/hooks/use-my-orgs'
 
 // Router (Link, useNavigate) provided by global mock in test-setup-root.ts.
 // @monobase/ui rendered as real components against happy-dom.

@@ -1,13 +1,26 @@
+// WF-007 — Session Management
 // Business Rules: Security flow coverage for Phase 5 hardening
 import { test, expect } from './helpers/test-fixture'
 import { signIn } from './helpers/auth'
 import { SEED_OFFICER_EMAIL, TEST_PASSWORD } from './helpers/test-config'
+import { captureAnyApiSuccess } from './helpers/real-flow'
 
 test.describe('Security Flows', () => {
+  test('authenticated user can access protected routes', async ({ page }) => {
+    const respP = captureAnyApiSuccess(page)
+    await signIn(page, SEED_OFFICER_EMAIL, TEST_PASSWORD)
+    const resp = await respP
+    expect(resp?.status()).toBe(200)
+    expect(resp?.ok()).toBe(true)
+    await page.goto('/my/dashboard')
+    expect(page.url()).not.toContain('/auth/')
+    const body = page.locator('body')
+    await expect(body).not.toBeEmpty()
+  })
+
   test('unauthenticated user cannot access member dashboard', async ({ page }) => {
     await page.context().clearCookies()
     await page.goto('/my/dashboard')
-    await page.waitForLoadState('networkidle')
     await page.waitForTimeout(2000)
     expect(page.url()).toContain('/auth/')
   })
@@ -15,30 +28,16 @@ test.describe('Security Flows', () => {
   test('unauthenticated user cannot access settings', async ({ page }) => {
     await page.context().clearCookies()
     await page.goto('/my/settings')
-    await page.waitForLoadState('networkidle')
     await page.waitForTimeout(2000)
     expect(page.url()).toContain('/auth/')
   })
 
-  test('authenticated user can access protected routes', async ({ page }) => {
-    await signIn(page, SEED_OFFICER_EMAIL, TEST_PASSWORD)
-    await page.goto('/my/dashboard')
-    await page.waitForLoadState('networkidle')
-    // Should NOT redirect to auth
-    expect(page.url()).not.toContain('/auth/')
-    // Dashboard should show some content
-    const body = page.locator('body')
-    await expect(body).not.toBeEmpty()
-  })
-
   test('error case — invalid credentials show error', async ({ page }) => {
     await page.goto('/auth/sign-in')
-    await page.waitForLoadState('networkidle')
-
     await page.getByLabel('Email', { exact: true }).fill('nonexistent@test.com')
     const passwordInput = page.getByLabel('Password', { exact: true })
     await passwordInput.click()
-    await passwordInput.pressSequentially('WrongPass123!', { delay: 10 })
+    await passwordInput.fill('WrongPass123!')
 
     const submit = page.getByRole('button', { name: /login|sign in/i })
     await submit.click()

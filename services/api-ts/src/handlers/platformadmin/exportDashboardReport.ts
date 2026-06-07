@@ -11,7 +11,7 @@ import type { Context } from 'hono';
 import type { DatabaseInstance } from '@/core/database';
 import { DashboardRepository } from './repos/dashboard.repo';
 import type { NewDashboardExportLog } from './repos/dashboard-snapshot.schema';
-import { auditAction } from '@/utils/audit';
+import { auditAction } from '@/core/audit/audit-action';
 
 type ReportType = 'association_summary' | 'dues_collection' | 'cpd_compliance' | 'activity';
 type OutputFormat = 'pdf' | 'csv';

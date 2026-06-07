@@ -15,7 +15,6 @@ import type { MarkInvoiceUncollectibleParams } from '@/generated/openapi/validat
 import type { Session } from '@/types/auth';
 import { InvoiceRepository } from './repos/billing.repo';
 import { PersonRepository } from '../person/repos/person.repo';
-import { auditAction } from '@/utils/audit';
 
 /**
  * markInvoiceUncollectible
@@ -29,7 +28,9 @@ export async function markInvoiceUncollectible(
   ctx: ValidatedContext<never, never, MarkInvoiceUncollectibleParams>
 ): Promise<Response> {
   const database = ctx.get('database');
-  const logger = ctx.get('logger');
+  const baseLogger = ctx.get('logger');
+  const traceId = ctx.get('requestId');
+  const logger = baseLogger?.child?.({ traceId, module: 'billing' }) ?? baseLogger;
 
   // Get authenticated session (guaranteed by middleware)
   const session = ctx.get('session') as Session;
@@ -39,7 +40,7 @@ export async function markInvoiceUncollectible(
   const params = ctx.req.valid('param');
   const invoiceId = params.invoice;
 
-  logger.info({ invoiceId, userId: user.id }, 'Marking invoice as uncollectible');
+  logger.info({ action: 'markInvoiceUncollectible.1', invoiceId, userId: user.id }, 'Marking invoice as uncollectible');
 
   // Create repository instances
   const invoiceRepo = new InvoiceRepository(database, logger);
@@ -92,7 +93,7 @@ export async function markInvoiceUncollectible(
   // Deferred: uncollectible cleanup pipeline — billing v2
   // Cancel pending payment intents, update accounting, send notifications, create audit log
 
-  logger.info({
+  logger.info({ action: 'markInvoiceUncollectible.2',
     invoiceId,
     invoiceNumber: updatedInvoice.invoiceNumber,
     merchantId: updatedInvoice.merchant,
@@ -101,20 +102,15 @@ export async function markInvoiceUncollectible(
     markedUncollectibleBy: user.id
   }, 'Invoice marked as uncollectible successfully');
 
-  await auditAction(ctx, {
-    action: 'update',
-    resourceType: 'invoice',
-    resourceId: invoiceId,
-    description: `Invoice ${updatedInvoice.invoiceNumber} marked uncollectible (${updatedInvoice.total} ${updatedInvoice.currency})`,
-    eventSubType: 'financial.invoice-uncollectible',
-    details: {
+  ctx.set('auditResourceId', invoiceId);
+  ctx.set('auditDescription', `Invoice ${updatedInvoice.invoiceNumber} marked uncollectible (${updatedInvoice.total} ${updatedInvoice.currency})`);
+  ctx.set('auditDetails', {
       invoiceNumber: updatedInvoice.invoiceNumber,
       total: updatedInvoice.total,
       currency: updatedInvoice.currency,
       customerId: updatedInvoice.customer,
       merchantId: updatedInvoice.merchant,
-    },
-  });
+    });
 
   // Format response to match TypeSpec Invoice model
   const response = {

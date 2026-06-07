@@ -1,7 +1,7 @@
 import { useQuery } from '@tanstack/react-query'
 import { listMyCertificatesOptions } from '@monobase/sdk-ts/generated/react-query'
 import type { Certificate } from '@monobase/sdk-ts/generated/types.gen'
-import { useOrgContext } from '@/hooks/useOrgContext'
+import { useOrgContext } from '@/hooks/use-org-context'
 import { EmptyState } from '@/components/patterns/empty-state'
 import { CardSkeleton } from '@/components/patterns/skeleton-loader'
 import { GlassCard } from '@/components/motion/glass-card'

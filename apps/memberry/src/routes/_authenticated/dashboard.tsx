@@ -448,6 +448,7 @@ function OrgCard({ membership: m, invoices }: { membership: any; invoices: any[]
             </div>
             <Progress
               value={Math.min(100, periodProgress * 100)}
+              aria-label="Credit period progress"
               className={`h-1.5 bg-[var(--color-border-light)] ${
                 (daysLeft ?? 0) <= 0 ? '[&>div]:bg-[var(--color-error)]' :
                 (daysLeft ?? 0) <= 30 ? '[&>div]:bg-[var(--color-warning)]' : '[&>div]:bg-[var(--color-success)]'

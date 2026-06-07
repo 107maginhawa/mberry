@@ -153,7 +153,7 @@ export function OfficerSidebar({ orgName, userEmail, userName, role, positions }
           <span className="text-white font-bold text-sm">M</span>
         </div>
         {orgName && (
-          <p className="mt-2 text-xs text-white/50 truncate hidden lg:block" title={orgName}>
+          <p className="mt-2 text-xs text-white/85 truncate hidden lg:block" title={orgName}>
             {orgName}
           </p>
         )}
@@ -164,7 +164,7 @@ export function OfficerSidebar({ orgName, userEmail, userName, role, positions }
         {filteredSections.map((section, si) => (
           <div key={si} className={si > 0 ? "mt-3" : ""}>
             {section.label && (
-              <div className="hidden lg:block px-6 py-1.5 text-[0.625rem] font-semibold uppercase tracking-[1.5px] text-white/40">
+              <div className="hidden lg:block px-6 py-1.5 text-[0.625rem] font-semibold uppercase tracking-[1.5px] text-white/80">
                 {section.label}
               </div>
             )}
@@ -176,10 +176,10 @@ export function OfficerSidebar({ orgName, userEmail, userName, role, positions }
                 key={`${to}-${idx}`}
                 to={to}
                 title={label}
-                className="flex items-center justify-center lg:justify-start gap-2.5 px-0 lg:px-6 py-2.5 text-sm text-white/65 hover:text-white hover:bg-white/[0.08] transition-colors duration-150"
+                className="flex items-center justify-center lg:justify-start gap-2.5 px-0 lg:px-6 py-2.5 text-sm text-white/80 hover:text-white hover:bg-white/[0.08] transition-colors duration-150"
                 activeProps={{
                   className:
-                    "flex items-center justify-center lg:justify-start gap-2.5 px-0 lg:px-6 py-2.5 text-sm text-white font-semibold bg-white/[0.12] border-l-[3px] border-[var(--color-cream)] lg:pl-[21px]",
+                    "flex items-center justify-center lg:justify-start gap-2.5 px-0 lg:px-6 py-2.5 text-sm text-white font-semibold bg-[var(--color-primary-mid)] border-l-[3px] border-[var(--color-cream)] lg:pl-[21px]",
                 }}
                 activeOptions={{ exact: false }}
               >                <NavIcon icon={Icon} className="opacity-70" />
@@ -195,7 +195,7 @@ export function OfficerSidebar({ orgName, userEmail, userName, role, positions }
         <Link
           to="/dashboard"
           title="Back to Member View"
-          className="flex items-center justify-center lg:justify-start gap-2 px-2 py-2 text-xs text-white/50 hover:text-white hover:bg-white/[0.08] rounded-[6px] transition-colors"
+          className="flex items-center justify-center lg:justify-start gap-2 px-2 py-2 text-xs text-white/85 hover:text-white hover:bg-white/[0.08] rounded-[6px] transition-colors"
         >
           <ArrowLeft size={14} />
           <span className="hidden lg:inline">Back to Member View</span>
@@ -212,8 +212,8 @@ export function OfficerSidebar({ orgName, userEmail, userName, role, positions }
           </div>
           <div className="min-w-0 hidden lg:block">
             {userName && <p className="text-sm text-white font-medium truncate">{userName}</p>}
-            {role && <p className="text-xs text-white/50">{role}</p>}
-            {!userName && userEmail && <p className="text-xs text-white/50 truncate">{userEmail}</p>}
+            {role && <p className="text-xs text-white/85">{role}</p>}
+            {!userName && userEmail && <p className="text-xs text-white/85 truncate">{userEmail}</p>}
           </div>
         </div>
       </div>

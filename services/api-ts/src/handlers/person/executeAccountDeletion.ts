@@ -34,7 +34,9 @@ export async function executeAccountDeletion(
 ): Promise<Response> {
   const personId = ctx.req.param('personId')!;
   const db = ctx.get('database') as DatabaseInstance;
-  const logger = ctx.get('logger');
+  const baseLogger = ctx.get('logger');
+  const traceId = ctx.get('requestId');
+  const logger = baseLogger?.child?.({ traceId, module: 'person' }) ?? baseLogger;
   const repo = new PersonRepository(db, logger);
 
   const person = await repo.findOneById(personId);
@@ -59,11 +61,10 @@ export async function executeAccountDeletion(
   // Kill sessions first — before PII is scrubbed
   await db.delete(schema.session).where(eq(schema.session.userId, personId));
 
-  // Cascade deletion across all modules (flow 6.6)
-  const cascadeResult = await executeCascadeDeletion({ db, personId, logger });
-  if (cascadeResult.errors > 0) {
-    logger?.warn({ personId, cascadeErrors: cascadeResult.errors }, 'Cascade completed with errors');
-  }
+  // Cascade deletion across all modules (flow 6.6) — fire-and-forget event
+  // emit. Per-module subscribers in core/domain-event-consumers.ts run their
+  // own try/catch + logging; we no longer aggregate per-step outcomes here.
+  await executeCascadeDeletion({ db, personId, logger });
 
   // Anonymize PII — keep the record but scrub all personal data
   await repo.updateOneById(personId, {
@@ -102,11 +103,11 @@ export async function executeAccountDeletion(
         details: { originalRequestDate: person.deletionRequestedAt },
       });
     } catch (e) {
-      logger?.error({ error: e }, 'Failed to log deletion execution audit');
+      logger?.error({ action: 'executeAccountDeletion.1', error: e }, 'Failed to log deletion execution audit');
     }
   }
 
-  logger?.info({ personId }, 'Account deletion executed — PII anonymized');
+  logger?.info({ action: 'executeAccountDeletion.2', personId }, 'Account deletion executed — PII anonymized');
 
   domainEvents.emit('person.anonymized', { personId }).catch(() => {});
 

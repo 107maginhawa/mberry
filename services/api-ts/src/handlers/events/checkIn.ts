@@ -73,8 +73,10 @@ export async function checkIn(ctx: Context): Promise<Response> {
     }
   } catch (err) {
     // Non-blocking — credit pipeline failure shouldn't prevent check-in
-    const logger = ctx.get('logger');
-    logger?.warn({ error: err, eventId }, 'Failed to enqueue attendance.confirmed job');
+    const baseLogger = ctx.get('logger');
+    const traceId = ctx.get('requestId');
+    const logger = baseLogger?.child?.({ traceId, module: 'events' }) ?? baseLogger;
+    logger?.warn({ action: 'checkIn.1', error: err, eventId }, 'Failed to enqueue attendance.confirmed job');
   }
 
   // Post-event NPS survey trigger (non-blocking)

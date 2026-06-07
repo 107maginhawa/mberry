@@ -1,21 +1,24 @@
+// WF-070 — Credit Reporting: officer compliance dashboard
 import { test, expect } from '../helpers/test-fixture'
-import { signIn } from '../helpers/auth'
 import { SEED_OFFICER_EMAIL, TEST_PASSWORD } from '../helpers/test-config'
+import { authStateFile } from '../helpers/auth-state'
+import { captureRouteHydration } from '../helpers/real-flow'
 
+
+test.use({ storageState: authStateFile('officer') })
 const ORG_ID = 'ed8e3a96-8126-4341-be42-e6eb7940c562'
+const REPORTS = /\/(credits|reports)/
 
 test.describe('Credit Compliance Report', () => {
-  test.beforeEach(async ({ page }) => {
-    await signIn(page, SEED_OFFICER_EMAIL, TEST_PASSWORD)
-  })
-
-  test('report page loads with heading and summary cards', async ({ page }) => {
+test('report page loads with heading and summary cards', async ({ page }) => {
+    const respP = captureRouteHydration(page, REPORTS)
     await page.goto(`/org/${ORG_ID}/officer/reports/credits`)
-    await page.waitForLoadState('networkidle')
-
     await expect(
       page.getByRole('heading', { name: /credit compliance report/i }),
     ).toBeVisible({ timeout: 10000 })
+    const resp = await respP
+    expect(resp?.status()).toBe(200)
+    expect(resp?.ok()).toBe(true)
 
     // Summary cards exist (filter buttons)
     await expect(page.getByText(/total tracked/i)).toBeVisible({ timeout: 10000 })
@@ -24,8 +27,6 @@ test.describe('Credit Compliance Report', () => {
 
   test('filter buttons update the member table', async ({ page }) => {
     await page.goto(`/org/${ORG_ID}/officer/reports/credits`)
-    await page.waitForLoadState('networkidle')
-
     // Table should be visible
     const table = page.locator('table')
     await expect(table).toBeVisible({ timeout: 10000 })
@@ -42,8 +43,6 @@ test.describe('Credit Compliance Report', () => {
 
   test('no NaN or Infinity visible in progress bars', async ({ page }) => {
     await page.goto(`/org/${ORG_ID}/officer/reports/credits`)
-    await page.waitForLoadState('networkidle')
-
     // Check that no NaN or Infinity text appears on the page
     const pageText = await page.locator('body').textContent()
     expect(pageText).not.toContain('NaN')

@@ -3,9 +3,6 @@ import type { DatabaseInstance } from '@/core/database';
 import type { DeleteCourseParams } from '@/generated/openapi/validators';
 import { NotFoundError } from '@/core/errors';
 import { CourseRepository } from './repos/training.repo';
-import { auditAction } from '@/utils/audit';
-import { requirePosition } from '@/utils/officer-check';
-import { POSITION_TITLES } from '@/utils/position-titles';
 
 /**
  * deleteCourse
@@ -19,9 +16,6 @@ export async function deleteCourse(
   const user = ctx.get('user');
   if (!user) return ctx.json({ error: 'Unauthorized' }, 401);
 
-  const denied = await requirePosition(ctx, [POSITION_TITLES.SOCIETY_OFFICER, POSITION_TITLES.PRESIDENT]);
-  if (denied) return denied;
-
   const params = ctx.req.valid('param');
   const db = ctx.get('database') as DatabaseInstance;
   const logger = ctx.get('logger');
@@ -32,12 +26,8 @@ export async function deleteCourse(
 
   await repo.deleteOneById(params.courseId, user.id);
 
-  await auditAction(ctx, {
-    action: 'delete',
-    resourceType: 'course',
-    resourceId: params.courseId,
-    description: 'Course deleted',
-  });
+  ctx.set('auditResourceId', params.courseId);
+  ctx.set('auditDescription', 'Course deleted');
 
   return ctx.json({ success: true }, 200);
 }

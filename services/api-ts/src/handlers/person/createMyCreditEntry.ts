@@ -2,10 +2,11 @@ import type { ValidatedContext } from '@/types/app';
 import type { DatabaseInstance } from '@/core/database';
 import { UnauthorizedError, ValidationError } from '@/core/errors';
 import type { CreateMyCreditEntryBody } from '@/generated/openapi/validators';
-import { CreditService } from '@/handlers/association:member/services/credit.service';
+import { CreditService } from '@/handlers/member/credits/services/credit.service';
 import { DocumentRepository } from '@/handlers/documents/repos/documents.repo';
+import { memberships } from '@/handlers/association:member/repos/membership.schema';
+import { and, eq, inArray } from 'drizzle-orm';
 import { domainEvents } from '@/core/domain-events';
-import { auditAction } from '@/utils/audit';
 
 // M10-R5: supporting documents must be PDF or image, max 5MB.
 const MAX_SUPPORTING_DOC_BYTES = 5 * 1024 * 1024;
@@ -34,6 +35,30 @@ export async function createMyCreditEntry(
 
   if (!b['activityName'] || (b['creditAmount'] as number) <= 0) {
     throw new ValidationError('activityName required and creditAmount must be positive');
+  }
+
+  // G13: organizationId is optional from /my/credits/log (member doesn't
+  // pick an org in the UI). Default to the user's first active/grace
+  // membership. CreditService.createEntry requires an orgId to compute
+  // the cycle window — without this fallback the call throws and the
+  // form toasts "Failed to add credit entry".
+  if (!b['organizationId']) {
+    const [m] = await db
+      .select({ orgId: memberships.organizationId })
+      .from(memberships)
+      .where(
+        and(
+          eq(memberships.personId, personId),
+          inArray(memberships.status, ['active', 'gracePeriod', 'pendingPayment']),
+        ),
+      )
+      .limit(1);
+    if (!m) {
+      throw new ValidationError(
+        'No active membership found — credit entries require an organization context',
+      );
+    }
+    b['organizationId'] = m.orgId;
   }
 
   // [M10-R5] Validate supporting document: PDF/image only, max 5MB.
@@ -82,12 +107,8 @@ export async function createMyCreditEntry(
     })
     .catch(() => {});
 
-  await auditAction(ctx, {
-    action: 'create',
-    resourceType: 'credit-entry',
-    resourceId: entry.id,
-    description: `Self-service credit entry: ${b['activityName']} (${b['creditAmount']} credits)`,
-  });
+  ctx.set('auditResourceId', entry.id);
+  ctx.set('auditDescription', `Self-service credit entry: ${b['activityName']} (${b['creditAmount']} credits)`);
 
   return ctx.json(entry, 201);
 }

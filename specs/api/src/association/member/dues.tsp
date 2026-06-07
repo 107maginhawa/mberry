@@ -803,6 +803,7 @@ namespace Association.Member.Dues {
     @post
     @useAuth(bearerAuth)
     @extension("x-security-required-roles", #["association:admin"])
+    @extension("x-audit", #{ action: "create", resourceType: "dues-config" })
     createDuesConfig(
       @body body: DuesConfigCreateRequest
     ): ApiCreatedResponse<DuesConfig>
@@ -843,6 +844,7 @@ namespace Association.Member.Dues {
     @route("/{duesConfigId}")
     @useAuth(bearerAuth)
     @extension("x-security-required-roles", #["association:admin"])
+    @extension("x-audit", #{ action: "update", resourceType: "dues-config" })
     updateDuesConfig(
       @path duesConfigId: string,
       @body updates: DuesConfigUpdateRequest
@@ -857,6 +859,7 @@ namespace Association.Member.Dues {
     @route("/{duesConfigId}")
     @useAuth(bearerAuth)
     @extension("x-security-required-roles", #["association:admin"])
+    @extension("x-audit", #{ action: "delete", resourceType: "dues-config" })
     deleteDuesConfig(
       @path duesConfigId: string
     ): ApiNoContentResponse
@@ -872,6 +875,7 @@ namespace Association.Member.Dues {
     @post
     @useAuth(bearerAuth)
     @extension("x-security-required-roles", #["association:admin"])
+    @extension("x-audit", #{ action: "create", resourceType: "dues-invoice" })
     createDuesInvoice(
       @body body: DuesInvoice
     ): ApiCreatedResponse<DuesInvoice>
@@ -912,6 +916,7 @@ namespace Association.Member.Dues {
     @route("/{invoiceId}")
     @useAuth(bearerAuth)
     @extension("x-security-required-roles", #["association:admin"])
+    @extension("x-audit", #{ action: "update", resourceType: "dues-invoice" })
     updateDuesInvoice(
       @path invoiceId: string,
       @body updates: DuesInvoice
@@ -926,6 +931,7 @@ namespace Association.Member.Dues {
     @route("/{invoiceId}")
     @useAuth(bearerAuth)
     @extension("x-security-required-roles", #["association:admin"])
+    @extension("x-audit", #{ action: "delete", resourceType: "dues-invoice" })
     deleteDuesInvoice(
       @path invoiceId: string
     ): ApiNoContentResponse
@@ -939,6 +945,7 @@ namespace Association.Member.Dues {
     @route("/generate")
     @useAuth(bearerAuth)
     @extension("x-security-required-roles", #["association:admin"])
+    @extension("x-audit", #{ action: "create", resourceType: "dues-invoice" })
     generateDuesInvoicesForOrg(
       @body body: GenerateInvoicesRequest
     ): ApiOkResponse<PaginatedResponse<DuesInvoice>>
@@ -952,6 +959,7 @@ namespace Association.Member.Dues {
     @route("/{invoiceId}/mark-paid")
     @useAuth(bearerAuth)
     @extension("x-security-required-roles", #["association:admin"])
+    @extension("x-audit", #{ action: "mark-paid", resourceType: "dues-invoice" })
     markDuesInvoicePaid(
       @path invoiceId: string,
       @body body: MarkInvoicePaidRequest
@@ -983,6 +991,7 @@ namespace Association.Member.Dues {
     @route("/{organizationId}/recalculate")
     @useAuth(bearerAuth)
     @extension("x-security-required-roles", #["association:admin"])
+    @extension("x-audit", #{ action: "update", resourceType: "aging-bucket" })
     recalculateAgingBucket(
       @path organizationId: string
     ): ApiOkResponse<AgingBucket>
@@ -1119,6 +1128,7 @@ namespace Association.Member.Dues {
     @post
     @useAuth(bearerAuth)
     @extension("x-security-required-roles", #["association:admin"])
+    @extension("x-audit", #{ action: "create", resourceType: "dues-payment" })
     recordDuesPayment(
       @body body: RecordPaymentRequest
     ): ApiCreatedResponse<DuesPayment>
@@ -1132,6 +1142,7 @@ namespace Association.Member.Dues {
     @route("/{paymentId}/refund")
     @useAuth(bearerAuth)
     @extension("x-security-required-roles", #["association:admin"])
+    @extension("x-audit", #{ action: "update", resourceType: "dues-payment" })
     refundDuesPayment(
       @path paymentId: string,
       @body body: DuesRefundRequest
@@ -1150,6 +1161,7 @@ namespace Association.Member.Dues {
     @route("/submit-proof")
     @useAuth(bearerAuth)
     @extension("x-security-required-roles", #["association:member"])
+    @extension("x-audit", #{ action: "create", resourceType: "dues-payment-proof" })
     submitPaymentProof(
       @body body: SubmitPaymentProofRequest
     ): ApiCreatedResponse<DuesPayment>
@@ -1164,6 +1176,7 @@ namespace Association.Member.Dues {
     @route("/{paymentId}/confirm")
     @useAuth(bearerAuth)
     @extension("x-security-required-roles", #["association:admin"])
+    @extension("x-audit", #{ action: "approve", resourceType: "dues-payment-proof" })
     confirmPaymentProof(
       @path paymentId: string,
       @body body: ConfirmPaymentProofRequest
@@ -1179,6 +1192,7 @@ namespace Association.Member.Dues {
     @route("/{paymentId}/reject")
     @useAuth(bearerAuth)
     @extension("x-security-required-roles", #["association:admin"])
+    @extension("x-audit", #{ action: "deny", resourceType: "dues-payment-proof" })
     rejectPaymentProof(
       @path paymentId: string,
       @body body: RejectPaymentProofRequest
@@ -1223,6 +1237,7 @@ namespace Association.Member.Dues {
     @route("/{organizationId}")
     @useAuth(bearerAuth)
     @extension("x-security-required-roles", #["association:admin"])
+    @extension("x-audit", #{ action: "update", resourceType: "dues-gateway" })
     upsertDuesGatewayConfig(
       @path organizationId: string,
       @body body: GatewayConfigRequest
@@ -1250,6 +1265,7 @@ namespace Association.Member.Dues {
     @route("/{organizationId}")
     @useAuth(bearerAuth)
     @extension("x-security-required-roles", #["association:admin"])
+    @extension("x-audit", #{ action: "delete", resourceType: "dues-gateway" })
     disconnectDuesGateway(
       @path organizationId: string
     ): ApiNoContentResponse
@@ -1276,6 +1292,7 @@ namespace Association.Member.Dues {
     @route("/{organizationId}")
     @useAuth(bearerAuth)
     @extension("x-security-required-roles", #["association:admin"])
+    @extension("x-audit", #{ action: "update", resourceType: "dues-funds" })
     upsertDuesFunds(
       @path organizationId: string,
       @body body: UpsertFundsRequest

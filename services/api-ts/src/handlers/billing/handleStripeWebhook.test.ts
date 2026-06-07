@@ -625,3 +625,161 @@ describe('handleStripeWebhook — unknown event types', () => {
     expect(resp.status).toBe(200);
   });
 });
+
+// ---------------------------------------------------------------------------
+// Observability: structured log fields (Wave 4.5)
+// ---------------------------------------------------------------------------
+
+describe('handleStripeWebhook — observability: structured log fields', () => {
+  /**
+   * Make a capturing logger that records all log calls.
+   * Also implements .child() so the handler's child-logger pattern works:
+   *   baseLogger.child({ traceId, module }) → childLogger (merged bindings)
+   * This lets tests assert that the child logger is used and carries the right fields.
+   */
+  function makeCapturingLogger(calls: any[]) {
+    function makeChild(inherited: Record<string, any>) {
+      const child = {
+        debug: (obj: any, msg?: string) => calls.push({ level: 'debug', ...inherited, ...obj, msg }),
+        info:  (obj: any, msg?: string) => calls.push({ level: 'info',  ...inherited, ...obj, msg }),
+        warn:  (obj: any, msg?: string) => calls.push({ level: 'warn',  ...inherited, ...obj, msg }),
+        error: (obj: any, msg?: string) => calls.push({ level: 'error', ...inherited, ...obj, msg }),
+        child: (bindings: Record<string, any>) => makeChild({ ...inherited, ...bindings }),
+      };
+      return child;
+    }
+    return makeChild({});
+  }
+
+  /**
+   * Build a Hono app that injects a capturing logger and requestId, then
+   * dispatches the handler directly (no middleware stack needed for unit test).
+   */
+  async function buildObsApp(deps: {
+    verifySignature?: (rawBody: string, sig: string) => Promise<any>;
+    invoiceById?: (id: string) => any;
+    allInvoices?: any[];
+    calls: any[];
+  }) {
+    const {
+      verifySignature = async () => { throw new Error('no sig'); },
+      invoiceById = () => makeInvoice(),
+      allInvoices = [makeInvoice()],
+      calls,
+    } = deps;
+
+    const { handleStripeWebhook } = await import('./handleStripeWebhook');
+    const { InvoiceRepository } = await import('./repos/billing.repo');
+    const { MerchantAccountRepository } = await import('./repos/billing.repo');
+
+    const app = new Hono();
+    attachErrorHandler(app);
+
+    app.post('/', async (c) => {
+      (c as any).set('logger', makeCapturingLogger(calls));
+      (c as any).set('requestId', 'trace-abc-123');
+      (c as any).set('billing', { verifyWebhookSignature: verifySignature });
+      (c as any).set('notifs', { createNotification: async () => {} });
+
+      const selectChain: any = {};
+      const selectMethods = ['select', 'from', 'where', 'limit', 'offset', 'orderBy'];
+      for (const m of selectMethods) selectChain[m] = () => selectChain;
+      selectChain.then = (resolve: any, reject?: any) => Promise.resolve(allInvoices).then(resolve, reject);
+      (c as any).set('database', { select: () => selectChain });
+
+      const origFindOneById = InvoiceRepository.prototype.findOneById;
+      const origUpdateOneById = InvoiceRepository.prototype.updateOneById;
+      const origMAFindByStripe = MerchantAccountRepository.prototype.findByStripeAccountId;
+      const origMAUpdateById = MerchantAccountRepository.prototype.updateOneById;
+
+      InvoiceRepository.prototype.findOneById = async (id: string) => invoiceById(id);
+      InvoiceRepository.prototype.updateOneById = async () => {};
+      MerchantAccountRepository.prototype.findByStripeAccountId = async () => makeMerchantAccount();
+      MerchantAccountRepository.prototype.updateOneById = async () => {};
+
+      try {
+        return await handleStripeWebhook(c as any);
+      } finally {
+        InvoiceRepository.prototype.findOneById = origFindOneById;
+        InvoiceRepository.prototype.updateOneById = origUpdateOneById;
+        MerchantAccountRepository.prototype.findByStripeAccountId = origMAFindByStripe;
+        MerchantAccountRepository.prototype.updateOneById = origMAUpdateById;
+      }
+    });
+
+    return app;
+  }
+
+  test('logs carry traceId from requestId on every call site', async () => {
+    const calls: any[] = [];
+    const event = makeStripeEvent('payment_intent.succeeded', makePaymentIntentObject());
+
+    const app = await buildObsApp({
+      verifySignature: async () => event,
+      calls,
+    });
+
+    await postWebhook(app, JSON.stringify(event));
+
+    expect(calls.length).toBeGreaterThan(0);
+    // Every call site should have traceId (inherited from child logger bindings)
+    for (const call of calls) {
+      expect(call.traceId).toBe('trace-abc-123');
+    }
+  });
+
+  test('logs carry module:billing on every call site', async () => {
+    const calls: any[] = [];
+    const event = makeStripeEvent('payment_intent.succeeded', makePaymentIntentObject());
+
+    const app = await buildObsApp({
+      verifySignature: async () => event,
+      calls,
+    });
+
+    await postWebhook(app, JSON.stringify(event));
+
+    expect(calls.length).toBeGreaterThan(0);
+    for (const call of calls) {
+      expect(call.module).toBe('billing');
+    }
+  });
+
+  test('dispatch log includes action field', async () => {
+    const calls: any[] = [];
+    const event = makeStripeEvent('invoice.created', { id: 'inv_xyz' });
+
+    const app = await buildObsApp({
+      verifySignature: async () => event,
+      calls,
+    });
+
+    await postWebhook(app, JSON.stringify(event));
+
+    const dispatchLog = calls.find(c => c.action === 'handleStripeWebhook.dispatch');
+    expect(dispatchLog).toBeDefined();
+    expect(dispatchLog.eventType).toBe('invoice.created');
+    expect(dispatchLog.eventId).toBe('evt_test');
+  });
+
+  test('signature field is NOT present in any log call (PII guard)', async () => {
+    const calls: any[] = [];
+    // Cause verification to fail so we get the verify log
+    const app = await buildObsApp({
+      verifySignature: async () => { throw new Error('bad sig'); },
+      calls,
+    });
+
+    // Post with a signature that would leak if logged
+    const app2 = new Hono();
+    attachErrorHandler(app2);
+    // Just build fresh app with normal sig failure
+    const event = makeStripeEvent('payment_intent.succeeded', makePaymentIntentObject());
+    const app3 = await buildObsApp({ verifySignature: async () => event, calls });
+    await postWebhook(app3, JSON.stringify(event));
+
+    for (const call of calls) {
+      expect('signature' in call).toBe(false);
+    }
+  });
+});

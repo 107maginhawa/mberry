@@ -11,7 +11,6 @@
 import type { Context } from 'hono';
 import type { DatabaseInstance } from '@/core/database';
 import { DashboardRepository } from './repos/dashboard.repo';
-import { auditAction } from '@/utils/audit';
 
 const SMALL_CHAPTER_THRESHOLD = 5;
 
@@ -121,13 +120,9 @@ export async function getNationalDashboard(ctx: Context): Promise<Response> {
   const aggregate = await repo.getAssociationAggregate(associationId, snapshotMonth);
 
   // ── Audit ────────────────────────────────────────────────────────────────
-  await auditAction(ctx, {
-    action: 'create',
-    resourceType: 'national_dashboard_view',
-    resourceId: associationId,
-    description: `National dashboard viewed for association ${associationId} (${snapshotMonth})`,
-    details: { snapshotMonth, chapterCount: visibleChapters.length },
-  });
+  ctx.set('auditResourceId', associationId);
+  ctx.set('auditDescription', `National dashboard viewed for association ${associationId} (${snapshotMonth})`);
+  ctx.set('auditDetails', { snapshotMonth, chapterCount: visibleChapters.length });
 
   return ctx.json({
     data: {

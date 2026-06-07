@@ -10,7 +10,6 @@ import type { InvoiceMetadata, MerchantMetadata } from './repos/billing.schema';
 import { subscriptions } from '@/handlers/platformadmin/repos/platform-admin.schema';
 import { eq } from 'drizzle-orm';
 import type Stripe from 'stripe';
-import { auditAction } from '@/utils/audit';
 
 /**
  * handleStripeWebhook
@@ -24,36 +23,42 @@ export async function handleStripeWebhook(
   ctx: BaseContext
 ): Promise<Response> {
   const database = ctx.get('database');
-  const logger = ctx.get('logger');
+  const baseLogger = ctx.get('logger');
   const billing = ctx.get('billing');
   const notificationService = ctx.get('notifs') as NotificationService;
-  
+  const traceId = ctx.get('requestId');
+
+  // Child logger carries traceId + module on every call in this handler
+  const logger = baseLogger?.child?.({ traceId, module: 'billing' }) ?? baseLogger;
+
   // Get the raw body and signature for webhook verification
   const signature = ctx.req.header('stripe-signature');
   if (!signature) {
     throw new ValidationError('Missing Stripe signature header');
   }
-  
+
   const rawBody = await ctx.req.text();
-  
-  logger.info({ signature: signature.substring(0, 20) }, 'Processing Stripe webhook');
-  
+
+  // NOTE: do NOT log the signature value (even truncated) — partial HMAC leaks to logs.
+  logger?.info({ action: 'handleStripeWebhook.verify' }, 'Verifying Stripe webhook signature');
+
   let event: Stripe.Event;
 
   try {
     // Verify webhook signature
     event = await billing.verifyWebhookSignature(rawBody, signature);
   } catch (error) {
-    logger.error({ error }, 'Webhook signature verification failed');
+    logger?.error({ action: 'handleStripeWebhook.verifyFailed', error }, 'Webhook signature verification failed');
     throw new ValidationError('Invalid webhook signature');
   }
-  
-  logger.info(
-    { 
+
+  logger?.info(
+    {
+      action: 'handleStripeWebhook.dispatch',
       eventType: event.type,
       eventId: event.id,
-      livemode: event.livemode 
-    }, 
+      livemode: event.livemode,
+    },
     'Processing Stripe webhook event'
   );
   
@@ -132,36 +137,31 @@ export async function handleStripeWebhook(
 
       default:
         logger.info(
-          { eventType: event.type, eventId: event.id }, 
+          { action: 'handleStripeWebhook.4', eventType: event.type, eventId: event.id }, 
           'Unhandled webhook event type - ignoring'
         );
         break;
     }
     
-    logger.info(
-      { eventType: event.type, eventId: event.id },
+    logger?.info(
+      { action: 'handleStripeWebhook.completed', eventType: event.type, eventId: event.id },
       'Webhook event processed successfully'
     );
 
-    await auditAction(ctx, {
-      action: 'update',
-      resourceType: 'stripe-webhook',
-      resourceId: event.id,
-      description: `Stripe webhook processed: ${event.type}`,
-      eventSubType: 'financial.webhook-processed',
-      details: {
+    ctx.set('auditResourceId', event.id);
+    ctx.set('auditDescription', `Stripe webhook processed: ${event.type}`);
+    ctx.set('auditDetails', {
         stripeEventType: event.type,
         stripeEventId: event.id,
         livemode: event.livemode,
-      },
-    });
+      });
 
     // Return 200 to acknowledge receipt
     return ctx.json({ received: true }, 200);
-    
+
   } catch (error) {
-    logger.error(
-      { error, eventType: event.type, eventId: event.id }, 
+    logger?.error(
+      { action: 'handleStripeWebhook.error', error, eventType: event.type, eventId: event.id },
       'Failed to process webhook event'
     );
     
@@ -190,16 +190,16 @@ async function handlePaymentIntentSucceeded(
   const invoiceId = paymentIntent.metadata?.['invoiceId'];
   
   if (!invoiceId) {
-    logger.warn({ paymentIntentId: paymentIntent.id }, 'No invoice ID in payment intent metadata');
+    logger?.warn({ action: 'handlePaymentIntentSucceeded.noInvoiceId', paymentIntentId: paymentIntent.id }, 'No invoice ID in payment intent metadata');
     return;
   }
-  
+
   const invoice = await invoiceRepo.findOneById(invoiceId);
   if (!invoice) {
-    logger.warn({ invoiceId, paymentIntentId: paymentIntent.id }, 'Invoice not found for payment intent');
+    logger?.warn({ action: 'handlePaymentIntentSucceeded.invoiceNotFound', invoiceId, paymentIntentId: paymentIntent.id }, 'Invoice not found for payment intent');
     return;
   }
-  
+
   // Update invoice status to requires_capture (authorized and ready for capture decision)
   // Store Stripe IDs in metadata
   const updatedMetadata = {
@@ -211,9 +211,9 @@ async function handlePaymentIntentSucceeded(
     paymentStatus: 'requires_capture',
     metadata: updatedMetadata,
   });
-  
-  logger.info(
-    { invoiceId, paymentIntentId: paymentIntent.id }, 
+
+  logger?.info(
+    { action: 'handlePaymentIntentSucceeded.updated', invoiceId, paymentIntentId: paymentIntent.id },
     'Payment intent succeeded - invoice ready for provider decision'
   );
 
@@ -235,13 +235,13 @@ async function handlePaymentIntentSucceeded(
       priority: 'normal'
     });
 
-    logger.info(
-      { invoiceId, paymentIntentId: paymentIntent.id, customerId: invoice.customer },
+    logger?.info(
+      { action: 'handlePaymentIntentSucceeded.notified', invoiceId, paymentIntentId: paymentIntent.id, customerId: invoice.customer },
       'Payment authorization notification sent'
     );
   } catch (error) {
-    logger.error(
-      { error, invoiceId, paymentIntentId: paymentIntent.id },
+    logger?.error(
+      { action: 'handlePaymentIntentSucceeded.notifyFailed', error, invoiceId, paymentIntentId: paymentIntent.id },
       'Failed to send payment authorization notification'
     );
   }
@@ -260,22 +260,22 @@ async function handlePaymentIntentFailed(
   const invoiceId = paymentIntent.metadata?.['invoiceId'];
   
   if (!invoiceId) {
-    logger.warn({ paymentIntentId: paymentIntent.id }, 'No invoice ID in payment intent metadata');
+    logger?.warn({ action: 'handlePaymentIntentFailed.noInvoiceId', paymentIntentId: paymentIntent.id }, 'No invoice ID in payment intent metadata');
     return;
   }
 
   const invoice = await invoiceRepo.findOneById(invoiceId);
   if (!invoice) {
-    logger.warn({ invoiceId, paymentIntentId: paymentIntent.id }, 'Invoice not found for failed payment intent');
+    logger?.warn({ action: 'handlePaymentIntentFailed.invoiceNotFound', invoiceId, paymentIntentId: paymentIntent.id }, 'Invoice not found for failed payment intent');
     return;
   }
-  
+
   await invoiceRepo.updateOneById(invoiceId, {
     paymentStatus: 'failed',
   });
-  
-  logger.info(
-    { invoiceId, paymentIntentId: paymentIntent.id }, 
+
+  logger?.info(
+    { action: 'handlePaymentIntentFailed.updated', invoiceId, paymentIntentId: paymentIntent.id },
     'Payment intent failed'
   );
 
@@ -297,13 +297,13 @@ async function handlePaymentIntentFailed(
       priority: 'high'
     });
 
-    logger.info(
-      { invoiceId, paymentIntentId: paymentIntent.id, customerId: invoice.customer },
+    logger?.info(
+      { action: 'handlePaymentIntentFailed.notified', invoiceId, paymentIntentId: paymentIntent.id, customerId: invoice.customer },
       'Payment failure notification sent'
     );
   } catch (error) {
-    logger.error(
-      { error, invoiceId, paymentIntentId: paymentIntent.id },
+    logger?.error(
+      { action: 'handlePaymentIntentFailed.notifyFailed', error, invoiceId, paymentIntentId: paymentIntent.id },
       'Failed to send payment failure notification'
     );
   }
@@ -321,18 +321,18 @@ async function handlePaymentIntentCanceled(
   const invoiceId = paymentIntent.metadata?.['invoiceId'];
   
   if (!invoiceId) {
-    logger.warn({ paymentIntentId: paymentIntent.id }, 'No invoice ID in payment intent metadata');
+    logger?.warn({ action: 'handlePaymentIntentCanceled.noInvoiceId', paymentIntentId: paymentIntent.id }, 'No invoice ID in payment intent metadata');
     return;
   }
-  
+
   await invoiceRepo.updateOneById(invoiceId, {
     paymentStatus: 'canceled',
     status: 'void',
     voidedAt: new Date(),
   });
-  
-  logger.info(
-    { invoiceId, paymentIntentId: paymentIntent.id }, 
+
+  logger?.info(
+    { action: 'handlePaymentIntentCanceled.updated', invoiceId, paymentIntentId: paymentIntent.id },
     'Payment intent canceled'
   );
 }
@@ -349,16 +349,16 @@ async function handlePaymentIntentRequiresAction(
   const invoiceId = paymentIntent.metadata?.['invoiceId'];
   
   if (!invoiceId) {
-    logger.warn({ paymentIntentId: paymentIntent.id }, 'No invoice ID in payment intent metadata');
+    logger?.warn({ action: 'handlePaymentIntentRequiresAction.noInvoiceId', paymentIntentId: paymentIntent.id }, 'No invoice ID in payment intent metadata');
     return;
   }
-  
+
   await invoiceRepo.updateOneById(invoiceId, {
     paymentStatus: 'processing',
   });
-  
-  logger.info(
-    { invoiceId, paymentIntentId: paymentIntent.id }, 
+
+  logger?.info(
+    { action: 'handlePaymentIntentRequiresAction.updated', invoiceId, paymentIntentId: paymentIntent.id },
     'Payment intent requires additional action'
   );
 }
@@ -376,10 +376,10 @@ async function handleChargeSucceeded(
   const paymentIntentId = charge.payment_intent as string;
   
   if (!paymentIntentId) {
-    logger.warn({ chargeId: charge.id }, 'No payment intent ID in charge');
+    logger?.warn({ action: 'handleChargeSucceeded.noPaymentIntentId', chargeId: charge.id }, 'No payment intent ID in charge');
     return;
   }
-  
+
   // Find invoice by payment intent ID in metadata
   // Note: This requires a custom query since we're searching in JSONB
   const allInvoices = await invoiceRepo.findAll();
@@ -390,7 +390,7 @@ async function handleChargeSucceeded(
   });
 
   if (!invoice) {
-    logger.warn({ paymentIntentId, chargeId: charge.id }, 'No invoice found for charge');
+    logger?.warn({ action: 'handleChargeSucceeded.invoiceNotFound', paymentIntentId, chargeId: charge.id }, 'No invoice found for charge');
     return;
   }
 
@@ -409,13 +409,14 @@ async function handleChargeSucceeded(
     paidAt: new Date(),
     metadata: updatedMetadata,
   });
-  
-  logger.info(
-    { 
-      invoiceId: invoice.id, 
+
+  logger?.info(
+    {
+      action: 'handleChargeSucceeded.updated',
+      invoiceId: invoice.id,
       chargeId: charge.id,
-      transferId 
-    }, 
+      transferId,
+    },
     'Charge succeeded - payment captured'
   );
 
@@ -457,13 +458,13 @@ async function handleChargeSucceeded(
       priority: 'normal'
     });
 
-    logger.info(
-      { invoiceId: invoice.id, chargeId: charge.id, customerId: invoice.customer, merchantId: invoice.merchant },
+    logger?.info(
+      { action: 'handleChargeSucceeded.notified', invoiceId: invoice.id, chargeId: charge.id, customerId: invoice.customer, merchantId: invoice.merchant },
       'Payment success notifications sent'
     );
   } catch (error) {
-    logger.error(
-      { error, invoiceId: invoice.id, chargeId: charge.id },
+    logger?.error(
+      { action: 'handleChargeSucceeded.notifyFailed', error, invoiceId: invoice.id, chargeId: charge.id },
       'Failed to send payment success notifications'
     );
   }
@@ -482,10 +483,10 @@ async function handleChargeFailed(
   const paymentIntentId = charge.payment_intent as string;
   
   if (!paymentIntentId) {
-    logger.warn({ chargeId: charge.id }, 'No payment intent ID in failed charge');
+    logger?.warn({ action: 'handleChargeFailed.noPaymentIntentId', chargeId: charge.id }, 'No payment intent ID in failed charge');
     return;
   }
-  
+
   // Find invoice by payment intent ID in metadata
   const allInvoices = await invoiceRepo.findAll();
 
@@ -495,16 +496,16 @@ async function handleChargeFailed(
   });
 
   if (!invoice) {
-    logger.warn({ paymentIntentId, chargeId: charge.id }, 'No invoice found for failed charge');
+    logger?.warn({ action: 'handleChargeFailed.invoiceNotFound', paymentIntentId, chargeId: charge.id }, 'No invoice found for failed charge');
     return;
   }
-  
+
   await invoiceRepo.updateOneById(invoice.id, {
     paymentStatus: 'failed',
   });
-  
-  logger.info(
-    { invoiceId: invoice.id, chargeId: charge.id }, 
+
+  logger?.info(
+    { action: 'handleChargeFailed.updated', invoiceId: invoice.id, chargeId: charge.id },
     'Charge failed'
   );
 
@@ -528,13 +529,13 @@ async function handleChargeFailed(
       priority: 'high'
     });
 
-    logger.info(
-      { invoiceId: invoice.id, chargeId: charge.id, customerId: invoice.customer },
+    logger?.info(
+      { action: 'handleChargeFailed.notified', invoiceId: invoice.id, chargeId: charge.id, customerId: invoice.customer },
       'Charge failure notification sent'
     );
   } catch (error) {
-    logger.error(
-      { error, invoiceId: invoice.id, chargeId: charge.id },
+    logger?.error(
+      { action: 'handleChargeFailed.notifyFailed', error, invoiceId: invoice.id, chargeId: charge.id },
       'Failed to send charge failure notification'
     );
   }
@@ -552,10 +553,10 @@ async function handleChargeRefunded(
   const paymentIntentId = charge.payment_intent as string;
   
   if (!paymentIntentId) {
-    logger.warn({ chargeId: charge.id }, 'No payment intent ID in refunded charge');
+    logger?.warn({ action: 'handleChargeRefunded.noPaymentIntentId', chargeId: charge.id }, 'No payment intent ID in refunded charge');
     return;
   }
-  
+
   // Find invoice by payment intent ID in metadata
   const allInvoices = await invoiceRepo.findAll();
 
@@ -565,7 +566,7 @@ async function handleChargeRefunded(
   });
 
   if (!invoice) {
-    logger.warn({ paymentIntentId, chargeId: charge.id }, 'No invoice found for refunded charge');
+    logger?.warn({ action: 'handleChargeRefunded.invoiceNotFound', paymentIntentId, chargeId: charge.id }, 'No invoice found for refunded charge');
     return;
   }
 
@@ -591,13 +592,14 @@ async function handleChargeRefunded(
       metadata: updatedMetadata,
     });
 
-    logger.info(
+    logger?.info(
       {
+        action: 'handleChargeRefunded.updated',
         invoiceId: invoice.id,
         chargeId: charge.id,
         refundId: refund.id,
         refundAmount: charge.amount_refunded,
-        isFullRefund
+        isFullRefund,
       },
       'Charge refunded'
     );
@@ -618,10 +620,10 @@ async function handleAccountUpdated(
   const merchantAccount = await merchantAccountRepo.findByStripeAccountId(account.id);
   
   if (!merchantAccount) {
-    logger.warn({ accountId: account.id }, 'No merchant account found for Stripe account update');
+    logger?.warn({ action: 'handleAccountUpdated.notFound', accountId: account.id }, 'No merchant account found for Stripe account update');
     return;
   }
-  
+
   // Determine account status
   let status: string = 'pending';
   if (account.charges_enabled && account.payouts_enabled) {
@@ -646,13 +648,14 @@ async function handleAccountUpdated(
     }
   });
 
-  logger.info(
+  logger?.info(
     {
+      action: 'handleAccountUpdated.updated',
       merchantAccountId: merchantAccount.id,
       accountId: account.id,
       status,
       onboardingComplete,
-      requirementsCount: account.requirements?.currently_due?.length || 0
+      requirementsCount: account.requirements?.currently_due?.length || 0,
     },
     'Merchant account updated via webhook'
   );
@@ -672,7 +675,7 @@ async function handleAccountDeauthorized(
   const merchantAccount = await merchantAccountRepo.findByStripeAccountId(deauth.account);
 
   if (!merchantAccount) {
-    logger.warn({ accountId: deauth.account }, 'No merchant account found for deauthorized Stripe account');
+    logger?.warn({ action: 'handleAccountDeauthorized.notFound', accountId: deauth.account }, 'No merchant account found for deauthorized Stripe account');
     return;
   }
 
@@ -689,8 +692,8 @@ async function handleAccountDeauthorized(
     }
   });
 
-  logger.info(
-    { merchantAccountId: merchantAccount.id, accountId: deauth.account },
+  logger?.info(
+    { action: 'handleAccountDeauthorized.updated', merchantAccountId: merchantAccount.id, accountId: deauth.account },
     'Merchant account Stripe account deauthorized'
   );
 }
@@ -714,16 +717,17 @@ async function handleTransferCreated(
   });
 
   if (!foundInvoices || foundInvoices.length === 0) {
-    logger.info({ transferId: transfer.id }, 'Transfer created but no associated invoice found');
+    logger?.info({ action: 'handleTransferCreated.noInvoice', transferId: transfer.id }, 'Transfer created but no associated invoice found');
     return;
   }
-  
-  logger.info(
-    { 
+
+  logger?.info(
+    {
+      action: 'handleTransferCreated.matched',
       transferId: transfer.id,
       amount: transfer.amount,
-      invoiceIds: foundInvoices.map((i: any) => i.id)
-    }, 
+      invoiceIds: foundInvoices.map((i: any) => i.id),
+    },
     'Transfer created for invoice payments'
   );
 }
@@ -747,17 +751,18 @@ async function handleTransferFailed(
   });
 
   if (!foundInvoices || foundInvoices.length === 0) {
-    logger.warn({ transferId: transfer.id }, 'Transfer failed but no associated invoice found');
+    logger?.warn({ action: 'handleTransferFailed.noInvoice', transferId: transfer.id }, 'Transfer failed but no associated invoice found');
     return;
   }
-  
+
   // Mark invoice as having transfer issues (might need manual review)
   for (const invoice of foundInvoices) {
-    logger.error(
+    logger?.error(
       {
+        action: 'handleTransferFailed.error',
         invoiceId: invoice.id,
         transferId: transfer.id,
-        failureMessage: (transfer as any).failure_message // structural: Stripe type gap — failure_message not in Stripe.Transfer type
+        failureMessage: (transfer as any).failure_message, // structural: Stripe type gap — failure_message not in Stripe.Transfer type
       },
       'Transfer failed for invoice - requires manual review'
     );
@@ -785,13 +790,13 @@ async function handleSubscriptionUpdated(
     .limit(1);
 
   if (!local) {
-    logger.warn({ stripeSubscriptionId: stripeSub.id }, 'No local subscription found for Stripe subscription update');
+    logger?.warn({ action: 'handleSubscriptionUpdated.notFound', stripeSubscriptionId: stripeSub.id }, 'No local subscription found for Stripe subscription update');
     return;
   }
 
   // Idempotency guard
   if (local.lastStripeEventId === stripeEventId) {
-    logger.debug({ stripeEventId, subscriptionId: local.id }, 'Duplicate Stripe event — skipping');
+    logger?.debug({ action: 'handleSubscriptionUpdated.duplicate', stripeEventId, subscriptionId: local.id }, 'Duplicate Stripe event — skipping');
     return;
   }
 
@@ -826,8 +831,8 @@ async function handleSubscriptionUpdated(
     })
     .where(eq(subscriptions.id, local.id));
 
-  logger.info(
-    { subscriptionId: local.id, stripeStatus: stripeSub.status, localStatus: newStatus },
+  logger?.info(
+    { action: 'handleSubscriptionUpdated.synced', subscriptionId: local.id, stripeStatus: stripeSub.status, localStatus: newStatus },
     'Subscription synced from Stripe update',
   );
 }
@@ -850,12 +855,12 @@ async function handleSubscriptionDeleted(
     .limit(1);
 
   if (!local) {
-    logger.warn({ stripeSubscriptionId: stripeSub.id }, 'No local subscription found for Stripe subscription deletion');
+    logger?.warn({ action: 'handleSubscriptionDeleted.notFound', stripeSubscriptionId: stripeSub.id }, 'No local subscription found for Stripe subscription deletion');
     return;
   }
 
   if (local.lastStripeEventId === stripeEventId) {
-    logger.debug({ stripeEventId }, 'Duplicate Stripe event — skipping');
+    logger?.debug({ action: 'handleSubscriptionDeleted.duplicate', stripeEventId }, 'Duplicate Stripe event — skipping');
     return;
   }
 
@@ -871,7 +876,7 @@ async function handleSubscriptionDeleted(
     })
     .where(eq(subscriptions.id, local.id));
 
-  logger.info({ subscriptionId: local.id }, 'Subscription cancelled via Stripe deletion event');
+  logger?.info({ action: 'handleSubscriptionDeleted.cancelled', subscriptionId: local.id }, 'Subscription cancelled via Stripe deletion event');
 }
 
 /**
@@ -901,7 +906,7 @@ async function handleInvoicePaymentSucceeded(
 
     if (local) {
       if (local.lastStripeEventId === stripeEventId) {
-        logger.debug({ stripeEventId }, 'Duplicate invoice.payment_succeeded — skipping');
+        logger?.debug({ action: 'handleInvoicePaymentSucceeded.duplicate', stripeEventId }, 'Duplicate invoice.payment_succeeded — skipping');
         return;
       }
 
@@ -923,13 +928,13 @@ async function handleInvoicePaymentSucceeded(
         })
         .where(eq(subscriptions.id, local.id));
 
-      logger.info({ subscriptionId: local.id }, 'Subscription activated on payment success');
+      logger?.info({ action: 'handleInvoicePaymentSucceeded.activated', subscriptionId: local.id }, 'Subscription activated on payment success');
       return;
     }
   }
 
   // Fallback: not a platform subscription invoice — ignore (dues handled elsewhere)
-  logger.debug({ invoiceId: invoice.id }, 'invoice.payment_succeeded — no matching platform subscription');
+  logger?.debug({ action: 'handleInvoicePaymentSucceeded.noSubscription', invoiceId: invoice.id }, 'invoice.payment_succeeded — no matching platform subscription');
 }
 
 /**
@@ -946,7 +951,7 @@ async function handleInvoicePaymentFailed(
   // structural: Stripe 2025 API — `subscription` removed from static Invoice type, present at runtime.
   const stripeSubscriptionId = (invoice as { subscription?: string | null }).subscription ?? null;
   if (!stripeSubscriptionId) {
-    logger.debug({ invoiceId: invoice.id }, 'invoice.payment_failed — no subscription ID, skipping');
+    logger?.debug({ action: 'handleInvoicePaymentFailed.noSubscriptionId', invoiceId: invoice.id }, 'invoice.payment_failed — no subscription ID, skipping');
     return;
   }
 
@@ -957,12 +962,12 @@ async function handleInvoicePaymentFailed(
     .limit(1);
 
   if (!local) {
-    logger.debug({ stripeSubscriptionId }, 'invoice.payment_failed — no matching platform subscription');
+    logger?.debug({ action: 'handleInvoicePaymentFailed.noSubscription', stripeSubscriptionId }, 'invoice.payment_failed — no matching platform subscription');
     return;
   }
 
   if (local.lastStripeEventId === stripeEventId) {
-    logger.debug({ stripeEventId }, 'Duplicate invoice.payment_failed — skipping');
+    logger?.debug({ action: 'handleInvoicePaymentFailed.duplicate', stripeEventId }, 'Duplicate invoice.payment_failed — skipping');
     return;
   }
 
@@ -976,5 +981,5 @@ async function handleInvoicePaymentFailed(
     })
     .where(eq(subscriptions.id, local.id));
 
-  logger.info({ subscriptionId: local.id }, 'Subscription set to past_due on invoice payment failure');
+  logger?.info({ action: 'handleInvoicePaymentFailed.pastDue', subscriptionId: local.id }, 'Subscription set to past_due on invoice payment failure');
 }

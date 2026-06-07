@@ -32,7 +32,9 @@ export async function createBookingEvent(
 
   // Get dependencies from context
   const db = ctx.get('database') as DatabaseInstance;
-  const logger = ctx.get('logger');
+  const baseLogger = ctx.get('logger');
+  const traceId = ctx.get('requestId');
+  const logger = baseLogger?.child?.({ traceId, module: 'booking' }) ?? baseLogger;
 
   // Instantiate repository
   const repo = new BookingEventRepository(db, logger);
@@ -48,7 +50,7 @@ export async function createBookingEvent(
 
   // Generate initial slots for this specific event only
   await regenerateEventSlots(db, event.id);
-  logger?.info({ eventId: event.id, ownerId: user.id }, 'Initial slots generated successfully');
+  logger?.info({ action: 'createBookingEvent.1', eventId: event.id, ownerId: user.id }, 'Initial slots generated successfully');
 
   // Log audit trail
   logger?.info({

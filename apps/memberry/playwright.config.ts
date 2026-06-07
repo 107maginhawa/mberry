@@ -5,11 +5,23 @@ export default defineConfig({
   testMatch: '**/*.spec.ts',
   testIgnore: ['**/stubs/**'],
 
+  // Restore mutated seed rows (org name, association) before any worker
+  // spawns. See tests/e2e/global-setup.ts + services/api-ts/src/seed/reset-mutated.ts.
+  globalSetup: './tests/e2e/global-setup.ts',
+
   maxFailures: process.env.CI ? 0 : 1,
-  fullyParallel: false,
+  // Enabled after the storageState setup project (auth.setup.ts) eliminated
+  // per-test UI sign-ins. Read-only specs (the bulk of the suite) parallelize
+  // safely. Specs that mutate shared SEED_* state and aren't yet using fresh
+  // signUp users can opt out via `test.describe.configure({ mode: 'serial' })`.
+  fullyParallel: true,
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 1 : 0,
-  workers: 1,
+  // Workers=2 in CI is a temporary mitigation for parallel test contamination
+  // (multiple specs mutate the same seeded org/event/member rows). Bump back
+  // to 4 once G10 (per-test seed isolation via /test/seed-isolated endpoint)
+  // lands. See docs/audits/E2E_REMEDIATION_FINAL.md §Parallel contamination.
+  workers: process.env.CI ? 2 : 2,
 
   reporter: process.env.CI
     ? [['json', { outputFile: 'test-results.json' }], ['github']]
@@ -53,10 +65,19 @@ export default defineConfig({
   ],
 
   projects: [
+    // Setup project signs each persona in once and saves cookies to .auth/<role>.json.
+    // Specs opt in via `test.use({ storageState: authStateFile('member') })` from
+    // tests/e2e/auth.setup.ts. See docs/audits/E2E_TIMEOUT_ROOT_CAUSE.md §6.
+    {
+      name: 'setup',
+      testMatch: /auth\.setup\.ts$/,
+      testIgnore: [],
+    },
     {
       name: 'chromium',
       use: { ...devices['Desktop Chrome'] },
-      testIgnore: ['**/mobile/**'],
+      testIgnore: ['**/mobile/**', '**/auth.setup.ts'],
+      dependencies: ['setup'],
     },
     {
       name: 'mobile',
@@ -67,6 +88,7 @@ export default defineConfig({
         hasTouch: true,
       },
       testMatch: '**/mobile/**',
+      dependencies: ['setup'],
     },
   ],
 })

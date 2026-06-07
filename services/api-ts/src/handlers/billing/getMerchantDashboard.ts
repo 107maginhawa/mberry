@@ -12,7 +12,6 @@ import type { Session } from '@/types/auth';
 import type { BillingService } from '@/core/billing';
 import { MerchantAccountRepository } from './repos/billing.repo';
 import { addMinutes } from 'date-fns';
-import { auditAction } from '@/utils/audit';
 
 /**
  * getMerchantDashboard
@@ -26,7 +25,9 @@ export async function getMerchantDashboard(
   ctx: ValidatedContext<never, never, GetMerchantDashboardParams>
 ): Promise<Response> {
   const database = ctx.get('database');
-  const logger = ctx.get('logger');
+  const baseLogger = ctx.get('logger');
+  const traceId = ctx.get('requestId');
+  const logger = baseLogger?.child?.({ traceId, module: 'billing' }) ?? baseLogger;
   const billing = ctx.get('billing') as BillingService;
 
   // Get authenticated session (guaranteed by middleware)
@@ -41,7 +42,7 @@ export async function getMerchantDashboard(
   const params = ctx.req.valid('param');
   let merchantAccountId = params.merchantAccount;
 
-  logger.debug({ merchantAccountId, userId: user.id }, 'Generating merchant dashboard link');
+  logger.debug({ action: 'getMerchantDashboard.1', merchantAccountId, userId: user.id }, 'Generating merchant dashboard link');
 
   // Create repository instance
   const merchantAccountRepo = new MerchantAccountRepository(database, logger);
@@ -104,26 +105,20 @@ export async function getMerchantDashboard(
     );
   }
 
-  logger.info({
+  logger.info({ action: 'getMerchantDashboard.2',
     merchantAccountId,
     personId: merchantAccount.person,
     stripeAccountId,
     accountStatus: accountStatus.status
   }, 'Merchant dashboard link generated successfully');
 
-  await auditAction(ctx, {
-    action: 'read',
-    resourceType: 'merchant-account',
-    resourceId: merchantAccountId,
-    description: `Merchant dashboard accessed for account ${merchantAccountId}`,
-    eventSubType: 'financial.merchant-dashboard-accessed',
-    eventType: 'data-access',
-    details: {
+  ctx.set('auditResourceId', merchantAccountId);
+  ctx.set('auditDescription', `Merchant dashboard accessed for account ${merchantAccountId}`);
+  ctx.set('auditDetails', {
       stripeAccountId,
       accountStatus: accountStatus.status,
       personId: merchantAccount.person,
-    },
-  });
+    });
 
   // Calculate expiration time (Stripe dashboard links expire in 5 minutes)
   const expiresAt = addMinutes(new Date(), 5);

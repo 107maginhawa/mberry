@@ -78,6 +78,13 @@ export async function requireOrgOfficer({ context, params }: { context: RouterCo
     const json = await context.queryClient.ensureQueryData({
       queryKey: ['me-officer-role-raw', orgId],
       queryFn: () => api.get<any>(`/api/persons/me/officer-role/${orgId}`),
+      // Officer roster of an org doesn't change mid-session. Without an
+      // explicit staleTime the query falls back to the SDK 5-minute
+      // default, which under E2E parallel pressure occasionally serves
+      // a stale empty-array response and trips the redirect-to-/dashboard
+      // path even for users who DO have an officer term. See
+      // docs/audits/E2E_REMEDIATION_FINAL.md §Root cause 2.
+      staleTime: Infinity,
     })
     const positions = Array.isArray(json?.data) ? json.data : []
     if (positions.length === 0) {

@@ -1,15 +1,19 @@
+// WF-118 — Confirm/Reject Booking: provider accepts or declines pending bookings
 // Business Rules: [BR-9] Booking module
 // E2E: Host confirms/rejects booking requests
 import { test, expect } from '../helpers/test-fixture'
 import { signInAsOfficer, signInAsMember } from '../helpers/auth'
+import { captureRouteHydration } from '../helpers/real-flow'
 
 test.describe('Booking host actions: confirm and reject', () => {
   test.describe('Host views pending bookings', () => {
     test('officer can access bookings page', async ({ page }) => {
       await signInAsOfficer(page)
+      const respP = captureRouteHydration(page, '/bookings')
       await page.goto('/my/bookings')
-      await page.waitForLoadState('networkidle')
-
+      const resp = await respP
+      expect(resp?.status()).toBe(200)
+      expect(resp?.ok()).toBe(true)
       await expect(
         page.getByRole('heading', { name: /bookings/i }),
       ).toBeVisible({ timeout: 10000 })
@@ -18,8 +22,6 @@ test.describe('Booking host actions: confirm and reject', () => {
     test('host can switch to "My bookings" tab and see host section', async ({ page }) => {
       await signInAsOfficer(page)
       await page.goto('/my/bookings')
-      await page.waitForLoadState('networkidle')
-
       // Switch to "My bookings" tab
       await page.getByRole('tab', { name: /my bookings/i }).click()
       await page.waitForLoadState('networkidle')
@@ -45,8 +47,6 @@ test.describe('Booking host actions: confirm and reject', () => {
     test('pending booking detail shows accept/decline buttons for host', async ({ page }) => {
       await signInAsOfficer(page)
       await page.goto('/my/bookings')
-      await page.waitForLoadState('networkidle')
-
       await page.getByRole('tab', { name: /my bookings/i }).click()
       await page.waitForLoadState('networkidle')
 
@@ -82,8 +82,6 @@ test.describe('Booking host actions: confirm and reject', () => {
     test('accepting a booking changes status to confirmed', async ({ page }) => {
       await signInAsOfficer(page)
       await page.goto('/my/bookings')
-      await page.waitForLoadState('networkidle')
-
       await page.getByRole('tab', { name: /my bookings/i }).click()
       await page.waitForLoadState('networkidle')
 
@@ -116,8 +114,6 @@ test.describe('Booking host actions: confirm and reject', () => {
     test('declining a booking changes status to rejected', async ({ page }) => {
       await signInAsOfficer(page)
       await page.goto('/my/bookings')
-      await page.waitForLoadState('networkidle')
-
       await page.getByRole('tab', { name: /my bookings/i }).click()
       await page.waitForLoadState('networkidle')
 
@@ -150,8 +146,6 @@ test.describe('Booking host actions: confirm and reject', () => {
     test('member can view their booking with current status', async ({ page }) => {
       await signInAsMember(page)
       await page.goto('/my/bookings')
-      await page.waitForLoadState('networkidle')
-
       await page.getByRole('tab', { name: /my bookings/i }).click()
       await page.waitForLoadState('networkidle')
 

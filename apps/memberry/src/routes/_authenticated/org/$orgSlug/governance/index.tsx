@@ -7,7 +7,7 @@ import { CountUp } from '@/components/motion/count-up'
 import { CardSkeleton } from '@/components/patterns/skeleton-loader'
 import { EmptyState } from '@/components/patterns/empty-state'
 import { StaggerGrid, StaggerItem } from '@/components/motion/stagger-grid'
-import { useOrg } from '@/hooks/useOrg'
+import { useOrg } from '@/hooks/use-org'
 import {
   listElectionsOptions,
   searchDocumentsOptions,

@@ -3,9 +3,6 @@ import type { DatabaseInstance } from '@/core/database';
 import type { UpdateEventRegistrationBody, UpdateEventRegistrationParams } from '@/generated/openapi/validators';
 import { NotFoundError } from '@/core/errors';
 import { EventRegistrationRepository } from './repos/events.repo';
-import { auditAction } from '@/utils/audit';
-import { requirePosition } from '@/utils/officer-check';
-import { POSITION_TITLES } from '@/utils/position-titles';
 
 /**
  * updateEventRegistration
@@ -19,9 +16,6 @@ export async function updateEventRegistration(
   const user = ctx.get('user');
   if (!user) return ctx.json({ error: 'Unauthorized' }, 401);
 
-  const denied = await requirePosition(ctx, [POSITION_TITLES.SOCIETY_OFFICER, POSITION_TITLES.PRESIDENT]);
-  if (denied) return denied;
-
   const params = ctx.req.valid('param');
   const body = ctx.req.valid('json');
   const db = ctx.get('database') as DatabaseInstance;
@@ -33,12 +27,8 @@ export async function updateEventRegistration(
 
   const updated = await repo.updateOneById(params.registrationId, body as Record<string, unknown>);
 
-  await auditAction(ctx, {
-    action: 'update',
-    resourceType: 'event-registration',
-    resourceId: updated.id,
-    description: 'Event registration updated',
-  });
+  ctx.set('auditResourceId', updated.id);
+  ctx.set('auditDescription', 'Event registration updated');
 
   return ctx.json(updated, 200);
 }

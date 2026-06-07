@@ -12,18 +12,22 @@
 
 import { test, expect } from '@playwright/test'
 import { signInAsMember } from './helpers/auth'
+import { captureAnyApiSuccess } from './helpers/real-flow'
 
 /** Sign in and navigate to a path */
 async function signInAndGo(page: import('@playwright/test').Page, path = '/') {
   await signInAsMember(page)
   await page.goto(path)
-  await page.waitForLoadState('networkidle')
 }
 
 test.describe('Org Switcher', () => {
   test.describe('Desktop — OrgIconRail', () => {
     test('renders org switcher rail with memberships', async ({ page }) => {
+      const respP = captureAnyApiSuccess(page)
       await signInAndGo(page, '/')
+      const resp = await respP
+      expect(resp?.status()).toBe(200)
+      expect(resp?.ok()).toBe(true)
 
       // Wait for org rail to appear (desktop only, hidden on mobile)
       const rail = page.locator('nav[aria-label="Organization switcher"]')

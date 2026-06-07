@@ -1,10 +1,3 @@
----
-based-on: map@2331bd9f
-last-modified: 2026-06-03T20:30:00Z
-engine-version: 7b2a640
-map-version: 6
----
-
 # Code API Surface
 
 <!-- oli:regen:code-api-surface:begin -->
@@ -249,7 +242,7 @@ map-version: 6
 | `GET /association/member/special-assessments/:id/collection` | `getSpecialAssessmentCollection` | true | 0 |  | HIGH |
 | `GET /association/member/special-assessments/:orgId` | `listSpecialAssessments` | true | 1 |  | HIGH |
 | `POST /association/member/tiers` | `createMembershipTier` | true | 0 |  | HIGH |
-| `GET /association/member/tiers` | `listMembershipTiers` | true | 1 |  | HIGH |
+| `GET /association/member/tiers` | `listMembershipTiers` | true | 0 |  | HIGH |
 | `GET /association/member/tiers/:tierId` | `getMembershipTier` | true | 0 |  | HIGH |
 | `PATCH /association/member/tiers/:tierId` | `updateMembershipTier` | true | 0 |  | HIGH |
 | `DELETE /association/member/tiers/:tierId` | `deleteMembershipTier` | true | 0 |  | HIGH |
@@ -391,7 +384,7 @@ map-version: 6
 | `GET /listings` | `listListings` | true | 0 |  | HIGH |
 | `GET /membership/applications/:organizationId` | `listOrgApplications` | true | 1 |  | HIGH |
 | `GET /membership/members/:organizationId` | `listOrgMembers` | true | 1 |  | HIGH |
-| `GET /membership/org-profile/:organizationId` | `getOrgProfile` | true | 0 |  | HIGH |
+| `GET /membership/org-profile/:organizationId` | `getOrgProfile` | true | 1 |  | HIGH |
 | `PUT /membership/org-profile/:organizationId` | `updateOrgProfile` | true | 1 |  | HIGH |
 | `GET /notifs` | `listNotifications` | true | 1 |  | HIGH |
 | `POST /notifs/read-all` | `markAllNotificationsAsRead` | true | 1 |  | HIGH |
@@ -435,7 +428,6 @@ map-version: 6
 | `GET /public/events/:slug` | `getPublicEvent` | ? | 1 |  | HIGH |
 | `GET /public/org/:slug` | `getOrganizationBySlug` | ? | 1 |  | HIGH |
 | `GET /public/orgs` | `listPublicOrgs` | ? | 0 |  | HIGH |
-| `POST /read-all` | `markAllNotificationsRead` | true | 0 |  | HIGH |
 | `POST /reviews/` | `createReview` | true | 0 |  | HIGH |
 | `GET /reviews/` | `listReviews` | true | 1 |  | HIGH |
 | `GET /reviews/:review` | `getReview` | true | 0 |  | HIGH |
@@ -466,10 +458,10 @@ map-version: 6
 | `GET /vendors/:vendorId` | `getVendor` | true | 0 |  | HIGH |
 | `PATCH /vendors/:vendorId` | `updateVendor` | true | 0 |  | HIGH |
 | `POST /vendors/:vendorId/verify` | `verifyVendor` | true | 0 |  | HIGH |
-| `GET /public/orgs*` | — | ? | 1 | ⚠️ | LOW |
 | `GET /persons/me` | — | ? | 1 | ⚠️ | LOW |
+| `GET /public/org/*/tiers` | — | ? | 1 | ⚠️ | LOW |
+| `GET /public/orgs*` | — | ? | 1 | ⚠️ | LOW |
 | `GET /verify/*` | — | ? | 1 | ⚠️ | LOW |
-| `POST /persons/me/export` | — | ? | 1 | ⚠️ | LOW |
 | `GET /surveys` | — | ? | 1 | ⚠️ | LOW |
 | `POST /surveys` | — | ? | 1 | ⚠️ | LOW |
 | `GET /communications/templates/:edit` | — | ? | 1 | ⚠️ | LOW |

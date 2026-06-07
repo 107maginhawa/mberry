@@ -1,7 +1,6 @@
 import type { Context } from 'hono';
 import { CommitteeTaskRepository } from './repos/committee-task.repo';
 import { NotFoundError, BusinessLogicError } from '@/core/errors';
-import { auditAction } from '@/utils/audit';
 import type { Session } from '@/types/auth';
 
 export async function completeCommitteeTask(ctx: Context): Promise<Response> {
@@ -22,12 +21,8 @@ export async function completeCommitteeTask(ctx: Context): Promise<Response> {
 
   const completed = await taskRepo.updateStatus(id, 'completed', session.user.id);
 
-  await auditAction(ctx, {
-    action: 'complete',
-    resourceType: 'committee_task',
-    resourceId: completed.id,
-    description: `Completed task: ${completed.title}`,
-  });
+  ctx.set('auditResourceId', completed.id);
+  ctx.set('auditDescription', `Completed task: ${completed.title}`);
 
   return ctx.json({ data: completed }, 200);
 }

@@ -27,6 +27,25 @@ import {
   TransitionChecklistRepository,
 } from '@/handlers/association:member/repos/governance.repo';
 
+// ── person.deleted cascade — schema imports (mirror accountDeletionCascade.ts) ──
+import { membershipStatusHistory } from '@/handlers/association:member/repos/status-history.schema';
+import { checkIns, waitlistEntries } from '@/handlers/association:operations/repos/events.schema';
+import { courseEnrollments, quizAttempts } from '@/handlers/association:operations/repos/training.schema';
+import { creditEntries } from '@/handlers/association:member/repos/credits.schema';
+import { electionNominees, electionVotes } from '@/handlers/elections/repos/elections.schema';
+import { officerTerms } from '@/handlers/association:member/repos/governance.schema';
+import { personSubscriptions } from '@/handlers/communication/repos/communication.schema';
+import { certificates } from '@/handlers/member/certificates/repos/certificates.schema';
+import { directoryProfiles } from '@/handlers/association:member/repos/directory.schema';
+import { notificationPreferences } from '@/handlers/person/repos/notification-preferences.schema';
+import { personPrivacySettings } from '@/handlers/person/repos/privacy-settings.schema';
+import { documents } from '@/handlers/documents/repos/documents.schema';
+import { dunningEvents } from '@/handlers/association:member/repos/dunning.schema';
+import { digitalCredentials } from '@/handlers/association:member/repos/credentials.schema';
+import { chapterAffiliations, affiliationTransfers } from '@/handlers/association:member/repos/chapters.schema';
+import { duesPayments } from '@/handlers/association:member/repos/dues-payments.schema';
+import { merchantAccounts } from '@/handlers/billing/repos/billing.schema';
+
 const ELECTION_TRANSITION_CHECKLIST_ITEMS = [
   'Hand over account credentials and passwords',
   'Transfer financial records and bank access',
@@ -1121,5 +1140,259 @@ export function registerDomainEventConsumers(
         logger.error({ error: err }, '[consumer] training.completed certificate-available failed');
       }
     })();
+  });
+
+  // -----------------------------------------------------------------------
+  // person.deleted → association:member: soft-delete / anonymize 10 tables
+  // (memberships, membershipStatusHistory, creditEntries, officerTerms,
+  //  directoryProfiles, dunningEvents, digitalCredentials, chapterAffiliations,
+  //  affiliationTransfers, duesPayments — BR-32 preserves dues amounts).
+  // Mirrors CASCADE_STEPS steps 1, 4, 6, 9, 13, 14, 15, 16 + BR-32 dues.
+  // -----------------------------------------------------------------------
+  domainEvents.on('person.deleted', async (payload) => {
+    const { personId } = payload;
+    try {
+      // Memberships (soft-delete)
+      await deps.db.update(memberships)
+        .set({
+          status: 'removed',
+          removedAt: new Date(),
+          removalReason: 'Account deletion — DPA 2012',
+          updatedBy: SYSTEM_USER_ID,
+        })
+        .where(eq(memberships.personId, personId));
+
+      // Membership status history (anonymize)
+      await deps.db.update(membershipStatusHistory)
+        .set({
+          reason: 'Account deleted',
+          updatedBy: SYSTEM_USER_ID,
+        })
+        .where(eq(membershipStatusHistory.personId, personId));
+
+      // Credit entries (anonymize)
+      await deps.db.update(creditEntries)
+        .set({
+          activityName: 'DELETED',
+          provider: null,
+          updatedBy: SYSTEM_USER_ID,
+        })
+        .where(eq(creditEntries.personId, personId));
+
+      // Officer terms (soft-delete)
+      await deps.db.update(officerTerms)
+        .set({
+          status: 'completed',
+          endDate: new Date(),
+          notes: 'Term ended — account deletion',
+          updatedBy: SYSTEM_USER_ID,
+        })
+        .where(eq(officerTerms.personId, personId));
+
+      // Directory profiles (delete)
+      await deps.db.delete(directoryProfiles)
+        .where(eq(directoryProfiles.personId, personId));
+
+      // Dunning events (delete)
+      await deps.db.delete(dunningEvents)
+        .where(eq(dunningEvents.personId, personId));
+
+      // Digital credentials (delete)
+      await deps.db.delete(digitalCredentials)
+        .where(eq(digitalCredentials.personId, personId));
+
+      // Chapter affiliations (soft-delete)
+      await deps.db.update(chapterAffiliations)
+        .set({
+          status: 'withdrawn',
+          updatedBy: SYSTEM_USER_ID,
+        })
+        .where(eq(chapterAffiliations.personId, personId));
+
+      // Affiliation transfers (soft-delete)
+      await deps.db.update(affiliationTransfers)
+        .set({
+          status: 'cancelled',
+          updatedBy: SYSTEM_USER_ID,
+        })
+        .where(eq(affiliationTransfers.personId, personId));
+
+      // Dues payments (anonymize proof — BR-32 preserve amounts)
+      await deps.db.update(duesPayments)
+        .set({
+          proofStorageKey: null,
+          proofFileName: null,
+          proofMimeType: null,
+          updatedBy: SYSTEM_USER_ID,
+        })
+        .where(eq(duesPayments.personId, personId));
+    } catch (err) {
+      logger.error({ error: err, personId }, '[consumer] person.deleted association:member cascade failed');
+    }
+  });
+
+  // -----------------------------------------------------------------------
+  // person.deleted → association:operations: events + training cascade
+  // (eventRegistrations, checkIns, waitlistEntries, trainingEnrollments,
+  //  courseEnrollments, quizAttempts). Mirrors CASCADE_STEPS steps 2 + 3.
+  // -----------------------------------------------------------------------
+  domainEvents.on('person.deleted', async (payload) => {
+    const { personId } = payload;
+    try {
+      // Event registrations (soft-delete)
+      await deps.db.update(eventRegistrations)
+        .set({
+          status: 'cancelled',
+          cancelledAt: new Date(),
+          updatedBy: SYSTEM_USER_ID,
+        })
+        .where(eq(eventRegistrations.personId, personId));
+
+      // Check-ins (delete)
+      await deps.db.delete(checkIns)
+        .where(eq(checkIns.personId, personId));
+
+      // Waitlist entries (delete)
+      await deps.db.delete(waitlistEntries)
+        .where(eq(waitlistEntries.personId, personId));
+
+      // Training enrollments (soft-delete)
+      await deps.db.update(trainingEnrollments)
+        .set({
+          status: 'cancelled',
+          cancelledAt: new Date(),
+          updatedBy: SYSTEM_USER_ID,
+        })
+        .where(eq(trainingEnrollments.personId, personId));
+
+      // Course enrollments (soft-delete)
+      await deps.db.update(courseEnrollments)
+        .set({
+          status: 'cancelled',
+          updatedBy: SYSTEM_USER_ID,
+        })
+        .where(eq(courseEnrollments.personId, personId));
+
+      // Quiz attempts (delete)
+      await deps.db.delete(quizAttempts)
+        .where(eq(quizAttempts.personId, personId));
+    } catch (err) {
+      logger.error({ error: err, personId }, '[consumer] person.deleted association:operations cascade failed');
+    }
+  });
+
+  // -----------------------------------------------------------------------
+  // person.deleted → elections: anonymize nominees, delete votes
+  // Mirrors CASCADE_STEPS step 5.
+  // -----------------------------------------------------------------------
+  domainEvents.on('person.deleted', async (payload) => {
+    const { personId } = payload;
+    try {
+      await deps.db.update(electionNominees)
+        .set({
+          status: 'declined',
+          updatedBy: SYSTEM_USER_ID,
+        })
+        .where(eq(electionNominees.personId, personId));
+
+      // Secret ballot — delete votes by voterId
+      await deps.db.delete(electionVotes)
+        .where(eq(electionVotes.voterId, personId));
+    } catch (err) {
+      logger.error({ error: err, personId }, '[consumer] person.deleted elections cascade failed');
+    }
+  });
+
+  // -----------------------------------------------------------------------
+  // person.deleted → certificates: mark updatedBy=system (records retained
+  // for compliance, PII anonymized at person table). Mirrors step 8.
+  // -----------------------------------------------------------------------
+  domainEvents.on('person.deleted', async (payload) => {
+    const { personId } = payload;
+    try {
+      await deps.db.update(certificates)
+        .set({ updatedBy: SYSTEM_USER_ID })
+        .where(eq(certificates.personId, personId));
+    } catch (err) {
+      logger.error({ error: err, personId }, '[consumer] person.deleted certificates cascade failed');
+    }
+  });
+
+  // -----------------------------------------------------------------------
+  // person.deleted → communication: delete personSubscriptions
+  // Mirrors CASCADE_STEPS step 7.
+  // -----------------------------------------------------------------------
+  domainEvents.on('person.deleted', async (payload) => {
+    const { personId } = payload;
+    try {
+      await deps.db.delete(personSubscriptions)
+        .where(eq(personSubscriptions.personId, personId));
+    } catch (err) {
+      logger.error({ error: err, personId }, '[consumer] person.deleted communication cascade failed');
+    }
+  });
+
+  // -----------------------------------------------------------------------
+  // person.deleted → documents: delete documents owned by the person
+  // Mirrors CASCADE_STEPS step 12.
+  // -----------------------------------------------------------------------
+  domainEvents.on('person.deleted', async (payload) => {
+    const { personId } = payload;
+    try {
+      await deps.db.delete(documents)
+        .where(eq(documents.ownerId, personId));
+    } catch (err) {
+      logger.error({ error: err, personId }, '[consumer] person.deleted documents cascade failed');
+    }
+  });
+
+  // -----------------------------------------------------------------------
+  // person.deleted → invite: delete invitation tokens
+  // Mirrors CASCADE_STEPS step 17.
+  // -----------------------------------------------------------------------
+  domainEvents.on('person.deleted', async (payload) => {
+    const { personId } = payload;
+    try {
+      await deps.db.delete(invitationTokens)
+        .where(eq(invitationTokens.personId, personId));
+    } catch (err) {
+      logger.error({ error: err, personId }, '[consumer] person.deleted invite cascade failed');
+    }
+  });
+
+  // -----------------------------------------------------------------------
+  // person.deleted → billing: deactivate merchant accounts (BR-32 preserves
+  // invoices). Mirrors CASCADE_STEPS billing step.
+  // -----------------------------------------------------------------------
+  domainEvents.on('person.deleted', async (payload) => {
+    const { personId } = payload;
+    try {
+      await deps.db.update(merchantAccounts)
+        .set({
+          active: false,
+          metadata: { deletedAccount: true },
+          updatedBy: SYSTEM_USER_ID,
+        })
+        .where(eq(merchantAccounts.person, personId));
+    } catch (err) {
+      logger.error({ error: err, personId }, '[consumer] person.deleted billing cascade failed');
+    }
+  });
+
+  // -----------------------------------------------------------------------
+  // person.deleted → person: delete notification preferences + privacy settings
+  // Mirrors CASCADE_STEPS steps 10 + 11.
+  // -----------------------------------------------------------------------
+  domainEvents.on('person.deleted', async (payload) => {
+    const { personId } = payload;
+    try {
+      await deps.db.delete(notificationPreferences)
+        .where(eq(notificationPreferences.personId, personId));
+
+      await deps.db.delete(personPrivacySettings)
+        .where(eq(personPrivacySettings.personId, personId));
+    } catch (err) {
+      logger.error({ error: err, personId }, '[consumer] person.deleted person preferences cascade failed');
+    }
   });
 }

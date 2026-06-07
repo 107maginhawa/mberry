@@ -3,7 +3,6 @@ import type { DatabaseInstance } from '@/core/database';
 import type { UpdateOrganizationBody, UpdateOrganizationParams } from '@/generated/openapi/validators';
 import { NotFoundError } from '@/core/errors';
 import { OrganizationRepository } from './repos/platform-admin.repo';
-import { auditAction } from '@/utils/audit';
 
 /**
  * updateOrganization
@@ -30,12 +29,8 @@ export async function updateOrganization(
 
   const updated = await repo.update(organizationId, body);
 
-  await auditAction(ctx, {
-    action: 'update',
-    resourceType: 'organization',
-    resourceId: organizationId,
-    description: `Organization "${existing.name}" updated`,
-  });
+  ctx.set('auditResourceId', organizationId);
+  ctx.set('auditDescription', `Organization "${existing.name}" updated`);
 
   return ctx.json(updated, 200);
 }

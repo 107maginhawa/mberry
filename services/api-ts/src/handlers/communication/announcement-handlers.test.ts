@@ -4,7 +4,7 @@ import { CommunicationsRepository } from './repos/communication.repo';
 import { OfficerTermRepository } from '../association:member/repos/governance.repo';
 
 // Mock audit
-mock.module('@/utils/audit', () => ({
+mock.module('@/core/audit/audit-action', () => ({
   auditAction: async () => {},
 }));
 
@@ -504,15 +504,6 @@ describe('archiveAnnouncement', () => {
   });
 
   // ─── M7: Officer role enforcement ───────────────────────
-  test('returns 403 when non-officer tries to archive', async () => {
-    const { archiveAnnouncement } = await import('./archiveAnnouncement');
-    restoreRepo(OfficerTermRepository);
-    stubRepo(OfficerTermRepository, {
-      findActiveByPersonAndOrg: async () => [],
-    });
-
-    const ctx = makeCtx({ _params: { id: 'ann-2' } });
-    const res = await archiveAnnouncement(ctx as any);
-    expect(res.status).toBe(403);
-  });
+  // 403 case removed — gate moved to requirePositionMiddleware
+  // (covered by src/middleware/require-position.test.ts).
 });

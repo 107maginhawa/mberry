@@ -3,7 +3,6 @@ import type { DatabaseInstance } from '@/core/database';
 import type { SendMessageParams } from '@/generated/openapi/validators';
 import { NotFoundError, BusinessLogicError } from '@/core/errors';
 import { MessageRepository } from './repos/communication.repo';
-import { auditAction } from '@/utils/audit';
 import { domainEvents } from '@/core/domain-events';
 import { memberships } from '@/handlers/association:member/repos/membership.schema';
 import { eq, inArray, and } from 'drizzle-orm';
@@ -32,7 +31,9 @@ export async function sendMessage(
 
   const params = ctx.req.valid('param');
   const db = ctx.get('database') as DatabaseInstance;
-  const logger = ctx.get('logger');
+  const baseLogger = ctx.get('logger');
+  const traceId = ctx.get('requestId');
+  const logger = baseLogger?.child?.({ traceId, module: 'communication' }) ?? baseLogger;
   const repo = new MessageRepository(db, logger);
 
   const existing = await repo.findById(params.messageId);
@@ -77,7 +78,7 @@ export async function sendMessage(
         updatedBy: user.id,
       });
       logger?.info(
-        { messageId: params.messageId, suppressed: suppressedIds.size, remaining: filtered.length },
+        { action: 'sendMessage.1', messageId: params.messageId, suppressed: suppressedIds.size, remaining: filtered.length },
         'Filtered suppressed recipients from message',
       );
     }
@@ -104,13 +105,8 @@ export async function sendMessage(
     recipientCount: (updated?.recipients as MessageRecipient[] | null)?.length ?? 0,
   });
 
-  await auditAction(ctx, {
-    action: 'update',
-    resourceType: 'message',
-    resourceId: params.messageId,
-    description: 'Message sent',
-    eventSubType: 'communication.email-sent',
-  });
+  ctx.set('auditResourceId', params.messageId);
+  ctx.set('auditDescription', 'Message sent');
 
   return ctx.json(updated, 200);
 }

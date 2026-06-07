@@ -5,7 +5,6 @@ import type { UpdateMyPrivacySettingsBody } from '@/generated/openapi/validators
 import { eq, and, inArray } from 'drizzle-orm';
 import { personPrivacySettings } from './repos/privacy-settings.schema';
 import { memberships } from '@/handlers/association:member/repos/membership.schema';
-import { auditAction } from '@/utils/audit';
 
 /**
  * updateMyPrivacySettings
@@ -72,13 +71,9 @@ export async function updateMyPrivacySettings(
       .returning();
   }
 
-  await auditAction(ctx, {
-    action: 'update',
-    resourceType: 'privacy-settings',
-    resourceId: personId,
-    description: 'Self-service privacy settings update',
-    details: { orgId: b['organizationId'] as string },
-  });
+  ctx.set('auditResourceId', personId);
+  ctx.set('auditDescription', 'Self-service privacy settings update');
+  ctx.set('auditDetails', { orgId: b['organizationId'] as string });
 
   return ctx.json(row, existing ? 200 : 201);
 }

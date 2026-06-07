@@ -1,19 +1,31 @@
+// WF-019 — User Impersonation
 // Cross-org isolation (IDOR) E2E tests
 // Verifies officers from one organization cannot access another org's data
 // through the full browser stack. Backend IDOR protection from Phase 12-04.
 import { test, expect } from './helpers/test-fixture'
-import { signIn } from './helpers/auth'
 import { SEED_IDOR_EMAIL, TEST_PASSWORD } from './helpers/test-config'
+import { authStateFile } from './helpers/auth-state'
+import { captureAnyApiSuccess } from './helpers/real-flow'
 
+
+test.use({ storageState: authStateFile('idor') })
 const API_BASE = process.env.API_BASE_URL ?? 'http://localhost:7213'
 const ORG_A_ID = 'ed8e3a96-8126-4341-be42-e6eb7940c562' // pda-metro-manila
 
-test.describe('Cross-Org Isolation (IDOR Prevention)', () => {
-  test.beforeEach(async ({ page }) => {
-    await signIn(page, SEED_IDOR_EMAIL, TEST_PASSWORD)
-  })
+// Cross-origin fetch from `page.evaluate(() => fetch(API))` runs with
+// Origin: null when the page hasn't navigated anywhere, and hono/cors
+// rejects null-origin preflights. Land on the SPA first so subsequent
+// fetches inherit the http://localhost:3004 origin that CORS_ORIGINS allows.
+test.beforeEach(async ({ page }) => {
+  const respP = captureAnyApiSuccess(page)
+  await page.goto('/dashboard')
+  const resp = await respP
+  expect(resp?.status()).toBe(200)
+  expect(resp?.ok()).toBe(true)
+})
 
-  test('org B officer cannot view org A roster', async ({ page }) => {
+test.describe('Cross-Org Isolation (IDOR Prevention)', () => {
+test('org B officer cannot view org A roster', async ({ page }) => {
     const status = await page.evaluate(
       async ({ apiBase, orgAId }) => {
         const res = await fetch(

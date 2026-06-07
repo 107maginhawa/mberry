@@ -1,0 +1,110 @@
+{
+  "dues": {
+    "apps/memberry/src": 421,
+    "apps/admin/src": 0
+  },
+  "booking": {
+    "apps/memberry/src": 145,
+    "apps/admin/src": 1
+  },
+  "person": {
+    "apps/memberry/src": 253,
+    "apps/admin/src": 31
+  },
+  "marketplace": {
+    "apps/memberry/src": 0,
+    "apps/admin/src": 0
+  },
+  "comms": {
+    "apps/memberry/src": 29,
+    "apps/admin/src": 1
+  },
+  "default": {
+    "apps/memberry/src": 108,
+    "apps/admin/src": 3
+  },
+  "certificates": {
+    "apps/memberry/src": 85,
+    "apps/admin/src": 1
+  },
+  "storage": {
+    "apps/memberry/src": 7,
+    "apps/admin/src": 1
+  },
+  "notifs": {
+    "apps/memberry/src": 16,
+    "apps/admin/src": 1
+  },
+  "invite": {
+    "apps/memberry/src": 32,
+    "apps/admin/src": 9
+  },
+  "audit": {
+    "apps/memberry/src": 1,
+    "apps/admin/src": 35
+  },
+  "__tests__": {
+    "apps/memberry/src": 0,
+    "apps/admin/src": 0
+  },
+  "association:operations": {
+    "apps/memberry/src": 0,
+    "apps/admin/src": 0
+  },
+  "association:member": {
+    "apps/memberry/src": 1,
+    "apps/admin/src": 0
+  },
+  "advertising": {
+    "apps/memberry/src": 0,
+    "apps/admin/src": 0
+  },
+  "surveys": {
+    "apps/memberry/src": 143,
+    "apps/admin/src": 30
+  },
+  "documents": {
+    "apps/memberry/src": 172,
+    "apps/admin/src": 0
+  },
+  "communication": {
+    "apps/memberry/src": 6,
+    "apps/admin/src": 0
+  },
+  "jobs": {
+    "apps/memberry/src": 0,
+    "apps/admin/src": 0
+  },
+  "events": {
+    "apps/memberry/src": 324,
+    "apps/admin/src": 51
+  },
+  "email": {
+    "apps/memberry/src": 229,
+    "apps/admin/src": 76
+  },
+  "billing": {
+    "apps/memberry/src": 73,
+    "apps/admin/src": 1
+  },
+  "onboarding": {
+    "apps/memberry/src": 31,
+    "apps/admin/src": 0
+  },
+  "membership": {
+    "apps/memberry/src": 193,
+    "apps/admin/src": 0
+  },
+  "elections": {
+    "apps/memberry/src": 214,
+    "apps/admin/src": 0
+  },
+  "reviews": {
+    "apps/memberry/src": 27,
+    "apps/admin/src": 1
+  },
+  "platformadmin": {
+    "apps/memberry/src": 0,
+    "apps/admin/src": 0
+  }
+}

@@ -7,17 +7,15 @@
 // UI coverage (this file): officer nomination flow, status-gated "Add" button, dialog presence
 
 import { test, expect } from '../helpers/test-fixture'
-import { signIn } from '../helpers/auth'
 import { SEED_OFFICER_EMAIL, TEST_PASSWORD, API_BASE } from '../helpers/test-config'
+import { authStateFile } from '../helpers/auth-state'
 
+
+test.use({ storageState: authStateFile('officer') })
 const ORG_ID = 'ed8e3a96-8126-4341-be42-e6eb7940c562'
 
 test.describe('BR-34: Nomination Eligibility', () => {
-  test.beforeEach(async ({ page }) => {
-    await signIn(page, SEED_OFFICER_EMAIL, TEST_PASSWORD)
-  })
-
-  test('unauthenticated nomination request returns 401', async ({ page }) => {
+test('unauthenticated nomination request returns 401', async ({ page }) => {
     const response = await page.evaluate(async ({ orgId }) => {
       const res = await fetch(`${API_BASE}/association/elections/nominations/eligibility?organizationId=${orgId}`)
       return { status: res.status }
@@ -35,8 +33,6 @@ test.describe('BR-34: Nomination Eligibility', () => {
     // Eligibility enforcement happens when they select a specific member (handler-level).
 
     await page.goto(`/org/${ORG_ID}/officer/elections`)
-    await page.waitForLoadState('networkidle')
-
     // Navigate into the seeded 2026 draft election
     const electionLink = page.getByText(/2026.*officer election/i).first()
     await expect(electionLink).toBeVisible({ timeout: 10000 })
@@ -75,8 +71,6 @@ test.describe('BR-34: Nomination Eligibility', () => {
     // This E2E test covers the UI nomination flow entry point and dialog presence.
 
     await page.goto(`/org/${ORG_ID}/officer/elections`)
-    await page.waitForLoadState('networkidle')
-
     const electionLink = page.getByText(/2026.*officer election/i).first()
     await expect(electionLink).toBeVisible({ timeout: 10000 })
     await electionLink.click()
@@ -131,8 +125,6 @@ test.describe('BR-34: Nomination Eligibility', () => {
     //   - nomination-eligibility-e2e.test.ts: "eligible member can be nominated after opening nominations"
 
     await page.goto(`/org/${ORG_ID}/officer/elections`)
-    await page.waitForLoadState('networkidle')
-
     const electionLink = page.getByText(/2026.*officer election/i).first()
     await expect(electionLink).toBeVisible({ timeout: 10000 })
     await electionLink.click()

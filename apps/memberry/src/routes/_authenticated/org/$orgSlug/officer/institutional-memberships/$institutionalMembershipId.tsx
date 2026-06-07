@@ -9,7 +9,7 @@ import { Badge } from '@monobase/ui'
 import { PageShell } from '@/components/patterns/page-shell'
 import { InstitutionalMembershipForm } from '@/features/membership/components/institutional-membership-form'
 import { SeatManagementPanel } from '@/features/membership/components/seat-management-panel'
-import { useOrg } from '@/hooks/useOrg'
+import { useOrg } from '@/hooks/use-org'
 import { Trash2 } from 'lucide-react'
 import {
   getInstitutionalMembershipOptions,

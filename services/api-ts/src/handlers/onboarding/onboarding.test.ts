@@ -143,9 +143,6 @@ describe('updateOnboardingStep', () => {
     }
   });
 
-  test('403 when caller has no officer term', async () => {
-    mocks.push(stubRepo(OfficerTermRepository, { findActiveByPersonAndOrg: async () => [] }));
-    const ctx = makeCtx({ _body: { orgId: ORG, step: 1, data: {} } });
-    await expect(updateOnboardingStep(ctx)).rejects.toBeInstanceOf(ForbiddenError);
-  });
+  // 403 for missing officer term is now enforced by requireOfficerMiddleware
+  // (body-orgId mode) in the route chain — see middleware/require-officer.test.ts.
 });

@@ -13,6 +13,12 @@ import {
 /**
  * Sign up a new user via the UI.
  * Returns { email, password, name }.
+ *
+ * NOTE: sign-up auto-creates the person row via the Better-Auth
+ * `user.create.after` hook (services/api-ts/src/core/auth.ts:194).
+ * Earlier versions of this helper did an extra POST /persons here, which
+ * (a) duplicated the auto-create and (b) silently failed under the new
+ * CSRF middleware. Removed in the E2E timeout RCA pass (P1.3e-fix2).
  */
 export async function signUp(page: Page) {
   const timestamp = Date.now()
@@ -22,19 +28,14 @@ export async function signUp(page: Page) {
   const name = `Test User ${timestamp}`
 
   await page.goto('/auth/sign-up')
-  await page.waitForLoadState('networkidle')
 
   const submit = page.getByRole('button', { name: /create an account|sign up|register/i })
   await expect(submit).toBeVisible({ timeout: 10000 })
 
   await page.getByLabel('Name', { exact: true }).fill(name)
   await page.getByLabel('Email', { exact: true }).fill(email)
+  await page.getByLabel('Password', { exact: true }).fill(password)
 
-  const passwordInput = page.getByLabel('Password', { exact: true })
-  await passwordInput.click()
-  await passwordInput.pressSequentially(password, { delay: 10 })
-
-  // Capture the signup API response
   const signupResponse = page.waitForResponse(
     (resp) => resp.url().includes('/auth/sign-up') && resp.request().method() === 'POST',
     { timeout: 10000 },
@@ -48,27 +49,17 @@ export async function signUp(page: Page) {
     throw new Error(`Sign-up failed ${response.status()}: ${body.slice(0, 500)}`)
   }
 
-  // Wait for session to settle
-  await page.waitForTimeout(2000)
-  await page.waitForLoadState('networkidle')
-
-  // Create person record (sign-up only creates auth user, not person)
-  const [firstName, ...lastParts] = name.split(' ')
-  const lastName = lastParts.join(' ') || null
-  await page.evaluate(async ({ firstName, lastName, email, apiBase }) => {
-    await fetch(`${apiBase}/persons`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      credentials: 'include',
-      body: JSON.stringify({
-        firstName,
-        lastName,
-        contactInfo: { email },
-      }),
-    })
-  }, { firstName, lastName, email, apiBase: API_BASE })
-
-  await page.waitForTimeout(1000)
+  // Wait for navigation away from /auth/sign-up — Better-Auth sets the session
+  // cookie in the sign-up response, so the next render redirects the user
+  // either into onboarding, the dashboard, or an org home.
+  // Accept any post-auth landing: dashboard, onboarding, my/*, org/*, OR
+  // /auth/verify-email (Better-Auth's gate when requireEmailVerification is on).
+  await page.waitForURL(
+    (url) =>
+      !url.pathname.startsWith('/auth/') ||
+      url.pathname.startsWith('/auth/verify-email'),
+    { timeout: 10000 },
+  )
 
   return { email, password, name }
 }
@@ -87,17 +78,13 @@ export async function signUpForOnboarding(page: Page) {
 
   // Step 1: Sign up (creates auth user, no person)
   await page.goto('/auth/sign-up')
-  await page.waitForLoadState('networkidle')
 
   const submit = page.getByRole('button', { name: /create an account|sign up|register/i })
   await expect(submit).toBeVisible({ timeout: 10000 })
 
   await page.getByLabel('Name', { exact: true }).fill(name)
   await page.getByLabel('Email', { exact: true }).fill(email)
-
-  const passwordInput = page.getByLabel('Password', { exact: true })
-  await passwordInput.click()
-  await passwordInput.pressSequentially(password, { delay: 10 })
+  await page.getByLabel('Password', { exact: true }).fill(password)
 
   const signupResponse = page.waitForResponse(
     (resp) => resp.url().includes('/auth/sign-up') && resp.request().method() === 'POST',
@@ -111,8 +98,14 @@ export async function signUpForOnboarding(page: Page) {
     throw new Error(`Sign-up failed ${response.status()}: ${body.slice(0, 500)}`)
   }
 
-  await page.waitForTimeout(2000)
-  await page.waitForLoadState('networkidle')
+  // Accept any post-auth landing: dashboard, onboarding, my/*, org/*, OR
+  // /auth/verify-email (Better-Auth's gate when requireEmailVerification is on).
+  await page.waitForURL(
+    (url) =>
+      !url.pathname.startsWith('/auth/') ||
+      url.pathname.startsWith('/auth/verify-email'),
+    { timeout: 10000 },
+  )
 
   // Step 2: Sign in as officer (has admin role) to verify email via admin API
   // Officer uses admin list-users to find the new user, then sets emailVerified
@@ -154,19 +147,19 @@ export async function signUpForOnboarding(page: Page) {
 
 /**
  * Sign in an existing user via the UI.
+ *
+ * Replaces the prior `waitForTimeout(2000) + waitForLoadState('networkidle')`
+ * trailing pair (~3-5s per call across 166 invocations) with an explicit
+ * "we left the auth surface" URL wait. See E2E_TIMEOUT_ROOT_CAUSE.md §1.
  */
 export async function signIn(page: Page, email: string, password: string) {
   await page.goto('/auth/sign-in')
-  await page.waitForLoadState('networkidle')
 
   const submit = page.getByRole('button', { name: /login|sign in/i })
   await expect(submit).toBeVisible({ timeout: 10000 })
 
   await page.getByLabel('Email', { exact: true }).fill(email)
-
-  const passwordInput = page.getByLabel('Password', { exact: true })
-  await passwordInput.click()
-  await passwordInput.pressSequentially(password, { delay: 10 })
+  await page.getByLabel('Password', { exact: true }).fill(password)
 
   const loginResponse = page.waitForResponse(
     (resp) => resp.url().includes('/auth/sign-in') && resp.request().method() === 'POST',
@@ -181,9 +174,17 @@ export async function signIn(page: Page, email: string, password: string) {
     throw new Error(`Sign-in failed ${response.status()}: ${body.slice(0, 500)}`)
   }
 
-  // Wait for session + redirect
-  await page.waitForTimeout(2000)
-  await page.waitForLoadState('networkidle')
+  // Wait for the redirect after the session cookie lands. Better-Auth's
+  // sign-in handler returns 200 with Set-Cookie and the SPA navigates next
+  // render — usually < 200ms in dev, < 500ms in CI.
+  // Accept any post-auth landing: dashboard, onboarding, my/*, org/*, OR
+  // /auth/verify-email (Better-Auth's gate when requireEmailVerification is on).
+  await page.waitForURL(
+    (url) =>
+      !url.pathname.startsWith('/auth/') ||
+      url.pathname.startsWith('/auth/verify-email'),
+    { timeout: 10000 },
+  )
 }
 
 /**

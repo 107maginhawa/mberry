@@ -3,7 +3,6 @@ import type { DatabaseInstance } from '@/core/database';
 import type { DeleteDocumentTagParams } from '@/generated/openapi/validators';
 import { UnauthorizedError, NotFoundError } from '@/core/errors';
 import { DocumentTagRepository } from './repos/documents.repo';
-import { auditAction } from '@/utils/audit';
 
 /**
  * deleteDocumentTag
@@ -26,12 +25,8 @@ export async function deleteDocumentTag(
 
   await repo.deleteOneById(tagId);
 
-  await auditAction(ctx, {
-    action: 'delete',
-    resourceType: 'document-tag',
-    resourceId: tagId,
-    description: 'Document tag deleted',
-  });
+  ctx.set('auditResourceId', tagId);
+  ctx.set('auditDescription', 'Document tag deleted');
 
   return ctx.body(null, 204);
 }

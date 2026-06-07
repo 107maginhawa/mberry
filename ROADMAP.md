@@ -1,5 +1,14 @@
 # Roadmap
 
+> **Active hardening plan:** `~/.claude/plans/whats-good-for-long-crystalline-blum.md`
+> (Wave 7 Decomposition Closeout + Wave 8 Coverage Bootstrap).
+> Mega-module decomposition (P1-11) **CLOSED** 2026-06-07 via the
+> `member-*-cutover` tag series (cert + chapters + credentials + credits
+> + directory + dues + governance + membership).
+> Landed at `handlers/member/<sub>/` (NOT the SPLIT-PLAN-proposed
+> `handlers/association:<sub>/`). See SUPERSEDED banner in
+> `.planning/deferred/14-mega-module-split/SPLIT-PLAN.md`.
+
 > Single source of truth for all planned work, structural refactors, and migration backlog.
 > Bugs are fixed immediately — they don't belong here. This file tracks only **planned work**.
 
@@ -24,15 +33,22 @@
 
 ## Active Work
 
-### Phase 47a: Institutional Memberships
+### Phase 47a: Institutional Memberships — **BACKEND COMPLETE**
 
-**Goal:** Implement multi-seat institutional (corporate/org) memberships — DB schema, repositories, all 8 CRUD + seat-allocation handlers, tests. Wire `requiredCredits` from CPD config API to member-table frontend component.
+**Backend (DONE 2026-06-07 at `member-membership-cutover`):**
+- ✅ DB schema: `institutional_memberships`, `seat_allocations` tables
+- ✅ 8 handler implementations (no DeferredScopeError stubs remain).
+  Located at `handlers/member/membership/` (createInstitutionalMembership,
+  getInstitutionalMembership, listInstitutionalMemberships,
+  updateInstitutionalMembership, deleteInstitutionalMembership,
+  allocateSeat, listSeatAllocations, revokeSeat)
+- ✅ Repository layer + unit tests
+- ✅ Hurl contract: `seat-allocation-flow.hurl` (Wave 7 baseline 144/144)
 
-**Scope:**
-- 2 new DB tables: `institutional_memberships`, `seat_allocations`
-- 8 handler implementations (replace DeferredScopeError stubs)
-- Repository layer + unit tests
-- Frontend: wire `requiredCredits` prop from org CPD config API
+**Frontend (STILL PENDING):**
+- ⏳ Wire `requiredCredits` prop from org CPD config API to
+  `apps/memberry/src/features/membership/components/member-table.tsx:60`
+  (currently defaults to `60` hardcoded). Pass real value from parent route.
 
 ### Phase 47b: National Dashboard Frontend + Booking Cleanup
 
@@ -50,18 +66,21 @@
 
 TypeSpec-defined endpoints with generated routes, returning HTTP 501 via `DeferredScopeError`. Frontend does not call any of these. They are scaffolding for future features.
 
-| Handler | Module | Target | Description |
+| Handler | Module | Status | Description |
 |---------|--------|--------|-------------|
-| `listInstitutionalMemberships` | association:member | Phase 47a | List corporate/org memberships |
-| `getInstitutionalMembership` | association:member | Phase 47a | Get single institutional membership |
-| `createInstitutionalMembership` | association:member | Phase 47a | Create multi-seat org membership |
-| `updateInstitutionalMembership` | association:member | Phase 47a | Update institutional membership |
-| `deleteInstitutionalMembership` | association:member | Phase 47a | Delete institutional membership |
-| `allocateSeat` | association:member | Phase 47a | Allocate seat in institutional membership |
-| `revokeSeat` | association:member | Phase 47a | Revoke allocated seat |
-| `listSeatAllocations` | association:member | Phase 47a | List seat allocations |
+| ~~`listInstitutionalMemberships`~~ | member/membership | ✅ Done (member-membership-cutover) | List corporate/org memberships |
+| ~~`getInstitutionalMembership`~~ | member/membership | ✅ Done | Get single institutional membership |
+| ~~`createInstitutionalMembership`~~ | member/membership | ✅ Done | Create multi-seat org membership |
+| ~~`updateInstitutionalMembership`~~ | member/membership | ✅ Done | Update institutional membership |
+| ~~`deleteInstitutionalMembership`~~ | member/membership | ✅ Done | Delete institutional membership |
+| ~~`allocateSeat`~~ | member/membership | ✅ Done | Allocate seat in institutional membership |
+| ~~`revokeSeat`~~ | member/membership | ✅ Done | Revoke allocated seat |
+| ~~`listSeatAllocations`~~ | member/membership | ✅ Done | List seat allocations |
 
-> When implementing: replace `DeferredScopeError` throw with real logic, add tests, remove from this table.
+> All Phase 47a backend scaffolds resolved at `member-membership-cutover`
+> (commit `5f0c374d`). When future scaffolds appear: replace
+> `DeferredScopeError` throw with real logic, add tests, remove from this
+> table.
 
 ---
 
@@ -107,25 +126,40 @@ Dynamic configuration per association/tier. Currently hardcoded values.
 
 ## Structural Refactors
 
-### Domain Module Decomposition
+### Carry-forwards
 
-The `association:member` handler directory contains ~211 handlers across 7 natural bounded contexts in a single flat directory. This is a structural refactor for DDD alignment — not a bug or debt.
+**`elections/updateElectionStatus`** — orphan handler. Implemented + tested (24 refs across 5 sibling tests asserting BR-33, transition guards, status-changed event, cancellation cascade) but unwired (no TypeSpec operation, not in `app.ts`). Per-transition successors (`openElectionVoting`, `openElectionNominations`, `certifyElection` in `association:member/`) cover the `votingOpen`/`published`/etc. branches; the `cancelled` branch has no wired path. Build a real `cancelElection` operation when product needs it, then retire `updateElectionStatus` + its dependent tests in one pass. Reference: F5 cleanup, commit 9cc394a5.
 
-**Current:** 1 directory, ~211 handlers, 7 repo pairs
-**Proposed:** 7 domain modules:
+### Domain Module Decomposition — **CLOSED 2026-06-07** (P1-11)
 
-| Module | Handlers | Domain |
-|--------|----------|--------|
-| `association:membership` | ~42 | Core membership lifecycle, institutional, roster |
-| `association:dues` | ~42 | Invoicing, payments, dunning, royalties |
-| `association:governance` | ~30 | Elections, officers, positions |
-| `association:chapter` | ~13 | Chapter affiliations, transfers |
-| `association:credentials` | ~17 | Professional credentials, certificates |
-| `association:credits` | ~12 | CE/CPD tracking, licenses |
-| `association:directory` | ~7 | Member directory, search |
+**Status:** ✅ COMPLETE. The `association:member` mega-module has been
+decomposed via the `member-*-cutover` tag series. Final landing point
+differs from the original SPLIT-PLAN proposal:
 
-**Status:** Planned, not blocking. Reference: `.planning/deferred/14-mega-module-split/SPLIT-PLAN.md`
-**Prerequisites:** Route regeneration + update 19 external consumers importing from `association:member/repos/`
+| Sub-module (actual) | Path | Cutover Tag |
+|---|---|---|
+| Member/Certificates | `handlers/member/certificates/` | `member-certificates-cutover` |
+| Member/Chapters | `handlers/member/chapters/` | `member-chapters-cutover` |
+| Member/Credentials | `handlers/member/credentials/` | `member-credentials-cutover` |
+| Member/Credits | `handlers/member/credits/` | `member-credits-cutover` |
+| Member/Directory | `handlers/member/directory/` | `member-directory-cutover` |
+| Member/Governance | `handlers/member/governance/` | `member-governance-cutover` |
+| Member/DuesSpecialAssessments | `handlers/member/duesspecialassessments/` | `member-dues-cutover` |
+| Member/Membership | `handlers/member/membership/` | `member-membership-cutover` (FINAL) |
+
+**Residual at `handlers/association:member/`** (intentional cross-domain
+leftover, NOT a sub-module): `getOrgDashboard.ts`,
+`transitionOfficerTerm.ts`, 3 cross-domain jobs, single-domain utils
+(deferred future cleanup), all `repos/*` (canonical per cutover § 4.2),
+3 cross-domain integration tests.
+
+**Residual at `handlers/membership/`** (intentional admin-tier surface,
+distinct from `handlers/member/membership/`): 4 LIVE legacy handlers
+back `/membership/*/{organizationId}` admin routes, repos/membership.repo
+(query-rich JOIN/search canonical per CLAUDE.md).
+
+Reference (superseded planning doc): `.planning/deferred/14-mega-module-split/SPLIT-PLAN.md`
+See SUPERSEDED banner in that file for context.
 
 ---
 

@@ -190,6 +190,51 @@ describe('EmailQueueRepository', () => {
       expect(callArgs.attempts).toBe(0);
     });
 
+    test('defaults organizationId to SYSTEM_ORG_ID when not provided (better-auth signup path)', async () => {
+      const repo = makeRepo();
+      const createOneSpy = spyOn(repo, 'createOne' as any).mockResolvedValue(makeQueueItem());
+
+      await repo.queueEmail({
+        templateTags: ['auth.email-verify'],
+        recipient: 'signup@example.com',
+        variables: {},
+      });
+
+      const callArgs = createOneSpy.mock.calls[0][0] as any;
+      expect(callArgs.organizationId).toBe('00000000-0000-0000-0000-000000000000');
+    });
+
+    test('defaults organizationId to SYSTEM_ORG_ID when empty string supplied (regression: B-01/B-02)', async () => {
+      const repo = makeRepo();
+      const createOneSpy = spyOn(repo, 'createOne' as any).mockResolvedValue(makeQueueItem());
+
+      await repo.queueEmail({
+        templateTags: ['auth.password-reset'],
+        recipient: 'reset@example.com',
+        variables: {},
+        organizationId: '',
+      });
+
+      const callArgs = createOneSpy.mock.calls[0][0] as any;
+      expect(callArgs.organizationId).toBe('00000000-0000-0000-0000-000000000000');
+    });
+
+    test('preserves caller-supplied organizationId when set', async () => {
+      const repo = makeRepo();
+      const createOneSpy = spyOn(repo, 'createOne' as any).mockResolvedValue(makeQueueItem());
+      const orgId = '11111111-2222-3333-4444-555555555555';
+
+      await repo.queueEmail({
+        templateTags: ['announcements.org-broadcast'],
+        recipient: 'member@example.com',
+        variables: {},
+        organizationId: orgId,
+      });
+
+      const callArgs = createOneSpy.mock.calls[0][0] as any;
+      expect(callArgs.organizationId).toBe(orgId);
+    });
+
     test('sets scheduledAt to null when not provided', async () => {
       const repo = makeRepo();
       const createOneSpy = spyOn(repo, 'createOne' as any).mockResolvedValue(makeQueueItem());

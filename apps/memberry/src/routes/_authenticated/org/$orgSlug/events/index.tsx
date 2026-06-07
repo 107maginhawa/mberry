@@ -14,7 +14,7 @@ import {
 } from '@monobase/sdk-ts/generated/react-query'
 import type { Event, EventStatus, EventType } from '@monobase/sdk-ts/generated/types.gen'
 import type { ApiListResponse } from '@/types/api'
-import { useOrg } from '@/hooks/useOrg'
+import { useOrg } from '@/hooks/use-org'
 
 export const Route = createFileRoute('/_authenticated/org/$orgSlug/events/')({
   component: OrgEvents,
@@ -66,7 +66,7 @@ function OrgEvents() {
       {/* Filters */}
       <div className="flex flex-col sm:flex-row gap-3 items-start sm:items-center">
         <Select value={typeFilter} onValueChange={setTypeFilter}>
-          <SelectTrigger className="h-9 w-[160px]">
+          <SelectTrigger className="h-9 w-[160px]" aria-label="Filter events by type">
             <SelectValue placeholder="All Types" />
           </SelectTrigger>
           <SelectContent>

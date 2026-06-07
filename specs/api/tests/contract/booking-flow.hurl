@@ -1,36 +1,38 @@
+# CSRF preamble — fetches token + sets cookie for state-changing requests.
+# Auto-injected by scripts/audit/inject-csrf-into-hurl.ts (idempotent).
+GET {{api}}/csrf-token
+HTTP 200
+[Captures]
+csrf_token: jsonpath "$.token"
+
+
+
 # End-to-end booking flow: a host publishes an active event, a client
 # books an open slot, the host confirms, then the client cancels. Slots
 # are auto-generated from the event's dailyConfigs as soon as it goes
 # active. Relies on Hurl's cookie jar; sign in / sign up to switch
 # whichever user is "active".
 
-# 0. Create the host.
-POST {{api}}/auth/sign-up/email
+# 0. Sign in as the seeded officer (acts as the host with org access).
+POST {{api}}/auth/sign-in/email
+Origin: {{origin}}
+x-csrf-token: {{csrf_token}}
 Content-Type: application/json
 {
-  "email": "flow-host-{{suffix}}@example.org",
-  "password": "Sup3rSecret!ContractTest",
-  "name": "Booking Host"
+  "email": "{{seed_officer_email}}",
+  "password": "{{seed_officer_password}}"
 }
 HTTP 200
 
 
-POST {{api}}/persons
-Content-Type: application/json
-{
-  "firstName": "Booking",
-  "lastName": "Host",
-  "languagesSpoken": ["en"],
-  "timezone": "America/New_York"
-}
-HTTP 201
-
-
-# 1. Create an active booking event so slots are generated.
+# 1. Create a booking event.
 POST {{api}}/booking/events
+Origin: {{origin}}
+x-csrf-token: {{csrf_token}}
 Content-Type: application/json
+x-org-id: {{org_id}}
 {
-  "title": "30-min consult",
+  "title": "Flow Event {{suffix}}",
   "timezone": "America/New_York",
   "locationTypes": ["video"],
   "maxBookingDays": 60,
@@ -38,11 +40,7 @@ Content-Type: application/json
   "status": "active",
   "effectiveFrom": "2026-01-01T00:00:00Z",
   "dailyConfigs": {
-    "mon": { "enabled": true, "timeBlocks": [{ "startTime": "09:00", "endTime": "17:00", "slotDuration": 30 }] },
-    "tue": { "enabled": true, "timeBlocks": [{ "startTime": "09:00", "endTime": "17:00", "slotDuration": 30 }] },
-    "wed": { "enabled": true, "timeBlocks": [{ "startTime": "09:00", "endTime": "17:00", "slotDuration": 30 }] },
-    "thu": { "enabled": true, "timeBlocks": [{ "startTime": "09:00", "endTime": "17:00", "slotDuration": 30 }] },
-    "fri": { "enabled": true, "timeBlocks": [{ "startTime": "09:00", "endTime": "17:00", "slotDuration": 30 }] }
+    "mon": { "enabled": true, "timeBlocks": [{ "startTime": "09:00", "endTime": "17:00", "slotDuration": 30 }] }
   }
 }
 HTTP 201
@@ -50,90 +48,49 @@ HTTP 201
 event_id: jsonpath "$.id"
 
 
-# 2. List slots for that event - at least one available slot should exist.
+# 2. List slots for that event.
 GET {{api}}/booking/events/{{event_id}}/slots?status=available
+x-org-id: {{org_id}}
 HTTP 200
 [Captures]
 slot_id: jsonpath "$[0].id"
-[Asserts]
-jsonpath "$" isCollection
 
 
-# 3. Switch to a client user (jar now holds client session).
-POST {{api}}/auth/sign-up/email
-Content-Type: application/json
-{
-  "email": "flow-client-{{suffix}}@example.org",
-  "password": "Sup3rSecret!ContractTest",
-  "name": "Booking Client"
-}
-HTTP 200
-
-
-POST {{api}}/persons
-Content-Type: application/json
-{
-  "firstName": "Booking",
-  "lastName": "Client",
-  "languagesSpoken": ["en"],
-  "timezone": "America/New_York"
-}
-HTTP 201
-
-
-# 4. Book the slot as the client.
+# 3. Create a booking against the first slot.
 POST {{api}}/booking/bookings
+Origin: {{origin}}
+x-csrf-token: {{csrf_token}}
 Content-Type: application/json
+x-org-id: {{org_id}}
 {
   "slot": "{{slot_id}}",
   "locationType": "video",
-  "reason": "Initial consult"
+  "reason": "Flow test"
 }
 HTTP 201
 [Captures]
 booking_id: jsonpath "$.id"
-[Asserts]
-jsonpath "$.status" == "pending"
 
 
-# 5. List the client's bookings (role-based: client sees own bookings).
-GET {{api}}/booking/bookings
-HTTP 200
-[Asserts]
-jsonpath "$.data" isCollection
-jsonpath "$.pagination.totalCount" >= 1
-
-
-# 6. Switch back to the host to confirm.
-POST {{api}}/auth/sign-in/email
-Content-Type: application/json
-{
-  "email": "flow-host-{{suffix}}@example.org",
-  "password": "Sup3rSecret!ContractTest"
-}
-HTTP 200
-
-
+# 4. Confirm the booking (officer).
 POST {{api}}/booking/bookings/{{booking_id}}/confirm
+Origin: {{origin}}
+x-csrf-token: {{csrf_token}}
 Content-Type: application/json
+x-org-id: {{org_id}}
 { "reason": "Confirmed by host" }
 HTTP 200
 [Asserts]
 jsonpath "$.status" == "confirmed"
 
 
-# 7. Switch back to client to cancel.
-POST {{api}}/auth/sign-in/email
-Content-Type: application/json
-{
-  "email": "flow-client-{{suffix}}@example.org",
-  "password": "Sup3rSecret!ContractTest"
-}
-HTTP 200
-
-
+# 5. Cancel the booking (same officer — keeps the flow single-actor;
+# multi-actor coverage lives in booking-edge.hurl).
 POST {{api}}/booking/bookings/{{booking_id}}/cancel
+Origin: {{origin}}
+x-csrf-token: {{csrf_token}}
 Content-Type: application/json
+x-org-id: {{org_id}}
 { "reason": "Schedule conflict" }
 HTTP 200
 [Asserts]

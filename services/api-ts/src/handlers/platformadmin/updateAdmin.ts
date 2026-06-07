@@ -3,7 +3,6 @@ import type { DatabaseInstance } from '@/core/database';
 import type { UpdateAdminBody, UpdateAdminParams } from '@/generated/openapi/validators';
 import { NotFoundError, BusinessLogicError } from '@/core/errors';
 import { PlatformAdminRepository } from './repos/platform-admin.repo';
-import { auditAction } from '@/utils/audit';
 
 /**
  * updateAdmin
@@ -51,12 +50,8 @@ export async function updateAdmin(
 
   const updated = await repo.update(adminId, body);
 
-  await auditAction(ctx, {
-    action: 'update',
-    resourceType: 'platform-admin',
-    resourceId: adminId,
-    description: `Platform admin "${existing.name}" updated`,
-  });
+  ctx.set('auditResourceId', adminId);
+  ctx.set('auditDescription', `Platform admin "${existing.name}" updated`);
 
   return ctx.json(updated, 200);
 }

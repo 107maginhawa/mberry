@@ -12,6 +12,7 @@
 import { test, expect } from '@playwright/test'
 import { signIn } from '../helpers/auth'
 import { SEED_OFFICER_EMAIL, TEST_PASSWORD } from '../helpers/test-config'
+import { captureAnyApiSuccess } from '../helpers/real-flow'
 
 const ORG_ID = process.env.TEST_ORG_ID ?? 'ed8e3a96-8126-4341-be42-e6eb7940c562'
 const ORG_SLUG = ORG_ID
@@ -24,12 +25,14 @@ async function login(page: import('@playwright/test').Page) {
 
 test('Settings > Org Profile renders form with org data', async ({ page }) => {
   await login(page)
+  const respP = captureAnyApiSuccess(page)
   await page.goto(`/org/${ORG_SLUG}/officer/settings/org`)
-  await page.waitForLoadState('networkidle')
-
   await expect(
     page.getByRole('heading', { name: /organization settings/i })
   ).toBeVisible({ timeout: 10000 })
+  const resp = await respP
+  expect(resp?.status()).toBe(200)
+  expect(resp?.ok()).toBe(true)
 
   await expect(
     page.getByRole('heading', { name: /organization profile/i })
@@ -42,8 +45,6 @@ test('Settings > Org Profile renders form with org data', async ({ page }) => {
 test('Settings > Org Profile edit mode shows inputs', async ({ page }) => {
   await login(page)
   await page.goto(`/org/${ORG_SLUG}/officer/settings/org`)
-  await page.waitForLoadState('networkidle')
-
   const editBtn = page.getByRole('button', { name: /edit/i })
   await expect(editBtn).toBeVisible({ timeout: 10000 })
   await editBtn.click()
@@ -60,8 +61,6 @@ test('Settings > Org Profile edit mode shows inputs', async ({ page }) => {
 test('Settings > Officers page renders', async ({ page }) => {
   await login(page)
   await page.goto(`/org/${ORG_SLUG}/officer/officers`)
-  await page.waitForLoadState('networkidle')
-
   await expect(
     page.getByRole('heading', { name: /officer management/i })
   ).toBeVisible({ timeout: 10000 })
@@ -79,8 +78,6 @@ test('Settings > Officers page renders', async ({ page }) => {
 test('Settings > Categories page renders', async ({ page }) => {
   await login(page)
   await page.goto(`/org/${ORG_SLUG}/officer/settings/membership-categories`)
-  await page.waitForLoadState('networkidle')
-
   await expect(
     page.getByRole('heading', { name: /membership categories/i })
   ).toBeVisible({ timeout: 10000 })
@@ -96,8 +93,6 @@ test('Settings > Categories page renders', async ({ page }) => {
 test('Settings > Categories Add dialog opens', async ({ page }) => {
   await login(page)
   await page.goto(`/org/${ORG_SLUG}/officer/settings/membership-categories`)
-  await page.waitForLoadState('networkidle')
-
   const addBtn = page.getByRole('button', { name: /add category/i })
   await expect(addBtn).toBeVisible({ timeout: 10000 })
   await addBtn.click()
@@ -112,8 +107,6 @@ test('Settings > Categories Add dialog opens', async ({ page }) => {
 test('Settings > Payment Gateway renders', async ({ page }) => {
   await login(page)
   await page.goto(`/org/${ORG_SLUG}/officer/settings/gateway`)
-  await page.waitForLoadState('networkidle')
-
   await expect(
     page.getByRole('heading', { name: /payment gateway/i })
   ).toBeVisible({ timeout: 10000 })
@@ -127,8 +120,6 @@ test('Settings > Payment Gateway renders', async ({ page }) => {
 test('Settings > Providers page renders', async ({ page }) => {
   await login(page)
   await page.goto(`/org/${ORG_SLUG}/officer/settings/providers`)
-  await page.waitForLoadState('networkidle')
-
   await expect(
     page.getByRole('heading', { name: /accredited providers/i })
   ).toBeVisible({ timeout: 10000 })
@@ -140,7 +131,6 @@ test('Settings > Providers page renders', async ({ page }) => {
 test('Settings > Providers table or empty state', async ({ page }) => {
   await login(page)
   await page.goto(`/org/${ORG_SLUG}/officer/settings/providers`)
-  await page.waitForLoadState('networkidle')
   await page.waitForTimeout(2000)
 
   const hasTable = await page.locator('table').isVisible().catch(() => false)
@@ -151,8 +141,6 @@ test('Settings > Providers table or empty state', async ({ page }) => {
 test('Settings > Providers create dialog opens', async ({ page }) => {
   await login(page)
   await page.goto(`/org/${ORG_SLUG}/officer/settings/providers`)
-  await page.waitForLoadState('networkidle')
-
   await page.getByRole('button', { name: /new provider/i }).click()
 
   await expect(page.getByText('New Provider').last()).toBeVisible({ timeout: 5000 })
@@ -163,8 +151,6 @@ test('Settings > Providers create dialog opens', async ({ page }) => {
 test('Settings > Providers form validation', async ({ page }) => {
   await login(page)
   await page.goto(`/org/${ORG_SLUG}/officer/settings/providers`)
-  await page.waitForLoadState('networkidle')
-
   await page.getByRole('button', { name: /new provider/i }).click()
   await page.waitForTimeout(500)
 
@@ -189,8 +175,6 @@ test('Settings > Providers form validation', async ({ page }) => {
 test('Settings > Providers can create provider', async ({ page }) => {
   await login(page)
   await page.goto(`/org/${ORG_SLUG}/officer/settings/providers`)
-  await page.waitForLoadState('networkidle')
-
   await page.getByRole('button', { name: /new provider/i }).click()
   await page.waitForTimeout(500)
 
@@ -230,8 +214,6 @@ test('Settings > Providers API endpoint responds', async ({ page }) => {
 test('Settings > Sidebar shows settings links', async ({ page }) => {
   await login(page)
   await page.goto(`/org/${ORG_SLUG}/officer/settings/org`)
-  await page.waitForLoadState('networkidle')
-
   const hasOrgProfile = await page.getByText(/org profile/i).isVisible().catch(() => false)
   const hasOfficers = await page.getByText(/officers/i).isVisible().catch(() => false)
   const hasCategories = await page.getByText(/categories/i).isVisible().catch(() => false)

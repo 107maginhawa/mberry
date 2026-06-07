@@ -3,6 +3,7 @@ import { test, expect } from '../helpers/test-fixture'
 import { expectVisibleAfterReload, expectVisibleOnPage } from '../helpers/persistence'
 import { signIn } from '../helpers/auth'
 import { SEED_OFFICER_EMAIL, SEED_MEMBER_EMAIL, TEST_PASSWORD } from '../helpers/test-config'
+import { captureAnyApiSuccess } from '../helpers/real-flow'
 
 const ORG_ID = 'ed8e3a96-8126-4341-be42-e6eb7940c562'
 
@@ -12,7 +13,11 @@ test.describe('Training Actions', () => {
   })
 
   test('training list shows real training data', async ({ page }) => {
+    const respP = captureAnyApiSuccess(page)
     await page.goto(`/org/${ORG_ID}/officer/training`)
+    const resp = await respP
+    expect(resp?.status()).toBe(200)
+    expect(resp?.ok()).toBe(true)
 
     await expect(page.getByText(/Create Training/i)).toBeVisible({ timeout: 15000 })
     await expect(page.getByRole('link', { name: /Workshop|Endodontics|Photography/i }).first()).toBeVisible({ timeout: 10000 })

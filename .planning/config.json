@@ -1,0 +1,108 @@
+{
+  "model_profile": "balanced",
+  "commit_docs": true,
+  "parallelization": true,
+  "search_gitignored": false,
+  "brave_search": false,
+  "firecrawl": false,
+  "exa_search": false,
+  "git": {
+    "branching_strategy": "none",
+    "quick_branch_template": null
+  },
+  "workflow": {
+    "research": true,
+    "plan_check": true,
+    "verifier": true,
+    "nyquist_validation": true,
+    "auto_advance": true,
+    "node_repair": true,
+    "node_repair_budget": 2,
+    "ui_phase": true,
+    "ui_safety_gate": true,
+    "ai_integration_phase": true,
+    "tdd_mode": true,
+    "text_mode": false,
+    "research_before_questions": false,
+    "discuss_mode": "discuss",
+    "skip_discuss": false,
+    "code_review": true,
+    "code_review_depth": "standard",
+    "code_review_command": null,
+    "pattern_mapper": true,
+    "plan_bounce": false,
+    "plan_bounce_script": null,
+    "plan_bounce_passes": 2,
+    "auto_prune_state": false,
+    "post_planning_gaps": true,
+    "security_enforcement": true,
+    "security_asvs_level": 1,
+    "security_block_on": "high"
+  },
+  "hooks": {
+    "context_warnings": true
+  },
+  "project_code": null,
+  "phase_naming": "sequential",
+  "agent_skills": {
+    "superpowers-implementer": ["oli-execute"]
+  },
+  "claude_md_path": "./CLAUDE.md",
+  "mode": "yolo",
+  "granularity": "fine",
+  "brownfield": {
+    "execution_state": "graduated",
+    "cycle": 1,
+    "graduated_at": "2026-05-30",
+    "previous_graduation": "2026-05-24",
+    "previous_cycles_completed": 4,
+    "last_graduation_scorecard": {
+      "codebase_health": 9.5,
+      "spec_compliance": 9.5,
+      "test_confidence": 9.0,
+      "trace_coverage_pct": 89,
+      "p0_count": 0,
+      "p1_shipped_count": 0,
+      "backend_tests_pass": 6008,
+      "backend_tests_fail": 0,
+      "br_complete": 42,
+      "br_incomplete": 3,
+      "br_deferred": 6,
+      "br_untested": 0
+    }
+  },
+  "ui_consistency": {
+    "enabled": true,
+    "spec_source": "infer",
+    "enforcement_floor": "p2_pages_p1_shared",
+    "shared_classification": {
+      "fan_in_threshold": 3,
+      "workspace_glob": ["packages/*/src/**", "packages/ui/**"],
+      "path_fallback": ["components/", "ui/", "primitives/", "shared/"]
+    },
+    "variance_gini_high_conformity": 0.3,
+    "variance_gini_multi_variant": 0.6,
+    "variance_outlier_min_share": 0.05,
+    "exemption_cap_pct": 2.0,
+    "rolling_window_runs": 5,
+    "spec_codeowners_required": false,
+    "tailwind_config_hash_pinning": true,
+    "contrast_algorithm": "wcag-aa",
+    "tooling": {
+      "ast_walker": "babel@7",
+      "css_parser": "postcss@8",
+      "scss_parser": "postcss-scss@4"
+    },
+    "categories_enabled": [
+      "component_contracts",
+      "spacing_scale",
+      "color_tokens",
+      "layout_primitives",
+      "z_index_scale",
+      "icon_size",
+      "contrast_pairs",
+      "focus_order"
+    ],
+    "categories_advisory": ["typography"]
+  }
+}

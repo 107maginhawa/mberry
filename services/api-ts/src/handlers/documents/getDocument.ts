@@ -3,7 +3,6 @@ import type { DatabaseInstance } from '@/core/database';
 import type { GetDocumentParams } from '@/generated/openapi/validators';
 import { UnauthorizedError, NotFoundError, ForbiddenError } from '@/core/errors';
 import { DocumentRepository } from './repos/documents.repo';
-import { auditAction } from '@/utils/audit';
 
 /**
  * getDocument
@@ -30,14 +29,8 @@ export async function getDocument(
     throw new ForbiddenError('Access denied to this document');
   }
 
-  await auditAction(ctx, {
-    action: 'read',
-    resourceType: 'document',
-    resourceId: params.documentId,
-    description: `Document accessed: ${document.title ?? params.documentId}`,
-    eventSubType: 'data.document-accessed',
-    eventType: 'data-access',
-  });
+  ctx.set('auditResourceId', params.documentId);
+  ctx.set('auditDescription', `Document accessed: ${document.title ?? params.documentId}`);
 
   return ctx.json(document, 200);
 }

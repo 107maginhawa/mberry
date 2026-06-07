@@ -12,7 +12,7 @@ import { PageShell } from '@/components/patterns/page-shell'
 import { CardSkeleton } from '@/components/patterns/skeleton-loader'
 import { GlassCard } from '@/components/motion/glass-card'
 import { CountUp } from '@/components/motion/count-up'
-import { useOrg } from '@/hooks/useOrg'
+import { useOrg } from '@/hooks/use-org'
 
 export const Route = createFileRoute('/_authenticated/org/$orgSlug/training/$trainingId')({
   component: TrainingDetail,

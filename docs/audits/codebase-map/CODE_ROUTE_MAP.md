@@ -1,10 +1,3 @@
----
-based-on: map@2331bd9f
-last-modified: 2026-06-03T20:30:00Z
-engine-version: 7b2a640
-map-version: 6
----
-
 # Code Route Map
 
 <!-- oli:regen:code-route-map:begin -->
@@ -14,7 +7,6 @@ Strategy: `file-based`
 |---|---|---|---|---|---|
 | `/` | * | — | ? | — | apps/memberry |
 | `/_authenticated` | * | AuthenticatedLayout | true | — | apps/memberry |
-| `/join` | * | JoinPage | ? | — | apps/memberry |
 | `/onboarding` | * | OnboardingPage | true | — | apps/memberry |
 | `/verify-email` | * | VerifyEmailPage | true | — | apps/memberry |
 | `/associations/$associationId` | * | AssociationDetailPage | ? | associationId | apps/admin |
@@ -42,7 +34,8 @@ Strategy: `file-based`
 | `/discover/events` | * | DiscoverEvents | ? | — | apps/memberry |
 | `/events/$eventSlug` | * | PublicEventPage | ? | eventSlug | apps/memberry |
 | `/invite/$token` | * | InvitePage | ? | token | apps/memberry |
-| `/org/$slug` | * | PublicOrgProfile | ? | slug | apps/memberry |
+| `/join/$slug` | * | PublicOrgProfile | ? | slug | apps/memberry |
+| `/join/` | * | JoinPage | ? | — | apps/memberry |
 | `/pay/$token` | * | PublicPaymentPage | ? | token | apps/memberry |
 | `/verify/$certificateNumber` | * | VerifyCertificatePage | ? | certificateNumber | apps/memberry |
 | `/verify/$credentialNumber` | * | VerifyCredentialPage | ? | credentialNumber | apps/memberry |

@@ -3,9 +3,6 @@ import type { DatabaseInstance } from '@/core/database';
 import type { DeleteTrainingEnrollmentParams } from '@/generated/openapi/validators';
 import { NotFoundError, BusinessLogicError } from '@/core/errors';
 import { TrainingRepository, TrainingEnrollmentRepository } from './repos/training.repo';
-import { auditAction } from '@/utils/audit';
-import { requirePosition } from '@/utils/officer-check';
-import { POSITION_TITLES } from '@/utils/position-titles';
 
 /**
  * deleteTrainingEnrollment
@@ -18,9 +15,6 @@ export async function deleteTrainingEnrollment(
 ): Promise<Response> {
   const user = ctx.get('user');
   if (!user) return ctx.json({ error: 'Unauthorized' }, 401);
-
-  const denied = await requirePosition(ctx, [POSITION_TITLES.SOCIETY_OFFICER, POSITION_TITLES.PRESIDENT]);
-  if (denied) return denied;
 
   const params = ctx.req.valid('param');
   const db = ctx.get('database') as DatabaseInstance;
@@ -41,13 +35,8 @@ export async function deleteTrainingEnrollment(
 
   await repo.deleteOneById(params.enrollmentId, user.id);
 
-  await auditAction(ctx, {
-    action: 'delete',
-    resourceType: 'training-enrollment',
-    resourceId: params.enrollmentId,
-    description: 'Training enrollment deleted',
-    eventSubType: 'training.enrollment-cancelled',
-  });
+  ctx.set('auditResourceId', params.enrollmentId);
+  ctx.set('auditDescription', 'Training enrollment deleted');
 
   return ctx.json({ success: true }, 200);
 }

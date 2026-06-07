@@ -5,7 +5,7 @@ import { PageShell } from '@/components/patterns/page-shell'
 import { GlassCard } from '@/components/motion/glass-card'
 import { ListSkeleton } from '@/components/patterns/skeleton-loader'
 import { DeliveryFunnel } from '@/features/communications/components/delivery-funnel'
-import { useOrg } from '@/hooks/useOrg'
+import { useOrg } from '@/hooks/use-org'
 import { api } from '@/lib/api'
 
 export const Route = createFileRoute(

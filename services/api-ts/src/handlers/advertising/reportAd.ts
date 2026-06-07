@@ -23,7 +23,9 @@ export async function reportAd(ctx: ValidatedContext<any, never, any>): Promise<
   const { creativeId } = ctx.req.valid('param');
   const body = ctx.req.valid('json');
   const db = ctx.get('database') as DatabaseInstance;
-  const logger = ctx.get('logger');
+  const baseLogger = ctx.get('logger');
+  const traceId = ctx.get('requestId');
+  const logger = baseLogger?.child?.({ traceId, module: 'advertising' }) ?? baseLogger;
 
   if (!body.reason?.trim()) throw new ValidationError('Report reason is required');
 

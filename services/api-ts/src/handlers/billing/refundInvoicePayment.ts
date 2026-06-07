@@ -11,7 +11,6 @@ import type { Session } from '@/types/auth';
 import { InvoiceRepository, MerchantAccountRepository } from './repos/billing.repo';
 import type { InvoiceMetadata, MerchantMetadata } from './repos/billing.schema';
 import { PersonRepository } from '../person/repos/person.repo';
-import { auditAction } from '@/utils/audit';
 
 /**
  * refundInvoicePayment
@@ -25,7 +24,9 @@ export async function refundInvoicePayment(
   ctx: ValidatedContext<RefundInvoicePaymentBody, never, RefundInvoicePaymentParams>
 ): Promise<Response> {
   const database = ctx.get('database');
-  const logger = ctx.get('logger');
+  const baseLogger = ctx.get('logger');
+  const traceId = ctx.get('requestId');
+  const logger = baseLogger?.child?.({ traceId, module: 'billing' }) ?? baseLogger;
   const billing = ctx.get('billing');
   
   // Get authenticated session (guaranteed by middleware)
@@ -39,7 +40,7 @@ export async function refundInvoicePayment(
   const { amount, reason, metadata: requestMetadata } = body;
   const notes = (requestMetadata?.['notes'] as string | undefined) || '';
 
-  logger.info({ invoiceId, amount, reason, notes }, 'Creating refund for invoice');
+  logger.info({ action: 'refundInvoicePayment.1', invoiceId, amount, reason, notes }, 'Creating refund for invoice');
   
   // Create repository instances
   const invoiceRepo = new InvoiceRepository(database, logger);
@@ -170,7 +171,7 @@ export async function refundInvoicePayment(
     });
 
     logger.info(
-      {
+      { action: 'refundInvoicePayment.2',
         invoiceId,
         paymentIntentId: stripePaymentIntentId,
         refundId: refundResult.refundId,
@@ -181,14 +182,9 @@ export async function refundInvoicePayment(
       'Refund created successfully for invoice'
     );
 
-    await auditAction(ctx, {
-      action: 'create',
-      resourceType: 'refund',
-      resourceId: refundResult.refundId,
-      description: `Refund ${isFullRefund ? 'full' : 'partial'} for invoice ${invoiceId}: ${refundAmountDecimal}`,
-      eventSubType: 'financial.payment-reversed',
-      details: { invoiceId, refundAmount: refundAmountCents, reason, isFullRefund },
-    });
+    ctx.set('auditResourceId', refundResult.refundId);
+    ctx.set('auditDescription', `Refund ${isFullRefund ? 'full' : 'partial'} for invoice ${invoiceId}: ${refundAmountDecimal}`);
+    ctx.set('auditDetails', { invoiceId, refundAmount: refundAmountCents, reason, isFullRefund });
 
     // Return the response as defined in TypeSpec
     return ctx.json({
@@ -202,7 +198,7 @@ export async function refundInvoicePayment(
     }, 200);
     
   } catch (error) {
-    logger.error({ error, invoiceId, refundAmount: refundAmountCents, reason }, 'Failed to create refund');
+    logger.error({ action: 'refundInvoicePayment.3', error, invoiceId, refundAmount: refundAmountCents, reason }, 'Failed to create refund');
     
     if (error instanceof ValidationError || error instanceof ConflictError || error instanceof BusinessLogicError) {
       throw error;

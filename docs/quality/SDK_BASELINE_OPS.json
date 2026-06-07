@@ -1,0 +1,2277 @@
+{
+  "capturedAt": "2026-06-07T02:05:12.795Z",
+  "count": 454,
+  "note": "Baseline operationId set for the association:member rebuild milestone (Step 6). Regenerated only once at R0.5 of docs/quality/R0_BASELINE.md and frozen until Step 6 closes. Diffed by scripts/check-sdk-compat.ts.",
+  "ops": [
+    {
+      "method": "POST",
+      "path": "/association/member/license-renewal-alerts/{alertId}/acknowledge",
+      "operationId": "acknowledgeLicenseRenewalAlert"
+    },
+    {
+      "method": "POST",
+      "path": "/association/member/roster",
+      "operationId": "addRosterMember"
+    },
+    {
+      "method": "POST",
+      "path": "/association/member/credits/adjust",
+      "operationId": "adjustCreditEntry"
+    },
+    {
+      "method": "POST",
+      "path": "/association/member/institutional-memberships/{institutionalMembershipId}/seats",
+      "operationId": "allocateSeat"
+    },
+    {
+      "method": "POST",
+      "path": "/association/member/special-assessments/{id}/apply",
+      "operationId": "applySpecialAssessment"
+    },
+    {
+      "method": "POST",
+      "path": "/association/member/applications/{applicationId}/approve",
+      "operationId": "approveMembershipApplication"
+    },
+    {
+      "method": "POST",
+      "path": "/association/member/affiliation-transfers/{transferId}/approve-source",
+      "operationId": "approveTransferBySource"
+    },
+    {
+      "method": "POST",
+      "path": "/association/member/affiliation-transfers/{transferId}/approve-target",
+      "operationId": "approveTransferByTarget"
+    },
+    {
+      "method": "POST",
+      "path": "/communications/announcements/{id}/archive",
+      "operationId": "archiveAnnouncement"
+    },
+    {
+      "method": "POST",
+      "path": "/association/documents/{documentId}/archive",
+      "operationId": "archiveDocument"
+    },
+    {
+      "method": "POST",
+      "path": "/association/member/credits/manual",
+      "operationId": "awardManualCredit"
+    },
+    {
+      "method": "POST",
+      "path": "/association/member/applications/bulk-approve",
+      "operationId": "bulkApproveMembershipApplications"
+    },
+    {
+      "method": "POST",
+      "path": "/invitations/bulk-import",
+      "operationId": "bulkImportMembers"
+    },
+    {
+      "method": "POST",
+      "path": "/certificates/bulk-issue",
+      "operationId": "bulkIssueCertificates"
+    },
+    {
+      "method": "POST",
+      "path": "/association/person-subscriptions/bulk-update",
+      "operationId": "bulkUpdatePersonSubscriptions"
+    },
+    {
+      "method": "POST",
+      "path": "/booking/bookings/{booking}/cancel",
+      "operationId": "cancelBooking"
+    },
+    {
+      "method": "POST",
+      "path": "/association/training-lifecycle/{trainingId}/cancel",
+      "operationId": "cancelCustomTraining"
+    },
+    {
+      "method": "POST",
+      "path": "/email/queue/{queue}/cancel",
+      "operationId": "cancelEmailQueueItem"
+    },
+    {
+      "method": "POST",
+      "path": "/association/events/{eventId}/cancel",
+      "operationId": "cancelEvent"
+    },
+    {
+      "method": "POST",
+      "path": "/association/events/registrations/{registrationId}/cancel",
+      "operationId": "cancelEventRegistration"
+    },
+    {
+      "method": "POST",
+      "path": "/association/messages/{messageId}/cancel",
+      "operationId": "cancelMessage"
+    },
+    {
+      "method": "POST",
+      "path": "/persons/me/cancel-delete",
+      "operationId": "cancelMyAccountDeletion"
+    },
+    {
+      "method": "POST",
+      "path": "/billing/invoices/{invoice}/capture",
+      "operationId": "captureInvoicePayment"
+    },
+    {
+      "method": "POST",
+      "path": "/association/member/ballots",
+      "operationId": "castBallot"
+    },
+    {
+      "method": "POST",
+      "path": "/association/member/elections/{electionId}/certify",
+      "operationId": "certifyElection"
+    },
+    {
+      "method": "POST",
+      "path": "/association/event-lifecycle/{eventId}/check-in",
+      "operationId": "checkInCustomEvent"
+    },
+    {
+      "method": "POST",
+      "path": "/association/training-lifecycle/{trainingId}/check-in",
+      "operationId": "checkInCustomTraining"
+    },
+    {
+      "method": "POST",
+      "path": "/pay/{token}/checkout",
+      "operationId": "checkoutPaymentToken"
+    },
+    {
+      "method": "POST",
+      "path": "/invite/claim/{token}",
+      "operationId": "claimInvite"
+    },
+    {
+      "method": "POST",
+      "path": "/surveys/{survey}/clone",
+      "operationId": "cloneSurvey"
+    },
+    {
+      "method": "POST",
+      "path": "/surveys/{survey}/close",
+      "operationId": "closeSurvey"
+    },
+    {
+      "method": "POST",
+      "path": "/association/member/affiliation-transfers/{transferId}/complete",
+      "operationId": "completeAffiliationTransfer"
+    },
+    {
+      "method": "POST",
+      "path": "/association/training-lifecycle/{trainingId}/complete",
+      "operationId": "completeCustomTraining"
+    },
+    {
+      "method": "POST",
+      "path": "/association/event-lifecycle/{eventId}/complete",
+      "operationId": "completeEvent"
+    },
+    {
+      "method": "POST",
+      "path": "/storage/files/{file}/complete",
+      "operationId": "completeFileUpload"
+    },
+    {
+      "method": "POST",
+      "path": "/association/training/enrollments/{enrollmentId}/complete",
+      "operationId": "completeTrainingEnrollment"
+    },
+    {
+      "method": "POST",
+      "path": "/booking/bookings/{booking}/confirm",
+      "operationId": "confirmBooking"
+    },
+    {
+      "method": "POST",
+      "path": "/association/member/dues-payments/{paymentId}/confirm",
+      "operationId": "confirmPaymentProof"
+    },
+    {
+      "method": "POST",
+      "path": "/advertisers",
+      "operationId": "createAdvertiser"
+    },
+    {
+      "method": "POST",
+      "path": "/association/member/affiliation-transfers",
+      "operationId": "createAffiliationTransfer"
+    },
+    {
+      "method": "POST",
+      "path": "/communications/announcements/{organizationId}",
+      "operationId": "createAnnouncement"
+    },
+    {
+      "method": "POST",
+      "path": "/admin/associations",
+      "operationId": "createAssociation"
+    },
+    {
+      "method": "POST",
+      "path": "/booking/bookings",
+      "operationId": "createBooking"
+    },
+    {
+      "method": "POST",
+      "path": "/booking/events",
+      "operationId": "createBookingEvent"
+    },
+    {
+      "method": "POST",
+      "path": "/campaigns",
+      "operationId": "createCampaign"
+    },
+    {
+      "method": "POST",
+      "path": "/association/member/candidates",
+      "operationId": "createCandidate"
+    },
+    {
+      "method": "POST",
+      "path": "/association/member/chapter-affiliations",
+      "operationId": "createChapterAffiliation"
+    },
+    {
+      "method": "POST",
+      "path": "/comms/chat-rooms",
+      "operationId": "createChatRoom"
+    },
+    {
+      "method": "POST",
+      "path": "/association/events/checkins",
+      "operationId": "createCheckIn"
+    },
+    {
+      "method": "POST",
+      "path": "/association/training/courses",
+      "operationId": "createCourse"
+    },
+    {
+      "method": "POST",
+      "path": "/association/training/courses/enrollments",
+      "operationId": "createCourseEnrollment"
+    },
+    {
+      "method": "POST",
+      "path": "/creatives",
+      "operationId": "createCreative"
+    },
+    {
+      "method": "POST",
+      "path": "/association/member/credential-templates",
+      "operationId": "createCredentialTemplate"
+    },
+    {
+      "method": "POST",
+      "path": "/association/member/directory/profiles",
+      "operationId": "createDirectoryProfile"
+    },
+    {
+      "method": "POST",
+      "path": "/association/documents",
+      "operationId": "createDocument"
+    },
+    {
+      "method": "POST",
+      "path": "/association/document-tags",
+      "operationId": "createDocumentTag"
+    },
+    {
+      "method": "POST",
+      "path": "/association/member/dues-configs",
+      "operationId": "createDuesConfig"
+    },
+    {
+      "method": "POST",
+      "path": "/association/member/dues-invoices",
+      "operationId": "createDuesInvoice"
+    },
+    {
+      "method": "POST",
+      "path": "/association/member/dunning/templates",
+      "operationId": "createDunningTemplate"
+    },
+    {
+      "method": "POST",
+      "path": "/association/member/elections",
+      "operationId": "createElection"
+    },
+    {
+      "method": "POST",
+      "path": "/email/templates",
+      "operationId": "createEmailTemplate"
+    },
+    {
+      "method": "POST",
+      "path": "/association/events",
+      "operationId": "createEvent"
+    },
+    {
+      "method": "POST",
+      "path": "/association/events/registrations",
+      "operationId": "createEventRegistration"
+    },
+    {
+      "method": "POST",
+      "path": "/association/member/institutional-memberships",
+      "operationId": "createInstitutionalMembership"
+    },
+    {
+      "method": "POST",
+      "path": "/invite",
+      "operationId": "createInvite"
+    },
+    {
+      "method": "POST",
+      "path": "/billing/invoices",
+      "operationId": "createInvoice"
+    },
+    {
+      "method": "POST",
+      "path": "/applications",
+      "operationId": "createJobApplication"
+    },
+    {
+      "method": "POST",
+      "path": "/postings",
+      "operationId": "createJobPosting"
+    },
+    {
+      "method": "POST",
+      "path": "/listings",
+      "operationId": "createListing"
+    },
+    {
+      "method": "POST",
+      "path": "/association/member/memberships",
+      "operationId": "createMembership"
+    },
+    {
+      "method": "POST",
+      "path": "/association/member/applications",
+      "operationId": "createMembershipApplication"
+    },
+    {
+      "method": "POST",
+      "path": "/association/member/tiers",
+      "operationId": "createMembershipTier"
+    },
+    {
+      "method": "POST",
+      "path": "/billing/merchant-accounts",
+      "operationId": "createMerchantAccount"
+    },
+    {
+      "method": "POST",
+      "path": "/association/messages",
+      "operationId": "createMessage"
+    },
+    {
+      "method": "POST",
+      "path": "/association/message-templates",
+      "operationId": "createMessageTemplate"
+    },
+    {
+      "method": "POST",
+      "path": "/persons/me/credit-entries",
+      "operationId": "createMyCreditEntry"
+    },
+    {
+      "method": "POST",
+      "path": "/association/member/officer-terms",
+      "operationId": "createOfficerTerm"
+    },
+    {
+      "method": "POST",
+      "path": "/orders",
+      "operationId": "createOrder"
+    },
+    {
+      "method": "POST",
+      "path": "/accredited-providers/{organizationId}",
+      "operationId": "createOrgAccreditedProvider"
+    },
+    {
+      "method": "POST",
+      "path": "/admin/organizations",
+      "operationId": "createOrganization"
+    },
+    {
+      "method": "POST",
+      "path": "/persons",
+      "operationId": "createPerson"
+    },
+    {
+      "method": "POST",
+      "path": "/association/member/positions",
+      "operationId": "createPosition"
+    },
+    {
+      "method": "POST",
+      "path": "/association/member/licenses",
+      "operationId": "createProfessionalLicense"
+    },
+    {
+      "method": "POST",
+      "path": "/association/training/courses/quiz-attempts",
+      "operationId": "createQuizAttempt"
+    },
+    {
+      "method": "POST",
+      "path": "/reviews/",
+      "operationId": "createReview"
+    },
+    {
+      "method": "POST",
+      "path": "/association/member/royalty-splits",
+      "operationId": "createRoyaltySplit"
+    },
+    {
+      "method": "POST",
+      "path": "/communications/segments",
+      "operationId": "createSavedSegment"
+    },
+    {
+      "method": "POST",
+      "path": "/booking/events/{event}/exceptions",
+      "operationId": "createScheduleException"
+    },
+    {
+      "method": "POST",
+      "path": "/association/member/special-assessments",
+      "operationId": "createSpecialAssessment"
+    },
+    {
+      "method": "POST",
+      "path": "/association/subscription-topics",
+      "operationId": "createSubscriptionTopic"
+    },
+    {
+      "method": "POST",
+      "path": "/surveys/",
+      "operationId": "createSurvey"
+    },
+    {
+      "method": "POST",
+      "path": "/association/training",
+      "operationId": "createTraining"
+    },
+    {
+      "method": "POST",
+      "path": "/association/training/enrollments",
+      "operationId": "createTrainingEnrollment"
+    },
+    {
+      "method": "POST",
+      "path": "/vendors",
+      "operationId": "createVendor"
+    },
+    {
+      "method": "POST",
+      "path": "/association/member/memberships/{membershipId}/deceased",
+      "operationId": "deceaseMembership"
+    },
+    {
+      "method": "DELETE",
+      "path": "/communications/announcements/{id}",
+      "operationId": "deleteAnnouncement"
+    },
+    {
+      "method": "DELETE",
+      "path": "/admin/associations/{associationId}",
+      "operationId": "deleteAssociation"
+    },
+    {
+      "method": "DELETE",
+      "path": "/booking/events/{event}",
+      "operationId": "deleteBookingEvent"
+    },
+    {
+      "method": "DELETE",
+      "path": "/association/member/candidates/{candidateId}",
+      "operationId": "deleteCandidate"
+    },
+    {
+      "method": "DELETE",
+      "path": "/association/member/chapter-affiliations/{affiliationId}",
+      "operationId": "deleteChapterAffiliation"
+    },
+    {
+      "method": "DELETE",
+      "path": "/association/training/courses/{courseId}",
+      "operationId": "deleteCourse"
+    },
+    {
+      "method": "DELETE",
+      "path": "/association/training/courses/enrollments/{enrollmentId}",
+      "operationId": "deleteCourseEnrollment"
+    },
+    {
+      "method": "DELETE",
+      "path": "/association/member/credential-templates/{templateId}",
+      "operationId": "deleteCredentialTemplate"
+    },
+    {
+      "method": "DELETE",
+      "path": "/association/member/credentials/{credentialId}",
+      "operationId": "deleteDigitalCredential"
+    },
+    {
+      "method": "DELETE",
+      "path": "/association/member/directory/profiles/{profileId}",
+      "operationId": "deleteDirectoryProfile"
+    },
+    {
+      "method": "DELETE",
+      "path": "/association/documents/{documentId}",
+      "operationId": "deleteDocument"
+    },
+    {
+      "method": "DELETE",
+      "path": "/association/document-tags/{tagId}",
+      "operationId": "deleteDocumentTag"
+    },
+    {
+      "method": "DELETE",
+      "path": "/association/member/dues-configs/{duesConfigId}",
+      "operationId": "deleteDuesConfig"
+    },
+    {
+      "method": "DELETE",
+      "path": "/association/member/dues-invoices/{invoiceId}",
+      "operationId": "deleteDuesInvoice"
+    },
+    {
+      "method": "DELETE",
+      "path": "/association/member/dunning/templates/{templateId}",
+      "operationId": "deleteDunningTemplate"
+    },
+    {
+      "method": "DELETE",
+      "path": "/association/member/elections/{electionId}",
+      "operationId": "deleteElection"
+    },
+    {
+      "method": "DELETE",
+      "path": "/association/events/{eventId}",
+      "operationId": "deleteEvent"
+    },
+    {
+      "method": "DELETE",
+      "path": "/association/events/registrations/{registrationId}",
+      "operationId": "deleteEventRegistration"
+    },
+    {
+      "method": "DELETE",
+      "path": "/admin/feature-flags/{flagId}",
+      "operationId": "deleteFeatureFlag"
+    },
+    {
+      "method": "DELETE",
+      "path": "/storage/files/{file}",
+      "operationId": "deleteFile"
+    },
+    {
+      "method": "DELETE",
+      "path": "/association/member/institutional-memberships/{institutionalMembershipId}",
+      "operationId": "deleteInstitutionalMembership"
+    },
+    {
+      "method": "DELETE",
+      "path": "/billing/invoices/{invoice}",
+      "operationId": "deleteInvoice"
+    },
+    {
+      "method": "DELETE",
+      "path": "/postings/{postingId}",
+      "operationId": "deleteJobPosting"
+    },
+    {
+      "method": "DELETE",
+      "path": "/surveys/my-responses",
+      "operationId": "deleteMemberResponses"
+    },
+    {
+      "method": "DELETE",
+      "path": "/association/member/memberships/{membershipId}",
+      "operationId": "deleteMembership"
+    },
+    {
+      "method": "DELETE",
+      "path": "/association/member/applications/{applicationId}",
+      "operationId": "deleteMembershipApplication"
+    },
+    {
+      "method": "DELETE",
+      "path": "/association/member/tiers/{tierId}",
+      "operationId": "deleteMembershipTier"
+    },
+    {
+      "method": "DELETE",
+      "path": "/association/messages/{messageId}",
+      "operationId": "deleteMessage"
+    },
+    {
+      "method": "DELETE",
+      "path": "/association/message-templates/{templateId}",
+      "operationId": "deleteMessageTemplate"
+    },
+    {
+      "method": "DELETE",
+      "path": "/association/member/officer-terms/{termId}",
+      "operationId": "deleteOfficerTerm"
+    },
+    {
+      "method": "DELETE",
+      "path": "/accredited-providers/{organizationId}/{providerId}",
+      "operationId": "deleteOrgAccreditedProvider"
+    },
+    {
+      "method": "DELETE",
+      "path": "/association/member/positions/{positionId}",
+      "operationId": "deletePosition"
+    },
+    {
+      "method": "DELETE",
+      "path": "/association/member/licenses/{licenseId}",
+      "operationId": "deleteProfessionalLicense"
+    },
+    {
+      "method": "DELETE",
+      "path": "/reviews/{review}",
+      "operationId": "deleteReview"
+    },
+    {
+      "method": "DELETE",
+      "path": "/association/member/royalty-splits/{royaltySplitId}",
+      "operationId": "deleteRoyaltySplit"
+    },
+    {
+      "method": "DELETE",
+      "path": "/communications/segments/{id}",
+      "operationId": "deleteSavedSegment"
+    },
+    {
+      "method": "DELETE",
+      "path": "/booking/events/{event}/exceptions/{exception}",
+      "operationId": "deleteScheduleException"
+    },
+    {
+      "method": "DELETE",
+      "path": "/association/member/special-assessments/{id}",
+      "operationId": "deleteSpecialAssessment"
+    },
+    {
+      "method": "DELETE",
+      "path": "/association/subscription-topics/{topicId}",
+      "operationId": "deleteSubscriptionTopic"
+    },
+    {
+      "method": "DELETE",
+      "path": "/surveys/{survey}",
+      "operationId": "deleteSurvey"
+    },
+    {
+      "method": "DELETE",
+      "path": "/association/training/{trainingId}",
+      "operationId": "deleteTraining"
+    },
+    {
+      "method": "DELETE",
+      "path": "/association/training/enrollments/{enrollmentId}",
+      "operationId": "deleteTrainingEnrollment"
+    },
+    {
+      "method": "POST",
+      "path": "/association/member/affiliation-transfers/{transferId}/deny",
+      "operationId": "denyAffiliationTransfer"
+    },
+    {
+      "method": "POST",
+      "path": "/association/member/applications/{applicationId}/deny",
+      "operationId": "denyMembershipApplication"
+    },
+    {
+      "method": "DELETE",
+      "path": "/association/member/dues-gateway/{organizationId}",
+      "operationId": "disconnectDuesGateway"
+    },
+    {
+      "method": "POST",
+      "path": "/surveys/{survey}/responses/dismiss",
+      "operationId": "dismissSurveyResponse"
+    },
+    {
+      "method": "GET",
+      "path": "/org/{organizationId}/payments/{paymentId}/receipt",
+      "operationId": "downloadReceipt"
+    },
+    {
+      "method": "POST",
+      "path": "/admin/impersonate/{sessionId}/end",
+      "operationId": "endImpersonation"
+    },
+    {
+      "method": "POST",
+      "path": "/comms/chat-rooms/{room}/video-call/end",
+      "operationId": "endVideoCall"
+    },
+    {
+      "method": "POST",
+      "path": "/association/training-lifecycle/{trainingId}/enroll",
+      "operationId": "enrollInCustomTraining"
+    },
+    {
+      "method": "GET",
+      "path": "/persons/me/export",
+      "operationId": "exportMyData"
+    },
+    {
+      "method": "GET",
+      "path": "/surveys/{survey}/export",
+      "operationId": "exportSurveyResponses"
+    },
+    {
+      "method": "POST",
+      "path": "/billing/invoices/{invoice}/finalize",
+      "operationId": "finalizeInvoice"
+    },
+    {
+      "method": "POST",
+      "path": "/orders/{orderId}/fulfill",
+      "operationId": "fulfillOrder"
+    },
+    {
+      "method": "POST",
+      "path": "/association/member/dues-invoices/generate",
+      "operationId": "generateDuesInvoicesForOrg"
+    },
+    {
+      "method": "GET",
+      "path": "/association/member/dues-reporting/{organizationId}/report",
+      "operationId": "generateDuesReport"
+    },
+    {
+      "method": "GET",
+      "path": "/placement",
+      "operationId": "getAdForPlacement"
+    },
+    {
+      "method": "GET",
+      "path": "/admin/me/role",
+      "operationId": "getAdminRole"
+    },
+    {
+      "method": "GET",
+      "path": "/association/member/affiliation-transfers/{transferId}",
+      "operationId": "getAffiliationTransfer"
+    },
+    {
+      "method": "GET",
+      "path": "/association/member/aging-buckets/{organizationId}",
+      "operationId": "getAgingBucket"
+    },
+    {
+      "method": "GET",
+      "path": "/communications/announcements/detail/{id}",
+      "operationId": "getAnnouncement"
+    },
+    {
+      "method": "GET",
+      "path": "/communications/announcements/{id}/stats",
+      "operationId": "getAnnouncementStats"
+    },
+    {
+      "method": "GET",
+      "path": "/admin/associations/{associationId}",
+      "operationId": "getAssociation"
+    },
+    {
+      "method": "GET",
+      "path": "/booking/bookings/{booking}",
+      "operationId": "getBooking"
+    },
+    {
+      "method": "GET",
+      "path": "/booking/events/{event}",
+      "operationId": "getBookingEvent"
+    },
+    {
+      "method": "GET",
+      "path": "/association/member/candidates/{candidateId}",
+      "operationId": "getCandidate"
+    },
+    {
+      "method": "GET",
+      "path": "/association/member/certificates/{certificateId}",
+      "operationId": "getCertificate"
+    },
+    {
+      "method": "GET",
+      "path": "/association/member/chapter-affiliations/{affiliationId}",
+      "operationId": "getChapterAffiliation"
+    },
+    {
+      "method": "GET",
+      "path": "/comms/chat-rooms/{room}/messages",
+      "operationId": "getChatMessages"
+    },
+    {
+      "method": "GET",
+      "path": "/comms/chat-rooms/{room}",
+      "operationId": "getChatRoom"
+    },
+    {
+      "method": "GET",
+      "path": "/admin/committees/{id}",
+      "operationId": "getCommittee"
+    },
+    {
+      "method": "GET",
+      "path": "/association/member/compliance/{organizationId}",
+      "operationId": "getComplianceReport"
+    },
+    {
+      "method": "GET",
+      "path": "/association/training/courses/{courseId}",
+      "operationId": "getCourse"
+    },
+    {
+      "method": "GET",
+      "path": "/association/training/courses/enrollments/{enrollmentId}",
+      "operationId": "getCourseEnrollment"
+    },
+    {
+      "method": "GET",
+      "path": "/association/member/credential-templates/{templateId}",
+      "operationId": "getCredentialTemplate"
+    },
+    {
+      "method": "GET",
+      "path": "/credit-compliance/{organizationId}",
+      "operationId": "getCreditCompliance"
+    },
+    {
+      "method": "GET",
+      "path": "/association/member/credentials/{credentialId}",
+      "operationId": "getDigitalCredential"
+    },
+    {
+      "method": "GET",
+      "path": "/association/member/directory/profiles/{profileId}",
+      "operationId": "getDirectoryProfile"
+    },
+    {
+      "method": "GET",
+      "path": "/association/documents/{documentId}",
+      "operationId": "getDocument"
+    },
+    {
+      "method": "GET",
+      "path": "/association/documents/{documentId}/access-log",
+      "operationId": "getDocumentAccessLog"
+    },
+    {
+      "method": "GET",
+      "path": "/association/document-tags/{tagId}",
+      "operationId": "getDocumentTag"
+    },
+    {
+      "method": "GET",
+      "path": "/association/documents/{documentId}/versions/{versionId}",
+      "operationId": "getDocumentVersion"
+    },
+    {
+      "method": "GET",
+      "path": "/association/member/dues-configs/{duesConfigId}",
+      "operationId": "getDuesConfig"
+    },
+    {
+      "method": "GET",
+      "path": "/dues/dashboard/{organizationId}",
+      "operationId": "getDuesDashboard"
+    },
+    {
+      "method": "GET",
+      "path": "/association/member/dues-reporting/{organizationId}/dashboard",
+      "operationId": "getDuesFinancialDashboard"
+    },
+    {
+      "method": "GET",
+      "path": "/association/member/dues-gateway/{organizationId}",
+      "operationId": "getDuesGatewayConfig"
+    },
+    {
+      "method": "GET",
+      "path": "/association/member/dues-invoices/{invoiceId}",
+      "operationId": "getDuesInvoice"
+    },
+    {
+      "method": "GET",
+      "path": "/association/member/dues-member-summary/{organizationId}/{personId}",
+      "operationId": "getDuesMemberSummary"
+    },
+    {
+      "method": "GET",
+      "path": "/association/member/dues-metrics/{organizationId}",
+      "operationId": "getDuesMetrics"
+    },
+    {
+      "method": "GET",
+      "path": "/association/member/dues-payments/{paymentId}",
+      "operationId": "getDuesPayment"
+    },
+    {
+      "method": "GET",
+      "path": "/association/member/dunning/templates/{templateId}",
+      "operationId": "getDunningTemplate"
+    },
+    {
+      "method": "GET",
+      "path": "/association/member/elections/{electionId}",
+      "operationId": "getElection"
+    },
+    {
+      "method": "GET",
+      "path": "/email/queue/{queue}",
+      "operationId": "getEmailQueueItem"
+    },
+    {
+      "method": "GET",
+      "path": "/email/templates/{template}",
+      "operationId": "getEmailTemplate"
+    },
+    {
+      "method": "GET",
+      "path": "/association/events/{eventId}",
+      "operationId": "getEvent"
+    },
+    {
+      "method": "GET",
+      "path": "/association/events/registrations/{registrationId}",
+      "operationId": "getEventRegistration"
+    },
+    {
+      "method": "GET",
+      "path": "/storage/files/{file}",
+      "operationId": "getFile"
+    },
+    {
+      "method": "GET",
+      "path": "/storage/files/{file}/download",
+      "operationId": "getFileDownload"
+    },
+    {
+      "method": "GET",
+      "path": "/comms/ice-servers",
+      "operationId": "getIceServers"
+    },
+    {
+      "method": "GET",
+      "path": "/association/member/institutional-memberships/{institutionalMembershipId}",
+      "operationId": "getInstitutionalMembership"
+    },
+    {
+      "method": "GET",
+      "path": "/billing/invoices/{invoice}",
+      "operationId": "getInvoice"
+    },
+    {
+      "method": "GET",
+      "path": "/postings/{postingId}",
+      "operationId": "getJobPosting"
+    },
+    {
+      "method": "GET",
+      "path": "/association/member/memberships/{membershipId}",
+      "operationId": "getMembership"
+    },
+    {
+      "method": "GET",
+      "path": "/association/member/applications/{applicationId}",
+      "operationId": "getMembershipApplication"
+    },
+    {
+      "method": "GET",
+      "path": "/association/member/tiers/{tierId}",
+      "operationId": "getMembershipTier"
+    },
+    {
+      "method": "GET",
+      "path": "/billing/merchant-accounts/{merchantAccount}",
+      "operationId": "getMerchantAccount"
+    },
+    {
+      "method": "POST",
+      "path": "/billing/merchant-accounts/{merchantAccount}/dashboard",
+      "operationId": "getMerchantDashboard"
+    },
+    {
+      "method": "GET",
+      "path": "/association/messages/{messageId}",
+      "operationId": "getMessage"
+    },
+    {
+      "method": "GET",
+      "path": "/association/message-templates/{templateId}",
+      "operationId": "getMessageTemplate"
+    },
+    {
+      "method": "GET",
+      "path": "/persons/me/credits",
+      "operationId": "getMyCredits"
+    },
+    {
+      "method": "GET",
+      "path": "/persons/me/credit-summary",
+      "operationId": "getMyCreditSummary"
+    },
+    {
+      "method": "GET",
+      "path": "/persons/me/memberships",
+      "operationId": "getMyMemberships"
+    },
+    {
+      "method": "GET",
+      "path": "/persons/me/notification-preferences",
+      "operationId": "getMyNotificationPreferences"
+    },
+    {
+      "method": "GET",
+      "path": "/persons/me/officer-role/{organizationId}",
+      "operationId": "getMyOfficerRole"
+    },
+    {
+      "method": "GET",
+      "path": "/persons/me/privacy",
+      "operationId": "getMyPrivacySettings"
+    },
+    {
+      "method": "GET",
+      "path": "/admin/national/chapters/{organizationId}",
+      "operationId": "getNationalChapterDetail"
+    },
+    {
+      "method": "GET",
+      "path": "/admin/national-dashboard/{associationId}",
+      "operationId": "getNationalDashboard"
+    },
+    {
+      "method": "GET",
+      "path": "/notifs/{notif}",
+      "operationId": "getNotification"
+    },
+    {
+      "method": "GET",
+      "path": "/surveys/analytics/nps-trends",
+      "operationId": "getNpsTrends"
+    },
+    {
+      "method": "GET",
+      "path": "/association/member/officer-terms/{termId}",
+      "operationId": "getOfficerTerm"
+    },
+    {
+      "method": "GET",
+      "path": "/onboarding/state",
+      "operationId": "getOnboardingState"
+    },
+    {
+      "method": "GET",
+      "path": "/admin/organizations/{organizationId}",
+      "operationId": "getOrganization"
+    },
+    {
+      "method": "GET",
+      "path": "/public/org/{slug}",
+      "operationId": "getOrganizationBySlug"
+    },
+    {
+      "method": "GET",
+      "path": "/association/member/org-profile/{organizationId}",
+      "operationId": "getOrganizationProfile"
+    },
+    {
+      "method": "GET",
+      "path": "/association/member/cpd-config/{organizationId}",
+      "operationId": "getOrgCpdConfig"
+    },
+    {
+      "method": "GET",
+      "path": "/membership/org-profile/{organizationId}",
+      "operationId": "getOrgProfile"
+    },
+    {
+      "method": "GET",
+      "path": "/persons/{person}",
+      "operationId": "getPerson"
+    },
+    {
+      "method": "GET",
+      "path": "/admin/national/platform",
+      "operationId": "getPlatformSummary"
+    },
+    {
+      "method": "GET",
+      "path": "/association/member/positions/{positionId}",
+      "operationId": "getPosition"
+    },
+    {
+      "method": "GET",
+      "path": "/association/member/licenses/{licenseId}",
+      "operationId": "getProfessionalLicense"
+    },
+    {
+      "method": "GET",
+      "path": "/association/member/directory/search/{personId}/public",
+      "operationId": "getPublicDirectoryProfile"
+    },
+    {
+      "method": "GET",
+      "path": "/public/events/{slug}",
+      "operationId": "getPublicEvent"
+    },
+    {
+      "method": "GET",
+      "path": "/reviews/{review}",
+      "operationId": "getReview"
+    },
+    {
+      "method": "GET",
+      "path": "/association/member/roster/{memberId}",
+      "operationId": "getRosterMember"
+    },
+    {
+      "method": "GET",
+      "path": "/association/member/royalty-splits/{royaltySplitId}",
+      "operationId": "getRoyaltySplit"
+    },
+    {
+      "method": "GET",
+      "path": "/booking/events/{event}/exceptions/{exception}",
+      "operationId": "getScheduleException"
+    },
+    {
+      "method": "GET",
+      "path": "/association/member/special-assessments/{id}/collection",
+      "operationId": "getSpecialAssessmentCollection"
+    },
+    {
+      "method": "GET",
+      "path": "/association/subscription-topics/{topicId}",
+      "operationId": "getSubscriptionTopic"
+    },
+    {
+      "method": "GET",
+      "path": "/surveys/{survey}",
+      "operationId": "getSurvey"
+    },
+    {
+      "method": "GET",
+      "path": "/surveys/{survey}/analytics",
+      "operationId": "getSurveyAnalytics"
+    },
+    {
+      "method": "GET",
+      "path": "/booking/slots/{slotId}",
+      "operationId": "getTimeSlot"
+    },
+    {
+      "method": "GET",
+      "path": "/association/training/{trainingId}",
+      "operationId": "getTraining"
+    },
+    {
+      "method": "GET",
+      "path": "/association/training/enrollments/{enrollmentId}",
+      "operationId": "getTrainingEnrollment"
+    },
+    {
+      "method": "GET",
+      "path": "/vendors/{vendorId}",
+      "operationId": "getVendor"
+    },
+    {
+      "method": "POST",
+      "path": "/billing/webhooks/stripe",
+      "operationId": "handleStripeWebhook"
+    },
+    {
+      "method": "POST",
+      "path": "/association/member/roster/import",
+      "operationId": "importRosterMembers"
+    },
+    {
+      "method": "POST",
+      "path": "/admin/admins",
+      "operationId": "inviteAdmin"
+    },
+    {
+      "method": "POST",
+      "path": "/association/member/credentials/issue",
+      "operationId": "issueDigitalCredential"
+    },
+    {
+      "method": "POST",
+      "path": "/comms/chat-rooms/{room}/video-call/join",
+      "operationId": "joinVideoCall"
+    },
+    {
+      "method": "POST",
+      "path": "/comms/chat-rooms/{room}/video-call/leave",
+      "operationId": "leaveVideoCall"
+    },
+    {
+      "method": "GET",
+      "path": "/admin/admins",
+      "operationId": "listAdmins"
+    },
+    {
+      "method": "GET",
+      "path": "/admin/surveys/",
+      "operationId": "listAdminSurveys"
+    },
+    {
+      "method": "GET",
+      "path": "/association/member/affiliation-transfers",
+      "operationId": "listAffiliationTransfers"
+    },
+    {
+      "method": "GET",
+      "path": "/admin/committees",
+      "operationId": "listAllCommittees"
+    },
+    {
+      "method": "GET",
+      "path": "/communications/announcements/{organizationId}",
+      "operationId": "listAnnouncements"
+    },
+    {
+      "method": "GET",
+      "path": "/admin/associations",
+      "operationId": "listAssociations"
+    },
+    {
+      "method": "GET",
+      "path": "/audit/logs",
+      "operationId": "listAuditLogs"
+    },
+    {
+      "method": "GET",
+      "path": "/association/member/ballots",
+      "operationId": "listBallots"
+    },
+    {
+      "method": "GET",
+      "path": "/booking/events",
+      "operationId": "listBookingEvents"
+    },
+    {
+      "method": "GET",
+      "path": "/booking/bookings",
+      "operationId": "listBookings"
+    },
+    {
+      "method": "GET",
+      "path": "/association/member/candidates",
+      "operationId": "listCandidates"
+    },
+    {
+      "method": "GET",
+      "path": "/association/member/chapter-affiliations",
+      "operationId": "listChapterAffiliations"
+    },
+    {
+      "method": "GET",
+      "path": "/comms/chat-rooms",
+      "operationId": "listChatRooms"
+    },
+    {
+      "method": "GET",
+      "path": "/association/member/credential-templates",
+      "operationId": "listCredentialTemplates"
+    },
+    {
+      "method": "GET",
+      "path": "/association/event-lifecycle/{eventId}/attendance",
+      "operationId": "listCustomEventAttendance"
+    },
+    {
+      "method": "GET",
+      "path": "/association/event-lifecycle/{eventId}/registrations",
+      "operationId": "listCustomEventRegistrations"
+    },
+    {
+      "method": "GET",
+      "path": "/association/training-lifecycle/{trainingId}/enrollments",
+      "operationId": "listCustomTrainingEnrollments"
+    },
+    {
+      "method": "GET",
+      "path": "/association/member/credentials",
+      "operationId": "listDigitalCredentials"
+    },
+    {
+      "method": "GET",
+      "path": "/association/member/directory/profiles",
+      "operationId": "listDirectoryProfiles"
+    },
+    {
+      "method": "GET",
+      "path": "/association/document-tags",
+      "operationId": "listDocumentTags"
+    },
+    {
+      "method": "GET",
+      "path": "/association/documents/{documentId}/versions",
+      "operationId": "listDocumentVersions"
+    },
+    {
+      "method": "GET",
+      "path": "/association/member/dues-configs",
+      "operationId": "listDuesConfigs"
+    },
+    {
+      "method": "GET",
+      "path": "/association/member/dues-reporting",
+      "operationId": "listDuesFunds"
+    },
+    {
+      "method": "GET",
+      "path": "/association/member/dues-invoices",
+      "operationId": "listDuesInvoices"
+    },
+    {
+      "method": "GET",
+      "path": "/association/member/dues-payments",
+      "operationId": "listDuesPayments"
+    },
+    {
+      "method": "GET",
+      "path": "/association/member/dunning/events",
+      "operationId": "listDunningEvents"
+    },
+    {
+      "method": "GET",
+      "path": "/association/member/dunning/templates",
+      "operationId": "listDunningTemplates"
+    },
+    {
+      "method": "GET",
+      "path": "/association/member/elections",
+      "operationId": "listElections"
+    },
+    {
+      "method": "GET",
+      "path": "/email/queue",
+      "operationId": "listEmailQueueItems"
+    },
+    {
+      "method": "GET",
+      "path": "/email/suppressions",
+      "operationId": "listEmailSuppressions"
+    },
+    {
+      "method": "GET",
+      "path": "/email/templates",
+      "operationId": "listEmailTemplates"
+    },
+    {
+      "method": "GET",
+      "path": "/booking/events/{event}/slots",
+      "operationId": "listEventSlots"
+    },
+    {
+      "method": "GET",
+      "path": "/admin/feature-flags",
+      "operationId": "listFeatureFlags"
+    },
+    {
+      "method": "GET",
+      "path": "/storage/files",
+      "operationId": "listFiles"
+    },
+    {
+      "method": "GET",
+      "path": "/association/member/institutional-memberships",
+      "operationId": "listInstitutionalMemberships"
+    },
+    {
+      "method": "GET",
+      "path": "/billing/invoices",
+      "operationId": "listInvoices"
+    },
+    {
+      "method": "GET",
+      "path": "/association/member/license-renewal-alerts",
+      "operationId": "listLicenseRenewalAlerts"
+    },
+    {
+      "method": "GET",
+      "path": "/listings",
+      "operationId": "listListings"
+    },
+    {
+      "method": "GET",
+      "path": "/association/member/credits",
+      "operationId": "listMemberCreditsForPeer"
+    },
+    {
+      "method": "GET",
+      "path": "/association/member/applications",
+      "operationId": "listMembershipApplications"
+    },
+    {
+      "method": "GET",
+      "path": "/association/member/membership-categories",
+      "operationId": "listMembershipCategories"
+    },
+    {
+      "method": "GET",
+      "path": "/association/member/memberships",
+      "operationId": "listMemberships"
+    },
+    {
+      "method": "GET",
+      "path": "/association/member/tiers",
+      "operationId": "listMembershipTiers"
+    },
+    {
+      "method": "GET",
+      "path": "/association/member/certificates",
+      "operationId": "listMyCertificates"
+    },
+    {
+      "method": "GET",
+      "path": "/persons/me/credit-entries",
+      "operationId": "listMyCreditEntries"
+    },
+    {
+      "method": "GET",
+      "path": "/association/event-lifecycle/my",
+      "operationId": "listMyCustomEvents"
+    },
+    {
+      "method": "GET",
+      "path": "/association/training-lifecycle/my",
+      "operationId": "listMyCustomTrainings"
+    },
+    {
+      "method": "GET",
+      "path": "/admin/national/chapters",
+      "operationId": "listNationalChapters"
+    },
+    {
+      "method": "GET",
+      "path": "/notifs",
+      "operationId": "listNotifications"
+    },
+    {
+      "method": "GET",
+      "path": "/association/member/officer-terms",
+      "operationId": "listOfficerTerms"
+    },
+    {
+      "method": "GET",
+      "path": "/officer-terms/{organizationId}",
+      "operationId": "listOfficerTermsSummary"
+    },
+    {
+      "method": "GET",
+      "path": "/accredited-providers/{organizationId}",
+      "operationId": "listOrgAccreditedProviders"
+    },
+    {
+      "method": "GET",
+      "path": "/admin/organizations",
+      "operationId": "listOrganizations"
+    },
+    {
+      "method": "GET",
+      "path": "/membership/applications/{organizationId}",
+      "operationId": "listOrgApplications"
+    },
+    {
+      "method": "GET",
+      "path": "/association/member/chapters",
+      "operationId": "listOrgChapters"
+    },
+    {
+      "method": "GET",
+      "path": "/membership/members/{organizationId}",
+      "operationId": "listOrgMembers"
+    },
+    {
+      "method": "GET",
+      "path": "/association/member/dues-payments/pending-proofs",
+      "operationId": "listPendingProofs"
+    },
+    {
+      "method": "GET",
+      "path": "/persons",
+      "operationId": "listPersons"
+    },
+    {
+      "method": "GET",
+      "path": "/association/person-subscriptions",
+      "operationId": "listPersonSubscriptions"
+    },
+    {
+      "method": "GET",
+      "path": "/association/member/positions",
+      "operationId": "listPositions"
+    },
+    {
+      "method": "GET",
+      "path": "/association/member/licenses",
+      "operationId": "listProfessionalLicenses"
+    },
+    {
+      "method": "GET",
+      "path": "/public/events",
+      "operationId": "listPublicEvents"
+    },
+    {
+      "method": "GET",
+      "path": "/public/orgs",
+      "operationId": "listPublicOrgs"
+    },
+    {
+      "method": "GET",
+      "path": "/reviews/",
+      "operationId": "listReviews"
+    },
+    {
+      "method": "GET",
+      "path": "/association/member/roster",
+      "operationId": "listRosterMembers"
+    },
+    {
+      "method": "GET",
+      "path": "/association/member/royalty-splits",
+      "operationId": "listRoyaltySplits"
+    },
+    {
+      "method": "GET",
+      "path": "/communications/segments",
+      "operationId": "listSavedSegments"
+    },
+    {
+      "method": "GET",
+      "path": "/booking/events/{event}/exceptions",
+      "operationId": "listScheduleExceptions"
+    },
+    {
+      "method": "GET",
+      "path": "/association/member/institutional-memberships/{institutionalMembershipId}/seats",
+      "operationId": "listSeatAllocations"
+    },
+    {
+      "method": "GET",
+      "path": "/association/member/special-assessments/{orgId}",
+      "operationId": "listSpecialAssessments"
+    },
+    {
+      "method": "GET",
+      "path": "/surveys/{survey}/responses",
+      "operationId": "listSurveyResponses"
+    },
+    {
+      "method": "GET",
+      "path": "/surveys/",
+      "operationId": "listSurveys"
+    },
+    {
+      "method": "GET",
+      "path": "/vendors",
+      "operationId": "listVendors"
+    },
+    {
+      "method": "GET",
+      "path": "/association/events/{eventId}/waitlist",
+      "operationId": "listWaitlistEntries"
+    },
+    {
+      "method": "GET",
+      "path": "/association/member/credentials/lookup/{credentialNumber}",
+      "operationId": "lookupCredentialPublic"
+    },
+    {
+      "method": "POST",
+      "path": "/notifs/read-all",
+      "operationId": "markAllNotificationsAsRead"
+    },
+    {
+      "method": "POST",
+      "path": "/association/member/dues-invoices/{invoiceId}/mark-paid",
+      "operationId": "markDuesInvoicePaid"
+    },
+    {
+      "method": "POST",
+      "path": "/billing/invoices/{invoice}/mark-uncollectible",
+      "operationId": "markInvoiceUncollectible"
+    },
+    {
+      "method": "POST",
+      "path": "/booking/bookings/{booking}/no-show",
+      "operationId": "markNoShowBooking"
+    },
+    {
+      "method": "POST",
+      "path": "/notifs/{notif}/read",
+      "operationId": "markNotificationAsRead"
+    },
+    {
+      "method": "POST",
+      "path": "/billing/merchant-accounts/{merchantAccount}/onboard",
+      "operationId": "onboardMerchantAccount"
+    },
+    {
+      "method": "POST",
+      "path": "/association/member/elections/{electionId}/open-nominations",
+      "operationId": "openElectionNominations"
+    },
+    {
+      "method": "POST",
+      "path": "/association/member/elections/{electionId}/open-voting",
+      "operationId": "openElectionVoting"
+    },
+    {
+      "method": "POST",
+      "path": "/billing/invoices/{invoice}/pay",
+      "operationId": "payInvoice"
+    },
+    {
+      "method": "POST",
+      "path": "/association/message-templates/{templateId}/preview",
+      "operationId": "previewMessageTemplate"
+    },
+    {
+      "method": "POST",
+      "path": "/association/events/{eventId}/waitlist/{entryId}/promote",
+      "operationId": "promoteWaitlistEntry"
+    },
+    {
+      "method": "POST",
+      "path": "/communications/announcements/{id}/publish",
+      "operationId": "publishAnnouncement"
+    },
+    {
+      "method": "POST",
+      "path": "/association/events/{eventId}/publish",
+      "operationId": "publishEvent"
+    },
+    {
+      "method": "POST",
+      "path": "/surveys/{survey}/publish",
+      "operationId": "publishSurvey"
+    },
+    {
+      "method": "POST",
+      "path": "/association/training/{trainingId}/publish",
+      "operationId": "publishTraining"
+    },
+    {
+      "method": "POST",
+      "path": "/association/member/aging-buckets/{organizationId}/recalculate",
+      "operationId": "recalculateAgingBucket"
+    },
+    {
+      "method": "POST",
+      "path": "/association/member/dues-payments",
+      "operationId": "recordDuesPayment"
+    },
+    {
+      "method": "POST",
+      "path": "/association/member/compliance/{organizationId}/refresh",
+      "operationId": "refreshCompliance"
+    },
+    {
+      "method": "POST",
+      "path": "/association/member/dues-payments/{paymentId}/refund",
+      "operationId": "refundDuesPayment"
+    },
+    {
+      "method": "POST",
+      "path": "/association/events/registrations/{registrationId}/refund",
+      "operationId": "refundEventRegistration"
+    },
+    {
+      "method": "POST",
+      "path": "/billing/invoices/{invoice}/refund",
+      "operationId": "refundInvoicePayment"
+    },
+    {
+      "method": "POST",
+      "path": "/association/event-lifecycle/{eventId}/register-and-pay",
+      "operationId": "registerAndPayForEvent"
+    },
+    {
+      "method": "POST",
+      "path": "/association/event-lifecycle/{eventId}/register",
+      "operationId": "registerForCustomEvent"
+    },
+    {
+      "method": "POST",
+      "path": "/association/member/memberships/{membershipId}/reinstate",
+      "operationId": "reinstateMembership"
+    },
+    {
+      "method": "POST",
+      "path": "/booking/bookings/{booking}/reject",
+      "operationId": "rejectBooking"
+    },
+    {
+      "method": "POST",
+      "path": "/association/member/dues-payments/{paymentId}/reject",
+      "operationId": "rejectPaymentProof"
+    },
+    {
+      "method": "POST",
+      "path": "/association/member/memberships/{membershipId}/renew",
+      "operationId": "renewMembership"
+    },
+    {
+      "method": "POST",
+      "path": "/creatives/{creativeId}/report",
+      "operationId": "reportAd"
+    },
+    {
+      "method": "POST",
+      "path": "/persons/me/delete",
+      "operationId": "requestMyAccountDeletion"
+    },
+    {
+      "method": "POST",
+      "path": "/association/member/memberships/{membershipId}/resign",
+      "operationId": "resignMembership"
+    },
+    {
+      "method": "POST",
+      "path": "/email/queue/{queue}/retry",
+      "operationId": "retryEmailQueueItem"
+    },
+    {
+      "method": "POST",
+      "path": "/creatives/{creativeId}/review",
+      "operationId": "reviewCreative"
+    },
+    {
+      "method": "DELETE",
+      "path": "/admin/admins/{adminId}",
+      "operationId": "revokeAdmin"
+    },
+    {
+      "method": "POST",
+      "path": "/association/member/credentials/{credentialId}/revoke",
+      "operationId": "revokeDigitalCredential"
+    },
+    {
+      "method": "POST",
+      "path": "/association/member/institutional-memberships/{institutionalMembershipId}/seats/{seatAllocationId}/revoke",
+      "operationId": "revokeSeat"
+    },
+    {
+      "method": "POST",
+      "path": "/association/member/dunning/run",
+      "operationId": "runDunning"
+    },
+    {
+      "method": "POST",
+      "path": "/communications/announcements/{id}/schedule",
+      "operationId": "scheduleAnnouncement"
+    },
+    {
+      "method": "POST",
+      "path": "/association/messages/{messageId}/schedule",
+      "operationId": "scheduleMessage"
+    },
+    {
+      "method": "GET",
+      "path": "/comms/messages/search",
+      "operationId": "searchChatMessages"
+    },
+    {
+      "method": "GET",
+      "path": "/association/events/checkins",
+      "operationId": "searchCheckIns"
+    },
+    {
+      "method": "GET",
+      "path": "/association/training/courses/enrollments",
+      "operationId": "searchCourseEnrollments"
+    },
+    {
+      "method": "GET",
+      "path": "/association/training/courses",
+      "operationId": "searchCourses"
+    },
+    {
+      "method": "GET",
+      "path": "/association/member/directory/search",
+      "operationId": "searchDirectory"
+    },
+    {
+      "method": "GET",
+      "path": "/association/documents",
+      "operationId": "searchDocuments"
+    },
+    {
+      "method": "GET",
+      "path": "/association/events/registrations",
+      "operationId": "searchEventRegistrations"
+    },
+    {
+      "method": "GET",
+      "path": "/association/events",
+      "operationId": "searchEvents"
+    },
+    {
+      "method": "GET",
+      "path": "/postings",
+      "operationId": "searchJobPostings"
+    },
+    {
+      "method": "GET",
+      "path": "/association/messages",
+      "operationId": "searchMessages"
+    },
+    {
+      "method": "GET",
+      "path": "/association/message-templates",
+      "operationId": "searchMessageTemplates"
+    },
+    {
+      "method": "GET",
+      "path": "/association/training/courses/quiz-attempts",
+      "operationId": "searchQuizAttempts"
+    },
+    {
+      "method": "GET",
+      "path": "/association/training/enrollments",
+      "operationId": "searchTrainingEnrollments"
+    },
+    {
+      "method": "GET",
+      "path": "/association/training",
+      "operationId": "searchTrainings"
+    },
+    {
+      "method": "POST",
+      "path": "/comms/chat-rooms/{room}/messages",
+      "operationId": "sendChatMessage"
+    },
+    {
+      "method": "POST",
+      "path": "/association/messages/{messageId}/send",
+      "operationId": "sendMessage"
+    },
+    {
+      "method": "POST",
+      "path": "/org/{organizationId}/payments/send-link",
+      "operationId": "sendPaymentLink"
+    },
+    {
+      "method": "POST",
+      "path": "/admin/feature-flags",
+      "operationId": "setFeatureFlag"
+    },
+    {
+      "method": "POST",
+      "path": "/opt-out",
+      "operationId": "setMemberOptOut"
+    },
+    {
+      "method": "POST",
+      "path": "/association/member/chapter-affiliations/{affiliationId}/set-primary",
+      "operationId": "setPrimaryChapterAffiliation"
+    },
+    {
+      "method": "POST",
+      "path": "/admin/impersonate",
+      "operationId": "startImpersonation"
+    },
+    {
+      "method": "POST",
+      "path": "/association/member/dues-payments/submit-proof",
+      "operationId": "submitPaymentProof"
+    },
+    {
+      "method": "POST",
+      "path": "/surveys/{survey}/responses",
+      "operationId": "submitSurveyResponse"
+    },
+    {
+      "method": "POST",
+      "path": "/association/member/memberships/{membershipId}/terminate",
+      "operationId": "terminateMembership"
+    },
+    {
+      "method": "POST",
+      "path": "/association/member/dues-gateway/{organizationId}/test",
+      "operationId": "testDuesGatewayConnection"
+    },
+    {
+      "method": "POST",
+      "path": "/email/templates/{template}/test",
+      "operationId": "testEmailTemplate"
+    },
+    {
+      "method": "POST",
+      "path": "/admin/organizations/{organizationId}/transition",
+      "operationId": "transitionOrgStatus"
+    },
+    {
+      "method": "GET",
+      "path": "/email/unsubscribe",
+      "operationId": "unsubscribeEmailGet"
+    },
+    {
+      "method": "POST",
+      "path": "/email/unsubscribe",
+      "operationId": "unsubscribeEmailPost"
+    },
+    {
+      "method": "PATCH",
+      "path": "/admin/admins/{adminId}",
+      "operationId": "updateAdmin"
+    },
+    {
+      "method": "PATCH",
+      "path": "/communications/announcements/{id}",
+      "operationId": "updateAnnouncement"
+    },
+    {
+      "method": "PATCH",
+      "path": "/admin/associations/{associationId}",
+      "operationId": "updateAssociation"
+    },
+    {
+      "method": "PATCH",
+      "path": "/booking/events/{event}",
+      "operationId": "updateBookingEvent"
+    },
+    {
+      "method": "PATCH",
+      "path": "/association/member/candidates/{candidateId}",
+      "operationId": "updateCandidate"
+    },
+    {
+      "method": "POST",
+      "path": "/association/member/candidates/{candidateId}/status",
+      "operationId": "updateCandidateStatus"
+    },
+    {
+      "method": "PATCH",
+      "path": "/association/member/chapter-affiliations/{affiliationId}",
+      "operationId": "updateChapterAffiliation"
+    },
+    {
+      "method": "PATCH",
+      "path": "/association/training/courses/{courseId}",
+      "operationId": "updateCourse"
+    },
+    {
+      "method": "PATCH",
+      "path": "/association/training/courses/enrollments/{enrollmentId}",
+      "operationId": "updateCourseEnrollment"
+    },
+    {
+      "method": "POST",
+      "path": "/association/training/courses/enrollments/{enrollmentId}/progress",
+      "operationId": "updateCourseProgress"
+    },
+    {
+      "method": "PATCH",
+      "path": "/association/member/credential-templates/{templateId}",
+      "operationId": "updateCredentialTemplate"
+    },
+    {
+      "method": "PATCH",
+      "path": "/association/member/credentials/{credentialId}",
+      "operationId": "updateDigitalCredential"
+    },
+    {
+      "method": "PATCH",
+      "path": "/association/member/directory/profiles/{profileId}",
+      "operationId": "updateDirectoryProfile"
+    },
+    {
+      "method": "PATCH",
+      "path": "/association/documents/{documentId}",
+      "operationId": "updateDocument"
+    },
+    {
+      "method": "PATCH",
+      "path": "/association/document-tags/{tagId}",
+      "operationId": "updateDocumentTag"
+    },
+    {
+      "method": "PATCH",
+      "path": "/association/member/dues-configs/{duesConfigId}",
+      "operationId": "updateDuesConfig"
+    },
+    {
+      "method": "PATCH",
+      "path": "/association/member/dues-invoices/{invoiceId}",
+      "operationId": "updateDuesInvoice"
+    },
+    {
+      "method": "PATCH",
+      "path": "/association/member/dunning/templates/{templateId}",
+      "operationId": "updateDunningTemplate"
+    },
+    {
+      "method": "PATCH",
+      "path": "/association/member/elections/{electionId}",
+      "operationId": "updateElection"
+    },
+    {
+      "method": "PATCH",
+      "path": "/email/templates/{template}",
+      "operationId": "updateEmailTemplate"
+    },
+    {
+      "method": "PATCH",
+      "path": "/association/events/{eventId}",
+      "operationId": "updateEvent"
+    },
+    {
+      "method": "PATCH",
+      "path": "/association/events/registrations/{registrationId}",
+      "operationId": "updateEventRegistration"
+    },
+    {
+      "method": "PATCH",
+      "path": "/association/member/institutional-memberships/{institutionalMembershipId}",
+      "operationId": "updateInstitutionalMembership"
+    },
+    {
+      "method": "PATCH",
+      "path": "/billing/invoices/{invoice}",
+      "operationId": "updateInvoice"
+    },
+    {
+      "method": "PATCH",
+      "path": "/applications/{applicationId}",
+      "operationId": "updateJobApplication"
+    },
+    {
+      "method": "PATCH",
+      "path": "/postings/{postingId}",
+      "operationId": "updateJobPosting"
+    },
+    {
+      "method": "PATCH",
+      "path": "/association/member/memberships/{membershipId}",
+      "operationId": "updateMembership"
+    },
+    {
+      "method": "PATCH",
+      "path": "/association/member/applications/{applicationId}",
+      "operationId": "updateMembershipApplication"
+    },
+    {
+      "method": "PATCH",
+      "path": "/association/member/tiers/{tierId}",
+      "operationId": "updateMembershipTier"
+    },
+    {
+      "method": "PATCH",
+      "path": "/association/messages/{messageId}",
+      "operationId": "updateMessage"
+    },
+    {
+      "method": "PATCH",
+      "path": "/association/message-templates/{templateId}",
+      "operationId": "updateMessageTemplate"
+    },
+    {
+      "method": "PATCH",
+      "path": "/persons/me/notification-preferences",
+      "operationId": "updateMyNotificationPreferences"
+    },
+    {
+      "method": "PATCH",
+      "path": "/persons/me/privacy",
+      "operationId": "updateMyPrivacySettings"
+    },
+    {
+      "method": "PATCH",
+      "path": "/persons/me",
+      "operationId": "updateMyProfile"
+    },
+    {
+      "method": "PATCH",
+      "path": "/association/member/officer-terms/{termId}",
+      "operationId": "updateOfficerTerm"
+    },
+    {
+      "method": "PUT",
+      "path": "/onboarding/step",
+      "operationId": "updateOnboardingStep"
+    },
+    {
+      "method": "PATCH",
+      "path": "/accredited-providers/{organizationId}/{providerId}",
+      "operationId": "updateOrgAccreditedProvider"
+    },
+    {
+      "method": "PATCH",
+      "path": "/admin/organizations/{organizationId}",
+      "operationId": "updateOrganization"
+    },
+    {
+      "method": "PUT",
+      "path": "/association/member/org-profile/{organizationId}",
+      "operationId": "updateOrganizationProfile"
+    },
+    {
+      "method": "PATCH",
+      "path": "/association/member/cpd-config/{organizationId}",
+      "operationId": "updateOrgCpdConfig"
+    },
+    {
+      "method": "PUT",
+      "path": "/membership/org-profile/{organizationId}",
+      "operationId": "updateOrgProfile"
+    },
+    {
+      "method": "PATCH",
+      "path": "/persons/{person}",
+      "operationId": "updatePerson"
+    },
+    {
+      "method": "PATCH",
+      "path": "/association/person-subscriptions/{subscriptionId}",
+      "operationId": "updatePersonSubscription"
+    },
+    {
+      "method": "PATCH",
+      "path": "/association/member/positions/{positionId}",
+      "operationId": "updatePosition"
+    },
+    {
+      "method": "PATCH",
+      "path": "/association/member/licenses/{licenseId}",
+      "operationId": "updateProfessionalLicense"
+    },
+    {
+      "method": "PUT",
+      "path": "/association/member/roster/{memberId}",
+      "operationId": "updateRosterMember"
+    },
+    {
+      "method": "PATCH",
+      "path": "/association/member/royalty-splits/{royaltySplitId}",
+      "operationId": "updateRoyaltySplit"
+    },
+    {
+      "method": "PUT",
+      "path": "/association/member/special-assessments/{id}",
+      "operationId": "updateSpecialAssessment"
+    },
+    {
+      "method": "PATCH",
+      "path": "/association/subscription-topics/{topicId}",
+      "operationId": "updateSubscriptionTopic"
+    },
+    {
+      "method": "PATCH",
+      "path": "/surveys/{survey}",
+      "operationId": "updateSurvey"
+    },
+    {
+      "method": "PATCH",
+      "path": "/association/training/{trainingId}",
+      "operationId": "updateTraining"
+    },
+    {
+      "method": "PATCH",
+      "path": "/association/training/enrollments/{enrollmentId}",
+      "operationId": "updateTrainingEnrollment"
+    },
+    {
+      "method": "PATCH",
+      "path": "/vendors/{vendorId}",
+      "operationId": "updateVendor"
+    },
+    {
+      "method": "PATCH",
+      "path": "/comms/chat-rooms/{room}/video-call/participant",
+      "operationId": "updateVideoCallParticipant"
+    },
+    {
+      "method": "POST",
+      "path": "/storage/files/upload",
+      "operationId": "uploadFile"
+    },
+    {
+      "method": "POST",
+      "path": "/association/documents/{documentId}/versions",
+      "operationId": "uploadNewDocumentVersion"
+    },
+    {
+      "method": "PUT",
+      "path": "/association/member/dues-reporting/{organizationId}",
+      "operationId": "upsertDuesFunds"
+    },
+    {
+      "method": "PUT",
+      "path": "/association/member/dues-gateway/{organizationId}",
+      "operationId": "upsertDuesGatewayConfig"
+    },
+    {
+      "method": "PUT",
+      "path": "/association/member/membership-categories/{organizationId}",
+      "operationId": "upsertMembershipCategory"
+    },
+    {
+      "method": "GET",
+      "path": "/invite/validate/{token}",
+      "operationId": "validateInvite"
+    },
+    {
+      "method": "GET",
+      "path": "/pay/{token}/validate",
+      "operationId": "validatePaymentToken"
+    },
+    {
+      "method": "GET",
+      "path": "/certificates/verify/{certificateNumber}",
+      "operationId": "verifyCertificatePublic"
+    },
+    {
+      "method": "POST",
+      "path": "/association/member/credentials/public-verify",
+      "operationId": "verifyCredentialPublic"
+    },
+    {
+      "method": "POST",
+      "path": "/association/member/credentials/verify",
+      "operationId": "verifyDigitalCredentialAuthenticated"
+    },
+    {
+      "method": "POST",
+      "path": "/vendors/{vendorId}/verify",
+      "operationId": "verifyVendor"
+    },
+    {
+      "method": "POST",
+      "path": "/association/member/credits/void-event",
+      "operationId": "voidCreditEntry"
+    },
+    {
+      "method": "POST",
+      "path": "/billing/invoices/{invoice}/void",
+      "operationId": "voidInvoice"
+    }
+  ]
+}

@@ -2395,9 +2395,7 @@
         "handler_function": "listMembershipTiers",
         "module": "handlers/association:member"
       },
-      "consumers": [
-        "apps/memberry"
-      ],
+      "consumers": [],
       "status": "matched",
       "auth_drift": false
     },
@@ -3315,7 +3313,9 @@
         "handler_function": "getOrgProfile",
         "module": "handlers/membership"
       },
-      "consumers": [],
+      "consumers": [
+        "apps/memberry"
+      ],
       "status": "matched",
       "auth_drift": false
     },
@@ -7453,22 +7453,6 @@
       "auth_drift": false
     },
     {
-      "operation_id": "markAllNotificationsRead",
-      "method": "POST",
-      "path": "/read-all",
-      "required_roles": [
-        "user"
-      ],
-      "backend": {
-        "handler_file": "services/api-ts/src/handlers/notifs/markAllNotificationsRead.ts",
-        "handler_function": "markAllNotificationsRead",
-        "module": "handlers/notifs"
-      },
-      "consumers": [],
-      "status": "matched",
-      "auth_drift": false
-    },
-    {
       "operation_id": "createReview",
       "method": "POST",
       "path": "/reviews/",
@@ -8231,7 +8215,6 @@
       "POST /persons/me/credit-entries",
       "POST /persons/me/delete",
       "POST /postings",
-      "POST /read-all",
       "POST /reviews/",
       "POST /storage/files/:file/complete",
       "POST /storage/files/upload",

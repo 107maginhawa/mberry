@@ -1,3 +1,12 @@
+# CSRF preamble — fetches token + sets cookie for state-changing requests.
+# Auto-injected by scripts/audit/inject-csrf-into-hurl.ts (idempotent).
+GET {{api}}/csrf-token
+HTTP 200
+[Captures]
+csrf_token: jsonpath "$.token"
+
+
+
 # Security: Officer API Authorization Tests
 # Business Rules: [BR-09]
 # Verifies that officer-only endpoints reject non-officer users
@@ -6,6 +15,8 @@
 # ── 1. Sign up a fresh non-officer user ─────────────────────
 
 POST {{api}}/auth/sign-up/email
+Origin: {{origin}}
+x-csrf-token: {{csrf_token}}
 Content-Type: application/json
 {
   "email": "security-test-{{timestamp}}@example.com",
@@ -20,6 +31,8 @@ status < 500
 # ── 2. Sign in as the fresh user ────────────────────────────
 
 POST {{api}}/auth/sign-in/email
+Origin: {{origin}}
+x-csrf-token: {{csrf_token}}
 Content-Type: application/json
 {
   "email": "security-test-{{timestamp}}@example.com",
@@ -34,6 +47,7 @@ status < 500
 
 # Dues configs (officer-only)
 GET {{api}}/association/member/dues-configs
+x-org-id: {{org_id}}
 HTTP 403
 
 # ORPHANED: /dues/funds/{orgId} has no spec equivalent
@@ -46,7 +60,10 @@ HTTP 403
 
 # Create event (officer-only)
 POST {{api}}/association/events
+Origin: {{origin}}
+x-csrf-token: {{csrf_token}}
 Content-Type: application/json
+x-org-id: {{org_id}}
 {
   "title": "Unauthorized Event",
   "startDate": "2026-08-01T00:00:00Z",
@@ -60,7 +77,10 @@ HTTP 403
 
 # Create training (officer-only)
 POST {{api}}/association/training
+Origin: {{origin}}
+x-csrf-token: {{csrf_token}}
 Content-Type: application/json
+x-org-id: {{org_id}}
 {
   "title": "Unauthorized Training",
   "startDate": "2026-08-01T00:00:00Z",
@@ -70,7 +90,10 @@ HTTP 403
 
 # Create election (officer-only)
 POST {{api}}/association/member/elections
+Origin: {{origin}}
+x-csrf-token: {{csrf_token}}
 Content-Type: application/json
+x-org-id: {{org_id}}
 {
   "title": "Unauthorized Election"
 }
@@ -78,6 +101,8 @@ HTTP 403
 
 # Create announcement (officer-only)
 POST {{api}}/communications/announcements/ed8e3a96-8126-4341-be42-e6eb7940c562
+Origin: {{origin}}
+x-csrf-token: {{csrf_token}}
 Content-Type: application/json
 {
   "title": "Unauthorized Announcement",
@@ -89,15 +114,18 @@ HTTP 403
 # ── 4. Verify officer CAN access (sign in as officer) ───────
 
 POST {{api}}/auth/sign-in/email
+Origin: {{origin}}
+x-csrf-token: {{csrf_token}}
 Content-Type: application/json
 {
   "email": "test@memberry.ph",
-  "password": "Test1234!"
+  "password": "TestPass123!"
 }
 HTTP 200
 
 # Officer should get 200 on same endpoints
 GET {{api}}/association/member/dues-configs
+x-org-id: {{org_id}}
 HTTP 200
 
 GET {{api}}/dues/dashboard/ed8e3a96-8126-4341-be42-e6eb7940c562

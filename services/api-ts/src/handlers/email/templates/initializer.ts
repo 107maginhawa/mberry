@@ -17,6 +17,7 @@ import type { DatabaseInstance } from '@/core/database';
 import type { Logger } from '@/types/logger';
 import { EmailTemplateRepository } from '../repos/template.repo';
 import { EmailTemplateTags } from '../repos/email.schema';
+import { SYSTEM_ORG_ID } from '@/core/email-types';
 import { readFile } from 'fs/promises';
 import { join, dirname } from 'path';
 import { fileURLToPath } from 'url';
@@ -197,12 +198,16 @@ async function loadTemplateContent(templatePath: string): Promise<{ html: string
  */
 export async function initializeEmailTemplates(
   db: DatabaseInstance,
-  logger?: Logger,
+  baseLogger?: Logger,
   organizationId?: string
 ): Promise<void> {
+  // Module-level child logger — initializer runs at startup, no request
+  // trace available, so traceId stays unset but module is bound on every
+  // call so log aggregators can route initialization output.
+  const logger = baseLogger?.child?.({ module: 'email' }) ?? baseLogger;
   const templateRepo = new EmailTemplateRepository(db, logger);
-  
-  logger?.info('Starting email template initialization from filesystem');
+
+  logger?.info({ action: 'initializeEmailTemplates.start' }, 'Starting email template initialization from filesystem');
   
   for (const [templatePath, metadata] of Object.entries(TEMPLATE_METADATA)) {
     try {
@@ -214,7 +219,7 @@ export async function initializeEmailTemplates(
       
       if (existing.length > 0) {
         logger?.debug(
-          { tags: metadata.tags, name: metadata.name }, 
+          { action: 'initializeEmailTemplates.skipExisting', tags: metadata.tags, name: metadata.name },
           'Template already exists, skipping'
         );
         continue;
@@ -226,7 +231,7 @@ export async function initializeEmailTemplates(
       // Create template definition
       const templateDef: NewEmailTemplate = {
         name: metadata.name,
-        organizationId: organizationId || '00000000-0000-0000-0000-000000000000',
+        organizationId: organizationId || SYSTEM_ORG_ID,
         description: metadata.description,
         subject: metadata.subject,
         bodyHtml: html,
@@ -244,17 +249,17 @@ export async function initializeEmailTemplates(
       const created = await templateRepo.createTemplate(templateDef);
       
       logger?.info(
-        { id: created.id, name: created.name, tags: created.tags, templatePath },
+        { action: 'initializeEmailTemplates.created', id: created.id, name: created.name, tags: created.tags, templatePath },
         'Email template initialized from file'
       );
-      
+
     } catch (error) {
       logger?.error(
-        { error, name: metadata.name, tags: metadata.tags, templatePath },
+        { action: 'initializeEmailTemplates.error', error, name: metadata.name, tags: metadata.tags, templatePath },
         'Failed to initialize email template from file'
       );
     }
   }
-  
-  logger?.info('Email template initialization from filesystem completed');
+
+  logger?.info({ action: 'initializeEmailTemplates.done' }, 'Email template initialization from filesystem completed');
 }

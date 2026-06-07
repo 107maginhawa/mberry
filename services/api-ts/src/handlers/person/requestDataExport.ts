@@ -8,7 +8,7 @@ import { CreditEntryRepository } from '@/handlers/association:member/repos/credi
 import { duesPayments } from '@/handlers/association:member/repos/dues-payments.schema';
 import { dataExports } from './repos/data-export.schema';
 import { domainEvents } from '@/core/domain-events';
-import { auditAction } from '@/utils/audit';
+import { auditAction } from '@/core/audit/audit-action';
 
 const EXPORT_TTL_MS = 7 * 24 * 60 * 60 * 1000;
 const RATE_WINDOW_MS = 24 * 60 * 60 * 1000;
@@ -27,7 +27,9 @@ export async function requestDataExport(ctx: BaseContext): Promise<Response> {
   if (!session) throw new UnauthorizedError();
 
   const db = ctx.get('database') as DatabaseInstance;
-  const logger = ctx.get('logger');
+  const baseLogger = ctx.get('logger');
+  const traceId = ctx.get('requestId');
+  const logger = baseLogger?.child?.({ traceId, module: 'person' }) ?? baseLogger;
   const personId = session.user.id;
 
   // M2-R4: rate limit — 1 export per 24h per person
@@ -116,7 +118,7 @@ export async function requestDataExport(ctx: BaseContext): Promise<Response> {
 
     return ctx.json({ exportId, status: 'ready', downloadUrl, expiresAt: expiresAt.toISOString() }, 202);
   } catch (err) {
-    logger?.error({ error: err, exportId }, 'Data export generation failed');
+    logger?.error({ action: 'requestDataExport.1', error: err, exportId }, 'Data export generation failed');
     await db
       .update(dataExports)
       .set({ status: 'failed', updatedBy: personId })

@@ -1,3 +1,12 @@
+# CSRF preamble — fetches token + sets cookie for state-changing requests.
+# Auto-injected by scripts/audit/inject-csrf-into-hurl.ts (idempotent).
+GET {{api}}/csrf-token
+HTTP 200
+[Captures]
+csrf_token: jsonpath "$.token"
+
+
+
 # Business Rules: [BR-02] [BR-04] [BR-05] [BR-06] [BR-07] [BR-08] [BR-30] [BR-32]
 # Dues module contract test: officer configures dues, creates funds,
 # records a payment, views dashboard, and generates a report.
@@ -8,10 +17,12 @@
 # ── Auth: sign in as officer ───────────────────────────────
 
 POST {{api}}/auth/sign-in/email
+Origin: {{origin}}
+x-csrf-token: {{csrf_token}}
 Content-Type: application/json
 {
   "email": "test@memberry.ph",
-  "password": "Test1234!"
+  "password": "TestPass123!"
 }
 HTTP 200
 
@@ -19,23 +30,31 @@ HTTP 200
 # ── 0. Unauthenticated access → 401 ───────────────────────
 
 POST {{api}}/auth/sign-out
+Origin: {{origin}}
+x-csrf-token: {{csrf_token}}
 HTTP 200
 
 GET {{api}}/association/member/dues-configs
+x-org-id: {{org_id}}
 HTTP 401
 
 POST {{api}}/association/member/dues-payments
+Origin: {{origin}}
+x-csrf-token: {{csrf_token}}
 Content-Type: application/json
+x-org-id: {{org_id}}
 {}
 HTTP 401
 
 # ── Re-authenticate ────────────────────────────────────────
 
 POST {{api}}/auth/sign-in/email
+Origin: {{origin}}
+x-csrf-token: {{csrf_token}}
 Content-Type: application/json
 {
   "email": "test@memberry.ph",
-  "password": "Test1234!"
+  "password": "TestPass123!"
 }
 HTTP 200
 
@@ -43,13 +62,17 @@ HTTP 200
 # ── 1. List dues configs ──────────────────────────────────
 
 GET {{api}}/association/member/dues-configs
+x-org-id: {{org_id}}
 HTTP 200
 
 
 # ── 2. Create dues config ─────────────────────────────────
 
 POST {{api}}/association/member/dues-configs
+Origin: {{origin}}
+x-csrf-token: {{csrf_token}}
 Content-Type: application/json
+x-org-id: {{org_id}}
 {
   "defaultAmount": 150000,
   "currency": "PHP",
@@ -70,6 +93,7 @@ status < 500
 # ── 4. List payments ──────────────────────────────────────
 
 GET {{api}}/association/member/dues-payments
+x-org-id: {{org_id}}
 HTTP 200
 
 
@@ -82,6 +106,7 @@ HTTP 200
 # ── 6. Verify dues configs list (BR-02) ──────────────────
 
 GET {{api}}/association/member/dues-configs
+x-org-id: {{org_id}}
 HTTP 200
 
 
@@ -89,6 +114,8 @@ HTTP 200
 # Verify endpoint exists and doesn't 500 on a missing payment.
 
 POST {{api}}/association/member/dues-payments/00000000-0000-0000-0000-000000000000/refund
+Origin: {{origin}}
+x-csrf-token: {{csrf_token}}
 Content-Type: application/json
 {
   "amount": 100,
@@ -108,6 +135,10 @@ status < 500
 
 
 # ── 9. [BR-32] Financial dashboard (retention verification) ──
+# Identical to step 5 above. Re-verify the dashboard still responds
+# after the refund + gateway calls (BR-32 = "financial records survive
+# unrelated mutations").
 
 GET {{api}}/dues/dashboard/ed8e3a96-8126-4341-be42-e6eb7940c562
+x-org-id: {{org_id}}
 HTTP 200

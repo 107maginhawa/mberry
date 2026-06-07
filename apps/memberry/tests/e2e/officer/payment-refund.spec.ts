@@ -1,25 +1,26 @@
+// WF-045 — Payment Receipt Generation: auto-generate receipt on completed payment
 // CT-7 / BR-08: Payment refund flow
 import { test, expect } from '../helpers/test-fixture'
-import { signInAsTreasurer } from '../helpers/auth'
+import { authStateFile } from '../helpers/auth-state'
+import { captureRouteHydration } from '../helpers/real-flow'
 
+
+test.use({ storageState: authStateFile('treasurer') })
 const ORG_ID = 'ed8e3a96-8126-4341-be42-e6eb7940c562'
+const PAYMENTS = /\/(payments|dues-invoices)/
 
 test.describe('CT-7: Payment Refund', () => {
-  test.beforeEach(async ({ page }) => {
-    await signInAsTreasurer(page)
-  })
-
-  test('payments page loads with history table', async ({ page }) => {
+test('payments page loads with history table', async ({ page }) => {
+    const respP = captureRouteHydration(page, PAYMENTS)
     await page.goto(`/org/${ORG_ID}/officer/payments`)
-    await page.waitForLoadState('networkidle')
-
     await expect(page.getByText('Dues & Payments')).toBeVisible({ timeout: 10000 })
+    const resp = await respP
+    expect(resp?.status()).toBe(200)
+    expect(resp?.ok()).toBe(true)
   })
 
   test('payment detail page shows receipt and status', async ({ page }) => {
     await page.goto(`/org/${ORG_ID}/officer/payments`)
-    await page.waitForLoadState('networkidle')
-
     // Click first payment row to go to detail
     const paymentLink = page.locator('a[href*="/officer/payments/"]:not([href*="/new"])').first()
     const hasPayments = await paymentLink.isVisible({ timeout: 10000 }).catch(() => false)
@@ -36,8 +37,6 @@ test.describe('CT-7: Payment Refund', () => {
 
   test('completed payment shows refund form', async ({ page }) => {
     await page.goto(`/org/${ORG_ID}/officer/payments`)
-    await page.waitForLoadState('networkidle')
-
     const paymentLink = page.locator('a[href*="/officer/payments/"]:not([href*="/new"])').first()
     const hasPayments = await paymentLink.isVisible({ timeout: 10000 }).catch(() => false)
 
@@ -57,8 +56,6 @@ test.describe('CT-7: Payment Refund', () => {
 
   test('payment detail has back navigation', async ({ page }) => {
     await page.goto(`/org/${ORG_ID}/officer/payments`)
-    await page.waitForLoadState('networkidle')
-
     const paymentLink = page.locator('a[href*="/officer/payments/"]:not([href*="/new"])').first()
     const hasPayments = await paymentLink.isVisible({ timeout: 10000 }).catch(() => false)
 

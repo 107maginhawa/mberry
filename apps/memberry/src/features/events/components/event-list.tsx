@@ -136,7 +136,7 @@ export function EventList({ orgId }: EventListProps) {
         </div>
         <div className="flex gap-2 w-full sm:w-auto">
           <Select value={typeFilter} onValueChange={setTypeFilter}>
-            <SelectTrigger className="h-9 w-[160px]">
+            <SelectTrigger className="h-9 w-[160px]" aria-label="Filter events by type">
               <SelectValue placeholder="All Types" />
             </SelectTrigger>
             <SelectContent>

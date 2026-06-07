@@ -34,6 +34,12 @@ import {
 const ORG_CONTEXT_EXEMPT: { path: string; methods: string[] }[] = [
   { path: '/association/event-lifecycle/my', methods: ['GET'] },
   { path: '/association/training-lifecycle/my', methods: ['GET'] },
+  // Applicants by definition are not yet org members — POST applications
+  // and read tiers must not require existing membership. Once a person
+  // has an approved application, they become a member and subsequent
+  // /association/member/* calls go through the standard membership check.
+  { path: '/association/member/applications', methods: ['POST'] },
+  { path: '/association/member/tiers', methods: ['GET'] },
 ];
 
 export interface OrgContextDeps {
@@ -50,6 +56,17 @@ export function orgContextMiddleware(deps: OrgContextDeps = {}) {
         e.methods.includes(ctx.req.method)
     );
     if (isExempt) {
+      // Surface orgId to handlers when provided — applicants POSTing to
+      // /association/member/applications still need ctx.get('organizationId')
+      // populated even though we skip the membership check.
+      const exemptOrgId =
+        ctx.req.header('x-org-id') ??
+        ctx.req.query('orgId') ??
+        ctx.req.query('organizationId') ??
+        null;
+      if (exemptOrgId) {
+        ctx.set('organizationId', exemptOrgId);
+      }
       await next();
       return;
     }

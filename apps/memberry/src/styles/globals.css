@@ -32,13 +32,13 @@
     --color-muted: #73656D; /* darkened from #9E8890 for WCAG AA 4.5:1 on --card (5.61:1) */
     --color-border: #E4D8DC;
     --color-border-light: #EDE5E8;
-    --color-success: #5A8A6B;
+    --color-success: #2E6043;
     --color-success-bg: #EDF5F0;
-    --color-warning: #C4960A;
+    --color-warning: #8A6800;
     --color-warning-bg: #FDF8E8;
-    --color-error: #B85454;
+    --color-error: #8A2C2C;
     --color-error-bg: #FDF0F0;
-    --color-info: #5B7EB5;
+    --color-info: #3D5A8C;
     --color-info-bg: #EDF2F8;
 
     /* Glass surface tokens (extends --color-surface family) */

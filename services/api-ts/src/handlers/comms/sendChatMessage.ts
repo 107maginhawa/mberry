@@ -52,7 +52,9 @@ export async function sendChatMessage(
   
   // Get dependencies from context
   const db = ctx.get('database') as DatabaseInstance;
-  const logger = ctx.get('logger');
+  const baseLogger = ctx.get('logger');
+  const traceId = ctx.get('requestId');
+  const logger = baseLogger?.child?.({ traceId, module: 'comms' }) ?? baseLogger;
 
   // Multi-tenant scoping (P0-7): inherit orgId from room on message creation
   const organizationId = ctx.get('organizationId') as string;

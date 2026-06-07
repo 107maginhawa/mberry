@@ -1,3 +1,12 @@
+# CSRF preamble — fetches token + sets cookie for state-changing requests.
+# Auto-injected by scripts/audit/inject-csrf-into-hurl.ts (idempotent).
+GET {{api}}/csrf-token
+HTTP 200
+[Captures]
+csrf_token: jsonpath "$.token"
+
+
+
 # Business Rules: [BR-34]
 # Nomination eligibility contract test.
 #
@@ -17,4 +26,5 @@
 
 # Validate auth on the elections list endpoint instead
 GET {{api}}/association/member/elections
+x-org-id: {{org_id}}
 HTTP 401

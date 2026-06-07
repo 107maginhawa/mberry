@@ -3,13 +3,18 @@
 import { test, expect } from '../helpers/test-fixture'
 import { signIn, signUp } from '../helpers/auth'
 import { SEED_OFFICER_EMAIL, TEST_PASSWORD } from '../helpers/test-config'
+import { captureAnyApiSuccess } from '../helpers/real-flow'
 
 const ORG_ID = 'ed8e3a96-8126-4341-be42-e6eb7940c562'
 
 test.describe('Cross-Role Access Control', () => {
   test('fresh signup user: no officer link on dashboard', async ({ page }) => {
     await signUp(page)
+    const respP = captureAnyApiSuccess(page)
     await page.goto('/dashboard')
+    const resp = await respP
+    expect(resp?.status()).toBe(200)
+    expect(resp?.ok()).toBe(true)
     await expect(page.getByText(/Good/i).first()).toBeVisible({ timeout: 10000 })
 
     // Should NOT show any "Officer Dashboard" or "President Dashboard" link

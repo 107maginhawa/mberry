@@ -1,20 +1,23 @@
+// WF-043 — Financial Dashboard: collection rates, payment history, fund reports
 // CT-3: Payment reconciliation — test payment list as reconciliation view
 import { test, expect } from '../helpers/test-fixture'
-import { signInAsTreasurer } from '../helpers/auth'
+import { authStateFile } from '../helpers/auth-state'
+import { captureRouteHydration } from '../helpers/real-flow'
 
+
+test.use({ storageState: authStateFile('treasurer') })
 const ORG_ID = 'ed8e3a96-8126-4341-be42-e6eb7940c562'
+const PAYMENTS = /\/(payments|dues-invoices)/
 
 test.describe('CT-3: Payment Reconciliation', () => {
-  test.beforeEach(async ({ page }) => {
-    await signInAsTreasurer(page)
-  })
-
-  test('payments page shows financial dashboard with data', async ({ page }) => {
+test('payments page shows financial dashboard with data', async ({ page }) => {
+    const respP = captureRouteHydration(page, PAYMENTS)
     await page.goto(`/org/${ORG_ID}/officer/payments`)
-    await page.waitForLoadState('networkidle')
-
     // Heading must exist
     await expect(page.getByText('Dues & Payments')).toBeVisible({ timeout: 10000 })
+    const resp = await respP
+    expect(resp?.status()).toBe(200)
+    expect(resp?.ok()).toBe(true)
 
     // Dashboard must show financial data — amounts, member counts, or payment records
     await expect(
@@ -24,8 +27,6 @@ test.describe('CT-3: Payment Reconciliation', () => {
 
   test('payment history table renders with structure', async ({ page }) => {
     await page.goto(`/org/${ORG_ID}/officer/payments`)
-    await page.waitForLoadState('networkidle')
-
     // Table must render with headers or empty state message — not broken rendering
     const pageText = await page.locator('body').textContent()
     expect(pageText).not.toContain('undefined undefined')
@@ -38,8 +39,6 @@ test.describe('CT-3: Payment Reconciliation', () => {
 
   test('financial report page loads with content', async ({ page }) => {
     await page.goto(`/org/${ORG_ID}/officer/reports/financial`)
-    await page.waitForLoadState('networkidle')
-
     // Must show financial report content, not just shell
     await expect(page.getByText(/financial|report|revenue|summary/i).first()).toBeVisible({ timeout: 10000 })
   })

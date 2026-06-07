@@ -1,8 +1,10 @@
+// WF-074 — Certificate Download: member downloads training certificates
 // Cross-Module Flow 6.3: Training Attendance → Credit Award
 // Covers: M09 (training) → M10 (credits) → M11 (certificates)
 // Officer creates training, member enrolls, attendance confirmed, credits awarded.
 import { test, expect } from '../helpers/test-fixture'
 import { signInAsOfficer, signInAsMember, signInAsSociety } from '../helpers/auth'
+import { captureAnyApiSuccess } from '../helpers/real-flow'
 
 const ORG_ID = 'ed8e3a96-8126-4341-be42-e6eb7940c562'
 
@@ -13,8 +15,11 @@ test.describe('Journey: Training → Attendance → Credit Award', () => {
     })
 
     await test.step('navigate to training management', async () => {
+      const respP = captureAnyApiSuccess(page)
       await page.goto(`/org/${ORG_ID}/officer/training`)
-      await page.waitForLoadState('networkidle')
+      const resp = await respP
+      expect(resp?.status()).toBe(200)
+      expect(resp?.ok()).toBe(true)
     })
 
     await test.step('training list shows seeded trainings', async () => {
@@ -31,7 +36,6 @@ test.describe('Journey: Training → Attendance → Credit Award', () => {
 
     await test.step('navigate to training page', async () => {
       await page.goto('/my/training')
-      await page.waitForLoadState('networkidle')
     })
 
     await test.step('training page shows available programs', async () => {
@@ -47,7 +51,6 @@ test.describe('Journey: Training → Attendance → Credit Award', () => {
 
     await test.step('check credits page', async () => {
       await page.goto('/my/credits')
-      await page.waitForLoadState('networkidle')
       await expect(page).toHaveURL(/\/my\/credits/)
     })
 
@@ -65,7 +68,6 @@ test.describe('Journey: Training → Attendance → Credit Award', () => {
 
     await test.step('navigate to certificates', async () => {
       await page.goto('/my/certificates')
-      await page.waitForLoadState('networkidle')
     })
 
     await test.step('certificates page renders', async () => {
@@ -79,7 +81,6 @@ test.describe('Journey: Training → Attendance → Credit Award', () => {
     await test.step('sign in and browse training', async () => {
       await signInAsMember(page)
       await page.goto('/my/training')
-      await page.waitForLoadState('networkidle')
     })
 
     await test.step('verify training programs visible', async () => {
@@ -89,14 +90,12 @@ test.describe('Journey: Training → Attendance → Credit Award', () => {
 
     await test.step('check credits earned', async () => {
       await page.goto('/my/credits')
-      await page.waitForLoadState('networkidle')
       const hasCredits = await page.getByText(/credit|CPD|total/i).first().isVisible({ timeout: 10000 }).catch(() => false)
       expect(hasCredits).toBeTruthy()
     })
 
     await test.step('check certificates', async () => {
       await page.goto('/my/certificates')
-      await page.waitForLoadState('networkidle')
       await expect(page).toHaveURL(/\/my\/certificates/)
     })
   })
@@ -108,7 +107,6 @@ test.describe('Journey: Training → Attendance → Credit Award', () => {
 
     await test.step('access training management', async () => {
       await page.goto(`/org/${ORG_ID}/officer/training`)
-      await page.waitForLoadState('networkidle')
     })
 
     await test.step('training management accessible', async () => {

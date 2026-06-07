@@ -3,7 +3,7 @@ import { makeCtx, stubRepo, restoreRepo } from '@/test-utils/make-ctx';
 import { SubscriptionTopicRepository } from './repos/communication.repo';
 import { deleteSubscriptionTopic } from './deleteSubscriptionTopic';
 
-mock.module('@/utils/audit', () => ({ auditAction: async () => {} }));
+mock.module('@/core/audit/audit-action', () => ({ auditAction: async () => {} }));
 
 describe('deleteSubscriptionTopic', () => {
   beforeEach(() => { restoreRepo(SubscriptionTopicRepository); });

@@ -375,6 +375,7 @@ namespace MessageTemplateManagement {
     @post
     @useAuth(bearerAuth)
     @extension("x-security-required-roles", #["admin", "coordinator"])
+    @extension("x-audit", #{ action: "create", resourceType: "message-template" })
     createMessageTemplate(
       @body body: MessageTemplateCreateRequest
     ): ApiCreatedResponse<MessageTemplate>
@@ -401,6 +402,7 @@ namespace MessageTemplateManagement {
     @route("/{templateId}")
     @useAuth(bearerAuth)
     @extension("x-security-required-roles", #["admin", "coordinator"])
+    @extension("x-audit", #{ action: "update", resourceType: "message-template" })
     updateMessageTemplate(
       @path templateId: string,
       @body updates: MessageTemplateUpdateRequest
@@ -416,6 +418,7 @@ namespace MessageTemplateManagement {
     @route("/{templateId}")
     @useAuth(bearerAuth)
     @extension("x-security-required-roles", #["admin"])
+    @extension("x-audit", #{ action: "delete", resourceType: "message-template" })
     deleteMessageTemplate(
       @path templateId: string
     ): ApiNoContentResponse
@@ -459,6 +462,7 @@ namespace MessageManagement {
     @post
     @useAuth(bearerAuth)
     @extension("x-security-required-roles", #["admin", "coordinator"])
+    @extension("x-audit", #{ action: "create", resourceType: "message" })
     createMessage(
       @body body: MessageCreateRequest
     ): ApiCreatedResponse<Message>
@@ -485,6 +489,7 @@ namespace MessageManagement {
     @route("/{messageId}")
     @useAuth(bearerAuth)
     @extension("x-security-required-roles", #["admin", "coordinator"])
+    @extension("x-audit", #{ action: "update", resourceType: "message" })
     updateMessage(
       @path messageId: string,
       @body updates: MessageCreateRequest
@@ -500,6 +505,7 @@ namespace MessageManagement {
     @route("/{messageId}")
     @useAuth(bearerAuth)
     @extension("x-security-required-roles", #["admin"])
+    @extension("x-audit", #{ action: "delete", resourceType: "message" })
     deleteMessage(
       @path messageId: string
     ): ApiNoContentResponse
@@ -525,6 +531,7 @@ namespace MessageManagement {
     @route("/{messageId}/send")
     @useAuth(bearerAuth)
     @extension("x-security-required-roles", #["admin", "coordinator"])
+    @extension("x-audit", #{ action: "update", resourceType: "message", eventSubType: "communication.email-sent" })
     sendMessage(
       @path messageId: string
     ): ApiOkResponse<Message>
@@ -539,6 +546,7 @@ namespace MessageManagement {
     @route("/{messageId}/schedule")
     @useAuth(bearerAuth)
     @extension("x-security-required-roles", #["admin", "coordinator"])
+    @extension("x-audit", #{ action: "update", resourceType: "message" })
     scheduleMessage(
       @path messageId: string,
       @body body: { scheduledAt: utcDateTime }
@@ -554,6 +562,7 @@ namespace MessageManagement {
     @route("/{messageId}/cancel")
     @useAuth(bearerAuth)
     @extension("x-security-required-roles", #["admin", "coordinator"])
+    @extension("x-audit", #{ action: "update", resourceType: "message" })
     cancelMessage(
       @path messageId: string
     ): ApiOkResponse<Message>
@@ -571,6 +580,8 @@ namespace SubscriptionTopicManagement {
     @post
     @useAuth(bearerAuth)
     @extension("x-security-required-roles", #["admin"])
+    @extension("x-require-position", #["President", "Secretary"])
+    @extension("x-audit", #{ action: "create", resourceType: "subscription-topic" })
     createSubscriptionTopic(
       @body body: SubscriptionTopicCreateRequest
     ): ApiCreatedResponse<SubscriptionTopic>
@@ -597,6 +608,7 @@ namespace SubscriptionTopicManagement {
     @route("/{topicId}")
     @useAuth(bearerAuth)
     @extension("x-security-required-roles", #["admin"])
+    @extension("x-audit", #{ action: "update", resourceType: "subscription-topic" })
     updateSubscriptionTopic(
       @path topicId: string,
       @body updates: SubscriptionTopicCreateRequest
@@ -612,6 +624,7 @@ namespace SubscriptionTopicManagement {
     @route("/{topicId}")
     @useAuth(bearerAuth)
     @extension("x-security-required-roles", #["admin"])
+    @extension("x-audit", #{ action: "delete", resourceType: "subscription-topic" })
     deleteSubscriptionTopic(
       @path topicId: string
     ): ApiNoContentResponse
@@ -642,6 +655,7 @@ namespace PersonSubscriptionManagement {
     @route("/{subscriptionId}")
     @useAuth(bearerAuth)
     @extension("x-security-required-roles", #["admin", "member:owner"])
+    @extension("x-audit", #{ action: "update", resourceType: "person-subscription" })
     updatePersonSubscription(
       @path subscriptionId: string,
       @body updates: { enabled: boolean }
@@ -657,6 +671,7 @@ namespace PersonSubscriptionManagement {
     @route("/bulk-update")
     @useAuth(bearerAuth)
     @extension("x-security-required-roles", #["admin", "member:owner"])
+    @extension("x-audit", #{ action: "update", resourceType: "person-subscription" })
     bulkUpdatePersonSubscriptions(
       @body body: PersonSubscriptionBulkUpdateRequest
     ): ApiOkResponse<PersonSubscription[]>

@@ -1,3 +1,12 @@
+# CSRF preamble — fetches token + sets cookie for state-changing requests.
+# Auto-injected by scripts/audit/inject-csrf-into-hurl.ts (idempotent).
+GET {{api}}/csrf-token
+HTTP 200
+[Captures]
+csrf_token: jsonpath "$.token"
+
+
+
 # Extended billing endpoints not covered by billing.hurl.
 # Covers single invoice CRUD, capture/refund/void, merchant dashboard,
 # and Stripe webhook. Most operations require Stripe test keys.
@@ -5,6 +14,8 @@
 # ── Auth ─────────────────────────────────────────────────────
 
 POST {{api}}/auth/sign-up/email
+Origin: {{origin}}
+x-csrf-token: {{csrf_token}}
 Content-Type: application/json
 {
   "email": "bill-ext-{{suffix}}@example.org",
@@ -13,26 +24,13 @@ Content-Type: application/json
 }
 HTTP 200
 [Captures]
-session_token: cookie "better-auth.session_token"
-
-
-POST {{api}}/persons
-Cookie: better-auth.session_token={{session_token}}
-Content-Type: application/json
-{
-  "firstName": "BillExt",
-  "lastName": "Tester",
-  "languagesSpoken": ["en"],
-  "timezone": "America/New_York"
-}
-HTTP 201
-
-
-# ── 1. Create an invoice to work with ───────────────────────
+person_id: jsonpath "$.user.id"
 
 POST {{api}}/billing/invoices
-Cookie: better-auth.session_token={{session_token}}
+Origin: {{origin}}
+x-csrf-token: {{csrf_token}}
 Content-Type: application/json
+x-org-id: {{org_id}}
 {
   "description": "Contract test invoice {{suffix}}",
   "amount": 5000,
@@ -49,7 +47,7 @@ status < 300
 # ── 2. Get single invoice ───────────────────────────────────
 
 GET {{api}}/billing/invoices/{{invoice_id}}
-Cookie: better-auth.session_token={{session_token}}
+x-org-id: {{org_id}}
 HTTP *
 [Asserts]
 status >= 200
@@ -59,8 +57,10 @@ status < 300
 # ── 3. Update invoice ───────────────────────────────────────
 
 PATCH {{api}}/billing/invoices/{{invoice_id}}
-Cookie: better-auth.session_token={{session_token}}
+Origin: {{origin}}
+x-csrf-token: {{csrf_token}}
 Content-Type: application/json
+x-org-id: {{org_id}}
 {
   "description": "Updated contract test invoice {{suffix}}"
 }
@@ -74,8 +74,10 @@ status < 300
 # PREREQUISITE: Requires Stripe test keys
 
 POST {{api}}/billing/invoices/{{invoice_id}}/capture
-Cookie: better-auth.session_token={{session_token}}
+Origin: {{origin}}
+x-csrf-token: {{csrf_token}}
 Content-Type: application/json
+x-org-id: {{org_id}}
 {}
 HTTP *
 
@@ -84,8 +86,10 @@ HTTP *
 # PREREQUISITE: Requires Stripe test keys and captured payment
 
 POST {{api}}/billing/invoices/{{invoice_id}}/refund
-Cookie: better-auth.session_token={{session_token}}
+Origin: {{origin}}
+x-csrf-token: {{csrf_token}}
 Content-Type: application/json
+x-org-id: {{org_id}}
 {}
 HTTP *
 
@@ -93,8 +97,10 @@ HTTP *
 # ── 6. Void invoice ─────────────────────────────────────────
 
 POST {{api}}/billing/invoices/{{invoice_id}}/void
-Cookie: better-auth.session_token={{session_token}}
+Origin: {{origin}}
+x-csrf-token: {{csrf_token}}
 Content-Type: application/json
+x-org-id: {{org_id}}
 {}
 HTTP *
 
@@ -102,7 +108,9 @@ HTTP *
 # ── 7. Delete invoice ───────────────────────────────────────
 
 DELETE {{api}}/billing/invoices/{{invoice_id}}
-Cookie: better-auth.session_token={{session_token}}
+Origin: {{origin}}
+x-csrf-token: {{csrf_token}}
+x-org-id: {{org_id}}
 HTTP *
 
 
@@ -111,7 +119,8 @@ HTTP *
 # Using a placeholder ID; real tests need a seeded merchant account.
 
 POST {{api}}/billing/merchant-accounts/00000000-0000-0000-0000-000000000000/dashboard
-Cookie: better-auth.session_token={{session_token}}
+Origin: {{origin}}
+x-csrf-token: {{csrf_token}}
 Content-Type: application/json
 {}
 HTTP *
@@ -121,7 +130,10 @@ HTTP *
 # PREREQUISITE: Requires Stripe webhook secret
 
 POST {{api}}/billing/webhooks/stripe
+Origin: {{origin}}
+x-csrf-token: {{csrf_token}}
 Content-Type: application/json
+x-org-id: {{org_id}}
 {
   "type": "invoice.paid",
   "data": { "object": {} }

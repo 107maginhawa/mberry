@@ -1,16 +1,18 @@
+// WF-101 — Survey Response
 import { test, expect } from './helpers/test-fixture'
-import { signIn } from './helpers/auth'
 import { SEED_MEMBER_EMAIL, TEST_PASSWORD } from './helpers/test-config'
+import { authStateFile } from './helpers/auth-state'
+import { captureAnyApiSuccess } from './helpers/real-flow'
 
+
+test.use({ storageState: authStateFile('member') })
 test.describe('Feedback: Member Surveys', () => {
-  test.beforeEach(async ({ page }) => {
-    await signIn(page, SEED_MEMBER_EMAIL, TEST_PASSWORD)
-  })
-
-  test('my surveys page loads without error', async ({ page }) => {
+test('my surveys page loads without error', async ({ page }) => {
+    const respP = captureAnyApiSuccess(page)
     await page.goto('/my/surveys')
-    await page.waitForLoadState('networkidle')
-
+    const resp = await respP
+    expect(resp?.status()).toBe(200)
+    expect(resp?.ok()).toBe(true)
     // Should NOT show error state
     await expect(page.getByText('Failed to load surveys')).not.toBeVisible()
 
@@ -20,8 +22,6 @@ test.describe('Feedback: Member Surveys', () => {
 
   test('page subtitle renders (no crash)', async ({ page }) => {
     await page.goto('/my/surveys')
-    await page.waitForLoadState('networkidle')
-
     // Subtitle always renders regardless of data state
     await expect(
       page.getByText('Share your feedback and see past responses'),

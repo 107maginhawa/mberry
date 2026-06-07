@@ -3,7 +3,6 @@ import type { DatabaseInstance } from '@/core/database';
 import type { CreateTrainingEnrollmentBody } from '@/generated/openapi/validators';
 import { NotFoundError, BusinessLogicError } from '@/core/errors';
 import { TrainingRepository, TrainingEnrollmentRepository } from './repos/training.repo';
-import { auditAction } from '@/utils/audit';
 
 /**
  * createTrainingEnrollment
@@ -63,13 +62,8 @@ export async function createTrainingEnrollment(
     organizationId: orgId,
   });
 
-  await auditAction(ctx, {
-    action: 'create',
-    resourceType: 'training-enrollment',
-    resourceId: enrollment.id,
-    description: 'Training enrollment created',
-    eventSubType: 'training.enrollment-created',
-  });
+  ctx.set('auditResourceId', enrollment.id);
+  ctx.set('auditDescription', 'Training enrollment created');
 
   return ctx.json(enrollment, 201);
 }

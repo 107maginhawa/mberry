@@ -2,7 +2,7 @@ import { createFileRoute } from '@tanstack/react-router'
 import { VotingBallot } from '@/features/elections/components/voting-ballot'
 import { PageShell } from '@/components/patterns/page-shell'
 import { GlassCard } from '@/components/motion/glass-card'
-import { useOrg } from '@/hooks/useOrg'
+import { useOrg } from '@/hooks/use-org'
 
 export const Route = createFileRoute('/_authenticated/org/$orgSlug/elections/$electionId/vote')({
   component: VotePage,

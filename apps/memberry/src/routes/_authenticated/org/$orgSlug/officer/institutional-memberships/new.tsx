@@ -1,7 +1,7 @@
 import { createFileRoute, useNavigate } from '@tanstack/react-router'
 import { InstitutionalMembershipForm } from '@/features/membership/components/institutional-membership-form'
 import { PageShell } from '@/components/patterns/page-shell'
-import { useOrg } from '@/hooks/useOrg'
+import { useOrg } from '@/hooks/use-org'
 
 export const Route = createFileRoute('/_authenticated/org/$orgSlug/officer/institutional-memberships/new')({
   component: NewInstitutionalMembershipPage,

@@ -82,7 +82,9 @@ describe('DataExport', () => {
 
   test('shows export table after successful request', async () => {
     const user = userEvent.setup()
-    mockApiPost.mockResolvedValue({ categories: ['profile', 'membership'] })
+    // data-export.tsx calls api.get('/api/persons/me/export'); the endpoint
+    // migrated from POST to GET (see component comment) — update the stub.
+    mockApiGet.mockResolvedValue({ categories: ['profile', 'membership'] })
 
     renderWithProviders(<DataExport />)
 
@@ -100,7 +102,7 @@ describe('DataExport', () => {
 
   test('shows error toast on failed request', async () => {
     const user = userEvent.setup()
-    mockApiPost.mockRejectedValue(new Error('Network error'))
+    mockApiGet.mockRejectedValue(new Error('Network error'))
 
     renderWithProviders(<DataExport />)
 

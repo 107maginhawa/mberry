@@ -1,7 +1,9 @@
+// WF-050 — Event Lifecycle: create, publish, register, complete
 // Business Rules: [BR-15] [BR-27]
 import { test, expect } from '../helpers/test-fixture'
 import { signIn } from '../helpers/auth'
 import { SEED_OFFICER_EMAIL, SEED_MEMBER_EMAIL, TEST_PASSWORD } from '../helpers/test-config'
+import { captureRouteHydration } from '../helpers/real-flow'
 
 const MEMBER_EMAIL = SEED_MEMBER_EMAIL
 const MEMBER_PASSWORD = TEST_PASSWORD
@@ -13,9 +15,11 @@ test.describe('Event lifecycle: officer manages events, member views registratio
   test.describe('Officer event management', () => {
     test('officer views events list with seeded events', async ({ page }) => {
       await signIn(page, OFFICER_EMAIL, OFFICER_PASSWORD)
+      const respP = captureRouteHydration(page, /\/events?(?:[/?]|$)/)
       await page.goto(`/org/${ORG_ID}/officer/events`)
-      await page.waitForLoadState('networkidle')
-
+      const resp = await respP
+      expect(resp?.status()).toBe(200)
+      expect(resp?.ok()).toBe(true)
       await expect(
         page.getByRole('heading', { name: 'Events' }),
       ).toBeVisible({ timeout: 10000 })
@@ -29,8 +33,6 @@ test.describe('Event lifecycle: officer manages events, member views registratio
     test('officer can navigate to event detail page', async ({ page }) => {
       await signIn(page, OFFICER_EMAIL, OFFICER_PASSWORD)
       await page.goto(`/org/${ORG_ID}/officer/events`)
-      await page.waitForLoadState('networkidle')
-
       await page.getByRole('link', { name: /General Assembly/i }).click()
       await page.waitForLoadState('networkidle')
 
@@ -42,8 +44,6 @@ test.describe('Event lifecycle: officer manages events, member views registratio
     test('member views their events page', async ({ page }) => {
       await signIn(page, MEMBER_EMAIL, MEMBER_PASSWORD)
       await page.goto('/my/events')
-      await page.waitForLoadState('networkidle')
-
       await expect(
         page.getByRole('heading', { name: 'My Events' }),
       ).toBeVisible({ timeout: 10000 })
@@ -55,8 +55,6 @@ test.describe('Event lifecycle: officer manages events, member views registratio
     test('member events page shows stat cards', async ({ page }) => {
       await signIn(page, MEMBER_EMAIL, MEMBER_PASSWORD)
       await page.goto('/my/events')
-      await page.waitForLoadState('networkidle')
-
       await expect(page.getByText('Upcoming').first()).toBeVisible({ timeout: 10000 })
       await expect(page.getByText('Past').first()).toBeVisible({ timeout: 10000 })
     })
@@ -66,8 +64,6 @@ test.describe('Event lifecycle: officer manages events, member views registratio
     test('officer views training list', async ({ page }) => {
       await signIn(page, OFFICER_EMAIL, OFFICER_PASSWORD)
       await page.goto(`/org/${ORG_ID}/officer/training`)
-      await page.waitForLoadState('networkidle')
-
       await expect(
         page.getByRole('heading', { name: 'Training' }),
       ).toBeVisible({ timeout: 10000 })
@@ -76,8 +72,6 @@ test.describe('Event lifecycle: officer manages events, member views registratio
     test('member views their training page', async ({ page }) => {
       await signIn(page, MEMBER_EMAIL, MEMBER_PASSWORD)
       await page.goto('/my/training')
-      await page.waitForLoadState('networkidle')
-
       await expect(
         page.getByRole('heading', { name: 'My Training' }),
       ).toBeVisible({ timeout: 10000 })

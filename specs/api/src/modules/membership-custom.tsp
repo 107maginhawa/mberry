@@ -138,6 +138,7 @@ namespace MembershipCustomModule {
     @route("/membership/org-profile/{organizationId}")
     @useAuth(bearerAuth)
     @extension("x-security-required-roles", #["association:admin"])
+    @extension("x-require-position", #["President"])
     updateOrgProfile(
       @path @doc("Organisation ID") organizationId: UUID,
       @body updates: MembershipUpdateOrgProfileRequest

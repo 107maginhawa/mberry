@@ -1,26 +1,26 @@
+// WF-060 — Training Completion: mark complete, credits awarded
 // SO-3: Training completion — member view
 import { test, expect } from '../helpers/test-fixture'
-import { signInAsMember } from '../helpers/auth'
+import { authStateFile } from '../helpers/auth-state'
+import { captureAnyApiSuccess } from '../helpers/real-flow'
 
+
+test.use({ storageState: authStateFile('member') })
 const ORG_ID = 'ed8e3a96-8126-4341-be42-e6eb7940c562'
 
 test.describe('SO-3: Training Completion Flow', () => {
-  test.beforeEach(async ({ page }) => {
-    await signInAsMember(page)
-  })
-
-  test('member training page shows available trainings', async ({ page }) => {
+test('member training page shows available trainings', async ({ page }) => {
+    const respP = captureAnyApiSuccess(page)
     await page.goto(`/org/${ORG_ID}/training`)
-    await page.waitForLoadState('networkidle')
-
+    const resp = await respP
+    expect(resp?.status()).toBe(200)
+    expect(resp?.ok()).toBe(true)
     const hasContent = await page.getByText(/training|course|seminar|no training/i).first().isVisible({ timeout: 10000 }).catch(() => false)
     expect(hasContent).toBeTruthy()
   })
 
   test('member can view training detail with enroll button', async ({ page }) => {
     await page.goto(`/org/${ORG_ID}/training`)
-    await page.waitForLoadState('networkidle')
-
     const trainingLink = page.locator('a[href*="/training/"]:not([href*="/new"]):not([href$="/training"])').first()
     const hasTrainings = await trainingLink.isVisible({ timeout: 10000 }).catch(() => false)
 
@@ -40,8 +40,6 @@ test.describe('SO-3: Training Completion Flow', () => {
 
   test('my training page shows enrolled trainings', async ({ page }) => {
     await page.goto('/my/training')
-    await page.waitForLoadState('networkidle')
-
     const hasContent = await page.getByText(/training|enrolled|completed|no training/i).first().isVisible({ timeout: 10000 }).catch(() => false)
     expect(hasContent).toBeTruthy()
   })

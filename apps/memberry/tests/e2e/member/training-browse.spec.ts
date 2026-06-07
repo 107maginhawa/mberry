@@ -1,15 +1,18 @@
 import { test, expect } from '../helpers/test-fixture'
 import { signIn } from '../helpers/auth'
 import { SEED_MEMBER_EMAIL, SEED_OFFICER_EMAIL, TEST_PASSWORD, API_BASE } from '../helpers/test-config'
+import { captureAnyApiSuccess } from '../helpers/real-flow'
 
 const ORG_ID = 'ed8e3a96-8126-4341-be42-e6eb7940c562'
 
 test.describe('Training Browse (/org/$orgId/training)', () => {
   test('training index shows heading and table structure', async ({ page }) => {
     await signIn(page, SEED_MEMBER_EMAIL, TEST_PASSWORD)
+    const respP = captureAnyApiSuccess(page)
     await page.goto(`/org/${ORG_ID}/training`)
-    await page.waitForLoadState('networkidle')
-
+    const resp = await respP
+    expect(resp?.status()).toBe(200)
+    expect(resp?.ok()).toBe(true)
     // Heading may be "Training & Courses" or similar
     const hasHeading = await page.getByText(/training/i).first().isVisible({ timeout: 10000 }).catch(() => false)
     expect(hasHeading).toBeTruthy()
@@ -43,8 +46,6 @@ test.describe('Training Browse (/org/$orgId/training)', () => {
     test.skip(!trainingId, 'No published trainings in seed data — seed training data first')
 
     await page.goto(`/org/${ORG_ID}/training/${trainingId}`)
-    await page.waitForLoadState('networkidle')
-
     // Should show training title (not error state)
     const hasTitle = await page.locator('h1').first().isVisible().catch(() => false)
     const hasError = await page

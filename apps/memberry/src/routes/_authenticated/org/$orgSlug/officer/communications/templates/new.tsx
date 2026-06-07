@@ -4,7 +4,7 @@ import { api } from '@/lib/api'
 import { PageShell } from '@/components/patterns/page-shell'
 import { GlassCard } from '@/components/motion/glass-card'
 import { TemplateForm } from '@/features/communications/components/template-form'
-import { useOrg } from '@/hooks/useOrg'
+import { useOrg } from '@/hooks/use-org'
 
 export const Route = createFileRoute(
   '/_authenticated/org/$orgSlug/officer/communications/templates/new',

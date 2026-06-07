@@ -1,8 +1,10 @@
+// WF-046 — Communication Dashboard: announcement list, drafts, scheduled
 // Cross-Module Flow 6.8: Communication Delivery Pipeline
 // Covers: M07 (communications) → Email Queue → Notification Service
 // Officer creates announcement → delivery to members → track status
 import { test, expect } from '../helpers/test-fixture'
 import { signInAsOfficer, signInAsMember } from '../helpers/auth'
+import { captureAnyApiSuccess } from '../helpers/real-flow'
 
 const ORG_ID = 'ed8e3a96-8126-4341-be42-e6eb7940c562'
 
@@ -13,8 +15,11 @@ test.describe('Journey: Communication Delivery Pipeline', () => {
     })
 
     await test.step('navigate to communications', async () => {
+      const respP = captureAnyApiSuccess(page)
       await page.goto(`/org/${ORG_ID}/officer/communications`)
-      await page.waitForLoadState('networkidle')
+      const resp = await respP
+      expect(resp?.status()).toBe(200)
+      expect(resp?.ok()).toBe(true)
     })
 
     await test.step('communications list shows announcements', async () => {
@@ -35,7 +40,6 @@ test.describe('Journey: Communication Delivery Pipeline', () => {
 
     await test.step('navigate to new announcement', async () => {
       await page.goto(`/org/${ORG_ID}/officer/communications/new`)
-      await page.waitForLoadState('networkidle')
     })
 
     await test.step('compose form renders', async () => {
@@ -49,8 +53,6 @@ test.describe('Journey: Communication Delivery Pipeline', () => {
   test('officer can view announcement detail', async ({ page }) => {
     await signInAsOfficer(page)
     await page.goto(`/org/${ORG_ID}/officer/communications`)
-    await page.waitForLoadState('networkidle')
-
     // Click on a seeded announcement
     const announcementLink = page.locator(`a[href*="/communications/"]`).first()
     const hasLink = await announcementLink.isVisible({ timeout: 10000 }).catch(() => false)
@@ -72,7 +74,6 @@ test.describe('Journey: Communication Delivery Pipeline', () => {
 
     await test.step('check notifications page', async () => {
       await page.goto('/my/notifications')
-      await page.waitForLoadState('networkidle')
     })
 
     await test.step('notifications page renders', async () => {
@@ -86,14 +87,12 @@ test.describe('Journey: Communication Delivery Pipeline', () => {
     await test.step('officer views communications', async () => {
       await signInAsOfficer(page)
       await page.goto(`/org/${ORG_ID}/officer/communications`)
-      await page.waitForLoadState('networkidle')
       const hasComms = await page.getByText(/announcement|communication/i).first().isVisible({ timeout: 10000 }).catch(() => false)
       expect(hasComms).toBeTruthy()
     })
 
     await test.step('navigate to compose', async () => {
       await page.goto(`/org/${ORG_ID}/officer/communications/new`)
-      await page.waitForLoadState('networkidle')
       // Form should render
       const hasForm = await page.getByRole('textbox').first().isVisible({ timeout: 10000 }).catch(() => false)
       expect(hasForm).toBeTruthy()
@@ -101,7 +100,6 @@ test.describe('Journey: Communication Delivery Pipeline', () => {
 
     await test.step('back to list', async () => {
       await page.goto(`/org/${ORG_ID}/officer/communications`)
-      await page.waitForLoadState('networkidle')
     })
 
     await test.step('click into detail', async () => {

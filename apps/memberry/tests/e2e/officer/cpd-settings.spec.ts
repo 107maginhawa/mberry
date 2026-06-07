@@ -1,23 +1,24 @@
 // P1 E2E Gap: CPD settings configuration
 // Tests officer CPD settings page: form loads, fields render, save flow
 import { test, expect } from '../helpers/test-fixture'
-import { signIn } from '../helpers/auth'
 import { SEED_OFFICER_EMAIL, TEST_PASSWORD } from '../helpers/test-config'
+import { authStateFile } from '../helpers/auth-state'
+import { captureRouteHydration } from '../helpers/real-flow'
 
+
+test.use({ storageState: authStateFile('officer') })
 const ORG_ID = 'ed8e3a96-8126-4341-be42-e6eb7940c562'
 
 test.describe('Officer CPD Settings', () => {
-  test.beforeEach(async ({ page }) => {
-    await signIn(page, SEED_OFFICER_EMAIL, TEST_PASSWORD)
-  })
-
-  test('CPD settings page loads with heading', async ({ page }) => {
+test('CPD settings page loads with heading', async ({ page }) => {
+    const respP = captureRouteHydration(page, /\/cpd-config/)
     await page.goto(`/org/${ORG_ID}/officer/settings/cpd`)
-    await page.waitForLoadState('networkidle')
-
     await expect(
       page.getByRole('heading', { name: /CPD Settings/i }),
     ).toBeVisible({ timeout: 10000 })
+    const resp = await respP
+    expect(resp?.status()).toBe(200)
+    expect(resp?.ok()).toBe(true)
 
     // Subtitle present
     await expect(
@@ -27,8 +28,6 @@ test.describe('Officer CPD Settings', () => {
 
   test('CPD settings form shows Required Credits field', async ({ page }) => {
     await page.goto(`/org/${ORG_ID}/officer/settings/cpd`)
-    await page.waitForLoadState('networkidle')
-
     // Required Credits label
     await expect(
       page.getByText('Required Credits per Cycle'),
@@ -45,8 +44,6 @@ test.describe('Officer CPD Settings', () => {
 
   test('CPD settings form shows Cycle Length selector', async ({ page }) => {
     await page.goto(`/org/${ORG_ID}/officer/settings/cpd`)
-    await page.waitForLoadState('networkidle')
-
     await expect(
       page.getByText('Cycle Length (years)'),
     ).toBeVisible({ timeout: 10000 })
@@ -61,8 +58,6 @@ test.describe('Officer CPD Settings', () => {
 
   test('CPD settings form shows SDL Cap field with percentage', async ({ page }) => {
     await page.goto(`/org/${ORG_ID}/officer/settings/cpd`)
-    await page.waitForLoadState('networkidle')
-
     await expect(
       page.getByText('SDL Cap (%)'),
     ).toBeVisible({ timeout: 10000 })
@@ -79,8 +74,6 @@ test.describe('Officer CPD Settings', () => {
 
   test('CPD settings form shows Cycle Start Month selector', async ({ page }) => {
     await page.goto(`/org/${ORG_ID}/officer/settings/cpd`)
-    await page.waitForLoadState('networkidle')
-
     await expect(
       page.getByText('Cycle Start Month'),
     ).toBeVisible({ timeout: 10000 })
@@ -95,8 +88,6 @@ test.describe('Officer CPD Settings', () => {
 
   test('CPD settings has Save Configuration button', async ({ page }) => {
     await page.goto(`/org/${ORG_ID}/officer/settings/cpd`)
-    await page.waitForLoadState('networkidle')
-
     const saveBtn = page.getByRole('button', { name: /save configuration/i })
     await expect(saveBtn).toBeVisible({ timeout: 10000 })
     await expect(saveBtn).toBeEnabled()
@@ -104,8 +95,6 @@ test.describe('Officer CPD Settings', () => {
 
   test('updating Required Credits changes the SDL Cap helper text', async ({ page }) => {
     await page.goto(`/org/${ORG_ID}/officer/settings/cpd`)
-    await page.waitForLoadState('networkidle')
-
     // Get the credits input and change it
     const creditsInput = page.locator('input[type="number"]').first()
     await expect(creditsInput).toBeVisible({ timeout: 10000 })
@@ -125,8 +114,6 @@ test.describe('Officer CPD Settings', () => {
 
   test('all four form fields are present on the page', async ({ page }) => {
     await page.goto(`/org/${ORG_ID}/officer/settings/cpd`)
-    await page.waitForLoadState('networkidle')
-
     // All four config fields should be visible
     const fields = [
       'Required Credits per Cycle',

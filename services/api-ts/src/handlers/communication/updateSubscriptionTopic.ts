@@ -3,7 +3,6 @@ import type { DatabaseInstance } from '@/core/database';
 import type { UpdateSubscriptionTopicBody, UpdateSubscriptionTopicParams } from '@/generated/openapi/validators';
 import { NotFoundError } from '@/core/errors';
 import { SubscriptionTopicRepository } from './repos/communication.repo';
-import { auditAction } from '@/utils/audit';
 
 /**
  * updateSubscriptionTopic
@@ -36,12 +35,8 @@ export async function updateSubscriptionTopic(
     updatedBy: user.id,
   });
 
-  await auditAction(ctx, {
-    action: 'update',
-    resourceType: 'subscription-topic',
-    resourceId: params.topicId,
-    description: `Subscription topic "${existing.name}" updated`,
-  });
+  ctx.set('auditResourceId', params.topicId);
+  ctx.set('auditDescription', `Subscription topic "${existing.name}" updated`);
 
   return ctx.json(updated, 200);
 }

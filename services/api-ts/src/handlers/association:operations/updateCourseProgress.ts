@@ -3,9 +3,6 @@ import type { DatabaseInstance } from '@/core/database';
 import type { UpdateCourseProgressBody, UpdateCourseProgressParams } from '@/generated/openapi/validators';
 import { NotFoundError, BusinessLogicError } from '@/core/errors';
 import { CourseEnrollmentRepository } from './repos/training.repo';
-import { auditAction } from '@/utils/audit';
-import { requirePosition } from '@/utils/officer-check';
-import { POSITION_TITLES } from '@/utils/position-titles';
 
 /**
  * updateCourseProgress
@@ -18,9 +15,6 @@ export async function updateCourseProgress(
 ): Promise<Response> {
   const user = ctx.get('user');
   if (!user) return ctx.json({ error: 'Unauthorized' }, 401);
-
-  const denied = await requirePosition(ctx, [POSITION_TITLES.SOCIETY_OFFICER, POSITION_TITLES.PRESIDENT]);
-  if (denied) return denied;
 
   const params = ctx.req.valid('param');
   const body = ctx.req.valid('json');
@@ -47,12 +41,8 @@ export async function updateCourseProgress(
 
   const updated = await repo.updateOneById(enrollment.id, updates);
 
-  await auditAction(ctx, {
-    action: 'update',
-    resourceType: 'course-enrollment',
-    resourceId: updated.id,
-    description: `Course progress updated to ${updates['progress']}%`,
-  });
+  ctx.set('auditResourceId', updated.id);
+  ctx.set('auditDescription', `Course progress updated to ${updates['progress']}%`);
 
   return ctx.json(updated, 200);
 }

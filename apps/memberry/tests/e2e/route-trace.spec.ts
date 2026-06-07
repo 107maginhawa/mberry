@@ -14,6 +14,7 @@ import { fileURLToPath } from 'url'
 import type { Page } from '@playwright/test'
 import { test, expect } from './helpers/test-fixture'
 import { signInAsOfficer } from './helpers/auth'
+import { captureAnyApiSuccess } from './helpers/real-flow'
 
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = dirname(__filename)
@@ -77,7 +78,11 @@ test.describe('Wave G5 W3 — cross-layer route trace', () => {
         await r.continue()
       })
 
+      const respP = captureAnyApiSuccess(page)
       await page.goto(route.path)
+      const resp = await respP
+      expect(resp?.status()).toBe(200)
+      expect(resp?.ok()).toBe(true)
 
       // The page must reach an actionable state: a button/CTA, an error alert,
       // or a region with the page heading visible without the skeleton signature.

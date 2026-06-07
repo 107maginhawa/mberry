@@ -5,14 +5,11 @@
 
 import type { JobScheduler, JobContext } from '@/core/jobs';
 import type { BillingService } from '@/core/billing';
-import { processDuesReminders } from './reminderProcessor';
-import { processWebhookRetry } from './webhookRetryProcessor';
+import { processDuesReminders } from '@/handlers/member/duesspecialassessments/jobs/reminderProcessor';
+import { processWebhookRetry } from '@/handlers/member/duesspecialassessments/jobs/webhookRetryProcessor';
 import { processCreditIssue } from './creditIssue';
 import { processComplianceThreshold } from './complianceThreshold';
-import { registerStatusRecomputeJob } from './statusRecomputeCron';
-import { createProcessPayment } from '../../dues/jobs/processStripePayment';
-
-export { registerStatusRecomputeJob };
+import { createProcessPayment } from '@/handlers/member/duesspecialassessments/jobs/processStripePayment';
 
 /**
  * Register all dues module jobs with the scheduler
@@ -56,7 +53,7 @@ export function registerDuesJobs(scheduler: JobScheduler, billing: BillingServic
   });
 
   scheduler.registerDelayed('certificate.bulk_generate', 0, async (context: JobContext) => {
-    const { generateCertificates } = await import('../../certificates/bulkIssueCertificates');
+    const { generateCertificates } = await import('@/handlers/member/certificates/bulkIssueCertificates');
     const data = context.data as Parameters<typeof generateCertificates>[1];
     await generateCertificates(context.db, data, (context.data as Record<string, unknown>)['requestedBy'] as string);
     context.logger.info({ count: data.personIds?.length, orgId: data.organizationId }, 'certificate.bulk_generate: done');

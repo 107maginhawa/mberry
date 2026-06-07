@@ -15,7 +15,6 @@ import type { ValidatedContext } from '@/types/app';
 import type { UpdateInvoiceBody, UpdateInvoiceParams } from '@/generated/openapi/validators';
 import type { Session } from '@/types/auth';
 import { InvoiceRepository } from './repos/billing.repo';
-import { auditAction } from '@/utils/audit';
 
 /**
  * updateInvoice
@@ -29,7 +28,9 @@ export async function updateInvoice(
   ctx: ValidatedContext<UpdateInvoiceBody, never, UpdateInvoiceParams>
 ): Promise<Response> {
   const database = ctx.get('database');
-  const logger = ctx.get('logger');
+  const baseLogger = ctx.get('logger');
+  const traceId = ctx.get('requestId');
+  const logger = baseLogger?.child?.({ traceId, module: 'billing' }) ?? baseLogger;
 
   // Get authenticated session (guaranteed by middleware)
   const session = ctx.get('session') as Session;
@@ -41,7 +42,7 @@ export async function updateInvoice(
 
   const invoiceId = params.invoice;
 
-  logger.info({
+  logger.info({ action: 'updateInvoice.1',
     invoiceId,
     userId: user.id,
     updateFields: Object.keys(body)
@@ -135,26 +136,21 @@ export async function updateInvoice(
   // Update invoice
   const updatedInvoice = await invoiceRepo.updateOneById(invoiceId, updateData);
 
-  logger.info({
+  logger.info({ action: 'updateInvoice.2',
     invoiceId,
     invoiceNumber: updatedInvoice.invoiceNumber,
     changes: Object.keys(updateData),
     newAmount: (updatedInvoice as Record<string, unknown>)['amount']
   }, 'Invoice updated successfully');
 
-  await auditAction(ctx, {
-    action: 'update',
-    resourceType: 'invoice',
-    resourceId: invoiceId,
-    description: `Invoice ${updatedInvoice.invoiceNumber} updated (fields: ${Object.keys(updateData).join(', ')})`,
-    eventSubType: 'financial.invoice-updated',
-    details: {
+  ctx.set('auditResourceId', invoiceId);
+  ctx.set('auditDescription', `Invoice ${updatedInvoice.invoiceNumber} updated (fields: ${Object.keys(updateData).join(', ')})`);
+  ctx.set('auditDetails', {
       invoiceNumber: updatedInvoice.invoiceNumber,
       changedFields: Object.keys(updateData),
       total: updatedInvoice.total,
       currency: updatedInvoice.currency,
-    },
-  });
+    });
 
   // Fetch updated invoice with line items for complete response
   const invoiceWithLineItems = await invoiceRepo.findOneWithLineItems(invoiceId);

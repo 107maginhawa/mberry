@@ -3,7 +3,7 @@ import { makeCtx, stubRepo, restoreRepo } from '@/test-utils/make-ctx';
 import { PersonSubscriptionRepository } from './repos/communication.repo';
 import { bulkUpdatePersonSubscriptions } from './bulkUpdatePersonSubscriptions';
 
-mock.module('@/utils/audit', () => ({ auditAction: async () => {} }));
+mock.module('@/core/audit/audit-action', () => ({ auditAction: async () => {} }));
 
 describe('bulkUpdatePersonSubscriptions', () => {
   beforeEach(() => { restoreRepo(PersonSubscriptionRepository); });

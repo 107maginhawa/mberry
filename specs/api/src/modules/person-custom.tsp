@@ -326,6 +326,7 @@ namespace PersonCustomModule {
     @route("/export")
     @useAuth(bearerAuth)
     @extension("x-security-required-roles", #["user"])
+    @extension("x-audit", #{ action: "export", resourceType: "person", eventType: "data-access", eventSubType: "data.bulk-export" })
     exportMyData(): ApiOkResponse<MyDataExport>
       | ApiUnauthorizedResponse
       | ApiNotFoundResponse;
@@ -336,6 +337,7 @@ namespace PersonCustomModule {
     @route("/delete")
     @useAuth(bearerAuth)
     @extension("x-security-required-roles", #["user"])
+    @extension("x-audit", #{ action: "delete", resourceType: "person" })
     requestMyAccountDeletion(): ApiOkResponse<AccountDeletionResponse>
       | ApiUnauthorizedResponse
       | ApiNotFoundResponse
@@ -347,6 +349,7 @@ namespace PersonCustomModule {
     @route("/cancel-delete")
     @useAuth(bearerAuth)
     @extension("x-security-required-roles", #["user"])
+    @extension("x-audit", #{ action: "update", resourceType: "person" })
     cancelMyAccountDeletion(): ApiOkResponse<CancelDeletionResponse>
       | ApiUnauthorizedResponse
       | ApiNotFoundResponse;
@@ -357,6 +360,7 @@ namespace PersonCustomModule {
     @route("/credit-entries")
     @useAuth(bearerAuth)
     @extension("x-security-required-roles", #["user"])
+    @extension("x-audit", #{ action: "create", resourceType: "credit-entry" })
     createMyCreditEntry(
       @body entry: CreateCreditEntryRequest
     ): ApiCreatedResponse<{ data: MyCreditEntry }>
@@ -401,6 +405,7 @@ namespace PersonCustomModule {
     @route("/privacy")
     @useAuth(bearerAuth)
     @extension("x-security-required-roles", #["user"])
+    @extension("x-audit", #{ action: "update", resourceType: "privacy-settings" })
     updateMyPrivacySettings(
       @body updates: UpdatePrivacySettingsRequest
     ): ApiOkResponse<PrivacySettings>
@@ -422,6 +427,7 @@ namespace PersonCustomModule {
     @route("/notification-preferences")
     @useAuth(bearerAuth)
     @extension("x-security-required-roles", #["user"])
+    @extension("x-audit", #{ action: "update", resourceType: "notification-preferences" })
     updateMyNotificationPreferences(
       @body updates: UpdateNotificationPreferencesRequest
     ): ApiOkResponse<NotificationPreference[]>
@@ -433,6 +439,7 @@ namespace PersonCustomModule {
     @patch(#{implicitOptionality: true})
     @useAuth(bearerAuth)
     @extension("x-security-required-roles", #["user"])
+    @extension("x-audit", #{ action: "update", resourceType: "person" })
     updateMyProfile(
       @body updates: PersonMeUpdateRequest
     ): ApiOkResponse<Record<unknown>>

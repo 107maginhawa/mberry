@@ -3,9 +3,6 @@ import type { DatabaseInstance } from '@/core/database';
 import { NotFoundError, BusinessLogicError } from '@/core/errors';
 import type { CheckInCustomEventBody, CheckInCustomEventParams } from '@/generated/openapi/validators';
 import { EventRepository, CheckInRepository } from './repos/events.repo';
-import { auditAction } from '@/utils/audit';
-import { requirePosition } from '@/utils/officer-check';
-import { POSITION_TITLES } from '@/utils/position-titles';
 
 /**
  * checkInCustomEvent
@@ -18,9 +15,6 @@ export async function checkInCustomEvent(
 ): Promise<Response> {
   const user = ctx.get('user');
   if (!user) return ctx.json({ error: 'Unauthorized' }, 401);
-
-  const denied = await requirePosition(ctx, [POSITION_TITLES.SOCIETY_OFFICER, POSITION_TITLES.PRESIDENT]);
-  if (denied) return denied;
 
   const params = ctx.req.valid('param');
   const body = ctx.req.valid('json');
@@ -52,12 +46,8 @@ export async function checkInCustomEvent(
     organizationId: orgId,
   });
 
-  await auditAction(ctx, {
-    action: 'create',
-    resourceType: 'check-in',
-    resourceId: checkIn.id,
-    description: `Checked in to event via ${method}`,
-  });
+  ctx.set('auditResourceId', checkIn.id);
+  ctx.set('auditDescription', `Checked in to event via ${method}`);
 
   return ctx.json(checkIn, 201);
 }

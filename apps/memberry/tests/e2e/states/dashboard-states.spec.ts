@@ -2,15 +2,24 @@ import { test, expect } from '../helpers/test-fixture'
 import { signIn } from '../helpers/auth'
 import { SEED_MEMBER_EMAIL, TEST_PASSWORD } from '../helpers/test-config'
 import { expectNoA11yViolations } from '../helpers/a11y'
+import { captureRouteHydration } from '../helpers/real-flow'
+
+// W2 real-flow upgrade: every authenticated /dashboard mount fires
+// GET /persons/me via getPersonOptions in src/routes/_authenticated/dashboard.tsx.
+// Each test captures that response so the assertion proves the backend
+// returned data, not just that the shell rendered a heading.
 
 const MEMBER_EMAIL = SEED_MEMBER_EMAIL
 const MEMBER_PASSWORD = TEST_PASSWORD
+// Match any GET to /persons/me, whether via direct API base or vite proxy.
+// Captures /persons/me, /persons/me?include=…, /api/persons/me, etc.
+const PERSON_ME = /\/persons\/me(?:[/?]|$)/
 
 test.describe('Dashboard — Interaction States', () => {
   test('loading: shows skeleton or spinner before data loads', async ({ page }) => {
     await signIn(page, MEMBER_EMAIL, MEMBER_PASSWORD)
 
-    // Navigate without waiting for networkidle to catch loading state
+    const personRespP = captureRouteHydration(page, PERSON_ME)
     await page.goto('/dashboard', { waitUntil: 'commit' })
 
     // Should see a loading indicator (skeleton, spinner, or loading text)
@@ -23,12 +32,13 @@ test.describe('Dashboard — Interaction States', () => {
       (await spinner.first().isVisible().catch(() => false)) ||
       (await loadingText.first().isVisible().catch(() => false))
 
-    // Loading state may be too fast to catch — that's acceptable
-    // The test validates the page eventually renders
     await page.waitForLoadState('networkidle')
     await expect(page.locator('main')).toBeVisible({ timeout: 10000 })
 
-    // If loading was visible, it should be gone now
+    const personResp = await personRespP
+    expect(personResp?.status()).toBe(200)
+    expect(personResp?.ok()).toBe(true)
+
     if (hasLoading) {
       await expect(loadingText).not.toBeVisible({ timeout: 10000 }).catch(() => {})
     }
@@ -36,40 +46,44 @@ test.describe('Dashboard — Interaction States', () => {
 
   test('success: shows greeting and org card with real data', async ({ page }) => {
     await signIn(page, MEMBER_EMAIL, MEMBER_PASSWORD)
+    const personRespP = captureRouteHydration(page, PERSON_ME)
     await page.goto('/dashboard')
-    await page.waitForLoadState('networkidle')
 
-    // Time-based greeting
+    const personResp = await personRespP
+    expect(personResp?.status()).toBe(200)
+    expect(personResp?.ok()).toBe(true)
+
     const greeting = page.getByText(/good (morning|afternoon|evening)/i)
     await expect(greeting).toBeVisible({ timeout: 10000 })
 
-    // Org card with real membership ID
     await expect(page.getByText(/PDA-2025/).first()).toBeVisible({ timeout: 10000 })
-
-    // Active status badge
     await expect(page.getByText('Active').first()).toBeVisible({ timeout: 10000 })
-
-    // Credit progress widget
     await expect(page.getByText('Credit Progress')).toBeVisible({ timeout: 10000 })
   })
 
   test('success: Your Organizations section lists at least one org', async ({ page }) => {
     await signIn(page, MEMBER_EMAIL, MEMBER_PASSWORD)
+    const personRespP = captureRouteHydration(page, PERSON_ME)
     await page.goto('/dashboard')
-    await page.waitForLoadState('networkidle')
 
-    await expect(page.getByText('Your Organizations')).toBeVisible({ timeout: 10000 })
+    const personResp = await personRespP
+    expect(personResp?.status()).toBe(200)
+    expect(personResp?.ok()).toBe(true)
+
+    await expect(page.getByRole('heading', { name: 'Your Organizations' })).toBeVisible({ timeout: 10000 })
   })
 
   test('disabled: credit progress shows correct numeric values', async ({ page }) => {
     await signIn(page, MEMBER_EMAIL, MEMBER_PASSWORD)
+    const personRespP = captureRouteHydration(page, PERSON_ME)
     await page.goto('/dashboard')
-    await page.waitForLoadState('networkidle')
 
-    // Credit progress section should show numeric credit values
+    const personResp = await personRespP
+    expect(personResp?.status()).toBe(200)
+    expect(personResp?.ok()).toBe(true)
+
     await expect(page.getByText('Credit Progress')).toBeVisible({ timeout: 10000 })
 
-    // Should have a progress bar or numeric indicator
     const progressBar = page.getByRole('progressbar')
     const creditNumber = page.locator('text=/\\d+/')
 
@@ -80,25 +94,26 @@ test.describe('Dashboard — Interaction States', () => {
   })
 
   test('permission-error: unauthenticated user redirects to sign-in', async ({ page }) => {
-    // Go directly without signing in
     await page.goto('/dashboard')
-    await page.waitForLoadState('networkidle')
 
-    // Should redirect to sign-in or show auth prompt
+    // Should redirect to sign-in or show auth prompt — assert via URL or form.
     const isOnSignIn = page.url().includes('/auth/sign-in')
     const hasSignInForm = await page.getByLabel('Email', { exact: true }).isVisible().catch(() => false)
     const hasAuthPrompt = await page.getByText(/sign in|log in/i).first().isVisible().catch(() => false)
 
-    expect(isOnSignIn || hasSignInForm || hasAuthPrompt).toBeTruthy()
+    expect(isOnSignIn || hasSignInForm || hasAuthPrompt).toBe(true)
   })
 
   test('a11y: baseline accessibility check passes', async ({ page }) => {
     await signIn(page, MEMBER_EMAIL, MEMBER_PASSWORD)
+    const personRespP = captureRouteHydration(page, PERSON_ME)
     await page.goto('/dashboard')
-    await page.waitForLoadState('networkidle')
+
+    const personResp = await personRespP
+    expect(personResp?.status()).toBe(200)
+    expect(personResp?.ok()).toBe(true)
 
     await expectNoA11yViolations(page, {
-      // Exclude third-party widgets that may have known issues
       exclude: ['[data-radix-popper-content-wrapper]'],
     })
   })

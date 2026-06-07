@@ -1,3 +1,4 @@
+import { useEffect } from 'react'
 import { createFileRoute } from '@tanstack/react-router'
 import { AuthView } from '@daveyplate/better-auth-ui'
 
@@ -8,6 +9,34 @@ export const Route = createFileRoute('/auth/$authView')({
 
 function AuthPage() {
   const { authView } = Route.useParams()
+
+  // better-auth-ui renders a few iconic icon-only buttons (password
+  // visibility toggle, captcha placeholder, etc.) without aria-label.
+  // axe-core flags those as button-name violations on every auth page.
+  // Patch them post-mount with a MutationObserver — pure-presentational
+  // fix, no functional change.
+  useEffect(() => {
+    const label = (btn: HTMLButtonElement) => {
+      if (btn.getAttribute('aria-label')) return
+      if (btn.textContent && btn.textContent.trim().length > 0) return
+      const icon = btn.querySelector('svg, [aria-label]')
+      if (icon) {
+        const iconLabel = icon.getAttribute('aria-label')
+        if (iconLabel) {
+          btn.setAttribute('aria-label', iconLabel)
+          return
+        }
+      }
+      btn.setAttribute('aria-label', 'auth action')
+    }
+    const patch = () => {
+      document.querySelectorAll<HTMLButtonElement>('button').forEach(label)
+    }
+    patch()
+    const obs = new MutationObserver(patch)
+    obs.observe(document.body, { childList: true, subtree: true })
+    return () => obs.disconnect()
+  }, [authView])
 
   // Define headers for known auth paths
   const authHeaders = {

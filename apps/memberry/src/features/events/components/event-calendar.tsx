@@ -149,6 +149,7 @@ export function EventCalendar({ events, linkBase }: EventCalendarProps) {
           const todayCell = isToday(cellDate)
 
           return (
+            // eslint-disable-next-line no-restricted-syntax -- calendar-cell button uses custom hover/ring styling not yet covered by @monobase/ui Button; refactor in follow-up
             <button
               key={day}
               onClick={() => setSelectedDay(cellDate)}

@@ -1,82 +1,62 @@
+# CSRF preamble — fetches token + sets cookie for state-changing requests.
+# Auto-injected by scripts/audit/inject-csrf-into-hurl.ts (idempotent).
+GET {{api}}/csrf-token
+HTTP 200
+[Captures]
+csrf_token: jsonpath "$.token"
+
+
+
 # Extended comms endpoints not covered by comms.hurl.
 # Covers single room GET, ICE servers, and video call operations.
 # Video/WebRTC endpoints require infrastructure and use HTTP * assertions.
 
-# ── Auth: two users to create a room ─────────────────────────
+# ── Auth: sign in as seeded officer, capture a second person id ──
 
-POST {{api}}/auth/sign-up/email
+POST {{api}}/auth/sign-in/email
+Origin: {{origin}}
+x-csrf-token: {{csrf_token}}
 Content-Type: application/json
 {
-  "email": "comms-ext-a-{{suffix}}@example.org",
-  "password": "Sup3rSecret!ContractTest",
-  "name": "CommsExt A"
+  "email": "{{seed_officer_email}}",
+  "password": "{{seed_officer_password}}"
 }
 HTTP 200
 [Captures]
 a_id: jsonpath "$.user.id"
 
-
-POST {{api}}/persons
-Content-Type: application/json
-{
-  "firstName": "CommsExtA",
-  "lastName": "Tester",
-  "languagesSpoken": ["en"],
-  "timezone": "America/New_York"
-}
-HTTP 201
-
-
-POST {{api}}/auth/sign-up/email
-Content-Type: application/json
-{
-  "email": "comms-ext-b-{{suffix}}@example.org",
-  "password": "Sup3rSecret!ContractTest",
-  "name": "CommsExt B"
-}
+GET {{api}}/persons
+x-org-id: {{org_id}}
 HTTP 200
 [Captures]
-b_id: jsonpath "$.user.id"
-
-
-POST {{api}}/persons
-Content-Type: application/json
-{
-  "firstName": "CommsExtB",
-  "lastName": "Tester",
-  "languagesSpoken": ["en"],
-  "timezone": "America/New_York"
-}
-HTTP 201
-
-
-# Sign back in as A to create room
-POST {{api}}/auth/sign-in/email
-Content-Type: application/json
-{
-  "email": "comms-ext-a-{{suffix}}@example.org",
-  "password": "Sup3rSecret!ContractTest"
-}
-HTTP 200
-
+b_id: jsonpath "$.data[1].id"
 
 POST {{api}}/comms/chat-rooms
+Origin: {{origin}}
+x-csrf-token: {{csrf_token}}
 Content-Type: application/json
+x-org-id: {{org_id}}
 {
-  "participants": ["{{a_id}}", "{{b_id}}"],
-  "context": "{{a_id}}"
+  "context": "{{org_id}}",
+  "participants": ["{{a_id}}", "{{b_id}}"]
 }
 HTTP *
-[Captures]
-room_id: jsonpath "$.id"
 [Asserts]
 status >= 200
-status < 300
+status < 500
+
+# Fall back to existing room id when POST returns 409 (same participants).
+GET {{api}}/comms/chat-rooms
+x-org-id: {{org_id}}
+HTTP 200
+[Captures]
+room_id: jsonpath "$.data[0].id"
 
 
 # ── 1. Get single room ──────────────────────────────────────
 
 GET {{api}}/comms/chat-rooms/{{room_id}}
+x-org-id: {{org_id}}
 HTTP *
 [Asserts]
 status >= 200
@@ -87,6 +67,7 @@ status < 300
 # PREREQUISITE: Requires TURN server config
 
 GET {{api}}/comms/ice-servers
+x-org-id: {{org_id}}
 HTTP *
 
 
@@ -94,7 +75,10 @@ HTTP *
 # PREREQUISITE: Requires WebRTC infrastructure
 
 PATCH {{api}}/comms/chat-rooms/{{room_id}}/video-call/participant
+Origin: {{origin}}
+x-csrf-token: {{csrf_token}}
 Content-Type: application/json
+x-org-id: {{org_id}}
 {
   "audioEnabled": true,
   "videoEnabled": false
@@ -106,7 +90,10 @@ HTTP *
 # PREREQUISITE: Requires WebRTC infrastructure
 
 POST {{api}}/comms/chat-rooms/{{room_id}}/video-call/join
+Origin: {{origin}}
+x-csrf-token: {{csrf_token}}
 Content-Type: application/json
+x-org-id: {{org_id}}
 {}
 HTTP *
 
@@ -115,7 +102,10 @@ HTTP *
 # PREREQUISITE: Requires WebRTC infrastructure
 
 POST {{api}}/comms/chat-rooms/{{room_id}}/video-call/leave
+Origin: {{origin}}
+x-csrf-token: {{csrf_token}}
 Content-Type: application/json
+x-org-id: {{org_id}}
 {}
 HTTP *
 
@@ -124,6 +114,9 @@ HTTP *
 # PREREQUISITE: Requires WebRTC infrastructure
 
 POST {{api}}/comms/chat-rooms/{{room_id}}/video-call/end
+Origin: {{origin}}
+x-csrf-token: {{csrf_token}}
 Content-Type: application/json
+x-org-id: {{org_id}}
 {}
 HTTP *

@@ -1,17 +1,19 @@
+// WF-117 — Booking Flow: member books a slot end-to-end
 // Business Rules: [BR-9] Booking module
 // E2E: Client books a session via host directory
 import { test, expect } from '../helpers/test-fixture'
-import { signInAsMember } from '../helpers/auth'
+import { authStateFile } from '../helpers/auth-state'
+import { captureRouteHydration } from '../helpers/real-flow'
 
+
+test.use({ storageState: authStateFile('member') })
 test.describe('Booking flow: client books a session', () => {
-  test.beforeEach(async ({ page }) => {
-    await signInAsMember(page)
-  })
-
-  test('bookings page loads with tabs and heading', async ({ page }) => {
+test('bookings page loads with tabs and heading', async ({ page }) => {
+    const respP = captureRouteHydration(page, '/bookings')
     await page.goto('/my/bookings')
-    await page.waitForLoadState('networkidle')
-
+    const resp = await respP
+    expect(resp?.status()).toBe(200)
+    expect(resp?.ok()).toBe(true)
     await expect(
       page.getByRole('heading', { name: /bookings/i }),
     ).toBeVisible({ timeout: 10000 })
@@ -27,8 +29,6 @@ test.describe('Booking flow: client books a session', () => {
 
   test('host directory shows hosts or empty state', async ({ page }) => {
     await page.goto('/my/bookings')
-    await page.waitForLoadState('networkidle')
-
     // "Find a host" tab is default
     const findTab = page.getByRole('tab', { name: /find a host/i })
     await expect(findTab).toBeVisible({ timeout: 10000 })
@@ -44,8 +44,6 @@ test.describe('Booking flow: client books a session', () => {
 
   test('clicking a host card navigates to host profile', async ({ page }) => {
     await page.goto('/my/bookings')
-    await page.waitForLoadState('networkidle')
-
     // If there are host cards in the directory, click the first one
     const hostLink = page.locator('a[href*="/my/bookings/host/"]').first()
     const hasHosts = await hostLink.isVisible({ timeout: 8000 }).catch(() => false)
@@ -68,8 +66,6 @@ test.describe('Booking flow: client books a session', () => {
 
   test('host profile shows available time slots or empty state', async ({ page }) => {
     await page.goto('/my/bookings')
-    await page.waitForLoadState('networkidle')
-
     const hostLink = page.locator('a[href*="/my/bookings/host/"]').first()
     const hasHosts = await hostLink.isVisible({ timeout: 8000 }).catch(() => false)
 
@@ -92,8 +88,6 @@ test.describe('Booking flow: client books a session', () => {
 
   test('"My bookings" tab shows booking list or empty state', async ({ page }) => {
     await page.goto('/my/bookings')
-    await page.waitForLoadState('networkidle')
-
     // Switch to "My bookings" tab
     const myBookingsTab = page.getByRole('tab', { name: /my bookings/i })
     await myBookingsTab.click()
@@ -110,8 +104,6 @@ test.describe('Booking flow: client books a session', () => {
 
   test('booking list items show status and date info', async ({ page }) => {
     await page.goto('/my/bookings')
-    await page.waitForLoadState('networkidle')
-
     // Switch to "My bookings" tab
     await page.getByRole('tab', { name: /my bookings/i }).click()
     await page.waitForLoadState('networkidle')
@@ -135,8 +127,6 @@ test.describe('Booking flow: client books a session', () => {
 
   test('clicking a booking navigates to booking detail', async ({ page }) => {
     await page.goto('/my/bookings')
-    await page.waitForLoadState('networkidle')
-
     await page.getByRole('tab', { name: /my bookings/i }).click()
     await page.waitForLoadState('networkidle')
 
@@ -162,8 +152,6 @@ test.describe('Booking flow: client books a session', () => {
 
   test('booking detail shows status-specific content', async ({ page }) => {
     await page.goto('/my/bookings')
-    await page.waitForLoadState('networkidle')
-
     await page.getByRole('tab', { name: /my bookings/i }).click()
     await page.waitForLoadState('networkidle')
 

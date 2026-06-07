@@ -23,7 +23,9 @@ export async function deleteMemberResponses(
 
   const userId = session.user.id;
   const db = ctx.get('database') as DatabaseInstance;
-  const logger = ctx.get('logger');
+  const baseLogger = ctx.get('logger');
+  const traceId = ctx.get('requestId');
+  const logger = baseLogger?.child?.({ traceId, module: 'surveys' }) ?? baseLogger;
 
   const result = await db
     .delete(surveyResponses)

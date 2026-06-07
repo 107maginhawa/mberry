@@ -4,9 +4,6 @@ import type { PublishEventParams } from '@/generated/openapi/validators';
 import { NotFoundError, BusinessLogicError } from '@/core/errors';
 import { EventRepository } from './repos/events.repo';
 import { domainEvents } from '@/core/domain-events';
-import { auditAction } from '@/utils/audit';
-import { requirePosition } from '@/utils/officer-check';
-import { POSITION_TITLES } from '@/utils/position-titles';
 
 /**
  * publishEvent
@@ -19,9 +16,6 @@ export async function publishEvent(
 ): Promise<Response> {
   const user = ctx.get('user');
   if (!user) return ctx.json({ error: 'Unauthorized' }, 401);
-
-  const denied = await requirePosition(ctx, [POSITION_TITLES.SOCIETY_OFFICER, POSITION_TITLES.PRESIDENT]);
-  if (denied) return denied;
 
   const params = ctx.req.valid('param');
   const db = ctx.get('database') as DatabaseInstance;
@@ -60,12 +54,8 @@ export async function publishEvent(
     publishedBy: user.id,
   }).catch(() => {});
 
-  await auditAction(ctx, {
-    action: 'update',
-    resourceType: 'event',
-    resourceId: published.id,
-    description: 'Event published',
-  });
+  ctx.set('auditResourceId', published.id);
+  ctx.set('auditDescription', 'Event published');
 
   return ctx.json(published, 200);
 }

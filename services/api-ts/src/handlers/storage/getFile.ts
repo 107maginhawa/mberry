@@ -46,7 +46,9 @@ export async function getFile(
 
   // Get dependencies from context
   const storage = ctx.get('storage') as StorageProvider;
-  const logger = ctx.get('logger');
+  const baseLogger = ctx.get('logger');
+  const traceId = ctx.get('requestId');
+  const logger = baseLogger?.child?.({ traceId, module: 'storage' }) ?? baseLogger;
   const db = ctx.get('database') as DatabaseInstance;
   const auth = ctx.get('auth');
   const audit = ctx.get('audit');
@@ -100,7 +102,7 @@ export async function getFile(
       });
       auditEventId = auditEntry.id;
     } catch (error) {
-      logger?.error({ error, userId: user.id, fileId }, 'Failed to log file access');
+      logger?.error({ action: 'getFile.1', error, userId: user.id, fileId }, 'Failed to log file access');
     }
   }
 

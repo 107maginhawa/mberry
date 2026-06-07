@@ -3,7 +3,7 @@ import { Building2 } from 'lucide-react'
 import { Button } from '@monobase/ui'
 import { InstitutionalMembershipTable } from '@/features/membership/components/institutional-membership-table'
 import { PageShell } from '@/components/patterns/page-shell'
-import { useOrg } from '@/hooks/useOrg'
+import { useOrg } from '@/hooks/use-org'
 
 export const Route = createFileRoute('/_authenticated/org/$orgSlug/officer/institutional-memberships/')({
   component: InstitutionalMembershipsPage,

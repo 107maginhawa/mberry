@@ -2,13 +2,20 @@ import { test, expect } from '../helpers/test-fixture'
 import { signIn } from '../helpers/auth'
 import { SEED_OFFICER_EMAIL, SEED_MEMBER_EMAIL, TEST_PASSWORD } from '../helpers/test-config'
 import { expectNoA11yViolations } from '../helpers/a11y'
+import { captureRouteHydration } from '../helpers/real-flow'
+
+// W2 real-flow upgrade: officer communications hydrates via
+// GET /communications/announcements/. Capture proves the wire returned
+// data, not just that the shell rendered a heading.
 
 const ORG_ID = 'ed8e3a96-8126-4341-be42-e6eb7940c562'
+const ANNOUNCEMENTS = '/communications/announcements/'
 
 test.describe('Communications — Interaction States', () => {
   test('loading: shows loading state before announcements load', async ({ page }) => {
     await signIn(page, SEED_OFFICER_EMAIL, TEST_PASSWORD)
 
+    const respP = captureRouteHydration(page, ANNOUNCEMENTS)
     await page.goto(`/org/${ORG_ID}/officer/communications`, { waitUntil: 'commit' })
 
     const skeleton = page.locator('[class*="skeleton"], [class*="animate-pulse"]')
@@ -19,12 +26,20 @@ test.describe('Communications — Interaction States', () => {
 
     await page.waitForLoadState('networkidle')
     await expect(page.locator('main')).toBeVisible({ timeout: 10000 })
+
+    const resp = await respP
+    expect(resp?.status()).toBe(200)
+    expect(resp?.ok()).toBe(true)
   })
 
   test('success: shows communications heading and announcement list', async ({ page }) => {
     await signIn(page, SEED_OFFICER_EMAIL, TEST_PASSWORD)
+    const respP = captureRouteHydration(page, ANNOUNCEMENTS)
     await page.goto(`/org/${ORG_ID}/officer/communications`)
-    await page.waitForLoadState('networkidle')
+
+    const resp = await respP
+    expect(resp?.status()).toBe(200)
+    expect(resp?.ok()).toBe(true)
 
     await expect(
       page.getByRole('heading', { name: /communications?|announcements?/i }).first(),
@@ -40,8 +55,6 @@ test.describe('Communications — Interaction States', () => {
   test('permission-error: regular member cannot access officer communications', async ({ page }) => {
     await signIn(page, SEED_MEMBER_EMAIL, TEST_PASSWORD)
     await page.goto(`/org/${ORG_ID}/officer/communications`)
-    await page.waitForLoadState('networkidle')
-
     const isRedirected = !page.url().includes('/officer/communications')
     const hasForbidden = await page.getByText(/forbidden|access denied|not authorized|officers only/i).first().isVisible().catch(() => false)
 
@@ -50,8 +63,12 @@ test.describe('Communications — Interaction States', () => {
 
   test('empty: communications list shows empty state when no announcements', async ({ page }) => {
     await signIn(page, SEED_OFFICER_EMAIL, TEST_PASSWORD)
+    const respP = captureRouteHydration(page, ANNOUNCEMENTS)
     await page.goto(`/org/${ORG_ID}/officer/communications`)
-    await page.waitForLoadState('networkidle')
+
+    const resp = await respP
+    expect(resp?.status()).toBe(200)
+    expect(resp?.ok()).toBe(true)
 
     // Either announcements are listed or empty state shown
     const rows = page.locator('.divide-y a, [class*="announcement"], [class*="card"]')
@@ -68,8 +85,12 @@ test.describe('Communications — Interaction States', () => {
 
   test('confirmation: new announcement form requires content before sending', async ({ page }) => {
     await signIn(page, SEED_OFFICER_EMAIL, TEST_PASSWORD)
+    const respP = captureRouteHydration(page, ANNOUNCEMENTS)
     await page.goto(`/org/${ORG_ID}/officer/communications`)
-    await page.waitForLoadState('networkidle')
+
+    const resp = await respP
+    expect(resp?.status()).toBe(200)
+    expect(resp?.ok()).toBe(true)
 
     // Click New Message button
     const newBtn = page.getByRole('link', { name: /new (message|announcement)|create (message|announcement)/i })
@@ -101,8 +122,12 @@ test.describe('Communications — Interaction States', () => {
 
   test('a11y: baseline accessibility check passes', async ({ page }) => {
     await signIn(page, SEED_OFFICER_EMAIL, TEST_PASSWORD)
+    const respP = captureRouteHydration(page, ANNOUNCEMENTS)
     await page.goto(`/org/${ORG_ID}/officer/communications`)
-    await page.waitForLoadState('networkidle')
+
+    const resp = await respP
+    expect(resp?.status()).toBe(200)
+    expect(resp?.ok()).toBe(true)
 
     await expectNoA11yViolations(page, {
       exclude: ['[data-radix-popper-content-wrapper]'],

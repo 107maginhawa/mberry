@@ -6,8 +6,7 @@ import {
   TransitionChecklistRepository,
 } from './repos/governance.repo';
 import { PersonRepository } from '@/handlers/person/repos/person.repo';
-import { auditAction } from '@/utils/audit';
-import { requirePosition } from '@/utils/officer-check';
+import { requirePosition } from '@/core/auth/officer-checks';
 import { POSITION_TITLES } from '@/utils/position-titles';
 import { domainEvents } from '@/core/domain-events';
 
@@ -91,20 +90,15 @@ export async function transitionOfficerTerm(
     }
   }
 
-  await auditAction(ctx, {
-    action: 'update',
-    resourceType: 'officer-term',
-    resourceId: termId,
-    description: 'Officer term transitioned to successor',
-    details: {
+  ctx.set('auditResourceId', termId);
+  ctx.set('auditDescription', 'Officer term transitioned to successor');
+  ctx.set('auditDetails', {
       outgoingTermId: termId,
       newTermId: newTerm.id,
       successorPersonId: body.successorPersonId,
       positionId: outgoingTerm.positionId,
       checklistItemCount: body.checklistItems?.length ?? 0,
-    },
-    eventSubType: 'governance.officer-transitioned',
-  });
+    });
 
   domainEvents.emit('officer.transitioned', {
     outgoingTermId: termId,

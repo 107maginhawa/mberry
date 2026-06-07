@@ -3,9 +3,9 @@ import { z } from 'zod';
 import { NotFoundError, ConflictError, ValidationError, BusinessLogicError } from '@/core/errors';
 import { ElectionsRepository } from './repos/elections.repo';
 import { MembershipRepository } from '../association:member/repos/membership.repo';
-import { computeMembershipStatus } from '../association:member/utils/compute-membership-status';
+import { computeMembershipStatus } from '@/handlers/member/membership/utils/compute-membership-status';
 import type { Session } from '@/types/auth';
-import { auditAction } from '@/utils/audit';
+import { auditAction } from '@/core/audit/audit-action';
 
 const castVoteSchema = z.object({
   positionId: z.string().uuid('positionId must be a valid UUID'),

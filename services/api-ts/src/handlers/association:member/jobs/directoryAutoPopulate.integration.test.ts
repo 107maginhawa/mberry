@@ -1,9 +1,9 @@
 import { describe, test, expect, mock } from 'bun:test';
 import { makeCtx, stubRepo, restoreRepo } from '@/test-utils/make-ctx';
-import { MembershipTierRepository, MembershipRepository } from '../repos/membership.repo';
-import { OfficerTermRepository } from '../repos/governance.repo';
-import { DuesConfigRepository } from '../repos/dues.repo';
-import { createMembership } from '../createMembership';
+import { MembershipTierRepository, MembershipRepository } from '@/handlers/association:member/repos/membership.repo';
+import { OfficerTermRepository } from '@/handlers/association:member/repos/governance.repo';
+import { DuesConfigRepository } from '@/handlers/association:member/repos/dues.repo';
+import { createMembership } from '@/handlers/member/membership/createMembership';
 
 /**
  * Integration test: createMembership → triggers directory.autoPopulate job

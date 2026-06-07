@@ -1,40 +1,40 @@
-CREATE TYPE "public"."ad_slot" AS ENUM('feed_banner', 'sidebar', 'email_footer', 'event_sponsor');--> statement-breakpoint
-CREATE TYPE "public"."campaign_status" AS ENUM('draft', 'pending_review', 'active', 'paused', 'completed', 'rejected');--> statement-breakpoint
-CREATE TYPE "public"."creative_status" AS ENUM('pending', 'approved', 'rejected');--> statement-breakpoint
-CREATE TYPE "public"."credit_source_type" AS ENUM('event_checkin', 'training_completion', 'course_completion', 'manual_award');--> statement-breakpoint
-CREATE TYPE "public"."credit_status" AS ENUM('active', 'voided', 'disputed');--> statement-breakpoint
-CREATE TYPE "public"."webhook_retry_status" AS ENUM('processing', 'completed', 'pending_retry', 'dead_letter');--> statement-breakpoint
-CREATE TYPE "public"."disciplinary_action_type" AS ENUM('warning', 'suspension', 'removal', 'probation');--> statement-breakpoint
-CREATE TYPE "public"."transition_checklist_status" AS ENUM('pending', 'completed');--> statement-breakpoint
-CREATE TYPE "public"."assessment_applies_to" AS ENUM('all', 'selected');--> statement-breakpoint
-CREATE TYPE "public"."assessment_status" AS ENUM('draft', 'active', 'closed');--> statement-breakpoint
-CREATE TYPE "public"."assessment_target_status" AS ENUM('pending', 'paid');--> statement-breakpoint
-CREATE TYPE "public"."committee_task_priority" AS ENUM('low', 'medium', 'high', 'urgent');--> statement-breakpoint
-CREATE TYPE "public"."committee_task_status" AS ENUM('pending', 'in_progress', 'completed', 'cancelled');--> statement-breakpoint
-CREATE TYPE "public"."committee_member_role" AS ENUM('member', 'chairperson', 'vice_chairperson', 'secretary');--> statement-breakpoint
-CREATE TYPE "public"."committee_status" AS ENUM('active', 'completed');--> statement-breakpoint
-CREATE TYPE "public"."cpd_activity_type" AS ENUM('seminar', 'workshop', 'conference', 'webinar', 'hands_on', 'community', 'research', 'mentorship', 'self_directed', 'other');--> statement-breakpoint
-CREATE TYPE "public"."certificate_status" AS ENUM('issued', 'revoked');--> statement-breakpoint
-CREATE TYPE "public"."feed_post_status" AS ENUM('published', 'draft', 'flagged', 'removed');--> statement-breakpoint
-CREATE TYPE "public"."feed_post_type" AS ENUM('announcement', 'event_highlight', 'training_opportunity', 'achievement', 'clinical_update');--> statement-breakpoint
-CREATE TYPE "public"."feed_post_visibility" AS ENUM('org', 'network');--> statement-breakpoint
-CREATE TYPE "public"."survey_distribution" AS ENUM('all_members', 'active_members', 'specific_categories');--> statement-breakpoint
-CREATE TYPE "public"."survey_status" AS ENUM('draft', 'active', 'closed');--> statement-breakpoint
-CREATE TYPE "public"."survey_type" AS ENUM('anonymous', 'identified');--> statement-breakpoint
-CREATE TYPE "public"."job_application_status" AS ENUM('applied', 'screening', 'interviewed', 'offered', 'hired', 'rejected', 'withdrawn');--> statement-breakpoint
-CREATE TYPE "public"."job_posting_status" AS ENUM('draft', 'active', 'filled', 'expired', 'closed');--> statement-breakpoint
-CREATE TYPE "public"."job_posting_type" AS ENUM('full_time', 'part_time', 'contract', 'fellowship', 'internship');--> statement-breakpoint
-CREATE TYPE "public"."listing_status" AS ENUM('draft', 'active', 'archived');--> statement-breakpoint
-CREATE TYPE "public"."order_status" AS ENUM('pending', 'confirmed', 'fulfilled', 'cancelled', 'refunded');--> statement-breakpoint
-CREATE TYPE "public"."vendor_category" AS ENUM('emr', 'supplies', 'insurance', 'telehealth', 'other');--> statement-breakpoint
-CREATE TYPE "public"."vendor_status" AS ENUM('pending', 'verified', 'suspended', 'rejected');--> statement-breakpoint
-CREATE TYPE "public"."dashboard_output_format" AS ENUM('pdf', 'csv');--> statement-breakpoint
-CREATE TYPE "public"."dashboard_report_type" AS ENUM('association_summary', 'dues_collection', 'cpd_compliance', 'activity');--> statement-breakpoint
-ALTER TYPE "public"."notification_type" ADD VALUE 'waitlist.promoted';--> statement-breakpoint
-ALTER TYPE "public"."notification_type" ADD VALUE 'event.late-cancellation';--> statement-breakpoint
-ALTER TYPE "public"."notification_type" ADD VALUE 'dunning.escalation';--> statement-breakpoint
-ALTER TYPE "public"."notification_type" ADD VALUE 'task.overdue';--> statement-breakpoint
-CREATE TABLE "ad_report" (
+DO $$ BEGIN CREATE TYPE "public"."ad_slot" AS ENUM('feed_banner', 'sidebar', 'email_footer', 'event_sponsor'); EXCEPTION WHEN duplicate_object THEN NULL; END $$;--> statement-breakpoint
+DO $$ BEGIN CREATE TYPE "public"."campaign_status" AS ENUM('draft', 'pending_review', 'active', 'paused', 'completed', 'rejected'); EXCEPTION WHEN duplicate_object THEN NULL; END $$;--> statement-breakpoint
+DO $$ BEGIN CREATE TYPE "public"."creative_status" AS ENUM('pending', 'approved', 'rejected'); EXCEPTION WHEN duplicate_object THEN NULL; END $$;--> statement-breakpoint
+DO $$ BEGIN CREATE TYPE "public"."credit_source_type" AS ENUM('event_checkin', 'training_completion', 'course_completion', 'manual_award'); EXCEPTION WHEN duplicate_object THEN NULL; END $$;--> statement-breakpoint
+DO $$ BEGIN CREATE TYPE "public"."credit_status" AS ENUM('active', 'voided', 'disputed'); EXCEPTION WHEN duplicate_object THEN NULL; END $$;--> statement-breakpoint
+DO $$ BEGIN CREATE TYPE "public"."webhook_retry_status" AS ENUM('processing', 'completed', 'pending_retry', 'dead_letter'); EXCEPTION WHEN duplicate_object THEN NULL; END $$;--> statement-breakpoint
+DO $$ BEGIN CREATE TYPE "public"."disciplinary_action_type" AS ENUM('warning', 'suspension', 'removal', 'probation'); EXCEPTION WHEN duplicate_object THEN NULL; END $$;--> statement-breakpoint
+DO $$ BEGIN CREATE TYPE "public"."transition_checklist_status" AS ENUM('pending', 'completed'); EXCEPTION WHEN duplicate_object THEN NULL; END $$;--> statement-breakpoint
+DO $$ BEGIN CREATE TYPE "public"."assessment_applies_to" AS ENUM('all', 'selected'); EXCEPTION WHEN duplicate_object THEN NULL; END $$;--> statement-breakpoint
+DO $$ BEGIN CREATE TYPE "public"."assessment_status" AS ENUM('draft', 'active', 'closed'); EXCEPTION WHEN duplicate_object THEN NULL; END $$;--> statement-breakpoint
+DO $$ BEGIN CREATE TYPE "public"."assessment_target_status" AS ENUM('pending', 'paid'); EXCEPTION WHEN duplicate_object THEN NULL; END $$;--> statement-breakpoint
+DO $$ BEGIN CREATE TYPE "public"."committee_task_priority" AS ENUM('low', 'medium', 'high', 'urgent'); EXCEPTION WHEN duplicate_object THEN NULL; END $$;--> statement-breakpoint
+DO $$ BEGIN CREATE TYPE "public"."committee_task_status" AS ENUM('pending', 'in_progress', 'completed', 'cancelled'); EXCEPTION WHEN duplicate_object THEN NULL; END $$;--> statement-breakpoint
+DO $$ BEGIN CREATE TYPE "public"."committee_member_role" AS ENUM('member', 'chairperson', 'vice_chairperson', 'secretary'); EXCEPTION WHEN duplicate_object THEN NULL; END $$;--> statement-breakpoint
+DO $$ BEGIN CREATE TYPE "public"."committee_status" AS ENUM('active', 'completed'); EXCEPTION WHEN duplicate_object THEN NULL; END $$;--> statement-breakpoint
+DO $$ BEGIN CREATE TYPE "public"."cpd_activity_type" AS ENUM('seminar', 'workshop', 'conference', 'webinar', 'hands_on', 'community', 'research', 'mentorship', 'self_directed', 'other'); EXCEPTION WHEN duplicate_object THEN NULL; END $$;--> statement-breakpoint
+DO $$ BEGIN CREATE TYPE "public"."certificate_status" AS ENUM('issued', 'revoked'); EXCEPTION WHEN duplicate_object THEN NULL; END $$;--> statement-breakpoint
+DO $$ BEGIN CREATE TYPE "public"."feed_post_status" AS ENUM('published', 'draft', 'flagged', 'removed'); EXCEPTION WHEN duplicate_object THEN NULL; END $$;--> statement-breakpoint
+DO $$ BEGIN CREATE TYPE "public"."feed_post_type" AS ENUM('announcement', 'event_highlight', 'training_opportunity', 'achievement', 'clinical_update'); EXCEPTION WHEN duplicate_object THEN NULL; END $$;--> statement-breakpoint
+DO $$ BEGIN CREATE TYPE "public"."feed_post_visibility" AS ENUM('org', 'network'); EXCEPTION WHEN duplicate_object THEN NULL; END $$;--> statement-breakpoint
+DO $$ BEGIN CREATE TYPE "public"."survey_distribution" AS ENUM('all_members', 'active_members', 'specific_categories'); EXCEPTION WHEN duplicate_object THEN NULL; END $$;--> statement-breakpoint
+DO $$ BEGIN CREATE TYPE "public"."survey_status" AS ENUM('draft', 'active', 'closed'); EXCEPTION WHEN duplicate_object THEN NULL; END $$;--> statement-breakpoint
+DO $$ BEGIN CREATE TYPE "public"."survey_type" AS ENUM('anonymous', 'identified'); EXCEPTION WHEN duplicate_object THEN NULL; END $$;--> statement-breakpoint
+DO $$ BEGIN CREATE TYPE "public"."job_application_status" AS ENUM('applied', 'screening', 'interviewed', 'offered', 'hired', 'rejected', 'withdrawn'); EXCEPTION WHEN duplicate_object THEN NULL; END $$;--> statement-breakpoint
+DO $$ BEGIN CREATE TYPE "public"."job_posting_status" AS ENUM('draft', 'active', 'filled', 'expired', 'closed'); EXCEPTION WHEN duplicate_object THEN NULL; END $$;--> statement-breakpoint
+DO $$ BEGIN CREATE TYPE "public"."job_posting_type" AS ENUM('full_time', 'part_time', 'contract', 'fellowship', 'internship'); EXCEPTION WHEN duplicate_object THEN NULL; END $$;--> statement-breakpoint
+DO $$ BEGIN CREATE TYPE "public"."listing_status" AS ENUM('draft', 'active', 'archived'); EXCEPTION WHEN duplicate_object THEN NULL; END $$;--> statement-breakpoint
+DO $$ BEGIN CREATE TYPE "public"."order_status" AS ENUM('pending', 'confirmed', 'fulfilled', 'cancelled', 'refunded'); EXCEPTION WHEN duplicate_object THEN NULL; END $$;--> statement-breakpoint
+DO $$ BEGIN CREATE TYPE "public"."vendor_category" AS ENUM('emr', 'supplies', 'insurance', 'telehealth', 'other'); EXCEPTION WHEN duplicate_object THEN NULL; END $$;--> statement-breakpoint
+DO $$ BEGIN CREATE TYPE "public"."vendor_status" AS ENUM('pending', 'verified', 'suspended', 'rejected'); EXCEPTION WHEN duplicate_object THEN NULL; END $$;--> statement-breakpoint
+DO $$ BEGIN CREATE TYPE "public"."dashboard_output_format" AS ENUM('pdf', 'csv'); EXCEPTION WHEN duplicate_object THEN NULL; END $$;--> statement-breakpoint
+DO $$ BEGIN CREATE TYPE "public"."dashboard_report_type" AS ENUM('association_summary', 'dues_collection', 'cpd_compliance', 'activity'); EXCEPTION WHEN duplicate_object THEN NULL; END $$;--> statement-breakpoint
+ALTER TYPE "public"."notification_type" ADD VALUE IF NOT EXISTS 'waitlist.promoted';--> statement-breakpoint
+ALTER TYPE "public"."notification_type" ADD VALUE IF NOT EXISTS 'event.late-cancellation';--> statement-breakpoint
+ALTER TYPE "public"."notification_type" ADD VALUE IF NOT EXISTS 'dunning.escalation';--> statement-breakpoint
+ALTER TYPE "public"."notification_type" ADD VALUE IF NOT EXISTS 'task.overdue';--> statement-breakpoint
+CREATE TABLE IF NOT EXISTS "ad_report" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
 	"created_at" timestamp with time zone DEFAULT now() NOT NULL,
 	"updated_at" timestamp with time zone DEFAULT now() NOT NULL,
@@ -47,7 +47,7 @@ CREATE TABLE "ad_report" (
 	"reason" text NOT NULL
 );
 --> statement-breakpoint
-CREATE TABLE "advertiser" (
+CREATE TABLE IF NOT EXISTS "advertiser" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
 	"created_at" timestamp with time zone DEFAULT now() NOT NULL,
 	"updated_at" timestamp with time zone DEFAULT now() NOT NULL,
@@ -61,7 +61,7 @@ CREATE TABLE "advertiser" (
 	"is_active" boolean DEFAULT true NOT NULL
 );
 --> statement-breakpoint
-CREATE TABLE "ad_campaign" (
+CREATE TABLE IF NOT EXISTS "ad_campaign" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
 	"created_at" timestamp with time zone DEFAULT now() NOT NULL,
 	"updated_at" timestamp with time zone DEFAULT now() NOT NULL,
@@ -82,7 +82,7 @@ CREATE TABLE "ad_campaign" (
 	"ad_slot" "ad_slot" DEFAULT 'feed_banner' NOT NULL
 );
 --> statement-breakpoint
-CREATE TABLE "ad_creative" (
+CREATE TABLE IF NOT EXISTS "ad_creative" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
 	"created_at" timestamp with time zone DEFAULT now() NOT NULL,
 	"updated_at" timestamp with time zone DEFAULT now() NOT NULL,
@@ -102,7 +102,7 @@ CREATE TABLE "ad_creative" (
 	"sponsored_label" boolean DEFAULT true NOT NULL
 );
 --> statement-breakpoint
-CREATE TABLE "member_ad_opt_out" (
+CREATE TABLE IF NOT EXISTS "member_ad_opt_out" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
 	"created_at" timestamp with time zone DEFAULT now() NOT NULL,
 	"updated_at" timestamp with time zone DEFAULT now() NOT NULL,
@@ -114,7 +114,7 @@ CREATE TABLE "member_ad_opt_out" (
 	"opted_out_at" timestamp with time zone DEFAULT now() NOT NULL
 );
 --> statement-breakpoint
-CREATE TABLE "org_cpd_config" (
+CREATE TABLE IF NOT EXISTS "org_cpd_config" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
 	"created_at" timestamp with time zone DEFAULT now() NOT NULL,
 	"updated_at" timestamp with time zone DEFAULT now() NOT NULL,
@@ -130,7 +130,7 @@ CREATE TABLE "org_cpd_config" (
 	CONSTRAINT "uq_org_cpd_config_org" UNIQUE("organization_id")
 );
 --> statement-breakpoint
-CREATE TABLE "webhook_retry_log" (
+CREATE TABLE IF NOT EXISTS "webhook_retry_log" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
 	"created_at" timestamp with time zone DEFAULT now() NOT NULL,
 	"updated_at" timestamp with time zone DEFAULT now() NOT NULL,
@@ -150,7 +150,7 @@ CREATE TABLE "webhook_retry_log" (
 	CONSTRAINT "webhook_retry_idempotency_unique" UNIQUE("idempotency_key")
 );
 --> statement-breakpoint
-CREATE TABLE "disciplinary_action" (
+CREATE TABLE IF NOT EXISTS "disciplinary_action" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
 	"created_at" timestamp with time zone DEFAULT now() NOT NULL,
 	"updated_at" timestamp with time zone DEFAULT now() NOT NULL,
@@ -167,7 +167,7 @@ CREATE TABLE "disciplinary_action" (
 	"notes" text
 );
 --> statement-breakpoint
-CREATE TABLE "transition_checklist" (
+CREATE TABLE IF NOT EXISTS "transition_checklist" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
 	"created_at" timestamp with time zone DEFAULT now() NOT NULL,
 	"updated_at" timestamp with time zone DEFAULT now() NOT NULL,
@@ -183,7 +183,7 @@ CREATE TABLE "transition_checklist" (
 	"notes" text
 );
 --> statement-breakpoint
-CREATE TABLE "special_assessment_target" (
+CREATE TABLE IF NOT EXISTS "special_assessment_target" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
 	"created_at" timestamp with time zone DEFAULT now() NOT NULL,
 	"updated_at" timestamp with time zone DEFAULT now() NOT NULL,
@@ -196,7 +196,7 @@ CREATE TABLE "special_assessment_target" (
 	"target_status" "assessment_target_status" DEFAULT 'pending' NOT NULL
 );
 --> statement-breakpoint
-CREATE TABLE "special_assessment" (
+CREATE TABLE IF NOT EXISTS "special_assessment" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
 	"created_at" timestamp with time zone DEFAULT now() NOT NULL,
 	"updated_at" timestamp with time zone DEFAULT now() NOT NULL,
@@ -214,7 +214,7 @@ CREATE TABLE "special_assessment" (
 	"status" "assessment_status" DEFAULT 'draft' NOT NULL
 );
 --> statement-breakpoint
-CREATE TABLE "committee_task" (
+CREATE TABLE IF NOT EXISTS "committee_task" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
 	"created_at" timestamp with time zone DEFAULT now() NOT NULL,
 	"updated_at" timestamp with time zone DEFAULT now() NOT NULL,
@@ -233,7 +233,7 @@ CREATE TABLE "committee_task" (
 	"completed_by" uuid
 );
 --> statement-breakpoint
-CREATE TABLE "committee_member" (
+CREATE TABLE IF NOT EXISTS "committee_member" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
 	"created_at" timestamp with time zone DEFAULT now() NOT NULL,
 	"updated_at" timestamp with time zone DEFAULT now() NOT NULL,
@@ -249,7 +249,7 @@ CREATE TABLE "committee_member" (
 	"active" boolean DEFAULT true NOT NULL
 );
 --> statement-breakpoint
-CREATE TABLE "committee" (
+CREATE TABLE IF NOT EXISTS "committee" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
 	"created_at" timestamp with time zone DEFAULT now() NOT NULL,
 	"updated_at" timestamp with time zone DEFAULT now() NOT NULL,
@@ -265,7 +265,7 @@ CREATE TABLE "committee" (
 	"dissolution_reason" text
 );
 --> statement-breakpoint
-CREATE TABLE "billing_config" (
+CREATE TABLE IF NOT EXISTS "billing_config" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
 	"created_at" timestamp with time zone DEFAULT now() NOT NULL,
 	"updated_at" timestamp with time zone DEFAULT now() NOT NULL,
@@ -282,7 +282,7 @@ CREATE TABLE "billing_config" (
 	CONSTRAINT "billing_configs_org_provider_mode_unique" UNIQUE("organization_id","provider","test_mode")
 );
 --> statement-breakpoint
-CREATE TABLE "org_certificate_seq" (
+CREATE TABLE IF NOT EXISTS "org_certificate_seq" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
 	"created_at" timestamp with time zone DEFAULT now() NOT NULL,
 	"updated_at" timestamp with time zone DEFAULT now() NOT NULL,
@@ -296,7 +296,7 @@ CREATE TABLE "org_certificate_seq" (
 	CONSTRAINT "org_cert_seq_org_year_unique" UNIQUE("organization_id","year")
 );
 --> statement-breakpoint
-CREATE TABLE "saved_segment" (
+CREATE TABLE IF NOT EXISTS "saved_segment" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
 	"created_at" timestamp with time zone DEFAULT now() NOT NULL,
 	"updated_at" timestamp with time zone DEFAULT now() NOT NULL,
@@ -308,7 +308,7 @@ CREATE TABLE "saved_segment" (
 	"filters" jsonb NOT NULL
 );
 --> statement-breakpoint
-CREATE TABLE "feed_muted_author" (
+CREATE TABLE IF NOT EXISTS "feed_muted_author" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
 	"created_at" timestamp with time zone DEFAULT now() NOT NULL,
 	"updated_at" timestamp with time zone DEFAULT now() NOT NULL,
@@ -320,7 +320,7 @@ CREATE TABLE "feed_muted_author" (
 	"organization_id" uuid NOT NULL
 );
 --> statement-breakpoint
-CREATE TABLE "feed_post_reaction" (
+CREATE TABLE IF NOT EXISTS "feed_post_reaction" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
 	"created_at" timestamp with time zone DEFAULT now() NOT NULL,
 	"updated_at" timestamp with time zone DEFAULT now() NOT NULL,
@@ -332,7 +332,7 @@ CREATE TABLE "feed_post_reaction" (
 	"reaction_type" varchar(50) DEFAULT 'like' NOT NULL
 );
 --> statement-breakpoint
-CREATE TABLE "feed_post_report" (
+CREATE TABLE IF NOT EXISTS "feed_post_report" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
 	"created_at" timestamp with time zone DEFAULT now() NOT NULL,
 	"updated_at" timestamp with time zone DEFAULT now() NOT NULL,
@@ -344,7 +344,7 @@ CREATE TABLE "feed_post_report" (
 	"reason" text
 );
 --> statement-breakpoint
-CREATE TABLE "feed_post" (
+CREATE TABLE IF NOT EXISTS "feed_post" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
 	"created_at" timestamp with time zone DEFAULT now() NOT NULL,
 	"updated_at" timestamp with time zone DEFAULT now() NOT NULL,
@@ -365,7 +365,7 @@ CREATE TABLE "feed_post" (
 	"report_count" integer DEFAULT 0 NOT NULL
 );
 --> statement-breakpoint
-CREATE TABLE "survey_response" (
+CREATE TABLE IF NOT EXISTS "survey_response" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
 	"created_at" timestamp with time zone DEFAULT now() NOT NULL,
 	"updated_at" timestamp with time zone DEFAULT now() NOT NULL,
@@ -382,7 +382,7 @@ CREATE TABLE "survey_response" (
 	CONSTRAINT "survey_responses_survey_responder_unique" UNIQUE("survey_id","responder_id")
 );
 --> statement-breakpoint
-CREATE TABLE "survey" (
+CREATE TABLE IF NOT EXISTS "survey" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
 	"created_at" timestamp with time zone DEFAULT now() NOT NULL,
 	"updated_at" timestamp with time zone DEFAULT now() NOT NULL,
@@ -399,7 +399,7 @@ CREATE TABLE "survey" (
 	"analytics_snapshot" jsonb
 );
 --> statement-breakpoint
-CREATE TABLE "payment_token" (
+CREATE TABLE IF NOT EXISTS "payment_token" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
 	"created_at" timestamp with time zone DEFAULT now() NOT NULL,
 	"updated_at" timestamp with time zone DEFAULT now() NOT NULL,
@@ -418,7 +418,7 @@ CREATE TABLE "payment_token" (
 	CONSTRAINT "payment_token_token_hash_unique" UNIQUE("token_hash")
 );
 --> statement-breakpoint
-CREATE TABLE "job_application" (
+CREATE TABLE IF NOT EXISTS "job_application" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
 	"created_at" timestamp with time zone DEFAULT now() NOT NULL,
 	"updated_at" timestamp with time zone DEFAULT now() NOT NULL,
@@ -433,7 +433,7 @@ CREATE TABLE "job_application" (
 	"status" "job_application_status" DEFAULT 'applied' NOT NULL
 );
 --> statement-breakpoint
-CREATE TABLE "job_posting" (
+CREATE TABLE IF NOT EXISTS "job_posting" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
 	"created_at" timestamp with time zone DEFAULT now() NOT NULL,
 	"updated_at" timestamp with time zone DEFAULT now() NOT NULL,
@@ -454,7 +454,7 @@ CREATE TABLE "job_posting" (
 	"posted_by" uuid
 );
 --> statement-breakpoint
-CREATE TABLE "marketplace_listing" (
+CREATE TABLE IF NOT EXISTS "marketplace_listing" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
 	"created_at" timestamp with time zone DEFAULT now() NOT NULL,
 	"updated_at" timestamp with time zone DEFAULT now() NOT NULL,
@@ -471,7 +471,7 @@ CREATE TABLE "marketplace_listing" (
 	"category_tags" jsonb DEFAULT '[]'::jsonb
 );
 --> statement-breakpoint
-CREATE TABLE "marketplace_order" (
+CREATE TABLE IF NOT EXISTS "marketplace_order" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
 	"created_at" timestamp with time zone DEFAULT now() NOT NULL,
 	"updated_at" timestamp with time zone DEFAULT now() NOT NULL,
@@ -489,7 +489,7 @@ CREATE TABLE "marketplace_order" (
 	"fulfilled_at" timestamp with time zone
 );
 --> statement-breakpoint
-CREATE TABLE "vendor" (
+CREATE TABLE IF NOT EXISTS "vendor" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
 	"created_at" timestamp with time zone DEFAULT now() NOT NULL,
 	"updated_at" timestamp with time zone DEFAULT now() NOT NULL,
@@ -508,7 +508,7 @@ CREATE TABLE "vendor" (
 	"verified_by" uuid
 );
 --> statement-breakpoint
-CREATE TABLE "chapter_snapshot" (
+CREATE TABLE IF NOT EXISTS "chapter_snapshot" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
 	"created_at" timestamp with time zone DEFAULT now() NOT NULL,
 	"updated_at" timestamp with time zone DEFAULT now() NOT NULL,
@@ -531,7 +531,7 @@ CREATE TABLE "chapter_snapshot" (
 	"activity_count_90d" integer
 );
 --> statement-breakpoint
-CREATE TABLE "dashboard_export_log" (
+CREATE TABLE IF NOT EXISTS "dashboard_export_log" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
 	"created_at" timestamp with time zone DEFAULT now() NOT NULL,
 	"updated_at" timestamp with time zone DEFAULT now() NOT NULL,
@@ -547,7 +547,7 @@ CREATE TABLE "dashboard_export_log" (
 	"output_format" "dashboard_output_format" NOT NULL
 );
 --> statement-breakpoint
-CREATE TABLE "national_dashboard_access" (
+CREATE TABLE IF NOT EXISTS "national_dashboard_access" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
 	"created_at" timestamp with time zone DEFAULT now() NOT NULL,
 	"updated_at" timestamp with time zone DEFAULT now() NOT NULL,
@@ -566,7 +566,7 @@ ALTER TABLE "membership" ALTER COLUMN "status" SET DEFAULT 'pendingPayment'::tex
 ALTER TABLE "membership_status_history" ALTER COLUMN "from_status" SET DATA TYPE text;--> statement-breakpoint
 ALTER TABLE "membership_status_history" ALTER COLUMN "to_status" SET DATA TYPE text;--> statement-breakpoint
 DROP TYPE "public"."membership_status";--> statement-breakpoint
-CREATE TYPE "public"."membership_status" AS ENUM('pendingPayment', 'active', 'gracePeriod', 'lapsed', 'expired', 'suspended', 'removed', 'resigned', 'deceased', 'expelled');--> statement-breakpoint
+DO $$ BEGIN CREATE TYPE "public"."membership_status" AS ENUM('pendingPayment', 'active', 'gracePeriod', 'lapsed', 'expired', 'suspended', 'removed', 'resigned', 'deceased', 'expelled'); EXCEPTION WHEN duplicate_object THEN NULL; END $$;--> statement-breakpoint
 ALTER TABLE "membership" ALTER COLUMN "status" SET DEFAULT 'pendingPayment'::"public"."membership_status";--> statement-breakpoint
 ALTER TABLE "membership" ALTER COLUMN "status" SET DATA TYPE "public"."membership_status" USING "status"::"public"."membership_status";--> statement-breakpoint
 ALTER TABLE "membership_status_history" ALTER COLUMN "from_status" SET DATA TYPE "public"."membership_status" USING "from_status"::"public"."membership_status";--> statement-breakpoint
@@ -575,7 +575,7 @@ ALTER TABLE "dues_gateway_config" ALTER COLUMN "provider" SET DATA TYPE text;-->
 ALTER TABLE "billing_config" ALTER COLUMN "provider" SET DATA TYPE text;--> statement-breakpoint
 ALTER TABLE "billing_config" ALTER COLUMN "provider" SET DEFAULT 'stripe'::text;--> statement-breakpoint
 DROP TYPE "public"."gateway_provider";--> statement-breakpoint
-CREATE TYPE "public"."gateway_provider" AS ENUM('stripe', 'paymongo');--> statement-breakpoint
+DO $$ BEGIN CREATE TYPE "public"."gateway_provider" AS ENUM('stripe', 'paymongo'); EXCEPTION WHEN duplicate_object THEN NULL; END $$;--> statement-breakpoint
 ALTER TABLE "dues_gateway_config" ALTER COLUMN "provider" SET DATA TYPE "public"."gateway_provider" USING "provider"::"public"."gateway_provider";--> statement-breakpoint
 ALTER TABLE "billing_config" ALTER COLUMN "provider" SET DEFAULT 'stripe'::"public"."gateway_provider";--> statement-breakpoint
 ALTER TABLE "billing_config" ALTER COLUMN "provider" SET DATA TYPE "public"."gateway_provider" USING "provider"::"public"."gateway_provider";--> statement-breakpoint
@@ -1012,36 +1012,36 @@ ALTER TABLE "accredited_provider" ALTER COLUMN "created_at" SET DEFAULT now();--
 ALTER TABLE "accredited_provider" ALTER COLUMN "updated_at" SET DATA TYPE timestamp with time zone;--> statement-breakpoint
 ALTER TABLE "accredited_provider" ALTER COLUMN "updated_at" SET DEFAULT now();--> statement-breakpoint
 ALTER TABLE "accredited_provider" ALTER COLUMN "expiry_date" SET DATA TYPE timestamp with time zone;--> statement-breakpoint
-ALTER TABLE "credit_entry" ADD COLUMN "source_type" "credit_source_type";--> statement-breakpoint
-ALTER TABLE "credit_entry" ADD COLUMN "source_id" uuid;--> statement-breakpoint
-ALTER TABLE "credit_entry" ADD COLUMN "cpd_activity_type" "cpd_activity_type";--> statement-breakpoint
-ALTER TABLE "credit_entry" ADD COLUMN "attestation" jsonb;--> statement-breakpoint
-ALTER TABLE "credit_entry" ADD COLUMN "status" "credit_status" DEFAULT 'active';--> statement-breakpoint
-ALTER TABLE "credit_entry" ADD COLUMN "voided_reason" varchar(500);--> statement-breakpoint
-ALTER TABLE "dues_config" ADD COLUMN "due_date_day" integer DEFAULT 1 NOT NULL;--> statement-breakpoint
-ALTER TABLE "dues_config" ADD COLUMN "cycle_start_month" integer DEFAULT 1 NOT NULL;--> statement-breakpoint
-ALTER TABLE "membership" ADD COLUMN "removed_at" timestamp with time zone;--> statement-breakpoint
-ALTER TABLE "membership" ADD COLUMN "removal_reason" varchar(500);--> statement-breakpoint
-ALTER TABLE "check_in" ADD COLUMN "attestation" jsonb;--> statement-breakpoint
-ALTER TABLE "event" ADD COLUMN "cpd_activity_type" "cpd_activity_type";--> statement-breakpoint
-ALTER TABLE "event" ADD COLUMN "event_slug" varchar(300);--> statement-breakpoint
-ALTER TABLE "event" ADD COLUMN "cover_image_url" varchar(2048);--> statement-breakpoint
-ALTER TABLE "audit_log_entry" ADD COLUMN "event_sub_type" varchar(100);--> statement-breakpoint
-ALTER TABLE "certificate" ADD COLUMN "template_id" varchar(100);--> statement-breakpoint
-ALTER TABLE "certificate" ADD COLUMN "signing_officer_id" uuid;--> statement-breakpoint
-ALTER TABLE "certificate" ADD COLUMN "credit_hours" integer;--> statement-breakpoint
-ALTER TABLE "certificate" ADD COLUMN "cpd_activity_type" "cpd_activity_type";--> statement-breakpoint
-ALTER TABLE "certificate" ADD COLUMN "status" "certificate_status" DEFAULT 'issued';--> statement-breakpoint
-ALTER TABLE "certificate" ADD COLUMN "pdf_url" varchar(500);--> statement-breakpoint
-ALTER TABLE "certificate" ADD COLUMN "revoked_at" timestamp with time zone;--> statement-breakpoint
-ALTER TABLE "certificate" ADD COLUMN "revoked_reason" varchar(500);--> statement-breakpoint
-ALTER TABLE "dues_payment" ADD COLUMN "refund_date" timestamp with time zone;--> statement-breakpoint
-ALTER TABLE "dues_payment" ADD COLUMN "refund_reason" text;--> statement-breakpoint
-ALTER TABLE "person_privacy_setting" ADD COLUMN "credentials_visible" boolean DEFAULT false NOT NULL;--> statement-breakpoint
-ALTER TABLE "person_privacy_setting" ADD COLUMN "dues_status_visible" boolean DEFAULT false NOT NULL;--> statement-breakpoint
-ALTER TABLE "person_privacy_setting" ADD COLUMN "ce_compliance_visible" boolean DEFAULT false NOT NULL;--> statement-breakpoint
-ALTER TABLE "association" ADD COLUMN "cycle_start_month" integer;--> statement-breakpoint
-ALTER TABLE "association" ADD COLUMN "cycle_start_day" integer;--> statement-breakpoint
+ALTER TABLE "credit_entry" ADD COLUMN IF NOT EXISTS "source_type" "credit_source_type";--> statement-breakpoint
+ALTER TABLE "credit_entry" ADD COLUMN IF NOT EXISTS "source_id" uuid;--> statement-breakpoint
+ALTER TABLE "credit_entry" ADD COLUMN IF NOT EXISTS "cpd_activity_type" "cpd_activity_type";--> statement-breakpoint
+ALTER TABLE "credit_entry" ADD COLUMN IF NOT EXISTS "attestation" jsonb;--> statement-breakpoint
+ALTER TABLE "credit_entry" ADD COLUMN IF NOT EXISTS "status" "credit_status" DEFAULT 'active';--> statement-breakpoint
+ALTER TABLE "credit_entry" ADD COLUMN IF NOT EXISTS "voided_reason" varchar(500);--> statement-breakpoint
+ALTER TABLE "dues_config" ADD COLUMN IF NOT EXISTS "due_date_day" integer DEFAULT 1 NOT NULL;--> statement-breakpoint
+ALTER TABLE "dues_config" ADD COLUMN IF NOT EXISTS "cycle_start_month" integer DEFAULT 1 NOT NULL;--> statement-breakpoint
+ALTER TABLE "membership" ADD COLUMN IF NOT EXISTS "removed_at" timestamp with time zone;--> statement-breakpoint
+ALTER TABLE "membership" ADD COLUMN IF NOT EXISTS "removal_reason" varchar(500);--> statement-breakpoint
+ALTER TABLE "check_in" ADD COLUMN IF NOT EXISTS "attestation" jsonb;--> statement-breakpoint
+ALTER TABLE "event" ADD COLUMN IF NOT EXISTS "cpd_activity_type" "cpd_activity_type";--> statement-breakpoint
+ALTER TABLE "event" ADD COLUMN IF NOT EXISTS "event_slug" varchar(300);--> statement-breakpoint
+ALTER TABLE "event" ADD COLUMN IF NOT EXISTS "cover_image_url" varchar(2048);--> statement-breakpoint
+ALTER TABLE "audit_log_entry" ADD COLUMN IF NOT EXISTS "event_sub_type" varchar(100);--> statement-breakpoint
+ALTER TABLE "certificate" ADD COLUMN IF NOT EXISTS "template_id" varchar(100);--> statement-breakpoint
+ALTER TABLE "certificate" ADD COLUMN IF NOT EXISTS "signing_officer_id" uuid;--> statement-breakpoint
+ALTER TABLE "certificate" ADD COLUMN IF NOT EXISTS "credit_hours" integer;--> statement-breakpoint
+ALTER TABLE "certificate" ADD COLUMN IF NOT EXISTS "cpd_activity_type" "cpd_activity_type";--> statement-breakpoint
+ALTER TABLE "certificate" ADD COLUMN IF NOT EXISTS "status" "certificate_status" DEFAULT 'issued';--> statement-breakpoint
+ALTER TABLE "certificate" ADD COLUMN IF NOT EXISTS "pdf_url" varchar(500);--> statement-breakpoint
+ALTER TABLE "certificate" ADD COLUMN IF NOT EXISTS "revoked_at" timestamp with time zone;--> statement-breakpoint
+ALTER TABLE "certificate" ADD COLUMN IF NOT EXISTS "revoked_reason" varchar(500);--> statement-breakpoint
+ALTER TABLE "dues_payment" ADD COLUMN IF NOT EXISTS "refund_date" timestamp with time zone;--> statement-breakpoint
+ALTER TABLE "dues_payment" ADD COLUMN IF NOT EXISTS "refund_reason" text;--> statement-breakpoint
+ALTER TABLE "person_privacy_setting" ADD COLUMN IF NOT EXISTS "credentials_visible" boolean DEFAULT false NOT NULL;--> statement-breakpoint
+ALTER TABLE "person_privacy_setting" ADD COLUMN IF NOT EXISTS "dues_status_visible" boolean DEFAULT false NOT NULL;--> statement-breakpoint
+ALTER TABLE "person_privacy_setting" ADD COLUMN IF NOT EXISTS "ce_compliance_visible" boolean DEFAULT false NOT NULL;--> statement-breakpoint
+ALTER TABLE "association" ADD COLUMN IF NOT EXISTS "cycle_start_month" integer;--> statement-breakpoint
+ALTER TABLE "association" ADD COLUMN IF NOT EXISTS "cycle_start_day" integer;--> statement-breakpoint
 ALTER TABLE "ad_report" ADD CONSTRAINT "ad_report_creative_id_ad_creative_id_fk" FOREIGN KEY ("creative_id") REFERENCES "public"."ad_creative"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "ad_campaign" ADD CONSTRAINT "ad_campaign_advertiser_id_advertiser_id_fk" FOREIGN KEY ("advertiser_id") REFERENCES "public"."advertiser"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "ad_creative" ADD CONSTRAINT "ad_creative_campaign_id_ad_campaign_id_fk" FOREIGN KEY ("campaign_id") REFERENCES "public"."ad_campaign"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
@@ -1061,87 +1061,87 @@ ALTER TABLE "payment_token" ADD CONSTRAINT "payment_token_created_by_officer_per
 ALTER TABLE "marketplace_listing" ADD CONSTRAINT "marketplace_listing_vendor_id_vendor_id_fk" FOREIGN KEY ("vendor_id") REFERENCES "public"."vendor"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "marketplace_order" ADD CONSTRAINT "marketplace_order_listing_id_marketplace_listing_id_fk" FOREIGN KEY ("listing_id") REFERENCES "public"."marketplace_listing"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "marketplace_order" ADD CONSTRAINT "marketplace_order_vendor_id_vendor_id_fk" FOREIGN KEY ("vendor_id") REFERENCES "public"."vendor"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
-CREATE INDEX "ad_reports_creative_idx" ON "ad_report" USING btree ("creative_id");--> statement-breakpoint
-CREATE INDEX "advertisers_org_idx" ON "advertiser" USING btree ("organization_id");--> statement-breakpoint
-CREATE INDEX "campaigns_org_idx" ON "ad_campaign" USING btree ("organization_id");--> statement-breakpoint
-CREATE INDEX "campaigns_advertiser_idx" ON "ad_campaign" USING btree ("advertiser_id");--> statement-breakpoint
-CREATE INDEX "campaigns_status_idx" ON "ad_campaign" USING btree ("status");--> statement-breakpoint
-CREATE INDEX "campaigns_slot_idx" ON "ad_campaign" USING btree ("ad_slot");--> statement-breakpoint
-CREATE INDEX "creatives_campaign_idx" ON "ad_creative" USING btree ("campaign_id");--> statement-breakpoint
-CREATE INDEX "creatives_status_idx" ON "ad_creative" USING btree ("status");--> statement-breakpoint
-CREATE INDEX "ad_opt_out_person_idx" ON "member_ad_opt_out" USING btree ("person_id");--> statement-breakpoint
-CREATE INDEX "ad_opt_out_org_person_idx" ON "member_ad_opt_out" USING btree ("organization_id","person_id");--> statement-breakpoint
-CREATE INDEX "webhook_retry_org_idx" ON "webhook_retry_log" USING btree ("organization_id");--> statement-breakpoint
-CREATE INDEX "webhook_retry_status_idx" ON "webhook_retry_log" USING btree ("status");--> statement-breakpoint
-CREATE INDEX "webhook_retry_next_retry_idx" ON "webhook_retry_log" USING btree ("next_retry_at");--> statement-breakpoint
-CREATE INDEX "idx_disciplinary_action_org" ON "disciplinary_action" USING btree ("organization_id");--> statement-breakpoint
-CREATE INDEX "idx_disciplinary_action_target" ON "disciplinary_action" USING btree ("target_person_id");--> statement-breakpoint
-CREATE INDEX "idx_disciplinary_action_issuer" ON "disciplinary_action" USING btree ("issued_by");--> statement-breakpoint
-CREATE INDEX "idx_transition_checklist_term" ON "transition_checklist" USING btree ("officer_term_id");--> statement-breakpoint
-CREATE INDEX "idx_transition_checklist_org" ON "transition_checklist" USING btree ("organization_id");--> statement-breakpoint
-CREATE INDEX "special_assessment_target_assessment_idx" ON "special_assessment_target" USING btree ("assessment_id");--> statement-breakpoint
-CREATE INDEX "special_assessment_target_person_idx" ON "special_assessment_target" USING btree ("person_id");--> statement-breakpoint
-CREATE INDEX "special_assessment_target_assessment_person_idx" ON "special_assessment_target" USING btree ("assessment_id","person_id");--> statement-breakpoint
-CREATE INDEX "special_assessment_org_idx" ON "special_assessment" USING btree ("organization_id");--> statement-breakpoint
-CREATE INDEX "special_assessment_org_status_idx" ON "special_assessment" USING btree ("organization_id","status");--> statement-breakpoint
-CREATE INDEX "idx_committee_task_org" ON "committee_task" USING btree ("organization_id");--> statement-breakpoint
-CREATE INDEX "idx_committee_task_committee" ON "committee_task" USING btree ("committee_id");--> statement-breakpoint
-CREATE INDEX "idx_committee_task_assignee" ON "committee_task" USING btree ("assignee_id");--> statement-breakpoint
-CREATE INDEX "idx_committee_task_status" ON "committee_task" USING btree ("status");--> statement-breakpoint
-CREATE INDEX "idx_committee_task_due" ON "committee_task" USING btree ("due_date");--> statement-breakpoint
-CREATE INDEX "idx_committee_member_org" ON "committee_member" USING btree ("organization_id");--> statement-breakpoint
-CREATE INDEX "idx_committee_member_committee" ON "committee_member" USING btree ("committee_id");--> statement-breakpoint
-CREATE INDEX "idx_committee_member_person" ON "committee_member" USING btree ("person_id");--> statement-breakpoint
-CREATE INDEX "idx_committee_org" ON "committee" USING btree ("organization_id");--> statement-breakpoint
-CREATE INDEX "idx_committee_status" ON "committee" USING btree ("status");--> statement-breakpoint
-CREATE INDEX "billing_configs_org_idx" ON "billing_config" USING btree ("organization_id");--> statement-breakpoint
-CREATE INDEX "saved_segment_org_idx" ON "saved_segment" USING btree ("organization_id");--> statement-breakpoint
-CREATE INDEX "idx_feed_muted_member" ON "feed_muted_author" USING btree ("member_id");--> statement-breakpoint
-CREATE INDEX "idx_feed_muted_org" ON "feed_muted_author" USING btree ("organization_id");--> statement-breakpoint
-CREATE INDEX "idx_feed_reaction_post" ON "feed_post_reaction" USING btree ("post_id");--> statement-breakpoint
-CREATE INDEX "idx_feed_reaction_member" ON "feed_post_reaction" USING btree ("member_id");--> statement-breakpoint
-CREATE INDEX "idx_feed_report_post" ON "feed_post_report" USING btree ("post_id");--> statement-breakpoint
-CREATE INDEX "idx_feed_post_org" ON "feed_post" USING btree ("organization_id");--> statement-breakpoint
-CREATE INDEX "idx_feed_post_author" ON "feed_post" USING btree ("author_id");--> statement-breakpoint
-CREATE INDEX "idx_feed_post_status" ON "feed_post" USING btree ("status");--> statement-breakpoint
-CREATE INDEX "survey_responses_org_idx" ON "survey_response" USING btree ("organization_id");--> statement-breakpoint
-CREATE INDEX "survey_responses_survey_idx" ON "survey_response" USING btree ("survey_id");--> statement-breakpoint
-CREATE INDEX "survey_responses_responder_idx" ON "survey_response" USING btree ("responder_id");--> statement-breakpoint
-CREATE INDEX "survey_responses_status_idx" ON "survey_response" USING btree ("status");--> statement-breakpoint
-CREATE INDEX "surveys_org_idx" ON "survey" USING btree ("organization_id");--> statement-breakpoint
-CREATE INDEX "surveys_status_idx" ON "survey" USING btree ("status");--> statement-breakpoint
-CREATE INDEX "surveys_type_idx" ON "survey" USING btree ("survey_type");--> statement-breakpoint
-CREATE INDEX "surveys_created_by_idx" ON "survey" USING btree ("created_by");--> statement-breakpoint
-CREATE INDEX "idx_payment_token_hash" ON "payment_token" USING btree ("token_hash");--> statement-breakpoint
-CREATE INDEX "idx_payment_token_person" ON "payment_token" USING btree ("person_id");--> statement-breakpoint
-CREATE INDEX "idx_payment_token_org" ON "payment_token" USING btree ("organization_id");--> statement-breakpoint
-CREATE INDEX "idx_job_app_posting" ON "job_application" USING btree ("posting_id");--> statement-breakpoint
-CREATE INDEX "idx_job_app_person" ON "job_application" USING btree ("person_id");--> statement-breakpoint
-CREATE INDEX "idx_job_app_status" ON "job_application" USING btree ("status");--> statement-breakpoint
-CREATE INDEX "idx_job_posting_org" ON "job_posting" USING btree ("organization_id");--> statement-breakpoint
-CREATE INDEX "idx_job_posting_status" ON "job_posting" USING btree ("status");--> statement-breakpoint
-CREATE INDEX "idx_job_posting_expires" ON "job_posting" USING btree ("expires_at");--> statement-breakpoint
-CREATE INDEX "idx_job_posting_type" ON "job_posting" USING btree ("type");--> statement-breakpoint
-CREATE INDEX "listings_org_idx" ON "marketplace_listing" USING btree ("organization_id");--> statement-breakpoint
-CREATE INDEX "listings_vendor_idx" ON "marketplace_listing" USING btree ("vendor_id");--> statement-breakpoint
-CREATE INDEX "listings_status_idx" ON "marketplace_listing" USING btree ("status");--> statement-breakpoint
-CREATE INDEX "orders_org_idx" ON "marketplace_order" USING btree ("organization_id");--> statement-breakpoint
-CREATE INDEX "orders_buyer_idx" ON "marketplace_order" USING btree ("buyer_person_id");--> statement-breakpoint
-CREATE INDEX "orders_vendor_idx" ON "marketplace_order" USING btree ("vendor_id");--> statement-breakpoint
-CREATE INDEX "orders_status_idx" ON "marketplace_order" USING btree ("status");--> statement-breakpoint
-CREATE INDEX "orders_listing_idx" ON "marketplace_order" USING btree ("listing_id");--> statement-breakpoint
-CREATE INDEX "vendors_org_idx" ON "vendor" USING btree ("organization_id");--> statement-breakpoint
-CREATE INDEX "vendors_status_idx" ON "vendor" USING btree ("verification_status");--> statement-breakpoint
-CREATE INDEX "vendors_category_idx" ON "vendor" USING btree ("category");--> statement-breakpoint
-CREATE INDEX "idx_chapter_snapshot_org" ON "chapter_snapshot" USING btree ("org_id");--> statement-breakpoint
-CREATE INDEX "idx_chapter_snapshot_association" ON "chapter_snapshot" USING btree ("association_id");--> statement-breakpoint
-CREATE INDEX "idx_chapter_snapshot_month" ON "chapter_snapshot" USING btree ("snapshot_month");--> statement-breakpoint
-CREATE INDEX "idx_export_log_association" ON "dashboard_export_log" USING btree ("association_id");--> statement-breakpoint
-CREATE INDEX "idx_nda_association" ON "national_dashboard_access" USING btree ("association_id");--> statement-breakpoint
-CREATE INDEX "idx_nda_member" ON "national_dashboard_access" USING btree ("member_id");--> statement-breakpoint
-CREATE INDEX "idx_credit_source" ON "credit_entry" USING btree ("source_type","source_id");--> statement-breakpoint
-CREATE INDEX "idx_event_slug" ON "event" USING btree ("event_slug");--> statement-breakpoint
-CREATE INDEX "certificate_status_idx" ON "certificate" USING btree ("status");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "ad_reports_creative_idx" ON "ad_report" USING btree ("creative_id");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "advertisers_org_idx" ON "advertiser" USING btree ("organization_id");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "campaigns_org_idx" ON "ad_campaign" USING btree ("organization_id");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "campaigns_advertiser_idx" ON "ad_campaign" USING btree ("advertiser_id");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "campaigns_status_idx" ON "ad_campaign" USING btree ("status");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "campaigns_slot_idx" ON "ad_campaign" USING btree ("ad_slot");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "creatives_campaign_idx" ON "ad_creative" USING btree ("campaign_id");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "creatives_status_idx" ON "ad_creative" USING btree ("status");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "ad_opt_out_person_idx" ON "member_ad_opt_out" USING btree ("person_id");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "ad_opt_out_org_person_idx" ON "member_ad_opt_out" USING btree ("organization_id","person_id");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "webhook_retry_org_idx" ON "webhook_retry_log" USING btree ("organization_id");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "webhook_retry_status_idx" ON "webhook_retry_log" USING btree ("status");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "webhook_retry_next_retry_idx" ON "webhook_retry_log" USING btree ("next_retry_at");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "idx_disciplinary_action_org" ON "disciplinary_action" USING btree ("organization_id");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "idx_disciplinary_action_target" ON "disciplinary_action" USING btree ("target_person_id");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "idx_disciplinary_action_issuer" ON "disciplinary_action" USING btree ("issued_by");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "idx_transition_checklist_term" ON "transition_checklist" USING btree ("officer_term_id");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "idx_transition_checklist_org" ON "transition_checklist" USING btree ("organization_id");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "special_assessment_target_assessment_idx" ON "special_assessment_target" USING btree ("assessment_id");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "special_assessment_target_person_idx" ON "special_assessment_target" USING btree ("person_id");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "special_assessment_target_assessment_person_idx" ON "special_assessment_target" USING btree ("assessment_id","person_id");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "special_assessment_org_idx" ON "special_assessment" USING btree ("organization_id");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "special_assessment_org_status_idx" ON "special_assessment" USING btree ("organization_id","status");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "idx_committee_task_org" ON "committee_task" USING btree ("organization_id");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "idx_committee_task_committee" ON "committee_task" USING btree ("committee_id");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "idx_committee_task_assignee" ON "committee_task" USING btree ("assignee_id");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "idx_committee_task_status" ON "committee_task" USING btree ("status");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "idx_committee_task_due" ON "committee_task" USING btree ("due_date");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "idx_committee_member_org" ON "committee_member" USING btree ("organization_id");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "idx_committee_member_committee" ON "committee_member" USING btree ("committee_id");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "idx_committee_member_person" ON "committee_member" USING btree ("person_id");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "idx_committee_org" ON "committee" USING btree ("organization_id");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "idx_committee_status" ON "committee" USING btree ("status");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "billing_configs_org_idx" ON "billing_config" USING btree ("organization_id");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "saved_segment_org_idx" ON "saved_segment" USING btree ("organization_id");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "idx_feed_muted_member" ON "feed_muted_author" USING btree ("member_id");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "idx_feed_muted_org" ON "feed_muted_author" USING btree ("organization_id");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "idx_feed_reaction_post" ON "feed_post_reaction" USING btree ("post_id");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "idx_feed_reaction_member" ON "feed_post_reaction" USING btree ("member_id");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "idx_feed_report_post" ON "feed_post_report" USING btree ("post_id");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "idx_feed_post_org" ON "feed_post" USING btree ("organization_id");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "idx_feed_post_author" ON "feed_post" USING btree ("author_id");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "idx_feed_post_status" ON "feed_post" USING btree ("status");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "survey_responses_org_idx" ON "survey_response" USING btree ("organization_id");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "survey_responses_survey_idx" ON "survey_response" USING btree ("survey_id");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "survey_responses_responder_idx" ON "survey_response" USING btree ("responder_id");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "survey_responses_status_idx" ON "survey_response" USING btree ("status");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "surveys_org_idx" ON "survey" USING btree ("organization_id");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "surveys_status_idx" ON "survey" USING btree ("status");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "surveys_type_idx" ON "survey" USING btree ("survey_type");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "surveys_created_by_idx" ON "survey" USING btree ("created_by");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "idx_payment_token_hash" ON "payment_token" USING btree ("token_hash");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "idx_payment_token_person" ON "payment_token" USING btree ("person_id");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "idx_payment_token_org" ON "payment_token" USING btree ("organization_id");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "idx_job_app_posting" ON "job_application" USING btree ("posting_id");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "idx_job_app_person" ON "job_application" USING btree ("person_id");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "idx_job_app_status" ON "job_application" USING btree ("status");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "idx_job_posting_org" ON "job_posting" USING btree ("organization_id");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "idx_job_posting_status" ON "job_posting" USING btree ("status");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "idx_job_posting_expires" ON "job_posting" USING btree ("expires_at");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "idx_job_posting_type" ON "job_posting" USING btree ("type");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "listings_org_idx" ON "marketplace_listing" USING btree ("organization_id");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "listings_vendor_idx" ON "marketplace_listing" USING btree ("vendor_id");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "listings_status_idx" ON "marketplace_listing" USING btree ("status");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "orders_org_idx" ON "marketplace_order" USING btree ("organization_id");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "orders_buyer_idx" ON "marketplace_order" USING btree ("buyer_person_id");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "orders_vendor_idx" ON "marketplace_order" USING btree ("vendor_id");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "orders_status_idx" ON "marketplace_order" USING btree ("status");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "orders_listing_idx" ON "marketplace_order" USING btree ("listing_id");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "vendors_org_idx" ON "vendor" USING btree ("organization_id");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "vendors_status_idx" ON "vendor" USING btree ("verification_status");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "vendors_category_idx" ON "vendor" USING btree ("category");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "idx_chapter_snapshot_org" ON "chapter_snapshot" USING btree ("org_id");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "idx_chapter_snapshot_association" ON "chapter_snapshot" USING btree ("association_id");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "idx_chapter_snapshot_month" ON "chapter_snapshot" USING btree ("snapshot_month");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "idx_export_log_association" ON "dashboard_export_log" USING btree ("association_id");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "idx_nda_association" ON "national_dashboard_access" USING btree ("association_id");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "idx_nda_member" ON "national_dashboard_access" USING btree ("member_id");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "idx_credit_source" ON "credit_entry" USING btree ("source_type","source_id");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "idx_event_slug" ON "event" USING btree ("event_slug");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "certificate_status_idx" ON "certificate" USING btree ("status");--> statement-breakpoint
 ALTER TABLE "membership" DROP COLUMN "terminated_at";--> statement-breakpoint
 ALTER TABLE "membership" DROP COLUMN "termination_reason";--> statement-breakpoint
 ALTER TABLE "credit_entry" ADD CONSTRAINT "uq_credit_source_person" UNIQUE("source_type","source_id","person_id");--> statement-breakpoint

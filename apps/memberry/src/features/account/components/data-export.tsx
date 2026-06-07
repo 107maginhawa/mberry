@@ -73,7 +73,10 @@ export function DataExport() {
 
     setIsRequesting(true)
     try {
-      const data = await api.post<any>('/api/persons/me/export')
+      // T3: this endpoint is GET (services/api-ts/src/handlers/person/exportMyData.ts
+      // registers `app.get('/persons/me/export', …)`). Previously POSTed,
+      // which silently 405'd and left the Previous Exports list empty.
+      const data = await api.get<any>('/api/persons/me/export')
 
       // Create downloadable JSON blob
       const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' })

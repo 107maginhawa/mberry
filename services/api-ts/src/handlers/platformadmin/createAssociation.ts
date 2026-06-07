@@ -3,7 +3,6 @@ import type { DatabaseInstance } from '@/core/database';
 import type { CreateAssociationBody } from '@/generated/openapi/validators';
 import { ConflictError } from '@/core/errors';
 import { AssociationRepository } from './repos/platform-admin.repo';
-import { auditAction } from '@/utils/audit';
 import { domainEvents } from '@/core/domain-events';
 
 /**
@@ -45,12 +44,8 @@ export async function createAssociation(
     carryoverEnabled: body.carryoverEnabled ?? false,
   });
 
-  await auditAction(ctx, {
-    action: 'create',
-    resourceType: 'association',
-    resourceId: association.id,
-    description: `Association "${association.name}" created`,
-  });
+  ctx.set('auditResourceId', association.id);
+  ctx.set('auditDescription', `Association "${association.name}" created`);
 
   // [EM-M03-d1e2f3a4] Emit spec-declared AssociationCreated event.
   domainEvents

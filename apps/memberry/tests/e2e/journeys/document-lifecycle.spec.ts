@@ -1,18 +1,20 @@
+// WF-071 — Document Upload: officer publishes new document
 import { test, expect } from '../helpers/test-fixture'
-import { signIn } from '../helpers/auth'
 import { SEED_OFFICER_EMAIL, TEST_PASSWORD } from '../helpers/test-config'
+import { authStateFile } from '../helpers/auth-state'
+import { captureRouteHydration } from '../helpers/real-flow'
 
+
+test.use({ storageState: authStateFile('officer') })
 const ORG_ID = 'ed8e3a96-8126-4341-be42-e6eb7940c562'
 
 test.describe('Document Lifecycle (Officer Journey)', () => {
-  test.beforeEach(async ({ page }) => {
-    await signIn(page, SEED_OFFICER_EMAIL, TEST_PASSWORD)
-  })
-
-  test('officer can navigate to document library', async ({ page }) => {
+test('officer can navigate to document library', async ({ page }) => {
+    const respP = captureRouteHydration(page, '/documents')
     await page.goto(`/org/${ORG_ID}/officer/documents`)
-    await page.waitForLoadState('networkidle')
-
+    const resp = await respP
+    expect(resp?.status()).toBe(200)
+    expect(resp?.ok()).toBe(true)
     await expect(
       page.getByRole('heading', { name: /document library/i }).first(),
     ).toBeVisible({ timeout: 10000 })
@@ -20,8 +22,6 @@ test.describe('Document Lifecycle (Officer Journey)', () => {
 
   test('upload button opens upload dialog or form', async ({ page }) => {
     await page.goto(`/org/${ORG_ID}/officer/documents`)
-    await page.waitForLoadState('networkidle')
-
     const uploadBtn = page
       .getByRole('button', { name: /upload|add document|new document/i })
       .first()
@@ -38,8 +38,6 @@ test.describe('Document Lifecycle (Officer Journey)', () => {
 
   test('document list shows category filter', async ({ page }) => {
     await page.goto(`/org/${ORG_ID}/officer/documents`)
-    await page.waitForLoadState('networkidle')
-
     // Categories may appear as tabs, filter buttons, or select dropdown
     const hasTabs = await page.getByRole('tab').first().isVisible({ timeout: 5000 }).catch(() => false)
     const hasFilter = await page.getByText(/all|bylaws|policies|forms/i).first().isVisible({ timeout: 5000 }).catch(() => false)
@@ -49,8 +47,6 @@ test.describe('Document Lifecycle (Officer Journey)', () => {
 
   test('clicking a document navigates to detail page', async ({ page }) => {
     await page.goto(`/org/${ORG_ID}/officer/documents`)
-    await page.waitForLoadState('networkidle')
-
     // Find a clickable document row/link
     const docLink = page
       .getByRole('link')
@@ -79,8 +75,6 @@ test.describe('Document Lifecycle (Officer Journey)', () => {
 
   test('document detail page shows metadata', async ({ page }) => {
     await page.goto(`/org/${ORG_ID}/officer/documents`)
-    await page.waitForLoadState('networkidle')
-
     const docLink = page
       .getByRole('link')
       .filter({ hasNot: page.getByText(/upload|create|new|officer|home|dashboard/i) })
@@ -106,8 +100,6 @@ test.describe('Document Lifecycle (Officer Journey)', () => {
 
   test('search filters document list', async ({ page }) => {
     await page.goto(`/org/${ORG_ID}/officer/documents`)
-    await page.waitForLoadState('networkidle')
-
     const searchInput = page
       .getByRole('searchbox')
       .or(page.getByPlaceholder(/search/i))

@@ -1,15 +1,13 @@
 // Action-Contract Tests: Profile, Settings, Notifications, Credits
 import { test, expect } from '../helpers/test-fixture'
 import { expectVisibleAfterReload, expectVisibleOnPage } from '../helpers/persistence'
-import { signIn } from '../helpers/auth'
 import { SEED_OFFICER_EMAIL, TEST_PASSWORD } from '../helpers/test-config'
+import { authStateFile } from '../helpers/auth-state'
 
+
+test.use({ storageState: authStateFile('officer') })
 test.describe('Profile Actions', () => {
-  test.beforeEach(async ({ page }) => {
-    await signIn(page, SEED_OFFICER_EMAIL, TEST_PASSWORD)
-  })
-
-  test('edit profile → change specialization → save → persists on reload', async ({ page }) => {
+test('edit profile → change specialization → save → persists on reload', async ({ page }) => {
     await page.goto('/my/profile')
     await expect(page.getByRole('button', { name: /Edit Profile/i })).toBeVisible({ timeout: 10000 })
 
@@ -41,7 +39,6 @@ test.describe('Profile Actions', () => {
 
   test('notifications page works — shows content or empty state', async ({ page }) => {
     await page.goto('/my/notifications')
-    await page.waitForLoadState('networkidle')
     await expect(page.getByRole('heading', { name: /Notifications/i })).toBeVisible({ timeout: 10000 })
 
     // Should show either notifications or "No notifications" — not a crash
@@ -80,7 +77,10 @@ test.describe('Profile Actions', () => {
   test('manual credit entry form submits and saves', async ({ page }) => {
     await page.goto('/my/credits/log')
 
-    await expect(page.getByText(/Log Manual Credit|Credit Log/i)).toBeVisible({ timeout: 10000 })
+    // Scope to the h1 — the same text also appears in the breadcrumb.
+    await expect(
+      page.getByRole('heading', { name: /log manual credit/i, level: 1 }),
+    ).toBeVisible({ timeout: 10000 })
 
     // Fill form
     const activityInput = page.getByPlaceholder(/Dental|activity/i).first()

@@ -8,6 +8,7 @@ import {
 import { SurveyRepository } from './repos/survey.repo';
 import type { SurveySettings } from './repos/survey.schema';
 import { OfficerTermRepository } from '../association:member/repos/governance.repo';
+import { hasRole } from '@/utils/auth';
 
 /**
  * createSurvey
@@ -27,11 +28,13 @@ export async function createSurvey(
 
   const userId = session.user.id;
   const db = ctx.get('database') as DatabaseInstance;
-  const logger = ctx.get('logger');
+  const baseLogger = ctx.get('logger');
+  const traceId = ctx.get('requestId');
+  const logger = baseLogger?.child?.({ traceId, module: 'surveys' }) ?? baseLogger;
   const organizationId = ctx.get('organizationId') as string;
 
   // Officer/admin gate
-  if (session.user.role !== 'admin') {
+  if (!hasRole(session.user, 'admin')) {
     const officerRepo = new OfficerTermRepository(db, logger);
     const terms = await officerRepo.findActiveByPersonAndOrg(userId, organizationId);
     if (terms.length === 0) {

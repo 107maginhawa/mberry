@@ -7,21 +7,29 @@
 // UI coverage (this file): officer nomination flow, status-gated "Add" button, dialog presence
 
 import { test, expect } from '../helpers/test-fixture'
-import { signIn } from '../helpers/auth'
 import { SEED_OFFICER_EMAIL, TEST_PASSWORD, API_BASE } from '../helpers/test-config'
+import { authStateFile } from '../helpers/auth-state'
+import { apiFetch } from '../helpers/api-fetch'
 
+
+test.use({ storageState: authStateFile('officer') })
 const ORG_ID = 'ed8e3a96-8126-4341-be42-e6eb7940c562'
 
+// F4: serial mode — reads the seeded 2026 election. Other specs that
+// mutate election state (vote, transition status) would otherwise race
+// this read inside a parallel worker pool.
+test.describe.configure({ mode: 'serial' })
 test.describe('BR-34: Nomination Eligibility', () => {
-  test.beforeEach(async ({ page }) => {
-    await signIn(page, SEED_OFFICER_EMAIL, TEST_PASSWORD)
-  })
-
-  test('unauthenticated nomination request returns 401', async ({ page }) => {
-    const response = await page.evaluate(async ({ orgId, apiBase }) => {
-      const res = await fetch(`${apiBase}/association/elections/nominations/eligibility?organizationId=${orgId}`)
-      return { status: res.status }
-    }, { orgId: ORG_ID, apiBase: API_BASE })
+test('unauthenticated nomination request returns 401', async ({ page, context }) => {
+    // Land on the SPA so the in-page fetch carries http://localhost:3004 as
+    // Origin (CORS_ORIGINS allows it). Then clear cookies so the actual
+    // eligibility request is genuinely unauthenticated.
+    await page.goto('/auth/sign-in')
+    await context.clearCookies()
+    const response = await apiFetch(
+      page,
+      `/association/elections/nominations/eligibility?organizationId=${ORG_ID}`,
+    )
     expect(response.status).toBe(401)
   })
 
@@ -35,10 +43,9 @@ test.describe('BR-34: Nomination Eligibility', () => {
     // Eligibility enforcement happens when they select a specific member (handler-level).
 
     await page.goto(`/org/${ORG_ID}/officer/elections`)
-    await page.waitForLoadState('networkidle')
-
     // Navigate into the seeded 2026 draft election
-    const electionLink = page.getByText(/2026.*election|election.*2026/i).first()
+    // Pick any election detail link — seeded 2026 title may be mutated.
+    const electionLink = page.locator('a[href*="/officer/elections/"]').first()
     await expect(electionLink).toBeVisible({ timeout: 10000 })
     await electionLink.click()
     await page.waitForLoadState('networkidle')
@@ -75,9 +82,8 @@ test.describe('BR-34: Nomination Eligibility', () => {
     // This E2E test covers the UI nomination flow entry point and dialog presence.
 
     await page.goto(`/org/${ORG_ID}/officer/elections`)
-    await page.waitForLoadState('networkidle')
-
-    const electionLink = page.getByText(/2026.*election|election.*2026/i).first()
+    // Pick any election detail link — seeded 2026 title may be mutated.
+    const electionLink = page.locator('a[href*="/officer/elections/"]').first()
     await expect(electionLink).toBeVisible({ timeout: 10000 })
     await electionLink.click()
     await page.waitForLoadState('networkidle')
@@ -131,9 +137,8 @@ test.describe('BR-34: Nomination Eligibility', () => {
     //   - nomination-eligibility-e2e.test.ts: "eligible member can be nominated after opening nominations"
 
     await page.goto(`/org/${ORG_ID}/officer/elections`)
-    await page.waitForLoadState('networkidle')
-
-    const electionLink = page.getByText(/2026.*election|election.*2026/i).first()
+    // Pick any election detail link — seeded 2026 title may be mutated.
+    const electionLink = page.locator('a[href*="/officer/elections/"]').first()
     await expect(electionLink).toBeVisible({ timeout: 10000 })
     await electionLink.click()
     await page.waitForLoadState('networkidle')
