@@ -23,7 +23,17 @@ jobs:
       - name: Install
         run: bun install --frozen-lockfile
 
+      - name: Build OpenAPI spec
+        run: bun run --filter @monobase/api-spec build
+
+      - name: Generate API codegen
+        env:
+          AUTH_SECRET: ci-codegen-secret-do-not-use-in-prod
+        run: bun run --filter @monobase/api-ts generate
+
       - name: Typecheck
+        env:
+          AUTH_SECRET: ci-codegen-secret-do-not-use-in-prod
         run: bun typecheck
 
       - name: Handler verb lint (strict)
