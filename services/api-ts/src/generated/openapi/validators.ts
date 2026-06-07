@@ -600,24 +600,9 @@ export const ApplySpecialAssessmentRequestSchema = z.object({
 });
 
 export const ApplySpecialAssessmentResultSchema = z.object({
-  assessment: z.object({
-  id: z.string().uuid(),
-  version: z.number().int(),
-  createdAt: z.string().datetime().transform((str) => new Date(str)),
-  createdBy: z.string().uuid().optional(),
-  updatedAt: z.string().datetime().transform((str) => new Date(str)),
-  updatedBy: z.string().uuid().optional(),
-  organizationId: z.string(),
-  name: z.string().min(1).max(255),
-  description: z.union([z.string(), z.null()]).optional(),
-  amount: z.number().int().gte(1),
-  currency: z.string().max(3),
-  dueDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).refine(val => { const parsed = new Date(val + "T00:00:00Z"); return !isNaN(parsed.getTime()) && parsed.toISOString().split("T")[0] === val; }, { message: "Invalid calendar date" }),
-  fundId: z.union([z.string(), z.null()]).optional(),
-  appliesTo: z.enum(["all", "selected"]),
-  status: z.enum(["draft", "active", "closed"])
-}),
-  invoicesGenerated: z.number().int()
+  message: z.string(),
+  invoicesCreated: z.number().int(),
+  skipped: z.number().int()
 });
 
 export const ArticleSchema = z.object({

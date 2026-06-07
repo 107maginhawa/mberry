@@ -1858,74 +1858,17 @@ export type ApplySpecialAssessmentRequest = {
  */
 export type ApplySpecialAssessmentResult = {
     /**
-     * The updated assessment (now active)
+     * Human-readable confirmation message
      */
-    assessment: {
-        /**
-         * Unique identifier
-         */
-        id: string;
-        /**
-         * Entity version for optimistic locking
-         */
-        version: number;
-        /**
-         * Creation timestamp
-         */
-        createdAt: Date;
-        /**
-         * User who created the entity
-         */
-        createdBy?: string;
-        /**
-         * Last update timestamp
-         */
-        updatedAt: Date;
-        /**
-         * User who last updated the entity
-         */
-        updatedBy?: string;
-        /**
-         * ID of the association organization
-         */
-        organizationId: string;
-        /**
-         * Name of the special assessment
-         */
-        name: string;
-        /**
-         * Description of the assessment purpose
-         */
-        description?: string | null;
-        /**
-         * Amount in minor currency units (e.g. cents)
-         */
-        amount: bigint;
-        /**
-         * ISO 4217 currency code
-         */
-        currency: string;
-        /**
-         * Due date for the assessment
-         */
-        dueDate: Date;
-        /**
-         * Optional fund to allocate collected amounts
-         */
-        fundId?: string | null;
-        /**
-         * Whether assessment applies to all members or selected members
-         */
-        appliesTo: 'all' | 'selected';
-        /**
-         * Lifecycle status
-         */
-        status: 'draft' | 'active' | 'closed';
-    };
+    message: string;
     /**
-     * Number of invoices generated
+     * Number of new invoices created on this apply call
      */
-    invoicesGenerated: number;
+    invoicesCreated: number;
+    /**
+     * Number of targets already invoiced and skipped (BR-T8-004 idempotency)
+     */
+    skipped: number;
 };
 
 /**

@@ -172,11 +172,14 @@ model ApplySpecialAssessmentRequest {
 
 @doc("Result of applying a special assessment")
 model ApplySpecialAssessmentResult {
-  @doc("The updated assessment (now active)")
-  assessment: SpecialAssessment;
+  @doc("Human-readable confirmation message")
+  message: string;
 
-  @doc("Number of invoices generated")
-  invoicesGenerated: int32;
+  @doc("Number of new invoices created on this apply call")
+  invoicesCreated: int32;
+
+  @doc("Number of targets already invoiced and skipped (BR-T8-004 idempotency)")
+  skipped: int32;
 }
 
 @doc("Collection metrics for a special assessment")
