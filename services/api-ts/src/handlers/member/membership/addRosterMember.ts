@@ -31,7 +31,16 @@ export async function addRosterMember(
   const logger = baseLogger?.child?.({ traceId, module: 'association:member' }) ?? baseLogger;
   const repo = new MembershipRepository(db, logger);
 
-  const member = await repo.createOne({ ...body, organizationId: orgId } as NewMembership);
+  const now = new Date();
+  const today = now.toISOString().split('T')[0];
+  const member = await repo.createOne({
+    ...body,
+    organizationId: orgId,
+    startDate: (body.startDate || today) as string,
+    gracePeriodDays: body.gracePeriodDays ?? 30,
+    status: 'pendingPayment',
+    joinedAt: now,
+  } as NewMembership);
 
   ctx.set('auditResourceId', member.id);
   ctx.set('auditDescription', 'Roster member added');

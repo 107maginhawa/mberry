@@ -1,26 +1,26 @@
 {
-  "generatedAt": "2026-06-07T11:52:23.736Z",
+  "generatedAt": "2026-06-07T12:12:35.778Z",
   "totals": {
     "endpoints": 454,
-    "hurlFiles": 146,
-    "coveredCount": 387,
-    "uncoveredCount": 67,
-    "coveragePercent": 85
+    "hurlFiles": 157,
+    "coveredCount": 422,
+    "uncoveredCount": 32,
+    "coveragePercent": 93
   },
   "uncoveredByTag": [
     {
       "tag": "Member/DuesSpecialAssessments",
-      "uncoveredCount": 34,
+      "uncoveredCount": 18,
       "totalCount": 50,
-      "coveredCount": 16,
-      "coveragePercent": 32
+      "coveredCount": 32,
+      "coveragePercent": 64
     },
     {
       "tag": "Member/Membership",
-      "uncoveredCount": 25,
+      "uncoveredCount": 6,
       "totalCount": 40,
-      "coveredCount": 15,
-      "coveragePercent": 38
+      "coveredCount": 34,
+      "coveragePercent": 85
     },
     {
       "tag": "Member/Credits",
@@ -54,45 +54,9 @@
   "uncoveredEndpoints": [
     {
       "method": "GET",
-      "path": "/association/member/aging-buckets/{organizationId}",
-      "tag": "Member/DuesSpecialAssessments",
-      "operationId": "getAgingBucket"
-    },
-    {
-      "method": "POST",
-      "path": "/association/member/aging-buckets/{organizationId}/recalculate",
-      "tag": "Member/DuesSpecialAssessments",
-      "operationId": "recalculateAgingBucket"
-    },
-    {
-      "method": "GET",
       "path": "/association/member/applications",
       "tag": "Member/Membership",
       "operationId": "listMembershipApplications"
-    },
-    {
-      "method": "POST",
-      "path": "/association/member/applications/bulk-approve",
-      "tag": "Member/Membership",
-      "operationId": "bulkApproveMembershipApplications"
-    },
-    {
-      "method": "PATCH",
-      "path": "/association/member/applications/{applicationId}",
-      "tag": "Member/Membership",
-      "operationId": "updateMembershipApplication"
-    },
-    {
-      "method": "DELETE",
-      "path": "/association/member/applications/{applicationId}",
-      "tag": "Member/Membership",
-      "operationId": "deleteMembershipApplication"
-    },
-    {
-      "method": "POST",
-      "path": "/association/member/applications/{applicationId}/deny",
-      "tag": "Member/Membership",
-      "operationId": "denyMembershipApplication"
     },
     {
       "method": "GET",
@@ -153,24 +117,6 @@
       "path": "/association/member/dues-configs/{duesConfigId}",
       "tag": "Member/DuesSpecialAssessments",
       "operationId": "deleteDuesConfig"
-    },
-    {
-      "method": "PUT",
-      "path": "/association/member/dues-gateway/{organizationId}",
-      "tag": "Member/DuesSpecialAssessments",
-      "operationId": "upsertDuesGatewayConfig"
-    },
-    {
-      "method": "DELETE",
-      "path": "/association/member/dues-gateway/{organizationId}",
-      "tag": "Member/DuesSpecialAssessments",
-      "operationId": "disconnectDuesGateway"
-    },
-    {
-      "method": "POST",
-      "path": "/association/member/dues-gateway/{organizationId}/test",
-      "tag": "Member/DuesSpecialAssessments",
-      "operationId": "testDuesGatewayConnection"
     },
     {
       "method": "POST",
@@ -245,72 +191,6 @@
       "operationId": "rejectPaymentProof"
     },
     {
-      "method": "GET",
-      "path": "/association/member/dues-reporting",
-      "tag": "Member/DuesSpecialAssessments",
-      "operationId": "listDuesFunds"
-    },
-    {
-      "method": "PUT",
-      "path": "/association/member/dues-reporting/{organizationId}",
-      "tag": "Member/DuesSpecialAssessments",
-      "operationId": "upsertDuesFunds"
-    },
-    {
-      "method": "GET",
-      "path": "/association/member/dues-reporting/{organizationId}/dashboard",
-      "tag": "Member/DuesSpecialAssessments",
-      "operationId": "getDuesFinancialDashboard"
-    },
-    {
-      "method": "GET",
-      "path": "/association/member/dues-reporting/{organizationId}/report",
-      "tag": "Member/DuesSpecialAssessments",
-      "operationId": "generateDuesReport"
-    },
-    {
-      "method": "GET",
-      "path": "/association/member/dunning/events",
-      "tag": "Member/DuesSpecialAssessments",
-      "operationId": "listDunningEvents"
-    },
-    {
-      "method": "POST",
-      "path": "/association/member/dunning/run",
-      "tag": "Member/DuesSpecialAssessments",
-      "operationId": "runDunning"
-    },
-    {
-      "method": "POST",
-      "path": "/association/member/dunning/templates",
-      "tag": "Member/DuesSpecialAssessments",
-      "operationId": "createDunningTemplate"
-    },
-    {
-      "method": "GET",
-      "path": "/association/member/dunning/templates",
-      "tag": "Member/DuesSpecialAssessments",
-      "operationId": "listDunningTemplates"
-    },
-    {
-      "method": "GET",
-      "path": "/association/member/dunning/templates/{templateId}",
-      "tag": "Member/DuesSpecialAssessments",
-      "operationId": "getDunningTemplate"
-    },
-    {
-      "method": "PATCH",
-      "path": "/association/member/dunning/templates/{templateId}",
-      "tag": "Member/DuesSpecialAssessments",
-      "operationId": "updateDunningTemplate"
-    },
-    {
-      "method": "DELETE",
-      "path": "/association/member/dunning/templates/{templateId}",
-      "tag": "Member/DuesSpecialAssessments",
-      "operationId": "deleteDunningTemplate"
-    },
-    {
       "method": "POST",
       "path": "/association/member/elections/{electionId}/certify",
       "tag": "Member/Governance",
@@ -341,76 +221,10 @@
       "operationId": "deleteInstitutionalMembership"
     },
     {
-      "method": "PATCH",
-      "path": "/association/member/memberships/{membershipId}",
-      "tag": "Member/Membership",
-      "operationId": "updateMembership"
-    },
-    {
-      "method": "DELETE",
-      "path": "/association/member/memberships/{membershipId}",
-      "tag": "Member/Membership",
-      "operationId": "deleteMembership"
-    },
-    {
-      "method": "POST",
-      "path": "/association/member/memberships/{membershipId}/deceased",
-      "tag": "Member/Membership",
-      "operationId": "deceaseMembership"
-    },
-    {
       "method": "POST",
       "path": "/association/member/memberships/{membershipId}/renew",
       "tag": "Member/Membership",
       "operationId": "renewMembership"
-    },
-    {
-      "method": "POST",
-      "path": "/association/member/memberships/{membershipId}/terminate",
-      "tag": "Member/Membership",
-      "operationId": "terminateMembership"
-    },
-    {
-      "method": "GET",
-      "path": "/association/member/org-profile/{organizationId}",
-      "tag": "Member/Membership",
-      "operationId": "getOrganizationProfile"
-    },
-    {
-      "method": "PUT",
-      "path": "/association/member/org-profile/{organizationId}",
-      "tag": "Member/Membership",
-      "operationId": "updateOrganizationProfile"
-    },
-    {
-      "method": "GET",
-      "path": "/association/member/roster",
-      "tag": "Member/Membership",
-      "operationId": "listRosterMembers"
-    },
-    {
-      "method": "POST",
-      "path": "/association/member/roster",
-      "tag": "Member/Membership",
-      "operationId": "addRosterMember"
-    },
-    {
-      "method": "POST",
-      "path": "/association/member/roster/import",
-      "tag": "Member/Membership",
-      "operationId": "importRosterMembers"
-    },
-    {
-      "method": "GET",
-      "path": "/association/member/roster/{memberId}",
-      "tag": "Member/Membership",
-      "operationId": "getRosterMember"
-    },
-    {
-      "method": "PUT",
-      "path": "/association/member/roster/{memberId}",
-      "tag": "Member/Membership",
-      "operationId": "updateRosterMember"
     },
     {
       "method": "PUT",
@@ -429,30 +243,6 @@
       "path": "/association/member/special-assessments/{orgId}",
       "tag": "Member/DuesSpecialAssessments",
       "operationId": "listSpecialAssessments"
-    },
-    {
-      "method": "POST",
-      "path": "/association/member/tiers",
-      "tag": "Member/Membership",
-      "operationId": "createMembershipTier"
-    },
-    {
-      "method": "GET",
-      "path": "/association/member/tiers/{tierId}",
-      "tag": "Member/Membership",
-      "operationId": "getMembershipTier"
-    },
-    {
-      "method": "PATCH",
-      "path": "/association/member/tiers/{tierId}",
-      "tag": "Member/Membership",
-      "operationId": "updateMembershipTier"
-    },
-    {
-      "method": "DELETE",
-      "path": "/association/member/tiers/{tierId}",
-      "tag": "Member/Membership",
-      "operationId": "deleteMembershipTier"
     }
   ]
 }
