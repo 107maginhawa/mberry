@@ -115,14 +115,32 @@ Total: 81 tests across 12 files, all passing post-cutover.
 `specs/api/tests/contract/member/certificates/`:
 - `certificates-public-verify.hurl` (52 LOC, moved from `certificates-flow.hurl`)
 - `certificates-list-get.hurl` (25 LOC, moved from `assoc-certificates-flow.hurl`)
+- `certificates-bulk-issue.hurl` (87 LOC, post-cutover supplement `a59ecdd9`) —
+  officer (President) signs in, sign-ups fresh ephemeral recipient,
+  bulk-issues 1 cert via the sync path, asserts envelope shape +
+  PDA-MM-YYYY-NNNN number pattern, then verifies isValid=true publicly
+  (proves cert reached DB, not the bulk handler's `certificateNumber:'ERROR'`
+  best-effort fallback).
+- `certificates-verify-not-found.hurl` (28 LOC, post-cutover supplement
+  `a59ecdd9`) — covers 404 negative path on verifyCertificatePublic.
+  Scope swap from originally-planned `verify-revoked`: TypeSpec exposes
+  no revoke endpoint (revocation only via direct DB transitions in
+  layer-5 seed), so an end-to-end revoked-status flow can't run.
+  status='revoked' → isValid=false semantics covered by
+  `verifyCertificatePublic.test.ts`.
+- `certificates-verify-hmac.hurl` (92 LOC, post-cutover supplement
+  `a59ecdd9`) — covers HMAC signature query-param surface, both
+  fail-closed paths (no signature → verified:false, garbage signature →
+  verified:false). The verified=true positive path requires
+  CERTIFICATE_QR_SECRET-derived signatures Hurl can't compute inline;
+  covered deterministically by `utils/certificate-qr.test.ts` and
+  `verifyCertificatePublic-hmac.test.ts`.
 
-**Deferred (not blocking cutover):** the cert-scope plan envisioned 5 Hurl
-scenarios for end-to-end coverage (bulk-issue happy path, verify-revoked,
-verify-with-hmac, get-not-found, list-empty). The current 2 files only
-cover skeletal sign-in + sign-out + first request. Because the cutover did
-not change wire behavior (only relocated impls), the existing Hurl
-suite remains valid. New scenarios should be authored as a follow-up
-commit set with a live API session.
+DB invariant note: `bulkIssueCertificates` sets `trainingId = organizationId`,
+so the `certificate_training_person_unique` constraint disallows
+re-issuing to the same (orgId, personId). All 3 new scenarios sign up
+a fresh recipient per `{{suffix}}` so the suite stays idempotent across
+re-runs and across sibling hurl files.
 
 ## 5. Decisions resolved during the cutover
 
@@ -147,8 +165,8 @@ commit set with a live API session.
 
 ## 7. Open follow-ups
 
-- [ ] Write 3 supplemental Hurl scenarios (bulk-issue, verify-revoked, verify-with-hmac) against live API.
-- [ ] Run live contract gate (`scripts/run-contract-tests.ts`) to confirm ≥130 pass + new.
-- [ ] Run SDK drift check + observability audit.
-- [ ] Tag `member-certificates-cutover` once final gates pass.
-- [ ] Decide future: should `handlers/member/certificates/listCertificates.ts` (the now-recognized non-orphan) be removed when the documents test that imports it is itself refactored?
+- [x] Write 3 supplemental Hurl scenarios (bulk-issue, verify-revoked, verify-with-hmac) against live API. — done `a59ecdd9`. `verify-revoked` swapped for `verify-not-found` because no revoke API exists; `verify-with-hmac` covers fail-closed paths only (positive path needs server-side secret + pre-computed signature, deferred to the existing HMAC unit suite).
+- [x] Run live contract gate (`scripts/run-contract-tests.ts`) to confirm ≥130 pass + new. — done: **135/135 pass (100%)**. All 5 cert hurl files pass. Storage-edge prerequisite: `docker compose up -d minio createbuckets`.
+- [x] Run SDK drift check + observability audit. — done at cutover (`1b9215b8`, `93ed1090`).
+- [x] Tag `member-certificates-cutover` once final gates pass. — done at cutover commit `1b9215b8`. Post-cutover hygiene commits (`a59ecdd9`, `0e696707`, this commit) intentionally not retagged; the cutover atomic itself stays at its tagged baseline.
+- [x] Decide future: should `handlers/member/certificates/listCertificates.ts` (the now-recognized non-orphan) be removed when the documents test that imports it is itself refactored? — resolved `0e696707`: **kept as pre-Phase-35 service-helper** with explicit marker comment forbidding any route wiring. Live route surface unaffected (`listMyCertificates` owns `GET /association/member/certificates` and uses `DigitalCredentialRepository`). Three test suites stub `CertificatesRepository` directly against this helper; mechanical rewrite onto the live repo wasn't trivial (slice-023 + flow-09 + listCertificates.test.ts together).
