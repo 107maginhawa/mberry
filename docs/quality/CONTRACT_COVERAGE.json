@@ -1,19 +1,26 @@
 {
-  "generatedAt": "2026-06-07T09:50:12.240Z",
+  "generatedAt": "2026-06-07T10:31:54.031Z",
   "totals": {
     "endpoints": 454,
-    "hurlFiles": 140,
-    "coveredCount": 372,
-    "uncoveredCount": 82,
-    "coveragePercent": 82
+    "hurlFiles": 143,
+    "coveredCount": 375,
+    "uncoveredCount": 79,
+    "coveragePercent": 83
   },
   "uncoveredByTag": [
     {
       "tag": "Association:Member",
-      "uncoveredCount": 74,
-      "totalCount": 83,
-      "coveredCount": 9,
-      "coveragePercent": 11
+      "uncoveredCount": 37,
+      "totalCount": 40,
+      "coveredCount": 3,
+      "coveragePercent": 8
+    },
+    {
+      "tag": "Member/DuesSpecialAssessments",
+      "uncoveredCount": 34,
+      "totalCount": 50,
+      "coveredCount": 16,
+      "coveragePercent": 32
     },
     {
       "tag": "Member/Credits",
@@ -48,13 +55,13 @@
     {
       "method": "GET",
       "path": "/association/member/aging-buckets/{organizationId}",
-      "tag": "Association:Member",
+      "tag": "Member/DuesSpecialAssessments",
       "operationId": "getAgingBucket"
     },
     {
       "method": "POST",
       "path": "/association/member/aging-buckets/{organizationId}/recalculate",
-      "tag": "Association:Member",
+      "tag": "Member/DuesSpecialAssessments",
       "operationId": "recalculateAgingBucket"
     },
     {
@@ -150,175 +157,175 @@
     {
       "method": "GET",
       "path": "/association/member/dues-configs/{duesConfigId}",
-      "tag": "Association:Member",
+      "tag": "Member/DuesSpecialAssessments",
       "operationId": "getDuesConfig"
     },
     {
       "method": "PATCH",
       "path": "/association/member/dues-configs/{duesConfigId}",
-      "tag": "Association:Member",
+      "tag": "Member/DuesSpecialAssessments",
       "operationId": "updateDuesConfig"
     },
     {
       "method": "DELETE",
       "path": "/association/member/dues-configs/{duesConfigId}",
-      "tag": "Association:Member",
+      "tag": "Member/DuesSpecialAssessments",
       "operationId": "deleteDuesConfig"
     },
     {
       "method": "PUT",
       "path": "/association/member/dues-gateway/{organizationId}",
-      "tag": "Association:Member",
+      "tag": "Member/DuesSpecialAssessments",
       "operationId": "upsertDuesGatewayConfig"
     },
     {
       "method": "DELETE",
       "path": "/association/member/dues-gateway/{organizationId}",
-      "tag": "Association:Member",
+      "tag": "Member/DuesSpecialAssessments",
       "operationId": "disconnectDuesGateway"
     },
     {
       "method": "POST",
       "path": "/association/member/dues-gateway/{organizationId}/test",
-      "tag": "Association:Member",
+      "tag": "Member/DuesSpecialAssessments",
       "operationId": "testDuesGatewayConnection"
     },
     {
       "method": "POST",
       "path": "/association/member/dues-invoices",
-      "tag": "Association:Member",
+      "tag": "Member/DuesSpecialAssessments",
       "operationId": "createDuesInvoice"
     },
     {
       "method": "GET",
       "path": "/association/member/dues-invoices",
-      "tag": "Association:Member",
+      "tag": "Member/DuesSpecialAssessments",
       "operationId": "listDuesInvoices"
     },
     {
       "method": "POST",
       "path": "/association/member/dues-invoices/generate",
-      "tag": "Association:Member",
+      "tag": "Member/DuesSpecialAssessments",
       "operationId": "generateDuesInvoicesForOrg"
     },
     {
       "method": "GET",
       "path": "/association/member/dues-invoices/{invoiceId}",
-      "tag": "Association:Member",
+      "tag": "Member/DuesSpecialAssessments",
       "operationId": "getDuesInvoice"
     },
     {
       "method": "PATCH",
       "path": "/association/member/dues-invoices/{invoiceId}",
-      "tag": "Association:Member",
+      "tag": "Member/DuesSpecialAssessments",
       "operationId": "updateDuesInvoice"
     },
     {
       "method": "DELETE",
       "path": "/association/member/dues-invoices/{invoiceId}",
-      "tag": "Association:Member",
+      "tag": "Member/DuesSpecialAssessments",
       "operationId": "deleteDuesInvoice"
     },
     {
       "method": "POST",
       "path": "/association/member/dues-invoices/{invoiceId}/mark-paid",
-      "tag": "Association:Member",
+      "tag": "Member/DuesSpecialAssessments",
       "operationId": "markDuesInvoicePaid"
     },
     {
       "method": "GET",
       "path": "/association/member/dues-payments/pending-proofs",
-      "tag": "Association:Member",
+      "tag": "Member/DuesSpecialAssessments",
       "operationId": "listPendingProofs"
     },
     {
       "method": "POST",
       "path": "/association/member/dues-payments/submit-proof",
-      "tag": "Association:Member",
+      "tag": "Member/DuesSpecialAssessments",
       "operationId": "submitPaymentProof"
     },
     {
       "method": "GET",
       "path": "/association/member/dues-payments/{paymentId}",
-      "tag": "Association:Member",
+      "tag": "Member/DuesSpecialAssessments",
       "operationId": "getDuesPayment"
     },
     {
       "method": "POST",
       "path": "/association/member/dues-payments/{paymentId}/confirm",
-      "tag": "Association:Member",
+      "tag": "Member/DuesSpecialAssessments",
       "operationId": "confirmPaymentProof"
     },
     {
       "method": "POST",
       "path": "/association/member/dues-payments/{paymentId}/reject",
-      "tag": "Association:Member",
+      "tag": "Member/DuesSpecialAssessments",
       "operationId": "rejectPaymentProof"
     },
     {
       "method": "GET",
       "path": "/association/member/dues-reporting",
-      "tag": "Association:Member",
+      "tag": "Member/DuesSpecialAssessments",
       "operationId": "listDuesFunds"
     },
     {
       "method": "PUT",
       "path": "/association/member/dues-reporting/{organizationId}",
-      "tag": "Association:Member",
+      "tag": "Member/DuesSpecialAssessments",
       "operationId": "upsertDuesFunds"
     },
     {
       "method": "GET",
       "path": "/association/member/dues-reporting/{organizationId}/dashboard",
-      "tag": "Association:Member",
+      "tag": "Member/DuesSpecialAssessments",
       "operationId": "getDuesFinancialDashboard"
     },
     {
       "method": "GET",
       "path": "/association/member/dues-reporting/{organizationId}/report",
-      "tag": "Association:Member",
+      "tag": "Member/DuesSpecialAssessments",
       "operationId": "generateDuesReport"
     },
     {
       "method": "GET",
       "path": "/association/member/dunning/events",
-      "tag": "Association:Member",
+      "tag": "Member/DuesSpecialAssessments",
       "operationId": "listDunningEvents"
     },
     {
       "method": "POST",
       "path": "/association/member/dunning/run",
-      "tag": "Association:Member",
+      "tag": "Member/DuesSpecialAssessments",
       "operationId": "runDunning"
     },
     {
       "method": "POST",
       "path": "/association/member/dunning/templates",
-      "tag": "Association:Member",
+      "tag": "Member/DuesSpecialAssessments",
       "operationId": "createDunningTemplate"
     },
     {
       "method": "GET",
       "path": "/association/member/dunning/templates",
-      "tag": "Association:Member",
+      "tag": "Member/DuesSpecialAssessments",
       "operationId": "listDunningTemplates"
     },
     {
       "method": "GET",
       "path": "/association/member/dunning/templates/{templateId}",
-      "tag": "Association:Member",
+      "tag": "Member/DuesSpecialAssessments",
       "operationId": "getDunningTemplate"
     },
     {
       "method": "PATCH",
       "path": "/association/member/dunning/templates/{templateId}",
-      "tag": "Association:Member",
+      "tag": "Member/DuesSpecialAssessments",
       "operationId": "updateDunningTemplate"
     },
     {
       "method": "DELETE",
       "path": "/association/member/dunning/templates/{templateId}",
-      "tag": "Association:Member",
+      "tag": "Member/DuesSpecialAssessments",
       "operationId": "deleteDunningTemplate"
     },
     {
@@ -472,39 +479,21 @@
       "operationId": "updateRosterMember"
     },
     {
-      "method": "POST",
-      "path": "/association/member/special-assessments",
-      "tag": "Association:Member",
-      "operationId": "createSpecialAssessment"
-    },
-    {
       "method": "PUT",
       "path": "/association/member/special-assessments/{id}",
-      "tag": "Association:Member",
+      "tag": "Member/DuesSpecialAssessments",
       "operationId": "updateSpecialAssessment"
     },
     {
       "method": "DELETE",
       "path": "/association/member/special-assessments/{id}",
-      "tag": "Association:Member",
+      "tag": "Member/DuesSpecialAssessments",
       "operationId": "deleteSpecialAssessment"
-    },
-    {
-      "method": "POST",
-      "path": "/association/member/special-assessments/{id}/apply",
-      "tag": "Association:Member",
-      "operationId": "applySpecialAssessment"
-    },
-    {
-      "method": "GET",
-      "path": "/association/member/special-assessments/{id}/collection",
-      "tag": "Association:Member",
-      "operationId": "getSpecialAssessmentCollection"
     },
     {
       "method": "GET",
       "path": "/association/member/special-assessments/{orgId}",
-      "tag": "Association:Member",
+      "tag": "Member/DuesSpecialAssessments",
       "operationId": "listSpecialAssessments"
     },
     {
