@@ -234,7 +234,7 @@ cd services/api-ts && bun test
 
 ## How to Add a New Module
 
-1. Read or write the module spec (use `docs/templates/MODULE_SPEC.template.md`).
+1. Read or write the module spec (use `docs/quality/MODULE_SPEC_TEMPLATE.md`).
 2. Define TypeSpec API in `specs/api/src/modules/<module>.tsp`.
 3. Run code generation pipeline (steps 2-3 above).
 4. Create handler directory: `services/api-ts/src/handlers/<module>/`.
@@ -247,7 +247,7 @@ cd services/api-ts && bun test
 
 ## How to Add a New Vertical Slice
 
-1. Read or write the slice spec (use `docs/templates/SLICE_SPEC.template.md`).
+1. Read or write the slice spec (model after `docs/execution/slices/w1-t1-repo-consolidation/SLICE_SPEC.md`).
 2. Inspect the Pattern Exemplar that matches your slice type.
 3. Write/update tests first for business rules, validation, permissions.
 4. Define or update TypeSpec API definitions.
