@@ -67,7 +67,7 @@ HEAD: d24d98ba5aab0f47487a5fe38bade91ce768e48e
 - **Wave 6.3 (TypeSpec elections backfill)**: elections.tsp does NOT exist yet — W6.3 must create from scratch, not patch
 - **Wave 3.0 (coverage threshold spike)**: Use wrapper script (no native bunfig threshold key in Bun 1.2.21)
 - **Wave 2 (E2E depth)**: 144 *.spec.ts files confirmed in apps/memberry/tests/e2e/, 8 in apps/admin. Prior "130+ passing" memory claim is consistent. Wave 2 scope: deepen coverage quality, not bootstrap from zero.
-- **KG staleness**: 59 commits — re-index before any Wave 5 map work (`/oli-check` or equivalent)
+- **KG staleness**: 59 commits — re-index before any Wave 5 map work
 
 ## Residual caveats (known limitations)
 

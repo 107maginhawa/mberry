@@ -3,11 +3,10 @@
 ```yaml
 # UI Consistency Spec — memberry
 # Generated: 2026-05-30T00:00:00Z
-# Source: infer-from-code
-# Mode: pilot (oli-spec-ui --infer-from-code, sampled inference)
+# Source: infer-from-code (sampled inference)
 # spec_sha: sha256:pilot-7a3c1e9d
 # curation:
-#   gate: oli-spec-gate Phase C (3 structural decisions)
+#   gate: Phase C (3 structural decisions)
 #   date: 2026-05-31
 #   reviewer: Claude Opus + Elad (sign-off authority)
 #   spec_sha_curated: sha256:phaseC-3decisions-2026-05-31
@@ -505,16 +504,3 @@ inferred_markers:
     requires_verify: true
 ```
 
----
-
-## Pilot Notes (not part of spec body)
-
-This file was produced by `oli-spec-ui --infer-from-code` in **pilot mode**:
-- AST traversal via Babel was approximated with `grep -E` + targeted `Read`. Counts are accurate; tuple resolution (size, variant, className_token_set) is partial.
-- `cn()` resolver was not simulated — `className` literals were taken at face value.
-- Spec is intended as input to `/oli-spec-gate` for human curation of every `[VERIFY]` marker.
-
-Downstream consumers:
-- `/oli-spec-gate` — validates VERIFY markers, requires human curation
-- `/oli-execute` Phase 5b — TDD-time gate on canonical enums and forbidden override tokens
-- `/oli-check --ui-consistency` — cross-codebase audit, finding namespace `EU-`

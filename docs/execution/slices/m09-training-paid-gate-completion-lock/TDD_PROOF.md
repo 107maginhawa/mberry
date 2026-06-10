@@ -1,13 +1,11 @@
 ---
 slice: m09-training-paid-gate-completion-lock
 phase: traceability-remediation
-generated-by: oli-execute
 timestamp: 2026-05-30T00:00:00Z
 ---
 
 ## Config Self-Check
 - `.planning/config.json`: `workflow.tdd_mode = true` ✓
-- `agent_skills.superpowers-implementer` containing `oli-execute`: not declared → WARN (skill loaded manually for traceability P1 remediation; downstream `/oli-check --confidence` will still re-verify this proof against git history).
 
 ## Context Loaded
 - SLICE_SPEC.md: — (brownfield module; no slice spec — training ships tests-as-implementation per TRACE_REPORT Phase C note)
@@ -47,7 +45,7 @@ Files modified:
 - 4d Assertion min-counts: PASS — every new `test` block has ≥3 `expect()` (paid-reject: instanceof + code + message + createCalled=false = 4; free-allow: status + createCalled + body = 3; update-reject: instanceof + code + updateCalled = 3; delete-reject: 3; update-allow: status + updateCalled + body = 3). Backend slice → no component-file floor.
 - 4e In-gate proof re-run: PASS (re-ran `bun test training-enrollment.test.ts` inside gate → 27 pass; this file conforms to schema)
 - 4f Boot-smoke: skipped (no web entry in slice — backend handlers only)
-- 4g Commit-discipline: WARN — changes uncommitted at proof time; test-first ordering will be established at commit (`test(training): …` before `feat(training): …`). Downstream `/oli-check --confidence` Step 6c.2 may report git-history UNVERIFIED until committed.
+- 4g Commit-discipline: WARN — changes uncommitted at proof time; test-first ordering will be established at commit (`test(training): …` before `feat(training): …`).
 
 ## Spec Compliance Checks
 | Check | File:Line | Severity | Status | Detail |

@@ -21,9 +21,3 @@ trust comes from skills and tests, not workflow enforcement.
 - `bun run lint:handler-verbs` rejects `new*`/`make*`/`do*`/`process*` in handler scope
 - `bun run check:hand-wired-routes` diffs `app.ts` against `docs/quality/HAND_WIRED_ROUTES.yaml`
 - `bun run lint:e2e-depth` rejects selector-only specs without `@selector-only-ok: <reason>` exemption
-
-## OLI
-
-OLI infrastructure (`scripts/codebase-map/`, `.oli/`, the engine at
-`/Users/elad-mini/Desktop/oli-engine/`) is preserved. Use OLI for codebase
-mapping, structure audits, and consistency checks.

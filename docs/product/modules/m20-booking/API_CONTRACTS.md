@@ -63,7 +63,7 @@
 
 ## 3. Domain Events Published
 
-Audit-grade stub. See `docs/audits/codebase-map/events.json` for the authoritative ledger.
+Audit-grade stub.
 
 - `booking.created`, `booking.cancelled`, `booking.confirmed`, `booking.rejected`, `booking.no_show`
 - `booking_event.created`, `booking_event.updated`, `booking_event.deleted`

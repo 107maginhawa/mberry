@@ -58,7 +58,7 @@ Hand-wired: `app.ts` — public route registered before auth middleware.
 
 ## 3. Domain Events Published
 
-Audit-grade stub. See `docs/audits/codebase-map/events.json` for the authoritative ledger.
+Audit-grade stub.
 
 - `invoice.created`, `invoice.finalized`, `invoice.paid`, `invoice.payment_captured`, `invoice.refunded`, `invoice.voided`, `invoice.uncollectible`
 - `merchant_account.created`, `merchant_account.onboarding_started`, `merchant_account.onboarding_completed`

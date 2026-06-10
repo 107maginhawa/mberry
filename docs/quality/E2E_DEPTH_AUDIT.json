@@ -499,13 +499,6 @@
       "exempt": false
     },
     {
-      "file": "/Users/elad-mini/Desktop/memberry/apps/memberry/tests/e2e/oli-runtime-loop.spec.ts",
-      "dataAssertions": 0,
-      "selectorAssertions": 0,
-      "verdict": "unknown",
-      "exempt": false
-    },
-    {
       "file": "/Users/elad-mini/Desktop/memberry/apps/memberry/tests/e2e/states/communications-states.spec.ts",
       "dataAssertions": 0,
       "selectorAssertions": 4,

@@ -2,7 +2,6 @@
 slice: w1-t2-ux-polish
 phase: wave1-financial
 priority: P1
-agent_skills: [oli-execution-gate]
 ---
 
 # T2: Phase 1 UX Polish — Billing Clarity

@@ -1,7 +1,6 @@
 ---
 slice: wave-4-communications
 phase: wave-4-alpha-beta
-generated-by: oli-execution-gate
 timestamp: 2026-05-24T00:30:00Z
 ---
 

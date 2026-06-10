@@ -817,7 +817,7 @@ Documents Flow:
 
 ## 11. Execution Gate Compliance
 
-When implementing this plan, use `/oli-execution-gate` to enforce:
+When implementing this plan, enforce:
 - **TDD proof artifacts** — each phase must produce `TDD_PROOF.md` mapping spec items to test files
 - **Test-first for all new components** — write failing test before implementation
 - **Git-history verification** — test commits must precede implementation commits
