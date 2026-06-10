@@ -272,7 +272,7 @@ These are deliberate placeholders for future-scope modules. Track in roadmap, **
 
 ### Where to track
 
-- **Code anchor:** this file (`docs/roadmap/deferred-tests.md`).
+- **Code anchor:** this file (`docs/quality/deferred-tests.md`).
 - **CI anchor:** `.github/workflows/ci.yml` `integration-tests` job presence + green run on main.
 - **BR anchor:** `br-registry.json` flips P2-deferred → covered for BR-16/23/25/26/28/32.
 

@@ -15,7 +15,7 @@
 
 ## Process for new ADRs
 
-1. Copy `docs/adr/0000-template.md`.
+1. Copy `docs/architecture/adr/0000-template.md`.
 2. Increment the number (next: `0011-...`).
 3. Set status to `Proposed` until merged.
 4. Update this index after merge.
