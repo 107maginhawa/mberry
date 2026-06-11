@@ -1,4 +1,3 @@
-// oli-execute: error-handled-inline
 // `error || !data` renders explicit "could not verify credential" branch.
 import { createFileRoute } from '@tanstack/react-router'
 import { useQuery } from '@tanstack/react-query'

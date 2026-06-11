@@ -1,4 +1,3 @@
-// oli-execute: error-handled-inline -- consumed by parent finances route.
 import { useQuery } from '@tanstack/react-query'
 import { useState } from 'react'
 import { listDuesPaymentsOptions } from '@monobase/sdk-ts/generated/react-query'

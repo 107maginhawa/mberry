@@ -1,4 +1,3 @@
-// oli-execute: error-handled-inline -- DM list; parent /messages route owns isError.
 import { useQuery } from '@tanstack/react-query'
 import { listChatRoomsOptions } from '@monobase/sdk-ts/generated/react-query'
 import type { ChatRoom } from '@monobase/sdk-ts/generated/types.gen'

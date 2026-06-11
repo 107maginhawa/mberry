@@ -139,7 +139,6 @@ export function DuesConfigForm({ orgId }: DuesConfigFormProps) {
     []
   )
 
-  // oli-execute: skeleton-ok -- 404 = no config yet (expected); query failure surfaces as defaults, write failures via toast.
   const { data: config, isLoading } = useQuery({
     ...getDuesConfigOptions(
       { path: { duesConfigId: orgId }, headers: { 'x-org-id': orgId } } as unknown as GetDuesConfigDataWithHeaders

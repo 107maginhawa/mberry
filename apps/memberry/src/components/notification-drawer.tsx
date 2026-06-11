@@ -1,4 +1,3 @@
-// oli-execute: error-handled-inline -- consumed inside drawer; errors surface via parent route's isError.
 /**
  * NotificationDrawer — slide-out sheet from the right with category tabs.
  * VS-029: Wave 4a Communications.

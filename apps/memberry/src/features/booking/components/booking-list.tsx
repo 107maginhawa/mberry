@@ -1,4 +1,3 @@
-// oli-execute: error-handled-inline -- consumed by /my/bookings parent route (G7 isError fix).
 import { useMemo } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { Link } from '@tanstack/react-router'

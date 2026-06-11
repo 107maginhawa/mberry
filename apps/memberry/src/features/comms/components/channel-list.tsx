@@ -1,4 +1,3 @@
-// oli-execute: error-handled-inline -- consumed by /org/$orgSlug/messages parent route; errors surface there.
 import { useQuery } from '@tanstack/react-query'
 import { listChatRoomsOptions } from '@monobase/sdk-ts/generated/react-query'
 import type { ChatRoom } from '@monobase/sdk-ts/generated/types.gen'

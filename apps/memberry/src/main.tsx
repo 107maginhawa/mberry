@@ -1,4 +1,3 @@
-// oli-execute: error-handled-inline -- app shell; per-route ErrorBoundary + isError handle async failures.
 import { RouterProvider } from '@tanstack/react-router'
 import { ApiProvider, createDefaultQueryClient } from '@monobase/sdk-ts/react/provider'
 import { createRoot } from 'react-dom/client'

@@ -1,4 +1,3 @@
-// oli-execute: error-handled-inline -- consumed by /org/$orgSlug/documents route.
 import { useState, useMemo, useCallback } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { Link, useParams } from '@tanstack/react-router'

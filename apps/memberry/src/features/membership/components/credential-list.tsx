@@ -1,4 +1,3 @@
-// oli-execute: error-handled-inline -- consumed by /my/credentials route.
 import { useQuery } from '@tanstack/react-query'
 import { ShieldCheck, AlertTriangle, XCircle, Clock } from 'lucide-react'
 import { GlassCard } from '@/components/motion/glass-card'

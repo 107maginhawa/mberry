@@ -1,4 +1,3 @@
-// oli-execute: error-handled-inline -- provider shell; org-not-found redirects, query errors bubble to consuming routes.
 /**
  * OrgProvider — centralized org context for all /org/$orgSlug/* routes.
  *

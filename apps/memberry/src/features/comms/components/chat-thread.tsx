@@ -1,4 +1,3 @@
-// oli-execute: error-handled-inline -- chat thread; mutation errors via toast, query errors via parent route.
 import { useEffect, useRef, useState } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import {
