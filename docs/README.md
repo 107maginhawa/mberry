@@ -60,4 +60,4 @@ Treat ver-3 business as the **runtime business-rules source of truth** (the `br-
 - Empty `docs/_archive/` removed (re-create when first archive lands).
 - 2 broken template references in root `ARCHITECTURE.md` fixed.
 
-Full migration history: see `docs/DOCS_INVENTORY.md` + `docs/DOCS_MIGRATION_PLAN.md` + `docs/DOCS_CLEANUP_REPORT.md`.
+Full migration history: see `docs/aha/project-structure/outputs/old/DOCS_INVENTORY.2026-06-10.md` + `docs/aha/project-structure/migration-plans/old/DOCS_MIGRATION_PLAN.2026-06-10.md` + `docs/aha/project-structure/outputs/old/DOCS_CLEANUP_REPORT.2026-06-10.md`.

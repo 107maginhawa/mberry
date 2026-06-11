@@ -47,4 +47,4 @@ The Person module is the single PII safeguard. All module-specific entities refe
 - `CONTRIBUTING.md` §"Enterprise Development Best Practices > Person-Centric Design"
 - `CONTRIBUTING.md` §"Cross-Module Import Rules > Forbidden"
 - `services/api-ts/src/handlers/person/accountDeletionCascade.ts`
-- `docs/_archive/oli/audits/EXISTING_CODEBASE_ADOPTION_AUDIT.md` §7 — current Person table structure
+- `services/api-ts/src/handlers/person/repos/person.schema.ts` — current Person table structure (source of truth)
