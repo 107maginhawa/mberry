@@ -8,13 +8,22 @@ export async function createJobPosting(ctx: Context): Promise<Response> {
   const body = await ctx.req.json();
   const repo = new JobPostingRepository(db);
 
+  // FIX-003: bind the posting to the membership-verified org resolved by
+  // orgContextMiddleware (ctx.var.organizationId), NOT a body/param-supplied
+  // org. Trusting body.organizationId let an authenticated member of org A
+  // write a posting into org B (cross-org write). Fail closed if absent.
+  const organizationId = ctx.get('organizationId') as string | undefined;
+  if (!organizationId) {
+    return ctx.json({ error: 'Organization context required' }, 403);
+  }
+
   if (!body.title || !body.organizationName) {
     return ctx.json({ error: 'title and organizationName are required' }, 400);
   }
 
   const now = new Date();
   const posting = await repo.create({
-    organizationId: body.organizationId ?? ctx.req.param('organizationId'),
+    organizationId,
     title: body.title,
     organizationName: body.organizationName,
     location: body.location,

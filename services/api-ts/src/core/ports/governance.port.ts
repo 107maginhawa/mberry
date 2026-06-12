@@ -1,7 +1,7 @@
 /**
  * GovernancePort — minimal slice of governance behavior consumed by core/middleware.
  *
- * Resolves S-C4-014 (audit IC-01): middleware/officer-auth.ts previously
+ * Resolves S-C4-014 (audit IC-01): officer/position middleware previously
  * imported `OfficerTermRepository` from `@/handlers/association:member/repos`.
  * The interface lives here; the adapter is exported as `governanceRepoPort`
  * from the same repo file so callers in `app.ts` can wire concretely while
@@ -12,7 +12,7 @@
 export interface ActiveOfficerTerm {
   id: string;
   positionTitle?: string;
-  // The repo exposes more fields; the port narrows to what officer-auth uses.
+  // The repo exposes more fields; the port narrows to what the middleware uses.
 }
 
 export interface GovernancePort {

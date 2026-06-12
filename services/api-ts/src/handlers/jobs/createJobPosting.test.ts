@@ -172,6 +172,76 @@ describe('[M15] createJobPosting', () => {
   });
 });
 
+describe('[M15] createJobPosting org-context trust (FIX-003)', () => {
+  let mocks: ReturnType<typeof stubRepo>;
+
+  afterEach(() => {
+    if (mocks) Object.values(mocks).forEach((m) => m.mockRestore());
+  });
+
+  test('binds organizationId to the middleware-resolved ctx org, not body.organizationId', async () => {
+    let capturedData: any = null;
+    mocks = stubRepo(JobPostingRepository, {
+      create: async (data: any) => { capturedData = data; return { ...fakePosting, ...data }; },
+    });
+
+    // Authenticated member of tenant-1 (ctx org), but body claims org-evil.
+    const ctx = makeCtx({
+      organizationId: 'tenant-1',
+      _body: {
+        title: 'Engineer',
+        organizationName: 'Acme',
+        organizationId: 'org-evil',
+      },
+    });
+
+    const response = await createJobPosting(ctx);
+
+    expect(response.status).toBe(201);
+    // The persisted insert MUST carry the ctx org, never the body-supplied org.
+    expect(capturedData.organizationId).toBe('tenant-1');
+    expect(capturedData.organizationId).not.toBe('org-evil');
+  });
+
+  test('ignores body.organizationId entirely even when ctx org matches', async () => {
+    let capturedData: any = null;
+    mocks = stubRepo(JobPostingRepository, {
+      create: async (data: any) => { capturedData = data; return { ...fakePosting, ...data }; },
+    });
+
+    const ctx = makeCtx({
+      organizationId: 'org-real',
+      _body: {
+        title: 'Engineer',
+        organizationName: 'Acme',
+        organizationId: 'org-real',
+      },
+    });
+
+    await createJobPosting(ctx);
+    expect(capturedData.organizationId).toBe('org-real');
+  });
+
+  test('fails closed with 403 when no org context is present', async () => {
+    mocks = stubRepo(JobPostingRepository, {
+      create: async (data: any) => ({ ...fakePosting, ...data }),
+    });
+
+    // No org context (middleware would have 403'd, but defense-in-depth here).
+    const ctx = makeCtx({
+      organizationId: undefined,
+      _body: {
+        title: 'Engineer',
+        organizationName: 'Acme',
+        organizationId: 'org-smuggled',
+      },
+    });
+
+    const response = await createJobPosting(ctx);
+    expect(response.status).toBe(403);
+  });
+});
+
 describe('[M15] createJobPosting employment types', () => {
   let mocks: ReturnType<typeof stubRepo>;
 

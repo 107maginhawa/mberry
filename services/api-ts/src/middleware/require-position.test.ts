@@ -2,8 +2,7 @@
  * Tests for requirePositionMiddleware (P1.5).
  *
  * Replaces hand-called `requirePosition()` from utils/officer-check.ts.
- * Uses an injectable GovernancePort fake instead of stubbing the repo,
- * mirroring the dep-injection style used by officerAuthMiddleware deps.
+ * Uses an injectable GovernancePort fake instead of stubbing the repo.
  */
 
 import { describe, test, expect } from 'bun:test';

@@ -1,11 +1,12 @@
 /**
  * Handler-level officer term check for generated /association/* routes.
  *
- * Unlike officerAuthMiddleware (which runs as Hono middleware and throws),
- * this returns a 403 Response or null (per requireOrgRole convention from D-09).
+ * Unlike the generated requireOfficer/requirePosition middleware (which run
+ * as Hono middleware and throw), this returns a 403 Response or null so it
+ * can be called inline from handlers on generated /association/* routes.
  *
  * Required because orgContextMiddleware sets role='member' for ALL users,
- * making requireOrgRole() unable to distinguish members from officers.
+ * so a session-role check alone cannot distinguish members from officers.
  *
  * P1-3: Both functions enforce 2FA for privileged positions (President,
  * Treasurer, Secretary) when they are in the allowed titles list.
@@ -15,7 +16,7 @@ import { OfficerTermRepository } from '@/handlers/association:member/repos/gover
 
 /**
  * Privileged positions requiring 2FA (P1-3).
- * Shared with officerAuthMiddleware for consistency.
+ * Kept consistent with the generated requireOfficer/requirePosition middleware.
  */
 const PRIVILEGED_POSITIONS = new Set([
   'president',

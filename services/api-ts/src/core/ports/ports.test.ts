@@ -53,8 +53,10 @@ describe('S-C4-014: core/ports interfaces and adapters', () => {
   });
 
   // ── Boundary: middleware files MUST NOT import from handlers/* ──
+  // (officer-auth.ts removed — the dead `officerAuthMiddleware` it housed was
+  //  never mounted in app.ts; its routes migrated to TypeSpec-generated
+  //  requirePosition/officer middleware. The boundary now covers the live set.)
   const middlewareFiles = [
-    'officer-auth.ts',
     'platform-admin-auth.ts',
     'impersonation-guard.ts',
     'org-context.ts',

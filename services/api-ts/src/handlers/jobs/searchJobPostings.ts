@@ -5,8 +5,15 @@ export async function searchJobPostings(ctx: Context): Promise<Response> {
   const db = ctx.get('database');
   const repo = new JobPostingRepository(db);
 
+  // FIX-004: scope the listing to the membership-verified org resolved by
+  // orgContextMiddleware (ctx.var.organizationId) by default, instead of the
+  // attacker-controllable ?organizationId query param. This prevents an
+  // authenticated member of org A from listing org B's postings (or all orgs
+  // when the param is omitted).
+  const organizationId = ctx.get('organizationId') as string | undefined;
+
   const filters = {
-    organizationId: ctx.req.query('organizationId') ?? undefined,
+    organizationId,
     status: ctx.req.query('status') ?? undefined,
     type: ctx.req.query('type') ?? undefined,
     search: ctx.req.query('search') ?? undefined,
