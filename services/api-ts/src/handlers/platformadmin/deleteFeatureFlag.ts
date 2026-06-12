@@ -16,6 +16,14 @@ export async function deleteFeatureFlag(
   const session = ctx.get('session');
   if (!session) return ctx.json({ error: 'Unauthorized' }, 401);
 
+  // FIX-001 (G1) / Matrix §3.7: deleting a feature flag is a super-only
+  // platform mutation. analyst/support must be rejected. Mirrors
+  // createAssociation.ts:20-24.
+  const callerAdmin = ctx.get('platformAdmin') as { role: string } | undefined;
+  if (!callerAdmin || callerAdmin.role !== 'super') {
+    return ctx.json({ error: 'Super admin access required' }, 403);
+  }
+
   const { flagId } = ctx.req.valid('param');
   const db = ctx.get('database') as DatabaseInstance;
   const logger = ctx.get('logger');

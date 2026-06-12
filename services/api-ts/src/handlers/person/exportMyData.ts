@@ -2,10 +2,8 @@ import { eq, and, gte, desc } from 'drizzle-orm';
 import type { BaseContext } from '@/types/app';
 import type { DatabaseInstance } from '@/core/database';
 import { UnauthorizedError } from '@/core/errors';
-import { PersonRepository } from './repos/person.repo';
-import { MembershipRepository } from '@/handlers/association:member/repos/membership.repo';
-import { CreditEntryRepository } from '@/handlers/association:member/repos/credits.repo';
 import { dataExports } from './repos/data-export.schema';
+import { buildMyDataExport } from './utils/build-data-export';
 
 const RATE_WINDOW_MS = 24 * 60 * 60 * 1000;
 
@@ -41,34 +39,9 @@ export async function exportMyData(ctx: BaseContext): Promise<Response> {
     );
   }
 
-  const personRepo = new PersonRepository(db, logger);
-  const membershipRepo = new MembershipRepository(db, logger);
-  const creditRepo = new CreditEntryRepository(db, logger);
-
-  const [person, memberships, creditEntries] = await Promise.all([
-    personRepo.findOneById(personId),
-    membershipRepo.findAllByPerson(personId),
-    creditRepo.findMany({ personId }),
-  ]);
-
-  // EF-M01: Filter to GDPR-appropriate fields only — exclude internal IDs,
-  // timestamps, deletion fields, and system metadata.
-  const safePerson = person ? {
-    firstName: person.firstName,
-    lastName: person.lastName,
-    middleName: person.middleName,
-    dateOfBirth: person.dateOfBirth,
-    gender: person.gender,
-    primaryAddress: person.primaryAddress,
-    contactInfo: person.contactInfo,
-    avatar: person.avatar,
-    languagesSpoken: person.languagesSpoken,
-    timezone: person.timezone,
-    licenseNumber: person.licenseNumber,
-    specialization: person.specialization,
-    preferredLanguage: person.preferredLanguage,
-    bio: person.bio,
-  } : null;
+  // Aggregate the full DPA portability envelope (shared with the async path so
+  // the contract and the stored payload cannot drift) — FIX-008.
+  const exportEnvelope = await buildMyDataExport(db, logger, personId);
 
   // Record in the shared export ledger so the 24h window applies across both
   // the sync and async export endpoints.
@@ -82,11 +55,5 @@ export async function exportMyData(ctx: BaseContext): Promise<Response> {
   ctx.set('auditResourceId', personId);
   ctx.set('auditDescription', 'User exported personal data (GDPR/DPA portability)');
 
-  return ctx.json({
-    exportedAt: new Date().toISOString(),
-    personId,
-    person: safePerson,
-    memberships,
-    creditEntries,
-  }, 200);
+  return ctx.json(exportEnvelope, 200);
 }

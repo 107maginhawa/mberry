@@ -16,6 +16,14 @@ export async function updateOrganization(
   const session = ctx.get('session');
   if (!session) return ctx.json({ error: 'Unauthorized' }, 401);
 
+  // FIX-001 (G1) / Matrix §3.7: patching an organization is a super-only
+  // platform mutation. analyst/support must be rejected. Mirrors
+  // createAssociation.ts:20-24.
+  const callerAdmin = ctx.get('platformAdmin') as { role: string } | undefined;
+  if (!callerAdmin || callerAdmin.role !== 'super') {
+    return ctx.json({ error: 'Super admin access required' }, 403);
+  }
+
   const { organizationId } = ctx.req.valid('param');
   const body = ctx.req.valid('json');
   const db = ctx.get('database') as DatabaseInstance;

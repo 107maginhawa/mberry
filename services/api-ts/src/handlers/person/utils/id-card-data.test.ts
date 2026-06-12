@@ -2,7 +2,7 @@
  * BR-18: ID card QR payload must be HMAC-signed and include a timestamp so
  * verifiers can detect stale/replayed codes (EM-M02-4b5c6d7e).
  */
-import { describe, test, expect } from 'bun:test';
+import { describe, test, expect, afterEach } from 'bun:test';
 import { getIdCardData } from './id-card-data';
 
 // Minimal chainable db: each select().from().where().limit() resolves the next
@@ -25,6 +25,33 @@ function buildDb(rowSets: any[][]) {
 const PERSON = [{ id: 'p-1', firstName: 'Ada', lastName: 'Lovelace', licenseNumber: 'LIC-1', prcId: null, avatar: null }];
 const MEMBERSHIP = [{ status: 'active', duesExpiryDate: '2027-01-01' }];
 const ORG = [{ name: 'PDA' }];
+
+describe('[BR-18] getIdCardData — HMAC secret fail-closed (FIX-004 / G-04)', () => {
+  const savedAuth = process.env['AUTH_SECRET'];
+  const savedIdCard = process.env['ID_CARD_HMAC_SECRET'];
+
+  afterEach(() => {
+    if (savedAuth === undefined) delete process.env['AUTH_SECRET'];
+    else process.env['AUTH_SECRET'] = savedAuth;
+    if (savedIdCard === undefined) delete process.env['ID_CARD_HMAC_SECRET'];
+    else process.env['ID_CARD_HMAC_SECRET'] = savedIdCard;
+  });
+
+  test('throws (fails closed) when no HMAC secret is configured', async () => {
+    delete process.env['AUTH_SECRET'];
+    delete process.env['ID_CARD_HMAC_SECRET'];
+    const db = buildDb([PERSON, MEMBERSHIP, ORG]);
+    await expect(getIdCardData(db, 'p-1', 'org-1')).rejects.toThrow(/secret/i);
+  });
+
+  test('uses ID_CARD_HMAC_SECRET when set, never a hardcoded fallback', async () => {
+    delete process.env['AUTH_SECRET'];
+    process.env['ID_CARD_HMAC_SECRET'] = 'dedicated-id-card-secret';
+    const db = buildDb([PERSON, MEMBERSHIP, ORG]);
+    const data = await getIdCardData(db, 'p-1', 'org-1');
+    expect(data!.qrSignature).toMatch(/^[0-9a-f]{64}$/);
+  });
+});
 
 describe('[BR-18] getIdCardData — QR payload timestamp', () => {
   test('QR payload includes an ISO timestamp field', async () => {

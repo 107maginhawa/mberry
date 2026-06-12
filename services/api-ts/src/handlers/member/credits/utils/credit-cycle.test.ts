@@ -14,8 +14,10 @@ import {
   getCurrentCycleWithConfig,
   calculateCarryover,
   summarizeCycle,
+  resolveCycle,
   type CreditCycleConfig,
   type CreditCycle,
+  type ResolveCycleConfig,
 } from './credit-cycle';
 
 // ─── Helpers ───────────────────────────────────────────
@@ -159,6 +161,51 @@ describe('getCycleForDateWithConfig [BR-11]', () => {
     };
     const cycle = getCycleForDateWithConfig(date('2025-08-01'), config);
     expect(cycle.cycleStart.getDate()).toBe(15);
+  });
+});
+
+// ─── resolveCycle (single cycle authority — FIX-004 / G2) [BR-11] ───
+
+describe('resolveCycle [FIX-004 single cycle authority]', () => {
+  // org_cpd_config defaults: requiredCredits=60, cycleLengthYears=3, cycleStartMonth=1.
+  const config: ResolveCycleConfig = { cycleStartMonth: 1, cycleLengthYears: 3 };
+
+  test('anchors the window from org_cpd_config (cycleStartMonth/cycleLengthYears), not a hardcoded 2-year period', () => {
+    // Activity in March 2022. With Jan-start 3-year cycles aligned to epoch 2020:
+    // 2022 belongs to the 2021–2024 window (epoch 2020 → +3 = 2023? no — 2020,2023,2026...)
+    // (2022-2020)=2; floor(2/3)=0; aligned start year = 2020. So window is 2020-01-01 .. 2023-01-01.
+    const cycle = resolveCycle(config, new Date('2022-03-15'));
+    expect(cycle.cycleStart).toEqual(new Date(2020, 0, 1));
+    expect(cycle.cycleEnd).toEqual(new Date(2023, 0, 1));
+  });
+
+  test('a 3-year window spans exactly 3 years (not the legacy 2-year default)', () => {
+    const cycle = resolveCycle(config, new Date('2025-06-01'));
+    expect(cycle.cycleEnd.getFullYear() - cycle.cycleStart.getFullYear()).toBe(3);
+  });
+
+  test('respects a July (month=7) cycle start anchor', () => {
+    // cycleStartMonth=7: an activity in March 2025 belongs to the cycle that
+    // started the previous July (mid-cycle), i.e. cycle-start year is 2024.
+    const cfg: ResolveCycleConfig = { cycleStartMonth: 7, cycleLengthYears: 1 };
+    const cycle = resolveCycle(cfg, new Date('2025-03-15'));
+    expect(cycle.cycleStart).toEqual(new Date(2024, 6, 1));
+    expect(cycle.cycleEnd).toEqual(new Date(2025, 6, 1));
+  });
+
+  test('falls back to defaults (Jan start, 3-year) when config fields are missing', () => {
+    const cycle = resolveCycle({}, new Date('2025-06-01'));
+    // defaults: cycleStartMonth=1, cycleLengthYears=3 → 2023-01-01 .. 2026-01-01
+    expect(cycle.cycleStart).toEqual(new Date(2023, 0, 1));
+    expect(cycle.cycleEnd).toEqual(new Date(2026, 0, 1));
+  });
+
+  test('the SAME anchor date + SAME config yields ONE window across all call sites (cycle consistency)', () => {
+    const anchor = new Date('2024-09-15');
+    const a = resolveCycle(config, anchor);
+    const b = resolveCycle(config, anchor);
+    expect(a.cycleStart.getTime()).toBe(b.cycleStart.getTime());
+    expect(a.cycleEnd.getTime()).toBe(b.cycleEnd.getTime());
   });
 });
 

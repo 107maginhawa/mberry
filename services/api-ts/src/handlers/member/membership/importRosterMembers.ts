@@ -29,14 +29,41 @@ export async function importRosterMembers(
   const logger = ctx.get('logger');
   const repo = new MembershipRepository(db, logger);
 
+  // FIX-016 / G-13: cap the batch size. A raw unbounded JSON-array insert is an
+  // abuse/runaway vector; 500 rows matches the spec §16 import-size target.
+  // Larger rosters are split into batches by the caller.
+  const MAX_IMPORT_ROWS = 500;
+  if (body.members.length > MAX_IMPORT_ROWS) {
+    return ctx.json(
+      {
+        error: `Roster import exceeds the maximum of ${MAX_IMPORT_ROWS} rows per request (received ${body.members.length}). Split the file into smaller batches.`,
+      },
+      400,
+    );
+  }
+
   let imported = 0;
   let failed = 0;
   const errors: Array<{ index: number; error: string }> = [];
   const importedPersonIds: string[] = [];
 
   for (let i = 0; i < body.members.length; i++) {
+    const row = body.members[i];
+
+    // FIX-016 / G-13: validate each row before insert and report a structured
+    // error, instead of relying on a raw DB failure message. Required fields
+    // mirror the membership insert contract (personId + tierId).
+    const rowErrors: string[] = [];
+    if (!row?.personId) rowErrors.push('personId is required');
+    if (!row?.tierId) rowErrors.push('tierId is required');
+    if (rowErrors.length > 0) {
+      failed++;
+      errors.push({ index: i, error: rowErrors.join('; ') });
+      continue;
+    }
+
     try {
-      const created = await repo.createOne({ ...body.members[i], organizationId: orgId } as NewMembership);
+      const created = await repo.createOne({ ...row, organizationId: orgId } as NewMembership);
       imported++;
       if (created?.personId) importedPersonIds.push(created.personId);
     } catch (err) {

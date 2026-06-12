@@ -189,6 +189,9 @@ describe('searchDocuments — authentication enforcement', () => {
     stubRepo(DocumentRepository, {
       findManyWithPagination: async () => ({ data: [], totalCount: 0 }),
     });
+    // searchDocuments now always resolves officer status (FIX-004 publish
+    // enforcement), so the officer repo must be stubbed.
+    stubOfficer(true);
 
     const ctx = makeCtx({
       organizationId: 'tenant-1',

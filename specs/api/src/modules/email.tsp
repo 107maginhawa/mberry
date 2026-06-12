@@ -657,6 +657,21 @@ namespace EmailModule {
     ): ApiOkResponse<EmailSuppressionListResponse>
       | ApiUnauthorizedResponse
       | ApiForbiddenResponse;
+
+    @doc("Remove an email suppression by ID. Lets an admin unblock a wrongly or mistyped-suppressed address (WF-125). Org-scoped — only suppressions in the caller's organisation can be removed. Admin only.")
+    @operationId("deleteEmailSuppression")
+    @delete
+    @route("/suppressions/{id}")
+    @useAuth(bearerAuth)
+    @extension("x-security-required-roles", #["admin"])
+    @extension("x-audit", #{ action: "delete", resourceType: "email-suppression" })
+    deleteEmailSuppression(
+      @doc("Suppression record ID to remove")
+      @path id: UUID,
+    ): ApiNoContentResponse
+      | ApiNotFoundResponse
+      | ApiUnauthorizedResponse
+      | ApiForbiddenResponse;
   }
 }
 

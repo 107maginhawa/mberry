@@ -30,6 +30,13 @@ export interface CreditEntryFilters {
   type?: 'auto' | 'manual';
   cycleStart?: Date;
   cycleEnd?: Date;
+  /**
+   * FIX-005 (G3): optional lifecycle-status filter. When set to 'active',
+   * voided/disputed entries are excluded. Left optional so non-record reads
+   * (e.g. DPA data export) can still retrieve every entry; record-facing
+   * reads like the transcript opt in to 'active'.
+   */
+  status?: 'active' | 'voided' | 'disputed';
 }
 
 export class CreditEntryRepository extends DatabaseRepository<CreditEntry, NewCreditEntry, CreditEntryFilters> {
@@ -58,6 +65,11 @@ export class CreditEntryRepository extends DatabaseRepository<CreditEntry, NewCr
       conditions.push(
         between(creditEntries.activityDate, filters.cycleStart, filters.cycleEnd),
       );
+    }
+
+    // FIX-005 (G3): exclude non-active (voided/disputed) entries when requested.
+    if (filters.status) {
+      conditions.push(eq(creditEntries.status, filters.status));
     }
 
     return conditions.length > 0 ? and(...conditions) : undefined;
@@ -90,6 +102,28 @@ export class CreditEntryRepository extends DatabaseRepository<CreditEntry, NewCr
   }
 
   /**
+   * FIX-008 (M9-R2): count AUTO credit entries awarded for a training (any
+   * member). Used by updateTraining to lock `creditAmount` once the first
+   * attendance-based credit has been awarded, preventing credit-value drift
+   * from corrupting already-issued history.
+   */
+  async countAutoByTraining(trainingId: string): Promise<number> {
+    this.logger?.debug({ trainingId }, 'Counting auto credits for training');
+
+    const [row] = await this.db
+      .select({ count: sql<number>`count(*)::int` })
+      .from(creditEntries)
+      .where(
+        and(
+          eq(creditEntries.trainingId, trainingId),
+          eq(creditEntries.type, 'auto'),
+        ),
+      );
+
+    return row?.count ?? 0;
+  }
+
+  /**
    * Sum credit amounts for a person within a cycle, optionally filtered by org.
    */
   async sumCreditsForCycle(
@@ -103,6 +137,8 @@ export class CreditEntryRepository extends DatabaseRepository<CreditEntry, NewCr
     const conditions = [
       eq(creditEntries.personId, personId),
       between(creditEntries.activityDate, cycleStart, cycleEnd),
+      // FIX-005 (G3): exclude voided entries so an officer void reduces totals.
+      eq(creditEntries.status, 'active'),
     ];
 
     if (organizationId) {
@@ -141,6 +177,8 @@ export class CreditEntryRepository extends DatabaseRepository<CreditEntry, NewCr
           inArray(creditEntries.personId, personIds),
           between(creditEntries.activityDate, cycleStart, cycleEnd),
           eq(creditEntries.organizationId, organizationId),
+          // FIX-005 (G3): exclude voided entries from category breakdown.
+          eq(creditEntries.status, 'active'),
         ),
       )
       .groupBy(creditEntries.personId, creditEntries.category);
@@ -166,6 +204,9 @@ export class CreditEntryRepository extends DatabaseRepository<CreditEntry, NewCr
       personId,
       cycleStart: filters.cycleStart,
       cycleEnd: filters.cycleEnd,
+      // FIX-005 (G3): the transcript is a record-facing read — voided entries
+      // must not appear among the listed activities.
+      status: 'active',
     });
   }
 
@@ -189,6 +230,9 @@ export class CreditEntryRepository extends DatabaseRepository<CreditEntry, NewCr
         and(
           eq(creditEntries.personId, personId),
           between(creditEntries.activityDate, cycleStart, cycleEnd),
+          // FIX-005 (G3): exclude voided entries so the cross-org transcript
+          // total and per-org breakdown drop when an officer voids credits.
+          eq(creditEntries.status, 'active'),
         ),
       )
       .groupBy(creditEntries.organizationId);

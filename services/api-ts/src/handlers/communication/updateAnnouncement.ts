@@ -22,13 +22,16 @@ export async function updateAnnouncement(
   const db = ctx.get('database') as DatabaseInstance;
   const repo = new CommunicationsRepository(db);
 
-  const existing = await repo.get(params.id);
+  // FIX-007 (tenant isolation): scope the fetch + write to the caller's org so an
+  // officer of org A cannot update org B's announcement by id.
+  const orgId = ctx.get('organizationId');
+  const existing = await repo.get(params.id, orgId);
   if (!existing) throw new NotFoundError('Announcement');
   if (existing.status !== 'draft') {
     throw new BusinessLogicError('Only draft announcements can be updated', 'ANNOUNCEMENT_NOT_DRAFT');
   }
 
-  const updated = await repo.update(params.id, body as Record<string, unknown>);
+  const updated = await repo.update(params.id, body as Record<string, unknown>, orgId);
 
   ctx.set('auditResourceId', params.id);
   ctx.set('auditDescription', `Updated announcement`);

@@ -2,6 +2,7 @@ import { describe, test, expect, afterEach } from 'bun:test';
 import { makeCtx, stubRepo } from '@/test-utils/make-ctx';
 import { fakeMembership as createFakeMembership } from '@/test-utils/factories';
 import { resignMembership } from './resignMembership';
+import { withComputedStatus } from './utils/membership-status-middleware';
 import { MembershipRepository } from '@/handlers/association:member/repos/membership.repo';
 import { NotFoundError, UnauthorizedError, BusinessLogicError } from '@/core/errors';
 import { domainEvents } from '@/core/domain-events';
@@ -12,6 +13,9 @@ const FUTURE_EXPIRY = new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOStri
 
 const fakeMembership = createFakeMembership({
   id: 'mem-1',
+  // Match the makeCtx() default org context so the FIX-003 cross-org guard
+  // (record org must equal caller org) is satisfied for these same-org tests.
+  organizationId: 'tenant-1',
   personId: 'person-1',
   tierId: 'tier-1',
   removedAt: null,
@@ -28,9 +32,11 @@ const makeUpdateChain = (rows: any[] = []) => ({
   returning: async () => rows,
 });
 
-const txDb = {
+const txDb: any = {
+  _inserted: [] as any[],
   transaction: async (fn: (tx: any) => Promise<any>) => fn(txDb),
   update: (_table: any) => makeUpdateChain(),
+  insert: (_table: any) => ({ values: async (vals: any) => { txDb._inserted.push(vals); } }),
 };
 
 // ─── Tests ──────────────────────────────────────────────
@@ -196,8 +202,11 @@ describe('resignMembership', () => {
     expect(capturedUpdate.removalReason).toBeNull();
   });
 
-  // Test 7: sets removedAt to current timestamp
-  test('sets removedAt to current timestamp', async () => {
+  // Test 7 (FIX-007): resign stamps resignedAt — NOT removedAt. Storing
+  // removedAt made a recompute decay the status to 'removed' (removedAt has
+  // higher priority than the absent resignedAt). resigned_at keeps a
+  // resignation distinct + terminal in its own right.
+  test('sets resignedAt to current timestamp and does not write removedAt', async () => {
     let capturedUpdate: any = null;
     const before = new Date();
     mocks = stubRepo(MembershipRepository, {
@@ -216,9 +225,63 @@ describe('resignMembership', () => {
 
     await resignMembership(ctx);
     const after = new Date();
-    expect(capturedUpdate.removedAt).toBeInstanceOf(Date);
-    expect(capturedUpdate.removedAt.getTime()).toBeGreaterThanOrEqual(before.getTime());
-    expect(capturedUpdate.removedAt.getTime()).toBeLessThanOrEqual(after.getTime());
+    expect(capturedUpdate.resignedAt).toBeInstanceOf(Date);
+    expect(capturedUpdate.resignedAt.getTime()).toBeGreaterThanOrEqual(before.getTime());
+    expect(capturedUpdate.resignedAt.getTime()).toBeLessThanOrEqual(after.getTime());
+    // FIX-007: a resignation is not a removal — removed_at stays untouched.
+    expect(capturedUpdate.removedAt).toBeUndefined();
+  });
+
+  // Test 7b (FIX-007): the resignation survives a status recompute as
+  // 'resigned' rather than decaying to 'removed'. This is the core G-08 bug.
+  test('resignation survives a status recompute as resigned (FIX-007)', async () => {
+    let capturedUpdate: any = null;
+    mocks = stubRepo(MembershipRepository, {
+      findOneById: async () => fakeMembership,
+      updateOneById: async (_id: string, data: any) => {
+        capturedUpdate = data;
+        return { ...fakeMembership, ...data };
+      },
+    });
+
+    const ctx = makeCtx({
+      database: txDb,
+      _params: { membershipId: 'mem-1' },
+      _body: {},
+    });
+
+    await resignMembership(ctx);
+    // Recompute purely from the persisted flag fields (what the cron/read path
+    // does). Must be 'resigned', not 'removed'.
+    const recomputed = withComputedStatus({ ...fakeMembership, ...capturedUpdate });
+    expect(recomputed.status).toBe('resigned');
+  });
+
+  // Test (FIX-006 / G-08): writes a membership_status_history row for the audit trail
+  test('writes a membership_status_history row on resign (FIX-006)', async () => {
+    mocks = stubRepo(MembershipRepository, {
+      findOneById: async () => fakeMembership,
+      updateOneById: async (_id: string, data: any) => ({ ...fakeMembership, ...data }),
+    });
+
+    txDb._inserted = [];
+    const ctx = makeCtx({
+      database: txDb,
+      _params: { membershipId: 'mem-1' },
+      _body: { terminationReason: 'Relocating' },
+    });
+
+    await resignMembership(ctx);
+
+    expect(txDb._inserted.length).toBeGreaterThanOrEqual(1);
+    const row = txDb._inserted[txDb._inserted.length - 1];
+    expect(row.membershipId).toBe('mem-1');
+    expect(row.personId).toBe('person-1');
+    expect(row.organizationId).toBe('tenant-1');
+    expect(row.fromStatus).toBe('active');
+    expect(row.toStatus).toBe('resigned');
+    expect(row.reason).toBe('Relocating');
+    expect(row.changedBy).toBe('user-1');
   });
 
   // Test: emits membership.status.changed for cross-module visibility (EM-M05-evt-resigned)
@@ -244,7 +307,8 @@ describe('resignMembership', () => {
       expect(evt!.p.newStatus).toBe('resigned');
       expect(evt!.p.membershipId).toBe('mem-1');
       expect(evt!.p.personId).toBe('person-1');
-      expect(evt!.p.organizationId).toBe('org-1');
+      // Event carries the membership's org (fixture aligned to ctx org for FIX-003).
+      expect(evt!.p.organizationId).toBe('tenant-1');
     } finally {
       (domainEvents as any).emit = origEmit;
     }

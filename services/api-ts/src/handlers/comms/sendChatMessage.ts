@@ -208,6 +208,26 @@ export async function sendChatMessage(
   
   // Update room's last message timestamp and count
   await roomRepo.updateLastMessage(params.room, message.timestamp);
-  
+
+  // FIX-001 (G1): broadcast the persisted message to the room's WS channel so
+  // other connected participants receive it in real time. Without this, the
+  // REST send path only persists — recipients see nothing until a refetch.
+  // Uses the shared WebSocketService envelope { event, payload } (core/ws.ts);
+  // channel namespacing mirrors ws.chat-room.ts (`chat-rooms/${roomId}`).
+  const wsService = ctx.get('ws');
+  if (wsService) {
+    try {
+      await wsService.publishToChannel(`chat-rooms/${params.room}`, 'chat.message', message);
+    } catch (error) {
+      // Broadcast is best-effort; never fail the persisted send on a WS error.
+      logger?.warn({
+        roomId: params.room,
+        messageId: message.id,
+        error: error instanceof Error ? error.message : 'Unknown error',
+        action: 'broadcast_chat_message'
+      }, 'Failed to broadcast chat message to WS channel');
+    }
+  }
+
   return ctx.json(message, 201);
 }

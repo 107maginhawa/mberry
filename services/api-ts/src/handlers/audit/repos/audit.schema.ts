@@ -50,7 +50,9 @@ export const auditActionEnum = pgEnum('audit_action', [
   'anonymize',
   'export',
   'resign',
-  'deceased'
+  'deceased',
+  'suspend',
+  'unsuspend'
 ]);
 
 // Audit outcome enumeration - matches TypeSpec definition

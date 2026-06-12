@@ -104,6 +104,17 @@ export async function updateInvoice(
   }
 
   // Handle line items update
+  // FIX-007 / AC-M21-002: when line items are replaced, the new rows AND the
+  // recomputed totals must be persisted together in one transaction, otherwise
+  // the stored total drifts from the stored rows (receipt/audit mismatch).
+  let processedLineItems: Array<{
+    description: string;
+    quantity: number;
+    unitPrice: number;
+    amount: number;
+    metadata?: Record<string, unknown>;
+  }> | null = null;
+
   if (body.lineItems) {
     // Validate line items
     if (body.lineItems.length === 0) {
@@ -112,7 +123,7 @@ export async function updateInvoice(
 
     // Calculate new amounts
     let subtotal = 0;
-    const processedLineItems = body.lineItems.map((item: any) => {
+    processedLineItems = body.lineItems.map((item: any) => {
       const amount = (item.quantity || 1) * item.unitPrice;
       subtotal += amount;
       return {
@@ -133,8 +144,11 @@ export async function updateInvoice(
     updateData.total = total;
   }
 
-  // Update invoice
-  const updatedInvoice = await invoiceRepo.updateOneById(invoiceId, updateData);
+  // Update invoice. When line items are present, replace the rows and persist
+  // the recomputed totals atomically; otherwise a plain field update suffices.
+  const updatedInvoice = processedLineItems
+    ? await invoiceRepo.replaceLineItems(invoiceId, processedLineItems, updateData)
+    : await invoiceRepo.updateOneById(invoiceId, updateData);
 
   logger.info({ action: 'updateInvoice.2',
     invoiceId,

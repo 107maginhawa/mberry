@@ -1,5 +1,6 @@
-import { describe, test, expect } from 'bun:test';
-import { makeCtx } from '@/test-utils/make-ctx';
+import { describe, test, expect, afterEach } from 'bun:test';
+import { makeCtx, stubRepo, restoreRepo } from '@/test-utils/make-ctx';
+import { TrainingRepository } from './repos/training.repo';
 
 /**
  * Training Module Tests
@@ -61,6 +62,184 @@ describe('Trainings', () => {
     expect(publishableStatuses).toContain('draft');
     expect(publishableStatuses).not.toContain('published');
     expect(publishableStatuses).not.toContain('cancelled');
+  });
+});
+
+describe('FIX-007 (G7a / M9-R1): searchTrainings applies a real type filter', () => {
+  afterEach(() => restoreRepo(TrainingRepository));
+
+  test('passes ?type=webinar through to the repository filters', async () => {
+    const { searchTrainings } = await import('./searchTrainings');
+
+    const capturedFilters: Array<Record<string, unknown>> = [];
+    stubRepo(TrainingRepository, {
+      findMany: async (filters: Record<string, unknown>) => {
+        capturedFilters.push(filters);
+        return [];
+      },
+      count: async (filters: Record<string, unknown>) => {
+        capturedFilters.push(filters);
+        return 0;
+      },
+    });
+
+    const ctx = makeCtx({
+      organizationId: 'org-1',
+      _query: { type: 'webinar', limit: '20', offset: '0' },
+    });
+
+    const response = await searchTrainings(ctx);
+    expect(response.status).toBe(200);
+    // The advertised ?type filter must actually reach the query, not be a no-op.
+    expect(capturedFilters.length).toBeGreaterThan(0);
+    for (const f of capturedFilters) {
+      expect(f['type']).toBe('webinar');
+      expect(f['organizationId']).toBe('org-1');
+    }
+  });
+});
+
+describe('FIX-008 (G7b / M9-R2): creditAmount is locked after first AUTO credit', () => {
+  afterEach(async () => {
+    const { CreditEntryRepository } = await import('@/handlers/association:member/repos/credits.repo');
+    restoreRepo(TrainingRepository);
+    restoreRepo(CreditEntryRepository);
+  });
+
+  function stubExistingTraining(creditAmount: number) {
+    stubRepo(TrainingRepository, {
+      findOneById: async (id: string) => ({
+        id,
+        organizationId: 'org-1',
+        title: 'Existing Training',
+        creditAmount,
+        status: 'published',
+      }),
+      updateOneById: async (id: string, updates: Record<string, unknown>) => ({
+        id,
+        organizationId: 'org-1',
+        title: 'Existing Training',
+        creditAmount,
+        status: 'published',
+        ...updates,
+      }),
+    });
+  }
+
+  test('rejects a creditAmount change once any AUTO credit exists for the training', async () => {
+    const { updateTraining } = await import('./updateTraining');
+    const { CreditEntryRepository } = await import('@/handlers/association:member/repos/credits.repo');
+
+    stubExistingTraining(5);
+    stubRepo(CreditEntryRepository, {
+      countAutoByTraining: async () => 3, // credits already awarded
+    });
+
+    const ctx = makeCtx({
+      organizationId: 'org-1',
+      _params: { trainingId: 'training-1' },
+      _body: { creditAmount: 99 },
+    });
+
+    const response = await updateTraining(ctx);
+    expect(response.status).toBe(409);
+  });
+
+  test('allows a creditAmount change when no AUTO credit exists yet', async () => {
+    const { updateTraining } = await import('./updateTraining');
+    const { CreditEntryRepository } = await import('@/handlers/association:member/repos/credits.repo');
+
+    stubExistingTraining(5);
+    stubRepo(CreditEntryRepository, {
+      countAutoByTraining: async () => 0,
+    });
+
+    const ctx = makeCtx({
+      organizationId: 'org-1',
+      _params: { trainingId: 'training-1' },
+      _body: { creditAmount: 8 },
+    });
+
+    const response = await updateTraining(ctx);
+    expect(response.status).toBe(200);
+    expect((response as any).body.creditAmount).toBe(8);
+  });
+
+  test('allows a non-creditAmount change (title) even after a credit exists', async () => {
+    const { updateTraining } = await import('./updateTraining');
+    const { CreditEntryRepository } = await import('@/handlers/association:member/repos/credits.repo');
+
+    stubExistingTraining(5);
+    stubRepo(CreditEntryRepository, {
+      countAutoByTraining: async () => 2,
+    });
+
+    const ctx = makeCtx({
+      organizationId: 'org-1',
+      _params: { trainingId: 'training-1' },
+      _body: { title: 'Renamed Training' },
+    });
+
+    const response = await updateTraining(ctx);
+    expect(response.status).toBe(200);
+    expect((response as any).body.title).toBe('Renamed Training');
+    // creditAmount must remain untouched
+    expect((response as any).body.creditAmount).toBe(5);
+  });
+
+  test('allows an identical creditAmount (no-op) after a credit exists', async () => {
+    const { updateTraining } = await import('./updateTraining');
+    const { CreditEntryRepository } = await import('@/handlers/association:member/repos/credits.repo');
+
+    stubExistingTraining(5);
+    stubRepo(CreditEntryRepository, {
+      countAutoByTraining: async () => 4,
+    });
+
+    const ctx = makeCtx({
+      organizationId: 'org-1',
+      _params: { trainingId: 'training-1' },
+      _body: { creditAmount: 5 }, // same value — not a drift
+    });
+
+    const response = await updateTraining(ctx);
+    expect(response.status).toBe(200);
+  });
+
+  test('strips status from the (loose) PATCH body so it cannot be mutated', async () => {
+    const { updateTraining } = await import('./updateTraining');
+    const { CreditEntryRepository } = await import('@/handlers/association:member/repos/credits.repo');
+
+    stubExistingTraining(5);
+    stubRepo(CreditEntryRepository, {
+      countAutoByTraining: async () => 0,
+    });
+
+    let captured: Record<string, unknown> | undefined;
+    stubRepo(TrainingRepository, {
+      findOneById: async (id: string) => ({
+        id,
+        organizationId: 'org-1',
+        title: 'Existing Training',
+        creditAmount: 5,
+        status: 'published',
+      }),
+      updateOneById: async (id: string, updates: Record<string, unknown>) => {
+        captured = updates;
+        return { id, organizationId: 'org-1', creditAmount: 5, status: 'published', ...updates };
+      },
+    });
+
+    const ctx = makeCtx({
+      organizationId: 'org-1',
+      _params: { trainingId: 'training-1' },
+      _body: { title: 'New Title', status: 'cancelled' },
+    });
+
+    const response = await updateTraining(ctx);
+    expect(response.status).toBe(200);
+    expect(captured).toBeDefined();
+    expect('status' in (captured ?? {})).toBe(false);
   });
 });
 

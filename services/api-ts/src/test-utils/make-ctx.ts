@@ -55,6 +55,10 @@ export function makeMember(overrides: Partial<TestUser> = {}): TestUser {
  * (e.g. base membership fields the handler expects to be present).
  */
 export function makeMockDb(extraFields: Record<string, any> = {}) {
+  // Captures rows passed to db.insert(...).values(...) so handlers that write
+  // audit/history rows (e.g. membership_status_history — FIX-006) can be
+  // asserted in unit tests. Additive: read via `(ctx.get('database') as any)._inserted`.
+  const inserted: any[] = [];
   function makeUpdateChain(setData: Record<string, any> = {}) {
     return {
       set: (data: any) => makeUpdateChain({ ...extraFields, ...data }),
@@ -62,9 +66,30 @@ export function makeMockDb(extraFields: Record<string, any> = {}) {
       returning: async () => [setData],
     };
   }
+  // Minimal read chain so handlers/utils that issue a raw
+  // `db.select().from(table).where(cond).limit(n)` (e.g. resolveCycle's
+  // org_cpd_config read in awardTrainingCredit — FIX-004) don't throw under
+  // the mock DB. Returns an empty result by default, which lets config-backed
+  // code fall back to its documented defaults. Override `database` in makeCtx
+  // when a test needs a specific config row.
+  function makeSelectChain() {
+    const chain: any = {
+      from: (_table: any) => chain,
+      where: (_cond: any) => chain,
+      limit: async (_n: number) => [] as any[],
+      orderBy: async (..._a: any[]) => [] as any[],
+      then: (resolve: any, reject?: any) => Promise.resolve([] as any[]).then(resolve, reject),
+    };
+    return chain;
+  }
   return {
+    _inserted: inserted,
     transaction: async (fn: any) => fn(makeMockDb(extraFields)),
+    select: (..._a: any[]) => makeSelectChain(),
     update: (_table: any) => makeUpdateChain(extraFields),
+    insert: (_table: any) => ({
+      values: async (vals: any) => { inserted.push(vals); return undefined; },
+    }),
   };
 }
 

@@ -1,12 +1,15 @@
 import type { JobContext } from '@/core/jobs';
 import { eq, and, sql } from 'drizzle-orm';
 import { creditEntries, orgCpdConfig } from '../repos/credits.schema';
+import { resolveCycle } from '@/handlers/member/credits/utils/credit-cycle';
 
 export interface CreditIssuePayload {
   sourceType: 'event_checkin' | 'training_completion' | 'course_completion' | 'manual_award';
   sourceId: string; personId: string; organizationId: string; creditAmount: number;
   cpdActivityType?: string | null; attestation?: Record<string, unknown>;
   activityName?: string; category?: 'General' | 'Major' | 'Self-Directed';
+  /** FIX-004: anchor date for the cycle window. Defaults to now when absent. */
+  activityDate?: string | Date | null;
 }
 
 export interface CreditIssueResult {
@@ -20,11 +23,17 @@ export async function processCreditIssue(context: JobContext): Promise<CreditIss
   if (!payload.creditAmount || payload.creditAmount <= 0) { logger.info({ payload }, 'credit.issue: skip'); return null; }
 
   const config = await db.select().from(orgCpdConfig).where(eq(orgCpdConfig.organizationId, payload.organizationId)).limit(1);
-  const cycleStartMonth = config[0]?.cycleStartMonth ?? 1;
-  const cycleLengthYears = config[0]?.cycleLengthYears ?? 3;
   const requiredCredits = config[0]?.requiredCredits ?? 60;
   const now = new Date();
-  const { cycleStart, cycleEnd } = computeCycleBoundaries(now, cycleStartMonth, cycleLengthYears);
+  // FIX-004 (G2): single cycle authority. Anchor on the activity date when the
+  // payload carries one (so the same activity lands in the same window as the
+  // inline award paths); otherwise fall back to now. Window resolved by the
+  // one shared resolveCycle() over org_cpd_config.
+  const activityDate = payload.activityDate ? new Date(payload.activityDate) : now;
+  const { cycleStart, cycleEnd } = resolveCycle(
+    { cycleStartMonth: config[0]?.cycleStartMonth, cycleLengthYears: config[0]?.cycleLengthYears },
+    activityDate,
+  );
   const sourceLabels: Record<string, string> = { event_checkin: 'Event attendance', training_completion: 'Training completion', course_completion: 'Course completion', manual_award: 'Manual credit award' };
 
   try {
@@ -32,7 +41,7 @@ export async function processCreditIssue(context: JobContext): Promise<CreditIss
       personId: payload.personId, organizationId: payload.organizationId,
       type: payload.sourceType === 'manual_award' ? 'manual' : 'auto',
       activityName: payload.activityName ?? sourceLabels[payload.sourceType] ?? 'Credit award',
-      activityDate: now, creditAmount: payload.creditAmount, cycleStart, cycleEnd,
+      activityDate, creditAmount: payload.creditAmount, cycleStart, cycleEnd,
       verificationStatus: 'verified', sourceType: payload.sourceType, sourceId: payload.sourceId,
       cpdActivityType: (payload.cpdActivityType ?? null) as typeof creditEntries.cpdActivityType.enumValues[number] | null, attestation: payload.attestation ?? null,
       status: 'active', category: payload.category ?? null,
@@ -51,13 +60,4 @@ export async function processCreditIssue(context: JobContext): Promise<CreditIss
   const thresholdMet = totalCredits >= requiredCredits;
   if (thresholdMet) logger.info({ personId: payload.personId, totalCredits, requiredCredits }, 'credit.issue: threshold met');
   return { thresholdMet, personId: payload.personId, organizationId: payload.organizationId, totalCredits, requiredCredits };
-}
-
-function computeCycleBoundaries(date: Date, cycleStartMonth: number, cycleLengthYears: number) {
-  const year = date.getFullYear(); const month = date.getMonth() + 1;
-  const cycleStartYear = month < cycleStartMonth ? year - 1 : year;
-  const baseYear = 2020;
-  const cycleIndex = Math.floor((cycleStartYear - baseYear) / cycleLengthYears);
-  const alignedStartYear = baseYear + cycleIndex * cycleLengthYears;
-  return { cycleStart: new Date(alignedStartYear, cycleStartMonth - 1, 1), cycleEnd: new Date(alignedStartYear + cycleLengthYears, cycleStartMonth - 1, 1) };
 }

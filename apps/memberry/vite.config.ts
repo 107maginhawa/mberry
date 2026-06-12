@@ -10,6 +10,12 @@ export default defineConfig({
       '/api': {
         target: 'http://localhost:7213',
         changeOrigin: true,
+        // FIX-009 (G8): proxy WebSocket upgrades too. The chat hook connects to
+        // `/api/ws/comms/chat-rooms/:room`; without this the dev proxy never
+        // forwards the Upgrade request and the socket hangs (permanent
+        // "Reconnecting…"). Verified live: before this line the proxied upgrade
+        // timed out; after it, the upgrade reaches the API on :7213.
+        ws: true,
         rewrite: (path) => path.replace(/^\/api/, ''),
       },
     },

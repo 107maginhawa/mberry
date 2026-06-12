@@ -1388,7 +1388,7 @@ namespace Association.Operations.Training {
       | ApiNotFoundResponse
       | ApiConflictResponse;
 
-    @doc("Check in a participant at a training session.")
+    @doc("Check in a participant at a training session. When personId is supplied the officer marks that enrolled member present, which completes their enrollment and awards CE credit; without it the caller checks in their own enrollment.")
     @operationId("checkInCustomTraining")
     @post
     @route("/{trainingId}/check-in")
@@ -1397,7 +1397,9 @@ namespace Association.Operations.Training {
     @extension("x-audit", #{ action: "update", resourceType: "training-enrollment" })
     checkInCustomTraining(
       @path trainingId: string,
-      @query organizationId: string
+      @query organizationId: string,
+      @doc("Enrolled member to mark present. Officer marks this person attended; their credit is awarded to them.")
+      @query personId?: string
     ): ApiOkResponse<TrainingEnrollment>
       | ApiBadRequestResponse
       | ApiUnauthorizedResponse

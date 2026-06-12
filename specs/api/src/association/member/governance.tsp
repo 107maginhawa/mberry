@@ -780,6 +780,15 @@ namespace Association.Member.Governance {
     @extension("x-audit", #{ action: "update", resourceType: "election" })
     openElectionVoting(@path electionId: string): ApiOkResponse<Election> | ApiNotFoundResponse | ApiConflictResponse | ApiForbiddenResponse;
 
+    @doc("Close the voting period for an election, moving it to awaiting confirmation so results can be certified.")
+    @operationId("closeElectionVoting")
+    @post
+    @route("/{electionId}/close-voting")
+    @useAuth(bearerAuth)
+    @extension("x-security-required-roles", #["association:admin"])
+    @extension("x-audit", #{ action: "update", resourceType: "election" })
+    closeElectionVoting(@path electionId: string): ApiOkResponse<Election> | ApiNotFoundResponse | ApiConflictResponse | ApiForbiddenResponse;
+
     @doc("Certify the results of an election after voting closes.")
     @operationId("certifyElection")
     @post
@@ -861,6 +870,14 @@ namespace Association.Member.Governance {
     @useAuth(bearerAuth)
     @extension("x-security-required-roles", #["association:admin"])
     listBallots(...PaginationQuery, @query electionId?: string, @query positionId?: string): ApiOkResponse<PaginatedResponse<Ballot>> | ApiUnauthorizedResponse | ApiForbiddenResponse;
+
+    @doc("List the calling member's own ballots for an election (self-check; never exposes other voters' ballots).")
+    @operationId("myBallots")
+    @get
+    @route("/mine")
+    @useAuth(bearerAuth)
+    @extension("x-security-required-roles", #["association:admin", "association:member"])
+    myBallots(@query electionId?: string): ApiOkResponse<PaginatedResponse<Ballot>> | ApiUnauthorizedResponse | ApiForbiddenResponse;
   }
 
   @doc("CRUD and search for officer terms")

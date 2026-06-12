@@ -26,8 +26,13 @@ export async function createTraining(
   const repo = new TrainingRepository(db, logger);
 
   const training = await repo.createOne({
-    organizationId: body.organizationId || orgId,
+    // FIX-013 (F6): bind the training to the caller's resolved org context.
+    // Never trust a body-supplied organizationId — accepting it would let an
+    // officer create a training under a foreign org (org-isolation breach).
+    organizationId: orgId,
     title: body.title,
+    // FIX-007 (M9-R1): persist the platform training type (CPD reporting taxonomy).
+    type: body.type,
     description: body.description,
     instructorName: body.instructor,
     location: body.location,

@@ -60,6 +60,7 @@ describe('[M15] searchJobPostings', () => {
     });
 
     const ctx = makeCtx({
+      organizationId: 'tenant-1',
       _query: { status: 'active', type: 'contract', search: 'senior', limit: '10', offset: '5' },
     });
 
@@ -69,5 +70,51 @@ describe('[M15] searchJobPostings', () => {
     expect(capturedFilters.search).toBe('senior');
     expect(capturedFilters.limit).toBe(10);
     expect(capturedFilters.offset).toBe(5);
+  });
+});
+
+describe('[M15] searchJobPostings org-scope default (FIX-004)', () => {
+  let mocks: ReturnType<typeof stubRepo>;
+
+  afterEach(() => {
+    if (mocks) Object.values(mocks).forEach((m) => m.mockRestore());
+  });
+
+  test('defaults the org filter to the tenant-resolved context org when no query param', async () => {
+    let capturedFilters: any = null;
+    mocks = stubRepo(JobPostingRepository, {
+      list: async (filters: any) => { capturedFilters = filters; return { data: [], total: 0 }; },
+    });
+
+    // orgContextMiddleware verified membership in 'tenant-A' and set ctx.var.organizationId.
+    // No organizationId query param is supplied.
+    const ctx = makeCtx({
+      organizationId: 'tenant-A',
+      _query: { status: 'active' },
+    });
+
+    const response = await searchJobPostings(ctx);
+    expect(response.status).toBe(200);
+    // Listing MUST be scoped to the caller's org by default — not unscoped.
+    expect(capturedFilters.organizationId).toBe('tenant-A');
+  });
+
+  test('ignores a query-supplied organizationId that differs from context org', async () => {
+    let capturedFilters: any = null;
+    mocks = stubRepo(JobPostingRepository, {
+      list: async (filters: any) => { capturedFilters = filters; return { data: [], total: 0 }; },
+    });
+
+    // Caller is a member of 'tenant-A' but tries to read 'tenant-B' postings via query param.
+    const ctx = makeCtx({
+      organizationId: 'tenant-A',
+      _query: { organizationId: 'tenant-B' },
+    });
+
+    const response = await searchJobPostings(ctx);
+    expect(response.status).toBe(200);
+    // The list MUST stay scoped to the tenant context, never the cross-org query value.
+    expect(capturedFilters.organizationId).toBe('tenant-A');
+    expect(capturedFilters.organizationId).not.toBe('tenant-B');
   });
 });

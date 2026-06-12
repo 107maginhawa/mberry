@@ -209,10 +209,75 @@ describe('voidInvoice', () => {
     await expect(voidInvoice(ctx)).rejects.toBeInstanceOf(ConflictError);
   });
 
-  test('throws BusinessLogicError when payment is not in requires_capture state', async () => {
+  // FIX-008 / SM-M21-INVOICE (Draft/Open → Void): an unpaid open (finalized)
+  // invoice with no held payment must be voidable via the "standard void
+  // process without charge" — there is no payment intent to cancel. The old
+  // code rejected this with PAYMENT_NOT_AUTHORIZED; that was spec-divergent.
+  test('voids an unpaid open invoice (no held payment) without calling Stripe', async () => {
+    const unpaidOpen = {
+      ...fakeInvoice,
+      status: 'open',
+      paymentStatus: null,
+      paidAt: null,
+      metadata: {}, // no stripePaymentIntentId — nothing was ever authorized
+    };
+    const unpaidVoided = {
+      ...unpaidOpen,
+      status: 'void',
+      voidedAt: new Date(),
+    };
+
+    let callCount = 0;
     invoiceMocks = stubRepo(InvoiceRepository, {
-      findOneById: async () => ({ ...fakeInvoice, paymentStatus: 'requires_payment_method' }),
-      updateOneById: async () => fakeVoidedInvoice,
+      findOneById: async () => {
+        callCount++;
+        return callCount === 1 ? unpaidOpen : unpaidVoided;
+      },
+      updateOneById: async () => unpaidVoided,
+      findOneWithLineItems: async () => ({ ...unpaidVoided, lineItems: [] }),
+    });
+    merchantMocks = stubRepo(MerchantAccountRepository, {
+      findByPerson: async () => fakeMerchantAccount,
+    });
+    personMocks = stubRepo(PersonRepository, {
+      findOneById: async () => fakePerson,
+    });
+
+    let cancelCalled = false;
+    const ctx = makeVoidCtx({
+      billing: {
+        cancelPaymentIntent: async () => {
+          cancelCalled = true;
+          return { id: 'pi_x', status: 'canceled' };
+        },
+      },
+    });
+
+    const response = await voidInvoice(ctx);
+
+    expect(response.status).toBe(200);
+    expect(response.body.status).toBe('void');
+    expect(cancelCalled).toBe(false); // no held payment → no Stripe cancel
+  });
+
+  test('voids a draft invoice (Draft → Void) without a payment', async () => {
+    const draft = {
+      ...fakeInvoice,
+      status: 'draft',
+      paymentStatus: null,
+      paidAt: null,
+      metadata: {},
+    };
+    const draftVoided = { ...draft, status: 'void', voidedAt: new Date() };
+
+    let callCount = 0;
+    invoiceMocks = stubRepo(InvoiceRepository, {
+      findOneById: async () => {
+        callCount++;
+        return callCount === 1 ? draft : draftVoided;
+      },
+      updateOneById: async () => draftVoided,
+      findOneWithLineItems: async () => ({ ...draftVoided, lineItems: [] }),
     });
     merchantMocks = stubRepo(MerchantAccountRepository, {
       findByPerson: async () => fakeMerchantAccount,
@@ -222,9 +287,10 @@ describe('voidInvoice', () => {
     });
 
     const ctx = makeVoidCtx();
+    const response = await voidInvoice(ctx);
 
-    const { BusinessLogicError } = await import('@/core/errors');
-    await expect(voidInvoice(ctx)).rejects.toBeInstanceOf(BusinessLogicError);
+    expect(response.status).toBe(200);
+    expect(response.body.status).toBe('void');
   });
 
   test('throws ConflictError when provider decision already exists in metadata', async () => {

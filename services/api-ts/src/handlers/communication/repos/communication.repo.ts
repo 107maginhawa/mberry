@@ -188,6 +188,36 @@ export class SubscriptionTopicRepository {
     return this.db.select().from(subscriptionTopics).where(eq(subscriptionTopics.organizationId, organizationId)).limit(100);
   }
 
+  async findByName(organizationId: string, name: string): Promise<SubscriptionTopic | undefined> {
+    const [row] = await this.db.select().from(subscriptionTopics)
+      .where(and(eq(subscriptionTopics.organizationId, organizationId), eq(subscriptionTopics.name, name)))
+      .limit(1);
+    return row;
+  }
+
+  /**
+   * Resolve a subscription topic by (org, name), creating it if absent.
+   * Used to map the notification-preferences UI category keys onto real
+   * topic UUIDs so person_subscription.topic_id (a uuid column) never
+   * receives a synthetic string. Idempotent on the (org, name) pair.
+   */
+  async findOrCreateByName(
+    organizationId: string,
+    name: string,
+    defaults?: Partial<Pick<NewSubscriptionTopic, 'channel' | 'category' | 'description' | 'defaultEnabled'>>,
+  ): Promise<SubscriptionTopic> {
+    const existing = await this.findByName(organizationId, name);
+    if (existing) return existing;
+    return this.create({
+      organizationId,
+      name,
+      channel: defaults?.channel ?? 'email',
+      category: defaults?.category ?? name,
+      description: defaults?.description ?? null,
+      defaultEnabled: defaults?.defaultEnabled ?? true,
+    } as NewSubscriptionTopic);
+  }
+
   async update(id: string, data: Partial<SubscriptionTopic>): Promise<SubscriptionTopic | undefined> {
     const [row] = await this.db.update(subscriptionTopics).set({ ...data, updatedAt: new Date() }).where(eq(subscriptionTopics.id, id)).returning();
     return row;
@@ -215,6 +245,27 @@ export class PersonSubscriptionRepository {
     return this.db.select().from(personSubscriptions)
       .where(and(eq(personSubscriptions.personId, personId), eq(personSubscriptions.organizationId, organizationId)))
       .limit(100);
+  }
+
+  /**
+   * Like findByPerson, but enriches each row with the topic name so the
+   * notification-preferences UI can map a stored topic UUID back to its
+   * category and reflect saved toggle state on reload (FIX-005 round-trip).
+   */
+  async findByPersonWithTopic(
+    personId: string,
+    organizationId: string,
+  ): Promise<Array<PersonSubscription & { topicName: string | null }>> {
+    const rows = await this.db
+      .select({
+        sub: personSubscriptions,
+        topicName: subscriptionTopics.name,
+      })
+      .from(personSubscriptions)
+      .leftJoin(subscriptionTopics, eq(personSubscriptions.topicId, subscriptionTopics.id))
+      .where(and(eq(personSubscriptions.personId, personId), eq(personSubscriptions.organizationId, organizationId)))
+      .limit(100);
+    return rows.map((r) => ({ ...r.sub, topicName: r.topicName ?? null }));
   }
 
   async findByPersonAndTopic(personId: string, topicId: string): Promise<PersonSubscription | undefined> {
@@ -265,14 +316,20 @@ export class CommunicationsRepository {
     if (filters?.status) conditions.push(eq(announcements.status, filters.status as Announcement['status']));
     if (filters?.search) conditions.push(like(announcements.title, `%${escapeLikePattern(filters.search)}%`));
 
-    const [data, countResult] = await Promise.all([
-      this.db.select().from(announcements)
+    // FIX-008: left-join announcement_stats so the analytics dashboard (which reads
+    // `announcement.stats` off this list endpoint) shows the real delivery counts
+    // written by the now-live fan-out. Mirrors the per-row stats shape from get().
+    const [rows, countResult] = await Promise.all([
+      this.db.select({ announcement: announcements, stats: announcementStats })
+        .from(announcements)
+        .leftJoin(announcementStats, eq(announcementStats.announcementId, announcements.id))
         .where(and(...conditions))
         .orderBy(desc(announcements.createdAt))
         .limit(filters?.limit ?? 20)
         .offset(filters?.offset ?? 0),
       this.db.select({ count: sql<number>`count(*)::int` }).from(announcements).where(and(...conditions)),
     ]);
+    const data = rows.map((r) => ({ ...r.announcement, stats: r.stats ?? undefined }));
     return { data, total: countResult[0]?.count ?? 0 };
   }
 

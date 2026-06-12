@@ -1,4 +1,5 @@
 import { createFileRoute } from '@tanstack/react-router'
+import { useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { QRCodeSVG } from 'qrcode.react'
 import { Badge, Button } from '@monobase/ui'
@@ -51,10 +52,20 @@ function MyIdCard() {
     },
   })
 
+  // FIX-011 (G-12 / WF-012): multi-org members need to pick which org's card to
+  // view — the backend is already per-org (GET /persons/me/id-card/:orgId), only
+  // the UI hardcoded memberships[0]. Drive the selected org from state, defaulting
+  // to the first membership.
+  const [selectedOrgId, setSelectedOrgId] = useState<string | null>(null)
+
   const isLoading = personLoading || membershipsLoading
   const isError = personError || membershipsError
   const p = person?.data ?? person
-  const membership = Array.isArray(memberships) ? memberships[0] : null
+  const activeMemberships = Array.isArray(memberships) ? memberships : []
+  const membership =
+    activeMemberships.find((m: { organizationId?: string }) => m.organizationId === selectedOrgId) ??
+    activeMemberships[0] ??
+    null
 
   const fullName = p ? `${p.firstName ?? ''} ${p.lastName ?? ''}`.trim() : ''
   const initials = fullName
@@ -110,6 +121,26 @@ function MyIdCard() {
         />
       ) : (
         <div className="max-w-md mx-auto">
+          {activeMemberships.length > 1 && (
+            <div className="mb-4">
+              <label htmlFor="id-card-org" className="block text-sm text-[var(--color-muted)] mb-1.5">
+                Organization
+              </label>
+              <select
+                id="id-card-org"
+                aria-label="Select organization"
+                value={membership?.organizationId ?? ''}
+                onChange={(e) => setSelectedOrgId(e.target.value)}
+                className="w-full rounded-[var(--radius-md)] border border-[var(--color-border)] bg-[var(--color-surface)] px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[var(--color-primary)]"
+              >
+                {activeMemberships.map((m: { organizationId?: string; id?: string; organizationName?: string; orgName?: string; memberNumber?: string }) => (
+                  <option key={m.organizationId ?? m.id} value={m.organizationId ?? ''}>
+                    {m.organizationName ?? m.orgName ?? m.memberNumber ?? 'Organization'}
+                  </option>
+                ))}
+              </select>
+            </div>
+          )}
           <GlassCard className="p-6 space-y-4">
             <div className="text-center space-y-2">
               <div className="w-20 h-20 rounded-full bg-[var(--color-primary)] mx-auto flex items-center justify-center text-2xl font-bold font-display text-white">

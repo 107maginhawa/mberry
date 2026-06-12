@@ -48,7 +48,10 @@ export function registerStatusRecomputeJob(
 
       logger.info({ jobId }, 'Membership status recompute job starting');
 
-      let offset = 0;
+      // Keyset (seek) pagination cursor — last processed id.
+      // Replaces OFFSET pagination, which degrades on large tables and can
+      // skip/duplicate rows when concurrent updates shift offsets.
+      let lastId: string | null = null;
       let totalProcessed = 0;
       let totalDiscrepancies = 0;
 
@@ -56,6 +59,15 @@ export function registerStatusRecomputeJob(
         while (true) {
           // Fetch one batch of non-terminal memberships with FOR UPDATE SKIP LOCKED
           // to handle concurrent scheduler instances safely.
+          //
+          // FIX-001 (G-01): the previous query selected `is_expired` /
+          // `is_pending_payment`, which do not exist in the `membership`
+          // schema (no migration ever added them). That made the nightly
+          // recompute throw `column "is_expired" does not exist` and abort,
+          // so the automatic ACTIVE→gracePeriod→lapsed chain never ran.
+          // We now select only real columns and derive pendingPayment from
+          // the stored status, matching `withComputedStatus` / `listOrgMembers`.
+          const cursorClause = lastId === null ? sql`` : sql`AND id > ${lastId}`;
           const batch = await db.execute(sql`
             SELECT
               id,
@@ -64,17 +76,15 @@ export function registerStatusRecomputeJob(
               grace_period_days AS "gracePeriodDays",
               suspended_at      AS "suspendedAt",
               removed_at        AS "removedAt",
-              date_of_death     AS "dateOfDeath",
-              is_expired        AS "isExpired",
-              is_pending_payment AS "isPendingPayment"
+              date_of_death     AS "dateOfDeath"
             FROM membership
             WHERE status NOT IN (${sql.join(
               TERMINAL_STATUSES.map((s) => sql`${s}`),
               sql`, `,
             )})
+            ${cursorClause}
             ORDER BY id
             LIMIT ${BATCH_SIZE}
-            OFFSET ${offset}
             FOR UPDATE SKIP LOCKED
           `);
 
@@ -95,10 +105,13 @@ export function registerStatusRecomputeJob(
               suspendedAt: row['suspendedAt'] ? new Date(row['suspendedAt'] as string) : null,
               removedAt: row['removedAt'] ? new Date(row['removedAt'] as string) : null,
               dateOfDeath: (row['dateOfDeath'] as string | null) ?? null,
-              isExpired: Boolean(row['isExpired']),
-              isPendingPayment: Boolean(row['isPendingPayment']),
-              // expelledAt / resignedAt are not stored as timestamps in this schema;
-              // those terminal states are excluded from the query above.
+              // pendingPayment is derived from the stored status (the single
+              // source for it), mirroring withComputedStatus()/listOrgMembers.
+              isPendingPayment: storedStatus === 'pendingPayment',
+              // isExpired has no source column today (LAPSED→EXPIRED automation
+              // is deferred); leave unset so compute treats it as not expired.
+              // expelledAt / resignedAt are not stored as timestamps in this
+              // schema; those terminal states are excluded from the query above.
             };
 
             const computedStatus = computeMembershipStatus(input);
@@ -122,6 +135,9 @@ export function registerStatusRecomputeJob(
 
               totalDiscrepancies++;
             }
+
+            // Advance keyset cursor to the last id seen in this batch.
+            lastId = membershipId;
           }
 
           totalProcessed += rows.length;
@@ -130,8 +146,6 @@ export function registerStatusRecomputeJob(
             // Last batch — no more rows to process
             break;
           }
-
-          offset += BATCH_SIZE;
         }
 
         logger.info(

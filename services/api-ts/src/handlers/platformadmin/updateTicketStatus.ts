@@ -11,6 +11,7 @@ import type { DatabaseInstance } from '@/core/database';
 import { eq } from 'drizzle-orm';
 import { ValidationError } from '@/core/errors';
 import { supportTickets } from './repos/platform-admin.schema';
+import { domainEvents } from '@/core/domain-events';
 
 // Valid transitions: from → set of allowed to
 const VALID_TRANSITIONS: Record<string, string[]> = {
@@ -78,6 +79,21 @@ export async function updateTicketStatus(ctx: Context): Promise<Response> {
     .returning();
 
   logger.info({ action: 'updateTicketStatus.1', ticketId, oldStatus: ticket.status, newStatus: status }, 'Ticket status updated');
+
+  // FIX-012 (G12 / PA-8): "Success outcome: Ticket resolved. Officer notified."
+  // Notify the reporter of any status change via the domain event bus. An
+  // assignee-only update (no `status` in the body) does not notify.
+  if (status) {
+    domainEvents
+      .emit('ticket.status.changed', {
+        ticketId,
+        organizationId: ticket.organizationId,
+        reportedBy: ticket.reportedBy,
+        status,
+        subject: ticket.subject,
+      })
+      .catch(() => {});
+  }
 
   return ctx.json({ data: updated });
 }

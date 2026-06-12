@@ -27,6 +27,12 @@ export async function updateMyProfile(
   const existing = await repo.findOneById(personId);
   if (!existing) throw new NotFoundError('Person not found');
 
+  // PersonMeUpdateRequest (the generated validator) only carries these fields.
+  // Anything else (contactInfo, primaryAddress, languagesSpoken, licenseNumber,
+  // prcId, avatar) is stripped by the validator before reaching here, so we map
+  // ONLY the contract fields. FIX-005 (G-05): the contract `phone` was never
+  // mapped — every PATCH /persons/me with {phone} returned 200 and silently
+  // dropped it. Map it into contactInfo.phone, preserving the existing email.
   const b = body as Record<string, unknown>;
   const updateData: Record<string, unknown> = { updatedBy: personId };
   if (b['firstName'] !== undefined) updateData['firstName'] = b['firstName'];
@@ -34,15 +40,12 @@ export async function updateMyProfile(
   if (b['middleName'] !== undefined) updateData['middleName'] = b['middleName'];
   if (b['dateOfBirth'] !== undefined) updateData['dateOfBirth'] = b['dateOfBirth'];
   if (b['gender'] !== undefined) updateData['gender'] = b['gender'];
-  if (b['contactInfo'] !== undefined) updateData['contactInfo'] = b['contactInfo'];
-  if (b['primaryAddress'] !== undefined) updateData['primaryAddress'] = b['primaryAddress'];
-  if (b['languagesSpoken'] !== undefined) updateData['languagesSpoken'] = b['languagesSpoken'];
-  if (b['timezone'] !== undefined) updateData['timezone'] = b['timezone'];
-  if (b['licenseNumber'] !== undefined) updateData['licenseNumber'] = b['licenseNumber'];
   if (b['specialization'] !== undefined) updateData['specialization'] = b['specialization'];
-  if (b['prcId'] !== undefined) updateData['prcId'] = b['prcId'];
+  if (b['timezone'] !== undefined) updateData['timezone'] = b['timezone'];
   if (b['preferredLanguage'] !== undefined) updateData['preferredLanguage'] = b['preferredLanguage'];
-  if (b['avatar'] !== undefined) updateData['avatar'] = b['avatar'];
+  if (b['phone'] !== undefined) {
+    updateData['contactInfo'] = { ...(existing.contactInfo ?? {}), phone: b['phone'] as string };
+  }
 
   const updated = await repo.updateOneById(personId, updateData as Record<string, unknown>);
 

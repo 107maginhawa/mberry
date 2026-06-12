@@ -306,17 +306,25 @@ describe('Invoice Lifecycle', () => {
     await expect(finalizeInvoice(ctx)).rejects.toBeInstanceOf(BusinessLogicError);
   });
 
-  test('Cannot void draft invoice -> requires_capture check fails', async () => {
-    // Draft invoice has no paymentStatus (not requires_capture)
+  // FIX-008 / SM-M21-INVOICE: Draft → Void is a valid transition. An unpaid
+  // draft invoice (no held payment) voids via the standard no-charge path —
+  // the old behavior (rejecting it on the requires_capture check) was
+  // spec-divergent and is corrected here.
+  test('Voids a draft invoice (Draft -> Void) without charge', async () => {
     const draftForVoid = {
       ...baseDraftInvoice,
-      metadata: { stripePaymentIntentId: 'pi_test_123' },
+      metadata: {}, // no held payment intent
       paymentStatus: null,
     };
 
+    let callCount = 0;
     invoiceMocks = stubRepo(InvoiceRepository, {
-      findOneById: async () => draftForVoid,
+      findOneById: async () => {
+        callCount++;
+        return callCount === 1 ? draftForVoid : voidedInvoice;
+      },
       updateOneById: async () => voidedInvoice,
+      findOneWithLineItems: async () => ({ ...voidedInvoice, lineItems: [] }),
     });
     merchantMocks = stubRepo(MerchantAccountRepository, {
       findByPerson: async () => fakeMerchantAccount,
@@ -332,7 +340,8 @@ describe('Invoice Lifecycle', () => {
       billing: fakeBilling,
     });
 
-    const { BusinessLogicError } = await import('@/core/errors');
-    await expect(voidInvoice(ctx)).rejects.toBeInstanceOf(BusinessLogicError);
+    const res = await voidInvoice(ctx);
+    expect(res.status).toBe(200);
+    expect(res.body.status).toBe('void');
   });
 });

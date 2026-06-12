@@ -19,9 +19,11 @@ export interface DomainEventMap {
     updatedFields: string[];
   };
 
-  'person.anonymized': {
-    personId: string;
-  };
+  // 'person.anonymized' removed (FIX-007): it was declared but never emitted
+  // (Batch C FIX-003 deleted its only emitter) and never consumed. The actual
+  // anonymization is audited inline in jobs/deletionProcessor.ts, so a separate
+  // event + consumer would only duplicate that audit. The cascade runs off
+  // 'person.deleted'. Do not re-add without a real emitter and consumer.
 
   'person.deletion.requested': {
     personId: string;
@@ -249,6 +251,17 @@ export interface DomainEventMap {
     cancelledBy: string;
   };
 
+  // Enrollment-scoped: ONE member's enrollment was cancelled. Distinct from
+  // the program-wide `training.cancelled` so it does NOT mass-notify every
+  // enrollee that the whole training is cancelled (FIX-003 / G6).
+  'training.enrollment.cancelled': {
+    enrollmentId: string;
+    trainingId: string;
+    organizationId: string;
+    personId: string;
+    cancelledBy: string;
+  };
+
   // ── Financial Context (Credits) ───────────────────────────────────────
   'credit.adjusted': {
     creditEntryId: string;
@@ -356,6 +369,25 @@ export interface DomainEventMap {
     ticketId: string;
     reason: string;
     escalatedTo: string;
+  };
+
+  // FIX-012 (G12 / PA-8): an officer reply reopens a resolved ticket (alerts
+  // the assignee); an admin status change notifies the reporter. Consumers in
+  // domain-event-consumers.ts turn these into in-app notifications.
+  'ticket.reopened': {
+    ticketId: string;
+    organizationId: string | null;
+    assignedTo: string | null;
+    reopenedBy: string;
+    subject: string;
+  };
+
+  'ticket.status.changed': {
+    ticketId: string;
+    organizationId: string | null;
+    reportedBy: string;
+    status: string;
+    subject: string;
   };
 
   // ── Compliance Context ────────────────────────────────────────────────
@@ -470,6 +502,15 @@ export interface DomainEventMap {
 
   'admin.invited': {
     adminId: string;
+    email: string;
+    role: string;
+  };
+
+  // FIX-003 (G4): emitted by claimAdminInvite when an invited admin binds their
+  // real Better-Auth userId to the placeholder row, so the bind is auditable.
+  'admin.invite.claimed': {
+    adminId: string;
+    userId: string;
     email: string;
     role: string;
   };

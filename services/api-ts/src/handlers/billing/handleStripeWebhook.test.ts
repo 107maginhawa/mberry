@@ -19,10 +19,14 @@ const PAYMENT_INTENT_ID = 'pi_test_12345';
 const CHARGE_ID = 'ch_test_12345';
 const TRANSFER_ID = 'tr_test_12345';
 const STRIPE_ACCOUNT_ID = 'acct_test_67890';
+// invoices.organization_id is a notNull uuid column — every invoice the webhook
+// loads carries one. Notifications created off an invoice must propagate it.
+const ORG_ID = 'org-uuid-1111-2222-3333-444444444444';
 
 function makeInvoice(overrides?: Record<string, any>) {
   return {
     id: INVOICE_ID,
+    organizationId: ORG_ID,
     customer: 'cust-uuid',
     merchant: 'merch-uuid',
     invoiceNumber: 'INV-2026-000001',
@@ -153,9 +157,18 @@ async function buildApp(deps: {
     // Patch InvoiceRepository prototype — save originals for restoration
     const origFindOneById = InvoiceRepository.prototype.findOneById;
     const origUpdateOneById = InvoiceRepository.prototype.updateOneById;
+    // FIX-002: webhook handlers now correlate via indexed JSONB lookups, not
+    // a findAll() scan. Patch those methods with predicate-aware mocks so the
+    // tests prove the correct lookup path (and can't fake-green a 500-row scan).
+    const origFindByPI = InvoiceRepository.prototype.findByStripePaymentIntentId;
+    const origFindByTransfer = InvoiceRepository.prototype.findByStripeTransferId;
 
     InvoiceRepository.prototype.findOneById = async (id: string) => invoiceById(id);
     InvoiceRepository.prototype.updateOneById = captureUpdate;
+    InvoiceRepository.prototype.findByStripePaymentIntentId = async (pi: string) =>
+      allInvoices.find((inv: any) => (inv.metadata as any)?.stripePaymentIntentId === pi) ?? null;
+    InvoiceRepository.prototype.findByStripeTransferId = async (tr: string) =>
+      allInvoices.filter((inv: any) => (inv.metadata as any)?.stripeTransferId === tr);
 
     // Patch MerchantAccountRepository prototype
     const origMAFindByStripe = MerchantAccountRepository.prototype.findByStripeAccountId;
@@ -170,6 +183,8 @@ async function buildApp(deps: {
     } finally {
       InvoiceRepository.prototype.findOneById = origFindOneById;
       InvoiceRepository.prototype.updateOneById = origUpdateOneById;
+      InvoiceRepository.prototype.findByStripePaymentIntentId = origFindByPI;
+      InvoiceRepository.prototype.findByStripeTransferId = origFindByTransfer;
       MerchantAccountRepository.prototype.findByStripeAccountId = origMAFindByStripe;
       MerchantAccountRepository.prototype.updateOneById = origMAUpdateById;
     }
@@ -397,6 +412,34 @@ describe('handleStripeWebhook — charge.succeeded', () => {
     const app = await buildApp({ verifySignature: async () => event });
     const resp = await postWebhook(app, JSON.stringify(event));
     expect(resp.status).toBe(200);
+  });
+
+  // FIX-002 regression: correlate the invoice even when it is well beyond the
+  // first 500 rows. The old findAll()+limit(500) scan silently dropped this
+  // charge — money captured, invoice never marked paid. The indexed lookup
+  // must find it regardless of position.
+  test('marks invoice paid even when it is beyond the old 500-row scan window', async () => {
+    const event = makeStripeEvent('charge.succeeded', makeChargeObject());
+    let captured: any = null;
+
+    // 600 non-matching invoices, then the matching one at index 600.
+    const noise = Array.from({ length: 600 }, (_, i) =>
+      makeInvoice({ id: `noise-${i}`, metadata: { stripePaymentIntentId: `pi_other_${i}` } })
+    );
+    const target = makeInvoice({ metadata: { stripePaymentIntentId: PAYMENT_INTENT_ID } });
+
+    const app = await buildApp({
+      verifySignature: async () => event,
+      allInvoices: [...noise, target],
+      captureUpdate: async (id: string, data: any) => { captured = { id, data }; return makeInvoice(data); },
+    });
+
+    const resp = await postWebhook(app, JSON.stringify(event));
+    expect(resp.status).toBe(200);
+    // The matching invoice (position 601) was found and marked paid.
+    expect(captured?.id).toBe(INVOICE_ID);
+    expect(captured?.data?.status).toBe('paid');
+    expect(captured?.data?.paymentStatus).toBe('succeeded');
   });
 });
 
@@ -781,5 +824,273 @@ describe('handleStripeWebhook — observability: structured log fields', () => {
     for (const call of calls) {
       expect('signature' in call).toBe(false);
     }
+  });
+});
+
+// ---------------------------------------------------------------------------
+// FIX-004: webhook idempotency for invoice payment events
+// Stripe redelivers events; the same event.id must be a no-op for invoice
+// payment handlers (mirrors the subscription path's lastStripeEventId dedupe).
+// ---------------------------------------------------------------------------
+
+describe('handleStripeWebhook — idempotency (FIX-004)', () => {
+  async function buildIdempotencyApp(deps: {
+    verifySignature: () => Promise<any>;
+    getInvoice: () => any;
+    onUpdate: (id: string, data: any) => void;
+    onNotify: () => void;
+  }) {
+    const { handleStripeWebhook } = await import('./handleStripeWebhook');
+    const { InvoiceRepository } = await import('./repos/billing.repo');
+
+    const app = new Hono();
+    attachErrorHandler(app);
+
+    app.post('/', async (c) => {
+      (c as any).set('logger', makeNullLogger());
+      (c as any).set('billing', { verifyWebhookSignature: deps.verifySignature });
+      (c as any).set('notifs', { createNotification: async () => { deps.onNotify(); } });
+
+      const selectChain: any = {};
+      for (const m of ['select', 'from', 'where', 'limit', 'offset', 'orderBy']) selectChain[m] = () => selectChain;
+      selectChain.then = (resolve: any, reject?: any) => Promise.resolve([]).then(resolve, reject);
+      (c as any).set('database', { select: () => selectChain });
+
+      const origFind = InvoiceRepository.prototype.findOneById;
+      const origUpd = InvoiceRepository.prototype.updateOneById;
+      const origFindPI = InvoiceRepository.prototype.findByStripePaymentIntentId;
+
+      InvoiceRepository.prototype.findOneById = async () => deps.getInvoice();
+      InvoiceRepository.prototype.updateOneById = async (id: string, data: any) => { deps.onUpdate(id, data); return data; };
+      InvoiceRepository.prototype.findByStripePaymentIntentId = async () => deps.getInvoice();
+
+      try {
+        return await handleStripeWebhook(c as any);
+      } finally {
+        InvoiceRepository.prototype.findOneById = origFind;
+        InvoiceRepository.prototype.updateOneById = origUpd;
+        InvoiceRepository.prototype.findByStripePaymentIntentId = origFindPI;
+      }
+    });
+
+    return app;
+  }
+
+  test('duplicate payment_intent.succeeded (same event.id) is a no-op: single transition + single notification', async () => {
+    const event = makeStripeEvent('payment_intent.succeeded', makePaymentIntentObject(), 'evt_idem_777');
+    let stored = makeInvoice({ metadata: { stripePaymentIntentId: PAYMENT_INTENT_ID } });
+    let updateCount = 0;
+    let notifyCount = 0;
+
+    const app = await buildIdempotencyApp({
+      verifySignature: async () => event,
+      getInvoice: () => stored,
+      onUpdate: (_id, data) => { updateCount++; stored = { ...stored, ...data }; },
+      onNotify: () => { notifyCount++; },
+    });
+
+    await postWebhook(app, JSON.stringify(event)); // first delivery — processes
+    await postWebhook(app, JSON.stringify(event)); // redelivery (same id) — skipped
+
+    expect(updateCount).toBe(1);
+    expect(notifyCount).toBe(1);
+  });
+
+  test('duplicate charge.succeeded (same event.id) does not double-notify customer+merchant', async () => {
+    const event = makeStripeEvent('charge.succeeded', makeChargeObject(), 'evt_idem_888');
+    let stored = makeInvoice({ metadata: { stripePaymentIntentId: PAYMENT_INTENT_ID } });
+    let updateCount = 0;
+    let notifyCount = 0;
+
+    const app = await buildIdempotencyApp({
+      verifySignature: async () => event,
+      getInvoice: () => stored,
+      onUpdate: (_id, data) => { updateCount++; stored = { ...stored, ...data }; },
+      onNotify: () => { notifyCount++; },
+    });
+
+    await postWebhook(app, JSON.stringify(event));
+    await postWebhook(app, JSON.stringify(event));
+
+    expect(updateCount).toBe(1);
+    expect(notifyCount).toBe(2); // charge.succeeded notifies customer + merchant exactly once each
+  });
+
+  test('a distinct event.id for the same invoice still processes (not over-deduped)', async () => {
+    let stored = makeInvoice({ metadata: { stripePaymentIntentId: PAYMENT_INTENT_ID } });
+    let updateCount = 0;
+    let notifyCount = 0;
+
+    const buildFor = (evtId: string) => buildIdempotencyApp({
+      verifySignature: async () => makeStripeEvent('payment_intent.succeeded', makePaymentIntentObject(), evtId),
+      getInvoice: () => stored,
+      onUpdate: (_id, data) => { updateCount++; stored = { ...stored, ...data }; },
+      onNotify: () => { notifyCount++; },
+    });
+
+    const e1 = makeStripeEvent('payment_intent.succeeded', makePaymentIntentObject(), 'evt_A');
+    await postWebhook(await buildFor('evt_A'), JSON.stringify(e1));
+    const e2 = makeStripeEvent('payment_intent.succeeded', makePaymentIntentObject(), 'evt_B');
+    await postWebhook(await buildFor('evt_B'), JSON.stringify(e2));
+
+    expect(updateCount).toBe(2); // two distinct events both processed
+  });
+});
+
+// ---------------------------------------------------------------------------
+// AHA notifications-webhook: organizationId must be threaded onto every
+// createNotification call.
+//
+// NotificationRepository.createNotificationForModule (FIX-012) throws
+// ValidationError when organizationId is missing/empty, and the webhook wraps
+// each createNotification in a try/catch that only logs the error. So if the
+// webhook omits organizationId, every payment notification SILENTLY DROPS:
+// payment_authorized, payment_failed, payment_captured (customer),
+// payment_received (merchant), charge_failed. The invoice already carries its
+// notNull organizationId; the webhook must propagate it to each notification.
+//
+// CROSS-MODULE RISK (billing -> notifs): these tests assert the org actually
+// reaches the notifs boundary, captured via a real-shaped createNotification.
+// ---------------------------------------------------------------------------
+
+describe('handleStripeWebhook — notification organizationId (billing -> notifs)', () => {
+  /**
+   * Build an app whose notifs.createNotification captures every request AND
+   * enforces the same precondition the real NotificationRepository enforces
+   * (FIX-012): reject a missing/empty organizationId. This guarantees the test
+   * fails for the right reason (silent drop) before the fix, and proves real
+   * propagation after.
+   */
+  async function buildNotifyApp(deps: {
+    verifySignature: () => Promise<any>;
+    invoiceById?: () => any;
+    allInvoices?: any[];
+    captured: any[];
+  }) {
+    const {
+      verifySignature,
+      invoiceById = () => makeInvoice(),
+      allInvoices = [makeInvoice()],
+      captured,
+    } = deps;
+
+    const { handleStripeWebhook } = await import('./handleStripeWebhook');
+    const { InvoiceRepository } = await import('./repos/billing.repo');
+
+    const app = new Hono();
+    attachErrorHandler(app);
+
+    app.post('/', async (c) => {
+      (c as any).set('logger', makeNullLogger());
+      (c as any).set('billing', { verifyWebhookSignature: verifySignature });
+      // Mirror the real repo's organizationId precondition so an omitted org
+      // throws here — exactly as it would in production (FIX-012). The webhook
+      // swallows that throw, so the proof is "no captured request", not a 500.
+      (c as any).set('notifs', {
+        createNotification: async (req: any) => {
+          if (!req?.organizationId || String(req.organizationId).trim() === '') {
+            throw new Error('organizationId is required to create a notification');
+          }
+          captured.push(req);
+          return { id: 'notif-1', ...req };
+        },
+      });
+
+      const selectChain: any = {};
+      for (const m of ['select', 'from', 'where', 'limit', 'offset', 'orderBy']) selectChain[m] = () => selectChain;
+      selectChain.then = (resolve: any, reject?: any) => Promise.resolve(allInvoices).then(resolve, reject);
+      (c as any).set('database', { select: () => selectChain });
+
+      const origFind = InvoiceRepository.prototype.findOneById;
+      const origUpd = InvoiceRepository.prototype.updateOneById;
+      const origFindPI = InvoiceRepository.prototype.findByStripePaymentIntentId;
+
+      InvoiceRepository.prototype.findOneById = async () => invoiceById();
+      InvoiceRepository.prototype.updateOneById = async (_id: string, data: any) => ({ ...makeInvoice(), ...data });
+      InvoiceRepository.prototype.findByStripePaymentIntentId = async (pi: string) =>
+        allInvoices.find((inv: any) => (inv.metadata as any)?.stripePaymentIntentId === pi) ?? null;
+
+      try {
+        return await handleStripeWebhook(c as any);
+      } finally {
+        InvoiceRepository.prototype.findOneById = origFind;
+        InvoiceRepository.prototype.updateOneById = origUpd;
+        InvoiceRepository.prototype.findByStripePaymentIntentId = origFindPI;
+      }
+    });
+
+    return app;
+  }
+
+  test('payment_intent.succeeded → payment_authorized notification carries the invoice organizationId', async () => {
+    const event = makeStripeEvent('payment_intent.succeeded', makePaymentIntentObject(), 'evt_org_1');
+    const captured: any[] = [];
+
+    const app = await buildNotifyApp({ verifySignature: async () => event, captured });
+    const resp = await postWebhook(app, JSON.stringify(event));
+
+    expect(resp.status).toBe(200);
+    expect(captured).toHaveLength(1);
+    expect(captured[0].type).toBe('payment_authorized');
+    expect(captured[0].recipient).toBe('cust-uuid');
+    expect(captured[0].organizationId).toBe(ORG_ID);
+  });
+
+  test('payment_intent.payment_failed → payment_failed notification carries the invoice organizationId', async () => {
+    const event = makeStripeEvent('payment_intent.payment_failed', makePaymentIntentObject({ status: 'canceled' }), 'evt_org_2');
+    const captured: any[] = [];
+
+    const app = await buildNotifyApp({ verifySignature: async () => event, captured });
+    const resp = await postWebhook(app, JSON.stringify(event));
+
+    expect(resp.status).toBe(200);
+    expect(captured).toHaveLength(1);
+    expect(captured[0].type).toBe('payment_failed');
+    expect(captured[0].recipient).toBe('cust-uuid');
+    expect(captured[0].organizationId).toBe(ORG_ID);
+  });
+
+  test('charge.succeeded → customer + merchant notifications both carry the invoice organizationId', async () => {
+    const event = makeStripeEvent('charge.succeeded', makeChargeObject(), 'evt_org_3');
+    const captured: any[] = [];
+
+    const app = await buildNotifyApp({
+      verifySignature: async () => event,
+      allInvoices: [makeInvoice({ metadata: { stripePaymentIntentId: PAYMENT_INTENT_ID } })],
+      captured,
+    });
+    const resp = await postWebhook(app, JSON.stringify(event));
+
+    expect(resp.status).toBe(200);
+    expect(captured).toHaveLength(2);
+
+    const customerNote = captured.find((n) => n.type === 'payment_captured');
+    const merchantNote = captured.find((n) => n.type === 'payment_received');
+
+    expect(customerNote).toBeDefined();
+    expect(customerNote.recipient).toBe('cust-uuid');
+    expect(customerNote.organizationId).toBe(ORG_ID);
+
+    expect(merchantNote).toBeDefined();
+    expect(merchantNote.recipient).toBe('merch-uuid');
+    expect(merchantNote.organizationId).toBe(ORG_ID);
+  });
+
+  test('charge.failed → charge_failed notification carries the invoice organizationId', async () => {
+    const event = makeStripeEvent('charge.failed', makeChargeObject({ status: 'failed' }), 'evt_org_4');
+    const captured: any[] = [];
+
+    const app = await buildNotifyApp({
+      verifySignature: async () => event,
+      allInvoices: [makeInvoice({ metadata: { stripePaymentIntentId: PAYMENT_INTENT_ID } })],
+      captured,
+    });
+    const resp = await postWebhook(app, JSON.stringify(event));
+
+    expect(resp.status).toBe(200);
+    expect(captured).toHaveLength(1);
+    expect(captured[0].type).toBe('charge_failed');
+    expect(captured[0].recipient).toBe('cust-uuid');
+    expect(captured[0].organizationId).toBe(ORG_ID);
   });
 });

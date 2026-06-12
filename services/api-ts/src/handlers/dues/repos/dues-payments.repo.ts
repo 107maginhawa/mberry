@@ -4,6 +4,8 @@ import { memberships } from '../../association:member/repos/membership.schema';
 import { duesPaymentStatusHistory } from '../../association:member/repos/dues-payment-status-history.schema';
 import { duesInvoices } from './dues.schema';
 import { persons } from '../../person/repos/person.schema';
+import { organizations } from '@/handlers/platformadmin/repos/platform-admin.schema';
+import { buildReceiptPrefix } from '@/handlers/association:member/utils/receipt-number';
 import { assertValidTransition, DUES_PAYMENT_VALID_TRANSITIONS } from '@/utils/status-transitions';
 
 /** @deprecated Use DUES_PAYMENT_VALID_TRANSITIONS from @/utils/status-transitions instead. */
@@ -16,6 +18,7 @@ import {
   duesFundAllocations,
   duesReminderSchedules,
   duesGatewayConfigs,
+  duesReceiptCounters,
   type DuesOrgConfig,
   type NewDuesOrgConfig,
   type DuesFund,
@@ -241,16 +244,42 @@ export class DuesRepository {
     return recent;
   }
 
+  /**
+   * [FIX-003] Atomically claim the next receipt sequence for an org/year.
+   *
+   * Replaces the previous `count(*)`-based sequence which (a) raced under
+   * concurrent recording within one org and (b) combined with the old global
+   * unique constraint + hardcoded 'ORG' prefix caused cross-org collisions.
+   *
+   * Uses an upsert against `dues_receipt_counter` so the increment is a single
+   * atomic statement. The RETURNING value is the sequence to USE for this
+   * receipt; the stored `next_sequence` is left pointing at the following one.
+   */
   async getNextReceiptSequence(organizationId: string, year: number): Promise<number> {
-    const pattern = `%-${year}-%`;
-    const [result] = await this.db
-      .select({ count: sql<number>`count(*)::int` })
-      .from(duesPayments)
-      .where(and(
-        eq(duesPayments.organizationId, organizationId),
-        sql`${duesPayments.receiptNumber} LIKE ${pattern}`,
-      ));
-    return (result?.count ?? 0) + 1;
+    const [row] = await this.db
+      .insert(duesReceiptCounters)
+      .values({ organizationId, year, nextSequence: 2 })
+      .onConflictDoUpdate({
+        target: [duesReceiptCounters.organizationId, duesReceiptCounters.year],
+        set: { nextSequence: sql`${duesReceiptCounters.nextSequence} + 1`, updatedAt: new Date() },
+      })
+      .returning({ nextSequence: duesReceiptCounters.nextSequence });
+    // On first insert nextSequence=2 → sequence to use is 1.
+    // On conflict the value returned is the post-increment counter → use value-1.
+    return (row?.nextSequence ?? 2) - 1;
+  }
+
+  /**
+   * [FIX-003] Resolve the per-org receipt prefix from the organization slug.
+   * Replaces the hardcoded literal 'ORG' prefix at all recording call sites.
+   */
+  async getOrgReceiptPrefix(organizationId: string): Promise<string> {
+    const [org] = await this.db
+      .select({ slug: organizations.slug })
+      .from(organizations)
+      .where(eq(organizations.id, organizationId))
+      .limit(1);
+    return buildReceiptPrefix(org?.slug);
   }
 
   // ─── Dashboard Stats ──────────────────────────────────

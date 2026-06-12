@@ -25,12 +25,20 @@ mock.module('@/core/audit/audit-action', () => ({ auditAction: async () => {} })
 // Given a member uploads a 3MB JPEG and crops to square,
 // When saved,
 // Then photo appears on profile, ID card, and directory within 1 minute.
+//
+// NOTE (FIX-005 / G-05): `avatar` is NOT a field of PersonMeUpdateRequest, so
+// the generated validator strips it before it reaches updateMyProfile. Avatar
+// persistence happens on the full-profile path (updatePerson) / onboarding, not
+// on PATCH /persons/me. The original tests here asserted a dead mapping (the
+// handler used to map a field the validator removes) — fake-green. These tests
+// now assert the REAL contract: updateMyProfile does not write avatar, and the
+// contract field path still works.
 // ---------------------------------------------------------------------------
-describe('AC-M02-001: Photo Upload', () => {
+describe('AC-M02-001: Photo Upload (updateMyProfile contract boundary)', () => {
   beforeEach(() => { restoreRepo(PersonRepository); });
   afterEach(() => { restoreRepo(PersonRepository); });
 
-  test('updateMyProfile persists avatar field (fileId reference)', async () => {
+  test('updateMyProfile does NOT persist avatar (not a /persons/me contract field)', async () => {
     const person = { id: 'user-1', firstName: 'Test', avatar: null };
     let capturedUpdate: any = null;
     stubRepo(PersonRepository, {
@@ -40,31 +48,15 @@ describe('AC-M02-001: Photo Upload', () => {
         return { ...person, ...data };
       },
     });
-    const avatarPayload = { fileId: 'file-abc', url: 'https://cdn.example.com/photo.jpg' };
-    const ctx = makeCtx({ _body: { avatar: avatarPayload } });
+    // A raw body carrying avatar (validator would strip it). The handler must
+    // not map it — avatar belongs to the full-profile / onboarding path.
+    const ctx = makeCtx({ _body: { avatar: { fileId: 'file-abc', url: 'https://cdn.example.com/photo.jpg' } } });
     const res = await updateMyProfile(ctx);
     expect(res.status).toBe(200);
-    expect(capturedUpdate).toBeDefined();
-    expect(capturedUpdate.avatar).toEqual(avatarPayload);
+    expect(capturedUpdate).not.toHaveProperty('avatar');
   });
 
-  test('updateMyProfile can clear avatar with null', async () => {
-    const person = { id: 'user-1', firstName: 'Test', avatar: { fileId: 'old' } };
-    let capturedUpdate: any = null;
-    stubRepo(PersonRepository, {
-      findOneById: async () => person,
-      updateOneById: async (_id: string, data: any) => {
-        capturedUpdate = data;
-        return { ...person, ...data };
-      },
-    });
-    const ctx = makeCtx({ _body: { avatar: null } });
-    const res = await updateMyProfile(ctx);
-    expect(res.status).toBe(200);
-    expect(capturedUpdate.avatar).toBeNull();
-  });
-
-  test('updateMyProfile with avatar preserves other fields unchanged', async () => {
+  test('updateMyProfile persists a real contract field (firstName) and ignores avatar', async () => {
     const person = { id: 'user-1', firstName: 'Test', lastName: 'User', avatar: null };
     let capturedUpdate: any = null;
     stubRepo(PersonRepository, {
@@ -77,8 +69,8 @@ describe('AC-M02-001: Photo Upload', () => {
     const ctx = makeCtx({ _body: { avatar: { fileId: 'f1' }, firstName: 'NewName' } });
     const res = await updateMyProfile(ctx);
     expect(res.status).toBe(200);
-    expect(capturedUpdate.avatar).toEqual({ fileId: 'f1' });
     expect(capturedUpdate.firstName).toBe('NewName');
+    expect(capturedUpdate).not.toHaveProperty('avatar');
   });
 
   test('updateMyProfile returns 404 when person not found', async () => {
@@ -86,7 +78,7 @@ describe('AC-M02-001: Photo Upload', () => {
       findOneById: async () => null,
       updateOneById: async () => null,
     });
-    const ctx = makeCtx({ _body: { avatar: { fileId: 'f1' } } });
+    const ctx = makeCtx({ _body: { firstName: 'X' } });
     await expect(updateMyProfile(ctx)).rejects.toThrow('Person not found');
   });
 });
@@ -181,7 +173,8 @@ describe('AC-M02-002: Privacy Toggle', () => {
         }),
       }),
     };
-    const ctx = makeCtx({ database: mockDb, _body: { organizationId: 'org-1', emailVisible: true } });
+    // FIX-001 (G-01): contract field is `orgId`, not `organizationId`.
+    const ctx = makeCtx({ database: mockDb, _body: { orgId: 'org-1', emailVisible: true } });
     const res = await updateMyPrivacySettings(ctx);
     expect(res.status).toBe(201);
     const body = (res as any).body;
@@ -211,7 +204,7 @@ describe('AC-M02-002: Privacy Toggle', () => {
         }),
       }),
     };
-    const ctx = makeCtx({ database: mockDb, _body: { organizationId: 'org-1', phoneVisible: true, emailVisible: false } });
+    const ctx = makeCtx({ database: mockDb, _body: { orgId: 'org-1', phoneVisible: true, emailVisible: false } });
     const res = await updateMyPrivacySettings(ctx);
     expect(res.status).toBe(200);
   });
@@ -226,13 +219,14 @@ describe('AC-M02-002: Privacy Toggle', () => {
         }),
       }),
     };
-    const ctx = makeCtx({ database: mockDb, _body: { organizationId: 'org-1', emailVisible: true } });
+    const ctx = makeCtx({ database: mockDb, _body: { orgId: 'org-1', emailVisible: true } });
     await expect(updateMyPrivacySettings(ctx)).rejects.toThrow('Not a member of this organization');
   });
 
-  test('updateMyPrivacySettings requires organizationId', async () => {
+  test('updateMyPrivacySettings requires orgId', async () => {
+    // FIX-001 (G-01): the contract scope field is `orgId`.
     const ctx = makeCtx({ _body: {} });
-    await expect(updateMyPrivacySettings(ctx)).rejects.toThrow('organizationId is required');
+    await expect(updateMyPrivacySettings(ctx)).rejects.toThrow('orgId is required');
   });
 });
 

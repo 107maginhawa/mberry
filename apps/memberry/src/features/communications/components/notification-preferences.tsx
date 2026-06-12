@@ -80,17 +80,23 @@ export function NotificationPreferences({ orgId, personId }: PreferencesProps) {
     enabled: !!personId,
   })
 
-  // Merge server data into local state
+  // Merge server data into local state.
+  // The server persists one row per (person, topic); topic_id is a real UUID and
+  // each row carries its topicName (the category, e.g. "dues"). The schema has no
+  // per-channel dimension, so a topic's saved `enabled` applies to all 3 channels
+  // of its category.
   useEffect(() => {
     if (!data?.data) return
     const serverPrefs = data.data
     setPrefs((prev) => {
       const next = { ...prev }
       for (const sub of serverPrefs) {
-        const topicId = sub.topicId as string
-        // Match topicId pattern like "dues-email"
-        if (topicId && topicId in next) {
-          next[topicId] = sub.enabled !== false
+        const category = (sub.topicName as string | undefined) ?? undefined
+        if (!category) continue
+        const enabled = sub.enabled !== false
+        for (const ch of CHANNELS) {
+          const key = prefKey(category, ch.key)
+          if (key in next) next[key] = enabled
         }
       }
       return next

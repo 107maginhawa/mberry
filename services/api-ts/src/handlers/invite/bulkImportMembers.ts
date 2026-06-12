@@ -91,6 +91,26 @@ export async function bulkImportMembers(
     throw new ForbiddenError('Officer access required for this organization');
   }
 
+  // FIX-006 (m01 §6): roster import is a high-impact bulk mutation restricted
+  // to President / Secretary, and those privileged positions require 2FA (parity
+  // with requirePosition / P1-3). Titles are sourced from the DB term, never the
+  // request. NB: this handler scopes by the request-body `orgId`, so the gate is
+  // applied inline against the already-fetched terms rather than via
+  // requirePosition (which reads ctx organizationId).
+  const ALLOWED_IMPORT_TITLES = new Set(['president', 'secretary']);
+  const holdsAllowedTitle = terms.some(t =>
+    ALLOWED_IMPORT_TITLES.has(((t.positionTitle as string) ?? '').toLowerCase()),
+  );
+  if (!holdsAllowedTitle) {
+    throw new ForbiddenError('Roster import requires a President or Secretary position');
+  }
+  const isDev = process.env['NODE_ENV'] !== 'production';
+  if (!user.twoFactorEnabled && !isDev) {
+    throw new ForbiddenError(
+      'Two-factor authentication required for roster import. Please enable 2FA in your account settings.',
+    );
+  }
+
   const inviteRepo = new InviteRepository(db, logger);
 
   const grid = parseCsv(csvContent);

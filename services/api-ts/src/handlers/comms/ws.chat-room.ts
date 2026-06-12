@@ -19,6 +19,7 @@ import type { DatabaseInstance } from '@/core/database';
 import { authMiddleware } from '@/middleware/auth';
 import { ChatRoomRepository } from './repos/chatRoom.repo';
 import { ChatMessageRepository } from './repos/chatMessage.repo';
+import { ChatRoomMemberRepository } from './repos/chatRoomMember.repo';
 
 /**
  * Message types for chat room WebSocket.
@@ -70,8 +71,15 @@ export const config: WebSocketHandler = {
       return;
     }
 
-    // Check if user is a participant (via their profiles)
-    const isParticipant = room.participants.includes(user.id);
+    // Check if user is a participant.
+    // FIX-007 (G5): honor BOTH the legacy JSONB `participants` array AND the
+    // `chat_room_member` join table, so a member tracked only in the join table
+    // can connect. Compatibility OR-shim — JSONB stays canonical; the `||`
+    // short-circuits, so the join-table query only runs when JSONB misses.
+    const memberRepo = new ChatRoomMemberRepository(db, logger);
+    const isParticipant =
+      room.participants.includes(user.id) ||
+      (await memberRepo.isMember(roomId, user.id));
 
     if (!isParticipant) {
       logger.error({ action: 'ws.chat-room.2', userId: user.id, roomId }, 'User is not a participant in chat room');

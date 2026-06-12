@@ -3,14 +3,7 @@ import { describe, test, expect } from 'bun:test';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
-type DocumentId = string;
 type PersonId = string;
-
-interface AccessLogEntry {
-  documentId: DocumentId;
-  viewerId: PersonId;
-  timestamp: Date;
-}
 
 interface DocumentVersion {
   versionNumber: number;
@@ -20,26 +13,20 @@ interface DocumentVersion {
 }
 
 interface Document {
-  id: DocumentId;
+  id: string;
   currentVersion: number;
   versions: DocumentVersion[];
-  accessLog: AccessLogEntry[];
+  accessLog: unknown[];
 }
 
 // ─── Pure Functions ───────────────────────────────────────────────────────────
 
-function logDocumentAccess(
-  doc: Document,
-  viewerId: PersonId,
-  now: Date,
-): Document {
-  const entry: AccessLogEntry = {
-    documentId: doc.id,
-    viewerId,
-    timestamp: now,
-  };
-  return { ...doc, accessLog: [...doc.accessLog, entry] };
-}
+// NOTE (FIX-003 / AC-M11-005): the former in-memory `logDocumentAccess`
+// simulation was removed. It tested a local closure, not the production code
+// path, and gave fake-green confidence while `document_access_log` was never
+// actually written on view/download. Real handler-level coverage now lives in:
+//   - getDocument.access-log.test.ts  (view → access-log row)
+//   - downloadDocument.test.ts        (download → access-log row + auth matrix)
 
 function uploadNewVersion(
   doc: Document,
@@ -67,48 +54,8 @@ function getVersionHistory(doc: Document): DocumentVersion[] {
 
 // ─── Tests ────────────────────────────────────────────────────────────────────
 
-describe('[AC-M11-005] Document Access Logging', () => {
-  const baseDoc: Document = {
-    id: 'doc-001',
-    currentVersion: 1,
-    versions: [
-      {
-        versionNumber: 1,
-        uploadedAt: new Date('2026-01-01T00:00:00Z'),
-        uploadedBy: 'person-owner',
-        content: 'initial content',
-      },
-    ],
-    accessLog: [],
-  };
-
-  test('viewing a document logs viewer ID and timestamp', () => {
-    const viewerId = 'person-viewer-1';
-    const now = new Date('2026-05-22T10:00:00Z');
-    const updated = logDocumentAccess(baseDoc, viewerId, now);
-
-    expect(updated.accessLog).toHaveLength(1);
-    expect(updated.accessLog[0].viewerId).toBe(viewerId);
-    expect(updated.accessLog[0].timestamp).toEqual(now);
-    expect(updated.accessLog[0].documentId).toBe(baseDoc.id);
-  });
-
-  test('multiple views accumulate in access log', () => {
-    const t1 = new Date('2026-05-22T10:00:00Z');
-    const t2 = new Date('2026-05-22T11:00:00Z');
-    const doc1 = logDocumentAccess(baseDoc, 'person-a', t1);
-    const doc2 = logDocumentAccess(doc1, 'person-b', t2);
-
-    expect(doc2.accessLog).toHaveLength(2);
-    expect(doc2.accessLog[0].viewerId).toBe('person-a');
-    expect(doc2.accessLog[1].viewerId).toBe('person-b');
-  });
-
-  test('access log entry preserves document ID', () => {
-    const updated = logDocumentAccess(baseDoc, 'person-x', new Date());
-    expect(updated.accessLog[0].documentId).toBe('doc-001');
-  });
-});
+// [AC-M11-005] Document Access Logging is now covered by real handler tests:
+//   getDocument.access-log.test.ts and downloadDocument.test.ts (FIX-003).
 
 describe('[AC-M11-006] Version History', () => {
   const baseDoc: Document = {

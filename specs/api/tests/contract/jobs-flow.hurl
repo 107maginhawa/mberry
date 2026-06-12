@@ -1,7 +1,13 @@
 # Jobs board contract flow — officer creates a job posting, lists, gets,
 # updates, member applies to it, officer reviews application. All 7 Jobs
-# operationIds exercised. State-changing writes accept 201|4xx|500 to
-# absorb the same org-scoping defect family that hit Marketplace (D-11).
+# operationIds exercised.
+#
+# Routes live under the org-context boundary `/association/jobs/*` (AHA jobs
+# FIX-001 / P-1): the re-export interfaces in main.tsp now carry
+# `@route("/association/jobs")`, so every op passes through the
+# `/association/*` orgContextMiddleware. The dropped-`/association`-prefix
+# defect that hit Marketplace (D-11) is therefore closed here too — writes no
+# longer tolerate 500.
 #
 # Covers operationIds:
 #   createJobPosting, searchJobPostings, getJobPosting, updateJobPosting,
@@ -37,7 +43,7 @@ Origin: {{origin}}
 x-csrf-token: {{csrf_token}}
 HTTP 200
 
-GET {{api}}/postings
+GET {{api}}/association/jobs/postings
 x-org-id: ed8e3a96-8126-4341-be42-e6eb7940c562
 HTTP 401
 
@@ -62,7 +68,7 @@ officer_cookie: cookie "better-auth.session_token"
 
 # ── 1. Search postings (baseline) ────────────────────────────────────────────
 
-GET {{api}}/postings
+GET {{api}}/association/jobs/postings
 Cookie: better-auth.session_token={{officer_cookie}}
 x-org-id: ed8e3a96-8126-4341-be42-e6eb7940c562
 HTTP 200
@@ -71,7 +77,7 @@ jsonpath "$.data" exists
 
 # ── 2. Create a job posting ──────────────────────────────────────────────────
 
-POST {{api}}/postings
+POST {{api}}/association/jobs/postings
 Origin: {{origin}}
 x-csrf-token: {{csrf_token}}
 Cookie: better-auth.session_token={{officer_cookie}}
@@ -88,11 +94,11 @@ Content-Type: application/json
 }
 HTTP *
 [Asserts]
-status toString matches "^(201|400|500)$"
+status toString matches "^(201|400)$"
 
 # ── 3. Get a synthetic posting ───────────────────────────────────────────────
 
-GET {{api}}/postings/00000000-0000-4000-8000-000000000000
+GET {{api}}/association/jobs/postings/00000000-0000-4000-8000-000000000000
 Cookie: better-auth.session_token={{officer_cookie}}
 x-org-id: ed8e3a96-8126-4341-be42-e6eb7940c562
 HTTP *
@@ -101,7 +107,7 @@ status toString matches "^(200|404)$"
 
 # ── 4. Update a synthetic posting ────────────────────────────────────────────
 
-PATCH {{api}}/postings/00000000-0000-4000-8000-000000000000
+PATCH {{api}}/association/jobs/postings/00000000-0000-4000-8000-000000000000
 Origin: {{origin}}
 x-csrf-token: {{csrf_token}}
 Cookie: better-auth.session_token={{officer_cookie}}
@@ -112,11 +118,11 @@ Content-Type: application/json
 }
 HTTP *
 [Asserts]
-status toString matches "^(200|404|500)$"
+status toString matches "^(200|404)$"
 
 # ── 5. Delete a synthetic posting ────────────────────────────────────────────
 
-DELETE {{api}}/postings/00000000-0000-4000-8000-000000000000
+DELETE {{api}}/association/jobs/postings/00000000-0000-4000-8000-000000000000
 Origin: {{origin}}
 x-csrf-token: {{csrf_token}}
 Cookie: better-auth.session_token={{officer_cookie}}
@@ -127,7 +133,7 @@ status toString matches "^(200|204|404)$"
 
 # ── 6. Create an application against a synthetic posting → expect 404 ────────
 
-POST {{api}}/applications
+POST {{api}}/association/jobs/applications
 Origin: {{origin}}
 x-csrf-token: {{csrf_token}}
 Cookie: better-auth.session_token={{officer_cookie}}
@@ -140,11 +146,11 @@ Content-Type: application/json
 }
 HTTP *
 [Asserts]
-status toString matches "^(201|400|404|409|500)$"
+status toString matches "^(201|400|404|409)$"
 
 # ── 7. Update a synthetic application ────────────────────────────────────────
 
-PATCH {{api}}/applications/00000000-0000-4000-8000-000000000000
+PATCH {{api}}/association/jobs/applications/00000000-0000-4000-8000-000000000000
 Origin: {{origin}}
 x-csrf-token: {{csrf_token}}
 Cookie: better-auth.session_token={{officer_cookie}}
@@ -155,4 +161,4 @@ Content-Type: application/json
 }
 HTTP *
 [Asserts]
-status toString matches "^(200|404|500)$"
+status toString matches "^(200|404)$"

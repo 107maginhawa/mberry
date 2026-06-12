@@ -89,19 +89,41 @@ export async function createChatRoom(
     // Room exists and upsert is true - update with new settings if needed
     const updates: any = {};
 
-    // Update admins if different
-    const currentAdmins = new Set(room.admins);
-    const newAdmins = new Set(admins);
-    const adminsChanged = currentAdmins.size !== newAdmins.size ||
-                         [...currentAdmins].some(admin => !newAdmins.has(admin));
+    // Security (FIX-005 / G6): privileged fields (admins, context) may only be
+    // mutated by an existing admin of the room. Without this guard any
+    // participant could self-promote to admin (gaining video start/end and
+    // future admin powers) or relink the room's context via upsert.
+    const callerIsExistingAdmin = room.admins.includes(user.id);
 
-    if (adminsChanged) {
-      updates.admins = admins;
-    }
+    if (callerIsExistingAdmin) {
+      // Update admins if different
+      const currentAdmins = new Set(room.admins);
+      const newAdmins = new Set(admins);
+      const adminsChanged = currentAdmins.size !== newAdmins.size ||
+                           [...currentAdmins].some(admin => !newAdmins.has(admin));
 
-    // Link to context if provided and not already linked
-    if (body.context && room.context !== body.context) {
-      updates.context = body.context;
+      if (adminsChanged) {
+        updates.admins = admins;
+      }
+
+      // Link to context if provided and not already linked
+      if (body.context && room.context !== body.context) {
+        updates.context = body.context;
+      }
+    } else if (
+      (body.admins && body.admins.length > 0) ||
+      (body.context && room.context !== body.context)
+    ) {
+      // A non-admin attempted to change privileged fields — ignore those
+      // fields silently rather than failing the idempotent upsert, but record
+      // the rejected escalation attempt for audit/trace.
+      logger?.warn({
+        userId: user.id,
+        roomId: room.id,
+        attemptedAdmins: body.admins,
+        attemptedContext: body.context,
+        action: 'reject_upsert_privilege_escalation'
+      }, 'Non-admin upsert attempted to change admins/context; ignored');
     }
 
     // Reactivate if archived

@@ -8,7 +8,7 @@
  * in environments where no DATABASE_URL is set.
  */
 
-import { describe, test, expect, beforeAll } from 'bun:test';
+import { describe, test, expect, beforeAll, afterAll } from 'bun:test';
 
 const DATABASE_URL = process.env['DATABASE_URL'];
 const SKIP_DB_TESTS = !DATABASE_URL;
@@ -90,4 +90,57 @@ describe('Migration Verification (DATA-04)', () => {
 
     expect(violations).toHaveLength(0);
   });
+});
+
+// ---------------------------------------------------------------------------
+// FIX-010 (AHA realtime-comms): chat_room / chat_message organization_id must
+// be NOT NULL (the schema declares .notNull(); migration 0016 left it nullable
+// and 0019's conditional SET NOT NULL was skipped). Migration 0064 backfills
+// from the room then enforces NOT NULL.
+// ---------------------------------------------------------------------------
+
+describe('Migration Verification — comms org_id NOT NULL (FIX-010)', () => {
+  // Connect directly via pg (DATABASE_URL only) — importing ./core/database
+  // triggers full-env config validation that fails in a bare `bun test` run.
+  const DB_URL = process.env['DATABASE_URL'];
+  let pool: any = null;
+
+  beforeAll(async () => {
+    if (!DB_URL) return;
+    const { Pool } = await import('pg');
+    pool = new Pool({ connectionString: DB_URL });
+  });
+
+  afterAll(async () => {
+    if (pool) await pool.end();
+  });
+
+  const commsTables = ['chat_room', 'chat_message'] as const;
+
+  for (const table of commsTables) {
+    test(`${table}.organization_id is NOT NULL`, async () => {
+      if (!pool) {
+        console.log('Skipping: no DATABASE_URL');
+        return;
+      }
+      const { rows } = await pool.query(
+        `SELECT is_nullable FROM information_schema.columns
+         WHERE table_schema = 'public' AND table_name = $1 AND column_name = 'organization_id'`,
+        [table]
+      );
+      expect(rows[0]?.is_nullable).toBe('NO');
+    });
+
+    test(`${table} has no NULL organization_id rows`, async () => {
+      if (!pool) {
+        console.log('Skipping: no DATABASE_URL');
+        return;
+      }
+      // `table` comes from a fixed allowlist above — safe to inline as identifier.
+      const { rows } = await pool.query(
+        `SELECT count(*)::int AS n FROM ${table} WHERE organization_id IS NULL`
+      );
+      expect(rows[0]?.n).toBe(0);
+    });
+  }
 });

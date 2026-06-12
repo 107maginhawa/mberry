@@ -1,6 +1,6 @@
 import type { ValidatedContext } from '@/types/app';
 import type { DatabaseInstance } from '@/core/database';
-import { NotFoundError, UnauthorizedError } from '@/core/errors';
+import { NotFoundError, UnauthorizedError, ConflictError } from '@/core/errors';
 import type { DeleteMembershipTierParams } from '@/generated/openapi/validators';
 import { MembershipTierRepository } from '@/handlers/association:member/repos/membership.repo';
 
@@ -22,6 +22,16 @@ export async function deleteMembershipTier(
 
   const existing = await repo.findOneById(tierId);
   if (!existing) throw new NotFoundError('Membership tier');
+
+  // FIX-015 / BR-04: cannot delete a tier with members assigned — surface a
+  // friendly 409 instead of a raw FK-violation 500. Officers should reassign
+  // members or retire the tier first.
+  const assignedMembers = await repo.countMembersInTier(tierId);
+  if (assignedMembers > 0) {
+    throw new ConflictError(
+      `Cannot delete a membership tier with ${assignedMembers} member(s) assigned. Reassign or retire the tier instead.`,
+    );
+  }
 
   await repo.deleteOneById(tierId, session.user.id);
 

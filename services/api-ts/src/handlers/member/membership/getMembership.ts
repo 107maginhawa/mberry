@@ -3,6 +3,7 @@ import type { DatabaseInstance } from '@/core/database';
 import { NotFoundError, UnauthorizedError, ForbiddenError } from '@/core/errors';
 import type { GetMembershipParams } from '@/generated/openapi/validators';
 import { MembershipRepository } from '@/handlers/association:member/repos/membership.repo';
+import { withComputedStatus } from './utils/membership-status-middleware';
 
 /**
  * getMembership
@@ -29,5 +30,7 @@ export async function getMembership(
     throw new ForbiddenError('Access denied to this membership');
   }
 
-  return ctx.json(membership, 200);
+  // FIX-002 (G-10): status truth is computed on read so this surface agrees
+  // with listOrgMembers and never serves a stale stored cache value.
+  return ctx.json(withComputedStatus(membership), 200);
 }

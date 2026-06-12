@@ -37,10 +37,12 @@ export async function recordDuesPayment(
   const recentPayment = await repo.findRecentPaymentForPerson(orgId, body.personId);
   const hasConcurrentWarning = !!recentPayment;
 
-  // Generate receipt number in org sequence
+  // Generate receipt number in org sequence.
+  // [FIX-003] Per-org prefix + atomic per-org/year counter (no cross-org collision).
   const year = new Date().getFullYear();
+  const orgPrefix = await repo.getOrgReceiptPrefix(orgId);
   const sequence = await repo.getNextReceiptSequence(orgId, year);
-  const receiptNumber = formatReceiptNumber('ORG', year, sequence);
+  const receiptNumber = formatReceiptNumber(orgPrefix, year, sequence);
 
   // [PAY-01][PAY-03] Pre-validate invoice outside transaction (read-only).
   // Backend reads version from DB — never from client — to prevent lock bypass (T-20-02).

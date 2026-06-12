@@ -2,7 +2,7 @@
  * CampaignRepository - Data access layer for ad campaigns
  */
 
-import { eq, and, type SQL } from 'drizzle-orm';
+import { eq, and, inArray, type SQL } from 'drizzle-orm';
 import type { DatabaseInstance } from '@/core/database';
 import { DatabaseRepository } from '@/core/database.repo';
 import {
@@ -43,5 +43,26 @@ export class CampaignRepository extends DatabaseRepository<Campaign, NewCampaign
       status: 'paused',
       updatedBy,
     });
+  }
+
+  /**
+   * Fetch campaigns by a list of ids (AHA FIX-010). Used by ad serving to gate
+   * creatives on their parent campaign's status + schedule window.
+   *
+   * Always org-scoped (defense-in-depth): even though callers derive the ids
+   * from org-scoped creatives, the query explicitly filters by organizationId
+   * so cross-org campaigns can never leak into ad serving.
+   */
+  async findByIds(ids: string[], organizationId?: string): Promise<Campaign[]> {
+    if (ids.length === 0) return [];
+    const conditions = [inArray(campaigns.id, ids)];
+    if (organizationId) {
+      conditions.push(eq(campaigns.organizationId, organizationId));
+    }
+    const rows = await this.db
+      .select()
+      .from(campaigns)
+      .where(and(...conditions));
+    return rows as Campaign[];
   }
 }

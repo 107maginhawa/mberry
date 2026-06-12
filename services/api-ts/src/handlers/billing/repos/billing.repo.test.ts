@@ -293,6 +293,69 @@ describe('InvoiceRepository.findMany', () => {
 });
 
 // ---------------------------------------------------------------------------
+// InvoiceRepository — findByStripePaymentIntentId (FIX-002: indexed JSONB lookup)
+//
+// Replaces the old findAll()+limit(500) in-memory scan used by webhook handlers.
+// Correlation must work at any scale via an indexed metadata->>'stripePaymentIntentId'
+// predicate, not a paginated full-table scan.
+// ---------------------------------------------------------------------------
+
+describe('InvoiceRepository.findByStripePaymentIntentId', () => {
+  test('returns invoice matching stripePaymentIntentId in metadata', async () => {
+    const invoice = makeInvoice({ metadata: { stripePaymentIntentId: 'pi_live_999' } });
+    const chain = makeSelectChain([invoice]);
+    const db = { select: () => chain } as any;
+
+    const repo = new InvoiceRepository(db, makeNullLogger());
+    const result = await repo.findByStripePaymentIntentId('pi_live_999');
+    expect(result?.id).toBe('inv-001');
+    expect((result?.metadata as any)?.stripePaymentIntentId).toBe('pi_live_999');
+  });
+
+  test('returns null when no invoice matches the payment intent id', async () => {
+    const chain = makeSelectChain([]);
+    const db = { select: () => chain } as any;
+
+    const repo = new InvoiceRepository(db, makeNullLogger());
+    const result = await repo.findByStripePaymentIntentId('pi_missing');
+    expect(result).toBeNull();
+  });
+
+  test('does not use the unbounded findAll() scan path', () => {
+    // Regression guard: the indexed lookup must be its own method, not a wrapper
+    // around findAll() + Array.find (the old 500-row-capped scan).
+    const repo = new InvoiceRepository({} as any, makeNullLogger());
+    expect(typeof (repo as any).findByStripePaymentIntentId).toBe('function');
+  });
+});
+
+// ---------------------------------------------------------------------------
+// InvoiceRepository — findByStripeTransferId (FIX-002: indexed JSONB lookup)
+// ---------------------------------------------------------------------------
+
+describe('InvoiceRepository.findByStripeTransferId', () => {
+  test('returns all invoices matching stripeTransferId in metadata', async () => {
+    const inv = makeInvoice({ metadata: { stripeTransferId: 'tr_live_123' } });
+    const chain = makeSelectChain([inv]);
+    const db = { select: () => chain } as any;
+
+    const repo = new InvoiceRepository(db, makeNullLogger());
+    const results = await repo.findByStripeTransferId('tr_live_123');
+    expect(results).toHaveLength(1);
+    expect((results[0]?.metadata as any)?.stripeTransferId).toBe('tr_live_123');
+  });
+
+  test('returns empty array when no invoice matches the transfer id', async () => {
+    const chain = makeSelectChain([]);
+    const db = { select: () => chain } as any;
+
+    const repo = new InvoiceRepository(db, makeNullLogger());
+    const results = await repo.findByStripeTransferId('tr_missing');
+    expect(results).toHaveLength(0);
+  });
+});
+
+// ---------------------------------------------------------------------------
 // InvoiceRepository — updateStatus (state machine)
 // ---------------------------------------------------------------------------
 
@@ -448,6 +511,90 @@ describe('InvoiceRepository.createWithLineItems', () => {
     expect(result.id).toBe(invoice.id);
     expect(result.lineItems).toHaveLength(1);
     expect(result.lineItems[0]?.description).toBe('Consulting');
+  });
+});
+
+// ---------------------------------------------------------------------------
+// InvoiceRepository — replaceLineItems (transaction) — FIX-007 / AC-M21-002
+//
+// updateInvoice must replace line-item rows AND persist recomputed totals in a
+// single transaction so the stored `total` never drifts from the stored rows.
+// ---------------------------------------------------------------------------
+
+describe('InvoiceRepository.replaceLineItems', () => {
+  test('deletes old rows, inserts new rows, and updates totals in one transaction', async () => {
+    const updatedInvoice = makeInvoice({ subtotal: 1750, total: 1750, updatedBy: 'user-1' });
+    const newRows = [
+      makeLineItem({ id: 'li-a', description: 'A', quantity: 2, unitPrice: 500, amount: 1000 }),
+      makeLineItem({ id: 'li-b', description: 'B', quantity: 1, unitPrice: 750, amount: 750 }),
+    ];
+
+    let deleteCalled = false;
+    let insertedValues: any[] = [];
+    let transactionUsed = false;
+
+    const tx = {
+      delete: () => ({
+        where: () => {
+          deleteCalled = true;
+          return Promise.resolve([]);
+        },
+      }),
+      insert: () => ({
+        values: (vals: any[]) => {
+          insertedValues = vals;
+          return { returning: () => Promise.resolve(newRows) };
+        },
+      }),
+      update: () => ({
+        set: () => ({
+          where: () => ({
+            returning: () => Promise.resolve([updatedInvoice]),
+          }),
+        }),
+      }),
+    };
+
+    const db = {
+      transaction: async (fn: (tx: any) => Promise<any>) => {
+        transactionUsed = true;
+        return fn(tx);
+      },
+    } as any;
+
+    const repo = new InvoiceRepository(db, makeNullLogger());
+    const result = await repo.replaceLineItems(
+      'inv-001',
+      [
+        { description: 'A', quantity: 2, unitPrice: 500, amount: 1000 },
+        { description: 'B', quantity: 1, unitPrice: 750, amount: 750 },
+      ] as any,
+      { subtotal: 1750, total: 1750, updatedBy: 'user-1' } as any,
+    );
+
+    expect(transactionUsed).toBe(true);                 // single transactional boundary
+    expect(deleteCalled).toBe(true);                    // old rows removed
+    expect(insertedValues).toHaveLength(2);             // new rows inserted
+    expect(insertedValues[0].invoice).toBe('inv-001');  // rows bound to the invoice
+    expect(insertedValues[0].amount).toBe(1000);
+    expect(result.total).toBe(1750);                    // persisted total == sum of rows
+    expect(result.subtotal).toBe(1750);
+    expect(result.lineItems).toHaveLength(2);
+    expect(result.lineItems.map((li) => li.amount)).toEqual([1000, 750]);
+  });
+
+  test('throws when the invoice update returns no row', async () => {
+    const tx = {
+      delete: () => ({ where: () => Promise.resolve([]) }),
+      insert: () => ({ values: () => ({ returning: () => Promise.resolve([]) }) }),
+      update: () => ({ set: () => ({ where: () => ({ returning: () => Promise.resolve([]) }) }) }),
+    };
+    const db = { transaction: async (fn: (tx: any) => Promise<any>) => fn(tx) } as any;
+
+    const repo = new InvoiceRepository(db, makeNullLogger());
+    await expect(
+      repo.replaceLineItems('inv-missing', [] as any, { total: 0, subtotal: 0 } as any),
+    ).rejects.toThrow();
   });
 });
 

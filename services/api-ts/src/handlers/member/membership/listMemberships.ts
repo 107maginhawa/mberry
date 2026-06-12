@@ -3,6 +3,7 @@ import type { DatabaseInstance } from '@/core/database';
 import { UnauthorizedError } from '@/core/errors';
 import type { ListMembershipsQuery } from '@/generated/openapi/validators';
 import { MembershipRepository } from '@/handlers/association:member/repos/membership.repo';
+import { withComputedStatus } from './utils/membership-status-middleware';
 
 /**
  * listMemberships
@@ -35,8 +36,13 @@ export async function listMemberships(
   const totalPages = Math.ceil(result.totalCount / limit);
   const currentPage = Math.floor(offset / limit) + 1;
 
+  // FIX-002 (G-10): compute status on read so the member/admin list surface
+  // agrees with getMembership and listOrgMembers rather than serving the
+  // possibly-stale stored cache.
+  const data = result.data.map((row) => withComputedStatus(row));
+
   return ctx.json({
-    data: result.data,
+    data,
     pagination: {
       offset,
       limit,

@@ -71,8 +71,18 @@ export async function getIdCardData(
   const payloadJson = JSON.stringify(payload);
   const qrPayload = Buffer.from(payloadJson).toString('base64');
 
-  // HMAC-SHA256 signature
-  const secret = process.env['AUTH_SECRET'] ?? 'fallback-secret';
+  // HMAC-SHA256 signature.
+  // FIX-004 (G-04): fail closed. The old `?? 'fallback-secret'` made ID cards
+  // forgeable in any env missing the secret. Prefer a dedicated key, fall back
+  // to AUTH_SECRET (required by core/config.ts in every env), and THROW rather
+  // than sign with a known literal.
+  const secret = process.env['ID_CARD_HMAC_SECRET'] ?? process.env['AUTH_SECRET'];
+  if (!secret) {
+    throw new Error(
+      'ID card HMAC secret is not configured. Set ID_CARD_HMAC_SECRET (or AUTH_SECRET) — ' +
+        'refusing to sign an ID card with an insecure fallback (BR-18).',
+    );
+  }
   const qrSignature = createHmac('sha256', secret).update(payloadJson).digest('hex');
 
   // Photo URL from avatar

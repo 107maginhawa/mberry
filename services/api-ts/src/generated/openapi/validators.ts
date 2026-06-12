@@ -6707,7 +6707,7 @@ export const MembershipCreateRequestSchema = z.object({
   memberNumber: z.string().optional(),
   startDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).refine(val => { const parsed = new Date(val + "T00:00:00Z"); return !isNaN(parsed.getTime()) && parsed.toISOString().split("T")[0] === val; }, { message: "Invalid calendar date" }),
   duesExpiryDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).refine(val => { const parsed = new Date(val + "T00:00:00Z"); return !isNaN(parsed.getTime()) && parsed.toISOString().split("T")[0] === val; }, { message: "Invalid calendar date" }),
-  gracePeriodDays: z.number().int().optional(),
+  gracePeriodDays: z.number().int().gte(0).lte(90).optional(),
   note: z.string().optional()
 });
 
@@ -6735,6 +6735,10 @@ export const MembershipResignRequestSchema = z.object({
 });
 
 export const MembershipStatusSchema = z.enum(["pendingPayment", "active", "gracePeriod", "lapsed", "expired", "suspended", "removed", "resigned", "deceased", "expelled"]);
+
+export const MembershipSuspendRequestSchema = z.object({
+  reason: z.string().max(500).optional()
+});
 
 export const MembershipTerminateRequestSchema = z.object({
   terminationReason: z.string().min(1).max(500)
@@ -6844,7 +6848,7 @@ export const MembershipUpdateRequestSchema = z.object({
   categoryId: z.union([z.string(), z.null()]).optional(),
   memberNumber: z.union([z.string(), z.null()]).optional(),
   duesExpiryDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).refine(val => { const parsed = new Date(val + "T00:00:00Z"); return !isNaN(parsed.getTime()) && parsed.toISOString().split("T")[0] === val; }, { message: "Invalid calendar date" }).optional(),
-  gracePeriodDays: z.number().int().optional(),
+  gracePeriodDays: z.number().int().gte(0).lte(90).optional(),
   note: z.union([z.string(), z.null()]).optional()
 });
 
@@ -7037,7 +7041,9 @@ export const MyDataExportSchema = z.object({
   memberships: z.array(z.unknown()),
   payments: z.array(z.unknown()),
   credits: z.array(z.unknown()),
-  notifications: z.array(z.unknown())
+  notifications: z.array(z.unknown()),
+  certificates: z.array(z.unknown()),
+  prcId: z.string().optional()
 });
 
 export const MyMembershipSchema = z.object({
@@ -7351,6 +7357,15 @@ export const OnboardingStateResponseSchema = z.object({
   currentStep: z.number().int().gte(1).lte(5),
   stepsCompleted: z.array(z.number().int()),
   completedAt: z.union([z.string().datetime().transform((str) => new Date(str)), z.null()])
+});
+
+export const OrderListResponseSchema = z.object({
+  data: z.array(MarketplaceOrderSchema),
+  pagination: z.object({
+  total: z.number().int(),
+  limit: z.number().int(),
+  offset: z.number().int()
+})
 });
 
 export const OrderStatusSchema = z.enum(["pending", "confirmed", "fulfilled", "cancelled", "refunded"]);
@@ -9468,6 +9483,15 @@ export const UpdateJobBoardPostingRequestSchema = z.object({
   status: z.enum(["draft", "active", "filled", "expired", "closed"]).optional()
 });
 
+export const UpdateMarketplaceListingRequestSchema = z.object({
+  title: z.string().optional(),
+  description: z.string().optional(),
+  price: z.string().optional(),
+  currency: z.string().optional(),
+  status: z.enum(["draft", "active", "archived"]).optional(),
+  categoryTags: z.array(z.string()).optional()
+});
+
 export const UpdateMarketplaceVendorRequestSchema = z.object({
   companyName: z.string().optional(),
   category: z.enum(["emr", "supplies", "insurance", "telehealth", "other"]).optional(),
@@ -9619,6 +9643,8 @@ export const VendorListResponseSchema = z.object({
 
 export const VendorStatusSchema = z.enum(["pending", "verified", "suspended", "rejected"]);
 
+export const VendorVerificationDecisionSchema = z.enum(["verified", "rejected", "suspended"]);
+
 export const VerificationResultSchema = z.enum(["valid", "expired", "revoked", "notFound"]);
 
 export const VerifyCredentialRequestSchema = z.object({
@@ -9648,6 +9674,10 @@ export const VerifyCredentialResultSchema = z.object({
   verificationUrl: z.string().url().optional()
 }).optional(),
   message: z.string().max(500)
+});
+
+export const VerifyVendorRequestSchema = z.object({
+  decision: z.enum(["verified", "rejected", "suspended"]).optional()
 });
 
 export const VideoCallDataSchema = z.object({
@@ -10202,24 +10232,52 @@ export type CreateAdvertiserBody = z.infer<typeof CreateAdvertiserBody>;
 
 export const CreateAdvertiserResponse = AdvertiserSchema;
 
-export const CreateJobApplicationBody = CreateJobBoardApplicationRequestSchema;
-export type CreateJobApplicationBody = z.infer<typeof CreateJobApplicationBody>;
+export const CreateCampaignBody = CreateCampaignRequestSchema;
+export type CreateCampaignBody = z.infer<typeof CreateCampaignBody>;
 
-export const CreateJobApplicationResponse = z.object({
-  data: JobBoardApplicationSchema
+export const CreateCampaignResponse = AdCampaignSchema;
+
+export const CreateCreativeBody = CreateCreativeRequestSchema;
+export type CreateCreativeBody = z.infer<typeof CreateCreativeBody>;
+
+export const CreateCreativeResponse = CreativeSchema;
+
+export const ReportAdParams = z.object({
+  creativeId: UUIDSchema,
+});
+export type ReportAdParams = z.infer<typeof ReportAdParams>;
+
+export const ReportAdBody = ReportAdRequestSchema;
+export type ReportAdBody = z.infer<typeof ReportAdBody>;
+
+export const ReportAdResponse = z.object({
+  success: z.boolean()
 });
 
-export const UpdateJobApplicationParams = z.object({
-  applicationId: UUIDSchema,
+export const ReviewCreativeParams = z.object({
+  creativeId: UUIDSchema,
 });
-export type UpdateJobApplicationParams = z.infer<typeof UpdateJobApplicationParams>;
+export type ReviewCreativeParams = z.infer<typeof ReviewCreativeParams>;
 
-export const UpdateJobApplicationBody = UpdateJobBoardApplicationRequestSchema;
-export type UpdateJobApplicationBody = z.infer<typeof UpdateJobApplicationBody>;
+export const ReviewCreativeBody = ReviewCreativeRequestSchema;
+export type ReviewCreativeBody = z.infer<typeof ReviewCreativeBody>;
 
-export const UpdateJobApplicationResponse = z.object({
-  data: JobBoardApplicationSchema
+export const ReviewCreativeResponse = CreativeSchema;
+
+export const SetMemberOptOutBody = SetMemberOptOutRequestSchema;
+export type SetMemberOptOutBody = z.infer<typeof SetMemberOptOutBody>;
+
+export const SetMemberOptOutResponse = z.object({
+  success: z.boolean()
 });
+
+export const GetAdForPlacementQuery = z.object({
+  optedOut: z.coerce.boolean().optional(),
+  adSlot: AdSlotSchema.optional(),
+});
+export type GetAdForPlacementQuery = z.infer<typeof GetAdForPlacementQuery>;
+
+export const GetAdForPlacementResponse = AdPlacementResponseSchema;
 
 export const CreateDocumentTagBody = AssociationCoreDocumentsDocumentTagCreateRequestSchema;
 export type CreateDocumentTagBody = z.infer<typeof CreateDocumentTagBody>;
@@ -10277,6 +10335,7 @@ export const SearchDocumentsQuery = z.object({
   accessLevel: AssociationCoreDocumentsDocumentAccessLevelSchema.optional(),
   category: z.string().optional(),
   tag: z.string().optional(),
+  status: z.enum(["draft", "published", "archived"]).optional(),
 });
 export type SearchDocumentsQuery = z.infer<typeof SearchDocumentsQuery>;
 
@@ -10605,6 +10664,179 @@ export type PromoteWaitlistEntryParams = z.infer<typeof PromoteWaitlistEntryPara
 
 export const PromoteWaitlistEntryResponse = WaitlistEntrySchema;
 
+export const CreateJobApplicationBody = CreateJobBoardApplicationRequestSchema;
+export type CreateJobApplicationBody = z.infer<typeof CreateJobApplicationBody>;
+
+export const CreateJobApplicationResponse = z.object({
+  data: JobBoardApplicationSchema
+});
+
+export const UpdateJobApplicationParams = z.object({
+  applicationId: UUIDSchema,
+});
+export type UpdateJobApplicationParams = z.infer<typeof UpdateJobApplicationParams>;
+
+export const UpdateJobApplicationBody = UpdateJobBoardApplicationRequestSchema;
+export type UpdateJobApplicationBody = z.infer<typeof UpdateJobApplicationBody>;
+
+export const UpdateJobApplicationResponse = z.object({
+  data: JobBoardApplicationSchema
+});
+
+export const CreateJobPostingBody = CreateJobBoardPostingRequestSchema;
+export type CreateJobPostingBody = z.infer<typeof CreateJobPostingBody>;
+
+export const CreateJobPostingResponse = z.object({
+  data: JobBoardPostingSchema
+});
+
+export const SearchJobPostingsQuery = z.object({
+  organizationId: UUIDSchema.optional(),
+  status: JobBoardPostingStatusSchema.optional(),
+  type: JobBoardPostingTypeSchema.optional(),
+  search: z.string().optional(),
+  limit: z.coerce.number().int().optional(),
+  offset: z.coerce.number().int().optional(),
+});
+export type SearchJobPostingsQuery = z.infer<typeof SearchJobPostingsQuery>;
+
+export const SearchJobPostingsResponse = JobBoardPostingListResponseSchema;
+
+export const GetJobPostingParams = z.object({
+  postingId: UUIDSchema,
+});
+export type GetJobPostingParams = z.infer<typeof GetJobPostingParams>;
+
+export const GetJobPostingResponse = z.object({
+  data: JobBoardPostingSchema
+});
+
+export const UpdateJobPostingParams = z.object({
+  postingId: UUIDSchema,
+});
+export type UpdateJobPostingParams = z.infer<typeof UpdateJobPostingParams>;
+
+export const UpdateJobPostingBody = UpdateJobBoardPostingRequestSchema;
+export type UpdateJobPostingBody = z.infer<typeof UpdateJobPostingBody>;
+
+export const UpdateJobPostingResponse = z.object({
+  data: JobBoardPostingSchema
+});
+
+export const DeleteJobPostingParams = z.object({
+  postingId: UUIDSchema,
+});
+export type DeleteJobPostingParams = z.infer<typeof DeleteJobPostingParams>;
+
+export const DeleteJobPostingResponse = z.void();
+
+export const CreateListingBody = CreateMarketplaceListingRequestSchema;
+export type CreateListingBody = z.infer<typeof CreateListingBody>;
+
+export const CreateListingResponse = MarketplaceListingSchema;
+
+export const ListListingsQuery = z.object({
+  organizationId: UUIDSchema.optional(),
+  vendorId: UUIDSchema.optional(),
+  status: ListingStatusSchema.optional(),
+  categoryTag: z.string().optional(),
+  limit: z.coerce.number().int().optional(),
+  offset: z.coerce.number().int().optional(),
+});
+export type ListListingsQuery = z.infer<typeof ListListingsQuery>;
+
+export const ListListingsResponse = ListingListResponseSchema;
+
+export const UpdateListingParams = z.object({
+  listingId: UUIDSchema,
+});
+export type UpdateListingParams = z.infer<typeof UpdateListingParams>;
+
+export const UpdateListingBody = UpdateMarketplaceListingRequestSchema;
+export type UpdateListingBody = z.infer<typeof UpdateListingBody>;
+
+export const UpdateListingResponse = MarketplaceListingSchema;
+
+export const CreateOrderBody = CreateMarketplaceOrderRequestSchema;
+export type CreateOrderBody = z.infer<typeof CreateOrderBody>;
+
+export const CreateOrderResponse = MarketplaceOrderSchema;
+
+export const ListOrdersQuery = z.object({
+  buyerPersonId: UUIDSchema.optional(),
+  vendorId: UUIDSchema.optional(),
+  status: OrderStatusSchema.optional(),
+  limit: z.coerce.number().int().optional(),
+  offset: z.coerce.number().int().optional(),
+});
+export type ListOrdersQuery = z.infer<typeof ListOrdersQuery>;
+
+export const ListOrdersResponse = OrderListResponseSchema;
+
+export const GetOrderParams = z.object({
+  orderId: UUIDSchema,
+});
+export type GetOrderParams = z.infer<typeof GetOrderParams>;
+
+export const GetOrderResponse = MarketplaceOrderSchema;
+
+export const CancelOrderParams = z.object({
+  orderId: UUIDSchema,
+});
+export type CancelOrderParams = z.infer<typeof CancelOrderParams>;
+
+export const CancelOrderResponse = MarketplaceOrderSchema;
+
+export const FulfillOrderParams = z.object({
+  orderId: UUIDSchema,
+});
+export type FulfillOrderParams = z.infer<typeof FulfillOrderParams>;
+
+export const FulfillOrderResponse = MarketplaceOrderSchema;
+
+export const CreateVendorBody = CreateMarketplaceVendorRequestSchema;
+export type CreateVendorBody = z.infer<typeof CreateVendorBody>;
+
+export const CreateVendorResponse = MarketplaceVendorSchema;
+
+export const ListVendorsQuery = z.object({
+  organizationId: UUIDSchema.optional(),
+  category: VendorCategorySchema.optional(),
+  verificationStatus: VendorStatusSchema.optional(),
+  limit: z.coerce.number().int().optional(),
+  offset: z.coerce.number().int().optional(),
+});
+export type ListVendorsQuery = z.infer<typeof ListVendorsQuery>;
+
+export const ListVendorsResponse = VendorListResponseSchema;
+
+export const GetVendorParams = z.object({
+  vendorId: UUIDSchema,
+});
+export type GetVendorParams = z.infer<typeof GetVendorParams>;
+
+export const GetVendorResponse = MarketplaceVendorSchema;
+
+export const UpdateVendorParams = z.object({
+  vendorId: UUIDSchema,
+});
+export type UpdateVendorParams = z.infer<typeof UpdateVendorParams>;
+
+export const UpdateVendorBody = UpdateMarketplaceVendorRequestSchema;
+export type UpdateVendorBody = z.infer<typeof UpdateVendorBody>;
+
+export const UpdateVendorResponse = MarketplaceVendorSchema;
+
+export const VerifyVendorParams = z.object({
+  vendorId: UUIDSchema,
+});
+export type VerifyVendorParams = z.infer<typeof VerifyVendorParams>;
+
+export const VerifyVendorBody = VerifyVendorRequestSchema;
+export type VerifyVendorBody = z.infer<typeof VerifyVendorBody>;
+
+export const VerifyVendorResponse = MarketplaceVendorSchema;
+
 export const CreateAffiliationTransferBody = AffiliationTransferCreateRequestSchema;
 export type CreateAffiliationTransferBody = z.infer<typeof CreateAffiliationTransferBody>;
 
@@ -10725,13 +10957,6 @@ export type UpdateMembershipApplicationBody = z.infer<typeof UpdateMembershipApp
 
 export const UpdateMembershipApplicationResponse = MembershipApplicationSchema;
 
-export const DeleteMembershipApplicationParams = z.object({
-  applicationId: z.string(),
-});
-export type DeleteMembershipApplicationParams = z.infer<typeof DeleteMembershipApplicationParams>;
-
-export const DeleteMembershipApplicationResponse = z.void();
-
 export const ApproveMembershipApplicationParams = z.object({
   applicationId: z.string(),
 });
@@ -10767,6 +10992,13 @@ export const ListBallotsQuery = z.object({
 export type ListBallotsQuery = z.infer<typeof ListBallotsQuery>;
 
 export const ListBallotsResponse = BallotListResponseSchema;
+
+export const MyBallotsQuery = z.object({
+  electionId: z.string().optional(),
+});
+export type MyBallotsQuery = z.infer<typeof MyBallotsQuery>;
+
+export const MyBallotsResponse = BallotListResponseSchema;
 
 export const CreateCandidateBody = CandidateRequestSchema;
 export type CreateCandidateBody = z.infer<typeof CreateCandidateBody>;
@@ -11520,6 +11752,13 @@ export type CertifyElectionParams = z.infer<typeof CertifyElectionParams>;
 
 export const CertifyElectionResponse = ElectionSchema;
 
+export const CloseElectionVotingParams = z.object({
+  electionId: z.string(),
+});
+export type CloseElectionVotingParams = z.infer<typeof CloseElectionVotingParams>;
+
+export const CloseElectionVotingResponse = ElectionSchema;
+
 export const OpenElectionNominationsParams = z.object({
   electionId: z.string(),
 });
@@ -11740,13 +11979,6 @@ export type UpdateMembershipBody = z.infer<typeof UpdateMembershipBody>;
 
 export const UpdateMembershipResponse = z.unknown();
 
-export const DeleteMembershipParams = z.object({
-  membershipId: z.string(),
-});
-export type DeleteMembershipParams = z.infer<typeof DeleteMembershipParams>;
-
-export const DeleteMembershipResponse = z.void();
-
 export const DeceaseMembershipParams = z.object({
   membershipId: z.string(),
 });
@@ -11781,6 +12013,16 @@ export type ResignMembershipBody = z.infer<typeof ResignMembershipBody>;
 
 export const ResignMembershipResponse = z.unknown();
 
+export const SuspendMembershipParams = z.object({
+  membershipId: z.string(),
+});
+export type SuspendMembershipParams = z.infer<typeof SuspendMembershipParams>;
+
+export const SuspendMembershipBody = MembershipSuspendRequestSchema;
+export type SuspendMembershipBody = z.infer<typeof SuspendMembershipBody>;
+
+export const SuspendMembershipResponse = z.unknown();
+
 export const TerminateMembershipParams = z.object({
   membershipId: z.string(),
 });
@@ -11790,6 +12032,13 @@ export const TerminateMembershipBody = MembershipTerminateRequestSchema;
 export type TerminateMembershipBody = z.infer<typeof TerminateMembershipBody>;
 
 export const TerminateMembershipResponse = z.unknown();
+
+export const UnsuspendMembershipParams = z.object({
+  membershipId: z.string(),
+});
+export type UnsuspendMembershipParams = z.infer<typeof UnsuspendMembershipParams>;
+
+export const UnsuspendMembershipResponse = z.unknown();
 
 export const CreateOfficerTermBody = OfficerTermRequestSchema;
 export type CreateOfficerTermBody = z.infer<typeof CreateOfficerTermBody>;
@@ -12309,6 +12558,7 @@ export type CheckInCustomTrainingParams = z.infer<typeof CheckInCustomTrainingPa
 
 export const CheckInCustomTrainingQuery = z.object({
   organizationId: z.string(),
+  personId: z.string().optional(),
 });
 export type CheckInCustomTrainingQuery = z.infer<typeof CheckInCustomTrainingQuery>;
 
@@ -12912,11 +13162,6 @@ export type GetTimeSlotQuery = z.infer<typeof GetTimeSlotQuery>;
 
 export const GetTimeSlotResponse = TimeSlotSchema;
 
-export const CreateCampaignBody = CreateCampaignRequestSchema;
-export type CreateCampaignBody = z.infer<typeof CreateCampaignBody>;
-
-export const CreateCampaignResponse = AdCampaignSchema;
-
 export const BulkIssueCertificatesBody = BulkIssueCertificatesRequestSchema;
 export type BulkIssueCertificatesBody = z.infer<typeof BulkIssueCertificatesBody>;
 
@@ -13142,33 +13387,6 @@ export type DeleteSavedSegmentQuery = z.infer<typeof DeleteSavedSegmentQuery>;
 
 export const DeleteSavedSegmentResponse = AssociationCoreCommunicationSavedSegmentDeleteResponseSchema;
 
-export const CreateCreativeBody = CreateCreativeRequestSchema;
-export type CreateCreativeBody = z.infer<typeof CreateCreativeBody>;
-
-export const CreateCreativeResponse = CreativeSchema;
-
-export const ReportAdParams = z.object({
-  creativeId: UUIDSchema,
-});
-export type ReportAdParams = z.infer<typeof ReportAdParams>;
-
-export const ReportAdBody = ReportAdRequestSchema;
-export type ReportAdBody = z.infer<typeof ReportAdBody>;
-
-export const ReportAdResponse = z.object({
-  success: z.boolean()
-});
-
-export const ReviewCreativeParams = z.object({
-  creativeId: UUIDSchema,
-});
-export type ReviewCreativeParams = z.infer<typeof ReviewCreativeParams>;
-
-export const ReviewCreativeBody = ReviewCreativeRequestSchema;
-export type ReviewCreativeBody = z.infer<typeof ReviewCreativeBody>;
-
-export const ReviewCreativeResponse = CreativeSchema;
-
 export const GetCreditComplianceParams = z.object({
   organizationId: UUIDSchema,
 });
@@ -13234,6 +13452,13 @@ export const ListEmailSuppressionsQuery = z.object({
 export type ListEmailSuppressionsQuery = z.infer<typeof ListEmailSuppressionsQuery>;
 
 export const ListEmailSuppressionsResponse = EmailSuppressionListResponseSchema;
+
+export const DeleteEmailSuppressionParams = z.object({
+  id: UUIDSchema,
+});
+export type DeleteEmailSuppressionParams = z.infer<typeof DeleteEmailSuppressionParams>;
+
+export const DeleteEmailSuppressionResponse = z.void();
 
 export const ListEmailTemplatesQuery = z.object({
   status: TemplateStatusSchema.optional(),
@@ -13322,23 +13547,6 @@ export const ValidateInviteParams = z.object({
 export type ValidateInviteParams = z.infer<typeof ValidateInviteParams>;
 
 export const ValidateInviteResponse = ValidateInviteResponseSchema;
-
-export const CreateListingBody = CreateMarketplaceListingRequestSchema;
-export type CreateListingBody = z.infer<typeof CreateListingBody>;
-
-export const CreateListingResponse = MarketplaceListingSchema;
-
-export const ListListingsQuery = z.object({
-  organizationId: UUIDSchema.optional(),
-  vendorId: UUIDSchema.optional(),
-  status: ListingStatusSchema.optional(),
-  categoryTag: z.string().optional(),
-  limit: z.coerce.number().int().optional(),
-  offset: z.coerce.number().int().optional(),
-});
-export type ListListingsQuery = z.infer<typeof ListListingsQuery>;
-
-export const ListListingsResponse = ListingListResponseSchema;
 
 export const ListOrgApplicationsParams = z.object({
   organizationId: UUIDSchema,
@@ -13440,25 +13648,6 @@ export const UpdateOnboardingStepBody = UpdateOnboardingStepRequestSchema;
 export type UpdateOnboardingStepBody = z.infer<typeof UpdateOnboardingStepBody>;
 
 export const UpdateOnboardingStepResponse = UpdateOnboardingStepResponseSchema;
-
-export const SetMemberOptOutBody = SetMemberOptOutRequestSchema;
-export type SetMemberOptOutBody = z.infer<typeof SetMemberOptOutBody>;
-
-export const SetMemberOptOutResponse = z.object({
-  success: z.boolean()
-});
-
-export const CreateOrderBody = CreateMarketplaceOrderRequestSchema;
-export type CreateOrderBody = z.infer<typeof CreateOrderBody>;
-
-export const CreateOrderResponse = MarketplaceOrderSchema;
-
-export const FulfillOrderParams = z.object({
-  orderId: UUIDSchema,
-});
-export type FulfillOrderParams = z.infer<typeof FulfillOrderParams>;
-
-export const FulfillOrderResponse = MarketplaceOrderSchema;
 
 export const SendPaymentLinkParams = z.object({
   organizationId: z.string(),
@@ -13588,61 +13777,6 @@ export const UpdatePersonBody = PersonUpdateRequestSchema;
 export type UpdatePersonBody = z.infer<typeof UpdatePersonBody>;
 
 export const UpdatePersonResponse = PersonSchema;
-
-export const GetAdForPlacementQuery = z.object({
-  optedOut: z.coerce.boolean().optional(),
-  adSlot: AdSlotSchema.optional(),
-});
-export type GetAdForPlacementQuery = z.infer<typeof GetAdForPlacementQuery>;
-
-export const GetAdForPlacementResponse = AdPlacementResponseSchema;
-
-export const CreateJobPostingBody = CreateJobBoardPostingRequestSchema;
-export type CreateJobPostingBody = z.infer<typeof CreateJobPostingBody>;
-
-export const CreateJobPostingResponse = z.object({
-  data: JobBoardPostingSchema
-});
-
-export const SearchJobPostingsQuery = z.object({
-  organizationId: UUIDSchema.optional(),
-  status: JobBoardPostingStatusSchema.optional(),
-  type: JobBoardPostingTypeSchema.optional(),
-  search: z.string().optional(),
-  limit: z.coerce.number().int().optional(),
-  offset: z.coerce.number().int().optional(),
-});
-export type SearchJobPostingsQuery = z.infer<typeof SearchJobPostingsQuery>;
-
-export const SearchJobPostingsResponse = JobBoardPostingListResponseSchema;
-
-export const GetJobPostingParams = z.object({
-  postingId: UUIDSchema,
-});
-export type GetJobPostingParams = z.infer<typeof GetJobPostingParams>;
-
-export const GetJobPostingResponse = z.object({
-  data: JobBoardPostingSchema
-});
-
-export const UpdateJobPostingParams = z.object({
-  postingId: UUIDSchema,
-});
-export type UpdateJobPostingParams = z.infer<typeof UpdateJobPostingParams>;
-
-export const UpdateJobPostingBody = UpdateJobBoardPostingRequestSchema;
-export type UpdateJobPostingBody = z.infer<typeof UpdateJobPostingBody>;
-
-export const UpdateJobPostingResponse = z.object({
-  data: JobBoardPostingSchema
-});
-
-export const DeleteJobPostingParams = z.object({
-  postingId: UUIDSchema,
-});
-export type DeleteJobPostingParams = z.infer<typeof DeleteJobPostingParams>;
-
-export const DeleteJobPostingResponse = z.void();
 
 export const ListPublicEventsQuery = z.object({
   offset: z.coerce.number().int().gte(0).lte(2147483647).optional(),
@@ -13887,43 +14021,3 @@ export const DismissSurveyResponseParams = z.object({
 export type DismissSurveyResponseParams = z.infer<typeof DismissSurveyResponseParams>;
 
 export const DismissSurveyResponseResponse = z.void();
-
-export const CreateVendorBody = CreateMarketplaceVendorRequestSchema;
-export type CreateVendorBody = z.infer<typeof CreateVendorBody>;
-
-export const CreateVendorResponse = MarketplaceVendorSchema;
-
-export const ListVendorsQuery = z.object({
-  organizationId: UUIDSchema.optional(),
-  category: VendorCategorySchema.optional(),
-  verificationStatus: VendorStatusSchema.optional(),
-  limit: z.coerce.number().int().optional(),
-  offset: z.coerce.number().int().optional(),
-});
-export type ListVendorsQuery = z.infer<typeof ListVendorsQuery>;
-
-export const ListVendorsResponse = VendorListResponseSchema;
-
-export const GetVendorParams = z.object({
-  vendorId: UUIDSchema,
-});
-export type GetVendorParams = z.infer<typeof GetVendorParams>;
-
-export const GetVendorResponse = MarketplaceVendorSchema;
-
-export const UpdateVendorParams = z.object({
-  vendorId: UUIDSchema,
-});
-export type UpdateVendorParams = z.infer<typeof UpdateVendorParams>;
-
-export const UpdateVendorBody = UpdateMarketplaceVendorRequestSchema;
-export type UpdateVendorBody = z.infer<typeof UpdateVendorBody>;
-
-export const UpdateVendorResponse = MarketplaceVendorSchema;
-
-export const VerifyVendorParams = z.object({
-  vendorId: UUIDSchema,
-});
-export type VerifyVendorParams = z.infer<typeof VerifyVendorParams>;
-
-export const VerifyVendorResponse = MarketplaceVendorSchema;

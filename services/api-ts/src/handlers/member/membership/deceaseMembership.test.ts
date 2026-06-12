@@ -12,6 +12,9 @@ const FUTURE_EXPIRY = new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOStri
 
 const fakeMembership = createFakeMembership({
   id: 'mem-1',
+  // Match the makeCtx() default org context so the FIX-003 cross-org guard
+  // (record org must equal caller org) is satisfied for these same-org tests.
+  organizationId: 'tenant-1',
   personId: 'person-1',
   tierId: 'tier-1',
   removedAt: null,
@@ -28,9 +31,11 @@ const makeUpdateChain = (rows: any[] = []) => ({
   returning: async () => rows,
 });
 
-const txDb = {
+const txDb: any = {
+  _inserted: [] as any[],
   transaction: async (fn: (tx: any) => Promise<any>) => fn(txDb),
   update: (_table: any) => makeUpdateChain(),
+  insert: (_table: any) => ({ values: async (vals: any) => { txDb._inserted.push(vals); } }),
 };
 
 // ─── Tests ──────────────────────────────────────────────
@@ -83,10 +88,36 @@ describe('deceaseMembership', () => {
       expect(evt!.p.newStatus).toBe('deceased');
       expect(evt!.p.membershipId).toBe('mem-1');
       expect(evt!.p.personId).toBe('person-1');
-      expect(evt!.p.organizationId).toBe('org-1');
+      // Event carries the membership's org (fixture aligned to ctx org for FIX-003).
+      expect(evt!.p.organizationId).toBe('tenant-1');
     } finally {
       (domainEvents as any).emit = origEmit;
     }
+  });
+
+  // Test (FIX-006 / G-08): writes a membership_status_history row
+  test('writes a membership_status_history row on decease (FIX-006)', async () => {
+    mocks = stubRepo(MembershipRepository, {
+      findOneById: async () => fakeMembership,
+      updateOneById: async (_id: string, data: any) => ({ ...fakeMembership, ...data }),
+    });
+
+    txDb._inserted = [];
+    const ctx = makeCtx({
+      database: txDb,
+      _params: { membershipId: 'mem-1' },
+      _body: { dateOfDeath: '2026-01-15' },
+    });
+
+    await deceaseMembership(ctx);
+
+    expect(txDb._inserted.length).toBeGreaterThanOrEqual(1);
+    const row = txDb._inserted[txDb._inserted.length - 1];
+    expect(row.membershipId).toBe('mem-1');
+    expect(row.personId).toBe('person-1');
+    expect(row.fromStatus).toBe('active');
+    expect(row.toStatus).toBe('deceased');
+    expect(row.changedBy).toBe('user-1');
   });
 
   // Test 2: throws NotFoundError for non-existent membershipId

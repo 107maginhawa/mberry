@@ -1,4 +1,5 @@
 import { useEffect, useRef, useCallback, useState } from 'react'
+import { serializeOutboundFrame, parseInboundFrame } from './comms-ws-frames'
 
 interface UseChatWebSocketReturn {
   isConnected: boolean
@@ -58,17 +59,18 @@ export function useChatWebSocket(
       // Keep-alive ping every 30s
       pingTimerRef.current = setInterval(() => {
         if (ws.readyState === WebSocket.OPEN) {
-          ws.send(JSON.stringify({ type: 'ping' }))
+          ws.send(serializeOutboundFrame('ping', {}))
         }
       }, 30_000)
     }
 
     ws.onmessage = (event) => {
       try {
-        const data = JSON.parse(event.data)
+        // Server uses the { event, payload } envelope (core/ws.ts).
+        const frame = parseInboundFrame(JSON.parse(event.data))
         // Handle pong silently
-        if (data.type === 'pong') return
-        onMessageRef.current(data)
+        if (frame.event === 'pong') return
+        onMessageRef.current(frame)
       } catch {
         // Non-JSON message, ignore
       }
@@ -93,7 +95,8 @@ export function useChatWebSocket(
 
   const send = useCallback((type: string, data: unknown) => {
     if (wsRef.current?.readyState === WebSocket.OPEN) {
-      wsRef.current.send(JSON.stringify({ type, ...data as Record<string, unknown> }))
+      // Outbound envelope is { type, data } (server reads message.data).
+      wsRef.current.send(serializeOutboundFrame(type, data))
     }
   }, [])
 

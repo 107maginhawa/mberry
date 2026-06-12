@@ -67,6 +67,8 @@ export class DuesConfigRepository extends DatabaseRepository<DuesConfig, NewDues
 export interface DuesInvoiceFilters {
   organizationId?: string;
   membershipId?: string;
+  /** [FIX-006] Self-scope filter — constrains results to a single member's invoices. */
+  personId?: string;
   status?: 'generated' | 'sent' | 'paid' | 'overdue' | 'cancelled' | 'writtenOff';
 }
 
@@ -89,6 +91,10 @@ export class DuesInvoiceRepository extends DatabaseRepository<DuesInvoice, NewDu
 
     if (filters.membershipId) {
       conditions.push(eq(duesInvoices.membershipId, filters.membershipId));
+    }
+
+    if (filters.personId) {
+      conditions.push(eq(duesInvoices.personId, filters.personId));
     }
 
     if (filters.status) {

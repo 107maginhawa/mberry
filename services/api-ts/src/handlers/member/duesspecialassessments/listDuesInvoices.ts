@@ -1,8 +1,9 @@
-import type { ValidatedContext } from '@/types/app';
+import type { ValidatedContext, BaseContext } from '@/types/app';
 import type { DatabaseInstance } from '@/core/database';
 import { UnauthorizedError, ForbiddenError } from '@/core/errors';
 import type { ListDuesInvoicesQuery } from '@/generated/openapi/validators';
 import { DuesInvoiceRepository } from '@/handlers/association:member/repos/dues.repo';
+import { requireOfficerTerm } from '@/core/auth/officer-checks';
 import { sql } from 'drizzle-orm';
 import { persons } from '@/handlers/person/repos/person.schema';
 
@@ -27,10 +28,20 @@ export async function listDuesInvoices(
   const db = ctx.get('database') as DatabaseInstance;
   const repo = new DuesInvoiceRepository(db, ctx.get('logger'));
 
+  // [FIX-006] Self-scope: non-officer callers may only see their OWN invoices.
+  // Mirrors the PAY-02 pattern in listDuesPayments. Invoices carry a personId
+  // column, so non-officers are pinned to personId = session.user.id (an
+  // attacker-supplied membershipId then resolves to zero rows). Officers see
+  // all org invoices.
+  const officerDenied = await requireOfficerTerm(ctx as unknown as BaseContext);
+  const isOfficer = officerDenied === null; // null = is officer
+  const effectivePersonId = isOfficer ? undefined : session.user.id;
+
   const result = await repo.findManyWithPagination(
     {
       organizationId: orgId,
       membershipId: query['membershipId'] as string | undefined,
+      personId: effectivePersonId,
       status: query['status'] as 'generated' | 'cancelled' | 'sent' | 'paid' | 'overdue' | 'writtenOff' | undefined,
     },
     { pagination: { offset, limit } },

@@ -226,3 +226,74 @@ describe('Billing Access Control', () => {
     expect(response.status).toBe(200);
   });
 });
+
+// ─── FIX-003: listInvoices filter self-scoping ──────────────────────────────
+// Non-admins must not enumerate another merchant's/customer's invoices by
+// passing a foreign ?merchant= / ?customer= filter. The original guard only
+// fired when ?customer= was set, leaving ?merchant=<foreign> unscoped.
+
+describe('Billing Access Control — listInvoices filter self-scoping (FIX-003)', () => {
+  test('Non-admin passing a foreign ?merchant= filter is denied -> 403', async () => {
+    invoiceMocks = stubRepo(InvoiceRepository, {
+      findManyWithPagination: async () => ({ data: [baseInvoice], totalCount: 1 }),
+      findLineItemsByInvoiceIds: async () => new Map(),
+    });
+
+    const ctx = makeCtx({
+      user: { id: CUSTOMER_ID, role: 'user' },
+      logger: noopLogger,
+      _query: { merchant: MERCHANT_ID }, // foreign merchant (not self), no customer filter
+    });
+
+    const { ForbiddenError } = await import('@/core/errors');
+    await expect(listInvoices(ctx)).rejects.toBeInstanceOf(ForbiddenError);
+  });
+
+  test('Non-admin passing a foreign ?customer= filter is denied -> 403', async () => {
+    invoiceMocks = stubRepo(InvoiceRepository, {
+      findManyWithPagination: async () => ({ data: [baseInvoice], totalCount: 1 }),
+      findLineItemsByInvoiceIds: async () => new Map(),
+    });
+
+    const ctx = makeCtx({
+      user: { id: CUSTOMER_ID, role: 'user' },
+      logger: noopLogger,
+      _query: { customer: OTHER_CUSTOMER },
+    });
+
+    const { ForbiddenError } = await import('@/core/errors');
+    await expect(listInvoices(ctx)).rejects.toBeInstanceOf(ForbiddenError);
+  });
+
+  test('Admin may pass a foreign ?merchant= filter -> 200', async () => {
+    invoiceMocks = stubRepo(InvoiceRepository, {
+      findManyWithPagination: async () => ({ data: [baseInvoice], totalCount: 1 }),
+      findLineItemsByInvoiceIds: async () => new Map(),
+    });
+
+    const ctx = makeCtx({
+      user: { id: ADMIN_ID, role: 'admin' },
+      logger: noopLogger,
+      _query: { merchant: MERCHANT_ID },
+    });
+
+    const response = await listInvoices(ctx);
+    expect(response.status).toBe(200);
+  });
+
+  test('Merchant may scope to own ?merchant=self with a ?customer= filter -> 200 (legit path preserved)', async () => {
+    invoiceMocks = stubRepo(InvoiceRepository, {
+      findManyWithPagination: async () => ({ data: [baseInvoice], totalCount: 1 }),
+      findLineItemsByInvoiceIds: async () => new Map(),
+    });
+
+    const ctx = makeCtx({
+      user: { id: MERCHANT_ID, role: 'user' },
+      logger: noopLogger,
+      _query: { merchant: MERCHANT_ID, customer: CUSTOMER_ID },
+    });
+
+    const response = await listInvoices(ctx);
+    expect(response.status).toBe(200);
+  });
+});

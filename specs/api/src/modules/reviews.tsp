@@ -153,6 +153,7 @@ namespace ReviewsModule {
     @route("/{review}")
     @useAuth(bearerAuth)
     @extension("x-security-required-roles", #["review:owner", "admin"])
+    @extension("x-audit", #{ action: "delete", resourceType: "review" })
     deleteReview(
       @path review: UUID
     ): ApiNoContentResponse

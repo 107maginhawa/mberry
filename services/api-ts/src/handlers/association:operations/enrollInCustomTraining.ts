@@ -33,6 +33,17 @@ export async function enrollInCustomTraining(
     throw new BusinessLogicError('Enrollment is only accepted for published trainings', 'TRAINING_NOT_PUBLISHED');
   }
 
+  // FIX-010 (G10): a member may hold at most one active enrollment per
+  // training. Reject a second enroll attempt for the same (trainingId,
+  // personId) — a duplicate row distorts capacity counting and makes
+  // `enrollments[0]` selection arbitrary at check-in. (A previously
+  // cancelled enrollment does not block re-enrollment.) The DB also carries
+  // a partial unique index as the backstop for races.
+  const existingEnrollments = await enrollRepo.findMany({ trainingId: params.trainingId, personId: user.id });
+  if (existingEnrollments.some((e) => e.status !== 'cancelled')) {
+    throw new BusinessLogicError('Already enrolled in this training', 'ALREADY_ENROLLED');
+  }
+
   // BR-41: paid training requires confirmed payment before enrollment.
   if (training.registrationFee && training.registrationFee > 0) {
     throw new BusinessLogicError(

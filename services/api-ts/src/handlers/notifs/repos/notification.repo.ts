@@ -108,6 +108,14 @@ export class NotificationRepository extends DatabaseRepository<Notification, New
   async createNotificationForModule(request: CreateNotificationRequest | InternalNotificationRequest): Promise<Notification> {
     this.logger?.debug({ request }, 'Creating notification from module');
 
+    // FIX-012: organizationId is a notNull uuid column. Reject a missing/empty
+    // value here with a caller-visible ValidationError instead of letting the
+    // old `|| ''` fallback hit a Postgres uuid cast error at insert time.
+    const organizationId = request.organizationId;
+    if (!organizationId || organizationId.trim() === '') {
+      throw new ValidationError('organizationId is required to create a notification');
+    }
+
     // Validate recipient exists (optional - Person records may not exist for all User IDs)
     const recipient = await this.personRepo.findOneById(request.recipient);
 
@@ -142,7 +150,7 @@ export class NotificationRepository extends DatabaseRepository<Notification, New
 
     // Create notification record with final status in single operation
     const notification = await this.createOne({
-      organizationId: request.organizationId || '',
+      organizationId,
       recipient: request.recipient,
       type: request.type as Notification['type'],
       channel: (request.channel || ('channels' in request ? (request as InternalNotificationRequest).channels?.[0] : undefined) || 'in-app') as Notification['channel'],

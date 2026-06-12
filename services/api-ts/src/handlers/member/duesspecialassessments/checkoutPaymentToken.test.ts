@@ -52,6 +52,10 @@ function defaultStubs() {
   });
   stubRepo(DuesRepository, {
     getGatewayConfig: async () => gatewayConfig,
+    // [FIX-001] checkout now mints a pending ledger row + receipt number.
+    getOrgReceiptPrefix: async () => 'ORG',
+    getNextReceiptSequence: async () => 1,
+    createPayment: async (data: any) => ({ id: 'online-pay-1', ...data }),
   });
 }
 
@@ -103,6 +107,9 @@ describe('[VS-W0B-003] checkoutPaymentToken', () => {
     });
     stubRepo(DuesRepository, {
       getGatewayConfig: async () => gatewayConfig,
+      getOrgReceiptPrefix: async () => 'ORG',
+      getNextReceiptSequence: async () => 1,
+      createPayment: async (data: any) => ({ id: 'online-pay-1', ...data }),
     });
     const ctx = makeCtx({
       user: null,

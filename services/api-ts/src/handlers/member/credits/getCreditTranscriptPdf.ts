@@ -1,12 +1,12 @@
+import { eq } from 'drizzle-orm';
 import type { ValidatedContext } from '@/types/app';
 import type { DatabaseInstance } from '@/core/database';
 import { CreditEntryRepository } from '@/handlers/association:member/repos/credits.repo';
+import { orgCpdConfig } from '@/handlers/association:member/repos/credits.schema';
 import {
-  getCycleForDate,
-  getCycleForDateWithConfig,
+  resolveCycle,
   calculateCarryover,
   summarizeCycle,
-  type CreditCycleConfig,
 } from './utils/credit-cycle';
 import {
   renderTranscriptHtml,
@@ -21,19 +21,19 @@ import {
  * Generates a cycle-aware credit transcript as HTML for PDF conversion.
  * Cross-org aggregated with per-org breakdowns, cycle boundary display,
  * and compliance status.
+ *
+ * FIX-006 (G4): this is the regulator-facing record. Required credits, cycle
+ * length and the cycle window are resolved SERVER-SIDE from the member's
+ * org_cpd_config. Client-supplied requiredCredits / cyclePeriodYears /
+ * registrationDate / targetDate / cycleStartMonth / cycleStartDay query params
+ * are IGNORED so a member cannot self-certify compliance on the PDF. Falls
+ * back to platform defaults (60/3) when no config row exists.
  */
 
 interface GetCreditTranscriptPdfQuery {
-  registrationDate: string;
-  cyclePeriodYears?: string;
-  requiredCredits?: string;
   carryoverEnabled?: string;
   previousCycleEarned?: string;
-  targetDate?: string;
   personName?: string;
-  /** Association-level cycle config (BR-11) */
-  cycleStartMonth?: string;
-  cycleStartDay?: string;
 }
 
 export async function getCreditTranscriptPdf(
@@ -43,33 +43,30 @@ export async function getCreditTranscriptPdf(
   if (!user) return ctx.json({ error: 'Unauthorized' }, 401);
 
   const query = ctx.req.valid('query');
-  const registrationDate = new Date(query.registrationDate);
-  const cyclePeriodYears = Number(query.cyclePeriodYears) || 2;
-  const requiredCredits = Number(query.requiredCredits) || 40;
   const carryoverEnabled = query.carryoverEnabled !== 'false';
   const previousCycleEarned = Number(query.previousCycleEarned) || 0;
-  const targetDate = query.targetDate ? new Date(query.targetDate) : new Date();
   const personName = query.personName ?? user.name ?? 'Member';
-  const cycleStartMonth = query.cycleStartMonth ? Number(query.cycleStartMonth) : null;
-  const cycleStartDay = query.cycleStartDay ? Number(query.cycleStartDay) : undefined;
-
-  // Determine cycle using either association-level config (BR-11) or registration-based
-  let cycle;
-  if (cycleStartMonth) {
-    const config: CreditCycleConfig = {
-      cyclePeriodYears,
-      requiredCredits,
-      carryoverEnabled,
-      cycleStartMonth,
-      cycleStartDay,
-    };
-    cycle = getCycleForDateWithConfig(targetDate, config, registrationDate);
-  } else {
-    cycle = getCycleForDate(registrationDate, targetDate, cyclePeriodYears);
-  }
 
   const db = ctx.get('database') as DatabaseInstance;
   const logger = ctx.get('logger');
+
+  // FIX-006: resolve required credits + cycle from org_cpd_config, not client.
+  const organizationId = ctx.get('organizationId') as string | undefined;
+  let requiredCredits = 60;
+  let cycleConfig: { cycleStartMonth?: number | null; cycleLengthYears?: number | null } = {};
+  if (organizationId) {
+    const [config] = await db
+      .select()
+      .from(orgCpdConfig)
+      .where(eq(orgCpdConfig.organizationId, organizationId))
+      .limit(1);
+    if (config) {
+      requiredCredits = config.requiredCredits;
+      cycleConfig = { cycleStartMonth: config.cycleStartMonth, cycleLengthYears: config.cycleLengthYears };
+    }
+  }
+  const cycle = resolveCycle(cycleConfig, new Date());
+
   const repo = new CreditEntryRepository(db, logger);
 
   // Get cross-org credit summaries

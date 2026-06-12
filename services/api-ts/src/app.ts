@@ -44,6 +44,7 @@ import { registerDuesJobs } from '@/handlers/association:member/jobs';
 import { registerPersonJobs } from '@/handlers/person/jobs';
 import { registerMembershipJobs, registerStatusRecomputeJob } from '@/handlers/member/membership/jobs';
 import { registerSurveyJobs } from '@/handlers/surveys/jobs';
+import { registerCommunicationJobs } from '@/handlers/communication/jobs/announcementSend';
 import { registerBreachJobs, registerTicketJobs, registerTrialExpiryMonitor, registerPastDueMonitor } from '@/handlers/platformadmin/jobs';
 import { registerDomainEventConsumers } from '@/core/domain-event-consumers';
 
@@ -69,6 +70,7 @@ import { createDependencyInjection } from '@/middleware/dependency';
 import { createSecurityHeaders, createCorsMiddleware } from '@/middleware/security';
 import { createCsrfTokenMiddleware, registerCsrfTokenEndpoint } from '@/middleware/csrf-token';
 import { authMiddleware } from '@/middleware/auth';
+import { isAssociationPublicPath } from '@/middleware/association-public-paths';
 import { platformAdminAuthMiddleware } from '@/middleware/platform-admin-auth';
 import { createAuditMiddleware } from '@/middleware/audit';
 import { createRateLimiter } from '@/middleware/rate-limit';
@@ -125,6 +127,7 @@ import { listTickets } from '@/handlers/platformadmin/listTickets';
 import { getTicket } from '@/handlers/platformadmin/getTicket';
 import { updateTicketStatus } from '@/handlers/platformadmin/updateTicketStatus';
 import { addTicketComment } from '@/handlers/platformadmin/addTicketComment';
+import { claimAdminInvite } from '@/handlers/platformadmin/claimAdminInvite';
 
 // getNationalDashboard, listAllCommittees, getCommittee — served via generated routes (Phase 35)
 
@@ -339,6 +342,9 @@ export function createApp(config: Config): App {
   // Register auth routes
   registerAuthRoutes(app as App);
 
+  // @hand-wired reason="admin invite claim — the invitee is authenticated but NOT yet a platform admin, so it must sit OUTSIDE the /admin/* platform-admin gate; it binds the invited row's userId on first claim (FIX-003 / G4 / WF-022). Migrate to TypeSpec with the rest of the hand-wired admin surface under G7." wave="AHA-FIX-003"
+  app.post('/platform-admin/claim', authMiddleware(), claimAdminInvite as unknown as Handler);
+
   // Platform admin authorization — auth first (sets user), then check platform_admin table
   app.use('/admin/*', authMiddleware(), platformAdminAuthMiddleware());
 
@@ -404,20 +410,12 @@ export function createApp(config: Config): App {
   // @hand-wired reason="suppression list, middleware ordering with /email/* auth" wave="by-design"
   app.get('/email/suppressions', listEmailSuppressions);
 
-  // Public association endpoints that must NOT have auth middleware
-  const ASSOCIATION_PUBLIC_PATHS = [
-    '/association/member/credentials/public-verify',
-    '/association/member/credentials/lookup',
-    '/association/member/ethics/public-complaints',
-    '/association/member/ethics/public-complaint',
-    '/association/member/directory/public',
-    '/association/member/directory/search', // covers /search/:personId/public
-  ];
-
-  // Auth middleware for all association routes EXCEPT public endpoints
+  // Auth middleware for all association routes EXCEPT public endpoints.
+  // Public-path matching is boundary-aware (FIX-009) — see
+  // middleware/association-public-paths.ts.
   app.use('/association/*', async (c, next) => {
     const path = new URL(c.req.url).pathname;
-    if (ASSOCIATION_PUBLIC_PATHS.some(p => path.startsWith(p))) {
+    if (isAssociationPublicPath(path)) {
       return next();
     }
     return authMiddleware()(c, next);
@@ -425,7 +423,7 @@ export function createApp(config: Config): App {
   // Org-context middleware for association routes EXCEPT public endpoints
   app.use('/association/*', async (c, next) => {
     const path = new URL(c.req.url).pathname;
-    if (ASSOCIATION_PUBLIC_PATHS.some(p => path.startsWith(p))) {
+    if (isAssociationPublicPath(path)) {
       return next();
     }
     return orgContextMiddleware()(c, next);
@@ -520,24 +518,19 @@ export function createApp(config: Config): App {
   app.get('/certificates/:id/pdf', certIdParam, authMiddleware(), generateCertificatePdf as unknown as Handler);
 
   // @hand-wired reason="WF-070 cross-org credit transcript export, inline query schema not in TypeSpec" wave="Wave-22"
+  // FIX-006 (G4): the compliance basis (requiredCredits, cyclePeriodYears,
+  // cycle anchor) and registrationDate are resolved SERVER-SIDE from
+  // org_cpd_config and are NO LONGER accepted from the client — a member must
+  // not be able to set their own pass/fail bar on this regulator-facing PDF.
+  // Only carryover inputs and the display name remain client-supplied.
   const creditTranscriptQuery = zValidator('query', z.object({
-    registrationDate: z.string().min(1),
-    cyclePeriodYears: z.string().optional(),
-    requiredCredits: z.string().optional(),
     carryoverEnabled: z.string().optional(),
     previousCycleEarned: z.string().optional(),
-    targetDate: z.string().optional(),
   }), validationErrorHandler);
   const creditTranscriptPdfQuery = zValidator('query', z.object({
-    registrationDate: z.string().min(1),
-    cyclePeriodYears: z.string().optional(),
-    requiredCredits: z.string().optional(),
     carryoverEnabled: z.string().optional(),
     previousCycleEarned: z.string().optional(),
-    targetDate: z.string().optional(),
     personName: z.string().optional(),
-    cycleStartMonth: z.string().optional(),
-    cycleStartDay: z.string().optional(),
   }), validationErrorHandler);
   app.get('/persons/me/credit-transcript', creditTranscriptQuery, authMiddleware(), getCreditTranscript as unknown as Handler);
   app.get('/persons/me/credit-transcript/pdf', creditTranscriptPdfQuery, authMiddleware(), getCreditTranscriptPdf as unknown as Handler);
@@ -677,6 +670,10 @@ export async function initializeApp(app: App, config: Config): Promise<void> {
   registerPersonJobs(jobs);
   registerMembershipJobs(jobs, app.notifs);
   registerSurveyJobs(jobs, app.notifs);
+  // FIX-001/002: register communication jobs — wires the announcement.published
+  // fan-out subscriber AND the */5 scheduled-delivery cron. Without this call
+  // no announcement ever reached a member. [SHARED DEPENDENCY: one init line]
+  registerCommunicationJobs(jobs, app.notifs, app.email, database);
   registerBreachJobs(jobs, app.notifs);
   registerTicketJobs(jobs, app.notifs);
   registerTrialExpiryMonitor(jobs);

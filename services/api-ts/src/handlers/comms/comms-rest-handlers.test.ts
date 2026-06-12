@@ -9,7 +9,8 @@
  * Each handler tests: auth guard, happy path, not-found / forbidden.
  */
 
-import { describe, test, expect, mock, beforeEach } from 'bun:test';
+import { describe, test, expect, mock, beforeEach, afterEach } from 'bun:test';
+import { ensurePristine, restoreRepo } from '@/test-utils/make-ctx';
 
 // Mock-Classification: APPROPRIATE — WebSocket/WebRTC real-time service boundary
 import { createChatRoom } from './createChatRoom';
@@ -24,6 +25,19 @@ import { getIceServers } from './getIceServers';
 
 import { ChatRoomRepository } from './repos/chatRoom.repo';
 import { ChatMessageRepository } from './repos/chatMessage.repo';
+import { ChatRoomMemberRepository } from './repos/chatRoomMember.repo';
+
+// Restore repo prototypes after every test so the raw `prototype.x = mock()`
+// patches below don't leak into other test files (bun runs files in one process).
+ensurePristine(ChatRoomRepository);
+ensurePristine(ChatMessageRepository);
+ensurePristine(ChatRoomMemberRepository);
+afterEach(() => {
+  restoreRepo(ChatRoomRepository);
+  restoreRepo(ChatMessageRepository);
+  restoreRepo(ChatRoomMemberRepository);
+});
+
 import {
   ForbiddenError,
   NotFoundError,
@@ -129,6 +143,7 @@ function makeCtx(opts: {
   logger?: any;
   config?: any;
   organizationId?: string;
+  ws?: any;
 } = {}) {
   const userId = opts.userId ?? 'user-1';
   const userName = opts.userName ?? 'Test User';
@@ -139,6 +154,7 @@ function makeCtx(opts: {
   const logger = opts.logger ?? { info: () => {}, warn: () => {}, error: () => {} };
   const notifs = opts.notifs ?? { createNotification: mock(async () => {}) };
   const organizationId = opts.organizationId ?? 'org-1';
+  const ws = opts.ws ?? { publishToChannel: mock(async () => 0) };
   const config = opts.config ?? {
     auth: { baseUrl: 'http://localhost:7213' },
     webrtc: {
@@ -160,6 +176,7 @@ function makeCtx(opts: {
         config,
         notifs,
         organizationId,
+        ws,
       };
       return store[key];
     },
@@ -176,6 +193,7 @@ function makeCtx(opts: {
       return new Response(JSON.stringify(data), { status });
     },
     _captured: () => captured,
+    _ws: () => ws,
   };
 
   return ctx as any;
@@ -270,6 +288,80 @@ describe('createChatRoom', () => {
     expect(status).toBe(200);
     expect(data.created).toBe(false);
   });
+
+  // FIX-005 (G6): Admin-escalation guard. On upsert of an existing room, a
+  // caller who is NOT already an admin must not be able to overwrite the
+  // room's `admins` or `context` (privilege escalation via self-promotion).
+  describe('upsert admin/context escalation guard (FIX-005 / G6)', () => {
+    let updateOneById: ReturnType<typeof mock>;
+
+    beforeEach(() => {
+      // Existing room: admins = [user-1]; user-2 is a plain participant.
+      ChatRoomRepository.prototype.findRoomWithParticipants = mock(async () =>
+        makeRoom({ participants: ['user-1', 'user-2'], admins: ['user-1'], context: null })
+      ) as any;
+      updateOneById = mock(async (_id: string, updates: any) =>
+        makeRoom({ ...updates })
+      );
+      ChatRoomRepository.prototype.updateOneById = updateOneById as any;
+    });
+
+    test('non-admin participant cannot promote themselves to admin via upsert', async () => {
+      const ctx = makeCtx({
+        userId: 'user-2', // plain participant, not an existing admin
+        body: {
+          participants: ['user-1', 'user-2'],
+          admins: ['user-1', 'user-2'], // attempt self-promotion
+          upsert: true,
+        },
+      });
+
+      await createChatRoom(ctx);
+
+      // The escalation must be ignored: admins must NOT be mutated.
+      const adminsUpdate = updateOneById.mock.calls.find(
+        (c: any[]) => c[1] && 'admins' in c[1]
+      );
+      expect(adminsUpdate).toBeUndefined();
+    });
+
+    test('non-admin participant cannot relink context via upsert', async () => {
+      const ctx = makeCtx({
+        userId: 'user-2',
+        body: {
+          participants: ['user-1', 'user-2'],
+          context: '11111111-1111-1111-1111-111111111111',
+          upsert: true,
+        },
+      });
+
+      await createChatRoom(ctx);
+
+      const contextUpdate = updateOneById.mock.calls.find(
+        (c: any[]) => c[1] && 'context' in c[1]
+      );
+      expect(contextUpdate).toBeUndefined();
+    });
+
+    test('existing admin can still change admins via upsert', async () => {
+      const ctx = makeCtx({
+        userId: 'user-1', // existing admin
+        body: {
+          participants: ['user-1', 'user-2'],
+          admins: ['user-1', 'user-2'],
+          upsert: true,
+        },
+      });
+
+      await createChatRoom(ctx);
+
+      const adminsUpdate = updateOneById.mock.calls.find(
+        (c: any[]) => c[1] && 'admins' in c[1]
+      );
+      expect(adminsUpdate).toBeDefined();
+      expect(adminsUpdate![1].admins).toEqual(['user-1', 'user-2']);
+    });
+  });
 });
 
 // ---------------------------------------------------------------------------
@@ -279,6 +371,8 @@ describe('createChatRoom', () => {
 describe('getChatRoom', () => {
   beforeEach(() => {
     ChatRoomRepository.prototype.findOneById = mock(async () => makeRoom()) as any;
+    // Default: not in the join table; JSONB participants is the only grant path.
+    ChatRoomMemberRepository.prototype.isMember = mock(async () => false) as any;
   });
 
   test('throws ValidationError without valid user', async () => {
@@ -309,6 +403,35 @@ describe('getChatRoom', () => {
     const ctx = makeCtx({ userId: 'user-99' });
     await expect(getChatRoom(ctx)).rejects.toBeInstanceOf(ForbiddenError);
   });
+
+  // FIX-007 (G5): membership compatibility OR-shim. A member tracked only in
+  // the `chat_room_member` join table (NOT in the legacy JSONB participants
+  // array) must still be granted access.
+  test('grants access to a join-table member not in JSONB participants (FIX-007)', async () => {
+    ChatRoomRepository.prototype.findOneById = mock(async () =>
+      makeRoom({ participants: ['user-2', 'user-3'] })
+    ) as any;
+    ChatRoomMemberRepository.prototype.isMember = mock(async () => true) as any;
+
+    const ctx = makeCtx({ userId: 'user-99' });
+    await getChatRoom(ctx);
+
+    const { status, data } = ctx._captured();
+    expect(status).toBe(200);
+    expect(data.id).toBe('room-1');
+  });
+
+  // FIX-007 regression: the shim must NOT be fail-open. A user in neither the
+  // JSONB participants array nor the join table is still denied.
+  test('denies a user in neither JSONB participants nor the join table (FIX-007)', async () => {
+    ChatRoomRepository.prototype.findOneById = mock(async () =>
+      makeRoom({ participants: ['user-2', 'user-3'] })
+    ) as any;
+    ChatRoomMemberRepository.prototype.isMember = mock(async () => false) as any;
+
+    const ctx = makeCtx({ userId: 'user-99' });
+    await expect(getChatRoom(ctx)).rejects.toBeInstanceOf(ForbiddenError);
+  });
 });
 
 // ---------------------------------------------------------------------------
@@ -318,6 +441,8 @@ describe('getChatRoom', () => {
 describe('getChatMessages', () => {
   beforeEach(() => {
     ChatRoomRepository.prototype.findOneById = mock(async () => makeRoom()) as any;
+    // Default: not in the join table; JSONB participants is the only grant path.
+    ChatRoomMemberRepository.prototype.isMember = mock(async () => false) as any;
     ChatMessageRepository.prototype.findManyWithPagination = mock(async () => ({
       data: [makeTextMessage({ id: 'msg-1' }), makeTextMessage({ id: 'msg-2' })],
       totalCount: 2,
@@ -350,6 +475,33 @@ describe('getChatMessages', () => {
     ChatRoomRepository.prototype.findOneById = mock(async () =>
       makeRoom({ participants: ['user-2', 'user-3'] })
     ) as any;
+    const ctx = makeCtx({ userId: 'user-99' });
+    await expect(getChatMessages(ctx)).rejects.toBeInstanceOf(ForbiddenError);
+  });
+
+  // FIX-007 (G5): join-table member (not in JSONB participants) can read the
+  // message history via the membership compatibility OR-shim.
+  test('grants message-read access to a join-table member not in JSONB participants (FIX-007)', async () => {
+    ChatRoomRepository.prototype.findOneById = mock(async () =>
+      makeRoom({ participants: ['user-2', 'user-3'] })
+    ) as any;
+    ChatRoomMemberRepository.prototype.isMember = mock(async () => true) as any;
+
+    const ctx = makeCtx({ userId: 'user-99', query: {} });
+    await getChatMessages(ctx);
+
+    const { status, data } = ctx._captured();
+    expect(status).toBe(200);
+    expect(data.data.length).toBe(2);
+  });
+
+  // FIX-007 regression: shim is not fail-open.
+  test('denies message-read for a user in neither JSONB participants nor the join table (FIX-007)', async () => {
+    ChatRoomRepository.prototype.findOneById = mock(async () =>
+      makeRoom({ participants: ['user-2', 'user-3'] })
+    ) as any;
+    ChatRoomMemberRepository.prototype.isMember = mock(async () => false) as any;
+
     const ctx = makeCtx({ userId: 'user-99' });
     await expect(getChatMessages(ctx)).rejects.toBeInstanceOf(ForbiddenError);
   });
@@ -532,6 +684,46 @@ describe('sendChatMessage', () => {
     await sendChatMessage(ctx);
 
     expect(updateLastMessage).toHaveBeenCalledTimes(1);
+  });
+
+  // FIX-001 (G1): REST send must broadcast the persisted message to the
+  // room's WS channel using the spec envelope { event, payload }, so other
+  // participants receive it live instead of only on a manual refetch.
+  test('broadcasts persisted text message to the room WS channel', async () => {
+    const savedMessage = makeTextMessage({ id: 'msg-broadcast-1' });
+    ChatMessageRepository.prototype.createTextMessage = mock(async () => savedMessage) as any;
+
+    const ctx = makeCtx({
+      body: { messageType: 'text', message: 'Hello world' },
+    });
+    await sendChatMessage(ctx);
+
+    const publish = ctx._ws().publishToChannel as ReturnType<typeof mock>;
+    const chatCall = publish.mock.calls.find((c: any[]) => c[1] === 'chat.message');
+    expect(chatCall).toBeDefined();
+    // channelId is namespaced as `chat-rooms/${roomId}`
+    expect(chatCall![0]).toBe('chat-rooms/room-1');
+    // payload is the full saved message object
+    expect(chatCall![2]).toEqual(savedMessage);
+  });
+
+  test('broadcasts started video_call message to the room WS channel', async () => {
+    const ctx = makeCtx({
+      body: {
+        messageType: 'video_call',
+        videoCallData: {
+          participants: [
+            { user: 'user-1', displayName: 'Alice', userType: 'host', audioEnabled: true, videoEnabled: true },
+          ],
+        },
+      },
+    });
+    await sendChatMessage(ctx);
+
+    const publish = ctx._ws().publishToChannel as ReturnType<typeof mock>;
+    const callBroadcast = publish.mock.calls.find((c: any[]) => c[1] === 'chat.message');
+    expect(callBroadcast).toBeDefined();
+    expect(callBroadcast![0]).toBe('chat-rooms/room-1');
   });
 });
 

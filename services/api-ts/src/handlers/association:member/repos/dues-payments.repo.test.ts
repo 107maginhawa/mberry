@@ -659,16 +659,22 @@ describe('DuesRepository.findRecentPaymentForPerson', () => {
 // ---------------------------------------------------------------------------
 
 describe('DuesRepository.getNextReceiptSequence', () => {
-  test('returns count + 1 based on receipt number pattern', async () => {
-    const db = makeDb({ selectRows: [{ count: 5 }] });
+  // [FIX-003] Now sourced from an atomic per-(org, year) counter upsert.
+  // The upsert returns the post-increment counter value; the sequence to USE
+  // is that value minus 1. First payment of the year: insert with
+  // nextSequence=2 → returned 2 → use 1.
+  test('returns the claimed sequence from the atomic counter (subsequent payment)', async () => {
+    // Counter already existed; the upsert incremented it and RETURNED 6.
+    const db = makeDb({ insertRow: { nextSequence: 6 } });
     const repo = safeRepo(db as any);
 
     const result = await repo.getNextReceiptSequence('org-1', 2026);
-    expect(result).toBe(6);
+    expect(result).toBe(5);
   });
 
-  test('returns 1 when no receipts exist for the year', async () => {
-    const db = makeDb({ selectRows: [{ count: 0 }] });
+  test('returns 1 for the first payment of the year', async () => {
+    // First insert of the year stores nextSequence=2 and RETURNS it.
+    const db = makeDb({ insertRow: { nextSequence: 2 } });
     const repo = safeRepo(db as any);
 
     const result = await repo.getNextReceiptSequence('org-1', 2026);

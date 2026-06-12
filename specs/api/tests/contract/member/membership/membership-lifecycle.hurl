@@ -7,13 +7,14 @@ csrf_token: jsonpath "$.token"
 
 
 
-# member/membership — full state-machine lifecycle
+# member/membership — terminal-state lifecycle (resign is irreversible)
 #
 # Covers operationIds: createMembership, resignMembership, reinstateMembership,
 # getMembership
 # Real flow: sign up fresh applicant per {{suffix}}, officer creates a
-# membership for them, drives through resign → reinstate transitions,
-# then verifies state via getMembership.
+# membership for them, resigns it, then asserts the decided state-machine
+# semantics — resign is terminal, and reinstate (lapsed-only, decision #1)
+# rejects a resigned member. getMembership confirms the resignation persists.
 #
 # Idempotency: fresh person via {{suffix}}-email signup keeps the
 # (organization_id, person_id) unique index clean per Hurl run.
@@ -92,7 +93,10 @@ Content-Type: application/json
 HTTP 200
 
 
-# ── 5. reinstateMembership → 200, status returns to active ────────────
+# ── 5. reinstateMembership of a RESIGNED member → 422 (terminal) ─────
+# FIX-007/008 / decision #1: removed/resigned/deceased/expelled are terminal +
+# irreversible. Reinstate is LAPSED-ONLY, so reinstating a resigned member is
+# rejected — re-entry would go through re-application, not reinstate.
 POST {{api}}/association/member/memberships/{{membership_id}}/reinstate
 Origin: {{origin}}
 x-csrf-token: {{csrf_token}}
@@ -100,10 +104,12 @@ Cookie: better-auth.session_token={{officer_cookie}}
 x-org-id: {{org_id}}
 Content-Type: application/json
 {}
-HTTP 200
+HTTP 422
 
 
-# ── 6. getMembership → 200, confirm record persists ──────────────────
+# ── 6. getMembership → 200, the resignation persists as 'resigned' ───
+# FIX-007: a resignation stamps resigned_at, so the status survives as
+# 'resigned' (it does NOT decay to 'removed').
 GET {{api}}/association/member/memberships/{{membership_id}}
 Origin: {{origin}}
 x-csrf-token: {{csrf_token}}
@@ -113,3 +119,4 @@ HTTP 200
 [Asserts]
 jsonpath "$.id" == "{{membership_id}}"
 jsonpath "$.personId" == "{{applicant_person_id}}"
+jsonpath "$.status" == "resigned"

@@ -10,8 +10,12 @@ import { listOrganizationsOptions } from '@monobase/sdk-ts/generated/react-query
 import { startImpersonation as startImpersonationApi, endImpersonation as endImpersonationApi } from '@monobase/sdk-ts/generated/sdk.gen'
 
 export const Route = createFileRoute('/impersonate/')({
+  // FIX-007 (PA-6): align the UI gate to the backend allow-list
+  // IMPERSONATION_ALLOWED_ROLES = ['super', 'support'] (startImpersonation.ts).
+  // The support tier is entitled to impersonate for diagnosis; gating to
+  // super-only locked it out of a tool it is permitted to use.
   component: () => (
-    <RequireRole allowed={['super']}>
+    <RequireRole allowed={['super', 'support']}>
       <ImpersonatePage />
     </RequireRole>
   ),

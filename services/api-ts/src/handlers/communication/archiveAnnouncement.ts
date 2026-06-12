@@ -21,13 +21,16 @@ export async function archiveAnnouncement(
   const db = ctx.get('database') as DatabaseInstance;
   const repo = new CommunicationsRepository(db);
 
-  const existing = await repo.get(params.id);
+  // FIX-007 (tenant isolation): scope the fetch + write to the caller's org so an
+  // officer of org A cannot archive org B's announcement by id.
+  const orgId = ctx.get('organizationId');
+  const existing = await repo.get(params.id, orgId);
   if (!existing) throw new NotFoundError('Announcement');
   if (existing.status !== 'sent') {
     throw new BusinessLogicError('Only sent announcements can be archived', 'ANNOUNCEMENT_CANNOT_ARCHIVE');
   }
 
-  const archived = await repo.updateStatus(params.id, 'archived');
+  const archived = await repo.updateStatus(params.id, 'archived', undefined, orgId);
 
   ctx.set('auditResourceId', params.id);
   ctx.set('auditDescription', `Archived announcement`);

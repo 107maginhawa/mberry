@@ -52,21 +52,25 @@ export function ChatView({ roomId, myPersonId, roomName }: ChatViewProps) {
     }
   }, [messagesQuery.data])
 
-  // Handle incoming WebSocket messages
+  // Handle incoming WebSocket messages.
+  // Server uses the { event, payload } envelope (see core/ws.ts publishToChannel).
   const handleWsMessage = useCallback(
     (msg: unknown) => {
-      const event = msg as { type?: string; data?: ChatMessage }
-      if (event.type === 'chat.message' && event.data) {
+      const frame = msg as { event?: string; payload?: unknown }
+      if (frame.event === 'chat.message' && frame.payload) {
+        // payload is the full persisted ChatMessage object.
+        const incoming = frame.payload as ChatMessage
         // Optimistic append — avoid duplicates by checking ID
         setLocalMessages((prev) => {
-          if (prev.some((m) => m.id === event.data!.id)) return prev
-          return [...prev, event.data!]
+          if (prev.some((m) => m.id === incoming.id)) return prev
+          return [...prev, incoming]
         })
       }
-      if (event.type === 'chat.typing') {
-        const typingEvent = msg as { type: string; senderId?: string; senderName?: string }
-        const name = typingEvent.senderName ?? typingEvent.senderId
-        if (name && typingEvent.senderId !== myPersonId) {
+      if (frame.event === 'chat.typing') {
+        // Server typing payload: { from, isTyping }.
+        const typing = (frame.payload ?? {}) as { from?: string; isTyping?: boolean }
+        const name = typing.from
+        if (name && typing.from !== myPersonId && typing.isTyping !== false) {
           setTypingUsers((prev) => {
             const next = new Map(prev)
             // Clear after 3s of no typing events from this user

@@ -327,6 +327,7 @@ namespace AdvertisingModule {
     @route("/creatives/{creativeId}/review")
     @useAuth(bearerAuth)
     @extension("x-security-required-roles", #["association:admin"])
+    @extension("x-audit", #{ action: "update", resourceType: "ad-creative" })
     reviewCreative(
       @path creativeId: UUID,
       @body body: ReviewCreativeRequest
