@@ -159,7 +159,9 @@ async function buildApp(deps: {
     for (const m of selectMethods) selectChain[m] = () => selectChain;
     // Subscription lifecycle handlers issue `.limit(1)` reads — return the
     // injected subscription row there; everything else settles to allInvoices.
-    selectChain.limit = async () => (subscriptionRow ? [subscriptionRow] : allInvoices);
+    // Subscription `.limit(1)` lookups return the injected row, or [] when none
+    // is injected (mirrors a real no-match db read — never the invoice list).
+    selectChain.limit = async () => (subscriptionRow ? [subscriptionRow] : []);
     selectChain.then = (resolve: any, reject?: any) => Promise.resolve(allInvoices).then(resolve, reject);
     // Subscription handlers also call db.update(subscriptions).set(data).where().
     const updateChain: any = {

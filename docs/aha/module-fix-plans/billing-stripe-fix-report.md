@@ -403,3 +403,45 @@ No code/tests changed → no validation to run for this pass. Baseline billing s
 - Once both are decided, run a **coordinated `04` pass** on `core/billing.ts` fee wiring **with dues (`checkoutPaymentToken`) + events (`registerAndPayForEvent`) regression** — `[SHARED DEPENDENCY]` / `[CROSS-MODULE RISK]`.
 - Separately, wire **stripe-mock into CI** (ENV-BILL-01) to unblock the full pay→capture→refund contract tests.
 - Meanwhile, the next **decision-free** billing-stripe `04` work is **Batch C** (FIX-009 actor columns, FIX-010 cumulative partial refunds) — gateway-independent, no product decision — and **Batch F** (FIX-011 invoice-number race). These are the productive next passes; the fee path is not.
+
+---
+
+## Platform Subscription Billing — re-scoped task 7 build (2026-06-13, CONTINUE-49)
+
+### Founder decisions that unblocked this (locked CONTINUE-48 session)
+
+The fee-path block above was a `[NEEDS PRODUCT DECISION]`. CONTINUE-48 resolved the *revenue model itself*, which re-scoped the task away from the blocked per-transaction skim:
+
+- **Platform fee model = tiered SaaS subscription.** A `pricing_tier` covers up to `maxMembers` for a flat monthly/annual price; **the org pays the platform**. Tier prices are admin DATA (`createPricingTier`), not code. This is platform revenue.
+- **Member-dues model = per-org direct charges.** Member dues are collected on each org's OWN Stripe account (org = merchant of record). The platform takes **NO `application_fee` / skim** on member dues. Therefore `payInvoice.ts platformAmount = 0` is **correct by design, NOT a gap** — the V2-DEFERRED/`[BLOCKED BY MISSING SPEC]` fee-policy block above is now **moot for V1** (it was only ever the skim model the founder did not choose). Org Stripe-Connect onboarding is a separate future item, not this task.
+- **Refund-fee netting → N/A** (no per-transaction skim under this model).
+
+### What was built (TDD RED→GREEN)
+
+| Item | File(s) | Status |
+| --- | --- | --- |
+| `createSubscription` handler (org → tier), super-only RBAC (`requireAdminTier(SUPER_ONLY)`), unique-per-org 409, org-not-found 404 | `handlers/platformadmin/createSubscription.ts` | ✅ GREEN — TypeSpec-modeled (`specs/api/.../platform-admin-support.tsp`), generated route `routes.ts:307`, registry + SDK `createSubscriptionMutation` regenerated |
+| Member-count → tier validation (pure helper): `maxMembers === null` ⇒ unlimited OK; else `activeMembers <= maxMembers` else 422; cheapest-covering-tier auto-pick when no `tierId` supplied | `handlers/platformadmin/utils/tier-fit.ts` (`tierFitsMemberCount`, `pickCheapestCoveringTier`) + `tier-fit.test.ts` | ✅ GREEN — billable headroom = memberships in `active`/`gracePeriod` |
+| Stripe subscription wiring → populates `stripeSubscriptionId` | `createSubscription.ts` `provisionStripeSubscription` behind injectable `stripeBoundary.provision` | ✅ GREEN — **Stripe SDK STUBBED in tests** (Mock-Classification: APPROPRIATE — external gateway). Stub returns a fake `sub_…` id and the test asserts it persists. When Stripe is unconfigured (local/test) the row is persisted with `stripeSubscriptionId` null; non-fatal try/catch. Live call = `[BLOCKED BY ENVIRONMENT]`. |
+| `past_due` transition on payment failure | `handlers/billing/handleStripeWebhook.ts` `handleInvoicePaymentFailed` (`invoice.payment_failed` → `past_due`, `lastStripeEventId` dedupe, no-match no-op) | ✅ GREEN |
+
+### Fix applied this pass
+
+The CONTINUE-49 verification run surfaced one RED in `handleStripeWebhook.test.ts` — the *"no-op when invoice has no matching platform subscription"* case. Root cause was a **test-mock dishonesty**, not a handler bug: the mock's `selectChain.limit` fell back to returning the full `allInvoices` fixture list when no subscription row was injected, so the handler's `if (!local) return` guard never fired (a real db returns `[]` on no match). Fixed the mock to return `[]` — **zero production code changed**. The handler logic was already correct.
+
+### Validation (real counts)
+
+```
+bun test src/handlers/platformadmin/ src/handlers/billing/
+  → 698 pass / 0 fail / 1208 expect() calls (78 files)
+bun run --filter '*' typecheck
+  → @monobase/ui, admin, @monobase/sdk-ts, @monobase/api-ts, memberry — all exit 0
+```
+
+No migrations needed (schema `pricingTiers` + `subscriptions` already had `maxMembers`/`trialDays`/`stripeSubscriptionId`/`stripeCustomerId`). Pre-existing unrelated `email/jobs/index.test.ts` `.env` interval failure ignored per scope.
+
+### Not built (per locked decisions)
+
+- Dropped `application_fee`/Connect skim on member dues (per-org direct charges, no skim — `platformAmount = 0` stays).
+- Org Stripe-Connect onboarding flow (separate future item).
+- Member-dues recurring-billing changes (m21 §1 out-of-scope).
