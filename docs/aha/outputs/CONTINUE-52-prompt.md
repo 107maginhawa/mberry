@@ -29,9 +29,18 @@ CONTINUE-51 outcome:
 e2e currently **times out at 30 min** and was masking a **pre-existing failure backlog** that
 CI had never reached. Three sub-problems, do in this order:
 
-### 1. Per-test DB isolation (root cause of most local "failures")
-The dev DB `monobase` is heavily polluted (100+ junk orgs, 360+ junk announcements from
-accumulated contract/e2e residue). `tests/e2e/global-setup.ts` only restores **2 org rows +
+### 1. Per-test auth + state isolation (the actual driver — NOT dirty data)
+CORRECTION (CONTINUE-51 follow-up): a fresh-DB run **disproved** dirty data as the cause —
+clean DB (5 announcements / 2 orgs) failed **259/721**, ~identical to the polluted run's 257,
+and officer/ run **serially** (1 worker) still failed **73/151**. So it is **not** parallel
+contamination and **not** stale data. The driver is **run length**: deep into a 25-46 min run,
+officer API calls start returning 403 and pages stop rendering, while every feature passes in
+isolation (officer/roster 12/12). Root cause is **session/auth + shared-seed-state degrading
+across the run** — `global-setup.ts` resets once at start, never per-test, and the storageState
+auth is captured once. FIX: refresh auth per spec/file (don't reuse one long-lived storageState)
+AND isolate mutable seed state per test (the G10 `/test/seed-isolated` idea). DB-pollution is a
+side issue, not the driver. Context: the dev DB `monobase` is also polluted (100+ junk orgs,
+360+ junk announcements); `tests/e2e/global-setup.ts` only restores **2 org rows +
 association baseline** — it does NOT purge accumulated junk. So data-presence / data-count
 assertions pass on a fresh CI DB but rot over time. The config comment already points at the
 fix: **G10 — per-test seed isolation via a `/test/seed-isolated` endpoint**
