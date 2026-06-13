@@ -2,7 +2,6 @@
 slice: w1-t5-chart-components
 phase: wave1-financial
 priority: P2
-agent_skills: [oli-execution-gate]
 ---
 
 # T5: Recharts Chart Components (Lazy-Loaded)

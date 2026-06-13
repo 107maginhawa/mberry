@@ -2,7 +2,7 @@ import { describe, test, expect, vi } from '@/test/vitest-shim'
 import { render, screen, fireEvent, waitFor } from '@testing-library/react'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 // SUT — first-party imports (static, so Confidence scanner detects SUT binding)
-import { CreateChannelDialog } from '../components/create-channel-dialog'
+import { CreateChannelDialog, buildChannelCreateBody } from '../components/create-channel-dialog'
 import { ChannelList } from '../components/channel-list'
 
 // @monobase/ui rendered as real components against happy-dom.
@@ -76,6 +76,21 @@ describe('CreateChannelDialog', () => {
     fireEvent.change(nameInput, { target: { value: 'general' } })
     const submit = screen.getByRole('button', { name: /create/i })
     expect(submit.hasAttribute('disabled')).toBe(false)
+  })
+})
+
+describe('buildChannelCreateBody (FIX-002 payload)', () => {
+  test('sends a valid channel payload: name, roomType=channel, org-scoped, no fake context', () => {
+    const body = buildChannelCreateBody('General Chat', 'org-123')
+    // slugged channel name
+    expect(body.name).toBe('general-chat')
+    expect(body.roomType).toBe('channel')
+    // org-scoped so the optional org-context middleware resolves organizationId
+    expect(body.organizationId).toBe('org-123')
+    // creator auto-added by backend → no client participants required
+    expect(body.participants).toEqual([])
+    // the old fake `context: "channel:x"` UUID-violating hack is gone
+    expect('context' in body).toBe(false)
   })
 })
 

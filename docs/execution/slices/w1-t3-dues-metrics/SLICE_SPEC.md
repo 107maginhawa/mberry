@@ -2,7 +2,6 @@
 slice: w1-t3-dues-metrics
 phase: wave1-financial
 priority: P1
-agent_skills: [oli-execution-gate]
 ---
 
 # T3: getDuesMetrics Endpoint

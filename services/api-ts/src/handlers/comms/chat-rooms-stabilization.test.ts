@@ -12,7 +12,8 @@
  * - Room admin operations (archive)
  */
 
-import { describe, test, expect, mock, beforeEach } from 'bun:test';
+import { describe, test, expect, mock, beforeEach, afterEach } from 'bun:test';
+import { ensurePristine, restoreRepo } from '@/test-utils/make-ctx';
 
 // Mock-Classification: APPROPRIATE — WebSocket/WebRTC real-time service boundary
 // Assertion-Style: EXISTENCE_CHECK — verifying middleware/context injection patterns
@@ -25,6 +26,16 @@ import { config as wsHandler } from './ws.chat-room';
 
 import { ChatRoomRepository } from './repos/chatRoom.repo';
 import { ChatMessageRepository } from './repos/chatMessage.repo';
+
+// Restore repo prototypes after every test so the raw `prototype.x = mock()`
+// patches below don't leak into other test files (bun runs files in one process).
+ensurePristine(ChatRoomRepository);
+ensurePristine(ChatMessageRepository);
+afterEach(() => {
+  restoreRepo(ChatRoomRepository);
+  restoreRepo(ChatMessageRepository);
+});
+
 import {
   ForbiddenError,
   NotFoundError,
@@ -104,18 +115,18 @@ function makeCtx(opts: {
 
   let captured: { data: any; status: number } = { data: null, status: 0 };
 
+  const store: Record<string, any> = {
+    user: userId ? { id: userId, name: 'Test User' } : null,
+    database: {},
+    logger,
+    config,
+    notifs,
+    organizationId,
+  };
+
   const ctx = {
-    get: (key: string) => {
-      const store: Record<string, any> = {
-        user: userId ? { id: userId, name: 'Test User' } : null,
-        database: {},
-        logger,
-        config,
-        notifs,
-        organizationId,
-      };
-      return store[key];
-    },
+    get: (key: string) => store[key],
+    set: (key: string, value: any) => { store[key] = value; },
     req: {
       valid: (type: string) => {
         if (type === 'param') return params;
@@ -344,11 +355,12 @@ describe('sendChatMessage — message send/receive scenarios', () => {
 
 describe('listChatRooms — permission boundaries', () => {
   test('only returns rooms where user is a participant', async () => {
+    // FIX-013: the handler scopes by the current user via the SQL-filtered repo.
     const findUserRoomsMock = mock(async (userId: string) => {
       expect(userId).toBe('user-1');
-      return [makeRoom({ id: 'my-room' })];
+      return { data: [makeRoom({ id: 'my-room' })], totalCount: 1 };
     });
-    ChatRoomRepository.prototype.findUserChatRooms = findUserRoomsMock as any;
+    ChatRoomRepository.prototype.findUserRoomsPage = findUserRoomsMock as any;
 
     const ctx = makeCtx({ query: {} });
     await listChatRooms(ctx);
@@ -359,7 +371,7 @@ describe('listChatRooms — permission boundaries', () => {
   });
 
   test('returns empty list for user with no rooms', async () => {
-    ChatRoomRepository.prototype.findUserChatRooms = mock(async () => []) as any;
+    ChatRoomRepository.prototype.findUserRoomsPage = mock(async () => ({ data: [], totalCount: 0 })) as any;
 
     const ctx = makeCtx({ query: {} });
     await listChatRooms(ctx);

@@ -1,7 +1,6 @@
 ---
 slice: wave4-comms-phase1-schema
 phase: wave4-comms-phase1
-generated-by: oli-execution-gate
 timestamp: 2026-05-24T12:00:00Z
 ---
 

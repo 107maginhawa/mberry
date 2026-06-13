@@ -23,6 +23,8 @@ export type {
   ImpersonationSessionRecord,
 } from './platform-admin.port';
 export type { MembershipPort, ActiveMembership } from './membership.port';
+export type { FeatureFlagPort, FeatureFlagRow } from './feature-flag.port';
+export type { NotificationPreferencePort } from './notification-preference.port';
 
 import type { GovernancePort } from './governance.port';
 import type {
@@ -30,6 +32,8 @@ import type {
   ImpersonationPort,
 } from './platform-admin.port';
 import type { MembershipPort } from './membership.port';
+import type { FeatureFlagPort } from './feature-flag.port';
+import type { NotificationPreferencePort } from './notification-preference.port';
 
 // ── Wire-up helpers ─────────────────────────────────────────────────────
 //
@@ -66,4 +70,21 @@ export async function getMembershipPort(db: DatabaseInstance): Promise<Membershi
     '@/handlers/membership/repos/membership.repo'
   );
   return membershipRepoPort(db);
+}
+
+export async function getFeatureFlagPort(db: DatabaseInstance): Promise<FeatureFlagPort> {
+  const { featureFlagRepoPort } = await import(
+    '@/handlers/platformadmin/repos/platform-admin.repo'
+  );
+  return featureFlagRepoPort(db);
+}
+
+export async function getNotificationPreferencePort(
+  db: DatabaseInstance,
+  logger?: Logger,
+): Promise<NotificationPreferencePort> {
+  const { notificationPreferenceRepoPort } = await import(
+    '@/handlers/communication/repos/communication.repo'
+  );
+  return notificationPreferenceRepoPort(db, logger);
 }

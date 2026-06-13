@@ -380,6 +380,193 @@ describe('checkInCustomTraining — guards', () => {
 
 });
 
+// ─── G1 / FIX-001 — officer check-in awards a credit to the named member ──
+//
+// The officer marks a SPECIFIC enrollee (personId from the request) present.
+// That enrollee's enrollment transitions to completed and a single AUTO
+// CreditEntry is written for THAT member (not the officer). Repeating the
+// check-in must not award a second credit (idempotent per member).
+import { TrainingRepository as TrainingRepo2, TrainingEnrollmentRepository as EnrollRepo2 } from './repos/training.repo';
+import { CreditEntryRepository as CreditRepo2 } from '@/handlers/association:member/repos/credits.repo';
+import { OfficerTermRepository as OfficerRepo2 } from '@/handlers/association:member/repos/governance.repo';
+
+describe('checkInCustomTraining — awards credit to the named member (FIX-001)', () => {
+  let trainingMocks: ReturnType<typeof stubRepo>;
+  let enrollMocks: ReturnType<typeof stubRepo>;
+  let creditMocks: ReturnType<typeof stubRepo>;
+  let officerMocks: ReturnType<typeof stubRepo>;
+
+  beforeEach(() => {
+    restoreRepo(TrainingRepo2);
+    restoreRepo(EnrollRepo2);
+    restoreRepo(CreditRepo2);
+    restoreRepo(OfficerRepo2);
+  });
+
+  afterEach(() => {
+    [trainingMocks, enrollMocks, creditMocks, officerMocks].forEach(
+      (m) => m && Object.values(m).forEach((s) => s.mockRestore()),
+    );
+    restoreRepo(TrainingRepo2);
+    restoreRepo(EnrollRepo2);
+    restoreRepo(CreditRepo2);
+    restoreRepo(OfficerRepo2);
+  });
+
+  test('officer checks in member m-1 → AUTO credit written for m-1, enrollment completed', async () => {
+    let createdCredit: any = null;
+    let updatedTo: any = null;
+    officerMocks = stubRepo(OfficerRepo2, {
+      findActiveByPersonAndOrg: async () => [{ positionTitle: 'President' }],
+    });
+    trainingMocks = stubRepo(TrainingRepo2, {
+      findOneById: async () => ({
+        id: 't-1',
+        organizationId: 'org-1',
+        title: 'CPD Seminar',
+        creditBearing: true,
+        creditAmount: 12,
+        endDate: new Date(),
+      }),
+    });
+    enrollMocks = stubRepo(EnrollRepo2, {
+      findMany: async () => [{ id: 'e-1', trainingId: 't-1', personId: 'm-1', status: 'enrolled' }],
+      updateOneById: async (_id: string, data: any) => { updatedTo = data; return { id: 'e-1', personId: 'm-1', status: data.status }; },
+    });
+    creditMocks = stubRepo(CreditRepo2, {
+      findByTrainingAndPerson: async () => null,
+      createOne: async (data: any) => { createdCredit = data; return { id: 'c-1' }; },
+    });
+
+    const { checkInCustomTraining } = await import('./checkInCustomTraining');
+    const ctx = makeCtx({
+      user: { id: 'officer-1', role: 'user', twoFactorEnabled: true },
+      _params: { trainingId: 't-1' },
+      _query: { organizationId: 'org-1', personId: 'm-1' },
+    });
+
+    const response = await checkInCustomTraining(ctx);
+    expect(response.status).toBe(200);
+    expect(createdCredit).not.toBeNull();
+    expect(createdCredit.personId).toBe('m-1');
+    expect(createdCredit.creditAmount).toBe(12);
+    expect(updatedTo?.status).toBe('completed');
+  });
+
+  test('re-checking-in the same member does NOT award a second credit (idempotent)', async () => {
+    let createCalls = 0;
+    officerMocks = stubRepo(OfficerRepo2, {
+      findActiveByPersonAndOrg: async () => [{ positionTitle: 'President' }],
+    });
+    trainingMocks = stubRepo(TrainingRepo2, {
+      findOneById: async () => ({
+        id: 't-1', organizationId: 'org-1', title: 'CPD Seminar',
+        creditBearing: true, creditAmount: 12, endDate: new Date(),
+      }),
+    });
+    enrollMocks = stubRepo(EnrollRepo2, {
+      findMany: async () => [{ id: 'e-1', trainingId: 't-1', personId: 'm-1', status: 'completed' }],
+      updateOneById: async () => ({ id: 'e-1', personId: 'm-1', status: 'completed' }),
+    });
+    creditMocks = stubRepo(CreditRepo2, {
+      findByTrainingAndPerson: async () => ({ id: 'c-existing' }),
+      createOne: async () => { createCalls += 1; return { id: 'c-2' }; },
+    });
+
+    const { checkInCustomTraining } = await import('./checkInCustomTraining');
+    const ctx = makeCtx({
+      user: { id: 'officer-1', role: 'user', twoFactorEnabled: true },
+      _params: { trainingId: 't-1' },
+      _query: { organizationId: 'org-1', personId: 'm-1' },
+    });
+
+    const response = await checkInCustomTraining(ctx);
+    expect(response.status).toBe(200);
+    expect(createCalls).toBe(0);
+  });
+});
+
+// ─── G9 / FIX-009 — toggle suppresses the check-in credit award ──
+//
+// The officer-attendance seam (the core CPD journey) shares the
+// awardTrainingCredit routine, so the org credit-tracking toggle must
+// suppress the award here too.
+import { organizations as orgsTableCI } from '@/handlers/platformadmin/repos/platform-admin.schema';
+import { orgCpdConfig as cpdTableCI } from '@/handlers/association:member/repos/credits.schema';
+
+function makeToggleDbCI(rowsByTable: Map<unknown, unknown[]>) {
+  function selectChain() {
+    let currentTable: unknown;
+    const chain: any = {
+      from: (t: unknown) => { currentTable = t; return chain; },
+      where: () => chain,
+      limit: async () => (rowsByTable.get(currentTable) ?? []),
+      orderBy: async () => (rowsByTable.get(currentTable) ?? []),
+      then: (resolve: any, reject?: any) =>
+        Promise.resolve(rowsByTable.get(currentTable) ?? []).then(resolve, reject),
+    };
+    return chain;
+  }
+  return {
+    select: () => selectChain(),
+    update: () => { const c: any = { set: () => c, where: () => c, returning: async () => [{}] }; return c; },
+    insert: () => ({ values: async () => undefined }),
+    transaction: async (fn: any) => fn(makeToggleDbCI(rowsByTable)),
+  };
+}
+
+describe('checkInCustomTraining — G9 toggle suppresses the credit (FIX-009)', () => {
+  beforeEach(() => {
+    restoreRepo(TrainingRepo2);
+    restoreRepo(EnrollRepo2);
+    restoreRepo(CreditRepo2);
+    restoreRepo(OfficerRepo2);
+  });
+  afterEach(() => {
+    restoreRepo(TrainingRepo2);
+    restoreRepo(EnrollRepo2);
+    restoreRepo(CreditRepo2);
+    restoreRepo(OfficerRepo2);
+  });
+
+  test('toggle DISABLED → member marked present but NO credit written', async () => {
+    let createCalls = 0;
+    stubRepo(OfficerRepo2, { findActiveByPersonAndOrg: async () => [{ positionTitle: 'President' }] });
+    stubRepo(TrainingRepo2, {
+      findOneById: async () => ({
+        id: 't-1', organizationId: 'org-1', title: 'CPD Seminar',
+        creditBearing: true, creditAmount: 12, endDate: new Date(),
+      }),
+    });
+    stubRepo(EnrollRepo2, {
+      findMany: async () => [{ id: 'e-1', trainingId: 't-1', personId: 'm-1', status: 'enrolled' }],
+      updateOneById: async (_id: string, data: any) => ({ id: 'e-1', personId: 'm-1', status: data.status }),
+    });
+    stubRepo(CreditRepo2, {
+      findByTrainingAndPerson: async () => null,
+      createOne: async () => { createCalls += 1; return { id: 'c-1' }; },
+    });
+
+    const db = makeToggleDbCI(new Map<unknown, unknown[]>([
+      [orgsTableCI, [{ id: 'org-1', featureFlags: { creditTracking: false } }]],
+      [cpdTableCI, []],
+    ]));
+
+    const { checkInCustomTraining } = await import('./checkInCustomTraining');
+    const ctx = makeCtx({
+      user: { id: 'officer-1', role: 'user', twoFactorEnabled: true },
+      database: db,
+      _params: { trainingId: 't-1' },
+      _query: { organizationId: 'org-1', personId: 'm-1' },
+    });
+
+    const response = await checkInCustomTraining(ctx);
+    expect(response.status).toBe(200);
+    expect((response as any).body.creditAwarded).toBe(0);
+    expect(createCalls).toBe(0);
+  });
+});
+
 // ─── Check-in method defaults ────────────────────────────
 
 describe('Check-in method defaults', () => {

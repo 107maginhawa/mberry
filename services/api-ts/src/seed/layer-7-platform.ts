@@ -130,6 +130,10 @@ export async function seedPlatformCoverage(
     const flags: NewFlag[] = [
       { targetType: 'org', targetId: orgId, moduleName: 'feed.enabled', enabled: true, isOverride: false },
       { targetType: 'org', targetId: orgId, moduleName: 'marketplace.beta', enabled: false, isOverride: true },
+      // FIX-009 (G2): the `marketplace` module is enforced by the feature-flag
+      // gate wired in app.ts. Seed it enabled for the demo org so the gate is
+      // exercised end-to-end without locking the demo out of marketplace.
+      { targetType: 'org', targetId: orgId, moduleName: 'marketplace', enabled: true, isOverride: false },
       { targetType: 'org', targetId: orgId, moduleName: 'elections.online_voting', enabled: true, isOverride: false },
       { targetType: 'association', targetId: associationId, moduleName: 'national_dashboard', enabled: true, isOverride: false },
       { targetType: 'association', targetId: associationId, moduleName: 'communications.bulk_email', enabled: false, isOverride: false },

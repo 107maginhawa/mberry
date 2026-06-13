@@ -5,8 +5,14 @@ export async function searchJobPostings(ctx: Context): Promise<Response> {
   const db = ctx.get('database');
   const repo = new JobPostingRepository(db);
 
+  // FIX-004: scope the listing to the tenant-resolved org from orgContextMiddleware
+  // (ctx.var.organizationId) by default. Previously the org filter was only applied
+  // when an `organizationId` query param was present, allowing an unscoped, cross-org
+  // listing. The trusted context org always wins over any client-supplied query value.
+  const organizationId = ctx.get('organizationId') as string | undefined;
+
   const filters = {
-    organizationId: ctx.req.query('organizationId') ?? undefined,
+    organizationId,
     status: ctx.req.query('status') ?? undefined,
     type: ctx.req.query('type') ?? undefined,
     search: ctx.req.query('search') ?? undefined,

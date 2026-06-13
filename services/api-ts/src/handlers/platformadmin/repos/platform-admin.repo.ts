@@ -215,6 +215,8 @@ import type {
   ImpersonationPort,
   ImpersonationSessionRecord,
 } from '@/core/ports/platform-admin.port';
+import type { FeatureFlagPort, FeatureFlagRow } from '@/core/ports/feature-flag.port';
+import { inArray } from 'drizzle-orm';
 
 export function platformAdminRepoPort(db: NodePgDatabase): PlatformAdminPort {
   const repo = new PlatformAdminRepository(db);
@@ -248,6 +250,68 @@ export function impersonationRepoPort(
         expiresAt: row.expiresAt,
         createdAt: row.createdAt,
       };
+    },
+  };
+}
+
+/**
+ * Feature-flag enforcement adapter (AHA FIX-009 / G2).
+ *
+ * Resolves every flag row that could decide enforcement of `moduleName` for
+ * an org: the org's own rows, plus the org's association rows, plus the org's
+ * subscription-tier rows. The gate (middleware/feature-flag-gate.ts) applies
+ * precedence over the returned set; this adapter only fetches.
+ *
+ * Resolution is best-effort: association/tier lookups are wrapped so a missing
+ * org or subscription simply narrows the candidate set rather than throwing —
+ * the gate then decides from whatever rows resolve (fail-open when none).
+ */
+export function featureFlagRepoPort(db: NodePgDatabase): FeatureFlagPort {
+  return {
+    async findEnforcementFlags(orgId: string, moduleName: string): Promise<FeatureFlagRow[]> {
+      // Candidate (targetType, targetId) pairs. Org is always a candidate.
+      const targetIds: string[] = [orgId];
+
+      // Resolve the org's association so association-scoped flags apply.
+      const [org] = await db
+        .select({ associationId: organizations.associationId })
+        .from(organizations)
+        .where(eq(organizations.id, orgId))
+        .limit(1);
+      if (org?.associationId) targetIds.push(org.associationId);
+
+      // Resolve the org's active subscription tier slug so tier flags apply.
+      try {
+        const { subscriptions, pricingTiers } = await import('./platform-admin.schema');
+        const [sub] = await db
+          .select({ tierId: subscriptions.pricingTierId })
+          .from(subscriptions)
+          .where(eq(subscriptions.organizationId, orgId))
+          .limit(1);
+        if (sub?.tierId) {
+          const [tier] = await db
+            .select({ slug: pricingTiers.slug })
+            .from(pricingTiers)
+            .where(eq(pricingTiers.id, sub.tierId))
+            .limit(1);
+          if (tier?.slug) targetIds.push(tier.slug);
+        }
+      } catch {
+        // Tier resolution is best-effort; absence just narrows candidates.
+      }
+
+      const rows = await db
+        .select()
+        .from(featureFlags)
+        .where(and(eq(featureFlags.moduleName, moduleName), inArray(featureFlags.targetId, targetIds)));
+
+      return rows.map((r) => ({
+        targetType: r.targetType,
+        targetId: r.targetId,
+        moduleName: r.moduleName,
+        enabled: r.enabled,
+        isOverride: r.isOverride,
+      }));
     },
   };
 }

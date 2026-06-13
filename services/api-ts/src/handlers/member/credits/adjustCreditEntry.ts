@@ -7,6 +7,7 @@ import { creditEntries, orgCpdConfig } from '@/handlers/association:member/repos
 import { domainEvents } from '@/core/domain-events';
 import { requirePosition } from '@/core/auth/officer-checks';
 import { POSITION_TITLES } from '@/utils/position-titles';
+import { resolveCycle } from './utils/credit-cycle';
 
 // Acceptance Criteria: [AC-M10-005] mandatory adjustment reason — M10-R4
 export async function adjustCreditEntry(ctx: Context): Promise<Response> {
@@ -32,17 +33,15 @@ export async function adjustCreditEntry(ctx: Context): Promise<Response> {
   if (!reasonRaw) throw new ValidationError('reason required');
   if (reasonRaw.length < 10) throw new ValidationError('reason required (min 10 characters)');
 
+  // FIX-004 (G2): single cycle authority. An officer adjustment is anchored at
+  // the time it is made (now); the window comes from org_cpd_config via the one
+  // shared resolveCycle() used by every credit-write path.
   const config = await db.select().from(orgCpdConfig).where(eq(orgCpdConfig.organizationId, orgId)).limit(1);
-  const csm = (config[0] as any)?.cycleStartMonth ?? 1;
-  const cly = (config[0] as any)?.cycleLengthYears ?? 3;
   const now = new Date();
-  const y = now.getFullYear();
-  const m = now.getMonth() + 1;
-  const csy = m < csm ? y - 1 : y;
-  const ci = Math.floor((csy - 2020) / cly);
-  const asy = 2020 + ci * cly;
-  const cycleStart = new Date(asy, csm - 1, 1);
-  const cycleEnd = new Date(asy + cly, csm - 1, 1);
+  const { cycleStart, cycleEnd } = resolveCycle(
+    { cycleStartMonth: config[0]?.cycleStartMonth, cycleLengthYears: config[0]?.cycleLengthYears },
+    now,
+  );
 
   const sourceId = body.idempotencyKey ?? randomUUID();
 

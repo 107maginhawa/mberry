@@ -60,11 +60,27 @@ HTTP 200
 tier_id: jsonpath "$.data[0].id"
 
 
-# ── 3. Applicant A creates application ────────────────────────────────
+# ── 3. Officer signs in (creates the applications on behalf of A and B) ─
+# FIX-013: creating an application for someone else (personId != caller) is an
+# officer-on-behalf action, so the officer is the authenticated actor here.
+POST {{api}}/auth/sign-in/email
+Origin: {{origin}}
+x-csrf-token: {{csrf_token}}
+Content-Type: application/json
+{
+  "email": "{{seed_officer_email}}",
+  "password": "{{seed_officer_password}}"
+}
+HTTP 200
+[Captures]
+officer_cookie: cookie "better-auth.session_token"
+
+
+# ── 4. Officer creates application for A (officer-on-behalf, FIX-013) ──
 POST {{api}}/association/member/applications
 Origin: {{origin}}
 x-csrf-token: {{csrf_token}}
-Cookie: better-auth.session_token={{person_a_cookie}}
+Cookie: better-auth.session_token={{officer_cookie}}
 x-org-id: {{org_id}}
 Content-Type: application/json
 {
@@ -78,11 +94,11 @@ HTTP 201
 app_a_id: jsonpath "$.id"
 
 
-# ── 4. Applicant B creates application ────────────────────────────────
+# ── 5. Officer creates application for B (officer-on-behalf) ──────────
 POST {{api}}/association/member/applications
 Origin: {{origin}}
 x-csrf-token: {{csrf_token}}
-Cookie: better-auth.session_token={{person_b_cookie}}
+Cookie: better-auth.session_token={{officer_cookie}}
 x-org-id: {{org_id}}
 Content-Type: application/json
 {
@@ -94,20 +110,6 @@ Content-Type: application/json
 HTTP 201
 [Captures]
 app_b_id: jsonpath "$.id"
-
-
-# ── 5. Officer signs in ───────────────────────────────────────────────
-POST {{api}}/auth/sign-in/email
-Origin: {{origin}}
-x-csrf-token: {{csrf_token}}
-Content-Type: application/json
-{
-  "email": "{{seed_officer_email}}",
-  "password": "{{seed_officer_password}}"
-}
-HTTP 200
-[Captures]
-officer_cookie: cookie "better-auth.session_token"
 
 
 # ── 6. denyMembershipApplication (A) → 200 ────────────────────────────
@@ -155,7 +157,9 @@ status >= 200
 status < 300
 
 
-# ── 9. deleteMembershipApplication (A) → 200/204 ─────────────────────
+# ── 9. deleteMembershipApplication removed (FIX-011 / decision #6) ────
+# Applications are resolved by deny (with a reason), preserving the audit
+# trail; the hard-delete op no longer exists, so the route must NOT delete.
 DELETE {{api}}/association/member/applications/{{app_a_id}}
 Origin: {{origin}}
 x-csrf-token: {{csrf_token}}
@@ -163,5 +167,4 @@ Cookie: better-auth.session_token={{officer_cookie}}
 x-org-id: {{org_id}}
 HTTP *
 [Asserts]
-status >= 200
-status < 300
+status >= 400

@@ -6,6 +6,7 @@ import { MemberSidebar } from "@/components/layout/member-sidebar"
 import { MemberBottomNav } from "@/components/layout/member-bottom-nav"
 import { MemberHeader } from "@/components/layout/member-header"
 import { OrgIconRail } from "@/components/layout/org-icon-rail"
+import { DeletionGraceBanner } from "@/components/layout/deletion-grace-banner"
 import { ErrorBoundary } from "@/components/patterns/error-boundary"
 import { AnimatePresence, motion } from "framer-motion"
 import { useSpringTransition } from "@/components/motion/use-spring-transition"
@@ -80,6 +81,7 @@ function AuthenticatedLayout() {
       <OrgIconRail officerOrgIds={officerOrgIds} />
       <MemberSidebar userEmail={user?.email} isOfficer={isOfficerForActiveOrg} />
       <div className="flex-1 flex flex-col overflow-hidden">
+        <DeletionGraceBanner />
         <MemberHeader userName={user?.name} />
         <main id="main-content" className="flex-1 overflow-auto pb-[var(--bottom-nav-height)] md:pb-0">
           <AnimatePresence mode="wait">

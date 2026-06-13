@@ -3,6 +3,7 @@ import type { DatabaseInstance } from '@/core/database';
 import type { RevokeAdminParams } from '@/generated/openapi/validators';
 import { NotFoundError, BusinessLogicError } from '@/core/errors';
 import { PlatformAdminRepository } from './repos/platform-admin.repo';
+import { requireAdminTier, SUPER_ONLY } from '@/core/auth/admin-tier';
 
 /**
  * revokeAdmin
@@ -16,11 +17,9 @@ export async function revokeAdmin(
   const session = ctx.get('session');
   if (!session) return ctx.json({ error: 'Unauthorized' }, 401);
 
-  // [EM-M03-9a3e7b12] Only super admins can revoke platform admins
-  const callerAdmin = ctx.get('platformAdmin') as { role: string } | undefined;
-  if (!callerAdmin || callerAdmin.role !== 'super') {
-    return ctx.json({ error: 'Super admin access required' }, 403);
-  }
+  // FIX-008 (G1) / Q1: revoking a platform admin is a super-only mutation.
+  const denied = requireAdminTier(ctx, SUPER_ONLY);
+  if (denied) return denied;
 
   const { adminId } = ctx.req.valid('param');
   const db = ctx.get('database') as DatabaseInstance;

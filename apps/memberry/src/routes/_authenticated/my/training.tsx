@@ -39,6 +39,30 @@ function formatDate(iso: string | null | undefined) {
   return new Date(iso).toLocaleDateString('en-PH', { year: 'numeric', month: 'short', day: 'numeric' })
 }
 
+export interface MyTrainingItem {
+  enrollment: { id: string; status: string }
+  training: { id: string; title: string; type?: string; startDate?: string; creditAmount?: number; status: string }
+}
+
+/**
+ * FIX-011 (G11): a CPE credit is EARNED only when the enrollment is
+ * `completed` (officer-confirmed attendance / completion) — never while it is
+ * merely `enrolled`. The previous predicate counted `enrolled` as completed,
+ * overstating both earned credits and the "Completed" stat.
+ */
+export function computeTrainingStats(items: MyTrainingItem[]) {
+  const isEarned = (status: string | undefined) => status === 'completed'
+
+  const totalCredits = items.reduce(
+    (acc, item) => acc + (isEarned(item.enrollment?.status) ? Number(item.training?.creditAmount ?? 0) : 0),
+    0,
+  )
+  const enrolled = items.filter((i) => i.enrollment?.status === 'enrolled').length
+  const completed = items.filter((i) => isEarned(i.enrollment?.status)).length
+
+  return { totalCredits, enrolled, completed }
+}
+
 function MyTraining() {
   const { orgId } = useOrgContext()
   const navigate = useNavigate()
@@ -57,23 +81,19 @@ function MyTraining() {
     enabled: !!orgId,
   })
 
-  interface TrainingItem { enrollment: { id: string; status: string }; training: { id: string; title: string; type?: string; startDate?: string; creditAmount?: number; status: string } }
-  const rawItems: TrainingItem[] = (data as unknown as ApiListResponse<TrainingItem>)?.data ?? []
+  const rawItems: MyTrainingItem[] = (data as unknown as ApiListResponse<MyTrainingItem>)?.data ?? []
   const items = rawItems.filter((i) => i.training && i.enrollment)
 
-  const totalCredits = items.reduce((acc, item) => {
-    const isCompleted = item.enrollment?.status === 'enrolled'
-    return acc + (isCompleted ? Number(item.training?.creditAmount ?? 0) : 0)
-  }, 0)
-
-  const enrolled = items.filter((i) => i.enrollment?.status === 'enrolled').length
+  // FIX-011 (G11): earned credits + "Completed" count only `completed`
+  // enrollments — not `enrolled` ones (the prior bug overstated both).
+  const { totalCredits, enrolled, completed } = computeTrainingStats(items)
   const pending = items.filter((i) => ['pending_approval', 'pending_payment', 'waitlisted'].includes(i.enrollment?.status)).length
 
   const statCards = [
     { label: 'Enrolled', value: enrolled, icon: BookOpen, color: 'text-[var(--color-primary)]', bg: 'bg-[var(--color-primary)]/10' },
     { label: 'Pending', value: pending, icon: Calendar, color: 'text-orange-600', bg: 'bg-orange-100 dark:bg-orange-900/20' },
     { label: 'CPE Credits', value: totalCredits, icon: Award, color: 'text-amber-600', bg: 'bg-amber-100 dark:bg-amber-900/20', isFloat: true },
-    { label: 'Completed', value: items.filter((i) => i.enrollment?.status === 'enrolled').length, icon: CheckCircle, color: 'text-green-600', bg: 'bg-green-100 dark:bg-green-900/20' },
+    { label: 'Completed', value: completed, icon: CheckCircle, color: 'text-green-600', bg: 'bg-green-100 dark:bg-green-900/20' },
   ]
 
   return (

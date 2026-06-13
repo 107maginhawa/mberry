@@ -48,6 +48,72 @@ describe('requireOfficerTerm', () => {
     const result = await requireOfficerTerm(ctx as any);
     expect(result!.status).toBe(403);
   });
+
+  // ─── FIX-002 (G2): 2FA enforcement for privileged officer titles ──────
+  // P1-3 / Matrix §4: a president/treasurer/secretary without 2FA must be
+  // rejected in production. The inline requireOfficerTerm path previously
+  // skipped this branch entirely (its docstring claimed it enforced 2FA).
+
+  test('returns 403 when privileged officer (President) lacks 2FA in production', async () => {
+    const old = process.env['NODE_ENV'];
+    process.env['NODE_ENV'] = 'production';
+    try {
+      mocks = stubRepo(OfficerTermRepository, {
+        findActiveByPersonAndOrg: async () => [{ id: 'term-1', positionTitle: 'President' }],
+      });
+      const ctx = makeCtx({ user: { id: 'user-1', role: 'user', twoFactorEnabled: false } });
+      const result = await requireOfficerTerm(ctx as any);
+      expect(result).not.toBeNull();
+      expect(result!.status).toBe(403);
+    } finally {
+      process.env['NODE_ENV'] = old;
+    }
+  });
+
+  test('allows privileged officer (Treasurer) WITH 2FA in production', async () => {
+    const old = process.env['NODE_ENV'];
+    process.env['NODE_ENV'] = 'production';
+    try {
+      mocks = stubRepo(OfficerTermRepository, {
+        findActiveByPersonAndOrg: async () => [{ id: 'term-1', positionTitle: 'Treasurer' }],
+      });
+      const ctx = makeCtx({ user: { id: 'user-1', role: 'user', twoFactorEnabled: true } });
+      const result = await requireOfficerTerm(ctx as any);
+      expect(result).toBeNull();
+    } finally {
+      process.env['NODE_ENV'] = old;
+    }
+  });
+
+  test('allows privileged officer (Secretary) without 2FA in development', async () => {
+    const old = process.env['NODE_ENV'];
+    process.env['NODE_ENV'] = 'development';
+    try {
+      mocks = stubRepo(OfficerTermRepository, {
+        findActiveByPersonAndOrg: async () => [{ id: 'term-1', positionTitle: 'Secretary' }],
+      });
+      const ctx = makeCtx({ user: { id: 'user-1', role: 'user', twoFactorEnabled: false } });
+      const result = await requireOfficerTerm(ctx as any);
+      expect(result).toBeNull();
+    } finally {
+      process.env['NODE_ENV'] = old;
+    }
+  });
+
+  test('allows non-privileged officer (Board Member) without 2FA in production', async () => {
+    const old = process.env['NODE_ENV'];
+    process.env['NODE_ENV'] = 'production';
+    try {
+      mocks = stubRepo(OfficerTermRepository, {
+        findActiveByPersonAndOrg: async () => [{ id: 'term-1', positionTitle: 'Board Member' }],
+      });
+      const ctx = makeCtx({ user: { id: 'user-1', role: 'user', twoFactorEnabled: false } });
+      const result = await requireOfficerTerm(ctx as any);
+      expect(result).toBeNull();
+    } finally {
+      process.env['NODE_ENV'] = old;
+    }
+  });
 });
 
 describe('requirePosition', () => {

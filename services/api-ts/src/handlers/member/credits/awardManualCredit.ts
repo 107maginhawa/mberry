@@ -6,6 +6,7 @@ import { creditEntries, orgCpdConfig } from '@/handlers/association:member/repos
 import { domainEvents } from '@/core/domain-events';
 import { requirePosition } from '@/core/auth/officer-checks';
 import { POSITION_TITLES } from '@/utils/position-titles';
+import { resolveCycle } from './utils/credit-cycle';
 
 export async function awardManualCredit(ctx: Context): Promise<Response> {
   const denied = await requirePosition(ctx, [POSITION_TITLES.PRESIDENT, POSITION_TITLES.SECRETARY, POSITION_TITLES.TREASURER]);
@@ -26,11 +27,15 @@ export async function awardManualCredit(ctx: Context): Promise<Response> {
     if (Number(sdlTotal[0]?.total ?? 0) + body.creditAmount > sdlMax) sdlCapWarning = `SDL cap exceeded (${Number(sdlTotal[0]?.total ?? 0) + body.creditAmount}/${sdlMax}). Officer override.`;
   }
 
+  // FIX-004 (G2): single cycle authority. Resolve the cycle window from
+  // org_cpd_config anchored at the activity date, via the one shared
+  // resolveCycle() used by all credit-write paths.
   const config = await db.select().from(orgCpdConfig).where(eq(orgCpdConfig.organizationId, orgId)).limit(1);
-  const csm = config[0]?.cycleStartMonth ?? 1; const cly = config[0]?.cycleLengthYears ?? 3;
-  const ad = new Date(body.activityDate); const y = ad.getFullYear(); const m = ad.getMonth() + 1;
-  const csy = m < csm ? y - 1 : y; const ci = Math.floor((csy - 2020) / cly); const asy = 2020 + ci * cly;
-  const cycleStart = new Date(asy, csm - 1, 1); const cycleEnd = new Date(asy + cly, csm - 1, 1);
+  const ad = new Date(body.activityDate);
+  const { cycleStart, cycleEnd } = resolveCycle(
+    { cycleStartMonth: config[0]?.cycleStartMonth, cycleLengthYears: config[0]?.cycleLengthYears },
+    ad,
+  );
 
   try {
     const [entry] = await db.insert(creditEntries).values({ personId: body.personId, organizationId: orgId, type: 'manual', activityName: body.activityName, provider: body.provider ?? null, activityDate: ad, creditAmount: body.creditAmount, cycleStart, cycleEnd, supportingDocumentId: body.supportingDocumentId ?? null, category: body.category ?? null, verificationStatus: 'verified', sourceType: 'manual_award', sourceId: body.idempotencyKey, cpdActivityType: (body.cpdActivityType ?? null) as typeof creditEntries.cpdActivityType.enumValues[number] | null, status: 'active', createdBy: session.user.id, updatedBy: session.user.id }).returning();

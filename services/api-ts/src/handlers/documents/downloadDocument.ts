@@ -4,7 +4,7 @@ import type { StorageProvider } from '@/core/storage';
 import type { Session } from '@/types/auth';
 import { UnauthorizedError, NotFoundError, ForbiddenError } from '@/core/errors';
 import { getMembershipPort, getPlatformAdminPort } from '@/core/ports';
-import { DocumentRepository } from './repos/documents.repo';
+import { DocumentRepository, DocumentAccessLogRepository } from './repos/documents.repo';
 import { auditAction } from '@/core/audit/audit-action';
 
 /**
@@ -46,6 +46,26 @@ export async function downloadDocument(ctx: Context): Promise<Response> {
   }
 
   const downloadUrl = await storage.generateDownloadUrl(document.storageKey);
+
+  // FIX-003 (M11-R5 / AC-M11-005): persist a module-owned access-log row for
+  // every download so the officer-facing access-log UI/API has real data.
+  // Best-effort: a logging failure must never break the download redirect.
+  try {
+    const accessLogRepo = new DocumentAccessLogRepository(db, logger);
+    await accessLogRepo.createOne({
+      documentId,
+      personId: session.user.id,
+      action: 'download',
+      accessedAt: new Date(),
+      ipAddress: ctx.req.header('x-forwarded-for') || ctx.req.header('x-real-ip') || null,
+      organizationId: document.organizationId,
+    });
+  } catch {
+    logger?.warn?.(
+      { action: 'downloadDocument.accessLog', documentId },
+      'Failed to record document download access log',
+    );
+  }
 
   await auditAction(ctx, {
     action: 'read',

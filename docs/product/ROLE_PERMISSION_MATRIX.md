@@ -2,9 +2,11 @@
 
 > Generated from `docs/audits/EXISTING_CODEBASE_ADOPTION_AUDIT.md` Section 6,
 > `services/api-ts/src/types/auth.ts`, `services/api-ts/src/utils/org-auth.ts`,
-> and `services/api-ts/src/utils/officer-check.ts`.
+> and `services/api-ts/src/core/auth/officer-checks.ts` (formerly
+> `utils/officer-check.ts`).
 >
-> Last updated: 2026-05-14
+> Last updated: 2026-06-11 (AHA FIX-004 / G5 — §2/§4/§5/§3.28 corrected to
+> describe the mechanisms that actually run; phantom layers flagged as dead).
 
 ---
 
@@ -46,12 +48,22 @@ Listed in descending privilege order (index 0 = highest):
 
 ## 2. Auth Middleware Stack
 
+> **Accuracy note (AHA FIX-004 / G5, 2026-06-11):** earlier revisions of this
+> table described `officerAuthMiddleware` (layer 2) and `requireOrgRole` /
+> `hasMinimumRole` (layers 4/§5) as live enforcement. They are NOT mounted /
+> NOT called anywhere in `src` — `officerAuthMiddleware` (`middleware/officer-auth.ts`)
+> has zero mounts and `requireOrgRole`/`hasMinimumRole` (`utils/org-auth.ts`)
+> have zero callers. The rows below now describe the mechanisms that actually
+> run. The dead code is slated for removal in a later cleanup pass.
+
 | Layer | Middleware | Applied To | Mechanism |
 |-------|-----------|------------|-----------|
-| 1 | Global auth | All routes (except public) | Session validation via Better-Auth |
-| 2 | Officer auth | `/association/*` mutations | `officerAuthMiddleware` — verifies active officer term; enforces 2FA for president/treasurer/secretary |
-| 3 | Platform admin | `/admin/*` routes | `platformAdminAuthMiddleware` — checks `platform_admin` table membership |
-| 4 | Handler guards | Per-handler | `requirePosition()`, `requireOrgRole()`, `requireActiveStatus()`, `requireTenantAccess()` |
+| 1 | Global auth | All routes (except public) | `authMiddleware` (`middleware/auth.ts`) — session validation via Better-Auth; banned-user rejection; optional `roles:[...]` from TypeSpec `x-security-required-roles` |
+| 1b | Org context | `/association/*` | `orgContextMiddleware` (`middleware/org-context.ts`) — resolves `organizationId` and verifies membership (fails closed); sets `role:'member'` for members, `role:'admin'` for platform admins |
+| 2 | Officer / position gate (generated) | TypeSpec ops declaring `@extension("x-require-officer"/"x-require-position", …)` | Generator (`scripts/generate.ts`) emits `requireOfficerMiddleware()` (`middleware/require-officer.ts`) and `requirePositionMiddleware({titles})` (`middleware/require-position.ts`) into `routes.ts`. Both enforce 2FA for president/treasurer/secretary in production. (`officerAuthMiddleware` is dead code — not this path.) |
+| 2b | Officer / position gate (inline) | Handlers with runtime-branching authorization | Handlers call `requireOfficerTerm(ctx)` / `requirePosition(ctx, [titles])` from `core/auth/officer-checks.ts`. Both verify active officer terms from the governance DB and enforce 2FA for privileged titles in production (`requireOfficerTerm` 2FA added in AHA FIX-002). |
+| 3 | Platform admin | `/admin/*` routes | `platformAdminAuthMiddleware` — checks `platform_admin` table membership. Tier (`super`/`support`/`analyst`) enforcement is per-handler via `callerAdmin.role` checks (e.g. super-only mutations — see §3.7). |
+| 4 | Handler guards | Per-handler | `requirePosition()` / `requireOfficerTerm()` (title- and term-based). `requireActiveStatus()` / `requireTenantAccess()` exist in `utils/org-auth.ts`; `requireOrgRole()` / `hasMinimumRole()` are present but **not called** — see §5. |
 
 ### Public (Unprotected) Routes
 
@@ -377,7 +389,14 @@ Listed in descending privilege order (index 0 = highest):
 | Manage tasks | GA+HG | Y | Y | -- | Y | Y | Y | -- | Y | Y | -- | -- | -- |
 | Dissolve committee | GA+HG | Y | Y | -- | Y | -- | -- | -- | -- | -- | -- | -- | -- |
 
-**Committee-Scoped Roles** (stored in `committee_member.role`, checked via custom `requireCommitteeRole()` — not `hasMinimumRole()`):
+<!-- AHA FIX-004 / G5 (2026-06-11): `requireCommitteeRole()` does NOT exist in
+     services/api-ts/src (grep finds only `committee_member` schema references).
+     The actual committee-scoped guard is UNVERIFIED and owned by the
+     committee-management (M19) audit. The "checked via custom requireCommitteeRole()"
+     wording below is aspirational, not a description of live code. [NEEDS CONFIRMATION]
+     [CROSS-MODULE RISK: committee-management] -->
+
+**Committee-Scoped Roles** (stored in `committee_member.role`; the concrete guard that enforces these is **unverified** — `requireCommitteeRole()` does not exist in `src` and the actual committee-role check is to be confirmed by the committee-management (M19) audit, not `hasMinimumRole()`):
 
 | Action | chairperson | vice_chair | secretary | member |
 |--------|------------|-----------|-----------|--------|
@@ -388,33 +407,53 @@ Listed in descending privilege order (index 0 = highest):
 | Submit reports | Y | -- | -- | -- |
 | Dissolve committee (own) | Y | -- | -- | -- |
 
-> **Note:** `chairperson` is a committee-scoped role, not an org-level role in ROLE_HIERARCHY. Auth is checked via `committee_member.role` lookup, not `hasMinimumRole()`. Org-level president/admin overrides apply regardless of committee role. See M19-R1: every committee must have a chairperson assigned. M19-R6: if chairperson removed from org, committee enters `leaderless` state until new chairperson assigned.
+> **Note:** `chairperson` is a committee-scoped role, not an org-level role in ROLE_HIERARCHY. Auth is checked via a `committee_member.role` lookup (the exact guard is **unverified** — see the AHA FIX-004 comment above; `requireCommitteeRole()` does not exist in `src`), not `hasMinimumRole()`. Org-level president/admin overrides apply regardless of committee role. See M19-R1: every committee must have a chairperson assigned. M19-R6: if chairperson removed from org, committee enters `leaderless` state until new chairperson assigned.
 
 ---
 
 ## 4. 2FA Enforcement
 
-Privileged positions require two-factor authentication in production (P1-3):
+Privileged positions require two-factor authentication in production (P1-3).
+
+The 2FA branch lives in every live officer/position enforcement path:
+generated `requireOfficerMiddleware` / `requirePositionMiddleware`
+(`middleware/require-officer.ts`, `middleware/require-position.ts`) and inline
+`requireOfficerTerm` / `requirePosition` (`core/auth/officer-checks.ts`).
+(`officerAuthMiddleware` is dead code and is NOT an enforcement path — corrected
+in AHA FIX-004. `requireOfficerTerm`'s 2FA branch was added in AHA FIX-002.)
 
 | Position | 2FA Required | Enforced By |
 |----------|-------------|-------------|
-| President | Yes | `requirePosition()` + `officerAuthMiddleware` |
-| Treasurer | Yes | `requirePosition()` + `officerAuthMiddleware` |
-| Secretary | Yes | `requirePosition()` + `officerAuthMiddleware` |
+| President | Yes | `requirePosition()` / `requireOfficerTerm()` (inline) + `requirePositionMiddleware` / `requireOfficerMiddleware` (generated) |
+| Treasurer | Yes | `requirePosition()` / `requireOfficerTerm()` (inline) + `requirePositionMiddleware` / `requireOfficerMiddleware` (generated) |
+| Secretary | Yes | `requirePosition()` / `requireOfficerTerm()` (inline) + `requirePositionMiddleware` / `requireOfficerMiddleware` (generated) |
 
 2FA is skipped in development (`NODE_ENV !== 'production'`).
 
 ---
 
-## 5. Hierarchy-Based Access (hasMinimumRole)
+## 5. Hierarchy-Based Access (hasMinimumRole) — NOT WIRED
 
-`org-auth.ts` provides `hasMinimumRole(userRole, minimumRole)` for hierarchy-based checks. A role at index N has access to anything requiring index >= N:
+> **Accuracy note (AHA FIX-004 / G5):** the `ROLE_HIERARCHY` /
+> `hasMinimumRole()` model described below is **not enforced anywhere**.
+> `hasMinimumRole()` and `requireOrgRole()` in `utils/org-auth.ts` have **zero
+> call sites**, and `orgContextMiddleware` hardcodes `role:'member'` (or
+> `'admin'` for platform admins), so the 8-level hierarchy can never be
+> evaluated against a real per-org role. Real org-scoped authority is enforced
+> entirely through **officer terms + position titles** (`requireOfficerTerm` /
+> `requirePosition`, §2 layers 2/2b/4), not this hierarchy. Do not treat the
+> hierarchy as a live gate. The dead exports are slated for removal in a later
+> cleanup pass.
+
+`org-auth.ts` defines `hasMinimumRole(userRole, minimumRole)` and a
+`ROLE_HIERARCHY` (president 0 → member 7), but nothing calls it:
 
 ```
 president (0) > vice-president (1) > secretary (2) > treasurer (3) > board-member (4) > officer (5) > staff (6) > member (7)
 ```
 
-Most handlers use `requirePosition()` (title-based, explicit allow-list) rather than hierarchy-based checks. The hierarchy is available for future use.
+Authorization is title-based (`requirePosition()` with explicit allow-lists)
+and officer-term-based (`requireOfficerTerm()`), not hierarchy-based.
 
 ---
 

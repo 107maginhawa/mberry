@@ -1,7 +1,6 @@
 ---
 slice: wave-0-foundation-audit
 phase: 0
-generated-by: oli-execution-gate
 timestamp: 2026-05-24T13:42:00Z
 ---
 

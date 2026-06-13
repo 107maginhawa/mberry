@@ -8,7 +8,7 @@
 
 import type { Context } from 'hono';
 import type { DatabaseInstance } from '@/core/database';
-import { eq, and, type SQL } from 'drizzle-orm';
+import { eq, and, asc, desc, type SQL } from 'drizzle-orm';
 import {
   supportTickets,
   ticketStatusEnum,
@@ -54,11 +54,14 @@ export async function listTickets(ctx: Context): Promise<Response> {
   if (priority && isPriority(priority)) filters.push(eq(supportTickets.priority, priority));
   if (assignee) filters.push(eq(supportTickets.assignedTo, assignee));
 
+  // PA-8 step 1: inbox sorted by priority (highest first) then age (oldest
+  // first). ticket_priority is declared low → standard → high → critical, so
+  // Postgres enum ordering makes desc(priority) surface critical before low.
   const rows = await db
     .select()
     .from(supportTickets)
     .where(filters.length > 0 ? and(...filters) : undefined)
-    .orderBy(supportTickets.createdAt);
+    .orderBy(desc(supportTickets.priority), asc(supportTickets.createdAt));
 
   const now = Date.now();
   const data = rows.map(t => ({ ...t, slaStatus: computeSlaStatus(t, now) }));

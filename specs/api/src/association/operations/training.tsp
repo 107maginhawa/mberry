@@ -61,6 +61,9 @@ enum TrainingStatus {
 
 @doc("Enrollment status for a training session")
 enum TrainingEnrollmentStatus {
+  @doc("Paid training awaiting offline-payment confirmation (TC-DEC-01 proof-of-payment)")
+  paymentPending: "payment_pending",
+
   @doc("Enrolled and awaiting the session to begin")
   enrolled: "enrolled",
 
@@ -232,6 +235,24 @@ model TrainingEnrollment extends BaseEntity {
 
   @doc("Reference to the CE credit ledger entry if credit was awarded")
   creditEntryId?: string;
+
+  @doc("Storage key of the offline payment proof (TC-DEC-01 proof-of-payment)")
+  proofStorageKey?: string;
+
+  @doc("File name of the offline payment proof")
+  proofFileName?: string;
+
+  @doc("MIME type of the offline payment proof")
+  proofMimeType?: string;
+
+  @doc("UTC timestamp when the member submitted payment proof")
+  paymentSubmittedAt?: utcDateTime;
+
+  @doc("Officer who confirmed offline payment")
+  paymentConfirmedBy?: string;
+
+  @doc("UTC timestamp when an officer confirmed offline payment")
+  paymentConfirmedAt?: utcDateTime;
 }
 
 @doc("A self-paced online course composed of ordered modules")
@@ -858,6 +879,18 @@ model TrainingEnrollmentCompleteRequest {
   awardCredit: boolean;
 }
 
+@doc("Request body for attaching offline payment proof to a paid training enrollment (TC-DEC-01 proof-of-payment).")
+model TrainingPaymentProofRequest {
+  @doc("Storage key of the uploaded proof document")
+  proofStorageKey: string;
+
+  @doc("Original file name of the uploaded proof")
+  proofFileName?: string;
+
+  @doc("MIME type of the uploaded proof")
+  proofMimeType?: string;
+}
+
 @doc("Query parameters for enrollment search")
 model TrainingEnrollmentSearchParams {
   ...PaginationQuery;
@@ -1388,7 +1421,7 @@ namespace Association.Operations.Training {
       | ApiNotFoundResponse
       | ApiConflictResponse;
 
-    @doc("Check in a participant at a training session.")
+    @doc("Check in a participant at a training session. When personId is supplied the officer marks that enrolled member present, which completes their enrollment and awards CE credit; without it the caller checks in their own enrollment.")
     @operationId("checkInCustomTraining")
     @post
     @route("/{trainingId}/check-in")
@@ -1397,6 +1430,42 @@ namespace Association.Operations.Training {
     @extension("x-audit", #{ action: "update", resourceType: "training-enrollment" })
     checkInCustomTraining(
       @path trainingId: string,
+      @query organizationId: string,
+      @doc("Enrolled member to mark present. Officer marks this person attended; their credit is awarded to them.")
+      @query personId?: string
+    ): ApiOkResponse<TrainingEnrollment>
+      | ApiBadRequestResponse
+      | ApiUnauthorizedResponse
+      | ApiForbiddenResponse
+      | ApiNotFoundResponse
+      | ApiConflictResponse;
+
+    @doc("Submit offline payment proof for the authenticated member's payment_pending training enrollment (TC-DEC-01 proof-of-payment). Stores the proof for officer review; does not by itself unlock the enrollment.")
+    @operationId("submitTrainingPaymentProof")
+    @post
+    @route("/enrollments/{enrollmentId}/payment-proof")
+    @extension("x-security-required-roles", #["association:member"])
+    @extension("x-audit", #{ action: "update", resourceType: "training-enrollment" })
+    submitTrainingPaymentProof(
+      @path enrollmentId: string,
+      @query organizationId: string,
+      @body body: TrainingPaymentProofRequest
+    ): ApiOkResponse<TrainingEnrollment>
+      | ApiBadRequestResponse
+      | ApiUnauthorizedResponse
+      | ApiForbiddenResponse
+      | ApiNotFoundResponse
+      | ApiConflictResponse;
+
+    @doc("Officer confirms offline payment for a payment_pending training enrollment, moving it to enrolled (TC-DEC-01 proof-of-payment).")
+    @operationId("confirmTrainingPayment")
+    @post
+    @route("/enrollments/{enrollmentId}/confirm-payment")
+    @extension("x-security-required-roles", #["association:admin", "association:staff"])
+    @extension("x-require-position", #["Society Officer", "President"])
+    @extension("x-audit", #{ action: "update", resourceType: "training-enrollment" })
+    confirmTrainingPayment(
+      @path enrollmentId: string,
       @query organizationId: string
     ): ApiOkResponse<TrainingEnrollment>
       | ApiBadRequestResponse

@@ -33,18 +33,22 @@ status < 300
 
 
 # ── 2. Update self via /me ────────────────────────────────────
+# FIX-005 (G-05): the contract field `phone` must round-trip into
+# contactInfo.phone — it used to be silently dropped on a 200 OK.
 
 PATCH {{api}}/persons/me
 Origin: {{origin}}
 x-csrf-token: {{csrf_token}}
 Content-Type: application/json
 {
-  "firstName": "ExtUpdated"
+  "firstName": "ExtUpdated",
+  "phone": "+639170000000"
 }
 HTTP *
 [Asserts]
 status >= 200
 status < 300
+jsonpath "$.contactInfo.phone" == "+639170000000"
 
 
 # ── 3. Credit summary ────────────────────────────────────────
@@ -140,19 +144,34 @@ status < 300
 
 
 # ── 11. Update privacy settings ─────────────────────────────
+# FIX-001 (G-01): the contract field is `orgId` (not `organizationId`).
+# The seeded caller is an active member of {{org_id}}, so this must persist
+# and return 2xx — NOT the old fake-green `status < 500` that passed on 400.
 
 PATCH {{api}}/persons/me/privacy
 Origin: {{origin}}
 x-csrf-token: {{csrf_token}}
 Content-Type: application/json
 {
-  "organizationId": "{{org_id}}",
-  "profileVisibility": "members"
+  "orgId": "{{org_id}}",
+  "photoVisible": false,
+  "emailVisible": true
 }
 HTTP *
 [Asserts]
 status >= 200
-status < 500
+status < 300
+jsonpath "$.photoVisible" == false
+jsonpath "$.emailVisible" == true
+
+
+# ── 11b. Read back privacy settings — the flipped flags persisted ──
+
+GET {{api}}/persons/me/privacy?orgId={{org_id}}
+HTTP 200
+[Asserts]
+jsonpath "$.photoVisible" == false
+jsonpath "$.emailVisible" == true
 
 
 # ── 12. Check officer role for org ───────────────────────────

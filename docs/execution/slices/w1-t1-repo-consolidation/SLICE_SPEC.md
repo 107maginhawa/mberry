@@ -2,7 +2,6 @@
 slice: w1-t1-repo-consolidation
 phase: wave1-financial
 priority: P1
-agent_skills: [oli-execution-gate]
 ---
 
 # T1: Audit and Deprecate Legacy DuesRepository

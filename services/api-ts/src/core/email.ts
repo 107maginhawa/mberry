@@ -15,6 +15,7 @@ import type {
   EmailTemplateEntry,
   EmailConfig,
 } from '@/core/email-types';
+import { BusinessLogicError } from '@/core/errors';
 import nodemailer from 'nodemailer';
 import type { Transporter } from 'nodemailer';
 import postmark from 'postmark';
@@ -264,10 +265,35 @@ export interface EmailQueueRepo {
 }
 
 /**
+ * Suppression reasons recognised by the send pipeline.
+ * Mirrors `suppression_reason` pgEnum (suppression.schema.ts).
+ */
+export type EmailSuppressionReason = 'hard_bounce' | 'unsubscribe' | 'complaint' | 'manual';
+
+/**
+ * Suppression reasons that block delivery even for transactional mail.
+ * `unsubscribe` is intentionally NOT here — transactional mail (dues invoices,
+ * receipts, security notices) overrides a marketing unsubscribe (BR-57). A
+ * `manual` admin suppression is treated as hard (an admin deliberately blocked
+ * the address) and is never overridden.
+ */
+const TRANSACTIONAL_HARD_SUPPRESSION_REASONS: readonly EmailSuppressionReason[] = [
+  'hard_bounce',
+  'complaint',
+  'manual',
+];
+
+/**
  * Suppression repo contract — subset used by the email service.
  */
 export interface EmailSuppressionRepo {
   isSuppressed(email: string, organizationId: string): Promise<boolean>;
+  /**
+   * Reason-aware lookup (BR-57): returns the suppression reason or null.
+   * Optional for back-compat with stubs/impls that predate BR-57; when absent
+   * the guard falls back to the boolean `isSuppressed` (all reasons block).
+   */
+  getSuppressionReason?(email: string, organizationId: string): Promise<EmailSuppressionReason | null>;
 }
 
 /**
@@ -449,8 +475,37 @@ class EmailServiceImpl implements EmailService {
     if (!request.templateTags || request.templateTags.length === 0) {
       throw new Error('Template tags are required');
     }
-    
-    // Queue the email - template resolution and validation will happen during processing
+
+    // FIX-008 (BR-53): reject at enqueue time if no ACTIVE template matches the
+    // requested tags. Previously this was deferred to processing, turning a
+    // caller error into a silent failed queue item.
+    const template = await this.resolveTemplateByTags(request.templateTags);
+    if (!template) {
+      throw new BusinessLogicError(
+        `No active email template found for tags: ${request.templateTags.join(', ')}`,
+        'TEMPLATE_INACTIVE',
+      );
+    }
+
+    // FIX-008 (BR-58): reject at enqueue time if any required template variable
+    // is missing, preventing later render failures. A variable with a default
+    // value is not required; an empty string counts as missing.
+    const provided = request.variables ?? {};
+    const missing = (template.variables ?? [])
+      .filter(v => v.required && v.defaultValue === undefined)
+      .map(v => v.id)
+      .filter(id => {
+        const value = provided[id];
+        return value === undefined || value === null || value === '';
+      });
+    if (missing.length > 0) {
+      throw new BusinessLogicError(
+        `Missing required template variables: ${missing.join(', ')}`,
+        'MISSING_REQUIRED_VARIABLES',
+      );
+    }
+
+    // Queue the email - final rendering happens during processing
     return this.queueRepo.queueEmail(request);
   }
   
@@ -496,16 +551,34 @@ class EmailServiceImpl implements EmailService {
       await this.queueRepo.markAsProcessing(email.id);
 
       // -----------------------------------------------------------------------
-      // Guard 1: Suppression check
+      // Guard 1: Suppression check (reason-aware — BR-57)
+      //
+      // Transactional mail overrides a marketing `unsubscribe` suppression so an
+      // unsubscribed member still receives dues invoices, receipts, and security
+      // notices. It is NEVER allowed past a deliverability/CAN-SPAM suppression
+      // (`hard_bounce`/`complaint`) or a deliberate admin `manual` block. Bulk
+      // mail is blocked by any suppression reason.
       // -----------------------------------------------------------------------
-      const suppressed = await this.suppressionRepo.isSuppressed(email.recipientEmail, email.organizationId);
-      if (suppressed) {
-        await this.queueRepo.markAsFailed(email.id, 'Recipient is suppressed', email.attempts);
+      const suppression = await this.getSuppressionStatus(email.recipientEmail, email.organizationId);
+      if (suppression.suppressed) {
+        const isTransactional = email.emailCategory === 'transactional';
+        const overridable =
+          suppression.reason !== null &&
+          !(TRANSACTIONAL_HARD_SUPPRESSION_REASONS as readonly string[]).includes(suppression.reason);
+
+        if (!(isTransactional && overridable)) {
+          await this.queueRepo.markAsFailed(email.id, 'Recipient is suppressed', email.attempts);
+          this.logger?.info(
+            { emailId: email.id, recipient: email.recipientEmail, reason: suppression.reason },
+            'Email skipped: recipient suppressed',
+          );
+          return;
+        }
+
         this.logger?.info(
-          { emailId: email.id, recipient: email.recipientEmail },
-          'Email skipped: recipient suppressed',
+          { emailId: email.id, reason: suppression.reason },
+          'Transactional email overriding marketing suppression (BR-57)',
         );
-        return;
       }
 
       // -----------------------------------------------------------------------
@@ -613,6 +686,24 @@ class EmailServiceImpl implements EmailService {
   }
   
   
+  /**
+   * Reason-aware suppression status for Guard 1 (BR-57).
+   * Prefers the reason-returning lookup; falls back to the boolean `isSuppressed`
+   * for suppression repos that don't yet implement `getSuppressionReason`
+   * (reason then unknown — treated as a hard block, preserving prior behaviour).
+   */
+  private async getSuppressionStatus(
+    email: string,
+    organizationId: string,
+  ): Promise<{ suppressed: boolean; reason: string | null }> {
+    if (typeof this.suppressionRepo.getSuppressionReason === 'function') {
+      const reason = await this.suppressionRepo.getSuppressionReason(email, organizationId);
+      return { suppressed: reason !== null, reason };
+    }
+    const suppressed = await this.suppressionRepo.isSuppressed(email, organizationId);
+    return { suppressed, reason: null };
+  }
+
   /**
    * Resolve template by tags
    */

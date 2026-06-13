@@ -1,8 +1,9 @@
 /**
  * Tests for registerPersonJobs
  *
- * The person module registers one cron job:
+ * The person module registers two cron jobs:
  * - person.deletionProcessor (daily at midnight)
+ * - person.dataExportPurge (daily at 03:00) — FIX-009
  */
 
 import { describe, test, expect, mock } from 'bun:test';
@@ -46,10 +47,23 @@ describe('registerPersonJobs', () => {
 
     registerPersonJobs(scheduler);
 
-    expect(registerCron).toHaveBeenCalledTimes(1);
+    expect(registerCron).toHaveBeenCalledTimes(2);
     const [name, schedule] = registerCron.mock.calls[0];
     expect(name).toBe('person.deletionProcessor');
     expect(schedule).toBe('0 0 * * *');
+  });
+
+  // FIX-009: export-payload purge job is registered alongside the deletion processor.
+  test('registers person.dataExportPurge cron job', () => {
+    const registerCron = mock(() => {});
+    const scheduler: JobScheduler = { registerCron } as any;
+
+    registerPersonJobs(scheduler);
+
+    expect(registerCron).toHaveBeenCalledTimes(2);
+    const [name, schedule] = registerCron.mock.calls[1];
+    expect(name).toBe('person.dataExportPurge');
+    expect(schedule).toBe('0 3 * * *');
   });
 
   test('handler is a callable function', () => {

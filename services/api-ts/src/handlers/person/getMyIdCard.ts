@@ -18,7 +18,7 @@ export async function getMyIdCard(ctx: Context): Promise<Response> {
 
   if (!orgId) return ctx.json({ error: 'orgId is required' }, 400);
 
-  const cardData = await getIdCardData(db, personId, orgId);
+  const cardData = await getIdCardData(db, personId, orgId, ctx.get('logger'));
   if (!cardData) throw new NotFoundError('Person not found');
 
   return ctx.json({ data: cardData });

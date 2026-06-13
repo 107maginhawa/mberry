@@ -9,6 +9,8 @@ import type { BillingService } from '@/core/billing';
 import type { DatabaseInstance } from '@/core/database';
 import type { Logger } from 'pino';
 import { settlePayment as defaultSettlePayment } from '@/handlers/association:member/utils/settle-payment';
+import { DuesRepository } from '@/handlers/association:member/repos/dues-payments.repo';
+import { DuesInvoiceRepository } from '@/handlers/association:member/repos/dues.repo';
 
 /**
  * Creates a processPayment callback bound to the given dependencies.
@@ -41,11 +43,20 @@ export function createProcessPayment(
 
     const orgId = metadata['orgId'] ?? metadata['organizationId'];
     const personId = metadata['personId'];
-    const paymentId = metadata['paymentId'] ?? paymentIntentId;
+    // [FIX-001] paymentId MUST be the real DuesPayment row id (a UUID) written
+    // by checkoutPaymentToken. The previous fallback to the Stripe `pi_...`
+    // intent id produced a non-UUID that failed the fund-allocation FK insert
+    // and dead-lettered the webhook — leaving money charged with no ledger row.
+    const paymentId = metadata['paymentId'];
 
     if (!orgId || !personId) {
       throw new Error(
         `Missing required metadata fields: orgId=${orgId}, personId=${personId}`,
+      );
+    }
+    if (!paymentId) {
+      throw new Error(
+        'Missing metadata.paymentId — cannot settle online payment without the ledger row id',
       );
     }
 
@@ -68,17 +79,50 @@ export function createProcessPayment(
       logger.info({ paymentIntentId }, 'Payment intent captured');
     }
 
+    // [FIX-001] Load the pending ledger row so we can settle it, flip its
+    // status, and mark its invoice paid — a COMPLETE financial record.
+    const duesRepo = new DuesRepository(db);
+    const payment = await duesRepo.getPayment(paymentId);
+    if (!payment) {
+      throw new Error(`No DuesPayment row found for metadata.paymentId=${paymentId}`);
+    }
+
     // Settle the payment in our database (fund allocation + membership extension)
     await settle({
       db,
       orgId,
       personId,
       paymentId,
-      amount,
+      amount: amount || payment.amount,
     });
 
+    // [FIX-001] Flip the pending row to completed (so it appears in the ledger,
+    // dashboards, and reports). Idempotent: skip if already completed.
+    if (payment.status !== 'completed' && payment.status !== 'confirmed') {
+      await duesRepo.updatePaymentStatus(paymentId, payment.status, 'completed', {
+        paidAt: new Date(),
+      }, personId);
+    }
+
+    // [FIX-001] Mark the linked invoice paid so the join→pay→active funnel
+    // completes. Non-fatal if the invoice is already paid.
+    if (payment.invoiceId) {
+      try {
+        const invoiceRepo = new DuesInvoiceRepository(db);
+        const invoice = await invoiceRepo.findOneById(payment.invoiceId);
+        if (invoice && invoice.status !== 'paid') {
+          await invoiceRepo.markPaid(payment.invoiceId, invoice.version, paymentId, new Date());
+        }
+      } catch (err) {
+        logger.warn(
+          { paymentId, invoiceId: payment.invoiceId, error: err instanceof Error ? err.message : String(err) },
+          'Online payment settled but invoice mark-paid failed (non-fatal)',
+        );
+      }
+    }
+
     logger.info(
-      { paymentIntentId, orgId, personId, amount },
+      { paymentIntentId, orgId, personId, amount, paymentId },
       'Payment settled successfully',
     );
 

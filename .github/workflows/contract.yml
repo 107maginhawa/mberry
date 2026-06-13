@@ -38,6 +38,15 @@ jobs:
       PORT: 7213
       API_URL: http://localhost:7213
       AUTH_SECRET: contract-test-secret-do-not-use-in-prod
+      # See ci.yml contract job — the suite signs up ad-hoc users and uses the
+      # session immediately; verification must be off (matches local dev .env).
+      AUTH_REQUIRE_EMAIL_VERIFICATION: false
+      # Runner auto-promotes this email to platform_admin; admin-gated flows
+      # (GET /audit/logs cross-org reads) need it. Matches local dev .env.
+      AUTH_ADMIN_EMAILS: admin@contract-tests.local
+      # HMAC secret for one-tap dues payment tokens — getPaymentTokenSecret()
+      # 500s without it (send-link + /pay/:token/validate). Matches local dev .env.
+      PAYMENT_TOKEN_SECRET: contract-test-payment-secret-do-not-use-in-prod
       STORAGE_PROVIDER: minio
       STORAGE_ENDPOINT: http://localhost:9000
       STORAGE_BUCKET: monobase-files
@@ -81,7 +90,7 @@ jobs:
       - name: Install Hurl
         run: |
           curl -fsSL -o /tmp/hurl.deb \
-            https://github.com/Orange-OpenSource/hurl/releases/download/6.0.0/hurl_6.0.0_amd64.deb
+            https://github.com/Orange-OpenSource/hurl/releases/download/8.0.1/hurl_8.0.1_amd64.deb
           sudo dpkg -i /tmp/hurl.deb
 
       - name: Install Schemathesis
@@ -105,15 +114,24 @@ jobs:
           bun dev > /tmp/api.log 2>&1 &
           echo $! > /tmp/api.pid
 
-      - name: Wait for /livez
+      - name: Wait for /readyz
         run: |
+          # /readyz returns 200 only after migrations + storage + jobs scheduler
+          # have all initialized — required before the seed step so it does not
+          # race in-flight migrations.
           for i in {1..60}; do
-            curl -fsS "$API_URL/livez" && exit 0
+            curl -fsS "$API_URL/readyz" && exit 0
             sleep 1
           done
           echo "API never became ready"
           tail -200 /tmp/api.log
           exit 1
+
+      - name: Seed database
+        # The contract scenarios depend on a seeded org + officer
+        # (test@memberry.ph / vicepresident@memberry.ph). TS-impl specific, like
+        # the boot step above.
+        run: cd services/api-ts && bun run db:seed
 
       # ----- Contract checks -----
 
@@ -122,6 +140,11 @@ jobs:
 
       - name: Schemathesis fuzz (shadow)
         continue-on-error: true
+        # Hard cap so the shadow fuzz can never exhaust the job's 15-min budget.
+        # Now that the Hurl step passes (it used to fail fast and skip this), the
+        # fuzz runs to completion and previously timed the whole job out.
+        # continue-on-error swallows a step-level timeout — the job stays green.
+        timeout-minutes: 6
         run: bun run test:contract:fuzz
 
       - name: API logs (always)

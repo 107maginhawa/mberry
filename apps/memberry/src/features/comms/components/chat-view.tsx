@@ -1,4 +1,3 @@
-// oli-execute: error-handled-inline -- chat view; consumed by /messages route.
 import { useEffect, useRef, useState, useCallback } from 'react'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import {
@@ -20,13 +19,19 @@ interface ChatViewProps {
   roomId: string
   myPersonId: string
   roomName?: string
+  /**
+   * Org id (FIX-008): when present, message reads carry `x-org-id` so the
+   * Step-33 getChatMessages cross-org guard is enforced for non-DM rooms.
+   * DM rooms are exempt server-side (PD-2), so this is harmless there.
+   */
+  orgId?: string
 }
 
 /**
  * Main chat area: message list + composer + WebSocket real-time updates.
  * Auto-scrolls on new messages. Shows reconnection banner when WS drops.
  */
-export function ChatView({ roomId, myPersonId, roomName }: ChatViewProps) {
+export function ChatView({ roomId, myPersonId, roomName, orgId }: ChatViewProps) {
   const queryClient = useQueryClient()
   const scrollRef = useRef<HTMLDivElement>(null)
   const [localMessages, setLocalMessages] = useState<ChatMessage[]>([])
@@ -41,7 +46,11 @@ export function ChatView({ roomId, myPersonId, roomName }: ChatViewProps) {
   }, [roomId, markRead])
 
   const messagesQuery = useQuery({
-    ...getChatMessagesOptions({ path: { room: roomId }, query: { limit: 50 } }),
+    ...getChatMessagesOptions({
+      path: { room: roomId },
+      query: { limit: 50 },
+      ...(orgId ? { headers: { 'x-org-id': orgId } } : {}),
+    }),
     staleTime: 5_000,
   })
 
@@ -53,21 +62,25 @@ export function ChatView({ roomId, myPersonId, roomName }: ChatViewProps) {
     }
   }, [messagesQuery.data])
 
-  // Handle incoming WebSocket messages
+  // Handle incoming WebSocket messages.
+  // Server uses the { event, payload } envelope (see core/ws.ts publishToChannel).
   const handleWsMessage = useCallback(
     (msg: unknown) => {
-      const event = msg as { type?: string; data?: ChatMessage }
-      if (event.type === 'chat.message' && event.data) {
+      const frame = msg as { event?: string; payload?: unknown }
+      if (frame.event === 'chat.message' && frame.payload) {
+        // payload is the full persisted ChatMessage object.
+        const incoming = frame.payload as ChatMessage
         // Optimistic append — avoid duplicates by checking ID
         setLocalMessages((prev) => {
-          if (prev.some((m) => m.id === event.data!.id)) return prev
-          return [...prev, event.data!]
+          if (prev.some((m) => m.id === incoming.id)) return prev
+          return [...prev, incoming]
         })
       }
-      if (event.type === 'chat.typing') {
-        const typingEvent = msg as { type: string; senderId?: string; senderName?: string }
-        const name = typingEvent.senderName ?? typingEvent.senderId
-        if (name && typingEvent.senderId !== myPersonId) {
+      if (frame.event === 'chat.typing') {
+        // Server typing payload: { from, isTyping }.
+        const typing = (frame.payload ?? {}) as { from?: string; isTyping?: boolean }
+        const name = typing.from
+        if (name && typing.from !== myPersonId && typing.isTyping !== false) {
           setTypingUsers((prev) => {
             const next = new Map(prev)
             // Clear after 3s of no typing events from this user
@@ -102,9 +115,13 @@ export function ChatView({ roomId, myPersonId, roomName }: ChatViewProps) {
 
   const handleMessageSent = useCallback(() => {
     queryClient.invalidateQueries({
-      queryKey: getChatMessagesQueryKey({ path: { room: roomId }, query: { limit: 50 } }),
+      queryKey: getChatMessagesQueryKey({
+        path: { room: roomId },
+        query: { limit: 50 },
+        ...(orgId ? { headers: { 'x-org-id': orgId } } : {}),
+      }),
     })
-  }, [queryClient, roomId])
+  }, [queryClient, roomId, orgId])
 
   return (
     <div className="flex h-full">
@@ -175,6 +192,7 @@ export function ChatView({ roomId, myPersonId, roomName }: ChatViewProps) {
         roomId={roomId}
         parentMessage={threadMessage}
         myPersonId={myPersonId}
+        orgId={orgId}
         onClose={() => setThreadMessage(null)}
       />
     )}

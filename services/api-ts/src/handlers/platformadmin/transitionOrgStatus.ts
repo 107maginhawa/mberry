@@ -4,6 +4,7 @@ import type { TransitionOrgStatusBody, TransitionOrgStatusParams } from '@/gener
 import { NotFoundError, BusinessLogicError } from '@/core/errors';
 import { OrganizationRepository } from './repos/platform-admin.repo';
 import { domainEvents } from '@/core/domain-events';
+import { requireAdminTier, SUPER_ONLY } from '@/core/auth/admin-tier';
 
 // [EM-M03-c7d8e9f0] trial -> cancelled (trial expired, no conversion) is a
 // spec-declared transition (M3-R10) — was missing, blocking the trial-expiry flow.
@@ -25,6 +26,10 @@ export async function transitionOrgStatus(
 ): Promise<Response> {
   const session = ctx.get('session');
   if (!session) return ctx.json({ error: 'Unauthorized' }, 401);
+
+  // FIX-008 (G1) / Q1: transitioning org status is a super-only mutation.
+  const denied = requireAdminTier(ctx, SUPER_ONLY);
+  if (denied) return denied;
 
   const { organizationId } = ctx.req.valid('param');
   const body = ctx.req.valid('json');

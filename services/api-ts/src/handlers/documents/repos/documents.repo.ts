@@ -3,7 +3,7 @@
  * Covers documents, versions, tags, and access logs.
  */
 
-import { eq, and, or, ilike, desc, type SQL } from 'drizzle-orm';
+import { eq, and, or, ilike, desc, sql, type SQL } from 'drizzle-orm';
 import type { DatabaseInstance } from '@/core/database';
 import { DatabaseRepository } from '@/core/database.repo';
 import {
@@ -32,6 +32,7 @@ export interface DocumentFilters {
   accessLevel?: string;
   category?: string;
   status?: string;
+  tag?: string;
   q?: string;
 }
 
@@ -71,6 +72,12 @@ export class DocumentRepository extends DatabaseRepository<
 
     if (filters.status) {
       conditions.push(eq(documents.status, filters.status as Document['status']));
+    }
+
+    if (filters.tag) {
+      // tags is a jsonb text[] column; match documents whose tags array
+      // contains the requested tag (Postgres jsonb containment).
+      conditions.push(sql`${documents.tags} @> ${JSON.stringify([filters.tag])}::jsonb`);
     }
 
     if (filters.q) {

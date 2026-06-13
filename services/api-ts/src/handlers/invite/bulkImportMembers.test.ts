@@ -8,8 +8,16 @@ import { ForbiddenError, ValidationError } from '@/core/errors';
 const ORG = '22222222-2222-2222-2222-222222222222';
 
 function asOfficer() {
+  // FIX-006: roster import is restricted to President/Secretary — the default
+  // authorized officer used by happy-path tests now holds a permitted title.
   return stubRepo(OfficerTermRepository, {
-    findActiveByPersonAndOrg: async () => [{ id: 't1', organizationId: ORG }],
+    findActiveByPersonAndOrg: async () => [{ id: 't1', organizationId: ORG, positionTitle: 'President' }],
+  });
+}
+
+function asOfficerTitled(positionTitle: string) {
+  return stubRepo(OfficerTermRepository, {
+    findActiveByPersonAndOrg: async () => [{ id: 't1', organizationId: ORG, positionTitle }],
   });
 }
 
@@ -98,5 +106,36 @@ describe('bulkImportMembers', () => {
     mocks.push(stubRepo(OfficerTermRepository, { findActiveByPersonAndOrg: async () => [] }));
     const ctx = makeCtx({ _body: { orgId: ORG, csvContent: 'email\na@example.com', mode: 'preview' } });
     await expect(bulkImportMembers(ctx)).rejects.toBeInstanceOf(ForbiddenError);
+  });
+
+  // ── FIX-006: title + 2FA gate (m01 §6 — President/Secretary only) ──────────
+
+  test('403 when caller holds a non-import officer title (e.g. Treasurer)', async () => {
+    mocks.push(asOfficerTitled('Treasurer'));
+    const ctx = makeCtx({ _body: { orgId: ORG, csvContent: 'email\na@example.com', mode: 'preview' } });
+    await expect(bulkImportMembers(ctx)).rejects.toBeInstanceOf(ForbiddenError);
+  });
+
+  test('Secretary is permitted to import roster', async () => {
+    mocks.push(asOfficerTitled('Secretary'));
+    mocks.push(stubRepo(InviteRepository, { findPendingByEmail: async () => undefined }));
+    const ctx = makeCtx({ _body: { orgId: ORG, csvContent: 'email\na@example.com', mode: 'preview' } });
+    const res = await bulkImportMembers(ctx);
+    expect(res.body.mode).toBe('preview');
+  });
+
+  test('403 in production when a privileged importer lacks 2FA', async () => {
+    const old = process.env['NODE_ENV'];
+    process.env['NODE_ENV'] = 'production';
+    try {
+      mocks.push(asOfficerTitled('President'));
+      const ctx = makeCtx({
+        user: { id: 'user-1', role: 'user', twoFactorEnabled: false },
+        _body: { orgId: ORG, csvContent: 'email\na@example.com', mode: 'preview' },
+      });
+      await expect(bulkImportMembers(ctx)).rejects.toBeInstanceOf(ForbiddenError);
+    } finally {
+      process.env['NODE_ENV'] = old;
+    }
   });
 });

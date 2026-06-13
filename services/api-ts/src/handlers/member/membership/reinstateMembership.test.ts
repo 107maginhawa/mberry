@@ -5,35 +5,33 @@ import { MembershipRepository } from '@/handlers/association:member/repos/member
 import { NotFoundError, UnauthorizedError, BusinessLogicError } from '@/core/errors';
 
 // ─── Fixtures ───────────────────────────────────────────
+//
+// FIX-008 / decision #1: reinstate is LAPSED-ONLY.
+//   - REMOVED / RESIGNED / DECEASED / EXPELLED are terminal + irreversible
+//     (re-entry goes through re-application, not reinstate).
+//   - SUSPENDED is restored via the dedicated unsuspend op, not reinstate.
+//   - LAPSED is the only status reinstate accepts; it restores active standing
+//     by extending the dues expiry.
 
-const FUTURE_EXPIRY = new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
+const OLD_LAPSED_EXPIRY = '2020-01-01'; // far past grace → computes 'lapsed'
 
-const removedMembership = {
+// A lapsed membership: no terminal/suspend flags, expiry long past grace.
+const lapsedMembership = {
   id: 'mem-1',
-  organizationId: 'org-1',
+  // Match the makeCtx() default org context so the FIX-003 cross-org guard
+  // (record org must equal caller org) is satisfied for these same-org tests.
+  organizationId: 'tenant-1',
   personId: 'person-1',
   tierId: 'tier-1',
-  status: 'removed',
-  removedAt: new Date('2025-06-01'),
-  removalReason: 'Non-payment',
-  startDate: '2025-01-01',
-  duesExpiryDate: FUTURE_EXPIRY,
-  suspendedAt: null,
-  dateOfDeath: null,
-  expelledAt: null,
-  resignedAt: null,
-  gracePeriodDays: 30,
-};
-
-const suspendedMembership = {
-  ...removedMembership,
-  status: 'suspended',
+  status: 'lapsed',
   removedAt: null,
   removalReason: null,
-  suspendedAt: new Date('2025-05-01'),
+  suspendedAt: null,
+  resignedAt: null,
   dateOfDeath: null,
   expelledAt: null,
-  resignedAt: null,
+  startDate: '2018-01-01',
+  duesExpiryDate: OLD_LAPSED_EXPIRY,
   gracePeriodDays: 30,
 };
 
@@ -46,190 +44,110 @@ describe('reinstateMembership', () => {
     if (mocks) Object.values(mocks).forEach((m) => m.mockRestore());
   });
 
-  test('reinstates a removed membership and returns 200', async () => {
+  // ─── The one valid path: lapsed → active ───
+
+  test('reinstates a lapsed membership and returns 200 with status active', async () => {
     mocks = stubRepo(MembershipRepository, {
-      findOneById: async () => removedMembership,
-      updateOneById: async (_id: string, data: any) => ({ ...removedMembership, ...data }),
+      findOneById: async () => lapsedMembership,
+      updateOneById: async (_id: string, data: any) => ({ ...lapsedMembership, ...data }),
     });
 
-    const ctx = makeCtx({
-      _params: { membershipId: 'mem-1' },
-    });
+    const ctx = makeCtx({ _params: { membershipId: 'mem-1' } });
 
     const response = await reinstateMembership(ctx);
     expect(response.status).toBe(200);
     expect(response.body.status).toBe('active');
   });
 
-  test('reinstates a suspended membership and returns 200', async () => {
+  test('reinstatement pushes duesExpiryDate into the future (restores standing)', async () => {
+    let captured: any = null;
     mocks = stubRepo(MembershipRepository, {
-      findOneById: async () => suspendedMembership,
-      updateOneById: async (_id: string, data: any) => ({ ...suspendedMembership, ...data }),
+      findOneById: async () => lapsedMembership,
+      updateOneById: async (_id: string, data: any) => { captured = data; return { ...lapsedMembership, ...data }; },
     });
 
-    const ctx = makeCtx({
-      _params: { membershipId: 'mem-1' },
-    });
-
+    const ctx = makeCtx({ _params: { membershipId: 'mem-1' } });
     const response = await reinstateMembership(ctx);
+
     expect(response.status).toBe(200);
-    expect(response.body.status).toBe('active');
+    // The new expiry (written via persistWithComputedStatus or the response)
+    // must be today or later so the computed status is 'active'.
+    const newExpiry = response.body.duesExpiryDate ?? captured?.duesExpiryDate;
+    expect(newExpiry).toBeDefined();
+    const today = new Date().toISOString().split('T')[0];
+    expect(newExpiry >= today).toBe(true);
   });
+
+  // FIX-006 / G-08: reinstatement writes a status-history audit row
+  test('writes a membership_status_history row on reinstate (FIX-006)', async () => {
+    mocks = stubRepo(MembershipRepository, {
+      findOneById: async () => lapsedMembership,
+      updateOneById: async (_id: string, data: any) => ({ ...lapsedMembership, ...data }),
+    });
+
+    const ctx = makeCtx({ _params: { membershipId: 'mem-1' } });
+    await reinstateMembership(ctx);
+
+    const inserts = (ctx.get('database') as any)._inserted as any[];
+    expect(inserts.length).toBeGreaterThanOrEqual(1);
+    const row = inserts[inserts.length - 1];
+    expect(row.membershipId).toBe('mem-1');
+    expect(row.personId).toBe('person-1');
+    expect(row.fromStatus).toBe('lapsed');
+    expect(row.toStatus).toBe('active');
+    expect(row.changedBy).toBe('user-1');
+  });
+
+  // ─── Error guards ───
 
   test('throws NotFoundError for non-existent membership', async () => {
-    mocks = stubRepo(MembershipRepository, {
-      findOneById: async () => undefined,
-    });
-
-    const ctx = makeCtx({
-      _params: { membershipId: 'nonexistent' },
-    });
-
+    mocks = stubRepo(MembershipRepository, { findOneById: async () => undefined });
+    const ctx = makeCtx({ _params: { membershipId: 'nonexistent' } });
     await expect(reinstateMembership(ctx)).rejects.toBeInstanceOf(NotFoundError);
   });
 
   test('throws UnauthorizedError when no session', async () => {
-    mocks = stubRepo(MembershipRepository, {
-      findOneById: async () => removedMembership,
-    });
-
-    const ctx = makeCtx({
-      user: null,
-      session: null,
-      _params: { membershipId: 'mem-1' },
-    });
-
+    mocks = stubRepo(MembershipRepository, { findOneById: async () => lapsedMembership });
+    const ctx = makeCtx({ user: null, session: null, _params: { membershipId: 'mem-1' } });
     await expect(reinstateMembership(ctx)).rejects.toBeInstanceOf(UnauthorizedError);
-  });
-
-  test('throws BusinessLogicError when membership is already active', async () => {
-    const activeMembership = { ...removedMembership, status: 'active', removedAt: null, removalReason: null, suspendedAt: null };
-    mocks = stubRepo(MembershipRepository, {
-      findOneById: async () => activeMembership,
-    });
-
-    const ctx = makeCtx({
-      _params: { membershipId: 'mem-1' },
-    });
-
-    await expect(reinstateMembership(ctx)).rejects.toBeInstanceOf(BusinessLogicError);
-  });
-
-  test('throws BusinessLogicError when membership is in grace status', async () => {
-    // gracePeriod: expiry in recent past (within 30-day grace window), no flags set
-    const yesterday = new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
-    mocks = stubRepo(MembershipRepository, {
-      findOneById: async () => ({ ...removedMembership, removedAt: null, duesExpiryDate: yesterday }),
-    });
-
-    const ctx = makeCtx({
-      _params: { membershipId: 'mem-1' },
-    });
-
-    await expect(reinstateMembership(ctx)).rejects.toBeInstanceOf(BusinessLogicError);
-  });
-
-  test('throws BusinessLogicError when membership is lapsed', async () => {
-    mocks = stubRepo(MembershipRepository, {
-      findOneById: async () => ({ ...removedMembership, removedAt: null, duesExpiryDate: '2020-01-01' }),
-    });
-
-    const ctx = makeCtx({
-      _params: { membershipId: 'mem-1' },
-    });
-
-    await expect(reinstateMembership(ctx)).rejects.toBeInstanceOf(BusinessLogicError);
-  });
-
-  test('clears removedAt and removalReason on reinstatement', async () => {
-    let capturedRemovalReason: any = 'NOT_CALLED';
-    mocks = stubRepo(MembershipRepository, {
-      findOneById: async () => removedMembership,
-      updateOneById: async (_id: string, data: any) => {
-        // Handler calls updateOneById to clear removalReason after persistWithComputedStatus
-        capturedRemovalReason = data.removalReason;
-        return { ...removedMembership, ...data };
-      },
-    });
-
-    const ctx = makeCtx({
-      _params: { membershipId: 'mem-1' },
-    });
-
-    const response = await reinstateMembership(ctx);
-    // persistWithComputedStatus sets suspendedAt/removedAt to null + status=active in DB
-    expect(response.body.status).toBe('active');
-    // updateOneById also called to clear removalReason
-    expect(capturedRemovalReason).toBeNull();
   });
 
   test('scopes findOneById call to membershipId from route param', async () => {
     let capturedId: string | null = null;
     mocks = stubRepo(MembershipRepository, {
-      findOneById: async (id: string) => { capturedId = id; return removedMembership; },
-      updateOneById: async (_id: string, data: any) => ({ ...removedMembership, ...data }),
+      findOneById: async (id: string) => { capturedId = id; return lapsedMembership; },
+      updateOneById: async (_id: string, data: any) => ({ ...lapsedMembership, ...data }),
     });
-
-    const ctx = makeCtx({
-      _params: { membershipId: 'mem-77' },
-    });
-
+    const ctx = makeCtx({ _params: { membershipId: 'mem-77' } });
     await reinstateMembership(ctx);
     expect(capturedId).toBe('mem-77');
   });
 
-  // ─── [BR] Valid reinstatement paths ───────────────────
+  // ─── [BR] Non-reinstatable statuses (terminal, suspended, in-standing) ───
+  //
+  // Each must reject. Terminal states are irreversible; suspended uses
+  // unsuspend; active/grace/pending are already in standing.
 
-  describe('valid reinstatement statuses', () => {
-    // Flag-field overrides that produce each reinstatable computed status
-    const reinstatableFixtures: Array<[string, Record<string, any>]> = [
-      ['removed', { removedAt: new Date('2025-06-01'), suspendedAt: null }],
-      ['suspended', { suspendedAt: new Date('2025-05-01'), removedAt: null }],
+  describe('rejects every non-lapsed status', () => {
+    const future = new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
+    const recentPast = new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
+
+    const nonReinstatable: Array<[string, Record<string, any>]> = [
+      ['removed (terminal)', { removedAt: new Date('2025-06-01'), status: 'removed' }],
+      ['resigned (terminal)', { resignedAt: new Date('2025-06-01'), status: 'resigned' }],
+      ['deceased (terminal)', { dateOfDeath: '2025-06-01', status: 'deceased' }],
+      ['suspended (use unsuspend)', { suspendedAt: new Date('2025-05-01'), duesExpiryDate: future, status: 'suspended' }],
+      ['active (in standing)', { duesExpiryDate: future, status: 'active' }],
+      ['gracePeriod (in standing)', { duesExpiryDate: recentPast, status: 'gracePeriod' }],
+      ['pendingPayment', { isPendingPayment: true, duesExpiryDate: null, status: 'pendingPayment' }],
     ];
 
-    for (const [status, flags] of reinstatableFixtures) {
-      test(`${status} → active succeeds`, async () => {
-        const memberWithStatus = { ...removedMembership, ...flags };
+    for (const [label, flags] of nonReinstatable) {
+      test(`throws BusinessLogicError for ${label}`, async () => {
         mocks = stubRepo(MembershipRepository, {
-          findOneById: async () => memberWithStatus,
-          updateOneById: async (_id: string, data: any) => ({ ...memberWithStatus, ...data }),
+          findOneById: async () => ({ ...lapsedMembership, ...flags }),
         });
-
-        const ctx = makeCtx({
-          _params: { membershipId: 'mem-1' },
-        });
-
-        const response = await reinstateMembership(ctx);
-        expect(response.status).toBe(200);
-        // persistWithComputedStatus writes status to DB directly; verify via response body
-        expect(response.body.status).toBe('active');
-      });
-    }
-  });
-
-  // ─── [BR] Invalid reinstatement statuses ─────────────
-
-  describe('invalid reinstatement statuses', () => {
-    const yesterday = new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
-    // Flag-field overrides that produce each non-reinstatable computed status
-    const nonReinstatableFixtures: Array<[string, Record<string, any>]> = [
-      ['active', { removedAt: null, suspendedAt: null, duesExpiryDate: '2099-01-01' }],
-      ['pending', { removedAt: null, suspendedAt: null, isPendingPayment: true, duesExpiryDate: null }],
-      ['grace', { removedAt: null, suspendedAt: null, duesExpiryDate: yesterday }],
-      ['lapsed', { removedAt: null, suspendedAt: null, duesExpiryDate: '2020-01-01' }],
-      ['pendingPayment', { removedAt: null, suspendedAt: null, isPendingPayment: true, duesExpiryDate: null }],
-    ];
-
-    for (const [status, flags] of nonReinstatableFixtures) {
-      test(`throws BusinessLogicError for status '${status}'`, async () => {
-        mocks = stubRepo(MembershipRepository, {
-          findOneById: async () => ({ ...removedMembership, ...flags }),
-        });
-
-        const ctx = makeCtx({
-          _params: { membershipId: 'mem-1' },
-        });
-
+        const ctx = makeCtx({ _params: { membershipId: 'mem-1' } });
         await expect(reinstateMembership(ctx)).rejects.toBeInstanceOf(BusinessLogicError);
       });
     }

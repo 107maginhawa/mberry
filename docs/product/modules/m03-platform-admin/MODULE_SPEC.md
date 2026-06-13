@@ -33,7 +33,7 @@ Give the platform operations team full control over the multi-tenant platform: a
 - Org health scoring
 - User impersonation (read-only, 30-min, logged)
 - Support ticket workflow with SLA
-- Multi-admin role management (super, admin, support)
+- Multi-admin role management (super, support, analyst)
 - Platform-wide announcements
 - Org lifecycle management (Trial -> Active -> Suspended -> Cancelled)
 - Member account merge
@@ -150,7 +150,7 @@ Actor: Super Admin
 Preconditions: Admin authenticated with MFA
 Steps:
 1. Opens /admin/team. List of all platform admins with roles.
-2. Invite new admin: email, role (super/admin/support).
+2. Invite new admin: email, role (super/support/analyst).
 3. Modify existing admin: change role, deactivate.
 4. Remove admin: confirmation required.
 
@@ -182,20 +182,27 @@ Postconditions: Admin team updated. New admins receive email invitation.
 
 ## 6. Permissions
 
+> **Role taxonomy (Q1, AHA FIX-005/FIX-008):** the canonical admin tiers are the
+> code enum `super | support | analyst` (`platformadmin/repos/platform-admin.schema.ts`
+> `adminRoleEnum`). The former `admin` mid-tier is retired. Per Q8, `analyst` is
+> **read-only** (analytics + all reads, no mutation, no impersonation). Enforced by
+> `requireAdminTier` (`core/auth/admin-tier.ts`).
+
 | Action | Allowed Roles | Restricted Roles | Notes |
 |--------|--------------|-----------------|-------|
-| List/get admins | super, admin, support | -- | PA |
-| Create/invite admin | super | admin, support | PA |
-| Remove admin | super | admin, support | PA, subject to M3-R6 |
-| Create org | super, admin | support | PA |
-| Transition org status | super, admin | support | PA |
-| Create/update association | super, admin | support | PA |
-| Delete association | super | admin, support | PA |
-| Feature flags | super, admin | support | PA |
-| Impersonation | super, support (limited) | admin | PA, MFA required |
-| View analytics | super, admin, support | -- | PA |
-| Manage pricing | super | admin, support | PA |
-| Process data breach | super, admin | support | PA |
+| List/get admins | super, support, analyst | -- | PA (read) |
+| Create/invite admin | super | support, analyst | PA |
+| Remove admin | super | support, analyst | PA, subject to M3-R6 |
+| Create org | super | support, analyst | PA |
+| Transition org status | super | support, analyst | PA |
+| Create/update association | super | support, analyst | PA |
+| Delete association | super | support, analyst | PA |
+| Feature flags | super | support, analyst | PA |
+| Impersonation | super, support | analyst | PA, MFA required |
+| View analytics | super, support, analyst | -- | PA (read) |
+| Manage pricing | super | support, analyst | PA |
+| Process data breach | super, support | analyst | PA |
+| Support tickets (status/comment) | super, support | analyst | PA, analyst read-only |
 
 ## 7. Data Requirements
 

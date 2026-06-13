@@ -72,7 +72,16 @@ describe('registerEmailJobs', () => {
     const registerCron = mock(() => {});
     const scheduler: JobScheduler = { registerInterval, registerCron } as any;
 
-    registerEmailJobs(scheduler, makeEmailService());
+    // The dev/contract .env sets EMAIL_PROCESSOR_INTERVAL_MS=1000 (tighter loop
+    // for auth-email latency); clear it here so this unit test verifies the
+    // documented 30s default deterministically, regardless of ambient env.
+    const prevInterval = process.env['EMAIL_PROCESSOR_INTERVAL_MS'];
+    delete process.env['EMAIL_PROCESSOR_INTERVAL_MS'];
+    try {
+      registerEmailJobs(scheduler, makeEmailService());
+    } finally {
+      if (prevInterval !== undefined) process.env['EMAIL_PROCESSOR_INTERVAL_MS'] = prevInterval;
+    }
 
     expect(registerInterval).toHaveBeenCalledTimes(1);
     const [name, interval] = registerInterval.mock.calls[0];

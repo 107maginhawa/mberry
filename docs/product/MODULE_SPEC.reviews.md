@@ -22,7 +22,7 @@ Captures Net Promoter Score (NPS) feedback from one person about a flexible "con
 | Handler file | Verb | Auth required | Audit action | Notes |
 |---|---|---|---|---|
 | `createReview.ts` | POST `/reviews/` | `user` | `review.create` | Enforces `(context, reviewer, reviewType)` uniqueness; rejects duplicates with ConflictError. |
-| `listReviews.ts` | GET `/reviews/` | `user` | (read) | Role-based filtering: callers see reviews they authored + reviews about them; admins see all in org. |
+| `listReviews.ts` | GET `/reviews/` | `user` | (read) | Org-scoped (AHA FIX-011): the caller's `organizationId` from ctx is applied to the filter — officers/members see only their org's reviews; a platform admin without org context lists cross-org. Role-based filtering (via `hasRole`) layers on top: callers see reviews they authored + reviews about them; admins bypass the author/entity filter. |
 | `getReview.ts` | GET `/reviews/:review` | `user` | (read) | Visibility uses the same role filter as listReviews — non-author, non-reviewedEntity, non-admin → NotFoundError (not 403, to avoid leaking existence). |
 | `deleteReview.ts` | DELETE `/reviews/:review` | `review:owner` or `admin` | `review.delete` | Ownership-based — middleware passes through, handler validates `reviewer === session.user.id` OR `hasRole(session.user, 'admin')`. |
 
@@ -30,7 +30,7 @@ Test coverage: 4 unit specs + `reviews-handlers.test.ts` aggregator. All four ha
 
 ## 4. TypeSpec source
 
-`specs/api/src/modules/reviews.tsp` — single file, operations `createReview`, `listReviews`, `getReview`, `deleteReview`. Uses `@operationId` + `@doc`; no `x-audit`/`x-require-officer`/`x-require-position` extensions yet. Audit events are emitted inline in the handler today; migrating them to `@extension("x-audit", ...)` is a candidate W4.5 follow-on.
+`specs/api/src/modules/reviews.tsp` — single file, operations `createReview`, `listReviews`, `getReview`, `deleteReview`. Uses `@operationId` + `@doc`. AHA FIX-012 added `@extension("x-audit", #{ action: "delete", resourceType: "review" })` to `deleteReview` (the per-route audit middleware composes the event after the handler returns; `createReview` still logs inline). `x-require-officer`/`x-require-position` are not used (reviews use role-based `bearerAuth` + `review:owner`/`admin`).
 
 ## 5. Database schema
 

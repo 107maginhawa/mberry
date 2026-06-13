@@ -68,6 +68,7 @@ export async function listOrgMembers(
       gracePeriodDays: memberships.gracePeriodDays,
       suspendedAt: memberships.suspendedAt,
       removedAt: memberships.removedAt,
+      dateOfDeath: memberships.dateOfDeath,
       categoryId: memberships.categoryId,
     })
     .from(memberships)
@@ -80,11 +81,16 @@ export async function listOrgMembers(
     personId: row.personId,
     firstName: row.firstName,
     lastName: row.lastName,
+    // FIX-002 (G-10): feed the FULL terminal inputs so this legacy officer
+    // surface computes the same status as getMembership/listMemberships.
+    // Previously it omitted dateOfDeath, so deceased members showed as
+    // active/lapsed here while other surfaces reported 'deceased'.
     status: computeMembershipStatus({
       duesExpiryDate: row.duesExpiryDate,
       gracePeriodDays: row.gracePeriodDays ?? 30,
       suspendedAt: row.suspendedAt,
       removedAt: row.removedAt,
+      dateOfDeath: row.dateOfDeath,
       isPendingPayment: row.status === 'pendingPayment',
     }),
     memberNumber: row.memberNumber,

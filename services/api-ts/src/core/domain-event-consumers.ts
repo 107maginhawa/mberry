@@ -26,6 +26,9 @@ import {
   OfficerTermRepository,
   TransitionChecklistRepository,
 } from '@/handlers/association:member/repos/governance.repo';
+import { AuditRepository } from '@/handlers/audit/repos/audit.repo';
+import { EmailQueueRepository } from '@/handlers/email/repos/queue.repo';
+import { EmailTemplateTags, SYSTEM_ORG_ID } from '@/core/email-types';
 
 // ── person.deleted cascade — schema imports (mirror accountDeletionCascade.ts) ──
 import { membershipStatusHistory } from '@/handlers/association:member/repos/status-history.schema';
@@ -45,6 +48,9 @@ import { digitalCredentials } from '@/handlers/association:member/repos/credenti
 import { chapterAffiliations, affiliationTransfers } from '@/handlers/association:member/repos/chapters.schema';
 import { duesPayments } from '@/handlers/association:member/repos/dues-payments.schema';
 import { merchantAccounts } from '@/handlers/billing/repos/billing.schema';
+import { surveyResponses } from '@/handlers/surveys/repos/survey.schema';
+import { createDefaultChannels, autoJoinOrgChannels } from '@/handlers/comms/default-channels';
+import { mintFirstDuesInvoice } from '@/handlers/member/duesspecialassessments/firstInvoiceOnApproval';
 
 const ELECTION_TRANSITION_CHECKLIST_ITEMS = [
   'Hand over account credentials and passwords',
@@ -366,6 +372,79 @@ export function registerDomainEventConsumers(
   });
 
   // -----------------------------------------------------------------------
+  // FIX-004 (G2 / PD-1) — comms channel provisioning + member auto-join
+  // -----------------------------------------------------------------------
+
+  // organization.created → provision #general + #announcements channels so the
+  // org ships with channels its members auto-belong to.
+  domainEvents.on('organization.created', async (payload) => {
+    try {
+      await createDefaultChannels(deps.db, payload.organizationId, []);
+    } catch (err) {
+      logger.error({ error: err }, '[consumer] organization.created channel provisioning failed');
+    }
+  });
+
+  // membership.created → auto-join the new member to the org's channels (PD-1).
+  domainEvents.on('membership.created', async (payload) => {
+    try {
+      await autoJoinOrgChannels(deps.db, payload.organizationId, payload.personId);
+    } catch (err) {
+      logger.error({ error: err }, '[consumer] membership.created channel auto-join failed');
+    }
+  });
+
+  // -----------------------------------------------------------------------
+  // FIX-009 / Q-PD7 — membership.created → mint the member's FIRST dues invoice.
+  // Approval/claim leaves a new member `pendingPayment` with no invoice, and the
+  // batch generator only picks up `active` members — so without this they never
+  // get a payable invoice (the join→pay→active funnel dead-ends). Idempotent per
+  // (membership, period); read-only on memberships (no status change — settle
+  // still flips pendingPayment→active). On success, emit dues.invoice.generated
+  // so the existing consumer notifies the member of their new invoice.
+  // -----------------------------------------------------------------------
+  domainEvents.on('membership.created', async (payload) => {
+    try {
+      const result = await mintFirstDuesInvoice(
+        deps.db,
+        {
+          membershipId: payload.membershipId,
+          personId: payload.personId,
+          organizationId: payload.organizationId,
+        },
+        logger,
+      );
+
+      if (result.created && result.invoiceId) {
+        domainEvents
+          .emit('dues.invoice.generated', {
+            invoiceId: result.invoiceId,
+            organizationId: payload.organizationId,
+            personId: payload.personId,
+            amount: result.amount ?? 0,
+            dueDate: result.periodEnd ?? '',
+          })
+          .catch(() => {});
+      }
+    } catch (err) {
+      logger.error({ error: err }, '[consumer] membership.created first-invoice failed');
+    }
+  });
+
+  // membership.imported → auto-join each roster-imported member to org channels.
+  domainEvents.on('membership.imported', async (payload) => {
+    (async () => {
+      try {
+        for (const personId of payload.personIds) {
+          await autoJoinOrgChannels(deps.db, payload.organizationId, personId);
+        }
+      } catch (err) {
+        logger.error({ error: err }, '[consumer] membership.imported channel auto-join failed');
+      }
+    })();
+  });
+
+  // -----------------------------------------------------------------------
   // credit.awarded → notify member of CPD credits earned
   // -----------------------------------------------------------------------
   domainEvents.on('credit.awarded', async (payload) => {
@@ -428,6 +507,92 @@ export function registerDomainEventConsumers(
   });
 
   // -----------------------------------------------------------------------
+  // ticket.reopened → alert the assigned admin that an officer reply reopened
+  // a resolved support ticket (FIX-012 / G12 / PA-8). Skip when unassigned.
+  // organizationId is nullable on platform-wide tickets — fall back to the
+  // platform sentinel org (mirrors breach.reported).
+  // -----------------------------------------------------------------------
+  domainEvents.on('ticket.reopened', async (payload) => {
+    try {
+      if (!payload.assignedTo) {
+        logger.debug({ ticketId: payload.ticketId }, '[consumer] ticket.reopened: unassigned ticket, skipping notification');
+        return;
+      }
+      await deps.db.insert(notifications).values({
+        organizationId: payload.organizationId ?? '00000000-0000-0000-0000-000000000001',
+        recipient: payload.assignedTo,
+        type: 'system',
+        channel: 'in-app',
+        title: 'Support ticket reopened',
+        message: `An officer replied to a resolved ticket ("${payload.subject}"), reopening it.`,
+        status: 'sent',
+        sentAt: new Date(),
+        relatedEntityType: 'support-ticket',
+        relatedEntity: payload.ticketId,
+        consentValidated: false,
+        createdBy: SYSTEM_USER_ID,
+        updatedBy: SYSTEM_USER_ID,
+      });
+    } catch (err) {
+      logger.error({ error: err }, '[consumer] ticket.reopened failed');
+    }
+  });
+
+  // -----------------------------------------------------------------------
+  // ticket.status.changed → notify the reporter (officer) that their support
+  // ticket changed status (FIX-012 / G12 / PA-8 "Officer notified").
+  // -----------------------------------------------------------------------
+  domainEvents.on('ticket.status.changed', async (payload) => {
+    try {
+      await deps.db.insert(notifications).values({
+        organizationId: payload.organizationId ?? '00000000-0000-0000-0000-000000000001',
+        recipient: payload.reportedBy,
+        type: 'system',
+        channel: 'in-app',
+        title: 'Support ticket update',
+        message: `Your support ticket ("${payload.subject}") is now "${payload.status}".`,
+        status: 'sent',
+        sentAt: new Date(),
+        relatedEntityType: 'support-ticket',
+        relatedEntity: payload.ticketId,
+        consentValidated: false,
+        createdBy: SYSTEM_USER_ID,
+        updatedBy: SYSTEM_USER_ID,
+      });
+    } catch (err) {
+      logger.error({ error: err }, '[consumer] ticket.status.changed failed');
+    }
+  });
+
+  // -----------------------------------------------------------------------
+  // admin.invited → queue the platform-admin invite email (FIX-003 / G4 /
+  // WF-022 step 2). inviteAdmin emits this with no consumer, so invited admins
+  // never learned to sign in + claim. The invitee's email is in the payload;
+  // POST /platform-admin/claim binds their real userId. SYSTEM_ORG_ID scopes
+  // the system-level invite template (admin.invite).
+  // -----------------------------------------------------------------------
+  domainEvents.on('admin.invited', async (payload) => {
+    try {
+      const emailRepo = new EmailQueueRepository(deps.db, logger);
+      const claimUrl = `${process.env['ADMIN_APP_URL'] ?? ''}/claim`;
+      await emailRepo.queueEmail({
+        templateTags: [EmailTemplateTags.ADMIN_INVITE],
+        recipient: payload.email,
+        variables: {
+          email: payload.email,
+          role: payload.role,
+          claimUrl,
+        },
+        organizationId: SYSTEM_ORG_ID,
+        emailCategory: 'transactional',
+        metadata: { adminId: payload.adminId },
+      });
+    } catch (err) {
+      logger.error({ error: err }, '[consumer] admin.invited failed');
+    }
+  });
+
+  // -----------------------------------------------------------------------
   // training.cancelled → bulk async notify all enrolled members (fire-and-forget)
   // -----------------------------------------------------------------------
   domainEvents.on('training.cancelled', async (payload) => {
@@ -467,6 +632,34 @@ export function registerDomainEventConsumers(
         }
       } catch (err) {
         logger.error({ error: err }, '[consumer] training.cancelled bulk notify failed');
+      }
+    })();
+  });
+
+  // -----------------------------------------------------------------------
+  // training.enrollment.cancelled → notify ONLY the affected member (FIX-003)
+  // Distinct from the program-wide training.cancelled mass-notify above.
+  // -----------------------------------------------------------------------
+  domainEvents.on('training.enrollment.cancelled', async (payload) => {
+    (async () => {
+      try {
+        await deps.db.insert(notifications).values({
+          organizationId: payload.organizationId,
+          recipient: payload.personId,
+          type: 'system' as const,
+          channel: 'in-app' as const,
+          title: 'Training Enrollment Cancelled',
+          message: 'Your enrollment in a training has been cancelled.',
+          status: 'sent' as const,
+          sentAt: new Date(),
+          relatedEntityType: 'training',
+          relatedEntity: payload.trainingId,
+          consentValidated: false,
+          createdBy: SYSTEM_USER_ID,
+          updatedBy: SYSTEM_USER_ID,
+        });
+      } catch (err) {
+        logger.error({ error: err }, '[consumer] training.enrollment.cancelled notify failed');
       }
     })();
   });
@@ -1100,6 +1293,12 @@ export function registerDomainEventConsumers(
   // -----------------------------------------------------------------------
   // training.completed → make certificate available: notify enrolled members
   // that their certificate can now be downloaded. (EM-M11-e2f45a01)
+  //
+  // FIX-010 (G12): gate on certificate existence. Issuance is manual
+  // (officer-initiated bulk-issue), so a training.completed does NOT imply a
+  // certificate was produced. Only notify members who actually have a
+  // non-revoked certificate for this training — never claim a download exists
+  // when none was issued.
   // -----------------------------------------------------------------------
   domainEvents.on('training.completed', async (payload) => {
     (async () => {
@@ -1116,9 +1315,27 @@ export function registerDomainEventConsumers(
 
         if (enrollees.length === 0) return;
 
+        // FIX-010: resolve who actually has an issued (non-revoked) certificate
+        // for this training. No certificate → no "available to download" notice.
+        const issuedCerts = await deps.db
+          .select({ personId: certificates.personId, status: certificates.status })
+          .from(certificates)
+          .where(
+            and(
+              eq(certificates.trainingId, payload.trainingId),
+              eq(certificates.organizationId, payload.organizationId),
+            ),
+          );
+        const eligible = new Set(
+          issuedCerts.filter((c) => c.status !== 'revoked').map((c) => c.personId),
+        );
+
+        const recipients = enrollees.filter((e) => eligible.has(e.personId));
+        if (recipients.length === 0) return;
+
         const CHUNK_SIZE = 100;
-        for (let i = 0; i < enrollees.length; i += CHUNK_SIZE) {
-          const chunk = enrollees.slice(i, i + CHUNK_SIZE);
+        for (let i = 0; i < recipients.length; i += CHUNK_SIZE) {
+          const chunk = recipients.slice(i, i + CHUNK_SIZE);
           const rows = chunk.map((e) => ({
             organizationId: payload.organizationId,
             recipient: e.personId,
@@ -1140,6 +1357,155 @@ export function registerDomainEventConsumers(
         logger.error({ error: err }, '[consumer] training.completed certificate-available failed');
       }
     })();
+  });
+
+  // -----------------------------------------------------------------------
+  // verification.requested → audit-log public certificate verifications.
+  // FIX-011 (G13): the event was emitted by verifyCertificatePublic with zero
+  // consumers, so certificate verifications went unlogged (asymmetric with the
+  // credential trust path). Write a tamper-evident audit_log_entry via the
+  // platform AuditRepository so verification attempts are auditable.
+  // -----------------------------------------------------------------------
+  domainEvents.on('verification.requested', async (payload) => {
+    try {
+      // Resolve the owning org for tenant-scoped auditing. The public verifier
+      // is anonymous; the event payload carries only the certificate number.
+      const rows = await deps.db
+        .select({ organizationId: certificates.organizationId })
+        .from(certificates)
+        .where(eq(certificates.certificateNumber, payload.credentialNumber))
+        .limit(1);
+      const organizationId = rows[0]?.organizationId;
+
+      const auditRepo = new AuditRepository(deps.db, logger);
+      await auditRepo.logEvent({
+        eventType: 'compliance',
+        category: 'association',
+        action: 'read',
+        outcome: payload.verified ? 'success' : 'failure',
+        organizationId,
+        resourceType: 'certificate',
+        resource: payload.credentialNumber,
+        description: `Public certificate verification for ${payload.credentialNumber}: ${payload.verified ? 'signature verified' : 'not verified'}`,
+        details: { credentialNumber: payload.credentialNumber, verified: payload.verified },
+      });
+    } catch (err) {
+      logger.error({ error: err }, '[consumer] verification.requested audit-log failed');
+    }
+  });
+
+  // -----------------------------------------------------------------------
+  // FIX-007 (G-07): GDPR account-lifecycle events were emitted with ZERO
+  // consumers. Wire them here, reusing the raw-insert notification pattern.
+  // The payloads carry only personId (no organizationId), so org context is
+  // resolved from the person's active memberships (mirrors person.updated).
+  // -----------------------------------------------------------------------
+
+  // person.deletion.requested → alert active officers of the member's orgs (Spec 10b).
+  domainEvents.on('person.deletion.requested', async (payload) => {
+    void (async () => {
+      try {
+        const orgs = await deps.db
+          .select({ organizationId: memberships.organizationId })
+          .from(memberships)
+          .where(and(eq(memberships.personId, payload.personId), eq(memberships.status, 'active')));
+        for (const { organizationId } of orgs) {
+          const officers = await deps.db
+            .select({ personId: officerTerms.personId })
+            .from(officerTerms)
+            .where(and(eq(officerTerms.organizationId, organizationId), eq(officerTerms.status, 'active')));
+          const rows = officers
+            .filter((o) => o.personId && o.personId !== payload.personId)
+            .map((o) => ({
+              organizationId,
+              recipient: o.personId,
+              type: 'system' as const,
+              channel: 'in-app' as const,
+              title: 'Member requested account deletion',
+              message: `A member has requested account deletion, scheduled for ${payload.scheduledDate}.`,
+              status: 'sent' as const,
+              sentAt: new Date(),
+              relatedEntityType: 'person',
+              relatedEntity: payload.personId,
+              consentValidated: false,
+              createdBy: SYSTEM_USER_ID,
+              updatedBy: SYSTEM_USER_ID,
+            }));
+          if (rows.length > 0) await deps.db.insert(notifications).values(rows);
+        }
+      } catch (err) {
+        logger.error({ error: err }, '[consumer] person.deletion.requested failed');
+      }
+    })();
+  });
+
+  // person.deletion.cancelled → tell the same officers the deletion was called off.
+  domainEvents.on('person.deletion.cancelled', async (payload) => {
+    void (async () => {
+      try {
+        const orgs = await deps.db
+          .select({ organizationId: memberships.organizationId })
+          .from(memberships)
+          .where(and(eq(memberships.personId, payload.personId), eq(memberships.status, 'active')));
+        for (const { organizationId } of orgs) {
+          const officers = await deps.db
+            .select({ personId: officerTerms.personId })
+            .from(officerTerms)
+            .where(and(eq(officerTerms.organizationId, organizationId), eq(officerTerms.status, 'active')));
+          const rows = officers
+            .filter((o) => o.personId && o.personId !== payload.personId)
+            .map((o) => ({
+              organizationId,
+              recipient: o.personId,
+              type: 'system' as const,
+              channel: 'in-app' as const,
+              title: 'Member cancelled account deletion',
+              message: 'A member has cancelled their pending account deletion.',
+              status: 'sent' as const,
+              sentAt: new Date(),
+              relatedEntityType: 'person',
+              relatedEntity: payload.personId,
+              consentValidated: false,
+              createdBy: SYSTEM_USER_ID,
+              updatedBy: SYSTEM_USER_ID,
+            }));
+          if (rows.length > 0) await deps.db.insert(notifications).values(rows);
+        }
+      } catch (err) {
+        logger.error({ error: err }, '[consumer] person.deletion.cancelled failed');
+      }
+    })();
+  });
+
+  // data-export.ready → notify the requester their personal-data export is ready.
+  domainEvents.on('data-export.ready', async (payload) => {
+    try {
+      const orgs = await deps.db
+        .select({ organizationId: memberships.organizationId })
+        .from(memberships)
+        .where(and(eq(memberships.personId, payload.personId), eq(memberships.status, 'active')))
+        .limit(1);
+      const organizationId = orgs[0]?.organizationId;
+      // notifications.organizationId is NOT NULL — skip if the person has no org context.
+      if (!organizationId) return;
+      await deps.db.insert(notifications).values({
+        organizationId,
+        recipient: payload.personId,
+        type: 'system',
+        channel: 'in-app',
+        title: 'Your data export is ready',
+        message: 'Your personal data export is ready to download. The link expires in 7 days.',
+        status: 'sent',
+        sentAt: new Date(),
+        relatedEntityType: 'data-export',
+        relatedEntity: payload.exportId,
+        consentValidated: false,
+        createdBy: SYSTEM_USER_ID,
+        updatedBy: SYSTEM_USER_ID,
+      });
+    } catch (err) {
+      logger.error({ error: err }, '[consumer] data-export.ready failed');
+    }
   });
 
   // -----------------------------------------------------------------------
@@ -1376,6 +1742,24 @@ export function registerDomainEventConsumers(
         .where(eq(merchantAccounts.person, personId));
     } catch (err) {
       logger.error({ error: err, personId }, '[consumer] person.deleted billing cascade failed');
+    }
+  });
+
+  // -----------------------------------------------------------------------
+  // person.deleted → surveys: anonymize identified survey responses
+  // (NULL responder_id, retain answers for aggregate integrity — BR-32).
+  // The responder_id FK is onDelete:'restrict', so this MUST run before any
+  // hard person delete; it also de-anonymizes identified responses so a
+  // deleted member can no longer be mapped to their individual answers.
+  // -----------------------------------------------------------------------
+  domainEvents.on('person.deleted', async (payload) => {
+    const { personId } = payload;
+    try {
+      await deps.db.update(surveyResponses)
+        .set({ responderId: null, updatedBy: SYSTEM_USER_ID })
+        .where(eq(surveyResponses.responderId, personId));
+    } catch (err) {
+      logger.error({ error: err, personId }, '[consumer] person.deleted surveys cascade failed');
     }
   });
 

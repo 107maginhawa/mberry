@@ -11,6 +11,8 @@ import type { DatabaseInstance } from '@/core/database';
 import { eq } from 'drizzle-orm';
 import { ValidationError } from '@/core/errors';
 import { supportTickets } from './repos/platform-admin.schema';
+import { domainEvents } from '@/core/domain-events';
+import { requireAdminTier, SUPPORT_OR_SUPER } from '@/core/auth/admin-tier';
 
 // Valid transitions: from → set of allowed to
 const VALID_TRANSITIONS: Record<string, string[]> = {
@@ -27,6 +29,11 @@ export async function updateTicketStatus(ctx: Context): Promise<Response> {
 
   const admin = ctx.get('platformAdmin');
   if (!admin) return ctx.json({ error: 'Platform admin access required' }, 403);
+
+  // FIX-008 (G1) / Q8: changing ticket status is a support-or-super mutation;
+  // analyst is read-only.
+  const denied = requireAdminTier(ctx, SUPPORT_OR_SUPER);
+  if (denied) return denied;
 
   const db = ctx.get('database') as DatabaseInstance;
   const baseLogger = ctx.get('logger');
@@ -78,6 +85,21 @@ export async function updateTicketStatus(ctx: Context): Promise<Response> {
     .returning();
 
   logger.info({ action: 'updateTicketStatus.1', ticketId, oldStatus: ticket.status, newStatus: status }, 'Ticket status updated');
+
+  // FIX-012 (G12 / PA-8): "Success outcome: Ticket resolved. Officer notified."
+  // Notify the reporter of any status change via the domain event bus. An
+  // assignee-only update (no `status` in the body) does not notify.
+  if (status) {
+    domainEvents
+      .emit('ticket.status.changed', {
+        ticketId,
+        organizationId: ticket.organizationId,
+        reportedBy: ticket.reportedBy,
+        status,
+        subject: ticket.subject,
+      })
+      .catch(() => {});
+  }
 
   return ctx.json({ data: updated });
 }

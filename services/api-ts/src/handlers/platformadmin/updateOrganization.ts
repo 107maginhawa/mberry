@@ -3,6 +3,7 @@ import type { DatabaseInstance } from '@/core/database';
 import type { UpdateOrganizationBody, UpdateOrganizationParams } from '@/generated/openapi/validators';
 import { NotFoundError } from '@/core/errors';
 import { OrganizationRepository } from './repos/platform-admin.repo';
+import { requireAdminTier, SUPER_ONLY } from '@/core/auth/admin-tier';
 
 /**
  * updateOrganization
@@ -15,6 +16,10 @@ export async function updateOrganization(
 ): Promise<Response> {
   const session = ctx.get('session');
   if (!session) return ctx.json({ error: 'Unauthorized' }, 401);
+
+  // FIX-008 (G1) / Q1: patching an organization is a super-only mutation.
+  const denied = requireAdminTier(ctx, SUPER_ONLY);
+  if (denied) return denied;
 
   const { organizationId } = ctx.req.valid('param');
   const body = ctx.req.valid('json');

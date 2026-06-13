@@ -110,6 +110,100 @@ TypeSpec → OpenAPI → Generated Routes/Validators → Handler Implementations
                   → Generated SDK (sdk-ts) → TanStack Query hooks → React Components
 ```
 
+## Request Flow
+
+```
+Browser → Vite proxy (/api/* → /*) → Hono → Middleware stack → Handler → Drizzle ORM → PostgreSQL
+```
+
+### Vite Proxy
+
+Each frontend app proxies `/api/*` to `http://localhost:7213`, stripping the `/api` prefix:
+
+```typescript
+// apps/admin/vite.config.ts, apps/memberry/vite.config.ts
+proxy: {
+  '/api': {
+    target: 'http://localhost:7213',
+    changeOrigin: true,
+    rewrite: (path) => path.replace(/^\/api/, ''),
+  },
+}
+```
+
+Frontend calls `fetch('/api/persons/me')` → proxy rewrites to `GET /persons/me` → Hono handler.
+
+## Middleware Stack
+
+Global middleware applied in order on every request. Registered in `services/api-ts/src/app.ts` (search "Global middleware - order matters!"):
+
+| # | Middleware | File | Purpose |
+|---|-----------|------|---------|
+| 1 | requestId | `src/middleware/request.ts` | UUID per request for tracing |
+| 2 | tracing | `src/core/observability.ts` | OpenTelemetry server span per request; no-op when `OTEL_EXPORTER_OTLP_ENDPOINT` unset |
+| 3 | DI | `src/middleware/dependency.ts` | Inject logger, DB, storage, auth, jobs |
+| 4 | audit | `src/middleware/audit.ts` | After-middleware: log write ops (POST/PUT/PATCH/DELETE) to `audit_log_entries` |
+| 5 | requestLogger | `src/middleware/request.ts` | Pino structured logging with correlation IDs |
+| 6 | securityHeaders | `src/middleware/security.ts` | Standard security headers |
+| 7 | CORS | `src/middleware/security.ts` | Cross-origin configuration |
+| 8 | CSRF origin check | Hono `csrf()` | Blocks cross-origin state-changing requests (same origins as CORS) |
+| 9 | CSRF double-submit token | `src/middleware/csrf-token.ts` | `x-csrf-token` header must mirror same-origin cookie; allowlists `/webhooks/`, `/email/unsubscribe`, `/pay/`, `/auth/`, `/test/` |
+| 10 | bodyLimit | Hono `bodyLimit()` | 1MB global; 10MB on `/storage/*` and `/documents/*` |
+| 11 | rateLimiter | `src/middleware/rate-limit.ts` | Global rate limiting for custom endpoints (auth routes handled by Better-Auth) |
+| 12 | impersonation guard | `src/middleware/impersonation-guard.ts` | Resolve impersonation cookie → context, then block writes while impersonating |
+| 13 | metrics | `src/core/metrics.ts` | Request metrics |
+
+Auth is **scoped, not global**: `authMiddleware` + `platformAdminAuthMiddleware` on `/admin/*`; `authMiddleware` + `orgContextMiddleware` on `/email/*` and association routes (with explicit public-path exceptions); officer/position checks emitted per-route by the generator from `x-require-officer` / `x-require-position` TypeSpec extensions.
+
+Auth plugins: emailOTP, admin, bearer, twoFactor, magicLink, apiKey, passkey.
+
+Internal bypass: `X-Internal-Service-Token` header for service-to-service calls.
+
+## Deployment Topology
+
+```
+┌─────────────────────────────────────────────────────┐
+│                    Frontend Apps                      │
+│            admin (:3003)  memberry (:3004)            │
+│         Vite dev server + proxy → /api → :7213       │
+└──────────────────────┬──────────────────────────────┘
+                       │ HTTP (proxy strips /api prefix)
+┌──────────────────────▼──────────────────────────────┐
+│                  api-ts (:7213)                       │
+│               Bun + Hono runtime                     │
+└───┬──────┬──────┬──────┬──────┬──────┬──────────────┘
+    │      │      │      │      │      │
+    ▼      ▼      ▼      ▼      ▼      ▼
+  Postgres S3/   Stripe Postmark OneSignal pg-boss
+   :5432  MinIO  (Connect) (email) (push)  (jobs)
+          :9000
+```
+
+### Docker Dev Dependencies (`docker-compose.yml` at repo root)
+
+Brought up via `bun infra:up` (orchestrated by Turborepo / root scripts).
+
+| Service | Image | Port | Purpose |
+|---------|-------|------|---------|
+| postgres | postgres:16-alpine | 5432 | Primary database |
+| minio | minio/minio:latest | 9000, 9001 | S3-compatible file storage |
+| createbuckets | minio/mc:latest | (init) | Auto-creates STORAGE_BUCKET on first start |
+| mailpit | axllent/mailpit:latest | 1025 (SMTP), 8025 (UI) | Email capture for dev |
+| stripe-mock | stripe/stripe-mock:latest | 12111 | Stripe API mock |
+| loki | grafana/loki:3.3.2 | 3100 | Log aggregation backend |
+| grafana | grafana/grafana:11.4.0 | 3030 | Log/metric visualization (pre-provisioned Loki + API dashboard) |
+
+### External Integrations (Production)
+
+| Service | Purpose | Config Source | Status |
+|---------|---------|--------------|--------|
+| Stripe Connect | Billing, payments | `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET` | Integrated |
+| OneSignal | Push notifications | `ONESIGNAL_APP_ID`, `ONESIGNAL_API_KEY` | Integrated |
+| S3/MinIO | File storage | Storage config in `core/storage.ts` | Integrated |
+| Postmark | Transactional email | `POSTMARK_API_KEY`, `POSTMARK_MESSAGE_STREAM` | Integrated |
+| pg-boss | Background job queue | Uses same PostgreSQL connection | Integrated |
+| WebRTC | Video calls | `WEBRTC_ICE_SERVERS` | Scaffolded (infra-ready) |
+
 ## Handler Pattern
 
 The actual implementation pattern (NOT "Router → Validators → Service → Handlers"):
@@ -234,7 +328,7 @@ cd services/api-ts && bun test
 
 ## How to Add a New Module
 
-1. Read or write the module spec (use `docs/templates/MODULE_SPEC.template.md`).
+1. Read or write the module spec (use `docs/quality/MODULE_SPEC_TEMPLATE.md`).
 2. Define TypeSpec API in `specs/api/src/modules/<module>.tsp`.
 3. Run code generation pipeline (steps 2-3 above).
 4. Create handler directory: `services/api-ts/src/handlers/<module>/`.
@@ -247,7 +341,7 @@ cd services/api-ts && bun test
 
 ## How to Add a New Vertical Slice
 
-1. Read or write the slice spec (use `docs/templates/SLICE_SPEC.template.md`).
+1. Read or write the slice spec (model after `docs/execution/slices/w1-t1-repo-consolidation/SLICE_SPEC.md`).
 2. Inspect the Pattern Exemplar that matches your slice type.
 3. Write/update tests first for business rules, validation, permissions.
 4. Define or update TypeSpec API definitions.

@@ -21,15 +21,20 @@ using TypeSpec.OpenAPI;
  *   GET    /vendors                                — list vendors
  *   GET    /vendors/{vendorId}                     — fetch a vendor
  *   PATCH  /vendors/{vendorId}                     — update a vendor
- *   POST   /vendors/{vendorId}/verify              — verify a vendor (officer)
+ *   POST   /vendors/{vendorId}/verify              — review a vendor (approve/reject/suspend, officer)
  *   POST   /listings                               — create a listing
  *   GET    /listings                               — list listings
+ *   PATCH  /listings/{listingId}                   — update / activate / archive a listing (officer)
  *   POST   /orders                                 — place an order
+ *   GET    /orders                                 — list orders (org-scoped)
+ *   GET    /orders/{orderId}                       — fetch an order (org-scoped)
+ *   POST   /orders/{orderId}/cancel                — cancel a pending/confirmed order
  *   POST   /orders/{orderId}/fulfill               — mark order fulfilled (vendor/officer)
  *
- * Status: TypeSpec authored Wave G3 (S-C4-026). Route mounting is deferred —
- * handler implementations exist in services/api-ts/src/handlers/marketplace/ but
- * are not currently wired into app.ts. See ROADMAP.md for activation plan.
+ * Status: TypeSpec authored Wave G3 (S-C4-026). Routes are emitted under the
+ * /association/* org-context boundary (AHA FIX-001 / G-01) and registered via
+ * the generated registry; handler implementations live in
+ * services/api-ts/src/handlers/marketplace/.
  */
 
 // ---------------------------------------------------------------------------
@@ -67,6 +72,13 @@ enum OrderStatus {
   fulfilled: "fulfilled",
   cancelled: "cancelled",
   refunded: "refunded",
+}
+
+@doc("Officer decision when reviewing a vendor's verification")
+enum VendorVerificationDecision {
+  verified: "verified",
+  rejected: "rejected",
+  suspended: "suspended",
 }
 
 // ---------------------------------------------------------------------------
@@ -253,6 +265,33 @@ model CreateMarketplaceOrderRequest {
   notes?: string;
 }
 
+@doc("Officer's vendor verification decision. Defaults to 'verified' when omitted.")
+model VerifyVendorRequest {
+  @doc("Target review decision: approve (verified), reject, or suspend.")
+  decision?: VendorVerificationDecision;
+}
+
+@doc("Request body for updating a listing (editable fields and/or lifecycle transition)")
+model UpdateMarketplaceListingRequest {
+  @doc("Listing title")
+  title?: string;
+
+  @doc("Listing description")
+  description?: string;
+
+  @doc("Unit price as decimal string")
+  price?: string;
+
+  @doc("ISO 4217 currency code")
+  currency?: string;
+
+  @doc("Lifecycle status transition (draft → active → archived)")
+  status?: ListingStatus;
+
+  @doc("Category tags")
+  categoryTags?: string[];
+}
+
 @doc("Paginated list of vendors")
 model VendorListResponse {
   @doc("Page of vendors")
@@ -270,6 +309,19 @@ model VendorListResponse {
 model ListingListResponse {
   @doc("Page of listings")
   data: MarketplaceListing[];
+
+  @doc("Pagination metadata")
+  pagination: {
+    total: int32;
+    limit: int32;
+    offset: int32;
+  };
+}
+
+@doc("Paginated list of orders")
+model OrderListResponse {
+  @doc("Page of orders")
+  data: MarketplaceOrder[];
 
   @doc("Pagination metadata")
   pagination: {
@@ -343,15 +395,18 @@ namespace MarketplaceModule {
       | ApiForbiddenResponse
       | ApiNotFoundResponse;
 
-    @doc("Verify a vendor — transitions status to 'verified'. Officer-only.")
+    @doc("Review a vendor's verification — approve (verified), reject, or suspend. Decision defaults to 'verified'. Officer-only.")
     @operationId("verifyVendor")
     @post
     @route("/vendors/{vendorId}/verify")
     @useAuth(bearerAuth)
     @extension("x-security-required-roles", #["association:admin"])
+    @extension("x-audit", #{ action: "update", resourceType: "marketplace-vendor" })
     verifyVendor(
-      @path vendorId: UUID
+      @path vendorId: UUID,
+      @body body: VerifyVendorRequest
     ): ApiOkResponse<MarketplaceVendor>
+      | ApiBadRequestResponse
       | ApiUnauthorizedResponse
       | ApiForbiddenResponse
       | ApiNotFoundResponse
@@ -389,6 +444,22 @@ namespace MarketplaceModule {
       @query offset?: int32
     ): ApiOkResponse<ListingListResponse>
       | ApiUnauthorizedResponse;
+
+    @doc("Update a listing or transition its lifecycle status (draft → active → archived). Officer-only.")
+    @operationId("updateListing")
+    @patch(#{ implicitOptionality: true })
+    @route("/listings/{listingId}")
+    @useAuth(bearerAuth)
+    @extension("x-security-required-roles", #["association:admin", "association:staff"])
+    updateListing(
+      @path listingId: UUID,
+      @body body: UpdateMarketplaceListingRequest
+    ): ApiOkResponse<MarketplaceListing>
+      | ApiBadRequestResponse
+      | ApiUnauthorizedResponse
+      | ApiForbiddenResponse
+      | ApiNotFoundResponse
+      | ApiConflictResponse;
   }
 
   @doc("Order placement and fulfilment")
@@ -406,12 +477,54 @@ namespace MarketplaceModule {
       | ApiUnauthorizedResponse
       | ApiNotFoundResponse;
 
+    @doc("List orders for the caller's organization, with optional filters.")
+    @operationId("listOrders")
+    @get
+    @route("/orders")
+    @useAuth(bearerAuth)
+    @extension("x-security-required-roles", #["user"])
+    listOrders(
+      @query buyerPersonId?: UUID,
+      @query vendorId?: UUID,
+      @query status?: OrderStatus,
+      @query limit?: int32,
+      @query offset?: int32
+    ): ApiOkResponse<OrderListResponse>
+      | ApiUnauthorizedResponse;
+
+    @doc("Fetch a single order by ID (org-scoped).")
+    @operationId("getOrder")
+    @get
+    @route("/orders/{orderId}")
+    @useAuth(bearerAuth)
+    @extension("x-security-required-roles", #["user"])
+    getOrder(
+      @path orderId: UUID
+    ): ApiOkResponse<MarketplaceOrder>
+      | ApiUnauthorizedResponse
+      | ApiNotFoundResponse;
+
+    @doc("Cancel a pending or confirmed order.")
+    @operationId("cancelOrder")
+    @post
+    @route("/orders/{orderId}/cancel")
+    @useAuth(bearerAuth)
+    @extension("x-security-required-roles", #["user"])
+    cancelOrder(
+      @path orderId: UUID
+    ): ApiOkResponse<MarketplaceOrder>
+      | ApiUnauthorizedResponse
+      | ApiForbiddenResponse
+      | ApiNotFoundResponse
+      | ApiConflictResponse;
+
     @doc("Mark an order as fulfilled. Vendor or officer.")
     @operationId("fulfillOrder")
     @post
     @route("/orders/{orderId}/fulfill")
     @useAuth(bearerAuth)
     @extension("x-security-required-roles", #["association:admin", "association:staff", "user"])
+    @extension("x-audit", #{ action: "complete", resourceType: "marketplace-order" })
     fulfillOrder(
       @path orderId: UUID
     ): ApiOkResponse<MarketplaceOrder>

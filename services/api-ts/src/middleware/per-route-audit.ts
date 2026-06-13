@@ -24,7 +24,8 @@ export interface PerRouteAuditMeta {
     | 'approve' | 'deny' | 'renew'
     | 'terminate' | 'reinstate' | 'mark-paid'
     | 'complete' | 'transfer' | 'resign'
-    | 'deceased' | 'read' | 'export'
+    | 'deceased' | 'suspend' | 'unsuspend'
+    | 'read' | 'export'
     | 'capture' | 'finalize';
   resourceType: string;
   eventSubType?: AuditEventSubType | string;

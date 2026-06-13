@@ -69,7 +69,7 @@ export function VotingBallot({ electionId, orgId, userId }: VotingBallotProps) {
   // Check existing votes
   const { data: ballotData } = useQuery({
     queryKey: ['my-ballots', electionId],
-    queryFn: () => api.get<{ data: BallotRecord[] }>(`/api/association/member/ballots?electionId=${electionId}`),
+    queryFn: () => api.get<{ data: BallotRecord[] }>(`/api/association/member/ballots/mine?electionId=${electionId}`),
     enabled: !!electionId,
   })
 

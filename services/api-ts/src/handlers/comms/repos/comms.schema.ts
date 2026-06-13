@@ -199,6 +199,17 @@ export const chatMessageReactions = pgTable('chat_message_reaction', {
 export type ChatMessageReaction = typeof chatMessageReactions.$inferSelect;
 export type NewChatMessageReaction = typeof chatMessageReactions.$inferInsert;
 
+// ---------------------------------------------------------------------------
+// Video call V1 scope (PD-3, AHA realtime-comms)
+// ---------------------------------------------------------------------------
+// V1 video = 1:1 + small-group over the EXISTING WebSocket signaling, capacity-
+// capped, NO recording. Richer video (recording, large rooms, dedicated TURN
+// infra) is V2. The cap below is the hard ceiling on *active* participants
+// (joined && !left) enforced on the start/join signaling path. 1:1 = 2;
+// small-group = up to this N. Chosen at 6 — comfortably covers a small
+// committee/officer huddle without implying a large-room / SFU product.
+export const VIDEO_CALL_MAX_PARTICIPANTS = 6;
+
 // TypeScript interfaces for video call data structure
 export interface VideoCallData {
   status: 'starting' | 'active' | 'ended' | 'cancelled';
@@ -208,6 +219,36 @@ export interface VideoCallData {
   endedAt?: string;
   durationMinutes?: number;
   participants: CallParticipant[];
+}
+
+// V1 NO-RECORDING INVARIANT (PD-3). The VideoCallData shape above intentionally
+// carries NO recording field — recording is a V2 capability that requires media
+// infra this build does not have. This guard rejects any attempt to smuggle a
+// recording flag through an untyped/`any` start payload, locking the invariant
+// at the write boundary. Returns the (recording-free) data unchanged.
+export function assertNoRecording<T>(videoCallData: T): T {
+  const data = videoCallData as Record<string, unknown> | null | undefined;
+  if (data && typeof data === 'object') {
+    const rec = data as Record<string, unknown>;
+    const recording = rec['recording'] ?? rec['recordingEnabled'] ?? rec['record'];
+    if (recording === true) {
+      throw new Error(
+        'Video call recording is not available in V1 (no-recording invariant)'
+      );
+    }
+  }
+  return videoCallData;
+}
+
+/**
+ * Count participants currently occupying a call slot — joined and not yet left.
+ * This is the number the V1 capacity cap is enforced against.
+ */
+export function countActiveCallParticipants(
+  participants: CallParticipant[] | undefined | null
+): number {
+  if (!participants) return 0;
+  return participants.filter((p) => p.joinedAt && !p.leftAt).length;
 }
 
 export interface CallParticipant {
@@ -238,7 +279,11 @@ export interface ChatRoomFilters {
   status?: 'active' | 'archived';
   context?: string; // Generic context ID (booking, billing, etc.)
   withParticipant?: string; // Find rooms containing this specific participant
+  withParticipants?: string[]; // Find rooms containing ALL of these participants (AND semantics)
   hasActiveCall?: boolean;
+  // FIX-008 (G4 read-path): scope non-DM rooms to this org while preserving DMs
+  // (org-agnostic, PD-2). Emits `(organization_id = X OR room_type = 'dm')`.
+  organizationIdOrDm?: string;
 }
 
 export interface ChatMessageFilters {
@@ -278,6 +323,8 @@ export interface UpdateParticipantRequest {
 }
 
 export interface CreateChatRoomRequest {
+  name?: string;
+  roomType?: 'channel' | 'dm' | 'group';
   participants: string[];
   admins?: string[];
   context?: string;

@@ -42,11 +42,46 @@ export class InvoiceRepository extends DatabaseRepository<Invoice, NewInvoice, I
     super(db, invoices, logger);
   }
 
+  // NOTE (FIX-002): the previous `findAll()` (`limit(500)`) full-table scan was
+  // removed. Webhook handlers now correlate invoices via the indexed JSONB
+  // lookups below, which work at any scale. Do not reintroduce an unbounded scan.
+
   /**
-   * Find all invoices (unfiltered). Used by webhook handlers to search by metadata fields.
+   * Find the invoice whose metadata.stripePaymentIntentId matches (TypeSpec-aligned).
+   *
+   * FIX-002: replaces the old `findAll()` + in-memory `Array.find` 500-row scan
+   * used by the Stripe webhook handlers. That scan silently failed to find
+   * invoices once more than 500 existed — money would be captured but the
+   * invoice never marked paid. This indexed JSONB predicate (backed by
+   * `invoices_metadata_payment_intent_idx`) correlates at any scale.
+   * Mirrors `MerchantAccountRepository.findByStripeAccountId`.
    */
-  async findAll(): Promise<Invoice[]> {
-    return await this.db.select().from(invoices).limit(500) as Invoice[];
+  async findByStripePaymentIntentId(paymentIntentId: string): Promise<Invoice | null> {
+    this.logger?.debug({ paymentIntentId }, 'Finding invoice by Stripe payment intent ID');
+
+    const result = await this.db
+      .select()
+      .from(invoices)
+      .where(sql`${invoices.metadata}->>'stripePaymentIntentId' = ${paymentIntentId}`)
+      .limit(1);
+
+    return result.length > 0 && result[0] ? (result[0] as Invoice) : null;
+  }
+
+  /**
+   * Find all invoices whose metadata.stripeTransferId matches (TypeSpec-aligned).
+   *
+   * FIX-002: replaces the old `findAll()` 500-row scan in the transfer webhook
+   * handlers. A single Stripe transfer can settle multiple invoices, so this
+   * returns an array. Backed by `invoices_metadata_transfer_idx`.
+   */
+  async findByStripeTransferId(transferId: string): Promise<Invoice[]> {
+    this.logger?.debug({ transferId }, 'Finding invoices by Stripe transfer ID');
+
+    return await this.db
+      .select()
+      .from(invoices)
+      .where(sql`${invoices.metadata}->>'stripeTransferId' = ${transferId}`) as Invoice[];
   }
 
   /**
@@ -242,6 +277,62 @@ export class InvoiceRepository extends DatabaseRepository<Invoice, NewInvoice, I
           }))
         )
         .returning();
+
+      return {
+        ...invoice,
+        lineItems
+      } as InvoiceWithLineItems;
+    });
+  }
+
+  /**
+   * Transactionally replace all line items for an invoice and persist the
+   * recomputed invoice fields in a single transaction (FIX-007 / AC-M21-002).
+   *
+   * The previous `updateInvoice` path recomputed `subtotal`/`total` from the
+   * request line items but only persisted the invoice row — the line-item rows
+   * themselves were never replaced. A reload then returned stale rows whose sum
+   * diverged from the stored total (receipt/audit mismatch). This deletes the
+   * existing rows, inserts the replacement rows, and updates the invoice
+   * (totals + any other changed fields) atomically so the stored total always
+   * equals the sum of the stored rows.
+   */
+  async replaceLineItems(
+    invoiceId: string,
+    lineItemsData: Omit<NewInvoiceLineItem, 'id' | 'invoice'>[],
+    invoiceUpdate: Partial<NewInvoice>
+  ): Promise<InvoiceWithLineItems> {
+    this.logger?.debug({ invoiceId, lineItemCount: lineItemsData.length }, 'Replacing invoice line items');
+
+    return await this.db.transaction(async (tx) => {
+      // Remove the existing line items for this invoice
+      await tx
+        .delete(invoiceLineItems)
+        .where(eq(invoiceLineItems.invoice, invoiceId));
+
+      // Insert the replacement rows (skip the insert entirely if none)
+      const lineItems = lineItemsData.length > 0
+        ? await tx
+            .insert(invoiceLineItems)
+            .values(
+              lineItemsData.map(item => ({
+                ...item,
+                invoice: invoiceId
+              }))
+            )
+            .returning()
+        : [];
+
+      // Persist the recomputed invoice fields (subtotal/tax/total + others)
+      const [invoice] = await tx
+        .update(invoices)
+        .set(invoiceUpdate)
+        .where(eq(invoices.id, invoiceId))
+        .returning();
+
+      if (!invoice) {
+        throw new InternalError('Failed to update invoice during line-item replacement');
+      }
 
       return {
         ...invoice,

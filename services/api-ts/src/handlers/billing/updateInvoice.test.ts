@@ -65,4 +65,57 @@ describe('updateInvoice', () => {
     const ctx = makeBillingCtx(MERCHANT_ID, 'provider', { _params: { invoice: INVOICE_ID }, _body: {} });
     await expect(updateInvoice(ctx)).rejects.toBeInstanceOf(BusinessLogicError);
   });
+
+  // FIX-007 / AC-M21-002: line-item replacement must transactionally persist the
+  // new rows AND recompute the stored total. The old code updated the invoice
+  // total but never replaced the line-item rows, so a reload returned stale rows
+  // whose sum diverged from the persisted total.
+  test('transactionally replaces line items so reloaded rows == request and total == sum of rows', async () => {
+    restoreRepo(InvoiceRepository);
+
+    // Stateful store seeded with the OLD line items + old total. updateOneById
+    // (the buggy non-transactional path) updates invoice fields but NOT the rows;
+    // replaceLineItems (the fix) swaps the rows and total together.
+    let store: { lineItems: any[]; subtotal: number; total: number } = {
+      lineItems: [{ id: 'li-old', invoice: INVOICE_ID, description: 'OLD', quantity: 1, unitPrice: 1000, amount: 1000, metadata: null }],
+      subtotal: 1000,
+      total: 1000,
+    };
+
+    stubRepo(InvoiceRepository, {
+      findOneById: async () => ({ ...draftInvoice }),
+      updateOneById: async (_id: string, data: any) => {
+        // Buggy path: persists invoice fields only — line-item rows untouched.
+        store = { ...store, subtotal: data.subtotal ?? store.subtotal, total: data.total ?? store.total };
+        return { ...draftInvoice, ...data };
+      },
+      replaceLineItems: async (_id: string, lineItemsData: any[], invoiceUpdate: any) => {
+        const rows = lineItemsData.map((li, i) => ({ id: `li-${i}`, invoice: INVOICE_ID, metadata: null, ...li }));
+        store = { lineItems: rows, subtotal: invoiceUpdate.subtotal, total: invoiceUpdate.total };
+        return { ...draftInvoice, ...invoiceUpdate, lineItems: rows };
+      },
+      findOneWithLineItems: async () => ({ ...draftInvoice, subtotal: store.subtotal, total: store.total, lineItems: store.lineItems }),
+    });
+
+    const requestLineItems = [
+      { description: 'A', quantity: 2, unitPrice: 500 }, // amount 1000
+      { description: 'B', quantity: 1, unitPrice: 750 }, // amount 750
+    ];
+    const expectedTotal = 1000 + 750;
+
+    const ctx = makeBillingCtx(MERCHANT_ID, 'provider', {
+      _params: { invoice: INVOICE_ID },
+      _body: { lineItems: requestLineItems },
+    });
+    const res = await updateInvoice(ctx);
+
+    expect(res.status).toBe(200);
+    // Reloaded rows match the request (not the stale OLD row)
+    expect(res.body.lineItems).toHaveLength(2);
+    expect(res.body.lineItems.map((li: any) => li.description)).toEqual(['A', 'B']);
+    expect(res.body.lineItems.map((li: any) => li.amount)).toEqual([1000, 750]);
+    // Persisted total == sum of the persisted rows
+    expect(res.body.total).toBe(expectedTotal);
+    expect(res.body.lineItems.reduce((s: number, li: any) => s + li.amount, 0)).toBe(res.body.total);
+  });
 });

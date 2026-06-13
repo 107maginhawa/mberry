@@ -5,7 +5,9 @@ import type { DatabaseInstance } from '@/core/database';
 import { NotFoundError, UnauthorizedError, BusinessLogicError } from '@/core/errors';
 import type { ResignMembershipBody, ResignMembershipParams } from '@/generated/openapi/validators';
 import { MembershipRepository } from '@/handlers/association:member/repos/membership.repo';
+import { membershipStatusHistory } from '@/handlers/association:member/repos/status-history.schema';
 import { withComputedStatus } from './utils/membership-status-middleware';
+import { assertRecordInCallerOrg } from './utils/assert-record-org';
 import { duesInvoices } from '@/handlers/association:member/repos/dues.schema';
 import { INVOICE_VALID_TRANSITIONS } from './utils/status-transitions';
 import { isValidTransition } from '@/utils/status-transitions';
@@ -44,6 +46,8 @@ export async function resignMembership(
 
   const membership = await repo.findOneById(membershipId);
   if (!membership) throw new NotFoundError('Membership');
+  // FIX-003 (G-02): the record must belong to the caller's org.
+  assertRecordInCallerOrg(ctx, membership.organizationId, 'this membership');
   const enriched = withComputedStatus(membership);
 
   if (TERMINAL_STATUSES.includes(enriched.status)) {
@@ -55,10 +59,12 @@ export async function resignMembership(
 
   let updated!: Membership;
   await db.transaction(async (tx: DatabaseInstance) => {
-    // Update membership status
+    // Update membership status. FIX-007: stamp resignedAt (NOT removedAt) so a
+    // recompute (cron/read path) keeps the status 'resigned' instead of decaying
+    // to 'removed'. resignedAt outranks removedAt in computeMembershipStatus.
     updated = await repo.updateOneById(membershipId, {
       status: 'resigned',
-      removedAt: new Date(),
+      resignedAt: new Date(),
       removalReason: body.terminationReason ?? null,
     } as Partial<Membership>);
 
@@ -73,6 +79,22 @@ export async function resignMembership(
           inArray(duesInvoices.status, INVOICE_STATUSES_CANCELABLE),
         ),
       );
+
+    // FIX-006 / G-08: record the officer-initiated transition for the audit
+    // trail (spec §7). Same transaction so history is atomic with the status
+    // change. fromStatus is the COMPUTED status before the change, not the cache.
+    if (membership.personId) {
+      await tx.insert(membershipStatusHistory).values({
+        organizationId: membership.organizationId,
+        membershipId,
+        personId: membership.personId,
+        fromStatus: enriched.status,
+        toStatus: 'resigned',
+        reason: body.terminationReason ?? 'resigned',
+        changedBy: session.user.id,
+        changedAt: new Date(),
+      });
+    }
   });
 
   ctx.set('auditResourceId', membershipId);

@@ -1,4 +1,3 @@
-// oli-execute: error-handled-inline -- consumed by officer finances routes (G7 isError fix).
 import { useQuery } from '@tanstack/react-query'
 import { Link, useParams } from '@tanstack/react-router'
 import { getDuesFinancialDashboardOptions } from '@monobase/sdk-ts/generated/react-query'

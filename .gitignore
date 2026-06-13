@@ -148,6 +148,7 @@ lerna-debug.log*
 # Audit scratch outputs (only PRODUCTION_AUDIT.md is tracked)
 .audits/*.json
 .audits/*.txt
+.audits/*.log
 
 # Diagnostic reports
 report.[0-9]*.[0-9]*.[0-9]*.[0-9]*.json

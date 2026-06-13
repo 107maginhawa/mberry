@@ -45,6 +45,31 @@ describe('terminateMembership', () => {
     expect(response.body.status).toBe('removed');
   });
 
+  // FIX-006 / G-08: officer transition writes a status-history audit row
+  test('writes a membership_status_history row on terminate (FIX-006)', async () => {
+    mocks = stubRepo(MembershipRepository, {
+      findOneById: async () => fakeMembership,
+      updateOneById: async (_id: string, data: any) => ({ ...fakeMembership, ...data }),
+    });
+
+    const ctx = makeCtx({
+      _params: { membershipId: 'mem-1' },
+      _body: { terminationReason: 'Non-payment of dues' },
+    });
+
+    await terminateMembership(ctx);
+
+    const inserts = (ctx.get('database') as any)._inserted as any[];
+    expect(inserts.length).toBeGreaterThanOrEqual(1);
+    const row = inserts[inserts.length - 1];
+    expect(row.membershipId).toBe('mem-1');
+    expect(row.personId).toBe('person-1');
+    expect(row.fromStatus).toBe('active');
+    expect(row.toStatus).toBe('removed');
+    expect(row.reason).toBe('Non-payment of dues');
+    expect(row.changedBy).toBe('user-1');
+  });
+
   test('throws NotFoundError for non-existent membership', async () => {
     mocks = stubRepo(MembershipRepository, {
       findOneById: async () => undefined,

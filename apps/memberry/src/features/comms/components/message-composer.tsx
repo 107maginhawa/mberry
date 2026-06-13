@@ -70,11 +70,12 @@ export function MessageComposer({ roomId, wsSend, onMessageSent }: MessageCompos
         value={draft}
         onChange={(e) => {
           setDraft(e.target.value)
-          // Emit typing event throttled to once per 2s
+          // Emit typing event throttled to once per 2s.
+          // Server reads `data.isTyping` and broadcasts { from, isTyping }.
           const now = Date.now()
           if (wsSend && now - typingThrottleRef.current > 2000) {
             typingThrottleRef.current = now
-            wsSend('chat.typing', { roomId })
+            wsSend('chat.typing', { isTyping: true })
           }
         }}
         onKeyDown={handleKeyDown}

@@ -1,4 +1,4 @@
-import { readFileSync, writeFileSync, statSync, readdirSync } from 'fs';
+import { readFileSync, writeFileSync, readdirSync } from 'fs';
 import { join } from 'path';
 import { execSync } from 'child_process';
 
@@ -29,14 +29,7 @@ function countModuleSpecs(): number {
 }
 
 function countAdrs(): number {
-  try { return readdirSync('docs/adr').filter(f => /^\d{4}-/.test(f)).length; } catch { return 0; }
-}
-
-function oliFreshDays(): number {
-  try {
-    const s = statSync('docs/audits/codebase-map/CONFIDENCE_REPORT.md');
-    return Math.floor((Date.now() - s.mtimeMs) / 86_400_000);
-  } catch { return -1; }
+  try { return readdirSync('docs/architecture/adr').filter(f => /^\d{4}-/.test(f)).length; } catch { return 0; }
 }
 
 const e2eTotals = e2eDepth.totals ?? { realFlow: 0, selectorOnly: 0, unknown: 0 };
@@ -61,7 +54,6 @@ Plan: \`~/.claude/plans/so-is-our-codebase-hidden-dream.md\`
 | Contract coverage | ${contractCov.totals?.coveragePercent ?? 0}% | ≥60% | W4 |
 | E2E real-flow | ${e2eTotals.realFlow}/${e2eTotal} | 100% | W2 (handoff active) |
 | MODULE_SPEC | ${countModuleSpecs()} | full coverage | W5 |
-| OLI map freshness | ${oliFreshDays()} days | < 7 days | W5 ✅ |
 | TypeSpec | 59 .tsp files | 100% live routes | W6 ✅ |
 | Hand-wired allowlist | YAML-gated | YAML-gated | W6 ✅ |
 | Verb-convention | lint strict in CI | lint-gated | W7 ✅ |

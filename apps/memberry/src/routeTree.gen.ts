@@ -14,9 +14,7 @@ import { Route as OnboardingRouteImport } from './routes/onboarding'
 import { Route as AuthenticatedRouteImport } from './routes/_authenticated'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as JoinIndexRouteImport } from './routes/join/index'
-import { Route as VerifyTokenRouteImport } from './routes/verify/$token'
-import { Route as VerifyCredentialNumberRouteImport } from './routes/verify/$credentialNumber'
-import { Route as VerifyCertificateNumberRouteImport } from './routes/verify/$certificateNumber'
+import { Route as VerifyIdRouteImport } from './routes/verify/$id'
 import { Route as PayTokenRouteImport } from './routes/pay/$token'
 import { Route as JoinSlugRouteImport } from './routes/join/$slug'
 import { Route as InviteTokenRouteImport } from './routes/invite/$token'
@@ -161,19 +159,9 @@ const JoinIndexRoute = JoinIndexRouteImport.update({
   path: '/join/',
   getParentRoute: () => rootRouteImport,
 } as any)
-const VerifyTokenRoute = VerifyTokenRouteImport.update({
-  id: '/verify/$token',
-  path: '/verify/$token',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const VerifyCredentialNumberRoute = VerifyCredentialNumberRouteImport.update({
-  id: '/verify/$credentialNumber',
-  path: '/verify/$credentialNumber',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const VerifyCertificateNumberRoute = VerifyCertificateNumberRouteImport.update({
-  id: '/verify/$certificateNumber',
-  path: '/verify/$certificateNumber',
+const VerifyIdRoute = VerifyIdRouteImport.update({
+  id: '/verify/$id',
+  path: '/verify/$id',
   getParentRoute: () => rootRouteImport,
 } as any)
 const PayTokenRoute = PayTokenRouteImport.update({
@@ -891,9 +879,7 @@ export interface FileRoutesByFullPath {
   '/invite/$token': typeof InviteTokenRoute
   '/join/$slug': typeof JoinSlugRoute
   '/pay/$token': typeof PayTokenRoute
-  '/verify/$certificateNumber': typeof VerifyCertificateNumberRoute
-  '/verify/$credentialNumber': typeof VerifyCredentialNumberRoute
-  '/verify/$token': typeof VerifyTokenRoute
+  '/verify/$id': typeof VerifyIdRoute
   '/join/': typeof JoinIndexRoute
   '/org/$orgSlug': typeof AuthenticatedOrgOrgSlugRouteRouteWithChildren
   '/my/billing': typeof AuthenticatedMyBillingRoute
@@ -1019,9 +1005,7 @@ export interface FileRoutesByTo {
   '/invite/$token': typeof InviteTokenRoute
   '/join/$slug': typeof JoinSlugRoute
   '/pay/$token': typeof PayTokenRoute
-  '/verify/$certificateNumber': typeof VerifyCertificateNumberRoute
-  '/verify/$credentialNumber': typeof VerifyCredentialNumberRoute
-  '/verify/$token': typeof VerifyTokenRoute
+  '/verify/$id': typeof VerifyIdRoute
   '/join': typeof JoinIndexRoute
   '/org/$orgSlug': typeof AuthenticatedOrgOrgSlugRouteRouteWithChildren
   '/my/billing': typeof AuthenticatedMyBillingRoute
@@ -1145,9 +1129,7 @@ export interface FileRoutesById {
   '/invite/$token': typeof InviteTokenRoute
   '/join/$slug': typeof JoinSlugRoute
   '/pay/$token': typeof PayTokenRoute
-  '/verify/$certificateNumber': typeof VerifyCertificateNumberRoute
-  '/verify/$credentialNumber': typeof VerifyCredentialNumberRoute
-  '/verify/$token': typeof VerifyTokenRoute
+  '/verify/$id': typeof VerifyIdRoute
   '/join/': typeof JoinIndexRoute
   '/_authenticated/org/$orgSlug': typeof AuthenticatedOrgOrgSlugRouteRouteWithChildren
   '/_authenticated/my/billing': typeof AuthenticatedMyBillingRoute
@@ -1275,9 +1257,7 @@ export interface FileRouteTypes {
     | '/invite/$token'
     | '/join/$slug'
     | '/pay/$token'
-    | '/verify/$certificateNumber'
-    | '/verify/$credentialNumber'
-    | '/verify/$token'
+    | '/verify/$id'
     | '/join/'
     | '/org/$orgSlug'
     | '/my/billing'
@@ -1403,9 +1383,7 @@ export interface FileRouteTypes {
     | '/invite/$token'
     | '/join/$slug'
     | '/pay/$token'
-    | '/verify/$certificateNumber'
-    | '/verify/$credentialNumber'
-    | '/verify/$token'
+    | '/verify/$id'
     | '/join'
     | '/org/$orgSlug'
     | '/my/billing'
@@ -1528,9 +1506,7 @@ export interface FileRouteTypes {
     | '/invite/$token'
     | '/join/$slug'
     | '/pay/$token'
-    | '/verify/$certificateNumber'
-    | '/verify/$credentialNumber'
-    | '/verify/$token'
+    | '/verify/$id'
     | '/join/'
     | '/_authenticated/org/$orgSlug'
     | '/_authenticated/my/billing'
@@ -1657,9 +1633,7 @@ export interface RootRouteChildren {
   InviteTokenRoute: typeof InviteTokenRoute
   JoinSlugRoute: typeof JoinSlugRoute
   PayTokenRoute: typeof PayTokenRoute
-  VerifyCertificateNumberRoute: typeof VerifyCertificateNumberRoute
-  VerifyCredentialNumberRoute: typeof VerifyCredentialNumberRoute
-  VerifyTokenRoute: typeof VerifyTokenRoute
+  VerifyIdRoute: typeof VerifyIdRoute
   JoinIndexRoute: typeof JoinIndexRoute
 }
 
@@ -1700,25 +1674,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof JoinIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/verify/$token': {
-      id: '/verify/$token'
-      path: '/verify/$token'
-      fullPath: '/verify/$token'
-      preLoaderRoute: typeof VerifyTokenRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/verify/$credentialNumber': {
-      id: '/verify/$credentialNumber'
-      path: '/verify/$credentialNumber'
-      fullPath: '/verify/$credentialNumber'
-      preLoaderRoute: typeof VerifyCredentialNumberRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/verify/$certificateNumber': {
-      id: '/verify/$certificateNumber'
-      path: '/verify/$certificateNumber'
-      fullPath: '/verify/$certificateNumber'
-      preLoaderRoute: typeof VerifyCertificateNumberRouteImport
+    '/verify/$id': {
+      id: '/verify/$id'
+      path: '/verify/$id'
+      fullPath: '/verify/$id'
+      preLoaderRoute: typeof VerifyIdRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/pay/$token': {
@@ -3035,9 +2995,7 @@ const rootRouteChildren: RootRouteChildren = {
   InviteTokenRoute: InviteTokenRoute,
   JoinSlugRoute: JoinSlugRoute,
   PayTokenRoute: PayTokenRoute,
-  VerifyCertificateNumberRoute: VerifyCertificateNumberRoute,
-  VerifyCredentialNumberRoute: VerifyCredentialNumberRoute,
-  VerifyTokenRoute: VerifyTokenRoute,
+  VerifyIdRoute: VerifyIdRoute,
   JoinIndexRoute: JoinIndexRoute,
 }
 export const routeTree = rootRouteImport

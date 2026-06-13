@@ -11,6 +11,7 @@ import type { DatabaseInstance } from '@/core/database';
 import { eq } from 'drizzle-orm';
 import { ValidationError } from '@/core/errors';
 import { supportTickets, ticketComments } from './repos/platform-admin.schema';
+import { domainEvents } from '@/core/domain-events';
 
 interface SessionLike {
   userId?: string;
@@ -52,6 +53,28 @@ export async function addTicketComment(ctx: Context): Promise<Response> {
     content,
     isInternal: isInternal === true && !!admin,
   }).returning();
+
+  // FIX-012 (G12 / PA-8): "Officer replies to a resolved ticket: Ticket
+  // re-opens automatically." Only a non-admin reply counts as an officer reply
+  // (the 403 guard above proves a non-admin commenter is the reporter); admins
+  // drive status via updateTicketStatus, not by commenting. The assignee is
+  // alerted through the domain event bus.
+  if (!admin && ticket.status === 'resolved') {
+    await db
+      .update(supportTickets)
+      .set({ status: 'open', updatedAt: new Date(), updatedBy: userId })
+      .where(eq(supportTickets.id, ticketId));
+
+    domainEvents
+      .emit('ticket.reopened', {
+        ticketId,
+        organizationId: ticket.organizationId,
+        assignedTo: ticket.assignedTo,
+        reopenedBy: userId,
+        subject: ticket.subject,
+      })
+      .catch(() => {});
+  }
 
   return ctx.json({ data: comment }, 201);
 }

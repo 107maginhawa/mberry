@@ -3,7 +3,7 @@ import type { DatabaseInstance } from '@/core/database';
 import type { VerifyDigitalCredentialAuthenticatedBody } from '@/generated/openapi/validators';
 import { UnauthorizedError } from '@/core/errors';
 import { DigitalCredentialRepository } from '@/handlers/association:member/repos/credentials.repo';
-import { verifyCredentialToken } from '@/handlers/association:member/utils/credential-token';
+import { verifyCredentialToken, resolveCredentialVerifySecret } from '@/handlers/association:member/utils/credential-token';
 
 /**
  * verifyDigitalCredentialAuthenticated
@@ -21,7 +21,17 @@ export async function verifyDigitalCredentialAuthenticated(
   if (!session) throw new UnauthorizedError();
 
   const body = ctx.req.valid('json');
-  const secret = process.env['CREDENTIAL_VERIFY_SECRET'] || 'dev-credential-verify-secret';
+
+  // FIX-012 follow-up (G16): fail closed. If the verify secret is unset in
+  // production, resolveCredentialVerifySecret() throws rather than fall back to a
+  // guessable literal — treat that as "cannot verify" (notFound) instead of
+  // validating a forgeable token. Mirrors verifyCredentialPublic.ts.
+  let secret: string;
+  try {
+    secret = resolveCredentialVerifySecret();
+  } catch {
+    return ctx.json({ result: 'notFound', credential: null }, 200);
+  }
 
   const payload = verifyCredentialToken(body.token, secret);
   if (!payload) {

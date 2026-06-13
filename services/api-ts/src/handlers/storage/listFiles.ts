@@ -10,6 +10,7 @@ import {
 } from '@/core/errors';
 import { type StoredFile } from './repos/file.schema';
 import { StorageFileRepository } from './repos/file.repo';
+import { deriveAuditUserType } from '@/core/audit/derive-user-type';
 import { parsePagination, buildPaginationMeta, parseFilters } from '@/utils/query';
 import { userHasRole } from '@/utils/auth';
 
@@ -69,7 +70,7 @@ export async function listFiles(
         outcome: 'success',
         organizationId: ctx.get('organizationId'),
         user: user.id,
-        userType: (user.role === 'user' ? 'client' : user.role || 'client') as 'client' | 'host' | 'admin' | 'system',
+        userType: deriveAuditUserType(user.role),
         resourceType: 'file',
         resource: 'multiple',
         description: `File listing access by user ${user.id}`,

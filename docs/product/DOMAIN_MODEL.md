@@ -16,11 +16,7 @@ Generated from 37 Drizzle ORM schema files + spec review additions. Source of tr
 All tables inherit 6 base entity fields from `core/database.schema.ts`:
 `id` (uuid PK), `createdAt`, `updatedAt`, `version` (optimistic locking), `createdBy`, `updatedBy`.
 
-> **Footnote — count reconciliation (C-3):** The 104/93 figures above are the documented Drizzle-managed surface (`services/api-ts/src/handlers/**/repos/*.schema.ts`). The engine codebase-map (CODE_DATA_MODEL v6) reports a higher total (~131 tables, ~122 enums) because it includes:
-> - Better-Auth managed tables (`user`, `account`, `session`, `verification`, `passkey`, `apikey`, `jwks`, `organization`, `member`, `invitation`, `oauthApplication`, `oauthAccessToken`, `oauthConsent`, `rateLimit`, `subscription`, `twoFactor`, …) — authored at `services/api-ts/src/generated/better-auth/schema.ts`, governed by the Better-Auth library spec, NOT this domain-model document.
-> - Internal junction/audit tables emitted by Drizzle that don't surface as first-class domain entities.
->
-> Net: documented domain surface = **104 tables + 93 enums** (Drizzle-managed, business-domain entities). Engine-emitted superset = **~131 tables + ~122 enums** (incl. Better-Auth + Drizzle internals). The delta is by design and tracked at the Compliance dim (CMP-P3-012 informational).
+> **Footnote — count scope (C-3):** The 104/93 figures above are the documented Drizzle-managed business-domain surface (`services/api-ts/src/handlers/**/repos/*.schema.ts`). Better-Auth managed tables (`user`, `account`, `session`, `organization`, `member`, `invitation`, etc. — authored at `services/api-ts/src/generated/better-auth/schema.ts`) and internal junction/audit tables are excluded by design; they are governed by the Better-Auth library spec, NOT this domain-model document.
 
 ---
 
@@ -1898,8 +1894,4 @@ The following enums appear in code (`fsm:*`) but are intentionally **excluded** 
 | `fsm:detail-tab` | UI tab selector (active tab on member-detail / org-detail / etc.) — presentation state, not domain status | Frontend route components |
 | `fsm:sort-by` | UI sort-order selector on list pages — presentation state, not domain status | Frontend list components |
 
-These are reported by the engine map as `spec_comparison.code_only` and routed to the Compliance dim's `unverified` bucket (informational, never score-affecting per R1 trust contract).
-
-#### Engine matcher edge cases (acknowledged)
-
-- `billing_frequency` row is authored above (entity `billingFrequency`) but the engine matcher requires a `_status` suffix on the enum identifier (`fsm:billing-frequency` ≠ `*_status`). Filed upstream at `~/Desktop/oli-engine/BACKLOG.md` as the `_status`-suffix matcher edge case. Until upstream lands, this row contributes 1 to the `unverified` bucket.
+These `fsm:*` enums are intentionally out-of-scope for the domain FSM table above (UI/presentation state, not domain object lifecycle).

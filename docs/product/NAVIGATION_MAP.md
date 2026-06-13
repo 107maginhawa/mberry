@@ -2,9 +2,7 @@
 name: navigation-map-consolidated
 route-count: 147
 derived-from-head: bf8b8fdd
-derived-from-map: 80312e6e
 last-generated: 2026-06-03T01:03:31.717Z
-last-generated-by: scripts/generate-navigation-map.ts (P2-14)
 ---
 
 # Navigation Map — Consolidated
@@ -17,9 +15,7 @@ Each per-module `NAVIGATION_MAP.md` file carries frontmatter declaring:
 - `name: navigation-map` — sentinel for journeys-dim consumers
 - `module: m{NN}-{slug}` — the product module ID this file anchors
 - `route-count: <int>` — number of routes assigned to this module
-- `derivation: heuristic-path-tokens-from-CODE_ROUTE_MAP` — provenance
 - `derived-from-head: <git_sha>` — code anchor
-- `derived-from-map: <map_sha>` — codebase-map snapshot anchor
 - `last-generated: <ISO-8601>` — regeneration timestamp
 - `status: INFERRED | NO-UI (deferred|backend-only) | HUMAN-REVIEWED`
 
@@ -52,12 +48,3 @@ Body is a table of routes (path, logical, page_component, app, auth, params, mid
 | m21-billing | 0 | ⊘ no-ui |
 | m22-email | 0 | ⊘ no-ui |
 
-## Re-generation
-
-```sh
-bun scripts/generate-navigation-map.ts
-git add docs/product/NAVIGATION_MAP.md docs/product/modules/*/NAVIGATION_MAP.md
-git commit -m 'docs(nav-map): regenerate after route changes'
-```
-
-Re-run after any route add, rename, or removal. Always commit alongside the route change.

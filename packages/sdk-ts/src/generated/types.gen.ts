@@ -9512,6 +9512,10 @@ export type BulkIssueCertificatesRequest = {
      */
     personIds: Array<string>;
     /**
+     * ID of the real training activity these certificates link to (FIX-006). Optional/nullable-tolerant: when omitted the cert is issued unlinked (trainingId NULL). When supplied it must reference an actual training row and re-keys the per-(training, person) uniqueness.
+     */
+    trainingId?: string;
+    /**
      * Title of the training activity
      */
     trainingTitle: string;
@@ -10944,6 +10948,14 @@ export type ChatRoom = {
      */
     updatedBy?: string;
     /**
+     * Channel display name (e.g., "general", "events"). Null for DMs.
+     */
+    name?: string;
+    /**
+     * Room kind: channel (org-wide, officer-created), dm (1:1), or group
+     */
+    roomType: 'channel' | 'dm' | 'group';
+    /**
      * Room participants (e.g., [client, host])
      */
     participants: Array<Uuid>;
@@ -10952,7 +10964,7 @@ export type ChatRoom = {
      */
     admins: Array<Uuid>;
     /**
-     * Optional context ID for contextual associations (e.g., booking ID, billing session ID)
+     * Optional context link for contextual associations (e.g., booking ID, billing session ID, or a channel:* slug). Free-form string, not necessarily a UUID.
      */
     context?: string;
     /**
@@ -11026,6 +11038,11 @@ export type ChatRoomListResponse = {
 export type ChatRoomStatus = 'active' | 'archived';
 
 /**
+ * Chat room kind
+ */
+export type ChatRoomType = 'channel' | 'dm' | 'group';
+
+/**
  * Communication room with admin-controlled video calls
  */
 export type ChatRoomUpdate = {
@@ -11054,6 +11071,14 @@ export type ChatRoomUpdate = {
      */
     updatedBy?: string;
     /**
+     * Channel display name (e.g., "general", "events"). Null for DMs.
+     */
+    name?: string;
+    /**
+     * Room kind: channel (org-wide, officer-created), dm (1:1), or group
+     */
+    roomType?: 'channel' | 'dm' | 'group';
+    /**
      * Room participants (e.g., [client, host])
      */
     participants?: Array<Uuid>;
@@ -11062,7 +11087,7 @@ export type ChatRoomUpdate = {
      */
     admins?: Array<Uuid>;
     /**
-     * Optional context ID for contextual associations (e.g., booking ID, billing session ID)
+     * Optional context link for contextual associations (e.g., booking ID, billing session ID, or a channel:* slug). Free-form string, not necessarily a UUID.
      */
     context?: string;
     /**
@@ -12892,7 +12917,15 @@ export type CreateCampaignRequest = {
  */
 export type CreateChatRoomRequest = {
     /**
-     * Participant IDs (e.g., [client, host])
+     * Channel display name (required for channels; ignored for DMs/groups)
+     */
+    name?: string;
+    /**
+     * Room kind. Defaults to group. 'channel' creation is officer-only; the creator auto-joins as admin.
+     */
+    roomType?: 'channel' | 'dm' | 'group';
+    /**
+     * Participant IDs (e.g., [client, host]). May be empty for a channel — the creator is auto-added.
      */
     participants: Array<Uuid>;
     /**
@@ -12900,7 +12933,7 @@ export type CreateChatRoomRequest = {
      */
     admins?: Array<Uuid>;
     /**
-     * Optional context ID for contextual associations (e.g., booking ID, billing session ID)
+     * Optional context link for contextual associations (e.g., booking ID, billing session ID, or a channel:* slug). Free-form string, not necessarily a UUID.
      */
     context?: string;
     /**
@@ -21979,6 +22012,16 @@ export type MembershipResignRequest = {
 export type MembershipStatus = 'pendingPayment' | 'active' | 'gracePeriod' | 'lapsed' | 'expired' | 'suspended' | 'removed' | 'resigned' | 'deceased' | 'expelled';
 
 /**
+ * Request to suspend a membership
+ */
+export type MembershipSuspendRequest = {
+    /**
+     * Reason for the administrative suspension
+     */
+    reason?: string;
+};
+
+/**
  * Request to terminate a membership
  */
 export type MembershipTerminateRequest = {
@@ -23052,6 +23095,14 @@ export type MyDataExport = {
      * Notification history for this person
      */
     notifications: Array<unknown>;
+    /**
+     * All certificates issued to this person
+     */
+    certificates: Array<unknown>;
+    /**
+     * PRC professional license ID, if recorded (DPA portability)
+     */
+    prcId?: string;
 };
 
 /**
@@ -24096,6 +24147,24 @@ export type OnboardingStateResponse = {
 };
 
 /**
+ * Paginated list of orders
+ */
+export type OrderListResponse = {
+    /**
+     * Page of orders
+     */
+    data: Array<MarketplaceOrder>;
+    /**
+     * Pagination metadata
+     */
+    pagination: {
+        total: number;
+        limit: number;
+        offset: number;
+    };
+};
+
+/**
  * Lifecycle status of a marketplace order
  */
 export type OrderStatus = 'pending' | 'confirmed' | 'fulfilled' | 'cancelled' | 'refunded';
@@ -24562,6 +24631,152 @@ export type OrganizationProfile = {
      * Founding date of the organization
      */
     foundingDate?: Date;
+};
+
+/**
+ * Request body to add a comment to a support ticket
+ */
+export type PaAddTicketCommentRequest = {
+    /**
+     * Comment body
+     */
+    content: string;
+    /**
+     * When true, the note is internal (admin-only visibility)
+     */
+    isInternal?: boolean;
+};
+
+/**
+ * Request body to cancel a subscription
+ */
+export type PaCancelSubscriptionRequest = {
+    /**
+     * Reason for cancellation
+     */
+    reason: string;
+};
+
+/**
+ * Request body to create a platform subscription for an organisation (UJ-M03). The org pays a flat band price for a tier that covers up to maxMembers members.
+ */
+export type PaCreateSubscriptionRequest = {
+    /**
+     * Organisation the subscription is for
+     */
+    organizationId: string;
+    /**
+     * Chosen pricing tier. When omitted, the cheapest active tier that covers the org's active member count is selected; if none fits, an explicit tierId is required.
+     */
+    tierId?: string;
+    /**
+     * Billing cycle: monthly (default) or annual
+     */
+    billingCycle?: string;
+};
+
+/**
+ * Request body to create or update a pricing tier
+ */
+export type PaPricingTierRequest = {
+    /**
+     * Tier display name
+     */
+    name?: string;
+    /**
+     * URL-safe tier slug
+     */
+    slug?: string;
+    /**
+     * Monthly price in cents
+     */
+    monthlyPrice?: number;
+    /**
+     * Annual price in cents
+     */
+    annualPrice?: number;
+    /**
+     * ISO 4217 currency code
+     */
+    currency?: string;
+    /**
+     * Maximum members allowed on the tier
+     */
+    maxMembers?: number;
+    /**
+     * Trial period length in days
+     */
+    trialDays?: number;
+    /**
+     * Feature flags / labels included in the tier
+     */
+    features?: Array<string>;
+    /**
+     * Whether the tier is active and selectable
+     */
+    isActive?: boolean;
+    /**
+     * Sort order for display
+     */
+    sortOrder?: number;
+};
+
+/**
+ * Request body to record a new personal-data breach incident (DPA 2012 / M3-R11)
+ */
+export type PaReportBreachRequest = {
+    /**
+     * Organisation the breach affects (optional)
+     */
+    organizationId?: string;
+    /**
+     * ISO timestamp the breach was discovered
+     */
+    discoveredAt: string;
+    /**
+     * Description of the breach
+     */
+    description: string;
+    /**
+     * Number of affected records
+     */
+    affectedRecordsCount?: number;
+    /**
+     * Categories of data involved
+     */
+    dataCategories?: Array<string>;
+};
+
+/**
+ * Request body to transition a breach incident's status
+ */
+export type PaUpdateBreachStatusRequest = {
+    /**
+     * Target status: investigating, notified, or resolved
+     */
+    status: string;
+    /**
+     * NPC reference number (required when transitioning to notified)
+     */
+    npcReferenceNumber?: string;
+};
+
+/**
+ * Request body to transition a support ticket's status
+ */
+export type PaUpdateTicketStatusRequest = {
+    /**
+     * Target ticket status
+     */
+    status?: string;
+    /**
+     * User the ticket is assigned to
+     */
+    assignedTo?: string;
+    /**
+     * Resolution note
+     */
+    resolution?: string;
 };
 
 /**
@@ -31301,7 +31516,7 @@ export type TrainingEnrollment = {
     /**
      * Current enrollment status
      */
-    status: 'enrolled' | 'in_progress' | 'completed' | 'withdrawn' | 'no_show';
+    status: 'payment_pending' | 'enrolled' | 'in_progress' | 'completed' | 'withdrawn' | 'no_show';
     /**
      * UTC timestamp when the learner completed the training
      */
@@ -31314,6 +31529,30 @@ export type TrainingEnrollment = {
      * Reference to the CE credit ledger entry if credit was awarded
      */
     creditEntryId?: string;
+    /**
+     * Storage key of the offline payment proof (TC-DEC-01 proof-of-payment)
+     */
+    proofStorageKey?: string;
+    /**
+     * File name of the offline payment proof
+     */
+    proofFileName?: string;
+    /**
+     * MIME type of the offline payment proof
+     */
+    proofMimeType?: string;
+    /**
+     * UTC timestamp when the member submitted payment proof
+     */
+    paymentSubmittedAt?: Date;
+    /**
+     * Officer who confirmed offline payment
+     */
+    paymentConfirmedBy?: string;
+    /**
+     * UTC timestamp when an officer confirmed offline payment
+     */
+    paymentConfirmedAt?: Date;
 };
 
 /**
@@ -31394,7 +31633,7 @@ export type TrainingEnrollmentListResponse = {
 /**
  * Enrollment status for a training session
  */
-export type TrainingEnrollmentStatus = 'enrolled' | 'in_progress' | 'completed' | 'withdrawn' | 'no_show';
+export type TrainingEnrollmentStatus = 'payment_pending' | 'enrolled' | 'in_progress' | 'completed' | 'withdrawn' | 'no_show';
 
 /**
  * Enrollment of a person in an instructor-led training session
@@ -31439,7 +31678,7 @@ export type TrainingEnrollmentUpdate = {
     /**
      * Current enrollment status
      */
-    status?: 'enrolled' | 'in_progress' | 'completed' | 'withdrawn' | 'no_show';
+    status?: 'payment_pending' | 'enrolled' | 'in_progress' | 'completed' | 'withdrawn' | 'no_show';
     /**
      * UTC timestamp when the learner completed the training
      */
@@ -31452,6 +31691,30 @@ export type TrainingEnrollmentUpdate = {
      * Reference to the CE credit ledger entry if credit was awarded
      */
     creditEntryId?: string;
+    /**
+     * Storage key of the offline payment proof (TC-DEC-01 proof-of-payment)
+     */
+    proofStorageKey?: string;
+    /**
+     * File name of the offline payment proof
+     */
+    proofFileName?: string;
+    /**
+     * MIME type of the offline payment proof
+     */
+    proofMimeType?: string;
+    /**
+     * UTC timestamp when the member submitted payment proof
+     */
+    paymentSubmittedAt?: Date;
+    /**
+     * Officer who confirmed offline payment
+     */
+    paymentConfirmedBy?: string;
+    /**
+     * UTC timestamp when an officer confirmed offline payment
+     */
+    paymentConfirmedAt?: Date;
 };
 
 /**
@@ -31499,6 +31762,24 @@ export type TrainingListResponse = {
          */
         hasPreviousPage: boolean;
     };
+};
+
+/**
+ * Request body for attaching offline payment proof to a paid training enrollment (TC-DEC-01 proof-of-payment).
+ */
+export type TrainingPaymentProofRequest = {
+    /**
+     * Storage key of the uploaded proof document
+     */
+    proofStorageKey: string;
+    /**
+     * Original file name of the uploaded proof
+     */
+    proofFileName?: string;
+    /**
+     * MIME type of the uploaded proof
+     */
+    proofMimeType?: string;
 };
 
 /**
@@ -31765,6 +32046,36 @@ export type UpdateJobBoardPostingRequest = {
      * Lifecycle status
      */
     status?: 'draft' | 'active' | 'filled' | 'expired' | 'closed';
+};
+
+/**
+ * Request body for updating a listing (editable fields and/or lifecycle transition)
+ */
+export type UpdateMarketplaceListingRequest = {
+    /**
+     * Listing title
+     */
+    title?: string;
+    /**
+     * Listing description
+     */
+    description?: string;
+    /**
+     * Unit price as decimal string
+     */
+    price?: string;
+    /**
+     * ISO 4217 currency code
+     */
+    currency?: string;
+    /**
+     * Lifecycle status transition (draft → active → archived)
+     */
+    status?: 'draft' | 'active' | 'archived';
+    /**
+     * Category tags
+     */
+    categoryTags?: Array<string>;
 };
 
 /**
@@ -32253,6 +32564,11 @@ export type VendorListResponse = {
 export type VendorStatus = 'pending' | 'verified' | 'suspended' | 'rejected';
 
 /**
+ * Officer decision when reviewing a vendor's verification
+ */
+export type VendorVerificationDecision = 'verified' | 'rejected' | 'suspended';
+
+/**
  * Result of a credential verification attempt
  */
 export type VerificationResult = 'valid' | 'expired' | 'revoked' | 'notFound';
@@ -32356,6 +32672,16 @@ export type VerifyCredentialResult = {
      * Human-readable explanation of the result
      */
     message: string;
+};
+
+/**
+ * Officer's vendor verification decision. Defaults to 'verified' when omitted.
+ */
+export type VerifyVendorRequest = {
+    /**
+     * Target review decision: approve (verified), reject, or suspend.
+     */
+    decision?: 'verified' | 'rejected' | 'suspended';
 };
 
 /**
@@ -33384,6 +33710,11 @@ export type AssociationCoreDocumentsDocumentSearchParamsOwnerId = string;
 export type AssociationCoreDocumentsDocumentSearchParamsOwnerType = string;
 
 /**
+ * Filter by publication status. Non-officer callers are always restricted to 'published' regardless of this value.
+ */
+export type AssociationCoreDocumentsDocumentSearchParamsStatus = 'draft' | 'published' | 'archived';
+
+/**
  * Filter by tag name.
  */
 export type AssociationCoreDocumentsDocumentSearchParamsTag = string;
@@ -34015,6 +34346,119 @@ export type UpdateAssociationResponses = {
 
 export type UpdateAssociationResponse = UpdateAssociationResponses[keyof UpdateAssociationResponses];
 
+export type ListBreachesData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/admin/breaches';
+};
+
+export type ListBreachesErrors = {
+    /**
+     * Unauthorized access response
+     */
+    401: AuthenticationError;
+    /**
+     * Forbidden access response
+     */
+    403: AuthorizationError;
+};
+
+export type ListBreachesError = ListBreachesErrors[keyof ListBreachesErrors];
+
+export type ListBreachesResponses = {
+    /**
+     * Success response with data
+     */
+    200: {
+        data: Array<{
+            [key: string]: unknown;
+        }>;
+    };
+};
+
+export type ListBreachesResponse = ListBreachesResponses[keyof ListBreachesResponses];
+
+export type ReportBreachData = {
+    body: PaReportBreachRequest;
+    path?: never;
+    query?: never;
+    url: '/admin/breaches';
+};
+
+export type ReportBreachErrors = {
+    /**
+     * Validation error response
+     */
+    400: ValidationError;
+    /**
+     * Unauthorized access response
+     */
+    401: AuthenticationError;
+    /**
+     * Forbidden access response
+     */
+    403: AuthorizationError;
+};
+
+export type ReportBreachError = ReportBreachErrors[keyof ReportBreachErrors];
+
+export type ReportBreachResponses = {
+    /**
+     * Resource created response
+     */
+    201: {
+        data: {
+            [key: string]: unknown;
+        };
+    };
+};
+
+export type ReportBreachResponse = ReportBreachResponses[keyof ReportBreachResponses];
+
+export type UpdateBreachStatusData = {
+    body: PaUpdateBreachStatusRequest;
+    path: {
+        id: string;
+    };
+    query?: never;
+    url: '/admin/breaches/{id}';
+};
+
+export type UpdateBreachStatusErrors = {
+    /**
+     * Validation error response
+     */
+    400: ValidationError;
+    /**
+     * Unauthorized access response
+     */
+    401: AuthenticationError;
+    /**
+     * Forbidden access response
+     */
+    403: AuthorizationError;
+    /**
+     * Resource not found response
+     */
+    404: NotFoundError;
+};
+
+export type UpdateBreachStatusError = UpdateBreachStatusErrors[keyof UpdateBreachStatusErrors];
+
+export type UpdateBreachStatusResponses = {
+    /**
+     * Success response with data
+     */
+    200: {
+        data: {
+            [key: string]: unknown;
+        };
+    };
+};
+
+export type UpdateBreachStatusResponse = UpdateBreachStatusResponses[keyof UpdateBreachStatusResponses];
+
 export type ListAllCommitteesData = {
     body?: never;
     path?: never;
@@ -34632,6 +35076,279 @@ export type TransitionOrgStatusResponses = {
 
 export type TransitionOrgStatusResponse = TransitionOrgStatusResponses[keyof TransitionOrgStatusResponses];
 
+export type ListPricingTiersData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/admin/pricing';
+};
+
+export type ListPricingTiersErrors = {
+    /**
+     * Unauthorized access response
+     */
+    401: AuthenticationError;
+    /**
+     * Forbidden access response
+     */
+    403: AuthorizationError;
+};
+
+export type ListPricingTiersError = ListPricingTiersErrors[keyof ListPricingTiersErrors];
+
+export type ListPricingTiersResponses = {
+    /**
+     * Success response with data
+     */
+    200: {
+        data: Array<{
+            [key: string]: unknown;
+        }>;
+    };
+};
+
+export type ListPricingTiersResponse = ListPricingTiersResponses[keyof ListPricingTiersResponses];
+
+export type CreatePricingTierData = {
+    body: PaPricingTierRequest;
+    path?: never;
+    query?: never;
+    url: '/admin/pricing';
+};
+
+export type CreatePricingTierErrors = {
+    /**
+     * Validation error response
+     */
+    400: ValidationError;
+    /**
+     * Unauthorized access response
+     */
+    401: AuthenticationError;
+    /**
+     * Forbidden access response
+     */
+    403: AuthorizationError;
+};
+
+export type CreatePricingTierError = CreatePricingTierErrors[keyof CreatePricingTierErrors];
+
+export type CreatePricingTierResponses = {
+    /**
+     * Resource created response
+     */
+    201: {
+        data: {
+            [key: string]: unknown;
+        };
+    };
+};
+
+export type CreatePricingTierResponse = CreatePricingTierResponses[keyof CreatePricingTierResponses];
+
+export type UpdatePricingTierData = {
+    body: PaPricingTierRequest;
+    path: {
+        tierId: string;
+    };
+    query?: never;
+    url: '/admin/pricing/{tierId}';
+};
+
+export type UpdatePricingTierErrors = {
+    /**
+     * Validation error response
+     */
+    400: ValidationError;
+    /**
+     * Unauthorized access response
+     */
+    401: AuthenticationError;
+    /**
+     * Forbidden access response
+     */
+    403: AuthorizationError;
+    /**
+     * Resource not found response
+     */
+    404: NotFoundError;
+};
+
+export type UpdatePricingTierError = UpdatePricingTierErrors[keyof UpdatePricingTierErrors];
+
+export type UpdatePricingTierResponses = {
+    /**
+     * Success response with data
+     */
+    200: {
+        data: {
+            [key: string]: unknown;
+        };
+    };
+};
+
+export type UpdatePricingTierResponse = UpdatePricingTierResponses[keyof UpdatePricingTierResponses];
+
+export type ListSubscriptionsData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/admin/subscriptions';
+};
+
+export type ListSubscriptionsErrors = {
+    /**
+     * Unauthorized access response
+     */
+    401: AuthenticationError;
+    /**
+     * Forbidden access response
+     */
+    403: AuthorizationError;
+};
+
+export type ListSubscriptionsError = ListSubscriptionsErrors[keyof ListSubscriptionsErrors];
+
+export type ListSubscriptionsResponses = {
+    /**
+     * Success response with data
+     */
+    200: {
+        data: Array<{
+            [key: string]: unknown;
+        }>;
+    };
+};
+
+export type ListSubscriptionsResponse = ListSubscriptionsResponses[keyof ListSubscriptionsResponses];
+
+export type CreateSubscriptionData = {
+    body: PaCreateSubscriptionRequest;
+    path?: never;
+    query?: never;
+    url: '/admin/subscriptions';
+};
+
+export type CreateSubscriptionErrors = {
+    /**
+     * Validation error response
+     */
+    400: ValidationError;
+    /**
+     * Unauthorized access response
+     */
+    401: AuthenticationError;
+    /**
+     * Forbidden access response
+     */
+    403: AuthorizationError;
+    /**
+     * Resource not found response
+     */
+    404: NotFoundError;
+};
+
+export type CreateSubscriptionError = CreateSubscriptionErrors[keyof CreateSubscriptionErrors];
+
+export type CreateSubscriptionResponses = {
+    /**
+     * Resource created response
+     */
+    201: {
+        data: {
+            [key: string]: unknown;
+        };
+    };
+};
+
+export type CreateSubscriptionResponse = CreateSubscriptionResponses[keyof CreateSubscriptionResponses];
+
+export type GetSubscriptionData = {
+    body?: never;
+    path: {
+        id: string;
+    };
+    query?: never;
+    url: '/admin/subscriptions/{id}';
+};
+
+export type GetSubscriptionErrors = {
+    /**
+     * Unauthorized access response
+     */
+    401: AuthenticationError;
+    /**
+     * Forbidden access response
+     */
+    403: AuthorizationError;
+    /**
+     * Resource not found response
+     */
+    404: NotFoundError;
+};
+
+export type GetSubscriptionError = GetSubscriptionErrors[keyof GetSubscriptionErrors];
+
+export type GetSubscriptionResponses = {
+    /**
+     * Success response with data
+     */
+    200: {
+        data: {
+            [key: string]: unknown;
+        };
+    };
+};
+
+export type GetSubscriptionResponse = GetSubscriptionResponses[keyof GetSubscriptionResponses];
+
+export type CancelSubscriptionData = {
+    body: PaCancelSubscriptionRequest;
+    path: {
+        id: string;
+    };
+    query?: never;
+    url: '/admin/subscriptions/{id}/cancel';
+};
+
+export type CancelSubscriptionErrors = {
+    /**
+     * Validation error response
+     */
+    400: ValidationError;
+    /**
+     * Unauthorized access response
+     */
+    401: AuthenticationError;
+    /**
+     * Forbidden access response
+     */
+    403: AuthorizationError;
+    /**
+     * Resource not found response
+     */
+    404: NotFoundError;
+    /**
+     * Conflict response
+     */
+    409: ConflictError;
+};
+
+export type CancelSubscriptionError = CancelSubscriptionErrors[keyof CancelSubscriptionErrors];
+
+export type CancelSubscriptionResponses = {
+    /**
+     * Success response with data
+     */
+    200: {
+        data: {
+            [key: string]: unknown;
+        };
+    };
+};
+
+export type CancelSubscriptionResponse = CancelSubscriptionResponses[keyof CancelSubscriptionResponses];
+
 export type ListAdminSurveysData = {
     body?: never;
     path?: never;
@@ -34678,11 +35395,182 @@ export type ListAdminSurveysResponses = {
 
 export type ListAdminSurveysResponse = ListAdminSurveysResponses[keyof ListAdminSurveysResponses];
 
+export type ListTicketsData = {
+    body?: never;
+    path?: never;
+    query?: {
+        /**
+         * Filter by ticket status
+         */
+        status?: string;
+        /**
+         * Filter by priority
+         */
+        priority?: string;
+        /**
+         * Filter by assignee user id
+         */
+        assignee?: string;
+    };
+    url: '/admin/tickets';
+};
+
+export type ListTicketsErrors = {
+    /**
+     * Unauthorized access response
+     */
+    401: AuthenticationError;
+    /**
+     * Forbidden access response
+     */
+    403: AuthorizationError;
+};
+
+export type ListTicketsError = ListTicketsErrors[keyof ListTicketsErrors];
+
+export type ListTicketsResponses = {
+    /**
+     * Success response with data
+     */
+    200: {
+        data: Array<{
+            [key: string]: unknown;
+        }>;
+    };
+};
+
+export type ListTicketsResponse = ListTicketsResponses[keyof ListTicketsResponses];
+
+export type GetTicketData = {
+    body?: never;
+    path: {
+        id: string;
+    };
+    query?: never;
+    url: '/admin/tickets/{id}';
+};
+
+export type GetTicketErrors = {
+    /**
+     * Unauthorized access response
+     */
+    401: AuthenticationError;
+    /**
+     * Forbidden access response
+     */
+    403: AuthorizationError;
+    /**
+     * Resource not found response
+     */
+    404: NotFoundError;
+};
+
+export type GetTicketError = GetTicketErrors[keyof GetTicketErrors];
+
+export type GetTicketResponses = {
+    /**
+     * Success response with data
+     */
+    200: {
+        data: {
+            [key: string]: unknown;
+        };
+    };
+};
+
+export type GetTicketResponse = GetTicketResponses[keyof GetTicketResponses];
+
+export type UpdateTicketStatusData = {
+    body: PaUpdateTicketStatusRequest;
+    path: {
+        id: string;
+    };
+    query?: never;
+    url: '/admin/tickets/{id}';
+};
+
+export type UpdateTicketStatusErrors = {
+    /**
+     * Validation error response
+     */
+    400: ValidationError;
+    /**
+     * Unauthorized access response
+     */
+    401: AuthenticationError;
+    /**
+     * Forbidden access response
+     */
+    403: AuthorizationError;
+    /**
+     * Resource not found response
+     */
+    404: NotFoundError;
+};
+
+export type UpdateTicketStatusError = UpdateTicketStatusErrors[keyof UpdateTicketStatusErrors];
+
+export type UpdateTicketStatusResponses = {
+    /**
+     * Success response with data
+     */
+    200: {
+        data: {
+            [key: string]: unknown;
+        };
+    };
+};
+
+export type UpdateTicketStatusResponse = UpdateTicketStatusResponses[keyof UpdateTicketStatusResponses];
+
+export type AddTicketCommentData = {
+    body: PaAddTicketCommentRequest;
+    path: {
+        id: string;
+    };
+    query?: never;
+    url: '/admin/tickets/{id}/comments';
+};
+
+export type AddTicketCommentErrors = {
+    /**
+     * Validation error response
+     */
+    400: ValidationError;
+    /**
+     * Unauthorized access response
+     */
+    401: AuthenticationError;
+    /**
+     * Forbidden access response
+     */
+    403: AuthorizationError;
+    /**
+     * Resource not found response
+     */
+    404: NotFoundError;
+};
+
+export type AddTicketCommentError = AddTicketCommentErrors[keyof AddTicketCommentErrors];
+
+export type AddTicketCommentResponses = {
+    /**
+     * Resource created response
+     */
+    201: {
+        data: {
+            [key: string]: unknown;
+        };
+    };
+};
+
+export type AddTicketCommentResponse = AddTicketCommentResponses[keyof AddTicketCommentResponses];
+
 export type CreateAdvertiserData = {
     body: CreateAdvertiserRequest;
     path?: never;
     query?: never;
-    url: '/advertisers';
+    url: '/association/advertising/advertisers';
 };
 
 export type CreateAdvertiserErrors = {
@@ -34711,55 +35599,14 @@ export type CreateAdvertiserResponses = {
 
 export type CreateAdvertiserResponse = CreateAdvertiserResponses[keyof CreateAdvertiserResponses];
 
-export type CreateJobApplicationData = {
-    body: CreateJobBoardApplicationRequest;
+export type CreateCampaignData = {
+    body: CreateCampaignRequest;
     path?: never;
     query?: never;
-    url: '/applications';
+    url: '/association/advertising/campaigns';
 };
 
-export type CreateJobApplicationErrors = {
-    /**
-     * Validation error response
-     */
-    400: ValidationError;
-    /**
-     * Unauthorized access response
-     */
-    401: AuthenticationError;
-    /**
-     * Resource not found response
-     */
-    404: NotFoundError;
-    /**
-     * Conflict response
-     */
-    409: ConflictError;
-};
-
-export type CreateJobApplicationError = CreateJobApplicationErrors[keyof CreateJobApplicationErrors];
-
-export type CreateJobApplicationResponses = {
-    /**
-     * Resource created response
-     */
-    201: {
-        data: JobBoardApplication;
-    };
-};
-
-export type CreateJobApplicationResponse = CreateJobApplicationResponses[keyof CreateJobApplicationResponses];
-
-export type UpdateJobApplicationData = {
-    body: UpdateJobBoardApplicationRequest;
-    path: {
-        applicationId: Uuid;
-    };
-    query?: never;
-    url: '/applications/{applicationId}';
-};
-
-export type UpdateJobApplicationErrors = {
+export type CreateCampaignErrors = {
     /**
      * Validation error response
      */
@@ -34778,18 +35625,180 @@ export type UpdateJobApplicationErrors = {
     404: NotFoundError;
 };
 
-export type UpdateJobApplicationError = UpdateJobApplicationErrors[keyof UpdateJobApplicationErrors];
+export type CreateCampaignError = CreateCampaignErrors[keyof CreateCampaignErrors];
 
-export type UpdateJobApplicationResponses = {
+export type CreateCampaignResponses = {
+    /**
+     * Resource created response
+     */
+    201: AdCampaign;
+};
+
+export type CreateCampaignResponse = CreateCampaignResponses[keyof CreateCampaignResponses];
+
+export type CreateCreativeData = {
+    body: CreateCreativeRequest;
+    path?: never;
+    query?: never;
+    url: '/association/advertising/creatives';
+};
+
+export type CreateCreativeErrors = {
+    /**
+     * Validation error response
+     */
+    400: ValidationError;
+    /**
+     * Unauthorized access response
+     */
+    401: AuthenticationError;
+};
+
+export type CreateCreativeError = CreateCreativeErrors[keyof CreateCreativeErrors];
+
+export type CreateCreativeResponses = {
+    /**
+     * Resource created response
+     */
+    201: Creative;
+};
+
+export type CreateCreativeResponse = CreateCreativeResponses[keyof CreateCreativeResponses];
+
+export type ReportAdData = {
+    body: ReportAdRequest;
+    path: {
+        creativeId: Uuid;
+    };
+    query?: never;
+    url: '/association/advertising/creatives/{creativeId}/report';
+};
+
+export type ReportAdErrors = {
+    /**
+     * Validation error response
+     */
+    400: ValidationError;
+    /**
+     * Unauthorized access response
+     */
+    401: AuthenticationError;
+    /**
+     * Resource not found response
+     */
+    404: NotFoundError;
+};
+
+export type ReportAdError = ReportAdErrors[keyof ReportAdErrors];
+
+export type ReportAdResponses = {
     /**
      * Success response with data
      */
     200: {
-        data: JobBoardApplication;
+        success: boolean;
     };
 };
 
-export type UpdateJobApplicationResponse = UpdateJobApplicationResponses[keyof UpdateJobApplicationResponses];
+export type ReportAdResponse = ReportAdResponses[keyof ReportAdResponses];
+
+export type ReviewCreativeData = {
+    body: ReviewCreativeRequest;
+    path: {
+        creativeId: Uuid;
+    };
+    query?: never;
+    url: '/association/advertising/creatives/{creativeId}/review';
+};
+
+export type ReviewCreativeErrors = {
+    /**
+     * Validation error response
+     */
+    400: ValidationError;
+    /**
+     * Unauthorized access response
+     */
+    401: AuthenticationError;
+    /**
+     * Forbidden access response
+     */
+    403: AuthorizationError;
+    /**
+     * Resource not found response
+     */
+    404: NotFoundError;
+};
+
+export type ReviewCreativeError = ReviewCreativeErrors[keyof ReviewCreativeErrors];
+
+export type ReviewCreativeResponses = {
+    /**
+     * Success response with data
+     */
+    200: Creative;
+};
+
+export type ReviewCreativeResponse = ReviewCreativeResponses[keyof ReviewCreativeResponses];
+
+export type SetMemberOptOutData = {
+    body: SetMemberOptOutRequest;
+    path?: never;
+    query?: never;
+    url: '/association/advertising/opt-out';
+};
+
+export type SetMemberOptOutErrors = {
+    /**
+     * Validation error response
+     */
+    400: ValidationError;
+    /**
+     * Unauthorized access response
+     */
+    401: AuthenticationError;
+};
+
+export type SetMemberOptOutError = SetMemberOptOutErrors[keyof SetMemberOptOutErrors];
+
+export type SetMemberOptOutResponses = {
+    /**
+     * Success response with data
+     */
+    200: {
+        success: boolean;
+    };
+};
+
+export type SetMemberOptOutResponse = SetMemberOptOutResponses[keyof SetMemberOptOutResponses];
+
+export type GetAdForPlacementData = {
+    body?: never;
+    path?: never;
+    query?: {
+        optedOut?: boolean;
+        adSlot?: AdSlot;
+    };
+    url: '/association/advertising/placement';
+};
+
+export type GetAdForPlacementErrors = {
+    /**
+     * Unauthorized access response
+     */
+    401: AuthenticationError;
+};
+
+export type GetAdForPlacementError = GetAdForPlacementErrors[keyof GetAdForPlacementErrors];
+
+export type GetAdForPlacementResponses = {
+    /**
+     * Success response with data
+     */
+    200: AdPlacementResponse;
+};
+
+export type GetAdForPlacementResponse = GetAdForPlacementResponses[keyof GetAdForPlacementResponses];
 
 export type ListDocumentTagsData = {
     body?: never;
@@ -35031,6 +36040,10 @@ export type SearchDocumentsData = {
          * Filter by tag name.
          */
         tag?: string;
+        /**
+         * Filter by publication status. Non-officer callers are always restricted to 'published' regardless of this value.
+         */
+        status?: 'draft' | 'published' | 'archived';
     };
     url: '/association/documents';
 };
@@ -36562,6 +37575,724 @@ export type PromoteWaitlistEntryResponses = {
 
 export type PromoteWaitlistEntryResponse = PromoteWaitlistEntryResponses[keyof PromoteWaitlistEntryResponses];
 
+export type CreateJobApplicationData = {
+    body: CreateJobBoardApplicationRequest;
+    path?: never;
+    query?: never;
+    url: '/association/jobs/applications';
+};
+
+export type CreateJobApplicationErrors = {
+    /**
+     * Validation error response
+     */
+    400: ValidationError;
+    /**
+     * Unauthorized access response
+     */
+    401: AuthenticationError;
+    /**
+     * Resource not found response
+     */
+    404: NotFoundError;
+    /**
+     * Conflict response
+     */
+    409: ConflictError;
+};
+
+export type CreateJobApplicationError = CreateJobApplicationErrors[keyof CreateJobApplicationErrors];
+
+export type CreateJobApplicationResponses = {
+    /**
+     * Resource created response
+     */
+    201: {
+        data: JobBoardApplication;
+    };
+};
+
+export type CreateJobApplicationResponse = CreateJobApplicationResponses[keyof CreateJobApplicationResponses];
+
+export type UpdateJobApplicationData = {
+    body: UpdateJobBoardApplicationRequest;
+    path: {
+        applicationId: Uuid;
+    };
+    query?: never;
+    url: '/association/jobs/applications/{applicationId}';
+};
+
+export type UpdateJobApplicationErrors = {
+    /**
+     * Validation error response
+     */
+    400: ValidationError;
+    /**
+     * Unauthorized access response
+     */
+    401: AuthenticationError;
+    /**
+     * Forbidden access response
+     */
+    403: AuthorizationError;
+    /**
+     * Resource not found response
+     */
+    404: NotFoundError;
+};
+
+export type UpdateJobApplicationError = UpdateJobApplicationErrors[keyof UpdateJobApplicationErrors];
+
+export type UpdateJobApplicationResponses = {
+    /**
+     * Success response with data
+     */
+    200: {
+        data: JobBoardApplication;
+    };
+};
+
+export type UpdateJobApplicationResponse = UpdateJobApplicationResponses[keyof UpdateJobApplicationResponses];
+
+export type SearchJobPostingsData = {
+    body?: never;
+    path?: never;
+    query?: {
+        organizationId?: Uuid;
+        status?: JobBoardPostingStatus;
+        type?: JobBoardPostingType;
+        search?: string;
+        limit?: number;
+        offset?: number;
+    };
+    url: '/association/jobs/postings';
+};
+
+export type SearchJobPostingsErrors = {
+    /**
+     * Unauthorized access response
+     */
+    401: AuthenticationError;
+};
+
+export type SearchJobPostingsError = SearchJobPostingsErrors[keyof SearchJobPostingsErrors];
+
+export type SearchJobPostingsResponses = {
+    /**
+     * Success response with data
+     */
+    200: JobBoardPostingListResponse;
+};
+
+export type SearchJobPostingsResponse = SearchJobPostingsResponses[keyof SearchJobPostingsResponses];
+
+export type CreateJobPostingData = {
+    body: CreateJobBoardPostingRequest;
+    path?: never;
+    query?: never;
+    url: '/association/jobs/postings';
+};
+
+export type CreateJobPostingErrors = {
+    /**
+     * Validation error response
+     */
+    400: ValidationError;
+    /**
+     * Unauthorized access response
+     */
+    401: AuthenticationError;
+    /**
+     * Forbidden access response
+     */
+    403: AuthorizationError;
+};
+
+export type CreateJobPostingError = CreateJobPostingErrors[keyof CreateJobPostingErrors];
+
+export type CreateJobPostingResponses = {
+    /**
+     * Resource created response
+     */
+    201: {
+        data: JobBoardPosting;
+    };
+};
+
+export type CreateJobPostingResponse = CreateJobPostingResponses[keyof CreateJobPostingResponses];
+
+export type DeleteJobPostingData = {
+    body?: never;
+    path: {
+        postingId: Uuid;
+    };
+    query?: never;
+    url: '/association/jobs/postings/{postingId}';
+};
+
+export type DeleteJobPostingErrors = {
+    /**
+     * Unauthorized access response
+     */
+    401: AuthenticationError;
+    /**
+     * Forbidden access response
+     */
+    403: AuthorizationError;
+    /**
+     * Resource not found response
+     */
+    404: NotFoundError;
+};
+
+export type DeleteJobPostingError = DeleteJobPostingErrors[keyof DeleteJobPostingErrors];
+
+export type DeleteJobPostingResponses = {
+    /**
+     * Success response with no content
+     */
+    204: void;
+};
+
+export type DeleteJobPostingResponse = DeleteJobPostingResponses[keyof DeleteJobPostingResponses];
+
+export type GetJobPostingData = {
+    body?: never;
+    path: {
+        postingId: Uuid;
+    };
+    query?: never;
+    url: '/association/jobs/postings/{postingId}';
+};
+
+export type GetJobPostingErrors = {
+    /**
+     * Unauthorized access response
+     */
+    401: AuthenticationError;
+    /**
+     * Resource not found response
+     */
+    404: NotFoundError;
+};
+
+export type GetJobPostingError = GetJobPostingErrors[keyof GetJobPostingErrors];
+
+export type GetJobPostingResponses = {
+    /**
+     * Success response with data
+     */
+    200: {
+        data: JobBoardPosting;
+    };
+};
+
+export type GetJobPostingResponse = GetJobPostingResponses[keyof GetJobPostingResponses];
+
+export type UpdateJobPostingData = {
+    body: UpdateJobBoardPostingRequest;
+    path: {
+        postingId: Uuid;
+    };
+    query?: never;
+    url: '/association/jobs/postings/{postingId}';
+};
+
+export type UpdateJobPostingErrors = {
+    /**
+     * Validation error response
+     */
+    400: ValidationError;
+    /**
+     * Unauthorized access response
+     */
+    401: AuthenticationError;
+    /**
+     * Forbidden access response
+     */
+    403: AuthorizationError;
+    /**
+     * Resource not found response
+     */
+    404: NotFoundError;
+};
+
+export type UpdateJobPostingError = UpdateJobPostingErrors[keyof UpdateJobPostingErrors];
+
+export type UpdateJobPostingResponses = {
+    /**
+     * Success response with data
+     */
+    200: {
+        data: JobBoardPosting;
+    };
+};
+
+export type UpdateJobPostingResponse = UpdateJobPostingResponses[keyof UpdateJobPostingResponses];
+
+export type ListListingsData = {
+    body?: never;
+    path?: never;
+    query?: {
+        organizationId?: Uuid;
+        vendorId?: Uuid;
+        status?: ListingStatus;
+        categoryTag?: string;
+        limit?: number;
+        offset?: number;
+    };
+    url: '/association/marketplace/listings';
+};
+
+export type ListListingsErrors = {
+    /**
+     * Unauthorized access response
+     */
+    401: AuthenticationError;
+};
+
+export type ListListingsError = ListListingsErrors[keyof ListListingsErrors];
+
+export type ListListingsResponses = {
+    /**
+     * Success response with data
+     */
+    200: ListingListResponse;
+};
+
+export type ListListingsResponse = ListListingsResponses[keyof ListListingsResponses];
+
+export type CreateListingData = {
+    body: CreateMarketplaceListingRequest;
+    path?: never;
+    query?: never;
+    url: '/association/marketplace/listings';
+};
+
+export type CreateListingErrors = {
+    /**
+     * Validation error response
+     */
+    400: ValidationError;
+    /**
+     * Unauthorized access response
+     */
+    401: AuthenticationError;
+    /**
+     * Forbidden access response
+     */
+    403: AuthorizationError;
+    /**
+     * Resource not found response
+     */
+    404: NotFoundError;
+};
+
+export type CreateListingError = CreateListingErrors[keyof CreateListingErrors];
+
+export type CreateListingResponses = {
+    /**
+     * Resource created response
+     */
+    201: MarketplaceListing;
+};
+
+export type CreateListingResponse = CreateListingResponses[keyof CreateListingResponses];
+
+export type UpdateListingData = {
+    body: UpdateMarketplaceListingRequest;
+    path: {
+        listingId: Uuid;
+    };
+    query?: never;
+    url: '/association/marketplace/listings/{listingId}';
+};
+
+export type UpdateListingErrors = {
+    /**
+     * Validation error response
+     */
+    400: ValidationError;
+    /**
+     * Unauthorized access response
+     */
+    401: AuthenticationError;
+    /**
+     * Forbidden access response
+     */
+    403: AuthorizationError;
+    /**
+     * Resource not found response
+     */
+    404: NotFoundError;
+    /**
+     * Conflict response
+     */
+    409: ConflictError;
+};
+
+export type UpdateListingError = UpdateListingErrors[keyof UpdateListingErrors];
+
+export type UpdateListingResponses = {
+    /**
+     * Success response with data
+     */
+    200: MarketplaceListing;
+};
+
+export type UpdateListingResponse = UpdateListingResponses[keyof UpdateListingResponses];
+
+export type ListOrdersData = {
+    body?: never;
+    path?: never;
+    query?: {
+        buyerPersonId?: Uuid;
+        vendorId?: Uuid;
+        status?: OrderStatus;
+        limit?: number;
+        offset?: number;
+    };
+    url: '/association/marketplace/orders';
+};
+
+export type ListOrdersErrors = {
+    /**
+     * Unauthorized access response
+     */
+    401: AuthenticationError;
+};
+
+export type ListOrdersError = ListOrdersErrors[keyof ListOrdersErrors];
+
+export type ListOrdersResponses = {
+    /**
+     * Success response with data
+     */
+    200: OrderListResponse;
+};
+
+export type ListOrdersResponse = ListOrdersResponses[keyof ListOrdersResponses];
+
+export type CreateOrderData = {
+    body: CreateMarketplaceOrderRequest;
+    path?: never;
+    query?: never;
+    url: '/association/marketplace/orders';
+};
+
+export type CreateOrderErrors = {
+    /**
+     * Validation error response
+     */
+    400: ValidationError;
+    /**
+     * Unauthorized access response
+     */
+    401: AuthenticationError;
+    /**
+     * Resource not found response
+     */
+    404: NotFoundError;
+};
+
+export type CreateOrderError = CreateOrderErrors[keyof CreateOrderErrors];
+
+export type CreateOrderResponses = {
+    /**
+     * Resource created response
+     */
+    201: MarketplaceOrder;
+};
+
+export type CreateOrderResponse = CreateOrderResponses[keyof CreateOrderResponses];
+
+export type GetOrderData = {
+    body?: never;
+    path: {
+        orderId: Uuid;
+    };
+    query?: never;
+    url: '/association/marketplace/orders/{orderId}';
+};
+
+export type GetOrderErrors = {
+    /**
+     * Unauthorized access response
+     */
+    401: AuthenticationError;
+    /**
+     * Resource not found response
+     */
+    404: NotFoundError;
+};
+
+export type GetOrderError = GetOrderErrors[keyof GetOrderErrors];
+
+export type GetOrderResponses = {
+    /**
+     * Success response with data
+     */
+    200: MarketplaceOrder;
+};
+
+export type GetOrderResponse = GetOrderResponses[keyof GetOrderResponses];
+
+export type CancelOrderData = {
+    body?: never;
+    path: {
+        orderId: Uuid;
+    };
+    query?: never;
+    url: '/association/marketplace/orders/{orderId}/cancel';
+};
+
+export type CancelOrderErrors = {
+    /**
+     * Unauthorized access response
+     */
+    401: AuthenticationError;
+    /**
+     * Forbidden access response
+     */
+    403: AuthorizationError;
+    /**
+     * Resource not found response
+     */
+    404: NotFoundError;
+    /**
+     * Conflict response
+     */
+    409: ConflictError;
+};
+
+export type CancelOrderError = CancelOrderErrors[keyof CancelOrderErrors];
+
+export type CancelOrderResponses = {
+    /**
+     * Success response with data
+     */
+    200: MarketplaceOrder;
+};
+
+export type CancelOrderResponse = CancelOrderResponses[keyof CancelOrderResponses];
+
+export type FulfillOrderData = {
+    body?: never;
+    path: {
+        orderId: Uuid;
+    };
+    query?: never;
+    url: '/association/marketplace/orders/{orderId}/fulfill';
+};
+
+export type FulfillOrderErrors = {
+    /**
+     * Unauthorized access response
+     */
+    401: AuthenticationError;
+    /**
+     * Forbidden access response
+     */
+    403: AuthorizationError;
+    /**
+     * Resource not found response
+     */
+    404: NotFoundError;
+    /**
+     * Conflict response
+     */
+    409: ConflictError;
+};
+
+export type FulfillOrderError = FulfillOrderErrors[keyof FulfillOrderErrors];
+
+export type FulfillOrderResponses = {
+    /**
+     * Success response with data
+     */
+    200: MarketplaceOrder;
+};
+
+export type FulfillOrderResponse = FulfillOrderResponses[keyof FulfillOrderResponses];
+
+export type ListVendorsData = {
+    body?: never;
+    path?: never;
+    query?: {
+        organizationId?: Uuid;
+        category?: VendorCategory;
+        verificationStatus?: VendorStatus;
+        limit?: number;
+        offset?: number;
+    };
+    url: '/association/marketplace/vendors';
+};
+
+export type ListVendorsErrors = {
+    /**
+     * Unauthorized access response
+     */
+    401: AuthenticationError;
+};
+
+export type ListVendorsError = ListVendorsErrors[keyof ListVendorsErrors];
+
+export type ListVendorsResponses = {
+    /**
+     * Success response with data
+     */
+    200: VendorListResponse;
+};
+
+export type ListVendorsResponse = ListVendorsResponses[keyof ListVendorsResponses];
+
+export type CreateVendorData = {
+    body: CreateMarketplaceVendorRequest;
+    path?: never;
+    query?: never;
+    url: '/association/marketplace/vendors';
+};
+
+export type CreateVendorErrors = {
+    /**
+     * Validation error response
+     */
+    400: ValidationError;
+    /**
+     * Unauthorized access response
+     */
+    401: AuthenticationError;
+    /**
+     * Forbidden access response
+     */
+    403: AuthorizationError;
+};
+
+export type CreateVendorError = CreateVendorErrors[keyof CreateVendorErrors];
+
+export type CreateVendorResponses = {
+    /**
+     * Resource created response
+     */
+    201: MarketplaceVendor;
+};
+
+export type CreateVendorResponse = CreateVendorResponses[keyof CreateVendorResponses];
+
+export type GetVendorData = {
+    body?: never;
+    path: {
+        vendorId: Uuid;
+    };
+    query?: never;
+    url: '/association/marketplace/vendors/{vendorId}';
+};
+
+export type GetVendorErrors = {
+    /**
+     * Unauthorized access response
+     */
+    401: AuthenticationError;
+    /**
+     * Resource not found response
+     */
+    404: NotFoundError;
+};
+
+export type GetVendorError = GetVendorErrors[keyof GetVendorErrors];
+
+export type GetVendorResponses = {
+    /**
+     * Success response with data
+     */
+    200: MarketplaceVendor;
+};
+
+export type GetVendorResponse = GetVendorResponses[keyof GetVendorResponses];
+
+export type UpdateVendorData = {
+    body: UpdateMarketplaceVendorRequest;
+    path: {
+        vendorId: Uuid;
+    };
+    query?: never;
+    url: '/association/marketplace/vendors/{vendorId}';
+};
+
+export type UpdateVendorErrors = {
+    /**
+     * Validation error response
+     */
+    400: ValidationError;
+    /**
+     * Unauthorized access response
+     */
+    401: AuthenticationError;
+    /**
+     * Forbidden access response
+     */
+    403: AuthorizationError;
+    /**
+     * Resource not found response
+     */
+    404: NotFoundError;
+};
+
+export type UpdateVendorError = UpdateVendorErrors[keyof UpdateVendorErrors];
+
+export type UpdateVendorResponses = {
+    /**
+     * Success response with data
+     */
+    200: MarketplaceVendor;
+};
+
+export type UpdateVendorResponse = UpdateVendorResponses[keyof UpdateVendorResponses];
+
+export type VerifyVendorData = {
+    body: VerifyVendorRequest;
+    path: {
+        vendorId: Uuid;
+    };
+    query?: never;
+    url: '/association/marketplace/vendors/{vendorId}/verify';
+};
+
+export type VerifyVendorErrors = {
+    /**
+     * Validation error response
+     */
+    400: ValidationError;
+    /**
+     * Unauthorized access response
+     */
+    401: AuthenticationError;
+    /**
+     * Forbidden access response
+     */
+    403: AuthorizationError;
+    /**
+     * Resource not found response
+     */
+    404: NotFoundError;
+    /**
+     * Conflict response
+     */
+    409: ConflictError;
+};
+
+export type VerifyVendorError = VerifyVendorErrors[keyof VerifyVendorErrors];
+
+export type VerifyVendorResponses = {
+    /**
+     * Success response with data
+     */
+    200: MarketplaceVendor;
+};
+
+export type VerifyVendorResponse = VerifyVendorResponses[keyof VerifyVendorResponses];
+
 export type ListAffiliationTransfersData = {
     body?: never;
     path?: never;
@@ -37032,37 +38763,6 @@ export type BulkApproveMembershipApplicationsResponses = {
 
 export type BulkApproveMembershipApplicationsResponse = BulkApproveMembershipApplicationsResponses[keyof BulkApproveMembershipApplicationsResponses];
 
-export type DeleteMembershipApplicationData = {
-    body?: never;
-    path: {
-        applicationId: string;
-    };
-    query?: never;
-    url: '/association/member/applications/{applicationId}';
-};
-
-export type DeleteMembershipApplicationErrors = {
-    /**
-     * Forbidden access response
-     */
-    403: AuthorizationError;
-    /**
-     * Resource not found response
-     */
-    404: NotFoundError;
-};
-
-export type DeleteMembershipApplicationError = DeleteMembershipApplicationErrors[keyof DeleteMembershipApplicationErrors];
-
-export type DeleteMembershipApplicationResponses = {
-    /**
-     * Success response with no content
-     */
-    204: void;
-};
-
-export type DeleteMembershipApplicationResponse = DeleteMembershipApplicationResponses[keyof DeleteMembershipApplicationResponses];
-
 export type GetMembershipApplicationData = {
     body?: never;
     path: {
@@ -37299,6 +38999,37 @@ export type CastBallotResponses = {
 };
 
 export type CastBallotResponse = CastBallotResponses[keyof CastBallotResponses];
+
+export type MyBallotsData = {
+    body?: never;
+    path?: never;
+    query?: {
+        electionId?: string;
+    };
+    url: '/association/member/ballots/mine';
+};
+
+export type MyBallotsErrors = {
+    /**
+     * Unauthorized access response
+     */
+    401: AuthenticationError;
+    /**
+     * Forbidden access response
+     */
+    403: AuthorizationError;
+};
+
+export type MyBallotsError = MyBallotsErrors[keyof MyBallotsErrors];
+
+export type MyBallotsResponses = {
+    /**
+     * Success response with data
+     */
+    200: BallotListResponse;
+};
+
+export type MyBallotsResponse = MyBallotsResponses[keyof MyBallotsResponses];
 
 export type ListCandidatesData = {
     body?: never;
@@ -40635,6 +42366,41 @@ export type CertifyElectionResponses = {
 
 export type CertifyElectionResponse = CertifyElectionResponses[keyof CertifyElectionResponses];
 
+export type CloseElectionVotingData = {
+    body?: never;
+    path: {
+        electionId: string;
+    };
+    query?: never;
+    url: '/association/member/elections/{electionId}/close-voting';
+};
+
+export type CloseElectionVotingErrors = {
+    /**
+     * Forbidden access response
+     */
+    403: AuthorizationError;
+    /**
+     * Resource not found response
+     */
+    404: NotFoundError;
+    /**
+     * Conflict response
+     */
+    409: ConflictError;
+};
+
+export type CloseElectionVotingError = CloseElectionVotingErrors[keyof CloseElectionVotingErrors];
+
+export type CloseElectionVotingResponses = {
+    /**
+     * Success response with data
+     */
+    200: Election;
+};
+
+export type CloseElectionVotingResponse = CloseElectionVotingResponses[keyof CloseElectionVotingResponses];
+
 export type OpenElectionNominationsData = {
     body?: never;
     path: {
@@ -41509,41 +43275,6 @@ export type CreateMembershipResponses = {
     201: unknown;
 };
 
-export type DeleteMembershipData = {
-    body?: never;
-    path: {
-        membershipId: string;
-    };
-    query?: never;
-    url: '/association/member/memberships/{membershipId}';
-};
-
-export type DeleteMembershipErrors = {
-    /**
-     * Forbidden access response
-     */
-    403: AuthorizationError;
-    /**
-     * Resource not found response
-     */
-    404: NotFoundError;
-    /**
-     * Conflict response
-     */
-    409: ConflictError;
-};
-
-export type DeleteMembershipError = DeleteMembershipErrors[keyof DeleteMembershipErrors];
-
-export type DeleteMembershipResponses = {
-    /**
-     * Success response with no content
-     */
-    204: void;
-};
-
-export type DeleteMembershipResponse = DeleteMembershipResponses[keyof DeleteMembershipResponses];
-
 export type GetMembershipData = {
     body?: never;
     path: {
@@ -41658,6 +43389,10 @@ export type ReinstateMembershipData = {
 
 export type ReinstateMembershipErrors = {
     /**
+     * Validation error response
+     */
+    400: ValidationError;
+    /**
      * Forbidden access response
      */
     403: AuthorizationError;
@@ -41750,6 +43485,43 @@ export type ResignMembershipResponses = {
     200: unknown;
 };
 
+export type SuspendMembershipData = {
+    body: MembershipSuspendRequest;
+    path: {
+        membershipId: string;
+    };
+    query?: never;
+    url: '/association/member/memberships/{membershipId}/suspend';
+};
+
+export type SuspendMembershipErrors = {
+    /**
+     * Validation error response
+     */
+    400: ValidationError;
+    /**
+     * Forbidden access response
+     */
+    403: AuthorizationError;
+    /**
+     * Resource not found response
+     */
+    404: NotFoundError;
+    /**
+     * Conflict response
+     */
+    409: ConflictError;
+};
+
+export type SuspendMembershipError = SuspendMembershipErrors[keyof SuspendMembershipErrors];
+
+export type SuspendMembershipResponses = {
+    /**
+     * Success response with data
+     */
+    200: unknown;
+};
+
 export type TerminateMembershipData = {
     body: MembershipTerminateRequest;
     path: {
@@ -41781,6 +43553,43 @@ export type TerminateMembershipErrors = {
 export type TerminateMembershipError = TerminateMembershipErrors[keyof TerminateMembershipErrors];
 
 export type TerminateMembershipResponses = {
+    /**
+     * Success response with data
+     */
+    200: unknown;
+};
+
+export type UnsuspendMembershipData = {
+    body?: never;
+    path: {
+        membershipId: string;
+    };
+    query?: never;
+    url: '/association/member/memberships/{membershipId}/unsuspend';
+};
+
+export type UnsuspendMembershipErrors = {
+    /**
+     * Validation error response
+     */
+    400: ValidationError;
+    /**
+     * Forbidden access response
+     */
+    403: AuthorizationError;
+    /**
+     * Resource not found response
+     */
+    404: NotFoundError;
+    /**
+     * Conflict response
+     */
+    409: ConflictError;
+};
+
+export type UnsuspendMembershipError = UnsuspendMembershipErrors[keyof UnsuspendMembershipErrors];
+
+export type UnsuspendMembershipResponses = {
     /**
      * Success response with data
      */
@@ -44008,6 +45817,96 @@ export type CreateTrainingResponses = {
     201: unknown;
 };
 
+export type ConfirmTrainingPaymentData = {
+    body?: never;
+    path: {
+        enrollmentId: string;
+    };
+    query: {
+        organizationId: string;
+    };
+    url: '/association/training-lifecycle/enrollments/{enrollmentId}/confirm-payment';
+};
+
+export type ConfirmTrainingPaymentErrors = {
+    /**
+     * Validation error response
+     */
+    400: ValidationError;
+    /**
+     * Unauthorized access response
+     */
+    401: AuthenticationError;
+    /**
+     * Forbidden access response
+     */
+    403: AuthorizationError;
+    /**
+     * Resource not found response
+     */
+    404: NotFoundError;
+    /**
+     * Conflict response
+     */
+    409: ConflictError;
+};
+
+export type ConfirmTrainingPaymentError = ConfirmTrainingPaymentErrors[keyof ConfirmTrainingPaymentErrors];
+
+export type ConfirmTrainingPaymentResponses = {
+    /**
+     * Success response with data
+     */
+    200: TrainingEnrollment;
+};
+
+export type ConfirmTrainingPaymentResponse = ConfirmTrainingPaymentResponses[keyof ConfirmTrainingPaymentResponses];
+
+export type SubmitTrainingPaymentProofData = {
+    body: TrainingPaymentProofRequest;
+    path: {
+        enrollmentId: string;
+    };
+    query: {
+        organizationId: string;
+    };
+    url: '/association/training-lifecycle/enrollments/{enrollmentId}/payment-proof';
+};
+
+export type SubmitTrainingPaymentProofErrors = {
+    /**
+     * Validation error response
+     */
+    400: ValidationError;
+    /**
+     * Unauthorized access response
+     */
+    401: AuthenticationError;
+    /**
+     * Forbidden access response
+     */
+    403: AuthorizationError;
+    /**
+     * Resource not found response
+     */
+    404: NotFoundError;
+    /**
+     * Conflict response
+     */
+    409: ConflictError;
+};
+
+export type SubmitTrainingPaymentProofError = SubmitTrainingPaymentProofErrors[keyof SubmitTrainingPaymentProofErrors];
+
+export type SubmitTrainingPaymentProofResponses = {
+    /**
+     * Success response with data
+     */
+    200: TrainingEnrollment;
+};
+
+export type SubmitTrainingPaymentProofResponse = SubmitTrainingPaymentProofResponses[keyof SubmitTrainingPaymentProofResponses];
+
 export type ListMyCustomTrainingsData = {
     body?: never;
     path?: never;
@@ -44109,6 +46008,10 @@ export type CheckInCustomTrainingData = {
     };
     query: {
         organizationId: string;
+        /**
+         * Enrolled member to mark present. Officer marks this person attended; their credit is awarded to them.
+         */
+        personId?: string;
     };
     url: '/association/training-lifecycle/{trainingId}/check-in';
 };
@@ -46661,43 +48564,6 @@ export type GetTimeSlotResponses = {
 
 export type GetTimeSlotResponse = GetTimeSlotResponses[keyof GetTimeSlotResponses];
 
-export type CreateCampaignData = {
-    body: CreateCampaignRequest;
-    path?: never;
-    query?: never;
-    url: '/campaigns';
-};
-
-export type CreateCampaignErrors = {
-    /**
-     * Validation error response
-     */
-    400: ValidationError;
-    /**
-     * Unauthorized access response
-     */
-    401: AuthenticationError;
-    /**
-     * Forbidden access response
-     */
-    403: AuthorizationError;
-    /**
-     * Resource not found response
-     */
-    404: NotFoundError;
-};
-
-export type CreateCampaignError = CreateCampaignErrors[keyof CreateCampaignErrors];
-
-export type CreateCampaignResponses = {
-    /**
-     * Resource created response
-     */
-    201: AdCampaign;
-};
-
-export type CreateCampaignResponse = CreateCampaignResponses[keyof CreateCampaignResponses];
-
 export type BulkIssueCertificatesData = {
     body: BulkIssueCertificatesRequest;
     path?: never;
@@ -47669,111 +49535,6 @@ export type DeleteSavedSegmentResponses = {
 
 export type DeleteSavedSegmentResponse = DeleteSavedSegmentResponses[keyof DeleteSavedSegmentResponses];
 
-export type CreateCreativeData = {
-    body: CreateCreativeRequest;
-    path?: never;
-    query?: never;
-    url: '/creatives';
-};
-
-export type CreateCreativeErrors = {
-    /**
-     * Validation error response
-     */
-    400: ValidationError;
-    /**
-     * Unauthorized access response
-     */
-    401: AuthenticationError;
-};
-
-export type CreateCreativeError = CreateCreativeErrors[keyof CreateCreativeErrors];
-
-export type CreateCreativeResponses = {
-    /**
-     * Resource created response
-     */
-    201: Creative;
-};
-
-export type CreateCreativeResponse = CreateCreativeResponses[keyof CreateCreativeResponses];
-
-export type ReportAdData = {
-    body: ReportAdRequest;
-    path: {
-        creativeId: Uuid;
-    };
-    query?: never;
-    url: '/creatives/{creativeId}/report';
-};
-
-export type ReportAdErrors = {
-    /**
-     * Validation error response
-     */
-    400: ValidationError;
-    /**
-     * Unauthorized access response
-     */
-    401: AuthenticationError;
-    /**
-     * Resource not found response
-     */
-    404: NotFoundError;
-};
-
-export type ReportAdError = ReportAdErrors[keyof ReportAdErrors];
-
-export type ReportAdResponses = {
-    /**
-     * Success response with data
-     */
-    200: {
-        success: boolean;
-    };
-};
-
-export type ReportAdResponse = ReportAdResponses[keyof ReportAdResponses];
-
-export type ReviewCreativeData = {
-    body: ReviewCreativeRequest;
-    path: {
-        creativeId: Uuid;
-    };
-    query?: never;
-    url: '/creatives/{creativeId}/review';
-};
-
-export type ReviewCreativeErrors = {
-    /**
-     * Validation error response
-     */
-    400: ValidationError;
-    /**
-     * Unauthorized access response
-     */
-    401: AuthenticationError;
-    /**
-     * Forbidden access response
-     */
-    403: AuthorizationError;
-    /**
-     * Resource not found response
-     */
-    404: NotFoundError;
-};
-
-export type ReviewCreativeError = ReviewCreativeErrors[keyof ReviewCreativeErrors];
-
-export type ReviewCreativeResponses = {
-    /**
-     * Success response with data
-     */
-    200: Creative;
-};
-
-export type ReviewCreativeResponse = ReviewCreativeResponses[keyof ReviewCreativeResponses];
-
 export type GetCreditComplianceData = {
     body?: never;
     path: {
@@ -48076,6 +49837,44 @@ export type ListEmailSuppressionsResponses = {
 };
 
 export type ListEmailSuppressionsResponse = ListEmailSuppressionsResponses[keyof ListEmailSuppressionsResponses];
+
+export type DeleteEmailSuppressionData = {
+    body?: never;
+    path: {
+        /**
+         * Suppression record ID to remove
+         */
+        id: Uuid;
+    };
+    query?: never;
+    url: '/email/suppressions/{id}';
+};
+
+export type DeleteEmailSuppressionErrors = {
+    /**
+     * Unauthorized access response
+     */
+    401: AuthenticationError;
+    /**
+     * Forbidden access response
+     */
+    403: AuthorizationError;
+    /**
+     * Resource not found response
+     */
+    404: NotFoundError;
+};
+
+export type DeleteEmailSuppressionError = DeleteEmailSuppressionErrors[keyof DeleteEmailSuppressionErrors];
+
+export type DeleteEmailSuppressionResponses = {
+    /**
+     * Success response with no content
+     */
+    204: void;
+};
+
+export type DeleteEmailSuppressionResponse = DeleteEmailSuppressionResponses[keyof DeleteEmailSuppressionResponses];
 
 export type ListEmailTemplatesData = {
     body?: never;
@@ -48504,75 +50303,6 @@ export type ValidateInviteResponses = {
 };
 
 export type ValidateInviteResponse2 = ValidateInviteResponses[keyof ValidateInviteResponses];
-
-export type ListListingsData = {
-    body?: never;
-    path?: never;
-    query?: {
-        organizationId?: Uuid;
-        vendorId?: Uuid;
-        status?: ListingStatus;
-        categoryTag?: string;
-        limit?: number;
-        offset?: number;
-    };
-    url: '/listings';
-};
-
-export type ListListingsErrors = {
-    /**
-     * Unauthorized access response
-     */
-    401: AuthenticationError;
-};
-
-export type ListListingsError = ListListingsErrors[keyof ListListingsErrors];
-
-export type ListListingsResponses = {
-    /**
-     * Success response with data
-     */
-    200: ListingListResponse;
-};
-
-export type ListListingsResponse = ListListingsResponses[keyof ListListingsResponses];
-
-export type CreateListingData = {
-    body: CreateMarketplaceListingRequest;
-    path?: never;
-    query?: never;
-    url: '/listings';
-};
-
-export type CreateListingErrors = {
-    /**
-     * Validation error response
-     */
-    400: ValidationError;
-    /**
-     * Unauthorized access response
-     */
-    401: AuthenticationError;
-    /**
-     * Forbidden access response
-     */
-    403: AuthorizationError;
-    /**
-     * Resource not found response
-     */
-    404: NotFoundError;
-};
-
-export type CreateListingError = CreateListingErrors[keyof CreateListingErrors];
-
-export type CreateListingResponses = {
-    /**
-     * Resource created response
-     */
-    201: MarketplaceListing;
-};
-
-export type CreateListingResponse = CreateListingResponses[keyof CreateListingResponses];
 
 export type ListOrgApplicationsData = {
     body?: never;
@@ -49020,109 +50750,6 @@ export type UpdateOnboardingStepResponses = {
 };
 
 export type UpdateOnboardingStepResponse2 = UpdateOnboardingStepResponses[keyof UpdateOnboardingStepResponses];
-
-export type SetMemberOptOutData = {
-    body: SetMemberOptOutRequest;
-    path?: never;
-    query?: never;
-    url: '/opt-out';
-};
-
-export type SetMemberOptOutErrors = {
-    /**
-     * Validation error response
-     */
-    400: ValidationError;
-    /**
-     * Unauthorized access response
-     */
-    401: AuthenticationError;
-};
-
-export type SetMemberOptOutError = SetMemberOptOutErrors[keyof SetMemberOptOutErrors];
-
-export type SetMemberOptOutResponses = {
-    /**
-     * Success response with data
-     */
-    200: {
-        success: boolean;
-    };
-};
-
-export type SetMemberOptOutResponse = SetMemberOptOutResponses[keyof SetMemberOptOutResponses];
-
-export type CreateOrderData = {
-    body: CreateMarketplaceOrderRequest;
-    path?: never;
-    query?: never;
-    url: '/orders';
-};
-
-export type CreateOrderErrors = {
-    /**
-     * Validation error response
-     */
-    400: ValidationError;
-    /**
-     * Unauthorized access response
-     */
-    401: AuthenticationError;
-    /**
-     * Resource not found response
-     */
-    404: NotFoundError;
-};
-
-export type CreateOrderError = CreateOrderErrors[keyof CreateOrderErrors];
-
-export type CreateOrderResponses = {
-    /**
-     * Resource created response
-     */
-    201: MarketplaceOrder;
-};
-
-export type CreateOrderResponse = CreateOrderResponses[keyof CreateOrderResponses];
-
-export type FulfillOrderData = {
-    body?: never;
-    path: {
-        orderId: Uuid;
-    };
-    query?: never;
-    url: '/orders/{orderId}/fulfill';
-};
-
-export type FulfillOrderErrors = {
-    /**
-     * Unauthorized access response
-     */
-    401: AuthenticationError;
-    /**
-     * Forbidden access response
-     */
-    403: AuthorizationError;
-    /**
-     * Resource not found response
-     */
-    404: NotFoundError;
-    /**
-     * Conflict response
-     */
-    409: ConflictError;
-};
-
-export type FulfillOrderError = FulfillOrderErrors[keyof FulfillOrderErrors];
-
-export type FulfillOrderResponses = {
-    /**
-     * Success response with data
-     */
-    200: MarketplaceOrder;
-};
-
-export type FulfillOrderResponse = FulfillOrderResponses[keyof FulfillOrderResponses];
 
 export type SendPaymentLinkData = {
     body: SendPaymentLinkRequest;
@@ -49823,210 +51450,6 @@ export type UpdatePersonResponses = {
 };
 
 export type UpdatePersonResponse = UpdatePersonResponses[keyof UpdatePersonResponses];
-
-export type GetAdForPlacementData = {
-    body?: never;
-    path?: never;
-    query?: {
-        optedOut?: boolean;
-        adSlot?: AdSlot;
-    };
-    url: '/placement';
-};
-
-export type GetAdForPlacementErrors = {
-    /**
-     * Unauthorized access response
-     */
-    401: AuthenticationError;
-};
-
-export type GetAdForPlacementError = GetAdForPlacementErrors[keyof GetAdForPlacementErrors];
-
-export type GetAdForPlacementResponses = {
-    /**
-     * Success response with data
-     */
-    200: AdPlacementResponse;
-};
-
-export type GetAdForPlacementResponse = GetAdForPlacementResponses[keyof GetAdForPlacementResponses];
-
-export type SearchJobPostingsData = {
-    body?: never;
-    path?: never;
-    query?: {
-        organizationId?: Uuid;
-        status?: JobBoardPostingStatus;
-        type?: JobBoardPostingType;
-        search?: string;
-        limit?: number;
-        offset?: number;
-    };
-    url: '/postings';
-};
-
-export type SearchJobPostingsErrors = {
-    /**
-     * Unauthorized access response
-     */
-    401: AuthenticationError;
-};
-
-export type SearchJobPostingsError = SearchJobPostingsErrors[keyof SearchJobPostingsErrors];
-
-export type SearchJobPostingsResponses = {
-    /**
-     * Success response with data
-     */
-    200: JobBoardPostingListResponse;
-};
-
-export type SearchJobPostingsResponse = SearchJobPostingsResponses[keyof SearchJobPostingsResponses];
-
-export type CreateJobPostingData = {
-    body: CreateJobBoardPostingRequest;
-    path?: never;
-    query?: never;
-    url: '/postings';
-};
-
-export type CreateJobPostingErrors = {
-    /**
-     * Validation error response
-     */
-    400: ValidationError;
-    /**
-     * Unauthorized access response
-     */
-    401: AuthenticationError;
-    /**
-     * Forbidden access response
-     */
-    403: AuthorizationError;
-};
-
-export type CreateJobPostingError = CreateJobPostingErrors[keyof CreateJobPostingErrors];
-
-export type CreateJobPostingResponses = {
-    /**
-     * Resource created response
-     */
-    201: {
-        data: JobBoardPosting;
-    };
-};
-
-export type CreateJobPostingResponse = CreateJobPostingResponses[keyof CreateJobPostingResponses];
-
-export type DeleteJobPostingData = {
-    body?: never;
-    path: {
-        postingId: Uuid;
-    };
-    query?: never;
-    url: '/postings/{postingId}';
-};
-
-export type DeleteJobPostingErrors = {
-    /**
-     * Unauthorized access response
-     */
-    401: AuthenticationError;
-    /**
-     * Forbidden access response
-     */
-    403: AuthorizationError;
-    /**
-     * Resource not found response
-     */
-    404: NotFoundError;
-};
-
-export type DeleteJobPostingError = DeleteJobPostingErrors[keyof DeleteJobPostingErrors];
-
-export type DeleteJobPostingResponses = {
-    /**
-     * Success response with no content
-     */
-    204: void;
-};
-
-export type DeleteJobPostingResponse = DeleteJobPostingResponses[keyof DeleteJobPostingResponses];
-
-export type GetJobPostingData = {
-    body?: never;
-    path: {
-        postingId: Uuid;
-    };
-    query?: never;
-    url: '/postings/{postingId}';
-};
-
-export type GetJobPostingErrors = {
-    /**
-     * Unauthorized access response
-     */
-    401: AuthenticationError;
-    /**
-     * Resource not found response
-     */
-    404: NotFoundError;
-};
-
-export type GetJobPostingError = GetJobPostingErrors[keyof GetJobPostingErrors];
-
-export type GetJobPostingResponses = {
-    /**
-     * Success response with data
-     */
-    200: {
-        data: JobBoardPosting;
-    };
-};
-
-export type GetJobPostingResponse = GetJobPostingResponses[keyof GetJobPostingResponses];
-
-export type UpdateJobPostingData = {
-    body: UpdateJobBoardPostingRequest;
-    path: {
-        postingId: Uuid;
-    };
-    query?: never;
-    url: '/postings/{postingId}';
-};
-
-export type UpdateJobPostingErrors = {
-    /**
-     * Validation error response
-     */
-    400: ValidationError;
-    /**
-     * Unauthorized access response
-     */
-    401: AuthenticationError;
-    /**
-     * Forbidden access response
-     */
-    403: AuthorizationError;
-    /**
-     * Resource not found response
-     */
-    404: NotFoundError;
-};
-
-export type UpdateJobPostingError = UpdateJobPostingErrors[keyof UpdateJobPostingErrors];
-
-export type UpdateJobPostingResponses = {
-    /**
-     * Success response with data
-     */
-    200: {
-        data: JobBoardPosting;
-    };
-};
-
-export type UpdateJobPostingResponse = UpdateJobPostingResponses[keyof UpdateJobPostingResponses];
 
 export type ListPublicEventsData = {
     body?: never;
@@ -51159,176 +52582,3 @@ export type DismissSurveyResponseResponses = {
 };
 
 export type DismissSurveyResponseResponse = DismissSurveyResponseResponses[keyof DismissSurveyResponseResponses];
-
-export type ListVendorsData = {
-    body?: never;
-    path?: never;
-    query?: {
-        organizationId?: Uuid;
-        category?: VendorCategory;
-        verificationStatus?: VendorStatus;
-        limit?: number;
-        offset?: number;
-    };
-    url: '/vendors';
-};
-
-export type ListVendorsErrors = {
-    /**
-     * Unauthorized access response
-     */
-    401: AuthenticationError;
-};
-
-export type ListVendorsError = ListVendorsErrors[keyof ListVendorsErrors];
-
-export type ListVendorsResponses = {
-    /**
-     * Success response with data
-     */
-    200: VendorListResponse;
-};
-
-export type ListVendorsResponse = ListVendorsResponses[keyof ListVendorsResponses];
-
-export type CreateVendorData = {
-    body: CreateMarketplaceVendorRequest;
-    path?: never;
-    query?: never;
-    url: '/vendors';
-};
-
-export type CreateVendorErrors = {
-    /**
-     * Validation error response
-     */
-    400: ValidationError;
-    /**
-     * Unauthorized access response
-     */
-    401: AuthenticationError;
-    /**
-     * Forbidden access response
-     */
-    403: AuthorizationError;
-};
-
-export type CreateVendorError = CreateVendorErrors[keyof CreateVendorErrors];
-
-export type CreateVendorResponses = {
-    /**
-     * Resource created response
-     */
-    201: MarketplaceVendor;
-};
-
-export type CreateVendorResponse = CreateVendorResponses[keyof CreateVendorResponses];
-
-export type GetVendorData = {
-    body?: never;
-    path: {
-        vendorId: Uuid;
-    };
-    query?: never;
-    url: '/vendors/{vendorId}';
-};
-
-export type GetVendorErrors = {
-    /**
-     * Unauthorized access response
-     */
-    401: AuthenticationError;
-    /**
-     * Resource not found response
-     */
-    404: NotFoundError;
-};
-
-export type GetVendorError = GetVendorErrors[keyof GetVendorErrors];
-
-export type GetVendorResponses = {
-    /**
-     * Success response with data
-     */
-    200: MarketplaceVendor;
-};
-
-export type GetVendorResponse = GetVendorResponses[keyof GetVendorResponses];
-
-export type UpdateVendorData = {
-    body: UpdateMarketplaceVendorRequest;
-    path: {
-        vendorId: Uuid;
-    };
-    query?: never;
-    url: '/vendors/{vendorId}';
-};
-
-export type UpdateVendorErrors = {
-    /**
-     * Validation error response
-     */
-    400: ValidationError;
-    /**
-     * Unauthorized access response
-     */
-    401: AuthenticationError;
-    /**
-     * Forbidden access response
-     */
-    403: AuthorizationError;
-    /**
-     * Resource not found response
-     */
-    404: NotFoundError;
-};
-
-export type UpdateVendorError = UpdateVendorErrors[keyof UpdateVendorErrors];
-
-export type UpdateVendorResponses = {
-    /**
-     * Success response with data
-     */
-    200: MarketplaceVendor;
-};
-
-export type UpdateVendorResponse = UpdateVendorResponses[keyof UpdateVendorResponses];
-
-export type VerifyVendorData = {
-    body?: never;
-    path: {
-        vendorId: Uuid;
-    };
-    query?: never;
-    url: '/vendors/{vendorId}/verify';
-};
-
-export type VerifyVendorErrors = {
-    /**
-     * Unauthorized access response
-     */
-    401: AuthenticationError;
-    /**
-     * Forbidden access response
-     */
-    403: AuthorizationError;
-    /**
-     * Resource not found response
-     */
-    404: NotFoundError;
-    /**
-     * Conflict response
-     */
-    409: ConflictError;
-};
-
-export type VerifyVendorError = VerifyVendorErrors[keyof VerifyVendorErrors];
-
-export type VerifyVendorResponses = {
-    /**
-     * Success response with data
-     */
-    200: MarketplaceVendor;
-};
-
-export type VerifyVendorResponse = VerifyVendorResponses[keyof VerifyVendorResponses];

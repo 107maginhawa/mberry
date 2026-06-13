@@ -644,6 +644,20 @@ describe('[AC-M10-001] getCreditTranscript cross-org aggregation', () => {
     expect(response.status).toBe(401);
   });
 
+  // FIX-006: required credits are now resolved server-side from
+  // org_cpd_config (client requiredCredits is ignored). Inject a config row so
+  // these carryover/compliance assertions run against a known requirement.
+  function transcriptConfigDb(requiredCredits: number, cycleLengthYears = 2) {
+    const row = { requiredCredits, cycleLengthYears, cycleStartMonth: 1 };
+    const chain: any = {
+      from: () => chain,
+      where: () => chain,
+      limit: async () => [row],
+      then: (r: any, j?: any) => Promise.resolve([row]).then(r, j),
+    };
+    return { select: () => chain } as any;
+  }
+
   test('aggregates credits from multiple orgs into single summary', async () => {
     const { getCreditTranscript } = await import('./getCreditTranscript');
     stubs = stubRepo(CreditEntryRepository, {
@@ -654,12 +668,8 @@ describe('[AC-M10-001] getCreditTranscript cross-org aggregation', () => {
       ],
     });
     const ctx = makeCtx({
-      _query: {
-        registrationDate: '2024-01-01',
-        cyclePeriodYears: '2',
-        requiredCredits: '40',
-        carryoverEnabled: 'false',
-      },
+      database: transcriptConfigDb(40),
+      _query: { carryoverEnabled: 'false' },
     });
     const response = await getCreditTranscript(ctx);
     expect(response.status).toBe(200);
@@ -667,6 +677,7 @@ describe('[AC-M10-001] getCreditTranscript cross-org aggregation', () => {
     const body = (response as any).body;
     expect(body.earned).toBe(33);
     expect(body.organizations).toHaveLength(3);
+    expect(body.required).toBe(40); // from config, not client
     expect(body.remaining).toBe(7);
     expect(body.compliant).toBe(false);
   });
@@ -680,10 +691,8 @@ describe('[AC-M10-001] getCreditTranscript cross-org aggregation', () => {
       ],
     });
     const ctx = makeCtx({
+      database: transcriptConfigDb(40),
       _query: {
-        registrationDate: '2024-01-01',
-        cyclePeriodYears: '2',
-        requiredCredits: '40',
         carryoverEnabled: 'true',
         previousCycleEarned: '60', // excess 20, capped at 50% of 40 = 20
       },
@@ -706,12 +715,8 @@ describe('[AC-M10-001] getCreditTranscript cross-org aggregation', () => {
       ],
     });
     const ctx = makeCtx({
-      _query: {
-        registrationDate: '2023-06-01',
-        cyclePeriodYears: '1',
-        requiredCredits: '40',
-        carryoverEnabled: 'false',
-      },
+      database: transcriptConfigDb(40, 1),
+      _query: { carryoverEnabled: 'false' },
     });
     const response = await getCreditTranscript(ctx);
     expect(response.status).toBe(200);
@@ -720,6 +725,7 @@ describe('[AC-M10-001] getCreditTranscript cross-org aggregation', () => {
     expect(body.organizations).toHaveLength(1);
     expect(body.organizations[0].credits).toBe(45);
     expect(body.earned).toBe(45);
+    expect(body.required).toBe(40); // from config, not client
     expect(body.remaining).toBe(0);
     expect(body.compliant).toBe(true);
   });

@@ -37,6 +37,15 @@ x-org-id: {{org_id}}
 HTTP 403
 
 
+# 2b. Non-admin DELETE of a suppression → 403 (FIX-007 RBAC).
+# Still the regular user's session — admin role is required to unblock.
+DELETE {{api}}/email/suppressions/00000000-0000-0000-0000-000000000000
+Origin: {{origin}}
+x-csrf-token: {{csrf_token}}
+x-org-id: {{org_id}}
+HTTP 403
+
+
 # 3. Sign in as the seeded admin so the cookie jar holds the admin's
 # session for the rest of the scenario.
 POST {{api}}/auth/sign-in/email
@@ -118,3 +127,14 @@ x-org-id: {{org_id}}
 HTTP 200
 [Asserts]
 jsonpath "$.data" isCollection
+
+
+# 10. Admin deletes a non-existent suppression → 404 (FIX-007 / WF-125).
+# Proves the DELETE endpoint exists, the admin passes RBAC (404 not 403),
+# and the not-found path is handled. A 204 happy-path delete is covered by
+# the deleteEmailSuppression unit test (no suppression is seeded to delete).
+DELETE {{api}}/email/suppressions/00000000-0000-0000-0000-000000000000
+Origin: {{origin}}
+x-csrf-token: {{csrf_token}}
+x-org-id: {{org_id}}
+HTTP 404

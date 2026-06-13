@@ -5,6 +5,7 @@ import { ConflictError, NotFoundError, ValidationError } from '@/core/errors';
 import { OrganizationRepository, AssociationRepository } from './repos/platform-admin.repo';
 import { domainEvents } from '@/core/domain-events';
 import { generateSlug, ensureUniqueSlug } from './utils/slug';
+import { requireAdminTier, SUPER_ONLY } from '@/core/auth/admin-tier';
 
 /**
  * createOrganization
@@ -17,6 +18,10 @@ export async function createOrganization(
 ): Promise<Response> {
   const session = ctx.get('session');
   if (!session) return ctx.json({ error: 'Unauthorized' }, 401);
+
+  // FIX-008 (G1) / Q1: creating an organization is a super-only mutation.
+  const denied = requireAdminTier(ctx, SUPER_ONLY);
+  if (denied) return denied;
 
   const body = ctx.req.valid('json');
   const db = ctx.get('database') as DatabaseInstance;

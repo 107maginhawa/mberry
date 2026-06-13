@@ -504,7 +504,7 @@ Source: DOMAIN_MODEL.md `creative_status` enum: pending, approved, rejected.
 |-----------|------|---------|-------------|--------------|
 | advertising_enabled | boolean | false | Enable advertising module | Post Phase 2 GA |
 | advertising_auto_pause_reports | boolean | true | Auto-pause creative on report threshold | — |
-| advertising_report_threshold | number | 5 | Number of reports before auto-pause | — |
+| advertising_report_threshold | number | 3 | Number of reports (within a rolling 7-day window) before the creative auto-pauses (reverts to `pending` for re-review). Implemented in reportAd (AHA FIX-009). | — |
 | advertising_impression_tracking | boolean | true | Enable impression/click tracking | — |
 
 ## 19. Vertical Slice Plan

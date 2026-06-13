@@ -61,6 +61,13 @@ jobs:
       PORT: 7213
       API_URL: http://localhost:7213
       AUTH_SECRET: contract-test-secret-do-not-use-in-prod
+      # Match local dev .env — frontend signup E2E flows expect an immediate
+      # session (no email-verification gate). Default is true.
+      AUTH_REQUIRE_EMAIL_VERIFICATION: false
+      # Platform-admin allowlist (admin app E2E + admin-gated reads). Matches .env.
+      AUTH_ADMIN_EMAILS: admin@contract-tests.local
+      # HMAC secret for one-tap dues payment tokens (see contract job). Matches .env.
+      PAYMENT_TOKEN_SECRET: contract-test-payment-secret-do-not-use-in-prod
       STORAGE_PROVIDER: minio
       STORAGE_ENDPOINT: http://localhost:9000
       STORAGE_BUCKET: monobase-files
@@ -315,6 +322,20 @@ jobs:
       PORT: 7213
       API_URL: http://localhost:7213
       AUTH_SECRET: contract-test-secret-do-not-use-in-prod
+      # The contract suite signs up many ad-hoc users and immediately uses the
+      # session; the dedicated email-verification flows (auth-verification.hurl)
+      # exercise verification explicitly. Without this, signup yields no session
+      # (401) and re-sign-in is blocked (403 EMAIL_NOT_VERIFIED) — matches the
+      # local dev .env which sets it false. Default is true.
+      AUTH_REQUIRE_EMAIL_VERIFICATION: false
+      # The contract runner (scripts/run-contract-tests.ts) auto-promotes this
+      # email to platform_admin on sign-up; admin-gated flows ({{admin_token}},
+      # GET /audit/logs cross-org reads) need it. Matches local dev .env.
+      AUTH_ADMIN_EMAILS: admin@contract-tests.local
+      # HMAC secret for one-tap dues payment tokens. getPaymentTokenSecret()
+      # throws (500) when neither PAYMENT_TOKEN_SECRET nor INVITE_TOKEN_SECRET is
+      # set — breaks send-link + /pay/:token/validate. Matches local dev .env.
+      PAYMENT_TOKEN_SECRET: contract-test-payment-secret-do-not-use-in-prod
       STORAGE_PROVIDER: minio
       STORAGE_ENDPOINT: http://localhost:9000
       STORAGE_BUCKET: monobase-files
@@ -352,7 +373,7 @@ jobs:
       - name: Install Hurl
         run: |
           curl -fsSL -o /tmp/hurl.deb \
-            https://github.com/Orange-OpenSource/hurl/releases/download/6.0.0/hurl_6.0.0_amd64.deb
+            https://github.com/Orange-OpenSource/hurl/releases/download/8.0.1/hurl_8.0.1_amd64.deb
           sudo dpkg -i /tmp/hurl.deb
       - name: Build OpenAPI spec
         run: bun run --filter @monobase/api-spec build

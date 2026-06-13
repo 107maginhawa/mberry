@@ -1,7 +1,6 @@
 ---
 slice: w1-t2-ux-polish
 phase: wave1-financial
-generated-by: oli-execution-gate
 timestamp: 2026-05-24T06:00:00+08:00
 ---
 

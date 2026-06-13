@@ -82,6 +82,47 @@ describe('importRosterMembers', () => {
     }
   });
 
+  // FIX-016 / G-13: reject an import that exceeds the row cap (abuse / runaway).
+  test('rejects an import exceeding the row cap (FIX-016)', async () => {
+    grantOfficer();
+    mocks = stubRepo(MembershipRepository, {
+      createOne: async (data: any) => ({ id: 'm-x', personId: data.personId }),
+    });
+
+    const members = Array.from({ length: 501 }, (_, i) => ({ personId: `p-${i}`, tierId: 'tier-1', status: 'active' }));
+    const ctx = makeCtx({ organizationId: 'org-9', _body: { members } });
+    const response = await importRosterMembers(ctx);
+
+    expect(response.status).toBe(400);
+  });
+
+  // FIX-016 / G-13: per-row validation returns a structured error for a bad row
+  // while still importing the valid rows.
+  test('returns a structured per-row error for a row missing tierId, importing the valid rows (FIX-016)', async () => {
+    grantOfficer();
+    mocks = stubRepo(MembershipRepository, {
+      createOne: async (data: any) => ({ id: 'm-x', personId: data.personId }),
+    });
+
+    const ctx = makeCtx({
+      organizationId: 'org-9',
+      _body: {
+        members: [
+          { personId: 'p-1', tierId: 'tier-1', status: 'active' },
+          { personId: 'p-2', status: 'active' }, // missing tierId
+        ],
+      },
+    });
+    const response = await importRosterMembers(ctx);
+
+    expect(response.status).toBe(200);
+    expect(response.body.imported).toBe(1);
+    expect(response.body.failed).toBe(1);
+    const err = (response.body.errors as Array<{ index: number; error: string }>).find((e) => e.index === 1);
+    expect(err).toBeDefined();
+    expect(err!.error).toMatch(/tierId/i);
+  });
+
   // Test: requirePosition guard returns 403 for non-officer
   test('returns 403 when caller holds no qualifying officer position', async () => {
     officerMocks = stubRepo(OfficerTermRepository, {

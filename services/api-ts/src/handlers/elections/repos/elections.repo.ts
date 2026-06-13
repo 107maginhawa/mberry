@@ -62,6 +62,35 @@ export class ElectionsRepository {
     return !!existing;
   }
 
+  /**
+   * AHA FIX-003 (G3): member self-read — the caller's OWN ballots for an election.
+   * Returns full rows because they belong to the requesting voter; no other voter's
+   * data is exposed. Powers the "already voted?" self-check.
+   */
+  async listVotesForVoter(electionId: string, voterId: string) {
+    return this.db.select().from(electionVotes)
+      .where(and(eq(electionVotes.electionId, electionId), eq(electionVotes.voterId, voterId)))
+      .limit(100);
+  }
+
+  /**
+   * AHA FIX-003 (G3): admin search — anonymised ballots. The projection deliberately
+   * OMITS voterId / createdBy / updatedBy so an individual vote can never be linked back
+   * to a voter (secret ballot, WF-077). Scoped to one election; optional position filter.
+   */
+  async listAnonymizedVotes(electionId: string, positionId?: string) {
+    const conditions: SQL<unknown>[] = [eq(electionVotes.electionId, electionId)];
+    if (positionId) conditions.push(eq(electionVotes.positionId, positionId));
+    return this.db.select({
+      id: electionVotes.id,
+      electionId: electionVotes.electionId,
+      positionId: electionVotes.positionId,
+      nomineeId: electionVotes.nomineeId,
+      organizationId: electionVotes.organizationId,
+      castAt: electionVotes.createdAt,
+    }).from(electionVotes).where(and(...conditions)).limit(100);
+  }
+
   async getVoteTallies(electionId: string) {
     return this.db.select({
       positionId: electionVotes.positionId,

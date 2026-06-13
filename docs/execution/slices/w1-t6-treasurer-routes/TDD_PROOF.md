@@ -1,7 +1,6 @@
 ---
 slice: w1-t6-treasurer-routes
 phase: wave1-financial
-generated-by: oli-execution-gate
 timestamp: 2026-05-24T05:45:00+08:00
 ---
 

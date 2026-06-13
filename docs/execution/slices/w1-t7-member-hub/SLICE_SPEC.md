@@ -2,7 +2,6 @@
 slice: w1-t7-member-hub
 phase: wave1-financial
 priority: P2
-agent_skills: [oli-execution-gate]
 ---
 
 # T7: Member Financial Hub

@@ -48,6 +48,7 @@ function defaultStubs() {
   return stubRepo(DuesRepository, {
     getGatewayConfig: async () => gatewayConfig,
     getNextReceiptSequence: async () => 1,
+      getOrgReceiptPrefix: async () => 'ORG',
     createPayment: async (data: any) => ({ ...createdPayment, ...data }),
   });
 }
@@ -189,6 +190,7 @@ describe('[031] initiateOnlinePayment', () => {
     stubRepo(DuesRepository, {
       getGatewayConfig: async () => gatewayConfig,
       getNextReceiptSequence: async () => 42,
+      getOrgReceiptPrefix: async () => 'ORG',
       createPayment: async (data: any) => {
         capturedPayment = data;
         return { ...createdPayment, ...data };

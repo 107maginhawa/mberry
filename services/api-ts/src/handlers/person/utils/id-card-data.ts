@@ -9,6 +9,7 @@ import type { DatabaseInstance } from '@/core/database';
 import { persons } from '@/handlers/person/repos/person.schema';
 import { memberships } from '@/handlers/association:member/repos/membership.schema';
 import { organizations } from '@/handlers/platformadmin/repos/platform-admin.schema';
+import { ensureMemberCardCredential } from '@/handlers/association:member/utils/ensure-member-card-credential';
 
 export interface IdCardData {
   personId: string;
@@ -21,12 +22,14 @@ export interface IdCardData {
   qrPayload: string; // base64 encoded JSON
   qrSignature: string; // HMAC-SHA256 hex
   validUntil: string | null; // ISO date string
+  verifyCredentialNumber: string | null; // member-card digital-credential number for the public QR (Batch A2)
 }
 
 export async function getIdCardData(
   db: DatabaseInstance,
   personId: string,
   orgId: string,
+  logger?: any,
 ): Promise<IdCardData | null> {
   // Query person
   const personRows = await db
@@ -71,12 +74,35 @@ export async function getIdCardData(
   const payloadJson = JSON.stringify(payload);
   const qrPayload = Buffer.from(payloadJson).toString('base64');
 
-  // HMAC-SHA256 signature
-  const secret = process.env['AUTH_SECRET'] ?? 'fallback-secret';
+  // HMAC-SHA256 signature.
+  // FIX-004 (G-04): fail closed. The old `?? 'fallback-secret'` made ID cards
+  // forgeable in any env missing the secret. Prefer a dedicated key, fall back
+  // to AUTH_SECRET (required by core/config.ts in every env), and THROW rather
+  // than sign with a known literal.
+  const secret = process.env['ID_CARD_HMAC_SECRET'] ?? process.env['AUTH_SECRET'];
+  if (!secret) {
+    throw new Error(
+      'ID card HMAC secret is not configured. Set ID_CARD_HMAC_SECRET (or AUTH_SECRET) — ' +
+        'refusing to sign an ID card with an insecure fallback (BR-18).',
+    );
+  }
   const qrSignature = createHmac('sha256', secret).update(payloadJson).digest('hex');
 
   // Photo URL from avatar
   const photoUrl = person.avatar?.url ?? null;
+
+  // Batch A2 / FIX-001: lazily ensure an active member has a member-card digital
+  // credential so the public QR has a verifiable identifier to point at. Only
+  // active memberships get one; best-effort (null on failure — card still renders).
+  const verifyCredentialNumber =
+    membership && status === 'active'
+      ? await ensureMemberCardCredential(db, logger, {
+          personId,
+          orgId,
+          membershipId: membership.id,
+          expiresAt: validUntil ? new Date(validUntil) : null,
+        })
+      : null;
 
   return {
     personId,
@@ -89,5 +115,6 @@ export async function getIdCardData(
     qrPayload,
     qrSignature,
     validUntil,
+    verifyCredentialNumber,
   };
 }

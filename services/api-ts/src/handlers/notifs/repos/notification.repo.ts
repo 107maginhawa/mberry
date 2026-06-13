@@ -19,6 +19,19 @@ import { ValidationError, NotFoundError, ForbiddenError, ExternalServiceError } 
 import * as OneSignal from '@onesignal/node-onesignal';
 import { SYSTEM_USER_ID } from '@/core/constants';
 import { subDays } from 'date-fns';
+import { resolveNotificationCategory } from './notification-category';
+import type { NotificationPreferencePort } from '@/core/ports/notification-preference.port';
+
+/**
+ * Shape returned by createNotificationForModule when a notification is
+ * suppressed by preference enforcement (FIX-004 / G4). It is a synthetic,
+ * NON-persisted Notification-shaped object: no DB row is created, the send is
+ * skipped. `suppressed: true` flags the skip; `id: ''` keeps the historically
+ * non-null return contract so callers reading `.id` (e.g. dues reminder logs)
+ * do not crash. In-app is never suppressed, so this only ever stands in for a
+ * skipped email/push.
+ */
+type SuppressedNotification = Notification & { suppressed: true };
 
 /** Typed shape of the global app singleton used by the email service bridge. */
 interface AppGlobal {
@@ -33,15 +46,24 @@ export class NotificationRepository extends DatabaseRepository<Notification, New
   private personRepo: PersonRepository;
   private oneSignalClient?: OneSignal.DefaultApi;
   private oneSignalAppId?: string;
+  /**
+   * FIX-004 / G4 — preference store reader. Injected (defaults to the
+   * production communication-owned adapter, resolved lazily) and overridable
+   * in tests. The notifs module never imports communication repos directly;
+   * the read crosses the boundary through this port.
+   */
+  private preferencePort?: NotificationPreferencePort;
 
   constructor(
     db: DatabaseInstance,
     personRepo: PersonRepository,
     logger?: any,
-    oneSignalConfig?: { appId: string; apiKey: string }
+    oneSignalConfig?: { appId: string; apiKey: string },
+    preferencePort?: NotificationPreferencePort,
   ) {
     super(db, notifications, logger);
     this.personRepo = personRepo;
+    this.preferencePort = preferencePort;
 
     // Initialize OneSignal if config provided
     if (oneSignalConfig) {
@@ -51,6 +73,18 @@ export class NotificationRepository extends DatabaseRepository<Notification, New
       this.oneSignalClient = new OneSignal.DefaultApi(configuration);
       this.oneSignalAppId = oneSignalConfig.appId;
     }
+  }
+
+  /**
+   * Resolve the preference port. Uses the injected port when present;
+   * otherwise lazily constructs the production adapter against this repo's db.
+   * Kept as a protected method so it is overridable/spyable in tests.
+   */
+  protected async getPreferencePort(): Promise<NotificationPreferencePort> {
+    if (this.preferencePort) return this.preferencePort;
+    const { getNotificationPreferencePort } = await import('@/core/ports');
+    this.preferencePort = await getNotificationPreferencePort(this.db, this.logger);
+    return this.preferencePort;
   }
 
   /**
@@ -108,6 +142,14 @@ export class NotificationRepository extends DatabaseRepository<Notification, New
   async createNotificationForModule(request: CreateNotificationRequest | InternalNotificationRequest): Promise<Notification> {
     this.logger?.debug({ request }, 'Creating notification from module');
 
+    // FIX-012: organizationId is a notNull uuid column. Reject a missing/empty
+    // value here with a caller-visible ValidationError instead of letting the
+    // old `|| ''` fallback hit a Postgres uuid cast error at insert time.
+    const organizationId = request.organizationId;
+    if (!organizationId || organizationId.trim() === '') {
+      throw new ValidationError('organizationId is required to create a notification');
+    }
+
     // Validate recipient exists (optional - Person records may not exist for all User IDs)
     const recipient = await this.personRepo.findOneById(request.recipient);
 
@@ -130,10 +172,55 @@ export class NotificationRepository extends DatabaseRepository<Notification, New
       }, 'Medical notification created without explicit consent validation');
     }
 
+    // Resolve the effective delivery channel up-front (single `channel`, then
+    // first of `channels[]`, then default 'in-app'). Needed both for the
+    // preference gate below and for the persisted row.
+    const resolvedChannel = (request.channel
+      || ('channels' in request ? (request as InternalNotificationRequest).channels?.[0] : undefined)
+      || 'in-app') as Notification['channel'];
+
+    // FIX-004 / G4 — per-category preference enforcement at delivery.
+    //  • in-app is NEVER suppressed (it is the in-app inbox).
+    //  • email / push are skipped when the recipient EXPLICITLY disabled the
+    //    category this notification belongs to (opt-out / fail-open: only an
+    //    explicit `enabled = false` person_subscription suppresses).
+    if (resolvedChannel === 'email' || resolvedChannel === 'push') {
+      const category = resolveNotificationCategory(request.type);
+      if (category) {
+        const port = await this.getPreferencePort();
+        const enabled = await port.isCategoryEnabledForPerson(
+          request.recipient,
+          organizationId,
+          category,
+        );
+        if (!enabled) {
+          this.logger?.info({
+            recipient: request.recipient,
+            type: request.type,
+            channel: resolvedChannel,
+            category,
+          }, 'Notification suppressed: recipient disabled this category (FIX-004)');
+          // Skip: do NOT create any row, do NOT send. Return a synthetic,
+          // non-persisted marker so callers reading `.id` stay safe.
+          return {
+            id: '',
+            organizationId,
+            recipient: request.recipient,
+            type: request.type as Notification['type'],
+            channel: resolvedChannel,
+            title: request.title,
+            message: request.message,
+            status: 'failed',
+            suppressed: true,
+          } as unknown as SuppressedNotification;
+        }
+      }
+    }
+
     // Determine final status and sentAt based on scheduling and channel
     // This allows us to create the notification with its final state in a single operation
     const isImmediate = !request.scheduledAt || request.scheduledAt <= new Date();
-    const isInApp = request.channel === 'in-app';
+    const isInApp = resolvedChannel === 'in-app';
 
     // For immediate in-app notifications, create with 'sent' status directly
     // For scheduled or non-in-app notifications, create with 'queued' status
@@ -142,10 +229,10 @@ export class NotificationRepository extends DatabaseRepository<Notification, New
 
     // Create notification record with final status in single operation
     const notification = await this.createOne({
-      organizationId: request.organizationId || '',
+      organizationId,
       recipient: request.recipient,
       type: request.type as Notification['type'],
-      channel: (request.channel || ('channels' in request ? (request as InternalNotificationRequest).channels?.[0] : undefined) || 'in-app') as Notification['channel'],
+      channel: resolvedChannel,
       title: request.title,
       message: request.message,
       scheduledAt: request.scheduledAt || null,

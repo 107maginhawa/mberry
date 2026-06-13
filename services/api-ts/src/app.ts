@@ -44,6 +44,7 @@ import { registerDuesJobs } from '@/handlers/association:member/jobs';
 import { registerPersonJobs } from '@/handlers/person/jobs';
 import { registerMembershipJobs, registerStatusRecomputeJob } from '@/handlers/member/membership/jobs';
 import { registerSurveyJobs } from '@/handlers/surveys/jobs';
+import { registerCommunicationJobs } from '@/handlers/communication/jobs/announcementSend';
 import { registerBreachJobs, registerTicketJobs, registerTrialExpiryMonitor, registerPastDueMonitor } from '@/handlers/platformadmin/jobs';
 import { registerDomainEventConsumers } from '@/core/domain-event-consumers';
 
@@ -69,11 +70,13 @@ import { createDependencyInjection } from '@/middleware/dependency';
 import { createSecurityHeaders, createCorsMiddleware } from '@/middleware/security';
 import { createCsrfTokenMiddleware, registerCsrfTokenEndpoint } from '@/middleware/csrf-token';
 import { authMiddleware } from '@/middleware/auth';
+import { isAssociationPublicPath } from '@/middleware/association-public-paths';
 import { platformAdminAuthMiddleware } from '@/middleware/platform-admin-auth';
 import { createAuditMiddleware } from '@/middleware/audit';
 import { createRateLimiter } from '@/middleware/rate-limit';
 import { orgContextMiddleware, orgContextOptionalMiddleware } from '@/middleware/org-context';
-import { impersonationResolver, impersonationWriteBlock } from '@/middleware/impersonation-guard';
+import { impersonationResolver, impersonationReadAudit, impersonationWriteBlock } from '@/middleware/impersonation-guard';
+import { featureFlagGate } from '@/middleware/feature-flag-gate';
 
 // PRC Accredited Providers — MIGRATED to generated routes (association:operations).
 // Training lifecycle — MIGRATED to generated routes (completeCustomTraining, publishTraining).
@@ -115,16 +118,14 @@ import { listPublicOrgs } from '@/handlers/platformadmin/listPublicOrgs';
 import { createIsolatedFixture, deleteIsolatedFixture } from '@/handlers/test-isolation';
 
 // Breach notification handlers — DPA 2012 / M3-R11
-import { reportBreach } from '@/handlers/platformadmin/reportBreach';
-import { listBreaches } from '@/handlers/platformadmin/listBreaches';
-import { updateBreachStatus } from '@/handlers/platformadmin/updateBreachStatus';
+// Breach register (DPA 2012 / M3-R11) — reportBreach / listBreaches /
+// updateBreachStatus now served via generated TypeSpec routes (FIX-011 / G7).
 
-// Support ticket SLA system — M3-R12
+// Support ticket SLA system — M3-R12. createTicket stays hand-wired (public
+// /support/tickets); listTickets / getTicket / updateTicketStatus /
+// addTicketComment now served via generated TypeSpec routes (FIX-011 / G7).
 import { createTicket } from '@/handlers/platformadmin/createTicket';
-import { listTickets } from '@/handlers/platformadmin/listTickets';
-import { getTicket } from '@/handlers/platformadmin/getTicket';
-import { updateTicketStatus } from '@/handlers/platformadmin/updateTicketStatus';
-import { addTicketComment } from '@/handlers/platformadmin/addTicketComment';
+import { claimAdminInvite } from '@/handlers/platformadmin/claimAdminInvite';
 
 // getNationalDashboard, listAllCommittees, getCommittee — served via generated routes (Phase 35)
 
@@ -161,13 +162,11 @@ import { getOrgDashboard } from '@/handlers/association:member/getOrgDashboard';
 
 // voidCreditEntry — migrated to generated routes (member-credits cutover); hand-wired duplicate removed.
 
-// Subscription system (UJ-M03) — pricing tier management and org subscriptions
-import { listPricingTiers } from '@/handlers/platformadmin/listPricingTiers';
-import { createPricingTier } from '@/handlers/platformadmin/createPricingTier';
-import { updatePricingTier } from '@/handlers/platformadmin/updatePricingTier';
-import { listSubscriptions } from '@/handlers/platformadmin/listSubscriptions';
-import { getSubscription } from '@/handlers/platformadmin/getSubscription';
-import { cancelSubscription } from '@/handlers/platformadmin/cancelSubscription';
+// Subscription system (UJ-M03). Admin pricing + subscription management
+// (listPricingTiers / createPricingTier / updatePricingTier /
+// listSubscriptions / getSubscription / cancelSubscription) now served via
+// generated TypeSpec routes (FIX-011 / G7). Org-facing subscription routes +
+// revenue/health analytics remain hand-wired below.
 import { getRevenueAnalytics } from '@/handlers/platformadmin/getRevenueAnalytics';
 import { getOrgHealthScores } from '@/handlers/platformadmin/getOrgHealthScores';
 import { getMySubscription } from '@/handlers/member/membership/subscription/getMySubscription';
@@ -289,8 +288,10 @@ export function createApp(config: Config): App {
   // P1-5: Global rate limiting for custom endpoints (auth routes handled by Better-Auth)
   app.use('*', createRateLimiter());
 
-  // Impersonation: resolve cookie → context, then block writes if impersonating
+  // Impersonation: resolve cookie → context, audit every read under
+  // impersonation (FIX-016 / M3-R2: both admin + target IDs), then block writes
   app.use('*', impersonationResolver());
+  app.use('*', impersonationReadAudit());
   app.use('*', impersonationWriteBlock());
 
   // Register metrics middleware (before routes, after app creation)
@@ -339,6 +340,9 @@ export function createApp(config: Config): App {
   // Register auth routes
   registerAuthRoutes(app as App);
 
+  // @hand-wired reason="admin invite claim — the invitee is authenticated but NOT yet a platform admin, so it must sit OUTSIDE the /admin/* platform-admin gate; it binds the invited row's userId on first claim (FIX-003 / G4 / WF-022). Migrate to TypeSpec with the rest of the hand-wired admin surface under G7." wave="AHA-FIX-003"
+  app.post('/platform-admin/claim', authMiddleware(), claimAdminInvite as unknown as Handler);
+
   // Platform admin authorization — auth first (sets user), then check platform_admin table
   app.use('/admin/*', authMiddleware(), platformAdminAuthMiddleware());
 
@@ -346,23 +350,12 @@ export function createApp(config: Config): App {
   const assocIdParam = zValidator('param', z.object({ associationId: z.string().uuid() }), validationErrorHandler);
   const uuidIdParam = zValidator('param', z.object({ id: z.string().uuid() }), validationErrorHandler);
 
-  // @hand-wired reason="DPA 2012 breach notification, admin-only" wave="M3-R11"
-  const reportBreachBody = zValidator('json', z.object({
-    organizationId: z.string().uuid().optional(),
-    discoveredAt: z.string().min(1),
-    description: z.string().min(1).max(5000),
-    affectedRecordsCount: z.number().int().nonnegative().optional(),
-    dataCategories: z.array(z.enum(['personal', 'sensitive_personal', 'health', 'financial', 'biometric', 'genetic', 'criminal'])).optional(),
-  }), validationErrorHandler);
-  app.post('/admin/breaches', reportBreachBody, reportBreach as unknown as Handler);
-  app.get('/admin/breaches', listBreaches as unknown as Handler);
-  const breachStatusBody = zValidator('json', z.object({
-    status: z.enum(['investigating', 'notified', 'resolved']),
-    npcReferenceNumber: z.string().min(1).max(255).optional(),
-  }), validationErrorHandler);
-  app.put('/admin/breaches/:id', uuidIdParam, breachStatusBody, updateBreachStatus as unknown as Handler);
+  // Breach register (DPA 2012 / M3-R11) — MIGRATED to generated TypeSpec routes
+  // (FIX-011 / G7): /admin/breaches (POST,GET), /admin/breaches/:id (PUT). The
+  // /admin/* gate above still sets ctx.platformAdmin; in-handler requireAdminTier
+  // (FIX-008) and updateBreachStatus's inline auditAction survive unchanged.
 
-  // @hand-wired reason="support ticket SLA system, not in TypeSpec" wave="M3-R12"
+  // @hand-wired reason="support ticket creation is public-authenticated (any signed-in user), must NOT sit behind the /admin/* platform-admin gate" wave="M3-R12 / FIX-011"
   const createTicketBody = zValidator('json', z.object({
     subject: z.string().min(1).max(500),
     description: z.string().min(1).max(10000),
@@ -371,19 +364,10 @@ export function createApp(config: Config): App {
     organizationId: z.string().uuid().optional(),
   }), validationErrorHandler);
   app.post('/support/tickets', authMiddleware(), createTicketBody, createTicket as unknown as Handler);
-  app.get('/admin/tickets', listTickets as unknown as Handler);
-  app.get('/admin/tickets/:id', uuidIdParam, getTicket as unknown as Handler);
-  const ticketStatusBody = zValidator('json', z.object({
-    status: z.string().min(1).max(50),
-    assignedTo: z.string().uuid().optional(),
-    resolution: z.string().max(5000).optional(),
-  }).passthrough(), validationErrorHandler);
-  app.put('/admin/tickets/:id', uuidIdParam, ticketStatusBody, updateTicketStatus as unknown as Handler);
-  const ticketCommentBody = zValidator('json', z.object({
-    comment: z.string().min(1).max(5000),
-    internal: z.boolean().optional(),
-  }).passthrough(), validationErrorHandler);
-  app.post('/admin/tickets/:id/comments', uuidIdParam, ticketCommentBody, addTicketComment as unknown as Handler);
+  // Support inbox admin routes — MIGRATED to generated TypeSpec routes (FIX-011 /
+  // G7): /admin/tickets (GET), /admin/tickets/:id (GET,PUT),
+  // /admin/tickets/:id/comments (POST). Creator-access branches in getTicket /
+  // addTicketComment are dead under the /admin gate (unchanged from hand-wired).
 
   // @hand-wired reason="Stripe webhook, must precede auth middleware" wave="by-design"
   app.post('/webhooks/stripe', stripeWebhookHandler as unknown as Handler);
@@ -404,20 +388,12 @@ export function createApp(config: Config): App {
   // @hand-wired reason="suppression list, middleware ordering with /email/* auth" wave="by-design"
   app.get('/email/suppressions', listEmailSuppressions);
 
-  // Public association endpoints that must NOT have auth middleware
-  const ASSOCIATION_PUBLIC_PATHS = [
-    '/association/member/credentials/public-verify',
-    '/association/member/credentials/lookup',
-    '/association/member/ethics/public-complaints',
-    '/association/member/ethics/public-complaint',
-    '/association/member/directory/public',
-    '/association/member/directory/search', // covers /search/:personId/public
-  ];
-
-  // Auth middleware for all association routes EXCEPT public endpoints
+  // Auth middleware for all association routes EXCEPT public endpoints.
+  // Public-path matching is boundary-aware (FIX-009) — see
+  // middleware/association-public-paths.ts.
   app.use('/association/*', async (c, next) => {
     const path = new URL(c.req.url).pathname;
-    if (ASSOCIATION_PUBLIC_PATHS.some(p => path.startsWith(p))) {
+    if (isAssociationPublicPath(path)) {
       return next();
     }
     return authMiddleware()(c, next);
@@ -425,7 +401,7 @@ export function createApp(config: Config): App {
   // Org-context middleware for association routes EXCEPT public endpoints
   app.use('/association/*', async (c, next) => {
     const path = new URL(c.req.url).pathname;
-    if (ASSOCIATION_PUBLIC_PATHS.some(p => path.startsWith(p))) {
+    if (isAssociationPublicPath(path)) {
       return next();
     }
     return orgContextMiddleware()(c, next);
@@ -451,6 +427,20 @@ export function createApp(config: Config): App {
 
   // Accredited Providers — defense-in-depth wildcard (generated routes now have per-route auth)
   app.use('/accredited-providers/*', authMiddleware());
+
+  // FIX-009 (G2 / Q2): Feature-flag enforcement gate — OPT-IN, keyed by module name.
+  // The DB `feature_flag` table is written by setFeatureFlag but, before this,
+  // was never enforced. The marketplace router is wired as the representative
+  // proof-of-enforcement: a `marketplace` flag disabled for an org returns 403,
+  // an org override beats the tier/association default, and modules with no
+  // flag row fail open. This is a STAGED rollout — other module routers opt in
+  // by adding `featureFlagGate('<module>')` after their auth+org-context
+  // middleware. See middleware/feature-flag-gate.ts. [CROSS-MODULE RISK: gate
+  // sits on the request pipeline for one prefix only; route-walk regression in
+  // feature-flag-gate.test.ts proves enabled/no-row modules are not gated.]
+  // Mounted AFTER the `/association/*` auth + org-context middleware above so
+  // `ctx.var.organizationId` is populated before the gate reads it.
+  app.use('/association/marketplace/*', featureFlagGate('marketplace'));
 
   // Register API routes
   registerOpenAPIRoutes(app as unknown as Parameters<typeof registerOpenAPIRoutes>[0]); // structural: Hono app type narrowing
@@ -520,24 +510,19 @@ export function createApp(config: Config): App {
   app.get('/certificates/:id/pdf', certIdParam, authMiddleware(), generateCertificatePdf as unknown as Handler);
 
   // @hand-wired reason="WF-070 cross-org credit transcript export, inline query schema not in TypeSpec" wave="Wave-22"
+  // FIX-006 (G4): the compliance basis (requiredCredits, cyclePeriodYears,
+  // cycle anchor) and registrationDate are resolved SERVER-SIDE from
+  // org_cpd_config and are NO LONGER accepted from the client — a member must
+  // not be able to set their own pass/fail bar on this regulator-facing PDF.
+  // Only carryover inputs and the display name remain client-supplied.
   const creditTranscriptQuery = zValidator('query', z.object({
-    registrationDate: z.string().min(1),
-    cyclePeriodYears: z.string().optional(),
-    requiredCredits: z.string().optional(),
     carryoverEnabled: z.string().optional(),
     previousCycleEarned: z.string().optional(),
-    targetDate: z.string().optional(),
   }), validationErrorHandler);
   const creditTranscriptPdfQuery = zValidator('query', z.object({
-    registrationDate: z.string().min(1),
-    cyclePeriodYears: z.string().optional(),
-    requiredCredits: z.string().optional(),
     carryoverEnabled: z.string().optional(),
     previousCycleEarned: z.string().optional(),
-    targetDate: z.string().optional(),
     personName: z.string().optional(),
-    cycleStartMonth: z.string().optional(),
-    cycleStartDay: z.string().optional(),
   }), validationErrorHandler);
   app.get('/persons/me/credit-transcript', creditTranscriptQuery, authMiddleware(), getCreditTranscript as unknown as Handler);
   app.get('/persons/me/credit-transcript/pdf', creditTranscriptPdfQuery, authMiddleware(), getCreditTranscriptPdf as unknown as Handler);
@@ -564,23 +549,14 @@ export function createApp(config: Config): App {
   // void-event hand-wired duplicate killed by member-credits cutover (Cr.7).
   // Generated route at routes.ts:1043 serves /association/member/credits/void-event.
 
-  // @hand-wired reason="admin pricing tier CRUD, not in TypeSpec" wave="UJ-M03"
-  const pricingBody = zValidator('json', z.object({
-    name: z.string().min(1).max(255),
-    amount: z.number().nonnegative(),
-    currency: z.string().length(3).optional(),
-    interval: z.enum(['monthly', 'quarterly', 'annually']).optional(),
-    features: z.array(z.string()).optional(),
-  }).passthrough(), validationErrorHandler);
-  const tierIdParam = zValidator('param', z.object({ tierId: z.string().uuid() }), validationErrorHandler);
-  app.get('/admin/pricing', listPricingTiers as unknown as Handler);
-  app.post('/admin/pricing', pricingBody, createPricingTier as unknown as Handler);
-  app.put('/admin/pricing/:tierId', tierIdParam, pricingBody, updatePricingTier as unknown as Handler);
+  // Admin pricing tiers (UJ-M03) — MIGRATED to generated TypeSpec routes
+  // (FIX-011 / G7): /admin/pricing (GET,POST), /admin/pricing/:tierId (PUT).
+  // create/update enforce SUPER_ONLY in-handler (FIX-008); unchanged.
 
-  // @hand-wired reason="admin subscription management, not in TypeSpec" wave="UJ-M03"
-  app.get('/admin/subscriptions', listSubscriptions as unknown as Handler);
-  app.get('/admin/subscriptions/:id', uuidIdParam, getSubscription as unknown as Handler);
-  app.put('/admin/subscriptions/:id/cancel', uuidIdParam, cancelSubscription as unknown as Handler);
+  // Admin subscription management (UJ-M03) — MIGRATED to generated TypeSpec
+  // routes (FIX-011 / G7): /admin/subscriptions (GET), /admin/subscriptions/:id
+  // (GET), /admin/subscriptions/:id/cancel (PUT). cancel enforces SUPER_ONLY
+  // in-handler (FIX-008); unchanged.
 
   // @hand-wired reason="platform revenue/health analytics, not in TypeSpec" wave="23" finding="EM-M03-b4c5d6e7"
   app.get('/admin/analytics/revenue', getRevenueAnalytics as unknown as Handler);
@@ -677,6 +653,10 @@ export async function initializeApp(app: App, config: Config): Promise<void> {
   registerPersonJobs(jobs);
   registerMembershipJobs(jobs, app.notifs);
   registerSurveyJobs(jobs, app.notifs);
+  // FIX-001/002: register communication jobs — wires the announcement.published
+  // fan-out subscriber AND the */5 scheduled-delivery cron. Without this call
+  // no announcement ever reached a member. [SHARED DEPENDENCY: one init line]
+  registerCommunicationJobs(jobs, app.notifs, app.email, database);
   registerBreachJobs(jobs, app.notifs);
   registerTicketJobs(jobs, app.notifs);
   registerTrialExpiryMonitor(jobs);

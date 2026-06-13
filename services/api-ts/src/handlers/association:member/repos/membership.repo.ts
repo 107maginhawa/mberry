@@ -117,6 +117,18 @@ export class MembershipTierRepository extends DatabaseRepository<
 
     return (record as MembershipTier) || null;
   }
+
+  /**
+   * FIX-015 / BR-04: count memberships assigned to a tier. Gate for delete —
+   * deleting a tier with members would raise a raw FK-violation 500.
+   */
+  async countMembersInTier(tierId: string): Promise<number> {
+    const [row] = await this.db
+      .select({ count: sql<number>`count(*)` })
+      .from(memberships)
+      .where(eq(memberships.tierId, tierId));
+    return Number(row?.count ?? 0);
+  }
 }
 
 // ---------------------------------------------------------------------------
@@ -153,6 +165,14 @@ export class MembershipRepository extends DatabaseRepository<
 
     if (filters.tierId) {
       conditions.push(eq(memberships.tierId, filters.tierId));
+    }
+
+    // FIX-017 (§12): `q` was declared on MembershipFilters but never built a
+    // condition — roster search silently did nothing. The TypeSpec-generated
+    // repo is schema-only (no person join), so it searches the membership's own
+    // member_number. Person name search lives in the hand-wired rich roster repo.
+    if (filters.q) {
+      conditions.push(ilike(memberships.memberNumber, `%${filters.q}%`));
     }
 
     return conditions.length > 0 ? and(...conditions) : undefined;

@@ -172,6 +172,71 @@ describe('[M15] createJobPosting', () => {
   });
 });
 
+describe('[M15] createJobPosting org-context trust (FIX-003)', () => {
+  let mocks: ReturnType<typeof stubRepo>;
+
+  afterEach(() => {
+    if (mocks) Object.values(mocks).forEach((m) => m.mockRestore());
+  });
+
+  test('binds organizationId to the tenant-resolved org from context, not body', async () => {
+    let capturedData: any = null;
+    mocks = stubRepo(JobPostingRepository, {
+      create: async (data: any) => { capturedData = data; return { ...fakePosting, ...data }; },
+    });
+
+    // orgContextMiddleware verified the caller is a member of 'tenant-A' and set
+    // ctx.var.organizationId = 'tenant-A'. The body attempts to redirect the write
+    // to 'tenant-B' (cross-org write attack).
+    const ctx = makeCtx({
+      organizationId: 'tenant-A',
+      _body: {
+        title: 'Engineer',
+        organizationName: 'Acme',
+        organizationId: 'tenant-B',
+      },
+    });
+
+    const response = await createJobPosting(ctx);
+    expect(response.status).toBe(201);
+    // The insert MUST use the trusted context org, never the body-supplied org.
+    expect(capturedData.organizationId).toBe('tenant-A');
+    expect(capturedData.organizationId).not.toBe('tenant-B');
+  });
+
+  test('uses context org even when body omits organizationId entirely', async () => {
+    let capturedData: any = null;
+    mocks = stubRepo(JobPostingRepository, {
+      create: async (data: any) => { capturedData = data; return { ...fakePosting, ...data }; },
+    });
+
+    const ctx = makeCtx({
+      organizationId: 'tenant-A',
+      _body: { title: 'Engineer', organizationName: 'Acme' },
+    });
+
+    const response = await createJobPosting(ctx);
+    expect(response.status).toBe(201);
+    expect(capturedData.organizationId).toBe('tenant-A');
+  });
+
+  test('rejects with 403 when no org context is established', async () => {
+    mocks = stubRepo(JobPostingRepository, {
+      create: async (data: any) => ({ ...fakePosting, ...data }),
+    });
+
+    // No org context (middleware would have already 403'd, but the handler must
+    // fail closed rather than insert a posting with a missing/undefined org).
+    const ctx = makeCtx({
+      organizationId: undefined,
+      _body: { title: 'Engineer', organizationName: 'Acme', organizationId: 'tenant-B' },
+    });
+
+    const response = await createJobPosting(ctx);
+    expect(response.status).toBe(403);
+  });
+});
+
 describe('[M15] createJobPosting employment types', () => {
   let mocks: ReturnType<typeof stubRepo>;
 

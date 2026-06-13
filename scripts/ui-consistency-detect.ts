@@ -148,6 +148,9 @@ for (const file of files) {
 
   // Detector 4: PageShell-missing (only for .tsx under routes/)
   if (/apps\/(memberry|admin)\/src\/routes\//.test(file)) {
+    // Colocated test/spec files live under routes/ but are never page routes —
+    // they render mocked/stubbed components, so PageShell never applies.
+    if (/\.(test|spec)\.tsx$/.test(file)) continue
     if (layoutP.some((p) => p.test(file))) continue
     if (INTENTIONAL_EXEMPT_ROUTES.has(file)) continue
     if (!/<PageShell\b|import.*PageShell/.test(src) && !fileHeaderExempt(file)) {

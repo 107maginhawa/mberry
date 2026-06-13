@@ -4,6 +4,7 @@ import type { InviteAdminBody } from '@/generated/openapi/validators';
 import { ConflictError } from '@/core/errors';
 import { PlatformAdminRepository } from './repos/platform-admin.repo';
 import { domainEvents } from '@/core/domain-events';
+import { requireAdminTier, SUPER_ONLY } from '@/core/auth/admin-tier';
 
 /**
  * inviteAdmin
@@ -17,11 +18,9 @@ export async function inviteAdmin(
   const session = ctx.get('session');
   if (!session) return ctx.json({ error: 'Unauthorized' }, 401);
 
-  // P0: Only super admins can invite new admins
-  const callerAdmin = ctx.get('platformAdmin') as { role: string } | undefined;
-  if (!callerAdmin || callerAdmin.role !== 'super') {
-    return ctx.json({ error: 'Super admin access required' }, 403);
-  }
+  // FIX-008 (G1) / Q1: inviting a new admin is a super-only mutation.
+  const denied = requireAdminTier(ctx, SUPER_ONLY);
+  if (denied) return denied;
 
   const body = ctx.req.valid('json');
   const db = ctx.get('database') as DatabaseInstance;

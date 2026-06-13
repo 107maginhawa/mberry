@@ -2,7 +2,6 @@
 slice: w1-t6-treasurer-routes
 phase: wave1-financial
 priority: P2
-agent_skills: [oli-execution-gate]
 ---
 
 # T6: Treasurer Dashboard + Member Detail Routes

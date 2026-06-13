@@ -1,15 +1,83 @@
+import { eq } from 'drizzle-orm';
 import type { ValidatedContext } from '@/types/app';
 import type { DatabaseInstance } from '@/core/database';
 import { CertificatesRepository } from './repos/certificates.repo';
+import type { Certificate } from './repos/certificates.schema';
 import { NotFoundError, ForbiddenError } from '@/core/errors';
 import { auditAction } from '@/core/audit/audit-action';
 import {
   renderCertificatePdf,
   validateTemplateData,
   type CertificateTemplateData,
-  type OrgBranding,
 } from './utils/certificate-template';
+import { signCertificateQR } from './utils/certificate-qr';
 import { domainEvents } from '@/core/domain-events';
+import { persons } from '@/handlers/person/repos/person.schema';
+import { organizations } from '@/handlers/platformadmin/repos/platform-admin.schema';
+import { trainings } from '@/handlers/association:operations/repos/training.schema';
+
+const VALID_CERT_TYPES = ['attendance', 'completion', 'speaker'] as const;
+type CertType = (typeof VALID_CERT_TYPES)[number];
+
+/**
+ * FIX-005 (G5): resolve all certificate display data SERVER-SIDE from the DB —
+ * recipient name (person), org name (organization), training title (training),
+ * plus the persisted certificate type and credits — and build the signed verify
+ * URL. Takes NO request body, so a client cannot forge the identity printed on a
+ * genuinely-numbered certificate. Exported for unit testing.
+ */
+export async function resolveCertificatePdfData(
+  db: DatabaseInstance,
+  cert: Pick<Certificate, 'certificateNumber' | 'personId' | 'organizationId' | 'trainingId' | 'issuedAt' | 'certificateType' | 'creditHours' | 'cpdActivityType'>,
+  recipientFallbackName: string,
+  secret: string,
+): Promise<{ templateData: CertificateTemplateData; verifyUrl: string | null }> {
+  const [person] = await db
+    .select({ firstName: persons.firstName, lastName: persons.lastName })
+    .from(persons)
+    .where(eq(persons.id, cert.personId))
+    .limit(1);
+  const recipientName =
+    person ? [person.firstName, person.lastName].filter(Boolean).join(' ').trim() || recipientFallbackName : recipientFallbackName;
+
+  const [org] = await db
+    .select({ name: organizations.name })
+    .from(organizations)
+    .where(eq(organizations.id, cert.organizationId))
+    .limit(1);
+  const organizationName = org?.name ?? 'Organization';
+
+  let trainingTitle = 'Training Activity';
+  if (cert.trainingId) {
+    const [training] = await db
+      .select({ title: trainings.title })
+      .from(trainings)
+      .where(eq(trainings.id, cert.trainingId))
+      .limit(1);
+    if (training?.title) trainingTitle = training.title;
+  }
+
+  const certificateType: CertType = VALID_CERT_TYPES.includes(cert.certificateType as CertType)
+    ? (cert.certificateType as CertType)
+    : 'attendance';
+
+  const templateData: CertificateTemplateData = {
+    certificateNumber: cert.certificateNumber,
+    recipientName,
+    trainingTitle,
+    issuedAt: cert.issuedAt,
+    organizationName,
+    certificateType,
+    creditAmount: cert.creditHours ?? undefined,
+    creditCategory: cert.cpdActivityType ?? undefined,
+  };
+
+  const verifyUrl = secret
+    ? `https://memberry.app/verify/${encodeURIComponent(cert.certificateNumber)}?signature=${signCertificateQR(cert.certificateNumber, secret)}`
+    : null;
+
+  return { templateData, verifyUrl };
+}
 
 /**
  * generateCertificatePdf
@@ -35,34 +103,32 @@ export async function generateCertificatePdf(
     throw new ForbiddenError('Access denied');
   }
 
-  // Build template data from certificate record + request body overrides
-  const body = ctx.req.valid('json') ?? {};
+  // FIX-005 (G5): resolve ALL display data server-side from the DB. The GET route
+  // no longer trusts a client body — identity fields on a genuinely-numbered cert
+  // were a forgery surface. The signed verify QR points scanners at the public
+  // verify endpoint.
+  const qrSecret =
+    (ctx.get('config') as { certificates?: { qrSecret?: string } } | undefined)?.certificates?.qrSecret
+    ?? process.env['CERTIFICATE_QR_SECRET']
+    ?? '';
 
-  const templateData: CertificateTemplateData = {
-    certificateNumber: cert.certificateNumber,
-    recipientName: body.recipientName ?? user.name ?? 'Member',
-    trainingTitle: body.trainingTitle ?? 'Training Event',
-    issuedAt: cert.issuedAt,
-    organizationName: body.organizationName ?? 'Organization',
-    certificateType: body.certificateType ?? 'attendance',
-    creditAmount: body.creditAmount,
-    creditCategory: body.creditCategory,
-  };
+  const { templateData, verifyUrl } = await resolveCertificatePdfData(
+    db,
+    cert,
+    user.name ?? 'Member',
+    qrSecret,
+  );
 
   const errors = validateTemplateData(templateData);
   if (errors.length > 0) {
     return ctx.json({ error: 'Invalid template data', details: errors }, 400);
   }
 
-  const branding: Partial<OrgBranding> = {
-    logoUrl: body.logoUrl,
-    primaryColor: body.primaryColor,
-    signatoryName: body.signatoryName,
-    signatoryTitle: body.signatoryTitle,
-    orgName: body.organizationName,
-  };
-
-  const pdfBytes = await renderCertificatePdf(templateData, branding);
+  const pdfBytes = await renderCertificatePdf(
+    templateData,
+    { orgName: templateData.organizationName },
+    { verifyUrl },
+  );
 
   await auditAction(ctx, {
     action: 'create',

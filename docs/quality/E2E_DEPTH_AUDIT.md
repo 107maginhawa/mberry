@@ -159,7 +159,6 @@ These have 0 data assertions AND 0 selector assertions — stubs, visual specs, 
 | apps/memberry/tests/e2e/error-boundaries.spec.ts |
 | apps/memberry/tests/e2e/role-boundaries.spec.ts |
 | apps/memberry/tests/e2e/mobile/profile.spec.ts |
-| apps/memberry/tests/e2e/oli-runtime-loop.spec.ts |
 | apps/memberry/tests/e2e/officer/role-assignment.spec.ts |
 | apps/memberry/tests/e2e/officer/guard-enforcement.spec.ts |
 | apps/memberry/tests/e2e/officer/election-integrity.spec.ts |

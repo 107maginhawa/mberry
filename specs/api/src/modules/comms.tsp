@@ -33,14 +33,20 @@ using TypeSpec.OpenAPI;
  */
 @doc("Communication room with admin-controlled video calls")
 model ChatRoom extends BaseEntity {
+  @doc("Channel display name (e.g., \"general\", \"events\"). Null for DMs.")
+  name?: string;
+
+  @doc("Room kind: channel (org-wide, officer-created), dm (1:1), or group")
+  roomType: ChatRoomType;
+
   @doc("Room participants (e.g., [client, host])")
   participants: UUID[];
 
   @doc("Room administrators who can control video calls (typically includes the host)")
   admins: UUID[];
 
-  @doc("Optional context ID for contextual associations (e.g., booking ID, billing session ID)")
-  context?: UUID;
+  @doc("Optional context link for contextual associations (e.g., booking ID, billing session ID, or a channel:* slug). Free-form string, not necessarily a UUID.")
+  context?: string;
 
   @doc("Room status")
   status: ChatRoomStatus;
@@ -62,9 +68,24 @@ model ChatRoom extends BaseEntity {
 enum ChatRoomStatus {
   @doc("Room is active and available for messaging")
   active: "active",
-  
+
   @doc("Room is archived and read-only")
   archived: "archived"
+}
+
+/**
+ * Chat room kind
+ */
+@doc("Chat room kind")
+enum ChatRoomType {
+  @doc("Org-wide channel (officer-created; members auto-join)")
+  channel: "channel",
+
+  @doc("Direct 1:1 message room")
+  dm: "dm",
+
+  @doc("Ad-hoc multi-participant group (e.g. booking rooms)")
+  group: "group"
 }
 
 /**
@@ -326,14 +347,20 @@ model IceServersResponse {
  */
 @doc("Create chat room request")
 model CreateChatRoomRequest {
-  @doc("Participant IDs (e.g., [client, host])")
+  @doc("Channel display name (required for channels; ignored for DMs/groups)")
+  name?: string;
+
+  @doc("Room kind. Defaults to group. 'channel' creation is officer-only; the creator auto-joins as admin.")
+  roomType?: ChatRoomType;
+
+  @doc("Participant IDs (e.g., [client, host]). May be empty for a channel — the creator is auto-added.")
   participants: UUID[];
 
   @doc("Admin IDs (users who can control video calls). Defaults to all participants if not specified.")
   admins?: UUID[];
 
-  @doc("Optional context ID for contextual associations (e.g., booking ID, billing session ID)")
-  context?: UUID;
+  @doc("Optional context link for contextual associations (e.g., booking ID, billing session ID, or a channel:* slug). Free-form string, not necessarily a UUID.")
+  context?: string;
 
   @doc("If true, return existing room instead of error when unique constraint is hit")
   upsert?: boolean = false;
@@ -380,6 +407,7 @@ namespace CommsModule {
     @route("/chat-rooms")
     @useAuth(bearerAuth)
     @extension("x-security-required-roles", #["user"])
+    @extension("x-audit", #{ action: "create", resourceType: "chat-room" })
     createChatRoom(
       @body request: CreateChatRoomRequest
     ): ApiOkResponse<ChatRoom> // Existing room returned when upsert=true
@@ -490,6 +518,7 @@ namespace CommsModule {
     @route("/chat-rooms/{room}/video-call/end")
     @useAuth(bearerAuth)
     @extension("x-security-required-roles", #["user:admin"])
+    @extension("x-audit", #{ action: "complete", resourceType: "video-call" })
     endVideoCall(
       @path room: UUID
     ): ApiOkResponse<VideoCallEndResponse>

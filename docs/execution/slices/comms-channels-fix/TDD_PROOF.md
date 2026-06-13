@@ -1,7 +1,6 @@
 ---
 slice: comms-channels-fix
 phase: wave4-comms-fix
-generated-by: oli-execution-gate
 timestamp: 2026-05-24T15:38:00Z
 ---
 

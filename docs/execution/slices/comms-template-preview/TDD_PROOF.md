@@ -1,7 +1,6 @@
 ---
 slice: comms-template-preview
 phase: wave4-comms-phase3
-generated-by: oli-execution-gate
 timestamp: 2026-05-24T13:37:00Z
 ---
 

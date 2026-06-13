@@ -4,6 +4,8 @@ import { UnauthorizedError } from '@/core/errors';
 import type { CreateElectionBody } from '@/generated/openapi/validators';
 import { ElectionsRepository } from '@/handlers/elections/repos/elections.repo';
 import type { NewElection } from '@/handlers/elections/repos/elections.schema';
+import { PositionRepository } from '@/handlers/association:member/repos/governance.repo';
+import { resolveElectionPositionSlots } from './resolve-election-positions';
 import { requirePosition } from '@/core/auth/officer-checks';
 import { POSITION_TITLES } from '@/utils/position-titles';
 import { domainEvents } from '@/core/domain-events';
@@ -32,12 +34,10 @@ export async function createElection(
   const db = ctx.get('database') as DatabaseInstance;
   const repo = new ElectionsRepository(db);
 
-  // Convert position strings to {id, title, sortOrder} objects for JSONB storage
-  const positionObjects = (body.positions ?? []).map((p: string, i: number) => ({
-    id: crypto.randomUUID(),
-    title: p,
-    sortOrder: i,
-  }));
+  // AHA FIX-002 (G2): resolve position titles to REAL `position` rows so the slot
+  // ids stored in election.positions are valid FK targets for nominee/vote inserts.
+  const positionRepo = new PositionRepository(db, ctx.get('logger'));
+  const positionObjects = await resolveElectionPositionSlots(positionRepo, orgId, body.positions ?? []);
 
   // Explicit field mapping (TypeSpec request fields now match schema columns)
   const election = await repo.create({

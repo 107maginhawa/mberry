@@ -9,10 +9,11 @@ import {
   listElectionsQueryKey,
   openElectionNominationsMutation,
   openElectionVotingMutation,
+  closeElectionVotingMutation,
   certifyElectionMutation,
   deleteCandidateMutation,
 } from '@monobase/sdk-ts/generated/react-query'
-import type { OpenElectionNominationsData, OpenElectionVotingData, CertifyElectionData } from '@monobase/sdk-ts/generated/types.gen'
+import type { OpenElectionNominationsData, OpenElectionVotingData, CloseElectionVotingData, CertifyElectionData } from '@monobase/sdk-ts/generated/types.gen'
 import type { Options } from '@monobase/sdk-ts/generated/sdk.gen'
 import { NomineePickerDialog } from './nominee-picker-dialog'
 import { ElectionTimeline } from './election-timeline'
@@ -97,6 +98,11 @@ export function ElectionDetail({ electionId, orgId }: ElectionDetailProps) {
     onSuccess: onStatusSuccess,
     onError: onStatusError,
   })
+  const closeVotingMut = useMutation({
+    mutationFn: closeElectionVotingMutation().mutationFn,
+    onSuccess: onStatusSuccess,
+    onError: onStatusError,
+  })
   const certifyMut = useMutation({
     mutationFn: certifyElectionMutation().mutationFn,
     onSuccess: onStatusSuccess,
@@ -107,6 +113,7 @@ export function ElectionDetail({ electionId, orgId }: ElectionDetailProps) {
     const electionPath = { path: { electionId } }
     if (nextStatus === 'nominationsOpen') nominationsMutation.mutate(electionPath as Options<OpenElectionNominationsData>)
     else if (nextStatus === 'votingOpen') votingMutation.mutate(electionPath as Options<OpenElectionVotingData>)
+    else if (nextStatus === 'awaitingConfirmation') closeVotingMut.mutate(electionPath as Options<CloseElectionVotingData>)
     else certifyMut.mutate(electionPath as Options<CertifyElectionData>)
   }
 
@@ -123,7 +130,7 @@ export function ElectionDetail({ electionId, orgId }: ElectionDetailProps) {
     },
   })
 
-  const statusMutationPending = nominationsMutation.isPending || votingMutation.isPending || certifyMut.isPending
+  const statusMutationPending = nominationsMutation.isPending || votingMutation.isPending || closeVotingMut.isPending || certifyMut.isPending
 
   if (isLoading) {
     return (

@@ -196,6 +196,41 @@ describe('MemberDetail', () => {
     })
   })
 
+  // FIX-018: terminal statuses (resigned, deceased) must render their own
+  // badge/label instead of falling through to the 'Pending Payment' fallback.
+  test('renders the correct badge and banner for a resigned member (FIX-018)', async () => {
+    mockGetRosterMemberOptions.mockReturnValue({
+      queryKey: ['roster-member', 'mbr-1'],
+      queryFn: () => Promise.resolve({ ...MOCK_ACTIVE_MEMBER, status: 'resigned' }),
+    })
+
+    renderWithProviders(<MemberDetail orgId="org-1" memberId="mbr-1" />)
+
+    await waitFor(() => {
+      expect(screen.getAllByText('Dr. Maria Santos').length).toBeGreaterThanOrEqual(1)
+    })
+
+    expect(screen.getAllByText('Resigned').length).toBeGreaterThanOrEqual(1)
+    // Must NOT fall back to the Pending Payment badge.
+    expect(screen.queryByText('Pending Payment')).not.toBeInTheDocument()
+  })
+
+  test('renders the correct badge for a deceased member (FIX-018)', async () => {
+    mockGetRosterMemberOptions.mockReturnValue({
+      queryKey: ['roster-member', 'mbr-1'],
+      queryFn: () => Promise.resolve({ ...MOCK_ACTIVE_MEMBER, status: 'deceased' }),
+    })
+
+    renderWithProviders(<MemberDetail orgId="org-1" memberId="mbr-1" />)
+
+    await waitFor(() => {
+      expect(screen.getAllByText('Dr. Maria Santos').length).toBeGreaterThanOrEqual(1)
+    })
+
+    expect(screen.getAllByText('Deceased').length).toBeGreaterThanOrEqual(1)
+    expect(screen.queryByText('Pending Payment')).not.toBeInTheDocument()
+  })
+
   test('shows no contact info message when email and phone are absent', async () => {
     mockGetRosterMemberOptions.mockReturnValue({
       queryKey: ['roster-member', 'mbr-1'],

@@ -59,7 +59,7 @@ Hand-wired (by design): both registered at `app.ts:388-389` BEFORE `/email/*` au
 
 ## 3. Domain Events Published
 
-Audit-grade stub. See `docs/audits/codebase-map/events.json` for the authoritative ledger.
+Audit-grade stub.
 
 - `email_queue.enqueued`, `email_queue.sent`, `email_queue.failed`, `email_queue.cancelled`, `email_queue.retried`
 - `email_template.created`, `email_template.updated`

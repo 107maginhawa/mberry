@@ -12,10 +12,14 @@ import {
 } from '@/core/errors';
 import { ChatRoomRepository } from './repos/chatRoom.repo';
 import { ChatMessageRepository } from './repos/chatMessage.repo';
-import type { 
+import type {
   JoinVideoCallRequest,
   VideoCallJoinResponse,
   CallParticipant
+} from './repos/comms.schema';
+import {
+  VIDEO_CALL_MAX_PARTICIPANTS,
+  countActiveCallParticipants,
 } from './repos/comms.schema';
 
 /**
@@ -103,7 +107,19 @@ export async function joinVideoCall(
   if (existingParticipant && existingParticipant.joinedAt && !existingParticipant.leftAt) {
     throw new ConflictError('User is already in the video call');
   }
-  
+
+  // PD-3 (FIX-011) — V1 capacity cap. V1 video is 1:1 + small-group over the
+  // existing WS signaling (no TURN/media server, no SFU). Enforce a hard ceiling
+  // on *active* participants (joined && !left). A user who previously left and
+  // is re-joining counts only once they re-occupy a slot — their stale row is
+  // not active, so it does not block them here.
+  const activeCount = countActiveCallParticipants(activeCall.videoCallData.participants);
+  if (activeCount >= VIDEO_CALL_MAX_PARTICIPANTS) {
+    throw new ConflictError(
+      `Video call is full (V1 limit: ${VIDEO_CALL_MAX_PARTICIPANTS} participants)`
+    );
+  }
+
   // Create participant data
   // User type is determined by room context (participant role)
   const userType = 'user'; // Simplified - actual type determined by room context

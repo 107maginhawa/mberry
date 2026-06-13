@@ -62,6 +62,93 @@ describe('enrollInCustomTraining', () => {
   });
 });
 
+// ─── G10 / FIX-010 — duplicate enrollment guard ──
+//
+// A member may hold at most one active (non-cancelled) enrollment per
+// training. A second enroll attempt must be rejected (not silently create a
+// duplicate row that distorts capacity and makes enrollments[0] arbitrary).
+
+describe('enrollInCustomTraining — G10 duplicate-enrollment guard (FIX-010)', () => {
+  beforeEach(() => {
+    restoreRepo(TrainingRepository);
+    restoreRepo(TrainingEnrollmentRepository);
+  });
+  afterEach(() => {
+    restoreRepo(TrainingRepository);
+    restoreRepo(TrainingEnrollmentRepository);
+  });
+
+  test('rejects a second enrollment for the same (trainingId, personId)', async () => {
+    let createCalls = 0;
+    stubRepo(TrainingRepository, {
+      findOneById: async () => ({ id: 't-1', status: 'published', registrationFee: 0, capacity: null }),
+    });
+    stubRepo(TrainingEnrollmentRepository, {
+      // The member already holds an active enrollment.
+      findMany: async () => [{ id: 'e-existing', trainingId: 't-1', personId: 'user-1', status: 'enrolled' }],
+      count: async () => 0,
+      createOne: async () => { createCalls += 1; return { id: 'e-new' }; },
+    });
+
+    const { enrollInCustomTraining } = await import('./enrollInCustomTraining');
+    const ctx = makeCtx({
+      user: { id: 'user-1', role: 'user', twoFactorEnabled: true },
+      organizationId: 'org-1',
+      _params: { trainingId: 't-1' },
+    });
+
+    await expect(enrollInCustomTraining(ctx)).rejects.toThrow(BusinessLogicError);
+    expect(createCalls).toBe(0);
+  });
+
+  test('allows enrollment when the only prior enrollment was cancelled', async () => {
+    let created: any = null;
+    stubRepo(TrainingRepository, {
+      findOneById: async () => ({ id: 't-1', status: 'published', registrationFee: 0, capacity: null }),
+    });
+    stubRepo(TrainingEnrollmentRepository, {
+      // Prior enrollment was cancelled — re-enrollment is permitted.
+      findMany: async () => [{ id: 'e-old', trainingId: 't-1', personId: 'user-1', status: 'cancelled' }],
+      count: async () => 0,
+      createOne: async (data: any) => { created = data; return { id: 'e-new', ...data }; },
+    });
+
+    const { enrollInCustomTraining } = await import('./enrollInCustomTraining');
+    const ctx = makeCtx({
+      user: { id: 'user-1', role: 'user', twoFactorEnabled: true },
+      organizationId: 'org-1',
+      _params: { trainingId: 't-1' },
+    });
+
+    const response = await enrollInCustomTraining(ctx);
+    expect(response.status).toBe(201);
+    expect(created?.personId).toBe('user-1');
+  });
+
+  test('allows the first-ever enrollment (no prior rows)', async () => {
+    let created: any = null;
+    stubRepo(TrainingRepository, {
+      findOneById: async () => ({ id: 't-1', status: 'published', registrationFee: 0, capacity: null }),
+    });
+    stubRepo(TrainingEnrollmentRepository, {
+      findMany: async () => [],
+      count: async () => 0,
+      createOne: async (data: any) => { created = data; return { id: 'e-new', ...data }; },
+    });
+
+    const { enrollInCustomTraining } = await import('./enrollInCustomTraining');
+    const ctx = makeCtx({
+      user: { id: 'user-1', role: 'user', twoFactorEnabled: true },
+      organizationId: 'org-1',
+      _params: { trainingId: 't-1' },
+    });
+
+    const response = await enrollInCustomTraining(ctx);
+    expect(response.status).toBe(201);
+    expect(created?.personId).toBe('user-1');
+  });
+});
+
 // ─── listCustomTrainingEnrollments ─────────────────────────
 
 describe('listCustomTrainingEnrollments', () => {
@@ -192,6 +279,230 @@ describe('completeTrainingEnrollment — emits training.completed (EM-M09-n4o5p6
   });
 });
 
+// ─── G9 / FIX-009 — credit-tracking toggle (M9-R8) suppresses the award ──
+//
+// The hosting org carries a per-org `creditTracking` toggle in
+// organizations.featureFlags. When it is explicitly disabled the completion
+// must still record (enrollment → completed) but NO AUTO credit may be
+// awarded. The default (toggle absent/true) keeps awarding credit.
+
+import { organizations as organizationsTable } from '@/handlers/platformadmin/repos/platform-admin.schema';
+import { orgCpdConfig as orgCpdConfigTable } from '@/handlers/association:member/repos/credits.schema';
+
+/**
+ * A table-aware mock DB: db.select().from(table) returns the seeded row for
+ * that table (so the organizations featureFlags read and the org_cpd_config
+ * read each get their own row). Supports the .where().limit() and update
+ * chains the award path uses.
+ */
+function makeToggleDb(rowsByTable: Map<unknown, unknown[]>) {
+  function selectChain() {
+    let currentTable: unknown;
+    const chain: any = {
+      from: (t: unknown) => { currentTable = t; return chain; },
+      where: () => chain,
+      limit: async () => (rowsByTable.get(currentTable) ?? []),
+      orderBy: async () => (rowsByTable.get(currentTable) ?? []),
+      then: (resolve: any, reject?: any) =>
+        Promise.resolve(rowsByTable.get(currentTable) ?? []).then(resolve, reject),
+    };
+    return chain;
+  }
+  return {
+    select: () => selectChain(),
+    update: () => {
+      const c: any = { set: () => c, where: () => c, returning: async () => [{}] };
+      return c;
+    },
+    insert: () => ({ values: async () => undefined }),
+    transaction: async (fn: any) => fn(makeToggleDb(rowsByTable)),
+  };
+}
+
+describe('completeTrainingEnrollment — G9 credit-tracking toggle (FIX-009)', () => {
+  let enrollMocks: ReturnType<typeof stubRepo>;
+  let trainingMocks: ReturnType<typeof stubRepo>;
+  let creditMocks: ReturnType<typeof stubRepo>;
+  let officerMocks: ReturnType<typeof stubRepo>;
+
+  beforeEach(() => {
+    restoreRepo(TrainingRepository);
+    restoreRepo(TrainingEnrollmentRepository);
+    restoreRepo(CreditEntryRepository);
+    restoreRepo(OfficerTermRepository);
+  });
+
+  afterEach(() => {
+    [enrollMocks, trainingMocks, creditMocks, officerMocks].forEach(
+      (m) => m && Object.values(m).forEach((s) => s.mockRestore()),
+    );
+    restoreRepo(TrainingRepository);
+    restoreRepo(TrainingEnrollmentRepository);
+    restoreRepo(CreditEntryRepository);
+    restoreRepo(OfficerTermRepository);
+  });
+
+  function wireRepos(onCreate: () => void) {
+    officerMocks = stubRepo(OfficerTermRepository, {
+      findActiveByPersonAndOrg: async () => [{ positionTitle: 'President' }],
+    });
+    enrollMocks = stubRepo(TrainingEnrollmentRepository, {
+      findOneById: async () => ({ id: 'e-1', trainingId: 't-1', personId: 'm-1', status: 'enrolled' }),
+      updateOneById: async () => ({ id: 'e-1', trainingId: 't-1', personId: 'm-1', status: 'completed' }),
+    });
+    trainingMocks = stubRepo(TrainingRepository, {
+      findOneById: async () => ({
+        id: 't-1', organizationId: 'org-1', title: 'CPD Seminar',
+        creditBearing: true, creditAmount: 10, endDate: new Date(),
+      }),
+    });
+    creditMocks = stubRepo(CreditEntryRepository, {
+      findByTrainingAndPerson: async () => null,
+      createOne: async () => { onCreate(); return { id: 'c-1' }; },
+    });
+  }
+
+  test('toggle DISABLED → completion records but NO credit is awarded', async () => {
+    const { completeTrainingEnrollment } = await import('./completeTrainingEnrollment');
+    let createCalls = 0;
+    wireRepos(() => { createCalls += 1; });
+
+    const db = makeToggleDb(new Map<unknown, unknown[]>([
+      [organizationsTable, [{ id: 'org-1', featureFlags: { creditTracking: false } }]],
+      [orgCpdConfigTable, []],
+    ]));
+
+    const ctx = makeCtx({
+      user: { id: 'officer-1', role: 'user', twoFactorEnabled: true },
+      database: db,
+      _params: { enrollmentId: 'e-1' },
+      _body: {},
+    });
+
+    const response = await completeTrainingEnrollment(ctx);
+    expect(response.status).toBe(200);
+    // Completion succeeds...
+    expect((response as any).body.status).toBe('completed');
+    // ...but the credit is suppressed by the org toggle.
+    expect((response as any).body.creditAwarded).toBe(0);
+    expect(createCalls).toBe(0);
+  });
+
+  test('toggle ENABLED (true) → credit is awarded as normal', async () => {
+    const { completeTrainingEnrollment } = await import('./completeTrainingEnrollment');
+    let createCalls = 0;
+    wireRepos(() => { createCalls += 1; });
+
+    const db = makeToggleDb(new Map<unknown, unknown[]>([
+      [organizationsTable, [{ id: 'org-1', featureFlags: { creditTracking: true } }]],
+      [orgCpdConfigTable, []],
+    ]));
+
+    const ctx = makeCtx({
+      user: { id: 'officer-1', role: 'user', twoFactorEnabled: true },
+      database: db,
+      _params: { enrollmentId: 'e-1' },
+      _body: {},
+    });
+
+    const response = await completeTrainingEnrollment(ctx);
+    expect(response.status).toBe(200);
+    expect((response as any).body.creditAwarded).toBe(10);
+    expect(createCalls).toBe(1);
+  });
+
+  test('toggle ABSENT (no org row / no flag) → credit awarded by default', async () => {
+    const { completeTrainingEnrollment } = await import('./completeTrainingEnrollment');
+    let createCalls = 0;
+    wireRepos(() => { createCalls += 1; });
+
+    const db = makeToggleDb(new Map<unknown, unknown[]>([
+      [organizationsTable, [{ id: 'org-1', featureFlags: null }]],
+      [orgCpdConfigTable, []],
+    ]));
+
+    const ctx = makeCtx({
+      user: { id: 'officer-1', role: 'user', twoFactorEnabled: true },
+      database: db,
+      _params: { enrollmentId: 'e-1' },
+      _body: {},
+    });
+
+    const response = await completeTrainingEnrollment(ctx);
+    expect(response.status).toBe(200);
+    expect((response as any).body.creditAwarded).toBe(10);
+    expect(createCalls).toBe(1);
+  });
+});
+
+// ─── G8 / FIX-002 — silent credit-award failure is surfaced, not swallowed ──
+
+describe('completeTrainingEnrollment — G8 silent credit-failure is surfaced (FIX-002)', () => {
+  let enrollMocks: ReturnType<typeof stubRepo>;
+  let trainingMocks: ReturnType<typeof stubRepo>;
+  let creditMocks: ReturnType<typeof stubRepo>;
+  let officerMocks: ReturnType<typeof stubRepo>;
+
+  beforeEach(() => {
+    restoreRepo(TrainingRepository);
+    restoreRepo(TrainingEnrollmentRepository);
+    restoreRepo(CreditEntryRepository);
+    restoreRepo(OfficerTermRepository);
+  });
+
+  afterEach(() => {
+    [enrollMocks, trainingMocks, creditMocks, officerMocks].forEach(
+      (m) => m && Object.values(m).forEach((s) => s.mockRestore()),
+    );
+    restoreRepo(TrainingRepository);
+    restoreRepo(TrainingEnrollmentRepository);
+    restoreRepo(CreditEntryRepository);
+    restoreRepo(OfficerTermRepository);
+  });
+
+  test('credit-insert failure does NOT report a misleading non-zero creditAwarded', async () => {
+    const { completeTrainingEnrollment } = await import('./completeTrainingEnrollment');
+
+    officerMocks = stubRepo(OfficerTermRepository, {
+      findActiveByPersonAndOrg: async () => [{ positionTitle: 'President' }],
+    });
+    enrollMocks = stubRepo(TrainingEnrollmentRepository, {
+      findOneById: async () => ({ id: 'e-1', trainingId: 't-1', personId: 'm-1', status: 'enrolled' }),
+      updateOneById: async () => ({ id: 'e-1', trainingId: 't-1', personId: 'm-1', status: 'completed' }),
+    });
+    trainingMocks = stubRepo(TrainingRepository, {
+      findOneById: async () => ({
+        id: 't-1',
+        organizationId: 'org-1',
+        title: 'CPD Seminar',
+        creditBearing: true,
+        creditAmount: 10,
+        endDate: new Date(),
+      }),
+    });
+    creditMocks = stubRepo(CreditEntryRepository, {
+      findByTrainingAndPerson: async () => null,
+      createOne: async () => { throw new Error('insert failed'); },
+    });
+
+    const logged: any[] = [];
+    const ctx = makeCtx({
+      user: { id: 'officer-1', role: 'user', twoFactorEnabled: true },
+      logger: { error: (...a: any[]) => logged.push(a), warn: () => {}, info: () => {}, debug: () => {} },
+      _params: { enrollmentId: 'e-1' },
+      _body: {},
+    });
+
+    const response = await completeTrainingEnrollment(ctx);
+    expect(response.status).toBe(200);
+    // Completion still succeeds, but the response must NOT claim 10 credits were awarded
+    // when the credit insert actually failed.
+    expect((response as any).body.creditAwarded).toBe(0);
+    // The failure must leave a trace (structured log), not be swallowed by a bare catch.
+    expect(logged.length).toBeGreaterThan(0);
+  });
+});
+
 // ─── createTrainingEnrollment — org guard ──────────────────
 
 describe('createTrainingEnrollment — org guard', () => {
@@ -226,29 +537,27 @@ describe('BR-41 — paid training requires payment before enrollment', () => {
     restoreRepo(TrainingEnrollmentRepository);
   });
 
-  test('BR-41: createTrainingEnrollment rejects a paid training with PAYMENT_REQUIRED', async () => {
+  test('BR-41 / TC-DEC-01: createTrainingEnrollment places a paid training into payment_pending (proof-of-payment), not a hard reject', async () => {
     const { createTrainingEnrollment } = await import('./createTrainingEnrollment');
-    let createCalled = false;
+    let createdWith: any = null;
     stubRepo(TrainingRepository, {
       findOneById: async () => ({ id: 't-paid', status: 'published', capacity: null, registrationFee: 5000 }),
     });
     stubRepo(TrainingEnrollmentRepository, {
       count: async () => 0,
-      createOne: async () => { createCalled = true; return { id: 'should-not-be-created' }; },
+      createOne: async (data: any) => { createdWith = data; return { id: 'e-paid', ...data }; },
     });
 
     const ctx = makeCtx({ _body: { trainingId: 't-paid' } });
-    let thrown: unknown;
-    try {
-      await createTrainingEnrollment(ctx);
-    } catch (e) {
-      thrown = e;
-    }
-    expect(thrown).toBeInstanceOf(BusinessLogicError);
-    expect((thrown as BusinessLogicError).code).toBe('PAYMENT_REQUIRED');
-    expect((thrown as BusinessLogicError).message).toContain('payment');
-    // gate fires before any enrollment row is written
-    expect(createCalled).toBe(false);
+    const response = await createTrainingEnrollment(ctx);
+    // TC-DEC-01: paid trainings no longer dead-end on PAYMENT_REQUIRED — the
+    // member is enrolled in a payment_pending state pending offline-proof
+    // confirmation by an officer. The credit-award path (completion) stays
+    // blocked until the officer confirms payment → enrolled.
+    expect(response.status).toBe(201);
+    expect(createdWith).toBeTruthy();
+    expect(createdWith.status).toBe('payment_pending');
+    expect((response as any).body).toMatchObject({ trainingId: 't-paid', status: 'payment_pending' });
   });
 
   test('BR-41: createTrainingEnrollment allows a free training (registrationFee 0)', async () => {
@@ -269,27 +578,24 @@ describe('BR-41 — paid training requires payment before enrollment', () => {
     expect((response as any).body).toMatchObject({ trainingId: 't-free', status: 'enrolled' });
   });
 
-  test('BR-41: enrollInCustomTraining rejects a paid training with PAYMENT_REQUIRED', async () => {
+  test('BR-41 / TC-DEC-01: enrollInCustomTraining places a paid training into payment_pending (proof-of-payment)', async () => {
     const { enrollInCustomTraining } = await import('./enrollInCustomTraining');
-    let createCalled = false;
+    let createdWith: any = null;
     stubRepo(TrainingRepository, {
       findOneById: async () => ({ id: 't-paid', status: 'published', capacity: null, registrationFee: 2500 }),
     });
     stubRepo(TrainingEnrollmentRepository, {
+      findMany: async () => [],
       count: async () => 0,
-      createOne: async () => { createCalled = true; return { id: 'should-not-be-created' }; },
+      createOne: async (data: any) => { createdWith = data; return { id: 'e-paid', ...data }; },
     });
 
     const ctx = makeCtx({ _params: { trainingId: 't-paid' } });
-    let thrown: unknown;
-    try {
-      await enrollInCustomTraining(ctx);
-    } catch (e) {
-      thrown = e;
-    }
-    expect(thrown).toBeInstanceOf(BusinessLogicError);
-    expect((thrown as BusinessLogicError).code).toBe('PAYMENT_REQUIRED');
-    expect(createCalled).toBe(false);
+    const response = await enrollInCustomTraining(ctx);
+    expect(response.status).toBe(201);
+    expect(createdWith).toBeTruthy();
+    expect(createdWith.status).toBe('payment_pending');
+    expect((response as any).body).toMatchObject({ status: 'payment_pending' });
   });
 });
 

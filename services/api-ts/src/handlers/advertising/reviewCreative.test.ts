@@ -32,6 +32,7 @@ function makeCtx(opts: { userId?: string; body?: Record<string, any>; params?: R
   let captured: { data: any; status: number } = { data: null, status: 0 };
   const ctx = {
     get: (key: string) => ({ user: userId ? { id: userId, name: 'Test User' } : null, database: {}, logger, organizationId: 'org-1' })[key],
+    set: (_key: string, _val: any) => {},
     req: { valid: (type: string) => type === 'json' ? body : type === 'param' ? params : {} },
     json: (data: any, status: number) => { captured = { data, status }; return new Response(JSON.stringify(data), { status }); },
     _captured: () => captured,
@@ -57,13 +58,17 @@ describe('reviewCreative', () => {
     ) as any;
   });
 
+  // Contract alignment (Batch D): the generated validator strips to the contract
+  // shape `{ approved: boolean, rejectionReason?: string }` (advertising.tsp
+  // ReviewCreativeRequest). The handler must read `approved`/`rejectionReason`,
+  // NOT the legacy `decision`/`reason` fields.
   test('throws ValidationError without valid user', async () => {
-    const ctx = makeNoUserCtx({ params: { creativeId: 'cre-1' }, body: { decision: 'approved' } });
+    const ctx = makeNoUserCtx({ params: { creativeId: 'cre-1' }, body: { approved: true } });
     await expect(reviewCreative(ctx)).rejects.toBeInstanceOf(ValidationError);
   });
 
-  test('AC-M16-001: approves a pending creative', async () => {
-    const ctx = makeCtx({ params: { creativeId: 'cre-1' }, body: { decision: 'approved' } });
+  test('AC-M16-001: approves a pending creative when approved=true', async () => {
+    const ctx = makeCtx({ params: { creativeId: 'cre-1' }, body: { approved: true } });
     await reviewCreative(ctx);
     const { status, data } = ctx._captured();
     expect(status).toBe(200);
@@ -71,8 +76,8 @@ describe('reviewCreative', () => {
     expect(data.reviewedBy).toBe('admin-1');
   });
 
-  test('AC-M16-001: rejects a pending creative with reason', async () => {
-    const ctx = makeCtx({ params: { creativeId: 'cre-1' }, body: { decision: 'rejected', reason: 'Inappropriate content' } });
+  test('AC-M16-001: rejects a pending creative when approved=false with rejectionReason', async () => {
+    const ctx = makeCtx({ params: { creativeId: 'cre-1' }, body: { approved: false, rejectionReason: 'Inappropriate content' } });
     await reviewCreative(ctx);
     const { status, data } = ctx._captured();
     expect(status).toBe(200);
@@ -80,25 +85,25 @@ describe('reviewCreative', () => {
     expect(data.rejectionReason).toBe('Inappropriate');
   });
 
-  test('throws ValidationError when decision is invalid', async () => {
-    const ctx = makeCtx({ params: { creativeId: 'cre-1' }, body: { decision: 'maybe' } });
+  test('throws ValidationError when approved is not a boolean', async () => {
+    const ctx = makeCtx({ params: { creativeId: 'cre-1' }, body: {} });
     await expect(reviewCreative(ctx)).rejects.toBeInstanceOf(ValidationError);
   });
 
-  test('throws ValidationError when rejecting without reason', async () => {
-    const ctx = makeCtx({ params: { creativeId: 'cre-1' }, body: { decision: 'rejected' } });
+  test('throws ValidationError when rejecting (approved=false) without rejectionReason', async () => {
+    const ctx = makeCtx({ params: { creativeId: 'cre-1' }, body: { approved: false } });
     await expect(reviewCreative(ctx)).rejects.toBeInstanceOf(ValidationError);
   });
 
   test('throws NotFoundError when creative does not exist', async () => {
     CreativeRepository.prototype.findOneById = mock(async () => null) as any;
-    const ctx = makeCtx({ params: { creativeId: 'cre-999' }, body: { decision: 'approved' } });
+    const ctx = makeCtx({ params: { creativeId: 'cre-999' }, body: { approved: true } });
     await expect(reviewCreative(ctx)).rejects.toBeInstanceOf(NotFoundError);
   });
 
   test('throws BusinessLogicError when creative is already reviewed', async () => {
     CreativeRepository.prototype.findOneById = mock(async () => makeCreative({ status: 'approved' })) as any;
-    const ctx = makeCtx({ params: { creativeId: 'cre-1' }, body: { decision: 'approved' } });
+    const ctx = makeCtx({ params: { creativeId: 'cre-1' }, body: { approved: true } });
     await expect(reviewCreative(ctx)).rejects.toBeInstanceOf(BusinessLogicError);
   });
 });

@@ -102,7 +102,7 @@ Authentication is handled by Better-Auth (integrated, not a separate module).
 The Person module is the central PII safeguard for user data.
 
 ### Consent Management
-Consent management is planned but **not yet implemented** in the database schema. No JSONB consent fields exist on the Person model currently. See `docs/_archive/oli/audits/EXISTING_CODEBASE_ADOPTION_AUDIT.md` §7 for current Person table structure.
+Consent management is planned but **not yet implemented** in the database schema. No JSONB consent fields exist on the Person model currently.
 
 ### Handler verb conventions
 

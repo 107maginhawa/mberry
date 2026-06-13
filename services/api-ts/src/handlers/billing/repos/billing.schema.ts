@@ -16,6 +16,7 @@ import {
   index,
   unique
 } from 'drizzle-orm/pg-core';
+import { sql } from 'drizzle-orm';
 import { baseEntityFields, type BaseEntity } from '@/core/database.schema';
 import { persons } from '../../person/repos/person.schema';
 
@@ -127,6 +128,15 @@ export const invoices = pgTable('invoice', {
     .on(table.customer, table.status),
   merchantStatusIdx: index('invoices_merchant_status_idx')
     .on(table.merchant, table.status),
+
+  // FIX-002: indexed JSONB lookups used by the Stripe webhook handlers to
+  // correlate invoices by Stripe payment-intent / transfer id at any scale
+  // (replaces the old findAll()+limit(500) scan). Backing SQL ships in the
+  // hand-written migration 0063_billing_webhook_metadata_indexes.sql.
+  metadataPaymentIntentIdx: index('invoices_metadata_payment_intent_idx')
+    .on(sql`(${table.metadata}->>'stripePaymentIntentId')`),
+  metadataTransferIdx: index('invoices_metadata_transfer_idx')
+    .on(sql`(${table.metadata}->>'stripeTransferId')`),
 
 }));
 

@@ -9,6 +9,7 @@ import { StaggerGrid, StaggerItem } from '@/components/motion/stagger-grid'
 import { EmptyState } from '@/components/patterns/empty-state'
 import { TableSkeleton, CardSkeleton } from '@/components/patterns/skeleton-loader'
 import { Button, Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from '@monobase/ui'
+import { Download } from 'lucide-react'
 import { useOrg } from '@/hooks/use-org'
 
 export const Route = createFileRoute('/_authenticated/org/$orgSlug/officer/reports/credits')({
@@ -21,18 +22,96 @@ const STATUS_BADGE: Record<string, { label: string; className: string }> = {
   non_compliant: { label: 'Non-Compliant', className: 'bg-[var(--color-error-bg)] text-[var(--color-error)]' },
 }
 
+export interface ComplianceRow {
+  person_id?: string
+  first_name?: string
+  last_name?: string
+  member_number?: string
+  earned?: number
+  byCategory?: Record<string, number>
+  required?: number
+  remaining?: number
+  compliance_status?: string
+}
+
+/**
+ * FIX-012 (10.7): build a regulator-facing CSV from the compliance standings
+ * already loaded on the page. Pure transform (rows → CSV text) so it is
+ * testable and the download handler stays a thin wrapper.
+ */
+export function buildComplianceCsv(rows: ComplianceRow[]): string {
+  const header = [
+    'Member',
+    'ID',
+    'Earned',
+    'General',
+    'Major',
+    'Self-Directed',
+    'Required',
+    'Remaining',
+    'Status',
+  ]
+  const escape = (v: unknown): string => {
+    const s = v === null || v === undefined ? '' : String(v)
+    // Quote fields containing commas, quotes, or newlines (RFC 4180).
+    return /[",\n]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s
+  }
+  const lines = rows.map((m) => {
+    const name = [m.first_name, m.last_name].filter(Boolean).join(' ') || 'Unknown'
+    const cat = m.byCategory ?? {}
+    return [
+      name,
+      m.member_number ?? '',
+      m.earned ?? 0,
+      cat.General ?? 0,
+      cat.Major ?? 0,
+      cat['Self-Directed'] ?? 0,
+      m.required ?? 0,
+      m.remaining ?? 0,
+      m.compliance_status ?? '',
+    ]
+      .map(escape)
+      .join(',')
+  })
+  return [header.join(','), ...lines].join('\n') + '\n'
+}
+
+function downloadCsv(filename: string, csv: string): void {
+  const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' })
+  const url = URL.createObjectURL(blob)
+  const a = document.createElement('a')
+  a.href = url
+  a.download = filename
+  document.body.appendChild(a)
+  a.click()
+  document.body.removeChild(a)
+  URL.revokeObjectURL(url)
+}
+
 function CreditReport() {
   const { orgId, orgSlug } = useOrg()
   const [filter, setFilter] = useState<string>('all')
 
+  // FIX-006: required credits + cycle are resolved server-side from the org's
+  // CPD config (org_cpd_config). Do NOT send a client requiredCredits override
+  // — it is ignored by the server and previously produced a verdict that
+  // disagreed with Settings → CPD.
   const { data, isLoading, isError } = useQuery<any>({
     queryKey: ['credit-compliance', orgId],
-    queryFn: () => api.get(`/api/credit-compliance/${orgId}?requiredCredits=45&cyclePeriodYears=3`),
+    queryFn: () => api.get(`/api/credit-compliance/${orgId}`),
   })
 
-  const summary = data?.summary ?? { compliant: 0, atRisk: 0, nonCompliant: 0, total: 0, requiredCredits: 45 }
+  const summary = data?.summary ?? { compliant: 0, atRisk: 0, nonCompliant: 0, total: 0, requiredCredits: 0 }
   const allMembers: any[] = data?.data ?? []
   const members = filter === 'all' ? allMembers : allMembers.filter((m: any) => m.compliance_status === filter)
+
+  // FIX-012 (10.7): export the currently-filtered standings to a regulator-
+  // facing CSV. Client-side — the rows are already loaded, no extra request.
+  const handleExport = () => {
+    const csv = buildComplianceCsv(members as ComplianceRow[])
+    const date = new Date().toISOString().slice(0, 10)
+    downloadCsv(`credit-compliance-${orgSlug}-${date}.csv`, csv)
+  }
 
   const creditsBreadcrumbs = [
     { label: 'Officer', href: `/org/${orgSlug}/officer/dashboard` },
@@ -68,6 +147,17 @@ function CreditReport() {
       title="Credit Compliance Report"
       subtitle={`Member CPD credit status — ${summary.requiredCredits} credits required per cycle`}
       breadcrumbs={creditsBreadcrumbs}
+      actions={
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={handleExport}
+          disabled={members.length === 0}
+        >
+          <Download className="h-4 w-4 mr-2" />
+          Export CSV
+        </Button>
+      }
     >
       <div className="space-y-6">
       {/* Summary cards */}
@@ -106,9 +196,9 @@ function CreditReport() {
         </StaggerItem>
       </StaggerGrid>
 
-      {/* PRC note */}
+      {/* PRC note — requirement reflects the org's CPD config (FIX-006) */}
       <p className="text-xs text-muted-foreground">
-        PRC CPD Compliance: 45 units required per 3-year cycle (General + Major + Self-Directed)
+        PRC CPD Compliance: {summary.requiredCredits} units required per cycle (General + Major + Self-Directed)
       </p>
 
       {/* Table */}

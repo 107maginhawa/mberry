@@ -5,6 +5,7 @@ import type { EndImpersonationParams } from '@/generated/openapi/validators';
 import { NotFoundError } from '@/core/errors';
 import { ImpersonationSessionRepository } from './repos/platform-admin.repo';
 import { domainEvents } from '@/core/domain-events';
+import { requireAdminTier, SUPPORT_OR_SUPER } from '@/core/auth/admin-tier';
 
 /**
  * endImpersonation
@@ -17,6 +18,11 @@ export async function endImpersonation(
 ): Promise<Response> {
   const session = ctx.get('session');
   if (!session) return ctx.json({ error: 'Unauthorized' }, 401);
+
+  // FIX-008 (G1) / Q8: ending an impersonation session is a support-or-super
+  // action; analyst is read-only and cannot start or end impersonation.
+  const denied = requireAdminTier(ctx, SUPPORT_OR_SUPER);
+  if (denied) return denied;
 
   const { sessionId } = ctx.req.valid('param');
   const db = ctx.get('database') as DatabaseInstance;

@@ -1,6 +1,8 @@
-import { describe, test, expect, afterEach } from 'bun:test';
-import { makeCtx, stubRepo } from '@/test-utils/make-ctx';
+import { describe, test, expect, afterEach, beforeEach, spyOn } from 'bun:test';
+import { makeCtx, stubRepo, restoreRepo } from '@/test-utils/make-ctx';
 import { TrainingRepository, TrainingEnrollmentRepository } from './repos/training.repo';
+import { OfficerTermRepository } from '@/handlers/association:member/repos/governance.repo';
+import { domainEvents } from '@/core/domain-events';
 
 /**
  * Training Lifecycle Tests
@@ -108,6 +110,68 @@ describe('cancelCustomTraining', () => {
     const enrollment = { status: 'enrolled' };
     const cancellable = enrollment.status !== 'cancelled' && enrollment.status !== 'completed';
     expect(cancellable).toBe(true);
+  });
+});
+
+// ─── G6 / FIX-003 — enrollment-scoped cancel event, not program-wide ────────
+//
+// cancelCustomTraining cancels ONLY the caller's enrollment. Emitting the
+// program-wide `training.cancelled` makes the consumer mass-notify EVERY
+// enrolled member that the whole training is cancelled. It must emit the
+// enrollment-scoped `training.enrollment.cancelled` instead. [CROSS-MODULE RISK]
+describe('cancelCustomTraining — emits enrollment-scoped event (FIX-003)', () => {
+  let emitSpy: ReturnType<typeof spyOn>;
+  let officerMocks: ReturnType<typeof stubRepo>;
+  let trainingMocks: ReturnType<typeof stubRepo>;
+  let enrollMocks: ReturnType<typeof stubRepo>;
+
+  beforeEach(() => {
+    restoreRepo(TrainingRepository);
+    restoreRepo(TrainingEnrollmentRepository);
+    restoreRepo(OfficerTermRepository);
+    emitSpy = spyOn(domainEvents, 'emit');
+  });
+
+  afterEach(() => {
+    [officerMocks, trainingMocks, enrollMocks].forEach(
+      (m) => m && Object.values(m).forEach((s) => s.mockRestore()),
+    );
+    emitSpy.mockRestore();
+    restoreRepo(TrainingRepository);
+    restoreRepo(TrainingEnrollmentRepository);
+    restoreRepo(OfficerTermRepository);
+  });
+
+  test('cancelling one enrollment does NOT emit the program-wide training.cancelled', async () => {
+    const { cancelCustomTraining } = await import('./cancelCustomTraining');
+
+    officerMocks = stubRepo(OfficerTermRepository, {
+      findActiveByPersonAndOrg: async () => [{ positionTitle: 'President' }],
+    });
+    trainingMocks = stubRepo(TrainingRepository, {
+      findOneById: async () => ({ id: 't-1', organizationId: 'org-1' }),
+    });
+    enrollMocks = stubRepo(TrainingEnrollmentRepository, {
+      findMany: async () => [{ id: 'e-1', trainingId: 't-1', personId: 'officer-1', status: 'enrolled' }],
+      updateOneById: async () => ({ id: 'e-1', status: 'cancelled' }),
+    });
+
+    const ctx = makeCtx({
+      user: { id: 'officer-1', role: 'user', twoFactorEnabled: true },
+      _params: { trainingId: 't-1' },
+    });
+
+    const response = await cancelCustomTraining(ctx);
+    expect(response.status).toBe(200);
+
+    const programCancelled = emitSpy.mock.calls.find((c) => c[0] === 'training.cancelled');
+    expect(programCancelled).toBeUndefined();
+
+    const enrollmentCancelled = emitSpy.mock.calls.find(
+      (c) => c[0] === 'training.enrollment.cancelled',
+    );
+    expect(enrollmentCancelled).toBeDefined();
+    expect(enrollmentCancelled![1]).toMatchObject({ trainingId: 't-1', organizationId: 'org-1' });
   });
 });
 

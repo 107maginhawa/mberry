@@ -4,6 +4,7 @@ import { NotFoundError, UnauthorizedError, BusinessLogicError } from '@/core/err
 import type { DenyMembershipApplicationBody, DenyMembershipApplicationParams } from '@/generated/openapi/validators';
 import { MembershipApplicationRepository } from '@/handlers/association:member/repos/membership.repo';
 import type { MembershipApplication } from '@/handlers/association:member/repos/membership.schema';
+import { assertRecordInCallerOrg } from './utils/assert-record-org';
 import { requirePosition } from '@/core/auth/officer-checks';
 import { POSITION_TITLES } from '@/utils/position-titles';
 
@@ -29,6 +30,8 @@ export async function denyMembershipApplication(
 
   const application = await repo.findOneById(applicationId);
   if (!application) throw new NotFoundError('Membership application');
+  // FIX-003 (G-02): the application must belong to the caller's org.
+  assertRecordInCallerOrg(ctx, application.organizationId, 'this application');
 
   const deniableStatuses = ['submitted', 'underReview'];
   if (!deniableStatuses.includes(application.status)) {

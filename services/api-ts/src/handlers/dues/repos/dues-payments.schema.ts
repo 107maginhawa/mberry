@@ -10,6 +10,7 @@ import {
   pgEnum,
   index,
   unique,
+  primaryKey,
   date,
   jsonb,
 } from 'drizzle-orm/pg-core';
@@ -100,7 +101,21 @@ export const duesPayments = pgTable('dues_payment', {
   personIdx: index('dues_payment_person_idx').on(table.personId),
   statusIdx: index('dues_payment_status_idx').on(table.status),
   orgPersonIdx: index('dues_payment_org_person_idx').on(table.organizationId, table.personId),
-  receiptUnique: unique('dues_payment_receipt_unique').on(table.receiptNumber),
+  // [FIX-003] Receipt numbers are unique PER ORG (not globally). Combined with
+  // the per-org receipt prefix this prevents cross-org collisions while still
+  // forbidding duplicate receipt numbers within an org. Migration 0062.
+  receiptUnique: unique('dues_payment_org_receipt_unique').on(table.organizationId, table.receiptNumber),
+}));
+
+// [FIX-003 / Batch F] Atomic per-(org, year) receipt sequence source.
+// Replaces the racy count(*)-based sequence. See migration 0062.
+export const duesReceiptCounters = pgTable('dues_receipt_counter', {
+  organizationId: uuid('organization_id').notNull().references(() => organizations.id, { onDelete: 'cascade' }),
+  year: integer('year').notNull(),
+  nextSequence: integer('next_sequence').notNull().default(1),
+  updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
+}, (table) => ({
+  pk: primaryKey({ name: 'dues_receipt_counter_pk', columns: [table.organizationId, table.year] }),
 }));
 
 export const duesFundAllocations = pgTable('dues_fund_allocation', {
@@ -182,3 +197,4 @@ export type DuesReminderSchedule = typeof duesReminderSchedules.$inferSelect;
 export type DuesGatewayConfig = typeof duesGatewayConfigs.$inferSelect;
 export type WebhookRetryLog = typeof webhookRetryLogs.$inferSelect;
 export type NewWebhookRetryLog = typeof webhookRetryLogs.$inferInsert;
+export type DuesReceiptCounter = typeof duesReceiptCounters.$inferSelect;

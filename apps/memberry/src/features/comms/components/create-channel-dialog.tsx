@@ -18,13 +18,33 @@ interface CreateChannelDialogProps {
   open: boolean
   onOpenChange: (open: boolean) => void
   onCreated: (roomId: string) => void
+  /** Org UUID — scopes the channel so the org-context middleware resolves it. */
+  orgId?: string
+}
+
+/**
+ * Build the createChatRoom request body for a new channel (FIX-002).
+ *
+ * Sends `roomType: 'channel'` + a slugged `name` + the org id so the room is
+ * org-scoped. The creator is auto-added by the backend, so `participants` is
+ * empty. The old `context: "channel:x"` hack (which violated the UUID validator)
+ * is gone — `name`/`roomType` now model the channel directly.
+ */
+export function buildChannelCreateBody(name: string, orgId: string) {
+  const channelName = name.trim().toLowerCase().replace(/\s+/g, '-')
+  return {
+    name: channelName,
+    roomType: 'channel' as const,
+    organizationId: orgId,
+    participants: [] as string[],
+  }
 }
 
 /**
  * Dialog for officers to create a new chat channel.
  * Name is required, description optional.
  */
-export function CreateChannelDialog({ open, onOpenChange, onCreated }: CreateChannelDialogProps) {
+export function CreateChannelDialog({ open, onOpenChange, onCreated, orgId = '' }: CreateChannelDialogProps) {
   const [name, setName] = useState('')
   const [description, setDescription] = useState('')
   const queryClient = useQueryClient()
@@ -48,12 +68,8 @@ export function CreateChannelDialog({ open, onOpenChange, onCreated }: CreateCha
 
   const handleSubmit = () => {
     if (!canSubmit) return
-    const channelName = name.trim().toLowerCase().replace(/\s+/g, '-')
     createRoom.mutate({
-      body: {
-        participants: [], // Backend adds creator automatically
-        context: `channel:${channelName}`,
-      },
+      body: buildChannelCreateBody(name, orgId),
     } as any)
   }
 

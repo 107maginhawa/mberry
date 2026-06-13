@@ -12,6 +12,7 @@ import { domainEvents } from '@/core/domain-events';
 
 const fakePayment = createFakeDuesPayment({
   id: 'pay-1',
+  organizationId: 'org-1',
   personId: 'person-1',
   receiptNumber: 'ORG-2025-000001',
   amount: 5000,
@@ -20,6 +21,10 @@ const fakePayment = createFakeDuesPayment({
   status: 'completed',
   refundedAmount: 0,
   recordedBy: 'user-1',
+  // A completed payment always carries a paidAt in production
+  // (recordDuesPayment/settlePayment set it). Recent date keeps the refund
+  // inside the 30-day BR-08 window so eligibility passes for these flow tests.
+  paidAt: new Date(),
   membershipExtendedFrom: '2025-06-30',
   membershipExtendedTo: '2026-06-30',
 });
@@ -106,6 +111,7 @@ describe('[Phase15] refundDuesPayment — fund reversal + membership status', ()
 
     const ctx = makeCtx({
       database: txDb,
+      organizationId: 'org-1',
       _params: { paymentId: 'pay-1' },
       _body: {}, // no amount = full refund
     });
@@ -152,6 +158,7 @@ describe('[Phase15] refundDuesPayment — fund reversal + membership status', ()
 
     const ctx = makeCtx({
       database: capturingDb,
+      organizationId: 'org-1',
       _params: { paymentId: 'pay-1' },
       _body: {},
     });
@@ -182,6 +189,7 @@ describe('[Phase15] refundDuesPayment — fund reversal + membership status', ()
 
     const ctx = makeCtx({
       database: txDb,
+      organizationId: 'org-1',
       _params: { paymentId: 'pay-1' },
       _body: { amount: 2500 }, // 50% refund
     });
@@ -228,6 +236,7 @@ describe('[Phase15] refundDuesPayment — fund reversal + membership status', ()
 
     const ctx = makeCtx({
       database: capturingDb,
+      organizationId: 'org-1',
       _params: { paymentId: 'pay-1' },
       _body: {},
     });
@@ -269,6 +278,7 @@ describe('[Phase15] refundDuesPayment — fund reversal + membership status', ()
 
     const ctx = makeCtx({
       database: txDbTracking,
+      organizationId: 'org-1',
       _params: { paymentId: 'pay-1' },
       _body: {},
     });
@@ -284,6 +294,7 @@ describe('[Phase15] refundDuesPayment — fund reversal + membership status', ()
 
     const ctx = makeCtx({
       database: txDb,
+      organizationId: 'org-1',
       _params: { paymentId: 'pay-1' },
       _body: {},
     });
@@ -298,6 +309,7 @@ describe('[Phase15] refundDuesPayment — fund reversal + membership status', ()
 
     const ctx = makeCtx({
       database: txDb,
+      organizationId: 'org-1',
       _params: { paymentId: 'nonexistent' },
       _body: {},
     });
@@ -324,6 +336,7 @@ describe('[Phase15] refundDuesPayment — fund reversal + membership status', ()
 
     const ctx = makeCtx({
       database: txDb,
+      organizationId: 'org-1',
       _params: { paymentId: 'pay-1' },
       _body: { amount: 2500 },
     });
@@ -351,6 +364,7 @@ describe('[Phase15] refundDuesPayment — fund reversal + membership status', ()
 
     const ctx = makeCtx({
       database: txDb,
+      organizationId: 'org-1',
       _params: { paymentId: 'pay-1' },
       _body: {}, // no amount = full refund
     });
@@ -392,12 +406,173 @@ describe('[Phase15] refundDuesPayment — fund reversal + membership status', ()
 
     const ctx = makeCtx({
       database: txDbTracking,
+      organizationId: 'org-1',
       _params: { paymentId: 'pay-1' },
       _body: {},
     });
 
     await expect(refundDuesPayment(ctx)).rejects.toThrow('Membership update failed');
     expect(transactionCalled).toBe(true);
+  });
+
+  // ─── FIX-007: over-refund cap + validateRefundEligibility wiring ──────────
+  // The handler must not let repeated partial refunds exceed the original
+  // payment. It must wire the existing validateRefundEligibility util (BR-08):
+  // a requested amount > (amount - alreadyRefunded) is rejected, and the
+  // refund must never be processed (no fund reversal, no membership change).
+
+  test('[FIX-007] rejects refund exceeding remaining refundable (partial already refunded)', async () => {
+    let refundProcessed = false;
+    const recentPaidAt = new Date(); // within the 30-day window
+    stubRepo(DuesRepository, {
+      // 5000 payment, 3000 already refunded → only 2000 remaining
+      getPayment: async () => ({
+        ...fakePayment,
+        amount: 5000,
+        refundedAmount: 3000,
+        status: 'partiallyRefunded',
+        paidAt: recentPaidAt,
+      }),
+      getFundAllocations: async () => { refundProcessed = true; return [...fakeAllocations]; },
+      createFundAllocations: async () => { refundProcessed = true; },
+      updatePaymentStatus: async (_id: string, _cur: string, status: string, extra: any) => {
+        refundProcessed = true;
+        return { ...fakePayment, status, ...extra };
+      },
+    });
+    stubRepo(MembershipRepository, {
+      findMany: async () => { refundProcessed = true; return [{ ...fakeMembership }]; },
+      updateOneById: async () => { refundProcessed = true; return fakeMembership; },
+    });
+
+    const ctx = makeCtx({
+      database: txDb,
+      organizationId: 'org-1',
+      _params: { paymentId: 'pay-1' },
+      _body: { amount: 3000 }, // 3000 > 2000 remaining → over-refund
+    });
+
+    // Must reject (thrown error) and NOT touch funds/membership.
+    await expect(refundDuesPayment(ctx)).rejects.toThrow();
+    expect(refundProcessed).toBe(false);
+  });
+
+  test('[FIX-007] allows refund within remaining refundable; cumulative-full → status refunded', async () => {
+    let capturedRefundedAmount: number | undefined;
+    let capturedStatus: string | undefined;
+    const recentPaidAt = new Date();
+    stubRepo(DuesRepository, {
+      // 5000 payment, 3000 already refunded → 2000 remaining
+      getPayment: async () => ({
+        ...fakePayment,
+        amount: 5000,
+        refundedAmount: 3000,
+        status: 'partiallyRefunded',
+        paidAt: recentPaidAt,
+      }),
+      getFundAllocations: async () => [...fakeAllocations],
+      createFundAllocations: async () => {},
+      updatePaymentStatus: async (_id: string, _cur: string, status: string, extra: any) => {
+        capturedRefundedAmount = extra?.refundedAmount;
+        capturedStatus = status;
+        return { ...fakePayment, status, ...extra };
+      },
+    });
+    stubRepo(MembershipRepository, {
+      findMany: async () => [{ ...fakeMembership }],
+      updateOneById: async () => fakeMembership,
+    });
+
+    const ctx = makeCtx({
+      database: txDb,
+      organizationId: 'org-1',
+      _params: { paymentId: 'pay-1' },
+      _body: { amount: 2000 }, // exactly the remaining → allowed
+    });
+
+    const res = await refundDuesPayment(ctx);
+    expect(res.status).toBe(200);
+    // Cumulative refunded must equal the full original (3000 + 2000 = 5000)
+    expect(capturedRefundedAmount).toBe(5000);
+    // A refund that brings cumulative to the full amount IS a full refund.
+    expect(capturedStatus).toBe('refunded');
+  });
+
+  test('[FIX-007] genuinely-partial refund (below full) stays partiallyRefunded and does NOT reverse expiry (Q-PD2 boundary)', async () => {
+    // Q-PD2 (partial-refund expiry reversal) is product-gated. This test pins
+    // the *current* behavior: a refund below the cumulative-full amount must
+    // NOT reset duesExpiryDate (only full refunds reverse expiry today).
+    let capturedSetData: any;
+    const capturingDb = makeCapturingDb((data) => { capturedSetData = data; });
+    const recentPaidAt = new Date();
+
+    stubRepo(DuesRepository, {
+      getPayment: async () => ({
+        ...fakePayment,
+        amount: 5000,
+        refundedAmount: 0,
+        status: 'completed',
+        paidAt: recentPaidAt,
+        membershipExtendedFrom: '2025-06-30',
+        membershipExtendedTo: '2026-06-30',
+      }),
+      getFundAllocations: async () => [...fakeAllocations],
+      createFundAllocations: async () => {},
+      updatePaymentStatus: async (_id: string, _cur: string, status: string, extra: any) => ({
+        ...fakePayment, status, ...extra,
+      }),
+    });
+    stubRepo(MembershipRepository, {
+      findMany: async () => [{ ...fakeMembership, duesExpiryDate: '2026-06-30' }],
+      updateOneById: async () => fakeMembership,
+    });
+
+    const ctx = makeCtx({
+      database: capturingDb,
+      organizationId: 'org-1',
+      _params: { paymentId: 'pay-1' },
+      _body: { amount: 2500 }, // 50% partial — below cumulative full
+    });
+
+    const res = await refundDuesPayment(ctx);
+    expect(res.status).toBe(200);
+    // Genuinely-partial refund: persistWithComputedStatus (expiry reset) must
+    // NOT have been invoked — capturedSetData stays undefined.
+    expect(capturedSetData).toBeUndefined();
+  });
+
+  test('[FIX-007] rejects refund outside the 30-day window (eligibility wired)', async () => {
+    let refundProcessed = false;
+    const oldPaidAt = new Date(Date.now() - 45 * 24 * 60 * 60 * 1000); // 45 days ago
+    stubRepo(DuesRepository, {
+      getPayment: async () => ({
+        ...fakePayment,
+        amount: 5000,
+        refundedAmount: 0,
+        status: 'completed',
+        paidAt: oldPaidAt,
+      }),
+      getFundAllocations: async () => { refundProcessed = true; return [...fakeAllocations]; },
+      createFundAllocations: async () => { refundProcessed = true; },
+      updatePaymentStatus: async (_id: string, _cur: string, status: string, extra: any) => {
+        refundProcessed = true;
+        return { ...fakePayment, status, ...extra };
+      },
+    });
+    stubRepo(MembershipRepository, {
+      findMany: async () => { refundProcessed = true; return [{ ...fakeMembership }]; },
+      updateOneById: async () => { refundProcessed = true; return fakeMembership; },
+    });
+
+    const ctx = makeCtx({
+      database: txDb,
+      organizationId: 'org-1',
+      _params: { paymentId: 'pay-1' },
+      _body: {}, // full refund attempt, but outside window
+    });
+
+    await expect(refundDuesPayment(ctx)).rejects.toThrow();
+    expect(refundProcessed).toBe(false);
   });
 
   // [EM-M06] Wave 26 — dues lifecycle event
@@ -418,6 +593,7 @@ describe('[Phase15] refundDuesPayment — fund reversal + membership status', ()
     const emitSpy = spyOn(domainEvents, 'emit');
     const ctx = makeCtx({
       database: txDb,
+      organizationId: 'org-1',
       _params: { paymentId: 'pay-1' },
       _body: {}, // full refund
     });

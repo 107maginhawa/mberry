@@ -1,4 +1,3 @@
-// oli-execute: error-handled-inline
 // `error` renders explicit "Failed to load document" branch at ~L106. Gate
 // heuristic misses the destructured rename.
 import { createFileRoute, Link } from '@tanstack/react-router'

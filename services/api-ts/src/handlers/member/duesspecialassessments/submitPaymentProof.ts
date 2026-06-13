@@ -58,11 +58,13 @@ export async function submitPaymentProof(
     );
   }
 
-  // Generate receipt number
+  // Generate receipt number.
+  // [FIX-003] Per-org prefix + atomic per-org/year counter (no cross-org collision).
   const repo = new DuesRepository(db);
   const year = new Date().getFullYear();
+  const orgPrefix = await repo.getOrgReceiptPrefix(orgId);
   const sequence = await repo.getNextReceiptSequence(orgId, year);
-  const receiptNumber = formatReceiptNumber('ORG', year, sequence);
+  const receiptNumber = formatReceiptNumber(orgPrefix, year, sequence);
 
   const payment = await repo.createPayment({
     organizationId: orgId,

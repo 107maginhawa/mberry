@@ -11,6 +11,7 @@
 import { describe, test, expect } from 'bun:test';
 import {
   renderCertificateHtml,
+  renderCertificatePdf,
   validateTemplateData,
   type CertificateTemplateData,
   type OrgBranding,
@@ -220,6 +221,42 @@ describe('[042] Certificate Template XSS Prevention', () => {
     const html = renderCertificateHtml(data);
     expect(html).not.toContain('<b>CERT');
     expect(html).toContain('&lt;b&gt;');
+  });
+});
+
+// ─── FIX-005: Verify QR + branding footer in PDF ─────────
+
+describe('[FIX-005] Certificate PDF verify QR', () => {
+  function makeTemplateData(overrides: Partial<CertificateTemplateData> = {}): CertificateTemplateData {
+    return {
+      certificateNumber: 'PDA-2026-0001',
+      recipientName: 'Dr. Maria Santos',
+      trainingTitle: 'Advanced Implants',
+      issuedAt: new Date('2026-03-15'),
+      organizationName: 'PDA',
+      certificateType: 'completion',
+      ...overrides,
+    };
+  }
+
+  test('renders a valid PDF when a verifyUrl is supplied', async () => {
+    const bytes = await renderCertificatePdf(makeTemplateData(), { orgName: 'PDA' }, {
+      verifyUrl: 'https://memberry.app/verify/PDA-2026-0001?signature=abcdef0123456789',
+    });
+    expect(String.fromCharCode(bytes[0]!, bytes[1]!, bytes[2]!, bytes[3]!)).toBe('%PDF');
+  });
+
+  test('embedding the QR adds content (PDF larger than the no-QR variant)', async () => {
+    const withQr = await renderCertificatePdf(makeTemplateData(), { orgName: 'PDA' }, {
+      verifyUrl: 'https://memberry.app/verify/PDA-2026-0001?signature=abcdef0123456789',
+    });
+    const withoutQr = await renderCertificatePdf(makeTemplateData(), { orgName: 'PDA' });
+    expect(withQr.byteLength).toBeGreaterThan(withoutQr.byteLength);
+  });
+
+  test('still renders without a verifyUrl (backward compatible)', async () => {
+    const bytes = await renderCertificatePdf(makeTemplateData(), { orgName: 'PDA' });
+    expect(String.fromCharCode(bytes[0]!, bytes[1]!, bytes[2]!, bytes[3]!)).toBe('%PDF');
   });
 });
 

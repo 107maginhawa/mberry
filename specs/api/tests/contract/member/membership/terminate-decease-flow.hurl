@@ -154,7 +154,10 @@ status >= 200
 status < 300
 
 
-# ── 9. deleteMembership (A) → 200/204 ─────────────────────────────────
+# ── 9. deleteMembership removed (FIX-011 / decision #6) ───────────────
+# Officers use terminal states (terminate/resign/decease) which preserve
+# history; the officer-facing hard-delete op no longer exists, so the route
+# must NOT perform a delete.
 DELETE {{api}}/association/member/memberships/{{membership_a_id}}
 Origin: {{origin}}
 x-csrf-token: {{csrf_token}}
@@ -162,5 +165,4 @@ Cookie: better-auth.session_token={{officer_cookie}}
 x-org-id: {{org_id}}
 HTTP *
 [Asserts]
-status >= 200
-status < 300
+status >= 400

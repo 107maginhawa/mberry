@@ -9,6 +9,7 @@ import { DatabaseRepository, type PaginationOptions } from '@/core/database.repo
 import { ValidationError, NotFoundError, BusinessLogicError } from '@/core/errors';
 import {
   chatMessages,
+  chatRooms,
   type ChatMessage,
   type NewChatMessage,
   type ChatMessageFilters,
@@ -63,6 +64,29 @@ export class ChatMessageRepository extends DatabaseRepository<ChatMessage, NewCh
   }
 
   /**
+   * FIX-008: resolve the organization for a message. Callers that already hold
+   * the org (e.g. REST with org context) pass it through; callers that don't
+   * (the WS chat path, system messages) get it derived from the room row — so
+   * no path can insert a NULL organization_id. Prerequisite for the FIX-010
+   * SET NOT NULL migration.
+   */
+  private async resolveOrgId(chatRoomId: string, organizationId?: string): Promise<string> {
+    if (organizationId) return organizationId;
+    const [room] = await this.db
+      .select({ organizationId: chatRooms.organizationId })
+      .from(chatRooms)
+      .where(eq(chatRooms.id, chatRoomId))
+      .limit(1);
+    if (!room?.organizationId) {
+      throw new NotFoundError('Chat room not found for message organization scoping', {
+        resourceType: 'chat-room',
+        resource: chatRoomId,
+      });
+    }
+    return room.organizationId;
+  }
+
+  /**
    * Create a text message
    */
   async createTextMessage(
@@ -81,14 +105,15 @@ export class ChatMessageRepository extends DatabaseRepository<ChatMessage, NewCh
     if (!messageContent.trim()) {
       throw new ValidationError('Message content cannot be empty');
     }
-    
+
+    const orgId = await this.resolveOrgId(chatRoomId, organizationId);
     const message = await this.createOne({
       chatRoom: chatRoomId,
       sender: senderId,
       messageType: 'text',
       message: messageContent.trim(),
       timestamp: new Date(),
-      organizationId: organizationId!
+      organizationId: orgId
     });
 
     this.logger?.info({
@@ -123,13 +148,14 @@ export class ChatMessageRepository extends DatabaseRepository<ChatMessage, NewCh
       startedAt: new Date().toISOString()
     };
     
+    const orgId = await this.resolveOrgId(chatRoomId, organizationId);
     const message = await this.createOne({
       chatRoom: chatRoomId,
       sender: senderId,
       messageType: 'video_call',
       videoCallData: callData,
       timestamp: new Date(),
-      organizationId: organizationId!
+      organizationId: orgId
     });
 
     this.logger?.info({
@@ -153,13 +179,14 @@ export class ChatMessageRepository extends DatabaseRepository<ChatMessage, NewCh
   ): Promise<ChatMessage> {
     this.logger?.debug({ chatRoomId, systemMessage, triggeredByUserId }, 'Creating system message');
 
+    const orgId = await this.resolveOrgId(chatRoomId, organizationId);
     const message = await this.createOne({
       chatRoom: chatRoomId,
       sender: triggeredByUserId, // User who triggered the system action
       messageType: 'system',
       message: systemMessage,
       timestamp: new Date(),
-      organizationId: organizationId!
+      organizationId: orgId
     });
 
     this.logger?.info({

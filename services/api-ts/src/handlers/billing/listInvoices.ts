@@ -77,9 +77,17 @@ export async function listInvoices(
   const isAdmin = userRoles.includes('admin');
 
   if (!isAdmin) {
-    // Non-admin: scope to invoices where user is customer or merchant
-    // If they specified a customer/merchant filter that isn't themselves, deny
+    // Non-admin: scope to invoices where user is customer or merchant.
+    // A customer/merchant filter that isn't the user is denied unless the
+    // *other* party filter pins the result to the user (e.g. merchant=self +
+    // customer=X, or customer=self + merchant=Y). The merchant-side check
+    // (FIX-003) closes the leak where ?merchant=<foreign> with no ?customer=
+    // was left unscoped — letting any member enumerate another merchant's
+    // invoices (amounts + customer person IDs) across orgs.
     if (filters.customer && filters.customer !== user.id && filters.merchant !== user.id) {
+      throw new ForbiddenError('You can only view your own invoices');
+    }
+    if (filters.merchant && filters.merchant !== user.id && filters.customer !== user.id) {
       throw new ForbiddenError('You can only view your own invoices');
     }
     if (!filters.customer && !filters.merchant) {

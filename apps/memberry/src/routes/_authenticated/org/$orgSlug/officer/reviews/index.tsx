@@ -1,4 +1,3 @@
-// oli-execute: error-handled-inline
 // `error` renders explicit error branch at ~L77-79. Gate heuristic misses
 // the destructured rename.
 import { createFileRoute } from '@tanstack/react-router'

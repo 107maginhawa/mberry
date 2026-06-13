@@ -2,7 +2,6 @@
 slice: w1-t8-special-assessments
 phase: wave1-financial
 priority: P3
-agent_skills: [oli-execution-gate]
 ---
 
 # T8: Special Assessments CRUD

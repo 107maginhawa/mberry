@@ -1,8 +1,7 @@
 import type { ValidatedContext } from '@/types/app';
 import type { DatabaseInstance } from '@/core/database';
-import { UnauthorizedError } from '@/core/errors';
-import { surveyResponses } from './repos/survey.schema';
-import { eq } from 'drizzle-orm';
+import { UnauthorizedError, ValidationError } from '@/core/errors';
+import { SurveyResponseRepository } from './repos/survey.repo';
 
 /**
  * deleteMemberResponses
@@ -10,7 +9,10 @@ import { eq } from 'drizzle-orm';
  * Path: DELETE /surveys/my-responses
  * Hand-wired route
  *
- * Deletes all survey responses for the authenticated member.
+ * Deletes the authenticated member's survey responses within their current
+ * organization (FIX-009). Scoped to the org context to prevent a silent
+ * cross-org wipe; anonymized rows (responderId nulled by the person.deleted
+ * cascade) are naturally excluded since they no longer match the caller's id.
  * Supports data retention / right-to-deletion compliance.
  */
 export async function deleteMemberResponses(
@@ -27,15 +29,18 @@ export async function deleteMemberResponses(
   const traceId = ctx.get('requestId');
   const logger = baseLogger?.child?.({ traceId, module: 'surveys' }) ?? baseLogger;
 
-  const result = await db
-    .delete(surveyResponses)
-    .where(eq(surveyResponses.responderId, userId))
-    .returning({ id: surveyResponses.id });
+  const organizationId = ctx.get('organizationId') as string | undefined;
+  if (!organizationId) {
+    throw new ValidationError('Organization context is required to delete your survey responses');
+  }
+
+  const responseRepo = new SurveyResponseRepository(db, logger);
+  const deletedCount = await responseRepo.deleteByResponderAndOrg(userId, organizationId);
 
   logger?.info(
-    { personId: userId, deletedCount: result.length, action: 'delete_member_responses' },
+    { personId: userId, organizationId, deletedCount, action: 'delete_member_responses' },
     'Deleted member survey responses'
   );
 
-  return ctx.json({ deletedCount: result.length }, 200);
+  return ctx.json({ deletedCount }, 200);
 }

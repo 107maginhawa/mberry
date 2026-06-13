@@ -8,13 +8,22 @@ export async function createJobPosting(ctx: Context): Promise<Response> {
   const body = await ctx.req.json();
   const repo = new JobPostingRepository(db);
 
+  // FIX-003: bind the write to the tenant-resolved org from orgContextMiddleware
+  // (ctx.var.organizationId), never the client-supplied body.organizationId.
+  // Trusting the body allowed a member of org A to write a posting into org B.
+  // Fail closed if no org context was established.
+  const organizationId = ctx.get('organizationId') as string | undefined;
+  if (!organizationId) {
+    return ctx.json({ error: 'Organization context required' }, 403);
+  }
+
   if (!body.title || !body.organizationName) {
     return ctx.json({ error: 'title and organizationName are required' }, 400);
   }
 
   const now = new Date();
   const posting = await repo.create({
-    organizationId: body.organizationId ?? ctx.req.param('organizationId'),
+    organizationId,
     title: body.title,
     organizationName: body.organizationName,
     location: body.location,

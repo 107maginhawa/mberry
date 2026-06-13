@@ -141,6 +141,10 @@ export const TRAINING_VALID_TRANSITIONS: Record<string, string[]> = {
 };
 
 export const TRAINING_ENROLLMENT_VALID_TRANSITIONS: Record<string, string[]> = {
+  // TC-DEC-01 (Step 47): proof-of-payment holding state. An officer confirms
+  // offline payment (payment_pending → enrolled) before the enrollment can be
+  // completed for credit; a member or officer may cancel it before payment.
+  payment_pending: ['enrolled', 'cancelled'],
   enrolled: ['completed', 'cancelled', 'noShow'],
   completed: [],   // terminal
   cancelled: [],   // terminal

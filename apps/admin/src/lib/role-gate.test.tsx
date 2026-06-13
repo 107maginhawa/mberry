@@ -105,8 +105,13 @@ describe('ROUTE_ROLES', () => {
 
   test('operator-only routes restrict to super role', () => {
     expect(ROUTE_ROLES['/operators']).toEqual(['super'])
-    expect(ROUTE_ROLES['/impersonate']).toEqual(['super'])
     expect(ROUTE_ROLES['/feature-flags']).toEqual(['super'])
+  })
+
+  // FIX-007 (PA-6): impersonation nav is entitled to super + support, matching
+  // the route gate and the backend IMPERSONATION_ALLOWED_ROLES allow-list.
+  test('impersonate nav is visible to super and support', () => {
+    expect(ROUTE_ROLES['/impersonate']).toEqual(['super', 'support'])
   })
 
   test('dashboard is accessible to all roles', () => {

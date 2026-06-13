@@ -249,6 +249,10 @@ model DocumentSearchParams {
   @doc("Filter by tag name.")
   @query
   tag?: string;
+
+  @doc("Filter by publication status. Non-officer callers are always restricted to 'published' regardless of this value.")
+  @query
+  status?: "draft" | "published" | "archived";
 }
 
 // ---------------------------------------------------------------------------

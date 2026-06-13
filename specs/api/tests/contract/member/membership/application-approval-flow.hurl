@@ -96,3 +96,36 @@ x-org-id: {{org_id}}
 Content-Type: application/json
 {}
 HTTP 200
+
+
+# ── 6. FIX-010: a fresh application for a person who already has a membership ──
+# The applicant now holds a membership from step 5. A new application is allowed
+# (the prior one is 'approved', not 'submitted'), so creation still returns 201.
+POST {{api}}/association/member/applications
+Origin: {{origin}}
+x-csrf-token: {{csrf_token}}
+Cookie: better-auth.session_token={{applicant_cookie}}
+x-org-id: {{org_id}}
+Content-Type: application/json
+{
+  "personId": "{{applicant_person_id}}",
+  "organizationId": "{{org_id}}",
+  "tierId": "{{tier_id}}",
+  "applicationDate": "2026-06-09"
+}
+HTTP 201
+[Captures]
+reapplication_id: jsonpath "$.id"
+
+
+# ── 7. FIX-010 / decision #5: re-approval must NOT raw-500 on the unique index ──
+# The existing membership is in standing, so approval resolves to a handled
+# ConflictError (409) — never a raw (organization_id, person_id) unique violation.
+POST {{api}}/association/member/applications/{{reapplication_id}}/approve
+Origin: {{origin}}
+x-csrf-token: {{csrf_token}}
+Cookie: better-auth.session_token={{officer_cookie}}
+x-org-id: {{org_id}}
+Content-Type: application/json
+{}
+HTTP 409

@@ -46,9 +46,14 @@ export async function cancelCustomTraining(
     cancelledAt: new Date(),
   });
 
-  domainEvents.emit('training.cancelled', {
+  // FIX-003 / G6: this cancels ONE enrollment, not the whole training program.
+  // Emit the enrollment-scoped event so the program-wide `training.cancelled`
+  // consumer does not mass-notify every enrollee. [CROSS-MODULE RISK]
+  domainEvents.emit('training.enrollment.cancelled', {
+    enrollmentId: enrollment.id,
     trainingId: training.id,
     organizationId: training.organizationId,
+    personId: enrollment.personId,
     cancelledBy: user.id,
   }).catch(() => {});
 

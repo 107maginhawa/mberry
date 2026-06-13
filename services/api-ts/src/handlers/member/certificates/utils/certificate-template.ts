@@ -6,6 +6,13 @@
  */
 
 import { PDFDocument, rgb, StandardFonts, type RGB } from 'pdf-lib';
+import { drawQrCode } from '@/core/pdf/qr';
+
+/** Optional render-time extras for the PDF (FIX-005). */
+export interface CertificatePdfOptions {
+  /** Full public verify URL to encode as a scannable QR (e.g. memberry.app/verify/<num>?signature=<hmac>). */
+  verifyUrl?: string | null;
+}
 
 export interface CertificateTemplateData {
   certificateNumber: string;
@@ -157,6 +164,7 @@ function hexToRgb(color: string | undefined, fallback: RGB = rgb(0.1, 0.21, 0.36
 export async function renderCertificatePdf(
   data: CertificateTemplateData,
   branding?: Partial<OrgBranding>,
+  options?: CertificatePdfOptions,
 ): Promise<Uint8Array> {
   const brand = { ...DEFAULT_BRANDING, ...branding };
   const typeLabel = TYPE_LABELS[data.certificateType] ?? 'Certificate';
@@ -229,6 +237,22 @@ export async function renderCertificatePdf(
       page.drawText(sigTitle, { x: sigX, y: 96, size: 9, font: serif, color: rgb(0.55, 0.55, 0.55) });
     }
   }
+
+  // FIX-005: scannable verify QR (bottom-center) when a signed verify URL is provided.
+  if (options?.verifyUrl) {
+    const qrSize = 64;
+    const qrX = (PAGE_WIDTH - qrSize) / 2;
+    const qrY = 56;
+    drawQrCode(page, { x: qrX, y: qrY, size: qrSize, data: options.verifyUrl });
+    const scanText = 'Scan to verify';
+    const scanWidth = serif.widthOfTextAtSize(scanText, 8);
+    page.drawText(scanText, { x: (PAGE_WIDTH - scanWidth) / 2, y: qrY - 12, size: 8, font: serif, color: rgb(0.5, 0.5, 0.5) });
+  }
+
+  // FIX-015 (PRD 11.7): non-removable platform branding footer.
+  const brandText = 'Verified by Memberry';
+  const brandWidth = serif.widthOfTextAtSize(brandText, 8);
+  page.drawText(brandText, { x: (PAGE_WIDTH - brandWidth) / 2, y: 30, size: 8, font: serif, color: rgb(0.6, 0.6, 0.65) });
 
   return pdfDoc.save();
 }

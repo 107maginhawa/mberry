@@ -34,6 +34,16 @@ export async function searchChatMessages(
 
   const db = ctx.get('database') as DatabaseInstance;
 
+  // FIX-008 (G4 read-path): when the caller's org context is known, scope the
+  // search to messages in that org's rooms OR DM rooms (org-agnostic, PD-2).
+  // orgId derives from ctx.get('organizationId'); module-local, no shared
+  // middleware change. When absent (no org context on the request) the search
+  // keeps its prior participant-only scope.
+  const callerOrgId = ctx.get('organizationId') as string | undefined;
+  const orgScope = callerOrgId
+    ? sql` AND (${chatRooms.organizationId} = ${callerOrgId} OR ${chatRooms.roomType} = 'dm')`
+    : sql``;
+
   const rows = await db
     .select({
       id: chatMessages.id,
@@ -46,7 +56,7 @@ export async function searchChatMessages(
     .innerJoin(chatRooms, sql`${chatMessages.chatRoom} = ${chatRooms.id}`)
     .where(sql`${chatRooms.participants} @> ${JSON.stringify([user.id])}::jsonb
                AND ${chatMessages.messageType} = 'text'
-               AND ${chatMessages.message} ILIKE ${'%' + q + '%'}`)
+               AND ${chatMessages.message} ILIKE ${'%' + q + '%'}${orgScope}`)
     .orderBy(sql`${chatMessages.timestamp} DESC`)
     .limit(50);
 

@@ -1,5 +1,5 @@
 import { describe, test, expect, vi, beforeEach } from '@/test/vitest-shim'
-import { screen } from '@testing-library/react'
+import { screen, waitFor, fireEvent } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { renderWithProviders } from '@/test/utils'
 import { ComposeForm } from './compose-form'
@@ -7,10 +7,17 @@ import { ComposeForm } from './compose-form'
 // Router (useNavigate, useParams) provided by global mock in test-setup-root.ts.
 // @monobase/ui rendered as real components against happy-dom.
 
-// Mock date-picker
+// Mock date-picker. The real component uses `onValueChange(iso)`, so the mock
+// must wire keystrokes through that prop (not `onChange`) for the value to flow.
 vi.mock('@/components/patterns/date-picker', () => ({
-  DateTimePicker: ({ value, onChange, ...rest }: any) => (
-    <input data-testid="datetime-picker" type="text" value={value ?? ''} onChange={(e: any) => onChange?.(e.target.value)} {...rest} />
+  DateTimePicker: ({ value, onValueChange, placeholder }: any) => (
+    <input
+      data-testid="datetime-picker"
+      type="text"
+      placeholder={placeholder}
+      value={value ?? ''}
+      onChange={(e: any) => onValueChange?.(e.target.value)}
+    />
   ),
 }))
 
@@ -21,6 +28,9 @@ vi.mock('@/lib/api', () => ({
     patch: vi.fn(),
   },
 }))
+
+import { api } from '@/lib/api'
+const mockApi = api as unknown as { post: ReturnType<typeof vi.fn>; patch: ReturnType<typeof vi.fn> }
 
 describe('ComposeForm', () => {
   beforeEach(() => {
@@ -113,5 +123,61 @@ describe('ComposeForm', () => {
     renderWithProviders(<ComposeForm orgId="org-1" />)
     expect(screen.getByText('Schedule (optional)')).toBeInTheDocument()
     expect(screen.getByText('Leave empty to send immediately or save as draft')).toBeInTheDocument()
+  })
+
+  // FIX-003: "Send Now" must actually publish. createAnnouncement force-drafts,
+  // so the component MUST chain create → publish endpoint. Previously it only
+  // POSTed status:'sent' (silently ignored) and navigated away on a draft.
+  test('Send Now chains create then publish endpoint', async () => {
+    const user = userEvent.setup()
+    mockApi.post.mockResolvedValueOnce({ data: { id: 'new-ann-1' } }) // create
+    mockApi.post.mockResolvedValueOnce({ data: { id: 'new-ann-1', status: 'sent' } }) // publish
+
+    renderWithProviders(<ComposeForm orgId="org-1" />)
+    await user.type(screen.getByLabelText('Title'), 'Town Hall')
+    await user.type(screen.getByLabelText('Message'), 'Meeting on Friday')
+    await user.click(screen.getByText('Send Now'))
+
+    await waitFor(() => {
+      // create
+      expect(mockApi.post).toHaveBeenCalledWith(
+        '/api/communications/announcements/org-1',
+        expect.objectContaining({ title: 'Town Hall' }),
+      )
+      // publish the created id
+      expect(mockApi.post).toHaveBeenCalledWith(
+        '/api/communications/announcements/new-ann-1/publish',
+        expect.anything(),
+      )
+    })
+  })
+
+  // FIX-003: "Schedule" must hit the schedule endpoint with scheduledAt.
+  test('Schedule chains create then schedule endpoint with scheduledAt', async () => {
+    const user = userEvent.setup()
+    mockApi.post.mockResolvedValueOnce({ data: { id: 'new-ann-2' } }) // create
+    mockApi.post.mockResolvedValueOnce({ data: { id: 'new-ann-2', status: 'scheduled' } }) // schedule
+
+    renderWithProviders(<ComposeForm orgId="org-1" />)
+    await user.type(screen.getByLabelText('Title'), 'Future Notice')
+    await user.type(screen.getByLabelText('Message'), 'Later')
+
+    // Set a future schedule so the Schedule button appears
+    const picker = screen.getByTestId('datetime-picker')
+    const future = new Date(Date.now() + 86400000).toISOString()
+    fireEvent.change(picker, { target: { value: future } })
+
+    await user.click(await screen.findByText('Schedule'))
+
+    await waitFor(() => {
+      expect(mockApi.post).toHaveBeenCalledWith(
+        '/api/communications/announcements/org-1',
+        expect.objectContaining({ title: 'Future Notice' }),
+      )
+      expect(mockApi.post).toHaveBeenCalledWith(
+        '/api/communications/announcements/new-ann-2/schedule',
+        expect.objectContaining({ scheduledAt: expect.any(String) }),
+      )
+    })
   })
 })

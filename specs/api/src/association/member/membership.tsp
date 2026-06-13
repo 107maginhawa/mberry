@@ -360,7 +360,8 @@ model MembershipCreateRequest {
   memberNumber?: string;
   startDate: plainDate;
   duesExpiryDate: plainDate;
-  gracePeriodDays?: int32;
+  // BR-02: grace period must be within 0–90 days (FIX-020).
+  @minValue(0) @maxValue(90) gracePeriodDays?: int32;
   note?: string;
 }
 
@@ -370,7 +371,8 @@ model MembershipUpdateRequest {
   categoryId?: string | null;
   memberNumber?: string | null;
   duesExpiryDate?: plainDate;
-  gracePeriodDays?: int32;
+  // BR-02: grace period must be within 0–90 days (FIX-020).
+  @minValue(0) @maxValue(90) gracePeriodDays?: int32;
   note?: string | null;
 }
 
@@ -387,6 +389,13 @@ model MembershipResignRequest {
   @doc("Reason for resignation")
   @maxLength(500)
   terminationReason?: string;
+}
+
+@doc("Request to suspend a membership")
+model MembershipSuspendRequest {
+  @doc("Reason for the administrative suspension")
+  @maxLength(500)
+  reason?: string;
 }
 
 @doc("Request to record a member's death")
@@ -851,19 +860,11 @@ namespace Association.Member.Membership {
       | ApiNotFoundResponse
       | ApiForbiddenResponse;
 
-    @doc("Delete a membership record.")
-    @operationId("deleteMembership")
-    @delete
-    @route("/{membershipId}")
-    @useAuth(bearerAuth)
-    @extension("x-security-required-roles", #["association:admin"])
-    @extension("x-audit", #{ action: "delete", resourceType: "membership" })
-    deleteMembership(
-      @path membershipId: string
-    ): ApiNoContentResponse
-      | ApiNotFoundResponse
-      | ApiConflictResponse
-      | ApiForbiddenResponse;
+    // FIX-011 / decision #6: the officer-facing `deleteMembership` op is removed.
+    // Hard-deleting a membership destroys financial + audit history (and FK
+    // RESTRICT 500s anyway). Officers use terminal states (terminate/resign/
+    // decease) which preserve history; any genuine hard delete is platform-admin
+    // only and soft/guarded.
 
     @doc("Renew a membership by extending its dues expiry date.")
     @operationId("renewMembership")
@@ -927,7 +928,7 @@ namespace Association.Member.Membership {
       | ApiConflictResponse
       | ApiForbiddenResponse;
 
-    @doc("Reinstate a suspended or lapsed membership.")
+    @doc("Reinstate a lapsed membership by restoring its dues standing. Lapsed-only: suspended members use unsuspend, and removed/resigned/deceased/expelled are terminal.")
     @operationId("reinstateMembership")
     @post
     @route("/{membershipId}/reinstate")
@@ -937,6 +938,38 @@ namespace Association.Member.Membership {
     reinstateMembership(
       @path membershipId: string
     ): ApiOkResponse<Membership>
+      | ApiBadRequestResponse
+      | ApiNotFoundResponse
+      | ApiConflictResponse
+      | ApiForbiddenResponse;
+
+    @doc("Suspend a membership administratively. Reversible via unsuspend.")
+    @operationId("suspendMembership")
+    @post
+    @route("/{membershipId}/suspend")
+    @useAuth(bearerAuth)
+    @extension("x-security-required-roles", #["association:admin"])
+    @extension("x-audit", #{ action: "suspend", resourceType: "membership" })
+    suspendMembership(
+      @path membershipId: string,
+      @body body: MembershipSuspendRequest
+    ): ApiOkResponse<Membership>
+      | ApiBadRequestResponse
+      | ApiNotFoundResponse
+      | ApiConflictResponse
+      | ApiForbiddenResponse;
+
+    @doc("Lift an administrative suspension, restoring the membership's computed standing.")
+    @operationId("unsuspendMembership")
+    @post
+    @route("/{membershipId}/unsuspend")
+    @useAuth(bearerAuth)
+    @extension("x-security-required-roles", #["association:admin"])
+    @extension("x-audit", #{ action: "unsuspend", resourceType: "membership" })
+    unsuspendMembership(
+      @path membershipId: string
+    ): ApiOkResponse<Membership>
+      | ApiBadRequestResponse
       | ApiNotFoundResponse
       | ApiConflictResponse
       | ApiForbiddenResponse;
@@ -998,18 +1031,9 @@ namespace Association.Member.Membership {
       | ApiNotFoundResponse
       | ApiForbiddenResponse;
 
-    @doc("Delete a membership application.")
-    @operationId("deleteMembershipApplication")
-    @delete
-    @route("/{applicationId}")
-    @useAuth(bearerAuth)
-    @extension("x-security-required-roles", #["association:admin"])
-    @extension("x-audit", #{ action: "delete", resourceType: "membership-application" })
-    deleteMembershipApplication(
-      @path applicationId: string
-    ): ApiNoContentResponse
-      | ApiNotFoundResponse
-      | ApiForbiddenResponse;
+    // FIX-011 / decision #6: the officer-facing `deleteMembershipApplication` op
+    // is removed. Applications are resolved by deny (with a reason), preserving
+    // the audit trail, instead of hard-deleted.
 
     @doc("Approve a membership application and create a membership.")
     @operationId("approveMembershipApplication")

@@ -10,6 +10,7 @@ import {
 } from '@/core/errors';
 import { ChatRoomRepository } from './repos/chatRoom.repo';
 import { ChatMessageRepository } from './repos/chatMessage.repo';
+import { ChatRoomMemberRepository } from './repos/chatRoomMember.repo';
 import { buildPaginationMeta } from '@/utils/query';
 
 /**
@@ -67,13 +68,29 @@ export async function getChatMessages(
     });
   }
 
-  // Check if user is a participant (via their profiles)
-  const isParticipant = room.participants.includes(user.id);
+  // FIX-008 (G4 read-path): tenant isolation for org-scoped rooms — a caller
+  // from a different org cannot read a channel/group/booking room's history.
+  // DM rooms are org-agnostic (PD-2 gated) and skip this guard. orgId derives
+  // from ctx.get('organizationId'); module-local, no shared middleware change.
+  const callerOrgId = ctx.get('organizationId') as string | undefined;
+  if (room.roomType !== 'dm' && callerOrgId && callerOrgId !== room.organizationId) {
+    throw new ForbiddenError('Access denied: chat room belongs to a different organization');
+  }
+
+  // Check if user is a participant.
+  // FIX-007 (G5): honor BOTH the legacy JSONB `participants` array AND the
+  // `chat_room_member` join table, so a member tracked only in the join table
+  // can read the room's history. Compatibility OR-shim — JSONB stays canonical;
+  // the `||` short-circuits, so the join-table query only runs when JSONB misses.
+  const memberRepo = new ChatRoomMemberRepository(db, logger);
+  const isParticipant =
+    room.participants.includes(user.id) ||
+    (await memberRepo.isMember(params.room, user.id));
 
   if (!isParticipant) {
     throw new ForbiddenError('Access denied: not a participant in this chat room');
   }
-  
+
   // Build pagination options
   const page = query.page || 1;
   const pageSize = query.pageSize || query.limit || 50;

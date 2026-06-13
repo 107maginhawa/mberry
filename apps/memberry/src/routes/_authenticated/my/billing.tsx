@@ -18,7 +18,6 @@ export const Route = createFileRoute('/_authenticated/my/billing')({
 
 const STALL_TIMEOUT_MS = 12_000
 
-// oli-execute: error-handled-inline
 function BillingPage() {
   const navigate = useNavigate()
   const [isStarting, setIsStarting] = useState(false)

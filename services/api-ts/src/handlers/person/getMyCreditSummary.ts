@@ -2,9 +2,9 @@ import type { BaseContext } from '@/types/app';
 import type { DatabaseInstance } from '@/core/database';
 import { UnauthorizedError } from '@/core/errors';
 import { CreditEntryRepository } from '@/handlers/association:member/repos/credits.repo';
-import { getCycleForDate } from '@/handlers/member/credits/utils/credit-cycle';
+import { resolveCycle } from '@/handlers/member/credits/utils/credit-cycle';
 import { memberships } from '@/handlers/association:member/repos/membership.schema';
-import { associations, organizations } from '@/handlers/platformadmin/repos/platform-admin.schema';
+import { orgCpdConfig } from '@/handlers/association:member/repos/credits.schema';
 import { eq } from 'drizzle-orm';
 
 /**
@@ -13,9 +13,18 @@ import { eq } from 'drizzle-orm';
  * Path: GET /credit-summary
  * OperationId: getMyCreditSummary
  *
- * Returns aggregated credit totals for the current user across all orgs.
- * Query params: registrationDate (optional — auto-looked up from membership if missing),
- *               cyclePeriodYears (default 3), targetDate (default now)
+ * Returns aggregated credit totals for the current user across all orgs,
+ * backing the member-facing /my/credits and /dashboard views.
+ *
+ * FIX-006 (G4): required credits AND the cycle window are resolved
+ * SERVER-SIDE from the member's org `org_cpd_config` — the SAME single source
+ * of truth used by getCreditCompliance / getCreditTranscript. This handler no
+ * longer reads `associations.requiredCreditsPerCycle` (a second, divergent
+ * source) and no longer honors client-supplied `requiredCredits`,
+ * `registrationDate`, `cyclePeriodYears`, or `targetDate` query params, so a
+ * member cannot pick a favorable cycle window or lower the requirement to
+ * self-certify compliance on their own summary. Falls back to the platform
+ * config defaults (60 credits / 3-year cycle) when no config row exists.
  */
 export async function getMyCreditSummary(ctx: BaseContext): Promise<Response> {
   const session = ctx.get('session');
@@ -25,30 +34,32 @@ export async function getMyCreditSummary(ctx: BaseContext): Promise<Response> {
   const logger = ctx.get('logger');
   const personId = session.user.id;
 
-  // Auto-lookup registrationDate + requiredCredits from membership → org → association
-  let registrationDateStr = ctx.req.query('registrationDate');
-  let requiredCredits = 60; // default
+  // Resolve the member's org from their membership, then the cycle config from
+  // that org's org_cpd_config. Defaults (60/3) match org_cpd_config column
+  // defaults — no new default literal is introduced here.
   const [membership] = await db.select({
-    startDate: memberships.startDate,
     organizationId: memberships.organizationId,
   }).from(memberships).where(eq(memberships.personId, personId)).limit(1);
-  if (!registrationDateStr) {
-    registrationDateStr = membership?.startDate || '2025-01-01';
-  }
+
+  let requiredCredits = 60;
+  let cycleStartMonth: number | null = null;
+  let cycleLengthYears: number | null = null;
   if (membership?.organizationId) {
-    const [org] = await db.select({ associationId: organizations.associationId })
-      .from(organizations).where(eq(organizations.id, membership.organizationId)).limit(1);
-    if (org?.associationId) {
-      const [assoc] = await db.select({ requiredCreditsPerCycle: associations.requiredCreditsPerCycle })
-        .from(associations).where(eq(associations.id, org.associationId)).limit(1);
-      if (assoc?.requiredCreditsPerCycle) requiredCredits = assoc.requiredCreditsPerCycle;
+    const [config] = await db
+      .select()
+      .from(orgCpdConfig)
+      .where(eq(orgCpdConfig.organizationId, membership.organizationId))
+      .limit(1);
+    if (config) {
+      requiredCredits = config.requiredCredits;
+      cycleStartMonth = config.cycleStartMonth;
+      cycleLengthYears = config.cycleLengthYears;
     }
   }
-  const registrationDate = new Date(registrationDateStr);
-  const cyclePeriodYears = Number(ctx.req.query('cyclePeriodYears') ?? '3');
-  const targetDate = ctx.req.query('targetDate') ? new Date(ctx.req.query('targetDate')!) : new Date();
 
-  const cycle = getCycleForDate(registrationDate, targetDate, cyclePeriodYears);
+  // FIX-006: cycle window is the org-configured, server-resolved window for the
+  // current date — client cycle params are ignored entirely.
+  const cycle = resolveCycle({ cycleStartMonth, cycleLengthYears }, new Date());
 
   const repo = new CreditEntryRepository(db, logger);
   const byOrg = await repo.sumCreditsByOrg(personId, cycle.cycleStart, cycle.cycleEnd);

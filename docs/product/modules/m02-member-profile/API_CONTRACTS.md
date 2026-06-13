@@ -9,7 +9,7 @@
 
 | Property | Value |
 |----------|-------|
-| Base path | `/my` |
+| Base path | `/persons/me` |
 | Auth default | GA (session required) — all endpoints require authentication |
 | Rate limit tier | Authenticated (120 req/min) |
 | Tenant scoping | Person-scoped (from session); org-scoped where orgId is a path param |
@@ -17,6 +17,30 @@
 ---
 
 ## 2. Endpoints
+
+> **Route corrections (FIX-014).** The endpoint headings in this section were
+> generated against an early `/my/*` plan. The **actual** implemented routes use
+> the `/persons/me` prefix (and PATCH, not PUT). This table is authoritative; the
+> per-endpoint sub-sections below retain their request/response schemas but their
+> heading paths/verbs are superseded by this mapping.
+>
+> | Documented (stale) | Actual route | Handler |
+> |---|---|---|
+> | `GET /my/profile` | `GET /persons/me` | `getMyProfile` |
+> | `PUT /my/profile` | `PATCH /persons/me` | `updateMyProfile` |
+> | `PUT /my/privacy` | `PATCH /persons/me/privacy` | `updateMyPrivacySettings` |
+> | `PUT /my/notifications` | `PATCH /persons/me/notification-preferences` | `updateMyNotificationPreferences` |
+> | `POST /my/data-export` | `POST /persons/me/data-export` | `requestDataExport` — handler exists; **not in the generated route registry**, verify wiring |
+> | `GET /my/data-export/:id` | _not implemented_ | the only export route is `GET /persons/me/export` (`exportMyData`, sync JSON envelope per the `MyDataExport` model) |
+> | `POST /my/delete-account` | `POST /persons/me/delete` | `requestMyAccountDeletion` |
+> | `DELETE /my/delete-account` | `POST /persons/me/cancel-delete` | `cancelMyAccountDeletion` |
+> | `GET /my/id-card/:orgId` | _not implemented_ | no id-card route exists in the generated registry |
+> | `GET /my/id-card/:orgId/pdf` | _not implemented_ | no id-card PDF route exists in the generated registry |
+>
+> Real `/persons/me` routes the doc omits: `GET /persons/me/export`,
+> `GET /persons/me/memberships`, `GET /persons/me/credits`,
+> `GET /persons/me/credit-entries` (+ `POST`), `GET /persons/me/credit-summary`,
+> `GET /persons/me/officer-role/:organizationId`.
 
 ### 2.1 Profile
 
@@ -509,11 +533,11 @@ Binary PDF file download.
 
 | Event Name | Trigger Endpoint | Payload |
 |------------|-----------------|---------|
-| PersonUpdated | `PUT /my/profile` | `{ personId, changedFields }` |
-| PersonAnonymized | System (30 days after deletion request) | `{ personId }` |
-| DataExportReady | System (async generation complete) | `{ personId, downloadUrl }` |
-| DeletionRequested | `POST /my/delete-account` | `{ personId, scheduledDate }` |
-| DeletionCancelled | `DELETE /my/delete-account` | `{ personId }` |
+| PersonUpdated (`person.updated`) | `PATCH /persons/me` | `{ personId, updatedBy, updatedFields }` |
+| ~~PersonAnonymized~~ | _(removed — FIX-007)_ | **Not implemented** — never emitted; registry entry removed. Anonymization is audited inline in `jobs/deletionProcessor.ts`; cascade runs off `person.deleted`. |
+| DataExportReady (`data-export.ready`) | System (async generation complete) → notifies the requester (FIX-007) | `{ personId, exportId, downloadUrl }` |
+| DeletionRequested (`person.deletion.requested`) | `POST /persons/me/delete` → notifies the member's org officers (FIX-007) | `{ personId, scheduledDate }` |
+| DeletionCancelled (`person.deletion.cancelled`) | `POST /persons/me/cancel-delete` → notifies the member's org officers (FIX-007) | `{ personId }` |
 
 ### Consumed Events
 

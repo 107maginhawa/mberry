@@ -43,7 +43,10 @@ interface MemberDetailProps {
   memberId: string
 }
 
-type MemberStatus = 'active' | 'gracePeriod' | 'lapsed' | 'suspended' | 'pendingPayment' | 'removed'
+// FIX-018: terminal statuses resigned + deceased are part of the API's
+// MembershipStatus enum. (expired is dropped from V1 and expulsion is deferred
+// to V2 — see membership-lifecycle product decisions — so they are not listed.)
+type MemberStatus = 'active' | 'gracePeriod' | 'lapsed' | 'suspended' | 'pendingPayment' | 'removed' | 'resigned' | 'deceased'
 
 const STATUS_BADGE: Record<MemberStatus, { label: string; className: string }> = {
   active: { label: 'Active', className: 'bg-[var(--color-success-bg)] text-[var(--color-success)] hover:bg-[var(--color-success-bg)]' },
@@ -52,6 +55,8 @@ const STATUS_BADGE: Record<MemberStatus, { label: string; className: string }> =
   suspended: { label: 'Suspended', className: 'bg-gray-100 text-gray-800 hover:bg-gray-100' },
   pendingPayment: { label: 'Pending Payment', className: 'bg-[var(--color-info-bg)] text-[var(--color-info)] hover:bg-[var(--color-info-bg)]' },
   removed: { label: 'Removed', className: 'bg-gray-200 text-gray-700 hover:bg-gray-200' },
+  resigned: { label: 'Resigned', className: 'bg-gray-200 text-gray-700 hover:bg-gray-200' },
+  deceased: { label: 'Deceased', className: 'bg-gray-200 text-gray-700 hover:bg-gray-200' },
 }
 
 const STATUS_BANNER: Partial<Record<MemberStatus, { message: string; className: string }>> = {
@@ -70,6 +75,14 @@ const STATUS_BANNER: Partial<Record<MemberStatus, { message: string; className: 
   removed: {
     message: 'Membership has been removed.',
     className: 'border-gray-300 bg-gray-50 text-gray-700',
+  },
+  resigned: {
+    message: 'Member has voluntarily resigned from the association.',
+    className: 'border-gray-300 bg-gray-50 text-gray-800',
+  },
+  deceased: {
+    message: 'Membership closed following notification of the member’s passing.',
+    className: 'border-gray-300 bg-gray-50 text-gray-800',
   },
 }
 

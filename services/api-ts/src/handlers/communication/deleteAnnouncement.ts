@@ -21,13 +21,16 @@ export async function deleteAnnouncement(
   const db = ctx.get('database') as DatabaseInstance;
   const repo = new CommunicationsRepository(db);
 
-  const existing = await repo.get(params.id);
+  // FIX-007 (tenant isolation): scope the fetch + delete to the caller's org so an
+  // officer of org A cannot delete org B's announcement by id.
+  const orgId = ctx.get('organizationId');
+  const existing = await repo.get(params.id, orgId);
   if (!existing) throw new NotFoundError('Announcement');
   if (existing.status !== 'draft') {
     throw new BusinessLogicError('Only draft announcements can be deleted', 'ANNOUNCEMENT_NOT_DRAFT');
   }
 
-  await repo.delete(params.id);
+  await repo.delete(params.id, orgId);
 
   ctx.set('auditResourceId', params.id);
   ctx.set('auditDescription', `Deleted draft announcement`);

@@ -63,4 +63,20 @@ describe('publishAnnouncement', () => {
     const res = await publishAnnouncement(ctx as any);
     expect(res.status).toBe(200);
   });
+
+  // FIX-007 (tenant isolation): the handler must fetch the announcement scoped to
+  // the caller's org. An officer of org-A must NOT be able to publish org-B's
+  // announcement by id. We model org-scoping in the `get` stub: it only returns
+  // the row when fetched with the owning org (or unscoped, the legacy leak path).
+  test('rejects cross-org publish — 404 when the announcement belongs to another org', async () => {
+    stubRepo(CommunicationsRepository, {
+      get: async (_id: string, orgId?: string) =>
+        orgId === undefined || orgId === 'org-B'
+          ? { id: 'ann-1', status: 'draft', organizationId: 'org-B' }
+          : undefined,
+      updateStatus: async (_id: string, status: string, extra: any) => ({ id: 'ann-1', status, ...extra }),
+    });
+    const ctx = makeCtx({ organizationId: 'org-A', _params: { id: 'ann-1' } });
+    await expect(publishAnnouncement(ctx as any)).rejects.toThrow('Announcement');
+  });
 });

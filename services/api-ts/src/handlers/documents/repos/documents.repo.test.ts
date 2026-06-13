@@ -179,6 +179,14 @@ describe('DocumentRepository.buildWhereConditions', () => {
     const result = (repo as any).buildWhereConditions({ status: 'draft' });
     expect(result).toBeDefined();
   });
+
+  test('builds conditions for tag filter (FIX-004)', () => {
+    const db = makeDb();
+    const repo = new DocumentRepository(db as any);
+
+    const result = (repo as any).buildWhereConditions({ tag: 'compliance' });
+    expect(result).toBeDefined();
+  });
 });
 
 // ---------------------------------------------------------------------------

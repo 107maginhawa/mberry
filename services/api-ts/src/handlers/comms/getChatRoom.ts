@@ -9,6 +9,7 @@ import {
   BusinessLogicError
 } from '@/core/errors';
 import { ChatRoomRepository } from './repos/chatRoom.repo';
+import { ChatRoomMemberRepository } from './repos/chatRoomMember.repo';
 
 /**
  * getChatRoom
@@ -57,8 +58,27 @@ export async function getChatRoom(
     });
   }
 
-  // Security check: user must be a participant in the room (using Person ID)
-  const isParticipant = room.participants.includes(user.id);
+  // FIX-008 (G4 read-path): tenant isolation for org-scoped rooms. A caller
+  // whose active org context differs from the room's org must not read a
+  // channel/group/booking room — defense-in-depth beyond the (possibly stale)
+  // participant arrays. DM rooms are org-agnostic by design (PD-2 gated): the
+  // org guard is skipped for them and participant access still governs. orgId is
+  // derived from ctx.get('organizationId') (set by orgContextOptionalMiddleware)
+  // — module-local, no shared middleware change.
+  const callerOrgId = ctx.get('organizationId') as string | undefined;
+  if (room.roomType !== 'dm' && callerOrgId && callerOrgId !== room.organizationId) {
+    throw new ForbiddenError('Access denied: chat room belongs to a different organization');
+  }
+
+  // Security check: user must be a participant in the room (using Person ID).
+  // FIX-007 (G5): honor BOTH the legacy JSONB `participants` array AND the
+  // `chat_room_member` join table, so a member tracked only in the join table
+  // is not wrongly denied. Compatibility OR-shim — JSONB stays canonical; the
+  // `||` short-circuits, so the join-table query only runs when JSONB misses.
+  const memberRepo = new ChatRoomMemberRepository(db, logger);
+  const isParticipant =
+    room.participants.includes(user.id) ||
+    (await memberRepo.isMember(params.room, user.id));
 
   if (!isParticipant) {
     throw new ForbiddenError('Access denied: not a participant in this chat room');

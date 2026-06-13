@@ -1,7 +1,6 @@
 ---
 slice: wave-0b-features
 phase: wave-0
-agent_skills: [oli-execution-gate]
 priority: P1
 status: complete
 depends_on: [wave-0a-infrastructure]

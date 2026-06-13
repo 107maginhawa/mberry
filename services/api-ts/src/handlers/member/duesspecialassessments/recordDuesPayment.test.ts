@@ -89,6 +89,7 @@ describe('[BR-06] recordDuesPayment fund allocation', () => {
     stubRepo(DuesRepository, {
       findRecentPaymentForPerson: async () => undefined,
       getNextReceiptSequence: async () => 1,
+      getOrgReceiptPrefix: async () => 'ORG',
       createPayment: async (data: any) => ({ ...fakePayment, ...data }),
       getConfig: async () => undefined,
       listFunds: async () => fakeFunds,
@@ -133,6 +134,7 @@ describe('[BR-06] recordDuesPayment fund allocation', () => {
     stubRepo(DuesRepository, {
       findRecentPaymentForPerson: async () => undefined,
       getNextReceiptSequence: async () => 1,
+      getOrgReceiptPrefix: async () => 'ORG',
       createPayment: async (data: any) => ({ ...fakePayment, ...data, amount: 10000 }),
       getConfig: async () => undefined,
       listFunds: async () => thirdFunds,
@@ -168,6 +170,7 @@ describe('[BR-06] recordDuesPayment fund allocation', () => {
     stubRepo(DuesRepository, {
       findRecentPaymentForPerson: async () => undefined,
       getNextReceiptSequence: async () => 1,
+      getOrgReceiptPrefix: async () => 'ORG',
       createPayment: async (data: any) => ({ ...fakePayment, ...data }),
       getConfig: async () => undefined,
       listFunds: async () => [],
@@ -220,6 +223,7 @@ describe('[BR-07] recordDuesPayment expiry extension', () => {
     stubRepo(DuesRepository, {
       findRecentPaymentForPerson: async () => undefined,
       getNextReceiptSequence: async () => 1,
+      getOrgReceiptPrefix: async () => 'ORG',
       createPayment: async (data: any) => ({ ...fakePayment, ...data }),
       getConfig: async () => undefined,
       listFunds: async () => [],
@@ -253,6 +257,7 @@ describe('[BR-07] recordDuesPayment expiry extension', () => {
     stubRepo(DuesRepository, {
       findRecentPaymentForPerson: async () => undefined,
       getNextReceiptSequence: async () => 1,
+      getOrgReceiptPrefix: async () => 'ORG',
       createPayment: async (data: any) => ({ ...fakePayment, ...data }),
       getConfig: async () => undefined,
       listFunds: async () => [],
@@ -283,6 +288,7 @@ describe('[BR-07] recordDuesPayment expiry extension', () => {
     stubRepo(DuesRepository, {
       findRecentPaymentForPerson: async () => undefined,
       getNextReceiptSequence: async () => 42,
+      getOrgReceiptPrefix: async () => 'ORG',
       createPayment: async (data: any) => ({ ...fakePayment, ...data }),
       getConfig: async () => undefined,
       listFunds: async () => [],
@@ -333,6 +339,7 @@ describe('[BR-06] recordDuesPayment concurrent guard', () => {
     stubRepo(DuesRepository, {
       findRecentPaymentForPerson: async () => ({ id: 'recent-pay', amount: 5000 }),
       getNextReceiptSequence: async () => 1,
+      getOrgReceiptPrefix: async () => 'ORG',
       createPayment: async (data: any) => ({ ...fakePayment, ...data }),
       getConfig: async () => undefined,
       listFunds: async () => [],
@@ -364,6 +371,7 @@ describe('[BR-06] recordDuesPayment concurrent guard', () => {
     stubRepo(DuesRepository, {
       findRecentPaymentForPerson: async () => undefined,
       getNextReceiptSequence: async () => 1,
+      getOrgReceiptPrefix: async () => 'ORG',
       createPayment: async (data: any) => ({ ...fakePayment, ...data }),
       getConfig: async () => undefined,
       listFunds: async () => [],
@@ -443,6 +451,7 @@ describe('recordDuesPayment transaction atomicity', () => {
     stubRepo(DuesRepository, {
       findRecentPaymentForPerson: async () => undefined,
       getNextReceiptSequence: async () => 1,
+      getOrgReceiptPrefix: async () => 'ORG',
       createPayment: async (data: any) => {
         callOrder.push('createPayment');
         return { ...fakePayment, ...data };
@@ -497,6 +506,7 @@ describe('recordDuesPayment transaction atomicity', () => {
     stubRepo(DuesRepository, {
       findRecentPaymentForPerson: async () => undefined,
       getNextReceiptSequence: async () => 1,
+      getOrgReceiptPrefix: async () => 'ORG',
       createPayment: async (data: any) => ({ ...fakePayment, ...data }),
       getConfig: async () => undefined,
       listFunds: async () => fakeFunds,
@@ -576,6 +586,7 @@ describe('[PAY-01] invoice linking on payment recording', () => {
     stubRepo(DuesRepository, {
       findRecentPaymentForPerson: async () => undefined,
       getNextReceiptSequence: async () => 1,
+      getOrgReceiptPrefix: async () => 'ORG',
       createPayment: async (data: any) => ({ ...fakePayment, ...data }),
       getConfig: async () => undefined,
       listFunds: async () => [],
@@ -615,6 +626,7 @@ describe('[PAY-01] invoice linking on payment recording', () => {
     stubRepo(DuesRepository, {
       findRecentPaymentForPerson: async () => undefined,
       getNextReceiptSequence: async () => 1,
+      getOrgReceiptPrefix: async () => 'ORG',
       createPayment: async (data: any) => ({ ...fakePayment, ...data }),
       getConfig: async () => undefined,
       listFunds: async () => [],
@@ -650,6 +662,7 @@ describe('[PAY-01] invoice linking on payment recording', () => {
     stubRepo(DuesRepository, {
       findRecentPaymentForPerson: async () => undefined,
       getNextReceiptSequence: async () => 1,
+      getOrgReceiptPrefix: async () => 'ORG',
       createPayment: async (data: any) => ({ ...fakePayment, ...data }),
       getConfig: async () => undefined,
       listFunds: async () => [],
@@ -750,6 +763,7 @@ describe('[AC-M06-002] recordDuesPayment treasurer/president-only RBAC', () => {
     stubRepo(DuesRepository, {
       findRecentPaymentForPerson: async () => undefined,
       getNextReceiptSequence: async () => 1,
+      getOrgReceiptPrefix: async () => 'ORG',
       createPayment: async (data: any) => ({ ...fakePayment, ...data }),
       getConfig: async () => undefined,
       listFunds: async () => [],

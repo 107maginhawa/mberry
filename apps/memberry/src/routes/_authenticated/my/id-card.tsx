@@ -1,7 +1,8 @@
 import { createFileRoute } from '@tanstack/react-router'
+import { useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { QRCodeSVG } from 'qrcode.react'
-import { Badge, Button } from '@monobase/ui'
+import { Badge, Button, Label, Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@monobase/ui'
 import { getStatusLabel } from '@/features/membership/lib/membership-status'
 import type { MembershipStatus } from '@/features/membership/lib/membership-status'
 import { api } from '@/lib/api'
@@ -51,10 +52,20 @@ function MyIdCard() {
     },
   })
 
+  // FIX-011 (G-12 / WF-012): multi-org members need to pick which org's card to
+  // view — the backend is already per-org (GET /persons/me/id-card/:orgId), only
+  // the UI hardcoded memberships[0]. Drive the selected org from state, defaulting
+  // to the first membership.
+  const [selectedOrgId, setSelectedOrgId] = useState<string | null>(null)
+
   const isLoading = personLoading || membershipsLoading
   const isError = personError || membershipsError
   const p = person?.data ?? person
-  const membership = Array.isArray(memberships) ? memberships[0] : null
+  const activeMemberships = Array.isArray(memberships) ? memberships : []
+  const membership =
+    activeMemberships.find((m: { organizationId?: string }) => m.organizationId === selectedOrgId) ??
+    activeMemberships[0] ??
+    null
 
   const fullName = p ? `${p.firstName ?? ''} ${p.lastName ?? ''}`.trim() : ''
   const initials = fullName
@@ -78,8 +89,21 @@ function MyIdCard() {
     : '—'
 
   const orgId: string | null = membership?.organizationId ?? null
-  const memberId: string | null = membership?.memberNumber ?? membership?.id ?? null
-  const verifyUrl = memberId ? `${window.location.origin}/verify/${memberId}` : null
+
+  // Batch A2 / FIX-001: consume the backend card builder (GET /persons/me/id-card/:orgId)
+  // for the selected org. It lazily ensures + returns the verifiable member-card
+  // credential number, converging the QR onto the canonical builder instead of
+  // rebuilding card state client-side. The QR must encode a value the public
+  // /verify surface accepts — the old `/verify/<memberNumber>` always resolved to
+  // "not found" and leaked the member number. Render no QR until a credential exists.
+  const { data: idCard } = useQuery<any>({
+    queryKey: ['my-id-card', orgId],
+    enabled: !!orgId,
+    queryFn: () => api.get<any>(`/api/persons/me/id-card/${orgId}`),
+  })
+  const credentialNumber: string | null =
+    idCard?.data?.verifyCredentialNumber ?? membership?.credentialNumber ?? null
+  const verifyUrl = credentialNumber ? `${window.location.origin}/verify/${credentialNumber}` : null
 
   function handleDownloadPdf() {
     if (!orgId) return
@@ -110,6 +134,30 @@ function MyIdCard() {
         />
       ) : (
         <div className="max-w-md mx-auto">
+          {activeMemberships.length > 1 && (
+            <div className="mb-4">
+              <Label htmlFor="id-card-org" className="block text-sm text-[var(--color-muted)] mb-1.5">
+                Organization
+              </Label>
+              <Select
+                value={membership?.organizationId ?? ''}
+                onValueChange={(v) => setSelectedOrgId(v)}
+              >
+                <SelectTrigger id="id-card-org" aria-label="Select organization" className="w-full">
+                  <SelectValue placeholder="Organization" />
+                </SelectTrigger>
+                <SelectContent>
+                  {activeMemberships
+                    .filter((m: { organizationId?: string; id?: string }) => Boolean(m.organizationId ?? m.id))
+                    .map((m: { organizationId?: string; id?: string; organizationName?: string; orgName?: string; memberNumber?: string }) => (
+                      <SelectItem key={m.organizationId ?? m.id} value={(m.organizationId ?? m.id) as string}>
+                        {m.organizationName ?? m.orgName ?? m.memberNumber ?? 'Organization'}
+                      </SelectItem>
+                    ))}
+                </SelectContent>
+              </Select>
+            </div>
+          )}
           <GlassCard className="p-6 space-y-4">
             <div className="text-center space-y-2">
               <div className="w-20 h-20 rounded-full bg-[var(--color-primary)] mx-auto flex items-center justify-center text-2xl font-bold font-display text-white">
@@ -139,11 +187,11 @@ function MyIdCard() {
                     size={84}
                     level="M"
                     marginSize={0}
-                    aria-label={`QR code to verify member ${memberId}`}
+                    aria-label={`QR code to verify credential ${credentialNumber}`}
                   />
                 </div>
               ) : (
-                <div className="w-24 h-24 bg-[var(--color-surface-warm)] mx-auto rounded-[8px] flex items-center justify-center text-xs text-[var(--color-muted)]">No code</div>
+                <div className="w-24 h-24 bg-[var(--color-surface-warm)] mx-auto rounded-[8px] flex items-center justify-center text-center text-[10px] leading-tight text-[var(--color-muted)] p-1.5">Verification code not yet available</div>
               )}
               <p className="text-xs text-[var(--color-muted)] mt-2">Verified by Memberry</p>
             </div>

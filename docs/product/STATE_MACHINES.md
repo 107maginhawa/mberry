@@ -22,11 +22,14 @@
     │ REMOVED │◄────────┤ SUSPENDED │◄──── suspend (officer) ──────────┘
     └─────────┘  remove └─────┬─────┘
       (president)             │
-                              │ restore (officer)
+                              │ unsuspend (officer) — NOT reinstate
                               ▼
-                          ┌────────┐
-                          │ ACTIVE │
-                          └────────┘
+                       ┌──────────────┐
+                       │ ACTIVE/GRACE/ │   (status recomputes from dues)
+                       │   LAPSED      │
+                       └──────────────┘
+
+   reinstate (officer, LAPSED-ONLY): LAPSED ──► ACTIVE  (extends dues expiry)
 ```
 
 | From | To | Trigger | Actor |
@@ -35,18 +38,20 @@
 | PENDING | REMOVED | Officer rejects application | Officer (president/secretary) |
 | ACTIVE | GRACE | Automatic when `dues_expiry_date` passes | System |
 | GRACE | LAPSED | Automatic when grace period expires | System |
-| LAPSED | ACTIVE | Member pays dues | System (on payment) |
-| ACTIVE/GRACE/LAPSED | SUSPENDED | Officer action | Officer (president) |
-| SUSPENDED | ACTIVE | Officer restores | Officer (president) |
-| ACTIVE | REMOVED | President action | President only |
-| ACTIVE/GRACE/LAPSED | EXPIRED | Automatic when lapsed period exceeds configured duration | System |
-| ACTIVE/GRACE/LAPSED | RESIGNED | Member voluntarily resigns | Member (self-service) |
-| Any (except DECEASED) | DECEASED | Officer records member death | Officer (president) |
-| Any (except DECEASED) | EXPELLED | Disciplinary expulsion via M04 | President only |
+| LAPSED | ACTIVE | Member pays dues, or officer reinstates (reinstate is **LAPSED-ONLY**) | System (on payment) / Officer |
+| ACTIVE/GRACE/LAPSED | SUSPENDED | Officer suspends (`suspendMembership`) | Officer (admin) |
+| SUSPENDED | ACTIVE | Officer lifts the suspension (`unsuspendMembership` — **not** reinstate); the restored standing is then recomputed from the dues date (active, or gracePeriod/lapsed if dues have since passed) | Officer (admin) |
+| ACTIVE/GRACE/LAPSED | REMOVED | Officer removes the member | Officer (admin) |
+| ACTIVE/GRACE/LAPSED | RESIGNED | Officer records a member's voluntary resignation (stamps `resigned_at`) | Officer-recorded (V1: no member self-resign) |
+| Any (except DECEASED) | DECEASED | Officer records member death | Officer (admin) |
 
-**Terminal States:** EXPIRED, RESIGNED, DECEASED, EXPELLED have no outward transitions. Reactivation from terminal states is not supported — a new membership record must be created.
+**Removed from V1 (do not implement):**
+- **EXPIRED** — dropped from V1 vocabulary (decision #3). LAPSED already covers "past grace"; no lapse→expired threshold or job ships. The `expired` enum value is retained only for a deliberate V2 definition.
+- **EXPELLED** — disciplinary expulsion is deferred to V2 (decision #4). `createDisciplinaryAction` stays unrouted; no `expelled_at` column is added.
 
-**Invariant:** Status is computed from `dues_expiry_date`, not stored as a mutable field. Invalid transitions are rejected silently.
+**Terminal States:** REMOVED, RESIGNED, DECEASED (and, in V2, EXPELLED) have no outward transitions and are irreversible. Re-entry after a terminal state goes through **re-application**: approving a fresh application REUSES the existing `(organization, person)` row — flipping it back to `pendingPayment` with a `membership_status_history` entry — rather than creating a second record (decision #5). SUSPENDED is reversible only via `unsuspendMembership`; reinstate does not apply to it.
+
+**Invariant:** Status is computed from `dues_expiry_date` and the flag fields (`suspended_at`, `removed_at`, `resigned_at`, `date_of_death`), not stored as a mutable source of truth. Invalid transitions are rejected.
 
 ---
 

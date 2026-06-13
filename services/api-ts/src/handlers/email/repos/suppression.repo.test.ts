@@ -109,6 +109,49 @@ describe('SuppressionRepository', () => {
   });
 
   // ---------------------------------------------------------------------------
+  // getSuppressionReason (BR-57 — reason-aware lookup for transactional override)
+  // ---------------------------------------------------------------------------
+
+  describe('getSuppressionReason', () => {
+    test('returns the suppression reason for a suppressed email', async () => {
+      const repo = makeRepo();
+      spyOn(repo, 'findMany' as any).mockResolvedValue([
+        makeSuppression({ email: 'unsub@example.com', organizationId: 'org-1', reason: 'unsubscribe' }),
+      ]);
+
+      const reason = await repo.getSuppressionReason('unsub@example.com', 'org-1');
+      expect(reason).toBe('unsubscribe');
+    });
+
+    test('returns hard_bounce reason distinctly from unsubscribe', async () => {
+      const repo = makeRepo();
+      spyOn(repo, 'findMany' as any).mockResolvedValue([
+        makeSuppression({ email: 'bounce@example.com', organizationId: 'org-1', reason: 'hard_bounce' }),
+      ]);
+
+      const reason = await repo.getSuppressionReason('bounce@example.com', 'org-1');
+      expect(reason).toBe('hard_bounce');
+    });
+
+    test('returns null when email is not suppressed', async () => {
+      const repo = makeRepo();
+      spyOn(repo, 'findMany' as any).mockResolvedValue([]);
+
+      const reason = await repo.getSuppressionReason('clean@example.com', 'org-1');
+      expect(reason).toBeNull();
+    });
+
+    test('isSuppressed stays consistent with getSuppressionReason', async () => {
+      const repo = makeRepo();
+      spyOn(repo, 'findMany' as any).mockResolvedValue([
+        makeSuppression({ email: 'x@example.com', organizationId: 'org-1', reason: 'complaint' }),
+      ]);
+
+      expect(await repo.isSuppressed('x@example.com', 'org-1')).toBe(true);
+    });
+  });
+
+  // ---------------------------------------------------------------------------
   // addSuppression
   // ---------------------------------------------------------------------------
 
@@ -179,6 +222,53 @@ describe('SuppressionRepository', () => {
       const repo = makeRepo();
       // Should resolve without error
       await repo.removeSuppression('org-1', 'bounce@example.com');
+    });
+  });
+
+  // ---------------------------------------------------------------------------
+  // deleteByIdForOrg (FIX-007 — admin unblock of a wrongly suppressed address)
+  // ---------------------------------------------------------------------------
+
+  describe('deleteByIdForOrg', () => {
+    function makeDbWithRows(rows: EmailSuppression[]) {
+      let deleteCalled = false;
+      const db = {
+        select: () => ({
+          from: () => ({
+            where: () => ({ limit: () => Promise.resolve(rows) }),
+          }),
+        }),
+        delete: () => ({
+          where: () => {
+            deleteCalled = true;
+            return Promise.resolve({ rowCount: rows.length });
+          },
+        }),
+      } as any;
+      return { db, wasDeleteCalled: () => deleteCalled };
+    }
+
+    test('returns the deleted suppression and performs the delete when found in org', async () => {
+      const row = makeSuppression({ id: 'sup-1', organizationId: 'org-1', email: 'oops@example.com', reason: 'unsubscribe' });
+      const { db, wasDeleteCalled } = makeDbWithRows([row]);
+      const repo = makeRepo(db);
+
+      const result = await repo.deleteByIdForOrg('sup-1', 'org-1');
+
+      expect(result).not.toBeNull();
+      expect(result?.id).toBe('sup-1');
+      expect(result?.email).toBe('oops@example.com');
+      expect(wasDeleteCalled()).toBe(true);
+    });
+
+    test('returns null and does NOT delete when no row matches id+org (org-scoped)', async () => {
+      const { db, wasDeleteCalled } = makeDbWithRows([]);
+      const repo = makeRepo(db);
+
+      const result = await repo.deleteByIdForOrg('sup-1', 'other-org');
+
+      expect(result).toBeNull();
+      expect(wasDeleteCalled()).toBe(false);
     });
   });
 });

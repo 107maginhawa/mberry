@@ -2,7 +2,7 @@ import type { ValidatedContext } from '@/types/app';
 import type { DatabaseInstance } from '@/core/database';
 import type { VerifyCredentialPublicBody } from '@/generated/openapi/validators';
 import { DigitalCredentialRepository } from '@/handlers/association:member/repos/credentials.repo';
-import { verifyCredentialToken } from '@/handlers/association:member/utils/credential-token';
+import { verifyCredentialToken, resolveCredentialVerifySecret } from '@/handlers/association:member/utils/credential-token';
 
 /**
  * verifyCredentialPublic
@@ -19,7 +19,17 @@ export async function verifyCredentialPublic(
   // NO auth check -- this is a public endpoint
 
   const body = ctx.req.valid('json');
-  const secret = process.env['CREDENTIAL_VERIFY_SECRET'] || 'dev-credential-verify-secret';
+
+  // FIX-012 (G16): fail closed. If the verify secret is unset in production,
+  // resolveCredentialVerifySecret() throws rather than fall back to a guessable
+  // literal — we treat that as "cannot verify" (notFound) instead of validating
+  // a forgeable token.
+  let secret: string;
+  try {
+    secret = resolveCredentialVerifySecret();
+  } catch {
+    return ctx.json({ result: 'notFound', credential: null }, 200);
+  }
 
   // Verify HMAC signature
   const payload = verifyCredentialToken(body.token, secret);

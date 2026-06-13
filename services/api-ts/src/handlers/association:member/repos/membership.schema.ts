@@ -117,9 +117,10 @@ export const memberships = pgTable(
     duesExpiryDate: date('dues_expiry_date'),
     gracePeriodDays: integer('grace_period_days').notNull().default(30),
     status: membershipStatusEnum('status').notNull().default('pendingPayment'),
-    joinedAt: timestamp('joined_at', { withTimezone: true }).notNull(),
+    joinedAt: timestamp('joined_at', { withTimezone: true }).notNull().defaultNow(),
     suspendedAt: timestamp('suspended_at', { withTimezone: true }),
     removedAt: timestamp('removed_at', { withTimezone: true }),
+    resignedAt: timestamp('resigned_at', { withTimezone: true }), // LIF-04: voluntary departure (distinct from removed)
     removalReason: varchar('removal_reason', { length: 500 }),
     dateOfDeath: date('date_of_death'),               // LIF-04: recorded on deceased
     note: text('note'),

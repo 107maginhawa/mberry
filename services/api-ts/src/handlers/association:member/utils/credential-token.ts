@@ -13,6 +13,28 @@ interface CredentialTokenPayload {
 }
 
 /**
+ * Resolve the HMAC secret for credential verification tokens.
+ *
+ * FIX-012 (G16): fail closed. The old `?? 'dev-credential-verify-secret'`
+ * literal made every issued credential token forgeable in any environment that
+ * forgot to set the secret — anyone could mint a token that validated. In
+ * production we now REFUSE the guessable fallback and throw; outside production
+ * the dev literal is allowed so local/test flows keep working. Mirrors the
+ * id-card-data.ts fail-closed pattern (BR-18).
+ */
+export function resolveCredentialVerifySecret(): string {
+  const secret = process.env['CREDENTIAL_VERIFY_SECRET'];
+  if (secret) return secret;
+  if (process.env['NODE_ENV'] === 'production') {
+    throw new Error(
+      'CREDENTIAL_VERIFY_SECRET is not configured. Set it — refusing to sign/verify ' +
+        'credential tokens with a guessable fallback secret (BR-18, FIX-012).',
+    );
+  }
+  return 'dev-credential-verify-secret';
+}
+
+/**
  * Create a signed credential verification token.
  */
 export function createCredentialToken(credentialId: string, organizationId: string, secret: string): string {

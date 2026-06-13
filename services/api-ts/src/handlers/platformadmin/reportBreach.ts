@@ -11,6 +11,7 @@ import type { DatabaseInstance } from '@/core/database';
 import { ValidationError } from '@/core/errors';
 import { domainEvents } from '@/core/domain-events';
 import { breachIncidents } from './repos/platform-admin.schema';
+import { requireAdminTier, SUPPORT_OR_SUPER } from '@/core/auth/admin-tier';
 
 export async function reportBreach(ctx: Context): Promise<Response> {
   const session = ctx.get('session');
@@ -18,6 +19,11 @@ export async function reportBreach(ctx: Context): Promise<Response> {
 
   const admin = ctx.get('platformAdmin');
   if (!admin) return ctx.json({ error: 'Platform admin access required' }, 403);
+
+  // FIX-008 (G1) / Q8: reporting a breach is a support-or-super mutation;
+  // analyst is read-only.
+  const denied = requireAdminTier(ctx, SUPPORT_OR_SUPER);
+  if (denied) return denied;
 
   const db = ctx.get('database') as DatabaseInstance;
   const baseLogger = ctx.get('logger');

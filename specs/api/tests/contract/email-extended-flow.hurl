@@ -8,8 +8,20 @@ csrf_token: jsonpath "$.token"
 
 
 # Extended email endpoints not covered by email.hurl.
-# Covers single queue item, cancel, retry, and template test send.
+# Covers the REAL email-queue lifecycle (enqueue -> cancel -> guarded retry),
+# template test send, suppressions, and RFC 8058 unsubscribe.
 # Uses admin credentials since email is admin-only.
+#
+# FIX-010: the cancel/retry steps used to target a placeholder UUID with
+# `HTTP *`, which proved nothing (the route 404'd before any transition logic
+# ran). They now drive a real queue item through actual status transitions:
+#   pending --cancel--> cancelled  (succeeds)
+#   cancelled --cancel--> (rejected, invalid transition)
+#   cancelled --retry--> (rejected, invalid transition)
+# A *successful* retry (failed -> pending) is intentionally not asserted here:
+# no public API path produces a `failed` item, and the only seeded failed item
+# has attempts=3 (MAX_RETRIES_EXCEEDED), so a green retry is unreachable via the
+# contract surface. The guard rejection below is the honest, real proof.
 
 # ── Auth: sign in as admin ───────────────────────────────────
 
@@ -24,7 +36,7 @@ Content-Type: application/json
 HTTP 200
 
 
-# ── 1. Create a template to test with ───────────────────────
+# ── 1. Create an active template to test with ────────────────
 
 POST {{api}}/email/templates
 Origin: {{origin}}
@@ -44,7 +56,8 @@ HTTP 201
 template_id: jsonpath "$.id"
 
 
-# ── 2. Test template send ───────────────────────────────────
+# ── 2. Test send → enqueues a REAL pending queue item ────────
+# TestTemplateResult wraps the created EmailQueueItem under `queue`.
 
 POST {{api}}/email/templates/{{template_id}}/test
 Origin: {{origin}}
@@ -52,59 +65,66 @@ x-csrf-token: {{csrf_token}}
 Content-Type: application/json
 x-org-id: {{org_id}}
 {
-  "to": "test-recipient-{{suffix}}@example.org"
+  "recipientEmail": "lifecycle-{{suffix}}@example.org",
+  "recipientName": "Lifecycle Tester"
 }
-HTTP *
-[Asserts]
-status >= 200
-status < 500
-
-
-# ── 3. List queue to find an item ────────────────────────────
-
-GET {{api}}/email/queue
-x-org-id: {{org_id}}
-HTTP 200
-[Asserts]
-jsonpath "$.data" isCollection
-
-
-# ── 4. Get single queue item (use first if available) ────────
-# If queue is empty this may 404 — that's acceptable.
-
-GET {{api}}/email/queue?status=pending
-x-org-id: {{org_id}}
 HTTP 200
 [Captures]
-queue_item_count: jsonpath "$.pagination.totalCount"
+queue_id: jsonpath "$.queue.id"
+[Asserts]
+jsonpath "$.queue.id" exists
+jsonpath "$.queue.status" == "pending"
 
 
-# ── 4b. Get single queue item by ID ─────────────────────────
-# Uses placeholder UUID; returns 404 if not found — acceptable.
+# ── 3. Read the queued item back (real item, pending) ────────
 
-GET {{api}}/email/queue/00000000-0000-0000-0000-000000000000
-HTTP *
+GET {{api}}/email/queue/{{queue_id}}
+x-org-id: {{org_id}}
+HTTP 200
+[Asserts]
+jsonpath "$.id" == "{{queue_id}}"
+jsonpath "$.status" == "pending"
 
 
-# ── 5. Cancel a queue item ──────────────────────────────────
-# Uses a placeholder UUID; real run needs a queued item.
+# ── 4. Cancel the pending item → REAL transition succeeds ────
 
-POST {{api}}/email/queue/00000000-0000-0000-0000-000000000000/cancel
+POST {{api}}/email/queue/{{queue_id}}/cancel
 Origin: {{origin}}
 x-csrf-token: {{csrf_token}}
 Content-Type: application/json
-{}
-HTTP *
+x-org-id: {{org_id}}
+{
+  "reason": "Contract lifecycle test {{suffix}}"
+}
+HTTP 200
+[Asserts]
+jsonpath "$.status" == "cancelled"
 
 
-# ── 6. Retry a queue item ───────────────────────────────────
+# ── 5. Cancel again → invalid transition (cancelled→cancelled) ─
+# Proves the transition guard actually runs against the real item's status.
 
-POST {{api}}/email/queue/00000000-0000-0000-0000-000000000000/retry
+POST {{api}}/email/queue/{{queue_id}}/cancel
 Origin: {{origin}}
 x-csrf-token: {{csrf_token}}
 Content-Type: application/json
+x-org-id: {{org_id}}
+{
+  "reason": "Should be rejected"
+}
+HTTP 409
+
+
+# ── 6. Retry the cancelled item → invalid transition ─────────
+# Only `failed → pending` is a valid retry; cancelled cannot be retried.
+
+POST {{api}}/email/queue/{{queue_id}}/retry
+Origin: {{origin}}
+x-csrf-token: {{csrf_token}}
+Content-Type: application/json
+x-org-id: {{org_id}}
 {}
-HTTP *
+HTTP 409
 
 
 # ── 7. List email suppressions (admin) ──────────────────────
@@ -127,6 +147,7 @@ status toString matches "^(200|400|404)$"
 # ── 9. RFC 8058 one-click unsubscribe POST (public) ─────────
 
 POST {{api}}/email/unsubscribe
+x-csrf-token: {{csrf_token}}
 Origin: {{origin}}
 Content-Type: application/json
 {

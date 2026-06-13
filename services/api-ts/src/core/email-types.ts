@@ -35,6 +35,8 @@ export enum EmailTemplateTags {
   AUTH_2FA = 'auth.2fa',
   AUTH_WELCOME = 'auth.welcome',
   AUTH_MAGIC_LINK = 'auth.magic-link',
+  // Platform admin (M03) — FIX-003 (G4): invite a platform admin to claim access
+  ADMIN_INVITE = 'admin.invite',
 }
 
 /**
@@ -124,6 +126,17 @@ export interface EmailTemplateEntry {
   fromName: string | null;
   replyToEmail: string | null;
   replyToName: string | null;
+  /**
+   * Template variable definitions (structural subset of the DB
+   * `TemplateVariable[]`). Used for enqueue-time required-variable validation
+   * (FIX-008 / BR-58). Kept structural so this lightweight types module stays
+   * decoupled from the Drizzle schema.
+   */
+  variables?: Array<{
+    id: string;
+    required: boolean;
+    defaultValue?: unknown;
+  }> | null;
 }
 
 /**
