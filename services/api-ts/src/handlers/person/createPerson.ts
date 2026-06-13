@@ -10,6 +10,7 @@ import {
   ConflictError
 } from '@/core/errors';
 import { PersonRepository } from './repos/person.repo';
+import { deriveAuditUserType } from '@/core/audit/derive-user-type';
 import { validatedDateOfBirth } from '@/utils/date';
 import { domainEvents } from '@/core/domain-events';
 
@@ -76,7 +77,7 @@ export async function createPerson(
         outcome: 'success',
         organizationId: ctx.get('organizationId'),
         user: user.id,
-        userType: (user.role === 'user' ? 'client' : user.role || 'client') as 'client' | 'host' | 'admin' | 'system',
+        userType: deriveAuditUserType(user.role),
         resourceType: 'person',
         resource: person.id,
         description: 'Person profile created',

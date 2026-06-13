@@ -147,6 +147,7 @@ status toString matches "^(200|400|404)$"
 # ── 9. RFC 8058 one-click unsubscribe POST (public) ─────────
 
 POST {{api}}/email/unsubscribe
+x-csrf-token: {{csrf_token}}
 Origin: {{origin}}
 Content-Type: application/json
 {

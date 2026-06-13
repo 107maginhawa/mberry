@@ -1,3 +1,12 @@
+# CSRF preamble — fetches token + sets cookie for state-changing requests.
+# Auto-injected by scripts/audit/inject-csrf-into-hurl.ts (idempotent).
+GET {{api}}/csrf-token
+HTTP 200
+[Captures]
+csrf_token: jsonpath "$.token"
+
+
+
 # Marketplace contract flow — exercises every Marketplace operationId at least
 # once and proves the full workflow end-to-end with captured real ids:
 #   create vendor → verify → create listing → activate → place order →

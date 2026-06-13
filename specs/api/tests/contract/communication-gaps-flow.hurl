@@ -1,3 +1,12 @@
+# CSRF preamble — fetches token + sets cookie for state-changing requests.
+# Auto-injected by scripts/audit/inject-csrf-into-hurl.ts (idempotent).
+GET {{api}}/csrf-token
+HTTP 200
+[Captures]
+csrf_token: jsonpath "$.token"
+
+
+
 # Communication gaps contract flow — covers the 22 operationIds not
 # exercised by communications-flow.hurl / communications-extended-flow.hurl.
 # Officer-driven. Read endpoints use real seeded org; mutations use

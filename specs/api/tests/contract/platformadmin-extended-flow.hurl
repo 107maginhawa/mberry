@@ -1,3 +1,12 @@
+# CSRF preamble — fetches token + sets cookie for state-changing requests.
+# Auto-injected by scripts/audit/inject-csrf-into-hurl.ts (idempotent).
+GET {{api}}/csrf-token
+HTTP 200
+[Captures]
+csrf_token: jsonpath "$.token"
+
+
+
 # PlatformAdmin extended contract flow — committees, national dashboard,
 # national chapters, platform summary, public org directory.
 #
@@ -8,24 +17,22 @@
 #
 # Requires: seeded org + officer (test@memberry.ph) from db:seed-modules.
 #
-# AHA FIX-017 (tightened): the seeded officer is NOT in the platform_admin
-# table, and `app.use('/admin/*', authMiddleware(), platformAdminAuthMiddleware())`
+# AHA FIX-017 (tightened): the seeded Vice President (vicepresident@memberry.ph)
+# is an org officer but NOT in the platform_admin table, and
+# `app.use('/admin/*', authMiddleware(), platformAdminAuthMiddleware())`
 # (app.ts) guards the whole /admin surface. Every /admin/* call below MUST be
 # rejected with a deterministic 403 for this non-admin user. We now assert that
 # exact RBAC behavior instead of the prior `matches "^(200|400|403|404)$"`
 # tolerance, which also passed on accidental 200/400/404 and masked a broken
-# guard. The public org directory (step 7) is unauthenticated and asserts a
-# real 200/4xx outcome.
+# guard. (NOTE: the President test@memberry.ph IS a seeded `super` platform_admin
+# — see seed/layer-2-users.ts `seedPresident`, load-bearing for admin-flow.hurl
+# + admin E2E — so she would (correctly) get 200 here and is unsuitable as the
+# non-admin subject.) The public org directory (step 7) is unauthenticated and
+# asserts a real 200/4xx outcome.
 #
 # NOTE: [BLOCKED BY ENVIRONMENT] — not executed during the AHA fix pass (no API
 # server boot). Run via scripts/run-contract-tests.ts against $API_URL.
 # Org ID: ed8e3a96-8126-4341-be42-e6eb7940c562
-
-# CSRF preamble
-GET {{api}}/csrf-token
-HTTP 200
-[Captures]
-csrf_token: jsonpath "$.token"
 
 # ── Auth: sign in as officer ──────────────────────────────────────────────────
 
@@ -34,7 +41,7 @@ Origin: {{origin}}
 x-csrf-token: {{csrf_token}}
 Content-Type: application/json
 {
-  "email": "test@memberry.ph",
+  "email": "vicepresident@memberry.ph",
   "password": "TestPass123!"
 }
 HTTP 200

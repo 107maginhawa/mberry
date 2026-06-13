@@ -38,6 +38,12 @@ jobs:
       PORT: 7213
       API_URL: http://localhost:7213
       AUTH_SECRET: contract-test-secret-do-not-use-in-prod
+      # See ci.yml contract job — the suite signs up ad-hoc users and uses the
+      # session immediately; verification must be off (matches local dev .env).
+      AUTH_REQUIRE_EMAIL_VERIFICATION: false
+      # Runner auto-promotes this email to platform_admin; admin-gated flows
+      # (GET /audit/logs cross-org reads) need it. Matches local dev .env.
+      AUTH_ADMIN_EMAILS: admin@contract-tests.local
       STORAGE_PROVIDER: minio
       STORAGE_ENDPOINT: http://localhost:9000
       STORAGE_BUCKET: monobase-files
@@ -105,15 +111,24 @@ jobs:
           bun dev > /tmp/api.log 2>&1 &
           echo $! > /tmp/api.pid
 
-      - name: Wait for /livez
+      - name: Wait for /readyz
         run: |
+          # /readyz returns 200 only after migrations + storage + jobs scheduler
+          # have all initialized — required before the seed step so it does not
+          # race in-flight migrations.
           for i in {1..60}; do
-            curl -fsS "$API_URL/livez" && exit 0
+            curl -fsS "$API_URL/readyz" && exit 0
             sleep 1
           done
           echo "API never became ready"
           tail -200 /tmp/api.log
           exit 1
+
+      - name: Seed database
+        # The contract scenarios depend on a seeded org + officer
+        # (test@memberry.ph / vicepresident@memberry.ph). TS-impl specific, like
+        # the boot step above.
+        run: cd services/api-ts && bun run db:seed
 
       # ----- Contract checks -----
 

@@ -1,3 +1,12 @@
+# CSRF preamble — fetches token + sets cookie for state-changing requests.
+# Auto-injected by scripts/audit/inject-csrf-into-hurl.ts (idempotent).
+GET {{api}}/csrf-token
+HTTP 200
+[Captures]
+csrf_token: jsonpath "$.token"
+
+
+
 # Advertising contract flow — exercises every Advertising operationId.
 # Routes now live under /association/advertising/* so the /association/*
 # orgContextMiddleware resolves organizationId before insert (AHA FIX-001 /

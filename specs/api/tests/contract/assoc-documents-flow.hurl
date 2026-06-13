@@ -1,3 +1,12 @@
+# CSRF preamble — fetches token + sets cookie for state-changing requests.
+# Auto-injected by scripts/audit/inject-csrf-into-hurl.ts (idempotent).
+GET {{api}}/csrf-token
+HTTP 200
+[Captures]
+csrf_token: jsonpath "$.token"
+
+
+
 # Association documents CRUD flow: officer creates a document (draft),
 # lists, gets, updates, archives, reads access log, uploads a new version,
 # lists + gets versions, then deletes.

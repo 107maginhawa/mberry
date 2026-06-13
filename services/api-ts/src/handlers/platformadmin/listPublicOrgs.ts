@@ -69,13 +69,13 @@ export async function listPublicOrgs(
     try {
       const orgIds = orgs.map(o => o.id);
       const result = await db.execute(
-        sql`SELECT org_id, count(*)::int as count FROM membership WHERE org_id = ANY(${orgIds}) AND status = 'active' GROUP BY org_id`
+        sql`SELECT organization_id, count(*)::int as count FROM membership WHERE organization_id = ANY(${orgIds}) AND status = 'active' GROUP BY organization_id`
       );
       const rows = (result as unknown as Record<string, unknown>)['rows'] as Array<Record<string, unknown>> | undefined
         ?? (result as unknown as Array<Record<string, unknown>>);
       if (Array.isArray(rows)) {
         for (const row of rows) {
-          memberCounts.set(row['org_id'] as string, (row['count'] as number) ?? 0);
+          memberCounts.set(row['organization_id'] as string, (row['count'] as number) ?? 0);
         }
       }
     } catch {

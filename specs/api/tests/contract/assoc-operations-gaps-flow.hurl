@@ -1,3 +1,12 @@
+# CSRF preamble — fetches token + sets cookie for state-changing requests.
+# Auto-injected by scripts/audit/inject-csrf-into-hurl.ts (idempotent).
+GET {{api}}/csrf-token
+HTTP 200
+[Captures]
+csrf_token: jsonpath "$.token"
+
+
+
 # Association:Operations gaps contract flow — covers the 46 operationIds
 # under accredited-providers, event-lifecycle, events, training-lifecycle,
 # training/courses, and training/enrollments not covered elsewhere.

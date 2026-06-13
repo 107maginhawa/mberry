@@ -413,7 +413,7 @@ export class DuesRepository {
         active: sql<number>`COUNT(CASE WHEN status = 'paid' THEN 1 END)::int`,
         dueSoon: sql<number>`COUNT(CASE WHEN status IN ('generated', 'sent') THEN 1 END)::int`,
         overdue: sql<number>`COUNT(CASE WHEN status = 'overdue' THEN 1 END)::int`,
-        lapsed: sql<number>`COUNT(CASE WHEN status = 'voided' THEN 1 END)::int`,
+        lapsed: sql<number>`COUNT(CASE WHEN status = 'writtenOff' THEN 1 END)::int`,
       })
       .from(duesInvoices)
       .where(eq(duesInvoices.organizationId, organizationId));

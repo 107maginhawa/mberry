@@ -61,6 +61,11 @@ jobs:
       PORT: 7213
       API_URL: http://localhost:7213
       AUTH_SECRET: contract-test-secret-do-not-use-in-prod
+      # Match local dev .env — frontend signup E2E flows expect an immediate
+      # session (no email-verification gate). Default is true.
+      AUTH_REQUIRE_EMAIL_VERIFICATION: false
+      # Platform-admin allowlist (admin app E2E + admin-gated reads). Matches .env.
+      AUTH_ADMIN_EMAILS: admin@contract-tests.local
       STORAGE_PROVIDER: minio
       STORAGE_ENDPOINT: http://localhost:9000
       STORAGE_BUCKET: monobase-files
@@ -315,6 +320,16 @@ jobs:
       PORT: 7213
       API_URL: http://localhost:7213
       AUTH_SECRET: contract-test-secret-do-not-use-in-prod
+      # The contract suite signs up many ad-hoc users and immediately uses the
+      # session; the dedicated email-verification flows (auth-verification.hurl)
+      # exercise verification explicitly. Without this, signup yields no session
+      # (401) and re-sign-in is blocked (403 EMAIL_NOT_VERIFIED) — matches the
+      # local dev .env which sets it false. Default is true.
+      AUTH_REQUIRE_EMAIL_VERIFICATION: false
+      # The contract runner (scripts/run-contract-tests.ts) auto-promotes this
+      # email to platform_admin on sign-up; admin-gated flows ({{admin_token}},
+      # GET /audit/logs cross-org reads) need it. Matches local dev .env.
+      AUTH_ADMIN_EMAILS: admin@contract-tests.local
       STORAGE_PROVIDER: minio
       STORAGE_ENDPOINT: http://localhost:9000
       STORAGE_BUCKET: monobase-files

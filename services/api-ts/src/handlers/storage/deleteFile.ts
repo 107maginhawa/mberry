@@ -10,6 +10,7 @@ import {
 } from '@/core/errors';
 import type { StorageProvider } from '@/core/storage';
 import { StorageFileRepository } from './repos/file.repo';
+import { deriveAuditUserType } from '@/core/audit/derive-user-type';
 import { userHasRole } from '@/utils/auth';
 
 /**
@@ -75,7 +76,7 @@ export async function deleteFile(
         outcome: 'success',
         organizationId: ctx.get('organizationId'),
         user: user.id,
-        userType: (user.role === 'user' ? 'client' : user.role || 'client') as 'client' | 'host' | 'admin' | 'system',
+        userType: deriveAuditUserType(user.role),
         resourceType: 'file',
         resource: fileId,
         description: `File deleted: ${file.filename}`,

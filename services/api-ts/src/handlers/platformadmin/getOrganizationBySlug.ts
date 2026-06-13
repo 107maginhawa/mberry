@@ -35,7 +35,7 @@ export async function getOrganizationBySlug(
   let memberCount = 0;
   try {
     const result = await db.execute(
-      sql`SELECT count(*)::int as count FROM membership WHERE org_id = ${org.id} AND status = 'active'`
+      sql`SELECT count(*)::int as count FROM membership WHERE organization_id = ${org.id} AND status = 'active'`
     );
     const resultObj = result as unknown as Record<string, unknown>;
     memberCount = ((resultObj['rows'] as Record<string, unknown>[] | undefined)?.[0]?.['count'] as number) ?? ((result as unknown as Record<string, unknown>[])?.[0]?.['count'] as number) ?? 0;

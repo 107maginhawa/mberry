@@ -11,9 +11,12 @@ csrf_token: jsonpath "$.token"
 # Impersonation RBAC contract test (AHA FIX-017 — tightened from the prior
 # "status < 500 / route is wired and doesn't crash" tolerance).
 #
-# The seeded test user (test@memberry.ph) is an ORG OFFICER, NOT a platform
-# admin — it is not present in the platform_admin table. The /admin/* surface
-# is guarded by `app.use('/admin/*', authMiddleware(), platformAdminAuthMiddleware())`
+# The seeded Vice President (vicepresident@memberry.ph) is an ORG OFFICER, NOT a
+# platform admin — not present in the platform_admin table. (The President
+# test@memberry.ph IS a seeded `super` platform_admin — see seed/layer-2-users.ts
+# `seedPresident`, load-bearing for admin-flow.hurl + admin E2E — so she is
+# unsuitable as the non-admin subject here.) The /admin/* surface is guarded by
+# `app.use('/admin/*', authMiddleware(), platformAdminAuthMiddleware())`
 # (app.ts), so every /admin/impersonate call by this non-admin user MUST be
 # rejected with 403 (ForbiddenError "User is not a platform admin"). We now
 # assert that real RBAC behavior instead of merely "did not 500".
@@ -30,7 +33,7 @@ Origin: {{origin}}
 x-csrf-token: {{csrf_token}}
 Content-Type: application/json
 {
-  "email": "test@memberry.ph",
+  "email": "vicepresident@memberry.ph",
   "password": "TestPass123!"
 }
 HTTP 200

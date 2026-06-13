@@ -9,6 +9,7 @@ import {
   BusinessLogicError
 } from '@/core/errors';
 import { PersonRepository } from './repos/person.repo';
+import { deriveAuditUserType } from '@/core/audit/derive-user-type';
 import { type PersonUpdateRequest } from './repos/person.schema';
 import { validateDateOfBirth } from '@/utils/date';
 import { domainEvents } from '@/core/domain-events';
@@ -108,7 +109,7 @@ export async function updatePerson(
         outcome: 'success',
         organizationId: ctx.get('organizationId'),
         user: user.id,
-        userType: (user.role === 'user' ? 'client' : user.role || 'client') as 'client' | 'host' | 'admin' | 'system',
+        userType: deriveAuditUserType(user.role),
         resourceType: 'person',
         resource: personId,
         description: 'Person profile updated',
