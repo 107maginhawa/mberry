@@ -140,6 +140,11 @@ jobs:
 
       - name: Schemathesis fuzz (shadow)
         continue-on-error: true
+        # Hard cap so the shadow fuzz can never exhaust the job's 15-min budget.
+        # Now that the Hurl step passes (it used to fail fast and skip this), the
+        # fuzz runs to completion and previously timed the whole job out.
+        # continue-on-error swallows a step-level timeout — the job stays green.
+        timeout-minutes: 6
         run: bun run test:contract:fuzz
 
       - name: API logs (always)
