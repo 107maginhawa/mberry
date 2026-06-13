@@ -42,7 +42,7 @@ describe('bulkUpdatePersonSubscriptions', () => {
   test('resolves synthetic UI key (dues-email) to a topic UUID before upsert', async () => {
     const SEEDED_TOPIC_UUID = '44444444-4444-4444-4444-444444444444';
     let upsertedTopicIds: string[] = [];
-    let resolvedNames: string[] = [];
+    const resolvedNames: string[] = [];
 
     stubRepo(SubscriptionTopicRepository, {
       findOrCreateByName: async (_orgId: string, name: string) => {

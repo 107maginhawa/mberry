@@ -8,7 +8,8 @@
 #
 # CI script: scripts/check-hand-wired-routes.ts diffs this file against app.ts.
 #
-# Total: 52 non-test routes (54 total; 2 are /test/isolated-fixture test-only routes).
+# Total: 35 non-test routes (FIX-011/G7 migrated the admin breaches/tickets/
+# pricing/subscriptions read+CRUD surface to TypeSpec-generated routes).
 # Test routes are omitted below — they are guarded by NODE_ENV !== 'production'.
 #
 # ELECTIONS MODULE NOTE (Task 6.3 verification):
@@ -29,17 +30,11 @@ routes:
   # Public credential/certificate lookups
   - { method: GET,    path: "/association/member/credentials/lookup/:credentialNumber",        reason: public-unauth,       owner: association:member,  note: "public credential lookup, no auth by design" }
 
-  # DPA breach notification (admin-only)
-  - { method: POST,   path: "/admin/breaches",                                                 reason: middleware-ordering, owner: platformadmin,       note: "DPA 2012 breach notification, admin-only" }
-  - { method: GET,    path: "/admin/breaches",                                                 reason: middleware-ordering, owner: platformadmin,       note: "DPA 2012 breach notification, admin-only" }
-  - { method: PUT,    path: "/admin/breaches/:id",                                             reason: middleware-ordering, owner: platformadmin,       note: "DPA 2012 breach notification, admin-only" }
+  # Platform admin invite claim (FIX-003 / G4 / WF-022)
+  - { method: POST,   path: "/platform-admin/claim",                                           reason: middleware-ordering, owner: platformadmin,       note: "admin invite claim — invitee authenticated but not yet platform admin, sits outside the /admin/* gate" }
 
-  # Support ticket SLA system
-  - { method: POST,   path: "/support/tickets",                                                reason: legacy-deferred,     owner: platformadmin,       note: "support ticket SLA system, not in TypeSpec" }
-  - { method: GET,    path: "/admin/tickets",                                                  reason: legacy-deferred,     owner: platformadmin,       note: "support ticket SLA system, not in TypeSpec" }
-  - { method: GET,    path: "/admin/tickets/:id",                                              reason: legacy-deferred,     owner: platformadmin,       note: "support ticket SLA system, not in TypeSpec" }
-  - { method: PUT,    path: "/admin/tickets/:id",                                              reason: legacy-deferred,     owner: platformadmin,       note: "support ticket SLA system, not in TypeSpec" }
-  - { method: POST,   path: "/admin/tickets/:id/comments",                                    reason: legacy-deferred,     owner: platformadmin,       note: "support ticket SLA system, not in TypeSpec" }
+  # Support ticket creation (createTicket kept hand-wired/public; read ops migrated to TypeSpec in FIX-011/G7)
+  - { method: POST,   path: "/support/tickets",                                                reason: legacy-deferred,     owner: platformadmin,       note: "support ticket creation, not in TypeSpec" }
 
   # Payment token (must precede auth middleware)
 
@@ -85,15 +80,10 @@ routes:
 
   # Bulk void credit awards
 
-  # Admin pricing tier CRUD
-  - { method: GET,    path: "/admin/pricing",                                                  reason: legacy-deferred,     owner: platformadmin,       note: "admin pricing tier CRUD, not in TypeSpec" }
-  - { method: POST,   path: "/admin/pricing",                                                  reason: legacy-deferred,     owner: platformadmin,       note: "admin pricing tier CRUD, not in TypeSpec" }
-  - { method: PUT,    path: "/admin/pricing/:tierId",                                          reason: legacy-deferred,     owner: platformadmin,       note: "admin pricing tier CRUD, not in TypeSpec" }
-
-  # Admin subscription management
-  - { method: GET,    path: "/admin/subscriptions",                                            reason: legacy-deferred,     owner: platformadmin,       note: "admin subscription management, not in TypeSpec" }
-  - { method: GET,    path: "/admin/subscriptions/:id",                                        reason: legacy-deferred,     owner: platformadmin,       note: "admin subscription management, not in TypeSpec" }
-  - { method: PUT,    path: "/admin/subscriptions/:id/cancel",                                reason: legacy-deferred,     owner: platformadmin,       note: "admin subscription management, not in TypeSpec" }
+  # Admin pricing tier + subscription ops migrated to TypeSpec in FIX-011/G7
+  # (getPricingTier/listPricingTiers/createPricingTier/updatePricingTier,
+  #  getSubscription/listSubscriptions/createSubscription/cancelSubscription) —
+  # they are now generated routes and intentionally NOT hand-wired here.
 
   # Platform revenue/health analytics
   - { method: GET,    path: "/admin/analytics/revenue",                                        reason: legacy-deferred,     owner: platformadmin,       note: "platform revenue analytics, not in TypeSpec" }

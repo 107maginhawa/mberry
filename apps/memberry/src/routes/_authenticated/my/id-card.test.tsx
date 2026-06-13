@@ -12,10 +12,30 @@ import type { ComponentType } from 'react'
 // we mock that. PageShell/GlassCard are simplified to passthroughs to keep the
 // render focused on the selector + card body.
 //
-// NOTE on assertions: a native <select> keeps every org name in the DOM as an
+// NOTE on assertions: the org selector keeps every org name in the DOM as an
 // <option>, so org-name text is NOT unique. The per-org *category* ("Regular" /
 // "Associate") only appears in the rendered card, so we use it as the switch
 // signal; org names are only queried scoped to the selector.
+//
+// The page renders the @monobase/ui <Select> (Radix) — not testable in happy-dom
+// without pointer polyfills — so we mock the Select family down to a native
+// <select>/<option> here (the same pattern as training-form.test / event-form.test).
+// This keeps the assertions driving the *real* org-switch logic, not a stub.
+vi.mock('@monobase/ui', () => ({
+  Badge: ({ children, ...props }: any) => <span {...props}>{children}</span>,
+  Button: ({ children, onClick, ...props }: any) => (
+    <button type="button" onClick={onClick} {...props}>{children}</button>
+  ),
+  Label: ({ htmlFor, children, ...props }: any) => <label htmlFor={htmlFor} {...props}>{children}</label>,
+  // aria-label mirrors the component's <SelectTrigger aria-label="Select organization">
+  Select: ({ children, value, onValueChange, ...props }: any) => (
+    <select aria-label="Select organization" value={value ?? ''} onChange={(e) => onValueChange?.(e.target.value)} {...props}>{children}</select>
+  ),
+  SelectContent: ({ children }: any) => <>{children}</>,
+  SelectItem: ({ children, value }: any) => <option value={value}>{children}</option>,
+  SelectTrigger: () => null,
+  SelectValue: () => null,
+}))
 vi.mock('@/lib/api', () => ({ api: { get: vi.fn() } }))
 vi.mock('@/components/patterns/page-shell', () => ({
   PageShell: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,

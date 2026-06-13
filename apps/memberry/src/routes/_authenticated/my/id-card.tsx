@@ -2,7 +2,7 @@ import { createFileRoute } from '@tanstack/react-router'
 import { useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { QRCodeSVG } from 'qrcode.react'
-import { Badge, Button } from '@monobase/ui'
+import { Badge, Button, Label, Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@monobase/ui'
 import { getStatusLabel } from '@/features/membership/lib/membership-status'
 import type { MembershipStatus } from '@/features/membership/lib/membership-status'
 import { api } from '@/lib/api'
@@ -136,22 +136,26 @@ function MyIdCard() {
         <div className="max-w-md mx-auto">
           {activeMemberships.length > 1 && (
             <div className="mb-4">
-              <label htmlFor="id-card-org" className="block text-sm text-[var(--color-muted)] mb-1.5">
+              <Label htmlFor="id-card-org" className="block text-sm text-[var(--color-muted)] mb-1.5">
                 Organization
-              </label>
-              <select
-                id="id-card-org"
-                aria-label="Select organization"
+              </Label>
+              <Select
                 value={membership?.organizationId ?? ''}
-                onChange={(e) => setSelectedOrgId(e.target.value)}
-                className="w-full rounded-[var(--radius-md)] border border-[var(--color-border)] bg-[var(--color-surface)] px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[var(--color-primary)]"
+                onValueChange={(v) => setSelectedOrgId(v)}
               >
-                {activeMemberships.map((m: { organizationId?: string; id?: string; organizationName?: string; orgName?: string; memberNumber?: string }) => (
-                  <option key={m.organizationId ?? m.id} value={m.organizationId ?? ''}>
-                    {m.organizationName ?? m.orgName ?? m.memberNumber ?? 'Organization'}
-                  </option>
-                ))}
-              </select>
+                <SelectTrigger id="id-card-org" aria-label="Select organization" className="w-full">
+                  <SelectValue placeholder="Organization" />
+                </SelectTrigger>
+                <SelectContent>
+                  {activeMemberships
+                    .filter((m: { organizationId?: string; id?: string }) => Boolean(m.organizationId ?? m.id))
+                    .map((m: { organizationId?: string; id?: string; organizationName?: string; orgName?: string; memberNumber?: string }) => (
+                      <SelectItem key={m.organizationId ?? m.id} value={(m.organizationId ?? m.id) as string}>
+                        {m.organizationName ?? m.orgName ?? m.memberNumber ?? 'Organization'}
+                      </SelectItem>
+                    ))}
+                </SelectContent>
+              </Select>
             </div>
           )}
           <GlassCard className="p-6 space-y-4">

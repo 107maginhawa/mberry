@@ -20,7 +20,7 @@
  *     (e.g. meta-tests that collect violations then `throw new Error(...)`)
  *   - `.toMatchSnapshot()`
  *
- * NOT flagged: `test.skip` / `test.todo` (explicitly pending, they don't run).
+ * NOT flagged: explicitly-pending skip / todo markers (they don't run).
  * NOT a test block: `someRegex.test(x)` and other `.test(` / `.it(` METHOD
  * calls — a negative lookbehind keeps the scanner from mistaking them for a
  * test-framework `test()` / `it()`.

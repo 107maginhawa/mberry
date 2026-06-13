@@ -21,11 +21,24 @@
 // "simulation" tests here — drive the real handler instead.
 
 import { describe, test, expect } from 'bun:test';
+import { existsSync } from 'node:fs';
+import { join } from 'node:path';
 
 describe('ac-m11 documents (fake-green simulations removed)', () => {
-  test('AC-M11-005 / AC-M11-006 are covered by real handler tests (see header)', () => {
-    // Sentinel: this assertion documents that the former in-file simulations were
-    // replaced by real handler-driven coverage in the sibling test files above.
-    expect(true).toBe(true);
+  // Real guard (not a vacuous sentinel): enforce that the real handler-driven
+  // coverage that replaced the former in-file simulations still exists. If a
+  // sibling file is deleted/renamed, this fails loudly instead of silently
+  // dropping AC-M11-005/006 coverage.
+  test('AC-M11-005 / AC-M11-006 real handler coverage files exist', () => {
+    const dir = import.meta.dir;
+    const required = [
+      'getDocument.access-log.test.ts',
+      'downloadDocument.test.ts',
+      'uploadNewDocumentVersion.test.ts',
+      'listDocumentVersions.test.ts',
+      'getDocumentVersion.test.ts',
+    ];
+    const missing = required.filter((f) => !existsSync(join(dir, f)));
+    expect(missing).toEqual([]);
   });
 });

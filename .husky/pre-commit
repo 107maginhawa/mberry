@@ -1,3 +1,8 @@
+# Typed eslint over a large staged set (api-ts ~391 files) exhausts the default
+# V8 heap and gets SIGKILLed mid-run. Give node enough headroom so lint-staged
+# completes instead of failing the hook with an OOM (not a real lint failure).
+export NODE_OPTIONS="--max-old-space-size=8192"
+
 bun run typecheck
 bunx lint-staged
 ./scripts/ui-consistency-check.sh --staged
