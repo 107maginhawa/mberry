@@ -66,6 +66,8 @@ jobs:
       AUTH_REQUIRE_EMAIL_VERIFICATION: false
       # Platform-admin allowlist (admin app E2E + admin-gated reads). Matches .env.
       AUTH_ADMIN_EMAILS: admin@contract-tests.local
+      # HMAC secret for one-tap dues payment tokens (see contract job). Matches .env.
+      PAYMENT_TOKEN_SECRET: contract-test-payment-secret-do-not-use-in-prod
       STORAGE_PROVIDER: minio
       STORAGE_ENDPOINT: http://localhost:9000
       STORAGE_BUCKET: monobase-files
@@ -330,6 +332,10 @@ jobs:
       # email to platform_admin on sign-up; admin-gated flows ({{admin_token}},
       # GET /audit/logs cross-org reads) need it. Matches local dev .env.
       AUTH_ADMIN_EMAILS: admin@contract-tests.local
+      # HMAC secret for one-tap dues payment tokens. getPaymentTokenSecret()
+      # throws (500) when neither PAYMENT_TOKEN_SECRET nor INVITE_TOKEN_SECRET is
+      # set — breaks send-link + /pay/:token/validate. Matches local dev .env.
+      PAYMENT_TOKEN_SECRET: contract-test-payment-secret-do-not-use-in-prod
       STORAGE_PROVIDER: minio
       STORAGE_ENDPOINT: http://localhost:9000
       STORAGE_BUCKET: monobase-files
