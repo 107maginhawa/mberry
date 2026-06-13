@@ -374,7 +374,7 @@ namespace MessageTemplateManagement {
     @operationId("createMessageTemplate")
     @post
     @useAuth(bearerAuth)
-    @extension("x-security-required-roles", #["admin", "coordinator"])
+    @extension("x-security-required-roles", #["association:officer"])
     @extension("x-audit", #{ action: "create", resourceType: "message-template" })
     createMessageTemplate(
       @body body: MessageTemplateCreateRequest
@@ -388,7 +388,7 @@ namespace MessageTemplateManagement {
     @get
     @route("/{templateId}")
     @useAuth(bearerAuth)
-    @extension("x-security-required-roles", #["admin", "coordinator"])
+    @extension("x-security-required-roles", #["association:officer"])
     getMessageTemplate(
       @path templateId: string
     ): ApiOkResponse<MessageTemplate>
@@ -401,7 +401,7 @@ namespace MessageTemplateManagement {
     @patch(#{implicitOptionality: true})
     @route("/{templateId}")
     @useAuth(bearerAuth)
-    @extension("x-security-required-roles", #["admin", "coordinator"])
+    @extension("x-security-required-roles", #["association:officer"])
     @extension("x-audit", #{ action: "update", resourceType: "message-template" })
     updateMessageTemplate(
       @path templateId: string,
@@ -430,7 +430,7 @@ namespace MessageTemplateManagement {
     @operationId("searchMessageTemplates")
     @get
     @useAuth(bearerAuth)
-    @extension("x-security-required-roles", #["admin", "coordinator"])
+    @extension("x-security-required-roles", #["association:officer"])
     searchMessageTemplates(
       ...MessageTemplateSearchParams
     ): ApiOkResponse<PaginatedResponse<MessageTemplate>>
@@ -443,7 +443,7 @@ namespace MessageTemplateManagement {
     @post
     @route("/{templateId}/preview")
     @useAuth(bearerAuth)
-    @extension("x-security-required-roles", #["admin", "coordinator"])
+    @extension("x-security-required-roles", #["association:officer"])
     previewMessageTemplate(
       @path templateId: string,
       @body body: MessageTemplatePreviewRequest
@@ -461,7 +461,7 @@ namespace MessageManagement {
     @operationId("createMessage")
     @post
     @useAuth(bearerAuth)
-    @extension("x-security-required-roles", #["admin", "coordinator"])
+    @extension("x-security-required-roles", #["association:officer"])
     @extension("x-audit", #{ action: "create", resourceType: "message" })
     createMessage(
       @body body: MessageCreateRequest
@@ -475,7 +475,7 @@ namespace MessageManagement {
     @get
     @route("/{messageId}")
     @useAuth(bearerAuth)
-    @extension("x-security-required-roles", #["admin", "coordinator"])
+    @extension("x-security-required-roles", #["association:officer"])
     getMessage(
       @path messageId: string
     ): ApiOkResponse<Message>
@@ -488,7 +488,7 @@ namespace MessageManagement {
     @patch(#{implicitOptionality: true})
     @route("/{messageId}")
     @useAuth(bearerAuth)
-    @extension("x-security-required-roles", #["admin", "coordinator"])
+    @extension("x-security-required-roles", #["association:officer"])
     @extension("x-audit", #{ action: "update", resourceType: "message" })
     updateMessage(
       @path messageId: string,
@@ -517,7 +517,7 @@ namespace MessageManagement {
     @operationId("searchMessages")
     @get
     @useAuth(bearerAuth)
-    @extension("x-security-required-roles", #["admin", "coordinator"])
+    @extension("x-security-required-roles", #["association:officer"])
     searchMessages(
       ...MessageSearchParams
     ): ApiOkResponse<PaginatedResponse<Message>>
@@ -530,7 +530,7 @@ namespace MessageManagement {
     @post
     @route("/{messageId}/send")
     @useAuth(bearerAuth)
-    @extension("x-security-required-roles", #["admin", "coordinator"])
+    @extension("x-security-required-roles", #["association:officer"])
     @extension("x-audit", #{ action: "update", resourceType: "message", eventSubType: "communication.email-sent" })
     sendMessage(
       @path messageId: string
@@ -545,7 +545,7 @@ namespace MessageManagement {
     @post
     @route("/{messageId}/schedule")
     @useAuth(bearerAuth)
-    @extension("x-security-required-roles", #["admin", "coordinator"])
+    @extension("x-security-required-roles", #["association:officer"])
     @extension("x-audit", #{ action: "update", resourceType: "message" })
     scheduleMessage(
       @path messageId: string,
@@ -561,7 +561,7 @@ namespace MessageManagement {
     @post
     @route("/{messageId}/cancel")
     @useAuth(bearerAuth)
-    @extension("x-security-required-roles", #["admin", "coordinator"])
+    @extension("x-security-required-roles", #["association:officer"])
     @extension("x-audit", #{ action: "update", resourceType: "message" })
     cancelMessage(
       @path messageId: string
@@ -756,7 +756,7 @@ namespace SavedSegmentManagement {
     @operationId("createSavedSegment")
     @post
     @useAuth(bearerAuth)
-    @extension("x-security-required-roles", #["admin", "coordinator"])
+    @extension("x-security-required-roles", #["association:officer"])
     createSavedSegment(
       @body body: SavedSegmentCreateRequest
     ): ApiCreatedResponse<SavedSegmentResponse>
@@ -768,7 +768,7 @@ namespace SavedSegmentManagement {
     @operationId("listSavedSegments")
     @get
     @useAuth(bearerAuth)
-    @extension("x-security-required-roles", #["admin", "coordinator"])
+    @extension("x-security-required-roles", #["association:officer"])
     listSavedSegments(
       @query organizationId: string
     ): ApiOkResponse<SavedSegmentListResponse>
@@ -781,7 +781,7 @@ namespace SavedSegmentManagement {
     @delete
     @route("/{id}")
     @useAuth(bearerAuth)
-    @extension("x-security-required-roles", #["admin", "coordinator"])
+    @extension("x-security-required-roles", #["association:officer"])
     deleteSavedSegment(
       @path id: string,
       @query organizationId: string

@@ -6,11 +6,29 @@
  * lightweight stubs so the tests run without a real database or WS server.
  */
 
-import { describe, test, expect, mock, beforeEach } from 'bun:test';
+import { describe, test, expect, mock, beforeEach, afterEach } from 'bun:test';
+import { ensurePristine, restoreRepo } from '@/test-utils/make-ctx';
 import { config as wsHandler } from './ws.chat-room';
 import { ChatRoomRepository } from './repos/chatRoom.repo';
 import { ChatMessageRepository } from './repos/chatMessage.repo';
+import { ChatRoomMemberRepository } from './repos/chatRoomMember.repo';
+import { OfficerTermRepository } from '@/handlers/association:member/repos/governance.repo';
 import type { ChatRoom, ChatMessage } from './repos/comms.schema';
+
+// Capture clean prototypes at module load, then restore after every test so the
+// raw `prototype.x = mock()` patches below don't leak across test files (they
+// would otherwise pollute ChatMessageRepository.createTextMessage for other
+// files — e.g. repos/chatMessage.repo.test.ts).
+ensurePristine(ChatRoomRepository);
+ensurePristine(ChatMessageRepository);
+ensurePristine(ChatRoomMemberRepository);
+ensurePristine(OfficerTermRepository);
+afterEach(() => {
+  restoreRepo(ChatRoomRepository);
+  restoreRepo(ChatMessageRepository);
+  restoreRepo(ChatRoomMemberRepository);
+  restoreRepo(OfficerTermRepository);
+});
 
 // Mock-Classification: APPROPRIATE — WebSocket/WebRTC real-time service boundary
 // Assertion-Style: EXISTENCE_CHECK — verifying middleware/context injection patterns
@@ -122,6 +140,8 @@ describe('ws.chat-room onConnect', () => {
   beforeEach(() => {
     // Default: room exists, user is participant
     ChatRoomRepository.prototype.findOneById = mock(async () => makeRoom()) as any;
+    // Default: not in the join table; JSONB participants is the only grant path.
+    ChatRoomMemberRepository.prototype.isMember = mock(async () => false) as any;
   });
 
   test('sends connected event when user is participant', async () => {
@@ -185,6 +205,45 @@ describe('ws.chat-room onConnect', () => {
     expect(errorEvent).toBeDefined();
     expect(ws.close).toHaveBeenCalledWith(1008, 'Not authorized');
   });
+
+  // FIX-007 (G5): membership compatibility OR-shim. A member tracked only in
+  // the `chat_room_member` join table (NOT in JSONB participants) must be
+  // allowed to connect to the room WebSocket.
+  test('grants connection to a join-table member not in JSONB participants (FIX-007)', async () => {
+    ChatRoomRepository.prototype.findOneById = mock(async () =>
+      makeRoom({ participants: ['user-2', 'user-3'] })
+    ) as any;
+    ChatRoomMemberRepository.prototype.isMember = mock(async () => true) as any;
+
+    const wsService = makeWsService();
+    const ws = makeWs();
+    const ctx = makeCtx({ userId: 'user-99', wsService });
+
+    await wsHandler.onConnect(ctx, ws as any);
+
+    const events = ws._sent.map(s => JSON.parse(s));
+    const connectedEvent = events.find((e: any) => e.event === 'connected');
+    expect(connectedEvent).toBeDefined();
+    expect(connectedEvent.payload.userId).toBe('user-99');
+    expect(wsService.trackChannel).toHaveBeenCalledWith('chat-rooms/room-1', ws);
+    expect(ws.close).not.toHaveBeenCalled();
+  });
+
+  // FIX-007 regression: the shim must not be fail-open. A user in neither the
+  // JSONB participants array nor the join table is still rejected.
+  test('closes when user is in neither JSONB participants nor join table (FIX-007)', async () => {
+    ChatRoomRepository.prototype.findOneById = mock(async () =>
+      makeRoom({ participants: ['user-2', 'user-3'] })
+    ) as any;
+    ChatRoomMemberRepository.prototype.isMember = mock(async () => false) as any;
+
+    const ws = makeWs();
+    const ctx = makeCtx({ userId: 'user-99' });
+
+    await wsHandler.onConnect(ctx, ws as any);
+
+    expect(ws.close).toHaveBeenCalledWith(1008, 'Not authorized');
+  });
 });
 
 // ---------------------------------------------------------------------------
@@ -228,6 +287,94 @@ describe('ws.chat-room onMessage — chat.message', () => {
     const broadcastCall = calls.find((c: any[]) => c[1] === 'chat.message');
     expect(broadcastCall).toBeDefined();
     expect(broadcastCall![2]).toEqual(savedMsg);
+  });
+
+  // FIX-012 (G10): archived rooms are read-only on the WS path too — the message
+  // must NOT persist and an error frame is sent back instead of broadcasting.
+  test('rejects chat.message to an archived room without persisting (FIX-012)', async () => {
+    const createTextMessage = mock(async () => makeMessage());
+    ChatMessageRepository.prototype.createTextMessage = createTextMessage as any;
+    ChatRoomRepository.prototype.findOneById = mock(async () =>
+      makeRoom({ status: 'archived' })
+    ) as any;
+
+    const wsService = makeWsService();
+    const ws = makeWs();
+    const ctx = makeCtx({ wsService });
+
+    await wsHandler.onMessage(ctx, ws as any, {
+      type: 'chat.message',
+      data: { text: 'Hello archived' },
+    });
+
+    // No persistence, no broadcast.
+    expect(createTextMessage).not.toHaveBeenCalled();
+    const broadcast = (wsService.publishToChannel as ReturnType<typeof mock>).mock.calls
+      .find((c: any[]) => c[1] === 'chat.message');
+    expect(broadcast).toBeUndefined();
+    // An error frame was sent back to the sender.
+    const errorFrame = ws._sent.map((m) => JSON.parse(m)).find((f: any) => f.event === 'error');
+    expect(errorFrame).toBeDefined();
+    expect(errorFrame.payload.message).toContain('archived');
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Tests: onMessage — #announcements officer-post-only (PD-1 decision-3, Step 41)
+// Mirrors the REST sendChatMessage gate on the WS write path.
+// ---------------------------------------------------------------------------
+
+describe('ws.chat-room onMessage — announcements officer-post gate (PD-1 d3)', () => {
+  test('rejects non-officer chat.message to #announcements without persisting', async () => {
+    const createTextMessage = mock(async () => makeMessage());
+    ChatMessageRepository.prototype.createTextMessage = createTextMessage as any;
+    ChatRoomRepository.prototype.findOneById = mock(async () =>
+      makeRoom({ context: 'channel:announcements', organizationId: 'org-1' } as any)
+    ) as any;
+    ChatRoomRepository.prototype.updateLastMessage = mock(async () => makeRoom()) as any;
+    OfficerTermRepository.prototype.findActiveByPersonAndOrg = mock(async () => []) as any;
+
+    const wsService = makeWsService();
+    const ws = makeWs();
+    const ctx = makeCtx({ wsService });
+
+    await wsHandler.onMessage(ctx, ws as any, {
+      type: 'chat.message',
+      data: { text: 'unauthorized notice' },
+    });
+
+    expect(createTextMessage).not.toHaveBeenCalled();
+    const broadcast = (wsService.publishToChannel as ReturnType<typeof mock>).mock.calls
+      .find((c: any[]) => c[1] === 'chat.message');
+    expect(broadcast).toBeUndefined();
+    const errorFrame = ws._sent.map((m) => JSON.parse(m)).find((f: any) => f.event === 'error');
+    expect(errorFrame).toBeDefined();
+    expect(errorFrame.payload.message.toLowerCase()).toContain('officer');
+  });
+
+  test('allows officer chat.message to #announcements (persists + broadcasts)', async () => {
+    const savedMsg = makeMessage();
+    const createTextMessage = mock(async () => savedMsg);
+    ChatMessageRepository.prototype.createTextMessage = createTextMessage as any;
+    ChatRoomRepository.prototype.findOneById = mock(async () =>
+      makeRoom({ context: 'channel:announcements', organizationId: 'org-1' } as any)
+    ) as any;
+    ChatRoomRepository.prototype.updateLastMessage = mock(async () => makeRoom()) as any;
+    OfficerTermRepository.prototype.findActiveByPersonAndOrg = mock(async () => [{ positionTitle: 'Officer' }]) as any;
+
+    const wsService = makeWsService();
+    const ws = makeWs();
+    const ctx = makeCtx({ wsService });
+
+    await wsHandler.onMessage(ctx, ws as any, {
+      type: 'chat.message',
+      data: { text: 'official notice' },
+    });
+
+    expect(createTextMessage).toHaveBeenCalledTimes(1);
+    const broadcast = (wsService.publishToChannel as ReturnType<typeof mock>).mock.calls
+      .find((c: any[]) => c[1] === 'chat.message');
+    expect(broadcast).toBeDefined();
   });
 });
 

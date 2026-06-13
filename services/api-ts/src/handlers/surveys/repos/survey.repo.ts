@@ -170,6 +170,20 @@ export class SurveyRepository {
     return row;
   }
 
+  /**
+   * System-initiated close at deadline (FIX-008). Unlike `close`, this leaves
+   * `updatedBy` untouched (a cron has no person actor and the column FKs to
+   * person). Only flips an active survey → closed.
+   */
+  async closeExpiredSurvey(id: string): Promise<Survey | undefined> {
+    const [row] = await this.db
+      .update(surveys)
+      .set({ status: 'closed', updatedAt: new Date() })
+      .where(and(eq(surveys.id, id), eq(surveys.status, 'active')))
+      .returning();
+    return row;
+  }
+
   async deleteDraft(id: string): Promise<boolean> {
     const result = await this.db
       .delete(surveys)
@@ -395,6 +409,25 @@ export class SurveyResponseRepository {
         and(
           eq(surveyResponses.status, 'pending'),
           lt(surveyResponses.createdAt, cutoff)
+        )
+      )
+      .returning({ id: surveyResponses.id });
+    return result.length;
+  }
+
+  /**
+   * Right-to-deletion, scoped to a single organization (FIX-009). Deletes the
+   * caller's responses only within the given org — never a cross-org wipe.
+   * Anonymized rows (responderId nulled by the person.deleted cascade) are
+   * naturally excluded since they no longer match the caller's id.
+   */
+  async deleteByResponderAndOrg(responderId: string, organizationId: string): Promise<number> {
+    const result = await this.db
+      .delete(surveyResponses)
+      .where(
+        and(
+          eq(surveyResponses.responderId, responderId),
+          eq(surveyResponses.organizationId, organizationId)
         )
       )
       .returning({ id: surveyResponses.id });

@@ -38,15 +38,14 @@ export async function createTrainingEnrollment(
     throw new BusinessLogicError('Enrollment is only accepted for published trainings', 'TRAINING_NOT_PUBLISHED');
   }
 
-  // BR-41: paid training requires confirmed payment before enrollment.
-  // The free-enrollment path must not create an enrolled record for a paid
-  // training — payment is confirmed out-of-band (M06 billing) first.
-  if (training.registrationFee && training.registrationFee > 0) {
-    throw new BusinessLogicError(
-      'This training requires payment. Complete payment before enrolling.',
-      'PAYMENT_REQUIRED',
-    );
-  }
+  // BR-41 / TC-DEC-01 (Step 47): paid trainings use the proof-of-payment flow
+  // instead of a hard PAYMENT_REQUIRED dead-end. A paid enrollment is created
+  // in `payment_pending`; the member submits proof and an officer confirms
+  // (confirmTrainingPayment) before it becomes `enrolled`. The credit-award
+  // path (completeTrainingEnrollment) only accepts `enrolled → completed`, so
+  // no credit can be awarded while payment is unconfirmed.
+  const isPaid = !!(training.registrationFee && training.registrationFee > 0);
+  const initialStatus = isPaid ? 'payment_pending' : 'enrolled';
 
   if (training.capacity) {
     const enrolledCount = await enrollRepo.count({ trainingId, status: 'enrolled' });
@@ -58,7 +57,7 @@ export async function createTrainingEnrollment(
   const enrollment = await enrollRepo.createOne({
     trainingId,
     personId,
-    status: 'enrolled',
+    status: initialStatus,
     organizationId: orgId,
   });
 

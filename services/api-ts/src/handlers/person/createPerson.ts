@@ -93,12 +93,12 @@ export async function createPerson(
     }
   }
 
-  // Log basic info
+  // Log basic info — never log raw PII (DPA-05); a boolean presence flag only.
   logger?.info({
     personId: person.id,
     userId: user.id,
     action: 'create',
-    email: body.contactInfo?.email,
+    hasEmail: !!body.contactInfo?.email,
     ipAddress: ctx.req.header('x-forwarded-for') || ctx.req.header('x-real-ip'),
     isOwner: true
   }, 'Person created for authenticated user');

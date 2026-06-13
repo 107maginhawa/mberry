@@ -9,6 +9,7 @@ import { VideoPeerConnection } from '@monobase/sdk-ts/utils/webrtc/peer-connecti
 import { getSdkBaseUrl } from '@monobase/sdk-ts/client'
 import type { IceServer } from '@monobase/sdk-ts/generated/types.gen'
 import { useVideoCall } from '@/features/comms/hooks/use-video-call'
+import { useFeatureFlag } from '@/features/comms/hooks/use-feature-flag'
 import { VideoCallUI } from '@/features/comms/components/video-call-ui'
 import { Button } from '@monobase/ui'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@monobase/ui'
@@ -39,6 +40,12 @@ export function VideoCallPanel({
   displayName,
   enabled,
 }: VideoCallPanelProps) {
+  // FIX-011: video calling is gated behind the `comms_video_calls` release flag
+  // (m07 MODULE_SPEC, default false). When off, the join/call surface — which
+  // 404s by construction and tracks no call records — must not render. Fail
+  // closed to the honest "unavailable" state while loading / on error.
+  const videoEnabledFlag = useFeatureFlag('commsVideoCalls')
+
   const [active, setActive] = useState(false)
   const [peer, setPeer] = useState<VideoPeerConnection | null>(null)
 
@@ -99,6 +106,22 @@ export function VideoCallPanel({
     leave.mutate({ path: { room: roomId } })
     setPeer(null)
     setActive(false)
+  }
+
+  // FIX-011 gate: flag off → honest unavailable state, no join control, no
+  // mutation, no peer connection. Takes precedence over the schedule window.
+  if (!videoEnabledFlag) {
+    return (
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2 text-base">
+            <VideoOff className="h-4 w-4 text-muted-foreground" />
+            Video call
+          </CardTitle>
+          <CardDescription>Video calls aren&apos;t available yet.</CardDescription>
+        </CardHeader>
+      </Card>
+    )
   }
 
   if (!enabled) {

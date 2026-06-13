@@ -69,7 +69,7 @@ export function MemberElectionDetail({ electionId, orgId, userId }: MemberElecti
   // Check if user already voted — raw api.get due to SDK type gap
   const { data: ballotData } = useQuery({
     queryKey: ['my-ballots', electionId],
-    queryFn: () => api.get<any>(`/api/association/member/ballots?electionId=${electionId}`),
+    queryFn: () => api.get<any>(`/api/association/member/ballots/mine?electionId=${electionId}`),
     enabled: !!electionId,
   })
 

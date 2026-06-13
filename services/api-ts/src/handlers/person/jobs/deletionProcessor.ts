@@ -17,6 +17,7 @@ import { and, isNotNull, isNull, lt, sql, eq } from 'drizzle-orm';
 import { persons } from '../repos/person.schema';
 import * as schema from '@/generated/better-auth/schema';
 import { executeCascadeDeletion } from '../accountDeletionCascade';
+import { anonymizePersonFields } from '../utils/anonymize-person';
 
 interface DeletionContext {
   db: DatabaseInstance;
@@ -68,26 +69,10 @@ export async function processDeletions(ctx: DeletionContext): Promise<DeletionRe
       // aggregate outcome to inspect here.
       await executeCascadeDeletion({ db, personId: person.id, logger });
 
-      // Anonymize PII
+      // Anonymize PII — single canonical scrub field set (FIX-002/FIX-003).
       await db
         .update(persons)
-        .set({
-          firstName: 'DELETED',
-          lastName: 'DELETED',
-          middleName: null,
-          contactInfo: { email: 'deleted@deleted.invalid', phone: undefined },
-          primaryAddress: null,
-          avatar: null,
-          licenseNumber: null,
-          specialization: null,
-          prcId: null,
-          dateOfBirth: null,
-          languagesSpoken: null,
-          timezone: null,
-          preferredLanguage: null,
-          deletionCompletedAt: now,
-          updatedBy: 'system',
-        })
+        .set(anonymizePersonFields(now))
         .where(eq(persons.id, person.id));
 
       // Audit — NO PII in details (DPA-05)

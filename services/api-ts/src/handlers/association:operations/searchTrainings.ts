@@ -29,6 +29,8 @@ export async function searchTrainings(
   const filters: Record<string, unknown> = { organizationId: orgId };
   const q = query as Record<string, unknown>;
   if (q['status']) filters['status'] = q['status'];
+  // FIX-007 (M9-R1): the advertised type filter is now backed by a DB column.
+  if (q['type']) filters['type'] = q['type'];
 
   const results = await repo.findMany(filters, { pagination: { limit, offset } });
   const totalCount = await repo.count(filters);

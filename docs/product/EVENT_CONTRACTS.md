@@ -36,25 +36,30 @@ All domain events use the `CreateNotificationRequest` interface as the event env
 
 ## 0.1 Delivery Guarantees
 
+> **Reality check (FIX-014):** the domain-event bus is an **in-process**
+> `Promise.allSettled` dispatcher in `services/api-ts/src/core/domain-events.ts`
+> — not pg-boss. It has no broker, no persistence, no retry, and no DLQ. The
+> pg-boss machinery below applies **only to the Background Jobs column**.
+
 | Aspect | Value |
 |--------|-------|
-| Delivery | **At-least-once** (pg-boss retries on failure) |
-| Idempotency | Consumer-side dedup by `eventId` (notification `id` column) |
-| Ordering | **Per-entity** ordering (same `relatedEntity` processed sequentially) |
-| Trigger pattern | **Fire-and-forget** — errors swallowed to avoid breaking producer flow |
+| Delivery | **Best-effort / at-most-once** — in-process bus, no broker, no persistence |
+| Idempotency | Consumer-side dedup by `eventId` (notification `id` column) where a consumer writes one |
+| Ordering | **No ordering guarantee** — all handlers run concurrently via `Promise.allSettled` |
+| Trigger pattern | **Fire-and-forget** — handler rejections are caught and `logger.error`-logged, never rethrown to the producer |
 
 ## 0.2 Retry Policy
 
-| Parameter | Domain Events (Notifications) | Background Jobs (pg-boss) |
+| Parameter | Domain Events (in-process bus) | Background Jobs (pg-boss) |
 |-----------|------------------------------|--------------------------|
-| Max retries | 1 (fire-and-forget) | 3 (configurable per job) |
+| Max retries | **0** — a failed handler is logged and dropped | 3 (configurable per job) |
 | Backoff | N/A | Exponential (`retryBackoff: true`, base 5s) |
-| Timeout | 30s | 5 min (`expireInMinutes`) |
-| DLQ | Failed notifications logged, status → `failed` | pg-boss built-in archive |
+| Timeout | None (handlers run within the producer request) | 5 min (`expireInMinutes`) |
+| DLQ | **None** — no dead-letter; failures are `logger.error` only | pg-boss built-in archive |
 
 ## 0.3 Dead Letter Queue Handling
 
-- **Notifications**: Failed after delivery attempt → `status: 'failed'` in `notification` table. Admin can view/retry via M03 platform admin.
+- **Domain events (in-process bus)**: **No DLQ.** A rejected handler is caught by `Promise.allSettled` and logged via `logger.error({ event, error })` in `core/domain-events.ts`; it is never retried or persisted. (A consumer may write a `notification` row carrying its own `status: 'failed'`, but the event bus itself does not requeue.)
 - **Background jobs**: Failed after all retries → pg-boss archive table. `audit.retention` job cleans up after `deleteAfterDays`.
 - **Alerting**: P0 failed jobs (deletion processor, dues reminders) trigger platform admin notification.
 
@@ -91,7 +96,7 @@ All domain events use the `CreateNotificationRequest` interface as the event env
 |------------|----------|-------------|---------|------------|
 | `PersonCreated` | M01 | M02, M05 | `{ personId, email, firstName, lastName }` | Sync (in-request) |
 | `PersonUpdated` | M02 | M11 (card regeneration) | `{ personId, changedFields[] }` | Async |
-| `PersonAnonymized` | M02 | M05, M06, M10, M11 | `{ personId }` | Async (deletion processor) |
+| `PersonAnonymized` | _(removed — FIX-007)_ | — | `{ personId }` | **Not implemented.** Never emitted (its only emitter was deleted in FIX-003); registry entry removed in FIX-007. Anonymization is audited inline in `jobs/deletionProcessor.ts`; the cross-module cascade runs off `person.deleted`. |
 | `AccountDeletionScheduled` | M02 | Deletion processor | `{ personId, gracePeriodEnd }` | Async (30-day delay) |
 | `OrganizationCreated` | M03 | M04 (default positions) | `{ orgId, type, associationId }` | Sync |
 | `FeatureFlagToggled` | M03 | All modules | `{ flagName, enabled, scope }` | Async |

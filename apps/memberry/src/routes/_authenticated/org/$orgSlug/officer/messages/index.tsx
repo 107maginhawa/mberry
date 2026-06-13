@@ -6,6 +6,7 @@ import { PageShell } from '@/components/patterns/page-shell'
 import { ChannelList } from '@/features/comms/components/channel-list'
 import { ChatView } from '@/features/comms/components/chat-view'
 import { CreateChannelDialog } from '@/features/comms/components/create-channel-dialog'
+import { useOrgProvider } from '@/providers/OrgProvider'
 import { EmptyState } from '@/components/patterns/empty-state'
 import { Button } from '@monobase/ui'
 import { MessageSquare, Plus } from 'lucide-react'
@@ -16,6 +17,7 @@ export const Route = createFileRoute('/_authenticated/org/$orgSlug/officer/messa
 
 function OfficerMessagesPage() {
   const { orgSlug } = Route.useParams()
+  const { orgId } = useOrgProvider()
   const [activeRoomId, setActiveRoomId] = useState<string | null>(null)
   const [showCreateDialog, setShowCreateDialog] = useState(false)
 
@@ -47,6 +49,7 @@ function OfficerMessagesPage() {
         <div className="w-64 flex-shrink-0 overflow-y-auto">
           <ChannelList
             orgSlug={orgSlug}
+            orgId={orgId}
             activeRoomId={activeRoomId ?? undefined}
             onSelectRoom={setActiveRoomId}
             isOfficer
@@ -60,6 +63,7 @@ function OfficerMessagesPage() {
             <ChatView
               roomId={activeRoomId}
               myPersonId={myPersonId}
+              orgId={orgId}
             />
           ) : (
             <div className="h-full flex items-center justify-center">
@@ -77,6 +81,7 @@ function OfficerMessagesPage() {
         open={showCreateDialog}
         onOpenChange={setShowCreateDialog}
         onCreated={(roomId) => setActiveRoomId(roomId)}
+        orgId={orgId}
       />
     </div>
   )

@@ -6,7 +6,7 @@
 import { eq, and, or, ne, desc, sql, isNull, isNotNull, type SQL } from 'drizzle-orm';
 import type { DatabaseInstance } from '@/core/database';
 import { DatabaseRepository } from '@/core/database.repo';
-import { NotFoundError } from '@/core/errors';
+import { NotFoundError, ConflictError } from '@/core/errors';
 import { 
   chatRooms,
   chatMessages,
@@ -66,6 +66,29 @@ export class ChatRoomRepository extends DatabaseRepository<ChatRoom, NewChatRoom
       );
     }
 
+    // FIX-013: rooms that contain ALL of the given participants (AND semantics).
+    // Each `@>` is ANDed so e.g. [currentUser, otherUser] only matches rooms
+    // containing both — used by listChatRooms for the `withParticipant` query.
+    if (filters.withParticipants && filters.withParticipants.length > 0) {
+      for (const participantId of filters.withParticipants) {
+        conditions.push(
+          sql`${chatRooms.participants} @> ${JSON.stringify([participantId])}`
+        );
+      }
+    }
+
+    // FIX-008 (G4 read-path): tenant-scope the listing to the caller's org for
+    // org-scoped rooms while preserving DMs (org-agnostic, PD-2 gated). Emits
+    // `(organization_id = X OR room_type = 'dm')`.
+    if (filters.organizationIdOrDm) {
+      conditions.push(
+        or(
+          eq(chatRooms.organizationId, filters.organizationIdOrDm),
+          eq(chatRooms.roomType, 'dm')
+        )
+      );
+    }
+
     // Special filter: rooms with active video calls
     if (filters.hasActiveCall !== undefined) {
       if (filters.hasActiveCall) {
@@ -112,6 +135,50 @@ export class ChatRoomRepository extends DatabaseRepository<ChatRoom, NewChatRoom
     }, 'User chat rooms retrieved');
 
     return chatRoomList;
+  }
+
+  /**
+   * FIX-013: list a user's chat rooms with context/participant filtering AND
+   * pagination pushed into SQL, returning the true total. The previous handler
+   * sliced an unbounded in-memory list and applied the `context`/`withParticipant`
+   * filters AFTER the slice — so a matching room on a later page silently
+   * vanished (broke booking-chat discoverability). Here every filter is part of
+   * the WHERE clause and LIMIT/OFFSET run server-side.
+   */
+  async findUserRoomsPage(
+    userId: string,
+    opts: {
+      status?: 'active' | 'archived';
+      context?: string;
+      withParticipant?: string;
+      hasActiveCall?: boolean;
+      organizationId?: string;
+      limit: number;
+      offset: number;
+    }
+  ): Promise<{ data: ChatRoom[]; totalCount: number }> {
+    const withParticipants = [userId];
+    if (opts.withParticipant) withParticipants.push(opts.withParticipant);
+
+    const filters: ChatRoomFilters = {
+      withParticipants,
+      status: opts.status,
+      context: opts.context,
+      hasActiveCall: opts.hasActiveCall,
+      // PD-2 (CONTINUE-48): rooms are org-scoped INCLUDING DMs — no cross-org
+      // DMs. Previously DMs were exempted (`organizationIdOrDm`, org-agnostic);
+      // the decision flips that to a strict org filter on every room type.
+      organizationId: opts.organizationId,
+    };
+
+    const { data, totalCount } = await this.findManyWithPagination(filters, {
+      orderBy: desc(chatRooms.lastMessageAt),
+      pagination: { limit: opts.limit, offset: opts.offset },
+    });
+
+    this.logger?.debug({ userId, opts, totalCount, returned: data.length }, 'User chat rooms page retrieved');
+
+    return { data, totalCount };
   }
 
   /**
@@ -221,19 +288,16 @@ export class ChatRoomRepository extends DatabaseRepository<ChatRoom, NewChatRoom
     messageTimestamp: Date = new Date()
   ): Promise<ChatRoom> {
     this.logger?.debug({ roomId, messageTimestamp }, 'Updating room last message');
-    
-    // Get current message count and increment
-    const currentRoom = await this.findOneById(roomId);
-    if (!currentRoom) {
-      throw new NotFoundError(`Chat room ${roomId} not found`, { resourceType: 'ChatRoom', resource: roomId });
-    }
-    
+
+    // FIX-014: increment messageCount atomically in SQL (`message_count + 1`)
+    // instead of read-then-write. The previous findOneById + `currentRoom.messageCount + 1`
+    // dropped concurrent messages (two sends reading the same count both wrote N+1).
     const updatedRoom = await this.updateOneById(roomId, {
       lastMessageAt: messageTimestamp,
-      messageCount: currentRoom.messageCount + 1
-    });
-    
-    this.logger?.debug({ 
+      messageCount: sql`${chatRooms.messageCount} + 1`
+    } as unknown as Partial<ChatRoom>);
+
+    this.logger?.debug({
       roomId, 
       messageCount: updatedRoom.messageCount 
     }, 'Room last message updated');
@@ -249,18 +313,39 @@ export class ChatRoomRepository extends DatabaseRepository<ChatRoom, NewChatRoom
     videoCallMessageId: string | null
   ): Promise<ChatRoom> {
     this.logger?.debug({ roomId, videoCallMessageId }, 'Setting active video call');
-    
-    const updatedRoom = await this.updateOneById(roomId, {
-      activeVideoCallMessage: videoCallMessageId
-    });
-    
-    this.logger?.info({ 
-      roomId, 
-      videoCallMessageId,
-      action: videoCallMessageId ? 'set' : 'cleared'
-    }, 'Active video call updated');
-    
-    return updatedRoom;
+
+    // Clearing the pointer is unconditional (end/leave call).
+    if (videoCallMessageId === null) {
+      const cleared = await this.updateOneById(roomId, {
+        activeVideoCallMessage: null
+      });
+      this.logger?.info({ roomId, action: 'cleared' }, 'Active video call updated');
+      return cleared;
+    }
+
+    // FIX-014: claim the active-call slot atomically — only set it when no call
+    // is currently active (`active_video_call_message IS NULL`). Two concurrent
+    // starts can no longer both become the active call: the loser's conditional
+    // UPDATE affects 0 rows and we surface a ConflictError so the caller can
+    // retire its orphaned call message.
+    const [claimed] = await this.db
+      .update(chatRooms)
+      .set({
+        activeVideoCallMessage: videoCallMessageId,
+        updatedAt: new Date(),
+        version: sql`${chatRooms.version} + 1`
+      } as Record<string, unknown>)
+      .where(and(eq(chatRooms.id, roomId), isNull(chatRooms.activeVideoCallMessage)))
+      .returning();
+
+    if (!claimed) {
+      this.logger?.warn({ roomId, videoCallMessageId, action: 'claim_conflict' }, 'Active video call already set; claim rejected');
+      throw new ConflictError('An active video call already exists in this room');
+    }
+
+    this.logger?.info({ roomId, videoCallMessageId, action: 'set' }, 'Active video call updated');
+
+    return claimed as ChatRoom;
   }
 
   /**

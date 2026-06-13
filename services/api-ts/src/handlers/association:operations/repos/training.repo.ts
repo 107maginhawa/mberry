@@ -32,6 +32,8 @@ export interface TrainingFilters {
   id?: string;
   organizationId?: string;
   status?: string;
+  /** FIX-007 (M9-R1): filter by platform training delivery format. */
+  type?: string;
 }
 
 export class TrainingRepository extends DatabaseRepository<Training, NewTraining, TrainingFilters> {
@@ -51,6 +53,9 @@ export class TrainingRepository extends DatabaseRepository<Training, NewTraining
     }
     if (filters.status) {
       conditions.push(eq(trainings.status, filters.status as Training['status']));
+    }
+    if (filters.type) {
+      conditions.push(eq(trainings.type, filters.type as NonNullable<Training['type']>));
     }
 
     return conditions.length > 0 ? and(...conditions) : undefined;

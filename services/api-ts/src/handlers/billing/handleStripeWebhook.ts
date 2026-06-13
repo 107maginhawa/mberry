@@ -5,8 +5,9 @@ import {
   BusinessLogicError
 } from '@/core/errors';
 import { InvoiceRepository, MerchantAccountRepository } from './repos/billing.repo';
-// invoices table import removed — use invoiceRepo.findAll() instead
-import type { InvoiceMetadata, MerchantMetadata } from './repos/billing.schema';
+// invoices are correlated via indexed repo lookups
+// (invoiceRepo.findByStripePaymentIntentId / findByStripeTransferId — FIX-002).
+import type { MerchantMetadata } from './repos/billing.schema';
 import { subscriptions } from '@/handlers/platformadmin/repos/platform-admin.schema';
 import { eq } from 'drizzle-orm';
 import type Stripe from 'stripe';
@@ -200,11 +201,19 @@ async function handlePaymentIntentSucceeded(
     return;
   }
 
+  // FIX-004: idempotency — skip a redelivered event (same event.id already
+  // processed for this invoice), mirroring the subscription dedupe pattern.
+  if ((invoice.metadata as Record<string, unknown> | null)?.['lastStripeEventId'] === event.id) {
+    logger?.debug({ action: 'handlePaymentIntentSucceeded.duplicate', stripeEventId: event.id, invoiceId: invoice.id }, 'Duplicate Stripe event — skipping');
+    return;
+  }
+
   // Update invoice status to requires_capture (authorized and ready for capture decision)
   // Store Stripe IDs in metadata
   const updatedMetadata = {
     ...(invoice.metadata || {}),
     stripePaymentIntentId: paymentIntent.id,
+    lastStripeEventId: event.id,
   };
 
   await invoiceRepo.updateOneById(invoiceId, {
@@ -220,6 +229,7 @@ async function handlePaymentIntentSucceeded(
   // Send payment authorization notification to patient
   try {
     await notificationService.createNotification({
+      organizationId: invoice.organizationId,
       recipient: invoice.customer,
       type: 'payment_authorized',
       title: 'Payment Authorized',
@@ -270,8 +280,18 @@ async function handlePaymentIntentFailed(
     return;
   }
 
+  // FIX-004: idempotency — skip a redelivered event for this invoice.
+  if ((invoice.metadata as Record<string, unknown> | null)?.['lastStripeEventId'] === event.id) {
+    logger?.debug({ action: 'handlePaymentIntentFailed.duplicate', stripeEventId: event.id, invoiceId: invoice.id }, 'Duplicate Stripe event — skipping');
+    return;
+  }
+
   await invoiceRepo.updateOneById(invoiceId, {
     paymentStatus: 'failed',
+    metadata: {
+      ...(invoice.metadata || {}),
+      lastStripeEventId: event.id,
+    },
   });
 
   logger?.info(
@@ -282,6 +302,7 @@ async function handlePaymentIntentFailed(
   // Send payment failure notification to patient
   try {
     await notificationService.createNotification({
+      organizationId: invoice.organizationId,
       recipient: invoice.customer,
       type: 'payment_failed',
       title: 'Payment Failed',
@@ -380,17 +401,18 @@ async function handleChargeSucceeded(
     return;
   }
 
-  // Find invoice by payment intent ID in metadata
-  // Note: This requires a custom query since we're searching in JSONB
-  const allInvoices = await invoiceRepo.findAll();
-
-  const invoice = allInvoices.find((inv: any) => {
-    const metadata = inv.metadata as InvoiceMetadata;
-    return metadata?.stripePaymentIntentId === paymentIntentId;
-  });
+  // Find invoice by payment intent ID via indexed JSONB lookup (FIX-002).
+  const invoice = await invoiceRepo.findByStripePaymentIntentId(paymentIntentId);
 
   if (!invoice) {
     logger?.warn({ action: 'handleChargeSucceeded.invoiceNotFound', paymentIntentId, chargeId: charge.id }, 'No invoice found for charge');
+    return;
+  }
+
+  // FIX-004: idempotency — skip a redelivered event for this invoice (prevents
+  // double customer+merchant notifications on Stripe charge.succeeded retries).
+  if ((invoice.metadata as Record<string, unknown> | null)?.['lastStripeEventId'] === event.id) {
+    logger?.debug({ action: 'handleChargeSucceeded.duplicate', stripeEventId: event.id, invoiceId: invoice.id }, 'Duplicate Stripe event — skipping');
     return;
   }
 
@@ -401,6 +423,7 @@ async function handleChargeSucceeded(
     ...(invoice.metadata || {}),
     stripeChargeId: charge.id,
     stripeTransferId: transferId,
+    lastStripeEventId: event.id,
   };
 
   await invoiceRepo.updateOneById(invoice.id, {
@@ -424,6 +447,7 @@ async function handleChargeSucceeded(
   try {
     // Notification for patient - payment captured
     await notificationService.createNotification({
+      organizationId: invoice.organizationId,
       recipient: invoice.customer,
       type: 'payment_captured',
       title: 'Payment Processed',
@@ -442,6 +466,7 @@ async function handleChargeSucceeded(
 
     // Notification for provider - payment received
     await notificationService.createNotification({
+      organizationId: invoice.organizationId,
       recipient: invoice.merchant,
       type: 'payment_received',
       title: 'Payment Received',
@@ -487,21 +512,26 @@ async function handleChargeFailed(
     return;
   }
 
-  // Find invoice by payment intent ID in metadata
-  const allInvoices = await invoiceRepo.findAll();
-
-  const invoice = allInvoices.find((inv: any) => {
-    const metadata = inv.metadata as InvoiceMetadata;
-    return metadata?.stripePaymentIntentId === paymentIntentId;
-  });
+  // Find invoice by payment intent ID via indexed JSONB lookup (FIX-002).
+  const invoice = await invoiceRepo.findByStripePaymentIntentId(paymentIntentId);
 
   if (!invoice) {
     logger?.warn({ action: 'handleChargeFailed.invoiceNotFound', paymentIntentId, chargeId: charge.id }, 'No invoice found for failed charge');
     return;
   }
 
+  // FIX-004: idempotency — skip a redelivered event for this invoice.
+  if ((invoice.metadata as Record<string, unknown> | null)?.['lastStripeEventId'] === event.id) {
+    logger?.debug({ action: 'handleChargeFailed.duplicate', stripeEventId: event.id, invoiceId: invoice.id }, 'Duplicate Stripe event — skipping');
+    return;
+  }
+
   await invoiceRepo.updateOneById(invoice.id, {
     paymentStatus: 'failed',
+    metadata: {
+      ...(invoice.metadata || {}),
+      lastStripeEventId: event.id,
+    },
   });
 
   logger?.info(
@@ -512,6 +542,7 @@ async function handleChargeFailed(
   // Send charge failure notification to patient
   try {
     await notificationService.createNotification({
+      organizationId: invoice.organizationId,
       recipient: invoice.customer,
       type: 'charge_failed',
       title: 'Payment Charge Failed',
@@ -557,16 +588,17 @@ async function handleChargeRefunded(
     return;
   }
 
-  // Find invoice by payment intent ID in metadata
-  const allInvoices = await invoiceRepo.findAll();
-
-  const invoice = allInvoices.find((inv: any) => {
-    const metadata = inv.metadata as InvoiceMetadata;
-    return metadata?.stripePaymentIntentId === paymentIntentId;
-  });
+  // Find invoice by payment intent ID via indexed JSONB lookup (FIX-002).
+  const invoice = await invoiceRepo.findByStripePaymentIntentId(paymentIntentId);
 
   if (!invoice) {
     logger?.warn({ action: 'handleChargeRefunded.invoiceNotFound', paymentIntentId, chargeId: charge.id }, 'No invoice found for refunded charge');
+    return;
+  }
+
+  // FIX-004: idempotency — skip a redelivered refund event for this invoice.
+  if ((invoice.metadata as Record<string, unknown> | null)?.['lastStripeEventId'] === event.id) {
+    logger?.debug({ action: 'handleChargeRefunded.duplicate', stripeEventId: event.id, invoiceId: invoice.id }, 'Duplicate Stripe event — skipping');
     return;
   }
 
@@ -584,6 +616,7 @@ async function handleChargeRefunded(
       refundReason: refund.reason || 'requested_by_customer',
       refundedAt: new Date().toISOString(),
       refundStatus: isFullRefund ? 'full_refund' : 'partial_refund',
+      lastStripeEventId: event.id,
     };
 
     await invoiceRepo.updateOneById(invoice.id, {
@@ -708,13 +741,8 @@ async function handleTransferCreated(
 ) {
   const transfer = event.data.object as Stripe.Transfer;
   
-  // Find invoice by transfer ID in metadata
-  const allInvoices = await invoiceRepo.findAll();
-
-  const foundInvoices = allInvoices.filter((inv: any) => {
-    const metadata = inv.metadata as InvoiceMetadata;
-    return metadata?.stripeTransferId === transfer.id;
-  });
+  // Find invoices by transfer ID via indexed JSONB lookup (FIX-002).
+  const foundInvoices = await invoiceRepo.findByStripeTransferId(transfer.id);
 
   if (!foundInvoices || foundInvoices.length === 0) {
     logger?.info({ action: 'handleTransferCreated.noInvoice', transferId: transfer.id }, 'Transfer created but no associated invoice found');
@@ -742,13 +770,8 @@ async function handleTransferFailed(
 ) {
   const transfer = event.data.object as Stripe.Transfer;
   
-  // Find invoice by transfer ID in metadata
-  const allInvoices = await invoiceRepo.findAll();
-
-  const foundInvoices = allInvoices.filter((inv: any) => {
-    const metadata = inv.metadata as InvoiceMetadata;
-    return metadata?.stripeTransferId === transfer.id;
-  });
+  // Find invoices by transfer ID via indexed JSONB lookup (FIX-002).
+  const foundInvoices = await invoiceRepo.findByStripeTransferId(transfer.id);
 
   if (!foundInvoices || foundInvoices.length === 0) {
     logger?.warn({ action: 'handleTransferFailed.noInvoice', transferId: transfer.id }, 'Transfer failed but no associated invoice found');

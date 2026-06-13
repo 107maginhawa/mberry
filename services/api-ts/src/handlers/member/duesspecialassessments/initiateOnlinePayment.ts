@@ -46,10 +46,12 @@ export async function initiateOnlinePayment(
     throw new BusinessLogicError('Payment amount must be positive', 'INVALID_AMOUNT');
   }
 
-  // Generate receipt number
+  // Generate receipt number.
+  // [FIX-003] Per-org prefix + atomic per-org/year counter (no cross-org collision).
   const year = new Date().getFullYear();
+  const orgPrefix = await repo.getOrgReceiptPrefix(orgId);
   const sequence = await repo.getNextReceiptSequence(orgId, year);
-  const receiptNumber = formatReceiptNumber('ORG', year, sequence);
+  const receiptNumber = formatReceiptNumber(orgPrefix, year, sequence);
 
   // Create pending payment record
   const payment = await repo.createPayment({

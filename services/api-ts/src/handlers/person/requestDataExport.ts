@@ -2,13 +2,10 @@ import { eq, and, gte, desc } from 'drizzle-orm';
 import type { BaseContext } from '@/types/app';
 import type { DatabaseInstance } from '@/core/database';
 import { UnauthorizedError } from '@/core/errors';
-import { PersonRepository } from './repos/person.repo';
-import { MembershipRepository } from '@/handlers/association:member/repos/membership.repo';
-import { CreditEntryRepository } from '@/handlers/association:member/repos/credits.repo';
-import { duesPayments } from '@/handlers/association:member/repos/dues-payments.schema';
 import { dataExports } from './repos/data-export.schema';
 import { domainEvents } from '@/core/domain-events';
 import { auditAction } from '@/core/audit/audit-action';
+import { buildMyDataExport } from './utils/build-data-export';
 
 const EXPORT_TTL_MS = 7 * 24 * 60 * 60 * 1000;
 const RATE_WINDOW_MS = 24 * 60 * 60 * 1000;
@@ -56,52 +53,16 @@ export async function requestDataExport(ctx: BaseContext): Promise<Response> {
   const exportId = created!.id;
 
   try {
-    const personRepo = new PersonRepository(db, logger);
-    const membershipRepo = new MembershipRepository(db, logger);
-    const creditRepo = new CreditEntryRepository(db, logger);
-
-    const [person, memberships, creditEntries, payments] = await Promise.all([
-      personRepo.findOneById(personId),
-      membershipRepo.findAllByPerson(personId),
-      creditRepo.findMany({ personId }),
-      db.select().from(duesPayments).where(eq(duesPayments.personId, personId)),
-    ]);
-
-    // EF-M01: GDPR-appropriate fields only — exclude internal IDs and system metadata.
-    const safePerson = person
-      ? {
-          firstName: person.firstName,
-          lastName: person.lastName,
-          middleName: person.middleName,
-          dateOfBirth: person.dateOfBirth,
-          gender: person.gender,
-          primaryAddress: person.primaryAddress,
-          contactInfo: person.contactInfo,
-          avatar: person.avatar,
-          languagesSpoken: person.languagesSpoken,
-          timezone: person.timezone,
-          licenseNumber: person.licenseNumber,
-          specialization: person.specialization,
-          preferredLanguage: person.preferredLanguage,
-          bio: person.bio,
-        }
-      : null;
-
-    const payload = {
-      exportedAt: now.toISOString(),
-      personId,
-      person: safePerson,
-      memberships,
-      creditEntries,
-      payments,
-    };
+    // Same envelope as the sync export (FIX-008) so the downloaded payload and
+    // the GET /persons/me/export contract response never diverge.
+    const payload = await buildMyDataExport(db, logger, personId);
 
     const expiresAt = new Date(now.getTime() + EXPORT_TTL_MS);
     const downloadUrl = `/persons/me/data-export/${exportId}/download`;
 
     await db
       .update(dataExports)
-      .set({ status: 'ready', payload, downloadUrl, expiresAt, updatedBy: personId })
+      .set({ status: 'ready', payload: payload as unknown as Record<string, unknown>, downloadUrl, expiresAt, updatedBy: personId })
       .where(eq(dataExports.id, exportId));
 
     await auditAction(ctx, {

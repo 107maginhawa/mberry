@@ -90,4 +90,23 @@ export class VendorRepository extends DatabaseRepository<Vendor, NewVendor, Vend
       updatedBy,
     });
   }
+
+  /**
+   * Reject a vendor (admin action). FSM-guarded: only pending → rejected is allowed.
+   * Terminal state — a rejected vendor cannot transition further.
+   */
+  async rejectVendor(vendorId: string, updatedBy: string): Promise<Vendor> {
+    const current = await this.findOneById(vendorId);
+    if (!current) throw new NotFoundError('Vendor not found');
+    assertValidTransition(
+      MARKETPLACE_VENDOR_VALID_TRANSITIONS,
+      current.verificationStatus,
+      'rejected',
+      'vendor',
+    );
+    return this.updateOneById(vendorId, {
+      verificationStatus: 'rejected',
+      updatedBy,
+    });
+  }
 }

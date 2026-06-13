@@ -89,9 +89,22 @@ export async function payInvoice(
   if (invoice.customer !== user.id) {
     throw new ForbiddenError('You can only pay your own invoices');
   }
-  
-  // Check if payment already exists
-  if (invoice.paymentStatus && invoice.paymentStatus !== 'pending') {
+
+  // FIX-005 (BR-61): only `open` invoices are payable. Drafts have unfinalized
+  // totals; void / uncollectible / paid are terminal. Charging any of these
+  // would create a PaymentIntent against an invalid or already-settled invoice.
+  if (invoice.status !== 'open') {
+    throw new BusinessLogicError(
+      `Invoice is not payable in its current status: ${invoice.status}`,
+      'INVOICE_NOT_PAYABLE'
+    );
+  }
+
+  // FIX-006: an in-progress or captured payment blocks re-pay; a failed or
+  // canceled payment is retryable (m21 §1 "retry failed payments"). The old
+  // check (`paymentStatus && !== 'pending'`) permanently 409'd a declined card.
+  const blockingPaymentStatuses = ['requires_capture', 'processing', 'succeeded'];
+  if (invoice.paymentStatus && blockingPaymentStatuses.includes(invoice.paymentStatus)) {
     throw new ConflictError('Payment already exists for this invoice');
   }
   

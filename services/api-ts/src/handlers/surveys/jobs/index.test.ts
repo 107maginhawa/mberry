@@ -8,8 +8,10 @@
  * - survey.retentionPurge (weekly Sundays at 3 AM)
  */
 
-import { describe, test, expect, mock } from 'bun:test';
+import { describe, test, expect, mock, afterEach } from 'bun:test';
 import { registerSurveyJobs, DEFAULT_SURVEY_FATIGUE_THRESHOLD, DEFAULT_SURVEY_FATIGUE_WINDOW_DAYS } from './index';
+import { stubRepo, restoreRepo } from '@/test-utils/make-ctx';
+import { SurveyRepository, SurveyResponseRepository } from '../repos/survey.repo';
 import type { JobScheduler, JobContext } from '@/core/jobs';
 import type { NotificationService } from '@/core/notifs';
 
@@ -138,6 +140,45 @@ describe('registerSurveyJobs', () => {
 
     // Should return silently
     expect((context.logger as any).error).not.toHaveBeenCalled();
+  });
+
+  // ── FIX-008: auto-close active surveys at their deadline ───────────────────
+
+  test('survey.expirePending auto-closes active surveys whose deadline has passed', async () => {
+    const closed: string[] = [];
+    stubRepo(SurveyRepository, {
+      findManyWithPagination: async (filters: any) => {
+        if (filters?.status === 'active') {
+          return {
+            data: [
+              { id: 'past', settings: { deadline: '2020-01-01T00:00:00Z' } },
+              { id: 'future', settings: { deadline: '2999-01-01T00:00:00Z' } },
+              { id: 'no-deadline', settings: {} },
+            ],
+            totalCount: 3,
+          };
+        }
+        return { data: [], totalCount: 0 };
+      },
+      closeExpiredSurvey: async (id: string) => { closed.push(id); return { id, status: 'closed' } as any; },
+    });
+    stubRepo(SurveyResponseRepository, {
+      markPendingAsSkippedBefore: async () => 0,
+    });
+
+    let handler: (ctx: JobContext) => Promise<void>;
+    const scheduler: JobScheduler = {
+      registerCron: mock((n: string, _s: string, h: any) => { if (n === 'survey.expirePending') handler = h; }),
+    } as any;
+
+    registerSurveyJobs(scheduler, makeNotifsService());
+    await handler!(makeContext({ db: {} as any }));
+
+    // Only the past-deadline active survey is closed; future + no-deadline untouched.
+    expect(closed).toEqual(['past']);
+
+    restoreRepo(SurveyRepository);
+    restoreRepo(SurveyResponseRepository);
   });
 
   test('exports DEFAULT_SURVEY_FATIGUE_THRESHOLD as 2', () => {

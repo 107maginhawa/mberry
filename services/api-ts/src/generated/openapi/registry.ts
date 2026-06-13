@@ -41,6 +41,8 @@ import { listWaitlistEntries } from '../../handlers/association:operations/listW
 import { promoteWaitlistEntry } from '../../handlers/association:operations/promoteWaitlistEntry';
 import { createTraining } from '../../handlers/association:operations/createTraining';
 import { searchTrainings } from '../../handlers/association:operations/searchTrainings';
+import { confirmTrainingPayment } from '../../handlers/association:operations/confirmTrainingPayment';
+import { submitTrainingPaymentProof } from '../../handlers/association:operations/submitTrainingPaymentProof';
 import { listMyCustomTrainings } from '../../handlers/association:operations/listMyCustomTrainings';
 import { cancelCustomTraining } from '../../handlers/association:operations/cancelCustomTraining';
 import { checkInCustomTraining } from '../../handlers/association:operations/checkInCustomTraining';
@@ -79,6 +81,9 @@ import { listAssociations } from '../../handlers/platformadmin/listAssociations'
 import { getAssociation } from '../../handlers/platformadmin/getAssociation';
 import { updateAssociation } from '../../handlers/platformadmin/updateAssociation';
 import { deleteAssociation } from '../../handlers/platformadmin/deleteAssociation';
+import { reportBreach } from '../../handlers/platformadmin/reportBreach';
+import { listBreaches } from '../../handlers/platformadmin/listBreaches';
+import { updateBreachStatus } from '../../handlers/platformadmin/updateBreachStatus';
 import { listAllCommittees } from '../../handlers/platformadmin/listAllCommittees';
 import { getCommittee } from '../../handlers/platformadmin/getCommittee';
 import { setFeatureFlag } from '../../handlers/platformadmin/setFeatureFlag';
@@ -96,6 +101,17 @@ import { listOrganizations } from '../../handlers/platformadmin/listOrganization
 import { getOrganization } from '../../handlers/platformadmin/getOrganization';
 import { updateOrganization } from '../../handlers/platformadmin/updateOrganization';
 import { transitionOrgStatus } from '../../handlers/platformadmin/transitionOrgStatus';
+import { listPricingTiers } from '../../handlers/platformadmin/listPricingTiers';
+import { createPricingTier } from '../../handlers/platformadmin/createPricingTier';
+import { updatePricingTier } from '../../handlers/platformadmin/updatePricingTier';
+import { listSubscriptions } from '../../handlers/platformadmin/listSubscriptions';
+import { createSubscription } from '../../handlers/platformadmin/createSubscription';
+import { getSubscription } from '../../handlers/platformadmin/getSubscription';
+import { cancelSubscription } from '../../handlers/platformadmin/cancelSubscription';
+import { listTickets } from '../../handlers/platformadmin/listTickets';
+import { getTicket } from '../../handlers/platformadmin/getTicket';
+import { updateTicketStatus } from '../../handlers/platformadmin/updateTicketStatus';
+import { addTicketComment } from '../../handlers/platformadmin/addTicketComment';
 import { getOrganizationBySlug } from '../../handlers/platformadmin/getOrganizationBySlug';
 import { listPublicOrgs } from '../../handlers/platformadmin/listPublicOrgs';
 import { listAdminSurveys } from '../../handlers/surveys/listAdminSurveys';
@@ -121,13 +137,6 @@ import { reportAd } from '../../handlers/advertising/reportAd';
 import { reviewCreative } from '../../handlers/advertising/reviewCreative';
 import { setMemberOptOut } from '../../handlers/advertising/setMemberOptOut';
 import { getAdForPlacement } from '../../handlers/advertising/getAdForPlacement';
-import { createJobApplication } from '../../handlers/jobs/createJobApplication';
-import { updateJobApplication } from '../../handlers/jobs/updateJobApplication';
-import { createJobPosting } from '../../handlers/jobs/createJobPosting';
-import { searchJobPostings } from '../../handlers/jobs/searchJobPostings';
-import { getJobPosting } from '../../handlers/jobs/getJobPosting';
-import { updateJobPosting } from '../../handlers/jobs/updateJobPosting';
-import { deleteJobPosting } from '../../handlers/jobs/deleteJobPosting';
 import { createDocumentTag } from '../../handlers/documents/createDocumentTag';
 import { listDocumentTags } from '../../handlers/documents/listDocumentTags';
 import { getDocumentTag } from '../../handlers/documents/getDocumentTag';
@@ -143,6 +152,26 @@ import { archiveDocument } from '../../handlers/documents/archiveDocument';
 import { uploadNewDocumentVersion } from '../../handlers/documents/uploadNewDocumentVersion';
 import { listDocumentVersions } from '../../handlers/documents/listDocumentVersions';
 import { getDocumentVersion } from '../../handlers/documents/getDocumentVersion';
+import { createJobApplication } from '../../handlers/jobs/createJobApplication';
+import { updateJobApplication } from '../../handlers/jobs/updateJobApplication';
+import { createJobPosting } from '../../handlers/jobs/createJobPosting';
+import { searchJobPostings } from '../../handlers/jobs/searchJobPostings';
+import { getJobPosting } from '../../handlers/jobs/getJobPosting';
+import { updateJobPosting } from '../../handlers/jobs/updateJobPosting';
+import { deleteJobPosting } from '../../handlers/jobs/deleteJobPosting';
+import { createListing } from '../../handlers/marketplace/createListing';
+import { listListings } from '../../handlers/marketplace/listListings';
+import { updateListing } from '../../handlers/marketplace/updateListing';
+import { createOrder } from '../../handlers/marketplace/createOrder';
+import { listOrders } from '../../handlers/marketplace/listOrders';
+import { getOrder } from '../../handlers/marketplace/getOrder';
+import { cancelOrder } from '../../handlers/marketplace/cancelOrder';
+import { fulfillOrder } from '../../handlers/marketplace/fulfillOrder';
+import { createVendor } from '../../handlers/marketplace/createVendor';
+import { listVendors } from '../../handlers/marketplace/listVendors';
+import { getVendor } from '../../handlers/marketplace/getVendor';
+import { updateVendor } from '../../handlers/marketplace/updateVendor';
+import { verifyVendor } from '../../handlers/marketplace/verifyVendor';
 import { createAffiliationTransfer } from '../../handlers/member/chapters/createAffiliationTransfer';
 import { listAffiliationTransfers } from '../../handlers/member/chapters/listAffiliationTransfers';
 import { getAffiliationTransfer } from '../../handlers/member/chapters/getAffiliationTransfer';
@@ -217,7 +246,6 @@ import { listMembershipApplications } from '../../handlers/member/membership/lis
 import { bulkApproveMembershipApplications } from '../../handlers/member/membership/bulkApproveMembershipApplications';
 import { getMembershipApplication } from '../../handlers/member/membership/getMembershipApplication';
 import { updateMembershipApplication } from '../../handlers/member/membership/updateMembershipApplication';
-import { deleteMembershipApplication } from '../../handlers/member/membership/deleteMembershipApplication';
 import { approveMembershipApplication } from '../../handlers/member/membership/approveMembershipApplication';
 import { denyMembershipApplication } from '../../handlers/member/membership/denyMembershipApplication';
 import { createInstitutionalMembership } from '../../handlers/member/membership/createInstitutionalMembership';
@@ -234,12 +262,13 @@ import { createMembership } from '../../handlers/member/membership/createMembers
 import { listMemberships } from '../../handlers/member/membership/listMemberships';
 import { getMembership } from '../../handlers/member/membership/getMembership';
 import { updateMembership } from '../../handlers/member/membership/updateMembership';
-import { deleteMembership } from '../../handlers/member/membership/deleteMembership';
 import { deceaseMembership } from '../../handlers/member/membership/deceaseMembership';
 import { reinstateMembership } from '../../handlers/member/membership/reinstateMembership';
 import { renewMembership } from '../../handlers/member/membership/renewMembership';
 import { resignMembership } from '../../handlers/member/membership/resignMembership';
+import { suspendMembership } from '../../handlers/member/membership/suspendMembership';
 import { terminateMembership } from '../../handlers/member/membership/terminateMembership';
+import { unsuspendMembership } from '../../handlers/member/membership/unsuspendMembership';
 import { getOrganizationProfile } from '../../handlers/member/membership/getOrganizationProfile';
 import { updateOrganizationProfile } from '../../handlers/member/membership/updateOrganizationProfile';
 import { listRosterMembers } from '../../handlers/member/membership/listRosterMembers';
@@ -254,6 +283,7 @@ import { updateMembershipTier } from '../../handlers/member/membership/updateMem
 import { deleteMembershipTier } from '../../handlers/member/membership/deleteMembershipTier';
 import { castBallot } from '../../handlers/member/governance/castBallot';
 import { listBallots } from '../../handlers/member/governance/listBallots';
+import { myBallots } from '../../handlers/member/governance/myBallots';
 import { createCandidate } from '../../handlers/member/governance/createCandidate';
 import { listCandidates } from '../../handlers/member/governance/listCandidates';
 import { getCandidate } from '../../handlers/member/governance/getCandidate';
@@ -266,6 +296,7 @@ import { getElection } from '../../handlers/member/governance/getElection';
 import { updateElection } from '../../handlers/member/governance/updateElection';
 import { deleteElection } from '../../handlers/member/governance/deleteElection';
 import { certifyElection } from '../../handlers/member/governance/certifyElection';
+import { closeElectionVoting } from '../../handlers/member/governance/closeElectionVoting';
 import { openElectionNominations } from '../../handlers/member/governance/openElectionNominations';
 import { openElectionVoting } from '../../handlers/member/governance/openElectionVoting';
 import { createOfficerTerm } from '../../handlers/member/governance/createOfficerTerm';
@@ -404,6 +435,7 @@ import { getEmailQueueItem } from '../../handlers/email/getEmailQueueItem';
 import { cancelEmailQueueItem } from '../../handlers/email/cancelEmailQueueItem';
 import { retryEmailQueueItem } from '../../handlers/email/retryEmailQueueItem';
 import { listEmailSuppressions } from '../../handlers/email/listEmailSuppressions';
+import { deleteEmailSuppression } from '../../handlers/email/deleteEmailSuppression';
 import { listEmailTemplates } from '../../handlers/email/listEmailTemplates';
 import { createEmailTemplate } from '../../handlers/email/createEmailTemplate';
 import { getEmailTemplate } from '../../handlers/email/getEmailTemplate';
@@ -415,15 +447,6 @@ import { bulkImportMembers } from '../../handlers/invite/bulkImportMembers';
 import { createInvite } from '../../handlers/invite/createInvite';
 import { claimInvite } from '../../handlers/invite/claimInvite';
 import { validateInvite } from '../../handlers/invite/validateInvite';
-import { createListing } from '../../handlers/marketplace/createListing';
-import { listListings } from '../../handlers/marketplace/listListings';
-import { createOrder } from '../../handlers/marketplace/createOrder';
-import { fulfillOrder } from '../../handlers/marketplace/fulfillOrder';
-import { createVendor } from '../../handlers/marketplace/createVendor';
-import { listVendors } from '../../handlers/marketplace/listVendors';
-import { getVendor } from '../../handlers/marketplace/getVendor';
-import { updateVendor } from '../../handlers/marketplace/updateVendor';
-import { verifyVendor } from '../../handlers/marketplace/verifyVendor';
 import { listOrgApplications } from '../../handlers/membership/listOrgApplications';
 import { listOrgMembers } from '../../handlers/membership/listOrgMembers';
 import { getOrgProfile } from '../../handlers/membership/getOrgProfile';
@@ -498,6 +521,8 @@ export const registry = {
   promoteWaitlistEntry,
   createTraining,
   searchTrainings,
+  confirmTrainingPayment,
+  submitTrainingPaymentProof,
   listMyCustomTrainings,
   cancelCustomTraining,
   checkInCustomTraining,
@@ -538,6 +563,9 @@ export const registry = {
   getAssociation,
   updateAssociation,
   deleteAssociation,
+  reportBreach,
+  listBreaches,
+  updateBreachStatus,
   listAllCommittees,
   getCommittee,
   setFeatureFlag,
@@ -555,6 +583,17 @@ export const registry = {
   getOrganization,
   updateOrganization,
   transitionOrgStatus,
+  listPricingTiers,
+  createPricingTier,
+  updatePricingTier,
+  listSubscriptions,
+  createSubscription,
+  getSubscription,
+  cancelSubscription,
+  listTickets,
+  getTicket,
+  updateTicketStatus,
+  addTicketComment,
   getOrganizationBySlug,
   listPublicOrgs,
 
@@ -585,15 +624,6 @@ export const registry = {
   setMemberOptOut,
   getAdForPlacement,
 
-  // Jobs handlers
-  createJobApplication,
-  updateJobApplication,
-  createJobPosting,
-  searchJobPostings,
-  getJobPosting,
-  updateJobPosting,
-  deleteJobPosting,
-
   // Documents handlers
   createDocumentTag,
   listDocumentTags,
@@ -610,6 +640,30 @@ export const registry = {
   uploadNewDocumentVersion,
   listDocumentVersions,
   getDocumentVersion,
+
+  // Jobs handlers
+  createJobApplication,
+  updateJobApplication,
+  createJobPosting,
+  searchJobPostings,
+  getJobPosting,
+  updateJobPosting,
+  deleteJobPosting,
+
+  // Marketplace handlers
+  createListing,
+  listListings,
+  updateListing,
+  createOrder,
+  listOrders,
+  getOrder,
+  cancelOrder,
+  fulfillOrder,
+  createVendor,
+  listVendors,
+  getVendor,
+  updateVendor,
+  verifyVendor,
 
   // Member/chapters handlers
   createAffiliationTransfer,
@@ -690,7 +744,6 @@ export const registry = {
   bulkApproveMembershipApplications,
   getMembershipApplication,
   updateMembershipApplication,
-  deleteMembershipApplication,
   approveMembershipApplication,
   denyMembershipApplication,
   createInstitutionalMembership,
@@ -707,12 +760,13 @@ export const registry = {
   listMemberships,
   getMembership,
   updateMembership,
-  deleteMembership,
   deceaseMembership,
   reinstateMembership,
   renewMembership,
   resignMembership,
+  suspendMembership,
   terminateMembership,
+  unsuspendMembership,
   getOrganizationProfile,
   updateOrganizationProfile,
   listRosterMembers,
@@ -729,6 +783,7 @@ export const registry = {
   // Member/governance handlers
   castBallot,
   listBallots,
+  myBallots,
   createCandidate,
   listCandidates,
   getCandidate,
@@ -741,6 +796,7 @@ export const registry = {
   updateElection,
   deleteElection,
   certifyElection,
+  closeElectionVoting,
   openElectionNominations,
   openElectionVoting,
   createOfficerTerm,
@@ -899,6 +955,7 @@ export const registry = {
   cancelEmailQueueItem,
   retryEmailQueueItem,
   listEmailSuppressions,
+  deleteEmailSuppression,
   listEmailTemplates,
   createEmailTemplate,
   getEmailTemplate,
@@ -912,17 +969,6 @@ export const registry = {
   createInvite,
   claimInvite,
   validateInvite,
-
-  // Marketplace handlers
-  createListing,
-  listListings,
-  createOrder,
-  fulfillOrder,
-  createVendor,
-  listVendors,
-  getVendor,
-  updateVendor,
-  verifyVendor,
 
   // Membership handlers
   listOrgApplications,

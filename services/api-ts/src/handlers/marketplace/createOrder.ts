@@ -30,7 +30,11 @@ export async function createOrder(ctx: ValidatedContext<any, never, never>): Pro
   const listingRepo = new ListingRepository(db, logger);
   const listing = await listingRepo.findOneById(body.listingId);
 
-  if (!listing) throw new NotFoundError('Listing not found');
+  // FIX-007 (G-10, org-scope half): a listing outside the caller's org is
+  // indistinguishable from a missing one — prevents cross-org order placement.
+  if (!listing || listing.organizationId !== organizationId) {
+    throw new NotFoundError('Listing not found');
+  }
   if (listing.status !== 'active') {
     throw new BusinessLogicError('Listing is not active');
   }
@@ -38,7 +42,14 @@ export async function createOrder(ctx: ValidatedContext<any, never, never>): Pro
   const quantity = body.quantity ?? 1;
   if (quantity < 1) throw new ValidationError('Quantity must be at least 1');
 
-  const unitPrice = parseFloat(listing.price ?? '0');
+  // FIX-005 (G-11): reject a price-less listing instead of silently charging 0.
+  if (listing.price == null || listing.price === '') {
+    throw new BusinessLogicError('Listing has no price set and cannot be ordered');
+  }
+  const unitPrice = parseFloat(listing.price);
+  if (Number.isNaN(unitPrice)) {
+    throw new BusinessLogicError('Listing has an invalid price and cannot be ordered');
+  }
   const totalPrice = (unitPrice * quantity).toFixed(2);
 
   const orderRepo = new OrderRepository(db, logger);

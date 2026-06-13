@@ -22,7 +22,11 @@ export async function publishAnnouncement(
   const db = ctx.get('database') as DatabaseInstance;
   const repo = new CommunicationsRepository(db);
 
-  const existing = await repo.get(params.id);
+  // FIX-007 (tenant isolation): scope the fetch to the caller's org so an officer
+  // of org A cannot publish org B's announcement by id (the position gate resolves
+  // org from the caller header, not the record).
+  const orgId = ctx.get('organizationId');
+  const existing = await repo.get(params.id, orgId);
   if (!existing) throw new NotFoundError('Announcement');
   if (existing.status !== 'draft' && existing.status !== 'scheduled') {
     throw new BusinessLogicError('Only draft or scheduled announcements can be published', 'ANNOUNCEMENT_CANNOT_PUBLISH');
@@ -30,9 +34,8 @@ export async function publishAnnouncement(
 
   const published = await repo.updateStatus(params.id, 'sent', {
     publishedAt: new Date(),
-  });
+  }, orgId);
 
-  const orgId = ctx.get('organizationId');
   await domainEvents.emit('announcement.published', {
     announcementId: params.id,
     organizationId: orgId ?? '',

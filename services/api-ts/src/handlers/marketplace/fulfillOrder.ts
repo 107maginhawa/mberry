@@ -23,11 +23,16 @@ export async function fulfillOrder(ctx: ValidatedContext<never, never, any>): Pr
   const baseLogger = ctx.get('logger');
   const traceId = ctx.get('requestId');
   const logger = baseLogger?.child?.({ traceId, module: 'marketplace' }) ?? baseLogger;
+  const organizationId = ctx.get('organizationId') as string;
 
   const repo = new OrderRepository(db, logger);
 
   const order = await repo.findOneById(orderId);
-  if (!order) throw new NotFoundError('Order not found');
+  // FIX-007 (G-10, org-scope half): an order outside the caller's org is
+  // indistinguishable from a missing one — prevents cross-org fulfilment.
+  if (!order || order.organizationId !== organizationId) {
+    throw new NotFoundError('Order not found');
+  }
 
   assertValidTransition(MARKETPLACE_ORDER_VALID_TRANSITIONS, order.status, 'fulfilled', 'marketplace order');
 

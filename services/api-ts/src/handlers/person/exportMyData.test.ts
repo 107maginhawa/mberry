@@ -88,7 +88,7 @@ describe('exportMyData', () => {
   // ctx.auditResourceId + ctx.auditDescription. Per-route audit emission
   // is covered by middleware/per-route-audit.test.ts.
 
-  test('[EF-M01] exported person excludes internal/system fields', async () => {
+  test('[EF-M01] exported profile excludes internal/system fields', async () => {
     stubRepo(PersonRepository, {
       findOneById: async () => ({
         id: 'user-1',
@@ -125,24 +125,57 @@ describe('exportMyData', () => {
     const res = await exportMyData(ctx) as any;
 
     expect(res.status).toBe(200);
-    const person = res.body.person;
+    const profile = res.body.profile;
 
     // Safe fields present
-    expect(person.firstName).toBe('Alice');
-    expect(person.lastName).toBe('Santos');
-    expect(person.licenseNumber).toBe('PRC-12345');
-    expect(person.bio).toBe('Cardiologist');
+    expect(profile.firstName).toBe('Alice');
+    expect(profile.lastName).toBe('Santos');
+    expect(profile.licenseNumber).toBe('PRC-12345');
+    expect(profile.bio).toBe('Cardiologist');
 
-    // Internal fields MUST be absent
-    expect(person.id).toBeUndefined();
-    expect(person.createdAt).toBeUndefined();
-    expect(person.updatedAt).toBeUndefined();
-    expect(person.version).toBeUndefined();
-    expect(person.createdBy).toBeUndefined();
-    expect(person.updatedBy).toBeUndefined();
-    expect(person.deletionRequestedAt).toBeUndefined();
-    expect(person.deletionScheduledAt).toBeUndefined();
-    expect(person.deletionCompletedAt).toBeUndefined();
-    expect(person.prcId).toBeUndefined();
+    // Internal fields MUST be absent from the profile projection
+    expect(profile.id).toBeUndefined();
+    expect(profile.createdAt).toBeUndefined();
+    expect(profile.updatedAt).toBeUndefined();
+    expect(profile.version).toBeUndefined();
+    expect(profile.createdBy).toBeUndefined();
+    expect(profile.updatedBy).toBeUndefined();
+    expect(profile.deletionRequestedAt).toBeUndefined();
+    expect(profile.deletionScheduledAt).toBeUndefined();
+    expect(profile.deletionCompletedAt).toBeUndefined();
+    // prcId is surfaced as a dedicated top-level field, NOT inside the profile.
+    expect(profile.prcId).toBeUndefined();
+  });
+
+  // FIX-008 (G-08): the response must match the MyDataExport TypeSpec model
+  // (profile/categories/memberships/payments/credits/notifications) and add
+  // certificates + a top-level prcId for complete DPA portability.
+  test('[FIX-008] response matches MyDataExport shape incl. certificates + prcId', async () => {
+    stubRepo(PersonRepository, {
+      findOneById: async () => ({ id: 'user-1', firstName: 'Alice', prcId: 'PRC-99999' }),
+    });
+    stubRepo(MembershipRepository, { findAllByPerson: async () => [] });
+    stubRepo(CreditEntryRepository, { findMany: async () => [] });
+
+    const ctx = makeCtx({ database: makeExportDb([]) });
+    const res = await exportMyData(ctx) as any;
+
+    expect(res.status).toBe(200);
+    const body = res.body;
+
+    // Envelope keys match the MyDataExport model (no legacy person/creditEntries keys).
+    expect(typeof body.exportedAt).toBe('string');
+    expect(Array.isArray(body.categories)).toBe(true);
+    expect(body.profile).toBeDefined();
+    expect(Array.isArray(body.memberships)).toBe(true);
+    expect(Array.isArray(body.payments)).toBe(true);
+    expect(Array.isArray(body.credits)).toBe(true);
+    expect(Array.isArray(body.notifications)).toBe(true);
+    expect(Array.isArray(body.certificates)).toBe(true);
+    // Top-level PRC ID present (DPA portability).
+    expect(body.prcId).toBe('PRC-99999');
+    // Legacy keys gone.
+    expect(body.person).toBeUndefined();
+    expect(body.creditEntries).toBeUndefined();
   });
 });

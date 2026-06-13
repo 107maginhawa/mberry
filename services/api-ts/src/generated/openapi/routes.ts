@@ -123,6 +123,27 @@ export function registerRoutes(app: Hono<{ Variables: Variables }>) {
     registry.deleteAssociation as unknown as Handler
   );
 
+  // reportBreach
+  app.post('/admin/breaches',
+    authMiddleware({ roles: ["platform_admin"] }),
+    zValidator('json', validators.ReportBreachBody, validationErrorHandler),
+    registry.reportBreach as unknown as Handler
+  );
+
+  // listBreaches
+  app.get('/admin/breaches',
+    authMiddleware({ roles: ["platform_admin"] }),
+    registry.listBreaches as unknown as Handler
+  );
+
+  // updateBreachStatus
+  app.put('/admin/breaches/:id',
+    authMiddleware({ roles: ["platform_admin"] }),
+    zValidator('param', validators.UpdateBreachStatusParams, validationErrorHandler),
+    zValidator('json', validators.UpdateBreachStatusBody, validationErrorHandler),
+    registry.updateBreachStatus as unknown as Handler
+  );
+
   // listAllCommittees
   app.get('/admin/committees',
     authMiddleware({ roles: ["platform_admin"] }),
@@ -256,6 +277,55 @@ export function registerRoutes(app: Hono<{ Variables: Variables }>) {
     registry.transitionOrgStatus as unknown as Handler
   );
 
+  // listPricingTiers
+  app.get('/admin/pricing',
+    authMiddleware({ roles: ["platform_admin"] }),
+    registry.listPricingTiers as unknown as Handler
+  );
+
+  // createPricingTier
+  app.post('/admin/pricing',
+    authMiddleware({ roles: ["platform_admin"] }),
+    zValidator('json', validators.CreatePricingTierBody, validationErrorHandler),
+    registry.createPricingTier as unknown as Handler
+  );
+
+  // updatePricingTier
+  app.put('/admin/pricing/:tierId',
+    authMiddleware({ roles: ["platform_admin"] }),
+    zValidator('param', validators.UpdatePricingTierParams, validationErrorHandler),
+    zValidator('json', validators.UpdatePricingTierBody, validationErrorHandler),
+    registry.updatePricingTier as unknown as Handler
+  );
+
+  // listSubscriptions
+  app.get('/admin/subscriptions',
+    authMiddleware({ roles: ["platform_admin"] }),
+    registry.listSubscriptions as unknown as Handler
+  );
+
+  // createSubscription
+  app.post('/admin/subscriptions',
+    authMiddleware({ roles: ["platform_admin"] }),
+    zValidator('json', validators.CreateSubscriptionBody, validationErrorHandler),
+    registry.createSubscription as unknown as Handler
+  );
+
+  // getSubscription
+  app.get('/admin/subscriptions/:id',
+    authMiddleware({ roles: ["platform_admin"] }),
+    zValidator('param', validators.GetSubscriptionParams, validationErrorHandler),
+    registry.getSubscription as unknown as Handler
+  );
+
+  // cancelSubscription
+  app.put('/admin/subscriptions/:id/cancel',
+    authMiddleware({ roles: ["platform_admin"] }),
+    zValidator('param', validators.CancelSubscriptionParams, validationErrorHandler),
+    zValidator('json', validators.CancelSubscriptionBody, validationErrorHandler),
+    registry.cancelSubscription as unknown as Handler
+  );
+
   // listAdminSurveys
   app.get('/admin/surveys/',
     authMiddleware({ roles: ["admin"] }),
@@ -263,26 +333,86 @@ export function registerRoutes(app: Hono<{ Variables: Variables }>) {
     registry.listAdminSurveys as unknown as Handler
   );
 
+  // listTickets
+  app.get('/admin/tickets',
+    authMiddleware({ roles: ["platform_admin"] }),
+    zValidator('query', validators.ListTicketsQuery, validationErrorHandler),
+    registry.listTickets as unknown as Handler
+  );
+
+  // getTicket
+  app.get('/admin/tickets/:id',
+    authMiddleware({ roles: ["platform_admin"] }),
+    zValidator('param', validators.GetTicketParams, validationErrorHandler),
+    registry.getTicket as unknown as Handler
+  );
+
+  // updateTicketStatus
+  app.put('/admin/tickets/:id',
+    authMiddleware({ roles: ["platform_admin"] }),
+    zValidator('param', validators.UpdateTicketStatusParams, validationErrorHandler),
+    zValidator('json', validators.UpdateTicketStatusBody, validationErrorHandler),
+    registry.updateTicketStatus as unknown as Handler
+  );
+
+  // addTicketComment
+  app.post('/admin/tickets/:id/comments',
+    authMiddleware({ roles: ["platform_admin"] }),
+    zValidator('param', validators.AddTicketCommentParams, validationErrorHandler),
+    zValidator('json', validators.AddTicketCommentBody, validationErrorHandler),
+    registry.addTicketComment as unknown as Handler
+  );
+
   // createAdvertiser
-  app.post('/advertisers',
+  app.post('/association/advertising/advertisers',
     authMiddleware({ roles: ["association:admin", "association:staff"] }),
     zValidator('json', validators.CreateAdvertiserBody, validationErrorHandler),
     registry.createAdvertiser as unknown as Handler
   );
 
-  // createJobApplication
-  app.post('/applications',
-    authMiddleware({ roles: ["user"] }),
-    zValidator('json', validators.CreateJobApplicationBody, validationErrorHandler),
-    registry.createJobApplication as unknown as Handler
+  // createCampaign
+  app.post('/association/advertising/campaigns',
+    authMiddleware({ roles: ["association:admin", "association:staff"] }),
+    zValidator('json', validators.CreateCampaignBody, validationErrorHandler),
+    registry.createCampaign as unknown as Handler
   );
 
-  // updateJobApplication
-  app.patch('/applications/:applicationId',
+  // createCreative
+  app.post('/association/advertising/creatives',
     authMiddleware({ roles: ["association:admin", "association:staff"] }),
-    zValidator('param', validators.UpdateJobApplicationParams, validationErrorHandler),
-    zValidator('json', validators.UpdateJobApplicationBody, validationErrorHandler),
-    registry.updateJobApplication as unknown as Handler
+    zValidator('json', validators.CreateCreativeBody, validationErrorHandler),
+    registry.createCreative as unknown as Handler
+  );
+
+  // reportAd
+  app.post('/association/advertising/creatives/:creativeId/report',
+    authMiddleware({ roles: ["user"] }),
+    zValidator('param', validators.ReportAdParams, validationErrorHandler),
+    zValidator('json', validators.ReportAdBody, validationErrorHandler),
+    registry.reportAd as unknown as Handler
+  );
+
+  // reviewCreative
+  app.post('/association/advertising/creatives/:creativeId/review',
+    authMiddleware({ roles: ["association:admin"] }),
+    createPerRouteAuditMiddleware({ action: "update", resourceType: "ad-creative" }),
+    zValidator('param', validators.ReviewCreativeParams, validationErrorHandler),
+    zValidator('json', validators.ReviewCreativeBody, validationErrorHandler),
+    registry.reviewCreative as unknown as Handler
+  );
+
+  // setMemberOptOut
+  app.post('/association/advertising/opt-out',
+    authMiddleware({ roles: ["user"] }),
+    zValidator('json', validators.SetMemberOptOutBody, validationErrorHandler),
+    registry.setMemberOptOut as unknown as Handler
+  );
+
+  // getAdForPlacement
+  app.get('/association/advertising/placement',
+    authMiddleware({ roles: ["user"] }),
+    zValidator('query', validators.GetAdForPlacementQuery, validationErrorHandler),
+    registry.getAdForPlacement as unknown as Handler
   );
 
   // createDocumentTag
@@ -616,6 +746,153 @@ export function registerRoutes(app: Hono<{ Variables: Variables }>) {
     registry.promoteWaitlistEntry as unknown as Handler
   );
 
+  // createJobApplication
+  app.post('/association/jobs/applications',
+    authMiddleware({ roles: ["user"] }),
+    zValidator('json', validators.CreateJobApplicationBody, validationErrorHandler),
+    registry.createJobApplication as unknown as Handler
+  );
+
+  // updateJobApplication
+  app.patch('/association/jobs/applications/:applicationId',
+    authMiddleware({ roles: ["association:admin", "association:staff"] }),
+    zValidator('param', validators.UpdateJobApplicationParams, validationErrorHandler),
+    zValidator('json', validators.UpdateJobApplicationBody, validationErrorHandler),
+    registry.updateJobApplication as unknown as Handler
+  );
+
+  // createJobPosting
+  app.post('/association/jobs/postings',
+    authMiddleware({ roles: ["association:admin", "association:staff"] }),
+    zValidator('json', validators.CreateJobPostingBody, validationErrorHandler),
+    registry.createJobPosting as unknown as Handler
+  );
+
+  // searchJobPostings
+  app.get('/association/jobs/postings',
+    authMiddleware({ roles: ["user"] }),
+    zValidator('query', validators.SearchJobPostingsQuery, validationErrorHandler),
+    registry.searchJobPostings as unknown as Handler
+  );
+
+  // getJobPosting
+  app.get('/association/jobs/postings/:postingId',
+    authMiddleware({ roles: ["user"] }),
+    zValidator('param', validators.GetJobPostingParams, validationErrorHandler),
+    registry.getJobPosting as unknown as Handler
+  );
+
+  // updateJobPosting
+  app.patch('/association/jobs/postings/:postingId',
+    authMiddleware({ roles: ["association:admin", "association:staff"] }),
+    zValidator('param', validators.UpdateJobPostingParams, validationErrorHandler),
+    zValidator('json', validators.UpdateJobPostingBody, validationErrorHandler),
+    registry.updateJobPosting as unknown as Handler
+  );
+
+  // deleteJobPosting
+  app.delete('/association/jobs/postings/:postingId',
+    authMiddleware({ roles: ["association:admin", "association:staff"] }),
+    zValidator('param', validators.DeleteJobPostingParams, validationErrorHandler),
+    registry.deleteJobPosting as unknown as Handler
+  );
+
+  // createListing
+  app.post('/association/marketplace/listings',
+    authMiddleware({ roles: ["association:admin", "association:staff"] }),
+    zValidator('json', validators.CreateListingBody, validationErrorHandler),
+    registry.createListing as unknown as Handler
+  );
+
+  // listListings
+  app.get('/association/marketplace/listings',
+    authMiddleware({ roles: ["user"] }),
+    zValidator('query', validators.ListListingsQuery, validationErrorHandler),
+    registry.listListings as unknown as Handler
+  );
+
+  // updateListing
+  app.patch('/association/marketplace/listings/:listingId',
+    authMiddleware({ roles: ["association:admin", "association:staff"] }),
+    zValidator('param', validators.UpdateListingParams, validationErrorHandler),
+    zValidator('json', validators.UpdateListingBody, validationErrorHandler),
+    registry.updateListing as unknown as Handler
+  );
+
+  // createOrder
+  app.post('/association/marketplace/orders',
+    authMiddleware({ roles: ["user"] }),
+    zValidator('json', validators.CreateOrderBody, validationErrorHandler),
+    registry.createOrder as unknown as Handler
+  );
+
+  // listOrders
+  app.get('/association/marketplace/orders',
+    authMiddleware({ roles: ["user"] }),
+    zValidator('query', validators.ListOrdersQuery, validationErrorHandler),
+    registry.listOrders as unknown as Handler
+  );
+
+  // getOrder
+  app.get('/association/marketplace/orders/:orderId',
+    authMiddleware({ roles: ["user"] }),
+    zValidator('param', validators.GetOrderParams, validationErrorHandler),
+    registry.getOrder as unknown as Handler
+  );
+
+  // cancelOrder
+  app.post('/association/marketplace/orders/:orderId/cancel',
+    authMiddleware({ roles: ["user"] }),
+    zValidator('param', validators.CancelOrderParams, validationErrorHandler),
+    registry.cancelOrder as unknown as Handler
+  );
+
+  // fulfillOrder
+  app.post('/association/marketplace/orders/:orderId/fulfill',
+    authMiddleware({ roles: ["association:admin", "association:staff", "user"] }),
+    createPerRouteAuditMiddleware({ action: "complete", resourceType: "marketplace-order" }),
+    zValidator('param', validators.FulfillOrderParams, validationErrorHandler),
+    registry.fulfillOrder as unknown as Handler
+  );
+
+  // createVendor
+  app.post('/association/marketplace/vendors',
+    authMiddleware({ roles: ["association:admin", "association:staff"] }),
+    zValidator('json', validators.CreateVendorBody, validationErrorHandler),
+    registry.createVendor as unknown as Handler
+  );
+
+  // listVendors
+  app.get('/association/marketplace/vendors',
+    authMiddleware({ roles: ["user"] }),
+    zValidator('query', validators.ListVendorsQuery, validationErrorHandler),
+    registry.listVendors as unknown as Handler
+  );
+
+  // getVendor
+  app.get('/association/marketplace/vendors/:vendorId',
+    authMiddleware({ roles: ["user"] }),
+    zValidator('param', validators.GetVendorParams, validationErrorHandler),
+    registry.getVendor as unknown as Handler
+  );
+
+  // updateVendor
+  app.patch('/association/marketplace/vendors/:vendorId',
+    authMiddleware({ roles: ["association:admin", "association:staff"] }),
+    zValidator('param', validators.UpdateVendorParams, validationErrorHandler),
+    zValidator('json', validators.UpdateVendorBody, validationErrorHandler),
+    registry.updateVendor as unknown as Handler
+  );
+
+  // verifyVendor
+  app.post('/association/marketplace/vendors/:vendorId/verify',
+    authMiddleware({ roles: ["association:admin"] }),
+    createPerRouteAuditMiddleware({ action: "update", resourceType: "marketplace-vendor" }),
+    zValidator('param', validators.VerifyVendorParams, validationErrorHandler),
+    zValidator('json', validators.VerifyVendorBody, validationErrorHandler),
+    registry.verifyVendor as unknown as Handler
+  );
+
   // createAffiliationTransfer
   app.post('/association/member/affiliation-transfers',
     authMiddleware({ roles: ["association:member:owner", "association:admin"] }),
@@ -683,6 +960,7 @@ export function registerRoutes(app: Hono<{ Variables: Variables }>) {
   // recalculateAgingBucket
   app.post('/association/member/aging-buckets/:organizationId/recalculate',
     authMiddleware({ roles: ["association:admin"] }),
+    requirePositionMiddleware({ titles: ["Treasurer", "President"] }),
     createPerRouteAuditMiddleware({ action: "update", resourceType: "aging-bucket" }),
     zValidator('param', validators.RecalculateAgingBucketParams, validationErrorHandler),
     registry.recalculateAgingBucket as unknown as Handler
@@ -727,14 +1005,6 @@ export function registerRoutes(app: Hono<{ Variables: Variables }>) {
     registry.updateMembershipApplication as unknown as Handler
   );
 
-  // deleteMembershipApplication
-  app.delete('/association/member/applications/:applicationId',
-    authMiddleware({ roles: ["association:admin"] }),
-    createPerRouteAuditMiddleware({ action: "delete", resourceType: "membership-application" }),
-    zValidator('param', validators.DeleteMembershipApplicationParams, validationErrorHandler),
-    registry.deleteMembershipApplication as unknown as Handler
-  );
-
   // approveMembershipApplication
   app.post('/association/member/applications/:applicationId/approve',
     authMiddleware({ roles: ["association:admin"] }),
@@ -765,6 +1035,13 @@ export function registerRoutes(app: Hono<{ Variables: Variables }>) {
     authMiddleware({ roles: ["association:admin"] }),
     zValidator('query', validators.ListBallotsQuery, validationErrorHandler),
     registry.listBallots as unknown as Handler
+  );
+
+  // myBallots
+  app.get('/association/member/ballots/mine',
+    authMiddleware({ roles: ["association:admin", "association:member"] }),
+    zValidator('query', validators.MyBallotsQuery, validationErrorHandler),
+    registry.myBallots as unknown as Handler
   );
 
   // createCandidate
@@ -1124,6 +1401,7 @@ export function registerRoutes(app: Hono<{ Variables: Variables }>) {
   // updateDuesConfig
   app.patch('/association/member/dues-configs/:duesConfigId',
     authMiddleware({ roles: ["association:admin"] }),
+    requirePositionMiddleware({ titles: ["Treasurer", "President"] }),
     createPerRouteAuditMiddleware({ action: "update", resourceType: "dues-config" }),
     zValidator('param', validators.UpdateDuesConfigParams, validationErrorHandler),
     zValidator('json', validators.UpdateDuesConfigBody, validationErrorHandler),
@@ -1133,6 +1411,7 @@ export function registerRoutes(app: Hono<{ Variables: Variables }>) {
   // deleteDuesConfig
   app.delete('/association/member/dues-configs/:duesConfigId',
     authMiddleware({ roles: ["association:admin"] }),
+    requirePositionMiddleware({ titles: ["Treasurer", "President"] }),
     createPerRouteAuditMiddleware({ action: "delete", resourceType: "dues-config" }),
     zValidator('param', validators.DeleteDuesConfigParams, validationErrorHandler),
     registry.deleteDuesConfig as unknown as Handler
@@ -1148,6 +1427,7 @@ export function registerRoutes(app: Hono<{ Variables: Variables }>) {
   // upsertDuesGatewayConfig
   app.put('/association/member/dues-gateway/:organizationId',
     authMiddleware({ roles: ["association:admin"] }),
+    requirePositionMiddleware({ titles: ["Treasurer", "President"] }),
     createPerRouteAuditMiddleware({ action: "update", resourceType: "dues-gateway" }),
     zValidator('param', validators.UpsertDuesGatewayConfigParams, validationErrorHandler),
     zValidator('json', validators.UpsertDuesGatewayConfigBody, validationErrorHandler),
@@ -1157,6 +1437,7 @@ export function registerRoutes(app: Hono<{ Variables: Variables }>) {
   // disconnectDuesGateway
   app.delete('/association/member/dues-gateway/:organizationId',
     authMiddleware({ roles: ["association:admin"] }),
+    requirePositionMiddleware({ titles: ["Treasurer", "President"] }),
     createPerRouteAuditMiddleware({ action: "delete", resourceType: "dues-gateway" }),
     zValidator('param', validators.DisconnectDuesGatewayParams, validationErrorHandler),
     registry.disconnectDuesGateway as unknown as Handler
@@ -1165,6 +1446,7 @@ export function registerRoutes(app: Hono<{ Variables: Variables }>) {
   // testDuesGatewayConnection
   app.post('/association/member/dues-gateway/:organizationId/test',
     authMiddleware({ roles: ["association:admin"] }),
+    requirePositionMiddleware({ titles: ["Treasurer", "President"] }),
     zValidator('param', validators.TestDuesGatewayConnectionParams, validationErrorHandler),
     registry.testDuesGatewayConnection as unknown as Handler
   );
@@ -1315,6 +1597,7 @@ export function registerRoutes(app: Hono<{ Variables: Variables }>) {
   // upsertDuesFunds
   app.put('/association/member/dues-reporting/:organizationId',
     authMiddleware({ roles: ["association:admin"] }),
+    requirePositionMiddleware({ titles: ["Treasurer", "President"] }),
     createPerRouteAuditMiddleware({ action: "update", resourceType: "dues-funds" }),
     zValidator('param', validators.UpsertDuesFundsParams, validationErrorHandler),
     zValidator('json', validators.UpsertDuesFundsBody, validationErrorHandler),
@@ -1346,6 +1629,7 @@ export function registerRoutes(app: Hono<{ Variables: Variables }>) {
   // runDunning
   app.post('/association/member/dunning/run',
     authMiddleware({ roles: ["association:admin"] }),
+    requirePositionMiddleware({ titles: ["Treasurer", "President"] }),
     zValidator('json', validators.RunDunningBody, validationErrorHandler),
     registry.runDunning as unknown as Handler
   );
@@ -1353,6 +1637,7 @@ export function registerRoutes(app: Hono<{ Variables: Variables }>) {
   // createDunningTemplate
   app.post('/association/member/dunning/templates',
     authMiddleware({ roles: ["association:admin"] }),
+    requirePositionMiddleware({ titles: ["Treasurer", "President"] }),
     zValidator('json', validators.CreateDunningTemplateBody, validationErrorHandler),
     registry.createDunningTemplate as unknown as Handler
   );
@@ -1374,6 +1659,7 @@ export function registerRoutes(app: Hono<{ Variables: Variables }>) {
   // updateDunningTemplate
   app.patch('/association/member/dunning/templates/:templateId',
     authMiddleware({ roles: ["association:admin"] }),
+    requirePositionMiddleware({ titles: ["Treasurer", "President"] }),
     zValidator('param', validators.UpdateDunningTemplateParams, validationErrorHandler),
     zValidator('json', validators.UpdateDunningTemplateBody, validationErrorHandler),
     registry.updateDunningTemplate as unknown as Handler
@@ -1382,6 +1668,7 @@ export function registerRoutes(app: Hono<{ Variables: Variables }>) {
   // deleteDunningTemplate
   app.delete('/association/member/dunning/templates/:templateId',
     authMiddleware({ roles: ["association:admin"] }),
+    requirePositionMiddleware({ titles: ["Treasurer", "President"] }),
     zValidator('param', validators.DeleteDunningTemplateParams, validationErrorHandler),
     registry.deleteDunningTemplate as unknown as Handler
   );
@@ -1431,6 +1718,14 @@ export function registerRoutes(app: Hono<{ Variables: Variables }>) {
     createPerRouteAuditMiddleware({ action: "update", resourceType: "election" }),
     zValidator('param', validators.CertifyElectionParams, validationErrorHandler),
     registry.certifyElection as unknown as Handler
+  );
+
+  // closeElectionVoting
+  app.post('/association/member/elections/:electionId/close-voting',
+    authMiddleware({ roles: ["association:admin"] }),
+    createPerRouteAuditMiddleware({ action: "update", resourceType: "election" }),
+    zValidator('param', validators.CloseElectionVotingParams, validationErrorHandler),
+    registry.closeElectionVoting as unknown as Handler
   );
 
   // openElectionNominations
@@ -1614,14 +1909,6 @@ export function registerRoutes(app: Hono<{ Variables: Variables }>) {
     registry.updateMembership as unknown as Handler
   );
 
-  // deleteMembership
-  app.delete('/association/member/memberships/:membershipId',
-    authMiddleware({ roles: ["association:admin"] }),
-    createPerRouteAuditMiddleware({ action: "delete", resourceType: "membership" }),
-    zValidator('param', validators.DeleteMembershipParams, validationErrorHandler),
-    registry.deleteMembership as unknown as Handler
-  );
-
   // deceaseMembership
   app.post('/association/member/memberships/:membershipId/deceased',
     authMiddleware({ roles: ["association:admin"] }),
@@ -1656,6 +1943,15 @@ export function registerRoutes(app: Hono<{ Variables: Variables }>) {
     registry.resignMembership as unknown as Handler
   );
 
+  // suspendMembership
+  app.post('/association/member/memberships/:membershipId/suspend',
+    authMiddleware({ roles: ["association:admin"] }),
+    createPerRouteAuditMiddleware({ action: "suspend", resourceType: "membership" }),
+    zValidator('param', validators.SuspendMembershipParams, validationErrorHandler),
+    zValidator('json', validators.SuspendMembershipBody, validationErrorHandler),
+    registry.suspendMembership as unknown as Handler
+  );
+
   // terminateMembership
   app.post('/association/member/memberships/:membershipId/terminate',
     authMiddleware({ roles: ["association:admin"] }),
@@ -1663,6 +1959,14 @@ export function registerRoutes(app: Hono<{ Variables: Variables }>) {
     zValidator('param', validators.TerminateMembershipParams, validationErrorHandler),
     zValidator('json', validators.TerminateMembershipBody, validationErrorHandler),
     registry.terminateMembership as unknown as Handler
+  );
+
+  // unsuspendMembership
+  app.post('/association/member/memberships/:membershipId/unsuspend',
+    authMiddleware({ roles: ["association:admin"] }),
+    createPerRouteAuditMiddleware({ action: "unsuspend", resourceType: "membership" }),
+    zValidator('param', validators.UnsuspendMembershipParams, validationErrorHandler),
+    registry.unsuspendMembership as unknown as Handler
   );
 
   // createOfficerTerm
@@ -1923,7 +2227,7 @@ export function registerRoutes(app: Hono<{ Variables: Variables }>) {
 
   // createMessageTemplate
   app.post('/association/message-templates',
-    authMiddleware({ roles: ["admin", "coordinator"] }),
+    authMiddleware({ roles: ["association:officer"] }),
     createPerRouteAuditMiddleware({ action: "create", resourceType: "message-template" }),
     zValidator('json', validators.CreateMessageTemplateBody, validationErrorHandler),
     registry.createMessageTemplate as unknown as Handler
@@ -1931,21 +2235,21 @@ export function registerRoutes(app: Hono<{ Variables: Variables }>) {
 
   // searchMessageTemplates
   app.get('/association/message-templates',
-    authMiddleware({ roles: ["admin", "coordinator"] }),
+    authMiddleware({ roles: ["association:officer"] }),
     zValidator('query', validators.SearchMessageTemplatesQuery, validationErrorHandler),
     registry.searchMessageTemplates as unknown as Handler
   );
 
   // getMessageTemplate
   app.get('/association/message-templates/:templateId',
-    authMiddleware({ roles: ["admin", "coordinator"] }),
+    authMiddleware({ roles: ["association:officer"] }),
     zValidator('param', validators.GetMessageTemplateParams, validationErrorHandler),
     registry.getMessageTemplate as unknown as Handler
   );
 
   // updateMessageTemplate
   app.patch('/association/message-templates/:templateId',
-    authMiddleware({ roles: ["admin", "coordinator"] }),
+    authMiddleware({ roles: ["association:officer"] }),
     createPerRouteAuditMiddleware({ action: "update", resourceType: "message-template" }),
     zValidator('param', validators.UpdateMessageTemplateParams, validationErrorHandler),
     zValidator('json', validators.UpdateMessageTemplateBody, validationErrorHandler),
@@ -1962,7 +2266,7 @@ export function registerRoutes(app: Hono<{ Variables: Variables }>) {
 
   // previewMessageTemplate
   app.post('/association/message-templates/:templateId/preview',
-    authMiddleware({ roles: ["admin", "coordinator"] }),
+    authMiddleware({ roles: ["association:officer"] }),
     zValidator('param', validators.PreviewMessageTemplateParams, validationErrorHandler),
     zValidator('json', validators.PreviewMessageTemplateBody, validationErrorHandler),
     registry.previewMessageTemplate as unknown as Handler
@@ -1970,7 +2274,7 @@ export function registerRoutes(app: Hono<{ Variables: Variables }>) {
 
   // createMessage
   app.post('/association/messages',
-    authMiddleware({ roles: ["admin", "coordinator"] }),
+    authMiddleware({ roles: ["association:officer"] }),
     createPerRouteAuditMiddleware({ action: "create", resourceType: "message" }),
     zValidator('json', validators.CreateMessageBody, validationErrorHandler),
     registry.createMessage as unknown as Handler
@@ -1978,21 +2282,21 @@ export function registerRoutes(app: Hono<{ Variables: Variables }>) {
 
   // searchMessages
   app.get('/association/messages',
-    authMiddleware({ roles: ["admin", "coordinator"] }),
+    authMiddleware({ roles: ["association:officer"] }),
     zValidator('query', validators.SearchMessagesQuery, validationErrorHandler),
     registry.searchMessages as unknown as Handler
   );
 
   // getMessage
   app.get('/association/messages/:messageId',
-    authMiddleware({ roles: ["admin", "coordinator"] }),
+    authMiddleware({ roles: ["association:officer"] }),
     zValidator('param', validators.GetMessageParams, validationErrorHandler),
     registry.getMessage as unknown as Handler
   );
 
   // updateMessage
   app.patch('/association/messages/:messageId',
-    authMiddleware({ roles: ["admin", "coordinator"] }),
+    authMiddleware({ roles: ["association:officer"] }),
     createPerRouteAuditMiddleware({ action: "update", resourceType: "message" }),
     zValidator('param', validators.UpdateMessageParams, validationErrorHandler),
     zValidator('json', validators.UpdateMessageBody, validationErrorHandler),
@@ -2009,7 +2313,7 @@ export function registerRoutes(app: Hono<{ Variables: Variables }>) {
 
   // cancelMessage
   app.post('/association/messages/:messageId/cancel',
-    authMiddleware({ roles: ["admin", "coordinator"] }),
+    authMiddleware({ roles: ["association:officer"] }),
     createPerRouteAuditMiddleware({ action: "update", resourceType: "message" }),
     zValidator('param', validators.CancelMessageParams, validationErrorHandler),
     registry.cancelMessage as unknown as Handler
@@ -2017,7 +2321,7 @@ export function registerRoutes(app: Hono<{ Variables: Variables }>) {
 
   // scheduleMessage
   app.post('/association/messages/:messageId/schedule',
-    authMiddleware({ roles: ["admin", "coordinator"] }),
+    authMiddleware({ roles: ["association:officer"] }),
     createPerRouteAuditMiddleware({ action: "update", resourceType: "message" }),
     zValidator('param', validators.ScheduleMessageParams, validationErrorHandler),
     zValidator('json', validators.ScheduleMessageBody, validationErrorHandler),
@@ -2026,7 +2330,7 @@ export function registerRoutes(app: Hono<{ Variables: Variables }>) {
 
   // sendMessage
   app.post('/association/messages/:messageId/send',
-    authMiddleware({ roles: ["admin", "coordinator"] }),
+    authMiddleware({ roles: ["association:officer"] }),
     createPerRouteAuditMiddleware({ action: "update", resourceType: "message", eventSubType: "communication.email-sent" }),
     zValidator('param', validators.SendMessageParams, validationErrorHandler),
     registry.sendMessage as unknown as Handler
@@ -2103,6 +2407,26 @@ export function registerRoutes(app: Hono<{ Variables: Variables }>) {
     authMiddleware({ roles: ["association:admin", "association:staff", "association:member"] }),
     zValidator('query', validators.SearchTrainingsQuery, validationErrorHandler),
     registry.searchTrainings as unknown as Handler
+  );
+
+  // confirmTrainingPayment
+  app.post('/association/training-lifecycle/enrollments/:enrollmentId/confirm-payment',
+    authMiddleware({ roles: ["association:admin", "association:staff"] }),
+    requirePositionMiddleware({ titles: ["Society Officer", "President"] }),
+    createPerRouteAuditMiddleware({ action: "update", resourceType: "training-enrollment" }),
+    zValidator('param', validators.ConfirmTrainingPaymentParams, validationErrorHandler),
+    zValidator('query', validators.ConfirmTrainingPaymentQuery, validationErrorHandler),
+    registry.confirmTrainingPayment as unknown as Handler
+  );
+
+  // submitTrainingPaymentProof
+  app.post('/association/training-lifecycle/enrollments/:enrollmentId/payment-proof',
+    authMiddleware({ roles: ["association:member"] }),
+    createPerRouteAuditMiddleware({ action: "update", resourceType: "training-enrollment" }),
+    zValidator('param', validators.SubmitTrainingPaymentProofParams, validationErrorHandler),
+    zValidator('query', validators.SubmitTrainingPaymentProofQuery, validationErrorHandler),
+    zValidator('json', validators.SubmitTrainingPaymentProofBody, validationErrorHandler),
+    registry.submitTrainingPaymentProof as unknown as Handler
   );
 
   // listMyCustomTrainings
@@ -2647,13 +2971,6 @@ export function registerRoutes(app: Hono<{ Variables: Variables }>) {
     registry.getTimeSlot as unknown as Handler
   );
 
-  // createCampaign
-  app.post('/campaigns',
-    authMiddleware({ roles: ["association:admin", "association:staff"] }),
-    zValidator('json', validators.CreateCampaignBody, validationErrorHandler),
-    registry.createCampaign as unknown as Handler
-  );
-
   // bulkIssueCertificates
   app.post('/certificates/bulk-issue',
     authMiddleware({ roles: ["association:admin", "association:staff"] }),
@@ -2671,6 +2988,7 @@ export function registerRoutes(app: Hono<{ Variables: Variables }>) {
   // createChatRoom
   app.post('/comms/chat-rooms',
     authMiddleware({ roles: ["user"] }),
+    createPerRouteAuditMiddleware({ action: "create", resourceType: "chat-room" }),
     zValidator('json', validators.CreateChatRoomBody, validationErrorHandler),
     registry.createChatRoom as unknown as Handler
   );
@@ -2708,6 +3026,7 @@ export function registerRoutes(app: Hono<{ Variables: Variables }>) {
   // endVideoCall
   app.post('/comms/chat-rooms/:room/video-call/end',
     authMiddleware({ roles: ["user:admin"] }),
+    createPerRouteAuditMiddleware({ action: "complete", resourceType: "video-call" }),
     zValidator('param', validators.EndVideoCallParams, validationErrorHandler),
     registry.endVideoCall as unknown as Handler
   );
@@ -2826,47 +3145,24 @@ export function registerRoutes(app: Hono<{ Variables: Variables }>) {
 
   // createSavedSegment
   app.post('/communications/segments',
-    authMiddleware({ roles: ["admin", "coordinator"] }),
+    authMiddleware({ roles: ["association:officer"] }),
     zValidator('json', validators.CreateSavedSegmentBody, validationErrorHandler),
     registry.createSavedSegment as unknown as Handler
   );
 
   // listSavedSegments
   app.get('/communications/segments',
-    authMiddleware({ roles: ["admin", "coordinator"] }),
+    authMiddleware({ roles: ["association:officer"] }),
     zValidator('query', validators.ListSavedSegmentsQuery, validationErrorHandler),
     registry.listSavedSegments as unknown as Handler
   );
 
   // deleteSavedSegment
   app.delete('/communications/segments/:id',
-    authMiddleware({ roles: ["admin", "coordinator"] }),
+    authMiddleware({ roles: ["association:officer"] }),
     zValidator('param', validators.DeleteSavedSegmentParams, validationErrorHandler),
     zValidator('query', validators.DeleteSavedSegmentQuery, validationErrorHandler),
     registry.deleteSavedSegment as unknown as Handler
-  );
-
-  // createCreative
-  app.post('/creatives',
-    authMiddleware({ roles: ["association:admin", "association:staff"] }),
-    zValidator('json', validators.CreateCreativeBody, validationErrorHandler),
-    registry.createCreative as unknown as Handler
-  );
-
-  // reportAd
-  app.post('/creatives/:creativeId/report',
-    authMiddleware({ roles: ["user"] }),
-    zValidator('param', validators.ReportAdParams, validationErrorHandler),
-    zValidator('json', validators.ReportAdBody, validationErrorHandler),
-    registry.reportAd as unknown as Handler
-  );
-
-  // reviewCreative
-  app.post('/creatives/:creativeId/review',
-    authMiddleware({ roles: ["association:admin"] }),
-    zValidator('param', validators.ReviewCreativeParams, validationErrorHandler),
-    zValidator('json', validators.ReviewCreativeBody, validationErrorHandler),
-    registry.reviewCreative as unknown as Handler
   );
 
   // getCreditCompliance
@@ -2918,6 +3214,14 @@ export function registerRoutes(app: Hono<{ Variables: Variables }>) {
     authMiddleware({ roles: ["admin"] }),
     zValidator('query', validators.ListEmailSuppressionsQuery, validationErrorHandler),
     registry.listEmailSuppressions as unknown as Handler
+  );
+
+  // deleteEmailSuppression
+  app.delete('/email/suppressions/:id',
+    authMiddleware({ roles: ["admin"] }),
+    createPerRouteAuditMiddleware({ action: "delete", resourceType: "email-suppression" }),
+    zValidator('param', validators.DeleteEmailSuppressionParams, validationErrorHandler),
+    registry.deleteEmailSuppression as unknown as Handler
   );
 
   // listEmailTemplates
@@ -2997,20 +3301,6 @@ export function registerRoutes(app: Hono<{ Variables: Variables }>) {
   app.get('/invite/validate/:token',
     zValidator('param', validators.ValidateInviteParams, validationErrorHandler),
     registry.validateInvite as unknown as Handler
-  );
-
-  // createListing
-  app.post('/listings',
-    authMiddleware({ roles: ["association:admin", "association:staff"] }),
-    zValidator('json', validators.CreateListingBody, validationErrorHandler),
-    registry.createListing as unknown as Handler
-  );
-
-  // listListings
-  app.get('/listings',
-    authMiddleware({ roles: ["user"] }),
-    zValidator('query', validators.ListListingsQuery, validationErrorHandler),
-    registry.listListings as unknown as Handler
   );
 
   // listOrgApplications
@@ -3093,27 +3383,6 @@ export function registerRoutes(app: Hono<{ Variables: Variables }>) {
     zValidator('json', validators.UpdateOnboardingStepBody, validationErrorHandler),
     requireOfficerMiddleware({ orgIdFrom: "body", bodyField: "orgId" }),
     registry.updateOnboardingStep as unknown as Handler
-  );
-
-  // setMemberOptOut
-  app.post('/opt-out',
-    authMiddleware({ roles: ["user"] }),
-    zValidator('json', validators.SetMemberOptOutBody, validationErrorHandler),
-    registry.setMemberOptOut as unknown as Handler
-  );
-
-  // createOrder
-  app.post('/orders',
-    authMiddleware({ roles: ["user"] }),
-    zValidator('json', validators.CreateOrderBody, validationErrorHandler),
-    registry.createOrder as unknown as Handler
-  );
-
-  // fulfillOrder
-  app.post('/orders/:orderId/fulfill',
-    authMiddleware({ roles: ["association:admin", "association:staff", "user"] }),
-    zValidator('param', validators.FulfillOrderParams, validationErrorHandler),
-    registry.fulfillOrder as unknown as Handler
   );
 
   // sendPaymentLink
@@ -3274,49 +3543,6 @@ export function registerRoutes(app: Hono<{ Variables: Variables }>) {
     registry.updatePerson as unknown as Handler
   );
 
-  // getAdForPlacement
-  app.get('/placement',
-    authMiddleware({ roles: ["user"] }),
-    zValidator('query', validators.GetAdForPlacementQuery, validationErrorHandler),
-    registry.getAdForPlacement as unknown as Handler
-  );
-
-  // createJobPosting
-  app.post('/postings',
-    authMiddleware({ roles: ["association:admin", "association:staff"] }),
-    zValidator('json', validators.CreateJobPostingBody, validationErrorHandler),
-    registry.createJobPosting as unknown as Handler
-  );
-
-  // searchJobPostings
-  app.get('/postings',
-    authMiddleware({ roles: ["user"] }),
-    zValidator('query', validators.SearchJobPostingsQuery, validationErrorHandler),
-    registry.searchJobPostings as unknown as Handler
-  );
-
-  // getJobPosting
-  app.get('/postings/:postingId',
-    authMiddleware({ roles: ["user"] }),
-    zValidator('param', validators.GetJobPostingParams, validationErrorHandler),
-    registry.getJobPosting as unknown as Handler
-  );
-
-  // updateJobPosting
-  app.patch('/postings/:postingId',
-    authMiddleware({ roles: ["association:admin", "association:staff"] }),
-    zValidator('param', validators.UpdateJobPostingParams, validationErrorHandler),
-    zValidator('json', validators.UpdateJobPostingBody, validationErrorHandler),
-    registry.updateJobPosting as unknown as Handler
-  );
-
-  // deleteJobPosting
-  app.delete('/postings/:postingId',
-    authMiddleware({ roles: ["association:admin", "association:staff"] }),
-    zValidator('param', validators.DeleteJobPostingParams, validationErrorHandler),
-    registry.deleteJobPosting as unknown as Handler
-  );
-
   // listPublicEvents
   app.get('/public/events',
     zValidator('query', validators.ListPublicEventsQuery, validationErrorHandler),
@@ -3365,6 +3591,7 @@ export function registerRoutes(app: Hono<{ Variables: Variables }>) {
   // deleteReview
   app.delete('/reviews/:review',
     authMiddleware({ roles: ["review:owner", "admin"] }),
+    createPerRouteAuditMiddleware({ action: "delete", resourceType: "review" }),
     zValidator('param', validators.DeleteReviewParams, validationErrorHandler),
     registry.deleteReview as unknown as Handler
   );
@@ -3516,42 +3743,6 @@ export function registerRoutes(app: Hono<{ Variables: Variables }>) {
     authMiddleware({ roles: ["user"] }),
     zValidator('param', validators.DismissSurveyResponseParams, validationErrorHandler),
     registry.dismissSurveyResponse as unknown as Handler
-  );
-
-  // createVendor
-  app.post('/vendors',
-    authMiddleware({ roles: ["association:admin", "association:staff"] }),
-    zValidator('json', validators.CreateVendorBody, validationErrorHandler),
-    registry.createVendor as unknown as Handler
-  );
-
-  // listVendors
-  app.get('/vendors',
-    authMiddleware({ roles: ["user"] }),
-    zValidator('query', validators.ListVendorsQuery, validationErrorHandler),
-    registry.listVendors as unknown as Handler
-  );
-
-  // getVendor
-  app.get('/vendors/:vendorId',
-    authMiddleware({ roles: ["user"] }),
-    zValidator('param', validators.GetVendorParams, validationErrorHandler),
-    registry.getVendor as unknown as Handler
-  );
-
-  // updateVendor
-  app.patch('/vendors/:vendorId',
-    authMiddleware({ roles: ["association:admin", "association:staff"] }),
-    zValidator('param', validators.UpdateVendorParams, validationErrorHandler),
-    zValidator('json', validators.UpdateVendorBody, validationErrorHandler),
-    registry.updateVendor as unknown as Handler
-  );
-
-  // verifyVendor
-  app.post('/vendors/:vendorId/verify',
-    authMiddleware({ roles: ["association:admin"] }),
-    zValidator('param', validators.VerifyVendorParams, validationErrorHandler),
-    registry.verifyVendor as unknown as Handler
   );
 
 }

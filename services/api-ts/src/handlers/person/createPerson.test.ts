@@ -52,6 +52,21 @@ function makeBody(overrides: Record<string, any> = {}) {
   };
 }
 
+// Capturing logger that implements pino-style child() so createPerson's
+// `baseLogger?.child?.({...})` path is exercised and every (obj, msg) call is recorded.
+function makeCapturingLogger(calls: any[]) {
+  function makeChild(inherited: Record<string, any>) {
+    return {
+      debug: (obj: any, msg?: string) => calls.push({ level: 'debug', ...inherited, ...obj, msg }),
+      info: (obj: any, msg?: string) => calls.push({ level: 'info', ...inherited, ...obj, msg }),
+      warn: (obj: any, msg?: string) => calls.push({ level: 'warn', ...inherited, ...obj, msg }),
+      error: (obj: any, msg?: string) => calls.push({ level: 'error', ...inherited, ...obj, msg }),
+      child: (bindings: Record<string, any>) => makeChild({ ...inherited, ...bindings }),
+    };
+  }
+  return makeChild({});
+}
+
 // ---------------------------------------------------------------------------
 // Context builder
 // ---------------------------------------------------------------------------
@@ -189,5 +204,25 @@ describe('createPerson', () => {
     const ctx = makeCtx({ audit: null });
     await createPerson(ctx);
     // No assertion needed — just verifying it does not throw
+  });
+
+  // FIX-012 (G-14, DPA-05): createPerson must NOT log the raw email address.
+  // Log a `hasEmail` boolean instead of the PII.
+  test('[FIX-012] does not log the raw email address (logs hasEmail boolean)', async () => {
+    const calls: any[] = [];
+    const ctx = makeCtx({
+      logger: makeCapturingLogger(calls),
+      body: makeBody({ contactInfo: { email: 'alice@example.com', phone: '+1234567890' } }),
+    });
+
+    await createPerson(ctx);
+
+    const infoCalls = calls.filter((c) => c.level === 'info');
+    expect(infoCalls.length).toBeGreaterThan(0);
+    // No raw email value anywhere in the structured log payloads.
+    expect(JSON.stringify(infoCalls)).not.toContain('alice@example.com');
+    expect(infoCalls.some((c) => 'email' in c)).toBe(false);
+    // A PII-safe boolean is logged instead.
+    expect(infoCalls.some((c) => c.hasEmail === true)).toBe(true);
   });
 });

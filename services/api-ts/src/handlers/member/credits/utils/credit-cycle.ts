@@ -104,6 +104,61 @@ export function getCycleForDateWithConfig(
 }
 
 /**
+ * FIX-004 (G2): Single cycle authority.
+ *
+ * Resolves the credit-tracking cycle window [cycleStart, cycleEnd) for a given
+ * activity date from the per-org `org_cpd_config` row (cycleStartMonth +
+ * cycleLengthYears). This is the ONE algorithm every credit-write path must
+ * use so that entries for the same member/org and the same activity date
+ * always land in the same window — replacing the three previously divergent
+ * inline computations (training completion's hardcoded 2-year
+ * getCycleForDate, awardManualCredit's inline 2020-epoch math, and the
+ * creditIssue job's computeCycleBoundaries).
+ *
+ * Windows are aligned to a fixed epoch (year 2020) so multi-year cycles are
+ * stable regardless of which year a member first earns a credit. The anchor
+ * month comes from config; the day is always the 1st (the schema has no
+ * cycleStartDay column).
+ *
+ * Note: this intentionally reads ONLY the two config fields that exist on
+ * `org_cpd_config`. It does not consult registrationDate — the legacy
+ * registration-anchored mode (getCycleForDate) is kept separately for the
+ * cross-org transcript, which has no single org config.
+ */
+export interface ResolveCycleConfig {
+  /** Fixed cycle start month (1-12). Defaults to January. */
+  cycleStartMonth?: number | null;
+  /** Cycle duration in years. Defaults to 3 (org_cpd_config default). */
+  cycleLengthYears?: number | null;
+}
+
+const CYCLE_EPOCH_YEAR = 2020;
+
+export function resolveCycle(
+  config: ResolveCycleConfig,
+  activityDate: Date,
+): CreditCycle {
+  const cycleStartMonth = config.cycleStartMonth ?? 1;
+  const cycleLengthYears = config.cycleLengthYears ?? 3;
+
+  const year = activityDate.getFullYear();
+  const month = activityDate.getMonth() + 1; // 1-12
+
+  // The cycle-start year is the prior year when the activity falls before the
+  // anchor month within its calendar year (mid-cycle).
+  const cycleStartYearRaw = month < cycleStartMonth ? year - 1 : year;
+
+  // Align to the fixed-period grid anchored at the epoch year.
+  const cycleIndex = Math.floor((cycleStartYearRaw - CYCLE_EPOCH_YEAR) / cycleLengthYears);
+  const alignedStartYear = CYCLE_EPOCH_YEAR + cycleIndex * cycleLengthYears;
+
+  const cycleStart = new Date(alignedStartYear, cycleStartMonth - 1, 1);
+  const cycleEnd = new Date(alignedStartYear + cycleLengthYears, cycleStartMonth - 1, 1);
+
+  return { cycleStart, cycleEnd, cycleNumber: cycleIndex };
+}
+
+/**
  * Get the current cycle for a member.
  */
 export function getCurrentCycle(

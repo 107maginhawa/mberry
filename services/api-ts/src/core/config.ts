@@ -103,6 +103,15 @@ const logLevelSchema = z.preprocess((v) => {
   return valid.includes(lower) ? lower : 'info';
 }, z.enum(['debug', 'info', 'warn', 'error']));
 
+/**
+ * Insecure development fallback for the invite/payment token signing secret.
+ * The invite handlers (createInvite, bulkImportMembers, validateInvite,
+ * claimInvite) and the dues payment-token util fall back to this in dev/test.
+ * Production MUST override it — enforced by the superRefine block below — so
+ * invite/payment tokens are not forgeable with a publicly-known secret.
+ */
+const INVITE_TOKEN_DEV_DEFAULT = 'dev-secret-change-in-production';
+
 const envSchema = z.object({
   NODE_ENV: z.string().default('development'),
 
@@ -191,6 +200,10 @@ const envSchema = z.object({
   // Internal service token — production-required (random UUID fallback in dev)
   INTERNAL_SERVICE_TOKEN: z.string().optional(),
 
+  // Invite/payment token signing secret — production-required, and must not be
+  // the insecure dev default (handlers keep that fallback in dev/test only).
+  INVITE_TOKEN_SECRET: z.string().optional(),
+
   // WebRTC
   WEBRTC_ICE_SERVERS: z.string().optional(),
 }).superRefine((env, ctx) => {
@@ -217,6 +230,15 @@ const envSchema = z.object({
         code: z.ZodIssueCode.custom,
         path: ['INTERNAL_SERVICE_TOKEN'],
         message: 'Required in production',
+      });
+    }
+    if (!env.INVITE_TOKEN_SECRET || env.INVITE_TOKEN_SECRET === INVITE_TOKEN_DEV_DEFAULT) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ['INVITE_TOKEN_SECRET'],
+        message: env.INVITE_TOKEN_SECRET
+          ? 'Must not be the insecure dev default in production'
+          : 'Required in production',
       });
     }
   }

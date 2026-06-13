@@ -71,6 +71,12 @@ model MyDataExport {
 
   @doc("Notification history for this person")
   notifications: unknown[];
+
+  @doc("All certificates issued to this person")
+  certificates: unknown[];
+
+  @doc("PRC professional license ID, if recorded (DPA portability)")
+  prcId?: string;
 }
 
 @doc("Response from account deletion request")

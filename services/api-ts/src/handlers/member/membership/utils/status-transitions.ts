@@ -72,11 +72,17 @@ export function paymentTransitionError(from: string, to: string): string {
  * Membership statuses: pendingPayment | active | gracePeriod | lapsed |
  *                      expired | suspended | removed | resigned | deceased | expelled
  *
- * Notes:
+ * Notes (decided semantics — AHA membership-lifecycle E2, 2026-06-12):
  * - pendingPayment → active is the approval path
  * - active → gracePeriod and gracePeriod → lapsed are automatic (computed from dues_expiry_date)
- * - lapsed → active happens via payment recording (BR-07)
- * - removed/resigned/deceased/expelled are terminal states
+ * - lapsed → active happens via payment recording (BR-07) or officer reinstate;
+ *   `reinstateMembership` is LAPSED-ONLY (decision #1)
+ * - active/gracePeriod/lapsed → suspended is `suspendMembership`; suspended → active
+ *   is `unsuspendMembership` (NOT reinstate)
+ * - removed/resigned/deceased/expelled are terminal + irreversible; re-entry after a
+ *   terminal state goes through re-application (approve flow), not a transition back
+ * - `expired` is retained in the enum/table but is NOT produced by any V1 op
+ *   (decision #3: EXPIRED is dropped from V1 vocabulary — no threshold or job ships)
  */
 export const MEMBERSHIP_VALID_TRANSITIONS: Record<string, string[]> = {
   pendingPayment: ['active', 'removed', 'expired'],

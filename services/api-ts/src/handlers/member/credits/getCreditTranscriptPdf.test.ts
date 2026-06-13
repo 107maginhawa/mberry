@@ -51,12 +51,25 @@ const creditEntries = [
   },
 ];
 
+// FIX-006: required credits + cycle are resolved server-side from
+// org_cpd_config (client requiredCredits / cyclePeriodYears / registrationDate
+// are ignored). Inject a config row (required=40, 2-year) so these existing
+// carryover/compliance assertions keep a known requirement basis.
+function transcriptConfigDb(requiredCredits = 40, cycleLengthYears = 2) {
+  const row = { requiredCredits, cycleLengthYears, cycleStartMonth: 1 };
+  const chain: any = {
+    from: () => chain,
+    where: () => chain,
+    limit: async () => [row],
+    then: (r: any, j?: any) => Promise.resolve([row]).then(r, j),
+  };
+  return { select: () => chain } as any;
+}
+
 function makeTranscriptCtx(queryOverrides: Record<string, string> = {}) {
   return makeCtx({
+    database: transcriptConfigDb(),
     _query: {
-      registrationDate: '2024-01-01',
-      cyclePeriodYears: '2',
-      requiredCredits: '40',
       carryoverEnabled: 'true',
       previousCycleEarned: '50',
       personName: 'Dr. Maria Santos',

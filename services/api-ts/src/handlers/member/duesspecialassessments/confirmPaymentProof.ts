@@ -51,35 +51,47 @@ export async function confirmPaymentProof(
     );
   }
 
-  // Settle: fund allocation + expiry extension
-  const settlement = await settlePayment({
-    db,
-    orgId,
-    personId: payment.personId,
-    paymentId: payment.id,
-    amount: payment.amount,
-  });
+  const { DuesInvoiceRepository } = await import('@/handlers/association:member/repos/dues.repo');
 
-  // Update payment status to confirmed
-  const updatedPayment = await repo.updatePaymentStatus(payment.id, payment.status, 'confirmed', {
-    recordedBy: session.user.id,
-    membershipExtendedFrom: settlement.membershipExtendedFrom,
-    membershipExtendedTo: settlement.membershipExtendedTo,
-  } as Partial<DuesPayment>, session.user.id);
+  // [FIX-010] Wrap settle + status update + invoice markPaid in ONE
+  // transaction (mirrors recordDuesPayment). Previously settle ran in its own
+  // inner transaction and the status update + invoice markPaid ran OUTSIDE any
+  // transaction, with a bare `catch {}` swallowing invoice failures — a failure
+  // between steps left membership expiry extended while the payment was stuck
+  // 'submitted' (silent financial-state corruption). Now any failure rolls the
+  // whole unit back, and invoice-markPaid failures surface instead of being lost.
+  const { settlement, updatedPayment } = await db.transaction(async (tx: DatabaseInstance) => {
+    const txRepo = new DuesRepository(tx);
 
-  // Mark linked invoice as paid if present
-  if (payment.invoiceId) {
-    const { DuesInvoiceRepository } = await import('@/handlers/association:member/repos/dues.repo');
-    const invoiceRepo = new DuesInvoiceRepository(db);
-    try {
-      const invoice = await invoiceRepo.findOneById(payment.invoiceId);
+    // Settle: fund allocation + expiry extension (reuse the outer tx).
+    const settle = await settlePayment({
+      db,
+      orgId,
+      personId: payment.personId,
+      paymentId: payment.id,
+      amount: payment.amount,
+      tx,
+    });
+
+    // Update payment status to confirmed (inside the tx).
+    const updated = await txRepo.updatePaymentStatus(payment.id, payment.status, 'confirmed', {
+      recordedBy: session.user.id,
+      membershipExtendedFrom: settle.membershipExtendedFrom,
+      membershipExtendedTo: settle.membershipExtendedTo,
+    } as Partial<DuesPayment>, session.user.id);
+
+    // Mark linked invoice as paid if present (inside the tx). Failures now
+    // propagate and roll the whole confirmation back instead of being swallowed.
+    if (payment.invoiceId) {
+      const txInvoiceRepo = new DuesInvoiceRepository(tx);
+      const invoice = await txInvoiceRepo.findOneById(payment.invoiceId);
       if (invoice) {
-        await invoiceRepo.markPaid(payment.invoiceId, invoice.version, payment.id, new Date());
+        await txInvoiceRepo.markPaid(payment.invoiceId, invoice.version, payment.id, new Date());
       }
-    } catch {
-      // Invoice may already be paid — non-fatal
     }
-  }
+
+    return { settlement: settle, updatedPayment: updated };
+  });
 
   ctx.set('auditResourceId', payment.id);
   ctx.set('auditDescription', 'Payment proof confirmed by officer');

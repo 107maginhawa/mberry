@@ -78,6 +78,9 @@ export function ComposeForm({ orgId, existingAnnouncement }: ComposeFormProps) {
 
   const mutation = useMutation({
     mutationFn: async (action: FormAction) => {
+      // The create/update endpoints only persist a DRAFT (the server ignores any
+      // status in the body). To actually send or schedule we must chain the
+      // dedicated publish/schedule endpoints after create/update (FIX-003).
       const data = {
         title: titleValue,
         content: watch('content'),
@@ -85,13 +88,33 @@ export function ComposeForm({ orgId, existingAnnouncement }: ComposeFormProps) {
         channelPush,
         channelEmail,
         visibility,
-        status: action,
         scheduledAt: action === 'scheduled' && scheduledAt ? scheduledAt : undefined,
       }
-      if (existingAnnouncement?.id) {
-        return api.patch(`/api/communications/announcements/${existingAnnouncement.id}`, data)
+
+      // 1) Persist the announcement (create or update).
+      let announcementId = existingAnnouncement?.id
+      if (announcementId) {
+        await api.patch(`/api/communications/announcements/${announcementId}`, data)
+      } else {
+        const created = await api.post<{ data: { id: string } }>(
+          `/api/communications/announcements/${orgId}`,
+          data,
+        )
+        announcementId = created?.data?.id
       }
-      return api.post(`/api/communications/announcements/${orgId}`, data)
+
+      // 2) Transition the persisted draft to its target state.
+      if (!announcementId) return
+      if (action === 'sent') {
+        return api.post(`/api/communications/announcements/${announcementId}/publish`, {})
+      }
+      if (action === 'scheduled' && scheduledAt) {
+        return api.post(`/api/communications/announcements/${announcementId}/schedule`, {
+          scheduledAt,
+        })
+      }
+      // action === 'draft' — already persisted as a draft, nothing more to do.
+      return
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['announcements', orgId] })

@@ -3,6 +3,7 @@ import type { DatabaseInstance } from '@/core/database';
 import type { DeleteFeatureFlagParams } from '@/generated/openapi/validators';
 import { NotFoundError } from '@/core/errors';
 import { FeatureFlagRepository } from './repos/platform-admin.repo';
+import { requireAdminTier, SUPER_ONLY } from '@/core/auth/admin-tier';
 
 /**
  * deleteFeatureFlag
@@ -15,6 +16,10 @@ export async function deleteFeatureFlag(
 ): Promise<Response> {
   const session = ctx.get('session');
   if (!session) return ctx.json({ error: 'Unauthorized' }, 401);
+
+  // FIX-008 (G1) / Q1: deleting a feature flag is a super-only mutation.
+  const denied = requireAdminTier(ctx, SUPER_ONLY);
+  if (denied) return denied;
 
   const { flagId } = ctx.req.valid('param');
   const db = ctx.get('database') as DatabaseInstance;

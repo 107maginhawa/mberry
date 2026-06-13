@@ -25,6 +25,9 @@ const endedSession = {
   endedAt: new Date(),
 };
 
+// FIX-008 (G1): ending an impersonation session requires a support-or-super tier.
+const SUPER = { id: 'pa-1', userId: 'user-1', role: 'super' };
+
 // ─── Tests ───────────────────────────────────────────────
 
 describe('endImpersonation', () => {
@@ -46,6 +49,7 @@ describe('endImpersonation', () => {
     });
 
     const ctx = makeCtx({
+      platformAdmin: SUPER,
       _params: { sessionId: 'imp-session-1' },
     });
 
@@ -61,6 +65,7 @@ describe('endImpersonation', () => {
     });
 
     const ctx = makeCtx({
+      platformAdmin: SUPER,
       _params: { sessionId: 'imp-session-1' },
     });
 
@@ -79,6 +84,7 @@ describe('endImpersonation', () => {
     });
 
     const ctx = makeCtx({
+      platformAdmin: SUPER,
       _params: { sessionId: 'imp-session-1' },
     });
 
@@ -93,6 +99,7 @@ describe('endImpersonation', () => {
     });
 
     const ctx = makeCtx({
+      platformAdmin: SUPER,
       _params: { sessionId: 'nonexistent' },
     });
 
@@ -112,6 +119,7 @@ describe('endImpersonation', () => {
     });
 
     const ctx = makeCtx({
+      platformAdmin: SUPER,
       audit: null,
       _params: { sessionId: 'imp-session-1' },
     });
@@ -134,6 +142,7 @@ describe('endImpersonation', () => {
     };
 
     const ctx = makeCtx({
+      platformAdmin: SUPER,
       audit: auditService,
       _params: { sessionId: 'imp-session-1' },
     });
@@ -156,7 +165,7 @@ describe('endImpersonation', () => {
     });
     const emitSpy = spyOn(domainEvents, 'emit');
 
-    const ctx = makeCtx({ _params: { sessionId: 'imp-session-1' } });
+    const ctx = makeCtx({ platformAdmin: SUPER, _params: { sessionId: 'imp-session-1' } });
     await endImpersonation(ctx);
 
     const call = emitSpy.mock.calls.find((c) => c[0] === 'impersonation.ended');

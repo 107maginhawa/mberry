@@ -6,29 +6,35 @@ import { toast } from 'sonner'
 import { Button, Input, Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from '@monobase/ui'
 import { PageShell } from '@/components/patterns/page-shell'
 import { RequireRole } from '@/lib/role-gate'
-import { listOrganizationsOptions } from '@monobase/sdk-ts/generated/react-query'
+import { listPersonsOptions } from '@monobase/sdk-ts/generated/react-query'
 import { startImpersonation as startImpersonationApi, endImpersonation as endImpersonationApi } from '@monobase/sdk-ts/generated/sdk.gen'
 
 export const Route = createFileRoute('/impersonate/')({
+  // FIX-007 (PA-6): align the UI gate to the backend allow-list
+  // IMPERSONATION_ALLOWED_ROLES = ['super', 'support'] (startImpersonation.ts).
+  // The support tier is entitled to impersonate for diagnosis; gating to
+  // super-only locked it out of a tool it is permitted to use.
   component: () => (
-    <RequireRole allowed={['super']}>
+    <RequireRole allowed={['super', 'support']}>
       <ImpersonatePage />
     </RequireRole>
   ),
 })
 
-interface Organization {
+// FIX-010 (G3): the picker searches real person records via listPersons
+// (GET /persons, admin/support only). The previous source — org.members off
+// listOrganizations — was never populated, so search was always empty.
+interface Person {
   id: string
-  name: string
-  members?: Member[]
+  firstName?: string
+  lastName?: string
+  contactInfo?: { email?: string } | null
 }
 
-interface Member {
+interface SearchResult {
   id: string
   name: string
   email: string
-  role?: string
-  organizationName?: string
 }
 
 interface ImpersonationSession {
@@ -43,24 +49,18 @@ function ImpersonatePage() {
   const [activeSession, setActiveSession] = useState<ImpersonationSession | null>(null)
   const queryClient = useQueryClient()
 
-  const { data: orgsData, isLoading: orgsLoading } = useQuery(listOrganizationsOptions({ query: { limit: 100 } }))
-  const orgs = orgsData?.data as Organization[] | undefined
+  // Search persons server-side via listPersons (only fires at >= 2 chars).
+  const { data: personsData, isLoading: searchLoading } = useQuery({
+    ...listPersonsOptions({ query: { q: search, limit: 25 } }),
+    enabled: search.length >= 2,
+  })
+  const persons = personsData?.data as Person[] | undefined
 
-  // Derive a flat member list from organizations for search
-  const allMembers: Member[] = (orgs || []).flatMap((org) =>
-    (org.members || []).map((m) => ({
-      ...m,
-      organizationName: org.name,
-    }))
-  )
-
-  const filteredMembers = search.length >= 2
-    ? allMembers.filter(
-        (m) =>
-          m.name?.toLowerCase().includes(search.toLowerCase()) ||
-          m.email?.toLowerCase().includes(search.toLowerCase())
-      )
-    : []
+  const filteredMembers: SearchResult[] = (persons || []).map((p) => ({
+    id: p.id,
+    name: [p.firstName, p.lastName].filter(Boolean).join(' ').trim() || p.id,
+    email: p.contactInfo?.email ?? '',
+  }))
 
   const startImpersonation = useMutation({
     mutationFn: async (targetUserId: string) => {
@@ -147,8 +147,8 @@ function ImpersonatePage() {
         />
       </div>
 
-      {orgsLoading && (
-        <p className="text-sm text-muted-foreground mb-4">Loading organizations...</p>
+      {search.length >= 2 && searchLoading && (
+        <p className="text-sm text-muted-foreground mb-4">Searching users...</p>
       )}
 
       {/* Results Table */}
@@ -158,21 +158,25 @@ function ImpersonatePage() {
             <TableRow>
               <TableHead className="p-4 text-sm">Name</TableHead>
               <TableHead className="p-4 text-sm">Email</TableHead>
-              <TableHead className="p-4 text-sm">Organization</TableHead>
-              <TableHead className="p-4 text-sm">Role</TableHead>
               <TableHead className="text-right p-4 text-sm">Action</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {search.length < 2 ? (
               <TableRow>
-                <TableCell colSpan={5} className="p-8 text-center text-muted-foreground">
+                <TableCell colSpan={3} className="p-8 text-center text-muted-foreground">
                   Type at least 2 characters to search for a user.
+                </TableCell>
+              </TableRow>
+            ) : searchLoading ? (
+              <TableRow>
+                <TableCell colSpan={3} className="p-8 text-center text-muted-foreground">
+                  Searching...
                 </TableCell>
               </TableRow>
             ) : filteredMembers.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={5} className="p-8 text-center text-muted-foreground">
+                <TableCell colSpan={3} className="p-8 text-center text-muted-foreground">
                   No users found matching "{search}".
                 </TableCell>
               </TableRow>
@@ -180,13 +184,7 @@ function ImpersonatePage() {
               filteredMembers.map((member) => (
                 <TableRow key={member.id}>
                   <TableCell className="p-4 text-sm">{member.name}</TableCell>
-                  <TableCell className="p-4 text-sm text-muted-foreground">{member.email}</TableCell>
-                  <TableCell className="p-4 text-sm text-muted-foreground">{member.organizationName || '--'}</TableCell>
-                  <TableCell className="p-4">
-                    <span className="inline-block px-2 py-0.5 rounded text-xs font-medium bg-muted">
-                      {member.role || 'member'}
-                    </span>
-                  </TableCell>
+                  <TableCell className="p-4 text-sm text-muted-foreground">{member.email || '--'}</TableCell>
                   <TableCell className="p-4 text-right">
                     <Button
                       size="sm"

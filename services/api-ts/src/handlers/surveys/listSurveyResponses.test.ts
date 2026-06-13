@@ -128,7 +128,7 @@ describe('listSurveyResponses', () => {
     expect((res as any).body.data[1].responderId).toBe('member-2');
   });
 
-  test('BR-40: anonymous surveys strip responderId to zeros UUID', async () => {
+  test('BR-40 / FIX-007: anonymous surveys return null responderId (not a sentinel UUID)', async () => {
     stubRepo(SurveyRepository, {
       findById: async () => anonymousSurvey,
     });
@@ -144,8 +144,11 @@ describe('listSurveyResponses', () => {
 
     const res = await listSurveyResponses(ctx);
     expect(res.status).toBe(200);
-    expect((res as any).body.data[0].responderId).toBe(ANONYMOUS_UUID);
-    expect((res as any).body.data[1].responderId).toBe(ANONYMOUS_UUID);
+    // FIX-007: anonymity is represented as null (matches TypeSpec `responderId?`),
+    // not the all-zeros sentinel a client might mistake for a real person id.
+    expect((res as any).body.data[0].responderId).toBe(null);
+    expect((res as any).body.data[1].responderId).toBe(null);
+    expect((res as any).body.data[0].responderId).not.toBe(ANONYMOUS_UUID);
   });
 
   test('returns empty data when no responses', async () => {

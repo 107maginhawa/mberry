@@ -6,7 +6,7 @@ import { CredentialTemplateRepository, DigitalCredentialRepository } from '@/han
 import type { DigitalCredential } from '@/handlers/association:member/repos/credentials.schema';
 import { MembershipRepository } from '@/handlers/association:member/repos/membership.repo';
 import { withComputedStatus } from '@/handlers/member/membership/utils/membership-status-middleware';
-import { createCredentialToken } from '@/handlers/association:member/utils/credential-token';
+import { createCredentialToken, resolveCredentialVerifySecret } from '@/handlers/association:member/utils/credential-token';
 
 /**
  * issueDigitalCredential
@@ -79,8 +79,8 @@ export async function issueDigitalCredential(
     status: 'active',
   });
 
-  // Generate HMAC verification token
-  const secret = process.env['CREDENTIAL_VERIFY_SECRET'] || 'dev-credential-verify-secret';
+  // Generate HMAC verification token (FIX-012: fail-closed secret resolution)
+  const secret = resolveCredentialVerifySecret();
   const token = createCredentialToken(credential.id, orgId, secret);
 
   // Update credential with qrPayload and verificationUrl

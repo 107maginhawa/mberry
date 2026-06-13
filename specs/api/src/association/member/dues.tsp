@@ -844,6 +844,7 @@ namespace Association.Member.Dues {
     @route("/{duesConfigId}")
     @useAuth(bearerAuth)
     @extension("x-security-required-roles", #["association:admin"])
+    @extension("x-require-position", #["Treasurer", "President"])
     @extension("x-audit", #{ action: "update", resourceType: "dues-config" })
     updateDuesConfig(
       @path duesConfigId: string,
@@ -859,6 +860,7 @@ namespace Association.Member.Dues {
     @route("/{duesConfigId}")
     @useAuth(bearerAuth)
     @extension("x-security-required-roles", #["association:admin"])
+    @extension("x-require-position", #["Treasurer", "President"])
     @extension("x-audit", #{ action: "delete", resourceType: "dues-config" })
     deleteDuesConfig(
       @path duesConfigId: string
@@ -991,6 +993,7 @@ namespace Association.Member.Dues {
     @route("/{organizationId}/recalculate")
     @useAuth(bearerAuth)
     @extension("x-security-required-roles", #["association:admin"])
+    @extension("x-require-position", #["Treasurer", "President"])
     @extension("x-audit", #{ action: "update", resourceType: "aging-bucket" })
     recalculateAgingBucket(
       @path organizationId: string
@@ -1007,6 +1010,7 @@ namespace Association.Member.Dues {
     @route("/templates")
     @useAuth(bearerAuth)
     @extension("x-security-required-roles", #["association:admin"])
+    @extension("x-require-position", #["Treasurer", "President"])
     createDunningTemplate(
       @body body: DunningTemplateCreateRequest
     ): ApiCreatedResponse<DunningTemplate>
@@ -1046,6 +1050,7 @@ namespace Association.Member.Dues {
     @route("/templates/{templateId}")
     @useAuth(bearerAuth)
     @extension("x-security-required-roles", #["association:admin"])
+    @extension("x-require-position", #["Treasurer", "President"])
     updateDunningTemplate(
       @path templateId: string,
       @body updates: DunningTemplateUpdateRequest
@@ -1060,6 +1065,7 @@ namespace Association.Member.Dues {
     @route("/templates/{templateId}")
     @useAuth(bearerAuth)
     @extension("x-security-required-roles", #["association:admin"])
+    @extension("x-require-position", #["Treasurer", "President"])
     deleteDunningTemplate(
       @path templateId: string
     ): ApiNoContentResponse
@@ -1086,6 +1092,7 @@ namespace Association.Member.Dues {
     @route("/run")
     @useAuth(bearerAuth)
     @extension("x-security-required-roles", #["association:admin"])
+    @extension("x-require-position", #["Treasurer", "President"])
     runDunning(
       @body body: RunDunningRequest
     ): ApiOkResponse<DunningRunResult>
@@ -1237,6 +1244,7 @@ namespace Association.Member.Dues {
     @route("/{organizationId}")
     @useAuth(bearerAuth)
     @extension("x-security-required-roles", #["association:admin"])
+    @extension("x-require-position", #["Treasurer", "President"])
     @extension("x-audit", #{ action: "update", resourceType: "dues-gateway" })
     upsertDuesGatewayConfig(
       @path organizationId: string,
@@ -1252,6 +1260,7 @@ namespace Association.Member.Dues {
     @route("/{organizationId}/test")
     @useAuth(bearerAuth)
     @extension("x-security-required-roles", #["association:admin"])
+    @extension("x-require-position", #["Treasurer", "President"])
     testDuesGatewayConnection(
       @path organizationId: string
     ): ApiOkResponse<GatewayTestResult>
@@ -1265,6 +1274,7 @@ namespace Association.Member.Dues {
     @route("/{organizationId}")
     @useAuth(bearerAuth)
     @extension("x-security-required-roles", #["association:admin"])
+    @extension("x-require-position", #["Treasurer", "President"])
     @extension("x-audit", #{ action: "delete", resourceType: "dues-gateway" })
     disconnectDuesGateway(
       @path organizationId: string
@@ -1292,6 +1302,7 @@ namespace Association.Member.Dues {
     @route("/{organizationId}")
     @useAuth(bearerAuth)
     @extension("x-security-required-roles", #["association:admin"])
+    @extension("x-require-position", #["Treasurer", "President"])
     @extension("x-audit", #{ action: "update", resourceType: "dues-funds" })
     upsertDuesFunds(
       @path organizationId: string,

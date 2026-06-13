@@ -14,6 +14,7 @@ import { eq } from 'drizzle-orm';
 import { NotFoundError, BusinessLogicError, ValidationError } from '@/core/errors';
 import { breachIncidents, type BreachIncident } from './repos/platform-admin.schema';
 import { auditAction } from '@/core/audit/audit-action';
+import { requireAdminTier, SUPPORT_OR_SUPER } from '@/core/auth/admin-tier';
 
 const VALID_TRANSITIONS: Record<string, string> = {
   reported: 'investigating',
@@ -27,6 +28,11 @@ export async function updateBreachStatus(ctx: Context): Promise<Response> {
 
   const admin = ctx.get('platformAdmin');
   if (!admin) return ctx.json({ error: 'Platform admin access required' }, 403);
+
+  // FIX-008 (G1) / Q8: transitioning breach status is a support-or-super
+  // mutation; analyst is read-only.
+  const denied = requireAdminTier(ctx, SUPPORT_OR_SUPER);
+  if (denied) return denied;
 
   const db = ctx.get('database') as DatabaseInstance;
   const id = ctx.req.param('id') as string;

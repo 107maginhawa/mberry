@@ -88,3 +88,54 @@ export async function createDefaultChannels(
 
   return createdIds;
 }
+
+/**
+ * Auto-join a person to every channel in an org (PD-1).
+ *
+ * Called when a member is provisioned (membership.created / membership.imported)
+ * so the `/messages` surface is non-empty out of the box. Adds the person to
+ * both the authoritative `chat_room_member` join table AND the legacy JSONB
+ * `participants` array — the latter keeps `listChatRooms` (which filters on the
+ * participants array) surfacing the channel in the member's sidebar.
+ *
+ * Idempotent: the join-table insert no-ops on conflict, and the JSONB append is
+ * skipped when the person is already present.
+ *
+ * @returns ids of the channels the person was (or already is) a member of
+ */
+export async function autoJoinOrgChannels(
+  db: DatabaseInstance,
+  organizationId: string,
+  personId: string,
+): Promise<string[]> {
+  const channels = await db
+    .select({ id: chatRooms.id, participants: chatRooms.participants })
+    .from(chatRooms)
+    .where(
+      and(
+        eq(chatRooms.organizationId, organizationId),
+        eq(chatRooms.roomType, 'channel'),
+      ),
+    );
+
+  const joined: string[] = [];
+
+  for (const ch of channels) {
+    await db
+      .insert(chatRoomMembers)
+      .values({ chatRoomId: ch.id, personId, role: 'member' as const })
+      .onConflictDoNothing();
+
+    const current: string[] = ch.participants ?? [];
+    if (!current.includes(personId)) {
+      await db
+        .update(chatRooms)
+        .set({ participants: [...current, personId] })
+        .where(eq(chatRooms.id, ch.id));
+    }
+
+    joined.push(ch.id);
+  }
+
+  return joined;
+}

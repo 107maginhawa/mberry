@@ -1,8 +1,9 @@
-import { describe, test, expect, afterEach } from 'bun:test';
-import { makeCtx, stubRepo } from '@/test-utils/make-ctx';
+import { describe, test, expect, afterEach, beforeEach } from 'bun:test';
+import { makeCtx, stubRepo, restoreRepo } from '@/test-utils/make-ctx';
 import { fakeInvite as createFakeInvite } from '@/test-utils/factories';
 import { createInvite } from './createInvite';
 import { InviteRepository } from './repos/invite.repo';
+import { OfficerTermRepository } from '@/handlers/association:member/repos/governance.repo';
 
 // ─── Fixtures ───────────────────────────────────────────
 
@@ -24,9 +25,60 @@ const fakeInvite = createFakeInvite({
 
 describe('createInvite', () => {
   let mocks: ReturnType<typeof stubRepo>;
+  let officerMocks: ReturnType<typeof stubRepo>;
+
+  beforeEach(() => {
+    // FIX-003 (G4): createInvite now requires an active officer term. Default
+    // the caller to a (non-privileged) officer so the existing happy-path tests
+    // continue to exercise invite creation; tests that assert the officer gate
+    // override this stub explicitly.
+    restoreRepo(OfficerTermRepository);
+    officerMocks = stubRepo(OfficerTermRepository, {
+      findActiveByPersonAndOrg: async () => [{ id: 'term-1', positionTitle: 'Society Officer' }],
+    });
+  });
 
   afterEach(() => {
     if (mocks) Object.values(mocks).forEach((m) => m.mockRestore());
+    if (officerMocks) Object.values(officerMocks).forEach((m) => m.mockRestore());
+    restoreRepo(OfficerTermRepository);
+  });
+
+  // ─── FIX-003 (G4): only officers may issue invitations ────────────────
+  // m01 §6: send invite = president/secretary/officer. A plain active member
+  // (no officer term) must be rejected with 403.
+  test('returns 403 when caller has no active officer term (member)', async () => {
+    restoreRepo(OfficerTermRepository);
+    officerMocks = stubRepo(OfficerTermRepository, {
+      findActiveByPersonAndOrg: async () => [],
+    });
+    mocks = stubRepo(InviteRepository, {
+      findPendingByEmail: async () => undefined,
+      create: async (data: any) => ({ ...fakeInvite, ...data }),
+    });
+
+    const ctx = makeCtx({
+      user: { id: 'member-1', role: 'member', twoFactorEnabled: true },
+      _body: { email: 'invitee@example.com' },
+    });
+
+    const response = await createInvite(ctx);
+    expect(response.status).toBe(403);
+  });
+
+  test('allows an officer with an active term to create an invite (201)', async () => {
+    mocks = stubRepo(InviteRepository, {
+      findPendingByEmail: async () => undefined,
+      create: async (data: any) => ({ ...fakeInvite, ...data }),
+    });
+
+    const ctx = makeCtx({
+      user: { id: 'officer-1', role: 'officer', twoFactorEnabled: true },
+      _body: { email: 'invitee@example.com' },
+    });
+
+    const response = await createInvite(ctx);
+    expect(response.status).toBe(201);
   });
 
   test('creates invite and returns 201 with token and invite details', async () => {

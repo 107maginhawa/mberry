@@ -23,7 +23,11 @@ export async function updateMyPrivacySettings(
   const body = ctx.req.valid('json');
   const b = body as Record<string, unknown>;
 
-  if (!b['organizationId']) throw new ValidationError('organizationId is required');
+  // FIX-001 (G-01): the contract/validator/frontend all carry `orgId`. Reading
+  // the wrong key (`organizationId`) made every contract-valid PATCH 400. Read
+  // the validated `orgId`.
+  const orgId = b['orgId'] as string | undefined;
+  if (!orgId) throw new ValidationError('orgId is required');
 
   // Verify membership
   const [membership] = await db
@@ -31,7 +35,7 @@ export async function updateMyPrivacySettings(
     .from(memberships)
     .where(and(
       eq(memberships.personId, personId),
-      eq(memberships.organizationId, b['organizationId'] as string),
+      eq(memberships.organizationId, orgId),
       inArray(memberships.status, ['active', 'gracePeriod']),
     ))
     .limit(1);
@@ -43,7 +47,7 @@ export async function updateMyPrivacySettings(
     .from(personPrivacySettings)
     .where(and(
       eq(personPrivacySettings.personId, personId),
-      eq(personPrivacySettings.organizationId, b['organizationId'] as string),
+      eq(personPrivacySettings.organizationId, orgId),
     ))
     .limit(1);
 
@@ -67,13 +71,13 @@ export async function updateMyPrivacySettings(
   } else {
     [row] = await db
       .insert(personPrivacySettings)
-      .values({ personId, organizationId: b['organizationId'] as string, ...updates })
+      .values({ personId, organizationId: orgId, ...updates })
       .returning();
   }
 
   ctx.set('auditResourceId', personId);
   ctx.set('auditDescription', 'Self-service privacy settings update');
-  ctx.set('auditDetails', { orgId: b['organizationId'] as string });
+  ctx.set('auditDetails', { orgId });
 
   return ctx.json(row, existing ? 200 : 201);
 }

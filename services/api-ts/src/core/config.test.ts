@@ -554,6 +554,7 @@ describe('production config validation — fail fast on missing vars', () => {
       AUTH_SECRET: undefined,
       DATABASE_URL: 'postgres://prod:5432/db',
       INTERNAL_SERVICE_TOKEN: 'tok',
+      INVITE_TOKEN_SECRET: 'invite-tok',
     });
     try {
       expect(() => parseConfig()).toThrow('AUTH_SECRET');
@@ -568,6 +569,7 @@ describe('production config validation — fail fast on missing vars', () => {
       AUTH_SECRET: 'secret',
       DATABASE_URL: undefined,
       INTERNAL_SERVICE_TOKEN: 'tok',
+      INVITE_TOKEN_SECRET: 'invite-tok',
     });
     try {
       expect(() => parseConfig()).toThrow('DATABASE_URL');
@@ -582,6 +584,7 @@ describe('production config validation — fail fast on missing vars', () => {
       AUTH_SECRET: 'secret',
       DATABASE_URL: 'postgres://prod:5432/db',
       INTERNAL_SERVICE_TOKEN: undefined,
+      INVITE_TOKEN_SECRET: 'invite-tok',
     });
     try {
       expect(() => parseConfig()).toThrow('INTERNAL_SERVICE_TOKEN');
@@ -596,9 +599,12 @@ describe('production config validation — fail fast on missing vars', () => {
       AUTH_SECRET: undefined,
       DATABASE_URL: undefined,
       INTERNAL_SERVICE_TOKEN: undefined,
+      INVITE_TOKEN_SECRET: undefined,
     });
     try {
-      expect(() => parseConfig()).toThrow(/AUTH_SECRET.*DATABASE_URL.*INTERNAL_SERVICE_TOKEN/);
+      expect(() => parseConfig()).toThrow(
+        /AUTH_SECRET.*DATABASE_URL.*INTERNAL_SERVICE_TOKEN.*INVITE_TOKEN_SECRET/,
+      );
     } finally {
       restore();
     }
@@ -610,6 +616,7 @@ describe('production config validation — fail fast on missing vars', () => {
       AUTH_SECRET: 'prod-secret',
       DATABASE_URL: 'postgres://prod:5432/db',
       INTERNAL_SERVICE_TOKEN: 'service-tok',
+      INVITE_TOKEN_SECRET: 'service-invite-secret',
       CORS_ORIGINS: 'https://app.example.com',
       STORAGE_ACCESS_KEY_ID: 'real-key',
     });
@@ -631,6 +638,80 @@ describe('production config validation — fail fast on missing vars', () => {
     });
     try {
       expect(() => parseConfig()).toThrow('AUTH_SECRET');
+    } finally {
+      restore();
+    }
+  });
+});
+
+// ---------------------------------------------------------------------------
+// INVITE_TOKEN_SECRET production validation (FIX-010 / Batch E)
+//
+// The invite + payment token signing secret falls back to a predictable dev
+// default in the invite handlers. In a misconfigured production that makes
+// invite tokens forgeable. The server must refuse to boot in production when
+// INVITE_TOKEN_SECRET is unset OR still equals the insecure dev default.
+// Dev/test keep the fallback (handlers retain it).
+// ---------------------------------------------------------------------------
+
+describe('INVITE_TOKEN_SECRET production validation (FIX-010)', () => {
+  const INVITE_TOKEN_DEV_DEFAULT = 'dev-secret-change-in-production';
+
+  test('throws when INVITE_TOKEN_SECRET is unset in production', () => {
+    const restore = withEnv({
+      NODE_ENV: 'production',
+      AUTH_SECRET: 'prod-secret',
+      DATABASE_URL: 'postgres://prod:5432/db',
+      INTERNAL_SERVICE_TOKEN: 'service-tok',
+      INVITE_TOKEN_SECRET: undefined,
+    });
+    try {
+      expect(() => parseConfig()).toThrow('INVITE_TOKEN_SECRET');
+    } finally {
+      restore();
+    }
+  });
+
+  test('throws when INVITE_TOKEN_SECRET equals the insecure dev default in production', () => {
+    const restore = withEnv({
+      NODE_ENV: 'production',
+      AUTH_SECRET: 'prod-secret',
+      DATABASE_URL: 'postgres://prod:5432/db',
+      INTERNAL_SERVICE_TOKEN: 'service-tok',
+      INVITE_TOKEN_SECRET: INVITE_TOKEN_DEV_DEFAULT,
+    });
+    try {
+      expect(() => parseConfig()).toThrow('INVITE_TOKEN_SECRET');
+    } finally {
+      restore();
+    }
+  });
+
+  test('succeeds in production with a real INVITE_TOKEN_SECRET', () => {
+    const restore = withEnv({
+      NODE_ENV: 'production',
+      AUTH_SECRET: 'prod-secret',
+      DATABASE_URL: 'postgres://prod:5432/db',
+      INTERNAL_SERVICE_TOKEN: 'service-tok',
+      INVITE_TOKEN_SECRET: 'a-real-strong-prod-invite-secret',
+      CORS_ORIGINS: 'https://app.example.com',
+      STORAGE_ACCESS_KEY_ID: 'real-key',
+    });
+    try {
+      expect(() => parseConfig()).not.toThrow();
+    } finally {
+      restore();
+    }
+  });
+
+  test('allows the dev default INVITE_TOKEN_SECRET outside production (dev fallback retained)', () => {
+    const restore = withEnv({
+      NODE_ENV: 'development',
+      AUTH_SECRET: 'dev-secret',
+      INVITE_TOKEN_SECRET: undefined,
+    });
+    try {
+      expect(() => parseConfig()).not.toThrow();
     } finally {
       restore();
     }

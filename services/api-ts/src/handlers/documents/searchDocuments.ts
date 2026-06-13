@@ -22,18 +22,24 @@ export async function searchDocuments(
   const offset = Number(query.offset ?? 0);
   const limit = Number(query.limit ?? 20);
 
+  // Resolve officer status once — drives both the accessLevel downgrade and
+  // the status (publish-visibility) enforcement below.
+  const isOfficer = (await requireOfficerTerm(ctx)) === null;
+
   // P0-04: Override caller-provided accessLevel based on role.
   // Members can only see 'public' and 'internal' documents.
   // Only officers/admins can access 'privileged' or 'restricted'.
   const PRIVILEGED_LEVELS = ['privileged', 'restricted', 'confidential'];
   let effectiveAccessLevel = query.accessLevel;
-  if (effectiveAccessLevel && PRIVILEGED_LEVELS.includes(effectiveAccessLevel)) {
-    const officerDenied = await requireOfficerTerm(ctx);
-    if (officerDenied) {
-      // Downgrade to 'tenantOnly' — don't expose privileged docs to non-officers
-      effectiveAccessLevel = 'tenantOnly';
-    }
+  if (effectiveAccessLevel && PRIVILEGED_LEVELS.includes(effectiveAccessLevel) && !isOfficer) {
+    // Downgrade to 'tenantOnly' — don't expose privileged docs to non-officers
+    effectiveAccessLevel = 'tenantOnly';
   }
+
+  // FIX-004 (WF-073 publish semantics): non-officers may only see published
+  // documents. Drafts/archived are officer work-in-progress. Officers may
+  // optionally narrow by a status filter; with no filter they see all statuses.
+  const effectiveStatus = isOfficer ? query.status : 'published';
 
   const db = ctx.get('database') as DatabaseInstance;
   const repo = new DocumentRepository(db, ctx.get('logger'));
@@ -45,6 +51,8 @@ export async function searchDocuments(
       ownerType: query.ownerType,
       accessLevel: effectiveAccessLevel,
       category: query.category,
+      status: effectiveStatus,
+      tag: query.tag,
       q: query.q,
     },
     { pagination: { offset, limit } },

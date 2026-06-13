@@ -188,6 +188,36 @@ export class SubscriptionTopicRepository {
     return this.db.select().from(subscriptionTopics).where(eq(subscriptionTopics.organizationId, organizationId)).limit(100);
   }
 
+  async findByName(organizationId: string, name: string): Promise<SubscriptionTopic | undefined> {
+    const [row] = await this.db.select().from(subscriptionTopics)
+      .where(and(eq(subscriptionTopics.organizationId, organizationId), eq(subscriptionTopics.name, name)))
+      .limit(1);
+    return row;
+  }
+
+  /**
+   * Resolve a subscription topic by (org, name), creating it if absent.
+   * Used to map the notification-preferences UI category keys onto real
+   * topic UUIDs so person_subscription.topic_id (a uuid column) never
+   * receives a synthetic string. Idempotent on the (org, name) pair.
+   */
+  async findOrCreateByName(
+    organizationId: string,
+    name: string,
+    defaults?: Partial<Pick<NewSubscriptionTopic, 'channel' | 'category' | 'description' | 'defaultEnabled'>>,
+  ): Promise<SubscriptionTopic> {
+    const existing = await this.findByName(organizationId, name);
+    if (existing) return existing;
+    return this.create({
+      organizationId,
+      name,
+      channel: defaults?.channel ?? 'email',
+      category: defaults?.category ?? name,
+      description: defaults?.description ?? null,
+      defaultEnabled: defaults?.defaultEnabled ?? true,
+    } as NewSubscriptionTopic);
+  }
+
   async update(id: string, data: Partial<SubscriptionTopic>): Promise<SubscriptionTopic | undefined> {
     const [row] = await this.db.update(subscriptionTopics).set({ ...data, updatedAt: new Date() }).where(eq(subscriptionTopics.id, id)).returning();
     return row;
@@ -215,6 +245,27 @@ export class PersonSubscriptionRepository {
     return this.db.select().from(personSubscriptions)
       .where(and(eq(personSubscriptions.personId, personId), eq(personSubscriptions.organizationId, organizationId)))
       .limit(100);
+  }
+
+  /**
+   * Like findByPerson, but enriches each row with the topic name so the
+   * notification-preferences UI can map a stored topic UUID back to its
+   * category and reflect saved toggle state on reload (FIX-005 round-trip).
+   */
+  async findByPersonWithTopic(
+    personId: string,
+    organizationId: string,
+  ): Promise<Array<PersonSubscription & { topicName: string | null }>> {
+    const rows = await this.db
+      .select({
+        sub: personSubscriptions,
+        topicName: subscriptionTopics.name,
+      })
+      .from(personSubscriptions)
+      .leftJoin(subscriptionTopics, eq(personSubscriptions.topicId, subscriptionTopics.id))
+      .where(and(eq(personSubscriptions.personId, personId), eq(personSubscriptions.organizationId, organizationId)))
+      .limit(100);
+    return rows.map((r) => ({ ...r.sub, topicName: r.topicName ?? null }));
   }
 
   async findByPersonAndTopic(personId: string, topicId: string): Promise<PersonSubscription | undefined> {
@@ -265,14 +316,20 @@ export class CommunicationsRepository {
     if (filters?.status) conditions.push(eq(announcements.status, filters.status as Announcement['status']));
     if (filters?.search) conditions.push(like(announcements.title, `%${escapeLikePattern(filters.search)}%`));
 
-    const [data, countResult] = await Promise.all([
-      this.db.select().from(announcements)
+    // FIX-008: left-join announcement_stats so the analytics dashboard (which reads
+    // `announcement.stats` off this list endpoint) shows the real delivery counts
+    // written by the now-live fan-out. Mirrors the per-row stats shape from get().
+    const [rows, countResult] = await Promise.all([
+      this.db.select({ announcement: announcements, stats: announcementStats })
+        .from(announcements)
+        .leftJoin(announcementStats, eq(announcementStats.announcementId, announcements.id))
         .where(and(...conditions))
         .orderBy(desc(announcements.createdAt))
         .limit(filters?.limit ?? 20)
         .offset(filters?.offset ?? 0),
       this.db.select({ count: sql<number>`count(*)::int` }).from(announcements).where(and(...conditions)),
     ]);
+    const data = rows.map((r) => ({ ...r.announcement, stats: r.stats ?? undefined }));
     return { data, total: countResult[0]?.count ?? 0 };
   }
 
@@ -366,4 +423,68 @@ export class SavedSegmentRepository {
     await this.db.delete(savedSegments)
       .where(and(eq(savedSegments.id, id), eq(savedSegments.organizationId, organizationId)));
   }
+}
+
+// ───────────────────────────────────────────────────────────────────────────
+// NotificationPreferencePort adapter (AHA FIX-004 / G4)
+//
+// Lets the notifs module READ the canonical `person_subscription` preference
+// store at delivery time WITHOUT importing across the module boundary — the
+// adapter lives next to its owning repo and is resolved via core/ports.
+//
+// Per-category, opt-out / fail-open. A category is "disabled" only when an
+// explicit `enabled = false` person_subscription row exists for a topic whose
+// `category` OR `name` (case-insensitive) matches the requested category. The
+// dual match absorbs the seed's two vocabularies for the same logical category
+// (e.g. topic name `dues` carries category `billing`; name `announcements`
+// carries category `general`). Anything else → enabled (send). This is NOT the
+// blunt "any disabled sub = global opt-out" semantics used by announcementSend.
+// ───────────────────────────────────────────────────────────────────────────
+import type { NotificationPreferencePort } from '@/core/ports/notification-preference.port';
+
+export function notificationPreferenceRepoPort(
+  db: DatabaseInstance,
+  logger?: Logger,
+): NotificationPreferencePort {
+  return {
+    async isCategoryEnabledForPerson(
+      personId: string,
+      organizationId: string,
+      category: string,
+    ): Promise<boolean> {
+      if (!personId || !organizationId || !category) return true; // fail-open
+      const cat = category.trim().toLowerCase();
+      try {
+        // Find any EXPLICITLY-disabled subscription for this person whose topic
+        // matches the category by either the topic.category or topic.name
+        // column. We only need existence, so limit(1).
+        const [row] = await db
+          .select({ id: personSubscriptions.id })
+          .from(personSubscriptions)
+          .innerJoin(
+            subscriptionTopics,
+            eq(personSubscriptions.topicId, subscriptionTopics.id),
+          )
+          .where(
+            and(
+              eq(personSubscriptions.personId, personId),
+              eq(personSubscriptions.organizationId, organizationId),
+              eq(personSubscriptions.enabled, false),
+              sql`(lower(${subscriptionTopics.category}) = ${cat} OR lower(${subscriptionTopics.name}) = ${cat})`,
+            ),
+          )
+          .limit(1);
+        // A matching explicit-disable row ⇒ category disabled ⇒ false (skip).
+        return !row;
+      } catch (err) {
+        // Fail-open on any lookup error — never silently drop a notification
+        // because the preference store was unreachable.
+        logger?.warn(
+          { err, personId, organizationId, category: cat },
+          'notificationPreferenceRepoPort: lookup failed, failing open (send)',
+        );
+        return true;
+      }
+    },
+  };
 }

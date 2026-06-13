@@ -12,6 +12,7 @@
 import type { ValidatedContext } from '@/types/app';
 import { PaymentTokenRepository } from '@/handlers/dues/repos/payment-token.repo';
 import { DuesRepository } from '@/handlers/association:member/repos/dues-payments.repo';
+import { formatReceiptNumber } from '@/handlers/association:member/utils/receipt-number';
 import {
   hashPaymentToken,
   isPaymentTokenExpired,
@@ -61,6 +62,31 @@ export async function checkoutPaymentToken(
   }
 
   try {
+    // [FIX-001] Create the pending DuesPayment ledger row BEFORE the checkout
+    // session, and carry its real id as `metadata.paymentId`. Previously the
+    // checkout created no row and the webhook had no `paymentId` to settle, so
+    // online payments charged money but left no ledger record. The webhook
+    // (createProcessPayment) reads `metadata.paymentId` to settle the exact row.
+    const year = new Date().getFullYear();
+    const orgPrefix = await duesRepo.getOrgReceiptPrefix(tokenRecord.organizationId);
+    const sequence = await duesRepo.getNextReceiptSequence(tokenRecord.organizationId, year);
+    const receiptNumber = formatReceiptNumber(orgPrefix, year, sequence);
+
+    const pendingPayment = await duesRepo.createPayment({
+      organizationId: tokenRecord.organizationId,
+      personId: tokenRecord.personId,
+      invoiceId: tokenRecord.invoiceId || null,
+      receiptNumber,
+      amount: tokenRecord.amount,
+      currency: tokenRecord.currency,
+      paymentMethod: 'online',
+      status: 'pending',
+      recordedBy: tokenRecord.personId,
+      paidAt: null as unknown as Date,
+      createdBy: tokenRecord.personId,
+      updatedBy: tokenRecord.personId,
+    });
+
     const publicUrl = process.env['SERVER_PUBLIC_URL'] || process.env['PUBLIC_URL'] || 'http://localhost:3004';
     const result = await billing.createPaymentIntent({
       amount: tokenRecord.amount,
@@ -71,8 +97,12 @@ export async function checkoutPaymentToken(
       successUrl: `${publicUrl}/pay/${rawToken}?status=success`,
       cancelUrl: `${publicUrl}/pay/${rawToken}?status=cancelled`,
       metadata: {
+        // The webhook settles by `paymentId` — this is the load-bearing field.
+        paymentId: pendingPayment.id,
         paymentTokenId: tokenRecord.id,
         personId: tokenRecord.personId,
+        // Both orgId and organizationId for webhook compatibility (it reads either).
+        orgId: tokenRecord.organizationId,
         organizationId: tokenRecord.organizationId,
         invoiceId: tokenRecord.invoiceId || '',
       },

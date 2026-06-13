@@ -12,6 +12,8 @@ interface ThreadPanelProps {
   roomId: string
   parentMessage: ChatMessage
   myPersonId: string
+  /** Org id (FIX-008): forwarded so thread reply reads carry `x-org-id` too. */
+  orgId?: string
   onClose: () => void
 }
 
@@ -19,7 +21,7 @@ interface ThreadPanelProps {
  * Slide-out thread panel showing parent message + replies.
  * Appears on the right side of the chat view.
  */
-export function ThreadPanel({ roomId, parentMessage, myPersonId, onClose }: ThreadPanelProps) {
+export function ThreadPanel({ roomId, parentMessage, myPersonId, orgId, onClose }: ThreadPanelProps) {
   const scrollRef = useRef<HTMLDivElement>(null)
   const [localReplies, setLocalReplies] = useState<ChatMessage[]>([])
 
@@ -28,6 +30,7 @@ export function ThreadPanel({ roomId, parentMessage, myPersonId, onClose }: Thre
     ...getChatMessagesOptions({
       path: { room: roomId },
       query: { limit: 50 },
+      ...(orgId ? { headers: { 'x-org-id': orgId } } : {}),
     }),
     // Filter client-side since API may not support parentMessageId filter yet
     select: (data) => ({

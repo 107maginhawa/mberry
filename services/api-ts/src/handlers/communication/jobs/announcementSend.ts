@@ -16,6 +16,7 @@ import { sql, eq, and, inArray } from 'drizzle-orm';
 import { SYSTEM_USER_ID } from '@/core/constants';
 import type { SegmentFilters } from '../repos/communication.schema';
 import { personSubscriptions } from '../repos/communication.schema';
+import { domainEvents } from '@/core/domain-events';
 import Handlebars from 'handlebars';
 
 const BATCH_SIZE = 50;
@@ -260,23 +261,58 @@ export async function processAnnouncementSend(
 }
 
 /**
- * Register communication background jobs with the scheduler.
+ * Register communication background jobs with the scheduler AND wire the
+ * announcement delivery fan-out to the domain event bus.
+ *
+ * Called once during app initialization (initializeApp). Before this wiring,
+ * `registerCommunicationJobs` was never invoked, no subscriber existed for
+ * `announcement.published`, and `processAnnouncementSend` was dead code —
+ * meaning no announcement ever reached a member (FIX-001 / FIX-002).
+ *
+ * @param db Database instance used by the published-event subscriber. The cron
+ *           handler receives its own db via JobContext; the event subscriber
+ *           has no context, so it captures `db` from the closure.
  */
 export function registerCommunicationJobs(
   scheduler: JobScheduler,
   notifsService: NotificationService,
   emailService: EmailService,
+  db: DatabaseInstance,
 ): void {
-  // Process scheduled announcements — runs every 5 minutes
+  // FIX-001: deliver on publish. When an announcement is published, fan out to
+  // in-app / email / push immediately. Fire-and-forget per domain-event-bus
+  // convention — the subscriber owns its own try/catch + structured logging.
+  domainEvents.on('announcement.published', async (payload) => {
+    try {
+      const repo = new CommunicationsRepository(db);
+      const announcement = await repo.get(payload.announcementId, payload.organizationId);
+      if (!announcement) return;
+      await processAnnouncementSend(
+        db,
+        payload.announcementId,
+        {
+          push: announcement.channelPush,
+          email: announcement.channelEmail,
+          inApp: true, // in-app is the mandatory baseline channel (M7-R1)
+        },
+        notifsService,
+        emailService,
+      );
+    } catch (err) {
+      console.error('[announcement.published] fan-out failed:', err);
+    }
+  });
+
+  // FIX-002: process scheduled announcements — runs every 5 minutes
   scheduler.registerCron('communication.processScheduled', '*/5 * * * *', async (context: JobContext) => {
-    const db = context.db;
-    const repo = new CommunicationsRepository(db);
+    const cronDb = context.db;
+    const repo = new CommunicationsRepository(cronDb);
     const { data: scheduled } = await repo.list('', { status: 'scheduled', limit: 10 });
 
     for (const announcement of scheduled) {
       if (announcement.scheduledAt && new Date(announcement.scheduledAt) <= new Date()) {
         await repo.updateStatus(announcement.id, 'sent', { publishedAt: new Date() });
-        await processAnnouncementSend(db, announcement.id, {
+        await processAnnouncementSend(cronDb, announcement.id, {
           push: announcement.channelPush,
           email: announcement.channelEmail,
           inApp: true,

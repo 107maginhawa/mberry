@@ -204,6 +204,22 @@ describe('createOrder', () => {
     const { data } = ctx._captured();
     expect(data.totalPrice).toBe('449.97');
   });
+
+  // FIX-005 (G-11): a listing with no price must NOT yield a silent ₱0 order.
+  test('throws BusinessLogicError when listing has no price (null-price guard)', async () => {
+    ListingRepository.prototype.findOneById = mock(async () => makeListing({ price: null })) as any;
+    const ctx = makeCtx({ body: { listingId: 'listing-1' } });
+    await expect(createOrder(ctx)).rejects.toBeInstanceOf(BusinessLogicError);
+  });
+
+  // FIX-007 (G-10, org-scope half): a listing in another org must be unreachable.
+  test('throws NotFoundError when listing belongs to another org (org-scope)', async () => {
+    ListingRepository.prototype.findOneById = mock(async () =>
+      makeListing({ organizationId: 'org-OTHER' })
+    ) as any;
+    const ctx = makeCtx({ body: { listingId: 'listing-1' } });
+    await expect(createOrder(ctx)).rejects.toBeInstanceOf(NotFoundError);
+  });
 });
 
 // ===========================================================================
@@ -248,5 +264,14 @@ describe('fulfillOrder', () => {
     OrderRepository.prototype.findOneById = mock(async () => makeOrder({ status: 'cancelled' })) as any;
     const ctx = makeCtx({ params: { orderId: 'order-1' } });
     await expect(fulfillOrder(ctx)).rejects.toBeInstanceOf(ConflictError);
+  });
+
+  // FIX-007 (G-10, org-scope half): an order in another org must be unreachable.
+  test('throws NotFoundError when order belongs to another org (org-scope)', async () => {
+    OrderRepository.prototype.findOneById = mock(async () =>
+      makeOrder({ organizationId: 'org-OTHER' })
+    ) as any;
+    const ctx = makeCtx({ params: { orderId: 'order-1' } });
+    await expect(fulfillOrder(ctx)).rejects.toBeInstanceOf(NotFoundError);
   });
 });

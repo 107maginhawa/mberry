@@ -84,4 +84,66 @@ describe('listReviews', () => {
     expect(capturedPaginationOpts.pagination.limit).toBe(20);
     expect(capturedPaginationOpts.pagination.offset).toBe(0);
   });
+
+  // FIX-011 (G-12): org-scope listReviews from ctx.get('organizationId').
+  test('FIX-011: org-scopes a non-admin caller to their organization', async () => {
+    let capturedFilters: any;
+    mocks = stubRepo(ReviewRepository, {
+      findManyWithPagination: async (filters: any) => {
+        capturedFilters = filters;
+        return { data: [], totalCount: 0 };
+      },
+    });
+
+    const ctx = makeCtx({
+      user: { id: 'user-1', role: 'user' },
+      organizationId: 'org-A',
+      _query: {},
+    });
+
+    await listReviews(ctx as any);
+    expect(capturedFilters.organizationId).toBe('org-A');
+  });
+
+  test('FIX-011: platform admin without org context lists cross-org (no org filter)', async () => {
+    let capturedFilters: any;
+    mocks = stubRepo(ReviewRepository, {
+      findManyWithPagination: async (filters: any) => {
+        capturedFilters = filters;
+        return { data: [], totalCount: 0 };
+      },
+    });
+
+    const ctx = makeCtx({
+      user: { id: 'admin-1', role: 'admin' },
+      session: { id: 'session-1', userId: 'admin-1', user: { id: 'admin-1', role: 'admin' } },
+      organizationId: undefined,
+      _query: {},
+    });
+
+    await listReviews(ctx as any);
+    expect(capturedFilters.organizationId).toBeUndefined();
+  });
+
+  test('FIX-011: multi-role admin recognized via hasRole; still org-scoped when org context present', async () => {
+    let capturedFilters: any;
+    mocks = stubRepo(ReviewRepository, {
+      findManyWithPagination: async (filters: any) => {
+        capturedFilters = filters;
+        return { data: [], totalCount: 0 };
+      },
+    });
+
+    // role string carries multiple comma-separated roles — the buggy `=== 'admin'`
+    // check would mis-classify this admin as a non-admin and 403 on the cross-user filter.
+    const ctx = makeCtx({
+      user: { id: 'admin-1', role: 'admin,platform_admin' },
+      session: { id: 'session-1', userId: 'admin-1', user: { id: 'admin-1', role: 'admin,platform_admin' } },
+      organizationId: 'org-B',
+      _query: { reviewer: 'someone-else' },
+    });
+
+    await listReviews(ctx as any);
+    expect(capturedFilters.organizationId).toBe('org-B');
+  });
 });

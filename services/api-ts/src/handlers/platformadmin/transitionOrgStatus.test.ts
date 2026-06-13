@@ -20,6 +20,8 @@ function makeOrg(status: string, updatedAt?: Date) {
   };
 }
 
+const SUPER_ADMIN = { id: 'pa-1', userId: 'admin-1', role: 'super' };
+
 // ─── Tests ───────────────────────────────────────────────
 
 describe('transitionOrgStatus', () => {
@@ -33,6 +35,53 @@ describe('transitionOrgStatus', () => {
     const ctx = makeCtx({ session: null, _params: { organizationId: 'org-1' }, _body: { status: 'active' } });
     const response = await transitionOrgStatus(ctx);
     expect(response.status).toBe(401);
+  });
+
+  // ─── FIX-001 (G1): super-only platform mutation ──────────────────────
+  // Matrix §3.7: transition org status = super only. analyst/support rejected.
+  test('returns 403 for analyst platform admin (not super)', async () => {
+    mocks = stubRepo(OrganizationRepository, {
+      findById: async () => makeOrg('trial'),
+      update: async () => makeOrg('active'),
+    });
+    const ctx = makeCtx({
+      user: { id: 'admin-1', role: 'platform_admin' },
+      platformAdmin: { id: 'pa-1', userId: 'admin-1', role: 'analyst' },
+      _params: { organizationId: 'org-1' },
+      _body: { status: 'active' },
+    });
+    const response = await transitionOrgStatus(ctx);
+    expect(response.status).toBe(403);
+  });
+
+  test('returns 403 for support platform admin (not super)', async () => {
+    mocks = stubRepo(OrganizationRepository, {
+      findById: async () => makeOrg('trial'),
+      update: async () => makeOrg('active'),
+    });
+    const ctx = makeCtx({
+      user: { id: 'admin-1', role: 'platform_admin' },
+      platformAdmin: { id: 'pa-1', userId: 'admin-1', role: 'support' },
+      _params: { organizationId: 'org-1' },
+      _body: { status: 'active' },
+    });
+    const response = await transitionOrgStatus(ctx);
+    expect(response.status).toBe(403);
+  });
+
+  test('returns 403 when platformAdmin context is absent', async () => {
+    mocks = stubRepo(OrganizationRepository, {
+      findById: async () => makeOrg('trial'),
+      update: async () => makeOrg('active'),
+    });
+    const ctx = makeCtx({
+      user: { id: 'user-1', role: 'member' },
+      platformAdmin: undefined,
+      _params: { organizationId: 'org-1' },
+      _body: { status: 'active' },
+    });
+    const response = await transitionOrgStatus(ctx);
+    expect(response.status).toBe(403);
   });
 
   // ─── Valid transitions ────────────────────────────────
@@ -56,6 +105,7 @@ describe('transitionOrgStatus', () => {
       });
 
       const ctx = makeCtx({
+        platformAdmin: SUPER_ADMIN,
         _params: { organizationId: 'org-1' },
         _body: { status: to },
       });
@@ -81,6 +131,7 @@ describe('transitionOrgStatus', () => {
       });
 
       const ctx = makeCtx({
+        platformAdmin: SUPER_ADMIN,
         _params: { organizationId: 'org-1' },
         _body: { status: to },
       });
@@ -98,6 +149,7 @@ describe('transitionOrgStatus', () => {
     });
 
     const ctx = makeCtx({
+      platformAdmin: SUPER_ADMIN,
       _params: { organizationId: 'nonexistent' },
       _body: { status: 'active' },
     });
@@ -116,6 +168,7 @@ describe('transitionOrgStatus', () => {
     });
 
     const ctx = makeCtx({
+      platformAdmin: SUPER_ADMIN,
       _params: { organizationId: 'org-1' },
       _body: { status: 'active' },
     });
@@ -132,6 +185,7 @@ describe('transitionOrgStatus', () => {
     });
 
     const ctx = makeCtx({
+      platformAdmin: SUPER_ADMIN,
       _params: { organizationId: 'org-1' },
       _body: { status: 'active' },
     });
@@ -149,6 +203,7 @@ describe('transitionOrgStatus', () => {
 
     const ctx = makeCtx({
       audit: null,
+      platformAdmin: SUPER_ADMIN,
       _params: { organizationId: 'org-1' },
       _body: { status: 'active' },
     });
@@ -167,6 +222,7 @@ describe('transitionOrgStatus', () => {
     const emitSpy = spyOn(domainEvents, 'emit');
 
     const ctx = makeCtx({
+      platformAdmin: SUPER_ADMIN,
       _params: { organizationId: 'org-1' },
       _body: { status: 'active' },
     });

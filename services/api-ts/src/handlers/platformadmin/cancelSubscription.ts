@@ -12,6 +12,7 @@ import type { DatabaseInstance } from "@/core/database";
 import { domainEvents } from "@/core/domain-events";
 import { ValidationError } from "@/core/errors";
 import { subscriptions } from "./repos/platform-admin.schema";
+import { requireAdminTier, SUPER_ONLY } from "@/core/auth/admin-tier";
 
 export async function cancelSubscription(ctx: Context): Promise<Response> {
 	const session = ctx.get("session");
@@ -19,6 +20,10 @@ export async function cancelSubscription(ctx: Context): Promise<Response> {
 
 	const admin = ctx.get("platformAdmin");
 	if (!admin) return ctx.json({ error: "Platform admin access required" }, 403);
+
+	// FIX-008 (G1) / Q1: cancelling a subscription is a super-only mutation.
+	const denied = requireAdminTier(ctx, SUPER_ONLY);
+	if (denied) return denied;
 
 	const db = ctx.get("database") as DatabaseInstance;
 	const baseLogger = ctx.get('logger');

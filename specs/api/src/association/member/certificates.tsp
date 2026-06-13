@@ -83,6 +83,9 @@ model BulkIssueCertificatesRequest {
   @maxItems(100)
   personIds: string[];
 
+  @doc("ID of the real training activity these certificates link to (FIX-006). Optional/nullable-tolerant: when omitted the cert is issued unlinked (trainingId NULL). When supplied it must reference an actual training row and re-keys the per-(training, person) uniqueness.")
+  trainingId?: string;
+
   @doc("Title of the training activity")
   @minLength(1)
   trainingTitle: string;

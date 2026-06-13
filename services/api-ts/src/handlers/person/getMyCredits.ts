@@ -14,7 +14,13 @@ export async function getMyCredits(ctx: Context): Promise<Response> {
   if (organizationId) { const config = await db.select().from(orgCpdConfig).where(eq(orgCpdConfig.organizationId, organizationId)).limit(1); if (config[0]) { requiredCredits = config[0].requiredCredits; sdlCapPercent = config[0].sdlCapPercent; } }
   const conditions = [eq(creditEntries.personId, personId), eq(creditEntries.status, 'active')];
   if (organizationId) conditions.push(eq(creditEntries.organizationId, organizationId));
-  const credits = await db.select({ totalCredits: sql<number>`COALESCE(SUM(${creditEntries.creditAmount}), 0)`, generalCredits: sql<number>`COALESCE(SUM(${creditEntries.creditAmount}) FILTER (WHERE ${creditEntries.category} = 'General'), 0)`, majorCredits: sql<number>`COALESCE(SUM(${creditEntries.creditAmount}) FILTER (WHERE ${creditEntries.category} = 'Major'), 0)`, sdlCredits: sql<number>`COALESCE(SUM(${creditEntries.creditAmount}) FILTER (WHERE ${creditEntries.category} = 'Self-Directed'), 0)`, entryCount: sql<number>`COUNT(*)` }).from(creditEntries).where(and(...conditions));
+  // TC-DEC-02 (Step 47): the credit TOTAL counts only officer-verified entries
+  // (AUTO + officer-awarded are written 'verified'); a member's pending manual
+  // submission must not inflate the total until it is verified. The HISTORY
+  // list below intentionally keeps the unfiltered conditions so the member can
+  // still see their pending submissions (with the verificationStatus badge).
+  const sumConditions = [...conditions, eq(creditEntries.verificationStatus, 'verified')];
+  const credits = await db.select({ totalCredits: sql<number>`COALESCE(SUM(${creditEntries.creditAmount}), 0)`, generalCredits: sql<number>`COALESCE(SUM(${creditEntries.creditAmount}) FILTER (WHERE ${creditEntries.category} = 'General'), 0)`, majorCredits: sql<number>`COALESCE(SUM(${creditEntries.creditAmount}) FILTER (WHERE ${creditEntries.category} = 'Major'), 0)`, sdlCredits: sql<number>`COALESCE(SUM(${creditEntries.creditAmount}) FILTER (WHERE ${creditEntries.category} = 'Self-Directed'), 0)`, entryCount: sql<number>`COUNT(*)` }).from(creditEntries).where(and(...sumConditions));
   const row = credits[0] ?? { totalCredits: 0, generalCredits: 0, majorCredits: 0, sdlCredits: 0, entryCount: 0 };
   const total = Number(row.totalCredits); const sdlMax = Math.floor((sdlCapPercent / 100) * requiredCredits); const sdlCredits = Number(row.sdlCredits);
   const history = await db.select().from(creditEntries).where(and(...conditions)).limit(500);

@@ -42,6 +42,21 @@ export async function requireOfficerTerm(ctx: BaseContext): Promise<Response | n
     return ctx.json({ error: 'Officer access required for this organization' }, 403);
   }
 
+  // P1-3 / FIX-002 (G2): enforce 2FA when any active term is a privileged
+  // position (President, Treasurer, Secretary). requireOfficerTerm takes no
+  // title argument, so the privileged check inspects the DB-sourced
+  // positionTitle of the already-fetched terms (mirrors require-officer.ts).
+  const holdsPrivileged = terms.some(t =>
+    PRIVILEGED_POSITIONS.has(((t.positionTitle as string) ?? '').toLowerCase()),
+  );
+  const isDev = process.env['NODE_ENV'] !== 'production';
+  if (holdsPrivileged && !user.twoFactorEnabled && !isDev) {
+    return ctx.json(
+      { error: 'Two-factor authentication required for privileged officer positions. Please enable 2FA in your account settings.' },
+      403,
+    );
+  }
+
   return null; // allowed
 }
 

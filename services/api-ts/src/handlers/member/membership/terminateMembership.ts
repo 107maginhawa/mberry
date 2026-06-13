@@ -5,7 +5,9 @@ import type { DatabaseInstance } from '@/core/database';
 import { NotFoundError, UnauthorizedError, BusinessLogicError } from '@/core/errors';
 import type { TerminateMembershipBody, TerminateMembershipParams } from '@/generated/openapi/validators';
 import { MembershipRepository } from '@/handlers/association:member/repos/membership.repo';
+import { membershipStatusHistory } from '@/handlers/association:member/repos/status-history.schema';
 import { withComputedStatus } from './utils/membership-status-middleware';
+import { assertRecordInCallerOrg } from './utils/assert-record-org';
 import { assertValidTransition } from '@/utils/status-transitions';
 import { MEMBERSHIP_VALID_TRANSITIONS } from './utils/status-transitions';
 
@@ -28,6 +30,8 @@ export async function terminateMembership(
 
   const membership = await repo.findOneById(membershipId);
   if (!membership) throw new NotFoundError('Membership');
+  // FIX-003 (G-02): the record must belong to the caller's org.
+  assertRecordInCallerOrg(ctx, membership.organizationId, 'this membership');
   const enriched = withComputedStatus(membership);
 
   if (enriched.status === 'pendingPayment') {
@@ -43,6 +47,20 @@ export async function terminateMembership(
     removedAt: new Date(),
     removalReason: body.terminationReason ?? null,
   } as Partial<Membership>);
+
+  // FIX-006 / G-08: record the officer-initiated transition for the audit trail.
+  if (membership.personId) {
+    await db.insert(membershipStatusHistory).values({
+      organizationId: membership.organizationId,
+      membershipId,
+      personId: membership.personId,
+      fromStatus: enriched.status,
+      toStatus: 'removed',
+      reason: body.terminationReason ?? 'terminated',
+      changedBy: session.user.id,
+      changedAt: new Date(),
+    });
+  }
 
   ctx.set('auditResourceId', membershipId);
   ctx.set('auditDescription', 'Membership removed');

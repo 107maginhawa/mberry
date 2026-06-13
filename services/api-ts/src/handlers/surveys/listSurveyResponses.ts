@@ -11,8 +11,6 @@ import { OfficerTermRepository } from '../association:member/repos/governance.re
 import { buildPaginationMeta } from '@/utils/query';
 import { hasRole } from '@/utils/auth';
 
-const ANONYMOUS_UUID = '00000000-0000-0000-0000-000000000000';
-
 /**
  * listSurveyResponses
  *
@@ -20,7 +18,9 @@ const ANONYMOUS_UUID = '00000000-0000-0000-0000-000000000000';
  * OperationId: listSurveyResponses
  *
  * Lists responses for a survey. Officer/admin only.
- * Anonymous surveys strip responderId to zeros UUID.
+ * Anonymous surveys null out responderId (FIX-007) — matches the nullable
+ * TypeSpec `responderId?` and avoids a sentinel a client could mistake for a
+ * real person id.
  */
 export async function listSurveyResponses(
   ctx: ValidatedContext<never, ListSurveyResponsesQuery, ListSurveyResponsesParams>
@@ -74,7 +74,7 @@ export async function listSurveyResponses(
   const isAnonymous = settings?.anonymous === true;
 
   const data = isAnonymous
-    ? result.data.map((r) => ({ ...r, responderId: ANONYMOUS_UUID }))
+    ? result.data.map((r) => ({ ...r, responderId: null }))
     : result.data;
 
   return ctx.json({

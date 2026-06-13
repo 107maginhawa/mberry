@@ -6,11 +6,22 @@
  * side-effects, and the placeholder token value.
  */
 
-import { describe, test, expect, mock, beforeEach } from 'bun:test';
+import { describe, test, expect, mock, beforeEach, afterEach } from 'bun:test';
+import { ensurePristine, restoreRepo } from '@/test-utils/make-ctx';
 // Assertion-Style: EXISTENCE_CHECK — verifying middleware/context injection patterns
 import { joinVideoCall } from './joinVideoCall';
 import { ChatRoomRepository } from './repos/chatRoom.repo';
 import { ChatMessageRepository } from './repos/chatMessage.repo';
+
+// Restore repo prototypes after every test so the raw `prototype.x = mock()`
+// patches below don't leak into other test files (bun runs files in one process).
+ensurePristine(ChatRoomRepository);
+ensurePristine(ChatMessageRepository);
+afterEach(() => {
+  restoreRepo(ChatRoomRepository);
+  restoreRepo(ChatMessageRepository);
+});
+
 import {
   ForbiddenError,
   NotFoundError,
@@ -292,5 +303,85 @@ describe('joinVideoCall', () => {
 
     // Should not rethrow notification errors
     await expect(joinVideoCall(ctx)).resolves.toBeDefined();
+  });
+
+  // -------------------------------------------------------------------------
+  // PD-3 (FIX-011) — V1 capacity cap on the join signaling path
+  // -------------------------------------------------------------------------
+  describe('V1 capacity cap (PD-3)', () => {
+    // Build N active participants (joined, not left) that are NOT the joining user.
+    function activeParticipants(n: number) {
+      return Array.from({ length: n }, (_, i) => ({
+        user: `occupant-${i}`,
+        displayName: `Occ ${i}`,
+        userType: 'host',
+        audioEnabled: true,
+        videoEnabled: true,
+        joinedAt: new Date().toISOString(),
+      }));
+    }
+
+    test('rejects join when the call is already at the V1 cap (6)', async () => {
+      const fullCall = makeCallMessage({
+        videoCallData: makeVideoCallData({
+          status: 'active',
+          participants: activeParticipants(6) as any,
+        }),
+      });
+      ChatRoomRepository.prototype.findOneById = mock(async () =>
+        makeRoom({ participants: ['user-1', 'user-2'] })
+      ) as any;
+      ChatMessageRepository.prototype.findActiveVideoCall = mock(async () => fullCall) as any;
+
+      const ctx = makeCtx({ userId: 'user-1', body: { displayName: 'Late', audioEnabled: true, videoEnabled: true } });
+      await expect(joinVideoCall(ctx)).rejects.toBeInstanceOf(ConflictError);
+      // and it must NOT have added the participant
+      expect(addVideoCallParticipant).not.toHaveBeenCalled();
+    });
+
+    test('allows join when the call is below the V1 cap', async () => {
+      const partialCall = makeCallMessage({
+        videoCallData: makeVideoCallData({
+          status: 'active',
+          participants: activeParticipants(5) as any,
+        }),
+      });
+      ChatRoomRepository.prototype.findOneById = mock(async () =>
+        makeRoom({ participants: ['user-1', 'user-2'] })
+      ) as any;
+      ChatMessageRepository.prototype.findActiveVideoCall = mock(async () => partialCall) as any;
+
+      const ctx = makeCtx({ userId: 'user-1', body: { displayName: 'Alice', audioEnabled: true, videoEnabled: true } });
+      await joinVideoCall(ctx);
+
+      const { status } = ctx._captured();
+      expect(status).toBe(200);
+      expect(addVideoCallParticipant).toHaveBeenCalledTimes(1);
+    });
+
+    test('does not count left participants against the cap', async () => {
+      // 6 total but one has left → 5 active → join allowed
+      const mixed: any[] = activeParticipants(5);
+      mixed.push({
+        user: 'occupant-gone',
+        displayName: 'Gone',
+        userType: 'host',
+        audioEnabled: true,
+        videoEnabled: true,
+        joinedAt: new Date(Date.now() - 1000).toISOString(),
+        leftAt: new Date().toISOString(),
+      });
+      const call = makeCallMessage({
+        videoCallData: makeVideoCallData({ status: 'active', participants: mixed as any }),
+      });
+      ChatRoomRepository.prototype.findOneById = mock(async () =>
+        makeRoom({ participants: ['user-1', 'user-2'] })
+      ) as any;
+      ChatMessageRepository.prototype.findActiveVideoCall = mock(async () => call) as any;
+
+      const ctx = makeCtx({ userId: 'user-1', body: { displayName: 'Alice', audioEnabled: true, videoEnabled: true } });
+      await joinVideoCall(ctx);
+      expect(ctx._captured().status).toBe(200);
+    });
   });
 });

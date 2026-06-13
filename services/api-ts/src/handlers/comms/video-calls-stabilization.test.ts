@@ -11,7 +11,8 @@
  * - Edge cases: simultaneous joins, call already ended
  */
 
-import { describe, test, expect, mock, beforeEach } from 'bun:test';
+import { describe, test, expect, mock, beforeEach, afterEach } from 'bun:test';
+import { ensurePristine, restoreRepo } from '@/test-utils/make-ctx';
 
 // Mock-Classification: APPROPRIATE — WebSocket/WebRTC real-time service boundary
 // Assertion-Style: EXISTENCE_CHECK — verifying middleware/context injection patterns
@@ -23,6 +24,16 @@ import { sendChatMessage } from './sendChatMessage';
 
 import { ChatRoomRepository } from './repos/chatRoom.repo';
 import { ChatMessageRepository } from './repos/chatMessage.repo';
+
+// Restore repo prototypes after every test so the raw `prototype.x = mock()`
+// patches below don't leak into other test files (bun runs files in one process).
+ensurePristine(ChatRoomRepository);
+ensurePristine(ChatMessageRepository);
+afterEach(() => {
+  restoreRepo(ChatRoomRepository);
+  restoreRepo(ChatMessageRepository);
+});
+
 import {
   ForbiddenError,
   NotFoundError,

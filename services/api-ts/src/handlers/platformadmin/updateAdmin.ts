@@ -3,6 +3,7 @@ import type { DatabaseInstance } from '@/core/database';
 import type { UpdateAdminBody, UpdateAdminParams } from '@/generated/openapi/validators';
 import { NotFoundError, BusinessLogicError } from '@/core/errors';
 import { PlatformAdminRepository } from './repos/platform-admin.repo';
+import { requireAdminTier, SUPER_ONLY } from '@/core/auth/admin-tier';
 
 /**
  * updateAdmin
@@ -16,11 +17,9 @@ export async function updateAdmin(
   const session = ctx.get('session');
   if (!session) return ctx.json({ error: 'Unauthorized' }, 401);
 
-  // [EM-M03-9a3e7b12] Only super admins can update platform admins
-  const callerAdmin = ctx.get('platformAdmin') as { role: string } | undefined;
-  if (!callerAdmin || callerAdmin.role !== 'super') {
-    return ctx.json({ error: 'Super admin access required' }, 403);
-  }
+  // FIX-008 (G1) / Q1: updating a platform admin is a super-only mutation.
+  const denied = requireAdminTier(ctx, SUPER_ONLY);
+  if (denied) return denied;
 
   const { adminId } = ctx.req.valid('param');
   const body = ctx.req.valid('json');

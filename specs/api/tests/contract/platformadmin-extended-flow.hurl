@@ -7,8 +7,18 @@
 #   listPublicOrgs
 #
 # Requires: seeded org + officer (test@memberry.ph) from db:seed-modules.
-# Most admin endpoints require role=super; the seeded officer is org-scoped
-# so 403 is the expected response for them — still exercises the route.
+#
+# AHA FIX-017 (tightened): the seeded officer is NOT in the platform_admin
+# table, and `app.use('/admin/*', authMiddleware(), platformAdminAuthMiddleware())`
+# (app.ts) guards the whole /admin surface. Every /admin/* call below MUST be
+# rejected with a deterministic 403 for this non-admin user. We now assert that
+# exact RBAC behavior instead of the prior `matches "^(200|400|403|404)$"`
+# tolerance, which also passed on accidental 200/400/404 and masked a broken
+# guard. The public org directory (step 7) is unauthenticated and asserts a
+# real 200/4xx outcome.
+#
+# NOTE: [BLOCKED BY ENVIRONMENT] — not executed during the AHA fix pass (no API
+# server boot). Run via scripts/run-contract-tests.ts against $API_URL.
 # Org ID: ed8e3a96-8126-4341-be42-e6eb7940c562
 
 # CSRF preamble
@@ -36,58 +46,48 @@ officer_cookie: cookie "better-auth.session_token"
 GET {{api}}/admin/committees
 Cookie: better-auth.session_token={{officer_cookie}}
 x-org-id: ed8e3a96-8126-4341-be42-e6eb7940c562
-HTTP *
-[Asserts]
-status toString matches "^(200|400|403)$"
+HTTP 403
 
 # ── 2. Get a synthetic committee ─────────────────────────────────────────────
 
 GET {{api}}/admin/committees/00000000-0000-4000-8000-000000000000
 Cookie: better-auth.session_token={{officer_cookie}}
 x-org-id: ed8e3a96-8126-4341-be42-e6eb7940c562
-HTTP *
-[Asserts]
-status toString matches "^(200|400|403|404)$"
+HTTP 403
 
 # ── 3. National dashboard for a synthetic association ────────────────────────
 
 GET {{api}}/admin/national-dashboard/00000000-0000-4000-8000-000000000000
 Cookie: better-auth.session_token={{officer_cookie}}
 x-org-id: ed8e3a96-8126-4341-be42-e6eb7940c562
-HTTP *
-[Asserts]
-status toString matches "^(200|400|403|404)$"
+HTTP 403
 
 # ── 4. List national chapters ────────────────────────────────────────────────
 
 GET {{api}}/admin/national/chapters
 Cookie: better-auth.session_token={{officer_cookie}}
 x-org-id: ed8e3a96-8126-4341-be42-e6eb7940c562
-HTTP *
-[Asserts]
-status toString matches "^(200|400|403)$"
+HTTP 403
 
 # ── 5. National chapter detail (synthetic org id) ────────────────────────────
 
 GET {{api}}/admin/national/chapters/00000000-0000-4000-8000-000000000000
 Cookie: better-auth.session_token={{officer_cookie}}
 x-org-id: ed8e3a96-8126-4341-be42-e6eb7940c562
-HTTP *
-[Asserts]
-status toString matches "^(200|400|403|404)$"
+HTTP 403
 
 # ── 6. Platform summary ──────────────────────────────────────────────────────
 
 GET {{api}}/admin/national/platform
 Cookie: better-auth.session_token={{officer_cookie}}
 x-org-id: ed8e3a96-8126-4341-be42-e6eb7940c562
-HTTP *
-[Asserts]
-status toString matches "^(200|400|403)$"
+HTTP 403
 
 # ── 7. Public org directory (anonymous) ──────────────────────────────────────
+# Genuinely public endpoint (listPublicOrgs) — must return 200 for an anonymous
+# caller. Tightened from `matches "^(200|400|404)$"`.
 
 GET {{api}}/public/orgs
-HTTP *
+HTTP 200
 [Asserts]
-status toString matches "^(200|400|404)$"
+jsonpath "$.data" exists

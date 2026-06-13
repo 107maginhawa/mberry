@@ -15,12 +15,27 @@ import {
   uuid,
   pgEnum,
   index,
+  uniqueIndex,
   bigint,
   real,
 } from 'drizzle-orm/pg-core';
+import { sql } from 'drizzle-orm';
 import { baseEntityFields } from '@/core/database.schema';
 
 export const trainingVisibilityEnum = pgEnum('training_visibility', ['internal', 'network']);
+
+/**
+ * FIX-007 (M9-R1): platform-defined training delivery formats. Mirrors the
+ * TypeSpec `TrainingType` enum (training.tsp). The set is immutable —
+ * per-org custom types are explicitly forbidden by M9-R1.
+ */
+export const trainingTypeEnum = pgEnum('training_type', [
+  'seminar',
+  'workshop',
+  'webinar',
+  'self_paced',
+  'hands_on',
+]);
 
 export const trainingStatusEnum = pgEnum('training_status', [
   'draft',
@@ -30,6 +45,10 @@ export const trainingStatusEnum = pgEnum('training_status', [
 ]);
 
 export const enrollmentStatusEnum = pgEnum('enrollment_status', [
+  // TC-DEC-01 (Step 47): proof-of-payment holding state for paid trainings.
+  // A paid enrollment starts here; an officer confirms offline payment to
+  // move it to `enrolled`. Only `enrolled` may be completed for credit.
+  'payment_pending',
   'enrolled',
   'completed',
   'cancelled',
@@ -46,6 +65,8 @@ export const trainings = pgTable('training', {
   ...baseEntityFields,
   organizationId: uuid('organization_id').notNull(),
   title: varchar('title', { length: 300 }).notNull(),
+  /** FIX-007 (M9-R1): platform training delivery format (nullable for pre-migration rows). */
+  type: trainingTypeEnum('type'),
   description: text('description'),
   instructorName: varchar('instructor_name', { length: 200 }),
   instructorId: uuid('instructor_id'),
@@ -67,6 +88,7 @@ export const trainings = pgTable('training', {
 }, (table) => [
   index('idx_training_org').on(table.organizationId),
   index('idx_training_status').on(table.status),
+  index('idx_training_type').on(table.type),
 ]);
 
 export const trainingEnrollments = pgTable('training_enrollment', {
@@ -78,10 +100,26 @@ export const trainingEnrollments = pgTable('training_enrollment', {
   enrolledAt: timestamp('enrolled_at', { withTimezone: true }).notNull().defaultNow(),
   completedAt: timestamp('completed_at', { withTimezone: true }),
   cancelledAt: timestamp('cancelled_at', { withTimezone: true }),
+  // TC-DEC-01 (Step 47): proof-of-payment fields for paid trainings. The
+  // member attaches an offline-payment proof (submitTrainingPaymentProof);
+  // an officer confirms it (confirmTrainingPayment), recording who/when.
+  proofStorageKey: varchar('proof_storage_key', { length: 500 }),
+  proofFileName: varchar('proof_file_name', { length: 255 }),
+  proofMimeType: varchar('proof_mime_type', { length: 100 }),
+  paymentSubmittedAt: timestamp('payment_submitted_at', { withTimezone: true }),
+  paymentConfirmedBy: uuid('payment_confirmed_by'),
+  paymentConfirmedAt: timestamp('payment_confirmed_at', { withTimezone: true }),
 }, (table) => [
   index('idx_training_enroll_org').on(table.organizationId),
   index('idx_training_enroll_training').on(table.trainingId),
   index('idx_training_enroll_person').on(table.personId),
+  // FIX-010 (G10): DB backstop for the duplicate-enrollment guard. A member
+  // may hold at most one ACTIVE (non-cancelled) enrollment per training; the
+  // partial unique index lets a member re-enroll after cancelling while
+  // preventing duplicate live rows even under a race.
+  uniqueIndex('uq_training_enroll_active')
+    .on(table.trainingId, table.personId)
+    .where(sql`${table.status} <> 'cancelled'`),
 ]);
 
 export const courses = pgTable('course', {

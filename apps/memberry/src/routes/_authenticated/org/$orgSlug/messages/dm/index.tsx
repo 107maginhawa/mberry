@@ -4,7 +4,9 @@ import { useQuery } from '@tanstack/react-query'
 import { getPersonOptions } from '@monobase/sdk-ts/generated/react-query'
 import { PageShell } from '@/components/patterns/page-shell'
 import { DmList } from '@/features/comms/components/dm-list'
+import { DmMemberPicker } from '@/features/comms/components/dm-member-picker'
 import { ChatView } from '@/features/comms/components/chat-view'
+import { useOrgProvider } from '@/providers/OrgProvider'
 import { EmptyState } from '@/components/patterns/empty-state'
 import { MessageCircle } from 'lucide-react'
 
@@ -14,7 +16,9 @@ export const Route = createFileRoute('/_authenticated/org/$orgSlug/messages/dm/'
 
 function DmIndexPage() {
   const { orgSlug } = Route.useParams()
+  const { orgId } = useOrgProvider()
   const [activeRoomId, setActiveRoomId] = useState<string | null>(null)
+  const [pickerOpen, setPickerOpen] = useState(false)
 
   const person = useQuery({
     ...getPersonOptions({ path: { person: 'me' } }),
@@ -35,8 +39,10 @@ function DmIndexPage() {
         {/* DM list sidebar */}
         <div className="w-64 flex-shrink-0 overflow-y-auto hidden md:block">
           <DmList
+            orgId={orgId}
             activeRoomId={activeRoomId ?? undefined}
             onSelectRoom={setActiveRoomId}
+            onNewDm={() => setPickerOpen(true)}
             myPersonId={myPersonId}
           />
         </div>
@@ -48,6 +54,7 @@ function DmIndexPage() {
               roomId={activeRoomId}
               myPersonId={myPersonId}
               roomName="Direct Message"
+              orgId={orgId}
             />
           ) : (
             <div className="h-full flex items-center justify-center">
@@ -60,6 +67,16 @@ function DmIndexPage() {
           )}
         </div>
       </div>
+
+      <DmMemberPicker
+        open={pickerOpen}
+        onOpenChange={setPickerOpen}
+        orgId={orgId}
+        myPersonId={myPersonId}
+        onCreated={(roomId) => {
+          if (roomId) setActiveRoomId(roomId)
+        }}
+      />
     </PageShell>
   )
 }

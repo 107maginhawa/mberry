@@ -9,6 +9,12 @@ import { useUnreadCounts } from '../hooks/use-unread-counts'
 
 interface ChannelListProps {
   orgSlug: string
+  /**
+   * Org id (FIX-008): when present, the chat-room list read carries
+   * `x-org-id` so the backend org-scoping filter (organization_id = caller
+   * OR room_type = 'dm') is exercised. Omitted in org-agnostic contexts.
+   */
+  orgId?: string
   activeRoomId?: string
   onSelectRoom: (roomId: string) => void
   isOfficer?: boolean
@@ -49,10 +55,13 @@ function roomDisplayName(room: ChatRoom): string {
  * Channel list sidebar. Shows chat rooms the user is in,
  * sorted by last activity. Active room highlighted.
  */
-export function ChannelList({ activeRoomId, onSelectRoom, isOfficer = false, onCreateChannel }: ChannelListProps) {
+export function ChannelList({ orgId, activeRoomId, onSelectRoom, isOfficer = false, onCreateChannel }: ChannelListProps) {
   const { hasUnread } = useUnreadCounts()
   const roomsQuery = useQuery({
-    ...listChatRoomsOptions({ query: { status: 'active' } }),
+    ...listChatRoomsOptions({
+      query: { status: 'active' },
+      ...(orgId ? { headers: { 'x-org-id': orgId } } : {}),
+    }),
     staleTime: 10_000,
   })
 

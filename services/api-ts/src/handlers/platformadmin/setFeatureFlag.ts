@@ -4,6 +4,7 @@ import type { SetFeatureFlagBody } from '@/generated/openapi/validators';
 import { FeatureFlagRepository } from './repos/platform-admin.repo';
 import { domainEvents } from '@/core/domain-events';
 import { BusinessLogicError } from '@/core/errors';
+import { requireAdminTier, SUPER_ONLY } from '@/core/auth/admin-tier';
 
 /**
  * setFeatureFlag
@@ -16,6 +17,10 @@ export async function setFeatureFlag(
 ): Promise<Response> {
   const session = ctx.get('session');
   if (!session) return ctx.json({ error: 'Unauthorized' }, 401);
+
+  // FIX-008 (G1) / Q1: setting a feature flag is a super-only mutation.
+  const denied = requireAdminTier(ctx, SUPER_ONLY);
+  if (denied) return denied;
 
   const body = ctx.req.valid('json');
 

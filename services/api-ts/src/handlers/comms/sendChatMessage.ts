@@ -11,12 +11,14 @@ import {
 } from '@/core/errors';
 import { ChatRoomRepository } from './repos/chatRoom.repo';
 import { ChatMessageRepository } from './repos/chatMessage.repo';
-import type { 
-  SendTextMessageRequest, 
+import { requireOfficerTerm } from '@/core/auth/officer-checks';
+import type {
+  SendTextMessageRequest,
   StartVideoCallRequest,
   VideoCallData,
   CallParticipant
 } from './repos/comms.schema';
+import { VIDEO_CALL_MAX_PARTICIPANTS } from './repos/comms.schema';
 
 /**
  * sendChatMessage
@@ -81,7 +83,32 @@ export async function sendChatMessage(
   if (!isParticipant) {
     throw new ForbiddenError('Access denied: not a participant in this chat room');
   }
-  
+
+  // PD-2 (CONTINUE-48): rooms (DMs included) are org-scoped — no cross-org
+  // messaging. When both the caller's org context and the room's org are known
+  // and differ, reject. Only enforced when both are present so org-agnostic
+  // legacy rows / unscoped contexts are not falsely blocked.
+  if (room.organizationId && organizationId && room.organizationId !== organizationId) {
+    throw new ForbiddenError('Access denied: chat room belongs to a different organization');
+  }
+
+  // FIX-012 (G10): archived rooms are read-only — reject new messages. Mirrors
+  // the WS chat.message guard so neither write path can append to a closed room.
+  if (room.status === 'archived') {
+    throw new BusinessLogicError(
+      'Cannot send messages to an archived chat room',
+      'ROOM_ARCHIVED'
+    );
+  }
+
+  // PD-1 decision-3 (Step 41): #announcements is officer-post-only. Members may
+  // read but only officers may post. The provisioned announcements channel is
+  // keyed by its context slug; the gate runs before any message persistence.
+  if (room.context === 'channel:announcements') {
+    const denied = await requireOfficerTerm(ctx);
+    if (denied) return denied;
+  }
+
   let message;
   
   if (body.messageType === 'text') {
@@ -128,7 +155,22 @@ export async function sendChatMessage(
     if (!videoBody.videoCallData || !videoBody.videoCallData.participants) {
       throw new ValidationError('Video call data with participants is required');
     }
-    
+
+    // PD-3 (FIX-011) — V1 no-recording invariant. Recording is a V2 capability
+    // (needs media infra). Reject any start payload that tries to enable it so
+    // the invariant is enforced at the write boundary, not just by schema shape.
+    const incomingCallData = videoBody.videoCallData as unknown as Record<string, unknown>;
+    if (
+      incomingCallData['recording'] === true ||
+      incomingCallData['recordingEnabled'] === true ||
+      incomingCallData['record'] === true
+    ) {
+      throw new BusinessLogicError(
+        'Video call recording is not available in V1',
+        'VIDEO_RECORDING_NOT_SUPPORTED'
+      );
+    }
+
     // Ensure the initiator is included in participants
     // User type is determined by room context (participant role)
     const initiatorParticipant: CallParticipant = {
@@ -145,8 +187,21 @@ export async function sendChatMessage(
     if (!initiatorExists) {
       participants = [initiatorParticipant, ...participants];
     }
-    
-    // Create video call data structure
+
+    // PD-3 (FIX-011) — V1 capacity cap. A call may not be SEEDED with more than
+    // the V1 ceiling (1:1 + small-group, no SFU/TURN). Count distinct invited
+    // persons so a duplicated id does not inflate the total.
+    const uniqueSeeded = new Set(participants.map(p => p.user)).size;
+    if (uniqueSeeded > VIDEO_CALL_MAX_PARTICIPANTS) {
+      throw new BusinessLogicError(
+        `Video call cannot start with more than ${VIDEO_CALL_MAX_PARTICIPANTS} participants (V1 limit)`,
+        'VIDEO_CALL_CAPACITY_EXCEEDED'
+      );
+    }
+
+    // Create video call data structure. Only the canonical (recording-free)
+    // VideoCallData fields are persisted — any extra keys on the incoming
+    // payload (e.g. a rejected recording flag) are deliberately not copied.
     const videoCallData: VideoCallData = {
       status: 'starting',
       participants: participants,
@@ -160,8 +215,27 @@ export async function sendChatMessage(
       organizationId
     );
     
-    // Update room's active video call reference
-    await roomRepo.setActiveVideoCall(params.room, message.id);
+    // Update room's active video call reference. FIX-014: setActiveVideoCall now
+    // claims the slot atomically and throws ConflictError if another start won
+    // the race. Retire this orphaned call message so it can't later masquerade
+    // as the active call once the winning call ends.
+    try {
+      await roomRepo.setActiveVideoCall(params.room, message.id);
+    } catch (err) {
+      if (err instanceof ConflictError) {
+        try {
+          await messageRepo.updateVideoCallData(message.id, { status: 'ended' });
+        } catch (cleanupErr) {
+          logger?.warn({
+            roomId: params.room,
+            messageId: message.id,
+            error: cleanupErr instanceof Error ? cleanupErr.message : 'Unknown error',
+            action: 'retire_orphan_video_call'
+          }, 'Failed to retire orphaned video call message after lost claim');
+        }
+      }
+      throw err;
+    }
 
     // Send notifications to other participants
     const notifs = ctx.get('notifs');
@@ -208,6 +282,26 @@ export async function sendChatMessage(
   
   // Update room's last message timestamp and count
   await roomRepo.updateLastMessage(params.room, message.timestamp);
-  
+
+  // FIX-001 (G1): broadcast the persisted message to the room's WS channel so
+  // other connected participants receive it in real time. Without this, the
+  // REST send path only persists — recipients see nothing until a refetch.
+  // Uses the shared WebSocketService envelope { event, payload } (core/ws.ts);
+  // channel namespacing mirrors ws.chat-room.ts (`chat-rooms/${roomId}`).
+  const wsService = ctx.get('ws');
+  if (wsService) {
+    try {
+      await wsService.publishToChannel(`chat-rooms/${params.room}`, 'chat.message', message);
+    } catch (error) {
+      // Broadcast is best-effort; never fail the persisted send on a WS error.
+      logger?.warn({
+        roomId: params.room,
+        messageId: message.id,
+        error: error instanceof Error ? error.message : 'Unknown error',
+        action: 'broadcast_chat_message'
+      }, 'Failed to broadcast chat message to WS channel');
+    }
+  }
+
   return ctx.json(message, 201);
 }

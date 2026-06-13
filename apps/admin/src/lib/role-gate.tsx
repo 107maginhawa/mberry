@@ -66,7 +66,10 @@ export const ROUTE_ROLES: Record<string, AdminRole[]> = {
   '/national-dashboard': ['super'],
   '/committees': ['super', 'support'],
   '/operators': ['super'],
-  '/impersonate': ['super'],
+  // FIX-007 (PA-6): impersonation is entitled to super + support
+  // (IMPERSONATION_ALLOWED_ROLES). Keep the sidebar nav filter in sync with the
+  // route-level RequireRole gate so support can actually discover the tool.
+  '/impersonate': ['super', 'support'],
   '/feature-flags': ['super'],
   '/audit': ['super', 'support'],
   '/surveys': ['super', 'support', 'analyst'],

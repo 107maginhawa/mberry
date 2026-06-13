@@ -33,13 +33,23 @@ export async function enrollInCustomTraining(
     throw new BusinessLogicError('Enrollment is only accepted for published trainings', 'TRAINING_NOT_PUBLISHED');
   }
 
-  // BR-41: paid training requires confirmed payment before enrollment.
-  if (training.registrationFee && training.registrationFee > 0) {
-    throw new BusinessLogicError(
-      'This training requires payment. Complete payment before enrolling.',
-      'PAYMENT_REQUIRED',
-    );
+  // FIX-010 (G10): a member may hold at most one active enrollment per
+  // training. Reject a second enroll attempt for the same (trainingId,
+  // personId) — a duplicate row distorts capacity counting and makes
+  // `enrollments[0]` selection arbitrary at check-in. (A previously
+  // cancelled enrollment does not block re-enrollment.) The DB also carries
+  // a partial unique index as the backstop for races.
+  const existingEnrollments = await enrollRepo.findMany({ trainingId: params.trainingId, personId: user.id });
+  if (existingEnrollments.some((e) => e.status !== 'cancelled')) {
+    throw new BusinessLogicError('Already enrolled in this training', 'ALREADY_ENROLLED');
   }
+
+  // BR-41 / TC-DEC-01 (Step 47): paid trainings enter the proof-of-payment
+  // flow (payment_pending) rather than dead-ending on PAYMENT_REQUIRED. An
+  // officer confirms offline payment (confirmTrainingPayment) before the
+  // enrollment becomes `enrolled` and can be completed for credit.
+  const isPaid = !!(training.registrationFee && training.registrationFee > 0);
+  const initialStatus = isPaid ? 'payment_pending' : 'enrolled';
 
   if (training.capacity) {
     const enrolledCount = await enrollRepo.count({ trainingId: params.trainingId, status: 'enrolled' });
@@ -51,7 +61,7 @@ export async function enrollInCustomTraining(
   const enrollment = await enrollRepo.createOne({
     trainingId: params.trainingId,
     personId: user.id,
-    status: 'enrolled',
+    status: initialStatus,
     organizationId: orgId,
   });
 

@@ -435,6 +435,76 @@
       "when": 1780156800000,
       "tag": "0061_chat_message_reactions",
       "breakpoints": true
+    },
+    {
+      "idx": 62,
+      "version": "7",
+      "when": 1780243200000,
+      "tag": "0062_dues_receipt_counter",
+      "breakpoints": true
+    },
+    {
+      "idx": 63,
+      "version": "7",
+      "when": 1780329600000,
+      "tag": "0063_billing_webhook_metadata_indexes",
+      "breakpoints": true
+    },
+    {
+      "idx": 64,
+      "version": "7",
+      "when": 1780416000000,
+      "tag": "0064_comms_org_id_not_null",
+      "breakpoints": true
+    },
+    {
+      "idx": 65,
+      "version": "7",
+      "when": 1780502400000,
+      "tag": "0065_membership_resigned_at",
+      "breakpoints": true
+    },
+    {
+      "idx": 66,
+      "version": "7",
+      "when": 1780588800000,
+      "tag": "0066_audit_action_suspend_unsuspend",
+      "breakpoints": true
+    },
+    {
+      "idx": 67,
+      "version": "7",
+      "when": 1780675200000,
+      "tag": "0067_training_type",
+      "breakpoints": true
+    },
+    {
+      "idx": 68,
+      "version": "7",
+      "when": 1780761600000,
+      "tag": "0068_training_enroll_unique_active",
+      "breakpoints": true
+    },
+    {
+      "idx": 69,
+      "version": "7",
+      "when": 1780848000000,
+      "tag": "0069_certificate_training_nullable_partial_unique",
+      "breakpoints": true
+    },
+    {
+      "idx": 70,
+      "version": "7",
+      "when": 1780934400000,
+      "tag": "0070_credit_verification_gate",
+      "breakpoints": true
+    },
+    {
+      "idx": 71,
+      "version": "7",
+      "when": 1781020800000,
+      "tag": "0071_training_payment_proof",
+      "breakpoints": true
     }
   ]
 }

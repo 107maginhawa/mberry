@@ -24,12 +24,15 @@ export async function reviewCreative(ctx: ValidatedContext<any, never, any>): Pr
   const traceId = ctx.get('requestId');
   const logger = baseLogger?.child?.({ traceId, module: 'advertising' }) ?? baseLogger;
 
-  if (!body.decision || !['approved', 'rejected'].includes(body.decision)) {
-    throw new ValidationError('decision must be "approved" or "rejected"');
+  // Contract: ReviewCreativeRequest = { approved: boolean, rejectionReason?: string }
+  // (advertising.tsp). The generated zValidator strips to this shape, so the
+  // handler MUST read `approved`/`rejectionReason`.
+  if (typeof body.approved !== 'boolean') {
+    throw new ValidationError('approved must be a boolean');
   }
 
-  if (body.decision === 'rejected' && !body.reason?.trim()) {
-    throw new ValidationError('Rejection reason is required');
+  if (body.approved === false && !body.rejectionReason?.trim()) {
+    throw new ValidationError('Rejection reason is required when approved is false');
   }
 
   const repo = new CreativeRepository(db, logger);
@@ -41,15 +44,19 @@ export async function reviewCreative(ctx: ValidatedContext<any, never, any>): Pr
   }
 
   let updated: any;
-  if (body.decision === 'approved') {
+  if (body.approved) {
     updated = await repo.approveCreative(creativeId, user.id);
   } else {
-    updated = await repo.rejectCreative(creativeId, user.id, body.reason.trim());
+    updated = await repo.rejectCreative(creativeId, user.id, body.rejectionReason.trim());
   }
+
+  // Audit (FIX-012): expose the actual review outcome on the per-route audit event.
+  ctx.set('auditResourceId', creativeId);
+  ctx.set('auditDescription', `Creative ${creativeId} review: ${body.approved ? 'approved' : 'rejected'} by ${user.id}`);
 
   logger?.info({
     creativeId,
-    decision: body.decision,
+    approved: body.approved,
     reviewedBy: user.id,
     action: 'review_creative',
   }, 'Creative reviewed');

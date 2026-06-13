@@ -6,7 +6,7 @@ import { certificates } from './repos/certificates.schema';
 import { getNextCertificateNumber, reserveCertificateRange } from './utils/certificate-numbering';
 import { renderCertificateHtml, type CertificateTemplateData, type OrgBranding } from './utils/certificate-template';
 
-interface BulkIssueBody { organizationId: string; personIds: string[]; trainingTitle: string; certificateType: 'attendance' | 'completion' | 'speaker'; cpdActivityType?: string; creditHours?: number; templateId?: string; signingOfficerId: string; orgCode: string; orgBranding?: Partial<OrgBranding>; signatoryName?: string; signatoryTitle?: string; }
+interface BulkIssueBody { organizationId: string; personIds: string[]; trainingId?: string; trainingTitle: string; certificateType: 'attendance' | 'completion' | 'speaker'; cpdActivityType?: string; creditHours?: number; templateId?: string; signingOfficerId: string; orgCode: string; orgBranding?: Partial<OrgBranding>; signatoryName?: string; signatoryTitle?: string; }
 
 export async function bulkIssueCertificates(ctx: Context): Promise<Response> {
   const session = ctx.get('session');
@@ -43,7 +43,10 @@ export async function generateCertificates(db: DatabaseInstance, body: BulkIssue
       try {
         const templateData: CertificateTemplateData = { certificateNumber, recipientName: personId ?? '', trainingTitle: body.trainingTitle ?? '', issuedAt: now, organizationName: (body.orgBranding as OrgBranding | undefined)?.orgName ?? 'Organization', certificateType: body.certificateType ?? 'attendance', creditAmount: body.creditHours, creditCategory: body.cpdActivityType };
         renderCertificateHtml(templateData, { ...body.orgBranding, signatoryName: body.signatoryName ?? '', signatoryTitle: body.signatoryTitle ?? '' } as OrgBranding);
-        certRows.push({ organizationId: body.organizationId, personId: personId!, trainingId: body.organizationId, certificateNumber, issuedAt: now, templateId: body.templateId ?? null, signingOfficerId: body.signingOfficerId, creditHours: body.creditHours ?? null, cpdActivityType: (body.cpdActivityType ?? null) as typeof certificates.$inferInsert['cpdActivityType'], status: 'issued' as const, pdfUrl: null, createdBy: requestedBy, updatedBy: requestedBy });
+        // FIX-006 (G6): link to the REAL training. Never store organizationId in
+        // trainingId — that bogus self-reference collapsed the (training, person)
+        // uniqueness to one cert per person per org. NULL when unlinked (Q8 Option A).
+        certRows.push({ organizationId: body.organizationId, personId: personId!, trainingId: body.trainingId ?? null, certificateNumber, issuedAt: now, templateId: body.templateId ?? null, signingOfficerId: body.signingOfficerId, creditHours: body.creditHours ?? null, certificateType: body.certificateType ?? null, cpdActivityType: (body.cpdActivityType ?? null) as typeof certificates.$inferInsert['cpdActivityType'], status: 'issued' as const, pdfUrl: null, createdBy: requestedBy, updatedBy: requestedBy });
         results.push({ personId: personId ?? '', certificateNumber, pdfUrl: null });
       } catch (err) {
         logger?.error({ error: err, personId }, 'Failed to prepare cert');

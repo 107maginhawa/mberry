@@ -167,6 +167,34 @@ const TEMPLATE_METADATA: Record<string, TemplateMetadata> = {
         required: true
       }
     ]
+  },
+
+  // Platform Admin (M03) — FIX-003 (G4): invite a platform admin to claim access
+  'admin/invite': {
+    name: 'Platform Admin Invitation',
+    description: 'Invites a platform admin to sign in and claim their access (WF-022)',
+    subject: "You've been invited to the Memberry admin team",
+    tags: [EmailTemplateTags.ADMIN_INVITE],
+    variables: [
+      {
+        id: 'email',
+        type: 'email' as const,
+        label: 'Invited Email Address',
+        required: true
+      },
+      {
+        id: 'role',
+        type: 'string' as const,
+        label: 'Admin Role',
+        required: true
+      },
+      {
+        id: 'claimUrl',
+        type: 'url' as const,
+        label: 'Claim Link',
+        required: true
+      }
+    ]
   }
 };
 

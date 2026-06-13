@@ -1,12 +1,13 @@
 import type { ValidatedContext } from '@/types/app';
 import type { DatabaseInstance } from '@/core/database';
-import { UnauthorizedError, NotFoundError, BusinessLogicError } from '@/core/errors';
+import { UnauthorizedError, NotFoundError, ForbiddenError, BusinessLogicError } from '@/core/errors';
 import type { RefundDuesPaymentBody, RefundDuesPaymentParams } from '@/generated/openapi/validators';
 import { DuesRepository } from '@/handlers/association:member/repos/dues-payments.repo';
 import { membershipLifecycle } from '@/handlers/member/membership/utils/membership-lifecycle';
 import { domainEvents } from '@/core/domain-events';
 import { requirePosition } from '@/core/auth/officer-checks';
 import { POSITION_TITLES } from '@/utils/position-titles';
+import { validateRefundEligibility } from '@/handlers/association:member/utils/refund-validation';
 
 /**
  * refundDuesPayment
@@ -27,6 +28,7 @@ export async function refundDuesPayment(
   if (!session) throw new UnauthorizedError();
 
   const { paymentId } = ctx.req.valid('param');
+  const orgId = ctx.get('organizationId') as string;
   const body = ctx.req.valid('json');
   const db = ctx.get('database') as DatabaseInstance;
 
@@ -35,13 +37,45 @@ export async function refundDuesPayment(
   const payment = await repo.getPayment(paymentId);
   if (!payment) throw new NotFoundError('Dues payment');
 
+  // [FIX-002] Tenant-isolation guard: a Treasurer/President of org A must not be
+  // able to refund (and reverse membership expiry of) a payment owned by org B.
+  // getPayment() is unscoped (by id only), so the org check is enforced here —
+  // mirroring confirmPaymentProof / markDuesInvoicePaid sibling mutations.
+  if (payment.organizationId !== orgId) {
+    throw new ForbiddenError('Payment does not belong to this organization');
+  }
+
   if (payment.status === 'refunded') {
     throw new BusinessLogicError('Payment already refunded', 'ALREADY_REFUNDED');
   }
 
   const bodyRecord = body as Record<string, unknown>;
-  const refundAmount = (bodyRecord['amount'] as number) ?? payment.amount;
-  const isFullRefund = refundAmount >= payment.amount;
+  const requestedAmount = (bodyRecord['amount'] as number | undefined) ?? null;
+
+  // [FIX-007][BR-08] Refund eligibility + over-refund cap.
+  // validateRefundEligibility enforces: refundable status, 30-day window,
+  // and — critically — that the requested amount cannot exceed
+  // (paymentAmount - alreadyRefunded). This prevents repeated partial refunds
+  // from cumulatively exceeding the original payment (over-refund), which would
+  // otherwise let the books show refunds larger than the receipt.
+  const alreadyRefunded = payment.refundedAmount ?? 0;
+  const eligibility = validateRefundEligibility({
+    paymentStatus: payment.status,
+    paymentPaidAt: payment.paidAt ?? null,
+    paymentAmount: payment.amount,
+    alreadyRefunded,
+    requestedRefundAmount: requestedAmount,
+  });
+  if (!eligibility.eligible) {
+    throw new BusinessLogicError(eligibility.reason, eligibility.code);
+  }
+
+  // Cap to the remaining refundable amount. After eligibility passes,
+  // requestedAmount is guaranteed <= remaining, but default (full) refund must
+  // also be capped to what is actually left so cumulative never exceeds amount.
+  const remaining = payment.amount - alreadyRefunded;
+  const refundAmount = requestedAmount ?? remaining;
+  const isFullRefund = alreadyRefunded + refundAmount >= payment.amount;
 
   const updated = await db.transaction(async (tx: DatabaseInstance) => {
     const txRepo = new DuesRepository(tx);

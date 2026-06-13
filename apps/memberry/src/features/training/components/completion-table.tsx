@@ -7,19 +7,18 @@ import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from '@
 import {
   listCustomTrainingEnrollmentsOptions,
   listCustomTrainingEnrollmentsQueryKey,
-  completeCustomTrainingMutation,
+  checkInCustomTrainingMutation,
 } from '@monobase/sdk-ts/generated/react-query'
-import type { TrainingEnrollment, TrainingEnrollmentCompleteRequest } from '@monobase/sdk-ts/generated/types.gen'
+import type { TrainingEnrollment } from '@monobase/sdk-ts/generated/types.gen'
 
 /**
- * Handler accepts personId + creditAmount for direct completion without a prior enrollment record.
- * These fields are not in the base TrainingEnrollmentCompleteRequest — extend locally.
+ * FIX-014-followup (Option B): the reachable officer "Mark Complete" action
+ * points at `checkInCustomTraining`, which honours the targeted member's
+ * `personId` (via query), completes THAT enrollee, and awards them the AUTO
+ * credit (server reads the credit amount from the training record). The old
+ * `completeCustomTraining` wiring ignored `personId` (acted on the officer's
+ * own enrollment) and awarded no credit — the P0 attendance→credit break.
  */
-interface CompleteTrainingByPersonBody extends TrainingEnrollmentCompleteRequest {
-  personId: string
-  creditAmount: number
-}
-
 interface CompletionTableProps {
   orgId: string
   trainingId: string
@@ -63,11 +62,11 @@ export function CompletionTable({ orgId, trainingId, creditAmount }: CompletionT
   }
 
   const markMutation = useMutation({
-    ...completeCustomTrainingMutation(),
+    ...checkInCustomTrainingMutation(),
     onMutate: async (variables: any) => {
       await queryClient.cancelQueries({ queryKey: enrollmentQueryKey })
       const previous = queryClient.getQueryData(enrollmentQueryKey)
-      const pid = variables.body?.personId
+      const pid = variables.query?.personId
       if (pid) {
         queryClient.setQueryData(enrollmentQueryKey, (old: any) => {
           if (!old?.data) return old
@@ -92,7 +91,7 @@ export function CompletionTable({ orgId, trainingId, creditAmount }: CompletionT
   })
 
   const markAllMutation = useMutation({
-    ...completeCustomTrainingMutation(),
+    ...checkInCustomTrainingMutation(),
     onMutate: async () => {
       await queryClient.cancelQueries({ queryKey: enrollmentQueryKey })
       const previous = queryClient.getQueryData(enrollmentQueryKey)
@@ -184,7 +183,7 @@ export function CompletionTable({ orgId, trainingId, creditAmount }: CompletionT
               const ids = [...selected]
               // Fire one mutation per person (SDK doesn't support bulk)
               ids.forEach(pid =>
-                markMutation.mutate({ path: { trainingId }, query: { organizationId: orgId }, body: { personId: pid, creditAmount: Number(creditAmount) } as unknown as CompleteTrainingByPersonBody })
+                markMutation.mutate({ path: { trainingId }, query: { organizationId: orgId, personId: pid } })
               )
             }}
             disabled={markAllMutation.isPending}
@@ -268,7 +267,7 @@ export function CompletionTable({ orgId, trainingId, creditAmount }: CompletionT
                         size="sm"
                         onClick={() => {
                           setMarking(e.personId)
-                          markMutation.mutate({ path: { trainingId }, query: { organizationId: orgId }, body: { personId: e.personId, creditAmount: Number(creditAmount) } as unknown as CompleteTrainingByPersonBody })
+                          markMutation.mutate({ path: { trainingId }, query: { organizationId: orgId, personId: e.personId } })
                         }}
                         disabled={markMutation.isPending && marking === e.personId}
                       >

@@ -8,6 +8,7 @@ import { DatabaseRepository } from '@/core/database.repo';
 import { reviews, type Review, type NewReview, type CreateReviewRequest } from './review.schema';
 
 export interface ReviewFilters {
+  organizationId?: string;
   context?: string;
   reviewer?: string;
   reviewType?: string;
@@ -30,6 +31,12 @@ export class ReviewRepository extends DatabaseRepository<Review, NewReview, Revi
 
     const conditions = [];
 
+    // FIX-011 (G-12): multi-tenant org isolation. Applied only when present so an
+    // undefined org (platform admin without org context) yields a cross-org view,
+    // mirroring the listAuditLogs P0-3 pattern.
+    if (filters.organizationId) {
+      conditions.push(eq(reviews.organizationId, filters.organizationId));
+    }
     if (filters.context) {
       conditions.push(eq(reviews.context, filters.context));
     }

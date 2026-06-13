@@ -3,6 +3,7 @@ import { eq, sql } from 'drizzle-orm';
 import { events, eventRegistrations } from '@/handlers/association:operations/repos/events.schema';
 import { trainings, trainingEnrollments } from '@/handlers/association:operations/repos/training.schema';
 import { creditEntries } from '@/handlers/association:member/repos/credits.schema';
+import { positions } from '@/handlers/association:member/repos/governance.schema';
 import { persons } from '@/handlers/person/repos/person.schema';
 import { SeedClient } from './client';
 import { NOW, daysAgo, daysFromNow, dateStr } from './helpers';
@@ -62,6 +63,22 @@ export async function seedTraining(db: ReturnType<typeof drizzle>, orgId: string
 export async function seedElections(db: ReturnType<typeof drizzle>, orgId: string, presidentId: string) {
   console.log('  Elections...');
 
+  // AHA FIX-002 (G2): election.positions slots must carry REAL `position` row ids
+  // (canonical identity) so seeded nominee/vote inserts satisfy the position FK and
+  // the BR-33 min-candidate counts group correctly. Resolve the desired titles to
+  // existing org positions (seeded in layer-2); skip any title without a row.
+  const desiredTitles = ['President', 'Treasurer', 'Secretary'];
+  const posRows = await db.select({ id: positions.id, title: positions.title })
+    .from(positions)
+    .where(eq(positions.organizationId, orgId));
+  const slots = desiredTitles
+    .map((title, sortOrder) => {
+      const match = posRows.find((p) => p.title.trim().toLowerCase() === title.toLowerCase());
+      return match ? { id: match.id, title, sortOrder } : null;
+    })
+    .filter((s): s is { id: string; title: string; sortOrder: number } => s !== null);
+  const positionsJson = JSON.stringify(slots);
+
   // Use raw SQL since election table uses hand-wired schema
   const electionData = [
     { title: 'PDA Metro Manila Officers Election 2025', status: 'published', nominationsOpenAt: '2025-01-01', nominationsCloseAt: '2025-01-15', votingOpenAt: '2025-01-20', votingCloseAt: '2025-01-25' },
@@ -81,7 +98,7 @@ export async function seedElections(db: ReturnType<typeof drizzle>, orgId: strin
         VALUES (${orgId}, ${e.title}, 'officer', ${e.status}, 'online',
           ${e.nominationsOpenAt}::timestamptz, ${e.nominationsCloseAt}::timestamptz,
           ${e.votingOpenAt}::timestamptz, ${e.votingCloseAt}::timestamptz,
-          '["President","Treasurer","Secretary"]'::jsonb, ${presidentId}, ${presidentId})
+          ${positionsJson}::jsonb, ${presidentId}, ${presidentId})
       `);
     }
     console.log(`    ✓ ${e.status}: ${e.title}`);

@@ -3,6 +3,7 @@ import type { DatabaseInstance } from '@/core/database';
 import type { UpdateAssociationBody, UpdateAssociationParams } from '@/generated/openapi/validators';
 import { NotFoundError } from '@/core/errors';
 import { AssociationRepository } from './repos/platform-admin.repo';
+import { requireAdminTier, SUPER_ONLY } from '@/core/auth/admin-tier';
 
 /**
  * updateAssociation
@@ -15,6 +16,10 @@ export async function updateAssociation(
 ): Promise<Response> {
   const session = ctx.get('session');
   if (!session) return ctx.json({ error: 'Unauthorized' }, 401);
+
+  // FIX-008 (G1) / Q1: patching an association is a super-only mutation.
+  const denied = requireAdminTier(ctx, SUPER_ONLY);
+  if (denied) return denied;
 
   const { associationId } = ctx.req.valid('param');
   const body = ctx.req.valid('json');

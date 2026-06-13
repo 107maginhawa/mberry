@@ -147,6 +147,8 @@ function makeLogger() {
 function buildService(stubs: {
   pendingEmails?: EmailQueueItem[];
   isSuppressed?: boolean;
+  /** Suppression reason returned by getSuppressionReason. `undefined` here means "use isSuppressed for back-compat"; an explicit null = not suppressed. */
+  suppressionReason?: 'hard_bounce' | 'unsubscribe' | 'complaint' | 'manual' | null;
   membership?: { status: string } | null;
   canSend?: boolean;
   sendResult?: { success: boolean; provider?: string; messageId?: string; error?: string };
@@ -182,8 +184,17 @@ function buildService(stubs: {
     updateOneById: updateOneByIdMock,
   };
 
+  // Reason-aware lookup (BR-57). When `suppressionReason` is provided it drives
+  // the new method; otherwise derive a back-compat reason from isSuppressed so
+  // existing guard-pipeline tests keep working unchanged.
+  const derivedReason =
+    stubs.suppressionReason !== undefined
+      ? stubs.suppressionReason
+      : (stubs.isSuppressed ? 'manual' : null);
+
   const suppressionRepoStub = {
-    isSuppressed: mock(async () => stubs.isSuppressed ?? false),
+    isSuppressed: mock(async () => stubs.isSuppressed ?? (derivedReason !== null)),
+    getSuppressionReason: mock(async () => derivedReason),
   };
 
   const membershipLookupStub = {
@@ -220,6 +231,7 @@ function buildService(stubs: {
       markAsSent: markAsSentMock,
       updateOneById: updateOneByIdMock,
       isSuppressed: suppressionRepoStub.isSuppressed as ReturnType<typeof mock>,
+      getSuppressionReason: suppressionRepoStub.getSuppressionReason as ReturnType<typeof mock>,
       findByPersonAndOrg: membershipLookupStub.findByPersonAndOrg as ReturnType<typeof mock>,
       canSend: bulkRateLimiterStub.canSend as ReturnType<typeof mock>,
       send: providerSendMock,
@@ -248,7 +260,9 @@ describe('EmailServiceImpl guard pipeline', () => {
 
       await service.processPendingEmails();
 
-      expect(mocks.isSuppressed).toHaveBeenCalledWith(email.recipientEmail, email.organizationId);
+      // Guard 1 is now reason-aware (BR-57): it consults getSuppressionReason
+      // for the org-scoped recipient. A non-overridable reason still blocks.
+      expect(mocks.getSuppressionReason).toHaveBeenCalledWith(email.recipientEmail, email.organizationId);
       expect(mocks.markAsFailed).toHaveBeenCalledTimes(1);
       const [id, reason] = mocks.markAsFailed.mock.calls[0] as [string, string, number];
       expect(id).toBe(email.id);
@@ -265,9 +279,79 @@ describe('EmailServiceImpl guard pipeline', () => {
 
       await service.processPendingEmails();
 
-      expect(mocks.isSuppressed).toHaveBeenCalledTimes(1);
       expect(mocks.markAsFailed).not.toHaveBeenCalled();
       expect(mocks.send).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  // -------------------------------------------------------------------------
+  // BR-57 / AC-M22-006: Transactional emails override marketing suppression
+  //
+  // A `transactional` email (dues invoice, receipt, security notice) MUST still
+  // be delivered to a recipient who unsubscribed from marketing — but MUST
+  // remain blocked when the suppression reason is `hard_bounce` or `complaint`
+  // (deliverability / CAN-SPAM). Bulk email is never allowed to override any
+  // suppression reason.
+  // -------------------------------------------------------------------------
+
+  describe('BR-57: Transactional suppression override (reason-aware Guard 1)', () => {
+    test('transactional email IS sent to a recipient suppressed for "unsubscribe"', async () => {
+      const email = makeEmail({ emailCategory: 'transactional' });
+      const { service, mocks } = buildService({
+        pendingEmails: [email],
+        suppressionReason: 'unsubscribe',
+      });
+
+      await service.processPendingEmails();
+
+      // Reason-aware override: do NOT mark failed, DO send.
+      expect(mocks.markAsFailed).not.toHaveBeenCalled();
+      expect(mocks.send).toHaveBeenCalledTimes(1);
+    });
+
+    test('transactional email is STILL blocked when suppressed for "hard_bounce"', async () => {
+      const email = makeEmail({ emailCategory: 'transactional' });
+      const { service, mocks } = buildService({
+        pendingEmails: [email],
+        suppressionReason: 'hard_bounce',
+      });
+
+      await service.processPendingEmails();
+
+      expect(mocks.markAsFailed).toHaveBeenCalledTimes(1);
+      const [id, reason] = mocks.markAsFailed.mock.calls[0] as [string, string, number];
+      expect(id).toBe(email.id);
+      expect(reason).toMatch(/suppressed/i);
+      expect(mocks.send).not.toHaveBeenCalled();
+    });
+
+    test('transactional email is STILL blocked when suppressed for "complaint"', async () => {
+      const email = makeEmail({ emailCategory: 'transactional' });
+      const { service, mocks } = buildService({
+        pendingEmails: [email],
+        suppressionReason: 'complaint',
+      });
+
+      await service.processPendingEmails();
+
+      expect(mocks.markAsFailed).toHaveBeenCalledTimes(1);
+      expect(mocks.send).not.toHaveBeenCalled();
+    });
+
+    test('bulk email is blocked even when suppressed only for "unsubscribe"', async () => {
+      const email = makeEmail({ emailCategory: 'bulk' });
+      const { service, mocks } = buildService({
+        pendingEmails: [email],
+        suppressionReason: 'unsubscribe',
+        canSend: true, // rate limit would otherwise pass — prove suppression, not rate-limit, blocks
+      });
+
+      await service.processPendingEmails();
+
+      expect(mocks.markAsFailed).toHaveBeenCalledTimes(1);
+      const [, reason] = mocks.markAsFailed.mock.calls[0] as [string, string, number];
+      expect(reason).toMatch(/suppressed/i);
+      expect(mocks.send).not.toHaveBeenCalled();
     });
   });
 
@@ -460,5 +544,78 @@ describe('EmailServiceImpl guard pipeline', () => {
 
       expect(mocks.send).toHaveBeenCalledTimes(2);
     });
+  });
+});
+
+// ---------------------------------------------------------------------------
+// BR-53 / BR-58: enqueue-time validation (FIX-008)
+// queueEmail() must reject before insert when no active template matches the
+// tags (TEMPLATE_INACTIVE) or a required template variable is missing
+// (MISSING_REQUIRED_VARIABLES) — instead of creating a silently-failing item.
+// ---------------------------------------------------------------------------
+
+describe('BR-53 / BR-58: enqueue-time validation (FIX-008)', () => {
+  function makeQueueRequest(overrides: Record<string, any> = {}) {
+    return {
+      templateTags: ['auth.welcome'],
+      recipient: 'member@example.com',
+      variables: {},
+      organizationId: 'org-001',
+      emailCategory: 'transactional' as const,
+      ...overrides,
+    };
+  }
+
+  async function rejection(p: Promise<unknown>): Promise<any> {
+    try { await p; return undefined; } catch (e) { return e; }
+  }
+
+  test('BR-53: rejects with TEMPLATE_INACTIVE when no active template matches the tags', async () => {
+    const { service, impl } = buildService({});
+    impl.templateRepo.findMany = mock(async () => []); // repo returns no ACTIVE template
+
+    const err = await rejection(service.queueEmail(makeQueueRequest()));
+    expect(err).toBeDefined();
+    expect(err.code).toBe('TEMPLATE_INACTIVE');
+  });
+
+  test('BR-58: rejects with MISSING_REQUIRED_VARIABLES when a required variable is absent', async () => {
+    const { service, impl } = buildService({});
+    impl.templateRepo.findMany = mock(async () => [{
+      ...makeTemplate(),
+      variables: [{ id: 'name', type: 'string', label: 'Name', required: true }],
+    }]);
+
+    const err = await rejection(service.queueEmail(makeQueueRequest({ variables: {} })));
+    expect(err).toBeDefined();
+    expect(err.code).toBe('MISSING_REQUIRED_VARIABLES');
+  });
+
+  test('accepts enqueue when active template matches and all required variables present', async () => {
+    const { service, impl } = buildService({});
+    impl.templateRepo.findMany = mock(async () => [{
+      ...makeTemplate(),
+      variables: [{ id: 'name', type: 'string', label: 'Name', required: true }],
+    }]);
+
+    const result = await service.queueEmail(makeQueueRequest({ variables: { name: 'Alice' } }));
+    expect(result).toBeDefined();
+  });
+
+  test('accepts enqueue when template has no required variables', async () => {
+    const { service } = buildService({}); // default makeTemplate: active, tags match, variables: []
+    const result = await service.queueEmail(makeQueueRequest({ variables: {} }));
+    expect(result).toBeDefined();
+  });
+
+  test('a required variable provided as empty string is treated as missing', async () => {
+    const { service, impl } = buildService({});
+    impl.templateRepo.findMany = mock(async () => [{
+      ...makeTemplate(),
+      variables: [{ id: 'name', type: 'string', label: 'Name', required: true }],
+    }]);
+
+    const err = await rejection(service.queueEmail(makeQueueRequest({ variables: { name: '' } })));
+    expect(err?.code).toBe('MISSING_REQUIRED_VARIABLES');
   });
 });

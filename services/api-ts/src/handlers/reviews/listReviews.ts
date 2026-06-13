@@ -1,12 +1,13 @@
 import type { ValidatedContext } from '@/types/app';
 import type { ListReviewsQuery } from '@/generated/openapi/validators';
 import type { DatabaseInstance } from '@/core/database';
-import { 
+import {
   UnauthorizedError,
   ForbiddenError,
 } from '@/core/errors';
 import { ReviewRepository, type ReviewFilters } from './repos/review.repo';
 import { buildPaginationMeta } from '@/utils/query';
+import { hasRole } from '@/utils/auth';
 
 /**
  * listReviews
@@ -30,25 +31,33 @@ export async function listReviews(
   }
   
   const userId = session.user.id;
-  const isAdmin = session.user.role === 'admin';
-  
+  // hasRole handles comma-separated multi-role strings; the bare `=== 'admin'`
+  // check silently demoted multi-role platform admins.
+  const isAdmin = hasRole(session.user, 'admin');
+
+  // FIX-011 (G-12): org context from the fail-open /reviews/* middleware. When set
+  // (officer/member, or admin scoping via x-org-id) the listing is org-scoped; when
+  // undefined (platform admin without org context) it intentionally stays cross-org.
+  const organizationId = ctx.get('organizationId') as string | undefined;
+
   // Get dependencies from context
   const db = ctx.get('database') as DatabaseInstance;
   const logger = ctx.get('logger');
-  
+
   // Instantiate repository
   const repo = new ReviewRepository(db, logger);
-  
+
   // Extract query parameters
   const query = ctx.req.valid('query');
-  
+
   const filters: ReviewFilters = {
+    organizationId,
     context: query.context as string | undefined,
     reviewer: query.reviewer as string | undefined,
     reviewType: query.reviewType as string | undefined,
     reviewedEntity: query.reviewedEntity as string | undefined,
   };
-  
+
   // Apply role-based access control for non-admins
   if (!isAdmin) {
     // Check if user is trying to view someone else's reviews

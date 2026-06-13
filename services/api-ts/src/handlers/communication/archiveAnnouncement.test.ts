@@ -35,4 +35,18 @@ describe('archiveAnnouncement', () => {
     const ctx = makeCtx({ _params: { id: 'ann-1' } });
     await expect(archiveAnnouncement(ctx as any)).rejects.toThrow('Only sent announcements can be archived');
   });
+
+  // FIX-007 (tenant isolation): an officer of org-A must NOT archive org-B's
+  // sent announcement by id. The handler must fetch scoped to the caller's org.
+  test('rejects cross-org archive — 404 when the announcement belongs to another org', async () => {
+    stubRepo(CommunicationsRepository, {
+      get: async (_id: string, orgId?: string) =>
+        orgId === undefined || orgId === 'org-B'
+          ? { id: 'ann-1', status: 'sent', organizationId: 'org-B' }
+          : undefined,
+      updateStatus: async (_id: string, status: string) => ({ id: 'ann-1', status }),
+    });
+    const ctx = makeCtx({ organizationId: 'org-A', _params: { id: 'ann-1' } });
+    await expect(archiveAnnouncement(ctx as any)).rejects.toThrow('Announcement');
+  });
 });

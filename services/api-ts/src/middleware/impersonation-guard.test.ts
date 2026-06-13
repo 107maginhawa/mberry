@@ -1,6 +1,6 @@
 import { describe, test, expect, beforeEach } from 'bun:test';
 import { Hono } from 'hono';
-import { impersonationResolver, impersonationWriteBlock } from './impersonation-guard';
+import { impersonationResolver, impersonationWriteBlock, impersonationReadAudit } from './impersonation-guard';
 import { stubRepo, restoreRepo } from '@/test-utils/make-ctx';
 import { ImpersonationSessionRepository } from '@/handlers/platformadmin/repos/platform-admin.repo';
 import { AppError } from '@/core/errors';
@@ -180,6 +180,90 @@ describe('impersonation-guard middleware', () => {
         headers: { Cookie: 'memberry-imp-token=unknown-token' },
       });
       expect(res.status).toBe(201);
+    });
+  });
+
+  describe('per-request read audit under impersonation (FIX-016 / M3-R2)', () => {
+    interface CapturedEvent {
+      eventType: string;
+      eventSubType?: string;
+      action: string;
+      user?: string;
+      resource: string;
+      resourceType: string;
+      details?: Record<string, unknown>;
+    }
+
+    function createAuditingApp(captured: CapturedEvent[]) {
+      const app = new Hono();
+      app.use('*', async (c, next) => {
+        c.set('database', {});
+        c.set('logger', { debug: () => {}, warn: () => {}, info: () => {}, error: () => {} });
+        c.set('audit', {
+          logEvent: async (req: CapturedEvent) => {
+            captured.push(req);
+            return { id: 'evt-1' } as unknown as Record<string, unknown>;
+          },
+        });
+        await next();
+      });
+      app.use('*', impersonationResolver());
+      app.use('*', impersonationReadAudit());
+      app.use('*', impersonationWriteBlock());
+      app.get('/admin/orgs/:id', (c) => c.json({ ok: true }));
+      app.post('/test', (c) => c.json({ created: true }, 201));
+      app.onError((err, c) => {
+        if (err instanceof AppError) return c.json({ error: err.message, code: err.code }, err.statusCode as any);
+        return c.json({ error: 'Internal error' }, 500);
+      });
+      return app;
+    }
+
+    test('GET under active impersonation emits an audit entry carrying BOTH admin + target IDs', async () => {
+      stubRepo(ImpersonationSessionRepository, { findByToken: async () => activeSession });
+      const captured: CapturedEvent[] = [];
+      const app = createAuditingApp(captured);
+
+      const res = await app.request('/admin/orgs/org-9', {
+        headers: { Cookie: 'memberry-imp-token=valid-token' },
+      });
+
+      expect(res.status).toBe(200);
+      expect(captured.length).toBe(1);
+      const evt = captured[0]!;
+      // both identities present
+      expect(evt.user).toBe('admin-1');
+      expect(evt.details?.adminId).toBe('admin-1');
+      expect(evt.details?.targetUserId).toBe('target-1');
+      // classified as a read / data-access of a navigation under impersonation
+      expect(evt.eventType).toBe('data-access');
+      expect(evt.action).toBe('read');
+      // records what was navigated to
+      expect(String(evt.details?.method)).toBe('GET');
+      expect(String(evt.details?.path)).toContain('/admin/orgs/org-9');
+    });
+
+    test('GET with no impersonation session emits NO read-audit entry', async () => {
+      stubRepo(ImpersonationSessionRepository, { findByToken: async () => undefined });
+      const captured: CapturedEvent[] = [];
+      const app = createAuditingApp(captured);
+
+      const res = await app.request('/admin/orgs/org-9');
+      expect(res.status).toBe(200);
+      expect(captured.length).toBe(0);
+    });
+
+    test('blocked write (POST) under impersonation does NOT emit a read-audit entry', async () => {
+      stubRepo(ImpersonationSessionRepository, { findByToken: async () => activeSession });
+      const captured: CapturedEvent[] = [];
+      const app = createAuditingApp(captured);
+
+      const res = await app.request('/test', {
+        method: 'POST',
+        headers: { Cookie: 'memberry-imp-token=valid-token' },
+      });
+      expect(res.status).toBe(403);
+      expect(captured.length).toBe(0);
     });
   });
 

@@ -4,11 +4,15 @@ import { fakeApplication as createFakeApplication } from '@/test-utils/factories
 import { approveMembershipApplication } from './approveMembershipApplication';
 import { MembershipApplicationRepository, MembershipRepository } from '@/handlers/association:member/repos/membership.repo';
 import { OfficerTermRepository } from '@/handlers/association:member/repos/governance.repo';
-import { NotFoundError, UnauthorizedError, BusinessLogicError } from '@/core/errors';
+import { NotFoundError, UnauthorizedError, BusinessLogicError, ConflictError } from '@/core/errors';
+import { domainEvents } from '@/core/domain-events';
 
 // ─── Fixtures ───────────────────────────────────────────
 
 const fakeApplication = createFakeApplication({
+  // Match the makeCtx() default org context so the FIX-003 cross-org guard
+  // (record org must equal caller org) is satisfied for these same-org tests.
+  organizationId: 'tenant-1',
   personId: 'person-1',
   tierId: 'tier-1',
   status: 'submitted',
@@ -51,6 +55,7 @@ describe('approveMembershipApplication', () => {
     // stubRepo returns one mock record, but approveMembershipApplication instantiates
     // two separate repo classes — patch MembershipRepository separately
     const membershipMocks = stubRepo(MembershipRepository, {
+      findByPersonAndOrg: async () => null,
       createOne: async () => ({ id: 'mem-1' }),
     });
 
@@ -71,6 +76,7 @@ describe('approveMembershipApplication', () => {
       updateOneById: async (_id: string, data: any) => ({ ...underReviewApp, ...data }),
     });
     const membershipMocks = stubRepo(MembershipRepository, {
+      findByPersonAndOrg: async () => null,
       createOne: async () => ({ id: 'mem-2' }),
     });
 
@@ -148,6 +154,7 @@ describe('approveMembershipApplication', () => {
       updateOneById: async (_id: string, data: any) => { capturedUpdate = data; return { ...fakeApplication, ...data }; },
     });
     const membershipMocks = stubRepo(MembershipRepository, {
+      findByPersonAndOrg: async () => null,
       createOne: async () => ({ id: 'mem-1' }),
     });
 
@@ -170,6 +177,7 @@ describe('approveMembershipApplication', () => {
       updateOneById: async (_id: string, data: any) => { capturedUpdate = data; return { ...fakeApplication, ...data }; },
     });
     const membershipMocks = stubRepo(MembershipRepository, {
+      findByPersonAndOrg: async () => null,
       createOne: async () => ({ id: 'mem-1' }),
     });
 
@@ -192,6 +200,7 @@ describe('approveMembershipApplication', () => {
       updateOneById: async (_id: string, data: any) => ({ ...fakeApplication, ...data }),
     });
     const membershipMocks = stubRepo(MembershipRepository, {
+      findByPersonAndOrg: async () => null,
       createOne: async (data: any) => { capturedMembership = data; return { id: 'mem-1' }; },
     });
 
@@ -220,6 +229,7 @@ describe('approveMembershipApplication', () => {
       updateOneById: async (_id: string, data: any) => ({ ...fakeApplication, ...data }),
     });
     const membershipMocks = stubRepo(MembershipRepository, {
+      findByPersonAndOrg: async () => null,
       createOne: async (data: any) => { capturedMembership = data; return { id: 'mem-1' }; },
     });
 
@@ -230,7 +240,8 @@ describe('approveMembershipApplication', () => {
     await approveMembershipApplication(ctx);
     expect(capturedMembership.status).toBe('pendingPayment');
     expect(capturedMembership.personId).toBe('person-1');
-    expect(capturedMembership.organizationId).toBe('org-1');
+    // Created membership inherits the application's org (fixture aligned to ctx org for FIX-003).
+    expect(capturedMembership.organizationId).toBe('tenant-1');
     expect(capturedMembership.tierId).toBe('tier-1');
   });
 
@@ -252,6 +263,7 @@ describe('approveMembershipApplication', () => {
       updateOneById: async (_id: string, data: any) => ({ ...fakeApplication, ...data }),
     });
     const membershipMocks = stubRepo(MembershipRepository, {
+      findByPersonAndOrg: async () => null,
       createOne: async () => ({ id: 'mem-1' }),
     });
 
@@ -282,6 +294,7 @@ describe('approveMembershipApplication', () => {
       },
     });
     const membershipMocks = stubRepo(MembershipRepository, {
+      findByPersonAndOrg: async () => null,
       createOne: async () => { throw new Error('Membership creation failed'); },
     });
 
@@ -316,6 +329,7 @@ describe('approveMembershipApplication', () => {
       updateOneById: async (_id: string, data: any) => ({ ...fakeApplication, ...data }),
     });
     const membershipMocks = stubRepo(MembershipRepository, {
+      findByPersonAndOrg: async () => null,
       createOne: async () => ({ id: 'mem-1' }),
     });
 
@@ -329,5 +343,176 @@ describe('approveMembershipApplication', () => {
     // The transaction must have been used (verified by the wraps test above)
     // This test ensures the handler calls db.transaction at all
     expect(txDb).toBeDefined();
+  });
+
+  // ─── FIX-010 / decision #5: reuse-row re-application ─────
+  //
+  // A terminal member re-applies. The (organizationId, personId) unique index
+  // means a fresh INSERT raises a 500. Approve must instead REUSE the existing
+  // row — flip it back through a clean pendingPayment — and a status-history row.
+
+  test('re-application of a terminal member reuses the existing row instead of inserting a duplicate (FIX-010)', async () => {
+    const txDb = {
+      transaction: async (fn: (tx: any) => Promise<any>) => fn(txDb),
+      insert: () => ({ values: async () => undefined }),
+    };
+
+    officerMocks = stubRepo(OfficerTermRepository, { findActiveByPersonAndOrg: async () => [{ positionTitle: 'President' }] });
+    mocks = stubRepo(MembershipApplicationRepository, {
+      findOneById: async () => fakeApplication,
+      updateOneById: async (_id: string, data: any) => ({ ...fakeApplication, ...data }),
+    });
+
+    let createCalled = false;
+    let capturedUpdate: { id: string; data: any } | null = null;
+    const membershipMocks = stubRepo(MembershipRepository, {
+      findByPersonAndOrg: async () => ({
+        id: 'mem-existing',
+        organizationId: 'tenant-1',
+        personId: 'person-1',
+        tierId: 'tier-old',
+        status: 'resigned',
+        resignedAt: new Date('2025-01-01'),
+        removedAt: null,
+        removalReason: 'Relocated',
+        suspendedAt: null,
+        dateOfDeath: null,
+        duesExpiryDate: null,
+        gracePeriodDays: 30,
+      }),
+      createOne: async () => { createCalled = true; return { id: 'mem-new' }; },
+      updateOneById: async (id: string, data: any) => { capturedUpdate = { id, data }; return { id, ...data }; },
+    });
+
+    const ctx = makeCtx({ database: txDb, _params: { applicationId: 'app-1' } });
+    const response = await approveMembershipApplication(ctx);
+
+    expect(response.status).toBe(200);
+    // No duplicate INSERT (the unique index would 500).
+    expect(createCalled).toBe(false);
+    // The existing row was flipped back to a clean pendingPayment.
+    expect(capturedUpdate).not.toBeNull();
+    expect(capturedUpdate!.id).toBe('mem-existing');
+    expect(capturedUpdate!.data.status).toBe('pendingPayment');
+    expect(capturedUpdate!.data.tierId).toBe('tier-1'); // the new application's tier
+    expect(capturedUpdate!.data.resignedAt).toBeNull();
+    expect(capturedUpdate!.data.removedAt).toBeNull();
+    expect(capturedUpdate!.data.duesExpiryDate).toBeNull();
+
+    membershipMocks.findByPersonAndOrg.mockRestore();
+    membershipMocks.createOne.mockRestore();
+    membershipMocks.updateOneById.mockRestore();
+  });
+
+  test('re-application throws ConflictError (not 500) when an active membership already exists (FIX-010)', async () => {
+    const txDb = {
+      transaction: async (fn: (tx: any) => Promise<any>) => fn(txDb),
+      insert: () => ({ values: async () => undefined }),
+    };
+
+    officerMocks = stubRepo(OfficerTermRepository, { findActiveByPersonAndOrg: async () => [{ positionTitle: 'President' }] });
+    mocks = stubRepo(MembershipApplicationRepository, {
+      findOneById: async () => fakeApplication,
+      updateOneById: async (_id: string, data: any) => ({ ...fakeApplication, ...data }),
+    });
+    const membershipMocks = stubRepo(MembershipRepository, {
+      findByPersonAndOrg: async () => ({
+        id: 'mem-active',
+        organizationId: 'tenant-1',
+        personId: 'person-1',
+        tierId: 'tier-1',
+        status: 'active',
+        resignedAt: null,
+        removedAt: null,
+        suspendedAt: null,
+        dateOfDeath: null,
+        duesExpiryDate: '2099-01-01',
+        gracePeriodDays: 30,
+      }),
+      createOne: async () => ({ id: 'should-not-be-called' }),
+    });
+
+    const ctx = makeCtx({ database: txDb, _params: { applicationId: 'app-1' } });
+    await expect(approveMembershipApplication(ctx)).rejects.toBeInstanceOf(ConflictError);
+
+    membershipMocks.findByPersonAndOrg.mockRestore();
+    membershipMocks.createOne.mockRestore();
+  });
+
+  // ─── FIX-005 / G-07: approve emits membership.created ───
+  //
+  // The welcome consumer (domain-event-consumers.ts) only fired on the invite
+  // funnel (claimInvite emits membership.created). Officer approval — the main
+  // join funnel — produced a silent member with no welcome. Approve must emit
+  // the same event the existing consumer handles.
+
+  test('emits membership.created with source=application when a new membership is approved (FIX-005)', async () => {
+    officerMocks = stubRepo(OfficerTermRepository, { findActiveByPersonAndOrg: async () => [{ positionTitle: 'President' }] });
+    mocks = stubRepo(MembershipApplicationRepository, {
+      findOneById: async () => fakeApplication,
+      updateOneById: async (_id: string, data: any) => ({ ...fakeApplication, ...data }),
+    });
+    const membershipMocks = stubRepo(MembershipRepository, {
+      findByPersonAndOrg: async () => null,
+      createOne: async () => ({ id: 'mem-1' }),
+    });
+
+    const emitted: Array<{ e: string; p: any }> = [];
+    const origEmit = domainEvents.emit.bind(domainEvents);
+    (domainEvents as any).emit = async (e: string, p: any) => { emitted.push({ e, p }); };
+    try {
+      const ctx = makeCtx({ _params: { applicationId: 'app-1' } });
+      await approveMembershipApplication(ctx);
+
+      const evt = emitted.find((x) => x.e === 'membership.created');
+      expect(evt).toBeDefined();
+      expect(evt!.p.membershipId).toBe('mem-1');
+      expect(evt!.p.personId).toBe('person-1');
+      expect(evt!.p.organizationId).toBe('tenant-1');
+      expect(evt!.p.source).toBe('application');
+    } finally {
+      (domainEvents as any).emit = origEmit;
+      membershipMocks.findByPersonAndOrg.mockRestore();
+      membershipMocks.createOne.mockRestore();
+    }
+  });
+
+  test('emits membership.created on re-application reusing an existing row (FIX-005)', async () => {
+    const txDb = {
+      transaction: async (fn: (tx: any) => Promise<any>) => fn(txDb),
+      insert: () => ({ values: async () => undefined }),
+    };
+    officerMocks = stubRepo(OfficerTermRepository, { findActiveByPersonAndOrg: async () => [{ positionTitle: 'President' }] });
+    mocks = stubRepo(MembershipApplicationRepository, {
+      findOneById: async () => fakeApplication,
+      updateOneById: async (_id: string, data: any) => ({ ...fakeApplication, ...data }),
+    });
+    const membershipMocks = stubRepo(MembershipRepository, {
+      findByPersonAndOrg: async () => ({
+        id: 'mem-existing', organizationId: 'tenant-1', personId: 'person-1', tierId: 'tier-old',
+        status: 'resigned', resignedAt: new Date('2025-01-01'), removedAt: null, removalReason: null,
+        suspendedAt: null, dateOfDeath: null, duesExpiryDate: null, gracePeriodDays: 30,
+      }),
+      createOne: async () => ({ id: 'should-not-be-called' }),
+      updateOneById: async (id: string, data: any) => ({ id, ...data }),
+    });
+
+    const emitted: Array<{ e: string; p: any }> = [];
+    const origEmit = domainEvents.emit.bind(domainEvents);
+    (domainEvents as any).emit = async (e: string, p: any) => { emitted.push({ e, p }); };
+    try {
+      const ctx = makeCtx({ database: txDb, _params: { applicationId: 'app-1' } });
+      await approveMembershipApplication(ctx);
+
+      const evt = emitted.find((x) => x.e === 'membership.created');
+      expect(evt).toBeDefined();
+      expect(evt!.p.membershipId).toBe('mem-existing');
+      expect(evt!.p.source).toBe('application');
+    } finally {
+      (domainEvents as any).emit = origEmit;
+      membershipMocks.findByPersonAndOrg.mockRestore();
+      membershipMocks.createOne.mockRestore();
+      membershipMocks.updateOneById.mockRestore();
+    }
   });
 });

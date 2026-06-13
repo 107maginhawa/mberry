@@ -3,6 +3,7 @@ import type { DatabaseInstance } from '@/core/database';
 import { UnauthorizedError, ForbiddenError, ConflictError, ValidationError } from '@/core/errors';
 import { InviteRepository } from './repos/invite.repo';
 import { generateInviteToken, defaultExpiryDate } from './utils/token';
+import { requireOfficerTerm } from '@/core/auth/officer-checks';
 
 /**
  * createInvite
@@ -18,6 +19,13 @@ export async function createInvite(
 
   const orgId = ctx.get('organizationId');
   if (!orgId) return ctx.json({ error: 'Organization context required' }, 403);
+
+  // FIX-003 (G4) / m01 §6: only officers may issue invitations. A plain
+  // active member must be rejected. requireOfficerTerm verifies an active
+  // officer term for this org (and enforces 2FA for privileged titles in
+  // production — see FIX-002).
+  const officerDenied = await requireOfficerTerm(ctx);
+  if (officerDenied) return officerDenied;
 
   const body = ctx.req.valid('json');
   const db = ctx.get('database') as DatabaseInstance;

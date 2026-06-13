@@ -84,155 +84,165 @@ export async function voidInvoice(
     }
   }
 
-  // Check for already voided payment (Conflict 409)
-  if (invoice.paymentStatus === 'canceled') {
+  // Terminal-state guards (Conflict 409) — cannot void an already-voided or
+  // already-paid invoice, regardless of which void path applies.
+  if (invoice.status === 'void' || invoice.paymentStatus === 'canceled') {
     throw new ConflictError('Payment has already been voided');
   }
 
-  // Check for already captured payment (Conflict 409)
-  if (invoice.paymentStatus === 'succeeded') {
+  if (invoice.status === 'paid' || invoice.paymentStatus === 'succeeded') {
     throw new ConflictError('Payment has already been captured and cannot be voided');
   }
 
-  // Check if payment is in requires_capture state (authorized and waiting for provider decision)
-  if (invoice.paymentStatus !== 'requires_capture') {
+  // FIX-008 / SM-M21-INVOICE: only Draft or Open (Sent) invoices transition to
+  // Void. Anything else (e.g. uncollectible) is not a voidable state.
+  if (invoice.status !== 'draft' && invoice.status !== 'open') {
     throw new BusinessLogicError(
-      'Payment must be authorized (requires_capture) to void',
-      'PAYMENT_NOT_AUTHORIZED'
+      `Cannot void invoice in ${invoice.status} state`,
+      'INVOICE_NOT_VOIDABLE'
     );
   }
 
-  // Extract Stripe IDs and provider decision from metadata
   const invoiceMetadata = invoice.metadata as InvoiceMetadata;
-  const providerDecision = invoiceMetadata?.providerDecision;
-  const stripePaymentIntentId = invoiceMetadata?.stripePaymentIntentId;
 
-  if (providerDecision) {
-    throw new ConflictError('Payment decision has already been made');
-  }
+  if (invoice.paymentStatus === 'requires_capture') {
+    // ── Authorized-payment void path ──────────────────────────────────────
+    // A payment is authorized and held; cancel the Stripe payment intent to
+    // release the held funds before voiding the invoice.
+    const providerDecision = invoiceMetadata?.providerDecision;
+    const stripePaymentIntentId = invoiceMetadata?.stripePaymentIntentId;
 
-  if (!stripePaymentIntentId) {
-    throw new BusinessLogicError(
-      'No payment intent found for this invoice',
-      'PAYMENT_INTENT_MISSING'
-    );
-  }
-  
-  // Get the merchant account for the merchant person
-  const merchantAccount = await merchantAccountRepo.findByPerson(invoice.merchant);
-  if (!merchantAccount) {
-    throw new NotFoundError('Merchant account not found', {
-      resourceType: 'merchant-account',
-      resource: invoice.merchant,
-      suggestions: ['Check merchant person ID format', 'Verify merchant person exists in system', 'Complete billing setup']
-    });
-  }
-  
-  const metadata = merchantAccount.metadata as MerchantMetadata;
-  if (!metadata?.stripeAccountId) {
-    throw new BusinessLogicError(
-      'Provider Stripe account not found',
-      'STRIPE_ACCOUNT_MISSING'
-    );
-  }
+    if (providerDecision) {
+      throw new ConflictError('Payment decision has already been made');
+    }
 
-  try {
-    // Cancel the payment intent with Stripe
-    const cancelResult = await billing.cancelPaymentIntent(
-      stripePaymentIntentId,
-      metadata.stripeAccountId,
-      'Voided by provider'
-    );
+    if (!stripePaymentIntentId) {
+      throw new BusinessLogicError(
+        'No payment intent found for this invoice',
+        'PAYMENT_INTENT_MISSING'
+      );
+    }
 
-    // Update invoice with void details in metadata
-    const updatedMetadata = {
-      ...invoiceMetadata,
-      providerDecision: 'void',
-      providerDecisionAt: new Date().toISOString(),
-    };
-
-    await invoiceRepo.updateOneById(invoiceId, {
-      paymentStatus: 'canceled',
-      status: 'void',
-      voidedAt: new Date(),
-      metadata: updatedMetadata,
-    });
-
-    logger.info(
-      { action: 'voidInvoice.2',
-        invoiceId,
-        paymentIntentId: stripePaymentIntentId,
-        total: invoice.total
-      },
-      'Invoice voided successfully'
-    );
-
-    ctx.set('auditResourceId', invoiceId);
-    ctx.set('auditDescription', `Invoice voided: ${invoice.invoiceNumber ?? invoiceId}`);
-    ctx.set('auditDetails', { invoiceId, total: invoice.total });
-
-    // Fetch the updated invoice to return
-    const updatedInvoice = await invoiceRepo.findOneById(invoiceId);
-    if (!updatedInvoice) {
-      throw new NotFoundError('Updated invoice not found', {
-        resourceType: 'invoice',
-        resource: invoiceId
+    // Get the merchant account for the merchant person
+    const merchantAccount = await merchantAccountRepo.findByPerson(invoice.merchant);
+    if (!merchantAccount) {
+      throw new NotFoundError('Merchant account not found', {
+        resourceType: 'merchant-account',
+        resource: invoice.merchant,
+        suggestions: ['Check merchant person ID format', 'Verify merchant person exists in system', 'Complete billing setup']
       });
     }
 
-    // Return the full invoice as defined in TypeSpec
-    // Expose safe metadata fields for client use
-    const safeMetadata = updatedInvoice.metadata ? {
-      stripePaymentIntentId: (updatedInvoice.metadata as InvoiceMetadata)?.stripePaymentIntentId,
-      providerDecision: (updatedInvoice.metadata as InvoiceMetadata)?.providerDecision,
-    } : null;
-
-    // Fetch with line items for complete response
-    const invoiceWithLineItems = await invoiceRepo.findOneWithLineItems(invoiceId);
-
-    return ctx.json({
-      id: updatedInvoice.id,
-      invoiceNumber: updatedInvoice.invoiceNumber,
-      customer: updatedInvoice.customer,
-      merchant: updatedInvoice.merchant,
-      context: updatedInvoice.context || null,
-      status: updatedInvoice.status,
-      subtotal: updatedInvoice.subtotal,
-      tax: updatedInvoice.tax ?? null,
-      total: updatedInvoice.total,
-      currency: updatedInvoice.currency,
-      paymentCaptureMethod: updatedInvoice.paymentCaptureMethod,
-      paymentDueAt: updatedInvoice.paymentDueAt?.toISOString() ?? null,
-      lineItems: ((invoiceWithLineItems as Record<string, unknown> | null)?.['lineItems'] as Array<Record<string, unknown>> || []).map((item: Record<string, unknown>) => ({
-        description: item['description'],
-        quantity: item['quantity'],
-        unitPrice: item['unitPrice'],
-        amount: item['amount'],
-        metadata: item['metadata'] || null
-      })),
-      paymentStatus: updatedInvoice.paymentStatus ?? null,
-      paidAt: updatedInvoice.paidAt?.toISOString() ?? null,
-      paidBy: updatedInvoice.paidBy ?? null,
-      voidedAt: updatedInvoice.voidedAt?.toISOString() ?? null,
-      voidedBy: updatedInvoice.voidedBy ?? null,
-      voidThresholdMinutes: updatedInvoice.voidThresholdMinutes ?? null,
-      authorizedAt: updatedInvoice.authorizedAt?.toISOString() ?? null,
-      authorizedBy: updatedInvoice.authorizedBy ?? null,
-      metadata: safeMetadata,
-      createdAt: updatedInvoice.createdAt.toISOString(),
-      updatedAt: updatedInvoice.updatedAt.toISOString()
-    }, 200);
-    
-  } catch (error) {
-    logger.error({ action: 'voidInvoice.3', error, invoiceId }, 'Failed to void invoice');
-    
-    if (error instanceof ValidationError || error instanceof ConflictError || error instanceof BusinessLogicError) {
-      throw error;
+    const merchantMetadata = merchantAccount.metadata as MerchantMetadata;
+    if (!merchantMetadata?.stripeAccountId) {
+      throw new BusinessLogicError(
+        'Provider Stripe account not found',
+        'STRIPE_ACCOUNT_MISSING'
+      );
     }
-    
-    throw new BusinessLogicError(
-      'Failed to void invoice. Please try again later.',
-      'INVOICE_VOID_ERROR'
-    );
+
+    try {
+      // Cancel the payment intent with Stripe
+      await billing.cancelPaymentIntent(
+        stripePaymentIntentId,
+        merchantMetadata.stripeAccountId,
+        'Voided by provider'
+      );
+
+      // Update invoice with void details in metadata
+      const updatedMetadata = {
+        ...invoiceMetadata,
+        providerDecision: 'void',
+        providerDecisionAt: new Date().toISOString(),
+      };
+
+      await invoiceRepo.updateOneById(invoiceId, {
+        paymentStatus: 'canceled',
+        status: 'void',
+        voidedAt: new Date(),
+        metadata: updatedMetadata,
+      });
+    } catch (error) {
+      logger.error({ action: 'voidInvoice.3', error, invoiceId }, 'Failed to void invoice');
+
+      if (error instanceof ValidationError || error instanceof ConflictError || error instanceof BusinessLogicError) {
+        throw error;
+      }
+
+      throw new BusinessLogicError(
+        'Failed to void invoice. Please try again later.',
+        'INVOICE_VOID_ERROR'
+      );
+    }
+  } else {
+    // ── Unpaid / unauthorized void path (no charge) ───────────────────────
+    // SM-M21-INVOICE Draft/Open → Void. Per billing.md, an invoice voided
+    // before authorization follows the "standard void process without charge"
+    // — there is no held payment intent to cancel.
+    await invoiceRepo.updateOneById(invoiceId, {
+      status: 'void',
+      voidedAt: new Date(),
+    });
   }
+
+  logger.info(
+    { action: 'voidInvoice.2', invoiceId, total: invoice.total },
+    'Invoice voided successfully'
+  );
+
+  ctx.set('auditResourceId', invoiceId);
+  ctx.set('auditDescription', `Invoice voided: ${invoice.invoiceNumber ?? invoiceId}`);
+  ctx.set('auditDetails', { invoiceId, total: invoice.total });
+
+  // Fetch the updated invoice to return
+  const updatedInvoice = await invoiceRepo.findOneById(invoiceId);
+  if (!updatedInvoice) {
+    throw new NotFoundError('Updated invoice not found', {
+      resourceType: 'invoice',
+      resource: invoiceId
+    });
+  }
+
+  // Return the full invoice as defined in TypeSpec
+  // Expose safe metadata fields for client use
+  const safeMetadata = updatedInvoice.metadata ? {
+    stripePaymentIntentId: (updatedInvoice.metadata as InvoiceMetadata)?.stripePaymentIntentId,
+    providerDecision: (updatedInvoice.metadata as InvoiceMetadata)?.providerDecision,
+  } : null;
+
+  // Fetch with line items for complete response
+  const invoiceWithLineItems = await invoiceRepo.findOneWithLineItems(invoiceId);
+
+  return ctx.json({
+    id: updatedInvoice.id,
+    invoiceNumber: updatedInvoice.invoiceNumber,
+    customer: updatedInvoice.customer,
+    merchant: updatedInvoice.merchant,
+    context: updatedInvoice.context || null,
+    status: updatedInvoice.status,
+    subtotal: updatedInvoice.subtotal,
+    tax: updatedInvoice.tax ?? null,
+    total: updatedInvoice.total,
+    currency: updatedInvoice.currency,
+    paymentCaptureMethod: updatedInvoice.paymentCaptureMethod,
+    paymentDueAt: updatedInvoice.paymentDueAt?.toISOString() ?? null,
+    lineItems: ((invoiceWithLineItems as Record<string, unknown> | null)?.['lineItems'] as Array<Record<string, unknown>> || []).map((item: Record<string, unknown>) => ({
+      description: item['description'],
+      quantity: item['quantity'],
+      unitPrice: item['unitPrice'],
+      amount: item['amount'],
+      metadata: item['metadata'] || null
+    })),
+    paymentStatus: updatedInvoice.paymentStatus ?? null,
+    paidAt: updatedInvoice.paidAt?.toISOString() ?? null,
+    paidBy: updatedInvoice.paidBy ?? null,
+    voidedAt: updatedInvoice.voidedAt?.toISOString() ?? null,
+    voidedBy: updatedInvoice.voidedBy ?? null,
+    voidThresholdMinutes: updatedInvoice.voidThresholdMinutes ?? null,
+    authorizedAt: updatedInvoice.authorizedAt?.toISOString() ?? null,
+    authorizedBy: updatedInvoice.authorizedBy ?? null,
+    metadata: safeMetadata,
+    createdAt: updatedInvoice.createdAt.toISOString(),
+    updatedAt: updatedInvoice.updatedAt.toISOString()
+  }, 200);
 }

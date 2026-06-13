@@ -25,7 +25,9 @@ describe('NotificationPreferences', () => {
     mockApi.post.mockResolvedValue({ ok: true })
   })
 
-  test('renders 5 category rows x 3 channel columns of switches', async () => {
+  // AHA FIX-006 (Q1): web push is DESCOPED for V1. The preference matrix exposes
+  // only Email + In-App; the Push column is hidden behind WEB_PUSH_ENABLED=false.
+  test('renders 5 category rows x 2 channel columns (web push descoped)', async () => {
     renderWithProviders(
       <NotificationPreferences orgId="org-1" personId="person-1" />
     )
@@ -41,14 +43,14 @@ describe('NotificationPreferences', () => {
     expect(screen.getByText('Announcements')).toBeInTheDocument()
     expect(screen.getByText('Comms')).toBeInTheDocument()
 
-    // 3 column headers
+    // 2 column headers — Push descoped (Q1)
     expect(screen.getByText('Email')).toBeInTheDocument()
-    expect(screen.getByText('Push')).toBeInTheDocument()
     expect(screen.getByText('In-App')).toBeInTheDocument()
+    expect(screen.queryByText('Push')).not.toBeInTheDocument()
 
-    // 15 switches total (5 rows x 3 columns)
+    // 10 switches total (5 rows x 2 columns)
     const switches = screen.getAllByRole('switch')
-    expect(switches).toHaveLength(15)
+    expect(switches).toHaveLength(10)
   })
 
   test('clicking switch calls update API', async () => {

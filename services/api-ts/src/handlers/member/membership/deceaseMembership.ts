@@ -4,7 +4,9 @@ import type { DatabaseInstance } from '@/core/database';
 import { NotFoundError, UnauthorizedError, BusinessLogicError } from '@/core/errors';
 import type { DeceaseMembershipBody, DeceaseMembershipParams } from '@/generated/openapi/validators';
 import { MembershipRepository } from '@/handlers/association:member/repos/membership.repo';
+import { membershipStatusHistory } from '@/handlers/association:member/repos/status-history.schema';
 import { withComputedStatus } from './utils/membership-status-middleware';
+import { assertRecordInCallerOrg } from './utils/assert-record-org';
 import type { Membership } from '@/handlers/association:member/repos/membership.schema';
 import { duesInvoices } from '@/handlers/association:member/repos/dues.schema';
 import { INVOICE_VALID_TRANSITIONS } from './utils/status-transitions';
@@ -43,6 +45,8 @@ export async function deceaseMembership(
 
   const membership = await repo.findOneById(membershipId);
   if (!membership) throw new NotFoundError('Membership');
+  // FIX-003 (G-02): the record must belong to the caller's org.
+  assertRecordInCallerOrg(ctx, membership.organizationId, 'this membership');
   const enriched = withComputedStatus(membership);
 
   if (TERMINAL_STATUSES.includes(enriched.status)) {
@@ -73,6 +77,21 @@ export async function deceaseMembership(
           inArray(duesInvoices.status, INVOICE_STATUSES_CANCELABLE),
         ),
       );
+
+    // FIX-006 / G-08: record the officer-initiated transition (atomic with the
+    // status change). fromStatus is the COMPUTED status before the change.
+    if (membership.personId) {
+      await tx.insert(membershipStatusHistory).values({
+        organizationId: membership.organizationId,
+        membershipId,
+        personId: membership.personId,
+        fromStatus: enriched.status,
+        toStatus: 'deceased',
+        reason: body.terminationReason ?? 'deceased',
+        changedBy: session.user.id,
+        changedAt: new Date(),
+      });
+    }
   });
 
   ctx.set('auditResourceId', membershipId);

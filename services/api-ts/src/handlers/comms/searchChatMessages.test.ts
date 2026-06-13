@@ -2,22 +2,39 @@ import { describe, test, expect, mock } from 'bun:test';
 import { searchChatMessages } from './searchChatMessages';
 import { ValidationError } from '@/core/errors';
 
-function makeDb(rows: any[]) {
-  const chain = {
+function makeDb(rows: any[], onWhere?: (w: any) => void) {
+  const chain: any = {
     select: () => chain,
     from: () => chain,
     innerJoin: () => chain,
-    where: () => chain,
+    where: (w: any) => { onWhere?.(w); return chain; },
     orderBy: () => chain,
     limit: async () => rows,
   };
   return chain;
 }
 
+// Circular-safe collector of param values / string chunks / column names from a
+// drizzle SQL object, so FIX-008 can assert the org-scope clause was appended.
+function sqlCollect(node: any, acc: string[] = [], seen = new WeakSet()): string[] {
+  if (node == null) return acc;
+  if (typeof node === 'string') { acc.push(node); return acc; }
+  if (typeof node !== 'object') { acc.push(String(node)); return acc; }
+  if (seen.has(node)) return acc;
+  seen.add(node);
+  if (Array.isArray(node)) { for (const n of node) sqlCollect(n, acc, seen); return acc; }
+  if (node.queryChunks) { sqlCollect(node.queryChunks, acc, seen); return acc; }
+  if (Array.isArray(node.value)) { for (const v of node.value) sqlCollect(v, acc, seen); return acc; }
+  if (node.value !== undefined && typeof node.value !== 'object') acc.push(String(node.value));
+  if (node.name) acc.push(String(node.name));
+  return acc;
+}
+
 function makeCtx(opts: {
   userId?: string | null;
   q?: string;
   db?: any;
+  organizationId?: string;
 } = {}) {
   const userId = opts.userId === undefined ? 'user-1' : opts.userId;
   const q = opts.q ?? '';
@@ -31,6 +48,7 @@ function makeCtx(opts: {
         user: userId ? { id: userId, name: 'Test' } : null,
         database: db,
         logger: { info: () => {}, warn: () => {}, error: () => {}, debug: () => {} },
+        ...(opts.organizationId ? { organizationId: opts.organizationId } : {}),
       };
       return store[key];
     },
@@ -99,5 +117,29 @@ describe('searchChatMessages', () => {
     await searchChatMessages(ctx);
     const out = ctx._captured().data.data;
     expect(out[0].message).toBe('');
+  });
+
+  // FIX-008 (G4 read-path): when the caller's org context is known, the search
+  // is scoped to messages in that org's rooms OR DM rooms (org-agnostic, PD-2).
+  test('[FIX-008] org-scopes the search to (caller org OR dm) when org context is set', async () => {
+    let where: any;
+    const db = makeDb([], (w) => { where = w; });
+    const ctx = makeCtx({ q: 'hello', db, organizationId: 'org-1' });
+    await searchChatMessages(ctx);
+
+    const text = sqlCollect(where).join(' ');
+    expect(text).toContain('org-1');
+    expect(text.toLowerCase()).toContain('dm');
+  });
+
+  // FIX-008: without org context, no org filter is appended (existing behavior).
+  test('[FIX-008] does not org-scope when no org context is present', async () => {
+    let where: any;
+    const db = makeDb([], (w) => { where = w; });
+    const ctx = makeCtx({ q: 'hello', db });
+    await searchChatMessages(ctx);
+
+    const text = sqlCollect(where).join(' ');
+    expect(text).not.toContain('org-1');
   });
 });

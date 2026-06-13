@@ -9,7 +9,6 @@ import {
   BusinessLogicError
 } from '@/core/errors';
 import { ChatRoomRepository } from './repos/chatRoom.repo';
-import type { ChatRoomFilters } from './repos/comms.schema';
 import { buildPaginationMeta } from '@/utils/query';
 
 /**
@@ -58,66 +57,43 @@ export async function listChatRooms(
   const pageSize = query.pageSize || query.limit || 50;
   const offset = query.offset || (page - 1) * pageSize;
 
-  // Build filters based on user's profiles
-  const filters: ChatRoomFilters = {
+  // FIX-013: push status/context/withParticipant filtering AND pagination into
+  // SQL. The previous handler sliced an unbounded in-memory list and applied the
+  // context/withParticipant filters AFTER the slice, so a matching room on a
+  // later page disappeared (broke booking-chat lookup by context). The repo now
+  // builds every filter into the WHERE clause and returns the true total.
+  // FIX-008 (G4 read-path): when the caller's org context is known, scope the
+  // listing to that org's non-DM rooms while preserving DMs (org-agnostic,
+  // PD-2). orgId from ctx.get('organizationId'); module-local.
+  const callerOrgId = ctx.get('organizationId') as string | undefined;
+
+  const { data: finalRooms, totalCount } = await repo.findUserRoomsPage(user.id, {
     status: query.status,
     context: query.context,
-    hasActiveCall: query.hasActiveCall
-  };
-
-  // If withParticipant is specified, need to find rooms with both current user's profiles
-  // AND the specified participant
-  if (query.withParticipant) {
-    // This is more complex with arrays - we need to find rooms where:
-    // 1. The user (using Person ID) is a participant
-    // 2. The specified participant is also a participant
-    // Get all user rooms and filter
-    const userRooms = await repo.findUserChatRooms(user.id, {
-      status: query.status,
-      hasActiveCall: query.hasActiveCall,
-      limit: pageSize,
-      offset: offset
-    });
-
-    // Filter to only rooms that also contain the specified participant
-    const filteredRooms = userRooms.filter(room =>
-      room.participants.includes(query.withParticipant!)
-    );
-
-    // Return filtered results
-    return ctx.json({
-      data: filteredRooms,
-      pagination: buildPaginationMeta(filteredRooms, filteredRooms.length, pageSize, offset)
-    }, 200);
-  }
-
-  // Get user's chat rooms (rooms where user's Person ID is a participant)
-  const allUserRooms = await repo.findUserChatRooms(user.id, {
-    status: query.status,
-    hasActiveCall: query.hasActiveCall
+    withParticipant: query.withParticipant,
+    hasActiveCall: query.hasActiveCall,
+    organizationId: callerOrgId,
+    limit: pageSize,
+    offset
   });
-
-  // Apply pagination
-  const start = offset;
-  const end = offset + pageSize;
-  let finalRooms = allUserRooms.slice(start, end);
-
-  // Apply context filter if specified
-  if (query.context) {
-    finalRooms = finalRooms.filter(room => room.context === query.context);
-  }
 
   // Log audit trail
   logger?.info({
     userId: user.id,
-    filters,
+    filters: {
+      status: query.status,
+      context: query.context,
+      withParticipant: query.withParticipant,
+      hasActiveCall: query.hasActiveCall
+    },
     resultCount: finalRooms.length,
+    totalCount,
     action: 'list_chat_rooms'
   }, 'Chat rooms listed successfully');
 
   // Return paginated response matching TypeSpec definition
   return ctx.json({
     data: finalRooms,
-    pagination: buildPaginationMeta(finalRooms, allUserRooms.length, pageSize, offset)
+    pagination: buildPaginationMeta(finalRooms, totalCount, pageSize, offset)
   }, 200);
 }

@@ -3,7 +3,7 @@ import { render, screen, cleanup, fireEvent } from '@testing-library/react'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import type { ReactNode } from 'react'
 import { ChannelList } from './channel-list'
-import { listChatRoomsQueryKey } from '@monobase/sdk-ts/generated/react-query'
+import { listChatRoomsOptions, listChatRoomsQueryKey } from '@monobase/sdk-ts/generated/react-query'
 import type { ChatRoom } from '@monobase/sdk-ts/generated/types.gen'
 
 function buildRoom(overrides: Partial<ChatRoom> = {}): ChatRoom {
@@ -110,6 +110,29 @@ describe('ChannelList', () => {
       fireEvent.click(clickable)
       expect(selectedIds).toContain(room.id)
     }
+  })
+
+  // FIX-008 FE activation: org-scoping goes live when the read carries x-org-id.
+  test('passes orgId as x-org-id header to listChatRooms options when orgId provided', async () => {
+    const qc = buildClient()
+    renderWithQuery(<ChannelList orgSlug="acme" orgId="org-99" onSelectRoom={() => {}} />, qc)
+    await new Promise((r) => setTimeout(r, 0))
+    expect(listChatRoomsOptions).toHaveBeenCalledWith(
+      expect.objectContaining({ headers: { 'x-org-id': 'org-99' } }),
+    )
+  })
+
+  test('omits x-org-id header when no orgId is provided (key stays org-agnostic)', async () => {
+    const qc = buildClient()
+    renderWithQuery(<ChannelList orgSlug="acme" onSelectRoom={() => {}} />, qc)
+    await new Promise((r) => setTimeout(r, 0))
+    // The org-agnostic call must NOT carry a headers field — otherwise the
+    // query key shifts and seeded caches (and prod single-org reads) break.
+    const calls = (listChatRoomsOptions as unknown as { mock: { calls: unknown[][] } }).mock.calls
+    const orgAgnostic = calls.find(
+      (args) => (args[0] as { headers?: unknown })?.headers === undefined,
+    )
+    expect(orgAgnostic).toBeDefined()
   })
 
   test('shows Create channel button only when isOfficer is true', async () => {

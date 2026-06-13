@@ -32,7 +32,7 @@ function TrainingAttendance() {
   const checkInMutation = useMutation({
     mutationFn: (memberId: string) => (checkInMutOpts.mutationFn as (...args: any[]) => any)({
       path: { trainingId },
-      query: { organizationId: orgId },
+      query: { organizationId: orgId, personId: memberId },
     }),
     onSuccess: (_data, memberId) => {
       setCheckedIn((prev) => new Set(prev).add(memberId))

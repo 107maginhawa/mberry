@@ -276,15 +276,28 @@ describe('payInvoice — authorization', () => {
 // ---------------------------------------------------------------------------
 
 describe('payInvoice — invoice payment state', () => {
-  const alreadyActiveStatuses = ['requires_capture', 'processing', 'succeeded', 'failed', 'canceled'] as const;
+  // FIX-006: only in-progress/captured payments block re-pay. failed/canceled
+  // must be retryable (m21 §1 "retry failed payments").
+  const blockingPaymentStatuses = ['requires_capture', 'processing', 'succeeded'] as const;
 
-  for (const ps of alreadyActiveStatuses) {
+  for (const ps of blockingPaymentStatuses) {
     test(`returns 409 when paymentStatus is already "${ps}"`, async () => {
       const app = await buildApp({ invoice: makeInvoice({ paymentStatus: ps }) });
       const resp = await postPay(app);
       expect(resp.status).toBe(409);
       const body = await resp.json() as any;
       expect(body.code).toBe('CONFLICT');
+    });
+  }
+
+  // FIX-006: a declined/canceled payment must not permanently lock the invoice.
+  const retryablePaymentStatuses = ['failed', 'canceled'] as const;
+
+  for (const ps of retryablePaymentStatuses) {
+    test(`allows retry (200) when paymentStatus is "${ps}"`, async () => {
+      const app = await buildApp({ invoice: makeInvoice({ paymentStatus: ps }) });
+      const resp = await postPay(app);
+      expect(resp.status).toBe(200);
     });
   }
 
@@ -295,9 +308,33 @@ describe('payInvoice — invoice payment state', () => {
   });
 
   test('allows payment when paymentStatus is pending (re-initiation)', async () => {
-    // Handler check: `invoice.paymentStatus && invoice.paymentStatus !== 'pending'`
-    // null and 'pending' both pass
+    // Handler check: blocking only for in-progress/captured states.
+    // null and 'pending' both pass.
     const app = await buildApp({ invoice: makeInvoice({ paymentStatus: 'pending' }) });
+    const resp = await postPay(app);
+    expect(resp.status).toBe(200);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// FIX-005: invoice status guard (BR-61) — only `open` invoices are payable
+// ---------------------------------------------------------------------------
+
+describe('payInvoice — invoice status guard (BR-61)', () => {
+  const unpayableStatuses = ['draft', 'void', 'uncollectible', 'paid'] as const;
+
+  for (const status of unpayableStatuses) {
+    test(`returns 422 when invoice.status is "${status}"`, async () => {
+      const app = await buildApp({ invoice: makeInvoice({ status }) });
+      const resp = await postPay(app);
+      expect(resp.status).toBe(422);
+      const body = await resp.json() as any;
+      expect(body.code).toBe('INVOICE_NOT_PAYABLE');
+    });
+  }
+
+  test('allows payment when invoice.status is "open"', async () => {
+    const app = await buildApp({ invoice: makeInvoice({ status: 'open' }) });
     const resp = await postPay(app);
     expect(resp.status).toBe(200);
   });

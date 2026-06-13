@@ -19,6 +19,8 @@ import type { DatabaseInstance } from '@/core/database';
 import { authMiddleware } from '@/middleware/auth';
 import { ChatRoomRepository } from './repos/chatRoom.repo';
 import { ChatMessageRepository } from './repos/chatMessage.repo';
+import { ChatRoomMemberRepository } from './repos/chatRoomMember.repo';
+import { OfficerTermRepository } from '@/handlers/association:member/repos/governance.repo';
 
 /**
  * Message types for chat room WebSocket.
@@ -70,8 +72,15 @@ export const config: WebSocketHandler = {
       return;
     }
 
-    // Check if user is a participant (via their profiles)
-    const isParticipant = room.participants.includes(user.id);
+    // Check if user is a participant.
+    // FIX-007 (G5): honor BOTH the legacy JSONB `participants` array AND the
+    // `chat_room_member` join table, so a member tracked only in the join table
+    // can connect. Compatibility OR-shim — JSONB stays canonical; the `||`
+    // short-circuits, so the join-table query only runs when JSONB misses.
+    const memberRepo = new ChatRoomMemberRepository(db, logger);
+    const isParticipant =
+      room.participants.includes(user.id) ||
+      (await memberRepo.isMember(roomId, user.id));
 
     if (!isParticipant) {
       logger.error({ action: 'ws.chat-room.2', userId: user.id, roomId }, 'User is not a participant in chat room');
@@ -126,6 +135,39 @@ export const config: WebSocketHandler = {
         // Persist message to database
         const messageRepo = new ChatMessageRepository(db, logger);
         const roomRepo = new ChatRoomRepository(db, logger);
+
+        // FIX-012 (G10): archived rooms are read-only — reject the send on the WS
+        // path too (mirrors the REST guard in sendChatMessage). Do not persist.
+        const targetRoom = await roomRepo.findOneById(roomId);
+        if (targetRoom?.status === 'archived') {
+          ws.send(JSON.stringify({
+            event: 'error',
+            payload: { message: 'Cannot send messages to an archived chat room' },
+          }));
+          logger.warn({ action: 'ws.chat-room.archived-rejected', userId: user.id, roomId }, 'Rejected chat message to archived room');
+          break;
+        }
+
+        // PD-1 decision-3 (Step 41): #announcements is officer-post-only on the
+        // WS write path too (mirrors sendChatMessage). The provisioned
+        // announcements channel is keyed by its context slug; only an officer of
+        // the room's org may post. WS connections carry no org-context
+        // middleware, so the officer term is checked against the room's own org.
+        if (targetRoom?.context === 'channel:announcements') {
+          const termRepo = new OfficerTermRepository(db);
+          const terms = await termRepo.findActiveByPersonAndOrg(
+            user.id,
+            (targetRoom as { organizationId: string }).organizationId,
+          );
+          if (terms.length === 0) {
+            ws.send(JSON.stringify({
+              event: 'error',
+              payload: { message: 'Only officers may post to the announcements channel' },
+            }));
+            logger.warn({ action: 'ws.chat-room.announcements-rejected', userId: user.id, roomId }, 'Rejected non-officer announcement post');
+            break;
+          }
+        }
 
         const savedMessage = await messageRepo.createTextMessage(
           roomId,

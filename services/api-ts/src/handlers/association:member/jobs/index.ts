@@ -10,6 +10,7 @@ import { processWebhookRetry } from '@/handlers/member/duesspecialassessments/jo
 import { processCreditIssue } from './creditIssue';
 import { processComplianceThreshold } from './complianceThreshold';
 import { createProcessPayment } from '@/handlers/member/duesspecialassessments/jobs/processStripePayment';
+import { processLicenseRenewalAlerts } from './licenseRenewalProcessor';
 
 /**
  * Register all dues module jobs with the scheduler
@@ -18,6 +19,14 @@ export function registerDuesJobs(scheduler: JobScheduler, billing: BillingServic
   // Process dues reminders daily at midnight
   scheduler.registerCron('dues.reminderProcessor', '0 0 * * *', async (context: JobContext) => {
     await processDuesReminders({ db: context.db, logger: context.logger });
+  });
+
+  // Generate license-renewal alerts daily (FIX-007, G7).
+  // Scans active professional licenses approaching expiry and inserts
+  // idempotent license_renewal_alert rows — the previously-missing producer
+  // for the "nudge before license expiry" credential feature.
+  scheduler.registerCron('member.licenseRenewalProcessor', '0 1 * * *', async (context: JobContext) => {
+    await processLicenseRenewalAlerts({ db: context.db, logger: context.logger });
   });
 
   // Process webhook retries every minute (slice 009, GAP-009)

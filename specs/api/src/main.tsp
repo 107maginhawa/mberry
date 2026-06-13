@@ -23,6 +23,7 @@ import "./modules/reviews.tsp";
 // Platform administration
 import "./modules/platform-admin.tsp";
 import "./modules/platform-admin-custom.tsp";
+import "./modules/platform-admin-support.tsp";
 
 // Officer dashboard custom endpoints
 import "./modules/membership-custom.tsp";
@@ -643,6 +644,11 @@ namespace MonobaseAPI {
   @tag("PlatformAdmin")
   interface PlatformAdminDashboardEndpoints extends PlatformAdminCustomModule.AdminDashboardEndpoints {}
 
+  // Support inbox / breach register / billing (FIX-011 / G7). Ops carry their own
+  // absolute @route("/admin/...") so no interface-level @route base is applied here.
+  @tag("PlatformAdmin")
+  interface PlatformAdminSupportBillingEndpoints extends PlatformAdminSupportModule.SupportBillingEndpoints {}
+
   // =========================================================================
   // Association Domain — Announcements
   // =========================================================================
@@ -695,34 +701,49 @@ namespace MonobaseAPI {
 
   // =========================================================================
   // Wave G3 — Advertising / Jobs / Marketplace
-  // (TypeSpec-only; routes are NOT mounted in app.ts pending product decision)
+  //
+  // AHA FIX-001 (G-01 / D-11): re-exported interfaces MUST carry an explicit
+  // @route("/association/...") prefix. Without it, TypeSpec drops the source
+  // namespace's @route and emits these ops at ROOT paths (/vendors, /opt-out,
+  // ...), bypassing the /association/* orgContextMiddleware mounted in app.ts
+  // and 500-ing every insert on the organization_id NOT NULL constraint.
+  // The prefixes below mirror the @route on each module's namespace.
   // =========================================================================
 
   @tag("Advertising")
+  @route("/association/advertising")
   interface AdvertisingAdvertiserManagement extends AdvertisingModule.AdvertiserManagement {}
 
   @tag("Advertising")
+  @route("/association/advertising")
   interface AdvertisingCampaignManagement extends AdvertisingModule.CampaignManagement {}
 
   @tag("Advertising")
+  @route("/association/advertising")
   interface AdvertisingCreativeManagement extends AdvertisingModule.CreativeManagement {}
 
   @tag("Advertising")
+  @route("/association/advertising")
   interface AdvertisingAdPlacement extends AdvertisingModule.AdPlacement {}
 
   @tag("Jobs")
+  @route("/association/jobs")
   interface JobsJobPostingManagement extends JobsModule.JobBoardPostingManagement {}
 
   @tag("Jobs")
+  @route("/association/jobs")
   interface JobsJobApplicationManagement extends JobsModule.JobBoardApplicationManagement {}
 
   @tag("Marketplace")
+  @route("/association/marketplace")
   interface MarketplaceVendorManagement extends MarketplaceModule.VendorManagement {}
 
   @tag("Marketplace")
+  @route("/association/marketplace")
   interface MarketplaceListingManagement extends MarketplaceModule.ListingManagement {}
 
   @tag("Marketplace")
+  @route("/association/marketplace")
   interface MarketplaceOrderManagement extends MarketplaceModule.OrderManagement {}
 
   // =========================================================================

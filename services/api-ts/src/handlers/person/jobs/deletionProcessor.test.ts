@@ -199,6 +199,101 @@ describe('processDeletions', () => {
     expect(updateData.specialization).toBeNull();
   });
 
+  // ── FIX-002 (G-03): bio is free-text PII (can hold clinic address/phone)
+  //    and was never scrubbed at either deletion site. ──
+  test('[DPA-02] nulls bio (free-text PII) during anonymization', async () => {
+    const capturedSets: any[] = [];
+
+    const db = {
+      select: () => ({
+        from: (t: any) => ({
+          where: async () => [fakePersonPendingDeletion],
+        }),
+      }),
+      update: (t: any) => ({
+        set: (data: any) => {
+          capturedSets.push(data);
+          return { where: async () => [] };
+        },
+      }),
+      delete: (t: any) => ({ where: async () => [] }),
+    };
+
+    await processDeletions({ db: db as any, logger: makeLogger() });
+
+    const updateData = capturedSets.find((s: any) => s.firstName === 'DELETED');
+    expect(updateData.bio).toBeNull();
+  });
+
+  // ── Q-4 (Step 46): gender is a stored PII column. The field-level erasure
+  //    policy decision is "scrub it" — null gender alongside bio. ──
+  test('[DPA-02] nulls gender during anonymization (Q-4 decided: scrub)', async () => {
+    const capturedSets: any[] = [];
+
+    const db = {
+      select: () => ({
+        from: (t: any) => ({
+          where: async () => [fakePersonPendingDeletion],
+        }),
+      }),
+      update: (t: any) => ({
+        set: (data: any) => {
+          capturedSets.push(data);
+          return { where: async () => [] };
+        },
+      }),
+      delete: (t: any) => ({ where: async () => [] }),
+    };
+
+    await processDeletions({ db: db as any, logger: makeLogger() });
+
+    const updateData = capturedSets.find((s: any) => s.firstName === 'DELETED');
+    expect(updateData.gender).toBeNull();
+  });
+
+  // ── FIX-003 (G-17): a single shared scrub field set drives the processor,
+  //    so the two-list drift that hid the bio omission cannot recur. ──
+  test('[DPA-02] anonymization scrubs the full canonical PII field set', async () => {
+    const capturedSets: any[] = [];
+
+    const db = {
+      select: () => ({
+        from: (t: any) => ({
+          where: async () => [fakePersonPendingDeletion],
+        }),
+      }),
+      update: (t: any) => ({
+        set: (data: any) => {
+          capturedSets.push(data);
+          return { where: async () => [] };
+        },
+      }),
+      delete: (t: any) => ({ where: async () => [] }),
+    };
+
+    await processDeletions({ db: db as any, logger: makeLogger() });
+
+    const s = capturedSets.find((d: any) => d.firstName === 'DELETED');
+    // Explicit field set — NOT a snapshot mirror of the implementation.
+    expect(s.firstName).toBe('DELETED');
+    expect(s.lastName).toBe('DELETED');
+    expect(s.middleName).toBeNull();
+    expect(s.contactInfo).toEqual({ email: 'deleted@deleted.invalid', phone: undefined });
+    expect(s.primaryAddress).toBeNull();
+    expect(s.avatar).toBeNull();
+    expect(s.languagesSpoken).toBeNull();
+    expect(s.timezone).toBeNull();
+    expect(s.licenseNumber).toBeNull();
+    expect(s.specialization).toBeNull();
+    expect(s.prcId).toBeNull();
+    expect(s.preferredLanguage).toBeNull();
+    expect(s.dateOfBirth).toBeNull();
+    expect(s.bio).toBeNull();
+    expect(s.gender).toBeNull();
+    expect(s.updatedBy).toBe('system');
+    expect(s.deletionCompletedAt).toBeInstanceOf(Date);
+  });
+
   test('deletes Better-Auth sessions for the person', async () => {
     let deleteCalledCount = 0;
 

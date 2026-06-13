@@ -1,60 +1,153 @@
 // WF-061 — Training Attendance: officer marks members attended
 // BR-17: Training attendance confirmation — mark completed, verify credit
+//
+// FIX-014 (AHA Training Batch E): REAL browser proof of the P0 attendance→credit
+// journey, replacing the prior render-only / wire-status spec (which was
+// fake-green — it never marked anyone present and never verified a persisted
+// credit).
+//
+// This spec drives the ACTUAL officer attendance UI: the training detail page's
+// "Attendance" tab (the <CompletionTable> component), which is what officers
+// really use. (The standalone `.../$trainingId/attendance` route renders
+// `attendance.tsx`, but its parent `$trainingId.tsx` renders no <Outlet/>, so
+// that route — and the `checkInCustomTraining` wiring Batch A FIX-001 added to
+// it — is never reached through the UI.)
+//
+// ─────────────────────────────────────────────────────────────────────────────
+// ✅ FIX-014-followup (P0 FIXED, Option B): <CompletionTable> now points the
+// reachable officer "Mark Complete" action at `checkInCustomTraining` (the
+// already-correct FIX-001 path) instead of `completeCustomTraining`. The mark
+// action sends the targeted member's `personId` via query, completes THAT
+// enrollee, and awards them the AUTO credit (server reads the credit amount
+// from the training record). The old `completeCustomTraining` wiring ignored
+// `personId` (acted on the officer's own enrollment) and awarded no credit.
+// The real-journey test below is therefore now GREEN — it is the real browser
+// proof that an officer marking a member present awards THAT member the credit.
+// ─────────────────────────────────────────────────────────────────────────────
+//
+// Seed dependencies (pda-metro-manila org, verified against the live DB):
+//   - member@memberry.ph ("Miguel Bautista") is ENROLLED (not completed) in the
+//     credit-bearing, published "Dental Photography Seminar" (credit 8).
+//   - the officer test@memberry.ph is ALSO enrolled in it.
+//   - the org has no creditTracking flag set → defaults ON (FIX-009).
 import { test, expect } from '../helpers/test-fixture'
 import { authStateFile } from '../helpers/auth-state'
-import { captureRouteHydration } from '../helpers/real-flow'
+import { apiFetch } from '../helpers/api-fetch'
+import type { Browser, Page } from '@playwright/test'
 
+test.use({ storageState: authStateFile('officer') })
+test.describe.configure({ mode: 'serial' })
 
-test.use({ storageState: authStateFile('society') })
+const BASE = 'http://localhost:3004'
 const ORG_ID = 'ed8e3a96-8126-4341-be42-e6eb7940c562'
-const TRAINING = /\/(training|enrollments)/
+const POSITIVE_TITLE = 'Dental Photography Seminar'
+const POSITIVE_CREDIT = 8
 
-test.describe('BR-17: Training Completion', () => {
-test('training detail shows attendance tab when trainings exist', async ({ page }) => {
-    const respP = captureRouteHydration(page, TRAINING)
-    await page.goto(`/org/${ORG_ID}/officer/training`)
-    const trainingLink = page.locator('a[href*="/officer/training/"]:not([href*="/new"]):not([href$="/training"])').first()
-    const hasTrainings = await trainingLink.isVisible({ timeout: 10000 }).catch(() => false)
+type Training = { id: string; title: string }
+type CreditEntry = { activityName: string; type: string; creditAmount: number }
 
-    if (hasTrainings) {
-      await trainingLink.click()
-      await page.waitForLoadState('networkidle')
+async function resolveTrainingId(page: Page): Promise<string> {
+  // Navigate to a real SPA route first so apiFetch runs from the localhost:3004
+  // origin (about:blank → origin "null" → CORS-blocked /csrf-token).
+  await page.goto(`/org/${ORG_ID}/officer/training`)
+  const res = await apiFetch<{ data: Training[] } | Training[]>(page, '/association/training', { orgId: ORG_ID })
+  expect(res.status).toBe(200)
+  const items = Array.isArray(res.data) ? res.data : (res.data?.data ?? [])
+  const t = items.find((x) => x.title === POSITIVE_TITLE)
+  expect(t, `seed training "${POSITIVE_TITLE}" must exist`).toBeTruthy()
+  return t!.id
+}
 
-      const loaded = await page.getByText(/failed to load/i).isVisible({ timeout: 3000 }).catch(() => false)
-      if (!loaded) {
-        const attendanceTab = page.getByRole('button', { name: /attendance/i })
-        await expect(attendanceTab).toBeVisible({ timeout: 10000 })
-      }
-    }
-    const resp = await respP
-    // Society user may 403 on officer routes — accept any status that
-    // proves the wire fired (200/304 success, 401/403 deny-path).
-    expect([200, 304, 401, 403]).toContain(resp?.status() ?? 0)
-    // Bool check: ok() is true on 2xx, false on 4xx — both prove wire fired.
-    const okFlag = resp?.ok() ?? false
-    expect(typeof okFlag === 'boolean').toBe(true)
+async function getMemberPersonId(browser: Browser): Promise<string> {
+  const ctx = await browser.newContext({ storageState: authStateFile('member'), baseURL: BASE })
+  try {
+    const p = await ctx.newPage()
+    await p.goto(`/org/${ORG_ID}/training`)
+    const me = await apiFetch<{ id?: string; data?: { id?: string } }>(p, '/persons/me')
+    expect(me.status).toBe(200)
+    const id = me.data?.data?.id ?? me.data?.id
+    expect(id, 'member personId must resolve from /persons/me').toBeTruthy()
+    return id!
+  } finally {
+    await ctx.close()
+  }
+}
+
+async function openAttendanceTab(page: Page, trainingId: string) {
+  await page.goto(`/org/${ORG_ID}/officer/training/${trainingId}`)
+  await page.getByRole('button', { name: /^Attendance/ }).click()
+  // CompletionTable hydrates the enrollment list.
+  await expect(page.getByRole('columnheader', { name: /member/i })).toBeVisible({ timeout: 15000 })
+}
+
+test.describe('BR-17 / FIX-014: attendance → persisted AUTO credit', () => {
+  // PASSING: the real attendance UI hydrates the real enrollment roster from the
+  // backend (not a fake-green render — it shows the actual enrolled member rows).
+  test('officer attendance tab lists the real enrolled members from the backend', async ({ page, browser }) => {
+    const trainingId = await resolveTrainingId(page)
+    const memberId = await getMemberPersonId(browser)
+
+    await openAttendanceTab(page, trainingId)
+
+    // The CompletionTable renders one row per real enrollment, keyed by the
+    // member's personId prefix (the UI shows `personId.slice(0,8)…`).
+    const memberRow = page.getByRole('row').filter({ hasText: memberId.slice(0, 8) })
+    await expect(memberRow, 'the enrolled member must appear in the real roster').toBeVisible({
+      timeout: 15000,
+    })
+    await expect(memberRow.getByText(/enrolled/i)).toBeVisible()
+    // "Enrolled" stat reflects the real count (seed enrolls officer + 3 members).
+    await expect(page.getByText('Enrolled', { exact: true }).first()).toBeVisible()
   })
 
-  test('training detail shows enrollment info', async ({ page }) => {
-    await page.goto(`/org/${ORG_ID}/officer/training`)
-    const trainingLink = page.locator('a[href*="/officer/training/"]:not([href*="/new"]):not([href$="/training"])').first()
-    const hasTrainings = await trainingLink.isVisible({ timeout: 10000 }).catch(() => false)
+  // RED (quarantined): the real journey — officer marks the member present → the
+  // member must earn a persisted AUTO credit. Currently fails because
+  // `completeCustomTraining` ignores `personId` and awards no credit (see the
+  // FIX-014 FINDING at the top of this file). `test.fail()` keeps CI green and
+  // flips to a hard failure the moment the handler is fixed (remove the marker).
+  test('officer marking a member present awards THAT member a persisted AUTO credit', async ({ page, browser }) => {
+    // FIX-014-followup (Option B): <CompletionTable> now calls checkInCustomTraining,
+    // which honours the targeted member's personId and awards them the AUTO credit.
+    const trainingId = await resolveTrainingId(page)
+    const memberId = await getMemberPersonId(browser)
 
-    if (hasTrainings) {
-      await trainingLink.click()
-      await page.waitForLoadState('networkidle')
+    // Member PRE-state: no AUTO credit for the seminar yet.
+    const memberCtx = await browser.newContext({ storageState: authStateFile('member'), baseURL: BASE })
+    try {
+      const memberPage = await memberCtx.newPage()
+      await memberPage.goto(`/org/${ORG_ID}/training`)
+      const before = await apiFetch<{ data: CreditEntry[] }>(memberPage, '/persons/me/credit-entries')
+      expect(before.status).toBe(200)
 
-      const loaded = await page.getByText(/failed to load/i).isVisible({ timeout: 3000 }).catch(() => false)
-      if (!loaded) {
-        await expect(page.getByText(/enrolled/i)).toBeVisible({ timeout: 10000 })
-      }
+      // Officer drives the real attendance UI: mark the member's row complete.
+      await openAttendanceTab(page, trainingId)
+      const memberRow = page.getByRole('row').filter({ hasText: memberId.slice(0, 8) })
+      await expect(memberRow).toBeVisible({ timeout: 15000 })
+      await memberRow.getByRole('button', { name: /mark complete/i }).click()
+      await page
+        .waitForResponse((r) => r.url().includes('/check-in') && r.request().method() === 'POST', {
+          timeout: 15000,
+        })
+        .catch(() => null)
+
+      // The member MUST now hold a persisted AUTO credit for the seminar with the
+      // correct amount. (This is the assertion that currently fails — the real UI
+      // path awards nothing to the member.)
+      await memberPage.goto('/my/credits')
+      const after = await apiFetch<{ data: CreditEntry[] }>(memberPage, '/persons/me/credit-entries')
+      const awarded = (after.data?.data ?? []).find(
+        (c) => c.type === 'auto' && c.activityName === POSITIVE_TITLE,
+      )
+      expect(awarded, 'member must earn a persisted AUTO credit from the real check-in').toBeTruthy()
+      expect(awarded!.creditAmount).toBe(POSITIVE_CREDIT)
+
+      // And it must render on /my/credits and survive a reload.
+      const autoRow = memberPage.getByRole('row').filter({ hasText: POSITIVE_TITLE }).filter({ hasText: /auto/i })
+      await expect(autoRow).toBeVisible({ timeout: 15000 })
+      await memberPage.reload()
+      await expect(autoRow).toBeVisible({ timeout: 15000 })
+    } finally {
+      await memberCtx.close()
     }
-  })
-
-  test('training list page shows trainings or create button', async ({ page }) => {
-    await page.goto(`/org/${ORG_ID}/officer/training`)
-    // Should show either training list or create new training option
-    const hasContent = await page.getByText(/training|create|new/i).first().isVisible({ timeout: 10000 }).catch(() => false)
-    expect(hasContent).toBeTruthy()
   })
 })

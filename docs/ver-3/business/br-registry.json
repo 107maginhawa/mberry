@@ -926,11 +926,14 @@
     "module": "M22",
     "ruleClass": "p0-data",
     "tests": {
-      "backend": [],
+      "backend": [
+        "services/api-ts/src/core/email.test.ts",
+        "services/api-ts/src/handlers/email/repos/suppression.repo.test.ts"
+      ],
       "contract": [],
       "e2e": []
     },
-    "annotations": "Minted 2026-06-02 to resolve TR-P1-003. Aliases module-local M22-R1. IF recipient email is on suppression list THEN skip delivery. Test coverage to be backfilled in a follow-up audit pass."
+    "annotations": "Backend coverage registered 2026-06-11 (AHA notifications-email Batch D): core/email.test.ts asserts Guard 1 skips+marks-failed a suppressed recipient; suppression.repo.test.ts asserts org-scoped isSuppressed. Status remains INCOMPLETE per p0-data rule class (requires contract+e2e); contract/e2e backfill deferred — kept on br-coverage KNOWN_INCOMPLETE allowlist."
   },
   "BR-53": {
     "rule": "Active Template Required for Enqueue (alias M22-R2)",
@@ -938,11 +941,13 @@
     "module": "M22",
     "ruleClass": "p1-business",
     "tests": {
-      "backend": [],
+      "backend": [
+        "services/api-ts/src/core/email.test.ts"
+      ],
       "contract": [],
       "e2e": []
     },
-    "annotations": "Minted 2026-06-02 to resolve TR-P1-003. Aliases module-local M22-R2. IF template status is not active THEN reject queue item creation. Test coverage to be backfilled."
+    "annotations": "Implemented + backend coverage added 2026-06-11 (AHA notifications-email Batch C / FIX-008): core/email.ts queueEmail now resolves the template by tags at enqueue and throws BusinessLogicError('TEMPLATE_INACTIVE') when no ACTIVE template matches — instead of creating a silently-failing queue item. core/email.test.ts FIX-008 suite proves the rejection + the happy path. Status remains INCOMPLETE per p1-business rule class (requires contract OR e2e); kept on br-coverage KNOWN_INCOMPLETE allowlist."
   },
   "BR-54": {
     "rule": "Max Retry Attempts Terminal Failure (alias M22-R3)",
@@ -950,11 +955,13 @@
     "module": "M22",
     "ruleClass": "p1-business",
     "tests": {
-      "backend": [],
+      "backend": [
+        "services/api-ts/src/handlers/email/repos/queue.repo.test.ts"
+      ],
       "contract": [],
       "e2e": []
     },
-    "annotations": "Minted 2026-06-02 to resolve TR-P1-003. Aliases module-local M22-R3. IF retry attempts exceed max THEN mark queue item failed (terminal). Test coverage to be backfilled."
+    "annotations": "Backend coverage registered 2026-06-11 (AHA notifications-email Batch D): queue.repo.test.ts asserts retryEmail throws MAX_RETRIES_EXCEEDED at attempts>=3 and markAsFailed sets nextRetryAt=null at the cap (terminal). Status remains INCOMPLETE per p1-business rule class (requires contract OR e2e); kept on br-coverage KNOWN_INCOMPLETE allowlist."
   },
   "BR-55": {
     "rule": "Hard Bounce Auto-Suppression (alias M22-R4)",
@@ -986,11 +993,14 @@
     "module": "M22",
     "ruleClass": "p1-business",
     "tests": {
-      "backend": [],
+      "backend": [
+        "services/api-ts/src/core/email.test.ts",
+        "services/api-ts/src/handlers/email/repos/suppression.repo.test.ts"
+      ],
       "contract": [],
       "e2e": []
     },
-    "annotations": "Minted 2026-06-02 to resolve TR-P1-003. Aliases module-local M22-R6. IF email category is transactional THEN check suppression but allow override of marketing suppressions. Test coverage to be backfilled."
+    "annotations": "Implemented + backend coverage added 2026-06-11 (AHA notifications-email Batch B / BR-57 slice): reason-aware Guard 1 in core/email.ts now lets transactional mail override an 'unsubscribe' suppression while still blocking hard_bounce/complaint/manual; bulk overrides nothing. core/email.test.ts BR-57 suite (4 cases) + suppression.repo.test.ts getSuppressionReason suite prove it. Status remains INCOMPLETE per p1-business rule class (requires contract OR e2e); kept on br-coverage KNOWN_INCOMPLETE allowlist."
   },
   "BR-58": {
     "rule": "Template Variable Validation Before Enqueue (alias M22-R7)",
@@ -998,11 +1008,13 @@
     "module": "M22",
     "ruleClass": "p1-business",
     "tests": {
-      "backend": [],
+      "backend": [
+        "services/api-ts/src/core/email.test.ts"
+      ],
       "contract": [],
       "e2e": []
     },
-    "annotations": "Minted 2026-06-02 to resolve TR-P1-003. Aliases module-local M22-R7. IF template has required variables THEN validate all present before enqueue (prevent rendering errors). Test coverage to be backfilled."
+    "annotations": "Implemented + backend coverage added 2026-06-11 (AHA notifications-email Batch C / FIX-008): core/email.ts queueEmail validates required template variables at enqueue and throws BusinessLogicError('MISSING_REQUIRED_VARIABLES') when a required variable is absent or empty (variables with a defaultValue are exempt). core/email.test.ts FIX-008 suite proves missing/empty rejection + present-value happy path. Status remains INCOMPLETE per p1-business rule class (requires contract OR e2e); kept on br-coverage KNOWN_INCOMPLETE allowlist."
   },
   "BR-59": {
     "rule": "Queue Cancellation Audit Trail (alias M22-R8)",
@@ -1010,11 +1022,13 @@
     "module": "M22",
     "ruleClass": "p0-data",
     "tests": {
-      "backend": [],
+      "backend": [
+        "services/api-ts/src/handlers/email/repos/queue.repo.test.ts"
+      ],
       "contract": [],
       "e2e": []
     },
-    "annotations": "Minted 2026-06-02 to resolve TR-P1-003. Aliases module-local M22-R8. IF queue item cancelled THEN record canceller ID, reason, and timestamp (audit trail). Test coverage to be backfilled."
+    "annotations": "Backend coverage registered 2026-06-11 (AHA notifications-email Batch D): queue.repo.test.ts cancelEmail suite asserts cancelledBy/cancellationReason/cancelledAt are persisted and the pending-only state-machine guard rejects cancel from failed/processing/sent/cancelled. Status remains INCOMPLETE per p0-data rule class (requires contract+e2e); kept on br-coverage KNOWN_INCOMPLETE allowlist."
   },
   "BR-60": {
     "rule": "Merchant Account Required for Payment (alias M21-R1)",

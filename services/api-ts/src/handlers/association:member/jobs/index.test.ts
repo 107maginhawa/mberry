@@ -58,6 +58,19 @@ describe('registerDuesJobs', () => {
     expect(reminderCall![1]).toBe('0 0 * * *');
   });
 
+  test('registers member.licenseRenewalProcessor as a daily cron (FIX-007)', () => {
+    const registerCron = mock(() => {});
+    const registerInterval = mock(() => {});
+    const registerDelayed = mock(() => {});
+    const scheduler: JobScheduler = { registerCron, registerInterval, registerDelayed } as any;
+
+    registerDuesJobs(scheduler);
+
+    const licenseCall = registerCron.mock.calls.find((c: any) => c[0] === 'member.licenseRenewalProcessor');
+    expect(licenseCall).toBeDefined();
+    expect(licenseCall![1]).toBe('0 1 * * *');
+  });
+
   test('registers dues.webhookRetryProcessor as 60s interval', () => {
     const registerCron = mock(() => {});
     const registerInterval = mock(() => {});

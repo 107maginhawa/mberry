@@ -3,6 +3,7 @@ import type { DatabaseInstance } from '@/core/database';
 import type { DeleteAssociationParams } from '@/generated/openapi/validators';
 import { NotFoundError, ConflictError } from '@/core/errors';
 import { AssociationRepository, OrganizationRepository } from './repos/platform-admin.repo';
+import { requireAdminTier, SUPER_ONLY } from '@/core/auth/admin-tier';
 
 /**
  * deleteAssociation
@@ -16,11 +17,9 @@ export async function deleteAssociation(
   const session = ctx.get('session');
   if (!session) return ctx.json({ error: 'Unauthorized' }, 401);
 
-  // [EM-M03-9a3e7b12] Only super admins can delete associations
-  const callerAdmin = ctx.get('platformAdmin') as { role: string } | undefined;
-  if (!callerAdmin || callerAdmin.role !== 'super') {
-    return ctx.json({ error: 'Super admin access required' }, 403);
-  }
+  // FIX-008 (G1) / Q1: deleting an association is a super-only mutation.
+  const denied = requireAdminTier(ctx, SUPER_ONLY);
+  if (denied) return denied;
 
   const { associationId } = ctx.req.valid('param');
   const db = ctx.get('database') as DatabaseInstance;

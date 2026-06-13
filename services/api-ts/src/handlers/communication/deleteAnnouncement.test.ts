@@ -31,4 +31,20 @@ describe('deleteAnnouncement', () => {
     const ctx = makeCtx({ _params: { id: 'ann-1' } });
     await expect(deleteAnnouncement(ctx as any)).rejects.toThrow('Only draft announcements can be deleted');
   });
+
+  // FIX-007 (tenant isolation): an officer of org-A must NOT delete org-B's
+  // draft announcement by id. The handler must fetch scoped to the caller's org.
+  test('rejects cross-org delete — 404 when the announcement belongs to another org', async () => {
+    let deleted = false;
+    stubRepo(CommunicationsRepository, {
+      get: async (_id: string, orgId?: string) =>
+        orgId === undefined || orgId === 'org-B'
+          ? { id: 'ann-1', status: 'draft', organizationId: 'org-B' }
+          : undefined,
+      delete: async () => { deleted = true; },
+    });
+    const ctx = makeCtx({ organizationId: 'org-A', _params: { id: 'ann-1' } });
+    await expect(deleteAnnouncement(ctx as any)).rejects.toThrow('Announcement');
+    expect(deleted).toBe(false);
+  });
 });

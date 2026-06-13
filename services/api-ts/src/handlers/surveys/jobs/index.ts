@@ -21,7 +21,8 @@ export function registerSurveyJobs(
   scheduler: JobScheduler,
   notifs: NotificationService
 ): void {
-  // Expire pending responses older than 48 hours — runs daily at 4 AM
+  // Expire pending responses older than 48 hours + auto-close surveys whose
+  // deadline has passed (FIX-008) — runs daily at 4 AM
   scheduler.registerCron('survey.expirePending', '0 4 * * *', async (context: JobContext) => {
     const db = context.db as DatabaseInstance | undefined;
     if (!db) {
@@ -36,6 +37,32 @@ export function registerSurveyJobs(
       context.logger?.info(
         { skippedCount, cutoff: cutoff.toISOString() },
         'Expired pending survey responses'
+      );
+    }
+
+    // FIX-008: flip active surveys whose deadline has passed to `closed`, so
+    // lists/UX no longer show a stale "active" state past the deadline. The
+    // submit-time guard already blocks new responses; this fixes the lifecycle.
+    const surveyRepo = new SurveyRepository(db);
+    const now = new Date();
+    const { data: activeSurveys } = await surveyRepo.findManyWithPagination(
+      { status: 'active' },
+      { pagination: { limit: 1000, offset: 0 } }
+    );
+
+    let closedCount = 0;
+    for (const survey of activeSurveys) {
+      const deadline = survey.settings?.deadline;
+      if (!deadline) continue;
+      if (new Date(deadline) > now) continue;
+      const closed = await surveyRepo.closeExpiredSurvey(survey.id);
+      if (closed) closedCount++;
+    }
+
+    if (closedCount > 0) {
+      context.logger?.info(
+        { closedCount, at: now.toISOString() },
+        'Auto-closed surveys past their deadline'
       );
     }
   });

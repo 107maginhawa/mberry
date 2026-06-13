@@ -10,6 +10,7 @@ import type { Context } from "hono";
 import type { DatabaseInstance } from "@/core/database";
 import { ValidationError } from "@/core/errors";
 import { pricingTiers } from "./repos/platform-admin.schema";
+import { requireAdminTier, SUPER_ONLY } from "@/core/auth/admin-tier";
 
 export async function createPricingTier(ctx: Context): Promise<Response> {
 	const session = ctx.get("session");
@@ -18,10 +19,9 @@ export async function createPricingTier(ctx: Context): Promise<Response> {
 	const admin = ctx.get("platformAdmin");
 	if (!admin) return ctx.json({ error: "Platform admin access required" }, 403);
 
-	// MODULE_SPEC permission matrix: "Manage pricing: super only".
-	if (admin.role !== "super") {
-		return ctx.json({ error: "Super admin access required" }, 403);
-	}
+	// FIX-008 (G1) / Q1: managing pricing is a super-only mutation.
+	const denied = requireAdminTier(ctx, SUPER_ONLY);
+	if (denied) return denied;
 
 	const db = ctx.get("database") as DatabaseInstance;
 	const baseLogger = ctx.get('logger');

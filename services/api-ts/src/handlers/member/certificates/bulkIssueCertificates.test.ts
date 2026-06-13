@@ -94,6 +94,40 @@ describe('generateCertificates', () => {
     expect(results[0].certificateNumber).toBe('ERROR');
     expect(results[1].certificateNumber).toBe('ERROR');
   });
+
+  // FIX-006 (G6): persist the REAL trainingId, never organizationId. The bogus
+  // trainingId = organizationId collapsed uniqueness to one cert per person per org.
+  test('persists the real trainingId on inserted certificate rows', async () => {
+    const { db, insertSpy } = buildMockDb();
+    await generateCertificates(db as any, { ...validBody, trainingId: 'training-X' }, 'user-1');
+    const batch = insertSpy.mock.calls.map(c => c[0]).find(v => Array.isArray(v)) as any[];
+    expect(batch).toBeDefined();
+    expect(batch.length).toBe(2);
+    for (const row of batch) {
+      expect(row.trainingId).toBe('training-X');
+      expect(row.trainingId).not.toBe(validBody.organizationId);
+    }
+  });
+
+  test('stores NULL trainingId (not organizationId) when none supplied', async () => {
+    const { db, insertSpy } = buildMockDb();
+    await generateCertificates(db as any, validBody, 'user-1');
+    const batch = insertSpy.mock.calls.map(c => c[0]).find(v => Array.isArray(v)) as any[];
+    for (const row of batch) {
+      expect(row.trainingId).toBeNull();
+      expect(row.trainingId).not.toBe(validBody.organizationId);
+    }
+  });
+
+  // FIX-005 (G5): persist the certificate kind so the PDF resolves it server-side.
+  test('persists certificateType on inserted rows', async () => {
+    const { db, insertSpy } = buildMockDb();
+    await generateCertificates(db as any, { ...validBody, certificateType: 'completion' }, 'user-1');
+    const batch = insertSpy.mock.calls.map(c => c[0]).find(v => Array.isArray(v)) as any[];
+    for (const row of batch) {
+      expect(row.certificateType).toBe('completion');
+    }
+  });
 });
 
 describe('bulkIssueCertificates', () => {

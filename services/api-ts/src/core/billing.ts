@@ -90,9 +90,11 @@ export class BillingService {
       this.logger.info({ url: this.config.url }, 'Using custom Stripe URL');
     }
 
-    this.logger.info({ 
-      key: this.config.secretKey,
-      stripeOptions
+    // SECURITY (FIX-001): never log the plaintext secret key. Log only
+    // non-sensitive init metadata so this credential cannot leak to any log sink.
+    this.logger.info({
+      hasSecretKey: Boolean(this.config.secretKey),
+      stripeOptions,
     }, 'stripe.initialize')
     this.stripe = new Stripe(this.config.secretKey, stripeOptions);
 

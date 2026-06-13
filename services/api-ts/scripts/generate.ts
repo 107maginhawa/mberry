@@ -1122,7 +1122,7 @@ function convertObjectSchema(schema: any): string {
   return result;
 }
 
-function convertParameterToZod(param: any): string {
+export function convertParameterToZod(param: any): string {
   let zodType: string;
   
   // Use schema if available, otherwise infer from type
@@ -1231,11 +1231,20 @@ function convertParameterToZod(param: any): string {
     }
   }
   
-  // Make optional if not required
-  if (!param.required) {
+  // Make optional if not required.
+  //
+  // AHA F-3 / P-2 / R-6 invariant: a PATH parameter is structurally always
+  // present — the route cannot match without it — so it must NEVER be emitted
+  // `.optional()`, even if the upstream OpenAPI/TypeSpec marks `required:
+  // false`. This is the only "org id MUST be in the request" class (cross-org
+  // admin org-id path params); a TypeSpec slip making such a param optional
+  // would otherwise silently produce a skippable org id. Query/body org
+  // presence is enforced by `orgContextMiddleware` (the sole org-presence
+  // authority), so those fields correctly remain optional here.
+  if (param.in !== 'path' && !param.required) {
     zodType += '.optional()';
   }
-  
+
   return zodType;
 }
 
@@ -1526,5 +1535,9 @@ export function registerRoutes(app: App) {
   console.log('   ✓ Generated WebSocket registry\n');
 }
 
-// Run the script
-main().catch(console.error);
+// Run the script only when executed directly (`bun scripts/generate.ts`),
+// not when imported (e.g. by generator unit tests) — keeps the module
+// side-effect-free on import.
+if (import.meta.main) {
+  main().catch(console.error);
+}

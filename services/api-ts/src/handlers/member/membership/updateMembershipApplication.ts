@@ -4,6 +4,7 @@ import type { DatabaseInstance } from '@/core/database';
 import { NotFoundError, UnauthorizedError } from '@/core/errors';
 import type { UpdateMembershipApplicationBody, UpdateMembershipApplicationParams } from '@/generated/openapi/validators';
 import { MembershipApplicationRepository } from '@/handlers/association:member/repos/membership.repo';
+import { assertRecordInCallerOrg } from './utils/assert-record-org';
 
 /**
  * updateMembershipApplication
@@ -24,8 +25,17 @@ export async function updateMembershipApplication(
 
   const existing = await repo.findOneById(applicationId);
   if (!existing) throw new NotFoundError('Membership application');
+  // FIX-003 (G-02): the application must belong to the caller's org.
+  assertRecordInCallerOrg(ctx, existing.organizationId, 'this application');
 
-  const updated = await repo.updateOneById(applicationId, body as Partial<MembershipApplication>);
+  // FIX-013 (G-15): the update body's generated shape still exposes personId /
+  // organizationId (TypeSpec body-field removal is deferred to its own regen
+  // pass). Strip the identity fields here so an admin cannot rewrite WHO
+  // applied or for WHICH org; only mutable fields are forwarded to the repo.
+  const { personId: _personId, organizationId: _organizationId, ...mutable } =
+    body as Record<string, unknown>;
+
+  const updated = await repo.updateOneById(applicationId, mutable as Partial<MembershipApplication>);
 
   ctx.set('auditResourceId', applicationId);
   ctx.set('auditDescription', 'Membership application updated');

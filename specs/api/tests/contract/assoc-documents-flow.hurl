@@ -109,6 +109,26 @@ HTTP 200
 jsonpath "$.id" == "{{document_id}}"
 jsonpath "$.title" == "Contract Test Policy"
 
+# ── 3b. Officer can filter by status=draft (FIX-004) ─────────────────────────
+# The officer just created a draft; officers may filter by publication status.
+
+GET {{api}}/association/documents?status=draft
+Cookie: better-auth.session_token={{officer_cookie}}
+x-org-id: ed8e3a96-8126-4341-be42-e6eb7940c562
+HTTP 200
+[Asserts]
+jsonpath "$.data" isCollection
+jsonpath "$.data[*].status" includes "draft"
+
+# ── 3c. Officer can filter by tag (FIX-004; previously a no-op) ───────────────
+
+GET {{api}}/association/documents?tag=contract-test
+Cookie: better-auth.session_token={{officer_cookie}}
+x-org-id: ed8e3a96-8126-4341-be42-e6eb7940c562
+HTTP 200
+[Asserts]
+jsonpath "$.data" isCollection
+
 # ── 4. Update the document ───────────────────────────────────────────────────
 
 PATCH {{api}}/association/documents/{{document_id}}

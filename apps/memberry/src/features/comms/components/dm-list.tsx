@@ -7,6 +7,12 @@ import { Button, Skeleton } from '@monobase/ui'
 import { MessageCircle, Plus } from 'lucide-react'
 
 interface DmListProps {
+  /**
+   * Org id (FIX-008): when present, the chat-room list read carries
+   * `x-org-id`. DM rooms are exempt from the backend org guard (PD-2),
+   * so the `(org OR dm)` filter still returns them.
+   */
+  orgId?: string
   activeRoomId?: string
   onSelectRoom: (roomId: string) => void
   onNewDm?: () => void
@@ -31,9 +37,12 @@ function formatRelativeTime(d?: Date): string {
  * DM list sidebar. Shows direct message conversations
  * (rooms with exactly 2 participants) sorted by last activity.
  */
-export function DmList({ activeRoomId, onSelectRoom, onNewDm, myPersonId }: DmListProps) {
+export function DmList({ orgId, activeRoomId, onSelectRoom, onNewDm, myPersonId }: DmListProps) {
   const roomsQuery = useQuery({
-    ...listChatRoomsOptions({ query: { status: 'active' } }),
+    ...listChatRoomsOptions({
+      query: { status: 'active' },
+      ...(orgId ? { headers: { 'x-org-id': orgId } } : {}),
+    }),
     staleTime: 10_000,
   })
 
@@ -85,6 +94,7 @@ export function DmList({ activeRoomId, onSelectRoom, onNewDm, myPersonId }: DmLi
             icon={<MessageCircle className="h-8 w-8" />}
             headline="No direct messages"
             description="Start a conversation with a fellow member."
+            action={onNewDm ? { label: 'New message', onClick: onNewDm } : undefined}
           />
         </div>
       ) : (
