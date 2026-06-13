@@ -307,17 +307,18 @@ export function registerCommunicationJobs(
   scheduler.registerCron('communication.processScheduled', '*/5 * * * *', async (context: JobContext) => {
     const cronDb = context.db;
     const repo = new CommunicationsRepository(cronDb);
-    const { data: scheduled } = await repo.list('', { status: 'scheduled', limit: 10 });
+    // Cross-org: find scheduled announcements whose time has come. MUST NOT pass a
+    // single orgId — this cron spans every org. Passing '' previously cast to uuid
+    // and threw `invalid input syntax for type uuid: ""` on every 5-min tick.
+    const due = await repo.findScheduledDue(10);
 
-    for (const announcement of scheduled) {
-      if (announcement.scheduledAt && new Date(announcement.scheduledAt) <= new Date()) {
-        await repo.updateStatus(announcement.id, 'sent', { publishedAt: new Date() });
-        await processAnnouncementSend(cronDb, announcement.id, {
-          push: announcement.channelPush,
-          email: announcement.channelEmail,
-          inApp: true,
-        }, notifsService, emailService);
-      }
+    for (const announcement of due) {
+      await repo.updateStatus(announcement.id, 'sent', { publishedAt: new Date() });
+      await processAnnouncementSend(cronDb, announcement.id, {
+        push: announcement.channelPush,
+        email: announcement.channelEmail,
+        inApp: true,
+      }, notifsService, emailService);
     }
   });
 }

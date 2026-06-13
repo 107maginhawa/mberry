@@ -2,7 +2,7 @@
  * Repositories for communication module.
  */
 
-import { eq, and, gte, like, sql, desc, type SQL } from 'drizzle-orm';
+import { eq, and, gte, lte, like, sql, desc, type SQL } from 'drizzle-orm';
 import type { NodePgDatabase } from 'drizzle-orm/node-postgres';
 import type { Logger } from '@/types/logger';
 import type { DatabaseInstance } from '@/core/database';
@@ -312,6 +312,10 @@ export class CommunicationsRepository {
   constructor(private db: DatabaseInstance) {}
 
   async list(orgId: string, filters?: { status?: string; search?: string; limit?: number; offset?: number }) {
+    // Fail loud on an empty org instead of letting Postgres cast '' to uuid and
+    // throw `invalid input syntax for type uuid: ""`. This is an org-scoped read;
+    // a cross-org caller (e.g. the scheduled-send cron) must use findScheduledDue().
+    if (!orgId) throw new Error('CommunicationsRepository.list requires a non-empty organizationId');
     const conditions: SQL<unknown>[] = [eq(announcements.organizationId, orgId)];
     if (filters?.status) conditions.push(eq(announcements.status, filters.status as Announcement['status']));
     if (filters?.search) conditions.push(like(announcements.title, `%${escapeLikePattern(filters.search)}%`));
@@ -331,6 +335,21 @@ export class CommunicationsRepository {
     ]);
     const data = rows.map((r) => ({ ...r.announcement, stats: r.stats ?? undefined }));
     return { data, total: countResult[0]?.count ?? 0 };
+  }
+
+  /**
+   * Cron-only: scheduled announcements now due to send (scheduledAt <= now()),
+   * ACROSS EVERY org. Deliberately NOT org-scoped — the processScheduled cron
+   * spans all orgs and has no single organizationId to pass. `now()` uses the DB
+   * clock; null scheduledAt rows are excluded by the comparison.
+   */
+  async findScheduledDue(limit = 10): Promise<Announcement[]> {
+    return this.db
+      .select()
+      .from(announcements)
+      .where(and(eq(announcements.status, 'scheduled'), lte(announcements.scheduledAt, sql`now()`)))
+      .orderBy(announcements.scheduledAt)
+      .limit(limit);
   }
 
   async get(id: string, orgId?: string): Promise<(Announcement & { stats?: AnnouncementStats }) | undefined> {
