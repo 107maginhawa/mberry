@@ -3094,7 +3094,6 @@ export function registerRoutes(app: Hono<{ Variables: Variables }>) {
   // archiveAnnouncement
   app.post('/communications/announcements/:id/archive',
     authMiddleware({ roles: ["association:officer"] }),
-    requirePositionMiddleware({ titles: ["President", "Secretary"] }),
     createPerRouteAuditMiddleware({ action: "update", resourceType: "announcement", eventSubType: "content.announcement-archived" }),
     zValidator('param', validators.ArchiveAnnouncementParams, validationErrorHandler),
     registry.archiveAnnouncement as unknown as Handler
@@ -3103,7 +3102,6 @@ export function registerRoutes(app: Hono<{ Variables: Variables }>) {
   // publishAnnouncement
   app.post('/communications/announcements/:id/publish',
     authMiddleware({ roles: ["association:officer"] }),
-    requirePositionMiddleware({ titles: ["President", "Secretary"] }),
     createPerRouteAuditMiddleware({ action: "update", resourceType: "announcement", eventSubType: "content.announcement-published" }),
     zValidator('param', validators.PublishAnnouncementParams, validationErrorHandler),
     registry.publishAnnouncement as unknown as Handler
