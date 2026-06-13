@@ -97,6 +97,15 @@ function AnnouncementDetailPage() {
       ]}
     >
       <div className="space-y-6 max-w-3xl">
+      {/* Back link */}
+      <Link
+        to="/org/$orgSlug/officer/communications"
+        params={{ orgSlug }}
+        className="inline-flex items-center gap-1 text-sm font-medium text-[var(--color-muted)] hover:text-[var(--color-text)]"
+      >
+        ← Back to Communications
+      </Link>
+
       {/* Status bar */}
       <div className="flex items-center gap-3 text-sm text-[var(--color-muted)]">
         <span className={`inline-flex items-center px-2 py-0.5 rounded-md text-xs font-medium ${STATUS_BADGE[ann.status] ?? ''}`}>

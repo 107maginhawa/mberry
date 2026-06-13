@@ -30,12 +30,18 @@ export function ModuleSummaryCard({
 }: ModuleSummaryCardProps) {
   return (
     <>
-      {/* Desktop card */}
-      <Link
-        to={href as any}
-        className="hidden md:block group"
-      >
-        <GlassCard className="p-4 transition-shadow group-hover:shadow-md">
+      {/* Desktop card — stretched-link pattern: the primary link is an
+          absolute overlay sibling (not an ancestor) so the secondary action's
+          anchor is never nested inside another <a>. Content is
+          pointer-events-none so clicks fall through to the overlay link;
+          the secondary link re-enables pointer events and sits above it. */}
+      <div className="hidden md:block group relative">
+        <Link
+          to={href as any}
+          aria-label={title}
+          className="absolute inset-0 z-0 rounded-[10px]"
+        />
+        <GlassCard className="p-4 transition-shadow group-hover:shadow-md relative z-[1] pointer-events-none">
           <div className="flex items-center justify-between mb-2">
             <div className="flex items-center gap-2">
               <span className="text-[var(--color-muted)]">{icon}</span>
@@ -49,14 +55,13 @@ export function ModuleSummaryCard({
           {secondaryAction && (
             <Link
               to={secondaryAction.href as any}
-              className="text-xs font-semibold text-[var(--color-primary)] mt-2 inline-block hover:underline"
-              onClick={(e) => e.stopPropagation()}
+              className="relative z-10 pointer-events-auto text-xs font-semibold text-[var(--color-primary)] mt-2 inline-block hover:underline"
             >
               {secondaryAction.label}
             </Link>
           )}
         </GlassCard>
-      </Link>
+      </div>
 
       {/* Mobile compact row */}
       <Link

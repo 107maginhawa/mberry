@@ -54,11 +54,12 @@ test('communications list renders heading', async ({ page }) => {
 
   test('status badges show readable text, not raw enum', async ({ page }) => {
     await page.goto(`/org/${ORG_ID}/officer/communications`)
+    // Scope to the announcement-list rows. A bare [rounded-md][font-medium]
+    // selector also matches shadcn buttons (e.g. the hidden mobile "Open menu"
+    // hamburger), whose .first() is hidden on desktop and never resolves.
+    const badges = page.locator('.divide-y a [class*="rounded-md"][class*="font-medium"]')
     // Wait for announcements to load
-    await expect(page.locator('[class*="rounded-md"][class*="font-medium"]').first()).toBeVisible({ timeout: 10000 })
-
-    // All status badges should have capitalized text
-    const badges = page.locator('[class*="rounded-md"][class*="font-medium"]')
+    await expect(badges.first()).toBeVisible({ timeout: 10000 })
     const count = await badges.count()
     for (let i = 0; i < Math.min(count, 5); i++) {
       const text = await badges.nth(i).textContent()

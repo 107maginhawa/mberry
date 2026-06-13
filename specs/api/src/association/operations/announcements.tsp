@@ -237,7 +237,10 @@ namespace Association.Operations.Announcements {
     @route("/communications/announcements/{id}/publish")
     @useAuth(bearerAuth)
     @extension("x-security-required-roles", #["association:officer"])
-    @extension("x-require-position", #["President", "Secretary"])
+    // Position gate is enforced inside the handler, not via x-require-position:
+    // this route is id-only (no {organizationId} path param), so the path-mode
+    // middleware would resolve org from the :id UUID. The handler derives org
+    // from the announcement record, then calls requirePosition (President/Secretary).
     @extension("x-audit", #{ action: "update", resourceType: "announcement", eventSubType: "content.announcement-published" })
     publishAnnouncement(
       @path id: UUID
@@ -252,7 +255,7 @@ namespace Association.Operations.Announcements {
     @route("/communications/announcements/{id}/archive")
     @useAuth(bearerAuth)
     @extension("x-security-required-roles", #["association:officer"])
-    @extension("x-require-position", #["President", "Secretary"])
+    // Position gate enforced inside the handler (id-only route — see publishAnnouncement).
     @extension("x-audit", #{ action: "update", resourceType: "announcement", eventSubType: "content.announcement-archived" })
     archiveAnnouncement(
       @path id: UUID

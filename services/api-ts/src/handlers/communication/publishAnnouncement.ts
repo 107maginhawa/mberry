@@ -3,6 +3,7 @@ import { UnauthorizedError, NotFoundError, BusinessLogicError } from '@/core/err
 import type { DatabaseInstance } from '@/core/database';
 import type { PublishAnnouncementParams } from '@/generated/openapi/validators';
 import { CommunicationsRepository } from './repos/communication.repo';
+import { requirePosition } from '@/core/auth/officer-checks';
 import { domainEvents } from '@/core/domain-events';
 
 /**
@@ -22,16 +23,25 @@ export async function publishAnnouncement(
   const db = ctx.get('database') as DatabaseInstance;
   const repo = new CommunicationsRepository(db);
 
-  // FIX-007 (tenant isolation): scope the fetch to the caller's org so an officer
-  // of org A cannot publish org B's announcement by id (the position gate resolves
-  // org from the caller header, not the record).
-  const orgId = ctx.get('organizationId');
-  const existing = await repo.get(params.id, orgId);
+  // Org context + authorization (CONTINUE-53). This route is id-only
+  // (/communications/announcements/:id/publish) so the org-context middleware's
+  // UUID-from-path fallback mistakes the announcement :id for organizationId and
+  // the x-require-position path-mode gate can't resolve the real org. Resolve org
+  // from the record, then enforce the President/Secretary gate against THAT org
+  // (mirrors the governance handlers). This also preserves tenant isolation: an
+  // officer of org A holds no term in org B, so requirePosition returns 403.
+  const existing = await repo.get(params.id);
   if (!existing) throw new NotFoundError('Announcement');
+  ctx.set('organizationId', existing.organizationId);
+
+  const denied = await requirePosition(ctx, ['President', 'Secretary']);
+  if (denied) return denied;
+
   if (existing.status !== 'draft' && existing.status !== 'scheduled') {
     throw new BusinessLogicError('Only draft or scheduled announcements can be published', 'ANNOUNCEMENT_CANNOT_PUBLISH');
   }
 
+  const orgId = existing.organizationId;
   const published = await repo.updateStatus(params.id, 'sent', {
     publishedAt: new Date(),
   }, orgId);
