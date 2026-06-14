@@ -37,8 +37,9 @@ test.describe('Settings — Interaction States', () => {
   test('success: dues config form renders with populated amount field', async ({ page }) => {
     await signIn(page, SEED_OFFICER_EMAIL, TEST_PASSWORD)
     await page.goto(`/org/${ORG_ID}/officer/settings/dues`)
+    // /officer/settings/dues redirects to /officer/finances/dues (PageShell title "Dues Schedule").
     await expect(
-      page.getByRole('heading', { name: /dues configuration/i }),
+      page.getByRole('heading', { name: /dues schedule/i }),
     ).toBeVisible({ timeout: 10000 })
 
     // Amount input should be present and populated
@@ -49,14 +50,16 @@ test.describe('Settings — Interaction States', () => {
   test('success: fund allocation page shows 3 funds totaling 100%', async ({ page }) => {
     await signIn(page, SEED_OFFICER_EMAIL, TEST_PASSWORD)
     await page.goto(`/org/${ORG_ID}/officer/settings/funds`)
+    // /officer/settings/funds redirects to /officer/finances/funds (PageShell title "Funds").
     await expect(
-      page.getByRole('heading', { name: /fund allocation/i }),
+      page.getByRole('heading', { name: 'Funds', exact: true }),
     ).toBeVisible({ timeout: 10000 })
 
-    // Fund names in inputs
-    await expect(page.locator('input[value="General Fund"]')).toBeVisible({ timeout: 10000 })
-    await expect(page.locator('input[value="Education Fund"]')).toBeVisible({ timeout: 10000 })
-    await expect(page.locator('input[value="Building Fund"]')).toBeVisible({ timeout: 10000 })
+    // Fund names render as text in the read view (inputs only appear in the editor).
+    // Seeded allocation for this org: General 50% / Building 30% / Emergency 20% = 100%.
+    await expect(page.getByText('General Fund').first()).toBeVisible({ timeout: 10000 })
+    await expect(page.getByText('Building Fund').first()).toBeVisible({ timeout: 10000 })
+    await expect(page.getByText('Emergency Fund').first()).toBeVisible({ timeout: 10000 })
   })
 
   test('validation-error: dues config rejects invalid amount', async ({ page }) => {
