@@ -40,6 +40,9 @@ export async function seedTraining(db: ReturnType<typeof drizzle>, orgId: string
 
   const trainingData = [
     { title: 'Advanced Implant Placement Workshop', description: 'Hands-on workshop covering modern implant techniques.', instructorName: 'Dr. Ramon Aquino', location: 'PDA Training Center, Quezon City', startDate: new Date('2025-02-01T08:00:00Z'), endDate: new Date('2025-02-02T17:00:00Z'), capacity: 30, registrationFee: 5000, creditBearing: true, creditAmount: 16, status: 'completed' as const },
+    // Published endodontics training — e2e officer/member training specs assert this
+    // exists as SEEDED data (training-lifecycle, officer/training, training-actions).
+    { title: 'Advanced Endodontics', description: 'Advanced root canal therapy and endodontic techniques.', instructorName: 'Dr. Carlos Diaz', location: 'PDA Metro Manila Office', startDate: new Date('2026-06-10T09:00:00Z'), endDate: new Date('2026-06-11T17:00:00Z'), capacity: 20, registrationFee: 4500, creditBearing: true, creditAmount: 12, status: 'published' as const },
     { title: 'Dental Photography Seminar', description: 'Clinical photography techniques for documentation.', instructorName: 'Dr. Elena Villanueva', location: 'Makati Medical Center', startDate: new Date('2026-04-20T09:00:00Z'), endDate: new Date('2026-04-20T17:00:00Z'), capacity: 25, registrationFee: 3000, creditBearing: true, creditAmount: 8, status: 'published' as const },
     { title: 'Infection Control & Sterilization Update', description: 'Updated protocols for infection prevention.', instructorName: 'Dr. Patricia Reyes', location: 'PDA Metro Manila Office', startDate: new Date('2026-07-15T09:00:00Z'), endDate: new Date('2026-07-15T16:00:00Z'), capacity: 40, registrationFee: 2000, creditBearing: true, creditAmount: 6, status: 'published' as const },
   ];

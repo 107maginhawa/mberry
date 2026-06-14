@@ -100,7 +100,7 @@ test.describe('Sign-in flow', () => {
 
     // Register the waitForResponse BEFORE clicking submit
     const signInResponseP = page.waitForResponse(
-      (resp) => resp.url().includes('/auth/sign-in') && resp.request().method() === 'POST',
+      (resp) => resp.url().includes('/auth/sign-in/email') && resp.request().method() === 'POST',
       { timeout: 15000 },
     )
 
@@ -110,18 +110,25 @@ test.describe('Sign-in flow', () => {
     // Data assertion 1: HTTP status must be 200
     expect(signInResponse.status()).toBe(200)
 
-    // Data assertion 2: response body must contain a user object with an email field
-    const body = await signInResponse.json().catch(() => null)
-    expect(body).not.toBeNull()
-    // Better-Auth returns { token, user: { id, email, name, ... } } on sign-in
-    expect(body?.user?.email).toBe(SEED_OFFICER_EMAIL)
-
-    // Navigate to authenticated page and assert user identity in sidebar
+    // Data assertion 2: the established session must carry the signed-in user.
+    // We do NOT read signInResponse.json() — the post-login redirect tears down
+    // the in-flight proxied response, so response.json() flakily resolves to
+    // null (the body is fine in the browser, just unavailable to Playwright
+    // once navigation begins). Instead assert via an authenticated in-page
+    // fetch of get-session: a real data assertion that the session is active
+    // and returns the correct user.
     await page.waitForURL(
       (url) => !url.pathname.startsWith('/auth/') || url.pathname.startsWith('/auth/verify-email'),
       { timeout: 10000 },
     )
-    // User email must be visible in the UI — confirms session is active
+    const session = await page.evaluate(async () => {
+      const r = await fetch('/api/auth/get-session', { credentials: 'include' })
+      return r.ok ? ((await r.json()) as { user?: { email?: string } }) : null
+    })
+    expect(session).not.toBeNull()
+    expect(session?.user?.email).toBe(SEED_OFFICER_EMAIL)
+
+    // User email must also be visible in the UI — confirms session is active
     await expect(page.getByText(SEED_OFFICER_EMAIL)).toBeVisible({ timeout: 10000 })
   })
 

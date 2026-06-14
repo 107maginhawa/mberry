@@ -91,6 +91,13 @@ jobs:
       # env is bypassed because reuseExistingServer reuses the running API).
       # Production stays at the default 5 (this env is CI/e2e-scoped).
       SESSION_LIMIT: 100000
+      # Skip pixel-diff visual regression on CI: baselines are committed only
+      # for darwin (-chromium-darwin.png). Linux CI has no -linux.png baseline,
+      # so toHaveScreenshot fails every _visual.spec.ts test with "snapshot
+      # doesn't exist, writing actual". Cross-platform baselines are font-render
+      # fragile; visual regression runs locally on darwin where baselines exist.
+      # Re-enable here once linux baselines are generated in-container (CONTINUE-59).
+      SKIP_VISUAL: 1
     steps:
       - uses: actions/checkout@v4
       - name: Start minio (server mode)

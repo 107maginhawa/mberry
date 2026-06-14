@@ -35,6 +35,7 @@ test('shows heading and stat cards with numeric values', async ({ page }) => {
   })
 
   test('tab switching filters event list', async ({ page }) => {
+    await page.goto('/my/events')
     // Upcoming button active by default
     const upcomingBtn = page.getByRole('button', { name: /upcoming/i }).first()
     await expect(upcomingBtn).toBeVisible({ timeout: 10000 })
@@ -53,6 +54,7 @@ test('shows heading and stat cards with numeric values', async ({ page }) => {
   })
 
   test('[BR-27] event card shows registration status or capacity info', async ({ page }) => {
+    await page.goto('/my/events')
     // If events exist, cards should show more than just title
     const eventCard = page.locator('[class*="card"]').first()
     const hasCard = await eventCard.isVisible({ timeout: 5000 }).catch(() => false)
