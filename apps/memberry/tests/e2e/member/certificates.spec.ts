@@ -33,10 +33,13 @@ test.describe('Member Certificates (/my/certificates)', () => {
     await signIn(page, MEMBER_EMAIL, MEMBER_PASSWORD)
     await page.goto('/my/certificates')
     // Page shows certificates, empty state, or skeleton loading cards
-    const hasCert = await page.getByText(/CERT-/i).isVisible().catch(() => false)
-    const hasEmpty = await page.getByText(/no certificates/i).isVisible().catch(() => false)
-    const hasCards = await page.locator('main').locator('div').first().isVisible().catch(() => false)
-    expect(hasCert || hasEmpty || hasCards).toBeTruthy()
+    await expect(
+      page
+        .getByText(/CERT-/i)
+        .or(page.getByText(/no certificates/i))
+        .or(page.locator('main'))
+        .first(),
+    ).toBeVisible({ timeout: 10000 })
   })
 })
 

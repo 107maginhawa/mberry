@@ -212,9 +212,9 @@ test.describe('Journey: Training Lifecycle (create -> enroll -> complete -> cred
         page.getByRole('heading', { name: /training/i }).first(),
       ).toBeVisible({ timeout: 10000 })
 
-      // Should show training cards or empty state
+      // Should show training entries (each links to /training/<id>) or empty state
       await expect(
-        page.locator('[class*="card"]').first()
+        page.locator('a[href*="/training/"]').first()
           .or(page.getByText(/no training/i).first())
           .first(),
       ).toBeVisible({ timeout: 10000 })

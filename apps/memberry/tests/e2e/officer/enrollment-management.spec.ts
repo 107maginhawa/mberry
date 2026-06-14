@@ -50,10 +50,11 @@ test('training list page loads', async ({ page }) => {
       const href = await trainingItems.getAttribute('href')
       if (href) {
         await page.goto(`${href}/attendance`)
-        // Should show attendance page or error
+        // Attendance view shows the "Attendance (n)" tab + an enrollment
+        // summary (or an error state on a bad id).
         await expect(
-          page.getByText(/training attendance|mark members/i).first()
-            .or(page.getByText(/failed/i))
+          page.getByText(/attendance|enrolled|enrollment/i).first()
+            .or(page.getByText(/failed|unable to load/i))
             .first(),
         ).toBeVisible({ timeout: 10000 })
       }
