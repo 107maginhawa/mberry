@@ -73,6 +73,14 @@ jobs:
       STORAGE_BUCKET: monobase-files
       STORAGE_ACCESS_KEY_ID: minioadmin
       STORAGE_SECRET_ACCESS_KEY: minioadmin
+      # V-15 concurrent-session limit. Production default is 5 (core/config.ts
+      # SESSION_LIMIT: intish(5)). The E2E suite re-signs-in the seeded personas
+      # dozens of times across one run; at the prod cap the 6th sign-in
+      # hard-deletes the oldest session row — the long-lived reused storageState
+      # session — yielding a 401 cascade mid-run (CONTINUE-55 root cause). Lift
+      # the cap for the test API only so test sign-ins never evict an in-use
+      # session. Production stays at the default 5 (this env is CI/e2e-scoped).
+      SESSION_LIMIT: 100000
     steps:
       - uses: actions/checkout@v4
       - name: Start minio (server mode)

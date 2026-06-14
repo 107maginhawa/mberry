@@ -55,6 +55,15 @@ export default defineConfig({
       port: 7213,
       reuseExistingServer: true,
       timeout: 30000,
+      // V-15 concurrent-session limit (core/session-limit.ts). Prod default is
+      // 5; the E2E suite re-signs-in the seeded personas dozens of times, so at
+      // the prod cap the 6th sign-in hard-deletes the oldest session row — the
+      // reused storageState/per-test session — causing a 401 cascade mid-run
+      // (CONTINUE-55 root cause). Lift the cap for the test API only; prod stays
+      // at 5. NOTE: reuseExistingServer is true — an already-running API is
+      // reused as-is and this env will NOT apply; boot a fresh `bun dev` (or
+      // free :7213) when you need the override locally.
+      env: { SESSION_LIMIT: '100000' },
     },
     {
       command: 'bun dev',
