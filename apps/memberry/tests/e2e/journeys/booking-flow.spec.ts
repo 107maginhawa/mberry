@@ -106,22 +106,16 @@ test('bookings page loads with tabs and heading', async ({ page }) => {
     await page.getByRole('tab', { name: /my bookings/i }).click()
     await page.waitForLoadState('networkidle')
 
-    // If bookings exist, verify they have status badges
-    const bookingCard = page.locator('[class*="card"]').first()
-    const hasCard = await bookingCard.isVisible({ timeout: 5000 }).catch(() => false)
-
-    if (hasCard) {
-      // Poll until the card hydrates real content — the first matched
-      // `[class*="card"]` can be an empty skeleton mid-load.
-      await expect(async () => {
-        const cardText = (await bookingCard.textContent()) ?? ''
-        // Booking cards should show at least a date and status
-        expect(cardText.length).toBeGreaterThan(5)
-        const hasStatus = /pending|confirmed|rejected|cancelled|completed/i.test(cardText)
-        const isEmptyState = /haven.*booked|no.*bookings/i.test(cardText)
-        expect(hasStatus || isEmptyState).toBe(true)
-      }).toPass({ timeout: 8000 })
-    }
+    // The "Booked by me" view shows either real bookings (with a status
+    // badge) or an empty state. Assert on the rendered copy directly —
+    // `[class*="card"]`.first() can resolve to an empty layout wrapper.
+    await expect(
+      page
+        .getByText(
+          /pending|confirmed|rejected|cancelled|completed|haven.*booked|no past bookings|no bookings/i,
+        )
+        .first(),
+    ).toBeVisible({ timeout: 10000 })
   })
 
   test('clicking a booking navigates to booking detail', async ({ page }) => {

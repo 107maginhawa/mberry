@@ -26,8 +26,10 @@ test.describe('Booking host actions: confirm and reject', () => {
       await page.getByRole('tab', { name: /my bookings/i }).click()
       await page.waitForLoadState('networkidle')
 
-      // BookingList component has "As client" and "As host" inner tabs
-      const hostTab = page.getByRole('tab', { name: /as host|host/i }).first()
+      // BookingList component has "Booked by me" / "With me" inner tabs.
+      // Match the host view by its exact label — a loose /host/i regex also
+      // matches the outer "Find a host" tab.
+      const hostTab = page.getByRole('tab', { name: /with me/i }).first()
       const hasHostTab = await hostTab.isVisible({ timeout: 5000 }).catch(() => false)
 
       if (hasHostTab) {
