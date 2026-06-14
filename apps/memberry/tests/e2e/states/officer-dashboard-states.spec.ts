@@ -55,6 +55,11 @@ test.describe('Officer Dashboard — Interaction States', () => {
   test('permission-error: regular member cannot access officer dashboard', async ({ page }) => {
     await signIn(page, SEED_MEMBER_EMAIL, TEST_PASSWORD)
     await page.goto(`/org/${ORG_ID}/officer/dashboard`)
+    // Guard redirect is async (slug→org then officer-role, ~2-3s); wait for it
+    // to settle before asserting rather than racing it.
+    await page
+      .waitForURL((u) => !u.pathname.includes('/officer/dashboard'), { timeout: 15000 })
+      .catch(() => {})
     // Should be redirected or see access denied
     const isRedirected = !page.url().includes('/officer/dashboard')
     const hasForbidden = await page.getByText(/forbidden|access denied|not authorized|officers only/i).first().isVisible().catch(() => false)
@@ -68,6 +73,10 @@ test.describe('Officer Dashboard — Interaction States', () => {
 
     const fakeOrgId = '00000000-0000-0000-0000-000000000000'
     await page.goto(`/org/${fakeOrgId}/officer/dashboard`)
+    // Guard resolves the (nonexistent) org async then redirects — wait for it.
+    await page
+      .waitForURL((u) => !u.pathname.includes(fakeOrgId), { timeout: 15000 })
+      .catch(() => {})
     const hasError = await page.getByText(/not found|error|no access/i).first().isVisible().catch(() => false)
     const redirected = !page.url().includes(fakeOrgId)
     expect(hasError || redirected).toBeTruthy()

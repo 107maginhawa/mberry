@@ -12,7 +12,12 @@ test.describe('Officer Route Guard Enforcement', () => {
 
     // Try to navigate to officer dashboard
     await page.goto(`/org/${ORG_ID}/officer/dashboard`)
-    await page.waitForTimeout(2000)
+    // The guard's beforeLoad resolves slug→org then officer-role over two
+    // sequential round-trips (~2-3s), so the redirect lands after a fixed
+    // 2s wait would race it. Wait for the URL to leave the officer surface.
+    await page
+      .waitForURL((u) => !u.pathname.includes('/officer/dashboard'), { timeout: 15000 })
+      .catch(() => {})
 
     // Should NOT be on officer dashboard — guard should redirect to /dashboard
     const url = page.url()
@@ -23,7 +28,9 @@ test.describe('Officer Route Guard Enforcement', () => {
     await signUp(page)
 
     await page.goto(`/org/${ORG_ID}/officer/roster`)
-    await page.waitForTimeout(2000)
+    await page
+      .waitForURL((u) => !u.pathname.includes('/officer/roster'), { timeout: 15000 })
+      .catch(() => {})
 
     const url = page.url()
     expect(url).not.toContain('/officer/roster')
@@ -33,7 +40,9 @@ test.describe('Officer Route Guard Enforcement', () => {
     await signUp(page)
 
     await page.goto(`/org/${ORG_ID}/officer/settings/dues`)
-    await page.waitForTimeout(2000)
+    await page
+      .waitForURL((u) => !u.pathname.includes('/officer/settings'), { timeout: 15000 })
+      .catch(() => {})
 
     const url = page.url()
     expect(url).not.toContain('/officer/settings')

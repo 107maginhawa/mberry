@@ -96,6 +96,9 @@ test.describe('Settings — Interaction States', () => {
   test('permission-error: regular member cannot access officer settings', async ({ page }) => {
     await signIn(page, SEED_MEMBER_EMAIL, TEST_PASSWORD)
     await page.goto(`/org/${ORG_ID}/officer/settings/dues`)
+    await page
+      .waitForURL((u) => !u.pathname.includes('/officer/settings'), { timeout: 15000 })
+      .catch(() => {})
     const isRedirected = !page.url().includes('/officer/settings')
     const hasForbidden = await page.getByText(/forbidden|access denied|not authorized|officers only/i).first().isVisible().catch(() => false)
 

@@ -71,7 +71,16 @@ export async function requireOrgOfficer({ context, params }: { context: RouterCo
     if (!orgId) throw new Error('Org not found')
   } catch (err) {
     if (err && typeof err === 'object' && 'to' in err) throw err
-    throw redirect({ to: '/dashboard' })
+    // Back-compat: the $orgSlug param may already be an org UUID rather than a
+    // slug — older deep links (and pre-slug-migration tests) address orgs by
+    // id. The public /org/:slug lookup 404s for a UUID, so fall through to
+    // treating the param itself as the org id instead of booting the user.
+    const ORG_UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
+    if (ORG_UUID_RE.test(orgSlug)) {
+      orgId = orgSlug
+    } else {
+      throw redirect({ to: '/dashboard' })
+    }
   }
 
   try {

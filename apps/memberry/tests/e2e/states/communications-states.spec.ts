@@ -55,6 +55,9 @@ test.describe('Communications — Interaction States', () => {
   test('permission-error: regular member cannot access officer communications', async ({ page }) => {
     await signIn(page, SEED_MEMBER_EMAIL, TEST_PASSWORD)
     await page.goto(`/org/${ORG_ID}/officer/communications`)
+    await page
+      .waitForURL((u) => !u.pathname.includes('/officer/communications'), { timeout: 15000 })
+      .catch(() => {})
     const isRedirected = !page.url().includes('/officer/communications')
     const hasForbidden = await page.getByText(/forbidden|access denied|not authorized|officers only/i).first().isVisible().catch(() => false)
 

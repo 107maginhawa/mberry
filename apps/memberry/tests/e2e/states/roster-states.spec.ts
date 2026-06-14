@@ -57,6 +57,9 @@ test.describe('Roster — Interaction States', () => {
   test('permission-error: regular member cannot access roster', async ({ page }) => {
     await signIn(page, SEED_MEMBER_EMAIL, TEST_PASSWORD)
     await page.goto(`/org/${ORG_ID}/officer/roster`)
+    await page
+      .waitForURL((u) => !u.pathname.includes('/officer/roster'), { timeout: 15000 })
+      .catch(() => {})
     const isRedirected = !page.url().includes('/officer/roster')
     const hasForbidden = await page.getByText(/forbidden|access denied|not authorized|officers only/i).first().isVisible().catch(() => false)
 

@@ -82,7 +82,10 @@ export default defineConfig({
     {
       name: 'chromium',
       use: { ...devices['Desktop Chrome'] },
-      testIgnore: ['**/mobile/**'],
+      // Re-state '**/stubs/**' here: a project-level testIgnore shadows the
+      // top-level one, so the global stub exclude is lost for this project
+      // unless repeated. Without it the unbuilt-feature stub specs run and fail.
+      testIgnore: ['**/mobile/**', '**/stubs/**'],
     },
     {
       name: 'mobile',
