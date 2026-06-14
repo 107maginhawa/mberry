@@ -1,5 +1,5 @@
 import { test, expect } from '@playwright/test'
-import { signInAndNavigate, signInAsAdmin } from './helpers/auth'
+import { signInAndNavigate, signInAsAdmin, csrfHeaders } from './helpers/auth'
 import { ADMIN_BASE } from './helpers/test-config'
 
 const API_URL = `${ADMIN_BASE}/api`
@@ -10,6 +10,7 @@ test.describe('Audit event capture via API', () => {
 
     // POST to create an association (cross-module: associations)
     const createRes = await page.context().request.post(`${API_URL}/admin/associations`, {
+      headers: await csrfHeaders(page.context()),
       data: {
         name: `Audit Test Assoc ${Date.now()}`,
         country: 'PH',
@@ -50,6 +51,7 @@ test.describe('Audit event capture via API', () => {
       const updateRes = await page.context().request.patch(
         `${API_URL}/admin/organizations/${orgId}`,
         {
+          headers: await csrfHeaders(page.context()),
           data: {
             name: `Updated Org ${Date.now()}`,
           },
@@ -60,6 +62,7 @@ test.describe('Audit event capture via API', () => {
     } else {
       // No orgs to update — create one to generate a create (still a write event)
       const createRes = await page.context().request.post(`${API_URL}/admin/associations`, {
+        headers: await csrfHeaders(page.context()),
         data: {
           name: `Audit Write Test ${Date.now()}`,
           country: 'PH',
@@ -94,6 +97,7 @@ test.describe('Audit event capture via API', () => {
 
     // Create a feature flag first so we have something to delete
     const setRes = await page.context().request.post(`${API_URL}/admin/feature-flags`, {
+      headers: await csrfHeaders(page.context()),
       data: {
         targetType: 'global',
         targetId: 'global',
@@ -114,7 +118,8 @@ test.describe('Audit event capture via API', () => {
 
       // DELETE the feature flag
       const deleteRes = await page.context().request.delete(
-        `${API_URL}/admin/feature-flags/${flagId}`
+        `${API_URL}/admin/feature-flags/${flagId}`,
+        { headers: await csrfHeaders(page.context()) },
       )
       // Accept 200 (deleted) or 404 (already gone)
       expect([200, 204, 404]).toContain(deleteRes.status())
@@ -160,11 +165,10 @@ test.describe('Audit dashboard', () => {
   test('audit page has filter controls', async ({ page }) => {
     await signInAndNavigate(page, '/audit')
 
-    // Wait for page to load
-    await page.waitForSelector('select', { timeout: 10000 })
-
-    // Verify action dropdown is present
-    await expect(page.locator('select').first()).toBeVisible()
+    // Action dropdown is a shadcn/Radix Select (renders as
+    // button[role="combobox"], not a native <select>).
+    const actionFilter = page.getByRole('combobox').first()
+    await expect(actionFilter).toBeVisible({ timeout: 10000 })
 
     // Verify date filter inputs are present
     await expect(page.locator('input[type="date"]').first()).toBeVisible()

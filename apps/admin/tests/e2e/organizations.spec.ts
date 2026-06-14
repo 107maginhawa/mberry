@@ -1,5 +1,5 @@
 import { test, expect } from '@playwright/test'
-import { signInAsAdmin, signInAndNavigate } from './helpers/auth'
+import { signInAsAdmin, signInAndNavigate, csrfHeaders } from './helpers/auth'
 import { ADMIN_BASE } from './helpers/test-config'
 
 const API_URL = `${ADMIN_BASE}/api`
@@ -16,6 +16,7 @@ test.describe('Admin Organizations CRUD', () => {
 
     // POST to create a new organization
     const res = await page.context().request.post(`${API_URL}/admin/organizations`, {
+      headers: await csrfHeaders(page.context()),
       data: {
         name: `TestOrg-${Date.now()}`,
         orgType: 'chapter',
@@ -46,6 +47,7 @@ test.describe('Admin Organizations CRUD', () => {
       const updateRes = await page.context().request.patch(
         `${API_URL}/admin/organizations/${orgId}`,
         {
+          headers: await csrfHeaders(page.context()),
           data: {
             name: `Updated-${Date.now()}`,
           },
@@ -61,6 +63,7 @@ test.describe('Admin Organizations CRUD', () => {
       test.skip(!associationId, 'No associations in seed data — run db:seed first')
 
       const createRes = await page.context().request.post(`${API_URL}/admin/organizations`, {
+        headers: await csrfHeaders(page.context()),
         data: {
           name: `UpdateTestOrg-${Date.now()}`,
           orgType: 'chapter',
@@ -89,6 +92,7 @@ test.describe('Admin Organizations CRUD', () => {
 
     // POST to create a new org with a unique name (Bucket B: deleteOrganization handler may not exist)
     const createRes = await page.context().request.post(`${API_URL}/admin/organizations`, {
+      headers: await csrfHeaders(page.context()),
       data: {
         name: uniqueName,
         orgType: 'chapter',
@@ -103,7 +107,8 @@ test.describe('Admin Organizations CRUD', () => {
 
     // DELETE the organization (may not be implemented yet)
     const deleteRes = await page.context().request.delete(
-      `${API_URL}/admin/organizations/${orgId}`
+      `${API_URL}/admin/organizations/${orgId}`,
+      { headers: await csrfHeaders(page.context()) },
     )
     // 405 = not implemented, 404 = already gone, 200/204 = deleted
     expect([200, 204, 404, 405]).toContain(deleteRes.status())

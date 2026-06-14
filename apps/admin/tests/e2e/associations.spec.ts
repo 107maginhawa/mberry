@@ -1,12 +1,8 @@
 import { test, expect } from '@playwright/test'
-import { signInAsAdmin, signInAndNavigate } from './helpers/auth'
+import { signInAsAdmin, signInAndNavigate, csrfHeaders } from './helpers/auth'
 import { ADMIN_BASE } from './helpers/test-config'
 
 const API_URL = `${ADMIN_BASE}/api`
-// Better-Auth's CSRF guard rejects requests with a missing/null Origin.
-// Provide the admin app origin on all admin-API calls made via the raw
-// APIRequestContext (which does NOT auto-set Origin like a real page).
-const ADMIN_API_HEADERS = { Origin: ADMIN_BASE }
 
 test.describe('Admin Associations CRUD', () => {
   test('creates an association and it appears in the list', async ({ page }) => {
@@ -14,7 +10,7 @@ test.describe('Admin Associations CRUD', () => {
 
     // POST to create a new association
     const res = await page.context().request.post(`${API_URL}/admin/associations`, {
-      headers: ADMIN_API_HEADERS,
+      headers: await csrfHeaders(page.context()),
       data: {
         name: `TestAssoc-${Date.now()}`,
         country: 'PH',
@@ -52,7 +48,7 @@ test.describe('Admin Associations CRUD', () => {
 
     // POST to create a new association with a unique name
     const createRes = await page.context().request.post(`${API_URL}/admin/associations`, {
-      headers: ADMIN_API_HEADERS,
+      headers: await csrfHeaders(page.context()),
       data: {
         name: uniqueName,
         country: 'PH',
@@ -68,7 +64,7 @@ test.describe('Admin Associations CRUD', () => {
     // DELETE the association
     const deleteRes = await page.context().request.delete(
       `${API_URL}/admin/associations/${assocId}`,
-      { headers: ADMIN_API_HEADERS },
+      { headers: await csrfHeaders(page.context()) },
     )
     // 404 is acceptable if already gone
     expect([200, 204, 404]).toContain(deleteRes.status())
