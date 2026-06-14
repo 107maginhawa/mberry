@@ -45,10 +45,14 @@ test.describe('Certificate Detail (/my/certificates/:id)', () => {
     await signIn(page, MEMBER_EMAIL, MEMBER_PASSWORD)
     await page.goto('/my/certificates/00000000-0000-0000-0000-000000000000')
     // Should show not-found state or redirect, not crash
-    const hasNotFound = await page.getByText(/not found|no certificate|error/i).first().isVisible().catch(() => false)
-    const hasRedirect = page.url().includes('/my/certificates') && !page.url().includes('00000000')
-    const hasContent = await page.locator('main').isVisible()
-    expect(hasNotFound || hasRedirect || hasContent).toBeTruthy()
+    // isVisible() does not retry — poll the combined state until the page
+    // settles into a not-found, redirect, or rendered-shell outcome.
+    await expect(async () => {
+      const hasNotFound = await page.getByText(/not found|no certificate|error/i).first().isVisible().catch(() => false)
+      const hasRedirect = page.url().includes('/my/certificates') && !page.url().includes('00000000')
+      const hasContent = await page.locator('main').isVisible().catch(() => false)
+      expect(hasNotFound || hasRedirect || hasContent).toBe(true)
+    }).toPass({ timeout: 10000 })
   })
 })
 
@@ -66,8 +70,8 @@ test.describe('Member ID Card', () => {
   test('[BR-19] ID card page renders', async ({ page }) => {
     await signIn(page, MEMBER_EMAIL, MEMBER_PASSWORD)
     await page.goto('/my/id-card')
-    const hasHeading = await page.getByRole('heading').first().isVisible().catch(() => false)
-    const hasContent = await page.locator('main').isVisible()
-    expect(hasHeading || hasContent).toBeTruthy()
+    await expect(
+      page.getByRole('heading').first().or(page.locator('main')).first(),
+    ).toBeVisible({ timeout: 10000 })
   })
 })

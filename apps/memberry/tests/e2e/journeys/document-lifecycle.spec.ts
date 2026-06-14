@@ -29,19 +29,23 @@ test('officer can navigate to document library', async ({ page }) => {
     await uploadBtn.click()
 
     // Should open a dialog, drawer, or navigate to upload form
-    const hasDialog = await page.getByRole('dialog').isVisible({ timeout: 5000 }).catch(() => false)
-    const hasForm = await page.getByLabel(/title|file|name/i).first().isVisible({ timeout: 5000 }).catch(() => false)
-    const hasFileInput = await page.locator('input[type="file"]').isVisible({ timeout: 5000 }).catch(() => false)
-    expect(hasDialog || hasForm || hasFileInput).toBeTruthy()
+    await expect(
+      page.getByRole('dialog')
+        .or(page.getByLabel(/title|file|name/i).first())
+        .or(page.locator('input[type="file"]'))
+        .first(),
+    ).toBeVisible({ timeout: 10000 })
   })
 
   test('document list shows category filter', async ({ page }) => {
     await page.goto(`/org/${ORG_ID}/officer/documents`)
     // Categories may appear as tabs, filter buttons, or select dropdown
-    const hasTabs = await page.getByRole('tab').first().isVisible({ timeout: 5000 }).catch(() => false)
-    const hasFilter = await page.getByText(/all|bylaws|policies|forms/i).first().isVisible({ timeout: 5000 }).catch(() => false)
-    const hasSelect = await page.getByRole('combobox').first().isVisible({ timeout: 5000 }).catch(() => false)
-    expect(hasTabs || hasFilter || hasSelect).toBeTruthy()
+    await expect(
+      page.getByRole('tab').first()
+        .or(page.getByText(/all|bylaws|policies|forms/i).first())
+        .or(page.getByRole('combobox').first())
+        .first(),
+    ).toBeVisible({ timeout: 10000 })
   })
 
   test('clicking a document navigates to detail page', async ({ page }) => {

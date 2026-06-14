@@ -42,14 +42,18 @@ test.describe('Officer Dashboard — Interaction States', () => {
     expect(resp?.ok()).toBe(true)
 
     // Dashboard or welcome content
-    const hasGreeting = await page.getByText(/dashboard|welcome|good\s(morning|afternoon|evening)|overview/i).first().isVisible().catch(() => false)
-    const hasOrgName = await page.getByText(/PDA Metro Manila/i).first().isVisible().catch(() => false)
-    expect(hasGreeting || hasOrgName).toBeTruthy()
+    await expect(
+      page.getByText(/dashboard|welcome|good\s(morning|afternoon|evening)|overview/i).first()
+        .or(page.getByText(/PDA Metro Manila/i).first())
+        .first(),
+    ).toBeVisible({ timeout: 10000 })
 
     // Metrics strip with member counts
-    const hasMembers = await page.getByText(/members?/i).first().isVisible().catch(() => false)
-    const hasTotal = await page.getByText(/total|active|pending|collection/i).first().isVisible().catch(() => false)
-    expect(hasMembers || hasTotal).toBeTruthy()
+    await expect(
+      page.getByText(/members?/i).first()
+        .or(page.getByText(/total|active|pending|collection/i).first())
+        .first(),
+    ).toBeVisible({ timeout: 10000 })
   })
 
   test('permission-error: regular member cannot access officer dashboard', async ({ page }) => {

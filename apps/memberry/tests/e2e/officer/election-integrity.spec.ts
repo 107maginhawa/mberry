@@ -24,9 +24,11 @@ test.describe('[BR-67, BR-44, BR-50] Election Integrity', () => {
 
     await test.step('form renders with required fields', async () => {
       // Election form should have title, dates, positions
-      const hasForm = await page.getByRole('textbox').first().isVisible({ timeout: 10000 }).catch(() => false)
-        || await page.getByLabel(/title|name/i).first().isVisible({ timeout: 10000 }).catch(() => false)
-      expect(hasForm).toBeTruthy()
+      await expect(
+        page.getByRole('textbox').first()
+          .or(page.getByLabel(/title|name/i).first())
+          .first(),
+      ).toBeVisible({ timeout: 10000 })
     })
   })
 

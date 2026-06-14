@@ -27,10 +27,12 @@ test.describe('[BR-45, BR-46] Credit Validation', () => {
     await expect(page).toHaveURL(/\/my\/credits\/log/)
 
     // Should show credit entries with activity names (seeded data has 3 entries)
-    const hasEntries = await page.getByText(/workshop|seminar|convention|training|activity/i).first().isVisible({ timeout: 10000 }).catch(() => false)
-    // Could also show empty state if member has no credits
-    const hasEmptyState = await page.getByText(/no.*credit|no.*entries/i).first().isVisible({ timeout: 3000 }).catch(() => false)
-    expect(hasEntries || hasEmptyState).toBeTruthy()
+    // or an empty state if member has no credits
+    await expect(
+      page.getByText(/workshop|seminar|convention|training|activity/i).first()
+        .or(page.getByText(/no.*credit|no.*entries/i).first())
+        .first(),
+    ).toBeVisible({ timeout: 10000 })
   })
 
   test('[BR-45] credit entry form requires activity name', async ({ page }) => {

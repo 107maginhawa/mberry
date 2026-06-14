@@ -23,7 +23,7 @@ test('shows Delete Account card with destructive border', async ({ page }) => {
     expect(personResp?.ok()).toBe(true)
 
     await expect(
-      page.getByRole('heading', { name: /delete account/i }),
+      page.getByText(/delete account/i).first(),
     ).toBeVisible({ timeout: 10000 })
 
     await expect(

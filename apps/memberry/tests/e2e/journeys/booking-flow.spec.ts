@@ -93,12 +93,11 @@ test('bookings page loads with tabs and heading', async ({ page }) => {
     await page.waitForLoadState('networkidle')
 
     // Should show either booking rows with status badges or empty state
-    const hasBookings = await page.locator('a[href*="/my/bookings/"]')
-      .first().isVisible({ timeout: 5000 }).catch(() => false)
-    const hasEmptyState = await page.getByText(/haven.*booked|no.*bookings|no.*schedule/i)
-      .first().isVisible({ timeout: 3000 }).catch(() => false)
-
-    expect(hasBookings || hasEmptyState).toBeTruthy()
+    await expect(
+      page.locator('a[href*="/my/bookings/"]').first()
+        .or(page.getByText(/haven.*booked|no.*bookings|no.*schedule/i).first())
+        .first(),
+    ).toBeVisible({ timeout: 10000 })
   })
 
   test('booking list items show status and date info', async ({ page }) => {
@@ -112,15 +111,16 @@ test('bookings page loads with tabs and heading', async ({ page }) => {
     const hasCard = await bookingCard.isVisible({ timeout: 5000 }).catch(() => false)
 
     if (hasCard) {
-      const cardText = await bookingCard.textContent() ?? ''
-      // Booking cards should show at least a date and status
-      expect(cardText.length).toBeGreaterThan(5)
-
-      // Look for status badge text
-      const hasStatus = /pending|confirmed|rejected|cancelled|completed/i.test(cardText)
-      // Or it might be an empty state card
-      const isEmptyState = /haven.*booked|no.*bookings/i.test(cardText)
-      expect(hasStatus || isEmptyState).toBeTruthy()
+      // Poll until the card hydrates real content — the first matched
+      // `[class*="card"]` can be an empty skeleton mid-load.
+      await expect(async () => {
+        const cardText = (await bookingCard.textContent()) ?? ''
+        // Booking cards should show at least a date and status
+        expect(cardText.length).toBeGreaterThan(5)
+        const hasStatus = /pending|confirmed|rejected|cancelled|completed/i.test(cardText)
+        const isEmptyState = /haven.*booked|no.*bookings/i.test(cardText)
+        expect(hasStatus || isEmptyState).toBe(true)
+      }).toPass({ timeout: 8000 })
     }
   })
 

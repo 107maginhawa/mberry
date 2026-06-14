@@ -51,9 +51,11 @@ test('training list page loads', async ({ page }) => {
       if (href) {
         await page.goto(`${href}/attendance`)
         // Should show attendance page or error
-        const hasAttendance = await page.getByText(/training attendance|mark members/i).first().isVisible({ timeout: 10000 }).catch(() => false)
-        const hasFailed = await page.getByText(/failed/i).isVisible({ timeout: 3000 }).catch(() => false)
-        expect(hasAttendance || hasFailed).toBeTruthy()
+        await expect(
+          page.getByText(/training attendance|mark members/i).first()
+            .or(page.getByText(/failed/i))
+            .first(),
+        ).toBeVisible({ timeout: 10000 })
       }
     }
   })

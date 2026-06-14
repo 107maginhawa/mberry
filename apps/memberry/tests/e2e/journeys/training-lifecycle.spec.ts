@@ -213,9 +213,11 @@ test.describe('Journey: Training Lifecycle (create -> enroll -> complete -> cred
       ).toBeVisible({ timeout: 10000 })
 
       // Should show training cards or empty state
-      const hasTrainings = await page.locator('[class*="card"]').first().isVisible({ timeout: 10000 }).catch(() => false)
-      const hasEmpty = await page.getByText(/no training/i).first().isVisible({ timeout: 5000 }).catch(() => false)
-      expect(hasTrainings || hasEmpty).toBeTruthy()
+      await expect(
+        page.locator('[class*="card"]').first()
+          .or(page.getByText(/no training/i).first())
+          .first(),
+      ).toBeVisible({ timeout: 10000 })
     })
 
     test('member training detail shows Enroll button and training info', async ({ page }) => {

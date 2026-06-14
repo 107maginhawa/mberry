@@ -35,12 +35,11 @@ test.describe('Booking host actions: confirm and reject', () => {
         await page.waitForLoadState('networkidle')
 
         // Should show host bookings or empty state
-        const hasBookings = await page.locator('a[href*="/my/bookings/"]')
-          .first().isVisible({ timeout: 5000 }).catch(() => false)
-        const hasEmpty = await page.getByText(/no.*bookings|no.*schedule|publish.*schedule/i)
-          .first().isVisible({ timeout: 3000 }).catch(() => false)
-
-        expect(hasBookings || hasEmpty).toBeTruthy()
+        await expect(
+          page.locator('a[href*="/my/bookings/"]').first()
+            .or(page.getByText(/no.*bookings|no.*schedule|publish.*schedule/i).first())
+            .first(),
+        ).toBeVisible({ timeout: 10000 })
       }
     })
 

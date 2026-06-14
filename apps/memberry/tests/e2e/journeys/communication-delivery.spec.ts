@@ -43,9 +43,11 @@ test.describe('Journey: Communication Delivery Pipeline', () => {
 
     await test.step('compose form renders', async () => {
       // Should see compose form with subject/body fields
-      const hasForm = await page.getByRole('textbox').first().isVisible({ timeout: 10000 }).catch(() => false)
-        || await page.getByLabel(/subject|title|message/i).first().isVisible({ timeout: 10000 }).catch(() => false)
-      expect(hasForm).toBeTruthy()
+      await expect(
+        page.getByRole('textbox').first()
+          .or(page.getByLabel(/subject|title|message/i).first())
+          .first(),
+      ).toBeVisible({ timeout: 10000 })
     })
   })
 

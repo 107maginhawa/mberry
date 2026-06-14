@@ -39,8 +39,16 @@ test.describe('Error Boundaries', () => {
     await signInAsMember(page)
     await page.goto('/org/00000000-0000-0000-0000-000000000000/home')
     // Should show error or redirect — not crash
-    const hasError = await page.getByText(/not.*found|error|no.*org|unauthorized/i).first().isVisible({ timeout: 10000 }).catch(() => false)
-    const redirectedAway = !page.url().includes('00000000-0000-0000-0000-000000000000')
-    expect(hasError || redirectedAway).toBeTruthy()
+    // isVisible() does not retry — poll the combined visibility/redirect
+    // state until the SPA settles into an error or redirect.
+    await expect(async () => {
+      const hasError = await page
+        .getByText(/not.*found|error|no.*org|unauthorized/i)
+        .first()
+        .isVisible()
+        .catch(() => false)
+      const redirectedAway = !page.url().includes('00000000-0000-0000-0000-000000000000')
+      expect(hasError || redirectedAway).toBe(true)
+    }).toPass({ timeout: 10000 })
   })
 })
