@@ -65,7 +65,7 @@ test('shows "Export My Data" card', async ({ page }) => {
     await page.goto('/settings/account')
     // Description should mention the types of data included
     await expect(
-      page.getByText(/profile|memberships|payments|training|certificates|events/i),
+      page.getByText(/profile|memberships|payments|training|certificates|events/i).first(),
     ).toBeVisible({ timeout: 10000 })
   })
 })

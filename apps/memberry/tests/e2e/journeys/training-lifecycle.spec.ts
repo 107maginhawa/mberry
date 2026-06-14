@@ -25,7 +25,7 @@ test.describe('Journey: Training Lifecycle (create -> enroll -> complete -> cred
 
       // Form sections visible
       await expect(page.getByText('Basic Info')).toBeVisible({ timeout: 5000 })
-      await expect(page.getByText('Schedule')).toBeVisible({ timeout: 5000 })
+      await expect(page.getByRole('heading', { name: 'Schedule' })).toBeVisible({ timeout: 5000 })
       await expect(page.getByText('Credits')).toBeVisible({ timeout: 5000 })
 
       // Required fields present
@@ -211,7 +211,7 @@ test.describe('Journey: Training Lifecycle (create -> enroll -> complete -> cred
       await page.goto(`/org/${ORG_ID}/training`)
       // Page header
       await expect(
-        page.getByRole('heading', { name: /training/i }),
+        page.getByRole('heading', { name: /training/i }).first(),
       ).toBeVisible({ timeout: 10000 })
 
       // Should show training cards or empty state

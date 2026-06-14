@@ -93,6 +93,8 @@ test.describe('Credits — Interaction States', () => {
 
   test('permission-error: unauthenticated user cannot see credits', async ({ page }) => {
     await page.goto('/dashboard')
+    // Guard redirect is async (client-side beforeLoad) — wait for it to settle.
+    await page.waitForURL(/\/auth\/sign-in/, { timeout: 10000 }).catch(() => {})
     const isOnSignIn = page.url().includes('/auth/sign-in')
     const hasAuthPrompt = await page.getByText(/sign in|log in/i).first().isVisible().catch(() => false)
 

@@ -39,17 +39,26 @@ export interface OrgContextValue {
 
 const OrgContext = createContext<OrgContextValue | null>(null)
 
+// Post slug-migration, /org/:orgSlug URLs carry the org UUID directly (see the
+// matching back-compat path in apps/memberry/src/utils/guards.ts). The public
+// slug→org lookup 404s for a UUID, which previously left orgId empty and broke
+// every child API call (events 403 / announcements 404 with `organizationId=`).
+const ORG_UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
+
 export function OrgProvider({ children }: { children: ReactNode }) {
   const { orgSlug } = useParams({ strict: false }) as { orgSlug: string }
+  const slugIsUuid = ORG_UUID_RE.test(orgSlug ?? '')
 
-  // Step 1: Resolve slug → org (cached forever — slugs immutable in Wave 0)
+  // Step 1: Resolve slug → org (cached forever — slugs immutable in Wave 0).
+  // Skipped when the param is already a UUID, since /public/org/:slug 404s for one.
   const { data: org, isLoading: orgLoading } = useQuery({
     ...getOrganizationBySlugOptions({ path: { slug: orgSlug } }),
     staleTime: Infinity,
-    enabled: !!orgSlug,
+    enabled: !!orgSlug && !slugIsUuid,
   })
 
-  const orgId = org?.id ?? ''
+  // Prefer the resolved org UUID; fall back to a UUID route param directly.
+  const orgId = org?.id ?? (slugIsUuid ? orgSlug : '')
 
   // Step 2: Fetch officer role (needs orgId from step 1)
   const { data: officerData, isLoading: officerLoading } = useQuery({

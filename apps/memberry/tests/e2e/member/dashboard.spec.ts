@@ -29,7 +29,7 @@ test.describe('Member Dashboard (/dashboard)', () => {
     await signIn(page, MEMBER_EMAIL, MEMBER_PASSWORD)
     await page.goto('/dashboard')
     await expect(
-      page.getByText('Your Organizations'),
+      page.getByText('Your Organizations').first(),
     ).toBeVisible({ timeout: 10000 })
 
     // Org card shows membership ID and Active badge

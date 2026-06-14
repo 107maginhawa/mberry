@@ -95,6 +95,8 @@ test.describe('Dashboard — Interaction States', () => {
 
   test('permission-error: unauthenticated user redirects to sign-in', async ({ page }) => {
     await page.goto('/dashboard')
+    // Guard redirect is async (client-side beforeLoad) — wait for it to settle.
+    await page.waitForURL(/\/auth\/sign-in/, { timeout: 10000 }).catch(() => {})
 
     // Should redirect to sign-in or show auth prompt — assert via URL or form.
     const isOnSignIn = page.url().includes('/auth/sign-in')

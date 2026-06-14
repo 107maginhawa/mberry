@@ -95,7 +95,7 @@ test('event form: publish blocked with empty title', async ({ page }) => {
 
   test('credit log: submit blocked with empty activity name', async ({ page }) => {
     await page.goto('/my/credits/log')
-    await expect(page.getByText(/Log Manual Credit|Credit Log/i)).toBeVisible({ timeout: 10000 })
+    await expect(page.getByRole('heading', { name: /Log Manual Credit|Credit Log/i })).toBeVisible({ timeout: 10000 })
 
     // Fill credit amount but NOT activity name
     const creditInput = page.locator('input[type="number"]').first()
