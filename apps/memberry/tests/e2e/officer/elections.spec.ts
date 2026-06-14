@@ -1,10 +1,8 @@
 // Business Rules: [BR-33]
 import { test, expect } from '../helpers/test-fixture'
 import { SEED_OFFICER_EMAIL, TEST_PASSWORD } from '../helpers/test-config'
-import { authStateFile } from '../helpers/auth-state'
 
-
-test.use({ storageState: authStateFile('officer') })
+test.use({ authRole: 'officer' })
 const ORG_ID = 'ed8e3a96-8126-4341-be42-e6eb7940c562'
 
 test.describe('Officer Elections', () => {

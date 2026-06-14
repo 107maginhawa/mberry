@@ -31,11 +31,11 @@
 //   - the officer test@memberry.ph is ALSO enrolled in it.
 //   - the org has no creditTracking flag set → defaults ON (FIX-009).
 import { test, expect } from '../helpers/test-fixture'
-import { authStateFile } from '../helpers/auth-state'
+import { freshAuthState } from '../helpers/programmatic-auth'
 import { apiFetch } from '../helpers/api-fetch'
 import type { Browser, Page } from '@playwright/test'
 
-test.use({ storageState: authStateFile('officer') })
+test.use({ authRole: 'officer' })
 test.describe.configure({ mode: 'serial' })
 
 const BASE = 'http://localhost:3004'
@@ -59,7 +59,7 @@ async function resolveTrainingId(page: Page): Promise<string> {
 }
 
 async function getMemberPersonId(browser: Browser): Promise<string> {
-  const ctx = await browser.newContext({ storageState: authStateFile('member'), baseURL: BASE })
+  const ctx = await browser.newContext({ storageState: await freshAuthState('member'), baseURL: BASE })
   try {
     const p = await ctx.newPage()
     await p.goto(`/org/${ORG_ID}/training`)
@@ -112,7 +112,7 @@ test.describe('BR-17 / FIX-014: attendance → persisted AUTO credit', () => {
     const memberId = await getMemberPersonId(browser)
 
     // Member PRE-state: no AUTO credit for the seminar yet.
-    const memberCtx = await browser.newContext({ storageState: authStateFile('member'), baseURL: BASE })
+    const memberCtx = await browser.newContext({ storageState: await freshAuthState('member'), baseURL: BASE })
     try {
       const memberPage = await memberCtx.newPage()
       await memberPage.goto(`/org/${ORG_ID}/training`)

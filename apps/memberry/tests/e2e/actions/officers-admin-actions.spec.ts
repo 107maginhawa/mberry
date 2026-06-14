@@ -2,11 +2,10 @@
 import { test, expect } from '../helpers/test-fixture'
 import { expectVisibleAfterReload, expectVisibleOnPage } from '../helpers/persistence'
 import { SEED_OFFICER_EMAIL, TEST_PASSWORD } from '../helpers/test-config'
-import { authStateFile } from '../helpers/auth-state'
 import { captureAnyApiSuccess } from '../helpers/real-flow'
 
 
-test.use({ storageState: authStateFile('officer') })
+test.use({ authRole: 'officer' })
 const ORG_ID = 'ed8e3a96-8126-4341-be42-e6eb7940c562'
 
 test.describe('Officer Management Actions', () => {

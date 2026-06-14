@@ -17,7 +17,6 @@
  */
 
 import { test, expect } from './helpers/test-fixture'
-import { authStateFile } from './helpers/auth-state'
 
 const ORG_ID = process.env['SEED_ORG_ID'] ?? 'ed8e3a96-8126-4341-be42-e6eb7940c562'
 const BLANK_PAGE_TIMEOUT = 3000
@@ -80,7 +79,7 @@ async function clickThrough(page: import('@playwright/test').Page, entryRoute: s
 }
 
 test.describe('click-through — member', () => {
-  test.use({ storageState: authStateFile('member') })
+  test.use({ authRole: 'member' })
   test('member can reach + render every visible link from /dashboard without blanks or 5xx', async ({ page }) => {
     await clickThrough(page, '/dashboard')
   })
@@ -90,7 +89,7 @@ test.describe('click-through — member', () => {
 })
 
 test.describe('click-through — officer', () => {
-  test.use({ storageState: authStateFile('officer') })
+  test.use({ authRole: 'officer' })
   test('officer can reach + render every visible link from officer dashboard', async ({ page }) => {
     await clickThrough(page, `/org/${ORG_ID}/officer/dashboard`)
   })
@@ -103,7 +102,7 @@ test.describe('T5 focused 5-page click-through with data-row assertions', () => 
   // (skeleton/empty-state both count — proves the SPA query resolved and
   // the UI committed to a final visual state, not a perpetual loading
   // shimmer or blank container).
-  test.use({ storageState: authStateFile('officer') })
+  test.use({ authRole: 'officer' })
 
   const SURFACES: Array<{ name: string; path: string; heading: RegExp }> = [
     { name: 'Roster',         path: `/org/pda-metro-manila/officer/roster`,           heading: /roster|members/i },

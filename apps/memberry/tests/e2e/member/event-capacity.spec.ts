@@ -1,11 +1,10 @@
 // WF-052 — Event Registration: member registers, waitlist if full
 // BR-27: Event capacity and registration limits
 import { test, expect } from '../helpers/test-fixture'
-import { authStateFile } from '../helpers/auth-state'
 import { captureAnyApiSuccess } from '../helpers/real-flow'
 
 
-test.use({ storageState: authStateFile('member') })
+test.use({ authRole: 'member' })
 const ORG_ID = 'ed8e3a96-8126-4341-be42-e6eb7940c562'
 
 test.describe('BR-27: Event Capacity', () => {

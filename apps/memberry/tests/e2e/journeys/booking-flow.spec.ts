@@ -2,11 +2,10 @@
 // Business Rules: [BR-9] Booking module
 // E2E: Client books a session via host directory
 import { test, expect } from '../helpers/test-fixture'
-import { authStateFile } from '../helpers/auth-state'
 import { captureRouteHydration } from '../helpers/real-flow'
 
 
-test.use({ storageState: authStateFile('member') })
+test.use({ authRole: 'member' })
 test.describe('Booking flow: client books a session', () => {
 test('bookings page loads with tabs and heading', async ({ page }) => {
     const respP = captureRouteHydration(page, '/bookings')

@@ -1,10 +1,8 @@
 // WF-038 — Pay Dues Online: member initiates payment, gateway processes, webhook confirms
 import { test, expect } from '../helpers/test-fixture'
 import { SEED_MEMBER_EMAIL, TEST_PASSWORD } from '../helpers/test-config'
-import { authStateFile } from '../helpers/auth-state'
 
-
-test.use({ storageState: authStateFile('member') })
+test.use({ authRole: 'member' })
 const ORG_ID = 'ed8e3a96-8126-4341-be42-e6eb7940c562'
 
 test.describe('Member Dues (/org/$orgId/dues)', () => {

@@ -2,7 +2,6 @@
 // Business Rules: Documents module — member document browsing
 import { test, expect } from '../helpers/test-fixture'
 import { SEED_MEMBER_EMAIL, TEST_PASSWORD } from '../helpers/test-config'
-import { authStateFile } from '../helpers/auth-state'
 import { captureRouteHydration } from '../helpers/real-flow'
 
 // W2 real-flow upgrade: the org documents browser hydrates via a GET
@@ -10,7 +9,7 @@ import { captureRouteHydration } from '../helpers/real-flow'
 // proves the wire returned data, not just that the heading rendered.
 const DOCS_OR_PERSON = /\/(documents|persons\/me)(?:[/?]|$)/
 
-test.use({ storageState: authStateFile('member') })
+test.use({ authRole: 'member' })
 const ORG_ID = 'ed8e3a96-8126-4341-be42-e6eb7940c562'
 
 test.describe('Member Documents', () => {

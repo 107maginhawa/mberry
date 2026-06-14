@@ -1,11 +1,10 @@
 // WF-038 — Pay Dues Online: gateway error path
 // M-19: Payment gateway unavailable fallback
 import { test, expect } from '../helpers/test-fixture'
-import { authStateFile } from '../helpers/auth-state'
 import { captureAnyApiSuccess } from '../helpers/real-flow'
 
 
-test.use({ storageState: authStateFile('member') })
+test.use({ authRole: 'member' })
 test.describe('M-19: Gateway Error Handling', () => {
 test('payments page loads without crash', async ({ page }) => {
     const respP = captureAnyApiSuccess(page)

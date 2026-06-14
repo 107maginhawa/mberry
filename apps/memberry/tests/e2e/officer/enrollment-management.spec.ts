@@ -1,11 +1,10 @@
 // WF-059 — Training Enrollment: register with capacity management
 // SO-2: Manage training enrollments
 import { test, expect } from '../helpers/test-fixture'
-import { authStateFile } from '../helpers/auth-state'
 import { captureRouteHydration } from '../helpers/real-flow'
 
 
-test.use({ storageState: authStateFile('society') })
+test.use({ authRole: 'society' })
 const ORG_ID = 'ed8e3a96-8126-4341-be42-e6eb7940c562'
 
 test.describe('SO-2: Enrollment Management', () => {

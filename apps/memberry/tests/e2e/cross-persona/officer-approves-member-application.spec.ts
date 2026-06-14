@@ -17,7 +17,7 @@
  */
 
 import { test, expect } from '@playwright/test'
-import { authStateFile } from '../helpers/auth-state'
+import { freshAuthState } from '../helpers/programmatic-auth'
 import { apiFetch } from '../helpers/api-fetch'
 import { signUp } from '../helpers/auth'
 
@@ -76,7 +76,7 @@ test.describe('cross-persona: officer approves member application', () => {
 
     // ---- 2. Officer context: approve ----
     const officerCtx = await browser.newContext({
-      storageState: authStateFile('officer'),
+      storageState: await freshAuthState('officer'),
     })
     const officerPage = await officerCtx.newPage()
     await officerPage.goto('/dashboard')

@@ -16,7 +16,7 @@
  */
 
 import { test, expect } from '@playwright/test'
-import { authStateFile } from '../helpers/auth-state'
+import { freshAuthState } from '../helpers/programmatic-auth'
 import { apiFetch } from '../helpers/api-fetch'
 import { signIn } from '../helpers/auth'
 import { SEED_MEMBER_EMAIL, TEST_PASSWORD } from '../helpers/test-config'
@@ -30,7 +30,7 @@ test.describe('cross-persona: treasurer records dues, member sees receipt', () =
   test('manual payment propagates from treasurer to member', async ({ browser }) => {
     // ---- Treasurer context: record a payment for the seeded member ----
     const treasurerCtx = await browser.newContext({
-      storageState: authStateFile('treasurer'),
+      storageState: await freshAuthState('treasurer'),
     })
     const treasurerPage = await treasurerCtx.newPage()
     const treasurerHydration = captureAnyApiSuccess(treasurerPage)

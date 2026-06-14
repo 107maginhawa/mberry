@@ -20,7 +20,6 @@
 
 import { test, expect } from './helpers/test-fixture'
 import AxeBuilder from '@axe-core/playwright'
-import { authStateFile } from './helpers/auth-state'
 
 const SERIOUS_OR_WORSE = ['serious', 'critical'] as const
 const ORG_ID = process.env['SEED_ORG_ID'] ?? 'ed8e3a96-8126-4341-be42-e6eb7940c562'
@@ -87,7 +86,7 @@ test.describe('a11y — public routes', () => {
 })
 
 test.describe('a11y — member-authed routes', () => {
-  test.use({ storageState: authStateFile('member') })
+  test.use({ authRole: 'member' })
   for (const route of MEMBER_ROUTES) {
     test(`member ${route}`, async ({ page }) => {
       await scan(page, route)
@@ -96,7 +95,7 @@ test.describe('a11y — member-authed routes', () => {
 })
 
 test.describe('a11y — officer-authed routes', () => {
-  test.use({ storageState: authStateFile('officer') })
+  test.use({ authRole: 'officer' })
   for (const route of OFFICER_ROUTES) {
     test(`officer ${route}`, async ({ page }) => {
       await scan(page, route)

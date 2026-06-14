@@ -1,11 +1,10 @@
 // WF-043 — Financial Dashboard: collection rates, payment history, fund reports
 // BR-07: Payment recording extends dues expiry
 import { test, expect } from '../helpers/test-fixture'
-import { authStateFile } from '../helpers/auth-state'
 import { captureAnyApiSuccess, captureRouteHydration } from '../helpers/real-flow'
 
 
-test.use({ storageState: authStateFile('treasurer') })
+test.use({ authRole: 'treasurer' })
 const ORG_ID = 'ed8e3a96-8126-4341-be42-e6eb7940c562'
 const PAYMENTS = /\/(payments|dues-invoices)/
 

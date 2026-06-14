@@ -1,7 +1,6 @@
 // M-27: Voluntary organization departure
 // Verifies the "Leave" button, confirmation dialog, and termination flow
 import { test, expect } from '../helpers/test-fixture'
-import { authStateFile } from '../helpers/auth-state'
 import { captureRouteHydration } from '../helpers/real-flow'
 
 // W2 real-flow upgrade: /my/organizations hydrates via GET /memberships
@@ -9,7 +8,7 @@ import { captureRouteHydration } from '../helpers/real-flow'
 // backend returned data, not just that the Active badge rendered.
 const MEMBERSHIPS_OR_PERSON = /\/(memberships|persons\/me)(?:[/?]|$)/
 
-test.use({ storageState: authStateFile('member') })
+test.use({ authRole: 'member' })
 test.describe('M-27: Leave Organization', () => {
   test('Leave button is visible for active memberships', async ({ page }) => {
     const respP = captureRouteHydration(page, MEMBERSHIPS_OR_PERSON)

@@ -1,11 +1,10 @@
 // WF-025 — Officer Role Assignment: assign positions to members
 // BR-09: Officer role assignment
 import { test, expect } from '../helpers/test-fixture'
-import { authStateFile } from '../helpers/auth-state'
 import { captureAnyApiSuccess } from '../helpers/real-flow'
 
 
-test.use({ storageState: authStateFile('officer') })
+test.use({ authRole: 'officer' })
 const ORG_ID = 'ed8e3a96-8126-4341-be42-e6eb7940c562'
 
 test.describe('BR-09: Role Assignment', () => {

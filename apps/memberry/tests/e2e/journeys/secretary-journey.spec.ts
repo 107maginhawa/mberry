@@ -2,11 +2,10 @@
 // Persona P4: Chapter Secretary (Ana Reyes)
 // Covers: CS-1 through CS-13 — roster, member import, events, communications
 import { test, expect } from '../helpers/test-fixture'
-import { authStateFile } from '../helpers/auth-state'
 import { captureRouteHydration } from '../helpers/real-flow'
 
 
-test.use({ storageState: authStateFile('secretary') })
+test.use({ authRole: 'secretary' })
 const ORG_ID = 'ed8e3a96-8126-4341-be42-e6eb7940c562'
 
 // Helper: assert the page navigated to the expected URL pattern AND the

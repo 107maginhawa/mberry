@@ -3,7 +3,6 @@
 // Upgraded from heading-only to behavioral (Phase 31)
 import { test, expect } from '../helpers/test-fixture'
 import { SEED_MEMBER_EMAIL, TEST_PASSWORD } from '../helpers/test-config'
-import { authStateFile } from '../helpers/auth-state'
 import { captureRouteHydration } from '../helpers/real-flow'
 
 // W2 real-flow upgrade: /my/events hydrates via the event-lifecycle
@@ -11,7 +10,7 @@ import { captureRouteHydration } from '../helpers/real-flow'
 // the backend returned data, not just that the shell rendered.
 const EVENTS_OR_PERSON = /\/(event-lifecycle|events|persons\/me)(?:[/?]|$)/
 
-test.use({ storageState: authStateFile('member') })
+test.use({ authRole: 'member' })
 const MEMBER_EMAIL = SEED_MEMBER_EMAIL
 const MEMBER_PASSWORD = TEST_PASSWORD
 

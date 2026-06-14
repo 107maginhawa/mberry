@@ -16,9 +16,8 @@
  */
 
 import { test, expect } from '../helpers/test-fixture'
-import { authStateFile } from '../helpers/auth-state'
 
-test.use({ storageState: authStateFile('member') })
+test.use({ authRole: 'member' })
 
 test.describe('T2 — Digital ID card renders real member identity', () => {
   test('seeded member sees their name, license, and status badge', async ({ page }) => {

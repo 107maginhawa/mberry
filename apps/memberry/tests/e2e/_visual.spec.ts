@@ -17,7 +17,6 @@
  */
 
 import { test, expect } from './helpers/test-fixture'
-import { authStateFile } from './helpers/auth-state'
 
 if (process.env['SKIP_VISUAL']) {
   test.skip(true, 'SKIP_VISUAL=1 set — visual regression suite bypassed')
@@ -64,14 +63,14 @@ test.describe('visual — public', () => {
 })
 
 test.describe('visual — member', () => {
-  test.use({ storageState: authStateFile('member') })
+  test.use({ authRole: 'member' })
   for (const { route, label } of MEMBER_VIEWS) {
     test(label, async ({ page }) => snapshot(page, route, label))
   }
 })
 
 test.describe('visual — officer', () => {
-  test.use({ storageState: authStateFile('officer') })
+  test.use({ authRole: 'officer' })
   for (const { route, label } of OFFICER_VIEWS) {
     test(label, async ({ page }) => snapshot(page, route, label))
   }

@@ -1,11 +1,10 @@
 // Action-Contract Tests: Communications + Elections
 import { test, expect } from '../helpers/test-fixture'
 import { expectVisibleOnPage } from '../helpers/persistence'
-import { authStateFile } from '../helpers/auth-state'
 import { withIsolatedFixture } from '../helpers/isolated-fixture'
 
 
-test.use({ storageState: authStateFile('officer') })
+test.use({ authRole: 'officer' })
 
 test.describe('Communications Actions', () => {
   // F3: announcement create/save-draft mutators move to isolated org so

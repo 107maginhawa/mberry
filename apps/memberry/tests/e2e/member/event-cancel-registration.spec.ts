@@ -2,7 +2,6 @@
 // Tests member event detail page with registration/cancel flow
 import { test, expect } from '../helpers/test-fixture'
 import { SEED_MEMBER_EMAIL, TEST_PASSWORD } from '../helpers/test-config'
-import { authStateFile } from '../helpers/auth-state'
 import { captureRouteHydration } from '../helpers/real-flow'
 
 // W2 real-flow upgrade: /org/$ORG/events hydrates via the
@@ -11,7 +10,7 @@ import { captureRouteHydration } from '../helpers/real-flow'
 // the heading rendered.
 const EVENTS_OR_PERSON = /\/(event-lifecycle|events|persons\/me)(?:[/?]|$)/
 
-test.use({ storageState: authStateFile('member') })
+test.use({ authRole: 'member' })
 const ORG_ID = 'ed8e3a96-8126-4341-be42-e6eb7940c562'
 
 test.describe('Member Event Registration Cancellation', () => {

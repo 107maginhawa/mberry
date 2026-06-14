@@ -5,6 +5,7 @@ import { test, expect } from '../helpers/test-fixture'
 import { signIn, signInAsMember } from '../helpers/auth'
 import { TEST_PASSWORD } from '../helpers/test-config'
 import { captureRouteHydration } from '../helpers/real-flow'
+import { freshAuthState } from '../helpers/programmatic-auth'
 
 // W2 real-flow upgrade: every authenticated member route hydrates via
 // GET /persons/me. Capturing that on the dashboard mount proves the
@@ -21,7 +22,7 @@ test.describe('[BR-49] Grace Period Access', () => {
     // Asserts the cross-layer DB→roster→UI contract that the status
     // enum gracePeriod surfaces correctly in the filter chips + table.
     const ctx = await browser.newContext({
-      storageState: (await import('../helpers/auth-state')).authStateFile('officer'),
+      storageState: await freshAuthState('officer'),
     })
     const officerPage = await ctx.newPage()
     try {

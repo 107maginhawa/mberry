@@ -2,12 +2,12 @@
 // Persona P3: Chapter Treasurer (Juan Cruz)
 // Covers: CT-1 through CT-11 — payment recording, dues config, financial reports
 import { test, expect } from '../helpers/test-fixture'
-import { authStateFile } from '../helpers/auth-state'
+import { freshAuthState } from '../helpers/programmatic-auth'
 import { withIsolatedFixture } from '../helpers/isolated-fixture'
 import { captureRouteHydration } from '../helpers/real-flow'
 
 
-test.use({ storageState: authStateFile('treasurer') })
+test.use({ authRole: 'treasurer' })
 const ORG_ID = 'ed8e3a96-8126-4341-be42-e6eb7940c562'
 
 // Helper: assert the page navigated to the expected URL pattern AND the
@@ -41,7 +41,7 @@ test.describe('P3 Treasurer Journey', () => {
     // submission flow needs an actor who can do both. This server-side
     // gating gap should be tracked separately.
     const ctx = await browser.newContext({
-      storageState: authStateFile('officer'),
+      storageState: await freshAuthState('officer'),
     })
     const page = await ctx.newPage()
     try {

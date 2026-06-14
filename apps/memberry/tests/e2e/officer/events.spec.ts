@@ -1,11 +1,10 @@
 // WF-055 — Events Dashboard
 // Business Rules: [BR-15] [BR-16] [BR-17] [BR-27]
 import { test, expect } from '../helpers/test-fixture'
-import { authStateFile } from '../helpers/auth-state'
 import { captureRouteHydration } from '../helpers/real-flow'
 
 
-test.use({ storageState: authStateFile('officer') })
+test.use({ authRole: 'officer' })
 const ORG_ID = 'ed8e3a96-8126-4341-be42-e6eb7940c562'
 const EVENTS = /\/(event-lifecycle|events)/
 

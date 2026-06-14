@@ -13,7 +13,7 @@
  */
 
 import { test, expect } from '@playwright/test'
-import { authStateFile } from '../helpers/auth-state'
+import { freshAuthState } from '../helpers/programmatic-auth'
 import { apiFetch } from '../helpers/api-fetch'
 import { signIn } from '../helpers/auth'
 import { withIsolatedFixture } from '../helpers/isolated-fixture'
@@ -31,7 +31,7 @@ test.describe('cross-persona: president runs election → members vote → secre
 
     // ---- President / officer context ----
     const presidentCtx = await browser.newContext({
-      storageState: authStateFile('officer'),
+      storageState: await freshAuthState('officer'),
     })
     const presidentPage = await presidentCtx.newPage()
     await presidentPage.goto('/dashboard')
@@ -44,7 +44,7 @@ test.describe('cross-persona: president runs election → members vote → secre
 
     // ---- Secretary context ----
     const secretaryCtx = await browser.newContext({
-      storageState: authStateFile('secretary'),
+      storageState: await freshAuthState('secretary'),
     })
     const secretaryPage = await secretaryCtx.newPage()
     await secretaryPage.goto('/dashboard')

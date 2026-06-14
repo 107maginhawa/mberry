@@ -74,19 +74,15 @@ export default defineConfig({
   ],
 
   projects: [
-    // Setup project signs each persona in once and saves cookies to .auth/<role>.json.
-    // Specs opt in via `test.use({ storageState: authStateFile('member') })` from
-    // tests/e2e/auth.setup.ts. See docs/audits/E2E_TIMEOUT_ROOT_CAUSE.md §6.
-    {
-      name: 'setup',
-      testMatch: /auth\.setup\.ts$/,
-      testIgnore: [],
-    },
+    // No setup/storageState-file project: specs authenticate per-test via
+    // `test.use({ authRole: '<role>' })`, which mints a fresh API session
+    // (helpers/programmatic-auth.ts → helpers/test-fixture.ts). This retires
+    // the once-per-suite UI sign-in that produced a single long-lived session
+    // and the CONTINUE-55 401 cascade. See docs/aha/outputs/CONTINUE-56-prompt.md.
     {
       name: 'chromium',
       use: { ...devices['Desktop Chrome'] },
-      testIgnore: ['**/mobile/**', '**/auth.setup.ts'],
-      dependencies: ['setup'],
+      testIgnore: ['**/mobile/**'],
     },
     {
       name: 'mobile',
@@ -97,7 +93,6 @@ export default defineConfig({
         hasTouch: true,
       },
       testMatch: '**/mobile/**',
-      dependencies: ['setup'],
     },
   ],
 })
