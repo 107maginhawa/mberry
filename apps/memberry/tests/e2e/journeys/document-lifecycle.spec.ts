@@ -67,8 +67,7 @@ test('officer can navigate to document library', async ({ page }) => {
       expect(hasHeading || hasContent).toBeTruthy()
     } else {
       // No documents seeded -- verify empty state renders correctly
-      const hasEmpty = await page.getByText(/no documents|upload your first|empty/i).first().isVisible({ timeout: 5000 }).catch(() => false)
-      expect(hasEmpty).toBeTruthy()
+      await expect(page.getByText(/no documents|upload your first|empty/i).first()).toBeVisible({ timeout: 5000 })
     }
   })
 

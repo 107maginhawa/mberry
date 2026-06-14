@@ -29,32 +29,42 @@ test.describe('Discover Events (/discover/events) — Public', () => {
 
   test('shows pricing filter dropdown', async ({ page }) => {
     await page.goto('/discover/events')
-    // Pricing filter with Free/Paid options
+    // Pricing filter with Free/Paid options. Wait for the page to hydrate
+    // either the combobox trigger or some pricing copy before probing —
+    // isVisible() does not retry.
     const pricingTrigger = page.getByRole('combobox').last()
-    const hasPricing = await pricingTrigger.isVisible({ timeout: 5000 }).catch(() => false)
+    await expect(
+      pricingTrigger.or(page.getByText(/free|paid|pricing/i).first()),
+    ).toBeVisible({ timeout: 10000 })
+
+    const hasPricing = await pricingTrigger.isVisible().catch(() => false)
 
     if (hasPricing) {
       await pricingTrigger.click()
-      const hasFreeOption = await page.getByText(/^free$/i).isVisible({ timeout: 5000 }).catch(() => false)
-      const hasPaidOption = await page.getByText(/^paid$/i).isVisible({ timeout: 5000 }).catch(() => false)
-      expect(hasFreeOption || hasPaidOption).toBeTruthy()
+      await expect(
+        page.getByText(/^free$/i).or(page.getByText(/^paid$/i)).first(),
+      ).toBeVisible({ timeout: 5000 })
     } else {
       // Pricing filter may render differently
-      const hasPricingText = await page.getByText(/free|paid|pricing/i).first().isVisible({ timeout: 5000 }).catch(() => false)
-      expect(hasPricingText).toBeTruthy()
+      await expect(
+        page.getByText(/free|paid|pricing/i).first(),
+      ).toBeVisible({ timeout: 5000 })
     }
   })
 
   test('displays events or empty state', async ({ page }) => {
     await page.goto('/discover/events')
     // Either event cards or an empty state message
-    const hasEvents = await page.getByText(/CPD|PHP|Free/i).first().isVisible({ timeout: 5000 }).catch(() => false)
-    const hasEmpty = await page.getByText(/no public events found/i).isVisible({ timeout: 5000 }).catch(() => false)
-    const hasLoading = await page.locator('.animate-shimmer').first().isVisible({ timeout: 3000 }).catch(() => false)
-    const hasError = await page.getByText(/failed to load/i).isVisible({ timeout: 3000 }).catch(() => false)
-
-    // Page should show one of these states
-    expect(hasEvents || hasEmpty || hasLoading || hasError).toBeTruthy()
+    // Page should show one of these states — wait for any to appear
+    // (isVisible() does not retry).
+    await expect(
+      page
+        .getByText(/CPD|PHP|Free/i)
+        .or(page.getByText(/no public events found/i))
+        .or(page.locator('.animate-shimmer'))
+        .or(page.getByText(/failed to load/i))
+        .first(),
+    ).toBeVisible({ timeout: 10000 })
   })
 
   test('search input filters events', async ({ page }) => {
@@ -68,8 +78,7 @@ test.describe('Discover Events (/discover/events) — Public', () => {
     await page.waitForLoadState('networkidle')
 
     // Page should still be functional (either results or empty state)
-    const hasContent = await page.locator('main, [class*="space-y"]').first().isVisible()
-    expect(hasContent).toBeTruthy()
+    await expect(page.locator('main, [class*="space-y"]').first()).toBeVisible({ timeout: 10000 })
   })
 
   test('event cards show date and pricing info', async ({ page }) => {

@@ -24,9 +24,12 @@ test('dashboard renders with content', async ({ page }) => {
 
   test('metrics strip shows member counts or activity summary', async ({ page }) => {
     await page.goto(`/org/${ORG_ID}/officer/dashboard`)
-    const hasMembers = await page.getByText(/members?/i).first().isVisible().catch(() => false)
-    const hasTotal = await page.getByText(/total|active|pending|collection/i).first().isVisible().catch(() => false)
-    expect(hasMembers || hasTotal).toBeTruthy()
+    await expect(
+      page
+        .getByText(/members?/i)
+        .or(page.getByText(/total|active|pending|collection/i))
+        .first(),
+    ).toBeVisible({ timeout: 10000 })
   })
 
   test('can navigate to officer roster via URL', async ({ page }) => {

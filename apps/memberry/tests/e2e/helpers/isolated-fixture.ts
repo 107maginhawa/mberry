@@ -36,6 +36,12 @@ export interface IsolatedFixture {
    */
   officerPersonId?: string
   positionId?: string
+  /**
+   * person.id of the seeded member granted an ACTIVE membership on the new
+   * org. Returned only when `memberEmail` is supplied. Sign in as that
+   * member and target `fx().orgId` for member-persona specs.
+   */
+  memberPersonId?: string
 }
 
 export interface IsolatedFixtureOptions {
@@ -48,6 +54,13 @@ export interface IsolatedFixtureOptions {
    * entirely (use for specs that test the "no officer" path).
    */
   officerEmail?: string | null
+  /**
+   * Seeded member email to grant an ACTIVE membership on the new org
+   * (e.g. 'member@memberry.ph'). Opt-in — when omitted, no seeded member
+   * is enrolled. Use for member-persona specs that sign in as the member
+   * and need to target the isolated org.
+   */
+  memberEmail?: string | null
 }
 
 /**
@@ -64,6 +77,9 @@ export async function createIsolatedFixture(
   // to opt out). Undefined means "use server default".
   if (opts.officerEmail !== undefined) {
     payload['officerEmail'] = opts.officerEmail
+  }
+  if (opts.memberEmail !== undefined) {
+    payload['memberEmail'] = opts.memberEmail
   }
   const res = await fetch(`${API_BASE}/test/isolated-fixture`, {
     method: 'POST',

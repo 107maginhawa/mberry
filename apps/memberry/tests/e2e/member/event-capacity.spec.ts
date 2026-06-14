@@ -15,8 +15,7 @@ test('event list page loads', async ({ page }) => {
     expect(resp?.status()).toBe(200)
     expect(resp?.ok()).toBe(true)
     // Should show events or empty state
-    const hasContent = await page.getByText(/event|upcoming|no events/i).first().isVisible({ timeout: 10000 }).catch(() => false)
-    expect(hasContent).toBeTruthy()
+    await expect(page.getByText(/event|upcoming|no events/i).first()).toBeVisible({ timeout: 10000 })
   })
 
   test('event detail shows capacity info when available', async ({ page }) => {
@@ -38,7 +37,6 @@ test('event list page loads', async ({ page }) => {
   test('member events page shows registration status', async ({ page }) => {
     await page.goto('/my/events')
     // Should show events or empty state
-    const hasContent = await page.getByText(/event|registered|no events/i).first().isVisible({ timeout: 10000 }).catch(() => false)
-    expect(hasContent).toBeTruthy()
+    await expect(page.getByText(/event|registered|no events/i).first()).toBeVisible({ timeout: 10000 })
   })
 })

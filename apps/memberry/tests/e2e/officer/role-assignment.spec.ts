@@ -15,8 +15,7 @@ test('officers page loads with officer list', async ({ page }) => {
     expect(resp?.status()).toBe(200)
     expect(resp?.ok()).toBe(true)
     // Should show officers or heading
-    const hasContent = await page.getByText(/officer|role|position/i).first().isVisible({ timeout: 10000 }).catch(() => false)
-    expect(hasContent).toBeTruthy()
+    await expect(page.getByText(/officer|role|position/i).first()).toBeVisible({ timeout: 10000 })
   })
 
   test('officers page shows existing officer assignments', async ({ page }) => {
@@ -26,8 +25,7 @@ test('officers page loads with officer list', async ({ page }) => {
     expect(pageText).not.toContain('undefined undefined')
 
     // Should show at least one role like President, Treasurer, etc
-    const hasRole = await page.getByText(/president|treasurer|secretary|officer/i).first().isVisible({ timeout: 10000 }).catch(() => false)
-    expect(hasRole).toBeTruthy()
+    await expect(page.getByText(/president|treasurer|secretary|officer/i).first()).toBeVisible({ timeout: 10000 })
   })
 
   test('officers page renders without errors', async ({ page }) => {

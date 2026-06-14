@@ -14,8 +14,7 @@ test('officer events page loads', async ({ page }) => {
     const resp = await respP
     expect(resp?.status()).toBe(200)
     expect(resp?.ok()).toBe(true)
-    const hasContent = await page.getByText(/event/i).first().isVisible({ timeout: 10000 }).catch(() => false)
-    expect(hasContent).toBeTruthy()
+    await expect(page.getByText(/event/i).first()).toBeVisible({ timeout: 10000 })
   })
 
   test('event detail has attendance link', async ({ page }) => {
@@ -28,8 +27,7 @@ test('officer events page loads', async ({ page }) => {
       await page.waitForLoadState('networkidle')
 
       // Event detail should have attendance link or tab
-      const hasAttendance = await page.getByText(/attendance|check-in/i).first().isVisible({ timeout: 10000 }).catch(() => false)
-      expect(hasAttendance).toBeTruthy()
+      await expect(page.getByText(/attendance|check-in/i).first()).toBeVisible({ timeout: 10000 })
     }
   })
 
@@ -43,8 +41,7 @@ test('officer events page loads', async ({ page }) => {
       if (href) {
         await page.goto(`${href}/attendance`)
         // Should show attendance page or error
-        const hasPage = await page.getByText(/attendance|present|check-in/i).first().isVisible({ timeout: 10000 }).catch(() => false)
-        expect(hasPage).toBeTruthy()
+        await expect(page.getByText(/attendance|present|check-in/i).first()).toBeVisible({ timeout: 10000 })
       }
     }
   })

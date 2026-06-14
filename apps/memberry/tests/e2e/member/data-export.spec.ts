@@ -21,8 +21,9 @@ test('shows "Export My Data" card', async ({ page }) => {
     expect(resp?.status()).toBe(200)
     expect(resp?.ok()).toBe(true)
 
+    // Card title renders as a styled div, not a semantic heading.
     await expect(
-      page.getByRole('heading', { name: /export my data/i }),
+      page.getByText(/export my data/i).first(),
     ).toBeVisible({ timeout: 10000 })
 
     await expect(

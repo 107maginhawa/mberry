@@ -25,8 +25,7 @@ test('applications page loads with heading', async ({ page }) => {
     expect(hasContent).not.toContain('undefined undefined')
 
     // Check for either application items or empty state message
-    const hasApps = await page.getByText(/pending|approved|denied|no applications/i).first().isVisible({ timeout: 10000 }).catch(() => false)
-    expect(hasApps).toBeTruthy()
+    await expect(page.getByText(/pending|approved|denied|no applications/i).first()).toBeVisible({ timeout: 10000 })
     const resp = await respP
     expect(resp?.ok()).toBe(true)
   })

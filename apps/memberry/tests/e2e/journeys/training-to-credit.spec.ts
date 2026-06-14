@@ -23,9 +23,11 @@ test.describe('Journey: Training → Attendance → Credit Award', () => {
     })
 
     await test.step('training list shows seeded trainings', async () => {
-      // Should see seeded training programs
-      const hasTraining = await page.getByText(/training|workshop|seminar|course/i).first().isVisible({ timeout: 10000 }).catch(() => false)
-      expect(hasTraining).toBeTruthy()
+      // Should see seeded training programs. Use a retrying assertion —
+      // isVisible() does NOT wait for the SPA to hydrate the list.
+      await expect(
+        page.getByText(/training|workshop|seminar|course/i).first(),
+      ).toBeVisible({ timeout: 10000 })
     })
   })
 
@@ -39,8 +41,11 @@ test.describe('Journey: Training → Attendance → Credit Award', () => {
     })
 
     await test.step('training page shows available programs', async () => {
-      const hasContent = await page.getByText(/training|workshop|seminar|course|available|enrolled/i).first().isVisible({ timeout: 10000 }).catch(() => false)
-      expect(hasContent).toBeTruthy()
+      await expect(
+        page
+          .getByText(/training|workshop|seminar|course|available|enrolled/i)
+          .first(),
+      ).toBeVisible({ timeout: 10000 })
     })
   })
 
@@ -56,8 +61,9 @@ test.describe('Journey: Training → Attendance → Credit Award', () => {
 
     await test.step('credits show balance from completed trainings', async () => {
       // Seeded data has credit entries from completed trainings
-      const hasCredits = await page.getByText(/credit|CPD|total|balance|hour/i).first().isVisible({ timeout: 10000 }).catch(() => false)
-      expect(hasCredits).toBeTruthy()
+      await expect(
+        page.getByText(/credit|CPD|total|balance|hour/i).first(),
+      ).toBeVisible({ timeout: 10000 })
     })
   })
 
@@ -72,8 +78,9 @@ test.describe('Journey: Training → Attendance → Credit Award', () => {
 
     await test.step('certificates page renders', async () => {
       // Page may show certificates, empty state, or loading
-      const hasContent = await page.locator('main, [role="main"], h1, h2').first().isVisible({ timeout: 10000 }).catch(() => false)
-      expect(hasContent).toBeTruthy()
+      await expect(
+        page.locator('main, [role="main"], h1, h2').first(),
+      ).toBeVisible({ timeout: 10000 })
     })
   })
 
@@ -84,14 +91,16 @@ test.describe('Journey: Training → Attendance → Credit Award', () => {
     })
 
     await test.step('verify training programs visible', async () => {
-      const hasTraining = await page.getByText(/training|workshop|seminar/i).first().isVisible({ timeout: 10000 }).catch(() => false)
-      expect(hasTraining).toBeTruthy()
+      await expect(
+        page.getByText(/training|workshop|seminar/i).first(),
+      ).toBeVisible({ timeout: 10000 })
     })
 
     await test.step('check credits earned', async () => {
       await page.goto('/my/credits')
-      const hasCredits = await page.getByText(/credit|CPD|total/i).first().isVisible({ timeout: 10000 }).catch(() => false)
-      expect(hasCredits).toBeTruthy()
+      await expect(
+        page.getByText(/credit|CPD|total/i).first(),
+      ).toBeVisible({ timeout: 10000 })
     })
 
     await test.step('check certificates', async () => {
@@ -110,8 +119,9 @@ test.describe('Journey: Training → Attendance → Credit Award', () => {
     })
 
     await test.step('training management accessible', async () => {
-      const hasContent = await page.getByText(/training|manage|create/i).first().isVisible({ timeout: 10000 }).catch(() => false)
-      expect(hasContent).toBeTruthy()
+      await expect(
+        page.getByText(/training|manage|create/i).first(),
+      ).toBeVisible({ timeout: 10000 })
     })
   })
 })

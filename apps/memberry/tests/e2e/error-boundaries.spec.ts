@@ -32,8 +32,7 @@ test.describe('Error Boundaries', () => {
     expect(bodyText?.length).toBeGreaterThan(0)
 
     // Error boundary or empty state is acceptable — blank white page is not
-    const hasAnyContent = await page.locator('main, [role="main"], .container, #root > *').first().isVisible({ timeout: 5000 }).catch(() => false)
-    expect(hasAnyContent).toBeTruthy()
+    await expect(page.locator('main, [role="main"], .container, #root > *').first()).toBeVisible({ timeout: 5000 })
   })
 
   test('org page shows error state for non-existent org', async ({ page }) => {

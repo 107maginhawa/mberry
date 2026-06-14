@@ -199,12 +199,9 @@ test.describe('Directory Onboarding: signup → join org → directory profile',
         await page.waitForTimeout(2000) // debounce + API call
 
         // The new member should appear in results
-        const hasResult = await page
+        await expect(page
           .getByText(uniqueName)
-          .first()
-          .isVisible({ timeout: 10000 })
-          .catch(() => false)
-        expect(hasResult).toBeTruthy()
+          .first()).toBeVisible({ timeout: 10000 })
       })
     })
   })

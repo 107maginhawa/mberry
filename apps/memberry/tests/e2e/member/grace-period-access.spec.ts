@@ -71,8 +71,7 @@ test.describe('[BR-49] Grace Period Access', () => {
     // Org home should render, not show access denied
     await expect(page).toHaveURL(new RegExp(`/org/${ORG_ID}`))
     // Should see org content (name, sections, etc.)
-    const hasOrgContent = await page.getByText(/PDA|Philippine|Metro Manila/i).first().isVisible({ timeout: 10000 }).catch(() => false)
-    expect(hasOrgContent).toBeTruthy()
+    await expect(page.getByText(/PDA|Philippine|Metro Manila/i).first()).toBeVisible({ timeout: 10000 })
   })
 
   test('member can access events page', async ({ page }) => {
@@ -80,16 +79,14 @@ test.describe('[BR-49] Grace Period Access', () => {
     await page.goto('/my/events')
     // Events page loads — should see event list or empty state, not access denied
     await expect(page).toHaveURL(/\/my\/events/)
-    const hasContent = await page.getByText(/event|activities|no.*upcoming/i).first().isVisible({ timeout: 10000 }).catch(() => false)
-    expect(hasContent).toBeTruthy()
+    await expect(page.getByText(/event|activities|no.*upcoming/i).first()).toBeVisible({ timeout: 10000 })
   })
 
   test('member can access training page', async ({ page }) => {
     await signInAsMember(page)
     await page.goto('/my/training')
     await expect(page).toHaveURL(/\/my\/training/)
-    const hasContent = await page.getByText(/training|course|no.*training/i).first().isVisible({ timeout: 10000 }).catch(() => false)
-    expect(hasContent).toBeTruthy()
+    await expect(page.getByText(/training|course|no.*training/i).first()).toBeVisible({ timeout: 10000 })
   })
 
   test('member can access credits page', async ({ page }) => {
@@ -97,8 +94,7 @@ test.describe('[BR-49] Grace Period Access', () => {
     await page.goto('/my/credits')
     await expect(page).toHaveURL(/\/my\/credits/)
     // Credits page should show credit balance or summary
-    const hasContent = await page.getByText(/credit|CPD|hours|balance|0/i).first().isVisible({ timeout: 10000 }).catch(() => false)
-    expect(hasContent).toBeTruthy()
+    await expect(page.getByText(/credit|CPD|hours|balance|0/i).first()).toBeVisible({ timeout: 10000 })
   })
 
   test('member can access payments page', async ({ page }) => {
@@ -106,16 +102,14 @@ test.describe('[BR-49] Grace Period Access', () => {
     await page.goto('/my/payments')
     await expect(page).toHaveURL(/\/my\/payments/)
     // Payments page should show payment list or empty state
-    const hasContent = await page.getByText(/payment|No Payments Found/i).first().isVisible({ timeout: 10000 }).catch(() => false)
-    expect(hasContent).toBeTruthy()
+    await expect(page.getByText(/payment|No Payments Found/i).first()).toBeVisible({ timeout: 10000 })
   })
 
   test('member status badge shows on organizations page', async ({ page }) => {
     await signInAsMember(page)
     await page.goto('/my/organizations')
     // Should display membership status (Active, Grace, etc.)
-    const hasStatus = await page.getByText(/Active|Grace|Lapsed|Pending/i).first().isVisible({ timeout: 10000 }).catch(() => false)
-    expect(hasStatus).toBeTruthy()
+    await expect(page.getByText(/Active|Grace|Lapsed|Pending/i).first()).toBeVisible({ timeout: 10000 })
   })
 
   test('[BR-49] member in grace period retains navigation access', async ({ page }) => {
@@ -125,6 +119,8 @@ test.describe('[BR-49] Grace Period Access', () => {
     // Sidebar should show navigation links for: Home, Activities, Credits, Profile
     // These should be clickable for both Active and Grace members
     const navLinks = page.locator('nav a, aside a').filter({ hasText: /home|activit|credit|profile/i })
+    // Wait for the nav to hydrate before counting — count() does not retry.
+    await expect(navLinks.first()).toBeVisible({ timeout: 10000 })
     const count = await navLinks.count()
     expect(count).toBeGreaterThanOrEqual(2)
   })
@@ -136,7 +132,6 @@ test.describe('[BR-49] Grace Period Access', () => {
     // Should see member directory for this org
     await expect(page).toHaveURL(new RegExp(`/org/${ORG_ID}`))
     // Should have at least one member listed
-    const hasMemberContent = await page.getByText(/member|roster|directory/i).first().isVisible({ timeout: 10000 }).catch(() => false)
-    expect(hasMemberContent).toBeTruthy()
+    await expect(page.getByText(/member|roster|directory/i).first()).toBeVisible({ timeout: 10000 })
   })
 })

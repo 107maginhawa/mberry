@@ -20,10 +20,16 @@ test.describe('Public Payment Page (/pay/$token)', () => {
     await page.goto('/pay/invalid-test-token')
 
     const resp = await respP
-    // Bad token → backend returns non-2xx (validation failure or
-    // 500 if the impl maps an invalid token to a server error).
-    expect(resp?.ok()).toBe(false)
-    expect([400, 401, 403, 404, 422, 500]).toContain(resp?.status() ?? 0)
+    // Bad token → the validate endpoint returns 200 with { valid:false }
+    // (or a non-2xx on impls that hard-error). Accept either: the wire
+    // signal is that the token did not validate.
+    const status = resp?.status() ?? 0
+    if (resp?.ok()) {
+      const json = (await resp.json().catch(() => ({}))) as { valid?: boolean }
+      expect(json.valid).toBe(false)
+    } else {
+      expect([400, 401, 403, 404, 422, 500]).toContain(status)
+    }
 
     // Should show error state — "Payment Link Invalid" heading
     await expect(

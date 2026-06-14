@@ -35,8 +35,7 @@ test.describe('Journey: Registration → Membership → Payment', () => {
 
     await test.step('applications page renders', async () => {
       // Should see heading and either applications or empty state
-      const hasContent = await page.getByText(/application|pending|review|no.*application/i).first().isVisible({ timeout: 10000 }).catch(() => false)
-      expect(hasContent).toBeTruthy()
+      await expect(page.getByText(/application|pending|review|no.*application/i).first()).toBeVisible({ timeout: 10000 })
     })
   })
 
@@ -56,8 +55,7 @@ test.describe('Journey: Registration → Membership → Payment', () => {
 
     await test.step('payments page shows history or empty state', async () => {
       // Active member should see payment history or dues info
-      const hasPaymentContent = await page.getByText(/payment|dues|amount|history|no.*payment/i).first().isVisible({ timeout: 10000 }).catch(() => false)
-      expect(hasPaymentContent).toBeTruthy()
+      await expect(page.getByText(/payment|dues|amount|history|no.*payment/i).first()).toBeVisible({ timeout: 10000 })
     })
   })
 
@@ -65,8 +63,7 @@ test.describe('Journey: Registration → Membership → Payment', () => {
     await signInAsMember(page)
     await page.goto(`/org/${ORG_ID}/dues`)
     // Should see dues info — amount, status, or payment button
-    const hasDuesContent = await page.getByText(/dues|payment|amount|pay|₱|\$/i).first().isVisible({ timeout: 10000 }).catch(() => false)
-    expect(hasDuesContent).toBeTruthy()
+    await expect(page.getByText(/dues|payment|amount|pay|₱|\$/i).first()).toBeVisible({ timeout: 10000 })
   })
 
   test('full journey: dashboard → org → dues → payment visibility', async ({ page }) => {
@@ -92,8 +89,7 @@ test.describe('Journey: Registration → Membership → Payment', () => {
     })
 
     await test.step('verify dues information visible', async () => {
-      const hasDuesInfo = await page.getByText(/dues|membership|payment|balance/i).first().isVisible({ timeout: 10000 }).catch(() => false)
-      expect(hasDuesInfo).toBeTruthy()
+      await expect(page.getByText(/dues|membership|payment|balance/i).first()).toBeVisible({ timeout: 10000 })
     })
   })
 })

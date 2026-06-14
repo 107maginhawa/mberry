@@ -14,17 +14,16 @@ test.describe('Training Browse (/org/$orgId/training)', () => {
     expect(resp?.status()).toBe(200)
     expect(resp?.ok()).toBe(true)
     // Heading may be "Training & Courses" or similar
-    const hasHeading = await page.getByText(/training/i).first().isVisible({ timeout: 10000 }).catch(() => false)
-    expect(hasHeading).toBeTruthy()
+    await expect(page.getByText(/training/i).first()).toBeVisible({ timeout: 10000 })
 
     // Card grid, table, or empty state
-    const hasCards = await page.locator('[class*="card"], [class*="glass"]').first().isVisible().catch(() => false)
-    const hasTable = await page.locator('table').isVisible().catch(() => false)
-    const hasEmpty = await page
-      .getByText(/no training/i)
-      .isVisible()
-      .catch(() => false)
-    expect(hasCards || hasTable || hasEmpty).toBeTruthy()
+    await expect(
+      page
+        .locator('[class*="card"], [class*="glass"]')
+        .or(page.locator('table'))
+        .or(page.getByText(/no training/i))
+        .first(),
+    ).toBeVisible({ timeout: 10000 })
   })
 
   test('training detail page loads with title and enroll button', async ({ page }) => {
@@ -46,24 +45,26 @@ test.describe('Training Browse (/org/$orgId/training)', () => {
     test.skip(!trainingId, 'No published trainings in seed data — seed training data first')
 
     await page.goto(`/org/${ORG_ID}/training/${trainingId}`)
-    // Should show training title (not error state)
-    const hasTitle = await page.locator('h1').first().isVisible().catch(() => false)
+    // Wait for the detail page to settle into either the title or an error
+    // state — isVisible() does not retry, so probing immediately races the
+    // SPA hydration and wrongly takes the error branch.
+    await expect(
+      page.locator('h1').first().or(page.getByText(/failed to load/i)),
+    ).toBeVisible({ timeout: 10000 })
+
     const hasError = await page
       .getByText(/failed to load/i)
       .isVisible()
       .catch(() => false)
 
-    if (hasTitle && !hasError) {
+    if (!hasError) {
       // Verify enroll button or already-enrolled message
-      const hasEnroll = await page
-        .getByRole('button', { name: /enroll/i })
-        .isVisible()
-        .catch(() => false)
-      const hasEnrolled = await page
-        .getByText(/you are enrolled/i)
-        .isVisible()
-        .catch(() => false)
-      expect(hasEnroll || hasEnrolled).toBeTruthy()
+      await expect(
+        page
+          .getByRole('button', { name: /enroll/i })
+          .or(page.getByText(/you are enrolled/i))
+          .first(),
+      ).toBeVisible({ timeout: 10000 })
     } else {
       // Training exists in DB but API returned error — still meaningful coverage
       expect(hasError).toBeTruthy()

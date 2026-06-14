@@ -12,8 +12,7 @@ test('training list page loads', async ({ page }) => {
     const respP = captureRouteHydration(page, /\/training/)
     await page.goto(`/org/${ORG_ID}/officer/training`)
     // Should show training list or empty state
-    const hasHeading = await page.getByText(/training|programs/i).first().isVisible({ timeout: 10000 }).catch(() => false)
-    expect(hasHeading).toBeTruthy()
+    await expect(page.getByText(/training|programs/i).first()).toBeVisible({ timeout: 10000 })
     const resp = await respP
     expect(resp?.status()).toBe(200)
     expect(resp?.ok()).toBe(true)

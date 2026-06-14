@@ -17,11 +17,9 @@ test('shows My Dues heading', async ({ page }) => {
     const allPaid = page.getByText('All Dues Paid')
     const periodEnded = page.getByText('Membership Period Ended')
 
-    const isPayDuesVisible = await payDues.isVisible()
-    const isAllPaidVisible = await allPaid.isVisible()
-    const isPeriodEndedVisible = await periodEnded.isVisible()
-
-    expect(isPayDuesVisible || isAllPaidVisible || isPeriodEndedVisible).toBe(true)
+    await expect(
+      payDues.or(allPaid).or(periodEnded).first(),
+    ).toBeVisible({ timeout: 10000 })
   })
 
   test('shows payment proof upload or paid status', async ({ page }) => {
@@ -30,10 +28,8 @@ test('shows My Dues heading', async ({ page }) => {
     const allPaid = page.getByText('All Dues Paid')
     const periodEnded = page.getByText('Membership Period Ended')
 
-    const isProofUploadVisible = await proofUpload.isVisible()
-    const isAllPaidVisible = await allPaid.isVisible()
-    const isPeriodEndedVisible = await periodEnded.isVisible()
-
-    expect(isProofUploadVisible || isAllPaidVisible || isPeriodEndedVisible).toBe(true)
+    await expect(
+      proofUpload.or(allPaid).or(periodEnded).first(),
+    ).toBeVisible({ timeout: 10000 })
   })
 })

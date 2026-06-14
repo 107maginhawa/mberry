@@ -20,7 +20,6 @@ test('payments page loads without crash', async ({ page }) => {
 
   test('payments page shows payment history or empty state', async ({ page }) => {
     await page.goto('/my/payments')
-    const hasContent = await page.getByText(/payment|no payment|history/i).first().isVisible({ timeout: 10000 }).catch(() => false)
-    expect(hasContent).toBeTruthy()
+    await expect(page.getByText(/payment|no payment|history/i).first()).toBeVisible({ timeout: 10000 })
   })
 })

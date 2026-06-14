@@ -178,12 +178,10 @@ test.describe('Journey: Training Lifecycle (create -> enroll -> complete -> cred
       await page.waitForLoadState('networkidle')
 
       // Schedule info
-      const hasStart = await page.getByText(/start/i).first().isVisible({ timeout: 10000 }).catch(() => false)
-      expect(hasStart).toBeTruthy()
+      await expect(page.getByText(/start/i).first()).toBeVisible({ timeout: 10000 })
 
       // Enrollment info
-      const hasEnrollment = await page.getByText(/enrolled/i).first().isVisible({ timeout: 5000 }).catch(() => false)
-      expect(hasEnrollment).toBeTruthy()
+      await expect(page.getByText(/enrolled/i).first()).toBeVisible({ timeout: 5000 })
     })
 
     test('clicking Attendance tab shows completion table', async ({ page }) => {
@@ -277,8 +275,7 @@ test.describe('Journey: Training Lifecycle (create -> enroll -> complete -> cred
       await expect(page).toHaveURL(/\/my\/credits/)
 
       // Credits page should show credit-related content
-      const hasCredits = await page.getByText(/credit|CPD|total|balance|hour/i).first().isVisible({ timeout: 10000 }).catch(() => false)
-      expect(hasCredits).toBeTruthy()
+      await expect(page.getByText(/credit|CPD|total|balance|hour/i).first()).toBeVisible({ timeout: 10000 })
     })
 
     test('member CPD page shows cycle progress', async ({ page }) => {
@@ -286,8 +283,7 @@ test.describe('Journey: Training Lifecycle (create -> enroll -> complete -> cred
 
       await page.goto(`/org/${ORG_ID}/my-cpd`)
       // CPD page should show progress or credit-related content
-      const hasContent = await page.locator('main, [role="main"], h1, h2').first().isVisible({ timeout: 10000 }).catch(() => false)
-      expect(hasContent).toBeTruthy()
+      await expect(page.locator('main, [role="main"], h1, h2').first()).toBeVisible({ timeout: 10000 })
     })
   })
 })

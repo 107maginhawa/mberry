@@ -31,9 +31,12 @@ test('payments page shows financial dashboard with data', async ({ page }) => {
     expect(pageText).not.toContain('undefined undefined')
 
     // Must show either payment records or explicit empty state
-    const hasTable = await page.locator('table, [role="table"]').first().isVisible({ timeout: 5000 }).catch(() => false)
-    const hasEmptyState = await page.getByText(/no payments|no records|no data/i).isVisible({ timeout: 3000 }).catch(() => false)
-    expect(hasTable || hasEmptyState).toBeTruthy()
+    await expect(
+      page
+        .locator('table, [role="table"]')
+        .or(page.getByText(/no payments|no records|no data/i))
+        .first(),
+    ).toBeVisible({ timeout: 10000 })
   })
 
   test('financial report page loads with content', async ({ page }) => {

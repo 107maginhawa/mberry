@@ -63,8 +63,7 @@ test.describe('[BR-67, BR-44, BR-50] Election Integrity', () => {
     await signInAsOfficer(page)
     await page.goto(`/org/${ORG_ID}/officer/elections`)
     // Should show seeded elections
-    const hasElections = await page.getByText(/election/i).first().isVisible({ timeout: 10000 }).catch(() => false)
-    expect(hasElections).toBeTruthy()
+    await expect(page.getByText(/election/i).first()).toBeVisible({ timeout: 10000 })
 
     // Each election should display a valid status
     const statuses = await page.getByText(/draft|open|closed|published|nominations/i).all()
@@ -75,8 +74,7 @@ test.describe('[BR-67, BR-44, BR-50] Election Integrity', () => {
     await signInAsMember(page)
     await page.goto(`/org/${ORG_ID}/elections`)
     // Member should see election list
-    const hasElections = await page.getByText(/election/i).first().isVisible({ timeout: 10000 }).catch(() => false)
-    expect(hasElections).toBeTruthy()
+    await expect(page.getByText(/election/i).first()).toBeVisible({ timeout: 10000 })
   })
 
   test('[BR-67] voting page shows ballot positions', async ({ page }) => {
