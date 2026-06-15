@@ -24,12 +24,17 @@ test('shows My Dues heading', async ({ page }) => {
 
   test('shows payment proof upload or paid status', async ({ page }) => {
     await page.goto(`/org/${ORG_ID}/dues`)
-    const proofUpload = page.getByText('Upload your GCash screenshot')
-    const allPaid = page.getByText('All Dues Paid')
-    const periodEnded = page.getByText('Membership Period Ended')
-
+    // The dues page surfaces one of several payment states depending on the
+    // member's standing: an upload prompt, a pay action, a submitted/
+    // outstanding badge, or a fully-paid / period-ended terminal state.
     await expect(
-      proofUpload.or(allPaid).or(periodEnded).first(),
+      page
+        .getByText(/Upload your GCash screenshot/i)
+        .or(page.getByText(/All Dues Paid/i))
+        .or(page.getByText(/Membership Period Ended/i))
+        .or(page.getByText(/Pay Now|Pay Dues/i))
+        .or(page.getByText(/Submitted|Outstanding/i))
+        .first(),
     ).toBeVisible({ timeout: 10000 })
   })
 })

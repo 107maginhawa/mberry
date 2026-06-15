@@ -43,9 +43,12 @@ test.describe('Member Payments (/my/payments)', () => {
     await signIn(page, MEMBER_EMAIL, MEMBER_PASSWORD)
     await page.goto('/my/payments')
     // Member may see empty state or payment rows depending on data
-    const hasEmpty = await page.getByText(/No Payments Found/i).isVisible().catch(() => false)
-    const hasPayments = await page.locator('table tbody tr, [class*="card"]').first().isVisible().catch(() => false)
-    const hasHistory = await page.getByText(/payment/i).first().isVisible().catch(() => false)
-    expect(hasEmpty || hasPayments || hasHistory).toBeTruthy()
+    await expect(
+      page
+        .getByText(/No Payments Found/i)
+        .or(page.locator('table tbody tr, [class*="card"]'))
+        .or(page.getByText(/payment/i))
+        .first(),
+    ).toBeVisible({ timeout: 10000 })
   })
 })

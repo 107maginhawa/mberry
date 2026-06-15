@@ -49,7 +49,7 @@ test.describe('Training Browse (/org/$orgId/training)', () => {
     // state — isVisible() does not retry, so probing immediately races the
     // SPA hydration and wrongly takes the error branch.
     await expect(
-      page.locator('h1').first().or(page.getByText(/failed to load/i)),
+      page.locator('h1').first().or(page.getByText(/failed to load/i)).first(),
     ).toBeVisible({ timeout: 10000 })
 
     const hasError = await page

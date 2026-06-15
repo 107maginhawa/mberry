@@ -46,7 +46,7 @@ test.describe('Member Training Detail (/org/:orgId/training/:trainingId)', () =>
     await page.goto(`/org/${ORG_ID}/training/${FAKE_ID}`)
     // Should show not-found, redirect, or error — not crash
     await expect(
-      page.getByText(/not found|no training|error/i).first().or(page.locator('main')),
+      page.getByText(/not found|no training|error/i).first().or(page.locator('main')).first(),
     ).toBeVisible({ timeout: 10000 })
   })
 })
