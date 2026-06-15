@@ -43,36 +43,22 @@ export interface IdentityMatch {
  */
 export async function findIdentityMatches(
   _db: unknown,
-  email?: string,
-  licenseNumber?: string
+  _email?: string,
+  _licenseNumber?: string
 ): Promise<IdentityMatch[]> {
-  // Deferred: DB queries pending person schema license fields — identity matching v1.2.0
-  // Placeholder structure:
+  // NOT IMPLEMENTED — deferred to identity-matching v1.2.0 (pending person-schema
+  // license fields). This previously returned [] unconditionally, which is a
+  // silent landmine: in a cross-org dedup context an empty result reads as
+  // "no existing person -> safe to create a new one", so a future caller wired
+  // to this stub would silently create duplicate persons. Fail loud instead so
+  // the missing implementation is impossible to miss.
   //
-  // const matches: IdentityMatch[] = [];
-  // if (email) {
-  //   const normalized = normalizeEmail(email);
-  //   const emailMatch = await db.query.persons.findFirst({
-  //     where: eq(persons.contactInfo, ...) // JSON query for email
-  //   });
-  //   if (emailMatch) matches.push({ personId: emailMatch.id, matchedBy: 'email', confidence: 'exact' });
-  // }
-  // if (licenseNumber) {
-  //   const normalized = normalizeLicenseNumber(licenseNumber);
-  //   const licenseMatch = await db.query.persons.findFirst({
-  //     where: eq(persons.licenseNumber, normalized)
-  //   });
-  //   if (licenseMatch) {
-  //     const existing = matches.find(m => m.personId === licenseMatch.id);
-  //     if (existing) existing.matchedBy = 'both';
-  //     else matches.push({ personId: licenseMatch.id, matchedBy: 'license', confidence: 'exact' });
-  //   }
-  // }
-  // // If email and license point to different persons, mark ambiguous
-  // if (matches.length > 1) {
-  //   matches.forEach(m => m.confidence = 'ambiguous');
-  // }
-  // return matches;
-
-  return []; // Placeholder until person queries are built
+  // Implementation sketch:
+  //   if (email) -> normalizeEmail + query persons by email (JSON contactInfo)
+  //   if (licenseNumber) -> normalizeLicenseNumber + query persons.licenseNumber
+  //   merge -> matchedBy 'both'; >1 distinct person -> confidence 'ambiguous'
+  throw new Error(
+    'findIdentityMatches is not implemented (deferred to identity-matching v1.2.0). ' +
+    'Do not wire callers to this until person license-field queries exist.',
+  );
 }
