@@ -42,6 +42,12 @@ export async function completeFileUpload(
     });
   }
   
+  // P0-1: Tenant boundary — the file must belong to the caller's organization.
+  // Enforced BEFORE owner/admin so a foreign-org admin can't finalize by UUID.
+  if (file.organizationId !== ctx.get('organizationId')) {
+    throw new ForbiddenError('Access denied: file belongs to a different organization');
+  }
+
   // P0-03: Ownership check — only the file owner or admin can complete upload
   const user = ctx.get('user');
   if (user && file.owner !== user.id && user.role !== 'admin') {

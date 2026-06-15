@@ -57,6 +57,12 @@ export async function deleteFile(
     });
   }
 
+  // P0-1: Tenant boundary — file must belong to the caller's organization.
+  // Enforced BEFORE owner/admin so a foreign-org admin can't delete by UUID.
+  if (file.organizationId !== ctx.get('organizationId')) {
+    throw new ForbiddenError('Access denied: file belongs to a different organization');
+  }
+
   // Check access: user must be owner or admin to delete
   const isAdmin = await userHasRole(auth, user, 'admin');
   const isOwner = file.owner === user.id;
