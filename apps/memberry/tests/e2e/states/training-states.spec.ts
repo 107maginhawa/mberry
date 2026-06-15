@@ -70,11 +70,13 @@ test.describe('Training — Interaction States', () => {
   test('unexpected-error: invalid training detail shows error gracefully', async ({ page }) => {
     await signIn(page, SEED_MEMBER_EMAIL, TEST_PASSWORD)
     await page.goto(`/org/${ORG_ID}/training/${FAKE_TRAINING_ID}`)
-    await page.waitForLoadState('networkidle')
-    const hasNotFound = await page.getByText(/not found|no training|error|failed to load/i).first().isVisible().catch(() => false)
-    // Graceful = the app shell still renders <main> instead of white-screening.
-    const hasContent = await page.locator('main').isVisible().catch(() => false)
-    expect(hasNotFound || hasContent).toBeTruthy()
+    // Graceful = a not-found message OR the app shell's <main> renders
+    // (never a white screen). Retrying — isVisible() does not wait.
+    await expect(
+      page.getByText(/not found|no training|error|failed to load/i).first()
+        .or(page.locator('main'))
+        .first(),
+    ).toBeVisible({ timeout: 10000 })
   })
 
   test('permission-error: unauthenticated user redirects to sign-in', async ({ page }) => {

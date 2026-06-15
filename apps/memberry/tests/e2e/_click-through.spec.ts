@@ -72,25 +72,11 @@ async function clickThrough(page: import('@playwright/test').Page, entryRoute: s
         .filter((href, idx, arr) => arr.indexOf(href) === idx),
     )
 
-  const targets = links.slice(0, 25)
-
-  // Warm pass: visit every route once so vite-dev finishes its on-demand
-  // route-chunk compile + dependency re-optimization. Under CI's concurrent
-  // shards that reopt transiently 404s in-flight chunk requests, which leaves
-  // a lazily-mounted route blank on first paint. Warming first lets the
-  // assertion pass below hit already-served chunks. (No-op in production
-  // builds / once dev deps are pre-bundled.)
-  for (const href of targets) {
-    await page.goto(href, { waitUntil: 'domcontentloaded' }).catch(() => {})
-  }
-
-  // Assertion pass: every route must now render content or an empty state.
-  for (const href of targets) {
+  for (const href of links.slice(0, 25)) {
     await page.goto(href, { waitUntil: 'domcontentloaded' }).catch(() => {})
     let blank = await isBlank(page)
     if (blank) {
-      // Belt-and-suspenders: reload once in case a reopt cycle was still
-      // settling during the warm pass.
+      // One retry for transient first-paint races.
       await page.reload({ waitUntil: 'domcontentloaded' }).catch(() => {})
       blank = await isBlank(page)
     }

@@ -152,10 +152,18 @@ jobs:
           exit 1
       - name: Seed database
         run: cd services/api-ts && bun run db:seed
+      - name: Build Memberry app
+        # Serve a production build (vite preview) rather than the dev server:
+        # vite-dev re-optimizes deps on the fly, which transiently 404s
+        # in-flight route-chunk requests under the 6 concurrent shards and
+        # leaves lazily-mounted routes blank (the _click-through crawler hit
+        # this). A prebuilt bundle has no runtime reopt. preview proxies /api
+        # to the API via vite.config preview.proxy.
+        run: cd apps/memberry && bun run build
       - name: Start Memberry app
         run: |
           cd apps/memberry
-          bun dev > /tmp/memberry.log 2>&1 &
+          bun run preview > /tmp/memberry.log 2>&1 &
           echo $! > /tmp/memberry.pid
       - name: Wait for Memberry app
         run: |

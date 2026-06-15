@@ -61,11 +61,8 @@ test.describe('Events — Interaction States', () => {
     const eventCards = page.locator('a[href*="/events/"]')
     const emptyMessage = page.getByText(/no upcoming events|no events/i).first()
 
-    const hasEvents = await eventCards.first().isVisible().catch(() => false)
-    const hasEmptyState = await emptyMessage.isVisible().catch(() => false)
-
-    // One of these must be true
-    expect(hasEvents || hasEmptyState).toBeTruthy()
+    // One of these must render (retrying — isVisible() does not wait).
+    await expect(eventCards.first().or(emptyMessage).first()).toBeVisible({ timeout: 10000 })
   })
 
   test('permission-error: unauthenticated user cannot access org events', async ({ page }) => {
@@ -83,10 +80,12 @@ test.describe('Events — Interaction States', () => {
 
     const fakeOrgId = '00000000-0000-0000-0000-000000000000'
     await page.goto(`/org/${fakeOrgId}/home`)
-    await page.waitForLoadState('networkidle')
-    const hasError = await page.getByText(/not found|error|no access|not a member|failed to load/i).first().isVisible().catch(() => false)
-    const redirected = !page.url().includes(fakeOrgId)
-    expect(hasError || redirected).toBeTruthy()
+    // isVisible()/url are one-shot — poll the combined error/redirect state.
+    await expect(async () => {
+      const hasError = await page.getByText(/not found|error|no access|not a member|failed to load/i).first().isVisible().catch(() => false)
+      const redirected = !page.url().includes(fakeOrgId)
+      expect(hasError || redirected).toBe(true)
+    }).toPass({ timeout: 10000 })
   })
 
   test('a11y: baseline accessibility check passes', async ({ page }) => {
