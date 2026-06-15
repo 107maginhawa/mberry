@@ -24,16 +24,19 @@ test.describe('Event lifecycle: officer manages events, member views registratio
         page.getByRole('heading', { name: 'Events' }),
       ).toBeVisible({ timeout: 10000 })
 
-      // Seeded events visible as links
+      // Seeded events visible as detail links (event names vary by seed —
+      // assert an event-detail link exists rather than a specific title).
       await expect(
-        page.getByRole('link', { name: /General Assembly/i }),
+        page.locator('a[href*="/officer/events/"]').first(),
       ).toBeVisible({ timeout: 10000 })
     })
 
     test('officer can navigate to event detail page', async ({ page }) => {
       await signIn(page, OFFICER_EMAIL, OFFICER_PASSWORD)
       await page.goto(`/org/${ORG_ID}/officer/events`)
-      await page.getByRole('link', { name: /General Assembly/i }).click()
+      const eventLink = page.locator('a[href*="/officer/events/"]').first()
+      await expect(eventLink).toBeVisible({ timeout: 10000 })
+      await eventLink.click()
       await page.waitForLoadState('networkidle')
 
       expect(page.url()).toContain('/officer/events/')
