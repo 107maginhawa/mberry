@@ -10,16 +10,17 @@
  */
 
 import { createHmac, timingSafeEqual } from 'node:crypto';
+import { getUnsubscribeSecret } from '@/core/config';
 
 /** Payload separator — neither field may contain this character */
 const SEP = '|';
 
 /**
- * Get the HMAC secret from env, with a dev fallback.
- * In production, UNSUBSCRIBE_SECRET must be set to a strong random value.
+ * HMAC secret, resolved via the validated config accessor (single source of
+ * truth; dev fallback only outside production, fails loud in prod).
  */
 function getSecret(): string {
-  return process.env['UNSUBSCRIBE_SECRET'] ?? 'dev-unsub-secret-change-in-production';
+  return getUnsubscribeSecret();
 }
 
 /**

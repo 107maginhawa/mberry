@@ -3,6 +3,7 @@ import type { DatabaseInstance } from '@/core/database';
 import { NotFoundError } from '@/core/errors';
 import { InviteRepository } from './repos/invite.repo';
 import { hashToken, isExpired } from './utils/token';
+import { getInviteTokenSecret } from '@/core/config';
 
 /**
  * validateInvite
@@ -18,7 +19,7 @@ export async function validateInvite(
     return ctx.json({ error: 'Token is required' }, 400);
   }
 
-  const secret = process.env['INVITE_TOKEN_SECRET'] || 'dev-secret-change-in-production';
+  const secret = getInviteTokenSecret();
   const tokenHash = hashToken(token, secret);
 
   const db = ctx.get('database') as DatabaseInstance;

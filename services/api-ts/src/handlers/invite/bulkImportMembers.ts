@@ -6,6 +6,7 @@ import { OfficerTermRepository } from '@/handlers/association:member/repos/gover
 import { InviteRepository } from './repos/invite.repo';
 import { generateInviteToken, defaultExpiryDate } from './utils/token';
 import type { BulkImportMembersBody } from '@/generated/openapi/validators';
+import { getInviteTokenSecret } from '@/core/config';
 
 const EMAIL_RE = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
 
@@ -193,7 +194,7 @@ export async function bulkImportMembers(
 
   // import mode — persist invitations + issue claim tokens for valid rows.
   const importId = randomUUID();
-  const secret = process.env['INVITE_TOKEN_SECRET'] || 'dev-secret-change-in-production';
+  const secret = getInviteTokenSecret();
   let imported = 0;
 
   for (const r of preview) {

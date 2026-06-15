@@ -2,6 +2,7 @@ import type { ValidatedContext } from '@/types/app';
 import type { DatabaseInstance } from '@/core/database';
 import { PayMongoAdapter } from '@/handlers/association:member/utils/paymongo.adapter';
 import { DuesInvoiceRepository } from '@/handlers/association:member/repos/dues.repo';
+import { getPaymongoConfig } from '@/core/config';
 
 /**
  * handlePaymentWebhook
@@ -16,14 +17,12 @@ export async function handlePaymentWebhook(
   const body = await ctx.req.text();
   const signature = ctx.req.header('paymongo-signature') || '';
 
-  const secretKey = process.env['PAYMONGO_SECRET_KEY'];
-  const webhookSecret = process.env['PAYMONGO_WEBHOOK_SECRET'];
-
-  if (!secretKey || !webhookSecret) {
+  const paymongo = getPaymongoConfig();
+  if (!paymongo) {
     return ctx.json({ error: 'Payment gateway not configured' }, 503);
   }
 
-  const adapter = new PayMongoAdapter(secretKey, webhookSecret);
+  const adapter = new PayMongoAdapter(paymongo.secretKey, paymongo.webhookSecret);
   const event = adapter.verifyWebhook(body, signature);
 
   if (!event) {

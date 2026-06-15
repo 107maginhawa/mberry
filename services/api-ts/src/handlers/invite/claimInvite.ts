@@ -6,6 +6,7 @@ import { MembershipRepository } from '../membership/repos/membership.repo';
 import { OrganizationRepository } from '../platformadmin/repos/platform-admin.repo';
 import { hashToken, isExpired } from './utils/token';
 import { domainEvents } from '@/core/domain-events';
+import { getInviteTokenSecret } from '@/core/config';
 
 /**
  * claimInvite
@@ -25,7 +26,7 @@ export async function claimInvite(
     return ctx.json({ error: 'Token is required' }, 400);
   }
 
-  const secret = process.env['INVITE_TOKEN_SECRET'] || 'dev-secret-change-in-production';
+  const secret = getInviteTokenSecret();
   const tokenHash = hashToken(token, secret);
 
   const db = ctx.get('database') as DatabaseInstance;

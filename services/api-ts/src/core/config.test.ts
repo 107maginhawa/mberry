@@ -7,7 +7,12 @@
  */
 
 import { describe, test, expect, beforeEach, afterEach } from 'bun:test';
-import { parseConfig } from './config';
+import {
+  parseConfig,
+  getInviteTokenSecret,
+  getUnsubscribeSecret,
+  getPaymongoConfig,
+} from './config';
 // Factory N/A: core infrastructure test — config/setup/service assertions, no domain entities
 
 // ---------------------------------------------------------------------------
@@ -617,8 +622,10 @@ describe('production config validation — fail fast on missing vars', () => {
       DATABASE_URL: 'postgres://prod:5432/db',
       INTERNAL_SERVICE_TOKEN: 'service-tok',
       INVITE_TOKEN_SECRET: 'service-invite-secret',
+      UNSUBSCRIBE_SECRET: 'service-unsub-secret',
       CORS_ORIGINS: 'https://app.example.com',
       STORAGE_ACCESS_KEY_ID: 'real-key',
+      STORAGE_SECRET_ACCESS_KEY: 'real-secret',
       // P0-3: a valid prod config has tunnel/local-network CORS disabled.
       CORS_ALLOW_TUNNELING: undefined,
       CORS_ALLOW_LOCAL_NETWORK: undefined,
@@ -697,8 +704,10 @@ describe('INVITE_TOKEN_SECRET production validation (FIX-010)', () => {
       DATABASE_URL: 'postgres://prod:5432/db',
       INTERNAL_SERVICE_TOKEN: 'service-tok',
       INVITE_TOKEN_SECRET: 'a-real-strong-prod-invite-secret',
+      UNSUBSCRIBE_SECRET: 'a-real-strong-prod-unsub-secret',
       CORS_ORIGINS: 'https://app.example.com',
       STORAGE_ACCESS_KEY_ID: 'real-key',
+      STORAGE_SECRET_ACCESS_KEY: 'real-secret',
       // P0-3: a valid prod config has tunnel/local-network CORS disabled.
       CORS_ALLOW_TUNNELING: undefined,
       CORS_ALLOW_LOCAL_NETWORK: undefined,
@@ -754,6 +763,9 @@ describe('CORS tunneling / local-network defaults', () => {
     DATABASE_URL: 'postgres://u:p@db:5432/app',
     INTERNAL_SERVICE_TOKEN: 'svc-token',
     INVITE_TOKEN_SECRET: 'a-real-prod-secret',
+    UNSUBSCRIBE_SECRET: 'a-real-prod-unsub-secret',
+    STORAGE_ACCESS_KEY_ID: 'real-key',
+    STORAGE_SECRET_ACCESS_KEY: 'real-secret',
   };
 
   test('production rejects CORS_ALLOW_TUNNELING=true', () => {
@@ -778,6 +790,126 @@ describe('CORS tunneling / local-network defaults', () => {
     const restore = withEnv({ ...PROD_BASE, CORS_ALLOW_TUNNELING: undefined, CORS_ALLOW_LOCAL_NETWORK: undefined });
     try {
       expect(() => parseConfig()).not.toThrow();
+    } finally {
+      restore();
+    }
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Secret hardening (audit P1) — production validation + validated accessors
+// ---------------------------------------------------------------------------
+
+describe('production secret validation', () => {
+  const PROD_BASE = {
+    NODE_ENV: 'production',
+    AUTH_SECRET: 'prod-secret-value',
+    DATABASE_URL: 'postgres://u:p@db:5432/app',
+    INTERNAL_SERVICE_TOKEN: 'svc-token',
+    INVITE_TOKEN_SECRET: 'a-real-prod-secret',
+    UNSUBSCRIBE_SECRET: 'a-real-prod-unsub-secret',
+    STORAGE_ACCESS_KEY_ID: 'real-key',
+    STORAGE_SECRET_ACCESS_KEY: 'real-secret',
+    CORS_ALLOW_TUNNELING: undefined as string | undefined,
+    CORS_ALLOW_LOCAL_NETWORK: undefined as string | undefined,
+  };
+
+  test('rejects missing UNSUBSCRIBE_SECRET', () => {
+    const restore = withEnv({ ...PROD_BASE, UNSUBSCRIBE_SECRET: undefined });
+    try {
+      expect(() => parseConfig()).toThrow(/UNSUBSCRIBE_SECRET/);
+    } finally {
+      restore();
+    }
+  });
+
+  test('rejects the dev-default UNSUBSCRIBE_SECRET', () => {
+    const restore = withEnv({ ...PROD_BASE, UNSUBSCRIBE_SECRET: 'dev-unsub-secret-change-in-production' });
+    try {
+      expect(() => parseConfig()).toThrow(/UNSUBSCRIBE_SECRET/);
+    } finally {
+      restore();
+    }
+  });
+
+  test('rejects default minioadmin storage credentials', () => {
+    const restore = withEnv({ ...PROD_BASE, STORAGE_ACCESS_KEY_ID: 'minioadmin' });
+    try {
+      expect(() => parseConfig()).toThrow(/STORAGE_ACCESS_KEY_ID/);
+    } finally {
+      restore();
+    }
+  });
+});
+
+describe('validated secret accessors', () => {
+  test('getInviteTokenSecret returns dev default outside production', () => {
+    const restore = withEnv({ NODE_ENV: 'development', INVITE_TOKEN_SECRET: undefined });
+    try {
+      expect(getInviteTokenSecret()).toBe('dev-secret-change-in-production');
+    } finally {
+      restore();
+    }
+  });
+
+  test('getInviteTokenSecret returns the configured value when set', () => {
+    const restore = withEnv({ INVITE_TOKEN_SECRET: 'configured-invite-secret' });
+    try {
+      expect(getInviteTokenSecret()).toBe('configured-invite-secret');
+    } finally {
+      restore();
+    }
+  });
+
+  test('getInviteTokenSecret throws in production when unset', () => {
+    const restore = withEnv({ NODE_ENV: 'production', INVITE_TOKEN_SECRET: undefined });
+    try {
+      expect(() => getInviteTokenSecret()).toThrow(/INVITE_TOKEN_SECRET/);
+    } finally {
+      restore();
+    }
+  });
+
+  test('getUnsubscribeSecret returns dev default outside production', () => {
+    const restore = withEnv({ NODE_ENV: 'development', UNSUBSCRIBE_SECRET: undefined });
+    try {
+      expect(getUnsubscribeSecret()).toBe('dev-unsub-secret-change-in-production');
+    } finally {
+      restore();
+    }
+  });
+
+  test('getUnsubscribeSecret throws in production when unset', () => {
+    const restore = withEnv({ NODE_ENV: 'production', UNSUBSCRIBE_SECRET: undefined });
+    try {
+      expect(() => getUnsubscribeSecret()).toThrow(/UNSUBSCRIBE_SECRET/);
+    } finally {
+      restore();
+    }
+  });
+
+  test('getPaymongoConfig returns null when unset', () => {
+    const restore = withEnv({ PAYMONGO_SECRET_KEY: undefined, PAYMONGO_WEBHOOK_SECRET: undefined });
+    try {
+      expect(getPaymongoConfig()).toBeNull();
+    } finally {
+      restore();
+    }
+  });
+
+  test('getPaymongoConfig returns credentials when both set', () => {
+    const restore = withEnv({ PAYMONGO_SECRET_KEY: 'sk_test', PAYMONGO_WEBHOOK_SECRET: 'whsec_test' });
+    try {
+      expect(getPaymongoConfig()).toEqual({ secretKey: 'sk_test', webhookSecret: 'whsec_test' });
+    } finally {
+      restore();
+    }
+  });
+
+  test('getPaymongoConfig returns null when only one is set', () => {
+    const restore = withEnv({ PAYMONGO_SECRET_KEY: 'sk_test', PAYMONGO_WEBHOOK_SECRET: undefined });
+    try {
+      expect(getPaymongoConfig()).toBeNull();
     } finally {
       restore();
     }
