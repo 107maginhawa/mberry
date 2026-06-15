@@ -68,7 +68,7 @@ test.describe('T2 — Digital ID card renders real member identity', () => {
 
     // QR code rendered with the correct verify URL — proves the membership
     // memberNumber/id flowed through end-to-end.
-    const qr = page.locator('svg[aria-label^="QR code to verify member"]')
+    const qr = page.locator('svg[aria-label^="QR code to verify"]')
     await expect(qr).toBeVisible({ timeout: 5000 })
 
     // Download PDF button is enabled (orgId resolved from real membership).

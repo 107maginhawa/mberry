@@ -17,29 +17,19 @@ test('event form: publish blocked with empty title', async ({ page }) => {
     expect(resp?.ok()).toBe(true)
     await expect(page.getByText(/Create Event/i)).toBeVisible({ timeout: 10000 })
 
-    // Fill dates but NOT title
-    await page.getByRole('textbox', { name: /Start/i }).fill('2026-12-01T09:00')
-    await page.getByRole('textbox', { name: /End/i }).fill('2026-12-01T17:00')
-
-    // Publish button should be disabled or submit should fail
-    const publishBtn = page.getByRole('button', { name: /Publish/i })
+    // Leave the Title (and other required fields) empty. Start/End are
+    // date-time picker buttons, not text inputs — no need to fill them to
+    // exercise the empty-title path.
+    const publishBtn = page.getByRole('button', { name: /^Publish$/i })
     const isDisabled = await publishBtn.isDisabled().catch(() => false)
-
     if (!isDisabled) {
-      // If not disabled, click and verify no 201 response
-      const responsePromise = page.waitForResponse(
-        resp => resp.url().includes('/events/create/') && resp.status() === 201,
-        { timeout: 3000 }
-      ).catch(() => null)
       await publishBtn.click()
-      const resp = await responsePromise
-      // Either no response (blocked) or error toast shown
-      if (resp === null) {
-        // Good — submission was blocked
-      }
     }
-    // Either way, we should still be on the create page
-    expect(page.url()).toContain('/events/new')
+
+    // Submission is blocked: a required-field error shows and we stay on
+    // the create page (no redirect to a new event's detail).
+    await expect(page.getByText(/required/i).first()).toBeVisible({ timeout: 5000 })
+    await expect(page).toHaveURL(/\/events\/new/)
   })
 
   test('payment form: submit blocked with no member selected', async ({ page }) => {
@@ -98,13 +88,19 @@ test('event form: publish blocked with empty title', async ({ page }) => {
     await expect(page.getByRole('heading', { name: /Log Manual Credit|Credit Log/i })).toBeVisible({ timeout: 10000 })
 
     // Fill credit amount but NOT activity name
-    const creditInput = page.locator('input[type="number"]').first()
-    if (await creditInput.isVisible({ timeout: 3000 }).catch(() => false)) {
-      await creditInput.fill('5')
+    const creditInput = page.locator('input[name="creditAmount"], input[type="number"]').first()
+    await expect(creditInput).toBeVisible({ timeout: 10000 })
+    await creditInput.fill('5')
 
-      // Submit button should be disabled
-      const submitBtn = page.getByRole('button', { name: /Add|Save|Submit/i })
-      await expect(submitBtn).toBeDisabled()
-    }
+    // The form validates on submit (the button is not pre-disabled).
+    // Submitting with an empty Activity Name keeps us on the form and
+    // surfaces a required-field error rather than creating an entry.
+    await page
+      .getByRole('button', { name: /Add Credit Entry|Add|Save|Submit/i })
+      .first()
+      .click()
+
+    await expect(page).toHaveURL(/\/my\/credits\/log/)
+    await expect(page.getByText(/required/i).first()).toBeVisible({ timeout: 5000 })
   })
 })

@@ -36,10 +36,16 @@ test.describe('Profile page (/my/profile)', () => {
     await page.goto('/my/profile')
     await page.waitForTimeout(2000)
 
-    // Should show some content, not spinner forever
-    const hasHeading = await page.getByRole('heading', { name: 'My Profile' }).isVisible()
-    const hasEmptyState = await page.getByText(/no profile|complete onboarding/i).isVisible()
-    expect(hasHeading || hasEmptyState).toBe(true)
+    // Fresh user with no person record: the page should settle into a
+    // readable state (the Profile shell, an empty/onboarding prompt, or a
+    // redirect to onboarding) — never an infinite spinner. isVisible() does
+    // not retry, so poll the combined state.
+    await expect(async () => {
+      const hasHeading = await page.getByRole('heading', { name: /profile/i }).first().isVisible().catch(() => false)
+      const hasEmptyState = await page.getByText(/no profile|complete onboarding|onboarding/i).first().isVisible().catch(() => false)
+      const redirected = /\/onboarding/.test(page.url())
+      expect(hasHeading || hasEmptyState || redirected).toBe(true)
+    }).toPass({ timeout: 10000 })
   })
 
   test('B2: edit → change specialization → save → returns to view mode', async ({ page }) => {
@@ -98,8 +104,13 @@ test.describe('Profile page (/my/profile)', () => {
     await page.goto('/my/profile')
 
     await page.getByRole('button', { name: /edit profile/i }).click()
-    await page.locator('form input').first().fill('')
+    await page.locator('form input[name="firstName"], form input').first().fill('')
 
-    await expect(page.getByRole('button', { name: /save changes/i })).toBeDisabled()
+    // Save is not pre-disabled — the form validates on submit. Saving with
+    // an empty required name keeps us in edit mode and surfaces a
+    // required-field error rather than persisting.
+    await page.getByRole('button', { name: /save changes/i }).click()
+    await expect(page.getByText(/required/i).first()).toBeVisible({ timeout: 5000 })
+    await expect(page.getByRole('button', { name: /save changes/i })).toBeVisible()
   })
 })

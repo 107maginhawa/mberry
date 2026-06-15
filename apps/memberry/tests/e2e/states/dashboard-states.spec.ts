@@ -115,6 +115,12 @@ test.describe('Dashboard — Interaction States', () => {
     expect(personResp?.status()).toBe(200)
     expect(personResp?.ok()).toBe(true)
 
+    // Let the dashboard fully settle before scanning — loading skeletons
+    // render low-contrast shimmer placeholders that axe (correctly) flags
+    // as transient color-contrast violations until real data paints.
+    await expect(page.getByRole('heading').first()).toBeVisible({ timeout: 10000 })
+    await page.waitForLoadState('networkidle').catch(() => {})
+
     await expectNoA11yViolations(page, {
       exclude: ['[data-radix-popper-content-wrapper]'],
     })
