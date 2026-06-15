@@ -2,24 +2,23 @@
 #
 # Covers operationIds:
 #   searchDirectory
-# The /association/member/directory/search* prefix is in
-# ASSOCIATION_PUBLIC_PATHS (app.ts) so the global org-context middleware
-# is bypassed to keep the unauth public projection reachable. The
-# searchDirectory handler enforces its own per-call check
-# (`if (!orgMembership) → 403 "Organization membership required"`).
 #
-# Locks the current behavior — searchDirectory always returns 403 from
-# a generic per-route auth path because orgMembership is never set on
-# the public-prefix request lifecycle. The trust-enriched member search
-# flow is expected to migrate to a non-public sub-route in a follow-up;
-# this contract pins the regression edge until then.
+# Only the per-person public projection
+# (`/association/member/directory/search/:personId/public`) is public;
+# the bare `/association/member/directory/search` is the AUTHENTICATED
+# member directory search and flows through auth + org-context middleware.
+# Behavior:
+#   - unauthenticated            → 401
+#   - authenticated org member   → 200 (trust-enriched results)
+#   - authenticated non-member   → 403 "Not a member of this organization"
+#     (org-context middleware, before the handler runs)
 
 GET {{api}}/csrf-token
 HTTP 200
 [Captures]
 csrf_token: jsonpath "$.token"
 
-# ── 0. Unauthenticated searchDirectory → 401 (per-route bearerAuth) ────────
+# ── 0. Unauthenticated searchDirectory → 401 (per-route auth) ──────────────
 GET {{api}}/association/member/directory/search?limit=5
 Origin: {{origin}}
 HTTP 401
@@ -42,15 +41,16 @@ HTTP 200
 [Captures]
 officer_cookie: cookie "better-auth.session_token"
 
-# ── 2. Authenticated searchDirectory on public prefix → 403 ────────────────
-#       Handler check rejects when orgMembership is unset (public bypass).
+# ── 2. Authenticated org member (officer) searchDirectory → 200 ────────────
+#       org-context middleware resolves the membership and sets orgMembership.
 GET {{api}}/association/member/directory/search?limit=5
 Origin: {{origin}}
 Cookie: better-auth.session_token={{officer_cookie}}
 x-org-id: {{org_id}}
-HTTP 403
+HTTP 200
 [Asserts]
-jsonpath "$.error" == "Organization membership required"
+jsonpath "$.data" exists
+jsonpath "$.pagination" exists
 
 # ── 3. Sign in as seed member01 ────────────────────────────────────────────
 GET {{api}}/csrf-token
@@ -70,11 +70,37 @@ HTTP 200
 [Captures]
 member_cookie: cookie "better-auth.session_token"
 
-# ── 4. Member also hits 403 on public-prefix path (same guard) ─────────────
+# ── 4. Org member searchDirectory with a filter → 200 ──────────────────────
 GET {{api}}/association/member/directory/search?limit=5&specialty=Endodontics
 Origin: {{origin}}
 Cookie: better-auth.session_token={{member_cookie}}
 x-org-id: {{org_id}}
-HTTP 403
+HTTP 200
 [Asserts]
-jsonpath "$.error" == "Organization membership required"
+jsonpath "$.data" exists
+
+# ── 5. Sign up a fresh user with no membership in the org ──────────────────
+GET {{api}}/csrf-token
+HTTP 200
+[Captures]
+csrf_token: jsonpath "$.token"
+
+POST {{api}}/auth/sign-up/email
+Origin: {{origin}}
+x-csrf-token: {{csrf_token}}
+Content-Type: application/json
+{
+  "email": "dir-nonmember-{{suffix}}@example.org",
+  "password": "Sup3rSecret!ContractTest",
+  "name": "Dir NonMember {{suffix}}"
+}
+HTTP 200
+[Captures]
+nonmember_cookie: cookie "better-auth.session_token"
+
+# ── 6. Non-member searchDirectory → 403 (org-context guard) ────────────────
+GET {{api}}/association/member/directory/search?limit=5
+Origin: {{origin}}
+Cookie: better-auth.session_token={{nonmember_cookie}}
+x-org-id: {{org_id}}
+HTTP 403

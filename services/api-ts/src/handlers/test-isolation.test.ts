@@ -16,7 +16,7 @@ import { apiAs } from '@/tests/helpers/api-as';
 const API_URL = process.env['API_URL'] || 'http://localhost:7213';
 const SEED_MEMBER_EMAIL = 'member@memberry.ph';
 
-const d = API_AVAILABLE ? describe : describe.skip;
+const d = API_AVAILABLE ? describe : describe.skip; // allow-skip: integration test needs live API on :7213 + seeded DB
 
 async function createFixture(body: Record<string, unknown>): Promise<{
   orgId: string;
