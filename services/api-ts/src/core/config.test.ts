@@ -619,6 +619,9 @@ describe('production config validation — fail fast on missing vars', () => {
       INVITE_TOKEN_SECRET: 'service-invite-secret',
       CORS_ORIGINS: 'https://app.example.com',
       STORAGE_ACCESS_KEY_ID: 'real-key',
+      // P0-3: a valid prod config has tunnel/local-network CORS disabled.
+      CORS_ALLOW_TUNNELING: undefined,
+      CORS_ALLOW_LOCAL_NETWORK: undefined,
     });
     try {
       const cfg = parseConfig();
@@ -696,6 +699,9 @@ describe('INVITE_TOKEN_SECRET production validation (FIX-010)', () => {
       INVITE_TOKEN_SECRET: 'a-real-strong-prod-invite-secret',
       CORS_ORIGINS: 'https://app.example.com',
       STORAGE_ACCESS_KEY_ID: 'real-key',
+      // P0-3: a valid prod config has tunnel/local-network CORS disabled.
+      CORS_ALLOW_TUNNELING: undefined,
+      CORS_ALLOW_LOCAL_NETWORK: undefined,
     });
     try {
       expect(() => parseConfig()).not.toThrow();
@@ -710,6 +716,66 @@ describe('INVITE_TOKEN_SECRET production validation (FIX-010)', () => {
       AUTH_SECRET: 'dev-secret',
       INVITE_TOKEN_SECRET: undefined,
     });
+    try {
+      expect(() => parseConfig()).not.toThrow();
+    } finally {
+      restore();
+    }
+  });
+});
+
+// ---------------------------------------------------------------------------
+// CORS hardening (audit P0-3)
+// ---------------------------------------------------------------------------
+
+describe('CORS tunneling / local-network defaults', () => {
+  test('allowTunneling defaults to false when unset', () => {
+    const restore = withEnv({ CORS_ALLOW_TUNNELING: undefined });
+    try {
+      expect(parseConfig().cors.allowTunneling).toBe(false);
+    } finally {
+      restore();
+    }
+  });
+
+  test('allowLocalNetwork defaults to false when unset', () => {
+    const restore = withEnv({ CORS_ALLOW_LOCAL_NETWORK: undefined });
+    try {
+      expect(parseConfig().cors.allowLocalNetwork).toBe(false);
+    } finally {
+      restore();
+    }
+  });
+
+  // Minimum env for a valid production parse.
+  const PROD_BASE = {
+    NODE_ENV: 'production',
+    AUTH_SECRET: 'prod-secret-value',
+    DATABASE_URL: 'postgres://u:p@db:5432/app',
+    INTERNAL_SERVICE_TOKEN: 'svc-token',
+    INVITE_TOKEN_SECRET: 'a-real-prod-secret',
+  };
+
+  test('production rejects CORS_ALLOW_TUNNELING=true', () => {
+    const restore = withEnv({ ...PROD_BASE, CORS_ALLOW_TUNNELING: 'true' });
+    try {
+      expect(() => parseConfig()).toThrow(/CORS_ALLOW_TUNNELING/);
+    } finally {
+      restore();
+    }
+  });
+
+  test('production rejects CORS_ALLOW_LOCAL_NETWORK=true', () => {
+    const restore = withEnv({ ...PROD_BASE, CORS_ALLOW_LOCAL_NETWORK: 'true' });
+    try {
+      expect(() => parseConfig()).toThrow(/CORS_ALLOW_LOCAL_NETWORK/);
+    } finally {
+      restore();
+    }
+  });
+
+  test('production allows both disabled (default)', () => {
+    const restore = withEnv({ ...PROD_BASE, CORS_ALLOW_TUNNELING: undefined, CORS_ALLOW_LOCAL_NETWORK: undefined });
     try {
       expect(() => parseConfig()).not.toThrow();
     } finally {

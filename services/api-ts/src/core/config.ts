@@ -137,8 +137,10 @@ const envSchema = z.object({
   // CORS
   CORS_ORIGINS: csvList(['http://localhost:3003', 'http://localhost:3004']),
   CORS_CREDENTIALS: boolish(true),
-  CORS_ALLOW_LOCAL_NETWORK: boolish(true),
-  CORS_ALLOW_TUNNELING: boolish(true),
+  // P0-3: default to false — tunnel/local-network origins must be opted into
+  // explicitly per environment, never on by default (CSRF/credentialed-origin risk).
+  CORS_ALLOW_LOCAL_NETWORK: boolish(false),
+  CORS_ALLOW_TUNNELING: boolish(false),
   CORS_STRICT: boolish(false),
 
   // Logging
@@ -239,6 +241,21 @@ const envSchema = z.object({
         message: env.INVITE_TOKEN_SECRET
           ? 'Must not be the insecure dev default in production'
           : 'Required in production',
+      });
+    }
+    // P0-3: tunnel / local-network CORS origins must never be enabled in prod.
+    if (env.CORS_ALLOW_TUNNELING) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ['CORS_ALLOW_TUNNELING'],
+        message: 'Must be disabled in production (tunnel origins are not allowed)',
+      });
+    }
+    if (env.CORS_ALLOW_LOCAL_NETWORK) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ['CORS_ALLOW_LOCAL_NETWORK'],
+        message: 'Must be disabled in production (local-network origins are not allowed)',
       });
     }
   }
