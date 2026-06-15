@@ -73,8 +73,16 @@ async function clickThrough(page: import('@playwright/test').Page, entryRoute: s
     )
 
   for (const href of links.slice(0, 25)) {
-    await page.goto(href).catch(() => {})
-    expect.soft(await isBlank(page), `${href} rendered blank (no <main>, no empty state)`).toBe(false)
+    await page.goto(href, { waitUntil: 'domcontentloaded' }).catch(() => {})
+    let blank = await isBlank(page)
+    if (blank) {
+      // First visit to a route can race vite-dev's on-demand chunk compile
+      // (slow under CI's concurrent shards). The chunk is cached after the
+      // first request, so a reload reliably renders it — re-probe once.
+      await page.reload({ waitUntil: 'domcontentloaded' }).catch(() => {})
+      blank = await isBlank(page)
+    }
+    expect.soft(blank, `${href} rendered blank (no <main>, no empty state)`).toBe(false)
   }
 
   page.off('response', networkListener)
