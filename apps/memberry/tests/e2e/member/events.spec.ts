@@ -57,11 +57,14 @@ test('shows heading and stat cards with numeric values', async ({ page }) => {
     await page.goto('/my/events')
     // If events exist, cards should show more than just title
     const eventCard = page.locator('[class*="card"]').first()
-    const hasCard = await eventCard.isVisible({ timeout: 5000 }).catch(() => false)
+    const hasCard = await eventCard.isVisible({ timeout: 8000 }).catch(() => false)
     if (hasCard) {
-      // Card should contain date or location or status — not just title
-      const cardText = await eventCard.textContent() ?? ''
-      expect(cardText.length).toBeGreaterThan(10) // More than just a title
+      // Poll until the card hydrates real content — the first matched
+      // `[class*="card"]` can be an empty skeleton mid-load.
+      await expect(async () => {
+        const cardText = (await eventCard.textContent()) ?? ''
+        expect(cardText.length).toBeGreaterThan(10) // More than just a title
+      }).toPass({ timeout: 8000 })
     }
   })
 })

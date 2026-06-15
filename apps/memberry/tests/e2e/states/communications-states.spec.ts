@@ -132,6 +132,8 @@ test.describe('Communications — Interaction States', () => {
     expect(resp?.status()).toBe(200)
     expect(resp?.ok()).toBe(true)
 
+    await expect(page.getByRole('heading').first()).toBeVisible({ timeout: 10000 })
+    await page.waitForLoadState('networkidle').catch(() => {})
     await expectNoA11yViolations(page, {
       exclude: ['[data-radix-popper-content-wrapper]'],
     })

@@ -103,10 +103,12 @@ test.describe('Credits — Interaction States', () => {
 
   test('a11y: baseline accessibility check passes on credit progress', async ({ page }) => {
     await signIn(page, MEMBER_EMAIL, MEMBER_PASSWORD)
-    // Intentionally not capturing /persons/me here — waiting for hydration before
-    // the a11y scan surfaces a pre-existing color-contrast issue in .px-3 that the
-    // baseline test races past. Real-flow capture is covered by the other 4 tests.
+    // Let the dashboard settle before scanning — loading skeletons paint
+    // low-contrast shimmer that axe flags transiently until real data renders
+    // (the production preview build paints faster, exposing the race).
     await page.goto('/dashboard')
+    await expect(page.getByRole('heading').first()).toBeVisible({ timeout: 10000 })
+    await page.waitForLoadState('networkidle').catch(() => {})
     await expectNoA11yViolations(page, {
       exclude: ['[data-radix-popper-content-wrapper]'],
     })

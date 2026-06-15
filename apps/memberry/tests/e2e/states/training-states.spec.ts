@@ -92,6 +92,9 @@ test.describe('Training — Interaction States', () => {
   test('a11y: baseline accessibility check passes', async ({ page }) => {
     await signIn(page, SEED_MEMBER_EMAIL, TEST_PASSWORD)
     await page.goto(`/org/${ORG_ID}/training`)
+    // Settle before scanning — loading skeletons flag transient color-contrast.
+    await expect(page.getByRole('heading').first()).toBeVisible({ timeout: 10000 })
+    await page.waitForLoadState('networkidle').catch(() => {})
     await expectNoA11yViolations(page, {
       exclude: ['[data-radix-popper-content-wrapper]'],
     })
