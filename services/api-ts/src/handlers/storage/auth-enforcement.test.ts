@@ -8,7 +8,7 @@ import { makeCtx, stubRepo, restoreRepo } from '@/test-utils/make-ctx';
 import { fakeStoredFile } from '@/test-utils/factories';
 import { StorageFileRepository } from './repos/file.repo';
 import { completeFileUpload } from './completeFileUpload';
-import { ForbiddenError } from '@/core/errors';
+import { ForbiddenError, UnauthorizedError } from '@/core/errors';
 
 // ─── Shared Setup ───────────────────────────────────────
 
@@ -70,7 +70,7 @@ describe('P0-03: completeFileUpload ownership check', () => {
     expect(res.status).toBe(200);
   });
 
-  test('allows when no user context (unauthenticated — handled upstream)', async () => {
+  test('rejects unauthenticated request (fail-closed, not just middleware)', async () => {
     stubFileRepoWith(ownedFile);
     const ctx = makeCtx({
       user: null,
@@ -78,8 +78,7 @@ describe('P0-03: completeFileUpload ownership check', () => {
       _params: { file: 'file-1' },
       storage: mockStorage,
     });
-    // No user means ownership check is skipped (auth should be enforced by middleware)
-    const res = await completeFileUpload(ctx);
-    expect(res.status).toBe(200);
+    // P0-2: a falsy user must fail closed (401), not silently skip the ownership check.
+    await expect(completeFileUpload(ctx)).rejects.toBeInstanceOf(UnauthorizedError);
   });
 });

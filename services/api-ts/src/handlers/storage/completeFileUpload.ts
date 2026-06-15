@@ -20,9 +20,17 @@ import { StorageFileRepository } from './repos/file.repo';
 export async function completeFileUpload(
   ctx: BaseContext
 ): Promise<Response> {
+  // P0-2: Fail closed on unauthenticated requests. Previously a falsy user
+  // silently skipped the ownership check below; auth must not depend solely on
+  // middleware being present.
+  const user = ctx.get('user');
+  if (!user) {
+    throw new UnauthorizedError('Authentication required');
+  }
+
   // Get file ID from path parameters
   const fileId = ctx.req.param('file') as string;
-  
+
   // Get dependencies from context
   const storage = ctx.get('storage') as StorageProvider;
   const baseLogger = ctx.get('logger');
@@ -49,8 +57,7 @@ export async function completeFileUpload(
   }
 
   // P0-03: Ownership check — only the file owner or admin can complete upload
-  const user = ctx.get('user');
-  if (user && file.owner !== user.id && user.role !== 'admin') {
+  if (file.owner !== user.id && user.role !== 'admin') {
     throw new ForbiddenError('You can only complete your own uploads');
   }
 
