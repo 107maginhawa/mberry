@@ -15,11 +15,14 @@ test.describe('Journey: Registration → Membership → Payment', () => {
     })
 
     await test.step('new user reaches dashboard, onboarding, or stays on auth (email verification required)', async () => {
-      // After signup, user may land on dashboard, onboarding, or stay on auth
-      // (email verification may be required before redirect)
+      // After signup, the user may land on the dashboard, onboarding, an org
+      // home, the authenticated root, or an email-verification gate — the
+      // exact landing varies by env (CI requires email verification). The
+      // contract is simply: signUp navigated away from the sign-up form into
+      // a rendered app page.
       await page.waitForLoadState('networkidle')
-      const url = page.url()
-      expect(url).toMatch(/dashboard|onboarding|my|auth/)
+      expect(page.url()).not.toContain('/auth/sign-up')
+      await expect(page.locator('body')).toBeVisible()
     })
   })
 

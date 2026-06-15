@@ -96,10 +96,14 @@ test.describe('Dues — Interaction States', () => {
     // The API enforces access (dues queries 403 for a non-member of the org).
     // The frontend's job here is to fail gracefully: show an error/empty state
     // inside the app shell rather than leaking data or white-screening.
-    const hasError = await page.getByText(/not found|forbidden|error|no access|not a member|failed to load/i).first().isVisible().catch(() => false)
-    const redirected = !page.url().includes(fakeOrgId)
-    const gracefulShell = await page.locator('main').isVisible().catch(() => false)
-    expect(hasError || redirected || gracefulShell).toBeTruthy()
+    // isVisible() does not retry — poll the combined error/redirect/shell
+    // state until the SPA settles (slower under the CI preview build).
+    await expect(async () => {
+      const hasError = await page.getByText(/not found|forbidden|error|no access|not a member|failed to load/i).first().isVisible().catch(() => false)
+      const redirected = !page.url().includes(fakeOrgId)
+      const gracefulShell = await page.locator('main').isVisible().catch(() => false)
+      expect(hasError || redirected || gracefulShell).toBe(true)
+    }).toPass({ timeout: 10000 })
   })
 
   test('disabled: payment button disabled when dues already paid', async ({ page }) => {

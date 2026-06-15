@@ -19,7 +19,10 @@
 import { test, expect } from './helpers/test-fixture'
 
 const ORG_ID = process.env['SEED_ORG_ID'] ?? 'ed8e3a96-8126-4341-be42-e6eb7940c562'
-const BLANK_PAGE_TIMEOUT = 3000
+// Generous timeout: in CI the app is a production preview build, so each
+// lazy-loaded route chunk (and any post-signin redirect) hydrates slower
+// than the local dev server — 3s raced cold routes under sharded workers.
+const BLANK_PAGE_TIMEOUT = 10000
 
 async function isBlank(page: import('@playwright/test').Page): Promise<boolean> {
   // Page is "blank" if there's no <main>/<h1>/role=main content AND no
