@@ -55,12 +55,12 @@ test('shows heading and stat cards with numeric values', async ({ page }) => {
 
   test('[BR-27] event card shows registration status or capacity info', async ({ page }) => {
     await page.goto('/my/events')
-    // If events exist, cards should show more than just title
-    const eventCard = page.locator('[class*="card"]').first()
+    // If events exist, a card should show more than just a title. Scope to a
+    // card that actually has text — the first `[class*="card"]` can be an
+    // empty layout wrapper (no content).
+    const eventCard = page.locator('[class*="card"]').filter({ hasText: /\S/ }).first()
     const hasCard = await eventCard.isVisible({ timeout: 8000 }).catch(() => false)
     if (hasCard) {
-      // Poll until the card hydrates real content — the first matched
-      // `[class*="card"]` can be an empty skeleton mid-load.
       await expect(async () => {
         const cardText = (await eventCard.textContent()) ?? ''
         expect(cardText.length).toBeGreaterThan(10) // More than just a title
