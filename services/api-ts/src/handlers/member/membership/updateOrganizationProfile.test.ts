@@ -61,6 +61,60 @@ describe('updateOrganizationProfile — domain event', () => {
     expect(evt!.p.updatedFields).toEqual(['name', 'description']);
   });
 
+  test('rejects an SVG logo payload with a ValidationError', async () => {
+    stubRepo(OfficerTermRepository, {
+      findActiveByPersonAndOrg: async () => [{ positionTitle: 'President' }],
+    });
+
+    const ctx = makeCtx({
+      user: { id: 'user-1', role: 'user', twoFactorEnabled: true },
+      organizationId: 'org-1',
+      database: makeDb(),
+      _params: { organizationId: 'org-1' },
+      _body: { logoUrl: 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg"></svg>' },
+    });
+
+    const { updateOrganizationProfile } = await import('./updateOrganizationProfile');
+    const { ValidationError } = await import('@/core/errors');
+    await expect(updateOrganizationProfile(ctx)).rejects.toBeInstanceOf(ValidationError);
+  });
+
+  test('rejects a non-image logoMimeType with a ValidationError', async () => {
+    stubRepo(OfficerTermRepository, {
+      findActiveByPersonAndOrg: async () => [{ positionTitle: 'President' }],
+    });
+
+    const ctx = makeCtx({
+      user: { id: 'user-1', role: 'user', twoFactorEnabled: true },
+      organizationId: 'org-1',
+      database: makeDb(),
+      _params: { organizationId: 'org-1' },
+      _body: { logoMimeType: 'application/pdf' },
+    });
+
+    const { updateOrganizationProfile } = await import('./updateOrganizationProfile');
+    const { ValidationError } = await import('@/core/errors');
+    await expect(updateOrganizationProfile(ctx)).rejects.toBeInstanceOf(ValidationError);
+  });
+
+  test('rejects an svg logoMimeType with a ValidationError', async () => {
+    stubRepo(OfficerTermRepository, {
+      findActiveByPersonAndOrg: async () => [{ positionTitle: 'President' }],
+    });
+
+    const ctx = makeCtx({
+      user: { id: 'user-1', role: 'user', twoFactorEnabled: true },
+      organizationId: 'org-1',
+      database: makeDb(),
+      _params: { organizationId: 'org-1' },
+      _body: { logoMimeType: 'image/svg+xml' },
+    });
+
+    const { updateOrganizationProfile } = await import('./updateOrganizationProfile');
+    const { ValidationError } = await import('@/core/errors');
+    await expect(updateOrganizationProfile(ctx)).rejects.toBeInstanceOf(ValidationError);
+  });
+
   test('does not emit when caller lacks President position', async () => {
     stubRepo(OfficerTermRepository, {
       findActiveByPersonAndOrg: async () => [{ positionTitle: 'Member' }],

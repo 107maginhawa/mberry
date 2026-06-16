@@ -178,4 +178,59 @@ describe('[BR-17] checkIn', () => {
     expect(capturedData.checkedInBy).not.toBe('attacker-fake-id');
     expect(capturedData.createdBy).toBe(capturedData.checkedInBy);
   });
+
+  test('[M8-R6] throws BusinessLogicError when event is completed', async () => {
+    mocks = stubRepo(EventsRepository, {
+      get: async () => ({ ...fakeEvent, status: 'completed' }),
+      isCheckedIn: async () => false,
+      checkIn: async (data: any) => fakeAttendance,
+    });
+
+    const ctx = makeCtx({
+      _params: { id: 'evt-1' },
+      _body: { personId: 'person-1' },
+    });
+
+    await expect(checkIn(ctx)).rejects.toThrow('Check-in is not available after event completion.');
+  });
+
+  test('triggers credit pipeline job for credit-bearing event', async () => {
+    const triggered: any[] = [];
+    mocks = stubRepo(EventsRepository, {
+      get: async () => ({ ...fakeEvent, creditBearing: true, creditAmount: 5, cpdActivityType: 'lecture', organizationId: 'org-1' }),
+      isCheckedIn: async () => false,
+      checkIn: async (data: any) => ({ ...fakeAttendance, ...data }),
+    });
+
+    const jobs = { trigger: async (name: string, payload: any) => { triggered.push({ name, payload }); } };
+    const ctx = makeCtx({
+      _params: { id: 'evt-1' },
+      _body: { personId: 'person-1' },
+      jobs,
+    });
+
+    const response = await checkIn(ctx);
+    expect(response.status).toBe(201);
+    const attendanceJob = triggered.find((t) => t.name === 'attendance.confirmed');
+    expect(attendanceJob).toBeDefined();
+    expect(attendanceJob.payload.creditAmount).toBe(5);
+  });
+
+  test('swallows credit-pipeline job failure (non-blocking)', async () => {
+    mocks = stubRepo(EventsRepository, {
+      get: async () => ({ ...fakeEvent, creditBearing: true, creditAmount: 5, organizationId: 'org-1' }),
+      isCheckedIn: async () => false,
+      checkIn: async (data: any) => ({ ...fakeAttendance, ...data }),
+    });
+
+    const jobs = { trigger: async () => { throw new Error('boom'); } };
+    const ctx = makeCtx({
+      _params: { id: 'evt-1' },
+      _body: { personId: 'person-1' },
+      jobs,
+    });
+
+    const response = await checkIn(ctx);
+    expect(response.status).toBe(201);
+  });
 });

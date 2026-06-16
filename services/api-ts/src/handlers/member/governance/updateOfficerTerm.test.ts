@@ -2,7 +2,7 @@ import { describe, test, expect, afterEach, beforeEach } from 'bun:test';
 import { makeCtx, stubRepo, restoreRepo } from '@/test-utils/make-ctx';
 import { updateOfficerTerm } from './updateOfficerTerm';
 import { OfficerTermRepository } from '@/handlers/association:member/repos/governance.repo';
-import { NotFoundError } from '@/core/errors';
+import { NotFoundError, BusinessLogicError } from '@/core/errors';
 
 // ─── Fixtures ────────────────────────────────────────────
 
@@ -138,6 +138,69 @@ describe('updateOfficerTerm', () => {
     const ctx = makeCtx({ user: { id: 'u1', role: 'user' }, organizationId: null });
     const response = await updateOfficerTerm(ctx);
     expect(response.status).toBe(403);
+  });
+
+  test('throws BusinessLogicError on an invalid status transition', async () => {
+    // active term -> 'upcoming' is not a valid TERM transition
+    mocks = stubRepo(OfficerTermRepository, {
+      findById: async () => existingTerm,
+      update: async (_id: string, data: any) => ({ ...existingTerm, ...data }),
+      findActiveByPersonAndOrg: async () => [{ positionTitle: 'President' }],
+    });
+
+    const ctx = makeCtx({
+      organizationId: 'org-1',
+      _params: { termId: 'term-1' },
+      _body: { status: 'upcoming' },
+    });
+
+    await expect(updateOfficerTerm(ctx)).rejects.toBeInstanceOf(BusinessLogicError);
+  });
+
+  test('revokes affected user sessions when auth is present', async () => {
+    let revokedUserId: string | null = null;
+    mocks = stubRepo(OfficerTermRepository, {
+      findById: async () => existingTerm,
+      update: async (_id: string, data: any) => ({ ...existingTerm, ...data }),
+      findActiveByPersonAndOrg: async () => [{ positionTitle: 'President' }],
+    });
+
+    const auth = {
+      api: { revokeUserSessions: async ({ body }: any) => { revokedUserId = body.userId; } },
+    };
+
+    const ctx = makeCtx({
+      organizationId: 'org-1',
+      auth,
+      _params: { termId: 'term-1' },
+      _body: { notes: 'reassigned' },
+    });
+
+    const response = await updateOfficerTerm(ctx);
+    expect(response.body.id).toBe('term-1');
+    expect(revokedUserId).toBe('person-1');
+  });
+
+  test('still returns the updated record when session revocation throws', async () => {
+    mocks = stubRepo(OfficerTermRepository, {
+      findById: async () => existingTerm,
+      update: async (_id: string, data: any) => ({ ...existingTerm, ...data }),
+      findActiveByPersonAndOrg: async () => [{ positionTitle: 'President' }],
+    });
+
+    const auth = {
+      api: { revokeUserSessions: async () => { throw new Error('auth down'); } },
+    };
+
+    const ctx = makeCtx({
+      organizationId: 'org-1',
+      auth,
+      _params: { termId: 'term-1' },
+      _body: { notes: 'reassigned' },
+    });
+
+    const response = await updateOfficerTerm(ctx);
+    expect(response.body.id).toBe('term-1');
   });
 
   test('audit action fires after update without crashing', async () => {

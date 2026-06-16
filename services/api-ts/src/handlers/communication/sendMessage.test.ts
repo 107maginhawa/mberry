@@ -97,4 +97,72 @@ describe('sendMessage', () => {
     const res = await sendMessage(ctx as any);
     expect(res.status).toBe(200);
   });
+
+  test('sends message with recipients, none suppressed (db returns empty)', async () => {
+    mocks = stubRepo(MessageRepository, {
+      findById: async () => ({
+        ...DRAFT_MSG,
+        recipients: [{ personId: 'p1' }, { personId: 'p2' }],
+      }),
+      update: async (_id: string, data: any) => ({ ...DRAFT_MSG, ...data }),
+    });
+    // default makeMockDb select chain resolves to [] -> no suppressed recipients
+    const ctx = makeCtx({ organizationId: 'org-1', _params: { messageId: 'msg-1' } });
+    const res = await sendMessage(ctx as any);
+    expect(res.status).toBe(200);
+  });
+
+  test('filters suppressed recipients but still sends when some remain', async () => {
+    const updateCalls: any[] = [];
+    mocks = stubRepo(MessageRepository, {
+      findById: async () => ({
+        ...DRAFT_MSG,
+        recipients: [{ personId: 'p1' }, { personId: 'p2' }],
+      }),
+      update: async (_id: string, data: any) => {
+        updateCalls.push(data);
+        return { ...DRAFT_MSG, ...data };
+      },
+    });
+    // db.select(...).from(...).where(...) resolves to one suppressed personId
+    const ctx = makeCtx({
+      organizationId: 'org-1',
+      _params: { messageId: 'msg-1' },
+      database: {
+        select: () => ({
+          from: () => ({
+            where: async () => [{ personId: 'p1' }],
+          }),
+        }),
+      },
+    });
+    const res = await sendMessage(ctx as any);
+    expect(res.status).toBe(200);
+    // first update should carry filtered recipients (only p2 remains)
+    const filterUpdate = updateCalls.find((c) => Array.isArray(c.recipients));
+    expect(filterUpdate).toBeDefined();
+    expect(filterUpdate.recipients).toEqual([{ personId: 'p2' }]);
+  });
+
+  test('throws when all recipients are suppressed', async () => {
+    mocks = stubRepo(MessageRepository, {
+      findById: async () => ({
+        ...DRAFT_MSG,
+        recipients: [{ personId: 'p1' }, { personId: 'p2' }],
+      }),
+      update: async (_id: string, data: any) => ({ ...DRAFT_MSG, ...data }),
+    });
+    const ctx = makeCtx({
+      organizationId: 'org-1',
+      _params: { messageId: 'msg-1' },
+      database: {
+        select: () => ({
+          from: () => ({
+            where: async () => [{ personId: 'p1' }, { personId: 'p2' }],
+          }),
+        }),
+      },
+    });
+    await expect(sendMessage(ctx as any)).rejects.toThrow('All recipients are deceased, suspended, or removed');
+  });
 });
