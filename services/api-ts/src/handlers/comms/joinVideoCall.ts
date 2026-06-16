@@ -1,4 +1,3 @@
-import { createHmac } from 'crypto';
 import type { ValidatedContext } from '@/types/app';
 import type { JoinVideoCallBody, JoinVideoCallParams } from '@/generated/openapi/validators';
 import type { DatabaseInstance } from '@/core/database';
@@ -21,6 +20,7 @@ import {
   VIDEO_CALL_MAX_PARTICIPANTS,
   countActiveCallParticipants,
 } from './repos/comms.schema';
+import { generateCallToken } from './utils/call-token';
 
 /**
  * joinVideoCall
@@ -145,7 +145,9 @@ export async function joinVideoCall(
     finalMessage = await messageRepo.updateVideoCallData(activeCall.id, {
       status: 'active',
       roomUrl: generateWebRTCRoomUrl(params.room, config.auth.baseUrl),
-      token: generateWebRTCToken(user.id, activeCall.id, config.auth.secret)
+      // P0: signing secret comes from the validated accessor (no dev-fallback);
+      // fails closed in prod if absent. Token is bound to { callId, personId }.
+      token: generateCallToken({ callId: activeCall.id, personId: user.id })
     });
   }
 
@@ -201,7 +203,7 @@ export async function joinVideoCall(
   // Return WebRTC connection info
   const response: VideoCallJoinResponse = {
     roomUrl: finalMessage.videoCallData?.roomUrl || generateWebRTCRoomUrl(params.room, config.auth.baseUrl),
-    token: finalMessage.videoCallData?.token || generateWebRTCToken(user.id, activeCall.id, config.auth.secret),
+    token: finalMessage.videoCallData?.token || generateCallToken({ callId: activeCall.id, personId: user.id }),
     callStatus: finalMessage.videoCallData?.status || 'active',
     participants: finalMessage.videoCallData?.participants || []
   };
@@ -219,20 +221,4 @@ function generateWebRTCRoomUrl(roomId: string, baseUrl: string): string {
   const urlWithoutProtocol = baseUrl.replace(/^https?:\/\//, '');
 
   return `${wsProtocol}${urlWithoutProtocol}/comms/chat-rooms/${roomId}/video-call/signal`;
-}
-
-/**
- * Generate HMAC-signed authentication token for WebRTC signaling.
- *
- * EF-M07: Replaced hardcoded sentinel with a cryptographically signed token
- * that binds the user to the specific call. The WebSocket signaling server
- * can verify the token by recomputing the HMAC with the same secret.
- *
- * Token format: base64url(userId:callMessageId:timestamp).hmac-sha256-hex
- */
-function generateWebRTCToken(userId: string, callMessageId: string, secret?: string): string {
-  const signingKey = secret || process.env['WEBRTC_TOKEN_SECRET'] || process.env['AUTH_SECRET'] || 'dev-fallback';
-  const payload = `${userId}:${callMessageId}:${Date.now()}`;
-  const signature = createHmac('sha256', signingKey).update(payload).digest('hex');
-  return `${Buffer.from(payload).toString('base64url')}.${signature}`;
 }

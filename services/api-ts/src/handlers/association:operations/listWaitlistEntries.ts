@@ -1,6 +1,7 @@
 import type { ValidatedContext } from '@/types/app';
 import type { DatabaseInstance } from '@/core/database';
 import type { ListWaitlistEntriesQuery, ListWaitlistEntriesParams } from '@/generated/openapi/validators';
+import { clampPageSize } from '@/core/pagination';
 import { WaitlistEntryRepository } from './repos/events.repo';
 
 /**
@@ -24,8 +25,8 @@ export async function listWaitlistEntries(
   const logger = ctx.get('logger');
   const repo = new WaitlistEntryRepository(db, logger);
 
-  const limit = Number(query.limit) || 20;
-  const offset = Number(query.offset) || 0;
+  const limit = clampPageSize(query.limit === undefined ? 20 : Number(query.limit));
+  const offset = Math.max(0, Number(query.offset) || 0);
 
   const filters: Record<string, unknown> = { eventId: params.eventId };
 

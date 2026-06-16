@@ -2,6 +2,7 @@ import type { ValidatedContext } from '@/types/app';
 import type { DatabaseInstance } from '@/core/database';
 import type { ListMyCustomEventsQuery } from '@/generated/openapi/validators';
 import { events, eventRegistrations } from './repos/events.schema';
+import { clampPageSize } from '@/core/pagination';
 import { eq, desc } from 'drizzle-orm';
 
 /**
@@ -24,8 +25,8 @@ export async function listMyCustomEvents(
   const userId = session.user.id;
   const query = ctx.req.valid('query');
   const db = ctx.get('database') as DatabaseInstance;
-  const limit = Number(query.limit) || 20;
-  const offset = Number(query.offset) || 0;
+  const limit = clampPageSize(query.limit === undefined ? 20 : Number(query.limit));
+  const offset = Math.max(0, Number(query.offset) || 0);
 
   const rows = await db
     .select({

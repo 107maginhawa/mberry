@@ -11,10 +11,15 @@
  * No stripe-mock Docker container needed — Stripe SDK handles signing locally.
  */
 
-import { describe, test, expect, mock, beforeEach } from 'bun:test';
+import { describe, test, expect, mock, beforeEach, afterAll } from 'bun:test';
 import Stripe from 'stripe';
 import { Hono } from 'hono';
+import * as _realWebhookProcessor from './jobs/webhookRetryProcessor';
 import { stripeWebhookHandler } from './stripeWebhook';
+
+// Snapshot real exports before mocking so the global module-mock is restored
+// after this file (prevents leak into webhookRetryProcessor.test.ts).
+const realWebhookProcessor = { ..._realWebhookProcessor };
 
 // ─── Test Secrets ───────────────────────────────────────
 // These are NOT real keys — test-only values for local signature generation.
@@ -35,6 +40,10 @@ mock.module('./jobs/webhookRetryProcessor', () => ({
   MAX_RETRIES: 4,
   BACKOFF_SCHEDULE_MS: [60000, 300000, 900000, 3600000],
 }));
+
+afterAll(() => {
+  mock.module('./jobs/webhookRetryProcessor', () => realWebhookProcessor);
+});
 
 // ─── Real BillingService using test config ───────────────
 import { BillingService } from '@/core/billing';

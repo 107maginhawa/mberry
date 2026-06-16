@@ -338,6 +338,182 @@ describe('EventsRepository.register', () => {
 });
 
 // ---------------------------------------------------------------------------
+// EventsRepository.registerAtomic — P0 capacity/duplicate race fix
+// ---------------------------------------------------------------------------
+
+// Builds a db whose .transaction(fn) hands fn a tx that, in call order, serves:
+//   1. the event-row FOR UPDATE lock SELECT  → [{ id: 'evt-1' }]
+//   2. the existing (event, person) row SELECT → [existingRow] or []
+//   3. the confirmed-count SELECT             → [{ count: confirmedCount }]
+// and resolves INSERT/UPDATE returning() to the supplied row (or throws on insert).
+function makeTxDb(opts: {
+  confirmedCount?: number;
+  existingRow?: any;
+  insertRow?: any;
+  updateRow?: any;
+  insertThrow?: () => never;
+}) {
+  const insertRow = opts.insertRow ?? makeRegistration();
+  const updateRow = opts.updateRow ?? makeRegistration();
+  let selectCall = 0;
+  const tx: any = {
+    select: (_fields?: any) => {
+      const call = selectCall++;
+      // 0 = FOR UPDATE lock, 1 = existing-row lookup, 2 = confirmed count
+      const rows =
+        call === 0
+          ? [{ id: 'evt-1' }]
+          : call === 1
+            ? (opts.existingRow ? [opts.existingRow] : [])
+            : [{ count: opts.confirmedCount ?? 0 }];
+      const chain: any = {
+        from: () => chain,
+        where: () => chain,
+        for: (_mode: string) => chain, // FOR UPDATE lock
+        limit: (_n: number) => Promise.resolve(rows),
+        then: (resolve: any, reject?: any) => Promise.resolve(rows).then(resolve, reject),
+      };
+      return chain;
+    },
+    insert: (_table: any) => ({
+      values: (data: any) => ({
+        returning: () => {
+          if (opts.insertThrow) opts.insertThrow();
+          return Promise.resolve([{ ...insertRow, ...data }]);
+        },
+      }),
+    }),
+    update: (_table: any) => ({
+      set: (data: any) => ({
+        where: () => ({
+          returning: () => Promise.resolve([{ ...updateRow, ...data }]),
+        }),
+      }),
+    }),
+  };
+  return { transaction: async (fn: any) => fn(tx) };
+}
+
+describe('EventsRepository.registerAtomic', () => {
+  test('confirms (outcome=created) when no existing row and count < capacity', async () => {
+    const db = makeTxDb({ confirmedCount: 5 });
+    const repo = new EventsRepository(db as any);
+    const result = await repo.registerAtomic({
+      eventId: 'evt-1', personId: 'p-1', organizationId: 'org-1',
+      capacity: 10, createdBy: 'p-1', updatedBy: 'p-1',
+    });
+    expect(result.status).toBe('confirmed');
+    expect(result.outcome).toBe('created');
+  });
+
+  test('[P0] waitlists when confirmed count >= capacity (no overflow)', async () => {
+    const db = makeTxDb({ confirmedCount: 10 });
+    const repo = new EventsRepository(db as any);
+    const result = await repo.registerAtomic({
+      eventId: 'evt-1', personId: 'p-1', organizationId: 'org-1',
+      capacity: 10, createdBy: 'p-1', updatedBy: 'p-1',
+    });
+    expect(result.status).toBe('waitlisted');
+    expect(result.outcome).toBe('created');
+  });
+
+  test('confirms regardless of count when capacity is null (unlimited)', async () => {
+    const db = makeTxDb({ confirmedCount: 9999 });
+    const repo = new EventsRepository(db as any);
+    const result = await repo.registerAtomic({
+      eventId: 'evt-1', personId: 'p-1', organizationId: 'org-1',
+      capacity: null, createdBy: 'p-1', updatedBy: 'p-1',
+    });
+    expect(result.status).toBe('confirmed');
+    expect(result.outcome).toBe('created');
+  });
+
+  test('[P0] propagates 23505 from unique-index violation (concurrent double insert)', async () => {
+    const db = makeTxDb({
+      confirmedCount: 0,
+      insertThrow: () => {
+        const err = new Error('duplicate key value violates unique constraint "uq_event_reg_active"') as Error & { code: string };
+        err.code = '23505';
+        throw err;
+      },
+    });
+    const repo = new EventsRepository(db as any);
+    await expect(
+      repo.registerAtomic({
+        eventId: 'evt-1', personId: 'p-1', organizationId: 'org-1',
+        capacity: 10, createdBy: 'p-1', updatedBy: 'p-1',
+      }),
+    ).rejects.toMatchObject({ code: '23505' });
+  });
+
+  // ─── P1 single-row transition semantics ───────────────────────────────
+
+  test('[P1] existing noShow row → re-activates SAME row to confirmed (capacity free)', async () => {
+    const existing = makeRegistration({ id: 'reg-ns', status: 'noShow' });
+    const db = makeTxDb({ existingRow: existing, confirmedCount: 2, updateRow: existing });
+    const repo = new EventsRepository(db as any);
+    const result = await repo.registerAtomic({
+      eventId: 'evt-1', personId: 'person-1', organizationId: 'org-1',
+      capacity: 10, createdBy: 'person-1', updatedBy: 'person-1',
+    });
+    expect(result.outcome).toBe('reactivated');
+    expect(result.status).toBe('confirmed');
+    expect(result.id).toBe('reg-ns'); // same row, not a new insert
+  });
+
+  test('[P1] existing cancelled row → re-activates SAME row to confirmed', async () => {
+    const existing = makeRegistration({ id: 'reg-c', status: 'cancelled', cancelledAt: new Date() });
+    const db = makeTxDb({ existingRow: existing, confirmedCount: 0, updateRow: existing });
+    const repo = new EventsRepository(db as any);
+    const result = await repo.registerAtomic({
+      eventId: 'evt-1', personId: 'person-1', organizationId: 'org-1',
+      capacity: 10, createdBy: 'person-1', updatedBy: 'person-1',
+    });
+    expect(result.outcome).toBe('reactivated');
+    expect(result.status).toBe('confirmed');
+    expect(result.id).toBe('reg-c');
+  });
+
+  test('[P1] re-activating a terminal row at capacity → waitlisted', async () => {
+    const existing = makeRegistration({ id: 'reg-ns', status: 'noShow' });
+    const db = makeTxDb({ existingRow: existing, confirmedCount: 10, updateRow: existing });
+    const repo = new EventsRepository(db as any);
+    const result = await repo.registerAtomic({
+      eventId: 'evt-1', personId: 'person-1', organizationId: 'org-1',
+      capacity: 10, createdBy: 'person-1', updatedBy: 'person-1',
+    });
+    expect(result.outcome).toBe('reactivated');
+    expect(result.status).toBe('waitlisted');
+  });
+
+  test('[P1] existing confirmed row → idempotent, returns it unchanged (no insert)', async () => {
+    const existing = makeRegistration({ id: 'reg-ok', status: 'confirmed' });
+    const db = makeTxDb({ existingRow: existing });
+    const repo = new EventsRepository(db as any);
+    const result = await repo.registerAtomic({
+      eventId: 'evt-1', personId: 'person-1', organizationId: 'org-1',
+      capacity: 10, createdBy: 'person-1', updatedBy: 'person-1',
+    });
+    expect(result.outcome).toBe('idempotent');
+    expect(result.status).toBe('confirmed');
+    expect(result.id).toBe('reg-ok');
+  });
+
+  test('[P1] existing waitlisted row → idempotent, returns it unchanged (no 23505)', async () => {
+    const existing = makeRegistration({ id: 'reg-wl', status: 'waitlisted' });
+    const db = makeTxDb({ existingRow: existing });
+    const repo = new EventsRepository(db as any);
+    const result = await repo.registerAtomic({
+      eventId: 'evt-1', personId: 'person-1', organizationId: 'org-1',
+      capacity: 10, createdBy: 'person-1', updatedBy: 'person-1',
+    });
+    expect(result.outcome).toBe('idempotent');
+    expect(result.status).toBe('waitlisted');
+    expect(result.id).toBe('reg-wl');
+  });
+});
+
+// ---------------------------------------------------------------------------
 // EventsRepository.checkIn
 // ---------------------------------------------------------------------------
 

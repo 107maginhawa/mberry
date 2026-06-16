@@ -1,7 +1,8 @@
 // Acceptance Criteria: [AC-M10-005]
-import { describe, test, expect, mock } from 'bun:test';
+import { describe, test, expect, mock, spyOn } from 'bun:test';
 
 import { adjustCreditEntry } from './adjustCreditEntry';
+import { domainEvents } from '@/core/domain-events';
 
 const OFFICER_TERM = { positionTitle: 'President' };
 const ORG_CONFIG = { cycleStartMonth: 1, cycleLengthYears: 3, requiredCredits: 60, sdlCapPercent: 40 };
@@ -221,19 +222,32 @@ describe('adjustCreditEntry [AC-M10-005]', () => {
     expect(insertCalls[0].attestation.adjustmentReason).toBe('Conference attendance verified via signed sheet');
   });
 
-  test('success: refreshes materialized view (non-fatal if missing)', async () => {
+  test('defers compliance matview refresh off the request path (emits, does not await db.execute)', async () => {
     const { db, executeSpy } = buildMockDb();
-    const ctx = createMockCtx({ database: db, body: validBody });
-    const res = await adjustCreditEntry(ctx);
-    expect(res.status).toBe(201);
-    expect(executeSpy).toHaveBeenCalledTimes(1);
+    const emitSpy = spyOn(domainEvents, 'emit').mockResolvedValue(undefined);
+    try {
+      const ctx = createMockCtx({ database: db, body: validBody });
+      const res = await adjustCreditEntry(ctx);
+      expect(res.status).toBe(201);
+      // Refresh is no longer run inline on the request path.
+      expect(executeSpy).not.toHaveBeenCalled();
+      // It is dispatched as a fire-and-forget domain event instead.
+      expect(emitSpy).toHaveBeenCalledWith('compliance.recompute', expect.objectContaining({ reason: 'adjustment' }));
+    } finally {
+      emitSpy.mockRestore();
+    }
   });
 
-  test('success: tolerates view refresh failure', async () => {
-    const { db } = buildMockDb({ executeThrow: true });
-    const ctx = createMockCtx({ database: db, body: validBody });
-    const res = await adjustCreditEntry(ctx);
-    expect(res.status).toBe(201);
+  test('refresh dispatch failure does not fail the request', async () => {
+    const { db } = buildMockDb();
+    const emitSpy = spyOn(domainEvents, 'emit').mockRejectedValue(new Error('bus down'));
+    try {
+      const ctx = createMockCtx({ database: db, body: validBody });
+      const res = await adjustCreditEntry(ctx);
+      expect(res.status).toBe(201);
+    } finally {
+      emitSpy.mockRestore();
+    }
   });
 
   test('throws ConflictError on duplicate idempotency key', async () => {

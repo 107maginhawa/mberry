@@ -13,6 +13,8 @@ import { ChatRoomRepository } from './repos/chatRoom.repo';
 import { ChatMessageRepository } from './repos/chatMessage.repo';
 import { ChatRoomMemberRepository } from './repos/chatRoomMember.repo';
 import { OfficerTermRepository } from '@/handlers/association:member/repos/governance.repo';
+import { MembershipRepository } from '@/handlers/association:member/repos/membership.repo';
+import { generateCallToken } from './utils/call-token';
 import type { ChatRoom, ChatMessage } from './repos/comms.schema';
 
 // Capture clean prototypes at module load, then restore after every test so the
@@ -23,11 +25,13 @@ ensurePristine(ChatRoomRepository);
 ensurePristine(ChatMessageRepository);
 ensurePristine(ChatRoomMemberRepository);
 ensurePristine(OfficerTermRepository);
+ensurePristine(MembershipRepository);
 afterEach(() => {
   restoreRepo(ChatRoomRepository);
   restoreRepo(ChatMessageRepository);
   restoreRepo(ChatRoomMemberRepository);
   restoreRepo(OfficerTermRepository);
+  restoreRepo(MembershipRepository);
 });
 
 // Mock-Classification: APPROPRIATE — WebSocket/WebRTC real-time service boundary
@@ -268,6 +272,12 @@ describe('ws.chat-room onMessage — ping', () => {
 // ---------------------------------------------------------------------------
 
 describe('ws.chat-room onMessage — chat.message', () => {
+  beforeEach(() => {
+    // Default per-frame re-check stubs: org-membership present, join table empty.
+    ChatRoomMemberRepository.prototype.isMember = mock(async () => false) as any;
+    MembershipRepository.prototype.findByPersonAndOrg = mock(async () => ({ id: 'm-1' })) as any;
+  });
+
   test('persists message and broadcasts to channel', async () => {
     const savedMsg = makeMessage();
     ChatMessageRepository.prototype.createTextMessage = mock(async () => savedMsg) as any;
@@ -320,11 +330,103 @@ describe('ws.chat-room onMessage — chat.message', () => {
 });
 
 // ---------------------------------------------------------------------------
+// Tests: onMessage — per-frame org-isolation + revocation re-check (HOLE 3)
+// ---------------------------------------------------------------------------
+
+describe('ws.chat-room onMessage — per-frame authorization (HOLE 3)', () => {
+  test('rejects chat.message from a member revoked mid-session (not in participants nor join table)', async () => {
+    const createTextMessage = mock(async () => makeMessage());
+    ChatMessageRepository.prototype.createTextMessage = createTextMessage as any;
+    // Room no longer lists user-99; join table also empty → revoked.
+    ChatRoomRepository.prototype.findOneById = mock(async () =>
+      makeRoom({ participants: ['user-1', 'user-2'] })
+    ) as any;
+    ChatRoomMemberRepository.prototype.isMember = mock(async () => false) as any;
+    MembershipRepository.prototype.findByPersonAndOrg = mock(async () => ({ id: 'm-1' })) as any;
+
+    const wsService = makeWsService();
+    const ws = makeWs();
+    const ctx = makeCtx({ wsService, userId: 'user-99' });
+
+    await wsHandler.onMessage(ctx, ws as any, {
+      type: 'chat.message',
+      data: { text: 'still here?' },
+    });
+
+    expect(createTextMessage).not.toHaveBeenCalled();
+    const broadcast = (wsService.publishToChannel as ReturnType<typeof mock>).mock.calls
+      .find((c: any[]) => c[1] === 'chat.message');
+    expect(broadcast).toBeUndefined();
+    const err = ws._sent.map((m) => JSON.parse(m)).find((f: any) => f.event === 'error');
+    expect(err).toBeDefined();
+  });
+
+  test('rejects chat.message when sender does not belong to the room org (cross-org)', async () => {
+    const createTextMessage = mock(async () => makeMessage());
+    ChatMessageRepository.prototype.createTextMessage = createTextMessage as any;
+    ChatRoomRepository.prototype.findOneById = mock(async () =>
+      makeRoom({ participants: ['user-1', 'user-2'], organizationId: 'org-1' } as any)
+    ) as any;
+    ChatRoomMemberRepository.prototype.isMember = mock(async () => false) as any;
+    // No membership in the room's org → cross-org write rejected.
+    MembershipRepository.prototype.findByPersonAndOrg = mock(async () => null) as any;
+
+    const wsService = makeWsService();
+    const ws = makeWs();
+    const ctx = makeCtx({ wsService, userId: 'user-1' });
+
+    await wsHandler.onMessage(ctx, ws as any, {
+      type: 'chat.message',
+      data: { text: 'cross-org probe' },
+    });
+
+    expect(createTextMessage).not.toHaveBeenCalled();
+    const broadcast = (wsService.publishToChannel as ReturnType<typeof mock>).mock.calls
+      .find((c: any[]) => c[1] === 'chat.message');
+    expect(broadcast).toBeUndefined();
+    const err = ws._sent.map((m) => JSON.parse(m)).find((f: any) => f.event === 'error');
+    expect(err).toBeDefined();
+    expect(err.payload.message.toLowerCase()).toContain('organization');
+  });
+
+  test('allows chat.message from an active same-org member (legitimate flow still works)', async () => {
+    const savedMsg = makeMessage();
+    const createTextMessage = mock(async () => savedMsg);
+    ChatMessageRepository.prototype.createTextMessage = createTextMessage as any;
+    ChatRoomRepository.prototype.findOneById = mock(async () =>
+      makeRoom({ participants: ['user-1', 'user-2'], organizationId: 'org-1' } as any)
+    ) as any;
+    ChatRoomRepository.prototype.updateLastMessage = mock(async () => makeRoom()) as any;
+    ChatRoomMemberRepository.prototype.isMember = mock(async () => false) as any;
+    MembershipRepository.prototype.findByPersonAndOrg = mock(async () => ({ id: 'm-1' })) as any;
+
+    const wsService = makeWsService();
+    const ws = makeWs();
+    const ctx = makeCtx({ wsService, userId: 'user-1' });
+
+    await wsHandler.onMessage(ctx, ws as any, {
+      type: 'chat.message',
+      data: { text: 'hello team' },
+    });
+
+    expect(createTextMessage).toHaveBeenCalledTimes(1);
+    const broadcast = (wsService.publishToChannel as ReturnType<typeof mock>).mock.calls
+      .find((c: any[]) => c[1] === 'chat.message');
+    expect(broadcast).toBeDefined();
+  });
+});
+
+// ---------------------------------------------------------------------------
 // Tests: onMessage — #announcements officer-post-only (PD-1 decision-3, Step 41)
 // Mirrors the REST sendChatMessage gate on the WS write path.
 // ---------------------------------------------------------------------------
 
 describe('ws.chat-room onMessage — announcements officer-post gate (PD-1 d3)', () => {
+  beforeEach(() => {
+    ChatRoomMemberRepository.prototype.isMember = mock(async () => false) as any;
+    MembershipRepository.prototype.findByPersonAndOrg = mock(async () => ({ id: 'm-1' })) as any;
+  });
+
   test('rejects non-officer chat.message to #announcements without persisting', async () => {
     const createTextMessage = mock(async () => makeMessage());
     ChatMessageRepository.prototype.createTextMessage = createTextMessage as any;
@@ -383,6 +485,14 @@ describe('ws.chat-room onMessage — announcements officer-post gate (PD-1 d3)',
 // ---------------------------------------------------------------------------
 
 describe('ws.chat-room onMessage — chat.typing', () => {
+  beforeEach(() => {
+    // chat.typing now runs through authorizeWriteFrame (HOLE-3 fix): the room
+    // must resolve and the sender must be an active member of its org.
+    ChatRoomRepository.prototype.findOneById = mock(async () => makeRoom()) as any;
+    ChatRoomMemberRepository.prototype.isMember = mock(async () => false) as any;
+    MembershipRepository.prototype.findByPersonAndOrg = mock(async () => ({ id: 'm-1' })) as any;
+  });
+
   test('relays typing indicator with sender id and isTyping flag', async () => {
     const wsService = makeWsService();
     const ws = makeWs();
@@ -407,14 +517,25 @@ describe('ws.chat-room onMessage — chat.typing', () => {
 describe('ws.chat-room onMessage — video signaling', () => {
   const signalTypes = ['video.offer', 'video.answer', 'video.ice-candidate'] as const;
 
+  beforeEach(() => {
+    // Default: room exists with user-1 a participant, an active call is present.
+    ChatRoomRepository.prototype.findOneById = mock(async () => makeRoom()) as any;
+    ChatRoomMemberRepository.prototype.isMember = mock(async () => false) as any;
+    ChatMessageRepository.prototype.findActiveVideoCall = mock(async () =>
+      makeMessage({ id: 'call-1', messageType: 'video_call' })
+    ) as any;
+  });
+
+  // HOLE 2: a VALID call token (bound to this call + sender) lets signaling relay.
   for (const signalType of signalTypes) {
-    test(`relays ${signalType} with sender excluded`, async () => {
+    test(`relays ${signalType} with a valid call token, sender excluded`, async () => {
       const wsService = makeWsService();
       const ws = makeWs();
       const ctx = makeCtx({ wsService, userId: 'user-1' });
       const data = { sdp: 'test' };
+      const token = generateCallToken({ callId: 'call-1', personId: 'user-1' });
 
-      await wsHandler.onMessage(ctx, ws as any, { type: signalType, data });
+      await wsHandler.onMessage(ctx, ws as any, { type: signalType, token, data });
 
       const calls = (wsService.publishToChannel as ReturnType<typeof mock>).mock.calls;
       const sigCall = calls.find((c: any[]) => c[1] === signalType);
@@ -423,6 +544,94 @@ describe('ws.chat-room onMessage — video signaling', () => {
       expect(sigCall![3]).toBe(ws); // Sender excluded
     });
   }
+
+  // HOLE 2: a room participant WITHOUT a valid call token cannot relay signaling
+  // (room membership alone is insufficient — would otherwise allow hijack).
+  test('rejects video.offer with NO token even from a room participant (HOLE 2)', async () => {
+    const wsService = makeWsService();
+    const ws = makeWs();
+    const ctx = makeCtx({ wsService, userId: 'user-1' });
+
+    await wsHandler.onMessage(ctx, ws as any, { type: 'video.offer', data: { sdp: 'x' } });
+
+    const relayed = (wsService.publishToChannel as ReturnType<typeof mock>).mock.calls
+      .find((c: any[]) => c[1] === 'video.offer');
+    expect(relayed).toBeUndefined();
+    const err = ws._sent.map((m) => JSON.parse(m)).find((f: any) => f.event === 'error');
+    expect(err).toBeDefined();
+    expect(err.payload.message.toLowerCase()).toContain('token');
+  });
+
+  // HOLE 1/2: a forged token is rejected on the relay path.
+  test('rejects video.offer with a forged token (HOLE 1)', async () => {
+    const wsService = makeWsService();
+    const ws = makeWs();
+    const ctx = makeCtx({ wsService, userId: 'user-1' });
+
+    await wsHandler.onMessage(ctx, ws as any, {
+      type: 'video.offer',
+      token: 'forged.deadbeef',
+      data: { sdp: 'x' },
+    });
+
+    const relayed = (wsService.publishToChannel as ReturnType<typeof mock>).mock.calls
+      .find((c: any[]) => c[1] === 'video.offer');
+    expect(relayed).toBeUndefined();
+  });
+
+  // HOLE 2: a token minted for a DIFFERENT call is rejected (no cross-call hijack).
+  test('rejects a token bound to a foreign call (HOLE 2)', async () => {
+    const wsService = makeWsService();
+    const ws = makeWs();
+    const ctx = makeCtx({ wsService, userId: 'user-1' });
+    const foreignToken = generateCallToken({ callId: 'some-other-call', personId: 'user-1' });
+
+    await wsHandler.onMessage(ctx, ws as any, {
+      type: 'video.offer',
+      token: foreignToken,
+      data: { sdp: 'x' },
+    });
+
+    const relayed = (wsService.publishToChannel as ReturnType<typeof mock>).mock.calls
+      .find((c: any[]) => c[1] === 'video.offer');
+    expect(relayed).toBeUndefined();
+  });
+
+  // HOLE 1: an expired token is rejected.
+  test('rejects an expired call token (HOLE 1)', async () => {
+    const wsService = makeWsService();
+    const ws = makeWs();
+    const ctx = makeCtx({ wsService, userId: 'user-1' });
+    const expired = generateCallToken({ callId: 'call-1', personId: 'user-1', ttlSeconds: -1 });
+
+    await wsHandler.onMessage(ctx, ws as any, {
+      type: 'video.offer',
+      token: expired,
+      data: { sdp: 'x' },
+    });
+
+    const relayed = (wsService.publishToChannel as ReturnType<typeof mock>).mock.calls
+      .find((c: any[]) => c[1] === 'video.offer');
+    expect(relayed).toBeUndefined();
+  });
+
+  // The token must NOT be leaked to other peers when carried inside `data`.
+  test('strips a data-carried token before relaying to peers', async () => {
+    const wsService = makeWsService();
+    const ws = makeWs();
+    const ctx = makeCtx({ wsService, userId: 'user-1' });
+    const token = generateCallToken({ callId: 'call-1', personId: 'user-1' });
+
+    await wsHandler.onMessage(ctx, ws as any, {
+      type: 'video.offer',
+      data: { sdp: 'test', token },
+    });
+
+    const sigCall = (wsService.publishToChannel as ReturnType<typeof mock>).mock.calls
+      .find((c: any[]) => c[1] === 'video.offer');
+    expect(sigCall).toBeDefined();
+    expect(sigCall![2].data).not.toHaveProperty('token');
+  });
 });
 
 // ---------------------------------------------------------------------------

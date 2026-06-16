@@ -156,11 +156,50 @@ describe('createPerRouteAuditMiddleware', () => {
     expect(req.description).toBe('create thing res-1');
   });
 
-  it('skips logging when response status >= 400', async () => {
+  it('emits a failure audit event when response status >= 400 (422)', async () => {
     const logEvent = makeLogEvent();
     const ctx = makeCtx({ method: 'POST', status: 422, audit: makeAudit(logEvent) });
     await runMiddleware(ctx, { action: 'create', resourceType: 'x' });
-    expect(logEvent).not.toHaveBeenCalled();
+    expect(logEvent).toHaveBeenCalledTimes(1);
+    const [req] = logEvent.mock.calls[0] as [Record<string, unknown>];
+    expect(req.outcome).toBe('failure');
+    expect((req.details as Record<string, unknown>).statusCode).toBe(422);
+  });
+
+  it('emits a denied audit event on 403 (forbidden mutation)', async () => {
+    const logEvent = makeLogEvent();
+    const ctx = makeCtx({
+      method: 'DELETE',
+      path: '/memberships/mem-1',
+      status: 403,
+      audit: makeAudit(logEvent),
+      params: { membershipId: 'mem-1' },
+    });
+    await runMiddleware(ctx, { action: 'delete', resourceType: 'membership' });
+    expect(logEvent).toHaveBeenCalledTimes(1);
+    const [req] = logEvent.mock.calls[0] as [Record<string, unknown>];
+    expect(req.outcome).toBe('denied');
+    expect(req.resourceType).toBe('membership');
+    expect(req.resource).toBe('mem-1');
+    expect((req.details as Record<string, unknown>).statusCode).toBe(403);
+    expect((req.details as Record<string, unknown>).failureReason).toBe('HTTP 403');
+  });
+
+  it('emits a failure audit event on 409 (conflict mutation) and preserves auditDetails', async () => {
+    const logEvent = makeLogEvent();
+    const ctx = makeCtx({
+      method: 'POST',
+      status: 409,
+      audit: makeAudit(logEvent),
+      preset: { auditDetails: { attempted: 'rename' } },
+    });
+    await runMiddleware(ctx, { action: 'update', resourceType: 'thing' });
+    expect(logEvent).toHaveBeenCalledTimes(1);
+    const [req] = logEvent.mock.calls[0] as [Record<string, unknown>];
+    expect(req.outcome).toBe('failure');
+    const details = req.details as Record<string, unknown>;
+    expect(details.statusCode).toBe(409);
+    expect(details.attempted).toBe('rename'); // existing auditDetails preserved
   });
 
   it('does not throw when audit service logEvent rejects', async () => {
@@ -309,7 +348,7 @@ describe('createPerRouteAuditMiddleware', () => {
       expect(req.resource).toBe('inv-1');
     });
 
-    it('logs no events when handler throws before pushing any', async () => {
+    it('falls back to a single failure event when handler throws before pushing any auditEvents', async () => {
       const logEvent = makeLogEvent();
       const ctx = makeCtx({
         method: 'POST',
@@ -322,10 +361,14 @@ describe('createPerRouteAuditMiddleware', () => {
         async () => { throw new Error('boom'); },
       );
       expect(error).toBeInstanceOf(Error);
-      expect(logEvent).not.toHaveBeenCalled();
+      // No auditEvents pushed → single-event failure row (not multi-event).
+      expect(logEvent).toHaveBeenCalledTimes(1);
+      const [req] = logEvent.mock.calls[0] as [Record<string, unknown>];
+      expect(req.outcome).toBe('failure');
+      expect((req.details as Record<string, unknown>).failureReason).toBe('boom');
     });
 
-    it('single-event mode skips on handler throw (no inadvertent partial log)', async () => {
+    it('single-event mode emits a failure audit event on handler throw and re-throws', async () => {
       const logEvent = makeLogEvent();
       const ctx = makeCtx({
         method: 'POST',
@@ -339,7 +382,15 @@ describe('createPerRouteAuditMiddleware', () => {
         async () => { throw new Error('mid-handler'); },
       );
       expect(error).toBeInstanceOf(Error);
-      expect(logEvent).not.toHaveBeenCalled();
+      expect(error?.message).toBe('mid-handler');
+      // Compliance: the failed mutation must still produce an audit row.
+      expect(logEvent).toHaveBeenCalledTimes(1);
+      const [req] = logEvent.mock.calls[0] as [Record<string, unknown>];
+      expect(req.outcome).toBe('failure');
+      expect(req.resource).toBe('res-1');
+      const details = req.details as Record<string, unknown>;
+      expect(details.statusCode).toBe(500);
+      expect(details.failureReason).toBe('mid-handler');
     });
   });
 });

@@ -10,7 +10,14 @@
  * static route metadata + dynamic ctx setters populated by the handler
  * (`auditResourceId`, `auditDescription`, `auditDetails`).
  *
- * Skipped when response status >= 400 (validation failures, 4xx, 5xx).
+ * Outcome:
+ *  - 2xx/3xx  → `outcome: 'success'`.
+ *  - 4xx/5xx  → `outcome: 'denied'` (403) or `'failure'` (all other ≥400),
+ *               with `{ statusCode, failureReason }` merged into details.
+ *
+ * Healthcare-AMS compliance: denied/forbidden/conflict mutations on TypeSpec
+ * routes MUST leave an audit row — the failure path is not skipped.
+ *
  * Audit-service failures are caught and logged — they never propagate.
  */
 
@@ -81,20 +88,43 @@ export function createPerRouteAuditMiddleware(meta: PerRouteAuditMeta) {
             }
           }
         }
-      } else if (handlerError === undefined && ctx.res.status < 400) {
+      } else {
         // Single-event mode: composed from static route metadata + ctx setters.
-        // Skipped on throw — resourceId / description are typically set after
-        // the mutating step succeeds, so pre-success values aren't useful.
+        const statusCode = handlerError !== undefined ? 500 : ctx.res.status;
+        const isFailure = statusCode >= 400;
+
+        // Failure path (4xx/5xx or handler throw): emit a 'denied'/'failure'
+        // audit row so denied/forbidden/conflict mutations are never silent.
+        // Healthcare AMS requires every failed mutation to be auditable.
+        const outcome: 'success' | 'failure' | 'denied' = !isFailure
+          ? 'success'
+          : statusCode === 403
+            ? 'denied'
+            : 'failure';
+
         const resourceId =
           (ctx.get('auditResourceId') as string | undefined) ??
           firstPathParam(ctx) ??
           'unknown';
 
+        const failureSuffix = isFailure ? ` (failed: ${statusCode})` : '';
         const description =
           (ctx.get('auditDescription') as string | undefined) ??
-          `${meta.action} ${meta.resourceType} ${resourceId}`;
+          `${meta.action} ${meta.resourceType} ${resourceId}${failureSuffix}`;
 
-        const details = ctx.get('auditDetails') as Record<string, unknown> | undefined;
+        const baseDetails = ctx.get('auditDetails') as Record<string, unknown> | undefined;
+        const details = isFailure
+          ? {
+              ...(baseDetails ?? {}),
+              statusCode,
+              failureReason:
+                handlerError !== undefined
+                  ? handlerError instanceof Error
+                    ? handlerError.message
+                    : String(handlerError)
+                  : `HTTP ${statusCode}`,
+            }
+          : baseDetails;
 
         try {
           await audit.logEvent({
@@ -102,7 +132,7 @@ export function createPerRouteAuditMiddleware(meta: PerRouteAuditMeta) {
             eventSubType: meta.eventSubType,
             category: 'association',
             action: meta.action,
-            outcome: 'success',
+            outcome,
             organizationId: orgId,
             user: user?.id,
             userType: 'client' as const,

@@ -1,11 +1,17 @@
-import { describe, test, expect, afterEach } from 'bun:test';
+import { describe, test, expect, afterEach, afterAll, mock } from 'bun:test';
 import { makeCtx, stubRepo } from '@/test-utils/make-ctx';
 import { BookingRepository } from './repos/booking.repo';
 import { cancelBooking } from './cancelBooking';
 
 // Stub the ownership util
 import * as ownership from './utils/ownership';
-import { mock } from 'bun:test';
+
+// Restore real ownership module after this file so mock.module leaks don't
+// pollute the real-impl ownership.test.ts.
+const realOwnership = { ...ownership };
+afterAll(() => {
+  mock.module('./utils/ownership', () => realOwnership);
+});
 
 const BOOKING = {
   id: 'booking-1',

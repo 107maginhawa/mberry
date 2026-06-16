@@ -1,37 +1,47 @@
 /**
- * EF-M07: WebRTC token generation
+ * EF-M07 + P0 comms remediation: WebRTC/video-call token generation.
  *
- * Verifies that generateWebRTCToken produces a cryptographically
- * signed token instead of a hardcoded sentinel value.
+ * The call signaling token is now minted by the shared, validated util
+ * `utils/call-token.ts` (signed over { callId, personId, exp }, secret from the
+ * centralized accessor with NO runtime 'dev-fallback'). These source-level
+ * checks lock in that joinVideoCall delegates to that util and that the old
+ * insecure inline signer (with its 'dev-fallback' constant) is gone.
  */
 
 import { describe, test, expect } from 'bun:test';
 import * as fs from 'fs';
 import * as path from 'path';
 
-const source = fs.readFileSync(
+const joinSource = fs.readFileSync(
   path.resolve(import.meta.dir, './joinVideoCall.ts'),
   'utf-8',
 );
+const tokenUtilSource = fs.readFileSync(
+  path.resolve(import.meta.dir, './utils/call-token.ts'),
+  'utf-8',
+);
 
-describe('EF-M07: WebRTC token generation', () => {
-  test('does not return hardcoded USE_SESSION_TOKEN sentinel', () => {
-    // The sentinel placeholder must be replaced with real crypto
-    expect(source).not.toContain("return 'USE_SESSION_TOKEN'");
+describe('P0: video-call token generation', () => {
+  test('joinVideoCall no longer contains an inline dev-fallback secret', () => {
+    expect(joinSource).not.toContain("'dev-fallback'");
+    expect(joinSource).not.toContain('WEBRTC_TOKEN_SECRET');
   });
 
-  test('uses createHmac for token signing', () => {
-    expect(source).toContain('createHmac');
+  test('joinVideoCall delegates token minting to the shared call-token util', () => {
+    expect(joinSource).toContain('generateCallToken');
   });
 
-  test('token includes userId and callMessageId in payload', () => {
-    // The HMAC payload must bind the token to the specific user and call
-    expect(source).toContain('userId');
-    expect(source).toContain('callMessageId');
+  test('the token util binds the token to callId and personId', () => {
+    expect(tokenUtilSource).toContain('callId');
+    expect(tokenUtilSource).toContain('personId');
   });
 
-  test('uses config secret for signing', () => {
-    // Must use config.auth.secret or equivalent, not a hardcoded key
-    expect(source).toContain('auth.secret');
+  test('the token util signs with the validated accessor, not an inline literal', () => {
+    expect(tokenUtilSource).toContain('getCallSigningSecret');
+    expect(tokenUtilSource).not.toContain("'dev-fallback'");
+  });
+
+  test('the token util uses createHmac for signing', () => {
+    expect(tokenUtilSource).toContain('createHmac');
   });
 });

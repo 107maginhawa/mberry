@@ -185,4 +185,12 @@ describe('updateVendor', () => {
     const ctx = makeCtx({ params: { vendorId: 'vendor-999' }, body: { companyName: 'X' } });
     await expect(updateVendor(ctx)).rejects.toBeInstanceOf(NotFoundError);
   });
+
+  // Cross-org IDOR guard (updateVendor.ts:38-41): a vendor in another org is
+  // treated as missing, so a foreign-org caller cannot edit it by UUID.
+  test('throws NotFoundError when vendor belongs to a different org', async () => {
+    VendorRepository.prototype.findOneById = mock(async () => makeVendor({ organizationId: 'org-2' })) as any;
+    const ctx = makeCtx({ params: { vendorId: 'vendor-1' }, body: { companyName: 'X' } });
+    await expect(updateVendor(ctx)).rejects.toBeInstanceOf(NotFoundError);
+  });
 });

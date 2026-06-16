@@ -6,8 +6,10 @@ export async function getJobPosting(ctx: Context): Promise<Response> {
   const postingId = ctx.req.param('postingId')!;
   const repo = new JobPostingRepository(db);
 
+  const organizationId = ctx.get('organizationId');
   const posting = await repo.get(postingId);
-  if (!posting) {
+  // Org-scope: a posting outside the caller's org is treated as missing.
+  if (!posting || posting.organizationId !== organizationId) {
     return ctx.json({ error: 'Posting not found' }, 404);
   }
 

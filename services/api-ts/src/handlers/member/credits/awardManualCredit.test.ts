@@ -1,6 +1,7 @@
-import { describe, test, expect, mock } from 'bun:test';
+import { describe, test, expect, mock, spyOn } from 'bun:test';
 
 import { awardManualCredit } from './awardManualCredit';
+import { domainEvents } from '@/core/domain-events';
 
 const OFFICER_TERM = { positionTitle: 'President' };
 
@@ -101,6 +102,38 @@ describe('awardManualCredit', () => {
     expect(json.data.personId).toBe('person-1');
     expect(json.data.activityName).toBe('Annual Conference');
     expect(json.data.creditAmount).toBe(5);
+  });
+
+  test('defers compliance matview refresh off the request path (emits, no inline db.execute)', async () => {
+    const { db, executeSpy } = buildMockDb([
+      [OFFICER_TERM],
+      [{ cycleStartMonth: 1, cycleLengthYears: 3, requiredCredits: 60, sdlCapPercent: 40 }],
+    ]);
+    const emitSpy = spyOn(domainEvents, 'emit').mockResolvedValue(undefined);
+    try {
+      const ctx = createMockCtx({ database: db, body: validBody });
+      const res = await awardManualCredit(ctx);
+      expect(res.status).toBe(201);
+      expect(executeSpy).not.toHaveBeenCalled();
+      expect(emitSpy).toHaveBeenCalledWith('compliance.recompute', expect.objectContaining({ reason: 'manual_award' }));
+    } finally {
+      emitSpy.mockRestore();
+    }
+  });
+
+  test('refresh dispatch failure does not fail the request', async () => {
+    const { db } = buildMockDb([
+      [OFFICER_TERM],
+      [{ cycleStartMonth: 1, cycleLengthYears: 3, requiredCredits: 60, sdlCapPercent: 40 }],
+    ]);
+    const emitSpy = spyOn(domainEvents, 'emit').mockRejectedValue(new Error('bus down'));
+    try {
+      const ctx = createMockCtx({ database: db, body: validBody });
+      const res = await awardManualCredit(ctx);
+      expect(res.status).toBe(201);
+    } finally {
+      emitSpy.mockRestore();
+    }
   });
 
   test('throws ValidationError when required fields missing', async () => {

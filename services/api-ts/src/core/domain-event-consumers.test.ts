@@ -31,7 +31,11 @@ import { chapterAffiliations, affiliationTransfers } from '@/handlers/associatio
 import { duesPayments } from '@/handlers/association:member/repos/dues-payments.schema';
 import { merchantAccounts } from '@/handlers/billing/repos/billing.schema';
 import { surveyResponses } from '@/handlers/surveys/repos/survey.schema';
-import { chatRooms, chatRoomMembers } from '@/handlers/comms/repos/comms.schema';
+import { reviews } from '@/handlers/reviews/repos/review.schema';
+import { memberAdOptOuts, adReports } from '@/handlers/advertising/repos/advertising.schema';
+import { chatRooms, chatRoomMembers, chatMessages } from '@/handlers/comms/repos/comms.schema';
+import { committeeMembers } from '@/handlers/association:operations/repos/committee.schema';
+import { committeeTasks } from '@/handlers/association:operations/repos/committee-task.schema';
 import { trainingEnrollments, eventRegistrations } from './schema-registry';
 import { invitationTokens } from './schema-registry';
 import { EmailQueueRepository } from '@/handlers/email/repos/queue.repo';
@@ -634,6 +638,64 @@ describe('registerDomainEventConsumers', () => {
     expect(findCall(calls, 'delete', surveyResponses)).toBeUndefined();
   });
 
+  test('person.deleted → reviews — deletes authored reviews, nulls reviewed subject', async () => {
+    const { db, calls } = makeCascadeCapturingDb();
+    registerDomainEventConsumers({ membershipRepo: makeMembershipRepo(), db }, logger as any);
+
+    await domainEvents.emit('person.deleted', personDeletedPayload);
+
+    // Authored reviews: hard delete (personal NPS feedback)
+    expect(findCall(calls, 'delete', reviews)).toBeDefined();
+    // Reviews where person was the subject: anonymize the subject reference
+    expect(findCall(calls, 'update', reviews)?.set).toMatchObject({
+      reviewedEntity: null,
+      updatedBy: SYSTEM_USER_ID,
+    });
+  });
+
+  test('person.deleted → advertising — deletes ad opt-outs + reports', async () => {
+    const { db, calls } = makeCascadeCapturingDb();
+    registerDomainEventConsumers({ membershipRepo: makeMembershipRepo(), db }, logger as any);
+
+    await domainEvents.emit('person.deleted', personDeletedPayload);
+
+    expect(findCall(calls, 'delete', memberAdOptOuts)).toBeDefined();
+    expect(findCall(calls, 'delete', adReports)).toBeDefined();
+  });
+
+  test('person.deleted → comms — deletes chat memberships, anonymizes authored messages', async () => {
+    const { db, calls } = makeCascadeCapturingDb();
+    registerDomainEventConsumers({ membershipRepo: makeMembershipRepo(), db }, logger as any);
+
+    await domainEvents.emit('person.deleted', personDeletedPayload);
+
+    // Chat room membership / DM participation: hard delete
+    expect(findCall(calls, 'delete', chatRoomMembers)).toBeDefined();
+    // Authored messages: anonymize sender (retain thread integrity)
+    expect(findCall(calls, 'update', chatMessages)?.set).toMatchObject({
+      sender: SYSTEM_USER_ID,
+      updatedBy: SYSTEM_USER_ID,
+    });
+    expect(findCall(calls, 'delete', chatMessages)).toBeUndefined();
+  });
+
+  test('person.deleted → committee — soft-deletes memberships, unassigns tasks', async () => {
+    const { db, calls } = makeCascadeCapturingDb();
+    registerDomainEventConsumers({ membershipRepo: makeMembershipRepo(), db }, logger as any);
+
+    await domainEvents.emit('person.deleted', personDeletedPayload);
+
+    // Committee memberships: soft-delete (mirrors chapterAffiliations)
+    const cm = findCall(calls, 'update', committeeMembers);
+    expect(cm?.set).toMatchObject({ active: false, updatedBy: SYSTEM_USER_ID });
+    expect(cm?.set.removedAt).toBeInstanceOf(Date);
+    // Committee tasks: unassign (retain task)
+    expect(findCall(calls, 'update', committeeTasks)?.set).toMatchObject({
+      assigneeId: null,
+      updatedBy: SYSTEM_USER_ID,
+    });
+  });
+
   test('person.deleted — subscriber failure in one module does not block others', async () => {
     // Force assoc:member update(memberships) to throw; assert later subscribers still ran.
     const calls: CascadeCall[] = [];
@@ -677,6 +739,10 @@ describe('registerDomainEventConsumers', () => {
     expect(findCall(calls, 'delete', documents)).toBeDefined();           // documents
     expect(findCall(calls, 'delete', invitationTokens)).toBeDefined();    // invite
     expect(findCall(calls, 'delete', notificationPreferences)).toBeDefined(); // person
+    expect(findCall(calls, 'delete', reviews)).toBeDefined();             // reviews
+    expect(findCall(calls, 'delete', memberAdOptOuts)).toBeDefined();     // advertising
+    expect(findCall(calls, 'delete', chatRoomMembers)).toBeDefined();     // comms
+    expect(findCall(calls, 'update', committeeMembers)).toBeDefined();    // committee
     expect(logger.error).toHaveBeenCalled();
   });
 

@@ -3,10 +3,10 @@
  */
 
 import { describe, test, expect, afterEach } from 'bun:test';
-import { makeCtx, stubRepo } from '@/test-utils/make-ctx';
-import { fakeApplication as createFakeApplication } from '@/test-utils/factories';
+import { makeCtx, stubRepo, restoreRepo } from '@/test-utils/make-ctx';
+import { fakeApplication as createFakeApplication, fakeJobPosting } from '@/test-utils/factories';
 import { updateJobApplication } from './updateJobApplication';
-import { JobApplicationRepository } from './repos/jobs.repo';
+import { JobApplicationRepository, JobPostingRepository } from './repos/jobs.repo';
 
 const now = new Date('2026-06-01T00:00:00Z');
 
@@ -25,11 +25,19 @@ const fakeApplication = createFakeApplication({
   version: 1,
 });
 
+// The application's parent posting lives in the caller's org (makeCtx default
+// 'tenant-1'), so the cross-org guard passes for the happy-path tests.
+const parentPosting = fakeJobPosting({ id: 'job-1', organizationId: 'tenant-1' });
+function stubParentPosting() {
+  return stubRepo(JobPostingRepository, { get: async () => parentPosting });
+}
+
 describe('[M15] updateJobApplication', () => {
   let mocks: ReturnType<typeof stubRepo>;
 
   afterEach(() => {
     if (mocks) Object.values(mocks).forEach((m) => m.mockRestore());
+    restoreRepo(JobPostingRepository);
   });
 
   test('returns 200 with status change', async () => {
@@ -37,6 +45,7 @@ describe('[M15] updateJobApplication', () => {
       get: async () => fakeApplication,
       update: async (_id: string, data: any) => ({ ...fakeApplication, ...data }),
     });
+    stubParentPosting();
 
     const ctx = makeCtx({
       _params: { applicationId: 'app-1' },
@@ -70,6 +79,7 @@ describe('[M15] updateJobApplication', () => {
       get: async () => fakeApplication,
       update: async (_id: string, data: any) => { capturedData = data; return { ...fakeApplication, ...data }; },
     });
+    stubParentPosting();
 
     const ctx = makeCtx({
       _params: { applicationId: 'app-1' },
@@ -86,6 +96,7 @@ describe('[M15] updateJobApplication', () => {
       get: async () => fakeApplication,
       update: async (_id: string, data: any) => { capturedData = data; return { ...fakeApplication, ...data }; },
     });
+    stubParentPosting();
 
     const ctx = makeCtx({
       _params: { applicationId: 'app-1' },
@@ -102,6 +113,7 @@ describe('[M15] updateJobApplication', () => {
       get: async () => fakeApplication,
       update: async (_id: string, data: any) => { capturedData = data; return { ...fakeApplication, ...data }; },
     });
+    stubParentPosting();
 
     const ctx = makeCtx({
       _params: { applicationId: 'app-1' },
@@ -118,6 +130,7 @@ describe('[M15] updateJobApplication status lifecycle', () => {
 
   afterEach(() => {
     if (mocks) Object.values(mocks).forEach((m) => m.mockRestore());
+    restoreRepo(JobPostingRepository);
   });
 
   const statusTransitions = [
@@ -140,6 +153,7 @@ describe('[M15] updateJobApplication status lifecycle', () => {
         get: async () => ({ ...fakeApplication, status: from }),
         update: async (_id: string, data: any) => { capturedData = data; return { ...fakeApplication, ...data }; },
       });
+      stubParentPosting();
 
       const ctx = makeCtx({
         _params: { applicationId: 'app-1' },

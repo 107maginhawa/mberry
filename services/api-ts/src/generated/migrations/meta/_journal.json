@@ -512,6 +512,13 @@
       "when": 1781107200000,
       "tag": "0072_membership_joined_at_default",
       "breakpoints": true
+    },
+    {
+      "idx": 73,
+      "version": "7",
+      "when": 1781193600000,
+      "tag": "0073_booking_event_unique_indexes",
+      "breakpoints": true
     }
   ]
 }

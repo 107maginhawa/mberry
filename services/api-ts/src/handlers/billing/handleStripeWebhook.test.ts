@@ -97,6 +97,71 @@ function makeNullLogger() {
 }
 
 // ---------------------------------------------------------------------------
+// DB mock with durable webhook-idempotency ledger support
+// ---------------------------------------------------------------------------
+//
+// The handler now claims each Stripe event id in the `webhook_retry_log` ledger
+// via `db.insert(...).onConflictDoNothing({ target }).returning()`, all inside a
+// `db.transaction(cb)`. This factory mocks that surface:
+//   - `transaction(cb)` runs cb with the same db (single connection semantics)
+//   - `insert().values(v).onConflictDoNothing().returning()` enforces the UNIQUE
+//     idempotencyKey: a repeated event id returns [] (conflict), else [{ id }].
+// `ledger` is a shared Set of seen idempotency keys so multiple requests in one
+// test see a persistent ledger (mirrors a real durable table).
+function makeDbMock(opts: {
+  allInvoices?: any[];
+  subscriptionRow?: any;
+  subscriptionUpdateSink?: { set?: any };
+  ledger?: Set<string>;
+  onLedgerInsert?: (key: string) => void;
+}) {
+  const { allInvoices = [], subscriptionRow = null, subscriptionUpdateSink, ledger = new Set<string>(), onLedgerInsert } = opts;
+
+  const selectChain: any = {};
+  for (const m of ['select', 'from', 'where', 'offset', 'orderBy']) selectChain[m] = () => selectChain;
+  selectChain.limit = async () => (subscriptionRow ? [subscriptionRow] : []);
+  selectChain.then = (resolve: any, reject?: any) => Promise.resolve(allInvoices).then(resolve, reject);
+
+  const updateChain: any = {
+    set: (data: any) => { if (subscriptionUpdateSink) subscriptionUpdateSink.set = data; return updateChain; },
+    where: () => updateChain,
+    returning: async () => [subscriptionRow ? { ...subscriptionRow } : {}],
+    then: (resolve: any, reject?: any) => Promise.resolve(undefined).then(resolve, reject),
+  };
+
+  // insert(...).values(v).onConflictDoNothing().returning() — UNIQUE guard.
+  function makeInsertChain() {
+    let pendingKey: string | undefined;
+    const chain: any = {
+      values: (v: any) => { pendingKey = v?.idempotencyKey; return chain; },
+      onConflictDoNothing: () => chain,
+      returning: async () => {
+        if (pendingKey === undefined) return [{ id: 'row-generic' }];
+        if (ledger.has(pendingKey)) return []; // conflict → already processed
+        ledger.add(pendingKey);
+        onLedgerInsert?.(pendingKey);
+        return [{ id: `ledger-${pendingKey}` }];
+      },
+      then: (resolve: any, reject?: any) => {
+        // bare insert without returning() — resolve after applying the guard
+        if (pendingKey !== undefined && !ledger.has(pendingKey)) { ledger.add(pendingKey); onLedgerInsert?.(pendingKey); }
+        return Promise.resolve(undefined).then(resolve, reject);
+      },
+    };
+    return chain;
+  }
+
+  const db: any = {
+    select: () => selectChain,
+    update: () => updateChain,
+    insert: () => makeInsertChain(),
+  };
+  // transaction(cb) runs the callback with the same db handle.
+  db.transaction = async (cb: (tx: any) => Promise<any>) => cb(db);
+  return db;
+}
+
+// ---------------------------------------------------------------------------
 // Error handler
 // ---------------------------------------------------------------------------
 
@@ -153,27 +218,10 @@ async function buildApp(deps: {
     const notifs = { createNotification: async () => {} };
     (c as any).set('notifs', notifs);
 
-    // Build a db mock with a chainable select that settles to allInvoices
-    const selectChain: any = {};
-    const selectMethods = ['select', 'from', 'where', 'offset', 'orderBy'];
-    for (const m of selectMethods) selectChain[m] = () => selectChain;
-    // Subscription lifecycle handlers issue `.limit(1)` reads — return the
-    // injected subscription row there; everything else settles to allInvoices.
-    // Subscription `.limit(1)` lookups return the injected row, or [] when none
-    // is injected (mirrors a real no-match db read — never the invoice list).
-    selectChain.limit = async () => (subscriptionRow ? [subscriptionRow] : []);
-    selectChain.then = (resolve: any, reject?: any) => Promise.resolve(allInvoices).then(resolve, reject);
-    // Subscription handlers also call db.update(subscriptions).set(data).where().
-    const updateChain: any = {
-      set: (data: any) => {
-        if (subscriptionUpdateSink) subscriptionUpdateSink.set = data;
-        return updateChain;
-      },
-      where: () => updateChain,
-      returning: async () => [subscriptionRow ? { ...subscriptionRow } : {}],
-      then: (resolve: any, reject?: any) => Promise.resolve(undefined).then(resolve, reject),
-    };
-    (c as any).set('database', { select: () => selectChain, update: () => updateChain });
+    // DB mock supports the durable webhook-idempotency ledger surface
+    // (transaction + insert().onConflictDoNothing().returning()) plus the
+    // existing select/update used by subscription handlers.
+    (c as any).set('database', makeDbMock({ allInvoices, subscriptionRow, subscriptionUpdateSink }));
 
     // Patch InvoiceRepository prototype — save originals for restoration
     const origFindOneById = InvoiceRepository.prototype.findOneById;
@@ -745,11 +793,7 @@ describe('handleStripeWebhook — observability: structured log fields', () => {
       (c as any).set('billing', { verifyWebhookSignature: verifySignature });
       (c as any).set('notifs', { createNotification: async () => {} });
 
-      const selectChain: any = {};
-      const selectMethods = ['select', 'from', 'where', 'limit', 'offset', 'orderBy'];
-      for (const m of selectMethods) selectChain[m] = () => selectChain;
-      selectChain.then = (resolve: any, reject?: any) => Promise.resolve(allInvoices).then(resolve, reject);
-      (c as any).set('database', { select: () => selectChain });
+      (c as any).set('database', makeDbMock({ allInvoices }));
 
       const origFindOneById = InvoiceRepository.prototype.findOneById;
       const origUpdateOneById = InvoiceRepository.prototype.updateOneById;
@@ -860,6 +904,9 @@ describe('handleStripeWebhook — idempotency (FIX-004)', () => {
     getInvoice: () => any;
     onUpdate: (id: string, data: any) => void;
     onNotify: () => void;
+    // Shared across deliveries so the durable ledger persists between the two
+    // POSTs of the SAME event id (the second must hit a unique conflict → skip).
+    ledger?: Set<string>;
   }) {
     const { handleStripeWebhook } = await import('./handleStripeWebhook');
     const { InvoiceRepository } = await import('./repos/billing.repo');
@@ -872,10 +919,9 @@ describe('handleStripeWebhook — idempotency (FIX-004)', () => {
       (c as any).set('billing', { verifyWebhookSignature: deps.verifySignature });
       (c as any).set('notifs', { createNotification: async () => { deps.onNotify(); } });
 
-      const selectChain: any = {};
-      for (const m of ['select', 'from', 'where', 'limit', 'offset', 'orderBy']) selectChain[m] = () => selectChain;
-      selectChain.then = (resolve: any, reject?: any) => Promise.resolve([]).then(resolve, reject);
-      (c as any).set('database', { select: () => selectChain });
+      // allInvoices feeds findByStripeTransferId/org-resolution; the prototype
+      // patches below take precedence for the lookups the handlers actually use.
+      (c as any).set('database', makeDbMock({ allInvoices: [deps.getInvoice()].filter(Boolean), ledger: deps.ledger }));
 
       const origFind = InvoiceRepository.prototype.findOneById;
       const origUpd = InvoiceRepository.prototype.updateOneById;
@@ -903,15 +949,17 @@ describe('handleStripeWebhook — idempotency (FIX-004)', () => {
     let updateCount = 0;
     let notifyCount = 0;
 
+    const ledger = new Set<string>();
     const app = await buildIdempotencyApp({
       verifySignature: async () => event,
       getInvoice: () => stored,
       onUpdate: (_id, data) => { updateCount++; stored = { ...stored, ...data }; },
       onNotify: () => { notifyCount++; },
+      ledger,
     });
 
     await postWebhook(app, JSON.stringify(event)); // first delivery — processes
-    await postWebhook(app, JSON.stringify(event)); // redelivery (same id) — skipped
+    await postWebhook(app, JSON.stringify(event)); // redelivery (same id) — durable ledger conflict → skipped
 
     expect(updateCount).toBe(1);
     expect(notifyCount).toBe(1);
@@ -923,11 +971,13 @@ describe('handleStripeWebhook — idempotency (FIX-004)', () => {
     let updateCount = 0;
     let notifyCount = 0;
 
+    const ledger = new Set<string>();
     const app = await buildIdempotencyApp({
       verifySignature: async () => event,
       getInvoice: () => stored,
       onUpdate: (_id, data) => { updateCount++; stored = { ...stored, ...data }; },
       onNotify: () => { notifyCount++; },
+      ledger,
     });
 
     await postWebhook(app, JSON.stringify(event));
@@ -1017,10 +1067,7 @@ describe('handleStripeWebhook — notification organizationId (billing -> notifs
         },
       });
 
-      const selectChain: any = {};
-      for (const m of ['select', 'from', 'where', 'limit', 'offset', 'orderBy']) selectChain[m] = () => selectChain;
-      selectChain.then = (resolve: any, reject?: any) => Promise.resolve(allInvoices).then(resolve, reject);
-      (c as any).set('database', { select: () => selectChain });
+      (c as any).set('database', makeDbMock({ allInvoices }));
 
       const origFind = InvoiceRepository.prototype.findOneById;
       const origUpd = InvoiceRepository.prototype.updateOneById;
@@ -1193,5 +1240,153 @@ describe('handleStripeWebhook — invoice.payment_failed (subscription past_due)
 
     expect(resp.status).toBe(200);
     expect(sink.set).toBeUndefined();
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Durable webhook idempotency ledger (P1 FIX-WEBHOOK-IDEMP)
+//
+// Before: idempotency was non-durable — the processed event id was stamped into
+// per-invoice metadata.lastStripeEventId with no transaction/ledger. A failure
+// AFTER a partial mutation but BEFORE the stamp meant a Stripe retry would
+// double-process (re-notify, re-flip to paid).
+//
+// After: each event id is claimed in the unique `webhook_retry_log` ledger
+// INSIDE the same transaction as all side effects. A repeated event id conflicts
+// on the unique key → ack 200 with no replay. A mid-processing failure rolls the
+// ledger claim back with the tx → a genuine retry reprocesses cleanly.
+// ---------------------------------------------------------------------------
+
+describe('handleStripeWebhook — durable idempotency ledger (P1)', () => {
+  // Build an app whose db mock exposes the real ledger semantics:
+  //   transaction(cb) → cb(db); insert(...).onConflictDoNothing().returning()
+  //   enforces the UNIQUE idempotencyKey via a shared `ledger` Set.
+  // `failOnUpdate` forces a mid-processing throw AFTER the ledger claim so we can
+  // prove the claim is rolled back (the ledger Set has the key removed on throw).
+  async function buildLedgerApp(deps: {
+    verifySignature: () => Promise<any>;
+    getInvoice: () => any;
+    onUpdate?: (id: string, data: any) => void;
+    onNotify?: () => void;
+    ledger: Set<string>;
+    failOnUpdate?: boolean;
+  }) {
+    const { handleStripeWebhook } = await import('./handleStripeWebhook');
+    const { InvoiceRepository } = await import('./repos/billing.repo');
+
+    const app = new Hono();
+    attachErrorHandler(app);
+
+    app.post('/', async (c) => {
+      (c as any).set('logger', makeNullLogger());
+      (c as any).set('billing', { verifyWebhookSignature: deps.verifySignature });
+      (c as any).set('notifs', { createNotification: async () => { deps.onNotify?.(); } });
+
+      // Track keys claimed during THIS request so a mid-processing throw can undo
+      // them — emulating the real transaction rollback of the ledger row.
+      const claimedThisRequest: string[] = [];
+      (c as any).set('database', makeDbMock({
+        allInvoices: [deps.getInvoice()].filter(Boolean),
+        ledger: deps.ledger,
+        onLedgerInsert: (k) => claimedThisRequest.push(k),
+      }));
+      // Wrap transaction to roll back ledger claims if the callback throws.
+      const db = (c as any).get('database');
+      const realTx = db.transaction;
+      db.transaction = async (cb: (tx: any) => Promise<any>) => {
+        try {
+          return await realTx(cb);
+        } catch (err) {
+          for (const k of claimedThisRequest) deps.ledger.delete(k);
+          throw err;
+        }
+      };
+
+      const origFind = InvoiceRepository.prototype.findOneById;
+      const origUpd = InvoiceRepository.prototype.updateOneById;
+      const origFindPI = InvoiceRepository.prototype.findByStripePaymentIntentId;
+
+      InvoiceRepository.prototype.findOneById = async () => deps.getInvoice();
+      InvoiceRepository.prototype.updateOneById = async (id: string, data: any) => {
+        if (deps.failOnUpdate) throw new Error('boom — mid-processing failure after partial mutation');
+        deps.onUpdate?.(id, data);
+        return data;
+      };
+      InvoiceRepository.prototype.findByStripePaymentIntentId = async () => deps.getInvoice();
+
+      try {
+        return await handleStripeWebhook(c as any);
+      } finally {
+        InvoiceRepository.prototype.findOneById = origFind;
+        InvoiceRepository.prototype.updateOneById = origUpd;
+        InvoiceRepository.prototype.findByStripePaymentIntentId = origFindPI;
+      }
+    });
+
+    return app;
+  }
+
+  test('same event id delivered twice → processed once; second is a no-op 200 (no repeated side effects)', async () => {
+    const event = makeStripeEvent('payment_intent.succeeded', makePaymentIntentObject(), 'evt_ledger_dup_1');
+    let stored = makeInvoice({ metadata: { stripePaymentIntentId: PAYMENT_INTENT_ID } });
+    let updateCount = 0;
+    let notifyCount = 0;
+    const ledger = new Set<string>();
+
+    const app = await buildLedgerApp({
+      verifySignature: async () => event,
+      getInvoice: () => stored,
+      onUpdate: (_id, data) => { updateCount++; stored = { ...stored, ...data }; },
+      onNotify: () => { notifyCount++; },
+      ledger,
+    });
+
+    const r1 = await postWebhook(app, JSON.stringify(event)); // processed
+    const r2 = await postWebhook(app, JSON.stringify(event)); // durable conflict → skipped
+
+    expect(r1.status).toBe(200);
+    expect(r2.status).toBe(200);
+    const b2 = await r2.json() as any;
+    expect(b2.duplicate).toBe(true);     // second delivery explicitly flagged duplicate
+    expect(updateCount).toBe(1);          // single state transition
+    expect(notifyCount).toBe(1);          // single notification
+    expect(ledger.has('evt_ledger_dup_1')).toBe(true); // ledger holds the claim
+  });
+
+  test('mid-processing failure leaves NO ledger row → a later retry reprocesses (then dedupes)', async () => {
+    const event = makeStripeEvent('payment_intent.succeeded', makePaymentIntentObject(), 'evt_ledger_fail_1');
+    let stored = makeInvoice({ metadata: { stripePaymentIntentId: PAYMENT_INTENT_ID } });
+    let updateCount = 0;
+    const ledger = new Set<string>();
+
+    // 1) First delivery fails mid-processing (after the ledger claim, during the
+    //    invoice update). The handler maps it to a 500, and the tx rollback must
+    //    remove the ledger claim so the event is NOT recorded as processed.
+    const failApp = await buildLedgerApp({
+      verifySignature: async () => event,
+      getInvoice: () => stored,
+      onUpdate: (_id, data) => { updateCount++; stored = { ...stored, ...data }; },
+      ledger,
+      failOnUpdate: true,
+    });
+    const rFail = await postWebhook(failApp, JSON.stringify(event));
+
+    expect(rFail.status).toBe(500);                    // non-business error → 500 → Stripe retries
+    expect(updateCount).toBe(0);                        // no successful mutation
+    expect(ledger.has('evt_ledger_fail_1')).toBe(false); // ledger row rolled back
+
+    // 2) Stripe retries the SAME event id. Because the ledger has no row, it
+    //    reprocesses cleanly — proving the failure did not poison idempotency.
+    const okApp = await buildLedgerApp({
+      verifySignature: async () => event,
+      getInvoice: () => stored,
+      onUpdate: (_id, data) => { updateCount++; stored = { ...stored, ...data }; },
+      ledger,
+    });
+    const rRetry = await postWebhook(okApp, JSON.stringify(event));
+
+    expect(rRetry.status).toBe(200);
+    expect(updateCount).toBe(1);                        // retry processed it exactly once
+    expect(ledger.has('evt_ledger_fail_1')).toBe(true); // now durably recorded
   });
 });

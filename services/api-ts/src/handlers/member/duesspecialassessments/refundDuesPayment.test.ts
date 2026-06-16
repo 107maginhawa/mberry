@@ -98,6 +98,7 @@ describe('[Phase15] refundDuesPayment — fund reversal + membership status', ()
 
     stubRepo(DuesRepository, {
       getPayment: async () => ({ ...fakePayment }),
+      getPaymentForUpdate: async () => ({ ...fakePayment }),
       getFundAllocations: async () => [...fakeAllocations],
       createFundAllocations: async (allocs: any[]) => { capturedReversals = allocs; },
       updatePaymentStatus: async (_id: string, _cur: string, status: string, extra: any) => ({
@@ -142,6 +143,11 @@ describe('[Phase15] refundDuesPayment — fund reversal + membership status', ()
         membershipExtendedFrom: '2025-06-30',
         membershipExtendedTo: '2026-06-30',
       }),
+      getPaymentForUpdate: async () => ({
+        ...fakePayment,
+        membershipExtendedFrom: '2025-06-30',
+        membershipExtendedTo: '2026-06-30',
+      }),
       getFundAllocations: async () => [...fakeAllocations],
       createFundAllocations: async () => {},
       updatePaymentStatus: async (_id: string, _cur: string, status: string, extra: any) => ({
@@ -176,6 +182,7 @@ describe('[Phase15] refundDuesPayment — fund reversal + membership status', ()
 
     stubRepo(DuesRepository, {
       getPayment: async () => ({ ...fakePayment, amount: 5000 }),
+      getPaymentForUpdate: async () => ({ ...fakePayment, amount: 5000 }),
       getFundAllocations: async () => [...fakeAllocations],
       createFundAllocations: async (allocs: any[]) => { capturedReversals = allocs; },
       updatePaymentStatus: async (_id: string, _cur: string, status: string, extra: any) => ({
@@ -214,6 +221,11 @@ describe('[Phase15] refundDuesPayment — fund reversal + membership status', ()
 
     stubRepo(DuesRepository, {
       getPayment: async () => ({
+        ...fakePayment,
+        membershipExtendedFrom: '2024-01-01', // pre-payment expiry in the past
+        membershipExtendedTo: '2026-06-30',
+      }),
+      getPaymentForUpdate: async () => ({
         ...fakePayment,
         membershipExtendedFrom: '2024-01-01', // pre-payment expiry in the past
         membershipExtendedTo: '2026-06-30',
@@ -265,6 +277,7 @@ describe('[Phase15] refundDuesPayment — fund reversal + membership status', ()
 
     stubRepo(DuesRepository, {
       getPayment: async () => ({ ...fakePayment }),
+      getPaymentForUpdate: async () => ({ ...fakePayment }),
       getFundAllocations: async () => [],
       createFundAllocations: async () => {},
       updatePaymentStatus: async (_id: string, _cur: string, status: string, extra: any) => ({
@@ -322,6 +335,7 @@ describe('[Phase15] refundDuesPayment — fund reversal + membership status', ()
 
     stubRepo(DuesRepository, {
       getPayment: async () => ({ ...fakePayment, amount: 5000, refundedAmount: 0 }),
+      getPaymentForUpdate: async () => ({ ...fakePayment, amount: 5000, refundedAmount: 0 }),
       getFundAllocations: async () => [...fakeAllocations],
       createFundAllocations: async () => {},
       updatePaymentStatus: async (_id: string, _cur: string, status: string, extra: any) => {
@@ -350,6 +364,7 @@ describe('[Phase15] refundDuesPayment — fund reversal + membership status', ()
 
     stubRepo(DuesRepository, {
       getPayment: async () => ({ ...fakePayment, amount: 5000, refundedAmount: 0 }),
+      getPaymentForUpdate: async () => ({ ...fakePayment, amount: 5000, refundedAmount: 0 }),
       getFundAllocations: async () => [...fakeAllocations],
       createFundAllocations: async () => {},
       updatePaymentStatus: async (_id: string, _cur: string, status: string, extra: any) => {
@@ -393,6 +408,7 @@ describe('[Phase15] refundDuesPayment — fund reversal + membership status', ()
 
     stubRepo(DuesRepository, {
       getPayment: async () => ({ ...fakePayment }),
+      getPaymentForUpdate: async () => ({ ...fakePayment }),
       getFundAllocations: async () => [...fakeAllocations],
       createFundAllocations: async () => {},
       updatePaymentStatus: async (_id: string, _cur: string, status: string, extra: any) => ({
@@ -433,6 +449,13 @@ describe('[Phase15] refundDuesPayment — fund reversal + membership status', ()
         status: 'partiallyRefunded',
         paidAt: recentPaidAt,
       }),
+      getPaymentForUpdate: async () => ({
+        ...fakePayment,
+        amount: 5000,
+        refundedAmount: 3000,
+        status: 'partiallyRefunded',
+        paidAt: recentPaidAt,
+      }),
       getFundAllocations: async () => { refundProcessed = true; return [...fakeAllocations]; },
       createFundAllocations: async () => { refundProcessed = true; },
       updatePaymentStatus: async (_id: string, _cur: string, status: string, extra: any) => {
@@ -464,6 +487,13 @@ describe('[Phase15] refundDuesPayment — fund reversal + membership status', ()
     stubRepo(DuesRepository, {
       // 5000 payment, 3000 already refunded → 2000 remaining
       getPayment: async () => ({
+        ...fakePayment,
+        amount: 5000,
+        refundedAmount: 3000,
+        status: 'partiallyRefunded',
+        paidAt: recentPaidAt,
+      }),
+      getPaymentForUpdate: async () => ({
         ...fakePayment,
         amount: 5000,
         refundedAmount: 3000,
@@ -508,6 +538,15 @@ describe('[Phase15] refundDuesPayment — fund reversal + membership status', ()
 
     stubRepo(DuesRepository, {
       getPayment: async () => ({
+        ...fakePayment,
+        amount: 5000,
+        refundedAmount: 0,
+        status: 'completed',
+        paidAt: recentPaidAt,
+        membershipExtendedFrom: '2025-06-30',
+        membershipExtendedTo: '2026-06-30',
+      }),
+      getPaymentForUpdate: async () => ({
         ...fakePayment,
         amount: 5000,
         refundedAmount: 0,
@@ -579,6 +618,7 @@ describe('[Phase15] refundDuesPayment — fund reversal + membership status', ()
   test('emits dues.payment.refunded after successful refund', async () => {
     stubRepo(DuesRepository, {
       getPayment: async () => ({ ...fakePayment, amount: 5000, refundedAmount: 0 }),
+      getPaymentForUpdate: async () => ({ ...fakePayment, amount: 5000, refundedAmount: 0 }),
       getFundAllocations: async () => [...fakeAllocations],
       createFundAllocations: async () => {},
       updatePaymentStatus: async (_id: string, _cur: string, status: string, extra: any) => ({

@@ -1,5 +1,5 @@
 import type { Context } from 'hono';
-import { NotFoundError, BusinessLogicError } from '@/core/errors';
+import { NotFoundError, BusinessLogicError, ConflictError } from '@/core/errors';
 import { EventsRepository } from './repos/events.repo';
 import { checkActiveMembership } from './utils/membership-check';
 import type { Session } from '@/types/auth';
@@ -28,24 +28,59 @@ export async function registerForEvent(ctx: Context): Promise<Response> {
     throw new BusinessLogicError('Active membership required to register for events');
   }
 
-  const regCount = await repo.getRegistrationCount(eventId);
-  const isWaitlisted = event.capacity ? regCount >= event.capacity : false;
+  // P0 RACE FIX + P1 single-row transition: capacity check + insert/transition
+  // is atomic inside registerAtomic (event-row lock + confirmed-count + existing
+  // -row lookup + guarded insert/update in one transaction). The repo returns an
+  // `outcome` discriminator so the handler can branch on registration semantics
+  // without re-querying:
+  //   - 'created' / 'reactivated' → new active row (fresh insert OR a terminal
+  //     row — cancelled/refunded/noShow — transitioned back to active). 201.
+  //   - 'idempotent' + 'confirmed' → already actively registered → 409 conflict.
+  //   - 'idempotent' + 'waitlisted' → already on the waitlist → graceful 200,
+  //     NOT a 23505/"already registered" error. Promotion happens via the
+  //     waitlist-promotion path, not here.
+  // The 23505 catch remains the backstop for a genuinely concurrent double
+  // INSERT (two registrants with no existing row racing the unique index).
+  let registration;
+  try {
+    registration = await repo.registerAtomic({
+      eventId,
+      personId: session.user.id,
+      organizationId: event.organizationId,
+      capacity: event.capacity ?? null,
+      createdBy: session.user.id,
+      updatedBy: session.user.id,
+    });
+  } catch (error: unknown) {
+    const dbError = error as { code?: string };
+    if (dbError?.code === '23505') {
+      throw new ConflictError('You are already registered for this event');
+    }
+    throw error;
+  }
 
-  const registration = await repo.register({
-    eventId,
-    personId: session.user.id,
-    status: isWaitlisted ? 'waitlisted' : 'confirmed',
-    organizationId: event.organizationId,
-    createdBy: session.user.id,
-    updatedBy: session.user.id,
-  });
+  const { outcome, ...data } = registration;
 
+  // Already actively confirmed → idempotent conflict (no duplicate row created).
+  if (outcome === 'idempotent' && data.status === 'confirmed') {
+    throw new ConflictError('You are already registered for this event');
+  }
+
+  // Already on the waitlist → return current state gracefully (no error, no new row).
+  if (outcome === 'idempotent' && data.status === 'waitlisted') {
+    return ctx.json({ data }, 200);
+  }
+
+  // Fresh active registration ('created') or re-activated terminal row
+  // ('reactivated') → emit the domain event and return 201.
   domainEvents.emit('event.registered', {
     eventId,
     personId: session.user.id,
     organizationId: event.organizationId,
-    status: isWaitlisted ? 'waitlisted' : 'confirmed',
+    // registerAtomic only ever yields 'confirmed' | 'waitlisted' here; narrow the
+    // wider DB enum type to match the domain-event payload contract.
+    status: data.status as 'confirmed' | 'waitlisted',
   }).catch(() => {});
 
-  return ctx.json({ data: registration }, 201);
+  return ctx.json({ data }, 201);
 }

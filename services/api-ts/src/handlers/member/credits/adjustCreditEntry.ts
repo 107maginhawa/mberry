@@ -1,6 +1,6 @@
 import type { Context } from 'hono';
 import { randomUUID } from 'node:crypto';
-import { eq, sql } from 'drizzle-orm';
+import { eq } from 'drizzle-orm';
 import { UnauthorizedError, ValidationError, ConflictError } from '@/core/errors';
 import type { DatabaseInstance } from '@/core/database';
 import { creditEntries, orgCpdConfig } from '@/handlers/association:member/repos/credits.schema';
@@ -84,11 +84,13 @@ export async function adjustCreditEntry(ctx: Context): Promise<Response> {
       reason: reasonRaw,
     }).catch(() => {});
 
-    try {
-      await db.execute(sql`REFRESH MATERIALIZED VIEW CONCURRENTLY compliance_standings`);
-    } catch {
-      /* view may not exist */
-    }
+    // Defer the compliance_standings matview refresh off the request path.
+    // We return the written entry directly (no read-back of the view), so
+    // eventual consistency is fine. Fire-and-forget — never blocks the response.
+    domainEvents.emit('compliance.recompute', {
+      organizationId: orgId,
+      reason: 'adjustment',
+    }).catch(() => {});
 
     return ctx.json({ data: entry }, 201);
   } catch (err: any) {

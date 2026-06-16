@@ -18,7 +18,9 @@ const fakePendingInvite = createFakeInvite({
   email: 'member@example.com',
   personId: null,
   message: null,
-  metadata: { role: 'member' },
+  // tier is required to claim (NOT-NULL membership.tier_id) — default fixture
+  // carries one so happy-path tests succeed; tier-absent cases override it.
+  metadata: { role: 'member', membershipTierId: 'tier-default' },
   expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
   createdByOfficer: 'officer-1',
   claimedAt: null,
@@ -91,7 +93,7 @@ describe('claimInvite', () => {
     const response = await claimInvite(ctx);
     expect(response.body.claimed).toBe(true);
     expect(response.body.organizationId).toBe('org-1');
-    expect(response.body.metadata).toEqual({ role: 'member' });
+    expect(response.body.metadata).toEqual({ role: 'member', membershipTierId: 'tier-default' });
     expect(response.body.membershipStatus).toBe('joined');
     expect(response.body.membershipId).toBeDefined();
   });
@@ -205,20 +207,21 @@ describe('claimInvite', () => {
     expect(capturedId).toBe('invite-1');
   });
 
-  test('returns null metadata when invite has no metadata', async () => {
+  test('throws ValidationError (before any write) when invite has no metadata / no tier', async () => {
+    let markClaimedCalled = false;
     mocks = stubBothRepos({
       findByTokenHash: async () => ({ ...fakePendingInvite, metadata: null }),
-      markClaimed: async () => ({ ...fakeClaimedInvite, metadata: null }),
+      markClaimed: async () => { markClaimedCalled = true; return fakeClaimedInvite; },
     });
 
     const ctx = makeCtx({
       _params: { token: RAW_TOKEN },
     });
 
-    const response = await claimInvite(ctx);
-    expect(response.body.claimed).toBe(true);
-    expect(response.body.metadata).toBeNull();
-    expect(response.body.membershipStatus).toBe('joined');
+    const { ValidationError } = await import('@/core/errors');
+    await expect(claimInvite(ctx)).rejects.toBeInstanceOf(ValidationError);
+    // tierId guard runs before the transaction — no claim was burned.
+    expect(markClaimedCalled).toBe(false);
   });
 
   // ─── Membership-specific tests ────────────────────────
@@ -267,8 +270,8 @@ describe('claimInvite', () => {
     expect(capturedMemberData.memberNumber).toBe('LIC-123');
   });
 
-  test('creates membership with default null tierId when metadata has no tier', async () => {
-    let capturedMemberData: any = null;
+  test('throws ValidationError when metadata is present but tier is missing — no write occurs', async () => {
+    let addMemberCalled = false;
 
     mocks = stubBothRepos({
       findByTokenHash: async () => ({
@@ -278,7 +281,7 @@ describe('claimInvite', () => {
     }, {
       getMember: async () => null,
       addMember: async (data: any) => {
-        capturedMemberData = data;
+        addMemberCalled = true;
         return { ...fakeMembership, ...data, id: 'membership-3' };
       },
     });
@@ -287,10 +290,37 @@ describe('claimInvite', () => {
       _params: { token: RAW_TOKEN },
     });
 
-    await claimInvite(ctx);
-    expect(capturedMemberData.tierId).toBeNull();
-    expect(capturedMemberData.categoryId).toBeNull();
-    expect(capturedMemberData.memberNumber).toBeNull();
+    const { ValidationError } = await import('@/core/errors');
+    await expect(claimInvite(ctx)).rejects.toBeInstanceOf(ValidationError);
+    expect(addMemberCalled).toBe(false);
+  });
+
+  test('partial failure: addMember throws → whole claim rolls back (markClaimed not committed)', async () => {
+    // The mock db.transaction runs the callback and propagates throws; a real
+    // DB rolls back, so markClaimed never persists. We assert the handler
+    // surfaces the failure rather than returning a "claimed" success — i.e. the
+    // invite is NOT left burned with no membership.
+    let markClaimedCalled = false;
+
+    mocks = stubBothRepos({
+      findByTokenHash: async () => ({
+        ...fakePendingInvite,
+        metadata: { membershipTierId: 'tier-7', role: 'member' },
+      }),
+      markClaimed: async () => { markClaimedCalled = true; return fakeClaimedInvite; },
+    }, {
+      getMember: async () => null,
+      addMember: async () => { throw new Error('DB write failed'); },
+    });
+
+    const ctx = makeCtx({
+      _params: { token: RAW_TOKEN },
+    });
+
+    await expect(claimInvite(ctx)).rejects.toThrow('DB write failed');
+    // markClaimed + addMember share one transaction; the throw aborts it so the
+    // claim is never committed (no orphaned "claimed but no membership" state).
+    expect(markClaimedCalled).toBe(true);
   });
 
   test('membership addMember is called with correct personId from user context', async () => {

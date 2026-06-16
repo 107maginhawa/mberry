@@ -209,9 +209,12 @@ describe('[AC-M11-002] Certificate After Training', () => {
     expect(response.body.data).toHaveLength(0);
   });
 
-  test('certificate number format is CERT-YYYY-NNNNNN', () => {
-    const certNum = 'CERT-2026-000001';
-    expect(certNum).toMatch(/^CERT-\d{4}-\d{6}$/);
+  test('certificate number format is ORGCODE-YYYY-NNNN', () => {
+    // Canonical format produced by utils/certificate-numbering.ts (the single,
+    // ON-CONFLICT-based allocation path). The old count(*)-based CERT-YYYY-NNNNNN
+    // repo path was divergent dead code and was removed.
+    const certNum = 'PDA-2026-0001';
+    expect(certNum).toMatch(/^[A-Z]+-\d{4}-\d{4}$/);
   });
 
   test('certificate requires trainingId (schema constraint)', () => {
@@ -231,36 +234,10 @@ describe('[AC-M11-002] Certificate After Training', () => {
     expect(cert1.personId).toBe(cert2.personId);
   });
 
-  describe('CertificatesRepository', () => {
-    test('getNextCertificateNumber generates sequential numbers', async () => {
-      // The repo counts existing certs matching CERT-YYYY-% and increments
-      const mockDb = {
-        select: () => ({
-          from: () => ({
-            where: () => Promise.resolve([{ count: 5 }]),
-          }),
-        }),
-      } as any;
-
-      const repo = new CertificatesRepository(mockDb);
-      const nextNum = await repo.getNextCertificateNumber(ORG_ID, 2026);
-      expect(nextNum).toBe('CERT-2026-000006');
-    });
-
-    test('getNextCertificateNumber starts from 1 when no existing certs', async () => {
-      const mockDb = {
-        select: () => ({
-          from: () => ({
-            where: () => Promise.resolve([{ count: 0 }]),
-          }),
-        }),
-      } as any;
-
-      const repo = new CertificatesRepository(mockDb);
-      const nextNum = await repo.getNextCertificateNumber(ORG_ID, 2026);
-      expect(nextNum).toBe('CERT-2026-000001');
-    });
-  });
+  // NOTE: CertificatesRepository.getNextCertificateNumber removed — it was a
+  // divergent count(*)-based path (CERT-YYYY-NNNNNN, race-prone, no production
+  // callers). Certificate numbering is now the single ON-CONFLICT allocation in
+  // utils/certificate-numbering.ts, covered by certificate-numbering.test.ts.
 });
 
 // ─── AC-M11-003: SVG Sanitization ──────────────────────

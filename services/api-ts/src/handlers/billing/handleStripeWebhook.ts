@@ -2,13 +2,19 @@ import type { BaseContext } from '@/types/app';
 import type { NotificationService } from '@/core/notifs';
 import {
   ValidationError,
-  BusinessLogicError
+  BusinessLogicError,
+  InternalError
 } from '@/core/errors';
 import { InvoiceRepository, MerchantAccountRepository } from './repos/billing.repo';
 // invoices are correlated via indexed repo lookups
 // (invoiceRepo.findByStripePaymentIntentId / findByStripeTransferId — FIX-002).
 import type { MerchantMetadata } from './repos/billing.schema';
 import { subscriptions } from '@/handlers/platformadmin/repos/platform-admin.schema';
+// Durable webhook idempotency ledger (P1 FIX-WEBHOOK-IDEMP). Reuses the generic
+// `webhook_retry_log` table already used by the dues Stripe webhook — keyed on a
+// UNIQUE idempotencyKey (the Stripe event id). The unique insert IS the guard:
+// a 23505 conflict means the event was already processed → ack 200, no replay.
+import { webhookRetryLogs } from '@/handlers/association:member/repos/dues-payments.schema';
 import { eq } from 'drizzle-orm';
 import type Stripe from 'stripe';
 
@@ -64,10 +70,197 @@ export async function handleStripeWebhook(
   );
   
   try {
-    // Create repository instances
-    const invoiceRepo = new InvoiceRepository(database, logger);
-    const merchantAccountRepo = new MerchantAccountRepository(database, logger);
-    
+    // ── Durable idempotency (P1 FIX-WEBHOOK-IDEMP) ──────────────────────────
+    // Everything below runs inside a single transaction. The first thing we do
+    // is claim the event id in the unique `webhook_retry_log` ledger. If the
+    // claim conflicts (already present) the event was processed before → skip &
+    // ack 200. Because the claim and all side effects share one tx, a mid-
+    // processing failure rolls the ledger row back too, so Stripe safely retries.
+    const wasDuplicate = await database.transaction(async (tx: typeof database) => {
+      // Create repository instances bound to the transaction so reads/writes and
+      // the ledger claim commit (or roll back) atomically together.
+      const invoiceRepo = new InvoiceRepository(tx, logger);
+      const merchantAccountRepo = new MerchantAccountRepository(tx, logger);
+
+      // Resolve a real organizationId for this event. The ledger column is a
+      // NOT NULL FK to organization, and Stripe billing events do not carry an
+      // org id in metadata — so derive it from the entity the event targets.
+      // A read-only pre-lookup (idempotent) is safe before the claim.
+      const organizationId = await resolveEventOrganizationId(
+        event,
+        invoiceRepo,
+        merchantAccountRepo,
+        database,
+        logger,
+      );
+
+      // Events with no resolvable org target no billing entity → no durable
+      // side effects to dedupe (handlers below already no-op). Dispatch without
+      // a ledger claim so we never violate the FK with a sentinel org.
+      if (organizationId) {
+        const claimed = await tx
+          .insert(webhookRetryLogs)
+          .values({
+            idempotencyKey: event.id,
+            provider: 'stripe',
+            eventType: event.type,
+            payload: (event.data?.object ?? {}) as unknown as Record<string, unknown>,
+            organizationId,
+            status: 'completed',
+          })
+          .onConflictDoNothing({ target: webhookRetryLogs.idempotencyKey })
+          .returning({ id: webhookRetryLogs.id });
+
+        if (claimed.length === 0) {
+          // Unique conflict → this event id is already in the ledger → already
+          // processed. No replay; ack 200.
+          logger?.info(
+            { action: 'handleStripeWebhook.duplicate', eventType: event.type, eventId: event.id },
+            'Duplicate Stripe webhook event — already processed, skipping',
+          );
+          return true;
+        }
+      }
+
+      await dispatchWebhookEvent(event, invoiceRepo, merchantAccountRepo, tx, logger, notificationService);
+      return false;
+    });
+
+    if (wasDuplicate) {
+      return ctx.json({ received: true, duplicate: true }, 200);
+    }
+
+    logger?.info(
+      { action: 'handleStripeWebhook.completed', eventType: event.type, eventId: event.id },
+      'Webhook event processed successfully'
+    );
+
+    ctx.set('auditResourceId', event.id);
+    ctx.set('auditDescription', `Stripe webhook processed: ${event.type}`);
+    ctx.set('auditDetails', {
+        stripeEventType: event.type,
+        stripeEventId: event.id,
+        livemode: event.livemode,
+      });
+
+    // Return 200 to acknowledge receipt
+    return ctx.json({ received: true }, 200);
+
+  } catch (error) {
+    logger?.error(
+      { action: 'handleStripeWebhook.error', error, eventType: event.type, eventId: event.id },
+      'Failed to process webhook event'
+    );
+
+    // Explicit business-logic errors are terminal — ack 200 so Stripe stops
+    // retrying (the condition won't resolve on replay).
+    if (error instanceof BusinessLogicError) {
+      return ctx.json({ received: true, error: error.message }, 200);
+    }
+
+    // Genuine/unexpected failures must surface as 5xx so Stripe RETRIES. The
+    // durable ledger claim was rolled back with the transaction, so the retry
+    // reprocesses cleanly instead of being wrongly deduped (P1 FIX-WEBHOOK-IDEMP).
+    throw new InternalError('Failed to process webhook event');
+  }
+}
+
+/**
+ * Resolve the organizationId a Stripe event acts on, so the durable idempotency
+ * ledger (NOT NULL org FK) can record it. Returns null when the event targets no
+ * known billing entity (e.g. unhandled types, transfers/charges with no matching
+ * invoice) — those produce no durable side effects, so they need no ledger row.
+ */
+async function resolveEventOrganizationId(
+  event: Stripe.Event,
+  invoiceRepo: InvoiceRepository,
+  merchantAccountRepo: MerchantAccountRepository,
+  database: any,
+  logger: any,
+): Promise<string | null> {
+  try {
+    switch (event.type as string) {
+      case 'payment_intent.succeeded':
+      case 'payment_intent.payment_failed':
+      case 'payment_intent.canceled':
+      case 'payment_intent.requires_action': {
+        const pi = event.data.object as Stripe.PaymentIntent;
+        const invoiceId = pi.metadata?.['invoiceId'];
+        if (!invoiceId) return null;
+        const invoice = await invoiceRepo.findOneById(invoiceId);
+        return invoice?.organizationId ?? null;
+      }
+      case 'charge.succeeded':
+      case 'charge.failed':
+      case 'charge.refunded': {
+        const charge = event.data.object as Stripe.Charge;
+        const paymentIntentId = charge.payment_intent as string;
+        if (!paymentIntentId) return null;
+        const invoice = await invoiceRepo.findByStripePaymentIntentId(paymentIntentId);
+        return invoice?.organizationId ?? null;
+      }
+      case 'transfer.created':
+      case 'transfer.failed': {
+        const transfer = event.data.object as Stripe.Transfer;
+        const found = await invoiceRepo.findByStripeTransferId(transfer.id);
+        return found?.[0]?.organizationId ?? null;
+      }
+      case 'account.updated': {
+        const account = event.data.object as Stripe.Account;
+        const ma = await merchantAccountRepo.findByStripeAccountId(account.id);
+        return ma?.organizationId ?? null;
+      }
+      case 'account.application.deauthorized': {
+        const deauth = event.data.object as { account: string };
+        const ma = await merchantAccountRepo.findByStripeAccountId(deauth.account);
+        return ma?.organizationId ?? null;
+      }
+      case 'customer.subscription.updated':
+      case 'customer.subscription.deleted': {
+        const sub = event.data.object as Stripe.Subscription;
+        const [local] = await database
+          .select()
+          .from(subscriptions)
+          .where(eq(subscriptions.stripeSubscriptionId, sub.id))
+          .limit(1);
+        return local?.organizationId ?? null;
+      }
+      case 'invoice.payment_succeeded':
+      case 'invoice.payment_failed': {
+        const stripeSubscriptionId =
+          (event.data.object as { subscription?: string | null }).subscription ?? null;
+        if (!stripeSubscriptionId) return null;
+        const [local] = await database
+          .select()
+          .from(subscriptions)
+          .where(eq(subscriptions.stripeSubscriptionId, stripeSubscriptionId))
+          .limit(1);
+        return local?.organizationId ?? null;
+      }
+      default:
+        return null;
+    }
+  } catch (error) {
+    logger?.warn(
+      { action: 'resolveEventOrganizationId.failed', error, eventType: event.type, eventId: event.id },
+      'Could not resolve organizationId for webhook event',
+    );
+    return null;
+  }
+}
+
+/**
+ * Dispatch a verified Stripe event to its type-specific handler. Runs inside the
+ * idempotency transaction; any throw rolls back the ledger claim with it.
+ */
+async function dispatchWebhookEvent(
+  event: Stripe.Event,
+  invoiceRepo: InvoiceRepository,
+  merchantAccountRepo: MerchantAccountRepository,
+  database: any,
+  logger: any,
+  notificationService: NotificationService,
+): Promise<void> {
     // Handle different webhook event types
     switch (event.type as string) {
       // Payment Intent events
@@ -138,44 +331,11 @@ export async function handleStripeWebhook(
 
       default:
         logger.info(
-          { action: 'handleStripeWebhook.4', eventType: event.type, eventId: event.id }, 
+          { action: 'handleStripeWebhook.4', eventType: event.type, eventId: event.id },
           'Unhandled webhook event type - ignoring'
         );
         break;
     }
-    
-    logger?.info(
-      { action: 'handleStripeWebhook.completed', eventType: event.type, eventId: event.id },
-      'Webhook event processed successfully'
-    );
-
-    ctx.set('auditResourceId', event.id);
-    ctx.set('auditDescription', `Stripe webhook processed: ${event.type}`);
-    ctx.set('auditDetails', {
-        stripeEventType: event.type,
-        stripeEventId: event.id,
-        livemode: event.livemode,
-      });
-
-    // Return 200 to acknowledge receipt
-    return ctx.json({ received: true }, 200);
-
-  } catch (error) {
-    logger?.error(
-      { action: 'handleStripeWebhook.error', error, eventType: event.type, eventId: event.id },
-      'Failed to process webhook event'
-    );
-    
-    // Still return 200 to prevent retries for business logic errors
-    if (error instanceof BusinessLogicError) {
-      return ctx.json({ received: true, error: error.message }, 200);
-    }
-    
-    throw new BusinessLogicError(
-      'Failed to process webhook event',
-      'WEBHOOK_PROCESSING_ERROR'
-    );
-  }
 }
 
 /**

@@ -1,7 +1,8 @@
 import { describe, test, expect, beforeEach, afterEach } from 'bun:test';
 import { makeCtx, stubRepo, restoreRepo } from '@/test-utils/make-ctx';
-import { fakeDocument } from '@/test-utils/factories';
+import { fakeDocument, fakeStoredFile } from '@/test-utils/factories';
 import { DocumentRepository } from './repos/documents.repo';
+import { StorageFileRepository } from '@/handlers/storage/repos/file.repo';
 import { OfficerTermRepository } from '@/handlers/association:member/repos/governance.repo';
 import { createDocument } from './createDocument';
 
@@ -12,6 +13,7 @@ let lastCreateInput: any = null;
 describe('createDocument', () => {
   beforeEach(() => {
     restoreRepo(DocumentRepository);
+    restoreRepo(StorageFileRepository);
     restoreRepo(OfficerTermRepository);
     lastCreateInput = null;
     stubRepo(DocumentRepository, {
@@ -19,6 +21,13 @@ describe('createDocument', () => {
         lastCreateInput = input;
         return fakeDoc;
       },
+    });
+    // Default: the storageKey resolves to a StoredFile the caller (user-1) owns
+    // in their org (tenant-1) — so the ownership gate passes. Tests that probe
+    // the cross-tenant exfil path override this stub.
+    stubRepo(StorageFileRepository, {
+      findOneById: async (id: string) =>
+        fakeStoredFile({ id, organizationId: 'tenant-1', owner: 'user-1' }),
     });
     // Default: caller is an active officer (so org-owned creates are allowed).
     stubRepo(OfficerTermRepository, {
@@ -28,6 +37,7 @@ describe('createDocument', () => {
 
   afterEach(() => {
     restoreRepo(DocumentRepository);
+    restoreRepo(StorageFileRepository);
     restoreRepo(OfficerTermRepository);
   });
 
@@ -84,5 +94,55 @@ describe('createDocument', () => {
     const ctx = makeCtx({ _body: { title: 'T', fileName: 'f.pdf', mimeType: 'application/pdf', size: 1, storageKey: 'k', ownerId: 'org-1', ownerType: 'organization', accessLevel: 'tenantOnly' } });
     const res = await createDocument(ctx);
     expect(res.status).toBe(201);
+  });
+
+  // SEC (cross-tenant exfil): a self-owned document whose storageKey points at
+  // a file the caller does not own / is in another org must be rejected, even
+  // though the self-owned branch bypasses the officer check.
+  describe('storageKey ownership gate (cross-tenant exfil)', () => {
+    const selfOwnedBody = {
+      title: 'Mine',
+      fileName: 'f.pdf',
+      mimeType: 'application/pdf',
+      size: 1,
+      storageKey: 'foreign-file-uuid',
+      ownerId: 'user-1',
+      ownerType: 'person' as const,
+      accessLevel: 'tenantOnly' as const,
+    };
+
+    test('rejects a storageKey pointing at another ORG file (404 → ValidationError)', async () => {
+      restoreRepo(StorageFileRepository);
+      stubRepo(StorageFileRepository, {
+        findOneById: async (id: string) =>
+          fakeStoredFile({ id, organizationId: 'evil-org', owner: 'user-1' }),
+      });
+      const ctx = makeCtx({ _body: selfOwnedBody });
+      await expect(createDocument(ctx)).rejects.toThrow(/storageKey/);
+    });
+
+    test('rejects a storageKey owned by another USER in the same org', async () => {
+      restoreRepo(StorageFileRepository);
+      stubRepo(StorageFileRepository, {
+        findOneById: async (id: string) =>
+          fakeStoredFile({ id, organizationId: 'tenant-1', owner: 'other-user' }),
+      });
+      const ctx = makeCtx({ _body: selfOwnedBody });
+      await expect(createDocument(ctx)).rejects.toThrow(/storageKey/);
+    });
+
+    test('rejects a storageKey that resolves to no StoredFile row', async () => {
+      restoreRepo(StorageFileRepository);
+      stubRepo(StorageFileRepository, { findOneById: async () => undefined });
+      const ctx = makeCtx({ _body: selfOwnedBody });
+      await expect(createDocument(ctx)).rejects.toThrow(/storageKey/);
+    });
+
+    test('accepts a storageKey the caller owns in their org', async () => {
+      // default beforeEach stub: owner user-1, org tenant-1
+      const ctx = makeCtx({ _body: selfOwnedBody });
+      const res = await createDocument(ctx);
+      expect(res.status).toBe(201);
+    });
   });
 });

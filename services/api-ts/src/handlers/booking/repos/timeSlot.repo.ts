@@ -82,10 +82,17 @@ export class TimeSlotRepository extends DatabaseRepository<TimeSlot, NewTimeSlot
     }
 
     if (filters.locationTypes && filters.locationTypes.length > 0) {
+      // location_types is JSONB; `&&` (array overlap) is invalid on jsonb. Use
+      // jsonb_exists_any (the `?|` operator in function form) with a text[] built
+      // from individually-bound params — correct overlap semantics ("stored array
+      // contains ANY requested type"), injection-safe (each value is a separate
+      // bound placeholder; no sql.raw, no inline interpolation).
+      const boundValues = sql.join(
+        filters.locationTypes.map((t) => sql`${t}`),
+        sql`, `
+      );
       conditions.push(
-        sql`${timeSlots.locationTypes} && ARRAY[${sql.raw(
-          filters.locationTypes.map(t => `'${t}'`).join(',')
-        )}]::text[]`
+        sql`jsonb_exists_any(${timeSlots.locationTypes}, ARRAY[${boundValues}]::text[])`
       );
     }
 

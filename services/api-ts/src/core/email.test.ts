@@ -507,6 +507,29 @@ describe('EmailServiceImpl guard pipeline', () => {
       // Should contain org ID for scoping
       expect(unsubHeader).toContain('org-999');
     });
+
+    test('unsubscribe URL uses the `orgId` query param (matches handler)', async () => {
+      // The public unsubscribe handler reads c.req.query('orgId'); emitting
+      // `&org=` would 400 the one-click link. Lock the correct param name.
+      const email = makeEmail({
+        recipientEmail: 'alice@example.com',
+        organizationId: 'org-param-check',
+      });
+      const { service, mocks } = buildService({ pendingEmails: [email] });
+
+      await service.processPendingEmails();
+
+      const [sendRequest] = mocks.send.mock.calls[0] as [any];
+      const unsubHeader: string = sendRequest.headers['List-Unsubscribe'];
+      // Strip the angle brackets and parse the URL query.
+      const urlStr = unsubHeader.replace(/^<|>$/g, '');
+      const url = new URL(urlStr);
+      expect(url.searchParams.get('orgId')).toBe('org-param-check');
+      // The legacy/incorrect `org` param must NOT be present.
+      expect(url.searchParams.has('org')).toBe(false);
+      // Email param still carried for the handler.
+      expect(url.searchParams.get('email')).toBe('alice@example.com');
+    });
   });
 
   // -------------------------------------------------------------------------

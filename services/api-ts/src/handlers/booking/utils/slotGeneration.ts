@@ -258,9 +258,13 @@ export function getNextBookableTime(minBookingHours: number): Date {
   const now = new Date();
   let nextBookable = addMinutes(now, minBookingHours * 60);
 
-  // Round up to the next 15-minute boundary for cleaner slot times
+  // Round up to the next 15-minute boundary for cleaner slot times.
+  // Any sub-minute remainder (seconds/ms) must push the ceil to the *next*
+  // boundary — otherwise a time already on a boundary (e.g. 14:45:20) would
+  // round down to 14:45:00, landing in the past. (booking slotGeneration fix)
   const minutes = nextBookable.getMinutes();
-  const roundedMinutes = Math.ceil(minutes / 15) * 15;
+  const hasSubMinute = nextBookable.getSeconds() > 0 || nextBookable.getMilliseconds() > 0;
+  const roundedMinutes = Math.ceil((minutes + (hasSubMinute ? 0.5 : 0)) / 15) * 15;
 
   if (roundedMinutes === 60) {
     // Add hour and reset minutes using immutable operations

@@ -34,15 +34,20 @@ function buildMockDb(insertBehavior: 'success' | 'error' = 'success', selectResu
         insertSpy(v);
         // For 'error' mode: let the first insert (reserveCertificateRange seq) succeed,
         // but fail subsequent inserts (certificate batch insert)
-        if (behavior === 'error' && insertCallCount > 1) return Promise.reject(new Error('DB error'));
-        return Promise.resolve();
+        const fail = behavior === 'error' && insertCallCount > 1;
+        const base: any = fail
+          ? Promise.reject(new Error('DB error'))
+          : Promise.resolve();
+        // The seq allocation does .values(...).onConflictDoUpdate(...).returning(...).
+        // First insert per transaction is the seq row; a fresh (org,year) reserves
+        // a contiguous block starting at 1, so RETURNING lastSeq = count.
+        base.onConflictDoUpdate = (_cfg: any) => ({
+          returning: async (_cols?: any) => [{ lastSeq: v.lastSeq ?? 1 }],
+        });
+        // swallow unhandled rejection on the base promise when consumed via chain
+        if (fail) base.catch(() => {});
+        return base;
       },
-    }),
-    execute: mock(() => Promise.resolve({ rows: [] })),
-    update: (_t: any) => ({
-      set: (_v: any) => ({
-        where: (_c: any) => Promise.resolve(),
-      }),
     }),
   });
   const db = {

@@ -21,6 +21,16 @@ if (!process.env['AUTH_SECRET']) {
 
 import { ensurePristine } from './make-ctx';
 
+// Capture the pristine ComplianceRepository class BEFORE any test file can
+// replace the module via bun's process-global mock.module(). Sibling tests
+// (member/credits/getComplianceReport.test.ts, refreshCompliance.test.ts)
+// mock '@/handlers/association:member/repos/compliance.repo' with a stub class
+// that lacks getByOrganization/getOrgSummary/refresh; that mock leaks into
+// compliance.repo.coverage.test.ts. The coverage test reads the real class off
+// globalThis (set here, before any mock) to stay order-independent.
+import { ComplianceRepository as PristineComplianceRepository } from '@/handlers/association:member/repos/compliance.repo';
+(globalThis as any).__pristineComplianceRepository = PristineComplianceRepository;
+
 // --- association:member repos ---
 import { MembershipApplicationRepository, MembershipRepository as AssocMembershipRepository, MembershipTierRepository } from '@/handlers/association:member/repos/membership.repo';
 import { OfficerTermRepository } from '@/handlers/association:member/repos/governance.repo';

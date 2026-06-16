@@ -196,10 +196,16 @@ export async function bulkImportMembers(
   const importId = randomUUID();
   const secret = getInviteTokenSecret();
   let imported = 0;
+  // BUG-1 fix: capture the raw token per invite (mirrors createInvite, which
+  // returns `raw` in its response). Previously only `hash` was destructured and
+  // the raw token was discarded, leaving every bulk-imported invite unclaimable
+  // (no deliverable token). We surface the raw tokens in the response so the
+  // caller can deliver each claim link.
+  const invitations: { email: string; token: string }[] = [];
 
   for (const r of preview) {
     if (r.status !== 'valid' || !r.email) continue;
-    const { hash } = generateInviteToken(secret);
+    const { raw, hash } = generateInviteToken(secret);
     await inviteRepo.create({
       organizationId: orgId,
       personId: null,
@@ -214,6 +220,7 @@ export async function bulkImportMembers(
         licenseNumber: r.licenseNumber || undefined,
       },
     });
+    invitations.push({ email: r.email, token: raw });
     imported++;
   }
 
@@ -227,6 +234,7 @@ export async function bulkImportMembers(
       imported,
       skipped: totalRows - imported,
       invitationsSent: imported,
+      invitations,
     },
   });
 }

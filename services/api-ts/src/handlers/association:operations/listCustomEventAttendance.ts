@@ -2,6 +2,7 @@ import type { ValidatedContext } from '@/types/app';
 import type { DatabaseInstance } from '@/core/database';
 import { NotFoundError } from '@/core/errors';
 import type { ListCustomEventAttendanceQuery, ListCustomEventAttendanceParams } from '@/generated/openapi/validators';
+import { clampPageSize } from '@/core/pagination';
 import { EventRepository, CheckInRepository } from './repos/events.repo';
 
 /**
@@ -17,6 +18,7 @@ export async function listCustomEventAttendance(
   if (!user) return ctx.json({ error: 'Unauthorized' }, 401);
 
   const params = ctx.req.valid('param');
+  const query = ctx.req.valid('query') as Record<string, unknown>;
   const db = ctx.get('database') as DatabaseInstance;
   const logger = ctx.get('logger');
 
@@ -26,7 +28,10 @@ export async function listCustomEventAttendance(
   const event = await eventRepo.findOneById(params.eventId);
   if (!event) throw new NotFoundError('Event not found');
 
-  const checkIns = await checkInRepo.findMany({ eventId: params.eventId });
+  const limit = clampPageSize(query['limit'] === undefined ? undefined : Number(query['limit']));
+  const offset = Math.max(0, Number(query['offset']) || 0);
+
+  const checkIns = await checkInRepo.findMany({ eventId: params.eventId }, { pagination: { limit, offset } });
 
   return ctx.json({ data: checkIns, total: checkIns.length }, 200);
 }

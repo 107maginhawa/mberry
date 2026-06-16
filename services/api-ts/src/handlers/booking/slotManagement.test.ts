@@ -491,6 +491,7 @@ describe('041 — Conflict detection (double-booking prevention)', () => {
     const event = { id: 'event-1', billingConfig: null };
     const createdBooking = makeBooking();
 
+    // P0 race fix: createBooking now claims+books inside db.transaction.
     const db: any = {
       select: () => ({
         from: () => ({
@@ -501,16 +502,13 @@ describe('041 — Conflict detection (double-booking prevention)', () => {
           }),
         }),
       }),
-      insert: () => ({
-        values: () => ({
-          returning: () => Promise.resolve([createdBooking]),
+      transaction: async (fn: any) =>
+        fn({
+          update: () => ({
+            set: () => ({ where: () => ({ returning: () => Promise.resolve([{ id: 'slot-1' }]) }) }),
+          }),
+          insert: () => ({ values: () => ({ returning: () => Promise.resolve([createdBooking]) }) }),
         }),
-      }),
-      update: () => ({
-        set: () => ({
-          where: () => Promise.resolve([]),
-        }),
-      }),
     };
 
     const repo = new BookingRepository(db);
@@ -531,6 +529,8 @@ describe('041 — Conflict detection (double-booking prevention)', () => {
     let slotUpdated = false;
     let updatedData: any;
 
+    // P0 race fix: the slot is claimed via the conditional UPDATE inside the tx
+    // (set { status: 'booked' } ... .returning()).
     const db: any = {
       select: () => ({
         from: () => ({
@@ -541,20 +541,17 @@ describe('041 — Conflict detection (double-booking prevention)', () => {
           }),
         }),
       }),
-      insert: () => ({
-        values: () => ({
-          returning: () => Promise.resolve([createdBooking]),
+      transaction: async (fn: any) =>
+        fn({
+          update: () => ({
+            set: (data: any) => {
+              slotUpdated = true;
+              updatedData = data;
+              return { where: () => ({ returning: () => Promise.resolve([{ id: 'slot-1' }]) }) };
+            },
+          }),
+          insert: () => ({ values: () => ({ returning: () => Promise.resolve([createdBooking]) }) }),
         }),
-      }),
-      update: () => ({
-        set: (data: any) => {
-          slotUpdated = true;
-          updatedData = data;
-          return {
-            where: () => Promise.resolve([]),
-          };
-        },
-      }),
     };
 
     const repo = new BookingRepository(db);

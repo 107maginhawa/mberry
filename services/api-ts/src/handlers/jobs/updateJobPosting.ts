@@ -9,8 +9,10 @@ export async function updateJobPosting(ctx: Context): Promise<Response> {
   const body = await ctx.req.json();
   const repo = new JobPostingRepository(db);
 
+  const organizationId = ctx.get('organizationId');
   const existing = await repo.get(postingId);
-  if (!existing) {
+  // Org-scope: a posting outside the caller's org is treated as missing.
+  if (!existing || existing.organizationId !== organizationId) {
     return ctx.json({ error: 'Posting not found' }, 404);
   }
 

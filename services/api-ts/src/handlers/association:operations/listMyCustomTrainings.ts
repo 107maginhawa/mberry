@@ -1,6 +1,7 @@
 import type { ValidatedContext } from '@/types/app';
 import type { DatabaseInstance } from '@/core/database';
 import type { ListMyCustomTrainingsQuery } from '@/generated/openapi/validators';
+import { clampPageSize } from '@/core/pagination';
 import { TrainingEnrollmentRepository } from './repos/training.repo';
 
 /**
@@ -27,7 +28,10 @@ export async function listMyCustomTrainings(
     filters.status = q['status'] as string;
   }
 
-  const enrollments = await enrollRepo.findMany(filters);
+  const limit = clampPageSize(q['limit'] === undefined ? undefined : Number(q['limit']));
+  const offset = Math.max(0, Number(q['offset']) || 0);
+
+  const enrollments = await enrollRepo.findMany(filters, { pagination: { limit, offset } });
 
   return ctx.json({ data: enrollments, total: enrollments.length }, 200);
 }

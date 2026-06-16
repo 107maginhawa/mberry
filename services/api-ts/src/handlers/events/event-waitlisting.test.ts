@@ -64,11 +64,13 @@ describe('[033] Event waitlisting — capacity-based auto-waitlist', () => {
     restoreRepo(MembershipRepository);
   });
 
+  // P0 race fix: capacity vs waitlist is now decided ATOMICALLY inside
+  // registerAtomic (event-row lock + confirmed-count + guarded insert). These
+  // handler tests stub registerAtomic to return the status each scenario implies.
   test('registration is confirmed when under capacity', async () => {
     stubRepo(EventsRepository, {
       get: async () => limitedEvent,
-      getRegistrationCount: async () => 0, // 0 of 2
-      register: async (data: any) => ({ id: 'reg-1', ...data }),
+      registerAtomic: async (input: any) => ({ id: 'reg-1', ...input, status: 'confirmed' }),
     });
     stubRepo(MembershipRepository, {
       findByPersonAndOrg: async () => activeMembership,
@@ -86,8 +88,8 @@ describe('[033] Event waitlisting — capacity-based auto-waitlist', () => {
   test('registration is waitlisted when at capacity', async () => {
     stubRepo(EventsRepository, {
       get: async () => limitedEvent,
-      getRegistrationCount: async () => 2, // 2 of 2 = full
-      register: async (data: any) => ({ id: 'reg-3', ...data }),
+      // capacity 2 already full → atomic method degrades to waitlisted.
+      registerAtomic: async (input: any) => ({ id: 'reg-3', ...input, status: 'waitlisted' }),
     });
     stubRepo(MembershipRepository, {
       findByPersonAndOrg: async () => activeMembership,
@@ -105,8 +107,8 @@ describe('[033] Event waitlisting — capacity-based auto-waitlist', () => {
   test('unlimited capacity event never waitlists', async () => {
     stubRepo(EventsRepository, {
       get: async () => unlimitedEvent,
-      getRegistrationCount: async () => 1000,
-      register: async (data: any) => ({ id: 'reg-x', ...data }),
+      // null capacity → always confirmed regardless of count.
+      registerAtomic: async (input: any) => ({ id: 'reg-x', ...input, status: 'confirmed' }),
     });
     stubRepo(MembershipRepository, {
       findByPersonAndOrg: async () => activeMembership,

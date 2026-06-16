@@ -65,6 +65,13 @@ export async function getFile(
     });
   }
 
+  // P0-1: Tenant boundary — file must belong to the caller's organization.
+  // Enforced BEFORE owner/admin so a foreign-org admin can't read metadata or
+  // mint a presigned download URL by UUID. Mirrors getFileDownload.ts:56-60.
+  if (file.organizationId !== ctx.get('organizationId')) {
+    throw new ForbiddenError('Access denied: file belongs to a different organization');
+  }
+
   // Check access: user must be owner or admin
   const isAdmin = await userHasRole(auth, user, 'admin');
   const isOwner = file.owner === user.id;

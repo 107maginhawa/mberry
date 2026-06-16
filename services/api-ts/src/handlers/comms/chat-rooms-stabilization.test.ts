@@ -26,14 +26,20 @@ import { config as wsHandler } from './ws.chat-room';
 
 import { ChatRoomRepository } from './repos/chatRoom.repo';
 import { ChatMessageRepository } from './repos/chatMessage.repo';
+import { ChatRoomMemberRepository } from './repos/chatRoomMember.repo';
+import { MembershipRepository } from '@/handlers/association:member/repos/membership.repo';
 
 // Restore repo prototypes after every test so the raw `prototype.x = mock()`
 // patches below don't leak into other test files (bun runs files in one process).
 ensurePristine(ChatRoomRepository);
 ensurePristine(ChatMessageRepository);
+ensurePristine(ChatRoomMemberRepository);
+ensurePristine(MembershipRepository);
 afterEach(() => {
   restoreRepo(ChatRoomRepository);
   restoreRepo(ChatMessageRepository);
+  restoreRepo(ChatRoomMemberRepository);
+  restoreRepo(MembershipRepository);
 });
 
 import {
@@ -452,6 +458,9 @@ describe('ws.chat-room — broadcast behavior', () => {
     ChatMessageRepository.prototype.createTextMessage = mock(async () =>
       makeTextMessage()
     ) as any;
+    // P0 HOLE 3: WS write path now re-checks active membership + org per frame.
+    ChatRoomMemberRepository.prototype.isMember = mock(async () => false) as any;
+    MembershipRepository.prototype.findByPersonAndOrg = mock(async () => ({ id: 'm-1' })) as any;
   });
 
   test('broadcasts chat.message to correct channel', async () => {
@@ -470,6 +479,9 @@ describe('ws.chat-room — broadcast behavior', () => {
   });
 
   test('typing indicator includes from field', async () => {
+    // user-3 isn't in the cached participants list but is an active member;
+    // authorizeWriteFrame (HOLE-3) admits them via isMember.
+    ChatRoomMemberRepository.prototype.isMember = mock(async () => true) as any;
     const { ctx, wsService } = makeWsCtx({ userId: 'user-3' });
     const ws = makeWs();
 
@@ -481,5 +493,20 @@ describe('ws.chat-room — broadcast behavior', () => {
     const calls = (wsService.publishToChannel as ReturnType<typeof mock>).mock.calls;
     const typingCall = calls.find((c: any[]) => c[1] === 'chat.typing');
     expect(typingCall![2]).toMatchObject({ from: 'user-3', isTyping: false });
+  });
+
+  // HOLE-3 regression: a revoked / non-member sender must NOT broadcast typing.
+  test('typing indicator is dropped for a non-member sender', async () => {
+    ChatRoomMemberRepository.prototype.isMember = mock(async () => false) as any;
+    const { ctx, wsService } = makeWsCtx({ userId: 'user-3' }); // not in participants
+    const ws = makeWs();
+
+    await wsHandler.onMessage(ctx, ws as any, {
+      type: 'chat.typing',
+      data: { isTyping: true },
+    });
+
+    const calls = (wsService.publishToChannel as ReturnType<typeof mock>).mock.calls;
+    expect(calls.find((c: any[]) => c[1] === 'chat.typing')).toBeUndefined();
   });
 });

@@ -116,6 +116,11 @@ const INVITE_TOKEN_DEV_DEFAULT = 'dev-secret-change-in-production';
  *  override it — enforced by the superRefine block + getUnsubscribeSecret(). */
 const UNSUB_TOKEN_DEV_DEFAULT = 'dev-unsub-secret-change-in-production';
 
+/** Insecure dev fallback for the video-call signaling token secret. Used ONLY
+ *  outside production — getCallSigningSecret() fails closed in prod (and prefers
+ *  CALL_SIGNING_SECRET → AUTH_SECRET before ever reaching this). */
+const CALL_SIGNING_DEV_DEFAULT = 'dev-call-secret-change-in-production';
+
 /** Default MinIO credential that must never reach production. */
 const STORAGE_DEV_DEFAULT_CRED = 'minioadmin';
 
@@ -222,6 +227,12 @@ const envSchema = z.object({
   // Unsubscribe-link signing secret — production-required, must not be the dev
   // default. Resolved via getUnsubscribeSecret(); dev fallback only outside prod.
   UNSUBSCRIBE_SECRET: z.string().optional(),
+
+  // Video-call signaling token secret — resolved via getCallSigningSecret().
+  // Optional in the schema: when unset it falls back to AUTH_SECRET (always
+  // present), so production never lacks a real key. A dev-only literal fallback
+  // applies ONLY outside production; the accessor fails closed in prod.
+  CALL_SIGNING_SECRET: z.string().optional(),
 
   // WebRTC
   WEBRTC_ICE_SERVERS: z.string().optional(),
@@ -522,6 +533,32 @@ export function getUnsubscribeSecret(): string {
     throw new Error('UNSUBSCRIBE_SECRET is required and must not be the dev default in production');
   }
   return UNSUB_TOKEN_DEV_DEFAULT;
+}
+
+/**
+ * Video-call signaling token HMAC secret (P0 comms remediation).
+ *
+ * Precedence: explicit CALL_SIGNING_SECRET → AUTH_SECRET (always required, so
+ * present in every booted environment) → dev-only literal fallback. In
+ * production a missing/default secret throws (fail-closed) so signaling tokens
+ * are never minted/verified with a publicly-known constant. Reads env at call
+ * time so per-test overrides keep working.
+ */
+export function getCallSigningSecret(): string {
+  const explicit = process.env['CALL_SIGNING_SECRET'];
+  if (explicit && explicit !== CALL_SIGNING_DEV_DEFAULT) return explicit;
+
+  // Fall back to AUTH_SECRET — required in every env, so this gives prod a real
+  // key even when CALL_SIGNING_SECRET is not separately set.
+  const authSecret = process.env['AUTH_SECRET'];
+  if (authSecret) return authSecret;
+
+  if (process.env['NODE_ENV'] === 'production') {
+    throw new Error(
+      'CALL_SIGNING_SECRET (or AUTH_SECRET) is required and must not be the dev default in production',
+    );
+  }
+  return CALL_SIGNING_DEV_DEFAULT;
 }
 
 export interface PaymongoConfig {

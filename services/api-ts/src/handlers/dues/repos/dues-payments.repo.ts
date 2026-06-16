@@ -183,6 +183,30 @@ export class DuesRepository {
     return payment;
   }
 
+  /**
+   * [FIX-008] Lock-and-read a payment row for in-transaction refund accounting.
+   *
+   * Returns the payment row under a `SELECT … FOR UPDATE` row lock so the
+   * caller can re-read `refundedAmount`, validate the over-refund cap, and write
+   * the new cumulative total without a read-validate-write race. MUST be called
+   * inside a `db.transaction(...)` (the lock is held until the tx commits/rolls
+   * back); calling it outside a tx degrades to a plain read with no protection.
+   *
+   * Fixes the concurrent partial-refund over-refund race: two refunds that each
+   * read `refundedAmount=0` outside the tx would both pass the cap and both
+   * apply, exceeding the original payment. With the lock the second refund
+   * blocks until the first commits, then sees the updated `refundedAmount`.
+   */
+  async getPaymentForUpdate(id: string): Promise<DuesPayment | undefined> {
+    const [payment] = await this.db
+      .select()
+      .from(duesPayments)
+      .where(eq(duesPayments.id, id))
+      .for('update')
+      .limit(1);
+    return payment;
+  }
+
   async createPayment(data: NewDuesPayment): Promise<DuesPayment> {
     const [result] = await this.db.insert(duesPayments).values(data).returning();
     return result!;

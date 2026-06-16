@@ -205,6 +205,21 @@ describe('getFile', () => {
     expect(status).toBe(200);
   });
 
+  // Cross-org tenant guard (getFile.ts:68-73), mirrors getFileDownload.ts:56-60.
+  // Org is checked BEFORE owner/admin, so a foreign-org caller — even an admin —
+  // cannot read metadata or mint a presigned URL by UUID.
+  test('throws ForbiddenError when file belongs to a different org', async () => {
+    patchRepo({ findOneById: mock(async () => ({ ...FILE_RECORD, organizationId: 'org-2' })) });
+    const ctx = makeCtx({ organizationId: 'org-1' });
+    await expect(getFile(ctx)).rejects.toBeInstanceOf(ForbiddenError);
+  });
+
+  test('blocks a foreign-org admin from accessing a file by UUID', async () => {
+    patchRepo({ findOneById: mock(async () => ({ ...FILE_RECORD, organizationId: 'org-2', owner: 'other-user' })) });
+    const ctx = makeCtx({ user: makeAdmin(), organizationId: 'org-1' });
+    await expect(getFile(ctx)).rejects.toBeInstanceOf(ForbiddenError);
+  });
+
   test('throws ValidationError when fileId is empty', async () => {
     const ctx = makeCtx({ params: { file: '' } });
     await expect(getFile(ctx)).rejects.toBeInstanceOf(ValidationError);

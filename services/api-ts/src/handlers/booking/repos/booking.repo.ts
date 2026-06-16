@@ -5,6 +5,7 @@
 
 import { eq, and, or, gte, lte, inArray, isNull, desc, asc, type SQL } from 'drizzle-orm';
 import type { DatabaseInstance } from '@/core/database';
+// DatabaseInstance is used both as the constructor arg and the tx adapter type below.
 import { DatabaseRepository, type PaginationOptions } from '@/core/database.repo';
 import { BusinessLogicError } from '@/core/errors';
 
@@ -162,39 +163,19 @@ export class BookingRepository extends DatabaseRepository<Booking, NewBooking, B
 
     // Check for billing configuration (slot-level overrides event-level)
     const billingConfig = slot.billingConfig || event?.billingConfig;
-    let invoiceId: string | null = null;
 
-    // Create invoice FIRST if billing is required (before booking insert)
-    if (billingConfig) {
-      this.logger?.debug({ bookingId, billingConfig }, 'Creating invoice for booking with billingConfig');
-      
-      const invoiceRepo = new InvoiceRepository(this.db, this.logger);
-      
-      try {
-        const invoice = await invoiceRepo.createOne({
-          organizationId: organizationId!,
-          invoiceNumber: `INV-${Date.now()}-${bookingId.substring(0, 8)}`,
-          customer: clientId,
-          merchant: slot.owner,
-          context: `booking:${bookingId}`,
-          status: 'open',
-          subtotal: billingConfig.price,
-          total: billingConfig.price,
-          currency: billingConfig.currency,
-          paymentDueAt: slot.startTime,
-          createdBy: clientId,
-          updatedBy: clientId
-        });
-        
-        invoiceId = invoice.id;
-        this.logger?.info({ invoiceId, bookingId }, 'Invoice created for booking');
-      } catch (error) {
-        this.logger?.error({ error, bookingId }, 'Failed to create invoice - aborting booking');
-        throw error; // Abort booking if invoice creation fails
-      }
-    }
-
-    // Create booking with pre-generated ID and invoice reference
+    // P0 RACE FIX: the read above (slot.status check) is NOT a lock — two
+    // concurrent requests can both see 'available' and proceed. Make the whole
+    // reserve→book→invoice sequence atomic in a single transaction and let the
+    // database be the arbiter:
+    //   1. Conditional UPDATE flips the slot 'available' → 'booked' RETURNING.
+    //      Exactly one concurrent tx wins this row; the loser gets 0 rows.
+    //   2. The booking insert is additionally guarded by the partial unique
+    //      index bookings_active_slot_unique (slot WHERE status IN active).
+    //      A 23505 here means another active booking already holds the slot.
+    //   3. Invoice is created LAST, inside the same tx, only after the slot is
+    //      ours — so a losing request never leaves an orphan invoice, and an
+    //      invoice failure rolls back the booking + slot reservation.
     const bookingData: NewBooking = {
       id: bookingId,
       client: clientId,
@@ -206,18 +187,77 @@ export class BookingRepository extends DatabaseRepository<Booking, NewBooking, B
       scheduledAt: slot.startTime,
       durationMinutes: duration,
       formResponses: request.formResponses,
-      invoice: invoiceId ?? undefined, // Use undefined for optional fields
       // Audit fields - booking created by client
       createdBy: clientId,
       updatedBy: clientId
     };
 
-    const booking = await this.createOne(bookingData);
+    let booking: Booking;
+    let invoiceId: string | null = null;
 
-    // Update slot status
-    await this.db.update(timeSlots)
-      .set({ status: 'booked', booking: booking.id })
-      .where(eq(timeSlots.id, slotId));
+    try {
+      booking = await this.db.transaction(async (tx) => {
+        // 1. Atomically claim the slot. Only an 'available' slot flips; a slot
+        //    already 'booked'/'blocked' by a racing tx returns 0 rows.
+        const claimed = await tx
+          .update(timeSlots)
+          .set({ status: 'booked', booking: bookingId })
+          .where(and(eq(timeSlots.id, slotId), eq(timeSlots.status, 'available')))
+          .returning({ id: timeSlots.id });
+
+        if (claimed.length === 0) {
+          throw new ConflictError('Slot no longer available');
+        }
+
+        // 2. Create the booking (partial unique index is the backstop).
+        // `bookings` is typed `any` at the schema level, so .returning() widens
+        // to `any[] | QueryResult<never>`; coerce to an array before destructure.
+        const insertedRows = (await tx
+          .insert(bookings)
+          .values(bookingData)
+          .returning()) as Booking[];
+        const [created] = insertedRows;
+
+        if (!created) {
+          throw new ConflictError('Slot no longer available');
+        }
+
+        // 3. Create the invoice LAST, only now that the slot is ours.
+        if (billingConfig) {
+          this.logger?.debug({ bookingId, billingConfig }, 'Creating invoice for booking with billingConfig');
+          const invoiceRepo = new InvoiceRepository(tx as unknown as DatabaseInstance, this.logger);
+          const invoice = await invoiceRepo.createOne({
+            organizationId: organizationId!,
+            invoiceNumber: `INV-${Date.now()}-${bookingId.substring(0, 8)}`,
+            customer: clientId,
+            merchant: slot.owner,
+            context: `booking:${bookingId}`,
+            status: 'open',
+            subtotal: billingConfig.price,
+            total: billingConfig.price,
+            currency: billingConfig.currency,
+            paymentDueAt: slot.startTime,
+            createdBy: clientId,
+            updatedBy: clientId
+          });
+          invoiceId = invoice.id;
+          await tx
+            .update(bookings)
+            .set({ invoice: invoiceId })
+            .where(eq(bookings.id, bookingId));
+          this.logger?.info({ invoiceId, bookingId }, 'Invoice created for booking');
+        }
+
+        return { ...(created as Booking), invoice: invoiceId ?? undefined } as Booking;
+      });
+    } catch (error: unknown) {
+      // Partial unique index violation (concurrent active booking on same slot).
+      const dbError = error as { code?: string };
+      if (dbError?.code === '23505') {
+        throw new ConflictError('Slot no longer available');
+      }
+      throw error;
+    }
 
     this.logger?.info({ bookingId: booking.id, clientId, slotId, invoiceId }, 'Booking created');
 
