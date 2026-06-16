@@ -153,9 +153,15 @@ beforeAll(async () => {
     return;
   }
 
-  scopedPool = new Pool({ connectionString: DB_URL });
-  scopedPool.on('connect', (c) => {
-    c.query(`SET search_path TO "${TEST_SCHEMA}", public`);
+  // Pin search_path at connection establishment via libpq `options` (-c …).
+  // The previous `on('connect', c => c.query('SET search_path …'))` was
+  // fire-and-forget: under pool churn a query could run on a connection before
+  // its search_path was set, hit `public` instead of TEST_SCHEMA, and return
+  // wrong counts — the source of this suite's flakiness under parallel DB load.
+  // Setting it as a startup option is applied before any query runs, no race.
+  scopedPool = new Pool({
+    connectionString: DB_URL,
+    options: `-c search_path="${TEST_SCHEMA}",public`,
   });
   db = drizzle(scopedPool);
 });
