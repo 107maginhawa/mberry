@@ -20,7 +20,17 @@
  * are all stubs whose calls we assert.
  */
 
-import { describe, test, expect, mock } from 'bun:test';
+import { describe, test, expect, mock, afterAll } from 'bun:test';
+
+// Bun's `mock.module` is process-global and cannot be restored per-test. The
+// two-factor/disable tests below stub the platform-admin repo; capture the real
+// module up front and restore it after this file so the stub can't leak into
+// later test files (e.g. orgContextMiddleware, which checks platform-admin
+// status) under CI's full-suite execution order.
+const realPlatformAdminRepo = await import('@/handlers/platformadmin/repos/platform-admin.repo');
+afterAll(async () => {
+  await mock.module('@/handlers/platformadmin/repos/platform-admin.repo', () => realPlatformAdminRepo);
+});
 import { createAuth, registerRoutes } from './auth';
 import { clearFailedAttempts } from './account-lockout';
 
