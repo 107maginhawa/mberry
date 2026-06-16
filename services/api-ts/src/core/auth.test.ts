@@ -384,35 +384,39 @@ describe('createAuth — onAPIError', () => {
   });
 
   test('ignores non-sign-in paths', async () => {
-    const { opts } = build();
-    // No throw, returns early.
-    await opts.onAPIError.onError(new Error('x'), {
+    const { opts, logger } = build();
+    // Non sign-in path returns early — no failed-attempt tracking, no lockout log.
+    const res = await opts.onAPIError.onError(new Error('x'), {
       request: { url: 'http://localhost/auth/get-session' },
       body: { email: 'a@x.co' },
     });
-    expect(true).toBe(true);
+    expect(res).toBeUndefined();
+    expect(logger.info).not.toHaveBeenCalled();
   });
 
   test('returns early when no request', async () => {
-    const { opts } = build();
-    await opts.onAPIError.onError(new Error('x'), {});
-    expect(true).toBe(true);
+    const { opts, logger } = build();
+    const res = await opts.onAPIError.onError(new Error('x'), {});
+    expect(res).toBeUndefined();
+    expect(logger.info).not.toHaveBeenCalled();
   });
 
   test('returns early when no email in body', async () => {
-    const { opts } = build();
-    await opts.onAPIError.onError(new Error('x'), {
+    const { opts, logger } = build();
+    const res = await opts.onAPIError.onError(new Error('x'), {
       request: { url: 'http://localhost/auth/sign-in/email' },
       body: {},
     });
-    expect(true).toBe(true);
+    expect(res).toBeUndefined();
+    expect(logger.info).not.toHaveBeenCalled();
   });
 
   test('tolerates an internal hook error', async () => {
-    const { opts } = build();
-    // ctx.request.url is not a valid URL → URL() throws → caught.
-    await opts.onAPIError.onError(new Error('x'), { request: { url: 'not a url' }, body: { email: 'a@x.co' } });
-    expect(true).toBe(true);
+    const { opts, logger } = build();
+    // ctx.request.url is not a valid URL → URL() throws → caught, no lockout log.
+    const res = await opts.onAPIError.onError(new Error('x'), { request: { url: 'not a url' }, body: { email: 'a@x.co' } });
+    expect(res).toBeUndefined();
+    expect(logger.info).not.toHaveBeenCalled();
   });
 });
 

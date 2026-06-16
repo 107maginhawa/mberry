@@ -124,7 +124,11 @@ export class ChatRoomMemberRepository {
   async markRead(chatRoomId: string, personId: string): Promise<void> {
     await this.db
       .update(chatRoomMembers)
-      .set({ lastReadAt: new Date() })
+      // Use the DB clock (now()) for the read cursor so it shares a clock with
+      // chat_message.timestamp (also defaultNow()). Using the app clock here
+      // (new Date()) risks app↔DB skew miscounting unread — the strict
+      // `timestamp > lastReadAt` comparison in getUnreadCount is boundary-sensitive.
+      .set({ lastReadAt: sql`now()` })
       .where(
         and(
           eq(chatRoomMembers.chatRoomId, chatRoomId),

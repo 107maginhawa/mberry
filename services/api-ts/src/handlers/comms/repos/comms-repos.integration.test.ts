@@ -22,6 +22,7 @@ import { drizzle } from 'drizzle-orm/node-postgres';
 import { ChatRoomMemberRepository } from './chatRoomMember.repo';
 import { ChatMessageRepository } from './chatMessage.repo';
 import { ChatRoomRepository } from './chatRoom.repo';
+import { restoreRepo } from '@/test-utils/make-ctx';
 import { ConflictError, NotFoundError, ValidationError, BusinessLogicError } from '@/core/errors';
 import type { CallParticipant, VideoCallData } from './comms.schema';
 
@@ -137,6 +138,14 @@ async function insertRoom(opts: {
 }
 
 beforeAll(async () => {
+  // Defensive: sibling comms unit tests (chat-rooms-stabilization, ws.chat-room,
+  // comms-rest-handlers) stub these repo prototypes. In the full suite a leaked
+  // mock would reach this real-DB test and corrupt markRead/getUnreadCount —
+  // restore the real methods before running against Postgres.
+  restoreRepo(ChatRoomMemberRepository);
+  restoreRepo(ChatMessageRepository);
+  restoreRepo(ChatRoomRepository);
+
   setupPool = new Pool({ connectionString: DB_URL, connectionTimeoutMillis: 3000 });
   try {
     const client = await setupPool.connect();
@@ -162,6 +171,11 @@ beforeAll(async () => {
   scopedPool = new Pool({
     connectionString: DB_URL,
     options: `-c search_path="${TEST_SCHEMA}",public`,
+    // Small, patient pool: in the full suite many real-DB test files run and
+    // contend for Postgres connections. A bounded pool with a generous acquire
+    // timeout keeps this test from losing the connection race intermittently.
+    max: 4,
+    connectionTimeoutMillis: 15000,
   });
   db = drizzle(scopedPool);
 });
