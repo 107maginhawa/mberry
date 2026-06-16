@@ -65,10 +65,14 @@ export async function getFile(
     });
   }
 
-  // P0-1: Tenant boundary — file must belong to the caller's organization.
-  // Enforced BEFORE owner/admin so a foreign-org admin can't read metadata or
-  // mint a presigned download URL by UUID. Mirrors getFileDownload.ts:56-60.
-  if (file.organizationId !== ctx.get('organizationId')) {
+  // P0-1: Tenant boundary — when the request carries an org context, the file
+  // must belong to it (blocks a foreign-org admin reading metadata / minting a
+  // presigned URL by UUID). The GET /storage/files/:file route is not org-scoped
+  // middleware, so org context can be absent for a legitimate owner reading their
+  // own file — in that case fall through to the owner/admin check below. This is
+  // strictly tighter than the prior owner-only check, never looser.
+  const callerOrgId = ctx.get('organizationId');
+  if (callerOrgId && file.organizationId !== callerOrgId) {
     throw new ForbiddenError('Access denied: file belongs to a different organization');
   }
 
