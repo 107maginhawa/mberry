@@ -53,8 +53,8 @@
 
 - **[Contracts]** 157 Hurl files validate wire-level API across modules (auth flows, happy paths, error codes, multi-step journeys). Schemathesis fuzz in CI (`contract.yml`). `[Integration]` ✅
 - **[Person cascade]** `person.deleted` domain-event → 9 subscribers across `association:member`, `association:operations`, `elections`, `certificates`, `communication`, `documents`, `invite`, `billing`, `person` (`core/domain-event-consumers.ts`). Account-deletion cascade tested. `[Integration]` ✅
-- **[Gap] Subscriber error isolation** — subscribers are fire-and-forget with per-block try/catch, but the **catch arms are largely uncovered** (ln 50% on the 1782-LOC file). Risk: a throwing subscriber's swallow path is unverified. Priority MED. `[Integration]`
-  *Fix:* integration test that registers a failing subscriber and asserts the cascade still completes + logs structured error.
+- **[Verified] Subscriber error isolation** — `domain-event-consumers.test.ts:699` ("subscriber failure in one module does not block others") forces an assoc:member db write to reject, then asserts the communication/documents/invite/person/reviews/advertising/comms/committee subscribers still ran AND `logger.error` fired. The fire-and-forget swallow path is covered. ✅ `[Integration]`
+  *Residual:* the 1782-LOC consumer file still reports ~50% line — the uncovered remainder is notification-message builders + rarer event arms, not the cascade error path. Lower priority than first stated.
 - **[Gap] Dues ↔ billing webhook boundary** — PayMongo/Stripe webhook → `markPaid` underpayment guard (audit #9) is defense-in-depth only; add an integration test asserting `event.amount >= invoice.amount` before transition. Priority MED. `[Integration]`
 - **[Shared deps]** No circular-dependency failures observed; typecheck clean across 5 workspaces. SDK (`@monobase/sdk-ts`) + apps consume generated `@monobase/api-spec` types — single source of truth, no drift. `[Integration]` ✅
 
@@ -93,10 +93,10 @@
 - Below-90 line modules are **repo/schema-dominated**: dues 68.7, storage 76.0, reviews 77.6, billing 86.3, email 89.6 — the deficit is DB-layer code the stub convention can't reach.
 - Frontend: 111 unit test files + 143 e2e specs (per-module % needs a vitest/`test-isolated` coverage run not executed here).
 
-### Top 3 critical fixes (prioritized)
-1. **DB-test harness → dues money repos** (`REPO-HARNESS-PLAN.md`). Highest-risk uncovered code is `dues-payments.repo`/`payment-token.repo` (money). `[Unit/Integration]`
-2. **Officer-settings E2E** — 0 coverage on CPD/gateway/category config officers use to run the org. `[E2E]`
-3. **Domain-event subscriber error-path coverage** — verify the fire-and-forget catch arms in the 19-step `person.deleted` cascade. `[Integration]`
+### Top 3 critical fixes (prioritized) — post-session status
+1. ~~**DB-test harness → dues money repos**~~ ✅ **DONE this session** — `dues/repos/dues-repos.integration.test.ts`, 18 real-PG tests (receipt-sequence atomicity incl. 10-concurrent, status-transition audit trail, payment-token joins). `[Unit/Integration]`
+2. **Officer-settings E2E** (still open) — 0 coverage on CPD/gateway/category config officers use to run the org. Infra-gated: needs running `apps/memberry` + seeded Postgres; scoped spec in Layer 3 above. `[E2E]`
+3. ~~**Domain-event subscriber error-path coverage**~~ ✅ **Already covered** — `domain-event-consumers.test.ts:699`. Next-best remaining target: extend the repo harness to the other DB-layer repos (surveys/platformadmin/reviews/storage). `[Integration]`
 
 ### Production-readiness
 Security gate: **PASS** (all P0/P1 remediated, verified). Type safety: clean (5/5 workspaces, 0 `@ts-ignore`). The two suite failures are infra (real-DB ordering), not code. Remaining work to reach literal "90% every module + all E2E journeys" is **gated on provisioning a test Postgres + running apps** — tracked, not a code defect.
