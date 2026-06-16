@@ -102,7 +102,8 @@ describe('createDocument', () => {
     fileName: 'test.pdf',
     mimeType: 'application/pdf',
     size: 1024,
-    storageKey: 'uploads/test.pdf',
+    // Storage mints keys as the StoredFile UUID, so storageKey must be a UUID.
+    storageKey: '11111111-1111-4111-8111-111111111111',
     ownerId: USER_ID,
     ownerType: 'person',
     accessLevel: 'tenantOnly',

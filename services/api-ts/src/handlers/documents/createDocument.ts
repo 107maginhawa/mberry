@@ -2,6 +2,7 @@ import type { ValidatedContext } from '@/types/app';
 import type { DatabaseInstance } from '@/core/database';
 import type { CreateDocumentBody } from '@/generated/openapi/validators';
 import { UnauthorizedError, ValidationError } from '@/core/errors';
+import { z } from 'zod';
 import { DocumentRepository } from './repos/documents.repo';
 import { StorageFileRepository } from '@/handlers/storage/repos/file.repo';
 import { isBlockedDocumentFile } from '@/utils/sanitize';
@@ -49,6 +50,18 @@ export async function createDocument(
   // we resolve the key as that id and enforce owner + org. Without this, a
   // member could create a self-owned document whose storageKey points at any
   // object in the bucket (another org's file UUID) and then presign-download it.
+  //
+  // Robustness: storage mints keys as a UUID (the StoredFile.id). If the client
+  // sends a non-UUID storageKey (e.g. a path), `findOneById` would run
+  // `... WHERE id = '<path>'` and Postgres throws `invalid input syntax for
+  // type uuid` → unhandled 500. Validate the shape first and reject with the
+  // same clean 400 used for the ownership failure.
+  if (!z.string().uuid().safeParse(body.storageKey).success) {
+    throw new ValidationError(
+      'storageKey does not reference a file you uploaded in this organization',
+    );
+  }
+
   const storageRepo = new StorageFileRepository(db, logger);
   const storedFile = await storageRepo.findOneById(body.storageKey);
   if (

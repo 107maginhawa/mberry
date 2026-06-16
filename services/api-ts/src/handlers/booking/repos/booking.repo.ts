@@ -197,11 +197,15 @@ export class BookingRepository extends DatabaseRepository<Booking, NewBooking, B
 
     try {
       booking = await this.db.transaction(async (tx) => {
-        // 1. Atomically claim the slot. Only an 'available' slot flips; a slot
-        //    already 'booked'/'blocked' by a racing tx returns 0 rows.
+        // 1. Atomically claim the slot WITHOUT setting booking_id yet. Only an
+        //    'available' slot flips 'available' → 'booked'; a slot already
+        //    'booked'/'blocked' by a racing tx returns 0 rows (loser → Conflict).
+        //    We do NOT set booking_id here because the FK target (the booking
+        //    row) does not exist yet — setting it now would violate
+        //    time_slot_booking_id_booking_id_fk and 500 the request.
         const claimed = await tx
           .update(timeSlots)
-          .set({ status: 'booked', booking: bookingId })
+          .set({ status: 'booked' })
           .where(and(eq(timeSlots.id, slotId), eq(timeSlots.status, 'available')))
           .returning({ id: timeSlots.id });
 
@@ -222,7 +226,16 @@ export class BookingRepository extends DatabaseRepository<Booking, NewBooking, B
           throw new ConflictError('Slot no longer available');
         }
 
-        // 3. Create the invoice LAST, only now that the slot is ours.
+        // 3. Now that the booking row exists, point the slot at it. FK is
+        //    satisfied. Still inside the same tx, so any later failure (or the
+        //    claim above) rolls back together — slot reservation + booking are
+        //    all-or-nothing.
+        await tx
+          .update(timeSlots)
+          .set({ booking: bookingId })
+          .where(eq(timeSlots.id, slotId));
+
+        // 4. Create the invoice LAST, only now that the slot is ours.
         if (billingConfig) {
           this.logger?.debug({ bookingId, billingConfig }, 'Creating invoice for booking with billingConfig');
           const invoiceRepo = new InvoiceRepository(tx as unknown as DatabaseInstance, this.logger);

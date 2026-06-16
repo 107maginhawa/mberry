@@ -8,6 +8,10 @@ import { createDocument } from './createDocument';
 
 const fakeDoc = fakeDocument({ ownerId: 'user-1', ownerType: 'person', accessLevel: 'tenantOnly' });
 
+// Storage mints keys as the StoredFile UUID, so storageKey must be a UUID for
+// the ownership gate to even reach the lookup.
+const VALID_KEY = '11111111-1111-4111-8111-111111111111';
+
 let lastCreateInput: any = null;
 
 describe('createDocument', () => {
@@ -42,19 +46,19 @@ describe('createDocument', () => {
   });
 
   test('returns 401 without user', async () => {
-    const ctx = makeCtx({ user: null, session: null, _body: { title: 'T', fileName: 'f.pdf', mimeType: 'application/pdf', size: 1024, storageKey: 'k', ownerId: 'o', ownerType: 'person', accessLevel: 'tenantOnly' } });
+    const ctx = makeCtx({ user: null, session: null, _body: { title: 'T', fileName: 'f.pdf', mimeType: 'application/pdf', size: 1024, storageKey: VALID_KEY, ownerId: 'o', ownerType: 'person', accessLevel: 'tenantOnly' } });
     const res = await createDocument(ctx);
     expect(res.status).toBe(401);
   });
 
   test('returns 403 without organizationId', async () => {
-    const ctx = makeCtx({ organizationId: null, _body: { title: 'T', fileName: 'f.pdf', mimeType: 'application/pdf', size: 1024, storageKey: 'k', ownerId: 'o', ownerType: 'person', accessLevel: 'tenantOnly' } });
+    const ctx = makeCtx({ organizationId: null, _body: { title: 'T', fileName: 'f.pdf', mimeType: 'application/pdf', size: 1024, storageKey: VALID_KEY, ownerId: 'o', ownerType: 'person', accessLevel: 'tenantOnly' } });
     const res = await createDocument(ctx);
     expect(res.status).toBe(403);
   });
 
   test('returns 201 on success', async () => {
-    const ctx = makeCtx({ _body: { title: 'Test Doc', fileName: 'test.pdf', mimeType: 'application/pdf', size: 1024, storageKey: 'uploads/test.pdf', ownerId: 'user-1', ownerType: 'person', accessLevel: 'tenantOnly' } });
+    const ctx = makeCtx({ _body: { title: 'Test Doc', fileName: 'test.pdf', mimeType: 'application/pdf', size: 1024, storageKey: VALID_KEY, ownerId: 'user-1', ownerType: 'person', accessLevel: 'tenantOnly' } });
     const res = await createDocument(ctx);
     expect(res.status).toBe(201);
     expect((res as any).body?.id).toBe('doc-1');
@@ -62,13 +66,13 @@ describe('createDocument', () => {
 
   // EM-M11-7a3e1c02: documents start as draft, not auto-published.
   test('defaults status to draft when not provided', async () => {
-    const ctx = makeCtx({ _body: { title: 'T', fileName: 'f.pdf', mimeType: 'application/pdf', size: 1, storageKey: 'k', ownerId: 'user-1', ownerType: 'person', accessLevel: 'tenantOnly' } });
+    const ctx = makeCtx({ _body: { title: 'T', fileName: 'f.pdf', mimeType: 'application/pdf', size: 1, storageKey: VALID_KEY, ownerId: 'user-1', ownerType: 'person', accessLevel: 'tenantOnly' } });
     await createDocument(ctx);
     expect(lastCreateInput?.status).toBe('draft');
   });
 
   test('honors explicit published status', async () => {
-    const ctx = makeCtx({ _body: { title: 'T', fileName: 'f.pdf', mimeType: 'application/pdf', size: 1, storageKey: 'k', ownerId: 'user-1', ownerType: 'person', accessLevel: 'tenantOnly', status: 'published' } });
+    const ctx = makeCtx({ _body: { title: 'T', fileName: 'f.pdf', mimeType: 'application/pdf', size: 1, storageKey: VALID_KEY, ownerId: 'user-1', ownerType: 'person', accessLevel: 'tenantOnly', status: 'published' } });
     await createDocument(ctx);
     expect(lastCreateInput?.status).toBe('published');
   });
@@ -77,7 +81,7 @@ describe('createDocument', () => {
   test('allows a member to create their own person-owned document', async () => {
     restoreRepo(OfficerTermRepository);
     stubRepo(OfficerTermRepository, { findActiveByPersonAndOrg: async () => [] });
-    const ctx = makeCtx({ _body: { title: 'T', fileName: 'f.pdf', mimeType: 'application/pdf', size: 1, storageKey: 'k', ownerId: 'user-1', ownerType: 'person', accessLevel: 'tenantOnly' } });
+    const ctx = makeCtx({ _body: { title: 'T', fileName: 'f.pdf', mimeType: 'application/pdf', size: 1, storageKey: VALID_KEY, ownerId: 'user-1', ownerType: 'person', accessLevel: 'tenantOnly' } });
     const res = await createDocument(ctx);
     expect(res.status).toBe(201);
   });
@@ -85,13 +89,13 @@ describe('createDocument', () => {
   test('returns 403 when non-officer creates an org-owned document', async () => {
     restoreRepo(OfficerTermRepository);
     stubRepo(OfficerTermRepository, { findActiveByPersonAndOrg: async () => [] });
-    const ctx = makeCtx({ _body: { title: 'T', fileName: 'f.pdf', mimeType: 'application/pdf', size: 1, storageKey: 'k', ownerId: 'org-1', ownerType: 'organization', accessLevel: 'tenantOnly' } });
+    const ctx = makeCtx({ _body: { title: 'T', fileName: 'f.pdf', mimeType: 'application/pdf', size: 1, storageKey: VALID_KEY, ownerId: 'org-1', ownerType: 'organization', accessLevel: 'tenantOnly' } });
     const res = await createDocument(ctx);
     expect(res.status).toBe(403);
   });
 
   test('allows an officer to create an org-owned document', async () => {
-    const ctx = makeCtx({ _body: { title: 'T', fileName: 'f.pdf', mimeType: 'application/pdf', size: 1, storageKey: 'k', ownerId: 'org-1', ownerType: 'organization', accessLevel: 'tenantOnly' } });
+    const ctx = makeCtx({ _body: { title: 'T', fileName: 'f.pdf', mimeType: 'application/pdf', size: 1, storageKey: VALID_KEY, ownerId: 'org-1', ownerType: 'organization', accessLevel: 'tenantOnly' } });
     const res = await createDocument(ctx);
     expect(res.status).toBe(201);
   });
@@ -105,7 +109,7 @@ describe('createDocument', () => {
       fileName: 'f.pdf',
       mimeType: 'application/pdf',
       size: 1,
-      storageKey: 'foreign-file-uuid',
+      storageKey: VALID_KEY,
       ownerId: 'user-1',
       ownerType: 'person' as const,
       accessLevel: 'tenantOnly' as const,
@@ -136,6 +140,23 @@ describe('createDocument', () => {
       stubRepo(StorageFileRepository, { findOneById: async () => undefined });
       const ctx = makeCtx({ _body: selfOwnedBody });
       await expect(createDocument(ctx)).rejects.toThrow(/storageKey/);
+    });
+
+    // Robustness: a non-UUID storageKey (e.g. a path) must be a clean 400, not a
+    // 500 from Postgres `invalid input syntax for type uuid`. The lookup must
+    // never run for a malformed key.
+    test('rejects a non-UUID storageKey before any DB lookup (no 500)', async () => {
+      let lookupCalled = false;
+      restoreRepo(StorageFileRepository);
+      stubRepo(StorageFileRepository, {
+        findOneById: async () => {
+          lookupCalled = true;
+          return undefined;
+        },
+      });
+      const ctx = makeCtx({ _body: { ...selfOwnedBody, storageKey: 'test/contract/policy.pdf' } });
+      await expect(createDocument(ctx)).rejects.toThrow(/storageKey/);
+      expect(lookupCalled).toBe(false);
     });
 
     test('accepts a storageKey the caller owns in their org', async () => {
