@@ -53,7 +53,7 @@ const INVOICE_STATUS_CONFIG: Record<string, StatusConfig> = {
 const PAYMENT_STATUS_CONFIG: Record<string, StatusConfig> = {
   pending: {
     label: 'Pending',
-    className: 'bg-amber-50 text-amber-700',
+    className: 'bg-[var(--color-warning-bg)] text-[var(--color-warning)]',
     icon: Clock,
   },
   submitted: {
@@ -63,7 +63,7 @@ const PAYMENT_STATUS_CONFIG: Record<string, StatusConfig> = {
   },
   underReview: {
     label: 'Under Review',
-    className: 'bg-amber-50 text-amber-700',
+    className: 'bg-[var(--color-warning-bg)] text-[var(--color-warning)]',
     icon: Clock,
   },
   confirmed: {
@@ -88,12 +88,12 @@ const PAYMENT_STATUS_CONFIG: Record<string, StatusConfig> = {
   },
   refunded: {
     label: 'Refunded',
-    className: 'bg-purple-50 text-purple-700',
+    className: 'bg-[var(--color-primary-subtle)] text-[var(--color-primary)]',
     icon: RotateCcw,
   },
   partiallyRefunded: {
     label: 'Partially Refunded',
-    className: 'bg-purple-50 text-purple-700',
+    className: 'bg-[var(--color-primary-subtle)] text-[var(--color-primary)]',
     icon: RotateCcw,
   },
   expired: {
