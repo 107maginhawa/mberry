@@ -20,6 +20,10 @@
 
 -- 1. Double-booking guard: at most one ACTIVE (pending|confirmed) booking per
 --    time slot. A cancelled/rejected booking does NOT block re-booking.
+-- migration-safety: reviewed — non-CONCURRENT by necessity (drizzle runs
+-- migrations in a transaction; CREATE INDEX CONCURRENTLY cannot run in one).
+-- Pre-launch pilot: `booking` holds only seed/test rows, so the brief lock is
+-- negligible. Rollback: DROP INDEX "bookings_active_slot_unique".
 CREATE UNIQUE INDEX IF NOT EXISTS "bookings_active_slot_unique"
   ON "booking" USING btree ("slot_id")
   WHERE "status" IN ('pending', 'confirmed');
@@ -27,6 +31,9 @@ CREATE UNIQUE INDEX IF NOT EXISTS "bookings_active_slot_unique"
 -- 2. Event-registration guard: at most one ACTIVE registration per
 --    (event, person). A cancelled/refunded registration allows re-registration;
 --    a duplicate active row rejects with 23505 → "already registered".
+-- migration-safety: reviewed — same rationale as index 1 (non-CONCURRENT under
+-- the transactional migrator; pre-launch small table). Rollback: DROP INDEX
+-- "uq_event_reg_active".
 CREATE UNIQUE INDEX IF NOT EXISTS "uq_event_reg_active"
   ON "event_registration" USING btree ("event_id", "person_id")
   WHERE "status" NOT IN ('cancelled', 'refunded');
