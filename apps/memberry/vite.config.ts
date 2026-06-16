@@ -42,6 +42,22 @@ export default defineConfig({
     outDir: './dist',
     emptyOutDir: true,
     minify: 'esbuild',
+    rollupOptions: {
+      output: {
+        // Isolate the charting stack (recharts/d3) into its own chunk. It is a
+        // leaf dependency consumed only by route-lazy chart components, so
+        // splitting it keeps ~280kB off the critical path for the many routes
+        // that never render a chart. React/router/app code is intentionally
+        // left to Rollup's automatic chunking — hand-splitting the framework
+        // breaks module init order and white-screens the app.
+        manualChunks(id: string) {
+          if (!id.includes('node_modules')) return
+          if (/[\\/](recharts|d3-[^\\/]+|victory[^\\/]*|internmap)[\\/]/.test(id)) {
+            return 'charts'
+          }
+        },
+      },
+    },
   },
   esbuild: {
     // Mark console.log as side-effect-free so the bundler can drop it in
