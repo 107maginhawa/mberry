@@ -1,5 +1,6 @@
 import { useQuery } from '@tanstack/react-query'
-import { useState } from 'react'
+import { useState, type KeyboardEvent } from 'react'
+import { useNavigate, useParams } from '@tanstack/react-router'
 import { listDuesPaymentsOptions } from '@monobase/sdk-ts/generated/react-query'
 import type { DuesPaymentStatus, DuesPayment } from '@monobase/sdk-ts/generated/types.gen'
 import { Button } from '@monobase/ui'
@@ -28,6 +29,8 @@ const METHOD_LABELS: Record<string, string> = {
 }
 
 export function PaymentHistoryTable({ orgId, scope }: PaymentHistoryTableProps) {
+  const navigate = useNavigate()
+  const { orgSlug } = useParams({ strict: false }) as { orgSlug?: string }
   const [statusFilter, setStatusFilter] = useState<DuesPaymentStatus | 'all'>('all')
   const [methodFilter, setMethodFilter] = useState<string>('all')
   const [offset, setOffset] = useState(0)
@@ -109,8 +112,28 @@ export function PaymentHistoryTable({ orgId, scope }: PaymentHistoryTableProps) 
             </TableRow>
           </TableHeader>
           <TableBody>
-            {payments.map((p: DuesPayment, idx: number) => (
-              <TableRow key={p.id} className={`hover:bg-[var(--color-surface-warm)] cursor-pointer ${idx % 2 === 1 ? 'bg-[var(--color-surface-warm)]' : ''}`} onClick={() => orgId && window.location.assign(`/org/${orgId}/officer/payments/${p.id}`)}>
+            {payments.map((p: DuesPayment, idx: number) => {
+              const navigable = scope === 'org' && !!orgSlug
+              const goToDetail = () =>
+                navigate({ to: '/org/$orgSlug/officer/payments/$paymentId', params: { orgSlug: orgSlug!, paymentId: p.id } })
+              return (
+              <TableRow
+                key={p.id}
+                className={`hover:bg-[var(--color-surface-warm)] ${navigable ? 'cursor-pointer' : ''} ${idx % 2 === 1 ? 'bg-[var(--color-surface-warm)]' : ''}`}
+                {...(navigable
+                  ? {
+                      role: 'button',
+                      tabIndex: 0,
+                      onClick: goToDetail,
+                      onKeyDown: (e: KeyboardEvent) => {
+                        if (e.key === 'Enter' || e.key === ' ') {
+                          e.preventDefault()
+                          goToDetail()
+                        }
+                      },
+                    }
+                  : {})}
+              >
                 {scope === 'org' && <TableCell className="px-3 py-2 text-body-sm">{[(p as any).person?.firstName, (p as any).person?.lastName].filter(Boolean).join(' ') || (p.personId?.slice(0, 8) + '...')}</TableCell>}
                 <TableCell className="px-3 py-2 text-body-sm tabular-nums">{p.paidAt ? new Date(p.paidAt).toLocaleDateString() : '—'}</TableCell>
                 <TableCell className="px-3 py-2 text-mono tabular-nums">{p.receiptNumber}</TableCell>
@@ -120,7 +143,8 @@ export function PaymentHistoryTable({ orgId, scope }: PaymentHistoryTableProps) 
                   <DuesStatusBadge status={p.status} type="payment" />
                 </TableCell>
               </TableRow>
-            ))}
+              )
+            })}
           </TableBody>
         </Table>
         </GlassCard>

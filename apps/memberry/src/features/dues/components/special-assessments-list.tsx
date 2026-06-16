@@ -253,7 +253,7 @@ export function SpecialAssessmentsList({ orgId }: SpecialAssessmentsListProps) {
                     <TableCell className="text-right space-x-1">
                       {a.status === 'draft' && (
                         <>
-                          <Button size="icon" variant="ghost" onClick={() => openEdit(a)} title="Edit">
+                          <Button size="icon" variant="ghost" onClick={() => openEdit(a)} title="Edit" aria-label="Edit assessment">
                             <Pencil size={14} />
                           </Button>
                           <Button
@@ -265,6 +265,7 @@ export function SpecialAssessmentsList({ orgId }: SpecialAssessmentsListProps) {
                               }
                             }}
                             title="Apply"
+                            aria-label="Apply assessment"
                           >
                             <Play size={14} />
                           </Button>
@@ -277,13 +278,14 @@ export function SpecialAssessmentsList({ orgId }: SpecialAssessmentsListProps) {
                               }
                             }}
                             title="Delete"
+                            aria-label="Delete draft assessment"
                           >
                             <Trash2 size={14} />
                           </Button>
                         </>
                       )}
                       {a.status === 'active' && a.collection && (
-                        <Button size="icon" variant="ghost" onClick={() => setCollectionDialogId(a.id)} title="View Collection">
+                        <Button size="icon" variant="ghost" onClick={() => setCollectionDialogId(a.id)} title="View Collection" aria-label="View collection">
                           <Eye size={14} />
                         </Button>
                       )}

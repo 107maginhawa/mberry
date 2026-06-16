@@ -1,5 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { toast } from 'sonner'
 import { Button, Input } from '@monobase/ui'
 import { ConfirmDialog } from '@/components/patterns/confirm-dialog'
@@ -45,8 +45,15 @@ export function TrainingList({ orgId }: TrainingListProps) {
   const [activeTab, setActiveTab] = useState('published')
   const [typeFilter, setTypeFilter] = useState('all')
   const [search, setSearch] = useState('')
+  const [debouncedSearch, setDebouncedSearch] = useState('')
   const [cancelTrainingId, setCancelTrainingId] = useState<string | null>(null)
   const queryClient = useQueryClient()
+
+  // Debounce search 300ms
+  useEffect(() => {
+    const timer = setTimeout(() => setDebouncedSearch(search), 300)
+    return () => clearTimeout(timer)
+  }, [search])
 
   const statusMap: Record<string, string> = { published: 'published', past: 'completed', draft: 'draft' }
   const apiStatus = statusMap[activeTab]
@@ -58,7 +65,7 @@ export function TrainingList({ orgId }: TrainingListProps) {
         status: (apiStatus as TrainingStatus) || undefined,
         // UI offers broader type labels than the generated TrainingType union; cast to align
         type: (typeFilter !== 'all' ? typeFilter : undefined) as TrainingType | undefined,
-        q: search || undefined,
+        q: debouncedSearch || undefined,
       },
       headers: { 'x-org-id': orgId },
     }),

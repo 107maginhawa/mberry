@@ -111,7 +111,7 @@ export function MemberProfile({ personId, orgId, orgSlug }: MemberProfileProps) 
       <GlassCard className="p-6">
         <div className="flex items-start gap-4">
           {profile.photoUrl ? (
-            <img src={profile.photoUrl} alt="" className="w-20 h-20 rounded-full object-cover" />
+            <img src={profile.photoUrl} alt={profile.displayName || 'Member'} className="w-20 h-20 rounded-full object-cover" />
           ) : (
             <div className="w-20 h-20 rounded-full bg-[var(--color-surface-warm)] flex items-center justify-center text-2xl font-semibold text-[var(--color-primary)]">
               {(profile.displayName || '?')[0]}
