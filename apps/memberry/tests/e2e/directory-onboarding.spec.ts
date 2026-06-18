@@ -199,12 +199,9 @@ test.describe('Directory Onboarding: signup → join org → directory profile',
         await page.waitForTimeout(2000) // debounce + API call
 
         // The new member should appear in results
-        const hasResult = await page
+        await expect(page
           .getByText(uniqueName)
-          .first()
-          .isVisible({ timeout: 10000 })
-          .catch(() => false)
-        expect(hasResult).toBeTruthy()
+          .first()).toBeVisible({ timeout: 10000 })
       })
     })
   })
@@ -223,9 +220,11 @@ test.describe('Directory Onboarding: signup → join org → directory profile',
 
       await test.step('2. user lands on authenticated page after signup', async () => {
         await page.waitForLoadState('networkidle')
-        const url = page.url()
-        // User should be on dashboard, onboarding, or some authenticated route
-        expect(url).toMatch(/dashboard|onboarding|my|org|auth/)
+        // signUp already navigated away from /auth/sign-up; the exact landing
+        // (dashboard / onboarding / org / authenticated root / verify-email)
+        // varies by env. Assert we left the sign-up form into a rendered page.
+        expect(page.url()).not.toContain('/auth/sign-up')
+        await expect(page.locator('body')).toBeVisible()
       })
 
       await test.step('3. user profile page is accessible', async () => {

@@ -1,11 +1,10 @@
 // WF-071 — Document Upload: officer publishes new document
 import { test, expect } from '../helpers/test-fixture'
 import { SEED_OFFICER_EMAIL, TEST_PASSWORD } from '../helpers/test-config'
-import { authStateFile } from '../helpers/auth-state'
 import { captureRouteHydration } from '../helpers/real-flow'
 
 
-test.use({ storageState: authStateFile('officer') })
+test.use({ authRole: 'officer' })
 const ORG_ID = 'ed8e3a96-8126-4341-be42-e6eb7940c562'
 
 test.describe('Document Lifecycle (Officer Journey)', () => {
@@ -20,40 +19,43 @@ test('officer can navigate to document library', async ({ page }) => {
     ).toBeVisible({ timeout: 10000 })
   })
 
-  test('upload button opens upload dialog or form', async ({ page }) => {
+  test('upload affordance is present', async ({ page }) => {
     await page.goto(`/org/${ORG_ID}/officer/documents`)
-    const uploadBtn = page
-      .getByRole('button', { name: /upload|add document|new document/i })
-      .first()
-
-    await expect(uploadBtn).toBeVisible({ timeout: 10000 })
-    await uploadBtn.click()
-
-    // Should open a dialog, drawer, or navigate to upload form
-    const hasDialog = await page.getByRole('dialog').isVisible({ timeout: 5000 }).catch(() => false)
-    const hasForm = await page.getByLabel(/title|file|name/i).first().isVisible({ timeout: 5000 }).catch(() => false)
-    const hasFileInput = await page.locator('input[type="file"]').isVisible({ timeout: 5000 }).catch(() => false)
-    expect(hasDialog || hasForm || hasFileInput).toBeTruthy()
+    // Upload is an inline drag-and-drop zone (with a "browse" link + hidden
+    // file input), not a button that opens a dialog.
+    await expect(
+      page
+        .getByText(/drag and drop/i)
+        .or(page.getByText(/browse/i))
+        .or(page.locator('input[type="file"]'))
+        .first(),
+    ).toBeVisible({ timeout: 10000 })
   })
 
   test('document list shows category filter', async ({ page }) => {
     await page.goto(`/org/${ORG_ID}/officer/documents`)
     // Categories may appear as tabs, filter buttons, or select dropdown
-    const hasTabs = await page.getByRole('tab').first().isVisible({ timeout: 5000 }).catch(() => false)
-    const hasFilter = await page.getByText(/all|bylaws|policies|forms/i).first().isVisible({ timeout: 5000 }).catch(() => false)
-    const hasSelect = await page.getByRole('combobox').first().isVisible({ timeout: 5000 }).catch(() => false)
-    expect(hasTabs || hasFilter || hasSelect).toBeTruthy()
+    await expect(
+      page.getByRole('tab').first()
+        .or(page.getByText(/all|bylaws|policies|forms/i).first())
+        .or(page.getByRole('combobox').first())
+        .first(),
+    ).toBeVisible({ timeout: 10000 })
   })
 
   test('clicking a document navigates to detail page', async ({ page }) => {
     await page.goto(`/org/${ORG_ID}/officer/documents`)
-    // Find a clickable document row/link
+    // Target an actual document-detail link (href .../officer/documents/<id>)
+    // — a generic getByRole('link').first() resolves to a nav/breadcrumb link.
     const docLink = page
-      .getByRole('link')
-      .filter({ hasNot: page.getByText(/upload|create|new|officer|home|dashboard/i) })
+      .locator('a[href*="/officer/documents/"]')
       .first()
 
-    const hasDoc = await docLink.isVisible({ timeout: 5000 }).catch(() => false)
+    // Wait for the list to hydrate into either a doc link or empty state —
+    // isVisible() does not retry, so reading hasDoc immediately races.
+    const emptyState = page.getByText(/no documents|upload your first|empty/i).first()
+    await expect(docLink.or(emptyState)).toBeVisible({ timeout: 10000 })
+    const hasDoc = await docLink.isVisible().catch(() => false)
 
     if (hasDoc) {
       await docLink.click()
@@ -68,19 +70,19 @@ test('officer can navigate to document library', async ({ page }) => {
       expect(hasHeading || hasContent).toBeTruthy()
     } else {
       // No documents seeded -- verify empty state renders correctly
-      const hasEmpty = await page.getByText(/no documents|upload your first|empty/i).first().isVisible({ timeout: 5000 }).catch(() => false)
-      expect(hasEmpty).toBeTruthy()
+      await expect(page.getByText(/no documents|upload your first|empty/i).first()).toBeVisible({ timeout: 5000 })
     }
   })
 
   test('document detail page shows metadata', async ({ page }) => {
     await page.goto(`/org/${ORG_ID}/officer/documents`)
     const docLink = page
-      .getByRole('link')
-      .filter({ hasNot: page.getByText(/upload|create|new|officer|home|dashboard/i) })
+      .locator('a[href*="/officer/documents/"]')
       .first()
 
-    const hasDoc = await docLink.isVisible({ timeout: 5000 }).catch(() => false)
+    const emptyState = page.getByText(/no documents|upload your first|empty/i).first()
+    await expect(docLink.or(emptyState)).toBeVisible({ timeout: 10000 })
+    const hasDoc = await docLink.isVisible().catch(() => false)
 
     if (hasDoc) {
       await docLink.click()

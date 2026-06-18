@@ -15,15 +15,39 @@
  */
 
 import { test as base, expect } from '@playwright/test'
+import type { AuthRole } from './auth-state'
+import { freshAuthState } from './programmatic-auth'
 
 export { expect }
+export type { AuthRole }
 
 export const test = base.extend<{
   allowConsoleErrors: RegExp[]
   allowApiFailures: RegExp[]
+  /**
+   * Persona to authenticate as. Specs opt in with
+   * `test.use({ authRole: 'officer' })` — replaces the retired
+   * `test.use({ storageState: authStateFile('officer') })` pattern.
+   * Unset → unauthenticated context (same as no storageState).
+   */
+  authRole: AuthRole | undefined
 }>({
   allowConsoleErrors: [[], { option: true }],
   allowApiFailures: [[], { option: true }],
+  authRole: [undefined, { option: true }],
+
+  // Derive the built-in `storageState` from `authRole`: when set, mint a FRESH
+  // session per test via the API (helpers/programmatic-auth.ts) instead of
+  // reusing a long-lived .auth/<role>.json file. This removes the 401-cascade
+  // class entirely — no spec depends on an aged/evicted/revoked shared session
+  // (CONTINUE-55/56). Depending on `authRole` (not on storageState itself)
+  // sidesteps fixture self-recursion and lets the default `context` fixture
+  // keep applying viewport/device-emulation/etc.
+  storageState: async ({ authRole }, use) => {
+    const state = authRole ? await freshAuthState(authRole) : undefined
+    // eslint-disable-next-line react-hooks/rules-of-hooks -- Playwright fixture `use()`, not a React hook
+    await use(state)
+  },
 
   page: async ({ page, allowConsoleErrors, allowApiFailures }, use) => {
     const consoleErrors: string[] = []

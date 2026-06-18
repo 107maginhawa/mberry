@@ -12,7 +12,7 @@
  */
 
 import { test, expect } from '../helpers/test-fixture'
-import { authStateFile } from '../helpers/auth-state'
+import { freshAuthState } from '../helpers/programmatic-auth'
 import { withIsolatedFixture } from '../helpers/isolated-fixture'
 
 test.describe.configure({ mode: 'serial' })
@@ -23,7 +23,7 @@ test.describe('T5 — Officer CSV roster import succeeds end-to-end', () => {
 
   test('upload CSV → preview → Import → success banner', async ({ browser }) => {
     const ctx = await browser.newContext({
-      storageState: authStateFile('officer'),
+      storageState: await freshAuthState('officer'),
     })
     const page = await ctx.newPage()
 

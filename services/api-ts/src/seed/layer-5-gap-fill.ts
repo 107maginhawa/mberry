@@ -159,11 +159,24 @@ export async function seedEventsGapFill(
       if (positionRows.length > 0) {
         const presidentPos = positionRows.find(p => p.title === 'President') || positionRows[0]!;
         const treasurerPos = positionRows.find(p => p.title === 'Treasurer') || positionRows[Math.min(1, positionRows.length - 1)]!;
-        // 3 nominees: president (elected), 2 others for treasurer
+        // Demo an incumbent re-election rather than unseating the seeded
+        // Chapter Treasurer (Juan Cruz). The BR-44 rotation below ends any
+        // OTHER active term on the elected position; electing the current
+        // holder hits the existingNewTerm short-circuit so Juan keeps his
+        // active Treasurer term (the treasurer-persona journeys depend on
+        // it), while a challenger nominee still demonstrates the election.
+        const [incumbentTreasurer] = await db
+          .select({ personId: officerTerms.personId })
+          .from(officerTerms)
+          .where(and(eq(officerTerms.positionId, treasurerPos.id), eq(officerTerms.status, 'active')))
+          .limit(1);
+        const electedTreasurerId = incumbentTreasurer?.personId ?? memberPersonIds[0]!;
+        const challengerTreasurerId = memberPersonIds.find(id => id !== electedTreasurerId) ?? memberPersonIds[1]!;
+        // 3 nominees: president (elected), treasurer incumbent (elected) + challenger
         const nomineeData = [
           { electionId, organizationId: orgId, positionId: presidentPos.id, personId: presidentPersonId, nominatedBy: presidentPersonId, status: 'elected' as const },
-          { electionId, organizationId: orgId, positionId: treasurerPos.id, personId: memberPersonIds[0]!, nominatedBy: presidentPersonId, status: 'elected' as const },
-          { electionId, organizationId: orgId, positionId: treasurerPos.id, personId: memberPersonIds[1]!, nominatedBy: memberPersonIds[0]!, status: 'accepted' as const },
+          { electionId, organizationId: orgId, positionId: treasurerPos.id, personId: electedTreasurerId, nominatedBy: presidentPersonId, status: 'elected' as const },
+          { electionId, organizationId: orgId, positionId: treasurerPos.id, personId: challengerTreasurerId, nominatedBy: electedTreasurerId, status: 'accepted' as const },
         ];
         const insertedNominees: string[] = [];
         for (const n of nomineeData) {

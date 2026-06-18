@@ -19,20 +19,15 @@ test.describe('BR-25: OTP Registration', () => {
     expect(resp?.status()).toBe(200)
     expect(resp?.ok()).toBe(true)
     // Should show signup form
-    const hasForm = await page.getByRole('button', { name: /create|sign up|register/i }).isVisible({ timeout: 10000 }).catch(() => false)
-    expect(hasForm).toBeTruthy()
+    await expect(page.getByRole('button', { name: /create|sign up|register/i })).toBeVisible({ timeout: 10000 })
   })
 
   test('signup requires name, email, and password', async ({ page }) => {
     await page.goto('/auth/sign-up')
     // All required fields should be present
-    const hasName = await page.getByLabel(/name/i).isVisible({ timeout: 10000 }).catch(() => false)
-    const hasEmail = await page.getByLabel(/email/i).isVisible({ timeout: 5000 }).catch(() => false)
-    const hasPassword = await page.getByLabel(/password/i).first().isVisible({ timeout: 5000 }).catch(() => false)
-
-    expect(hasName).toBeTruthy()
-    expect(hasEmail).toBeTruthy()
-    expect(hasPassword).toBeTruthy()
+    await expect(page.getByLabel(/name/i)).toBeVisible({ timeout: 10000 })
+    await expect(page.getByLabel(/email/i)).toBeVisible({ timeout: 5000 })
+    await expect(page.getByLabel(/password/i).first()).toBeVisible({ timeout: 5000 })
   })
 
   test('signup with valid data completes or requests verification', async ({ page }) => {

@@ -2,10 +2,8 @@
 import { test, expect } from '../helpers/test-fixture'
 import { expectVisibleAfterReload, expectVisibleOnPage } from '../helpers/persistence'
 import { SEED_OFFICER_EMAIL, TEST_PASSWORD } from '../helpers/test-config'
-import { authStateFile } from '../helpers/auth-state'
 
-
-test.use({ storageState: authStateFile('officer') })
+test.use({ authRole: 'officer' })
 test.describe('Profile Actions', () => {
 test('edit profile → change specialization → save → persists on reload', async ({ page }) => {
     await page.goto('/my/profile')

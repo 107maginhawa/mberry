@@ -14,7 +14,7 @@
  */
 
 import { test, expect } from '@playwright/test'
-import { authStateFile } from '../helpers/auth-state'
+import { freshAuthState } from '../helpers/programmatic-auth'
 import { apiFetch } from '../helpers/api-fetch'
 import { signIn } from '../helpers/auth'
 import { SEED_MEMBER_EMAIL, TEST_PASSWORD } from '../helpers/test-config'
@@ -26,7 +26,7 @@ test.describe('cross-persona: admin suspends org → member sees lockout', () =>
   test('admin org status visible to both actors', async ({ browser }) => {
     // ---- Admin context ----
     const adminCtx = await browser.newContext({
-      storageState: authStateFile('officer'),
+      storageState: await freshAuthState('officer'),
     })
     const adminPage = await adminCtx.newPage()
     const adminHydration = captureAnyApiSuccess(adminPage)

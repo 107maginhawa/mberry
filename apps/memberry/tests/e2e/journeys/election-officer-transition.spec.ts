@@ -24,8 +24,7 @@ test.describe('Journey: Election → Officer Transition', () => {
 
     await test.step('elections list shows multiple elections with statuses', async () => {
       // Should see seeded elections: one published/completed (2025), one draft (2026)
-      const hasElections = await page.getByText(/election/i).first().isVisible({ timeout: 10000 }).catch(() => false)
-      expect(hasElections).toBeTruthy()
+      await expect(page.getByText(/election/i).first()).toBeVisible({ timeout: 10000 })
 
       // Multiple statuses should be visible
       const statuses = await page.getByText(/draft|published|open|closed|completed/i).all()
@@ -43,8 +42,7 @@ test.describe('Journey: Election → Officer Transition', () => {
     })
 
     await test.step('elections visible to member', async () => {
-      const hasElections = await page.getByText(/election/i).first().isVisible({ timeout: 10000 }).catch(() => false)
-      expect(hasElections).toBeTruthy()
+      await expect(page.getByText(/election/i).first()).toBeVisible({ timeout: 10000 })
     })
 
     await test.step('click into election detail', async () => {
@@ -72,12 +70,10 @@ test.describe('Journey: Election → Officer Transition', () => {
 
     await test.step('officers page shows current officers with positions', async () => {
       // Should see officer names and positions (seeded data)
-      const hasOfficers = await page.getByText(/president|treasurer|secretary|officer/i).first().isVisible({ timeout: 10000 }).catch(() => false)
-      expect(hasOfficers).toBeTruthy()
+      await expect(page.getByText(/president|treasurer|secretary|officer/i).first()).toBeVisible({ timeout: 10000 })
 
       // Should show real officer names from seed
-      const hasNames = await page.getByText(/Maria|Juan|Ana|Carlos/i).first().isVisible({ timeout: 10000 }).catch(() => false)
-      expect(hasNames).toBeTruthy()
+      await expect(page.getByText(/Maria|Juan|Ana|Carlos/i).first()).toBeVisible({ timeout: 10000 })
     })
   })
 
@@ -89,21 +85,18 @@ test.describe('Journey: Election → Officer Transition', () => {
 
     await test.step('view election detail', async () => {
       const link = page.getByText(/election/i).first()
-      const hasLink = await link.isVisible({ timeout: 10000 }).catch(() => false)
-      expect(hasLink).toBeTruthy()
+      await expect(link).toBeVisible({ timeout: 10000 })
     })
 
     await test.step('check officers page', async () => {
       await page.goto(`/org/${ORG_ID}/officer/officers`)
-      const hasOfficers = await page.getByText(/officer|president/i).first().isVisible({ timeout: 10000 }).catch(() => false)
-      expect(hasOfficers).toBeTruthy()
+      await expect(page.getByText(/officer|president/i).first()).toBeVisible({ timeout: 10000 })
     })
 
     await test.step('check org settings', async () => {
       await page.goto(`/org/${ORG_ID}/officer/settings`)
       // Settings page should render with any content (tabs, forms, headings)
-      const hasContent = await page.locator('main, [role="main"], form, h1, h2, [role="tablist"]').first().isVisible({ timeout: 10000 }).catch(() => false)
-      expect(hasContent).toBeTruthy()
+      await expect(page.locator('main, [role="main"], form, h1, h2, [role="tablist"]').first()).toBeVisible({ timeout: 10000 })
     })
   })
 })

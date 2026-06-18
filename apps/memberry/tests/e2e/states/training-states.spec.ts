@@ -70,13 +70,19 @@ test.describe('Training — Interaction States', () => {
   test('unexpected-error: invalid training detail shows error gracefully', async ({ page }) => {
     await signIn(page, SEED_MEMBER_EMAIL, TEST_PASSWORD)
     await page.goto(`/org/${ORG_ID}/training/${FAKE_TRAINING_ID}`)
-    const hasNotFound = await page.getByText(/not found|no training|error/i).first().isVisible().catch(() => false)
-    const hasContent = await page.locator('main').isVisible()
-    expect(hasNotFound || hasContent).toBeTruthy()
+    // Graceful = a not-found message OR the app shell's <main> renders
+    // (never a white screen). Retrying — isVisible() does not wait.
+    await expect(
+      page.getByText(/not found|no training|error|failed to load/i).first()
+        .or(page.locator('main'))
+        .first(),
+    ).toBeVisible({ timeout: 10000 })
   })
 
   test('permission-error: unauthenticated user redirects to sign-in', async ({ page }) => {
     await page.goto(`/org/${ORG_ID}/training`)
+    // Guard redirect is async (client-side beforeLoad) — wait for it to settle.
+    await page.waitForURL(/\/auth\/sign-in/, { timeout: 10000 }).catch(() => {})
     const isOnSignIn = page.url().includes('/auth/sign-in')
     const hasAuthPrompt = await page.getByText(/sign in|log in/i).first().isVisible().catch(() => false)
 
@@ -86,6 +92,9 @@ test.describe('Training — Interaction States', () => {
   test('a11y: baseline accessibility check passes', async ({ page }) => {
     await signIn(page, SEED_MEMBER_EMAIL, TEST_PASSWORD)
     await page.goto(`/org/${ORG_ID}/training`)
+    // Settle before scanning — loading skeletons flag transient color-contrast.
+    await expect(page.getByRole('heading').first()).toBeVisible({ timeout: 10000 })
+    await page.waitForLoadState('networkidle').catch(() => {})
     await expectNoA11yViolations(page, {
       exclude: ['[data-radix-popper-content-wrapper]'],
     })

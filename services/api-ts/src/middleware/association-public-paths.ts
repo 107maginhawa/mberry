@@ -13,8 +13,16 @@ export const ASSOCIATION_PUBLIC_PATHS = [
   '/association/member/ethics/public-complaints',
   '/association/member/ethics/public-complaint',
   '/association/member/directory/public',
-  '/association/member/directory/search', // covers /search/:personId/public
 ];
+
+/**
+ * The only public endpoint under `/directory/search` is the per-person
+ * public profile view: `/association/member/directory/search/:personId/public`.
+ * The bare `/directory/search` is the AUTHENTICATED member directory search
+ * and must NOT be exempted (it needs auth + org-context to set orgMembership).
+ */
+const DIRECTORY_PUBLIC_PROFILE =
+  /^\/association\/member\/directory\/search\/[^/]+\/public$/;
 
 /**
  * True when `path` is a public association endpoint.
@@ -24,5 +32,6 @@ export const ASSOCIATION_PUBLIC_PATHS = [
  * while `/association/member/directory/searchInternal` is not.
  */
 export function isAssociationPublicPath(path: string): boolean {
+  if (DIRECTORY_PUBLIC_PROFILE.test(path)) return true;
   return ASSOCIATION_PUBLIC_PATHS.some(p => path === p || path.startsWith(p + '/'));
 }

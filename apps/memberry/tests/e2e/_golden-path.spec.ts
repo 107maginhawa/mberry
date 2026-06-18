@@ -30,7 +30,7 @@
  */
 
 import { test, expect, type BrowserContext, type Page } from '@playwright/test'
-import { authStateFile } from './helpers/auth-state'
+import { freshAuthState } from './helpers/programmatic-auth'
 import { apiFetch } from './helpers/api-fetch'
 import { signUp, signIn } from './helpers/auth'
 import { withIsolatedFixture } from './helpers/isolated-fixture'
@@ -103,7 +103,7 @@ test.describe('Golden Path — does the app work? (UI-driven)', () => {
     browser,
   }) => {
     const officerCtx = await browser.newContext({
-      storageState: authStateFile('officer'),
+      storageState: await freshAuthState('officer'),
     })
     const officerPage = await officerCtx.newPage()
     await officerPage.goto(`/org/${fx().slug}/officer/applications`)
@@ -188,7 +188,7 @@ test.describe('Golden Path — does the app work? (UI-driven)', () => {
     // Real payment-record-via-UI is covered in
     // actions/dues-actions.spec.ts (Track C target).
     const treasurerCtx = await browser.newContext({
-      storageState: authStateFile('treasurer'),
+      storageState: await freshAuthState('treasurer'),
     })
     const treasurerPage = await treasurerCtx.newPage()
     await treasurerPage.goto(`/org/${fx().slug}/officer/payments/new`)
@@ -206,7 +206,7 @@ test.describe('Golden Path — does the app work? (UI-driven)', () => {
     browser,
   }) => {
     const officerCtx = await browser.newContext({
-      storageState: authStateFile('officer'),
+      storageState: await freshAuthState('officer'),
     })
     const officerPage = await officerCtx.newPage()
     await officerPage.goto(`/org/${fx().slug}/officer/roster`)
@@ -228,7 +228,7 @@ test.describe('Golden Path — does the app work? (UI-driven)', () => {
     browser,
   }) => {
     const officerCtx = await browser.newContext({
-      storageState: authStateFile('officer'),
+      storageState: await freshAuthState('officer'),
     })
     const officerPage = await officerCtx.newPage()
     const title = `Golden Path UI Draft ${Date.now().toString(36)}`

@@ -1,5 +1,5 @@
 import { test, expect } from '@playwright/test'
-import { signInAsAdmin, signInAndNavigate } from './helpers/auth'
+import { signInAsAdmin, signInAndNavigate, csrfHeaders } from './helpers/auth'
 import { ADMIN_BASE } from './helpers/test-config'
 
 const API_URL = `${ADMIN_BASE}/api`
@@ -79,7 +79,8 @@ test.describe('Admin Members', () => {
           if (memberId) {
             // Attempt DELETE on the first member — defensive: 404/405 acceptable
             const deleteRes = await page.context().request.delete(
-              `${API_URL}/organizations/${orgId}/members/${memberId}`
+              `${API_URL}/organizations/${orgId}/members/${memberId}`,
+              { headers: await csrfHeaders(page.context()) },
             )
             // 404 = not found, 405 = method not allowed (endpoint not implemented yet)
             expect([200, 204, 404, 405]).toContain(deleteRes.status())
@@ -88,7 +89,8 @@ test.describe('Admin Members', () => {
       } else {
         // Try admin fallback endpoint
         const fallbackRes = await page.context().request.delete(
-          `${API_URL}/admin/members/nonexistent-id`
+          `${API_URL}/admin/members/nonexistent-id`,
+          { headers: await csrfHeaders(page.context()) },
         )
         // 404/405 acceptable — just verifying endpoint shape
         expect([404, 405]).toContain(fallbackRes.status())

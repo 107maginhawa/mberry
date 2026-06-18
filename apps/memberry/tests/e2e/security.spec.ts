@@ -12,7 +12,7 @@ test.describe('Security Flows', () => {
     const resp = await respP
     expect(resp?.status()).toBe(200)
     expect(resp?.ok()).toBe(true)
-    await page.goto('/my/dashboard')
+    await page.goto('/dashboard')
     expect(page.url()).not.toContain('/auth/')
     const body = page.locator('body')
     await expect(body).not.toBeEmpty()
@@ -20,8 +20,10 @@ test.describe('Security Flows', () => {
 
   test('unauthenticated user cannot access member dashboard', async ({ page }) => {
     await page.context().clearCookies()
-    await page.goto('/my/dashboard')
-    await page.waitForTimeout(2000)
+    // /dashboard is the real member dashboard route (/my/dashboard does not
+    // exist, so it 404s outside the _authenticated guard and never redirects).
+    await page.goto('/dashboard')
+    await page.waitForURL((u) => u.pathname.includes('/auth/'), { timeout: 15000 }).catch(() => {})
     expect(page.url()).toContain('/auth/')
   })
 

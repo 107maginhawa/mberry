@@ -18,8 +18,7 @@ test.describe('[BR-45, BR-46] Credit Validation', () => {
     await expect(page).toHaveURL(/\/my\/credits/)
 
     // Should show credit balance or cycle info
-    const hasCredits = await page.getByText(/credit|CPD|hour|balance|total|cycle/i).first().isVisible({ timeout: 10000 }).catch(() => false)
-    expect(hasCredits).toBeTruthy()
+    await expect(page.getByText(/credit|CPD|hour|balance|total|cycle/i).first()).toBeVisible({ timeout: 10000 })
   })
 
   test('credit log page shows entries with activity names', async ({ page }) => {
@@ -28,10 +27,12 @@ test.describe('[BR-45, BR-46] Credit Validation', () => {
     await expect(page).toHaveURL(/\/my\/credits\/log/)
 
     // Should show credit entries with activity names (seeded data has 3 entries)
-    const hasEntries = await page.getByText(/workshop|seminar|convention|training|activity/i).first().isVisible({ timeout: 10000 }).catch(() => false)
-    // Could also show empty state if member has no credits
-    const hasEmptyState = await page.getByText(/no.*credit|no.*entries/i).first().isVisible({ timeout: 3000 }).catch(() => false)
-    expect(hasEntries || hasEmptyState).toBeTruthy()
+    // or an empty state if member has no credits
+    await expect(
+      page.getByText(/workshop|seminar|convention|training|activity/i).first()
+        .or(page.getByText(/no.*credit|no.*entries/i).first())
+        .first(),
+    ).toBeVisible({ timeout: 10000 })
   })
 
   test('[BR-45] credit entry form requires activity name', async ({ page }) => {
@@ -99,8 +100,7 @@ test.describe('[BR-45, BR-46] Credit Validation', () => {
     await page.goto('/my/credits')
     // The credit cycle should be auto-computed from association config
     // Look for cycle year or period display (e.g., "2025-2026", "Current Cycle", etc.)
-    const hasCycleInfo = await page.getByText(/202[4-7]|cycle|period|year|current/i).first().isVisible({ timeout: 10000 }).catch(() => false)
-    expect(hasCycleInfo).toBeTruthy()
+    await expect(page.getByText(/202[4-7]|cycle|period|year|current/i).first()).toBeVisible({ timeout: 10000 })
   })
 
   test('officer can view credit reports for org', async ({ page }) => {
@@ -114,8 +114,7 @@ test.describe('[BR-45, BR-46] Credit Validation', () => {
       await creditsLink.click()
       await page.waitForLoadState('networkidle')
       // Should see credit overview or compliance rates
-      const hasContent = await page.getByText(/credit|compliance|member/i).first().isVisible({ timeout: 10000 }).catch(() => false)
-      expect(hasContent).toBeTruthy()
+      await expect(page.getByText(/credit|compliance|member/i).first()).toBeVisible({ timeout: 10000 })
     }
   })
 })

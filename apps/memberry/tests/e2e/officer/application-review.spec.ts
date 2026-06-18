@@ -1,11 +1,10 @@
 // WF-024 — Application Approval: officer reviews + approves pending
 // CO-07: Application review — view pending, approve/deny
 import { test, expect } from '../helpers/test-fixture'
-import { authStateFile } from '../helpers/auth-state'
 import { captureRouteHydration, captureAnyApiSuccess } from '../helpers/real-flow'
 
 
-test.use({ storageState: authStateFile('officer') })
+test.use({ authRole: 'officer' })
 const ORG_ID = 'ed8e3a96-8126-4341-be42-e6eb7940c562'
 
 test.describe('CO-07: Application Review', () => {
@@ -26,8 +25,7 @@ test('applications page loads with heading', async ({ page }) => {
     expect(hasContent).not.toContain('undefined undefined')
 
     // Check for either application items or empty state message
-    const hasApps = await page.getByText(/pending|approved|denied|no applications/i).first().isVisible({ timeout: 10000 }).catch(() => false)
-    expect(hasApps).toBeTruthy()
+    await expect(page.getByText(/pending|approved|denied|no applications/i).first()).toBeVisible({ timeout: 10000 })
     const resp = await respP
     expect(resp?.ok()).toBe(true)
   })

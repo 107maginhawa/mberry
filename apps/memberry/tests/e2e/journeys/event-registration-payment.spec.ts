@@ -20,8 +20,7 @@ test.describe('Journey: Event Registration → Payment', () => {
       const resp = await respP
       expect(resp?.status()).toBe(200)
       expect(resp?.ok()).toBe(true)
-      const hasEvents = await page.getByText(/event|activity|convention|seminar/i).first().isVisible({ timeout: 10000 }).catch(() => false)
-      expect(hasEvents).toBeTruthy()
+      await expect(page.getByText(/event|activity|convention|seminar/i).first()).toBeVisible({ timeout: 10000 })
     })
   })
 
@@ -53,8 +52,7 @@ test.describe('Journey: Event Registration → Payment', () => {
     })
 
     await test.step('events list shows attendance data', async () => {
-      const hasEvents = await page.getByText(/event|registr|attend|capacity/i).first().isVisible({ timeout: 10000 }).catch(() => false)
-      expect(hasEvents).toBeTruthy()
+      await expect(page.getByText(/event|registr|attend|capacity/i).first()).toBeVisible({ timeout: 10000 })
     })
   })
 
@@ -76,8 +74,7 @@ test.describe('Journey: Event Registration → Payment', () => {
 
     await test.step('check payments page after', async () => {
       await page.goto('/my/payments')
-      const hasPayments = await page.getByText(/payment|transaction|history/i).first().isVisible({ timeout: 10000 }).catch(() => false)
-      expect(hasPayments).toBeTruthy()
+      await expect(page.getByText(/payment|transaction|history/i).first()).toBeVisible({ timeout: 10000 })
     })
   })
 })

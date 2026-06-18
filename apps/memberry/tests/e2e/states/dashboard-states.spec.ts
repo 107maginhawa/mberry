@@ -95,6 +95,8 @@ test.describe('Dashboard — Interaction States', () => {
 
   test('permission-error: unauthenticated user redirects to sign-in', async ({ page }) => {
     await page.goto('/dashboard')
+    // Guard redirect is async (client-side beforeLoad) — wait for it to settle.
+    await page.waitForURL(/\/auth\/sign-in/, { timeout: 10000 }).catch(() => {})
 
     // Should redirect to sign-in or show auth prompt — assert via URL or form.
     const isOnSignIn = page.url().includes('/auth/sign-in')
@@ -112,6 +114,12 @@ test.describe('Dashboard — Interaction States', () => {
     const personResp = await personRespP
     expect(personResp?.status()).toBe(200)
     expect(personResp?.ok()).toBe(true)
+
+    // Let the dashboard fully settle before scanning — loading skeletons
+    // render low-contrast shimmer placeholders that axe (correctly) flags
+    // as transient color-contrast violations until real data paints.
+    await expect(page.getByRole('heading').first()).toBeVisible({ timeout: 10000 })
+    await page.waitForLoadState('networkidle').catch(() => {})
 
     await expectNoA11yViolations(page, {
       exclude: ['[data-radix-popper-content-wrapper]'],

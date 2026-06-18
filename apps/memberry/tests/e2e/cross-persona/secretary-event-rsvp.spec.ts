@@ -12,7 +12,7 @@
  */
 
 import { test, expect } from '@playwright/test'
-import { authStateFile } from '../helpers/auth-state'
+import { freshAuthState } from '../helpers/programmatic-auth'
 import { apiFetch } from '../helpers/api-fetch'
 import { signIn } from '../helpers/auth'
 import { withIsolatedFixture } from '../helpers/isolated-fixture'
@@ -32,7 +32,7 @@ test.describe('cross-persona: secretary creates event → member RSVPs → offic
 
     // ---- 1. Secretary creates event ----
     const secretaryCtx = await browser.newContext({
-      storageState: authStateFile('secretary'),
+      storageState: await freshAuthState('secretary'),
     })
     const secretaryPage = await secretaryCtx.newPage()
     const secretaryHydration = captureAnyApiSuccess(secretaryPage)
@@ -75,7 +75,7 @@ test.describe('cross-persona: secretary creates event → member RSVPs → offic
 
     // ---- 3. Officer (president) context: list events for org ----
     const officerCtx = await browser.newContext({
-      storageState: authStateFile('officer'),
+      storageState: await freshAuthState('officer'),
     })
     const officerPage = await officerCtx.newPage()
     await officerPage.goto('/dashboard')

@@ -587,15 +587,19 @@ export class DuesRepository {
   // ─── Top Unpaid ───────────────────────────────────────
 
   private async computeTopUnpaid(organizationId: string, limit: number) {
+    // dues_invoice.person_id is varchar(255) while person.id is uuid, so the
+    // join needs an explicit text cast (otherwise Postgres errors with
+    // "operator does not exist: character varying = uuid"). Join on person_id
+    // — membership_id is a membership FK, not a person id.
     const rows = await this.db
       .select({
-        personId: duesInvoices.membershipId,
+        personId: duesInvoices.personId,
         name: sql<string>`COALESCE(${persons.firstName} || ' ' || ${persons.lastName}, 'Unknown')`,
         outstanding: sql<number>`COALESCE(SUM(${duesInvoices.totalAmount}), 0)::int`,
         invoiceCount: sql<number>`COUNT(*)::int`,
       })
       .from(duesInvoices)
-      .leftJoin(persons, eq(duesInvoices.membershipId, persons.id))
+      .leftJoin(persons, sql`${persons.id}::text = ${duesInvoices.personId}`)
       .where(
         and(
           eq(duesInvoices.organizationId, organizationId),
@@ -603,7 +607,7 @@ export class DuesRepository {
           ne(duesInvoices.status, 'cancelled'),
         ),
       )
-      .groupBy(duesInvoices.membershipId, persons.firstName, persons.lastName)
+      .groupBy(duesInvoices.personId, persons.firstName, persons.lastName)
       .orderBy(sql`SUM(${duesInvoices.totalAmount}) DESC`)
       .limit(limit);
 

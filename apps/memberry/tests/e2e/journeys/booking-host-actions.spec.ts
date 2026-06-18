@@ -26,8 +26,10 @@ test.describe('Booking host actions: confirm and reject', () => {
       await page.getByRole('tab', { name: /my bookings/i }).click()
       await page.waitForLoadState('networkidle')
 
-      // BookingList component has "As client" and "As host" inner tabs
-      const hostTab = page.getByRole('tab', { name: /as host|host/i }).first()
+      // BookingList component has "Booked by me" / "With me" inner tabs.
+      // Match the host view by its exact label — a loose /host/i regex also
+      // matches the outer "Find a host" tab.
+      const hostTab = page.getByRole('tab', { name: /with me/i }).first()
       const hasHostTab = await hostTab.isVisible({ timeout: 5000 }).catch(() => false)
 
       if (hasHostTab) {
@@ -35,12 +37,11 @@ test.describe('Booking host actions: confirm and reject', () => {
         await page.waitForLoadState('networkidle')
 
         // Should show host bookings or empty state
-        const hasBookings = await page.locator('a[href*="/my/bookings/"]')
-          .first().isVisible({ timeout: 5000 }).catch(() => false)
-        const hasEmpty = await page.getByText(/no.*bookings|no.*schedule|publish.*schedule/i)
-          .first().isVisible({ timeout: 3000 }).catch(() => false)
-
-        expect(hasBookings || hasEmpty).toBeTruthy()
+        await expect(
+          page.locator('a[href*="/my/bookings/"]').first()
+            .or(page.getByText(/no.*bookings|no.*schedule|publish.*schedule/i).first())
+            .first(),
+        ).toBeVisible({ timeout: 10000 })
       }
     })
 

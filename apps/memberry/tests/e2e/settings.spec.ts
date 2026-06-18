@@ -121,8 +121,9 @@ test.describe('Settings page (/my/settings)', () => {
     // Click Privacy tab
     await page.getByRole('tab', { name: 'Privacy' }).click()
 
-    // New user with no org → empty state
-    await expect(page.getByText(/join an organization/i)).toBeVisible()
+    // New user with no org → empty state (the phrase also appears as a nav
+    // link, so scope to the first match).
+    await expect(page.getByText(/join an organization/i).first()).toBeVisible({ timeout: 10000 })
   })
 
   // --- Security Section ---

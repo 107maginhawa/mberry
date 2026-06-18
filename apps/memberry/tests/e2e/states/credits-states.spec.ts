@@ -93,6 +93,8 @@ test.describe('Credits — Interaction States', () => {
 
   test('permission-error: unauthenticated user cannot see credits', async ({ page }) => {
     await page.goto('/dashboard')
+    // Guard redirect is async (client-side beforeLoad) — wait for it to settle.
+    await page.waitForURL(/\/auth\/sign-in/, { timeout: 10000 }).catch(() => {})
     const isOnSignIn = page.url().includes('/auth/sign-in')
     const hasAuthPrompt = await page.getByText(/sign in|log in/i).first().isVisible().catch(() => false)
 
@@ -101,10 +103,12 @@ test.describe('Credits — Interaction States', () => {
 
   test('a11y: baseline accessibility check passes on credit progress', async ({ page }) => {
     await signIn(page, MEMBER_EMAIL, MEMBER_PASSWORD)
-    // Intentionally not capturing /persons/me here — waiting for hydration before
-    // the a11y scan surfaces a pre-existing color-contrast issue in .px-3 that the
-    // baseline test races past. Real-flow capture is covered by the other 4 tests.
+    // Let the dashboard settle before scanning — loading skeletons paint
+    // low-contrast shimmer that axe flags transiently until real data renders
+    // (the production preview build paints faster, exposing the race).
     await page.goto('/dashboard')
+    await expect(page.getByRole('heading').first()).toBeVisible({ timeout: 10000 })
+    await page.waitForLoadState('networkidle').catch(() => {})
     await expectNoA11yViolations(page, {
       exclude: ['[data-radix-popper-content-wrapper]'],
     })

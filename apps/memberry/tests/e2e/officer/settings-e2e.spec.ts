@@ -66,11 +66,12 @@ test('Settings > Officers page renders', async ({ page }) => {
   ).toBeVisible({ timeout: 10000 })
 
   const addBtn = page.getByRole('button', { name: /add|assign|new/i }).first()
-  const hasTable = await page.locator('table').isVisible().catch(() => false)
-  const hasEmpty = await page.getByText(/no officers|empty|assign/i).first().isVisible().catch(() => false)
-  const hasBtn = await addBtn.isVisible().catch(() => false)
-
-  expect(hasBtn || hasTable || hasEmpty).toBeTruthy()
+  await expect(
+    addBtn
+      .or(page.locator('table'))
+      .or(page.getByText(/no officers|empty|assign/i))
+      .first(),
+  ).toBeVisible({ timeout: 10000 })
 })
 
 // ─── Membership Categories ──────────────────────────────────────────────────
@@ -111,8 +112,7 @@ test('Settings > Payment Gateway renders', async ({ page }) => {
     page.getByRole('heading', { name: /payment gateway/i })
   ).toBeVisible({ timeout: 10000 })
 
-  const hasContent = await page.getByText(/stripe|connect|gateway|configuration|payment/i).first().isVisible().catch(() => false)
-  expect(hasContent).toBeTruthy()
+  await expect(page.getByText(/stripe|connect|gateway|configuration|payment/i).first()).toBeVisible({ timeout: 10000 })
 })
 
 // ─── Providers ──────────────────────────────────────────────────────────────
@@ -214,12 +214,13 @@ test('Settings > Providers API endpoint responds', async ({ page }) => {
 test('Settings > Sidebar shows settings links', async ({ page }) => {
   await login(page)
   await page.goto(`/org/${ORG_SLUG}/officer/settings/org`)
-  const hasOrgProfile = await page.getByText(/org profile/i).isVisible().catch(() => false)
-  const hasOfficers = await page.getByText(/officers/i).isVisible().catch(() => false)
-  const hasCategories = await page.getByText(/categories/i).isVisible().catch(() => false)
-  const hasGateway = await page.getByText(/payment gateway/i).isVisible().catch(() => false)
-  const hasProviders = await page.getByText(/providers/i).isVisible().catch(() => false)
-
-  console.log(`Sidebar: OrgProfile=${hasOrgProfile} Officers=${hasOfficers} Categories=${hasCategories} Gateway=${hasGateway} Providers=${hasProviders}`)
-  expect(hasOrgProfile || hasOfficers || hasCategories || hasGateway || hasProviders).toBeTruthy()
+  await expect(
+    page
+      .getByText(/org profile/i)
+      .or(page.getByText(/officers/i))
+      .or(page.getByText(/categories/i))
+      .or(page.getByText(/payment gateway/i))
+      .or(page.getByText(/providers/i))
+      .first(),
+  ).toBeVisible({ timeout: 10000 })
 })

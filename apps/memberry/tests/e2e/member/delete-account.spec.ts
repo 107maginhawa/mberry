@@ -1,7 +1,6 @@
 // M-25: Account deletion
 // Verifies the delete account flow in Settings > General > Danger Zone
 import { test, expect } from '../helpers/test-fixture'
-import { authStateFile } from '../helpers/auth-state'
 import { captureRouteHydration } from '../helpers/real-flow'
 
 // W2 real-flow upgrade: /my/settings hydrates via GET /persons/me.
@@ -9,7 +8,7 @@ import { captureRouteHydration } from '../helpers/real-flow'
 // settings shell rendered.
 const PERSON_ME = /\/persons\/me(?:[/?]|$)/
 
-test.use({ storageState: authStateFile('member') })
+test.use({ authRole: 'member' })
 test.describe('M-25: Delete Account', () => {
   test('settings page shows Danger Zone with Delete Account button', async ({ page }) => {
     const respP = captureRouteHydration(page, PERSON_ME)

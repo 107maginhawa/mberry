@@ -3,7 +3,6 @@
 // Upgraded from heading-only to behavioral (Phase 31)
 import { test, expect } from '../helpers/test-fixture'
 import { SEED_MEMBER_EMAIL, TEST_PASSWORD } from '../helpers/test-config'
-import { authStateFile } from '../helpers/auth-state'
 import { captureRouteHydration } from '../helpers/real-flow'
 
 // W2 real-flow upgrade: /my/events hydrates via the event-lifecycle
@@ -11,7 +10,7 @@ import { captureRouteHydration } from '../helpers/real-flow'
 // the backend returned data, not just that the shell rendered.
 const EVENTS_OR_PERSON = /\/(event-lifecycle|events|persons\/me)(?:[/?]|$)/
 
-test.use({ storageState: authStateFile('member') })
+test.use({ authRole: 'member' })
 const MEMBER_EMAIL = SEED_MEMBER_EMAIL
 const MEMBER_PASSWORD = TEST_PASSWORD
 
@@ -36,6 +35,7 @@ test('shows heading and stat cards with numeric values', async ({ page }) => {
   })
 
   test('tab switching filters event list', async ({ page }) => {
+    await page.goto('/my/events')
     // Upcoming button active by default
     const upcomingBtn = page.getByRole('button', { name: /upcoming/i }).first()
     await expect(upcomingBtn).toBeVisible({ timeout: 10000 })
@@ -54,13 +54,17 @@ test('shows heading and stat cards with numeric values', async ({ page }) => {
   })
 
   test('[BR-27] event card shows registration status or capacity info', async ({ page }) => {
-    // If events exist, cards should show more than just title
-    const eventCard = page.locator('[class*="card"]').first()
-    const hasCard = await eventCard.isVisible({ timeout: 5000 }).catch(() => false)
+    await page.goto('/my/events')
+    // If events exist, a card should show more than just a title. Scope to a
+    // card that actually has text — the first `[class*="card"]` can be an
+    // empty layout wrapper (no content).
+    const eventCard = page.locator('[class*="card"]').filter({ hasText: /\S/ }).first()
+    const hasCard = await eventCard.isVisible({ timeout: 8000 }).catch(() => false)
     if (hasCard) {
-      // Card should contain date or location or status — not just title
-      const cardText = await eventCard.textContent() ?? ''
-      expect(cardText.length).toBeGreaterThan(10) // More than just a title
+      await expect(async () => {
+        const cardText = (await eventCard.textContent()) ?? ''
+        expect(cardText.length).toBeGreaterThan(10) // More than just a title
+      }).toPass({ timeout: 8000 })
     }
   })
 })

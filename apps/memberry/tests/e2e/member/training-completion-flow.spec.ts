@@ -8,11 +8,10 @@
 // credit rows (not just stat-card headings), by asserting a specific seeded
 // credit entry appears with its exact activity, type, and amount.
 import { test, expect } from '../helpers/test-fixture'
-import { authStateFile } from '../helpers/auth-state'
 import { apiFetch } from '../helpers/api-fetch'
 import { captureRouteHydration } from '../helpers/real-flow'
 
-test.use({ storageState: authStateFile('member') })
+test.use({ authRole: 'member' })
 const ORG_ID = 'ed8e3a96-8126-4341-be42-e6eb7940c562'
 
 type CreditEntry = { activityName: string; type: string; creditAmount: number }

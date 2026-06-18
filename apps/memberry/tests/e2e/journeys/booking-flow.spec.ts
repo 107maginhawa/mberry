@@ -2,11 +2,10 @@
 // Business Rules: [BR-9] Booking module
 // E2E: Client books a session via host directory
 import { test, expect } from '../helpers/test-fixture'
-import { authStateFile } from '../helpers/auth-state'
 import { captureRouteHydration } from '../helpers/real-flow'
 
 
-test.use({ storageState: authStateFile('member') })
+test.use({ authRole: 'member' })
 test.describe('Booking flow: client books a session', () => {
 test('bookings page loads with tabs and heading', async ({ page }) => {
     const respP = captureRouteHydration(page, '/bookings')
@@ -94,12 +93,11 @@ test('bookings page loads with tabs and heading', async ({ page }) => {
     await page.waitForLoadState('networkidle')
 
     // Should show either booking rows with status badges or empty state
-    const hasBookings = await page.locator('a[href*="/my/bookings/"]')
-      .first().isVisible({ timeout: 5000 }).catch(() => false)
-    const hasEmptyState = await page.getByText(/haven.*booked|no.*bookings|no.*schedule/i)
-      .first().isVisible({ timeout: 3000 }).catch(() => false)
-
-    expect(hasBookings || hasEmptyState).toBeTruthy()
+    await expect(
+      page.locator('a[href*="/my/bookings/"]').first()
+        .or(page.getByText(/haven.*booked|no.*bookings|no.*schedule/i).first())
+        .first(),
+    ).toBeVisible({ timeout: 10000 })
   })
 
   test('booking list items show status and date info', async ({ page }) => {
@@ -108,21 +106,16 @@ test('bookings page loads with tabs and heading', async ({ page }) => {
     await page.getByRole('tab', { name: /my bookings/i }).click()
     await page.waitForLoadState('networkidle')
 
-    // If bookings exist, verify they have status badges
-    const bookingCard = page.locator('[class*="card"]').first()
-    const hasCard = await bookingCard.isVisible({ timeout: 5000 }).catch(() => false)
-
-    if (hasCard) {
-      const cardText = await bookingCard.textContent() ?? ''
-      // Booking cards should show at least a date and status
-      expect(cardText.length).toBeGreaterThan(5)
-
-      // Look for status badge text
-      const hasStatus = /pending|confirmed|rejected|cancelled|completed/i.test(cardText)
-      // Or it might be an empty state card
-      const isEmptyState = /haven.*booked|no.*bookings/i.test(cardText)
-      expect(hasStatus || isEmptyState).toBeTruthy()
-    }
+    // The "Booked by me" view shows either real bookings (with a status
+    // badge) or an empty state. Assert on the rendered copy directly —
+    // `[class*="card"]`.first() can resolve to an empty layout wrapper.
+    await expect(
+      page
+        .getByText(
+          /pending|confirmed|rejected|cancelled|completed|haven.*booked|no past bookings|no bookings/i,
+        )
+        .first(),
+    ).toBeVisible({ timeout: 10000 })
   })
 
   test('clicking a booking navigates to booking detail', async ({ page }) => {

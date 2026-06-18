@@ -32,16 +32,23 @@ test.describe('Error Boundaries', () => {
     expect(bodyText?.length).toBeGreaterThan(0)
 
     // Error boundary or empty state is acceptable — blank white page is not
-    const hasAnyContent = await page.locator('main, [role="main"], .container, #root > *').first().isVisible({ timeout: 5000 }).catch(() => false)
-    expect(hasAnyContent).toBeTruthy()
+    await expect(page.locator('main, [role="main"], .container, #root > *').first()).toBeVisible({ timeout: 5000 })
   })
 
   test('org page shows error state for non-existent org', async ({ page }) => {
     await signInAsMember(page)
     await page.goto('/org/00000000-0000-0000-0000-000000000000/home')
     // Should show error or redirect — not crash
-    const hasError = await page.getByText(/not.*found|error|no.*org|unauthorized/i).first().isVisible({ timeout: 10000 }).catch(() => false)
-    const redirectedAway = !page.url().includes('00000000-0000-0000-0000-000000000000')
-    expect(hasError || redirectedAway).toBeTruthy()
+    // isVisible() does not retry — poll the combined visibility/redirect
+    // state until the SPA settles into an error or redirect.
+    await expect(async () => {
+      const hasError = await page
+        .getByText(/not.*found|error|no.*org|unauthorized/i)
+        .first()
+        .isVisible()
+        .catch(() => false)
+      const redirectedAway = !page.url().includes('00000000-0000-0000-0000-000000000000')
+      expect(hasError || redirectedAway).toBe(true)
+    }).toPass({ timeout: 10000 })
   })
 })

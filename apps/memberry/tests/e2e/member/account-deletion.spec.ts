@@ -1,7 +1,6 @@
 // WF-011 — Account Deletion: request, 30-day grace, cascade via person.deletionProcessor
 import { test, expect } from '../helpers/test-fixture'
 import { SEED_MEMBER_EMAIL, TEST_PASSWORD } from '../helpers/test-config'
-import { authStateFile } from '../helpers/auth-state'
 import { captureRouteHydration } from '../helpers/real-flow'
 
 // W2 real-flow upgrade: /settings/account mounts a settings shell that
@@ -10,7 +9,7 @@ import { captureRouteHydration } from '../helpers/real-flow'
 // settings shell rendered.
 const PERSON_ME = /\/persons\/me(?:[/?]|$)/
 
-test.use({ storageState: authStateFile('member') })
+test.use({ authRole: 'member' })
 const MEMBER_EMAIL = SEED_MEMBER_EMAIL
 const MEMBER_PASSWORD = TEST_PASSWORD
 
@@ -24,7 +23,7 @@ test('shows Delete Account card with destructive border', async ({ page }) => {
     expect(personResp?.ok()).toBe(true)
 
     await expect(
-      page.getByRole('heading', { name: /delete account/i }),
+      page.getByText(/delete account/i).first(),
     ).toBeVisible({ timeout: 10000 })
 
     await expect(

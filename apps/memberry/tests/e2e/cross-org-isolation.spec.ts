@@ -4,11 +4,10 @@
 // through the full browser stack. Backend IDOR protection from Phase 12-04.
 import { test, expect } from './helpers/test-fixture'
 import { SEED_IDOR_EMAIL, TEST_PASSWORD } from './helpers/test-config'
-import { authStateFile } from './helpers/auth-state'
 import { captureAnyApiSuccess } from './helpers/real-flow'
 
 
-test.use({ storageState: authStateFile('idor') })
+test.use({ authRole: 'idor' })
 const API_BASE = process.env.API_BASE_URL ?? 'http://localhost:7213'
 const ORG_A_ID = 'ed8e3a96-8126-4341-be42-e6eb7940c562' // pda-metro-manila
 

@@ -3,11 +3,10 @@
 // Covers: SO-1 through SO-14 — training programs, cross-chapter credits, society analytics
 // Weakest persona at 21% coverage — this test significantly improves it.
 import { test, expect } from '../helpers/test-fixture'
-import { authStateFile } from '../helpers/auth-state'
 import { captureRouteHydration } from '../helpers/real-flow'
 
 
-test.use({ storageState: authStateFile('society') })
+test.use({ authRole: 'society' })
 const ORG_ID = 'ed8e3a96-8126-4341-be42-e6eb7940c562'
 
 async function assertPageMounted(

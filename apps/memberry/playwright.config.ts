@@ -55,6 +55,15 @@ export default defineConfig({
       port: 7213,
       reuseExistingServer: true,
       timeout: 30000,
+      // V-15 concurrent-session limit (core/session-limit.ts). Prod default is
+      // 5; the E2E suite re-signs-in the seeded personas dozens of times, so at
+      // the prod cap the 6th sign-in hard-deletes the oldest session row — the
+      // reused storageState/per-test session — causing a 401 cascade mid-run
+      // (CONTINUE-55 root cause). Lift the cap for the test API only; prod stays
+      // at 5. NOTE: reuseExistingServer is true — an already-running API is
+      // reused as-is and this env will NOT apply; boot a fresh `bun dev` (or
+      // free :7213) when you need the override locally.
+      env: { SESSION_LIMIT: '100000' },
     },
     {
       command: 'bun dev',
@@ -65,19 +74,18 @@ export default defineConfig({
   ],
 
   projects: [
-    // Setup project signs each persona in once and saves cookies to .auth/<role>.json.
-    // Specs opt in via `test.use({ storageState: authStateFile('member') })` from
-    // tests/e2e/auth.setup.ts. See docs/audits/E2E_TIMEOUT_ROOT_CAUSE.md §6.
-    {
-      name: 'setup',
-      testMatch: /auth\.setup\.ts$/,
-      testIgnore: [],
-    },
+    // No setup/storageState-file project: specs authenticate per-test via
+    // `test.use({ authRole: '<role>' })`, which mints a fresh API session
+    // (helpers/programmatic-auth.ts → helpers/test-fixture.ts). This retires
+    // the once-per-suite UI sign-in that produced a single long-lived session
+    // and the CONTINUE-55 401 cascade. See docs/aha/outputs/CONTINUE-56-prompt.md.
     {
       name: 'chromium',
       use: { ...devices['Desktop Chrome'] },
-      testIgnore: ['**/mobile/**', '**/auth.setup.ts'],
-      dependencies: ['setup'],
+      // Re-state '**/stubs/**' here: a project-level testIgnore shadows the
+      // top-level one, so the global stub exclude is lost for this project
+      // unless repeated. Without it the unbuilt-feature stub specs run and fail.
+      testIgnore: ['**/mobile/**', '**/stubs/**'],
     },
     {
       name: 'mobile',
@@ -88,7 +96,6 @@ export default defineConfig({
         hasTouch: true,
       },
       testMatch: '**/mobile/**',
-      dependencies: ['setup'],
     },
   ],
 })

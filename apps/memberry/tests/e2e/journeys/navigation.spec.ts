@@ -54,7 +54,10 @@ test.describe('Officer navigation journey', () => {
 
     const respP = captureAnyApiSuccess(page)
     await page.goto(`/org/${ORG_ID}/officer/dashboard`)
-    await expect(page).toHaveURL(new RegExp(`/org/${ORG_ID}/officer/dashboard`))
+    // The app canonicalizes a UUID org segment to its slug, so the final URL
+    // is /org/<slug>/officer/dashboard — assert the officer surface, not the
+    // literal org id we navigated with.
+    await expect(page).toHaveURL(/\/officer\/dashboard/, { timeout: 15000 })
     const resp = await respP
     expect(resp?.status()).toBe(200)
     expect(resp?.ok()).toBe(true)

@@ -1,11 +1,10 @@
 // WF-101 — Survey Response
 import { test, expect } from './helpers/test-fixture'
 import { SEED_MEMBER_EMAIL, TEST_PASSWORD } from './helpers/test-config'
-import { authStateFile } from './helpers/auth-state'
 import { captureAnyApiSuccess } from './helpers/real-flow'
 
 
-test.use({ storageState: authStateFile('member') })
+test.use({ authRole: 'member' })
 test.describe('Feedback: Member Surveys', () => {
 test('my surveys page loads without error', async ({ page }) => {
     const respP = captureAnyApiSuccess(page)

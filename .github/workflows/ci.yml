@@ -39,9 +39,18 @@ jobs:
       - name: Dependency audit
         run: bunx audit-ci --moderate || true
 
-  e2e:
+  # Memberry E2E sharded across 6 parallel runners. Each shard gets its OWN
+  # postgres + minio + API + app, so seed mutations in one shard never leak
+  # into another. fail-fast:false so a single shard failure does not cancel the
+  # others. workers=2/shard is set in apps/memberry/playwright.config.ts (CI).
+  # Tradeoff (accepted, CONTINUE-57): ~6× the CI minutes of the old single job.
+  e2e-memberry:
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    timeout-minutes: 20
+    strategy:
+      fail-fast: false
+      matrix:
+        shard: [1, 2, 3, 4, 5, 6]
     services:
       postgres:
         image: postgres:16-alpine
@@ -73,6 +82,22 @@ jobs:
       STORAGE_BUCKET: monobase-files
       STORAGE_ACCESS_KEY_ID: minioadmin
       STORAGE_SECRET_ACCESS_KEY: minioadmin
+      # V-15 concurrent-session limit. Production default is 5 (core/config.ts
+      # SESSION_LIMIT: intish(5)). The E2E suite re-signs-in the seeded personas
+      # dozens of times across one run; at the prod cap the 6th sign-in
+      # hard-deletes the oldest session row — yielding a 401 cascade mid-run
+      # (CONTINUE-55 root cause). Lift the cap for the test API only. The
+      # step-booted `bun dev` reads this job env (the playwright.config webServer
+      # env is bypassed because reuseExistingServer reuses the running API).
+      # Production stays at the default 5 (this env is CI/e2e-scoped).
+      SESSION_LIMIT: 100000
+      # Skip pixel-diff visual regression on CI: baselines are committed only
+      # for darwin (-chromium-darwin.png). Linux CI has no -linux.png baseline,
+      # so toHaveScreenshot fails every _visual.spec.ts test with "snapshot
+      # doesn't exist, writing actual". Cross-platform baselines are font-render
+      # fragile; visual regression runs locally on darwin where baselines exist.
+      # Re-enable here once linux baselines are generated in-container (CONTINUE-59).
+      SKIP_VISUAL: 1
     steps:
       - uses: actions/checkout@v4
       - name: Start minio (server mode)
@@ -127,10 +152,18 @@ jobs:
           exit 1
       - name: Seed database
         run: cd services/api-ts && bun run db:seed
+      - name: Build Memberry app
+        # Serve a production build (vite preview) rather than the dev server:
+        # vite-dev re-optimizes deps on the fly, which transiently 404s
+        # in-flight route-chunk requests under the 6 concurrent shards and
+        # leaves lazily-mounted routes blank (the _click-through crawler hit
+        # this). A prebuilt bundle has no runtime reopt. preview proxies /api
+        # to the API via vite.config preview.proxy.
+        run: cd apps/memberry && bun run build
       - name: Start Memberry app
         run: |
           cd apps/memberry
-          bun dev > /tmp/memberry.log 2>&1 &
+          bun run preview > /tmp/memberry.log 2>&1 &
           echo $! > /tmp/memberry.pid
       - name: Wait for Memberry app
         run: |
@@ -141,18 +174,103 @@ jobs:
           echo "Memberry app never became ready"
           tail -100 /tmp/memberry.log
           exit 1
-      - name: Run E2E tests
-        run: cd apps/memberry && bun run test:e2e
+      - name: Run E2E tests (shard ${{ matrix.shard }}/6)
+        run: cd apps/memberry && bunx playwright test --shard=${{ matrix.shard }}/6
+      - name: Upload Memberry test results
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report-memberry-shard-${{ matrix.shard }}
+          path: apps/memberry/playwright-report/
 
+  # Admin E2E in its own runner. workers=1 (admin suite is small and some specs
+  # mutate shared admin state). Separate from the memberry shards so its result
+  # is independently visible to the `e2e` aggregator.
+  e2e-admin:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: password
+          POSTGRES_DB: monobase
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd "pg_isready -U postgres -d monobase"
+          --health-interval 5s --health-timeout 5s --health-retries 10
+    env:
+      TZ: UTC
+      DATABASE_URL: postgresql://postgres:password@localhost:5432/monobase
+      PORT: 7213
+      API_URL: http://localhost:7213
+      AUTH_SECRET: contract-test-secret-do-not-use-in-prod
+      AUTH_REQUIRE_EMAIL_VERIFICATION: false
+      AUTH_ADMIN_EMAILS: admin@contract-tests.local
+      PAYMENT_TOKEN_SECRET: contract-test-payment-secret-do-not-use-in-prod
+      STORAGE_PROVIDER: minio
+      STORAGE_ENDPOINT: http://localhost:9000
+      STORAGE_BUCKET: monobase-files
+      STORAGE_ACCESS_KEY_ID: minioadmin
+      STORAGE_SECRET_ACCESS_KEY: minioadmin
+      SESSION_LIMIT: 100000
+    steps:
+      - uses: actions/checkout@v4
+      - name: Start minio (server mode)
+        run: |
+          docker run -d --name minio \
+            -p 9000:9000 \
+            -e MINIO_ROOT_USER=minioadmin \
+            -e MINIO_ROOT_PASSWORD=minioadmin \
+            --health-cmd "curl -fsS http://localhost:9000/minio/health/live" \
+            --health-interval=5s --health-timeout=5s --health-retries=20 \
+            minio/minio:latest server /data
+          for i in $(seq 1 12); do
+            status=$(docker inspect --format='{{.State.Health.Status}}' minio 2>/dev/null || echo "starting")
+            echo "minio health: $status"
+            if [ "$status" = "healthy" ]; then break; fi
+            sleep 5
+          done
+          if [ "$(docker inspect --format='{{.State.Health.Status}}' minio)" != "healthy" ]; then
+            echo "minio did not become healthy in time" >&2
+            docker logs minio
+            exit 1
+          fi
+          docker run --rm --network host \
+            -e MC_HOST_local=http://minioadmin:minioadmin@localhost:9000 \
+            minio/mc mb --ignore-existing local/monobase-files
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: 1.2.21
+      - run: bun install --frozen-lockfile
+      - name: Build OpenAPI spec
+        run: bun run --filter @monobase/api-spec build
+      - name: Generate API codegen
+        run: bun run --filter @monobase/api-ts generate
+      - name: Boot API
+        run: |
+          cd services/api-ts
+          bun dev > /tmp/api.log 2>&1 &
+          echo $! > /tmp/api.pid
+      - name: Wait for API
+        run: |
+          for i in $(seq 1 60); do
+            curl -fsS "$API_URL/readyz" && exit 0
+            sleep 1
+          done
+          echo "API never became ready"
+          tail -200 /tmp/api.log
+          exit 1
+      - name: Seed database
+        run: cd services/api-ts && bun run db:seed
       - name: Install Playwright browsers (admin)
         run: cd apps/admin && bunx playwright install --with-deps chromium
-
       - name: Start Admin app
         run: |
           cd apps/admin
           bun dev > /tmp/admin.log 2>&1 &
           echo $! > /tmp/admin.pid
-
       - name: Wait for Admin app
         run: |
           for i in $(seq 1 30); do
@@ -162,23 +280,34 @@ jobs:
           echo "Admin app never became ready"
           tail -100 /tmp/admin.log
           exit 1
-
       - name: Run Admin E2E tests
-        run: cd apps/admin && bun run test:e2e
-
-      - name: Upload Memberry test results
-        if: failure()
-        uses: actions/upload-artifact@v4
-        with:
-          name: playwright-report-memberry
-          path: apps/memberry/playwright-report/
-
+        run: cd apps/admin && bunx playwright test --workers=1
       - name: Upload Admin test results
         if: failure()
         uses: actions/upload-artifact@v4
         with:
           name: playwright-report-admin
           path: apps/admin/playwright-report/
+
+  # Aggregator. MUST stay named `e2e` — ci-gate and coverage-gate depend on
+  # `needs.e2e.result`. Fails unless every memberry shard AND admin passed.
+  e2e:
+    if: always()
+    runs-on: ubuntu-latest
+    timeout-minutes: 2
+    needs: [e2e-memberry, e2e-admin]
+    steps:
+      - name: Check all E2E shards passed
+        run: |
+          echo "e2e-memberry (all shards): ${{ needs.e2e-memberry.result }}"
+          echo "e2e-admin: ${{ needs.e2e-admin.result }}"
+          # A matrix job's aggregate result is 'failure' if ANY shard failed.
+          if [[ "${{ needs.e2e-memberry.result }}" != "success" ]] || \
+             [[ "${{ needs.e2e-admin.result }}" != "success" ]]; then
+            echo "::error::One or more E2E shards failed"
+            exit 1
+          fi
+          echo "All E2E shards passed"
 
   build-api:
     runs-on: ubuntu-latest
@@ -407,7 +536,9 @@ jobs:
   coverage-gate:
     runs-on: ubuntu-latest
     timeout-minutes: 5
-    needs: [lint-typecheck, e2e]
+    # Decoupled from e2e (CONTINUE-57): coverage checks (BR/CSRF/matrix) are
+    # static and must not be skipped just because the long e2e suite is red.
+    needs: [lint-typecheck]
     steps:
       - uses: actions/checkout@v4
       - uses: oven-sh/setup-bun@v2

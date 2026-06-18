@@ -1,11 +1,10 @@
 // WF-052 — Event Registration: member registers, waitlist if full
 // BR-27: Event capacity and registration limits
 import { test, expect } from '../helpers/test-fixture'
-import { authStateFile } from '../helpers/auth-state'
 import { captureAnyApiSuccess } from '../helpers/real-flow'
 
 
-test.use({ storageState: authStateFile('member') })
+test.use({ authRole: 'member' })
 const ORG_ID = 'ed8e3a96-8126-4341-be42-e6eb7940c562'
 
 test.describe('BR-27: Event Capacity', () => {
@@ -16,8 +15,7 @@ test('event list page loads', async ({ page }) => {
     expect(resp?.status()).toBe(200)
     expect(resp?.ok()).toBe(true)
     // Should show events or empty state
-    const hasContent = await page.getByText(/event|upcoming|no events/i).first().isVisible({ timeout: 10000 }).catch(() => false)
-    expect(hasContent).toBeTruthy()
+    await expect(page.getByText(/event|upcoming|no events/i).first()).toBeVisible({ timeout: 10000 })
   })
 
   test('event detail shows capacity info when available', async ({ page }) => {
@@ -39,7 +37,6 @@ test('event list page loads', async ({ page }) => {
   test('member events page shows registration status', async ({ page }) => {
     await page.goto('/my/events')
     // Should show events or empty state
-    const hasContent = await page.getByText(/event|registered|no events/i).first().isVisible({ timeout: 10000 }).catch(() => false)
-    expect(hasContent).toBeTruthy()
+    await expect(page.getByText(/event|registered|no events/i).first()).toBeVisible({ timeout: 10000 })
   })
 })

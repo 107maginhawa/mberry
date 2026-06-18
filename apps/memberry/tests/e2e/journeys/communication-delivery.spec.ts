@@ -23,8 +23,7 @@ test.describe('Journey: Communication Delivery Pipeline', () => {
     })
 
     await test.step('communications list shows announcements', async () => {
-      const hasComms = await page.getByText(/announcement|communication|message/i).first().isVisible({ timeout: 10000 }).catch(() => false)
-      expect(hasComms).toBeTruthy()
+      await expect(page.getByText(/announcement|communication|message/i).first()).toBeVisible({ timeout: 10000 })
 
       // Should show seeded announcements
       const hasDues = await page.getByText(/dues.*reminder|board.*meeting/i).first().isVisible({ timeout: 10000 }).catch(() => false)
@@ -44,9 +43,11 @@ test.describe('Journey: Communication Delivery Pipeline', () => {
 
     await test.step('compose form renders', async () => {
       // Should see compose form with subject/body fields
-      const hasForm = await page.getByRole('textbox').first().isVisible({ timeout: 10000 }).catch(() => false)
-        || await page.getByLabel(/subject|title|message/i).first().isVisible({ timeout: 10000 }).catch(() => false)
-      expect(hasForm).toBeTruthy()
+      await expect(
+        page.getByRole('textbox').first()
+          .or(page.getByLabel(/subject|title|message/i).first())
+          .first(),
+      ).toBeVisible({ timeout: 10000 })
     })
   })
 
@@ -62,8 +63,7 @@ test.describe('Journey: Communication Delivery Pipeline', () => {
       await page.waitForLoadState('networkidle')
 
       // Detail page should show content and status
-      const hasDetail = await page.getByText(/sent|draft|recipient|content|body/i).first().isVisible({ timeout: 10000 }).catch(() => false)
-      expect(hasDetail).toBeTruthy()
+      await expect(page.getByText(/sent|draft|recipient|content|body/i).first()).toBeVisible({ timeout: 10000 })
     }
   })
 
@@ -78,8 +78,7 @@ test.describe('Journey: Communication Delivery Pipeline', () => {
 
     await test.step('notifications page renders', async () => {
       // Should see notifications or empty state
-      const hasNotifs = await page.getByText(/notification|announcement|no.*notification|empty/i).first().isVisible({ timeout: 10000 }).catch(() => false)
-      expect(hasNotifs).toBeTruthy()
+      await expect(page.getByText(/notification|announcement|no.*notification|empty/i).first()).toBeVisible({ timeout: 10000 })
     })
   })
 
@@ -87,15 +86,13 @@ test.describe('Journey: Communication Delivery Pipeline', () => {
     await test.step('officer views communications', async () => {
       await signInAsOfficer(page)
       await page.goto(`/org/${ORG_ID}/officer/communications`)
-      const hasComms = await page.getByText(/announcement|communication/i).first().isVisible({ timeout: 10000 }).catch(() => false)
-      expect(hasComms).toBeTruthy()
+      await expect(page.getByText(/announcement|communication/i).first()).toBeVisible({ timeout: 10000 })
     })
 
     await test.step('navigate to compose', async () => {
       await page.goto(`/org/${ORG_ID}/officer/communications/new`)
       // Form should render
-      const hasForm = await page.getByRole('textbox').first().isVisible({ timeout: 10000 }).catch(() => false)
-      expect(hasForm).toBeTruthy()
+      await expect(page.getByRole('textbox').first()).toBeVisible({ timeout: 10000 })
     })
 
     await test.step('back to list', async () => {

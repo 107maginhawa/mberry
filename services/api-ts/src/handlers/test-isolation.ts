@@ -34,12 +34,16 @@ const TERM_END = new Date(Date.UTC(2026, 11, 31));
 
 /**
  * POST /test/isolated-fixture
- * Body: { fixture?, memberCount?, officerEmail? }
+ * Body: { fixture?, memberCount?, officerEmail?, memberEmail? }
  *   - fixture: 'roster-with-3-members' | 'minimal'  (default: 'roster-with-3-members')
  *   - memberCount: number  (overrides fixture default; minimal=0, roster=3)
  *   - officerEmail: string (default 'test@memberry.ph' — the seeded president)
+ *   - memberEmail: string (optional — when supplied, the seeded member with
+ *     this email is granted an ACTIVE membership on the new org so
+ *     member-persona specs can target the isolated org. No default: member
+ *     enrollment is opt-in.)
  *
- * Returns: { orgId, slug, tierId, personIds, officerPersonId?, positionId? }
+ * Returns: { orgId, slug, tierId, personIds, officerPersonId?, positionId?, memberPersonId? }
  *
  * When officerEmail resolves to an existing seeded user, this also creates
  * a President position + active officer_term on the new org. That makes
@@ -56,6 +60,7 @@ export async function createIsolatedFixture(ctx: Context): Promise<Response> {
     fixture?: string;
     memberCount?: number;
     officerEmail?: string | null;
+    memberEmail?: string | null;
   };
   const memberCount = body.memberCount ?? (body.fixture === 'minimal' ? 0 : 3);
   // Distinguish "not provided" (use default) from explicit null (opt out).
@@ -63,6 +68,9 @@ export async function createIsolatedFixture(ctx: Context): Promise<Response> {
     'officerEmail' in body
       ? body.officerEmail
       : 'test@memberry.ph';
+  // memberEmail is opt-in — no default. Only when supplied do we enroll a
+  // seeded member onto the fresh org.
+  const memberEmail = body.memberEmail ?? null;
 
   // Find or reuse a default association (test orgs all belong to PDA).
   const [assoc] =
@@ -199,6 +207,49 @@ export async function createIsolatedFixture(ctx: Context): Promise<Response> {
     }
   }
 
+  // Member-persona provisioning (CONTINUE-60). When a memberEmail is
+  // supplied, resolve the seeded member's person.id via their better-auth
+  // user row and grant them an ACTIVE membership on the new org. Mirrors
+  // the officer path above; lets member specs target fx().orgId while
+  // signing in as the seeded member.
+  let memberPersonId: string | undefined;
+  if (tier && memberEmail) {
+    const [memberUser] = await db
+      .select({ id: userTable.id })
+      .from(userTable)
+      .where(eq(userTable.email, memberEmail))
+      .limit(1);
+    if (memberUser) {
+      // Avoid duplicate membership if one somehow already exists.
+      const [existing] = await db
+        .select({ id: memberships.id })
+        .from(memberships)
+        .where(
+          and(
+            eq(memberships.organizationId, org.id),
+            eq(memberships.personId, memberUser.id),
+          ),
+        )
+        .limit(1);
+      if (!existing) {
+        await db.insert(memberships).values({
+          organizationId: org.id,
+          personId: memberUser.id,
+          tierId: tier.id,
+          memberNumber: `T-${suffix}-MEMBER`,
+          startDate: new Date().toISOString().split('T')[0]!,
+          duesExpiryDate: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000)
+            .toISOString()
+            .split('T')[0]!,
+          gracePeriodDays: 30,
+          status: 'active',
+          joinedAt: new Date(),
+        });
+      }
+      memberPersonId = memberUser.id;
+    }
+  }
+
   return ctx.json(
     {
       orgId: org.id,
@@ -207,6 +258,7 @@ export async function createIsolatedFixture(ctx: Context): Promise<Response> {
       personIds,
       officerPersonId,
       positionId,
+      memberPersonId,
     },
     201,
   );

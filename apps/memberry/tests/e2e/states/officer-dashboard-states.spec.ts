@@ -42,19 +42,28 @@ test.describe('Officer Dashboard — Interaction States', () => {
     expect(resp?.ok()).toBe(true)
 
     // Dashboard or welcome content
-    const hasGreeting = await page.getByText(/dashboard|welcome|good\s(morning|afternoon|evening)|overview/i).first().isVisible().catch(() => false)
-    const hasOrgName = await page.getByText(/PDA Metro Manila/i).first().isVisible().catch(() => false)
-    expect(hasGreeting || hasOrgName).toBeTruthy()
+    await expect(
+      page.getByText(/dashboard|welcome|good\s(morning|afternoon|evening)|overview/i).first()
+        .or(page.getByText(/PDA Metro Manila/i).first())
+        .first(),
+    ).toBeVisible({ timeout: 10000 })
 
     // Metrics strip with member counts
-    const hasMembers = await page.getByText(/members?/i).first().isVisible().catch(() => false)
-    const hasTotal = await page.getByText(/total|active|pending|collection/i).first().isVisible().catch(() => false)
-    expect(hasMembers || hasTotal).toBeTruthy()
+    await expect(
+      page.getByText(/members?/i).first()
+        .or(page.getByText(/total|active|pending|collection/i).first())
+        .first(),
+    ).toBeVisible({ timeout: 10000 })
   })
 
   test('permission-error: regular member cannot access officer dashboard', async ({ page }) => {
     await signIn(page, SEED_MEMBER_EMAIL, TEST_PASSWORD)
     await page.goto(`/org/${ORG_ID}/officer/dashboard`)
+    // Guard redirect is async (slug→org then officer-role, ~2-3s); wait for it
+    // to settle before asserting rather than racing it.
+    await page
+      .waitForURL((u) => !u.pathname.includes('/officer/dashboard'), { timeout: 15000 })
+      .catch(() => {})
     // Should be redirected or see access denied
     const isRedirected = !page.url().includes('/officer/dashboard')
     const hasForbidden = await page.getByText(/forbidden|access denied|not authorized|officers only/i).first().isVisible().catch(() => false)
@@ -68,6 +77,10 @@ test.describe('Officer Dashboard — Interaction States', () => {
 
     const fakeOrgId = '00000000-0000-0000-0000-000000000000'
     await page.goto(`/org/${fakeOrgId}/officer/dashboard`)
+    // Guard resolves the (nonexistent) org async then redirects — wait for it.
+    await page
+      .waitForURL((u) => !u.pathname.includes(fakeOrgId), { timeout: 15000 })
+      .catch(() => {})
     const hasError = await page.getByText(/not found|error|no access/i).first().isVisible().catch(() => false)
     const redirected = !page.url().includes(fakeOrgId)
     expect(hasError || redirected).toBeTruthy()
@@ -96,6 +109,8 @@ test.describe('Officer Dashboard — Interaction States', () => {
   test('a11y: baseline accessibility check passes', async ({ page }) => {
     await signIn(page, SEED_OFFICER_EMAIL, TEST_PASSWORD)
     await page.goto(`/org/${ORG_ID}/officer/dashboard`)
+    await expect(page.getByRole('heading').first()).toBeVisible({ timeout: 10000 })
+    await page.waitForLoadState('networkidle').catch(() => {})
     await expectNoA11yViolations(page, {
       exclude: ['[data-radix-popper-content-wrapper]'],
     })

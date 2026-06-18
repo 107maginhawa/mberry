@@ -1,10 +1,9 @@
 import { test, expect } from '../helpers/test-fixture'
 import { SEED_OFFICER_EMAIL, TEST_PASSWORD } from '../helpers/test-config'
-import { authStateFile } from '../helpers/auth-state'
 import { captureRouteHydration } from '../helpers/real-flow'
 
 
-test.use({ storageState: authStateFile('officer') })
+test.use({ authRole: 'officer' })
 const ORG_ID = 'ed8e3a96-8126-4341-be42-e6eb7940c562'
 const PERSON_ME = /\/persons\/me(?:[/?]|$)/
 
@@ -25,9 +24,12 @@ test('dashboard renders with content', async ({ page }) => {
 
   test('metrics strip shows member counts or activity summary', async ({ page }) => {
     await page.goto(`/org/${ORG_ID}/officer/dashboard`)
-    const hasMembers = await page.getByText(/members?/i).first().isVisible().catch(() => false)
-    const hasTotal = await page.getByText(/total|active|pending|collection/i).first().isVisible().catch(() => false)
-    expect(hasMembers || hasTotal).toBeTruthy()
+    await expect(
+      page
+        .getByText(/members?/i)
+        .or(page.getByText(/total|active|pending|collection/i))
+        .first(),
+    ).toBeVisible({ timeout: 10000 })
   })
 
   test('can navigate to officer roster via URL', async ({ page }) => {

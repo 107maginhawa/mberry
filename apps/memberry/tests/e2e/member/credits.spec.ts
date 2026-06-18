@@ -51,9 +51,11 @@ test.describe('Member Credits (/my/credits)', () => {
     await page.goto('/my/credits')
     // The aggregate credit view should render — even if the total is 0,
     // the summary component (stat cards or total line) must be present.
-    const hasEarned = await page.getByText('Earned', { exact: true }).isVisible().catch(() => false)
-    const hasTotal = await page.getByText(/total/i).first().isVisible().catch(() => false)
-    const hasSummary = await page.getByText(/credits/i).first().isVisible().catch(() => false)
-    expect(hasEarned || hasTotal || hasSummary).toBeTruthy()
+    await expect(
+      page.getByText('Earned', { exact: true })
+        .or(page.getByText(/total/i).first())
+        .or(page.getByText(/credits/i).first())
+        .first(),
+    ).toBeVisible({ timeout: 10000 })
   })
 })

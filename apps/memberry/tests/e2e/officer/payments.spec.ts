@@ -1,10 +1,9 @@
 // Business Rules: [BR-04] [BR-05] [BR-06] [BR-08] [BR-32]
 import { test, expect } from '../helpers/test-fixture'
-import { authStateFile } from '../helpers/auth-state'
 import { captureRouteHydration } from '../helpers/real-flow'
 
 
-test.use({ storageState: authStateFile('officer') })
+test.use({ authRole: 'officer' })
 const ORG_ID = 'ed8e3a96-8126-4341-be42-e6eb7940c562'
 const PAYMENTS = /\/(payments|dues-invoices)/
 

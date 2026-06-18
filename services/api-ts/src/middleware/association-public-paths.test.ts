@@ -18,8 +18,21 @@ describe('isAssociationPublicPath (FIX-009 — public-path exemption boundary ma
   });
 
   test('a private route under a public prefix segment is NOT exempt', () => {
-    // `/search` is public, but `/searchInternal` is a distinct private route.
+    // `/searchInternal` is a distinct private route.
     expect(isAssociationPublicPath('/association/member/directory/searchInternal')).toBe(false);
+  });
+
+  test('the authenticated base directory search is NOT exempt', () => {
+    // Only the public profile sub-path (/search/:personId/public) is public.
+    // The bare /directory/search is the AUTHENTICATED member search and must
+    // pass through auth + org-context middleware (else orgMembership is never
+    // set and the handler 403s with "Organization membership required").
+    expect(isAssociationPublicPath('/association/member/directory/search')).toBe(false);
+    expect(
+      isAssociationPublicPath(
+        '/association/member/directory/search?organizationId=abc&q=Juan',
+      ),
+    ).toBe(false);
   });
 
   test('an unrelated association route is NOT exempt', () => {

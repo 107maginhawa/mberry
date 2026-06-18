@@ -1,10 +1,8 @@
 // M-10: Browse member directory
 // Verifies directory search page renders, search works, and member cards display
 import { test, expect } from '../helpers/test-fixture'
-import { authStateFile } from '../helpers/auth-state'
 
-
-test.use({ storageState: authStateFile('member') })
+test.use({ authRole: 'member' })
 const ORG_ID = 'ed8e3a96-8126-4341-be42-e6eb7940c562'
 
 test.describe('M-10: Member Directory', () => {
