@@ -35,7 +35,8 @@ const ORG_ID = 'ed8e3a96-8126-4341-be42-e6eb7940c562'
 const DASHBOARD_ALLOW = [
   /→ 401/,
   /GET \/api\/association\/event-lifecycle\/my → 403/,
-  /GET \/api\/credit-compliance\/[^ ]+ → 403/,
+  // credit-compliance/{org} 403 removed: dashboard.tsx now gates that officer-only
+  // fetch behind officer role, so it no longer fires for non-officers (fix #5).
 ]
 
 test.describe.configure({ mode: 'serial' })

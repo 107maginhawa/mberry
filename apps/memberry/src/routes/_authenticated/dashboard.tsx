@@ -117,7 +117,24 @@ function DashboardPage() {
     enabled: !!firstOrgId,
   })
 
-  // Fetch compliance for first org (API is per-org)
+  // credit-compliance is an OFFICER-ONLY org report — fetching it for every
+  // membership-holding user made the member dashboard fire a call that 403'd
+  // silently (swallowed: no isError surface, retry:false). Gate it behind
+  // officer status of the first org; members derive CPD status from the
+  // member-scoped /persons/me/credit-summary fallback below.
+  const firstOrgOfficerQuery = useQuery<boolean>({
+    queryKey: ['dashboard-first-org-officer', firstOrgId],
+    queryFn: async () => {
+      if (!firstOrgId) return false
+      const json = await api.get<any>(`/api/persons/me/officer-role/${firstOrgId}`)
+      return Array.isArray(json?.data) && json.data.length > 0
+    },
+    retry: false,
+    enabled: !!firstOrgId,
+  })
+  const officersFirstOrg = firstOrgOfficerQuery.data ?? false
+
+  // Fetch compliance for first org (API is per-org; officer-only).
   const complianceQuery = useQuery<any>({
     queryKey: ['dashboard-compliance', firstOrgId],
     queryFn: async () => {
@@ -126,7 +143,7 @@ function DashboardPage() {
       return res
     },
     retry: false,
-    enabled: !!firstOrgId,
+    enabled: !!firstOrgId && officersFirstOrg,
   })
 
   // Derived data
