@@ -600,3 +600,54 @@ describe('DuesRepository reads (real DB)', () => {
     expect(byStatus.total).toBe(0);
   });
 });
+
+// ─── DuesRepository — trailing collection rates (real DB) ─────────────────
+// Guards the N+1 collapse: computeTrailingRates now runs a single query with
+// six conditional aggregates instead of one query per window. `collected`
+// keys off paid_at (status='completed'); `total` keys off created_at.
+describe('DuesRepository.computeTrailingRates (real DB)', () => {
+  async function seedTrailPayment(
+    org: string,
+    opts: { status: string; amount: number; createdDaysAgo: number; paidDaysAgo: number | null },
+  ): Promise<void> {
+    await scopedPool.query(
+      `INSERT INTO "${TEST_SCHEMA}".dues_payment
+         (id, organization_id, person_id, receipt_number, amount, payment_method, status, created_at, paid_at)
+       VALUES (gen_random_uuid(), $1, $2, $3, $4, 'cash', $5,
+               now() - ($6::text || ' days')::interval,
+               CASE WHEN $7::text IS NULL THEN NULL ELSE now() - ($7::text || ' days')::interval END)`,
+      [org, PERSON_1, `trail-${freshId()}`, opts.amount, opts.status,
+       String(opts.createdDaysAgo), opts.paidDaysAgo === null ? null : String(opts.paidDaysAgo)],
+    );
+  }
+
+  test('one query yields the same per-window percentages as the old loop', async () => {
+    if (!dbReachable) return;
+    const repo = new DuesRepository(db as any);
+    const org = await insertOrg({ slug: `trail-${freshId().slice(0, 8)}` });
+
+    // A: completed, in all windows. B: pending, in all windows.
+    await seedTrailPayment(org, { status: 'completed', amount: 100, createdDaysAgo: 5, paidDaysAgo: 5 });
+    await seedTrailPayment(org, { status: 'pending', amount: 100, createdDaysAgo: 5, paidDaysAgo: null });
+    // C: completed, only in 90/365. D: pending, only in 365.
+    await seedTrailPayment(org, { status: 'completed', amount: 300, createdDaysAgo: 60, paidDaysAgo: 60 });
+    await seedTrailPayment(org, { status: 'pending', amount: 400, createdDaysAgo: 200, paidDaysAgo: null });
+
+    const rates = await (repo as any).computeTrailingRates(org, [30, 90, 365]);
+    // 30d: collected 100 / total 200 = 50
+    expect(rates.days30).toBe(50);
+    // 90d: collected 400 (A+C) / total 500 (A+B+C) = 80
+    expect(rates.days90).toBe(80);
+    // 365d: collected 400 (A+C) / total 900 (all) = round(44.44) = 44
+    expect(rates.days365).toBe(44);
+  });
+
+  test('empty data → all windows are 0', async () => {
+    if (!dbReachable) return;
+    const repo = new DuesRepository(db as any);
+    const org = await insertOrg({ slug: `trail-empty-${freshId().slice(0, 8)}` });
+
+    const rates = await (repo as any).computeTrailingRates(org, [30, 90, 365]);
+    expect(rates).toEqual({ days30: 0, days90: 0, days365: 0 });
+  });
+});

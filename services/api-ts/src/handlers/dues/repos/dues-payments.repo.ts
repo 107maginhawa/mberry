@@ -407,26 +407,25 @@ export class DuesRepository {
   }
 
   private async computeTrailingRates(organizationId: string, windows: number[]) {
-    const results: Record<string, number> = {};
-
-    for (const days of windows) {
-      const cutoff = new Date();
-      cutoff.setDate(cutoff.getDate() - days);
-
-      const [stats] = await this.db
-        .select({
-          collected: sql<number>`COALESCE(SUM(CASE WHEN status = 'completed' AND ${duesPayments.paidAt} >= ${cutoff} THEN amount ELSE 0 END), 0)::int`,
-          total: sql<number>`COALESCE(SUM(CASE WHEN ${duesPayments.createdAt} >= ${cutoff} THEN amount ELSE 0 END), 0)::int`,
-        })
-        .from(duesPayments)
-        .where(eq(duesPayments.organizationId, organizationId));
-
-      const collected = stats?.collected ?? 0;
-      const total = stats?.total ?? 0;
-      results[`days${days}`] = total > 0 ? Math.round((collected / total) * 100) : 0;
-    }
-
-    return results as { days30: number; days90: number; days365: number };
+    const cutoff = (days: number) => { const d = new Date(); d.setDate(d.getDate() - days); return d; };
+    const [c30, c90, c365] = [cutoff(30), cutoff(90), cutoff(365)];
+    const [stats] = await this.db
+      .select({
+        collected30: sql<number>`COALESCE(SUM(CASE WHEN status = 'completed' AND ${duesPayments.paidAt} >= ${c30} THEN amount ELSE 0 END), 0)::int`,
+        total30: sql<number>`COALESCE(SUM(CASE WHEN ${duesPayments.createdAt} >= ${c30} THEN amount ELSE 0 END), 0)::int`,
+        collected90: sql<number>`COALESCE(SUM(CASE WHEN status = 'completed' AND ${duesPayments.paidAt} >= ${c90} THEN amount ELSE 0 END), 0)::int`,
+        total90: sql<number>`COALESCE(SUM(CASE WHEN ${duesPayments.createdAt} >= ${c90} THEN amount ELSE 0 END), 0)::int`,
+        collected365: sql<number>`COALESCE(SUM(CASE WHEN status = 'completed' AND ${duesPayments.paidAt} >= ${c365} THEN amount ELSE 0 END), 0)::int`,
+        total365: sql<number>`COALESCE(SUM(CASE WHEN ${duesPayments.createdAt} >= ${c365} THEN amount ELSE 0 END), 0)::int`,
+      })
+      .from(duesPayments)
+      .where(eq(duesPayments.organizationId, organizationId));
+    const pct = (c: number, t: number) => (t > 0 ? Math.round((c / t) * 100) : 0);
+    return {
+      days30: pct(stats?.collected30 ?? 0, stats?.total30 ?? 0),
+      days90: pct(stats?.collected90 ?? 0, stats?.total90 ?? 0),
+      days365: pct(stats?.collected365 ?? 0, stats?.total365 ?? 0),
+    };
   }
 
   private async computeMonthlyBreakdown(organizationId: string, months: number) {
