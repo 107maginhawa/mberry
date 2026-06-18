@@ -1,4 +1,8 @@
 // WF-038 — Pay Dues Online: member initiates payment, gateway processes, webhook confirms
+// @selector-only-ok: UI-render smoke for the member dues view. The dues DATA path
+// (record → durable read) is enforced by the treasurer-records-dues @journey-firewall
+// journey + recordDuesPayment unit tests; this spec only checks the screen renders a
+// valid payment state. (Phase E disposition — accept-risk.)
 import { test, expect } from '../helpers/test-fixture'
 import { SEED_MEMBER_EMAIL, TEST_PASSWORD } from '../helpers/test-config'
 

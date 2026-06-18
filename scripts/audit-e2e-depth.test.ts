@@ -51,6 +51,20 @@ test('j', async () => {
     expect(journeyMissingClauses(c)).toEqual([]);
   });
 
+  test('a prose mention of the token (not a marker line) is NOT a journey', () => {
+    // Regression: an exemption rationale that names a @journey-firewall journey
+    // must not itself be flagged as a journey.
+    const src = `
+// @selector-only-ok: smoke only; data path covered by the treasurer-records-dues @journey-firewall
+// journey + unit tests.
+import { test, expect } from '../helpers/test-fixture'
+test('x', async () => { await expect(page.locator('h1')).toBeVisible() })
+`;
+    const c = detectClauses(src);
+    expect(c.journey).toBe(false);
+    expect(journeyMissingClauses(c)).toEqual([]);
+  });
+
   test('RED: journey missing the independent read → clause 4 violation', () => {
     const src = COMPLIANT.replace("import { independentRead } from './helpers/independent-read'", '')
       .replace(/const r = await independentRead[\s\S]*?\n/, 'const r = { status: 200, personId: memberId }\n');

@@ -37,6 +37,7 @@ const DATA_PATTERNS = [
   /expect\([^)]*\)\.toMatchObject/,
   /waitForResponse/,
   /\.toBe\((\d{3}|true|false)\)/,              // expect(x).toBe(200) etc.
+  /\.toHaveValue\(/,                            // form round-trip — asserts persisted value
 ];
 
 const SELECTOR_PATTERNS = [
@@ -54,7 +55,10 @@ const SELECTOR_PATTERNS = [
 // two trivial matching expects no longer satisfy a journey — it must also wire
 // the error-surface fixture (c1), an independent-session read (c4), a status
 // assertion (c3) AND a goal-value assertion distinct from status (c2).
-const JOURNEY_MARKER = /@journey-firewall/;
+// Must be a DEDICATED marker comment line (`// @journey-firewall ...`), not a
+// prose mention of the token elsewhere (e.g. an exemption rationale that names
+// a journey). Line-anchored so references in comments don't false-positive.
+const JOURNEY_MARKER = /^[ \t]*\/\/[ \t]*@journey-firewall\b/m;
 
 const CLAUSE1_PATTERNS = [/attachErrorSurface\s*\(/, /failOnUnexpected4xx/, /failOnConsoleError/];
 // Allow an optional generic type param: independentRead<{...}>(...) | independentRead(...)

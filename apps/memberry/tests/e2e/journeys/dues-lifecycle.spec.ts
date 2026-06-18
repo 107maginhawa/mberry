@@ -1,4 +1,8 @@
 // WF-037 — Dues Lifecycle: bill, pay, receipt, status update
+// @selector-only-ok: UI-render smoke for officer dues-config + member payment-history
+// screens. The dues data lifecycle (record → settle → durable read) is enforced by the
+// treasurer-records-dues + officer-approves @journey-firewall journeys and the
+// recordDuesPayment / dues-repo unit tests. (Phase E disposition — accept-risk.)
 // Business Rules: [BR-04] [BR-05] [BR-06] [BR-07]
 import { test, expect } from '../helpers/test-fixture'
 import { signIn } from '../helpers/auth'
