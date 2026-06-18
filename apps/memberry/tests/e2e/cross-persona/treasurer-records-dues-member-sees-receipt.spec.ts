@@ -29,23 +29,24 @@ const ORG_ID = 'ed8e3a96-8126-4341-be42-e6eb7940c562'
 // Known-expected errors on these personas' dashboards: pre-auth 401 session
 // probes + the role-gated GET /association/event-lifecycle/my → 403 (a
 // swallowed over-fetch flagged separately as an app bug). Declared, not masked.
-const DASHBOARD_ALLOW = [/→ 401/, /GET \/api\/association\/event-lifecycle\/my → 403/]
+// Known role-gated dashboard over-fetches that 403 for these personas and are
+// swallowed by the UI (flagged separately as app bugs in EXEC findings).
+const DASHBOARD_ALLOW = [
+  /→ 401/,
+  /GET \/api\/association\/event-lifecycle\/my → 403/,
+  /GET \/api\/credit-compliance\/[^ ]+ → 403/,
+]
 
 test.describe.configure({ mode: 'serial' })
 
 test.describe('cross-persona: treasurer records dues, member sees receipt', () => {
-  // ⚠ BLOCKED ON DOMAIN/TEST-ISOLATION DECISION (Phase B validation finding):
-  // Approve-then-pay still 409s ("Cannot transition dues payment from
-  // 'completed' to 'completed'") — even a freshly-approved member already
-  // carries a COMPLETED payment, so recordDuesPayment (with no invoiceId) has
-  // nothing open to record. The real path needs an explicit UNPAID invoiceId,
-  // and the only way to mint one (POST dues-invoices/generate) creates invoices
-  // for the WHOLE org for a period — polluting/non-idempotent in an E2E. Open
-  // decision: (a) generate per-period invoices + accept cleanup, (b) consume a
-  // seeded unpaid invoice (loses the cross-actor thread), or (c) treat the
-  // standalone-payment 409 as an API gap and add a test-friendly path. The
-  // route + body + durable read-back oracle below are correct and ready.
-  test.fixme('treasurer records a payment for a newly-approved member; it is durable', async ({
+  // This journey surfaced a real P1 backend bug (PAY-EXT-409): recordDuesPayment
+  // persisted membership-extension dates via updatePaymentStatus('completed' →
+  // 'completed'), which the dues state-machine rejects → 409 → the whole payment
+  // rolled back, so NO membership-extending manual payment could ever be
+  // recorded. Fixed by routing the field-only write through updatePaymentFields
+  // (services/api-ts; locked by recordDuesPayment.test.ts [PAY-EXT-409]).
+  test('treasurer records a payment for a newly-approved member; it is durable', async ({
     browser,
   }) => {
     // ---- 1. Applicant: fresh signUp + apply (no prior completed payment) ----

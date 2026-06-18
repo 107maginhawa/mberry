@@ -101,12 +101,15 @@ export async function recordDuesPayment(
       tx: txDb,
     });
 
-    // Update payment with extension dates
+    // Persist extension dates. This is a field-only update (status stays
+    // 'completed'), so it must NOT route through updatePaymentStatus — that
+    // would assert a no-op 'completed' → 'completed' transition and throw a
+    // 409, rolling back the whole payment (PAY-EXT-409). Use updatePaymentFields.
     if (settle.membershipExtendedTo) {
-      await txRepo.updatePaymentStatus(pay.id, pay.status, 'completed', {
+      await txRepo.updatePaymentFields(pay.id, {
         membershipExtendedFrom: settle.membershipExtendedFrom,
         membershipExtendedTo: settle.membershipExtendedTo,
-      } as Partial<DuesPayment>, session.user.id);
+      } as Partial<DuesPayment>);
     }
 
     return { payment: pay, settlement: settle };

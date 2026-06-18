@@ -227,7 +227,9 @@ describe('[BR-07] recordDuesPayment expiry extension', () => {
       createPayment: async (data: any) => ({ ...fakePayment, ...data }),
       getConfig: async () => undefined,
       listFunds: async () => [],
-      updatePaymentStatus: async (_id: string, _s: string, extra: any) => ({ ...fakePayment, ...extra }),
+      // Stub the payment field-update so its db.update() doesn't clobber the
+      // membership-expiry write this test captures.
+      updatePaymentFields: async (_id: string, extra: any) => ({ ...fakePayment, ...extra }),
     });
     stubRepo(MembershipRepository, {
       findMany: async () => [{ ...fakeMembership, duesExpiryDate: '2025-12-31' }],
@@ -250,6 +252,45 @@ describe('[BR-07] recordDuesPayment expiry extension', () => {
     // Extended from 2025-12-31 by 12 months → 2026-12-31
     expect(capturedSetData).toBeDefined();
     expect(capturedSetData.duesExpiryDate.startsWith('2026-12')).toBe(true);
+  });
+
+  // Regression [PAY-EXT-409]: recording a payment that EXTENDS a membership must
+  // NOT 409. The handler persisted extension dates via updatePaymentStatus(
+  // 'completed' → 'completed'), which the dues status state-machine rejects,
+  // rolling back the whole payment — so no membership-extending manual payment
+  // could ever be recorded. Every other test in this file STUBS
+  // updatePaymentStatus, so the real transition guard never ran (the mock hid
+  // the bug). This test deliberately leaves the extension-persist method
+  // un-stubbed so the real code path (and the fix) are exercised.
+  test('[PAY-EXT-409] records an extension payment without a completed→completed 409', async () => {
+    const capturingDb = makeCapturingDb(() => {});
+    stubRepo(DuesRepository, {
+      findRecentPaymentForPerson: async () => undefined,
+      getNextReceiptSequence: async () => 1,
+      getOrgReceiptPrefix: async () => 'ORG',
+      createPayment: async (data: any) => ({ ...fakePayment, ...data }),
+      getConfig: async () => undefined,
+      listFunds: async () => [],
+      // updatePaymentStatus / updatePaymentFields intentionally NOT stubbed.
+    });
+    stubRepo(MembershipRepository, {
+      findMany: async () => [{ ...fakeMembership, duesExpiryDate: '2025-12-31' }],
+      updateOneById: async () => fakeMembership,
+    });
+
+    const ctx = makeCtx({
+      database: capturingDb,
+      _body: {
+        organizationId: 'org-1',
+        personId: 'person-1',
+        amount: 5000,
+        currency: 'PHP',
+        paymentMethod: 'cash',
+      },
+    });
+
+    const response = await recordDuesPayment(ctx);
+    expect(response.status).toBe(201);
   });
 
   test('skips extension when no membership found', async () => {

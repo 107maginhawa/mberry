@@ -240,6 +240,23 @@ export class DuesRepository {
     return result!;
   }
 
+  /**
+   * Update non-status columns on a payment WITHOUT going through the status
+   * state-machine. Use when persisting side data (e.g. membership extension
+   * dates) on a payment whose status is unchanged — routing that through
+   * updatePaymentStatus would assert a no-op `completed → completed` transition
+   * and throw a 409, rolling back the caller's transaction (PAY-EXT-409).
+   * No status-history row is written because the status did not change.
+   */
+  async updatePaymentFields(id: string, fields: Partial<DuesPayment>): Promise<DuesPayment> {
+    const [result] = await this.db
+      .update(duesPayments)
+      .set({ ...fields, updatedAt: new Date() })
+      .where(eq(duesPayments.id, id))
+      .returning();
+    return result!;
+  }
+
   async createFundAllocations(allocations: NewDuesFundAllocation[]) {
     if (allocations.length > 0) {
       await this.db.insert(duesFundAllocations).values(allocations);
