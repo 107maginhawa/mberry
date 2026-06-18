@@ -1562,6 +1562,53 @@ test('client can book appointment', async ({ page }) => {
 });
 ```
 
+### Must-never-break journeys — the 4-clause Definition of Done
+
+A test suite can be fully green while the app is broken for a real user, because
+most layers verify *proxies* (an id is mentioned, a mock returns, a single step
+succeeds, a heading renders) rather than the complete real-world outcome. To
+defend against that, the most business-critical end-to-end journeys are marked
+`// @journey-firewall` and **must assert all four clauses** of this DoD:
+
+1. **No silent error surface** — fail the test on an unexpected `console.error`,
+   `pageerror`, or unhandled 4xx/5xx during a success path. Declare expected
+   errors explicitly via the allow-list (never blanket-ignore).
+2. **Goal state, not existence** — assert the meaningful END state (the recorded
+   value, the post-transition status), never merely "a row/heading exists".
+3. **Every step** — in a multi-step flow, assert that EACH network call
+   succeeded (no `< 500` tolerance that swallows a 404/409).
+4. **Independent read** — re-verify the goal from a SEPARATE auth session
+   reading durable state, not the UI/context you just drove.
+
+**Shared helpers (extend these — do not fork a harness):**
+
+```typescript
+import { test } from './helpers/test-fixture'        // clause 1 fixture (page-level)
+import { attachErrorSurface } from './helpers/error-surface'   // clause 1 for multi-context specs
+import { independentRead } from './helpers/independent-read'    // clause 4
+
+// Clause 1 — opt into strict error-surface enforcement on the success path:
+test.use({
+  failOnUnexpected4xx: true,
+  failOnConsoleError: true,
+  allowApiFailures: [/GET \/api\/expected-403-probe → 403/], // declare expected errors
+})
+
+// Clause 4 — confirm the goal from a fresh, separate session:
+const receipt = await independentRead('treasurer', (api) =>
+  api.get(`/association/member/dues-payments/${paymentId}`, { orgId }),
+)
+expect(receipt.personId).toBe(memberId) // clause 2 — goal value, not "exists"
+```
+
+**Enforced in CI.** `bun run lint:e2e-depth` (in `quality-gates.yml`) fails RED
+if a `// @journey-firewall` spec drops any clause — c1 (error-surface fixture),
+c2 (a goal-state value assertion distinct from status), c3 (a network status
+assertion), or c4 (`independentRead`). It also blocks any non-exempt spec that
+is selector-only (use `// @selector-only-ok: <reason>` to accept-risk a smoke
+test whose data path is covered elsewhere). See
+`docs/aha/outputs/verification-hardening-prompt.md` for the full methodology.
+
 ### Type Checking
 
 Always run type checking before committing:

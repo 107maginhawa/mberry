@@ -33,10 +33,15 @@ if (journeyViolations.length > 0) {
     console.error(`  • ${rel}: missing ${describeMissing(s.journeyMissing ?? [])}`);
   }
   console.error(
-    '\nA `// @journey-firewall` spec must assert all 4 clauses of the journey DoD.',
+    '\nA `// @journey-firewall` spec must assert all 4 clauses of the journey DoD:',
   );
   console.error(
-    'See docs/aha/outputs/verification-hardening-prompt.md (THE 4-CLAUSE DEFINITION OF DONE).',
+    '  c1 error-surface (test-fixture failOnUnexpected4xx/failOnConsoleError or attachErrorSurface)',
+  );
+  console.error('  c2 goal-state value (not just a status code)   c3 network status assertion');
+  console.error('  c4 independent-session read (independentRead)');
+  console.error(
+    'See CONTRIBUTING.md → "Must-never-break journeys — the 4-clause Definition of Done".',
   );
   failed = true;
 }
