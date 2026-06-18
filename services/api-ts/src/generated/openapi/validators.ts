@@ -2917,6 +2917,11 @@ export const BulkApproveApplicationsResponseSchema = z.object({
   failed: z.array(BulkApproveFailureSchema)
 });
 
+export const BulkImportInvitationSchema = z.object({
+  email: z.string(),
+  token: z.string()
+});
+
 export const BulkImportModeSchema = z.enum(["preview", "import"]);
 
 export const BulkImportPreviewRowSchema = z.object({
@@ -2957,7 +2962,8 @@ export const BulkImportResponseSchema = z.object({
   importId: z.string().uuid(),
   imported: z.number().int(),
   skipped: z.number().int(),
-  invitationsSent: z.number().int()
+  invitationsSent: z.number().int(),
+  invitations: z.array(BulkImportInvitationSchema)
 }).optional()
 });
 
@@ -2965,7 +2971,8 @@ export const BulkImportResultResponseSchema = z.object({
   importId: z.string().uuid(),
   imported: z.number().int(),
   skipped: z.number().int(),
-  invitationsSent: z.number().int()
+  invitationsSent: z.number().int(),
+  invitations: z.array(BulkImportInvitationSchema)
 });
 
 export const BulkIssueCertificateResultSchema = z.object({

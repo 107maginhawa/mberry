@@ -6,6 +6,7 @@ import { MembershipRepository } from '../membership/repos/membership.repo';
 import { OrganizationRepository } from '../platformadmin/repos/platform-admin.repo';
 import { hashToken, isExpired } from './utils/token';
 import { domainEvents } from '@/core/domain-events';
+import { getInviteTokenSecret } from '@/core/config';
 
 /**
  * claimInvite
@@ -25,7 +26,7 @@ export async function claimInvite(
     return ctx.json({ error: 'Token is required' }, 400);
   }
 
-  const secret = process.env['INVITE_TOKEN_SECRET'] || 'dev-secret-change-in-production';
+  const secret = getInviteTokenSecret();
   const tokenHash = hashToken(token, secret);
 
   const db = ctx.get('database') as DatabaseInstance;
@@ -54,17 +55,7 @@ export async function claimInvite(
   const auditEvents: AuditEventEntry[] = [];
   ctx.set('auditEvents', auditEvents);
 
-  // Mark as claimed
-  const claimed = await inviteRepo.markClaimed(invite.id);
-
-  auditEvents.push({
-    action: 'complete',
-    resourceType: 'invitation',
-    resource: invite.id,
-    description: `Invitation claimed by user ${user.id} for org ${invite.organizationId}`,
-  });
-
-  // Create membership record for the user in the org
+  // Guard against an existing membership BEFORE any write (read-only).
   const membershipRepo = new MembershipRepository(db);
   const existingMembership = await membershipRepo.getMember(invite.organizationId, user.id);
 
@@ -78,26 +69,50 @@ export async function claimInvite(
     licenseNumber?: string;
   } | null;
 
+  // BUG-2 fix (part 1): tier_id is NOT NULL at the DB level. Previously a missing
+  // tier was null-cast straight into the column, deferring an opaque DB failure
+  // to mid-claim. Validate up front so a null never reaches the write and the
+  // failure surfaces as a clean 4xx before the invite is touched.
+  const tierId = metadata?.membershipTierId;
+  if (!tierId) {
+    throw new ValidationError('Invitation is missing a membership tier and cannot be claimed');
+  }
+
   const now = new Date();
   const oneYearFromNow = new Date(now);
   oneYearFromNow.setFullYear(oneYearFromNow.getFullYear() + 1);
 
-  const membership = await membershipRepo.addMember({
-    organizationId: invite.organizationId,
-    personId: user.id,
-    // structural: tier_id is notNull at the DB level but invite metadata may
-    // legitimately omit it (org default applied by trigger). Inline null-cast
-    // preserves runtime semantics pending a real default-tier resolver (Wave G5).
-    tierId: (metadata?.membershipTierId ?? null) as unknown as string,
-    categoryId: metadata?.membershipCategoryId ?? null,
-    memberNumber: metadata?.licenseNumber ?? null,
-    startDate: now.toISOString().split('T')[0]!,
-    duesExpiryDate: oneYearFromNow.toISOString().split('T')[0]!,
-    gracePeriodDays: 30,
-    status: 'active',
-    joinedAt: now,
-    createdBy: user.id,
-    updatedBy: user.id,
+  // BUG-2 fix (part 2): markClaimed + addMember in ONE transaction. Previously
+  // they ran unwrapped, so an addMember failure after a successful markClaimed
+  // burned the invite while creating no membership — locking the invitee out
+  // permanently. Any failure now rolls the whole claim back.
+  const membership = await db.transaction(async (tx: DatabaseInstance) => {
+    const txInviteRepo = new InviteRepository(tx, logger);
+    const txMembershipRepo = new MembershipRepository(tx);
+
+    await txInviteRepo.markClaimed(invite.id);
+
+    return txMembershipRepo.addMember({
+      organizationId: invite.organizationId,
+      personId: user.id,
+      tierId,
+      categoryId: metadata?.membershipCategoryId ?? null,
+      memberNumber: metadata?.licenseNumber ?? null,
+      startDate: now.toISOString().split('T')[0]!,
+      duesExpiryDate: oneYearFromNow.toISOString().split('T')[0]!,
+      gracePeriodDays: 30,
+      status: 'active',
+      joinedAt: now,
+      createdBy: user.id,
+      updatedBy: user.id,
+    });
+  });
+
+  auditEvents.push({
+    action: 'complete',
+    resourceType: 'invitation',
+    resource: invite.id,
+    description: `Invitation claimed by user ${user.id} for org ${invite.organizationId}`,
   });
 
   auditEvents.push({

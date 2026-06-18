@@ -50,25 +50,37 @@ function buildApp({
   dbHealthy = true,
   storageHealthy = true,
   jobsHealthy = true,
+  dbHang = false,
+  storageHang = false,
+  jobsHang = false,
+  checkTimeoutMs,
 }: {
   dbHealthy?: boolean;
   storageHealthy?: boolean;
   jobsHealthy?: boolean;
+  dbHang?: boolean;
+  storageHang?: boolean;
+  jobsHang?: boolean;
+  checkTimeoutMs?: number;
 } = {}): HealthApp {
   const app = new Hono() as any;
 
+  // A promise that never settles — simulates an unreachable dependency whose
+  // health probe hangs (e.g. DB pool can't acquire a connection).
+  const hang = () => new Promise<never>(() => {});
+
   // DB health is controlled via the mocked checkDatabaseConnection
   (checkDatabaseConnection as ReturnType<typeof mock>).mockImplementation(
-    async () => dbHealthy
+    dbHang ? hang : async () => dbHealthy
   );
 
   // Minimal stubs for storage and jobs
   app.storage = {
-    healthCheck: mock(async () => storageHealthy),
+    healthCheck: mock(storageHang ? hang : async () => storageHealthy),
   };
 
   app.jobs = {
-    getHealth: mock(async () => ({ healthy: jobsHealthy })),
+    getHealth: mock(jobsHang ? hang : async () => ({ healthy: jobsHealthy })),
   };
 
   app.logger = {
@@ -83,7 +95,7 @@ function buildApp({
   // and also calls app.get() — so app must be the Hono instance
   app.database = {}; // passed to checkDatabaseConnection
 
-  registerRoutes(app);
+  registerRoutes(app, checkTimeoutMs !== undefined ? { checkTimeoutMs } : {});
   return app;
 }
 
@@ -271,6 +283,47 @@ describe('/readyz — all dependencies down', () => {
     expect(body.checks.database).toBe('fail');
     expect(body.checks.storage).toBe('fail');
     expect(body.checks.jobs).toBe('fail');
+  });
+});
+
+// ---------------------------------------------------------------------------
+// /readyz — dependency hangs (must fail-fast, never block the probe)
+// ---------------------------------------------------------------------------
+
+describe('/readyz — dependency probe hangs', () => {
+  test('hanging database check → 503 within the timeout, marked fail', async () => {
+    const app = buildApp({ dbHang: true, checkTimeoutMs: 50 });
+    const res = await app.request('/readyz?verbose');
+    expect(res.status).toBe(503);
+    const body = await res.json();
+    expect(body.checks.database).toBe('fail');
+    // Other deps still report pass — only the hung one fails.
+    expect(body.checks.storage).toBe('pass');
+    expect(body.checks.jobs).toBe('pass');
+  });
+
+  test('hanging storage check → 503, storage marked fail', async () => {
+    const app = buildApp({ storageHang: true, checkTimeoutMs: 50 });
+    const res = await app.request('/readyz?verbose');
+    expect(res.status).toBe(503);
+    const body = await res.json();
+    expect(body.checks.storage).toBe('fail');
+    expect(body.checks.database).toBe('pass');
+  });
+
+  test('hanging jobs check → 503, jobs marked fail', async () => {
+    const app = buildApp({ jobsHang: true, checkTimeoutMs: 50 });
+    const res = await app.request('/readyz?verbose');
+    expect(res.status).toBe(503);
+    const body = await res.json();
+    expect(body.checks.jobs).toBe('fail');
+  });
+
+  test('plain /readyz with a hanging dep returns "failed" 503 (does not hang)', async () => {
+    const app = buildApp({ dbHang: true, checkTimeoutMs: 50 });
+    const res = await app.request('/readyz');
+    expect(res.status).toBe(503);
+    expect(await res.text()).toBe('failed');
   });
 });
 

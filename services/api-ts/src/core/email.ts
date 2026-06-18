@@ -456,7 +456,9 @@ class EmailServiceImpl implements EmailService {
     if (ctx) {
       const token = this._generateUnsubToken(ctx.email, ctx.orgId);
       const appUrl = ((this.fullConfig as unknown as Record<string, unknown>)?.['app'] as Record<string, unknown>)?.['url'] as string ?? 'https://example.com';
-      const unsubUrl = `${appUrl}/email/unsubscribe?token=${encodeURIComponent(token)}&email=${encodeURIComponent(ctx.email)}&org=${encodeURIComponent(ctx.orgId)}`;
+      // Param MUST be `orgId` — the unsubscribe handler reads c.req.query('orgId')
+      // (handlers/email/unsubscribeEmail.ts); `&org=` 400s the one-click link.
+      const unsubUrl = `${appUrl}/email/unsubscribe?token=${encodeURIComponent(token)}&email=${encodeURIComponent(ctx.email)}&orgId=${encodeURIComponent(ctx.orgId)}`;
       request.headers = {
         ...(request.headers ?? {}),
         'List-Unsubscribe': `<${unsubUrl}>`,

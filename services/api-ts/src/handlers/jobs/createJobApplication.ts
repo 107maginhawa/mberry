@@ -5,6 +5,7 @@ import type { Session } from '@/types/auth';
 export async function createJobApplication(ctx: Context): Promise<Response> {
   const db = ctx.get('database');
   const session = ctx.get('session') as Session;
+  const organizationId = ctx.get('organizationId');
   const body = await ctx.req.json();
   const postingRepo = new JobPostingRepository(db);
   const appRepo = new JobApplicationRepository(db);
@@ -13,9 +14,11 @@ export async function createJobApplication(ctx: Context): Promise<Response> {
     return ctx.json({ error: 'postingId is required' }, 400);
   }
 
-  // Verify posting exists and is active
+  // Verify posting exists and is active. Org-scope: a posting outside the
+  // caller's org is treated as missing — prevents applying to another org's
+  // posting by UUID (cross-org IDOR guard).
   const posting = await postingRepo.get(body.postingId);
-  if (!posting) {
+  if (!posting || posting.organizationId !== organizationId) {
     return ctx.json({ error: 'Job posting not found' }, 404);
   }
   if (posting.status !== 'active') {

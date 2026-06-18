@@ -421,6 +421,7 @@ export function SurveyResults({ orgId, surveyId }: SurveyResultsProps) {
                       size="icon"
                       onClick={() => setResponsePage((p) => Math.max(0, p - 1))}
                       disabled={responsePage === 0}
+                      aria-label="Previous page"
                     >
                       <ChevronLeft className="w-4 h-4" />
                     </Button>
@@ -429,6 +430,7 @@ export function SurveyResults({ orgId, surveyId }: SurveyResultsProps) {
                       size="icon"
                       onClick={() => setResponsePage((p) => Math.min(totalPages - 1, p + 1))}
                       disabled={responsePage >= totalPages - 1}
+                      aria-label="Next page"
                     >
                       <ChevronRight className="w-4 h-4" />
                     </Button>

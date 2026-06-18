@@ -275,6 +275,14 @@ export interface DomainEventMap {
     reason: string;
   };
 
+  // Compliance standings matview needs a refresh because a credit-write path
+  // (manual award / officer adjustment / void) changed the underlying data.
+  // Deferred off the request path — eventual consistency is acceptable.
+  'compliance.recompute': {
+    organizationId: string;
+    reason: 'manual_award' | 'adjustment' | 'void';
+  };
+
   // ── Governance Context ────────────────────────────────────────────────
   'org.settings.updated': {
     organizationId: string;

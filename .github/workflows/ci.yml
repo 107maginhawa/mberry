@@ -622,6 +622,10 @@ jobs:
         run: bun run --filter @monobase/api-spec build
       - name: Generate API codegen
         run: bun run --filter @monobase/api-ts generate
+      - name: Apply DB migrations
+        # The real-PG integration tests exercise the migrated `public` schema.
+        # The Postgres service starts empty, so migrate before running tests.
+        run: cd services/api-ts && bun run scripts/ci-migrate.ts
       - name: Run unit tests
         run: cd services/api-ts && bun test
       - name: Run frontend unit tests (with coverage)

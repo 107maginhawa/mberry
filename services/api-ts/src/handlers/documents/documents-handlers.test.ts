@@ -11,8 +11,9 @@
 
 import { describe, test, expect, beforeEach, afterEach } from 'bun:test';
 import { makeCtx, stubRepo, restoreRepo } from '@/test-utils/make-ctx';
-import { fakeDocument as createFakeDocument } from '@/test-utils/factories';
+import { fakeDocument as createFakeDocument, fakeStoredFile } from '@/test-utils/factories';
 import { DocumentRepository, DocumentVersionRepository, DocumentAccessLogRepository } from './repos/documents.repo';
+import { StorageFileRepository } from '@/handlers/storage/repos/file.repo';
 import { OfficerTermRepository } from '@/handlers/association:member/repos/governance.repo';
 
 // Stub officer check globally so all handler tests pass the new auth guards.
@@ -79,15 +80,30 @@ const paginatedDocs = { data: [fakeDocument], totalCount: 1 };
 // ─── createDocument ───────────────────────────────────────────────────────────
 
 describe('createDocument', () => {
-  beforeEach(() => restoreRepo(DocumentRepository));
-  afterEach(() => restoreRepo(DocumentRepository));
+  beforeEach(() => {
+    restoreRepo(DocumentRepository);
+    restoreRepo(StorageFileRepository);
+    // The storageKey ownership gate resolves the key to a StoredFile and
+    // requires owner === caller and same org. makeCtx defaults to
+    // user.id='user-1' / organizationId='tenant-1', which fakeStoredFile
+    // defaults match — so the gate passes for the happy-path tests below.
+    stubRepo(StorageFileRepository, {
+      findOneById: async (id: string) =>
+        fakeStoredFile({ id, organizationId: 'tenant-1', owner: USER_ID }),
+    });
+  });
+  afterEach(() => {
+    restoreRepo(DocumentRepository);
+    restoreRepo(StorageFileRepository);
+  });
 
   const validBody = {
     title: 'Test Document',
     fileName: 'test.pdf',
     mimeType: 'application/pdf',
     size: 1024,
-    storageKey: 'uploads/test.pdf',
+    // Storage mints keys as the StoredFile UUID, so storageKey must be a UUID.
+    storageKey: '11111111-1111-4111-8111-111111111111',
     ownerId: USER_ID,
     ownerType: 'person',
     accessLevel: 'tenantOnly',

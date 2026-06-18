@@ -205,6 +205,15 @@ model BulkImportPreviewResponse {
   errors: string[];
 }
 
+@doc("A single issued claim invitation, carrying the raw deliverable token")
+model BulkImportInvitation {
+  @doc("Email the claim invitation was issued to")
+  email: string;
+
+  @doc("Raw claim token (only returned here — never stored) used to build the claim link")
+  token: string;
+}
+
 @doc("Response for a bulk import in import mode")
 model BulkImportResultResponse {
   @doc("Identifier for this import batch")
@@ -218,6 +227,9 @@ model BulkImportResultResponse {
 
   @doc("Count of invitation tokens issued/sent")
   invitationsSent: int32;
+
+  @doc("Issued invitations with their raw deliverable claim tokens")
+  invitations: BulkImportInvitation[];
 }
 
 @doc("Bulk import response — shape depends on requested mode")

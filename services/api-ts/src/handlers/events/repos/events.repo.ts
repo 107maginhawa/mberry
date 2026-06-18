@@ -150,6 +150,129 @@ export class EventsRepository {
     return result!;
   }
 
+  /**
+   * P0 RACE FIX + P1 single-row transition: atomic capacity-aware registration.
+   *
+   * Single-row-per-(event,person) model (industry standard): a person holds at
+   * most ONE registration row per event, which TRANSITIONS through states rather
+   * than spawning duplicate rows. All work happens inside ONE serializable-by-lock
+   * transaction:
+   *   - `SELECT … FOR UPDATE` on the parent event row serialises concurrent
+   *     registrants for the SAME event, so the confirmed-count each one sees
+   *     already reflects the other's committed write — capacity is race-safe.
+   *   - Look up the existing (event, person) row and branch:
+   *       • none                  → INSERT 'confirmed' (or 'waitlisted' at cap)
+   *       • existing 'confirmed'   → idempotent: return it unchanged (handler 409)
+   *       • existing 'waitlisted'  → idempotent: return it unchanged (graceful,
+   *                                  promotion happens via the waitlist path)
+   *       • terminal ('cancelled' | 'refunded' | 'noShow')
+   *                                → RE-ACTIVATE: UPDATE the SAME row back to
+   *                                  'confirmed' (or 'waitlisted' at cap). One row
+   *                                  preserved, so the unique index stays satisfied.
+   *   - If confirmed >= capacity the (re)activated row is 'waitlisted' instead of
+   *     'confirmed' (preserves existing waitlist product behaviour) — capacity can
+   *     never be exceeded.
+   *   - The partial unique index uq_event_reg_active remains the backstop for the
+   *     true concurrent double-INSERT race: two registrants with no existing row
+   *     both inserting — the loser raises 23505, surfaced as a duplicate.
+   *
+   * @returns the registration row plus an `outcome` discriminator:
+   *   - 'created'      a brand new row was inserted ('confirmed' | 'waitlisted')
+   *   - 'reactivated'  a terminal row was transitioned back to active
+   *   - 'idempotent'   an already-active row was returned unchanged (the handler
+   *                    maps a 'confirmed' idempotent to 409 "already registered")
+   * @throws  Error with code '23505' on a genuinely concurrent duplicate insert.
+   */
+  async registerAtomic(input: {
+    eventId: string;
+    personId: string;
+    organizationId: string;
+    capacity: number | null;
+    createdBy: string;
+    updatedBy: string;
+  }): Promise<EventRegistration & { outcome: 'created' | 'reactivated' | 'idempotent' }> {
+    const TERMINAL: EventRegistration['status'][] = ['cancelled', 'refunded', 'noShow'];
+
+    return this.db.transaction(async (tx) => {
+      // Lock the event row so concurrent registrants for THIS event serialise.
+      await tx
+        .select({ id: events.id })
+        .from(events)
+        .where(eq(events.id, input.eventId))
+        .for('update')
+        .limit(1);
+
+      // Find an existing row for (event, person). There is at most one active
+      // row (unique index), but a terminal row may also exist — pick whichever.
+      const [existing] = await tx
+        .select()
+        .from(eventRegistrations)
+        .where(
+          and(
+            eq(eventRegistrations.eventId, input.eventId),
+            eq(eventRegistrations.personId, input.personId),
+          ),
+        )
+        .limit(1);
+
+      // Already active → idempotent, no state change. Handler treats 'confirmed'
+      // as a 409 "already registered" and 'waitlisted' as a graceful waitlist
+      // response; neither surfaces a 23505.
+      if (existing && (existing.status === 'confirmed' || existing.status === 'waitlisted')) {
+        return { ...existing, outcome: 'idempotent' };
+      }
+
+      // Compute the target active status from current confirmed capacity.
+      let status: EventRegistration['status'] = 'confirmed';
+      if (input.capacity != null) {
+        const [countRow] = await tx
+          .select({ count: sql<number>`count(*)::int` })
+          .from(eventRegistrations)
+          .where(
+            and(
+              eq(eventRegistrations.eventId, input.eventId),
+              eq(eventRegistrations.status, 'confirmed'),
+            ),
+          );
+        const confirmed = countRow?.count ?? 0;
+        if (confirmed >= input.capacity) {
+          status = 'waitlisted';
+        }
+      }
+
+      // Existing terminal row → RE-ACTIVATE the SAME row (single-row model).
+      if (existing && TERMINAL.includes(existing.status)) {
+        const [result] = await tx
+          .update(eventRegistrations)
+          .set({
+            status,
+            cancelledAt: null,
+            refundedAt: null,
+            updatedBy: input.updatedBy,
+            updatedAt: new Date(),
+          })
+          .where(eq(eventRegistrations.id, existing.id))
+          .returning();
+        return { ...result!, outcome: 'reactivated' };
+      }
+
+      // No existing row → fresh insert. Unique index is the backstop for a
+      // genuinely concurrent double-insert (loser raises 23505).
+      const [result] = await tx
+        .insert(eventRegistrations)
+        .values({
+          eventId: input.eventId,
+          personId: input.personId,
+          organizationId: input.organizationId,
+          status,
+          createdBy: input.createdBy,
+          updatedBy: input.updatedBy,
+        })
+        .returning();
+      return { ...result!, outcome: 'created' };
+    });
+  }
+
   async getRegistrationCount(eventId: string): Promise<number> {
     const [result] = await this.db
       .select({ count: sql<number>`count(*)::int` })

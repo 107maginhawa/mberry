@@ -56,6 +56,7 @@ describe('[M15] createJobApplication', () => {
     });
 
     const ctx = makeCtx({
+      organizationId: 'org-1',
       _body: {
         postingId: 'job-1',
         coverLetter: 'I am interested',
@@ -92,7 +93,7 @@ describe('[M15] createJobApplication', () => {
       get: async () => ({ ...fakePosting, status: 'draft' }),
     });
 
-    const ctx = makeCtx({ _body: { postingId: 'job-1' } });
+    const ctx = makeCtx({ organizationId: 'org-1', _body: { postingId: 'job-1' } });
     const response = await createJobApplication(ctx);
     expect(response.status).toBe(409);
     expect(response.body.error).toContain('not accepting');
@@ -110,7 +111,7 @@ describe('[M15] createJobApplication', () => {
       findByPersonAndPosting: async () => undefined,
     });
 
-    const ctx = makeCtx({ _body: { postingId: 'job-1' } });
+    const ctx = makeCtx({ organizationId: 'org-1', _body: { postingId: 'job-1' } });
     const response = await createJobApplication(ctx);
     expect(response.status).toBe(409);
     expect(response.body.error).toContain('expired');
@@ -124,7 +125,7 @@ describe('[M15] createJobApplication', () => {
       findByPersonAndPosting: async () => fakeApplication,
     });
 
-    const ctx = makeCtx({ _body: { postingId: 'job-1' } });
+    const ctx = makeCtx({ organizationId: 'org-1', _body: { postingId: 'job-1' } });
     const response = await createJobApplication(ctx);
     expect(response.status).toBe(409);
     expect(response.body.error).toContain('already applied');
@@ -140,7 +141,7 @@ describe('[M15] createJobApplication', () => {
       create: async (data: any) => { capturedData = data; return { ...fakeApplication, ...data }; },
     });
 
-    const ctx = makeCtx({ _body: { postingId: 'job-1' } });
+    const ctx = makeCtx({ organizationId: 'org-1', _body: { postingId: 'job-1' } });
     await createJobApplication(ctx);
     expect(capturedData.personId).toBe('user-1');
     expect(capturedData.status).toBe('applied');
@@ -152,6 +153,7 @@ describe('[M15] createJobApplication', () => {
     });
 
     const ctx = makeCtx({
+      organizationId: 'org-1',
       user: null,
       session: null,
       _body: { postingId: 'job-1' },

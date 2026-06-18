@@ -3,9 +3,17 @@ import { listMemberCreditsForPeer } from './listMemberCreditsForPeer';
 import { UnauthorizedError, ValidationError } from '@/core/errors';
 import { CreditEntryRepository } from '@/handlers/association:member/repos/credits.repo';
 
+// Capture the filters passed to the underlying findMany so tests can assert
+// the query is always org-scoped (no cross-tenant widening).
+let lastFindManyFilters: any = null;
+
 function stubRepo(returns: any[]) {
   const orig = (CreditEntryRepository.prototype as any).findMany;
-  (CreditEntryRepository.prototype as any).findMany = async () => returns;
+  lastFindManyFilters = null;
+  (CreditEntryRepository.prototype as any).findMany = async (filters: any) => {
+    lastFindManyFilters = filters;
+    return returns;
+  };
   return () => {
     (CreditEntryRepository.prototype as any).findMany = orig;
   };
@@ -14,11 +22,13 @@ function stubRepo(returns: any[]) {
 function makeCtx(opts: {
   hasSession?: boolean;
   personId?: string | null;
-  orgId?: string;
+  orgId?: string | null;
 } = {}) {
   const hasSession = opts.hasSession ?? true;
   const personId = opts.personId === undefined ? 'person-2' : opts.personId;
-  const orgId = opts.orgId ?? 'org-1';
+  // Distinguish "caller did not specify" (default org) from an explicit
+  // absent/null org context (cross-org leak scenario).
+  const orgId = opts.orgId === undefined ? 'org-1' : opts.orgId;
 
   let captured: { data: any; status: number } = { data: null, status: 0 };
   return {
@@ -80,6 +90,42 @@ describe('listMemberCreditsForPeer', () => {
       const res = await listMemberCreditsForPeer(ctx);
       expect(res.status).toBe(200);
       expect(ctx._captured().data).toEqual({ data: [] });
+    } finally {
+      restore();
+    }
+  });
+
+  // P1 cross-org data leak regression guards.
+  test('[AC-PEER-005] rejects when org context is absent (no cross-org leak)', async () => {
+    // findMany would return cross-org rows if ever reached without an org
+    // filter — assert the handler fails closed before any query runs.
+    const restore = stubRepo([
+      { creditAmount: 9, activityName: 'Other Org Activity', activityDate: new Date() },
+    ]);
+    try {
+      const ctx = makeCtx({ personId: 'person-2', orgId: null });
+      await expect(listMemberCreditsForPeer(ctx)).rejects.toThrow(ValidationError);
+      // The query must never have executed without an org scope.
+      expect(lastFindManyFilters).toBeNull();
+    } finally {
+      restore();
+    }
+  });
+
+  test('[AC-PEER-006] scopes the query to the caller org when present', async () => {
+    const restore = stubRepo([
+      { creditAmount: 4, activityName: 'In-Org Activity', activityDate: new Date() },
+    ]);
+    try {
+      const ctx = makeCtx({ personId: 'person-2', orgId: 'org-42' });
+      const res = await listMemberCreditsForPeer(ctx);
+      expect(res.status).toBe(200);
+      // Org filter is always present and equals the caller's org.
+      expect(lastFindManyFilters).toMatchObject({
+        organizationId: 'org-42',
+        personId: 'person-2',
+      });
+      expect(lastFindManyFilters.organizationId).toBeTruthy();
     } finally {
       restore();
     }

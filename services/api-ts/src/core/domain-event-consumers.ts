@@ -5,7 +5,7 @@
  * Each consumer is a thin glue layer — heavy logic stays in repos/services.
  */
 
-import { eq, and, inArray } from 'drizzle-orm';
+import { eq, and, inArray, sql } from 'drizzle-orm';
 import { domainEvents } from './domain-events';
 import type { DatabaseInstance } from './database';
 import type { Logger } from '@/types/logger';
@@ -49,6 +49,11 @@ import { chapterAffiliations, affiliationTransfers } from '@/handlers/associatio
 import { duesPayments } from '@/handlers/association:member/repos/dues-payments.schema';
 import { merchantAccounts } from '@/handlers/billing/repos/billing.schema';
 import { surveyResponses } from '@/handlers/surveys/repos/survey.schema';
+import { reviews } from '@/handlers/reviews/repos/review.schema';
+import { memberAdOptOuts, adReports } from '@/handlers/advertising/repos/advertising.schema';
+import { chatRoomMembers, chatMessages } from '@/handlers/comms/repos/comms.schema';
+import { committeeMembers } from '@/handlers/association:operations/repos/committee.schema';
+import { committeeTasks } from '@/handlers/association:operations/repos/committee-task.schema';
 import { createDefaultChannels, autoJoinOrgChannels } from '@/handlers/comms/default-channels';
 import { mintFirstDuesInvoice } from '@/handlers/member/duesspecialassessments/firstInvoiceOnApproval';
 
@@ -1120,6 +1125,25 @@ export function registerDomainEventConsumers(
   });
 
   // -----------------------------------------------------------------------
+  // compliance.recompute → refresh the compliance_standings matview off the
+  // request path. Credit-write handlers (award/adjust/void) emit this instead
+  // of running REFRESH MATERIALIZED VIEW CONCURRENTLY inline, which added
+  // latency + a heavy lock to user-facing mutations. Eventual consistency is
+  // acceptable: those handlers return the written entry directly, not a read
+  // back of the view. Fire-and-forget — failure is logged, never propagated.
+  // -----------------------------------------------------------------------
+  domainEvents.on('compliance.recompute', async (payload) => {
+    try {
+      await deps.db.execute(sql`REFRESH MATERIALIZED VIEW CONCURRENTLY compliance_standings`);
+    } catch (err) {
+      logger.error(
+        { error: err, organizationId: payload.organizationId, reason: payload.reason },
+        '[consumer] compliance.recompute matview refresh failed',
+      );
+    }
+  });
+
+  // -----------------------------------------------------------------------
   // invite.claimed → notify the officer who sent the invite
   // -----------------------------------------------------------------------
   domainEvents.on('invite.claimed', async (payload) => {
@@ -1777,6 +1801,97 @@ export function registerDomainEventConsumers(
         .where(eq(personPrivacySettings.personId, personId));
     } catch (err) {
       logger.error({ error: err, personId }, '[consumer] person.deleted person preferences cascade failed');
+    }
+  });
+
+  // -----------------------------------------------------------------------
+  // person.deleted → reviews: hard-delete the member's own NPS reviews
+  // (PII feedback they authored), and null out reviewedEntity where the
+  // deleted person was the subject so other reviewers' rows are retained
+  // without pointing at a removed person. Both columns are onDelete:'restrict',
+  // so this MUST run before any hard person delete.
+  // -----------------------------------------------------------------------
+  domainEvents.on('person.deleted', async (payload) => {
+    const { personId } = payload;
+    try {
+      // Reviews authored by the person (delete — personal feedback)
+      await deps.db.delete(reviews)
+        .where(eq(reviews.reviewer, personId));
+
+      // Reviews where the person was the subject (anonymize subject reference)
+      await deps.db.update(reviews)
+        .set({ reviewedEntity: null, updatedBy: SYSTEM_USER_ID })
+        .where(eq(reviews.reviewedEntity, personId));
+    } catch (err) {
+      logger.error({ error: err, personId }, '[consumer] person.deleted reviews cascade failed');
+    }
+  });
+
+  // -----------------------------------------------------------------------
+  // person.deleted → advertising: hard-delete the member's ad opt-out
+  // preferences and any ad reports they filed (personal rows, mirrors the
+  // dunningEvents/digitalCredentials hard-delete choice).
+  // -----------------------------------------------------------------------
+  domainEvents.on('person.deleted', async (payload) => {
+    const { personId } = payload;
+    try {
+      await deps.db.delete(memberAdOptOuts)
+        .where(eq(memberAdOptOuts.personId, personId));
+
+      await deps.db.delete(adReports)
+        .where(eq(adReports.reporterPersonId, personId));
+    } catch (err) {
+      logger.error({ error: err, personId }, '[consumer] person.deleted advertising cascade failed');
+    }
+  });
+
+  // -----------------------------------------------------------------------
+  // person.deleted → comms: delete chat-room memberships (incl. DM rooms the
+  // person belonged to) and anonymize messages they authored. Memberships are
+  // pure person↔room links → hard delete. Messages are immutable thread content;
+  // we anonymize the sender to SYSTEM_USER_ID (retain thread integrity, sever
+  // the PII link) rather than delete, which would orphan replies in the thread.
+  // -----------------------------------------------------------------------
+  domainEvents.on('person.deleted', async (payload) => {
+    const { personId } = payload;
+    try {
+      // Chat room memberships / DM participation (hard delete)
+      await deps.db.delete(chatRoomMembers)
+        .where(eq(chatRoomMembers.personId, personId));
+
+      // Authored messages (anonymize sender — retain thread integrity)
+      await deps.db.update(chatMessages)
+        .set({ sender: SYSTEM_USER_ID, updatedBy: SYSTEM_USER_ID })
+        .where(eq(chatMessages.sender, personId));
+    } catch (err) {
+      logger.error({ error: err, personId }, '[consumer] person.deleted comms cascade failed');
+    }
+  });
+
+  // -----------------------------------------------------------------------
+  // person.deleted → committee: soft-delete the member's committee
+  // memberships (mirrors chapterAffiliations soft-delete — set inactive +
+  // removedAt) and unassign any committee tasks assigned to them (null the
+  // assignee, retain the task for the committee).
+  // -----------------------------------------------------------------------
+  domainEvents.on('person.deleted', async (payload) => {
+    const { personId } = payload;
+    try {
+      // Committee memberships (soft-delete)
+      await deps.db.update(committeeMembers)
+        .set({
+          active: false,
+          removedAt: new Date(),
+          updatedBy: SYSTEM_USER_ID,
+        })
+        .where(eq(committeeMembers.personId, personId));
+
+      // Committee tasks assigned to the person (unassign, retain task)
+      await deps.db.update(committeeTasks)
+        .set({ assigneeId: null, updatedBy: SYSTEM_USER_ID })
+        .where(eq(committeeTasks.assigneeId, personId));
+    } catch (err) {
+      logger.error({ error: err, personId }, '[consumer] person.deleted committee cascade failed');
     }
   });
 }

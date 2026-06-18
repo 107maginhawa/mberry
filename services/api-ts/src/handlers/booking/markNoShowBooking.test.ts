@@ -1,8 +1,16 @@
-import { describe, test, expect, afterEach, mock } from 'bun:test';
+import { describe, test, expect, afterEach, afterAll, mock } from 'bun:test';
 import { makeCtx, stubRepo } from '@/test-utils/make-ctx';
 import { fakeBooking as fakeBookingFactory } from '@/test-utils/factories';
 import { BookingRepository } from './repos/booking.repo';
 import { markNoShowBooking } from './markNoShowBooking';
+import * as _realOwnership from './utils/ownership';
+
+// Restore real ownership module after this file so mock.module leaks don't
+// pollute the real-impl ownership.test.ts.
+const realOwnership = { ..._realOwnership };
+afterAll(() => {
+  mock.module('./utils/ownership', () => realOwnership);
+});
 
 const pastTime = new Date(Date.now() - 15 * 60 * 1000); // 15 minutes ago
 

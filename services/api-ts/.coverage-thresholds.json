@@ -1,5 +1,23 @@
 {
-  "_comment": "Conservative baselines 2026-06-06. Default=0 for ungated. Schema files have 0% fn (expected). Tighten in Wave 7 after schema files excluded.",
+  "_comment": "Per-module line-coverage ratchet (audit 2026-06-16). Keys are 3-segment module paths (src/handlers/<module>); the gate enforces each floor against EVERY file in the module, so a floor cannot exceed the module's lowest-covered file (repos/schemas drag mixed modules down). Floors are set just below each module's current minimum file line% to prevent regression. function=0 everywhere because schema files legitimately have 0% function coverage. To lock handler-level gains independently of repos, the gate needs finer-grained (per-file glob) keys — tracked as follow-up.",
+  "src/handlers/audit": { "line": 80, "function": 0 },
+  "src/handlers/membership": { "line": 70, "function": 0 },
+  "src/handlers/documents": { "line": 70, "function": 0 },
+  "src/handlers/elections": { "line": 70, "function": 0 },
+  "src/handlers/billing": { "line": 60, "function": 0 },
+  "src/handlers/events": { "line": 60, "function": 0 },
   "src/handlers/person": { "line": 60, "function": 0 },
-  "src/handlers/billing": { "line": 40, "function": 0 }
+  "src/handlers/email": { "line": 50, "function": 0 },
+  "src/handlers/member": { "line": 40, "function": 0 },
+  "src/handlers/notifs": { "line": 30, "function": 0 },
+  "src/handlers/communication": { "line": 15, "function": 0 },
+  "src/handlers/storage": { "line": 15, "function": 0 },
+  "src/handlers/onboarding": { "line": 15, "function": 0 },
+  "src/handlers/dues": { "line": 10, "function": 0 },
+  "src/handlers/booking": { "line": 5, "function": 0 },
+  "src/handlers/invite": { "line": 5, "function": 0 },
+  "src/handlers/jobs": { "line": 5, "function": 0 },
+  "src/handlers/marketplace": { "line": 5, "function": 0 },
+  "src/handlers/reviews": { "line": 5, "function": 0 },
+  "src/handlers/advertising": { "line": 5, "function": 0 }
 }

@@ -244,21 +244,25 @@ describe('[FIX-002] refundDuesPayment — cross-org tenant guard', () => {
       findActiveByPersonAndOrg: async () => [{ id: 'term-1', positionTitle: 'Treasurer' }],
     });
     let refundProcessed = false;
+    // A completed payment carries a recent paidAt in production; keeps the
+    // refund inside the 30-day BR-08 window so eligibility (FIX-007) passes
+    // and this test still proves the org guard ALLOWS a legitimate refund.
+    const orgAPayment = fakeDuesPayment({
+      id: 'pay-orgA',
+      organizationId: 'org-A',
+      personId: 'person-A',
+      amount: 5000,
+      status: 'completed',
+      refundedAmount: 0,
+      paidAt: new Date(),
+      membershipExtendedFrom: '2025-06-30',
+      membershipExtendedTo: '2026-06-30',
+    });
     stubRepo(DuesRepository, {
-      getPayment: async () => fakeDuesPayment({
-        id: 'pay-orgA',
-        organizationId: 'org-A',
-        personId: 'person-A',
-        amount: 5000,
-        status: 'completed',
-        refundedAmount: 0,
-        // A completed payment carries a recent paidAt in production; keeps the
-        // refund inside the 30-day BR-08 window so eligibility (FIX-007) passes
-        // and this test still proves the org guard ALLOWS a legitimate refund.
-        paidAt: new Date(),
-        membershipExtendedFrom: '2025-06-30',
-        membershipExtendedTo: '2026-06-30',
-      }),
+      getPayment: async () => orgAPayment,
+      // The refund-race fix re-reads the payment under SELECT…FOR UPDATE inside
+      // the tx via getPaymentForUpdate; stub it to the same locked row.
+      getPaymentForUpdate: async () => orgAPayment,
       getFundAllocations: async () => [],
       createFundAllocations: async () => {},
       updatePaymentStatus: async (_id: string, _cur: string, status: string, extra: any) => {

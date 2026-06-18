@@ -79,17 +79,17 @@ function getTier(completed: number, total: number): Tier {
 }
 
 const TIER_COLORS: Record<Tier, string> = {
-  Beginner: 'bg-gray-400',
-  Active: 'bg-blue-500',
-  Verified: 'bg-green-500',
-  Exemplary: 'bg-amber-500',
+  Beginner: 'bg-[var(--color-muted)]',
+  Active: 'bg-[var(--color-info)]',
+  Verified: 'bg-[var(--color-success)]',
+  Exemplary: 'bg-[var(--color-warning)]',
 }
 
 const TIER_TEXT_COLORS: Record<Tier, string> = {
-  Beginner: 'text-gray-600',
-  Active: 'text-blue-600',
-  Verified: 'text-green-600',
-  Exemplary: 'text-amber-600',
+  Beginner: 'text-[var(--color-muted)]',
+  Active: 'text-[var(--color-info)]',
+  Verified: 'text-[var(--color-success)]',
+  Exemplary: 'text-[var(--color-warning)]',
 }
 
 export function StandingMeter({ person, duesStatus, onAction }: StandingMeterProps) {

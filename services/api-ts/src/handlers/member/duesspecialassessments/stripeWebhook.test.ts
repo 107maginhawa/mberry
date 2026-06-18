@@ -1,6 +1,13 @@
-import { describe, test, expect, mock, beforeEach } from 'bun:test';
+import { describe, test, expect, mock, beforeEach, afterAll } from 'bun:test';
 import { Hono } from 'hono';
+import * as _realWebhookProcessor from './jobs/webhookRetryProcessor';
 import { stripeWebhookHandler } from './stripeWebhook';
+
+// Snapshot the REAL processor exports BEFORE mocking. Bun's mock.module mutates
+// the process-global module record in place, so without restoring it the mock
+// would leak into webhookRetryProcessor.test.ts (which tests the real impl) and
+// fail it depending on file execution order.
+const realWebhookProcessor = { ..._realWebhookProcessor };
 
 // Mock the webhook retry processor
 const mockHandleIncomingWebhook = mock(() =>
@@ -14,6 +21,11 @@ mock.module('./jobs/webhookRetryProcessor', () => ({
   MAX_RETRIES: 4,
   BACKOFF_SCHEDULE_MS: [60000, 300000, 900000, 3600000],
 }));
+
+// Restore the real module after this file's tests so it doesn't pollute siblings.
+afterAll(() => {
+  mock.module('./jobs/webhookRetryProcessor', () => realWebhookProcessor);
+});
 
 // Note: createProcessPayment is called inside the handler but handleIncomingWebhook
 // is mocked above, so createProcessPayment's callback never actually executes.

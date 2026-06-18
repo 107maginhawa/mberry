@@ -6,6 +6,7 @@
 import { eq, and, sql, type SQL } from 'drizzle-orm';
 import type { DatabaseInstance } from '@/core/database';
 import { InternalError } from '@/core/errors';
+import { DEFAULT_PAGE_SIZE } from '@/core/pagination';
 import {
   accreditedProviders,
   type AccreditedProvider,
@@ -32,6 +33,7 @@ export class AccreditedProviderRepository {
   async listWithExpiry(
     orgId: string,
     statusFilter?: string | null,
+    pagination?: { limit: number; offset: number },
   ): Promise<{ data: AccreditedProviderWithExpiry[]; total: number }> {
     const conditions: SQL<unknown>[] = [eq(accreditedProviders.organizationId, orgId)];
     if (statusFilter) {
@@ -40,11 +42,17 @@ export class AccreditedProviderRepository {
 
     const where = and(...conditions);
 
+    // Always bound the data query to prevent unbounded result sets.
+    const limit = pagination?.limit ?? DEFAULT_PAGE_SIZE;
+    const offset = pagination?.offset ?? 0;
+
     const [rows, countResult] = await Promise.all([
       this.db
         .select()
         .from(accreditedProviders)
-        .where(where),
+        .where(where)
+        .limit(limit)
+        .offset(offset),
       this.db
         .select({ count: sql<number>`count(*)::int` })
         .from(accreditedProviders)

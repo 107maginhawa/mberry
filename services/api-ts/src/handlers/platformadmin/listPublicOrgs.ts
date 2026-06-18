@@ -68,8 +68,16 @@ export async function listPublicOrgs(
   if (orgs.length > 0) {
     try {
       const orgIds = orgs.map(o => o.id);
+      // Bind orgIds as a real Postgres uuid[] array. Interpolating a JS array
+      // directly produces `ANY(($1,$2,...))` (a tuple), which Postgres rejects
+      // with "op ANY/ALL (array) requires array on right side". Build an
+      // ARRAY[...] literal from individually-bound params (injection-safe).
+      const orgIdArray = sql`ARRAY[${sql.join(
+        orgIds.map((id) => sql`${id}`),
+        sql`, `
+      )}]::uuid[]`;
       const result = await db.execute(
-        sql`SELECT organization_id, count(*)::int as count FROM membership WHERE organization_id = ANY(${orgIds}) AND status = 'active' GROUP BY organization_id`
+        sql`SELECT organization_id, count(*)::int as count FROM membership WHERE organization_id = ANY(${orgIdArray}) AND status = 'active' GROUP BY organization_id`
       );
       const rows = (result as unknown as Record<string, unknown>)['rows'] as Array<Record<string, unknown>> | undefined
         ?? (result as unknown as Array<Record<string, unknown>>);

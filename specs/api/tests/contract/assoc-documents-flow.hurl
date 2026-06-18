@@ -80,6 +80,27 @@ HTTP 200
 [Asserts]
 jsonpath "$.data" isCollection
 
+# ── 2a. Mint a real StoredFile (storageKey gate) ─────────────────────────────
+# createDocument enforces that storageKey references a StoredFile the caller
+# uploaded in this org (storage mints the key as the StoredFile UUID). Initiate
+# an upload as the same officer/org and capture the returned file id; the gate
+# only needs the DB row to exist + be owned by the caller — not the object bytes.
+
+POST {{api}}/storage/files/upload
+Origin: {{origin}}
+x-csrf-token: {{csrf_token}}
+Cookie: better-auth.session_token={{officer_cookie}}
+x-org-id: ed8e3a96-8126-4341-be42-e6eb7940c562
+Content-Type: application/json
+{
+  "filename": "policy-{{suffix}}.pdf",
+  "size": 4096,
+  "mimeType": "application/pdf"
+}
+HTTP 201
+[Captures]
+doc_file_id: jsonpath "$.file"
+
 # ── 2. Create a document (officer, org-owned) ────────────────────────────────
 
 POST {{api}}/association/documents
@@ -93,7 +114,7 @@ Content-Type: application/json
   "fileName": "policy.pdf",
   "mimeType": "application/pdf",
   "size": 4096,
-  "storageKey": "test/contract/policy-{{suffix}}.pdf",
+  "storageKey": "{{doc_file_id}}",
   "ownerId": "ed8e3a96-8126-4341-be42-e6eb7940c562",
   "ownerType": "organization",
   "accessLevel": "tenantOnly",
@@ -155,6 +176,23 @@ HTTP 200
 jsonpath "$.id" == "{{document_id}}"
 jsonpath "$.title" == "Contract Test Policy (updated)"
 
+# ── 5a. Mint a real StoredFile for the new version ───────────────────────────
+
+POST {{api}}/storage/files/upload
+Origin: {{origin}}
+x-csrf-token: {{csrf_token}}
+Cookie: better-auth.session_token={{officer_cookie}}
+x-org-id: ed8e3a96-8126-4341-be42-e6eb7940c562
+Content-Type: application/json
+{
+  "filename": "policy-{{suffix}}-v2.pdf",
+  "size": 5120,
+  "mimeType": "application/pdf"
+}
+HTTP 201
+[Captures]
+version_file_id: jsonpath "$.file"
+
 # ── 5. Upload a new version ──────────────────────────────────────────────────
 
 POST {{api}}/association/documents/{{document_id}}/versions
@@ -166,7 +204,7 @@ Content-Type: application/json
 {
   "fileName": "policy-v2.pdf",
   "size": 5120,
-  "storageKey": "test/contract/policy-{{suffix}}-v2.pdf",
+  "storageKey": "{{version_file_id}}",
   "changeNotes": "Reflowed page 3"
 }
 HTTP 201

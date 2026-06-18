@@ -4,6 +4,7 @@ import { UnauthorizedError, ForbiddenError, ConflictError, ValidationError } fro
 import { InviteRepository } from './repos/invite.repo';
 import { generateInviteToken, defaultExpiryDate } from './utils/token';
 import { requireOfficerTerm } from '@/core/auth/officer-checks';
+import { getInviteTokenSecret } from '@/core/config';
 
 /**
  * createInvite
@@ -44,7 +45,7 @@ export async function createInvite(
   }
 
   // Generate HMAC-signed token
-  const secret = process.env['INVITE_TOKEN_SECRET'] || 'dev-secret-change-in-production';
+  const secret = getInviteTokenSecret();
   const { raw, hash } = generateInviteToken(secret);
 
   const invite = await inviteRepo.create({

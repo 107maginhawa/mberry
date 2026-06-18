@@ -4,7 +4,18 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+## [0.1.1.0] - 2026-06-16
+
 ### Fixed
+- Close cross-org data leaks: file metadata/download, vendor edits, job-board postings/applications, and peer CPD-credit views now reject access outside your organization
+- Block cross-tenant file exfiltration: documents can no longer point at another org's stored file
+- Lock down real-time calls/chat: signed per-call tokens, no insecure fallback secret, and per-message membership/org re-checks so removed members stop broadcasting
+- Prevent double-bookings and event over-capacity under concurrent signups (atomic claims + database guards)
+- Stop refunds from exceeding the original payment and stop Stripe webhooks from double-processing on retry
+- Fix scheduled announcements blasting twice, and now honor unsubscribe/consent across email, in-app, and push
+- Fix location-type filtering on time slots (was erroring instead of filtering)
+- Let members re-register for an event after a no-show or cancellation
+- Failed/denied actions are now written to the compliance audit trail
 - Fix UUID passed as orgSlug in dashboard/my routes — eliminates redirect round-trip on every org navigation
 - Fix getTraining handler using fetch-then-check org isolation (TOCTOU) — now uses scoped query
 - Fix getTraining auth guard returning raw JSON instead of throwing UnauthorizedError
@@ -26,6 +37,9 @@ All notable changes to this project will be documented in this file.
 - Add OrgIconRail component tests (render, active highlight, error state)
 - Add OrgPickerSheet component tests (open/close, org list, status badges)
 - Add CHANGELOG.md
+- Account-deletion cleanup now also removes a person's reviews, ad opt-outs/reports, chat memberships, and committee roles (data-privacy completeness)
+- Major test-coverage expansion: API line coverage 90% → 94%, dues module 0 → 35 tests, plus repo-layer integration tests across many modules (7690 passing)
+- Add database migration backing the new booking/event uniqueness guards
 
 ## [0.1.0.0] - 2026-05-02
 

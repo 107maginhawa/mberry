@@ -47,7 +47,13 @@ export async function awardManualCredit(ctx: Context): Promise<Response> {
       creditAmount: body.creditAmount,
       reason: body.activityName,
     }).catch(() => {});
-    try { await db.execute(sql`REFRESH MATERIALIZED VIEW CONCURRENTLY compliance_standings`); } catch { /* view may not exist */ }
+    // Defer the compliance_standings matview refresh off the request path
+    // (fire-and-forget). The written entry is returned directly, not read back
+    // from the view, so eventual consistency is acceptable.
+    domainEvents.emit('compliance.recompute', {
+      organizationId: orgId,
+      reason: 'manual_award',
+    }).catch(() => {});
     return ctx.json({ data: entry, ...(sdlCapWarning && { warning: sdlCapWarning }) }, 201);
   } catch (err: any) {
     if (err?.code === '23505' || err?.message?.includes('uq_credit_source_person')) throw new ConflictError('Credit already awarded with this idempotency key');

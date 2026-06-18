@@ -36,7 +36,7 @@ describe('[M15] deleteJobPosting', () => {
       delete: async () => true,
     });
 
-    const ctx = makeCtx({ _params: { postingId: 'job-1' } });
+    const ctx = makeCtx({ organizationId: 'org-1', _params: { postingId: 'job-1' } });
     const response = await deleteJobPosting(ctx);
     expect(response.status).toBe(204);
   });

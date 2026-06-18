@@ -36,7 +36,7 @@ describe('[M15] getJobPosting', () => {
       get: async () => fakePosting,
     });
 
-    const ctx = makeCtx({ _params: { postingId: 'job-1' } });
+    const ctx = makeCtx({ organizationId: 'org-1', _params: { postingId: 'job-1' } });
     const response = await getJobPosting(ctx);
     expect(response.status).toBe(200);
     expect(response.body.data.id).toBe('job-1');

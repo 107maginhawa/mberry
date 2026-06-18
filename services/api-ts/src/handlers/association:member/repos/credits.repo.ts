@@ -235,6 +235,30 @@ export class CreditEntryRepository extends DatabaseRepository<CreditEntry, NewCr
   }
 
   /**
+   * Org-scoped peer credit listing. Used by listMemberCreditsForPeer to render
+   * another member's public credit history on a directory profile card.
+   *
+   * Fail-closed: organizationId is REQUIRED here. The shared buildWhereConditions
+   * applies the org filter only when present, so a peer query that reached
+   * findMany() with an undefined org would silently return entries across ALL
+   * organizations (cross-tenant PII leak). This wrapper throws before that can
+   * happen, guaranteeing the query is always scoped to a single org.
+   */
+  async findManyForPeer(
+    organizationId: string,
+    personId: string,
+  ): Promise<CreditEntry[]> {
+    if (!organizationId) {
+      throw new Error('findManyForPeer requires a non-empty organizationId');
+    }
+    if (!personId) {
+      throw new Error('findManyForPeer requires a non-empty personId');
+    }
+
+    return this.findMany({ organizationId, personId });
+  }
+
+  /**
    * Cross-org aggregation: get total credits grouped by organization for a person in a cycle.
    */
   async sumCreditsByOrg(

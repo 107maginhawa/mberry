@@ -1,4 +1,4 @@
-import { eq, and, desc, sql, inArray } from 'drizzle-orm';
+import { eq, desc, inArray } from 'drizzle-orm';
 import type { DatabaseInstance } from '@/core/database';
 import { certificates, type Certificate, type NewCertificate } from './certificates.schema';
 
@@ -28,15 +28,5 @@ export class CertificatesRepository {
   async create(data: NewCertificate): Promise<Certificate> {
     const [result] = await this.db.insert(certificates).values(data).returning();
     return result!;
-  }
-
-  async getNextCertificateNumber(orgId: string, year: number): Promise<string> {
-    const pattern = `CERT-${year}-%`;
-    const [result] = await this.db
-      .select({ count: sql<number>`count(*)::int` })
-      .from(certificates)
-      .where(and(eq(certificates.organizationId, orgId), sql`${certificates.certificateNumber} LIKE ${pattern}`));
-    const seq = (result?.count ?? 0) + 1;
-    return `CERT-${year}-${seq.toString().padStart(6, '0')}`;
   }
 }

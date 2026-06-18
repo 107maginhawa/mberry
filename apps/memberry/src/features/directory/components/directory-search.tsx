@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { searchDirectoryOptions } from '@monobase/sdk-ts/generated/react-query'
 import type { DirectoryProfile } from '@monobase/sdk-ts/generated/types.gen'
@@ -15,10 +15,17 @@ interface DirectorySearchProps {
 
 export function DirectorySearch({ orgId, tenantId }: DirectorySearchProps) {
   const [search, setSearch] = useState('')
+  const [debouncedSearch, setDebouncedSearch] = useState('')
+
+  // Debounce search 300ms
+  useEffect(() => {
+    const timer = setTimeout(() => setDebouncedSearch(search), 300)
+    return () => clearTimeout(timer)
+  }, [search])
 
   const { data, isLoading, error } = useQuery({
     ...searchDirectoryOptions({
-      query: { q: search || undefined },
+      query: { q: debouncedSearch || undefined },
       headers: { 'x-org-id': tenantId },
     }),
   })
@@ -48,7 +55,7 @@ export function DirectorySearch({ orgId, tenantId }: DirectorySearchProps) {
             <GlassCard key={p.id} className="p-4 space-y-2">
               <div className="flex items-center gap-3">
                 {p.photoUrl ? (
-                  <img src={p.photoUrl} alt="" className="w-10 h-10 rounded-full object-cover" />
+                  <img src={p.photoUrl} alt={p.displayName || 'Member'} className="w-10 h-10 rounded-full object-cover" />
                 ) : (
                   <div className="w-10 h-10 rounded-full bg-[var(--color-surface-warm)] flex items-center justify-center text-sm font-medium text-[var(--color-primary)]">
                     {(p.displayName || '?')[0]}
@@ -70,7 +77,7 @@ export function DirectorySearch({ orgId, tenantId }: DirectorySearchProps) {
         </div>
       )}
 
-      {!isLoading && profiles.length === 0 && search && (
+      {!isLoading && profiles.length === 0 && debouncedSearch && (
         <EmptyState
           icon={<Users className="w-8 h-8" />}
           headline="No members found"

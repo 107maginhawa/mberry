@@ -23,11 +23,14 @@ export async function updateVendor(ctx: ValidatedContext<any, never, any>): Prom
   const baseLogger = ctx.get('logger');
   const traceId = ctx.get('requestId');
   const logger = baseLogger?.child?.({ traceId, module: 'marketplace' }) ?? baseLogger;
+  const organizationId = ctx.get('organizationId') as string;
 
   const repo = new VendorRepository(db, logger);
 
   const existing = await repo.findOneById(vendorId);
-  if (!existing) {
+  // Org-scope: a vendor outside the caller's org is treated as missing.
+  // Mirrors updateListing.ts:38-41 — prevents cross-org edit by UUID.
+  if (!existing || existing.organizationId !== organizationId) {
     throw new NotFoundError('Vendor not found');
   }
 

@@ -352,6 +352,28 @@ export class CommunicationsRepository {
       .limit(limit);
   }
 
+  /**
+   * Cron-only: atomically claim a scheduled announcement for sending.
+   *
+   * Conditional update: flips status 'scheduled' -> 'sent' ONLY when the row is
+   * still 'scheduled', in a single statement. Because the WHERE clause re-checks
+   * the status that the SET clause overwrites, exactly one of N overlapping cron
+   * ticks wins the claim — the rest match zero rows. Returns the claimed row, or
+   * `undefined` if another tick already moved it out of 'scheduled' (skip it).
+   *
+   * The announcement_status enum has no intermediate 'sending' state, so the
+   * claim transition is scheduled -> sent directly (matches updateStatus). This
+   * replaces the prior non-atomic findScheduledDue + updateStatus pair that let
+   * two ticks double-blast the same org.
+   */
+  async claimScheduled(id: string): Promise<Announcement | undefined> {
+    const [result] = await this.db.update(announcements)
+      .set({ status: 'sent', publishedAt: new Date(), updatedAt: new Date() })
+      .where(and(eq(announcements.id, id), eq(announcements.status, 'scheduled')))
+      .returning();
+    return result ?? undefined;
+  }
+
   async get(id: string, orgId?: string): Promise<(Announcement & { stats?: AnnouncementStats }) | undefined> {
     const conditions = orgId
       ? and(eq(announcements.id, id), eq(announcements.organizationId, orgId))

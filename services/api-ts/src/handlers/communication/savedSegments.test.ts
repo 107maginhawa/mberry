@@ -1,5 +1,11 @@
-import { describe, it, expect, beforeEach } from 'bun:test';
+import { describe, it, test, expect, beforeEach, afterEach } from 'bun:test';
 import { SavedSegmentRepository, CommunicationsRepository } from './repos/communication.repo';
+import { makeCtx, makeMockDb, stubRepo, restoreRepo } from '@/test-utils/make-ctx';
+import {
+  createSavedSegment,
+  listSavedSegments,
+  deleteSavedSegment,
+} from './savedSegments';
 
 /**
  * VS-032 — Saved Segments + Stats integration tests.
@@ -182,5 +188,191 @@ describe('CommunicationsRepository.createStats', () => {
     expect(statsStore[0].emailSent).toBe(0);
     expect(statsStore[0].pushDelivered).toBe(0);
     expect(statsStore[0].inappViews).toBe(0);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Handler-level tests (use makeCtx + stubRepo harness)
+// ---------------------------------------------------------------------------
+
+const FAKE_SEGMENT_HANDLER = {
+  id: 'seg-h1',
+  organizationId: 'org-1',
+  name: 'Handler Segment',
+  filters: { status: 'active' },
+  createdBy: 'user-1',
+  createdAt: new Date(),
+};
+
+describe('createSavedSegment handler', () => {
+  beforeEach(() => { restoreRepo(SavedSegmentRepository); });
+  afterEach(() => { restoreRepo(SavedSegmentRepository); });
+
+  test('returns 401 when no session', async () => {
+    const ctx = makeCtx({ session: null, user: null, database: makeMockDb() });
+    ctx.req.json = async () => ({ organizationId: 'org-1', name: 'Test', filters: {} });
+    const res = await createSavedSegment(ctx as any);
+    expect(res.status).toBe(401);
+  });
+
+  test('returns 400 when organizationId is missing', async () => {
+    const ctx = makeCtx({ database: makeMockDb() });
+    ctx.req.json = async () => ({ name: 'Test', filters: { status: 'active' } });
+    const res = await createSavedSegment(ctx as any);
+    expect(res.status).toBe(400);
+    expect((res as any).body.error).toMatch(/organizationId/);
+  });
+
+  test('returns 400 when filters is missing', async () => {
+    const ctx = makeCtx({ database: makeMockDb() });
+    ctx.req.json = async () => ({ organizationId: 'org-1', name: 'Test' });
+    const res = await createSavedSegment(ctx as any);
+    expect(res.status).toBe(400);
+    expect((res as any).body.error).toMatch(/filters/);
+  });
+
+  test('returns 400 when name exceeds 100 characters', async () => {
+    const ctx = makeCtx({ database: makeMockDb() });
+    ctx.req.json = async () => ({
+      organizationId: 'org-1',
+      name: 'A'.repeat(101),
+      filters: {},
+    });
+    const res = await createSavedSegment(ctx as any);
+    expect(res.status).toBe(400);
+    expect((res as any).body.error).toMatch(/100/);
+  });
+
+  test('happy path — returns 201 with segment data', async () => {
+    stubRepo(SavedSegmentRepository, {
+      create: async () => ({ ...FAKE_SEGMENT_HANDLER }),
+    });
+    const ctx = makeCtx({ database: makeMockDb() });
+    ctx.req.json = async () => ({
+      organizationId: 'org-1',
+      name: 'Handler Segment',
+      filters: { status: 'active' },
+    });
+    const res = await createSavedSegment(ctx as any);
+    expect(res.status).toBe(201);
+    expect((res as any).body.data.id).toBe('seg-h1');
+  });
+
+  test('name is trimmed before repo call', async () => {
+    let captured: any;
+    stubRepo(SavedSegmentRepository, {
+      create: async (d: any) => { captured = d; return { ...FAKE_SEGMENT_HANDLER, name: d.name }; },
+    });
+    const ctx = makeCtx({ database: makeMockDb() });
+    ctx.req.json = async () => ({
+      organizationId: 'org-1',
+      name: '  Spaced  ',
+      filters: {},
+    });
+    await createSavedSegment(ctx as any);
+    expect(captured.name).toBe('Spaced');
+  });
+
+  test('createdBy is session.user.id', async () => {
+    let captured: any;
+    stubRepo(SavedSegmentRepository, {
+      create: async (d: any) => { captured = d; return { ...FAKE_SEGMENT_HANDLER }; },
+    });
+    const ctx = makeCtx({
+      database: makeMockDb(),
+      user: { id: 'creator-7', role: 'user', twoFactorEnabled: true },
+    });
+    ctx.req.json = async () => ({ organizationId: 'org-1', name: 'X', filters: {} });
+    await createSavedSegment(ctx as any);
+    expect(captured.createdBy).toBe('creator-7');
+  });
+});
+
+describe('listSavedSegments handler', () => {
+  beforeEach(() => { restoreRepo(SavedSegmentRepository); });
+  afterEach(() => { restoreRepo(SavedSegmentRepository); });
+
+  test('returns 401 when no session', async () => {
+    const ctx = makeCtx({ session: null, user: null, database: makeMockDb() });
+    ctx.req.query = (k?: string) => k === 'organizationId' ? 'org-1' : null;
+    const res = await listSavedSegments(ctx as any);
+    expect(res.status).toBe(401);
+  });
+
+  test('returns 400 when organizationId param missing', async () => {
+    const ctx = makeCtx({ database: makeMockDb() });
+    ctx.req.query = (_k?: string) => null;
+    const res = await listSavedSegments(ctx as any);
+    expect(res.status).toBe(400);
+  });
+
+  test('happy path — returns 200 with data array', async () => {
+    stubRepo(SavedSegmentRepository, {
+      list: async () => [{ ...FAKE_SEGMENT_HANDLER }],
+    });
+    const ctx = makeCtx({ database: makeMockDb() });
+    ctx.req.query = (k?: string) => k === 'organizationId' ? 'org-1' : null;
+    const res = await listSavedSegments(ctx as any);
+    expect(res.status).toBe(200);
+    expect((res as any).body.data).toHaveLength(1);
+    expect((res as any).body.data[0].id).toBe('seg-h1');
+  });
+
+  test('repo.list called with correct organizationId', async () => {
+    let captured: string | undefined;
+    stubRepo(SavedSegmentRepository, {
+      list: async (orgId: string) => { captured = orgId; return []; },
+    });
+    const ctx = makeCtx({ database: makeMockDb() });
+    ctx.req.query = (k?: string) => k === 'organizationId' ? 'org-special' : null;
+    await listSavedSegments(ctx as any);
+    expect(captured).toBe('org-special');
+  });
+});
+
+describe('deleteSavedSegment handler', () => {
+  beforeEach(() => { restoreRepo(SavedSegmentRepository); });
+  afterEach(() => { restoreRepo(SavedSegmentRepository); });
+
+  test('returns 401 when no session', async () => {
+    const ctx = makeCtx({ session: null, user: null, database: makeMockDb() });
+    ctx.req.param = (_k?: string) => 'seg-h1';
+    ctx.req.query = (k?: string) => k === 'organizationId' ? 'org-1' : null;
+    const res = await deleteSavedSegment(ctx as any);
+    expect(res.status).toBe(401);
+  });
+
+  test('returns 400 when organizationId param missing', async () => {
+    const ctx = makeCtx({ database: makeMockDb() });
+    ctx.req.param = (_k?: string) => 'seg-h1';
+    ctx.req.query = (_k?: string) => null;
+    const res = await deleteSavedSegment(ctx as any);
+    expect(res.status).toBe(400);
+  });
+
+  test('happy path — returns 200 success:true', async () => {
+    stubRepo(SavedSegmentRepository, {
+      delete: async () => {},
+    });
+    const ctx = makeCtx({ database: makeMockDb() });
+    ctx.req.param = (_k?: string) => 'seg-h1';
+    ctx.req.query = (k?: string) => k === 'organizationId' ? 'org-1' : null;
+    const res = await deleteSavedSegment(ctx as any);
+    expect(res.status).toBe(200);
+    expect((res as any).body.success).toBe(true);
+  });
+
+  test('repo.delete called with id and organizationId', async () => {
+    let capturedId: string;
+    let capturedOrg: string;
+    stubRepo(SavedSegmentRepository, {
+      delete: async (id: string, org: string) => { capturedId = id; capturedOrg = org; },
+    });
+    const ctx = makeCtx({ database: makeMockDb() });
+    ctx.req.param = (_k?: string) => 'seg-del-99';
+    ctx.req.query = (k?: string) => k === 'organizationId' ? 'org-del' : null;
+    await deleteSavedSegment(ctx as any);
+    expect(capturedId!).toBe('seg-del-99');
+    expect(capturedOrg!).toBe('org-del');
   });
 });

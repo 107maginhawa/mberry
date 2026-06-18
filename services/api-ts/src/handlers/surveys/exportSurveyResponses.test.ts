@@ -163,4 +163,68 @@ describe('exportSurveyResponses', () => {
     expect(lines.length).toBe(1); // header only
     expect(lines[0]).toContain('How likely to recommend?');
   });
+
+  test('non-admin officer with active term is allowed', async () => {
+    stubRepo(OfficerTermRepository, {
+      findActiveByPersonAndOrg: async () => [{ positionTitle: 'Secretary' }],
+    });
+    stubRepo(SurveyRepository, { findById: async () => baseSurvey });
+    stubRepo(SurveyResponseRepository, { findAllBySurveyId: async () => responses });
+
+    const ctx = makeCtx({
+      user: { id: 'user-1', role: 'user' },
+      _params: { survey: 'survey-1' },
+    });
+    const res = await exportSurveyResponses(ctx);
+    expect(res.status).toBe(200);
+  });
+
+  test('throws NotFoundError when survey missing', async () => {
+    stubRepo(SurveyRepository, { findById: async () => null });
+    const ctx = makeCtx({
+      user: { id: 'user-1', role: 'admin' },
+      _params: { survey: 'nope' },
+    });
+    await expect(exportSurveyResponses(ctx)).rejects.toThrow('Survey not found');
+  });
+
+  test('throws NotFoundError when survey belongs to other org', async () => {
+    stubRepo(SurveyRepository, { findById: async () => ({ ...baseSurvey, organizationId: 'other-org' }) });
+    const ctx = makeCtx({
+      user: { id: 'user-1', role: 'admin' },
+      _params: { survey: 'survey-1' },
+    });
+    await expect(exportSurveyResponses(ctx)).rejects.toThrow('Survey not found');
+  });
+
+  test('accreditation format emits structured metadata header', async () => {
+    const surveyWithSnapshot = {
+      ...baseSurvey,
+      analyticsSnapshot: {
+        completionRate: 80,
+        npsScore: 42,
+        questionBreakdown: [
+          { questionId: 'q1', average: 8.5, count: 2, distribution: { '9': 1, '5': 1 } },
+        ],
+      },
+    };
+    stubRepo(SurveyRepository, { findById: async () => surveyWithSnapshot });
+    stubRepo(SurveyResponseRepository, { findAllBySurveyId: async () => responses });
+
+    const ctx = makeCtx({
+      user: { id: 'user-1', role: 'admin' },
+      _params: { survey: 'survey-1' },
+    });
+    // handler reads ctx.req.url to detect ?format=accreditation
+    (ctx as any).req.url = 'http://localhost/surveys/survey-1/export?format=accreditation';
+
+    const res = await exportSurveyResponses(ctx);
+    expect(res.status).toBe(200);
+    expect(res.headers.get('Content-Disposition')).toContain('accreditation-');
+    const csv = await res.text();
+    expect(csv).toContain('# Survey Export — Accreditation Format');
+    expect(csv).toContain('# SUMMARY');
+    expect(csv).toContain('# INDIVIDUAL RESPONSES');
+    expect(csv).toContain('# NPS Score: 42');
+  });
 });

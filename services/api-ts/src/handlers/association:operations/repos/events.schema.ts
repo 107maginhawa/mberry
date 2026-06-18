@@ -15,8 +15,10 @@ import {
   uuid,
   pgEnum,
   index,
+  uniqueIndex,
   bigint,
 } from 'drizzle-orm/pg-core';
+import { sql } from 'drizzle-orm';
 import { baseEntityFields } from '@/core/database.schema';
 
 export const eventStatusEnum = pgEnum('event_status', [
@@ -102,6 +104,14 @@ export const eventRegistrations = pgTable('event_registration', {
   index('idx_event_reg_org').on(table.organizationId),
   index('idx_event_reg_event').on(table.eventId),
   index('idx_event_reg_person').on(table.personId),
+  // P0 RACE FIX: a person may hold at most ONE active registration per event.
+  // Partial unique on (event_id, person_id) WHERE status NOT IN terminal states
+  // ('cancelled' | 'refunded') — so a cancelled/refunded reg does NOT block a
+  // later re-register, but a duplicate confirmed/waitlisted/noShow row is
+  // rejected with 23505 → "already registered".
+  uniqueIndex('uq_event_reg_active')
+    .on(table.eventId, table.personId)
+    .where(sql`status NOT IN ('cancelled', 'refunded')`),
 ]);
 
 export const checkIns = pgTable('check_in', {

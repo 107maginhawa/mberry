@@ -1,9 +1,18 @@
-import { describe, test, expect, afterEach, mock } from 'bun:test';
+import { describe, test, expect, afterEach, afterAll, mock } from 'bun:test';
 import { makeCtx, stubRepo } from '@/test-utils/make-ctx';
 import { fakeBookingEvent, fakeScheduleException } from '@/test-utils/factories';
 import { ScheduleExceptionRepository } from './repos/scheduleException.repo';
 import { BookingEventRepository } from './repos/bookingEvent.repo';
+import * as _realAuthorization from './utils/authorization';
 import { listScheduleExceptions } from './listScheduleExceptions';
+
+// Snapshot the real authorization module before any test mocks it, then restore
+// it after this file. mock.module is process-global; without this the mock of
+// checkBookingEventOwnership leaks into authorization.test.ts (real-impl tests).
+const realAuthorization = { ..._realAuthorization };
+afterAll(() => {
+  mock.module('./utils/authorization', () => realAuthorization);
+});
 
 const fakeEvent = fakeBookingEvent();
 

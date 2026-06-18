@@ -6,8 +6,10 @@ export async function deleteJobPosting(ctx: Context): Promise<Response> {
   const postingId = ctx.req.param('postingId')!;
   const repo = new JobPostingRepository(db);
 
+  const organizationId = ctx.get('organizationId');
   const existing = await repo.get(postingId);
-  if (!existing) {
+  // Org-scope: a posting outside the caller's org is treated as missing.
+  if (!existing || existing.organizationId !== organizationId) {
     return ctx.json({ error: 'Posting not found' }, 404);
   }
 

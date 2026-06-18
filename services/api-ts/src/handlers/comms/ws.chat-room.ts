@@ -21,6 +21,9 @@ import { ChatRoomRepository } from './repos/chatRoom.repo';
 import { ChatMessageRepository } from './repos/chatMessage.repo';
 import { ChatRoomMemberRepository } from './repos/chatRoomMember.repo';
 import { OfficerTermRepository } from '@/handlers/association:member/repos/governance.repo';
+import { MembershipRepository } from '@/handlers/association:member/repos/membership.repo';
+import type { ChatRoom } from './repos/comms.schema';
+import { verifyCallToken } from './utils/call-token';
 
 /**
  * Message types for chat room WebSocket.
@@ -42,6 +45,72 @@ interface SignalMessage {
   type: 'video.offer' | 'video.answer' | 'video.ice-candidate';
   from: string;
   data: unknown;
+}
+
+/**
+ * Per-frame authorization re-check (P0 — HOLE 3).
+ *
+ * The REST send path (sendChatMessage) enforces org-isolation and re-derives
+ * participant status on every request. The WS path historically only checked
+ * membership at connect, so a revoked member kept writing for the socket's
+ * lifetime, and the cross-org guard was skipped entirely. This re-runs BOTH on
+ * every inbound write frame:
+ *   (a) the sender is STILL an active room member (JSONB participants OR the
+ *       chat_room_member join table — same OR-shim as onConnect), and
+ *   (b) the room's org matches an org the sender currently belongs to (mirrors
+ *       the `room.organizationId !== callerOrg` guard in sendChatMessage). Only
+ *       enforced when the room is org-scoped, so org-agnostic legacy rows are
+ *       not falsely blocked.
+ *
+ * Returns the freshly-fetched room on success, or null after sending an error
+ * frame (caller must stop processing).
+ */
+async function authorizeWriteFrame(
+  db: DatabaseInstance,
+  logger: any,
+  ws: WSContext,
+  roomId: string,
+  userId: string,
+): Promise<ChatRoom | null> {
+  const roomRepo = new ChatRoomRepository(db, logger);
+  const room = await roomRepo.findOneById(roomId);
+  if (!room) {
+    ws.send(JSON.stringify({ event: 'error', payload: { message: 'Chat room not found' } }));
+    return null;
+  }
+
+  // (a) Re-verify ACTIVE membership on every frame — handles mid-session revocation.
+  const memberRepo = new ChatRoomMemberRepository(db, logger);
+  const stillMember =
+    room.participants.includes(userId) ||
+    (await memberRepo.isMember(roomId, userId));
+  if (!stillMember) {
+    ws.send(JSON.stringify({
+      event: 'error',
+      payload: { message: 'Access denied: no longer a participant in this chat room' },
+    }));
+    logger?.warn?.({ action: 'ws.chat-room.revoked-rejected', userId, roomId }, 'Rejected frame from revoked member');
+    return null;
+  }
+
+  // (b) Org-isolation: the room is org-scoped — the sender must currently belong
+  // to the room's org. Mirrors the REST cross-org guard. Skipped for
+  // org-agnostic rooms (no organizationId).
+  const orgId = (room as { organizationId?: string }).organizationId;
+  if (orgId) {
+    const membershipRepo = new MembershipRepository(db, logger);
+    const membership = await membershipRepo.findByPersonAndOrg(userId, orgId);
+    if (!membership) {
+      ws.send(JSON.stringify({
+        event: 'error',
+        payload: { message: 'Access denied: chat room belongs to a different organization' },
+      }));
+      logger?.warn?.({ action: 'ws.chat-room.cross-org-rejected', userId, roomId }, 'Rejected cross-org frame');
+      return null;
+    }
+  }
+
+  return room;
 }
 
 export const config: WebSocketHandler = {
@@ -136,9 +205,14 @@ export const config: WebSocketHandler = {
         const messageRepo = new ChatMessageRepository(db, logger);
         const roomRepo = new ChatRoomRepository(db, logger);
 
+        // P0 (HOLE 3): re-check org-isolation + ACTIVE membership on every frame.
+        // A revoked member or a cross-org sender is rejected here, even though
+        // they passed the connect-time check.
+        const targetRoom = await authorizeWriteFrame(db, logger, ws, roomId, user.id);
+        if (!targetRoom) break;
+
         // FIX-012 (G10): archived rooms are read-only — reject the send on the WS
         // path too (mirrors the REST guard in sendChatMessage). Do not persist.
-        const targetRoom = await roomRepo.findOneById(roomId);
         if (targetRoom?.status === 'archived') {
           ws.send(JSON.stringify({
             event: 'error',
@@ -185,22 +259,79 @@ export const config: WebSocketHandler = {
         break;
       }
 
-      case 'chat.typing':
+      case 'chat.typing': {
+        // P0 (HOLE 3): typing/presence is a write frame too — re-check
+        // org-isolation + ACTIVE membership before relaying `from: user.id`,
+        // so a revoked or cross-org member cannot keep broadcasting presence
+        // for the socket's lifetime (same guard as chat.message / video.*).
+        const targetRoom = await authorizeWriteFrame(db, logger, ws, roomId, user.id);
+        if (!targetRoom) break;
+
         // Relay typing indicator to channel
         await wsService.publishToChannel(channel, 'chat.typing', {
           from: user.id,
           isTyping: data.isTyping,
         });
         break;
+      }
 
       case 'video.offer':
       case 'video.answer':
       case 'video.ice-candidate': {
-        // Relay WebRTC signaling to channel participants (exclude sender)
+        // P0 (HOLE 3): re-check org-isolation + ACTIVE membership on every frame.
+        const targetRoom = await authorizeWriteFrame(db, logger, ws, roomId, user.id);
+        if (!targetRoom) break;
+
+        // P0 (HOLE 2 + HOLE 1): relaying video.* must be gated on a VERIFIED call
+        // token bound to THIS room's active call and THIS sender — NOT merely
+        // room membership. Without this, any room participant could hijack an
+        // active call's signaling or bypass the capacity cap.
+        const messageRepo = new ChatMessageRepository(db, logger);
+        const activeCall = await messageRepo.findActiveVideoCall(roomId);
+        if (!activeCall) {
+          ws.send(JSON.stringify({
+            event: 'error',
+            payload: { message: 'No active video call in this room' },
+          }));
+          logger?.warn?.({ action: 'ws.chat-room.no-active-call', userId: user.id, roomId, type }, 'Rejected video signaling: no active call');
+          break;
+        }
+
+        const token: string | undefined =
+          (message as { token?: string }).token ??
+          (data as { token?: string } | undefined)?.token;
+
+        const verdict = verifyCallToken(token ?? '', {
+          callId: activeCall.id,
+          personId: user.id,
+        });
+        if (!verdict.valid) {
+          ws.send(JSON.stringify({
+            event: 'error',
+            payload: { message: 'Invalid or missing video call token' },
+          }));
+          logger?.warn?.({
+            action: 'ws.chat-room.bad-call-token',
+            userId: user.id,
+            roomId,
+            type,
+            reason: verdict.reason,
+          }, 'Rejected video signaling: invalid call token');
+          break;
+        }
+
+        // Relay WebRTC signaling to channel participants (exclude sender).
+        // Strip any token carried inside `data` so a sender's call token is
+        // never leaked to other peers.
+        let relayData = data;
+        if (relayData && typeof relayData === 'object' && 'token' in relayData) {
+          const { token: _omit, ...rest } = relayData as Record<string, unknown>;
+          relayData = rest;
+        }
         const signalMessage: SignalMessage = {
           type,
           from: user.id,
-          data: data,
+          data: relayData,
         };
 
         await wsService.publishToChannel(channel, type, signalMessage, ws);

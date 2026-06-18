@@ -3,19 +3,20 @@
  * Uses Drizzle ORM with PostgreSQL
  */
 
-import { 
-  pgTable, 
-  uuid, 
-  integer, 
-  text, 
-  time, 
-  date, 
-  timestamp, 
-  boolean, 
-  decimal, 
-  jsonb, 
-  index, 
+import {
+  pgTable,
+  uuid,
+  integer,
+  text,
+  time,
+  date,
+  timestamp,
+  boolean,
+  decimal,
+  jsonb,
+  index,
   unique,
+  uniqueIndex,
   pgEnum,
   check,
   varchar
@@ -292,7 +293,16 @@ export const bookings: any = pgTable('booking', {
   pendingBookingsIdx: index('bookings_pending_idx')
     .on(table.status, table.bookedAt)
     .where(sql`"booking"."status" = 'pending'`),
-  
+
+  // P0 RACE FIX: at most ONE active booking may reference a given slot.
+  // Partial unique on slot WHERE status is active ('pending' | 'confirmed').
+  // Terminal states (rejected/cancelled/completed/no_show_*) are excluded so a
+  // cancelled or rejected booking does NOT block re-booking the freed slot.
+  // Backs the atomic createBooking guard (catch 23505 → "slot no longer available").
+  activeSlotUniqueIdx: uniqueIndex('bookings_active_slot_unique')
+    .on(table.slot)
+    .where(sql`"booking"."status" IN ('pending', 'confirmed')`),
+
   // Check constraints
   reasonLengthCheck: check('bookings_reason_check', sql`LENGTH(${table.reason}) <= 500`),
   durationMinutesCheck: check('bookings_duration_minutes_check', sql`${table.durationMinutes} >= 15 AND ${table.durationMinutes} <= 480`),

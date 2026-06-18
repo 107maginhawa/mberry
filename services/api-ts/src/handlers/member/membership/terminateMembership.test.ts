@@ -70,6 +70,48 @@ describe('terminateMembership', () => {
     expect(row.changedBy).toBe('user-1');
   });
 
+  test('revokes the removed member sessions when auth is present', async () => {
+    let revokedUserId: string | null = null;
+    mocks = stubRepo(MembershipRepository, {
+      findOneById: async () => fakeMembership,
+      updateOneById: async (_id: string, data: any) => ({ ...fakeMembership, ...data }),
+    });
+
+    const auth = {
+      api: { revokeUserSessions: async ({ body }: any) => { revokedUserId = body.userId; } },
+    };
+
+    const ctx = makeCtx({
+      auth,
+      _params: { membershipId: 'mem-1' },
+      _body: { terminationReason: 'Non-payment' },
+    });
+
+    const response = await terminateMembership(ctx);
+    expect(response.status).toBe(200);
+    expect(revokedUserId).toBe('person-1');
+  });
+
+  test('still returns 200 when session revocation throws', async () => {
+    mocks = stubRepo(MembershipRepository, {
+      findOneById: async () => fakeMembership,
+      updateOneById: async (_id: string, data: any) => ({ ...fakeMembership, ...data }),
+    });
+
+    const auth = {
+      api: { revokeUserSessions: async () => { throw new Error('auth down'); } },
+    };
+
+    const ctx = makeCtx({
+      auth,
+      _params: { membershipId: 'mem-1' },
+      _body: { terminationReason: 'Non-payment' },
+    });
+
+    const response = await terminateMembership(ctx);
+    expect(response.status).toBe(200);
+  });
+
   test('throws NotFoundError for non-existent membership', async () => {
     mocks = stubRepo(MembershipRepository, {
       findOneById: async () => undefined,

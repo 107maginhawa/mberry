@@ -112,6 +112,18 @@ const logLevelSchema = z.preprocess((v) => {
  */
 const INVITE_TOKEN_DEV_DEFAULT = 'dev-secret-change-in-production';
 
+/** Insecure dev fallback for the unsubscribe-link HMAC secret. Production must
+ *  override it — enforced by the superRefine block + getUnsubscribeSecret(). */
+const UNSUB_TOKEN_DEV_DEFAULT = 'dev-unsub-secret-change-in-production';
+
+/** Insecure dev fallback for the video-call signaling token secret. Used ONLY
+ *  outside production — getCallSigningSecret() fails closed in prod (and prefers
+ *  CALL_SIGNING_SECRET → AUTH_SECRET before ever reaching this). */
+const CALL_SIGNING_DEV_DEFAULT = 'dev-call-secret-change-in-production';
+
+/** Default MinIO credential that must never reach production. */
+const STORAGE_DEV_DEFAULT_CRED = 'minioadmin';
+
 const envSchema = z.object({
   NODE_ENV: z.string().default('development'),
 
@@ -137,8 +149,10 @@ const envSchema = z.object({
   // CORS
   CORS_ORIGINS: csvList(['http://localhost:3003', 'http://localhost:3004']),
   CORS_CREDENTIALS: boolish(true),
-  CORS_ALLOW_LOCAL_NETWORK: boolish(true),
-  CORS_ALLOW_TUNNELING: boolish(true),
+  // P0-3: default to false — tunnel/local-network origins must be opted into
+  // explicitly per environment, never on by default (CSRF/credentialed-origin risk).
+  CORS_ALLOW_LOCAL_NETWORK: boolish(false),
+  CORS_ALLOW_TUNNELING: boolish(false),
   CORS_STRICT: boolish(false),
 
   // Logging
@@ -197,12 +211,28 @@ const envSchema = z.object({
   STRIPE_WEBHOOK_SECRET: z.string().optional(),
   STRIPE_URL: z.string().optional(),
 
+  // PayMongo (optional per-org payment gateway). Not boot-required — when absent
+  // the webhook handler returns 503 rather than failing startup, since not every
+  // deployment uses PayMongo.
+  PAYMONGO_SECRET_KEY: z.string().optional(),
+  PAYMONGO_WEBHOOK_SECRET: z.string().optional(),
+
   // Internal service token — production-required (random UUID fallback in dev)
   INTERNAL_SERVICE_TOKEN: z.string().optional(),
 
   // Invite/payment token signing secret — production-required, and must not be
   // the insecure dev default (handlers keep that fallback in dev/test only).
   INVITE_TOKEN_SECRET: z.string().optional(),
+
+  // Unsubscribe-link signing secret — production-required, must not be the dev
+  // default. Resolved via getUnsubscribeSecret(); dev fallback only outside prod.
+  UNSUBSCRIBE_SECRET: z.string().optional(),
+
+  // Video-call signaling token secret — resolved via getCallSigningSecret().
+  // Optional in the schema: when unset it falls back to AUTH_SECRET (always
+  // present), so production never lacks a real key. A dev-only literal fallback
+  // applies ONLY outside production; the accessor fails closed in prod.
+  CALL_SIGNING_SECRET: z.string().optional(),
 
   // WebRTC
   WEBRTC_ICE_SERVERS: z.string().optional(),
@@ -239,6 +269,45 @@ const envSchema = z.object({
         message: env.INVITE_TOKEN_SECRET
           ? 'Must not be the insecure dev default in production'
           : 'Required in production',
+      });
+    }
+    if (!env.UNSUBSCRIBE_SECRET || env.UNSUBSCRIBE_SECRET === UNSUB_TOKEN_DEV_DEFAULT) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ['UNSUBSCRIBE_SECRET'],
+        message: env.UNSUBSCRIBE_SECRET
+          ? 'Must not be the insecure dev default in production'
+          : 'Required in production',
+      });
+    }
+    // Default MinIO credentials must never reach production (was warn-only).
+    if (env.STORAGE_ACCESS_KEY_ID === STORAGE_DEV_DEFAULT_CRED) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ['STORAGE_ACCESS_KEY_ID'],
+        message: 'Must not be the default minioadmin credential in production',
+      });
+    }
+    if (env.STORAGE_SECRET_ACCESS_KEY === STORAGE_DEV_DEFAULT_CRED) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ['STORAGE_SECRET_ACCESS_KEY'],
+        message: 'Must not be the default minioadmin credential in production',
+      });
+    }
+    // P0-3: tunnel / local-network CORS origins must never be enabled in prod.
+    if (env.CORS_ALLOW_TUNNELING) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ['CORS_ALLOW_TUNNELING'],
+        message: 'Must be disabled in production (tunnel origins are not allowed)',
+      });
+    }
+    if (env.CORS_ALLOW_LOCAL_NETWORK) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ['CORS_ALLOW_LOCAL_NETWORK'],
+        message: 'Must be disabled in production (local-network origins are not allowed)',
       });
     }
   }
@@ -432,4 +501,79 @@ export function parseConfig(): Config {
         : DEFAULT_ICE_SERVERS,
     },
   };
+}
+
+// ---------------------------------------------------------------------------
+// Validated secret accessors (audit P1)
+//
+// Handlers must NOT read signing secrets from process.env with inline literal
+// fallbacks — that scatters the insecure dev default across the codebase and
+// bypasses the validated pipeline. These accessors are the single source of
+// truth: dev fallback applies ONLY outside production, and production fails
+// loud (boot already gates these via superRefine; this is defense-in-depth for
+// any code path that runs before/around boot validation). They read env at call
+// time (not memoized) so per-test env overrides keep working.
+// ---------------------------------------------------------------------------
+
+/** Invite/payment token HMAC secret. */
+export function getInviteTokenSecret(): string {
+  const value = process.env['INVITE_TOKEN_SECRET'];
+  if (value && value !== INVITE_TOKEN_DEV_DEFAULT) return value;
+  if (process.env['NODE_ENV'] === 'production') {
+    throw new Error('INVITE_TOKEN_SECRET is required and must not be the dev default in production');
+  }
+  return INVITE_TOKEN_DEV_DEFAULT;
+}
+
+/** Unsubscribe-link HMAC secret. */
+export function getUnsubscribeSecret(): string {
+  const value = process.env['UNSUBSCRIBE_SECRET'];
+  if (value && value !== UNSUB_TOKEN_DEV_DEFAULT) return value;
+  if (process.env['NODE_ENV'] === 'production') {
+    throw new Error('UNSUBSCRIBE_SECRET is required and must not be the dev default in production');
+  }
+  return UNSUB_TOKEN_DEV_DEFAULT;
+}
+
+/**
+ * Video-call signaling token HMAC secret (P0 comms remediation).
+ *
+ * Precedence: explicit CALL_SIGNING_SECRET → AUTH_SECRET (always required, so
+ * present in every booted environment) → dev-only literal fallback. In
+ * production a missing/default secret throws (fail-closed) so signaling tokens
+ * are never minted/verified with a publicly-known constant. Reads env at call
+ * time so per-test overrides keep working.
+ */
+export function getCallSigningSecret(): string {
+  const explicit = process.env['CALL_SIGNING_SECRET'];
+  if (explicit && explicit !== CALL_SIGNING_DEV_DEFAULT) return explicit;
+
+  // Fall back to AUTH_SECRET — required in every env, so this gives prod a real
+  // key even when CALL_SIGNING_SECRET is not separately set.
+  const authSecret = process.env['AUTH_SECRET'];
+  if (authSecret) return authSecret;
+
+  if (process.env['NODE_ENV'] === 'production') {
+    throw new Error(
+      'CALL_SIGNING_SECRET (or AUTH_SECRET) is required and must not be the dev default in production',
+    );
+  }
+  return CALL_SIGNING_DEV_DEFAULT;
+}
+
+export interface PaymongoConfig {
+  secretKey: string;
+  webhookSecret: string;
+}
+
+/**
+ * PayMongo gateway credentials, or null when not configured. PayMongo is an
+ * optional per-org gateway, so absence is a 503 from the webhook handler, never
+ * a startup failure and never an insecure fallback.
+ */
+export function getPaymongoConfig(): PaymongoConfig | null {
+  const secretKey = process.env['PAYMONGO_SECRET_KEY'];
+  const webhookSecret = process.env['PAYMONGO_WEBHOOK_SECRET'];
+  if (!secretKey || !webhookSecret) return null;
+  return { secretKey, webhookSecret };
 }

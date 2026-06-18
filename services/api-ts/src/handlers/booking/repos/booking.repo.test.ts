@@ -127,36 +127,56 @@ function makeDb({
 // ---------------------------------------------------------------------------
 
 describe('BookingRepository.createBooking', () => {
+  // ── Tx stub helper ──────────────────────────────────────────────────────
+  // The atomic createBooking (P0 race fix) runs claim-slot → insert-booking →
+  // invoice inside db.transaction(fn). This builds a `tx` whose chained calls
+  // behave like Drizzle: the slot-claim UPDATE...returning yields `claimedRows`
+  // (1 row = won the slot, 0 rows = lost the race), and inserts return the row
+  // chosen by `onInsert`.
+  function makeTxDb(opts: {
+    claimedRows?: any[];
+    onInsert?: (data: any) => any[];
+    onInsertThrow?: () => never;
+  }) {
+    const claimedRows = opts.claimedRows ?? [{ id: 'slot-1' }];
+    const tx: any = {
+      update: (_table: any) => ({
+        set: (_data: any) => ({
+          where: () => ({
+            returning: () => Promise.resolve(claimedRows),
+          }),
+        }),
+      }),
+      insert: (_table: any) => ({
+        values: (data: any) => ({
+          returning: () => {
+            if (opts.onInsertThrow) opts.onInsertThrow();
+            return Promise.resolve(opts.onInsert ? opts.onInsert(data) : []);
+          },
+        }),
+      }),
+    };
+    // The slot-claim update returns the SAME chain shape; reuse tx.update.
+    return tx;
+  }
+
   test('creates a booking when slot is available', async () => {
     const slot = makeSlot();
     const event = makeEvent();
     const createdBooking = makeBooking();
 
-    // Simulate: select slot+event → returns slot row, insert booking → returns booking
-    let selectCallCount = 0;
     const db: any = {
       select: () => ({
         from: () => ({
           leftJoin: () => ({
             where: () => ({
-              limit: () => {
-                selectCallCount++;
-                return Promise.resolve([{ time_slot: slot, booking_event: event }]);
-              },
+              limit: () => Promise.resolve([{ time_slot: slot, booking_event: event }]),
             }),
           }),
         }),
       }),
-      insert: (_table: any) => ({
-        values: (_data: any) => ({
-          returning: () => Promise.resolve([createdBooking]),
-        }),
-      }),
-      update: (_table: any) => ({
-        set: (_data: any) => ({
-          where: () => Promise.resolve([]),
-        }),
-      }),
+      transaction: async (fn: any) =>
+        fn(makeTxDb({ claimedRows: [{ id: 'slot-1' }], onInsert: () => [createdBooking] })),
     };
 
     const repo = new BookingRepository(db);
@@ -168,6 +188,75 @@ describe('BookingRepository.createBooking', () => {
     expect(result.id).toBe('booking-1');
     expect(result.status).toBe('pending');
     expect(result.slotDetails).toEqual(slot);
+  });
+
+  // P0 RACE REGRESSION: a concurrent tx already flipped the slot, so the
+  // conditional UPDATE ... WHERE status='available' claims 0 rows. The loser
+  // must throw ConflictError BEFORE inserting a booking or invoice (no orphans).
+  test('[P0] throws ConflictError when slot claim wins 0 rows (lost race)', async () => {
+    const slot = makeSlot();
+    const event = makeEvent();
+    let bookingInserted = false;
+
+    const db: any = {
+      select: () => ({
+        from: () => ({
+          leftJoin: () => ({
+            where: () => ({
+              limit: () => Promise.resolve([{ time_slot: slot, booking_event: event }]),
+            }),
+          }),
+        }),
+      }),
+      transaction: async (fn: any) =>
+        fn(makeTxDb({
+          claimedRows: [], // lost the slot claim
+          onInsert: () => { bookingInserted = true; return [makeBooking()]; },
+        })),
+    };
+
+    const repo = new BookingRepository(db);
+    await expect(
+      repo.createBooking('client-1', 'slot-1', { slot: 'slot-1' })
+    ).rejects.toThrow(ConflictError);
+    await expect(
+      repo.createBooking('client-1', 'slot-1', { slot: 'slot-1' })
+    ).rejects.toThrow('Slot no longer available');
+    expect(bookingInserted).toBe(false);
+  });
+
+  // P0 RACE REGRESSION: the partial unique index bookings_active_slot_unique is
+  // the backstop — if two tx both claim before either inserts, the second
+  // booking insert raises 23505, mapped to ConflictError.
+  test('[P0] maps unique-index 23505 on booking insert to ConflictError', async () => {
+    const slot = makeSlot();
+    const event = makeEvent();
+
+    const db: any = {
+      select: () => ({
+        from: () => ({
+          leftJoin: () => ({
+            where: () => ({
+              limit: () => Promise.resolve([{ time_slot: slot, booking_event: event }]),
+            }),
+          }),
+        }),
+      }),
+      transaction: async (fn: any) =>
+        fn(makeTxDb({
+          claimedRows: [{ id: 'slot-1' }],
+          onInsertThrow: () => {
+            const err = new Error('duplicate key value violates unique constraint "bookings_active_slot_unique"') as Error & { code: string };
+            err.code = '23505';
+            throw err;
+          },
+        })),
+    };
+
+    const repo = new BookingRepository(db);
+    await expect(
+      repo.createBooking('client-1', 'slot-1', { slot: 'slot-1' })
+    ).rejects.toThrow(ConflictError);
   });
 
   test('throws NotFoundError when slot does not exist', async () => {
@@ -221,6 +310,32 @@ describe('BookingRepository.createBooking', () => {
     let invoiceInserted = false;
     let bookingInserted = false;
 
+    // tx for the invoice path: slot-claim update returns 1 row; booking insert
+    // returns the booking; invoice insert (distinguished by invoiceNumber)
+    // returns the invoice; the final invoice-link update returns [].
+    const txDb: any = {
+      update: (_table: any) => ({
+        set: (_data: any) => {
+          const whereResult: any = Promise.resolve([]);
+          // slot-claim path uses .where().returning(); link path uses .where() (await).
+          whereResult.returning = () => Promise.resolve([{ id: 'slot-1' }]);
+          return { where: () => whereResult };
+        },
+      }),
+      insert: (_table: any) => ({
+        values: (data: any) => ({
+          returning: () => {
+            if (data.invoiceNumber !== undefined) {
+              invoiceInserted = true;
+              return Promise.resolve([createdInvoice]);
+            }
+            bookingInserted = true;
+            return Promise.resolve([createdBooking]);
+          },
+        }),
+      }),
+    };
+
     const db: any = {
       select: () => ({
         from: () => ({
@@ -231,24 +346,7 @@ describe('BookingRepository.createBooking', () => {
           }),
         }),
       }),
-      insert: (_table: any) => ({
-        values: (data: any) => ({
-          returning: () => {
-            // Distinguish invoice vs booking insert by shape of data
-            if (data.invoiceNumber !== undefined) {
-              invoiceInserted = true;
-              return Promise.resolve([createdInvoice]);
-            }
-            bookingInserted = true;
-            return Promise.resolve([createdBooking]);
-          },
-        }),
-      }),
-      update: (_table: any) => ({
-        set: (_data: any) => ({
-          where: () => Promise.resolve([]),
-        }),
-      }),
+      transaction: async (fn: any) => fn(txDb),
     };
 
     const repo = new BookingRepository(db);

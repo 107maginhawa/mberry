@@ -75,8 +75,8 @@ describe('[032] Paid events — registration requires payment', () => {
   test('free event allows direct registration', async () => {
     stubRepo(EventsRepository, {
       get: async () => freeEvent,
-      getRegistrationCount: async () => 0,
-      register: async (data: any) => ({ ...confirmedRegistration, ...data, eventId: 'evt-free' }),
+      // P0 race fix: registration goes through the atomic repo method.
+      registerAtomic: async (input: any) => ({ ...confirmedRegistration, ...input, eventId: 'evt-free', status: 'confirmed' }),
     });
     stubRepo(MembershipRepository, {
       findByPersonAndOrg: async () => activeMembership,
@@ -93,9 +93,10 @@ describe('[032] Paid events — registration requires payment', () => {
   });
 
   test('paid event blocks registration without payment', async () => {
+    // Handler throws PAYMENT_REQUIRED before reaching registerAtomic.
     stubRepo(EventsRepository, {
       get: async () => paidEvent,
-      getRegistrationCount: async () => 0,
+      registerAtomic: async () => { throw new Error('should not be called for paid event'); },
     });
     stubRepo(MembershipRepository, {
       findByPersonAndOrg: async () => activeMembership,
@@ -123,8 +124,7 @@ describe('[032] Paid events — registration requires payment', () => {
     const zeroFeeEvent = { ...paidEvent, registrationFee: 0 };
     stubRepo(EventsRepository, {
       get: async () => zeroFeeEvent,
-      getRegistrationCount: async () => 0,
-      register: async (data: any) => ({ ...confirmedRegistration, ...data }),
+      registerAtomic: async (input: any) => ({ ...confirmedRegistration, ...input, status: 'confirmed' }),
     });
     stubRepo(MembershipRepository, {
       findByPersonAndOrg: async () => activeMembership,
@@ -143,8 +143,7 @@ describe('[032] Paid events — registration requires payment', () => {
     const nullFeeEvent = { ...paidEvent, registrationFee: null };
     stubRepo(EventsRepository, {
       get: async () => nullFeeEvent,
-      getRegistrationCount: async () => 0,
-      register: async (data: any) => ({ ...confirmedRegistration, ...data }),
+      registerAtomic: async (input: any) => ({ ...confirmedRegistration, ...input, status: 'confirmed' }),
     });
     stubRepo(MembershipRepository, {
       findByPersonAndOrg: async () => activeMembership,

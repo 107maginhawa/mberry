@@ -38,7 +38,7 @@ export function TrustCard({ profile, orgSlug }: TrustCardProps) {
           {profile.photoUrl ? (
             <img
               src={profile.photoUrl}
-              alt=""
+              alt={profile.displayName || 'Member'}
               className="w-11 h-11 rounded-full object-cover"
             />
           ) : (

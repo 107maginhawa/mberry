@@ -52,52 +52,78 @@ export async function refundDuesPayment(
   const bodyRecord = body as Record<string, unknown>;
   const requestedAmount = (bodyRecord['amount'] as number | undefined) ?? null;
 
-  // [FIX-007][BR-08] Refund eligibility + over-refund cap.
-  // validateRefundEligibility enforces: refundable status, 30-day window,
-  // and — critically — that the requested amount cannot exceed
-  // (paymentAmount - alreadyRefunded). This prevents repeated partial refunds
-  // from cumulatively exceeding the original payment (over-refund), which would
-  // otherwise let the books show refunds larger than the receipt.
-  const alreadyRefunded = payment.refundedAmount ?? 0;
+  // [FIX-007][BR-08] Pre-transaction eligibility check — fast-fail on the cheap,
+  // non-racy predicates (refundable status, 30-day window, obvious cap) using
+  // the unlocked snapshot. This gives an early 422 without opening a tx, but it
+  // is NOT the authoritative over-refund guard — see the FIX-008 re-check below.
+  const alreadyRefundedSnapshot = payment.refundedAmount ?? 0;
   const eligibility = validateRefundEligibility({
     paymentStatus: payment.status,
     paymentPaidAt: payment.paidAt ?? null,
     paymentAmount: payment.amount,
-    alreadyRefunded,
+    alreadyRefunded: alreadyRefundedSnapshot,
     requestedRefundAmount: requestedAmount,
   });
   if (!eligibility.eligible) {
     throw new BusinessLogicError(eligibility.reason, eligibility.code);
   }
 
-  // Cap to the remaining refundable amount. After eligibility passes,
-  // requestedAmount is guaranteed <= remaining, but default (full) refund must
-  // also be capped to what is actually left so cumulative never exceeds amount.
-  const remaining = payment.amount - alreadyRefunded;
-  const refundAmount = requestedAmount ?? remaining;
-  const isFullRefund = alreadyRefunded + refundAmount >= payment.amount;
+  let isFullRefund = false;
+  let refundAmount = 0;
 
   const updated = await db.transaction(async (tx: DatabaseInstance) => {
     const txRepo = new DuesRepository(tx);
 
+    // [FIX-008] Over-refund race fix. Re-read the payment row under a
+    // SELECT … FOR UPDATE lock so the cap check + refundedAmount increment are
+    // atomic. Two concurrent partial refunds that each read alreadyRefunded=0
+    // OUTSIDE the tx would both pass the snapshot eligibility check above and
+    // both apply, cumulatively exceeding the original payment. With the lock the
+    // second refund blocks until the first commits, then re-validates against
+    // the FRESH refundedAmount and is rejected. Integer-cents throughout.
+    const locked = await txRepo.getPaymentForUpdate(paymentId);
+    if (!locked) throw new NotFoundError('Dues payment');
+
+    const alreadyRefunded = locked.refundedAmount ?? 0;
+
+    // Authoritative cap re-check against the locked row. Preserves the same
+    // error code/message contract as the pre-tx check (EXCEEDS_REFUNDABLE etc.).
+    const recheck = validateRefundEligibility({
+      paymentStatus: locked.status,
+      paymentPaidAt: locked.paidAt ?? null,
+      paymentAmount: locked.amount,
+      alreadyRefunded,
+      requestedRefundAmount: requestedAmount,
+    });
+    if (!recheck.eligible) {
+      throw new BusinessLogicError(recheck.reason, recheck.code);
+    }
+
+    // Cap default (full) refund to what is actually left under the lock so the
+    // cumulative refundedAmount can never exceed the original amount.
+    const remaining = locked.amount - alreadyRefunded;
+    refundAmount = requestedAmount ?? remaining;
+    isFullRefund = alreadyRefunded + refundAmount >= locked.amount;
+
     // Delegate fund reversal + membership expiry reset to lifecycle service
-    const refundResult = await membershipLifecycle.processRefund(tx, {
+    await membershipLifecycle.processRefund(tx, {
       paymentId,
       payment: {
-        amount: payment.amount,
-        organizationId: payment.organizationId,
-        personId: payment.personId,
-        membershipExtendedFrom: payment.membershipExtendedFrom,
+        amount: locked.amount,
+        organizationId: locked.organizationId,
+        personId: locked.personId,
+        membershipExtendedFrom: locked.membershipExtendedFrom,
       },
       refundAmount,
       isFullRefund,
     });
 
-    // Update payment status
-    const newRefundedAmount = (payment.refundedAmount ?? 0) + refundAmount;
-    const newStatus = newRefundedAmount >= payment.amount ? 'refunded' : 'partiallyRefunded';
+    // Update payment status — increment computed from the LOCKED row, not the
+    // pre-tx snapshot.
+    const newRefundedAmount = alreadyRefunded + refundAmount;
+    const newStatus = newRefundedAmount >= locked.amount ? 'refunded' : 'partiallyRefunded';
 
-    const updatedPayment = await txRepo.updatePaymentStatus(paymentId, payment.status, newStatus, {
+    const updatedPayment = await txRepo.updatePaymentStatus(paymentId, locked.status, newStatus, {
       refundedAmount: newRefundedAmount,
       refundReason: bodyRecord['reason'] as string,
     } as Record<string, unknown>, session.user.id);

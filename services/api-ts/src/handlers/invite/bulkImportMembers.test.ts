@@ -3,9 +3,13 @@ import { makeCtx, stubRepo } from '@/test-utils/make-ctx';
 import { OfficerTermRepository } from '@/handlers/association:member/repos/governance.repo';
 import { InviteRepository } from './repos/invite.repo';
 import { bulkImportMembers } from './bulkImportMembers';
+import { hashToken } from './utils/token';
+import { getInviteTokenSecret } from '@/core/config';
 import { ForbiddenError, ValidationError } from '@/core/errors';
 
 const ORG = '22222222-2222-2222-2222-222222222222';
+// Use the same secret the handler hashes with so the token<->hash check holds.
+const TEST_SECRET = getInviteTokenSecret();
 
 function asOfficer() {
   // FIX-006: roster import is restricted to President/Secretary — the default
@@ -83,6 +87,32 @@ describe('bulkImportMembers', () => {
     expect(created).toHaveLength(2);
     expect(created[0].type).toBe('claim');
     expect(created[0].metadata.name).toBe('A');
+  });
+
+  test('import mode surfaces a deliverable raw claim token per invite (matching the stored hash)', async () => {
+    mocks.push(asOfficer());
+    const created: any[] = [];
+    mocks.push(stubRepo(InviteRepository, {
+      findPendingByEmail: async () => undefined,
+      create: async (d: any) => { created.push(d); return { ...d, id: 'inv' }; },
+    }));
+    const csv = 'email,name\na@example.com,A\nb@example.com,B';
+    const ctx = makeCtx({ _body: { orgId: ORG, csvContent: csv, mode: 'import' } });
+    const res = await bulkImportMembers(ctx);
+
+    const invitations = res.body.importResult.invitations;
+    // One deliverable invitation per imported row (not just a count).
+    expect(invitations).toHaveLength(2);
+    expect(invitations.map((i: any) => i.email).sort()).toEqual(['a@example.com', 'b@example.com']);
+
+    // Each invite carries a non-empty raw token whose hash is what got persisted —
+    // i.e. the token is actually claimable, not discarded.
+    for (const inv of invitations) {
+      expect(typeof inv.token).toBe('string');
+      expect(inv.token.length).toBeGreaterThan(0);
+      const stored = created.find((c) => c.email === inv.email);
+      expect(stored.tokenHash).toBe(hashToken(inv.token, TEST_SECRET));
+    }
   });
 
   test('handles quoted CSV fields with embedded commas', async () => {

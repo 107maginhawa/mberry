@@ -39,6 +39,7 @@ describe('[M15] updateJobPosting', () => {
     });
 
     const ctx = makeCtx({
+      organizationId: 'org-1',
       _params: { postingId: 'job-1' },
       _body: { title: 'Updated Title' },
     });
@@ -72,6 +73,7 @@ describe('[M15] updateJobPosting', () => {
     });
 
     const ctx = makeCtx({
+      organizationId: 'org-1',
       _params: { postingId: 'job-1' },
       _body: { status: 'active' },
     });
@@ -88,6 +90,7 @@ describe('[M15] updateJobPosting', () => {
     });
 
     const ctx = makeCtx({
+      organizationId: 'org-1',
       _params: { postingId: 'job-1' },
       _body: { status: 'closed' },
     });
@@ -104,6 +107,7 @@ describe('[M15] updateJobPosting', () => {
     });
 
     const ctx = makeCtx({
+      organizationId: 'org-1',
       _params: { postingId: 'job-1' },
       _body: { status: 'filled' },
     });
@@ -120,6 +124,7 @@ describe('[M15] updateJobPosting', () => {
     });
 
     const ctx = makeCtx({
+      organizationId: 'org-1',
       _params: { postingId: 'job-1' },
       _body: { expiresAt: '2026-12-31' },
     });
@@ -135,6 +140,7 @@ describe('[M15] updateJobPosting', () => {
     });
 
     const ctx = makeCtx({
+      organizationId: 'org-1',
       user: null,
       session: null,
       _params: { postingId: 'job-1' },

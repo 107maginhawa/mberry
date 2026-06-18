@@ -1,8 +1,9 @@
 import type { Context } from 'hono';
-import { eq, and, inArray, sql } from 'drizzle-orm';
+import { eq, and, inArray } from 'drizzle-orm';
 import { UnauthorizedError, ValidationError, NotFoundError } from '@/core/errors';
 import type { DatabaseInstance } from '@/core/database';
 import { creditEntries } from '@/handlers/association:member/repos/credits.schema';
+import { domainEvents } from '@/core/domain-events';
 import { requirePosition } from '@/core/auth/officer-checks';
 import { POSITION_TITLES } from '@/utils/position-titles';
 
@@ -45,9 +46,13 @@ export async function voidCreditEntry(ctx: Context): Promise<Response> {
     throw new NotFoundError('No active credits found to revoke');
   }
 
-  try {
-    await db.execute(sql`REFRESH MATERIALIZED VIEW CONCURRENTLY compliance_standings`);
-  } catch { /* view may not exist */ }
+  // Defer the compliance_standings matview refresh off the request path
+  // (fire-and-forget). The response only reports voidedCount, not view data,
+  // so eventual consistency is acceptable.
+  domainEvents.emit('compliance.recompute', {
+    organizationId: orgId,
+    reason: 'void',
+  }).catch(() => {});
 
   return ctx.json({ data: { voidedCount: result.length } }, 200);
 }

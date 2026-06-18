@@ -1,5 +1,6 @@
 import { eq, and, desc, type SQL } from 'drizzle-orm';
 import type { DatabaseInstance } from '@/core/database';
+import { DEFAULT_PAGE_SIZE } from '@/core/pagination';
 import {
   committees,
   committeeMembers,
@@ -14,13 +15,16 @@ export class CommitteeRepository {
 
   // ─── Committee CRUD ────────────────────────────────────
 
-  async list(orgId: string): Promise<Committee[]> {
+  async list(orgId: string, pagination?: { limit: number; offset: number }): Promise<Committee[]> {
+    const limit = pagination?.limit ?? DEFAULT_PAGE_SIZE;
+    const offset = pagination?.offset ?? 0;
     return this.db
       .select()
       .from(committees)
       .where(eq(committees.organizationId, orgId))
       .orderBy(desc(committees.createdAt))
-      .limit(100);
+      .limit(limit)
+      .offset(offset);
   }
 
   /**

@@ -491,6 +491,7 @@ describe('041 — Conflict detection (double-booking prevention)', () => {
     const event = { id: 'event-1', billingConfig: null };
     const createdBooking = makeBooking();
 
+    // P0 race fix: createBooking now claims+books inside db.transaction.
     const db: any = {
       select: () => ({
         from: () => ({
@@ -501,16 +502,13 @@ describe('041 — Conflict detection (double-booking prevention)', () => {
           }),
         }),
       }),
-      insert: () => ({
-        values: () => ({
-          returning: () => Promise.resolve([createdBooking]),
+      transaction: async (fn: any) =>
+        fn({
+          update: () => ({
+            set: () => ({ where: () => ({ returning: () => Promise.resolve([{ id: 'slot-1' }]) }) }),
+          }),
+          insert: () => ({ values: () => ({ returning: () => Promise.resolve([createdBooking]) }) }),
         }),
-      }),
-      update: () => ({
-        set: () => ({
-          where: () => Promise.resolve([]),
-        }),
-      }),
     };
 
     const repo = new BookingRepository(db);
@@ -531,6 +529,10 @@ describe('041 — Conflict detection (double-booking prevention)', () => {
     let slotUpdated = false;
     let updatedData: any;
 
+    // FK-ordering fix: the slot is claimed via the conditional UPDATE inside the
+    // tx WITHOUT booking_id (set { status: 'booked' } ... .returning()), the
+    // booking row is inserted, then a SECOND UPDATE sets booking_id once the FK
+    // target exists. Capture the claim (the set call that flips status).
     const db: any = {
       select: () => ({
         from: () => ({
@@ -541,20 +543,18 @@ describe('041 — Conflict detection (double-booking prevention)', () => {
           }),
         }),
       }),
-      insert: () => ({
-        values: () => ({
-          returning: () => Promise.resolve([createdBooking]),
+      transaction: async (fn: any) =>
+        fn({
+          update: () => ({
+            set: (data: any) => {
+              slotUpdated = true;
+              // Record only the claim (status flip), not the later booking_id update.
+              if (data.status !== undefined) updatedData = data;
+              return { where: () => ({ returning: () => Promise.resolve([{ id: 'slot-1' }]) }) };
+            },
+          }),
+          insert: () => ({ values: () => ({ returning: () => Promise.resolve([createdBooking]) }) }),
         }),
-      }),
-      update: () => ({
-        set: (data: any) => {
-          slotUpdated = true;
-          updatedData = data;
-          return {
-            where: () => Promise.resolve([]),
-          };
-        },
-      }),
     };
 
     const repo = new BookingRepository(db);
@@ -562,6 +562,9 @@ describe('041 — Conflict detection (double-booking prevention)', () => {
 
     expect(slotUpdated).toBe(true);
     expect(updatedData.status).toBe('booked');
+    // FK-ordering invariant: the claim UPDATE must NOT set booking_id (the
+    // booking row does not exist yet at claim time).
+    expect(updatedData.booking).toBeUndefined();
   });
 });
 

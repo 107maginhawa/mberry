@@ -2,6 +2,7 @@ import type { ValidatedContext } from '@/types/app';
 import type { DatabaseInstance } from '@/core/database';
 import { NotFoundError } from '@/core/errors';
 import type { ListCustomEventRegistrationsQuery, ListCustomEventRegistrationsParams } from '@/generated/openapi/validators';
+import { clampPageSize } from '@/core/pagination';
 import { EventRepository, EventRegistrationRepository } from './repos/events.repo';
 
 /**
@@ -33,7 +34,10 @@ export async function listCustomEventRegistrations(
     filters.status = q['status'] as string;
   }
 
-  const registrations = await regRepo.findMany(filters);
+  const limit = clampPageSize(q['limit'] === undefined ? undefined : Number(q['limit']));
+  const offset = Math.max(0, Number(q['offset']) || 0);
+
+  const registrations = await regRepo.findMany(filters, { pagination: { limit, offset } });
 
   return ctx.json({ data: registrations, total: registrations.length }, 200);
 }

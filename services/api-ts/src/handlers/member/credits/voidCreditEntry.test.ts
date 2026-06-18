@@ -1,6 +1,7 @@
-import { describe, test, expect, mock } from 'bun:test';
+import { describe, test, expect, mock, spyOn } from 'bun:test';
 
 import { voidCreditEntry } from './voidCreditEntry';
+import { domainEvents } from '@/core/domain-events';
 
 const OFFICER_TERM = { positionTitle: 'President' };
 
@@ -143,22 +144,34 @@ describe('voidCreditEntry', () => {
     await expect(voidCreditEntry(ctx)).rejects.toThrow('No active credits found to revoke');
   });
 
-  test('success: voids credits and returns 200 with voidedCount', async () => {
+  test('success: voids credits and returns 200 with voidedCount, defers matview refresh', async () => {
     const { db, executeSpy } = buildMockDb({ updateResult: [{ id: 'c-1' }, { id: 'c-2' }] });
-    const ctx = createMockCtx({ database: db, body: validBody });
-    const res = await voidCreditEntry(ctx);
-    expect(res.status).toBe(200);
-    const json = await res.json();
-    expect(json.data.voidedCount).toBe(2);
-    expect(executeSpy).toHaveBeenCalledTimes(1);
+    const emitSpy = spyOn(domainEvents, 'emit').mockResolvedValue(undefined);
+    try {
+      const ctx = createMockCtx({ database: db, body: validBody });
+      const res = await voidCreditEntry(ctx);
+      expect(res.status).toBe(200);
+      const json = await res.json();
+      expect(json.data.voidedCount).toBe(2);
+      // Refresh deferred off request path — no inline db.execute.
+      expect(executeSpy).not.toHaveBeenCalled();
+      expect(emitSpy).toHaveBeenCalledWith('compliance.recompute', expect.objectContaining({ reason: 'void' }));
+    } finally {
+      emitSpy.mockRestore();
+    }
   });
 
-  test('success: handles materialized view refresh failure gracefully', async () => {
-    const { db } = buildMockDb({ updateResult: [{ id: 'c-1' }], executeThrow: true });
-    const ctx = createMockCtx({ database: db, body: validBody });
-    const res = await voidCreditEntry(ctx);
-    expect(res.status).toBe(200);
-    const json = await res.json();
-    expect(json.data.voidedCount).toBe(1);
+  test('success: refresh dispatch failure does not fail the request', async () => {
+    const { db } = buildMockDb({ updateResult: [{ id: 'c-1' }] });
+    const emitSpy = spyOn(domainEvents, 'emit').mockRejectedValue(new Error('bus down'));
+    try {
+      const ctx = createMockCtx({ database: db, body: validBody });
+      const res = await voidCreditEntry(ctx);
+      expect(res.status).toBe(200);
+      const json = await res.json();
+      expect(json.data.voidedCount).toBe(1);
+    } finally {
+      emitSpy.mockRestore();
+    }
   });
 });

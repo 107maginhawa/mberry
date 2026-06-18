@@ -15,6 +15,25 @@ csrf_token: jsonpath "$.token"
 # 2-fund split (Operations 60% + Reserves 40% — reserves isLast=true to
 # absorb rounding), re-lists, then queries the financial dashboard +
 # generates a collection report.
+#
+# ── CROSS-SUITE ISOLATION (why this targets the seed org, not a throwaway) ──
+# upsertDuesFunds is a mutation: it deactivates the org's existing funds and
+# writes Operations/Reserves. That contaminates whatever org it runs against.
+# We CANNOT redirect it to a throwaway org, because both upsertDuesFunds
+# (x-require-position Treasurer/President) and the only API way to grant that
+# position (createPosition / createOfficerTerm) are themselves President-gated
+# *for the same org* — and the seeded officer is President only of
+# pda-metro-manila ({{org_id}}). There is no API path to bootstrap officer
+# authority on a fresh org, so the upsert can only succeed here.
+#
+# The contamination is instead healed at the consumer boundary:
+# services/api-ts/src/seed/reset-mutated.ts restores pda-metro-manila's
+# canonical dues funds (General 50 / Building 30 / Emergency 20, all active,
+# every Operations*/Reserves* row removed) on every Playwright E2E boot
+# (apps/memberry/tests/e2e/global-setup.ts). That is the same seed-reset
+# mechanism already used for org/association/tier pollution from E2E PATCHes.
+# Net effect: the dues-lifecycle / settings-states E2E funds specs always see
+# the canonical 3-fund 100% allocation regardless of this contract run.
 
 # ── 0. Officer signs in ───────────────────────────────────────────────
 POST {{api}}/auth/sign-in/email

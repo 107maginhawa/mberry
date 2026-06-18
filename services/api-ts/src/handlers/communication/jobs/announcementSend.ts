@@ -114,11 +114,37 @@ export async function processAnnouncementSend(
     return stats;
   }
 
-  // In-App notifications — bulk insert
+  // [M7-R2] Consent/opt-out gate — applies to ALL channels (in-app, email, push).
+  // Previously only the email fan-out honoured personSubscriptions opt-outs, so
+  // a member who disabled org announcements still received in-app + push blasts.
+  // Load opt-outs once and filter every channel against it.
+  const allRecipientIds = recipients.map((r) => r.personId);
+  const optedOutPersonIds = new Set<string>();
+  try {
+    if (allRecipientIds.length > 0) {
+      const optOuts = await db.select({ personId: personSubscriptions.personId })
+        .from(personSubscriptions)
+        .where(and(
+          eq(personSubscriptions.organizationId, announcement.organizationId),
+          eq(personSubscriptions.enabled, false),
+          inArray(personSubscriptions.personId, allRecipientIds),
+        ));
+      for (const row of optOuts) {
+        optedOutPersonIds.add(row.personId);
+      }
+    }
+  } catch (err) {
+    console.error('Failed to load subscription opt-outs, proceeding without filter:', err);
+  }
+
+  // Consent-gated recipient list shared by every channel.
+  const consentedRecipients = recipients.filter((r) => !optedOutPersonIds.has(r.personId));
+
+  // In-App notifications — bulk insert (consent-gated)
   if (channels.inApp) {
     try {
-      for (let i = 0; i < recipients.length; i += BATCH_SIZE) {
-        const batch = recipients.slice(i, i + BATCH_SIZE);
+      for (let i = 0; i < consentedRecipients.length; i += BATCH_SIZE) {
+        const batch = consentedRecipients.slice(i, i + BATCH_SIZE);
         await db.insert(notifications).values(
           batch.map((r) => ({
             organizationId: announcement.organizationId,
@@ -144,32 +170,11 @@ export async function processAnnouncementSend(
     }
   }
 
-  // [M7-R2] Email fan-out — respects opt-out preferences
+  // [M7-R2] Email fan-out — respects opt-out preferences (consent gate above)
   if (channels.email && emailService) {
-    // Batch-load email opt-outs for all recipients
-    const allPersonIds = recipients.map((r) => r.personId);
-    const optedOutPersonIds = new Set<string>();
     try {
-      if (allPersonIds.length > 0) {
-        const optOuts = await db.select({ personId: personSubscriptions.personId })
-          .from(personSubscriptions)
-          .where(and(
-            eq(personSubscriptions.organizationId, announcement.organizationId),
-            eq(personSubscriptions.enabled, false),
-            inArray(personSubscriptions.personId, allPersonIds),
-          ));
-        for (const row of optOuts) {
-          optedOutPersonIds.add(row.personId);
-        }
-      }
-    } catch (err) {
-      console.error('Failed to load email opt-outs, proceeding without filter:', err);
-    }
-
-    try {
-      for (let i = 0; i < recipients.length; i += BATCH_SIZE) {
-        const batch = recipients.slice(i, i + BATCH_SIZE)
-          .filter((r) => !optedOutPersonIds.has(r.personId));
+      for (let i = 0; i < consentedRecipients.length; i += BATCH_SIZE) {
+        const batch = consentedRecipients.slice(i, i + BATCH_SIZE);
         if (batch.length === 0) continue;
         const personIds = batch.map((r) => r.personId);
 
@@ -198,6 +203,10 @@ export async function processAnnouncementSend(
               await emailService.queueEmail({
                 templateTags: ['announcement'],
                 recipient: userEmail,
+                // Announcement fan-out is bulk mail: tagging it 'bulk' enforces
+                // suppression-list checks AND the bulk rate limiter at send time
+                // (both key off emailCategory in core/email.ts processEmail).
+                emailCategory: 'bulk',
                 variables: {
                   title: announcement.title,
                   message: announcement.content,
@@ -224,8 +233,8 @@ export async function processAnnouncementSend(
   if (channels.push) {
     try {
       if (notifsService) {
-        for (let i = 0; i < recipients.length; i += BATCH_SIZE) {
-          const batch = recipients.slice(i, i + BATCH_SIZE);
+        for (let i = 0; i < consentedRecipients.length; i += BATCH_SIZE) {
+          const batch = consentedRecipients.slice(i, i + BATCH_SIZE);
           for (const recipient of batch) {
             try {
               await notifsService.createNotification({
@@ -313,12 +322,25 @@ export function registerCommunicationJobs(
     const due = await repo.findScheduledDue(10);
 
     for (const announcement of due) {
-      await repo.updateStatus(announcement.id, 'sent', { publishedAt: new Date() });
-      await processAnnouncementSend(cronDb, announcement.id, {
-        push: announcement.channelPush,
-        email: announcement.channelEmail,
-        inApp: true,
-      }, notifsService, emailService);
+      // Atomic claim prevents double-blast: claimScheduled flips status
+      // 'scheduled' -> 'sent' in a single conditional UPDATE. Two overlapping
+      // 5-min ticks can both have selected this row via findScheduledDue, but
+      // only ONE wins the claim — the loser gets `undefined` and skips, so
+      // processAnnouncementSend fires exactly once per announcement.
+      const claimed = await repo.claimScheduled(announcement.id);
+      if (!claimed) continue; // another tick already claimed it — do not re-send
+      try {
+        await processAnnouncementSend(cronDb, claimed.id, {
+          push: claimed.channelPush,
+          email: claimed.channelEmail,
+          inApp: true,
+        }, notifsService, emailService);
+      } catch (err) {
+        // Claim succeeded but delivery failed — record terminal failure state
+        // so the row is not silently stuck (it is already out of 'scheduled').
+        console.error(`[communication.processScheduled] send failed for ${claimed.id}:`, err);
+        await repo.updateStatus(claimed.id, 'scheduledFailed').catch(() => {});
+      }
     }
   });
 }
