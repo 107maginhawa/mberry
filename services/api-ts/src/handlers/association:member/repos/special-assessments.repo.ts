@@ -27,6 +27,19 @@ export class SpecialAssessmentRepository {
     return result ?? null;
   }
 
+  async findByIdAndOrg(id: string, organizationId: string) {
+    const [result] = await this.db
+      .select()
+      .from(specialAssessments)
+      .where(
+        and(
+          eq(specialAssessments.id, id),
+          eq(specialAssessments.organizationId, organizationId),
+        ),
+      );
+    return result ?? null;
+  }
+
   async listByOrg(organizationId: string) {
     return this.db
       .select()

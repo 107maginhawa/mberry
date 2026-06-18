@@ -58,7 +58,7 @@ describe('[AC-T8-007] applySpecialAssessment', () => {
     const createdInvoices: any[] = [];
     let addedTargets: any[] = [];
     stubRepo(SpecialAssessmentRepository, {
-      findById: async () => DRAFT_ASSESSMENT,
+      findByIdAndOrg: async () => DRAFT_ASSESSMENT,
       getActiveOrgMemberPersonIds: async () => ['p-1', 'p-2', 'p-3'],
       getTargets: async () => [],
       addTargets: async (_aid: string, pids: string[]) => {
@@ -82,7 +82,7 @@ describe('[AC-T8-007] applySpecialAssessment', () => {
     stubRepo(OfficerTermRepository, { findActiveByPersonAndOrg: async () => [{ id: 'term-1', positionTitle: 'Treasurer' }] });
     const createdInvoices: any[] = [];
     stubRepo(SpecialAssessmentRepository, {
-      findById: async () => SELECTED_ASSESSMENT,
+      findByIdAndOrg: async () => SELECTED_ASSESSMENT,
       getTargetPersonIds: async () => ['p-1', 'p-2'],
       getTargets: async () => [
         { assessmentId: 'sa-3', personId: 'p-1', invoiceId: null, status: 'pending' },
@@ -106,7 +106,7 @@ describe('[AC-T8-007] applySpecialAssessment', () => {
     const createdInvoices: any[] = [];
     const ACTIVE_ASSESSMENT = { ...DRAFT_ASSESSMENT, status: 'active' };
     stubRepo(SpecialAssessmentRepository, {
-      findById: async () => ACTIVE_ASSESSMENT,
+      findByIdAndOrg: async () => ACTIVE_ASSESSMENT,
       getActiveOrgMemberPersonIds: async () => ['p-1', 'p-2', 'p-3'],
       getTargets: async () => [
         { assessmentId: 'sa-1', personId: 'p-1', invoiceId: 'inv-existing', status: 'pending' },
@@ -133,7 +133,7 @@ describe('[AC-T8-007] applySpecialAssessment', () => {
     stubRepo(OfficerTermRepository, { findActiveByPersonAndOrg: async () => [{ id: 'term-1', positionTitle: 'Treasurer' }] });
     const createdInvoices: any[] = [];
     stubRepo(SpecialAssessmentRepository, {
-      findById: async () => ASSESSMENT_WITH_FUND,
+      findByIdAndOrg: async () => ASSESSMENT_WITH_FUND,
       getActiveOrgMemberPersonIds: async () => ['p-1'],
       getTargets: async () => [],
       addTargets: async () => [{ assessmentId: 'sa-2', personId: 'p-1', invoiceId: null, status: 'pending' }],

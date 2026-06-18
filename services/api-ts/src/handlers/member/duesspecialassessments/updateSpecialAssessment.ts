@@ -21,11 +21,12 @@ export async function updateSpecialAssessment(
 
   const params = ctx.req.valid('param');
   const body = ctx.req.valid('json');
+  const organizationId = ctx.get('organizationId') as string;
 
   const db = ctx.get('database') as DatabaseInstance;
   const repo = new SpecialAssessmentRepository(db);
 
-  const existing = await repo.findById(params.id);
+  const existing = await repo.findByIdAndOrg(params.id, organizationId);
   if (!existing) return ctx.json({ error: 'Assessment not found' }, 404);
 
   // BR-T8-001: reject update if not draft

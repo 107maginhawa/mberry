@@ -47,7 +47,7 @@ describe('[AC-T8-005] updateSpecialAssessment', () => {
 
   test('[BR-T8-001] returns 409 when assessment is active', async () => {
     stubRepo(OfficerTermRepository, { findActiveByPersonAndOrg: async () => [{ id: 'term-1', positionTitle: 'Treasurer' }] });
-    stubRepo(SpecialAssessmentRepository, { findById: async () => ACTIVE_ASSESSMENT });
+    stubRepo(SpecialAssessmentRepository, { findByIdAndOrg: async () => ACTIVE_ASSESSMENT });
     const ctx = makeCtx({
       organizationId: 'org-1',
       _params: { id: 'sa-2' },
@@ -59,7 +59,7 @@ describe('[AC-T8-005] updateSpecialAssessment', () => {
 
   test('[BR-T8-001] returns 409 when assessment is closed', async () => {
     stubRepo(OfficerTermRepository, { findActiveByPersonAndOrg: async () => [{ id: 'term-1', positionTitle: 'Treasurer' }] });
-    stubRepo(SpecialAssessmentRepository, { findById: async () => ({ ...ACTIVE_ASSESSMENT, status: 'closed' }) });
+    stubRepo(SpecialAssessmentRepository, { findByIdAndOrg: async () => ({ ...ACTIVE_ASSESSMENT, status: 'closed' }) });
     const ctx = makeCtx({
       organizationId: 'org-1',
       _params: { id: 'sa-2' },
@@ -73,7 +73,7 @@ describe('[AC-T8-005] updateSpecialAssessment', () => {
     stubRepo(OfficerTermRepository, { findActiveByPersonAndOrg: async () => [{ id: 'term-1', positionTitle: 'Treasurer' }] });
     const updated = { ...DRAFT_ASSESSMENT, name: 'Updated Fund' };
     stubRepo(SpecialAssessmentRepository, {
-      findById: async () => DRAFT_ASSESSMENT,
+      findByIdAndOrg: async () => DRAFT_ASSESSMENT,
       update: async () => updated,
     });
     const ctx = makeCtx({
@@ -88,7 +88,7 @@ describe('[AC-T8-005] updateSpecialAssessment', () => {
 
   test('[AC-T8-005] returns 404 when assessment not found', async () => {
     stubRepo(OfficerTermRepository, { findActiveByPersonAndOrg: async () => [{ id: 'term-1', positionTitle: 'Treasurer' }] });
-    stubRepo(SpecialAssessmentRepository, { findById: async () => null });
+    stubRepo(SpecialAssessmentRepository, { findByIdAndOrg: async () => null });
     const ctx = makeCtx({
       organizationId: 'org-1',
       _params: { id: 'nonexistent' },

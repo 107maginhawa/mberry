@@ -20,11 +20,12 @@ export async function getSpecialAssessmentCollection(
   if (denied) return denied;
 
   const params = ctx.req.valid('param');
+  const organizationId = ctx.get('organizationId') as string;
 
   const db = ctx.get('database') as DatabaseInstance;
   const repo = new SpecialAssessmentRepository(db);
 
-  const assessment = await repo.findById(params.id);
+  const assessment = await repo.findByIdAndOrg(params.id, organizationId);
   if (!assessment) return ctx.json({ error: 'Assessment not found' }, 404);
 
   const metrics = await repo.getCollectionMetrics(assessment.id);

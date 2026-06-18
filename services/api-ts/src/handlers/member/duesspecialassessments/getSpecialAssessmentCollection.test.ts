@@ -33,7 +33,7 @@ describe('[AC-T8-008] getSpecialAssessmentCollection', () => {
 
   test('[AC-T8-008] returns 404 when not found', async () => {
     stubRepo(OfficerTermRepository, { findActiveByPersonAndOrg: async () => [{ id: 'term-1', positionTitle: 'Treasurer' }] });
-    stubRepo(SpecialAssessmentRepository, { findById: async () => null });
+    stubRepo(SpecialAssessmentRepository, { findByIdAndOrg: async () => null });
     const ctx = makeCtx({ organizationId: 'org-1', _params: { id: 'nonexistent' } });
     const res = await getSpecialAssessmentCollection(ctx as any);
     expect(res.status).toBe(404);
@@ -42,7 +42,7 @@ describe('[AC-T8-008] getSpecialAssessmentCollection', () => {
   test('[AC-T8-008] returns collection metrics (total, paid, pending counts + amounts)', async () => {
     stubRepo(OfficerTermRepository, { findActiveByPersonAndOrg: async () => [{ id: 'term-1', positionTitle: 'Treasurer' }] });
     stubRepo(SpecialAssessmentRepository, {
-      findById: async () => ({ id: 'sa-1', organizationId: 'org-1', name: 'Test' }),
+      findByIdAndOrg: async () => ({ id: 'sa-1', organizationId: 'org-1', name: 'Test' }),
       getCollectionMetrics: async () => ({
         totalTargets: 10,
         paidCount: 4,

@@ -36,7 +36,7 @@ describe('[AC-T8-006] deleteSpecialAssessment', () => {
 
   test('[BR-T8-001] returns 409 when assessment is active', async () => {
     stubRepo(OfficerTermRepository, { findActiveByPersonAndOrg: async () => [{ id: 'term-1', positionTitle: 'Treasurer' }] });
-    stubRepo(SpecialAssessmentRepository, { findById: async () => ACTIVE });
+    stubRepo(SpecialAssessmentRepository, { findByIdAndOrg: async () => ACTIVE });
     const ctx = makeCtx({ organizationId: 'org-1', _params: { id: 'sa-2' } });
     const res = await deleteSpecialAssessment(ctx as any);
     expect(res.status).toBe(409);
@@ -45,7 +45,7 @@ describe('[AC-T8-006] deleteSpecialAssessment', () => {
   test('[AC-T8-006] soft-deletes draft assessment', async () => {
     stubRepo(OfficerTermRepository, { findActiveByPersonAndOrg: async () => [{ id: 'term-1', positionTitle: 'Treasurer' }] });
     stubRepo(SpecialAssessmentRepository, {
-      findById: async () => DRAFT,
+      findByIdAndOrg: async () => DRAFT,
       softDelete: async () => ({ ...DRAFT, status: 'closed' }),
     });
     const ctx = makeCtx({ organizationId: 'org-1', _params: { id: 'sa-1' } });
@@ -55,7 +55,7 @@ describe('[AC-T8-006] deleteSpecialAssessment', () => {
 
   test('[AC-T8-006] returns 404 when not found', async () => {
     stubRepo(OfficerTermRepository, { findActiveByPersonAndOrg: async () => [{ id: 'term-1', positionTitle: 'Treasurer' }] });
-    stubRepo(SpecialAssessmentRepository, { findById: async () => null });
+    stubRepo(SpecialAssessmentRepository, { findByIdAndOrg: async () => null });
     const ctx = makeCtx({ organizationId: 'org-1', _params: { id: 'nonexistent' } });
     const res = await deleteSpecialAssessment(ctx as any);
     expect(res.status).toBe(404);
