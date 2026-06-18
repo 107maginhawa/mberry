@@ -47,9 +47,11 @@ The API service has **26 handler directories** under `services/api-ts/src/handle
 **Core Identity**:
 1. **person** — Central PII hub (~27 handlers)
 
-**Association** (mega-module domain — split deferred, see ROADMAP):
-2. **association:member** — Membership, chapters, officers, positions, credits, credentials, elections, committees (~193 handlers). Owns spec content for m05-membership, m10-credit-tracking, m11-documents-credentials, m12-elections-governance, m19-committee-management.
-3. **association:operations** — Analytics, training, events under association umbrella (~69 handlers).
+**Association** (handler decomposition closed 2026-06-07 — see ROADMAP):
+2. **member** — Membership-domain **handler entrypoints now live under `handlers/member/<sub>/`**, one subdir per concern: `certificates`, `chapters`, `credentials`, `credits`, `directory`, `duesspecialassessments`, `governance`, `membership` (~220 `.ts` files across these, excluding `*.test.ts`; numbers may drift — re-run `find services/api-ts/src/handlers/member -name '*.ts' -not -name '*.test.ts' | wc -l`). Owns spec content for m05-membership, m10-credit-tracking, m11-documents-credentials, m12-elections-governance, m19-committee-management.
+   - **`handlers/association:member/`** is **no longer where handlers live** — post-decomposition it holds the domain's **shared repos + schemas** (imported via `@/handlers/association:member/repos/...`), plus its `jobs/`, `utils/`, and a small set of residual handlers not yet relocated (`createDisciplinaryAction`, `getOrgDashboard`, `transitionOfficerTerm`).
+   - Note: `handlers/member/membership/` (decomposed domain code) is distinct from the standalone legacy `handlers/membership/` (items 5 below).
+3. **association:operations** — Analytics, training, events under the association umbrella (~71 handlers; still an undecomposed directory).
 
 **Platform**:
 4. **platformadmin** — Admin-tier operations (~45 handlers).
@@ -67,7 +69,7 @@ The API service has **26 handler directories** under `services/api-ts/src/handle
 10. **events** — Event management (~11 handlers).
 11. **elections** — Voting endpoints not yet migrated to TypeSpec (~5 handlers, hand-wired for deleteElection legacy path).
 
-**Note**: there is no `training/` handler directory — training/CPD lifecycle lives inside `association:member/` (CreditService, ProfessionalLicense, credit entries) and partly in `association:operations/`.
+**Note**: there is no `training/` handler directory — training/CPD lifecycle lives under `handlers/member/credits/` (credit entries, compliance reports) with its CreditService / ProfessionalLicense repos+schemas under `handlers/association:member/repos/`, and partly in `association:operations/`.
 
 **Communications** (2 by-design bounded contexts):
 12. **communication** — Templates, message queue, announcements, person subscriptions, saved segments (~43 handlers).
@@ -77,7 +79,7 @@ The API service has **26 handler directories** under `services/api-ts/src/handle
 
 **Content**:
 14. **documents** — Document management with access-log tracking (~16 handlers).
-15. **certificates** — Certificate generation (~5 handlers; some impls re-exported from `association:member/`).
+15. **certificates** — Certificate generation (~5 handlers; some impls re-exported from `handlers/member/certificates/`).
 16. **storage** — File upload/download via S3/MinIO (~6 handlers).
 17. **reviews** — NPS review system (~4 handlers).
 
@@ -354,7 +356,7 @@ All apps share the same API and SDK.
 
 All P0/P1 risks resolved (gate satisfied 2026-05-12). Planned work tracked in [ROADMAP.md](./ROADMAP.md).
 
-- P1-11 (association:member mega-module split) deferred — original plan sized for 157 files, current count is ~193 (post-Phase-35 cleanup); see `.planning/deferred/14-mega-module-split/SPLIT-PLAN.md` and re-scope before execution. See `.audits/PRODUCTION_AUDIT.md` for module ownership notes.
+- P1-11 (association:member mega-module split) — the **handler decomposition closed 2026-06-07**: entrypoints relocated to `handlers/member/<sub>/`, leaving only shared repos/schemas (+ jobs/utils + a few residual handlers) under `handlers/association:member/`. The original plan's file counts (157 → ~193) predate that move and described the old single directory. The deeper module split (extracting the shared repos into their own module/workspace) remains deferred; see `.planning/deferred/14-mega-module-split/SPLIT-PLAN.md` and re-scope before execution. See `.audits/PRODUCTION_AUDIT.md` for module ownership notes.
 - Phase 35 migrated all 24 pre-migration routes to TypeSpec. A small number of routes remain hand-wired in `app.ts` by design (middleware ordering, public unauthenticated paths, or migrations explicitly deferred for complex governance flows like `deleteElection`).
 
 ## Development Protocol
