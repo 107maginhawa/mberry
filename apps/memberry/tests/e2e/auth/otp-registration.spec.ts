@@ -4,6 +4,8 @@
 import { test, expect } from '../helpers/test-fixture'
 import { isMailpitAvailable } from '../helpers/mailpit'
 import { captureAnyApiSuccess } from '../helpers/real-flow'
+import { signUp } from '../helpers/auth'
+import { independentRead } from '../helpers/independent-read'
 
 let mailpitUp = false
 
@@ -52,5 +54,36 @@ test.describe('BR-25: OTP Registration', () => {
     const hasVerification = await page.getByText(/verify|code|otp|check your email/i).first().isVisible({ timeout: 3000 }).catch(() => false)
 
     expect(isRedirected || hasVerification).toBeTruthy()
+  })
+})
+
+// De-Mailpit core (gap G5): account creation does NOT depend on email. This
+// path runs in CI (no Mailpit) and asserts the real goal — a durable account —
+// without the email-verification step. Clauses 1 + 4.
+test.describe('BR-25: durable account creation (no Mailpit)', () => {
+  // Clause 1: catch silent errors on the signup success path. Pre-auth 401
+  // session/profile probes on the unauthenticated signup page are expected.
+  test.use({
+    failOnUnexpected4xx: true,
+    failOnConsoleError: true,
+    allowApiFailures: [/→ 401/],
+  })
+
+  test('signup durably creates an account verifiable from an independent session', async ({
+    page,
+  }) => {
+    const { email, password } = await signUp(page)
+
+    // Clause 4: confirm the person row durably exists by reading it back from
+    // a SEPARATE auth session, not the browser context that just signed up.
+    const me = await independentRead<{ status: number; id?: string }>(
+      { email, password },
+      async (api) => {
+        const res = await api.get<{ id?: string; data?: { id?: string } }>('/persons/me')
+        return { status: res.status, id: res.data?.id ?? res.data?.data?.id }
+      },
+    )
+    expect(me.status, 'new account /persons/me readable in a fresh session').toBe(200)
+    expect(me.id, 'signup durably created a person row').toBeTruthy()
   })
 })

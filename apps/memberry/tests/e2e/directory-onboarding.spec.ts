@@ -5,9 +5,17 @@ import { test, expect } from './helpers/test-fixture'
 import { signUp, signIn, signInAsOfficer } from './helpers/auth'
 import { API_BASE } from './helpers/test-config'
 import { apiFetch } from './helpers/api-fetch'
+import { independentRead } from './helpers/independent-read'
 
 const ORG_ID = 'ed8e3a96-8126-4341-be42-e6eb7940c562'
 const ORG_SLUG = 'pda-metro-manila'
+
+// Clause 1: catch JS crashes / console.error across this cross-module flow.
+// 4xx-strictness is intentionally NOT enabled here yet: this journey crosses
+// many unauth→auth→role-gated transitions whose benign 401/403 probes need a
+// per-step allow-list tuned against the real network profile — deferred to
+// Phase D. pageerror + console.error + 5xx are enforced now.
+test.use({ failOnConsoleError: true })
 
 test.describe('Directory Onboarding: signup → join org → directory profile', () => {
   test.describe('New user registration creates person record', () => {
@@ -210,6 +218,7 @@ test.describe('Directory Onboarding: signup → join org → directory profile',
     test('end-to-end onboarding produces a discoverable directory profile', async ({ page }) => {
       let email: string
       let userName: string
+      let personId: string | undefined
 
       await test.step('1. sign up new user', async () => {
         const creds = await signUp(page)
@@ -268,12 +277,10 @@ test.describe('Directory Onboarding: signup → join org → directory profile',
           '/persons/me',
         )
 
-        const personId = personResult.data?.id ?? personResult.data?.data?.id
-
-        if (!personId) {
-          test.skip(true, 'Could not retrieve person ID — skipping directory verification')
-          return
-        }
+        personId = personResult.data?.id ?? personResult.data?.data?.id
+        // Clause 3: the freshly-signed-up user MUST have a person row — assert
+        // it rather than silently skipping the rest of the journey (G3b).
+        expect(personId, 'signed-up user has a person id').toBeTruthy()
 
         // POST is state-changing — apiFetch attaches x-csrf-token + Origin.
         const memberResult = await apiFetch(page, `/organizations/${ORG_ID}/members`, {
@@ -282,8 +289,10 @@ test.describe('Directory Onboarding: signup → join org → directory profile',
           body: { personId, role: 'member', status: 'active' },
         })
 
-        // 201 = created, 409 = already exists — both acceptable
-        expect(memberResult.status).toBeLessThan(500)
+        // Clause 3: 201 created or 409 already-exists — both acceptable.
+        expect([200, 201, 409], `add-member succeeded (got ${memberResult.status})`).toContain(
+          memberResult.status,
+        )
       })
 
       await test.step('7. member directory shows the new member', async () => {
@@ -296,6 +305,24 @@ test.describe('Directory Onboarding: signup → join org → directory profile',
         // Page should not show broken state
         const pageContent = await page.textContent('body')
         expect(pageContent).not.toContain('undefined undefined')
+      })
+
+      await test.step('8. clause 4 — new member is in the org roster (independent session)', async () => {
+        // Confirm the goal from a SEPARATE officer session reading durable
+        // roster state, not the member UI just driven.
+        const roster = await independentRead<{ status: number; present: boolean }>(
+          'officer',
+          async (api) => {
+            const res = await api.get<{ data?: Array<{ personId?: string }> }>(
+              `/membership/members/${ORG_ID}`,
+              { orgId: ORG_ID },
+            )
+            const present = (res.data?.data ?? []).some((m) => m.personId === personId)
+            return { status: res.status, present }
+          },
+        )
+        expect(roster.status, 'officer reads org roster').toBe(200)
+        expect(roster.present, 'newly-added member appears in the durable roster').toBe(true)
       })
     })
   })

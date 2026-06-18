@@ -20,6 +20,8 @@ import { test, expect } from '@playwright/test'
 import { freshAuthState } from '../helpers/programmatic-auth'
 import { apiFetch } from '../helpers/api-fetch'
 import { signUp } from '../helpers/auth'
+import { attachErrorSurface } from '../helpers/error-surface'
+import { independentRead } from '../helpers/independent-read'
 
 const ORG_ID = 'ed8e3a96-8126-4341-be42-e6eb7940c562'
 
@@ -33,8 +35,15 @@ test.describe('cross-persona: officer approves member application', () => {
     // ---- 1. Applicant context: fresh signUp + apply ----
     const applicantCtx = await browser.newContext()
     const applicantPage = await applicantCtx.newPage()
-    const { email } = await signUp(applicantPage)
+    const { email, password } = await signUp(applicantPage)
     await applicantPage.goto('/dashboard') // ensure SPA origin for apiFetch
+    // Clause 1: no silent error surface on the applicant's path (pre-auth 401
+    // session probes during the signup→dashboard transition are expected).
+    const assertApplicantClean = attachErrorSurface(applicantPage, {
+      failOnUnexpected4xx: true,
+      failOnConsoleError: true,
+      allowApiFailures: [/→ 401/],
+    })
 
     // Resolve applicant's person id (better-auth hook autocreates person
     // row with person.id = user.id on sign-up).
@@ -67,11 +76,12 @@ test.describe('cross-persona: officer approves member application', () => {
         applicationDate: new Date().toISOString().split('T')[0],
       },
     })
-    // 201 created OR 409 already-applied (re-run safe).
+    // Clause 3: apply must succeed — 201/200 created, or 409 already-applied
+    // (re-run safe). No `< 400` tolerance (which paradoxically excluded 409).
     expect(
-      submit.status,
+      [200, 201, 409],
       `apply succeeded (got ${submit.status} ${JSON.stringify(submit.data).slice(0, 200)})`,
-    ).toBeLessThan(400)
+    ).toContain(submit.status)
     const applicationId = submit.data?.id ?? submit.data?.data?.id ?? null
 
     // ---- 2. Officer context: approve ----
@@ -79,6 +89,11 @@ test.describe('cross-persona: officer approves member application', () => {
       storageState: await freshAuthState('officer'),
     })
     const officerPage = await officerCtx.newPage()
+    const assertOfficerClean = attachErrorSurface(officerPage, {
+      failOnUnexpected4xx: true,
+      failOnConsoleError: true,
+      allowApiFailures: [/→ 401/],
+    })
     await officerPage.goto('/dashboard')
 
     // Find this applicant's pending application. DB enum is `submitted`
@@ -102,28 +117,33 @@ test.describe('cross-persona: officer approves member application', () => {
         body: { applicationIds: [approveTarget] },
       },
     )
-    expect(approve.status).toBeLessThan(400)
+    // Clause 3: approval must succeed.
+    expect([200, 201], `bulk-approve succeeded (got ${approve.status})`).toContain(approve.status)
 
-    // ---- 3. Applicant sees membership row in their list ----
-    // Bulk-approve creates the membership in `pendingPayment` status —
-    // it doesn't transition to `active` until the first dues payment
-    // clears. The cross-persona contract this test cares about is that
-    // the approval propagates a membership row to the applicant's view.
-    const memberships = await apiFetch<{
-      data?: Array<{ organizationId: string; status: string }>
-    }>(applicantPage, `/persons/me/memberships`)
-    const list = memberships.data?.data ?? []
-    const orgMembership = list.find((m) => m.organizationId === ORG_ID)
-    expect(
-      orgMembership,
-      `applicant has a membership row in org (list size ${list.length})`,
-    ).toBeTruthy()
-    expect(
-      orgMembership?.status,
-      'membership status is a known post-approval value',
-    ).toMatch(/^(active|pendingPayment|grace|gracePeriod)$/)
-
+    // Clause 1: both actors' success paths produced no silent error surface.
+    assertApplicantClean()
+    assertOfficerClean()
     await applicantCtx.close()
     await officerCtx.close()
+
+    // ---- 3. Clause 2 + 4: re-read memberships from a SEPARATE applicant
+    //      session (a fresh sign-in, not the context that drove signup/apply)
+    //      and assert the approval durably propagated a membership row.
+    //      Bulk-approve creates it in `pendingPayment` until first dues clear. ----
+    const membership = await independentRead<{ status: number; value?: string }>(
+      { email, password },
+      async (api) => {
+        const res = await api.get<{ data?: Array<{ organizationId: string; status: string }> }>(
+          '/persons/me/memberships',
+        )
+        const row = (res.data?.data ?? []).find((m) => m.organizationId === ORG_ID)
+        return { status: res.status, value: row?.status }
+      },
+    )
+    expect(membership.status, 'applicant reads memberships in a fresh session').toBe(200)
+    expect(
+      membership.value,
+      `approval propagated a membership row (got ${membership.value})`,
+    ).toMatch(/^(active|pendingPayment|grace|gracePeriod)$/)
   })
 })

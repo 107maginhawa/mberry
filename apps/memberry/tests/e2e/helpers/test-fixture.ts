@@ -1,13 +1,23 @@
 /**
- * Shared Playwright test fixture with global error listeners.
+ * Shared Playwright test fixture with global error listeners (clause 1 of
+ * the journey DoD — "no silent error surface").
  *
- * Catches:
- * - Unhandled page errors (JS crashes)
- * - Console errors
- * - Failed network requests (fetch/xhr)
- * - API 5xx responses
+ * Catches: unhandled `pageerror`, `console.error`, and unhandled API
+ * 4xx/5xx responses during a success path. The decision logic + listener
+ * wiring live in `helpers/error-surface.ts` so multi-context specs (which
+ * make pages via `browser.newContext()` and never touch this fixture's
+ * `page`) share the exact same enforcement via `attachErrorSurface`.
  *
- * Per-test opt-out via allowConsoleErrors / allowApiFailures arrays.
+ * Strictness is OPT-IN, preserving the legacy default for the ~140 existing
+ * specs: 5xx + pageerror always fail; 4xx + console.error are tolerated
+ * unless a spec sets `failOnUnexpected4xx` / `failOnConsoleError`.
+ *
+ * Per-test config:
+ *   test.use({
+ *     failOnUnexpected4xx: true,
+ *     failOnConsoleError: true,
+ *     allowApiFailures: [/GET \/api\/billing\/merchant-accounts\/me → 404/],
+ *   })
  *
  * Usage:
  *   import { test, expect } from '../helpers/test-fixture'
@@ -17,6 +27,7 @@
 import { test as base, expect } from '@playwright/test'
 import type { AuthRole } from './auth-state'
 import { freshAuthState } from './programmatic-auth'
+import { attachErrorSurface } from './error-surface'
 
 export { expect }
 export type { AuthRole }
@@ -24,6 +35,10 @@ export type { AuthRole }
 export const test = base.extend<{
   allowConsoleErrors: RegExp[]
   allowApiFailures: RegExp[]
+  /** Clause-1 strict: fail on unhandled 4xx (default false — legacy). */
+  failOnUnexpected4xx: boolean
+  /** Clause-1 strict: fail on unexpected console.error (default false). */
+  failOnConsoleError: boolean
   /**
    * Persona to authenticate as. Specs opt in with
    * `test.use({ authRole: 'officer' })` — replaces the retired
@@ -34,6 +49,8 @@ export const test = base.extend<{
 }>({
   allowConsoleErrors: [[], { option: true }],
   allowApiFailures: [[], { option: true }],
+  failOnUnexpected4xx: [false, { option: true }],
+  failOnConsoleError: [false, { option: true }],
   authRole: [undefined, { option: true }],
 
   // Derive the built-in `storageState` from `authRole`: when set, mint a FRESH
@@ -49,57 +66,20 @@ export const test = base.extend<{
     await use(state)
   },
 
-  page: async ({ page, allowConsoleErrors, allowApiFailures }, use) => {
-    const consoleErrors: string[] = []
-    const pageErrors: string[] = []
-    const apiFailures: string[] = []
-
-    const allowed = (text: string, rules: RegExp[]) =>
-      rules.some((rx) => rx.test(text))
-
-    // Catch unhandled JS errors
-    page.on('pageerror', (err) => {
-      pageErrors.push(err.stack || err.message)
-    })
-
-    // Catch console.error
-    page.on('console', (msg) => {
-      if (msg.type() !== 'error') return
-      const text = msg.text()
-      // Ignore React DevTools message and duplicate key warnings
-      if (text.includes('Download the React DevTools')) return
-      if (text.includes('Encountered two children with the same key')) return
-      if (!allowed(text, allowConsoleErrors)) consoleErrors.push(text)
-    })
-
-    // Catch API 5xx responses (same-origin only)
-    page.on('response', (res) => {
-      const req = res.request()
-      if (!['fetch', 'xhr'].includes(req.resourceType())) return
-
-      try {
-        const url = new URL(res.url())
-        // Only check /api/ paths (our app proxy)
-        if (!url.pathname.startsWith('/api/') && !url.pathname.startsWith('/auth/')) return
-        if (res.status() < 500) return
-
-        const key = `${req.method()} ${url.pathname} → ${res.status()}`
-        if (!allowed(key, allowApiFailures)) apiFailures.push(key)
-      } catch {
-        // URL parse failure — skip
-      }
+  page: async (
+    { page, allowConsoleErrors, allowApiFailures, failOnUnexpected4xx, failOnConsoleError },
+    use,
+  ) => {
+    const assertNoErrorSurface = attachErrorSurface(page, {
+      allowConsoleErrors,
+      allowApiFailures,
+      failOnUnexpected4xx,
+      failOnConsoleError,
     })
 
     // eslint-disable-next-line react-hooks/rules-of-hooks -- Playwright fixture `use()`, not a React hook
     await use(page)
 
-    // Assert no errors after test completes
-    expect(pageErrors, 'Unhandled page errors during test').toEqual([])
-    expect(apiFailures, 'API 5xx responses during test').toEqual([])
-    // Console errors are warnings — log but don't fail for now
-    // (too many existing console.error from React strict mode, etc.)
-    if (consoleErrors.length > 0) {
-      console.warn(`[${consoleErrors.length} console errors]`, consoleErrors.slice(0, 3))
-    }
+    assertNoErrorSurface()
   },
 })

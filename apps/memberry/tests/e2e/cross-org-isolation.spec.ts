@@ -3,11 +3,14 @@
 // Verifies officers from one organization cannot access another org's data
 // through the full browser stack. Backend IDOR protection from Phase 12-04.
 import { test, expect } from './helpers/test-fixture'
-import { SEED_IDOR_EMAIL, TEST_PASSWORD } from './helpers/test-config'
 import { captureAnyApiSuccess } from './helpers/real-flow'
+import { independentRead } from './helpers/independent-read'
 
-
-test.use({ authRole: 'idor' })
+// Clause 1: the idor officer's OWN page hydration (via the /api proxy) must
+// stay clean. The cross-org probes below hit :7213 directly (pathname
+// `/membership/...`, not `/api/...`) so their intentional 4xx denials are not
+// flagged by the error-surface listener.
+test.use({ authRole: 'idor', failOnUnexpected4xx: true, failOnConsoleError: true })
 const API_BASE = process.env.API_BASE_URL ?? 'http://localhost:7213'
 const ORG_A_ID = 'ed8e3a96-8126-4341-be42-e6eb7940c562' // pda-metro-manila
 
@@ -71,5 +74,22 @@ test('org B officer cannot view org A roster', async ({ page }) => {
       { apiBase: API_BASE, orgAId: ORG_A_ID },
     )
     expect(status).toBeGreaterThanOrEqual(400)
+  })
+
+  // Clause 4: from an INDEPENDENT session, org A's OWN officer CAN read org A's
+  // roster — proving the cross-org 4xx above is an authorization denial, not a
+  // missing/empty resource. Reads durable state, not the UI just driven.
+  test('org A officer CAN read org A roster (independent session)', async () => {
+    const roster = await independentRead<{ status: number; count: number }>(
+      'officer',
+      async (api) => {
+        const res = await api.get<{ data?: unknown[] }>(`/membership/members/${ORG_A_ID}`, {
+          orgId: ORG_A_ID,
+        })
+        return { status: res.status, count: res.data?.data?.length ?? 0 }
+      },
+    )
+    expect(roster.status, 'org A officer reads org A roster').toBe(200)
+    expect(roster.count, 'org A roster is non-empty (resource exists)').toBeGreaterThan(0)
   })
 })

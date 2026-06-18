@@ -68,11 +68,27 @@ export type AuthStorageState = Awaited<
  * of producing a silently-unauthenticated context (the 401-cascade trap).
  */
 export async function freshAuthState(role: AuthRole): Promise<AuthStorageState> {
-  const email = ROLE_EMAIL[role]
+  return signInState(ROLE_EMAIL[role], TEST_PASSWORD, `freshAuthState('${role}')`)
+}
+
+/**
+ * Sign ANY email/password in via the API and return a fresh Playwright
+ * storageState — used for dynamically-created users (a just-signed-up
+ * applicant) that have no seeded `AuthRole`. Same durable, per-call session
+ * semantics as `freshAuthState`. Backs the clause-4 independent-read helper.
+ *
+ * Throws on a non-2xx sign-in so a bad credential fails loudly instead of
+ * yielding a silently-unauthenticated context.
+ */
+export async function signInState(
+  email: string,
+  password: string,
+  label = `signInState('${email}')`,
+): Promise<AuthStorageState> {
   const ctx = await pwRequest.newContext({ baseURL: API_BASE })
   try {
     const res = await ctx.post('/auth/sign-in/email', {
-      data: { email, password: TEST_PASSWORD },
+      data: { email, password },
       headers: {
         'Content-Type': 'application/json',
         // CORS allow-list match (services CORS_ORIGINS); better-auth also uses
@@ -82,9 +98,7 @@ export async function freshAuthState(role: AuthRole): Promise<AuthStorageState> 
     })
     if (!res.ok()) {
       const body = await res.text().catch(() => '<unreadable>')
-      throw new Error(
-        `freshAuthState('${role}' = ${email}) sign-in failed: ${res.status()} ${body.slice(0, 300)}`,
-      )
+      throw new Error(`${label} sign-in failed: ${res.status()} ${body.slice(0, 300)}`)
     }
     return await ctx.storageState()
   } finally {
