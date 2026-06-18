@@ -137,4 +137,67 @@ describe('computeNewExpiry [BR-07]', () => {
     // No existing expiry → today + 12 months
     expect(result).toEqual(date('2027-06-15'));
   });
+
+  // ─── Month-end clamping (date-fns regression) ─────────
+  // These guard against setMonth overflow where Aug 31 + 6mo → March 3
+  // instead of the correct Feb 28/29. date-fns addMonths clamps correctly.
+
+  test('annual month-end: Aug 31 + 12 months = Aug 31 next year', () => {
+    // today before lapse threshold → standard extension branch
+    const TODAY_AUG = new Date('2025-07-01');
+    const result = computeNewExpiry({
+      currentExpiry: date('2025-08-31'),
+      billingCycle: 'annual',
+      today: TODAY_AUG,
+    });
+    // 2025-08-31 + 12 months = 2026-08-31 (Aug has 31 days)
+    expect(result).toEqual(date('2026-08-31'));
+  });
+
+  test('semi-annual month-end overflow regression: Aug 31 + 6mo = Feb 28 (2026, non-leap)', () => {
+    // today before lapse threshold → standard extension branch
+    const TODAY_AUG = new Date('2025-07-01');
+    const result = computeNewExpiry({
+      currentExpiry: date('2025-08-31'),
+      billingCycle: 'semi-annual',
+      today: TODAY_AUG,
+    });
+    // 2025-08-31 + 6 months = 2026-02-28 (Feb 2026 has 28 days — NOT March 3)
+    expect(result).toEqual(date('2026-02-28'));
+  });
+
+  test('leap-year clamp: Aug 31 + 6mo = Feb 29 in leap year (2024)', () => {
+    const TODAY_AUG_2023 = new Date('2023-07-01');
+    const result = computeNewExpiry({
+      currentExpiry: date('2023-08-31'),
+      billingCycle: 'semi-annual',
+      today: TODAY_AUG_2023,
+    });
+    // 2023-08-31 + 6 months = 2024-02-29 (2024 IS a leap year)
+    expect(result).toEqual(date('2024-02-29'));
+  });
+
+  test('first payment with month-end today: null expiry + semi-annual = Feb 28', () => {
+    // today = Aug 31 → first payment → today + 6mo = Feb 28 (2026 non-leap)
+    const TODAY_AUG_31 = new Date('2025-08-31');
+    const result = computeNewExpiry({
+      currentExpiry: null,
+      billingCycle: 'semi-annual',
+      today: TODAY_AUG_31,
+    });
+    expect(result).toEqual(date('2026-02-28'));
+  });
+
+  test('severely lapsed near month boundary resets from today (month-end)', () => {
+    // Severely lapsed: expiry 2024-08-31, today 2026-03-01, semi-annual (6mo threshold)
+    // threshold = subMonths(2026-03-01, 6) = 2025-09-01; expiry 2024-08-31 < threshold
+    // → reset: addMonths(2026-03-01, 6) = 2026-09-01
+    const TODAY_MAR = new Date('2026-03-01');
+    const result = computeNewExpiry({
+      currentExpiry: date('2024-08-31'),
+      billingCycle: 'semi-annual',
+      today: TODAY_MAR,
+    });
+    expect(result).toEqual(date('2026-09-01'));
+  });
 });

@@ -12,6 +12,7 @@
  * is exactly one billing cycle ago to the day, the standard extension
  * (from current expiry) still applies.
  */
+import { addMonths, subMonths } from 'date-fns';
 
 export type BillingCycle = 'annual' | 'quarterly' | 'semi-annual' | 'custom';
 
@@ -31,18 +32,6 @@ function getCycleMonths(cycle: BillingCycle, customMonths?: number): number {
   }
 }
 
-function addMonths(date: Date, months: number): Date {
-  const result = new Date(date);
-  result.setMonth(result.getMonth() + months);
-  return result;
-}
-
-function subtractMonths(date: Date, months: number): Date {
-  const result = new Date(date);
-  result.setMonth(result.getMonth() - months);
-  return result;
-}
-
 export function computeNewExpiry(input: ExpiryExtensionInput): Date {
   const today = input.today ?? new Date();
   const cycleMonths = getCycleMonths(input.billingCycle, input.customMonths);
@@ -54,7 +43,7 @@ export function computeNewExpiry(input: ExpiryExtensionInput): Date {
 
   // Check if severely lapsed: expiry is MORE THAN one billing cycle in the past
   // "Exactly one billing cycle ago to the day" still uses standard extension
-  const severeLapseThreshold = subtractMonths(today, cycleMonths);
+  const severeLapseThreshold = subMonths(today, cycleMonths);
 
   if (input.currentExpiry < severeLapseThreshold) {
     // Severely lapsed → reset from today
