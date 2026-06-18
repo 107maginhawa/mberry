@@ -187,17 +187,27 @@ export function createMembershipLifecycle(paymentPort: PaymentPort) {
 
       // --- Reverse fund allocations ---
       const allocations = await txRepo.getFundAllocations(paymentId);
-      const originalAllocations = allocations.filter((a: any) => !a.isReversal);
+      type FundAllocation = Awaited<ReturnType<typeof txRepo.getFundAllocations>>[number];
+      const originalAllocations = allocations.filter((a: FundAllocation) => !a.isReversal);
 
       if (originalAllocations.length > 0) {
         const refundRatio = refundAmount / payment.amount;
-        const reversals = originalAllocations.map((a: any) => ({
-          paymentId,
-          fundId: a.fundId,
-          amount: -Math.round(a.amount * refundRatio),
-          isReversal: true,
-          organizationId: payment.organizationId,
-        }));
+        const totalAllocated = originalAllocations.reduce((sum, a) => sum + a.amount, 0);
+        const targetTotal = Math.round(totalAllocated * refundRatio);
+
+        let distributed = 0;
+        const reversals = originalAllocations.map((a, i) => {
+          const isLast = i === originalAllocations.length - 1;
+          const share = isLast ? targetTotal - distributed : Math.round(a.amount * refundRatio);
+          distributed += share;
+          return {
+            paymentId,
+            fundId: a.fundId,
+            amount: -share,
+            isReversal: true,
+            organizationId: payment.organizationId,
+          };
+        });
         await txRepo.createFundAllocations(reversals);
       }
 
