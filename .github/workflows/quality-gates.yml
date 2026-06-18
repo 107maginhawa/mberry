@@ -48,6 +48,10 @@ jobs:
         run: bun run lint:e2e-depth
         continue-on-error: true   # Until Wave 2 follow-on plan completes (114-spec sweep)
 
+      - name: Journey coverage radar (advisory)
+        run: bun run scripts/journey-coverage-radar.ts
+        continue-on-error: true   # advisory — warns when a PR touches a flow with no @journey-firewall journey
+
       - name: Security quickscan
         run: bun run scripts/security-quickscan.ts
         continue-on-error: true   # P1+ queue allowed; warn-only. Flip false when queue cleared.
