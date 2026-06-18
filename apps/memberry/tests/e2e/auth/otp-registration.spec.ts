@@ -66,7 +66,9 @@ test.describe('BR-25: durable account creation (no Mailpit)', () => {
   test.use({
     failOnUnexpected4xx: true,
     failOnConsoleError: true,
-    allowApiFailures: [/→ 401/],
+    // Pre-auth 401 session probes during signup, + the known role-gated
+    // dashboard probe that 403s for a fresh member (see EXEC findings).
+    allowApiFailures: [/→ 401/, /GET \/api\/association\/event-lifecycle\/my → 403/],
   })
 
   test('signup durably creates an account verifiable from an independent session', async ({

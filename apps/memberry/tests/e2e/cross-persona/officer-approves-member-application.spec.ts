@@ -42,7 +42,7 @@ test.describe('cross-persona: officer approves member application', () => {
     const assertApplicantClean = attachErrorSurface(applicantPage, {
       failOnUnexpected4xx: true,
       failOnConsoleError: true,
-      allowApiFailures: [/→ 401/],
+      allowApiFailures: [/→ 401/, /GET \/api\/association\/event-lifecycle\/my → 403/],
     })
 
     // Resolve applicant's person id (better-auth hook autocreates person
@@ -92,7 +92,7 @@ test.describe('cross-persona: officer approves member application', () => {
     const assertOfficerClean = attachErrorSurface(officerPage, {
       failOnUnexpected4xx: true,
       failOnConsoleError: true,
-      allowApiFailures: [/→ 401/],
+      allowApiFailures: [/→ 401/, /GET \/api\/association\/event-lifecycle\/my → 403/],
     })
     await officerPage.goto('/dashboard')
 

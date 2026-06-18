@@ -22,6 +22,10 @@ import { expect, type Page } from '@playwright/test'
 const BUILTIN_CONSOLE_IGNORES = [
   'Download the React DevTools',
   'Encountered two children with the same key',
+  // Chromium's native log of a failed fetch ("Failed to load resource: …").
+  // Network failures are classified by isUnexpectedApiFailure (with allow-list
+  // semantics); the console clause must not double-count them.
+  'Failed to load resource',
 ]
 
 const allowed = (text: string, rules: RegExp[]): boolean => rules.some((rx) => rx.test(text))

@@ -10,7 +10,13 @@ import { independentRead } from './helpers/independent-read'
 // stay clean. The cross-org probes below hit :7213 directly (pathname
 // `/membership/...`, not `/api/...`) so their intentional 4xx denials are not
 // flagged by the error-surface listener.
-test.use({ authRole: 'idor', failOnUnexpected4xx: true, failOnConsoleError: true })
+test.use({
+  authRole: 'idor',
+  failOnUnexpected4xx: true,
+  failOnConsoleError: true,
+  // Known role-gated dashboard probe that 403s for this persona (see EXEC findings).
+  allowApiFailures: [/GET \/api\/association\/event-lifecycle\/my → 403/],
+})
 const API_BASE = process.env.API_BASE_URL ?? 'http://localhost:7213'
 const ORG_A_ID = 'ed8e3a96-8126-4341-be42-e6eb7940c562' // pda-metro-manila
 

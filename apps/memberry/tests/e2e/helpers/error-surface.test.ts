@@ -69,6 +69,18 @@ describe('isUnexpectedConsoleError (clause 1 — console.error)', () => {
     ).toBe(false)
   })
 
+  test('ignores the browser network-failure echo (owned by the API-failure listener)', () => {
+    // "Failed to load resource: …" is Chromium's native log of a failed fetch;
+    // it duplicates what isUnexpectedApiFailure already classifies (with proper
+    // allow-list semantics). The console clause must not double-count it.
+    expect(
+      isUnexpectedConsoleError(
+        'Failed to load resource: the server responded with a status of 403 (Forbidden)',
+        base,
+      ),
+    ).toBe(false)
+  })
+
   test('flags a real console.error when failOnConsoleError is on', () => {
     expect(isUnexpectedConsoleError('TypeError: x is not a function', base)).toBe(true)
   })
