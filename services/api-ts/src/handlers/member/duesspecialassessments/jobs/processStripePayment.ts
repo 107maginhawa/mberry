@@ -87,11 +87,14 @@ export function createProcessPayment(
       throw new Error(`No DuesPayment row found for metadata.paymentId=${paymentId}`);
     }
 
-    // Settle the payment in our database (fund allocation + membership extension)
+    // Settle using the authoritative ledger row's org/person — the row is
+    // fetched by validated paymentId and its organizationId/personId are the
+    // source of truth. The metadata org/person above only gate that the event
+    // is well-formed; they are not trusted for scoping the settlement.
     await settle({
       db,
-      orgId,
-      personId,
+      orgId: payment.organizationId,
+      personId: payment.personId,
       paymentId,
       amount: amount || payment.amount,
     });
