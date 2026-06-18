@@ -1,3 +1,4 @@
+// @journey-firewall — must-never-break journey; all 4 DoD clauses enforced by audit-e2e-depth gate
 // WF-024 — Application Approval
 /**
  * Cross-persona: Society officer approves a pending member application;

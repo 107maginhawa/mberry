@@ -1,3 +1,4 @@
+// @journey-firewall — must-never-break journey; all 4 DoD clauses enforced by audit-e2e-depth gate
 // WF-001 — Self-Registration: name, email, license, password + OTP verification
 // BR-25: OTP registration flow
 // Tests email verification during signup

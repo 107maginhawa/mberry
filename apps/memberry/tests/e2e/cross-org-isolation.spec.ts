@@ -1,3 +1,4 @@
+// @journey-firewall — must-never-break journey; all 4 DoD clauses enforced by audit-e2e-depth gate
 // WF-019 — User Impersonation
 // Cross-org isolation (IDOR) E2E tests
 // Verifies officers from one organization cannot access another org's data

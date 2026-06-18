@@ -1,3 +1,4 @@
+// @journey-firewall — must-never-break journey; all 4 DoD clauses enforced by audit-e2e-depth gate
 // WF-035 — Record Payment
 /**
  * Cross-persona money path: a fresh applicant is approved (→ pendingPayment),

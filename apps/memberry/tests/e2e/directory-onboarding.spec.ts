@@ -1,3 +1,4 @@
+// @journey-firewall — must-never-break journey; all 4 DoD clauses enforced by audit-e2e-depth gate
 // Cross-Module Flow: Signup → Join Org → Directory Profile Auto-Created
 // Covers: M01 (auth) → M05 (membership) → M10 (directory)
 // Verifies that a newly registered member who joins an org appears in the member directory.
