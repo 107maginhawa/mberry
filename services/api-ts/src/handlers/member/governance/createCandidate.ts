@@ -85,5 +85,5 @@ export async function createCandidate(
     organizationId: election.organizationId,
   }).catch(() => {});
 
-  return ctx.json({ data: nominee }, 201);
+  return ctx.json(nominee, 201);
 }

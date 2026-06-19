@@ -88,7 +88,7 @@ Content-Type: application/json
 }
 HTTP 201
 [Captures]
-election_id: jsonpath "$.data.id"
+election_id: jsonpath "$.id"
 
 # ── 4. Transition draft → nominationsOpen ──────────────────────────────────
 GET {{api}}/csrf-token
@@ -123,7 +123,7 @@ Content-Type: application/json
 }
 HTTP 201
 [Captures]
-candidate_id: jsonpath "$.data.id"
+candidate_id: jsonpath "$.id"
 
 # ── 6. Nominee accepts ─────────────────────────────────────────────────────
 GET {{api}}/csrf-token

@@ -49,11 +49,11 @@ Content-Type: application/json
 }
 HTTP 201
 [Captures]
-election_id: jsonpath "$.data.id"
+election_id: jsonpath "$.id"
 [Asserts]
-jsonpath "$.data.title" == "Lifecycle Election {{suffix}}"
-jsonpath "$.data.status" == "draft"
-jsonpath "$.data.type" == "officer"
+jsonpath "$.title" == "Lifecycle Election {{suffix}}"
+jsonpath "$.status" == "draft"
+jsonpath "$.type" == "officer"
 
 # ── 2. getElection ─────────────────────────────────────────────────────────
 GET {{api}}/association/member/elections/{{election_id}}
@@ -62,8 +62,8 @@ Cookie: better-auth.session_token={{officer_cookie}}
 x-org-id: {{org_id}}
 HTTP 200
 [Asserts]
-jsonpath "$.data.id" == "{{election_id}}"
-jsonpath "$.data.status" == "draft"
+jsonpath "$.id" == "{{election_id}}"
+jsonpath "$.status" == "draft"
 
 # ── 3. listElections includes it ───────────────────────────────────────────
 GET {{api}}/association/member/elections?organizationId={{org_id}}&limit=100
@@ -143,7 +143,7 @@ Content-Type: application/json
 }
 HTTP 201
 [Captures]
-disposable_election_id: jsonpath "$.data.id"
+disposable_election_id: jsonpath "$.id"
 
 GET {{api}}/csrf-token
 HTTP 200

@@ -37,7 +37,7 @@ Content-Type: application/json
 }
 HTTP 201
 [Captures]
-announcement_id: jsonpath "$.data.id"
+announcement_id: jsonpath "$.id"
 
 
 # ── 2. Update announcement ──────────────────────────────────
@@ -100,7 +100,7 @@ Content-Type: application/json
 }
 HTTP 201
 [Captures]
-draft_id: jsonpath "$.data.id"
+draft_id: jsonpath "$.id"
 
 DELETE {{api}}/communications/announcements/{{draft_id}}
 Origin: {{origin}}

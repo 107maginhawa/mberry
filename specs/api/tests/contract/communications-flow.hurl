@@ -64,7 +64,7 @@ Content-Type: application/json
 }
 HTTP 201
 [Captures]
-announcement_id: jsonpath "$.data.id"
+announcement_id: jsonpath "$.id"
 
 
 # ── Get announcement ──────────────────────────────────────

@@ -90,5 +90,5 @@ export async function castBallot(
   ctx.set('auditDescription', `Ballot cast in election ${body.electionId}`);
   ctx.set('auditDetails', { electionId: body.electionId, positionId: body.positionId });
 
-  return ctx.json({ data: vote }, 201);
+  return ctx.json(vote, 201);
 }

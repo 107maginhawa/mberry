@@ -42,5 +42,5 @@ export async function createAnnouncement(
   ctx.set('auditDescription', `Created announcement: ${announcement.title}`);
   ctx.set('auditDetails', { orgId: params.organizationId });
 
-  return ctx.json({ data: announcement }, 201);
+  return ctx.json(announcement, 201);
 }

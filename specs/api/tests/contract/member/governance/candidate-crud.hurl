@@ -91,7 +91,7 @@ Content-Type: application/json
 }
 HTTP 201
 [Captures]
-election_id: jsonpath "$.data.id"
+election_id: jsonpath "$.id"
 
 GET {{api}}/csrf-token
 HTTP 200
@@ -127,7 +127,7 @@ Content-Type: application/json
 }
 HTTP 201
 [Captures]
-candidate_id: jsonpath "$.data.id"
+candidate_id: jsonpath "$.id"
 
 # ── 5. getCandidate ────────────────────────────────────────────────────────
 GET {{api}}/association/member/candidates/{{candidate_id}}

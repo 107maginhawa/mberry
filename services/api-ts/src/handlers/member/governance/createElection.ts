@@ -65,5 +65,5 @@ export async function createElection(
     createdBy: user.id,
   }).catch(() => {});
 
-  return ctx.json({ data: election }, 201);
+  return ctx.json(election, 201);
 }

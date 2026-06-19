@@ -28,7 +28,7 @@ export async function getElection(
   const tallies = election.status === 'awaitingConfirmation' || election.status === 'published'
     ? await repo.getVoteTallies(params.electionId) : [];
 
-  return ctx.json({ data: {
+  return ctx.json({
     ...election,
     // Map DB → TypeSpec field names for SDK transformer
     nominationStart: election.nominationsOpenAt,
@@ -38,5 +38,5 @@ export async function getElection(
     nominees,
     voterCount,
     tallies,
-  } }, 200);
+  }, 200);
 }
