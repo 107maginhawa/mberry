@@ -496,6 +496,12 @@ export async function seedMissingRoles(
       role: pr.role,
       userId,
     });
+    // ISSUE-033: the admin app bootstraps via GET /admin/me/role, which is gated
+    // by x-security-required-roles:["platform_admin"] (checks the better-auth
+    // user.role, not the platform_admin table). Without granting the
+    // platform_admin user-role, support/analyst admins 403 on /admin/me/role and
+    // the admin app redirects to login → blank. test@ already gets it above.
+    await db.update(userTable).set({ role: 'user,platform_admin' }).where(eq(userTable.id, userId));
     console.log(`    ✓ ${pr.name} — platform ${pr.role} (${pr.email})`);
   }
 
