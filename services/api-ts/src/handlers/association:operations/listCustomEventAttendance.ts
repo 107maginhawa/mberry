@@ -1,8 +1,10 @@
+import { inArray } from 'drizzle-orm';
 import type { ValidatedContext } from '@/types/app';
 import type { DatabaseInstance } from '@/core/database';
 import { NotFoundError } from '@/core/errors';
 import type { ListCustomEventAttendanceQuery, ListCustomEventAttendanceParams } from '@/generated/openapi/validators';
 import { clampPageSize } from '@/core/pagination';
+import { persons } from '@/handlers/person/repos/person.schema';
 import { EventRepository, CheckInRepository } from './repos/events.repo';
 
 /**
@@ -33,5 +35,16 @@ export async function listCustomEventAttendance(
 
   const checkIns = await checkInRepo.findMany({ eventId: params.eventId }, { pagination: { limit, offset } });
 
-  return ctx.json({ data: checkIns, total: checkIns.length }, 200);
+  // ISSUE-031: join person so the roster renders names, not raw UUIDs.
+  const personIds = [...new Set(checkIns.map((c) => c.personId).filter(Boolean))];
+  const people = personIds.length
+    ? await db.select({ id: persons.id, firstName: persons.firstName, lastName: persons.lastName })
+        .from(persons).where(inArray(persons.id, personIds))
+    : [];
+  const nameById = new Map(
+    people.map((p) => [p.id, p.firstName ? `${p.firstName}${p.lastName ? ` ${p.lastName}` : ''}` : null]),
+  );
+  const enriched = checkIns.map((c) => ({ ...c, personName: nameById.get(c.personId) ?? null }));
+
+  return ctx.json({ data: enriched, total: enriched.length }, 200);
 }

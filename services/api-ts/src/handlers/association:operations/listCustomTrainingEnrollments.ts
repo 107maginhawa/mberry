@@ -1,8 +1,10 @@
+import { inArray } from 'drizzle-orm';
 import type { ValidatedContext } from '@/types/app';
 import type { DatabaseInstance } from '@/core/database';
 import { NotFoundError } from '@/core/errors';
 import type { ListCustomTrainingEnrollmentsQuery, ListCustomTrainingEnrollmentsParams } from '@/generated/openapi/validators';
 import { clampPageSize } from '@/core/pagination';
+import { persons } from '@/handlers/person/repos/person.schema';
 import { TrainingRepository, TrainingEnrollmentRepository } from './repos/training.repo';
 
 /**
@@ -39,5 +41,16 @@ export async function listCustomTrainingEnrollments(
 
   const enrollments = await enrollRepo.findMany(filters, { pagination: { limit, offset } });
 
-  return ctx.json({ data: enrollments, total: enrollments.length }, 200);
+  // ISSUE-031: join person so the roster renders names, not raw UUIDs.
+  const personIds = [...new Set(enrollments.map((e) => e.personId).filter(Boolean))];
+  const people = personIds.length
+    ? await db.select({ id: persons.id, firstName: persons.firstName, lastName: persons.lastName })
+        .from(persons).where(inArray(persons.id, personIds))
+    : [];
+  const nameById = new Map(
+    people.map((p) => [p.id, p.firstName ? `${p.firstName}${p.lastName ? ` ${p.lastName}` : ''}` : null]),
+  );
+  const enriched = enrollments.map((e) => ({ ...e, personName: nameById.get(e.personId) ?? null }));
+
+  return ctx.json({ data: enriched, total: enriched.length }, 200);
 }

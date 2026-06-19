@@ -71,9 +71,11 @@ export function AttendanceView({ eventId }: AttendanceViewProps) {
     })
 
   const filtered = search
-    ? attendance.filter((a) =>
-        a.personId.toLowerCase().includes(search.toLowerCase()),
-      )
+    ? attendance.filter((a) => {
+        const q = search.toLowerCase()
+        const name = (a as { personName?: string }).personName ?? ''
+        return a.personId.toLowerCase().includes(q) || name.toLowerCase().includes(q)
+      })
     : attendance
 
   return (
@@ -163,7 +165,7 @@ export function AttendanceView({ eventId }: AttendanceViewProps) {
             {filtered.map((record: any) => (
               <div key={record.id} className="flex items-center justify-between px-4 py-3">
                 <div>
-                  <p className="text-sm font-medium">{record.personId}</p>
+                  <p className="text-sm font-medium">{record.personName ?? record.personId}</p>
                   <p className="text-xs text-[var(--color-muted)]">
                     {formatTime(record.checkedInAt)}
                   </p>

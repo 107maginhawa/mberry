@@ -1,6 +1,7 @@
 import { eq, and, desc, sql, type SQL } from 'drizzle-orm';
 import type { DatabaseInstance } from '@/core/database';
 import { elections, electionNominees, electionVotes, type Election, type NewElection, type ElectionNominee } from './elections.schema';
+import { persons } from '@/handlers/person/repos/person.schema';
 
 export class ElectionsRepository {
   constructor(private db: DatabaseInstance) {}
@@ -33,8 +34,18 @@ export class ElectionsRepository {
     return result!;
   }
 
-  async listNominees(electionId: string): Promise<ElectionNominee[]> {
-    return this.db.select().from(electionNominees).where(eq(electionNominees.electionId, electionId)).limit(100);
+  async listNominees(electionId: string): Promise<(ElectionNominee & { personName: string | null })[]> {
+    // ISSUE-031: join person so candidate lists render names, not raw UUIDs.
+    const rows = await this.db
+      .select({ nominee: electionNominees, firstName: persons.firstName, lastName: persons.lastName })
+      .from(electionNominees)
+      .leftJoin(persons, eq(electionNominees.personId, persons.id))
+      .where(eq(electionNominees.electionId, electionId))
+      .limit(100);
+    return rows.map((r) => ({
+      ...r.nominee,
+      personName: r.firstName ? `${r.firstName}${r.lastName ? ` ${r.lastName}` : ''}` : null,
+    }));
   }
 
   async addNominee(data: { electionId: string; positionId: string; personId: string; nominatedBy: string; organizationId: string }) {

@@ -1,8 +1,10 @@
+import { inArray } from 'drizzle-orm';
 import type { ValidatedContext } from '@/types/app';
 import type { DatabaseInstance } from '@/core/database';
 import { NotFoundError } from '@/core/errors';
 import type { ListCustomEventRegistrationsQuery, ListCustomEventRegistrationsParams } from '@/generated/openapi/validators';
 import { clampPageSize } from '@/core/pagination';
+import { persons } from '@/handlers/person/repos/person.schema';
 import { EventRepository, EventRegistrationRepository } from './repos/events.repo';
 
 /**
@@ -39,5 +41,16 @@ export async function listCustomEventRegistrations(
 
   const registrations = await regRepo.findMany(filters, { pagination: { limit, offset } });
 
-  return ctx.json({ data: registrations, total: registrations.length }, 200);
+  // ISSUE-031: join person so the roster renders names, not raw UUIDs.
+  const personIds = [...new Set(registrations.map((r) => r.personId).filter(Boolean))];
+  const people = personIds.length
+    ? await db.select({ id: persons.id, firstName: persons.firstName, lastName: persons.lastName })
+        .from(persons).where(inArray(persons.id, personIds))
+    : [];
+  const nameById = new Map(
+    people.map((p) => [p.id, p.firstName ? `${p.firstName}${p.lastName ? ` ${p.lastName}` : ''}` : null]),
+  );
+  const enriched = registrations.map((r) => ({ ...r, personName: nameById.get(r.personId) ?? null }));
+
+  return ctx.json({ data: enriched, total: enriched.length }, 200);
 }
