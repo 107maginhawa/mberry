@@ -149,7 +149,11 @@ export function EventForm({ orgId, event, onSuccess, onCancel }: EventFormProps)
       startDate: new Date(data.startDate),
       endDate: new Date(data.endDate),
       location: data.location || undefined,
-      registrationFee: BigInt(Math.round((data.registrationFee ?? 0) * 100)),
+      // ISSUE-017: validator is z.number().int(); the SDK types money as
+      // int64→bigint and its bodySerializer stringifies bigint, which the
+      // validator rejects ("expected number, received string"). Send a plain
+      // integer (cents); the cast bridges the over-wide generated bigint type.
+      registrationFee: Math.round((data.registrationFee ?? 0) * 100) as unknown as bigint,
       capacity: data.capacity && !Number.isNaN(data.capacity) ? data.capacity : undefined,
       creditBearing: data.creditBearing,
       creditAmount: data.creditBearing ? data.creditAmount : 0,
