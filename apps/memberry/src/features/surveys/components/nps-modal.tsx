@@ -11,6 +11,7 @@ export interface NpsSurvey {
   id: string
   title: string
   questionText?: string
+  questions?: { id: string; type: string }[]
 }
 
 interface NpsModalProps {
@@ -69,10 +70,14 @@ export function NpsModal({ survey, onDismiss, onComplete }: NpsModalProps) {
     if (score === null || submitting) return
     setSubmitting(true)
     try {
-      await api.post(`/surveys/${survey.id}/responses`, {
+      // /api prefix so the Vite proxy forwards it; answers must use the survey's
+      // real question UUIDs (the API rejects non-UUID ids and aggregation keys on them).
+      const npsQ = survey.questions?.find((q) => q.type === 'nps')
+      const commentQ = survey.questions?.find((q) => q.type === 'text')
+      await api.post(`/api/surveys/${survey.id}/responses`, {
         answers: [
-          { questionId: 'nps', value: score },
-          ...(comment.trim() ? [{ questionId: 'nps_comment', value: comment.trim() }] : []),
+          ...(npsQ ? [{ questionId: npsQ.id, value: score }] : []),
+          ...(comment.trim() && commentQ ? [{ questionId: commentQ.id, value: comment.trim() }] : []),
         ],
       })
       toast.success('Thanks for your feedback!')
@@ -83,7 +88,7 @@ export function NpsModal({ survey, onDismiss, onComplete }: NpsModalProps) {
     } finally {
       setSubmitting(false)
     }
-  }, [score, submitting, survey.id, comment, onComplete])
+  }, [score, submitting, survey.id, survey.questions, comment, onComplete])
 
   return (
     <AnimatePresence>
