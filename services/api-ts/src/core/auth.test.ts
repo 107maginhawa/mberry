@@ -20,17 +20,16 @@
  * are all stubs whose calls we assert.
  */
 
-import { describe, test, expect, mock, afterAll } from 'bun:test';
+import { describe, test, expect, mock } from 'bun:test';
+import { stubRepo } from '@/test-utils/make-ctx';
+import { PlatformAdminRepository } from '@/handlers/platformadmin/repos/platform-admin.repo';
 
-// Bun's `mock.module` is process-global and cannot be restored per-test. The
-// two-factor/disable tests below stub the platform-admin repo; capture the real
-// module up front and restore it after this file so the stub can't leak into
-// later test files (e.g. orgContextMiddleware, which checks platform-admin
-// status) under CI's full-suite execution order.
-const realPlatformAdminRepo = await import('@/handlers/platformadmin/repos/platform-admin.repo');
-afterAll(async () => {
-  await mock.module('@/handlers/platformadmin/repos/platform-admin.repo', () => realPlatformAdminRepo);
-});
+// The two-factor/disable tests stub PlatformAdminRepository.findById. Use
+// stubRepo (prototype-level) NOT mock.module: mock.module is process-global and
+// bun cannot reliably restore it, so the stub class leaked into later files
+// (e.g. orgContextMiddleware → "repo.findByUserId is not a function"). The
+// global pristine-restore guard in preload-pristine.ts wipes the prototype stub
+// before every test, so it cannot leak.
 import { createAuth, registerRoutes } from './auth';
 import { clearFailedAttempts } from './account-lockout';
 
@@ -503,12 +502,8 @@ describe('registerRoutes — /auth/change-password', () => {
 
 describe('registerRoutes — /auth/two-factor/disable', () => {
   test('blocks platform admins (403, no auth.handler call)', async () => {
-    // Mock PlatformAdminRepository.findById to return an admin.
-    mock.module('@/handlers/platformadmin/repos/platform-admin.repo', () => ({
-      PlatformAdminRepository: class {
-        async findById() { return { id: 'u1' }; }
-      },
-    }));
+    // Stub PlatformAdminRepository.findById to return an admin.
+    stubRepo(PlatformAdminRepository, { findById: async () => ({ id: 'u1' }) });
     const handler = mock(async () => new Response('ok', { status: 200 }));
     const { app, routes, makeCtx } = makeFakeApp(handler as any, { session: { userId: 'u1' }, user: { id: 'u1' } });
     registerRoutes(app);
@@ -518,11 +513,7 @@ describe('registerRoutes — /auth/two-factor/disable', () => {
   });
 
   test('non-admin passes through to auth.handler + audits', async () => {
-    mock.module('@/handlers/platformadmin/repos/platform-admin.repo', () => ({
-      PlatformAdminRepository: class {
-        async findById() { return null; }
-      },
-    }));
+    stubRepo(PlatformAdminRepository, { findById: async () => null });
     const handler = mock(async () => new Response('ok', { status: 200 }));
     const { app, routes, makeCtx } = makeFakeApp(handler as any, { session: { userId: 'u1' }, user: { id: 'u1' } });
     registerRoutes(app);
