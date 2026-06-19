@@ -120,11 +120,14 @@ Shipped on `design/ui-ux-audit` (typecheck + lint + UI-consistency ratchet green
 
 Each fix preserves business logic, routes, API calls, permissions, and data behavior.
 
-Deferred (with rationale):
+### Round 2 — deferred items revisited (2026-06-19)
 
-- **Silent 403 → access-denied UI.** Surfacing it properly requires changing the `useOrg()` / `OrgProvider` hook contract to expose error state (a Wave-2 change touching every consumer), and the draft fix was incomplete + type-unsafe (`error.status` on `unknown`). Higher blast radius than a safe drop-in. Needs its own slice.
-- **`completion-table` status badge.** Its `waitlisted` branch references a status that isn't in `TrainingEnrollmentStatus` (dead branch). "Fixing" it changes which rows show which color — a behavior change, not cosmetic. Needs product confirmation of intended training statuses.
-- **Raster PWA icon set (apple-touch-icon, 192/512 PNG).** No SVG→PNG tool available without a new dependency; would need `sharp` as a devDep + a codegen step, or a one-time export from design. SVG icon already gives Chrome/Edge/Android installability.
-- **Arbitrary-class cleanup (~117), admin pattern sharing.** Lower-value churn; left as-is.
+| Item | Outcome |
+|---|---|
+| Silent 403 → access-denied UI | **Mostly already handled** in live code (OrgProvider slug/UUID resolution, dashboard compliance pre-gating, documents access-denied block). Shipped the one genuine inconsistency: the invoice not-found/denied state now uses the shared `EmptyState`. **No provider/`useOrg` contract change** — no value, real risk. |
+| `completion-table` status badge | **Shipped.** Confirmed the real `TrainingEnrollmentStatus` union (`payment_pending, enrolled, in_progress, completed, withdrawn, no_show`) — `waitlisted` was a dead branch. Mapped all real statuses onto `StatusBadge`. Presentational only. |
+| Raster PWA icons | **Shipped.** Generated 180/192/512 PNGs from a full-bleed square brand mark via a one-shot `bunx sharp-cli` (no repo dependency added). Wired apple-touch-icon + maskable manifest entries. |
+| Arbitrary-class cleanup (321 across 76 files) | **Declined.** Mostly off-scale one-offs (`text-[10px]`, `text-[26px]`). 321 edits, 76 files, real regression surface, zero user-visible benefit — churn disguised as consistency. |
+| Admin pattern sharing → `packages/ui` | **Declined for now.** Admin already has its own patterns; promoting shared ones is a multi-app refactor (a project), not a safe PR-sized change. |
 
 > Live-browser visual pass (first-impression, responsive screenshots, interaction feel) was **not** run — it needs the app booted with auth + seed data. Offered as a follow-up.
