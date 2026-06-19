@@ -100,6 +100,7 @@ export function MemberDetail({ orgId, memberId }: MemberDetailProps) {
   const [showDeceased, setShowDeceased] = useState(false)
   const [newCategoryId, setNewCategoryId] = useState('')
   const [suspendReason, setSuspendReason] = useState('')
+  const [showReinstate, setShowReinstate] = useState(false)
 
   // Hand-wired endpoint enriches RosterMember with person data fields (name, email, phone, etc.)
   const { data: rawData, isLoading, isError, error } = useQuery(
@@ -135,6 +136,7 @@ export function MemberDetail({ orgId, memberId }: MemberDetailProps) {
     ...reinstateMembershipMutation(),
     onSuccess: () => {
       invalidateMember()
+      setShowReinstate(false)
       toast.success('Membership reinstated')
     },
     onError: () => {
@@ -304,7 +306,7 @@ export function MemberDetail({ orgId, memberId }: MemberDetailProps) {
               variant="outline"
               size="sm"
               className="text-green-700 border-green-300 hover:bg-green-50"
-              onClick={() => reinstateMutation.mutate({ path: { membershipId: member.id } })}
+              onClick={() => setShowReinstate(true)}
               disabled={reinstateMutation.isPending}
             >
               <RefreshCw className="h-4 w-4 mr-2" />
@@ -416,6 +418,29 @@ export function MemberDetail({ orgId, memberId }: MemberDetailProps) {
               disabled={deceasedMutation.isPending}
             >
               {deceasedMutation.isPending ? 'Saving...' : 'Confirm'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Reinstate dialog */}
+      <Dialog open={showReinstate} onOpenChange={setShowReinstate}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Reinstate Membership</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-2 py-2">
+            <p className="text-sm text-[var(--color-muted)]">
+              This restores {member.name ?? 'this member'} to active membership and reactivates their benefits.
+            </p>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowReinstate(false)}>Cancel</Button>
+            <Button
+              onClick={() => reinstateMutation.mutate({ path: { membershipId: member.id } })}
+              disabled={reinstateMutation.isPending}
+            >
+              {reinstateMutation.isPending ? 'Reinstating...' : 'Reinstate'}
             </Button>
           </DialogFooter>
         </DialogContent>
