@@ -84,11 +84,23 @@ test.describe('Officer finances — route coverage with real data', () => {
     await expect(page.getByText(/INV-\d{4}-\d{3}/).first()).toBeVisible({ timeout: 10000 })
   })
 
-  // NOTE: the invoice DETAIL route (/officer/finances/invoices/$invoiceId) is
-  // currently UNREACHABLE — a flat `invoices.tsx` route shadows the
-  // `invoices/$invoiceId.tsx` child (no <Outlet/>), so navigating to a detail
-  // URL re-renders the list. Left intentionally uncovered (genuine app bug, not
-  // a test gap) until the route collision is fixed. Flagged in PHASE6 report.
+  test('invoice detail shows the real invoice amount', async ({ page }) => {
+    // The flat invoices.tsx route that used to shadow this detail route was
+    // removed; the $invoiceId route now renders. Resolve a real invoice id.
+    await page.goto(`/org/${ORG_ID}/officer/finances/invoices`)
+    const list = await apiFetch<{ data?: Array<{ id: string }> } | Array<{ id: string }>>(
+      page,
+      `/association/member/dues-invoices?organizationId=${ORG_ID}&limit=1`,
+      { orgId: ORG_ID },
+    )
+    expect(list.status).toBe(200)
+    const invoices = Array.isArray(list.data) ? list.data : (list.data?.data ?? [])
+    expect(invoices.length, 'seed must have at least one invoice').toBeGreaterThan(0)
+
+    await page.goto(`/org/${ORG_ID}/officer/finances/invoices/${invoices[0]!.id}`)
+    await expect(page.getByText(/invoice details/i).first()).toBeVisible({ timeout: 15000 })
+    await expect(page.getByText(/INV-\d{4}-\d{3}/).first()).toBeVisible({ timeout: 10000 })
+  })
 
   test('WF-129: officer triggers dues-invoice generation (real POST succeeds)', async ({ page }) => {
     // Officer reaches the invoice-management screen…
