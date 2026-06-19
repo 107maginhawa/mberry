@@ -145,16 +145,11 @@ const DEFERRED_FLOW_MODULES = new Set(['M13', 'M15', 'M16', 'M17'])
 //     WF-075 credential-template design · WF-103 quick poll (PollCard unmounted)
 //     · WF-116 booking schedule exceptions · WF-120 mark no-show (also needs a
 //       backdated booking the seed can't provide)
-//   Stateful / multi-subsystem, deferred for a dedicated pass:
-//     WF-036 member transfer (needs a 2nd chapter target + persistent pending state)
-//     · WF-057 waitlist promotion (FIFO across two event subsystems)
-//     · WF-062 paid training (Stripe checkout needs stripe-mock)
 const DEFERRED_FLOWS = new Set([
   'WF-122', 'WF-123', 'WF-124', 'WF-126', 'WF-127', 'WF-132',
   'WF-017', 'WF-020', 'WF-021',
   'WF-104', 'WF-105', 'WF-106', 'WF-107', 'WF-108',
   'WF-075', 'WF-103', 'WF-116', 'WF-120',
-  'WF-036', 'WF-057', 'WF-062',
 ])
 
 function parseWorkflowMap(): FlowRow[] {
