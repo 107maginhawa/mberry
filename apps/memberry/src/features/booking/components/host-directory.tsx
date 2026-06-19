@@ -78,7 +78,7 @@ export function HostDirectory() {
             to="/my/bookings/host/$personId"
             params={{ personId: owner.id }}
             search={{ eventId: event.id }}
-            className="block focus:outline-none"
+            className="block rounded-[var(--radius-lg)] outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)] focus-visible:ring-offset-2"
           >
             <Card className="h-full transition-shadow hover:shadow-md">
               <CardHeader className="flex flex-row items-center gap-3 pb-2">

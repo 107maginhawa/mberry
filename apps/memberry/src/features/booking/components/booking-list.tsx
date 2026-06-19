@@ -28,7 +28,7 @@ function BookingRow({ booking }: { booking: Booking }) {
     <Link
       to="/my/bookings/$bookingId"
       params={{ bookingId: booking.id }}
-      className="block focus:outline-none"
+      className="block rounded-[var(--radius-lg)] outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)] focus-visible:ring-offset-2"
     >
       <Card className="transition-shadow hover:shadow-md">
         <CardContent className="flex items-center justify-between p-4">
