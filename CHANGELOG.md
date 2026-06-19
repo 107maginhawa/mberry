@@ -4,6 +4,23 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+## [0.1.2.0] - 2026-06-19
+
+### Added
+- `DESIGN.md` design system: the Stripe/Linear list-item language, design tokens, card-vs-table responsive rule, and status/UI-state conventions.
+- PWA installability: web manifest, `theme-color`, `favicon.svg`, and raster app icons (apple-touch + 192/512 maskable). No service worker — healthcare data is not cached.
+- UI-consistency ratchet now blocks raw Tailwind status colors and arbitrary radii in `apps/memberry`, so design drift can't reappear.
+
+### Changed
+- The officer roster reflows from a dense table to scannable cards on narrow widths instead of forcing a horizontal scrollbar; the member card uses the Stripe-style list-item layout (no empty `—` placeholders).
+- Raw Tailwind status colors and arbitrary `rounded-[Npx]` radii across `apps/memberry` converted to semantic `--color-*` / radius tokens via codemod.
+- Status indicators (events, surveys, training, dues, documents, data export) now use the shared `StatusBadge`; loading/empty/error states use the shared `Skeleton`/`EmptyState`/`ErrorState`.
+
+### Fixed
+- Consequential one-click actions now require confirmation: mark dues invoice paid, reinstate membership, bulk-approve applications, and cancel event registration.
+- Accessibility: visible focus rings on booking card links, `aria-label` on the remove-fund icon button, and a clear empty state for an unavailable invoice.
+- Broken `/favicon.svg` reference (404).
+
 ## [0.1.1.0] - 2026-06-16
 
 ### Fixed
