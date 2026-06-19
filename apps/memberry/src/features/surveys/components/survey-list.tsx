@@ -78,11 +78,14 @@ export function SurveyList() {
   const [menuOpenId, setMenuOpenId] = useState<string | null>(null)
 
   const { data, isLoading, error } = useQuery({
+    // Backend route is GET /surveys/ (trailing slash; strict routing). Org is
+    // resolved from the x-org-id header injected by the api lib, not a query
+    // param. Response is paginated: { data, total }.
     queryKey: ['surveys', orgId],
-    queryFn: () => api.get<SurveyRow[]>(`/api/surveys?organizationId=${orgId}`),
+    queryFn: () => api.get<{ data: SurveyRow[]; total?: number }>(`/api/surveys/`),
   })
 
-  const surveys = data ?? []
+  const surveys = data?.data ?? []
 
   const filtered = tab === 'all' ? surveys : surveys.filter((s) => s.status === tab)
 
