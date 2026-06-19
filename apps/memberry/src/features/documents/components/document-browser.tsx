@@ -14,6 +14,9 @@ import {
   File,
 } from 'lucide-react'
 import { Button, Input, Skeleton, Tabs, TabsList, TabsTrigger } from '@monobase/ui'
+import { EmptyState } from '@/components/patterns/empty-state'
+import { ErrorState } from '@/components/patterns/error-state'
+import { StatusBadge } from '@/components/patterns/status-badge'
 import { searchDocumentsOptions } from '@monobase/sdk-ts/generated/react-query'
 
 interface DocumentBrowserProps {
@@ -189,21 +192,15 @@ export function DocumentBrowser({ orgId }: DocumentBrowserProps) {
           ))}
         </div>
       ) : error ? (
-        <div className="border rounded-lg p-12 text-center text-[var(--color-error)]">
-          Failed to load documents
-        </div>
+        <ErrorState message="Failed to load documents." />
       ) : documents.length === 0 ? (
-        <div className="border rounded-lg p-16 text-center">
-          <FileText className="w-10 h-10 text-[var(--color-muted)] mx-auto mb-3" />
-          <p className="font-medium">
-            {debouncedSearch ? 'No documents match your search' : 'No documents available'}
-          </p>
-          <p className="text-sm text-[var(--color-muted)] mt-1">
-            {debouncedSearch
-              ? 'Try a different search term or category.'
-              : 'Documents will appear here when published by your organization.'}
-          </p>
-        </div>
+        <EmptyState
+          icon={<FileText className="w-10 h-10" />}
+          headline={debouncedSearch ? 'No documents match your search' : 'No documents available'}
+          description={debouncedSearch
+            ? 'Try a different search term or category.'
+            : 'Documents will appear here when published by your organization.'}
+        />
       ) : (
         <div className="space-y-2">
           {documents.map((doc) => (
@@ -218,13 +215,9 @@ export function DocumentBrowser({ orgId }: DocumentBrowserProps) {
               </div>
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2 mb-1">
-                  <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-[var(--color-surface-warm)] text-[var(--color-muted)]">
-                    {categoryLabel(doc.category)}
-                  </span>
+                  <StatusBadge variant="muted">{categoryLabel(doc.category)}</StatusBadge>
                   {doc.accessLevel === 'public' && (
-                    <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-[var(--color-success-bg)] text-[var(--color-success)]">
-                      Public
-                    </span>
+                    <StatusBadge variant="success">Public</StatusBadge>
                   )}
                 </div>
                 <p className="font-medium truncate">{doc.title}</p>
