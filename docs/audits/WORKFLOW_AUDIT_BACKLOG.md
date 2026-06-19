@@ -1,9 +1,34 @@
 # Workflow Coverage Audit — Prioritized Backlog
 
 **Source:** `.audits/coverage-matrix.json`
-**Date:** 2026-06-19
+**Date:** 2026-06-19 (initial). **Updated 2026-06-19 post-detector-fix + Wave-1 batch 2.**
 
-**Total MISSING / UNTESTED counts:**
+**Total MISSING / UNTESTED counts (initial → current):**
+- Matrix **B** (flows, `WF-NNN`): 76 → **71 MISSING** (5 P0 flows were covered-but-untagged → tagged)
+- Matrix **C** (routes): 85 → **45 MISSING** (40 were false positives — route-coverage matcher broadened, `scripts/audit/route-match.ts`)
+- Matrix **A** (BRs): 4 → **2 UNTESTED** (BR-55/56 closed; BR-48 deferred, BR-39 p2-deferred)
+
+> **Caveat:** the per-row P0/P1/P2 tables below were generated from the *initial* matrix and OVERSTATE route gaps. Trust the live counts above + `docs/audits/COVERAGE_MATRIX.md`.
+
+## Wave-1 batch 2 — P0 flow triage (verified, 2026-06-19)
+
+**Tagged (covered-but-untagged, now COVERED):** WF-041 refund, WF-042 dunning, WF-076 run-election, WF-079 officer-transition, WF-128 merchant-onboard.
+
+**Genuinely MISSING P0 flows — need new live E2E specs (next write-batch):**
+- WF-077 — Member Votes (cast secret ballot, one vote/position). *president-election-tally is a read-only smoke; ballot cast blocked on G15 fixture.*
+- WF-078 — Bylaw Ratification (propose + vote on bylaw changes). *No e2e; "bylaw" hits are document specs.*
+- WF-124 — Handle Bounce (provider webhook → suppression). *Trigger not implemented in code; backend-shaped, not e2e.*
+- WF-125 — Manage Suppressions (admin views/removes suppressed addresses). *Handler tests exist; no e2e UI spec.*
+- WF-129 — Create Invoice (line items for dues/events/services). *Maps to officer/finances/invoices (also a C gap).*
+- WF-131 — Refund Payment (billing-module full/partial). *Distinct from dues-refund WF-041.*
+- WF-132 — Handle Webhook (Stripe payment success/failure/refund events). *Backend integration, not e2e-shaped.*
+- WF-133 — View Invoices (list/filter by status/date). *Maps to officer/finances/invoices route gap.*
+
+Note WF-124/132 are webhook/trigger flows that are backend-shaped — better closed by backend integration tests than e2e (Matrix B only counts e2e, so they may stay MISSING-by-design; revisit whether to exempt).
+
+---
+
+**(Original counts, for history:)**
 - Matrix **B** (flows, `WF-NNN`): **76 MISSING** (no E2E spec mentions the WF id)
 - Matrix **C** (routes): **85 MISSING** (no E2E `page.goto` hits the route)
 - Matrix **A** (BRs): **4 UNTESTED** (zero test refs) — BR-48, BR-55, BR-56, BR-39
