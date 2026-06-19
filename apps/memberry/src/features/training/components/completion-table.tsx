@@ -10,6 +10,27 @@ import {
   checkInCustomTrainingMutation,
 } from '@monobase/sdk-ts/generated/react-query'
 import type { TrainingEnrollment } from '@monobase/sdk-ts/generated/types.gen'
+import { StatusBadge, type StatusBadgeVariant } from '@/components/patterns/status-badge'
+
+// Maps the real TrainingEnrollment statuses to badge variants. (The previous
+// inline map only coloured 'enrolled' and a non-existent 'waitlisted'; every
+// other status fell through to grey.)
+function enrollmentStatusVariant(status: string): StatusBadgeVariant {
+  switch (status) {
+    case 'completed':
+      return 'success'
+    case 'payment_pending':
+      return 'warning'
+    case 'no_show':
+      return 'error'
+    case 'withdrawn':
+      return 'muted'
+    case 'enrolled':
+    case 'in_progress':
+    default:
+      return 'info'
+  }
+}
 
 /**
  * FIX-014-followup (Option B): the reachable officer "Mark Complete" action
@@ -239,13 +260,9 @@ export function CompletionTable({ orgId, trainingId, creditAmount }: CompletionT
                     <span className="font-medium">{e.personId.slice(0, 8)}…</span>
                   </TableCell>
                   <TableCell className="p-3">
-                    <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${
-                      e.status === 'enrolled' ? 'bg-green-100 text-green-700' :
-                      e.status === 'waitlisted' ? 'bg-yellow-100 text-yellow-700' :
-                      'bg-gray-100 text-gray-700'
-                    }`}>
-                      {e.status.replace('_', ' ')}
-                    </span>
+                    <StatusBadge variant={enrollmentStatusVariant(e.status)}>
+                      {e.status.replace(/_/g, ' ').replace(/^\w/, (c: string) => c.toUpperCase())}
+                    </StatusBadge>
                   </TableCell>
                   <TableCell className="p-3">
                     {e.completedAt ? (
