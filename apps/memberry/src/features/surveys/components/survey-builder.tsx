@@ -132,7 +132,9 @@ export function SurveyBuilder({ orgId, onSuccess, onCancel, initialData }: Surve
   )
 
   const createMut = useMutation({
-    mutationFn: (body: unknown) => api.post<{ id: string }>('/api/surveys', body),
+    // Backend route is POST /surveys/ (trailing slash, strict routing); without
+    // it the request 405s. Org comes from the x-org-id header.
+    mutationFn: (body: unknown) => api.post<{ id: string }>('/api/surveys/', body),
     onSuccess: (data) => {
       toast.success('Survey created')
       onSuccess?.(data)
@@ -193,13 +195,17 @@ export function SurveyBuilder({ orgId, onSuccess, onCancel, initialData }: Surve
         deadline: data.deadline || undefined,
         targetAudience,
       },
+      // The create contract (CreateSurveyRequestSchema → SurveyQuestionSchema)
+      // requires each question to carry a UUID `id` and an `order` field (the
+      // builder tracks position as `sortOrder`). Omitting `id`/`order` 400s.
       questions: questions
         .filter((q) => q.text.trim())
         .map((q) => ({
+          id: crypto.randomUUID(),
           type: q.type,
           text: q.text.trim(),
           required: q.required,
-          sortOrder: q.sortOrder,
+          order: q.sortOrder,
           options: ['single_choice', 'multi_choice'].includes(q.type)
             ? q.options.filter((o) => o.trim())
             : undefined,
