@@ -35,6 +35,7 @@ import { AvatarInitials } from '@/components/patterns/avatar-initials'
 import { GlassCard } from '@/components/motion/glass-card'
 import { EmptyState } from '@/components/patterns/empty-state'
 import { ListSkeleton } from '@/components/patterns/skeleton-loader'
+import { ConfirmDialog } from '@/components/patterns/confirm-dialog'
 
 interface ApplicationListProps {
   orgId: string
@@ -59,6 +60,7 @@ export function ApplicationList({ orgId }: ApplicationListProps) {
   const [statusFilter, setStatusFilter] = useState<AppStatus>('submitted')
   const [sortBy, setSortBy] = useState<'date' | 'name'>('date')
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set())
+  const [showBulkConfirm, setShowBulkConfirm] = useState(false)
 
   const { data, isLoading, error } = useQuery(
     listMembershipApplicationsOptions({
@@ -228,7 +230,7 @@ export function ApplicationList({ orgId }: ApplicationListProps) {
         {selectedIds.size > 0 && canBulkApprove && (
           <Button
             size="sm"
-            onClick={() => bulkApprove.mutate({ applicationIds: [...selectedIds] })}
+            onClick={() => setShowBulkConfirm(true)}
             disabled={bulkApprove.isPending}
           >
             {bulkApprove.isPending
@@ -280,6 +282,19 @@ export function ApplicationList({ orgId }: ApplicationListProps) {
           ))}
         </div>
       )}
+
+      <ConfirmDialog
+        open={showBulkConfirm}
+        onOpenChange={setShowBulkConfirm}
+        variant="high-consequence"
+        title="Approve selected applications?"
+        description={`Approve ${selectedIds.size} application${selectedIds.size !== 1 ? 's' : ''}? Each approved applicant becomes an active member.`}
+        confirmLabel={`Approve ${selectedIds.size}`}
+        onConfirm={() => {
+          bulkApprove.mutate({ applicationIds: [...selectedIds] })
+          setShowBulkConfirm(false)
+        }}
+      />
     </div>
   )
 }
