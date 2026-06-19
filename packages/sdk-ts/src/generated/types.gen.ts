@@ -9317,6 +9317,20 @@ export type BulkApproveFailure = {
 };
 
 /**
+ * A single issued claim invitation, carrying the raw deliverable token
+ */
+export type BulkImportInvitation = {
+    /**
+     * Email the claim invitation was issued to
+     */
+    email: string;
+    /**
+     * Raw claim token (only returned here — never stored) used to build the claim link
+     */
+    token: string;
+};
+
+/**
  * Bulk import mode — 'preview' validates without persisting, 'import' creates invites
  */
 export type BulkImportMode = 'preview' | 'import';
@@ -9456,6 +9470,10 @@ export type BulkImportResponse = {
          * Count of invitation tokens issued/sent
          */
         invitationsSent: number;
+        /**
+         * Issued invitations with their raw deliverable claim tokens
+         */
+        invitations: Array<BulkImportInvitation>;
     };
 };
 
@@ -9479,6 +9497,10 @@ export type BulkImportResultResponse = {
      * Count of invitation tokens issued/sent
      */
     invitationsSent: number;
+    /**
+     * Issued invitations with their raw deliverable claim tokens
+     */
+    invitations: Array<BulkImportInvitation>;
 };
 
 /**
