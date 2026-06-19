@@ -39,7 +39,7 @@ function markDismissedLocally(surveyId: string): void {
 
 async function dismissOnServer(surveyId: string): Promise<void> {
   try {
-    await api.post(`/surveys/${surveyId}/responses/dismiss`)
+    await api.post(`/api/surveys/${surveyId}/responses/dismiss`)
     markDismissedLocally(surveyId)
   } catch {
     // Fallback: still mark locally so user isn't re-prompted this session

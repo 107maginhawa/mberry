@@ -194,7 +194,7 @@ export function SurveyFlow({ survey, onComplete, previewMode }: SurveyFlowProps)
         questionId: q.id,
         value: answers[q.id] ?? null,
       }))
-      await api.post(`/surveys/${survey.id}/responses`, { answers: formattedAnswers })
+      await api.post(`/api/surveys/${survey.id}/responses`, { answers: formattedAnswers })
       clearDraft()
       setCompleted(true)
       toast.success('Survey submitted successfully!')
