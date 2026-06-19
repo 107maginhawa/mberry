@@ -1,4 +1,5 @@
-// WF-004 — Member Onboarding: required profile, license, payment
+// WF-006 — Member Onboarding: optional profile-completion wizard post-dashboard
+// WF-004 — Member Onboarding: required profile, license, payment (NOTE: stale — WF-004 is Password Reset; see WORKFLOW_AUDIT_BACKLOG)
 import { test, expect } from '../helpers/test-fixture'
 import { signUpForOnboarding } from '../helpers/auth'
 import { captureAnyApiSuccess } from '../helpers/real-flow'

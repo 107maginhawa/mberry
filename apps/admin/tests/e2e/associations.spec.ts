@@ -1,3 +1,4 @@
+// WF-015 — Onboard Association: create tenant (core create action; locale/regex/credit-config sub-steps not yet covered)
 import { test, expect } from '@playwright/test'
 import { signInAsAdmin, signInAndNavigate, csrfHeaders } from './helpers/auth'
 import { ADMIN_BASE } from './helpers/test-config'

@@ -1,3 +1,5 @@
+// WF-009 — Bulk CSV Import with Member Matching (M01 framing)
+// WF-031 — Bulk CSV Import: upload, validate, preview, import with matching (M05 framing)
 /**
  * T5 — Officer uploads a CSV roster, the import succeeds + success banner shows.
  *

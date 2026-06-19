@@ -1,4 +1,5 @@
 // WF-070 — Credit Reporting: officer compliance dashboard
+// WF-068 — Org Credit Compliance: officer view of member compliance rates
 import { test, expect } from '../helpers/test-fixture'
 import { SEED_OFFICER_EMAIL, TEST_PASSWORD } from '../helpers/test-config'
 import { captureRouteHydration } from '../helpers/real-flow'

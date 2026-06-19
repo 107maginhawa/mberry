@@ -1,4 +1,5 @@
 // WF-117 — Booking Flow: member books a slot end-to-end
+// WF-121 — List My Bookings: client/provider views upcoming and past bookings
 // Business Rules: [BR-9] Booking module
 // E2E: Client books a session via host directory
 import { test, expect } from '../helpers/test-fixture'

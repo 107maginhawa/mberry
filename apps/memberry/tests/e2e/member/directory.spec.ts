@@ -1,3 +1,4 @@
+// WF-034 — Member Directory: privacy-filtered searchable list
 // M-10: Browse member directory
 // Verifies directory search page renders, search works, and member cards display
 import { test, expect } from '../helpers/test-fixture'

@@ -1,3 +1,4 @@
+// WF-054 — Event Cancellation: cancel event, notify registrants, process refunds
 // P1 E2E Gap: Officer cancels event
 // Tests event detail page cancel flow and status badge update
 import { test, expect } from '../helpers/test-fixture'

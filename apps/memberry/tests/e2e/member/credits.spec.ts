@@ -1,3 +1,4 @@
+// WF-065 — View Credit Summary: per-cycle breakdown, cross-org aggregation
 // Business Rules: [BR-11] [BR-12] [BR-13] [BR-14]
 import { test, expect } from '../helpers/test-fixture'
 import { signIn } from '../helpers/auth'

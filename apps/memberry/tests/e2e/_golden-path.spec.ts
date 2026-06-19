@@ -1,3 +1,4 @@
+// WF-066 — Add Manual Credit: self-entry with activity details, optional docs
 /**
  * Golden Path — single comprehensive UI-driven happy-path spec.
  *

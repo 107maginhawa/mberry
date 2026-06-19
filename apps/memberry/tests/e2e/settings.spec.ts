@@ -1,3 +1,4 @@
+// WF-013 — Notification Preferences: per-channel opt-in/out
 import { test, expect } from './helpers/test-fixture'
 import { signUp, signIn } from './helpers/auth'
 

@@ -1,3 +1,4 @@
+// WF-012 — Digital ID Card: view/download QR-verified member ID
 /**
  * T2 — Digital ID Card renders real member identity + membership badge.
  *
