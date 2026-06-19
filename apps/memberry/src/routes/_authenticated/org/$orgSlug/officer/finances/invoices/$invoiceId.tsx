@@ -13,9 +13,10 @@ import { formatCents } from '@/features/dues/lib/money'
 import { useOrg } from '@/hooks/use-org'
 import { Button, Skeleton } from '@monobase/ui'
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@monobase/ui'
-import { MoreHorizontal, CheckCircle, Send, XCircle, FileDown } from 'lucide-react'
+import { MoreHorizontal, CheckCircle, Send, XCircle, FileDown, FileX } from 'lucide-react'
 import { toast } from 'sonner'
 import { extractErrorMessage } from '@/utils/error'
+import { EmptyState } from '@/components/patterns/empty-state'
 
 export const Route = createFileRoute('/_authenticated/org/$orgSlug/officer/finances/invoices/$invoiceId')({
   component: InvoiceDetailPage,
@@ -78,9 +79,11 @@ function InvoiceDetailPage() {
   if (error || !invoice) {
     return (
       <PageShell title="Invoice Not Found" breadcrumbs={invoiceBreadcrumbs}>
-        <div className="text-center py-12 text-[var(--color-muted)]">
-          Invoice not found or you don't have permission to view it.
-        </div>
+        <EmptyState
+          icon={<FileX className="w-10 h-10" />}
+          headline="Invoice not available"
+          description="This invoice may not exist, or you may not have permission to view it."
+        />
       </PageShell>
     )
   }
