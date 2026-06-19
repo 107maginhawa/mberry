@@ -60,8 +60,11 @@ export const cpdActivityTypeEnum = pgEnum('cpd_activity_type', [
 ]);
 
 export const eventTypeEnum = pgEnum('event_type', [
+  // Legacy values (kept for existing rows) …
   'generalAssembly', 'inductionCeremony', 'fellowship', 'medicalMission',
   'boardMeeting', 'committeeMeeting', 'fundraiser', 'other',
+  // … plus the canonical API/form values (ISSUE-030, migration 0074).
+  'assembly', 'seminar', 'social', 'networking', 'governance', 'custom',
 ]);
 
 export const events = pgTable('event', {

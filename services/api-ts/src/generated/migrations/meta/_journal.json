@@ -519,6 +519,13 @@
       "when": 1781193600000,
       "tag": "0073_booking_event_unique_indexes",
       "breakpoints": true
+    },
+    {
+      "idx": 74,
+      "version": "7",
+      "when": 1781280000000,
+      "tag": "0074_event_type_enum_reconcile",
+      "breakpoints": true
     }
   ]
 }

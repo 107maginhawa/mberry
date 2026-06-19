@@ -42,6 +42,28 @@ const eventSchema = z.object({
 
 type EventFormData = z.infer<typeof eventSchema>
 
+// ISSUE-030: the Select offers 7 canonical values, but older/imported events
+// carry legacy types (medicalMission, generalAssembly, conference, fellowship,
+// …). Without normalization the edit Select renders blank. Map known legacy
+// values to the nearest canonical option; unknowns degrade to 'custom'. The DB
+// enum (migration 0074) now accepts the canonical values, so saving works.
+const CANONICAL_EVENT_TYPES = ['assembly', 'seminar', 'social', 'networking', 'fundraiser', 'governance', 'custom']
+const LEGACY_EVENT_TYPE_MAP: Record<string, string> = {
+  generalAssembly: 'assembly',
+  inductionCeremony: 'governance',
+  boardMeeting: 'governance',
+  committeeMeeting: 'governance',
+  fellowship: 'social',
+  conference: 'seminar',
+  medicalMission: 'custom',
+  other: 'custom',
+}
+function normalizeEventType(stored?: string | null): string {
+  if (!stored) return 'assembly'
+  if (CANONICAL_EVENT_TYPES.includes(stored)) return stored
+  return LEGACY_EVENT_TYPE_MAP[stored] ?? 'custom'
+}
+
 const CPD_ACTIVITY_TYPES = [
   { value: 'seminar', label: 'Seminar' },
   { value: 'workshop', label: 'Workshop' },
@@ -99,7 +121,7 @@ export function EventForm({ orgId, event, onSuccess, onCancel }: EventFormProps)
     resolver: zodResolver(eventSchema),
     defaultValues: {
       title: event?.title ?? '',
-      eventType: event?.eventType ?? 'assembly',
+      eventType: normalizeEventType(event?.eventType),
       description: event?.description ?? '',
       startDate: toDatetimeLocal(event?.startDate),
       endDate: toDatetimeLocal(event?.endDate),

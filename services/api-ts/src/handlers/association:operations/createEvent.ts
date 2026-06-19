@@ -26,6 +26,9 @@ export async function createEvent(
   const event = await repo.createOne({
     organizationId: body.organizationId || orgId,
     title: body.title,
+    // ISSUE-030: previously dropped — every event defaulted to 'other'. The DB
+    // enum now carries the canonical values (migration 0074), so persist it.
+    eventType: body.eventType,
     description: body.description,
     location: body.location,
     startDate: body.startDate,
