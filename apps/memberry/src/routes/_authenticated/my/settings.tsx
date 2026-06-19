@@ -222,7 +222,7 @@ function NotificationPreferencesSection() {
     ))
 
     try {
-      await api.patch('/api/persons/me/notification-preferences', { category, [field]: value })
+      await api.patch('/api/persons/me/notification-preferences', { preferences: [{ category, [field]: value }] })
     } catch {
       setPrefs(current.map(p =>
         p.category === category ? { ...p, [field]: !value } : p

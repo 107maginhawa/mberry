@@ -21,10 +21,12 @@ export async function updateMyNotificationPreferences(
   const personId = session.user.id;
   const organizationId = ctx.get('organizationId') as string;
   const body = ctx.req.valid('json');
-  const b = body as Record<string, unknown>;
+  // The request contract carries updates under `preferences[]`. The UI toggles
+  // one category at a time, so operate on the first entry (single-row response).
+  const b = body.preferences?.[0];
 
-  if (!b['category']) throw new ValidationError('category is required');
-  if (!NOTIFICATION_CATEGORIES.includes(b['category'] as typeof NOTIFICATION_CATEGORIES[number])) {
+  if (!b?.category) throw new ValidationError('category is required');
+  if (!NOTIFICATION_CATEGORIES.includes(b.category as typeof NOTIFICATION_CATEGORIES[number])) {
     throw new ValidationError(`Invalid category. Must be one of: ${NOTIFICATION_CATEGORIES.join(', ')}`);
   }
 
@@ -33,13 +35,13 @@ export async function updateMyNotificationPreferences(
     .from(notificationPreferences)
     .where(and(
       eq(notificationPreferences.personId, personId),
-      eq(notificationPreferences.category, b['category'] as string),
+      eq(notificationPreferences.category, b.category),
     ))
     .limit(1);
 
   const updates = {
-    pushEnabled: (b['pushEnabled'] as boolean | undefined) ?? existing?.pushEnabled ?? true,
-    emailEnabled: (b['emailEnabled'] as boolean | undefined) ?? existing?.emailEnabled ?? false,
+    pushEnabled: b.pushEnabled ?? existing?.pushEnabled ?? true,
+    emailEnabled: b.emailEnabled ?? existing?.emailEnabled ?? false,
   };
 
   let row;
@@ -52,13 +54,13 @@ export async function updateMyNotificationPreferences(
   } else {
     [row] = await db
       .insert(notificationPreferences)
-      .values({ personId, category: b['category'] as string, organizationId, ...updates })
+      .values({ personId, category: b.category, organizationId, ...updates })
       .returning();
   }
 
   ctx.set('auditResourceId', personId);
-  ctx.set('auditDescription', `Notification preference updated: ${b['category']}`);
-  ctx.set('auditDetails', { category: b['category'] as string });
+  ctx.set('auditDescription', `Notification preference updated: ${b.category}`);
+  ctx.set('auditDetails', { category: b.category });
 
   return ctx.json(row, existing ? 200 : 201);
 }
