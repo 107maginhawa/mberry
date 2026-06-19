@@ -7,6 +7,7 @@ import { PageShell } from '@/components/patterns/page-shell'
 import { GlassCard } from '@/components/motion/glass-card'
 import { EmptyState } from '@/components/patterns/empty-state'
 import { ListSkeleton } from '@/components/patterns/skeleton-loader'
+import { ErrorState } from '@/components/patterns/error-state'
 import { StaggerGrid, StaggerItem } from '@/components/motion/stagger-grid'
 
 export const Route = createFileRoute('/_authenticated/org/$orgSlug/home')({
@@ -57,9 +58,7 @@ function OrgHome() {
         {loadingAnnouncements ? (
           <ListSkeleton rows={3} />
         ) : announcementsError ? (
-          <GlassCard className="p-6 text-center text-[var(--color-error)]">
-            Failed to load announcements.
-          </GlassCard>
+          <ErrorState message="Failed to load announcements." />
         ) : announcementItems.length === 0 ? (
           <GlassCard className="p-0">
             <EmptyState
@@ -114,9 +113,7 @@ function OrgHome() {
             <ListSkeleton rows={4} />
           </div>
         ) : eventsError ? (
-          <GlassCard className="p-6 text-center text-[var(--color-error)]">
-            Failed to load events.
-          </GlassCard>
+          <ErrorState message="Failed to load events." />
         ) : eventItems.length === 0 ? (
           <GlassCard className="p-0">
             <EmptyState
