@@ -331,7 +331,9 @@ export function DocumentLibrary({ orgId }: DocumentLibraryProps) {
         title: uploadTitle.trim(),
         fileName: uploadFile.name,
         mimeType: uploadFile.type || 'application/octet-stream',
-        size: BigInt(uploadFile.size),
+        // ISSUE-024: validator is z.number().int(); BigInt serializes to a
+        // string it rejects. Send a plain integer (bytes).
+        size: uploadFile.size as unknown as bigint,
         storageKey: `documents/${orgId}/${Date.now()}-${uploadFile.name}`,
         ownerId: orgId,
         ownerType: 'organization',

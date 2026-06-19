@@ -164,7 +164,8 @@ function VersionsTab({ documentId, orgId }: { documentId: string; orgId: string 
       body: {
         fileName: uploadingFile.name,
         storageKey: `documents/${orgId}/${documentId}/${Date.now()}-${uploadingFile.name}`,
-        size: BigInt(uploadingFile.size),
+        // ISSUE-024: validator is z.number().int(); BigInt serializes to a string it rejects.
+        size: uploadingFile.size as unknown as bigint,
         changeNotes: changeNotes.trim() || undefined,
       },
     })
