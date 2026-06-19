@@ -99,7 +99,7 @@ export function EventForm({ orgId, event, onSuccess, onCancel }: EventFormProps)
     resolver: zodResolver(eventSchema),
     defaultValues: {
       title: event?.title ?? '',
-      eventType: event?.eventType ?? 'other',
+      eventType: event?.eventType ?? 'assembly',
       description: event?.description ?? '',
       startDate: toDatetimeLocal(event?.startDate),
       endDate: toDatetimeLocal(event?.endDate),
@@ -224,14 +224,16 @@ export function EventForm({ orgId, event, onSuccess, onCancel }: EventFormProps)
                     <SelectValue placeholder="Select type" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="general_assembly">General Assembly</SelectItem>
-                    <SelectItem value="induction_ceremony">Induction</SelectItem>
-                    <SelectItem value="fellowship">Fellowship</SelectItem>
-                    <SelectItem value="medical_mission">Medical Mission</SelectItem>
-                    <SelectItem value="board_meeting">Board Meeting</SelectItem>
-                    <SelectItem value="committee_meeting">Committee Meeting</SelectItem>
+                    {/* ISSUE-016: values must match backend EventType enum
+                        (assembly|seminar|social|networking|fundraiser|governance|custom);
+                        the old labels posted values the validator rejected → 400. */}
+                    <SelectItem value="assembly">General Assembly</SelectItem>
+                    <SelectItem value="seminar">Seminar / CPD</SelectItem>
+                    <SelectItem value="social">Social / Fellowship</SelectItem>
+                    <SelectItem value="networking">Networking</SelectItem>
                     <SelectItem value="fundraiser">Fundraiser</SelectItem>
-                    <SelectItem value="other">Other</SelectItem>
+                    <SelectItem value="governance">Board / Governance Meeting</SelectItem>
+                    <SelectItem value="custom">Other / Custom</SelectItem>
                   </SelectContent>
                 </Select>
               )}
