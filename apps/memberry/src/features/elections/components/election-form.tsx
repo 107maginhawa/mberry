@@ -120,7 +120,11 @@ export function ElectionForm({ orgId, electionId, initialData, onSuccess, onCanc
     mutationFn: createElectionMutation().mutationFn,
     onSuccess: (data: { id: string }) => {
       queryClient.invalidateQueries({ queryKey: listElectionsQueryKey({ query: { organizationId: orgId } }) })
-      onSuccess?.(data)
+      // ISSUE-018: the createElection handler returns { data: election } though the
+      // OpenAPI contract is a flat Election, so data.id is undefined and the caller
+      // navigated to /elections/undefined → 500. Unwrap defensively until the backend
+      // {data}-envelope contract violation is fixed (see report's systemic note).
+      onSuccess?.((data as { data?: { id: string } })?.data ?? data)
     },
     onError: (err: Error) => {
       setServerError(err.message)
@@ -134,7 +138,8 @@ export function ElectionForm({ orgId, electionId, initialData, onSuccess, onCanc
       if (electionId) {
         queryClient.invalidateQueries({ queryKey: getElectionOptions({ path: { electionId } }).queryKey })
       }
-      onSuccess?.(data)
+      // ISSUE-018: see createMut — unwrap the {data} envelope defensively.
+      onSuccess?.((data as { data?: { id: string } })?.data ?? data)
     },
     onError: (err: Error) => {
       setServerError(err.message)
