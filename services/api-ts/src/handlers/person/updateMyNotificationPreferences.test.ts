@@ -16,7 +16,7 @@ describe('updateMyNotificationPreferences', () => {
   });
 
   test('throws ValidationError for invalid category', async () => {
-    const ctx = makeCtx({ _body: { category: 'invalid-cat' } });
+    const ctx = makeCtx({ _body: { preferences: [{ category: 'invalid-cat' }] } });
     await expect(updateMyNotificationPreferences(ctx)).rejects.toThrow('Invalid category');
   });
 
@@ -35,7 +35,7 @@ describe('updateMyNotificationPreferences', () => {
         }),
       }),
     };
-    const ctx = makeCtx({ database: mockDb, _body: { category: 'dues', pushEnabled: true } });
+    const ctx = makeCtx({ database: mockDb, _body: { preferences: [{ category: 'dues', pushEnabled: true }] } });
     const res = await updateMyNotificationPreferences(ctx);
     expect(res.status).toBe(201);
   });
