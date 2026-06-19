@@ -346,8 +346,13 @@ export async function seedIdorOfficer(db: ReturnType<typeof drizzle>, org2Id: st
     dateOfBirth: '1985-01-01', gender: 'male',
   });
 
-  // Set role
-  await db.update(userTable).set({ role: 'association:admin' }).where(eq(userTable.id, client.userId));
+  // Set role. Mirror the other seeded officers (vicepresident/boardmember):
+  // this user has a membership row + officer term below, so it must carry
+  // association:member (member-content routes like listAnnouncements enforce
+  // authMiddleware({roles:["association:member"]}) at the session-role level).
+  // Without it the dashboard's announcements widget 403'd — a swallowed 4xx the
+  // e2e journey-firewall (cross-org-isolation.spec) flags on the success path.
+  await db.update(userTable).set({ role: 'association:admin,association:member,association:officer' }).where(eq(userTable.id, client.userId));
 
   // Membership in org2
   const existingMbr = await db.select().from(memberships)
