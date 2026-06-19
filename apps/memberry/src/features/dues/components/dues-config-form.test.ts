@@ -109,7 +109,9 @@ describe('DuesConfigForm create-vs-update dispatch (Phase 15 / Plan 00b)', () =>
   test('buildCreatePayload includes organizationId and required create fields', () => {
     const payload = buildCreatePayload(orgId, formState)
     expect(payload).toHaveProperty('organizationId', orgId)
-    expect(payload).toHaveProperty('annualAmount', BigInt(50000))
+    // ISSUE-021: annualAmount must be a plain integer (cents), not BigInt —
+    // the validator is z.number().int() and BigInt serializes to a string it rejects.
+    expect(payload).toHaveProperty('annualAmount', 50000)
     expect(payload).toHaveProperty('gracePeriodDays', 30)
     expect(payload).toHaveProperty('currency')
   })
@@ -121,7 +123,8 @@ describe('DuesConfigForm create-vs-update dispatch (Phase 15 / Plan 00b)', () =>
 
   test('buildUpdatePayload includes annualAmount and gracePeriodDays only', () => {
     const payload = buildUpdatePayload(formState)
-    expect(payload).toHaveProperty('annualAmount', BigInt(50000))
+    // ISSUE-021: annualAmount must be a plain integer (cents), not BigInt.
+    expect(payload).toHaveProperty('annualAmount', 50000)
     expect(payload).toHaveProperty('gracePeriodDays', 30)
     expect(payload).not.toHaveProperty('organizationId')
     expect(payload).not.toHaveProperty('currency')

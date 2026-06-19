@@ -25,11 +25,15 @@ export function buildCreatePayload(
   return {
     organizationId: orgId,
     tierId: extras?.tierId ?? orgId, // default tier = org
-    annualAmount: BigInt(parseCentsInput(formState.defaultAmount)),
+    // ISSUE-021: validator is z.number().int(); BigInt serializes to a string
+    // the validator rejects. Send a plain integer (cents).
+    annualAmount: parseCentsInput(formState.defaultAmount) as unknown as bigint,
     currency: extras?.currency ?? 'PHP',
     gracePeriodDays: parseInt(formState.gracePeriodDays),
     fundAllocations: [] as [],
-    effectiveDate: new Date(),
+    // ISSUE-021: validator wants date-only YYYY-MM-DD; a Date serializes to a
+    // full ISO datetime that fails the regex. Send a date-only string.
+    effectiveDate: new Date().toISOString().slice(0, 10) as unknown as Date,
     status: 'active' as const,
   }
 }
@@ -43,7 +47,8 @@ export function buildUpdatePayload(formState: {
   gracePeriodDays: string
 }) {
   return {
-    annualAmount: BigInt(parseCentsInput(formState.defaultAmount)),
+    // ISSUE-021: see buildCreatePayload — send a plain integer (cents).
+    annualAmount: parseCentsInput(formState.defaultAmount) as unknown as bigint,
     gracePeriodDays: parseInt(formState.gracePeriodDays),
   }
 }
