@@ -16,10 +16,15 @@ import { DocumentRepository, DocumentVersionRepository, DocumentAccessLogReposit
 import { StorageFileRepository } from '@/handlers/storage/repos/file.repo';
 import { OfficerTermRepository } from '@/handlers/association:member/repos/governance.repo';
 
-// Stub officer check globally so all handler tests pass the new auth guards.
+// Stub officer check so all handler tests pass the new auth guards. Applied in
+// a file-level beforeEach (not at module scope) so it survives the global
+// pristine-restore guard in preload-pristine.ts that runs before every test.
 // Auth enforcement is tested separately in auth-enforcement.test.ts.
-stubRepo(OfficerTermRepository, {
-  findActiveByPersonAndOrg: async () => [{ positionTitle: 'President' }],
+beforeEach(() => {
+  restoreRepo(OfficerTermRepository);
+  stubRepo(OfficerTermRepository, {
+    findActiveByPersonAndOrg: async () => [{ positionTitle: 'President' }],
+  });
 });
 
 // ─── Shared fixtures ──────────────────────────────────────────────────────────

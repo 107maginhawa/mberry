@@ -15,8 +15,14 @@ import { OfficerTermRepository } from '../association:member/repos/governance.re
 
 mock.module('@/core/audit/audit-action', () => ({ auditAction: async () => {} }));
 
-// Global stub: publishAnnouncement and archiveAnnouncement call requirePosition → OfficerTermRepository
-stubRepo(OfficerTermRepository, { findActiveByPersonAndOrg: async () => [{ positionTitle: 'President' }] });
+// publishAnnouncement and archiveAnnouncement call requirePosition →
+// OfficerTermRepository. Apply the stub in a file-level beforeEach (not module
+// scope) so it survives the global pristine-restore guard in
+// preload-pristine.ts that runs before every test.
+beforeEach(() => {
+  restoreRepo(OfficerTermRepository);
+  stubRepo(OfficerTermRepository, { findActiveByPersonAndOrg: async () => [{ positionTitle: 'President' }] });
+});
 
 // ---------------------------------------------------------------------------
 // Fixtures
