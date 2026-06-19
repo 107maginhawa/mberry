@@ -183,11 +183,12 @@ describe('RecordPaymentForm', () => {
     })
 
     const callArg = mutateSpy.mock.calls[0][0]
-    // Payload shape: { body: { organizationId, personId, amount: BigInt(cents), currency, paymentMethod, ... }, headers }
+    // Payload shape: { body: { organizationId, personId, amount (integer cents), currency, paymentMethod, ... }, headers }
     expect(callArg.body.organizationId).toBe('org-42')
     expect(callArg.body.personId).toBe('person-999')
-    // 500 PHP → 50000 cents as BigInt
-    expect(callArg.body.amount).toBe(BigInt(50000))
+    // ISSUE-022: 500 PHP → 50000 cents as a plain integer (validator is
+    // z.number().int(); BigInt would serialize to a string it rejects).
+    expect(callArg.body.amount).toBe(50000)
     expect(callArg.body.currency).toBe('PHP')
     expect(callArg.body.paymentMethod).toBe('cash')
     expect(callArg.headers['x-org-id']).toBe('org-42')

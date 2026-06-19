@@ -68,10 +68,12 @@ describe('EventForm', () => {
   test('renders event type selector with options', () => {
     renderWithProviders(<EventForm orgId="org-1" />)
 
+    // ISSUE-016: options must match the backend EventType enum
+    // (assembly|seminar|social|networking|fundraiser|governance|custom).
     expect(screen.getByLabelText('Event Type')).toBeInTheDocument()
     expect(screen.getByText('General Assembly')).toBeInTheDocument()
-    expect(screen.getByText('Fellowship')).toBeInTheDocument()
-    expect(screen.getByText('Medical Mission')).toBeInTheDocument()
+    expect(screen.getByText('Social / Fellowship')).toBeInTheDocument()
+    expect(screen.getByText('Board / Governance Meeting')).toBeInTheDocument()
   })
 
   test('renders Save Draft and Publish buttons', () => {

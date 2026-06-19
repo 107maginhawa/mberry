@@ -60,11 +60,13 @@ describe('TrainingForm', () => {
     renderWithProviders(<TrainingForm orgId="org-1" />)
 
     // With mocked @monobase/ui Select, options render as role="option" elements
+    // ISSUE-019: options must match the backend Training type enum
+    // (seminar|workshop|webinar|self_paced|hands_on).
     expect(screen.getByRole('option', { name: 'Seminar' })).toBeInTheDocument()
     expect(screen.getByRole('option', { name: 'Workshop' })).toBeInTheDocument()
-    expect(screen.getByRole('option', { name: 'Convention' })).toBeInTheDocument()
-    expect(screen.getByRole('option', { name: 'Online Course' })).toBeInTheDocument()
-    expect(screen.getByRole('option', { name: 'Skills Training' })).toBeInTheDocument()
+    expect(screen.getByRole('option', { name: 'Webinar' })).toBeInTheDocument()
+    expect(screen.getByRole('option', { name: 'Self-Paced Course' })).toBeInTheDocument()
+    expect(screen.getByRole('option', { name: 'Hands-on Training' })).toBeInTheDocument()
   })
 
   test('renders Save Draft and Publish buttons', () => {

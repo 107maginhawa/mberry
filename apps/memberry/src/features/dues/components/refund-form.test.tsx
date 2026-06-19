@@ -152,10 +152,11 @@ describe('RefundForm', () => {
     }, { timeout: 3000 })
 
     const callArg = captureSpy.mock.calls[0][0]
-    // Payload shape: { path: { paymentId }, body: { amount: BigInt(cents), reason } }
+    // Payload shape: { path: { paymentId }, body: { amount (integer cents), reason } }
     expect(callArg.path.paymentId).toBe('pay-xyz')
-    // 250 PHP → 25000 cents as BigInt
-    expect(callArg.body.amount).toBe(BigInt(25000))
+    // ISSUE-022: 250 PHP → 25000 cents as a plain integer (validator is
+    // z.number().int(); BigInt would serialize to a string it rejects).
+    expect(callArg.body.amount).toBe(25000)
     expect(callArg.body.reason).toBe('Membership cancelled')
   })
 
