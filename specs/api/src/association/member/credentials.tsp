@@ -351,6 +351,12 @@ model ProfessionalLicenseUpdateRequest {
   expirationDate?: plainDate;
   status?: LicenseStatus;
   documentRef?: string | null;
+
+  @doc("Timestamp the license was verified by an officer")
+  verifiedAt?: utcDateTime | null;
+
+  @doc("Person ID of the officer who verified the license")
+  verifiedBy?: string | null;
 }
 
 // ---------------------------------------------------------------------------

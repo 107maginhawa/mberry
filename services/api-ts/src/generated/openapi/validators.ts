@@ -8073,7 +8073,9 @@ export const ProfessionalLicenseUpdateRequestSchema = z.object({
   issuedDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).refine(val => { const parsed = new Date(val + "T00:00:00Z"); return !isNaN(parsed.getTime()) && parsed.toISOString().split("T")[0] === val; }, { message: "Invalid calendar date" }).optional(),
   expirationDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).refine(val => { const parsed = new Date(val + "T00:00:00Z"); return !isNaN(parsed.getTime()) && parsed.toISOString().split("T")[0] === val; }, { message: "Invalid calendar date" }).optional(),
   status: LicenseStatusSchema.optional(),
-  documentRef: z.union([z.string(), z.null()]).optional()
+  documentRef: z.union([z.string(), z.null()]).optional(),
+  verifiedAt: z.union([z.string().datetime().transform((str) => new Date(str)), z.null()]).optional(),
+  verifiedBy: z.union([z.string(), z.null()]).optional()
 });
 
 export const PublicDirectoryProfileSchema = z.object({
