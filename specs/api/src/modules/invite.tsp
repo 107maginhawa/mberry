@@ -288,7 +288,7 @@ namespace InviteModule {
     @post
     @route("/invite")
     @useAuth(bearerAuth)
-    @extension("x-security-required-roles", #["officer"])
+    @extension("x-security-required-roles", #["officer", "association:officer", "association:admin"])
     @extension("x-audit", #{ action: "create", resourceType: "invitation" })
     createInvite(
       @body body: CreateInviteRequest

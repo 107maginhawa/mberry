@@ -1,16 +1,11 @@
 // WF-033 Membership Categories (officer creates a category) + Matrix C coverage
 // of the institutional-memberships list.
 //
-// Deferred from this pass (genuine backend/seed gaps, not test gaps — flagged in
-// the PHASE6 report + commit message by WF id, not faked here; the ids are kept
-// OUT of this file so the Matrix-B grep does not count them as covered):
-//   • Invite Member — POST /invite is gated on the bare "officer" role, but the
-//     seed officer carries "association:officer" → 403. Role-config gap.
+// Deferred from this pass (kept out of specs so Matrix-B doesn't mis-count; ids
+// in the commit trail):
 //   • Officer Credit Adjustment — POST /association/member/credits/adjust 500s on
-//     the credit_entry insert for the seed member (backend precondition; covered
-//     by the adjustCreditEntry handler unit tests).
-//   • Member Transfer — needs a second real chapter id as the transfer target;
-//     resolution is non-trivial and creates persistent pending state.
+//     the credit_entry insert for the seed member (separate backend fix).
+//   • Member Transfer — needs a second real chapter id + persistent pending state.
 import { test, expect } from '../helpers/test-fixture'
 import { apiFetch } from '../helpers/api-fetch'
 import { captureRouteHydration } from '../helpers/real-flow'
@@ -18,6 +13,26 @@ import { captureRouteHydration } from '../helpers/real-flow'
 test.use({ authRole: 'officer' })
 
 const ORG_ID = 'ed8e3a96-8126-4341-be42-e6eb7940c562'
+
+test.describe('WF-008: officer invites a member', () => {
+  test('creates a pending invite (validatable by token) and rejects duplicates', async ({ page }) => {
+    await page.goto(`/org/${ORG_ID}/officer/roster`)
+    const email = `wf008-${Date.now()}@example.test`
+
+    const created = await apiFetch<any>(page, '/invite', { method: 'POST', orgId: ORG_ID, body: { email } })
+    expect(created.status, 'invite must be created').toBe(201)
+    const token = (created.data?.data ?? created.data)?.token
+    expect(token, 'invite returns a one-time token').toBeTruthy()
+
+    // The invite durably exists — validate its token (public endpoint).
+    const validate = await apiFetch<any>(page, `/invite/validate/${token}`)
+    expect(validate.status).toBe(200)
+
+    // A second active invite for the same email is rejected.
+    const dup = await apiFetch<any>(page, '/invite', { method: 'POST', orgId: ORG_ID, body: { email } })
+    expect(dup.status, 'duplicate active invite is rejected').toBe(409)
+  })
+})
 
 test.describe('WF-033: officer creates a membership category', () => {
   test('upserts a new category and it appears in the org category list', async ({ page }) => {

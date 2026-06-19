@@ -148,11 +148,8 @@ const DEFERRED_FLOW_MODULES = new Set(['M13', 'M15', 'M16', 'M17'])
 //   M14 national dashboard endpoint 403s for the seed super-admin (handler wants
 //   platform_admin/national_officer in a form `super` doesn't satisfy):
 //     WF-084 · WF-085 · WF-086
-//   Blocked by an app bug / role gap (cannot assert a success path against a
-//   403/500 — fix then un-defer; bugs flagged in the Phase 6 commit trail):
-//     WF-008 invite (route needs bare "officer" role; seed has "association:officer")
-//     · WF-067 credit adjust (credit_entry insert 500s) · WF-115 booking create
-//       (POST /booking/events needs bare "user" role no seed user holds)
+//   Blocked by an app bug (cannot assert a success path against a 500):
+//     WF-067 credit adjust (credit_entry insert 500s)
 //   Stateful / multi-subsystem, deferred for a dedicated pass:
 //     WF-036 member transfer (needs a 2nd chapter target + persistent pending state)
 //     · WF-057 waitlist promotion (FIFO across two event subsystems)
@@ -163,7 +160,7 @@ const DEFERRED_FLOWS = new Set([
   'WF-104', 'WF-105', 'WF-106', 'WF-107', 'WF-108',
   'WF-075', 'WF-103', 'WF-116', 'WF-120',
   'WF-084', 'WF-085', 'WF-086',
-  'WF-008', 'WF-067', 'WF-115',
+  'WF-067',
   'WF-036', 'WF-057', 'WF-062',
 ])
 

@@ -324,7 +324,7 @@ namespace DocumentManagement {
     @operationId("searchDocuments")
     @get
     @useAuth(bearerAuth)
-    @extension("x-security-required-roles", #["admin", "coordinator", "member"])
+    @extension("x-security-required-roles", #["admin", "coordinator", "member", "association:member", "association:admin"])
     searchDocuments(
       ...DocumentSearchParams
     ): ApiOkResponse<PaginatedResponse<Document>>

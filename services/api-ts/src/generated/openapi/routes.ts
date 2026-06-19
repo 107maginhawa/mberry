@@ -464,7 +464,7 @@ export function registerRoutes(app: Hono<{ Variables: Variables }>) {
 
   // searchDocuments
   app.get('/association/documents',
-    authMiddleware({ roles: ["admin", "coordinator", "member"] }),
+    authMiddleware({ roles: ["admin", "coordinator", "member", "association:member", "association:admin"] }),
     zValidator('query', validators.SearchDocumentsQuery, validationErrorHandler),
     registry.searchDocuments as unknown as Handler
   );
@@ -3281,7 +3281,7 @@ export function registerRoutes(app: Hono<{ Variables: Variables }>) {
 
   // createInvite
   app.post('/invite',
-    authMiddleware({ roles: ["officer"] }),
+    authMiddleware({ roles: ["officer", "association:officer", "association:admin"] }),
     createPerRouteAuditMiddleware({ action: "create", resourceType: "invitation" }),
     zValidator('json', validators.CreateInviteBody, validationErrorHandler),
     registry.createInvite as unknown as Handler
