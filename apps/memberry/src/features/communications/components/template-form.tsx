@@ -131,7 +131,9 @@ export function TemplateForm({ orgId, existingTemplate, onSuccess }: TemplateFor
       if (existingTemplate?.id) {
         return api.patch(`/api/association/message-templates/${existingTemplate.id}`, payload)
       }
-      return api.post('/api/association/message-templates', payload)
+      // CreateMessageTemplate requires isTransactional; the form has no such
+      // toggle, so default to false (only on create — avoid resetting it on edit).
+      return api.post('/api/association/message-templates', { ...payload, isTransactional: false })
     },
     onSuccess: () => {
       toast.success(existingTemplate ? 'Template updated' : 'Template created')
