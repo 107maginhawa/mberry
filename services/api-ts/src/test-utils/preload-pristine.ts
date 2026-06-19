@@ -19,7 +19,8 @@ if (!process.env['AUTH_SECRET']) {
   process.env['AUTH_SECRET'] = 'test-secret-for-automated-tests-minimum-32-chars';
 }
 
-import { ensurePristine } from './make-ctx';
+import { beforeEach } from 'bun:test';
+import { ensurePristine, restoreRepo } from './make-ctx';
 
 // Capture the pristine ComplianceRepository class BEFORE any test file can
 // replace the module via bun's process-global mock.module(). Sibling tests
@@ -101,7 +102,7 @@ import { TrainingRepository } from '@/handlers/association:operations/repos/trai
 import { AccreditedProviderRepository } from '@/handlers/association:operations/repos/accredited-provider.repo';
 
 // Snapshot all 50 repo prototypes
-for (const Repo of [
+const PRISTINE_REPOS = [
   // association:member
   MembershipApplicationRepository,
   AssocMembershipRepository,
@@ -171,6 +172,14 @@ for (const Repo of [
   // training
   TrainingRepository,
   AccreditedProviderRepository,
-]) {
+];
+
+for (const Repo of PRISTINE_REPOS) {
   ensurePristine(Repo);
 }
+
+beforeEach(() => {
+  for (const Repo of PRISTINE_REPOS) {
+    restoreRepo(Repo);
+  }
+});
