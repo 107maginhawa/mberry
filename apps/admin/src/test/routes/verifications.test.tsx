@@ -28,4 +28,12 @@ describe('Verifications Page', () => {
     renderWithProviders(<Page />, { user: MOCK_ANALYST_ADMIN })
     expect(screen.getByText('Access Denied')).toBeInTheDocument()
   })
+
+  test('renders Coming Soon placeholder content', () => {
+    renderWithProviders(<Page />, { user: MOCK_SUPER_ADMIN })
+    expect(screen.getByText('Coming Soon')).toBeInTheDocument()
+    expect(
+      screen.getByText('Credential verification management will be available in a future update.'),
+    ).toBeInTheDocument()
+  })
 })
