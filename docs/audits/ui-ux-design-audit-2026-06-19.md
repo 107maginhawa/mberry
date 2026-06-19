@@ -102,4 +102,29 @@ So the work is **targeted hardening**, not a redesign. Gaps are specific and ind
 5. **Consistency:** consolidate status badges; replace arbitrary classes with token scale; sweep icon-button `aria-label`s.
 6. **Architecture:** promote shared patterns to `packages/ui`; raster icon set; (optional) static-shell service worker.
 
+## Implementation status — 2026-06-19
+
+Shipped on `design/ui-ux-audit` (typecheck + lint + UI-consistency ratchet green per commit; production build passes):
+
+| # | Change | Area |
+|---|---|---|
+| 1 | PWA: `manifest.json` + `theme-color` + `favicon.svg` (fixes 404); no service worker | PWA |
+| 2 | Confirm guard on "Mark Paid" (financial mutation) | Safety |
+| 3 | Confirm guard on "Reinstate Membership" | Safety |
+| 4 | Confirm guard on bulk "Approve Applications" (states the count) | Safety |
+| 5 | Roster reflows to cards below 960px container (kills the reported h-scroll) | Mobile |
+| 6 | Add-member name fields stack on mobile | Mobile |
+| 7 | Focus-visible rings on booking card-links | A11y |
+| 8 | `aria-label` on remove-fund icon button | A11y |
+| 9 | Status colors consolidated onto `StatusBadge` (booking-list, affiliation-list, special-assessments-list) | Consistency |
+
+Each fix preserves business logic, routes, API calls, permissions, and data behavior.
+
+Deferred (with rationale):
+
+- **Silent 403 → access-denied UI.** Surfacing it properly requires changing the `useOrg()` / `OrgProvider` hook contract to expose error state (a Wave-2 change touching every consumer), and the draft fix was incomplete + type-unsafe (`error.status` on `unknown`). Higher blast radius than a safe drop-in. Needs its own slice.
+- **`completion-table` status badge.** Its `waitlisted` branch references a status that isn't in `TrainingEnrollmentStatus` (dead branch). "Fixing" it changes which rows show which color — a behavior change, not cosmetic. Needs product confirmation of intended training statuses.
+- **Raster PWA icon set (apple-touch-icon, 192/512 PNG).** No SVG→PNG tool available without a new dependency; would need `sharp` as a devDep + a codegen step, or a one-time export from design. SVG icon already gives Chrome/Edge/Android installability.
+- **Arbitrary-class cleanup (~117), admin pattern sharing.** Lower-value churn; left as-is.
+
 > Live-browser visual pass (first-impression, responsive screenshots, interaction feel) was **not** run — it needs the app booted with auth + seed data. Offered as a follow-up.
