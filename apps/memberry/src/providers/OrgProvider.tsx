@@ -11,10 +11,11 @@
  *   3. Expose { org, orgId, orgSlug, role, permissions, isOfficer } via context
  */
 
-import { createContext, useContext, useMemo, type ReactNode } from 'react'
+import { createContext, useContext, useEffect, useMemo, type ReactNode } from 'react'
 import { useParams } from '@tanstack/react-router'
 import { useQuery } from '@tanstack/react-query'
 import { getOrganizationBySlugOptions } from '@monobase/sdk-ts/generated/react-query'
+import { setSdkOrgId } from '@monobase/sdk-ts/client'
 import { api } from '@/lib/api'
 import type { PublicOrganization, OfficerPosition } from '@monobase/sdk-ts/generated/types.gen'
 
@@ -59,6 +60,12 @@ export function OrgProvider({ children }: { children: ReactNode }) {
 
   // Prefer the resolved org UUID; fall back to a UUID route param directly.
   const orgId = org?.id ?? (slugIsUuid ? orgSlug : '')
+
+  // Publish the active org so the SDK client + api lib inject x-org-id on
+  // org-scoped requests. Set during render (before child queries fire) and
+  // cleared on unmount (leaving /org/* surfaces).
+  setSdkOrgId(orgId || null)
+  useEffect(() => () => setSdkOrgId(null), [])
 
   // Step 2: Fetch officer role (needs orgId from step 1)
   const { data: officerData, isLoading: officerLoading } = useQuery({

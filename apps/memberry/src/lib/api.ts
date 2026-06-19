@@ -4,6 +4,7 @@
  */
 
 import { CSRF_HEADER, isStateChangingMethod, readCsrfCookie } from '@monobase/sdk-ts/csrf'
+import { getSdkOrgId } from '@monobase/sdk-ts/client'
 
 class ApiError extends Error {
   constructor(
@@ -26,12 +27,17 @@ async function request<T = unknown>(
     const token = readCsrfCookie()
     if (token) csrfHeader[CSRF_HEADER] = token
   }
+  // Org-scoped routes resolve tenant from x-org-id; inject the active org so
+  // raw api-lib calls match the SDK behaviour (a per-call header still wins).
+  const orgId = getSdkOrgId()
+  const orgHeader: Record<string, string> = orgId ? { 'x-org-id': orgId } : {}
   const res = await fetch(path, {
     credentials: 'include',
     ...options,
     headers: {
       'Content-Type': 'application/json',
       ...csrfHeader,
+      ...orgHeader,
       ...options.headers,
     },
   })

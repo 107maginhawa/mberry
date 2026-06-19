@@ -36,12 +36,32 @@ export function getSdkBaseUrl(): string {
   return baseUrl;
 }
 
+/**
+ * Active organization id for org-scoped requests. Org-scoped backend routes
+ * resolve tenant from the `x-org-id` header; the React OrgProvider sets this on
+ * every `/org/$orgSlug/*` route so SDK + api-lib calls carry it automatically.
+ * Null on platform-level surfaces (e.g. the admin app) → no header injected.
+ */
+let currentOrgId: string | null = null;
+
+export function setSdkOrgId(id: string | null): void {
+  currentOrgId = id || null;
+}
+
+export function getSdkOrgId(): string | null {
+  return currentOrgId;
+}
+
 // Plain function type instead of `typeof fetch` — Bun's `typeof fetch` requires
 // the `preconnect` static method which we don't (and shouldn't) implement.
 type FetchFn = (input: RequestInfo | URL, init?: RequestInit) => Promise<Response>;
 
 const customFetch: FetchFn = async (input, init) => {
-  return fetch(input, { ...init, credentials: init?.credentials ?? 'include' });
+  // Inject the active org context for org-scoped routes (unless a caller already
+  // set x-org-id explicitly). Backend ignores the header on non-org routes.
+  const headers = new Headers(init?.headers as HeadersInit | undefined);
+  if (currentOrgId && !headers.has('x-org-id')) headers.set('x-org-id', currentOrgId);
+  return fetch(input, { ...init, credentials: init?.credentials ?? 'include', headers });
 };
 
 /**
