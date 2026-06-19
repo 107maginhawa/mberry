@@ -133,10 +133,15 @@ const DEFERRED_FLOW_MODULES = new Set(['M13', 'M15', 'M16', 'M17'])
 // ships, role/authz/bug fixed, Stripe-mock wired). NEVER add an id here to dodge
 // writing a real spec; these are the genuine, evidenced tail. Reasons:
 //
-//   Backend-shaped (server/webhook-triggered, no UI flow — backend-integration
-//   territory; bounce→suppression already has suppression.repo.integration.test):
-//     WF-122 create email template · WF-123 enqueue email · WF-124 handle bounce
-//     · WF-126 cancel queued email · WF-127 retry failed email · WF-132 stripe webhook
+//   Backend-shaped (server/webhook-triggered, no UI flow — covered at the backend
+//   layer by handler + repo + integration tests, which Matrix B (e2e-only) can't
+//   see; verified present 2026-06-19):
+//     WF-122 create email template (createEmailTemplate.test + template.repo.test)
+//     · WF-123 enqueue email (queue.repo.test + jobs/processor.test)
+//     · WF-124 handle bounce (suppression.repo.integration.test + suppression.repo.test)
+//     · WF-126 cancel queued email (cancelEmailQueueItem.test)
+//     · WF-127 retry failed email (retryEmailQueueItem.test)
+//     · WF-132 stripe webhook (billing/handleStripeWebhook.test [43] + dues stripeWebhook.integration.test)
 //   Platform-admin routes not built yet (no admin route exists):
 //     WF-017 subscriptions · WF-020 support tickets · WF-021 revenue dashboard
 //   No memberry route + no member-facing SDK (committee write handlers are unwired):
