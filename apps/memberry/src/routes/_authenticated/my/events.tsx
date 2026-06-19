@@ -16,18 +16,19 @@ import { StaggerGrid, StaggerItem } from '@/components/motion/stagger-grid'
 import { PageShell } from '@/components/patterns/page-shell'
 import { EmptyState } from '@/components/patterns/empty-state'
 import { ConfirmDialog } from '@/components/patterns/confirm-dialog'
+import { StatusBadge, type StatusBadgeVariant } from '@/components/patterns/status-badge'
 
 export const Route = createFileRoute('/_authenticated/my/events')({
   component: MyEvents,
 })
 
-const REG_STATUS_STYLES: Record<string, { bg: string; label: string }> = {
-  confirmed: { bg: 'bg-[var(--color-success-bg)] text-[var(--color-success)]', label: 'Confirmed' },
-  waitlisted: { bg: 'bg-[var(--color-warning-bg)] text-[var(--color-warning)]', label: 'Waitlisted' },
-  cancelled: { bg: 'bg-[var(--color-error-bg)] text-[var(--color-error)]', label: 'Cancelled' },
-  pendingPayment: { bg: 'bg-[var(--color-warning-bg)] text-[var(--color-warning)]', label: 'Pending Payment' },
-  refunded: { bg: 'bg-[var(--color-bg)] text-[var(--color-muted)]', label: 'Refunded' },
-  noShow: { bg: 'bg-[var(--color-bg)] text-[var(--color-muted)]', label: 'No Show' },
+const REG_STATUS_STYLES: Record<string, { variant: StatusBadgeVariant; label: string }> = {
+  confirmed: { variant: 'success', label: 'Confirmed' },
+  waitlisted: { variant: 'warning', label: 'Waitlisted' },
+  cancelled: { variant: 'error', label: 'Cancelled' },
+  pendingPayment: { variant: 'warning', label: 'Pending Payment' },
+  refunded: { variant: 'muted', label: 'Refunded' },
+  noShow: { variant: 'muted', label: 'No Show' },
 }
 
 function formatEventDate(startDate: string) {
@@ -74,7 +75,7 @@ function EventRegistrationCard({ item }: { item: { registration: any; event: any
     },
   })
 
-  const regStatus = REG_STATUS_STYLES[registration.status] ?? { bg: 'bg-[var(--color-bg)] text-[var(--color-muted)]', label: registration.status }
+  const regStatus = REG_STATUS_STYLES[registration.status] ?? { variant: 'muted' as StatusBadgeVariant, label: registration.status }
   const canCancel = upcoming && registration.status !== 'cancelled' && registration.status !== 'refunded'
   const countdown = upcoming ? formatCountdown(event.startDate) : null
   const credits = event.creditAmount ?? event.cpdCredits ?? event.cpd_credits ?? event.credits ?? null
@@ -91,9 +92,7 @@ function EventRegistrationCard({ item }: { item: { registration: any; event: any
       >
         <div className="flex items-start justify-between gap-2">
           <div className="flex items-center gap-2 flex-wrap">
-            <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold ${regStatus.bg}`}>
-              {regStatus.label}
-            </span>
+            <StatusBadge variant={regStatus.variant}>{regStatus.label}</StatusBadge>
             {credits != null && credits > 0 && (
               <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-semibold bg-[var(--color-primary-bg)] text-[var(--color-primary)]">
                 <Award size={10} />
