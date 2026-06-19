@@ -91,6 +91,7 @@ export function FundAllocationEditor({ funds, onChange, disabled }: FundAllocati
               onClick={() => removeFund(i)}
               disabled={disabled}
               className="text-[var(--color-error)] hover:text-[var(--color-error)]"
+              aria-label="Remove fund"
             >
               <Trash2 className="h-4 w-4" />
             </Button>
