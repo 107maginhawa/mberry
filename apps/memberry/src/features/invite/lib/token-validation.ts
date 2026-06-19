@@ -68,7 +68,7 @@ export async function validateInviteToken(token: string): Promise<
   { ok: true; data: InviteValidation } | { ok: false; error: InviteError; status: number }
 > {
   try {
-    const data = await api.get<InviteValidation>(`/api/invite/${encodeURIComponent(token)}/validate`);
+    const data = await api.get<InviteValidation>(`/api/invite/validate/${encodeURIComponent(token)}`);
     return { ok: true, data };
   } catch (err) {
     if (err instanceof ApiError) {
@@ -97,7 +97,7 @@ export async function claimInviteToken(token: string): Promise<
   { ok: true; data: ClaimInviteResult } | { ok: false; error: string }
 > {
   try {
-    const data = await api.post<ClaimInviteResult>(`/api/invite/${encodeURIComponent(token)}/claim`);
+    const data = await api.post<ClaimInviteResult>(`/api/invite/claim/${encodeURIComponent(token)}`);
     return { ok: true, data };
   } catch (err) {
     if (err instanceof ApiError) {
