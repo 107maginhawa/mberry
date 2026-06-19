@@ -24,6 +24,7 @@
     "lint:no-skips": "bun scripts/lint-no-skips.ts",
     "lint:shallow": "bun scripts/lint-shallow-tests.ts",
     "lint:e2e-depth": "bun run scripts/audit-e2e-depth.ts > /tmp/e2e-depth.json && bun run scripts/audit-e2e-depth-gate.ts",
+    "audit:workflows": "bun scripts/audit/coverage-matrix.ts --gate && bun run lint:e2e-depth",
     "lint:handler-verbs": "bun run scripts/lint-handler-verbs.ts",
     "check:hand-wired-routes": "bun run scripts/check-hand-wired-routes.ts",
     "check:sdk-compat": "bun run scripts/check-sdk-compat.ts",
