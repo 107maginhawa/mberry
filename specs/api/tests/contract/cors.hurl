@@ -12,13 +12,14 @@ csrf_token: jsonpath "$.token"
 # only that allowed origins get echoed in Access-Control-Allow-Origin
 # and rejected origins do not.
 
-# 1. Allowed origin (localhost:3000 is in the default CORS_ORIGINS).
+# 1. Allowed origin (localhost:3004 — the memberry app — is in the default
+# CORS_ORIGINS = [localhost:3003, localhost:3004]).
 OPTIONS {{api}}/persons
-Origin: http://localhost:3000
+Origin: http://localhost:3004
 Access-Control-Request-Method: GET
 HTTP 204
 [Asserts]
-header "Access-Control-Allow-Origin" == "http://localhost:3000"
+header "Access-Control-Allow-Origin" == "http://localhost:3004"
 header "Access-Control-Allow-Credentials" == "true"
 header "Access-Control-Allow-Methods" matches "GET"
 
