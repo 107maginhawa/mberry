@@ -71,15 +71,22 @@ function MyProfilePage() {
     },
   })
 
+  // The /my/* routes live outside the OrgProvider subtree, so the SDK's active
+  // org (x-org-id) is null here. Org-scoped /association/* endpoints reject with
+  // 403 without it. Resolve the org from the member's primary membership and pass
+  // it explicitly to those calls.
+  const orgId = memberships[0]?.organizationId
+  const orgHeader = orgId ? { 'x-org-id': orgId } : undefined
+
   // Directory profile for current user (for publish/preview)
   const { data: directoryProfile, refetch: refetchDirectory } = useQuery({
-    queryKey: ['my-directory-profile'],
+    queryKey: ['my-directory-profile', orgId],
     queryFn: async () => {
-      const res = await api.get<any>('/api/association/member/directory/search?q=&limit=50')
+      const res = await api.get<any>('/api/association/member/directory/search?q=&limit=50', orgHeader)
       const me = (res?.data ?? []).find((p: any) => p.personId === person?.id)
       return me ?? null
     },
-    enabled: !!person?.id,
+    enabled: !!person?.id && !!orgId,
   })
 
   const [previewMode, setPreviewMode] = useState(false)
@@ -87,14 +94,14 @@ function MyProfilePage() {
   const publishMutation = useMutation({
     mutationFn: async (visibility: 'public' | 'memberOnly' | 'hidden') => {
       if (directoryProfile?.id) {
-        await api.patch(`/api/association/member/directory/profiles/${directoryProfile.id}`, { visibility })
+        await api.patch(`/api/association/member/directory/profiles/${directoryProfile.id}`, { visibility }, orgHeader)
       } else {
         await api.post('/api/association/member/directory/profiles', {
           personId: person?.id,
           displayName: formatPersonName(person?.firstName || '', person?.lastName, person?.middleName),
           specialty: person?.specialization || undefined,
           visibility,
-        })
+        }, orgHeader)
       }
     },
     onSuccess: () => {
@@ -108,12 +115,12 @@ function MyProfilePage() {
 
   // Professional licenses
   const { data: myLicenses = [] } = useQuery({
-    queryKey: ['my-licenses'],
+    queryKey: ['my-licenses', orgId],
     queryFn: async () => {
-      const res = await api.get<{ data: any[] }>(`/api/association/member/licenses?personId=${encodeURIComponent(person?.id || '')}`)
+      const res = await api.get<{ data: any[] }>(`/api/association/member/licenses?personId=${encodeURIComponent(person?.id || '')}`, orgHeader)
       return res?.data ?? []
     },
-    enabled: !!person?.id,
+    enabled: !!person?.id && !!orgId,
   })
 
   const mutation = useMutation({
