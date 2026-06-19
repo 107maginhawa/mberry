@@ -51,7 +51,7 @@ export function ActionQueue({ items, maxVisible = 5 }: ActionQueueProps) {
           )}
         </h2>
 
-        <div className="rounded-[12px] border border-[var(--color-success-bg)] bg-[var(--color-success-bg)] p-5 flex items-center gap-3">
+        <div className="rounded-md border border-[var(--color-success-bg)] bg-[var(--color-success-bg)] p-5 flex items-center gap-3">
           <Users size={20} className="text-[var(--color-success)] shrink-0" />
           <div>
             <p className="text-sm font-semibold text-[var(--color-success)]">All clear</p>
@@ -107,7 +107,7 @@ function ActionCard({ item }: { item: ActionItem }) {
   return (
     <Link
       to={item.href as any}
-      className={`block rounded-[12px] border p-4 hover:shadow-soft transition-shadow ${VARIANT_STYLES[item.variant]}`}
+      className={`block rounded-md border p-4 hover:shadow-soft transition-shadow ${VARIANT_STYLES[item.variant]}`}
     >
       <div className="flex items-start gap-3">
         <span className="shrink-0 mt-0.5">{item.icon}</span>

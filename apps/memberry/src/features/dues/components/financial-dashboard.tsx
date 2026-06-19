@@ -31,7 +31,7 @@ export function FinancialDashboard({ orgId }: FinancialDashboardProps) {
     return (
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         {Array.from({ length: 4 }).map((_, i) => (
-          <Skeleton key={i} className="h-24 rounded-[12px] animate-shimmer" />
+          <Skeleton key={i} className="h-24 rounded-md animate-shimmer" />
         ))}
       </div>
     )

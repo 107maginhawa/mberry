@@ -121,16 +121,16 @@ function EventDetail() {
     return (
       <PageShell title="Event">
         <div className="space-y-6 max-w-3xl">
-          <div className="h-8 w-2/3 rounded-[8px] bg-[var(--color-surface-elevated-hover)] animate-shimmer" />
-          <div className="h-4 w-1/2 rounded-[8px] bg-[var(--color-surface-elevated-hover)] animate-shimmer" />
+          <div className="h-8 w-2/3 rounded-sm bg-[var(--color-surface-elevated-hover)] animate-shimmer" />
+          <div className="h-4 w-1/2 rounded-sm bg-[var(--color-surface-elevated-hover)] animate-shimmer" />
           <GlassCard className="p-5 space-y-4">
             <div className="grid gap-3 sm:grid-cols-2">
               {Array.from({ length: 4 }).map((_, i) => (
-                <div key={i} className="h-12 rounded-[8px] bg-[var(--color-surface-elevated-hover)] animate-shimmer" />
+                <div key={i} className="h-12 rounded-sm bg-[var(--color-surface-elevated-hover)] animate-shimmer" />
               ))}
             </div>
           </GlassCard>
-          <div className="h-12 w-40 rounded-[8px] bg-[var(--color-surface-elevated-hover)] animate-shimmer" />
+          <div className="h-12 w-40 rounded-sm bg-[var(--color-surface-elevated-hover)] animate-shimmer" />
         </div>
       </PageShell>
     )

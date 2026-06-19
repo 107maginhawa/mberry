@@ -151,7 +151,7 @@ export function AnnouncementContent({
               { label: 'Push Delivered', value: ann.stats.pushDelivered },
               { label: 'Email Sent', value: ann.stats.emailSent },
             ].map((stat) => (
-              <div key={stat.label} className="p-3 border rounded-[8px] text-center">
+              <div key={stat.label} className="p-3 border rounded-sm text-center">
                 <p className="text-[20px] font-bold">{stat.value}</p>
                 <p className="text-[12px] text-[var(--color-muted)] mt-0.5">{stat.label}</p>
               </div>
@@ -188,7 +188,7 @@ export function AnnouncementContent({
               to={"/org/$orgSlug/officer/communications/new" as any}
               params={{ orgSlug: orgId } as any}
               search={{ edit: ann.id } as any}
-              className="px-4 py-2 border rounded-[8px] text-[14px] font-medium hover:bg-[var(--color-surface-warm)]"
+              className="px-4 py-2 border rounded-sm text-[14px] font-medium hover:bg-[var(--color-surface-warm)]"
             >
               Edit
             </Link>

@@ -76,7 +76,7 @@ export function OrgPickerSheet({
                 variant="ghost"
                 key={org.organizationId}
                 onClick={() => handleSelectOrg(org)}
-                className={`w-full flex items-center gap-3 px-4 py-3 h-auto rounded-[8px] transition-colors ${
+                className={`w-full flex items-center gap-3 px-4 py-3 h-auto rounded-sm transition-colors ${
                   isActive
                     ? 'bg-[var(--color-surface-warm)]'
                     : 'hover:bg-[var(--color-surface-warm)]'
@@ -123,7 +123,7 @@ export function OrgPickerSheet({
           <Link
             to={"/my/organizations" as "/"}
             onClick={() => onOpenChange(false)}
-            className="flex items-center gap-2 px-4 py-3 text-sm font-medium text-[var(--color-primary)] hover:bg-[var(--color-surface-warm)] rounded-[8px] transition-colors"
+            className="flex items-center gap-2 px-4 py-3 text-sm font-medium text-[var(--color-primary)] hover:bg-[var(--color-surface-warm)] rounded-sm transition-colors"
           >
             <Plus size={16} />
             Join another organization

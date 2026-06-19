@@ -197,7 +197,7 @@ function MyEvents() {
         <GlassCard className="p-4">
           <p className="text-body-sm text-[var(--color-muted)]">Upcoming</p>
           {isLoading ? (
-            <div className="h-8 w-12 rounded-[8px] bg-[var(--color-surface-elevated-hover)] animate-shimmer mt-1" />
+            <div className="h-8 w-12 rounded-sm bg-[var(--color-surface-elevated-hover)] animate-shimmer mt-1" />
           ) : (
             <CountUp value={upcoming.length} className="text-h2 font-bold font-display block mt-1" />
           )}
@@ -205,7 +205,7 @@ function MyEvents() {
         <GlassCard className="p-4">
           <p className="text-body-sm text-[var(--color-muted)]">Past</p>
           {isLoading ? (
-            <div className="h-8 w-12 rounded-[8px] bg-[var(--color-surface-elevated-hover)] animate-shimmer mt-1" />
+            <div className="h-8 w-12 rounded-sm bg-[var(--color-surface-elevated-hover)] animate-shimmer mt-1" />
           ) : (
             <CountUp value={past.length} className="text-h2 font-bold font-display block mt-1" />
           )}
@@ -235,10 +235,10 @@ function MyEvents() {
         <div className="grid gap-4 sm:grid-cols-2">
           {Array.from({ length: 4 }).map((_, i) => (
             <GlassCard key={i} className="p-4 space-y-3">
-              <div className="h-5 w-20 rounded-[8px] bg-[var(--color-surface-elevated-hover)] animate-shimmer" />
-              <div className="h-5 w-3/4 rounded-[8px] bg-[var(--color-surface-elevated-hover)] animate-shimmer" />
-              <div className="h-4 w-1/2 rounded-[8px] bg-[var(--color-surface-elevated-hover)] animate-shimmer" />
-              <div className="h-4 w-2/3 rounded-[8px] bg-[var(--color-surface-elevated-hover)] animate-shimmer" />
+              <div className="h-5 w-20 rounded-sm bg-[var(--color-surface-elevated-hover)] animate-shimmer" />
+              <div className="h-5 w-3/4 rounded-sm bg-[var(--color-surface-elevated-hover)] animate-shimmer" />
+              <div className="h-4 w-1/2 rounded-sm bg-[var(--color-surface-elevated-hover)] animate-shimmer" />
+              <div className="h-4 w-2/3 rounded-sm bg-[var(--color-surface-elevated-hover)] animate-shimmer" />
             </GlassCard>
           ))}
         </div>

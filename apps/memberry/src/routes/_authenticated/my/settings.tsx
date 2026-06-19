@@ -118,7 +118,7 @@ function GeneralSection() {
       </div>
       <Link
         to="/my/profile"
-        className="flex items-center justify-between rounded-[8px] border border-[var(--color-border-light)] p-4 hover:shadow-soft transition-shadow"
+        className="flex items-center justify-between rounded-sm border border-[var(--color-border-light)] p-4 hover:shadow-soft transition-shadow"
       >
         <div>
           <p className="text-sm font-semibold">Edit Profile</p>
@@ -131,7 +131,7 @@ function GeneralSection() {
         <h3 className="text-h4 text-[var(--color-error)]">Danger Zone</h3>
 
         {deletionPending ? (
-          <div className="mt-3 rounded-[8px] border border-[var(--color-warning-bg)] bg-[var(--color-warning-bg)] p-4">
+          <div className="mt-3 rounded-sm border border-[var(--color-warning-bg)] bg-[var(--color-warning-bg)] p-4">
             <p className="text-sm font-semibold text-[var(--color-warning)]">Account deletion scheduled</p>
             <p className="text-sm text-[var(--color-muted)] mt-1">
               Your account will be permanently anonymized on{' '}
@@ -149,7 +149,7 @@ function GeneralSection() {
             </Button>
           </div>
         ) : showConfirm ? (
-          <div className="mt-3 rounded-[8px] border border-[var(--color-error-bg)] bg-[var(--color-error-bg)] p-4 space-y-3">
+          <div className="mt-3 rounded-sm border border-[var(--color-error-bg)] bg-[var(--color-error-bg)] p-4 space-y-3">
             <p className="text-sm text-[var(--color-muted)]">
               This will schedule your account for deletion after a 30-day grace period.
               Your personal data will be anonymized. Financial records are retained per law.

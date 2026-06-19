@@ -99,7 +99,7 @@ export function MemberHeader({ userName }: MemberHeaderProps) {
                     <ChevronDown size={12} className="transition-transform group-data-[state=open]:rotate-180" />
                   </Button>
                 </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="w-[var(--dropdown-width)] rounded-[12px] p-0 overflow-hidden">
+                <DropdownMenuContent align="end" className="w-[var(--dropdown-width)] rounded-md p-0 overflow-hidden">
                   {orgs.map((org) => (
                     <DropdownMenuItem
                       key={org.organizationId}

@@ -22,7 +22,7 @@ function OfficerEvents() {
         <Link
           to="/org/$orgSlug/officer/events/new"
           params={{ orgSlug }}
-          className="px-4 py-2 bg-[var(--color-primary)] text-white rounded-[8px] text-sm font-medium hover:bg-[var(--color-primary-mid)]"
+          className="px-4 py-2 bg-[var(--color-primary)] text-white rounded-sm text-sm font-medium hover:bg-[var(--color-primary-mid)]"
         >
           Create Event
         </Link>

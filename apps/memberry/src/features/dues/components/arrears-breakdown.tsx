@@ -101,7 +101,7 @@ export function ArrearsBreakdown({ invoices, currency = 'PHP', agingBuckets }: A
                 return (
                   <div
                     key={inv.id}
-                    className="flex items-center justify-between rounded-[8px] px-4 py-3 text-[14px] hover:bg-[var(--color-surface-elevated-hover)] transition-colors"
+                    className="flex items-center justify-between rounded-sm px-4 py-3 text-[14px] hover:bg-[var(--color-surface-elevated-hover)] transition-colors"
                   >
                     <div className="flex items-center gap-3">
                       <AlertTriangle className="w-4 h-4 text-[var(--color-warning)] shrink-0" />

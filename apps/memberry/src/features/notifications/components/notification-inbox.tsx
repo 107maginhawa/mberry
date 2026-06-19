@@ -121,7 +121,7 @@ export function NotificationInbox() {
   return (
     <div className="space-y-5">
       {error && (
-        <div className="rounded-[12px] border border-[var(--color-error)]/20 bg-[var(--color-error)]/5 p-4 text-sm text-[var(--color-error)]">
+        <div className="rounded-md border border-[var(--color-error)]/20 bg-[var(--color-error)]/5 p-4 text-sm text-[var(--color-error)]">
           {error}
         </div>
       )}

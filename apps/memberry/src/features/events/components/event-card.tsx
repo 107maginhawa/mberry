@@ -119,7 +119,7 @@ export function EventCard({ event, orgId, onEdit, onCancel, onDuplicate, linkBas
               <MoreHorizontal className="w-4 h-4 text-[var(--color-muted)]" />
             </Button>
             {menuOpen && (
-              <div className="absolute right-0 top-7 z-10 w-36 border border-[var(--color-surface-border-glass)] rounded-[8px] bg-[var(--color-surface-elevated)] backdrop-blur-[var(--surface-blur)] shadow-[var(--shadow-soft)] text-body-sm">
+              <div className="absolute right-0 top-7 z-10 w-36 border border-[var(--color-surface-border-glass)] rounded-sm bg-[var(--color-surface-elevated)] backdrop-blur-[var(--surface-blur)] shadow-[var(--shadow-soft)] text-body-sm">
                 <a
                   href={`${linkBase ?? `/org/${orgSlug}/officer/events`}/${event.id}`}
                   className="block px-3 py-2 hover:bg-[var(--color-surface-elevated-hover)] rounded-t-[8px]"

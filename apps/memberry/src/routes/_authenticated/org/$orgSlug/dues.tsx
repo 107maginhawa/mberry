@@ -247,7 +247,7 @@ function MemberDuesPage() {
                     </div>
 
                     {existingSubmission ? (
-                      <div className="rounded-[8px] p-4 bg-[var(--color-surface-warm)]">
+                      <div className="rounded-sm p-4 bg-[var(--color-surface-warm)]">
                         <div className="flex items-center gap-2 text-[14px]">
                           <DuesStatusBadge type="payment" status={existingSubmission.status} />
                         </div>
@@ -306,7 +306,7 @@ function MemberDuesPage() {
               </div>
             </div>
 
-            <div className="rounded-[8px] p-4 space-y-3 bg-[var(--color-surface-warm)]">
+            <div className="rounded-sm p-4 space-y-3 bg-[var(--color-surface-warm)]">
               <h3 className="text-h4 flex items-center gap-2">
                 <Info className="w-4 h-4" />
                 How Renewal Works
@@ -325,7 +325,7 @@ function MemberDuesPage() {
               )}
             </div>
 
-            <div className="rounded-[8px] p-4 flex items-start gap-3 border border-[var(--color-surface-border-glass)]">
+            <div className="rounded-sm p-4 flex items-start gap-3 border border-[var(--color-surface-border-glass)]">
               <Building className="w-4 h-4 text-[var(--color-muted)] shrink-0 mt-0.5" />
               <div className="text-[14px]">
                 <p className="font-semibold">Need to renew immediately?</p>
@@ -396,7 +396,7 @@ function MemberDuesPage() {
                   return (
                     <div
                       key={p.id}
-                      className="flex items-center justify-between rounded-[8px] px-4 py-3 text-[14px] hover:bg-[var(--color-surface-elevated-hover)] transition-colors"
+                      className="flex items-center justify-between rounded-sm px-4 py-3 text-[14px] hover:bg-[var(--color-surface-elevated-hover)] transition-colors"
                     >
                       <div className="flex items-center gap-3">
                         <span className="font-mono text-[12px] tabular-nums">{p.receiptNumber}</span>

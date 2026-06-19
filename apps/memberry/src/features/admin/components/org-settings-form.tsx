@@ -137,7 +137,7 @@ export function OrgSettingsForm({ orgId }: OrgSettingsFormProps) {
   const current = isEditing ? draft : saved
 
   return (
-    <div className="rounded-[12px] border border-[var(--color-border-light)] bg-[var(--color-surface)] p-6">
+    <div className="rounded-md border border-[var(--color-border-light)] bg-[var(--color-surface)] p-6">
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
         <h2 className="text-h4">Organization Profile</h2>

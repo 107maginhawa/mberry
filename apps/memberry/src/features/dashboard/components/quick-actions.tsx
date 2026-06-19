@@ -60,7 +60,7 @@ export function QuickActions({ duesOrgSlug, eventsOrgSlug }: QuickActionsProps) 
             key={action.label}
             to={action.to}
             params={action.params ?? {}}
-            className="flex flex-col items-center gap-1.5 rounded-[12px] border border-[var(--color-surface-border-glass)] bg-[var(--color-surface-elevated)] backdrop-blur-[var(--surface-blur)] p-3 hover:bg-[var(--color-surface-elevated-hover)] hover:border-[var(--color-cream-dark)] transition-colors shadow-[var(--shadow-soft)]"
+            className="flex flex-col items-center gap-1.5 rounded-md border border-[var(--color-surface-border-glass)] bg-[var(--color-surface-elevated)] backdrop-blur-[var(--surface-blur)] p-3 hover:bg-[var(--color-surface-elevated-hover)] hover:border-[var(--color-cream-dark)] transition-colors shadow-[var(--shadow-soft)]"
           >
             <span className="text-[var(--color-primary)]" aria-hidden="true">{action.icon}</span>
             <span className="text-xs font-semibold text-center">{action.label}</span>

@@ -108,7 +108,7 @@ export function StandingMeter({ person, duesStatus, onAction }: StandingMeterPro
   const pending = results.filter((r) => !r.completed)
 
   return (
-    <div className="rounded-[12px] border border-[var(--color-border-light)] bg-[var(--color-surface-elevated)] p-5 mb-4">
+    <div className="rounded-md border border-[var(--color-border-light)] bg-[var(--color-surface-elevated)] p-5 mb-4">
       {/* Header */}
       <div className="flex items-center justify-between mb-3">
         <div className="flex items-center gap-2">

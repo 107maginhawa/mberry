@@ -146,7 +146,7 @@ export function AlertBanner({ memberships, invoices, elections }: AlertBannerPro
 
   return (
     <div
-      className={`flex items-center justify-between gap-3 rounded-[12px] border px-4 py-3 mb-6 ${variantStyles[alert.variant]}`}
+      className={`flex items-center justify-between gap-3 rounded-md border px-4 py-3 mb-6 ${variantStyles[alert.variant]}`}
       role="alert"
     >
       <div className="flex items-center gap-2.5">

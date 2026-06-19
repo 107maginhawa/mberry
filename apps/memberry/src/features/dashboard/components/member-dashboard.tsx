@@ -130,7 +130,7 @@ export function MemberDashboard() {
             linkTo="/my/events"
             icon={<CalendarDays size={16} className="text-[var(--color-muted)]" />}
           />
-          <div className="rounded-[12px] border border-[var(--color-border-light)] bg-[var(--color-surface)] divide-y divide-[var(--color-border-light)]">
+          <div className="rounded-md border border-[var(--color-border-light)] bg-[var(--color-surface)] divide-y divide-[var(--color-border-light)]">
             {events.isLoading ? (
               <div className="p-4 space-y-2">
                 <CardSkeleton />
@@ -158,7 +158,7 @@ export function MemberDashboard() {
             linkTo="/my/training"
             icon={<BookOpen size={16} className="text-[var(--color-muted)]" />}
           />
-          <div className="rounded-[12px] border border-[var(--color-border-light)] bg-[var(--color-surface)] divide-y divide-[var(--color-border-light)]">
+          <div className="rounded-md border border-[var(--color-border-light)] bg-[var(--color-surface)] divide-y divide-[var(--color-border-light)]">
             {trainings.isLoading ? (
               <div className="p-4">
                 <CardSkeleton />
@@ -192,7 +192,7 @@ export function MemberDashboard() {
             linkTo="/my/notifications"
             icon={<Bell size={16} className="text-[var(--color-muted)]" />}
           />
-          <div className="rounded-[12px] border border-[var(--color-border-light)] bg-[var(--color-surface)] divide-y divide-[var(--color-border-light)]">
+          <div className="rounded-md border border-[var(--color-border-light)] bg-[var(--color-surface)] divide-y divide-[var(--color-border-light)]">
             {notifications.isLoading ? (
               <div className="p-4">
                 <CardSkeleton />
@@ -236,7 +236,7 @@ function MembershipCard({ membership: m }: { membership: Membership }) {
   const officerRole = officerQuery.data?.role ?? ''
 
   return (
-    <div className="rounded-[12px] border border-[var(--color-border-light)] bg-[var(--color-surface)] p-5">
+    <div className="rounded-md border border-[var(--color-border-light)] bg-[var(--color-surface)] p-5">
       <div className="flex items-start justify-between">
         <div className="flex items-center gap-3">
           <AvatarInitials name={m.orgName} size="md" />
@@ -260,7 +260,7 @@ function MembershipCard({ membership: m }: { membership: Membership }) {
         {isOfficer && (
           <Link
             to={`/org/${m.orgId}/officer/dashboard` as any /* eslint-disable-line @typescript-eslint/no-explicit-any */}
-            className="inline-flex items-center gap-1.5 text-sm font-semibold text-[var(--color-primary)] border border-[var(--color-primary)] hover:bg-[var(--color-primary)] hover:text-white px-4 py-1.5 rounded-[8px] transition-colors"
+            className="inline-flex items-center gap-1.5 text-sm font-semibold text-[var(--color-primary)] border border-[var(--color-primary)] hover:bg-[var(--color-primary)] hover:text-white px-4 py-1.5 rounded-sm transition-colors"
           >
             <Shield size={12} />
             {officerRole} Dashboard
@@ -269,7 +269,7 @@ function MembershipCard({ membership: m }: { membership: Membership }) {
         {needsPay && (
           <Link
             to="/my/payments"
-            className="inline-flex items-center gap-1.5 text-sm font-semibold text-white bg-[var(--color-primary)] hover:bg-[var(--color-primary-mid)] px-4 py-1.5 rounded-[8px] transition-colors"
+            className="inline-flex items-center gap-1.5 text-sm font-semibold text-white bg-[var(--color-primary)] hover:bg-[var(--color-primary-mid)] px-4 py-1.5 rounded-sm transition-colors"
           >
             <CreditCard size={12} />
             Pay Dues

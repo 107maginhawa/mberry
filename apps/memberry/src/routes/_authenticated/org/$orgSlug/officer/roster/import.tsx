@@ -180,7 +180,7 @@ function RosterImportPage() {
       <div className="space-y-6">
       {/* Result banner */}
       {result && (
-        <div className="flex items-center gap-3 p-4 rounded-[12px] bg-[var(--color-success-bg)] border border-[var(--color-success)]/20">          <NavIcon icon={Check} className="text-[var(--color-success)]" />
+        <div className="flex items-center gap-3 p-4 rounded-md bg-[var(--color-success-bg)] border border-[var(--color-success)]/20">          <NavIcon icon={Check} className="text-[var(--color-success)]" />
           <p className="text-sm text-[var(--color-success)]">
             Successfully imported {result.imported} members
           </p>
@@ -193,7 +193,7 @@ function RosterImportPage() {
           <div
             onDragOver={(e) => e.preventDefault()}
             onDrop={handleDrop}
-            className="border-2 border-dashed border-[var(--color-border)] rounded-[12px] p-12 text-center hover:border-[var(--color-primary)] hover:bg-[var(--color-primary-subtle)] transition-colors cursor-pointer"
+            className="border-2 border-dashed border-[var(--color-border)] rounded-md p-12 text-center hover:border-[var(--color-primary)] hover:bg-[var(--color-primary-subtle)] transition-colors cursor-pointer"
             onClick={() => document.getElementById('csv-input')?.click()}
           >
             <Upload size={32} className="mx-auto mb-3 text-[var(--color-muted)]" />
@@ -244,7 +244,7 @@ function RosterImportPage() {
 
           {/* Warning for rows without email */}
           {parsed.rows.some((r) => !r.email && !r.licenseNumber) && (
-            <div className="flex items-start gap-2 p-3 rounded-[8px] bg-[var(--color-warning-bg)] border border-[var(--color-warning)]/20">
+            <div className="flex items-start gap-2 p-3 rounded-sm bg-[var(--color-warning-bg)] border border-[var(--color-warning)]/20">
               <AlertTriangle size={14} className="text-[var(--color-warning)] shrink-0 mt-0.5" />
               <p className="text-xs text-[var(--color-warning)]">
                 Some rows have no email or license number and will be skipped during import.
@@ -254,7 +254,7 @@ function RosterImportPage() {
           )}
 
           {/* Preview table — show first 20 rows */}
-          <div className="rounded-[12px] border border-[var(--color-border-light)] overflow-hidden">
+          <div className="rounded-md border border-[var(--color-border-light)] overflow-hidden">
             <Table className="text-sm">
               <TableHeader className="bg-[var(--color-surface-warm)]">
                 <TableRow>

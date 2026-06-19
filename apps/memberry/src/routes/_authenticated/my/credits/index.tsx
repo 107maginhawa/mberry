@@ -90,7 +90,7 @@ function MyCredits() {
       actions={
         <Link
           to="/my/credits/log"
-          className="px-[16px] py-[8px] rounded-[8px] bg-[var(--color-primary)] text-white text-sm font-semibold hover:bg-[var(--color-primary-mid)] transition-colors"
+          className="px-[16px] py-[8px] rounded-sm bg-[var(--color-primary)] text-white text-sm font-semibold hover:bg-[var(--color-primary-mid)] transition-colors"
         >
           Log Manual Credit
         </Link>

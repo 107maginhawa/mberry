@@ -232,7 +232,7 @@ function DashboardPage() {
       {person.data && !person.data.specialization && (
         <Link
           to="/onboarding"
-          className="block rounded-[12px] border border-[var(--color-surface-border-glass)] bg-[var(--color-surface-elevated)] backdrop-blur-[var(--surface-blur)] shadow-[var(--shadow-soft)] p-4 hover:bg-[var(--color-surface-elevated-hover)] transition-colors"
+          className="block rounded-md border border-[var(--color-surface-border-glass)] bg-[var(--color-surface-elevated)] backdrop-blur-[var(--surface-blur)] shadow-[var(--shadow-soft)] p-4 hover:bg-[var(--color-surface-elevated-hover)] transition-colors"
         >
           <div className="flex items-center gap-3">
             <UserPlus size={20} className="text-[var(--color-primary)] shrink-0" aria-hidden="true" />

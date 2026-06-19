@@ -31,7 +31,7 @@ const statusDefaults: Record<string, string> = {
 export function ActionWidget({ icon, label, value, subtitle, status, statusLabel, action, errorMessage, children, className }: ActionWidgetProps) {
   if (errorMessage) {
     return (
-      <div role="alert" aria-live="polite" className="rounded-[12px] border border-[var(--color-error)]/20 bg-[var(--color-error-bg)] backdrop-blur-[var(--surface-blur)] shadow-[var(--shadow-soft)] p-4 flex flex-col justify-between min-h-[130px]">
+      <div role="alert" aria-live="polite" className="rounded-md border border-[var(--color-error)]/20 bg-[var(--color-error-bg)] backdrop-blur-[var(--surface-blur)] shadow-[var(--shadow-soft)] p-4 flex flex-col justify-between min-h-[130px]">
         <div>
           <div className="flex items-center gap-2 mb-2">
             <span className="text-[var(--color-error)]" aria-hidden="true">{icon}</span>
@@ -44,7 +44,7 @@ export function ActionWidget({ icon, label, value, subtitle, status, statusLabel
   }
 
   return (
-    <div className={`rounded-[12px] border border-[var(--color-surface-border-glass)] bg-[var(--color-surface-elevated)] backdrop-blur-[var(--surface-blur)] shadow-[var(--shadow-soft)] hover:bg-[var(--color-surface-elevated-hover)] transition-colors p-4 flex flex-col justify-between min-h-[130px] ${className ?? ''}`}>
+    <div className={`rounded-md border border-[var(--color-surface-border-glass)] bg-[var(--color-surface-elevated)] backdrop-blur-[var(--surface-blur)] shadow-[var(--shadow-soft)] hover:bg-[var(--color-surface-elevated-hover)] transition-colors p-4 flex flex-col justify-between min-h-[130px] ${className ?? ''}`}>
       <div>
         <div className="flex items-center gap-2 mb-2">
           <span className="text-[var(--color-muted)]" aria-hidden="true">{icon}</span>

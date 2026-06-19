@@ -1,7 +1,7 @@
 function Bone({ className, style }: { className?: string; style?: React.CSSProperties }) {
   return (
     <div
-      className={`rounded-[8px] animate-shimmer bg-[length:200%_100%] ${className ?? ""}`}
+      className={`rounded-sm animate-shimmer bg-[length:200%_100%] ${className ?? ""}`}
       style={{
         backgroundImage: "linear-gradient(90deg, var(--color-border-light) 0%, var(--color-surface) 50%, var(--color-border-light) 100%)",
         ...style,

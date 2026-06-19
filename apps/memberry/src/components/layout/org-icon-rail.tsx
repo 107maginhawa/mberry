@@ -41,7 +41,7 @@ export function OrgIconRail({ officerOrgIds }: OrgIconRailProps) {
       <aside className="hidden md:flex w-[var(--rail-width)] bg-[var(--color-surface)] border-r border-[var(--color-border-light)] flex-col items-center py-3 shrink-0">
         <Link
           to={"/my/organizations" as "/"}
-          className="flex items-center justify-center w-[34px] h-[34px] rounded-[12px] border-2 border-dashed border-[var(--color-border-light)] text-[var(--color-muted)] hover:border-[var(--color-primary)] hover:text-[var(--color-primary)] transition-colors"
+          className="flex items-center justify-center w-[34px] h-[34px] rounded-md border-2 border-dashed border-[var(--color-border-light)] text-[var(--color-muted)] hover:border-[var(--color-primary)] hover:text-[var(--color-primary)] transition-colors"
           aria-label="Join an organization"
         >          <NavIcon icon={Plus} />
         </Link>
@@ -71,7 +71,7 @@ export function OrgIconRail({ officerOrgIds }: OrgIconRailProps) {
                     onClick={() =>
                       navigate({ to: `/org/${org.orgSlug}/home` as '/' })
                     }
-                    className={`relative rounded-[12px] p-0 transition-all duration-150 ${
+                    className={`relative rounded-md p-0 transition-all duration-150 ${
                       isActive
                         ? 'ring-2 ring-[var(--color-primary)] ring-offset-2'
                         : 'hover:ring-2 hover:ring-[var(--color-border-light)] hover:ring-offset-1'
@@ -106,7 +106,7 @@ export function OrgIconRail({ officerOrgIds }: OrgIconRailProps) {
             <TooltipTrigger asChild>
               <Link
                 to={"/my/organizations" as "/"}
-                className="flex items-center justify-center w-[34px] h-[34px] rounded-[12px] border-2 border-dashed border-[var(--color-border-light)] text-[var(--color-muted)] hover:border-[var(--color-primary)] hover:text-[var(--color-primary)] transition-colors"
+                className="flex items-center justify-center w-[34px] h-[34px] rounded-md border-2 border-dashed border-[var(--color-border-light)] text-[var(--color-muted)] hover:border-[var(--color-primary)] hover:text-[var(--color-primary)] transition-colors"
                 aria-label="Join another organization"
               >                <NavIcon icon={Plus} />
               </Link>

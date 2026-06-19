@@ -22,14 +22,14 @@ function IdCardSkeleton() {
       <GlassCard className="p-6 space-y-4">
         <div className="flex flex-col items-center gap-2">
           <div className="w-20 h-20 rounded-full animate-shimmer bg-[length:200%_100%]" style={{ backgroundImage: 'linear-gradient(90deg, var(--color-border-light) 0%, var(--color-surface) 50%, var(--color-border-light) 100%)' }} />
-          <div className="h-6 w-40 rounded-[8px] animate-shimmer bg-[length:200%_100%]" style={{ backgroundImage: 'linear-gradient(90deg, var(--color-border-light) 0%, var(--color-surface) 50%, var(--color-border-light) 100%)' }} />
-          <div className="h-4 w-32 rounded-[8px] animate-shimmer bg-[length:200%_100%]" style={{ backgroundImage: 'linear-gradient(90deg, var(--color-border-light) 0%, var(--color-surface) 50%, var(--color-border-light) 100%)' }} />
+          <div className="h-6 w-40 rounded-sm animate-shimmer bg-[length:200%_100%]" style={{ backgroundImage: 'linear-gradient(90deg, var(--color-border-light) 0%, var(--color-surface) 50%, var(--color-border-light) 100%)' }} />
+          <div className="h-4 w-32 rounded-sm animate-shimmer bg-[length:200%_100%]" style={{ backgroundImage: 'linear-gradient(90deg, var(--color-border-light) 0%, var(--color-surface) 50%, var(--color-border-light) 100%)' }} />
         </div>
         <div className="space-y-3 pt-4 border-t border-[var(--color-border-light)]">
           {[1, 2, 3, 4].map((i) => (
             <div key={i} className="flex justify-between">
-              <div className="h-3.5 w-24 rounded-[8px] animate-shimmer bg-[length:200%_100%]" style={{ backgroundImage: 'linear-gradient(90deg, var(--color-border-light) 0%, var(--color-surface) 50%, var(--color-border-light) 100%)' }} />
-              <div className="h-3.5 w-32 rounded-[8px] animate-shimmer bg-[length:200%_100%]" style={{ backgroundImage: 'linear-gradient(90deg, var(--color-border-light) 0%, var(--color-surface) 50%, var(--color-border-light) 100%)' }} />
+              <div className="h-3.5 w-24 rounded-sm animate-shimmer bg-[length:200%_100%]" style={{ backgroundImage: 'linear-gradient(90deg, var(--color-border-light) 0%, var(--color-surface) 50%, var(--color-border-light) 100%)' }} />
+              <div className="h-3.5 w-32 rounded-sm animate-shimmer bg-[length:200%_100%]" style={{ backgroundImage: 'linear-gradient(90deg, var(--color-border-light) 0%, var(--color-surface) 50%, var(--color-border-light) 100%)' }} />
             </div>
           ))}
         </div>
@@ -181,7 +181,7 @@ function MyIdCard() {
             </div>
             <div className="border-t border-[var(--color-border-light)] pt-4 text-center">
               {verifyUrl ? (
-                <div className="w-24 h-24 bg-white mx-auto rounded-[8px] flex items-center justify-center p-1.5">
+                <div className="w-24 h-24 bg-white mx-auto rounded-sm flex items-center justify-center p-1.5">
                   <QRCodeSVG
                     value={verifyUrl}
                     size={84}
@@ -191,7 +191,7 @@ function MyIdCard() {
                   />
                 </div>
               ) : (
-                <div className="w-24 h-24 bg-[var(--color-surface-warm)] mx-auto rounded-[8px] flex items-center justify-center text-center text-[10px] leading-tight text-[var(--color-muted)] p-1.5">Verification code not yet available</div>
+                <div className="w-24 h-24 bg-[var(--color-surface-warm)] mx-auto rounded-sm flex items-center justify-center text-center text-[10px] leading-tight text-[var(--color-muted)] p-1.5">Verification code not yet available</div>
               )}
               <p className="text-xs text-[var(--color-muted)] mt-2">Verified by Memberry</p>
             </div>

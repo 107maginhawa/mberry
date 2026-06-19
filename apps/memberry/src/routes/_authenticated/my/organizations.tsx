@@ -93,7 +93,7 @@ function MyOrganizationsPage() {
           {memberships.map((m: any) => (
             <StaggerItem key={m.id}>
             <div
-              className="flex items-center gap-4 rounded-[12px] border border-[var(--color-surface-border-glass)] bg-[var(--color-surface-elevated)] backdrop-blur-[var(--surface-blur)] p-5 hover:bg-[var(--color-surface-elevated-hover)] hover:shadow-soft transition-all"
+              className="flex items-center gap-4 rounded-md border border-[var(--color-surface-border-glass)] bg-[var(--color-surface-elevated)] backdrop-blur-[var(--surface-blur)] p-5 hover:bg-[var(--color-surface-elevated-hover)] hover:shadow-soft transition-all"
             >
               <Link
                 to="/org/$orgSlug/members"

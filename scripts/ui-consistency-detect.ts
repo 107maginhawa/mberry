@@ -167,6 +167,16 @@ for (const file of files) {
       const mm = lines[i].match(rawColorRe)
       if (mm && !hasExemptNear(file, i + 1)) hits.push({ file, line: i + 1, rule: 'raw-color', detail: mm[0] })
     }
+
+    // Detector 6: arbitrary radius that HAS a token (8/12/18px → rounded-sm/md/lg).
+    // Off-token radii (6/10/14px) have no token and are not flagged.
+    const radiusRe = /\brounded-\[(8|12|18)px\]/
+    for (let i = 0; i < lines.length; i++) {
+      const trimmed = lines[i].trim()
+      if (trimmed.startsWith('//') || trimmed.startsWith('*') || trimmed.startsWith('/*')) continue
+      const mm = lines[i].match(radiusRe)
+      if (mm && !hasExemptNear(file, i + 1)) hits.push({ file, line: i + 1, rule: 'arbitrary-radius', detail: mm[0] })
+    }
   }
 
   // Detector 4: PageShell-missing (only for .tsx under routes/)

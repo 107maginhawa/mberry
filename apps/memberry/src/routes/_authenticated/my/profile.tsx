@@ -362,13 +362,13 @@ function MyProfilePage() {
 
           {/* Quick Links */}
           <div className="grid grid-cols-2 gap-3">
-            <Link to="/my/settings" className="flex items-center gap-2 rounded-[12px] border border-[var(--color-surface-border-glass)] bg-[var(--color-surface-elevated)] backdrop-blur-[var(--surface-blur)] p-4 hover:bg-[var(--color-surface-elevated-hover)] hover:shadow-soft transition-all text-sm font-semibold">              <NavIcon icon={Shield} className="text-[var(--color-muted)]" /> Privacy
+            <Link to="/my/settings" className="flex items-center gap-2 rounded-md border border-[var(--color-surface-border-glass)] bg-[var(--color-surface-elevated)] backdrop-blur-[var(--surface-blur)] p-4 hover:bg-[var(--color-surface-elevated-hover)] hover:shadow-soft transition-all text-sm font-semibold">              <NavIcon icon={Shield} className="text-[var(--color-muted)]" /> Privacy
             </Link>
-            <Link to="/settings/security" className="flex items-center gap-2 rounded-[12px] border border-[var(--color-surface-border-glass)] bg-[var(--color-surface-elevated)] backdrop-blur-[var(--surface-blur)] p-4 hover:bg-[var(--color-surface-elevated-hover)] hover:shadow-soft transition-all text-sm font-semibold">              <NavIcon icon={Lock} className="text-[var(--color-muted)]" /> Security
+            <Link to="/settings/security" className="flex items-center gap-2 rounded-md border border-[var(--color-surface-border-glass)] bg-[var(--color-surface-elevated)] backdrop-blur-[var(--surface-blur)] p-4 hover:bg-[var(--color-surface-elevated-hover)] hover:shadow-soft transition-all text-sm font-semibold">              <NavIcon icon={Lock} className="text-[var(--color-muted)]" /> Security
             </Link>
-            <Link to="/my/id-card" className="flex items-center gap-2 rounded-[12px] border border-[var(--color-surface-border-glass)] bg-[var(--color-surface-elevated)] backdrop-blur-[var(--surface-blur)] p-4 hover:bg-[var(--color-surface-elevated-hover)] hover:shadow-soft transition-all text-sm font-semibold">              <NavIcon icon={CreditCard} className="text-[var(--color-muted)]" /> ID Card
+            <Link to="/my/id-card" className="flex items-center gap-2 rounded-md border border-[var(--color-surface-border-glass)] bg-[var(--color-surface-elevated)] backdrop-blur-[var(--surface-blur)] p-4 hover:bg-[var(--color-surface-elevated-hover)] hover:shadow-soft transition-all text-sm font-semibold">              <NavIcon icon={CreditCard} className="text-[var(--color-muted)]" /> ID Card
             </Link>
-            <Link to="/my/data-export" className="flex items-center gap-2 rounded-[12px] border border-[var(--color-surface-border-glass)] bg-[var(--color-surface-elevated)] backdrop-blur-[var(--surface-blur)] p-4 hover:bg-[var(--color-surface-elevated-hover)] hover:shadow-soft transition-all text-sm font-semibold">              <NavIcon icon={Download} className="text-[var(--color-muted)]" /> Data Export
+            <Link to="/my/data-export" className="flex items-center gap-2 rounded-md border border-[var(--color-surface-border-glass)] bg-[var(--color-surface-elevated)] backdrop-blur-[var(--surface-blur)] p-4 hover:bg-[var(--color-surface-elevated-hover)] hover:shadow-soft transition-all text-sm font-semibold">              <NavIcon icon={Download} className="text-[var(--color-muted)]" /> Data Export
             </Link>
           </div>
         </div>
@@ -470,7 +470,7 @@ function ProfileEditForm({
           id={name}
           type={opts?.type || 'text'}
           placeholder={opts?.placeholder}
-          className="w-full border border-[var(--color-border)] rounded-[8px] px-4 py-[11px] text-sm focus:outline-none focus:border-[var(--color-primary)] focus:ring-[4px] focus:ring-[var(--color-primary-subtle)]"
+          className="w-full border border-[var(--color-border)] rounded-sm px-4 py-[11px] text-sm focus:outline-none focus:border-[var(--color-primary)] focus:ring-[4px] focus:ring-[var(--color-primary-subtle)]"
           {...register(name)}
         />
         {errMsg && <p role="alert" className="text-xs text-[var(--color-error)] mt-1">{errMsg}</p>}
@@ -484,7 +484,7 @@ function ProfileEditForm({
       actions={<Button variant="outline" onClick={onCancel}>Cancel</Button>}
     >
       {error && (
-        <div role="alert" className="rounded-[8px] border border-[var(--color-error)] bg-[var(--color-error-bg)] text-[var(--color-error)] p-3 text-sm mb-4">
+        <div role="alert" className="rounded-sm border border-[var(--color-error)] bg-[var(--color-error-bg)] text-[var(--color-error)] p-3 text-sm mb-4">
           {error}
         </div>
       )}
@@ -513,7 +513,7 @@ function ProfileEditForm({
             <Textarea
               id="bio"
               placeholder="Tell others about your practice and experience..."
-              className="w-full border border-[var(--color-border)] rounded-[8px] px-4 py-[11px] text-sm min-h-[100px] focus:outline-none focus:border-[var(--color-primary)] focus:ring-[4px] focus:ring-[var(--color-primary-subtle)]"
+              className="w-full border border-[var(--color-border)] rounded-sm px-4 py-[11px] text-sm min-h-[100px] focus:outline-none focus:border-[var(--color-primary)] focus:ring-[4px] focus:ring-[var(--color-primary-subtle)]"
               {...register('bio')}
             />
           </div>
@@ -528,7 +528,7 @@ function ProfileEditForm({
               type="email"
               value={person?.contactInfo?.email || ''}
               disabled
-              className="w-full border border-[var(--color-border)] rounded-[8px] px-4 py-[11px] text-sm bg-[var(--color-surface)] opacity-60"
+              className="w-full border border-[var(--color-border)] rounded-sm px-4 py-[11px] text-sm bg-[var(--color-surface)] opacity-60"
             />
             <p className="text-xs text-[var(--color-muted)] mt-1">Email is managed through your account settings</p>
           </div>

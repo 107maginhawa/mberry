@@ -66,9 +66,9 @@ function MySurveys() {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {Array.from({ length: 3 }).map((_, i) => (
             <GlassCard key={i} className="p-5 space-y-3">
-              <div className="h-5 w-20 rounded-[8px] bg-[var(--color-surface-elevated-hover)] animate-shimmer" />
-              <div className="h-5 w-3/4 rounded-[8px] bg-[var(--color-surface-elevated-hover)] animate-shimmer" />
-              <div className="h-4 w-1/2 rounded-[8px] bg-[var(--color-surface-elevated-hover)] animate-shimmer" />
+              <div className="h-5 w-20 rounded-sm bg-[var(--color-surface-elevated-hover)] animate-shimmer" />
+              <div className="h-5 w-3/4 rounded-sm bg-[var(--color-surface-elevated-hover)] animate-shimmer" />
+              <div className="h-4 w-1/2 rounded-sm bg-[var(--color-surface-elevated-hover)] animate-shimmer" />
             </GlassCard>
           ))}
         </div>

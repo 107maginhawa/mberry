@@ -13,7 +13,7 @@ interface GlassCardProps {
 export function GlassCard({ children, className = '' }: GlassCardProps) {
   return (
     <div
-      className={`rounded-[12px] border border-[var(--color-surface-border-glass)] bg-[var(--color-surface-elevated)] backdrop-blur-[var(--surface-blur)] shadow-[var(--shadow-soft)] hover:bg-[var(--color-surface-elevated-hover)] transition-colors ${className}`}
+      className={`rounded-md border border-[var(--color-surface-border-glass)] bg-[var(--color-surface-elevated)] backdrop-blur-[var(--surface-blur)] shadow-[var(--shadow-soft)] hover:bg-[var(--color-surface-elevated-hover)] transition-colors ${className}`}
     >
       {children}
     </div>

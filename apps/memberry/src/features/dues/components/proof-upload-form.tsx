@@ -182,7 +182,7 @@ export function ProofUploadForm({
       <div className="space-y-2">
         <Label>Proof of Payment</Label>
         <div
-          className="border-2 border-dashed rounded-[12px] p-6 text-center cursor-pointer hover:border-[var(--color-primary)]/50 bg-[var(--color-surface-elevated)] backdrop-blur-[var(--surface-blur)] transition-colors"
+          className="border-2 border-dashed rounded-md p-6 text-center cursor-pointer hover:border-[var(--color-primary)]/50 bg-[var(--color-surface-elevated)] backdrop-blur-[var(--surface-blur)] transition-colors"
           style={{ borderColor: file ? 'var(--color-primary)' : 'var(--color-surface-border-glass)' }}
           onClick={() => document.getElementById('proof-file-input')?.click()}
         >

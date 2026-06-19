@@ -95,10 +95,10 @@ function OrgEvents() {
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {Array.from({ length: 6 }).map((_, i) => (
             <GlassCard key={i} className="p-4 space-y-3">
-              <div className="h-5 w-20 rounded-[8px] bg-[var(--color-surface-elevated-hover)] animate-shimmer" />
-              <div className="h-5 w-3/4 rounded-[8px] bg-[var(--color-surface-elevated-hover)] animate-shimmer" />
-              <div className="h-4 w-1/2 rounded-[8px] bg-[var(--color-surface-elevated-hover)] animate-shimmer" />
-              <div className="h-4 w-2/3 rounded-[8px] bg-[var(--color-surface-elevated-hover)] animate-shimmer" />
+              <div className="h-5 w-20 rounded-sm bg-[var(--color-surface-elevated-hover)] animate-shimmer" />
+              <div className="h-5 w-3/4 rounded-sm bg-[var(--color-surface-elevated-hover)] animate-shimmer" />
+              <div className="h-4 w-1/2 rounded-sm bg-[var(--color-surface-elevated-hover)] animate-shimmer" />
+              <div className="h-4 w-2/3 rounded-sm bg-[var(--color-surface-elevated-hover)] animate-shimmer" />
             </GlassCard>
           ))}
         </div>
