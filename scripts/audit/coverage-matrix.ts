@@ -185,6 +185,22 @@ interface RouteResult {
   verdict: 'COVERED' | 'MISSING'
 }
 
+// Shipped-but-static placeholder routes: mounted UI with RBAC gating but NO
+// data layer (zero useQuery/api.get/useMutation) — they render a "Coming Soon"
+// shell or hardcoded sample figures. An e2e spec cannot assert REAL data on
+// them (there is none), and a render-only smoke is explicitly disallowed by the
+// audit ground rules. They are formally deferred from Matrix C the same way
+// DEFERRED_FLOW_MODULES defers route-less flows — drop an entry the day the
+// route gets a real backend query. Verified (2026-06-19): each file has 0 API
+// calls. (admin app, paths relative to apps/admin/src/routes)
+const PLACEHOLDER_ROUTES = new Set<string>([
+  'admin:/compliance',
+  'admin:/verifications',
+  'admin:/communications/email',
+  'admin:/communications/moderation',
+  'admin:/communications/templates',
+])
+
 function routeFilesToUrlPaths(app: 'memberry' | 'admin'): { fileRel: string; urlPath: string }[] {
   const baseRel = `apps/${app}/src/routes`
   const base = join(repoRoot, baseRel)
@@ -226,6 +242,8 @@ async function auditRoutes(): Promise<RouteResult[]> {
   for (const app of ['memberry', 'admin'] as const) {
     const routes = routeFilesToUrlPaths(app)
     for (const r of routes) {
+      // Skip formally-deferred static placeholder routes (no data layer).
+      if (PLACEHOLDER_ROUTES.has(`${app}:${r.urlPath}`)) continue
       // Match the route path inside any string literal — page.goto, nav helpers
       // (signInAndNavigate), and data-driven `path:` arrays all count. See
       // route-match.ts. Null matcher (index `/`) is treated as covered (not a
