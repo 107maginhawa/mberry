@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { describe, test, expect } from 'bun:test'
 import { screen } from '@testing-library/react'
-import { renderWithProviders, MOCK_SUPER_ADMIN, MOCK_ANALYST_ADMIN } from '@/test/utils'
+import { renderWithProviders, MOCK_SUPER_ADMIN, MOCK_SUPPORT_ADMIN, MOCK_ANALYST_ADMIN } from '@/test/utils'
 import { Route } from '@/routes/compliance/index'
 
 const Page = Route.options.component as any
@@ -27,8 +27,15 @@ describe('Compliance Page', () => {
     ).toBeInTheDocument()
   })
 
+  test('allows support role access', () => {
+    renderWithProviders(<Page />, { user: MOCK_SUPPORT_ADMIN })
+    expect(screen.getByText('Compliance')).toBeInTheDocument()
+    expect(screen.queryByText('Access Denied')).not.toBeInTheDocument()
+  })
+
   test('allows analyst access', () => {
     renderWithProviders(<Page />, { user: MOCK_ANALYST_ADMIN })
     expect(screen.getByText('Compliance')).toBeInTheDocument()
+    expect(screen.queryByText('Access Denied')).not.toBeInTheDocument()
   })
 })
