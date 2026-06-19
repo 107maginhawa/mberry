@@ -21,12 +21,15 @@ interface TrainingFormProps {
   trainingId?: string
 }
 
+// ISSUE-019: values must match backend Training type enum
+// (seminar|workshop|webinar|self_paced|hands_on); the old
+// convention/online_course/skills_training options 400 on submit.
 const TYPES = [
   { value: 'seminar', label: 'Seminar' },
   { value: 'workshop', label: 'Workshop' },
-  { value: 'convention', label: 'Convention' },
-  { value: 'online_course', label: 'Online Course' },
-  { value: 'skills_training', label: 'Skills Training' },
+  { value: 'webinar', label: 'Webinar' },
+  { value: 'self_paced', label: 'Self-Paced Course' },
+  { value: 'hands_on', label: 'Hands-on Training' },
 ]
 
 export function TrainingForm({ orgId, initial, trainingId }: TrainingFormProps) {
@@ -67,7 +70,9 @@ export function TrainingForm({ orgId, initial, trainingId }: TrainingFormProps) 
         endDate: form.endDate ? new Date(form.endDate) : undefined,
         location: form.location || undefined,
         creditAmount: parseFloat(String(form.creditAmount)) || 0,
-        registrationFee: BigInt(Math.round((parseInt(String(form.registrationFee)) || 0) * 100)),
+        // ISSUE-019: validator is z.number().int(); BigInt serializes to a
+        // string the validator rejects. Send a plain integer (cents).
+        registrationFee: Math.round((parseInt(String(form.registrationFee)) || 0) * 100),
         capacity: form.capacity ? parseInt(String(form.capacity)) : undefined,
         description: form.description || undefined,
       }
