@@ -88,9 +88,9 @@ const config: Config = {
         "border-light": "var(--color-border-light)",
       },
       borderRadius: {
-        sm: "8px",
-        md: "12px",
-        lg: "18px",
+        sm: "6px",
+        md: "8px",
+        lg: "12px",
         full: "9999px",
       },
       spacing: {
