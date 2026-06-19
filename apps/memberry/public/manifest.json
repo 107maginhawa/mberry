@@ -1,0 +1,18 @@
+{
+  "name": "Memberry",
+  "short_name": "Memberry",
+  "description": "Manage your association membership, dues, events, and continuing-education credits.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#FAF7F2",
+  "theme_color": "#554B68",
+  "icons": [
+    {
+      "src": "/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
