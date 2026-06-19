@@ -6,6 +6,7 @@ import { api } from '@/lib/api'
 import { Download, Clock, CheckCircle, AlertCircle, FileText } from 'lucide-react'
 import { GlassCard } from '@/components/motion/glass-card'
 import { EmptyState } from '@/components/patterns/empty-state'
+import { StatusBadge, type StatusBadgeVariant } from '@/components/patterns/status-badge'
 
 type ExportStatus = 'Processing' | 'Ready' | 'Expired'
 
@@ -20,22 +21,10 @@ const RATE_LIMIT_KEY = 'data_export_last_request'
 const RATE_LIMIT_HOURS = 24
 
 
-const STATUS_CONFIG: Record<ExportStatus, { icon: React.ReactNode; className: string; label: string }> = {
-  Processing: {
-    icon: <Clock size={12} />,
-    className: 'text-[var(--color-warning)] bg-[var(--color-warning-bg)]',
-    label: 'Processing',
-  },
-  Ready: {
-    icon: <CheckCircle size={12} />,
-    className: 'text-[var(--color-success)] bg-[var(--color-success-bg)]',
-    label: 'Ready',
-  },
-  Expired: {
-    icon: <AlertCircle size={12} />,
-    className: 'text-[var(--color-muted)] bg-[var(--color-border-light)]',
-    label: 'Expired',
-  },
+const STATUS_CONFIG: Record<ExportStatus, { icon: React.ReactNode; variant: StatusBadgeVariant; label: string }> = {
+  Processing: { icon: <Clock size={12} />, variant: 'warning', label: 'Processing' },
+  Ready: { icon: <CheckCircle size={12} />, variant: 'success', label: 'Ready' },
+  Expired: { icon: <AlertCircle size={12} />, variant: 'muted', label: 'Expired' },
 }
 
 function getLastRequestTime(): Date | null {
@@ -146,7 +135,13 @@ export function DataExport() {
       </div>
 
       {/* Previous exports */}
-      {exports.length > 0 && (
+      {exports.length === 0 ? (
+        <EmptyState
+          icon={<FileText size={40} />}
+          headline="No exports yet"
+          description="Request an export above and it will appear here to download."
+        />
+      ) : (
         <div>
           <h2 className="text-h4 mb-3">Previous Exports</h2>
           <GlassCard className="overflow-hidden">
@@ -174,12 +169,10 @@ export function DataExport() {
                         {new Date(e.requestedAt).toLocaleString()}
                       </TableCell>
                       <TableCell className="px-5 py-3.5">
-                        <span
-                          className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold ${config.className}`}
-                        >
+                        <StatusBadge variant={config.variant}>
                           {config.icon}
                           {config.label}
-                        </span>
+                        </StatusBadge>
                       </TableCell>
                       <TableCell className="px-5 py-3.5 text-right">
                         {e.status === 'Ready' && e.downloadUrl ? (
