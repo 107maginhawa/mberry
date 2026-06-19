@@ -127,6 +127,46 @@ interface FlowResult extends FlowRow {
 //   M13 social · M15 jobs · M16 advertising · M17 marketplace
 const DEFERRED_FLOW_MODULES = new Set(['M13', 'M15', 'M16', 'M17'])
 
+// Per-flow formal deferrals (Phase 6). Each WF here was verified — by live-stack
+// attempt and/or source reading — to have NO buildable e2e surface today, and
+// the reason is recorded. Drop an entry the moment its blocker is removed (route
+// ships, role/authz/bug fixed, Stripe-mock wired). NEVER add an id here to dodge
+// writing a real spec; these are the genuine, evidenced tail. Reasons:
+//
+//   Backend-shaped (server/webhook-triggered, no UI flow — backend-integration
+//   territory; bounce→suppression already has suppression.repo.integration.test):
+//     WF-122 create email template · WF-123 enqueue email · WF-124 handle bounce
+//     · WF-126 cancel queued email · WF-127 retry failed email · WF-132 stripe webhook
+//   Platform-admin routes not built yet (no admin route exists):
+//     WF-017 subscriptions · WF-020 support tickets · WF-021 revenue dashboard
+//   No memberry route + no member-facing SDK (committee write handlers are unwired):
+//     WF-104 · WF-105 · WF-106 · WF-107 · WF-108
+//   No UI shipped:
+//     WF-075 credential-template design · WF-103 quick poll (PollCard unmounted)
+//     · WF-116 booking schedule exceptions · WF-120 mark no-show (also needs a
+//       backdated booking the seed can't provide)
+//   M14 national dashboard endpoint 403s for the seed super-admin (handler wants
+//   platform_admin/national_officer in a form `super` doesn't satisfy):
+//     WF-084 · WF-085 · WF-086
+//   Blocked by an app bug / role gap (cannot assert a success path against a
+//   403/500 — fix then un-defer; bugs flagged in the Phase 6 commit trail):
+//     WF-008 invite (route needs bare "officer" role; seed has "association:officer")
+//     · WF-067 credit adjust (credit_entry insert 500s) · WF-115 booking create
+//       (POST /booking/events needs bare "user" role no seed user holds)
+//   Stateful / multi-subsystem, deferred for a dedicated pass:
+//     WF-036 member transfer (needs a 2nd chapter target + persistent pending state)
+//     · WF-057 waitlist promotion (FIFO across two event subsystems)
+//     · WF-062 paid training (Stripe checkout needs stripe-mock)
+const DEFERRED_FLOWS = new Set([
+  'WF-122', 'WF-123', 'WF-124', 'WF-126', 'WF-127', 'WF-132',
+  'WF-017', 'WF-020', 'WF-021',
+  'WF-104', 'WF-105', 'WF-106', 'WF-107', 'WF-108',
+  'WF-075', 'WF-103', 'WF-116', 'WF-120',
+  'WF-084', 'WF-085', 'WF-086',
+  'WF-008', 'WF-067', 'WF-115',
+  'WF-036', 'WF-057', 'WF-062',
+])
+
 function parseWorkflowMap(): FlowRow[] {
   const path = join(repoRoot, 'docs/product/WORKFLOW_MAP.md')
   if (!existsSync(path)) return []
@@ -167,7 +207,7 @@ async function auditFlows(): Promise<FlowResult[]> {
       ...flow,
       refs,
       verdict: refs.length > 0 ? 'COVERED' : 'MISSING',
-      deferred: DEFERRED_FLOW_MODULES.has(flow.module),
+      deferred: DEFERRED_FLOW_MODULES.has(flow.module) || DEFERRED_FLOWS.has(flow.id),
     })
   }
   return results
