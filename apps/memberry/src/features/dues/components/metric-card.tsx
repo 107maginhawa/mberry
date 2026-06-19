@@ -15,7 +15,7 @@ interface MetricCardProps {
 export function MetricCard({ label, value, format, prefix, changePercent, changeLabel = 'vs last quarter', icon }: MetricCardProps) {
   const isPositive = (changePercent ?? 0) > 0
   const isNegative = (changePercent ?? 0) < 0
-  const changeColor = isPositive ? 'text-emerald-600' : isNegative ? 'text-red-600' : 'text-[var(--color-muted)]'
+  const changeColor = isPositive ? 'text-[var(--color-success)]' : isNegative ? 'text-[var(--color-error)]' : 'text-[var(--color-muted)]'
 
   return (
     <GlassCard className="p-5" aria-label={label}>

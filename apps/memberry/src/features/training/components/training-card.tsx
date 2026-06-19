@@ -12,10 +12,10 @@ const TYPE_LABELS: Record<string, string> = {
 }
 
 const STATUS_STYLES: Record<string, string> = {
-  draft: 'bg-gray-100 text-gray-700',
-  published: 'bg-green-100 text-green-700',
-  cancelled: 'bg-red-100 text-red-700',
-  pending_approval: 'bg-yellow-100 text-yellow-700',
+  draft: 'bg-[var(--color-border-light)] text-[var(--color-muted)]',
+  published: 'bg-[var(--color-success-bg)] text-[var(--color-success)]',
+  cancelled: 'bg-[var(--color-error-bg)] text-[var(--color-error)]',
+  pending_approval: 'bg-[var(--color-warning-bg)] text-[var(--color-warning)]',
 }
 
 function formatDate(iso: string | null | undefined) {
@@ -91,11 +91,11 @@ export function TrainingCard({ training, orgId, onCancel, onDuplicate }: Trainin
           <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-primary/10 text-[var(--color-primary)]">
             {TYPE_LABELS[training.type] ?? training.type}
           </span>
-          <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${STATUS_STYLES[training.status] ?? 'bg-gray-100 text-gray-700'}`}>
+          <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${STATUS_STYLES[training.status] ?? 'bg-[var(--color-border-light)] text-[var(--color-muted)]'}`}>
             {training.status.replace('_', ' ')}
           </span>
           {Number(training.creditAmount) > 0 && (
-            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-amber-100 text-amber-700">
+            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-[var(--color-warning-bg)] text-[var(--color-warning)]">
               <Award className="w-3 h-3" />
               {training.creditAmount} CPE
             </span>

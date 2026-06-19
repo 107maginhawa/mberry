@@ -113,7 +113,7 @@ export function DuesInvoiceList({ orgId, tenantId }: DuesInvoiceListProps) {
                   size="sm"
                   onClick={() => setConfirmInv(inv)}
                   disabled={markPaidMutation.isPending}
-                  className="text-xs text-green-700"
+                  className="text-xs text-[var(--color-success)]"
                 >
                   Mark Paid
                 </Button>
