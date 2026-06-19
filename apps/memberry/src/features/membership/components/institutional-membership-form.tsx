@@ -99,8 +99,10 @@ export function InstitutionalMembershipForm({
       totalSeats: data.totalSeats,
       primaryContactId: data.primaryContactId,
       billingContactId: data.billingContactId || undefined,
-      startDate: new Date(data.startDate),
-      duesExpiryDate: new Date(data.duesExpiryDate),
+      // ISSUE-023: validator wants date-only YYYY-MM-DD; a Date serializes to a
+      // full ISO datetime that fails the regex. Send a date-only string.
+      startDate: new Date(data.startDate).toISOString().slice(0, 10) as unknown as Date,
+      duesExpiryDate: new Date(data.duesExpiryDate).toISOString().slice(0, 10) as unknown as Date,
     }
 
     if (isEdit) {
