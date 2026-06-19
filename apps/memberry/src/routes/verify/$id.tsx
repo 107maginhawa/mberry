@@ -1,7 +1,7 @@
 // FIX-002 (G2): single dispatching public-verify route. Replaces the three
 // sibling dynamic routes (/verify/$token, /verify/$certificateNumber,
 // /verify/$credentialNumber) that shadowed each other so at most one was
-// reachable. Dispatch is by id shape (see verify-dispatch.ts); every existing
+// reachable. Dispatch is by id shape (see -verify-dispatch.ts); every existing
 // /verify/<...> URL keeps working.
 import { createFileRoute } from '@tanstack/react-router'
 import { useQuery } from '@tanstack/react-query'
