@@ -410,7 +410,7 @@ describe('Notification Preferences (M02 supplementary)', () => {
   });
 
   test('updateMyNotificationPreferences rejects invalid category', async () => {
-    const ctx = makeCtx({ _body: { category: 'nonexistent' } });
+    const ctx = makeCtx({ _body: { preferences: [{ category: 'nonexistent' }] } });
     await expect(updateMyNotificationPreferences(ctx)).rejects.toThrow('Invalid category');
   });
 
@@ -432,7 +432,7 @@ describe('Notification Preferences (M02 supplementary)', () => {
         }),
       }),
     };
-    const ctx = makeCtx({ database: mockDb, _body: { category: 'events', pushEnabled: false, emailEnabled: true } });
+    const ctx = makeCtx({ database: mockDb, _body: { preferences: [{ category: 'events', pushEnabled: false, emailEnabled: true }] } });
     const res = await updateMyNotificationPreferences(ctx);
     expect(res.status).toBe(200);
   });
