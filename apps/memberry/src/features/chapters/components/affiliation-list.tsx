@@ -2,6 +2,7 @@ import { useQuery } from '@tanstack/react-query'
 import { listChapterAffiliationsOptions } from '@monobase/sdk-ts/generated/react-query'
 import type { ChapterAffiliation } from '@monobase/sdk-ts/generated/types.gen'
 import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from '@monobase/ui'
+import { StatusBadge } from '@/components/patterns/status-badge'
 
 interface AffiliationListProps {
   orgId: string
@@ -42,9 +43,9 @@ export function AffiliationList({ orgId, tenantId }: AffiliationListProps) {
             <TableCell className="px-4 py-3">{a.chapterId}</TableCell>
             <TableCell className="px-4 py-3">{a.isPrimary ? 'Yes' : 'No'}</TableCell>
             <TableCell className="px-4 py-3">
-              <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${a.status === 'active' ? 'bg-[var(--color-success-bg)] text-[var(--color-success)]' : 'bg-gray-100 text-gray-800'}`}>
-                {a.status}
-              </span>
+              <StatusBadge variant={a.status === 'active' ? 'success' : 'muted'}>
+                {a.status.charAt(0).toUpperCase() + a.status.slice(1)}
+              </StatusBadge>
             </TableCell>
             <TableCell className="px-4 py-3 text-xs">{a.affiliatedAt instanceof Date ? a.affiliatedAt.toLocaleDateString() : a.affiliatedAt}</TableCell>
           </TableRow>

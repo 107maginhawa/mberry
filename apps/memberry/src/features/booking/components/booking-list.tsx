@@ -6,6 +6,7 @@ import type { Booking } from '@monobase/sdk-ts/generated/types.gen'
 import { Card, CardContent } from '@monobase/ui'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@monobase/ui'
 import { Badge } from '@monobase/ui'
+import { StatusBadge, type StatusBadgeVariant } from '@/components/patterns/status-badge'
 import { formatDate } from '@/lib/format-date'
 import { Loader2, Calendar } from 'lucide-react'
 import { partitionBookings } from '@/features/booking/lib/partition-bookings'
@@ -14,16 +15,27 @@ interface BookingListProps {
   myPersonId: string
 }
 
-const STATUS_COLOR: Partial<Record<Booking['status'], string>> = {
-  pending: 'bg-yellow-100 text-yellow-800',
-  confirmed: 'bg-green-100 text-green-800',
-  rejected: 'bg-red-100 text-red-800',
-  cancelled: 'bg-gray-100 text-gray-700',
-  completed: 'bg-blue-100 text-blue-800',
+function bookingStatusVariant(status: Booking['status']): StatusBadgeVariant {
+  switch (status) {
+    case 'confirmed':
+      return 'success'
+    case 'pending':
+      return 'warning'
+    case 'rejected':
+      return 'error'
+    case 'completed':
+      return 'info'
+    default:
+      // cancelled and any no-show states read as neutral
+      return 'muted'
+  }
+}
+
+function formatBookingStatus(status: string): string {
+  return status.replace(/_/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase())
 }
 
 function BookingRow({ booking }: { booking: Booking }) {
-  const statusClass = STATUS_COLOR[booking.status] ?? 'bg-gray-100 text-gray-700'
   return (
     <Link
       to="/my/bookings/$bookingId"
@@ -47,9 +59,9 @@ function BookingRow({ booking }: { booking: Booking }) {
               </p>
             )}
           </div>
-          <Badge className={statusClass + ' capitalize'} variant="outline">
-            {booking.status}
-          </Badge>
+          <StatusBadge variant={bookingStatusVariant(booking.status)}>
+            {formatBookingStatus(booking.status)}
+          </StatusBadge>
         </CardContent>
       </Card>
     </Link>

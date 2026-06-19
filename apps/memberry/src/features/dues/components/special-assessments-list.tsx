@@ -9,7 +9,7 @@ import { api } from '@/lib/api'
 import { formatCents } from '@/features/dues/lib/money'
 import {
   Card, CardContent, CardHeader, CardTitle,
-  Button, Badge, Input, Textarea, Label,
+  Button, Input, Textarea, Label,
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter,
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
   Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
@@ -18,6 +18,7 @@ import {
 import { Plus, Pencil, Trash2, Play, Eye } from 'lucide-react'
 import { toast } from 'sonner'
 import { extractErrorMessage } from '@/utils/error'
+import { StatusBadge, type StatusBadgeVariant } from '@/components/patterns/status-badge'
 
 interface SpecialAssessment {
   id: string
@@ -169,10 +170,10 @@ export function SpecialAssessmentsList({ orgId }: SpecialAssessmentsListProps) {
     }
   }
 
-  const statusColor: Record<string, string> = {
-    draft: 'bg-yellow-100 text-yellow-800',
-    active: 'bg-green-100 text-green-800',
-    closed: 'bg-gray-100 text-gray-600',
+  const statusVariant: Record<string, StatusBadgeVariant> = {
+    draft: 'warning',
+    active: 'success',
+    closed: 'muted',
   }
 
   // Find current collection dialog assessment
@@ -235,7 +236,9 @@ export function SpecialAssessmentsList({ orgId }: SpecialAssessmentsListProps) {
                     <TableCell>{a.dueDate}</TableCell>
                     <TableCell className="capitalize">{a.appliesTo}</TableCell>
                     <TableCell>
-                      <Badge className={statusColor[a.status]}>{a.status}</Badge>
+                      <StatusBadge variant={statusVariant[a.status] ?? 'muted'}>
+                        {a.status.charAt(0).toUpperCase() + a.status.slice(1)}
+                      </StatusBadge>
                     </TableCell>
                     <TableCell>
                       {a.collection ? (
