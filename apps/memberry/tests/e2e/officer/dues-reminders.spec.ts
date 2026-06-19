@@ -1,4 +1,5 @@
 // WF-039 — Dues Reminders: scheduled email/notifs to overdue members
+// WF-042 — Dunning/Reminders: reminder processor checks expiry, creates notifications
 // CT-2: Batch dues reminders
 import { test, expect } from '../helpers/test-fixture'
 

@@ -1,4 +1,5 @@
 // Business Rules: [BR-33]
+// WF-076 — Create & Run Election: list, create, lifecycle status (draft/open/closed)
 import { test, expect } from '../helpers/test-fixture'
 import { SEED_OFFICER_EMAIL, TEST_PASSWORD } from '../helpers/test-config'
 

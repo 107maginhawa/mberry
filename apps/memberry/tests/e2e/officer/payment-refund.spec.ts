@@ -1,4 +1,5 @@
 // WF-045 — Payment Receipt Generation: auto-generate receipt on completed payment
+// WF-041 — Refund Processing: treasurer-initiated, reverses expiry extension
 // CT-7 / BR-08: Payment refund flow
 import { test, expect } from '../helpers/test-fixture'
 import { captureRouteHydration } from '../helpers/real-flow'

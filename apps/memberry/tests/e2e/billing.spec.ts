@@ -1,4 +1,5 @@
 // @journey-firewall — must-never-break journey; all 4 DoD clauses enforced by audit-e2e-depth gate
+// WF-128 — Onboard Merchant: admin creates Stripe Connect account, completes onboarding
 // Wave G5 W1.5 — Billing loading-state hygiene regression guard.
 // Backs the fix in apps/memberry/src/routes/_authenticated/my/billing.tsx that
 // resets isStarting on onboard error, adds an isError branch, and stalls after
