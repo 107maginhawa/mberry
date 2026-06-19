@@ -245,7 +245,7 @@ export function SpecialAssessmentsList({ orgId }: SpecialAssessmentsListProps) {
                         <Button
                           variant="link"
                           onClick={() => setCollectionDialogId(a.id)}
-                          className="h-auto p-0 text-sm text-blue-600 hover:underline"
+                          className="h-auto p-0 text-sm text-[var(--color-info)] hover:underline"
                         >
                           {a.collection.paidCount}/{a.collection.totalTargets} paid
                         </Button>
@@ -391,17 +391,17 @@ export function SpecialAssessmentsList({ orgId }: SpecialAssessmentsListProps) {
                   <p className="text-muted-foreground">Total Targets</p>
                   <p className="text-lg font-bold">{collectionAssessment.collection.totalTargets}</p>
                 </div>
-                <div className="bg-green-50 rounded-lg p-3">
+                <div className="bg-[var(--color-success-bg)] rounded-lg p-3">
                   <p className="text-muted-foreground">Paid</p>
-                  <p className="text-lg font-bold text-green-700">{collectionAssessment.collection.paidCount}</p>
+                  <p className="text-lg font-bold text-[var(--color-success)]">{collectionAssessment.collection.paidCount}</p>
                 </div>
-                <div className="bg-yellow-50 rounded-lg p-3">
+                <div className="bg-[var(--color-warning-bg)] rounded-lg p-3">
                   <p className="text-muted-foreground">Pending</p>
-                  <p className="text-lg font-bold text-yellow-700">{collectionAssessment.collection.pendingCount}</p>
+                  <p className="text-lg font-bold text-[var(--color-warning)]">{collectionAssessment.collection.pendingCount}</p>
                 </div>
-                <div className="bg-blue-50 rounded-lg p-3">
+                <div className="bg-[var(--color-info-bg)] rounded-lg p-3">
                   <p className="text-muted-foreground">Collected</p>
-                  <p className="text-lg font-bold text-blue-700">
+                  <p className="text-lg font-bold text-[var(--color-info)]">
                     {formatCents(collectionAssessment.collection.totalCollected, collectionAssessment.currency)}
                   </p>
                 </div>

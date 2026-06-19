@@ -20,13 +20,13 @@ const STATUS_COLORS = {
   paid: {
     dot: 'bg-emerald-500',
     line: 'bg-emerald-300',
-    text: 'text-emerald-600',
+    text: 'text-[var(--color-success)]',
     label: 'Paid',
   },
   overdue: {
     dot: 'bg-red-500',
     line: 'bg-red-300',
-    text: 'text-red-600',
+    text: 'text-[var(--color-error)]',
     label: 'Overdue',
   },
   upcoming: {

@@ -155,7 +155,7 @@ export function PendingProofsList({ orgId }: PendingProofsListProps) {
               <div className="space-y-1">
                 <div className="flex items-center gap-2">
                   <span className="font-mono text-sm font-medium">{p.receiptNumber}</span>
-                  <Badge className="bg-blue-100 text-blue-800">Pending Review</Badge>
+                  <Badge className="bg-[var(--color-info-bg)] text-[var(--color-info)]">Pending Review</Badge>
                 </div>
                 <div className="text-sm text-[var(--color-muted)]">
                   <span className="font-mono font-medium">

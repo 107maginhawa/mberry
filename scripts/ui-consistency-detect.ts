@@ -147,6 +147,28 @@ for (const file of files) {
     if (!hasExemptNear(file, line)) hits.push({ file, line, rule: 'hex-leakage', detail: '' })
   }
 
+  // Detector 5: Raw status-color leakage (any element — Button is covered by
+  // Detector 1). Status shades only, matching the color->token codemod: light
+  // backgrounds (bg-*-50/100/200) and text/border (*-300..900). Saturated
+  // -300/-400/-500 BG fills (category dots/avatars) are a separate
+  // category-palette concern and intentionally NOT flagged here. Skips ui/.
+  // Scoped to apps/memberry: it defines the --color-* semantic tokens. apps/admin
+  // has no such tokens yet, so converting it would point at undefined vars —
+  // bringing admin onto the token system is a separate effort.
+  if (/apps\/memberry\/src\//.test(file) && !/\/components\/ui\//.test(file)) {
+    const FAMS = 'red|rose|green|emerald|lime|teal|amber|yellow|orange|blue|sky|cyan|purple|violet|indigo|fuchsia|pink'
+    const rawColorRe = new RegExp(
+      `(?:hover:)?(?:bg-(?:${FAMS})-(?:50|100|200)|text-(?:${FAMS})-(?:500|600|700|800|900)|border-(?:${FAMS})-(?:200|300|400|500|600|700))\\b`,
+    )
+    const lines = src.split('\n')
+    for (let i = 0; i < lines.length; i++) {
+      const trimmed = lines[i].trim()
+      if (trimmed.startsWith('//') || trimmed.startsWith('*') || trimmed.startsWith('/*')) continue
+      const mm = lines[i].match(rawColorRe)
+      if (mm && !hasExemptNear(file, i + 1)) hits.push({ file, line: i + 1, rule: 'raw-color', detail: mm[0] })
+    }
+  }
+
   // Detector 4: PageShell-missing (only for .tsx under routes/)
   if (/apps\/(memberry|admin)\/src\/routes\//.test(file)) {
     // Colocated test/spec files live under routes/ but are never page routes —

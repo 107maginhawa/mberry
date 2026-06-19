@@ -71,8 +71,8 @@ export function ElectionTimeline(props: ElectionTimelineProps) {
           {/* Step indicator */}
           <div className="flex flex-col items-center">
             {step.status === 'completed' ? (
-              <div className="w-7 h-7 rounded-full bg-emerald-100 flex items-center justify-center shrink-0">
-                <CheckCircle2 className="w-4 h-4 text-emerald-600" />
+              <div className="w-7 h-7 rounded-full bg-[var(--color-success-bg)] flex items-center justify-center shrink-0">
+                <CheckCircle2 className="w-4 h-4 text-[var(--color-success)]" />
               </div>
             ) : step.status === 'active' ? (
               <div className="w-7 h-7 rounded-full bg-[var(--color-primary)] flex items-center justify-center shrink-0">
@@ -84,7 +84,7 @@ export function ElectionTimeline(props: ElectionTimelineProps) {
               </div>
             )}
             <div className="mt-2 text-center px-1">
-              <p className={`text-xs font-medium leading-tight ${step.status === 'active' ? 'text-[var(--color-primary)]' : step.status === 'completed' ? 'text-emerald-700' : 'text-[var(--color-muted)]'}`}>
+              <p className={`text-xs font-medium leading-tight ${step.status === 'active' ? 'text-[var(--color-primary)]' : step.status === 'completed' ? 'text-[var(--color-success)]' : 'text-[var(--color-muted)]'}`}>
                 {step.label}
               </p>
               {step.date && (

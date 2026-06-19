@@ -139,7 +139,7 @@ export function ChatView({ roomId, myPersonId, roomName, orgId }: ChatViewProps)
 
       {/* Reconnecting banner */}
       {isReconnecting && (
-        <div className="flex items-center justify-center gap-2 px-4 py-1.5 bg-amber-50 text-amber-700 text-xs border-b border-amber-200">
+        <div className="flex items-center justify-center gap-2 px-4 py-1.5 bg-[var(--color-warning-bg)] text-[var(--color-warning)] text-xs border-b border-[var(--color-warning)]">
           <WifiOff className="h-3 w-3" />
           Reconnecting...
         </div>

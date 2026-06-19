@@ -94,7 +94,7 @@ export function GatewaySetup({ orgId }: GatewaySetupProps) {
       <div className="space-y-4">
         <div className="p-4 border rounded-lg flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <Wifi className="h-5 w-5 text-green-600" />
+            <Wifi className="h-5 w-5 text-[var(--color-success)]" />
             <div>
               <Badge variant="secondary" className="bg-[var(--color-success-bg)] text-[var(--color-success)]">Connected</Badge>
               <p className="text-sm text-[var(--color-muted)] mt-1">
@@ -141,7 +141,7 @@ export function GatewaySetup({ orgId }: GatewaySetupProps) {
   return (
     <div className="space-y-6 max-w-lg">
       <div className="p-4 border rounded-lg flex items-center gap-3">
-        <WifiOff className="h-5 w-5 text-red-500" />
+        <WifiOff className="h-5 w-5 text-[var(--color-error)]" />
         <div>
           <Badge variant="secondary" className="bg-[var(--color-error-bg)] text-[var(--color-error)]">Not Connected</Badge>
           <p className="text-sm text-[var(--color-muted)] mt-1">
@@ -188,7 +188,7 @@ export function GatewaySetup({ orgId }: GatewaySetupProps) {
         </div>
 
         {testResult && (
-          <div className={`flex items-center gap-2 text-sm ${testResult.success ? 'text-green-600' : 'text-red-600'}`}>
+          <div className={`flex items-center gap-2 text-sm ${testResult.success ? 'text-[var(--color-success)]' : 'text-[var(--color-error)]'}`}>
             {testResult.success
               ? <CheckCircle className="h-4 w-4" />
               : <XCircle className="h-4 w-4" />}

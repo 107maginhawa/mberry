@@ -222,7 +222,7 @@ export function DocumentBrowser({ orgId }: DocumentBrowserProps) {
                     {categoryLabel(doc.category)}
                   </span>
                   {doc.accessLevel === 'public' && (
-                    <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-emerald-100 text-emerald-800">
+                    <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-[var(--color-success-bg)] text-[var(--color-success)]">
                       Public
                     </span>
                   )}

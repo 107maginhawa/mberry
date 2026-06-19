@@ -34,7 +34,7 @@ export function CollectionRateCard({ currentRate, previousRate }: CollectionRate
 function TrendIndicator({ trend, diff }: { trend: 'up' | 'down' | 'flat'; diff: number }) {
   if (trend === 'up') {
     return (
-      <span className="flex items-center text-sm text-green-600" aria-label={`Up ${diff} points`}>
+      <span className="flex items-center text-sm text-[var(--color-success)]" aria-label={`Up ${diff} points`}>
         <ArrowUp className="h-4 w-4" />
         +{diff}
       </span>
@@ -42,7 +42,7 @@ function TrendIndicator({ trend, diff }: { trend: 'up' | 'down' | 'flat'; diff: 
   }
   if (trend === 'down') {
     return (
-      <span className="flex items-center text-sm text-red-600" aria-label={`Down ${Math.abs(diff)} points`}>
+      <span className="flex items-center text-sm text-[var(--color-error)]" aria-label={`Down ${Math.abs(diff)} points`}>
         <ArrowDown className="h-4 w-4" />
         {diff}
       </span>

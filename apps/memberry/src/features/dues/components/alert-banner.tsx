@@ -32,10 +32,10 @@ export function AlertBanner({ variant = 'warning', message, dismissKey, action, 
   if (dismissed) return null
 
   const isWarning = variant === 'warning'
-  const bgColor = isWarning ? 'bg-amber-50 border-amber-200' : 'bg-blue-50 border-blue-200'
-  const textColor = isWarning ? 'text-amber-800' : 'text-blue-800'
+  const bgColor = isWarning ? 'bg-[var(--color-warning-bg)] border-[var(--color-warning)]' : 'bg-[var(--color-info-bg)] border-[var(--color-info)]'
+  const textColor = isWarning ? 'text-[var(--color-warning)]' : 'text-[var(--color-info)]'
   const Icon = isWarning ? AlertTriangle : Info
-  const iconColor = isWarning ? 'text-amber-500' : 'text-blue-500'
+  const iconColor = isWarning ? 'text-[var(--color-warning)]' : 'text-[var(--color-info)]'
 
   return (
     <div className={`flex items-center gap-3 px-4 py-3 rounded-lg border ${bgColor}`} role="alert">

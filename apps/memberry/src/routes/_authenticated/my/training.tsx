@@ -91,9 +91,9 @@ function MyTraining() {
 
   const statCards = [
     { label: 'Enrolled', value: enrolled, icon: BookOpen, color: 'text-[var(--color-primary)]', bg: 'bg-[var(--color-primary)]/10' },
-    { label: 'Pending', value: pending, icon: Calendar, color: 'text-orange-600', bg: 'bg-orange-100 dark:bg-orange-900/20' },
-    { label: 'CPE Credits', value: totalCredits, icon: Award, color: 'text-amber-600', bg: 'bg-amber-100 dark:bg-amber-900/20', isFloat: true },
-    { label: 'Completed', value: completed, icon: CheckCircle, color: 'text-green-600', bg: 'bg-green-100 dark:bg-green-900/20' },
+    { label: 'Pending', value: pending, icon: Calendar, color: 'text-[var(--color-warning)]', bg: 'bg-[var(--color-warning-bg)] dark:bg-orange-900/20' },
+    { label: 'CPE Credits', value: totalCredits, icon: Award, color: 'text-[var(--color-warning)]', bg: 'bg-[var(--color-warning-bg)] dark:bg-amber-900/20', isFloat: true },
+    { label: 'Completed', value: completed, icon: CheckCircle, color: 'text-[var(--color-success)]', bg: 'bg-[var(--color-success-bg)] dark:bg-green-900/20' },
   ]
 
   return (
@@ -173,7 +173,7 @@ function MyTraining() {
                   </TableCell>
                   <TableCell className="px-4 py-3">
                     {Number(item.training.creditAmount) > 0 ? (
-                      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-amber-100 text-amber-700 dark:bg-amber-900/20 dark:text-amber-400">
+                      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-[var(--color-warning-bg)] text-[var(--color-warning)] dark:bg-amber-900/20 dark:text-amber-400">
                         <Award className="w-3 h-3" />
                         {item.training.creditAmount} CPE
                       </span>
@@ -212,7 +212,7 @@ function MyTraining() {
                   <div className="flex items-center gap-3 mt-2 text-xs text-[var(--color-muted)]">
                     <span>{formatDate(t.startDate ?? t.startAt)}</span>
                     {Number(t.creditAmount ?? t.creditValue ?? 0) > 0 && (
-                      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-amber-100 text-amber-700 dark:bg-amber-900/20 dark:text-amber-400 font-medium">
+                      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-[var(--color-warning-bg)] text-[var(--color-warning)] dark:bg-amber-900/20 dark:text-amber-400 font-medium">
                         <Award className="w-3 h-3" />
                         {t.creditAmount ?? t.creditValue} CPE
                       </span>

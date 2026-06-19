@@ -101,7 +101,7 @@ export function AddressForm({
           render={({ field }) => (
             <FormItem>
               <FormLabel>
-                Street Address {required && <span className="text-red-500">*</span>}
+                Street Address {required && <span className="text-[var(--color-error)]">*</span>}
               </FormLabel>
               <FormControl>
                 <Input placeholder="123 Main Street" {...field} value={field.value || ''} />
@@ -132,7 +132,7 @@ export function AddressForm({
             render={({ field }) => (
               <FormItem>
                 <FormLabel>
-                  City {required && <span className="text-red-500">*</span>}
+                  City {required && <span className="text-[var(--color-error)]">*</span>}
                 </FormLabel>
                 <FormControl>
                   <Input placeholder="San Francisco" {...field} value={field.value || ''} />
@@ -148,7 +148,7 @@ export function AddressForm({
             render={({ field }) => (
               <FormItem>
                 <FormLabel>
-                  State/Province {required && <span className="text-red-500">*</span>}
+                  State/Province {required && <span className="text-[var(--color-error)]">*</span>}
                 </FormLabel>
                 <FormControl>
                   <Input placeholder="CA" {...field} value={field.value || ''} />
@@ -166,7 +166,7 @@ export function AddressForm({
             render={({ field }) => (
               <FormItem>
                 <FormLabel>
-                  ZIP/Postal Code {required && <span className="text-red-500">*</span>}
+                  ZIP/Postal Code {required && <span className="text-[var(--color-error)]">*</span>}
                 </FormLabel>
                 <FormControl>
                   <Input placeholder="94102" {...field} value={field.value || ''} />
@@ -187,7 +187,7 @@ export function AddressForm({
               return (
                 <FormItem className="flex flex-col">
                   <FormLabel>
-                    Country {required && <span className="text-red-500">*</span>}
+                    Country {required && <span className="text-[var(--color-error)]">*</span>}
                   </FormLabel>
                   <Popover open={open} onOpenChange={setOpen}>
                     <PopoverTrigger asChild>

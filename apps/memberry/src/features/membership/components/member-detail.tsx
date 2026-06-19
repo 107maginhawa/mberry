@@ -62,11 +62,11 @@ const STATUS_BADGE: Record<MemberStatus, { label: string; className: string }> =
 const STATUS_BANNER: Partial<Record<MemberStatus, { message: string; className: string }>> = {
   gracePeriod: {
     message: 'This member is in their grace period. Dues are overdue but membership is still active.',
-    className: 'border-yellow-300 bg-yellow-50 text-yellow-800',
+    className: 'border-[var(--color-warning)] bg-[var(--color-warning-bg)] text-[var(--color-warning)]',
   },
   lapsed: {
     message: 'Membership has lapsed. Member must renew to regain access to benefits.',
-    className: 'border-red-300 bg-red-50 text-red-800',
+    className: 'border-[var(--color-error)] bg-[var(--color-error-bg)] text-[var(--color-error)]',
   },
   suspended: {
     message: 'Membership is currently suspended.',
@@ -305,7 +305,7 @@ export function MemberDetail({ orgId, memberId }: MemberDetailProps) {
             <Button
               variant="outline"
               size="sm"
-              className="text-green-700 border-green-300 hover:bg-green-50"
+              className="text-[var(--color-success)] border-[var(--color-success)] hover:bg-[var(--color-success-bg)]"
               onClick={() => setShowReinstate(true)}
               disabled={reinstateMutation.isPending}
             >

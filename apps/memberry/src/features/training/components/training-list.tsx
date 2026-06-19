@@ -105,22 +105,22 @@ export function TrainingList({ orgId }: TrainingListProps) {
       label: 'Drafts',
       value: statsQuery.data?.drafts ?? '—',
       icon: SlidersHorizontal,
-      color: 'text-orange-600',
-      bg: 'bg-orange-100',
+      color: 'text-[var(--color-warning)]',
+      bg: 'bg-[var(--color-warning-bg)]',
     },
     {
       label: 'Enrollments',
       value: trainings.reduce((acc: number, t) => acc + (t.enrollmentCount ?? 0), 0),
       icon: Users,
-      color: 'text-blue-600',
-      bg: 'bg-blue-100',
+      color: 'text-[var(--color-info)]',
+      bg: 'bg-[var(--color-info-bg)]',
     },
     {
       label: 'CPE Credits Offered',
       value: trainings.reduce((acc: number, t) => acc + Number(t.creditAmount ?? 0), 0).toFixed(1),
       icon: Award,
-      color: 'text-amber-600',
-      bg: 'bg-amber-100',
+      color: 'text-[var(--color-warning)]',
+      bg: 'bg-[var(--color-warning-bg)]',
     },
   ]
 

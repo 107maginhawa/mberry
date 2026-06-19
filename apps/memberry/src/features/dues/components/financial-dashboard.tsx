@@ -52,7 +52,7 @@ export function FinancialDashboard({ orgId }: FinancialDashboardProps) {
   const expiringCount = dashboard?.expiringThisMonth ?? 0
   const hasGateway = dashboard?.gatewayConfigured ?? false
 
-  const rateColor = collectionRate > 80 ? 'text-green-600' : collectionRate > 50 ? 'text-yellow-600' : 'text-red-600'
+  const rateColor = collectionRate > 80 ? 'text-[var(--color-success)]' : collectionRate > 50 ? 'text-[var(--color-warning)]' : 'text-[var(--color-error)]'
 
   return (
     <div className="space-y-4">
@@ -95,20 +95,20 @@ export function FinancialDashboard({ orgId }: FinancialDashboardProps) {
       {(expiringCount > 0 || pendingCount > 0 || !hasGateway) && (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
           {expiringCount > 0 && (
-            <GlassCard className="flex items-center gap-3 p-3 border-amber-200/50">
-              <AlertTriangle className="h-5 w-5 text-amber-600 shrink-0" />
+            <GlassCard className="flex items-center gap-3 p-3 border-[var(--color-warning)]/50">
+              <AlertTriangle className="h-5 w-5 text-[var(--color-warning)] shrink-0" />
               <div className="flex-1 text-sm">
-                <p className="font-semibold text-amber-900">{expiringCount} members with expiring dues</p>
-                <p className="text-amber-700 text-sm">Send reminders before they lapse</p>
+                <p className="font-semibold text-[var(--color-warning)]">{expiringCount} members with expiring dues</p>
+                <p className="text-[var(--color-warning)] text-sm">Send reminders before they lapse</p>
               </div>
             </GlassCard>
           )}
           {pendingCount > 0 && (
-            <GlassCard className="flex items-center gap-3 p-3 border-blue-200/50">
-              <CreditCard className="h-5 w-5 text-blue-600 shrink-0" />
+            <GlassCard className="flex items-center gap-3 p-3 border-[var(--color-info)]/50">
+              <CreditCard className="h-5 w-5 text-[var(--color-info)] shrink-0" />
               <div className="flex-1 text-sm">
-                <p className="font-semibold text-blue-900">{pendingCount} pending payments</p>
-                <p className="text-blue-700 text-sm">Review and confirm</p>
+                <p className="font-semibold text-[var(--color-info)]">{pendingCount} pending payments</p>
+                <p className="text-[var(--color-info)] text-sm">Review and confirm</p>
               </div>
             </GlassCard>
           )}

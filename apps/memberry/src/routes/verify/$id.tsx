@@ -50,8 +50,8 @@ function NotFoundCard({ title, body }: { title: string; body: React.ReactNode })
   return (
     <div className="flex min-h-screen items-center justify-center bg-background">
       <div className="mx-auto max-w-md rounded-xl border bg-card p-8 text-center shadow-sm">
-        <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-red-100">
-          <svg className="h-8 w-8 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-[var(--color-error-bg)]">
+          <svg className="h-8 w-8 text-[var(--color-error)]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
           </svg>
         </div>
@@ -70,7 +70,7 @@ function StalenessHint({ issuedAt }: { issuedAt: string }) {
   const note = verifyStalenessNote(issuedAt, Date.now())
   if (!note) return null
   return (
-    <div className="mt-4 rounded-md border border-yellow-200 bg-yellow-50 p-3 text-center text-xs text-yellow-800">
+    <div className="mt-4 rounded-md border border-[var(--color-warning)] bg-[var(--color-warning-bg)] p-3 text-center text-xs text-[var(--color-warning)]">
       {note}
     </div>
   )
@@ -127,14 +127,14 @@ function CertificateResult({ certificateNumber }: { certificateNumber: string })
       <div className="mx-auto max-w-md rounded-xl border bg-card p-8 shadow-sm print:border-0 print:shadow-none">
         <div className="mb-6 flex justify-center">
           {cert.isValid ? (
-            <div className="flex h-20 w-20 items-center justify-center rounded-full bg-green-100">
-              <svg className="h-10 w-10 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <div className="flex h-20 w-20 items-center justify-center rounded-full bg-[var(--color-success-bg)]">
+              <svg className="h-10 w-10 text-[var(--color-success)]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
               </svg>
             </div>
           ) : (
-            <div className="flex h-20 w-20 items-center justify-center rounded-full bg-red-100">
-              <svg className="h-10 w-10 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <div className="flex h-20 w-20 items-center justify-center rounded-full bg-[var(--color-error-bg)]">
+              <svg className="h-10 w-10 text-[var(--color-error)]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
               </svg>
             </div>
@@ -142,7 +142,7 @@ function CertificateResult({ certificateNumber }: { certificateNumber: string })
         </div>
 
         <div className="text-center">
-          <Badge variant={cert.isValid ? 'default' : 'destructive'} className={cert.isValid ? 'bg-green-100 text-green-700' : ''}>
+          <Badge variant={cert.isValid ? 'default' : 'destructive'} className={cert.isValid ? 'bg-[var(--color-success-bg)] text-[var(--color-success)]' : ''}>
             {cert.isValid ? 'Valid Certificate' : 'REVOKED'}
           </Badge>
           <h1 className="mt-4 text-2xl font-bold">{cert.holderName}</h1>
@@ -190,8 +190,8 @@ interface CredentialLookupResponse {
 }
 
 const statusConfig = {
-  valid: { label: 'Valid', color: 'bg-green-100 text-green-700', variant: 'default' as const },
-  expired: { label: 'Expired', color: 'bg-yellow-100 text-yellow-700', variant: 'secondary' as const },
+  valid: { label: 'Valid', color: 'bg-[var(--color-success-bg)] text-[var(--color-success)]', variant: 'default' as const },
+  expired: { label: 'Expired', color: 'bg-[var(--color-warning-bg)] text-[var(--color-warning)]', variant: 'secondary' as const },
   revoked: { label: 'Revoked', color: '', variant: 'destructive' as const },
   notFound: { label: 'Not Found', color: '', variant: 'destructive' as const },
 } as const
@@ -222,20 +222,20 @@ function CredentialNumberResult({ credentialNumber }: { credentialNumber: string
       <div className="mx-auto max-w-md rounded-xl border bg-card p-8 shadow-sm print:border-0 print:shadow-none">
         <div className="mb-6 flex justify-center">
           {isValid ? (
-            <div className="flex h-20 w-20 items-center justify-center rounded-full bg-green-100">
-              <svg className="h-10 w-10 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <div className="flex h-20 w-20 items-center justify-center rounded-full bg-[var(--color-success-bg)]">
+              <svg className="h-10 w-10 text-[var(--color-success)]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
               </svg>
             </div>
           ) : data.result === 'expired' ? (
-            <div className="flex h-20 w-20 items-center justify-center rounded-full bg-yellow-100">
-              <svg className="h-10 w-10 text-yellow-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <div className="flex h-20 w-20 items-center justify-center rounded-full bg-[var(--color-warning-bg)]">
+              <svg className="h-10 w-10 text-[var(--color-warning)]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01M12 3a9 9 0 100 18 9 9 0 000-18z" />
               </svg>
             </div>
           ) : (
-            <div className="flex h-20 w-20 items-center justify-center rounded-full bg-red-100">
-              <svg className="h-10 w-10 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <div className="flex h-20 w-20 items-center justify-center rounded-full bg-[var(--color-error-bg)]">
+              <svg className="h-10 w-10 text-[var(--color-error)]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
               </svg>
             </div>
@@ -254,7 +254,7 @@ function CredentialNumberResult({ credentialNumber }: { credentialNumber: string
           <p className="mt-1 font-mono text-sm text-muted-foreground">{credential.credentialNumber}</p>
           {holder.membershipStatus === 'current' && (
             <div className="mt-2">
-              <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-200">Active Member</Badge>
+              <Badge variant="outline" className="bg-[var(--color-info-bg)] text-[var(--color-info)] border-[var(--color-info)]">Active Member</Badge>
             </div>
           )}
         </div>
@@ -322,14 +322,14 @@ function TokenResult({ token }: { token: string }) {
       <div className="mx-auto max-w-md rounded-xl border bg-card p-8 shadow-sm print:border-0 print:shadow-none">
         <div className="mb-6 flex justify-center">
           {isValid ? (
-            <div className="flex h-20 w-20 items-center justify-center rounded-full bg-green-100">
-              <svg className="h-10 w-10 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <div className="flex h-20 w-20 items-center justify-center rounded-full bg-[var(--color-success-bg)]">
+              <svg className="h-10 w-10 text-[var(--color-success)]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
               </svg>
             </div>
           ) : (
-            <div className="flex h-20 w-20 items-center justify-center rounded-full bg-red-100">
-              <svg className="h-10 w-10 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <div className="flex h-20 w-20 items-center justify-center rounded-full bg-[var(--color-error-bg)]">
+              <svg className="h-10 w-10 text-[var(--color-error)]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
               </svg>
             </div>

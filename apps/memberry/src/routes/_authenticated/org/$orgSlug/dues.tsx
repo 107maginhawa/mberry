@@ -293,7 +293,7 @@ function MemberDuesPage() {
         <section className="space-y-4">
           <GlassCard className="p-5 space-y-4">
             <div className="flex items-start gap-3">
-              <AlertTriangle className="w-5 h-5 text-amber-500 shrink-0 mt-0.5" />
+              <AlertTriangle className="w-5 h-5 text-[var(--color-warning)] shrink-0 mt-0.5" />
               <div className="space-y-2">
                 <h2 className="text-h3">Membership Period Ended</h2>
                 <p className="text-[14px] text-[var(--color-muted)]">
@@ -339,7 +339,7 @@ function MemberDuesPage() {
       ) : daysUntilExpiry !== null && daysUntilExpiry > 0 && daysUntilExpiry <= 60 ? (
         <GlassCard className="p-5">
           <div className="flex items-start gap-3">
-            <CheckCircle className="w-5 h-5 text-emerald-500 shrink-0 mt-0.5" />
+            <CheckCircle className="w-5 h-5 text-[var(--color-success)] shrink-0 mt-0.5" />
             <div>
               <h2 className="text-h3">All Dues Paid</h2>
               <p className="text-[14px] text-[var(--color-muted)]">
@@ -356,7 +356,7 @@ function MemberDuesPage() {
       ) : (
         <GlassCard className="p-5">
           <div className="flex items-start gap-3">
-            <CheckCircle className="w-5 h-5 text-emerald-500 shrink-0 mt-0.5" />
+            <CheckCircle className="w-5 h-5 text-[var(--color-success)] shrink-0 mt-0.5" />
             <div>
               <h2 className="text-h3">All Dues Paid</h2>
               <p className="text-[14px] text-[var(--color-muted)]">

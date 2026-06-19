@@ -85,7 +85,7 @@ function StatusBadge({ status }: { status: MembershipStatus }) {
   const colorClasses: Record<string, string> = {
     green: 'bg-[var(--color-success-bg)] text-[var(--color-success)]',
     yellow: 'bg-[var(--color-warning-bg)] text-[var(--color-warning)]',
-    orange: 'bg-orange-100 text-orange-800',
+    orange: 'bg-[var(--color-warning-bg)] text-[var(--color-warning)]',
     red: 'bg-[var(--color-error-bg)] text-[var(--color-error)]',
     blue: 'bg-[var(--color-info-bg)] text-[var(--color-info)]',
     gray: 'bg-gray-100 text-gray-800',

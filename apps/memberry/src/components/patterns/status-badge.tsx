@@ -18,7 +18,7 @@ const VARIANT_CLASSES: Record<StatusBadgeVariant, string> = {
   error: "text-[var(--color-error)] bg-[var(--color-error-bg)]",
   info: "text-[var(--color-info)] bg-[var(--color-info-bg)]",
   muted: "text-[var(--color-muted)] bg-[var(--color-border-light)]",
-  accent: "text-purple-700 bg-purple-100",
+  accent: "text-[var(--color-primary)] bg-[var(--color-primary-subtle)]",
 }
 
 interface StatusProp {

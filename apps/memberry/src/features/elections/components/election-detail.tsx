@@ -331,10 +331,10 @@ export function ElectionDetail({ electionId, orgId }: ElectionDetailProps) {
                         const isWinner = winner?.id === nominee.id && showTallies
 
                         return (
-                          <div key={nominee.id} className={`px-4 py-3 flex items-center gap-3 ${isWinner ? 'bg-emerald-50' : ''}`}>
+                          <div key={nominee.id} className={`px-4 py-3 flex items-center gap-3 ${isWinner ? 'bg-[var(--color-success-bg)]' : ''}`}>
                             <div className="flex-1 min-w-0">
                               <div className="flex items-center gap-2">
-                                {isWinner && <Trophy className="w-4 h-4 text-emerald-600 shrink-0" />}
+                                {isWinner && <Trophy className="w-4 h-4 text-[var(--color-success)] shrink-0" />}
                                 <p className="text-sm font-medium truncate">{(nominee as any).personName ?? nominee.personId}</p>
                                 <StatusBadge variant={NOMINEE_VARIANT[nominee.status] ?? 'muted'}>
                                   {nominee.status}
@@ -402,7 +402,7 @@ export function ElectionDetail({ electionId, orgId }: ElectionDetailProps) {
 
       {/* Published confirmation */}
       {election.status === 'published' && election.publishedAt && (
-        <div className="flex items-center gap-2 text-sm text-emerald-700 bg-emerald-50 border border-emerald-200 rounded-lg p-3">
+        <div className="flex items-center gap-2 text-sm text-[var(--color-success)] bg-[var(--color-success-bg)] border border-[var(--color-success)] rounded-lg p-3">
           <CheckCircle2 className="w-4 h-4 shrink-0" />
           Results published on {formatDate(election.publishedAt)}
         </div>

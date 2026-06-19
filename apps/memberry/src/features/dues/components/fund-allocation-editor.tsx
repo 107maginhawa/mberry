@@ -105,7 +105,7 @@ export function FundAllocationEditor({ funds, onChange, disabled }: FundAllocati
         </p>
       )}
 
-      <div className={`text-sm font-medium ${isValid ? 'text-green-600' : 'text-[var(--color-error)]'}`}>
+      <div className={`text-sm font-medium ${isValid ? 'text-[var(--color-success)]' : 'text-[var(--color-error)]'}`}>
         Total: {total.toFixed(2)}%
         {!isValid && <span className="ml-2 font-normal">Must equal exactly 100%</span>}
       </div>

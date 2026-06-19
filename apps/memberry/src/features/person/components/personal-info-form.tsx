@@ -281,7 +281,7 @@ export function PersonalInfoForm({
             render={({ field }) => (
               <FormItem>
                 <FormLabel>
-                  First Name <span className="text-red-500">*</span>
+                  First Name <span className="text-[var(--color-error)]">*</span>
                 </FormLabel>
                 <FormControl>
                   <Input placeholder="John" {...field} />
@@ -311,7 +311,7 @@ export function PersonalInfoForm({
             render={({ field }) => (
               <FormItem>
                 <FormLabel>
-                  Last Name <span className="text-red-500">*</span>
+                  Last Name <span className="text-[var(--color-error)]">*</span>
                 </FormLabel>
                 <FormControl>
                   <Input placeholder="Doe" {...field} />
@@ -330,7 +330,7 @@ export function PersonalInfoForm({
             render={({ field }) => (
               <FormItem className="flex flex-col">
                 <FormLabel>
-                  Date of Birth <span className="text-red-500">*</span>
+                  Date of Birth <span className="text-[var(--color-error)]">*</span>
                 </FormLabel>
                 <Popover>
                   <PopoverTrigger asChild>

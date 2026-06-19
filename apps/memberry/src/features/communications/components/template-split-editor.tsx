@@ -96,7 +96,7 @@ function renderBody(text: string): React.ReactNode {
       <span
         key={i}
         data-testid="unresolved-merge-field"
-        className="bg-amber-100 text-amber-800 px-0.5 rounded text-xs font-mono"
+        className="bg-[var(--color-warning-bg)] text-[var(--color-warning)] px-0.5 rounded text-xs font-mono"
       >
         {part}
       </span>

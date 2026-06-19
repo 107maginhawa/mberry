@@ -216,7 +216,7 @@ export function SurveyResults({ orgId, surveyId }: SurveyResultsProps) {
         <div className="flex items-center gap-3 mt-2 text-xs text-[var(--color-muted)]">
           <div className="flex items-center gap-3 flex-1">
             <span className="font-medium">{totalResponses} response{totalResponses !== 1 ? 's' : ''}</span>
-            <span className="inline-flex items-center px-2 py-0.5 rounded bg-blue-100 text-blue-800 font-medium">
+            <span className="inline-flex items-center px-2 py-0.5 rounded bg-[var(--color-info-bg)] text-[var(--color-info)] font-medium">
               {survey.surveyType}
             </span>
             <span

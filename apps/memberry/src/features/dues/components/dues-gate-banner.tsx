@@ -25,10 +25,10 @@ export function DuesGateBanner({ standing, orgSlug, feature, daysOverdue }: Dues
       : `Your dues are overdue. ${feature} requires current dues status.`
 
   return (
-    <div className="rounded-lg border border-amber-200 bg-amber-50 p-4 flex items-start gap-3" role="alert">
-      <AlertTriangle className="h-5 w-5 text-amber-500 shrink-0 mt-0.5" />
+    <div className="rounded-lg border border-[var(--color-warning)] bg-[var(--color-warning-bg)] p-4 flex items-start gap-3" role="alert">
+      <AlertTriangle className="h-5 w-5 text-[var(--color-warning)] shrink-0 mt-0.5" />
       <div className="flex-1">
-        <p className="text-sm text-amber-800 font-medium">{message}</p>
+        <p className="text-sm text-[var(--color-warning)] font-medium">{message}</p>
         <div className="mt-2">
           <Link to={`/org/${orgSlug}/dues` as any}>
             <Button variant="warning" size="sm">

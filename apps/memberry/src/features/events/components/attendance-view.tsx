@@ -132,7 +132,7 @@ export function AttendanceView({ eventId }: AttendanceViewProps) {
           <p role="alert" aria-live="polite" className="text-sm text-[var(--color-error)]">{checkInError}</p>
         )}
         {checkInSuccess && (
-          <p className="text-sm text-green-600">Checked in successfully!</p>
+          <p className="text-sm text-[var(--color-success)]">Checked in successfully!</p>
         )}
       </div>
 

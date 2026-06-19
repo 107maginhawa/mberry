@@ -116,8 +116,8 @@ export function ActiveBookingCard({
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="text-center py-4">
-            <div className="mx-auto w-12 h-12 bg-red-100 rounded-full flex items-center justify-center mb-4">
-              <XCircle className="w-6 h-6 text-red-600" />
+            <div className="mx-auto w-12 h-12 bg-[var(--color-error-bg)] rounded-full flex items-center justify-center mb-4">
+              <XCircle className="w-6 h-6 text-[var(--color-error)]" />
             </div>
             <h3 className="text-h3">Booking Request Rejected</h3>
             <p className="text-sm text-muted-foreground mt-2">
@@ -225,8 +225,8 @@ export function ActiveBookingCard({
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="text-center py-4">
-            <div className="mx-auto w-12 h-12 bg-green-100 rounded-full flex items-center justify-center mb-4">
-              <CheckCircle2 className="w-6 h-6 text-green-600" />
+            <div className="mx-auto w-12 h-12 bg-[var(--color-success-bg)] rounded-full flex items-center justify-center mb-4">
+              <CheckCircle2 className="w-6 h-6 text-[var(--color-success)]" />
             </div>
             <h3 className="text-h3">Session Completed</h3>
             <p className="text-sm text-muted-foreground mt-2">
@@ -273,8 +273,8 @@ export function ActiveBookingCard({
       <CardContent className="space-y-4">
         {/* Booking Status */}
         <div className="text-center py-4">
-          <div className="mx-auto w-12 h-12 bg-green-100 rounded-full flex items-center justify-center mb-4">
-            <Check className="w-6 h-6 text-green-600" />
+          <div className="mx-auto w-12 h-12 bg-[var(--color-success-bg)] rounded-full flex items-center justify-center mb-4">
+            <Check className="w-6 h-6 text-[var(--color-success)]" />
           </div>
           <h3 className="font-semibold text-lg">
             {isConfirmed ? 'Appointment Confirmed!' : 'Booking Request Submitted!'}

@@ -410,7 +410,7 @@ export function SurveyBuilder({ orgId, onSuccess, onCancel, initialData }: Surve
               <p className="text-sm text-[var(--color-muted)]">{formValues.description}</p>
             )}
             <div className="flex flex-wrap gap-2 text-xs">
-              <span className="inline-flex items-center px-2 py-0.5 rounded bg-blue-100 text-blue-800 font-medium">
+              <span className="inline-flex items-center px-2 py-0.5 rounded bg-[var(--color-info-bg)] text-[var(--color-info)] font-medium">
                 {SURVEY_TYPE_LABELS[formValues.surveyType]}
               </span>
               {formValues.anonymous && (

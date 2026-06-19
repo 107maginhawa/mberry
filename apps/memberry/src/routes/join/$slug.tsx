@@ -250,7 +250,7 @@ function PublicOrgProfile() {
                   )}
                 </div>
               ) : (
-                <div className="text-sm text-amber-600 bg-amber-50 rounded-md px-3 py-2">
+                <div className="text-sm text-[var(--color-warning)] bg-[var(--color-warning-bg)] rounded-md px-3 py-2">
                   No membership tiers are available at this time. Please contact the organization directly.
                 </div>
               )}

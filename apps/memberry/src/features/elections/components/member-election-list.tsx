@@ -14,12 +14,12 @@ const STATUS_CONFIG: Record<string, { label: string; color: string; icon: React.
   nominationsOpen: { label: 'Nominations Open', color: 'bg-[var(--color-info-bg)] text-[var(--color-info)]', icon: Users },
   votingOpen: { label: 'Voting Open', color: 'bg-[var(--color-success-bg)] text-[var(--color-success)]', icon: Vote },
   awaitingConfirmation: { label: 'Awaiting Results', color: 'bg-[var(--color-warning-bg)] text-[var(--color-warning)]', icon: Clock },
-  published: { label: 'Results Published', color: 'bg-emerald-100 text-emerald-800', icon: CheckCircle2 },
+  published: { label: 'Results Published', color: 'bg-[var(--color-success-bg)] text-[var(--color-success)]', icon: CheckCircle2 },
 }
 
 const TYPE_CONFIG: Record<string, { label: string; color: string }> = {
-  officer: { label: 'Officer', color: 'bg-purple-100 text-purple-800' },
-  bylaw: { label: 'Bylaw', color: 'bg-orange-100 text-orange-800' },
+  officer: { label: 'Officer', color: 'bg-[var(--color-primary-subtle)] text-[var(--color-primary)]' },
+  bylaw: { label: 'Bylaw', color: 'bg-[var(--color-warning-bg)] text-[var(--color-warning)]' },
 }
 
 const MEMBER_VISIBLE = ['nominationsOpen', 'votingOpen', 'awaitingConfirmation', 'published']

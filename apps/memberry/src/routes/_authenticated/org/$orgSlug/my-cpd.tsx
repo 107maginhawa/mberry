@@ -49,7 +49,7 @@ function MyCpdDashboard() {
   }
 
   const compliancePercent = credits?.compliancePercent ?? 0
-  const statusColor = compliancePercent >= 100 ? 'text-green-600' : compliancePercent >= 60 ? 'text-amber-600' : 'text-red-600'
+  const statusColor = compliancePercent >= 100 ? 'text-[var(--color-success)]' : compliancePercent >= 60 ? 'text-[var(--color-warning)]' : 'text-[var(--color-error)]'
   const StatusIcon = compliancePercent >= 100 ? CheckCircle : compliancePercent >= 60 ? TrendingUp : AlertTriangle
 
   return (
@@ -85,7 +85,7 @@ function MyCpdDashboard() {
               <div className="flex justify-between"><span>Major</span><span className="font-medium">{credits?.categoryBreakdown?.major ?? 0}</span></div>
               <div className="flex justify-between">
                 <span>Self-Directed</span>
-                <span className={`font-medium ${credits?.sdlCap?.exceeded ? 'text-red-600' : ''}`}>
+                <span className={`font-medium ${credits?.sdlCap?.exceeded ? 'text-[var(--color-error)]' : ''}`}>
                   {credits?.categoryBreakdown?.selfDirected ?? 0}{credits?.sdlCap ? `/${credits.sdlCap.max}` : ''}
                 </span>
               </div>
@@ -95,8 +95,8 @@ function MyCpdDashboard() {
       </div>
 
       {credits?.sdlCap?.exceeded && (
-        <div className="rounded-lg bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 p-4">
-          <p className="text-sm text-amber-800 dark:text-amber-300">
+        <div className="rounded-lg bg-[var(--color-warning-bg)] dark:bg-amber-900/20 border border-[var(--color-warning)] dark:border-amber-800 p-4">
+          <p className="text-sm text-[var(--color-warning)] dark:text-amber-300">
             <AlertTriangle className="w-4 h-4 inline mr-1" />
             Self-Directed Learning cap exceeded. Additional SDL credits may not count toward compliance.
           </p>
@@ -117,7 +117,7 @@ function MyCpdDashboard() {
                     {entry.sourceType && ` | ${entry.sourceType.replace('_', ' ')}`}
                   </p>
                 </div>
-                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-amber-100 text-amber-700 dark:bg-amber-900/20 dark:text-amber-400 text-xs font-medium">
+                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-[var(--color-warning-bg)] text-[var(--color-warning)] dark:bg-amber-900/20 dark:text-amber-400 text-xs font-medium">
                   <Award className="w-3 h-3" />
                   {entry.creditAmount} CPE
                 </span>

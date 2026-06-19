@@ -266,7 +266,7 @@ export function SurveyFlow({ survey, onComplete, previewMode }: SurveyFlowProps)
     <div className="flex flex-col min-h-[60vh]">
       {/* Preview banner */}
       {previewMode && (
-        <div className="mb-4 px-4 py-2.5 rounded-[var(--radius-md)] bg-amber-50 border border-amber-200 text-amber-800 text-sm font-medium text-center">
+        <div className="mb-4 px-4 py-2.5 rounded-[var(--radius-md)] bg-[var(--color-warning-bg)] border border-[var(--color-warning)] text-[var(--color-warning)] text-sm font-medium text-center">
           Preview Mode — This is how members will see your survey
         </div>
       )}

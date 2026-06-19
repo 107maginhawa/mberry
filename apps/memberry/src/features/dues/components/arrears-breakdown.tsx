@@ -59,7 +59,7 @@ export function ArrearsBreakdown({ invoices, currency = 'PHP', agingBuckets }: A
     return (
       <GlassCard className="p-5">
         <div className="flex items-center gap-3">
-          <CheckCircle className="w-5 h-5 text-emerald-500 shrink-0" />
+          <CheckCircle className="w-5 h-5 text-[var(--color-success)] shrink-0" />
           <p className="text-[14px] text-[var(--color-muted)]">All caught up! No outstanding invoices.</p>
         </div>
       </GlassCard>
@@ -104,7 +104,7 @@ export function ArrearsBreakdown({ invoices, currency = 'PHP', agingBuckets }: A
                     className="flex items-center justify-between rounded-[8px] px-4 py-3 text-[14px] hover:bg-[var(--color-surface-elevated-hover)] transition-colors"
                   >
                     <div className="flex items-center gap-3">
-                      <AlertTriangle className="w-4 h-4 text-amber-500 shrink-0" />
+                      <AlertTriangle className="w-4 h-4 text-[var(--color-warning)] shrink-0" />
                       <span className="font-mono text-[12px]">{inv.invoiceNumber}</span>
                       {daysOverdue > 0 && (
                         <span className="text-[12px] text-[var(--color-error)]">

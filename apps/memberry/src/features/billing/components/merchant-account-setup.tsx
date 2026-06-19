@@ -115,13 +115,13 @@ export function MerchantAccountSetup({
     // Complete setup
     if (status === 'complete') {
       return (
-        <div className="rounded-lg border border-green-200 bg-green-50 p-8 text-center">
-          <CheckCircle2 className="mx-auto h-12 w-12 text-green-600 mb-4" aria-hidden="true" />
-          <h3 className="text-h3 text-green-900 mb-2">Merchant Account Connected</h3>
-          <p className="text-sm text-green-700 mb-4">
+        <div className="rounded-lg border border-[var(--color-success)] bg-[var(--color-success-bg)] p-8 text-center">
+          <CheckCircle2 className="mx-auto h-12 w-12 text-[var(--color-success)] mb-4" aria-hidden="true" />
+          <h3 className="text-h3 text-[var(--color-success)] mb-2">Merchant Account Connected</h3>
+          <p className="text-sm text-[var(--color-success)] mb-4">
             Your payment account is fully set up and ready to accept payments.
           </p>
-          <p className="text-xs text-green-600">
+          <p className="text-xs text-[var(--color-success)]">
             You can manage your account settings from the dashboard.
           </p>
         </div>
@@ -131,10 +131,10 @@ export function MerchantAccountSetup({
     // Incomplete onboarding
     if (status === 'incomplete') {
       return (
-        <div className="rounded-lg border border-amber-200 bg-amber-50 p-8 text-center">
-          <AlertCircle className="mx-auto h-12 w-12 text-amber-600 mb-4" aria-hidden="true" />
-          <h3 className="text-h3 text-amber-900 mb-2">Complete Your Payment Setup</h3>
-          <p className="text-sm text-amber-700 mb-4">
+        <div className="rounded-lg border border-[var(--color-warning)] bg-[var(--color-warning-bg)] p-8 text-center">
+          <AlertCircle className="mx-auto h-12 w-12 text-[var(--color-warning)] mb-4" aria-hidden="true" />
+          <h3 className="text-h3 text-[var(--color-warning)] mb-2">Complete Your Payment Setup</h3>
+          <p className="text-sm text-[var(--color-warning)] mb-4">
             Your payment account onboarding is incomplete.
             {account?.metadata?.onboardingStartedAt && (
               <> Started {formatDate(new Date(account.metadata.onboardingStartedAt), { format: 'medium' })}.</>

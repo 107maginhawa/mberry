@@ -166,8 +166,8 @@ export function CompletionTable({ orgId, trainingId, creditAmount }: CompletionT
       {/* Stats strip */}
       <div className="grid grid-cols-3 gap-4">
         <div className="border rounded-xl p-4 flex items-center gap-3 bg-[var(--color-surface)]">
-          <div className="p-2 rounded-lg bg-blue-100">
-            <Users className="w-5 h-5 text-blue-600" />
+          <div className="p-2 rounded-lg bg-[var(--color-info-bg)]">
+            <Users className="w-5 h-5 text-[var(--color-info)]" />
           </div>
           <div>
             <p className="text-xl font-bold">{enrollmentCount}</p>
@@ -175,8 +175,8 @@ export function CompletionTable({ orgId, trainingId, creditAmount }: CompletionT
           </div>
         </div>
         <div className="border rounded-xl p-4 flex items-center gap-3 bg-[var(--color-surface)]">
-          <div className="p-2 rounded-lg bg-green-100">
-            <CheckCircle className="w-5 h-5 text-green-600" />
+          <div className="p-2 rounded-lg bg-[var(--color-success-bg)]">
+            <CheckCircle className="w-5 h-5 text-[var(--color-success)]" />
           </div>
           <div>
             <p className="text-xl font-bold">{attendance.completed}</p>
@@ -184,8 +184,8 @@ export function CompletionTable({ orgId, trainingId, creditAmount }: CompletionT
           </div>
         </div>
         <div className="border rounded-xl p-4 flex items-center gap-3 bg-[var(--color-surface)]">
-          <div className="p-2 rounded-lg bg-amber-100">
-            <Award className="w-5 h-5 text-amber-600" />
+          <div className="p-2 rounded-lg bg-[var(--color-warning-bg)]">
+            <Award className="w-5 h-5 text-[var(--color-warning)]" />
           </div>
           <div>
             <p className="text-xl font-bold">{attendance.totalCredits}</p>
@@ -266,7 +266,7 @@ export function CompletionTable({ orgId, trainingId, creditAmount }: CompletionT
                   </TableCell>
                   <TableCell className="p-3">
                     {e.completedAt ? (
-                      <span className="inline-flex items-center gap-1 text-green-700 text-xs">
+                      <span className="inline-flex items-center gap-1 text-[var(--color-success)] text-xs">
                         <CheckCircle className="w-3.5 h-3.5" />
                         {new Date(e.completedAt).toLocaleDateString()}
                       </span>

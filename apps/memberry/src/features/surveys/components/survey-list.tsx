@@ -41,10 +41,10 @@ const STATUS_CONFIG: Record<string, { label: string; color: string; icon: React.
 }
 
 const TYPE_CONFIG: Record<string, { label: string; color: string }> = {
-  nps: { label: 'NPS', color: 'bg-blue-100 text-blue-800' },
-  satisfaction: { label: 'Satisfaction', color: 'bg-green-100 text-green-800' },
-  poll: { label: 'Poll', color: 'bg-purple-100 text-purple-800' },
-  custom: { label: 'Custom', color: 'bg-orange-100 text-orange-800' },
+  nps: { label: 'NPS', color: 'bg-[var(--color-info-bg)] text-[var(--color-info)]' },
+  satisfaction: { label: 'Satisfaction', color: 'bg-[var(--color-success-bg)] text-[var(--color-success)]' },
+  poll: { label: 'Poll', color: 'bg-[var(--color-primary-subtle)] text-[var(--color-primary)]' },
+  custom: { label: 'Custom', color: 'bg-[var(--color-warning-bg)] text-[var(--color-warning)]' },
 }
 
 function StatusBadge({ status }: { status: string }) {
