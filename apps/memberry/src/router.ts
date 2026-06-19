@@ -1,5 +1,6 @@
 import { createRouter as createTanStackRouter } from '@tanstack/react-router'
 import { routeTree } from './routeTree.gen'
+import { NotFound } from './components/patterns/not-found'
 import type { User, Session } from 'better-auth'
 import type { QueryClient } from '@tanstack/react-query'
 
@@ -16,6 +17,7 @@ export function createRouter() {
   return createTanStackRouter({
     routeTree,
     scrollRestoration: true,
+    defaultNotFoundComponent: NotFound,
     context: {
       auth: undefined!, // Provided by RouterProvider in main.tsx
       queryClient: undefined!, // Provided by RouterProvider in main.tsx
