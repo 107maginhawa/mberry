@@ -7,7 +7,7 @@ stays green (no regression) while the gap closes. Ordering principle:
 
 Status legend: ✅ done · ▶ in progress · ⬜ pending
 
-Baseline trail: A=1/B=76/C=85 → **current A=0 / B=71 / C=45**.
+Baseline trail: A=1/B=76/C=85 → … → **current A=0 / B=0 / C=23** (Phase 6/7 complete).
 
 ---
 
