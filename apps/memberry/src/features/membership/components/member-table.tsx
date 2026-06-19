@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, type ReactNode } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { Link, useParams } from '@tanstack/react-router'
 import {
@@ -78,21 +78,29 @@ function MemberCard({
   const creditsEarned: number = m.creditsEarned ?? 0
   const trainingCompliant: boolean = m.trainingCompliant ?? false
   const duesBadge = duesInvoiceStatus ? DUES_STATUS_BADGE[duesInvoiceStatus] : null
+
+  // One meta line of only the facts that exist — no "—" placeholders.
+  const meta: ReactNode[] = []
+  if (m.memberNumber) meta.push(<span className="text-mono tabular-nums">{m.memberNumber}</span>)
+  if (m.categoryName ?? m.categoryId) meta.push(<span>{m.categoryName ?? m.categoryId}</span>)
+  if (m.duesExpiryDate) meta.push(<span>Expires {new Date(m.duesExpiryDate).toLocaleDateString()}</span>)
+  if (m.joinedAt) meta.push(<span>Joined {new Date(m.joinedAt).toLocaleDateString()}</span>)
+
   return (
-    <div className="rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)] p-3">
-      <div className="flex items-start gap-2.5">
+    <div className="rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)] p-3 transition-shadow hover:border-[var(--color-primary-subtle)] hover:shadow-[0_2px_10px_rgba(85,75,104,0.07)]">
+      {/* Identity row: selection · avatar · name/email · status */}
+      <div className="flex items-center gap-2.5">
         <Checkbox
           checked={selected}
           onCheckedChange={onToggle}
           aria-label={`Select ${m.name ?? m.id}`}
-          className="mt-1"
         />
         <AvatarInitials name={m.name ?? '?'} size="sm" photoUrl={m.avatar?.url || m.photoUrl} />
         <div className="min-w-0 flex-1">
           <Link
             to="/org/$orgSlug/officer/roster/$memberId"
             params={{ orgSlug, memberId: m.id }}
-            className="font-medium text-[var(--color-primary)] hover:underline"
+            className="font-semibold text-[var(--color-primary)] hover:underline"
           >
             {m.name ?? m.personId ?? m.id}
           </Link>
@@ -100,45 +108,32 @@ function MemberCard({
         </div>
         <Badge className={badge.className}>{badge.label}</Badge>
       </div>
-      <dl className="mt-3 grid grid-cols-2 gap-x-3 gap-y-2 text-xs">
-        <div>
-          <dt className="text-[var(--color-muted)]">License #</dt>
-          <dd className="text-mono tabular-nums">{m.memberNumber ?? '—'}</dd>
+
+      {/* Facts inline — empties simply don't render */}
+      {meta.length > 0 && (
+        <div className="mt-2.5 flex flex-wrap items-center text-xs text-[var(--color-muted)]">
+          {meta.map((part, i) => (
+            <span key={i} className="flex items-center">
+              {i > 0 && <span className="px-1.5">·</span>}
+              {part}
+            </span>
+          ))}
         </div>
-        <div>
-          <dt className="text-[var(--color-muted)]">Category</dt>
-          <dd>{m.categoryName ?? m.categoryId ?? '—'}</dd>
-        </div>
-        <div>
-          <dt className="text-[var(--color-muted)]">Dues Status</dt>
-          <dd>
-            {duesBadge ? (
-              <Badge className={duesBadge.className}>{duesBadge.label}</Badge>
-            ) : (
-              <span className="text-[var(--color-muted)]">No invoice</span>
-            )}
-          </dd>
-        </div>
-        <div>
-          <dt className="text-[var(--color-muted)]">Training</dt>
-          <dd className="flex items-center gap-1.5">
-            <span className="tabular-nums text-[var(--color-muted)]">{creditsEarned}</span>
-            {trainingCompliant ? (
-              <Badge className="bg-[var(--color-success-bg)] text-[var(--color-success)] hover:bg-[var(--color-success-bg)] text-xs">Compliant</Badge>
-            ) : (
-              <Badge className="bg-[var(--color-error-bg)] text-[var(--color-error)] hover:bg-[var(--color-error-bg)] text-xs">{creditsEarned}/{requiredCredits}</Badge>
-            )}
-          </dd>
-        </div>
-        <div>
-          <dt className="text-[var(--color-muted)]">Dues Expiry</dt>
-          <dd className="tabular-nums">{m.duesExpiryDate ? new Date(m.duesExpiryDate).toLocaleDateString() : '—'}</dd>
-        </div>
-        <div>
-          <dt className="text-[var(--color-muted)]">Joined</dt>
-          <dd>{m.joinedAt ? new Date(m.joinedAt).toLocaleDateString() : '—'}</dd>
-        </div>
-      </dl>
+      )}
+
+      {/* Dues + training pills */}
+      <div className="mt-2 flex flex-wrap items-center gap-2 text-xs">
+        {duesBadge ? (
+          <Badge className={duesBadge.className}>{duesBadge.label}</Badge>
+        ) : (
+          <span className="text-[var(--color-muted)]">No invoice</span>
+        )}
+        {trainingCompliant ? (
+          <Badge className="bg-[var(--color-success-bg)] text-[var(--color-success)] hover:bg-[var(--color-success-bg)] text-xs">Training compliant</Badge>
+        ) : (
+          <span className="tabular-nums text-[var(--color-muted)]">Training {creditsEarned}/{requiredCredits}</span>
+        )}
+      </div>
     </div>
   )
 }
