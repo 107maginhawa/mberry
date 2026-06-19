@@ -1,5 +1,5 @@
 import { describe, test, expect } from 'bun:test'
-import { resolveVerifyKind, verifyStalenessNote } from './verify-dispatch'
+import { resolveVerifyKind, verifyStalenessNote } from './-verify-dispatch'
 
 // FIX-002 (G2): one /verify/$id route must dispatch by id shape so cert numbers,
 // credential numbers, and signed credential tokens each reach the correct

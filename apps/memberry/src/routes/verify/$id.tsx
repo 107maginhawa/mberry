@@ -7,7 +7,7 @@ import { createFileRoute } from '@tanstack/react-router'
 import { useQuery } from '@tanstack/react-query'
 import { Badge, Button } from '@monobase/ui'
 import { api } from '@/lib/api'
-import { resolveVerifyKind, verifyStalenessNote } from './verify-dispatch'
+import { resolveVerifyKind, verifyStalenessNote } from './-verify-dispatch'
 
 // oli-ui: exempt-pageshell — public verification micro-page; centered single-card result
 export const Route = createFileRoute('/verify/$id')({

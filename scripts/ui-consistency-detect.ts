@@ -79,9 +79,9 @@ const INTENTIONAL_EXEMPT_ROUTES = new Set([
   'apps/memberry/src/routes/invite/$token.tsx',
   // Public-verify
   'apps/memberry/src/routes/pay/$token.tsx',
-  'apps/memberry/src/routes/verify/$token.tsx',
-  'apps/memberry/src/routes/verify/$certificateNumber.tsx',
-  'apps/memberry/src/routes/verify/$credentialNumber.tsx',
+  // FIX-002 (G2): the three sibling verify routes ($token, $certificateNumber,
+  // $credentialNumber) were consolidated into one dispatching $id route.
+  'apps/memberry/src/routes/verify/$id.tsx',
   'apps/memberry/src/routes/org/$slug.tsx',
   'apps/memberry/src/routes/events/$eventSlug.tsx',
   // Full-height-layout (officer + bookings shells own their chrome)

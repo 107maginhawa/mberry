@@ -35,6 +35,10 @@ export default defineConfig({
     tanstackRouter({
       routesDirectory: './src/routes',
       generatedRouteTree: './src/routeTree.gen.ts',
+      // Colocated unit tests (*.test.ts/.spec.tsx) live alongside route files;
+      // they don't export a Route, so exclude them from route generation to
+      // silence the "does not export a Route" boot warnings.
+      routeFileIgnorePattern: '\\.(test|spec)\\.(ts|tsx)$',
     }),
     viteReact(),
   ],
