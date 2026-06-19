@@ -56,6 +56,93 @@ const DUES_STATUS_BADGE: Record<string, { label: string; className: string }> = 
 
 const PAGE_SIZE = 50
 
+/** Card layout for the roster when the container is too narrow for the 9-column
+ *  table (mobile, tablet, or a constrained content column on desktop). Mirrors
+ *  the table's data exactly — selection, link target, and badges are identical. */
+function MemberCard({
+  m,
+  selected,
+  onToggle,
+  orgSlug,
+  requiredCredits,
+}: {
+  m: any
+  selected: boolean
+  onToggle: () => void
+  orgSlug: string
+  requiredCredits: number
+}) {
+  const status = m.status as MemberStatus
+  const badge = STATUS_BADGE[status] ?? STATUS_BADGE.pending
+  const duesInvoiceStatus: string | null = m.duesInvoiceStatus ?? null
+  const creditsEarned: number = m.creditsEarned ?? 0
+  const trainingCompliant: boolean = m.trainingCompliant ?? false
+  const duesBadge = duesInvoiceStatus ? DUES_STATUS_BADGE[duesInvoiceStatus] : null
+  return (
+    <div className="rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)] p-3">
+      <div className="flex items-start gap-2.5">
+        <Checkbox
+          checked={selected}
+          onCheckedChange={onToggle}
+          aria-label={`Select ${m.name ?? m.id}`}
+          className="mt-1"
+        />
+        <AvatarInitials name={m.name ?? '?'} size="sm" photoUrl={m.avatar?.url || m.photoUrl} />
+        <div className="min-w-0 flex-1">
+          <Link
+            to="/org/$orgSlug/officer/roster/$memberId"
+            params={{ orgSlug, memberId: m.id }}
+            className="font-medium text-[var(--color-primary)] hover:underline"
+          >
+            {m.name ?? m.personId ?? m.id}
+          </Link>
+          {m.email && <div className="truncate text-xs text-[var(--color-muted)]">{m.email}</div>}
+        </div>
+        <Badge className={badge.className}>{badge.label}</Badge>
+      </div>
+      <dl className="mt-3 grid grid-cols-2 gap-x-3 gap-y-2 text-xs">
+        <div>
+          <dt className="text-[var(--color-muted)]">License #</dt>
+          <dd className="text-mono tabular-nums">{m.memberNumber ?? '—'}</dd>
+        </div>
+        <div>
+          <dt className="text-[var(--color-muted)]">Category</dt>
+          <dd>{m.categoryName ?? m.categoryId ?? '—'}</dd>
+        </div>
+        <div>
+          <dt className="text-[var(--color-muted)]">Dues Status</dt>
+          <dd>
+            {duesBadge ? (
+              <Badge className={duesBadge.className}>{duesBadge.label}</Badge>
+            ) : (
+              <span className="text-[var(--color-muted)]">No invoice</span>
+            )}
+          </dd>
+        </div>
+        <div>
+          <dt className="text-[var(--color-muted)]">Training</dt>
+          <dd className="flex items-center gap-1.5">
+            <span className="tabular-nums text-[var(--color-muted)]">{creditsEarned}</span>
+            {trainingCompliant ? (
+              <Badge className="bg-[var(--color-success-bg)] text-[var(--color-success)] hover:bg-[var(--color-success-bg)] text-xs">Compliant</Badge>
+            ) : (
+              <Badge className="bg-[var(--color-error-bg)] text-[var(--color-error)] hover:bg-[var(--color-error-bg)] text-xs">{creditsEarned}/{requiredCredits}</Badge>
+            )}
+          </dd>
+        </div>
+        <div>
+          <dt className="text-[var(--color-muted)]">Dues Expiry</dt>
+          <dd className="tabular-nums">{m.duesExpiryDate ? new Date(m.duesExpiryDate).toLocaleDateString() : '—'}</dd>
+        </div>
+        <div>
+          <dt className="text-[var(--color-muted)]">Joined</dt>
+          <dd>{m.joinedAt ? new Date(m.joinedAt).toLocaleDateString() : '—'}</dd>
+        </div>
+      </dl>
+    </div>
+  )
+}
+
 export function MemberTable({ orgId, initialStatus, expiringDays, requiredCredits = 60 }: MemberTableProps) {
   const { orgSlug } = useParams({ strict: false }) as { orgSlug: string }
   const [search, setSearch] = useState('')
@@ -216,23 +303,40 @@ export function MemberTable({ orgId, initialStatus, expiringDays, requiredCredit
       )}
 
       {/* Table */}
-      <div className="border rounded-lg overflow-hidden">
-        {isLoading ? (
-          <div className="p-6 space-y-3">
-            {Array.from({ length: 6 }).map((_, i) => (
-              <Skeleton key={i} className="h-10 w-full" />
-            ))}
-          </div>
-        ) : error ? (
-          <div role="alert" aria-live="polite" className="p-10 text-center text-[var(--color-error)]">Failed to load members. Please try again.</div>
-        ) : members.length === 0 ? (
+      {isLoading ? (
+        <div className="border rounded-lg p-6 space-y-3">
+          {Array.from({ length: 6 }).map((_, i) => (
+            <Skeleton key={i} className="h-10 w-full" />
+          ))}
+        </div>
+      ) : error ? (
+        <div role="alert" aria-live="polite" className="border rounded-lg p-10 text-center text-[var(--color-error)]">Failed to load members. Please try again.</div>
+      ) : members.length === 0 ? (
+        <div className="border rounded-lg overflow-hidden">
           <EmptyState
             icon={<Users size={40} />}
             headline={debouncedSearch ? `No members match "${debouncedSearch}"` : 'No members yet'}
             description={debouncedSearch ? 'Try a different search or clear filters.' : 'Members will appear here once they are added or invited.'}
           />
-        ) : (
-          <Table className="text-sm">
+        </div>
+      ) : (
+        <div style={{ containerType: 'inline-size' }}>
+          {/* Card layout for narrow containers (no horizontal scroll) */}
+          <div className="cq-roster-cards hidden flex-col gap-3">
+            {members.map((m: any) => (
+              <MemberCard
+                key={m.id}
+                m={m}
+                selected={selected.has(m.id)}
+                onToggle={() => toggleSelect(m.id)}
+                orgSlug={orgSlug}
+                requiredCredits={requiredCredits}
+              />
+            ))}
+          </div>
+          {/* Full table when the container is wide enough to fit it */}
+          <div className="cq-roster-table border rounded-lg overflow-hidden">
+            <Table className="text-sm">
             <TableHeader>
               <TableRow className="bg-[var(--color-surface-warm)]">
                 <TableHead className="px-3 py-2.5 w-10">
@@ -324,9 +428,10 @@ export function MemberTable({ orgId, initialStatus, expiringDays, requiredCredit
                 )
               })}
             </TableBody>
-          </Table>
-        )}
-      </div>
+            </Table>
+          </div>
+        </div>
+      )}
 
       {/* Pagination */}
       {totalPages > 1 && (

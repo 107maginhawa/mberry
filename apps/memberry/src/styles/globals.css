@@ -285,6 +285,18 @@
   .cq-table-desktop { display: block !important; }
 }
 
+/* Roster: dense 9-column table needs ~960px to render without horizontal
+   scroll, so it reflows to cards below that container width (not viewport —
+   the officer content column is narrow even on wide screens). */
+@container (max-width: 959px) {
+  .cq-roster-cards { display: flex !important; }
+  .cq-roster-table { display: none !important; }
+}
+@container (min-width: 960px) {
+  .cq-roster-cards { display: none !important; }
+  .cq-roster-table { display: block !important; }
+}
+
 /* Stat grid: responsive columns based on container */
 @container (min-width: 800px) {
   .cq-stat-grid { grid-template-columns: repeat(4, 1fr); }
