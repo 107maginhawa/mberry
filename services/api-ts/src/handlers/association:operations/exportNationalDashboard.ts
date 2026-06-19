@@ -39,7 +39,8 @@ export async function exportNationalDashboard(ctx: Context): Promise<Response> {
 
   // BR-36: Access control — platform admin or designated national officer
   const user = session.user as { id: string; role?: string };
-  const isPlatformAdmin = user.role === 'platform_admin' || user.role === 'super';
+  const userRoles = (user.role ?? '').split(',').map((r) => r.trim());
+  const isPlatformAdmin = userRoles.includes('platform_admin') || userRoles.includes('super');
 
   if (!isPlatformAdmin) {
     const isOfficer = await repo.isDesignatedNationalOfficer(user.id, associationId);

@@ -1,14 +1,12 @@
 // WF-033 Membership Categories (officer creates a category) + Matrix C coverage
 // of the institutional-memberships list.
 //
-// Deferred from this pass (kept out of specs so Matrix-B doesn't mis-count; ids
-// in the commit trail):
-//   • Officer Credit Adjustment — POST /association/member/credits/adjust 500s on
-//     the credit_entry insert for the seed member (separate backend fix).
+// Deferred (kept out of specs so Matrix-B doesn't mis-count; ids in commit trail):
 //   • Member Transfer — needs a second real chapter id + persistent pending state.
 import { test, expect } from '../helpers/test-fixture'
 import { apiFetch } from '../helpers/api-fetch'
 import { captureRouteHydration } from '../helpers/real-flow'
+import { independentRead } from '../helpers/independent-read'
 
 test.use({ authRole: 'officer' })
 
@@ -59,6 +57,39 @@ test.describe('WF-033: officer creates a membership category', () => {
     expect(list.status).toBe(200)
     const cats = list.data?.data ?? list.data ?? []
     expect(cats.some((c: any) => c.name === name), 'new category is persisted').toBe(true)
+  })
+})
+
+test.describe('WF-067: officer adjusts member credits', () => {
+  test('awards then deducts credits with a mandatory reason; short reason rejected', async ({ page }) => {
+    const memberPid = await independentRead<string | undefined>('member', async (api) => {
+      const me = await api.get<any>('/persons/me', { orgId: ORG_ID })
+      return me.data?.data?.id ?? me.data?.id
+    })
+    expect(memberPid, 'member personId').toBeTruthy()
+    await page.goto(`/org/${ORG_ID}/officer/reports/credits`)
+
+    const stamp = Date.now()
+    const award = await apiFetch<any>(page, '/association/member/credits/adjust', {
+      method: 'POST', orgId: ORG_ID,
+      body: { personId: memberPid, creditAmount: 5, reason: 'E2E WF-067 award for coverage', idempotencyKey: `wf067-a-${stamp}` },
+    })
+    expect(award.status, 'award accepted').toBe(201)
+    expect(Number((award.data?.data ?? award.data)?.creditAmount)).toBe(5)
+
+    // Deduct the same back so the member balance nets to zero across runs.
+    const deduct = await apiFetch<any>(page, '/association/member/credits/adjust', {
+      method: 'POST', orgId: ORG_ID,
+      body: { personId: memberPid, creditAmount: -5, reason: 'E2E WF-067 deduct for coverage', idempotencyKey: `wf067-d-${stamp}` },
+    })
+    expect(deduct.status, 'deduct accepted').toBe(201)
+
+    // Mandatory-reason guard.
+    const bad = await apiFetch<any>(page, '/association/member/credits/adjust', {
+      method: 'POST', orgId: ORG_ID,
+      body: { personId: memberPid, creditAmount: 1, reason: 'short', idempotencyKey: `wf067-b-${stamp}` },
+    })
+    expect(bad.status, 'short reason rejected').toBe(400)
   })
 })
 

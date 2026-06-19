@@ -9,10 +9,16 @@ test.use({ authRole: 'member' })
 const ORG_ID = 'ed8e3a96-8126-4341-be42-e6eb7940c562'
 
 test.describe('Member self-service routes', () => {
-  // NOTE: /my-notifications is left uncovered — its person-subscriptions query
-  // returns 403 for the owning member (in-browser AND via API with personId=me
-  // + x-org-id), so no real subscription data can be asserted. Real authz bug,
-  // flagged in the PHASE6 report.
+  test('my-notifications hydrates real subscription preferences', async ({ page }) => {
+    const respP = captureRouteHydration(page, /\/person-subscriptions/)
+    await page.goto(`/org/${ORG_ID}/my-notifications`)
+
+    await expect(page.getByRole('heading', { name: /notification preferences/i })).toBeVisible({ timeout: 15000 })
+    const resp = await respP
+    expect(resp?.status(), 'person-subscriptions GET must succeed (me resolves to caller)').toBe(200)
+    // The preference matrix renders one switch per category × channel.
+    await expect(page.getByRole('switch').first()).toBeVisible({ timeout: 10000 })
+  })
 
   test('DM inbox hydrates the chat-room list', async ({ page }) => {
     const respP = captureRouteHydration(page, /\/chat-rooms(\?|$)/)

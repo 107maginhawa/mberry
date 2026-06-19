@@ -21,13 +21,17 @@ export async function listPersonSubscriptions(
 
   const query = ctx.req.valid('query');
 
+  // The UI passes the sentinel "me" for the caller's own subscriptions; resolve
+  // it to the caller's personId (user.id) before the ownership check.
+  const personId = query.personId === 'me' ? user.id : query.personId;
+
   // DEC-COMMS-05 (PII scoping): person_subscription rows are consent/opt-out
   // records. The route gate is `member:owner` — ownership is enforced HERE, not
   // in middleware. A member may read only their OWN subscriptions; reading any
   // other person's requires officer access. Otherwise any member could enumerate
   // another member's consent state via ?personId=. (user.id is the caller's
   // personId — see getPerson / listDuesPayments.)
-  if (query.personId !== user.id) {
+  if (personId !== user.id) {
     const officerDenied = await requireOfficerTerm(ctx as unknown as BaseContext);
     if (officerDenied !== null) {
       return ctx.json({ error: "Cannot access another member's subscription preferences" }, 403);
@@ -40,7 +44,7 @@ export async function listPersonSubscriptions(
 
   // Includes topicName so the prefs UI can map a stored topic UUID back to its
   // category and reflect the saved toggle state on reload (FIX-005 round-trip).
-  const items = await repo.findByPersonWithTopic(query.personId, orgId);
+  const items = await repo.findByPersonWithTopic(personId, orgId);
 
   const limit = query.limit ?? query.pageSize ?? 20;
   const offset = query.offset ?? (query.page ? (query.page - 1) * limit : 0);

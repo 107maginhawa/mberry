@@ -1,5 +1,4 @@
 import type { Context } from 'hono';
-import { randomUUID } from 'node:crypto';
 import { eq } from 'drizzle-orm';
 import { UnauthorizedError, ValidationError, ConflictError } from '@/core/errors';
 import type { DatabaseInstance } from '@/core/database';
@@ -7,7 +6,7 @@ import { creditEntries, orgCpdConfig } from '@/handlers/association:member/repos
 import { domainEvents } from '@/core/domain-events';
 import { requirePosition } from '@/core/auth/officer-checks';
 import { POSITION_TITLES } from '@/utils/position-titles';
-import { resolveCycle } from './utils/credit-cycle';
+import { resolveCycle, keyToSourceUuid } from './utils/credit-cycle';
 
 // Acceptance Criteria: [AC-M10-005] mandatory adjustment reason — M10-R4
 export async function adjustCreditEntry(ctx: Context): Promise<Response> {
@@ -43,7 +42,9 @@ export async function adjustCreditEntry(ctx: Context): Promise<Response> {
     now,
   );
 
-  const sourceId = body.idempotencyKey ?? randomUUID();
+  // source_id is a uuid column; map a caller-supplied idempotencyKey (any
+  // string) to a stable uuid so dedup works without a uuid-syntax 500.
+  const sourceId = keyToSourceUuid(body.idempotencyKey);
 
   try {
     const [entry] = await db

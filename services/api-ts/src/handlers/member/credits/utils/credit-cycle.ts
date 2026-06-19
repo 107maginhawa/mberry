@@ -9,6 +9,22 @@
  */
 
 import { ValidationError } from '@/core/errors';
+import { createHash, randomUUID } from 'node:crypto';
+
+const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
+/**
+ * credit_entry.source_id is a uuid column, but a caller-supplied idempotency key
+ * may be any string. Pass a uuid through unchanged; map any other string to a
+ * STABLE uuid (sha256-derived) so idempotency dedup still works without a
+ * uuid-syntax 500; generate a random uuid when no key is given.
+ */
+export function keyToSourceUuid(key: string | null | undefined): string {
+  if (!key) return randomUUID();
+  if (UUID_RE.test(key)) return key;
+  const h = createHash('sha256').update(key).digest('hex');
+  return `${h.slice(0, 8)}-${h.slice(8, 12)}-${h.slice(12, 16)}-${h.slice(16, 20)}-${h.slice(20, 32)}`;
+}
 
 export interface CreditCycleConfig {
   /** Cycle duration in years (1, 2, or 3) */

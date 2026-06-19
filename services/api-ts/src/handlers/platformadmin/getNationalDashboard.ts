@@ -83,7 +83,10 @@ export async function getNationalDashboard(ctx: Context): Promise<Response> {
 
   // ── Access control (BR-36) ───────────────────────────────────────────────
   const user = session.user as { id?: string; role?: string } | undefined;
-  const isPlatformAdmin = user?.role === 'platform_admin' || user?.role === 'super';
+  // role is a comma-separated list (e.g. "admin,platform_admin,association:admin"),
+  // so membership-test the segments rather than exact-equality.
+  const userRoles = (user?.role ?? '').split(',').map((r) => r.trim());
+  const isPlatformAdmin = userRoles.includes('platform_admin') || userRoles.includes('super');
 
   if (!isPlatformAdmin) {
     const memberId = user?.id;
