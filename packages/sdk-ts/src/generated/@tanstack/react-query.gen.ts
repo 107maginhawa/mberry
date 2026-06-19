@@ -1253,7 +1253,7 @@ export const updateDocumentTagMutation = (options?: Partial<Options<UpdateDocume
 export const searchDocumentsQueryKey = (options?: Options<SearchDocumentsData>) => createQueryKey('searchDocuments', options);
 
 /**
- * Search and list documents. Requires role: 'admin', 'coordinator', 'member'
+ * Search and list documents. Requires role: 'admin', 'coordinator', 'member', 'association:member', 'association:admin'
  */
 export const searchDocumentsOptions = (options?: Options<SearchDocumentsData>) => queryOptions<SearchDocumentsResponse, SearchDocumentsError, SearchDocumentsResponse, ReturnType<typeof searchDocumentsQueryKey>>({
     queryFn: async ({ queryKey, signal }) => {
@@ -1271,7 +1271,7 @@ export const searchDocumentsOptions = (options?: Options<SearchDocumentsData>) =
 export const searchDocumentsInfiniteQueryKey = (options?: Options<SearchDocumentsData>): QueryKey<Options<SearchDocumentsData>> => createQueryKey('searchDocuments', options, true);
 
 /**
- * Search and list documents. Requires role: 'admin', 'coordinator', 'member'
+ * Search and list documents. Requires role: 'admin', 'coordinator', 'member', 'association:member', 'association:admin'
  */
 export const searchDocumentsInfiniteOptions = (options?: Options<SearchDocumentsData>) => infiniteQueryOptions<SearchDocumentsResponse, SearchDocumentsError, InfiniteData<SearchDocumentsResponse>, QueryKey<Options<SearchDocumentsData>>, number | Pick<QueryKey<Options<SearchDocumentsData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
 // @ts-ignore
@@ -9148,7 +9148,7 @@ export const bulkImportMembersMutation = (options?: Partial<Options<BulkImportMe
 };
 
 /**
- * Create an invitation token for a prospective member. Requires officer auth and org context. Requires role: 'officer'
+ * Create an invitation token for a prospective member. Requires officer auth and org context. Requires role: 'officer', 'association:officer', 'association:admin'
  */
 export const createInviteMutation = (options?: Partial<Options<CreateInviteData>>): UseMutationOptions<CreateInviteResponse2, CreateInviteError, Options<CreateInviteData>> => {
     const mutationOptions: UseMutationOptions<CreateInviteResponse2, CreateInviteError, Options<CreateInviteData>> = {

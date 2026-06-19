@@ -663,7 +663,7 @@ export const updateDocumentTag = <ThrowOnError extends boolean = false>(options:
 });
 
 /**
- * Search and list documents. Requires role: 'admin', 'coordinator', 'member'
+ * Search and list documents. Requires role: 'admin', 'coordinator', 'member', 'association:member', 'association:admin'
  */
 export const searchDocuments = <ThrowOnError extends boolean = false>(options?: Options<SearchDocumentsData, ThrowOnError>) => (options?.client ?? client).get<SearchDocumentsResponses, SearchDocumentsErrors, ThrowOnError>({
     responseTransformer: searchDocumentsResponseTransformer,
@@ -4580,7 +4580,7 @@ export const bulkImportMembers = <ThrowOnError extends boolean = false>(options:
 });
 
 /**
- * Create an invitation token for a prospective member. Requires officer auth and org context. Requires role: 'officer'
+ * Create an invitation token for a prospective member. Requires officer auth and org context. Requires role: 'officer', 'association:officer', 'association:admin'
  */
 export const createInvite = <ThrowOnError extends boolean = false>(options: Options<CreateInviteData, ThrowOnError>) => (options.client ?? client).post<CreateInviteResponses, CreateInviteErrors, ThrowOnError>({
     responseTransformer: createInviteResponseTransformer,
