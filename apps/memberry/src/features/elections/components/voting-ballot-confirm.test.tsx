@@ -27,19 +27,19 @@ const mockGetElectionOptions = getElectionOptions as ReturnType<typeof vi.fn>
 const mockCastBallot = castBallot as ReturnType<typeof vi.fn>
 const mockApi = api as { get: ReturnType<typeof vi.fn> }
 
+// ISSUE-034: getElection now returns a flat Election (no { data } envelope),
+// and voting-ballot reads it flat — so the mock must be flat too.
 const ELECTION_DATA = {
-  data: {
-    title: '2025 Board Election',
-    status: 'votingOpen',
-    positions: [
-      { id: 'pos-1', title: 'President', sortOrder: 1 },
-      { id: 'pos-2', title: 'Secretary', sortOrder: 2 },
-    ],
-    nominees: [
-      { id: 'nom-1', personId: 'person-alice', personName: 'Alice Smith', positionId: 'pos-1', status: 'accepted' },
-      { id: 'nom-2', personId: 'person-bob', personName: 'Bob Jones', positionId: 'pos-2', status: 'accepted' },
-    ],
-  },
+  title: '2025 Board Election',
+  status: 'votingOpen',
+  positions: [
+    { id: 'pos-1', title: 'President', sortOrder: 1 },
+    { id: 'pos-2', title: 'Secretary', sortOrder: 2 },
+  ],
+  nominees: [
+    { id: 'nom-1', personId: 'person-alice', personName: 'Alice Smith', positionId: 'pos-1', status: 'accepted' },
+    { id: 'nom-2', personId: 'person-bob', personName: 'Bob Jones', positionId: 'pos-2', status: 'accepted' },
+  ],
 }
 
 describe('VotingBallot — confirm dialog', () => {
