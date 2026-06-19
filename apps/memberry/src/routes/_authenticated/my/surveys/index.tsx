@@ -4,6 +4,7 @@ import { ClipboardList, Clock, CheckCircle2, ChevronRight } from 'lucide-react'
 import { listSurveysOptions } from '@monobase/sdk-ts/generated/react-query'
 import { PageShell } from '@/components/patterns/page-shell'
 import { EmptyState } from '@/components/patterns/empty-state'
+import { StatusBadge } from '@/components/patterns/status-badge'
 import { GlassCard } from '@/components/motion/glass-card'
 import { StaggerGrid, StaggerItem } from '@/components/motion/stagger-grid'
 
@@ -109,9 +110,7 @@ function MySurveys() {
                         <div className="flex items-start justify-between gap-2">
                           <div className="space-y-1 flex-1">
                             <div className="flex items-center gap-2 flex-wrap">
-                              <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold bg-[var(--color-warning-bg)] text-[var(--color-warning)]">
-                                Pending
-                              </span>
+                              <StatusBadge variant="warning">Pending</StatusBadge>
                               <span className="text-xs text-[var(--color-muted)]">
                                 {formatSurveyType(survey.surveyType)}
                               </span>
@@ -162,9 +161,7 @@ function MySurveys() {
                     <GlassCard className="p-5 opacity-80">
                       <div className="space-y-1">
                         <div className="flex items-center gap-2 flex-wrap">
-                          <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold bg-[var(--color-success-bg)] text-[var(--color-success)]">
-                            Completed
-                          </span>
+                          <StatusBadge variant="success">Completed</StatusBadge>
                           <span className="text-xs text-[var(--color-muted)]">
                             {formatSurveyType(survey.surveyType)}
                           </span>
