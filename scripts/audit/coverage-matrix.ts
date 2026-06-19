@@ -115,7 +115,16 @@ interface FlowRow {
 interface FlowResult extends FlowRow {
   refs: string[]
   verdict: 'COVERED' | 'MISSING'
+  deferred: boolean
 }
+
+// Modules with NO frontend routes — their UI workflows cannot be exercised by an
+// e2e spec because the UI does not exist (backend-only or not-yet-built template
+// modules). Their MISSING flows are excluded from the gate the same way a BR with
+// a deferredReason is. Drop a module from this set the day it ships a frontend.
+//   M13 social · M14 national-reporting · M15 jobs · M16 advertising ·
+//   M17 marketplace · M18 surveys (backend-only, no UI routes)
+const DEFERRED_FLOW_MODULES = new Set(['M13', 'M14', 'M15', 'M16', 'M17', 'M18'])
 
 function parseWorkflowMap(): FlowRow[] {
   const path = join(repoRoot, 'docs/product/WORKFLOW_MAP.md')
@@ -153,7 +162,12 @@ async function auditFlows(): Promise<FlowResult[]> {
     for (const [path, body] of fileContents) {
       if (body.includes(flow.id)) refs.push(path)
     }
-    results.push({ ...flow, refs, verdict: refs.length > 0 ? 'COVERED' : 'MISSING' })
+    results.push({
+      ...flow,
+      refs,
+      verdict: refs.length > 0 ? 'COVERED' : 'MISSING',
+      deferred: DEFERRED_FLOW_MODULES.has(flow.module),
+    })
   }
   return results
 }
@@ -277,8 +291,13 @@ function renderMatrixB(rows: FlowResult[]): string {
   lines.push('')
   lines.push(`Source: \`docs/product/WORKFLOW_MAP.md\` (${rows.length} flows)`)
   lines.push('')
+  const deferredMissing = rows.filter((r) => r.verdict === 'MISSING' && r.deferred)
   lines.push(`- ✅ COVERED: ${covered}`)
   lines.push(`- ❌ MISSING (no E2E spec mentions WF-id): ${missing}`)
+  lines.push(
+    `- 🟡 of those, excluded from gate (module has no frontend — UI flow unbuildable): ${deferredMissing.length}`,
+  )
+  lines.push(`- ➡️ gate-counted MISSING: ${missing - deferredMissing.length}`)
   lines.push('')
   lines.push('| Module | Covered | Missing |')
   lines.push('|---|---|---|')
@@ -368,7 +387,7 @@ console.log(`Wrote ${relative(repoRoot, jsonPath)}`)
 if (gateMode) {
   const current = {
     a: countUndeferredPhase1Gaps(aRows),
-    b: bRows.filter((r) => r.verdict === 'MISSING').length,
+    b: bRows.filter((r) => r.verdict === 'MISSING' && !r.deferred).length,
     c: cRows.filter((r) => r.verdict === 'MISSING').length,
   }
   const baselinePath = join(import.meta.dir, 'coverage-baseline.json')
