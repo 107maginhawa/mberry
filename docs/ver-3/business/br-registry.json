@@ -969,11 +969,13 @@
     "module": "M22",
     "ruleClass": "p0-data",
     "tests": {
-      "backend": [],
+      "backend": [
+        "services/api-ts/src/handlers/email/repos/suppression.repo.integration.test.ts"
+      ],
       "contract": [],
       "e2e": []
     },
-    "annotations": "Minted 2026-06-02 to resolve TR-P1-003. Aliases module-local M22-R4. IF hard bounce received THEN add to suppression with reason hard_bounce. Test coverage to be backfilled."
+    "annotations": "Minted 2026-06-02 to resolve TR-P1-003. Aliases module-local M22-R4. IF hard bounce received THEN add to suppression with reason hard_bounce. 2026-06-19: durable-state half backfilled with a real-PG SuppressionRepository integration test (hard_bounce persists + idempotent re-add). The IF trigger (provider bounce webhook calling addSuppression) is not yet wired."
   },
   "BR-56": {
     "rule": "Complaint Auto-Suppression / CAN-SPAM (alias M22-R5)",
@@ -981,11 +983,13 @@
     "module": "M22",
     "ruleClass": "p0-security",
     "tests": {
-      "backend": [],
+      "backend": [
+        "services/api-ts/src/handlers/email/repos/suppression.repo.integration.test.ts"
+      ],
       "contract": [],
       "e2e": []
     },
-    "annotations": "Minted 2026-06-02 to resolve TR-P1-003. Aliases module-local M22-R5. IF complaint received THEN add to suppression with reason complaint (CAN-SPAM). Test coverage to be backfilled."
+    "annotations": "Minted 2026-06-02 to resolve TR-P1-003. Aliases module-local M22-R5. IF complaint received THEN add to suppression with reason complaint (CAN-SPAM). 2026-06-19: durable-state + tenant-isolation half backfilled with a real-PG SuppressionRepository integration test (complaint persists; org-A suppression does not leak to org-B). The IF trigger (provider complaint webhook calling addSuppression) is not yet wired."
   },
   "BR-57": {
     "rule": "Transactional Email Suppression Override (alias M22-R6)",

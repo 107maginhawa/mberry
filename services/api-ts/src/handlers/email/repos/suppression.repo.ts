@@ -95,8 +95,13 @@ export class SuppressionRepository extends DatabaseRepository<
         suppressedAt: new Date(),
       });
     } catch (err: any) {
-      // Unique constraint violation (23505) — already suppressed, treat as no-op
-      if (err?.code === '23505' || err?.message?.includes('unique')) {
+      // Unique constraint violation (23505) — already suppressed, treat as no-op.
+      // Drizzle wraps driver errors (DrizzleQueryError) with the pg error on
+      // `.cause`, so check both levels — a second hard_bounce/complaint for an
+      // already-suppressed address (BR-55/56) must stay an idempotent no-op.
+      const code = err?.code ?? err?.cause?.code;
+      const message = `${err?.message ?? ''} ${err?.cause?.message ?? ''}`;
+      if (code === '23505' || /unique/i.test(message)) {
         this.logger?.debug(
           { email: data.email, orgId: data.orgId },
           'Email already suppressed — skipping duplicate',
