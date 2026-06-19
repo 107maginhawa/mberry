@@ -29,6 +29,7 @@ import { readFileSync, writeFileSync, existsSync, statSync, mkdirSync } from 'no
 import { Glob } from 'bun'
 import { join, relative } from 'node:path'
 import { ratchetCheck, countUndeferredPhase1Gaps } from './ratchet'
+import { buildRouteMatcher } from './route-match'
 
 const repoRoot = join(import.meta.dir, '..', '..')
 const args = process.argv.slice(2)
@@ -208,22 +209,23 @@ async function auditRoutes(): Promise<RouteResult[]> {
   for (const app of ['memberry', 'admin'] as const) {
     const routes = routeFilesToUrlPaths(app)
     for (const r of routes) {
-      // Convert TanStack $param to a regex matcher: $orgSlug → [^/'"`]+
-      // We match against page.goto("...") string-literal contents.
-      const pattern = r.urlPath
-        .replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
-        .replace(/\\\$\w+/g, '[^/\'"`]+')
-      const re = new RegExp(`page\\.goto\\(\\s*[\\'\\"\`][^\\'\\"\`]*${pattern}(?:[/?\\'\\"\`]|$)`)
+      // Match the route path inside any string literal — page.goto, nav helpers
+      // (signInAndNavigate), and data-driven `path:` arrays all count. See
+      // route-match.ts. Null matcher (index `/`) is treated as covered (not a
+      // meaningful gap to chase).
+      const re = buildRouteMatcher(r.urlPath)
       const refs: string[] = []
-      for (const [path, body] of fileContents) {
-        if (re.test(body)) refs.push(path)
+      if (re) {
+        for (const [path, body] of fileContents) {
+          if (re.test(body)) refs.push(path)
+        }
       }
       results.push({
         app,
         path: r.urlPath,
         fileRel: r.fileRel,
         refs,
-        verdict: refs.length > 0 ? 'COVERED' : 'MISSING',
+        verdict: re === null || refs.length > 0 ? 'COVERED' : 'MISSING',
       })
     }
   }
