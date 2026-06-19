@@ -100,5 +100,5 @@ export async function certifyElection(
     winners,
   }).catch(() => {});
 
-  return ctx.json({ data: { election: updated, tallies, voterCount, winners } }, 200);
+  return ctx.json({ ...updated, tallies, voterCount, winners }, 200);
 }

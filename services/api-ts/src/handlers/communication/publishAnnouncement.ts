@@ -56,5 +56,5 @@ export async function publishAnnouncement(
   ctx.set('auditDescription', `Published announcement`);
   ctx.set('auditDetails', { transition: 'published' });
 
-  return ctx.json({ data: published }, 200);
+  return ctx.json(published, 200);
 }

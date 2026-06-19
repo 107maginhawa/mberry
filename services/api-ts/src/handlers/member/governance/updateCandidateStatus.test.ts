@@ -100,7 +100,7 @@ describe('updateCandidateStatus', () => {
     const res = await updateCandidateStatus(ctx);
 
     expect(res.status).toBe(200);
-    expect(res.body.data.status).toBe('accepted');
+    expect(res.body.status).toBe('accepted');
   });
 
   test('happy path — self-nominee transitions nominated → declined', async () => {
@@ -117,7 +117,7 @@ describe('updateCandidateStatus', () => {
     const res = await updateCandidateStatus(ctx);
 
     expect(res.status).toBe(200);
-    expect(res.body.data.status).toBe('declined');
+    expect(res.body.status).toBe('declined');
   });
 
   test('officer can update status of another nominee', async () => {
@@ -137,7 +137,7 @@ describe('updateCandidateStatus', () => {
     const res = await updateCandidateStatus(ctx);
 
     expect(res.status).toBe(200);
-    expect(res.body.data.status).toBe('accepted');
+    expect(res.body.status).toBe('accepted');
   });
 
   test('throws ForbiddenError when non-self non-officer tries to update', async () => {

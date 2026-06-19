@@ -14,5 +14,5 @@ export async function getAnnouncementStats(ctx: Context): Promise<Response> {
   const announcement = await repo.get(id);
   if (!announcement) throw new NotFoundError('Announcement');
 
-  return ctx.json({ data: { id: announcement.id, title: announcement.title, status: announcement.status, stats: announcement.stats } }, 200);
+  return ctx.json({ id: announcement.id, title: announcement.title, status: announcement.status, stats: announcement.stats }, 200);
 }

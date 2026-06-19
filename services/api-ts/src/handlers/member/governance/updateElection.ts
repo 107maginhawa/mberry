@@ -75,5 +75,5 @@ export async function updateElection(
   ctx.set('auditResourceId', updated.id);
   ctx.set('auditDescription', `Election updated: ${updated.title}`);
 
-  return ctx.json({ data: updated }, 200);
+  return ctx.json(updated, 200);
 }

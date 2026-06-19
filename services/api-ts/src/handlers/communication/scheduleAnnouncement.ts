@@ -43,5 +43,5 @@ export async function scheduleAnnouncement(ctx: Context): Promise<Response> {
   ctx.set('auditResourceId', id);
   ctx.set('auditDescription', `Scheduled announcement for ${scheduledAt.toISOString()}`);
 
-  return ctx.json({ data: updated }, 200);
+  return ctx.json(updated, 200);
 }

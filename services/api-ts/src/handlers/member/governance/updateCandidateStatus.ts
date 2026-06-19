@@ -72,5 +72,5 @@ export async function updateCandidateStatus(
   ctx.set('auditDescription', `Candidate status changed to ${newStatus}`);
   ctx.set('auditDetails', { electionId: election.id, fromStatus: nominee.status, toStatus: newStatus });
 
-  return ctx.json({ data: updated }, 200);
+  return ctx.json(updated, 200);
 }

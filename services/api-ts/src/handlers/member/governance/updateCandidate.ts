@@ -51,7 +51,7 @@ export async function updateCandidate(
       description: `Nominee status updated to ${bodyRecord['status'] as string}`,
     });
 
-    return ctx.json({ data: updated }, 200);
+    return ctx.json(updated, 200);
   }
 
   // Generic field update
@@ -68,5 +68,5 @@ export async function updateCandidate(
     description: 'Nominee updated',
   });
 
-  return ctx.json({ data: updated }, 200);
+  return ctx.json(updated, 200);
 }

@@ -7,7 +7,7 @@
 # candidate (seed member01), then casts a ballot in their own name (also
 # a member) for that candidate, lists ballots to verify the row is present.
 #
-# Election and candidate endpoints wrap responses in `{data: ...}` envelope.
+# Single-resource election/candidate endpoints return a flat body (no `{data: ...}` envelope).
 
 # ── 0. Resolve seed nominee personId (member01) ────────────────────────────
 GET {{api}}/csrf-token
@@ -155,7 +155,7 @@ Cookie: better-auth.session_token={{officer_cookie}}
 x-org-id: {{org_id}}
 HTTP 200
 [Asserts]
-jsonpath "$.data.status" == "votingOpen"
+jsonpath "$.status" == "votingOpen"
 
 # ── 8. castBallot ──────────────────────────────────────────────────────────
 GET {{api}}/csrf-token

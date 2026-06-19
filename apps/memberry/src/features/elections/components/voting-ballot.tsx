@@ -95,7 +95,7 @@ export function VotingBallot({ electionId, orgId, userId }: VotingBallotProps) {
     return <div role="alert" aria-live="polite" className="p-6 text-center text-[var(--color-error)]">Failed to load election</div>
   }
 
-  const election = ((data as unknown as { data: ElectionData })?.data ?? data) as ElectionData
+  const election = data as unknown as ElectionData
   const rawPositions = election.positions ?? []
   const positions: PositionRecord[] = rawPositions.map((p, i) =>
     typeof p === 'string' ? { id: p, title: p, sortOrder: i } : { id: p.id, title: p.title, sortOrder: p.sortOrder ?? i },

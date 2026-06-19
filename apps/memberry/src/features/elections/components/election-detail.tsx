@@ -147,11 +147,7 @@ export function ElectionDetail({ electionId, orgId }: ElectionDetailProps) {
   }
 
   // SDK Election type has Date fields; runtime response has string dates + extra fields — use local RuntimeElection
-  // ISSUE-027: getElection returns { data: election } though the contract is a flat
-  // Election, so reading data.status/title directly yielded undefined → blank detail
-  // with no lifecycle actions. Unwrap the {data} envelope defensively (as the
-  // member voting-ballot component already does) until the backend wrap is fixed.
-  const election = ((data as { data?: unknown })?.data ?? data) as unknown as RuntimeElection
+  const election = data as unknown as RuntimeElection
   const electionStatus = election.status as ElectionStatus
   const nextAction = STATUS_TRANSITIONS[electionStatus] ?? null
   const rawPositions: any[] = election.positions ?? []

@@ -224,8 +224,9 @@ describe('certifyElection [BR-33]', () => {
       _params: { electionId: 'election-1' },
     });
     const response = await certifyElection(ctx);
-    expect(response.body.data.tallies).toEqual(tallies);
-    expect(response.body.data.voterCount).toBe(15);
-    expect(response.body.data.election).toBeDefined();
+    expect(response.body.tallies).toEqual(tallies);
+    expect(response.body.voterCount).toBe(15);
+    // election fields are inlined into the flat response (no nested .election envelope)
+    expect(response.body.status).toBe('published');
   });
 });

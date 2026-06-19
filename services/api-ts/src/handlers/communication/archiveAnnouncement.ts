@@ -44,5 +44,5 @@ export async function archiveAnnouncement(
   ctx.set('auditDescription', `Archived announcement`);
   ctx.set('auditDetails', { transition: 'archived' });
 
-  return ctx.json({ data: archived }, 200);
+  return ctx.json(archived, 200);
 }

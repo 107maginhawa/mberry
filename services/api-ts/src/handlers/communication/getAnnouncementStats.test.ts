@@ -52,8 +52,8 @@ describe('getAnnouncementStats', () => {
     const response = await getAnnouncementStats(ctx);
 
     expect(response.status).toBe(200);
-    expect(response.body.data.stats.recipients).toBe(42);
-    expect(response.body.data.stats.emailSent).toBe(40);
+    expect(response.body.stats.recipients).toBe(42);
+    expect(response.body.stats.emailSent).toBe(40);
   });
 
   test('returns announcement without stats (stats undefined)', async () => {
@@ -65,7 +65,7 @@ describe('getAnnouncementStats', () => {
     const response = await getAnnouncementStats(ctx);
 
     expect(response.status).toBe(200);
-    expect(response.body.data.stats).toBeUndefined();
+    expect(response.body.stats).toBeUndefined();
   });
 
   test('throws NotFoundError when announcement does not exist', async () => {

@@ -82,7 +82,7 @@ describe('updateCandidate', () => {
     const response = await updateCandidate(ctx);
     expect(response.status).toBe(200);
     expect(capturedStatus).toBe('approved');
-    expect(response.body.data.status).toBe('approved');
+    expect(response.body.status).toBe('approved');
     const auditEvents = ctx.get('auditEvents') as any[];
     expect(auditEvents[0].action).toBe('update');
     expect(auditEvents[0].resource).toBe('cand-1');
@@ -105,7 +105,7 @@ describe('updateCandidate', () => {
 
     const response = await updateCandidate(ctx);
     expect(response.status).toBe(200);
-    expect(response.body.data.name).toBe('Jane Doe');
+    expect(response.body.name).toBe('Jane Doe');
     const auditEvents = ctx.get('auditEvents') as any[];
     expect(auditEvents[0].description).toBe('Nominee updated');
   });

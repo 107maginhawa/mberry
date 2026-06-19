@@ -10,7 +10,7 @@
 # Final delete proves teardown works for a draft election created
 # under a separate id (since published elections can be locked).
 #
-# Note: election endpoints wrap response body in `{data: ...}` envelope.
+# Note: single-resource election endpoints return a flat body; list endpoints stay `{data: [...]}`.
 
 GET {{api}}/csrf-token
 HTTP 200
@@ -91,7 +91,7 @@ Content-Type: application/json
 }
 HTTP 200
 [Asserts]
-jsonpath "$.data.title" == "Lifecycle Election {{suffix}} (rev2)"
+jsonpath "$.title" == "Lifecycle Election {{suffix}} (rev2)"
 
 # ── 5. openElectionNominations: draft → nominationsOpen ────────────────────
 GET {{api}}/csrf-token
@@ -106,7 +106,7 @@ Cookie: better-auth.session_token={{officer_cookie}}
 x-org-id: {{org_id}}
 HTTP 200
 [Asserts]
-jsonpath "$.data.status" == "nominationsOpen"
+jsonpath "$.status" == "nominationsOpen"
 
 # ── 6. openElectionVoting without candidates → 422 (business rule) ─────────
 # Voting cannot open until at least one candidate has been accepted.

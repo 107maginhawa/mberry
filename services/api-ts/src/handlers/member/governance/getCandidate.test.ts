@@ -47,9 +47,9 @@ describe('getCandidate', () => {
     const res = await getCandidate(ctx);
 
     expect(res.status).toBe(200);
-    expect(res.body.data.id).toBe('nominee-1');
-    expect(res.body.data.electionId).toBe('election-1');
-    expect(res.body.data.status).toBe('nominated');
+    expect(res.body.id).toBe('nominee-1');
+    expect(res.body.electionId).toBe('election-1');
+    expect(res.body.status).toBe('nominated');
   });
 
   test('throws NotFoundError when nominee does not exist', async () => {

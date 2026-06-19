@@ -90,5 +90,5 @@ export async function openElectionVoting(
     changedBy: ctx.get('user')?.id ?? '',
   }).catch(() => {});
 
-  return ctx.json({ data: updated }, 200);
+  return ctx.json(updated, 200);
 }

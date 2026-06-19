@@ -24,5 +24,5 @@ export async function getAnnouncement(
   const announcement = await repo.get(params.id);
   if (!announcement) throw new NotFoundError('Announcement');
 
-  return ctx.json({ data: announcement }, 200);
+  return ctx.json(announcement, 200);
 }

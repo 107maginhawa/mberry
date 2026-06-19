@@ -28,5 +28,5 @@ export async function getCandidate(
 
   if (!nominee) throw new NotFoundError('Candidate');
 
-  return ctx.json({ data: nominee }, 200);
+  return ctx.json(nominee, 200);
 }

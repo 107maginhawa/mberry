@@ -10,7 +10,7 @@
 # nomination, deletes the candidate.
 #
 # Uses seed member to satisfy the org-membership check in createCandidate.
-# Election endpoints wrap response in `{data: ...}` envelope.
+# Single-resource endpoints return a flat body (no `{data: ...}` envelope); lists stay enveloped.
 
 # ── 0. Resolve member01 personId ───────────────────────────────────────────
 GET {{api}}/csrf-token
@@ -136,7 +136,7 @@ Cookie: better-auth.session_token={{officer_cookie}}
 x-org-id: {{org_id}}
 HTTP 200
 [Asserts]
-jsonpath "$.data.id" == "{{candidate_id}}"
+jsonpath "$.id" == "{{candidate_id}}"
 
 # ── 6. listCandidates filtered by election ─────────────────────────────────
 GET {{api}}/association/member/candidates?electionId={{election_id}}&limit=50

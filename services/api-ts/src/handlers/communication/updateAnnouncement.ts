@@ -37,5 +37,5 @@ export async function updateAnnouncement(
   ctx.set('auditDescription', `Updated announcement`);
   ctx.set('auditDetails', { fields: Object.keys(body) });
 
-  return ctx.json({ data: updated }, 200);
+  return ctx.json(updated, 200);
 }
