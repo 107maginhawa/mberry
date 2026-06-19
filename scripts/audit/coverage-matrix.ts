@@ -28,6 +28,7 @@
 import { readFileSync, writeFileSync, existsSync, statSync, mkdirSync } from 'node:fs'
 import { Glob } from 'bun'
 import { join, relative } from 'node:path'
+import { ratchetCheck } from './ratchet'
 
 const repoRoot = join(import.meta.dir, '..', '..')
 const args = process.argv.slice(2)
@@ -353,21 +354,32 @@ mkdirSync(join(repoRoot, '.audits'), { recursive: true })
 writeFileSync(jsonPath, JSON.stringify({ A: aRows, B: bRows, C: cRows }, null, 2))
 console.log(`Wrote ${relative(repoRoot, jsonPath)}`)
 
-// Gate
+// Gate — baseline ratchet. Fails only when a gap GROWS vs .audits/coverage-baseline.json.
+// Pass --update-baseline after closing gaps to ratchet the baseline down.
 if (gateMode) {
-  const aBad = aRows.filter((r) => r.verdict !== 'COMPLETE' && r.phase === 1).length
-  const bBad = bRows.filter((r) => r.verdict === 'MISSING').length
-  const cBad = cRows.filter((r) => r.verdict === 'MISSING').length
-  console.log(`\nGate:`)
-  console.log(`  A (Phase 1 incomplete): ${aBad}`)
-  console.log(`  B (flow uncovered):     ${bBad}`)
-  console.log(`  C (route unvisited):    ${cBad}`)
-  // For now, gate is informational — exit 0 unless ALL three matrices are zero.
-  // Hard-enforce later once backfill closes the gap.
-  if (aBad === 0 && bBad === 0 && cBad === 0) {
-    console.log('  ✓ all matrices green')
+  const current = {
+    a: aRows.filter((r) => r.verdict !== 'COMPLETE' && r.phase === 1).length,
+    b: bRows.filter((r) => r.verdict === 'MISSING').length,
+    c: cRows.filter((r) => r.verdict === 'MISSING').length,
+  }
+  const baselinePath = join(import.meta.dir, 'coverage-baseline.json')
+
+  if (args.includes('--update-baseline')) {
+    writeFileSync(baselinePath, JSON.stringify(current, null, 2) + '\n')
+    console.log(`\nUpdated baseline → A=${current.a} B=${current.b} C=${current.c}`)
     process.exit(0)
   }
-  console.log('  ⚠️  matrices report gaps (informational; gate not hard-failing yet)')
+
+  const baseline = JSON.parse(readFileSync(baselinePath, 'utf8')) as { a: number; b: number; c: number }
+  const { pass, regressions, improvements } = ratchetCheck(current, baseline)
+  console.log(`\nGate (ratchet vs baseline A=${baseline.a} B=${baseline.b} C=${baseline.c}):`)
+  console.log(`  current: A=${current.a} B=${current.b} C=${current.c}`)
+  for (const i of improvements) console.log(`  ✓ improved ${i} — run with --update-baseline to lock it in`)
+  if (!pass) {
+    for (const r of regressions) console.error(`  ✗ REGRESSION ${r}`)
+    console.error('  Coverage gap grew. Add the missing test/spec or justify, then re-run.')
+    process.exit(1)
+  }
+  console.log('  ✓ no regression vs baseline')
   process.exit(0)
 }
