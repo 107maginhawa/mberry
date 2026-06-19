@@ -552,8 +552,10 @@ jobs:
         run: bun scripts/audit/inject-csrf-into-hurl.ts --check
       - name: Coverage matrix (BR + Flow + Route)
         # Regenerates docs/audits/COVERAGE_MATRIX.md and .audits/coverage-matrix.json.
-        # Currently informational — does not fail the build (per HEALTH_CHECK_PROGRESS plan
-        # P2.4). Promote --gate to hard-fail once backfill closes the route/flow gaps.
+        # Ratchet gate: fails ONLY if a gap GROWS vs scripts/audit/coverage-baseline.json.
+        # Ratchet the baseline down after closing gaps:
+        #   bun scripts/audit/coverage-matrix.ts --gate --update-baseline
+        # See docs/superpowers/plans/2026-06-19-workflow-audit-sweep.md.
         run: bun scripts/audit/coverage-matrix.ts --gate
       - name: Upload coverage matrix
         if: always()
