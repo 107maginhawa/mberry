@@ -28,7 +28,7 @@
 import { readFileSync, writeFileSync, existsSync, statSync, mkdirSync } from 'node:fs'
 import { Glob } from 'bun'
 import { join, relative } from 'node:path'
-import { ratchetCheck } from './ratchet'
+import { ratchetCheck, countUndeferredPhase1Gaps } from './ratchet'
 
 const repoRoot = join(import.meta.dir, '..', '..')
 const args = process.argv.slice(2)
@@ -45,6 +45,7 @@ interface BRRow {
   ruleClass: string
   tests: { backend: string[]; contract: string[]; e2e: string[] }
   annotations?: string
+  deferredReason?: string
 }
 
 interface BRResult {
@@ -57,6 +58,7 @@ interface BRResult {
   contract: { count: number; missing: string[] }
   e2e: { count: number; missing: string[] }
   verdict: 'COMPLETE' | 'INCOMPLETE' | 'UNTESTED'
+  deferred: boolean
 }
 
 function checkRefs(refs: string[]): { count: number; missing: string[] } {
@@ -92,6 +94,7 @@ function auditBRRegistry(): BRResult[] {
       contract,
       e2e,
       verdict,
+      deferred: Boolean(row.deferredReason),
     })
   }
   return results.sort((a, b) => a.id.localeCompare(b.id, undefined, { numeric: true }))
@@ -239,9 +242,13 @@ function renderMatrixA(rows: BRResult[]): string {
   lines.push('')
   lines.push(`Source: \`docs/ver-3/business/br-registry.json\` (${rows.length} BRs)`)
   lines.push('')
+  const deferredPhase1 = rows.filter((r) => r.deferred && r.phase === 1 && r.verdict !== 'COMPLETE')
   lines.push(`- ✅ COMPLETE: ${byVerdict.COMPLETE}`)
   lines.push(`- ⚠️ INCOMPLETE (file ref points at missing/empty): ${byVerdict.INCOMPLETE}`)
   lines.push(`- ❌ UNTESTED (zero refs across BE+contract+E2E): ${byVerdict.UNTESTED}`)
+  lines.push(
+    `- 🟡 Phase-1 gaps excluded from gate via \`deferredReason\` (reviewed known-gaps): ${deferredPhase1.length}${deferredPhase1.length ? ` — ${deferredPhase1.map((r) => r.id).join(', ')}` : ''}`,
+  )
   lines.push('')
   lines.push('| BR | Phase | Module | Class | Verdict | BE | Contract | E2E | Missing |')
   lines.push('|---|---|---|---|---|---|---|---|---|')
@@ -358,7 +365,7 @@ console.log(`Wrote ${relative(repoRoot, jsonPath)}`)
 // Pass --update-baseline after closing gaps to ratchet the baseline down.
 if (gateMode) {
   const current = {
-    a: aRows.filter((r) => r.verdict !== 'COMPLETE' && r.phase === 1).length,
+    a: countUndeferredPhase1Gaps(aRows),
     b: bRows.filter((r) => r.verdict === 'MISSING').length,
     c: cRows.filter((r) => r.verdict === 'MISSING').length,
   }
