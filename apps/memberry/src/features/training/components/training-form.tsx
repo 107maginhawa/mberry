@@ -42,8 +42,11 @@ export function TrainingForm({ orgId, initial, trainingId }: TrainingFormProps) 
     type: initial?.type ?? 'seminar',
     title: initial?.title ?? '',
     description: initial?.description ?? '',
-    startDate: initial?.startDate ? new Date(initial.startDate).toISOString().slice(0, 16) : '',
-    endDate: initial?.endDate ? new Date(initial.endDate).toISOString().slice(0, 16) : '',
+    // Store the full ISO (with Z). Slicing to 16 chars dropped the Z, so the
+    // picker's UTC value got re-parsed as local on the next render and drifted
+    // by the tz offset (ISSUE-028: pick June 25 in UTC+8 → showed June 24 16:00).
+    startDate: initial?.startDate ? new Date(initial.startDate).toISOString() : '',
+    endDate: initial?.endDate ? new Date(initial.endDate).toISOString() : '',
     location: initial?.location ?? '',
     creditAmount: initial?.creditAmount ?? '0',
     registrationFee: initial?.registrationFee ?? 0,
@@ -135,16 +138,16 @@ export function TrainingForm({ orgId, initial, trainingId }: TrainingFormProps) 
           <div>
             <Label>Start Date & Time <span className="text-[var(--color-error)]">*</span></Label>
             <DateTimePicker
-              value={form.startDate ? new Date(form.startDate).toISOString() : undefined}
-              onValueChange={(iso) => set('startDate', new Date(iso).toISOString().slice(0, 16))}
+              value={form.startDate || undefined}
+              onValueChange={(iso) => set('startDate', iso)}
               placeholder="Select start date & time"
             />
           </div>
           <div>
             <Label>End Date & Time</Label>
             <DateTimePicker
-              value={form.endDate ? new Date(form.endDate).toISOString() : undefined}
-              onValueChange={(iso) => set('endDate', new Date(iso).toISOString().slice(0, 16))}
+              value={form.endDate || undefined}
+              onValueChange={(iso) => set('endDate', iso)}
               placeholder="Select end date & time"
             />
           </div>

@@ -32,7 +32,7 @@ export const Route = createFileRoute('/_authenticated/org/$orgSlug/officer/elect
 
 function toDatetimeLocal(iso?: string | null) {
   if (!iso) return ''
-  return new Date(iso).toISOString().slice(0, 16)
+  return new Date(iso).toISOString()
 }
 
 function EditElection() {

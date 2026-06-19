@@ -102,7 +102,7 @@ interface EventFormProps {
 
 function toDatetimeLocal(iso?: string | null) {
   if (!iso) return ''
-  return new Date(iso).toISOString().slice(0, 16)
+  return new Date(iso).toISOString()
 }
 
 export function EventForm({ orgId, event, onSuccess, onCancel }: EventFormProps) {
@@ -292,7 +292,7 @@ export function EventForm({ orgId, event, onSuccess, onCancel }: EventFormProps)
               render={({ field }) => (
                 <DateTimePicker
                   value={field.value ? new Date(field.value).toISOString() : undefined}
-                  onValueChange={(iso) => field.onChange(new Date(iso).toISOString().slice(0, 16))}
+                  onValueChange={(iso) => field.onChange(new Date(iso).toISOString())}
                   placeholder="Select start date & time"
                 />
               )}
@@ -311,7 +311,7 @@ export function EventForm({ orgId, event, onSuccess, onCancel }: EventFormProps)
               render={({ field }) => (
                 <DateTimePicker
                   value={field.value ? new Date(field.value).toISOString() : undefined}
-                  onValueChange={(iso) => field.onChange(new Date(iso).toISOString().slice(0, 16))}
+                  onValueChange={(iso) => field.onChange(new Date(iso).toISOString())}
                   placeholder="Select end date & time"
                 />
               )}

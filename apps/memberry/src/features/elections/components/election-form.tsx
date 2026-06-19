@@ -339,7 +339,7 @@ export function ElectionForm({ orgId, electionId, initialData, onSuccess, onCanc
               <Label>Nominations Open</Label>
               <DateTimePicker
                 value={watch('nominationsOpenAt') ? new Date(watch('nominationsOpenAt')!).toISOString() : undefined}
-                onValueChange={(iso) => setValue('nominationsOpenAt', new Date(iso).toISOString().slice(0, 16))}
+                onValueChange={(iso) => setValue('nominationsOpenAt', new Date(iso).toISOString())}
                 placeholder="Select date & time"
               />
             </div>
@@ -347,7 +347,7 @@ export function ElectionForm({ orgId, electionId, initialData, onSuccess, onCanc
               <Label>Nominations Close</Label>
               <DateTimePicker
                 value={watch('nominationsCloseAt') ? new Date(watch('nominationsCloseAt')!).toISOString() : undefined}
-                onValueChange={(iso) => setValue('nominationsCloseAt', new Date(iso).toISOString().slice(0, 16))}
+                onValueChange={(iso) => setValue('nominationsCloseAt', new Date(iso).toISOString())}
                 placeholder="Select date & time"
               />
             </div>
@@ -355,7 +355,7 @@ export function ElectionForm({ orgId, electionId, initialData, onSuccess, onCanc
               <Label>Voting Opens</Label>
               <DateTimePicker
                 value={watch('votingOpenAt') ? new Date(watch('votingOpenAt')!).toISOString() : undefined}
-                onValueChange={(iso) => setValue('votingOpenAt', new Date(iso).toISOString().slice(0, 16))}
+                onValueChange={(iso) => setValue('votingOpenAt', new Date(iso).toISOString())}
                 placeholder="Select date & time"
               />
             </div>
@@ -363,7 +363,7 @@ export function ElectionForm({ orgId, electionId, initialData, onSuccess, onCanc
               <Label>Voting Closes</Label>
               <DateTimePicker
                 value={watch('votingCloseAt') ? new Date(watch('votingCloseAt')!).toISOString() : undefined}
-                onValueChange={(iso) => setValue('votingCloseAt', new Date(iso).toISOString().slice(0, 16))}
+                onValueChange={(iso) => setValue('votingCloseAt', new Date(iso).toISOString())}
                 placeholder="Select date & time"
               />
             </div>

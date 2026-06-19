@@ -318,7 +318,7 @@ export function SurveyBuilder({ orgId, onSuccess, onCancel, initialData }: Surve
             <Label>Deadline (optional)</Label>
             <DateTimePicker
               value={formValues.deadline ? new Date(formValues.deadline).toISOString() : undefined}
-              onValueChange={(iso) => setValue('deadline', new Date(iso).toISOString().slice(0, 16))}
+              onValueChange={(iso) => setValue('deadline', new Date(iso).toISOString())}
               placeholder="Select deadline"
             />
           </div>
