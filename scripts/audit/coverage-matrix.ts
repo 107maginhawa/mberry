@@ -119,12 +119,13 @@ interface FlowResult extends FlowRow {
 }
 
 // Modules with NO frontend routes — their UI workflows cannot be exercised by an
-// e2e spec because the UI does not exist (backend-only or not-yet-built template
-// modules). Their MISSING flows are excluded from the gate the same way a BR with
-// a deferredReason is. Drop a module from this set the day it ships a frontend.
-//   M13 social · M14 national-reporting · M15 jobs · M16 advertising ·
-//   M17 marketplace · M18 surveys (backend-only, no UI routes)
-const DEFERRED_FLOW_MODULES = new Set(['M13', 'M14', 'M15', 'M16', 'M17', 'M18'])
+// e2e spec because the UI does not exist (not-yet-built template modules). Their
+// MISSING flows are excluded from the gate the same way a BR with a deferredReason
+// is. Drop a module from this set the day it ships a frontend. Verified by listing
+// `apps/*/src/routes` per module (M14 national-dashboard and M18 surveys DO have
+// routes — they are NOT deferred):
+//   M13 social · M15 jobs · M16 advertising · M17 marketplace
+const DEFERRED_FLOW_MODULES = new Set(['M13', 'M15', 'M16', 'M17'])
 
 function parseWorkflowMap(): FlowRow[] {
   const path = join(repoRoot, 'docs/product/WORKFLOW_MAP.md')
@@ -193,6 +194,8 @@ function routeFilesToUrlPaths(app: 'memberry' | 'admin'): { fileRel: string; url
   for (const f of glob.scanSync({ cwd: base })) {
     // Skip __root, layout, server-only files
     if (f === '__root.tsx') continue
+    // Skip colocated test/spec files — they are not routes.
+    if (/\.(test|spec)\.tsx$/.test(f)) continue
     // Convert file path to TanStack file-based route URL:
     //   _authenticated.tsx          → (layout, skip)
     //   _authenticated/dashboard.tsx → /dashboard
