@@ -117,22 +117,26 @@ function DashboardPage() {
     enabled: !!firstOrgId,
   })
 
-  // credit-compliance is an OFFICER-ONLY org report — fetching it for every
-  // membership-holding user made the member dashboard fire a call that 403'd
-  // silently (swallowed: no isError surface, retry:false). Gate it behind
-  // officer status of the first org; members derive CPD status from the
-  // member-scoped /persons/me/credit-summary fallback below.
-  const firstOrgOfficerQuery = useQuery<boolean>({
-    queryKey: ['dashboard-first-org-officer', firstOrgId],
+  // credit-compliance is a POSITION-GATED org report — the API enforces
+  // requirePosition(['Society Officer', 'President']) (see getCreditCompliance).
+  // Gating on *any* officer term still let a Treasurer/Secretary fire a call
+  // that 403'd silently (swallowed: no isError surface, retry:false), which the
+  // e2e error-surface gate flags as an unhandled 4xx on the success path. Gate
+  // on the same two titles the endpoint allows; everyone else derives CPD
+  // status from the member-scoped /persons/me/credit-summary fallback below.
+  const COMPLIANCE_TITLES = ['Society Officer', 'President']
+  const firstOrgComplianceAccessQuery = useQuery<boolean>({
+    queryKey: ['dashboard-first-org-compliance-access', firstOrgId],
     queryFn: async () => {
       if (!firstOrgId) return false
       const json = await api.get<any>(`/api/persons/me/officer-role/${firstOrgId}`)
-      return Array.isArray(json?.data) && json.data.length > 0
+      return Array.isArray(json?.data) &&
+        json.data.some((t: any) => COMPLIANCE_TITLES.includes(t?.positionTitle))
     },
     retry: false,
     enabled: !!firstOrgId,
   })
-  const officersFirstOrg = firstOrgOfficerQuery.data ?? false
+  const canViewComplianceFirstOrg = firstOrgComplianceAccessQuery.data ?? false
 
   // Fetch compliance for first org (API is per-org; officer-only).
   const complianceQuery = useQuery<any>({
@@ -143,7 +147,7 @@ function DashboardPage() {
       return res
     },
     retry: false,
-    enabled: !!firstOrgId && officersFirstOrg,
+    enabled: !!firstOrgId && canViewComplianceFirstOrg,
   })
 
   // Derived data
