@@ -114,7 +114,10 @@ export function SpecialAssessmentsList({ orgId }: SpecialAssessmentsListProps) {
 
   const applyMutation = useMutation({
     mutationFn: (id: string) =>
-      api.post(`/api/association/member/special-assessments/${id}/apply`),
+      // Pass an explicit empty body: the api lib always sends Content-Type
+      // application/json, and the route's json validator parses the body, so a
+      // missing body throws "Malformed JSON" (400) before the handler runs.
+      api.post(`/api/association/member/special-assessments/${id}/apply`, {}),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['special-assessments', orgId] })
       toast.success('Assessment applied — invoices generated')
