@@ -1,8 +1,10 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { useQuery } from '@tanstack/react-query'
 import { PageShell } from '@/components/patterns/page-shell'
+import { EmptyState } from '@/components/patterns/empty-state'
 import { EventCalendar } from '@/features/events/components/event-calendar'
 import { listMyCustomEventsOptions } from '@monobase/sdk-ts/generated/react-query'
+import { Skeleton } from '@monobase/ui'
 import { Calendar } from 'lucide-react'
 
 export const Route = createFileRoute('/_authenticated/my/calendar')({
@@ -51,12 +53,13 @@ function MyCalendar() {
     >
       <div className="space-y-6">
       {isLoading ? (
-        <div className="h-96 rounded-lg bg-[var(--color-surface-elevated-hover)] animate-shimmer" />
+        <Skeleton className="h-96 w-full rounded-lg" />
       ) : events.length === 0 ? (
-        <div className="border rounded-lg p-12 text-center space-y-2">
-          <Calendar className="w-8 h-8 mx-auto text-[var(--color-muted)]" />
-          <p className="text-[var(--color-muted)]">No events yet. Register for events to see them here.</p>
-        </div>
+        <EmptyState
+          icon={<Calendar className="w-8 h-8" />}
+          headline="No events yet"
+          description="Register for events to see them here."
+        />
       ) : (
         <EventCalendar events={events} linkBase="/my/events" />
       )}
