@@ -532,6 +532,25 @@ model CheckInCreateRequest {
   checkedInBy?: string;
 }
 
+@doc("""
+Request body for a manual (staff) custom-event check-in. The event comes from
+the path; a person may be checked in without a prior registration (walk-in), so
+personId defaults to the caller and registrationId is optional.
+""")
+model CustomEventCheckInRequest {
+  @doc("Person being checked in; defaults to the authenticated caller when omitted")
+  personId?: string;
+
+  @doc("Check-in method; defaults to manual")
+  method?: CheckInMethod;
+
+  @doc("Registration record being checked in, if the attendee was pre-registered")
+  registrationId?: string;
+
+  @doc("Staff member performing the check-in")
+  checkedInBy?: string;
+}
+
 @doc("Query parameters for check-in search")
 model CheckInSearchParams {
   ...PaginationQuery;
@@ -888,7 +907,7 @@ namespace Association.Operations.Events {
     @extension("x-audit", #{ action: "create", resourceType: "check-in" })
     checkInCustomEvent(
       @path eventId: string,
-      @body body: CheckInCreateRequest
+      @body body: CustomEventCheckInRequest
     ): ApiCreatedResponse<CheckIn>
       | ApiBadRequestResponse
       | ApiUnauthorizedResponse

@@ -4360,6 +4360,13 @@ export const CurrencyAmountSchema = z.number().int().gte(0);
 
 export const CurrencyCodeSchema = z.string().regex(/^[A-Z]{3}$/);
 
+export const CustomEventCheckInRequestSchema = z.object({
+  personId: z.string().optional(),
+  method: z.enum(["qr_code", "manual", "badge"]).optional(),
+  registrationId: z.string().optional(),
+  checkedInBy: z.string().optional()
+});
+
 export const DashboardResponseSchema = z.object({
   dashboardUrl: z.string().url(),
   expiresAt: z.string().datetime().transform((str) => new Date(str))
@@ -10660,7 +10667,7 @@ export const CheckInCustomEventParams = z.object({
 });
 export type CheckInCustomEventParams = z.infer<typeof CheckInCustomEventParams>;
 
-export const CheckInCustomEventBody = CheckInCreateRequestSchema;
+export const CheckInCustomEventBody = CustomEventCheckInRequestSchema;
 export type CheckInCustomEventBody = z.infer<typeof CheckInCustomEventBody>;
 
 export const CheckInCustomEventResponse = CheckInSchema;
