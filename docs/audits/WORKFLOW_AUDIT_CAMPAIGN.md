@@ -43,14 +43,20 @@ covered-but-untagged → **B 71→56**. Verified-MISSING P1 flows needing NEW sp
 - **Data hygiene:** `onboarding.spec.ts` carries a stale `// WF-004` tag (that id
   is Password Reset) — clean up when touched.
 
-## Phase 4 — P2 + residual flow triage (Matrix B) ⬜
-Finish B false-positive sweep on the remaining flows. After this, B = the true
-flow gap.
+## Phase 4 — Defer route-less modules (Matrix B) ✅
+Modules with no frontend routes can't have UI e2e flows → excluded from the gate
+(`DEFERRED_FLOW_MODULES`, transparency line shows count). Verified per module by
+listing `apps/*/src/routes`. **Deferred: M13 social, M15 jobs, M16 advertising,
+M17 marketplace.** (M14 national-dashboard and M18 surveys DO have routes — NOT
+deferred; an initial grep bug wrongly deferred them, the ratchet caught the bad
+baseline, corrected B 36→41.) Net **B 56→41**.
 
-## Phase 5 — Matrix-C residual verification ⬜
-The 45 remaining "MISSING" routes may still include link-click navigations the
-static matcher can't see. Spot-verify; exempt or note any that are genuinely
-exercised without a URL literal. After this, C = the true route gap.
+## Phase 5 — Matrix-C residual verification ✅ (partial)
+Excluded colocated `*.test.tsx` from the route list (C 45→44). Of the 44 MISSING
+routes: **17 have zero e2e reference = definite gaps** (Phase 6). **27 are
+leaf-referenced** = likely link-click / dynamic-id navigation the literal-path
+matcher can't see — each needs per-route verification (read the spec) to tag or
+confirm genuine. That per-route verification is folded into Phase 6 batches.
 
 ## Phase 6 — Write new specs (the long pole) ⬜
 Live-stack E2E authoring for the genuinely-uncovered remainder. Order:
