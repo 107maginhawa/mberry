@@ -86,7 +86,9 @@ function ProvidersPage() {
     mutationFn: (body: ProviderFormData) =>
       api.post(`/api/accredited-providers/${orgId}`, {
         ...body,
-        expiryDate: body.expiryDate || undefined,
+        // The form holds a date-only string; the schema requires a full ISO
+        // datetime (z.string().datetime()), so normalize before sending.
+        expiryDate: body.expiryDate ? new Date(body.expiryDate).toISOString() : undefined,
       }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['accredited-providers', orgId] })
@@ -100,7 +102,7 @@ function ProvidersPage() {
     mutationFn: ({ id, body }: { id: string; body: ProviderFormData }) =>
       api.patch(`/api/accredited-providers/${orgId}/${id}`, {
         ...body,
-        expiryDate: body.expiryDate || undefined,
+        expiryDate: body.expiryDate ? new Date(body.expiryDate).toISOString() : undefined,
       }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['accredited-providers', orgId] })
