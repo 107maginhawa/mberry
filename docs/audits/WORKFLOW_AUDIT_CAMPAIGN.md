@@ -25,9 +25,23 @@ specs written.
 Verified 13 P0 flows; tagged 5 covered-but-untagged (WF-041/042/076/079/128).
 **B 76→71.** 8 genuinely-missing P0 flows recorded.
 
-## Phase 3 — P1 flow triage (Matrix B) ▶
-Same verify→tag pattern on the 38 P1 flows. Tag covered-but-untagged; list
-truly-missing. Expect another sizeable B drop. **Cheap, no live stack.**
+## Phase 3 — P1 flow triage (Matrix B) ✅
+Parallel-triaged ~35 P1 flows (5 subagents, read each spec). Tagged 15
+covered-but-untagged → **B 71→56**. Verified-MISSING P1 flows needing NEW specs
+(Phase 6 fodder):
+- **Actions that exist but specs only render/open-dialog:** WF-008 send-invite,
+  WF-033 category-create (submit), WF-036 member-transfer (submit),
+  WF-067 officer credit-adjust, WF-072 real-token verification.
+- **Disabled test (quick win — re-enable):** WF-051 create&publish event is
+  `test.fixme` in `actions/events-actions.spec.ts`.
+- **No spec at all:** WF-047/048 templates/stats, WF-057 waitlist-promotion,
+  WF-062/063 paid-training/analytics, WF-075 credential-templates, WF-077 cast-
+  ballot, WF-078 bylaw, WF-115/116/120 booking schedule/no-show,
+  WF-122/123/125/126/127 email admin UI, WF-129/131/133 billing invoices/refund,
+  WF-017/018/020/021 platform-admin (some routes don't exist yet).
+- **Backend-shaped (exempt candidates, not e2e):** WF-124 bounce, WF-132 webhook.
+- **Data hygiene:** `onboarding.spec.ts` carries a stale `// WF-004` tag (that id
+  is Password Reset) — clean up when touched.
 
 ## Phase 4 — P2 + residual flow triage (Matrix B) ⬜
 Finish B false-positive sweep on the remaining flows. After this, B = the true
