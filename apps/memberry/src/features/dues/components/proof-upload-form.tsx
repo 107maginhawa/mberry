@@ -120,7 +120,9 @@ export function ProofUploadForm({
     submitMutation.mutate({
       body: {
         invoiceId,
-        amount: BigInt(invoiceAmount),
+        // ISSUE-022: validator is z.number().int() (non-coercing); BigInt
+        // serializes to a string it rejects. Send a plain integer (cents).
+        amount: invoiceAmount as unknown as bigint,
         currency,
         paymentMethod: data.paymentMethod as 'online' | 'cash' | 'check' | 'bankTransfer' | 'gcash' | 'other',
         referenceNumber: data.referenceNumber || undefined,

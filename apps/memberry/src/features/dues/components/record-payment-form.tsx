@@ -229,9 +229,10 @@ export function RecordPaymentForm({ orgId }: RecordPaymentFormProps) {
                   body: {
                     organizationId: orgId,
                     personId,
-                    // BigInt is safe here: sdk-ts jsonBodySerializer (bodySerializer.gen.ts:62)
-                    // uses a JSON.stringify replacer that converts BigInt to string before transmission.
-                    amount: BigInt(Math.round(pendingData.amount * 100)),
+                    // ISSUE-022: NOT safe as BigInt — the jsonBodySerializer converts
+                    // BigInt to a string, but the validator is z.number().int().gte(1)
+                    // (non-coercing) and rejects strings → 400. Send a plain integer (cents).
+                    amount: Math.round(pendingData.amount * 100) as unknown as bigint,
                     currency: 'PHP',
                     paymentMethod: pendingData.paymentMethod as 'online' | 'cash' | 'check' | 'bankTransfer' | 'gcash' | 'other',
                     paidAt: pendingData.paymentDate ? new Date(pendingData.paymentDate) : undefined,

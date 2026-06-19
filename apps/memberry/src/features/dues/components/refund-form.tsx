@@ -95,7 +95,8 @@ export function RefundForm({ paymentId, maxAmount, currency }: RefundFormProps) 
           </p>
           <DialogFooter>
             <Button variant="outline" onClick={() => setShowConfirm(false)}>Cancel</Button>
-            <Button variant="destructive" onClick={() => refundMutation.mutate({ path: { paymentId }, body: { amount: BigInt(amountCents), reason } })} disabled={refundMutation.isPending}>
+            {/* ISSUE-022: validator is z.number().int() (non-coercing); BigInt serializes to a string it rejects. Send a plain integer (cents). */}
+            <Button variant="destructive" onClick={() => refundMutation.mutate({ path: { paymentId }, body: { amount: amountCents as unknown as bigint, reason } })} disabled={refundMutation.isPending}>
               {refundMutation.isPending ? 'Processing...' : 'Confirm Refund'}
             </Button>
           </DialogFooter>
