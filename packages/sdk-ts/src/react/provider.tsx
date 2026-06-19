@@ -5,7 +5,7 @@ import {
   QueryClientProvider,
 } from '@tanstack/react-query'
 import { AuthQueryProvider } from '@daveyplate/better-auth-tanstack'
-import { setSdkBaseUrl, errorInterceptor, SdkError } from '../client'
+import { setSdkBaseUrl, errorInterceptor, SdkError, getSdkOrgId } from '../client'
 import { client as generatedClient } from '../generated/client.gen'
 import { CSRF_HEADER, readCsrfCookie, isStateChangingMethod, seedCsrfToken } from '../csrf'
 import { initAuthClient, AuthClientContext } from './auth'
@@ -167,6 +167,12 @@ export function ApiProvider({
         }
         if (token) request.headers.set(CSRF_HEADER, token)
       }
+      // Inject the active org context for org-scoped routes (set by OrgProvider).
+      // Unless a caller already set x-org-id explicitly; backend ignores it on
+      // non-org routes. Done here (not in customFetch) so it never clobbers the
+      // CSRF header set above.
+      const orgId = getSdkOrgId()
+      if (orgId && !request.headers.has('x-org-id')) request.headers.set('x-org-id', orgId)
       return request
     })
     interceptorInstalledRef.current = true

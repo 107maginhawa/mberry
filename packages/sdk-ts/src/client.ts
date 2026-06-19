@@ -57,11 +57,7 @@ export function getSdkOrgId(): string | null {
 type FetchFn = (input: RequestInfo | URL, init?: RequestInit) => Promise<Response>;
 
 const customFetch: FetchFn = async (input, init) => {
-  // Inject the active org context for org-scoped routes (unless a caller already
-  // set x-org-id explicitly). Backend ignores the header on non-org routes.
-  const headers = new Headers(init?.headers as HeadersInit | undefined);
-  if (currentOrgId && !headers.has('x-org-id')) headers.set('x-org-id', currentOrgId);
-  return fetch(input, { ...init, credentials: init?.credentials ?? 'include', headers });
+  return fetch(input, { ...init, credentials: init?.credentials ?? 'include' });
 };
 
 /**

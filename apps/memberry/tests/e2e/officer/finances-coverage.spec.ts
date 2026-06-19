@@ -102,34 +102,21 @@ test.describe('Officer finances — route coverage with real data', () => {
     await expect(page.getByText(/INV-\d{4}-\d{3}/).first()).toBeVisible({ timeout: 10000 })
   })
 
-  test('WF-129: officer triggers dues-invoice generation (real POST succeeds)', async ({ page }) => {
-    // Officer reaches the invoice-management screen…
+  test('WF-129: officer triggers dues-invoice generation via the UI', async ({ page }) => {
     await page.goto(`/org/${ORG_ID}/officer/finances/invoices`)
     await expect(page.getByRole('heading', { name: /^invoices$/i })).toBeVisible({ timeout: 15000 })
 
-    // …then triggers the same generation the "Generate Invoices" button fires:
-    // POST /association/member/dues-invoices/generate for the current period.
-    // Idempotent — members already invoiced for the period are skipped, so the
-    // endpoint succeeds and returns the generated set on every run.
-    // periodStart/periodEnd are plainDate (YYYY-MM-DD), not ISO datetime.
-    const year = new Date().getFullYear()
-    const gen = await apiFetch<{ data?: unknown[] } | unknown[]>(
-      page,
-      `/association/member/dues-invoices/generate`,
-      {
-        method: 'POST',
-        orgId: ORG_ID,
-        body: {
-          organizationId: ORG_ID,
-          periodStart: `${year}-01-01`,
-          periodEnd: `${year}-12-31`,
-        },
-      },
+    // The Generate Invoices button now sends a valid plainDate period (was a 400
+    // bug). Click it and assert the real generate POST succeeds. Idempotent —
+    // members already invoiced for the period are skipped.
+    const genP = page.waitForResponse(
+      (r) => /\/dues-invoices\/generate/.test(r.url()) && r.request().method() === 'POST',
+      { timeout: 20000 },
     )
-    expect(gen.status, 'generate-invoices POST must succeed').toBeGreaterThanOrEqual(200)
-    expect(gen.status).toBeLessThan(300)
-    const generated = Array.isArray(gen.data) ? gen.data : (gen.data?.data ?? [])
-    expect(Array.isArray(generated), 'generate returns the invoice set').toBe(true)
+    await page.getByRole('button', { name: /generate invoices/i }).first().click()
+    const gen = await genP
+    expect(gen.status(), 'generate-invoices POST must succeed').toBeGreaterThanOrEqual(200)
+    expect(gen.status()).toBeLessThan(300)
   })
 })
 

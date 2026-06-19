@@ -152,8 +152,10 @@ function InvoicesPage() {
   }
 
   function handleGenerateInvoices() {
-    const now = new Date()
-    genInvoicesMut.mutate({ body: { organizationId: orgId, periodStart: new Date(now.getFullYear(), 0, 1), periodEnd: new Date(now.getFullYear(), 11, 31) } } as any)
+    // periodStart/periodEnd are plainDate (YYYY-MM-DD); sending Date objects
+    // serializes to an ISO datetime the validator rejects (400).
+    const year = new Date().getFullYear()
+    genInvoicesMut.mutate({ body: { organizationId: orgId, periodStart: `${year}-01-01`, periodEnd: `${year}-12-31` }, headers: { 'x-org-id': orgId } } as any)
   }
 
   function toggleSelect(id: string) {
