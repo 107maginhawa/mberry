@@ -47,6 +47,7 @@ test.describe('Settings — Interaction States', () => {
     await expect(amountInput).toBeVisible({ timeout: 10000 })
   })
 
+  // route-cov: `/org/$orgSlug/officer/finances/funds` — /officer/settings/funds redirects here; asserts 3 real seeded fund names. Matrix C.
   test('success: fund allocation page shows 3 funds totaling 100%', async ({ page }) => {
     await signIn(page, SEED_OFFICER_EMAIL, TEST_PASSWORD)
     await page.goto(`/org/${ORG_ID}/officer/settings/funds`)

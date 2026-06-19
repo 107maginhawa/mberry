@@ -33,6 +33,7 @@ test('org events page lists published events', async ({ page }) => {
     expect(hasEvents || hasEmpty).toBeTruthy()
   })
 
+  // route-cov: `/org/$orgSlug/events/$eventId` — reached via event-card link-click; asserts real detail (title/date + registration action). Matrix C.
   test('event detail page shows event info and registration action', async ({ page }) => {
     await page.goto(`/org/${ORG_ID}/events`)
     // Find and click on an event card/link

@@ -73,6 +73,7 @@ async function getMemberPersonId(browser: Browser): Promise<string> {
   }
 }
 
+// route-cov: `/org/$orgSlug/officer/training/$trainingId/attendance` — Attendance tab; asserts real enrolled-member roster from backend. Matrix C.
 async function openAttendanceTab(page: Page, trainingId: string) {
   await page.goto(`/org/${ORG_ID}/officer/training/${trainingId}`)
   await page.getByRole('button', { name: /^Attendance/ }).click()
