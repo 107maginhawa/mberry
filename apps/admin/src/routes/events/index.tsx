@@ -34,6 +34,8 @@ export const Route = createFileRoute('/events/')({
   ),
 })
 
+const MEMBERRY_BASE_URL = import.meta.env.VITE_MEMBERRY_URL || 'http://localhost:3004'
+
 type EventStatus = 'draft' | 'published' | 'completed' | 'cancelled'
 
 interface EventItem {
@@ -253,7 +255,7 @@ function EventsPage() {
             <div className="mt-4 space-y-4">
               {/* Deep link to Memberry */}
               <a
-                href={`${window.location.protocol}//localhost:3004/org/${selectedEvent.organizationId}/officer/events/${selectedEvent.id}`}
+                href={`${MEMBERRY_BASE_URL}/org/${selectedEvent.organizationId}/officer/events/${selectedEvent.id}`}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="inline-flex items-center gap-2 text-sm text-blue-600 hover:text-blue-800"
