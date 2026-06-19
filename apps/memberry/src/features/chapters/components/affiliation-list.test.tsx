@@ -94,8 +94,8 @@ describe('AffiliationList', () => {
     // Row data
     expect(screen.getByText('person-456')).toBeInTheDocument()
     expect(screen.getByText('chapter-def')).toBeInTheDocument()
-    expect(screen.getByText('active')).toBeInTheDocument()
-    expect(screen.getByText('inactive')).toBeInTheDocument()
+    expect(screen.getByText('Active')).toBeInTheDocument()
+    expect(screen.getByText('Inactive')).toBeInTheDocument()
 
     // isPrimary display
     const yesCells = screen.getAllByText('Yes')

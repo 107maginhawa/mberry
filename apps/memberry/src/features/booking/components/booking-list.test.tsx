@@ -83,7 +83,7 @@ describe('BookingList', () => {
     qc.setQueryData(listBookingsQueryKey({ query: { host: ME, limit: 100 } }), emptyPaginated())
     renderWithQuery(<BookingList myPersonId={ME} />, qc)
     expect(screen.getByText(/"Quarterly review"/)).toBeDefined()
-    // Status badge text — `capitalize` is a CSS class so the text is still 'confirmed'
-    expect(screen.getByText('confirmed')).toBeDefined()
+    // Status badge text — formatBookingStatus() title-cases in JS
+    expect(screen.getByText('Confirmed')).toBeDefined()
   })
 })

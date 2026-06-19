@@ -79,7 +79,7 @@ describe('DocumentBrowser', () => {
     renderWithProviders(<DocumentBrowser orgId="org-1" />)
 
     await waitFor(() => {
-      expect(screen.getByText('Failed to load documents')).toBeInTheDocument()
+      expect(screen.getByText(/Failed to load documents/)).toBeInTheDocument()
     })
   })
 

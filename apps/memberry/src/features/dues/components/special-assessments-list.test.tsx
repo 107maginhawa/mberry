@@ -58,7 +58,7 @@ describe('SpecialAssessmentsList', () => {
     render(<SpecialAssessmentsList orgId="org-1" />, { wrapper })
     expect(await screen.findByText('Building Fund')).toBeTruthy()
     expect(screen.getByText('2026-06-01')).toBeTruthy()
-    expect(screen.getByText('draft')).toBeTruthy()
+    expect(screen.getByText('Draft')).toBeTruthy()
   })
 
   it('shows New Assessment button', async () => {

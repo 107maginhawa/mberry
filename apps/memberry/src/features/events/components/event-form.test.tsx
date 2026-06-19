@@ -110,17 +110,19 @@ describe('EventForm', () => {
       capacity: 20,
       visibility: 'internal',
       status: 'draft',
-      eventType: 'board_meeting',
+      // ISSUE-030: 'board_meeting' is not a canonical type; normalizeEventType
+      // maps legacy types into the 7 canonical enum values. Use a canonical one.
+      eventType: 'governance',
     }
 
     renderWithProviders(<EventForm orgId="org-1" event={event} />)
 
     // Title input has value "Board Meeting"; eventType Select carries
-    // 'board_meeting' on its wrapper data-value (no native <select> in
+    // 'governance' on its wrapper data-value (no native <select> in
     // happy-dom, so display-value match is on inputs only).
     expect(screen.getByDisplayValue('Board Meeting')).toBeInTheDocument()
     const eventTypeSelect = screen.getAllByTestId('select').find(
-      (el) => el.getAttribute('data-value') === 'board_meeting'
+      (el) => el.getAttribute('data-value') === 'governance'
     )
     expect(eventTypeSelect).toBeTruthy()
     expect(screen.getByDisplayValue('Monthly board meeting')).toBeInTheDocument()

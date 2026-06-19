@@ -129,16 +129,18 @@ describe('MemberTable', () => {
     renderWithProviders(<MemberTable orgId="org-1" />)
 
     await waitFor(() => {
-      expect(screen.getByText('Dr. Maria Santos')).toBeInTheDocument()
+      expect(screen.getAllByText('Dr. Maria Santos')[0]).toBeInTheDocument()
     })
 
-    expect(screen.getByText('Dr. Juan Dela Cruz')).toBeInTheDocument()
-    expect(screen.getByText('Dr. Ana Reyes')).toBeInTheDocument()
+    // Names + license render in both the desktop row and the responsive
+    // roster-card layout (both present in JSDOM), so use getAllByText.
+    expect(screen.getAllByText('Dr. Juan Dela Cruz')[0]).toBeInTheDocument()
+    expect(screen.getAllByText('Dr. Ana Reyes')[0]).toBeInTheDocument()
 
     // License numbers
-    expect(screen.getByText('PDA-001')).toBeInTheDocument()
-    expect(screen.getByText('PDA-002')).toBeInTheDocument()
-    expect(screen.getByText('PDA-003')).toBeInTheDocument()
+    expect(screen.getAllByText('PDA-001')[0]).toBeInTheDocument()
+    expect(screen.getAllByText('PDA-002')[0]).toBeInTheDocument()
+    expect(screen.getAllByText('PDA-003')[0]).toBeInTheDocument()
 
     // Status badges (may appear multiple times due to tab labels + badge labels)
     expect(screen.getAllByText('Active').length).toBeGreaterThanOrEqual(1)
@@ -183,7 +185,7 @@ describe('MemberTable', () => {
     renderWithProviders(<MemberTable orgId="org-1" />)
 
     await waitFor(() => {
-      expect(screen.getByText('Dr. Maria Santos')).toBeInTheDocument()
+      expect(screen.getAllByText('Dr. Maria Santos')[0]).toBeInTheDocument()
     })
 
     // Default requiredCredits is 60 — credit badge shows earned/required
@@ -200,7 +202,7 @@ describe('MemberTable', () => {
     renderWithProviders(<MemberTable orgId="org-1" requiredCredits={100} />)
 
     await waitFor(() => {
-      expect(screen.getByText('Dr. Maria Santos')).toBeInTheDocument()
+      expect(screen.getAllByText('Dr. Maria Santos')[0]).toBeInTheDocument()
     })
 
     expect(screen.getByText('30/100')).toBeInTheDocument()
@@ -213,7 +215,7 @@ describe('MemberTable', () => {
     renderWithProviders(<MemberTable orgId="org-1" />)
 
     await waitFor(() => {
-      expect(screen.getByText('Dr. Maria Santos')).toBeInTheDocument()
+      expect(screen.getAllByText('Dr. Maria Santos')[0]).toBeInTheDocument()
     })
 
     // Click first member row checkbox
