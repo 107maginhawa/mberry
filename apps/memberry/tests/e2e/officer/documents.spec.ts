@@ -53,10 +53,12 @@ test('documents list renders heading', async ({ page }) => {
     await page.goto(`/org/${ORG_ID}/documents`)
     // Wait for the tablist to mount so we know the library hydrated.
     await expect(page.getByRole('tab').first()).toBeVisible({ timeout: 10000 })
-    // Three render-states are acceptable here:
+    // Render-states accepted here:
     //   (a) a document card heading is clickable → assert detail URL,
-    //   (b) library loaded but empty → dropzone visible,
+    //   (b) library loaded but empty → "No documents available" / dropzone,
     //   (c) backend errored → "Failed to load documents" message.
+    // The seed has no organization-owned documents (all 8 are person-owned), so
+    // the org library legitimately renders the empty state.
     const docHeadings = page.getByRole('heading', { level: 3 })
     const headingCount = await docHeadings.count()
     if (headingCount > 0) {
@@ -64,15 +66,12 @@ test('documents list renders heading', async ({ page }) => {
       await page.waitForLoadState('domcontentloaded')
       expect(page.url()).toMatch(/\/documents\/[^/]+$/)
     } else {
-      const hasDropzone = await page
-        .getByText(/drag and drop a file here/i)
-        .isVisible({ timeout: 3000 })
+      const empty = await page
+        .getByText(/no documents available|drag and drop a file here|failed to load documents/i)
+        .first()
+        .isVisible({ timeout: 5000 })
         .catch(() => false)
-      const hasErrorState = await page
-        .getByText(/failed to load documents/i)
-        .isVisible({ timeout: 3000 })
-        .catch(() => false)
-      expect(hasDropzone || hasErrorState).toBeTruthy()
+      expect(empty, 'empty/error document state renders').toBe(true)
     }
   })
 
@@ -88,15 +87,12 @@ test('documents list renders heading', async ({ page }) => {
       .first()
       .isVisible({ timeout: 3000 })
       .catch(() => false)
-    const hasDropzone = await page
-      .getByText(/drag and drop a file here/i)
+    const hasEmptyOrError = await page
+      .getByText(/no documents available|drag and drop a file here|failed to load documents/i)
+      .first()
       .isVisible({ timeout: 3000 })
       .catch(() => false)
-    const hasErrorState = await page
-      .getByText(/failed to load documents/i)
-      .isVisible({ timeout: 3000 })
-      .catch(() => false)
-    expect(hasStatus || hasDropzone || hasErrorState).toBeTruthy()
+    expect(hasStatus || hasEmptyOrError).toBeTruthy()
   })
 
   test('search input is functional', async ({ page }) => {

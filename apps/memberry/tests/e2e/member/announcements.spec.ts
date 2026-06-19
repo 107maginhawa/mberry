@@ -15,7 +15,8 @@ test.describe('Member announcement detail', () => {
     const list = await apiFetch<any>(page, `/communications/announcements/${ORG_ID}?status=sent`, { orgId: ORG_ID })
     expect(list.status).toBe(200)
     const rows = list.data?.data ?? list.data ?? []
-    test.skip(!Array.isArray(rows) || rows.length === 0, 'no sent announcements seeded')
+    const hasAnnouncements = Array.isArray(rows) && rows.length > 0
+    test.skip(!hasAnnouncements, 'no sent announcements seeded')
     const ann = rows[0]
     const title: string = ann.title ?? ann.subject
 
