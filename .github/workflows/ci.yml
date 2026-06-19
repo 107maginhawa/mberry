@@ -628,8 +628,14 @@ jobs:
         # The real-PG integration tests exercise the migrated `public` schema.
         # The Postgres service starts empty, so migrate before running tests.
         run: cd services/api-ts && bun run scripts/ci-migrate.ts
-      - name: Run unit tests
-        run: cd services/api-ts && bun test
+      # Unit (mocked) and integration (real-DB) suites run as SEPARATE bun
+      # processes. mock.module()/stubRepo() in unit tests mutate process-global
+      # state that leaked into same-process real-DB tests (repo.X is not a
+      # function), failing this job non-deterministically. Isolation fixes it.
+      - name: Run unit tests (mocked, isolated process)
+        run: cd services/api-ts && bun run test:unit
+      - name: Run integration tests (real DB, isolated process)
+        run: cd services/api-ts && bun run test:integration
       - name: Run frontend unit tests (with coverage)
         run: cd apps/memberry && bun run test -- --coverage
       - name: Run SDK unit tests
