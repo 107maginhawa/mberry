@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { toast } from 'sonner'
 import {
@@ -11,6 +12,7 @@ import { Button, Skeleton } from '@monobase/ui'
 import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from '@monobase/ui'
 import { formatCents } from '../lib/money'
 import { EmptyState } from '@/components/patterns/empty-state'
+import { ConfirmDialog } from '@/components/patterns/confirm-dialog'
 import { DuesStatusBadge } from './dues-status-badge'
 
 interface DuesInvoiceListProps {
@@ -21,6 +23,7 @@ interface DuesInvoiceListProps {
 
 export function DuesInvoiceList({ orgId, tenantId }: DuesInvoiceListProps) {
   const queryClient = useQueryClient()
+  const [confirmInv, setConfirmInv] = useState<DuesInvoice | null>(null)
 
   const { data, isLoading, error } = useQuery({
     ...listDuesInvoicesOptions({
@@ -77,6 +80,7 @@ export function DuesInvoiceList({ orgId, tenantId }: DuesInvoiceListProps) {
   }
 
   return (
+    <>
     <Table className="text-sm">
       <TableHeader>
         <TableRow>
@@ -107,11 +111,7 @@ export function DuesInvoiceList({ orgId, tenantId }: DuesInvoiceListProps) {
                 <Button
                   variant="link"
                   size="sm"
-                  onClick={() => markPaidMutation.mutate({
-                    path: { invoiceId: inv.id },
-                    body: { paymentId: `manual-${Date.now()}`, paidAt: new Date() },
-                    headers: { 'x-org-id': tenantId },
-                  })}
+                  onClick={() => setConfirmInv(inv)}
                   disabled={markPaidMutation.isPending}
                   className="text-xs text-green-700"
                 >
@@ -123,5 +123,28 @@ export function DuesInvoiceList({ orgId, tenantId }: DuesInvoiceListProps) {
         ))}
       </TableBody>
     </Table>
+
+    <ConfirmDialog
+      open={confirmInv !== null}
+      onOpenChange={(open) => { if (!open) setConfirmInv(null) }}
+      variant="high-consequence"
+      title="Mark invoice as paid?"
+      description={
+        confirmInv
+          ? `This records a manual payment of ${formatCents(Number(confirmInv.totalAmount))} for invoice ${confirmInv.invoiceNumber}. Only confirm if the payment was actually received.`
+          : ''
+      }
+      confirmLabel="Mark as Paid"
+      onConfirm={() => {
+        if (!confirmInv) return
+        markPaidMutation.mutate({
+          path: { invoiceId: confirmInv.id },
+          body: { paymentId: `manual-${Date.now()}`, paidAt: new Date() },
+          headers: { 'x-org-id': tenantId },
+        })
+        setConfirmInv(null)
+      }}
+    />
+    </>
   )
 }
