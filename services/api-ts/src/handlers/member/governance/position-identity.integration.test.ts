@@ -188,7 +188,7 @@ describe('election position identity — real-DB (FIX-002 / G2)', () => {
       expect(response.status).toBe(201);
 
       const slots: Array<{ id: string; title: string; sortOrder: number }> =
-        response.body.data.positions;
+        response.body.positions;
       expect(slots.length).toBe(2);
 
       // Every slot id must resolve to a REAL position row (canonical identity).
@@ -205,7 +205,7 @@ describe('election position identity — real-DB (FIX-002 / G2)', () => {
       // election_nominee_position_id_position_id_fk. Before the fix the slot id is a
       // random UUID absent from `position`, so this throws (RED).
       const presidentSlot = slots.find((s) => s.title === 'President')!;
-      const electionId = response.body.data.id as string;
+      const electionId = response.body.id as string;
       await scopedPool.query(
         `INSERT INTO "${TEST_SCHEMA}".election_nominee
            (organization_id, election_id, position_id, person_id, nominated_by)
@@ -242,7 +242,7 @@ describe('election position identity — real-DB (FIX-002 / G2)', () => {
           _body: { title, type: 'officer', votingMode: 'online', positions: ['President'] },
         });
         const res: any = await createElection(ctx);
-        return res.body.data.positions[0].id as string;
+        return res.body.positions[0].id as string;
       }
 
       const firstId = await create('Election A');

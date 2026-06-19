@@ -40,18 +40,18 @@ describe('getElection', () => {
     const res = await getElection(ctx);
 
     expect(res.status).toBe(200);
-    expect(res.body.data.id).toBe('elec-1');
-    expect(res.body.data.title).toBe('Board Election 2024');
-    expect(res.body.data.voterCount).toBe(42);
-    expect(Array.isArray(res.body.data.nominees)).toBe(true);
-    expect(res.body.data.nominees).toHaveLength(1);
+    expect(res.body.id).toBe('elec-1');
+    expect(res.body.title).toBe('Board Election 2024');
+    expect(res.body.voterCount).toBe(42);
+    expect(Array.isArray(res.body.nominees)).toBe(true);
+    expect(res.body.nominees).toHaveLength(1);
     // Tallies should be empty for active (not awaitingConfirmation/published)
-    expect(res.body.data.tallies).toEqual([]);
+    expect(res.body.tallies).toEqual([]);
     // Field mapping
-    expect(res.body.data.nominationStart).toBe(baseElection.nominationsOpenAt);
-    expect(res.body.data.nominationEnd).toBe(baseElection.nominationsCloseAt);
-    expect(res.body.data.votingStart).toBe(baseElection.votingOpenAt);
-    expect(res.body.data.votingEnd).toBe(baseElection.votingCloseAt);
+    expect(res.body.nominationStart).toBe(baseElection.nominationsOpenAt);
+    expect(res.body.nominationEnd).toBe(baseElection.nominationsCloseAt);
+    expect(res.body.votingStart).toBe(baseElection.votingOpenAt);
+    expect(res.body.votingEnd).toBe(baseElection.votingCloseAt);
   });
 
   test('published election — tallies fetched', async () => {
@@ -67,8 +67,8 @@ describe('getElection', () => {
     const res = await getElection(ctx);
 
     expect(res.status).toBe(200);
-    expect(res.body.data.tallies).toHaveLength(1);
-    expect(res.body.data.tallies[0].count).toBe(10);
+    expect(res.body.tallies).toHaveLength(1);
+    expect(res.body.tallies[0].count).toBe(10);
   });
 
   test('awaitingConfirmation election — tallies fetched', async () => {
@@ -85,7 +85,7 @@ describe('getElection', () => {
     const res = await getElection(ctx);
 
     expect(res.status).toBe(200);
-    expect(res.body.data.tallies).toHaveLength(1);
+    expect(res.body.tallies).toHaveLength(1);
   });
 
   test('throws on missing session (unauthorized)', async () => {

@@ -220,7 +220,7 @@ describe('createCandidate — BR-34 nomination eligibility', () => {
 
     const response = await createCandidate(ctx);
     expect(response.status).toBe(201);
-    expect((response as any).body.data.id).toBe('nominee-1');
+    expect((response as any).body.id).toBe('nominee-1');
   });
 
   test('creates candidate when nomination period dates are null (no restriction)', async () => {

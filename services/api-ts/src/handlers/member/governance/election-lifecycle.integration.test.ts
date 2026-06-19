@@ -339,8 +339,8 @@ describe('election lifecycle — real-DB (FIX-007 / FIX-001)', () => {
       });
       const createRes: any = await createElection(createCtx);
       expect(createRes.status).toBe(201);
-      const electionId = createRes.body.data.id as string;
-      const slots: Array<{ id: string; title: string }> = createRes.body.data.positions;
+      const electionId = createRes.body.id as string;
+      const slots: Array<{ id: string; title: string }> = createRes.body.positions;
       const presidentPositionId = slots.find((s) => s.title === 'President')!.id;
       // Slot id must be a real position row (the FK target).
       const posCheck = await scopedPool.query(
@@ -456,9 +456,9 @@ describe('election lifecycle — real-DB (FIX-007 / FIX-001)', () => {
         },
       });
       const createRes: any = await createElection(createCtx);
-      const electionId = createRes.body.data.id as string;
+      const electionId = createRes.body.id as string;
       const presidentPositionId = (
-        createRes.body.data.positions as Array<{ id: string; title: string }>
+        createRes.body.positions as Array<{ id: string; title: string }>
       ).find((s) => s.title === 'President')!.id;
 
       await scopedPool.query(
