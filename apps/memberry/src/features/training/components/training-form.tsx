@@ -62,12 +62,15 @@ export function TrainingForm({ orgId, initial, trainingId }: TrainingFormProps) 
 
   const saveMutation = useMutation({
     mutationFn: async (status: 'draft' | 'published') => {
+      const startDate = form.startDate ? new Date(form.startDate) : new Date()
       const payload = {
         title: form.title,
         organizationId: orgId,
         type: form.type as 'seminar' | 'workshop' | 'webinar' | 'self_paced' | 'hands_on',
-        startDate: form.startDate ? new Date(form.startDate) : new Date(),
-        endDate: form.endDate ? new Date(form.endDate) : undefined,
+        startDate,
+        // ISSUE-020: endDate is NOT NULL in the DB but optional in the form;
+        // leaving it blank sent undefined → DB insert 500. Default to startDate.
+        endDate: form.endDate ? new Date(form.endDate) : startDate,
         location: form.location || undefined,
         creditAmount: parseFloat(String(form.creditAmount)) || 0,
         // ISSUE-019: validator is z.number().int(); BigInt serializes to a
