@@ -452,7 +452,12 @@ function buildPathMethodIndex(app: App): Map<RegExp, Set<string>> {
   for (const [pattern, methods] of index) {
     const regexSrc = pattern
       .replace(/[.+?^${}()|[\]\\]/g, '\\$&')
-      .replace(/:([A-Za-z_][A-Za-z0-9_]*)/g, '[^/]+');
+      .replace(/:([A-Za-z_][A-Za-z0-9_]*)/g, '[^/]+')
+      // Hono wildcard mounts ("/surveys/*" from app.use) match a slash + any
+      // suffix. Without this, "*" stays literal and "\/*" collapses to
+      // "slash, zero-or-more", so "/surveys" wrongly matches "/surveys/*" and
+      // a genuine 404 is mislabeled 405.
+      .replace(/\*/g, '.*');
     compiled.set(new RegExp(`^${regexSrc}$`), methods);
   }
   return compiled;

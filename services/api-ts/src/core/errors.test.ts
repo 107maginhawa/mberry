@@ -24,6 +24,7 @@ import {
   TimeoutError,
   ExternalServiceError,
   createErrorHandler,
+  registerHandlers,
 } from './errors';
 import type { Config } from './config';
 // Factory N/A: core infrastructure test — config/setup/service assertions, no domain entities
@@ -551,5 +552,39 @@ describe('createErrorHandler', () => {
     expect(resp.status).toBe(422);
     const body = await resp.json() as any;
     expect(body.message).toBe('custom status');
+  });
+});
+
+// ---------------------------------------------------------------------------
+// registerHandlers — 404 vs 405 path/method disambiguation
+//
+// Regression for /qa 2026-06-19: a request to "/surveys" (no trailing slash)
+// was mislabeled 405 instead of 404 because the path→regex builder left the
+// Hono wildcard "*" literal, so "/surveys/*" compiled to "^/surveys/*$"
+// ("slash, zero-or-more") and wrongly matched "/surveys".
+// Report: .gstack/qa-reports/qa-report-memberry-2026-06-19.md
+// ---------------------------------------------------------------------------
+
+describe('registerHandlers — 404 vs 405', () => {
+  test('GET on a wildcard-mounted prefix without trailing slash → 404, not 405', async () => {
+    const app = new Hono(); // strict routing on by default
+    app.use('/surveys/*', (_c, next) => next());
+    app.get('/surveys/', (c) => c.json({ data: [] }));
+    registerHandlers(app, makeConfig());
+
+    const resp = await app.request(new Request('http://localhost/surveys', { method: 'GET' }));
+    expect(resp.status).toBe(404);
+    const body = (await resp.json()) as { code?: string };
+    expect(body.code).toBe('NOT_FOUND');
+  });
+
+  test('genuine method mismatch on a registered path still → 405 with Allow', async () => {
+    const app = new Hono();
+    app.post('/widgets', (c) => c.json({ ok: true }));
+    registerHandlers(app, makeConfig());
+
+    const resp = await app.request(new Request('http://localhost/widgets', { method: 'GET' }));
+    expect(resp.status).toBe(405);
+    expect(resp.headers.get('Allow')).toContain('POST');
   });
 });
