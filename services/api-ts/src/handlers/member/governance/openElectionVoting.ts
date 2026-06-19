@@ -65,9 +65,18 @@ export async function openElectionVoting(
     }
   }
 
+  // ISSUE-032: the DB check constraint `election_nominations_before_voting`
+  // requires voting to start at/after nominations close. Opening voting now while
+  // nominations are still scheduled to close in the future violated it (raw 500).
+  // Close nominations as part of the transition so the ordering always holds.
+  const now = new Date();
+  const existingClose = existing.nominationsCloseAt ? new Date(existing.nominationsCloseAt) : null;
+  const nominationsCloseAt = existingClose && existingClose < now ? existingClose : now;
+
   const updated = await repo.update(params.electionId, {
     status: 'votingOpen',
-    votingOpenAt: new Date(),
+    votingOpenAt: now,
+    nominationsCloseAt,
   });
 
   ctx.set('auditResourceId', updated.id);
