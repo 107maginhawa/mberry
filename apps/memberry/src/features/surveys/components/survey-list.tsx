@@ -97,7 +97,10 @@ export function SurveyList() {
   }
 
   const publishMut = useMutation({
-    mutationFn: (id: string) => api.patch(`/api/surveys/${id}`, { status: 'active' }),
+    // Status transitions go through dedicated endpoints. PATCH /surveys/:id only
+    // accepts content fields (UpdateSurveyRequestSchema has no `status`), so a
+    // {status} PATCH is silently dropped and the survey never changes state.
+    mutationFn: (id: string) => api.post(`/api/surveys/${id}/publish`),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['surveys', orgId] })
       toast.success('Survey published')
@@ -106,7 +109,7 @@ export function SurveyList() {
   })
 
   const closeMut = useMutation({
-    mutationFn: (id: string) => api.patch(`/api/surveys/${id}`, { status: 'closed' }),
+    mutationFn: (id: string) => api.post(`/api/surveys/${id}/close`),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['surveys', orgId] })
       toast.success('Survey closed')
