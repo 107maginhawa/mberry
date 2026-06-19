@@ -360,3 +360,30 @@ git commit -m "test(audit,dues): cover P0 untested BR-48/55/56; ratchet coverage
 **Type consistency:** `GateCounts {a,b,c}` and `ratchetCheck` signature are identical across the test (Task 2 Step 1), the implementation (Step 3), and the matrix wiring (Step 6). Baseline JSON keys `a/b/c` match throughout.
 
 **Out of scope (named, not forgotten):** full Matrix B/C backfill (76+85), flipping `lint:e2e-depth` off `continue-on-error`, and expanding firewall journeys beyond the current 8 — all feed off Task 4's backlog and are subsequent waves. Ratchet ensures none of those gaps can grow in the meantime.
+
+---
+
+## Execution Outcome (2026-06-19)
+
+All five tasks landed. Deviations from the plan, recorded honestly:
+
+- **Task 5 did NOT reach gate A=0.** The plan assumed BR-48 was a coverage-only
+  gap. Reality: there is **no `bulkRecordPayments` handler in the codebase** (the
+  registry's own `deferredReason` confirms it was never wired). BR-48 is the lone
+  Phase-1 UNTESTED BR, so the gate's `a` counter stays **1** — legitimately, as a
+  known deferred item, not a regression. Baseline unchanged (A=1, B=76, C=85).
+- **BR-55/56 were closed for real** with a new real-PG integration test
+  (`suppression.repo.integration.test.ts`). Matrix A UNTESTED dropped 4 → 2
+  (remaining: BR-39 p2-deferred, BR-48 no-handler).
+- **The sweep found and fixed a latent P0 bug.** Writing the BR-55/56 tests
+  surfaced that `SuppressionRepository.addSuppression`'s idempotency guard
+  (`err.code === '23505'`) no longer matched: current drizzle wraps driver errors
+  in `DrizzleQueryError` with the pg error on `.cause`. A second hard_bounce /
+  complaint for an already-suppressed address therefore **threw instead of
+  no-op'ing** — a real deliverability defect. Guard now unwraps `.cause`; the
+  red→green test locks it.
+
+Net: enforcement is live (Tasks 1-3), the gap is mapped and prioritized
+(Task 4), the two highest-risk untested rules are covered and a P0 bug is fixed
+(Task 5). The 76-flow / 85-route backlog remains for subsequent waves, now
+protected by the ratchet against regression.
