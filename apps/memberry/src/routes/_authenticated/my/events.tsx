@@ -15,6 +15,7 @@ import { CountUp } from '@/components/motion/count-up'
 import { StaggerGrid, StaggerItem } from '@/components/motion/stagger-grid'
 import { PageShell } from '@/components/patterns/page-shell'
 import { EmptyState } from '@/components/patterns/empty-state'
+import { ConfirmDialog } from '@/components/patterns/confirm-dialog'
 
 export const Route = createFileRoute('/_authenticated/my/events')({
   component: MyEvents,
@@ -59,6 +60,7 @@ function EventRegistrationCard({ item }: { item: { registration: any; event: any
   const orgId = event.organizationId
   const orgSlug = event.orgSlug || orgId || ''
   const queryClient = useQueryClient()
+  const [showCancel, setShowCancel] = useState(false)
 
   const cancelMutation = useMutation({
     ...cancelEventRegistrationMutation(),
@@ -128,31 +130,42 @@ function EventRegistrationCard({ item }: { item: { registration: any; event: any
 
       {/* Action row — cancel button for upcoming */}
       {canCancel && (
-        <div className="px-4 py-2.5 border-t border-[var(--color-surface-border-glass)] flex items-center justify-between">
-          <span className="text-body-sm text-[var(--color-muted)]">
-            {registration.status === 'waitlisted' ? 'On waitlist' : 'You\'re registered'}
-          </span>
-          {/* ui-c-exempt: methodology-carry — outlined destructive (cancel registration) 28px */}
-          <Button
-            variant="outline"
-            size="sm"
-            className="h-7 text-xs text-[var(--color-error)] border-[var(--color-error)] hover:bg-[var(--color-error-bg)]"
-            disabled={cancelMutation.isPending}
-            onClick={(e) => {
-              e.preventDefault()
-              e.stopPropagation()
+        <>
+          <div className="px-4 py-2.5 border-t border-[var(--color-surface-border-glass)] flex items-center justify-between">
+            <span className="text-body-sm text-[var(--color-muted)]">
+              {registration.status === 'waitlisted' ? 'On waitlist' : 'You\'re registered'}
+            </span>
+            {/* ui-c-exempt: methodology-carry — outlined destructive (cancel registration) 28px */}
+            <Button
+              variant="outline"
+              size="sm"
+              className="h-7 text-xs text-[var(--color-error)] border-[var(--color-error)] hover:bg-[var(--color-error-bg)]"
+              disabled={cancelMutation.isPending}
+              onClick={(e) => {
+                e.preventDefault()
+                e.stopPropagation()
+                setShowCancel(true)
+              }}
+            >
+              {cancelMutation.isPending && <Loader2 className="mr-1 h-3 w-3 animate-spin" />}
+              Cancel
+            </Button>
+          </div>
+          <ConfirmDialog
+            open={showCancel}
+            onOpenChange={setShowCancel}
+            variant="destructive"
+            title="Cancel registration?"
+            description={`Cancel your registration for "${event.title}"? If the event is full you may lose your spot.`}
+            confirmLabel="Cancel registration"
+            onConfirm={() => {
               const regId = registration.id
-              if (regId) {
-                cancelMutation.mutate({ path: { registrationId: regId } })
-              } else {
-                toast.error('Unable to find registration ID')
-              }
+              if (regId) cancelMutation.mutate({ path: { registrationId: regId } })
+              else toast.error('Unable to find registration ID')
+              setShowCancel(false)
             }}
-          >
-            {cancelMutation.isPending && <Loader2 className="mr-1 h-3 w-3 animate-spin" />}
-            Cancel
-          </Button>
-        </div>
+          />
+        </>
       )}
 
       {/* Past event: show attendance result */}
