@@ -75,7 +75,8 @@ const INTENTIONAL_EXEMPT_ROUTES = new Set([
   'apps/memberry/src/routes/index.tsx',
   // Onboarding-step
   'apps/memberry/src/routes/onboarding.tsx',
-  'apps/memberry/src/routes/join.tsx',
+  'apps/memberry/src/routes/join/index.tsx',
+  'apps/memberry/src/routes/join/$slug.tsx',
   'apps/memberry/src/routes/invite/$token.tsx',
   // Public-verify
   'apps/memberry/src/routes/pay/$token.tsx',
