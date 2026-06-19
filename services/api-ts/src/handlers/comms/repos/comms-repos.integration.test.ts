@@ -266,16 +266,25 @@ describe('ChatRoomMemberRepository (real DB)', () => {
     const p = '00000000-0000-4000-8000-000000000501';
     await memberRepo.addMember(roomId, p);
 
+    // getUnreadCount compares message.createdAt > member.lastReadAt, both
+    // sourced from Postgres now() (microsecond precision, = transaction start).
+    // Consecutive ops can land in the same tick, making the cursor boundary a
+    // tie that miscounts. Force strictly-increasing timestamps across each
+    // read boundary so the test is deterministic (not a wall-clock race).
+    const tick = () => new Promise((r) => setTimeout(r, 5));
+
     // No lastReadAt yet → all messages count as unread.
     await msgRepo.createTextMessage(roomId, p, 'one', ORG_A);
     await msgRepo.createTextMessage(roomId, p, 'two', ORG_A);
     expect(await memberRepo.getUnreadCount(roomId, p)).toBe(2);
 
-    // Mark read → cursor advances → 0 unread.
+    // Mark read strictly after the two messages → cursor advances → 0 unread.
+    await tick();
     await memberRepo.markRead(roomId, p);
     expect(await memberRepo.getUnreadCount(roomId, p)).toBe(0);
 
-    // New message after read cursor → 1 unread.
+    // New message strictly after the read cursor → 1 unread.
+    await tick();
     await msgRepo.createTextMessage(roomId, p, 'three', ORG_A);
     expect(await memberRepo.getUnreadCount(roomId, p)).toBe(1);
   });
