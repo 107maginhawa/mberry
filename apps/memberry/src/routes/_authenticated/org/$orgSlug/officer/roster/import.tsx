@@ -1,5 +1,5 @@
 import { useState, useCallback } from 'react'
-import { createFileRoute, Link } from '@tanstack/react-router'
+import { createFileRoute } from '@tanstack/react-router'
 import { useOrg } from '@/hooks/use-org'
 import { Button, Input, NavIcon } from '@monobase/ui'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@monobase/ui'
@@ -270,7 +270,7 @@ function RosterImportPage() {
             <div className="flex items-start gap-2 p-3 rounded-sm bg-[var(--color-warning-bg)] border border-[var(--color-warning)]/20">
               <AlertTriangle size={14} className="text-[var(--color-warning)] shrink-0 mt-0.5" />
               <p className="text-xs text-[var(--color-warning)]">
-                No membership tiers exist yet. <a href={`/org/${orgSlug}/officer/tiers`} className="underline">Create a tier</a> before importing.
+                No membership tiers exist yet. Ask an administrator to create a tier before importing.
               </p>
             </div>
           ) : (
