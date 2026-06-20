@@ -36,6 +36,7 @@ export interface Survey {
   surveyType?: string
   questions: SurveyQuestion[]
   pollResults?: PollResult[]
+  myResponseStatus?: string | null
 }
 
 type AnswerValue = number | string | string[] | boolean | null
@@ -280,7 +281,7 @@ export function SurveyFlow({ survey, onComplete, previewMode }: SurveyFlowProps)
   // ── Poll results state ─────────────────────────────────────────────
 
   const isPoll = survey.surveyType === 'poll'
-  const showResults = isPoll && (completed || (pollResults && pollResults.length > 0))
+  const showResults = isPoll && (completed || survey.myResponseStatus === 'completed')
 
   // ── Completion screen ──────────────────────────────────────────────
 

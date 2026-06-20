@@ -68,11 +68,14 @@ export async function getSurvey(
     settings: { deadline: s.deadline, anonymous: s.anonymous, allowReedit: s.allowReedit },
   };
 
+  const responseRepo = new SurveyResponseRepository(db, logger);
+  const ownResponse = await responseRepo.findByResponderAndSurvey(userId, surveyId);
+  const myResponseStatus = ownResponse?.status ?? null;
+
   if (survey.surveyType === 'poll') {
-    const responseRepo = new SurveyResponseRepository(db, logger);
     const all = await responseRepo.findAllBySurveyId(surveyId);
-    return ctx.json({ ...sanitized, pollResults: aggregatePollResults(survey, all) }, 200);
+    return ctx.json({ ...sanitized, myResponseStatus, pollResults: aggregatePollResults(survey, all) }, 200);
   }
 
-  return ctx.json(sanitized, 200);
+  return ctx.json({ ...sanitized, myResponseStatus }, 200);
 }

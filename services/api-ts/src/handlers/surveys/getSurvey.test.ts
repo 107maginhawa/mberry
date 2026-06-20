@@ -101,16 +101,38 @@ describe('getSurvey', () => {
     await expect(getSurvey(ctx)).rejects.toThrow('Survey not found');
   });
 
-  test('member reads an active poll — includes pollResults', async () => {
+  test('member reads an active poll — includes pollResults and myResponseStatus (voted)', async () => {
     stubRepo(OfficerTermRepository, { findActiveByPersonAndOrg: async () => [] });
     stubRepo(SurveyRepository, {
       findById: async () => ({ ...fakeSurvey, surveyType: 'poll', questions: [{ id: 'q1', type: 'single_choice', text: 'Pick', options: ['A', 'B'], required: true, order: 1 }] }),
     });
-    stubRepo(SurveyResponseRepository, { findAllBySurveyId: async () => [{ answers: [{ questionId: 'q1', value: 'A' }] }] });
+    stubRepo(SurveyResponseRepository, {
+      findByResponderAndSurvey: async () => ({ status: 'completed', answers: [{ questionId: 'q1', value: 'A' }] }),
+      findAllBySurveyId: async () => [{ answers: [{ questionId: 'q1', value: 'A' }] }],
+    });
     const ctx = makeCtx({ user: { id: 'member-1', role: 'user' }, _params: { survey: 'survey-1' } });
     const res = await getSurvey(ctx);
     expect(res.status).toBe(200);
     expect((res as any).body.pollResults[0]).toEqual({ questionId: 'q1', counts: { A: 1 }, total: 1 });
+    expect((res as any).body.myResponseStatus).toBe('completed');
+  });
+
+  // Regression guard: unvoted member must get myResponseStatus null (not 'completed'),
+  // so the frontend vote form is shown (not locked out by the old pollResults check).
+  test('unvoted member reads an active poll — myResponseStatus is null (vote form not locked)', async () => {
+    stubRepo(OfficerTermRepository, { findActiveByPersonAndOrg: async () => [] });
+    stubRepo(SurveyRepository, {
+      findById: async () => ({ ...fakeSurvey, surveyType: 'poll', questions: [{ id: 'q1', type: 'single_choice', text: 'Pick', options: ['A', 'B'], required: true, order: 1 }] }),
+    });
+    stubRepo(SurveyResponseRepository, {
+      findByResponderAndSurvey: async () => undefined,
+      findAllBySurveyId: async () => [],
+    });
+    const ctx = makeCtx({ user: { id: 'member-1', role: 'user' }, _params: { survey: 'survey-1' } });
+    const res = await getSurvey(ctx);
+    expect(res.status).toBe(200);
+    // null → frontend showResults = false → vote form renders (lockout prevented)
+    expect((res as any).body.myResponseStatus).toBeNull();
   });
 
   test('FIX-001: officer (active term) can read survey detail — 200', async () => {
