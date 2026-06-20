@@ -130,8 +130,9 @@ describe('ComposeForm', () => {
   // POSTed status:'sent' (silently ignored) and navigated away on a draft.
   test('Send Now chains create then publish endpoint', async () => {
     const user = userEvent.setup()
-    mockApi.post.mockResolvedValueOnce({ data: { id: 'new-ann-1' } }) // create
-    mockApi.post.mockResolvedValueOnce({ data: { id: 'new-ann-1', status: 'sent' } }) // publish
+    // ISSUE-029: createAnnouncement returns the flat resource, not { data }.
+    mockApi.post.mockResolvedValueOnce({ id: 'new-ann-1' }) // create
+    mockApi.post.mockResolvedValueOnce({ id: 'new-ann-1', status: 'sent' }) // publish
 
     renderWithProviders(<ComposeForm orgId="org-1" />)
     await user.type(screen.getByLabelText('Title'), 'Town Hall')
@@ -155,8 +156,9 @@ describe('ComposeForm', () => {
   // FIX-003: "Schedule" must hit the schedule endpoint with scheduledAt.
   test('Schedule chains create then schedule endpoint with scheduledAt', async () => {
     const user = userEvent.setup()
-    mockApi.post.mockResolvedValueOnce({ data: { id: 'new-ann-2' } }) // create
-    mockApi.post.mockResolvedValueOnce({ data: { id: 'new-ann-2', status: 'scheduled' } }) // schedule
+    // ISSUE-029: createAnnouncement returns the flat resource, not { data }.
+    mockApi.post.mockResolvedValueOnce({ id: 'new-ann-2' }) // create
+    mockApi.post.mockResolvedValueOnce({ id: 'new-ann-2', status: 'scheduled' }) // schedule
 
     renderWithProviders(<ComposeForm orgId="org-1" />)
     await user.type(screen.getByLabelText('Title'), 'Future Notice')
