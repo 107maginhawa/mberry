@@ -36,7 +36,8 @@ function AnnouncementDetailPage() {
 
   const { data, isLoading, isError, error } = useQuery({
     queryKey: ['announcement', announcementId],
-    queryFn: () => api.get<{ data: any }>(`/api/communications/announcements/detail/${announcementId}`),
+    // ISSUE-029: getAnnouncement returns the flat resource, not { data }.
+    queryFn: () => api.get<any>(`/api/communications/announcements/detail/${announcementId}`),
   })
 
   const publishMutation = useMutation({
@@ -57,7 +58,7 @@ function AnnouncementDetailPage() {
     onError: (err) => toast.error(err.message || 'Failed to archive announcement'),
   })
 
-  const ann = data?.data
+  const ann = data
 
   if (isLoading) {
     return (

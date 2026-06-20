@@ -20,19 +20,20 @@ function NewAnnouncementPage() {
   const { data: draft } = useQuery({
     queryKey: ['announcement-draft', edit],
     enabled: !!edit,
-    queryFn: () => api.get<{ data: any }>(`/api/communications/announcements/detail/${edit}`),
+    // ISSUE-029: getAnnouncement returns the flat resource, not { data }.
+    queryFn: () => api.get<any>(`/api/communications/announcements/detail/${edit}`),
   })
 
-  const existingAnnouncement = draft?.data ? {
-    id: draft.data.id,
-    title: draft.data.title,
-    content: draft.data.content,
-    audienceType: draft.data.audienceType ?? 'all',
-    audienceCategories: draft.data.audienceCategories,
-    channelPush: draft.data.channelPush ?? true,
-    channelEmail: draft.data.channelEmail ?? false,
-    visibility: draft.data.visibility ?? 'internal',
-    scheduledAt: draft.data.scheduledAt,
+  const existingAnnouncement = draft ? {
+    id: draft.id,
+    title: draft.title,
+    content: draft.content,
+    audienceType: draft.audienceType ?? 'all',
+    audienceCategories: draft.audienceCategories,
+    channelPush: draft.channelPush ?? true,
+    channelEmail: draft.channelEmail ?? false,
+    visibility: draft.visibility ?? 'internal',
+    scheduledAt: draft.scheduledAt,
   } : undefined
 
   return (
