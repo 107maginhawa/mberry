@@ -588,6 +588,65 @@ model AdjustCreditResponse {
 }
 
 // ---------------------------------------------------------------------------
+// Credit Verification Models (officer review of member self-logged credits)
+// ---------------------------------------------------------------------------
+
+@doc("A member self-logged CPD credit entry awaiting officer verification")
+model PendingCreditEntry {
+  @doc("Credit entry ID")
+  id: string;
+
+  @doc("Person who logged the credit")
+  personId: string;
+
+  @doc("Full name of the member who logged the credit")
+  memberName: string;
+
+  @doc("Name of the activity")
+  activityName: string;
+
+  @doc("CPD activity provider name")
+  provider?: string;
+
+  @doc("Date the activity was completed")
+  activityDate: utcDateTime;
+
+  @doc("Number of credits claimed")
+  creditAmount: float64;
+
+  @doc("Credit category (General, Major, Self-Directed)")
+  category?: string;
+
+  @doc("Supporting document ID")
+  supportingDocumentId?: string;
+
+  @doc("Verification status (pending while awaiting review)")
+  verificationStatus: string;
+
+  @doc("When the credit entry was created")
+  createdAt: utcDateTime;
+}
+
+@doc("Response wrapping the list of pending credit entries awaiting officer review")
+model PendingCreditEntriesResponse {
+  @doc("Pending credit entries awaiting verification")
+  entries: PendingCreditEntry[];
+}
+
+@doc("Response from verifying or rejecting a member-submitted credit entry")
+model CreditVerificationResponse {
+  @doc("The updated credit entry")
+  data: Record<unknown>;
+}
+
+@doc("Request for an officer to reject a member-submitted credit entry")
+model RejectCreditEntryRequest {
+  @doc("Reason for rejection — shown to the member")
+  @maxLength(500)
+  reason?: string;
+}
+
+// ---------------------------------------------------------------------------
 // My Credits Models
 // ---------------------------------------------------------------------------
 
@@ -1639,6 +1698,64 @@ namespace Association.Operations.Training {
       | ApiUnauthorizedResponse
       | ApiForbiddenResponse
       | ApiNotFoundResponse;
+  }
+
+  /**
+   * Officer-level review of member self-logged CPD credit entries that sit at
+   * verification_status='pending'. Mirrors the dues payment-proof review flow.
+   * verify/reject routes: /association/member/credits/{creditEntryId}/{verify|reject}
+   */
+  @useAuth(bearerAuth)
+  interface CreditVerificationManagement {
+    @doc("Verify (approve) a member self-logged CPD credit entry. Officers only.")
+    @operationId("verifyCreditEntry")
+    @post
+    @route("/{creditEntryId}/verify")
+    @extension("x-security-required-roles", #["association:admin", "association:staff"])
+    @extension("x-audit", #{ action: "approve", resourceType: "credit-entry" })
+    verifyCreditEntry(
+      @path creditEntryId: string
+    ): ApiOkResponse<CreditVerificationResponse>
+      | ApiBadRequestResponse
+      | ApiUnauthorizedResponse
+      | ApiForbiddenResponse
+      | ApiNotFoundResponse
+      | ApiConflictResponse;
+
+    @doc("Reject a member self-logged CPD credit entry with an optional reason. Officers only.")
+    @operationId("rejectCreditEntry")
+    @post
+    @route("/{creditEntryId}/reject")
+    @extension("x-security-required-roles", #["association:admin", "association:staff"])
+    @extension("x-audit", #{ action: "deny", resourceType: "credit-entry" })
+    rejectCreditEntry(
+      @path creditEntryId: string,
+      @body body: RejectCreditEntryRequest
+    ): ApiOkResponse<CreditVerificationResponse>
+      | ApiBadRequestResponse
+      | ApiUnauthorizedResponse
+      | ApiForbiddenResponse
+      | ApiNotFoundResponse
+      | ApiConflictResponse;
+  }
+
+  /**
+   * Officer-level list of member self-logged CPD credit entries awaiting
+   * verification for an organization. Org-scoped like the compliance report.
+   * Route: /credit-compliance/{organizationId}/pending
+   */
+  @useAuth(bearerAuth)
+  interface PendingCreditManagement {
+    @doc("List member self-logged CPD credit entries awaiting officer verification for an organization. Officers only.")
+    @operationId("listPendingCreditEntries")
+    @get
+    @route("/{organizationId}/pending")
+    @extension("x-security-required-roles", #["association:admin", "association:staff"])
+    listPendingCreditEntries(
+      @path organizationId: string
+    ): ApiOkResponse<PendingCreditEntriesResponse>
+      | ApiUnauthorizedResponse
+      | ApiForbiddenResponse;
   }
 
   /**

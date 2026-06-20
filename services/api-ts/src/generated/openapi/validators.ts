@@ -4356,6 +4356,10 @@ export const CreditHistoryEntrySchema = z.object({
   createdAt: z.string().datetime().transform((str) => new Date(str)).optional()
 });
 
+export const CreditVerificationResponseSchema = z.object({
+  data: z.record(z.string(), z.unknown())
+});
+
 export const CurrencyAmountSchema = z.number().int().gte(0);
 
 export const CurrencyCodeSchema = z.string().regex(/^[A-Z]{3}$/);
@@ -7637,6 +7641,24 @@ export const PaymentTokenValidationSchema = z.object({
   status: z.string().optional()
 });
 
+export const PendingCreditEntrySchema = z.object({
+  id: z.string(),
+  personId: z.string(),
+  memberName: z.string(),
+  activityName: z.string(),
+  provider: z.string().optional(),
+  activityDate: z.string().datetime().transform((str) => new Date(str)),
+  creditAmount: z.number(),
+  category: z.string().optional(),
+  supportingDocumentId: z.string().optional(),
+  verificationStatus: z.string(),
+  createdAt: z.string().datetime().transform((str) => new Date(str))
+});
+
+export const PendingCreditEntriesResponseSchema = z.object({
+  entries: z.array(PendingCreditEntrySchema)
+});
+
 export const PersonCreateRequestSchema = z.object({
   firstName: z.string().min(1).max(50),
   lastName: z.string().min(1).max(50).optional(),
@@ -8335,6 +8357,10 @@ export const RefundResponseSchema = z.object({
 });
 
 export const RegistrationStatusSchema = z.enum(["registered", "waitlisted", "confirmed", "checked_in", "cancelled", "no_show", "refunded"]);
+
+export const RejectCreditEntryRequestSchema = z.object({
+  reason: z.string().max(500).optional()
+});
 
 export const RejectPaymentProofRequestSchema = z.object({
   reason: z.string().min(1).max(500)
@@ -11541,6 +11567,23 @@ export type VoidCreditEntryBody = z.infer<typeof VoidCreditEntryBody>;
 
 export const VoidCreditEntryResponse = EventCreditVoidResponseSchema;
 
+export const RejectCreditEntryParams = z.object({
+  creditEntryId: z.string(),
+});
+export type RejectCreditEntryParams = z.infer<typeof RejectCreditEntryParams>;
+
+export const RejectCreditEntryBody = RejectCreditEntryRequestSchema;
+export type RejectCreditEntryBody = z.infer<typeof RejectCreditEntryBody>;
+
+export const RejectCreditEntryResponse = CreditVerificationResponseSchema;
+
+export const VerifyCreditEntryParams = z.object({
+  creditEntryId: z.string(),
+});
+export type VerifyCreditEntryParams = z.infer<typeof VerifyCreditEntryParams>;
+
+export const VerifyCreditEntryResponse = CreditVerificationResponseSchema;
+
 export const CreateDirectoryProfileBody = DirectoryProfileCreateRequestSchema;
 export type CreateDirectoryProfileBody = z.infer<typeof CreateDirectoryProfileBody>;
 
@@ -13654,6 +13697,13 @@ export const GetCreditComplianceParams = z.object({
 export type GetCreditComplianceParams = z.infer<typeof GetCreditComplianceParams>;
 
 export const GetCreditComplianceResponse = CreditComplianceReportSchema;
+
+export const ListPendingCreditEntriesParams = z.object({
+  organizationId: z.string(),
+});
+export type ListPendingCreditEntriesParams = z.infer<typeof ListPendingCreditEntriesParams>;
+
+export const ListPendingCreditEntriesResponse = PendingCreditEntriesResponseSchema;
 
 export const GetDuesDashboardParams = z.object({
   organizationId: UUIDSchema,

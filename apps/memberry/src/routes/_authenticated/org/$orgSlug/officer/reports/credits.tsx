@@ -1,9 +1,11 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { useQuery } from '@tanstack/react-query'
+import { listPendingCreditEntriesOptions } from '@monobase/sdk-ts/generated/react-query'
 import { api } from '@/lib/api'
 import { useState } from 'react'
 import { PageShell } from '@/components/patterns/page-shell'
 import { GlassCard } from '@/components/motion/glass-card'
+import { PendingCreditsList } from '@/features/training/components/pending-credits-list'
 import { CountUp } from '@/components/motion/count-up'
 import { StaggerGrid, StaggerItem } from '@/components/motion/stagger-grid'
 import { EmptyState } from '@/components/patterns/empty-state'
@@ -101,6 +103,14 @@ function CreditReport() {
     queryFn: () => api.get(`/api/credit-compliance/${orgId}`),
   })
 
+  // Pending member-logged credits awaiting officer verification. Used only to
+  // decide whether to show the "Pending Approvals" section — the list itself
+  // (verify/reject + its own optimistic state) lives in PendingCreditsList.
+  const { data: pendingCount = 0 } = useQuery({
+    ...listPendingCreditEntriesOptions({ path: { organizationId: orgId }, headers: { 'x-org-id': orgId } }),
+    select: (d: any) => d?.entries?.length ?? 0,
+  })
+
   const summary = data?.summary ?? { compliant: 0, atRisk: 0, nonCompliant: 0, total: 0, requiredCredits: 0 }
   const allMembers: any[] = data?.data ?? []
   const members = filter === 'all' ? allMembers : allMembers.filter((m: any) => m.compliance_status === filter)
@@ -160,6 +170,16 @@ function CreditReport() {
       }
     >
       <div className="space-y-6">
+      {/* Pending Approvals — member self-logged credits awaiting officer review.
+          Mirrors the dues payment-proof queue. Only shown when there are
+          pending entries (the list manages its own verify/reject + refresh). */}
+      {pendingCount > 0 && (
+        <GlassCard className="p-5">
+          <h2 className="text-h4 mb-3">Pending Approvals</h2>
+          <PendingCreditsList orgId={orgId} orgSlug={orgSlug} />
+        </GlassCard>
+      )}
+
       {/* Summary cards */}
       <StaggerGrid className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         <StaggerItem>

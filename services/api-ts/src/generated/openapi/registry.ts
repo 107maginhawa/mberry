@@ -321,7 +321,10 @@ import { listMemberCreditsForPeer } from '../../handlers/member/credits/listMemb
 import { adjustCreditEntry } from '../../handlers/member/credits/adjustCreditEntry';
 import { awardManualCredit } from '../../handlers/member/credits/awardManualCredit';
 import { voidCreditEntry } from '../../handlers/member/credits/voidCreditEntry';
+import { rejectCreditEntry } from '../../handlers/member/credits/rejectCreditEntry';
+import { verifyCreditEntry } from '../../handlers/member/credits/verifyCreditEntry';
 import { getCreditCompliance } from '../../handlers/member/credits/getCreditCompliance';
+import { listPendingCreditEntries } from '../../handlers/member/credits/listPendingCreditEntries';
 import { listOfficerTermsSummary } from '../../handlers/member/credits/listOfficerTermsSummary';
 import { createCredentialTemplate } from '../../handlers/member/credentials/createCredentialTemplate';
 import { listCredentialTemplates } from '../../handlers/member/credentials/listCredentialTemplates';
@@ -825,7 +828,10 @@ export const registry = {
   adjustCreditEntry,
   awardManualCredit,
   voidCreditEntry,
+  rejectCreditEntry,
+  verifyCreditEntry,
   getCreditCompliance,
+  listPendingCreditEntries,
   listOfficerTermsSummary,
 
   // Member/credentials handlers

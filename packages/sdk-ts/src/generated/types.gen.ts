@@ -14029,6 +14029,18 @@ export type CreditHistoryEntry = {
 };
 
 /**
+ * Response from verifying or rejecting a member-submitted credit entry
+ */
+export type CreditVerificationResponse = {
+    /**
+     * The updated credit entry
+     */
+    data: {
+        [key: string]: unknown;
+    };
+};
+
+/**
  * Monetary amount in cents to avoid floating point precision issues
  */
 export type CurrencyAmount = number;
@@ -24964,6 +24976,66 @@ export type PaymentTokenValidation = {
 };
 
 /**
+ * Response wrapping the list of pending credit entries awaiting officer review
+ */
+export type PendingCreditEntriesResponse = {
+    /**
+     * Pending credit entries awaiting verification
+     */
+    entries: Array<PendingCreditEntry>;
+};
+
+/**
+ * A member self-logged CPD credit entry awaiting officer verification
+ */
+export type PendingCreditEntry = {
+    /**
+     * Credit entry ID
+     */
+    id: string;
+    /**
+     * Person who logged the credit
+     */
+    personId: string;
+    /**
+     * Full name of the member who logged the credit
+     */
+    memberName: string;
+    /**
+     * Name of the activity
+     */
+    activityName: string;
+    /**
+     * CPD activity provider name
+     */
+    provider?: string;
+    /**
+     * Date the activity was completed
+     */
+    activityDate: Date;
+    /**
+     * Number of credits claimed
+     */
+    creditAmount: number;
+    /**
+     * Credit category (General, Major, Self-Directed)
+     */
+    category?: string;
+    /**
+     * Supporting document ID
+     */
+    supportingDocumentId?: string;
+    /**
+     * Verification status (pending while awaiting review)
+     */
+    verificationStatus: string;
+    /**
+     * When the credit entry was created
+     */
+    createdAt: Date;
+};
+
+/**
  * Person demographic and contact information
  */
 export type Person = {
@@ -27506,6 +27578,16 @@ export type RefundResponse = {
  * Status of an individual event registration
  */
 export type RegistrationStatus = 'registered' | 'waitlisted' | 'confirmed' | 'checked_in' | 'cancelled' | 'no_show' | 'refunded';
+
+/**
+ * Request for an officer to reject a member-submitted credit entry
+ */
+export type RejectCreditEntryRequest = {
+    /**
+     * Reason for rejection — shown to the member
+     */
+    reason?: string;
+};
 
 /**
  * Request for an officer to reject a submitted payment proof
@@ -40536,6 +40618,92 @@ export type VoidCreditEntryResponses = {
 
 export type VoidCreditEntryResponse = VoidCreditEntryResponses[keyof VoidCreditEntryResponses];
 
+export type RejectCreditEntryData = {
+    body: RejectCreditEntryRequest;
+    path: {
+        creditEntryId: string;
+    };
+    query?: never;
+    url: '/association/member/credits/{creditEntryId}/reject';
+};
+
+export type RejectCreditEntryErrors = {
+    /**
+     * Validation error response
+     */
+    400: ValidationError;
+    /**
+     * Unauthorized access response
+     */
+    401: AuthenticationError;
+    /**
+     * Forbidden access response
+     */
+    403: AuthorizationError;
+    /**
+     * Resource not found response
+     */
+    404: NotFoundError;
+    /**
+     * Conflict response
+     */
+    409: ConflictError;
+};
+
+export type RejectCreditEntryError = RejectCreditEntryErrors[keyof RejectCreditEntryErrors];
+
+export type RejectCreditEntryResponses = {
+    /**
+     * Success response with data
+     */
+    200: CreditVerificationResponse;
+};
+
+export type RejectCreditEntryResponse = RejectCreditEntryResponses[keyof RejectCreditEntryResponses];
+
+export type VerifyCreditEntryData = {
+    body?: never;
+    path: {
+        creditEntryId: string;
+    };
+    query?: never;
+    url: '/association/member/credits/{creditEntryId}/verify';
+};
+
+export type VerifyCreditEntryErrors = {
+    /**
+     * Validation error response
+     */
+    400: ValidationError;
+    /**
+     * Unauthorized access response
+     */
+    401: AuthenticationError;
+    /**
+     * Forbidden access response
+     */
+    403: AuthorizationError;
+    /**
+     * Resource not found response
+     */
+    404: NotFoundError;
+    /**
+     * Conflict response
+     */
+    409: ConflictError;
+};
+
+export type VerifyCreditEntryError = VerifyCreditEntryErrors[keyof VerifyCreditEntryErrors];
+
+export type VerifyCreditEntryResponses = {
+    /**
+     * Success response with data
+     */
+    200: CreditVerificationResponse;
+};
+
+export type VerifyCreditEntryResponse = VerifyCreditEntryResponses[keyof VerifyCreditEntryResponses];
+
 export type ListDirectoryProfilesData = {
     body?: never;
     path?: never;
@@ -49698,6 +49866,37 @@ export type GetCreditComplianceResponses = {
 };
 
 export type GetCreditComplianceResponse = GetCreditComplianceResponses[keyof GetCreditComplianceResponses];
+
+export type ListPendingCreditEntriesData = {
+    body?: never;
+    path: {
+        organizationId: string;
+    };
+    query?: never;
+    url: '/credit-compliance/{organizationId}/pending';
+};
+
+export type ListPendingCreditEntriesErrors = {
+    /**
+     * Unauthorized access response
+     */
+    401: AuthenticationError;
+    /**
+     * Forbidden access response
+     */
+    403: AuthorizationError;
+};
+
+export type ListPendingCreditEntriesError = ListPendingCreditEntriesErrors[keyof ListPendingCreditEntriesErrors];
+
+export type ListPendingCreditEntriesResponses = {
+    /**
+     * Success response with data
+     */
+    200: PendingCreditEntriesResponse;
+};
+
+export type ListPendingCreditEntriesResponse = ListPendingCreditEntriesResponses[keyof ListPendingCreditEntriesResponses];
 
 export type GetDuesDashboardData = {
     body?: never;

@@ -293,6 +293,10 @@ namespace MonobaseAPI {
   interface CreditComplianceManagement extends Association.Member.Credits.CreditComplianceManagement {}
 
   @tag("Member/Credits")
+  @route("/credit-compliance")
+  interface AssocPendingCreditManagement extends Association.Operations.Training.PendingCreditManagement {}
+
+  @tag("Member/Credits")
   @route("/officer-terms")
   interface OfficerTermsManagement extends Association.Member.Credits.OfficerTermsManagement {}
 
@@ -575,6 +579,14 @@ namespace MonobaseAPI {
   @tag("Member/Credits")
   @route("/association/member/credits/void-event")
   interface AssocEventCreditVoidManagement extends Association.Operations.Training.EventCreditVoidManagement {}
+
+  // =========================================================================
+  // Association Domain — Credit Verification (officer review of self-logged credits)
+  // =========================================================================
+
+  @tag("Member/Credits")
+  @route("/association/member/credits")
+  interface AssocCreditVerificationManagement extends Association.Operations.Training.CreditVerificationManagement {}
 
   // =========================================================================
   // Association Domain — My Credits (member-facing)

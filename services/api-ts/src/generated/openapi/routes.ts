@@ -1323,6 +1323,23 @@ export function registerRoutes(app: Hono<{ Variables: Variables }>) {
     registry.voidCreditEntry as unknown as Handler
   );
 
+  // rejectCreditEntry
+  app.post('/association/member/credits/:creditEntryId/reject',
+    authMiddleware({ roles: ["association:admin", "association:staff"] }),
+    createPerRouteAuditMiddleware({ action: "deny", resourceType: "credit-entry" }),
+    zValidator('param', validators.RejectCreditEntryParams, validationErrorHandler),
+    zValidator('json', validators.RejectCreditEntryBody, validationErrorHandler),
+    registry.rejectCreditEntry as unknown as Handler
+  );
+
+  // verifyCreditEntry
+  app.post('/association/member/credits/:creditEntryId/verify',
+    authMiddleware({ roles: ["association:admin", "association:staff"] }),
+    createPerRouteAuditMiddleware({ action: "approve", resourceType: "credit-entry" }),
+    zValidator('param', validators.VerifyCreditEntryParams, validationErrorHandler),
+    registry.verifyCreditEntry as unknown as Handler
+  );
+
   // createDirectoryProfile
   app.post('/association/member/directory/profiles',
     authMiddleware({ roles: ["association:member:owner", "association:admin"] }),
@@ -3168,6 +3185,13 @@ export function registerRoutes(app: Hono<{ Variables: Variables }>) {
     authMiddleware({ roles: ["association:admin"] }),
     zValidator('param', validators.GetCreditComplianceParams, validationErrorHandler),
     registry.getCreditCompliance as unknown as Handler
+  );
+
+  // listPendingCreditEntries
+  app.get('/credit-compliance/:organizationId/pending',
+    authMiddleware({ roles: ["association:admin", "association:staff"] }),
+    zValidator('param', validators.ListPendingCreditEntriesParams, validationErrorHandler),
+    registry.listPendingCreditEntries as unknown as Handler
   );
 
   // getDuesDashboard
