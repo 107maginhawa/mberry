@@ -300,9 +300,11 @@ describe('ElectionsRepository.getVoterCount', () => {
 
 describe('ElectionsRepository.listNominees', () => {
   test('returns nominees for an election', async () => {
+    // ISSUE-031: listNominees now selects { nominee, firstName, lastName } via a
+    // leftJoin on persons and maps r.nominee + personName. Mock the joined row shape.
     const nominees = [
-      { id: 'nom-1', electionId: 'election-1', positionId: 'pos-1', personId: 'person-1', status: 'nominated' },
-      { id: 'nom-2', electionId: 'election-1', positionId: 'pos-1', personId: 'person-2', status: 'accepted' },
+      { nominee: { id: 'nom-1', electionId: 'election-1', positionId: 'pos-1', personId: 'person-1', status: 'nominated' }, firstName: 'Ada', lastName: 'Lovelace' },
+      { nominee: { id: 'nom-2', electionId: 'election-1', positionId: 'pos-1', personId: 'person-2', status: 'accepted' }, firstName: 'Alan', lastName: 'Turing' },
     ];
     const db = makeDb({ selectRows: nominees });
     const repo = new ElectionsRepository(db as any);
@@ -310,6 +312,7 @@ describe('ElectionsRepository.listNominees', () => {
     const result = await repo.listNominees('election-1');
     expect(result).toHaveLength(2);
     expect(result[0].status).toBe('nominated');
+    expect(result[0].personName).toBe('Ada Lovelace');
   });
 
   test('returns empty array when no nominees', async () => {
