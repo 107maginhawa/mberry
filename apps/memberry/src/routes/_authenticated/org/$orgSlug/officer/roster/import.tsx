@@ -109,7 +109,7 @@ function RosterImportPage() {
   const [importing, setImporting] = useState(false)
   const [result, setResult] = useState<{ imported: number; skipped: number; failed: number; errors: Array<{ index: number; error: string }> } | null>(null)
 
-  const tiersQuery = useQuery(listMembershipTiersOptions({ query: { limit: 200 } }))
+  const tiersQuery = useQuery(listMembershipTiersOptions({ query: { limit: 100 } }))
   const tiers = tiersQuery.data?.data ?? []
   const [selectedTierId, setSelectedTierId] = useState('')
 
