@@ -87,9 +87,12 @@ test('Settings > Categories page renders', async ({ page }) => {
   const addBtn = page.getByRole('button', { name: /add category/i })
   await expect(addBtn).toBeVisible({ timeout: 10000 })
 
-  const hasTable = await page.locator('table').isVisible().catch(() => false)
-  const hasEmpty = await page.getByText(/no categories/i).first().isVisible().catch(() => false)
-  expect(hasTable || hasEmpty).toBeTruthy()
+  // Wait for the editor to settle — either the categories table or the empty
+  // state. Instant isVisible() checks race the data load and flake under CI
+  // shard load (the query is still pending at the moment of the check).
+  await expect(
+    page.locator('table').or(page.getByText(/no categories/i).first()),
+  ).toBeVisible({ timeout: 10000 })
 })
 
 test('Settings > Categories Add dialog opens', async ({ page }) => {

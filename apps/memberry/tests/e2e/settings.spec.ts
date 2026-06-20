@@ -69,11 +69,16 @@ test.describe('Settings page (/my/settings)', () => {
     const req = await requestPromise
     // Validate the wire payload — the toggle MUST send the right category
     // and an explicit boolean (real-UI contract, not a smoke check).
-    // The body shape is { category: <key>, pushEnabled?: bool, emailEnabled?: bool }.
-    const body = req.postDataJSON() as { category?: string; pushEnabled?: boolean; emailEnabled?: boolean }
-    expect(body.category, 'PATCH payload carries a notification category').toBeTruthy()
-    const hasPush = typeof body.pushEnabled === 'boolean'
-    const hasEmail = typeof body.emailEnabled === 'boolean'
+    // The body shape is { preferences: [{ category: <key>, pushEnabled?: bool,
+    // emailEnabled?: bool }] } — the handler reads body.preferences[0] (see
+    // updateMyNotificationPreferences.ts).
+    const body = req.postDataJSON() as {
+      preferences?: { category?: string; pushEnabled?: boolean; emailEnabled?: boolean }[]
+    }
+    const pref = body.preferences?.[0]
+    expect(pref?.category, 'PATCH payload carries a notification category').toBeTruthy()
+    const hasPush = typeof pref?.pushEnabled === 'boolean'
+    const hasEmail = typeof pref?.emailEnabled === 'boolean'
     expect(hasPush || hasEmail, 'PATCH payload carries push or email boolean').toBe(true)
     // expected was computed but we deliberately do NOT assert UI flip
     // here: optimistic toggle reverts when the handler 400s on accounts
