@@ -126,6 +126,9 @@ HTTP 200
 
 
 # ── 8. importRosterMembers → 200 ──────────────────────────────────────
+# Match-or-create: identity fields per row (no personId/tierId in the row);
+# tierId is a top-level batch field. Unique {{suffix}} email → fresh person
+# created + enrolled each run, so imported == 1, failed == 0.
 POST {{api}}/association/member/roster/import
 Origin: {{origin}}
 x-csrf-token: {{csrf_token}}
@@ -134,14 +137,17 @@ x-org-id: {{org_id}}
 Content-Type: application/json
 {
   "organizationId": "{{org_id}}",
+  "tierId": "{{tier_id}}",
   "members": [
     {
-      "personId": "{{import_person_id}}",
-      "tierId": "{{tier_id}}",
-      "memberNumber": "IMP-{{suffix}}",
-      "startDate": "2026-01-01",
-      "duesExpiryDate": "2026-12-31"
+      "firstName": "Imported",
+      "lastName": "Member {{suffix}}",
+      "email": "roster-import-{{suffix}}@example.org",
+      "memberNumber": "IMP-{{suffix}}"
     }
   ]
 }
 HTTP 200
+[Asserts]
+jsonpath "$.imported" == 1
+jsonpath "$.failed" == 0
