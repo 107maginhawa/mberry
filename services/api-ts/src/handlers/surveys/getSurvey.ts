@@ -3,12 +3,12 @@ import type { GetSurveyParams } from '@/generated/openapi/validators';
 import type { DatabaseInstance } from '@/core/database';
 import {
   UnauthorizedError,
-  ForbiddenError,
   NotFoundError,
 } from '@/core/errors';
-import { SurveyRepository } from './repos/survey.repo';
+import { SurveyRepository, SurveyResponseRepository } from './repos/survey.repo';
 import { OfficerTermRepository } from '../association:member/repos/governance.repo';
 import { hasRole } from '@/utils/auth';
+import { aggregatePollResults } from './utils/poll-results';
 
 /**
  * getSurvey
@@ -16,13 +16,10 @@ import { hasRole } from '@/utils/auth';
  * Path: GET /surveys/:survey
  * OperationId: getSurvey
  *
- * Returns a single survey by ID, scoped to the current organization.
- *
- * Officer/admin only (M18 read-auth, FIX-001): survey detail exposes draft
- * questions and internal settings (incl. targetAudience). Members must not
- * read the officer-facing survey detail; their access is the scoped
- * respond/assigned view. Matches the "any active officer term" gate used by
- * sibling handlers (publishSurvey, listSurveyResponses).
+ * Officers/admins: full survey detail (any status).
+ * Members: active surveys only, sanitized (no targetAudience / internal fields).
+ *   - Draft → NotFoundError (no existence leak).
+ *   - Poll type → includes aggregated pollResults.
  */
 export async function getSurvey(
   ctx: ValidatedContext<never, never, GetSurveyParams>
@@ -36,24 +33,46 @@ export async function getSurvey(
   const db = ctx.get('database') as DatabaseInstance;
   const logger = ctx.get('logger');
   const organizationId = ctx.get('organizationId') as string;
-
-  // Officer/admin gate
-  if (!hasRole(session.user, 'admin')) {
-    const officerRepo = new OfficerTermRepository(db, logger);
-    const terms = await officerRepo.findActiveByPersonAndOrg(userId, organizationId);
-    if (terms.length === 0) {
-      throw new ForbiddenError('Only officers or admins can view survey details');
-    }
-  }
-
   const surveyId = ctx.req.param('survey')!;
 
   const repo = new SurveyRepository(db, logger);
   const survey = await repo.findById(surveyId);
-
   if (!survey || survey.organizationId !== organizationId) {
     throw new NotFoundError('Survey not found');
   }
 
-  return ctx.json(survey, 200);
+  // Officers/admins get the full officer-facing detail (any status).
+  let isPrivileged = hasRole(session.user, 'admin');
+  if (!isPrivileged) {
+    const officerRepo = new OfficerTermRepository(db, logger);
+    const terms = await officerRepo.findActiveByPersonAndOrg(userId, organizationId);
+    isPrivileged = terms.length > 0;
+  }
+  if (isPrivileged) {
+    return ctx.json(survey, 200);
+  }
+
+  // Member read: only active surveys, sanitized (no drafts, no targetAudience/internals).
+  if (survey.status !== 'active') {
+    throw new NotFoundError('Survey not found');
+  }
+  const s = (survey.settings ?? {}) as { deadline?: string; anonymous?: boolean; allowReedit?: boolean };
+  const sanitized = {
+    id: survey.id,
+    organizationId: survey.organizationId,
+    title: survey.title,
+    description: survey.description,
+    status: survey.status,
+    surveyType: survey.surveyType,
+    questions: survey.questions,
+    settings: { deadline: s.deadline, anonymous: s.anonymous, allowReedit: s.allowReedit },
+  };
+
+  if (survey.surveyType === 'poll') {
+    const responseRepo = new SurveyResponseRepository(db, logger);
+    const all = await responseRepo.findAllBySurveyId(surveyId);
+    return ctx.json({ ...sanitized, pollResults: aggregatePollResults(survey, all) }, 200);
+  }
+
+  return ctx.json(sanitized, 200);
 }

@@ -12,7 +12,7 @@
 
 import { describe, test, expect, afterEach } from 'bun:test';
 import { makeCtx, stubRepo, restoreRepo } from '@/test-utils/make-ctx';
-import { SurveyRepository } from './repos/survey.repo';
+import { SurveyRepository, SurveyResponseRepository } from './repos/survey.repo';
 import { OfficerTermRepository } from '../association:member/repos/governance.repo';
 import { getSurvey } from './getSurvey';
 
@@ -46,6 +46,7 @@ describe('getSurvey', () => {
   afterEach(() => {
     restoreRepo(SurveyRepository);
     restoreRepo(OfficerTermRepository);
+    restoreRepo(SurveyResponseRepository);
   });
 
   test('throws UnauthorizedError without session', async () => {
@@ -79,33 +80,37 @@ describe('getSurvey', () => {
     await expect(getSurvey(ctx)).rejects.toThrow('Survey not found');
   });
 
-  // FIX-001 — RBAC read-auth gate (RED before fix)
-  test('FIX-001: throws ForbiddenError for non-officer member reading a draft', async () => {
-    stubRepo(OfficerTermRepository, {
-      findActiveByPersonAndOrg: async () => [],
-    });
+  // Member read of an ACTIVE survey is now allowed (aligns handler to its `user` spec)
+  test('member reads an active survey — 200 sanitized (no targetAudience)', async () => {
+    stubRepo(OfficerTermRepository, { findActiveByPersonAndOrg: async () => [] });
     stubRepo(SurveyRepository, {
-      findById: async () => draftSurvey,
+      findById: async () => ({ ...fakeSurvey, settings: { deadline: '2099-01-01', anonymous: false, allowReedit: true, targetAudience: { tiers: ['gold'] } } }),
     });
-    const ctx = makeCtx({
-      user: { id: 'member-1', role: 'user' },
-      _params: { survey: 'survey-draft' },
-    });
-    await expect(getSurvey(ctx)).rejects.toThrow('Only officers or admins can view survey details');
+    const ctx = makeCtx({ user: { id: 'member-1', role: 'user' }, _params: { survey: 'survey-1' } });
+    const res = await getSurvey(ctx);
+    expect(res.status).toBe(200);
+    expect((res as any).body.id).toBe('survey-1');
+    expect((res as any).body.settings.targetAudience).toBeUndefined();
+    expect((res as any).body.settings.deadline).toBe('2099-01-01');
   });
 
-  test('FIX-001: throws ForbiddenError for non-officer member reading any survey', async () => {
-    stubRepo(OfficerTermRepository, {
-      findActiveByPersonAndOrg: async () => [],
-    });
+  test('member reading a draft survey — 404 (no existence leak)', async () => {
+    stubRepo(OfficerTermRepository, { findActiveByPersonAndOrg: async () => [] });
+    stubRepo(SurveyRepository, { findById: async () => draftSurvey });
+    const ctx = makeCtx({ user: { id: 'member-1', role: 'user' }, _params: { survey: 'survey-draft' } });
+    await expect(getSurvey(ctx)).rejects.toThrow('Survey not found');
+  });
+
+  test('member reads an active poll — includes pollResults', async () => {
+    stubRepo(OfficerTermRepository, { findActiveByPersonAndOrg: async () => [] });
     stubRepo(SurveyRepository, {
-      findById: async () => fakeSurvey,
+      findById: async () => ({ ...fakeSurvey, surveyType: 'poll', questions: [{ id: 'q1', type: 'single_choice', text: 'Pick', options: ['A', 'B'], required: true, order: 1 }] }),
     });
-    const ctx = makeCtx({
-      user: { id: 'member-1', role: 'user' },
-      _params: { survey: 'survey-1' },
-    });
-    await expect(getSurvey(ctx)).rejects.toThrow('Only officers or admins can view survey details');
+    stubRepo(SurveyResponseRepository, { findAllBySurveyId: async () => [{ answers: [{ questionId: 'q1', value: 'A' }] }] });
+    const ctx = makeCtx({ user: { id: 'member-1', role: 'user' }, _params: { survey: 'survey-1' } });
+    const res = await getSurvey(ctx);
+    expect(res.status).toBe(200);
+    expect((res as any).body.pollResults[0]).toEqual({ questionId: 'q1', counts: { A: 1 }, total: 1 });
   });
 
   test('FIX-001: officer (active term) can read survey detail — 200', async () => {
