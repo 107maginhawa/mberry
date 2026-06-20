@@ -96,11 +96,12 @@ export function ComposeForm({ orgId, existingAnnouncement }: ComposeFormProps) {
       if (announcementId) {
         await api.patch(`/api/communications/announcements/${announcementId}`, data)
       } else {
-        const created = await api.post<{ data: { id: string } }>(
+        // ISSUE-029: createAnnouncement returns the flat resource, not { data }.
+        const created = await api.post<{ id: string }>(
           `/api/communications/announcements/${orgId}`,
           data,
         )
-        announcementId = created?.data?.id
+        announcementId = created?.id
       }
 
       // 2) Transition the persisted draft to its target state.

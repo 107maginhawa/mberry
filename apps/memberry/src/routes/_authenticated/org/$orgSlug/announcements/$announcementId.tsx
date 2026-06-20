@@ -25,12 +25,13 @@ function MemberAnnouncementPage() {
   const { data, isLoading, error } = useQuery({
     queryKey: ['announcement', announcementId],
     queryFn: () =>
-      api.get<{ data: any }>(
+      // ISSUE-029: getAnnouncement returns the flat resource, not { data }.
+      api.get<any>(
         `/api/communications/announcements/detail/${announcementId}`
       ),
   })
 
-  const ann = data?.data
+  const ann = data
 
   if (isLoading) {
     return (
