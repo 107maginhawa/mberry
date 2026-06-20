@@ -151,7 +151,35 @@ locally on `design/ui-ux-audit`. LIVE /browse verify before any "done" claim.
   - FE /browse skipped: `my/bookings/$bookingId` needs a slot→service→booking→invoice fixture chain
     (0 bookings seeded; booking requires `slot_id`) — disproportionate; the pay→checkout→redirect UI
     pattern is already /browse-proven on dues + event. Backend path proven via the authed driver.
-- [ ] **T5 — Verify driver + ledger**: one runnable driver script; finalize ledger; commit.
+- [x] **T5 — Verify driver + ledger**: DONE. One runnable driver `services/api-ts/scripts/stripe-happy-path.ts`
+  (`dues` | `event` | `booking` | `all`, `--keep`), self-contained + idempotent + cleans up. Ledger finalized.
+
+## Outcome (2026-06-20)
+
+**All 3 online-payment happy-paths now work end-to-end + are live-verified** against local stripe-mock
+(:12111) with locally-signed webhooks. One driver proves them: `cd services/api-ts && bun scripts/stripe-happy-path.ts all` → **41/41**.
+
+- **Dues** `/pay/$token`: was purely infra-gated (no dev Stripe keys). Fixed env. /browse: full member UI.
+- **Event** register-and-pay: needed real code — `paid_at` column (mig 0077) + webhook settlement branch +
+  **root-fix** (event metadata lacked `orgId` → real webhook dead-lettered at intake). /browse: Register & Pay → Checkout.
+- **Booking** invoice-pay (manual capture): fixture-gated + **root-fixed a real prod bug** (billing webhook
+  was CSRF-gated → unreachable by real Stripe). Backend verified; FE browse skipped (fixture chain disproportionate).
+
+**Real bugs found + fixed (would have broken production):**
+1. Event online payment dead-lettered at webhook intake (missing `orgId` in Stripe metadata). — `d0884454`
+2. `/billing/webhooks/stripe` rejected real Stripe (CSRF gate). — `c6027536`
+
+**Caveats / deferred (not blockers):**
+- stripe-mock `paymentIntents.capture` returns canned non-`succeeded` without throwing; `captureInvoicePayment`
+  treats no-throw as success. Proves our handler; true capture needs real Stripe test keys.
+- Event FE has no "Paid" badge (paid_at internal-only); registration still confirms optimistically pre-payment.
+- Officer `sendPaymentLink` mint is gated (officer-term/2FA) in dev → driver used a direct token-insert fallback.
+- `.env` Stripe keys are dummy + gitignored (local only). Prod needs real keys.
+- Pre-existing (not mine): `elections.repo.test.ts listNominees` fails (mock-pollution class); touched-area
+  tests 20/20 green; full API typecheck green.
+
+**Commits (local on `design/ui-ux-audit`, not pushed):** `06767156` (dues+driver) · `d0884454` (event) ·
+`c6027536` (booking+CSRF fix) · this ledger.
 
 ## Progress ledger
 
@@ -162,4 +190,5 @@ locally on `design/ui-ux-audit`. LIVE /browse verify before any "done" claim.
 | 2026-06-20 | **T1 setup DONE** | stripe-mock up :12111; 3 Stripe env keys added to api-ts/.env; API restarted (auth/ok 200); 2 webhook routes + dues_gateway_config(connected) + ground-truth ids confirmed | — |
 | 2026-06-20 | **T2 dues DONE** (implementer+reviewer driver, self-run 17/17, /browse) | dues `/pay/$token` end-to-end live-verified: settle + invoice paid + membership extended + member UI render + Pay→checkout 200. stripe-mock key fix: rejects underscored suffix → `sk_test_memberrydevdummy`. | 06767156 |
 | 2026-06-20 | **T3 event DONE** (implementer+reviewer, self-run 27/27, /browse) | event settlement built: paid_at col + migration 0077 + webhook branch + root-fix orgId metadata (real webhook would've dead-lettered). Register-and-pay 201 → Stripe Checkout. | d0884454 |
-| 2026-06-20 | **T4 booking DONE** (implementer+reviewer, self-run 14/14, all 41/41) | manual-capture pay→requires_capture→paid verified; **fixed real prod gap** (billing webhook CSRF-gated → unreachable by real Stripe); fixture-only otherwise. FE browse skipped (booking fixture chain disproportionate). | (pending) |
+| 2026-06-20 | **T4 booking DONE** (implementer+reviewer, self-run 14/14, all 41/41) | manual-capture pay→requires_capture→paid verified; **fixed real prod gap** (billing webhook CSRF-gated → unreachable by real Stripe); fixture-only otherwise. FE browse skipped (booking fixture chain disproportionate). | c6027536 |
+| 2026-06-20 | **T5 DONE** | driver finalized (all 41/41); touched-area tests 20/20; DB clean at baseline; ledger closed | (this) |
