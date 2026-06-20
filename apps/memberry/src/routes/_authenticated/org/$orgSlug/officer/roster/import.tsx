@@ -2,9 +2,12 @@ import { useState, useCallback } from 'react'
 import { createFileRoute, Link } from '@tanstack/react-router'
 import { useOrg } from '@/hooks/use-org'
 import { Button, Input, NavIcon } from '@monobase/ui'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@monobase/ui'
+import { Label } from '@monobase/ui'
 import { toast } from 'sonner'
 import { Upload, FileText, Check, AlertTriangle, Loader2 } from 'lucide-react'
-import { importRosterMembersMutation } from '@monobase/sdk-ts/generated/react-query'
+import { importRosterMembersMutation, listMembershipTiersOptions } from '@monobase/sdk-ts/generated/react-query'
+import { useQuery } from '@tanstack/react-query'
 import { ApiError } from '@/lib/api'
 import { PageShell } from '@/components/patterns/page-shell'
 import { GlassCard } from '@/components/motion/glass-card'
@@ -104,7 +107,11 @@ function RosterImportPage() {
   const [file, setFile] = useState<File | null>(null)
   const [parsed, setParsed] = useState<{ headers: string[]; rows: ParsedRow[] } | null>(null)
   const [importing, setImporting] = useState(false)
-  const [result, setResult] = useState<{ imported: number } | null>(null)
+  const [result, setResult] = useState<{ imported: number; skipped: number; failed: number; errors: Array<{ index: number; error: string }> } | null>(null)
+
+  const tiersQuery = useQuery(listMembershipTiersOptions({ query: { limit: 200 } }))
+  const tiers = tiersQuery.data?.data ?? []
+  const [selectedTierId, setSelectedTierId] = useState('')
 
   const handleFile = useCallback(async (f: File) => {
     setFile(f)
@@ -137,34 +144,59 @@ function RosterImportPage() {
 
   async function handleImport() {
     if (!parsed || parsed.rows.length === 0) return
+    if (!selectedTierId) {
+      toast.error('Select a membership tier first')
+      return
+    }
     setImporting(true)
 
     try {
-      // Map parsed rows to API shape
-      // BR-22: matching by email or license number happens server-side
+      // Send real identity fields; the server matches an existing person by
+      // email/license or creates one, then enrols them in the selected tier.
       const members = parsed.rows
         .filter((r) => r.email || r.licenseNumber)
         .map((r) => ({
-          personId: '', // server will match or create
-          tierId: 'default',
-          memberNumber: r.memberNumber || r.licenseNumber || undefined,
+          firstName: r.firstName || undefined,
+          lastName: r.lastName || undefined,
+          email: r.email || undefined,
+          licenseNumber: r.licenseNumber || undefined,
+          memberNumber: r.memberNumber || undefined,
         }))
 
-      const data = await (importMutOpts.mutationFn as (...args: unknown[]) => Promise<{ imported?: number; data?: { imported?: number } }>)({
-        body: { organizationId: orgId, members },
+      const data = await (importMutOpts.mutationFn as (...args: unknown[]) => Promise<any>)({
+        body: { organizationId: orgId, tierId: selectedTierId, members },
       })
 
-      setResult({ imported: data?.imported ?? data?.data?.imported ?? 0 })
-      toast.success(`Imported ${data?.imported ?? data?.data?.imported ?? 0} members`)
+      const r = data?.data ?? data ?? {}
+      setResult({
+        imported: r.imported ?? 0,
+        skipped: r.skipped ?? 0,
+        failed: r.failed ?? 0,
+        errors: r.errors ?? [],
+      })
+      toast.success(`Imported ${r.imported ?? 0} members${r.skipped ? `, skipped ${r.skipped}` : ''}${r.failed ? `, ${r.failed} failed` : ''}`)
     } catch (err: unknown) {
       interface ApiErrorBody { message?: string; error?: string }
       const msg = err instanceof ApiError
-        ? ((err.body as ApiErrorBody | null | undefined)?.message ?? 'Import failed')
+        ? ((err.body as ApiErrorBody | null | undefined)?.message ?? (err.body as ApiErrorBody | null | undefined)?.error ?? 'Import failed')
         : (err instanceof Error ? err.message : 'Import failed')
       toast.error(msg)
     } finally {
       setImporting(false)
     }
+  }
+
+  function downloadTemplate() {
+    const csv = [
+      'First Name,Last Name,Email,License Number,Member Number',
+      'Juan,Dela Cruz,juan@example.com,PRC-123456,M-0001',
+    ].join('\n')
+    const url = URL.createObjectURL(new Blob([csv], { type: 'text/csv' }))
+    const a = document.createElement('a')
+    a.href = url
+    a.download = 'roster-template.csv'
+    a.click()
+    URL.revokeObjectURL(url)
   }
 
   return (
@@ -180,10 +212,22 @@ function RosterImportPage() {
       <div className="space-y-6">
       {/* Result banner */}
       {result && (
-        <div className="flex items-center gap-3 p-4 rounded-md bg-[var(--color-success-bg)] border border-[var(--color-success)]/20">          <NavIcon icon={Check} className="text-[var(--color-success)]" />
-          <p className="text-sm text-[var(--color-success)]">
-            Successfully imported {result.imported} members
-          </p>
+        <div className="space-y-3">
+          <div className="flex items-center gap-3 p-4 rounded-md bg-[var(--color-success-bg)] border border-[var(--color-success)]/20">
+            <NavIcon icon={Check} className="text-[var(--color-success)]" />
+            <p className="text-sm text-[var(--color-success)]">
+              Imported {result.imported}
+              {result.skipped > 0 ? ` · skipped ${result.skipped} (already members)` : ''}
+              {result.failed > 0 ? ` · ${result.failed} failed` : ''}
+            </p>
+          </div>
+          {result.errors.length > 0 && (
+            <div className="rounded-md border border-[var(--color-border-light)] p-3 text-xs space-y-1">
+              {result.errors.slice(0, 50).map((e) => (
+                <p key={e.index} className="text-[var(--color-muted)]">Row {e.index + 1}: {e.error}</p>
+              ))}
+            </div>
+          )}
         </div>
       )}
 
@@ -211,12 +255,40 @@ function RosterImportPage() {
               onChange={handleFileInput}
             />
           </div>
+          <div className="px-4 pb-4 pt-2 text-center">
+            <Button variant="link" size="sm" onClick={downloadTemplate}>
+              Download template CSV
+            </Button>
+          </div>
         </GlassCard>
       )}
 
       {/* Preview table */}
       {parsed && !result && (
         <div className="space-y-4">
+          {tiers.length === 0 ? (
+            <div className="flex items-start gap-2 p-3 rounded-sm bg-[var(--color-warning-bg)] border border-[var(--color-warning)]/20">
+              <AlertTriangle size={14} className="text-[var(--color-warning)] shrink-0 mt-0.5" />
+              <p className="text-xs text-[var(--color-warning)]">
+                No membership tiers exist yet. <a href={`/org/${orgSlug}/officer/tiers`} className="underline">Create a tier</a> before importing.
+              </p>
+            </div>
+          ) : (
+            <div className="space-y-1.5 max-w-sm">
+              <Label htmlFor="import-tier">Membership Tier <span className="text-[var(--color-error)]">*</span></Label>
+              <Select value={selectedTierId} onValueChange={setSelectedTierId}>
+                <SelectTrigger id="import-tier" className="w-full">
+                  <SelectValue placeholder="Select a tier for all imported members..." />
+                </SelectTrigger>
+                <SelectContent>
+                  {tiers.map((t: any) => (
+                    <SelectItem key={t.id} value={t.id}>{t.name}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          )}
+
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
               <FileText size={16} className="text-[var(--color-primary)]" />
@@ -229,7 +301,7 @@ function RosterImportPage() {
               <Button variant="outline" size="sm" onClick={() => { setParsed(null); setFile(null) }}>
                 Change File
               </Button>
-              <Button size="sm" onClick={handleImport} disabled={importing}>
+              <Button size="sm" onClick={handleImport} disabled={importing || !selectedTierId || tiers.length === 0}>
                 {importing ? (
                   <>
                     <Loader2 size={14} className="mr-1.5 animate-spin" />
