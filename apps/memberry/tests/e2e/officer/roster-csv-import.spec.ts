@@ -59,6 +59,12 @@ test.describe('T5 — Officer CSV roster import succeeds end-to-end', () => {
       timeout: 10000,
     })
 
+    // A membership tier MUST be picked before import — the Import button is
+    // gated on selectedTierId (import.tsx). Pick the first available tier
+    // (the isolated fixture seeds one for the fresh org).
+    await page.locator('#import-tier').click()
+    await page.getByRole('option').first().click()
+
     const importBtn = page.getByRole('button', { name: /import 2 members/i })
     await expect(importBtn).toBeEnabled({ timeout: 5000 })
 
@@ -74,9 +80,10 @@ test.describe('T5 — Officer CSV roster import succeeds end-to-end', () => {
     const importResp = await importReq
     expect(importResp.status()).toBeLessThan(400)
 
-    // Sonner toast + success banner with the imported count.
+    // Success banner with the imported count ("Imported N · …"). The banner is
+    // persistent (the sonner toast auto-dismisses), so assert on it.
     await expect(
-      page.getByText(/successfully imported \d+ members/i).first(),
+      page.getByText(/imported \d+/i).first(),
     ).toBeVisible({ timeout: 15000 })
 
     await ctx.close()

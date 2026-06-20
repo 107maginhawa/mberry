@@ -21,15 +21,21 @@ test('heading "Member Roster" is visible', async ({ page }) => {
     expect(resp?.ok()).toBe(true)
   })
 
-  test('shows member table with columns', async ({ page }) => {
+  test('shows member roster with member fields', async ({ page }) => {
     await page.goto(`/org/${ORG_ID}/officer/roster`)
-    // Scope to columnheader role — "Status" also appears in filter pills
-    // and member-row badges, triggering strict-mode collisions.
+    // The roster reflows to a card layout when its content container is < 960px
+    // (globals.css .cq-roster-* container queries). The officer content column
+    // is capped at the PageShell default width (~720px container even on wide
+    // screens), so the card layout is what renders — the 9-column table only
+    // appears when the container reaches 960px. Assert a member card showing
+    // the member's name link and status badge (the same fields the table
+    // columns would show).
+    const cards = page.locator('.cq-roster-cards')
     await expect(
-      page.getByRole('columnheader', { name: /name/i }).first(),
+      cards.locator('a[href*="/officer/roster/"]').first(),
     ).toBeVisible({ timeout: 10000 })
     await expect(
-      page.getByRole('columnheader', { name: /status/i }).first(),
+      cards.getByText(/active|pending|lapsed|grace period|suspended|removed/i).first(),
     ).toBeVisible({ timeout: 10000 })
   })
 
