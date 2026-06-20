@@ -3,7 +3,7 @@
  * Encapsulates all database operations for the persons table
  */
 
-import { eq, and, or, ilike, type SQL } from 'drizzle-orm';
+import { eq, and, or, ilike, sql, type SQL } from 'drizzle-orm';
 import type { DatabaseInstance } from '@/core/database';
 import { DatabaseRepository, type PaginationOptions } from '@/core/database.repo';
 import { 
@@ -114,7 +114,30 @@ export class PersonRepository extends DatabaseRepository<Person, NewPerson, Pers
     return person;
   }
 
+  /**
+   * Find a person globally by email (stored in the contactInfo JSONB) or by
+   * license number. Person is cross-org PII, so this lookup is NOT org-scoped:
+   * the same person may hold memberships in several associations. Returns the
+   * first match, or null when no criteria are supplied or nothing matches.
+   *
+   * ponytail: email is non-unique/unindexed in JSONB — first match wins. Roster
+   * collisions are rare; tighten to a unique index only if duplicates bite.
+   */
+  async findByEmailOrLicense(
+    email?: string,
+    licenseNumber?: string,
+  ): Promise<Person | null> {
+    const conds: SQL<unknown>[] = [];
+    if (email) conds.push(sql`${persons.contactInfo}->>'email' = ${email}`);
+    if (licenseNumber) conds.push(eq(persons.licenseNumber, licenseNumber));
+    if (conds.length === 0) return null;
 
+    const [record] = await this.db
+      .select()
+      .from(persons)
+      .where(or(...conds))
+      .limit(1);
 
-
+    return (record as Person) || null;
+  }
 }

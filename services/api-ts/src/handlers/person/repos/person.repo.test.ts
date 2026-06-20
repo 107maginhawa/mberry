@@ -296,3 +296,47 @@ describe('PersonRepository.buildWhereConditions', () => {
     expect(result).toBeDefined();
   });
 });
+
+// ---------------------------------------------------------------------------
+// findByEmailOrLicense
+// ---------------------------------------------------------------------------
+
+// Minimal hand-rolled db stub capturing the drizzle select chain. We assert the
+// guard (no criteria → no query) and the "first row" return, not the SQL text.
+function dbReturning(rows: any[]) {
+  let selected = false;
+  return {
+    db: {
+      select: () => ({
+        from: () => ({
+          where: () => ({ limit: async () => { selected = true; return rows; } }),
+        }),
+      }),
+    } as any,
+    wasQueried: () => selected,
+  };
+}
+
+describe('PersonRepository.findByEmailOrLicense', () => {
+  test('returns null and skips the query when neither email nor license is given', async () => {
+    const { db, wasQueried } = dbReturning([{ id: 'p-1' }]);
+    const repo = new PersonRepository(db);
+    const result = await repo.findByEmailOrLicense(undefined, undefined);
+    expect(result).toBeNull();
+    expect(wasQueried()).toBe(false);
+  });
+
+  test('returns the first matching person when email is given', async () => {
+    const { db } = dbReturning([{ id: 'p-1', firstName: 'Ada' }]);
+    const repo = new PersonRepository(db);
+    const result = await repo.findByEmailOrLicense('ada@example.com');
+    expect(result).toEqual({ id: 'p-1', firstName: 'Ada' } as any);
+  });
+
+  test('returns null when nothing matches', async () => {
+    const { db } = dbReturning([]);
+    const repo = new PersonRepository(db);
+    const result = await repo.findByEmailOrLicense(undefined, 'LIC-404');
+    expect(result).toBeNull();
+  });
+});
