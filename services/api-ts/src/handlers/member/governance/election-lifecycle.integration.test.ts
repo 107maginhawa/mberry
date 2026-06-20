@@ -67,9 +67,13 @@ beforeAll(async () => {
       await client.query(`SET search_path TO "${TEST_SCHEMA}", public`);
 
       // Minimal person table (FK target for nominee/vote).
+      // first_name/last_name mirror the real person schema: listNominees
+      // (ISSUE-031) leftJoins person and selects these to render candidate names.
       await client.query(`
         CREATE TABLE "${TEST_SCHEMA}".person (
-          id uuid PRIMARY KEY DEFAULT gen_random_uuid()
+          id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+          first_name varchar(50),
+          last_name varchar(50)
         )
       `);
 
