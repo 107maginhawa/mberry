@@ -60,8 +60,8 @@
 | 1.4 | Live: training holds/serves 14.5 as number | ☑ |
 | 1.5 | Commit | ☑ |
 
-## B — Cosmetics (low)
+## B — Cosmetics (triaged, DONE)
 
-- CountUp force-`.0` consistency in credit tables.
-- `completion-table.tsx` "Credits Awarded" hardcoded `0` (pre-existing).
-- credit-breakdown deficit / dashboard fallback unrounded text. *(batch after #1)*
+- ☑ **`completion-table.tsx` "Credits Awarded" hardcoded `0`** (pre-existing bug) → FIXED: `completedCount * Number(creditAmount)` (decimal-safe). Verified live: a training with 4 completions × 16 credits now shows **64 Credits Awarded** (was 0).
+- ⊘ **CountUp force-`.0`** — WON'T FIX. Current "4" / "4.5" is the correct CPD convention; forcing "60.0" would regress.
+- ⊘ **deficit / dashboard fallback text** — NON-ISSUE. `60 − 1.5 = 58.5` renders "58.5 more credits needed"; dyadic half-credits produce no float artifacts, pluralization already guards `!== 1`.

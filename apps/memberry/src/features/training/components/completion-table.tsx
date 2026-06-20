@@ -138,7 +138,10 @@ export function CompletionTable({ orgId, trainingId, creditAmount }: CompletionT
 
   const enrollments: TrainingEnrollment[] = enrollmentsListQuery.data?.data ?? []
   const enrollmentCount = enrollmentsListQuery.data?.pagination?.totalCount ?? enrollments.length
-  const attendance = { completed: enrollments.filter((e) => e.completedAt).length, totalCredits: 0 }
+  const completedCount = enrollments.filter((e) => e.completedAt).length
+  // Each completed enrollment is awarded the training's creditAmount (server reads it
+  // from the training record). Number() keeps the sum decimal-safe for half-credits.
+  const attendance = { completed: completedCount, totalCredits: completedCount * Number(creditAmount) }
 
   // enrollments already derived above
   const allIds = enrollments.map((e) => e.personId)
