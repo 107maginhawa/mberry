@@ -9,35 +9,8 @@ import {
   ConflictError,
 } from '@/core/errors';
 import { SurveyRepository, SurveyResponseRepository } from './repos/survey.repo';
-import type { QuestionAnswer, Survey, SurveyResponseRecord, SurveyQuestion } from './repos/survey.schema';
-
-/**
- * [AC-M18-006] M18-R4 / WF-103 — aggregate inline poll results.
- * Counts each selected value (scalar or array) per question across all completed
- * responses. Used only when surveyType === 'poll'.
- */
-function aggregatePollResults(
-  survey: Survey,
-  responses: SurveyResponseRecord[],
-): Array<{ questionId: string; counts: Record<string, number>; total: number }> {
-  const questions = (survey.questions ?? []) as SurveyQuestion[];
-  return questions.map((q) => {
-    const counts: Record<string, number> = {};
-    let total = 0;
-    for (const resp of responses) {
-      const answers = (resp.answers ?? []) as QuestionAnswer[];
-      const ans = answers.find((a) => a.questionId === q.id);
-      if (!ans) continue;
-      const values = Array.isArray(ans.value) ? ans.value : [ans.value];
-      for (const v of values) {
-        const key = String(v);
-        counts[key] = (counts[key] ?? 0) + 1;
-        total += 1;
-      }
-    }
-    return { questionId: q.id, counts, total };
-  });
-}
+import type { QuestionAnswer } from './repos/survey.schema';
+import { aggregatePollResults } from './utils/poll-results';
 
 /**
  * submitSurveyResponse
