@@ -16,6 +16,14 @@ test('edit profile → change specialization → save → persists on reload', a
     await expect(specInput).toBeVisible({ timeout: 5000 })
     await specInput.fill('Oral Surgery and Implantology')
 
+    // The NPS auto-prompt (NpsProvider) renders a fixed bottom-right card that
+    // overlaps and intercepts the Save Changes button. Dismiss it if present.
+    const npsDismiss = page.getByRole('button', { name: /dismiss survey/i })
+    if (await npsDismiss.isVisible({ timeout: 2000 }).catch(() => false)) {
+      await npsDismiss.click()
+      await expect(npsDismiss).toBeHidden({ timeout: 5000 })
+    }
+
     // Save
     const responsePromise = page.waitForResponse(
       resp => resp.request().method() === 'PATCH' && resp.url().includes('/persons/')

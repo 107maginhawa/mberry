@@ -59,10 +59,14 @@ test('documents list renders heading', async ({ page }) => {
     //   (c) backend errored → "Failed to load documents" message.
     // The seed has no organization-owned documents (all 8 are person-owned), so
     // the org library legitimately renders the empty state.
-    const docHeadings = page.getByRole('heading', { level: 3 })
-    const headingCount = await docHeadings.count()
-    if (headingCount > 0) {
-      await docHeadings.first().click()
+    // Detect real documents by their card link to the detail route — NOT by
+    // heading level: the empty-state headline ("No documents available") and
+    // the NPS prompt card both render <h3>s, which would wrongly trigger the
+    // navigate branch.
+    const docCards = page.locator('a[href*="/officer/documents/"]')
+    const cardCount = await docCards.count()
+    if (cardCount > 0) {
+      await docCards.first().click()
       await page.waitForLoadState('domcontentloaded')
       expect(page.url()).toMatch(/\/documents\/[^/]+$/)
     } else {
