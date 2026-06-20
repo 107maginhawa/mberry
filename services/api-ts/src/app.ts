@@ -271,6 +271,7 @@ export function createApp(config: Config): App {
     createCsrfTokenMiddleware({
       allowlist: [
         '/webhooks/',          // Stripe webhook signature is the integrity story
+        '/billing/webhooks/',  // billing Stripe Connect webhook — same signature integrity story
         '/email/unsubscribe',  // RFC 8058 List-Unsubscribe (signed token in query)
         '/pay/',               // signed one-tap payment token in URL
         '/auth/',              // Better-Auth has its own CSRF + cookie story

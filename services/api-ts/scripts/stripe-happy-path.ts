@@ -1,8 +1,9 @@
 /**
  * stripe-happy-path.ts — End-to-end happy-path verify driver for online payments.
- *   Run: cd services/api-ts && bun scripts/stripe-happy-path.ts dues   (also: 'all'; default 'dues')
- *   DUES + EVENT are implemented; 'booking' is a TODO stub. Self-contained, idempotent,
- *   re-runnable; exits non-zero on ANY assertion failure and prints a PASS/FAIL summary.
+ *   Run: cd services/api-ts && bun scripts/stripe-happy-path.ts dues   (also: event | booking | all; default 'dues')
+ *   DUES + EVENT + BOOKING (billing Stripe-Connect, manual-capture "Hold & Decide") all
+ *   implemented. Self-contained, idempotent, re-runnable; exits non-zero on ANY assertion
+ *   failure and prints a PASS/FAIL summary.
  */
 
 import Stripe from 'stripe';
@@ -42,6 +43,13 @@ const FUND_ALLOCATIONS_JSON = JSON.stringify([
   { amount: 60000, fundName: 'Emergency Fund' },
 ]);
 const INVOICE_MARKER = 'INV-STRIPE-TEST-';
+// BILLING (Stripe Connect, manual-capture "Hold & Decide") fixtures.
+const BILLING_WEBHOOK_URL = `${API_BASE}/billing/webhooks/stripe`; // distinct from the dues /webhooks/stripe
+const BILLING_INVOICE_MARKER = 'BILL-STRIPE-TEST-'; // invoice_number prefix (unique scoping)
+const BILLING_CONTEXT_MARKER = 'booking:stripe-test-'; // context prefix (UNIQUE column scoping)
+const BILLING_TOTAL = 150000; // PHP 1500.00 in minor units (integer)
+const MARIA = '6dc8639e-4540-444f-807b-098f476ba8eb'; // merchant person (login test@memberry.ph)
+const MERCHANT_ACCOUNT_ID = '141e6642-7827-4690-a908-0e5a196f21d3';
 
 const KEEP = process.argv.includes('--keep');
 
@@ -569,10 +577,219 @@ function preCleanEventOrphans(): void {
   }
   console.log(`  Pre-clean: removed ${orphanIds.length} orphan fixture event(s) from prior runs.`);
 }
-// TODO(booking): billing-Connect invoice-pay → checkout → webhook → verify booking invoice settled.
+// ── Authed-request helper (session + CSRF double-submit + Origin) ─────────
+// Mirrors the event subcommand's inline flow: better-auth sign-in → GET /csrf-token
+// for the double-submit cookie+token → returns a fetch wrapper that sends the
+// session+csrf cookies, the x-csrf-token header, and a browser-equivalent Origin
+// (the global hono/csrf origin-check 403s state-changing requests off-allowlist).
+// `withOrgId` adds x-org-id only when asked — billing is org-context-optional, so a
+// bare call normally succeeds; we set this on retry if a bare call 403s.
+async function signInAuthed(email: string, password: string): Promise<{
+  post: (path: string, opts?: { withOrgId?: boolean }) => Promise<Response>;
+}> {
+  const signIn = await fetch(`${API_BASE}/auth/sign-in/email`, {
+    method: 'POST',
+    headers: { 'content-type': 'application/json' },
+    body: JSON.stringify({ email, password }),
+  });
+  const cookie = signIn.ok ? captureCookies(signIn) : '';
+  if (!cookie) throw new Error(`sign-in failed for ${email} (status ${signIn.status})`);
+
+  const csrfRes = await fetch(`${API_BASE}/csrf-token`, { headers: { Cookie: cookie } });
+  const csrfCookie = captureCookies(csrfRes);
+  const csrfToken = ((await csrfRes.json()) as { token?: string }).token ?? '';
+  const cookieWithCsrf = [cookie, csrfCookie].filter(Boolean).join('; ');
+
+  return {
+    post: (path, opts = {}) => {
+      const headers: Record<string, string> = {
+        'content-type': 'application/json',
+        Cookie: cookieWithCsrf,
+        Origin: APP_ORIGIN,
+        'x-csrf-token': csrfToken,
+      };
+      if (opts.withOrgId) headers['x-org-id'] = ORG;
+      return fetch(`${API_BASE}${path}`, { method: 'POST', headers, body: '{}' });
+    },
+  };
+}
+
+// ── BILLING (Stripe Connect, manual-capture "Hold & Decide") driver ───────
+// pay (member) → webhook(payment_intent.succeeded) → capture (merchant). Fixture-gated:
+// flips the seed merchant_account's onboardingComplete on, drives the real handlers,
+// restores it on cleanup. No product code change.
 async function runBooking(): Promise<void> {
-  console.log('\n=== BOOKING happy-path: TODO (not implemented) ===');
-  throw new Error('booking subcommand not implemented yet');
+  console.log('\n=== BILLING invoice-pay (Stripe Connect, Hold & Decide) happy-path ===\n');
+
+  // Pre-clean orphan BILL-STRIPE-TEST- invoices (+ their webhook ledger rows) from prior runs.
+  preCleanBillingOrphans();
+
+  const invoiceId = crypto.randomUUID();
+  const ts = Date.now();
+  const invoiceNumber = `${BILLING_INVOICE_MARKER}${ts}`;
+  const context = `${BILLING_CONTEXT_MARKER}${ts}`;
+  const piId = `pi_bill_test_${ts}`;
+  const eventId = `evt_bill_test_${ts}`;
+  // Record original merchant_account metadata so cleanup restores it exactly.
+  let origMerchantMeta = '';
+
+  try {
+    // 1. FIXTURE A — merchant onboarding: flip onboardingComplete on (RECORD original first).
+    origMerchantMeta = psql(`SELECT metadata::text FROM merchant_account WHERE id = ${q(MERCHANT_ACCOUNT_ID)};`);
+    assert('1a. recorded original merchant metadata', 'non-empty', origMerchantMeta ? 'recorded' : '(none)', origMerchantMeta.length > 0);
+    psql(`UPDATE merchant_account SET metadata = metadata || '{"onboardingComplete":true}'::jsonb, updated_at = now() WHERE id = ${q(MERCHANT_ACCOUNT_ID)};`);
+    const onboarded = psql(`SELECT metadata->>'onboardingComplete' FROM merchant_account WHERE id = ${q(MERCHANT_ACCOUNT_ID)};`);
+    assert('1b. merchant onboardingComplete=true', 'true', onboarded, onboarded === 'true');
+
+    // 2. FIXTURE B — open invoice: customer=Miguel, merchant=Maria, manual capture.
+    //    notNull-no-default cols: invoice_number, customer, merchant, subtotal, total.
+    //    payment_capture_method defaults 'automatic' → set 'manual' (Hold & Decide).
+    psql(`
+      INSERT INTO invoice
+        (id, created_at, updated_at, version, organization_id, invoice_number,
+         customer, merchant, merchant_account, context, status, subtotal, total,
+         currency, payment_capture_method, payment_status, created_by, updated_by)
+      VALUES
+        (${q(invoiceId)}, now(), now(), 1, ${q(ORG)}, ${q(invoiceNumber)},
+         ${q(MIGUEL)}, ${q(MARIA)}, ${q(MERCHANT_ACCOUNT_ID)}, ${q(context)}, 'open', ${BILLING_TOTAL}, ${BILLING_TOTAL},
+         'PHP', 'manual', NULL, ${q(MIGUEL)}, ${q(MIGUEL)});`);
+    const insertedNum = psql(`SELECT invoice_number FROM invoice WHERE id = ${q(invoiceId)};`);
+    assert('2. fixture invoice inserted (status=open)', invoiceNumber, insertedNum, insertedNum === invoiceNumber);
+
+    // 3. PAY — login Miguel; POST /billing/invoices/:id/pay {}. Bare call first (billing is
+    //    org-context-optional); retry once with x-org-id if it 403s with an org-context error.
+    const miguel = await signInAuthed(MEMBER_EMAIL, MEMBER_PASSWORD);
+    let payRes = await miguel.post(`/billing/invoices/${invoiceId}/pay`);
+    let usedOrgId = false;
+    if (payRes.status === 403) {
+      const txt = await payRes.clone().text();
+      if (/org/i.test(txt)) {
+        payRes = await miguel.post(`/billing/invoices/${invoiceId}/pay`, { withOrgId: true });
+        usedOrgId = true;
+      }
+    }
+    const payBody = (await payRes.json()) as { checkoutUrl?: string; metadata?: { paymentIntentId?: string }; error?: string };
+    assert('3. pay HTTP 200', 200, payRes.status, payRes.status === 200);
+    assert(
+      '3. checkoutUrl non-empty',
+      'non-empty string',
+      payBody.checkoutUrl ? `${payBody.checkoutUrl.slice(0, 40)}… (x-org-id=${usedOrgId})` : `(none) err=${payBody.error}`,
+      typeof payBody.checkoutUrl === 'string' && payBody.checkoutUrl.length > 0,
+    );
+    const payStatus = psql(`SELECT COALESCE(payment_status::text, 'NULL') FROM invoice WHERE id = ${q(invoiceId)};`);
+    assert('3. invoice.payment_status===pending', 'pending', payStatus, payStatus === 'pending');
+
+    // 4. WEBHOOK — fabricate + sign payment_intent.succeeded (metadata.invoiceId so the
+    //    handler resolves the org for the ledger AND flips the invoice). Stringify ONCE.
+    const payload = JSON.stringify({
+      id: eventId,
+      type: 'payment_intent.succeeded',
+      data: {
+        object: {
+          id: piId,
+          status: 'succeeded',
+          amount: BILLING_TOTAL,
+          currency: 'php',
+          metadata: { invoiceId },
+        },
+      },
+    });
+    const stripe = new Stripe('sk_test_x');
+    const sigHeader = await stripe.webhooks.generateTestHeaderStringAsync({ payload, secret: STRIPE_WEBHOOK_SECRET });
+    // The billing webhook at /billing/webhooks/stripe is now CSRF-allowlisted (app.ts) just
+    // like the dues /webhooks/stripe, so this is a plain unauthenticated, signature-only POST
+    // — exactly what real Stripe sends. No CSRF token, no auth cookie.
+    const whRes = await fetch(BILLING_WEBHOOK_URL, {
+      method: 'POST',
+      headers: {
+        'stripe-signature': sigHeader,
+        'content-type': 'application/json',
+      },
+      body: payload,
+    });
+    const whBody = (await whRes.json()) as { received?: boolean; error?: string };
+    assert('4. billing webhook HTTP 200', 200, whRes.status, whRes.status === 200);
+    assert('4. webhook received:true', true, `received=${whBody.received}${whBody.error ? ` err=${whBody.error}` : ''}`, whBody.received === true);
+    const reqCapStatus = psql(`SELECT COALESCE(payment_status::text, 'NULL') FROM invoice WHERE id = ${q(invoiceId)};`);
+    assert('4. invoice.payment_status===requires_capture', 'requires_capture', reqCapStatus, reqCapStatus === 'requires_capture');
+
+    // 5. CAPTURE — login Maria (merchant); POST /billing/invoices/:id/capture {}. The handler
+    //    calls billing.capturePaymentIntent(<event's pi id>, stripeAccountId) → stripe-mock.
+    //    If stripe-mock can't capture, this fails LOUDLY (no silent pass).
+    const maria = await signInAuthed(OFFICER_EMAIL, OFFICER_PASSWORD);
+    let capRes = await maria.post(`/billing/invoices/${invoiceId}/capture`);
+    if (capRes.status === 403) {
+      const txt = await capRes.clone().text();
+      if (/org/i.test(txt)) capRes = await maria.post(`/billing/invoices/${invoiceId}/capture`, { withOrgId: true });
+    }
+    const capText = await capRes.clone().text();
+    assert('5. capture HTTP 200', 200, capRes.status, capRes.status === 200);
+    if (capRes.status !== 200) {
+      // Surface the exact failure as a finding rather than swallowing it.
+      console.log(`  [finding] capture failed (status ${capRes.status}): ${capText.slice(0, 300)}`);
+    }
+    const settled = psql(`
+      SELECT status::text || '|' || COALESCE(payment_status::text,'NULL') || '|' || COALESCE(paid_at::text,'NULL')
+      FROM invoice WHERE id = ${q(invoiceId)};`);
+    const [invStatus, invPayStatus, paidAt] = (settled || '||').split('|');
+    assert('5. invoice.status===paid', 'paid', invStatus, invStatus === 'paid');
+    assert('5. invoice.payment_status===succeeded', 'succeeded', invPayStatus, invPayStatus === 'succeeded');
+    assert('5. invoice.paid_at not null', 'not NULL', paidAt, paidAt !== 'NULL' && paidAt !== '');
+
+    // 6. MONEY — total reads back as integer 150000 (no string concat / BigInt drift).
+    const totalStr = psql(`SELECT total FROM invoice WHERE id = ${q(invoiceId)};`);
+    const total = Number(totalStr);
+    assert('6. MONEY total===150000 (integer)', BILLING_TOTAL, `${totalStr} (Number=${total})`, total === BILLING_TOTAL && totalStr === '150000');
+  } finally {
+    // 7. CLEANUP (try/finally; runs even on failure unless --keep).
+    if (KEEP) {
+      console.log('\n  [--keep] Skipping cleanup. Fixture invoice left + merchant_account onboardingComplete still set.');
+    } else {
+      cleanupBilling(invoiceId, eventId, origMerchantMeta);
+    }
+  }
+}
+
+// Delete the fixture invoice + its webhook ledger row; restore merchant_account metadata.
+function cleanupBilling(invoiceId: string, eventId: string, origMerchantMeta: string): void {
+  const cleaned: string[] = [];
+
+  // webhook_retry_log row claimed by the billing webhook (keyed on the event id).
+  const delLog = psql(
+    `WITH d AS (DELETE FROM webhook_retry_log WHERE idempotency_key = ${q(eventId)} RETURNING 1) SELECT count(*) FROM d;`,
+  );
+  if (delLog !== '0') cleaned.push(`webhook_retry_log(${delLog})`);
+
+  // invoice_line_item cascades on invoice delete, but our fixture inserts none.
+  const delInv = psql(
+    `WITH d AS (DELETE FROM invoice WHERE id = ${q(invoiceId)} RETURNING 1) SELECT count(*) FROM d;`,
+  );
+  if (delInv !== '0') cleaned.push(`invoice(${delInv})`);
+
+  // RESTORE merchant_account metadata to the exact recorded original (drops onboardingComplete).
+  if (origMerchantMeta) {
+    psql(`UPDATE merchant_account SET metadata = ${q(origMerchantMeta)}::jsonb, updated_at = now() WHERE id = ${q(MERCHANT_ACCOUNT_ID)};`);
+    cleaned.push('merchant_account.metadata restored (onboardingComplete removed)');
+  }
+
+  console.log(`\n  Cleanup: ${cleaned.length ? cleaned.join(', ') : 'nothing to clean'}`);
+}
+
+// Clear leftover BILL-STRIPE-TEST- invoices (+ webhook ledger rows) from prior failed runs.
+function preCleanBillingOrphans(): void {
+  const orphanIds = psql(
+    `SELECT id FROM invoice WHERE invoice_number LIKE ${q(BILLING_INVOICE_MARKER + '%')} OR context LIKE ${q(BILLING_CONTEXT_MARKER + '%')};`,
+  )
+    .split('\n')
+    .filter(Boolean);
+  if (!orphanIds.length) return;
+  for (const id of orphanIds) {
+    psql(`DELETE FROM invoice_line_item WHERE invoice = ${q(id)};`);
+    psql(`DELETE FROM invoice WHERE id = ${q(id)};`);
+  }
+  // Stale ledger rows from prior fabricated billing events.
+  psql(`DELETE FROM webhook_retry_log WHERE idempotency_key LIKE 'evt_bill_test_%';`);
+  console.log(`  Pre-clean: removed ${orphanIds.length} orphan fixture invoice(s) + stale billing webhook ledger rows.`);
 }
 
 // ── Dispatch + summary ────────────────────────────────────────────────
@@ -589,8 +806,7 @@ async function main(): Promise<void> {
     } else if (cmd === 'all') {
       await runDues();
       await runEvent();
-      // TODO: await runBooking(); — enable once implemented.
-      console.log('\n  (all) booking is TODO — dues + event ran.');
+      await runBooking();
     } else {
       console.error(`Unknown subcommand: ${cmd}. Use: dues | event | booking | all`);
       process.exit(2);
