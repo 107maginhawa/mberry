@@ -12,6 +12,7 @@ import { AnimatePresence, motion } from "framer-motion"
 import { useSpringTransition } from "@/components/motion/use-spring-transition"
 import { useMyOrgs } from "@/hooks/use-my-orgs"
 import { api } from "@/lib/api"
+import { NpsProvider } from "@/features/surveys/components/nps-provider"
 
 // oli-ui: exempt-pageshell — layout-shell route renders MemberHeader + Outlet, no page content of its own
 export const Route = createFileRoute("/_authenticated")({
@@ -67,7 +68,12 @@ function AuthenticatedLayout() {
   const isOfficerForActiveOrg = activeOrg ? officerOrgIds.has(activeOrg.organizationId) : false
 
   if (isOfficerRoute) {
-    return <Outlet />
+    return (
+      <>
+        <Outlet />
+        <NpsProvider />
+      </>
+    )
   }
 
   return (
@@ -99,6 +105,7 @@ function AuthenticatedLayout() {
         </main>
       </div>
       <MemberBottomNav />
+      <NpsProvider />
     </div>
   )
 }
