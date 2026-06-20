@@ -46,6 +46,16 @@ export async function listSurveys(
   const repo = new SurveyRepository(db, logger);
 
   if (query.mine) {
+    if (query.available) {
+      const availResult = await repo.findAvailableForMember(organizationId, userId, {
+        surveyType: query.surveyType as string | undefined,
+        pagination: { limit, offset },
+      });
+      return ctx.json({
+        data: availResult.data,
+        pagination: buildPaginationMeta(availResult.data, availResult.totalCount, limit, offset),
+      }, 200);
+    }
     const mineResult = await repo.findMineWithPagination(organizationId, userId, {
       pagination: { limit, offset },
     });

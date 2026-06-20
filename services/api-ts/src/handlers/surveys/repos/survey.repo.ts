@@ -135,6 +135,56 @@ export class SurveyRepository {
     };
   }
 
+  async findAvailableForMember(
+    organizationId: string,
+    responderId: string,
+    opts: { surveyType?: string; pagination: { limit: number; offset: number } }
+  ): Promise<{ data: Array<Survey & { myResponseStatus: string | null; myCompletedAt: Date | null }>; totalCount: number }> {
+    const conditions: SQL<unknown>[] = [
+      eq(surveys.organizationId, organizationId),
+      eq(surveys.status, 'active'),
+    ];
+    if (opts.surveyType) {
+      conditions.push(eq(surveys.surveyType, opts.surveyType));
+    }
+    const where = and(...conditions);
+
+    const [data, countResult] = await Promise.all([
+      this.db
+        .select({
+          survey: surveys,
+          myResponseStatus: surveyResponses.status,
+          myCompletedAt: surveyResponses.completedAt,
+        })
+        .from(surveys)
+        // responderId is part of the ON so the join is per-member; unanswered → nulls
+        .leftJoin(
+          surveyResponses,
+          and(
+            eq(surveyResponses.surveyId, surveys.id),
+            eq(surveyResponses.responderId, responderId),
+          ),
+        )
+        .where(where)
+        .limit(opts.pagination.limit)
+        .offset(opts.pagination.offset)
+        .orderBy(surveys.createdAt),
+      this.db
+        .select({ count: count() })
+        .from(surveys)
+        .where(where),
+    ]);
+
+    return {
+      data: data.map((row) => ({
+        ...row.survey,
+        myResponseStatus: row.myResponseStatus ?? null,
+        myCompletedAt: row.myCompletedAt ?? null,
+      })),
+      totalCount: Number(countResult[0]?.count ?? 0),
+    };
+  }
+
   async createSurvey(data: NewSurvey): Promise<Survey> {
     const [row] = await this.db.insert(surveys).values(data).returning();
     return row!;
