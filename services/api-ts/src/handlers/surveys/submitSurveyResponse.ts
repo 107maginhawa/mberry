@@ -11,6 +11,7 @@ import {
 import { SurveyRepository, SurveyResponseRepository } from './repos/survey.repo';
 import type { QuestionAnswer } from './repos/survey.schema';
 import { aggregatePollResults } from './utils/poll-results';
+import { personBelongsToOrg } from './utils/membership-check';
 
 /**
  * submitSurveyResponse
@@ -35,7 +36,8 @@ export async function submitSurveyResponse(
   const baseLogger = ctx.get('logger');
   const traceId = ctx.get('requestId');
   const logger = baseLogger?.child?.({ traceId, module: 'surveys' }) ?? baseLogger;
-  const organizationId = ctx.get('organizationId') as string;
+  // organizationId may be undefined on /my/* routes (no x-org-id header).
+  const organizationId = ctx.get('organizationId') as string | undefined;
 
   const surveyId = ctx.req.param('survey')!;
   const body = ctx.req.valid('json');
@@ -43,9 +45,17 @@ export async function submitSurveyResponse(
   const surveyRepo = new SurveyRepository(db, logger);
   const responseRepo = new SurveyResponseRepository(db, logger);
 
-  // Verify survey exists and is active
+  // Verify survey exists.
+  // Enforce x-org-id equality only when the header was actually present.
   const survey = await surveyRepo.findById(surveyId);
-  if (!survey || survey.organizationId !== organizationId) {
+  if (!survey || (organizationId && survey.organizationId !== organizationId)) {
+    throw new NotFoundError('Survey not found');
+  }
+
+  // Tenant-boundary check: member must belong to the survey's org.
+  // Prevents voting on surveys in orgs the user has no membership in.
+  const isMember = await personBelongsToOrg(db, logger, userId, survey.organizationId);
+  if (!isMember) {
     throw new NotFoundError('Survey not found');
   }
 
@@ -87,7 +97,7 @@ export async function submitSurveyResponse(
       try {
         await jobsScheduler.trigger('survey.aggregateAnalytics', {
           surveyId,
-          organizationId,
+          organizationId: survey.organizationId,
         });
       } catch (err) {
         logger?.warn(
@@ -116,7 +126,7 @@ export async function submitSurveyResponse(
   const isAnonymous = settings?.anonymous === true;
 
   const response = await responseRepo.submitResponse({
-    organizationId,
+    organizationId: survey.organizationId,
     surveyId,
     // P0 privacy fix: strip responderId for anonymous surveys.
     // Polls are always attributed so vote dedup + already-voted detection work.
@@ -135,7 +145,7 @@ export async function submitSurveyResponse(
     try {
       await jobs.trigger('survey.aggregateAnalytics', {
         surveyId,
-        organizationId,
+        organizationId: survey.organizationId,
       });
     } catch (err) {
       logger?.warn(

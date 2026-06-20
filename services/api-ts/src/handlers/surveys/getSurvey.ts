@@ -9,6 +9,7 @@ import { SurveyRepository, SurveyResponseRepository } from './repos/survey.repo'
 import { OfficerTermRepository } from '../association:member/repos/governance.repo';
 import { hasRole } from '@/utils/auth';
 import { aggregatePollResults } from './utils/poll-results';
+import { personBelongsToOrg } from './utils/membership-check';
 
 /**
  * getSurvey
@@ -20,6 +21,9 @@ import { aggregatePollResults } from './utils/poll-results';
  * Members: active surveys only, sanitized (no targetAudience / internal fields).
  *   - Draft → NotFoundError (no existence leak).
  *   - Poll type → includes aggregated pollResults.
+ *
+ * Tenant boundary: enforced by membership when x-org-id is absent
+ * (routes under /my/surveys/* do not send x-org-id).
  */
 export async function getSurvey(
   ctx: ValidatedContext<never, never, GetSurveyParams>
@@ -32,20 +36,29 @@ export async function getSurvey(
   const userId = session.user.id;
   const db = ctx.get('database') as DatabaseInstance;
   const logger = ctx.get('logger');
-  const organizationId = ctx.get('organizationId') as string;
+  // organizationId may be undefined on /my/* routes (no x-org-id header).
+  const organizationId = ctx.get('organizationId') as string | undefined;
   const surveyId = ctx.req.param('survey')!;
 
   const repo = new SurveyRepository(db, logger);
   const survey = await repo.findById(surveyId);
-  if (!survey || survey.organizationId !== organizationId) {
+
+  // Always 404 if not found.
+  if (!survey) {
+    throw new NotFoundError('Survey not found');
+  }
+
+  // Enforce x-org-id equality only when the header was actually present.
+  if (organizationId && survey.organizationId !== organizationId) {
     throw new NotFoundError('Survey not found');
   }
 
   // Officers/admins get the full officer-facing detail (any status).
+  // Use survey.organizationId (not the possibly-undefined request header).
   let isPrivileged = hasRole(session.user, 'admin');
   if (!isPrivileged) {
     const officerRepo = new OfficerTermRepository(db, logger);
-    const terms = await officerRepo.findActiveByPersonAndOrg(userId, organizationId);
+    const terms = await officerRepo.findActiveByPersonAndOrg(userId, survey.organizationId);
     isPrivileged = terms.length > 0;
   }
   if (isPrivileged) {
@@ -56,6 +69,14 @@ export async function getSurvey(
   if (survey.status !== 'active') {
     throw new NotFoundError('Survey not found');
   }
+
+  // Tenant-boundary check: member must belong to the survey's org.
+  // Prevents cross-org read and existence leaks for non-members.
+  const isMember = await personBelongsToOrg(db, logger, userId, survey.organizationId);
+  if (!isMember) {
+    throw new NotFoundError('Survey not found');
+  }
+
   const s = (survey.settings ?? {}) as { deadline?: string; anonymous?: boolean; allowReedit?: boolean };
   const sanitized = {
     id: survey.id,

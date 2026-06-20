@@ -10,11 +10,14 @@
  * - Happy path: submits response — returns 201
  * - Triggers analytics aggregation job
  * - Works without deadline set
+ * - /my/surveys/* (no x-org-id): member with membership → 201
+ * - /my/surveys/* (no x-org-id): non-member → 404 (tenant boundary enforced)
  */
 
 import { describe, test, expect, afterEach } from 'bun:test';
 import { makeCtx, stubRepo, restoreRepo } from '@/test-utils/make-ctx';
 import { SurveyRepository, SurveyResponseRepository } from './repos/survey.repo';
+import { MembershipRepository } from '../association:member/repos/membership.repo';
 import { submitSurveyResponse } from './submitSurveyResponse';
 
 // ─── Fixtures ───────────────────────────────────────────
@@ -54,12 +57,20 @@ const fakeResponse = {
   updatedAt: new Date(),
 };
 
+const fakeMembership = {
+  id: 'membership-1',
+  personId: 'user-1',
+  organizationId: 'tenant-1',
+  status: 'active',
+};
+
 // ─── Tests ──────────────────────────────────────────────
 
 describe('submitSurveyResponse', () => {
   afterEach(() => {
     restoreRepo(SurveyRepository);
     restoreRepo(SurveyResponseRepository);
+    restoreRepo(MembershipRepository);
   });
 
   test('throws UnauthorizedError without session', async () => {
@@ -85,11 +96,12 @@ describe('submitSurveyResponse', () => {
     await expect(submitSurveyResponse(ctx)).rejects.toThrow('Survey not found');
   });
 
-  test('throws NotFoundError when survey belongs to different org', async () => {
+  test('throws NotFoundError when survey belongs to different org (x-org-id present)', async () => {
     stubRepo(SurveyRepository, {
       findById: async () => ({ ...activeSurvey, organizationId: 'other-org' }),
     });
     stubRepo(SurveyResponseRepository, {});
+    // membership check never reached — org mismatch fires first
 
     const ctx = makeCtx({
       _params: { survey: 'survey-1' },
@@ -103,6 +115,7 @@ describe('submitSurveyResponse', () => {
       findById: async () => ({ ...activeSurvey, status: 'draft' }),
     });
     stubRepo(SurveyResponseRepository, {});
+    stubRepo(MembershipRepository, { findByPersonAndOrg: async () => fakeMembership });
 
     const ctx = makeCtx({
       _params: { survey: 'survey-1' },
@@ -116,6 +129,7 @@ describe('submitSurveyResponse', () => {
       findById: async () => ({ ...activeSurvey, status: 'closed' }),
     });
     stubRepo(SurveyResponseRepository, {});
+    stubRepo(MembershipRepository, { findByPersonAndOrg: async () => fakeMembership });
 
     const ctx = makeCtx({
       _params: { survey: 'survey-1' },
@@ -129,6 +143,7 @@ describe('submitSurveyResponse', () => {
       findById: async () => pastDeadlineSurvey,
     });
     stubRepo(SurveyResponseRepository, {});
+    stubRepo(MembershipRepository, { findByPersonAndOrg: async () => fakeMembership });
 
     const ctx = makeCtx({
       _params: { survey: 'survey-1' },
@@ -144,6 +159,7 @@ describe('submitSurveyResponse', () => {
     stubRepo(SurveyResponseRepository, {
       findByResponderAndSurvey: async () => fakeResponse,
     });
+    stubRepo(MembershipRepository, { findByPersonAndOrg: async () => fakeMembership });
 
     const ctx = makeCtx({
       _params: { survey: 'survey-1' },
@@ -160,6 +176,7 @@ describe('submitSurveyResponse', () => {
       findByResponderAndSurvey: async () => undefined,
       submitResponse: async () => fakeResponse,
     });
+    stubRepo(MembershipRepository, { findByPersonAndOrg: async () => fakeMembership });
 
     const ctx = makeCtx({
       _params: { survey: 'survey-1' },
@@ -180,6 +197,7 @@ describe('submitSurveyResponse', () => {
       findByResponderAndSurvey: async () => undefined,
       submitResponse: async () => fakeResponse,
     });
+    stubRepo(MembershipRepository, { findByPersonAndOrg: async () => fakeMembership });
 
     const ctx = makeCtx({
       _params: { survey: 'survey-1' },
@@ -206,6 +224,7 @@ describe('submitSurveyResponse', () => {
         return { ...fakeResponse, responderId: null };
       },
     });
+    stubRepo(MembershipRepository, { findByPersonAndOrg: async () => fakeMembership });
 
     const ctx = makeCtx({
       _params: { survey: 'survey-1' },
@@ -229,6 +248,7 @@ describe('submitSurveyResponse', () => {
         return fakeResponse;
       },
     });
+    stubRepo(MembershipRepository, { findByPersonAndOrg: async () => fakeMembership });
 
     const ctx = makeCtx({
       _params: { survey: 'survey-1' },
@@ -251,6 +271,7 @@ describe('submitSurveyResponse', () => {
     stubRepo(SurveyResponseRepository, {
       findByResponderAndSurvey: async () => fakeResponse,
     });
+    stubRepo(MembershipRepository, { findByPersonAndOrg: async () => fakeMembership });
 
     const ctx = makeCtx({
       _params: { survey: 'survey-1' },
@@ -267,6 +288,7 @@ describe('submitSurveyResponse', () => {
       findByResponderAndSurvey: async () => undefined,
       submitResponse: async () => fakeResponse,
     });
+    stubRepo(MembershipRepository, { findByPersonAndOrg: async () => fakeMembership });
 
     let jobTriggered = false;
     let jobPayload: any;
@@ -308,6 +330,7 @@ describe('submitSurveyResponse', () => {
         return { ...fakeResponse, id, answers, updatedAt: new Date() };
       },
     });
+    stubRepo(MembershipRepository, { findByPersonAndOrg: async () => fakeMembership });
 
     const ctx = makeCtx({
       _params: { survey: 'survey-1' },
@@ -329,6 +352,7 @@ describe('submitSurveyResponse', () => {
     stubRepo(SurveyResponseRepository, {
       findByResponderAndSurvey: async () => fakeResponse,
     });
+    stubRepo(MembershipRepository, { findByPersonAndOrg: async () => fakeMembership });
 
     const ctx = makeCtx({
       _params: { survey: 'survey-1' },
@@ -349,6 +373,7 @@ describe('submitSurveyResponse', () => {
     stubRepo(SurveyResponseRepository, {
       findByResponderAndSurvey: async () => fakeResponse,
     });
+    stubRepo(MembershipRepository, { findByPersonAndOrg: async () => fakeMembership });
 
     const ctx = makeCtx({
       _params: { survey: 'survey-1' },
@@ -370,6 +395,7 @@ describe('submitSurveyResponse', () => {
       findByResponderAndSurvey: async () => undefined,
       submitResponse: async () => fakeResponse,
     });
+    stubRepo(MembershipRepository, { findByPersonAndOrg: async () => fakeMembership });
 
     const ctx = makeCtx({
       _params: { survey: 'survey-1' },
@@ -405,6 +431,7 @@ describe('submitSurveyResponse', () => {
       submitResponse: async () => ({ ...fakeResponse, id: 'r-new', answers: [{ questionId: 'q1', value: 'Pizza' }] }),
       findAllBySurveyId: async () => priorResponses,
     });
+    stubRepo(MembershipRepository, { findByPersonAndOrg: async () => fakeMembership });
 
     const ctx = makeCtx({
       _params: { survey: 'survey-1' },
@@ -431,6 +458,7 @@ describe('submitSurveyResponse', () => {
       findByResponderAndSurvey: async () => undefined,
       submitResponse: async () => fakeResponse,
     });
+    stubRepo(MembershipRepository, { findByPersonAndOrg: async () => fakeMembership });
 
     const ctx = makeCtx({
       _params: { survey: 'survey-1' },
@@ -463,6 +491,7 @@ describe('submitSurveyResponse', () => {
       updateResponseAnswers: async (id: string, answers: any) => ({ ...fakeResponse, id, answers }),
       findAllBySurveyId: async () => all,
     });
+    stubRepo(MembershipRepository, { findByPersonAndOrg: async () => fakeMembership });
 
     const ctx = makeCtx({
       _params: { survey: 'survey-1' },
@@ -497,6 +526,7 @@ describe('submitSurveyResponse', () => {
       submitResponse: async () => ({ ...fakeResponse, answers: [{ questionId: 'q1', value: ['X'] }] }),
       findAllBySurveyId: async () => responses,
     });
+    stubRepo(MembershipRepository, { findByPersonAndOrg: async () => fakeMembership });
 
     const ctx = makeCtx({
       _params: { survey: 'survey-1' },
@@ -520,6 +550,7 @@ describe('submitSurveyResponse', () => {
       submitResponse: async (data: any) => { Object.assign(captured, data); return { id: 'r1', ...data }; },
       findAllBySurveyId: async () => [],
     });
+    stubRepo(MembershipRepository, { findByPersonAndOrg: async () => ({ ...fakeMembership, personId: 'member-9' }) });
     const ctx = makeCtx({
       user: { id: 'member-9', role: 'user' },
       _params: { survey: 'survey-1' },
@@ -546,6 +577,7 @@ describe('submitSurveyResponse', () => {
         return { ...fakeResponse, id, answers, responderId: null };
       },
     });
+    stubRepo(MembershipRepository, { findByPersonAndOrg: async () => fakeMembership });
 
     const ctx = makeCtx({
       _params: { survey: 'survey-1' },
@@ -554,5 +586,47 @@ describe('submitSurveyResponse', () => {
     const res = await submitSurveyResponse(ctx);
     expect(res.status).toBe(200);
     expect(updateCalled).toBe(true);
+  });
+
+  // ─── /my/surveys/* — no x-org-id (ISSUE-FIX) ────────────────────────────
+
+  test('/my route: member with no x-org-id but membership in survey org → 201', async () => {
+    stubRepo(SurveyRepository, {
+      findById: async () => activeSurvey,
+    });
+    stubRepo(SurveyResponseRepository, {
+      findByResponderAndSurvey: async () => undefined,
+      submitResponse: async () => fakeResponse,
+    });
+    stubRepo(MembershipRepository, { findByPersonAndOrg: async () => fakeMembership });
+
+    // Simulate /my/surveys/* — no x-org-id header → organizationId undefined
+    const ctx = makeCtx({
+      user: { id: 'user-1', role: 'user' },
+      organizationId: undefined,
+      _params: { survey: 'survey-1' },
+      _body: { answers: [{ questionId: 'q1', value: 'My feedback' }] },
+    });
+
+    const res = await submitSurveyResponse(ctx);
+    expect(res.status).toBe(201);
+    expect((res as any).body.id).toBe('response-1');
+  });
+
+  test('/my route: non-member with no x-org-id → 404 (tenant boundary enforced)', async () => {
+    stubRepo(SurveyRepository, {
+      findById: async () => activeSurvey,
+    });
+    stubRepo(SurveyResponseRepository, {});
+    // Non-member: findByPersonAndOrg returns null
+    stubRepo(MembershipRepository, { findByPersonAndOrg: async () => null });
+
+    const ctx = makeCtx({
+      user: { id: 'outsider-1', role: 'user' },
+      organizationId: undefined,
+      _params: { survey: 'survey-1' },
+      _body: { answers: [{ questionId: 'q1', value: 'Hacking attempt' }] },
+    });
+    await expect(submitSurveyResponse(ctx)).rejects.toThrow('Survey not found');
   });
 });
