@@ -2,7 +2,8 @@
  * Repository for surveys module - database operations
  */
 
-import { and, eq, sql, gt, lt, count, type SQL } from 'drizzle-orm';
+import { and, eq, sql, gt, lt, count, inArray, type SQL } from 'drizzle-orm';
+import { memberships } from '@/handlers/association:member/repos/membership.schema';
 import type { DatabaseInstance } from '@/core/database';
 import {
   surveys,
@@ -136,14 +137,26 @@ export class SurveyRepository {
   }
 
   async findAvailableForMember(
-    organizationId: string,
+    organizationId: string | undefined,
     responderId: string,
     opts: { surveyType?: string; pagination: { limit: number; offset: number } }
   ): Promise<{ data: Array<Survey & { myResponseStatus: string | null; myCompletedAt: Date | null }>; totalCount: number }> {
+    // Tenant-boundary: always scope to orgs the member actually belongs to.
+    // This prevents leaking active surveys from orgs the member doesn't belong to
+    // even when no x-org-id header is present (e.g. /my/surveys outside org route tree).
+    const memberOrgsSubquery = this.db
+      .select({ orgId: memberships.organizationId })
+      .from(memberships)
+      .where(eq(memberships.personId, responderId));
+
     const conditions: SQL<unknown>[] = [
-      eq(surveys.organizationId, organizationId),
       eq(surveys.status, 'active'),
+      inArray(surveys.organizationId, memberOrgsSubquery),
     ];
+    // Optional narrowing: further restrict to a specific org when caller has org context.
+    if (organizationId) {
+      conditions.push(eq(surveys.organizationId, organizationId));
+    }
     if (opts.surveyType) {
       conditions.push(eq(surveys.surveyType, opts.surveyType));
     }
