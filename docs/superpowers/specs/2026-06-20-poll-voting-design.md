@@ -33,6 +33,8 @@ Add a repo method `findAvailableForMember(organizationId, responderId, { surveyT
 
 Expose via a **new, non-breaking** mode on `listSurveys` — `GET /surveys?mine=true&available=true` (param-gated; the existing `mine=true` answered-history path is untouched). `available=true` routes to `findAvailableForMember`. Member role (`["user"]`), same as `mine`.
 
+> **Plan-critical (gating first step).** `available` is **not** a handler-only change. The `ListSurveysQuery` Zod validator is a strict object (`generated/openapi/validators.ts`) — an undeclared `available` is silently dropped, so `query.available` is `undefined` and the mode is unreachable. The list page also sends via the generated SDK (`listSurveysOptions`), whose `ListSurveysData.query` won't accept `available` until regenerated. So step 1 of the plan: declare `available?: boolean` in `surveys.tsp` → `specs/api build` → `api-ts generate` → `sdk-ts generate`. Nothing downstream works until this lands. (Contrast: `getSurvey`'s member-read + `pollResults`/`myResponseStatus` fields work at the wire level *without* regen — routes have no response validator and `$surveyId.tsx` uses raw `api.get` with a local type — so the SDK regen there is type-only, not load-bearing.)
+
 > Why a param, not changing `mine` semantics: the existing `mine=true` is the member's answered history (incl. closed surveys they completed). A LEFT-JOIN active-only query would silently drop that history. Add a mode; don't mutate the existing one.
 
 **1b. `getSurvey` member read of active surveys (align handler to its `["user"]` spec).**
@@ -40,7 +42,7 @@ Expose via a **new, non-breaking** mode on `listSurveys` — `GET /surveys?mine=
 - Else (member): allow **only `status === 'active'`** surveys; return a **sanitized** payload — `{ id, title, description, surveyType, status, questions, settings: { deadline, anonymous, allowReedit } }`. Strip `targetAudience`, fatigue/analytics internals, audit columns. Draft/closed → `NotFoundError` for members (no existence leak).
 - When `surveyType === 'poll'`, include `pollResults` (current aggregated counts) in the response, computed by the shared aggregator. This gives the poll view its results without a separate endpoint and lets the "already voted" case render results on load.
 
-**1c. Extract `aggregatePollResults`** from `submitSurveyResponse.ts` into a shared spot (repo method or `surveys/utils`) so both `submitSurveyResponse` and `getSurvey` use it. No behavior change.
+**1c. Extract `aggregatePollResults`** from `submitSurveyResponse.ts` (currently a private fn) into a shared spot (`surveys/utils`, pure over `Survey` + `SurveyResponseRecord[]`) so both `submitSurveyResponse` and `getSurvey` use it. No behavior change, no import cycle (imports schema types only). `getSurvey` adds a `SurveyResponseRepository` to call `findAllBySurveyId`. **Known v1 limitation:** `findAllBySurveyId` caps at 500 completed responses (`survey.repo.ts:295`) — poll counts undercount beyond 500 votes. Acceptable for v1; noted, not raised.
 
 TypeSpec: `getSurvey` already declares `["user"]` — no contract change needed for auth. Add `available?: boolean` query param + `myResponseStatus`/`pollResults` to the relevant response models, then regenerate (`specs/api build` → `api-ts generate` → `sdk-ts generate`).
 
@@ -48,6 +50,7 @@ TypeSpec: `getSurvey` already declares `["user"]` — no contract change needed 
 
 - **`my/surveys` list** (`routes/_authenticated/my/surveys/index.tsx`): call the new `available` mode; add an **"Available"** section for `myResponseStatus == null` (clickable, includes polls). Keep Pending/Completed. Make completed **poll** cards clickable → results view.
 - **`SurveyFlow`** (`features/surveys/components/survey-flow.tsx`): add `surveyType` to the `Survey` type; on submit, **capture** the response and, when `surveyType === 'poll'`, render an aggregated-results view (per-option count + percentage bars) instead of the generic thank-you. If the member has already voted (detail loads with `pollResults` + completed status), show results immediately in read-only mode.
+  - **Results keying (important):** `pollResults.counts` is keyed by the **option-label string** (the aggregator does `String(answer.value)`, and `ChoiceQuestion` emits the label, not an index). Options with **zero votes are absent** from `counts`. The bar UI must iterate `question.options` and default each missing label to `0` — never iterate `counts` (it would hide unvoted options). Percentage = `count / pollResults.total` (guard `total === 0` → "No votes yet").
 - **Detail page** (`$surveyId.tsx`): now succeeds for members (getSurvey fix). Pass `surveyType`/`pollResults` through to `SurveyFlow`.
 - **Delete** dead `poll-card.tsx` + `poll-card.test.tsx`.
 
@@ -67,7 +70,7 @@ POST /surveys/{id}/responses ──▶ 201 { ...response, pollResults }   (exist
 
 ## Edge cases / guards
 
-- **Anonymous polls** (`settings.anonymous`): `submitResponse` already nulls `responderId`. Results aggregate by answer value, not responder — unaffected. Member's own answered-state for an anonymous survey may not resolve via response row; acceptable for v1 (polls are typically non-anonymous).
+- **Anonymous polls — guard (real hole).** If a poll has `settings.anonymous`, `submitResponse` nulls `responderId` → the dedup check (`findByResponderAndSurvey` with a null responder) never matches → the member can **double-vote**, and `myResponseStatus` is always null so the results-on-load UX can't tell they voted. Decision: **polls are always attributed** — for `surveyType === 'poll'`, ignore `settings.anonymous` (keep `responderId = userId`) so the existing 409 dedup + already-voted detection work. One conditional in `submitSurveyResponse`. (Results aggregate by answer value regardless, so attribution doesn't change displayed counts.)
 - **Deadline passed / not active**: `submitSurveyResponse` already 400s; member read is active-only so an expired-but-active poll still loads and the submit guard handles the race.
 - **Duplicate vote**: existing 409 unless `allowReedit`. Results view is the natural landing for an already-voted member.
 - **Draft leak**: member `getSurvey` returns `NotFound` for non-active — no draft questions/targetAudience exposure (preserves the FIX-001 intent for drafts while honoring the `["user"]` contract for active surveys).
@@ -75,7 +78,7 @@ POST /surveys/{id}/responses ──▶ 201 { ...response, pollResults }   (exist
 
 ## Testing (vertical, per VERTICAL_TDD)
 
-- **Contract (Hurl):** member `getSurvey` 200 on active + 403/404 on draft; `?mine=true&available=true` returns active unanswered for member; `submitSurveyResponse` echoes `pollResults`.
+- **Contract (Hurl):** member `getSurvey` 200 on active + 404 on draft; `?mine=true&available=true` returns active unanswered for member; `submitSurveyResponse` echoes `pollResults`. Note: `surveys-flow.hurl` today signs in only the **officer** (no member-403 assertion exists, so nothing breaks) — these are net-new and need a `member@memberry.ph` sign-in block added.
 - **Unit (bun):** `findAvailableForMember` LEFT-JOIN — member with no response sees the active survey (`myResponseStatus: null`); answered member sees their status; closed/draft excluded. `getSurvey` sanitization strips `targetAudience`.
 - **E2E (Playwright, as the MEMBER):** member@memberry.ph → my/surveys shows an Available poll → opens → votes → sees result bars; revisiting shows results read-only. Verify member can no longer 403 on a survey detail.
 
