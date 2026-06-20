@@ -5874,16 +5874,30 @@ export const IceServersResponseSchema = z.object({
   iceServers: z.array(IceServerSchema)
 });
 
+export const ImportMemberRowSchema = z.object({
+  firstName: z.string().max(50).optional(),
+  lastName: z.string().max(50).optional(),
+  email: z.string().max(254).optional(),
+  licenseNumber: z.string().max(50).optional(),
+  memberNumber: z.string().max(50).optional()
+});
+
 export const ImportMembersRequestSchema = z.object({
   organizationId: z.string(),
-  members: z.array(AddMemberRequestSchema)
+  tierId: z.string(),
+  members: z.array(ImportMemberRowSchema)
+});
+
+export const ImportRowErrorSchema = z.object({
+  index: z.number().int(),
+  error: z.string()
 });
 
 export const ImportResultSchema = z.object({
   imported: z.number().int(),
   skipped: z.number().int(),
   failed: z.number().int(),
-  errors: z.array(z.string())
+  errors: z.array(ImportRowErrorSchema)
 });
 
 export const InstitutionalMembershipSchema = z.object({

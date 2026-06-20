@@ -594,28 +594,63 @@ model UpdateMemberRequest {
   note?: string | null;
 }
 
-@doc("Request to import multiple members from an external source")
+@doc("A single member row in a roster import. Identity is resolved server-side: a person is matched globally by email or license number, and created if none exists.")
+model ImportMemberRow {
+  @doc("First name — required to CREATE a new person; optional when an existing person is matched")
+  @maxLength(50)
+  firstName?: string;
+
+  @doc("Last name")
+  @maxLength(50)
+  lastName?: string;
+
+  @doc("Email address — used to match/create the person (email or licenseNumber required)")
+  @maxLength(254)
+  email?: string;
+
+  @doc("Professional license number — used to match/create the person (email or licenseNumber required)")
+  @maxLength(50)
+  licenseNumber?: string;
+
+  @doc("Human-readable member number to store on the membership")
+  @maxLength(50)
+  memberNumber?: string;
+}
+
+@doc("Request to import multiple members from an external source (e.g. CSV)")
 model ImportMembersRequest {
   @doc("ID of the organization to import members into")
   organizationId: string;
 
-  @doc("Array of member records to import")
-  members: AddMemberRequest[];
+  @doc("Membership tier assigned to every imported member in this batch")
+  tierId: string;
+
+  @doc("Array of member rows to import")
+  members: ImportMemberRow[];
+}
+
+@doc("A single failed row in a roster import")
+model ImportRowError {
+  @doc("Zero-based index of the failed row within the request")
+  index: int32;
+
+  @doc("Human-readable reason the row failed")
+  error: string;
 }
 
 @doc("Result of a bulk member import operation")
 model ImportResult {
-  @doc("Number of records successfully imported")
+  @doc("Number of new memberships created")
   imported: int32;
 
-  @doc("Number of records skipped due to duplicates")
+  @doc("Number of rows skipped because the person is already a member of this org")
   skipped: int32;
 
-  @doc("Number of records that failed validation")
+  @doc("Number of rows that failed validation or insert")
   failed: int32;
 
-  @doc("Validation errors for failed records, indexed by position")
-  errors: string[];
+  @doc("Structured errors for failed rows")
+  errors: ImportRowError[];
 }
 
 @doc("Request to create or update a membership category")

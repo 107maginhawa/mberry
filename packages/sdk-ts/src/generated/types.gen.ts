@@ -14039,6 +14039,30 @@ export type CurrencyAmount = number;
 export type CurrencyCode = string;
 
 /**
+ * Request body for a manual (staff) custom-event check-in. The event comes from
+ * the path; a person may be checked in without a prior registration (walk-in), so
+ * personId defaults to the caller and registrationId is optional.
+ */
+export type CustomEventCheckInRequest = {
+    /**
+     * Person being checked in; defaults to the authenticated caller when omitted
+     */
+    personId?: string;
+    /**
+     * Check-in method; defaults to manual
+     */
+    method?: 'qr_code' | 'manual' | 'badge';
+    /**
+     * Registration record being checked in, if the attendee was pre-registered
+     */
+    registrationId?: string;
+    /**
+     * Staff member performing the check-in
+     */
+    checkedInBy?: string;
+};
+
+/**
  * Daily configuration within a weekly schedule
  */
 export type DailyConfig = {
@@ -19167,7 +19191,33 @@ export type IceServersResponse = {
 };
 
 /**
- * Request to import multiple members from an external source
+ * A single member row in a roster import. Identity is resolved server-side: a person is matched globally by email or license number, and created if none exists.
+ */
+export type ImportMemberRow = {
+    /**
+     * First name — required to CREATE a new person; optional when an existing person is matched
+     */
+    firstName?: string;
+    /**
+     * Last name
+     */
+    lastName?: string;
+    /**
+     * Email address — used to match/create the person (email or licenseNumber required)
+     */
+    email?: string;
+    /**
+     * Professional license number — used to match/create the person (email or licenseNumber required)
+     */
+    licenseNumber?: string;
+    /**
+     * Human-readable member number to store on the membership
+     */
+    memberNumber?: string;
+};
+
+/**
+ * Request to import multiple members from an external source (e.g. CSV)
  */
 export type ImportMembersRequest = {
     /**
@@ -19175,9 +19225,13 @@ export type ImportMembersRequest = {
      */
     organizationId: string;
     /**
-     * Array of member records to import
+     * Membership tier assigned to every imported member in this batch
      */
-    members: Array<AddMemberRequest>;
+    tierId: string;
+    /**
+     * Array of member rows to import
+     */
+    members: Array<ImportMemberRow>;
 };
 
 /**
@@ -19185,21 +19239,35 @@ export type ImportMembersRequest = {
  */
 export type ImportResult = {
     /**
-     * Number of records successfully imported
+     * Number of new memberships created
      */
     imported: number;
     /**
-     * Number of records skipped due to duplicates
+     * Number of rows skipped because the person is already a member of this org
      */
     skipped: number;
     /**
-     * Number of records that failed validation
+     * Number of rows that failed validation or insert
      */
     failed: number;
     /**
-     * Validation errors for failed records, indexed by position
+     * Structured errors for failed rows
      */
-    errors: Array<string>;
+    errors: Array<ImportRowError>;
+};
+
+/**
+ * A single failed row in a roster import
+ */
+export type ImportRowError = {
+    /**
+     * Zero-based index of the failed row within the request
+     */
+    index: number;
+    /**
+     * Human-readable reason the row failed
+     */
+    error: string;
 };
 
 /**
@@ -26603,6 +26671,14 @@ export type ProfessionalLicenseUpdateRequest = {
     expirationDate?: Date;
     status?: LicenseStatus;
     documentRef?: string | null;
+    /**
+     * Timestamp the license was verified by an officer
+     */
+    verifiedAt?: Date | null;
+    /**
+     * Person ID of the officer who verified the license
+     */
+    verifiedBy?: string | null;
 };
 
 /**
@@ -36568,7 +36644,7 @@ export type ListCustomEventAttendanceResponses = {
 export type ListCustomEventAttendanceResponse = ListCustomEventAttendanceResponses[keyof ListCustomEventAttendanceResponses];
 
 export type CheckInCustomEventData = {
-    body: CheckInCreateRequest;
+    body: CustomEventCheckInRequest;
     path: {
         eventId: string;
     };
