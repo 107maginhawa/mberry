@@ -23,11 +23,19 @@ export interface SurveyQuestion {
   maxStars?: number
 }
 
+export interface PollResult {
+  questionId: string
+  counts: Record<string, number>
+  total: number
+}
+
 export interface Survey {
   id: string
   title: string
   description?: string
+  surveyType?: string
   questions: SurveyQuestion[]
+  pollResults?: PollResult[]
 }
 
 type AnswerValue = number | string | string[] | boolean | null
@@ -119,6 +127,43 @@ function QuestionRenderer({
   }
 }
 
+// ── Poll Results ─────────────────────────────────────────────────────
+
+function PollResults({ questions, results }: { questions: SurveyQuestion[]; results: PollResult[] }) {
+  return (
+    <div className="w-full max-w-xl mx-auto space-y-6">
+      {questions.map((q) => {
+        const r = results.find((x) => x.questionId === q.id)
+        const total = r?.total ?? 0
+        return (
+          <div key={q.id} className="space-y-3">
+            <h3 className="text-h4 text-[var(--color-text)]">{q.text}</h3>
+            {total === 0 ? (
+              <p className="text-body-sm text-[var(--color-muted)]">No votes yet</p>
+            ) : (
+              (q.options ?? []).map((opt) => {
+                const cnt = r?.counts[opt] ?? 0
+                const pct = Math.round((cnt / total) * 100)
+                return (
+                  <div key={opt} className="space-y-1">
+                    <div className="flex justify-between text-body-sm">
+                      <span className="text-[var(--color-text)]">{opt}</span>
+                      <span className="text-[var(--color-muted)]">{cnt} · {pct}%</span>
+                    </div>
+                    <div className="h-2 w-full rounded-full bg-[var(--color-surface-elevated)] overflow-hidden">
+                      <div className="h-full rounded-full bg-[var(--color-primary)]" style={{ width: `${pct}%` }} />
+                    </div>
+                  </div>
+                )
+              })
+            )}
+          </div>
+        )
+      })}
+    </div>
+  )
+}
+
 // ── Component ────────────────────────────────────────────────────────
 
 interface SurveyFlowProps {
@@ -137,6 +182,7 @@ export function SurveyFlow({ survey, onComplete, previewMode }: SurveyFlowProps)
   const [answers, setAnswers] = useState<Record<string, AnswerValue>>({})
   const [submitting, setSubmitting] = useState(false)
   const [completed, setCompleted] = useState(false)
+  const [pollResults, setPollResults] = useState<PollResult[] | undefined>(survey.pollResults)
 
   // Offline draft persistence
   const { restoredAnswers, hasRestoredDraft, saveAnswers, clearDraft, isSaved } = useSurveyDraft({
@@ -194,7 +240,11 @@ export function SurveyFlow({ survey, onComplete, previewMode }: SurveyFlowProps)
         questionId: q.id,
         value: answers[q.id] ?? null,
       }))
-      await api.post(`/api/surveys/${survey.id}/responses`, { answers: formattedAnswers })
+      const res = await api.post<{ pollResults?: PollResult[] }>(
+        `/api/surveys/${survey.id}/responses`,
+        { answers: formattedAnswers },
+      )
+      if (res?.pollResults) setPollResults(res.pollResults)
       clearDraft()
       setCompleted(true)
       toast.success('Survey submitted successfully!')
@@ -227,6 +277,11 @@ export function SurveyFlow({ survey, onComplete, previewMode }: SurveyFlowProps)
     return () => window.removeEventListener('keydown', handleKeyDown)
   }, [canAdvance, isLast, goNext, goPrev, handleSubmit, completed])
 
+  // ── Poll results state ─────────────────────────────────────────────
+
+  const isPoll = survey.surveyType === 'poll'
+  const showResults = isPoll && (completed || (pollResults && pollResults.length > 0))
+
   // ── Completion screen ──────────────────────────────────────────────
 
   if (completed) {
@@ -254,6 +309,28 @@ export function SurveyFlow({ survey, onComplete, previewMode }: SurveyFlowProps)
               : 'Your responses have been recorded.'}
           </p>
         </motion.div>
+        {isPoll && pollResults && pollResults.length > 0 && (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.5 }}
+            className="w-full mt-4"
+          >
+            <p className="text-center text-body-sm text-[var(--color-muted)] mb-4">Poll results</p>
+            <PollResults questions={questions} results={pollResults} />
+          </motion.div>
+        )}
+      </div>
+    )
+  }
+
+  // ── Already-voted short-circuit ────────────────────────────────────
+
+  if (showResults && !completed && pollResults) {
+    return (
+      <div className="min-h-[60vh] flex flex-col justify-center">
+        <p className="text-center text-body-sm text-[var(--color-muted)] mb-6">You've already voted — here are the results.</p>
+        <PollResults questions={questions} results={pollResults} />
       </div>
     )
   }
