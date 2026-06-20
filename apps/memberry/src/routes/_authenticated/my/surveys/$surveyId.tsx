@@ -20,7 +20,7 @@ function SurveyDetailPage() {
 
   const { data, isLoading, error } = useQuery<Survey>({
     queryKey: ['surveys', surveyId],
-    queryFn: () => api.get<Survey>(`/surveys/${surveyId}`),
+    queryFn: () => api.get<Survey>(`/api/surveys/${surveyId}`),
     enabled: !!surveyId,
   })
 
