@@ -67,11 +67,15 @@ export async function uploadFile(
   onProgress?.(10);
 
   // Step 1: request presigned URL.
-  // The spec types `size` as int64 → BigInt; browser's File.size is number.
+  // The spec types `size` as int64 → bigint, but the SDK's jsonBodySerializer
+  // stringifies a real BigInt (`123n` → `"123"`), and the backend validator
+  // expects a JSON number — a string 400s ("size: expected number, received
+  // string"). Send a plain JS number on the wire; the cast keeps the bigint
+  // type checker happy. (Same trick qa-phase3 used for money fields.)
   const { data: uploadResp } = await requestUpload({
     body: {
       filename: file.name,
-      size: BigInt(file.size),
+      size: file.size as unknown as bigint,
       mimeType: file.type,
     },
     throwOnError: true,

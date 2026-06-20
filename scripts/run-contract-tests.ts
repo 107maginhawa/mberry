@@ -88,6 +88,11 @@ if (allFiles.length === 0) {
 // log is more useful than a 15s connection-refused fail.
 const mailpitSpecs = new Set(['auth-password-reset.hurl', 'auth-verification.hurl'])
 const stripeSpecs = new Set(['billing-extended-flow.hurl', 'billing-lifecycle.hurl'])
+// Storage specs PUT bytes through a presigned URL to MinIO; without it the
+// POST /storage/files/upload handler 500s instead of returning a usable URL.
+// (Set derived by grepping the contract dir for '/storage/files/upload'.)
+const storageSpecs = new Set(['storage-edge.hurl', 'assoc-documents-flow.hurl'])
+const minioUrl = process.env.MINIO_URL ?? 'http://localhost:9000'
 
 async function reachable(url: string, timeoutMs = 1000): Promise<boolean> {
   try {
@@ -106,6 +111,16 @@ const mailpitUp = await reachable(mailpitApi).then((ok) =>
 )
 const stripeMockUrl = process.env.STRIPE_API_BASE ?? 'http://localhost:12111'
 const stripeUp = process.env.STRIPE_SECRET_KEY != null && (await reachable(stripeMockUrl))
+// MinIO health endpoint: GET /minio/health/live → 200 when live. Mirror the
+// mailpit probe (a real fetch that resolves false on connection-refused), since
+// reachable() alone swallows the error and would report a downed service as up.
+const minioUp = await reachable(`${minioUrl}/minio/health/live`).then((ok) =>
+  ok
+    ? fetch(`${minioUrl}/minio/health/live`, { signal: AbortSignal.timeout(500) })
+        .then(() => true)
+        .catch(() => false)
+    : false,
+)
 
 const skipped: Array<{ file: string; reason: string }> = []
 const files = allFiles.filter((f) => {
@@ -116,6 +131,10 @@ const files = allFiles.filter((f) => {
   }
   if (stripeSpecs.has(base) && !stripeUp) {
     skipped.push({ file: base, reason: `stripe-mock or STRIPE_SECRET_KEY not configured` })
+    return false
+  }
+  if (storageSpecs.has(base) && !minioUp) {
+    skipped.push({ file: base, reason: `MinIO unreachable at ${minioUrl} — storage specs skipped` })
     return false
   }
   return true

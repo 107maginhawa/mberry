@@ -186,7 +186,11 @@ describe('uploadFile', () => {
     };
     expect(callArgs.body.filename).toBe('report.pdf');
     expect(callArgs.body.mimeType).toBe('application/pdf');
-    expect(callArgs.body.size).toBe(BigInt(1024));
+    // size must be a plain number, NOT a BigInt: the SDK's jsonBodySerializer
+    // stringifies BigInt → the backend validator rejects size as a string (400).
+    // Regression guard for the BigInt-stringify upload trap.
+    expect(callArgs.body.size).toBe(1024);
+    expect(typeof callArgs.body.size).toBe('number');
   });
 
   test('throws S3UploadError when PUT returns non-2xx', async () => {
