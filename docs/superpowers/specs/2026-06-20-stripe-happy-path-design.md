@@ -126,7 +126,16 @@ locally on `design/ui-ux-audit`. LIVE /browse verify before any "done" claim.
   (checkout 200, webhook `action=processed`, payment `completed`, invoice `paid`, membership 2027-01-16→2028-01-16,
   money 300000 exact). /browse `/pay/$token`: renders ₱3,000.00 / PDA Metro Manila / Miguel + Pay Now →
   `POST /api/pay/.../checkout 200` → redirect to Stripe Checkout (`cs_test_…`), 0 console errors.
-- [ ] **T3 — Event path**: ensure paid event; register-and-pay → checkout → webhook → settle → /browse.
+- [x] **T3 — Event path**: DONE + live-verified. Required real code (not just infra):
+  (1) `event_registration.paid_at` nullable column + migration **0077**; (2) webhook event-settlement
+  branch in `processStripePayment.ts` (matches `metadata.type=event_registration`, stamps `paid_at`,
+  idempotent, returns before dues guards); (3) **root-fix** `registerAndPayForEvent.ts` — its Stripe
+  metadata lacked `orgId`, so a REAL event webhook would dead-letter at intake (`webhook_retry_log.organization_id`
+  is NOT NULL, fed from `metadata.orgId ?? ''` → empty-uuid error). Added `orgId`/`organizationId`.
+  Driver `event` subcommand 10/10, `all` 27/27 (self-run). /browse: event page renders + "Register and Pay"
+  → `POST register-and-pay 201` → Stripe Checkout redirect.
+  - Deferred polish: no FE "Paid" badge (paid_at internal-only; would need TypeSpec+regen); optimistic
+    `confirmed`-before-payment unchanged (registration confirms pre-pay — separate redesign).
 - [ ] **T4 — Booking path**: ensure booking+invoice; payInvoice → checkout → webhook (capture) → paid → /browse.
 - [ ] **T5 — Verify driver + ledger**: one runnable driver script; finalize ledger; commit.
 
@@ -137,4 +146,5 @@ locally on `design/ui-ux-audit`. LIVE /browse verify before any "done" claim.
 | 2026-06-20 | Brainstorm + verify (2 workflow rounds, 10 agents) | Verified all claims; refuted stale `initiateOnlinePayment` chain; confirmed env is the blocker | — |
 | 2026-06-20 | Design approved | Option A, all 3 paths | — |
 | 2026-06-20 | **T1 setup DONE** | stripe-mock up :12111; 3 Stripe env keys added to api-ts/.env; API restarted (auth/ok 200); 2 webhook routes + dues_gateway_config(connected) + ground-truth ids confirmed | — |
-| 2026-06-20 | **T2 dues DONE** (implementer+reviewer driver, self-run 17/17, /browse) | dues `/pay/$token` end-to-end live-verified: settle + invoice paid + membership extended + member UI render + Pay→checkout 200. stripe-mock key fix: rejects underscored suffix → `sk_test_memberrydevdummy`. | (pending) |
+| 2026-06-20 | **T2 dues DONE** (implementer+reviewer driver, self-run 17/17, /browse) | dues `/pay/$token` end-to-end live-verified: settle + invoice paid + membership extended + member UI render + Pay→checkout 200. stripe-mock key fix: rejects underscored suffix → `sk_test_memberrydevdummy`. | 06767156 |
+| 2026-06-20 | **T3 event DONE** (implementer+reviewer, self-run 27/27, /browse) | event settlement built: paid_at col + migration 0077 + webhook branch + root-fix orgId metadata (real webhook would've dead-lettered). Register-and-pay 201 → Stripe Checkout. | (pending) |

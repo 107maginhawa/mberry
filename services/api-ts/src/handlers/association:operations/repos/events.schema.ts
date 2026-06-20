@@ -102,6 +102,7 @@ export const eventRegistrations = pgTable('event_registration', {
   personId: uuid('person_id').notNull(),
   status: registrationStatusEnum('status').notNull().default('confirmed'),
   registeredAt: timestamp('registered_at', { withTimezone: true }).notNull().defaultNow(),
+  paidAt: timestamp('paid_at', { withTimezone: true }),
   cancelledAt: timestamp('cancelled_at', { withTimezone: true }),
   refundedAt: timestamp('refunded_at', { withTimezone: true }),
 }, (table) => [

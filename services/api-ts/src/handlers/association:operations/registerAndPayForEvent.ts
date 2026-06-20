@@ -105,6 +105,11 @@ export async function registerAndPayForEvent(
       eventId: params.eventId,
       registrationId: registration.id,
       personId: session.user.id,
+      // The webhook intake (stripeWebhook.ts) writes webhook_retry_log.organization_id
+      // (NOT NULL) from metadata.orgId/organizationId. Without these the real event
+      // webhook dead-letters at intake on an empty-string uuid. Mirror the dues checkout.
+      orgId: event.organizationId,
+      organizationId: event.organizationId,
     },
   });
 

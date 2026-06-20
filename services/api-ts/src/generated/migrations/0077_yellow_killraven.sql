@@ -1,0 +1,1 @@
+ALTER TABLE "event_registration" ADD COLUMN "paid_at" timestamp with time zone;

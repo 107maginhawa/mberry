@@ -11,6 +11,7 @@ import type { Logger } from 'pino';
 import { settlePayment as defaultSettlePayment } from '@/handlers/association:member/utils/settle-payment';
 import { DuesRepository } from '@/handlers/association:member/repos/dues-payments.repo';
 import { DuesInvoiceRepository } from '@/handlers/association:member/repos/dues.repo';
+import { EventRegistrationRepository } from '@/handlers/association:operations/repos/events.repo';
 
 /**
  * Creates a processPayment callback bound to the given dependencies.
@@ -48,6 +49,23 @@ export function createProcessPayment(
     // intent id produced a non-UUID that failed the fund-allocation FK insert
     // and dead-lettered the webhook — leaving money charged with no ledger row.
     const paymentId = metadata['paymentId'];
+
+    // EVENT settlement — event_registration payments carry NO orgId and NO
+    // paymentId (only type/eventId/registrationId/personId). Settle by stamping
+    // paid_at on the registration row, then return BEFORE the dues guards below.
+    if (metadata['type'] === 'event_registration') {
+      const registrationId = metadata['registrationId'];
+      if (!registrationId) throw new Error('Missing metadata.registrationId for event_registration payment');
+      const regRepo = new EventRegistrationRepository(db);
+      const registration = await regRepo.findOneById(registrationId);
+      if (!registration) throw new Error(`No event_registration row for registrationId=${registrationId}`);
+      if (!registration.paidAt) {
+        // updateOneById (base repo) auto-bumps version + updatedAt; idempotent — only stamp when null.
+        await regRepo.updateOneById(registrationId, { paidAt: new Date(), updatedBy: registration.personId });
+      }
+      logger.info({ paymentIntentId, registrationId, eventId: metadata['eventId'] }, 'Event registration payment settled');
+      return { success: true };
+    }
 
     if (!orgId || !personId) {
       throw new Error(

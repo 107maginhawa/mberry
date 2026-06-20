@@ -1,7 +1,7 @@
 /**
  * stripe-happy-path.ts — End-to-end happy-path verify driver for online payments.
  *   Run: cd services/api-ts && bun scripts/stripe-happy-path.ts dues   (also: 'all'; default 'dues')
- *   DUES is implemented; 'event' and 'booking' are TODO stubs. Self-contained, idempotent,
+ *   DUES + EVENT are implemented; 'booking' is a TODO stub. Self-contained, idempotent,
  *   re-runnable; exits non-zero on ANY assertion failure and prints a PASS/FAIL summary.
  */
 
@@ -30,6 +30,11 @@ const MIGUEL = '425e7ea6-b8d8-4910-86f3-74b401701ce9';
 const MEMBERSHIP_ID = 'f659c8e0-7a5e-4efd-83a9-b472354dee34';
 const OFFICER_EMAIL = 'test@memberry.ph';
 const OFFICER_PASSWORD = 'TestPass123!';
+// Member (Miguel Bautista) — session.user.id === MIGUEL (person-centric: user.id IS person id).
+const MEMBER_EMAIL = 'member@memberry.ph';
+const MEMBER_PASSWORD = 'TestPass123!';
+const EVENT_MARKER = 'STRIPE-TEST-EVENT-';
+const EVENT_FEE = 250000; // PHP 2500.00 in minor units
 const AMOUNT = 300000; // PHP 3000.00 in minor units
 const FUND_ALLOCATIONS_JSON = JSON.stringify([
   { amount: 150000, fundName: 'General Fund' },
@@ -373,12 +378,196 @@ function preCleanOrphans(): void {
   console.log(`  Pre-clean: removed ${orphanIds.length} orphan fixture invoice(s) from prior runs.`);
 }
 
-// ── TODO stubs ────────────────────────────────────────────────────────
-// TODO(event): register-for-paid-event → mint/checkout → webhook → verify registration paid +
-//   ticket/seat decremented + ledger row. Mirror runDues structure once the event-pay flow is verified.
+// ── EVENT driver ──────────────────────────────────────────────────────
+// register-for-paid-event → checkout → webhook(payment_intent.succeeded) → verify
+// event_registration.paid_at stamped. Event fee is server-side; we assert paid_at set.
 async function runEvent(): Promise<void> {
-  console.log('\n=== EVENT happy-path: TODO (not implemented) ===');
-  throw new Error('event subcommand not implemented yet');
+  console.log('\n=== EVENT online-payment happy-path ===\n');
+
+  // Pre-clean any orphan STRIPE-TEST-EVENT- fixtures from prior failed runs.
+  preCleanEventOrphans();
+
+  const eventId = crypto.randomUUID();
+  const ts = Date.now();
+  const title = `${EVENT_MARKER}${ts}`;
+
+  try {
+    // 1. FIXTURE — insert a fresh paid, published event (status 'published' allows registration).
+    //    Required event columns (notNull, no default): organization_id, title, start_date, end_date.
+    //    status defaults to 'draft'; set 'published' explicitly so the member can register.
+    psql(`
+      INSERT INTO event
+        (id, created_at, updated_at, version, title, organization_id,
+         start_date, end_date, capacity, registration_fee, currency,
+         status, created_by, updated_by)
+      VALUES
+        (${q(eventId)}, now(), now(), 1, ${q(title)}, ${q(ORG)},
+         now() + interval '30 days', now() + interval '30 days' + interval '4 hours', 50,
+         ${EVENT_FEE}, 'PHP', 'published', ${q(MIGUEL)}, ${q(MIGUEL)});`);
+    const insertedTitle = psql(`SELECT title FROM event WHERE id = ${q(eventId)};`);
+    assert('1. fixture event inserted', title, insertedTitle, insertedTitle === title);
+
+    // 2. MEMBER sign-in (better-auth) → capture cookie.
+    let cookie = '';
+    const signIn = await fetch(`${API_BASE}/auth/sign-in/email`, {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ email: MEMBER_EMAIL, password: MEMBER_PASSWORD }),
+    });
+    if (signIn.ok) cookie = captureCookies(signIn);
+    assert('2. member sign-in 200 + cookie', 'cookie', cookie ? 'cookie' : '(none)', signIn.ok && cookie.length > 0);
+    if (!cookie) throw new Error(`member sign-in failed (status ${signIn.status}) — cannot continue`);
+
+    // 2b. CSRF double-submit — authenticated /association/* POSTs require a matching
+    //     `csrf_token` cookie + `x-csrf-token` header (createCsrfTokenMiddleware). The
+    //     dues /pay/* path is allowlisted; this authed route is not. GET /csrf-token to
+    //     mint both, then send the token in BOTH the cookie jar and the header.
+    const csrfRes = await fetch(`${API_BASE}/csrf-token`, { headers: { Cookie: cookie } });
+    const csrfCookie = captureCookies(csrfRes); // e.g. "csrf_token=<tok>"
+    const csrfToken = ((await csrfRes.json()) as { token?: string }).token ?? '';
+    assert('2b. csrf-token minted', 'non-empty', csrfToken ? `${csrfToken.slice(0, 8)}…` : '(none)', csrfToken.length > 0);
+    const cookieWithCsrf = [cookie, csrfCookie].filter(Boolean).join('; ');
+
+    // 3. REGISTER-AND-PAY — POST .../register-and-pay (session+csrf cookies, x-csrf-token
+    //    header, Origin for the hono/csrf origin-check). Response is enveloped:
+    //    { data: { checkoutUrl, registrationId } } (also tolerate flat shape).
+    //    x-org-id MUST be sent (as the real SDK client does): the org-context middleware
+    //    otherwise grabs the eventId UUID out of the path as the org and 403s membership.
+    const rapRes = await fetch(`${API_BASE}/association/event-lifecycle/${eventId}/register-and-pay`, {
+      method: 'POST',
+      headers: {
+        'content-type': 'application/json',
+        Cookie: cookieWithCsrf,
+        Origin: APP_ORIGIN,
+        'x-csrf-token': csrfToken,
+        'x-org-id': ORG,
+      },
+    });
+    assert('3. register-and-pay 200/201', '200|201', rapRes.status, rapRes.status === 200 || rapRes.status === 201);
+    const rapRaw = (await rapRes.json()) as
+      | { data?: { checkoutUrl?: string; registrationId?: string }; checkoutUrl?: string; registrationId?: string; error?: string };
+    const rapBody = rapRaw.data ?? rapRaw;
+    const checkoutUrl = rapBody.checkoutUrl;
+    assert(
+      '3. checkoutUrl non-empty',
+      'non-empty string',
+      checkoutUrl ? `${checkoutUrl.slice(0, 40)}…` : `(none) err=${(rapRaw as { error?: string }).error}`,
+      typeof checkoutUrl === 'string' && checkoutUrl.length > 0,
+    );
+
+    // Capture registrationId from response, else query event_registration for {eventId, person=MIGUEL}.
+    let registrationId = rapBody.registrationId ?? '';
+    if (!registrationId) {
+      registrationId = psql(`
+        SELECT id FROM event_registration
+        WHERE event_id = ${q(eventId)} AND person_id = ${q(MIGUEL)}
+        ORDER BY created_at DESC LIMIT 1;`);
+    }
+    assert('3. registrationId captured', 'non-empty', registrationId || '(none)', !!registrationId);
+    if (!registrationId) throw new Error('No registrationId captured — cannot continue');
+
+    // 4. ASSERT paid_at IS NULL before settlement.
+    const paidBefore = psql(`SELECT COALESCE(paid_at::text, 'NULL') FROM event_registration WHERE id = ${q(registrationId)};`);
+    assert('4. paid_at NULL before settle', 'NULL', paidBefore, paidBefore === 'NULL');
+
+    // 5. FABRICATE + SIGN webhook (payment_intent.succeeded). The SETTLEMENT branch in
+    //    processStripePayment only reads type/registrationId/eventId — it ignores orgId and
+    //    returns before the dues orgId/paymentId guards. BUT the webhook INTAKE
+    //    (stripeWebhookHandler → handleIncomingWebhook) inserts a webhook_retry_log row whose
+    //    organization_id is NOT NULL uuid, sourced from metadata.orgId. So we include orgId
+    //    here to satisfy that intake insert. (DISCOVERED: registerAndPayForEvent does NOT put
+    //    orgId in its Stripe metadata, so the real event webhook would dead-letter at intake on
+    //    an empty-string uuid — a separate, out-of-3-file-scope fix.) Stringify ONCE; sign+send same.
+    const payload = JSON.stringify({
+      id: `evt_stripe_test_event_${ts}`,
+      type: 'payment_intent.succeeded',
+      data: {
+        object: {
+          id: `pi_stripe_test_event_${ts}`,
+          status: 'succeeded',
+          amount: EVENT_FEE,
+          currency: 'php',
+          metadata: {
+            type: 'event_registration',
+            registrationId,
+            eventId,
+            personId: MIGUEL,
+            orgId: ORG, // intake-only: satisfies webhook_retry_log.organization_id NOT NULL
+          },
+        },
+      },
+    });
+    const stripe = new Stripe('sk_test_x');
+    const sigHeader = await stripe.webhooks.generateTestHeaderStringAsync({
+      payload,
+      secret: STRIPE_WEBHOOK_SECRET,
+    });
+
+    // 6. POST webhook → assert HTTP 200.
+    const whRes = await fetch(WEBHOOK_URL, {
+      method: 'POST',
+      headers: { 'stripe-signature': sigHeader, 'content-type': 'application/json' },
+      body: payload,
+    });
+    const whBody = (await whRes.json()) as { received?: boolean; action?: string };
+    assert('6. webhook HTTP 200', 200, whRes.status, whRes.status === 200);
+    // action 'processed' = settlement ran inline & succeeded; 'queued_for_retry' = it threw.
+    assert(
+      '6. webhook action===processed',
+      'processed',
+      `received=${whBody.received} action=${whBody.action}`,
+      whBody.received === true && whBody.action === 'processed',
+    );
+
+    // 7. VERIFY SETTLEMENT — paid_at IS NOT NULL. Settlement runs inline in the webhook, so
+    //    it's stamped by the time we get here; poll briefly anyway for timing robustness.
+    let paidAfter = 'NULL';
+    for (let i = 0; i < 10; i++) {
+      paidAfter = psql(`SELECT COALESCE(paid_at::text, 'NULL') FROM event_registration WHERE id = ${q(registrationId)};`);
+      if (paidAfter !== 'NULL' && paidAfter !== '') break;
+      await new Promise((r) => setTimeout(r, 300));
+    }
+    assert('7. paid_at set after settle', 'not NULL', paidAfter, paidAfter !== 'NULL' && paidAfter !== '');
+  } finally {
+    // 8. CLEANUP (try/finally; runs even on failure unless --keep).
+    if (KEEP) {
+      console.log('\n  [--keep] Skipping cleanup. Fixture event + registration left in DB.');
+    } else {
+      cleanupEvent(eventId);
+    }
+  }
+}
+
+// Delete event_registration rows for the fixture event, then the event itself (scoped by eventId).
+function cleanupEvent(eventId: string): void {
+  const cleaned: string[] = [];
+
+  const delReg = psql(
+    `WITH d AS (DELETE FROM event_registration WHERE event_id = ${q(eventId)} RETURNING 1) SELECT count(*) FROM d;`,
+  );
+  if (delReg !== '0') cleaned.push(`event_registration(${delReg})`);
+
+  const delEvt = psql(
+    `WITH d AS (DELETE FROM event WHERE id = ${q(eventId)} RETURNING 1) SELECT count(*) FROM d;`,
+  );
+  if (delEvt !== '0') cleaned.push(`event(${delEvt})`);
+
+  console.log(`\n  Cleanup: ${cleaned.length ? cleaned.join(', ') : 'nothing to clean'}`);
+}
+
+// Clear leftover STRIPE-TEST-EVENT- fixtures (+ their registrations) from prior failed runs.
+function preCleanEventOrphans(): void {
+  const orphanIds = psql(
+    `SELECT id FROM event WHERE title LIKE ${q(EVENT_MARKER + '%')};`,
+  )
+    .split('\n')
+    .filter(Boolean);
+  if (!orphanIds.length) return;
+  for (const id of orphanIds) {
+    psql(`DELETE FROM event_registration WHERE event_id = ${q(id)};`);
+    psql(`DELETE FROM event WHERE id = ${q(id)};`);
+  }
+  console.log(`  Pre-clean: removed ${orphanIds.length} orphan fixture event(s) from prior runs.`);
 }
 // TODO(booking): billing-Connect invoice-pay → checkout → webhook → verify booking invoice settled.
 async function runBooking(): Promise<void> {
@@ -399,8 +588,9 @@ async function main(): Promise<void> {
       await runBooking();
     } else if (cmd === 'all') {
       await runDues();
-      // TODO: await runEvent(); await runBooking(); — enable once implemented.
-      console.log('\n  (all) event + booking are TODO — only dues ran.');
+      await runEvent();
+      // TODO: await runBooking(); — enable once implemented.
+      console.log('\n  (all) booking is TODO — dues + event ran.');
     } else {
       console.error(`Unknown subcommand: ${cmd}. Use: dues | event | booking | all`);
       process.exit(2);
