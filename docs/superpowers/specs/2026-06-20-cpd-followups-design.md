@@ -44,9 +44,21 @@
 
 **Verify (DoD #2):** ✅ all met.
 
-## #1 — Activity-worth columns to float8 (cheap, finishes the story)
+## #1 — Activity-worth columns to float8 (DONE)
 
-`events.schema.ts:83`, `training.schema.ts:80/130` = `integer('credit_amount')` while their TypeSpec is already float64 → a 1.5-credit course truncates to 1. Migration 0076 (no matview dep) + 2 schema lines (`integer`→`doublePrecision`); specs already float64, regen only flips event/training validators if any were int (verify). Live: officer creates 1.5-credit training → member earns 1.5. *(detailed after #2)*
+`events.schema.ts:83`, `training.schema.ts:80/130` were `integer('credit_amount')` while their TypeSpec + generated validators were already `float64`/`z.number()` → the **DB column was the only blocker** (a 1.5-credit course truncated to 1; `award-training-credit.ts:94` then carried the truncated value into `credit_entry`).
+
+**Shipped:** 3 schema columns `integer`→`doublePrecision` (event, course, training) + `doublePrecision` import. Migration **0076_overjoyed_chamber** = 3 plain ALTERs (no matview dep — only `credit_entry.credit_amount` feeds `compliance_standings`). No TypeSpec/validator/SDK change needed (int and float both `number`; validators already `z.number()`).
+
+**Verified:** after 0076, `event`/`training`/`course`.credit_amount all `double precision`; API list read-back of a training set to `14.5` returns `creditAmount:14.5` `typeof "number"` (no truncation, no string). Officer create-training form already had `step=0.5` and held `1.5`. Award path now carries fractions into `credit_entry` (both float8). Migration applied clean on restart.
+
+| # | Task | Status |
+|---|---|---|
+| 1.1 | 3 schema cols integer→doublePrecision + import | ☑ |
+| 1.2 | Migration 0076 (3 ALTERs, no matview) | ☑ |
+| 1.3 | Restart + DB column types double precision | ☑ |
+| 1.4 | Live: training holds/serves 14.5 as number | ☑ |
+| 1.5 | Commit | ☑ |
 
 ## B — Cosmetics (low)
 
