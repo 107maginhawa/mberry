@@ -283,3 +283,128 @@ Content-Type: application/json
 HTTP *
 [Asserts]
 status toString matches "^(200|400|404|422)$"
+
+# ══════════════════════════════════════════════════════════════════════════════
+# D3 — Member survey read + available list + poll vote
+# ══════════════════════════════════════════════════════════════════════════════
+
+# ── D3.0. Re-fetch CSRF (previous one may be stale after sign-out/re-auth) ───
+
+GET {{api}}/csrf-token
+HTTP 200
+[Captures]
+csrf_token: jsonpath "$.token"
+
+POST {{api}}/auth/sign-in/email
+Origin: {{origin}}
+x-csrf-token: {{csrf_token}}
+Content-Type: application/json
+{
+  "email": "test@memberry.ph",
+  "password": "TestPass123!"
+}
+HTTP 200
+[Captures]
+officer_cookie: cookie "better-auth.session_token"
+
+# ── D3.1. Officer creates a poll survey ──────────────────────────────────────
+
+POST {{api}}/surveys/
+Origin: {{origin}}
+x-csrf-token: {{csrf_token}}
+Cookie: better-auth.session_token={{officer_cookie}}
+x-org-id: ed8e3a96-8126-4341-be42-e6eb7940c562
+Content-Type: application/json
+{
+  "title": "D3 Poll {{suffix}}",
+  "surveyType": "poll",
+  "questions": [
+    {
+      "id": "33333333-3333-4333-8333-333333333333",
+      "type": "single_choice",
+      "text": "Which option do you prefer?",
+      "required": true,
+      "order": 0,
+      "options": ["A", "B", "C"]
+    }
+  ]
+}
+HTTP 201
+[Captures]
+poll_id: jsonpath "$.id"
+[Asserts]
+jsonpath "$.surveyType" == "poll"
+jsonpath "$.status" == "draft"
+
+# ── D3.2. Officer publishes the poll ─────────────────────────────────────────
+
+POST {{api}}/surveys/{{poll_id}}/publish
+Origin: {{origin}}
+x-csrf-token: {{csrf_token}}
+Cookie: better-auth.session_token={{officer_cookie}}
+x-org-id: ed8e3a96-8126-4341-be42-e6eb7940c562
+HTTP 200
+[Asserts]
+jsonpath "$.id" == "{{poll_id}}"
+jsonpath "$.status" == "active"
+
+# ── D3.3. Member signs in ─────────────────────────────────────────────────────
+
+GET {{api}}/csrf-token
+HTTP 200
+[Captures]
+csrf_token: jsonpath "$.token"
+
+POST {{api}}/auth/sign-in/email
+Origin: {{origin}}
+x-csrf-token: {{csrf_token}}
+Content-Type: application/json
+{
+  "email": "member@memberry.ph",
+  "password": "TestPass123!"
+}
+HTTP 200
+[Captures]
+member_cookie: cookie "better-auth.session_token"
+
+# ── D3.4. Member reads active poll detail (sanitized — no targetAudience) ────
+
+GET {{api}}/surveys/{{poll_id}}
+Cookie: better-auth.session_token={{member_cookie}}
+x-org-id: ed8e3a96-8126-4341-be42-e6eb7940c562
+HTTP 200
+[Asserts]
+jsonpath "$.id" == "{{poll_id}}"
+jsonpath "$.surveyType" == "poll"
+jsonpath "$.settings.targetAudience" not exists
+
+# ── D3.5. Member discovery: available+mine lists the active poll ──────────────
+
+GET {{api}}/surveys/?mine=true&available=true
+Cookie: better-auth.session_token={{member_cookie}}
+x-org-id: ed8e3a96-8126-4341-be42-e6eb7940c562
+HTTP 200
+[Asserts]
+jsonpath "$.data" isCollection
+jsonpath "$.data" count >= 1
+
+# ── D3.6. Member votes; response echoes pollResults ──────────────────────────
+
+POST {{api}}/surveys/{{poll_id}}/responses
+Origin: {{origin}}
+x-csrf-token: {{csrf_token}}
+Cookie: better-auth.session_token={{member_cookie}}
+x-org-id: ed8e3a96-8126-4341-be42-e6eb7940c562
+Content-Type: application/json
+{
+  "answers": [
+    {
+      "questionId": "33333333-3333-4333-8333-333333333333",
+      "value": "A"
+    }
+  ]
+}
+HTTP 201
+[Asserts]
+jsonpath "$.pollResults" exists
+jsonpath "$.pollResults[0].total" >= 1
