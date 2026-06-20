@@ -1096,6 +1096,12 @@ export async function seedSurveysModule(
   memberPersonIds: string[],
 ) {
   console.log('  Surveys module...');
+  // Stable question ids for the NPS survey. The submit-response validator
+  // requires `questionId` to be a UUID, so question ids must be real UUIDs
+  // (not 'q1'/'q2'). Kept as fixed literals (not crypto.randomUUID()) so
+  // reseeds are deterministic and seeded responses can reference them.
+  const NPS_Q1_ID = 'b0a1c2d3-4e5f-4a6b-8c7d-9e0f1a2b3c4d';
+  const NPS_Q2_ID = 'c1b2d3e4-5f6a-4b7c-9d8e-0f1a2b3c4d5e';
   try {
     // ── Base surveys (NPS + draft + completed responses) ──
     // Guarded together: skip if any survey already exists.
@@ -1112,8 +1118,8 @@ export async function seedSurveysModule(
         status: 'active',
         createdBy: presidentPersonId,
         questions: [
-          { id: 'q1', type: 'nps', text: 'How likely are you to recommend our association to a colleague?', required: true, order: 1 },
-          { id: 'q2', type: 'text', text: 'What could we do better?', required: false, order: 2 },
+          { id: NPS_Q1_ID, type: 'nps', text: 'How likely are you to recommend our association to a colleague?', required: true, order: 1 },
+          { id: NPS_Q2_ID, type: 'text', text: 'What could we do better?', required: false, order: 2 },
         ],
         settings: { anonymous: false, fatigueThreshold: 2 },
       }).returning({ id: surveysTable.id });
@@ -1123,7 +1129,10 @@ export async function seedSurveysModule(
         organizationId: orgId,
         title: 'Annual Convention Feedback',
         description: 'Help us improve next year\'s convention.',
-        surveyType: 'general',
+        // 'general' is NOT a valid SurveyType (enum: nps|satisfaction|poll|custom).
+        // This is a satisfaction-rating survey (leads with a 1-5 experience rating),
+        // matching the sibling CPD "satisfaction" survey below.
+        surveyType: 'satisfaction',
         status: 'draft',
         createdBy: presidentPersonId,
         questions: [
@@ -1134,7 +1143,12 @@ export async function seedSurveysModule(
         settings: { anonymous: true },
       });
 
-      // NPS responses (completed)
+      // NPS responses (completed).
+      // Start at index 1 so memberPersonIds[0] (Miguel Bautista /
+      // member@memberry.ph, the login member) has NO response to this NPS
+      // survey — leaving the NPS auto-prompt PENDING/available for him to
+      // receive and submit. Question ids reference the stable UUID constants
+      // above so submitted answers pass the UUID `questionId` validator.
       if (npsSurvey) {
         const npsScores = [10, 9, 9, 8, 7, 6, 3];
         const comments = [
@@ -1146,20 +1160,22 @@ export async function seedSurveysModule(
           'Need more hands-on clinical workshops.',
           'Very poor response time from officers.',
         ];
-        for (let i = 0; i < Math.min(npsScores.length, memberPersonIds.length); i++) {
+        let seededResponses = 0;
+        for (let i = 1; i < Math.min(npsScores.length, memberPersonIds.length); i++) {
           await db.insert(surveyResponsesTable).values({
             organizationId: orgId,
             surveyId: npsSurvey.id,
             responderId: memberPersonIds[i]!,
             answers: [
-              { questionId: 'q1', value: npsScores[i]! },
-              ...(comments[i] ? [{ questionId: 'q2', value: comments[i]! }] : []),
+              { questionId: NPS_Q1_ID, value: npsScores[i]! },
+              ...(comments[i] ? [{ questionId: NPS_Q2_ID, value: comments[i]! }] : []),
             ],
             status: 'completed',
             completedAt: daysAgo(Math.floor(Math.random() * 14)),
           });
+          seededResponses++;
         }
-        console.log(`    ✓ 2 base surveys + ${Math.min(npsScores.length, memberPersonIds.length)} completed responses seeded`);
+        console.log(`    ✓ 2 base surveys + ${seededResponses} completed responses seeded (login member left pending for NPS auto-prompt)`);
       }
     }
 
