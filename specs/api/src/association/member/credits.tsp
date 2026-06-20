@@ -38,13 +38,13 @@ model ComplianceRow {
   membershipStatus: string;
 
   @doc("Total CPD credits earned this cycle")
-  earned: int32;
+  earned: float64;
 
   @doc("Credits required to be compliant this cycle")
   required: int32;
 
   @doc("Credits still needed to reach compliance")
-  remaining: int32;
+  remaining: float64;
 
   @doc("Compliance status derived from earned vs required")
   complianceStatus: ComplianceStatus;

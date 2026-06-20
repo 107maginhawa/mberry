@@ -46,7 +46,7 @@ model MyMembership {
 @doc("Lifetime credit total for the authenticated person")
 model MyCreditSummary {
   @doc("Total CPD credits earned across all cycles")
-  totalCredits: int32;
+  totalCredits: float64;
 }
 
 @doc("DPA 2012 personal data export envelope")
@@ -106,7 +106,7 @@ model CreateCreditEntryRequest {
 
   @doc("Number of CPD credits earned for this activity")
   @minValue(0)
-  creditAmount: int32;
+  creditAmount: float64;
 
   @doc("Organisation ID to associate the entry with; defaults to user's first membership org")
   organizationId?: UUID;
@@ -127,7 +127,7 @@ model MyCreditEntry extends BaseEntity {
   activityDate: utcDateTime;
 
   @doc("Number of CPD credits")
-  creditAmount: int32;
+  creditAmount: float64;
 
   @doc("Entry type (manual or system)")
   type: string;

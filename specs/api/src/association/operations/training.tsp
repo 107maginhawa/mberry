@@ -507,7 +507,7 @@ model ManualCreditAwardRequest {
 
   @doc("Number of credits to award")
   @minValue(0)
-  creditAmount: int32;
+  creditAmount: float64;
 
   @doc("Idempotency key to prevent duplicate awards")
   idempotencyKey: string;
@@ -571,7 +571,7 @@ model AdjustCreditRequest {
   personId: string;
 
   @doc("Credit amount (positive to award, negative to deduct). Cannot be zero.")
-  creditAmount: int32;
+  creditAmount: float64;
 
   @doc("Reason for the adjustment (minimum 10 characters, recorded in audit trail)")
   @minLength(10)
@@ -630,7 +630,7 @@ model CreditHistoryEntry {
   activityDate?: utcDateTime;
 
   @doc("Number of credits")
-  creditAmount: int32;
+  creditAmount: float64;
 
   @doc("Credit category")
   category?: string;

@@ -526,6 +526,13 @@
       "when": 1781280000000,
       "tag": "0074_event_type_enum_reconcile",
       "breakpoints": true
+    },
+    {
+      "idx": 75,
+      "version": "7",
+      "when": 1781935376205,
+      "tag": "0075_wise_shaman",
+      "breakpoints": true
     }
   ]
 }

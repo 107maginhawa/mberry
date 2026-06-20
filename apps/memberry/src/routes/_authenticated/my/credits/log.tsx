@@ -20,8 +20,10 @@ const creditLogSchema = z.object({
   activityDate: z.string().min(1, 'Date is required'),
   creditAmount: z
     .number()
-    .int('Enter whole credit hours')
-    .positive('Credit hours must be greater than 0'),
+    .positive('Credit hours must be greater than 0')
+    .refine((val) => val === 0 || (val * 2) % 1 === 0, {
+      message: 'Use 0.5 credit increments',
+    }),
   description: z.string().optional(),
 })
 
@@ -116,8 +118,8 @@ function CreditLog() {
               <Input
                 id="creditAmount"
                 type="number"
-                min="1"
-                step="1"
+                min="0.5"
+                step="0.5"
                 placeholder="e.g. 4"
                 aria-describedby={errors.creditAmount ? 'creditAmount-error' : undefined}
                 {...register('creditAmount', { valueAsNumber: true })}
@@ -127,6 +129,9 @@ function CreditLog() {
                   {errors.creditAmount.message}
                 </p>
               )}
+              <p className="text-xs text-[var(--color-muted)]">
+                Enter hours in 0.5 increments.
+              </p>
             </div>
           </div>
           <div className="space-y-1.5">

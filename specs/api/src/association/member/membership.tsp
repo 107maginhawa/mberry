@@ -507,7 +507,7 @@ model OfficerRosterMember extends RosterMember {
 
   @doc("Total CPD credits earned by this member in the current cycle")
   @minValue(0)
-  creditsEarned: int32;
+  creditsEarned: float64;
 
   @doc("Whether the member meets the 40-credit CPD threshold for the current cycle")
   trainingCompliant: boolean;

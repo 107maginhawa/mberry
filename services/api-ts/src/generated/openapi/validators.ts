@@ -285,7 +285,7 @@ export const AddressUpdateSchema = z.object({
 
 export const AdjustCreditRequestSchema = z.object({
   personId: z.string(),
-  creditAmount: z.number().int(),
+  creditAmount: z.number(),
   reason: z.string().min(10),
   idempotencyKey: z.string().optional()
 });
@@ -3687,9 +3687,9 @@ export const ComplianceRowSchema = z.object({
   lastName: z.string().optional(),
   memberNumber: z.string().optional(),
   membershipStatus: z.string(),
-  earned: z.number().int(),
+  earned: z.number(),
   required: z.number().int(),
-  remaining: z.number().int(),
+  remaining: z.number(),
   complianceStatus: z.enum(["compliant", "at_risk", "non_compliant"])
 });
 
@@ -4013,7 +4013,7 @@ export const CreateCreativeRequestSchema = z.object({
 export const CreateCreditEntryRequestSchema = z.object({
   activityName: z.string().min(1).max(255),
   activityDate: z.string().optional(),
-  creditAmount: z.number().int().gte(0),
+  creditAmount: z.number().gte(0),
   organizationId: z.string().uuid().optional()
 });
 
@@ -4348,7 +4348,7 @@ export const CreditHistoryEntrySchema = z.object({
   activityName: z.string(),
   provider: z.string().optional(),
   activityDate: z.string().datetime().transform((str) => new Date(str)).optional(),
-  creditAmount: z.number().int(),
+  creditAmount: z.number(),
   category: z.string().optional(),
   sourceType: z.string().optional(),
   verificationStatus: z.string(),
@@ -6380,7 +6380,7 @@ export const ManualCreditAwardRequestSchema = z.object({
   personId: z.string(),
   activityName: z.string().min(1).max(300),
   activityDate: z.string().datetime().transform((str) => new Date(str)),
-  creditAmount: z.number().int().gte(0),
+  creditAmount: z.number().gte(0),
   idempotencyKey: z.string(),
   provider: z.string().max(300).optional(),
   category: z.string().optional(),
@@ -7026,7 +7026,7 @@ export const MyCreditEntrySchema = z.object({
   organizationId: z.string().uuid(),
   activityName: z.string(),
   activityDate: z.string().datetime().transform((str) => new Date(str)),
-  creditAmount: z.number().int(),
+  creditAmount: z.number(),
   type: z.string(),
   cycleStart: z.string().datetime().transform((str) => new Date(str)),
   cycleEnd: z.string().datetime().transform((str) => new Date(str))
@@ -7043,14 +7043,14 @@ export const MyCreditEntryUpdateSchema = z.object({
   organizationId: z.string().uuid().optional(),
   activityName: z.string().optional(),
   activityDate: z.string().datetime().transform((str) => new Date(str)).optional(),
-  creditAmount: z.number().int().optional(),
+  creditAmount: z.number().optional(),
   type: z.string().optional(),
   cycleStart: z.string().datetime().transform((str) => new Date(str)).optional(),
   cycleEnd: z.string().datetime().transform((str) => new Date(str)).optional()
 });
 
 export const MyCreditSummarySchema = z.object({
-  totalCredits: z.number().int()
+  totalCredits: z.number()
 });
 
 export const MyCreditsResponseSchema = z.object({
@@ -7251,7 +7251,7 @@ export const OfficerRosterMemberSchema = z.object({
   email: z.string().optional(),
   categoryName: z.string().optional(),
   duesInvoiceStatus: z.string().optional(),
-  creditsEarned: z.number().int().gte(0),
+  creditsEarned: z.number().gte(0),
   trainingCompliant: z.boolean()
 });
 
@@ -7293,7 +7293,7 @@ export const OfficerRosterMemberUpdateSchema = z.object({
   email: z.string().optional(),
   categoryName: z.string().optional(),
   duesInvoiceStatus: z.string().optional(),
-  creditsEarned: z.number().int().gte(0).optional(),
+  creditsEarned: z.number().gte(0).optional(),
   trainingCompliant: z.boolean().optional()
 });
 
