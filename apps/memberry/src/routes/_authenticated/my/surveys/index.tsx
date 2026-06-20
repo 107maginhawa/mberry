@@ -18,7 +18,7 @@ interface SurveyListItem {
   description?: string
   surveyType: string
   status: string
-  myResponseStatus?: string
+  myResponseStatus?: string | null
   myCompletedAt?: string
   settings?: { deadline?: string }
 }
@@ -50,10 +50,11 @@ function isOverdue(deadline?: string): boolean {
 
 function MySurveys() {
   const { data, isLoading, error } = useQuery(
-    listSurveysOptions({ query: { mine: true } }),
+    listSurveysOptions({ query: { mine: true, available: true } }),
   )
 
   const allSurveys = ((data?.data ?? []) as unknown as SurveyListItem[])
+  const available = allSurveys.filter((s) => s.myResponseStatus == null)
   const pending = allSurveys.filter((s) => s.myResponseStatus === 'pending')
   const completed = allSurveys.filter((s) => s.myResponseStatus === 'completed')
 
@@ -91,6 +92,38 @@ function MySurveys() {
         </GlassCard>
       ) : (
         <>
+          {/* Available */}
+          {available.length > 0 && (
+            <section>
+              <h2 className="text-h4 text-[var(--color-text)] mb-3 flex items-center gap-2">
+                <ClipboardList size={16} className="text-[var(--color-primary)]" />
+                Available ({available.length})
+              </h2>
+              <StaggerGrid className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {available.map((survey) => (
+                  <StaggerItem key={survey.id}>
+                    <Link to="/my/surveys/$surveyId" params={{ surveyId: survey.id }} className="block">
+                      <GlassCard className="p-5 hover:bg-[var(--color-surface-elevated-hover)] transition-colors group">
+                        <div className="flex items-start justify-between gap-2">
+                          <div className="space-y-1 flex-1">
+                            <div className="flex items-center gap-2 flex-wrap">
+                              <StatusBadge variant="info">{formatSurveyType(survey.surveyType)}</StatusBadge>
+                            </div>
+                            <h3 className="text-sm font-semibold text-[var(--color-text)]">{survey.title}</h3>
+                            {survey.description && (
+                              <p className="text-xs text-[var(--color-muted)] line-clamp-2">{survey.description}</p>
+                            )}
+                          </div>
+                          <ChevronRight size={16} className="text-[var(--color-muted)] group-hover:text-[var(--color-primary)] transition-colors shrink-0 mt-1" />
+                        </div>
+                      </GlassCard>
+                    </Link>
+                  </StaggerItem>
+                ))}
+              </StaggerGrid>
+            </section>
+          )}
+
           {/* Pending */}
           {pending.length > 0 && (
             <section>
@@ -156,8 +189,8 @@ function MySurveys() {
                 Completed ({completed.length})
               </h2>
               <StaggerGrid className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {completed.map((survey) => (
-                  <StaggerItem key={survey.id}>
+                {completed.map((survey) => {
+                  const card = (
                     <GlassCard className="p-5 opacity-80">
                       <div className="space-y-1">
                         <div className="flex items-center gap-2 flex-wrap">
@@ -176,8 +209,15 @@ function MySurveys() {
                         )}
                       </div>
                     </GlassCard>
-                  </StaggerItem>
-                ))}
+                  )
+                  return (
+                    <StaggerItem key={survey.id}>
+                      {survey.surveyType === 'poll' ? (
+                        <Link to="/my/surveys/$surveyId" params={{ surveyId: survey.id }} className="block">{card}</Link>
+                      ) : card}
+                    </StaggerItem>
+                  )
+                })}
               </StaggerGrid>
             </section>
           )}
