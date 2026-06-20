@@ -510,6 +510,25 @@ describe('submitSurveyResponse', () => {
     expect(counts.Z).toBe(1);
   });
 
+  test('poll vote is attributed even when survey is anonymous (enables dedup)', async () => {
+    stubRepo(SurveyRepository, {
+      findById: async () => ({ ...activeSurvey, surveyType: 'poll', settings: { anonymous: true } }),
+    });
+    const captured: any = {};
+    stubRepo(SurveyResponseRepository, {
+      findByResponderAndSurvey: async () => undefined,
+      submitResponse: async (data: any) => { Object.assign(captured, data); return { id: 'r1', ...data }; },
+      findAllBySurveyId: async () => [],
+    });
+    const ctx = makeCtx({
+      user: { id: 'member-9', role: 'user' },
+      _params: { survey: 'survey-1' },
+      _body: { answers: [{ questionId: 'q1', value: 'A' }] },
+    });
+    await submitSurveyResponse(ctx);
+    expect(captured.responderId).toBe('member-9'); // NOT null
+  });
+
   test('[AC-M18-004] re-edit on anonymous survey: still works without responderId leak', async () => {
     // Acceptance Criteria: [AC-M18-004] — anonymity preserved on update
     const reeditAnon = {

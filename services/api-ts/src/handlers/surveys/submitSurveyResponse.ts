@@ -118,8 +118,9 @@ export async function submitSurveyResponse(
   const response = await responseRepo.submitResponse({
     organizationId,
     surveyId,
-    // P0 privacy fix: strip responderId for anonymous surveys
-    responderId: isAnonymous ? null : userId,
+    // P0 privacy fix: strip responderId for anonymous surveys.
+    // Polls are always attributed so vote dedup + already-voted detection work.
+    responderId: isAnonymous && survey.surveyType !== 'poll' ? null : userId,
     answers: (body.answers ?? []) as QuestionAnswer[],
     contextId: body.contextId ?? null,
     createdBy: userId,
