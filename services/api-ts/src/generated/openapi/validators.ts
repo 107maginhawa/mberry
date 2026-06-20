@@ -7866,6 +7866,12 @@ export const PlatformSummaryListResponseSchema = z.object({
 })
 });
 
+export const PollResultSchema = z.object({
+  questionId: z.string().uuid(),
+  counts: z.record(z.string(), z.unknown()),
+  total: z.number().int()
+});
+
 export const PortalInboxSchema = z.object({
   id: z.string().uuid(),
   version: z.number().int(),
@@ -9210,7 +9216,8 @@ export const SurveySchema = z.object({
   questionBreakdown: z.record(z.string(), z.unknown())
 }).optional(),
   myResponseStatus: z.enum(["pending", "completed", "skipped", "dismissed"]).optional(),
-  myCompletedAt: z.string().datetime().transform((str) => new Date(str)).optional()
+  myCompletedAt: z.string().datetime().transform((str) => new Date(str)).optional(),
+  pollResults: z.array(PollResultSchema).optional()
 });
 
 export const SurveyAnalyticsSchema = z.object({
@@ -9333,7 +9340,8 @@ export const SurveyUpdateSchema = z.object({
   questionBreakdown: z.record(z.string(), z.unknown()).optional()
 }).optional(),
   myResponseStatus: z.enum(["pending", "completed", "skipped", "dismissed"]).optional(),
-  myCompletedAt: z.string().datetime().transform((str) => new Date(str)).optional()
+  myCompletedAt: z.string().datetime().transform((str) => new Date(str)).optional(),
+  pollResults: z.array(PollResultSchema).optional()
 });
 
 export const TargetAudienceFilterSchema = z.object({
@@ -14162,6 +14170,7 @@ export const ListSurveysQuery = z.object({
   status: SurveyStatusSchema.optional(),
   surveyType: SurveyTypeSchema.optional(),
   mine: z.coerce.boolean().optional(),
+  available: z.coerce.boolean().optional(),
   offset: z.coerce.number().int().gte(0).lte(2147483647).optional(),
   limit: z.coerce.number().int().gte(1).lte(100).optional(),
   page: z.coerce.number().int().gte(1).lte(2147483647).optional(),

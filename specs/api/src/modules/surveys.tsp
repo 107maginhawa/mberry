@@ -204,6 +204,9 @@ model Survey extends BaseEntity {
 
   @doc("When the requesting member completed this survey (only populated when mine=true)")
   myCompletedAt?: utcDateTime;
+
+  @doc("Aggregated poll results (only populated for surveyType=poll on getSurvey/poll submit)")
+  pollResults?: PollResult[];
 }
 
 @doc("Response status")
@@ -300,6 +303,18 @@ model NpsTrendPoint {
 model DeleteMemberResponsesResult {
   @doc("Number of responses deleted")
   deletedCount: int32;
+}
+
+@doc("Aggregated vote counts for one poll question")
+model PollResult {
+  @doc("Question ID these counts belong to")
+  questionId: UUID;
+
+  @doc("Vote counts keyed by option-label string (zero-vote options omitted)")
+  counts: Record<int32>;
+
+  @doc("Total votes cast for this question")
+  total: int32;
 }
 
 /**
@@ -448,6 +463,8 @@ namespace SurveysModule {
       @query surveyType?: SurveyType,
       @doc("Show only my assigned surveys")
       @query mine?: boolean,
+      @doc("With mine=true: include active surveys I have NOT answered yet")
+      @query available?: boolean,
       ...PaginationQuery
     ): ApiOkResponse<PaginatedResponse<Survey>>
       | ApiUnauthorizedResponse

@@ -25954,6 +25954,26 @@ export type PlatformSummaryListResponse = {
 };
 
 /**
+ * Aggregated vote counts for one poll question
+ */
+export type PollResult = {
+    /**
+     * Question ID these counts belong to
+     */
+    questionId: string;
+    /**
+     * Vote counts keyed by option-label string (zero-vote options omitted)
+     */
+    counts: {
+        [key: string]: number;
+    };
+    /**
+     * Total votes cast for this question
+     */
+    total: number;
+};
+
+/**
  * An inbox item linking a portal user to a system or direct message
  */
 export type PortalInbox = {
@@ -30531,6 +30551,10 @@ export type Survey = {
      * When the requesting member completed this survey (only populated when mine=true)
      */
     myCompletedAt?: Date;
+    /**
+     * Aggregated poll results (only populated for surveyType=poll on getSurvey/poll submit)
+     */
+    pollResults?: Array<PollResult>;
 };
 
 /**
@@ -31014,6 +31038,10 @@ export type SurveyUpdate = {
      * When the requesting member completed this survey (only populated when mine=true)
      */
     myCompletedAt?: Date;
+    /**
+     * Aggregated poll results (only populated for surveyType=poll on getSurvey/poll submit)
+     */
+    pollResults?: Array<PollResult>;
 };
 
 /**
@@ -52113,6 +52141,10 @@ export type ListSurveysData = {
          * Show only my assigned surveys
          */
         mine?: boolean;
+        /**
+         * With mine=true: include active surveys I have NOT answered yet
+         */
+        available?: boolean;
         /**
          * Number of items to skip
          */
