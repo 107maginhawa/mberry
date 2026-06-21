@@ -10,15 +10,20 @@
  *  - happy path: 201 + persisted reviewer_id/org_id/nps_score/created_by/updated_by
  *  - self-review guard (createReview.ts:46) → ValidationError, zero rows
  *  - app-level dup guard (createReview.ts:51 reviewExists) → ConflictError, count stays 1
- *  - NPS-range escalation: the handler does NOT validate range (createReview.test.ts:186
- *    punted on it), so npsScore=99 reaches the DB CHECK reviews_nps_score_check and
- *    surfaces as a raw Postgres 23514 — NOT a clean 4xx. This is the range-bypass the
- *    plan flagged as a bug-watch; documented in notes (see the describe block below).
+ *  - NPS-range: in production the route Zod validator CreateReviewRequestSchema
+ *    (int().gte(0).lte(10)) is the FIRST-LAYER guard — it returns 422 for out-of-range
+ *    npsScore BEFORE the handler ever runs (asserted directly, no DB needed). The
+ *    handler itself does NOT re-validate range (createReview.test.ts:186 punted on it),
+ *    so calling it directly with an out-of-range body — the only way to get past the
+ *    validator — reaches the DB CHECK reviews_nps_score_check and surfaces a raw 23514.
+ *    That characterizes the CHECK as a defense-in-depth BACKSTOP at the repo seam, not
+ *    a production-reachable bug surface: bad data still cannot persist (see below).
  */
 import { describe, test, expect, beforeAll, afterAll } from 'bun:test';
 import { createReview } from './createReview';
 import { ReviewRepository } from './repos/review.repo';
 import { ValidationError, ConflictError } from '@/core/errors';
+import { CreateReviewRequestSchema } from '@/generated/openapi/validators';
 import {
   createContentScratch,
   CONTENT_ORG,
@@ -165,20 +170,41 @@ describe('createReview handler — app-level dup guard (reviewExists, createRevi
   });
 });
 
-describe('createReview handler — NPS range escalation (bug-watch)', () => {
-  // BUG-WATCH FINDING (characterization, not a code change): the handler performs
-  // NO npsScore range check — createReview.test.ts:186 explicitly removed it,
-  // deferring entirely to the DB CHECK reviews_nps_score_check (0..10). So an
-  // out-of-range body that bypasses the Zod validator (as a directly-invoked
-  // handler does, exactly like a malformed/forged payload would at the repo seam)
-  // reaches the INSERT and surfaces as a RAW Postgres 23514 error — it is NOT
-  // mapped to a clean ValidationError/4xx by the handler; the global error
-  // handler would render it 500. We assert the REAL outcome: the error carries
-  // SQLSTATE 23514 and NO row is persisted (the range is still enforced at the
-  // DB, so no bad data leaks — hence characterization, not realBugFound). The
-  // layer-correct upgrade (a handler-level range guard returning 4xx) is left to
-  // product per the plan's "if DB CHECK is the agreed contract, keep as
-  // characterization" branch.
+describe('createReview NPS range — Zod validator is the prod first-layer guard', () => {
+  // The PRODUCTION guard for npsScore range is the route Zod validator
+  // CreateReviewRequestSchema (npsScore: int().gte(0).lte(10)). It runs in the
+  // generated route middleware and returns 422 for any out-of-range body BEFORE
+  // createReview is invoked. We assert that guard DIRECTLY here — it needs no DB,
+  // so it sits OUTSIDE the `if (!H.dbReachable) return` gate. This grounds the
+  // raw-23514 assertions below as a defense-in-depth backstop, not a prod surface.
+  test('rejects out-of-range npsScore (12, -1, 99) and accepts boundaries (0, 5, 10)', () => {
+    const ctx = () => crypto.randomUUID();
+    // out-of-range → validator rejects (the 422 first-layer guard in production)
+    for (const npsScore of [12, -1, 99]) {
+      expect(
+        CreateReviewRequestSchema.safeParse({ context: ctx(), reviewType: 'nps', npsScore }).success,
+      ).toBe(false);
+    }
+    // boundaries and a midpoint → validator accepts
+    for (const npsScore of [0, 5, 10]) {
+      expect(
+        CreateReviewRequestSchema.safeParse({ context: ctx(), reviewType: 'nps', npsScore }).success,
+      ).toBe(true);
+    }
+  });
+});
+
+describe('createReview NPS range — DB CHECK is the defense-in-depth backstop', () => {
+  // The route validator above is the production first-layer guard (422). The
+  // handler itself does NOT re-validate range — createReview.test.ts:186 punted
+  // on it, deferring to the DB CHECK reviews_nps_score_check (0..10). So the ONLY
+  // way an out-of-range npsScore reaches the INSERT is by bypassing the validator
+  // entirely, which is exactly what calling the handler directly does (the repo
+  // seam, as a forged/internal payload would hit it). When that happens the CHECK
+  // fires and surfaces a RAW Postgres 23514 — the handler does not translate it to
+  // a 4xx. We assert the REAL outcome: SQLSTATE 23514 and NO row persisted. This
+  // characterizes the CHECK as a defense-in-depth backstop behind the validator —
+  // bad data still cannot persist — NOT a production-reachable escalation surface.
   test('npsScore=99 raises raw 23514 and persists no row', async () => {
     if (!H.dbReachable) return;
     const context = crypto.randomUUID();
@@ -198,7 +224,9 @@ describe('createReview handler — NPS range escalation (bug-watch)', () => {
     }
     // raw DB CHECK code propagates (handler does not translate it)
     expect(code).toBe('23514');
-    // and it is NOT a handler-mapped 4xx — documents the escalation surface
+    // and it is NOT a handler-mapped 4xx — confirms the CHECK is the backstop
+    // layer (defense-in-depth behind the route validator), reached only by
+    // bypassing that validator
     expect(mappedToAppError).toBe(false);
     // but the range is still enforced: no bad row leaked
     expect(await countReviews(context, reviewer)).toBe(0);
