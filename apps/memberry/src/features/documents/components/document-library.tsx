@@ -6,6 +6,8 @@ import { Button, Input, Skeleton } from '@monobase/ui'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@monobase/ui'
 import { GlassCard } from '@/components/motion/glass-card'
 import { ConfirmDialog } from '@/components/patterns/confirm-dialog'
+import { useFileUpload, FileTooLargeError, S3UploadError } from '@monobase/sdk-ts/flows'
+import { SdkError } from '@monobase/sdk-ts/client'
 import {
   FileText,
   Globe,
@@ -231,6 +233,9 @@ export function DocumentLibrary({ orgId }: DocumentLibraryProps) {
   const [offset, setOffset] = useState(0)
   const LIMIT = 50
 
+  // Presigned upload flow (init → S3 PUT → complete). Drop zone copy allows 25MB.
+  const { upload, isUploading } = useFileUpload({ maxBytes: 25 * 1024 * 1024 })
+
   const queryParams = {
     organizationId: orgId,
     category: category !== 'all' ? category : undefined,
@@ -323,8 +328,27 @@ export function DocumentLibrary({ orgId }: DocumentLibraryProps) {
     }
   }, [])
 
-  const handleUploadSubmit = useCallback(() => {
+  const handleUploadSubmit = useCallback(async () => {
     if (!uploadFile || !uploadTitle.trim()) return
+
+    // Step 1: upload the actual bytes via the presigned flow. Previously the
+    // form only created the metadata record against a synthetic storageKey, so
+    // every "uploaded" document pointed at an object that was never stored.
+    let storageKey: string
+    try {
+      const result = await upload(uploadFile)
+      storageKey = result.fileId
+    } catch (err: unknown) {
+      let msg = 'We couldn’t upload your file. Please try again.'
+      if (err instanceof FileTooLargeError) msg = 'File too large. Maximum 25MB.'
+      else if (err instanceof S3UploadError) msg = 'Upload to storage failed. Check your connection and try again.'
+      else if (err instanceof SdkError) msg = 'Storage rejected the upload. Please try again or use a different file.'
+      else if (err instanceof Error && err.message) msg = err.message
+      toast.error(msg)
+      return
+    }
+
+    // Step 2: create the document record pointing at the uploaded object.
     doCreate.mutate({
       headers: { 'x-org-id': orgId },
       body: {
@@ -334,14 +358,14 @@ export function DocumentLibrary({ orgId }: DocumentLibraryProps) {
         // ISSUE-024: validator is z.number().int(); BigInt serializes to a
         // string it rejects. Send a plain integer (bytes).
         size: uploadFile.size as unknown as bigint,
-        storageKey: `documents/${orgId}/${Date.now()}-${uploadFile.name}`,
+        storageKey,
         ownerId: orgId,
         ownerType: 'organization',
         accessLevel: uploadAccessLevel as AssociationCoreDocumentsDocumentAccessLevel,
         category: uploadCategory,
       },
     })
-  }, [uploadFile, uploadTitle, uploadCategory, uploadAccessLevel, orgId, doCreate])
+  }, [uploadFile, uploadTitle, uploadCategory, uploadAccessLevel, orgId, doCreate, upload])
 
   const documents = (data as any)?.data ?? []
   const total = documents.length
@@ -458,9 +482,9 @@ export function DocumentLibrary({ orgId }: DocumentLibraryProps) {
             <Button variant="outline" onClick={resetUploadForm}>Cancel</Button>
             <Button
               onClick={handleUploadSubmit}
-              disabled={!uploadTitle.trim() || doCreate.isPending}
+              disabled={!uploadTitle.trim() || isUploading || doCreate.isPending}
             >
-              {doCreate.isPending ? 'Uploading...' : 'Upload'}
+              {isUploading ? 'Uploading…' : doCreate.isPending ? 'Saving…' : 'Upload'}
             </Button>
           </div>
         </GlassCard>

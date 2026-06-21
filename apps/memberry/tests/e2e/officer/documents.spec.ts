@@ -35,18 +35,39 @@ test('documents list renders heading', async ({ page }) => {
     await expect(page.getByRole('tab').first()).toBeVisible({ timeout: 10000 })
   })
 
-  test.fixme('upload button is visible for officers', async ({ page }) => {
-    // OBSOLETE: upload affordance moved from a labeled Button to a
-    // drag-drop area + native <label>+<input type="file"> with the text
-    // "Drag and drop a file here, or browse". Rewrite to assert that the
-    // dropzone container is visible or to test the actual upload flow
-    // via setInputFiles on the hidden file input.
-    await page.goto(`/org/${ORG_ID}/documents`)
-    const uploadBtn = page
-      .getByRole('button', { name: /upload|add document|new document/i })
-      .or(page.getByRole('link', { name: /upload|add document|new document/i }))
-      .first()
-    await expect(uploadBtn).toBeVisible({ timeout: 10000 })
+  test('uploads a document end-to-end (bytes → storage → record)', async ({ page }) => {
+    // Real upload flow: pick a file via the hidden <input type="file">, which
+    // opens the upload form; clicking Upload runs the presigned flow (init → S3
+    // PUT to MinIO → complete) and then creates the document record against the
+    // returned storageKey. Before the useFileUpload wiring this only ever wrote
+    // metadata against a synthetic key — no bytes were stored.
+    // The upload UI (DocumentLibrary dropzone) lives on the officer route, not
+    // the member-facing /org/$id/documents read view the other specs hit.
+    await page.goto(`/org/${ORG_ID}/officer/documents`)
+    await expect(page.getByText(/drag and drop a file here/i)).toBeVisible({ timeout: 10000 })
+
+    const fileName = `e2e-upload-${Date.now()}.pdf`
+    await page.locator('input[type="file"]').setInputFiles({
+      name: fileName,
+      mimeType: 'application/pdf',
+      buffer: Buffer.from('%PDF-1.4\n% e2e upload test\n'),
+    })
+
+    // Upload form appears with the title pre-filled from the file name.
+    await expect(page.getByRole('heading', { name: /upload document/i })).toBeVisible({ timeout: 10000 })
+
+    // The NPS prompt (fixed bottom-right) can sit over the Upload button; dismiss
+    // it if it happens to be showing for this user.
+    const npsDismiss = page.getByRole('button', { name: /dismiss survey/i })
+    if (await npsDismiss.isVisible({ timeout: 1000 }).catch(() => false)) {
+      await npsDismiss.click()
+    }
+
+    await page.getByRole('button', { name: /^upload$/i }).click()
+
+    // Success surfaces as a "Document created" toast once the S3 PUT + record
+    // creation both complete. A failed PUT/complete would instead toast an error.
+    await expect(page.getByText(/document created/i)).toBeVisible({ timeout: 20000 })
   })
 
   test('can navigate to document detail', async ({ page }) => {
