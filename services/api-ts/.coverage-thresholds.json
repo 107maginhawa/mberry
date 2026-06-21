@@ -24,6 +24,8 @@
   "src/handlers/invite": { "line": 70, "function": 0 },
   "src/handlers/jobs": { "line": 5, "function": 0 },
   "src/handlers/marketplace": { "line": 5, "function": 0 },
-  "src/handlers/reviews": { "line": 5, "function": 0 },
+  "_comment_b2_content": "Wave-2 B2 content: reviews/surveys/documents gained real-PG createScratch suites (shared content-fixtures.ts) — constraint/cascade/workflow proofs replacing fake-db illusions (deleted reviews createReview.test/reviews-handlers.test + surveys/documents repo fakes). Measured module-min line%: reviews ~55.6 (review.schema.ts) -> floor 50; surveys ~36.1 (survey.repo.ts — its findMany/publish/close/admin-list/analytics methods remain UNSCOPED by B2, the binding gap -> floor 30, follow-up to reach 50 needs survey.repo depth); documents stays 70 (min ~81 after fake deletion, comfortably above). No number-chasing; floors set just below each module's lowest file.",
+  "src/handlers/reviews": { "line": 50, "function": 0 },
+  "src/handlers/surveys": { "line": 30, "function": 0 },
   "src/handlers/advertising": { "line": 5, "function": 0 }
 }
