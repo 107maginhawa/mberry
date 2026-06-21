@@ -561,6 +561,13 @@
       "when": 1782100000000,
       "tag": "0079_enforce_event_org_id_not_null",
       "breakpoints": true
+    },
+    {
+      "idx": 80,
+      "version": "7",
+      "when": 1782200000000,
+      "tag": "0080_enforce_notification_org_id_not_null",
+      "breakpoints": true
     }
   ]
 }
