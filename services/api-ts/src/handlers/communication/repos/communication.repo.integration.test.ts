@@ -1,16 +1,27 @@
 /**
- * Integration coverage for communication.repo against real Postgres.
+ * Real-PG integration coverage for communication.repo.
  *
  * Covers every exported class: MessageTemplateRepository, MessageRepository,
  * SubscriptionTopicRepository, PersonSubscriptionRepository, CommunicationsRepository,
  * SavedSegmentRepository, and the notificationPreferenceRepoPort adapter (enabled,
- * explicit-disable by category and by name, fail-open on empty args). Skips when
- * Postgres unreachable.
+ * explicit-disable by category and by name, fail-open on empty args).
+ *
+ * Isolation: the shared `createScratch` harness stands up a per-suite scratch
+ * schema by COPYING the real public table structures
+ * (`CREATE TABLE … (LIKE public.<t> INCLUDING ALL)`), so every real
+ * column/default/enum/CHECK/UNIQUE index is present — no hand-DDL drift. FKs are
+ * not copied (LIKE never copies FKs), so announcement rows insert directly
+ * without a parent person row, and person_subscription rows insert without a
+ * parent subscription_topic / person. search_path is pinned via the libpq
+ * startup option so the repos (which run against H.db) and the raw read-backs
+ * (H.scopedPool) both resolve unqualified table names to the scratch schema.
+ *
+ * Requires a migrated public schema (local dev DB / CI ci-migrate). If Postgres
+ * is unreachable the suite skips cleanly (`if (!H.dbReachable) return`) rather
+ * than false-failing. Runs in CI — no CI gate.
  */
 
 import { describe, test, expect, beforeAll, afterAll } from 'bun:test';
-import { Pool } from 'pg';
-import { drizzle } from 'drizzle-orm/node-postgres';
 import { randomUUID } from 'node:crypto';
 import {
   MessageTemplateRepository,
@@ -21,13 +32,9 @@ import {
   SavedSegmentRepository,
   notificationPreferenceRepoPort,
 } from './communication.repo';
+import { createScratch, type ScratchDb } from '@/test-utils/pg-scratch';
 
-const DB_URL =
-  process.env['DATABASE_URL'] ?? 'postgres://postgres:password@localhost:5432/monobase';
-
-let pool: Pool;
-let db: ReturnType<typeof drizzle>;
-let dbReachable = false;
+let H: ScratchDb;
 
 const ORG = randomUUID();
 const PERSON = randomUUID();
@@ -48,54 +55,33 @@ const createdAnnIds: string[] = [];
 const createdSegIds: string[] = [];
 
 beforeAll(async () => {
-  // These tests seed the shared `public` schema; under CI's parallel suite that
-  // contends on connections + needs migrations. Run them locally only — the
-  // equivalent coverage runs against a migrated dev DB. (See SCRATCH-schema
-  // integration tests, e.g. comms-repos / approvalRollback, for the isolated
-  // pattern these should migrate to later.)
-  if (process.env['CI']) { return; }
-  pool = new Pool({ connectionString: DB_URL, connectionTimeoutMillis: 3000 });
-  try {
-    const c = await pool.connect();
-    c.release();
-    db = drizzle(pool);
-    dbReachable = true;
-  } catch (err) {
-    dbReachable = false;
-    // eslint-disable-next-line no-console
-    console.warn(`[communication.repo integration] Postgres unreachable; skipping. ${(err as Error).message}`);
-    return;
-  }
-  tmplRepo = new MessageTemplateRepository(db as any);
-  msgRepo = new MessageRepository(db as any);
-  topicRepo = new SubscriptionTopicRepository(db as any);
-  subRepo = new PersonSubscriptionRepository(db as any);
-  commsRepo = new CommunicationsRepository(db as any);
-  segRepo = new SavedSegmentRepository(db as any);
+  H = await createScratch([
+    'message_template',
+    'message',
+    'subscription_topic',
+    'person_subscription',
+    'announcement',
+    'announcement_stats',
+    'saved_segment',
+  ]);
+  if (!H.dbReachable) return;
 
-  // announcement.author_id FK → person
-  await pool.query(`INSERT INTO person (id, first_name) VALUES ($1,'Comm Author') ON CONFLICT DO NOTHING`, [PERSON]);
+  tmplRepo = new MessageTemplateRepository(H.db as any);
+  msgRepo = new MessageRepository(H.db as any);
+  topicRepo = new SubscriptionTopicRepository(H.db as any);
+  subRepo = new PersonSubscriptionRepository(H.db as any);
+  commsRepo = new CommunicationsRepository(H.db as any);
+  segRepo = new SavedSegmentRepository(H.db as any);
+  // announcement.author_id FK → person is NOT copied by LIKE, so no person row needed.
 });
 
 afterAll(async () => {
-  if (pool) {
-    if (dbReachable) {
-      await pool.query(`DELETE FROM announcement_stats WHERE organization_id=$1`, [ORG]);
-      await pool.query(`DELETE FROM announcement WHERE organization_id=$1`, [ORG]);
-      await pool.query(`DELETE FROM person_subscription WHERE organization_id=$1`, [ORG]);
-      await pool.query(`DELETE FROM subscription_topic WHERE organization_id=$1`, [ORG]);
-      await pool.query(`DELETE FROM message WHERE organization_id=$1`, [ORG]);
-      await pool.query(`DELETE FROM message_template WHERE organization_id=$1`, [ORG]);
-      await pool.query(`DELETE FROM saved_segment WHERE organization_id=$1`, [ORG]);
-      await pool.query(`DELETE FROM person WHERE id=$1`, [PERSON]);
-    }
-    await pool.end();
-  }
+  await H?.teardown();
 });
 
 describe('MessageTemplateRepository', () => {
   test('create / findById / findByOrg', async () => {
-    if (!dbReachable) return;
+    if (!H.dbReachable) return;
     const t = await tmplRepo.create({
       organizationId: ORG, name: 'Welcome', channel: 'email',
       subject: 'Hi', body: 'Body', category: 'onboarding', status: 'active',
@@ -108,7 +94,7 @@ describe('MessageTemplateRepository', () => {
   });
 
   test('search with every filter branch', async () => {
-    if (!dbReachable) return;
+    if (!H.dbReachable) return;
     const t = await tmplRepo.create({
       organizationId: ORG, name: 'TxnReceipt', channel: 'sms',
       body: 'B', category: 'billing', isTransactional: true, status: 'draft',
@@ -125,7 +111,7 @@ describe('MessageTemplateRepository', () => {
   });
 
   test('update / delete', async () => {
-    if (!dbReachable) return;
+    if (!H.dbReachable) return;
     const id = createdTemplateIds[0]!;
     const upd = await tmplRepo.update(id, { name: 'Welcome v2' } as any);
     expect(upd?.name).toBe('Welcome v2');
@@ -137,7 +123,7 @@ describe('MessageTemplateRepository', () => {
 
 describe('MessageRepository', () => {
   test('create / findById / findByOrg', async () => {
-    if (!dbReachable) return;
+    if (!H.dbReachable) return;
     const m = await msgRepo.create({
       organizationId: ORG, channel: 'email', senderId: SENDER, body: 'Hello',
       recipients: [{ personId: PERSON, deliveryStatus: 'pending' }], status: 'draft',
@@ -149,7 +135,7 @@ describe('MessageRepository', () => {
   });
 
   test('search with all filter branches', async () => {
-    if (!dbReachable) return;
+    if (!H.dbReachable) return;
     const r = await msgRepo.search(ORG, {
       channel: 'email', senderId: SENDER, status: 'draft',
       scheduledAfter: new Date('2000-01-01'), limit: 5, offset: 0,
@@ -159,7 +145,7 @@ describe('MessageRepository', () => {
   });
 
   test('findDuplicateSentToday / findDuplicatesSentToday', async () => {
-    if (!dbReachable) return;
+    if (!H.dbReachable) return;
     // A 'sent' message today to PERSON.
     const sent = await msgRepo.create({
       organizationId: ORG, channel: 'email', senderId: SENDER, body: 'X',
@@ -178,7 +164,7 @@ describe('MessageRepository', () => {
   });
 
   test('update / delete', async () => {
-    if (!dbReachable) return;
+    if (!H.dbReachable) return;
     const id = createdMessageIds[0]!;
     const u = await msgRepo.update(id, { status: 'cancelled' } as any);
     expect(u?.status).toBe('cancelled');
@@ -190,7 +176,7 @@ describe('MessageRepository', () => {
 
 describe('SubscriptionTopicRepository', () => {
   test('create / findById / findByOrg / findByName', async () => {
-    if (!dbReachable) return;
+    if (!H.dbReachable) return;
     const t = await topicRepo.create({
       organizationId: ORG, name: 'dues', channel: 'email', category: 'billing', defaultEnabled: true,
     } as any);
@@ -203,7 +189,7 @@ describe('SubscriptionTopicRepository', () => {
   });
 
   test('findOrCreateByName: returns existing then creates new', async () => {
-    if (!dbReachable) return;
+    if (!H.dbReachable) return;
     const existing = await topicRepo.findOrCreateByName(ORG, 'dues');
     expect(existing.name).toBe('dues');
     const created = await topicRepo.findOrCreateByName(ORG, 'announcements', { category: 'general' });
@@ -213,7 +199,7 @@ describe('SubscriptionTopicRepository', () => {
   });
 
   test('update / delete', async () => {
-    if (!dbReachable) return;
+    if (!H.dbReachable) return;
     const created = await topicRepo.create({
       organizationId: ORG, name: 'tmp-topic', channel: 'push', category: 'misc',
     } as any);
@@ -227,7 +213,7 @@ describe('SubscriptionTopicRepository', () => {
 describe('PersonSubscriptionRepository', () => {
   let topicId: string;
   test('create / findById / findByPerson / findByPersonAndTopic', async () => {
-    if (!dbReachable) return;
+    if (!H.dbReachable) return;
     topicId = createdTopicIds[0]!;
     const s = await subRepo.create({
       organizationId: ORG, personId: PERSON, topicId, enabled: true,
@@ -240,14 +226,14 @@ describe('PersonSubscriptionRepository', () => {
   });
 
   test('findByPersonWithTopic enriches topic name', async () => {
-    if (!dbReachable) return;
+    if (!H.dbReachable) return;
     const rows = await subRepo.findByPersonWithTopic(PERSON, ORG);
     expect(rows.length).toBeGreaterThanOrEqual(1);
     expect(rows.some((r) => r.topicName === 'dues')).toBe(true);
   });
 
   test('upsert: updates existing, creates when absent', async () => {
-    if (!dbReachable) return;
+    if (!H.dbReachable) return;
     const updated = await subRepo.upsert({ organizationId: ORG, personId: PERSON, topicId, enabled: false } as any);
     expect(updated.enabled).toBe(false);
 
@@ -258,7 +244,7 @@ describe('PersonSubscriptionRepository', () => {
   });
 
   test('bulkUpsert: empty + conflict update path', async () => {
-    if (!dbReachable) return;
+    if (!H.dbReachable) return;
     expect(await subRepo.bulkUpsert([])).toEqual([]);
     const rows = await subRepo.bulkUpsert([
       { organizationId: ORG, personId: PERSON, topicId, enabled: true } as any,
@@ -267,7 +253,7 @@ describe('PersonSubscriptionRepository', () => {
   });
 
   test('update / delete', async () => {
-    if (!dbReachable) return;
+    if (!H.dbReachable) return;
     const id = createdSubIds[0]!;
     const u = await subRepo.update(id, { enabled: true } as any);
     expect(u?.enabled).toBe(true);
@@ -288,7 +274,7 @@ describe('CommunicationsRepository', () => {
   }
 
   test('create / get (with + without org) / get miss', async () => {
-    if (!dbReachable) return;
+    if (!H.dbReachable) return;
     const a = await mkAnnouncement();
     expect((await commsRepo.get(a.id))?.id).toBe(a.id);
     expect((await commsRepo.get(a.id, ORG))?.id).toBe(a.id);
@@ -296,7 +282,7 @@ describe('CommunicationsRepository', () => {
   });
 
   test('list: org required, status + search filters, stats join', async () => {
-    if (!dbReachable) return;
+    if (!H.dbReachable) return;
     await expect(commsRepo.list('')).rejects.toThrow();
     const a = await mkAnnouncement({ title: 'UniqueSearchable', status: 'sent' });
     await commsRepo.createStats(a.id, 5, ORG, { emailSent: 2, pushDelivered: 3, inappViews: 1 });
@@ -311,14 +297,14 @@ describe('CommunicationsRepository', () => {
   });
 
   test('findScheduledDue returns due scheduled announcements', async () => {
-    if (!dbReachable) return;
+    if (!H.dbReachable) return;
     await mkAnnouncement({ status: 'scheduled', scheduledAt: new Date('2000-01-01T00:00:00Z') });
     const due = await commsRepo.findScheduledDue(10);
     expect(due.some((d) => d.organizationId === ORG)).toBe(true);
   });
 
   test('updateStatus / update (with + without org)', async () => {
-    if (!dbReachable) return;
+    if (!H.dbReachable) return;
     const a = await mkAnnouncement();
     const us = await commsRepo.updateStatus(a.id, 'sent', { publishedAt: new Date() }, ORG);
     expect(us.status).toBe('sent');
@@ -329,14 +315,14 @@ describe('CommunicationsRepository', () => {
   });
 
   test('getStats aggregates', async () => {
-    if (!dbReachable) return;
+    if (!H.dbReachable) return;
     const stats = await commsRepo.getStats(ORG);
     expect(typeof stats!.totalThisMonth).toBe('number');
     expect(typeof stats!.totalRecipients).toBe('number');
   });
 
   test('delete (with + without org)', async () => {
-    if (!dbReachable) return;
+    if (!H.dbReachable) return;
     const a = await mkAnnouncement();
     await commsRepo.delete(a.id, ORG);
     expect(await commsRepo.get(a.id)).toBeUndefined();
@@ -348,7 +334,7 @@ describe('CommunicationsRepository', () => {
 
 describe('SavedSegmentRepository', () => {
   test('create / list / delete', async () => {
-    if (!dbReachable) return;
+    if (!H.dbReachable) return;
     const s = await segRepo.create({
       organizationId: ORG, name: 'Lapsed', filters: { duesStatus: 'overdue' },
     } as any);
@@ -362,16 +348,16 @@ describe('SavedSegmentRepository', () => {
 
 describe('notificationPreferenceRepoPort', () => {
   test('fail-open on empty args', async () => {
-    if (!dbReachable) return;
-    const port = notificationPreferenceRepoPort(db as any);
+    if (!H.dbReachable) return;
+    const port = notificationPreferenceRepoPort(H.db as any);
     expect(await port.isCategoryEnabledForPerson('', ORG, 'dues')).toBe(true);
     expect(await port.isCategoryEnabledForPerson(PERSON, '', 'dues')).toBe(true);
     expect(await port.isCategoryEnabledForPerson(PERSON, ORG, '')).toBe(true);
   });
 
   test('enabled when no explicit-disable row; disabled when category/name matches a disabled sub', async () => {
-    if (!dbReachable) return;
-    const port = notificationPreferenceRepoPort(db as any);
+    if (!H.dbReachable) return;
+    const port = notificationPreferenceRepoPort(H.db as any);
     const person2 = randomUUID();
 
     // Topic: name 'dues', category 'billing'. Disable a subscription on it.
@@ -393,6 +379,6 @@ describe('notificationPreferenceRepoPort', () => {
     // A different person has no disable row → enabled
     expect(await port.isCategoryEnabledForPerson(randomUUID(), ORG, 'billing')).toBe(true);
 
-    await pool.query(`DELETE FROM person_subscription WHERE id=$1`, [sub.id]);
+    await H.scopedPool.query(`DELETE FROM person_subscription WHERE id=$1`, [sub.id]);
   });
 });
