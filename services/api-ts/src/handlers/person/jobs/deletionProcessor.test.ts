@@ -290,7 +290,9 @@ describe('processDeletions', () => {
     expect(s.dateOfBirth).toBeNull();
     expect(s.bio).toBeNull();
     expect(s.gender).toBeNull();
-    expect(s.updatedBy).toBe('system');
+    // updated_by is null (system/cron action, no user actor) — person.updated_by is a
+    // uuid column, so the prior literal 'system' threw 22P02 and aborted the scrub.
+    expect(s.updatedBy).toBeNull();
     expect(s.deletionCompletedAt).toBeInstanceOf(Date);
   });
 
