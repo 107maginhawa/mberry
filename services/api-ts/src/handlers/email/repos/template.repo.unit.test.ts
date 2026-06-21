@@ -1,18 +1,34 @@
 /**
- * Tests for EmailTemplateRepository
+ * Pure-function unit tests for EmailTemplateRepository.
  *
- * Tests template CRUD, validation, rendering, caching, and variable checking.
- * Validation/rendering methods don't hit DB — tested directly.
- * DB-dependent methods mock at the class level via spyOn.
+ * Extracted (Wave-2 B3 finalize) from the deleted mock-only template.repo.test.ts.
+ * The DB-path assertions that file carried (createTemplate persistence, getActiveTemplate
+ * active-only lookup, updateTemplate version-bump, activate/archive) are now proven against
+ * real Postgres in template.repo.integration.test.ts. What remains here is the genuinely
+ * pure logic that has no SQL to migrate:
+ *
+ *   - validateVariables        — type/range/format checks on a values map (no I/O)
+ *   - validateTemplateSyntax   — Handlebars.precompile guard (the S4 precompile fix; lazy
+ *                                compile never threw at create time, making the guard a no-op)
+ *   - validateVariableDefinitions — duplicate-id / missing-field / min>max checks
+ *   - renderTemplate           — Handlebars render incl. formatCurrency/plural helpers
+ *   - generateSampleVariables  — sample-value synthesis driven off variable defs
+ *   - in-memory template cache — invalidateCache / clearCache / TTL hit
+ *
+ * The repo is constructed with a minimal stub DB only to satisfy the constructor guard;
+ * the methods under test below either never touch it or have their DB seam spied out, so
+ * these run as fast non-DB units (no `.integration.` suffix).
  */
 
-import { describe, test, expect, mock, beforeEach, afterEach, spyOn } from 'bun:test';
+import { describe, test, expect, mock, spyOn } from 'bun:test';
 import { EmailTemplateRepository } from './template.repo';
 import { ValidationError, NotFoundError } from '@/core/errors';
-import type { EmailTemplate, NewEmailTemplate, TemplateVariable } from './email.schema';
+import type { EmailTemplate, TemplateVariable } from './email.schema';
 import Handlebars from 'handlebars';
 
-// Mock-Classification: APPROPRIATE — external email/SMTP service boundary
+// Mock-Classification: N/A — these are pure-logic units; the stub DB only satisfies the
+// constructor guard and is never exercised by the methods under test (or is spied out).
+
 // ---------------------------------------------------------------------------
 // Helpers
 // ---------------------------------------------------------------------------
@@ -26,40 +42,26 @@ function makeLogger() {
   };
 }
 
-/** Minimal mock DB — just enough to pass constructor guard */
-function makeMockDb() {
+/** Minimal stub DB — just enough to pass the constructor guard. */
+function makeStubDb() {
   return {
     select: mock(() => ({
       from: mock(() => ({
         where: mock(() => ({
           limit: mock(() => Promise.resolve([])),
-          orderBy: mock(() => ({
-            limit: mock(() => Promise.resolve([])),
-          })),
+          orderBy: mock(() => ({ limit: mock(() => Promise.resolve([])) })),
         })),
         groupBy: mock(() => Promise.resolve([])),
       })),
     })),
-    insert: mock(() => ({
-      values: mock(() => ({
-        returning: mock(() => Promise.resolve([])),
-      })),
-    })),
-    update: mock(() => ({
-      set: mock(() => ({
-        where: mock(() => ({
-          returning: mock(() => Promise.resolve([])),
-        })),
-      })),
-    })),
-    delete: mock(() => ({
-      where: mock(() => Promise.resolve({ rowCount: 0 })),
-    })),
+    insert: mock(() => ({ values: mock(() => ({ returning: mock(() => Promise.resolve([])) })) })),
+    update: mock(() => ({ set: mock(() => ({ where: mock(() => ({ returning: mock(() => Promise.resolve([])) })) })) })),
+    delete: mock(() => ({ where: mock(() => Promise.resolve({ rowCount: 0 })) })),
   } as any;
 }
 
 function makeRepo(dbOverride?: any, loggerOverride?: any) {
-  const db = dbOverride ?? makeMockDb();
+  const db = dbOverride ?? makeStubDb();
   const logger = loggerOverride ?? makeLogger();
   return new EmailTemplateRepository(db, logger);
 }
@@ -89,20 +91,11 @@ function makeTemplate(overrides: Partial<EmailTemplate> = {}): EmailTemplate {
   } as EmailTemplate;
 }
 
-function makeVariableDefs(overrides: Partial<TemplateVariable>[] = []): TemplateVariable[] {
-  const defaults: TemplateVariable[] = [
-    { id: 'name', type: 'string', label: 'Name', required: true },
-    { id: 'age', type: 'number', label: 'Age', required: false },
-    { id: 'active', type: 'boolean', label: 'Active', required: false },
-  ];
-  return defaults.map((d, i) => ({ ...d, ...overrides[i] }));
-}
-
 // ---------------------------------------------------------------------------
-// Constructor
+// Constructor guard (pure)
 // ---------------------------------------------------------------------------
 
-describe('EmailTemplateRepository', () => {
+describe('EmailTemplateRepository (pure units)', () => {
   describe('constructor', () => {
     test('throws when db is null/undefined', () => {
       expect(() => new EmailTemplateRepository(null as any)).toThrow(
@@ -117,7 +110,7 @@ describe('EmailTemplateRepository', () => {
   });
 
   // ---------------------------------------------------------------------------
-  // validateVariables (public)
+  // validateVariables (public, pure)
   // ---------------------------------------------------------------------------
 
   describe('validateVariables', () => {
@@ -457,19 +450,20 @@ describe('EmailTemplateRepository', () => {
   });
 
   // ---------------------------------------------------------------------------
-  // validateTemplateSyntax (private — tested via createTemplate)
+  // validateTemplateSyntax (private — exercised via createTemplate; S4 precompile fix)
+  //
+  // validateTemplateSyntax parses via Handlebars.precompile (eager), NOT
+  // Handlebars.compile (lazy — it never threw at create time, making the guard a
+  // silent no-op). These patch precompile to drive the corrected implementation;
+  // the real-PG proof that an invalid template is rejected BEFORE insert lives in
+  // template.repo.integration.test.ts S4.
   // ---------------------------------------------------------------------------
 
   describe('template syntax validation (via createTemplate)', () => {
-    // NOTE: validateTemplateSyntax now parses via Handlebars.precompile (eager),
-    // NOT Handlebars.compile (lazy — it never threw at create time, making the
-    // guard a silent no-op). See template.repo.integration.test.ts S4. These
-    // tests patch precompile to match the corrected implementation.
     test('wraps Handlebars compile errors as ValidationError', async () => {
       const repo = makeRepo();
       const originalPrecompile = Handlebars.precompile;
 
-      // Temporarily make precompile throw
       Handlebars.precompile = (() => { throw new Error('Parse error'); }) as any;
 
       try {
@@ -511,7 +505,6 @@ describe('EmailTemplateRepository', () => {
       const originalPrecompile = Handlebars.precompile;
       const compileCalls: string[] = [];
 
-      // Track what gets parsed for validation
       Handlebars.precompile = ((template: string) => {
         compileCalls.push(template);
         return originalPrecompile(template);
@@ -528,7 +521,6 @@ describe('EmailTemplateRepository', () => {
           variables: [{ id: 'name', type: 'string', label: 'Name', required: true }],
         } as any);
 
-        // All three template parts should have been parsed for validation
         expect(compileCalls).toContain('Subject {{name}}');
         expect(compileCalls).toContain('<p>HTML {{name}}</p>');
         expect(compileCalls).toContain('Text {{name}}');
@@ -555,7 +547,7 @@ describe('EmailTemplateRepository', () => {
   });
 
   // ---------------------------------------------------------------------------
-  // validateVariableDefinitions (private — tested via createTemplate)
+  // validateVariableDefinitions (private — exercised via createTemplate; pure)
   // ---------------------------------------------------------------------------
 
   describe('variable definitions validation (via createTemplate)', () => {
@@ -666,34 +658,11 @@ describe('EmailTemplateRepository', () => {
 
       expect(result).toBeDefined();
     });
-  });
-
-  // ---------------------------------------------------------------------------
-  // createTemplate
-  // ---------------------------------------------------------------------------
-
-  describe('createTemplate', () => {
-    test('calls createOne after validation', async () => {
-      const repo = makeRepo();
-      const created = makeTemplate();
-      const createSpy = spyOn(repo, 'createOne' as any).mockResolvedValue(created);
-
-      const data = {
-        name: 'Test',
-        subject: 'Hello {{name}}',
-        bodyHtml: '<p>Hello {{name}}</p>',
-        variables: [{ id: 'name', type: 'string', label: 'Name', required: true }],
-      } as any;
-
-      await repo.createTemplate(data);
-      expect(createSpy).toHaveBeenCalledTimes(1);
-    });
 
     test('skips variable validation when variables not provided', async () => {
       const repo = makeRepo();
       spyOn(repo, 'createOne' as any).mockResolvedValue(makeTemplate({ variables: [] as any }));
 
-      // Should not throw — no variables to validate
       const result = await repo.createTemplate({
         name: 'Simple',
         subject: 'Hello',
@@ -705,10 +674,12 @@ describe('EmailTemplateRepository', () => {
   });
 
   // ---------------------------------------------------------------------------
-  // updateTemplate
+  // updateTemplate — content-field syntax/definition guards (pure branches)
+  // (version-bump + missing-id persistence proven in integration; here we lock the
+  // pure validation branches that throw BEFORE any write.)
   // ---------------------------------------------------------------------------
 
-  describe('updateTemplate', () => {
+  describe('updateTemplate (pure validation branches)', () => {
     test('throws NotFoundError when template does not exist', async () => {
       const repo = makeRepo();
       spyOn(repo, 'findOneById' as any).mockResolvedValue(null);
@@ -716,32 +687,6 @@ describe('EmailTemplateRepository', () => {
       await expect(
         repo.updateTemplate('nonexistent', { name: 'New Name' })
       ).rejects.toBeInstanceOf(NotFoundError);
-    });
-
-    test('bumps version on update', async () => {
-      const repo = makeRepo();
-      const existing = makeTemplate({ version: 3 });
-      spyOn(repo, 'findOneById' as any).mockResolvedValue(existing);
-      const updateSpy = spyOn(repo, 'updateOneById' as any).mockResolvedValue(
-        makeTemplate({ version: 4 })
-      );
-
-      await repo.updateTemplate('tpl-1', { name: 'Updated Name' });
-
-      const [, data] = updateSpy.mock.calls[0] as any;
-      expect(data.version).toBe(4); // 3 + 1
-    });
-
-    test('invalidates cache after update', async () => {
-      const repo = makeRepo();
-      const existing = makeTemplate();
-      spyOn(repo, 'findOneById' as any).mockResolvedValue(existing);
-      spyOn(repo, 'updateOneById' as any).mockResolvedValue(makeTemplate());
-      const cacheSpy = spyOn(repo, 'invalidateCache');
-
-      await repo.updateTemplate('tpl-1', { name: 'Updated' });
-
-      expect(cacheSpy).toHaveBeenCalledWith('tpl-1');
     });
 
     test('validates syntax when subject is updated', async () => {
@@ -789,20 +734,10 @@ describe('EmailTemplateRepository', () => {
         })
       ).rejects.toThrow('Duplicate variable ID');
     });
-
-    test('skips syntax validation when no content fields updated', async () => {
-      const repo = makeRepo();
-      spyOn(repo, 'findOneById' as any).mockResolvedValue(makeTemplate());
-      spyOn(repo, 'updateOneById' as any).mockResolvedValue(makeTemplate());
-
-      // Only updating name — should not validate syntax
-      const result = await repo.updateTemplate('tpl-1', { name: 'Renamed' });
-      expect(result).toBeDefined();
-    });
   });
 
   // ---------------------------------------------------------------------------
-  // renderTemplate
+  // renderTemplate (pure Handlebars render; getActiveTemplate seam spied out)
   // ---------------------------------------------------------------------------
 
   describe('renderTemplate', () => {
@@ -900,7 +835,7 @@ describe('EmailTemplateRepository', () => {
   });
 
   // ---------------------------------------------------------------------------
-  // previewTemplate
+  // previewTemplate + generateSampleVariables (pure; getActiveTemplate spied out)
   // ---------------------------------------------------------------------------
 
   describe('previewTemplate', () => {
@@ -942,10 +877,6 @@ describe('EmailTemplateRepository', () => {
       await expect(repo.previewTemplate('nonexistent')).rejects.toBeInstanceOf(NotFoundError);
     });
   });
-
-  // ---------------------------------------------------------------------------
-  // generateSampleVariables (private — tested via previewTemplate)
-  // ---------------------------------------------------------------------------
 
   describe('sample variable generation (via previewTemplate)', () => {
     test('generates sample string from label', async () => {
@@ -1070,13 +1001,12 @@ describe('EmailTemplateRepository', () => {
   });
 
   // ---------------------------------------------------------------------------
-  // Cache behavior
+  // In-memory template cache (pure — Map-backed, no DB on the hit path)
   // ---------------------------------------------------------------------------
 
   describe('cache', () => {
     test('invalidateCache removes entry', () => {
       const repo = makeRepo();
-      // Directly set cache for testing
       (repo as any).templateCache.set('tpl-1', {
         template: makeTemplate(),
         expiry: Date.now() + 300000,
@@ -1101,7 +1031,6 @@ describe('EmailTemplateRepository', () => {
       const repo = makeRepo();
       const tpl = makeTemplate();
 
-      // Pre-populate cache
       (repo as any).templateCache.set('tpl-1', {
         template: tpl,
         expiry: Date.now() + 300000,
@@ -1109,85 +1038,6 @@ describe('EmailTemplateRepository', () => {
 
       const result = await repo.getActiveTemplate('tpl-1');
       expect(result).toEqual(tpl);
-    });
-
-    test('getActiveTemplate ignores expired cache and queries DB', async () => {
-      const db = makeMockDb();
-      const tpl = makeTemplate();
-
-      // Set up DB to return the template
-      const limitMock = mock(() => Promise.resolve([tpl]));
-      db.select = mock(() => ({
-        from: mock(() => ({
-          where: mock(() => ({
-            limit: limitMock,
-          })),
-        })),
-      }));
-
-      const repo = makeRepo(db);
-
-      // Pre-populate with expired cache
-      (repo as any).templateCache.set('tpl-1', {
-        template: tpl,
-        expiry: Date.now() - 1000, // expired
-      });
-
-      const result = await repo.getActiveTemplate('tpl-1');
-      // DB was queried
-      expect(limitMock).toHaveBeenCalled();
-    });
-  });
-
-  // ---------------------------------------------------------------------------
-  // activateTemplate / archiveTemplate
-  // ---------------------------------------------------------------------------
-
-  describe('activateTemplate', () => {
-    test('throws NotFoundError when template not found', async () => {
-      const repo = makeRepo();
-      spyOn(repo, 'findOneById' as any).mockResolvedValue(null);
-
-      await expect(repo.activateTemplate('nonexistent')).rejects.toBeInstanceOf(NotFoundError);
-    });
-
-    test('updates status to active and invalidates cache', async () => {
-      const repo = makeRepo();
-      spyOn(repo, 'findOneById' as any).mockResolvedValue(makeTemplate({ status: 'draft' }));
-      const updateSpy = spyOn(repo, 'updateOneById' as any).mockResolvedValue(
-        makeTemplate({ status: 'active' })
-      );
-      const cacheSpy = spyOn(repo, 'invalidateCache');
-
-      const result = await repo.activateTemplate('tpl-1');
-
-      expect(result.status).toBe('active');
-      const [, data] = updateSpy.mock.calls[0] as any;
-      expect(data.status).toBe('active');
-      expect(cacheSpy).toHaveBeenCalledWith('tpl-1');
-    });
-  });
-
-  describe('archiveTemplate', () => {
-    test('throws NotFoundError when template not found', async () => {
-      const repo = makeRepo();
-      spyOn(repo, 'findOneById' as any).mockResolvedValue(null);
-
-      await expect(repo.archiveTemplate('nonexistent')).rejects.toBeInstanceOf(NotFoundError);
-    });
-
-    test('updates status to archived and invalidates cache', async () => {
-      const repo = makeRepo();
-      spyOn(repo, 'findOneById' as any).mockResolvedValue(makeTemplate({ status: 'active' }));
-      const updateSpy = spyOn(repo, 'updateOneById' as any).mockResolvedValue(
-        makeTemplate({ status: 'archived' })
-      );
-      const cacheSpy = spyOn(repo, 'invalidateCache');
-
-      const result = await repo.archiveTemplate('tpl-1');
-
-      expect(result.status).toBe('archived');
-      expect(cacheSpy).toHaveBeenCalledWith('tpl-1');
     });
   });
 });
