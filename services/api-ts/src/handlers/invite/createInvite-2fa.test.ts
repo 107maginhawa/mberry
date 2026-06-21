@@ -79,9 +79,16 @@ describe('createInvite — 2FA gate for privileged officer titles (FIX-002 / AXI
   let inviteMocks: ReturnType<typeof stubRepo> | undefined;
   let officerMocks: ReturnType<typeof stubRepo> | undefined;
   let savedNodeEnv: string | undefined;
+  let savedInviteSecret: string | undefined;
 
   beforeEach(() => {
     savedNodeEnv = process.env['NODE_ENV'];
+    // The "in production (201)" tests pass the 2FA gate and then actually mint an
+    // invite token; getInviteTokenSecret() throws in production unless a non-default
+    // secret is present. CI's unit-tests job has no .env, so provide one here (local
+    // .env has it, which is why this only failed in CI).
+    savedInviteSecret = process.env['INVITE_TOKEN_SECRET'];
+    process.env['INVITE_TOKEN_SECRET'] = 'test-invite-token-secret-not-the-dev-default';
     restoreRepo(OfficerTermRepository);
     restoreRepo(InviteRepository);
   });
@@ -95,6 +102,8 @@ describe('createInvite — 2FA gate for privileged officer titles (FIX-002 / AXI
     restoreRepo(InviteRepository);
     if (savedNodeEnv === undefined) delete process.env['NODE_ENV'];
     else process.env['NODE_ENV'] = savedNodeEnv;
+    if (savedInviteSecret === undefined) delete process.env['INVITE_TOKEN_SECRET'];
+    else process.env['INVITE_TOKEN_SECRET'] = savedInviteSecret;
   });
 
   // ── Wiring proof: createInvite delegates to the officer/2FA gate ──────────
