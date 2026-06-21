@@ -303,7 +303,11 @@ function PrivacySection() {
   const effectiveSettings = allSettings ?? privacyQuery.data ?? []
 
   const privacy = effectiveSettings[selectedOrgIndex] ?? defaults
-  const orgId = privacy.orgId
+  // GET /persons/me/privacy returns rows keyed `organizationId` (the wire shape), not
+  // `orgId` — reading `privacy.orgId` was always undefined, so the toggle's `if(!orgId)`
+  // guard short-circuited: clicking a privacy switch issued no PATCH and never flipped.
+  const orgId = (privacy as { organizationId?: string; orgId?: string }).organizationId
+    ?? (privacy as { orgId?: string }).orgId
 
   const toggle = useCallback(async (field: string, value: boolean) => {
     if (!orgId) return // no org context — cannot save
