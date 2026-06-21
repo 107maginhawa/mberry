@@ -69,7 +69,7 @@ test.describe('Member professional feed (announcement feed — live adjacent flo
     const rows = rowsOf(list.data)
     test.skip(rows.length === 0, 'no sent announcements seeded for this org')
 
-    const target = rows[0]
+    const target = rows[0]! // guarded by the test.skip(rows.length === 0) above
     const title = (target.title ?? target.subject ?? '').trim()
     expect(title.length).toBeGreaterThan(0)
 
@@ -99,7 +99,7 @@ test.describe('Member professional feed (announcement feed — live adjacent flo
     const rows = rowsOf(list.data)
     test.skip(rows.length === 0, 'no sent announcements seeded for this org')
 
-    const target = rows[0]
+    const target = rows[0]! // guarded by the test.skip(rows.length === 0) above
     const title = (target.title ?? target.subject ?? '').trim()
 
     // Open the feed, then click the matching card to navigate to the detail
