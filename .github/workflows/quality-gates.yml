@@ -10,6 +10,34 @@ jobs:
   gates:
     runs-on: ubuntu-latest
     timeout-minutes: 15
+    # The coverage gate runs the full `bun test --coverage` suite, which includes
+    # the real-PG *.integration.test.ts tests. Without a DB those fail ("relation
+    # … does not exist" / "db.select is not a function"), making the gate a dead
+    # signal (always red — even on main HEAD). Provision Postgres + migrate before
+    # the gate, mirroring ci.yml's unit-tests job. Minio is intentionally omitted:
+    # no integration test makes a real object-storage call (verified — the suite
+    # passes with STORAGE_ENDPOINT pointed at a dead port), so the heavy minio
+    # docker step the other jobs need is unnecessary here. STORAGE_* is still set
+    # because config/import paths read it; nothing actually connects.
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: password
+          POSTGRES_DB: monobase
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd "pg_isready -U postgres -d monobase"
+          --health-interval 5s --health-timeout 5s --health-retries 10
+    env:
+      DATABASE_URL: postgresql://postgres:password@localhost:5432/monobase
+      AUTH_SECRET: ci-codegen-secret-do-not-use-in-prod
+      STORAGE_PROVIDER: minio
+      STORAGE_ENDPOINT: http://localhost:9000
+      STORAGE_BUCKET: monobase-files
+      STORAGE_ACCESS_KEY_ID: minioadmin
+      STORAGE_SECRET_ACCESS_KEY: minioadmin
     steps:
       - uses: actions/checkout@v4
         with:
@@ -63,6 +91,11 @@ jobs:
 
       - name: Observability audit (info)
         run: bun run scripts/audit-observability.ts
+
+      - name: Apply DB migrations
+        # Postgres service starts empty; migrate the public schema so the real-PG
+        # integration tests in the coverage suite can run. Same step ci.yml uses.
+        run: cd services/api-ts && bun run scripts/ci-migrate.ts
 
       - name: API unit tests with coverage gate
         run: bun run test:coverage:gate
