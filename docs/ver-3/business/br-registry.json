@@ -956,12 +956,13 @@
     "ruleClass": "p1-business",
     "tests": {
       "backend": [
-        "services/api-ts/src/handlers/email/repos/queue.repo.test.ts"
+        "services/api-ts/src/handlers/email/repos/queue.retry-deadletter.integration.test.ts",
+        "services/api-ts/src/handlers/email/repos/queue.transitions.integration.test.ts"
       ],
       "contract": [],
       "e2e": []
     },
-    "annotations": "Backend coverage registered 2026-06-11 (AHA notifications-email Batch D): queue.repo.test.ts asserts retryEmail throws MAX_RETRIES_EXCEEDED at attempts>=3 and markAsFailed sets nextRetryAt=null at the cap (terminal). Status remains INCOMPLETE per p1-business rule class (requires contract OR e2e); kept on br-coverage KNOWN_INCOMPLETE allowlist."
+    "annotations": "Backend coverage registered 2026-06-11; UPGRADED to real-PG 2026-06-22 (Wave-2 B3 feedback). The mock-only queue.repo.test.ts was deleted; the terminal-failure contract is now proven against Postgres: queue.retry-deadletter.integration.test.ts exercises the exponential backoff lifecycle (attempts 0/1/2 -> next_retry_at +5min/+30min/+2h, attempts=3 -> dead-letter next_retry_at NULL) and queue.transitions.integration.test.ts asserts retryEmail from a failed row with attempts>=3 raises BusinessLogicError MAX_RETRIES_EXCEEDED. KNOWN GAP (product decision, characterized not fixed): getPendingEmails selects rows with lte(attempts,3) while the dead-letter cap fires after the 3rd retry, so the effective max is 4 send attempts (1 initial + 3 retries) — the inline '<3' comment overstates the cap by one. The state machine still terminates correctly (no infinite retry); off-by-one is intentional-leniency, left as-is. Status remains INCOMPLETE per p1-business rule class (requires contract OR e2e); kept on br-coverage KNOWN_INCOMPLETE allowlist."
   },
   "BR-55": {
     "rule": "Hard Bounce Auto-Suppression (alias M22-R4)",
@@ -970,12 +971,12 @@
     "ruleClass": "p0-data",
     "tests": {
       "backend": [
-        "services/api-ts/src/handlers/email/repos/suppression.repo.integration.test.ts"
+        "services/api-ts/src/handlers/email/repos/suppression.repo.createscratch.integration.test.ts"
       ],
       "contract": [],
       "e2e": []
     },
-    "annotations": "Minted 2026-06-02 to resolve TR-P1-003. Aliases module-local M22-R4. IF hard bounce received THEN add to suppression with reason hard_bounce. 2026-06-19: durable-state half backfilled with a real-PG SuppressionRepository integration test (hard_bounce persists + idempotent re-add). The IF trigger (provider bounce webhook calling addSuppression) is not yet wired."
+    "annotations": "Minted 2026-06-02 to resolve TR-P1-003. Aliases module-local M22-R4. IF hard bounce received THEN add to suppression with reason hard_bounce. 2026-06-19: durable-state half backfilled with a real-PG integration test. 2026-06-22 (Wave-2 B3): migrated off the hand-DDL suppression.repo.integration.test.ts (deleted) onto the shared createScratch harness — suppression.repo.createscratch.integration.test.ts proves hard_bounce persists+reads-back with the exact reason and a duplicate (org,email) add is an idempotent no-op (23505 swallowed, FIRST reason retained), plus the new org_id 23502 NOT-NULL invariant. KNOWN GAP (product decision): this locks only the THEN (suppression-state) half of the IF->THEN rule; the IF trigger — a provider bounce webhook that CALLS addSuppression — is still UNWIRED in the codebase (the guard protects a path nothing yet invokes)."
   },
   "BR-56": {
     "rule": "Complaint Auto-Suppression / CAN-SPAM (alias M22-R5)",
@@ -984,12 +985,12 @@
     "ruleClass": "p0-security",
     "tests": {
       "backend": [
-        "services/api-ts/src/handlers/email/repos/suppression.repo.integration.test.ts"
+        "services/api-ts/src/handlers/email/repos/suppression.repo.createscratch.integration.test.ts"
       ],
       "contract": [],
       "e2e": []
     },
-    "annotations": "Minted 2026-06-02 to resolve TR-P1-003. Aliases module-local M22-R5. IF complaint received THEN add to suppression with reason complaint (CAN-SPAM). 2026-06-19: durable-state + tenant-isolation half backfilled with a real-PG SuppressionRepository integration test (complaint persists; org-A suppression does not leak to org-B). The IF trigger (provider complaint webhook calling addSuppression) is not yet wired."
+    "annotations": "Minted 2026-06-02 to resolve TR-P1-003. Aliases module-local M22-R5. IF complaint received THEN add to suppression with reason complaint (CAN-SPAM). 2026-06-19: durable-state + tenant-isolation half backfilled with a real-PG integration test. 2026-06-22 (Wave-2 B3): migrated off the hand-DDL suppression.repo.integration.test.ts (deleted) onto the shared createScratch harness — suppression.repo.createscratch.integration.test.ts proves a complaint persists with reason complaint, suppression is strictly org-scoped (org-A complaint does NOT suppress the same address in org-B), listByOrg returns only the calling org's rows, and deleteByIdForOrg from a different org deletes NOTHING (cross-tenant guard). KNOWN GAP (product decision): this locks only the THEN (suppression-state) half; the IF trigger — a provider complaint webhook that CALLS addSuppression — is still UNWIRED in the codebase."
   },
   "BR-57": {
     "rule": "Transactional Email Suppression Override (alias M22-R6)",
@@ -1027,12 +1028,12 @@
     "ruleClass": "p0-data",
     "tests": {
       "backend": [
-        "services/api-ts/src/handlers/email/repos/queue.repo.test.ts"
+        "services/api-ts/src/handlers/email/repos/queue.transitions.integration.test.ts"
       ],
       "contract": [],
       "e2e": []
     },
-    "annotations": "Backend coverage registered 2026-06-11 (AHA notifications-email Batch D): queue.repo.test.ts cancelEmail suite asserts cancelledBy/cancellationReason/cancelledAt are persisted and the pending-only state-machine guard rejects cancel from failed/processing/sent/cancelled. Status remains INCOMPLETE per p0-data rule class (requires contract+e2e); kept on br-coverage KNOWN_INCOMPLETE allowlist."
+    "annotations": "Backend coverage registered 2026-06-11; UPGRADED to real-PG 2026-06-22 (Wave-2 B3 feedback). The mock-only queue.repo.test.ts was deleted; queue.transitions.integration.test.ts now proves against Postgres that cancelEmail from pending persists the cancelled fields (cancelledBy/cancellationReason/cancelledAt) and that the pending-only guard raises ConflictError when cancelling from processing/sent (row unchanged). Status remains INCOMPLETE per p0-data rule class (requires contract+e2e); kept on br-coverage KNOWN_INCOMPLETE allowlist."
   },
   "BR-60": {
     "rule": "Merchant Account Required for Payment (alias M21-R1)",
