@@ -19,6 +19,8 @@
   "src/handlers/dues": { "line": 45, "function": 0 },
   "_comment_booking": "Wave-2 B1: bookingEvent.repo gained a real-PG createScratch suite; booking/timeSlot/scheduleException repo integration tests un-gated from 'if(CI)return' onto createScratch; slotGeneration + getNextBookableTime unit-covered (latent minBookingHours/advanceBookingDays bug fixed); booking lifecycle slot-release + DB CHECKs + notification fan-out covered. Measured module-min line% ~62 (booking.schema.ts); floor raised 5→50 (the mid-tier target, ~12pt below min for CI variance).",
   "src/handlers/booking": { "line": 50, "function": 0 },
+  "_comment_assoc_ops": "Wave-2 B1: 5 fake-db repo tests (events/training/committee/committee-task/accredited-provider) converted to real-PG createScratch suites (fakes + __fake-db.ts deleted); awardTrainingCredit BR + completeTrainingEnrollment workflow + register-and-pay→settle→refund seam covered. Full-gate module-min line% ~64 (committee.repo.ts); newly gated at the mid-tier 50 (was ungated).",
+  "src/handlers/association:operations": { "line": 50, "function": 0 },
   "src/handlers/invite": { "line": 70, "function": 0 },
   "src/handlers/jobs": { "line": 5, "function": 0 },
   "src/handlers/marketplace": { "line": 5, "function": 0 },
