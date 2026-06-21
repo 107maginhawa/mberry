@@ -234,3 +234,76 @@ describe('EventsRepository.getRegistrationCount / getFirstWaitlisted — real-PG
     expect(await repo.getFirstWaitlisted(ev.id)).toBeUndefined();
   });
 });
+
+/**
+ * listPublic is NETWORK-wide (no org filter) so it sees every row in the shared
+ * scratch schema. Each test below seeds events carrying a unique title token and
+ * filters by that token via the `search` param, so pre-seeded rows from other
+ * tests can never pollute the assertion.
+ */
+describe('EventsRepository.listPublic — real-PG SQL filters', () => {
+  test('pricing filter binds the raw `registration_fee > 0` fragment correctly', async () => {
+    if (!H.dbReachable) return;
+    const tok = 'PRICINGTEST';
+    await seedEvent(H, { title: `${tok} free`, registrationFee: 0 });
+    await seedEvent(H, { title: `${tok} paid`, registrationFee: 5000 });
+
+    const paid = await repo.listPublic({ search: tok, pricing: 'paid' });
+    expect(paid.data).toHaveLength(1);
+    expect(paid.data[0]!.registrationFee).toBe(5000);
+    expect(paid.total).toBe(1);
+
+    const free = await repo.listPublic({ search: tok, pricing: 'free' });
+    expect(free.data).toHaveLength(1);
+    expect(free.data[0]!.registrationFee).toBe(0);
+
+    const all = await repo.listPublic({ search: tok, pricing: 'all' });
+    expect(all.data).toHaveLength(2);
+    expect(all.total).toBe(2);
+  });
+
+  test('visibility/status guard: draft and internal-visibility events are NEVER returned', async () => {
+    if (!H.dbReachable) return;
+    const tok = 'VISTEST';
+    // The only row that should ever surface: published + network.
+    const visible = await seedEvent(H, { title: `${tok} visible`, status: 'published', visibility: 'network' });
+    await seedEvent(H, { title: `${tok} draft`, status: 'draft', visibility: 'network' });
+    await seedEvent(H, { title: `${tok} internal`, status: 'published', visibility: 'internal' });
+
+    const res = await repo.listPublic({ search: tok });
+    expect(res.data).toHaveLength(1);
+    expect(res.data[0]!.id).toBe(visible.id);
+    // A draft + an internal must not leak under any pricing filter either.
+    expect((await repo.listPublic({ search: tok, pricing: 'all' })).data).toHaveLength(1);
+  });
+
+  test('date filters apply gte/lte on start_date inclusive of the boundary', async () => {
+    if (!H.dbReachable) return;
+    const tok = 'DATETEST';
+    const jan = new Date('2030-01-01T00:00:00Z');
+    const jun = new Date('2030-06-01T00:00:00Z');
+    await seedEvent(H, { title: `${tok} jan`, startDate: jan });
+    await seedEvent(H, { title: `${tok} jun`, startDate: jun });
+
+    const fromMar = await repo.listPublic({ search: tok, dateFrom: new Date('2030-03-01T00:00:00Z') });
+    expect(fromMar.data.map((e) => e.title)).toEqual([`${tok} jun`]);
+
+    const toMar = await repo.listPublic({ search: tok, dateTo: new Date('2030-03-01T00:00:00Z') });
+    expect(toMar.data.map((e) => e.title)).toEqual([`${tok} jan`]);
+
+    // Boundary: dateFrom EXACTLY equal to a row's start_date includes it (gte).
+    const fromJun = await repo.listPublic({ search: tok, dateFrom: jun });
+    expect(fromJun.data.map((e) => e.title)).toEqual([`${tok} jun`]);
+  });
+});
+
+describe('EventsRepository.findBySlug — real-PG', () => {
+  test('finds the row by its unique slug; returns undefined for an absent slug', async () => {
+    if (!H.dbReachable) return;
+    const seeded = await seedEvent(H, { eventSlug: 'spring-gala-s2' });
+    const found = await repo.findBySlug('spring-gala-s2');
+    expect(found?.id).toBe(seeded.id);
+    expect(found?.eventSlug).toBe('spring-gala-s2');
+    expect(await repo.findBySlug('absent-slug-xyz')).toBeUndefined();
+  });
+});
