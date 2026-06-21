@@ -19,6 +19,7 @@ import {
   generateSlotsForEvent,
   validateSlotBoundaries,
   batchGenerateSlots,
+  getNextBookableTime,
   type GeneratedSlot,
 } from './slotGeneration';
 import type { BookingEvent } from '../repos/booking.schema';
@@ -138,5 +139,49 @@ describe('batchGenerateSlots', () => {
     const events = Array.from({ length: 12 }, (_, i) => makeEvent({ id: `e${i}`, owner: `o${i}` }));
     const slots = await batchGenerateSlots(events, { start: FUT, end: FUT }, new Map());
     expect(slots.length).toBe(12 * 2); // each event → 2 slots
+  });
+});
+
+/**
+ * getNextBookableTime reads `new Date()` internally, so we pin `now` via a
+ * fixed-Date shim (local components → tz-robust) to assert the exact rounding.
+ */
+function withFixedNow<T>(y: number, mo: number, d: number, h: number, mi: number, s: number, ms: number, fn: () => T): T {
+  const Real = Date;
+  const fixedMs = new Real(y, mo, d, h, mi, s, ms).getTime();
+  // @ts-expect-error — test-only Date override
+  globalThis.Date = class extends Real {
+    constructor(...args: unknown[]) { super(...(args.length ? (args as []) : [fixedMs])); }
+    static now() { return fixedMs; }
+  };
+  try { return fn(); } finally { globalThis.Date = Real; }
+}
+
+describe('getNextBookableTime — round up to the next 15-min boundary', () => {
+  test('a sub-minute remainder on a boundary (14:45:20) rounds UP to 15:00 (never down into the past)', () => {
+    const r = withFixedNow(2030, 0, 1, 14, 45, 20, 500, () => getNextBookableTime(0));
+    expect(r.getHours()).toBe(15);
+    expect(r.getMinutes()).toBe(0);
+    expect(r.getSeconds()).toBe(0);
+    expect(r.getMilliseconds()).toBe(0);
+  });
+
+  test('exactly on a boundary with no remainder (14:45:00) stays at 14:45', () => {
+    const r = withFixedNow(2030, 0, 1, 14, 45, 0, 0, () => getNextBookableTime(0));
+    expect(r.getHours()).toBe(14);
+    expect(r.getMinutes()).toBe(45);
+    expect(r.getSeconds()).toBe(0);
+  });
+
+  test('rollover at :60 advances the hour and zeroes minutes (14:50 → 15:00)', () => {
+    const r = withFixedNow(2030, 0, 1, 14, 50, 0, 0, () => getNextBookableTime(0));
+    expect(r.getHours()).toBe(15);
+    expect(r.getMinutes()).toBe(0);
+  });
+
+  test('minBookingHours offset applies before rounding (10:00 + 2h → 12:00)', () => {
+    const r = withFixedNow(2030, 0, 1, 10, 0, 0, 0, () => getNextBookableTime(2));
+    expect(r.getHours()).toBe(12);
+    expect(r.getMinutes()).toBe(0);
   });
 });
