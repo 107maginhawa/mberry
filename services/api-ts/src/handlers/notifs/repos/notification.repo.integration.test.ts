@@ -10,19 +10,14 @@
  */
 
 import { describe, test, expect, beforeAll, afterAll } from 'bun:test';
-import { Pool } from 'pg';
-import { drizzle } from 'drizzle-orm/node-postgres';
 import { randomUUID } from 'node:crypto';
 import { NotificationRepository } from './notification.repo';
 import { ValidationError, NotFoundError } from '@/core/errors';
 import type { NotificationPreferencePort } from '@/core/ports/notification-preference.port';
+import { createFeedbackScratch } from '@/test-utils/feedback-fixtures';
+import type { ScratchDb } from '@/test-utils/pg-scratch';
 
-const DB_URL =
-  process.env['DATABASE_URL'] ?? 'postgres://postgres:password@localhost:5432/monobase';
-
-let pool: Pool;
-let db: ReturnType<typeof drizzle>;
-let dbReachable = false;
+let H: ScratchDb;
 let repo: NotificationRepository;
 
 const ORG = randomUUID();
@@ -46,39 +41,23 @@ const disabledPort: NotificationPreferencePort = {
 const createdIds: string[] = [];
 
 beforeAll(async () => {
-  // These tests seed the shared `public` schema; under CI's parallel suite that
-  // contends on connections + needs migrations. Run them locally only — the
-  // equivalent coverage runs against a migrated dev DB. (See SCRATCH-schema
-  // integration tests, e.g. comms-repos / approvalRollback, for the isolated
-  // pattern these should migrate to later.)
-  if (process.env['CI']) { return; }
-  pool = new Pool({ connectionString: DB_URL, connectionTimeoutMillis: 3000 });
-  try {
-    const c = await pool.connect();
-    c.release();
-    db = drizzle(pool);
-    dbReachable = true;
-  } catch (err) {
-    dbReachable = false;
-    // eslint-disable-next-line no-console
-    console.warn(`[notification.repo integration] Postgres unreachable; skipping. ${(err as Error).message}`);
-    return;
-  }
-  repo = new NotificationRepository(db as any, stubPersonRepo, undefined, undefined, enabledPort);
+  // Isolated scratch schema (CREATE TABLE … LIKE public.notification INCLUDING ALL)
+  // — runs in CI behind ci-migrate, parallel-safe, schema-faithful. Replaces the
+  // former public-schema + `if (CI) return` early-return so these ~16 assertions
+  // now execute on the gate (Wave-2 B3 Slice 1, DoD #1).
+  H = await createFeedbackScratch();
+  if (!H.dbReachable) return;
+  repo = new NotificationRepository(H.db as any, stubPersonRepo, undefined, undefined, enabledPort);
 });
 
 afterAll(async () => {
-  if (pool) {
-    if (dbReachable) {
-      await pool.query(`DELETE FROM notification WHERE organization_id=$1`, [ORG]);
-    }
-    await pool.end();
-  }
+  // Scratch teardown drops the schema — no manual DELETE needed.
+  await H?.teardown();
 });
 
 describe('NotificationRepository.createNotificationForModule', () => {
   test('rejects missing organizationId', async () => {
-    if (!dbReachable) return;
+    if (!H.dbReachable) return;
     let err: unknown;
     try {
       await repo.createNotificationForModule({ recipient: RECIPIENT, type: 'system', channel: 'in-app', title: 't', message: 'm' } as any);
@@ -87,7 +66,7 @@ describe('NotificationRepository.createNotificationForModule', () => {
   });
 
   test('immediate in-app → status sent, sentAt set', async () => {
-    if (!dbReachable) return;
+    if (!H.dbReachable) return;
     const n = await repo.createNotificationForModule({
       organizationId: ORG, recipient: RECIPIENT, type: 'system', channel: 'in-app', title: 'Hi', message: 'msg',
     } as any);
@@ -98,7 +77,7 @@ describe('NotificationRepository.createNotificationForModule', () => {
   });
 
   test('recipient without person record still creates (warn path)', async () => {
-    if (!dbReachable) return;
+    if (!H.dbReachable) return;
     const n = await repo.createNotificationForModule({
       organizationId: ORG, recipient: randomUUID(), type: 'system', channel: 'in-app', title: 'Hi', message: 'm',
     } as any);
@@ -107,7 +86,7 @@ describe('NotificationRepository.createNotificationForModule', () => {
   });
 
   test('scheduled in-app → status queued', async () => {
-    if (!dbReachable) return;
+    if (!H.dbReachable) return;
     const n = await repo.createNotificationForModule({
       organizationId: ORG, recipient: RECIPIENT, type: 'system', channel: 'in-app',
       title: 'Later', message: 'm', scheduledAt: new Date(Date.now() + 3600_000),
@@ -117,7 +96,7 @@ describe('NotificationRepository.createNotificationForModule', () => {
   });
 
   test('email channel with enabled preference → queued', async () => {
-    if (!dbReachable) return;
+    if (!H.dbReachable) return;
     const n = await repo.createNotificationForModule({
       organizationId: ORG, recipient: RECIPIENT, type: 'billing', channel: 'email', title: 'Bill', message: 'm',
     } as any);
@@ -127,20 +106,20 @@ describe('NotificationRepository.createNotificationForModule', () => {
   });
 
   test('email channel suppressed when preference disabled → synthetic non-persisted marker', async () => {
-    if (!dbReachable) return;
-    const r2 = new NotificationRepository(db as any, stubPersonRepo, undefined, undefined, disabledPort);
+    if (!H.dbReachable) return;
+    const r2 = new NotificationRepository(H.db as any, stubPersonRepo, undefined, undefined, disabledPort);
     const n = await r2.createNotificationForModule({
       organizationId: ORG, recipient: RECIPIENT, type: 'billing', channel: 'email', title: 'Bill', message: 'm',
     } as any);
     expect((n as any).suppressed).toBe(true);
     expect(n.id).toBe('');
     // No row persisted.
-    const cnt = await pool.query(`SELECT count(*)::int n FROM notification WHERE organization_id=$1 AND title='Bill' AND channel='email'`, [ORG]);
+    const cnt = await H.scopedPool.query(`SELECT count(*)::int n FROM "${H.schema}".notification WHERE organization_id=$1 AND title='Bill' AND channel='email'`, [ORG]);
     expect(cnt.rows[0].n).toBe(1); // only the enabled one above
   });
 
   test('channels[] fallback resolves channel when single channel absent', async () => {
-    if (!dbReachable) return;
+    if (!H.dbReachable) return;
     const n = await repo.createNotificationForModule({
       organizationId: ORG, recipient: RECIPIENT, type: 'system', channels: ['in-app'], title: 'Multi', message: 'm',
     } as any);
@@ -150,8 +129,8 @@ describe('NotificationRepository.createNotificationForModule', () => {
   });
 
   test('unmapped category (security) sends without preference gating', async () => {
-    if (!dbReachable) return;
-    const r2 = new NotificationRepository(db as any, stubPersonRepo, undefined, undefined, disabledPort);
+    if (!H.dbReachable) return;
+    const r2 = new NotificationRepository(H.db as any, stubPersonRepo, undefined, undefined, disabledPort);
     const n = await r2.createNotificationForModule({
       organizationId: ORG, recipient: RECIPIENT, type: 'security', channel: 'email', title: 'Sec', message: 'm',
     } as any);
@@ -164,7 +143,7 @@ describe('NotificationRepository.createNotificationForModule', () => {
 
 describe('NotificationRepository queries + state', () => {
   test('buildWhereConditions branches via findManyByRecipient', async () => {
-    if (!dbReachable) return;
+    if (!H.dbReachable) return;
     const res = await repo.findManyByRecipient(RECIPIENT, {
       organizationId: ORG, type: 'system', channel: 'in-app', status: 'unread',
       startDate: new Date('2000-01-01'), endDate: new Date('2100-01-01'),
@@ -179,14 +158,14 @@ describe('NotificationRepository queries + state', () => {
   });
 
   test('findOneByIdAndRecipient hit + miss', async () => {
-    if (!dbReachable) return;
+    if (!H.dbReachable) return;
     const id = createdIds.find(Boolean)!;
     expect((await repo.findOneByIdAndRecipient(id, RECIPIENT))?.id ?? null).toBeDefined();
     expect(await repo.findOneByIdAndRecipient(id, randomUUID())).toBeNull();
   });
 
   test('markAsRead: success, idempotent, NotFound', async () => {
-    if (!dbReachable) return;
+    if (!H.dbReachable) return;
     // a 'sent' in-app notification for RECIPIENT
     const sent = await repo.createNotificationForModule({
       organizationId: ORG, recipient: RECIPIENT, type: 'system', channel: 'in-app', title: 'ToRead', message: 'm',
@@ -205,7 +184,7 @@ describe('NotificationRepository queries + state', () => {
   });
 
   test('markAllAsRead + getUnreadCount', async () => {
-    if (!dbReachable) return;
+    if (!H.dbReachable) return;
     const r = randomUUID();
     for (let i = 0; i < 2; i++) {
       const n = await repo.createNotificationForModule({
@@ -223,7 +202,7 @@ describe('NotificationRepository queries + state', () => {
   });
 
   test('processScheduledNotifications delivers due queued notifications (email + in-app branches)', async () => {
-    if (!dbReachable) return;
+    if (!H.dbReachable) return;
     // queued email due now (exercises email delivery branch; no email service → warn path,
     // then marks delivered). Non-in-app channels are created 'queued' even when due.
     const dueEmail = await repo.createNotificationForModule({
@@ -236,8 +215,8 @@ describe('NotificationRepository queries + state', () => {
     // Force a queued in-app row (createNotificationForModule would make in-app 'sent'
     // immediately, so insert a queued in-app directly to drive the in-app delivery branch).
     const queuedInApp = randomUUID();
-    await pool.query(
-      `INSERT INTO notification (id, organization_id, recipient_id, type, channel, title, message, status, scheduled_at, created_at, updated_at)
+    await H.scopedPool.query(
+      `INSERT INTO "${H.schema}".notification (id, organization_id, recipient_id, type, channel, title, message, status, scheduled_at, created_at, updated_at)
        VALUES ($1,$2,$3,'system','in-app','QueuedInApp','m','queued', now() - interval '1 minute', now(), now())`,
       [queuedInApp, ORG, RECIPIENT],
     );
@@ -245,35 +224,35 @@ describe('NotificationRepository queries + state', () => {
 
     await repo.processScheduledNotifications();
 
-    const afterMail = await pool.query(`SELECT status FROM notification WHERE id=$1`, [dueEmail.id]);
+    const afterMail = await H.scopedPool.query(`SELECT status FROM "${H.schema}".notification WHERE id=$1`, [dueEmail.id]);
     expect(afterMail.rows[0].status).toBe('delivered');
-    const afterInApp = await pool.query(`SELECT status FROM notification WHERE id=$1`, [queuedInApp]);
+    const afterInApp = await H.scopedPool.query(`SELECT status FROM "${H.schema}".notification WHERE id=$1`, [queuedInApp]);
     expect(afterInApp.rows[0].status).toBe('delivered');
   });
 
   test('processScheduledNotifications: push with no OneSignal marks failed', async () => {
-    if (!dbReachable) return;
+    if (!H.dbReachable) return;
     const duePush = await repo.createNotificationForModule({
       organizationId: ORG, recipient: RECIPIENT, type: 'system', channel: 'push',
       title: 'Push', message: 'm', scheduledAt: new Date(Date.now() - 1000),
     } as any);
     createdIds.push(duePush.id);
     await repo.processScheduledNotifications();
-    const after = await pool.query(`SELECT status FROM notification WHERE id=$1`, [duePush.id]);
+    const after = await H.scopedPool.query(`SELECT status FROM "${H.schema}".notification WHERE id=$1`, [duePush.id]);
     // push branch throws ExternalServiceError → caught → status failed
     expect(after.rows[0].status).toBe('failed');
   });
 
   test('email delivery uses email service + template mapping when registered', async () => {
-    if (!dbReachable) return;
+    if (!H.dbReachable) return;
     const queued: Array<Record<string, unknown>> = [];
     const prev = (globalThis as any).app;
     (globalThis as any).app = { email: { queueEmail: async (o: Record<string, unknown>) => { queued.push(o); } } };
     try {
       // type 'security' maps to template tag 'auth.password-reset'; recipient has email.
       const id = randomUUID();
-      await pool.query(
-        `INSERT INTO notification (id, organization_id, recipient_id, type, channel, title, message, status, scheduled_at, created_at, updated_at)
+      await H.scopedPool.query(
+        `INSERT INTO "${H.schema}".notification (id, organization_id, recipient_id, type, channel, title, message, status, scheduled_at, created_at, updated_at)
          VALUES ($1,$2,$3,'security','email','Sec','m','queued', now() - interval '1 minute', now(), now())`,
         [id, ORG, RECIPIENT],
       );
@@ -281,7 +260,7 @@ describe('NotificationRepository queries + state', () => {
       await repo.processScheduledNotifications();
       expect(queued.length).toBeGreaterThanOrEqual(1);
       expect(queued[0]!['templateTags']).toEqual(['auth.password-reset']);
-      const after = await pool.query(`SELECT status FROM notification WHERE id=$1`, [id]);
+      const after = await H.scopedPool.query(`SELECT status FROM "${H.schema}".notification WHERE id=$1`, [id]);
       expect(after.rows[0].status).toBe('delivered');
     } finally {
       (globalThis as any).app = prev;
@@ -289,17 +268,17 @@ describe('NotificationRepository queries + state', () => {
   });
 
   test('cleanupExpiredNotifications removes old rows', async () => {
-    if (!dbReachable) return;
+    if (!H.dbReachable) return;
     // Insert an old notification directly.
     const oldId = randomUUID();
-    await pool.query(
-      `INSERT INTO notification (id, organization_id, recipient_id, type, channel, title, message, status, created_at, updated_at)
+    await H.scopedPool.query(
+      `INSERT INTO "${H.schema}".notification (id, organization_id, recipient_id, type, channel, title, message, status, created_at, updated_at)
        VALUES ($1,$2,$3,'system','in-app','Old','m','sent', now() - interval '200 days', now() - interval '200 days')`,
       [oldId, ORG, RECIPIENT],
     );
     const removed = await repo.cleanupExpiredNotifications(90);
     expect(removed).toBeGreaterThanOrEqual(1);
-    const gone = await pool.query(`SELECT count(*)::int n FROM notification WHERE id=$1`, [oldId]);
+    const gone = await H.scopedPool.query(`SELECT count(*)::int n FROM "${H.schema}".notification WHERE id=$1`, [oldId]);
     expect(gone.rows[0].n).toBe(0);
   });
 });
