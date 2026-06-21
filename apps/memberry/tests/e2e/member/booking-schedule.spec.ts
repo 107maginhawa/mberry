@@ -20,7 +20,10 @@ test.describe('WF-115: provider creates a booking schedule', () => {
       method: 'POST', orgId: ORG_ID,
       body: {
         title, timezone: 'Asia/Manila', locationTypes: ['video'], status: 'active',
-        dailyConfigs: { monday: { enabled: true, timeBlocks: [{ startTime: '09:00', endTime: '17:00', slotDuration: 30, bufferTime: 0 }] } },
+        // 3-letter day key (the generator's dayMapping uses 'mon'…'sun'); full
+        // names like 'monday' are now rejected (B1 follow-up item3) instead of
+        // silently generating zero availability.
+        dailyConfigs: { mon: { enabled: true, timeBlocks: [{ startTime: '09:00', endTime: '17:00', slotDuration: 30, bufferTime: 0 }] } },
       },
     })
     expect(created.status, 'booking event create must succeed').toBe(201)
