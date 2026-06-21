@@ -27,6 +27,9 @@ const INVOICE_STATUSES = ['generated', 'sent', 'paid', 'overdue', 'cancelled', '
 describe('isValidInvoiceTransition', () => {
   describe('valid transitions', () => {
     it('generated → sent', () => expect(isValidInvoiceTransition('generated', 'sent')).toBe(true));
+    // generated invoices are member-visible and directly payable (submitPaymentProof
+    // accepts 'generated'), so a confirmed proof can mark a generated invoice paid.
+    it('generated → paid (direct-pay)', () => expect(isValidInvoiceTransition('generated', 'paid')).toBe(true));
     it('generated → cancelled', () => expect(isValidInvoiceTransition('generated', 'cancelled')).toBe(true));
 
     it('sent → paid', () => expect(isValidInvoiceTransition('sent', 'paid')).toBe(true));
@@ -48,8 +51,8 @@ describe('isValidInvoiceTransition', () => {
   });
 
   describe('invalid transitions (non-terminal sources)', () => {
-    // generated cannot skip ahead or go backwards
-    it('generated → paid (skip)', () => expect(isValidInvoiceTransition('generated', 'paid')).toBe(false));
+    // generated cannot skip ahead (to overdue/writtenOff) or go backwards — but
+    // generated → paid IS allowed (direct member pay), asserted in valid transitions.
     it('generated → overdue (skip)', () => expect(isValidInvoiceTransition('generated', 'overdue')).toBe(false));
     it('generated → writtenOff (skip)', () => expect(isValidInvoiceTransition('generated', 'writtenOff')).toBe(false));
 

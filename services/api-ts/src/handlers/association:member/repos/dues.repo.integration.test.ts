@@ -590,18 +590,19 @@ describe('DuesInvoiceRepository.markPaid — FSM guard + optimistic lock (real D
     expect(updated.paidAt).not.toBeNull();
   });
 
-  test('rejects an invalid FSM transition (generated → paid) with ConflictError, leaving the row untouched', async () => {
+  test('rejects an invalid FSM transition (cancelled → paid) with ConflictError, leaving the row untouched', async () => {
     if (!H.dbReachable) return;
     const repo = new DuesInvoiceRepository(H.db as any, noopLogger);
-    // generated → paid is NOT in INVOICE_VALID_TRANSITIONS (must go via sent/overdue).
-    const id = await insertInvoice({ status: 'generated' });
+    // 'cancelled' is terminal — cancelled → paid is NOT in INVOICE_VALID_TRANSITIONS.
+    // (generated → paid IS now allowed: generated invoices are directly member-payable.)
+    const id = await insertInvoice({ status: 'cancelled' });
     const cur = await repo.findOneById(id);
 
     await expect(repo.markPaid(id, cur!.version, freshId())).rejects.toThrow(ConflictError);
 
-    // FSM guard fires BEFORE the write — row stays generated, version unchanged.
+    // FSM guard fires BEFORE the write — row stays cancelled, version unchanged.
     const reread = await repo.findOneById(id);
-    expect(reread?.status).toBe('generated');
+    expect(reread?.status).toBe('cancelled');
     expect(reread?.version).toBe(1);
     expect(reread?.paymentId).toBeNull();
   });

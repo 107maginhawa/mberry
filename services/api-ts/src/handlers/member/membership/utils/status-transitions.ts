@@ -8,7 +8,12 @@
  */
 
 export const INVOICE_VALID_TRANSITIONS: Record<string, string[]> = {
-  generated: ['sent', 'cancelled'],
+  // 'generated' invoices are member-visible and directly payable — submitPaymentProof
+  // accepts payableStatuses ['generated','sent','overdue'], so confirming a proof on a
+  // 'generated' invoice must be able to mark it paid (there is no mandatory 'send' step
+  // for dues). Without 'paid' here, a member can submit a proof the officer can never
+  // confirm (409 generated→paid). Caught by dues-payment-proof-lifecycle e2e.
+  generated: ['sent', 'paid', 'cancelled'],
   sent: ['paid', 'overdue', 'cancelled'],
   overdue: ['paid', 'cancelled', 'writtenOff'],
   paid: [],           // terminal

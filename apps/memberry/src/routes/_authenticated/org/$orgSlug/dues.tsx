@@ -152,10 +152,18 @@ function MemberDuesPage() {
     downloadCsv(csv, 'payment-history.csv')
   }
 
-  // Check if any proof is already submitted for each invoice
+  // Track the CURRENT proof per invoice (submitted, confirmed, or rejected) so a
+  // rejected proof surfaces its reason + a resubmit affordance. The latest
+  // payment per invoice wins (a fresh rejection must beat an earlier submission,
+  // and a fresh resubmission must beat an earlier rejection), so we sort by
+  // updatedAt/createdAt and keep the most recent.
+  const proofTime = (p: any) =>
+    new Date(p.updatedAt ?? p.paidAt ?? p.createdAt ?? 0).getTime()
   const submittedPaymentsByInvoice = new Map<string, any>()
   for (const p of payments) {
-    if (p.invoiceId && ['submitted', 'confirmed'].includes(p.status)) {
+    if (!p.invoiceId || !['submitted', 'confirmed', 'rejected'].includes(p.status)) continue
+    const current = submittedPaymentsByInvoice.get(p.invoiceId)
+    if (!current || proofTime(p) >= proofTime(current)) {
       submittedPaymentsByInvoice.set(p.invoiceId, p)
     }
   }
