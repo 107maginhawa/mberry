@@ -461,12 +461,16 @@ describe('EmailTemplateRepository', () => {
   // ---------------------------------------------------------------------------
 
   describe('template syntax validation (via createTemplate)', () => {
+    // NOTE: validateTemplateSyntax now parses via Handlebars.precompile (eager),
+    // NOT Handlebars.compile (lazy — it never threw at create time, making the
+    // guard a silent no-op). See template.repo.integration.test.ts S4. These
+    // tests patch precompile to match the corrected implementation.
     test('wraps Handlebars compile errors as ValidationError', async () => {
       const repo = makeRepo();
-      const originalCompile = Handlebars.compile;
+      const originalPrecompile = Handlebars.precompile;
 
-      // Temporarily make compile throw
-      Handlebars.compile = (() => { throw new Error('Parse error'); }) as any;
+      // Temporarily make precompile throw
+      Handlebars.precompile = (() => { throw new Error('Parse error'); }) as any;
 
       try {
         await expect(
@@ -478,15 +482,15 @@ describe('EmailTemplateRepository', () => {
           } as any)
         ).rejects.toBeInstanceOf(ValidationError);
       } finally {
-        Handlebars.compile = originalCompile;
+        Handlebars.precompile = originalPrecompile;
       }
     });
 
     test('ValidationError message includes original error', async () => {
       const repo = makeRepo();
-      const originalCompile = Handlebars.compile;
+      const originalPrecompile = Handlebars.precompile;
 
-      Handlebars.compile = (() => { throw new Error('Parse error on line 1'); }) as any;
+      Handlebars.precompile = (() => { throw new Error('Parse error on line 1'); }) as any;
 
       try {
         await expect(
@@ -498,19 +502,19 @@ describe('EmailTemplateRepository', () => {
           } as any)
         ).rejects.toThrow('Invalid template syntax: Parse error on line 1');
       } finally {
-        Handlebars.compile = originalCompile;
+        Handlebars.precompile = originalPrecompile;
       }
     });
 
     test('validates all template parts (subject, bodyHtml, bodyText)', async () => {
       const repo = makeRepo();
-      const originalCompile = Handlebars.compile;
+      const originalPrecompile = Handlebars.precompile;
       const compileCalls: string[] = [];
 
-      // Track what gets compiled
-      Handlebars.compile = ((template: string) => {
+      // Track what gets parsed for validation
+      Handlebars.precompile = ((template: string) => {
         compileCalls.push(template);
-        return originalCompile(template);
+        return originalPrecompile(template);
       }) as any;
 
       spyOn(repo, 'createOne' as any).mockResolvedValue(makeTemplate());
@@ -524,12 +528,12 @@ describe('EmailTemplateRepository', () => {
           variables: [{ id: 'name', type: 'string', label: 'Name', required: true }],
         } as any);
 
-        // All three template parts should have been compiled for validation
+        // All three template parts should have been parsed for validation
         expect(compileCalls).toContain('Subject {{name}}');
         expect(compileCalls).toContain('<p>HTML {{name}}</p>');
         expect(compileCalls).toContain('Text {{name}}');
       } finally {
-        Handlebars.compile = originalCompile;
+        Handlebars.precompile = originalPrecompile;
       }
     });
 
@@ -744,15 +748,15 @@ describe('EmailTemplateRepository', () => {
       const repo = makeRepo();
       spyOn(repo, 'findOneById' as any).mockResolvedValue(makeTemplate());
 
-      const originalCompile = Handlebars.compile;
-      Handlebars.compile = (() => { throw new Error('Parse error'); }) as any;
+      const originalPrecompile = Handlebars.precompile;
+      Handlebars.precompile = (() => { throw new Error('Parse error'); }) as any;
 
       try {
         await expect(
           repo.updateTemplate('tpl-1', { subject: 'bad-template' })
         ).rejects.toBeInstanceOf(ValidationError);
       } finally {
-        Handlebars.compile = originalCompile;
+        Handlebars.precompile = originalPrecompile;
       }
     });
 
@@ -760,15 +764,15 @@ describe('EmailTemplateRepository', () => {
       const repo = makeRepo();
       spyOn(repo, 'findOneById' as any).mockResolvedValue(makeTemplate());
 
-      const originalCompile = Handlebars.compile;
-      Handlebars.compile = (() => { throw new Error('Parse error'); }) as any;
+      const originalPrecompile = Handlebars.precompile;
+      Handlebars.precompile = (() => { throw new Error('Parse error'); }) as any;
 
       try {
         await expect(
           repo.updateTemplate('tpl-1', { bodyHtml: 'bad-template' })
         ).rejects.toBeInstanceOf(ValidationError);
       } finally {
-        Handlebars.compile = originalCompile;
+        Handlebars.precompile = originalPrecompile;
       }
     });
 

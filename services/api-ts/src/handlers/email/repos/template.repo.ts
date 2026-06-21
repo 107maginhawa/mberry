@@ -237,15 +237,19 @@ export class EmailTemplateRepository extends DatabaseRepository<EmailTemplate, N
    */
   private validateTemplateSyntax(template: any): void {
     try {
-      // Try to compile templates to check syntax
+      // Parse templates eagerly to check syntax. NOTE: Handlebars.compile is LAZY —
+      // it defers parsing until the delegate is first invoked, so it never throws
+      // here and the guard was a silent no-op (invalid templates were accepted and
+      // only blew up at render time). precompile parses immediately and surfaces
+      // syntax errors at create/update time, which is the intent of this guard.
       if (template.subject) {
-        Handlebars.compile(template.subject);
+        Handlebars.precompile(template.subject);
       }
       if (template.bodyHtml) {
-        Handlebars.compile(template.bodyHtml);
+        Handlebars.precompile(template.bodyHtml);
       }
       if (template.bodyText) {
-        Handlebars.compile(template.bodyText);
+        Handlebars.precompile(template.bodyText);
       }
     } catch (error) {
       throw new ValidationError(`Invalid template syntax: ${error instanceof Error ? error.message : 'Unknown error'}`);
