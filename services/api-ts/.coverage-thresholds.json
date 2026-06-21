@@ -4,7 +4,7 @@
   "src/handlers/membership": { "line": 70, "function": 0 },
   "src/handlers/documents": { "line": 70, "function": 0 },
   "src/handlers/elections": { "line": 70, "function": 0 },
-  "src/handlers/billing": { "line": 60, "function": 0 },
+  "src/handlers/billing": { "line": 62, "function": 0 },
   "src/handlers/events": { "line": 60, "function": 0 },
   "src/handlers/person": { "line": 60, "function": 0 },
   "src/handlers/email": { "line": 50, "function": 0 },
