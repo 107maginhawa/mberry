@@ -209,7 +209,7 @@ export function DuesConfigForm({ orgId }: DuesConfigFormProps) {
     if (action === 'create') {
       createMutation.mutate({ body: buildCreatePayload(orgId, formState, { currency }), headers: { 'x-org-id': orgId } })
     } else {
-      updateMutation.mutate({ path: { duesConfigId: orgId }, body: buildUpdatePayload(formState), headers: { 'x-org-id': orgId } })
+      updateMutation.mutate({ path: { duesConfigId: orgId }, body: buildUpdatePayload(formState, { currency, billingFrequency }), headers: { 'x-org-id': orgId } })
     }
   }
 
@@ -248,8 +248,13 @@ export function DuesConfigForm({ orgId }: DuesConfigFormProps) {
             </div>
             <div>
               <Label>Currency</Label>
-              <Select value={currency} onValueChange={(v) => { setCurrency(v); setHasChanges(true) }}>
-                <SelectTrigger><SelectValue /></SelectTrigger>
+              {/* key={currency} forces a remount when the server-loaded value
+                  changes, so Radix renders the selected item text instead of a
+                  blank trigger (controlled value set post-mount via the hydration
+                  effect otherwise leaves SelectValue empty). placeholder is a
+                  belt-and-suspenders fallback. */}
+              <Select key={`currency-${currency}`} value={currency} onValueChange={(v) => { setCurrency(v); setHasChanges(true) }}>
+                <SelectTrigger><SelectValue placeholder={currency} /></SelectTrigger>
                 <SelectContent>
                   <SelectItem value="PHP">PHP</SelectItem>
                   <SelectItem value="USD">USD</SelectItem>
@@ -260,7 +265,8 @@ export function DuesConfigForm({ orgId }: DuesConfigFormProps) {
           <div className="grid grid-cols-2 gap-4">
             <div>
               <Label>Billing Frequency</Label>
-              <Select value={billingFrequency} onValueChange={(v) => { setBillingFrequency(v as 'annual' | 'semi-annual' | 'quarterly'); setHasChanges(true) }}>
+              {/* key forces remount on server-hydrated value change (see Currency). */}
+              <Select key={`billing-${billingFrequency}`} value={billingFrequency} onValueChange={(v) => { setBillingFrequency(v as 'annual' | 'semi-annual' | 'quarterly'); setHasChanges(true) }}>
                 <SelectTrigger><SelectValue /></SelectTrigger>
                 <SelectContent>
                   <SelectItem value="annual">Annual</SelectItem>

@@ -15136,6 +15136,14 @@ export type DuesConfigUpdate = {
  */
 export type DuesConfigUpdateRequest = {
     annualAmount?: bigint;
+    /**
+     * ISO 4217 currency code
+     */
+    currency?: string;
+    /**
+     * Billing cadence for dues (org-level config)
+     */
+    billingFrequency?: 'annual' | 'semi-annual' | 'quarterly';
     gracePeriodDays?: number;
     fundAllocations?: Array<FundAllocation>;
     effectiveDate?: Date;

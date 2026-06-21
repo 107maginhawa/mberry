@@ -301,6 +301,10 @@ model DuesConfigCreateRequest {
 @doc("Request to update a dues configuration")
 model DuesConfigUpdateRequest {
   annualAmount?: int64;
+  @doc("ISO 4217 currency code")
+  currency?: string;
+  @doc("Billing cadence for dues (org-level config)")
+  billingFrequency?: "annual" | "semi-annual" | "quarterly";
   @minValue(0)
   @maxValue(90)
   gracePeriodDays?: int32;

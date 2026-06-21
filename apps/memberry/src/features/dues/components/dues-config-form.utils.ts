@@ -40,15 +40,32 @@ export function buildCreatePayload(
 
 /**
  * Build the body for PATCH /association/member/dues-configs/{id}
- * (DuesConfigUpdateRequest — only accepted fields).
+ * (DuesConfigUpdateRequest).
+ *
+ * `currency` and `billingFrequency` are editable in the form and are real
+ * columns on the org-level dues_org_config table (the table getDuesConfig reads
+ * from). Previously this payload omitted BOTH, so officer edits to currency or
+ * billing frequency were silently dropped on update — the form showed the change,
+ * the save returned 200, and a reload reverted it. They are now included and
+ * accepted by the update validator (DuesConfigUpdateRequest gained `currency?` +
+ * `billingFrequency?`) and persisted by the updateDuesConfig handler's
+ * org-config upsert path.
  */
-export function buildUpdatePayload(formState: {
-  defaultAmount: string
-  gracePeriodDays: string
-}) {
+export function buildUpdatePayload(
+  formState: {
+    defaultAmount: string
+    gracePeriodDays: string
+  },
+  extras?: {
+    currency?: string
+    billingFrequency?: 'annual' | 'semi-annual' | 'quarterly'
+  }
+) {
   return {
     // ISSUE-021: see buildCreatePayload — send a plain integer (cents).
     annualAmount: parseCentsInput(formState.defaultAmount) as unknown as bigint,
+    currency: extras?.currency ?? 'PHP',
+    billingFrequency: extras?.billingFrequency ?? 'annual',
     gracePeriodDays: parseInt(formState.gracePeriodDays),
   }
 }

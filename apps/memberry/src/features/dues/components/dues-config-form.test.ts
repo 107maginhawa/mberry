@@ -4,14 +4,18 @@ import { parseCentsInput } from '../lib/money'
 /**
  * Phase 15 / Plan 00a — silent data loss bug in dues config form.
  *
- * The PATCH validator (DuesConfigUpdateRequestSchema) accepts ONLY:
- *   annualAmount, gracePeriodDays, fundAllocations, effectiveDate, status
+ * The PATCH validator (DuesConfigUpdateRequestSchema) now accepts:
+ *   annualAmount, currency, billingFrequency, gracePeriodDays,
+ *   fundAllocations, effectiveDate, status
  *
- * The form was sending:
- *   defaultAmount, currency, billingFrequency, dueDateMonth, dueDateDay,
- *   gracePeriodDays, reminderSchedules
+ * `currency` and `billingFrequency` were added to the update request model
+ * (TypeSpec DuesConfigUpdateRequest) so officer edits to them persist on update.
+ * Both map to real columns on the org-level dues_org_config table (the table the
+ * form reads back from). Previously the update payload omitted both, so the edits
+ * were silently dropped: form showed the change, save 200'd, reload reverted.
  *
- * Zod strips unknown fields → 200 OK → edits silently lost on reload.
+ * Fields with NO backend representation must still NOT be sent (Zod strips them):
+ *   dueDateMonth, dueDateDay, reminderSchedules
  */
 
 /**
@@ -26,12 +30,16 @@ function buildSubmitPayload(formState: {
   // This mirrors what the form SHOULD send after the fix.
   return {
     annualAmount: parseCentsInput(formState.defaultAmount),
+    currency: 'PHP',
+    billingFrequency: 'annual' as const,
     gracePeriodDays: parseInt(formState.gracePeriodDays),
   }
 }
 
 const ACCEPTED_FIELDS = new Set([
   'annualAmount',
+  'currency',
+  'billingFrequency',
   'gracePeriodDays',
   'fundAllocations',
   'effectiveDate',
@@ -52,7 +60,9 @@ describe('DuesConfigForm payload shape (Phase 15 / Plan 00a)', () => {
 
   test('payload must NOT contain fields stripped by DuesConfigUpdateRequestSchema', () => {
     const payload = buildSubmitPayload({ defaultAmount: '500.00', gracePeriodDays: '30' })
-    const strippedFields = ['currency', 'billingFrequency', 'dueDateMonth', 'dueDateDay', 'reminderSchedules']
+    // dueDate*/reminderSchedules have no backend representation in the update
+    // request; currency + billingFrequency ARE now accepted and excluded here.
+    const strippedFields = ['dueDateMonth', 'dueDateDay', 'reminderSchedules']
     for (const field of strippedFields) {
       expect(payload).not.toHaveProperty(field)
     }
@@ -121,12 +131,20 @@ describe('DuesConfigForm create-vs-update dispatch (Phase 15 / Plan 00b)', () =>
     expect(payload).not.toHaveProperty('duesConfigId')
   })
 
-  test('buildUpdatePayload includes annualAmount and gracePeriodDays only', () => {
-    const payload = buildUpdatePayload(formState)
+  test('buildUpdatePayload includes annualAmount, currency, billingFrequency, gracePeriodDays', () => {
+    const payload = buildUpdatePayload(formState, { currency: 'USD', billingFrequency: 'semi-annual' })
     // ISSUE-021: annualAmount must be a plain integer (cents), not BigInt.
     expect(payload).toHaveProperty('annualAmount', 50000)
     expect(payload).toHaveProperty('gracePeriodDays', 30)
+    // currency + billingFrequency are now persisted on update (were previously dropped).
+    expect(payload).toHaveProperty('currency', 'USD')
+    expect(payload).toHaveProperty('billingFrequency', 'semi-annual')
     expect(payload).not.toHaveProperty('organizationId')
-    expect(payload).not.toHaveProperty('currency')
+  })
+
+  test('buildUpdatePayload defaults currency to PHP and billingFrequency to annual', () => {
+    const payload = buildUpdatePayload(formState)
+    expect(payload).toHaveProperty('currency', 'PHP')
+    expect(payload).toHaveProperty('billingFrequency', 'annual')
   })
 })

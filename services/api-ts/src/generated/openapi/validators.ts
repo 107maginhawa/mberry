@@ -4698,6 +4698,8 @@ export const DuesConfigUpdateSchema = z.object({
 
 export const DuesConfigUpdateRequestSchema = z.object({
   annualAmount: z.number().int().optional(),
+  currency: z.string().optional(),
+  billingFrequency: z.enum(["annual", "semi-annual", "quarterly"]).optional(),
   gracePeriodDays: z.number().int().gte(0).lte(90).optional(),
   fundAllocations: z.array(FundAllocationSchema).optional(),
   effectiveDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).refine(val => { const parsed = new Date(val + "T00:00:00Z"); return !isNaN(parsed.getTime()) && parsed.toISOString().split("T")[0] === val; }, { message: "Invalid calendar date" }).optional(),
