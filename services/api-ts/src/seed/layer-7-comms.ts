@@ -1,8 +1,8 @@
 /**
  * Layer 7: Communication + Email coverage seeding
  *
- * Seeds FK-coherent, idempotent data for the professional feed (M13),
- * communication templates/subscriptions, announcement stats, and the
+ * Seeds FK-coherent, idempotent data for communication
+ * templates/subscriptions, announcement stats, and the
  * email queue/templates. Safe to re-run — every insert is guarded by a
  * unique-marker existence check, and each table group is isolated in its
  * own try/catch so a single failure never aborts the whole layer.
@@ -13,12 +13,6 @@ import type { drizzle } from 'drizzle-orm/node-postgres';
 import { daysAgo, daysFromNow } from './helpers';
 
 // Schema imports
-import {
-  feedPosts,
-  feedPostReactions,
-  feedPostReports,
-  feedMutedAuthors,
-} from '@/handlers/communication/repos/feed-post.schema';
 import {
   announcementStats,
   messageTemplates,
@@ -37,104 +31,7 @@ export async function seedCommsCoverage(
   presidentPersonId: string,
   memberPersonIds: string[],
 ) {
-  console.log('  Comms coverage (feed, templates, subscriptions, email)...');
-
-  // ─── feedPosts + reactions/reports/mutes ───
-  try {
-    const existing = (await db.execute(
-      sql`SELECT id FROM feed_post WHERE organization_id = ${orgId} AND body_text LIKE 'SEED7:%' LIMIT 1`,
-    )) as unknown as { rows: Array<{ id: string }> };
-
-    if (existing.rows?.length === 0) {
-      const postSeeds: Array<{
-        postType: typeof feedPosts.$inferInsert['postType'];
-        bodyText: string;
-        visibility: typeof feedPosts.$inferInsert['visibility'];
-        status: typeof feedPosts.$inferInsert['status'];
-        isPinned: boolean;
-        isSponsored: boolean;
-        authorIdx: number;
-      }> = [
-        { postType: 'announcement', bodyText: 'SEED7: General Assembly 2025 registration is now open. Secure your slot before the early-bird deadline ends this Friday.', visibility: 'org', status: 'published', isPinned: true, isSponsored: false, authorIdx: -1 },
-        { postType: 'event_highlight', bodyText: 'SEED7: Huge turnout at the Restorative Dentistry Symposium — 240 colleagues joined us this weekend. Thank you all!', visibility: 'network', status: 'published', isPinned: false, isSponsored: false, authorIdx: 0 },
-        { postType: 'training_opportunity', bodyText: 'SEED7: New hands-on Endodontics workshop announced for next month. Earn 8 CPD units. Seats are limited.', visibility: 'org', status: 'published', isPinned: false, isSponsored: true, authorIdx: 1 },
-        { postType: 'achievement', bodyText: 'SEED7: Congratulations to Dr. Reyes for being elected Fellow of the International College of Dentists.', visibility: 'org', status: 'published', isPinned: false, isSponsored: false, authorIdx: 2 },
-        { postType: 'clinical_update', bodyText: 'SEED7: Updated infection-control guidelines for chairside procedures have been published. Please review before your next clinic day.', visibility: 'network', status: 'published', isPinned: false, isSponsored: false, authorIdx: -1 },
-        { postType: 'announcement', bodyText: 'SEED7: This draft post is pending review by the communications committee.', visibility: 'org', status: 'draft', isPinned: false, isSponsored: false, authorIdx: 3 },
-      ];
-
-      const reactionTypes = ['like', 'celebrate', 'support', 'insightful', 'curious'];
-      const insertedPostIds: string[] = [];
-
-      for (const p of postSeeds) {
-        const authorId = p.authorIdx === -1
-          ? presidentPersonId
-          : memberPersonIds[p.authorIdx % memberPersonIds.length]!;
-        const [row] = await db.insert(feedPosts).values({
-          organizationId: orgId,
-          authorId,
-          postType: p.postType,
-          bodyText: p.bodyText,
-          visibility: p.visibility,
-          status: p.status,
-          isPinned: p.isPinned,
-          isSponsored: p.isSponsored,
-          isRemoved: false,
-          reportCount: 0,
-          createdAt: daysAgo(postSeeds.indexOf(p) + 1),
-        }).returning({ id: feedPosts.id });
-        if (row) insertedPostIds.push(row.id);
-      }
-
-      // Reactions: spread across all reaction types and several members
-      let reactionCount = 0;
-      for (let i = 0; i < insertedPostIds.length; i++) {
-        const postId = insertedPostIds[i]!;
-        const numReactions = Math.min(reactionTypes.length, memberPersonIds.length);
-        for (let r = 0; r < numReactions; r++) {
-          await db.insert(feedPostReactions).values({
-            postId,
-            memberId: memberPersonIds[r % memberPersonIds.length]!,
-            reactionType: reactionTypes[(i + r) % reactionTypes.length]!,
-          });
-          reactionCount++;
-        }
-      }
-
-      // Reports: a couple of posts flagged by members
-      let reportCount = 0;
-      if (insertedPostIds.length >= 2 && memberPersonIds.length >= 2) {
-        await db.insert(feedPostReports).values({
-          postId: insertedPostIds[1]!,
-          reporterId: memberPersonIds[0]!,
-          reason: 'Possible misleading attendance figures — please verify.',
-        });
-        await db.insert(feedPostReports).values({
-          postId: insertedPostIds[2]!,
-          reporterId: memberPersonIds[1]!,
-          reason: 'Looks like a sponsored ad not clearly labelled.',
-        });
-        reportCount = 2;
-      }
-
-      // Muted authors: a member mutes another author
-      let muteCount = 0;
-      if (memberPersonIds.length >= 3) {
-        await db.insert(feedMutedAuthors).values({
-          memberId: memberPersonIds[0]!,
-          mutedAuthorId: memberPersonIds[2]!,
-          organizationId: orgId,
-        });
-        muteCount = 1;
-      }
-
-      console.log(`    ✓ ${insertedPostIds.length} feed posts + ${reactionCount} reactions + ${reportCount} reports + ${muteCount} mutes`);
-    } else {
-      console.log('    (feed posts already seeded, skipped)');
-    }
-  } catch (e) {
-    console.log(`    (feed seed failed: ${(e as Error).message?.slice(0, 120)})`);
-  }
+  console.log('  Comms coverage (templates, subscriptions, email)...');
 
   // ─── messageTemplates ───
   try {
