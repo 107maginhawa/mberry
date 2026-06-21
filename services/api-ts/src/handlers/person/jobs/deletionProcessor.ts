@@ -18,12 +18,15 @@ import { persons } from '../repos/person.schema';
 import * as schema from '@/generated/better-auth/schema';
 import { executeCascadeDeletion } from '../accountDeletionCascade';
 import { anonymizePersonFields } from '../utils/anonymize-person';
+import { SYSTEM_USER_ID } from '@/core/constants';
 
 interface DeletionContext {
   db: DatabaseInstance;
   logger: any;
+  // Structural — accepts the real AuditService (its logEvent returns the created
+  // entry, not void) as well as a test stub.
   audit?: {
-    logEvent: (args: any) => Promise<void>;
+    logEvent: (args: any) => Promise<unknown>;
   };
 }
 
@@ -83,7 +86,10 @@ export async function processDeletions(ctx: DeletionContext): Promise<DeletionRe
             category: 'privacy',
             action: 'anonymize',
             outcome: 'success',
-            user: 'system',
+            // audit_log_entry.user is a uuid column — the literal 'system' threw 22P02,
+            // swallowed by the catch below, so the DPA-05 deletion audit row was never
+            // persisted. SYSTEM_USER_ID is the established system-actor uuid.
+            user: SYSTEM_USER_ID,
             userType: 'system' as const,
             resourceType: 'person',
             resource: person.id,

@@ -22,6 +22,7 @@
 
 import type { ValidatedContext } from '@/types/app';
 import type { DatabaseInstance } from '@/core/database';
+import { SYSTEM_USER_ID } from '@/core/constants';
 import { PersonRepository } from './repos/person.repo';
 import { duesPayments } from '../association:member/repos/dues-payments.schema';
 import * as schema from '@/generated/better-auth/schema';
@@ -82,7 +83,9 @@ export async function executeAccountDeletion(
     timezone: null,
     preferredLanguage: null,
     deletionCompletedAt: now,
-    updatedBy: 'system',
+    // person.updated_by is a uuid column — the literal 'system' threw 22P02 and aborted
+    // the scrub. null = system/cron action, no user actor (mirrors anonymize-person.ts).
+    updatedBy: null,
   });
 
   // Audit
@@ -95,7 +98,8 @@ export async function executeAccountDeletion(
         action: 'anonymize',
         outcome: 'success',
         organizationId: ctx.get('organizationId'),
-        user: 'system',
+        // audit_log_entry.user is a uuid column; SYSTEM_USER_ID is the system-actor uuid.
+        user: SYSTEM_USER_ID,
         userType: 'system' as const,
         resourceType: 'person',
         resource: personId,
