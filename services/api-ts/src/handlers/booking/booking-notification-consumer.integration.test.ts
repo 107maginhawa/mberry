@@ -108,7 +108,7 @@ describe('booking domain events → notification fan-out (real-PG)', () => {
     expect(rows[0]!.c).toBe(0);
   });
 
-  test('CONTRACT GAP: booking.rejected has NO consumer → no notification (flagged for product)', async () => {
+  test('booking.rejected → one notification row for the client with correct columns', async () => {
     if (!H.dbReachable) return;
     const clientId = crypto.randomUUID();
     const bookingId = crypto.randomUUID();
@@ -117,9 +117,16 @@ describe('booking domain events → notification fan-out (real-PG)', () => {
       bookingId, hostId: crypto.randomUUID(), clientId, organizationId: ORG, reason: 'declined',
     } as never);
 
-    // No consumer is registered for booking.rejected today → zero rows. This
-    // documents current behaviour; whether a client SHOULD be notified of a
-    // rejection is a product decision (not silently changed here).
-    expect(await notifsFor(clientId)).toHaveLength(0);
+    // Product decision (Option A): the booking.rejected consumer inserts exactly
+    // ONE in-app notification for the client, straight from the payload (clientId
+    // + organizationId carried inline — no booking-row lookup needed). The inline
+    // client createNotification in rejectBooking.ts was removed to avoid a double
+    // notify; the consumer is now the single source of the client notification.
+    const rows = await notifsFor(clientId);
+    expect(rows).toHaveLength(1);
+    expect(rows[0]!.type).toBe('booking.rejected');
+    expect(rows[0]!.organization_id).toBe(ORG);
+    expect(rows[0]!.related_entity).toBe(bookingId);
+    expect(rows[0]!.related_entity_type).toBe('booking');
   });
 });
