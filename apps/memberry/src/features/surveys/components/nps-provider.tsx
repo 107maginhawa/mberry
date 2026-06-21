@@ -1,7 +1,14 @@
 import { useCallback, useState } from 'react'
 import { useQueryClient } from '@tanstack/react-query'
+import { useLocation } from '@tanstack/react-router'
 import { usePendingNps } from '../hooks/use-pending-nps'
 import { NpsModal } from './nps-modal'
+
+// Routes whose pages carry a bottom-right Save/submit action that the fixed
+// bottom-right NPS card would overlap and intercept (caught on /my/profile).
+// The pending survey is server-side, so suppressing here just defers it to the
+// next read page rather than dropping it.
+const FORM_ROUTE_RE = /\/(profile|settings|notifications|edit|new|create|import)(\/|$)/
 
 /**
  * NPS Provider — mount inside the authenticated layout.
@@ -11,6 +18,7 @@ import { NpsModal } from './nps-modal'
 export function NpsProvider() {
   const { pendingNps } = usePendingNps()
   const queryClient = useQueryClient()
+  const { pathname } = useLocation()
   const [dismissed, setDismissed] = useState(false)
 
   const handleDismiss = useCallback(() => {
@@ -23,7 +31,7 @@ export function NpsProvider() {
     queryClient.invalidateQueries({ queryKey: ['surveys', 'pending-nps'] })
   }, [queryClient])
 
-  if (!pendingNps || dismissed) return null
+  if (!pendingNps || dismissed || FORM_ROUTE_RE.test(pathname)) return null
 
   return (
     <NpsModal
