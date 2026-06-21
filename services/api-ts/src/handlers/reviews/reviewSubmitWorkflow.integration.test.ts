@@ -18,10 +18,13 @@
  *  - List-own RBAC: listReviews as the same non-admin (no filters → defaults
  *    reviewer=userId) → data.data[0].id===created.id, pagination.totalCount===1
  *    (the handler's buildPaginationMeta key; §5.6's `pagination.total` is shorthand).
- *  - Range guard at the workflow boundary: npsScore=12 → no persisted row
- *    (count unchanged). The DB CHECK reviews_nps_score_check (0..10) is the
- *    enforcing layer; the handler does not pre-validate (createReview.test.ts:186),
- *    so the out-of-range submit raises 23514 and leaks NO row.
+ *  - NPS range defense-in-depth: in production the route Zod validator
+ *    CreateReviewRequestSchema (int().gte(0).lte(10)) rejects out-of-range
+ *    npsScore with 422 BEFORE the handler runs (asserted directly, no DB). The
+ *    handler does not re-validate (createReview.test.ts:186), so a body that
+ *    bypasses the validator (npsScore=12, calling the handler directly) reaches
+ *    the DB CHECK reviews_nps_score_check (0..10) as the defense-in-depth backstop
+ *    at the repo seam — raises 23514 and leaks NO row. Not a prod boundary.
  *  - Delete-own: deleteReview as the reviewer → 204; read-back count=0 — confirms
  *    the HARD delete (deleteOneById), characterizing the misleading "excludes
  *    soft-deleted" comment in review.repo.ts.
@@ -32,6 +35,7 @@ import { getReview } from './getReview';
 import { listReviews } from './listReviews';
 import { deleteReview } from './deleteReview';
 import { ReviewRepository } from './repos/review.repo';
+import { CreateReviewRequestSchema } from '@/generated/openapi/validators';
 import { createContentScratch, CONTENT_ORG } from '@/test-utils/content-fixtures';
 import type { ScratchDb } from '@/test-utils/pg-scratch';
 
@@ -193,11 +197,33 @@ describe('reviews submit workflow — full member NPS lifecycle on real PG', () 
     await expect(getReview(getGoneCtx)).rejects.toThrow();
   });
 
-  test('range guard at workflow boundary: npsScore=12 raises 23514 and leaks no row', async () => {
+  test('NPS range prod guard: Zod validator rejects out-of-range (422) before the handler', () => {
+    // Production first-layer guard: the route validator CreateReviewRequestSchema
+    // (npsScore: int().gte(0).lte(10)) rejects out-of-range submits with 422 in the
+    // generated route middleware, BEFORE createReview runs. Asserted directly — no
+    // DB, so OUTSIDE the dbReachable gate — grounding the raw-23514 backstop below.
+    const ctx = () => crypto.randomUUID();
+    for (const npsScore of [12, -1, 99]) {
+      expect(
+        CreateReviewRequestSchema.safeParse({ context: ctx(), reviewType: 'nps', npsScore }).success,
+      ).toBe(false);
+    }
+    for (const npsScore of [0, 5, 10]) {
+      expect(
+        CreateReviewRequestSchema.safeParse({ context: ctx(), reviewType: 'nps', npsScore }).success,
+      ).toBe(true);
+    }
+  });
+
+  test('NPS range defense-in-depth: bypassing the validator hits DB CHECK 23514, leaks no row', async () => {
     if (!H.dbReachable) return;
     const userId = crypto.randomUUID();
     const context = crypto.randomUUID();
 
+    // The route validator (asserted above) is the prod 422 guard. Calling the
+    // handler directly with npsScore=12 bypasses it — the only way past it — so the
+    // submit reaches the DB CHECK reviews_nps_score_check (0..10) as the
+    // defense-in-depth backstop at the repo seam, NOT a production boundary.
     const ctx = makeCtx({
       userId,
       json: { context, reviewType: 'nps', npsScore: 12 },
@@ -209,7 +235,7 @@ describe('reviews submit workflow — full member NPS lifecycle on real PG', () 
     } catch (e) {
       code = pgCode(e);
     }
-    // DB CHECK reviews_nps_score_check (0..10) is the enforcing layer
+    // DB CHECK reviews_nps_score_check (0..10) fires as the backstop layer
     expect(code).toBe('23514');
 
     // no out-of-range row persisted for this (context, reviewer)
