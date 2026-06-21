@@ -12,7 +12,7 @@
  */
 
 import { describe, test, expect, mock, beforeEach, afterEach } from 'bun:test';
-import { slotGeneratorJob, regenerateEventSlots } from './slotGenerator';
+import { slotGeneratorJob, regenerateEventSlots, generateSlotsFromEvent } from './slotGenerator';
 import { restoreRepo } from '@/test-utils/make-ctx';
 import {
   generateSlotsForEvent,
@@ -525,6 +525,64 @@ describe('regenerateEventSlots', () => {
     restoreRepo(BookingEventRepository);
     restoreRepo(TimeSlotRepository);
     restoreRepo(ScheduleExceptionRepository);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// generateSlotsFromEvent (PROD JOB PATH) — booking-window enforcement
+// ---------------------------------------------------------------------------
+//
+// The cron job + create/update-event regeneration use this internal helper, NOT
+// the slotGeneration util. Before the fix it emitted EVERY slot with no
+// now-relative gate, ignoring event.minBookingMinutes (min-notice) and
+// event.maxBookingDays (advance window). These tests pin the window to the
+// SAME UTC basis the util uses (slotStartUtc vs addMinutes(now, ...) /
+// addDays(now, ...)).
+describe('generateSlotsFromEvent — booking-window enforcement (job path)', () => {
+  test('min-notice: large minBookingMinutes filters out near-term slots', async () => {
+    // Enable every day so the window — not the schedule — is what gates slots.
+    const now = new Date();
+    const event = makeEvent({
+      effectiveFrom: startOfDay(subDays(now, 1)), // already in effect
+      minBookingMinutes: 4320, // 3 days advance notice
+      maxBookingDays: 365,
+      dailyConfigs: makeDailyConfigs(Object.values(DayOfWeek)),
+    });
+
+    // Generate across the next 5 days. Without the fix, slots within the first
+    // 3 days (< minBookingTime) leak through.
+    const startDate = startOfDay(now);
+    const endDate = addDays(startDate, 5);
+
+    const slots = await generateSlotsFromEvent(event, startDate, endDate);
+
+    const minBookingTime = addMinutes(now, event.minBookingMinutes ?? 0);
+    expect(slots.length).toBeGreaterThan(0); // some far slots survive
+    for (const slot of slots) {
+      // Every emitted slot must start at or after the min-notice horizon.
+      expect(slot.startTime.getTime()).toBeGreaterThanOrEqual(minBookingTime.getTime());
+    }
+  });
+
+  test('advance-window: maxBookingDays caps how far ahead slots are generated', async () => {
+    const now = new Date();
+    const event = makeEvent({
+      effectiveFrom: startOfDay(subDays(now, 1)),
+      minBookingMinutes: 0, // no min-notice gate — isolate advance window
+      maxBookingDays: 1, // only ~1 day ahead is bookable
+      dailyConfigs: makeDailyConfigs(Object.values(DayOfWeek)),
+    });
+
+    const startDate = startOfDay(now);
+    const endDate = addDays(startDate, 10); // request a wide range
+
+    const slots = await generateSlotsFromEvent(event, startDate, endDate);
+
+    const maxBookingDate = addDays(now, event.maxBookingDays ?? 365);
+    for (const slot of slots) {
+      // No slot may start beyond the advance-booking horizon.
+      expect(slot.startTime.getTime()).toBeLessThanOrEqual(maxBookingDate.getTime());
+    }
   });
 });
 

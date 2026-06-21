@@ -10,7 +10,7 @@ import { ScheduleExceptionRepository } from '../repos/scheduleException.repo';
 import type { BookingEvent, DailyConfig, TimeBlock, NewTimeSlot, ScheduleException } from '../repos/booking.schema';
 import { timeSlots, DayOfWeek } from '../repos/booking.schema';
 import { eq, and, gte } from 'drizzle-orm';
-import { addDays, startOfDay, format, getDay, eachDayOfInterval, parseISO, setHours, setMinutes, addMinutes, areIntervalsOverlapping } from 'date-fns';
+import { addDays, startOfDay, format, getDay, eachDayOfInterval, parseISO, setHours, setMinutes, addMinutes, areIntervalsOverlapping, isAfter, isBefore } from 'date-fns';
 import { fromZonedTime, toZonedTime } from 'date-fns-tz';
 
 /**
@@ -174,7 +174,7 @@ export async function slotGeneratorJob(context: JobContext): Promise<void> {
  * Processes the event's dailyConfigs and creates slots for the date range
  * Filters out slots that overlap with schedule exceptions
  */
-async function generateSlotsFromEvent(
+export async function generateSlotsFromEvent(
   event: BookingEvent,
   startDate: Date,
   endDate: Date,
@@ -190,6 +190,15 @@ async function generateSlotsFromEvent(
   });
 
   const slots: NewTimeSlot[] = [];
+
+  // Booking-window horizons, computed once relative to "now". Mirrors the
+  // slotGeneration util exactly: min-notice gates near-term slots, advance
+  // window caps how far ahead slots are generated. Without these, the prod
+  // job path emitted every slot ignoring event.minBookingMinutes /
+  // event.maxBookingDays. (B1 follow-up: slotGenerator-window.)
+  const now = new Date();
+  const minBookingTime = addMinutes(now, event.minBookingMinutes ?? 0);
+  const maxBookingDate = addDays(now, event.maxBookingDays ?? 365);
 
   // Convert day numbers to DayOfWeek enum keys
   const dayMapping: Record<number, DayOfWeek> = {
@@ -233,12 +242,19 @@ async function generateSlotsFromEvent(
       continue;
     }
 
+    // Advance-booking window: skip any day that starts beyond the horizon.
+    // Mirrors the util's `isAfter(date, maxBookingDate)` day-level guard.
+    if (isAfter(dayStart, maxBookingDate)) {
+      continue;
+    }
+
     // Process each time block for this day
     for (const timeBlock of dailyConfig.timeBlocks) {
       const daySlots = generateSlotsFromTimeBlock(
         event,
         day,
         timeBlock,
+        minBookingTime,
         logger
       );
       slots.push(...daySlots);
@@ -295,6 +311,7 @@ function generateSlotsFromTimeBlock(
   event: BookingEvent,
   day: Date,
   timeBlock: TimeBlock,
+  minBookingTime: Date,
   logger?: any
 ): NewTimeSlot[] {
   const slots: NewTimeSlot[] = [];
@@ -325,6 +342,13 @@ function generateSlotsFromTimeBlock(
     // Convert from owner's local time to UTC for storage
     const slotStartUtc = fromZonedTime(currentTime, event.timezone);
     const slotEndUtc = fromZonedTime(slotEndTime, event.timezone);
+
+    // Min-notice gate: skip slots that start before the booking-notice horizon.
+    // Compared on the SAME UTC basis as the util (slotStartUtc vs minBookingTime).
+    if (isBefore(slotStartUtc, minBookingTime)) {
+      currentTime = addMinutes(slotEndTime, bufferTime);
+      continue;
+    }
 
     // Create the slot
     const slot: NewTimeSlot = {
