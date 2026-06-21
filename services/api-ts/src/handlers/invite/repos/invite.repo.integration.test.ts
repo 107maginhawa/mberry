@@ -2,71 +2,37 @@
  * Real-Postgres integration coverage for InviteRepository
  * (src/handlers/invite/repos/invite.repo.ts).
  *
- * invitation_token has a hard FK on organization_id -> organization(id), so we
- * insert one scratch organization (its association_id is a plain uuid, no FK)
- * and scope every token to it. afterAll deletes our tokens + org. Documented
- * skip when Postgres is unreachable.
+ * Isolation: the shared `createScratch` harness stands up a per-suite scratch
+ * schema by COPYING the real public.invitation_token structure
+ * (`CREATE TABLE … (LIKE public.invitation_token INCLUDING ALL)`), so every real
+ * column/default/enum/CHECK is present — no hand-DDL drift. FKs are NOT copied,
+ * so invitation_token rows insert directly without a parent organization row
+ * (the old shared-public-schema variant had to seed + tear down a scratch org to
+ * satisfy organization_id -> organization(id); under LIKE that FK is gone).
+ *
+ * This is why it now RUNS IN CI: the per-suite schema removes the shared-public
+ * cross-test contention the old `if (process.env['CI']) return` gate sidestepped.
+ *
+ * Requires a migrated public schema (local dev DB / CI ci-migrate). If Postgres
+ * is unreachable the suite skips cleanly rather than false-failing.
  */
 
 import { describe, test, expect, beforeAll, afterAll } from 'bun:test';
-import { Pool } from 'pg';
-import { drizzle } from 'drizzle-orm/node-postgres';
-import { sql, eq } from 'drizzle-orm';
 import { InviteRepository } from './invite.repo';
-import { invitationTokens } from './invite.schema';
+import { createScratch, type ScratchDb } from '@/test-utils/pg-scratch';
 
-const DB_URL =
-  process.env['DATABASE_URL'] ?? 'postgres://postgres:password@localhost:5432/monobase';
+let H: ScratchDb;
 
+// uuid NOT NULL columns need real UUIDs (no FK rows required — LIKE drops FKs).
 const ORG_ID = crypto.randomUUID();
 const OFFICER_ID = crypto.randomUUID();
 
-let pool: Pool;
-let db: ReturnType<typeof drizzle>;
-let repo: InviteRepository;
-let dbReachable = false;
-
 beforeAll(async () => {
-  // These tests seed the shared `public` schema; under CI's parallel suite that
-  // contends on connections + needs migrations. Run them locally only — the
-  // equivalent coverage runs against a migrated dev DB. (See SCRATCH-schema
-  // integration tests, e.g. comms-repos / approvalRollback, for the isolated
-  // pattern these should migrate to later.)
-  if (process.env['CI']) { return; }
-  pool = new Pool({ connectionString: DB_URL, connectionTimeoutMillis: 3000 });
-  try {
-    const c = await pool.connect();
-    try {
-      // Scratch org to satisfy the organization_id FK.
-      await c.query(
-        `INSERT INTO organization (id, association_id, name, slug, org_type, status)
-         VALUES ($1, $2, $3, $4, 'society', 'active')`,
-        [ORG_ID, crypto.randomUUID(), `invite-test-${ORG_ID}`, `invite-test-${ORG_ID}`],
-      );
-    } finally {
-      c.release();
-    }
-    db = drizzle(pool);
-    repo = new InviteRepository(db as never);
-    dbReachable = true;
-  } catch (err) {
-    dbReachable = false;
-    // eslint-disable-next-line no-console
-    console.warn(`[invite.repo integration] Postgres unreachable; skipping. ${(err as Error).message}`);
-  }
+  H = await createScratch(['invitation_token']);
 });
 
 afterAll(async () => {
-  if (pool) {
-    try {
-      if (dbReachable) {
-        await db.delete(invitationTokens).where(eq(invitationTokens.organizationId, ORG_ID));
-        await pool.query(`DELETE FROM organization WHERE id = $1`, [ORG_ID]);
-      }
-    } finally {
-      await pool.end();
-    }
-  }
+  await H?.teardown();
 });
 
 let hashCounter = 0;
@@ -85,7 +51,8 @@ const newToken = (over: Record<string, unknown> = {}) => ({
 
 describe('InviteRepository (real-PG)', () => {
   test('create + findByTokenHash (hit/miss)', async () => {
-    if (!dbReachable) return;
+    if (!H.dbReachable) return;
+    const repo = new InviteRepository(H.db as never);
     const hash = uniqueHash();
     const created = await repo.create(newToken({ tokenHash: hash }));
     expect(created.id).toBeTruthy();
@@ -96,7 +63,8 @@ describe('InviteRepository (real-PG)', () => {
   });
 
   test('findPendingByEmail matches case-insensitively, excludes expired + non-pending', async () => {
-    if (!dbReachable) return;
+    if (!H.dbReachable) return;
+    const repo = new InviteRepository(H.db as never);
     const email = `Pending.User+${crypto.randomUUID()}@Example.com`;
     const lower = email.toLowerCase();
     const created = await repo.create(newToken({ email: lower }));
@@ -118,7 +86,8 @@ describe('InviteRepository (real-PG)', () => {
   });
 
   test('markClaimed sets status=claimed + claimedAt; claim atomicity removes from pending lookup', async () => {
-    if (!dbReachable) return;
+    if (!H.dbReachable) return;
+    const repo = new InviteRepository(H.db as never);
     const email = `claim+${crypto.randomUUID()}@example.com`;
     const created = await repo.create(newToken({ email }));
 
@@ -134,14 +103,16 @@ describe('InviteRepository (real-PG)', () => {
   });
 
   test('markRevoked sets status=revoked', async () => {
-    if (!dbReachable) return;
+    if (!H.dbReachable) return;
+    const repo = new InviteRepository(H.db as never);
     const created = await repo.create(newToken());
     const revoked = await repo.markRevoked(created.id);
     expect(revoked?.status).toBe('revoked');
   });
 
   test('updateForResend rotates tokenHash, expiresAt, and metadata.resendCount', async () => {
-    if (!dbReachable) return;
+    if (!H.dbReachable) return;
+    const repo = new InviteRepository(H.db as never);
     const created = await repo.create(newToken());
     const newHash = uniqueHash();
     const newExpiry = new Date(Date.now() + 14 * 86400000);
@@ -153,7 +124,8 @@ describe('InviteRepository (real-PG)', () => {
   });
 
   test('listByOrg with and without status filter', async () => {
-    if (!dbReachable) return;
+    if (!H.dbReachable) return;
+    const repo = new InviteRepository(H.db as never);
     const pending = await repo.create(newToken());
     const toRevoke = await repo.create(newToken());
     await repo.markRevoked(toRevoke.id);
