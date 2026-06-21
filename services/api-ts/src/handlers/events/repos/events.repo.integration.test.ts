@@ -17,6 +17,7 @@ import {
   createSchedulingScratch,
   seedEvent,
   seedRegistration,
+  SCHED_ORG,
 } from '@/test-utils/scheduling-fixtures';
 
 let H: ScratchDb;
@@ -305,5 +306,95 @@ describe('EventsRepository.findBySlug — real-PG', () => {
     expect(found?.id).toBe(seeded.id);
     expect(found?.eventSlug).toBe('spring-gala-s2');
     expect(await repo.findBySlug('absent-slug-xyz')).toBeUndefined();
+  });
+});
+
+/**
+ * org_id NOT NULL invariant (multi-tenant scoping). events.schema.ts declares
+ * organization_id `.notNull()` on ALL three tables, but only `event` enforced it
+ * at the DB layer — `event_registration` + `check_in` were added nullable in 0019
+ * and never tightened (migration 0078 only touched invoice + notification_preference).
+ * Migration 0079 backfills NULLs from the parent event and adds SET NOT NULL so the
+ * DB enforces what the schema already claims. These tests assert the 23502 fires
+ * (they were RED before 0079).
+ */
+function pgCode(e: unknown): string | undefined {
+  const err = e as { code?: string; cause?: { code?: string } };
+  return err?.code ?? err?.cause?.code;
+}
+
+describe('org_id NOT NULL invariant (migration 0079) — real-PG', () => {
+  test('register WITHOUT organizationId is rejected by NOT NULL (23502) on event_registration', async () => {
+    if (!H.dbReachable) return;
+    const ev = await seedEvent(H, {});
+    let code: string | undefined;
+    try {
+      // Deliberately omit organizationId (cast past the notNull insert type).
+      await repo.register({
+        eventId: ev.id,
+        personId: crypto.randomUUID(),
+        status: 'confirmed',
+        createdBy: SYS,
+        updatedBy: SYS,
+      } as never);
+    } catch (e) {
+      code = pgCode(e);
+    }
+    expect(code).toBe('23502');
+  });
+
+  test('create WITHOUT organizationId is rejected by NOT NULL (23502) on event', async () => {
+    if (!H.dbReachable) return;
+    let code: string | undefined;
+    try {
+      await repo.create({
+        title: 'No Org Event',
+        startDate: new Date(),
+        endDate: new Date(Date.now() + 3600_000),
+      } as never);
+    } catch (e) {
+      code = pgCode(e);
+    }
+    expect(code).toBe('23502');
+  });
+
+  test('checkIn WITHOUT organizationId is rejected by NOT NULL (23502) on check_in', async () => {
+    if (!H.dbReachable) return;
+    let code: string | undefined;
+    try {
+      await repo.checkIn({
+        eventId: crypto.randomUUID(),
+        personId: crypto.randomUUID(),
+        method: 'manual',
+      } as never);
+    } catch (e) {
+      code = pgCode(e);
+    }
+    expect(code).toBe('23502');
+  });
+
+  test('positive: register/create WITH a valid org_id persist it (read-back)', async () => {
+    if (!H.dbReachable) return;
+    const ev = await repo.create({
+      organizationId: SCHED_ORG,
+      title: 'Org Event',
+      startDate: new Date(),
+      endDate: new Date(Date.now() + 3600_000),
+    } as never);
+    expect(ev.organizationId).toBe(SCHED_ORG);
+
+    const reg = await repo.register({
+      eventId: ev.id,
+      personId: crypto.randomUUID(),
+      organizationId: SCHED_ORG,
+      status: 'confirmed',
+      createdBy: SYS,
+      updatedBy: SYS,
+    });
+    const { rows } = await H.scopedPool.query(
+      `SELECT organization_id FROM "${H.schema}".event_registration WHERE id = $1`,
+      [reg.id],
+    );
+    expect(rows[0]?.organization_id).toBe(SCHED_ORG);
   });
 });
