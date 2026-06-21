@@ -222,6 +222,31 @@ export function registerDomainEventConsumers(
   });
 
   // -----------------------------------------------------------------------
+  // booking.rejected → notify client directly (clientId in payload)
+  // -----------------------------------------------------------------------
+  domainEvents.on('booking.rejected', async (payload) => {
+    try {
+      await deps.db.insert(notifications).values({
+        organizationId: payload.organizationId,
+        recipient: payload.clientId,
+        type: 'booking.rejected',
+        channel: 'in-app',
+        title: 'Booking Rejected',
+        message: `Your booking request has been rejected by the host. Reason: ${payload.reason}`,
+        status: 'sent',
+        sentAt: new Date(),
+        relatedEntityType: 'booking',
+        relatedEntity: payload.bookingId,
+        consentValidated: false,
+        createdBy: SYSTEM_USER_ID,
+        updatedBy: SYSTEM_USER_ID,
+      });
+    } catch (err) {
+      logger.error({ error: err }, '[consumer] booking.rejected failed');
+    }
+  });
+
+  // -----------------------------------------------------------------------
   // booking.cancelled → look up clientId from bookings table, then notify
   // -----------------------------------------------------------------------
   domainEvents.on('booking.cancelled', async (payload) => {

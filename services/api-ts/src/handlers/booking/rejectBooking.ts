@@ -118,19 +118,11 @@ export async function rejectBooking(
 
     // Both booking.client and booking.host now store person IDs directly
 
-    // Notification for client - booking was rejected
-    // (automatically sends WebSocket notification via NotificationService)
-    await notificationService.createNotification({
-      organizationId,
-      recipient: booking.client,
-      type: 'booking.rejected',
-      channel: 'in-app',
-      title: 'Booking Rejected',
-      message: `Your booking request has been rejected by the host. Reason: ${rejectionReason}`,
-      relatedEntityType: 'booking',
-      relatedEntity: rejectedBooking.id,
-      consentValidated: true
-    });
+    // NOTE: the client's in-app rejection notification is owned by the
+    // `booking.rejected` domain-event consumer (core/domain-event-consumers.ts),
+    // which the emit() above triggers. Inserting it here too would double-notify
+    // the client, so the inline client createNotification was removed. The
+    // real-time WS push below stays inline (it is not domain-event-shaped).
 
     // Send dedicated booking event via WebSocket
     await wsService.publishToUser(booking.client, 'booking.rejected', {
