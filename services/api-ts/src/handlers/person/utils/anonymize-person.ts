@@ -38,6 +38,10 @@ export function anonymizePersonFields(completedAt: Date): Record<string, unknown
     bio: null,
     gender: null,
     deletionCompletedAt: completedAt,
-    updatedBy: 'system',
+    // System/cron action — no user actor. person.updated_by is a uuid column, so
+    // the literal 'system' threw Postgres 22P02 (invalid uuid) on every scheduled
+    // deletion; deletionProcessor's per-record try/catch swallowed it, so PII was
+    // NEVER scrubbed in production. null is the correct system-actor representation.
+    updatedBy: null,
   };
 }
