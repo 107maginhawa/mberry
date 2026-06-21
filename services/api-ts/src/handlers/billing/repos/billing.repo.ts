@@ -223,6 +223,10 @@ export class InvoiceRepository extends DatabaseRepository<Invoice, NewInvoice, I
    */
   async generateInvoiceNumber(): Promise<string> {
     // Generate invoice number like: INV-2024-000001
+    // ponytail: read-max-then-increment races under concurrency — two parallel
+    // creates can mint the same number. Fine at current low invoice volume; if
+    // it matters, wrap create in a tx with `pg_advisory_xact_lock` or move to a
+    // per-year Postgres sequence. Tracked as W1-T2 in the post-merge backlog.
     const year = new Date().getFullYear();
     const prefix = `INV-${year}-`;
 
