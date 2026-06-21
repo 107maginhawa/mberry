@@ -9,18 +9,15 @@
  */
 
 import { describe, test, expect, beforeAll, afterAll } from 'bun:test';
-import { Pool } from 'pg';
-import { drizzle } from 'drizzle-orm/node-postgres';
 import { randomUUID } from 'node:crypto';
 import { ScheduleExceptionRepository } from './scheduleException.repo';
 import { NotFoundError } from '@/core/errors';
 import type { ScheduleException } from './booking.schema';
+import { createScratch, type ScratchDb } from '@/test-utils/pg-scratch';
 
-const DB_URL =
-  process.env['DATABASE_URL'] ?? 'postgres://postgres:password@localhost:5432/monobase';
-
-let pool: Pool;
-let db: ReturnType<typeof drizzle>;
+let H: ScratchDb;
+let pool: ScratchDb['scopedPool'];
+let db: ScratchDb['db'];
 let dbReachable = false;
 let repo: ScheduleExceptionRepository;
 
@@ -31,24 +28,13 @@ const CONTEXT = 'ctx-' + randomUUID();
 const EVENT_TZ = 'America/New_York';
 
 beforeAll(async () => {
-  // These tests seed the shared `public` schema; under CI's parallel suite that
-  // contends on connections + needs migrations. Run them locally only — the
-  // equivalent coverage runs against a migrated dev DB. (See SCRATCH-schema
-  // integration tests, e.g. comms-repos / approvalRollback, for the isolated
-  // pattern these should migrate to later.)
-  if (process.env['CI']) { return; }
-  pool = new Pool({ connectionString: DB_URL, connectionTimeoutMillis: 3000 });
-  try {
-    const c = await pool.connect();
-    c.release();
-    db = drizzle(pool);
-    dbReachable = true;
-  } catch (err) {
-    dbReachable = false;
-    // eslint-disable-next-line no-console
-    console.warn(`[scheduleException.repo integration] Postgres unreachable; skipping. ${(err as Error).message}`);
-    return;
-  }
+  // Isolated scratch schema (createScratch) — runs in CI's ci-migrate DB lane.
+  // Skips cleanly when Postgres is unreachable.
+  H = await createScratch(['schedule_exception', 'booking_event', 'person']);
+  pool = H.scopedPool;
+  db = H.db;
+  dbReachable = H.dbReachable;
+  if (!dbReachable) return;
 
   repo = new ScheduleExceptionRepository(db as any);
 
@@ -61,14 +47,7 @@ beforeAll(async () => {
 });
 
 afterAll(async () => {
-  if (pool) {
-    if (dbReachable) {
-      await pool.query(`DELETE FROM schedule_exception WHERE event_id=$1`, [EVENT]);
-      await pool.query(`DELETE FROM booking_event WHERE id=$1`, [EVENT]);
-      await pool.query(`DELETE FROM person WHERE id=$1`, [OWNER]);
-    }
-    await pool.end();
-  }
+  await H?.teardown();
 });
 
 const day = (iso: string) => new Date(iso);

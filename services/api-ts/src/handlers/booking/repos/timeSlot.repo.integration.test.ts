@@ -12,17 +12,14 @@
  */
 
 import { describe, test, expect, beforeAll, afterAll } from 'bun:test';
-import { Pool } from 'pg';
-import { drizzle } from 'drizzle-orm/node-postgres';
 import { randomUUID } from 'node:crypto';
 import { TimeSlotRepository } from './timeSlot.repo';
 import type { NewTimeSlot } from './booking.schema';
+import { createScratch, type ScratchDb } from '@/test-utils/pg-scratch';
 
-const DB_URL =
-  process.env['DATABASE_URL'] ?? 'postgres://postgres:password@localhost:5432/monobase';
-
-let pool: Pool;
-let db: ReturnType<typeof drizzle>;
+let H: ScratchDb;
+let pool: ScratchDb['scopedPool'];
+let db: ScratchDb['db'];
 let dbReachable = false;
 let repo: TimeSlotRepository;
 
@@ -59,24 +56,13 @@ function slot(overrides: Partial<NewTimeSlot> & { startTime: Date; endTime: Date
 }
 
 beforeAll(async () => {
-  // These tests seed the shared `public` schema; under CI's parallel suite that
-  // contends on connections + needs migrations. Run them locally only — the
-  // equivalent coverage runs against a migrated dev DB. (See SCRATCH-schema
-  // integration tests, e.g. comms-repos / approvalRollback, for the isolated
-  // pattern these should migrate to later.)
-  if (process.env['CI']) { return; }
-  pool = new Pool({ connectionString: DB_URL, connectionTimeoutMillis: 3000 });
-  try {
-    const c = await pool.connect();
-    c.release();
-    db = drizzle(pool);
-    dbReachable = true;
-  } catch (err) {
-    dbReachable = false;
-    // eslint-disable-next-line no-console
-    console.warn(`[timeSlot.repo integration] Postgres unreachable; skipping. ${(err as Error).message}`);
-    return;
-  }
+  // Isolated scratch schema (createScratch) — runs in CI's ci-migrate DB lane.
+  // Skips cleanly when Postgres is unreachable.
+  H = await createScratch(['time_slot', 'booking', 'booking_event', 'person']);
+  pool = H.scopedPool;
+  db = H.db;
+  dbReachable = H.dbReachable;
+  if (!dbReachable) return;
 
   repo = new TimeSlotRepository(db as any);
 
@@ -94,15 +80,7 @@ beforeAll(async () => {
 });
 
 afterAll(async () => {
-  if (pool) {
-    if (dbReachable) {
-      await pool.query(`DELETE FROM booking WHERE slot_id IN (SELECT id FROM time_slot WHERE event_id IN ($1,$2))`, [EVENT_A, EVENT_B]);
-      await pool.query(`DELETE FROM time_slot WHERE event_id IN ($1,$2)`, [EVENT_A, EVENT_B]);
-      await pool.query(`DELETE FROM booking_event WHERE id IN ($1,$2)`, [EVENT_A, EVENT_B]);
-      await pool.query(`DELETE FROM person WHERE id IN ($1,$2)`, [OWNER_A, OWNER_B]);
-    }
-    await pool.end();
-  }
+  await H?.teardown();
 });
 
 const base = new Date('2031-01-01T10:00:00Z');
