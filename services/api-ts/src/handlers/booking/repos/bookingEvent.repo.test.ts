@@ -10,6 +10,7 @@
 
 import { describe, test, expect, beforeEach } from 'bun:test';
 import { BookingEventRepository } from './bookingEvent.repo';
+import { ValidationError } from '@/core/errors';
 import { DayOfWeek } from './booking.schema';
 import type { BookingEvent, BookingEventCreateRequest, DailyConfig } from './booking.schema';
 
@@ -519,5 +520,54 @@ describe('BookingEventRepository.buildWhereConditions', () => {
   test('returns condition for tagsAnd filter', () => {
     const conds = (repo as any).buildWhereConditions({ tagsAnd: ['vip', 'premium'] });
     expect(conds).toBeTruthy();
+  });
+});
+
+// ---------------------------------------------------------------------------
+// dailyConfigs day-key validation (B1 follow-up item3 — silent-zero-slot trap)
+//
+// Generators key on the 3-letter DayOfWeek enum ('sun'..'sat'). A config keyed
+// by a full day-name like 'monday' previously passed validation untouched, then
+// produced ZERO slots with no error because dailyConfigs['mon'] was undefined.
+// processAndValidateDailyConfigs must now REJECT unknown keys (fail-fast).
+// ---------------------------------------------------------------------------
+
+describe('BookingEventRepository dailyConfigs day-key validation', () => {
+  const stubDb: any = {
+    insert: () => ({
+      values: (data: any) => ({
+        returning: () => Promise.resolve([{ ...data, id: 'evt-1' }]),
+      }),
+    }),
+  };
+
+  test('rejects a full day-name key (monday) naming the bad key', async () => {
+    const repo = new BookingEventRepository(stubDb);
+    // Build a config keyed by the invalid full day-name 'monday'.
+    const badConfigs: any = {
+      monday: {
+        enabled: true,
+        timeBlocks: [{ startTime: '09:00', endTime: '17:00', slotDuration: 30, bufferTime: 0 }],
+      },
+    };
+
+    let caught: unknown;
+    try {
+      await repo.createWithSmartDefaults('owner-1', makeCreateRequest({ dailyConfigs: badConfigs }));
+    } catch (e) {
+      caught = e;
+    }
+
+    expect(caught).toBeInstanceOf(ValidationError);
+    expect((caught as Error).message).toContain('monday');
+  });
+
+  test('accepts a correctly abbreviated key (mon)', async () => {
+    const repo = new BookingEventRepository(stubDb);
+    const goodConfigs = makeDailyConfigs([DayOfWeek.mon]);
+
+    await expect(
+      repo.createWithSmartDefaults('owner-1', makeCreateRequest({ dailyConfigs: goodConfigs }))
+    ).resolves.toBeTruthy();
   });
 });

@@ -8,10 +8,8 @@ import { eq, and, or, lte, gte, isNull, sql, type SQL } from 'drizzle-orm';
 import type { DatabaseInstance } from '@/core/database';
 import { DatabaseRepository, type PaginationOptions } from '@/core/database.repo';
 import { ConflictError, ValidationError, NotFoundError } from '@/core/errors';
-import type {
-  DayOfWeek
-} from './booking.schema';
 import {
+  DayOfWeek,
   bookingEvents,
   type BookingEvent,
   type NewBookingEvent,
@@ -357,6 +355,15 @@ export interface BookingEventFilters {
     const processedConfigs = { ...dailyConfigs };
 
     for (const [dayKey, config] of Object.entries(processedConfigs)) {
+      // Fail-fast on unknown day keys. Generators key on the 3-letter DayOfWeek
+      // enum ('sun'..'sat'); a full day-name like 'monday' would otherwise pass
+      // validation untouched and then silently generate ZERO slots (the lookup
+      // dailyConfigs['mon'] is undefined). Reject it here so callers learn early.
+      if (!Object.values(DayOfWeek).includes(dayKey as DayOfWeek)) {
+        throw new ValidationError(
+          `Invalid dailyConfigs day key: '${dayKey}'. Use 3-letter day names: sun, mon, tue, wed, thu, fri, sat.`
+        );
+      }
       const day = dayKey as DayOfWeek;
 
       if (config.enabled && config.timeBlocks) {
