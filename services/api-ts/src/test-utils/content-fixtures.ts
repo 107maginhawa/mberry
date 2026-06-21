@@ -182,3 +182,122 @@ export async function seedReview(H: ScratchDb, o: SeedReviewOpts = {}): Promise<
   );
   return { id, organizationId, reviewer, context, reviewType, npsScore };
 }
+
+export interface SeedSurveyOpts {
+  id?: string;
+  organizationId?: string;
+  title?: string;
+  /** Defaults to 'active' so member-availability tests see a live survey. */
+  status?: string | null;
+  /** varchar column (e.g. 'poll' | 'feedback' | 'nps' | 'pulse'). Defaults to 'feedback'. */
+  surveyType?: string | null;
+  /** JSONB; falls through to the DB default '[]' when omitted. */
+  questions?: unknown[] | null;
+  /** JSONB; falls through to the DB default '{}' when omitted. */
+  settings?: Record<string, unknown> | null;
+  createdBy?: string | null;
+}
+export interface SeededSurvey {
+  id: string;
+  organizationId: string;
+  status: string;
+  surveyType: string;
+}
+
+/**
+ * Insert one `survey` row, filling the NOT-NULL columns without DB defaults
+ * (organization_id, title, survey_type). `status` defaults to 'active' (DB
+ * default is 'draft'); `questions`/`settings` fall through to their DB
+ * defaults ('[]'/'{}') when omitted. JSONB params are passed as text and cast
+ * with ::jsonb (mirrors the scheduling-fixtures cast idiom).
+ */
+export async function seedSurvey(H: ScratchDb, o: SeedSurveyOpts = {}): Promise<SeededSurvey> {
+  const id = o.id ?? crypto.randomUUID();
+  const organizationId = o.organizationId ?? CONTENT_ORG;
+  const status = o.status ?? 'active';
+  const surveyType = o.surveyType ?? 'feedback';
+  await H.scopedPool.query(
+    `INSERT INTO "${H.schema}".survey
+       (id, organization_id, title, status, survey_type, questions, settings, created_by)
+     VALUES ($1,$2,$3,$4,$5,
+        COALESCE($6::jsonb, '[]'::jsonb),
+        COALESCE($7::jsonb, '{}'::jsonb),
+        $8)`,
+    [
+      id,
+      organizationId,
+      o.title ?? 'Test Survey',
+      status,
+      surveyType,
+      o.questions === undefined || o.questions === null ? null : JSON.stringify(o.questions),
+      o.settings === undefined || o.settings === null ? null : JSON.stringify(o.settings),
+      o.createdBy ?? null,
+    ],
+  );
+  return { id, organizationId, status, surveyType };
+}
+
+export interface SeedSurveyResponseOpts {
+  id?: string;
+  organizationId?: string;
+  surveyId?: string;
+  /** Nullable: pass null (or omit + set anonymous) for an anonymous response. */
+  responderId?: string | null;
+  /** JSONB array; falls through to the DB default '[]' when omitted. */
+  answers?: unknown[] | null;
+  /** Defaults to the DB default 'pending'. Pass 'completed' for a finished response. */
+  status?: string | null;
+  /** ISO timestamp; null when not completed. */
+  completedAt?: string | null;
+  contextId?: string | null;
+  updatedBy?: string | null;
+}
+export interface SeededSurveyResponse {
+  id: string;
+  organizationId: string;
+  surveyId: string;
+  responderId: string | null;
+  status: string;
+}
+
+/**
+ * Insert one `survey_response` row, filling the NOT-NULL columns without DB
+ * defaults (organization_id, survey_id). `responder_id` is nullable (NULL for
+ * anonymous). `answers` falls through to '[]' / `status` to 'pending' when
+ * omitted. JSONB answers passed as text + ::jsonb cast.
+ */
+export async function seedSurveyResponse(
+  H: ScratchDb,
+  o: SeedSurveyResponseOpts = {},
+): Promise<SeededSurveyResponse> {
+  const id = o.id ?? crypto.randomUUID();
+  const organizationId = o.organizationId ?? CONTENT_ORG;
+  const surveyId = o.surveyId ?? crypto.randomUUID();
+  // responder_id is nullable: only default to a fresh UUID when the key is
+  // entirely absent; an explicit `null` is preserved (anonymous response).
+  const responderId =
+    'responderId' in o ? o.responderId ?? null : crypto.randomUUID();
+  const status = o.status ?? 'pending';
+  await H.scopedPool.query(
+    `INSERT INTO "${H.schema}".survey_response
+       (id, organization_id, survey_id, responder_id, answers, status, completed_at, context_id, updated_by)
+     VALUES ($1,$2,$3,$4,
+        COALESCE($5::jsonb, '[]'::jsonb),
+        $6,
+        $7::timestamptz,
+        $8,
+        $9)`,
+    [
+      id,
+      organizationId,
+      surveyId,
+      responderId,
+      o.answers === undefined || o.answers === null ? null : JSON.stringify(o.answers),
+      status,
+      o.completedAt ?? null,
+      o.contextId ?? null,
+      o.updatedBy ?? null,
+    ],
+  );
+  return { id, organizationId, surveyId, responderId, status };
+}
