@@ -354,19 +354,6 @@ export function fakeTemplate(overrides: Record<string, any> = {}) {
   };
 }
 
-export function fakeFeedPost(overrides: Record<string, any> = {}) {
-  return {
-    id: 'post-1',
-    organizationId: 'org-1',
-    authorId: 'user-1',
-    title: 'Announcement',
-    body: 'Test post body',
-    status: 'published',
-    createdAt: new Date(),
-    ...overrides,
-  };
-}
-
 // ─── Email ──────────────────────────────────────────────
 
 export function fakeEmailQueue(overrides: Record<string, any> = {}) {

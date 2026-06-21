@@ -2,7 +2,6 @@ import { describe, it, expect } from 'bun:test';
 import {
   BOOKING_EVENT_VALID_TRANSITIONS,
   EMAIL_QUEUE_VALID_TRANSITIONS,
-  FEED_POST_VALID_TRANSITIONS,
   MEMBERSHIP_VALID_TRANSITIONS,
   DUES_PAYMENT_VALID_TRANSITIONS,
   ELECTION_VALID_TRANSITIONS,
@@ -128,50 +127,6 @@ describe('EMAIL_QUEUE_VALID_TRANSITIONS', () => {
   });
 });
 
-describe('FEED_POST_VALID_TRANSITIONS', () => {
-  it('draft → published is valid', () => {
-    expect(isValidTransition(FEED_POST_VALID_TRANSITIONS, 'draft', 'published')).toBe(true);
-  });
-
-  it('published → flagged is valid', () => {
-    expect(isValidTransition(FEED_POST_VALID_TRANSITIONS, 'published', 'flagged')).toBe(true);
-  });
-
-  it('published → removed is valid', () => {
-    expect(isValidTransition(FEED_POST_VALID_TRANSITIONS, 'published', 'removed')).toBe(true);
-  });
-
-  it('flagged → published is valid (officer restore)', () => {
-    expect(isValidTransition(FEED_POST_VALID_TRANSITIONS, 'flagged', 'published')).toBe(true);
-  });
-
-  it('flagged → removed is valid', () => {
-    expect(isValidTransition(FEED_POST_VALID_TRANSITIONS, 'flagged', 'removed')).toBe(true);
-  });
-
-  it('removed has no valid transitions (terminal)', () => {
-    expect(FEED_POST_VALID_TRANSITIONS['removed']).toEqual([]);
-    expect(isValidTransition(FEED_POST_VALID_TRANSITIONS, 'removed', 'draft')).toBe(false);
-    expect(isValidTransition(FEED_POST_VALID_TRANSITIONS, 'removed', 'published')).toBe(false);
-    expect(isValidTransition(FEED_POST_VALID_TRANSITIONS, 'removed', 'flagged')).toBe(false);
-  });
-
-  it('draft → flagged is invalid', () => {
-    expect(isValidTransition(FEED_POST_VALID_TRANSITIONS, 'draft', 'flagged')).toBe(false);
-  });
-
-  it('draft → removed is invalid', () => {
-    expect(isValidTransition(FEED_POST_VALID_TRANSITIONS, 'draft', 'removed')).toBe(false);
-  });
-
-  it('published → draft is invalid', () => {
-    expect(isValidTransition(FEED_POST_VALID_TRANSITIONS, 'published', 'draft')).toBe(false);
-  });
-
-  it('unknown status returns false', () => {
-    expect(isValidTransition(FEED_POST_VALID_TRANSITIONS, 'hidden', 'published')).toBe(false);
-  });
-});
 
 // ─── assertValidTransition ──────────────────────────────────────────
 

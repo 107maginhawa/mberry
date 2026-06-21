@@ -26,14 +26,6 @@ export const EMAIL_QUEUE_VALID_TRANSITIONS: Record<string, string[]> = {
   cancelled: [],  // terminal
 };
 
-// Feed post status (feedPostStatusEnum: published, draft, flagged, removed)
-export const FEED_POST_VALID_TRANSITIONS: Record<string, string[]> = {
-  draft: ['published'],
-  published: ['flagged', 'removed'],
-  flagged: ['published', 'removed'],  // officer can restore or remove
-  removed: [],   // terminal
-};
-
 export function isValidTransition(
   transitions: Record<string, string[]>,
   from: string,
