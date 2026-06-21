@@ -115,12 +115,15 @@ function generateSlotsForDay(params: {
     const bufferTime = timeBlock.bufferTime || 0; // Default 0 minutes
     const totalSlotTime = slotDuration + bufferTime;
     
-    // Check minimum booking hours constraint
+    // Check minimum booking notice. The schema field is minBookingMinutes
+    // (already in minutes) — the old code read a non-existent `minBookingHours`,
+    // so the notice window silently no-op'd. (Wave-2 booking s3 fix.)
     const now = new Date();
-    const minBookingTime = addMinutes(now, (((event as Record<string, unknown>)['minBookingHours'] as number) || 0) * 60);
+    const minBookingTime = addMinutes(now, event.minBookingMinutes ?? 0);
 
-    // Check advance booking constraint
-    const maxBookingDate = addDays(now, ((event as Record<string, unknown>)['advanceBookingDays'] as number) || 365);
+    // Check advance booking window. The schema field is maxBookingDays — the old
+    // code read a non-existent `advanceBookingDays`, defaulting everything to 365.
+    const maxBookingDate = addDays(now, event.maxBookingDays ?? 365);
     if (isAfter(date, maxBookingDate)) {
       continue; // Beyond advance booking window
     }
