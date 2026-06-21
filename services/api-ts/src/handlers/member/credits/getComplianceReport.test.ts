@@ -1,4 +1,7 @@
 import { describe, test, expect, mock, beforeEach } from 'bun:test';
+import { stubRepo } from '@/test-utils/make-ctx';
+import { ComplianceRepository } from '@/handlers/association:member/repos/compliance.repo';
+import { getComplianceReport } from './getComplianceReport';
 
 const mockGetOrgSummary = mock(() => Promise.resolve({ totalMembers: 10, compliant: 7, atRisk: 2, nonCompliant: 1, complianceRate: 70 }));
 const mockGetByOrganization = mock(() => Promise.resolve({
@@ -9,15 +12,11 @@ const mockGetByOrganization = mock(() => Promise.resolve({
   total: 2,
 }));
 
-mock.module('@/handlers/association:member/repos/compliance.repo', () => ({
-  ComplianceRepository: class {
-    constructor(_db: any) {}
-    getOrgSummary = mockGetOrgSummary;
-    getByOrganization = mockGetByOrganization;
-  },
-}));
-
-import { getComplianceReport } from './getComplianceReport';
+// stubRepo (not mock.module): mock.module replaces the whole module and leaks the
+// fake repo across files (broke compliance.repo.integration.test.ts in the single-
+// process coverage run). ComplianceRepository is registered in preload-pristine.ts,
+// whose beforeEach restores the prototype before every test — so the stub must be
+// (re)installed in THIS file's beforeEach (after the guard's restore), not top-level.
 
 const OFFICER_TERM = { positionTitle: 'President' };
 
@@ -73,6 +72,10 @@ function createMockCtx(overrides: {
 
 describe('getComplianceReport', () => {
   beforeEach(() => {
+    stubRepo(ComplianceRepository, {
+      getOrgSummary: mockGetOrgSummary,
+      getByOrganization: mockGetByOrganization,
+    });
     mockGetOrgSummary.mockReset();
     mockGetOrgSummary.mockImplementation(() => Promise.resolve({ totalMembers: 10, compliant: 7, atRisk: 2, nonCompliant: 1, complianceRate: 70 }));
     mockGetByOrganization.mockReset();

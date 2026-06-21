@@ -104,6 +104,7 @@ import { AccreditedProviderRepository } from '@/handlers/association:operations/
 // Snapshot all 50 repo prototypes
 const PRISTINE_REPOS = [
   // association:member
+  PristineComplianceRepository, // stubbed by member/credits/{getComplianceReport,refreshCompliance}.test.ts — MUST be restored each beforeEach
   MembershipApplicationRepository,
   AssocMembershipRepository,
   MembershipTierRepository,

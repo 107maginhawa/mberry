@@ -1,14 +1,13 @@
 import { describe, test, expect, mock, beforeEach } from 'bun:test';
+import { stubRepo } from '@/test-utils/make-ctx';
+import { ComplianceRepository } from '@/handlers/association:member/repos/compliance.repo';
+import { refreshCompliance } from './refreshCompliance';
 
 const mockRefresh = mock(() => Promise.resolve());
-mock.module('@/handlers/association:member/repos/compliance.repo', () => ({
-  ComplianceRepository: class {
-    constructor(_db: any) {}
-    refresh = mockRefresh;
-  },
-}));
 
-import { refreshCompliance } from './refreshCompliance';
+// stubRepo (not mock.module) so the prototype is restored between files. The
+// preload-pristine guard restores ComplianceRepository before every test, so the
+// stub is (re)installed in beforeEach below (after the guard's restore).
 
 const OFFICER_TERM = { positionTitle: 'President' };
 
@@ -59,6 +58,7 @@ function createMockCtx(overrides: {
 
 describe('refreshCompliance', () => {
   beforeEach(() => {
+    stubRepo(ComplianceRepository, { refresh: mockRefresh });
     mockRefresh.mockReset();
     mockRefresh.mockImplementation(() => Promise.resolve());
   });
