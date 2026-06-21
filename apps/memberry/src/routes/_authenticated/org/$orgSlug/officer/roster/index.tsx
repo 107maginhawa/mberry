@@ -45,6 +45,13 @@ function RosterPage() {
   return (
     <PageShell
       title="Member Roster"
+      // Roster shows a dense 9-column table that needs a ~960px container to
+      // render (globals.css .cq-roster-*). The default PageShell width (max-w-3xl
+      // ≈ 720px container) kept it permanently in card layout even on wide
+      // screens. "wide" (max-w-content = 1200px, bounded by the officer column's
+      // own max-w-[1200px]) gives the table room on desktop while still reflowing
+      // to cards on narrow/mobile widths.
+      maxWidth="wide"
       subtitle="View and manage organization members"
       breadcrumbs={[
         { label: 'Officer', href: `/org/${orgSlug}/officer/dashboard` },

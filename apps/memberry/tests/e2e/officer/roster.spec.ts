@@ -23,13 +23,12 @@ test('heading "Member Roster" is visible', async ({ page }) => {
 
   test('shows member roster with member fields', async ({ page }) => {
     await page.goto(`/org/${ORG_ID}/officer/roster`)
-    // The roster reflows to a card layout when its content container is < 960px
-    // (globals.css .cq-roster-* container queries). The officer content column
-    // is capped at the PageShell default width (~720px container even on wide
-    // screens), so the card layout is what renders — the 9-column table only
-    // appears when the container reaches 960px. Assert a member card showing
-    // the member's name link and status badge (the same fields the table
-    // columns would show).
+    // At the default desktop viewport the officer sidebar leaves the roster
+    // content column under the 960px breakpoint, so it renders the card layout
+    // (globals.css .cq-roster-* container queries). Assert a member card with the
+    // name link and status badge (same fields the table columns show). The wide-
+    // screen describe below verifies the 9-column table at a viewport where the
+    // container clears 960px.
     const cards = page.locator('.cq-roster-cards')
     await expect(
       cards.locator('a[href*="/officer/roster/"]').first(),
@@ -69,6 +68,29 @@ test('heading "Member Roster" is visible', async ({ page }) => {
         .getByPlaceholder(/search/i)
         .or(page.locator('input[type="text"], input[type="search"]'))
         .first(),
+    ).toBeVisible({ timeout: 10000 })
+  })
+})
+
+// PageShell maxWidth="wide" lets the dense 9-column roster table render once the
+// content container clears 960px. With the officer sidebar that needs a wide
+// viewport — the default Desktop Chrome 1280px column stays in card layout. This
+// describe pins a wide viewport to verify the table is now reachable (the fix).
+test.describe('Officer Roster — wide screen', () => {
+  test.use({ authRole: 'officer', viewport: { width: 1600, height: 900 } })
+
+  test('renders the 9-column table with member rows', async ({ page }) => {
+    await page.goto(`/org/${ORG_ID}/officer/roster`)
+    const table = page.locator('.cq-roster-table')
+    await expect(table).toBeVisible({ timeout: 10000 })
+    // Checkbox + Name + License # + Category + Status + Dues Status + Training +
+    // Dues Expiry + Joined = 9 columns.
+    await expect(table.locator('thead th')).toHaveCount(9)
+    await expect(
+      table.locator('a[href*="/officer/roster/"]').first(),
+    ).toBeVisible({ timeout: 10000 })
+    await expect(
+      table.getByText(/active|pending|lapsed|grace period|suspended|removed/i).first(),
     ).toBeVisible({ timeout: 10000 })
   })
 })
