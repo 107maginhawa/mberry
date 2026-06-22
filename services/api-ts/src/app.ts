@@ -44,6 +44,7 @@ import { registerDuesJobs } from '@/handlers/association:member/jobs';
 import { registerPersonJobs } from '@/handlers/person/jobs';
 import { registerMembershipJobs, registerStatusRecomputeJob } from '@/handlers/member/membership/jobs';
 import { registerSurveyJobs } from '@/handlers/surveys/jobs';
+import { registerJobPostingJobs } from '@/handlers/jobs/jobs';
 import { registerCommunicationJobs } from '@/handlers/communication/jobs/announcementSend';
 import { registerBreachJobs, registerTicketJobs, registerTrialExpiryMonitor, registerPastDueMonitor } from '@/handlers/platformadmin/jobs';
 import { registerDomainEventConsumers } from '@/core/domain-event-consumers';
@@ -654,6 +655,8 @@ export async function initializeApp(app: App, config: Config): Promise<void> {
   registerPersonJobs(jobs);
   registerMembershipJobs(jobs, app.notifs);
   registerSurveyJobs(jobs, app.notifs);
+  // BR-37: expire overdue job postings + remind posters 3 days before expiry.
+  registerJobPostingJobs(jobs, app.notifs);
   // FIX-001/002: register communication jobs — wires the announcement.published
   // fan-out subscriber AND the */5 scheduled-delivery cron. Without this call
   // no announcement ever reached a member. [SHARED DEPENDENCY: one init line]

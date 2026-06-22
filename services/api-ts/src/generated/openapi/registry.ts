@@ -160,6 +160,7 @@ import { searchJobPostings } from '../../handlers/jobs/searchJobPostings';
 import { getJobPosting } from '../../handlers/jobs/getJobPosting';
 import { updateJobPosting } from '../../handlers/jobs/updateJobPosting';
 import { deleteJobPosting } from '../../handlers/jobs/deleteJobPosting';
+import { extendJobPosting } from '../../handlers/jobs/extendJobPosting';
 import { createListing } from '../../handlers/marketplace/createListing';
 import { listListings } from '../../handlers/marketplace/listListings';
 import { updateListing } from '../../handlers/marketplace/updateListing';
@@ -655,6 +656,7 @@ export const registry = {
   getJobPosting,
   updateJobPosting,
   deleteJobPosting,
+  extendJobPosting,
 
   // Marketplace handlers
   createListing,

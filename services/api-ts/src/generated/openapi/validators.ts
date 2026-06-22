@@ -11010,6 +11010,15 @@ export type DeleteJobPostingParams = z.infer<typeof DeleteJobPostingParams>;
 
 export const DeleteJobPostingResponse = z.void();
 
+export const ExtendJobPostingParams = z.object({
+  postingId: UUIDSchema,
+});
+export type ExtendJobPostingParams = z.infer<typeof ExtendJobPostingParams>;
+
+export const ExtendJobPostingResponse = z.object({
+  data: JobBoardPostingSchema
+});
+
 export const CreateListingBody = CreateMarketplaceListingRequestSchema;
 export type CreateListingBody = z.infer<typeof CreateListingBody>;
 

@@ -182,6 +182,7 @@ export const exportMyDataOptions = makeStub('exportMyDataOptions');
 export const exportMyDataQueryKey = makeStub('exportMyDataQueryKey');
 export const exportSurveyResponsesOptions = makeStub('exportSurveyResponsesOptions');
 export const exportSurveyResponsesQueryKey = makeStub('exportSurveyResponsesQueryKey');
+export const extendJobPostingMutation = makeStub('extendJobPostingMutation');
 export const finalizeInvoiceMutation = makeStub('finalizeInvoiceMutation');
 export const fulfillOrderMutation = makeStub('fulfillOrderMutation');
 export const generateDuesInvoicesForOrgMutation = makeStub('generateDuesInvoicesForOrgMutation');
