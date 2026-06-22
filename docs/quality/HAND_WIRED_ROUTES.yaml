@@ -41,6 +41,9 @@ routes:
   # Stripe webhook (must precede auth middleware)
   - { method: POST,   path: "/webhooks/stripe",                                                reason: public-webhook,      owner: billing,             note: "Stripe webhook, must precede auth middleware" }
 
+  # Postmark bounce/complaint webhook (BR-55/56, must precede auth middleware)
+  - { method: POST,   path: "/webhooks/postmark",                                              reason: public-webhook,      owner: email,               note: "Postmark bounce/complaint webhook, shared-secret auth, must precede auth middleware" }
+
   # RFC 8058 unsubscribe (must precede /email/* auth)
   - { method: GET,    path: "/email/unsubscribe",                                              reason: middleware-ordering, owner: email,               note: "RFC 8058 unsubscribe, must precede /email/* auth" }
   - { method: POST,   path: "/email/unsubscribe",                                              reason: middleware-ordering, owner: email,               note: "RFC 8058 unsubscribe, must precede /email/* auth" }

@@ -1,3 +1,12 @@
+# CSRF preamble — fetches token + sets cookie for state-changing requests.
+# Auto-injected by scripts/audit/inject-csrf-into-hurl.ts (idempotent).
+GET {{api}}/csrf-token
+HTTP 200
+[Captures]
+csrf_token: jsonpath "$.token"
+
+
+
 # [BR-55][BR-56] Postmark bounce/complaint webhook — auto-suppression wire boundary.
 #
 # Hand-wired public endpoint (CSRF/auth-exempt) secured by a shared secret over
@@ -12,6 +21,8 @@
 
 # ── 1. Missing credentials → 401 ────────────────────────────
 POST {{api}}/webhooks/postmark
+x-csrf-token: {{csrf_token}}
+Origin: {{origin}}
 Content-Type: application/json
 {
   "RecordType": "Bounce",
@@ -23,6 +34,8 @@ HTTP 401
 
 # ── 2. Forged credentials → 401 ─────────────────────────────
 POST {{api}}/webhooks/postmark
+x-csrf-token: {{csrf_token}}
+Origin: {{origin}}
 Authorization: Basic cG9zdG1hcms6d3Jvbmc=
 Content-Type: application/json
 {
@@ -35,6 +48,8 @@ HTTP 401
 
 # ── 3. Correctly-signed hard bounce → 200 ───────────────────
 POST {{api}}/webhooks/postmark
+x-csrf-token: {{csrf_token}}
+Origin: {{origin}}
 Authorization: Basic cG9zdG1hcms6Y29udHJhY3QtdGVzdC1wb3N0bWFyay1zZWNyZXQtZG8tbm90LXVzZS1pbi1wcm9k
 Content-Type: application/json
 {
@@ -49,6 +64,8 @@ jsonpath "$.received" == true
 
 # ── 4. Correctly-signed spam complaint → 200 ────────────────
 POST {{api}}/webhooks/postmark
+x-csrf-token: {{csrf_token}}
+Origin: {{origin}}
 Authorization: Basic cG9zdG1hcms6Y29udHJhY3QtdGVzdC1wb3N0bWFyay1zZWNyZXQtZG8tbm90LXVzZS1pbi1wcm9k
 Content-Type: application/json
 {
