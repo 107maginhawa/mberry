@@ -126,7 +126,7 @@
           "redTargets": ["audit grep 'Factory N/A' + cross-check each BR against br-registry: live module -> real-PG test required"],
           "green": "Every COMPLETE/INCOMPLETE BR on a LIVE module has at least one test that exercises the real handler/repo, not a re-implemented pure function.",
           "codegraphAnchors": ["createContentScratch", "createScratch"],
-          "status": "todo"
+          "status": "done — classified all 14 BR/AC 'Factory N/A' characterization files (parallel codegraph audit). 5 were LIVE+wired with NO real-handler test → backfilled real-PG integration tests calling the REAL handler/repo: BR-40 read-side listSurveyResponses anonymity strip (the PR #18 created_by/updated_by defense-in-depth had ZERO coverage — write-side only), BR-26 enforceSessionLimit oldest-first revocation + audit fan-out, BR-22 importRosterMembers match-or-create through the real requirePosition gate, AC-M04 updateOrgProfile persistence, BR-18 createCheckIn QR verify→persist. The other 9: already-covered by existing *.integration.test.ts (ac-m02, ac-m18, br-37, ac-m15, ac-m17, ac-m16 reportAd) or genuinely-deferred greenfield (M13 feed ac-m13/br-35, M17 referral-disclosure br-38 — kept pure-fn placeholders). New tests appended to each BR's tests.backend in br-registry; pure-fn characterization files retained as supplementary spec. 14/14 new assertions green on real PG."
         },
         {
           "id": "R1-4",

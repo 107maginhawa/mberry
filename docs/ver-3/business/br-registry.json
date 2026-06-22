@@ -336,7 +336,8 @@
     "ruleClass": "p1-business",
     "tests": {
       "backend": [
-        "services/api-ts/src/handlers/member/credentials/credentials.test.ts"
+        "services/api-ts/src/handlers/member/credentials/credentials.test.ts",
+        "services/api-ts/src/handlers/association:operations/createCheckIn.integration.test.ts"
       ],
       "contract": [
         "specs/api/tests/contract/credentials-flow.hurl"
@@ -414,7 +415,8 @@
     "ruleClass": "p1-business",
     "tests": {
       "backend": [
-        "services/api-ts/src/handlers/member/membership/importRosterMembers.test.ts"
+        "services/api-ts/src/handlers/member/membership/importRosterMembers.test.ts",
+        "services/api-ts/src/handlers/member/membership/importRosterMembers.integration.test.ts"
       ],
       "contract": [
         "specs/api/tests/contract/membership-flow.hurl"
@@ -483,7 +485,8 @@
     "ruleClass": "p0-auth",
     "tests": {
       "backend": [
-        "services/api-ts/src/middleware/auth.test.ts"
+        "services/api-ts/src/middleware/auth.test.ts",
+        "services/api-ts/src/core/session-limit.integration.test.ts"
       ],
       "contract": [
         "specs/api/tests/contract/auth-signup-signin.hurl"
@@ -735,7 +738,8 @@
     "tests": {
       "backend": [
         "services/api-ts/src/handlers/communication/br-40.survey-anonymity.test.ts",
-        "services/api-ts/src/handlers/surveys/submitSurveyResponse.integration.test.ts"
+        "services/api-ts/src/handlers/surveys/submitSurveyResponse.integration.test.ts",
+        "services/api-ts/src/handlers/surveys/listSurveyResponses.integration.test.ts"
       ],
       "contract": [],
       "e2e": []
