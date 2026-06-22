@@ -590,3 +590,170 @@ describe('ElectionsRepository — 23505 double-vote backstop (B4 S4)', () => {
     expect(await repo.hasVoted(election.id, voterZ, positionP)).toBe(false);
   });
 });
+
+/**
+ * Slice 5 — Cancel cascade: withdrawAllNominees + voidVotesForNominee against
+ * real rows (BR-33), repo lines 119-161.
+ *
+ * These are the cascade SQL the fake-db stub could not run: the cancel-branch
+ * cascade (`withdrawAllNominees`) has NO wired successor (the orphan
+ * `updateElectionStatus.ts` is the only caller), so its real behavior was
+ * mock-only until now. This slice drives real rows through the three cascade
+ * methods and asserts the persisted outcomes:
+ *  - withdrawAllNominees flips ONLY non-terminal nominees to 'declined', via the
+ *    `NOT IN ('declined','elected')` filter (line 145) — terminal rows untouched.
+ *  - countNomineesByPosition counts ONLY status='nominated' per position (line 128),
+ *    the BR-33 min-candidate input.
+ *  - voidVotesForNominee is a SCOPED DELETE for one nominee (lines 152-161) — a
+ *    sibling nominee's votes survive.
+ */
+describe('ElectionsRepository — cancel cascade (B4 S5, BR-33)', () => {
+  test('withdrawAllNominees flips only non-terminal nominees to declined; terminal rows unchanged', async () => {
+    if (!H.dbReachable) return;
+    const repo = new ElectionsRepository(H.db as never);
+    const orgId = crypto.randomUUID();
+    const positionId = await seedPosition(orgId);
+
+    const election = await repo.create({
+      organizationId: orgId, title: 'Withdraw Cascade', type: 'officer',
+      status: 'votingOpen', votingMode: 'online',
+    } as never);
+
+    // addNominee always persists status='nominated'; drive the other three statuses
+    // via updateNomineeStatus so we have one nominee in each of the four states.
+    async function seedNominee(status: 'nominated' | 'accepted' | 'declined' | 'elected') {
+      const personId = await seedPerson();
+      const n = await repo.addNominee({
+        electionId: election.id, positionId, personId,
+        nominatedBy: personId, organizationId: orgId,
+      });
+      if (status !== 'nominated') await repo.updateNomineeStatus(n.id, status);
+      return n.id;
+    }
+    const nominatedId = await seedNominee('nominated');
+    const acceptedId = await seedNominee('accepted');
+    const declinedId = await seedNominee('declined');
+    const electedId = await seedNominee('elected');
+
+    // Cancel cascade: only the two non-terminal (nominated, accepted) are withdrawn.
+    const withdrawn = await repo.withdrawAllNominees(election.id);
+    expect(withdrawn).toBe(2);
+
+    // Read back the persisted statuses directly.
+    const { rows } = await H.scopedPool.query(
+      `SELECT id, status FROM "${H.schema}".election_nominee WHERE election_id = $1`,
+      [election.id],
+    );
+    const byId = new Map(rows.map((r) => [r.id as string, r.status as string]));
+    // The two non-terminal rows are now 'declined'.
+    expect(byId.get(nominatedId)).toBe('declined');
+    expect(byId.get(acceptedId)).toBe('declined');
+    // The pre-existing terminal rows are UNCHANGED (NOT IN filter binds at SQL).
+    expect(byId.get(declinedId)).toBe('declined'); // was already declined
+    expect(byId.get(electedId)).toBe('elected');   // elected survives the cascade
+
+    // Idempotent: a second call now has zero non-terminal nominees → returns 0.
+    expect(await repo.withdrawAllNominees(election.id)).toBe(0);
+  });
+
+  test('countNomineesByPosition counts only status=nominated, grouped per position', async () => {
+    if (!H.dbReachable) return;
+    const repo = new ElectionsRepository(H.db as never);
+    const orgId = crypto.randomUUID();
+    const positionP = await seedPosition(orgId);
+    const positionQ = await seedPosition(orgId);
+
+    const election = await repo.create({
+      organizationId: orgId, title: 'Count Cascade', type: 'officer',
+      status: 'nominationsOpen', votingMode: 'online',
+    } as never);
+
+    async function seedNomineeOn(positionId: string, status: 'nominated' | 'declined') {
+      const personId = await seedPerson();
+      const n = await repo.addNominee({
+        electionId: election.id, positionId, personId,
+        nominatedBy: personId, organizationId: orgId,
+      });
+      if (status !== 'nominated') await repo.updateNomineeStatus(n.id, status);
+      return n.id;
+    }
+    // positionP: 2 nominated + 1 declined → count must be 2 (declined excluded).
+    await seedNomineeOn(positionP, 'nominated');
+    await seedNomineeOn(positionP, 'nominated');
+    await seedNomineeOn(positionP, 'declined');
+    // positionQ: 1 nominated → its own row, count 1.
+    await seedNomineeOn(positionQ, 'nominated');
+
+    const counts = await repo.countNomineesByPosition(election.id);
+    // Two grouped rows, one per position.
+    expect(counts).toHaveLength(2);
+    const byPos = new Map(counts.map((c) => [c.positionId, c.count]));
+    expect(byPos.get(positionP)).toBe(2); // declined NOT counted
+    expect(byPos.get(positionQ)).toBe(1);
+    // Counts are real integers (count(*)::int cast), not strings.
+    expect(typeof byPos.get(positionP)).toBe('number');
+  });
+
+  test('voidVotesForNominee is a scoped DELETE — only the targeted nominee\'s votes removed', async () => {
+    if (!H.dbReachable) return;
+    const repo = new ElectionsRepository(H.db as never);
+    const orgId = crypto.randomUUID();
+    const positionA = await seedPosition(orgId);
+    const positionB = await seedPosition(orgId);
+
+    const election = await repo.create({
+      organizationId: orgId, title: 'Void Cascade', type: 'officer',
+      status: 'votingOpen', votingMode: 'online',
+    } as never);
+
+    const candidateA = await seedPerson();
+    const candidateB = await seedPerson();
+    // Two nominees on DIFFERENT positions so distinct voters can vote for both
+    // without tripping the per-(election,voter,position) unique index.
+    const nomineeA = await repo.addNominee({
+      electionId: election.id, positionId: positionA, personId: candidateA,
+      nominatedBy: candidateA, organizationId: orgId,
+    });
+    const nomineeB = await repo.addNominee({
+      electionId: election.id, positionId: positionB, personId: candidateB,
+      nominatedBy: candidateB, organizationId: orgId,
+    });
+
+    // 3 votes for nomineeA (positionA), 2 votes for nomineeB (positionB).
+    for (let i = 0; i < 3; i++) {
+      const voterId = await seedPerson();
+      await repo.castVote({
+        electionId: election.id, positionId: positionA, nomineeId: nomineeA.id,
+        voterId, organizationId: orgId,
+      });
+    }
+    for (let i = 0; i < 2; i++) {
+      const voterId = await seedPerson();
+      await repo.castVote({
+        electionId: election.id, positionId: positionB, nomineeId: nomineeB.id,
+        voterId, organizationId: orgId,
+      });
+    }
+
+    // Void only nomineeA's votes → returns 3 (the count deleted).
+    const voided = await repo.voidVotesForNominee(election.id, nomineeA.id);
+    expect(voided).toBe(3);
+
+    // Read back: 0 rows remain for nomineeA, but nomineeB's 2 are UNTOUCHED.
+    const remainingA = await H.scopedPool.query(
+      `SELECT count(*)::int AS n FROM "${H.schema}".election_vote
+         WHERE election_id = $1 AND nominee_id = $2`,
+      [election.id, nomineeA.id],
+    );
+    expect(remainingA.rows[0].n).toBe(0);
+    const remainingB = await H.scopedPool.query(
+      `SELECT count(*)::int AS n FROM "${H.schema}".election_vote
+         WHERE election_id = $1 AND nominee_id = $2`,
+      [election.id, nomineeB.id],
+    );
+    expect(remainingB.rows[0].n).toBe(2);
+
+    // Voiding a nominee with no votes is a no-op → returns 0.
+    expect(await repo.voidVotesForNominee(election.id, nomineeA.id)).toBe(0);
+  });
+});
