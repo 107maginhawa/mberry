@@ -18,6 +18,8 @@ import { makeCtx } from '@/test-utils/make-ctx';
 import { updateOnboardingStep } from './updateOnboardingStep';
 import { OnboardingStateRepository } from './repos/onboarding.repo';
 import { BusinessLogicError } from '@/core/errors';
+import { domainEvents } from '@/core/domain-events';
+import type { DomainEventMap } from '@/core/domain-events.registry';
 
 let H: ScratchDb;
 
@@ -29,6 +31,8 @@ const ORG_OOO_BOOT = '00000000-0000-4000-8000-0000000b0002';
 const ORG_SKIP = '00000000-0000-4000-8000-0000000b0003';
 const ORG_RESAVE = '00000000-0000-4000-8000-0000000b0004';
 const ORG_DEDUP = '00000000-0000-4000-8000-0000000b0005';
+const ORG_COMPLETE = '00000000-0000-4000-8000-0000000b0006';
+const ORG_IDEMPOTENT = '00000000-0000-4000-8000-0000000b0007';
 
 function putCtx(orgId: string, step: number) {
   return makeCtx({
@@ -177,5 +181,100 @@ describe('updateOnboardingStep — M01-004 ordering against real repo+PG', () =>
     expect(rows[0].current_step).toBe(4);
     // Array.from(new Set([3,1,3])).sort → [1,3] clean sorted+deduped in the real column.
     expect(rows[0].steps_completed).toEqual([1, 3]);
+  });
+});
+
+describe('updateOnboardingStep — final-step completion + onboarding.completed emit-once (real bus)', () => {
+  test('seed step5 stepsCompleted=[1,2,3,4] completedAt=null, save step 5 → completed_at stamped, exactly one event with {organizationId,officerId}', async () => {
+    if (!H.dbReachable) return;
+
+    const repo = new OnboardingStateRepository(H.db as never);
+    await repo.create({
+      organizationId: ORG_COMPLETE,
+      currentStep: 5,
+      stepsCompleted: [1, 2, 3, 4],
+      completedAt: null,
+      createdBy: USER_ID,
+      updatedBy: USER_ID,
+    });
+
+    // Real listener on the singleton bus — emit() awaits it (Promise.allSettled),
+    // so the capture lands synchronously before updateOnboardingStep returns.
+    const captured: Array<DomainEventMap['onboarding.completed']> = [];
+    const listener = async (payload: DomainEventMap['onboarding.completed']) => {
+      captured.push(payload);
+    };
+    domainEvents.on('onboarding.completed', listener);
+
+    try {
+      const ctx = putCtx(ORG_COMPLETE, 5);
+      const res = (await updateOnboardingStep(ctx)) as unknown as {
+        body: { saved: boolean; currentStep: number; stepsCompleted: number[] };
+      };
+
+      expect(res.body.saved).toBe(true);
+      expect(res.body.currentStep).toBe(5);
+      expect(res.body.stepsCompleted).toEqual([1, 2, 3, 4, 5]);
+
+      const rows = await rowFor(ORG_COMPLETE);
+      expect(rows).toHaveLength(1);
+      expect(rows[0].current_step).toBe(5);
+      expect(rows[0].steps_completed).toEqual([1, 2, 3, 4, 5]);
+      // completed_at stamped on the wasComplete→nowComplete transition.
+      expect(rows[0].completed_at).not.toBeNull();
+
+      // Exactly one event, payload shape matches the registry type at
+      // domain-events.registry.ts:473 ({organizationId, officerId}).
+      expect(captured).toHaveLength(1);
+      expect(captured[0]).toEqual({ organizationId: ORG_COMPLETE, officerId: USER_ID });
+    } finally {
+      domainEvents.off('onboarding.completed', listener);
+    }
+  });
+
+  test('re-save step 5 on an already-completed row → completed_at UNCHANGED + zero new emits (nowComplete && !wasComplete guard)', async () => {
+    if (!H.dbReachable) return;
+
+    const repo = new OnboardingStateRepository(H.db as never);
+    const fixedCompletedAt = new Date('2026-01-01T00:00:00.000Z');
+    await repo.create({
+      organizationId: ORG_IDEMPOTENT,
+      currentStep: 5,
+      stepsCompleted: [1, 2, 3, 4, 5],
+      completedAt: fixedCompletedAt,
+      createdBy: USER_ID,
+      updatedBy: USER_ID,
+    });
+
+    // Capture completed_at BEFORE re-save so we can prove it does not move.
+    const before = await rowFor(ORG_IDEMPOTENT);
+    expect(before).toHaveLength(1);
+    const beforeCompletedAt = new Date(before[0].completed_at).toISOString();
+    expect(beforeCompletedAt).toBe(fixedCompletedAt.toISOString());
+
+    const captured: Array<DomainEventMap['onboarding.completed']> = [];
+    const listener = async (payload: DomainEventMap['onboarding.completed']) => {
+      captured.push(payload);
+    };
+    domainEvents.on('onboarding.completed', listener);
+
+    try {
+      const ctx = putCtx(ORG_IDEMPOTENT, 5);
+      await updateOnboardingStep(ctx);
+
+      // No new emit: row was already complete (wasComplete=true) so the
+      // nowComplete && !wasComplete guard (updateOnboardingStep.ts:86) is false.
+      expect(captured).toHaveLength(0);
+
+      // completed_at unchanged — completedAt ?? new Date() keeps the original
+      // (updateOnboardingStep.ts:74); read-back confirms the timestamp did not move.
+      const after = await rowFor(ORG_IDEMPOTENT);
+      expect(after).toHaveLength(1);
+      expect(new Date(after[0].completed_at).toISOString()).toBe(fixedCompletedAt.toISOString());
+      expect(after[0].current_step).toBe(5);
+      expect(after[0].steps_completed).toEqual([1, 2, 3, 4, 5]);
+    } finally {
+      domainEvents.off('onboarding.completed', listener);
+    }
   });
 });
