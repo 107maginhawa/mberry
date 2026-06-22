@@ -322,6 +322,156 @@ describe('JobPostingRepository constraint/enum/default proofs (real-PG)', () => 
   });
 });
 
+/**
+ * Slice S3 — BR-37 job-posting expiry: characterize `listExpired` / `extendPosting`
+ * against real PG, and DOCUMENT the missing production caller.
+ *
+ * KNOWN GAP (BR-37 deferred — Wave-3 decision #2): `listExpired` (repo:98) and
+ * `extendPosting` (repo:111) have NO production caller — there is no `registerCron`
+ * / `registerInterval` for job-posting expiry anywhere (the 14 registered crons are
+ * booking/person/member/notifs/audit/surveys/communication/email/platformadmin —
+ * none for jobs), and no `handlers/jobs/jobs/` cron dir exists. BR-37 in
+ * `docs/ver-3/business/br-registry.json` is `p2-deferred` ("M15 not yet
+ * implemented") and its `tests.backend` points at a non-existent path (registry
+ * drift). NET EFFECT: a posting whose `expires_at` passes is NEVER transitioned
+ * `active → expired`; it stays `status='active'` forever and keeps surfacing in
+ * `list` / `searchJobPostings`. This block characterizes the repo primitives that
+ * a future cron WOULD use — it intentionally does NOT build the cron (deferred
+ * product work, mirrors the elections updateElectionStatus orphan handling). The
+ * apply path is partially guarded (`createJobApplication.ts:29` rejects an apply
+ * to an expired posting), but the listing leak + the `expired` status itself are
+ * never reached in prod.
+ */
+describe('BR-37 expiry primitives (real-PG, characterization — no prod cron exists)', () => {
+  const BR37_ORG = crypto.randomUUID(); // isolated org so the filtering asserts are exact
+
+  test('listExpired returns ONLY active+past postings (not future-active, not draft)', async () => {
+    if (!H.dbReachable) return;
+    const now = new Date();
+    const past = new Date(now.getTime() - 86400000); // 1 day ago
+    const future = new Date(now.getTime() + 86400000); // 1 day ahead
+
+    const pastActive = await postingRepo.create(
+      basePosting({
+        organizationId: BR37_ORG,
+        title: 'Past active (eligible)',
+        status: 'active',
+        postedAt: new Date('2020-01-01'),
+        expiresAt: past,
+      }),
+    );
+    const futureActive = await postingRepo.create(
+      basePosting({
+        organizationId: BR37_ORG,
+        title: 'Future active (not eligible)',
+        status: 'active',
+        postedAt: new Date('2026-01-01'),
+        expiresAt: future,
+      }),
+    );
+    const draftPast = await postingRepo.create(
+      basePosting({
+        organizationId: BR37_ORG,
+        title: 'Draft past-expiry (not eligible)',
+        status: 'draft',
+        postedAt: new Date('2020-01-01'),
+        expiresAt: past,
+      }),
+    );
+
+    const expired = await postingRepo.listExpired(now);
+    const expiredIds = expired.map((p) => p.id);
+
+    // exact membership: the past-active row is the only one of our three that qualifies.
+    expect(expiredIds).toContain(pastActive.id);
+    expect(expiredIds).not.toContain(futureActive.id); // expires_at in future
+    expect(expiredIds).not.toContain(draftPast.id); // status !== 'active'
+    // every returned row honours the WHERE (status='active' AND expires_at<=now)
+    expect(expired.every((p) => p.status === 'active')).toBe(true);
+    expect(expired.every((p) => p.expiresAt !== null && new Date(p.expiresAt).getTime() <= now.getTime())).toBe(true);
+  });
+
+  test('listExpired does NOT mutate status — the past-active posting is still active after listing (proves no auto-expire)', async () => {
+    if (!H.dbReachable) return;
+    const past = new Date(Date.now() - 86400000);
+    const created = await postingRepo.create(
+      basePosting({
+        organizationId: BR37_ORG,
+        title: 'Stays active after listExpired',
+        status: 'active',
+        postedAt: new Date('2020-01-01'),
+        expiresAt: past,
+      }),
+    );
+    await postingRepo.listExpired(new Date());
+    // KNOWN GAP: listExpired is read-only; with no cron consuming it, the row keeps surfacing as 'active'.
+    const { rows } = await H.scopedPool.query(
+      `SELECT status FROM "${H.schema}".job_posting WHERE id = $1`,
+      [created.id],
+    );
+    expect(rows[0]?.status).toBe('active');
+    // and it still appears in the org listing (the surfacing-stale-postings leak the missing cron would fix).
+    const listed = await postingRepo.list({ organizationId: BR37_ORG, status: 'active' });
+    expect(listed.data.some((p) => p.id === created.id)).toBe(true);
+  });
+
+  test('extendPosting sets a new expires_at (read-back) and reactivates the row', async () => {
+    if (!H.dbReachable) return;
+    const expiresAt = new Date('2026-06-01T00:00:00.000Z');
+    const created = await postingRepo.create(
+      basePosting({
+        organizationId: BR37_ORG,
+        title: 'Extend readback',
+        status: 'expired',
+        postedAt: new Date('2026-01-01'),
+        expiresAt,
+      }),
+    );
+    const extended = await postingRepo.extendPosting(created.id, 14);
+    expect(extended.status).toBe('active');
+
+    const expectedNew = new Date(expiresAt);
+    expectedNew.setDate(expectedNew.getDate() + 14);
+    // read the persisted column, not just the returned object
+    const { rows } = await H.scopedPool.query(
+      `SELECT status, expires_at FROM "${H.schema}".job_posting WHERE id = $1`,
+      [created.id],
+    );
+    expect(rows[0]?.status).toBe('active');
+    expect(new Date(rows[0]?.expires_at).toISOString()).toBe(expectedNew.toISOString());
+  });
+
+  test('extendPosting default param adds 30 days from the current expiry', async () => {
+    if (!H.dbReachable) return;
+    const expiresAt = new Date('2026-06-01T00:00:00.000Z');
+    const created = await postingRepo.create(
+      basePosting({
+        organizationId: BR37_ORG,
+        title: 'Extend default 30',
+        status: 'expired',
+        postedAt: new Date('2026-01-01'),
+        expiresAt,
+      }),
+    );
+    const extended = await postingRepo.extendPosting(created.id); // no days arg → DEFAULT_EXPIRY_DAYS (30)
+    const diffDays = Math.round(
+      (new Date(extended.expiresAt!).getTime() - expiresAt.getTime()) / 86400000,
+    );
+    expect(diffDays).toBe(30);
+  });
+
+  test('extendPosting on a random uuid throws NotFoundError', async () => {
+    if (!H.dbReachable) return;
+    let err: unknown;
+    try {
+      await postingRepo.extendPosting(crypto.randomUUID());
+    } catch (e) {
+      err = e;
+    }
+    expect(err).toBeInstanceOf(NotFoundError);
+  });
+});
+
 describe('JobApplicationRepository constraint/default proofs (real-PG)', () => {
   test('posting_id NOT NULL → 23502 on create without postingId', async () => {
     if (!H.dbReachable) return;
