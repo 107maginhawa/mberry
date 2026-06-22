@@ -453,6 +453,80 @@ describe('ChatMessageRepository (real DB)', () => {
   });
 });
 
+// ─── createTextMessage persist half (the WS send chokepoint) ──────────────────
+//
+// REST sendChatMessage.ts:122 and the WS-server path both funnel through
+// messageRepo.createTextMessage. The existing ChatMessageRepository tests above
+// assert the RETURNED object; these assert the actually-PERSISTED row read back
+// raw from Postgres — proving the historic WS NULL-org leak is closed by
+// resolveOrgId (chatMessage.repo.ts:73-86) and that the live NOT NULL invariant
+// on chat_message.organization_id holds for the no-org WS path.
+//
+// SCOPE BOUNDARY: the WS transport/broadcast half (wsService.publishToChannel,
+// sendChatMessage.ts:294) is a best-effort socket fan-out (try/catch, never fails
+// the send) and is OUT OF SCOPE here — it belongs to a ws-integration harness, not
+// this repo-persist slice.
+describe('createTextMessage persist (WS chokepoint)', () => {
+  const SENDER = '00000000-0000-4000-8000-000000000901';
+
+  test('no-org WS path persists a row with org DERIVED from the room (NOT NULL invariant)', async () => {
+    if (!H.dbReachable) return;
+    const repo = new ChatMessageRepository(H.db as any, noopLogger);
+    const roomId = await insertRoom({ organizationId: ORG_B });
+
+    // WS chokepoint: caller passes NO org — resolveOrgId derives it from the room.
+    const msg = await repo.createTextMessage(roomId, SENDER, 'hi');
+
+    // Read the PERSISTED row back raw — not the returned object.
+    const { rows } = await H.scopedPool.query(
+      `SELECT organization_id, chat_room_id, sender_id, message_type, message
+         FROM chat_message WHERE id = $1`,
+      [msg.id],
+    );
+    expect(rows).toHaveLength(1);
+    const row = rows[0];
+    expect(row.organization_id).toBe(ORG_B); // derived from the ORG_B room
+    expect(row.organization_id).not.toBeNull(); // the live SET NOT NULL invariant
+    expect(row.chat_room_id).toBe(roomId);
+    expect(row.sender_id).toBe(SENDER);
+    expect(row.message_type).toBe('text');
+    expect(row.message).toBe('hi');
+  });
+
+  test('explicit-org short-circuit: caller org wins over the room org (no room lookup)', async () => {
+    if (!H.dbReachable) return;
+    const repo = new ChatMessageRepository(H.db as any, noopLogger);
+    // Room belongs to ORG_B, but the caller supplies ORG_A explicitly.
+    const roomId = await insertRoom({ organizationId: ORG_B });
+
+    const msg = await repo.createTextMessage(roomId, SENDER, 'hi', ORG_A);
+
+    const { rows } = await H.scopedPool.query(
+      `SELECT organization_id, chat_room_id FROM chat_message WHERE id = $1`,
+      [msg.id],
+    );
+    expect(rows[0].organization_id).toBe(ORG_A); // caller wins, not the room's ORG_B
+    expect(rows[0].chat_room_id).toBe(roomId);
+  });
+
+  test('missing-room (no org) → NotFoundError and NO chat_message row is written', async () => {
+    if (!H.dbReachable) return;
+    const repo = new ChatMessageRepository(H.db as any, noopLogger);
+    const absentRoom = '00000000-0000-4000-8000-0000000009fe';
+
+    await expect(repo.createTextMessage(absentRoom, SENDER, 'hi')).rejects.toBeInstanceOf(
+      NotFoundError,
+    );
+
+    // The org could not be resolved → the insert must never have run.
+    const { rows } = await H.scopedPool.query(
+      `SELECT count(*)::int AS n FROM chat_message WHERE chat_room_id = $1`,
+      [absentRoom],
+    );
+    expect(rows[0].n).toBe(0);
+  });
+});
+
 // ─── ChatRoomRepository ───────────────────────────────────────────────────
 
 describe('ChatRoomRepository (real DB)', () => {
