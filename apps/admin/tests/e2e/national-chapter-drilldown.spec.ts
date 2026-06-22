@@ -59,8 +59,9 @@ test.describe('WF-085: national dashboard chapter drill-down', () => {
     // Drive the UI: open the dashboard, pick the association + month, click the row.
     await page.goto(`${ADMIN_BASE}/national-dashboard`)
 
-    // Select association.
-    await page.getByText('Select association').click()
+    // Select association (shadcn/Radix Select = button[role="combobox"]; the
+    // association trigger is the first combobox, the month picker the last).
+    await page.getByRole('combobox').first().click()
     await page.getByRole('option', { name: assoc.name }).click()
 
     // Select the probed month (the month picker lists YYYY-MM values verbatim).
@@ -77,17 +78,28 @@ test.describe('WF-085: national dashboard chapter drill-down', () => {
     // Detail route is loaded.
     await expect(page).toHaveURL(new RegExp(`/national-dashboard/chapters/${chapter.orgId}`))
 
-    // Real data — the chapter name heading AND the real Members metric value.
-    await expect(page.getByRole('heading', { name: chapterName })).toBeVisible()
-    const expectedMembers = Number(chapter.totalMembers).toLocaleString()
-    await expect(page.getByText(expectedMembers, { exact: true }).first()).toBeVisible()
+    // Assert against what getNationalChapterDetail ACTUALLY returns (the detail
+    // endpoint resolves org names + suppression independently of the dashboard
+    // list, so don't assume the row's name/values carry over verbatim).
+    const detRes = await req.get(
+      `${API_URL}/admin/national/chapters/${chapter.orgId}?associationId=${assoc.id}&snapshotMonth=${month}`,
+      { headers: hdr }
+    )
+    expect(detRes.status(), 'platform admin can read the chapter detail').toBe(200)
+    const detail = ((await detRes.json()) as any)?.data ?? {}
 
-    // Suppression contract: a small chapter (<5 members) must show the privacy
-    // notice instead of zeroed tiles. If the seeded row is small, assert it.
-    if (Number(chapter.totalMembers) < 5) {
-      await expect(
-        page.getByText(/hidden to protect member privacy/i)
-      ).toBeVisible()
+    // Detail shell rendered (breadcrumb back to the dashboard) — name-independent.
+    await expect(page.getByRole('link', { name: 'National Dashboard' }).first()).toBeVisible()
+    // Resolved org name heads the page (organizationName, or 'Chapter' when null).
+    await expect(page.getByText(detail.organizationName ?? 'Chapter').first()).toBeVisible()
+
+    if (detail.isSuppressed) {
+      // Small chapter (<5 members, M14-R2): privacy notice, NOT zeroed metric tiles.
+      await expect(page.getByText(/hidden to protect member privacy/i)).toBeVisible()
+    } else {
+      // Real Members metric value rendered from the detail response.
+      const expectedMembers = Number(detail.totalMembers).toLocaleString()
+      await expect(page.getByText(expectedMembers, { exact: true }).first()).toBeVisible()
     }
   })
 })
