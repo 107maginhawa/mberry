@@ -48795,6 +48795,45 @@ export type GetScheduleExceptionResponses = {
 
 export type GetScheduleExceptionResponse = GetScheduleExceptionResponses[keyof GetScheduleExceptionResponses];
 
+export type RegenerateBookingEventSlotsData = {
+    body?: never;
+    path: {
+        event: Uuid;
+    };
+    query?: never;
+    url: '/booking/events/{event}/regenerate-slots';
+};
+
+export type RegenerateBookingEventSlotsErrors = {
+    /**
+     * Validation error response
+     */
+    400: ValidationError;
+    /**
+     * Unauthorized access response
+     */
+    401: AuthenticationError;
+    /**
+     * Forbidden access response
+     */
+    403: AuthorizationError;
+    /**
+     * Resource not found response
+     */
+    404: NotFoundError;
+};
+
+export type RegenerateBookingEventSlotsError = RegenerateBookingEventSlotsErrors[keyof RegenerateBookingEventSlotsErrors];
+
+export type RegenerateBookingEventSlotsResponses = {
+    /**
+     * Success response with data
+     */
+    200: BookingEvent;
+};
+
+export type RegenerateBookingEventSlotsResponse = RegenerateBookingEventSlotsResponses[keyof RegenerateBookingEventSlotsResponses];
+
 export type ListEventSlotsData = {
     body?: never;
     path: {
