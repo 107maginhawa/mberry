@@ -7,7 +7,8 @@ test.use({ storageState: authStateFile('officer') })
 const ORG_ID = 'ed8e3a96-8126-4341-be42-e6eb7940c562'
 
 // Backend coverage: 9 unit tests in br-38.marketplace-disclosure.test.ts
-// E2E stubs below define user-facing scenarios for when module M17 is built.
+// DEFERRED to v2.0 — module M17 (Marketplace) is not built. These are
+// intentional `.skip` placeholders (NOT pending). See docs/ver-3/remediation (BR-38).
 
 test.describe('BR-38: Marketplace Referral Disclosure', () => {
 test('unauthenticated request returns 401', async ({ page }) => {
