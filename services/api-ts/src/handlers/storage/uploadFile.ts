@@ -101,7 +101,15 @@ export async function uploadFile(
 
   // Multi-tenant scoping (P0-7)
   const organizationId = ctx.get('organizationId') as string;
-  
+
+  // P0-7 / migration 0081: stored_file.organization_id is NOT NULL — every file
+  // must be tenant-scoped. The /storage/* route uses orgContextOptionalMiddleware,
+  // so a non-member (or a request without x-org-id) reaches here with no org; fail
+  // fast with a clean 400 rather than a DB 23502 not-null violation (a 500).
+  if (!organizationId) {
+    throw new ValidationError('Organization context is required to upload a file');
+  }
+
   // Create database record with "uploading" status
   let fileCreated = false;
   

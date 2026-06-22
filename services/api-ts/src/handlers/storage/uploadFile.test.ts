@@ -43,10 +43,15 @@ function makeCtx(opts: {
   user?: ReturnType<typeof makeUser> | null;
   storage?: any;
   logger?: any;
+  organizationId?: string | null;
 }) {
   const body = opts.body ?? makeBody();
   const user = opts.user !== undefined ? opts.user : makeUser();
   const logger = opts.logger ?? { debug: () => {}, info: () => {}, error: () => {} };
+  // Storage uploads are tenant-scoped (P0-7 / migration 0081). Default to a real
+  // org so the happy-path tests reach the repo; pass `null` to exercise the
+  // missing-org guard.
+  const organizationId = opts.organizationId !== undefined ? opts.organizationId : 'org-1';
 
   const defaultStorage = {
     generateUploadUrl: mock(async () => 'https://s3.example.com/upload/presigned'),
@@ -62,6 +67,7 @@ function makeCtx(opts: {
         logger,
         database: {},
         user,
+        organizationId,
       };
       return store[key];
     },
@@ -150,6 +156,16 @@ describe('[BR-31] uploadFile', () => {
     const ctx = makeCtx({ user: null });
     // user?.id is undefined which is falsy → ValidationError
     await expect(uploadFile(ctx)).rejects.toBeInstanceOf(ValidationError);
+  });
+
+  test('throws ValidationError (no tenant-less upload) when org context is missing', async () => {
+    // P0-7 / migration 0081: a non-member (or a request without x-org-id) reaches
+    // the handler with no organizationId. The guard fails fast with a 400 instead
+    // of a DB 23502 not-null violation, and NO row is ever attempted.
+    const { createOne } = patchRepo();
+    const ctx = makeCtx({ organizationId: null });
+    await expect(uploadFile(ctx)).rejects.toBeInstanceOf(ValidationError);
+    expect(createOne).not.toHaveBeenCalled();
   });
 
   test('deletes DB record and re-throws when storage.generateUploadUrl fails', async () => {
