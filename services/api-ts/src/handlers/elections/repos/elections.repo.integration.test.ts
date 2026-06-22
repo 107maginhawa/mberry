@@ -349,3 +349,107 @@ describe('ElectionsRepository — secret-ballot projection (B4 S2, WF-077)', () 
     expect((onlyQ[0] as { positionId: string }).positionId).toBe(positionQ);
   });
 });
+
+/**
+ * Slice 3 — Vote tally GROUP BY + distinct voter count against real aggregation,
+ * repo lines 105-115.
+ *
+ * The fake-db stub returned whatever scripted counts the test handed it, so the
+ * real SQL was never exercised: `getVoteTallies` (groupBy(positionId, nomineeId)
+ * + count(*)::int) and `getVoterCount` (count(DISTINCT voter_id)::int with the
+ * `?? 0` guard). This slice drives 8 real ballots into the scratch schema and
+ * asserts the aggregated INTEGERS Postgres computes — proving the GROUP BY bins
+ * by (position, nominee) and that DISTINCT actually dedups a voter who votes in
+ * two positions, plus the empty-election guards.
+ */
+const EMPTY_ELECTION_UUID = '00000000-0000-4000-8000-0000000000ee';
+
+describe('ElectionsRepository — vote tallies + voter count (B4 S3)', () => {
+  test('getVoteTallies groups by (position,nominee) with real count(*)::int; getVoterCount is count(DISTINCT voter_id)', async () => {
+    if (!H.dbReachable) return;
+    const repo = new ElectionsRepository(H.db as never);
+    const orgId = crypto.randomUUID();
+    const positionId = await seedPosition(orgId);
+
+    const election = await repo.create({
+      organizationId: orgId, title: 'Tally Election', type: 'officer',
+      status: 'votingOpen', votingMode: 'online',
+    } as never);
+
+    const candidateA = await seedPerson();
+    const candidateB = await seedPerson();
+    const nomineeA = await repo.addNominee({
+      electionId: election.id, positionId, personId: candidateA,
+      nominatedBy: candidateA, organizationId: orgId,
+    });
+    const nomineeB = await repo.addNominee({
+      electionId: election.id, positionId, personId: candidateB,
+      nominatedBy: candidateB, organizationId: orgId,
+    });
+
+    // 5 votes for A + 3 votes for B across 8 DISTINCT seeded voters.
+    const allVoters: string[] = [];
+    for (let i = 0; i < 5; i++) {
+      const voterId = await seedPerson();
+      allVoters.push(voterId);
+      await repo.castVote({
+        electionId: election.id, positionId, nomineeId: nomineeA.id, voterId, organizationId: orgId,
+      });
+    }
+    for (let i = 0; i < 3; i++) {
+      const voterId = await seedPerson();
+      allVoters.push(voterId);
+      await repo.castVote({
+        electionId: election.id, positionId, nomineeId: nomineeB.id, voterId, organizationId: orgId,
+      });
+    }
+
+    // Tallies: exactly 2 grouped rows, with the real aggregated integers.
+    const tallies = await repo.getVoteTallies(election.id);
+    expect(tallies).toHaveLength(2);
+    const tallyA = tallies.find((t) => t.nomineeId === nomineeA.id);
+    const tallyB = tallies.find((t) => t.nomineeId === nomineeB.id);
+    expect(tallyA?.count).toBe(5);
+    expect(tallyB?.count).toBe(3);
+    // count is a real integer, not a string (count(*)::int cast binds).
+    expect(typeof tallyA?.count).toBe('number');
+    expect(tallyA?.positionId).toBe(positionId);
+    expect(tallyB?.positionId).toBe(positionId);
+
+    // 8 distinct voters.
+    expect(await repo.getVoterCount(election.id)).toBe(8);
+
+    // A SECOND vote by an ALREADY-counted voter, for a DIFFERENT position — allowed
+    // (election_vote_unique is per (election, voter, position)). DISTINCT must dedup
+    // the voter so getVoterCount STAYS 8, while the tally row set grows by one.
+    const positionTwo = await seedPosition(orgId);
+    const nomineeC = await repo.addNominee({
+      electionId: election.id, positionId: positionTwo, personId: candidateA,
+      nominatedBy: candidateA, organizationId: orgId,
+    });
+    await repo.castVote({
+      electionId: election.id, positionId: positionTwo, nomineeId: nomineeC.id,
+      voterId: allVoters[0]!, organizationId: orgId,
+    });
+
+    // Still 8 — count(DISTINCT voter_id) dedups the repeat voter.
+    expect(await repo.getVoterCount(election.id)).toBe(8);
+    // But the tally row set grew: the new (positionTwo, nomineeC) bin appears.
+    const talliesAfter = await repo.getVoteTallies(election.id);
+    expect(talliesAfter).toHaveLength(3);
+    const newBin = talliesAfter.find((t) => t.nomineeId === nomineeC.id);
+    expect(newBin?.count).toBe(1);
+    expect(newBin?.positionId).toBe(positionTwo);
+  });
+
+  test('empty election: getVoteTallies returns []; getVoterCount returns 0 (?? 0 guard)', async () => {
+    if (!H.dbReachable) return;
+    const repo = new ElectionsRepository(H.db as never);
+
+    const tallies = await repo.getVoteTallies(EMPTY_ELECTION_UUID);
+    expect(tallies).toEqual([]);
+
+    const count = await repo.getVoterCount(EMPTY_ELECTION_UUID);
+    expect(count).toBe(0);
+  });
+});
