@@ -696,20 +696,18 @@
     "annotations": "Wave-3 (2026-06-22): repointed from a non-existent events/ path to the real jobs repo integration suite. BR remains deferred/characterize-only \u2014 the expiry cron was deliberately NOT built (out of test-gap scope), mirroring the elections updateElectionStatus orphan precedent."
   },
   "BR-38": {
-    "rule": "Marketplace Vendor Verification (admin verify gate)",
+    "rule": "Marketplace Referral Disclosure",
     "phase": 3,
     "module": "M17",
-    "ruleClass": "p1-business",
+    "ruleClass": "p2-deferred",
     "tests": {
       "backend": [
-        "services/api-ts/src/handlers/marketplace/verifyVendor.test.ts",
-        "services/api-ts/src/handlers/marketplace/repos/vendor.repo.integration.test.ts",
-        "services/api-ts/src/handlers/marketplace/marketplace-org-isolation.integration.test.ts"
+        "services/api-ts/src/handlers/billing/br-38.marketplace-disclosure.test.ts"
       ],
       "contract": [],
       "e2e": []
     },
-    "annotations": "Wave-3 (2026-06-22): flipped from p2-deferred to REAL. Module M17 marketplace is implemented \u2014 vendor verify FSM gate (pending->verified, ConflictError on already-verified) is unit-tested in verifyVendor.test.ts (BR-38), and vendor create/default-status/org-scoping isolation is proven against real PG in vendor.repo.integration.test.ts + marketplace-org-isolation.integration.test.ts. The original 'Referral Disclosure' label + billing/br-38.marketplace-disclosure.test.ts path were a deferred placeholder; the implemented BR-38 contract is the admin vendor-verification gate."
+    "deferredReason": "Module M17 (Marketplace) not yet implemented \u2014 deferred to milestone v2.0"
   },
   "BR-39": {
     "rule": "Committee Dissolution",
