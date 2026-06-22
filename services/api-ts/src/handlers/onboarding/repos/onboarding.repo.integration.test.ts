@@ -15,6 +15,7 @@ import { describe, test, expect, beforeAll, afterAll } from 'bun:test';
 import { createScratch } from '@/test-utils/pg-scratch';
 import type { ScratchDb } from '@/test-utils/pg-scratch';
 import { OnboardingStateRepository } from './onboarding.repo';
+import { onboardingStates } from './onboarding.schema';
 
 const MISSING_ORG_ID = crypto.randomUUID();
 
@@ -129,5 +130,81 @@ describe('OnboardingStateRepository (real-PG, scratch schema)', () => {
     if (!H.dbReachable) return;
     const result = await repo.update(MISSING_ORG_ID, { currentStep: 2 });
     expect(result).toBeUndefined();
+  });
+});
+
+/**
+ * W3 onboarding S2 — per-org singleton invariant proofs against the LIVE
+ * constraints copied by `LIKE … INCLUDING ALL`:
+ *   - UNIQUE onboarding_state_organization_id_unique → raw SQLSTATE 23505
+ *   - organization_id NOT NULL → raw SQLSTATE 23502
+ *   - positive: two distinct orgs each own a separate row (no false collision)
+ * Asserts the raw Postgres error codes, not a stubbed throw.
+ */
+describe('OnboardingStateRepository — per-org UNIQUE + org_id NOT NULL (real SQLSTATE)', () => {
+  test('second create for the same org raises 23505 from onboarding_state_organization_id_unique', async () => {
+    if (!H.dbReachable) return;
+    const orgId = crypto.randomUUID();
+
+    const first = await repo.create({ organizationId: orgId, currentStep: 1, stepsCompleted: [1] });
+    expect(first.organizationId).toBe(orgId);
+
+    let code: string | undefined;
+    let constraint: string | undefined;
+    try {
+      // Different surrogate id, SAME organization_id — the unique constraint must reject it.
+      await repo.create({ organizationId: orgId, currentStep: 1, stepsCompleted: [1] });
+    } catch (e) {
+      // drizzle wraps the pg driver error in `.cause`; prefer it.
+      const pg = (e as { cause?: { code?: string; constraint?: string } }).cause ?? e;
+      code = (pg as { code?: string }).code;
+      constraint = (pg as { constraint?: string }).constraint;
+    }
+    expect(code).toBe('23505');
+    expect(constraint).toBe('onboarding_state_organization_id_key');
+
+    // The original singleton row is untouched — still exactly one row for the org.
+    const { rows } = await H.scopedPool.query(
+      `SELECT id FROM "${H.schema}".onboarding_state WHERE organization_id = $1`,
+      [orgId],
+    );
+    expect(rows).toHaveLength(1);
+    expect(rows[0].id).toBe(first.id);
+  });
+
+  test('insert omitting organization_id raises 23502 (live NOT NULL)', async () => {
+    if (!H.dbReachable) return;
+
+    let code: string | undefined;
+    let column: string | undefined;
+    try {
+      // Omit organization_id entirely — the live NOT NULL must reject it (org_id has no default).
+      await H.db.insert(onboardingStates).values({} as never);
+    } catch (e) {
+      // drizzle wraps the pg driver error in `.cause`; prefer it.
+      const pg = (e as { cause?: { code?: string; column?: string } }).cause ?? e;
+      code = (pg as { code?: string }).code;
+      column = (pg as { column?: string }).column;
+    }
+    expect(code).toBe('23502');
+    expect(column).toBe('organization_id');
+  });
+
+  test('two different orgs each get their own state row — no false collision', async () => {
+    if (!H.dbReachable) return;
+    const orgA = crypto.randomUUID();
+    const orgB = crypto.randomUUID();
+
+    const a = await repo.create({ organizationId: orgA, currentStep: 1, stepsCompleted: [1] });
+    const b = await repo.create({ organizationId: orgB, currentStep: 1, stepsCompleted: [1] });
+    expect(a.id).not.toBe(b.id);
+
+    const hitA = await repo.findByOrg(orgA);
+    const hitB = await repo.findByOrg(orgB);
+    expect(hitA?.id).toBe(a.id);
+    expect(hitB?.id).toBe(b.id);
+    expect(hitA?.id).not.toBe(hitB?.id);
+    expect(hitA?.organizationId).toBe(orgA);
+    expect(hitB?.organizationId).toBe(orgB);
   });
 });
