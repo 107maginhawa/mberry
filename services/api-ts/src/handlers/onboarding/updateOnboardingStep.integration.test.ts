@@ -19,7 +19,8 @@ import { updateOnboardingStep } from './updateOnboardingStep';
 import { OnboardingStateRepository } from './repos/onboarding.repo';
 import { BusinessLogicError } from '@/core/errors';
 import { domainEvents } from '@/core/domain-events';
-import type { DomainEventMap } from '@/core/domain-events.registry';
+import { registerDomainEventConsumers } from '@/core/domain-event-consumers';
+import type { DomainEventMap, DomainEventName } from '@/core/domain-events.registry';
 
 let H: ScratchDb;
 
@@ -33,6 +34,7 @@ const ORG_RESAVE = '00000000-0000-4000-8000-0000000b0004';
 const ORG_DEDUP = '00000000-0000-4000-8000-0000000b0005';
 const ORG_COMPLETE = '00000000-0000-4000-8000-0000000b0006';
 const ORG_IDEMPOTENT = '00000000-0000-4000-8000-0000000b0007';
+const ORG_ORPHAN = '00000000-0000-4000-8000-0000000b0008';
 
 function putCtx(orgId: string, step: number) {
   return makeCtx({
@@ -275,6 +277,112 @@ describe('updateOnboardingStep — final-step completion + onboarding.completed 
       expect(after[0].steps_completed).toEqual([1, 2, 3, 4, 5]);
     } finally {
       domainEvents.off('onboarding.completed', listener);
+    }
+  });
+});
+
+/**
+ * Slice 6 — inter-module contract: `onboarding.completed` is emitted into the void.
+ *
+ * FINDING (not a confirmed bug — flagged as a PRODUCT DECISION): the handler emits
+ * `onboarding.completed` (updateOnboardingStep.ts:87, declared at
+ * domain-events.registry.ts:473), but the production consumer registry
+ * `registerDomainEventConsumers` (core/domain-event-consumers.ts) wires ZERO
+ * `domainEvents.on('onboarding.completed', ...)` handlers — `grep` across all of
+ * src/ confirms no consumer anywhere. So completing an org's onboarding fires an
+ * event that nothing acts on (no officer notification, no platform-admin "org
+ * activated" signal, no analytics hook).
+ *
+ * This block ASSERTS that current behavior against the REAL bus + REAL registry
+ * (the registration state, not a stub) and documents the gap, mirroring the
+ * booking B1 Slice-7 missing-consumer precedent
+ * (booking-notification-consumer.integration.test.ts) — it does NOT add a
+ * consumer. Decision owner: should completing onboarding trigger a downstream
+ * side-effect? If yes, add a `domainEvents.on('onboarding.completed', ...)` block.
+ */
+describe('updateOnboardingStep — onboarding.completed is emitted but UNCONSUMED (contract gap)', () => {
+  // Read the bus's real registered-handler list for an event. This is the genuine
+  // registration state produced by the production registry, not a tautology.
+  function registeredCount(event: DomainEventName): number {
+    const bus = domainEvents as unknown as { handlers: Map<string, unknown[]> };
+    return bus.handlers.get(event)?.length ?? 0;
+  }
+
+  beforeAll(() => {
+    if (!H.dbReachable) return;
+    // Clean slate, then wire the REAL production consumer registry against our db.
+    domainEvents.reset();
+    const membershipRepo = {
+      async findByPersonAndOrg() { return null; },
+      async updateOneById() { return undefined; },
+    } as never;
+    const noopLogger = { debug() {}, info() {}, warn() {}, error() {} } as never;
+    registerDomainEventConsumers({ membershipRepo, db: H.db as never }, noopLogger);
+  });
+
+  afterAll(() => {
+    domainEvents.reset();
+  });
+
+  test('the production registry wires ZERO consumers for onboarding.completed', () => {
+    if (!H.dbReachable) return;
+
+    // The real registration state: no handler is registered for this event.
+    expect(registeredCount('onboarding.completed')).toBe(0);
+
+    // Control: the SAME registry DID wire handlers for other events — proves the
+    // zero above is a genuine gap, not a silently-failed registration call.
+    expect(registeredCount('membership.created')).toBeGreaterThan(0);
+    expect(registeredCount('booking.confirmed')).toBeGreaterThan(0);
+  });
+
+  test('completion emits onboarding.completed once, yet no production consumer acts on it', async () => {
+    if (!H.dbReachable) return;
+
+    // Pre-condition: still zero production consumers after registry wiring.
+    expect(registeredCount('onboarding.completed')).toBe(0);
+
+    // A probe listener proves the event IS emitted (the gap is "emitted but
+    // unconsumed", not "never emitted"). It is the ONLY listener — count goes 0→1.
+    const captured: Array<DomainEventMap['onboarding.completed']> = [];
+    const probe = async (payload: DomainEventMap['onboarding.completed']) => {
+      captured.push(payload);
+    };
+    domainEvents.on('onboarding.completed', probe);
+    expect(registeredCount('onboarding.completed')).toBe(1); // only our probe
+
+    try {
+      // Drive a real completion through the handler over real PG.
+      const repo = new OnboardingStateRepository(H.db as never);
+      await repo.create({
+        organizationId: ORG_ORPHAN,
+        currentStep: 5,
+        stepsCompleted: [1, 2, 3, 4],
+        completedAt: null,
+        createdBy: USER_ID,
+        updatedBy: USER_ID,
+      });
+
+      const ctx = putCtx(ORG_ORPHAN, 5);
+      await updateOnboardingStep(ctx);
+
+      // The event fired exactly once with the registry-declared payload shape...
+      expect(captured).toHaveLength(1);
+      expect(captured[0]).toEqual({ organizationId: ORG_ORPHAN, officerId: USER_ID });
+
+      // ...but the ONLY thing that observed it was our test probe — the production
+      // registry contributed nothing. Removing the probe leaves zero consumers,
+      // i.e. in production this emit reaches no handler at all.
+      domainEvents.off('onboarding.completed', probe);
+      expect(registeredCount('onboarding.completed')).toBe(0);
+
+      // Real persisted proof the completion actually happened (so the unconsumed
+      // event is a real completion event, not a no-op): completed_at is stamped.
+      const rows = await rowFor(ORG_ORPHAN);
+      expect(rows).toHaveLength(1);
+      expect(rows[0].completed_at).not.toBeNull();
+    } finally {
+      domainEvents.off('onboarding.completed', probe);
     }
   });
 });
