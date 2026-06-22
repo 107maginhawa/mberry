@@ -18,61 +18,29 @@
  *   - deleteOneById             (hard delete)
  *   - SECURITY: cross-org isolation — ORG_B query cannot read/list a file owned by ORG_A.
  *
- * Pattern mirrors dues/repos/dues-repos.integration.test.ts: a per-run scratch
- * schema with hand-written DDL for ONLY the tables the exercised methods touch.
- * Enums modelled as `text`. Requires a reachable Postgres (DATABASE_URL or the
- * repo default); if unreachable the suite skips cleanly.
+ * SCHEMA-FAITHFUL: uses `createScratch(['stored_file'])` —
+ * `CREATE TABLE (LIKE public.stored_file INCLUDING ALL)` — so the table carries
+ * the REAL production columns, defaults, NOT NULL, and the `file_status` ENUM.
+ * The old hand-written DDL modelled `status` as `text` and hard-coded
+ * `organization_id NOT NULL` (which prod does NOT enforce — see the org_id NOT NULL
+ * test below). Migrating to the faithful copy un-masks that drift and makes the
+ * enum/default behavior real.
  */
 
 import { describe, test, expect, beforeAll, afterAll } from 'bun:test';
-import { Pool } from 'pg';
-import { drizzle } from 'drizzle-orm/node-postgres';
+import { createScratch } from '@/test-utils/pg-scratch';
+import type { ScratchDb } from '@/test-utils/pg-scratch';
 import { StorageFileRepository } from './file.repo';
 
-const DB_URL =
-  process.env['DATABASE_URL'] ?? 'postgres://postgres:password@localhost:5432/monobase';
-
-const TEST_SCHEMA = `storage_repos_${Date.now()}_${Math.floor(Math.random() * 1e6)}`;
-
-let setupPool: Pool;
-let scopedPool: Pool;
-let db: ReturnType<typeof drizzle>;
-let dbReachable = false;
+let H: ScratchDb;
 
 // uuid NOT NULL columns need real UUIDs.
 const ORG_A = '00000000-0000-4000-8000-00000000a001';
-const ORG_B = '00000000-0000-4000-8000-00000000b001';
 const OWNER_1 = '00000000-0000-4000-8000-00000000c001';
 const OWNER_2 = '00000000-0000-4000-8000-00000000c002';
 
 function freshId(): string {
   return crypto.randomUUID();
-}
-
-async function ddl(client: any) {
-  await client.query(`CREATE SCHEMA IF NOT EXISTS "${TEST_SCHEMA}"`);
-  await client.query(`SET search_path TO "${TEST_SCHEMA}", public`);
-
-  const baseCols = `
-    version integer NOT NULL DEFAULT 1,
-    created_by uuid,
-    updated_by uuid,
-    created_at timestamptz NOT NULL DEFAULT now(),
-    updated_at timestamptz NOT NULL DEFAULT now()`;
-
-  // stored_file — the only table this repo touches. status enum modelled as text.
-  await client.query(`
-    CREATE TABLE "${TEST_SCHEMA}".stored_file (
-      id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
-      organization_id uuid NOT NULL,
-      filename varchar(255) NOT NULL,
-      mime_type varchar(100) NOT NULL,
-      size bigint NOT NULL,
-      status text NOT NULL DEFAULT 'uploading',
-      owner uuid NOT NULL,
-      uploaded_at timestamptz DEFAULT now(),${baseCols}
-    )
-  `);
 }
 
 /** Insert a file via the repo (exercises createOne) and return the row. */
@@ -93,58 +61,23 @@ async function makeFile(
     mimeType: 'application/pdf',
     size: opts.size ?? 1024,
     status: opts.status ?? 'available',
-  } as any);
+  } as never);
 }
 
 beforeAll(async () => {
-  setupPool = new Pool({ connectionString: DB_URL, connectionTimeoutMillis: 3000 });
-  try {
-    const client = await setupPool.connect();
-    try {
-      await ddl(client);
-      dbReachable = true;
-    } finally {
-      client.release();
-    }
-  } catch (err) {
-    dbReachable = false;
-    // eslint-disable-next-line no-console
-    console.warn(`[storage-repos integration] Postgres unreachable, skipping: ${(err as Error).message}`);
-    return;
-  }
-
-  scopedPool = new Pool({
-    connectionString: DB_URL,
-    options: `-c search_path="${TEST_SCHEMA}",public`,
-    max: 4,
-    connectionTimeoutMillis: 15000,
-  });
-  db = drizzle(scopedPool);
+  H = await createScratch(['stored_file']);
 });
 
 afterAll(async () => {
-  if (dbReachable) {
-    try {
-      const client = await setupPool.connect();
-      try {
-        await client.query(`DROP SCHEMA IF EXISTS "${TEST_SCHEMA}" CASCADE`);
-      } finally {
-        client.release();
-      }
-    } catch {
-      /* best-effort cleanup */
-    }
-  }
-  if (scopedPool) await scopedPool.end();
-  if (setupPool) await setupPool.end();
+  await H?.teardown();
 });
 
 // ─── createOne + findOneById round-trip ───────────────────────────────────
 
 describe('StorageFileRepository create/read (real DB)', () => {
   test('createOne persists the file and returns the full row', async () => {
-    if (!dbReachable) return;
-    const repo = new StorageFileRepository(db as any);
+    if (!H.dbReachable) return;
+    const repo = new StorageFileRepository(H.db as never);
     const row = await makeFile(repo, {
       organizationId: ORG_A,
       owner: OWNER_1,
@@ -160,11 +93,24 @@ describe('StorageFileRepository create/read (real DB)', () => {
     expect(row.size).toBe(4096);
     expect(row.status).toBe('available');
     expect(row.version).toBe(1);
+
+    // Read-back against the REAL scratch table confirms the row persisted.
+    const { rows } = await H.scopedPool.query(
+      `SELECT organization_id, owner, filename, size, status, version FROM "${H.schema}".stored_file WHERE id = $1`,
+      [row.id],
+    );
+    expect(rows).toHaveLength(1);
+    expect(rows[0].organization_id).toBe(ORG_A);
+    expect(rows[0].owner).toBe(OWNER_1);
+    expect(rows[0].filename).toBe('invoice.pdf');
+    expect(Number(rows[0].size)).toBe(4096);
+    expect(rows[0].status).toBe('available');
+    expect(rows[0].version).toBe(1);
   });
 
   test('findOneById returns the row for a known id, null otherwise', async () => {
-    if (!dbReachable) return;
-    const repo = new StorageFileRepository(db as any);
+    if (!H.dbReachable) return;
+    const repo = new StorageFileRepository(H.db as never);
     const created = await makeFile(repo, { organizationId: ORG_A, owner: OWNER_1 });
 
     const found = await repo.findOneById(created.id);
@@ -174,32 +120,92 @@ describe('StorageFileRepository create/read (real DB)', () => {
   });
 });
 
+// ─── Real defaults + real enum (only possible on the faithful table) ───────
+
+describe('StorageFileRepository real schema defaults + enum (real DB)', () => {
+  test('a minimal insert (no status) yields the real column defaults', async () => {
+    if (!H.dbReachable) return;
+    // Insert ONLY the required columns — let the real defaults fill the rest.
+    // status DEFAULT 'uploading'::file_status, version DEFAULT 1, uploaded_at DEFAULT now().
+    const id = freshId();
+    await H.scopedPool.query(
+      `INSERT INTO "${H.schema}".stored_file (id, organization_id, filename, mime_type, size, owner)
+       VALUES ($1, $2, $3, $4, $5, $6)`,
+      [id, ORG_A, 'defaults.pdf', 'application/pdf', 10, OWNER_1],
+    );
+    const { rows } = await H.scopedPool.query(
+      `SELECT status, version, uploaded_at FROM "${H.schema}".stored_file WHERE id = $1`,
+      [id],
+    );
+    expect(rows[0].status).toBe('uploading');
+    expect(rows[0].version).toBe(1);
+    expect(rows[0].uploaded_at).not.toBeNull();
+  });
+
+  test('status is a real file_status enum — an out-of-domain value raises 22P02', async () => {
+    if (!H.dbReachable) return;
+    let code: string | undefined;
+    try {
+      await H.scopedPool.query(
+        `INSERT INTO "${H.schema}".stored_file (id, organization_id, filename, mime_type, size, owner, status)
+         VALUES ($1, $2, $3, $4, $5, $6, $7)`,
+        [freshId(), ORG_A, 'bogus.pdf', 'application/pdf', 10, OWNER_1, 'bogus'],
+      );
+    } catch (e) {
+      code = (e as { code?: string; cause?: { code?: string } }).code ?? (e as { cause?: { code?: string } }).cause?.code;
+    }
+    // Under the old hand-DDL `status` was text and this could NEVER fire.
+    expect(code).toBe('22P02');
+  });
+});
+
+// ─── org_id NOT NULL drift (schema says .notNull(), DB did NOT enforce it) ──
+
+describe('StorageFileRepository organization_id NOT NULL invariant (real DB)', () => {
+  test('inserting a stored_file with NULL organization_id is rejected (23502)', async () => {
+    if (!H.dbReachable) return;
+    // file.schema.ts:23 declares organizationId .notNull(). Prior to migration 0081
+    // the live column was NULLABLE and this insert SUCCEEDED (org_id IS NULL) — a
+    // multi-tenant scoping drift. Migration 0081 (mirroring 0079/0080) tightens the
+    // column to NOT NULL; the faithful LIKE-copy now reproduces that constraint and
+    // a tenant-less insert fails fast with 23502.
+    let code: string | undefined;
+    try {
+      await H.scopedPool.query(
+        `INSERT INTO "${H.schema}".stored_file (id, filename, mime_type, size, owner)
+         VALUES ($1, $2, $3, $4, $5)`,
+        [freshId(), 'no-org.pdf', 'application/pdf', 10, OWNER_1],
+      );
+    } catch (e) {
+      code = (e as { code?: string; cause?: { code?: string } }).code ?? (e as { cause?: { code?: string } }).cause?.code;
+    }
+    expect(code).toBe('23502');
+  });
+});
+
 // ─── Org-scoped read via findOne(filters) ─────────────────────────────────
 
 describe('StorageFileRepository.findOne org scoping (real DB)', () => {
   test('findOne returns a file matching the org filter', async () => {
-    if (!dbReachable) return;
-    const repo = new StorageFileRepository(db as any);
+    if (!H.dbReachable) return;
+    const repo = new StorageFileRepository(H.db as never);
     const created = await makeFile(repo, {
       organizationId: ORG_A,
       owner: OWNER_1,
       filename: 'scoped.pdf',
     });
 
-    // The base findOne uses buildWhereConditions; with no other rows guaranteed
-    // unique, assert the org filter resolves to a row in ORG_A.
     const found = await repo.findOne({ organizationId: ORG_A, owner: OWNER_1, status: 'available' });
     expect(found).toBeTruthy();
     expect(found!.organizationId).toBe(ORG_A);
 
-    // Confirm the specific file is reachable by combining owner+status into the scope.
     const list = await repo.findMany({ organizationId: ORG_A, owner: OWNER_1, status: 'available' });
     expect(list.some((f) => f.id === created.id)).toBe(true);
   });
 
   test('findOne with a non-matching status filter returns null', async () => {
-    if (!dbReachable) return;
-    const repo = new StorageFileRepository(db as any);
+    if (!H.dbReachable) return;
+    const repo = new StorageFileRepository(H.db as never);
     const uniqueOrg = freshId();
     await makeFile(repo, { organizationId: uniqueOrg, owner: OWNER_1, status: 'available' });
 
@@ -212,8 +218,8 @@ describe('StorageFileRepository.findOne org scoping (real DB)', () => {
 
 describe('StorageFileRepository cross-org isolation (real DB) [SECURITY]', () => {
   test('a file created under ORG_A is NOT returned by an ORG_B-scoped query', async () => {
-    if (!dbReachable) return;
-    const repo = new StorageFileRepository(db as any);
+    if (!H.dbReachable) return;
+    const repo = new StorageFileRepository(H.db as never);
     // Use isolated orgs so counts are deterministic regardless of other tests.
     const orgA = freshId();
     const orgB = freshId();
@@ -233,8 +239,8 @@ describe('StorageFileRepository cross-org isolation (real DB) [SECURITY]', () =>
   });
 
   test('findManyWithPagination scopes total + page to the requesting org', async () => {
-    if (!dbReachable) return;
-    const repo = new StorageFileRepository(db as any);
+    if (!H.dbReachable) return;
+    const repo = new StorageFileRepository(H.db as never);
     const orgA = freshId();
     const orgB = freshId();
     for (let i = 0; i < 3; i++) await makeFile(repo, { organizationId: orgA, owner: OWNER_1 });
@@ -251,8 +257,8 @@ describe('StorageFileRepository cross-org isolation (real DB) [SECURITY]', () =>
   });
 
   test('owner scoping isolates files between owners within the same org', async () => {
-    if (!dbReachable) return;
-    const repo = new StorageFileRepository(db as any);
+    if (!H.dbReachable) return;
+    const repo = new StorageFileRepository(H.db as never);
     const org = freshId();
     await makeFile(repo, { organizationId: org, owner: OWNER_1 });
     await makeFile(repo, { organizationId: org, owner: OWNER_1 });
@@ -269,8 +275,8 @@ describe('StorageFileRepository cross-org isolation (real DB) [SECURITY]', () =>
 
 describe('StorageFileRepository updates (real DB)', () => {
   test('updateOneStatusById flips status and bumps version', async () => {
-    if (!dbReachable) return;
-    const repo = new StorageFileRepository(db as any);
+    if (!H.dbReachable) return;
+    const repo = new StorageFileRepository(H.db as never);
     const created = await makeFile(repo, {
       organizationId: ORG_A,
       owner: OWNER_1,
@@ -282,15 +288,19 @@ describe('StorageFileRepository updates (real DB)', () => {
     expect(updated.status).toBe('available');
     expect(updated.version).toBe(2);
 
-    // Re-read confirms persistence.
-    const reread = await repo.findOneById(created.id);
-    expect(reread?.status).toBe('available');
+    // Re-read confirms persistence against the real table.
+    const { rows } = await H.scopedPool.query(
+      `SELECT status, version FROM "${H.schema}".stored_file WHERE id = $1`,
+      [created.id],
+    );
+    expect(rows[0].status).toBe('available');
+    expect(rows[0].version).toBe(2);
   });
 
   test('updateOneById throws NotFoundError for a missing id', async () => {
-    if (!dbReachable) return;
-    const repo = new StorageFileRepository(db as any);
-    await expect(repo.updateOneById(freshId(), { status: 'failed' } as any)).rejects.toThrow();
+    if (!H.dbReachable) return;
+    const repo = new StorageFileRepository(H.db as never);
+    await expect(repo.updateOneById(freshId(), { status: 'failed' } as never)).rejects.toThrow();
   });
 });
 
@@ -298,18 +308,25 @@ describe('StorageFileRepository updates (real DB)', () => {
 
 describe('StorageFileRepository delete (real DB)', () => {
   test('deleteOneById removes the row', async () => {
-    if (!dbReachable) return;
-    const repo = new StorageFileRepository(db as any);
+    if (!H.dbReachable) return;
+    const repo = new StorageFileRepository(H.db as never);
     const created = await makeFile(repo, { organizationId: ORG_A, owner: OWNER_1 });
     expect(await repo.findOneById(created.id)).toBeTruthy();
 
     await repo.deleteOneById(created.id);
     expect(await repo.findOneById(created.id)).toBeNull();
+
+    // Read-back confirms the row is gone from the real table.
+    const { rows } = await H.scopedPool.query(
+      `SELECT id FROM "${H.schema}".stored_file WHERE id = $1`,
+      [created.id],
+    );
+    expect(rows).toHaveLength(0);
   });
 
   test('deleting a file in ORG_A leaves ORG_B files untouched', async () => {
-    if (!dbReachable) return;
-    const repo = new StorageFileRepository(db as any);
+    if (!H.dbReachable) return;
+    const repo = new StorageFileRepository(H.db as never);
     const orgA = freshId();
     const orgB = freshId();
     const a = await makeFile(repo, { organizationId: orgA, owner: OWNER_1 });
