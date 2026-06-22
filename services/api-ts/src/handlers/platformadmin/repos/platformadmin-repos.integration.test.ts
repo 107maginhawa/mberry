@@ -19,10 +19,14 @@
  * Enums modelled as `text`; numeric columns as `numeric`. Requires a reachable
  * Postgres (DATABASE_URL or the repo default); skips cleanly if unreachable.
  *
- * SKIPPED (untestable without re-creating large slices of schema):
- *   - featureFlagRepoPort.findEnforcementFlags — joins organization +
- *     subscription + pricing_tier (3 extra tables, dynamic import); the
- *     enforcement-precedence logic is the gate's job, not the repo's. Out of scope.
+ * COVERED ELSEWHERE:
+ *   - featureFlagRepoPort.findEnforcementFlags — the 3-table resolution join
+ *     (organization + subscription + pricing_tier, dynamic import) is now
+ *     proven against real Postgres in the companion suite
+ *     `feature-flag-enforcement.integration.test.ts`, which uses `createScratch`
+ *     so the NOT-NULL created_by/updated_by + unique constraints on
+ *     subscription/pricing_tier come for free via `LIKE ... INCLUDING ALL`
+ *     (the reason this hand-DDL suite originally skipped it).
  *   - DashboardRepository.getAssociationAggregate's downstream handler usage —
  *     we test the aggregate math directly via seeded snapshots (the repo method
  *     reads only chapter_snapshot, so it IS covered).
