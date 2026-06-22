@@ -480,6 +480,9 @@ jobs:
       # throws (500) when neither PAYMENT_TOKEN_SECRET nor INVITE_TOKEN_SECRET is
       # set — breaks send-link + /pay/:token/validate. Matches local dev .env.
       PAYMENT_TOKEN_SECRET: contract-test-payment-secret-do-not-use-in-prod
+      # Enables the Postmark bounce/complaint webhook (BR-55/56) so the
+      # email-suppression-webhook.hurl signed cases return 200 not 503.
+      POSTMARK_WEBHOOK_SECRET: contract-test-postmark-secret-do-not-use-in-prod
       STORAGE_PROVIDER: minio
       STORAGE_ENDPOINT: http://localhost:9000
       STORAGE_BUCKET: monobase-files
