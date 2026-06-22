@@ -7,19 +7,49 @@ csrf_token: jsonpath "$.token"
 
 
 
-# Association dues gateway flow: get, create/update, test connection, delete.
-# Uses the seeded org ID directly in the path.
+# [BR-65] Association dues gateway — gateway-credential confidentiality at the wire.
+#
+# The per-org payment gateway secret is AES-256-GCM encrypted at rest and must
+# NEVER be returned to any client (encryption-at-rest + round-trip is proven on
+# real PG in gateway-config-encryption.integration.test.ts). This flow proves the
+# wire half: an association:admin can configure the gateway and read it back, and
+# neither the upsert nor the get response ever exposes the encrypted OR plaintext
+# secret — only non-secret metadata (provider, publicKey).
 
-# 0. Auth setup — sign up + create person.
-POST {{api}}/auth/sign-up/email
+# 0. Sign in as the seed officer (association:admin for {{org_id}}).
+POST {{api}}/auth/sign-in/email
 Origin: {{origin}}
 x-csrf-token: {{csrf_token}}
 Content-Type: application/json
 {
-  "email": "dues-gw-{{suffix}}@example.org",
-  "password": "Sup3rSecret!ContractTest",
-  "name": "Gateway Tester"
+  "email": "{{seed_officer_email}}",
+  "password": "{{seed_officer_password}}"
 }
 HTTP 200
-[Captures]
-person_id: jsonpath "$.user.id"
+
+
+# 1. Configure the gateway (PUT) — provide a secret; the response must omit it.
+PUT {{api}}/association/member/dues-gateway/{{org_id}}
+Origin: {{origin}}
+x-csrf-token: {{csrf_token}}
+Content-Type: application/json
+{
+  "provider": "stripe",
+  "publicKey": "pk_test_contract_visible",
+  "secretKey": "sk_test_contract_secret_never_returned"
+}
+HTTP 200
+[Asserts]
+jsonpath "$.publicKey" == "pk_test_contract_visible"
+jsonpath "$.encryptedSecret" not exists
+jsonpath "$.secretKey" not exists
+
+
+# 2. Read it back (GET) — non-secret metadata only, no secret of any kind.
+GET {{api}}/association/member/dues-gateway/{{org_id}}
+HTTP 200
+[Asserts]
+jsonpath "$.provider" == "stripe"
+jsonpath "$.publicKey" == "pk_test_contract_visible"
+jsonpath "$.encryptedSecret" not exists
+jsonpath "$.secretKey" not exists

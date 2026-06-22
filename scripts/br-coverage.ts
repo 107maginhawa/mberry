@@ -98,7 +98,10 @@ const KNOWN_INCOMPLETE: Set<string> = new Set([
   // R2-2 (2026-06-23): BR-62 REMOVED — Stripe webhook signature rejection is
   // now contract-tested (billing-webhook-signature.hurl), so the p0-security
   // rule is COMPLETE.
-  "BR-60", "BR-61", "BR-63", "BR-64", "BR-65", "BR-66",
+  // R2-3 (2026-06-23): BR-65 REMOVED — gateway-key encryption-at-rest +
+  // never-returned is now contract-tested (assoc-dues-gateway-flow.hurl) + real-PG
+  // (gateway-config-encryption.integration.test.ts), so the p0-security rule is COMPLETE.
+  "BR-60", "BR-61", "BR-63", "BR-64", "BR-66",
 
   // M20 booking module BRs minted 2026-06-02 to resolve TR-P1-001.
   // Same situation as M21: backend tests exist, contract+e2e planned

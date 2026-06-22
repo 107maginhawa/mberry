@@ -197,7 +197,7 @@
           "redTargets": ["gateway-config contract + a no-plaintext-key log assertion"],
           "green": "No endpoint or log path exposes a decrypted billing key.",
           "codegraphAnchors": ["upsertDuesGatewayConfig", "getDuesGatewayConfig", "billing-config.repo"],
-          "status": "todo"
+          "status": "done — two-layer black-box confidentiality proof. gateway-config-encryption.integration.test.ts (real-PG): upsert stores AES-256-GCM ciphertext in dues_gateway_config.encrypted_secret (≠ plaintext, round-trips via decryptCredential), and neither upsert nor get response exposes the encrypted/plaintext secret (only provider/publicKey). assoc-dues-gateway-flow.hurl (was a dead sign-up stub) now signs in as the seed association:admin, PUT→GET the gateway, asserts encryptedSecret/secretKey `not exists` in both responses. Live-verified locally (PUT/GET 200, no leak; stored col encrypted). BR-65 (p0-security) → COMPLETE, removed from allowlist."
         },
         {
           "id": "R2-4",
