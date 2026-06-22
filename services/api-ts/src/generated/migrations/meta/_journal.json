@@ -575,6 +575,13 @@
       "when": 1782300000000,
       "tag": "0081_enforce_stored_file_org_id_not_null",
       "breakpoints": true
+    },
+    {
+      "idx": 82,
+      "version": "7",
+      "when": 1782400000000,
+      "tag": "0082_unique_member_ad_opt_out_org_person",
+      "breakpoints": true
     }
   ]
 }
