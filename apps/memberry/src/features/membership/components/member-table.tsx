@@ -138,6 +138,9 @@ function MemberCard({
   )
 }
 
+// `requiredCredits` is wired from the org's CPD config (getOrgCpdConfig) by the
+// parent route. The `= 60` fallback only applies while that config is loading or
+// absent — it matches org_cpd_config's own DB default (see getCpdConfig handler).
 export function MemberTable({ orgId, initialStatus, expiringDays, requiredCredits = 60 }: MemberTableProps) {
   const { orgSlug } = useParams({ strict: false }) as { orgSlug: string }
   const [search, setSearch] = useState('')
