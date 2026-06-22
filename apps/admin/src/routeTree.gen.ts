@@ -31,6 +31,7 @@ import { Route as CommunicationsTemplatesRouteImport } from './routes/communicat
 import { Route as CommunicationsModerationRouteImport } from './routes/communications/moderation'
 import { Route as CommunicationsEmailRouteImport } from './routes/communications/email'
 import { Route as AssociationsAssociationIdRouteImport } from './routes/associations/$associationId'
+import { Route as NationalDashboardChaptersOrgIdRouteImport } from './routes/national-dashboard/chapters/$orgId'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -145,6 +146,12 @@ const AssociationsAssociationIdRoute =
     path: '/associations/$associationId',
     getParentRoute: () => rootRouteImport,
   } as any)
+const NationalDashboardChaptersOrgIdRoute =
+  NationalDashboardChaptersOrgIdRouteImport.update({
+    id: '/national-dashboard/chapters/$orgId',
+    path: '/national-dashboard/chapters/$orgId',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -154,21 +161,22 @@ export interface FileRoutesByFullPath {
   '/communications/templates': typeof CommunicationsTemplatesRoute
   '/members/$personId': typeof MembersPersonIdRoute
   '/organizations/$organizationId': typeof OrganizationsOrganizationIdRoute
-  '/associations': typeof AssociationsIndexRoute
-  '/audit': typeof AuditIndexRoute
-  '/committees': typeof CommitteesIndexRoute
-  '/communications': typeof CommunicationsIndexRoute
-  '/compliance': typeof ComplianceIndexRoute
-  '/events': typeof EventsIndexRoute
-  '/feature-flags': typeof FeatureFlagsIndexRoute
-  '/impersonate': typeof ImpersonateIndexRoute
-  '/members': typeof MembersIndexRoute
-  '/national-dashboard': typeof NationalDashboardIndexRoute
-  '/operators': typeof OperatorsIndexRoute
-  '/organizations': typeof OrganizationsIndexRoute
-  '/surveys': typeof SurveysIndexRoute
-  '/training': typeof TrainingIndexRoute
-  '/verifications': typeof VerificationsIndexRoute
+  '/associations/': typeof AssociationsIndexRoute
+  '/audit/': typeof AuditIndexRoute
+  '/committees/': typeof CommitteesIndexRoute
+  '/communications/': typeof CommunicationsIndexRoute
+  '/compliance/': typeof ComplianceIndexRoute
+  '/events/': typeof EventsIndexRoute
+  '/feature-flags/': typeof FeatureFlagsIndexRoute
+  '/impersonate/': typeof ImpersonateIndexRoute
+  '/members/': typeof MembersIndexRoute
+  '/national-dashboard/': typeof NationalDashboardIndexRoute
+  '/operators/': typeof OperatorsIndexRoute
+  '/organizations/': typeof OrganizationsIndexRoute
+  '/surveys/': typeof SurveysIndexRoute
+  '/training/': typeof TrainingIndexRoute
+  '/verifications/': typeof VerificationsIndexRoute
+  '/national-dashboard/chapters/$orgId': typeof NationalDashboardChaptersOrgIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -193,6 +201,7 @@ export interface FileRoutesByTo {
   '/surveys': typeof SurveysIndexRoute
   '/training': typeof TrainingIndexRoute
   '/verifications': typeof VerificationsIndexRoute
+  '/national-dashboard/chapters/$orgId': typeof NationalDashboardChaptersOrgIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -218,6 +227,7 @@ export interface FileRoutesById {
   '/surveys/': typeof SurveysIndexRoute
   '/training/': typeof TrainingIndexRoute
   '/verifications/': typeof VerificationsIndexRoute
+  '/national-dashboard/chapters/$orgId': typeof NationalDashboardChaptersOrgIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -229,21 +239,22 @@ export interface FileRouteTypes {
     | '/communications/templates'
     | '/members/$personId'
     | '/organizations/$organizationId'
-    | '/associations'
-    | '/audit'
-    | '/committees'
-    | '/communications'
-    | '/compliance'
-    | '/events'
-    | '/feature-flags'
-    | '/impersonate'
-    | '/members'
-    | '/national-dashboard'
-    | '/operators'
-    | '/organizations'
-    | '/surveys'
-    | '/training'
-    | '/verifications'
+    | '/associations/'
+    | '/audit/'
+    | '/committees/'
+    | '/communications/'
+    | '/compliance/'
+    | '/events/'
+    | '/feature-flags/'
+    | '/impersonate/'
+    | '/members/'
+    | '/national-dashboard/'
+    | '/operators/'
+    | '/organizations/'
+    | '/surveys/'
+    | '/training/'
+    | '/verifications/'
+    | '/national-dashboard/chapters/$orgId'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -268,6 +279,7 @@ export interface FileRouteTypes {
     | '/surveys'
     | '/training'
     | '/verifications'
+    | '/national-dashboard/chapters/$orgId'
   id:
     | '__root__'
     | '/'
@@ -292,6 +304,7 @@ export interface FileRouteTypes {
     | '/surveys/'
     | '/training/'
     | '/verifications/'
+    | '/national-dashboard/chapters/$orgId'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -317,6 +330,7 @@ export interface RootRouteChildren {
   SurveysIndexRoute: typeof SurveysIndexRoute
   TrainingIndexRoute: typeof TrainingIndexRoute
   VerificationsIndexRoute: typeof VerificationsIndexRoute
+  NationalDashboardChaptersOrgIdRoute: typeof NationalDashboardChaptersOrgIdRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -331,105 +345,105 @@ declare module '@tanstack/react-router' {
     '/verifications/': {
       id: '/verifications/'
       path: '/verifications'
-      fullPath: '/verifications'
+      fullPath: '/verifications/'
       preLoaderRoute: typeof VerificationsIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/training/': {
       id: '/training/'
       path: '/training'
-      fullPath: '/training'
+      fullPath: '/training/'
       preLoaderRoute: typeof TrainingIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/surveys/': {
       id: '/surveys/'
       path: '/surveys'
-      fullPath: '/surveys'
+      fullPath: '/surveys/'
       preLoaderRoute: typeof SurveysIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/organizations/': {
       id: '/organizations/'
       path: '/organizations'
-      fullPath: '/organizations'
+      fullPath: '/organizations/'
       preLoaderRoute: typeof OrganizationsIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/operators/': {
       id: '/operators/'
       path: '/operators'
-      fullPath: '/operators'
+      fullPath: '/operators/'
       preLoaderRoute: typeof OperatorsIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/national-dashboard/': {
       id: '/national-dashboard/'
       path: '/national-dashboard'
-      fullPath: '/national-dashboard'
+      fullPath: '/national-dashboard/'
       preLoaderRoute: typeof NationalDashboardIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/members/': {
       id: '/members/'
       path: '/members'
-      fullPath: '/members'
+      fullPath: '/members/'
       preLoaderRoute: typeof MembersIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/impersonate/': {
       id: '/impersonate/'
       path: '/impersonate'
-      fullPath: '/impersonate'
+      fullPath: '/impersonate/'
       preLoaderRoute: typeof ImpersonateIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/feature-flags/': {
       id: '/feature-flags/'
       path: '/feature-flags'
-      fullPath: '/feature-flags'
+      fullPath: '/feature-flags/'
       preLoaderRoute: typeof FeatureFlagsIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/events/': {
       id: '/events/'
       path: '/events'
-      fullPath: '/events'
+      fullPath: '/events/'
       preLoaderRoute: typeof EventsIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/compliance/': {
       id: '/compliance/'
       path: '/compliance'
-      fullPath: '/compliance'
+      fullPath: '/compliance/'
       preLoaderRoute: typeof ComplianceIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/communications/': {
       id: '/communications/'
       path: '/communications'
-      fullPath: '/communications'
+      fullPath: '/communications/'
       preLoaderRoute: typeof CommunicationsIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/committees/': {
       id: '/committees/'
       path: '/committees'
-      fullPath: '/committees'
+      fullPath: '/committees/'
       preLoaderRoute: typeof CommitteesIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/audit/': {
       id: '/audit/'
       path: '/audit'
-      fullPath: '/audit'
+      fullPath: '/audit/'
       preLoaderRoute: typeof AuditIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/associations/': {
       id: '/associations/'
       path: '/associations'
-      fullPath: '/associations'
+      fullPath: '/associations/'
       preLoaderRoute: typeof AssociationsIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
@@ -475,6 +489,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AssociationsAssociationIdRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/national-dashboard/chapters/$orgId': {
+      id: '/national-dashboard/chapters/$orgId'
+      path: '/national-dashboard/chapters/$orgId'
+      fullPath: '/national-dashboard/chapters/$orgId'
+      preLoaderRoute: typeof NationalDashboardChaptersOrgIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -501,6 +522,7 @@ const rootRouteChildren: RootRouteChildren = {
   SurveysIndexRoute: SurveysIndexRoute,
   TrainingIndexRoute: TrainingIndexRoute,
   VerificationsIndexRoute: VerificationsIndexRoute,
+  NationalDashboardChaptersOrgIdRoute: NationalDashboardChaptersOrgIdRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
