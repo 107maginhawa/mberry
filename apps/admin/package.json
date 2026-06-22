@@ -11,7 +11,8 @@
     "test": "cd ../.. && bun test apps/admin/src",
     "test:watch": "cd ../.. && bun test --watch apps/admin/src",
     "test:e2e": "bunx playwright test",
-    "lint": "eslint src"
+    "lint": "eslint src",
+    "check:routes": "bun scripts/check-routes.ts"
   },
   "keywords": [],
   "author": "",
@@ -55,6 +56,7 @@
     "tailwindcss": "^3",
     "typescript": "^5.9.2",
     "vite-tsconfig-paths": "^5.1.4",
-    "vitest": "^4.1.5"
+    "vitest": "^4.1.5",
+    "@tanstack/router-generator": "1.167.10"
   }
 }

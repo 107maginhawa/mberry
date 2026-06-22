@@ -32,6 +32,11 @@ jobs:
         run: bun run lint:no-skips
       - name: Shallow test assertion lint
         run: bun run lint:shallow --ci
+      - name: Strict route generation (admin)
+        # Runs the TanStack Router generator headlessly so a non-string-literal
+        # route id (the `as any` cast that blanked the admin SPA in dev) fails
+        # CI — not just someone's local dev. See apps/admin/scripts/check-routes.ts.
+        run: bun run --filter admin check:routes
       - name: Check SDK freshness
         run: |
           bun run --filter @monobase/sdk-ts generate
