@@ -243,7 +243,11 @@ export async function generateSlotsFromEvent(
     }
 
     // Advance-booking window: skip any day that starts beyond the horizon.
-    // Mirrors the util's `isAfter(date, maxBookingDate)` day-level guard.
+    // Mirrors the util's `isAfter(date, maxBookingDate)` day-level guard. This
+    // is a coarse pre-filter only — the boundary day is kept here and its
+    // individual slots are gated time-accurately against maxBookingDate inside
+    // generateSlotsFromTimeBlock (a slot at 17:00 must not survive when the
+    // horizon falls at 14:00 on the same day).
     if (isAfter(dayStart, maxBookingDate)) {
       continue;
     }
@@ -255,6 +259,7 @@ export async function generateSlotsFromEvent(
         day,
         timeBlock,
         minBookingTime,
+        maxBookingDate,
         logger
       );
       slots.push(...daySlots);
@@ -312,6 +317,7 @@ function generateSlotsFromTimeBlock(
   day: Date,
   timeBlock: TimeBlock,
   minBookingTime: Date,
+  maxBookingDate: Date,
   logger?: any
 ): NewTimeSlot[] {
   const slots: NewTimeSlot[] = [];
@@ -346,6 +352,16 @@ function generateSlotsFromTimeBlock(
     // Min-notice gate: skip slots that start before the booking-notice horizon.
     // Compared on the SAME UTC basis as the util (slotStartUtc vs minBookingTime).
     if (isBefore(slotStartUtc, minBookingTime)) {
+      currentTime = addMinutes(slotEndTime, bufferTime);
+      continue;
+    }
+
+    // Advance-window gate (time-accurate): skip slots that start after the
+    // advance-booking horizon. The day-level guard keeps the boundary day, so
+    // late-in-the-day slots on that day must still be dropped here — otherwise
+    // the prod job over-emits slots beyond event.maxBookingDays whenever "now"
+    // is earlier in the day than the slot time.
+    if (isAfter(slotStartUtc, maxBookingDate)) {
       currentTime = addMinutes(slotEndTime, bufferTime);
       continue;
     }
