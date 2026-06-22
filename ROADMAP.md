@@ -55,8 +55,7 @@
 **Goal:** Build national dashboard frontend page for cross-chapter aggregate views (BR-36). Resolve 2 remaining booking job stubs.
 
 **Scope:**
-- Frontend page + route for national dashboard (backend already exists)
-- Auth gate for national admin role
+- ✅ National dashboard frontend — DONE. The page + route (`/national-dashboard`, aggregate KPIs + per-chapter table + CSV export) + `RequireRole(['super'])` gate already existed; the missing piece was the **WF-085 per-chapter drill-down**, landed 2026-06-22 (PR #15, `da9f788c`): clickable chapter rows → `/national-dashboard/chapters/$orgId` detail using the real `getNationalChapterDetail` hook, with M14-R2 small-chapter suppression UX. Verified live (Playwright e2e green locally + in CI's e2e-admin lane).
 - ✅ Booking: manual slot-regeneration endpoint — DONE 2026-06-22 (PR #13, `0cf4340d`). `POST /booking/events/{event}/regenerate-slots` (owner/admin-gated, event-scoped, calls the existing `regenerateEventSlots` job). This resolves both the "ownerId → eventId redesign" note (the API is now event-scoped) and the "TypeSpec route for manual job trigger" item. Note: the prior `triggerSlotGeneration(ownerId)` owner-batch util was already implemented (not a throwing stub — the table below was stale) and is left as the unused batch variant.
 
 ---
