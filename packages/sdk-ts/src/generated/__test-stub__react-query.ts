@@ -690,6 +690,7 @@ export const refreshComplianceMutation = makeStub('refreshComplianceMutation');
 export const refundDuesPaymentMutation = makeStub('refundDuesPaymentMutation');
 export const refundEventRegistrationMutation = makeStub('refundEventRegistrationMutation');
 export const refundInvoicePaymentMutation = makeStub('refundInvoicePaymentMutation');
+export const regenerateBookingEventSlotsMutation = makeStub('regenerateBookingEventSlotsMutation');
 export const registerAndPayForEventMutation = makeStub('registerAndPayForEventMutation');
 export const registerForCustomEventMutation = makeStub('registerForCustomEventMutation');
 export const reinstateMembershipMutation = makeStub('reinstateMembershipMutation');
