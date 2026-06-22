@@ -44,6 +44,18 @@ import { DuesConfigRepository, DuesInvoiceRepository } from '@/handlers/associat
 // --- association:operations repos ---
 import { EventRegistrationRepository, WaitlistEntryRepository } from '@/handlers/association:operations/repos/events.repo';
 
+// --- advertising repos ---
+// Sibling handler unit tests (createAdvertiser.test.ts, createCampaign.test.ts,
+// createCreative.test.ts, getAdForPlacement.test.ts, reportAd.test.ts) assign
+// mock() functions directly onto these prototypes and never restore them.
+// Snapshotting + restoring here (global beforeEach) lets the real-PG createScratch
+// integration suites run the genuine prototype regardless of file order — replaces
+// the per-file capturePristine/restorePristine machinery deleted in W3 advertising S2.
+import { AdvertiserRepository } from '@/handlers/advertising/repos/advertiser.repo';
+import { CampaignRepository } from '@/handlers/advertising/repos/campaign.repo';
+import { CreativeRepository } from '@/handlers/advertising/repos/creative.repo';
+import { MemberAdOptOutRepository } from '@/handlers/advertising/repos/optOut.repo';
+
 // --- billing repos ---
 import { InvoiceRepository, MerchantAccountRepository } from '@/handlers/billing/repos/billing.repo';
 
@@ -133,6 +145,11 @@ const PRISTINE_REPOS = [
   // association:operations
   EventRegistrationRepository,
   WaitlistEntryRepository,
+  // advertising — restored each beforeEach to undo sibling handler-test mock() bleed
+  AdvertiserRepository,
+  CampaignRepository,
+  CreativeRepository,
+  MemberAdOptOutRepository,
   // billing
   InvoiceRepository,
   MerchantAccountRepository,
