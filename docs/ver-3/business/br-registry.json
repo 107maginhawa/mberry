@@ -715,11 +715,15 @@
     "module": "M19",
     "ruleClass": "p2-deferred",
     "tests": {
-      "backend": [],
+      "backend": [
+        "services/api-ts/src/handlers/platformadmin/dissolveCommittee.integration.test.ts",
+        "services/api-ts/src/handlers/association:operations/repos/committee.repo.integration.test.ts",
+        "services/api-ts/src/handlers/association:operations/ac-m19.committee.test.ts"
+      ],
       "contract": [],
       "e2e": []
     },
-    "deferredReason": "Module M19 (Committees) not yet implemented \u2014 deferred to milestone v2.0"
+    "deferredReason": "PARTIAL (2026-06-22): M19 Committees IS implemented (schema, repos, CRUD handlers, admin UI). BR-39 dissolution SHIPPED + live-verified: POST /admin/committees/{id}/dissolve (platform-admin only) sets status='completed', stamps dissolvedAt/dissolvedBy/dissolutionReason, deactivates member access (committee_member.active=false) in one transaction while RETAINING all rows; idempotent (409 on re-dissolve); admin 'Dissolve' action wired. Real-PG handler + repo tests cover it. NOTE: also corrected a spec/DB drift \u2014 committee status canonical value is 'completed' (DB enum), not the stale TypeSpec 'dissolved'/'suspended'. STILL DEFERRED to v2.0 (kept p2-deferred): contract (Hurl) + e2e coverage, member-facing committee workspace read-gating (no member UI exists yet \u2014 current access removal is the data-level active flag), and full M19 milestone."
   },
   "BR-40": {
     "rule": "Survey Anonymity",

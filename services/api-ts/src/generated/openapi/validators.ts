@@ -3551,7 +3551,7 @@ export const CommitteeSchema = z.object({
   chairId: z.string().optional(),
   purpose: z.string().max(2000).optional(),
   maxMembers: z.number().int().gte(1).optional(),
-  status: z.enum(["active", "suspended", "dissolved"])
+  status: z.enum(["active", "completed"])
 });
 
 export const CommitteeDetailSchema = z.object({
@@ -3561,6 +3561,7 @@ export const CommitteeDetailSchema = z.object({
   type: z.string().optional(),
   memberCount: z.number().int().optional(),
   status: z.string().optional(),
+  dissolvedAt: z.string().datetime().transform((str) => new Date(str)).optional(),
   description: z.string().optional(),
   members: z.array(z.record(z.string(), z.unknown())).optional()
 });
@@ -3627,7 +3628,7 @@ export const CommitteeSeatUpdateSchema = z.object({
   status: z.enum(["active", "resigned", "removed"]).optional()
 });
 
-export const CommitteeStatusSchema = z.enum(["active", "suspended", "dissolved"]);
+export const CommitteeStatusSchema = z.enum(["active", "completed"]);
 
 export const CommitteeSummarySchema = z.object({
   id: z.string(),
@@ -3635,7 +3636,8 @@ export const CommitteeSummarySchema = z.object({
   organizationId: z.string().optional(),
   type: z.string().optional(),
   memberCount: z.number().int().optional(),
-  status: z.string().optional()
+  status: z.string().optional(),
+  dissolvedAt: z.string().datetime().transform((str) => new Date(str)).optional()
 });
 
 export const CommitteeTypeSchema = z.enum(["standing", "adhoc", "taskForce"]);
@@ -3653,7 +3655,7 @@ export const CommitteeUpdateSchema = z.object({
   chairId: z.string().optional(),
   purpose: z.string().max(2000).optional(),
   maxMembers: z.number().int().gte(1).optional(),
-  status: z.enum(["active", "suspended", "dissolved"]).optional()
+  status: z.enum(["active", "completed"]).optional()
 });
 
 export const ComplianceRefreshResultSchema = z.object({
@@ -4572,6 +4574,10 @@ export const DirectorySearchIndexUpdateSchema = z.object({
 });
 
 export const DiscountTypeSchema = z.enum(["percentage", "fixed_amount", "free_item", "special_rate"]);
+
+export const DissolveCommitteeRequestSchema = z.object({
+  reason: z.string().max(2000).optional()
+});
 
 export const DocumentAccessLogEntryListResponseSchema = z.object({
   data: z.array(AssociationCoreDocumentsDocumentAccessLogEntrySchema),
@@ -10242,6 +10248,18 @@ export const GetCommitteeParams = z.object({
 export type GetCommitteeParams = z.infer<typeof GetCommitteeParams>;
 
 export const GetCommitteeResponse = z.object({
+  data: CommitteeDetailSchema
+});
+
+export const DissolveCommitteeParams = z.object({
+  id: z.string(),
+});
+export type DissolveCommitteeParams = z.infer<typeof DissolveCommitteeParams>;
+
+export const DissolveCommitteeBody = DissolveCommitteeRequestSchema;
+export type DissolveCommitteeBody = z.infer<typeof DissolveCommitteeBody>;
+
+export const DissolveCommitteeResponse = z.object({
   data: CommitteeDetailSchema
 });
 

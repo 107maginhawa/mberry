@@ -34,15 +34,33 @@ describe('CommitteeRepository — real-PG', () => {
     expect(list[1]!.name).toBe('Older');
   });
 
-  test('[BR-39] dissolve sets completed + dissolvedAt/dissolvedBy/dissolutionReason', async () => {
+  test('[BR-39] dissolve sets completed + dissolvedAt/dissolvedBy/dissolutionReason AND deactivates members (rows retained)', async () => {
     if (!H.dbReachable) return;
     const c = await repo.create({ organizationId: ORG, name: 'To Dissolve', status: 'active' } as never);
     const by = crypto.randomUUID();
+    // Two active members + a pre-removed one — dissolution must revoke the
+    // active ones but never delete any row (BR-39 retains all data).
+    await repo.addMember({ organizationId: ORG, committeeId: c.id, personId: crypto.randomUUID(), role: 'chairperson' } as never);
+    await repo.addMember({ organizationId: ORG, committeeId: c.id, personId: crypto.randomUUID(), role: 'member' } as never);
+    const preRemoved = await repo.addMember({ organizationId: ORG, committeeId: c.id, personId: crypto.randomUUID(), role: 'member' } as never);
+    await repo.removeMember(preRemoved.id);
+
     const dissolved = await repo.dissolve(c.id, by, 'mandate fulfilled');
     expect(dissolved.status).toBe('completed');
     expect(dissolved.dissolvedAt).not.toBeNull();
     expect(dissolved.dissolvedBy).toBe(by);
     expect(dissolved.dissolutionReason).toBe('mandate fulfilled');
+
+    // No active members remain (access revoked).
+    expect((await repo.listMembers(c.id)).length).toBe(0);
+    // But ALL three member rows are retained (nothing deleted).
+    const { rows } = await H.scopedPool.query(
+      `SELECT count(*)::int AS n, count(*) FILTER (WHERE active) AS active_n
+         FROM "${H.schema}".committee_member WHERE committee_id=$1`,
+      [c.id],
+    );
+    expect(rows[0].n).toBe(3);
+    expect(Number(rows[0].active_n)).toBe(0);
   });
 
   test('addMember/removeMember flip active+removedAt; listMembers returns only active', async () => {

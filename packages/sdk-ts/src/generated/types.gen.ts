@@ -11414,7 +11414,7 @@ export type Committee = {
     /**
      * Lifecycle status of the committee
      */
-    status: 'active' | 'suspended' | 'dissolved';
+    status: 'active' | 'completed';
 };
 
 /**
@@ -11445,6 +11445,10 @@ export type CommitteeDetail = {
      * Committee status
      */
     status?: string;
+    /**
+     * When the committee was dissolved (status='completed'), if applicable (BR-39)
+     */
+    dissolvedAt?: Date;
     /**
      * Description of the committee's purpose
      */
@@ -11678,7 +11682,7 @@ export type CommitteeSeatUpdate = {
 /**
  * Lifecycle status of a committee
  */
-export type CommitteeStatus = 'active' | 'suspended' | 'dissolved';
+export type CommitteeStatus = 'active' | 'completed';
 
 /**
  * Committee summary for cross-org committee listing
@@ -11708,6 +11712,10 @@ export type CommitteeSummary = {
      * Committee status
      */
     status?: string;
+    /**
+     * When the committee was dissolved (status='completed'), if applicable (BR-39)
+     */
+    dissolvedAt?: Date;
 };
 
 /**
@@ -11770,7 +11778,7 @@ export type CommitteeUpdate = {
     /**
      * Lifecycle status of the committee
      */
-    status?: 'active' | 'suspended' | 'dissolved';
+    status?: 'active' | 'completed';
 };
 
 /**
@@ -14752,6 +14760,16 @@ export type DirectoryVisibility = 'public' | 'memberOnly' | 'hidden';
  * Type of discount provided by a benefit offer
  */
 export type DiscountType = 'percentage' | 'fixed_amount' | 'free_item' | 'special_rate';
+
+/**
+ * Request to dissolve (complete) a committee — BR-39
+ */
+export type DissolveCommitteeRequest = {
+    /**
+     * Optional reason recorded on the committee's dissolution record
+     */
+    reason?: string;
+};
 
 /**
  * Offset-based paginated response with page navigation
@@ -34751,6 +34769,51 @@ export type GetCommitteeResponses = {
 };
 
 export type GetCommitteeResponse = GetCommitteeResponses[keyof GetCommitteeResponses];
+
+export type DissolveCommitteeData = {
+    body: DissolveCommitteeRequest;
+    path: {
+        id: string;
+    };
+    query?: never;
+    url: '/admin/committees/{id}/dissolve';
+};
+
+export type DissolveCommitteeErrors = {
+    /**
+     * Validation error response
+     */
+    400: ValidationError;
+    /**
+     * Unauthorized access response
+     */
+    401: AuthenticationError;
+    /**
+     * Forbidden access response
+     */
+    403: AuthorizationError;
+    /**
+     * Resource not found response
+     */
+    404: NotFoundError;
+    /**
+     * Conflict response
+     */
+    409: ConflictError;
+};
+
+export type DissolveCommitteeError = DissolveCommitteeErrors[keyof DissolveCommitteeErrors];
+
+export type DissolveCommitteeResponses = {
+    /**
+     * Success response with data
+     */
+    200: {
+        data: CommitteeDetail;
+    };
+};
+
+export type DissolveCommitteeResponse = DissolveCommitteeResponses[keyof DissolveCommitteeResponses];
 
 export type ListFeatureFlagsData = {
     body?: never;

@@ -158,6 +158,15 @@ export function registerRoutes(app: Hono<{ Variables: Variables }>) {
     registry.getCommittee as unknown as Handler
   );
 
+  // dissolveCommittee
+  app.post('/admin/committees/:id/dissolve',
+    authMiddleware({ roles: ["platform_admin"] }),
+    createPerRouteAuditMiddleware({ action: "complete", resourceType: "committee" }),
+    zValidator('param', validators.DissolveCommitteeParams, validationErrorHandler),
+    zValidator('json', validators.DissolveCommitteeBody, validationErrorHandler),
+    registry.dissolveCommittee as unknown as Handler
+  );
+
   // setFeatureFlag
   app.post('/admin/feature-flags',
     authMiddleware(),

@@ -172,6 +172,7 @@ export const denyAffiliationTransferMutation = makeStub('denyAffiliationTransfer
 export const denyMembershipApplicationMutation = makeStub('denyMembershipApplicationMutation');
 export const disconnectDuesGatewayMutation = makeStub('disconnectDuesGatewayMutation');
 export const dismissSurveyResponseMutation = makeStub('dismissSurveyResponseMutation');
+export const dissolveCommitteeMutation = makeStub('dissolveCommitteeMutation');
 export const downloadReceiptOptions = makeStub('downloadReceiptOptions');
 export const downloadReceiptQueryKey = makeStub('downloadReceiptQueryKey');
 export const endImpersonationMutation = makeStub('endImpersonationMutation');

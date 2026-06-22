@@ -13,7 +13,10 @@ import { describe, test, expect } from 'bun:test';
 
 // ─── Domain Types ─────────────────────────────────────────
 
-type CommitteeStatus = 'active' | 'expired' | 'dissolved';
+// BR-39: a dissolved committee's lifecycle STATUS is 'completed' (the only
+// value the committee_status DB enum can hold). The dissolution event itself is
+// captured via dissolvedAt/dissolvedBy/dissolutionReason.
+type CommitteeStatus = 'active' | 'completed';
 type CommitteeMemberRole = 'chairperson' | 'vice_chair' | 'secretary' | 'member';
 type TaskStatus = 'pending' | 'in_progress' | 'completed';
 type TaskPriority = 'low' | 'medium' | 'high';
@@ -98,7 +101,7 @@ function dissolveCommittee(
 ): DissolutionResult {
   const dissolved: Committee = {
     ...committee,
-    status: 'dissolved',
+    status: 'completed',
     dissolvedAt: now,
     dissolvedBy,
     dissolutionReason: reason,
@@ -178,7 +181,7 @@ function removeMemberFromCommittee(
 function assertCommitteeActive(
   committee: Committee,
 ): { ok: true } | { ok: false; error: string } {
-  if (committee.status === 'dissolved') {
+  if (committee.status === 'completed') {
     return {
       ok: false,
       error: 'This committee has been dissolved. No further changes are allowed.',
@@ -323,7 +326,7 @@ describe('[AC-M19-002] Dissolution preserves history (BR-39)', () => {
 
     const result = dissolveCommittee(committee, 'officer-1', 'Project completed', now, members);
 
-    expect(result.committee.status).toBe('dissolved');
+    expect(result.committee.status).toBe('completed');
     expect(result.committee.dissolvedAt).toEqual(now);
     expect(result.committee.dissolvedBy).toBe('officer-1');
     expect(result.committee.dissolutionReason).toBe('Project completed');
@@ -433,8 +436,8 @@ describe('[AC-M19-004] Member assignment — add/remove with role', () => {
 // ─── AC-M19-005: Dissolved Committee Blocks Mutations ─────
 
 describe('[AC-M19-005] Dissolved committee blocks mutations', () => {
-  test('dissolved committee blocks adding members', () => {
-    const committee = makeCommittee('dissolved');
+  test('dissolved (completed) committee blocks adding members', () => {
+    const committee = makeCommittee('completed');
     const result = assertCommitteeActive(committee);
     expect(result.ok).toBe(false);
     if (!result.ok) {
@@ -444,12 +447,6 @@ describe('[AC-M19-005] Dissolved committee blocks mutations', () => {
 
   test('active committee allows mutations', () => {
     const committee = makeCommittee('active');
-    const result = assertCommitteeActive(committee);
-    expect(result.ok).toBe(true);
-  });
-
-  test('expired committee is still mutable (not yet dissolved)', () => {
-    const committee = makeCommittee('expired');
     const result = assertCommitteeActive(committee);
     expect(result.ok).toBe(true);
   });

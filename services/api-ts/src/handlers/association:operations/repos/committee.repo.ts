@@ -65,18 +65,29 @@ export class CommitteeRepository {
   }
 
   async dissolve(id: string, dissolvedBy: string, reason?: string): Promise<Committee> {
-    const [result] = await this.db
-      .update(committees)
-      .set({
-        status: 'completed',
-        dissolvedAt: new Date(),
-        dissolvedBy,
-        dissolutionReason: reason ?? null,
-        updatedAt: new Date(),
-      })
-      .where(eq(committees.id, id))
-      .returning();
-    return result!;
+    // BR-39: dissolution = complete the committee + revoke member access, in one
+    // atomic step. Status goes to 'completed' (the dissolution event is recorded
+    // via dissolvedAt/dissolvedBy/dissolutionReason). Member rows are RETAINED
+    // for history — we only flip `active` to false; we never delete.
+    return this.db.transaction(async (tx) => {
+      const now = new Date();
+      const [result] = await tx
+        .update(committees)
+        .set({
+          status: 'completed',
+          dissolvedAt: now,
+          dissolvedBy,
+          dissolutionReason: reason ?? null,
+          updatedAt: now,
+        })
+        .where(eq(committees.id, id))
+        .returning();
+      await tx
+        .update(committeeMembers)
+        .set({ active: false, updatedBy: dissolvedBy, updatedAt: now })
+        .where(and(eq(committeeMembers.committeeId, id), eq(committeeMembers.active, true)));
+      return result!;
+    });
   }
 
   // ─── Committee Members ─────────────────────────────────

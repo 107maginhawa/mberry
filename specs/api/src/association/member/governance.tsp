@@ -138,8 +138,11 @@ enum ResolutionStatus {
 @doc("Lifecycle status of a committee")
 enum CommitteeStatus {
   active: "active",
-  suspended: "suspended",
-  dissolved: "dissolved",
+  // BR-39: a dissolved committee's lifecycle status is "completed" (the
+  // dissolution event itself is recorded via dissolvedAt/dissolvedBy). This
+  // matches the DB enum (committee_status), the repo, and the admin UI. The
+  // earlier "suspended"/"dissolved" values were never persistable.
+  completed: "completed",
 }
 
 @doc("Lifecycle status of a position")
