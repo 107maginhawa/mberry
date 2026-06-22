@@ -30,6 +30,7 @@ import { describe, test, expect, beforeAll, afterAll } from 'bun:test';
 import { createScratch } from '@/test-utils/pg-scratch';
 import type { ScratchDb } from '@/test-utils/pg-scratch';
 import { featureFlagRepoPort } from './platform-admin.repo';
+import { resolveFlagDecision } from '@/middleware/feature-flag-gate';
 
 let H: ScratchDb;
 
@@ -220,5 +221,141 @@ describe('featureFlagRepoPort.findEnforcementFlags (real-PG 3-table resolution)'
     const rows = await port.findEnforcementFlags(uuid(), 'events');
 
     expect(rows).toEqual([]);
+  });
+});
+
+/**
+ * S2 (inter-module: repo ⇄ feature-flag-gate) — precedence input contract.
+ *
+ * The gate's precedence resolver (`resolveFlagDecision`, the REAL function
+ * exported from src/middleware/feature-flag-gate.ts) is unit-tested against a
+ * canned stub set (feature-flag-gate.test.ts:40), and `findEnforcementFlags`
+ * is proven (S1) against real Postgres — but the two halves have never been
+ * wired together end-to-end. Here we feed the REAL rows returned by
+ * `findEnforcementFlags` into the REAL `resolveFlagDecision`, so the override
+ * precedence + tier-keying + fail-open contracts are proven across the
+ * repo↔gate boundary against persisted rows.
+ *
+ * Gate decision contract (mirrors middleware/feature-flag-gate.ts:112-123):
+ *   - resolveFlagDecision === false  -> gate would 403 (DISABLED)
+ *   - resolveFlagDecision === true   -> gate passes (ENABLED)
+ *   - resolveFlagDecision undefined  -> gate fail-opens (ENABLED)
+ */
+describe('gate precedence over real rows (repo ⇄ feature-flag-gate)', () => {
+  test('org override(enabled:false) beats association(enabled:true) → gate DISABLED', async () => {
+    if (!H.dbReachable) return;
+
+    const orgId = uuid();
+    const associationId = uuid();
+
+    await seedOrg({ id: orgId, associationId, slug: `o-${orgId.slice(0, 8)}` });
+    // Org-level explicit override DISABLED vs association-level ENABLED.
+    await seedFlag({
+      targetType: 'org',
+      targetId: orgId,
+      moduleName: 'events',
+      enabled: false,
+      isOverride: true,
+    });
+    await seedFlag({
+      targetType: 'association',
+      targetId: associationId,
+      moduleName: 'events',
+      enabled: true,
+    });
+
+    const port = featureFlagRepoPort(H.db as never);
+    const rows = await port.findEnforcementFlags(orgId, 'events');
+
+    // Both real rows must resolve (proves the join feeds both into the gate).
+    expect(rows.length).toBe(2);
+    expect(new Set(rows.map((r) => r.targetId))).toEqual(new Set([orgId, associationId]));
+
+    // The REAL precedence resolver, over the REAL persisted rows, picks the
+    // org override (priority 4) over the association default (priority 2).
+    const decision = resolveFlagDecision(rows);
+    expect(decision).toBe(false); // gate -> 403 DISABLED
+  });
+
+  test('tier(enabled:false) with no org/association rows → gate DISABLED (tier-only path)', async () => {
+    if (!H.dbReachable) return;
+
+    const orgId = uuid();
+    const associationId = uuid();
+    const tierId = uuid();
+    const tierSlug = `tier-${orgId.slice(0, 8)}`;
+
+    await seedOrg({ id: orgId, associationId, slug: `o-${orgId.slice(0, 8)}` });
+    await seedPricingTier({ id: tierId, slug: tierSlug });
+    await seedSubscription({ organizationId: orgId, pricingTierId: tierId });
+    // ONLY a tier-level DISABLED flag exists — no org, no association row.
+    await seedFlag({ targetType: 'tier', targetId: tierSlug, moduleName: 'events', enabled: false });
+
+    const port = featureFlagRepoPort(H.db as never);
+    const rows = await port.findEnforcementFlags(orgId, 'events');
+
+    // Exactly the single tier row resolves (keyed by SLUG — see contract test below).
+    expect(rows.length).toBe(1);
+    expect(rows[0]!.targetType).toBe('tier');
+    expect(rows[0]!.targetId).toBe(tierSlug);
+
+    const decision = resolveFlagDecision(rows);
+    expect(decision).toBe(false); // tier-only DISABLED -> gate 403
+  });
+
+  test('empty row set (module never flagged) → resolver undefined → gate FAIL-OPEN (enabled)', async () => {
+    if (!H.dbReachable) return;
+
+    const orgId = uuid();
+    const associationId = uuid();
+
+    await seedOrg({ id: orgId, associationId, slug: `o-${orgId.slice(0, 8)}` });
+    // Flag the org for a DIFFERENT module only; 'events' is never flagged.
+    await seedFlag({ targetType: 'org', targetId: orgId, moduleName: 'dues', enabled: false });
+
+    const port = featureFlagRepoPort(H.db as never);
+    const rows = await port.findEnforcementFlags(orgId, 'events');
+
+    expect(rows).toEqual([]);
+    // No rows -> resolver returns undefined -> gate passes (fail-open).
+    const decision = resolveFlagDecision(rows);
+    expect(decision).toBeUndefined();
+  });
+
+  test('CONTRACT (surface, do not fix): tier flags key on pricing-tier SLUG, not tier UUID', async () => {
+    if (!H.dbReachable) return;
+
+    const orgId = uuid();
+    const associationId = uuid();
+    const tierId = uuid();
+    const tierSlug = `slugkey-${orgId.slice(0, 8)}`;
+
+    await seedOrg({ id: orgId, associationId, slug: `o-${orgId.slice(0, 8)}` });
+    await seedPricingTier({ id: tierId, slug: tierSlug });
+    await seedSubscription({ organizationId: orgId, pricingTierId: tierId });
+
+    // Seed TWO tier-keyed flag rows for the same module: one keyed by the SLUG
+    // (the repo's actual candidate), one keyed by the tier UUID (the plausible
+    // alternative). The repo pushes the SLUG into target_id (platform-admin.repo.ts:297),
+    // so ONLY the slug-keyed row must resolve. This pins the data-integrity
+    // contract: feature_flag tier rows MUST be authored keyed by slug, else
+    // a UUID-keyed row is silently invisible to enforcement.
+    await seedFlag({ targetType: 'tier', targetId: tierSlug, moduleName: 'events', enabled: false });
+    await seedFlag({ targetType: 'tier', targetId: tierId, moduleName: 'events', enabled: true });
+
+    const port = featureFlagRepoPort(H.db as never);
+    const rows = await port.findEnforcementFlags(orgId, 'events');
+
+    // The repo resolves the SLUG-keyed row only — the UUID-keyed row is unreachable.
+    expect(rows.length).toBe(1);
+    expect(rows[0]!.targetId).toBe(tierSlug);
+    expect(rows[0]!.targetId).not.toBe(tierId);
+    expect(rows[0]!.enabled).toBe(false);
+
+    // End-to-end: the slug-keyed DISABLED row drives the gate to 403; the
+    // UUID-keyed ENABLED row, were it ever consulted, would have flipped this.
+    // FLAGGED as a product/data-integrity decision (slug-keying), NOT changed.
+    const decision = resolveFlagDecision(rows);
+    expect(decision).toBe(false);
   });
 });
