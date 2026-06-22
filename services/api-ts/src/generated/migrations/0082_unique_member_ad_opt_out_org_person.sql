@@ -18,11 +18,13 @@
 -- SELECT organization_id, person_id, count(*) ... GROUP BY 1,2 HAVING count(*)>1),
 -- but de-dup first (keep the earliest opted_out_at) so the migration applies
 -- cleanly even if any duplicates exist.
-DELETE FROM "member_ad_opt_out" a
-USING "member_ad_opt_out" b
-WHERE a."organization_id" = b."organization_id"
-  AND a."person_id" = b."person_id"
-  AND (a."opted_out_at" > b."opted_out_at"
-       OR (a."opted_out_at" = b."opted_out_at" AND a."id" > b."id"));--> statement-breakpoint
+DELETE FROM "member_ad_opt_out" WHERE "id" IN (
+  SELECT a."id" FROM "member_ad_opt_out" a
+  JOIN "member_ad_opt_out" b
+    ON a."organization_id" = b."organization_id"
+   AND a."person_id" = b."person_id"
+   AND (a."opted_out_at" > b."opted_out_at"
+        OR (a."opted_out_at" = b."opted_out_at" AND a."id" > b."id"))
+);--> statement-breakpoint
 CREATE UNIQUE INDEX IF NOT EXISTS "member_ad_opt_out_org_person_unique"
   ON "member_ad_opt_out" ("organization_id", "person_id");
