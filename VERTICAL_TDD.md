@@ -6,6 +6,12 @@ Auth (Better-Auth), WebSocket signaling, Rust crates (cadence, api-ts-embedded),
 
 Existing base modules are the reference target. They demonstrate production-quality patterns. When the testing infrastructure is in place, they should be retrofitted with tests. **New modules MUST follow this protocol from the start.**
 
+> **Retrofit backlog:** the prioritized, standards-aligned plan to close the
+> existing gaps (business rules 43/77 complete as of 2026-06-22, plus the
+> test-integrity gaps) lives in **[`docs/ver-3/remediation/`](docs/ver-3/remediation/REMEDIATION.md)**.
+> Each item there lists which of the 11 steps below remain (`missingSteps`), its
+> `redTargets` (failing tests first), and `codegraphAnchors` for navigation.
+
 ---
 
 ## Two Rules
