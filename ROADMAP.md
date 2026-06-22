@@ -33,6 +33,20 @@
 
 ## Active Work
 
+### Test-Coverage Remediation — **ACTIVE** (the current systematic work)
+
+A 2026-06-22 coverage audit found business rules only **43/77 COMPLETE** and a
+test-**integrity** problem (green ≠ correct — 3 cases this session where the suite
+passed while the live feature was broken). The systematic, standards-aligned plan
+to close this lives in **[`docs/ver-3/remediation/`](./docs/ver-3/remediation/REMEDIATION.md)**:
+- [`REMEDIATION.md`](./docs/ver-3/remediation/REMEDIATION.md) — the guide (standards mapping, priority waves, codegraph usage).
+- [`remediation-backlog.json`](./docs/ver-3/remediation/remediation-backlog.json) — the machine-readable, codegraph-navigable backlog (24 items, waves R1→R4 + deferred).
+
+Order: **R1 integrity → R2 P0 security/unwired → R3 workflow depth → R4 backfill**.
+One slice per PR, per VERTICAL_TDD. Update both that backlog and `br-registry.json` as items land.
+
+---
+
 ### Phase 47a: Institutional Memberships — **COMPLETE**
 
 **Backend (DONE 2026-06-07 at `member-membership-cutover`):**

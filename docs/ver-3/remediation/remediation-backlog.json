@@ -1,0 +1,465 @@
+{
+  "meta": {
+    "version": "1.0.0",
+    "title": "Test-Coverage Remediation Backlog",
+    "createdAt": "2026-06-22",
+    "purpose": "Systematic, standards-aligned plan to close the test-coverage + test-integrity gaps found by the 2026-06-22 coverage audit. Machine-readable so an AI agent can pick the next slice and execute it without re-deriving context.",
+    "sourceAudit": "5-dimension coverage audit 2026-06-22 (BR-coverage, suite-health, module-coverage, cross-module-workflows, test-integrity)",
+    "brSourceOfTruth": "docs/ver-3/business/br-registry.json (link by brIds; never duplicate rule text here)",
+    "headline": {
+      "brsComplete": "43/77 (56%)",
+      "brsIncomplete": 28,
+      "brsDeferred": 5,
+      "brsUntested": 1,
+      "phase1": "35/39 complete",
+      "phase2": "8/35 complete",
+      "integrityVerdict": "significant-gaps — green != correct; 3 cases this session where tests passed while live was broken"
+    }
+  },
+
+  "standards": {
+    "tdd": "Every item is RED-first: write the failing test (tagged [BR-##]) BEFORE the fix. See VERTICAL_TDD.md Rule 1.",
+    "specDriven": "TypeSpec (specs/api/src/modules/*.tsp) -> OpenAPI -> generated routes/validators/SDK is the source of truth. Contract gaps are closed at the spec + Hurl layer, not by hand-asserting JSON. After any op change: rebuild + regenerate SDK (CI lint-typecheck diffs packages/sdk-ts/src/generated).",
+    "verticalSlice": "Each item is executed end-to-end (the relevant subset of the 11 VERTICAL_TDD steps), never as a horizontal 'all contract tests first' batch. `missingSteps` lists which of the 11 steps remain.",
+    "domainDesign": "Items are grouped by bounded context / module (M20 booking, M21 billing, M22 email, M18 surveys, ...). A slice stays within its domain's repos/schemas; cross-module effects travel through the domain event bus (core/domain-event-consumers.ts), not inline orchestration.",
+    "codegraphDriven": "Each item carries `codegraphAnchors` (symbol names). An agent resolves them against .codegraph/codegraph.db to jump to the exact code, find callers (is the trigger wired?), and trace the slice. See the `codegraph` block."
+  },
+
+  "verticalTddSteps": {
+    "ref": "VERTICAL_TDD.md (11-step per-module sequence)",
+    "1": "TypeSpec (define/extend contract)",
+    "2": "Codegen (specs build + api-ts generate, incl db:generate)",
+    "2.5": "BR extraction (read business-rules.md, update br-registry.json)",
+    "3": "Backend tests RED (tag [BR-##])",
+    "4": "Backend impl GREEN",
+    "5": "Contract tests RED (Hurl)",
+    "6": "Contract impl GREEN",
+    "7": "SDK regen (sdk-ts generate)",
+    "8": "Frontend tests RED",
+    "9": "Frontend impl GREEN",
+    "10": "E2E Playwright journey",
+    "11": "Verify gate (all green)"
+  },
+
+  "codegraph": {
+    "db": ".codegraph/codegraph.db",
+    "type": "SQLite (understand-anything). gitignored local artifact.",
+    "regen": "Run the `understand-anything:understand` skill (or its CLI) to rebuild after large code changes. domain-graph at .understand-anything/domain-graph.json.",
+    "schema": {
+      "nodes": "id, kind(function|method|class|component|route|enum|type_alias|variable|...), name, qualified_name, file_path, start_line, end_line, signature, is_exported",
+      "edges": "source(node id), target(node id), kind(calls|contains|references|imports|extends|implements|instantiates), line"
+    },
+    "recipes": {
+      "findSymbol": "sqlite3 .codegraph/codegraph.db \"select id, kind, file_path, start_line from nodes where name='SYMBOL';\"",
+      "findCallers": "sqlite3 .codegraph/codegraph.db \"select src.name, src.file_path from edges e join nodes src on e.source=src.id join nodes tgt on e.target=tgt.id where tgt.name='SYMBOL' and e.kind='calls';\"",
+      "findCallees": "sqlite3 .codegraph/codegraph.db \"select tgt.name, tgt.file_path from edges e join nodes src on e.source=src.id join nodes tgt on e.target=tgt.id where src.name='SYMBOL' and e.kind='calls';\"",
+      "isTriggerWired": "findCallers on the effect (e.g. addSuppression). If the ONLY callers are *.test.ts files, the production trigger is UNWIRED — that is a behavioral gap, not just a test gap (see R2-1)."
+    }
+  },
+
+  "executionLoop": [
+    "1. Pick the highest-priority item with status 'todo' whose blockers are clear.",
+    "2. Resolve its codegraphAnchors (recipes above) to open the exact code + confirm wiring with findCallers.",
+    "3. Write the redTargets FIRST (failing). Run them, see RED.",
+    "4. Implement only `missingSteps`. Keep the slice inside its `domain`.",
+    "5. Real-data tests only (persisted rows / SQLSTATE / rendered values), real-PG via createScratch where applicable. No toBeDefined / 200-only.",
+    "6. If a TypeSpec op changed: specs build -> api-ts generate -> sdk-ts generate -> commit ALL generated outputs.",
+    "7. Run gate. Update this item's status + the BR's br-registry entry (flip incomplete->complete / deferred reason).",
+    "8. One slice per PR. Verify live (browse/HTTP) before 'done'."
+  ],
+
+  "waves": [
+    {
+      "id": "R1",
+      "title": "Test Integrity — make green mean correct",
+      "rationale": "Highest priority: this class undermines EVERY other coverage claim. Three confirmed cases this session where the suite was green but the live feature was broken. Fix the test architecture before backfilling more (possibly-blind) tests.",
+      "items": [
+        {
+          "id": "R1-1",
+          "title": "Kill FE mock-shape-vs-API divergence (flat-vs-nested class)",
+          "type": "integrity",
+          "domain": "memberry FE (cross-feature)",
+          "module": "apps/memberry",
+          "brIds": ["BR-40"],
+          "severity": "critical",
+          "problem": "FE components read API fields in a shape (flat) that diverges from the real response (nested under settings/pagination). Unit tests feed the mock the SAME wrong shape, so they pass while the live feature is dead. Proven 3x: survey settings.anonymous (flat read), responseCount vs pagination.totalCount, requiredCredits path.",
+          "missingSteps": [8, 9, 11],
+          "spec": "Derive FE response types from @monobase/api-spec (generated OpenAPI types) instead of hand-written interfaces, so a shape mismatch is a COMPILE error, not a silent runtime undefined.",
+          "redTargets": [
+            "A FE test util that builds component props from the GENERATED OpenAPI response types (not ad-hoc literals), so mocks can't drift from the contract.",
+            "Re-point existing survey/roster/results component tests at contract-typed fixtures."
+          ],
+          "green": "FE components consume @monobase/api-spec types for any api.get<...> response; a backend field rename/nesting change breaks FE typecheck.",
+          "codegraphAnchors": ["survey-results.tsx", "survey-list.tsx", "member-table.tsx", "api", "getSurvey"],
+          "status": "todo"
+        },
+        {
+          "id": "R1-2",
+          "title": "Resolve the .fixme() e2e stubs (false-green)",
+          "type": "integrity",
+          "domain": "e2e",
+          "module": "apps/memberry/tests/e2e",
+          "brIds": ["BR-40", "BR-36"],
+          "severity": "high",
+          "problem": "~40 e2e specs are .fixme() stubs (BR-40/38/36/35). Backend tests are green while the full-stack journey is switched off — false confidence. .fixme reads as 'temporarily pending' not 'deferred'.",
+          "missingSteps": [10, 11],
+          "spec": "For LIVE features (BR-40 anonymity, BR-36 national dashboard) write REAL e2e (the firewall 4-clause DoD). For genuinely-deferred (BR-35 feed, BR-38 marketplace) convert .fixme to a documented `test.skip` with a deferred-to-vX.X reason so it doesn't masquerade as pending.",
+          "redTargets": ["apps/memberry/tests/e2e/stubs/survey-anonymity.spec.ts", "apps/admin national-dashboard e2e"],
+          "green": "Zero .fixme() in e2e for features that are LIVE; deferred ones clearly tagged + excluded from 'pending' counts.",
+          "codegraphAnchors": ["submitSurveyResponse", "listSurveyResponses"],
+          "status": "todo"
+        },
+        {
+          "id": "R1-3",
+          "title": "Replace characterization-only pure-fn BR tests where the rule is LIVE",
+          "type": "integrity",
+          "domain": "cross (api-ts)",
+          "module": "services/api-ts",
+          "brIds": ["BR-40"],
+          "severity": "high",
+          "problem": "~47 'Factory N/A' test files re-implement the rule as inline pure functions (e.g. communication/br-40.survey-anonymity.test.ts, ac-m18/ac-m19) and lock CURRENT behavior incl. bugs. They never call the handler or touch the DB, so they can't catch handler/integration drift.",
+          "missingSteps": [3, 4],
+          "spec": "For each pure-fn BR test whose real handler EXISTS + is wired, replace with a real-PG handler test (createScratch) asserting the rule against persisted rows. Keep pure-fn only for genuinely module-not-built BRs.",
+          "redTargets": ["audit grep 'Factory N/A' + cross-check each BR against br-registry: live module -> real-PG test required"],
+          "green": "Every COMPLETE/INCOMPLETE BR on a LIVE module has at least one test that exercises the real handler/repo, not a re-implemented pure function.",
+          "codegraphAnchors": ["createContentScratch", "createScratch"],
+          "status": "todo"
+        },
+        {
+          "id": "R1-4",
+          "title": "e2e asserts function + add dev-build smoke (the blank-SPA blind spot)",
+          "type": "integrity",
+          "domain": "e2e (admin + memberry)",
+          "module": "apps/admin, apps/memberry",
+          "brIds": [],
+          "severity": "medium",
+          "problem": "e2e asserts DOM visibility (`main` visible), not real data/behavior — why the admin SPA could be blank in local dev while e2e-admin stayed green (CI tolerated the route-gen error). CI structurally can't catch dev-only/route-gen failures.",
+          "missingSteps": [10, 11],
+          "spec": "Harden admin e2e to assert real loaded content + a non-empty data row, not just container visibility. Add a CI step that runs the router generator / dev transform in strict mode so a route-gen error fails the build (not just dev).",
+          "redTargets": ["apps/admin/tests/e2e/admin-routes.spec.ts", "a strict route-gen CI check"],
+          "green": "A reintroduced `as any` route id or a blank-render fails CI.",
+          "codegraphAnchors": ["createFileRoute"],
+          "status": "todo"
+        }
+      ]
+    },
+    {
+      "id": "R2",
+      "title": "P0 security/data — unwired triggers + missing contract on critical rules",
+      "rationale": "These are P0 (security/data) rules with backend-only tests AND, in two cases, an actual behavioral gap (the trigger that should fire the rule is unwired). Highest real-risk after integrity.",
+      "items": [
+        {
+          "id": "R2-1",
+          "title": "Wire bounce/complaint webhooks -> auto-suppression (BR-55/56)",
+          "type": "unwired-trigger",
+          "domain": "M22 email",
+          "module": "email",
+          "brIds": ["BR-55", "BR-56"],
+          "severity": "high",
+          "problem": "BR-55 (hard-bounce auto-suppression) + BR-56 (complaint/CAN-SPAM auto-suppression, p0-security) test only the THEN (suppression state). The IF — the provider bounce/complaint webhook calling addSuppression — is UNWIRED. codegraph: addSuppression's only callers are *.integration.test.ts.",
+          "missingSteps": [1, 2, 3, 4, 5, 6],
+          "spec": "Add the provider webhook op (TypeSpec) -> handler that verifies the provider signature, parses bounce/complaint, calls addSuppression -> Hurl contract.",
+          "redTargets": ["a real-PG test: POST signed bounce webhook -> suppression row created", "Hurl: signed complaint -> 200 + suppressed"],
+          "green": "addSuppression has a NON-test caller (the webhook handler); real-PG + contract prove bounce/complaint -> suppression.",
+          "codegraphAnchors": ["addSuppression", "EmailSuppressionRepository"],
+          "status": "todo"
+        },
+        {
+          "id": "R2-2",
+          "title": "Stripe webhook signature verification — contract (BR-62)",
+          "type": "axis-gap",
+          "domain": "M21 billing",
+          "module": "billing",
+          "brIds": ["BR-62"],
+          "severity": "high",
+          "problem": "p0-security. handleStripeWebhook signature check is backend-tested only; no contract test proving a bad/missing signature is rejected at the wire.",
+          "missingSteps": [5, 6],
+          "spec": "Hurl: unsigned + wrong-signature webhook -> 4xx; correctly-signed -> 200.",
+          "redTargets": ["specs/api/tests/contract/billing-webhook.hurl (signature cases)"],
+          "green": "Contract suite rejects unsigned/forged Stripe webhooks.",
+          "codegraphAnchors": ["handleStripeWebhook"],
+          "status": "todo"
+        },
+        {
+          "id": "R2-3",
+          "title": "Billing key encryption-at-rest — contract/assertion (BR-65)",
+          "type": "axis-gap",
+          "domain": "M21 billing",
+          "module": "billing",
+          "brIds": ["BR-65"],
+          "severity": "high",
+          "problem": "p0-security. AES-256 encryption of Stripe keys + never-logged is backend-tested; add a contract/black-box assertion that the gateway config endpoint never returns raw keys and logs never contain them.",
+          "missingSteps": [5, 6],
+          "spec": "Hurl/integration: GET gateway config returns masked key; a log-scan test asserts no plaintext key.",
+          "redTargets": ["gateway-config contract + a no-plaintext-key log assertion"],
+          "green": "No endpoint or log path exposes a decrypted billing key.",
+          "codegraphAnchors": ["upsertDuesGatewayConfig", "getDuesGatewayConfig", "billing-config.repo"],
+          "status": "todo"
+        },
+        {
+          "id": "R2-4",
+          "title": "Billing payment guards — contract+e2e (BR-60/61/63/64)",
+          "type": "axis-gap",
+          "domain": "M21 billing",
+          "module": "billing",
+          "brIds": ["BR-60", "BR-61", "BR-63", "BR-64"],
+          "severity": "high",
+          "problem": "Merchant-account-required (60), invoice terminal-state double-pay guard (61), webhook-driven paid transition (63), refund-requires-paid (64) — all p0-data, backend-only. These guard money movement; need contract + (where user-facing) e2e.",
+          "missingSteps": [5, 6, 10],
+          "spec": "Hurl flows: pay without merchant -> 4xx; pay a paid/void invoice -> 409; signed webhook -> invoice paid; refund unpaid -> 4xx.",
+          "redTargets": ["specs/api/tests/contract/billing-payment-guards.hurl"],
+          "green": "Each guard rejected at the wire; refund/paid transitions proven end-to-end.",
+          "codegraphAnchors": ["payInvoice", "captureInvoicePayment", "refundInvoicePayment", "finalizeInvoice"],
+          "status": "todo"
+        },
+        {
+          "id": "R2-5",
+          "title": "Booking integrity guards — contract+e2e (BR-69/68/72/73)",
+          "type": "axis-gap",
+          "domain": "M20 booking",
+          "module": "booking",
+          "brIds": ["BR-69", "BR-68", "BR-72", "BR-73"],
+          "severity": "high",
+          "problem": "Double-booking prevention (69, race-condition), event-must-be-active (68), schedule-exception override (72), cancel/reject releases slot (73) — p0-data, backend-only. Need contract + e2e on the booking journey.",
+          "missingSteps": [5, 6, 10],
+          "spec": "Hurl: concurrent book same slot -> one 409; book inactive event -> 4xx; exception blocks slot; cancel re-opens slot. e2e: member booking journey.",
+          "redTargets": ["specs/api/tests/contract/booking-guards.hurl", "memberry e2e booking journey (firewall)"],
+          "green": "No double-booking at the wire; slot lifecycle durable across sessions.",
+          "codegraphAnchors": ["createBooking", "cancelBooking", "rejectBooking", "createScheduleException"],
+          "status": "todo"
+        }
+      ]
+    },
+    {
+      "id": "R3",
+      "title": "Cross-module workflow depth — selector-only -> 4-clause firewall",
+      "rationale": "187 e2e specs exist but only 5-6 are durability-hardened; the money/governance journeys are selector-only smoke tests (assert a heading, not that the flow works + persists). Harden the highest-value journeys.",
+      "items": [
+        {
+          "id": "R3-1",
+          "title": "Dues lifecycle firewall (bill -> pay -> settle -> durable read)",
+          "type": "workflow-depth",
+          "domain": "M06 dues",
+          "module": "dues",
+          "brIds": [],
+          "severity": "high",
+          "problem": "journeys/dues-lifecycle.spec.ts is @selector-only-ok; no independent-session read proving the payment settled + persists. The core money flow lacks an end-to-end durability test.",
+          "missingSteps": [10, 11],
+          "spec": "4-clause firewall: error-surface, goal-state value (invoice paid + ledger updated), status assertion, independent-session durable read.",
+          "redTargets": ["apps/memberry/tests/e2e/journeys/dues-lifecycle.spec.ts -> @journey-firewall"],
+          "green": "Dues bill->pay->settle proven durable across a fresh session.",
+          "codegraphAnchors": ["recordDuesPayment", "markDuesInvoicePaid", "getDuesFinancialDashboard"],
+          "status": "todo"
+        },
+        {
+          "id": "R3-2",
+          "title": "Refund reversal firewall (durable)",
+          "type": "workflow-depth",
+          "domain": "M21 billing / M06 dues",
+          "module": "billing",
+          "brIds": ["BR-64"],
+          "severity": "high",
+          "problem": "officer/payment-refund.spec.ts is selector-only; no independent-session verify that a refund reversal persists + payment history updates.",
+          "missingSteps": [10, 11],
+          "spec": "Firewall journey: refund -> reversal persisted -> history reflects it on fresh session.",
+          "redTargets": ["officer/payment-refund.spec.ts -> firewall"],
+          "green": "Refund reversal durable + reflected in history.",
+          "codegraphAnchors": ["refundDuesPayment", "refundInvoicePayment"],
+          "status": "todo"
+        },
+        {
+          "id": "R3-3",
+          "title": "Election lifecycle firewall (create->publish->vote->tally->certify, multi-actor)",
+          "type": "workflow-depth",
+          "domain": "M12 elections",
+          "module": "elections",
+          "brIds": ["BR-41", "BR-67"],
+          "severity": "high",
+          "problem": "officer/elections.spec.ts + governance-ballot.spec.ts exist but neither is a single multi-actor firewall covering the full lifecycle with durable tally.",
+          "missingSteps": [10, 11],
+          "spec": "Cross-actor (officer creates/publishes, members vote, officer certifies) firewall with durable result read.",
+          "redTargets": ["apps/memberry/tests/e2e/journeys/election-lifecycle.spec.ts (new, firewall)"],
+          "green": "Full election lifecycle durable + one-vote-per-person enforced end-to-end.",
+          "codegraphAnchors": ["castBallot", "certifyElection", "openElectionVoting"],
+          "status": "todo"
+        },
+        {
+          "id": "R3-4",
+          "title": "Paid-training proof-gate firewall (member->officer->unlock)",
+          "type": "workflow-depth",
+          "domain": "M09 training",
+          "module": "association:operations",
+          "brIds": [],
+          "severity": "medium",
+          "problem": "journeys/paid-training.spec.ts is @selector-only-ok; the offline proof-of-payment gate (member submits proof -> officer verifies -> training unlocks) isn't tested as a cross-actor state machine.",
+          "missingSteps": [10, 11],
+          "spec": "Firewall: member submits proof -> officer confirms -> enrollment unlocks, durable.",
+          "redTargets": ["journeys/paid-training.spec.ts -> firewall"],
+          "green": "Proof-gate cross-actor flow durable.",
+          "codegraphAnchors": ["submitTrainingPaymentProof", "confirmTrainingPayment"],
+          "status": "todo"
+        },
+        {
+          "id": "R3-5",
+          "title": "Contract backfill — dues special-assessments + credits endpoints",
+          "type": "axis-gap",
+          "domain": "M06 dues / M10 credits",
+          "module": "member/duesspecialassessments, member/credits",
+          "brIds": [],
+          "severity": "medium",
+          "problem": "Contract coverage lowest here: dues special-assessments 64% (18/50 endpoints uncovered — dunning, aging-bucket, apply/settle), credits 60% (adjust, compliance report).",
+          "missingSteps": [5, 6],
+          "spec": "Hurl flows for the uncovered endpoints.",
+          "redTargets": ["specs/api/tests/contract/dues-special-assessments.hurl", "credits-compliance.hurl"],
+          "green": "Endpoint contract coverage for these domains >= 85%.",
+          "codegraphAnchors": ["applySpecialAssessment", "runDunning", "getCreditCompliance"],
+          "status": "todo"
+        }
+      ]
+    },
+    {
+      "id": "R4",
+      "title": "Axis backfill + module depth (the long tail)",
+      "rationale": "Lower-risk but needed to move BRs to COMPLETE + raise thin-module floors. Mostly contract/e2e on rules already backend-correct, plus integration-depth on thin modules.",
+      "items": [
+        {
+          "id": "R4-1",
+          "title": "M20 booking — contract/e2e on the validation rules",
+          "type": "axis-gap",
+          "domain": "M20 booking",
+          "module": "booking",
+          "brIds": ["BR-70", "BR-71", "BR-74", "BR-75", "BR-76", "BR-77"],
+          "severity": "low",
+          "problem": "Advance-notice, lead-time, buffer, date-ordering, range constraints — backend-only (mostly DB CHECK + handler validation). Add contract OR e2e per rule class.",
+          "missingSteps": [5, 6],
+          "spec": "Hurl boundary cases per rule.",
+          "redTargets": ["booking-validation.hurl"],
+          "green": "BR-70/71/74/75/76/77 -> COMPLETE.",
+          "codegraphAnchors": ["createBookingEvent", "updateBookingEvent"],
+          "status": "todo"
+        },
+        {
+          "id": "R4-2",
+          "title": "M22 email — contract/e2e on suppression + template rules",
+          "type": "axis-gap",
+          "domain": "M22 email",
+          "module": "email",
+          "brIds": ["BR-52", "BR-53", "BR-54", "BR-57", "BR-58", "BR-59"],
+          "severity": "medium",
+          "problem": "Suppression-before-delivery, active-template-required, max-retry terminal, transactional override, template-var validation, cancellation audit — backend-only. (BR-54 known: effective max is 4 attempts not 3 — fix or document.)",
+          "missingSteps": [5, 6],
+          "spec": "Contract/integration for the wire-observable ones; document the crypto/async ones.",
+          "redTargets": ["email-suppression.hurl", "fix BR-54 retry off-by-one or re-document"],
+          "green": "Wire-observable email rules contract-covered; BR-54 retry count reconciled.",
+          "codegraphAnchors": ["enqueueEmail", "EmailQueueRepository"],
+          "status": "todo"
+        },
+        {
+          "id": "R4-3",
+          "title": "Surveys module — raise floor 30% -> 50% (unscoped methods)",
+          "type": "module-depth",
+          "domain": "M18 surveys",
+          "module": "surveys",
+          "brIds": [],
+          "severity": "medium",
+          "problem": ".coverage-thresholds.json sets surveys floor at 30% — findMany/publish/close/admin-list/analytics remain UNSCOPED (no real-PG depth).",
+          "missingSteps": [3, 4],
+          "spec": "Real-PG tests for the unscoped survey handlers; then raise the floor.",
+          "redTargets": ["surveys real-PG integration for publish/close/listAdminSurveys/getSurveyAnalytics"],
+          "green": "surveys floor raised to 50% with real-PG coverage.",
+          "codegraphAnchors": ["publishSurvey", "closeSurvey", "getSurveyAnalytics", "listAdminSurveys"],
+          "status": "todo"
+        },
+        {
+          "id": "R4-4",
+          "title": "Integration depth on thin modules (comms, association:operations)",
+          "type": "module-depth",
+          "domain": "M07 comms / M04 operations",
+          "module": "comms, association:operations",
+          "brIds": [],
+          "severity": "medium",
+          "problem": "comms ~12 tests/18 handlers (2 integration), association:operations 64 tests/82 handlers but only 8 integration (7:1 unit:integration). Unit-dominant => coupling errors hide.",
+          "missingSteps": [3, 4],
+          "spec": "Add createScratch integration for the untested/unit-only handlers in these modules.",
+          "redTargets": ["comms + association:operations *.integration.test.ts for untested handlers"],
+          "green": "Each module's untested handler count -> 0; integration ratio raised.",
+          "codegraphAnchors": ["createChatRoom", "getOrgDashboard", "exportNationalDashboard"],
+          "status": "todo"
+        },
+        {
+          "id": "R4-5",
+          "title": "BR-48 bulkRecordPayments — wire+test or remove (UNTESTED + unwired)",
+          "type": "decision",
+          "domain": "M06 dues",
+          "module": "dues",
+          "brIds": ["BR-48"],
+          "severity": "medium",
+          "problem": "Bulk payment batch-size limit is the ONLY fully-UNTESTED BR; the bulkRecordPayments handler is not wired to an HTTP route (no OpenAPI surface). Product decision: wire it (then boundary-table test 1/49/50/51/100/1000) or remove the orphan.",
+          "missingSteps": [1, 2, 3, 4],
+          "spec": "If kept: TypeSpec op + handler + boundary tests. If not: remove handler + BR.",
+          "redTargets": ["boundary-table test or removal"],
+          "green": "BR-48 either COMPLETE+wired or removed (no UNTESTED rule).",
+          "codegraphAnchors": ["bulkRecordPayments"],
+          "status": "todo"
+        }
+      ]
+    },
+    {
+      "id": "DEFERRED",
+      "title": "Product-decision-gated (not test debt — feature/scope calls)",
+      "rationale": "These BRs are deferred pending a product go/no-go, not just missing tests. Tie remediation to the product decision; don't autonomously build.",
+      "items": [
+        {
+          "id": "D-BR35",
+          "title": "BR-35 Feed Content Moderation",
+          "type": "deferred-feature",
+          "domain": "M13 feed",
+          "brIds": ["BR-35"],
+          "severity": "low",
+          "problem": "No feed module exists -> greenfield build (whole social-feed module first). Stub e2e is .fixme.",
+          "status": "blocked-product-decision"
+        },
+        {
+          "id": "D-BR38",
+          "title": "BR-38 Marketplace Referral Disclosure",
+          "type": "deferred-feature",
+          "domain": "M17 marketplace",
+          "brIds": ["BR-38"],
+          "severity": "low",
+          "problem": "Disclosure/consent flow unbuilt (product build). Also: cosmetic stale 'BR-38' labels in marketplace test files (coverage-gate-sensitive — see testgap notes).",
+          "status": "blocked-product-decision"
+        },
+        {
+          "id": "D-BR37",
+          "title": "BR-37 Job Posting Expiry — remaining axes",
+          "type": "axis-gap",
+          "domain": "M15 jobs",
+          "brIds": ["BR-37"],
+          "severity": "low",
+          "problem": "Backend cron+extend SHIPPED (2026-06-22). Remaining: contract (Hurl) + e2e + a member/officer job-board FE + a dedicated 'job.posting.expiring' notification type (currently reuses type=system).",
+          "status": "partial-deferred"
+        },
+        {
+          "id": "D-BR39",
+          "title": "BR-39 Committee Dissolution — remaining axes",
+          "type": "axis-gap",
+          "domain": "M19 committees",
+          "brIds": ["BR-39"],
+          "severity": "low",
+          "problem": "Dissolve endpoint+admin action SHIPPED (2026-06-22). Remaining: contract (Hurl) + e2e + member-facing committee workspace read-gating UI.",
+          "status": "partial-deferred"
+        },
+        {
+          "id": "D-BR40",
+          "title": "BR-40 Survey Anonymity — remaining",
+          "type": "axis-gap",
+          "domain": "M18 surveys",
+          "brIds": ["BR-40"],
+          "severity": "low",
+          "problem": "Core anonymity + warnings SHIPPED (2026-06-22). Remaining: anonymous one-response-per-member dedup ledger (product fork: dedup vs anonymity), contextId neutrality review, full M18 milestone, real e2e (currently .fixme).",
+          "status": "partial-deferred"
+        }
+      ]
+    }
+  ]
+}
