@@ -1,127 +1,130 @@
 // Business Rules: [BR-31]
 /**
- * [BR-31] SVG Upload Security — Pure Domain Logic Tests
+ * [BR-31] SVG Upload Security — REAL production control tests.
  *
- * BR-31: SVG uploads must be sanitized before storage.
- * - Script tags and their content must be removed.
- * - Event handler attributes (onload, onerror, onclick, etc.) must be stripped.
- * - External references (href, xlink:href to external URLs) must be removed.
- * - Safe SVG structure and inline styles/shapes must be preserved.
+ * BR-31 design is BLOCK, not sanitize. There is NO SVG sanitizer in
+ * production `src/` — the previous version of this file defined inline
+ * `sanitizeSvg`/`removeScriptTags`/… helpers and asserted against THEM,
+ * which made the suite green-but-vacuous (it tested test code, not prod).
+ *
+ * The load-bearing prod XSS controls are:
+ *   1. storage upload MIME allowlist — `uploadFile.ts` ALLOWED_MIME_TYPES
+ *      deliberately excludes `image/svg+xml`, rejecting it with a
+ *      ValidationError BEFORE any DB write.
+ *   2. documents path — `isBlockedDocumentFile()` (`@/utils/sanitize`)
+ *      blocks `image/svg+xml` MIME and `.svg`/`.svgz` extensions.
+ *
+ * This suite points assertions at those REAL controls.
  */
 
-import { describe, test, expect } from 'bun:test';
-// Factory N/A: handler test with inline primitives — no domain entity construction needed
+import { describe, test, expect, mock } from 'bun:test';
+import { uploadFile } from './uploadFile';
+import { StorageFileRepository } from './repos/file.repo';
+import { isBlockedDocumentFile } from '@/utils/sanitize';
+import { ValidationError } from '@/core/errors';
 
-// ─── Domain helpers (pure sanitization logic) ────────────────
+// ---------------------------------------------------------------------------
+// ctx builder — mirrors uploadFile.test.ts so we drive the REAL handler
+// ---------------------------------------------------------------------------
 
-/**
- * Removes <script> blocks and their contents from SVG.
- */
-function removeScriptTags(svg: string): string {
-  return svg.replace(/<script[\s\S]*?<\/script>/gi, '');
+const MB = 1024 * 1024;
+
+function makeCtx(opts: { body: Record<string, unknown> }) {
+  const storage = {
+    generateUploadUrl: mock(async () => 'https://s3.example.com/upload/presigned'),
+  };
+  const logger = { debug: () => {}, info: () => {}, error: () => {}, child: () => logger };
+
+  let captured: { data: unknown; status: number } = { data: null, status: 0 };
+
+  const ctx = {
+    get: (key: string) => {
+      const store: Record<string, unknown> = {
+        storage,
+        logger,
+        database: {},
+        user: { id: 'user-1' },
+        organizationId: 'org-1',
+        requestId: 'req-1',
+      };
+      return store[key];
+    },
+    req: { json: mock(async () => opts.body) },
+    json: (data: unknown, status: number) => {
+      captured = { data, status };
+      return new Response(JSON.stringify(data), { status });
+    },
+    _captured: () => captured,
+  };
+
+  return ctx as never as Parameters<typeof uploadFile>[0] & { _captured: () => typeof captured };
 }
 
-/**
- * Strips all event handler attributes (on*) from SVG elements.
- */
-function removeEventHandlers(svg: string): string {
-  return svg.replace(/\s+on\w+\s*=\s*["'][^"']*["']/gi, '');
-}
+// ---------------------------------------------------------------------------
+// [BR-31] documents path — isBlockedDocumentFile real allow/deny boundary
+// ---------------------------------------------------------------------------
 
-/**
- * Removes external href / xlink:href references (http/https/data).
- */
-function removeExternalReferences(svg: string): string {
-  // Remove xlink:href with external URL
-  svg = svg.replace(/\s+xlink:href\s*=\s*["'](https?:|data:)[^"']*["']/gi, '');
-  // Remove href with external URL on non-<a> elements (and <a> external links)
-  svg = svg.replace(/\s+href\s*=\s*["'](https?:|data:)[^"']*["']/gi, '');
-  return svg;
-}
-
-/**
- * Full SVG sanitizer — applies all BR-31 rules.
- */
-function sanitizeSvg(svg: string): string {
-  let result = removeScriptTags(svg);
-  result = removeEventHandlers(result);
-  result = removeExternalReferences(result);
-  return result;
-}
-
-/**
- * Checks whether an SVG contains any known injection patterns.
- */
-function svgHasSecurityRisk(svg: string): boolean {
-  if (/<script/i.test(svg)) return true;
-  if (/\son\w+\s*=/i.test(svg)) return true;
-  if (/xlink:href\s*=\s*["'](https?:|data:)/i.test(svg)) return true;
-  if (/\shref\s*=\s*["'](https?:|data:)/i.test(svg)) return true;
-  return false;
-}
-
-// ─── [BR-31] Tests ──────────────────────────────────────────
-
-describe('[BR-31] SVG Script Tag Removal', () => {
-  test('[BR-31] removes inline script tag', () => {
-    const malicious = `<svg xmlns="http://www.w3.org/2000/svg">
-      <script>alert("xss")</script>
-      <circle cx="50" cy="50" r="40"/>
-    </svg>`;
-    const clean = sanitizeSvg(malicious);
-    expect(clean).not.toContain('<script');
-    expect(clean).not.toContain('alert');
-    expect(clean).toContain('<circle'); // safe content preserved
+describe('[BR-31] isBlockedDocumentFile — REAL document-upload block control', () => {
+  test('[BR-31] blocks .svg with image/svg+xml mime', () => {
+    expect(isBlockedDocumentFile('icon.svg', 'image/svg+xml')).toBe(true);
   });
 
-  test('[BR-31] removes script with type attribute', () => {
-    const malicious = `<svg><script type="text/javascript">evil()</script></svg>`;
-    const clean = sanitizeSvg(malicious);
-    expect(clean).not.toContain('evil');
-    expect(svgHasSecurityRisk(clean)).toBe(false);
+  test('[BR-31] blocks .svgz on extension alone (no mime)', () => {
+    expect(isBlockedDocumentFile('logo.svgz')).toBe(true);
+  });
+
+  test('[BR-31] blocks bare image/svg+xml mime even with a non-svg filename', () => {
+    expect(isBlockedDocumentFile('tricky.png', 'image/svg+xml')).toBe(true);
+  });
+
+  test('[BR-31] allows png', () => {
+    expect(isBlockedDocumentFile('photo.png', 'image/png')).toBe(false);
+  });
+
+  test('[BR-31] allows jpeg', () => {
+    expect(isBlockedDocumentFile('photo.jpg', 'image/jpeg')).toBe(false);
+  });
+
+  test('[BR-31] allows pdf', () => {
+    expect(isBlockedDocumentFile('report.pdf', 'application/pdf')).toBe(false);
   });
 });
 
-describe('[BR-31] SVG Event Handler Removal', () => {
-  test('[BR-31] removes onload attribute', () => {
-    const malicious = `<svg onload="alert(1)" xmlns="http://www.w3.org/2000/svg"><rect/></svg>`;
-    const clean = sanitizeSvg(malicious);
-    expect(clean).not.toContain('onload');
-    expect(clean).toContain('<svg');
-    expect(clean).toContain('<rect');
+// ---------------------------------------------------------------------------
+// [BR-31] storage path — uploadFile MIME allowlist rejects SVG before DB write
+// ---------------------------------------------------------------------------
+
+describe('[BR-31] uploadFile MIME allowlist — REAL storage block control', () => {
+  test('[BR-31] rejects image/svg+xml with ValidationError BEFORE any DB write', async () => {
+    const createOne = mock(async () => ({}));
+    StorageFileRepository.prototype.createOne = createOne as never;
+
+    const ctx = makeCtx({
+      body: { filename: 'icon.svg', size: 1 * MB, mimeType: 'image/svg+xml' },
+    });
+
+    await expect(uploadFile(ctx)).rejects.toThrow(
+      "File type 'image/svg+xml' is not allowed",
+    );
+    await expect(
+      uploadFile(makeCtx({ body: { filename: 'icon.svg', size: 1 * MB, mimeType: 'image/svg+xml' } })),
+    ).rejects.toBeInstanceOf(ValidationError);
+
+    // The allowlist gate fires before repo.createOne — no row is ever attempted.
+    expect(createOne).not.toHaveBeenCalled();
   });
 
-  test('[BR-31] removes onerror and onclick attributes', () => {
-    const malicious = `<svg><image onerror="evil()" onclick="bad()"/></svg>`;
-    const clean = sanitizeSvg(malicious);
-    expect(clean).not.toContain('onerror');
-    expect(clean).not.toContain('onclick');
-  });
-});
+  test('[BR-31] positive: image/png passes the MIME allowlist gate (reaches DB write)', async () => {
+    const createOne = mock(async () => ({}));
+    StorageFileRepository.prototype.createOne = createOne as never;
 
-describe('[BR-31] SVG External Reference Removal', () => {
-  test('[BR-31] removes xlink:href with external URL', () => {
-    const malicious = `<svg><use xlink:href="https://evil.com/sprite.svg#icon"/></svg>`;
-    const clean = sanitizeSvg(malicious);
-    expect(clean).not.toContain('https://evil.com');
-  });
+    const ctx = makeCtx({
+      body: { filename: 'photo.png', size: 1 * MB, mimeType: 'image/png' },
+    });
 
-  test('[BR-31] removes data: URI references', () => {
-    const malicious = `<svg><image href="data:text/html,<script>alert(1)</script>"/></svg>`;
-    const clean = sanitizeSvg(malicious);
-    expect(clean).not.toContain('data:');
-  });
-
-  test('[BR-31] preserves safe SVG shapes and structure', () => {
-    const safe = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
-      <circle cx="50" cy="50" r="40" fill="#e8f4f8"/>
-      <rect x="10" y="10" width="30" height="30" fill="blue"/>
-      <text x="20" y="20">Hello</text>
-    </svg>`;
-    const clean = sanitizeSvg(safe);
-    expect(clean).toContain('<circle');
-    expect(clean).toContain('<rect');
-    expect(clean).toContain('<text');
-    expect(svgHasSecurityRisk(clean)).toBe(false);
+    const res = await uploadFile(ctx);
+    expect(res.status).toBe(201);
+    // png is allowed → the handler proceeded past the gate and wrote the row.
+    expect(createOne).toHaveBeenCalledTimes(1);
   });
 });
