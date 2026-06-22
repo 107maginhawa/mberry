@@ -44,6 +44,8 @@ export function ChoiceQuestion({
           <Button
             key={option}
             type="button"
+            data-choice-option={option}
+            aria-pressed={selected}
             onClick={() => handleSelect(option)}
             className={`relative flex items-center gap-3 px-5 py-4 rounded-[var(--radius-md)] text-left text-base font-medium transition-all
               ${

@@ -106,8 +106,14 @@ test.describe('Poll: Member vote + read-only results', () => {
       .catch(() => null)
 
     // ── Submit ──────────────────────────────────────────────────────
+    // Submit is `disabled={!canAdvance || submitting}` — it enables only once
+    // the selected answer has propagated into SurveyFlow state. The flake was
+    // two-fold: (1) choice-question options had no `data-choice-option` hook, so
+    // a multi-option poll selected nothing and submit never enabled (now fixed
+    // in the component); (2) under CI parallelism the enable can lag past a tight
+    // 5s window. Wait for the selection to register (enabled submit) generously.
     const submitBtn = page.getByRole('button', { name: /submit/i })
-    await expect(submitBtn).toBeEnabled({ timeout: 5000 })
+    await expect(submitBtn).toBeEnabled({ timeout: 15000 })
 
     const voteRespP = captureRouteHydration(page, /\/surveys\/[^/]+\/responses/, { method: 'POST' })
     await submitBtn.click()
