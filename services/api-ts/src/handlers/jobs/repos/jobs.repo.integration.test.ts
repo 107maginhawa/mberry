@@ -2,68 +2,35 @@
  * Real-Postgres integration coverage for JobPostingRepository +
  * JobApplicationRepository (src/handlers/jobs/repos/jobs.repo.ts).
  *
- * job_posting / job_application have plain-uuid org/person/posting columns
- * (no DB-level FK), so we isolate every row by a unique organizationId and
- * clean up exactly those rows in afterAll. Skips (documented) when Postgres
- * is unreachable, matching approvalRollback.integration.test.ts convention.
+ * Isolated via createScratch(['job_posting','job_application']) — a unique
+ * scratch schema is stood up with `CREATE TABLE (LIKE public.<t> INCLUDING ALL)`,
+ * so the suite is parallel-safe, runs in CI's ci-migrate lane (no `if (CI) return`
+ * gate), and never contends on the shared `public` schema. Teardown drops the
+ * schema wholesale, so no hand-scoped org-id cleanup loop is needed. Skips
+ * cleanly (`if (!H.dbReachable) return`) when Postgres is unreachable.
  */
 
 import { describe, test, expect, beforeAll, afterAll } from 'bun:test';
-import { Pool } from 'pg';
-import { drizzle } from 'drizzle-orm/node-postgres';
+import { createScratch } from '@/test-utils/pg-scratch';
+import type { ScratchDb } from '@/test-utils/pg-scratch';
 import { JobPostingRepository, JobApplicationRepository } from './jobs.repo';
-import { jobPostings, jobApplications } from './jobs.schema';
-import { eq } from 'drizzle-orm';
 import { NotFoundError, ValidationError } from '@/core/errors';
 
-const DB_URL =
-  process.env['DATABASE_URL'] ?? 'postgres://postgres:password@localhost:5432/monobase';
+const ORG_ID = crypto.randomUUID(); // unique scope for the rows this file creates
 
-const ORG_ID = crypto.randomUUID(); // unique scope for all rows this file creates
-
-let pool: Pool;
-let db: ReturnType<typeof drizzle>;
+let H: ScratchDb;
 let postingRepo: JobPostingRepository;
 let appRepo: JobApplicationRepository;
-let dbReachable = false;
 
 beforeAll(async () => {
-  // These tests seed the shared `public` schema; under CI's parallel suite that
-  // contends on connections + needs migrations. Run them locally only — the
-  // equivalent coverage runs against a migrated dev DB. (See SCRATCH-schema
-  // integration tests, e.g. comms-repos / approvalRollback, for the isolated
-  // pattern these should migrate to later.)
-  if (process.env['CI']) { return; }
-  pool = new Pool({ connectionString: DB_URL, connectionTimeoutMillis: 3000 });
-  try {
-    const c = await pool.connect();
-    c.release();
-    db = drizzle(pool);
-    postingRepo = new JobPostingRepository(db as never);
-    appRepo = new JobApplicationRepository(db as never);
-    dbReachable = true;
-  } catch (err) {
-    dbReachable = false;
-    // eslint-disable-next-line no-console
-    console.warn(`[jobs.repo integration] Postgres unreachable; skipping. ${(err as Error).message}`);
-  }
+  H = await createScratch(['job_posting', 'job_application']);
+  if (!H.dbReachable) return;
+  postingRepo = new JobPostingRepository(H.db as never);
+  appRepo = new JobApplicationRepository(H.db as never);
 });
 
 afterAll(async () => {
-  if (pool) {
-    try {
-      if (dbReachable) {
-        // Applications reference our postings by id; delete both by our org scope.
-        const ours = await db.select({ id: jobPostings.id }).from(jobPostings).where(eq(jobPostings.organizationId, ORG_ID));
-        for (const p of ours) {
-          await db.delete(jobApplications).where(eq(jobApplications.postingId, p.id));
-        }
-        await db.delete(jobPostings).where(eq(jobPostings.organizationId, ORG_ID));
-      }
-    } finally {
-      await pool.end();
-    }
-  }
+  await H?.teardown();
 });
 
 const basePosting = (over: Record<string, unknown> = {}) => ({
@@ -77,7 +44,7 @@ const basePosting = (over: Record<string, unknown> = {}) => ({
 
 describe('JobPostingRepository (real-PG)', () => {
   test('create auto-sets expiresAt 30 days after postedAt when expiresAt absent', async () => {
-    if (!dbReachable) return;
+    if (!H.dbReachable) return;
     const postedAt = new Date('2026-01-01T00:00:00.000Z');
     const row = await postingRepo.create(basePosting({ postedAt, status: 'active', title: 'Auto-expiry posting' }));
     expect(row.id).toBeTruthy();
@@ -87,20 +54,20 @@ describe('JobPostingRepository (real-PG)', () => {
   });
 
   test('create keeps caller expiresAt when provided (no auto-expiry branch)', async () => {
-    if (!dbReachable) return;
+    if (!H.dbReachable) return;
     const expiresAt = new Date('2026-06-01T00:00:00.000Z');
     const row = await postingRepo.create(basePosting({ postedAt: new Date('2026-01-01'), expiresAt }));
     expect(new Date(row.expiresAt!).toISOString()).toBe(expiresAt.toISOString());
   });
 
   test('create without postedAt leaves expiresAt null (skips auto-expiry branch)', async () => {
-    if (!dbReachable) return;
+    if (!H.dbReachable) return;
     const row = await postingRepo.create(basePosting({ title: 'No postedAt' }));
     expect(row.expiresAt).toBeNull();
   });
 
   test('get returns the row (hit) and undefined (miss)', async () => {
-    if (!dbReachable) return;
+    if (!H.dbReachable) return;
     const created = await postingRepo.create(basePosting({ title: 'Gettable' }));
     const hit = await postingRepo.get(created.id);
     expect(hit?.id).toBe(created.id);
@@ -109,7 +76,7 @@ describe('JobPostingRepository (real-PG)', () => {
   });
 
   test('update mutates fields and bumps updatedAt', async () => {
-    if (!dbReachable) return;
+    if (!H.dbReachable) return;
     const created = await postingRepo.create(basePosting({ title: 'Before' }));
     const updated = await postingRepo.update(created.id, { title: 'After', status: 'active' });
     expect(updated.title).toBe('After');
@@ -117,14 +84,14 @@ describe('JobPostingRepository (real-PG)', () => {
   });
 
   test('delete returns true when row exists, false when absent', async () => {
-    if (!dbReachable) return;
+    if (!H.dbReachable) return;
     const created = await postingRepo.create(basePosting({ title: 'Deleteme' }));
     expect(await postingRepo.delete(created.id)).toBe(true);
     expect(await postingRepo.delete(crypto.randomUUID())).toBe(false);
   });
 
   test('list covers every filter branch + pagination defaults', async () => {
-    if (!dbReachable) return;
+    if (!H.dbReachable) return;
     await postingRepo.create(basePosting({ title: 'Searchable Surgeon', type: 'contract', status: 'active' }));
     await postingRepo.create(basePosting({ title: 'Plain Hygienist', type: 'part_time', status: 'filled' }));
 
@@ -155,7 +122,7 @@ describe('JobPostingRepository (real-PG)', () => {
   });
 
   test('listExpired returns active postings whose expiresAt <= now', async () => {
-    if (!dbReachable) return;
+    if (!H.dbReachable) return;
     const past = new Date(Date.now() - 86400000);
     const created = await postingRepo.create(
       basePosting({ title: 'Expired active', status: 'active', postedAt: new Date('2020-01-01'), expiresAt: past }),
@@ -165,7 +132,7 @@ describe('JobPostingRepository (real-PG)', () => {
   });
 
   test('extendPosting success resets from current expiry and reactivates', async () => {
-    if (!dbReachable) return;
+    if (!H.dbReachable) return;
     const expiresAt = new Date('2026-06-01T00:00:00.000Z');
     const created = await postingRepo.create(basePosting({ title: 'Extendable', status: 'expired', postedAt: new Date('2026-01-01'), expiresAt }));
     const extended = await postingRepo.extendPosting(created.id, 10);
@@ -175,7 +142,7 @@ describe('JobPostingRepository (real-PG)', () => {
   });
 
   test('extendPosting default days param (30) when omitted', async () => {
-    if (!dbReachable) return;
+    if (!H.dbReachable) return;
     const expiresAt = new Date('2026-06-01T00:00:00.000Z');
     const created = await postingRepo.create(basePosting({ title: 'Extend default', status: 'expired', postedAt: new Date('2026-01-01'), expiresAt }));
     const extended = await postingRepo.extendPosting(created.id);
@@ -184,7 +151,7 @@ describe('JobPostingRepository (real-PG)', () => {
   });
 
   test('extendPosting throws NotFoundError when posting missing', async () => {
-    if (!dbReachable) return;
+    if (!H.dbReachable) return;
     let err: unknown;
     try {
       await postingRepo.extendPosting(crypto.randomUUID());
@@ -195,7 +162,7 @@ describe('JobPostingRepository (real-PG)', () => {
   });
 
   test('extendPosting throws ValidationError when posting has no expiresAt', async () => {
-    if (!dbReachable) return;
+    if (!H.dbReachable) return;
     const created = await postingRepo.create(basePosting({ title: 'No expiry' })); // no postedAt -> expiresAt null
     let err: unknown;
     try {
@@ -211,7 +178,7 @@ describe('JobApplicationRepository (real-PG)', () => {
   let postingId: string;
 
   test('create + get (hit/miss)', async () => {
-    if (!dbReachable) return;
+    if (!H.dbReachable) return;
     const posting = await postingRepo.create(basePosting({ title: 'App target', status: 'active', postedAt: new Date() }));
     postingId = posting.id;
     const personId = crypto.randomUUID();
@@ -226,7 +193,7 @@ describe('JobApplicationRepository (real-PG)', () => {
   });
 
   test('update mutates status + bumps updatedAt', async () => {
-    if (!dbReachable) return;
+    if (!H.dbReachable) return;
     const personId = crypto.randomUUID();
     const created = await appRepo.create({ postingId, personId });
     const updated = await appRepo.update(created.id, { status: 'screening' });
@@ -234,7 +201,7 @@ describe('JobApplicationRepository (real-PG)', () => {
   });
 
   test('findByPersonAndPosting (hit/miss)', async () => {
-    if (!dbReachable) return;
+    if (!H.dbReachable) return;
     const personId = crypto.randomUUID();
     const created = await appRepo.create({ postingId, personId });
     const hit = await appRepo.findByPersonAndPosting(personId, postingId);
@@ -244,7 +211,7 @@ describe('JobApplicationRepository (real-PG)', () => {
   });
 
   test('list covers every filter branch + no-filter + pagination', async () => {
-    if (!dbReachable) return;
+    if (!H.dbReachable) return;
     const personId = crypto.randomUUID();
     await appRepo.create({ postingId, personId, status: 'interviewed' });
 
