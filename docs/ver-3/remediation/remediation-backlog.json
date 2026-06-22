@@ -89,9 +89,10 @@
             "A FE test util that builds component props from the GENERATED OpenAPI response types (not ad-hoc literals), so mocks can't drift from the contract.",
             "Re-point existing survey/roster/results component tests at contract-typed fixtures."
           ],
-          "green": "FE components consume @monobase/api-spec types for any api.get<...> response; a backend field rename/nesting change breaks FE typecheck.",
+          "green": "FE components consume @monobase/sdk-ts generated types for any api.get<...> response; a backend field rename/nesting change breaks FE typecheck.",
           "codegraphAnchors": ["survey-results.tsx", "survey-list.tsx", "member-table.tsx", "api", "getSurvey"],
-          "status": "todo"
+          "pattern": "ESTABLISHED 2026-06-22: FE response types DERIVE from the generated SDK types via Pick / indexed-access. Full shape: `type Survey = Pick<ApiSurvey,'id'|'settings'|...> & { /* FE render-only fields */ }`. Single field: `settings?: ApiSurvey['settings']`. Import `type { Survey as ApiSurvey } from '@monobase/sdk-ts/generated/types.gen'`. A flat/renamed/un-nested field then fails `bun run typecheck` (CI lint-typecheck gate) instead of silently undefined at runtime.",
+          "status": "in-progress — surveys read-path LOCKED (survey-flow full Pick + survey-list/survey-results settings derivation); member-table already SDK-typed via hooks (the requiredCredits case was never actually wrong). Remaining: sweep other features' raw api.get<HandWritten> to the same pattern (incremental)."
         },
         {
           "id": "R1-2",

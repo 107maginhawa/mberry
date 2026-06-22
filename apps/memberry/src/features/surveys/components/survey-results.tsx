@@ -3,6 +3,7 @@ import { useQuery } from '@tanstack/react-query'
 import { BarChart3, MessageSquare, ChevronLeft, ChevronRight, Download, ShieldAlert } from 'lucide-react'
 import { Skeleton, Tabs, TabsList, TabsTrigger } from '@monobase/ui'
 import { Button } from '@monobase/ui'
+import type { Survey as ApiSurvey } from '@monobase/sdk-ts/generated/types.gen'
 import { api } from '@/lib/api'
 import { NpsGauge } from './nps-gauge'
 
@@ -33,9 +34,10 @@ interface SurveyDetail {
   description?: string
   surveyType: string
   status: string
-  // BR-40: GET /surveys/{id} returns the anonymity flag nested under settings,
-  // not flat. Reading it flat (the old `anonymous` field) silently never fired.
-  settings?: { anonymous?: boolean }
+  // BR-40 / R1-1: anonymity is nested under settings (not flat). The type is
+  // DERIVED from the generated API contract so a backend shape change breaks
+  // typecheck instead of silently never firing (the old flat read did exactly that).
+  settings?: ApiSurvey['settings']
   responseCount?: number
   questions: QuestionResult[]
 }

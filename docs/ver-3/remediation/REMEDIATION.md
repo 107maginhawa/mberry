@@ -100,6 +100,28 @@ skill. Domain-flow view: `.understand-anything/domain-graph.json`.
 
 ---
 
+## Established patterns (reuse these)
+
+**FE response types derive from the generated contract (R1-1).** Never hand-write
+an interface for an `api.get<...>` response. Import the generated type and derive:
+
+```ts
+import type { Survey as ApiSurvey } from '@monobase/sdk-ts/generated/types.gen'
+
+// whole response — Pick the contract fields, add FE render-only extensions:
+type Survey = Pick<ApiSurvey, 'id' | 'title' | 'settings' | 'questions' | 'myResponseStatus'>
+            & { /* FE-only, e.g. */ }
+// single nested field:
+settings?: ApiSurvey['settings']
+```
+
+A backend shape change (un-nesting `settings.anonymous`, a rename) then fails
+`bun run typecheck` (the CI **lint-typecheck** gate) instead of silently reading
+`undefined` at runtime — the exact class that shipped broken 3× pre-remediation.
+Applied first to the surveys read-path; sweep the rest incrementally.
+
+---
+
 ## Execute one slice
 
 1. Pick the top `status: "todo"` item in the active wave.

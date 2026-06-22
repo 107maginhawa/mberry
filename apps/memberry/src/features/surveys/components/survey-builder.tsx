@@ -491,13 +491,16 @@ export function SurveyBuilder({ orgId, onSuccess, onCancel, initialData }: Surve
               id: 'preview',
               title: formValues.title || 'Untitled Survey',
               description: formValues.description,
+              surveyType: formValues.surveyType,
+              settings: { anonymous: formValues.anonymous },
               questions: questions
                 .filter((q) => q.text.trim())
-                .map((q) => ({
+                .map((q, i) => ({
                   id: q.id,
                   type: q.type,
                   text: q.text.trim(),
                   required: q.required,
+                  order: i,
                   options: q.options,
                   maxLength: q.maxLength,
                 })),
