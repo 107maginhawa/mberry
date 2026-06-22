@@ -57,8 +57,7 @@
 **Scope:**
 - Frontend page + route for national dashboard (backend already exists)
 - Auth gate for national admin role
-- Booking: fix `triggerSlotGeneration` (ownerId → eventId lookup)
-- Booking: TypeSpec route for manual job trigger endpoint
+- ✅ Booking: manual slot-regeneration endpoint — DONE 2026-06-22 (PR #13, `0cf4340d`). `POST /booking/events/{event}/regenerate-slots` (owner/admin-gated, event-scoped, calls the existing `regenerateEventSlots` job). This resolves both the "ownerId → eventId redesign" note (the API is now event-scoped) and the "TypeSpec route for manual job trigger" item. Note: the prior `triggerSlotGeneration(ownerId)` owner-batch util was already implemented (not a throwing stub — the table below was stale) and is left as the unused batch variant.
 
 ---
 
@@ -90,8 +89,8 @@ Internal job scheduler stubs. These are NOT HTTP endpoints — they throw inside
 
 | Location | Description | Target |
 |----------|-------------|--------|
-| `booking/jobs/index.ts:61` | Slot regeneration with ownerId (needs API redesign) | Phase 47b |
-| `booking/jobs/index.ts:64` | Manual job trigger endpoint | Phase 47b |
+| ~~`booking/jobs/index.ts:61`~~ | ~~Slot regeneration with ownerId (needs API redesign)~~ | ✅ Resolved (PR #13, `0cf4340d`) — `triggerSlotGeneration` already implemented; manual slot-regen exposed event-scoped via `POST /booking/events/{event}/regenerate-slots` |
+| ~~`booking/jobs/index.ts:64`~~ | ~~Manual job trigger endpoint~~ | ✅ Resolved (PR #13) — `regenerateBookingEventSlots` handler + TypeSpec route |
 | ~~`dues/jobs/index.ts:36`~~ | ~~Payment processor webhook settlement~~ | ✅ Resolved (Phase 46) |
 | ~~`association:member/jobs/index.ts:32`~~ | ~~Payment processor integration~~ | ✅ Resolved (Phase 46) |
 
