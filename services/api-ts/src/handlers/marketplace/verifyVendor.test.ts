@@ -1,7 +1,14 @@
 /**
  * Tests for verifyVendor handler
  * Slice 045: Marketplace Vendor Management (M17)
- * BR-38: Vendor must be verified by admin before listings visible
+ *
+ * RULE (local label): Vendor must be verified by an admin/officer before its
+ * listings are visible — the vendor verification lifecycle gate.
+ *
+ * NOTE: earlier revisions tagged this "BR-38", but registry BR-38 is the
+ * deferred billing rule "Marketplace Referral Disclosure" (br-registry.json),
+ * NOT vendor verification. The 'BR-38' references below are a stale local label,
+ * not the registry BR-38 — kept descriptive only to avoid registry confusion.
  */
 
 import { describe, test, expect, mock, beforeEach } from 'bun:test';
@@ -46,7 +53,7 @@ function makeNoUserCtx(opts: Record<string, any> = {}) {
   return ctx;
 }
 
-describe('verifyVendor (BR-38)', () => {
+describe('verifyVendor (vendor verification gate — local label, not registry BR-38)', () => {
   beforeEach(() => {
     VendorRepository.prototype.findOneById = mock(async () =>
       makeVendor({ verificationStatus: 'pending' })
