@@ -453,3 +453,140 @@ describe('ElectionsRepository — vote tallies + voter count (B4 S3)', () => {
     expect(count).toBe(0);
   });
 });
+
+/**
+ * Slice 4 — 23505 double-vote prevention proven against the real unique index.
+ *
+ * THE BACKSTOP NEITHER STUB NOR OLD FIXTURE COULD PROVE: the live
+ * `election_vote_unique` UNIQUE INDEX on (election_id, voter_id, position_id) is
+ * the race-condition guard that `castVote.ts:68-74` catches and re-throws as
+ * ConflictError. The fake-db stub never had the index (it resolves to whatever
+ * rows the test hands it), and the OLD member/governance hand-DDL fixtures ALSO
+ * lacked it — so a second vote by the same voter for the same (election, position)
+ * has NEVER raised 23505 in any test. createScratch's `LIKE ... INCLUDING ALL`
+ * copies the index verbatim, so here it fires for real.
+ *
+ * This proves the index is (a) actually present in the scratch copy, (b) per
+ * (election, voter, position) — same voter+DIFFERENT position succeeds, and (c)
+ * per-voter — DIFFERENT voter+same (election, position) succeeds. Plus the
+ * `hasVoted` characterization that drives the application-layer pre-check.
+ */
+describe('ElectionsRepository — 23505 double-vote backstop (B4 S4)', () => {
+  test('a UNIQUE index on (election_id, voter_id, position_id) is present in the scratch copy (guards LIKE regression)', async () => {
+    if (!H.dbReachable) return;
+    // NOTE on index NAME: in public the index is named `election_vote_unique`, but
+    // `CREATE TABLE (LIKE ... INCLUDING ALL)` does NOT preserve index names — Postgres
+    // regenerates them (here `election_vote_election_id_voter_id_position_id_idx`). So
+    // the pre-assert matches on the load-bearing PROPERTY (a UNIQUE index over exactly
+    // those three columns), not the literal name — that is the actual double-vote
+    // backstop, and it still fails loudly if a future LIKE change drops the unique idx.
+    const { rows } = await H.scopedPool.query(
+      `SELECT indexname, indexdef FROM pg_indexes
+         WHERE schemaname = $1 AND tablename = 'election_vote' AND indexdef ILIKE '%UNIQUE%'`,
+      [H.schema],
+    );
+    const uniqueOnVoteKey = rows.filter(
+      (r) =>
+        /\(election_id, voter_id, position_id\)/.test(r.indexdef as string),
+    );
+    // Exactly one UNIQUE index over (election_id, voter_id, position_id). If a future
+    // LIKE change silently dropped it, this fails BEFORE the 23505 assert below.
+    expect(uniqueOnVoteKey).toHaveLength(1);
+    expect((uniqueOnVoteKey[0].indexdef as string)).toMatch(/UNIQUE INDEX/);
+  });
+
+  test('second vote same (election, voter, position) raises raw SQLSTATE 23505; per-position + per-voter keys allow the others; hasVoted characterization', async () => {
+    if (!H.dbReachable) return;
+    const repo = new ElectionsRepository(H.db as never);
+    const orgId = crypto.randomUUID();
+    const positionP = await seedPosition(orgId);
+    const positionR = await seedPosition(orgId);
+
+    const election = await repo.create({
+      organizationId: orgId, title: 'Double Vote Election', type: 'officer',
+      status: 'votingOpen', votingMode: 'online',
+    } as never);
+
+    const candidate1 = await seedPerson();
+    const candidate2 = await seedPerson();
+    // Two nominees on position P so the second (rejected) vote can target a DIFFERENT
+    // nominee — proving the unique key ignores nominee_id (it's (election,voter,position)).
+    const nomineeP1 = await repo.addNominee({
+      electionId: election.id, positionId: positionP, personId: candidate1,
+      nominatedBy: candidate1, organizationId: orgId,
+    });
+    const nomineeP2 = await repo.addNominee({
+      electionId: election.id, positionId: positionP, personId: candidate2,
+      nominatedBy: candidate2, organizationId: orgId,
+    });
+    // A nominee on a SECOND position so voterX can legally vote again there.
+    const nomineeR = await repo.addNominee({
+      electionId: election.id, positionId: positionR, personId: candidate1,
+      nominatedBy: candidate1, organizationId: orgId,
+    });
+
+    const voterX = await seedPerson();
+    const voterY = await seedPerson();
+
+    // First vote: voterX for (election, positionP, nomineeP1) — succeeds + persists.
+    const first = await repo.castVote({
+      electionId: election.id, positionId: positionP, nomineeId: nomineeP1.id,
+      voterId: voterX, organizationId: orgId,
+    });
+    expect(first.id).toBeTruthy();
+    const persisted = await H.scopedPool.query(
+      `SELECT count(*)::int AS n FROM "${H.schema}".election_vote
+         WHERE election_id = $1 AND voter_id = $2 AND position_id = $3`,
+      [election.id, voterX, positionP],
+    );
+    expect(persisted.rows[0].n).toBe(1);
+
+    // SECOND vote: SAME (election, voterX, positionP) but DIFFERENT nominee → 23505.
+    let dupCode: string | undefined;
+    let threw = false;
+    try {
+      await repo.castVote({
+        electionId: election.id, positionId: positionP, nomineeId: nomineeP2.id,
+        voterId: voterX, organizationId: orgId,
+      });
+    } catch (e) {
+      threw = true;
+      dupCode =
+        (e as { code?: string; cause?: { code?: string } }).code ??
+        (e as { cause?: { code?: string } }).cause?.code;
+    }
+    expect(threw).toBe(true);
+    expect(dupCode).toBe('23505'); // raw SQLSTATE off the real unique-index violation.
+    // The duplicate did NOT persist — still exactly one row for that key.
+    const stillOne = await H.scopedPool.query(
+      `SELECT count(*)::int AS n FROM "${H.schema}".election_vote
+         WHERE election_id = $1 AND voter_id = $2 AND position_id = $3`,
+      [election.id, voterX, positionP],
+    );
+    expect(stillOne.rows[0].n).toBe(1);
+
+    // Same voterX, same election, DIFFERENT position R → SUCCEEDS (key is per-position).
+    const otherPosition = await repo.castVote({
+      electionId: election.id, positionId: positionR, nomineeId: nomineeR.id,
+      voterId: voterX, organizationId: orgId,
+    });
+    expect(otherPosition.id).toBeTruthy();
+
+    // DIFFERENT voterY, same (election, positionP) → SUCCEEDS (key is per-voter).
+    const otherVoter = await repo.castVote({
+      electionId: election.id, positionId: positionP, nomineeId: nomineeP1.id,
+      voterId: voterY, organizationId: orgId,
+    });
+    expect(otherVoter.id).toBeTruthy();
+
+    // hasVoted characterization: true for the voter who voted in P, false for one who didn't.
+    expect(await repo.hasVoted(election.id, voterX, positionP)).toBe(true);
+    expect(await repo.hasVoted(election.id, voterY, positionP)).toBe(true);
+    // voterX did NOT vote on a fresh, separate position → false.
+    const freshPosition = await seedPosition(orgId);
+    expect(await repo.hasVoted(election.id, voterX, freshPosition)).toBe(false);
+    // A never-voted voter on positionP → false.
+    const voterZ = await seedPerson();
+    expect(await repo.hasVoted(election.id, voterZ, positionP)).toBe(false);
+  });
+});
