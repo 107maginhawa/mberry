@@ -7,7 +7,11 @@ test.use({ storageState: authStateFile('officer') })
 const ORG_ID = 'ed8e3a96-8126-4341-be42-e6eb7940c562'
 
 // Backend coverage: 14 unit tests in br-37.job-posting-expiry.test.ts
-// E2E stubs below define user-facing scenarios for when module M15 is built.
+// BACKEND/CONTRACT-ONLY — the M15 job board has no FE yet, so there is no UI
+// journey to drive. Expiry / public-board exclusion / extend / 3-day reminder
+// are covered on real PG by jobs/jobPostingExpiry.integration.test.ts and
+// jobs/extendJobPosting.test.ts. These remain `.skip` (NOT pending) until a
+// job-board FE exists. See docs/ver-3/remediation (BR-37).
 
 test.describe('BR-37: Job Posting Expiry', () => {
 test('unauthenticated request returns 401', async ({ page }) => {

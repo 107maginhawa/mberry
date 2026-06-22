@@ -7,7 +7,8 @@ test.use({ storageState: authStateFile('officer') })
 const ORG_ID = 'ed8e3a96-8126-4341-be42-e6eb7940c562'
 
 // Backend coverage: 9 unit tests in br-35.feed-moderation.test.ts
-// E2E stubs below define user-facing scenarios for when module M13 is built.
+// DEFERRED to v2.0 — module M13 (Feed) is not built. These are intentional
+// `.skip` placeholders (NOT pending work). See docs/ver-3/remediation (BR-35).
 
 test.describe('BR-35: Feed Content Moderation', () => {
 test('unauthenticated request returns 401', async ({ page }) => {

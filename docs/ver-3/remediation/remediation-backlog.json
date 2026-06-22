@@ -108,7 +108,9 @@
           "redTargets": ["apps/memberry/tests/e2e/stubs/survey-anonymity.spec.ts", "apps/admin national-dashboard e2e"],
           "green": "Zero .fixme() in e2e for features that are LIVE; deferred ones clearly tagged + excluded from 'pending' counts.",
           "codegraphAnchors": ["submitSurveyResponse", "listSurveyResponses"],
-          "status": "todo"
+          "finding": "IMPORTANT (2026-06-22): the whole apps/memberry/tests/e2e/stubs/ dir is testIgnore'd ('**/stubs/**') — the .fixme stubs NEVER RAN (doubly hidden). So the audit's 'false-green from .fixme' was overstated: they contribute nothing to the suite. The real fix is RUNNING e2e for live features (outside stubs/) + honest labels on the deferred placeholders.",
+          "patternNote": "e2e gotchas (hard-won): (1) auth = `test.use({ authRole: 'officer' })` (the working fixture), NOT `storageState: authStateFile(...)` (stale → 401 on every apiFetch). (2) navigate to `/org/${ORG_ID}/officer/...` before apiFetch (not `/dashboard`). (3) `.skip` is FORBIDDEN by the `lint:no-skips` gate — use `.fixme` for not-implemented placeholders. (4) state-changing apiFetch (PATCH/POST) to some survey routes 401'd even with auth — separate e2e-infra question; the BR-40 guarantee is real-PG covered so the e2e asserts the contract shape via listSurveys (GET).",
+          "status": "in-progress — BR-40 now has a REAL running e2e (officer/survey-anonymity.spec.ts: anonymity nested under settings, end-to-end). Deferred/no-FE stubs (BR-35 feed, BR-38 marketplace, BR-37 job-expiry) kept `.fixme` (the lint-allowed convention) with corrected honest headers. Remaining: real e2e for committee-dissolution (BR-39, admin) + national-dashboard (BR-36, admin)."
         },
         {
           "id": "R1-3",
