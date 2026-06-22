@@ -20,7 +20,7 @@ import { PageShell } from '@/components/patterns/page-shell'
 import { RequireRole } from '@/lib/role-gate'
 import { ErrorState } from '@/components/skeletons'
 
-export const Route = createFileRoute('/surveys/' as any)({
+export const Route = createFileRoute('/surveys/')({
   component: () => (
     <RequireRole allowed={['super', 'support', 'analyst']}>
       <SurveysPage />
