@@ -1,19 +1,22 @@
 /**
- * [M15] Slice 5 (W3 jobs S5) — duplicate-application dedup: characterize + flag the race.
+ * [M15] Slice 5 (W3 jobs S5) → W3 FOLLOW-UP S1 — duplicate-application dedup:
+ * close the TOCTOU race with a DB-level unique index + 23505 backstop.
  *
- * Dedup for job applications is a check-then-create app-layer guard:
- * createJobApplication.ts:34-37 calls findByPersonAndPosting and 409s if a row
- * already exists. There is NO unique index on (person_id, posting_id) — the live
- * catalog shows only the pkey + 3 plain btree indexes. So:
- *   - SERIALIZED: the app guard works — a second apply 409s, exactly one row.
- *   - CONCURRENT (TOCTOU): two appRepo.create for the same (person, posting) can
- *     both insert. Nothing at the DB layer stops it.
+ * Dedup for job applications was a check-then-create app-layer guard only:
+ * createJobApplication.ts calls findByPersonAndPosting and 409s if a row already
+ * exists. That guard works when serialized but races under concurrency — two
+ * requests both read "no existing row" before either inserts (TOCTOU). The
+ * original S5 CHARACTERIZED the gap (both concurrent inserts persisted, 2 rows).
  *
- * This slice CHARACTERIZES both behaviors against real PG and flags the missing
- * DB-level dedup as a data-integrity gap. We deliberately do NOT add a unique
- * index here — that is a schema change requiring a pre-backfill dedupe migration
- * (and would surface 23505 for the losing insert). Recommended as a follow-up,
- * out of scope for the floor-40 ratchet. realBugFound=false (characterize+flag).
+ * The W3 follow-up (independent review recommendation) closes the race:
+ *   - migration 0084 adds UNIQUE INDEX (person_id, posting_id) — DB backstop.
+ *   - createJobApplication catches the 23505 and re-throws the SAME ConflictError
+ *     the serial guard returns, so the concurrent loser gets a clean 409 (not 500).
+ *
+ * Defense-in-depth: the serial app-layer guard is KEPT (avoids the round-trip in
+ * the common case); the DB index is the authoritative backstop for the race.
+ * sourceChanged=true, realBugFound=false (the serial guard already worked; this
+ * closes the concurrent window + makes the loser a clean 409).
  */
 
 import { describe, test, expect, beforeAll, afterAll } from 'bun:test';
@@ -87,7 +90,7 @@ describe('[M15] job-application dedup — app-layer guard vs no DB unique index 
     expect(await countFor(posting.id, APPLICANT)).toBe(1);
   });
 
-  test('CONCURRENT race: two raw create() for same (person, posting) BOTH persist — no DB dedup (GAP)', async () => {
+  test('CONCURRENT race: two raw create() for same (person, posting) → exactly ONE persists, loser raises 23505 (DB backstop)', async () => {
     if (!H.dbReachable) return;
     const posting = await activePosting('Race Dedup Role');
     const appRepo = new JobApplicationRepository(H.db as never);
@@ -106,16 +109,80 @@ describe('[M15] job-application dedup — app-layer guard vs no DB unique index 
     const results = await Promise.allSettled([make(), make()]);
 
     const fulfilled = results.filter((r) => r.status === 'fulfilled');
-    const rejected = results.filter((r) => r.status === 'rejected');
+    const rejected = results.filter(
+      (r): r is PromiseRejectedResult => r.status === 'rejected',
+    );
 
-    // GAP: BOTH inserts succeed today. There is no unique (person_id, posting_id)
-    // index, so the DB does not reject the duplicate. If a follow-up migration adds
-    // the partial-unique index, the loser would reject with 23505 and this assert
-    // would flip — that is the intended forcing function for the fix.
-    expect(fulfilled.length).toBe(2);
-    expect(rejected.length).toBe(0);
+    // FIX: the migration-0084 UNIQUE INDEX (person_id, posting_id) closes the
+    // TOCTOU race. Exactly one insert wins; the loser is rejected by the DB.
+    expect(fulfilled.length).toBe(1);
+    expect(rejected.length).toBe(1);
 
-    // Real data-layer proof of the duplicate: two rows for the same (person, posting).
-    expect(await countFor(posting.id, APPLICANT)).toBe(2);
+    // The losing insert raised Postgres unique_violation (23505).
+    const loser = rejected[0]!.reason as { code?: string; cause?: { code?: string } };
+    const code = loser.code ?? loser.cause?.code;
+    expect(code).toBe('23505');
+
+    // Real data-layer proof: exactly ONE row for the (person, posting).
+    expect(await countFor(posting.id, APPLICANT)).toBe(1);
+  });
+
+  test('DIFFERENT (person, posting) still inserts cleanly — unique index does not over-constrain', async () => {
+    if (!H.dbReachable) return;
+    const postingX = await activePosting('Distinct Role X');
+    const postingY = await activePosting('Distinct Role Y');
+    const appRepo = new JobApplicationRepository(H.db as never);
+
+    const otherApplicant = '66666666-6666-6666-6666-666666666666';
+
+    // Same person, DIFFERENT posting → allowed.
+    const a = await appRepo.create({
+      postingId: postingX.id,
+      personId: APPLICANT,
+      appliedAt: new Date(),
+      status: 'applied',
+    });
+    // DIFFERENT person, same posting → allowed.
+    const b = await appRepo.create({
+      postingId: postingX.id,
+      personId: otherApplicant,
+      appliedAt: new Date(),
+      status: 'applied',
+    });
+    // Same person again on yet another posting → allowed.
+    const c = await appRepo.create({
+      postingId: postingY.id,
+      personId: APPLICANT,
+      appliedAt: new Date(),
+      status: 'applied',
+    });
+
+    expect(a.id).toBeTruthy();
+    expect(b.id).toBeTruthy();
+    expect(c.id).toBeTruthy();
+    expect(await countFor(postingX.id, APPLICANT)).toBe(1);
+    expect(await countFor(postingX.id, otherApplicant)).toBe(1);
+    expect(await countFor(postingY.id, APPLICANT)).toBe(1);
+  });
+
+  test('handler backstop: concurrent applies via createJobApplication → one 201, loser gets clean 409 (not 500)', async () => {
+    if (!H.dbReachable) return;
+    const posting = await activePosting('Handler Race Role');
+    const racer = '77777777-7777-7777-7777-777777777777';
+
+    // Two concurrent handler calls for the same (person, posting). Both pass the
+    // check-then-create guard, but the DB unique index rejects the loser; the
+    // handler's 23505 catch converts it to a 409 ConflictError, not an unhandled 500.
+    const call = () =>
+      createJobApplication(
+        ctxFor({ org: ORG_A, personId: racer, body: { postingId: posting.id } }),
+      );
+
+    const [r1, r2] = await Promise.all([call(), call()]);
+    const statuses = [r1.status, r2.status].sort();
+
+    expect(statuses).toEqual([201, 409]);
+    // Exactly one row persisted despite the concurrent double-apply.
+    expect(await countFor(posting.id, racer)).toBe(1);
   });
 });
