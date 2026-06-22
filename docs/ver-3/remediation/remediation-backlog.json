@@ -165,7 +165,7 @@
           "redTargets": ["a real-PG test: POST signed bounce webhook -> suppression row created", "Hurl: signed complaint -> 200 + suppressed"],
           "green": "addSuppression has a NON-test caller (the webhook handler); real-PG + contract prove bounce/complaint -> suppression.",
           "codegraphAnchors": ["addSuppression", "EmailSuppressionRepository"],
-          "status": "todo"
+          "status": "done — WIRED the missing IF trigger. New hand-wired public endpoint POST /webhooks/postmark (mirrors the Stripe webhook: pre-auth, CSRF-exempt /webhooks/ path) authenticates with a shared secret over HTTP Basic (timing-safe vs POSTMARK_WEBHOOK_SECRET, read from process.env like the PayMongo pattern), parses Postmark Bounce(HardBounce/BadEmailAddress)→hard_bounce + SpamComplaint→complaint (soft bounces/Delivery/Open ignored), resolves the org(s) that mailed the address from email_queue.recipient_email (suppression is org-scoped, provider event is account-global), and calls addSuppression per org (idempotent). addSuppression now has a NON-test caller (postmarkWebhook.ts). NO migration — suppression_reason enum already had hard_bounce+complaint. Coverage: postmarkWebhook.test.ts (pure parse+auth units), postmarkWebhook.integration.test.ts (real-PG: bounce→2-org suppression, complaint→reason, idempotent, bad-secret 401 no-write, no-secret 503, soft-bounce no-op), email-suppression-webhook.hurl (wire auth boundary 401/200). BR-56 (p0-security) → COMPLETE; BR-55 (p0-data) wired+contract'd but stays allowlisted as a UI e2e is N/A for a provider webhook. Live-HTTP verified (401/401/200). 15 unit+integ green, hurl 4/4, br-coverage PASS (44 COMPLETE)."
         },
         {
           "id": "R2-2",

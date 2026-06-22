@@ -100,6 +100,8 @@ import { getAnnouncementStats } from '@/handlers/communication/getAnnouncementSt
 import { downloadDocument } from '@/handlers/documents/downloadDocument';
 // Stripe webhook endpoint (hand-wired, must precede auth middleware)
 import { stripeWebhookHandler } from '@/handlers/member/duesspecialassessments/stripeWebhook';
+// Postmark bounce/complaint webhook (hand-wired, must precede auth middleware)
+import { postmarkWebhookHandler } from '@/handlers/email/postmarkWebhook';
 // National dashboard export (hand-wired, Cycle 8)
 import { exportNationalDashboard } from '@/handlers/association:operations/exportNationalDashboard';
 
@@ -373,6 +375,8 @@ export function createApp(config: Config): App {
 
   // @hand-wired reason="Stripe webhook, must precede auth middleware" wave="by-design"
   app.post('/webhooks/stripe', stripeWebhookHandler as unknown as Handler);
+  // @hand-wired reason="Postmark bounce/complaint webhook (BR-55/56), shared-secret auth, must precede auth middleware" wave="by-design"
+  app.post('/webhooks/postmark', postmarkWebhookHandler as unknown as Handler);
   // @hand-wired reason="RFC 8058 unsubscribe, must precede /email/* auth" wave="by-design"
   const unsubQuery = zValidator('query', z.object({
     token: z.string().min(1).max(512),

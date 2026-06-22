@@ -47,6 +47,10 @@ jobs:
       # HMAC secret for one-tap dues payment tokens — getPaymentTokenSecret()
       # 500s without it (send-link + /pay/:token/validate). Matches local dev .env.
       PAYMENT_TOKEN_SECRET: contract-test-payment-secret-do-not-use-in-prod
+      # Enables the Postmark bounce/complaint webhook (BR-55/56) so the
+      # email-suppression-webhook.hurl signed-event cases return 200 rather than
+      # 503. Matches the base64 Authorization values in that .hurl.
+      POSTMARK_WEBHOOK_SECRET: contract-test-postmark-secret-do-not-use-in-prod
       STORAGE_PROVIDER: minio
       STORAGE_ENDPOINT: http://localhost:9000
       STORAGE_BUCKET: monobase-files

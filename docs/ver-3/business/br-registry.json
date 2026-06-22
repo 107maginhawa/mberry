@@ -992,12 +992,15 @@
     "ruleClass": "p0-data",
     "tests": {
       "backend": [
-        "services/api-ts/src/handlers/email/repos/suppression.repo.createscratch.integration.test.ts"
+        "services/api-ts/src/handlers/email/repos/suppression.repo.createscratch.integration.test.ts",
+        "services/api-ts/src/handlers/email/postmarkWebhook.integration.test.ts"
       ],
-      "contract": [],
+      "contract": [
+        "specs/api/tests/contract/email-suppression-webhook.hurl"
+      ],
       "e2e": []
     },
-    "annotations": "Minted 2026-06-02 to resolve TR-P1-003. Aliases module-local M22-R4. IF hard bounce received THEN add to suppression with reason hard_bounce. 2026-06-19: durable-state half backfilled with a real-PG integration test. 2026-06-22 (Wave-2 B3): migrated off the hand-DDL suppression.repo.integration.test.ts (deleted) onto the shared createScratch harness — suppression.repo.createscratch.integration.test.ts proves hard_bounce persists+reads-back with the exact reason and a duplicate (org,email) add is an idempotent no-op (23505 swallowed, FIRST reason retained), plus the new org_id 23502 NOT-NULL invariant. KNOWN GAP (product decision): this locks only the THEN (suppression-state) half of the IF->THEN rule; the IF trigger — a provider bounce webhook that CALLS addSuppression — is still UNWIRED in the codebase (the guard protects a path nothing yet invokes)."
+    "annotations": "2026-06-23 (R2-1): the IF TRIGGER IS NOW WIRED — POST /webhooks/postmark (hand-wired, shared-secret Basic auth) verifies a Postmark hard-bounce and calls addSuppression(hard_bounce) for every org that mailed the address (resolved from email_queue.recipient_email). addSuppression now has a NON-test caller. postmarkWebhook.integration.test.ts proves bounce->suppression rows on real PG; email-suppression-webhook.hurl proves the wire auth boundary (missing/forged secret -> 401, signed -> 200). Stays p0-data INCOMPLETE only because a UI e2e is N/A for a provider webhook (no user-facing flow) — allowlisted on that basis, not on the old unwired-trigger basis. Minted 2026-06-02 to resolve TR-P1-003. Aliases module-local M22-R4. IF hard bounce received THEN add to suppression with reason hard_bounce. 2026-06-19: durable-state half backfilled with a real-PG integration test. 2026-06-22 (Wave-2 B3): migrated off the hand-DDL suppression.repo.integration.test.ts (deleted) onto the shared createScratch harness — suppression.repo.createscratch.integration.test.ts proves hard_bounce persists+reads-back with the exact reason and a duplicate (org,email) add is an idempotent no-op (23505 swallowed, FIRST reason retained), plus the new org_id 23502 NOT-NULL invariant. KNOWN GAP (product decision): this locks only the THEN (suppression-state) half of the IF->THEN rule; the IF trigger — a provider bounce webhook that CALLS addSuppression — is still UNWIRED in the codebase (the guard protects a path nothing yet invokes)."
   },
   "BR-56": {
     "rule": "Complaint Auto-Suppression / CAN-SPAM (alias M22-R5)",
@@ -1006,12 +1009,15 @@
     "ruleClass": "p0-security",
     "tests": {
       "backend": [
-        "services/api-ts/src/handlers/email/repos/suppression.repo.createscratch.integration.test.ts"
+        "services/api-ts/src/handlers/email/repos/suppression.repo.createscratch.integration.test.ts",
+        "services/api-ts/src/handlers/email/postmarkWebhook.integration.test.ts"
       ],
-      "contract": [],
+      "contract": [
+        "specs/api/tests/contract/email-suppression-webhook.hurl"
+      ],
       "e2e": []
     },
-    "annotations": "Minted 2026-06-02 to resolve TR-P1-003. Aliases module-local M22-R5. IF complaint received THEN add to suppression with reason complaint (CAN-SPAM). 2026-06-19: durable-state + tenant-isolation half backfilled with a real-PG integration test. 2026-06-22 (Wave-2 B3): migrated off the hand-DDL suppression.repo.integration.test.ts (deleted) onto the shared createScratch harness — suppression.repo.createscratch.integration.test.ts proves a complaint persists with reason complaint, suppression is strictly org-scoped (org-A complaint does NOT suppress the same address in org-B), listByOrg returns only the calling org's rows, and deleteByIdForOrg from a different org deletes NOTHING (cross-tenant guard). KNOWN GAP (product decision): this locks only the THEN (suppression-state) half; the IF trigger — a provider complaint webhook that CALLS addSuppression — is still UNWIRED in the codebase."
+    "annotations": "2026-06-23 (R2-1): COMPLETE — the IF TRIGGER IS NOW WIRED. POST /webhooks/postmark (hand-wired, shared-secret Basic auth) verifies a Postmark spam complaint and calls addSuppression(complaint) for every org that mailed the address. addSuppression now has a NON-test caller. postmarkWebhook.integration.test.ts proves complaint->suppression(reason=complaint) on real PG; email-suppression-webhook.hurl proves the wire auth boundary (missing/forged secret -> 401, signed -> 200). p0-security requires backend+contract, both now present. Minted 2026-06-02 to resolve TR-P1-003. Aliases module-local M22-R5. IF complaint received THEN add to suppression with reason complaint (CAN-SPAM). 2026-06-19: durable-state + tenant-isolation half backfilled with a real-PG integration test. 2026-06-22 (Wave-2 B3): migrated off the hand-DDL suppression.repo.integration.test.ts (deleted) onto the shared createScratch harness — suppression.repo.createscratch.integration.test.ts proves a complaint persists with reason complaint, suppression is strictly org-scoped (org-A complaint does NOT suppress the same address in org-B), listByOrg returns only the calling org's rows, and deleteByIdForOrg from a different org deletes NOTHING (cross-tenant guard). KNOWN GAP (product decision): this locks only the THEN (suppression-state) half; the IF trigger — a provider complaint webhook that CALLS addSuppression — is still UNWIRED in the codebase."
   },
   "BR-57": {
     "rule": "Transactional Email Suppression Override (alias M22-R6)",
