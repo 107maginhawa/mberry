@@ -79,6 +79,18 @@ import { EventsRepository } from '@/handlers/events/repos/events.repo';
 // --- invite repos ---
 import { InviteRepository } from '@/handlers/invite/repos/invite.repo';
 
+// --- marketplace repos ---
+// Sibling handler unit tests (listing-order.test.ts, order-discovery.test.ts,
+// cancelOrder.test.ts, getOrder.test.ts, listOrders.test.ts, vendor-crud.test.ts,
+// verifyVendor.test.ts, updateListing.test.ts) assign mock() functions directly
+// onto these prototypes and never restore them. Snapshotting + restoring here
+// (global beforeEach) lets the real-PG createScratch integration suites run the
+// genuine prototype regardless of file order — replaces the per-file
+// capturePristine/restorePristine machinery deleted in W3 marketplace S1.
+import { VendorRepository } from '@/handlers/marketplace/repos/vendor.repo';
+import { ListingRepository } from '@/handlers/marketplace/repos/listing.repo';
+import { OrderRepository } from '@/handlers/marketplace/repos/order.repo';
+
 // --- membership repos (standalone module, separate from association:member) ---
 import { MembershipRepository } from '@/handlers/membership/repos/membership.repo';
 
@@ -154,6 +166,10 @@ const PRISTINE_REPOS = [
   EventsRepository,
   // invite
   InviteRepository,
+  // marketplace — restored each beforeEach to undo sibling handler-test mock() bleed
+  VendorRepository,
+  ListingRepository,
+  OrderRepository,
   // membership (standalone)
   MembershipRepository,
   // notifs
