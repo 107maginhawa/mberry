@@ -4,7 +4,11 @@
  * Path: GET /association/marketplace/vendors/:vendorId
  * OperationId: getVendor
  *
- * Retrieve a vendor by ID
+ * Retrieve a vendor by ID, org-scoped (FIX-007 / G-10): a vendor outside the
+ * caller's org is indistinguishable from a missing one (404, not 403) — without
+ * this guard, any org could read another org's vendor record (company name,
+ * contact email, contact person) by id, a cross-org IDOR / info leak. Mirrors
+ * the guard in getOrder.ts.
  */
 
 import type { ValidatedContext } from '@/types/app';
@@ -20,11 +24,12 @@ export async function getVendor(ctx: ValidatedContext<never, never, any>): Promi
   const { vendorId } = ctx.req.valid('param');
   const db = ctx.get('database') as DatabaseInstance;
   const logger = ctx.get('logger');
+  const organizationId = ctx.get('organizationId') as string;
 
   const repo = new VendorRepository(db, logger);
   const vendor = await repo.findOneById(vendorId);
 
-  if (!vendor) {
+  if (!vendor || vendor.organizationId !== organizationId) {
     throw new NotFoundError('Vendor not found');
   }
 
