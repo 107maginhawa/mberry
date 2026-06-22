@@ -129,6 +129,9 @@ Dynamic configuration per association/tier. Currently hardcoded values.
 ### Carry-forwards
 
 **`elections/updateElectionStatus`** — orphan handler. Implemented + tested (24 refs across 5 sibling tests asserting BR-33, transition guards, status-changed event, cancellation cascade) but unwired (no TypeSpec operation, not in `app.ts`). Per-transition successors (`openElectionVoting`, `openElectionNominations`, `certifyElection` in `association:member/`) cover the `votingOpen`/`published`/etc. branches; the `cancelled` branch has no wired path. Build a real `cancelElection` operation when product needs it, then retire `updateElectionStatus` + its dependent tests in one pass. Reference: F5 cleanup, commit 9cc394a5.
+> **B4 decision (2026-06-22):** `elections/updateElectionStatus.ts` = unwired orphan (BR-33 cancel → `withdrawAllNominees`/`voidVotesForNominee` cascade has no wired successor); **LEFT for B4** — the repo-level cancel cascade is now real-PG covered (`elections.repo.integration.test.ts` S5). Revisit if BR-33 changes in `member/governance`.
+
+**`platformadmin/exportDashboardReport`** — unwired orphan (found B4 2026-06-22). Its access-control uses exact-equality role check (`user.role === 'platform_admin' || user.role === 'super'`), the SAME bug class fixed in `utils/national-access.ts` `isPlatformAdmin` (commit e9afbf2f) — it 403s a comma-separated multi-role seed admin. **Left unfixed by design** because the handler has NO route (no entry in `routes.ts`/`app.ts`/`registry`); the wired national-dashboard export is `association:operations/exportNationalDashboard`, which already does `split(',')+includes`. The orphan's own test file even documents a path (`POST /admin/national/export/:associationId`) that does not exist. If `exportDashboardReport` is ever wired, fix the role check first (reuse the `isPlatformAdmin` helper).
 
 ### Domain Module Decomposition — **CLOSED 2026-06-07** (P1-11)
 
