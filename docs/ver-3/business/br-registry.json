@@ -1148,12 +1148,15 @@
     "tests": {
       "backend": [
         "services/api-ts/src/handlers/billing/repos/billing-config.repo.test.ts",
-        "services/api-ts/src/core/gateway.test.ts"
+        "services/api-ts/src/core/gateway.test.ts",
+        "services/api-ts/src/handlers/member/duesspecialassessments/gateway-config-encryption.integration.test.ts"
       ],
-      "contract": [],
+      "contract": [
+        "specs/api/tests/contract/assoc-dues-gateway-flow.hurl"
+      ],
       "e2e": []
     },
-    "annotations": "Minted 2026-06-02 to resolve TR-P1-002. Aliases module-local M21-R6. IF billing config keys stored THEN encrypt with AES-256 (Stripe publishable/secret/webhook keys; never logged or exposed in API responses). Backs AC-M21-007."
+    "annotations": "2026-06-23 (R2-3): COMPLETE — black-box confidentiality now proven at two layers. gateway-config-encryption.integration.test.ts drives the REAL upsert+get handlers on real PG: the stored dues_gateway_config.encrypted_secret is AES-256-GCM ciphertext (≠ plaintext, round-trips via decryptCredential) and neither handler response exposes the encrypted OR plaintext secret. assoc-dues-gateway-flow.hurl (was a sign-up stub) now signs in as the seed association:admin, PUTs a gateway secret, GETs it back, and asserts both responses carry only provider/publicKey with `encryptedSecret`/`secretKey` NOT present. Minted 2026-06-02 to resolve TR-P1-002. Aliases module-local M21-R6. IF billing config keys stored THEN encrypt with AES-256 (Stripe publishable/secret/webhook keys; never logged or exposed in API responses). Backs AC-M21-007."
   },
   "BR-66": {
     "rule": "Invoice Total Computed From Line Items (alias M21-R7)",
