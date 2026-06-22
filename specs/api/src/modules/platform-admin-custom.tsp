@@ -314,6 +314,9 @@ model CommitteeSummary {
 
   @doc("Committee status")
   status?: string;
+
+  @doc("When the committee was dissolved (status='completed'), if applicable (BR-39)")
+  dissolvedAt?: utcDateTime;
 }
 
 @doc("Committee detail with member list")
@@ -323,6 +326,13 @@ model CommitteeDetail extends CommitteeSummary {
 
   @doc("Committee member list")
   members?: Record<unknown>[];
+}
+
+@doc("Request to dissolve (complete) a committee — BR-39")
+model DissolveCommitteeRequest {
+  @doc("Optional reason recorded on the committee's dissolution record")
+  @maxLength(2000)
+  reason?: string;
 }
 
 // ---------------------------------------------------------------------------
@@ -475,6 +485,23 @@ namespace PlatformAdminCustomModule {
       @path id: string,
     ): ApiOkResponse<{ data: CommitteeDetail }>
       | ApiNotFoundResponse
+      | ApiUnauthorizedResponse
+      | ApiForbiddenResponse;
+
+    @doc("Dissolve (complete) a committee — BR-39. Sets status to completed, stamps dissolvedAt/dissolvedBy/dissolutionReason, and deactivates member access while RETAINING all committee data (members, tasks, history). Re-dissolving an already-completed committee returns 409. Platform admin only.")
+    @operationId("dissolveCommittee")
+    @post
+    @route("/admin/committees/{id}/dissolve")
+    @useAuth(bearerAuth)
+    @extension("x-security-required-roles", #["platform_admin"])
+    @extension("x-audit", #{ action: "complete", resourceType: "committee" })
+    dissolveCommittee(
+      @path id: string,
+      @body body: DissolveCommitteeRequest,
+    ): ApiOkResponse<{ data: CommitteeDetail }>
+      | ApiBadRequestResponse
+      | ApiNotFoundResponse
+      | ApiConflictResponse
       | ApiUnauthorizedResponse
       | ApiForbiddenResponse;
   }

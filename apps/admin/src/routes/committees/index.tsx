@@ -2,6 +2,8 @@ import { createFileRoute } from '@tanstack/react-router'
 import { useQuery } from '@tanstack/react-query'
 import { Users2, Search } from 'lucide-react'
 import { useState } from 'react'
+import { toast } from 'sonner'
+import { CSRF_HEADER, readCsrfCookie } from '@monobase/sdk-ts/csrf'
 import {
   Button,
   Input,
@@ -40,6 +42,7 @@ const PAGE_SIZE = 25
 function CommitteesPage() {
   const [search, setSearch] = useState('')
   const [page, setPage] = useState(0)
+  const [dissolvingId, setDissolvingId] = useState<string | null>(null)
 
   const { data, isLoading, isError, refetch } = useQuery<{ data: CommitteeItem[] }>({
     queryKey: ['admin-committees'],
@@ -71,6 +74,34 @@ function CommitteesPage() {
   const committees = filtered.slice(page * PAGE_SIZE, (page + 1) * PAGE_SIZE)
 
   const activeCount = allCommittees.filter((c) => c.status === 'active').length
+
+  // BR-39: dissolve (complete) a committee. Members lose access; all data is
+  // retained. Idempotent — the API rejects re-dissolving with 409.
+  async function handleDissolve(c: CommitteeItem) {
+    if (!window.confirm(`Dissolve "${c.name}"? Members lose committee access, but all committee data is retained for the record. This cannot be undone.`)) {
+      return
+    }
+    setDissolvingId(c.id)
+    try {
+      const csrfToken = readCsrfCookie()
+      const res = await fetch(`/api/admin/committees/${c.id}/dissolve`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          ...(csrfToken ? { [CSRF_HEADER]: csrfToken } : {}),
+        },
+        credentials: 'include',
+        body: JSON.stringify({}),
+      })
+      if (!res.ok) throw new Error(`HTTP ${res.status}`)
+      toast.success(`"${c.name}" dissolved`)
+      refetch()
+    } catch {
+      toast.error(`Failed to dissolve "${c.name}"`)
+    } finally {
+      setDissolvingId(null)
+    }
+  }
 
   return (
     <PageShell
@@ -119,18 +150,19 @@ function CommitteesPage() {
               <TableHead className="p-4 text-sm">Status</TableHead>
               <TableHead className="p-4 text-sm text-right">Members</TableHead>
               <TableHead className="p-4 text-sm">Created</TableHead>
+              <TableHead className="p-4 text-sm text-right">Actions</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {isLoading ? (
               <TableRow>
-                <TableCell colSpan={5} className="p-8 text-center text-muted-foreground animate-pulse">
+                <TableCell colSpan={6} className="p-8 text-center text-muted-foreground animate-pulse">
                   Loading committees...
                 </TableCell>
               </TableRow>
             ) : committees.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={5} className="p-8 text-center text-muted-foreground">
+                <TableCell colSpan={6} className="p-8 text-center text-muted-foreground">
                   <Users2 className="w-8 h-8 mx-auto mb-2 opacity-40" />
                   <p>No committees found{search ? ` matching "${search}"` : ''}</p>
                 </TableCell>
@@ -160,6 +192,24 @@ function CommitteesPage() {
                       day: 'numeric',
                       year: 'numeric',
                     })}
+                  </TableCell>
+                  <TableCell className="p-4 text-sm text-right">
+                    {committee.status === 'active' ? (
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => handleDissolve(committee)}
+                        disabled={dissolvingId === committee.id}
+                      >
+                        {dissolvingId === committee.id ? 'Dissolving...' : 'Dissolve'}
+                      </Button>
+                    ) : committee.dissolvedAt ? (
+                      <span className="text-xs text-muted-foreground">
+                        Dissolved {new Date(committee.dissolvedAt).toLocaleDateString('en-PH', { month: 'short', day: 'numeric', year: 'numeric' })}
+                      </span>
+                    ) : (
+                      <span className="text-xs text-muted-foreground">--</span>
+                    )}
                   </TableCell>
                 </TableRow>
               ))

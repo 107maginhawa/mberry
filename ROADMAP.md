@@ -113,7 +113,7 @@ Business rules defined but modules not yet built. These are product features, no
 | BR-36 | National Dashboard Access | 2 | M14 | Cross-chapter aggregate views for national admins |
 | BR-37 | Job Posting Expiry | 2 | M15 | 30-day expiry with reminders and extensions |
 | BR-38 | Marketplace Referral Disclosure | 2 | M16 | Referral transparency for marketplace listings |
-| BR-39 | Committee Dissolution | 3 | M19 | Committee lifecycle completion with data retention |
+| BR-39 | Committee Dissolution | 3 | M19 | Committee lifecycle completion with data retention — **SHIPPED (2026-06-22)**: `POST /admin/committees/{id}/dissolve` (platform-admin) → status `completed` + dissolvedAt/By/reason, deactivates members (rows retained), idempotent 409; admin "Dissolve" action; real-PG + live-verified. Also fixed a committee-status spec/DB drift (canonical = `completed`). Still deferred: contract/e2e + member workspace read-gating + full M19. |
 | BR-40 | Survey Anonymity | 3 | M18 | Anonymous survey response guarantees — **PARTIAL (2026-06-22)**: core anonymity hardened (anonymous responses store null responder_id **and** null created_by/updated_by — closed an audit-column deanonymization vector) + both advisory warnings shipped (respondent free-text PII warning, creator <10 small-pool warning). Still deferred to v2.0: anonymous one-response-per-member dedup (intentionally traded for anonymity) + full M18 milestone. |
 
 ---

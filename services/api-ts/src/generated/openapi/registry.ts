@@ -86,6 +86,7 @@ import { listBreaches } from '../../handlers/platformadmin/listBreaches';
 import { updateBreachStatus } from '../../handlers/platformadmin/updateBreachStatus';
 import { listAllCommittees } from '../../handlers/platformadmin/listAllCommittees';
 import { getCommittee } from '../../handlers/platformadmin/getCommittee';
+import { dissolveCommittee } from '../../handlers/platformadmin/dissolveCommittee';
 import { setFeatureFlag } from '../../handlers/platformadmin/setFeatureFlag';
 import { listFeatureFlags } from '../../handlers/platformadmin/listFeatureFlags';
 import { deleteFeatureFlag } from '../../handlers/platformadmin/deleteFeatureFlag';
@@ -572,6 +573,7 @@ export const registry = {
   updateBreachStatus,
   listAllCommittees,
   getCommittee,
+  dissolveCommittee,
   setFeatureFlag,
   listFeatureFlags,
   deleteFeatureFlag,
