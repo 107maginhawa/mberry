@@ -420,6 +420,7 @@ import { createScheduleException } from '../../handlers/booking/createScheduleEx
 import { listScheduleExceptions } from '../../handlers/booking/listScheduleExceptions';
 import { getScheduleException } from '../../handlers/booking/getScheduleException';
 import { deleteScheduleException } from '../../handlers/booking/deleteScheduleException';
+import { regenerateBookingEventSlots } from '../../handlers/booking/regenerateBookingEventSlots';
 import { listEventSlots } from '../../handlers/booking/listEventSlots';
 import { getTimeSlot } from '../../handlers/booking/getTimeSlot';
 import { createChatRoom } from '../../handlers/comms/createChatRoom';
@@ -939,6 +940,7 @@ export const registry = {
   listScheduleExceptions,
   getScheduleException,
   deleteScheduleException,
+  regenerateBookingEventSlots,
   listEventSlots,
   getTimeSlot,
 

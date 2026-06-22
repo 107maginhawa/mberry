@@ -2971,6 +2971,14 @@ export function registerRoutes(app: Hono<{ Variables: Variables }>) {
     registry.deleteScheduleException as unknown as Handler
   );
 
+  // regenerateBookingEventSlots
+  app.post('/booking/events/:event/regenerate-slots',
+    authMiddleware({ roles: ["event:owner", "admin"] }),
+    zValidator('param', validators.RegenerateBookingEventSlotsParams, validationErrorHandler),
+    createExpandMiddleware("BookingEvent"),
+    registry.regenerateBookingEventSlots as unknown as Handler
+  );
+
   // listEventSlots
   app.get('/booking/events/:event/slots',
     authMiddleware({ required: false }),

@@ -13442,6 +13442,13 @@ export type DeleteScheduleExceptionParams = z.infer<typeof DeleteScheduleExcepti
 
 export const DeleteScheduleExceptionResponse = z.void();
 
+export const RegenerateBookingEventSlotsParams = z.object({
+  event: UUIDSchema,
+});
+export type RegenerateBookingEventSlotsParams = z.infer<typeof RegenerateBookingEventSlotsParams>;
+
+export const RegenerateBookingEventSlotsResponse = BookingEventSchema;
+
 export const ListEventSlotsParams = z.object({
   event: UUIDSchema,
 });
