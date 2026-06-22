@@ -142,3 +142,108 @@ describe('VendorRepository (real-PG / createScratch)', () => {
     await expect(repo.rejectVendor(crypto.randomUUID(), crypto.randomUUID())).rejects.toBeInstanceOf(NotFoundError);
   });
 });
+
+/**
+ * Slice 2 (W3 marketplace) — Vendor FSM (BR-38 verification lifecycle) proven at
+ * the SQL boundary. Slice 1 asserted the repo *return value*; here we read the
+ * persisted row back via `H.scopedPool` so the transition is proven on disk
+ * (real enum value + actually-stamped timestamp), and we prove the
+ * `vendor_status` enum column type itself rejects garbage (22P02) — the enum is
+ * enforced by the live column type copied via `LIKE ... INCLUDING ALL`, not just
+ * the Drizzle/TS type.
+ */
+describe('VendorRepository FSM @ SQL boundary (W3 S2 / BR-38)', () => {
+  async function readVendor(id: string) {
+    const { rows } = await H.scopedPool.query(
+      `SELECT verification_status, verified_by, verified_at, updated_by
+         FROM "${H.schema}".vendor WHERE id = $1`,
+      [id],
+    );
+    return rows[0] as
+      | { verification_status: string; verified_by: string | null; verified_at: Date | null; updated_by: string | null }
+      | undefined;
+  }
+
+  test('verifyVendor stamps verified_by/verified_at on the persisted row (pending→verified)', async () => {
+    if (!H.dbReachable) return;
+    const repo = new VendorRepository(H.db as never);
+    const org = crypto.randomUUID();
+    const admin = crypto.randomUUID();
+    const v = await repo.createOne(newVendor(org, { verificationStatus: 'pending' }));
+
+    await repo.verifyVendor(v.id, admin);
+
+    const row = await readVendor(v.id);
+    expect(row).toBeDefined();
+    expect(row!.verification_status).toBe('verified');
+    expect(row!.verified_by).toBe(admin);
+    expect(row!.verified_at).not.toBeNull();
+    expect(row!.verified_at).toBeInstanceOf(Date);
+  });
+
+  test('suspendVendor persists suspended (verified→suspended); suspend on pending → ConflictError, row unchanged', async () => {
+    if (!H.dbReachable) return;
+    const repo = new VendorRepository(H.db as never);
+    const org = crypto.randomUUID();
+    const by = crypto.randomUUID();
+
+    const ver = await repo.createOne(newVendor(org, { verificationStatus: 'verified' }));
+    await repo.suspendVendor(ver.id, by);
+    const sRow = await readVendor(ver.id);
+    expect(sRow!.verification_status).toBe('suspended');
+    expect(sRow!.updated_by).toBe(by);
+
+    // pending → suspended is NOT a valid edge (pending→[verified,rejected])
+    const pend = await repo.createOne(newVendor(org, { verificationStatus: 'pending' }));
+    await expect(repo.suspendVendor(pend.id, by)).rejects.toBeInstanceOf(ConflictError);
+    const pRow = await readVendor(pend.id);
+    expect(pRow!.verification_status).toBe('pending'); // rolled forward into nothing — still pending on disk
+  });
+
+  test('rejectVendor persists rejected (pending→rejected, terminal); reject on verified → ConflictError, row unchanged', async () => {
+    if (!H.dbReachable) return;
+    const repo = new VendorRepository(H.db as never);
+    const org = crypto.randomUUID();
+    const by = crypto.randomUUID();
+
+    const pend = await repo.createOne(newVendor(org, { verificationStatus: 'pending' }));
+    await repo.rejectVendor(pend.id, by);
+    const rRow = await readVendor(pend.id);
+    expect(rRow!.verification_status).toBe('rejected');
+
+    // verified → rejected is NOT a valid edge (verified→[suspended])
+    const ver = await repo.createOne(newVendor(org, { verificationStatus: 'verified' }));
+    await expect(repo.rejectVendor(ver.id, by)).rejects.toBeInstanceOf(ConflictError);
+    const vRow = await readVendor(ver.id);
+    expect(vRow!.verification_status).toBe('verified'); // unchanged on disk
+  });
+
+  test('every FSM method NotFoundError on a random uuid (no row written)', async () => {
+    if (!H.dbReachable) return;
+    const repo = new VendorRepository(H.db as never);
+    const by = crypto.randomUUID();
+    await expect(repo.verifyVendor(crypto.randomUUID(), by)).rejects.toBeInstanceOf(NotFoundError);
+    await expect(repo.suspendVendor(crypto.randomUUID(), by)).rejects.toBeInstanceOf(NotFoundError);
+    await expect(repo.rejectVendor(crypto.randomUUID(), by)).rejects.toBeInstanceOf(NotFoundError);
+  });
+
+  test('vendor_status enum column rejects a bogus value at the SQL boundary (22P02)', async () => {
+    if (!H.dbReachable) return;
+    // Raw insert bypassing Drizzle's TS type — the live column type (vendor_status
+    // enum, copied by LIKE INCLUDING ALL) must reject 'bogus' with invalid_text_representation.
+    let code: string | undefined;
+    try {
+      await H.scopedPool.query(
+        `INSERT INTO "${H.schema}".vendor
+           (organization_id, company_name, category, description, contact_email, verification_status, created_by, updated_by)
+         VALUES ($1, 'Bogus Co', 'supplies', 'd', 'b@x.test', 'bogus', $2, $2)`,
+        [crypto.randomUUID(), crypto.randomUUID()],
+      );
+      throw new Error('expected enum insert to fail');
+    } catch (e) {
+      code = (e as { code?: string; cause?: { code?: string } }).code
+        ?? (e as { cause?: { code?: string } }).cause?.code;
+    }
+    expect(code).toBe('22P02');
+  });
+});
