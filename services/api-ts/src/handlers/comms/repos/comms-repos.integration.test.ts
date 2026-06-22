@@ -6,19 +6,31 @@
  *   - ChatMessageRepository    (message create/pagination/video-call lifecycle)
  *   - ChatRoomRepository       (org-scoping, participant filters, atomic claims)
  *
- * Pattern: per-run scratch schema with hand-written DDL (mirrors
- * member/governance/position-identity.integration.test.ts). Every method is
- * driven against REAL drizzle queries on REAL Postgres rows, so the query
- * builders, WHERE predicates, pagination, ordering, soft-delete/archive and
- * conflict branches all execute end-to-end.
+ * Pattern: per-run scratch schema seeded by `createScratch([...])`, which copies
+ * the REAL public table structures via `CREATE TABLE … (LIKE public.<t> INCLUDING
+ * ALL)`. This is schema-faithful — the real PG enum types (`chat_room_status`,
+ * `chat_room_type`, `message_type`, `chat_room_member_role`), the real
+ * `chat_room_members_unique` constraint, the real NOT NULL set and CHECKs are all
+ * copied, so a repo query reading a column/enum the old hand-written DDL
+ * mis-modeled (it declared the enum columns as plain `text`) can no longer pass
+ * against a thinner fake table. Every repo method is driven against REAL drizzle
+ * queries on REAL Postgres rows, so the query builders, WHERE predicates,
+ * pagination, ordering, soft-delete/archive and conflict branches all execute
+ * end-to-end.
  *
- * Requires a reachable Postgres (DATABASE_URL or the repo default). If
- * unreachable the suite skips with a clear message rather than false-failing.
+ * NOTE: `createScratch` does NOT copy foreign keys (LIKE never copies FKs), so the
+ * `chat_room_member.chat_room_id`/`chat_message.chat_room_id` ON DELETE CASCADE
+ * FKs are absent. Parent `chat_room` rows are seeded first via `insertRoom`; no
+ * test in this suite relies on FK cascade-delete.
+ *
+ * Requires a reachable Postgres (DATABASE_URL or the repo default) with the public
+ * schema already migrated. If unreachable the suite skips cleanly
+ * (`if (!H.dbReachable) return`).
  */
 
 import { describe, test, expect, beforeAll, afterAll } from 'bun:test';
-import { Pool } from 'pg';
-import { drizzle } from 'drizzle-orm/node-postgres';
+import { createScratch } from '@/test-utils/pg-scratch';
+import type { ScratchDb } from '@/test-utils/pg-scratch';
 import { ChatRoomMemberRepository } from './chatRoomMember.repo';
 import { ChatMessageRepository } from './chatMessage.repo';
 import { ChatRoomRepository } from './chatRoom.repo';
@@ -26,15 +38,7 @@ import { restoreRepo } from '@/test-utils/make-ctx';
 import { ConflictError, NotFoundError, ValidationError, BusinessLogicError } from '@/core/errors';
 import type { CallParticipant, VideoCallData } from './comms.schema';
 
-const DB_URL =
-  process.env['DATABASE_URL'] ?? 'postgres://postgres:password@localhost:5432/monobase';
-
-const TEST_SCHEMA = `comms_repos_${Date.now()}_${Math.floor(Math.random() * 1e6)}`;
-
-let setupPool: Pool;
-let scopedPool: Pool;
-let db: ReturnType<typeof drizzle>;
-let dbReachable = false;
+let H: ScratchDb;
 
 const noopLogger = { debug() {}, info() {}, warn() {}, error() {} } as any;
 
@@ -52,61 +56,12 @@ function freshOrg(): string {
   return crypto.randomUUID();
 }
 
-async function ddl(client: any) {
-  await client.query(`CREATE SCHEMA IF NOT EXISTS "${TEST_SCHEMA}"`);
-  await client.query(`SET search_path TO "${TEST_SCHEMA}", public`);
-
-  const baseCols = `
-    version integer NOT NULL DEFAULT 1,
-    created_by uuid,
-    updated_by uuid,
-    created_at timestamptz NOT NULL DEFAULT now(),
-    updated_at timestamptz NOT NULL DEFAULT now()`;
-
-  // chat_room — enums modelled as text (drizzle sends the literal string).
-  await client.query(`
-    CREATE TABLE "${TEST_SCHEMA}".chat_room (
-      id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
-      organization_id uuid NOT NULL,
-      name text,
-      room_type text NOT NULL DEFAULT 'group',
-      participants jsonb NOT NULL,
-      admins jsonb NOT NULL,
-      context_id text,
-      status text NOT NULL DEFAULT 'active',
-      last_message_at timestamptz,
-      message_count integer NOT NULL DEFAULT 0,
-      active_video_call_message_id uuid,${baseCols}
-    )
-  `);
-
-  await client.query(`
-    CREATE TABLE "${TEST_SCHEMA}".chat_room_member (
-      id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
-      chat_room_id uuid NOT NULL REFERENCES "${TEST_SCHEMA}".chat_room(id) ON DELETE CASCADE,
-      person_id uuid NOT NULL,
-      role text NOT NULL DEFAULT 'member',
-      joined_at timestamptz NOT NULL DEFAULT now(),
-      last_read_at timestamptz,
-      muted_until timestamptz,
-      CONSTRAINT chat_room_members_unique UNIQUE (chat_room_id, person_id)
-    )
-  `);
-
-  await client.query(`
-    CREATE TABLE "${TEST_SCHEMA}".chat_message (
-      id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
-      organization_id uuid NOT NULL,
-      chat_room_id uuid NOT NULL REFERENCES "${TEST_SCHEMA}".chat_room(id) ON DELETE CASCADE,
-      sender_id uuid NOT NULL,
-      timestamp timestamptz NOT NULL DEFAULT now(),
-      message_type text NOT NULL,
-      parent_message_id uuid,
-      reply_count integer NOT NULL DEFAULT 0,
-      message text,
-      video_call_data jsonb,${baseCols}
-    )
-  `);
+/** Capture a Postgres SQLSTATE code from a thrown driver error. */
+function pgCode(e: unknown): string | undefined {
+  return (
+    (e as { code?: string; cause?: { code?: string } }).code ??
+    (e as { cause?: { code?: string } }).cause?.code
+  );
 }
 
 /** Insert a chat room directly (bypassing repo) and return its id. */
@@ -119,8 +74,8 @@ async function insertRoom(opts: {
   roomType?: string;
   lastMessageAt?: Date | null;
 }): Promise<string> {
-  const res = await scopedPool.query(
-    `INSERT INTO "${TEST_SCHEMA}".chat_room
+  const res = await H.scopedPool.query(
+    `INSERT INTO chat_room
        (organization_id, participants, admins, context_id, status, room_type, last_message_at, message_count)
      VALUES ($1,$2::jsonb,$3::jsonb,$4,$5,$6,$7,0)
      RETURNING id`,
@@ -146,63 +101,21 @@ beforeAll(async () => {
   restoreRepo(ChatMessageRepository);
   restoreRepo(ChatRoomRepository);
 
-  setupPool = new Pool({ connectionString: DB_URL, connectionTimeoutMillis: 3000 });
-  try {
-    const client = await setupPool.connect();
-    try {
-      await ddl(client);
-      dbReachable = true;
-    } finally {
-      client.release();
-    }
-  } catch (err) {
-    dbReachable = false;
-    // eslint-disable-next-line no-console
-    console.warn(`[comms-repos integration] Postgres unreachable, skipping: ${(err as Error).message}`);
-    return;
-  }
-
-  // Pin search_path at connection establishment via libpq `options` (-c …).
-  // The previous `on('connect', c => c.query('SET search_path …'))` was
-  // fire-and-forget: under pool churn a query could run on a connection before
-  // its search_path was set, hit `public` instead of TEST_SCHEMA, and return
-  // wrong counts — the source of this suite's flakiness under parallel DB load.
-  // Setting it as a startup option is applied before any query runs, no race.
-  scopedPool = new Pool({
-    connectionString: DB_URL,
-    options: `-c search_path="${TEST_SCHEMA}",public`,
-    // Small, patient pool: in the full suite many real-DB test files run and
-    // contend for Postgres connections. A bounded pool with a generous acquire
-    // timeout keeps this test from losing the connection race intermittently.
-    max: 4,
-    connectionTimeoutMillis: 15000,
-  });
-  db = drizzle(scopedPool);
+  // Schema-faithful scratch schema: LIKE public.<t> INCLUDING ALL copies the real
+  // enum types, the chat_room_members_unique constraint and the real NOT NULL set.
+  H = await createScratch(['chat_room', 'chat_room_member', 'chat_message']);
 });
 
 afterAll(async () => {
-  if (dbReachable) {
-    try {
-      const client = await setupPool.connect();
-      try {
-        await client.query(`DROP SCHEMA IF EXISTS "${TEST_SCHEMA}" CASCADE`);
-      } finally {
-        client.release();
-      }
-    } catch {
-      /* best-effort cleanup */
-    }
-  }
-  if (scopedPool) await scopedPool.end();
-  if (setupPool) await setupPool.end();
+  await H?.teardown();
 });
 
 // ─── ChatRoomMemberRepository ─────────────────────────────────────────────
 
 describe('ChatRoomMemberRepository (real DB)', () => {
   test('addMember inserts, returns the row; duplicate returns existing (onConflictDoNothing)', async () => {
-    if (!dbReachable) return;
-    const repo = new ChatRoomMemberRepository(db as any, noopLogger);
+    if (!H.dbReachable) return;
+    const repo = new ChatRoomMemberRepository(H.db as any, noopLogger);
     const roomId = await insertRoom({});
     const person = '00000000-0000-4000-8000-000000000101';
 
@@ -218,8 +131,8 @@ describe('ChatRoomMemberRepository (real DB)', () => {
   });
 
   test('addMembers bulk insert; empty array short-circuits to []', async () => {
-    if (!dbReachable) return;
-    const repo = new ChatRoomMemberRepository(db as any, noopLogger);
+    if (!H.dbReachable) return;
+    const repo = new ChatRoomMemberRepository(H.db as any, noopLogger);
     const roomId = await insertRoom({});
 
     expect(await repo.addMembers(roomId, [])).toEqual([]);
@@ -233,8 +146,8 @@ describe('ChatRoomMemberRepository (real DB)', () => {
   });
 
   test('isMember true/false; getRoomMembers ordered by joinedAt', async () => {
-    if (!dbReachable) return;
-    const repo = new ChatRoomMemberRepository(db as any, noopLogger);
+    if (!H.dbReachable) return;
+    const repo = new ChatRoomMemberRepository(H.db as any, noopLogger);
     const roomId = await insertRoom({});
     const p1 = '00000000-0000-4000-8000-000000000301';
     const p2 = '00000000-0000-4000-8000-000000000302';
@@ -249,8 +162,8 @@ describe('ChatRoomMemberRepository (real DB)', () => {
   });
 
   test('removeMember deletes the membership', async () => {
-    if (!dbReachable) return;
-    const repo = new ChatRoomMemberRepository(db as any, noopLogger);
+    if (!H.dbReachable) return;
+    const repo = new ChatRoomMemberRepository(H.db as any, noopLogger);
     const roomId = await insertRoom({});
     const p = '00000000-0000-4000-8000-000000000401';
     await repo.addMember(roomId, p);
@@ -259,9 +172,9 @@ describe('ChatRoomMemberRepository (real DB)', () => {
   });
 
   test('markRead sets lastReadAt; getUnreadCount honours read cursor', async () => {
-    if (!dbReachable) return;
-    const memberRepo = new ChatRoomMemberRepository(db as any, noopLogger);
-    const msgRepo = new ChatMessageRepository(db as any, noopLogger);
+    if (!H.dbReachable) return;
+    const memberRepo = new ChatRoomMemberRepository(H.db as any, noopLogger);
+    const msgRepo = new ChatMessageRepository(H.db as any, noopLogger);
     const roomId = await insertRoom({ organizationId: ORG_A });
     const p = '00000000-0000-4000-8000-000000000501';
     await memberRepo.addMember(roomId, p);
@@ -290,16 +203,16 @@ describe('ChatRoomMemberRepository (real DB)', () => {
   });
 
   test('getUnreadCount returns 0 for a non-member', async () => {
-    if (!dbReachable) return;
-    const repo = new ChatRoomMemberRepository(db as any, noopLogger);
+    if (!H.dbReachable) return;
+    const repo = new ChatRoomMemberRepository(H.db as any, noopLogger);
     const roomId = await insertRoom({});
     expect(await repo.getUnreadCount(roomId, '00000000-0000-4000-8000-0000000005ff')).toBe(0);
   });
 
   test('getPersonRoomsWithUnread aggregates rooms + unread per membership', async () => {
-    if (!dbReachable) return;
-    const memberRepo = new ChatRoomMemberRepository(db as any, noopLogger);
-    const msgRepo = new ChatMessageRepository(db as any, noopLogger);
+    if (!H.dbReachable) return;
+    const memberRepo = new ChatRoomMemberRepository(H.db as any, noopLogger);
+    const msgRepo = new ChatMessageRepository(H.db as any, noopLogger);
     const p = '00000000-0000-4000-8000-000000000601';
     const roomA = await insertRoom({ organizationId: ORG_A });
     const roomB = await insertRoom({ organizationId: ORG_A });
@@ -317,8 +230,8 @@ describe('ChatRoomMemberRepository (real DB)', () => {
   });
 
   test('muteRoom sets mutedUntil; unmuteRoom clears it', async () => {
-    if (!dbReachable) return;
-    const repo = new ChatRoomMemberRepository(db as any, noopLogger);
+    if (!H.dbReachable) return;
+    const repo = new ChatRoomMemberRepository(H.db as any, noopLogger);
     const roomId = await insertRoom({});
     const p = '00000000-0000-4000-8000-000000000701';
     await repo.addMember(roomId, p);
@@ -338,16 +251,16 @@ describe('ChatRoomMemberRepository (real DB)', () => {
 
 describe('ChatMessageRepository (real DB)', () => {
   test('createTextMessage validates length + emptiness', async () => {
-    if (!dbReachable) return;
-    const repo = new ChatMessageRepository(db as any, noopLogger);
+    if (!H.dbReachable) return;
+    const repo = new ChatMessageRepository(H.db as any, noopLogger);
     const roomId = await insertRoom({ organizationId: ORG_A });
     await expect(repo.createTextMessage(roomId, 'u', '   ', ORG_A)).rejects.toBeInstanceOf(ValidationError);
     await expect(repo.createTextMessage(roomId, 'u', 'x'.repeat(5001), ORG_A)).rejects.toBeInstanceOf(ValidationError);
   });
 
   test('createTextMessage derives org from room when caller omits it (WS chokepoint)', async () => {
-    if (!dbReachable) return;
-    const repo = new ChatMessageRepository(db as any, noopLogger);
+    if (!H.dbReachable) return;
+    const repo = new ChatMessageRepository(H.db as any, noopLogger);
     const roomId = await insertRoom({ organizationId: ORG_B });
     const msg = await repo.createTextMessage(roomId, '00000000-0000-4000-8000-000000000801', 'hello');
     expect(msg.organizationId).toBe(ORG_B);
@@ -356,24 +269,24 @@ describe('ChatMessageRepository (real DB)', () => {
   });
 
   test('createTextMessage with explicit org skips room lookup', async () => {
-    if (!dbReachable) return;
-    const repo = new ChatMessageRepository(db as any, noopLogger);
+    if (!H.dbReachable) return;
+    const repo = new ChatMessageRepository(H.db as any, noopLogger);
     const roomId = await insertRoom({ organizationId: ORG_A });
     const msg = await repo.createTextMessage(roomId, U1, 'hi', ORG_B);
     expect(msg.organizationId).toBe(ORG_B);
   });
 
   test('resolveOrgId throws NotFoundError when room is missing', async () => {
-    if (!dbReachable) return;
-    const repo = new ChatMessageRepository(db as any, noopLogger);
+    if (!H.dbReachable) return;
+    const repo = new ChatMessageRepository(H.db as any, noopLogger);
     await expect(
       repo.createTextMessage('00000000-0000-4000-8000-0000000008ff', U1, 'hi'),
     ).rejects.toBeInstanceOf(NotFoundError);
   });
 
   test('createSystemMessage and createVideoCallMessage persist with derived org', async () => {
-    if (!dbReachable) return;
-    const repo = new ChatMessageRepository(db as any, noopLogger);
+    if (!H.dbReachable) return;
+    const repo = new ChatMessageRepository(H.db as any, noopLogger);
     const roomId = await insertRoom({ organizationId: ORG_A });
 
     const sys = await repo.createSystemMessage(roomId, 'call ended', U1);
@@ -389,8 +302,8 @@ describe('ChatMessageRepository (real DB)', () => {
   });
 
   test('createVideoCallMessage rejects empty participants', async () => {
-    if (!dbReachable) return;
-    const repo = new ChatMessageRepository(db as any, noopLogger);
+    if (!H.dbReachable) return;
+    const repo = new ChatMessageRepository(H.db as any, noopLogger);
     const roomId = await insertRoom({ organizationId: ORG_A });
     await expect(
       repo.createVideoCallMessage(roomId, U1, { participants: [] } as any, ORG_A),
@@ -398,13 +311,13 @@ describe('ChatMessageRepository (real DB)', () => {
   });
 
   test('getChatRoomMessages: ordering (asc/desc), type filter, pagination', async () => {
-    if (!dbReachable) return;
-    const repo = new ChatMessageRepository(db as any, noopLogger);
+    if (!H.dbReachable) return;
+    const repo = new ChatMessageRepository(H.db as any, noopLogger);
     const roomId = await insertRoom({ organizationId: ORG_A });
     // 3 text with increasing timestamps, plus a system message.
     for (let i = 0; i < 3; i++) {
-      await scopedPool.query(
-        `INSERT INTO "${TEST_SCHEMA}".chat_message (organization_id, chat_room_id, sender_id, message_type, message, timestamp)
+      await H.scopedPool.query(
+        `INSERT INTO chat_message (organization_id, chat_room_id, sender_id, message_type, message, timestamp)
          VALUES ($1,$2,$3,'text',$4, now() + ($5 || ' seconds')::interval)`,
         [ORG_A, roomId, U1, `m${i}`, String(i)],
       );
@@ -425,8 +338,8 @@ describe('ChatMessageRepository (real DB)', () => {
   });
 
   test('updateVideoCallData: NotFound / not-a-call / no-data branches + duration on end', async () => {
-    if (!dbReachable) return;
-    const repo = new ChatMessageRepository(db as any, noopLogger);
+    if (!H.dbReachable) return;
+    const repo = new ChatMessageRepository(H.db as any, noopLogger);
     const roomId = await insertRoom({ organizationId: ORG_A });
 
     await expect(
@@ -450,8 +363,8 @@ describe('ChatMessageRepository (real DB)', () => {
   });
 
   test('add/update/remove video call participants', async () => {
-    if (!dbReachable) return;
-    const repo = new ChatMessageRepository(db as any, noopLogger);
+    if (!H.dbReachable) return;
+    const repo = new ChatMessageRepository(H.db as any, noopLogger);
     const roomId = await insertRoom({ organizationId: ORG_A });
     const base: CallParticipant = { user: HOST, userType: 'host', displayName: 'Host', audioEnabled: true, videoEnabled: true };
     const call = await repo.createVideoCallMessage(roomId, HOST, { participants: [base] } as VideoCallData, ORG_A);
@@ -482,8 +395,8 @@ describe('ChatMessageRepository (real DB)', () => {
   });
 
   test('addVideoCallParticipant on a non-call message → NotFound', async () => {
-    if (!dbReachable) return;
-    const repo = new ChatMessageRepository(db as any, noopLogger);
+    if (!H.dbReachable) return;
+    const repo = new ChatMessageRepository(H.db as any, noopLogger);
     const roomId = await insertRoom({ organizationId: ORG_A });
     const text = await repo.createTextMessage(roomId, U1, 'plain', ORG_A);
     await expect(
@@ -492,8 +405,8 @@ describe('ChatMessageRepository (real DB)', () => {
   });
 
   test('findActiveVideoCall returns the most recent active/starting call, else null', async () => {
-    if (!dbReachable) return;
-    const repo = new ChatMessageRepository(db as any, noopLogger);
+    if (!H.dbReachable) return;
+    const repo = new ChatMessageRepository(H.db as any, noopLogger);
     const roomId = await insertRoom({ organizationId: ORG_A });
     expect(await repo.findActiveVideoCall(roomId)).toBeNull();
 
@@ -509,15 +422,15 @@ describe('ChatMessageRepository (real DB)', () => {
   });
 
   test('validateMessageContent pure helper', () => {
-    const repo = new ChatMessageRepository(db as any, noopLogger);
+    const repo = new ChatMessageRepository(H.db as any, noopLogger);
     expect(repo.validateMessageContent('')).toEqual({ isValid: false, error: 'Message content cannot be empty' });
     expect(repo.validateMessageContent('x'.repeat(5001)).isValid).toBe(false);
     expect(repo.validateMessageContent('ok')).toEqual({ isValid: true });
   });
 
   test('getChatRoomStats counts by type with lastMessageAt', async () => {
-    if (!dbReachable) return;
-    const repo = new ChatMessageRepository(db as any, noopLogger);
+    if (!H.dbReachable) return;
+    const repo = new ChatMessageRepository(H.db as any, noopLogger);
     const empty = await insertRoom({ organizationId: ORG_A });
     const emptyStats = await repo.getChatRoomStats(empty);
     expect(emptyStats.totalMessages).toBe(0);
@@ -544,8 +457,8 @@ describe('ChatMessageRepository (real DB)', () => {
 
 describe('ChatRoomRepository (real DB)', () => {
   test('findUserChatRooms: participant filter + status, ordered by lastMessageAt desc', async () => {
-    if (!dbReachable) return;
-    const repo = new ChatRoomRepository(db as any, noopLogger);
+    if (!H.dbReachable) return;
+    const repo = new ChatRoomRepository(H.db as any, noopLogger);
     const user = '00000000-0000-4000-8000-000000001001';
     const older = await insertRoom({ participants: [user], lastMessageAt: new Date(Date.now() - 100_000) });
     const newer = await insertRoom({ participants: [user], lastMessageAt: new Date() });
@@ -557,8 +470,8 @@ describe('ChatRoomRepository (real DB)', () => {
   });
 
   test('findUserRoomsPage: AND participants + org scope + pagination + true total', async () => {
-    if (!dbReachable) return;
-    const repo = new ChatRoomRepository(db as any, noopLogger);
+    if (!H.dbReachable) return;
+    const repo = new ChatRoomRepository(H.db as any, noopLogger);
     const u = '00000000-0000-4000-8000-000000001101';
     const other = '00000000-0000-4000-8000-000000001102';
     // 3 rooms with both u+other in ORG_A; 1 with only u; 1 in ORG_B.
@@ -579,8 +492,8 @@ describe('ChatRoomRepository (real DB)', () => {
   });
 
   test('findRoomWithParticipants / findRoomBetweenParticipants', async () => {
-    if (!dbReachable) return;
-    const repo = new ChatRoomRepository(db as any, noopLogger);
+    if (!H.dbReachable) return;
+    const repo = new ChatRoomRepository(H.db as any, noopLogger);
     expect(await repo.findRoomWithParticipants([])).toBeNull();
     const a = '00000000-0000-4000-8000-000000001201';
     const b = '00000000-0000-4000-8000-000000001202';
@@ -591,8 +504,8 @@ describe('ChatRoomRepository (real DB)', () => {
   });
 
   test('findOrCreateBookingChatRoom: create / link-existing / find-by-context', async () => {
-    if (!dbReachable) return;
-    const repo = new ChatRoomRepository(db as any, noopLogger);
+    if (!H.dbReachable) return;
+    const repo = new ChatRoomRepository(H.db as any, noopLogger);
     const a = '00000000-0000-4000-8000-000000001301';
     const b = '00000000-0000-4000-8000-000000001302';
 
@@ -618,8 +531,8 @@ describe('ChatRoomRepository (real DB)', () => {
   });
 
   test('updateLastMessage increments messageCount SQL-side', async () => {
-    if (!dbReachable) return;
-    const repo = new ChatRoomRepository(db as any, noopLogger);
+    if (!H.dbReachable) return;
+    const repo = new ChatRoomRepository(H.db as any, noopLogger);
     const roomId = await insertRoom({});
     const first = await repo.updateLastMessage(roomId);
     expect(first.messageCount).toBe(1);
@@ -629,8 +542,8 @@ describe('ChatRoomRepository (real DB)', () => {
   });
 
   test('setActiveVideoCall: atomic claim, conflict on second claim, clear is unconditional', async () => {
-    if (!dbReachable) return;
-    const repo = new ChatRoomRepository(db as any, noopLogger);
+    if (!H.dbReachable) return;
+    const repo = new ChatRoomRepository(H.db as any, noopLogger);
     const roomId = await insertRoom({});
     const msg1 = '00000000-0000-4000-8000-000000001401';
     const msg2 = '00000000-0000-4000-8000-000000001402';
@@ -651,8 +564,8 @@ describe('ChatRoomRepository (real DB)', () => {
   });
 
   test('isUserParticipant / isUserAdmin true/false + missing room', async () => {
-    if (!dbReachable) return;
-    const repo = new ChatRoomRepository(db as any, noopLogger);
+    if (!H.dbReachable) return;
+    const repo = new ChatRoomRepository(H.db as any, noopLogger);
     const part = '00000000-0000-4000-8000-000000001501';
     const admin = '00000000-0000-4000-8000-000000001502';
     const roomId = await insertRoom({ participants: [part, admin], admins: [admin] });
@@ -668,16 +581,16 @@ describe('ChatRoomRepository (real DB)', () => {
   });
 
   test('archiveRoom flips status to archived', async () => {
-    if (!dbReachable) return;
-    const repo = new ChatRoomRepository(db as any, noopLogger);
+    if (!H.dbReachable) return;
+    const repo = new ChatRoomRepository(H.db as any, noopLogger);
     const roomId = await insertRoom({ status: 'active' });
     const archived = await repo.archiveRoom(roomId);
     expect(archived.status).toBe('archived');
   });
 
   test('buildWhereConditions emits org-or-dm clause and hasActiveCall variants', async () => {
-    if (!dbReachable) return;
-    const repo = new ChatRoomRepository(db as any, noopLogger);
+    if (!H.dbReachable) return;
+    const repo = new ChatRoomRepository(H.db as any, noopLogger);
     const org = freshOrg(); // isolate this test's rows from other tests
     // active call present
     const withCall = await insertRoom({ organizationId: org });
@@ -704,5 +617,82 @@ describe('ChatRoomRepository (real DB)', () => {
     const adminRoom = await insertRoom({ organizationId: org, admins: [U1] });
     const byAdmin = await (repo as any).findMany({ admins: [U1] });
     expect(byAdmin.map((r: any) => r.id)).toContain(adminRoom);
+  });
+});
+
+// ─── Schema-faithfulness (only createScratch's LIKE-copy enables these) ───────
+//
+// The old hand-written DDL modeled chat_room.status / room_type / message_type
+// and chat_room_member.role as plain `text`, so a bad enum value would have been
+// silently accepted. createScratch copies the REAL Postgres enum types
+// (chat_room_status / chat_room_type / message_type / chat_room_member_role), so
+// an out-of-domain literal is now rejected at the type boundary with SQLSTATE
+// 22P02 (invalid_text_representation). These asserts prove the suite is enforcing
+// the live enum domains, not a thinner fake column.
+describe('comms enum domains enforced by the real PG types (drift-proof)', () => {
+  test("chat_room.status outside {active,archived} → 22P02 (real enum, not text)", async () => {
+    if (!H.dbReachable) return;
+    let code: string | undefined;
+    try {
+      await H.scopedPool.query(
+        `INSERT INTO chat_room (organization_id, participants, admins, status)
+         VALUES ($1, '[]'::jsonb, '[]'::jsonb, 'frozen')`,
+        [ORG_A],
+      );
+      throw new Error('expected invalid status to be rejected');
+    } catch (e) {
+      code = pgCode(e);
+    }
+    expect(code).toBe('22P02');
+  });
+
+  test("chat_room.room_type outside {channel,dm,group} → 22P02", async () => {
+    if (!H.dbReachable) return;
+    let code: string | undefined;
+    try {
+      await H.scopedPool.query(
+        `INSERT INTO chat_room (organization_id, participants, admins, room_type)
+         VALUES ($1, '[]'::jsonb, '[]'::jsonb, 'broadcast')`,
+        [ORG_A],
+      );
+      throw new Error('expected invalid room_type to be rejected');
+    } catch (e) {
+      code = pgCode(e);
+    }
+    expect(code).toBe('22P02');
+  });
+
+  test("chat_room_member.role outside {member,admin} → 22P02", async () => {
+    if (!H.dbReachable) return;
+    const roomId = await insertRoom({});
+    let code: string | undefined;
+    try {
+      await H.scopedPool.query(
+        `INSERT INTO chat_room_member (chat_room_id, person_id, role)
+         VALUES ($1, $2, 'owner')`,
+        [roomId, '00000000-0000-4000-8000-000000001701'],
+      );
+      throw new Error('expected invalid role to be rejected');
+    } catch (e) {
+      code = pgCode(e);
+    }
+    expect(code).toBe('22P02');
+  });
+
+  test("chat_message.message_type outside {text,system,video_call} → 22P02", async () => {
+    if (!H.dbReachable) return;
+    const roomId = await insertRoom({ organizationId: ORG_A });
+    let code: string | undefined;
+    try {
+      await H.scopedPool.query(
+        `INSERT INTO chat_message (organization_id, chat_room_id, sender_id, message_type, message)
+         VALUES ($1, $2, $3, 'audio', 'x')`,
+        [ORG_A, roomId, U1],
+      );
+      throw new Error('expected invalid message_type to be rejected');
+    } catch (e) {
+      code = pgCode(e);
+    }
+    expect(code).toBe('22P02');
   });
 });
