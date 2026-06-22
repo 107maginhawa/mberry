@@ -2,7 +2,7 @@
 // renders an in-page error banner with retry CTA (see ~line 254). The gate
 // heuristic flags this because the local rename `error: dashError` masks the
 // literal `isError` token.
-import { createFileRoute } from '@tanstack/react-router'
+import { createFileRoute, Link } from '@tanstack/react-router'
 import { useQuery } from '@tanstack/react-query'
 import { BarChart3, RefreshCw, Download } from 'lucide-react'
 import { useState } from 'react'
@@ -311,7 +311,18 @@ function NationalDashboardPage() {
               {chapters.map((ch) => (
                 <TableRow key={ch.orgId}>
                   <TableCell className="p-4 text-sm font-medium">
-                    {ch.chapterName ?? ch.orgId}
+                    {ch.orgId ? (
+                      <Link
+                        to="/national-dashboard/chapters/$orgId"
+                        params={{ orgId: ch.orgId }}
+                        search={{ month: snapshotMonth, associationId: selectedAssociation }}
+                        className="hover:underline text-primary"
+                      >
+                        {ch.chapterName ?? ch.orgId}
+                      </Link>
+                    ) : (
+                      (ch.chapterName ?? ch.orgId)
+                    )}
                   </TableCell>
                   <TableCell className="p-4 text-sm text-right">{ch.totalMembers}</TableCell>
                   <TableCell className="p-4 text-sm text-right">{ch.activeMembers}</TableCell>
