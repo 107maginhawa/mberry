@@ -232,3 +232,128 @@ describe('JobApplicationRepository (real-PG)', () => {
     expect(all.total).toBeGreaterThanOrEqual(1);
   });
 });
+
+/**
+ * Slice S2 — constraint / enum / default proofs against real PG.
+ *
+ * These assert real SQLSTATE codes and DB-applied defaults that the mock-only
+ * handler tests (makeCtx + stubRepo + fakeJobPosting factories) can never prove:
+ * NOT-NULL invariants (23502), enum domain rejection (22P02), and PG-side column
+ * defaults (type/status/version/applied_at). Drizzle's typed `create` can't reach
+ * the enum-domain case, so those use a raw scopedPool INSERT.
+ */
+const pgCode = (e: unknown): string | undefined =>
+  (e as { code?: string; cause?: { code?: string } }).code ??
+  (e as { cause?: { code?: string } }).cause?.code;
+
+describe('JobPostingRepository constraint/enum/default proofs (real-PG)', () => {
+  test('organization_id NOT NULL → 23502 on create without org', async () => {
+    if (!H.dbReachable) return;
+    let err: unknown;
+    try {
+      // organizationId is required in NewJobPosting; cast past the type so PG enforces it.
+      await postingRepo.create({
+        title: 'No org',
+        organizationName: 'Acme Dental',
+        type: 'full_time',
+        status: 'draft',
+      } as never);
+    } catch (e) {
+      err = e;
+    }
+    expect(pgCode(err)).toBe('23502');
+  });
+
+  test('positive: create WITH org persists and organization_id reads back equal', async () => {
+    if (!H.dbReachable) return;
+    const org = crypto.randomUUID();
+    const created = await postingRepo.create(basePosting({ organizationId: org, title: 'Org readback' }));
+    const { rows } = await H.scopedPool.query(
+      `SELECT organization_id FROM "${H.schema}".job_posting WHERE id = $1`,
+      [created.id],
+    );
+    expect(rows[0]?.organization_id).toBe(org);
+  });
+
+  test('type enum domain → 22P02 on out-of-range value (real enum, not text)', async () => {
+    if (!H.dbReachable) return;
+    let err: unknown;
+    try {
+      await H.scopedPool.query(
+        `INSERT INTO "${H.schema}".job_posting (organization_id, title, organization_name, type)
+         VALUES ($1, $2, $3, $4)`,
+        [crypto.randomUUID(), 'Bad type', 'Acme Dental', 'director'],
+      );
+    } catch (e) {
+      err = e;
+    }
+    expect(pgCode(err)).toBe('22P02');
+  });
+
+  test('status enum domain → 22P02 on out-of-range value', async () => {
+    if (!H.dbReachable) return;
+    let err: unknown;
+    try {
+      await H.scopedPool.query(
+        `INSERT INTO "${H.schema}".job_posting (organization_id, title, organization_name, status)
+         VALUES ($1, $2, $3, $4)`,
+        [crypto.randomUUID(), 'Bad status', 'Acme Dental', 'archived'],
+      );
+    } catch (e) {
+      err = e;
+    }
+    expect(pgCode(err)).toBe('22P02');
+  });
+
+  test('PG applies defaults: NOT-NULL-minimum insert reads back type/status/version/id', async () => {
+    if (!H.dbReachable) return;
+    const org = crypto.randomUUID();
+    const { rows } = await H.scopedPool.query(
+      `INSERT INTO "${H.schema}".job_posting (organization_id, title, organization_name)
+       VALUES ($1, $2, $3)
+       RETURNING id, type, status, version`,
+      [org, 'Defaults only', 'Acme Dental'],
+    );
+    const row = rows[0];
+    expect(row.id).toBeTruthy();
+    expect(row.type).toBe('full_time');
+    expect(row.status).toBe('draft');
+    expect(row.version).toBe(1);
+  });
+});
+
+describe('JobApplicationRepository constraint/default proofs (real-PG)', () => {
+  test('posting_id NOT NULL → 23502 on create without postingId', async () => {
+    if (!H.dbReachable) return;
+    let err: unknown;
+    try {
+      await appRepo.create({ personId: crypto.randomUUID() } as never);
+    } catch (e) {
+      err = e;
+    }
+    expect(pgCode(err)).toBe('23502');
+  });
+
+  test('person_id NOT NULL → 23502 on create without personId', async () => {
+    if (!H.dbReachable) return;
+    let err: unknown;
+    try {
+      await appRepo.create({ postingId: crypto.randomUUID() } as never);
+    } catch (e) {
+      err = e;
+    }
+    expect(pgCode(err)).toBe('23502');
+  });
+
+  test('PG applies defaults: create with only posting/person reads back status=applied + applied_at non-null', async () => {
+    if (!H.dbReachable) return;
+    const created = await appRepo.create({ postingId: crypto.randomUUID(), personId: crypto.randomUUID() });
+    expect(created.status).toBe('applied');
+    const { rows } = await H.scopedPool.query(
+      `SELECT status, applied_at FROM "${H.schema}".job_application WHERE id = $1`,
+      [created.id],
+    );
+    expect(rows[0]?.status).toBe('applied');
+    expect(rows[0]?.applied_at).not.toBeNull();
+  });
+});
