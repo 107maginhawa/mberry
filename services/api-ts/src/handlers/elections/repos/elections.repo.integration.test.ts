@@ -214,3 +214,138 @@ describe('ElectionsRepository — real-PG (B4 S1)', () => {
     expect(new Date(after.rows[0].updated_at).getTime()).toBeGreaterThan(updatedAtBefore);
   });
 });
+
+/**
+ * Slice 2 — Secret-ballot anonymization projection (WF-077), repo lines 81-103.
+ *
+ * The privacy model is PROJECTION-only: `voter_id` IS persisted NOT NULL (so the
+ * "already voted?" self-check can run), but the admin tally path
+ * `listAnonymizedVotes` deliberately OMITS voterId/createdBy/updatedBy from its
+ * SELECT — so an admin tally row can never be linked back to a voter. The
+ * deliberate asymmetry: `listVotesForVoter` (self-read) DOES return the caller's
+ * own voterId, but only their own rows. The fake-db stub never exercised either
+ * SELECT against real SQL, so neither the omission nor the asymmetry was proven.
+ */
+describe('ElectionsRepository — secret-ballot projection (B4 S2, WF-077)', () => {
+  test('voter_id persisted NOT NULL; listAnonymizedVotes omits voter identity; listVotesForVoter is the asymmetric self-read', async () => {
+    if (!H.dbReachable) return;
+    const repo = new ElectionsRepository(H.db as never);
+    const orgId = crypto.randomUUID();
+    const positionId = await seedPosition(orgId);
+
+    const election = await repo.create({
+      organizationId: orgId, title: 'Secret Ballot', type: 'officer',
+      status: 'votingOpen', votingMode: 'online',
+    } as never);
+
+    const candidateId = await seedPerson();
+    const nominee = await repo.addNominee({
+      electionId: election.id,
+      positionId,
+      personId: candidateId,
+      nominatedBy: candidateId,
+      organizationId: orgId,
+    });
+
+    // 3 distinct voters each cast one vote for the same nominee/position.
+    const voterIds: string[] = [];
+    for (let i = 0; i < 3; i++) {
+      const voterId = await seedPerson();
+      voterIds.push(voterId);
+      await repo.castVote({
+        electionId: election.id,
+        positionId,
+        nomineeId: nominee.id,
+        voterId,
+        organizationId: orgId,
+      });
+    }
+
+    // Storage-level truth: voter_id IS persisted and NOT NULL (anonymity is
+    // projection-only, not storage-level). Read raw column directly.
+    const raw = await H.scopedPool.query(
+      `SELECT voter_id FROM "${H.schema}".election_vote WHERE election_id = $1`,
+      [election.id],
+    );
+    expect(raw.rows).toHaveLength(3);
+    expect(raw.rows.every((r) => r.voter_id !== null && r.voter_id !== undefined)).toBe(true);
+    expect(new Set(raw.rows.map((r) => r.voter_id))).toEqual(new Set(voterIds));
+
+    // Admin path: anonymized projection — 3 rows, each WITHOUT voter identity.
+    const anon = await repo.listAnonymizedVotes(election.id);
+    expect(anon).toHaveLength(3);
+    for (const row of anon) {
+      const keys = Object.keys(row);
+      // The secret-ballot guarantee: no key can link a tally row to a voter.
+      expect(keys).not.toContain('voterId');
+      expect(keys).not.toContain('createdBy');
+      expect(keys).not.toContain('updatedBy');
+      // What it DOES carry — the un-linkable tally fields.
+      expect(keys).toContain('castAt');
+      expect(keys).toContain('nomineeId');
+      expect(keys).toContain('positionId');
+      expect(keys).toContain('organizationId');
+      const r = row as { castAt: unknown; nomineeId: string; positionId: string; organizationId: string };
+      expect(r.castAt).toBeInstanceOf(Date); // created_at aliased to castAt
+      expect(r.nomineeId).toBe(nominee.id);
+      expect(r.positionId).toBe(positionId);
+      expect(r.organizationId).toBe(orgId);
+    }
+
+    // Self-read asymmetry: listVotesForVoter returns the caller's OWN full rows
+    // (including voterId) and ONLY that voter's rows — never another voter's.
+    const selfRows = await repo.listVotesForVoter(election.id, voterIds[0]!);
+    expect(selfRows).toHaveLength(1);
+    expect(Object.keys(selfRows[0]!)).toContain('voterId');
+    expect((selfRows[0] as { voterId: string }).voterId).toBe(voterIds[0]);
+    expect(selfRows.every((v) => (v as { voterId: string }).voterId === voterIds[0])).toBe(true);
+    // Another voter's self-read returns only THEIR row, not voter 0's.
+    const otherSelf = await repo.listVotesForVoter(election.id, voterIds[1]!);
+    expect(otherSelf).toHaveLength(1);
+    expect((otherSelf[0] as { voterId: string }).voterId).toBe(voterIds[1]);
+  });
+
+  test('listAnonymizedVotes(electionId, positionId) filters to one position; other position excluded', async () => {
+    if (!H.dbReachable) return;
+    const repo = new ElectionsRepository(H.db as never);
+    const orgId = crypto.randomUUID();
+    const positionP = await seedPosition(orgId);
+    const positionQ = await seedPosition(orgId);
+
+    const election = await repo.create({
+      organizationId: orgId, title: 'Two Position Ballot', type: 'officer',
+      status: 'votingOpen', votingMode: 'online',
+    } as never);
+
+    const candidate = await seedPerson();
+    const nomineeP = await repo.addNominee({
+      electionId: election.id, positionId: positionP, personId: candidate,
+      nominatedBy: candidate, organizationId: orgId,
+    });
+    const nomineeQ = await repo.addNominee({
+      electionId: election.id, positionId: positionQ, personId: candidate,
+      nominatedBy: candidate, organizationId: orgId,
+    });
+
+    // 2 votes for position P, 1 for position Q (distinct voters per (position) key).
+    const voterPa = await seedPerson();
+    const voterPb = await seedPerson();
+    const voterQ = await seedPerson();
+    await repo.castVote({ electionId: election.id, positionId: positionP, nomineeId: nomineeP.id, voterId: voterPa, organizationId: orgId });
+    await repo.castVote({ electionId: election.id, positionId: positionP, nomineeId: nomineeP.id, voterId: voterPb, organizationId: orgId });
+    await repo.castVote({ electionId: election.id, positionId: positionQ, nomineeId: nomineeQ.id, voterId: voterQ, organizationId: orgId });
+
+    const allRows = await repo.listAnonymizedVotes(election.id);
+    expect(allRows).toHaveLength(3);
+
+    const onlyP = await repo.listAnonymizedVotes(election.id, positionP);
+    expect(onlyP).toHaveLength(2);
+    expect(onlyP.every((r) => (r as { positionId: string }).positionId === positionP)).toBe(true);
+    // The other position's vote is excluded.
+    expect(onlyP.some((r) => (r as { positionId: string }).positionId === positionQ)).toBe(false);
+
+    const onlyQ = await repo.listAnonymizedVotes(election.id, positionQ);
+    expect(onlyQ).toHaveLength(1);
+    expect((onlyQ[0] as { positionId: string }).positionId).toBe(positionQ);
+  });
+});
