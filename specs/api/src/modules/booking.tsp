@@ -732,6 +732,20 @@ namespace BookingModule {
       | ApiBadRequestResponse  // Invalid query params (e.g. unparseable datetime)
       | ApiNotFoundResponse;
 
+    @doc("Manually regenerate time slots for a booking event from its current schedule. Owner/admin only. Used to recover availability after a schedule change or a missed cron run.")
+    @operationId("regenerateBookingEventSlots")
+    @post
+    @useAuth(bearerAuth)
+    @extension("x-security-required-roles", #["event:owner", "admin"])
+    @route("/events/{event}/regenerate-slots")
+    regenerateBookingEventSlots(
+      @path event: UUID
+    ): ApiOkResponse<BookingEvent>
+      | ApiBadRequestResponse
+      | ApiUnauthorizedResponse
+      | ApiForbiddenResponse
+      | ApiNotFoundResponse;
+
     @doc("Update booking event (partial updates supported).")
     @operationId("updateBookingEvent")
     @patch(#{implicitOptionality: true})
