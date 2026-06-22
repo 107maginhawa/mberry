@@ -570,13 +570,14 @@
     "annotations": "Path repair 2026-05-30: training/* moved to association:operations/*; dues.repo.test.ts paths replaced with existing covering tests."
   },
   "BR-31": {
-    "rule": "SVG Upload Security",
+    "rule": "SVG Upload Blocked (MIME allowlist + extension/mime block)",
     "phase": 1,
     "module": "M04",
     "ruleClass": "p0-security",
     "tests": {
       "backend": [
-        "services/api-ts/src/handlers/storage/uploadFile.test.ts"
+        "services/api-ts/src/handlers/storage/uploadFile.test.ts",
+        "services/api-ts/src/handlers/storage/br-31.svg-upload-security.test.ts"
       ],
       "contract": [
         "specs/api/tests/contract/storage.hurl"
@@ -585,7 +586,7 @@
         "apps/memberry/tests/e2e/officer/settings.spec.ts"
       ]
     },
-    "annotations": "SVG sanitization not directly verifiable in E2E \u2014 backend unit test is primary coverage"
+    "annotations": "REAL (Wave-2 B4): the prior 'SVG sanitized before storage' framing was a sanitize-illusion \u2014 there is no sanitizer. The rule is enforced as an outright BLOCK: image/svg+xml is not in the MIME allowlist and the .svg extension/mime is rejected at upload. br-31.svg-upload-security.test.ts asserts the real block control (was repointed off the illusion in S2)."
   },
   "BR-32": {
     "rule": "Financial Record Retention",
@@ -613,7 +614,8 @@
     "tests": {
       "backend": [
         "services/api-ts/src/handlers/elections/br-33.election-integrity.test.ts",
-        "services/api-ts/src/handlers/elections/castVote.test.ts"
+        "services/api-ts/src/handlers/elections/castVote.test.ts",
+        "services/api-ts/src/handlers/elections/repos/elections.repo.integration.test.ts"
       ],
       "contract": [
         "specs/api/tests/contract/elections-flow.hurl"
@@ -622,7 +624,7 @@
         "apps/memberry/tests/e2e/officer/elections.spec.ts"
       ]
     },
-    "annotations": "E2E deepened: status-restricts-voting test verifies Draft=no vote buttons, Closed=no vote buttons"
+    "annotations": "REAL (Wave-2 B4): elections.repo.integration (createScratch) proves the integrity backstops against real PG — secret-ballot anonymization projection (listAnonymizedVotes omits voter identity, WF-077), 23505 double-vote backstop on the real UNIQUE(election_id,voter_id,position_id) index, and the cancel cascade (withdrawAllNominees flips only non-terminal rows, voidVotesForNominee scoped DELETE, countNomineesByPosition min-candidate). The fake-db elections.repo.test/.nominees.test illusions were deleted. E2E: status-restricts-voting (Draft/Closed = no vote buttons)."
   },
   "BR-34": {
     "rule": "Nomination Eligibility",
@@ -661,15 +663,22 @@
     "rule": "National Dashboard Access",
     "phase": 2,
     "module": "M14",
-    "ruleClass": "p2-deferred",
+    "ruleClass": "p1-business",
     "tests": {
       "backend": [
-        "services/api-ts/src/handlers/platformadmin/br-36.national-dashboard.test.ts"
+        "services/api-ts/src/handlers/platformadmin/br-36.national-dashboard.test.ts",
+        "services/api-ts/src/handlers/platformadmin/repos/feature-flag-enforcement.integration.test.ts",
+        "services/api-ts/src/handlers/platformadmin/repos/platformadmin-repos.integration.test.ts",
+        "services/api-ts/src/handlers/platformadmin/getNationalChapterDetail.integration.test.ts"
       ],
       "contract": [],
-      "e2e": []
+      "e2e": [
+        "apps/admin/tests/e2e/national-dashboard.spec.ts"
+      ]
     },
-    "deferredReason": "Module M14 (National Dashboard) not yet implemented \u2014 deferred to milestone v2.0"
+    "annotations": "REAL (Wave-2 B4, was p2-deferred/MISSING): the national dashboard + tier enforcement IS implemented and now real-PG covered \u2014 findEnforcementFlags resolves the 3-table tier/org/flag join through the gate precedence resolver; getNationalChapterDetail real-PG suppression (< 5 members) + cents/percentage/compliance aggregation pinned to seed snapshots; exact-data chapter drill-down e2e. REAL BUG fixed (S4): isPlatformAdmin used exact-equality and 403'd the comma-separated seed super-admin role \u2192 now split(',')+includes (utils/national-access.ts).",
+    "knownGap": "TIER-FLAG SLUG-vs-UUID: feature_flag tier-scoped rows key on the pricing-tier SLUG (not its UUID). A feature flag created against a tier UUID is silently INVISIBLE to findEnforcementFlags \u2014 enforcement never matches it. Surfaced by the S2 gate-precedence wiring; contract is slug-keyed by design. Revisit if tier flags move to UUID keys.",
+    "orphanNote": "exportDashboardReport.ts carries the same exact-equality role-check bug class as the S4-fixed isPlatformAdmin, but it is an UNWIRED orphan (no route in routes.ts/app.ts/registry); the wired export path is exportNationalDashboard (association:operations), which already split-and-includes. Left unfixed by design \u2014 see ROADMAP carry-forwards."
   },
   "BR-37": {
     "rule": "Job Posting Expiry",
