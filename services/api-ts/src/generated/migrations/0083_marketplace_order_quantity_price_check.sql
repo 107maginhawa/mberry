@@ -1,0 +1,13 @@
+-- Defense-in-depth backstop on marketplace_order (W3 marketplace follow-up).
+--
+-- createOrder.ts guards quantity >= 1 (ValidationError 'Quantity must be at
+-- least 1', :43) and computes total_price = (unitPrice * quantity).toFixed(2),
+-- which is always >= 0 on the real path. But the live catalog has NO CHECK
+-- constraint backing either invariant (verified via \d marketplace_order), so a
+-- raw / out-of-band insert could land quantity=0 or a negative total_price.
+--
+-- This adds a last-line DB invariant that mirrors the app guards. It is a no-op
+-- against existing data: verified live there are 0 rows violating
+-- (quantity >= 1 AND total_price >= 0), so the constraint applies cleanly.
+-- No DELETE — pure ALTER TABLE ADD CONSTRAINT.
+ALTER TABLE "marketplace_order" ADD CONSTRAINT "marketplace_order_quantity_price_check" CHECK ("quantity" >= 1 AND "total_price" >= 0);

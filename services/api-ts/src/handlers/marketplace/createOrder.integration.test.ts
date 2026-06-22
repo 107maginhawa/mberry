@@ -16,11 +16,13 @@
  *  - price-less guard (G-11): price=NULL → BusinessLogicError 'Listing has no
  *    price set...' (:46) + 0 orders — proven against a real NULL price column.
  *  - quantity guard: quantity=0 → ValidationError (:43) + 0 orders.
- *    CHARACTERIZATION of a defense-in-depth gap: the DB has NO `quantity >= 1`
- *    CHECK (verified catalog), so a raw insert of quantity=0 via H.scopedPool
- *    SUCCEEDS. The only guard is app-layer. NOT a red-then-fix (adding a CHECK
- *    migration is a product decision; the app guard already protects the real
- *    path). Documented here + in the commit body.
+ *    DEFENSE-IN-DEPTH BACKSTOP (W3 follow-up): migration 0083 added
+ *    `marketplace_order_quantity_price_check` CHECK (quantity >= 1 AND
+ *    total_price >= 0). A raw insert of quantity=0 OR total_price=-1 via
+ *    H.scopedPool now raises Postgres 23514 (check_violation), proving the DB
+ *    backstop matches the app guards (createOrder.ts:43 quantity>=1, total_price
+ *    computed >= 0). The app guard remains the primary control; the CHECK is the
+ *    last-line invariant. Verified live: 0 pre-existing rows violate the CHECK.
  *  - cross-org IDOR: listing in orgB, ctx organizationId=orgA → NotFoundError
  *    'Listing not found' (:35) + 0 orders — cross-org placement blocked at the
  *    real row level.
@@ -284,7 +286,7 @@ describe('createOrder handler — quantity guard + defense-in-depth gap', () => 
     expect(await countOrdersForListing(listing.id)).toBe(0);
   });
 
-  test('CHARACTERIZATION: no DB CHECK backs quantity>=1 — raw insert quantity=0 SUCCEEDS', async () => {
+  test('BACKSTOP (0083): raw insert quantity=0 → Postgres 23514 check_violation', async () => {
     if (!H.dbReachable) return;
     const org = crypto.randomUUID();
     const vr = new VendorRepository(H.db as never);
@@ -296,22 +298,91 @@ describe('createOrder handler — quantity guard + defense-in-depth gap', () => 
       price: '99.99',
     });
 
-    // bypass the app guard — insert quantity=0 directly. The live catalog has NO
-    // `quantity >= 1` CHECK (verified), so Postgres accepts the row. Documents the
-    // defense-in-depth gap: the only quantity invariant is app-layer (createOrder.ts:43).
+    // bypass the app guard — insert quantity=0 directly. Migration 0083 added a
+    // `marketplace_order_quantity_price_check` CHECK (quantity >= 1 ...), so
+    // Postgres now rejects the row at the DB layer (defense-in-depth backstop for
+    // the app-only createOrder.ts:43 guard).
+    let err: unknown;
+    try {
+      await H.scopedPool.query(
+        `INSERT INTO "${H.schema}".marketplace_order
+           (id, organization_id, listing_id, buyer_person_id, vendor_id, quantity, total_price, status)
+         VALUES ($1,$2,$3,$4,$5,$6,$7,'pending')`,
+        [crypto.randomUUID(), org, listing.id, crypto.randomUUID(), vendor.id, 0, '0.00'],
+      );
+    } catch (e) {
+      err = e;
+    }
+    const code =
+      (err as { code?: string; cause?: { code?: string } })?.code ??
+      (err as { cause?: { code?: string } })?.cause?.code;
+    expect(code).toBe('23514'); // check_violation — quantity >= 1 enforced by the CHECK
+    // no row landed
+    const { rows } = await H.scopedPool.query(
+      `SELECT count(*)::int AS n FROM "${H.schema}".marketplace_order WHERE listing_id=$1`,
+      [listing.id],
+    );
+    expect(rows[0].n).toBe(0);
+  });
+
+  test('BACKSTOP (0083): raw insert total_price=-1 → Postgres 23514 check_violation', async () => {
+    if (!H.dbReachable) return;
+    const org = crypto.randomUUID();
+    const vr = new VendorRepository(H.db as never);
+    const vendor = await vr.createOne(newVendor(org));
+    const listing = await seedListing({
+      orgId: org,
+      vendorId: vendor.id,
+      status: 'active',
+      price: '99.99',
+    });
+
+    // negative total_price is impossible via the handler (unitPrice*qty.toFixed(2)
+    // >= 0) but the CHECK guards the raw path too.
+    let err: unknown;
+    try {
+      await H.scopedPool.query(
+        `INSERT INTO "${H.schema}".marketplace_order
+           (id, organization_id, listing_id, buyer_person_id, vendor_id, quantity, total_price, status)
+         VALUES ($1,$2,$3,$4,$5,$6,$7,'pending')`,
+        [crypto.randomUUID(), org, listing.id, crypto.randomUUID(), vendor.id, 1, '-1.00'],
+      );
+    } catch (e) {
+      err = e;
+    }
+    const code =
+      (err as { code?: string; cause?: { code?: string } })?.code ??
+      (err as { cause?: { code?: string } })?.cause?.code;
+    expect(code).toBe('23514'); // check_violation — total_price >= 0 enforced
+  });
+
+  test('BACKSTOP (0083): a valid raw insert (quantity=1, total_price=0) still succeeds', async () => {
+    if (!H.dbReachable) return;
+    const org = crypto.randomUUID();
+    const vr = new VendorRepository(H.db as never);
+    const vendor = await vr.createOne(newVendor(org));
+    const listing = await seedListing({
+      orgId: org,
+      vendorId: vendor.id,
+      status: 'active',
+      price: '99.99',
+    });
+
+    // boundary: quantity=1 and total_price=0 both satisfy the CHECK (>= bounds).
     const rawId = crypto.randomUUID();
     await H.scopedPool.query(
       `INSERT INTO "${H.schema}".marketplace_order
          (id, organization_id, listing_id, buyer_person_id, vendor_id, quantity, total_price, status)
        VALUES ($1,$2,$3,$4,$5,$6,$7,'pending')`,
-      [rawId, org, listing.id, crypto.randomUUID(), vendor.id, 0, '0.00'],
+      [rawId, org, listing.id, crypto.randomUUID(), vendor.id, 1, '0.00'],
     );
     const { rows } = await H.scopedPool.query(
-      `SELECT quantity FROM "${H.schema}".marketplace_order WHERE id=$1`,
+      `SELECT quantity, total_price FROM "${H.schema}".marketplace_order WHERE id=$1`,
       [rawId],
     );
     expect(rows).toHaveLength(1);
-    expect(rows[0].quantity).toBe(0); // accepted: no DB-level guard exists
+    expect(rows[0].quantity).toBe(1);
+    expect(rows[0].total_price).toBe('0.00');
   });
 });
 
