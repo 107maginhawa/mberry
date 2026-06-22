@@ -1104,10 +1104,12 @@
       "backend": [
         "services/api-ts/src/handlers/billing/handleStripeWebhook.test.ts"
       ],
-      "contract": [],
+      "contract": [
+        "specs/api/tests/contract/billing-webhook-signature.hurl"
+      ],
       "e2e": []
     },
-    "annotations": "Minted 2026-06-02 to resolve TR-P1-002. Aliases module-local M21-R3. IF Stripe webhook signature invalid THEN reject with 400 (signature verification mandatory). Backs WF-132, AC-M21-003."
+    "annotations": "2026-06-23 (R2-2): COMPLETE — wire contract added. billing-webhook-signature.hurl proves an unsigned and a forged Stripe webhook are both rejected with 400 at /webhooks/stripe before any processing (the p0-security guarantee). The correctly-signed->200 path needs a live HMAC and stays in the backend test + stripe-mock billing-lifecycle.hurl. Minted 2026-06-02 to resolve TR-P1-002. Aliases module-local M21-R3. IF Stripe webhook signature invalid THEN reject with 400 (signature verification mandatory). Backs WF-132, AC-M21-003."
   },
   "BR-63": {
     "rule": "Webhook-Driven Invoice Paid Transition (alias M21-R4)",

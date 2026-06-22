@@ -181,7 +181,7 @@
           "redTargets": ["specs/api/tests/contract/billing-webhook.hurl (signature cases)"],
           "green": "Contract suite rejects unsigned/forged Stripe webhooks.",
           "codegraphAnchors": ["handleStripeWebhook"],
-          "status": "todo"
+          "status": "done — billing-webhook-signature.hurl proves the p0-security boundary at the wire: unsigned (no Stripe-Signature) → 400 + forged signature → 400, both rejected before processing. Live-verified locally. The signed→200 path needs a live HMAC over (timestamp.payload) — not expressible in static Hurl — and stays in handleStripeWebhook.test.ts + the stripe-mock billing-lifecycle.hurl. BR-62 (p0-security) → COMPLETE, removed from br-coverage allowlist."
         },
         {
           "id": "R2-3",
