@@ -114,7 +114,7 @@ Business rules defined but modules not yet built. These are product features, no
 | BR-37 | Job Posting Expiry | 2 | M15 | 30-day expiry with reminders and extensions |
 | BR-38 | Marketplace Referral Disclosure | 2 | M16 | Referral transparency for marketplace listings |
 | BR-39 | Committee Dissolution | 3 | M19 | Committee lifecycle completion with data retention |
-| BR-40 | Survey Anonymity | 3 | M19 | Anonymous survey response guarantees |
+| BR-40 | Survey Anonymity | 3 | M18 | Anonymous survey response guarantees — **PARTIAL (2026-06-22)**: core anonymity hardened (anonymous responses store null responder_id **and** null created_by/updated_by — closed an audit-column deanonymization vector) + both advisory warnings shipped (respondent free-text PII warning, creator <10 small-pool warning). Still deferred to v2.0: anonymous one-response-per-member dedup (intentionally traded for anonymity) + full M18 milestone. |
 
 ---
 

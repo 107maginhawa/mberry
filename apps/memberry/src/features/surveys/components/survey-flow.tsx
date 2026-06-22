@@ -34,10 +34,20 @@ export interface Survey {
   title: string
   description?: string
   surveyType?: string
+  /** BR-40: when settings.anonymous is true, responses store no responder
+   *  identity. Drives the respondent-facing free-text privacy warning below.
+   *  GET /surveys/{id} returns this nested under `settings`. */
+  settings?: { anonymous?: boolean }
   questions: SurveyQuestion[]
   pollResults?: PollResult[]
   myResponseStatus?: string | null
 }
+
+// BR-40: free-text fields in anonymous surveys warn the respondent not to
+// self-identify, since open-ended answers can leak identity even though the
+// platform stores none.
+const ANONYMOUS_FREE_TEXT_WARNING =
+  'Avoid including personal details in open-ended answers to preserve your anonymity.'
 
 type AnswerValue = number | string | string[] | boolean | null
 
@@ -400,6 +410,17 @@ export function SurveyFlow({ survey, onComplete, previewMode }: SurveyFlowProps)
                 saveAnswers(updated)
               }}
             />
+
+            {/* BR-40: respondent-facing privacy warning on free-text fields of
+                anonymous surveys. */}
+            {survey.settings?.anonymous && currentQuestion.type === 'text' && (
+              <p
+                role="note"
+                className="text-center text-xs text-[var(--color-muted)]"
+              >
+                {ANONYMOUS_FREE_TEXT_WARNING}
+              </p>
+            )}
           </motion.div>
         </AnimatePresence>
       </div>

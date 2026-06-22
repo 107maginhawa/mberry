@@ -728,12 +728,13 @@
     "ruleClass": "p2-deferred",
     "tests": {
       "backend": [
-        "services/api-ts/src/handlers/communication/br-40.survey-anonymity.test.ts"
+        "services/api-ts/src/handlers/communication/br-40.survey-anonymity.test.ts",
+        "services/api-ts/src/handlers/surveys/submitSurveyResponse.integration.test.ts"
       ],
       "contract": [],
       "e2e": []
     },
-    "deferredReason": "Module M18 (Surveys) not yet implemented \u2014 deferred to milestone v2.0"
+    "deferredReason": "PARTIAL (2026-06-22): M18 Surveys IS implemented + live. Core anonymity enforced \u2014 anonymous non-poll responses store NULL responder_id AND NULL created_by/updated_by (the audit-column deanonymization vector was closed in submitSurveyResponse; the listSurveyResponses read path also strips those columns; export never emitted them). Real-PG covered. BR-40 advisory warnings shipped: respondent free-text PII warning (survey-flow.tsx) + creator <10 small-pool inference warning (survey-results.tsx); the Anonymous badge now renders in survey-list/survey-results (was reading the flag flat instead of settings.anonymous). All component-tested + live-verified. STILL DEFERRED to v2.0 (kept p2-deferred): (1) anonymous one-response-per-member dedup is intentionally traded away for anonymity \u2014 with responder_id NULL the dedup check can't match, so a member can submit multiple anonymous responses and allowReedit duplicates rather than updates (characterization-locked in submitSurveyResponse.integration.test.ts); the clean fix is a separate participation ledger. (2) contextId is left as-is on anonymous responses \u2014 it is a group/context reference (e.g. shared training-session id), not a person-unique token, so it does not deanonymize; nulling it would break legitimate context grouping. Revisit if any flow ever sets a per-person contextId. (3) full M18 survey milestone not yet feature-complete."
   },
   "BR-41": {
     "rule": "Election State Machine Transitions",

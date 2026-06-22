@@ -69,12 +69,16 @@ export async function listSurveyResponses(
     pagination: { limit, offset },
   });
 
-  // Strip responderId for anonymous surveys
+  // BR-40: for anonymous surveys strip every column that could re-identify the
+  // submitter — responderId AND the created_by/updated_by audit columns. The
+  // submit handler already writes these null for new anonymous responses; this
+  // is the defense-in-depth read-side guarantee so any legacy/abnormal row can
+  // never deanonymize a respondent through this endpoint.
   const settings = survey.settings as { anonymous?: boolean } | null;
   const isAnonymous = settings?.anonymous === true;
 
   const data = isAnonymous
-    ? result.data.map((r) => ({ ...r, responderId: null }))
+    ? result.data.map((r) => ({ ...r, responderId: null, createdBy: null, updatedBy: null }))
     : result.data;
 
   return ctx.json({
