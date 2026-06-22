@@ -778,3 +778,187 @@ describe('AuditRepository — archive/purge state machine + statistics over real
     expect(await countById(oldRow)).toBe(0);
   });
 });
+
+/**
+ * S4 — verifyIntegrity tamper-detection against PERSISTED rows + the DB-fetch path
+ * (audit.repo.ts:170-225 — the illusion stubbed the no-arg select to `[]`, so the
+ * real `findMany({retentionStatus:'active'})` query inside verifyIntegrity was never
+ * proven, and tamper-detection was only ever checked against a hand-built bad-hash
+ * literal, never a row mutated in the actual store).
+ *
+ * This block stands up its OWN isolated scratch schema (H4) because the no-arg
+ * verifyIntegrity() path calls findMany({retentionStatus:'active'}) GLOBALLY — the
+ * S1/S2 blocks seed active rows into the shared scratch table, which would make the
+ * exact `totalChecked === seeded active count` assertion non-deterministic. With H4
+ * the only rows present are the ones this block seeds.
+ *
+ * What it proves with REAL data:
+ *   - persisted-row roundtrip: logEvent → re-fetch (Drizzle-typed createdAt Date) →
+ *     verifyIntegrity([row]) → verifiedCount===1. This re-serializes the timestamptz
+ *     Postgres actually STORED via entry.createdAt.toISOString() and recomputes the
+ *     SHA-256, catching any tz/precision drift the in-process insert can't.
+ *   - real tamper: raw UPDATE description='TAMPERED' on a persisted row (no hash
+ *     recompute) → verifyIntegrity flags its id in compromisedEntries, verifiedCount===0.
+ *   - DB-fetch path: verifyIntegrity() with NO arg runs findMany({retentionStatus:'active'})
+ *     against real PG → totalChecked === the number of active rows actually persisted.
+ *   - legacy rows (integrity_hash IS NULL) are SKIPPED — neither verified nor counted
+ *     compromised (the repo `continue`s on a null hash).
+ */
+describe('AuditRepository.verifyIntegrity — tamper-detection over real PG (W3 audit S4)', () => {
+  let H4: ScratchDb;
+  const ORG_S4 = '00000000-0000-4000-8000-0000000000e1';
+
+  async function readRow4(id: string): Promise<any> {
+    const { rows } = await H4.scopedPool.query(
+      `SELECT * FROM "${H4.schema}".audit_log_entry WHERE id = $1`,
+      [id],
+    );
+    return rows[0];
+  }
+
+  /** logEvent a normal active row (real integrity hash) and return its id. */
+  async function logRow(description: string): Promise<string> {
+    const repo = new AuditRepository(H4.db as never, noopLogger);
+    const entry = await repo.logEvent(
+      {
+        eventType: 'data-access',
+        category: 'hipaa',
+        action: 'read',
+        outcome: 'success',
+        organizationId: ORG_S4,
+        user: freshId(),
+        userType: 'admin',
+        resourceType: 'audit_log',
+        resource: freshId(),
+        description,
+      },
+      freshId(),
+    );
+    return entry.id;
+  }
+
+  beforeAll(async () => {
+    H4 = await createScratch(['audit_log_entry']);
+  });
+
+  afterAll(async () => {
+    await H4?.teardown();
+  });
+
+  test('persisted-row roundtrip: verifyIntegrity over a re-fetched stored row verifies (tz-safe)', async () => {
+    if (!H4.dbReachable) return;
+    const repo = new AuditRepository(H4.db as never, noopLogger);
+
+    const id = await logRow('roundtrip-ok');
+    // Re-fetch via the repo so createdAt is a Drizzle-typed Date (verifyIntegrity
+    // calls entry.createdAt.toISOString() — this exercises the recompute against the
+    // timestamptz Postgres stored, not the in-process Date logEvent computed with).
+    const [readBack] = await repo.findMany({ resource: (await readRow4(id)).resource });
+    expect(readBack).toBeDefined();
+    expect(readBack.id).toBe(id);
+
+    const result = await repo.verifyIntegrity([readBack as AuditLogEntry]);
+    expect(result.verifiedCount).toBe(1);
+    expect(result.compromisedEntries).toEqual([]);
+    expect(result.totalChecked).toBe(1);
+  });
+
+  test('real tamper: raw UPDATE description without hash recompute → flagged compromised', async () => {
+    if (!H4.dbReachable) return;
+    const repo = new AuditRepository(H4.db as never, noopLogger);
+
+    const id = await logRow('pre-tamper');
+    const resource = (await readRow4(id)).resource;
+
+    // Mutate the row IN THE STORE (no integrity-hash recompute) — exactly what a
+    // tamper looks like. The persisted integrity_hash now no longer matches the
+    // recomputed hash over the row's (changed) description.
+    await H4.scopedPool.query(
+      `UPDATE "${H4.schema}".audit_log_entry SET description = 'TAMPERED' WHERE id = $1`,
+      [id],
+    );
+
+    const tamperedRow = await readRow4(id);
+    expect(tamperedRow.description).toBe('TAMPERED');
+    // The stored hash is unchanged (no trigger recomputes it).
+    expect(tamperedRow.integrity_hash).toMatch(/^[a-f0-9]{64}$/);
+
+    const [readBack] = await repo.findMany({ resource });
+    expect(readBack.id).toBe(id);
+
+    const result = await repo.verifyIntegrity([readBack as AuditLogEntry]);
+    expect(result.verifiedCount).toBe(0);
+    expect(result.compromisedEntries).toContain(id);
+    expect(result.totalChecked).toBe(1);
+  });
+
+  test('DB-fetch path: no-arg verifyIntegrity() runs findMany({retentionStatus:active}) against real PG', async () => {
+    if (!H4.dbReachable) return;
+    const repo = new AuditRepository(H4.db as never, noopLogger);
+
+    // Snapshot the live active count BEFORE seeding, so the assertion is exact
+    // regardless of rows the earlier S4 tests left (they logEvent → active).
+    const liveActiveCount = async (): Promise<number> => {
+      const { rows } = await H4.scopedPool.query(
+        `SELECT count(*)::int AS n FROM "${H4.schema}".audit_log_entry WHERE retention_status = 'active'`,
+      );
+      return rows[0].n;
+    };
+
+    // Seed two MORE clean active rows + one ARCHIVED row (which the no-arg path must
+    // NOT check, since it filters retentionStatus:'active').
+    await logRow('db-fetch-1');
+    await logRow('db-fetch-2');
+    const archivedId = await logRow('db-fetch-archived');
+    await H4.scopedPool.query(
+      `UPDATE "${H4.schema}".audit_log_entry SET retention_status = 'archived' WHERE id = $1`,
+      [archivedId],
+    );
+
+    const activeCount = await liveActiveCount();
+    expect(activeCount).toBeGreaterThanOrEqual(2);
+
+    const result = await repo.verifyIntegrity();
+    // totalChecked === the number of ACTIVE rows actually in the store (the real
+    // findMany ran — the illusion stubbed this select to []), and the archived row
+    // was excluded.
+    expect(result.totalChecked).toBe(activeCount);
+    // The archived row's id is never reported (it wasn't fetched).
+    expect(result.compromisedEntries).not.toContain(archivedId);
+  });
+
+  test('legacy rows (integrity_hash IS NULL) are SKIPPED — not verified, not compromised', async () => {
+    if (!H4.dbReachable) return;
+    const repo = new AuditRepository(H4.db as never, noopLogger);
+
+    // A clean row (real hash) + a legacy row with NULL integrity_hash.
+    const cleanId = await logRow('legacy-clean');
+    const legacyId = freshId();
+    await H4.scopedPool.query(
+      `INSERT INTO "${H4.schema}".audit_log_entry
+         (id, event_type, category, action, outcome, organization_id,
+          "user", resource_type, resource, description, retention_status,
+          integrity_hash, created_at, updated_at, created_by, updated_by)
+       VALUES ($1, 'data-access'::audit_event_type, 'hipaa'::audit_category,
+               'read'::audit_action, 'success'::audit_outcome, $2,
+               $3, 'audit_log', $4, 'legacy null hash', 'active'::audit_retention_status,
+               NULL, now(), now(), $3, $3)`,
+      [legacyId, ORG_S4, freshId(), freshId()],
+    );
+
+    const [clean] = await repo.findMany({ resource: (await readRow4(cleanId)).resource });
+    const [legacy] = await repo.findMany({ resource: (await readRow4(legacyId)).resource });
+    expect(legacy.integrityHash).toBeNull();
+
+    const result = await repo.verifyIntegrity([
+      clean as AuditLogEntry,
+      legacy as AuditLogEntry,
+    ]);
+    // totalChecked counts BOTH passed entries (the loop iterates all), but the legacy
+    // row is neither verified nor compromised — it is `continue`d past.
+    expect(result.totalChecked).toBe(2);
+    expect(result.verifiedCount).toBe(1);
+    expect(result.compromisedEntries).not.toContain(legacyId);
+    expect(result.compromisedEntries).toEqual([]);
+  });
+});
