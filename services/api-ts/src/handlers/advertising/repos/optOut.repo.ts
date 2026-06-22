@@ -51,27 +51,41 @@ export class MemberAdOptOutRepository extends DatabaseRepository<
   }
 
   /**
-   * Idempotent opt-out: persist a row if the member is not already opted out.
+   * Idempotent opt-out: persist a row for (organizationId, personId).
+   *
+   * The DB unique index on (organization_id, person_id) (migration 0082) is the
+   * source of truth — `ON CONFLICT DO NOTHING` makes concurrent opt-outs safe
+   * (no TOCTOU dup row, no bubbled 23505). The in-app findOne guard alone has a
+   * race window and is no longer relied on for uniqueness.
    */
   async optOut(organizationId: string, personId: string, actorId?: string): Promise<void> {
-    const existing = await this.findOne({ organizationId, personId });
-    if (existing) return;
-    await this.createOne({
-      organizationId,
-      personId,
-      createdBy: actorId ?? personId,
-      updatedBy: actorId ?? personId,
-    } as NewMemberAdOptOut);
+    await this.db
+      .insert(memberAdOptOuts)
+      .values({
+        organizationId,
+        personId,
+        createdBy: actorId ?? personId,
+        updatedBy: actorId ?? personId,
+      } as NewMemberAdOptOut)
+      .onConflictDoNothing({
+        target: [memberAdOptOuts.organizationId, memberAdOptOuts.personId],
+      });
   }
 
   /**
-   * Idempotent opt-in: remove the opt-out row if present (M16-R4: re-enabling
-   * targeting deletes the opt-out record).
+   * Idempotent opt-in: remove ALL opt-out rows for (organizationId, personId)
+   * (M16-R4: re-enabling targeting deletes the opt-out record). Deletes every
+   * matching row — not just the first found — so any pre-existing duplicate
+   * straggler can't keep the member silently opted-out.
    */
   async optIn(organizationId: string, personId: string): Promise<void> {
-    const existing = await this.findOne({ organizationId, personId });
-    if (existing) {
-      await this.deleteOneById((existing as MemberAdOptOut & { id: string }).id);
-    }
+    await this.db
+      .delete(memberAdOptOuts)
+      .where(
+        and(
+          eq(memberAdOptOuts.organizationId, organizationId),
+          eq(memberAdOptOuts.personId, personId)
+        )
+      );
   }
 }

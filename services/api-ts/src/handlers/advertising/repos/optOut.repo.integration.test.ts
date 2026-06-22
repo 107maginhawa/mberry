@@ -76,4 +76,125 @@ describe('MemberAdOptOutRepository (real-PG, createScratch)', () => {
     // person opted out in orgA but isOptedOut is org-scoped — false for a 3rd org.
     expect(await repo.isOptedOut(crypto.randomUUID(), personShared)).toBe(false);
   });
+
+  // ── REAL BUG (W3 S3): member_ad_opt_out has no unique(organization_id, person_id).
+  // optOut() is findOne-then-createOne (TOCTOU): concurrent calls both pass the
+  // findOne guard and insert TWO rows for the same (org, person). The fix is a
+  // DB unique index (migration 0082) + ON CONFLICT DO NOTHING upsert. Until then
+  // the DB has no backstop and the concurrent-dup test exposes the defect.
+  test('DB enforces uniqueness on (org, person) — a duplicate raw insert raises 23505', async () => {
+    if (!H.dbReachable) return;
+    const org = crypto.randomUUID();
+    const person = crypto.randomUUID();
+
+    const insert = () =>
+      H.scopedPool.query(
+        `INSERT INTO "${H.schema}".member_ad_opt_out (organization_id, person_id, created_by, updated_by)
+         VALUES ($1, $2, $2, $2)`,
+        [org, person]
+      );
+
+    await insert();
+    // The second insert for the same (org, person) must be rejected by the DB.
+    // Before migration 0082 there is no unique constraint → this SUCCEEDS (two
+    // rows, RED). After 0082 it raises unique_violation 23505 (GREEN).
+    let code: string | undefined;
+    try {
+      await insert();
+    } catch (e) {
+      code = (e as { code?: string; cause?: { code?: string } }).code ??
+        (e as { cause?: { code?: string } }).cause?.code;
+    }
+    expect(code).toBe('23505');
+
+    const { rows } = await H.scopedPool.query(
+      `SELECT id FROM "${H.schema}".member_ad_opt_out WHERE organization_id=$1 AND person_id=$2`,
+      [org, person]
+    );
+    expect(rows.length).toBe(1);
+  });
+
+  test('repo.optOut is idempotent under the DB unique constraint (ON CONFLICT swallows 23505)', async () => {
+    if (!H.dbReachable) return;
+    const repo = new MemberAdOptOutRepository(H.db as never);
+    const org = crypto.randomUUID();
+    const person = crypto.randomUUID();
+
+    // Concurrent opt-outs both pass the in-app findOne guard; the DB unique index
+    // is the real backstop. With ON CONFLICT DO NOTHING the loser is a no-op, not
+    // an uncaught 23505 — exactly one row, no rejection bubbles out.
+    const results = await Promise.allSettled([repo.optOut(org, person), repo.optOut(org, person)]);
+    expect(results.every((r) => r.status === 'fulfilled')).toBe(true);
+
+    const { rows } = await H.scopedPool.query(
+      `SELECT id FROM "${H.schema}".member_ad_opt_out WHERE organization_id=$1 AND person_id=$2`,
+      [org, person]
+    );
+    expect(rows.length).toBe(1);
+    expect(await repo.isOptedOut(org, person)).toBe(true);
+  });
+
+  // optIn() deletes only existing.id (the first found). If a duplicate ever exists
+  // (the race above), opt-in leaves a straggler and the member silently stays
+  // opted-OUT. The fix deletes ALL matching (org, person) rows.
+  test('optIn removes ALL opt-out rows for (org, person) — no straggler left behind', async () => {
+    if (!H.dbReachable) return;
+    const repo = new MemberAdOptOutRepository(H.db as never);
+    const org = crypto.randomUUID();
+    const person = crypto.randomUUID();
+
+    // Simulate the pre-fix race outcome: two duplicate rows for the same
+    // (org, person). Post-migration the unique index forbids that, so drop it
+    // inside this isolated scratch schema to seed the legacy-corrupt state and
+    // prove optIn's delete-ALL behavior cleans it up (not just the first row).
+    await H.scopedPool.query(
+      `DROP INDEX IF EXISTS "${H.schema}".member_ad_opt_out_organization_id_person_id_idx1`
+    );
+    for (let i = 0; i < 2; i++) {
+      await H.scopedPool.query(
+        `INSERT INTO "${H.schema}".member_ad_opt_out (organization_id, person_id, created_by, updated_by)
+         VALUES ($1, $2, $2, $2)`,
+        [org, person]
+      );
+    }
+    const before = await H.scopedPool.query(
+      `SELECT id FROM "${H.schema}".member_ad_opt_out WHERE organization_id=$1 AND person_id=$2`,
+      [org, person]
+    );
+    expect(before.rows.length).toBe(2);
+
+    await repo.optIn(org, person);
+
+    const after = await H.scopedPool.query(
+      `SELECT id FROM "${H.schema}".member_ad_opt_out WHERE organization_id=$1 AND person_id=$2`,
+      [org, person]
+    );
+    expect(after.rows.length).toBe(0);
+    expect(await repo.isOptedOut(org, person)).toBe(false);
+
+    // Restore the unique index so sibling tests sharing this scratch schema keep
+    // the ON CONFLICT backstop.
+    await H.scopedPool.query(
+      `CREATE UNIQUE INDEX IF NOT EXISTS member_ad_opt_out_organization_id_person_id_idx1
+       ON "${H.schema}".member_ad_opt_out (organization_id, person_id)`
+    );
+  });
+
+  // Positive characterization — the happy-path lifecycle is unchanged by the fix.
+  test('single optOut then optIn leaves 0 rows and isOptedOut false', async () => {
+    if (!H.dbReachable) return;
+    const repo = new MemberAdOptOutRepository(H.db as never);
+    const org = crypto.randomUUID();
+    const person = crypto.randomUUID();
+
+    await repo.optOut(org, person);
+    expect(await repo.isOptedOut(org, person)).toBe(true);
+    await repo.optIn(org, person);
+    expect(await repo.isOptedOut(org, person)).toBe(false);
+    const { rows } = await H.scopedPool.query(
+      `SELECT id FROM "${H.schema}".member_ad_opt_out WHERE organization_id=$1 AND person_id=$2`,
+      [org, person]
+    );
+    expect(rows.length).toBe(0);
+  });
 });
