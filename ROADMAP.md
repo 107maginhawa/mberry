@@ -33,7 +33,7 @@
 
 ## Active Work
 
-### Phase 47a: Institutional Memberships — **BACKEND COMPLETE**
+### Phase 47a: Institutional Memberships — **COMPLETE**
 
 **Backend (DONE 2026-06-07 at `member-membership-cutover`):**
 - ✅ DB schema: `institutional_memberships`, `seat_allocations` tables
@@ -45,10 +45,18 @@
 - ✅ Repository layer + unit tests
 - ✅ Hurl contract: `seat-allocation-flow.hurl` (Wave 7 baseline 144/144)
 
-**Frontend (STILL PENDING):**
-- ⏳ Wire `requiredCredits` prop from org CPD config API to
-  `apps/memberry/src/features/membership/components/member-table.tsx:60`
-  (currently defaults to `60` hardcoded). Pass real value from parent route.
+**Frontend (DONE):**
+- ✅ `requiredCredits` is wired from org CPD config. The roster parent route
+  (`routes/_authenticated/org/$orgSlug/officer/roster/index.tsx`) queries
+  `getOrgCpdConfigOptions` and passes `cpdConfig?.data?.requiredCredits` into
+  `<MemberTable>`; the component's `= 60` default is only the loading/absent
+  fallback (matches `org_cpd_config`'s DB default). Originally landed in
+  Phase 46 (commit `4c4b224b`); the ⏳ entry here was stale bookkeeping.
+  **Live-verified 2026-06-22:** temporarily set the seed org's CPD
+  `requiredCredits` to 45 → the officer roster's "Training X/Y" denominator
+  rendered `/45` (not `/60`) for all 40 members, then reverted to 60. Unit
+  coverage already exists in `member-table.test.tsx` (`30/100` custom prop +
+  `30/60` default).
 
 ### Phase 47b: National Dashboard Frontend + Booking Cleanup
 
@@ -116,9 +124,9 @@ Dynamic configuration per association/tier. Currently hardcoded values.
 
 | Item | Location | Current | Target |
 |------|----------|---------|--------|
-| `requiredCredits` | `apps/memberry/src/features/membership/components/member-table.tsx:20` | Hardcoded default=60 (API wired in Phase 46) | Phase 47a — wire prop from parent component |
+| ~~`requiredCredits`~~ | `apps/memberry/.../member-table.tsx` + roster route | ✅ Done — roster route queries `getOrgCpdConfig` and passes the real value; `= 60` is only the loading/absent fallback | Phase 47a FE — live-verified 2026-06-22 |
 
-> Prerequisite: Build association config endpoint that exposes CPD/CE credit requirements.
+> Endpoint built: `getOrgCpdConfig` (`GET /association/member/cpd-config/{organizationId}`) exposes CPD/CE credit requirements per org.
 
 ---
 
