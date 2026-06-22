@@ -38110,6 +38110,47 @@ export type UpdateJobPostingResponses = {
 
 export type UpdateJobPostingResponse = UpdateJobPostingResponses[keyof UpdateJobPostingResponses];
 
+export type ExtendJobPostingData = {
+    body?: never;
+    path: {
+        postingId: Uuid;
+    };
+    query?: never;
+    url: '/association/jobs/postings/{postingId}/extend';
+};
+
+export type ExtendJobPostingErrors = {
+    /**
+     * Validation error response
+     */
+    400: ValidationError;
+    /**
+     * Unauthorized access response
+     */
+    401: AuthenticationError;
+    /**
+     * Forbidden access response
+     */
+    403: AuthorizationError;
+    /**
+     * Resource not found response
+     */
+    404: NotFoundError;
+};
+
+export type ExtendJobPostingError = ExtendJobPostingErrors[keyof ExtendJobPostingErrors];
+
+export type ExtendJobPostingResponses = {
+    /**
+     * Success response with data
+     */
+    200: {
+        data: JobBoardPosting;
+    };
+};
+
+export type ExtendJobPostingResponse = ExtendJobPostingResponses[keyof ExtendJobPostingResponses];
+
 export type ListListingsData = {
     body?: never;
     path?: never;

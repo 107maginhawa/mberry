@@ -317,6 +317,21 @@ namespace JobsModule {
       | ApiUnauthorizedResponse
       | ApiForbiddenResponse
       | ApiNotFoundResponse;
+
+    @doc("Extend a posting's expiry by another 30 days (BR-37). The new expiry is computed from the CURRENT expiry, not from today, and the posting is reactivated if it had expired. Officer-only.")
+    @operationId("extendJobPosting")
+    @post
+    @route("/postings/{postingId}/extend")
+    @useAuth(bearerAuth)
+    @extension("x-security-required-roles", #["association:admin", "association:staff"])
+    @extension("x-audit", #{ action: "renew", resourceType: "job_posting" })
+    extendJobBoardPosting(
+      @path postingId: UUID
+    ): ApiOkResponse<{ data: JobBoardPosting }>
+      | ApiBadRequestResponse
+      | ApiUnauthorizedResponse
+      | ApiForbiddenResponse
+      | ApiNotFoundResponse;
   }
 
   @doc("Member job applications + officer review")

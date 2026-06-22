@@ -806,6 +806,14 @@ export function registerRoutes(app: Hono<{ Variables: Variables }>) {
     registry.deleteJobPosting as unknown as Handler
   );
 
+  // extendJobPosting
+  app.post('/association/jobs/postings/:postingId/extend',
+    authMiddleware({ roles: ["association:admin", "association:staff"] }),
+    createPerRouteAuditMiddleware({ action: "renew", resourceType: "job_posting" }),
+    zValidator('param', validators.ExtendJobPostingParams, validationErrorHandler),
+    registry.extendJobPosting as unknown as Handler
+  );
+
   // createListing
   app.post('/association/marketplace/listings',
     authMiddleware({ roles: ["association:admin", "association:staff"] }),

@@ -1,4 +1,4 @@
-import { eq, and, desc, gte, lte, like, sql, type SQL } from 'drizzle-orm';
+import { eq, ne, and, desc, gte, lt, lte, like, sql, type SQL } from 'drizzle-orm';
 import type { DatabaseInstance } from '@/core/database';
 import { escapeLikePattern } from '@/utils/sanitize';
 import { NotFoundError, ValidationError } from '@/core/errors';
@@ -32,6 +32,10 @@ export class JobPostingRepository {
     }
     if (filters?.status) {
       conditions.push(eq(jobPostings.status, filters.status as JobPosting['status']));
+    } else {
+      // BR-37: the public board hides expired postings by default. They remain
+      // queryable for the officer's history via an explicit `status=expired`.
+      conditions.push(ne(jobPostings.status, 'expired'));
     }
     if (filters?.type) {
       conditions.push(eq(jobPostings.type, filters.type as JobPosting['type']));
@@ -106,6 +110,40 @@ export class JobPostingRepository {
         ),
       )
       .limit(200);
+  }
+
+  /**
+   * BR-37 expiry cron: flip every active posting whose expiry has passed to
+   * 'expired' in one statement. Returns the rows that were expired.
+   */
+  async expireOverdue(now: Date): Promise<JobPosting[]> {
+    return this.db
+      .update(jobPostings)
+      .set({ status: 'expired', updatedAt: new Date() })
+      .where(and(eq(jobPostings.status, 'active'), lte(jobPostings.expiresAt, now)))
+      .returning();
+  }
+
+  /**
+   * BR-37 reminder cron: active postings whose expiry falls on the UTC day of
+   * `target`. The full-day window means a daily run targeting (today + 3 days)
+   * matches each posting exactly once — no per-posting "reminded" flag needed.
+   */
+  async listExpiringOn(target: Date): Promise<JobPosting[]> {
+    const start = new Date(Date.UTC(target.getUTCFullYear(), target.getUTCMonth(), target.getUTCDate()));
+    const end = new Date(start);
+    end.setUTCDate(end.getUTCDate() + 1);
+    return this.db
+      .select()
+      .from(jobPostings)
+      .where(
+        and(
+          eq(jobPostings.status, 'active'),
+          gte(jobPostings.expiresAt, start),
+          lt(jobPostings.expiresAt, end),
+        ),
+      )
+      .limit(500);
   }
 
   async extendPosting(id: string, days: number = DEFAULT_EXPIRY_DAYS): Promise<JobPosting> {

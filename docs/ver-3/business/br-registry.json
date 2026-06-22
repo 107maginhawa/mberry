@@ -687,13 +687,15 @@
     "ruleClass": "p2-deferred",
     "tests": {
       "backend": [
-        "services/api-ts/src/handlers/jobs/repos/jobs.repo.integration.test.ts"
+        "services/api-ts/src/handlers/jobs/repos/jobs.repo.integration.test.ts",
+        "services/api-ts/src/handlers/jobs/jobs/jobPostingExpiry.integration.test.ts",
+        "services/api-ts/src/handlers/jobs/extendJobPosting.test.ts"
       ],
       "contract": [],
       "e2e": []
     },
-    "deferredReason": "Module M15 (Job Board) repo layer is implemented + real-PG tested (Wave-3), but the EXPIRY behavior itself remains dead code: there is NO cron/scheduler that auto-expires postings. listExpired/extendPosting are characterized at the repo level by jobs.repo.integration.test.ts; the missing prod cron is a documented known-gap (postings do not auto-expire) deferred to a future product decision. Registry-drift fixed Wave-3: the old backend path (handlers/events/br-37.job-posting-expiry.test.ts) never existed.",
-    "annotations": "Wave-3 (2026-06-22): repointed from a non-existent events/ path to the real jobs repo integration suite. BR remains deferred/characterize-only \u2014 the expiry cron was deliberately NOT built (out of test-gap scope), mirroring the elections updateElectionStatus orphan precedent."
+    "deferredReason": "BUILT (2026-06-22): the M15 job board is live (routes wired in registry.ts; 2 seeded postings) and the prior 'expiry cron is dead code' gap is CLOSED. Shipped + live-verified: (1) expiry cron (jobs.expirePostings, daily 01:00 UTC) flips active postings past expiry to 'expired'; (2) public board hides expired by default (searchJobPostings/repo.list), officer history still queryable via explicit status=expired; (3) extend endpoint POST /association/jobs/postings/{postingId}/extend (officer) resets expiry +30 days from the CURRENT expiry (not today) and reactivates \u2014 verified live 2026-08-12->2026-09-11; (4) 3-day reminder cron (jobs.expiryReminders, daily 09:00 UTC) notifies the poster, deduped structurally by a daily date-band (no migration). Real-PG + unit tested. STILL DEFERRED to v2.0 (kept p2-deferred): contract (Hurl) + e2e, a member/officer job-board FE (none exists), and a dedicated 'job.posting.expiring' notification type (the reminder currently reuses type='system' + relatedEntityType='job_posting').",
+    "annotations": "BR-37 expiry automation shipped 2026-06-22 (PR for feat/br-37-job-posting-expiry). The earlier 'deliberately NOT built' note is superseded \u2014 the cron + reminder + extend + public-board exclusion now exist. Kept p2-deferred only for the remaining contract/e2e/FE/notif-type work."
   },
   "BR-38": {
     "rule": "Marketplace Referral Disclosure",
