@@ -124,4 +124,50 @@ describe('ListingRepository (real-PG / createScratch)', () => {
     expect(active.length).toBe(2);
     expect(active.every((l) => l.status === 'active' && l.vendorId === v.id)).toBe(true);
   });
+
+  test('repo updateOneById writes ANY status — FSM is handler-only, not repo-enforced (W3 S3)', async () => {
+    // Characterization: MARKETPLACE_LISTING_VALID_TRANSITIONS forbids draft→archived
+    // (draft only →active). But the base repo updateOneById issues a plain UPDATE
+    // with NO transition guard, so it WILL persist the illegal jump. This proves the
+    // FSM lives exclusively in the updateListing handler, not at the repo/SQL seam.
+    if (!H.dbReachable) return;
+    const lr = new ListingRepository(H.db as never);
+    const vr = new VendorRepository(H.db as never);
+    const org = crypto.randomUUID();
+    const v = await vr.createOne(newVendor(org));
+    const l = await lr.createOne(newListing(org, v.id, { status: 'draft' }));
+
+    // draft → archived is an ILLEGAL FSM edge, yet the repo writes it unguarded
+    const jumped = await lr.updateOneById(l.id, { status: 'archived' });
+    expect(jumped.status).toBe('archived');
+    const { rows } = await H.scopedPool.query(
+      `SELECT status FROM "${H.schema}".marketplace_listing WHERE id = $1`,
+      [l.id],
+    );
+    expect(rows[0].status).toBe('archived');
+  });
+
+  test('enum integrity: raw insert status=bogus → Postgres 22P02 on listing_status (W3 S3)', async () => {
+    // The scratch table is LIKE public.marketplace_listing INCLUDING ALL, so the
+    // status column carries the real listing_status enum type. A raw insert of an
+    // out-of-enum value must be rejected by the live column type (22P02 invalid
+    // text representation), not merely by the Drizzle TS type.
+    if (!H.dbReachable) return;
+    const org = crypto.randomUUID();
+    const vendorId = crypto.randomUUID();
+    let code: string | undefined;
+    try {
+      await H.scopedPool.query(
+        `INSERT INTO "${H.schema}".marketplace_listing
+           (organization_id, vendor_id, title, description, status)
+         VALUES ($1, $2, 'L', 'd', 'bogus')`,
+        [org, vendorId],
+      );
+    } catch (e) {
+      code =
+        (e as { code?: string; cause?: { code?: string } }).code ??
+        (e as { cause?: { code?: string } }).cause?.code;
+    }
+    expect(code).toBe('22P02');
+  });
 });
