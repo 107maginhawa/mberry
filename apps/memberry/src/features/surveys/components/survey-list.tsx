@@ -25,7 +25,9 @@ interface SurveyRow {
   description?: string | null
   surveyType: 'nps' | 'satisfaction' | 'poll' | 'custom'
   status: 'draft' | 'active' | 'closed'
-  anonymous: boolean
+  // BR-40: GET /surveys returns the anonymity flag nested under settings, not
+  // flat — reading it flat left the "Anonymous" badge silently never rendering.
+  settings?: { anonymous?: boolean }
   deadline?: string | null
   responseCount: number
   questionCount: number
@@ -202,7 +204,7 @@ export function SurveyList() {
                 <div className="flex items-center gap-2 mb-1">
                   <TypeBadge type={survey.surveyType} />
                   <StatusBadge status={survey.status} />
-                  {survey.anonymous && (
+                  {survey.settings?.anonymous && (
                     <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-gray-100 text-gray-600">
                       Anonymous
                     </span>

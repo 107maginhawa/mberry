@@ -123,18 +123,22 @@ export async function submitSurveyResponse(
     return ctx.json(updated, 200);
   }
 
-  const isAnonymous = settings?.anonymous === true;
+  // BR-40: an anonymous (non-poll) response must be technically unlinkable to
+  // its submitter. Strip the responderId AND the created_by/updated_by audit
+  // columns — leaving the actor in the audit trail would let a platform admin
+  // recover identity, defeating the "deanonymization is technically impossible"
+  // guarantee. Polls stay attributed so vote dedup / already-voted detection work.
+  const anonymize = settings?.anonymous === true && survey.surveyType !== 'poll';
+  const auditActor = anonymize ? null : userId;
 
   const response = await responseRepo.submitResponse({
     organizationId: survey.organizationId,
     surveyId,
-    // P0 privacy fix: strip responderId for anonymous surveys.
-    // Polls are always attributed so vote dedup + already-voted detection work.
-    responderId: isAnonymous && survey.surveyType !== 'poll' ? null : userId,
+    responderId: auditActor,
     answers: (body.answers ?? []) as QuestionAnswer[],
     contextId: body.contextId ?? null,
-    createdBy: userId,
-    updatedBy: userId,
+    createdBy: auditActor,
+    updatedBy: auditActor,
   });
 
   // Best-effort analytics aggregation. See update path above for context —

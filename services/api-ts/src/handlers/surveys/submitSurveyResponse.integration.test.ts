@@ -100,10 +100,10 @@ function capture(ctx: never): { data: unknown; status: number } {
 }
 
 async function responsesForSurvey(surveyId: string): Promise<
-  Array<{ id: string; responder_id: string | null; status: string; completed_at: Date | null; answers: unknown }>
+  Array<{ id: string; responder_id: string | null; created_by: string | null; updated_by: string | null; status: string; completed_at: Date | null; answers: unknown }>
 > {
   const { rows } = await H.scopedPool.query(
-    `SELECT id, responder_id, status, completed_at, answers
+    `SELECT id, responder_id, created_by, updated_by, status, completed_at, answers
        FROM "${H.schema}".survey_response WHERE survey_id=$1`,
     [surveyId],
   );
@@ -132,6 +132,9 @@ describe('submitSurveyResponse workflow — anonymity / deadline / re-edit / ded
     expect(rows[0].status).toBe('completed');
     expect(rows[0].completed_at).not.toBeNull();
     expect(rows[0].responder_id).toBe(member);
+    // Identified surveys keep the audit trail (officer-visible attribution).
+    expect(rows[0].created_by).toBe(member);
+    expect(rows[0].updated_by).toBe(member);
     expect(rows[0].answers).toEqual(answers);
   });
 
@@ -155,8 +158,44 @@ describe('submitSurveyResponse workflow — anonymity / deadline / re-edit / ded
     expect(rows).toHaveLength(1);
     // P0 privacy: responderId stripped to NULL for anonymous non-poll surveys
     expect(rows[0].responder_id).toBeNull();
+    // BR-40: the audit columns must ALSO be NULL — otherwise the submitter is
+    // recoverable from created_by/updated_by, making deanonymization possible.
+    expect(rows[0].created_by).toBeNull();
+    expect(rows[0].updated_by).toBeNull();
     // BR: the answers payload is retained even though attribution is dropped
     expect(rows[0].answers).toEqual(answers);
+  });
+
+  test('CHARACTERIZATION: anonymous responses are NOT deduped — a member can submit twice (deferred: participation ledger)', async () => {
+    if (!H.dbReachable) return;
+    // BR-40 deliberately trades one-response-per-member dedup away for true
+    // anonymity: with responder_id NULL, the dedup check (findByResponderAndSurvey
+    // on responder_id = userId) can never match a prior anonymous row, so the
+    // same member can submit multiple anonymous responses. The clean fix is a
+    // separate participation ledger (deferred to v2.0). This test LOCKS the
+    // current behavior so the tradeoff is visible, not silent.
+    const member = (await seedPerson(H)).id;
+    await seedMembership(H, { personId: member, organizationId: CONTENT_ORG });
+    const { id: surveyId } = await seedSurvey(H, {
+      organizationId: CONTENT_ORG,
+      status: 'active',
+      surveyType: 'feedback',
+      settings: { anonymous: true },
+    });
+
+    const ctx1 = makeCtx({ userId: member, surveyId, answers: [{ questionId: 'q1', value: 'first' }], organizationId: CONTENT_ORG });
+    await submitSurveyResponse(ctx1);
+    expect(capture(ctx1).status).toBe(201);
+
+    const ctx2 = makeCtx({ userId: member, surveyId, answers: [{ questionId: 'q1', value: 'second' }], organizationId: CONTENT_ORG });
+    await submitSurveyResponse(ctx2);
+    expect(capture(ctx2).status).toBe(201);
+
+    const rows = await responsesForSurvey(surveyId);
+    // TWO rows from the SAME member — no dedup, and both fully anonymized.
+    expect(rows).toHaveLength(2);
+    expect(rows.every((r) => r.responder_id === null)).toBe(true);
+    expect(rows.every((r) => r.created_by === null)).toBe(true);
   });
 
   test('anonymous POLL survey keeps responder_id (polls always attributed for dedup)', async () => {
@@ -183,6 +222,7 @@ describe('submitSurveyResponse workflow — anonymity / deadline / re-edit / ded
     expect(rows).toHaveLength(1);
     // poll path overrides anonymity: attribution kept so vote dedup works
     expect(rows[0].responder_id).toBe(member);
+    expect(rows[0].created_by).toBe(member);
   });
 
   test('second attributed submit without allowReedit → ConflictError, only ONE row', async () => {

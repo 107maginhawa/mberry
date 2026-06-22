@@ -37,6 +37,7 @@ const makeSurvey = (overrides: Partial<Survey> = {}): Survey => ({
   id: overrides.id ?? 'survey-1',
   title: overrides.title ?? 'Test Survey',
   description: overrides.description,
+  settings: overrides.settings,
   questions: overrides.questions ?? [
     {
       id: 'q1',
@@ -90,5 +91,27 @@ describe('SurveyFlow', () => {
     await userEvent.click(nextBtn)
     // Back button should now be present
     expect(screen.getByRole('button', { name: /back/i })).toBeInTheDocument()
+  })
+
+  // BR-40: free-text fields in anonymous surveys warn the respondent.
+  const PII_WARNING = /Avoid including personal details/i
+
+  test('[BR-40] anonymous survey shows the free-text privacy warning on a text question', () => {
+    renderWithProviders(<SurveyFlow survey={makeSurvey({ settings: { anonymous: true } })} />)
+    // First question (q1) is a text question.
+    expect(screen.getByText(PII_WARNING)).toBeInTheDocument()
+  })
+
+  test('[BR-40] non-anonymous survey shows NO free-text warning', () => {
+    renderWithProviders(<SurveyFlow survey={makeSurvey({ settings: { anonymous: false } })} />)
+    expect(screen.queryByText(PII_WARNING)).not.toBeInTheDocument()
+  })
+
+  test('[BR-40] anonymous survey shows NO warning on a non-text question', async () => {
+    renderWithProviders(<SurveyFlow survey={makeSurvey({ settings: { anonymous: true } })} />)
+    // Advance from q1 (text) to q2 (yes_no) — warning should disappear.
+    await userEvent.click(screen.getByRole('button', { name: /next/i }))
+    expect(screen.getByText('Would you recommend us?')).toBeInTheDocument()
+    expect(screen.queryByText(PII_WARNING)).not.toBeInTheDocument()
   })
 })

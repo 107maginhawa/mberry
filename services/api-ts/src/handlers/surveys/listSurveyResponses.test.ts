@@ -46,6 +46,8 @@ const responseList = [
     surveyId: 'survey-1',
     organizationId: 'tenant-1',
     responderId: 'member-1',
+    createdBy: 'member-1',
+    updatedBy: 'member-1',
     answers: [{ questionId: 'q1', value: 'Great' }],
     status: 'completed',
     createdAt: new Date(),
@@ -55,6 +57,8 @@ const responseList = [
     surveyId: 'survey-1',
     organizationId: 'tenant-1',
     responderId: 'member-2',
+    createdBy: 'member-2',
+    updatedBy: 'member-2',
     answers: [{ questionId: 'q1', value: 'Good' }],
     status: 'completed',
     createdAt: new Date(),
@@ -123,9 +127,11 @@ describe('listSurveyResponses', () => {
     const res = await listSurveyResponses(ctx);
     expect(res.status).toBe(200);
     expect((res as any).body.data.length).toBe(2);
-    // Non-anonymous: responderId preserved
+    // Non-anonymous: responderId + audit columns preserved (officer-visible).
     expect((res as any).body.data[0].responderId).toBe('member-1');
     expect((res as any).body.data[1].responderId).toBe('member-2');
+    expect((res as any).body.data[0].createdBy).toBe('member-1');
+    expect((res as any).body.data[0].updatedBy).toBe('member-1');
   });
 
   test('BR-40 / FIX-007: anonymous surveys return null responderId (not a sentinel UUID)', async () => {
@@ -149,6 +155,11 @@ describe('listSurveyResponses', () => {
     expect((res as any).body.data[0].responderId).toBe(null);
     expect((res as any).body.data[1].responderId).toBe(null);
     expect((res as any).body.data[0].responderId).not.toBe(ANONYMOUS_UUID);
+    // BR-40 defense-in-depth: the created_by/updated_by audit columns must ALSO
+    // be nulled on read, so a legacy/abnormal row can't deanonymize via them.
+    expect((res as any).body.data[0].createdBy).toBe(null);
+    expect((res as any).body.data[0].updatedBy).toBe(null);
+    expect((res as any).body.data[1].createdBy).toBe(null);
   });
 
   test('returns empty data when no responses', async () => {

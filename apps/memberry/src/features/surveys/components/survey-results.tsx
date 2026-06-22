@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
-import { BarChart3, MessageSquare, ChevronLeft, ChevronRight, Download } from 'lucide-react'
+import { BarChart3, MessageSquare, ChevronLeft, ChevronRight, Download, ShieldAlert } from 'lucide-react'
 import { Skeleton, Tabs, TabsList, TabsTrigger } from '@monobase/ui'
 import { Button } from '@monobase/ui'
 import { api } from '@/lib/api'
@@ -33,8 +33,10 @@ interface SurveyDetail {
   description?: string
   surveyType: string
   status: string
-  anonymous: boolean
-  responseCount: number
+  // BR-40: GET /surveys/{id} returns the anonymity flag nested under settings,
+  // not flat. Reading it flat (the old `anonymous` field) silently never fired.
+  settings?: { anonymous?: boolean }
+  responseCount?: number
   questions: QuestionResult[]
 }
 
@@ -168,13 +170,15 @@ export function SurveyResults({ orgId, surveyId }: SurveyResultsProps) {
     queryFn: () => api.get<SurveyDetail>(`/api/surveys/${surveyId}`),
   })
 
+  // Always enabled: `total` is the authoritative response count (GET
+  // /surveys/{id} doesn't return one), used for the header count, the tab
+  // label, and the BR-40 small-pool warning — not just the Responses tab.
   const { data: responsesData, isLoading: responsesLoading } = useQuery({
     queryKey: ['survey-responses', surveyId, responsePage],
     queryFn: () =>
-      api.get<{ data: IndividualResponse[]; total: number }>(
+      api.get<{ data: IndividualResponse[]; pagination: { totalCount: number; totalPages: number } }>(
         `/api/surveys/${surveyId}/responses?offset=${responsePage * PAGE_SIZE}&limit=${PAGE_SIZE}`,
       ),
-    enabled: tab === 'responses',
   })
 
   if (isLoading) {
@@ -202,11 +206,36 @@ export function SurveyResults({ orgId, surveyId }: SurveyResultsProps) {
     )
   }
 
-  const totalResponses = survey.responseCount
-  const totalPages = responsesData ? Math.ceil(responsesData.total / PAGE_SIZE) : 0
+  // The list endpoint returns the count under pagination.totalCount (not a flat
+  // `total`); reading it flat silently yielded 0 before, leaving the count and
+  // the BR-40 small-pool warning dead.
+  const totalResponses = responsesData?.pagination?.totalCount ?? survey.responseCount ?? 0
+  const totalPages = responsesData?.pagination?.totalPages ?? 0
+  const anonymous = survey.settings?.anonymous === true
+
+  // BR-40 edge case: an anonymous survey with a very small response pool
+  // (<10) risks re-identification by inference, even though the platform
+  // stores no identity. Warn the creator. Skip at 0 responses — nothing to
+  // infer yet.
+  const showSmallPoolWarning = anonymous && totalResponses >= 1 && totalResponses < 10
 
   return (
     <div className="space-y-6">
+      {/* BR-40: small-pool anonymity inference warning (creator-facing) */}
+      {showSmallPoolWarning && (
+        <div
+          role="alert"
+          className="flex items-start gap-2.5 rounded-lg border border-[var(--color-warning)] bg-[var(--color-warning-bg)] p-3 text-sm text-[var(--color-warning)]"
+        >
+          <ShieldAlert className="mt-0.5 h-4 w-4 shrink-0" />
+          <span>
+            Only {totalResponses} response{totalResponses !== 1 ? 's' : ''} so far. With fewer than 10
+            responses, members may be re-identifiable by inference even though their identity is not
+            stored. Consider waiting for more responses before sharing results.
+          </span>
+        </div>
+      )}
+
       {/* Survey header */}
       <div className="border rounded-lg p-4">
         <h2 className="font-semibold text-lg">{survey.title}</h2>
@@ -230,7 +259,7 @@ export function SurveyResults({ orgId, surveyId }: SurveyResultsProps) {
             >
               {survey.status}
             </span>
-            {survey.anonymous && (
+            {anonymous && (
               <span className="inline-flex items-center px-2 py-0.5 rounded bg-gray-100 text-gray-600 font-medium">
                 Anonymous
               </span>
@@ -361,7 +390,7 @@ export function SurveyResults({ orgId, surveyId }: SurveyResultsProps) {
                   <thead>
                     <tr className="bg-[var(--color-surface-warm)]">
                       <th className="text-left p-3 font-medium">#</th>
-                      {!survey.anonymous && (
+                      {!anonymous && (
                         <th className="text-left p-3 font-medium">Respondent</th>
                       )}
                       <th className="text-left p-3 font-medium">Submitted</th>
@@ -384,7 +413,7 @@ export function SurveyResults({ orgId, surveyId }: SurveyResultsProps) {
                         <td className="p-3 text-[var(--color-muted)]">
                           {responsePage * PAGE_SIZE + i + 1}
                         </td>
-                        {!survey.anonymous && (
+                        {!anonymous && (
                           <td className="p-3">{resp.respondentName ?? 'Anonymous'}</td>
                         )}
                         <td className="p-3 text-[var(--color-muted)]">
@@ -413,7 +442,7 @@ export function SurveyResults({ orgId, surveyId }: SurveyResultsProps) {
               {totalPages > 1 && (
                 <div className="flex items-center justify-between">
                   <p className="text-xs text-[var(--color-muted)]">
-                    Page {responsePage + 1} of {totalPages} ({responsesData.total} total)
+                    Page {responsePage + 1} of {totalPages} ({totalResponses} total)
                   </p>
                   <div className="flex items-center gap-1">
                     <Button
