@@ -85,7 +85,11 @@ const KNOWN_INCOMPLETE: Set<string> = new Set([
   // and have remained UNTESTED since. Pre-existing INCOMPLETE state
   // unrelated to the mega-module decomposition; allowlisted until the
   // dedicated M22 coverage pass lands.
-  "BR-52", "BR-53", "BR-54", "BR-55", "BR-56", "BR-57", "BR-58", "BR-59",
+  // R2-1 (2026-06-23): BR-56 REMOVED — the bounce/complaint webhook is now wired
+  // (POST /webhooks/postmark) with a contract test, so BR-56 (p0-security) is
+  // COMPLETE. BR-55 stays here: its trigger is wired + contract-tested too, but
+  // p0-data also wants an e2e, which is N/A for a provider webhook (no UI flow).
+  "BR-52", "BR-53", "BR-54", "BR-55", "BR-57", "BR-58", "BR-59",
 
   // M21 billing module BRs minted 2026-06-02 to resolve TR-P1-002.
   // Backend tests EXIST per the registry; missing contract+e2e layers

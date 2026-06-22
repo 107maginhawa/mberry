@@ -201,6 +201,11 @@ const envSchema = z.object({
   SMTP_PASS: z.string().default(''),
   POSTMARK_API_KEY: z.string().optional(),
   POSTMARK_MESSAGE_STREAM: z.string().default('outbound'),
+  // Shared secret for the Postmark bounce/complaint webhook (BR-55/56). When
+  // unset the /webhooks/postmark endpoint is disabled (503), mirroring the
+  // PayMongo pattern — not every deployment wires Postmark webhooks. Read
+  // directly from process.env in the handler (no boot-time requirement).
+  POSTMARK_WEBHOOK_SECRET: z.string().optional(),
 
   // OneSignal (shared by email + notifs)
   ONESIGNAL_APP_ID: z.string().optional(),
