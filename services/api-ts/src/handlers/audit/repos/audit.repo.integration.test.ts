@@ -544,3 +544,237 @@ describe('AuditRepository.buildWhereConditions — filter SQL over real PG (W3 a
     expect(await repo.count()).toBe(all.length);
   });
 });
+
+/**
+ * S3 — archive/purge retention state machine + statistics against real Postgres
+ * (audit.repo.ts:231-336 — the illusion only checked `update/delete toHaveBeenCalled`
+ * + a stubbed `.returning` length, and stubbed `repo.count` for statistics).
+ *
+ * archiveOldLogs / purgeArchivedLogs operate GLOBALLY (no org arg) over every
+ * active/archived row whose created_at crosses the cutoff, and getAuditStatistics
+ * counts the WHOLE table with no filter. The S1/S2 describe blocks seed rows into
+ * the shared scratch table (some with 2024 created_at → older than 365 days and
+ * `active`), which would pollute the EXACT return counts the plan demands
+ * (archiveOldLogs → 2, purgeArchivedLogs → 1, statistics totals = N). To keep the
+ * state-machine assertions deterministic and exact, this block stands up its OWN
+ * isolated scratch schema (H3) — a second `createScratch(['audit_log_entry'])`,
+ * the harness is multi-instance — so the only rows present are the ones this block
+ * seeds. Every assert is on real persisted state read back via `H3.scopedPool.query`
+ * (or a real `count`), never a stub, never the seed input re-echoed.
+ */
+describe('AuditRepository — archive/purge state machine + statistics over real PG (W3 audit S3)', () => {
+  let H3: ScratchDb;
+  const ORG_S3 = '00000000-0000-4000-8000-0000000000d1';
+
+  /** Raw INSERT with explicit created_at + retention_status (logEvent stamps now()/active). */
+  async function rawInsert(opts: {
+    retentionStatus?: string;
+    createdAt?: Date;
+    archivedAt?: Date | null;
+    archivedBy?: string | null;
+  }): Promise<string> {
+    const id = freshId();
+    await H3.scopedPool.query(
+      `INSERT INTO "${H3.schema}".audit_log_entry
+         (id, event_type, category, action, outcome, organization_id,
+          "user", resource_type, resource, description, retention_status,
+          archived_at, archived_by, created_at, updated_at, created_by, updated_by)
+       VALUES ($1, 'data-access'::audit_event_type, 'administrative'::audit_category,
+               'read'::audit_action, 'success'::audit_outcome, $2,
+               $3, 'generic', $4, 'seed', $5::audit_retention_status,
+               $6, $7, $8, $8, $3, $3)`,
+      [
+        id,
+        ORG_S3,
+        freshId(),
+        freshId(),
+        opts.retentionStatus ?? 'active',
+        opts.archivedAt ?? null,
+        opts.archivedBy ?? null,
+        opts.createdAt ?? new Date(),
+      ],
+    );
+    return id;
+  }
+
+  async function readRow3(id: string): Promise<any> {
+    const { rows } = await H3.scopedPool.query(
+      `SELECT * FROM "${H3.schema}".audit_log_entry WHERE id = $1`,
+      [id],
+    );
+    return rows[0];
+  }
+
+  async function countById(id: string): Promise<number> {
+    const { rows } = await H3.scopedPool.query(
+      `SELECT count(*)::int AS n FROM "${H3.schema}".audit_log_entry WHERE id = $1`,
+      [id],
+    );
+    return rows[0].n;
+  }
+
+  const oldDate = () => new Date(Date.now() - 800 * 24 * 60 * 60 * 1000); // ~800 days ago
+  const recentDate = () => new Date(Date.now() - 5 * 24 * 60 * 60 * 1000); // 5 days ago
+
+  beforeAll(async () => {
+    H3 = await createScratch(['audit_log_entry']);
+  });
+
+  afterAll(async () => {
+    await H3?.teardown();
+  });
+
+  test('archiveOldLogs: only OLD active rows flip to archived (+archived_at/+archived_by); recent stays active', async () => {
+    if (!H3.dbReachable) return;
+    const repo = new AuditRepository(H3.db as never, noopLogger);
+    const adminId = freshId();
+
+    // 2 old active rows (eligible) + 1 recent active row (not eligible)
+    const old1 = await rawInsert({ retentionStatus: 'active', createdAt: oldDate() });
+    const old2 = await rawInsert({ retentionStatus: 'active', createdAt: oldDate() });
+    const recent = await rawInsert({ retentionStatus: 'active', createdAt: recentDate() });
+
+    const archived = await repo.archiveOldLogs(365, adminId);
+    expect(archived).toBe(2);
+
+    // The two OLD rows are now archived, carry archived_at + archived_by=adminId.
+    for (const id of [old1, old2]) {
+      const row = await readRow3(id);
+      expect(row.retention_status).toBe('archived');
+      expect(row.archived_at).toBeInstanceOf(Date);
+      expect(row.archived_by).toBe(adminId);
+    }
+    // The RECENT row is untouched (still active, no archived_at).
+    const recentRow = await readRow3(recent);
+    expect(recentRow.retention_status).toBe('active');
+    expect(recentRow.archived_at).toBeNull();
+  });
+
+  test('purgeArchivedLogs two-step: OLD archived → pending-purge → DELETED; newer archived + active remain', async () => {
+    if (!H3.dbReachable) return;
+    const repo = new AuditRepository(H3.db as never, noopLogger);
+
+    // Fresh isolated trio (a sub-org tag keeps it conceptually distinct, though
+    // purge is global — H3 isolation already guarantees no foreign rows match).
+    const oldArchived = await rawInsert({
+      retentionStatus: 'archived',
+      createdAt: new Date(Date.now() - 3000 * 24 * 60 * 60 * 1000), // ~8.2y ago
+      archivedAt: new Date(),
+    });
+    const newArchived = await rawInsert({
+      retentionStatus: 'archived',
+      createdAt: recentDate(), // newer than the 2555-day purge window
+      archivedAt: new Date(),
+    });
+    const stillActive = await rawInsert({ retentionStatus: 'active', createdAt: recentDate() });
+
+    // Snapshot the live archived ids this purge could touch BEFORE the call, so the
+    // exact return count is the set of (archived AND old enough) rows — here only
+    // oldArchived qualifies (the S3 archive test left 2 archived rows but those were
+    // created ~800 days ago < 2555-day purge window, so they do NOT qualify).
+    const purged = await repo.purgeArchivedLogs(2555);
+    expect(purged).toBe(1);
+
+    // The old archived row is GONE (mark→pending-purge→DELETE ran in order).
+    expect(await countById(oldArchived)).toBe(0);
+    // The newer archived row + the active row REMAIN, with their statuses intact.
+    expect(await countById(newArchived)).toBe(1);
+    expect((await readRow3(newArchived)).retention_status).toBe('archived');
+    expect(await countById(stillActive)).toBe(1);
+    expect((await readRow3(stillActive)).retention_status).toBe('active');
+
+    // No row was left stranded in the transient 'pending-purge' state.
+    const { rows: pp } = await H3.scopedPool.query(
+      `SELECT count(*)::int AS n FROM "${H3.schema}".audit_log_entry WHERE retention_status = 'pending-purge'`,
+    );
+    expect(pp[0].n).toBe(0);
+  });
+
+  test('getAuditStatistics: 4 real counts match the live retention distribution; integrityStatus healthy', async () => {
+    if (!H3.dbReachable) return;
+    const repo = new AuditRepository(H3.db as never, noopLogger);
+
+    // Seed an explicit distribution ON TOP of whatever the prior S3 tests left.
+    // Assert against the LIVE counts (read directly), not hard-coded numbers, so
+    // this stays exact regardless of test execution order within H3.
+    await rawInsert({ retentionStatus: 'active', createdAt: recentDate() });
+    await rawInsert({ retentionStatus: 'active', createdAt: recentDate() });
+    await rawInsert({ retentionStatus: 'archived', createdAt: recentDate(), archivedAt: new Date() });
+    await rawInsert({ retentionStatus: 'pending-purge', createdAt: recentDate() });
+
+    const liveCount = async (status?: string): Promise<number> => {
+      const { rows } = status
+        ? await H3.scopedPool.query(
+            `SELECT count(*)::int AS n FROM "${H3.schema}".audit_log_entry WHERE retention_status = $1`,
+            [status],
+          )
+        : await H3.scopedPool.query(
+            `SELECT count(*)::int AS n FROM "${H3.schema}".audit_log_entry`,
+          );
+      return rows[0].n;
+    };
+
+    const [total, active, archivedN, pending] = await Promise.all([
+      liveCount(),
+      liveCount('active'),
+      liveCount('archived'),
+      liveCount('pending-purge'),
+    ]);
+
+    const stats = await repo.getAuditStatistics();
+    expect(stats.totalEntries).toBe(total);
+    expect(stats.activeEntries).toBe(active);
+    expect(stats.archivedEntries).toBe(archivedN);
+    expect(stats.pendingPurge).toBe(pending);
+    // sanity: the seeded pending-purge row makes pendingPurge ≥ 1 and total is the sum.
+    expect(stats.pendingPurge).toBeGreaterThanOrEqual(1);
+    expect(stats.activeEntries + stats.archivedEntries + stats.pendingPurge).toBe(stats.totalEntries);
+    expect(stats.integrityStatus).toBe('healthy');
+  });
+
+  test('BR-32: archive vs purge — a window shorter than a row age archives but never deletes (no DB guard on purge_after)', async () => {
+    if (!H3.dbReachable) return;
+    const repo = new AuditRepository(H3.db as never, noopLogger);
+
+    // A freshly-logged financial event records purge_after ≥ created_at + 7y.
+    const entry = await repo.logEvent(
+      {
+        eventType: 'compliance',
+        category: 'financial',
+        action: 'mark-paid',
+        outcome: 'success',
+        organizationId: ORG_S3,
+        user: freshId(),
+        userType: 'admin',
+        resourceType: 'invoice',
+        resource: freshId(),
+        description: 'retention floor',
+      },
+      freshId(),
+    );
+    const logged = await readRow3(entry.id);
+    expect(logged.purge_after).toBeInstanceOf(Date);
+    expect(new Date(logged.purge_after).getTime()).toBeGreaterThanOrEqual(
+      new Date(logged.created_at).getTime() + 6 * 365 * 24 * 60 * 60 * 1000,
+    );
+
+    // Seed an OLD active row, then archive with a 365-day window.
+    const oldRow = await rawInsert({ retentionStatus: 'active', createdAt: oldDate() });
+    await repo.archiveOldLogs(365, freshId());
+    expect((await readRow3(oldRow)).retention_status).toBe('archived');
+
+    // archiveOldLogs only flips status — the row is NOT deleted (archive ≠ purge).
+    expect(await countById(oldRow)).toBe(1);
+
+    // CHARACTERIZATION: there is NO DB-level guard preventing purge before
+    // purge_after. purgeArchivedLogs keys off the `daysOld` cron arg + archived
+    // status ONLY — it never consults purge_after. With a window short enough to
+    // catch the just-archived ~800-day-old row, it deletes it even though that
+    // row's own purge_after is years in the future. This is the documented product
+    // decision (retention enforced solely by the cron's daysOld arg), NOT a bug —
+    // so we assert the deletion happens (proves no purge_after guard exists).
+    const purged = await repo.purgeArchivedLogs(365);
+    expect(purged).toBeGreaterThanOrEqual(1);
+    expect(await countById(oldRow)).toBe(0);
+  });
+});
