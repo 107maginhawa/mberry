@@ -15,6 +15,7 @@ import {
   Copy,
 } from 'lucide-react'
 import { Skeleton, Tabs, TabsList, TabsTrigger, MenuItem, Button } from '@monobase/ui'
+import type { Survey as ApiSurvey } from '@monobase/sdk-ts/generated/types.gen'
 import { useOrg } from '@/hooks/use-org'
 import { api } from '@/lib/api'
 import { toast } from 'sonner'
@@ -25,9 +26,10 @@ interface SurveyRow {
   description?: string | null
   surveyType: 'nps' | 'satisfaction' | 'poll' | 'custom'
   status: 'draft' | 'active' | 'closed'
-  // BR-40: GET /surveys returns the anonymity flag nested under settings, not
-  // flat — reading it flat left the "Anonymous" badge silently never rendering.
-  settings?: { anonymous?: boolean }
+  // BR-40 / R1-1: anonymity is nested under settings (not flat). Type DERIVED
+  // from the generated API contract so a backend shape change breaks typecheck
+  // instead of silently never rendering the "Anonymous" badge.
+  settings?: ApiSurvey['settings']
   deadline?: string | null
   responseCount: number
   questionCount: number

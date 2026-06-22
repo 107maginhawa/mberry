@@ -267,3 +267,6 @@ apps/*/.auth/
 
 # Understand-anything knowledge graph (generated)
 .understand-anything/
+
+# Local code-graph artifact (understand-anything) — regenerated per machine
+.codegraph/

@@ -3,6 +3,11 @@ import { AnimatePresence, motion } from 'framer-motion'
 import { ChevronLeft, ChevronRight, Send, CheckCircle2, Save } from 'lucide-react'
 import { Button } from '@monobase/ui'
 import { toast } from 'sonner'
+import type {
+  Survey as ApiSurvey,
+  SurveyQuestion as ApiSurveyQuestion,
+  PollResult as ApiPollResult,
+} from '@monobase/sdk-ts/generated/types.gen'
 import { api } from '@/lib/api'
 import { useSurveyDraft } from '../hooks/use-survey-draft'
 import { NpsQuestion } from './question-renderers/nps-question'
@@ -13,34 +18,19 @@ import { YesNoQuestion } from './question-renderers/yes-no-question'
 
 // ── Types ────────────────────────────────────────────────────────────
 
-export interface SurveyQuestion {
-  id: string
-  type: 'nps' | 'rating' | 'single_choice' | 'multi_choice' | 'text' | 'yes_no'
-  text: string
-  required?: boolean
-  options?: string[]
-  maxLength?: number
-  maxStars?: number
-}
-
-export interface PollResult {
-  questionId: string
-  counts: Record<string, number>
-  total: number
-}
-
-export interface Survey {
-  id: string
-  title: string
-  description?: string
-  surveyType?: string
-  /** BR-40: when settings.anonymous is true, responses store no responder
-   *  identity. Drives the respondent-facing free-text privacy warning below.
-   *  GET /surveys/{id} returns this nested under `settings`. */
-  settings?: { anonymous?: boolean }
+// R1-1 (test-integrity): FE survey types DERIVE from the generated API contract
+// (@monobase/sdk-ts) instead of hand-written shapes. A backend shape change —
+// e.g. un-nesting settings.anonymous, or renaming a field — then becomes a
+// COMPILE error here, not a silent runtime `undefined` (the bug class that
+// shipped broken 3x: survey settings.anonymous flat read, response count, etc.).
+// `maxStars` is the single FE-only render extension on the question contract.
+export type SurveyQuestion = ApiSurveyQuestion & { maxStars?: number }
+export type PollResult = ApiPollResult
+export type Survey = Pick<
+  ApiSurvey,
+  'id' | 'title' | 'description' | 'surveyType' | 'settings' | 'myResponseStatus' | 'pollResults'
+> & {
   questions: SurveyQuestion[]
-  pollResults?: PollResult[]
-  myResponseStatus?: string | null
 }
 
 // BR-40: free-text fields in anonymous surveys warn the respondent not to
