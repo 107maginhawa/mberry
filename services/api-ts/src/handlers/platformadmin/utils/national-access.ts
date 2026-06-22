@@ -7,7 +7,12 @@ export interface SessionUser {
 }
 
 export function isPlatformAdmin(user: SessionUser | undefined): boolean {
-  return user?.role === 'platform_admin' || user?.role === 'super';
+  // `role` is a comma-separated list (e.g. "admin,platform_admin,association:admin"),
+  // so membership-test the segments rather than exact-equality — the seed super
+  // admin carries a multi-role string and exact-equality wrongly 403'd them from
+  // the national chapter drill-down + platform summary. Mirrors getNationalDashboard.ts.
+  const userRoles = (user?.role ?? '').split(',').map((r) => r.trim());
+  return userRoles.includes('platform_admin') || userRoles.includes('super');
 }
 
 /**
