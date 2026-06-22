@@ -687,26 +687,29 @@
     "ruleClass": "p2-deferred",
     "tests": {
       "backend": [
-        "services/api-ts/src/handlers/events/br-37.job-posting-expiry.test.ts"
+        "services/api-ts/src/handlers/jobs/repos/jobs.repo.integration.test.ts"
       ],
       "contract": [],
       "e2e": []
     },
-    "deferredReason": "Module M15 (Job Board) not yet implemented \u2014 deferred to milestone v2.0"
+    "deferredReason": "Module M15 (Job Board) repo layer is implemented + real-PG tested (Wave-3), but the EXPIRY behavior itself remains dead code: there is NO cron/scheduler that auto-expires postings. listExpired/extendPosting are characterized at the repo level by jobs.repo.integration.test.ts; the missing prod cron is a documented known-gap (postings do not auto-expire) deferred to a future product decision. Registry-drift fixed Wave-3: the old backend path (handlers/events/br-37.job-posting-expiry.test.ts) never existed.",
+    "annotations": "Wave-3 (2026-06-22): repointed from a non-existent events/ path to the real jobs repo integration suite. BR remains deferred/characterize-only \u2014 the expiry cron was deliberately NOT built (out of test-gap scope), mirroring the elections updateElectionStatus orphan precedent."
   },
   "BR-38": {
-    "rule": "Marketplace Referral Disclosure",
+    "rule": "Marketplace Vendor Verification (admin verify gate)",
     "phase": 3,
     "module": "M17",
-    "ruleClass": "p2-deferred",
+    "ruleClass": "p1-business",
     "tests": {
       "backend": [
-        "services/api-ts/src/handlers/billing/br-38.marketplace-disclosure.test.ts"
+        "services/api-ts/src/handlers/marketplace/verifyVendor.test.ts",
+        "services/api-ts/src/handlers/marketplace/repos/vendor.repo.integration.test.ts",
+        "services/api-ts/src/handlers/marketplace/marketplace-org-isolation.integration.test.ts"
       ],
       "contract": [],
       "e2e": []
     },
-    "deferredReason": "Module M17 (Marketplace) not yet implemented \u2014 deferred to milestone v2.0"
+    "annotations": "Wave-3 (2026-06-22): flipped from p2-deferred to REAL. Module M17 marketplace is implemented \u2014 vendor verify FSM gate (pending->verified, ConflictError on already-verified) is unit-tested in verifyVendor.test.ts (BR-38), and vendor create/default-status/org-scoping isolation is proven against real PG in vendor.repo.integration.test.ts + marketplace-org-isolation.integration.test.ts. The original 'Referral Disclosure' label + billing/br-38.marketplace-disclosure.test.ts path were a deferred placeholder; the implemented BR-38 contract is the admin vendor-verification gate."
   },
   "BR-39": {
     "rule": "Committee Dissolution",
