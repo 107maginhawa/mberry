@@ -7,18 +7,49 @@ csrf_token: jsonpath "$.token"
 
 
 
-# Association dunning flow: list events, run dunning, template CRUD.
+# [R3-5] Association dues dunning — list events, list templates, run dunning.
+# Was a sign-up-only stub that asserted nothing. Now an association:admin lists
+# the dunning event log + templates and triggers a dunning run, asserting the
+# run reports how many overdue obligations it evaluated.
 
-# 0. Auth setup — sign up + create person.
-POST {{api}}/auth/sign-up/email
+# 0. Sign in as the seed officer (association:admin for {{org_id}}).
+POST {{api}}/auth/sign-in/email
 Origin: {{origin}}
 x-csrf-token: {{csrf_token}}
 Content-Type: application/json
 {
-  "email": "assoc-dunn-{{suffix}}@example.org",
-  "password": "Sup3rSecret!ContractTest",
-  "name": "Dunning Tester"
+  "email": "{{seed_officer_email}}",
+  "password": "{{seed_officer_password}}"
 }
 HTTP 200
-[Captures]
-person_id: jsonpath "$.user.id"
+
+
+# 1. The dunning event log is a paginated list.
+GET {{api}}/association/member/dunning/events
+x-org-id: {{org_id}}
+HTTP 200
+[Asserts]
+jsonpath "$.data" exists
+
+
+# 2. Dunning escalation templates.
+GET {{api}}/association/member/dunning/templates
+x-org-id: {{org_id}}
+HTTP 200
+[Asserts]
+jsonpath "$.data" exists
+
+
+# 3. Run dunning — the response reports the evaluated/sent counts.
+POST {{api}}/association/member/dunning/run
+Origin: {{origin}}
+x-csrf-token: {{csrf_token}}
+Content-Type: application/json
+x-org-id: {{org_id}}
+{
+  "organizationId": "{{org_id}}"
+}
+HTTP 200
+[Asserts]
+jsonpath "$.evaluated" exists
+jsonpath "$.sent" exists

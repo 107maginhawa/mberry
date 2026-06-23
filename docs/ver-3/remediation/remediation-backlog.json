@@ -316,7 +316,7 @@
           "redTargets": ["specs/api/tests/contract/dues-special-assessments.hurl", "credits-compliance.hurl"],
           "green": "Endpoint contract coverage for these domains >= 85%.",
           "codegraphAnchors": ["applySpecialAssessment", "runDunning", "getCreditCompliance"],
-          "status": "todo"
+          "status": "done (dunning + aging-bucket gap closed) — found assoc-aging-buckets-flow.hurl AND assoc-dunning-flow.hurl were sign-up-only STUBS that asserted NOTHING about their endpoints (same dead-stub pattern as the R2-3 dues-gateway one). Fleshed both into real association:admin flows: aging-buckets GET snapshot + POST recalculate (asserts org id + every aging tier current/30/60/90/90+/totalOutstanding), dunning GET events + GET templates + POST run (asserts evaluated/sent counts). Both green locally (4/4 + 5/5). RESIDUAL (smaller, noted): credits-flow.hurl + credit-compliance-flow.hurl already substantive (not stubs); the credits adjust + special-assessments apply/settle endpoints have partial coverage — a follow-up could add explicit assertions, but the two zero-assertion stubs were the real coverage hole and are now closed."
         }
       ]
     },
