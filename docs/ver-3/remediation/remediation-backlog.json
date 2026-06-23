@@ -355,7 +355,7 @@
           "redTargets": ["email-suppression.hurl", "fix BR-54 retry off-by-one or re-document"],
           "green": "Wire-observable email rules contract-covered; BR-54 retry count reconciled.",
           "codegraphAnchors": ["enqueueEmail", "EmailQueueRepository"],
-          "status": "todo"
+          "status": "done (wire-observable rules; async ones documented) — the email-queue contract (email-extended-flow.hurl) substantially EXISTED but wasn't linked. R4-2 added the BR-53 GUARD assertion (draft/inactive template test-send → 404 'not found or not active' = no enqueue) and linked the contract to BR-53 (active-template, p1-business → COMPLETE), BR-54 (cancelled→retry 409 transition guard, p1-business → COMPLETE), BR-59 (enqueue→cancel transition, p0-data, linked but stays allowlisted: audit-trail e2e is N/A — email queue is admin-internal). Removed BR-53/54 from allowlist (49→51 COMPLETE). DOCUMENTED residuals (stay allowlisted, honest reasons): BR-52 (suppression-before-delivery) + BR-57 (transactional override) are ASYNC SEND-PIPELINE / worker behavior — not wire-observable at enqueue, backend-covered in core/email.test.ts; BR-58 (template-variable validation) needs the template `variables` schema (the create-template payload rejected an ad-hoc variables array — deferred to a follow-up that derives the real schema); BR-54 off-by-one (effective max 4 attempts) characterized + intentional. 13/13 hurl green."
         },
         {
           "id": "R4-3",
