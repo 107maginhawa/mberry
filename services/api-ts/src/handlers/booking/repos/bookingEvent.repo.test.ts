@@ -159,6 +159,26 @@ describe('BookingEventRepository.validateEventConfig', () => {
     expect(errors.some(e => e.includes('locationType'))).toBe(true);
   });
 
+  // [BR-75] effectiveTo must be after effectiveFrom — previously only a DB CHECK
+  // (raw 500 leak); now validated up front so the wire returns a clean 400.
+  test('[BR-75] rejects effectiveTo on/before effectiveFrom', () => {
+    const before = repo.validateEventConfig(
+      makeCreateRequest({ effectiveFrom: '2026-12-31T00:00:00Z', effectiveTo: '2026-01-01T00:00:00Z' } as any),
+    );
+    expect(before.some(e => e.includes('effectiveTo'))).toBe(true);
+    const equal = repo.validateEventConfig(
+      makeCreateRequest({ effectiveFrom: '2026-06-01T00:00:00Z', effectiveTo: '2026-06-01T00:00:00Z' } as any),
+    );
+    expect(equal.some(e => e.includes('effectiveTo'))).toBe(true);
+  });
+
+  test('[BR-75] accepts effectiveTo after effectiveFrom', () => {
+    const errors = repo.validateEventConfig(
+      makeCreateRequest({ effectiveFrom: '2026-01-01T00:00:00Z', effectiveTo: '2026-12-31T00:00:00Z' } as any),
+    );
+    expect(errors).toEqual([]);
+  });
+
   test('rejects invalid timezone format', () => {
     const errors = repo.validateEventConfig(makeCreateRequest({ timezone: 'UTC' }));
     // 'UTC' has no slash so fails the regex

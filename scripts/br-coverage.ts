@@ -106,8 +106,11 @@ const KNOWN_INCOMPLETE: Set<string> = new Set([
   // M20 booking module BRs minted 2026-06-02 to resolve TR-P1-001.
   // Same situation as M21: backend tests exist, contract+e2e planned
   // for a dedicated M20 coverage pass.
-  "BR-68", "BR-69", "BR-70", "BR-71", "BR-72", "BR-73",
-  "BR-74", "BR-75", "BR-76", "BR-77",
+  // R4-1 (2026-06-23): BR-75/76/77 REMOVED — booking config validation now
+  // contract-tested (booking-validation.hurl: bad date-order/range → 400);
+  // BR-75 also fixed a 500→400 leak. BR-70/71/74 stay (advance-notice/lead-time/
+  // buffer are booking-time / slot-generation enforcement, not create-config).
+  "BR-68", "BR-69", "BR-70", "BR-71", "BR-72", "BR-73", "BR-74",
 ]);
 
 // ── Coverage derivation ──────────────────────────────────

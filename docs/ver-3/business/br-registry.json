@@ -1302,12 +1302,15 @@
     "tests": {
       "backend": [
         "services/api-ts/src/handlers/booking/createBookingEvent.test.ts",
-        "services/api-ts/src/handlers/booking/updateBookingEvent.test.ts"
+        "services/api-ts/src/handlers/booking/updateBookingEvent.test.ts",
+        "services/api-ts/src/handlers/booking/repos/bookingEvent.repo.test.ts"
       ],
-      "contract": [],
+      "contract": [
+        "specs/api/tests/contract/booking-validation.hurl"
+      ],
       "e2e": []
     },
-    "annotations": "Minted 2026-06-02 to resolve TR-P1-001. Date-ordering validation on BookingEvent. Backs WF-115."
+    "annotations": "2026-06-23 (R4-1): COMPLETE + REAL BUG FIXED. effectiveTo<=effectiveFrom was guarded ONLY by a DB CHECK, so it surfaced as a raw 500 SQL-error leak instead of a 400. Added the check to BookingEventRepository.validateEventConfig (bookingEvent.repo.test.ts [BR-75] covers before/equal/after) and booking-validation.hurl asserts the wire returns 400. Minted 2026-06-02 to resolve TR-P1-001. Date-ordering validation on BookingEvent. Backs WF-115."
   },
   "BR-76": {
     "rule": "maxBookingDays Range Constraint 0-365 (alias M20-R9, DB CHECK)",
@@ -1319,10 +1322,12 @@
       "backend": [
         "services/api-ts/src/handlers/booking/createBookingEvent.test.ts"
       ],
-      "contract": [],
+      "contract": [
+        "specs/api/tests/contract/booking-validation.hurl"
+      ],
       "e2e": []
     },
-    "annotations": "Minted 2026-06-02 to resolve TR-P1-001. DB CHECK constraint on bookingEvent.maxBookingDays. Backs WF-115."
+    "annotations": "2026-06-23 (R4-1): COMPLETE — booking-validation.hurl asserts maxBookingDays>365 (and <0) → 400 at the wire (zod range). Minted 2026-06-02 to resolve TR-P1-001. DB CHECK constraint on bookingEvent.maxBookingDays. Backs WF-115."
   },
   "BR-77": {
     "rule": "minBookingMinutes Range Constraint 0-4320 / 72hr max (alias M20-R10, DB CHECK)",
@@ -1334,9 +1339,11 @@
       "backend": [
         "services/api-ts/src/handlers/booking/createBookingEvent.test.ts"
       ],
-      "contract": [],
+      "contract": [
+        "specs/api/tests/contract/booking-validation.hurl"
+      ],
       "e2e": []
     },
-    "annotations": "Minted 2026-06-02 to resolve TR-P1-001. DB CHECK constraint on bookingEvent.minBookingMinutes. Backs WF-115."
+    "annotations": "2026-06-23 (R4-1): COMPLETE — booking-validation.hurl asserts minBookingMinutes>4320 (72h) → 400 at the wire (zod range). Minted 2026-06-02 to resolve TR-P1-001. DB CHECK constraint on bookingEvent.minBookingMinutes. Backs WF-115."
   }
 }
