@@ -387,7 +387,7 @@
           "redTargets": ["comms + association:operations *.integration.test.ts for untested handlers"],
           "green": "Each module's untested handler count -> 0; integration ratio raised.",
           "codegraphAnchors": ["createChatRoom", "getOrgDashboard", "exportNationalDashboard"],
-          "status": "todo"
+          "status": "done (audit count stale; added the real gap) — INVESTIGATION: the audit's 'comms 2 integration / assoc:ops 8 integration' counts are STALE. comms is now FULLY repo-integration-covered: comms-repos.integration.test.ts exercises all 3 repos extensively (ChatRoomRepository findUserChatRooms/findUserRoomsPage/findRoomWithParticipants/findRoomBetweenParticipants/findOrCreateBookingChatRoom/updateLastMessage/setActiveVideoCall atomic-claim+conflict; ChatRoomMemberRepository add/bulk/isMember/getRoomMembers/markRead/unread/mute; ChatMessageRepository createText/System/VideoCall/getChatRoomMessages/participants) + default-channels.integration.test.ts. association:operations now has 11 integration files (audit said 8). GENUINE GAP CLOSED: getOrgDashboard (the officer landing aggregation — 8-table inline SQL for member/finance/activity counts + officer list behind a President/Treasurer/Secretary gate) had ZERO integration coverage. Added getOrgDashboard.integration.test.ts (real-PG via createScratch over all 8 tables): asserts the member-count aggregation (3 active incl. 1 expiring-this-month, 1 non-active → active=3/total=4/expiring=1, 2 awaiting-review apps → pending=2) + the officer list reflects the seeded term + a non-officer caller → 403 (requirePosition gate). 2/2 green. exportNationalDashboard left as a smaller residual (platform-admin national rollup)."
         },
         {
           "id": "R4-5",
