@@ -53,8 +53,17 @@ export async function createInvoice(
     metadata
   } = body;
 
-  // Multi-tenant scoping (P0-7)
-  const organizationId = ctx.get('organizationId') as string;
+  // Multi-tenant scoping (P0-7). The /billing/* org-context middleware is
+  // fail-open — it only populates organizationId when the session user is an
+  // active member of the x-org-id org. A non-member (or a request missing
+  // org context) leaves it undefined, which would otherwise insert a NULL
+  // organization_id and surface as a raw 500. Guard with a clean 400.
+  const organizationId = ctx.get('organizationId') as string | undefined;
+  if (!organizationId) {
+    throw new ValidationError(
+      'Organization context is required to create an invoice. Provide x-org-id for an organization you belong to.'
+    );
+  }
 
   logger.info({ action: 'createInvoice.1',
     customer,

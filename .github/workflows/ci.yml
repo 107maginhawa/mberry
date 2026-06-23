@@ -460,12 +460,24 @@ jobs:
         options: >-
           --health-cmd "pg_isready -U postgres -d monobase"
           --health-interval 5s --health-timeout 5s --health-retries 10
+      # stripe-mock: canned Stripe API responses so the gated billing specs
+      # (billing-lifecycle.hurl, billing-extended-flow.hurl) run instead of
+      # being skipped. No healthcheck — boots in <1s, well before API + seed.
+      stripe-mock:
+        image: stripe/stripe-mock:latest
+        ports: ['12111:12111']
       # Minio started as a step (see e2e job comment).
     env:
       DATABASE_URL: postgresql://postgres:password@localhost:5432/monobase
       PORT: 7213
       API_URL: http://localhost:7213
       AUTH_SECRET: contract-test-secret-do-not-use-in-prod
+      # Stripe billing specs: point the app's Stripe SDK at stripe-mock (STRIPE_URL),
+      # tell the contract runner's preflight where to probe (STRIPE_API_BASE), and
+      # set any test key so run-contract-tests un-gates the stripeSpecs set.
+      STRIPE_SECRET_KEY: sk_test_contract_do_not_use_in_prod
+      STRIPE_URL: http://localhost:12111
+      STRIPE_API_BASE: http://localhost:12111
       # The contract suite signs up many ad-hoc users and immediately uses the
       # session; the dedicated email-verification flows (auth-verification.hurl)
       # exercise verification explicitly. Without this, signup yields no session

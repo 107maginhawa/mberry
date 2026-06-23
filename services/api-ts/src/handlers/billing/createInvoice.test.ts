@@ -18,6 +18,7 @@ import { AppError } from '@/core/errors';
 const MERCHANT_ID = 'merch-uuid-1111-1111-1111-111111111111';
 const CUSTOMER_ID = 'cust-uuid-2222-2222-2222-222222222222';
 const INVOICE_ID = 'inv-uuid-3333-3333-3333-333333333333';
+const ORG_ID = 'org-uuid-4444-4444-4444-444444444444';
 
 function makeSession(userId = MERCHANT_ID) {
   return {
@@ -122,6 +123,7 @@ async function buildApp(deps: {
   customerPerson?: Record<string, any> | null;
   existingByContext?: any[];
   createdInvoice?: ReturnType<typeof makeCreatedInvoice>;
+  organizationId?: string;
 }) {
   const {
     session = makeSession(),
@@ -129,6 +131,10 @@ async function buildApp(deps: {
     customerPerson = makeCustomerPerson(),
     existingByContext = [],
     createdInvoice = makeCreatedInvoice(),
+    // The /billing/* org-context middleware is fail-open; the handler guards
+    // a missing org with a 400. Default to a present org so unrelated tests
+    // exercise their own assertions; pass '' to exercise the guard.
+    organizationId = ORG_ID,
   } = deps;
 
   // Pre-import the handler module
@@ -146,6 +152,7 @@ async function buildApp(deps: {
     (c as any).set('session', session);
     (c as any).set('logger', logger);
     (c as any).set('database', {} as any);
+    if (organizationId) (c as any).set('organizationId', organizationId);
 
     // Override InvoiceRepository prototype for this request
     const origFindMany = InvoiceRepository.prototype.findMany;
@@ -360,6 +367,27 @@ describe('createInvoice — not found', () => {
 // ---------------------------------------------------------------------------
 
 describe('createInvoice — validation', () => {
+  test('returns 400 (not 500) when org context is missing — fail-open middleware left it unset', async () => {
+    // A logged-in non-member of x-org-id reaches the handler with no
+    // organizationId set (the /billing/* middleware fails open). Without the
+    // guard this inserted a NULL organization_id and surfaced as a raw 500.
+    const app = await buildApp({ organizationId: '' });
+
+    const resp = await app.request('/', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        customer: CUSTOMER_ID,
+        merchant: MERCHANT_ID,
+        lineItems: makeLineItems(1),
+      }),
+    });
+
+    expect(resp.status).toBe(400);
+    const body = await resp.json() as any;
+    expect(body.code).toBe('VALIDATION_ERROR');
+  });
+
   test('returns 400 when lineItems array is empty', async () => {
     const app = await buildApp({});
 

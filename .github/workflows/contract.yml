@@ -29,6 +29,12 @@ jobs:
         options: >-
           --health-cmd "pg_isready -U postgres -d monobase"
           --health-interval 5s --health-timeout 5s --health-retries 10
+      # stripe-mock: canned Stripe API responses so the gated billing specs
+      # (billing-lifecycle.hurl, billing-extended-flow.hurl) run instead of
+      # being skipped. No healthcheck — boots in <1s, well before API + seed.
+      stripe-mock:
+        image: stripe/stripe-mock:latest
+        ports: ['12111:12111']
       # Minio cannot run as a `services:` entry: minio/minio requires
       # `server <path>` and Actions cannot pass a CMD; bitnami/minio:latest
       # was deprecated from Docker Hub. Started as a real step below.
@@ -38,6 +44,12 @@ jobs:
       PORT: 7213
       API_URL: http://localhost:7213
       AUTH_SECRET: contract-test-secret-do-not-use-in-prod
+      # Stripe billing specs: point the app's Stripe SDK at stripe-mock (STRIPE_URL),
+      # tell the contract runner's preflight where to probe (STRIPE_API_BASE), and
+      # set any test key so run-contract-tests un-gates the stripeSpecs set.
+      STRIPE_SECRET_KEY: sk_test_contract_do_not_use_in_prod
+      STRIPE_URL: http://localhost:12111
+      STRIPE_API_BASE: http://localhost:12111
       # See ci.yml contract job — the suite signs up ad-hoc users and uses the
       # session immediately; verification must be off (matches local dev .env).
       AUTH_REQUIRE_EMAIL_VERIFICATION: false

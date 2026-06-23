@@ -7,70 +7,33 @@ csrf_token: jsonpath "$.token"
 
 
 
-# Billing lifecycle against stripe-mock: a merchant creates an account,
-# drafts and finalizes an invoice, voids it. Pay/capture/refund are
-# tested at the boundary (provider-not-onboarded → 422) because
-# stripe-mock doesn't simulate the Connect onboarding webhook flow,
-# so the merchant account stays in `pending` status without external
-# state injection.
+# Billing invoice lifecycle against stripe-mock: the seeded merchant (the org
+# President, who already has a seeded — onboarding-incomplete — merchant account)
+# drafts and finalizes an invoice for a customer, the customer's pay attempt is
+# rejected at the readiness boundary, and the merchant closes it as uncollectible.
+#
+# We act as the seed President because createInvoice (and the /billing/* org-context
+# middleware) require the merchant to be an active member of {{org_id}}; a fresh
+# signup is not. Merchant-account create/get/onboard are intentionally NOT exercised
+# here — the President's account is pre-seeded (POST would 409) and there is no list
+# endpoint to recover its id; that surface is covered by createMerchantAccount /
+# onboardMerchantAccount unit tests.
 
-# 0. Merchant signup + person + merchant account.
-POST {{api}}/auth/sign-up/email
+# 0. Merchant = the seeded President (active org member + seeded merchant account).
+POST {{api}}/auth/sign-in/email
 Origin: {{origin}}
 x-csrf-token: {{csrf_token}}
 Content-Type: application/json
 {
-  "email": "merch-{{suffix}}@example.org",
-  "password": "Sup3rSecret!ContractTest",
-  "name": "Merchant"
+  "email": "{{seed_officer_email}}",
+  "password": "{{seed_officer_password}}"
 }
 HTTP 200
 [Captures]
-person_id: jsonpath "$.user.id"
-
-POST {{api}}/billing/merchant-accounts
-Origin: {{origin}}
-x-csrf-token: {{csrf_token}}
-Content-Type: application/json
-x-org-id: {{org_id}}
-{
-  "refreshUrl": "https://example.com/refresh",
-  "returnUrl": "https://example.com/return"
-}
-HTTP 201
-[Captures]
-merchant_account_id: jsonpath "$.id"
-[Asserts]
-jsonpath "$.active" == true
-jsonpath "$.metadata.stripeAccountId" exists
-jsonpath "$.metadata.onboardingComplete" == false
+merchant_person_id: jsonpath "$.user.id"
 
 
-# 1. Get merchant account back; status is 'pending' until Stripe webhook.
-GET {{api}}/billing/merchant-accounts/{{merchant_account_id}}
-x-org-id: {{org_id}}
-HTTP 200
-[Asserts]
-jsonpath "$.id" == "{{merchant_account_id}}"
-jsonpath "$.metadata.stripeAccountStatus" == "pending"
-
-
-# 2. Re-onboarding link generation works.
-POST {{api}}/billing/merchant-accounts/{{merchant_account_id}}/onboard
-Origin: {{origin}}
-x-csrf-token: {{csrf_token}}
-Content-Type: application/json
-x-org-id: {{org_id}}
-{
-  "refreshUrl": "https://example.com/refresh",
-  "returnUrl": "https://example.com/return"
-}
-HTTP 200
-[Asserts]
-jsonpath "$.onboardingUrl" exists
-
-
-# 3. Customer signup + person (cookie jar now holds customer session).
+# 1. Customer signup + person (cookie jar now holds the customer session).
 POST {{api}}/auth/sign-up/email
 Origin: {{origin}}
 x-csrf-token: {{csrf_token}}
@@ -82,8 +45,24 @@ Content-Type: application/json
 }
 HTTP 200
 [Captures]
-person_id: jsonpath "$.user.id"
+customer_person_id: jsonpath "$.user.id"
 
+
+# 2. Re-auth as the merchant (President) — createInvoice requires
+# merchant === session user, and the org-context middleware requires
+# the session user to be a member of {{org_id}}.
+POST {{api}}/auth/sign-in/email
+Origin: {{origin}}
+x-csrf-token: {{csrf_token}}
+Content-Type: application/json
+{
+  "email": "{{seed_officer_email}}",
+  "password": "{{seed_officer_password}}"
+}
+HTTP 200
+
+
+# 3. Draft an invoice for the customer.
 POST {{api}}/billing/invoices
 Origin: {{origin}}
 x-csrf-token: {{csrf_token}}
@@ -106,7 +85,7 @@ jsonpath "$.total" == 2500
 jsonpath "$.currency" == "USD"
 
 
-# 5. Finalize the invoice → status 'open'.
+# 4. Finalize the invoice → status 'open'.
 POST {{api}}/billing/invoices/{{invoice_id}}/finalize
 Origin: {{origin}}
 x-csrf-token: {{csrf_token}}
@@ -118,9 +97,9 @@ HTTP 200
 jsonpath "$.status" == "open"
 
 
-# 6. Customer attempts to pay → 422 because the merchant's Stripe Connect
-# onboarding hasn't completed (stripe-mock doesn't simulate webhooks).
-# Asserts the impl enforces the readiness boundary.
+# 5. Customer attempts to pay → 422 because the merchant's Stripe Connect
+# onboarding hasn't completed (the seeded account has no onboardingComplete).
+# Asserts the impl enforces the provider-readiness boundary.
 POST {{api}}/auth/sign-in/email
 Origin: {{origin}}
 x-csrf-token: {{csrf_token}}
@@ -143,7 +122,7 @@ HTTP 422
 jsonpath "$.code" == "PROVIDER_BILLING_INCOMPLETE"
 
 
-# 7. Merchant marks the unpaid invoice as uncollectible → status 'uncollectible'.
+# 6. Merchant marks the unpaid invoice as uncollectible → status 'uncollectible'.
 # (void is only valid for authorized-but-uncaptured payments; an open
 # invoice without an associated PaymentIntent uses uncollectible to close.)
 POST {{api}}/auth/sign-in/email
@@ -151,8 +130,8 @@ Origin: {{origin}}
 x-csrf-token: {{csrf_token}}
 Content-Type: application/json
 {
-  "email": "merch-{{suffix}}@example.org",
-  "password": "Sup3rSecret!ContractTest"
+  "email": "{{seed_officer_email}}",
+  "password": "{{seed_officer_password}}"
 }
 HTTP 200
 
@@ -168,7 +147,7 @@ HTTP 200
 jsonpath "$.status" == "uncollectible"
 
 
-# 8. List invoices includes the closed one.
+# 7. List invoices includes the closed one.
 GET {{api}}/billing/invoices
 x-org-id: {{org_id}}
 HTTP 200
