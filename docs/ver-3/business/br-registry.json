@@ -1191,7 +1191,7 @@
       "contract": [],
       "e2e": []
     },
-    "annotations": "Minted 2026-06-02 to resolve TR-P1-001 (m20-booking had zero global BR IDs). Module-local alias M20-R1 retained in MODULE_SPEC §4. Backs WF-117, WF-112, AC-M20-create-booking. (BR-52..BR-67 were claimed by parallel m21/m22/M12-split fixes for TR-P1-002/003/004; m20 booking IDs start at BR-68.)"
+    "annotations": "2026-06-23 (R2-5): BR-68 is enforced at SLOT GENERATION — only an `active` booking event produces bookable (available) slots, so an inactive/draft event has nothing to book; the wire-observable booking guard (slot not available -> 409) is BR-69's booking-edge.hurl. createBooking.test.ts covers the handler path. No crisp inactive-event wire assertion exists and there is no booking member-UI e2e, so BR-68 stays INCOMPLETE/allowlisted. Minted 2026-06-02 to resolve TR-P1-001 (m20-booking had zero global BR IDs). Module-local alias M20-R1 retained in MODULE_SPEC §4. Backs WF-117, WF-112, AC-M20-create-booking. (BR-52..BR-67 were claimed by parallel m21/m22/M12-split fixes for TR-P1-002/003/004; m20 booking IDs start at BR-68.)"
   },
   "BR-69": {
     "rule": "Prevent Double-Booking on Booked or Blocked Slots (alias M20-R2)",
@@ -1204,10 +1204,12 @@
         "services/api-ts/src/handlers/booking/createBooking.test.ts",
         "services/api-ts/src/handlers/booking/slotManagement.test.ts"
       ],
-      "contract": [],
+      "contract": [
+        "specs/api/tests/contract/booking-edge.hurl"
+      ],
       "e2e": []
     },
-    "annotations": "Minted 2026-06-02 to resolve TR-P1-001. Slot status check prior to booking creation. Backs WF-117, WF-112."
+    "annotations": "2026-06-23 (R2-5): contract coverage was present but UNLINKED — booking-edge.hurl already asserts the double-booking guard at the wire (booking the same slot a second time -> 409 'Slot is not available'). The repo guard (createBooking: slot.status !== 'available' -> ConflictError, plus the partial unique index bookings_active_slot_unique for the race) is real-PG-proven in booking.repo.integration.test.ts. Stays INCOMPLETE per p0-data only because there is no booking member-UI e2e (the booking flow is API/officer-driven). Minted 2026-06-02 to resolve TR-P1-001. Slot status check prior to booking creation. Backs WF-117, WF-112."
   },
   "BR-70": {
     "rule": "Enforce Minimum Booking Advance Notice (alias M20-R3, minBookingMinutes window)",
@@ -1250,10 +1252,12 @@
         "services/api-ts/src/handlers/booking/createScheduleException.test.ts",
         "services/api-ts/src/handlers/booking/slotManagement.test.ts"
       ],
-      "contract": [],
+      "contract": [
+        "specs/api/tests/contract/booking-exceptions.hurl"
+      ],
       "e2e": []
     },
-    "annotations": "Minted 2026-06-02 to resolve TR-P1-001. Backs WF-116, WF-113."
+    "annotations": "2026-06-23 (R2-5): contract coverage was present but UNLINKED — booking-exceptions.hurl exercises single/weekly/monthly exception creation that propagates into the slot generator (blocking the affected windows); scheduleException.repo.integration.test.ts proves overlap/recurrence real-PG. Stays INCOMPLETE per p0-data only because there is no booking member-UI e2e. Minted 2026-06-02 to resolve TR-P1-001. Backs WF-116, WF-113."
   },
   "BR-73": {
     "rule": "Cancelled or Rejected Booking Releases Slot (alias M20-R6, back to available)",
@@ -1266,10 +1270,13 @@
         "services/api-ts/src/handlers/booking/cancelBooking.test.ts",
         "services/api-ts/src/handlers/booking/rejectBooking.test.ts"
       ],
-      "contract": [],
+      "contract": [
+        "specs/api/tests/contract/booking-flow.hurl",
+        "specs/api/tests/contract/booking-edge.hurl"
+      ],
       "e2e": []
     },
-    "annotations": "Minted 2026-06-02 to resolve TR-P1-001. Backs WF-118, WF-119."
+    "annotations": "2026-06-23 (R2-5): the slot-RELEASE guarantee is now proven at the wire. booking-flow.hurl cancels a booking (-> cancelled) and booking-edge.hurl rejects one (-> rejected); R2-5 ADDED the missing half — after the reject, the released slot is RE-CLAIMED by a fresh booking (201, slot returns to the pool, not a permanent lock). booking-lifecycle.repo.integration.test.ts proves the cancel/reject release frees the slot real-PG. Stays INCOMPLETE per p0-data only because there is no booking member-UI e2e. Minted 2026-06-02 to resolve TR-P1-001. Backs WF-118, WF-119."
   },
   "BR-74": {
     "rule": "Slot Generation Respects Buffer Time (alias M20-R7, no overlap with bufferBefore/bufferAfter)",

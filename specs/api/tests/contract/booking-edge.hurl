@@ -207,3 +207,32 @@ Content-Type: application/json
 x-org-id: {{org_id}}
 { "reason": "Client didn't show up" }
 HTTP 422
+
+
+# 6. [BR-73] The rejected booking RELEASED its slot — slot_id (rejected in
+# step 4) is now bookable again. Re-claiming it succeeds, proving cancel/reject
+# returns the slot to the pool (not a permanent lock).
+POST {{api}}/auth/sign-in/email
+Origin: {{origin}}
+x-csrf-token: {{csrf_token}}
+Content-Type: application/json
+{
+  "email": "edge-client-{{suffix}}@example.org",
+  "password": "Sup3rSecret!ContractTest"
+}
+HTTP 200
+
+POST {{api}}/booking/bookings
+Origin: {{origin}}
+x-csrf-token: {{csrf_token}}
+Content-Type: application/json
+x-org-id: {{org_id}}
+{
+  "slot": "{{slot_id}}",
+  "locationType": "video",
+  "reason": "Re-claiming the released slot"
+}
+HTTP 201
+[Asserts]
+jsonpath "$.slot" == "{{slot_id}}"
+jsonpath "$.status" == "pending"
