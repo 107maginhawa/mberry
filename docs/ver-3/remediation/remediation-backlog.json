@@ -213,7 +213,7 @@
           "redTargets": ["specs/api/tests/contract/billing-payment-guards.hurl"],
           "green": "Each guard rejected at the wire; refund/paid transitions proven end-to-end.",
           "codegraphAnchors": ["payInvoice", "captureInvoicePayment", "refundInvoicePayment", "finalizeInvoice"],
-          "status": "todo"
+          "status": "done (real-PG guard half; contract/e2e infra-gated) — payment-guards.integration.test.ts drives the REAL payInvoice/captureInvoicePayment/refundInvoicePayment handlers against createScratch-seeded invoices/merchants in precise states, proving every money guard fires BEFORE Stripe (a billing stub that throws if reached confirms guard-first): BR-60 merchant-required (no merchant→404, not-onboarded→4xx), BR-61 terminal-state double-pay (paid/void/uncollectible/draft→not-payable, in-progress paymentStatus→409), BR-63 capture-authorization (requires_capture-or-reject, already-succeeded→409), BR-64 refund-requires-captured (non-succeeded→4xx, already-refunded→409). 14 assertions green. KEY FINDING: all four guards execute before the gateway call, so they're fully real-PG-provable with NO Stripe. The contract+e2e axes (p0-data → COMPLETE) need the stripe-mock happy-path journey, which is NOT wired in CI (stripeSpecs billing-lifecycle.hurl is gated/skipped) — so BR-60/61/63/64 stay allowlisted with annotations updated to reflect the guards are now real-PG-proven (not just unit-mocked). Added the integration test to all 4 BRs' tests.backend."
         },
         {
           "id": "R2-5",
