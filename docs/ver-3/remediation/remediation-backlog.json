@@ -300,7 +300,7 @@
           "redTargets": ["journeys/paid-training.spec.ts -> firewall"],
           "green": "Proof-gate cross-actor flow durable.",
           "codegraphAnchors": ["submitTrainingPaymentProof", "confirmTrainingPayment"],
-          "status": "todo"
+          "status": "done — journeys/paid-training.spec.ts hardened from @selector-only-ok single-context API smoke to a compliant @journey-firewall. The prior version read the result back from the SAME officer session that did the confirm (never proved durability). Now: officer (fresh ctx) creates+publishes a paid training -> member (fresh ctx) enrolls (asserts status='payment_pending', the paid gate) -> member submits offline proof -> officer confirms (asserts status='enrolled') -> CLAUSE 4: an INDEPENDENT fresh officer session lists enrollments and asserts the member's row is durably 'enrolled'. All 4 DoD clauses present (attachErrorSurface error-surface, goal-state values, per-step status, independentRead) — audit-e2e-depth gate exits 0. Green locally (1 passed)."
         },
         {
           "id": "R3-5",
