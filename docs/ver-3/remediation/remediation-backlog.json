@@ -284,7 +284,7 @@
           "redTargets": ["apps/memberry/tests/e2e/journeys/election-lifecycle.spec.ts (new, firewall)"],
           "green": "Full election lifecycle durable + one-vote-per-person enforced end-to-end.",
           "codegraphAnchors": ["castBallot", "certifyElection", "openElectionVoting"],
-          "status": "todo"
+          "status": "done (full lifecycle in one multi-actor spec) — the election lifecycle was already covered DISTRIBUTED (governance-ballot.spec.ts: officer provisions election→open-nominations→2 candidates[BR-33 ≥2]→open-voting, member casts ballot→durable /ballots/mine read, BR-33 second-vote→422 DUPLICATE_VOTE; election-integrity.spec.ts: BR-44 certify→winners→results; president-election-tally.spec.ts: cross-actor read-consistency). The author had DEFERRED the consolidated full-lifecycle tail (close→certify→tally) citing G15/G10 fixture-isolation blockers. R3-3 closed that: extended governance-ballot.spec.ts WF-077 with the certify tail — officer close-voting (asserts status='awaitingConfirmation') → certify (2xx) → durable post-certify read proves the member's ballot survives certification (the tally is built on the persisted vote). Now ONE multi-actor spec runs create→nominate→open→vote→one-vote-409→close→certify→durable. 2/2 green locally. RESIDUAL: a formal @journey-firewall TAG would need the attachErrorSurface+independentRead clause restructure (the spec uses roleApi/raw APIRequestContext) — noted, but the durable governance guarantees (BR-33 one-vote-per-person + full lifecycle through certify) are proven."
         },
         {
           "id": "R3-4",
