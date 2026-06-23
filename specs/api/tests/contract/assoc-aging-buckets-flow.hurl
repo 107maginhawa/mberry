@@ -7,18 +7,42 @@ csrf_token: jsonpath "$.token"
 
 
 
-# Association aging buckets flow: get and recalculate.
+# [R3-5] Association dues aging-buckets — get + recalculate.
+# Was a sign-up-only stub that asserted nothing. Now an association:admin reads
+# the org's receivables aging snapshot and recalculates it, asserting the real
+# aging tiers come back (current / 30 / 60 / 90 / 90+ + total outstanding).
 
-# 0. Auth setup — sign up + create person.
-POST {{api}}/auth/sign-up/email
+# 0. Sign in as the seed officer (association:admin for {{org_id}}).
+POST {{api}}/auth/sign-in/email
 Origin: {{origin}}
 x-csrf-token: {{csrf_token}}
 Content-Type: application/json
 {
-  "email": "assoc-aging-{{suffix}}@example.org",
-  "password": "Sup3rSecret!ContractTest",
-  "name": "AgingBuckets Tester"
+  "email": "{{seed_officer_email}}",
+  "password": "{{seed_officer_password}}"
 }
 HTTP 200
-[Captures]
-person_id: jsonpath "$.user.id"
+
+
+# 1. Read the current aging snapshot.
+GET {{api}}/association/member/aging-buckets/{{org_id}}
+x-org-id: {{org_id}}
+HTTP 200
+
+
+# 2. Recalculate — the response carries the org id + every aging tier.
+POST {{api}}/association/member/aging-buckets/{{org_id}}/recalculate
+Origin: {{origin}}
+x-csrf-token: {{csrf_token}}
+Content-Type: application/json
+x-org-id: {{org_id}}
+{}
+HTTP 200
+[Asserts]
+jsonpath "$.organizationId" == "{{org_id}}"
+jsonpath "$.current" exists
+jsonpath "$.thirtyDay" exists
+jsonpath "$.sixtyDay" exists
+jsonpath "$.ninetyDay" exists
+jsonpath "$.overNinety" exists
+jsonpath "$.totalOutstanding" exists
