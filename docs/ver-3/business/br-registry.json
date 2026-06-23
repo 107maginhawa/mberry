@@ -1071,12 +1071,13 @@
       "backend": [
         "services/api-ts/src/handlers/billing/payInvoice.test.ts",
         "services/api-ts/src/handlers/billing/createMerchantAccount.test.ts",
-        "services/api-ts/src/handlers/billing/onboardMerchantAccount.test.ts"
+        "services/api-ts/src/handlers/billing/onboardMerchantAccount.test.ts",
+        "services/api-ts/src/handlers/billing/payment-guards.integration.test.ts"
       ],
       "contract": [],
       "e2e": []
     },
-    "annotations": "Minted 2026-06-02 to resolve TR-P1-002. Aliases module-local M21-R1. IF merchant account does not exist THEN block payment processing for that person (require Stripe Connect onboarding first). Backs WF-128 (Onboard Merchant), WF-130 (Pay Invoice), AC-M21-001, AC-M21-006, SM-M21-MERCHANT."
+    "annotations": "2026-06-23 (R2-4): the merchant-required guard is now proven against real PG (payment-guards.integration.test.ts): payInvoice on an `open` invoice with NO merchant_account row -> NotFound, and with a merchant present but onboardingComplete=false -> rejected BEFORE any Stripe call (a billing stub that throws if reached confirms the guard fires first). Stays INCOMPLETE per p0-data (contract+e2e require the stripe-mock happy-path journey, not wired in CI) — kept on allowlist. Minted 2026-06-02 to resolve TR-P1-002. Aliases module-local M21-R1. IF merchant account does not exist THEN block payment processing for that person (require Stripe Connect onboarding first). Backs WF-128 (Onboard Merchant), WF-130 (Pay Invoice), AC-M21-001, AC-M21-006, SM-M21-MERCHANT."
   },
   "BR-61": {
     "rule": "Invoice Terminal-State Payment Guard (alias M21-R2)",
@@ -1088,12 +1089,13 @@
         "services/api-ts/src/handlers/billing/payInvoice.test.ts",
         "services/api-ts/src/handlers/billing/voidInvoice.test.ts",
         "services/api-ts/src/handlers/billing/updateInvoice.test.ts",
-        "services/api-ts/src/handlers/billing/captureInvoicePayment.test.ts"
+        "services/api-ts/src/handlers/billing/captureInvoicePayment.test.ts",
+        "services/api-ts/src/handlers/billing/payment-guards.integration.test.ts"
       ],
       "contract": [],
       "e2e": []
     },
-    "annotations": "Minted 2026-06-02 to resolve TR-P1-002. Aliases module-local M21-R2. IF invoice status is paid or void THEN reject further payment/update attempts (prevent double-payment). Backs SM-M21-INVOICE terminal-state guard, WF-130, AC-M21-001."
+    "annotations": "2026-06-23 (R2-4): the terminal-state double-pay guard is now proven against real PG (payment-guards.integration.test.ts): payInvoice on a paid/void/uncollectible/draft invoice -> rejected (not payable), and on an `open` invoice with an in-progress paymentStatus -> 409, all BEFORE Stripe. Stays INCOMPLETE per p0-data (contract+e2e require the stripe-mock journey, not wired in CI) — kept on allowlist. Minted 2026-06-02 to resolve TR-P1-002. Aliases module-local M21-R2. IF invoice status is paid or void THEN reject further payment/update attempts (prevent double-payment). Backs SM-M21-INVOICE terminal-state guard, WF-130, AC-M21-001."
   },
   "BR-62": {
     "rule": "Stripe Webhook Signature Verification (alias M21-R3)",
@@ -1119,12 +1121,13 @@
     "tests": {
       "backend": [
         "services/api-ts/src/handlers/billing/handleStripeWebhook.test.ts",
-        "services/api-ts/src/handlers/billing/captureInvoicePayment.test.ts"
+        "services/api-ts/src/handlers/billing/captureInvoicePayment.test.ts",
+        "services/api-ts/src/handlers/billing/payment-guards.integration.test.ts"
       ],
       "contract": [],
       "e2e": []
     },
-    "annotations": "Minted 2026-06-02 to resolve TR-P1-002. Aliases module-local M21-R4. IF payment_intent.succeeded webhook received THEN mark invoice paid (automated payment confirmation, idempotent on event ID). Backs WF-132, AC-M21-004, SM-M21-INVOICE."
+    "annotations": "2026-06-23 (R2-4): the capture authorization guard (the wire-observable half of the webhook-driven paid transition) is now proven against real PG (payment-guards.integration.test.ts): captureInvoicePayment requires paymentStatus=requires_capture, rejecting a pending payment and 409-ing an already-succeeded one. The actual open->paid transition runs INSIDE the Stripe capture/webhook path (stripe-mock-gated). Stays INCOMPLETE per p0-data — kept on allowlist. Minted 2026-06-02 to resolve TR-P1-002. Aliases module-local M21-R4. IF payment_intent.succeeded webhook received THEN mark invoice paid (automated payment confirmation, idempotent on event ID). Backs WF-132, AC-M21-004, SM-M21-INVOICE."
   },
   "BR-64": {
     "rule": "Refund Requires Paid Original Payment (alias M21-R5)",
@@ -1133,12 +1136,13 @@
     "ruleClass": "p0-data",
     "tests": {
       "backend": [
-        "services/api-ts/src/handlers/billing/refundInvoicePayment.test.ts"
+        "services/api-ts/src/handlers/billing/refundInvoicePayment.test.ts",
+        "services/api-ts/src/handlers/billing/payment-guards.integration.test.ts"
       ],
       "contract": [],
       "e2e": []
     },
-    "annotations": "Minted 2026-06-02 to resolve TR-P1-002. Aliases module-local M21-R5. IF refund requested THEN validate original payment exists and is in paid status (cannot refund unpaid invoice). Backs WF-131, AC-M21-005."
+    "annotations": "2026-06-23 (R2-4): the refund-requires-captured guard is now proven against real PG (payment-guards.integration.test.ts): refundInvoicePayment on a payment whose status is not `succeeded` (none/pending/requires_capture/failed) -> rejected (must be captured before refund), and an already-refunded invoice -> 409, all BEFORE Stripe. Stays INCOMPLETE per p0-data (contract+e2e require the stripe-mock journey) — kept on allowlist. Minted 2026-06-02 to resolve TR-P1-002. Aliases module-local M21-R5. IF refund requested THEN validate original payment exists and is in paid status (cannot refund unpaid invoice). Backs WF-131, AC-M21-005."
   },
   "BR-65": {
     "rule": "Billing Config Key Encryption at Rest (alias M21-R6)",
