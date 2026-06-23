@@ -229,7 +229,7 @@
           "redTargets": ["specs/api/tests/contract/booking-guards.hurl", "memberry e2e booking journey (firewall)"],
           "green": "No double-booking at the wire; slot lifecycle durable across sessions.",
           "codegraphAnchors": ["createBooking", "cancelBooking", "rejectBooking", "createScheduleException"],
-          "status": "todo"
+          "status": "done (contract-linked + wire gap filled; e2e is the residual axis) — INVESTIGATION found the audit overstated this gap: the booking contract coverage substantially EXISTED but was never LINKED to the BRs. booking-edge.hurl already asserts BR-69 double-booking -> 409; booking-flow.hurl asserts BR-73 cancel; booking-exceptions.hurl asserts BR-72 exception creation. R2-5 (1) ADDED the one genuinely-missing wire assertion: BR-73 slot RELEASE -> a fresh booking re-claims the rejected slot (201), proving release isn't a permanent lock (appended to booking-edge.hurl, 18/18 green locally); (2) LINKED the real contract coverage into BR-69/72/73 tests.contract; (3) honestly documented BR-68 (enforced at slot-generation: inactive events produce no bookable slots — no crisp wire assertion). The guards are ALSO real-PG-proven in booking.repo.integration / booking-lifecycle.repo.integration / scheduleException.repo.integration. RESIDUAL: p0-data -> COMPLETE needs e2e, and there is NO booking member-UI e2e (booking is API/officer-driven) — so BR-68/69/72/73 stay allowlisted with that honest reason, not the old 'backend-only' one. br-coverage PASS."
         }
       ]
     },
