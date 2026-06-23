@@ -445,6 +445,18 @@ export interface BookingEventFilters {
       errors.push('minBookingMinutes must be between 0-4320 minutes (72 hours)');
     }
 
+    // BR-75 (M20-R8): effectiveTo must be after effectiveFrom. A DB CHECK already
+    // guards this, but unvalidated it surfaced as a raw 500 (SQL error leak)
+    // instead of a clean 400 — validate up front so the wire returns a real
+    // validation error.
+    if (config.effectiveFrom && config.effectiveTo) {
+      const from = new Date(config.effectiveFrom).getTime();
+      const to = new Date(config.effectiveTo).getTime();
+      if (!Number.isNaN(from) && !Number.isNaN(to) && to <= from) {
+        errors.push('effectiveTo must be after effectiveFrom');
+      }
+    }
+
     if (config.locationTypes && config.locationTypes.length === 0) {
       errors.push('At least one locationType must be specified');
     }

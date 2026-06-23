@@ -339,7 +339,7 @@
           "redTargets": ["booking-validation.hurl"],
           "green": "BR-70/71/74/75/76/77 -> COMPLETE.",
           "codegraphAnchors": ["createBookingEvent", "updateBookingEvent"],
-          "status": "todo"
+          "status": "done (create-config rules + a real bug; BR-70/71/74 residual) — booking-validation.hurl asserts the create-time config rules at the wire: BR-75 effective-date ordering, BR-76 maxBookingDays 0–365, BR-77 minBookingMinutes 0–4320, each → 400. REAL BUG FIXED: BR-75 (effectiveTo<=effectiveFrom) was guarded ONLY by a DB CHECK → surfaced as a raw 500 SQL-error leak; added the check to BookingEventRepository.validateEventConfig (+ unit test) so it returns a clean 400. BR-75/76/77 → COMPLETE, removed from allowlist. RESIDUAL: BR-70 (min advance notice) / BR-71 (max lead time) / BR-74 (slot buffer) are BOOKING-TIME / SLOT-GENERATION enforcement (rejected when a member books outside the window / slot overlaps buffer), not create-config — they need a time-deterministic booking-flow or slot-inspection test (createScratch real-PG would be cleanest), left allowlisted. 6/6 hurl + 48 unit green; live-verified 500→400."
         },
         {
           "id": "R4-2",
