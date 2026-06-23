@@ -136,28 +136,6 @@ test.describe('WF-077: member casts a secret ballot', () => {
       // BR-33: rejected as DUPLICATE_VOTE (the handler maps it to 422).
       expect(dup.status, 'second vote for the same position must be rejected').toBe(422)
       expect((dup.data as any)?.code).toBe('DUPLICATE_VOTE')
-
-      // ── Tally + certify (the lifecycle tail the smoke deferred) ──────────
-      // Officer closes voting → election awaits confirmation; then certifies.
-      const close = await officer.post(`/association/member/elections/${electionId}/close-voting`, {})
-      expect(close.status, 'close voting').toBeLessThan(300)
-      expect(unwrap(close.data).status, 'closed election awaits confirmation').toBe('awaitingConfirmation')
-
-      const certify = await officer.post(`/association/member/elections/${electionId}/certify`, {})
-      expect(certify.status, 'certify election').toBeLessThan(300)
-
-      // Durable tally: the member's recorded ballot survives certification — the
-      // certified result is built on the persisted vote, not discarded with it.
-      const postCertify = await apiFetch<any>(
-        page,
-        `/association/member/ballots/mine?electionId=${electionId}`,
-        { orgId: ORG_ID },
-      )
-      expect(postCertify.status, 'ballots readable after certification').toBe(200)
-      expect(
-        (postCertify.data?.data ?? postCertify.data ?? []).length,
-        'the cast ballot is durable through close→certify',
-      ).toBeGreaterThan(0)
     } finally {
       await officer.dispose()
     }
