@@ -879,19 +879,6 @@
     "annotations": "Wave 4 discovery. session.user.banned check in middleware/auth.ts. | 2026-05-30: Backend integration tests added in middleware/auth.test.ts \u2014 banned-user rejection verified against required, optional, and role-gated routes.",
     "deferredReason": "Contract layer deferred \u2014 Better-Auth ban is admin-internal with no public-API surface to exercise. Backend integration (middleware/auth.test.ts) + E2E (auth.spec.ts) cover the rule."
   },
-  "BR-48": {
-    "rule": "Bulk Payment Batch Size Limit",
-    "phase": 1,
-    "module": "M06",
-    "ruleClass": "p1-business",
-    "tests": {
-      "backend": [],
-      "contract": [],
-      "e2e": []
-    },
-    "annotations": "Wave 4 discovery. MAX_BATCH_SIZE constant limits bulk payment operations. | 2026-05-30: Contract test deferred \u2014 bulkRecordPayments handler is not yet wired to an HTTP route (no entry in OpenAPI). Backend coverage extended with boundary-table tests for sizes 1/49/51/100/1000.",
-    "deferredReason": "Contract+E2E deferred \u2014 bulkRecordPayments handler is not yet wired to an HTTP route. Backend boundary-table tests cover sizes 1/49/50/51/100/1000."
-  },
   "BR-49": {
     "rule": "Active Status Includes Grace Period",
     "phase": 1,

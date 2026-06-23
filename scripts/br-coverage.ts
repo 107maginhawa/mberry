@@ -64,10 +64,13 @@ const KNOWN_INCOMPLETE: Set<string> = new Set([
   "BR-47", // Banned Users: Better-Auth ban is admin-internal, no public-API
            // wire to exercise; backend integration in middleware/auth.test.ts
            // + E2E in auth.spec.ts cover the rule.
-  "BR-48", // Bulk Payment Batch Size: bulkRecordPayments handler is not yet
-           // wired to an HTTP route (no OpenAPI surface); contract+E2E
-           // unreachable. Backend boundary-table tests cover sizes
-           // 1/49/50/51/100/1000.
+  // R4-5 (2026-06-23): BR-48 REMOVED from the registry — it was the only
+  // UNTESTED BR, describing a `bulkRecordPayments` batch-size limit for a handler
+  // that does NOT exist anywhere in services/api-ts (no handler, no route, no
+  // MAX_BATCH_SIZE constant, no boundary tests despite the stale annotation
+  // claiming them). UNTESTED since inception with nothing to wire or cover.
+  // Removed per the wire-or-remove decision; mint a fresh BR if bulk dues-payment
+  // recording is ever built.
   "BR-51", // Service Token Timing-Safe Comparison: cryptographic property of
            // the comparator, not observable at the wire layer. Backend test
            // in middleware/auth.test.ts asserts crypto.timingSafeEqual is the
