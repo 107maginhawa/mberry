@@ -371,7 +371,7 @@
           "redTargets": ["surveys real-PG integration for publish/close/listAdminSurveys/getSurveyAnalytics"],
           "green": "surveys floor raised to 50% with real-PG coverage.",
           "codegraphAnchors": ["publishSurvey", "closeSurvey", "getSurveyAnalytics", "listAdminSurveys"],
-          "status": "todo"
+          "status": "done — survey.repo.ts's UNSCOPED lifecycle methods (publish draft→active, close active→closed + guards, closeExpiredSurvey, deleteDraft draft-only, update draft-guard, updateAnalyticsSnapshot, findManyWithPagination org-scoped+count) now have real-PG depth in repos/survey.repo.integration.test.ts (8 tests, status-transition guards proven against persisted rows via createContentScratch). Measured module-min line% rose 36.1 → 63.96 (survey.repo.ts still the binding file; all other survey files 74%+). Raised .coverage-thresholds.json src/handlers/surveys floor 30 → 50 with headroom. 8/8 green."
         },
         {
           "id": "R4-4",
