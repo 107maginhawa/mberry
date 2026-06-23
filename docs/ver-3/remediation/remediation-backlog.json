@@ -403,7 +403,7 @@
           "redTargets": ["boundary-table test or removal"],
           "green": "BR-48 either COMPLETE+wired or removed (no UNTESTED rule).",
           "codegraphAnchors": ["bulkRecordPayments"],
-          "status": "todo"
+          "status": "done (REMOVED — orphan) — BR-48 was the ONLY UNTESTED BR. Investigation: the bulkRecordPayments handler DOES NOT EXIST anywhere in services/api-ts (find + grep for bulkRecordPayments / bulk-payment / recordBulk / MAX_BATCH_SIZE all empty), and the boundary tests the annotation CLAIMED (sizes 1/49/50/51/100/1000) do not exist either (tests.backend was empty). It was a spec'd-but-never-built rule, UNTESTED since inception, with nothing to wire and nothing to test. Per the wire-or-remove decision (and since wiring would be a greenfield feature build, not in scope), REMOVED the BR-48 entry from br-registry.json + the br-coverage allowlist. Result: br-coverage now reports 0 UNTESTED (the 'no BR is UNTESTED' DoD requirement is met). If bulk dues-payment recording is ever built, mint a fresh BR. Historical doc references (audits/specs) left as-is — they describe the original Wave-4 discovery."
         }
       ]
     },
