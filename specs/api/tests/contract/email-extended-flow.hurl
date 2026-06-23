@@ -136,6 +136,40 @@ HTTP *
 status toString matches "^(200|403)$"
 
 
+# ── 7b. [BR-53] Active template required — a DRAFT template cannot enqueue ───
+# Create an INACTIVE (draft) template, then attempt a test send: the enqueue is
+# rejected because no ACTIVE template matches (404 "not found or not active").
+# This is the guard half of BR-53 (the active-template happy path is steps 1-2).
+
+POST {{api}}/email/templates
+Origin: {{origin}}
+x-csrf-token: {{csrf_token}}
+Content-Type: application/json
+x-org-id: {{org_id}}
+{
+  "name": "Draft template {{suffix}}",
+  "description": "Inactive — must not enqueue",
+  "subject": "Draft subject",
+  "bodyHtml": "<p>Draft</p>",
+  "bodyText": "Draft",
+  "status": "draft"
+}
+HTTP 201
+[Captures]
+draft_template_id: jsonpath "$.id"
+
+POST {{api}}/email/templates/{{draft_template_id}}/test
+Origin: {{origin}}
+x-csrf-token: {{csrf_token}}
+Content-Type: application/json
+x-org-id: {{org_id}}
+{
+  "recipientEmail": "draft-{{suffix}}@example.org",
+  "recipientName": "Draft Tester"
+}
+HTTP 404
+
+
 # ── 8. RFC 8058 list-unsubscribe link click (public GET) ────
 
 GET {{api}}/email/unsubscribe?token=synthetic-contract-test-token-{{suffix}}
