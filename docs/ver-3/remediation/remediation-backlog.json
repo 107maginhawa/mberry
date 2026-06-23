@@ -252,7 +252,7 @@
           "redTargets": ["apps/memberry/tests/e2e/journeys/dues-lifecycle.spec.ts -> @journey-firewall"],
           "green": "Dues bill->pay->settle proven durable across a fresh session.",
           "codegraphAnchors": ["recordDuesPayment", "markDuesInvoicePaid", "getDuesFinancialDashboard"],
-          "status": "todo"
+          "status": "already-covered (audit overstated) — the durable dues bill→pay→settle→read firewall ALREADY EXISTS as cross-persona/treasurer-records-dues-member-sees-receipt.spec.ts (@journey-firewall, all 4 DoD clauses): applicant signs up+applies → officer approves → treasurer records a CASH dues payment (offline path, NO Stripe — recordDuesPayment) → clause-4 independent-session read-back proves the payment is durably retrievable by id, attributed to the member, amount round-trips, AND the member reads their own membership reflecting the lifecycle. It even surfaced+fixed a real P1 bug (PAY-EXT-409). journeys/dues-lifecycle.spec.ts is intentionally @selector-only-ok BECAUSE this firewall covers the durable path. No new code — duplicating it would be waste. Residual (product gap, surfaced not built): no member-facing /persons/me/dues receipt read-model."
         },
         {
           "id": "R3-2",
@@ -268,7 +268,7 @@
           "redTargets": ["officer/payment-refund.spec.ts -> firewall"],
           "green": "Refund reversal durable + reflected in history.",
           "codegraphAnchors": ["refundDuesPayment", "refundInvoicePayment"],
-          "status": "todo"
+          "status": "already-covered (audit named the wrong spec) — the durable refund firewall EXISTS as officer/refund-payment.spec.ts (NOT officer/payment-refund.spec.ts, which is the selector-only smoke the backlog redTarget named). refund-payment.spec.ts has the clause-4 independentRead: it refunds a dues payment then reads it back from a fresh treasurer session and asserts refundedAmount GREW on the durable row (payment re-readable). No Stripe — the dues refund path. No new code; the durable refund reversal is already proven."
         },
         {
           "id": "R3-3",
