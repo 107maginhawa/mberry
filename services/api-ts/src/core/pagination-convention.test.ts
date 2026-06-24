@@ -19,13 +19,13 @@
  * guards the convention surface.
  */
 import { describe, test, expect } from 'bun:test';
-import { readFileSync } from 'node:fs';
-import { join } from 'node:path';
 import { DEFAULT_QUERY_LIMIT } from './database.repo';
 import { DEFAULT_PAGE_SIZE, MAX_PAGE_SIZE } from './pagination';
 
-const REPO_ROOT = join(import.meta.dir, '..', '..', '..', '..');
-
+// ponytail: the prose-doc guard (asserting docs/product/PERFORMANCE.md spells out
+// the convention) was dropped in the lean-launch cleanup — that doc was deleted
+// with the old product docs. The convention now lives in the code constants below
+// (the real enforcement surface) + CLAUDE.md. These guard the runtime behavior.
 describe('S-C4-010: pagination convention', () => {
   test('DEFAULT_QUERY_LIMIT in base repo matches documented page size', () => {
     expect(DEFAULT_QUERY_LIMIT).toBe(DEFAULT_PAGE_SIZE);
@@ -37,18 +37,5 @@ describe('S-C4-010: pagination convention', () => {
 
   test('MAX_PAGE_SIZE is bounded (no runaway pages)', () => {
     expect(MAX_PAGE_SIZE).toBeLessThanOrEqual(1000);
-  });
-
-  test('PERFORMANCE.md documents the pagination convention', () => {
-    const perf = readFileSync(
-      join(REPO_ROOT, 'docs', 'product', 'PERFORMANCE.md'),
-      'utf-8',
-    );
-    expect(perf).toMatch(/##\s+Pagination Convention/);
-    expect(perf).toContain('DEFAULT_PAGE_SIZE');
-    expect(perf).toContain('MAX_PAGE_SIZE');
-    // The convention must spell out the silent-truncation risk that
-    // motivated S-C4-010.
-    expect(perf.toLowerCase()).toMatch(/silent\s+truncat/);
   });
 });
