@@ -93,12 +93,10 @@ jobs:
       - name: Generate API codegen
         run: bun run --filter @monobase/api-ts generate
 
-      - name: Build frontends (staging)
-        env:
-          VITE_API_URL: ${{ vars.STAGING_API_URL || '' }}
-        run: |
-          cd apps/memberry && bun run build
-          cd ../../apps/admin && bun run build
+      # NOTE (lean launch): frontend build + Cloudflare Pages deploy steps were
+      # removed with the deleted memberry/admin apps. Re-add per-environment
+      # builds + `wrangler pages deploy` for apps/org, apps/member, apps/console
+      # (each with its own VITE_API_URL + Pages project) once they exist.
 
       - name: Deploy API to staging
         env:
@@ -106,15 +104,6 @@ jobs:
         run: |
           npm install -g @railway/cli
           railway up --service memberry-api --environment staging --image ${{ needs.build.outputs.image_tag }}
-
-      - name: Deploy frontends to staging
-        env:
-          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-        run: |
-          npm install -g wrangler
-          wrangler pages deploy apps/memberry/dist/ --project-name memberry-staging --branch main
-          wrangler pages deploy apps/admin/dist/ --project-name memberry-admin-staging --branch main
 
       - name: Health check — staging API
         if: vars.STAGING_API_URL != ''
@@ -180,12 +169,10 @@ jobs:
       - name: Generate API codegen
         run: bun run --filter @monobase/api-ts generate
 
-      - name: Build frontends (production)
-        env:
-          VITE_API_URL: ${{ vars.PRODUCTION_API_URL || '' }}
-        run: |
-          cd apps/memberry && bun run build
-          cd ../../apps/admin && bun run build
+      # NOTE (lean launch): frontend build + Cloudflare Pages deploy steps were
+      # removed with the deleted memberry/admin apps. Re-add per-environment
+      # builds + `wrangler pages deploy` for apps/org, apps/member, apps/console
+      # (each with its own VITE_API_URL + Pages project) once they exist.
 
       - name: Deploy API to production
         env:
@@ -193,15 +180,6 @@ jobs:
         run: |
           npm install -g @railway/cli
           railway up --service memberry-api --environment production --image ${{ needs.build.outputs.image_tag }}
-
-      - name: Deploy frontends to production
-        env:
-          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-        run: |
-          npm install -g wrangler
-          wrangler pages deploy apps/memberry/dist/ --project-name memberry-production --branch main
-          wrangler pages deploy apps/admin/dist/ --project-name memberry-admin-production --branch main
 
       - name: Health check — production API
         if: vars.PRODUCTION_API_URL != ''

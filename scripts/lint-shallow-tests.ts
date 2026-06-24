@@ -37,7 +37,9 @@ const patterns: Array<{ name: string; regex: RegExp }> = [
 
 // Scan all test files
 const glob = new Glob('**/*.test.{ts,tsx}');
-const testDirs = ['services/api-ts/src', 'apps/memberry/src', 'apps/admin/src'];
+// ponytail: lean launch deleted apps/memberry + apps/admin. Add the new lean
+// app src dirs here (apps/org/src, apps/member/src, apps/console/src) as they land.
+const testDirs = ['services/api-ts/src'];
 
 for (const dir of testDirs) {
   for await (const file of glob.scan({ cwd: `${ROOT}/${dir}`, absolute: false })) {

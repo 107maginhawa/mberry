@@ -72,8 +72,11 @@ jobs:
       - name: Hand-wired routes check
         run: bun run check:hand-wired-routes
 
-      - name: E2E depth gate
-        run: bun run lint:e2e-depth   # hard gate (Phase 7) — 150 real-flow specs, 6 journeys 4/4
+      # NOTE (lean launch): the hard E2E-depth gate was retired with the deleted
+      # memberry/admin apps (it counted their real-flow specs). Re-add it pointed
+      # at the lean apps' journey specs once apps/org + apps/member land. The
+      # journey-coverage radar below stays wired (advisory) so it's ready to
+      # re-point at the lean journey registry in T9.
 
       - name: Journey coverage radar (advisory)
         run: bun run scripts/journey-coverage-radar.ts

@@ -1,8 +1,6 @@
-[test]
-# Skip Playwright E2E specs at load time (bun has no testPathIgnorePatterns;
-# the preload installs a Bun plugin that no-ops `tests/e2e/*.spec.ts` files).
-preload = ["./test-setup-root.ts"]
-
+# ponytail: root DOM/e2e test harness (test-setup-root.ts) removed with the deleted
+# frontend apps; services/api-ts has its own bunfig preload. Re-add a [test] preload
+# here only if a new root-level test suite needs one.
 [install]
 # Use isolated mode (pnpm-style) for strict dependency isolation
 linker = "isolated"

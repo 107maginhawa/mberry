@@ -1,80 +1,95 @@
-# Memberry — Design System
+# Memberry — Design System ("Friendly Clarity")
 
-The source of truth for how Memberry looks and feels. New screens adopt these
-patterns instead of inventing their own. When a screen needs something not
-covered here, extend this doc rather than one-off it.
+Source of truth for how the lean Memberry apps (`org`, `member`, `console`) look
+and feel. All three consume the SAME tokens + components from `packages/ui` — one
+design language, never per-app forks. New screens adopt these patterns; extend this
+doc rather than one-off.
 
-## Reference languages
+## Who this is for (read first — it drives every rule)
 
-We don't design from scratch — we adopt proven patterns from best-in-class apps
-and render them in Memberry's tokens.
+Primary user is an **older, non-technical dental professional**, often on a phone,
+who already uses **GCash**. Design for that person, not a power user:
+- **Legible, big, obvious** beats dense, clever, trendy.
+- **Echo GCash conventions** (big readable amounts, rounded friendly cards, explicit
+  confirm screens, QR) — 94M Filipinos are already trained on them. Familiarity = free onboarding.
+- **Augment, don't dumb down** — make the important things bigger; keep full capability.
 
-- **Stripe Dashboard** — North Star for operational + financial surfaces (roster,
-  dues, invoices, payments, applications). Their *Customers* list → our roster,
-  *Customer detail* → our member detail.
-- **Linear** — reference for list density and calm (compact rows, restraint).
-- **Tailwind UI (Application UI) + shadcn blocks** — the implementation source.
-  They productize the Stripe/Linear patterns and drop straight into our
-  React + shadcn + Tailwind stack.
+> This replaces the prior power-user system (Stripe/Linear density). We keep Stripe's
+> *clarity* for money screens and drop Linear's *density* entirely.
 
-## Tokens (defined in `apps/memberry/src/styles/globals.css`)
+## Aesthetic Direction
+- **Direction:** Friendly Clarity — warm, rounded, calm, trustworthy, professional.
+- **Decoration:** intentional, NOT flat. Buttons look raised and obviously tappable;
+  soft shadows separate cards (depth aids older eyes). Flat minimalism hurts this user.
+- **Mood:** "This just works, like the apps I already use." Calm and confident.
 
-- **Color** — CSS variables only. Primary `#554B68` (muted plum-grey), warm cream
-  surfaces, semantic `--color-{success,warning,error,info}` with `-bg` pairs.
-  Never use raw Tailwind colors (`bg-red-100`, `text-green-700`) in features.
-- **Typography** — DM Sans (display/headings), Plus Jakarta Sans (body),
-  JetBrains Mono (`text-mono`) for IDs, license numbers, money, and dates in tables.
-  Use the `.text-h1…text-micro` utilities, not arbitrary `text-[13px]`.
-- **Radius** — `--radius-sm/md/lg` (8/12/18px). **Spacing** — 4px base scale.
+## Accessibility baseline (non-negotiable — WCAG 2.1 AA min)
+- **Text ≥ 18px** base; never below 16px. Amounts large + tabular.
+- **Contrast** ≥ 4.5:1 body (AA); aim AAA on primary text.
+- **Tap targets ≥ 48px**; generous spacing between interactive elements.
+- **Text label on every icon.** No icon-only controls.
+- **One primary task per screen**; linear flows; no dense multi-panel dashboards.
+- **Plain labels** ("Membership Card", not "Credential Vault"). Consider Tagalog alongside English.
+- **Passwordless login** (OTP/biometric) — never multi-field password + CAPTCHA gauntlets.
+- **Confirmation screen at every money step**; **step indicators** ("Step 2 of 3") on multi-step flows.
+- **Touch-first**: no hover-only interactions. Works one-handed on a phone.
 
-## Background & chrome — do not flatten
+## Mobile-first & shells
+- Design at **phone width first**, scale up. Member app especially is a phone app.
+- Build as **responsive PWA**; **Capacitor-wrap** the same React app for App/Play Store
+  later if needed. No separate native codebase. (Ladder: PWA → Capacitor → RN only if forced.)
 
-- The app background is the **existing four-radial cream gradient** on `body`
-  (`globals.css`), `background-attachment: fixed`. Keep it. Do not replace it with
-  a flat fill.
-- The decorative `memberry-bg.png` on the officer dashboard
-  (`officer.tsx`) is intentional — retain it.
-- One shell per role (`_authenticated.tsx`, `officer.tsx`), sidebar + mobile
-  drawer/bottom-nav, breadcrumbs via `PageShell`. Don't add per-page chrome.
+## Typography
+- **One family: Hanken Grotesk** (display, body, UI) — warm, humanist, exceptionally
+  legible at large sizes. (Not Inter/Roboto.)
+- **Money & data:** Hanken Grotesk with `font-variant-numeric: tabular-nums`, large.
+  Balances/amounts must read at a glance (the GCash lesson).
+- **Scale:** amount 44 · page-title 30 · section 26 · large/list 21 · body 18 · caption 15.
+- **Loading:** Bunny Fonts (privacy-friendly) or self-host.
 
-## The list-item pattern (use this for every entity list)
+## Color (Memberry plum + cream — retained, WCAG-tuned)
+Defined as CSS variables in **`packages/ui`** (NOT per-app). Never use raw Tailwind
+colors (`bg-red-100`) in features.
+- **Primary:** `#554B68` (muted plum) · press `#3F3850` · on-primary `#FFFFFF`
+- **Background:** `#FAF7F2` warm cream (subtle four-radial cream gradient, fixed — keep it, don't flatten)
+- **Surface:** `#FFFFFF` · warm surface `#FDF9F3` · cream accent `#F2DEB0` / `#F9F0D8`
+- **Text:** `#2D2635` · secondary `#554B60` · muted `#73656D` (AA-tuned)
+- **Border:** `#E4D8DC` / light `#EDE5E8`
+- **Semantic (each with `-bg` pair):** success `#2E6043`/`#EDF5F0` · warning `#8A6800`/`#FDF8E8`
+  · error `#8A2C2C`/`#FDF0F0` · info `#3D5A8C`/`#EDF2F8`
+- **Dark mode:** deferred (older users skew light-mode; revisit post-launch).
 
-Lists of people/records (members, applications, payments, events) render as a
-**list item**, not a label/value grid. Shape (see `MemberCard` in
-`features/membership/components/member-table.tsx`):
+## Spacing & radius
+- **Base 8px, SPACIOUS density** (deliberate opposite of the old Linear-dense system).
+  Generous vertical rhythm; let screens breathe.
+- **Radius:** sm 8 · md 12 · lg 18 (friendly, not bubble).
 
-```
-[ ☐ ] (avatar)  Name (link)              [ Status pill ]
-                email / sub-id
-                fact · fact · fact            ← one inline meta line
-                [dues pill]  Training 0/60     ← pills only when relevant
-```
+## Layout
+- **Single-column, mobile-first.** Big cards. Member home is a "poster": large
+  good-standing status + one obvious primary action (Pay Dues).
+- **No multi-panel dashboards.** The `console` (platform) app may use a simple table,
+  but org/member stay single-column card flows.
 
-Rules:
-- **Identity left, status right.** Status is always a `StatusBadge` / badge, never color-only.
-- **One meta line of facts that exist.** Build the line from present fields only —
-  **never render `—` for missing data; omit it.**
-- **Pills only when relevant.** No empty placeholder pills.
-- **Reusable.** The same shape serves roster, applications, directory, payments,
-  events. If you need a second copy, extract a shared component rather than fork it.
+## Motion
+- **Minimal-functional only.** Gentle transitions, clear state + press feedback.
+  No scroll-jacking, no decorative choreography. Clarity over delight for this user.
 
-## Cards vs tables (responsive data views)
+## Patterns kept from the prior system (still good, rendered spacious)
+- **List-item pattern** for entity lists (members, payments, events): identity left,
+  status right; one meta line of *present* facts (never render `—` for missing data);
+  pills only when relevant. Reuse one component, don't fork.
+- **Status = text + color, never color alone.** Shared `StatusBadge`
+  (success | warning | error | info | muted | accent).
+- **Responsive data:** wide → table; narrow → reflow to list-item card (container
+  queries). Never horizontal-scroll a wide table on a phone.
+- **UI states:** Loading → `Skeleton`; Empty → `EmptyState` (icon + headline + desc +
+  optional action); Error → `role="alert"` + `ErrorState`; Success → `sonner` toast;
+  consequential one-click mutations → `ConfirmDialog`.
 
-- Wide container (`≥ 960px` for dense tables): show the full table.
-- Narrow container: reflow to the list-item **card** via container queries
-  (`cq-roster-*` pattern in `globals.css` + `containerType: inline-size`).
-  Never force a wide table to horizontal-scroll on narrow screens.
-- Empty cells in a desktop table stay quiet (small muted text), not loud dashes.
-
-## Status colors
-
-Use the shared `StatusBadge` (`components/patterns/status-badge.tsx`) or a
-per-domain badge map (e.g. `DuesStatusBadge`). Variants: `success | warning |
-error | info | muted | accent`. Every status carries text + color (never color alone).
-
-## UI states
-
-Loading → `Skeleton` matching the layout. Empty → `EmptyState` (icon + headline +
-description, optional action). Error → `role="alert"` + `ErrorState`/`Alert`.
-Permission-denied → `EmptyState` with an honest message. Success → `sonner` toast.
-Consequential one-click mutations (mark-paid, reinstate, bulk-approve) → `ConfirmDialog`.
+## Decisions Log
+| Date | Decision | Rationale |
+|------|----------|-----------|
+| 2026-06-24 | Replaced power-user system with "Friendly Clarity" | Lean relaunch; primary user is an older dentist on a phone, not a power user. GCash-adjacent familiarity + accessibility-first. |
+| 2026-06-24 | Kept Memberry plum+cream palette | Already WCAG-tuned + warm/distinctive; brand continuity. (Chose over trust-teal / healthcare-blue.) |
+| 2026-06-24 | Hanken Grotesk (single family) | Warm, highly legible at large sizes; one family = consistency across org/member/console + simpler lean build. |
+| 2026-06-24 | Tokens move to `packages/ui` | All 3 apps share one source; was `apps/memberry/globals.css`. |

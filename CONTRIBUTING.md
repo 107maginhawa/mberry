@@ -2,6 +2,18 @@
 
 Welcome to the Memberry codebase. This guide covers development setup, workflows, and conventions. The project is built on the @monobase/ platform template.
 
+> **Lean-launch note (2026-06-24).** Memberry pruned to a lean product: a frozen,
+> tested API engine (`services/api-ts`, additive-only) with three thin apps
+> (`apps/org`, `apps/member`, `apps/console`) **to be built next** on
+> `packages/ui` + the generated SDK. The old `apps/memberry` / `apps/admin` were
+> deleted (backup at `/desktop/memberry-full`). **The engine-side guidance below
+> — code generation, coding standards, database workflow, testing, conventions —
+> is current and authoritative.** Frontend sections that name the old apps are
+> historical; apply their *patterns* to the new lean apps. For architecture,
+> Execution Standards, and the current phase, **[CLAUDE.md](./CLAUDE.md) is the
+> source of truth**; design is governed by **[DESIGN.md](./DESIGN.md)** and the
+> test protocol by **[VERTICAL_TDD.md](./VERTICAL_TDD.md)**.
+
 ## Table of Contents
 
 - [Development Setup](#development-setup)

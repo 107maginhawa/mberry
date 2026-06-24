@@ -13,14 +13,16 @@ csrf_token: jsonpath "$.token"
 
 # ── Auth ─────────────────────────────────────────────────────
 
-POST {{api}}/auth/sign-up/email
+# Act as the seed officer: createInvoice requires merchant === session user AND
+# the /billing/* org-context middleware requires that user to be a member of
+# {{org_id}}. A fresh signup is neither, so it cannot create an org-scoped invoice.
+POST {{api}}/auth/sign-in/email
 Origin: {{origin}}
 x-csrf-token: {{csrf_token}}
 Content-Type: application/json
 {
-  "email": "bill-ext-{{suffix}}@example.org",
-  "password": "Sup3rSecret!ContractTest",
-  "name": "Billing Extended"
+  "email": "{{seed_officer_email}}",
+  "password": "{{seed_officer_password}}"
 }
 HTTP 200
 [Captures]
@@ -32,9 +34,12 @@ x-csrf-token: {{csrf_token}}
 Content-Type: application/json
 x-org-id: {{org_id}}
 {
-  "description": "Contract test invoice {{suffix}}",
-  "amount": 5000,
-  "currency": "usd"
+  "customer": "{{person_id}}",
+  "merchant": "{{person_id}}",
+  "currency": "USD",
+  "lineItems": [
+    { "description": "Contract test invoice {{suffix}}", "quantity": 1, "unitPrice": 5000 }
+  ]
 }
 HTTP *
 [Captures]

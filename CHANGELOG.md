@@ -4,6 +4,16 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+## [0.1.2.1] - 2026-06-24
+
+### Removed
+- **Lean launch cleanup (T1-T4).** Pruned the repo to a lean product: deleted `apps/memberry` + `apps/admin` (full platform preserved at `/desktop/memberry-full`), the product docs under `docs/` (kept `docs/deploy` + `docs/security`), `plans/`, `.planning/`, `.audits/`, and root `ROADMAP.md` + `ARCHITECTURE.md`. The tested API engine (`services/api-ts`), `packages/*`, `specs/`, CI, and Railway pipeline are untouched.
+
+### Changed
+- **Workspace config:** dropped the deleted apps from `package.json` lint-staged + neutralized `test:sanity`; removed the root `test-setup-root.ts` DOM test harness (only served the deleted frontend apps; `services/api-ts` keeps its own bunfig preload).
+- **CI reconciled for lean (re-pointed, not retired):** retired the memberry/admin E2E + frontend-build/deploy jobs (all NOTE-marked for re-adding lean-app jobs); kept the engine gates (contract, unit, coverage, build-api, migration-safety) green. `br-coverage` + `coverage-matrix` stay live — stripped deleted-app e2e references and re-baselined to the engine-only floor; lean content gets re-pointed in a later phase.
+- **Docs rewritten lean:** `CLAUDE.md` (now encodes the Execution Standards + DESIGN.md/VERTICAL_TDD pointers), `AGENTS.md`, `README.md`, `QUICKSTART.md`; `CONTRIBUTING.md` trimmed with a lean banner. `VERTICAL_TDD.md` kept as the test-protocol anchor.
+
 ## [0.1.2.0] - 2026-06-19
 
 ### Added

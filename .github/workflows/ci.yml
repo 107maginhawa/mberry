@@ -32,11 +32,6 @@ jobs:
         run: bun run lint:no-skips
       - name: Shallow test assertion lint
         run: bun run lint:shallow --ci
-      - name: Strict route generation (admin)
-        # Runs the TanStack Router generator headlessly so a non-string-literal
-        # route id (the `as any` cast that blanked the admin SPA in dev) fails
-        # CI — not just someone's local dev. See apps/admin/scripts/check-routes.ts.
-        run: bun run --filter admin check:routes
       - name: Check SDK freshness
         run: |
           bun run --filter @monobase/sdk-ts generate
@@ -44,285 +39,12 @@ jobs:
       - name: Dependency audit
         run: bunx audit-ci --moderate || true
 
-  # Memberry E2E sharded across 6 parallel runners. Each shard gets its OWN
-  # postgres + minio + API + app, so seed mutations in one shard never leak
-  # into another. fail-fast:false so a single shard failure does not cancel the
-  # others. workers=2/shard is set in apps/memberry/playwright.config.ts (CI).
-  # Tradeoff (accepted, CONTINUE-57): ~6× the CI minutes of the old single job.
-  e2e-memberry:
-    runs-on: ubuntu-latest
-    timeout-minutes: 20
-    strategy:
-      fail-fast: false
-      matrix:
-        shard: [1, 2, 3, 4, 5, 6]
-    services:
-      postgres:
-        image: postgres:16-alpine
-        env:
-          POSTGRES_USER: postgres
-          POSTGRES_PASSWORD: password
-          POSTGRES_DB: monobase
-        ports: ['5432:5432']
-        options: >-
-          --health-cmd "pg_isready -U postgres -d monobase"
-          --health-interval 5s --health-timeout 5s --health-retries 10
-      # Minio cannot run as a `services:` entry: minio/minio requires
-      # `server <path>` and Actions cannot pass a CMD. Started as a step below.
-    env:
-      TZ: UTC
-      DATABASE_URL: postgresql://postgres:password@localhost:5432/monobase
-      PORT: 7213
-      API_URL: http://localhost:7213
-      AUTH_SECRET: contract-test-secret-do-not-use-in-prod
-      # Match local dev .env — frontend signup E2E flows expect an immediate
-      # session (no email-verification gate). Default is true.
-      AUTH_REQUIRE_EMAIL_VERIFICATION: false
-      # Platform-admin allowlist (admin app E2E + admin-gated reads). Matches .env.
-      AUTH_ADMIN_EMAILS: admin@contract-tests.local
-      # HMAC secret for one-tap dues payment tokens (see contract job). Matches .env.
-      PAYMENT_TOKEN_SECRET: contract-test-payment-secret-do-not-use-in-prod
-      STORAGE_PROVIDER: minio
-      STORAGE_ENDPOINT: http://localhost:9000
-      STORAGE_BUCKET: monobase-files
-      STORAGE_ACCESS_KEY_ID: minioadmin
-      STORAGE_SECRET_ACCESS_KEY: minioadmin
-      # V-15 concurrent-session limit. Production default is 5 (core/config.ts
-      # SESSION_LIMIT: intish(5)). The E2E suite re-signs-in the seeded personas
-      # dozens of times across one run; at the prod cap the 6th sign-in
-      # hard-deletes the oldest session row — yielding a 401 cascade mid-run
-      # (CONTINUE-55 root cause). Lift the cap for the test API only. The
-      # step-booted `bun dev` reads this job env (the playwright.config webServer
-      # env is bypassed because reuseExistingServer reuses the running API).
-      # Production stays at the default 5 (this env is CI/e2e-scoped).
-      SESSION_LIMIT: 100000
-      # Skip pixel-diff visual regression on CI: baselines are committed only
-      # for darwin (-chromium-darwin.png). Linux CI has no -linux.png baseline,
-      # so toHaveScreenshot fails every _visual.spec.ts test with "snapshot
-      # doesn't exist, writing actual". Cross-platform baselines are font-render
-      # fragile; visual regression runs locally on darwin where baselines exist.
-      # Re-enable here once linux baselines are generated in-container (CONTINUE-59).
-      SKIP_VISUAL: 1
-    steps:
-      - uses: actions/checkout@v4
-      - name: Start minio (server mode)
-        run: |
-          # Retry image pulls — Docker Hub transient timeouts (context deadline
-          # exceeded / exit 125) were flaking ~half of CI runs across the 4 minio
-          # jobs. Pre-pull with backoff so a registry hiccup self-heals.
-          pull() { for i in 1 2 3 4 5; do docker pull "$1" && return 0; echo "pull $1 failed (try $i), retrying"; sleep $((i * 4)); done; echo "pull $1 failed after retries" >&2; return 1; }
-          pull minio/minio:latest && pull minio/mc:latest
-          docker run -d --name minio \
-            -p 9000:9000 \
-            -e MINIO_ROOT_USER=minioadmin \
-            -e MINIO_ROOT_PASSWORD=minioadmin \
-            --health-cmd "curl -fsS http://localhost:9000/minio/health/live" \
-            --health-interval=5s --health-timeout=5s --health-retries=20 \
-            minio/minio:latest server /data
-          for i in $(seq 1 12); do
-            status=$(docker inspect --format='{{.State.Health.Status}}' minio 2>/dev/null || echo "starting")
-            echo "minio health: $status"
-            if [ "$status" = "healthy" ]; then break; fi
-            sleep 5
-          done
-          if [ "$(docker inspect --format='{{.State.Health.Status}}' minio)" != "healthy" ]; then
-            echo "minio did not become healthy in time" >&2
-            docker logs minio
-            exit 1
-          fi
-          docker run --rm --network host \
-            -e MC_HOST_local=http://minioadmin:minioadmin@localhost:9000 \
-            minio/mc mb --ignore-existing local/monobase-files
-      - uses: oven-sh/setup-bun@v2
-        with:
-          bun-version: 1.2.21
-      - run: bun install --frozen-lockfile
-      - name: Build OpenAPI spec
-        run: bun run --filter @monobase/api-spec build
-      - name: Generate API codegen
-        run: bun run --filter @monobase/api-ts generate
-      - name: Install Playwright browsers
-        run: cd apps/memberry && bunx playwright install --with-deps chromium
-      - name: Boot API
-        run: |
-          cd services/api-ts
-          bun dev > /tmp/api.log 2>&1 &
-          echo $! > /tmp/api.pid
-      - name: Wait for API
-        run: |
-          # /readyz returns 200 only after migrations + storage + jobs scheduler
-          # have all initialized — /livez returns 200 immediately and would race
-          # the seed step against in-flight migrations.
-          for i in $(seq 1 60); do
-            curl -fsS "$API_URL/readyz" && exit 0
-            sleep 1
-          done
-          echo "API never became ready"
-          tail -200 /tmp/api.log
-          exit 1
-      - name: Seed database
-        run: cd services/api-ts && bun run db:seed
-      - name: Build Memberry app
-        # Serve a production build (vite preview) rather than the dev server:
-        # vite-dev re-optimizes deps on the fly, which transiently 404s
-        # in-flight route-chunk requests under the 6 concurrent shards and
-        # leaves lazily-mounted routes blank (the _click-through crawler hit
-        # this). A prebuilt bundle has no runtime reopt. preview proxies /api
-        # to the API via vite.config preview.proxy.
-        run: cd apps/memberry && bun run build
-      - name: Start Memberry app
-        run: |
-          cd apps/memberry
-          bun run preview > /tmp/memberry.log 2>&1 &
-          echo $! > /tmp/memberry.pid
-      - name: Wait for Memberry app
-        run: |
-          for i in $(seq 1 30); do
-            curl -fsS "http://localhost:3004" > /dev/null 2>&1 && exit 0
-            sleep 1
-          done
-          echo "Memberry app never became ready"
-          tail -100 /tmp/memberry.log
-          exit 1
-      - name: Run E2E tests (shard ${{ matrix.shard }}/6)
-        run: cd apps/memberry && bunx playwright test --shard=${{ matrix.shard }}/6
-      - name: Upload Memberry test results
-        if: failure()
-        uses: actions/upload-artifact@v4
-        with:
-          name: playwright-report-memberry-shard-${{ matrix.shard }}
-          path: apps/memberry/playwright-report/
-
-  # Admin E2E in its own runner. workers=1 (admin suite is small and some specs
-  # mutate shared admin state). Separate from the memberry shards so its result
-  # is independently visible to the `e2e` aggregator.
-  e2e-admin:
-    runs-on: ubuntu-latest
-    timeout-minutes: 20
-    services:
-      postgres:
-        image: postgres:16-alpine
-        env:
-          POSTGRES_USER: postgres
-          POSTGRES_PASSWORD: password
-          POSTGRES_DB: monobase
-        ports: ['5432:5432']
-        options: >-
-          --health-cmd "pg_isready -U postgres -d monobase"
-          --health-interval 5s --health-timeout 5s --health-retries 10
-    env:
-      TZ: UTC
-      DATABASE_URL: postgresql://postgres:password@localhost:5432/monobase
-      PORT: 7213
-      API_URL: http://localhost:7213
-      AUTH_SECRET: contract-test-secret-do-not-use-in-prod
-      AUTH_REQUIRE_EMAIL_VERIFICATION: false
-      AUTH_ADMIN_EMAILS: admin@contract-tests.local
-      PAYMENT_TOKEN_SECRET: contract-test-payment-secret-do-not-use-in-prod
-      STORAGE_PROVIDER: minio
-      STORAGE_ENDPOINT: http://localhost:9000
-      STORAGE_BUCKET: monobase-files
-      STORAGE_ACCESS_KEY_ID: minioadmin
-      STORAGE_SECRET_ACCESS_KEY: minioadmin
-      SESSION_LIMIT: 100000
-    steps:
-      - uses: actions/checkout@v4
-      - name: Start minio (server mode)
-        run: |
-          # Retry image pulls — Docker Hub transient timeouts (context deadline
-          # exceeded / exit 125) were flaking ~half of CI runs across the 4 minio
-          # jobs. Pre-pull with backoff so a registry hiccup self-heals.
-          pull() { for i in 1 2 3 4 5; do docker pull "$1" && return 0; echo "pull $1 failed (try $i), retrying"; sleep $((i * 4)); done; echo "pull $1 failed after retries" >&2; return 1; }
-          pull minio/minio:latest && pull minio/mc:latest
-          docker run -d --name minio \
-            -p 9000:9000 \
-            -e MINIO_ROOT_USER=minioadmin \
-            -e MINIO_ROOT_PASSWORD=minioadmin \
-            --health-cmd "curl -fsS http://localhost:9000/minio/health/live" \
-            --health-interval=5s --health-timeout=5s --health-retries=20 \
-            minio/minio:latest server /data
-          for i in $(seq 1 12); do
-            status=$(docker inspect --format='{{.State.Health.Status}}' minio 2>/dev/null || echo "starting")
-            echo "minio health: $status"
-            if [ "$status" = "healthy" ]; then break; fi
-            sleep 5
-          done
-          if [ "$(docker inspect --format='{{.State.Health.Status}}' minio)" != "healthy" ]; then
-            echo "minio did not become healthy in time" >&2
-            docker logs minio
-            exit 1
-          fi
-          docker run --rm --network host \
-            -e MC_HOST_local=http://minioadmin:minioadmin@localhost:9000 \
-            minio/mc mb --ignore-existing local/monobase-files
-      - uses: oven-sh/setup-bun@v2
-        with:
-          bun-version: 1.2.21
-      - run: bun install --frozen-lockfile
-      - name: Build OpenAPI spec
-        run: bun run --filter @monobase/api-spec build
-      - name: Generate API codegen
-        run: bun run --filter @monobase/api-ts generate
-      - name: Boot API
-        run: |
-          cd services/api-ts
-          bun dev > /tmp/api.log 2>&1 &
-          echo $! > /tmp/api.pid
-      - name: Wait for API
-        run: |
-          for i in $(seq 1 60); do
-            curl -fsS "$API_URL/readyz" && exit 0
-            sleep 1
-          done
-          echo "API never became ready"
-          tail -200 /tmp/api.log
-          exit 1
-      - name: Seed database
-        run: cd services/api-ts && bun run db:seed
-      - name: Install Playwright browsers (admin)
-        run: cd apps/admin && bunx playwright install --with-deps chromium
-      - name: Start Admin app
-        run: |
-          cd apps/admin
-          bun dev > /tmp/admin.log 2>&1 &
-          echo $! > /tmp/admin.pid
-      - name: Wait for Admin app
-        run: |
-          for i in $(seq 1 30); do
-            curl -fsS "http://localhost:3003" > /dev/null 2>&1 && exit 0
-            sleep 1
-          done
-          echo "Admin app never became ready"
-          tail -100 /tmp/admin.log
-          exit 1
-      - name: Run Admin E2E tests
-        run: cd apps/admin && bunx playwright test --workers=1
-      - name: Upload Admin test results
-        if: failure()
-        uses: actions/upload-artifact@v4
-        with:
-          name: playwright-report-admin
-          path: apps/admin/playwright-report/
-
-  # Aggregator. MUST stay named `e2e` — ci-gate and coverage-gate depend on
-  # `needs.e2e.result`. Fails unless every memberry shard AND admin passed.
-  e2e:
-    if: always()
-    runs-on: ubuntu-latest
-    timeout-minutes: 2
-    needs: [e2e-memberry, e2e-admin]
-    steps:
-      - name: Check all E2E shards passed
-        run: |
-          echo "e2e-memberry (all shards): ${{ needs.e2e-memberry.result }}"
-          echo "e2e-admin: ${{ needs.e2e-admin.result }}"
-          # A matrix job's aggregate result is 'failure' if ANY shard failed.
-          if [[ "${{ needs.e2e-memberry.result }}" != "success" ]] || \
-             [[ "${{ needs.e2e-admin.result }}" != "success" ]]; then
-            echo "::error::One or more E2E shards failed"
-            exit 1
-          fi
-          echo "All E2E shards passed"
+  # NOTE (lean launch): the memberry/admin E2E jobs (e2e-memberry, e2e-admin, the
+  # e2e aggregator) and the frontend build/smoke jobs (build-frontends,
+  # artifact-smoke) were retired with the deleted apps. Re-add app-scoped E2E +
+  # build jobs here when apps/org, apps/member, apps/console land — pointed at the
+  # lean apps on packages/ui. The engine gates below (contract, unit, coverage,
+  # build-api) protect the frozen API and stay green throughout.
 
   build-api:
     runs-on: ubuntu-latest
@@ -362,90 +84,6 @@ jobs:
           docker stop api-health-test || true
           exit 1
 
-  build-frontends:
-    runs-on: ubuntu-latest
-    timeout-minutes: 10
-    env:
-      VITE_API_URL: ""
-      AUTH_SECRET: ci-codegen-secret-do-not-use-in-prod
-    steps:
-      - uses: actions/checkout@v4
-      - uses: oven-sh/setup-bun@v2
-        with:
-          bun-version: 1.2.21
-      - run: bun install --frozen-lockfile
-      - name: Build OpenAPI spec
-        run: bun run --filter @monobase/api-spec build
-      - name: Generate API codegen
-        run: bun run --filter @monobase/api-ts generate
-      - name: Build Memberry app
-        run: cd apps/memberry && bun run build
-      - name: Build Admin app
-        run: cd apps/admin && bun run build
-      - name: Upload frontend-memberry artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: frontend-memberry
-          path: apps/memberry/dist/
-      - name: Upload frontend-admin artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: frontend-admin
-          path: apps/admin/dist/
-  artifact-smoke:
-    runs-on: ubuntu-latest
-    timeout-minutes: 10
-    needs: [build-frontends]
-    steps:
-      - uses: actions/checkout@v4
-      - uses: oven-sh/setup-bun@v2
-        with:
-          bun-version: 1.2.21
-      - run: bun install --frozen-lockfile
-      - name: Download frontend-memberry artifact
-        uses: actions/download-artifact@v4
-        with:
-          name: frontend-memberry
-          path: apps/memberry/dist/
-      - name: Download frontend-admin artifact
-        uses: actions/download-artifact@v4
-        with:
-          name: frontend-admin
-          path: apps/admin/dist/
-      - name: Verify built artifacts exist and have content
-        run: |
-          for app in memberry admin; do
-            INDEX="apps/$app/dist/index.html"
-            if [ ! -f "$INDEX" ]; then
-              echo "::error::Missing $INDEX in built artifact"
-              exit 1
-            fi
-            SIZE=$(wc -c < "$INDEX")
-            if [ "$SIZE" -lt 100 ]; then
-              echo "::error::$INDEX too small ($SIZE bytes) — build likely failed"
-              exit 1
-            fi
-            echo "$app: $INDEX ($SIZE bytes) ✓"
-          done
-      - name: Smoke test — built Memberry serves and contains app shell
-        run: |
-          cd apps/memberry
-          bun run preview --port 4173 &
-          PID=$!
-          for i in $(seq 1 15); do
-            curl -fsS http://localhost:4173 > /dev/null 2>&1 && break
-            sleep 1
-          done
-          # Verify HTML contains the app mount point
-          BODY=$(curl -sS http://localhost:4173)
-          echo "$BODY" | grep -q 'id="root"' || echo "$BODY" | grep -q 'id="app"' || {
-            echo "::error::Memberry built artifact missing app mount point"
-            kill $PID || true
-            exit 1
-          }
-          echo "Memberry artifact smoke ✓"
-          kill $PID || true
-
   contract:
     runs-on: ubuntu-latest
     timeout-minutes: 15
@@ -460,12 +98,24 @@ jobs:
         options: >-
           --health-cmd "pg_isready -U postgres -d monobase"
           --health-interval 5s --health-timeout 5s --health-retries 10
-      # Minio started as a step (see e2e job comment).
+      # stripe-mock: canned Stripe API responses so the gated billing specs
+      # (billing-lifecycle.hurl, billing-extended-flow.hurl) run instead of
+      # being skipped. No healthcheck — boots in <1s, well before API + seed.
+      stripe-mock:
+        image: stripe/stripe-mock:latest
+        ports: ['12111:12111']
+      # Minio started as a step (see comment in the start-minio step).
     env:
       DATABASE_URL: postgresql://postgres:password@localhost:5432/monobase
       PORT: 7213
       API_URL: http://localhost:7213
       AUTH_SECRET: contract-test-secret-do-not-use-in-prod
+      # Stripe billing specs: point the app's Stripe SDK at stripe-mock (STRIPE_URL),
+      # tell the contract runner's preflight where to probe (STRIPE_API_BASE), and
+      # set any test key so run-contract-tests un-gates the stripeSpecs set.
+      STRIPE_SECRET_KEY: sk_test_contract_do_not_use_in_prod
+      STRIPE_URL: http://localhost:12111
+      STRIPE_API_BASE: http://localhost:12111
       # The contract suite signs up many ad-hoc users and immediately uses the
       # session; the dedicated email-verification flows (auth-verification.hurl)
       # exercise verification explicitly. Without this, signup yields no session
@@ -493,8 +143,8 @@ jobs:
       - name: Start minio (server mode)
         run: |
           # Retry image pulls — Docker Hub transient timeouts (context deadline
-          # exceeded / exit 125) were flaking ~half of CI runs across the 4 minio
-          # jobs. Pre-pull with backoff so a registry hiccup self-heals.
+          # exceeded / exit 125) were flaking ~half of CI runs. Pre-pull with
+          # backoff so a registry hiccup self-heals.
           pull() { for i in 1 2 3 4 5; do docker pull "$1" && return 0; echo "pull $1 failed (try $i), retrying"; sleep $((i * 4)); done; echo "pull $1 failed after retries" >&2; return 1; }
           pull minio/minio:latest && pull minio/mc:latest
           docker run -d --name minio \
@@ -560,7 +210,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 5
     # Decoupled from e2e (CONTINUE-57): coverage checks (BR/CSRF/matrix) are
-    # static and must not be skipped just because the long e2e suite is red.
+    # static and must not be skipped just because a long suite is red.
     needs: [lint-typecheck]
     steps:
       - uses: actions/checkout@v4
@@ -578,7 +228,6 @@ jobs:
         # Ratchet gate: fails ONLY if a gap GROWS vs scripts/audit/coverage-baseline.json.
         # Ratchet the baseline down after closing gaps:
         #   bun scripts/audit/coverage-matrix.ts --gate --update-baseline
-        # See docs/superpowers/plans/2026-06-19-workflow-audit-sweep.md.
         run: bun scripts/audit/coverage-matrix.ts --gate
       - name: Upload coverage matrix
         if: always()
@@ -603,7 +252,7 @@ jobs:
         options: >-
           --health-cmd "pg_isready -U postgres -d monobase"
           --health-interval 5s --health-timeout 5s --health-retries 10
-      # Minio started as a step (see e2e job comment).
+      # Minio started as a step (see contract job comment).
     env:
       DATABASE_URL: postgresql://postgres:password@localhost:5432/monobase
       PORT: 7213
@@ -618,9 +267,6 @@ jobs:
       - uses: actions/checkout@v4
       - name: Start minio (server mode)
         run: |
-          # Retry image pulls — Docker Hub transient timeouts (context deadline
-          # exceeded / exit 125) were flaking ~half of CI runs across the 4 minio
-          # jobs. Pre-pull with backoff so a registry hiccup self-heals.
           pull() { for i in 1 2 3 4 5; do docker pull "$1" && return 0; echo "pull $1 failed (try $i), retrying"; sleep $((i * 4)); done; echo "pull $1 failed after retries" >&2; return 1; }
           pull minio/minio:latest && pull minio/mc:latest
           docker run -d --name minio \
@@ -664,8 +310,6 @@ jobs:
         run: cd services/api-ts && bun run test:unit
       - name: Run integration tests (real DB, isolated process)
         run: cd services/api-ts && bun run test:integration
-      - name: Run frontend unit tests (with coverage)
-        run: cd apps/memberry && bun run test -- --coverage
       - name: Run SDK unit tests
         run: cd packages/sdk-ts && bun run test
 
@@ -691,11 +335,8 @@ jobs:
     needs:
       - lint-typecheck
       - unit-tests
-      - e2e
       - contract
       - build-api
-      - build-frontends
-      - artifact-smoke
       - coverage-gate
       - new-code-gate
     steps:
@@ -704,20 +345,14 @@ jobs:
           echo "Gate results:"
           echo "  lint-typecheck: ${{ needs.lint-typecheck.result }}"
           echo "  unit-tests: ${{ needs.unit-tests.result }}"
-          echo "  e2e: ${{ needs.e2e.result }}"
           echo "  contract: ${{ needs.contract.result }}"
           echo "  build-api: ${{ needs.build-api.result }}"
-          echo "  build-frontends: ${{ needs.build-frontends.result }}"
-          echo "  artifact-smoke: ${{ needs.artifact-smoke.result }}"
           echo "  coverage-gate: ${{ needs.coverage-gate.result }}"
           echo "  new-code-gate: ${{ needs.new-code-gate.result }}"
           if [[ "${{ needs.lint-typecheck.result }}" != "success" ]] || \
              [[ "${{ needs.unit-tests.result }}" != "success" ]] || \
-             [[ "${{ needs.e2e.result }}" != "success" ]] || \
              [[ "${{ needs.contract.result }}" != "success" ]] || \
              [[ "${{ needs.build-api.result }}" != "success" ]] || \
-             [[ "${{ needs.build-frontends.result }}" != "success" ]] || \
-             [[ "${{ needs.artifact-smoke.result }}" != "success" ]] || \
              [[ "${{ needs.coverage-gate.result }}" != "success" ]] || \
              [[ "${{ needs.new-code-gate.result }}" == "failure" ]]; then
             echo "::error::One or more CI gates failed"

@@ -1,6 +1,6 @@
 {
   "name": "monobase",
-  "version": "0.1.2.0",
+  "version": "0.1.2.1",
   "private": true,
   "description": "Monobase Application Platform Monorepo",
   "type": "module",
@@ -29,7 +29,7 @@
     "check:hand-wired-routes": "bun run scripts/check-hand-wired-routes.ts",
     "check:sdk-compat": "bun run scripts/check-sdk-compat.ts",
     "rollback": "bash scripts/rollback.sh",
-    "test:sanity": "cd apps/memberry && CI=1 bunx playwright test _golden-path.spec.ts --workers=1 --reporter=line",
+    "test:sanity": "echo 'no lean app yet — wire org-app golden-path here once apps/org exists' && exit 0",
     "test:contract": "bun scripts/run-contract-tests.ts",
     "test:contract:full": "docker compose up -d mailpit stripe-mock --wait && bun scripts/run-contract-tests.ts",
     "test:br": "bun run scripts/br-coverage.ts",
@@ -44,12 +44,6 @@
   "lint-staged": {
     "services/api-ts/**/*.{ts,tsx}": [
       "services/api-ts/node_modules/.bin/eslint --fix --quiet --config services/api-ts/eslint.config.js"
-    ],
-    "apps/memberry/**/*.{ts,tsx}": [
-      "apps/memberry/node_modules/.bin/eslint --fix --quiet --config apps/memberry/eslint.config.js"
-    ],
-    "apps/admin/**/*.{ts,tsx}": [
-      "apps/admin/node_modules/.bin/eslint --fix --quiet --config apps/admin/eslint.config.js"
     ]
   },
   "engines": {
