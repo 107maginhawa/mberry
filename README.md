@@ -1,339 +1,80 @@
 # Memberry
 
-A healthcare Association Management System (AMS) built on the Monobase monorepo
-template. Manages membership, dues, events, training, credits, communications,
-and governance for healthcare professional associations. Built on Bun for ~3×
-faster execution than Node.js.
+A deliberately small healthcare **Association Management System** for Philippine
+dental chapters. The wedge is **money** — dues + renewals collected over PH
+payment rails (GCash / bank transfer via PayMongo). Built on Bun.
 
-## Overview
+Strategy + scope are locked — see **[DESIGN.md](./DESIGN.md)** (design law) and
+**[CLAUDE.md](./CLAUDE.md)** (architecture, standards, current phase).
 
-Memberry ships two apps on top of the Monobase platform primitives (identity,
-billing, scheduling, communications, storage, notifications). Out of the box
-you get:
-
-- **Memberry app** - Vite + TanStack Router product app with membership, dues,
-  events, training, auth, profile, and settings (port 3004)
-- **Admin app** - Platform ops dashboard (port 3003)
-- **API service** - Hono + Drizzle backend with nine vertical-neutral modules
-- **Shared SDK** - typed API client with TanStack Query hooks
-- **TypeSpec spec** - the source of truth for the API; OpenAPI and TS types
-  are generated from it
-
-## Key Features
-
-- **Real-time chat + video** - chat rooms with embedded WebRTC video calls
-- **Identity** - Better-Auth integrated; person model is the PII safeguard
-- **Compliance-friendly** - audit trails, JSONB consent fields, structured logs
-- **Multi-channel notifications** - email and push (OneSignal)
-- **File storage** - S3/MinIO with presigned URLs
-
-## Spec-first, polyglot-ready
-
-The OpenAPI document at `specs/api/dist/openapi/openapi.json` is the
-single source of truth. Every server implementation and every client SDK
-is generated from it. The TypeScript stack in this repo (`services/api-ts`,
-`packages/sdk-ts`, `apps/memberry`) is the reference; any language can ship
-its own sibling workspace and stay interchangeable behind the same
-`$API_URL`. See [`specs/api/CONTRACT.md`](./specs/api/CONTRACT.md) for the
-wire contract and [`specs/api/IMPLEMENTING.md`](./specs/api/IMPLEMENTING.md)
-for the playbook to add a new impl/SDK in any language.
-
-## Monorepo Structure
+## Architecture: thin apps over a frozen, tested engine
 
 ```
 memberry/
-├── apps/                      # Frontend applications
-│   ├── admin/                # Platform ops dashboard (port 3003)
-│   └── memberry/             # Product app — membership, dues, events, auth, profile, settings (port 3004)
-├── packages/                  # Shared libraries
-│   ├── eslint-config/        # Shared ESLint flat configs (base, react, next)
-│   ├── sdk-ts/               # TypeScript SDK (generated from OpenAPI + hand-written client/flows)
-│   ├── ui/                   # Shared UI components (shadcn/ui primitives)
-│   └── typescript-config/    # Shared TypeScript configurations
-├── services/                  # Backend services
-│   └── api-ts/               # Reference TypeScript impl (Hono + Bun)
-├── specs/                     # API contract
-│   └── api/                  # TypeSpec source + CONTRACT.md + IMPLEMENTING.md + tests/
-├── scripts/                   # Repo-level scripts (contract test runner, etc.)
-├── .github/workflows/         # CI (contract.yml runs Hurl + Schemathesis)
-├── .claude/skills/            # 16 Claude Code skills for end-to-end development
-├── CLAUDE.md                 # AI assistant project guide
-└── package.json              # Monorepo workspace configuration
+├── services/api-ts/   THE ENGINE — Hono + Drizzle, ~8000 tests, contract-gated.
+│                      Frozen + additive-only. The PH-payment adapter is net-new
+│                      code behind the billing seam.
+├── specs/api/         TypeSpec → OpenAPI (single source of truth) → types + routes.
+├── packages/
+│   ├── sdk-ts/        Generated typed client (regenerate after any spec change).
+│   ├── ui/            Shared design system — ALL apps build on this, no forks.
+│   ├── eslint-config/ typescript-config/ vitest-test-shim/
+├── apps/              (empty) — the lean apps are built next:
+│   ├── org/           PLANNED — officer: roster, dues, renewals, events+pay.
+│   ├── member/        PLANNED — thin dashboard + login-free pay-link page.
+│   └── console/       PLANNED — basic platform-operator app.
+└── docker/  testing/  scripts/  .github/
 ```
 
-Future Rust / Go / Python impls would live alongside `api-ts` (e.g.
-`services/api-rs`) and the matching SDK alongside `sdk-ts`. They're
-documented in `specs/api/IMPLEMENTING.md` but not yet scaffolded.
+The previous full platform (`apps/memberry`, `apps/admin`, the 26-module product
+docs) was deleted in the lean cleanup — full reference at `/desktop/memberry-full`.
+The API engine and CI moat were kept untouched.
 
 ## Prerequisites
 
-- **Bun** >= 1.2.21 ([installation guide](https://bun.sh))
-- **PostgreSQL** >= 14
-- **Node.js** >= 18 (for some tooling compatibility)
-- **Git** for version control
-- **Rust** (1.90+) — only required for future sibling impls (e.g. `services/api-rs`)
+- **Bun** ≥ 1.2.21 ([bun.sh](https://bun.sh))
+- **Docker** (Postgres + MinIO + mailpit via `docker-compose.yml`)
+- **Hurl** — for the contract suite (`bun run test:contract`)
 
-### Optional Services
-- **AWS S3** or **MinIO** for file storage
-- **SMTP** server or **Postmark** for email delivery
-- **OneSignal** for push notifications
-- **Hurl** + **Schemathesis** — for `bun run test:contract` and `:fuzz` (CI uses both)
-
-## Quick Start
-
-### 1. Clone and Install
+## Quick start
 
 ```bash
-git clone <repository-url>
-cd monobase
 bun install
+bun run infra:up                               # Postgres + MinIO + mail (docker)
+
+cd specs/api && bun run build                  # OpenAPI + TS types
+cd ../../services/api-ts && bun run generate    # routes/validators
+bun run db:seed                                 # seed dev data
+bun dev                                         # API on :7213
 ```
 
-### 2. Database Setup
+See [QUICKSTART.md](./QUICKSTART.md) for the short version.
 
-```bash
-# Create PostgreSQL database
-createdb monobase
+## API-first workflow (the established loop)
 
-# Generate database schema
-cd services/api-ts
-bun run db:generate
-```
-
-### 3. Configure Environment
-
-Create `.env` files in each service/app directory (see individual READMEs for required variables):
-
-```bash
-# services/api-ts/.env
-DATABASE_URL=postgresql://user:password@localhost:5432/monobase
-PORT=7213
-AUTH_SECRET=your-secret-key-here
-```
-
-### 4. Start Development Servers
-
-```bash
-# Terminal 1 - API Service
-cd services/api-ts
-bun dev
-
-# Terminal 2 - Memberry App
-cd apps/memberry
-bun dev
-```
-
-## Development Workflow
-
-### API-First Development
-
-1. **Define API** - Create/modify TypeSpec definitions in `specs/api/src/modules/`
-2. **Generate** - Run `cd specs/api && bun run build`
-3. **Implement** - Build Hono handlers in `services/api-ts/src/handlers/`
-4. **Test** - Write tests and run `cd services/api-ts && bun test`
-5. **Integrate** - Use generated TypeScript types in frontend apps
-
-### Working with the Monorepo
-
-```bash
-# Install dependencies across all workspaces
-bun install
-
-# Build all packages
-bun run --filter '*' build
-
-# Clean build artifacts
-bun run clean
-
-# Run specific workspace command
-cd apps/memberry && bun dev
-```
-
-## Available Commands
-
-### Root Level
-
-```bash
-bun install                    # Install all workspace dependencies
-bun run --filter '*' build    # Build all packages
-bun run clean                  # Clean build artifacts
-```
-
-### API Service (`services/api-ts/`)
-
-```bash
-bun dev                        # Start development server (port 7213)
-bun run build                  # Build production bundle
-bun run generate               # Generate routes, validators, handlers from OpenAPI
-bun test                       # Run test suite
-bun run typecheck              # TypeScript type checking
-bun run db:generate            # Generate Drizzle migrations
-bun run db:studio              # Open Drizzle Studio
-```
-
-**⚠️ Code Generation**: The API service auto-generates routes, validators, and handler stubs from TypeSpec. See [CONTRIBUTING.md#code-generation](./CONTRIBUTING.md#code-generation---do-not-edit) for what files to never edit manually.
-
-### API Specifications (`specs/api/`)
-
-```bash
-bun run build                  # Generate both OpenAPI and types
-bun run build:openapi          # Generate OpenAPI specs only
-bun run build:types            # Generate TypeScript types only
-```
-
-### Memberry App (`apps/memberry/`)
-
-```bash
-bun dev                        # Start dev server (port 3004)
-bun run build                  # Build production bundle
-bun run typecheck              # TypeScript type checking
-bun run test:e2e               # Run Playwright E2E tests
-```
-
-## Applications
-
-### Frontend Applications
-
-| App | Stack | Port | Purpose |
-|-----|-------|------|---------|
-| `apps/memberry` | Vite + TanStack Router | 3004 | Product app: membership, dues, events, auth, profile, settings |
-| `apps/admin` | Vite + TanStack Router | 3003 | Platform ops dashboard |
-
-Each app owns its own components, hooks, and feature directories.
-Nothing is shared between apps except the SDK.
-
-**Development**: `cd apps/<name> && bun dev`
-
-## API Service
-
-### Modules
-
-The API service ships nine vertical-neutral handler modules. Build product
-domains (e.g. `tenant`, `merchant`, `student`) as new modules under
-`services/api-ts/src/handlers/` plus matching `specs/api/src/modules/*.tsp`.
-
-1. **Person** - User profile management and PII safeguard
-2. **Booking** - Generic time-based scheduling (hosts, slots, bookings, events)
-3. **Billing** - Invoice-based payments via Stripe Connect
-4. **Audit** - Compliance logging and activity tracking
-5. **Comms** - Real-time chat rooms with embedded video calls (WebRTC)
-6. **Notifs** - Multi-channel notifications (email, push via OneSignal)
-7. **Storage** - File upload/download (S3/MinIO)
-8. **Email** - Transactional email delivery
-9. **Reviews** - NPS review system
-
-**Authentication** is handled by Better-Auth (integrated, not a separate module).
-
-### Key Architectural Patterns
-
-**Person-Centric Design**: The Person module serves as the central PII safeguard for user data.
-
-**Consent Management**: Consent is managed via JSONB fields on the Person model:
-- marketing_consent: Marketing communications
-- data_sharing_consent: Data sharing preferences
-- sms_consent: SMS notifications
-- email_consent: Email communications
-
-### API Documentation
-
-- **OpenAPI Spec**: `specs/api/dist/openapi/openapi.json`
-- **TypeScript Types**: Generated to `@monobase/api-spec` package
-- **Interactive Docs**: Scalar UI available at `/docs` endpoint
-
-## Technology Stack
-
-### Runtime & Build
-- **Bun** 1.2.21+ - Fast JavaScript runtime and package manager
-- **TypeScript** 5.9.2 - Type-safe development
-- **ESM** - Modern module system
-
-### Frontend
-- **React** 19 - UI library
-- **TanStack Router** - Type-safe routing
-- **Radix UI** - Accessible component primitives
-- **Tailwind CSS** - Utility-first styling
-- **shadcn/ui** - Component library
-- **React Hook Form** + **Zod** - Form validation
-
-### Backend
-- **Hono** - Fast web framework
-- **Drizzle ORM** - Type-safe database queries
-- **PostgreSQL** - Primary database
-- **Better-Auth** - Authentication (no external service)
-- **Pino** - Structured JSON logging
-- **Zod** - Runtime validation
-
-### API & Types
-- **TypeSpec** - API-first specification language
-- **OpenAPI** - REST API documentation
-- **Type Generation** - Automatic TypeScript types from specs
-
-### Infrastructure
-- **AWS S3** / **MinIO** - Object storage
-- **Postmark** / **SMTP** - Email delivery
-- **OneSignal** - Push notifications
+TypeSpec (`specs/api/src/`) → `bun run build` → `cd services/api-ts && bun run
+generate` → implement handler logic → regenerate the SDK (`bun run --filter
+@monobase/sdk-ts generate`). Frontends import generated types from
+`@monobase/api-spec`. **Never edit generated files.** Full standards in
+[CLAUDE.md](./CLAUDE.md); dev patterns in [CONTRIBUTING.md](./CONTRIBUTING.md);
+test protocol in [VERTICAL_TDD.md](./VERTICAL_TDD.md).
 
 ## Testing
 
-### Contract tests (any implementation)
-
-Black-box HTTP scenarios that target the OpenAPI contract, not any
-specific impl. Same suite runs against the TS impl today and a Rust impl
-tomorrow.
-
 ```bash
-# Boot the impl in one terminal
-cd services/api-ts && bun dev
-
-# Run Hurl scenarios in another
-bun run test:contract              # required check
-bun run test:contract:fuzz         # Schemathesis fuzz; shadow check
+cd services/api-ts && bun test          # engine unit + integration (real-PG)
+bun run test:contract                   # Hurl contract suite (the cross-impl gate)
+bun run typecheck                       # all workspaces
 ```
 
-Hurl files live under `specs/api/tests/contract/`. CI runs both layers
-on every PR (`.github/workflows/contract.yml`).
+Contract scenarios live under `specs/api/tests/contract/`; CI
+(`.github/workflows/contract.yml`) runs them on every PR. The OpenAPI spec at
+`specs/api/dist/openapi/openapi.json` is the single source of truth — any
+language can ship a sibling impl behind the same `$API_URL`
+(see `specs/api/IMPLEMENTING.md`).
 
-### Unit & Integration Tests (TypeScript impl)
-```bash
-cd services/api-ts
-bun test
-```
+## Tech stack
 
-### End-to-End Tests (memberry app)
-```bash
-cd apps/memberry
-bun run test:e2e
-```
-
-### Type Checking
-```bash
-bun --filter '*' typecheck
-```
-
-## Documentation
-
-- **CLAUDE.md** - Comprehensive project guide for AI assistants and developers
-- **CONTRIBUTING.md** - Developer contribution guidelines
-
-## Compliance Toolkit
-
-- **Audit Trails** - All data access includes structured audit logging
-- **Consent** - JSONB consent fields on the Person model for granular tracking
-- **Security** - role-based access via Better-Auth, server-side input validation
-- **Data Integrity** - ACID-compliant PostgreSQL transactions
-
-## Performance
-
-- **3x Faster Startup** - Bun vs Node.js
-- **Native TypeScript** - No transpilation overhead
-- **Connection Pooling** - Optimized database queries
-- **JSONB Indexing** - Fast consent and config queries
-
-## License
-
-[Add your license here - e.g., MIT, Apache 2.0, Proprietary]
-
----
-
-For detailed development guidelines, see [CONTRIBUTING.md](./CONTRIBUTING.md).  
-For AI assistant integration, see [CLAUDE.md](./CLAUDE.md).
+Bun · PostgreSQL · Drizzle ORM · Hono · TypeSpec/OpenAPI · Better-Auth ·
+React 19 + TanStack Router (lean apps) · `packages/ui` design system ·
+PayMongo (PH payments, net-new) · S3/MinIO storage.
