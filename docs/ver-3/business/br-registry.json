@@ -1,0 +1,1259 @@
+{
+  "BR-01": {
+    "rule": "Membership Status Computation",
+    "phase": 1,
+    "module": "M05",
+    "ruleClass": "p0-data",
+    "tests": {
+      "backend": [
+        "services/api-ts/src/handlers/association:member/membership.test.ts"
+      ],
+      "contract": [
+        "specs/api/tests/contract/membership-flow.hurl"
+      ],
+      "e2e": []
+    },
+    "annotations": "E2E deepened: suspend/reinstate action verifies status transition (Active→Suspended→Active)"
+  },
+  "BR-02": {
+    "rule": "Grace Period Default",
+    "phase": 1,
+    "module": "M05",
+    "ruleClass": "p1-business",
+    "tests": {
+      "backend": [
+        "services/api-ts/src/handlers/member/duesspecialassessments/dues.test.ts",
+        "services/api-ts/src/handlers/events/registerForEvent.test.ts",
+        "services/api-ts/src/handlers/member/duesspecialassessments/dues-config.test.ts",
+        "services/api-ts/src/handlers/member/membership/utils/compute-membership-status.test.ts"
+      ],
+      "contract": [
+        "specs/api/tests/contract/dues-flow.hurl"
+      ],
+      "e2e": []
+    },
+    "annotations": "Path repair 2026-05-30: training/* moved to association:operations/*; dues.repo.test.ts paths replaced with existing covering tests."
+  },
+  "BR-03": {
+    "rule": "Membership Transitions",
+    "phase": 1,
+    "module": "M05",
+    "ruleClass": "p0-data",
+    "tests": {
+      "backend": [
+        "services/api-ts/src/handlers/member/membership/approveMembershipApplication.test.ts",
+        "services/api-ts/src/handlers/member/membership/denyMembershipApplication.test.ts",
+        "services/api-ts/src/handlers/member/membership/reinstateMembership.test.ts",
+        "services/api-ts/src/handlers/member/membership/terminateMembership.test.ts",
+        "services/api-ts/src/handlers/member/membership/resignMembership.test.ts",
+        "services/api-ts/src/handlers/member/membership/deceaseMembership.test.ts"
+      ],
+      "contract": [
+        "specs/api/tests/contract/membership-flow.hurl"
+      ],
+      "e2e": []
+    },
+    "annotations": "E2E deepened: status-appropriate actions tested with real suspend/reinstate clicks"
+  },
+  "BR-04": {
+    "rule": "Dues Amount per Org",
+    "phase": 1,
+    "module": "M06",
+    "ruleClass": "p1-business",
+    "tests": {
+      "backend": [
+        "services/api-ts/src/handlers/member/duesspecialassessments/dues-config.test.ts"
+      ],
+      "contract": [
+        "specs/api/tests/contract/dues-flow.hurl"
+      ],
+      "e2e": []
+    },
+    "annotations": "Path repair 2026-05-30: training/* moved to association:operations/*; dues.repo.test.ts paths replaced with existing covering tests."
+  },
+  "BR-05": {
+    "rule": "Fund Allocation",
+    "phase": 1,
+    "module": "M06",
+    "ruleClass": "p1-business",
+    "tests": {
+      "backend": [
+        "services/api-ts/src/handlers/member/membership/utils/fund-math.test.ts",
+        "services/api-ts/src/handlers/member/duesspecialassessments/dues.test.ts",
+        "services/api-ts/src/handlers/member/duesspecialassessments/dues-config.test.ts",
+        "services/api-ts/src/handlers/member/membership/utils/fund-math.test.ts"
+      ],
+      "contract": [
+        "specs/api/tests/contract/dues-flow.hurl"
+      ],
+      "e2e": []
+    },
+    "annotations": "Path repair 2026-05-30: training/* moved to association:operations/*; dues.repo.test.ts paths replaced with existing covering tests."
+  },
+  "BR-06": {
+    "rule": "Payment Recording",
+    "phase": 1,
+    "module": "M06",
+    "ruleClass": "p0-data",
+    "tests": {
+      "backend": [
+        "services/api-ts/src/handlers/association:member/utils/settle-payment.test.ts"
+      ],
+      "contract": [
+        "specs/api/tests/contract/dues-flow.hurl"
+      ],
+      "e2e": []
+    }
+  },
+  "BR-07": {
+    "rule": "Dues Expiry Extension on Payment",
+    "phase": 1,
+    "module": "M06",
+    "ruleClass": "p0-data",
+    "tests": {
+      "backend": [
+        "services/api-ts/src/handlers/member/membership/utils/expiry-extension.test.ts",
+        "services/api-ts/src/handlers/association:member/utils/settle-payment.test.ts",
+        "services/api-ts/src/handlers/member/duesspecialassessments/dues.test.ts"
+      ],
+      "contract": [
+        "specs/api/tests/contract/dues-flow.hurl"
+      ],
+      "e2e": []
+    }
+  },
+  "BR-08": {
+    "rule": "Refund Policy",
+    "phase": 1,
+    "module": "M06",
+    "ruleClass": "p0-data",
+    "tests": {
+      "backend": [
+        "services/api-ts/src/handlers/member/duesspecialassessments/refundDuesPayment.test.ts",
+        "services/api-ts/src/handlers/association:member/utils/refund-validation.test.ts"
+      ],
+      "contract": [
+        "specs/api/tests/contract/dues-flow.hurl"
+      ],
+      "e2e": []
+    },
+    "annotations": "Path repair 2026-05-30: training/* moved to association:operations/*; dues.repo.test.ts paths replaced with existing covering tests."
+  },
+  "BR-09": {
+    "rule": "Officer Role Assignment",
+    "phase": 1,
+    "module": "M04",
+    "ruleClass": "p0-data",
+    "tests": {
+      "backend": [
+        "services/api-ts/src/handlers/member/governance/governance.test.ts"
+      ],
+      "contract": [
+        "specs/api/tests/contract/governance-flow.hurl"
+      ],
+      "e2e": []
+    }
+  },
+  "BR-10": {
+    "rule": "Platform Admin Impersonation",
+    "phase": 1,
+    "module": "M03",
+    "ruleClass": "p0-auth",
+    "tests": {
+      "backend": [
+        "services/api-ts/src/handlers/platformadmin/platformadmin.test.ts",
+        "services/api-ts/src/handlers/__tests__/br-edge-cases.test.ts"
+      ],
+      "contract": [
+        "specs/api/tests/contract/impersonation-flow.hurl"
+      ],
+      "e2e": []
+    }
+  },
+  "BR-11": {
+    "rule": "Credit Cycle Start",
+    "phase": 1,
+    "module": "M10",
+    "ruleClass": "p1-business",
+    "tests": {
+      "backend": [
+        "services/api-ts/src/handlers/member/credits/credits.test.ts"
+      ],
+      "contract": [
+        "specs/api/tests/contract/credits-flow.hurl"
+      ],
+      "e2e": []
+    }
+  },
+  "BR-12": {
+    "rule": "Credit Carry-Over",
+    "phase": 1,
+    "module": "M10",
+    "ruleClass": "p1-business",
+    "tests": {
+      "backend": [
+        "services/api-ts/src/handlers/member/credits/credits.test.ts"
+      ],
+      "contract": [
+        "specs/api/tests/contract/credits-flow.hurl"
+      ],
+      "e2e": []
+    }
+  },
+  "BR-13": {
+    "rule": "Auto vs Manual Credits",
+    "phase": 1,
+    "module": "M10",
+    "ruleClass": "p1-business",
+    "tests": {
+      "backend": [
+        "services/api-ts/src/handlers/member/credits/credits.test.ts",
+        "services/api-ts/src/handlers/association:operations/training-enrollment.test.ts"
+      ],
+      "contract": [
+        "specs/api/tests/contract/credits-flow.hurl"
+      ],
+      "e2e": []
+    },
+    "annotations": "Path repair 2026-05-30: training/* moved to association:operations/*; dues.repo.test.ts paths replaced with existing covering tests."
+  },
+  "BR-14": {
+    "rule": "Cross-Org Credit Aggregation",
+    "phase": 1,
+    "module": "M10",
+    "ruleClass": "p1-business",
+    "tests": {
+      "backend": [
+        "services/api-ts/src/handlers/member/credits/credits.test.ts"
+      ],
+      "contract": [
+        "specs/api/tests/contract/credits-flow.hurl"
+      ],
+      "e2e": []
+    }
+  },
+  "BR-15": {
+    "rule": "Training vs Event Distinction",
+    "phase": 1,
+    "module": "M08",
+    "ruleClass": "p1-business",
+    "tests": {
+      "backend": [
+        "services/api-ts/src/handlers/association:operations/events.test.ts",
+        "services/api-ts/src/handlers/association:operations/training.test.ts",
+        "services/api-ts/src/handlers/association:operations/financial-lifecycle.test.ts"
+      ],
+      "contract": [
+        "specs/api/tests/contract/events-flow.hurl",
+        "specs/api/tests/contract/training-flow.hurl"
+      ],
+      "e2e": []
+    },
+    "annotations": "Path repair 2026-05-30: training/* moved to association:operations/*; dues.repo.test.ts paths replaced with existing covering tests."
+  },
+  "BR-16": {
+    "rule": "Activity Visibility",
+    "phase": 1,
+    "module": "M08",
+    "ruleClass": "p1-business",
+    "tests": {
+      "backend": [
+        "services/api-ts/src/handlers/__tests__/br-edge-cases.test.ts"
+      ],
+      "contract": [
+        "specs/api/tests/contract/events-flow.hurl"
+      ],
+      "e2e": []
+    },
+    "annotations": "PARTIAL: training visibility feature partially unbuilt — updateTraining strips visibility field"
+  },
+  "BR-17": {
+    "rule": "Attendance Confirmation",
+    "phase": 1,
+    "module": "M08",
+    "ruleClass": "p1-business",
+    "tests": {
+      "backend": [
+        "services/api-ts/src/handlers/events/checkIn.test.ts"
+      ],
+      "contract": [
+        "specs/api/tests/contract/events-flow.hurl"
+      ],
+      "e2e": []
+    }
+  },
+  "BR-18": {
+    "rule": "QR Code Authentication",
+    "phase": 1,
+    "module": "M11",
+    "ruleClass": "p1-business",
+    "tests": {
+      "backend": [
+        "services/api-ts/src/handlers/member/credentials/credentials.test.ts",
+        "services/api-ts/src/handlers/association:operations/createCheckIn.integration.test.ts"
+      ],
+      "contract": [
+        "specs/api/tests/contract/credentials-flow.hurl"
+      ],
+      "e2e": []
+    },
+    "annotations": "QR crypto/auth pending — duplicate scan detection tested only"
+  },
+  "BR-19": {
+    "rule": "ID Card Generation",
+    "phase": 1,
+    "module": "M11",
+    "ruleClass": "p1-business",
+    "tests": {
+      "backend": [
+        "services/api-ts/src/handlers/member/credentials/credentials.test.ts",
+        "services/api-ts/src/handlers/__tests__/br-edge-cases.test.ts"
+      ],
+      "contract": [
+        "specs/api/tests/contract/credentials-flow.hurl"
+      ],
+      "e2e": []
+    }
+  },
+  "BR-20": {
+    "rule": "Certificate Generation",
+    "phase": 1,
+    "module": "M11",
+    "ruleClass": "p1-business",
+    "tests": {
+      "backend": [
+        "services/api-ts/src/handlers/member/certificates/listCertificates.test.ts",
+        "services/api-ts/src/handlers/member/certificates/getCertificate.test.ts",
+        "services/api-ts/src/handlers/member/certificates/repos/certificates.repo.test.ts",
+        "services/api-ts/src/handlers/__tests__/br-edge-cases.test.ts"
+      ],
+      "contract": [
+        "specs/api/tests/contract/member/certificates/certificates-list-get.hurl",
+        "specs/api/tests/contract/member/certificates/certificates-public-verify.hurl",
+        "specs/api/tests/contract/member/certificates/certificates-verify-hmac.hurl",
+        "specs/api/tests/contract/member/certificates/certificates-verify-not-found.hurl",
+        "specs/api/tests/contract/member/certificates/certificates-bulk-issue.hurl"
+      ],
+      "e2e": []
+    }
+  },
+  "BR-21": {
+    "rule": "Multi-Org Member Account",
+    "phase": 1,
+    "module": "M01",
+    "ruleClass": "p0-data",
+    "tests": {
+      "backend": [
+        "services/api-ts/src/handlers/member/membership/createMembership.test.ts",
+        "services/api-ts/src/handlers/__tests__/br-edge-cases.test.ts"
+      ],
+      "contract": [
+        "specs/api/tests/contract/auth-signup-signin.hurl"
+      ],
+      "e2e": []
+    }
+  },
+  "BR-22": {
+    "rule": "Member Matching on Import",
+    "phase": 1,
+    "module": "M01",
+    "ruleClass": "p1-business",
+    "tests": {
+      "backend": [
+        "services/api-ts/src/handlers/member/membership/importRosterMembers.test.ts",
+        "services/api-ts/src/handlers/member/membership/importRosterMembers.integration.test.ts"
+      ],
+      "contract": [
+        "specs/api/tests/contract/membership-flow.hurl"
+      ],
+      "e2e": []
+    }
+  },
+  "BR-23": {
+    "rule": "License Number Format",
+    "phase": 1,
+    "module": "M02",
+    "ruleClass": "p1-business",
+    "tests": {
+      "backend": [
+        "services/api-ts/src/handlers/member/membership/createMembership.test.ts",
+        "services/api-ts/src/handlers/__tests__/br-edge-cases.test.ts"
+      ],
+      "contract": [
+        "specs/api/tests/contract/membership-flow.hurl"
+      ],
+      "e2e": []
+    }
+  },
+  "BR-24": {
+    "rule": "Invitation Expiry",
+    "phase": 1,
+    "module": "M01",
+    "ruleClass": "p0-auth",
+    "tests": {
+      "backend": [
+        "services/api-ts/src/handlers/invite/invite.test.ts"
+      ],
+      "contract": [
+        "specs/api/tests/contract/auth-verification.hurl"
+      ],
+      "e2e": []
+    }
+  },
+  "BR-25": {
+    "rule": "OTP Registration",
+    "phase": 1,
+    "module": "M01",
+    "ruleClass": "p0-auth",
+    "tests": {
+      "backend": [
+        "services/api-ts/src/handlers/__tests__/br-edge-cases.test.ts"
+      ],
+      "contract": [
+        "specs/api/tests/contract/auth-signup-signin.hurl"
+      ],
+      "e2e": []
+    }
+  },
+  "BR-26": {
+    "rule": "Session Management",
+    "phase": 1,
+    "module": "M01",
+    "ruleClass": "p0-auth",
+    "tests": {
+      "backend": [
+        "services/api-ts/src/middleware/auth.test.ts",
+        "services/api-ts/src/core/session-limit.integration.test.ts"
+      ],
+      "contract": [
+        "specs/api/tests/contract/auth-signup-signin.hurl"
+      ],
+      "e2e": []
+    }
+  },
+  "BR-27": {
+    "rule": "Event Registration Limits",
+    "phase": 1,
+    "module": "M08",
+    "ruleClass": "p1-business",
+    "tests": {
+      "backend": [
+        "services/api-ts/src/handlers/events/registerForEvent.test.ts",
+        "services/api-ts/src/handlers/association:operations/events.test.ts"
+      ],
+      "contract": [
+        "specs/api/tests/contract/events-flow.hurl"
+      ],
+      "e2e": []
+    },
+    "notes": "Capacity check + auto-waitlist + FIFO promotion on cancellation implemented. Deferred to v1.2: automatic notification to promoted member, configurable cancellation deadline (needs schema field), late-cancellation officer workflow."
+  },
+  "BR-28": {
+    "rule": "Communication Deduplication",
+    "phase": 1,
+    "module": "M07",
+    "ruleClass": "p1-business",
+    "tests": {
+      "backend": [
+        "services/api-ts/src/handlers/communication/communication.test.ts"
+      ],
+      "contract": [
+        "specs/api/tests/contract/communications-flow.hurl"
+      ],
+      "e2e": []
+    },
+    "annotations": "Dedup not directly verifiable in E2E — backend unit test is primary coverage"
+  },
+  "BR-29": {
+    "rule": "Org Public Page",
+    "phase": 1,
+    "module": "M04",
+    "ruleClass": "p1-business",
+    "tests": {
+      "backend": [
+        "services/api-ts/src/handlers/platformadmin/getOrganizationBySlug.test.ts",
+        "services/api-ts/src/handlers/__tests__/br-edge-cases.test.ts"
+      ],
+      "contract": [
+        "specs/api/tests/contract/public-flow.hurl"
+      ],
+      "e2e": []
+    }
+  },
+  "BR-30": {
+    "rule": "Payment Gateway Isolation",
+    "phase": 1,
+    "module": "M06",
+    "ruleClass": "p0-security",
+    "tests": {
+      "backend": [
+        "services/api-ts/src/core/gateway.test.ts",
+        "services/api-ts/src/handlers/billing/repos/billing-config.repo.test.ts"
+      ],
+      "contract": [
+        "specs/api/tests/contract/dues-flow.hurl"
+      ],
+      "e2e": []
+    },
+    "annotations": "Path repair 2026-05-30: training/* moved to association:operations/*; dues.repo.test.ts paths replaced with existing covering tests."
+  },
+  "BR-31": {
+    "rule": "SVG Upload Blocked (MIME allowlist + extension/mime block)",
+    "phase": 1,
+    "module": "M04",
+    "ruleClass": "p0-security",
+    "tests": {
+      "backend": [
+        "services/api-ts/src/handlers/storage/uploadFile.test.ts",
+        "services/api-ts/src/handlers/storage/br-31.svg-upload-security.test.ts"
+      ],
+      "contract": [
+        "specs/api/tests/contract/storage.hurl"
+      ],
+      "e2e": []
+    },
+    "annotations": "REAL (Wave-2 B4): the prior 'SVG sanitized before storage' framing was a sanitize-illusion — there is no sanitizer. The rule is enforced as an outright BLOCK: image/svg+xml is not in the MIME allowlist and the .svg extension/mime is rejected at upload. br-31.svg-upload-security.test.ts asserts the real block control (was repointed off the illusion in S2)."
+  },
+  "BR-32": {
+    "rule": "Financial Record Retention",
+    "phase": 1,
+    "module": "M06",
+    "ruleClass": "p0-data",
+    "tests": {
+      "backend": [
+        "services/api-ts/src/handlers/person/jobs/deletionProcessor.test.ts"
+      ],
+      "contract": [
+        "specs/api/tests/contract/dues-flow.hurl"
+      ],
+      "e2e": []
+    },
+    "annotations": "Soft-delete explicitly asserted: deletionProcessor.test.ts verifies only persons/sessions touched, financial tables untouched"
+  },
+  "BR-33": {
+    "rule": "Election Integrity",
+    "phase": 2,
+    "module": "M12",
+    "ruleClass": "p0-security",
+    "tests": {
+      "backend": [
+        "services/api-ts/src/handlers/elections/br-33.election-integrity.test.ts",
+        "services/api-ts/src/handlers/elections/castVote.test.ts",
+        "services/api-ts/src/handlers/elections/repos/elections.repo.integration.test.ts"
+      ],
+      "contract": [
+        "specs/api/tests/contract/elections-flow.hurl"
+      ],
+      "e2e": []
+    },
+    "annotations": "REAL (Wave-2 B4): elections.repo.integration (createScratch) proves the integrity backstops against real PG — secret-ballot anonymization projection (listAnonymizedVotes omits voter identity, WF-077), 23505 double-vote backstop on the real UNIQUE(election_id,voter_id,position_id) index, and the cancel cascade (withdrawAllNominees flips only non-terminal rows, voidVotesForNominee scoped DELETE, countNomineesByPosition min-candidate). The fake-db elections.repo.test/.nominees.test illusions were deleted. E2E: status-restricts-voting (Draft/Closed = no vote buttons)."
+  },
+  "BR-34": {
+    "rule": "Nomination Eligibility",
+    "phase": 2,
+    "module": "M12",
+    "ruleClass": "p1-business",
+    "tests": {
+      "backend": [
+        "services/api-ts/src/handlers/elections/br-34.nomination-eligibility.test.ts",
+        "services/api-ts/src/handlers/elections/createNominee.test.ts"
+      ],
+      "contract": [
+        "specs/api/tests/contract/nomination-eligibility.hurl"
+      ],
+      "e2e": []
+    },
+    "annotations": "Backend solid (10 unit tests). E2E has test.fixme stubs for ineligible/eligible nomination. Contract: auth-only stub."
+  },
+  "BR-35": {
+    "rule": "Feed Content Moderation",
+    "phase": 2,
+    "module": "M13",
+    "ruleClass": "p2-deferred",
+    "tests": {
+      "backend": [
+        "services/api-ts/src/handlers/communication/br-35.feed-moderation.test.ts"
+      ],
+      "contract": [],
+      "e2e": []
+    },
+    "deferredReason": "Module M13 (Feed/Social) not yet implemented — deferred to milestone v2.0"
+  },
+  "BR-36": {
+    "rule": "National Dashboard Access",
+    "phase": 2,
+    "module": "M14",
+    "ruleClass": "p1-business",
+    "tests": {
+      "backend": [
+        "services/api-ts/src/handlers/platformadmin/br-36.national-dashboard.test.ts",
+        "services/api-ts/src/handlers/platformadmin/repos/feature-flag-enforcement.integration.test.ts",
+        "services/api-ts/src/handlers/platformadmin/repos/platformadmin-repos.integration.test.ts",
+        "services/api-ts/src/handlers/platformadmin/getNationalChapterDetail.integration.test.ts"
+      ],
+      "contract": [],
+      "e2e": []
+    },
+    "annotations": "REAL (Wave-2 B4, was p2-deferred/MISSING): the national dashboard + tier enforcement IS implemented and now real-PG covered — findEnforcementFlags resolves the 3-table tier/org/flag join through the gate precedence resolver; getNationalChapterDetail real-PG suppression (< 5 members) + cents/percentage/compliance aggregation pinned to seed snapshots; exact-data chapter drill-down e2e. REAL BUG fixed (S4): isPlatformAdmin used exact-equality and 403'd the comma-separated seed super-admin role → now split(',')+includes (utils/national-access.ts).",
+    "knownGap": "TIER-FLAG SLUG-vs-UUID: feature_flag tier-scoped rows key on the pricing-tier SLUG (not its UUID). A feature flag created against a tier UUID is silently INVISIBLE to findEnforcementFlags — enforcement never matches it. Surfaced by the S2 gate-precedence wiring; contract is slug-keyed by design. Revisit if tier flags move to UUID keys.",
+    "orphanNote": "exportDashboardReport.ts carries the same exact-equality role-check bug class as the S4-fixed isPlatformAdmin, but it is an UNWIRED orphan (no route in routes.ts/app.ts/registry); the wired export path is exportNationalDashboard (association:operations), which already split-and-includes. Left unfixed by design — see ROADMAP carry-forwards."
+  },
+  "BR-37": {
+    "rule": "Job Posting Expiry",
+    "phase": 2,
+    "module": "M15",
+    "ruleClass": "p2-deferred",
+    "tests": {
+      "backend": [
+        "services/api-ts/src/handlers/jobs/repos/jobs.repo.integration.test.ts",
+        "services/api-ts/src/handlers/jobs/jobs/jobPostingExpiry.integration.test.ts",
+        "services/api-ts/src/handlers/jobs/extendJobPosting.test.ts"
+      ],
+      "contract": [],
+      "e2e": []
+    },
+    "deferredReason": "BUILT (2026-06-22): the M15 job board is live (routes wired in registry.ts; 2 seeded postings) and the prior 'expiry cron is dead code' gap is CLOSED. Shipped + live-verified: (1) expiry cron (jobs.expirePostings, daily 01:00 UTC) flips active postings past expiry to 'expired'; (2) public board hides expired by default (searchJobPostings/repo.list), officer history still queryable via explicit status=expired; (3) extend endpoint POST /association/jobs/postings/{postingId}/extend (officer) resets expiry +30 days from the CURRENT expiry (not today) and reactivates — verified live 2026-08-12->2026-09-11; (4) 3-day reminder cron (jobs.expiryReminders, daily 09:00 UTC) notifies the poster, deduped structurally by a daily date-band (no migration). Real-PG + unit tested. STILL DEFERRED to v2.0 (kept p2-deferred): contract (Hurl) + e2e, a member/officer job-board FE (none exists), and a dedicated 'job.posting.expiring' notification type (the reminder currently reuses type='system' + relatedEntityType='job_posting').",
+    "annotations": "BR-37 expiry automation shipped 2026-06-22 (PR for feat/br-37-job-posting-expiry). The earlier 'deliberately NOT built' note is superseded — the cron + reminder + extend + public-board exclusion now exist. Kept p2-deferred only for the remaining contract/e2e/FE/notif-type work."
+  },
+  "BR-38": {
+    "rule": "Marketplace Referral Disclosure",
+    "phase": 3,
+    "module": "M17",
+    "ruleClass": "p2-deferred",
+    "tests": {
+      "backend": [
+        "services/api-ts/src/handlers/billing/br-38.marketplace-disclosure.test.ts"
+      ],
+      "contract": [],
+      "e2e": []
+    },
+    "deferredReason": "Module M17 (Marketplace) not yet implemented — deferred to milestone v2.0"
+  },
+  "BR-39": {
+    "rule": "Committee Dissolution",
+    "phase": 3,
+    "module": "M19",
+    "ruleClass": "p2-deferred",
+    "tests": {
+      "backend": [
+        "services/api-ts/src/handlers/platformadmin/dissolveCommittee.integration.test.ts",
+        "services/api-ts/src/handlers/association:operations/repos/committee.repo.integration.test.ts",
+        "services/api-ts/src/handlers/association:operations/ac-m19.committee.test.ts"
+      ],
+      "contract": [],
+      "e2e": []
+    },
+    "deferredReason": "PARTIAL (2026-06-22): M19 Committees IS implemented (schema, repos, CRUD handlers, admin UI). BR-39 dissolution SHIPPED + live-verified: POST /admin/committees/{id}/dissolve (platform-admin only) sets status='completed', stamps dissolvedAt/dissolvedBy/dissolutionReason, deactivates member access (committee_member.active=false) in one transaction while RETAINING all rows; idempotent (409 on re-dissolve); admin 'Dissolve' action wired. Real-PG handler + repo tests cover it. NOTE: also corrected a spec/DB drift — committee status canonical value is 'completed' (DB enum), not the stale TypeSpec 'dissolved'/'suspended'. STILL DEFERRED to v2.0 (kept p2-deferred): contract (Hurl) + e2e coverage, member-facing committee workspace read-gating (no member UI exists yet — current access removal is the data-level active flag), and full M19 milestone."
+  },
+  "BR-40": {
+    "rule": "Survey Anonymity",
+    "phase": 3,
+    "module": "M18",
+    "ruleClass": "p2-deferred",
+    "tests": {
+      "backend": [
+        "services/api-ts/src/handlers/communication/br-40.survey-anonymity.test.ts",
+        "services/api-ts/src/handlers/surveys/submitSurveyResponse.integration.test.ts",
+        "services/api-ts/src/handlers/surveys/listSurveyResponses.integration.test.ts"
+      ],
+      "contract": [],
+      "e2e": []
+    },
+    "deferredReason": "PARTIAL (2026-06-22): M18 Surveys IS implemented + live. Core anonymity enforced — anonymous non-poll responses store NULL responder_id AND NULL created_by/updated_by (the audit-column deanonymization vector was closed in submitSurveyResponse; the listSurveyResponses read path also strips those columns; export never emitted them). Real-PG covered. BR-40 advisory warnings shipped: respondent free-text PII warning (survey-flow.tsx) + creator <10 small-pool inference warning (survey-results.tsx); the Anonymous badge now renders in survey-list/survey-results (was reading the flag flat instead of settings.anonymous). All component-tested + live-verified. STILL DEFERRED to v2.0 (kept p2-deferred): (1) anonymous one-response-per-member dedup is intentionally traded away for anonymity — with responder_id NULL the dedup check can't match, so a member can submit multiple anonymous responses and allowReedit duplicates rather than updates (characterization-locked in submitSurveyResponse.integration.test.ts); the clean fix is a separate participation ledger. (2) contextId is left as-is on anonymous responses — it is a group/context reference (e.g. shared training-session id), not a person-unique token, so it does not deanonymize; nulling it would break legitimate context grouping. Revisit if any flow ever sets a per-person contextId. (3) full M18 survey milestone not yet feature-complete."
+  },
+  "BR-41": {
+    "rule": "Election State Machine Transitions",
+    "phase": 2,
+    "module": "M12",
+    "ruleClass": "p0-data",
+    "tests": {
+      "backend": [
+        "services/api-ts/src/handlers/elections/updateElectionStatus.test.ts"
+      ],
+      "contract": [
+        "specs/api/tests/contract/elections-flow.hurl"
+      ],
+      "e2e": []
+    },
+    "annotations": "Wave 4 discovery. VALID_TRANSITIONS map enforces: draft→nominationsOpen→votingOpen→awaitingConfirmation→published. Cancelled reachable from any non-terminal."
+  },
+  "BR-42": {
+    "rule": "Training Type Restricted to Platform-Defined Types",
+    "phase": 1,
+    "module": "M09",
+    "ruleClass": "p1-business",
+    "tests": {
+      "backend": [
+        "services/api-ts/src/handlers/association:operations/createTraining.test.ts"
+      ],
+      "contract": [],
+      "e2e": []
+    },
+    "annotations": "Canonical per WORKFLOW_MAP §4. Training type enum restricted to 5 platform-defined types (not org-customizable). Enforced in createTraining.ts via VALID_TRAINING_TYPES. Implements M9-R1. (Previously this key held the M12 vote-integrity rule due to ID overload — split into BR-67 per TR-P1-004 traceability fix.)"
+  },
+  "BR-67": {
+    "rule": "One Vote Per Person Per Position",
+    "phase": 2,
+    "module": "M12",
+    "ruleClass": "p0-data",
+    "tests": {
+      "backend": [
+        "services/api-ts/src/handlers/elections/castVote.test.ts"
+      ],
+      "contract": [
+        "specs/api/tests/contract/elections-flow.hurl"
+      ],
+      "e2e": []
+    },
+    "annotations": "Wave 4 discovery. ConflictError on duplicate vote. Renamed from BR-42 (M12 usage) per TR-P1-004 to resolve BR-42 ID overload — canonical BR-42 = M09 training-type per WORKFLOW_MAP §4. Implements M12-R1. (BR-52..BR-66 reserved for m20-booking/m21-billing/m22-email spec-ID minting; this rule jumps to BR-67.)"
+  },
+  "BR-43": {
+    "rule": "Voting Only When Status Is votingOpen",
+    "phase": 2,
+    "module": "M12",
+    "ruleClass": "p0-data",
+    "tests": {
+      "backend": [
+        "services/api-ts/src/handlers/elections/castVote.test.ts"
+      ],
+      "contract": [
+        "specs/api/tests/contract/br-43-voting-status-guard.hurl"
+      ],
+      "e2e": []
+    },
+    "annotations": "Wave 4 discovery. Guard checks election.status === 'votingOpen'. | 2026-05-30: Backend tests in castVote.test.ts now carry [BR-43] tags with explicit table-driven coverage of every non-votingOpen lifecycle status. | Contract test br-43-voting-status-guard.hurl added (runs when Hurl runner is repaired by GATE 2)."
+  },
+  "BR-44": {
+    "rule": "Election Certification Cross-Module Effects",
+    "phase": 2,
+    "module": "M12",
+    "ruleClass": "p1-business",
+    "tests": {
+      "backend": [
+        "services/api-ts/src/handlers/member/governance/certifyElection.test.ts"
+      ],
+      "contract": [],
+      "e2e": []
+    },
+    "annotations": "Wave 4 discovery. Certification ends outgoing officer terms, creates new terms, generates transition checklists."
+  },
+  "BR-45": {
+    "rule": "Credit Entry Requires ActivityName and Positive Amount",
+    "phase": 1,
+    "module": "M10",
+    "ruleClass": "p1-business",
+    "tests": {
+      "backend": [
+        "services/api-ts/src/handlers/person/createMyCreditEntry.test.ts"
+      ],
+      "contract": [],
+      "e2e": []
+    },
+    "annotations": "Wave 4 discovery. Validates activityName non-empty and creditAmount > 0."
+  },
+  "BR-46": {
+    "rule": "Credit Cycle Auto-Computed",
+    "phase": 1,
+    "module": "M10",
+    "ruleClass": "p1-business",
+    "tests": {
+      "backend": [
+        "services/api-ts/src/handlers/member/credits/utils/credit-cycle.test.ts"
+      ],
+      "contract": [],
+      "e2e": []
+    },
+    "annotations": "Wave 4 discovery. Cycle computed from registrationDate + activityDate + cyclePeriodYears."
+  },
+  "BR-47": {
+    "rule": "Banned Users Rejected at Auth Middleware",
+    "phase": 1,
+    "module": "M01",
+    "ruleClass": "p0-auth",
+    "tests": {
+      "backend": [
+        "services/api-ts/src/middleware/auth.test.ts"
+      ],
+      "contract": [],
+      "e2e": []
+    },
+    "annotations": "Wave 4 discovery. session.user.banned check in middleware/auth.ts. | 2026-05-30: Backend integration tests added in middleware/auth.test.ts — banned-user rejection verified against required, optional, and role-gated routes.",
+    "deferredReason": "Contract layer deferred — Better-Auth ban is admin-internal with no public-API surface to exercise. Backend integration (middleware/auth.test.ts) + E2E (auth.spec.ts) cover the rule."
+  },
+  "BR-49": {
+    "rule": "Active Status Includes Grace Period",
+    "phase": 1,
+    "module": "M01",
+    "ruleClass": "p1-business",
+    "tests": {
+      "backend": [
+        "services/api-ts/src/utils/org-auth.test.ts"
+      ],
+      "contract": [],
+      "e2e": []
+    },
+    "annotations": "Wave 4 discovery. requireActiveStatus() allows both 'active' and 'grace'. 6 test cases: active passes, grace passes, suspended/lapsed/expired/missing all fail with 403."
+  },
+  "BR-50": {
+    "rule": "Election Date Ordering DB Constraints",
+    "phase": 2,
+    "module": "M12",
+    "ruleClass": "p0-data",
+    "tests": {
+      "backend": [
+        "services/api-ts/src/handlers/elections/elections-schema.test.ts"
+      ],
+      "contract": [
+        "specs/api/tests/contract/br-50-election-date-ordering.hurl"
+      ],
+      "e2e": []
+    },
+    "annotations": "Wave 4 discovery. CHECK constraints enforce: nominations close > open, voting close > open, voting open >= nominations close. | 2026-05-30: BR-50 date-ordering CHECK constraints verified at schema/migration layer in elections-schema.test.ts. | Contract test br-50-election-date-ordering.hurl added covering all three DB CHECK constraints."
+  },
+  "BR-51": {
+    "rule": "Internal Service Token Timing-Safe Comparison",
+    "phase": 1,
+    "module": "M01",
+    "ruleClass": "p0-security",
+    "tests": {
+      "backend": [
+        "services/api-ts/src/middleware/auth.test.ts"
+      ],
+      "contract": [],
+      "e2e": []
+    },
+    "annotations": "Wave 4 discovery. timingSafeEqual against rotated token list in middleware/auth.ts. 4 test cases cover: valid token bypass, missing header, mismatch logging, context flag. | 2026-05-30: Backend assertion added in middleware/auth.test.ts that the comparator is crypto.timingSafeEqual on hashed inputs (not raw equality).",
+    "deferredReason": "Contract+E2E deferred — timing-safety is a cryptographic property of the comparator, not observable at the wire layer. Backend test in middleware/auth.test.ts asserts crypto.timingSafeEqual is used and near-miss tokens reject identically to unrelated tokens."
+  },
+  "BR-52": {
+    "rule": "Email Suppression Check Before Delivery (alias M22-R1)",
+    "phase": 2,
+    "module": "M22",
+    "ruleClass": "p0-data",
+    "tests": {
+      "backend": [
+        "services/api-ts/src/core/email.test.ts",
+        "services/api-ts/src/handlers/email/repos/suppression.repo.test.ts"
+      ],
+      "contract": [],
+      "e2e": []
+    },
+    "annotations": "Backend coverage registered 2026-06-11 (AHA notifications-email Batch D): core/email.test.ts asserts Guard 1 skips+marks-failed a suppressed recipient; suppression.repo.test.ts asserts org-scoped isSuppressed. Status remains INCOMPLETE per p0-data rule class (requires contract+e2e); contract/e2e backfill deferred — kept on br-coverage KNOWN_INCOMPLETE allowlist."
+  },
+  "BR-53": {
+    "rule": "Active Template Required for Enqueue (alias M22-R2)",
+    "phase": 2,
+    "module": "M22",
+    "ruleClass": "p1-business",
+    "tests": {
+      "backend": [
+        "services/api-ts/src/core/email.test.ts"
+      ],
+      "contract": [
+        "specs/api/tests/contract/email-extended-flow.hurl"
+      ],
+      "e2e": []
+    },
+    "annotations": "2026-06-23 (R4-2): COMPLETE — wire contract linked + guard assertion added. email-extended-flow.hurl proves the active-template happy path (create active template → test-send enqueues a pending queue item) AND the guard (a DRAFT/inactive template's test-send → 404 'not found or not active', i.e. no enqueue). Backend (core/email.test.ts FIX-008) proves the TEMPLATE_INACTIVE rejection at the service layer. Status was INCOMPLETE only for lack of a contract — now present. Implemented + backend coverage 2026-06-11 (FIX-008): core/email.ts queueEmail resolves template by tags at enqueue, throws on no ACTIVE match."
+  },
+  "BR-54": {
+    "rule": "Max Retry Attempts Terminal Failure (alias M22-R3)",
+    "phase": 2,
+    "module": "M22",
+    "ruleClass": "p1-business",
+    "tests": {
+      "backend": [
+        "services/api-ts/src/handlers/email/repos/queue.retry-deadletter.integration.test.ts",
+        "services/api-ts/src/handlers/email/repos/queue.transitions.integration.test.ts"
+      ],
+      "contract": [
+        "specs/api/tests/contract/email-extended-flow.hurl"
+      ],
+      "e2e": []
+    },
+    "annotations": "2026-06-23 (R4-2): COMPLETE — wire contract linked. email-extended-flow.hurl drives the real queue retry guard at the wire: a cancelled item's retry → 409 (only failed→pending is a valid retry), proving the transition guard runs against the real status. The terminal max-retry (attempts>=3 → MAX_RETRIES_EXCEEDED dead-letter) is real-PG backend-proven. KNOWN off-by-one (characterized, intentional-leniency, left as-is): getPendingEmails lte(attempts,3) vs dead-letter after the 3rd retry → effective max 4 attempts (1 initial + 3 retries); state machine still terminates. Backend coverage registered 2026-06-11; UPGRADED to real-PG 2026-06-22 (Wave-2 B3 feedback). The mock-only queue.repo.test.ts was deleted; the terminal-failure contract is now proven against Postgres: queue.retry-deadletter.integration.test.ts exercises the exponential backoff lifecycle (attempts 0/1/2 -> next_retry_at +5min/+30min/+2h, attempts=3 -> dead-letter next_retry_at NULL) and queue.transitions.integration.test.ts asserts retryEmail from a failed row with attempts>=3 raises BusinessLogicError MAX_RETRIES_EXCEEDED. KNOWN GAP (product decision, characterized not fixed): getPendingEmails selects rows with lte(attempts,3) while the dead-letter cap fires after the 3rd retry, so the effective max is 4 send attempts (1 initial + 3 retries) — the inline '<3' comment overstates the cap by one. The state machine still terminates correctly (no infinite retry); off-by-one is intentional-leniency, left as-is. Status remains INCOMPLETE per p1-business rule class (requires contract OR e2e); kept on br-coverage KNOWN_INCOMPLETE allowlist."
+  },
+  "BR-55": {
+    "rule": "Hard Bounce Auto-Suppression (alias M22-R4)",
+    "phase": 2,
+    "module": "M22",
+    "ruleClass": "p0-data",
+    "tests": {
+      "backend": [
+        "services/api-ts/src/handlers/email/repos/suppression.repo.createscratch.integration.test.ts",
+        "services/api-ts/src/handlers/email/postmarkWebhook.integration.test.ts"
+      ],
+      "contract": [
+        "specs/api/tests/contract/email-suppression-webhook.hurl"
+      ],
+      "e2e": []
+    },
+    "annotations": "2026-06-23 (R2-1): the IF TRIGGER IS NOW WIRED — POST /webhooks/postmark (hand-wired, shared-secret Basic auth) verifies a Postmark hard-bounce and calls addSuppression(hard_bounce) for every org that mailed the address (resolved from email_queue.recipient_email). addSuppression now has a NON-test caller. postmarkWebhook.integration.test.ts proves bounce->suppression rows on real PG; email-suppression-webhook.hurl proves the wire auth boundary (missing/forged secret -> 401, signed -> 200). Stays p0-data INCOMPLETE only because a UI e2e is N/A for a provider webhook (no user-facing flow) — allowlisted on that basis, not on the old unwired-trigger basis. Minted 2026-06-02 to resolve TR-P1-003. Aliases module-local M22-R4. IF hard bounce received THEN add to suppression with reason hard_bounce. 2026-06-19: durable-state half backfilled with a real-PG integration test. 2026-06-22 (Wave-2 B3): migrated off the hand-DDL suppression.repo.integration.test.ts (deleted) onto the shared createScratch harness — suppression.repo.createscratch.integration.test.ts proves hard_bounce persists+reads-back with the exact reason and a duplicate (org,email) add is an idempotent no-op (23505 swallowed, FIRST reason retained), plus the new org_id 23502 NOT-NULL invariant. KNOWN GAP (product decision): this locks only the THEN (suppression-state) half of the IF->THEN rule; the IF trigger — a provider bounce webhook that CALLS addSuppression — is still UNWIRED in the codebase (the guard protects a path nothing yet invokes)."
+  },
+  "BR-56": {
+    "rule": "Complaint Auto-Suppression / CAN-SPAM (alias M22-R5)",
+    "phase": 2,
+    "module": "M22",
+    "ruleClass": "p0-security",
+    "tests": {
+      "backend": [
+        "services/api-ts/src/handlers/email/repos/suppression.repo.createscratch.integration.test.ts",
+        "services/api-ts/src/handlers/email/postmarkWebhook.integration.test.ts"
+      ],
+      "contract": [
+        "specs/api/tests/contract/email-suppression-webhook.hurl"
+      ],
+      "e2e": []
+    },
+    "annotations": "2026-06-23 (R2-1): COMPLETE — the IF TRIGGER IS NOW WIRED. POST /webhooks/postmark (hand-wired, shared-secret Basic auth) verifies a Postmark spam complaint and calls addSuppression(complaint) for every org that mailed the address. addSuppression now has a NON-test caller. postmarkWebhook.integration.test.ts proves complaint->suppression(reason=complaint) on real PG; email-suppression-webhook.hurl proves the wire auth boundary (missing/forged secret -> 401, signed -> 200). p0-security requires backend+contract, both now present. Minted 2026-06-02 to resolve TR-P1-003. Aliases module-local M22-R5. IF complaint received THEN add to suppression with reason complaint (CAN-SPAM). 2026-06-19: durable-state + tenant-isolation half backfilled with a real-PG integration test. 2026-06-22 (Wave-2 B3): migrated off the hand-DDL suppression.repo.integration.test.ts (deleted) onto the shared createScratch harness — suppression.repo.createscratch.integration.test.ts proves a complaint persists with reason complaint, suppression is strictly org-scoped (org-A complaint does NOT suppress the same address in org-B), listByOrg returns only the calling org's rows, and deleteByIdForOrg from a different org deletes NOTHING (cross-tenant guard). KNOWN GAP (product decision): this locks only the THEN (suppression-state) half; the IF trigger — a provider complaint webhook that CALLS addSuppression — is still UNWIRED in the codebase."
+  },
+  "BR-57": {
+    "rule": "Transactional Email Suppression Override (alias M22-R6)",
+    "phase": 2,
+    "module": "M22",
+    "ruleClass": "p1-business",
+    "tests": {
+      "backend": [
+        "services/api-ts/src/core/email.test.ts",
+        "services/api-ts/src/handlers/email/repos/suppression.repo.test.ts"
+      ],
+      "contract": [],
+      "e2e": []
+    },
+    "annotations": "Implemented + backend coverage added 2026-06-11 (AHA notifications-email Batch B / BR-57 slice): reason-aware Guard 1 in core/email.ts now lets transactional mail override an 'unsubscribe' suppression while still blocking hard_bounce/complaint/manual; bulk overrides nothing. core/email.test.ts BR-57 suite (4 cases) + suppression.repo.test.ts getSuppressionReason suite prove it. Status remains INCOMPLETE per p1-business rule class (requires contract OR e2e); kept on br-coverage KNOWN_INCOMPLETE allowlist."
+  },
+  "BR-58": {
+    "rule": "Template Variable Validation Before Enqueue (alias M22-R7)",
+    "phase": 2,
+    "module": "M22",
+    "ruleClass": "p1-business",
+    "tests": {
+      "backend": [
+        "services/api-ts/src/core/email.test.ts"
+      ],
+      "contract": [],
+      "e2e": []
+    },
+    "annotations": "Implemented + backend coverage added 2026-06-11 (AHA notifications-email Batch C / FIX-008): core/email.ts queueEmail validates required template variables at enqueue and throws BusinessLogicError('MISSING_REQUIRED_VARIABLES') when a required variable is absent or empty (variables with a defaultValue are exempt). core/email.test.ts FIX-008 suite proves missing/empty rejection + present-value happy path. Status remains INCOMPLETE per p1-business rule class (requires contract OR e2e); kept on br-coverage KNOWN_INCOMPLETE allowlist."
+  },
+  "BR-59": {
+    "rule": "Queue Cancellation Audit Trail (alias M22-R8)",
+    "phase": 2,
+    "module": "M22",
+    "ruleClass": "p0-data",
+    "tests": {
+      "backend": [
+        "services/api-ts/src/handlers/email/repos/queue.transitions.integration.test.ts"
+      ],
+      "contract": [
+        "specs/api/tests/contract/email-extended-flow.hurl"
+      ],
+      "e2e": []
+    },
+    "annotations": "2026-06-23 (R4-2): contract LINKED — email-extended-flow.hurl drives the real cancel transition at the wire (enqueue→cancel→status='cancelled'; cancel-again→409 pending-only guard). The cancelled fields (cancelledBy/cancellationReason/cancelledAt) + the audit event are real-PG backend-proven (queue.transitions.integration.test.ts). Stays INCOMPLETE per p0-data (the audit-TRAIL e2e is N/A — email queue is admin-internal with no member-facing flow) — kept on allowlist on THAT basis. Backend coverage registered 2026-06-11; UPGRADED to real-PG 2026-06-22."
+  },
+  "BR-60": {
+    "rule": "Merchant Account Required for Payment (alias M21-R1)",
+    "phase": 2,
+    "module": "M21",
+    "ruleClass": "p0-data",
+    "tests": {
+      "backend": [
+        "services/api-ts/src/handlers/billing/payInvoice.test.ts",
+        "services/api-ts/src/handlers/billing/createMerchantAccount.test.ts",
+        "services/api-ts/src/handlers/billing/onboardMerchantAccount.test.ts",
+        "services/api-ts/src/handlers/billing/payment-guards.integration.test.ts"
+      ],
+      "contract": [],
+      "e2e": []
+    },
+    "annotations": "2026-06-23 (R2-4): the merchant-required guard is now proven against real PG (payment-guards.integration.test.ts): payInvoice on an `open` invoice with NO merchant_account row -> NotFound, and with a merchant present but onboardingComplete=false -> rejected BEFORE any Stripe call (a billing stub that throws if reached confirms the guard fires first). Stays INCOMPLETE per p0-data (contract+e2e require the stripe-mock happy-path journey, not wired in CI) — kept on allowlist. Minted 2026-06-02 to resolve TR-P1-002. Aliases module-local M21-R1. IF merchant account does not exist THEN block payment processing for that person (require Stripe Connect onboarding first). Backs WF-128 (Onboard Merchant), WF-130 (Pay Invoice), AC-M21-001, AC-M21-006, SM-M21-MERCHANT."
+  },
+  "BR-61": {
+    "rule": "Invoice Terminal-State Payment Guard (alias M21-R2)",
+    "phase": 2,
+    "module": "M21",
+    "ruleClass": "p0-data",
+    "tests": {
+      "backend": [
+        "services/api-ts/src/handlers/billing/payInvoice.test.ts",
+        "services/api-ts/src/handlers/billing/voidInvoice.test.ts",
+        "services/api-ts/src/handlers/billing/updateInvoice.test.ts",
+        "services/api-ts/src/handlers/billing/captureInvoicePayment.test.ts",
+        "services/api-ts/src/handlers/billing/payment-guards.integration.test.ts"
+      ],
+      "contract": [],
+      "e2e": []
+    },
+    "annotations": "2026-06-23 (R2-4): the terminal-state double-pay guard is now proven against real PG (payment-guards.integration.test.ts): payInvoice on a paid/void/uncollectible/draft invoice -> rejected (not payable), and on an `open` invoice with an in-progress paymentStatus -> 409, all BEFORE Stripe. Stays INCOMPLETE per p0-data (contract+e2e require the stripe-mock journey, not wired in CI) — kept on allowlist. Minted 2026-06-02 to resolve TR-P1-002. Aliases module-local M21-R2. IF invoice status is paid or void THEN reject further payment/update attempts (prevent double-payment). Backs SM-M21-INVOICE terminal-state guard, WF-130, AC-M21-001."
+  },
+  "BR-62": {
+    "rule": "Stripe Webhook Signature Verification (alias M21-R3)",
+    "phase": 2,
+    "module": "M21",
+    "ruleClass": "p0-security",
+    "tests": {
+      "backend": [
+        "services/api-ts/src/handlers/billing/handleStripeWebhook.test.ts"
+      ],
+      "contract": [
+        "specs/api/tests/contract/billing-webhook-signature.hurl"
+      ],
+      "e2e": []
+    },
+    "annotations": "2026-06-23 (R2-2): COMPLETE — wire contract added. billing-webhook-signature.hurl proves an unsigned and a forged Stripe webhook are both rejected with 400 at /webhooks/stripe before any processing (the p0-security guarantee). The correctly-signed->200 path needs a live HMAC and stays in the backend test + stripe-mock billing-lifecycle.hurl. Minted 2026-06-02 to resolve TR-P1-002. Aliases module-local M21-R3. IF Stripe webhook signature invalid THEN reject with 400 (signature verification mandatory). Backs WF-132, AC-M21-003."
+  },
+  "BR-63": {
+    "rule": "Webhook-Driven Invoice Paid Transition (alias M21-R4)",
+    "phase": 2,
+    "module": "M21",
+    "ruleClass": "p0-data",
+    "tests": {
+      "backend": [
+        "services/api-ts/src/handlers/billing/handleStripeWebhook.test.ts",
+        "services/api-ts/src/handlers/billing/captureInvoicePayment.test.ts",
+        "services/api-ts/src/handlers/billing/payment-guards.integration.test.ts"
+      ],
+      "contract": [],
+      "e2e": []
+    },
+    "annotations": "2026-06-23 (R2-4): the capture authorization guard (the wire-observable half of the webhook-driven paid transition) is now proven against real PG (payment-guards.integration.test.ts): captureInvoicePayment requires paymentStatus=requires_capture, rejecting a pending payment and 409-ing an already-succeeded one. The actual open->paid transition runs INSIDE the Stripe capture/webhook path (stripe-mock-gated). Stays INCOMPLETE per p0-data — kept on allowlist. Minted 2026-06-02 to resolve TR-P1-002. Aliases module-local M21-R4. IF payment_intent.succeeded webhook received THEN mark invoice paid (automated payment confirmation, idempotent on event ID). Backs WF-132, AC-M21-004, SM-M21-INVOICE."
+  },
+  "BR-64": {
+    "rule": "Refund Requires Paid Original Payment (alias M21-R5)",
+    "phase": 2,
+    "module": "M21",
+    "ruleClass": "p0-data",
+    "tests": {
+      "backend": [
+        "services/api-ts/src/handlers/billing/refundInvoicePayment.test.ts",
+        "services/api-ts/src/handlers/billing/payment-guards.integration.test.ts"
+      ],
+      "contract": [],
+      "e2e": []
+    },
+    "annotations": "2026-06-23 (R2-4): the refund-requires-captured guard is now proven against real PG (payment-guards.integration.test.ts): refundInvoicePayment on a payment whose status is not `succeeded` (none/pending/requires_capture/failed) -> rejected (must be captured before refund), and an already-refunded invoice -> 409, all BEFORE Stripe. Stays INCOMPLETE per p0-data (contract+e2e require the stripe-mock journey) — kept on allowlist. Minted 2026-06-02 to resolve TR-P1-002. Aliases module-local M21-R5. IF refund requested THEN validate original payment exists and is in paid status (cannot refund unpaid invoice). Backs WF-131, AC-M21-005."
+  },
+  "BR-65": {
+    "rule": "Billing Config Key Encryption at Rest (alias M21-R6)",
+    "phase": 2,
+    "module": "M21",
+    "ruleClass": "p0-security",
+    "tests": {
+      "backend": [
+        "services/api-ts/src/handlers/billing/repos/billing-config.repo.test.ts",
+        "services/api-ts/src/core/gateway.test.ts",
+        "services/api-ts/src/handlers/member/duesspecialassessments/gateway-config-encryption.integration.test.ts"
+      ],
+      "contract": [
+        "specs/api/tests/contract/assoc-dues-gateway-flow.hurl"
+      ],
+      "e2e": []
+    },
+    "annotations": "2026-06-23 (R2-3): COMPLETE — black-box confidentiality now proven at two layers. gateway-config-encryption.integration.test.ts drives the REAL upsert+get handlers on real PG: the stored dues_gateway_config.encrypted_secret is AES-256-GCM ciphertext (≠ plaintext, round-trips via decryptCredential) and neither handler response exposes the encrypted OR plaintext secret. assoc-dues-gateway-flow.hurl (was a sign-up stub) now signs in as the seed association:admin, PUTs a gateway secret, GETs it back, and asserts both responses carry only provider/publicKey with `encryptedSecret`/`secretKey` NOT present. Minted 2026-06-02 to resolve TR-P1-002. Aliases module-local M21-R6. IF billing config keys stored THEN encrypt with AES-256 (Stripe publishable/secret/webhook keys; never logged or exposed in API responses). Backs AC-M21-007."
+  },
+  "BR-66": {
+    "rule": "Invoice Total Computed From Line Items (alias M21-R7)",
+    "phase": 2,
+    "module": "M21",
+    "ruleClass": "p0-data",
+    "tests": {
+      "backend": [
+        "services/api-ts/src/handlers/billing/createInvoice.test.ts",
+        "services/api-ts/src/handlers/billing/updateInvoice.test.ts",
+        "services/api-ts/src/handlers/billing/finalizeInvoice.test.ts"
+      ],
+      "contract": [],
+      "e2e": []
+    },
+    "annotations": "Minted 2026-06-02 to resolve TR-P1-002. Aliases module-local M21-R7. IF invoice has line items THEN total = sum of (quantity × unitPrice) per item (calculated, not user-supplied). Backs WF-129, AC-M21-002."
+  },
+  "BR-68": {
+    "rule": "Booking Event Must Be Active to Accept Bookings (alias M20-R1)",
+    "phase": 2,
+    "module": "M20",
+    "ruleClass": "p0-data",
+    "aliases": [
+      "M20-R1"
+    ],
+    "tests": {
+      "backend": [
+        "services/api-ts/src/handlers/booking/createBooking.test.ts"
+      ],
+      "contract": [],
+      "e2e": []
+    },
+    "annotations": "2026-06-23 (R2-5): BR-68 is enforced at SLOT GENERATION — only an `active` booking event produces bookable (available) slots, so an inactive/draft event has nothing to book; the wire-observable booking guard (slot not available -> 409) is BR-69's booking-edge.hurl. createBooking.test.ts covers the handler path. No crisp inactive-event wire assertion exists and there is no booking member-UI e2e, so BR-68 stays INCOMPLETE/allowlisted. Minted 2026-06-02 to resolve TR-P1-001 (m20-booking had zero global BR IDs). Module-local alias M20-R1 retained in MODULE_SPEC §4. Backs WF-117, WF-112, AC-M20-create-booking. (BR-52..BR-67 were claimed by parallel m21/m22/M12-split fixes for TR-P1-002/003/004; m20 booking IDs start at BR-68.)"
+  },
+  "BR-69": {
+    "rule": "Prevent Double-Booking on Booked or Blocked Slots (alias M20-R2)",
+    "phase": 2,
+    "module": "M20",
+    "ruleClass": "p0-data",
+    "aliases": [
+      "M20-R2"
+    ],
+    "tests": {
+      "backend": [
+        "services/api-ts/src/handlers/booking/createBooking.test.ts",
+        "services/api-ts/src/handlers/booking/slotManagement.test.ts"
+      ],
+      "contract": [
+        "specs/api/tests/contract/booking-edge.hurl"
+      ],
+      "e2e": []
+    },
+    "annotations": "2026-06-23 (R2-5): contract coverage was present but UNLINKED — booking-edge.hurl already asserts the double-booking guard at the wire (booking the same slot a second time -> 409 'Slot is not available'). The repo guard (createBooking: slot.status !== 'available' -> ConflictError, plus the partial unique index bookings_active_slot_unique for the race) is real-PG-proven in booking.repo.integration.test.ts. Stays INCOMPLETE per p0-data only because there is no booking member-UI e2e (the booking flow is API/officer-driven). Minted 2026-06-02 to resolve TR-P1-001. Slot status check prior to booking creation. Backs WF-117, WF-112."
+  },
+  "BR-70": {
+    "rule": "Enforce Minimum Booking Advance Notice (alias M20-R3, minBookingMinutes window)",
+    "phase": 2,
+    "module": "M20",
+    "ruleClass": "p1-business",
+    "aliases": [
+      "M20-R3"
+    ],
+    "tests": {
+      "backend": [
+        "services/api-ts/src/handlers/booking/createBooking.test.ts"
+      ],
+      "contract": [],
+      "e2e": []
+    },
+    "annotations": "Minted 2026-06-02 to resolve TR-P1-001. Backs WF-117."
+  },
+  "BR-71": {
+    "rule": "Enforce Maximum Booking Lead Time (alias M20-R4, maxBookingDays window)",
+    "phase": 2,
+    "module": "M20",
+    "ruleClass": "p1-business",
+    "aliases": [
+      "M20-R4"
+    ],
+    "tests": {
+      "backend": [
+        "services/api-ts/src/handlers/booking/createBooking.test.ts"
+      ],
+      "contract": [],
+      "e2e": []
+    },
+    "annotations": "Minted 2026-06-02 to resolve TR-P1-001. Backs WF-117."
+  },
+  "BR-72": {
+    "rule": "Schedule Exceptions Override Regular Schedule (alias M20-R5, block affected slots)",
+    "phase": 2,
+    "module": "M20",
+    "ruleClass": "p0-data",
+    "aliases": [
+      "M20-R5"
+    ],
+    "tests": {
+      "backend": [
+        "services/api-ts/src/handlers/booking/createScheduleException.test.ts",
+        "services/api-ts/src/handlers/booking/slotManagement.test.ts"
+      ],
+      "contract": [
+        "specs/api/tests/contract/booking-exceptions.hurl"
+      ],
+      "e2e": []
+    },
+    "annotations": "2026-06-23 (R2-5): contract coverage was present but UNLINKED — booking-exceptions.hurl exercises single/weekly/monthly exception creation that propagates into the slot generator (blocking the affected windows); scheduleException.repo.integration.test.ts proves overlap/recurrence real-PG. Stays INCOMPLETE per p0-data only because there is no booking member-UI e2e. Minted 2026-06-02 to resolve TR-P1-001. Backs WF-116, WF-113."
+  },
+  "BR-73": {
+    "rule": "Cancelled or Rejected Booking Releases Slot (alias M20-R6, back to available)",
+    "phase": 2,
+    "module": "M20",
+    "ruleClass": "p0-data",
+    "aliases": [
+      "M20-R6"
+    ],
+    "tests": {
+      "backend": [
+        "services/api-ts/src/handlers/booking/cancelBooking.test.ts",
+        "services/api-ts/src/handlers/booking/rejectBooking.test.ts"
+      ],
+      "contract": [
+        "specs/api/tests/contract/booking-flow.hurl",
+        "specs/api/tests/contract/booking-edge.hurl"
+      ],
+      "e2e": []
+    },
+    "annotations": "2026-06-23 (R2-5): the slot-RELEASE guarantee is now proven at the wire. booking-flow.hurl cancels a booking (-> cancelled) and booking-edge.hurl rejects one (-> rejected); R2-5 ADDED the missing half — after the reject, the released slot is RE-CLAIMED by a fresh booking (201, slot returns to the pool, not a permanent lock). booking-lifecycle.repo.integration.test.ts proves the cancel/reject release frees the slot real-PG. Stays INCOMPLETE per p0-data only because there is no booking member-UI e2e. Minted 2026-06-02 to resolve TR-P1-001. Backs WF-118, WF-119."
+  },
+  "BR-74": {
+    "rule": "Slot Generation Respects Buffer Time (alias M20-R7, no overlap with bufferBefore/bufferAfter)",
+    "phase": 2,
+    "module": "M20",
+    "ruleClass": "p1-business",
+    "aliases": [
+      "M20-R7"
+    ],
+    "tests": {
+      "backend": [
+        "services/api-ts/src/handlers/booking/slotManagement.test.ts"
+      ],
+      "contract": [],
+      "e2e": []
+    },
+    "annotations": "Minted 2026-06-02 to resolve TR-P1-001. Slot generator in repos/timeSlot.repo.ts. Backs WF-113."
+  },
+  "BR-75": {
+    "rule": "Booking Event effective_to Must Be After effective_from (alias M20-R8, date ordering)",
+    "phase": 2,
+    "module": "M20",
+    "ruleClass": "p1-business",
+    "aliases": [
+      "M20-R8"
+    ],
+    "tests": {
+      "backend": [
+        "services/api-ts/src/handlers/booking/createBookingEvent.test.ts",
+        "services/api-ts/src/handlers/booking/updateBookingEvent.test.ts",
+        "services/api-ts/src/handlers/booking/repos/bookingEvent.repo.test.ts"
+      ],
+      "contract": [
+        "specs/api/tests/contract/booking-validation.hurl"
+      ],
+      "e2e": []
+    },
+    "annotations": "2026-06-23 (R4-1): COMPLETE + REAL BUG FIXED. effectiveTo<=effectiveFrom was guarded ONLY by a DB CHECK, so it surfaced as a raw 500 SQL-error leak instead of a 400. Added the check to BookingEventRepository.validateEventConfig (bookingEvent.repo.test.ts [BR-75] covers before/equal/after) and booking-validation.hurl asserts the wire returns 400. Minted 2026-06-02 to resolve TR-P1-001. Date-ordering validation on BookingEvent. Backs WF-115."
+  },
+  "BR-76": {
+    "rule": "maxBookingDays Range Constraint 0-365 (alias M20-R9, DB CHECK)",
+    "phase": 2,
+    "module": "M20",
+    "ruleClass": "p1-business",
+    "aliases": [
+      "M20-R9"
+    ],
+    "tests": {
+      "backend": [
+        "services/api-ts/src/handlers/booking/createBookingEvent.test.ts"
+      ],
+      "contract": [
+        "specs/api/tests/contract/booking-validation.hurl"
+      ],
+      "e2e": []
+    },
+    "annotations": "2026-06-23 (R4-1): COMPLETE — booking-validation.hurl asserts maxBookingDays>365 (and <0) → 400 at the wire (zod range). Minted 2026-06-02 to resolve TR-P1-001. DB CHECK constraint on bookingEvent.maxBookingDays. Backs WF-115."
+  },
+  "BR-77": {
+    "rule": "minBookingMinutes Range Constraint 0-4320 / 72hr max (alias M20-R10, DB CHECK)",
+    "phase": 2,
+    "module": "M20",
+    "ruleClass": "p1-business",
+    "aliases": [
+      "M20-R10"
+    ],
+    "tests": {
+      "backend": [
+        "services/api-ts/src/handlers/booking/createBookingEvent.test.ts"
+      ],
+      "contract": [
+        "specs/api/tests/contract/booking-validation.hurl"
+      ],
+      "e2e": []
+    },
+    "annotations": "2026-06-23 (R4-1): COMPLETE — booking-validation.hurl asserts minBookingMinutes>4320 (72h) → 400 at the wire (zod range). Minted 2026-06-02 to resolve TR-P1-001. DB CHECK constraint on bookingEvent.minBookingMinutes. Backs WF-115."
+  }
+}

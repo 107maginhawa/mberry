@@ -120,6 +120,19 @@ const KNOWN_INCOMPLETE: Set<string> = new Set([
   // BR-75 also fixed a 500→400 leak. BR-70/71/74 stay (advance-notice/lead-time/
   // buffer are booking-time / slot-generation enforcement, not create-config).
   "BR-68", "BR-69", "BR-70", "BR-71", "BR-72", "BR-73", "BR-74",
+
+  // ── Lean launch (T3, 2026-06-24) ──────────────────────────
+  // The memberry/admin frontend apps were deleted (lean-launch cleanup; full
+  // platform preserved in /desktop/memberry-full). Every BR below declared its
+  // E2E layer as a spec under apps/memberry|apps/admin — those files are gone, so
+  // the p0-data/p0-auth "needs e2e" requirement can no longer be met. Their
+  // BACKEND + CONTRACT layers are UNCHANGED (api-ts is untouched and still gated by
+  // the unit-tests + contract CI jobs), so each rule is still tested where it
+  // matters. Allowlisted (not deleted) until T9 re-authors lean E2E journeys
+  // against apps/org + apps/member + apps/console and ratchets these back out.
+  "BR-01", "BR-03", "BR-06", "BR-07", "BR-08", "BR-09", "BR-10", "BR-21",
+  "BR-24", "BR-25", "BR-26", "BR-32", "BR-36", "BR-41", "BR-43", "BR-44",
+  "BR-45", "BR-46", "BR-49", "BR-50", "BR-67",
 ]);
 
 // ── Coverage derivation ──────────────────────────────────
