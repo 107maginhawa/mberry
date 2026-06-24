@@ -1,8 +1,0 @@
-export const API_BASE = process.env.API_BASE_URL ?? 'http://localhost:7213'
-export const TEST_PASSWORD = process.env.TEST_PASSWORD ?? 'TestPass123!'
-export const SEED_OFFICER_EMAIL = process.env.SEED_OFFICER_EMAIL ?? 'test@memberry.ph'
-export const SEED_MEMBER_EMAIL = process.env.SEED_MEMBER_EMAIL ?? 'member@memberry.ph'
-export const SEED_TREASURER_EMAIL = process.env.SEED_TREASURER_EMAIL ?? 'treasurer@memberry.ph'
-export const SEED_SECRETARY_EMAIL = process.env.SEED_SECRETARY_EMAIL ?? 'secretary@memberry.ph'
-export const SEED_SOCIETY_EMAIL = process.env.SEED_SOCIETY_EMAIL ?? 'society@memberry.ph'
-export const SEED_IDOR_EMAIL = process.env.SEED_IDOR_EMAIL ?? 'idor-officer@memberry.ph'
