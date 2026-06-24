@@ -5,9 +5,11 @@
   "exports": {
     ".": "./src/index.ts",
     "./lib/utils": "./src/lib/utils.ts",
-    "./components/*": "./src/components/*.tsx"
+    "./components/*": "./src/components/*.tsx",
+    "./tokens.css": "./src/tokens.css",
+    "./tailwind-preset": "./tailwind-preset.ts"
   },
-  "files": ["src"],
+  "files": ["src", "tailwind-preset.ts"],
   "dependencies": {
     "@radix-ui/react-alert-dialog": "^1.1.15",
     "@radix-ui/react-avatar": "^1.1.10",

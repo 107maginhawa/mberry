@@ -1,0 +1,106 @@
+/**
+ * Memberry "Friendly Clarity" design tokens — the single source of truth for
+ * color, type, radius, and shadow across apps/org, apps/member, apps/console.
+ * See DESIGN.md. Apps import this once; never fork tokens per app.
+ *
+ * Pair with the Tailwind preset at @monobase/ui/tailwind-preset, which maps these
+ * CSS variables to semantic utility classes (bg-primary, text-muted, rounded-md…).
+ */
+
+/* Hanken Grotesk — one family, display + body + UI (DESIGN.md typography).
+   Bunny Fonts = privacy-friendly (no Google tracking). Self-host later if needed. */
+@import url("https://fonts.bunny.net/css?family=hanken-grotesk:400,500,600,700");
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    /* ── Brand: plum + cream (WCAG-tuned, DESIGN.md) ───────────────────── */
+    --color-primary: #554b68;        /* muted plum */
+    --color-primary-press: #3f3850;
+    --color-primary-mid: #675d78;
+    --color-primary-light: #9e8890;
+    --color-primary-lighter: #c8b4bc;
+    --color-primary-subtle: #f0e8ec;
+    --color-cream: #f2deb0;
+    --color-cream-light: #f9f0d8;
+    --color-cream-dark: #d4ba82;
+
+    --color-bg: #faf7f2;             /* warm cream background */
+    --color-surface: #ffffff;
+    --color-surface-warm: #fdf9f3;
+
+    --color-text: #2d2635;
+    --color-text-secondary: #554b60;
+    --color-muted: #73656d;          /* AA 4.5:1 on surface */
+
+    --color-border: #e4d8dc;
+    --color-border-light: #ede5e8;
+
+    /* ── Semantic (text + -bg pair) ────────────────────────────────────── */
+    --color-success: #2e6043;  --color-success-bg: #edf5f0;
+    --color-warning: #8a6800;  --color-warning-bg: #fdf8e8;
+    --color-error: #8a2c2c;    --color-error-bg: #fdf0f0;
+    --color-info: #3d5a8c;     --color-info-bg: #edf2f8;
+
+    /* ── Radius (DESIGN.md: sm 8 · md 12 · lg 18 — friendly, not bubble) ── */
+    --radius-sm: 8px;
+    --radius-md: 12px;
+    --radius-lg: 18px;
+    --radius-full: 9999px;
+    --radius: 12px; /* shadcn base */
+
+    /* ── Soft depth — separates cards for older eyes (DESIGN.md: not flat) ─ */
+    --shadow-soft: 0 1px 2px rgba(85, 75, 104, 0.06), 0 1px 1px rgba(85, 75, 104, 0.04);
+    --shadow-medium: 0 2px 8px rgba(85, 75, 104, 0.08), 0 1px 2px rgba(85, 75, 104, 0.05);
+    --shadow-deep: 0 8px 24px rgba(85, 75, 104, 0.12), 0 2px 6px rgba(85, 75, 104, 0.06);
+
+    /* ── shadcn-compat aliases (mapped to brand tokens) ────────────────── */
+    --background: var(--color-bg);
+    --foreground: var(--color-text);
+    --card: var(--color-surface);
+    --card-foreground: var(--color-text);
+    --popover: var(--color-surface);
+    --popover-foreground: var(--color-text);
+    --primary: var(--color-primary);
+    --primary-foreground: #ffffff;
+    --secondary: var(--color-primary-subtle);
+    --secondary-foreground: var(--color-primary);
+    --muted-color: var(--color-border-light);
+    --muted-foreground: var(--color-muted);
+    --accent: var(--color-cream-light);
+    --accent-foreground: var(--color-primary);
+    --destructive: var(--color-error);
+    --destructive-foreground: #ffffff;
+    --border: var(--color-border);
+    --input: var(--color-border);
+    --ring: var(--color-primary);
+  }
+
+  * {
+    border-color: var(--color-border);
+  }
+
+  html {
+    /* 18px base — never below 16px (DESIGN.md accessibility baseline) */
+    font-size: 18px;
+    -webkit-text-size-adjust: 100%;
+  }
+
+  body {
+    font-family: "Hanken Grotesk", ui-sans-serif, system-ui, sans-serif;
+    background-color: var(--color-bg);
+    color: var(--color-text);
+    font-size: 1rem; /* 18px */
+    line-height: 1.55;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* Money + data read at a glance — tabular figures (the GCash lesson). */
+  .tabular-amount {
+    font-variant-numeric: tabular-nums;
+    letter-spacing: -0.01em;
+  }
+}
