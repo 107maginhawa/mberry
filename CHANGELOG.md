@@ -4,6 +4,20 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+## [0.1.4.0] - 2026-06-27
+
+### Added
+- **Slice-1 — login-free dues pay-link over PayMongo (test mode).** A member can tap an officer-sent pay-link, land on a no-login page, and pay dues (GCash / Maya / card) straight into the chapter's **own** PayMongo connected account — the founder is never in the money flow. Double-tapping the link can never double-charge: the token is claimed with a single-winner DB mutex before PayMongo is ever called, and a per-attempt Idempotency-Key makes a lost-response retry return the same checkout session.
+- **Per-org PayMongo webhook** (`POST /webhooks/paymongo/:organizationId`) that verifies each event with **that org's** webhook secret, validates amount/currency/org against the recorded payment, and settles atomically. Claim-dedupe and settlement run in one transaction, so a crash mid-settle rolls back cleanly and the provider's redelivery reconciles instead of being silently deduped away.
+- **Officer revoke** (`POST /org/:organizationId/payments/:tokenId/revoke`) — kill an unused pay-link; org-scoped with no cross-org existence leak.
+- Per-org gateway resolver that decrypts each org's stored PayMongo secret per request; optional `Idempotency-Key` on the checkout adapter.
+
+### Fixed
+- **Latent lost-money bug:** collected online dues now actually reconcile into reports. Settlement moves the payment `pending → completed`, the invoice `→ paid`, and stamps the token used in a single lock-ordered, idempotent transaction — proven by a regression test asserting `totalCollected` moves 0 → amount and stays put on redelivery.
+
+### Changed
+- Re-pointed `POST /pay/:token/checkout` from Stripe to PayMongo behind the existing billing seam (additive; orphan handlers untouched). Schema gains additive pay-link columns (claim/session/revoke, per-org webhook secret) and invoice currency (PHP, centavos).
+
 ## [0.1.3.0] - 2026-06-26
 
 ### Added
