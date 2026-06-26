@@ -112,7 +112,7 @@ export async function paymongoWebhook(
     // latent double-charge break. Safe in practice (checkout always writes paymentId
     // AND paymentTokenId into the same metadata object) but must be observable.
     if (res.settled && !tokenId) {
-      logger.warn(
+      logger?.warn(
         { action: 'paymongoWebhook.settledWithoutTokenId', paymentId, gatewayEventId: event.gatewayEventId },
         'Settled a PayMongo pay-link payment with no paymentTokenId in metadata — token not burned (link remains re-usable)',
       );

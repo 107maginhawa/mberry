@@ -138,7 +138,7 @@ export async function checkoutPaymentToken(
   } catch (err) {
     // Money-path observability: the underlying PayMongo failure is otherwise
     // swallowed by the blanket 502 below — log it before mapping the response.
-    logger.error(
+    logger?.error(
       {
         action: 'checkoutPaymentToken.paymongoFailed',
         tokenId: token.id,
