@@ -1,5 +1,5 @@
-import { useQuery } from '@tanstack/react-query'
-import { validatePaymentToken } from '@monobase/sdk-ts/generated'
+import { useQuery, useMutation } from '@tanstack/react-query'
+import { validatePaymentToken, checkoutPaymentToken } from '@monobase/sdk-ts/generated'
 
 export type PayState =
   | { kind: 'loading' }
@@ -9,7 +9,13 @@ export type PayState =
   | { kind: 'cancelled'; amount: number; currency: string; orgName: string; memberName: string; dueDate: string }
   | { kind: 'notConfigured' } | { kind: 'temporaryError' }
 
-export function usePayLink(token: string): { state: PayState; pay: () => void } {
+const CHECKOUT_MAX_RETRIES = 3
+const CHECKOUT_RETRY_DELAY_MS = 1500
+
+export function usePayLink(
+  token: string,
+  { navigate = (url: string) => window.location.assign(url) }: { navigate?: (url: string) => void } = {}
+): { state: PayState; pay: () => void } {
   const q = useQuery({
     queryKey: ['pay-validate', token],
     // SDK does NOT throw on non-2xx and returns data:undefined on transport error.
@@ -21,14 +27,59 @@ export function usePayLink(token: string): { state: PayState; pay: () => void } 
       return data
     },
   })
+
+  const mutation = useMutation<PayState, Error>({
+    mutationFn: async (): Promise<PayState> => {
+      let retries = 0
+      // Plain async loop: retry logic lives entirely in the mutationFn so
+      // fake-timer tests can advance past the ~1500ms delay without fighting
+      // React Query's internal retry mechanics.
+      while (true) {
+        const { data, response } = await checkoutPaymentToken({ path: { token } })
+        // SDK returns { data, response } and does NOT throw on non-2xx.
+        const status = (response as Response).status
+        const errMsg = typeof (data as any)?.error === 'string' ? (data as any).error as string : ''
+
+        if (status === 200) {
+          navigate((data as any).checkoutUrl as string)
+          return { kind: 'succeeded' }
+        }
+        if (status === 202) {
+          retries++
+          if (retries >= CHECKOUT_MAX_RETRIES) return { kind: 'temporaryError' }
+          // Bounded: at most CHECKOUT_MAX_RETRIES attempts before giving up.
+          await new Promise<void>(r => setTimeout(r, CHECKOUT_RETRY_DELAY_MS))
+          continue
+        }
+        if (status === 400) return { kind: 'notConfigured' }
+        if (status === 409) return { kind: 'alreadyPaid' }
+        if (status === 410) return /expired/i.test(errMsg) ? { kind: 'expired' } : { kind: 'invalid' }
+        // 502 or any unexpected status → transient error, retryable
+        return { kind: 'temporaryError' }
+      }
+    },
+  })
+
+  // State resolution: checkout-side takes precedence once pay() is invoked.
   let state: PayState = { kind: 'loading' }
-  const d = q.data as any
-  if (q.isError) state = { kind: 'temporaryError' }
-  else if (d) {
-    if (d.valid) state = { kind: 'payable', amount: Number(d.amount), currency: d.currency, orgName: d.orgName, memberName: d.memberName, dueDate: d.dueDate }
-    else if (d.status === 'already_paid') state = { kind: 'alreadyPaid' }
-    else if (typeof d.error === 'string' && /expired/i.test(d.error)) state = { kind: 'expired' }
-    else state = { kind: 'invalid' }
+
+  if (mutation.isPending) {
+    state = { kind: 'paying' }
+  } else if (mutation.isSuccess && mutation.data) {
+    state = mutation.data
+  } else if (mutation.isError) {
+    state = { kind: 'temporaryError' }
+  } else {
+    // Validate-side mapping (pre-pay states — Task 2, unchanged)
+    const d = q.data as any
+    if (q.isError) state = { kind: 'temporaryError' }
+    else if (d) {
+      if (d.valid) state = { kind: 'payable', amount: Number(d.amount), currency: d.currency, orgName: d.orgName, memberName: d.memberName, dueDate: d.dueDate }
+      else if (d.status === 'already_paid') state = { kind: 'alreadyPaid' }
+      else if (typeof d.error === 'string' && /expired/i.test(d.error)) state = { kind: 'expired' }
+      else state = { kind: 'invalid' }
+    }
   }
-  return { state, pay: () => { /* Task 3 */ } }
+
+  return { state, pay: () => mutation.mutate() }
 }
