@@ -39,8 +39,8 @@
 - `502 { error }` — PayMongo network failure (retryable)
 
 SDK (generated): `import { validatePaymentToken, checkoutPaymentToken } from '@monobase/sdk-ts/generated'` →
-`validatePaymentToken({ path: { token } })` → `{ data: PaymentTokenValidation }`;
-`checkoutPaymentToken({ path: { token } })` → `{ data: { checkoutUrl } }` (and HTTP status). React-query helpers exist (`validatePaymentTokenOptions`, `checkoutPaymentTokenMutation`) but this plan uses the raw SDK fns inside one hook for full control of the 202-retry + status mapping. SDK client config: `import { client } from '@monobase/sdk-ts'` → `client.setConfig({ baseUrl })`.
+`validatePaymentToken({ path: { token } })` → `{ data, error, response }` (does NOT throw on non-2xx; `response.status` IS surfaced; `data` is `undefined` on transport error);
+`checkoutPaymentToken({ path: { token } })` → `{ data: { checkoutUrl }, response }` — read `response.status` for the 200/202/400/409/410/502 mapping. React-query helpers exist but this plan uses the raw SDK fns inside one hook for full control of the 202-retry + status mapping. **SDK client config (CORRECTED — `@monobase/sdk-ts` has NO root export; `client` lives in generated):** `import { client } from '@monobase/sdk-ts/generated/client.gen'` → `client.setConfig({ baseUrl })`. (Do NOT use `@monobase/sdk-ts/client`'s `setSdkBaseUrl` — its own doc says use `client.setConfig`.)
 
 ---
 
@@ -53,7 +53,8 @@ apps/member/
   tsconfig.json             # extends @monobase/typescript-config
   tailwind.config.ts        # presets:[@monobase/ui preset]; content: src + packages/ui/src
   postcss.config.ts         # tailwindcss + autoprefixer
-  vitest.config.ts          # jsdom env, setup file, @monobase/vitest-test-shim if applicable
+  vitest.config.ts          # happy-dom env, globals:true, setupFiles importing @testing-library/jest-dom/vitest. DO NOT add @monobase/vitest-test-shim (it is a `"vitest":"99.99.99"` stub that shadows real vitest — apps/member needs REAL vitest+Testing Library)
+  src/test-setup.ts         # import '@testing-library/jest-dom/vitest'
   playwright.config.ts      # baseURL http://localhost:3004
   index.html                # Vite entry + Hanken Grotesk
   src/
@@ -82,8 +83,8 @@ services/api-ts/scripts/
 ## Task 1: Scaffold `apps/member` (blank app boots on 3004)
 
 **Files:**
-- Create: `apps/member/package.json`, `vite.config.ts`, `tsconfig.json`, `tailwind.config.ts`, `postcss.config.ts`, `vitest.config.ts`, `index.html`, `src/main.tsx`, `src/styles.css`, `src/routes/__root.tsx`, `src/routes/index.tsx` (temporary placeholder), `src/vite-env.d.ts`
-- Modify: root `package.json` (ensure `apps/*` in `workspaces`)
+- Create: `apps/member/package.json`, `vite.config.ts`, `tsconfig.json`, `tailwind.config.ts`, `postcss.config.ts`, `vitest.config.ts`, `src/test-setup.ts`, `index.html`, `src/main.tsx`, `src/styles.css`, `src/routes/__root.tsx`, `src/routes/index.tsx` (temporary placeholder), `src/routeTree.gen.ts` (generated, committed), `src/vite-env.d.ts`
+- (Root `package.json` already has `apps/*` in `workspaces` — no change.)
 
 **Interfaces:**
 - Produces: a runnable app (`bun run --filter @monobase/member dev` on :3004), `client.setConfig({ baseUrl })` wired, Tailwind resolving `@monobase/ui` tokens. Later tasks add routes/features.
@@ -109,14 +110,14 @@ Read `/Users/elad-mini/desktop/memberry-full/apps/memberry/{package.json,vite.co
   "dependencies": {
     "@monobase/sdk-ts": "workspace:*",
     "@monobase/ui": "workspace:*",
-    "@tanstack/react-query": "<match root>",
-    "@tanstack/react-router": "<match root>",
+    "@tanstack/react-query": "^5 (match sdk-ts peer)",
+    "@tanstack/react-router": "<from the REFERENCE app — no current workspace depends on tanstack-router; do NOT 'match root'>",
     "react": "<match root>",
     "react-dom": "<match root>"
   },
   "devDependencies": {
     "@monobase/typescript-config": "workspace:*",
-    "@tanstack/router-plugin": "<match root>",
+    "@tanstack/router-plugin": "<from the REFERENCE app — not root>",
     "@vitejs/plugin-react": "<match root>",
     "@testing-library/react": "<latest compatible>",
     "@testing-library/jest-dom": "<latest>",
@@ -174,7 +175,7 @@ import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { createRouter, RouterProvider } from '@tanstack/react-router'
-import { client } from '@monobase/sdk-ts'
+import { client } from '@monobase/sdk-ts/generated/client.gen'
 import { routeTree } from './routeTree.gen'
 import './styles.css'
 
@@ -188,17 +189,19 @@ createRoot(document.getElementById('root')!).render(
 `src/routes/__root.tsx`: `createRootRoute({ component: () => <Outlet /> })`.
 `src/routes/index.tsx` (placeholder, replaced/kept minimal): renders `Memberry` heading so dev boot is verifiable.
 
-- [ ] **Step 6: Install + verify boot + typecheck**
+- [ ] **Step 6: Generate routeTree FIRST, then typecheck/build**
 
-Run: `bun install` then `bun run --filter @monobase/member typecheck` → clean. Then `bun run --filter @monobase/member build` → succeeds (generates `routeTree.gen.ts`). Optionally `bun run --filter @monobase/member dev` and confirm http://localhost:3004 serves the placeholder.
-Expected: typecheck 0 errors, build succeeds.
+`main.tsx` imports `./routeTree.gen` which only exists after the tanstack-router generator runs — so `tsc --noEmit` on a fresh tree fails "Cannot find module './routeTree.gen'". Generate it before typecheck and COMMIT it (the reference app commits it; do not gitignore it).
+Run: `bun install`; generate the route tree (`bun run --filter @monobase/member build` does this, or add a `tsr generate` script and run it); THEN `bun run --filter @monobase/member typecheck` → 0 errors; `bun run --filter @monobase/member build` → succeeds. Optionally `dev` and confirm http://localhost:3004.
+Expected: routeTree.gen.ts exists + committed, typecheck 0 errors, build succeeds.
 
-- [ ] **Step 7: Commit**
+- [ ] **Step 7: Commit** (include the generated routeTree)
 
 ```bash
-git add apps/member package.json
+git add apps/member
 git commit -m "feat(member): scaffold lean apps/member (vite+tanstack+packages/ui+sdk proxy, :3004)"
 ```
+(Root `package.json` already has `apps/*` in `workspaces` — no edit needed.)
 
 ---
 
@@ -255,7 +258,8 @@ vi.mock('@monobase/sdk-ts/generated', () => ({
 import { validatePaymentToken } from '@monobase/sdk-ts/generated'
 import { usePayLink } from './use-pay-link'
 
-const wrapper = ({ children }: { children: React.ReactNode }) => (
+// import type { ReactNode } from 'react'  (don't rely on a global React)
+const wrapper = ({ children }: { children: ReactNode }) => (
   <QueryClientProvider client={new QueryClient({ defaultOptions: { queries: { retry: false } } })}>{children}</QueryClientProvider>
 )
 const mockValidate = (data: unknown) => (validatePaymentToken as any).mockResolvedValue({ data })
@@ -304,11 +308,19 @@ export type PayState =
 export function usePayLink(token: string): { state: PayState; pay: () => void } {
   const q = useQuery({
     queryKey: ['pay-validate', token],
-    queryFn: async () => (await validatePaymentToken({ path: { token } })).data,
+    // SDK does NOT throw on non-2xx and returns data:undefined on transport error.
+    // Throw so a network failure surfaces as an error (→ temporaryError) instead of
+    // resolving undefined and hanging on `loading` forever (I3).
+    queryFn: async () => {
+      const { data } = await validatePaymentToken({ path: { token } })
+      if (!data) throw new Error('validate failed')
+      return data
+    },
   })
   let state: PayState = { kind: 'loading' }
   const d = q.data as any
-  if (d) {
+  if (q.isError) state = { kind: 'temporaryError' }
+  else if (d) {
     if (d.valid) state = { kind: 'payable', amount: d.amount, currency: d.currency, orgName: d.orgName, memberName: d.memberName, dueDate: d.dueDate }
     else if (d.status === 'already_paid') state = { kind: 'alreadyPaid' }
     else if (typeof d.error === 'string' && /expired/i.test(d.error)) state = { kind: 'expired' }
@@ -394,7 +406,7 @@ it('502 → temporaryError', async () => { /* mockCheckout(502,...) → temporar
 
 **Interfaces:**
 - Consumes: `usePayLink`, `centavosToPhp`, `@monobase/ui` (`Button`, card/layout, `ErrorState`, `EmptyState`, `StatusBadge`).
-- Produces: `pay/$token.tsx` route — reads `token` param + `?status` search, calls `usePayLink`, renders by `state.kind`. `PayCard` (payable/cancelled): org header, big `.tabular-amount` amount, member + due rows, ≥48px **Pay now** button → `pay()`. `PayResult` (succeeded/alreadyPaid/expired/invalid/notConfigured/temporaryError): icon+label+copy, `role="alert"` for errors, retry button on `temporaryError`.
+- Produces: `pay/$token.tsx` route — reads `token` param + `?status` search, calls `usePayLink`, renders by `state.kind`. `PayCard` (payable/cancelled): org header, big `.tabular-amount` amount, member name + a "link valid until" row (NOTE: validate's `dueDate` is the token's 72h `expiresAt`, NOT the invoice due date — use copy like "Pay by" / "Link valid until", not "Due date"), ≥48px **Pay now** button → `pay()`. `PayResult` (succeeded/alreadyPaid/expired/invalid/notConfigured/temporaryError): icon+label+copy, `role="alert"` for errors, retry button on `temporaryError`.
 
 - [ ] **Step 1: Write `pay-page.test.tsx`** (render route component with `usePayLink` mocked per state):
   - `payable` → amount text `₱2,500.00` visible, "Pay now" button present + ≥enabled, clicking calls `pay`.
@@ -416,8 +428,8 @@ it('502 → temporaryError', async () => { /* mockCheckout(502,...) → temporar
 **Interfaces:**
 - Produces: a script (run with the API's DB env) that ensures Dr. Olive's org + a member (person) + a dues invoice exist, sets a per-org PayMongo gateway config with `encryptCredential(...)`-encrypted **placeholder** `sk_test_...` (NOT raw plaintext — the existing `db:seed` bug), mints a real pay-link, and prints `http://localhost:3004/pay/<token>`.
 
-- [ ] **Step 1: Read the real paths** — `services/api-ts/src/seed/layer-1-foundation.ts`, `layer-5-gap-fill.ts` (gateway insert), `layer-7-dues.ts` (token), `src/core/gateway.ts` (`encryptCredential`, the key = `config.auth.secret`), and the `send-link` handler (`POST /org/:org/payments/send-link`, `generatePaymentLink`/`sendPaymentLink`) for the canonical token-mint path + `hashPaymentToken`. Prefer reusing the existing repo functions over hand SQL.
-- [ ] **Step 2: Implement** — idempotent: upsert org/member/invoice; upsert gateway config with `encryptCredential('sk_test_placeholder', config.auth.secret)`, `connected: true`, and an encrypted webhook secret; mint a token the SAME way `send-link` does (so `validatePaymentToken` resolves it — it looks up by `hashPaymentToken(raw, getPaymentTokenSecret())`). Print the raw token URL.
+- [ ] **Step 1: Read the real paths** — `services/api-ts/src/seed/layer-1-foundation.ts`, `layer-5-gap-fill.ts` (gateway insert), `src/core/gateway.ts` (`encryptCredential`), `src/core/config.ts` (`auth.secret = env.AUTH_SECRET`), and **`sendPaymentLink.ts`** (the WIRED mint path). **CRITICAL — there are two token systems; use the right one:** the wired `validatePaymentToken` resolves ONLY slice-1 `payment_token` rows, looked up by `hashPaymentToken(raw, getPaymentTokenSecret())`. So mint via `sendPaymentLink`'s exact path: `const raw = generatePaymentToken(getPaymentTokenSecret()); new PaymentTokenRepository(db).create({ tokenHash: hashPaymentToken(raw, getPaymentTokenSecret()), personId, organizationId, invoiceId, amount, currency, expiresAt, createdByOfficer })`. **Do NOT use `generatePaymentLink`** (legacy, keyed on `PAYMENT_LINK_SECRET`, feeds the dead `validatePaymentLink` orphan). Call the repo DIRECTLY — do not hit the HTTP `send-link` route (it's officer-authed; a script has no session).
+- [ ] **Step 2: Implement** — idempotent: upsert org/member/invoice; upsert the per-org gateway config with `encryptCredential('sk_test_placeholder', authSecret)` + an encrypted webhook secret, `connected: true`, where `authSecret = process.env.AUTH_SECRET` (I4 — MUST match the running API's `AUTH_SECRET`, since `checkoutPaymentToken` decrypts with `config.auth.secret = env.AUTH_SECRET`; a mismatch fails checkout decryption). Mint the token via the repo path above. Print `http://localhost:3004/pay/<raw>`.
 - [ ] **Step 3: Verify end-to-end (real-PG dev DB)** — start a Postgres + the API (`bun dev`), run `bun run scripts/seed-paylink.ts`, then `curl http://localhost:7213/pay/<token>/validate` → `{ valid: true, amount: ... }`. (Document the exact commands in the script header.)
 - [ ] **Step 4: Commit** `chore(dev): seed-paylink helper — real openable test pay link (encrypted gateway)`.
 
@@ -447,7 +459,7 @@ it('502 → temporaryError', async () => { /* mockCheckout(502,...) → temporar
 - Produces: CI runs `apps/member` typecheck + unit tests + build. (E2E stays local for now — needs the live stack + seed; add a NOTE for a later e2e job once a seed-in-CI exists.)
 
 - [ ] **Step 1: Confirm fan-out** — `bun run --filter '*' typecheck` and `lint` include `@monobase/member`. Fix tsconfig/eslint config so the new app is covered (mirror `packages/ui`'s wiring).
-- [ ] **Step 2: Add CI job** — a `member` job in `ci.yml`: setup-bun, `bun install --frozen-lockfile`, `bun run --filter @monobase/member typecheck`, `... test`, `... build`. Add it to `ci-gate` `needs`. NOTE-mark a future `e2e-member` job (deferred — needs live API + seed-in-CI).
+- [ ] **Step 2: Add CI job** — a `member` job in `ci.yml`: setup-bun, `bun install --frozen-lockfile`, then **build FIRST** (or run the `tsr generate` step) so `routeTree.gen.ts` exists, THEN `typecheck`, then `test`. Order: `bun run --filter @monobase/member build` → `... typecheck` → `... test`. (If routeTree is committed per Task 1, typecheck-first is fine — but build-first is robust either way.) Add the job to `ci-gate` `needs`. NOTE-mark a future `e2e-member` job (deferred — needs live API + seed-in-CI).
 - [ ] **Step 3: Run the full local gate** — `bun run typecheck` (all workspaces, 0 errors), `bun run --filter @monobase/member test` (green), `bun run --filter @monobase/member build` (green). Engine untouched: `git diff main -- services/api-ts/src` shows ONLY `scripts/seed-paylink.ts` (Task 6) added, no handler/schema changes.
 - [ ] **Step 4: Commit** `ci(member): typecheck+unit+build job for apps/member; lean-app fan-out`.
 
