@@ -4,6 +4,14 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+## [0.1.5.0] - 2026-06-27
+
+### Added
+- **Slice-2a — first-peso login-free pay-link page (`apps/member`).** A new minimal Vite + React + TanStack Router app — the canonical lean-app scaffold every later app copies — with one login-free route `/pay/:token`. A member opens a tokenized dues link, sees the amount GCash-style (`₱X,XXX.00`, tabular figures), taps **Pay now**, completes a PayMongo (test-mode) checkout into the org's own account, and lands on a clear paid / cancelled / error result. Built on `@monobase/ui` Friendly-Clarity tokens with the older-dentist accessibility baseline (18px base, ≥48px tap targets, WCAG AA, `role="alert"` on errors, labeled controls).
+- **`usePayLink` state machine** — a single testable hook encapsulating validate + checkout + bounded 202-retry (3 attempts, no infinite loop) + `?status=success|cancelled` return handling, mapping every engine response (200/202/400/409/410/502) to a discriminated UI state. Double-tap can't fire two checkouts; a returned `cancelled` link can be re-paid and surfaces real outcomes instead of getting stuck.
+- **Dev seed helper** (`services/api-ts/scripts/seed-paylink.ts`) that mints a real openable pay-link the wired engine can validate (slice-1 `payment_token` path) and encrypts the per-org gateway secret with the running API's `AUTH_SECRET`, so checkout decryption works end-to-end.
+- Unit tests (SDK mocked, 31 tests) covering every state transition + a mocked-PayMongo Playwright E2E of the pay flow. A CI `member` job (build → typecheck → test) gates the new app.
+
 ## [0.1.4.0] - 2026-06-27
 
 ### Added
