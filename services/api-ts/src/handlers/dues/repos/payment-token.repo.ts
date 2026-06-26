@@ -31,6 +31,16 @@ export class PaymentTokenRepository {
     return row;
   }
 
+  /** Look up a token by primary-key id (used by officer revoke for org-scope check). */
+  async findById(id: string): Promise<PaymentToken | undefined> {
+    const [row] = await this.db
+      .select()
+      .from(paymentTokens)
+      .where(eq(paymentTokens.id, id))
+      .limit(1);
+    return row;
+  }
+
   /**
    * Find token by hash with joined person and org names for validation response.
    */
