@@ -81,5 +81,5 @@ export function usePayLink(
     }
   }
 
-  return { state, pay: () => mutation.mutate() }
+  return { state, pay: () => { if (mutation.isPending) return; mutation.mutate() } }
 }

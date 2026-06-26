@@ -127,3 +127,50 @@ it('502 → temporaryError', async () => {
   act(() => result.current.pay())
   await waitFor(() => expect(result.current.state.kind).toBe('temporaryError'))
 })
+
+it('double-tap guard — second pay() while in-flight is a no-op', async () => {
+  mockValidate({ valid: true, amount: 1, currency: 'PHP', memberName: 'a', orgName: 'b', dueDate: 'c' })
+  // Use a hanging promise so the mutation stays in-flight long enough to test the guard.
+  let resolveCheckout!: (v: unknown) => void
+  ;(checkoutPaymentToken as any).mockImplementation(
+    () => new Promise(r => { resolveCheckout = r })
+  )
+  const navigate = vi.fn()
+  const { result } = renderHook(() => usePayLink('tok', { navigate }), { wrapper })
+  await waitFor(() => expect(result.current.state.kind).toBe('payable'))
+
+  // First call — mutation enters pending (isPending=true after React flushes the update).
+  act(() => result.current.pay())
+  // result.current now reflects the re-rendered hook (isPending===true);
+  // second call must be a no-op.
+  await waitFor(() => expect(result.current.state.kind).toBe('paying'))
+  act(() => result.current.pay())
+
+  // Resolve the single in-flight request and confirm only one request was made.
+  await act(async () => { resolveCheckout({ data: { checkoutUrl: 'https://pm.test/cs_1' }, response: { status: 200 } }) })
+  await waitFor(() => expect(navigate).toHaveBeenCalled())
+  expect(checkoutPaymentToken).toHaveBeenCalledTimes(1)
+})
+
+it('202 exhausted (3 calls) → temporaryError, never navigates', async () => {
+  // CHECKOUT_MAX_RETRIES=3: attempt 1 (202, delay), attempt 2 (202, delay), attempt 3 (202, retries>=3 → exit)
+  // = 3 total checkoutPaymentToken calls, 2×1500ms delays = 3000ms total.
+  mockValidate({ valid: true, amount: 1, currency: 'PHP', memberName: 'a', orgName: 'b', dueDate: 'c' })
+  mockCheckout(202, { checkoutUrl: '' })
+  const navigate = vi.fn()
+  const { result } = renderHook(() => usePayLink('tok', { navigate }), { wrapper })
+  await waitFor(() => expect(result.current.state.kind).toBe('payable'))
+
+  vi.useFakeTimers()
+  try {
+    act(() => result.current.pay())
+    // Advance past both retry delays (2 × 1500ms)
+    await act(() => vi.advanceTimersByTimeAsync(3100))
+  } finally {
+    vi.useRealTimers()
+  }
+
+  await waitFor(() => expect(result.current.state.kind).toBe('temporaryError'))
+  expect(checkoutPaymentToken).toHaveBeenCalledTimes(3)
+  expect(navigate).not.toHaveBeenCalled()
+})
