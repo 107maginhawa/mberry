@@ -25,13 +25,15 @@ export class PayMongoAdapter implements GatewayAdapter {
     private webhookSecret: string,
   ) {}
 
-  async createCheckout(opts: CheckoutOpts): Promise<CheckoutResult> {
+  async createCheckout(opts: CheckoutOpts, idempotencyKey?: string): Promise<CheckoutResult> {
+    const headers: Record<string, string> = {
+      'Content-Type': 'application/json',
+      'Authorization': `Basic ${btoa(this.secretKey + ':')}`,
+    };
+    if (idempotencyKey) headers['Idempotency-Key'] = idempotencyKey;
     const response = await fetch('https://api.paymongo.com/v1/checkout_sessions', {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Basic ${btoa(this.secretKey + ':')}`,
-      },
+      headers,
       body: JSON.stringify({
         data: {
           attributes: {
