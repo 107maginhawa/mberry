@@ -4,6 +4,12 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+## [0.1.3.0] - 2026-06-26
+
+### Added
+- **T8 — "Friendly Clarity" design system in `packages/ui`.** Design tokens (`tokens.css`) and a shared Tailwind preset (`tailwind-preset.ts`) that every lean app (org, member, console) extends — one design language, no per-app forks. Plum + cream palette, Hanken Grotesk, 18px root type scale, 8px spacing, ≥48px tap targets, and the older-dentist accessibility baseline from DESIGN.md.
+- **Shared pattern components:** `StatusBadge` (text + color membership statuses, never color alone), `EmptyState`, `ErrorState` (`role="alert"` + retry), and `ConfirmDialog` (consequential-mutation guard with a type-to-confirm `irreversible` variant). All exported from `@monobase/ui`.
+
 ## [0.1.2.1] - 2026-06-24
 
 ### Removed
