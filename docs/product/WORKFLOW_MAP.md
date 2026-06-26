@@ -76,7 +76,7 @@ Pipeline Stage: Phase A -- Workflow Discovery
 
 | WF-ID | Module | Type | Description | Source |
 |-------|--------|------|-------------|--------|
-| WF-038 | M06 | lifecycle | Pay Dues Online: member initiates payment, gateway processes, webhook confirms | PRD |
+| WF-038 | M06 | lifecycle | Pay Dues Online (lean/PayMongo): officer sends tokenized pay-link (POST /org/:orgId/payments/send-link); member (login-free) POSTs /pay/:token/checkout → PayMongo session; PayMongo POSTs /webhooks/paymongo/:orgId to confirm; officer revokes via DELETE /org/:orgId/payments/:tokenId/revoke. BRs: BR-78 single-use, BR-79 TTL, BR-80 revocable, BR-81 idempotent, BR-82 webhook-sig, BR-83 amount-validation, BR-84 per-org-settlement, BR-85 PHP-centavos. Backend tests: payment-token.repo.test.ts, checkoutPaymentToken.integration.test.ts, paymongoWebhook.integration.test.ts, dues-payments.settle.test.ts, revokePaymentLink.test.ts | slice-1 |
 | WF-039 | M06 | lifecycle | Fund Allocation: automatic split on every payment (chapter, national, special) | PRD |
 | WF-040 | M06 | admin | Dues Config: set amount, currency, billing cycle per org | PRD |
 | WF-041 | M06 | lifecycle | Refund Processing: treasurer-initiated, reverses expiry extension | PRD |

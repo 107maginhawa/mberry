@@ -1255,5 +1255,133 @@
       "e2e": []
     },
     "annotations": "2026-06-23 (R4-1): COMPLETE — booking-validation.hurl asserts minBookingMinutes>4320 (72h) → 400 at the wire (zod range). Minted 2026-06-02 to resolve TR-P1-001. DB CHECK constraint on bookingEvent.minBookingMinutes. Backs WF-115."
+  },
+  "BR-78": {
+    "rule": "Pay-link single-use",
+    "phase": 2,
+    "module": "M06",
+    "ruleClass": "p0-security",
+    "tests": {
+      "backend": [
+        "services/api-ts/src/handlers/dues/repos/payment-token.repo.test.ts",
+        "services/api-ts/src/handlers/member/duesspecialassessments/checkoutPaymentToken.integration.test.ts"
+      ],
+      "contract": [
+        "specs/api/tests/contract/dues-extended-flow.hurl",
+        "specs/api/tests/contract/member/dues-special-assessments/payment-token-validate.hurl"
+      ],
+      "e2e": []
+    },
+    "annotations": "Slice-1 lean dues pay-link. usedAt is set permanently on confirmed payment; markUsedCas CAS prevents any re-use. checkoutPaymentToken.integration.test: used-token → 409. Backs WF-038 lean."
+  },
+  "BR-79": {
+    "rule": "Pay-link TTL",
+    "phase": 2,
+    "module": "M06",
+    "ruleClass": "p1-business",
+    "tests": {
+      "backend": [
+        "services/api-ts/src/handlers/dues/repos/payment-token.repo.test.ts",
+        "services/api-ts/src/handlers/member/duesspecialassessments/checkoutPaymentToken.integration.test.ts"
+      ],
+      "contract": [
+        "specs/api/tests/contract/member/dues-special-assessments/payment-token-validate.hurl",
+        "specs/api/tests/contract/dues-extended-flow.hurl"
+      ],
+      "e2e": []
+    },
+    "annotations": "Slice-1. Token is unusable past expiresAt (default 72 h, operator-tunable); re-issue mints a new token. checkoutPaymentToken.integration.test: expired-token → 410. payment-token-validate.hurl exercises the validate endpoint which surfaces expiry state. Backs WF-038 lean."
+  },
+  "BR-80": {
+    "rule": "Pay-link revocable",
+    "phase": 2,
+    "module": "M06",
+    "ruleClass": "p1-business",
+    "tests": {
+      "backend": [
+        "services/api-ts/src/handlers/member/duesspecialassessments/revokePaymentLink.test.ts",
+        "services/api-ts/src/handlers/dues/repos/payment-token.repo.test.ts"
+      ],
+      "contract": [],
+      "e2e": []
+    },
+    "annotations": "Slice-1. Officer sets revokedAt via DELETE /org/:orgId/payments/:tokenId/revoke; revoked token is thereafter unusable (checkout → 410). revokePaymentLink.test: 200 happy-path + org-scope 404 + already-used/revoked CAS false → 404. Contract hurl for the revoke route is deferred until apps/org ships (no frontend yet). KNOWN_INCOMPLETE allowlisted."
+  },
+  "BR-81": {
+    "rule": "Pay-link idempotent",
+    "phase": 2,
+    "module": "M06",
+    "ruleClass": "p0-security",
+    "tests": {
+      "backend": [
+        "services/api-ts/src/handlers/member/duesspecialassessments/checkoutPaymentToken.integration.test.ts"
+      ],
+      "contract": [
+        "specs/api/tests/contract/dues-extended-flow.hurl"
+      ],
+      "e2e": []
+    },
+    "annotations": "Slice-1. ≤1 PayMongo checkout session and ≤1 settlement per token under any concurrency. checkoutPaymentToken.integration.test: concurrent double-tap → createCheckout called exactly once, both responses return the same checkout_url (no double-charge). dues-extended-flow.hurl exercises the checkout route at the wire. Backs WF-038 lean."
+  },
+  "BR-82": {
+    "rule": "Webhook signature trust boundary",
+    "phase": 2,
+    "module": "M06",
+    "ruleClass": "p0-security",
+    "tests": {
+      "backend": [
+        "services/api-ts/src/handlers/member/duesspecialassessments/paymongoWebhook.integration.test.ts"
+      ],
+      "contract": [],
+      "e2e": []
+    },
+    "annotations": "Slice-1. State changes only on a per-org HMAC-verified PayMongo event; tampered or unsigned payloads → 400. paymongoWebhook.integration.test: bad-sig → 400, missing-sig → 400, valid-sig → processes. No contract hurl: inbound PayMongo webhook is a server-to-server push with no public-UI route shape. KNOWN_INCOMPLETE allowlisted."
+  },
+  "BR-83": {
+    "rule": "Inbound amount/org validation",
+    "phase": 2,
+    "module": "M06",
+    "ruleClass": "p0-security",
+    "tests": {
+      "backend": [
+        "services/api-ts/src/handlers/member/duesspecialassessments/paymongoWebhook.integration.test.ts"
+      ],
+      "contract": [],
+      "e2e": []
+    },
+    "annotations": "Slice-1. Settlement only proceeds when the PayMongo event amount+currency+orgId match the token record; mismatch → reject (no partial/cross-org credit). paymongoWebhook.integration.test: amount-mismatch → conflict, org-mismatch → reject. No contract hurl for the inbound webhook route. KNOWN_INCOMPLETE allowlisted."
+  },
+  "BR-84": {
+    "rule": "Per-org settlement",
+    "phase": 2,
+    "module": "M06",
+    "ruleClass": "p0-security",
+    "tests": {
+      "backend": [
+        "services/api-ts/src/handlers/dues/repos/dues-payments.settle.test.ts"
+      ],
+      "contract": [
+        "specs/api/tests/contract/member/dues-special-assessments/gateway-config-flow.hurl"
+      ],
+      "e2e": []
+    },
+    "annotations": "Slice-1. Dues route exclusively to the org's own PayMongo connected account; the platform secret key is never used for dues money-movement. dues-payments.settle.test: per-org atomic settlement (PHP, centavos). gateway-config-flow.hurl: proves per-org gateway config is stored/retrieved in isolation (no platform key leakage at wire). Backs WF-038 lean."
+  },
+  "BR-85": {
+    "rule": "PHP currency, centavos",
+    "phase": 2,
+    "module": "M06",
+    "ruleClass": "p1-business",
+    "tests": {
+      "backend": [
+        "services/api-ts/src/handlers/dues/repos/dues-payments.settle.test.ts",
+        "services/api-ts/src/handlers/dues/repos/payment-token.repo.test.ts"
+      ],
+      "contract": [
+        "specs/api/tests/contract/dues-extended-flow.hurl"
+      ],
+      "e2e": []
+    },
+    "annotations": "Slice-1. All dues amounts are denominated in PHP with integer centavos (no floating-point representation). dues-payments.settle.test and payment-token.repo.test assert PHP currency on token and settlement records. dues-extended-flow.hurl exercises the checkout path that carries amount+currency. Backs WF-038 lean."
   }
 }
