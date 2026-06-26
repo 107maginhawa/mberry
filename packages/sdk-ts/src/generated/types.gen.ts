@@ -24913,11 +24913,11 @@ export type PaUpdateTicketStatusRequest = {
 export type PairStatus = 'proposed' | 'active' | 'completed' | 'dissolved';
 
 /**
- * Payment checkout response with Stripe redirect URL
+ * Payment checkout response with PayMongo redirect URL
  */
 export type PaymentCheckoutResponse = {
     /**
-     * Stripe Checkout session URL to redirect the member to
+     * PayMongo Checkout session URL to redirect the member to
      */
     checkoutUrl: string;
 };
@@ -51366,6 +51366,18 @@ export type CheckoutPaymentTokenErrors = {
      * Validation error response
      */
     400: ValidationError;
+    /**
+     * Conflict response
+     */
+    409: ConflictError;
+    /**
+     * Client error
+     */
+    410: ValidationError;
+    /**
+     * Server error
+     */
+    502: ValidationError;
 };
 
 export type CheckoutPaymentTokenError = CheckoutPaymentTokenErrors[keyof CheckoutPaymentTokenErrors];
@@ -53131,6 +53143,10 @@ export type PaymongoWebhookErrors = {
      * Validation error response
      */
     400: ValidationError;
+    /**
+     * Conflict response
+     */
+    409: ConflictError;
 };
 
 export type PaymongoWebhookError = PaymongoWebhookErrors[keyof PaymongoWebhookErrors];

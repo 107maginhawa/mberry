@@ -53,9 +53,9 @@ model PaymentTokenValidation {
   status?: string;
 }
 
-@doc("Payment checkout response with Stripe redirect URL")
+@doc("Payment checkout response with PayMongo redirect URL")
 model PaymentCheckoutResponse {
-  @doc("Stripe Checkout session URL to redirect the member to")
+  @doc("PayMongo Checkout session URL to redirect the member to")
   checkoutUrl: string;
 }
 
@@ -313,7 +313,13 @@ namespace DuesCustomModule {
       @path token: string,
     ): ApiOkResponse<PaymentCheckoutResponse>
       | { @statusCode statusCode: 202; @body body: PaymentCheckoutResponse }
-      | ApiBadRequestResponse;
+      | ApiBadRequestResponse
+      // 409 — the token was already used (payment already processed).
+      | ApiConflictResponse
+      // 410 — the token was revoked or has expired (gone, not retryable).
+      | { @statusCode statusCode: 410; @body body: ValidationError }
+      // 502 — the org's PayMongo gateway failed to create a checkout session.
+      | { @statusCode statusCode: 502; @body body: ValidationError };
   }
 
   /**
@@ -350,7 +356,10 @@ namespace DuesCustomModule {
     @route("/webhooks/paymongo/{organizationId}")
     paymongoWebhook(
       @path organizationId: UUID,
-    ): ApiOkResponse<PaymentWebhookAck> | ApiBadRequestResponse;
+    ): ApiOkResponse<PaymentWebhookAck>
+      | ApiBadRequestResponse
+      // 409 — the event failed inbound validation (org / amount / currency mismatch).
+      | ApiConflictResponse;
   }
 
   @doc("Officer endpoint for generating payment links")

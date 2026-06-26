@@ -35,6 +35,7 @@ export async function paymongoWebhook(
 
   const db = ctx.get('database') as DatabaseInstance;
   const config = ctx.get('config') as Config;
+  const logger = ctx.get('logger');
 
   // Raw body is required for HMAC verification — read it verbatim, never re-encode.
   const body = await ctx.req.text();
@@ -106,6 +107,16 @@ export async function paymongoWebhook(
       gatewayEventId: event.gatewayEventId,
       paidAt: new Date(),
     });
+    // Invariant guard: a real settlement with no paymentTokenId means the pay-link
+    // token was NOT burned (markUsedCas got '') → the paid link stays re-usable, a
+    // latent double-charge break. Safe in practice (checkout always writes paymentId
+    // AND paymentTokenId into the same metadata object) but must be observable.
+    if (res.settled && !tokenId) {
+      logger.warn(
+        { action: 'paymongoWebhook.settledWithoutTokenId', paymentId, gatewayEventId: event.gatewayEventId },
+        'Settled a PayMongo pay-link payment with no paymentTokenId in metadata — token not burned (link remains re-usable)',
+      );
+    }
     return { action: res.settled ? ('processed' as const) : ('already_settled' as const), paymentId };
   });
 

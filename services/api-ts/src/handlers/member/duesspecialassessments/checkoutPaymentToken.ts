@@ -52,6 +52,7 @@ export async function checkoutPaymentToken(
 
   const db = ctx.get('database') as DatabaseInstance;
   const config = ctx.get('config') as Config;
+  const logger = ctx.get('logger');
   const tokenRepo = new PaymentTokenRepository(db);
   const tokenHash = hashPaymentToken(rawToken, getPaymentTokenSecret());
   const token = await tokenRepo.findByTokenHash(tokenHash);
@@ -134,7 +135,18 @@ export async function checkoutPaymentToken(
 
     await tokenRepo.attachSession(token.id, result.sessionId);
     return ctx.json({ checkoutUrl: result.checkoutUrl }, 200);
-  } catch {
+  } catch (err) {
+    // Money-path observability: the underlying PayMongo failure is otherwise
+    // swallowed by the blanket 502 below — log it before mapping the response.
+    logger.error(
+      {
+        action: 'checkoutPaymentToken.paymongoFailed',
+        tokenId: token.id,
+        organizationId: token.organizationId,
+        error: err instanceof Error ? err.message : String(err),
+      },
+      'PayMongo checkout creation failed — returning 502 and releasing the claim',
+    );
     // PayMongo failed: release the lease so the token stays active and the next
     // tap re-wins (retryable). The pending ledger row is a harmless unpaid orphan
     // — the accepted-residual (duplicate-unpaid-session) note in the spec; it is
