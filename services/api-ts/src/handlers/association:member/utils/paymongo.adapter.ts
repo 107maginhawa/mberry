@@ -121,6 +121,7 @@ export class PayMongoAdapter implements GatewayAdapter {
     // PayMongo external API — deeply nested untyped response
     interface PayMongoAttrs {
       status?: string;
+      checkout_url?: string;
       payment_intent?: { attributes: { status: string } };
       payments?: Array<{ id: string; attributes: { paid_at: number } }>;
       line_items?: Array<{ amount: number; currency: string }>;
@@ -135,6 +136,8 @@ export class PayMongoAdapter implements GatewayAdapter {
       paidAt: payment?.attributes?.paid_at ? new Date(payment.attributes.paid_at * 1000) : undefined,
       amount: attrs.line_items?.[0]?.amount || 0,
       currency: attrs.line_items?.[0]?.currency || 'PHP',
+      // Hosted checkout url for the session-reuse path (idempotent double-tap).
+      checkoutUrl: attrs.checkout_url,
     };
   }
 }

@@ -28,6 +28,10 @@ import { createProcessPayment } from './jobs/processStripePayment';
 import { PaymentTokenRepository } from '@/handlers/dues/repos/payment-token.repo';
 import { DuesRepository } from '@/handlers/association:member/repos/dues-payments.repo';
 import { DuesInvoiceRepository } from '@/handlers/association:member/repos/dues.repo';
+import { PayMongoAdapter } from '@/handlers/association:member/utils/paymongo.adapter';
+import { encryptCredential } from '@/core/gateway';
+
+const FIX001_AUTH_SECRET = 'fix001-auth-secret';
 
 const tokenRecord = {
   id: 'pt-1',
@@ -50,10 +54,11 @@ const tokenRecord = {
 const gatewayConfig = {
   id: 'gw-1',
   organizationId: 'org-1',
-  provider: 'stripe',
+  provider: 'paymongo',
   connected: true,
-  publicKey: 'acct_connected_123',
-  encryptedSecret: 'sk_test_xxx',
+  publicKey: 'pk_test_xxx',
+  encryptedSecret: encryptCredential('sk_test_xxx', FIX001_AUTH_SECRET),
+  encryptedWebhookSecret: null,
 };
 
 // A real-looking UUID for the pending payment row the checkout must create.
@@ -63,21 +68,24 @@ describe('[FIX-001] checkout creates ledger row + correct metadata', () => {
   beforeEach(() => {
     restoreRepo(PaymentTokenRepository);
     restoreRepo(DuesRepository);
+    restoreRepo(PayMongoAdapter);
     process.env['PAYMENT_TOKEN_SECRET'] = 'test-secret-key-for-hmac';
   });
   afterEach(() => {
     restoreRepo(PaymentTokenRepository);
     restoreRepo(DuesRepository);
+    restoreRepo(PayMongoAdapter);
     delete process.env['PAYMENT_TOKEN_SECRET'];
   });
 
   test('creates a pending DuesPayment row and passes its real id as metadata.paymentId [RED]', async () => {
     let createdPaymentArg: any = null;
-    let metadataSeenByBilling: Record<string, string> | undefined;
+    let metadataSeenByGateway: Record<string, string> | undefined;
 
     stubRepo(PaymentTokenRepository, {
       findByTokenHash: async () => tokenRecord,
-      markUsed: async (id: string) => ({ ...tokenRecord, usedAt: new Date() }),
+      claimForCheckout: async () => ({ ...tokenRecord, idempotencyKey: 'idem-1' }),
+      attachSession: async () => {},
     });
     stubRepo(DuesRepository, {
       getGatewayConfig: async () => gatewayConfig,
@@ -88,22 +96,20 @@ describe('[FIX-001] checkout creates ledger row + correct metadata', () => {
         return { id: CREATED_PAYMENT_ID, ...data };
       },
     });
+    // The per-org PayMongo adapter is the new checkout seam. Capture the metadata
+    // it receives — the webhook settles by `metadata.paymentId`.
+    stubRepo(PayMongoAdapter, {
+      createCheckout: async (opts: any) => {
+        metadataSeenByGateway = opts.metadata;
+        return { checkoutUrl: 'https://checkout.paymongo.com/cs_test_session', sessionId: 'cs_test_session' };
+      },
+    });
 
     const ctx = makeCtx({
       user: null,
       session: null,
       _params: { token: 'raw-token-value' },
-      billing: {
-        createPaymentIntent: async (args: any) => {
-          metadataSeenByBilling = args.metadata;
-          return {
-            paymentIntentId: 'pi_test_123',
-            clientSecret: 'cs_test',
-            status: 'pending',
-            checkoutUrl: 'https://checkout.stripe.com/c/pay/cs_test_session',
-          };
-        },
-      },
+      config: { auth: { secret: FIX001_AUTH_SECRET } },
     });
 
     const res: any = await checkoutPaymentToken(ctx);
@@ -116,12 +122,12 @@ describe('[FIX-001] checkout creates ledger row + correct metadata', () => {
     expect(createdPaymentArg.personId).toBe('member-1');
     expect(createdPaymentArg.invoiceId).toBe('inv-1');
 
-    // The Stripe metadata must carry the REAL payment row id (so the webhook
+    // The PayMongo metadata must carry the REAL payment row id (so the webhook
     // can settle the exact row), never the token id, never empty.
-    expect(metadataSeenByBilling).toBeDefined();
-    expect(metadataSeenByBilling!['paymentId']).toBe(CREATED_PAYMENT_ID);
-    expect(metadataSeenByBilling!['paymentId']).not.toBe('pt-1');
-    expect(metadataSeenByBilling!['paymentId']).not.toBe('');
+    expect(metadataSeenByGateway).toBeDefined();
+    expect(metadataSeenByGateway!['paymentId']).toBe(CREATED_PAYMENT_ID);
+    expect(metadataSeenByGateway!['paymentId']).not.toBe('pt-1');
+    expect(metadataSeenByGateway!['paymentId']).not.toBe('');
   });
 });
 

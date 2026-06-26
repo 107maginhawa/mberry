@@ -31,6 +31,8 @@ export interface PaymentStatusResult {
   paidAt?: Date;
   amount: number;
   currency: string;
+  /** The session's hosted checkout url, when the session is still live (reuse path). */
+  checkoutUrl?: string;
 }
 
 export interface WebhookEvent {
@@ -47,8 +49,12 @@ export interface GatewayAdapter {
   readonly name: string;
   readonly supportedMethods: string[];
 
-  /** Create a checkout session and return the redirect URL */
-  createCheckout(opts: CheckoutOpts): Promise<CheckoutResult>;
+  /**
+   * Create a checkout session and return the redirect URL.
+   * `idempotencyKey` (when supported) makes a retried create return the same
+   * session instead of a new one — the double-tap / lost-response guard.
+   */
+  createCheckout(opts: CheckoutOpts, idempotencyKey?: string): Promise<CheckoutResult>;
 
   /** Verify webhook signature and parse the event */
   verifyWebhook(body: string, signature: string): WebhookEvent | null;
