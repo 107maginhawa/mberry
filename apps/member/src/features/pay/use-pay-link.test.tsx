@@ -18,7 +18,7 @@ const mockValidate = (data: unknown) => (validatePaymentToken as any).mockResolv
 beforeEach(() => vi.clearAllMocks())
 
 it('maps valid → payable with amount/org/member/due', async () => {
-  mockValidate({ valid: true, amount: 250000, currency: 'PHP', memberName: 'Olive Cruz', orgName: 'PDA Manila', dueDate: '2026-07-01T00:00:00.000Z' })
+  mockValidate({ valid: true, amount: 250000n, currency: 'PHP', memberName: 'Olive Cruz', orgName: 'PDA Manila', dueDate: '2026-07-01T00:00:00.000Z' })
   const { result } = renderHook(() => usePayLink('tok'), { wrapper })
   await waitFor(() => expect(result.current.state.kind).toBe('payable'))
   expect(result.current.state).toMatchObject({ amount: 250000, orgName: 'PDA Manila', memberName: 'Olive Cruz' })

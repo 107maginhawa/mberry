@@ -25,7 +25,7 @@ export function usePayLink(token: string): { state: PayState; pay: () => void } 
   const d = q.data as any
   if (q.isError) state = { kind: 'temporaryError' }
   else if (d) {
-    if (d.valid) state = { kind: 'payable', amount: d.amount, currency: d.currency, orgName: d.orgName, memberName: d.memberName, dueDate: d.dueDate }
+    if (d.valid) state = { kind: 'payable', amount: Number(d.amount), currency: d.currency, orgName: d.orgName, memberName: d.memberName, dueDate: d.dueDate }
     else if (d.status === 'already_paid') state = { kind: 'alreadyPaid' }
     else if (typeof d.error === 'string' && /expired/i.test(d.error)) state = { kind: 'expired' }
     else state = { kind: 'invalid' }
