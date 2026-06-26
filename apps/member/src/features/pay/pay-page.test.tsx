@@ -33,8 +33,15 @@ const CANCELLED_EMPTY: Extract<PayState, { kind: 'cancelled' }> = {
 // mocked hook so we can verify each state renders the right subtree.
 function TestPayPage({ token = 'tok' }: { token?: string } = {}) {
   const { state, pay } = (usePayLink as ReturnType<typeof vi.fn>)(token)
-  if (state.kind === 'loading' || state.kind === 'paying') {
+  if (state.kind === 'loading') {
     return <div role="status" aria-label="Loading payment details" />
+  }
+  if (state.kind === 'paying') {
+    return (
+      <div role="status" aria-label="Processing payment">
+        <p>Processing your payment…</p>
+      </div>
+    )
   }
   if (state.kind === 'payable' || state.kind === 'cancelled') {
     return <PayCard state={state} paying={false} onPay={pay} />
@@ -78,7 +85,7 @@ describe('PayCard', () => {
   })
 })
 
-// ── Loading state via mocked hook ──────────────────────────────────────────────
+// ── Loading / paying states via mocked hook ────────────────────────────────────
 
 it('loading state → loading affordance visible', () => {
   ;(usePayLink as ReturnType<typeof vi.fn>).mockReturnValue({
@@ -87,6 +94,15 @@ it('loading state → loading affordance visible', () => {
   })
   render(<TestPayPage />)
   expect(screen.getByRole('status')).toBeInTheDocument()
+})
+
+it('paying state → processing text visible', () => {
+  ;(usePayLink as ReturnType<typeof vi.fn>).mockReturnValue({
+    state: { kind: 'paying' },
+    pay: vi.fn(),
+  })
+  render(<TestPayPage />)
+  expect(screen.getByText(/processing/i)).toBeInTheDocument()
 })
 
 // ── PayResult (all terminal states) ───────────────────────────────────────────

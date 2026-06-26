@@ -23,11 +23,25 @@ export function PayResult({ state, onRetry }: PayResultProps) {
   )
 }
 
+// Inline icon nodes — decorative, aria-hidden. No lucide-react dep needed
+// (lucide-react is not resolvable from app-level code in this Bun workspace).
+const SuccessIcon = (
+  <span aria-hidden="true" style={{ fontSize: '2rem', color: 'var(--color-success)' }}>
+    ✓
+  </span>
+)
+const InfoIcon = (
+  <span aria-hidden="true" style={{ fontSize: '2rem', color: 'var(--color-primary)' }}>
+    ℹ
+  </span>
+)
+
 function ResultContent({ state, onRetry }: PayResultProps) {
   switch (state.kind) {
     case 'succeeded':
       return (
         <EmptyState
+          icon={SuccessIcon}
           headline="Payment successful"
           description="Your dues payment has been received. You'll get a receipt by email."
         />
@@ -35,6 +49,7 @@ function ResultContent({ state, onRetry }: PayResultProps) {
     case 'alreadyPaid':
       return (
         <EmptyState
+          icon={InfoIcon}
           headline="Already paid"
           description="This payment has already been processed. No further action needed."
         />
