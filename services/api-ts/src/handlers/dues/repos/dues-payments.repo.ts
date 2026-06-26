@@ -7,6 +7,8 @@ import { persons } from '../../person/repos/person.schema';
 import { organizations } from '@/handlers/platformadmin/repos/platform-admin.schema';
 import { buildReceiptPrefix } from '@/handlers/association:member/utils/receipt-number';
 import { assertValidTransition, DUES_PAYMENT_VALID_TRANSITIONS } from '@/utils/status-transitions';
+import { DuesInvoiceRepository } from '../../association:member/repos/dues.repo';
+import { PaymentTokenRepository } from './payment-token.repo';
 
 /** @deprecated Use DUES_PAYMENT_VALID_TRANSITIONS from @/utils/status-transitions instead. */
 export const VALID_PAYMENT_TRANSITIONS = DUES_PAYMENT_VALID_TRANSITIONS;
@@ -255,6 +257,59 @@ export class DuesRepository {
       .where(eq(duesPayments.id, id))
       .returning();
     return result!;
+  }
+
+  /**
+   * Settle a successful online payment in ONE transaction — the money-correctness
+   * path behind the pay-link. Moves the payment pending→completed, marks its
+   * invoice paid (generated|sent→paid, optimistic-locked), and stamps the pay-link
+   * token used. All-or-nothing: any failure rolls back the whole settlement so a
+   * collected payment can never be left invisible to reports (the lost-money bug)
+   * nor an invoice marked paid without its payment completing.
+   *
+   * Idempotent: a webhook redelivery (double settle) returns `{ settled: false }`
+   * without re-transitioning anything, so it can never double-charge or trip the
+   * status-machine guard on an already-`completed` payment.
+   *
+   * Note: there is no `gateway_event_id` column on dues_payment; the gateway event
+   * id is persisted into the payment's `metadata` for traceability/audit.
+   */
+  async settleOnlinePayment(args: {
+    paymentId: string;
+    tokenId: string;
+    invoiceId?: string | null;
+    gatewayEventId: string;
+    paidAt: Date;
+  }): Promise<{ settled: boolean }> {
+    return this.db.transaction(async (tx: DatabaseInstance) => {
+      const txRepo = new DuesRepository(tx);
+      const payment = await txRepo.getPayment(args.paymentId);
+      if (!payment) return { settled: false };
+      if (payment.status === 'completed') return { settled: false }; // idempotent
+
+      await txRepo.updatePaymentStatus(
+        args.paymentId,
+        payment.status,
+        'completed',
+        {
+          paidAt: args.paidAt,
+          metadata: { ...(payment.metadata ?? {}), gatewayEventId: args.gatewayEventId },
+        },
+        payment.personId,
+      );
+
+      if (args.invoiceId) {
+        const invoiceRepo = new DuesInvoiceRepository(tx);
+        const invoice = await invoiceRepo.findOneById(args.invoiceId);
+        if (invoice && invoice.status !== 'paid') {
+          await invoiceRepo.markPaid(invoice.id, invoice.version, args.paymentId, args.paidAt);
+        }
+      }
+
+      await new PaymentTokenRepository(tx).markUsedCas(args.tokenId);
+
+      return { settled: true };
+    });
   }
 
   async createFundAllocations(allocations: NewDuesFundAllocation[]) {
