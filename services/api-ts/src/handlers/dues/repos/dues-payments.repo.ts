@@ -283,7 +283,11 @@ export class DuesRepository {
   }): Promise<{ settled: boolean }> {
     return this.db.transaction(async (tx: DatabaseInstance) => {
       const txRepo = new DuesRepository(tx);
-      const payment = await txRepo.getPayment(args.paymentId);
+      // Lock the payment row (SELECT … FOR UPDATE) so concurrent webhook
+      // redeliveries serialize on the row instead of racing the invoice CAS —
+      // the second waits for the first to commit, then sees `completed` and
+      // short-circuits below. Settle always runs inside this tx, so the lock holds.
+      const payment = await txRepo.getPaymentForUpdate(args.paymentId);
       if (!payment) return { settled: false };
       if (payment.status === 'completed') return { settled: false }; // idempotent
 
