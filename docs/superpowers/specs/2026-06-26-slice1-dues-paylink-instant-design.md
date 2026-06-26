@@ -174,6 +174,11 @@ session or more than one settled payment.**
   (consistent with "PayMongo failure → token stays active, retryable"). On a PayMongo
   error the handler also best-effort clears `checkout_started_at` so recovery is
   immediate, not lease-delayed.
+- **Accepted residual (harmless).** An ambiguous checkout failure (PayMongo created
+  the session but the HTTP response was lost → reclaim mints a new session) can leave
+  a duplicate **unpaid** orphan session. `metadata.paymentId` ledger + `usedAt` CAS +
+  `webhookRetryLogs` dedupe still guarantee **≤1 settlement** — no double-charge. A
+  one-line handler comment notes this; no further mitigation.
 - **Per-attempt Idempotency-Key (not per-token).** The key is regenerated on every
   successful claim and stored on the row. Concurrent taps of one attempt never both
   call PayMongo (the mutex guarantees one winner), so the key is belt-only there; its
