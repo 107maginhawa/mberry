@@ -75,6 +75,7 @@ export const duesInvoices = pgTable('dues_invoice', {
   periodStart: date('period_start').notNull(),
   periodEnd: date('period_end').notNull(),
   totalAmount: bigint('total_amount', { mode: 'number' }).notNull(),
+  currency: varchar('currency', { length: 3 }).notNull().default('PHP'),
   fundAllocations: jsonb('fund_allocations').$type<DuesInvoiceAllocation[]>().notNull(),
   status: duesInvoiceStatusEnum('status').default('generated').notNull(),
   generatedAt: timestamp('generated_at', { withTimezone: true }).defaultNow().notNull(),

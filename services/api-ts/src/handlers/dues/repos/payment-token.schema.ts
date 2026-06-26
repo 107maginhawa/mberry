@@ -43,6 +43,18 @@ export const paymentTokens = pgTable('payment_token', {
   /** When the token was used for checkout (null = unused) */
   usedAt: timestamp('used_at', { withTimezone: true }),
 
+  /** Officer revocation timestamp (null = not revoked) */
+  revokedAt: timestamp('revoked_at', { withTimezone: true }),
+
+  /** PayMongo checkout session id for the active attempt (null = none yet) */
+  paymongoSessionId: varchar('paymongo_session_id', { length: 255 }),
+
+  /** Lease marker: when the current checkout attempt was claimed (null = unclaimed) */
+  checkoutStartedAt: timestamp('checkout_started_at', { withTimezone: true }),
+
+  /** Per-attempt PayMongo Idempotency-Key; regenerated on each claim/remint */
+  idempotencyKey: varchar('idempotency_key', { length: 255 }),
+
   /** Officer who created this payment link */
   createdByOfficer: uuid('created_by_officer').notNull().references(() => persons.id),
 }, (table) => [
