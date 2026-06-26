@@ -21,10 +21,11 @@ code) are the work:
    (`POST /pay/:token/checkout`, public) calls **Stripe** `billing.createPaymentIntent`
    with `connectedAccountId: gatewayConfig.publicKey` (a publishable key, not a
    Stripe `acct_` id) — wrong provider, wrong field.
-2. **Webhook metadata key mismatch → every webhook ignored.** Checkout sets
-   `metadata.invoiceId`/`paymentId`; `handlePaymentWebhook.ts:38` reads
-   `metadata['duesInvoiceId']` (never set) → returns `action: 'ignored'` for every
-   real event.
+2. **The PayMongo webhook is orphan code (not route-wired).** `handlePaymentWebhook.ts`
+   is not in the generated registry → there is **no live PayMongo webhook at all**
+   today. (It also has a key mismatch — reads `metadata['duesInvoiceId']`, never set.)
+   Online dues payment is therefore non-functional for PH: a Stripe checkout with no
+   PayMongo settlement path. Net-new wiring, not a fix of a live path.
 3. **Ledger never settles (latent money bug on main).** `[FIX-001]` in checkout now
    creates a `pending` `duesPayments` row and passes `metadata.paymentId`, but the
    webhook ignores `paymentId` and only `invoiceRepo.markPaid(...)`. Reports read
@@ -116,15 +117,25 @@ Officer (apps/org, later)              Member (login-free page, later)
                     + payment_token.usedAt = now()  (CAS)
 ```
 
-### Canonical handlers (replace the broken pair)
+### Canonical handlers — exactly one live checkout + one live webhook
 
-- `startCheckout` replaces `checkoutPaymentToken` — PayMongo via per-org key, no
-  Stripe, `usedAt` NOT set here.
-- `paymongoWebhook` replaces `handlePaymentWebhook` — per-org secret, binds by
-  `metadata.paymentId`, validates, settles the ledger row atomically.
+Route reality (generated registry): the **only** live online-dues route is
+`POST /pay/:token/checkout` → `checkoutPaymentToken` (Stripe). `validatePaymentToken`
+(`GET /pay/:token/validate`) is live and reused by the member pay page. Everything
+else PayMongo-flavored — `handlePaymentWebhook`, `initiateOnlinePayment`,
+`generatePaymentLink`, `validatePaymentLink`, dues `stripeWebhook` — is **unrouted
+orphan code**.
 
-The Stripe `billing` service stays for the org→founder subscription only (its own
-surface, untouched).
+- `startCheckout` **re-points `POST /pay/:token/checkout`** off Stripe onto canonical
+  PayMongo via the org's key; `usedAt` NOT set here.
+- `paymongoWebhook` is **net-new** at `POST /webhooks/paymongo/:orgId` (no live
+  PayMongo webhook exists today); per-org secret, binds by `metadata.paymentId`,
+  validates, settles atomically.
+
+Per CLAUDE.md the **module diet is deferred and test-guarded** — the orphan handlers
+are NOT deleted in this slice. They are already off every route, so they are not
+parallel *live* money paths; they are inventoried here and left for the later diet.
+The Stripe `billing` service stays for the org→founder subscription only (untouched).
 
 ## Settlement model (B3 — match the real tables)
 
@@ -143,22 +154,42 @@ Source of truth for "money collected" is the **`duesPayments`** row, not the inv
 The invariant: **repeated taps of one token never produce more than one PayMongo
 session or more than one settled payment.**
 
-- **Single active session, claim-then-call.** Before calling PayMongo, atomically
-  claim the right to create a session:
-  `UPDATE payment_token SET checkout_started_at=now() WHERE id=$1 AND used_at IS NULL
-   AND revoked_at IS NULL AND expires_at > now() RETURNING ...`. The winner calls
-  PayMongo with a per-token `Idempotency-Key` header and persists
-  `paymongo_session_id`. A concurrent loser (row already claimed) reads the stored
-  `paymongo_session_id` and returns the **same** `checkout_url`. PayMongo's
-  `Idempotency-Key` is the belt to the DB-claim's suspenders, so even a true race
-  yields one session.
+- **Single-winner claim (real mutex, with lease).** Before calling PayMongo, claim
+  the exclusive right to create a session AND mint a fresh per-attempt key in one
+  atomic statement:
+  `UPDATE payment_token SET checkout_started_at=now(), idempotency_key=$newKey
+   WHERE id=$1 AND used_at IS NULL AND revoked_at IS NULL AND expires_at>now()
+   AND paymongo_session_id IS NULL
+   AND (checkout_started_at IS NULL OR checkout_started_at < now() - interval '2 minutes')
+   RETURNING idempotency_key`.
+  The `paymongo_session_id IS NULL` + stale-`checkout_started_at` predicate make this
+  a true mutex: only one concurrent tap gets a row. The winner calls PayMongo with
+  `Idempotency-Key: <idempotency_key>` and persists `paymongo_session_id`.
+- **Loser / re-tap paths.** A tap that gets **no row** is one of:
+  (a) session already exists → read `paymongo_session_id`, return the **same**
+  `checkout_url`; (b) another tap is mid-flight inside the 2-minute lease and no
+  session yet → return `202` "checkout starting, retry". The 2-minute lease also
+  **reclaims a stranded claim**: if the winner's PayMongo call 502s after claiming,
+  the claim goes stale and the next tap re-wins — closing the failure-strand
+  (consistent with "PayMongo failure → token stays active, retryable"). On a PayMongo
+  error the handler also best-effort clears `checkout_started_at` so recovery is
+  immediate, not lease-delayed.
+- **Per-attempt Idempotency-Key (not per-token).** The key is regenerated on every
+  successful claim and stored on the row. Concurrent taps of one attempt never both
+  call PayMongo (the mutex guarantees one winner), so the key is belt-only there; its
+  real job is to **change on remint** so PayMongo's sticky (~24h) idempotency does not
+  replay a dead session.
 - **`usedAt` set only on confirmed payment** (webhook), via CAS
   `UPDATE ... SET used_at=now() WHERE id=$1 AND used_at IS NULL RETURNING`. Abandoned
   checkouts leave the token active and re-tappable (fixes R2).
-- **Session re-fetch / expiry (R3).** On re-tap with a stored session, re-fetch it;
-  if PayMongo reports it expired/cancelled, mint a fresh session and overwrite
-  `paymongo_session_id`. A live session is reused; a dead one is replaced — the link
-  never becomes permanently unpayable before token TTL.
+- **Session re-fetch / remint on expiry (R3).** On re-tap with a stored session,
+  re-fetch it; if PayMongo reports expired/cancelled, atomically release it
+  (`UPDATE ... SET paymongo_session_id=NULL, checkout_started_at=NULL
+   WHERE id=$1 AND paymongo_session_id=$expiredSession`, guarded on the expired id so
+  it can't race a concurrent settlement) and fall through to a fresh claim → new key
+  → new session. A live session is reused; a dead one is replaced — the link never
+  becomes permanently unpayable before token TTL, and remint is not defeated by the
+  idempotency key.
 - **Webhook redelivery** deduped via `webhookRetryLogs` unique idempotency key
   (ported from the Stripe path — `handleStripeWebhook.ts:79-127` — not "reused
   verbatim"; the live PayMongo webhook doesn't touch it today). Org-FK NOT NULL is
@@ -182,6 +213,7 @@ session or more than one settled payment.**
 
 - Invalid/unknown token → `400`. Expired → `410`. Revoked → `410`. Already
   used/paid → `409`. Org not connected / no decryptable secret → `400`.
+- Checkout already starting (claim held, no session yet, within lease) → `202`.
 - Bad/absent webhook signature → `verifyWebhook` null → `400`, no state change.
 - Amount/currency/org mismatch on a verified event → `409`, logged, no settle.
 - PayMongo API failure at checkout → `502`, token stays active (retryable).
@@ -217,8 +249,11 @@ All additive (no `DELETE`). `bun run db:generate` → review SQL → PR referenc
 `createScratch` real-PG integration tests, RED first:
 
 1. Create pay-link → correct `payment_token` row.
-2. **Concurrent double-tap** → exactly one PayMongo session; loser gets same
-   `checkout_url`. (The money-safety test.)
+2. **Concurrent double-tap** → exactly one claim wins, exactly one PayMongo session
+   (adapter `createCheckout` call count == 1); loser gets the same `checkout_url` or
+   `202`. (The money-safety test.)
+2b. **Reclaim after checkout failure** → winner's PayMongo call fails; a later tap
+   (after lease/clear) re-wins and creates the one session; token never strands.
 3. Webhook `paid` (valid amount/org) → `duesPayments pending→completed`,
    invoice→paid, `usedAt` set — in one tx; reports' `totalCollected` moves
    (regression test for bug #3).
@@ -238,8 +273,9 @@ round-trip from R5).
 
 ## Definition of done
 
-- One canonical PayMongo checkout + webhook; the broken Stripe-at-PH-route checkout
-  and the mismatched webhook are replaced. No parallel dead money paths.
+- Exactly one live online-dues checkout route (`/pay/:token/checkout`, re-pointed to
+  PayMongo) + one live webhook route (`/webhooks/paymongo/:orgId`, net-new). Orphan
+  handlers inventoried, left unrouted for the deferred module diet (not deleted).
 - Per-org secret used for checkout; per-org webhook secret verifies the webhook;
   platform key not used for dues.
 - Ledger settles correctly (`duesPayments → completed`); the report-collection
