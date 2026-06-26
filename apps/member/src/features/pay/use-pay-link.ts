@@ -14,7 +14,10 @@ const CHECKOUT_RETRY_DELAY_MS = 1500
 
 export function usePayLink(
   token: string,
-  { navigate = (url: string) => window.location.assign(url) }: { navigate?: (url: string) => void } = {}
+  {
+    navigate = (url: string) => window.location.assign(url),
+    returnStatus,
+  }: { navigate?: (url: string) => void; returnStatus?: 'success' | 'cancelled' } = {}
 ): { state: PayState; pay: () => void } {
   const q = useQuery({
     queryKey: ['pay-validate', token],
@@ -60,10 +63,23 @@ export function usePayLink(
     },
   })
 
-  // State resolution: checkout-side takes precedence once pay() is invoked.
+  // State resolution: returnStatus (gateway redirect) takes top precedence,
+  // then checkout-side once pay() is invoked, then validate-side.
   let state: PayState = { kind: 'loading' }
 
-  if (mutation.isPending) {
+  if (returnStatus === 'success') {
+    // User returned from the payment gateway with a success signal — trust it.
+    state = { kind: 'succeeded' }
+  } else if (returnStatus === 'cancelled') {
+    // User returned after cancelling — show cancelled screen. Reuse payable
+    // fields from validate when available so the Pay-again affordance can
+    // display the amount/org/member/due.
+    const d = q.data as any
+    const payableFields = d?.valid
+      ? { amount: Number(d.amount), currency: d.currency as string, orgName: d.orgName as string, memberName: d.memberName as string, dueDate: d.dueDate as string }
+      : { amount: 0, currency: '', orgName: '', memberName: '', dueDate: '' }
+    state = { kind: 'cancelled', ...payableFields }
+  } else if (mutation.isPending) {
     state = { kind: 'paying' }
   } else if (mutation.isSuccess && mutation.data) {
     state = mutation.data

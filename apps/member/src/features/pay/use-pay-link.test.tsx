@@ -152,6 +152,58 @@ it('double-tap guard — second pay() while in-flight is a no-op', async () => {
   expect(checkoutPaymentToken).toHaveBeenCalledTimes(1)
 })
 
+// ── returnStatus tests (Task 4) ──────────────────────────────────────────────
+
+describe('returnStatus handling', () => {
+  it('cancelled + valid validate → cancelled carrying payable fields', async () => {
+    mockValidate({ valid: true, amount: 500000n, currency: 'PHP', memberName: 'Olive Cruz', orgName: 'PDA Manila', dueDate: '2026-07-01T00:00:00.000Z' })
+    const { result } = renderHook(
+      () => usePayLink('tok', { returnStatus: 'cancelled' }),
+      { wrapper }
+    )
+    // Wait until validate resolves and the state carries the payable fields.
+    await waitFor(() =>
+      expect(result.current.state).toMatchObject({
+        kind: 'cancelled',
+        amount: 500000,
+        currency: 'PHP',
+        orgName: 'PDA Manila',
+        memberName: 'Olive Cruz',
+        dueDate: '2026-07-01T00:00:00.000Z',
+      })
+    )
+  })
+
+  it('cancelled + validate still loading → cancelled (no payable fields yet)', async () => {
+    // validate resolves after a delay — hook should still land on cancelled immediately
+    ;(validatePaymentToken as any).mockImplementation(() => new Promise(() => {}))
+    const { result } = renderHook(
+      () => usePayLink('tok', { returnStatus: 'cancelled' }),
+      { wrapper }
+    )
+    // Should be cancelled even before validate resolves
+    await waitFor(() => expect(result.current.state.kind).toBe('cancelled'))
+  })
+
+  it('success + valid validate → succeeded (success wins)', async () => {
+    mockValidate({ valid: true, amount: 500000n, currency: 'PHP', memberName: 'Olive Cruz', orgName: 'PDA Manila', dueDate: '2026-07-01T00:00:00.000Z' })
+    const { result } = renderHook(
+      () => usePayLink('tok', { returnStatus: 'success' }),
+      { wrapper }
+    )
+    await waitFor(() => expect(result.current.state.kind).toBe('succeeded'))
+  })
+
+  it('success + already_paid validate → succeeded (success still wins)', async () => {
+    mockValidate({ valid: false, status: 'already_paid', error: 'x' })
+    const { result } = renderHook(
+      () => usePayLink('tok', { returnStatus: 'success' }),
+      { wrapper }
+    )
+    await waitFor(() => expect(result.current.state.kind).toBe('succeeded'))
+  })
+})
+
 it('202 exhausted (3 calls) → temporaryError, never navigates', async () => {
   // CHECKOUT_MAX_RETRIES=3: attempt 1 (202, delay), attempt 2 (202, delay), attempt 3 (202, retries>=3 → exit)
   // = 3 total checkoutPaymentToken calls, 2×1500ms delays = 3000ms total.
