@@ -63,13 +63,26 @@ export function usePayLink(
     },
   })
 
-  // State resolution: returnStatus (gateway redirect) takes top precedence,
-  // then checkout-side once pay() is invoked, then validate-side.
+  // State resolution precedence:
+  //   1. returnStatus === 'success' — terminal post-payment return; trust it.
+  //   2. checkout-side (mutation) states — these MUST win over a stale
+  //      `cancelled` return so that re-paying from the cancelled screen shows
+  //      Processing and surfaces the real outcome (409/410/400/502/200).
+  //      returnStatus comes from the URL and never changes, so if `cancelled`
+  //      sat above these the hook would be stuck on cancelled forever.
+  //   3. returnStatus === 'cancelled' — fresh cancelled return (no tap yet).
+  //   4. validate-side (pre-pay) mapping.
   let state: PayState = { kind: 'loading' }
 
   if (returnStatus === 'success') {
     // User returned from the payment gateway with a success signal — trust it.
     state = { kind: 'succeeded' }
+  } else if (mutation.isPending) {
+    state = { kind: 'paying' }
+  } else if (mutation.isSuccess && mutation.data) {
+    state = mutation.data
+  } else if (mutation.isError) {
+    state = { kind: 'temporaryError' }
   } else if (returnStatus === 'cancelled') {
     // User returned after cancelling — show cancelled screen. Reuse payable
     // fields from validate when available so the Pay-again affordance can
@@ -79,12 +92,6 @@ export function usePayLink(
       ? { amount: Number(d.amount), currency: d.currency as string, orgName: d.orgName as string, memberName: d.memberName as string, dueDate: d.dueDate as string }
       : { amount: 0, currency: '', orgName: '', memberName: '', dueDate: '' }
     state = { kind: 'cancelled', ...payableFields }
-  } else if (mutation.isPending) {
-    state = { kind: 'paying' }
-  } else if (mutation.isSuccess && mutation.data) {
-    state = mutation.data
-  } else if (mutation.isError) {
-    state = { kind: 'temporaryError' }
   } else {
     // Validate-side mapping (pre-pay states — Task 2, unchanged)
     const d = q.data as any

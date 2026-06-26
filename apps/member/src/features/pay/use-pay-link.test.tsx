@@ -202,6 +202,49 @@ describe('returnStatus handling', () => {
     )
     await waitFor(() => expect(result.current.state.kind).toBe('succeeded'))
   })
+
+  // ── re-pay from cancelled: checkout-side states must win over the stale
+  //    `cancelled` return (returnStatus never changes). ────────────────────────
+  it('cancelled + re-pay 409 → alreadyPaid (not stuck cancelled)', async () => {
+    mockValidate({ valid: true, amount: 500000n, currency: 'PHP', memberName: 'Olive Cruz', orgName: 'PDA Manila', dueDate: '2026-07-01T00:00:00.000Z' })
+    mockCheckout(409, { error: 'This payment has already been processed' })
+    const { result } = renderHook(
+      () => usePayLink('tok', { returnStatus: 'cancelled', navigate: vi.fn() }),
+      { wrapper }
+    )
+    await waitFor(() => expect(result.current.state.kind).toBe('cancelled'))
+    act(() => result.current.pay())
+    await waitFor(() => expect(result.current.state.kind).toBe('alreadyPaid'))
+  })
+
+  it('cancelled + re-pay 502 → temporaryError (not stuck cancelled)', async () => {
+    mockValidate({ valid: true, amount: 500000n, currency: 'PHP', memberName: 'Olive Cruz', orgName: 'PDA Manila', dueDate: '2026-07-01T00:00:00.000Z' })
+    mockCheckout(502, { error: 'Failed to create checkout session. Please try again.' })
+    const { result } = renderHook(
+      () => usePayLink('tok', { returnStatus: 'cancelled', navigate: vi.fn() }),
+      { wrapper }
+    )
+    await waitFor(() => expect(result.current.state.kind).toBe('cancelled'))
+    act(() => result.current.pay())
+    await waitFor(() => expect(result.current.state.kind).toBe('temporaryError'))
+  })
+
+  it('cancelled + re-pay in-flight → paying (not stuck cancelled)', async () => {
+    mockValidate({ valid: true, amount: 500000n, currency: 'PHP', memberName: 'Olive Cruz', orgName: 'PDA Manila', dueDate: '2026-07-01T00:00:00.000Z' })
+    let resolveCheckout!: (v: unknown) => void
+    ;(checkoutPaymentToken as any).mockImplementation(
+      () => new Promise(r => { resolveCheckout = r })
+    )
+    const { result } = renderHook(
+      () => usePayLink('tok', { returnStatus: 'cancelled', navigate: vi.fn() }),
+      { wrapper }
+    )
+    await waitFor(() => expect(result.current.state.kind).toBe('cancelled'))
+    act(() => result.current.pay())
+    await waitFor(() => expect(result.current.state.kind).toBe('paying'))
+    // cleanup: resolve the hanging request
+    await act(async () => { resolveCheckout({ data: { checkoutUrl: 'https://pm.test/cs_1' }, response: { status: 200 } }) })
+  })
 })
 
 it('202 exhausted (3 calls) → temporaryError, never navigates', async () => {
