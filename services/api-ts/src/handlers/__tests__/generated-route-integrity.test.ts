@@ -97,6 +97,7 @@ const SANCTIONED_PREFIXES = new Set([
   'reviews',
   'storage',
   'surveys',
+  'webhooks',
 ]);
 
 /**
@@ -117,6 +118,7 @@ const ABSOLUTE_PATH_REEXPORTS = new Set([
   'OnboardingManagement',
   'PaymentLinkManagement',
   'PaymentTokenEndpoints',
+  'PayMongoWebhookEndpoints',
   'PlatformAdminDashboardEndpoints',
   'PlatformAdminIdentityEndpoints',
   'PlatformPublicEndpoints',
