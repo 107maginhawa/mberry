@@ -1,191 +1,263 @@
-# Slice-1 — Login-free dues pay-link (instant rail)
+# Slice-1 — Login-free dues pay-link (instant rail), consolidated & corrected
 
-**Date:** 2026-06-26
+**Date:** 2026-06-26 (rev 2 — after adversarial review)
 **Branch:** `feat/slice1-dues-paylink-paymongo`
 **Phase:** Lean launch T9 (first vertical slice) + T7 (PayMongo adapter, test mode)
 **Goal:** The critical path to the first peso — an officer creates a dues pay-link,
-a member taps a login-free page, pays via PayMongo (GCash/Maya/card), and the
-payment auto-reconciles. Production-grade for real orgs handling real money.
+a member taps a login-free page, pays via PayMongo (GCash/Maya/card) into the
+**org's own** PayMongo account, and the payment correctly reconciles end to end.
+Production-grade for real orgs handling real money.
 
-> Strategy is LOCKED (see memory `lean-launch-strategy` + DESIGN.md). This spec
-> is the technical design for the first money-path slice only.
+> Strategy is LOCKED (memory `lean-launch-strategy` + DESIGN.md). Each org brings
+> its **own** PayMongo account; the founder is never in the dues money flow.
+
+## Why this slice is "fix + consolidate," not greenfield
+
+A T7 spike + adversarial review found the PayMongo money path **already half-exists
+on main and is broken**. Slice-1 makes it correct. The defects (all verified in
+code) are the work:
+
+1. **Wrong rail at the PH checkout.** `handlers/member/duesspecialassessments/checkoutPaymentToken.ts`
+   (`POST /pay/:token/checkout`, public) calls **Stripe** `billing.createPaymentIntent`
+   with `connectedAccountId: gatewayConfig.publicKey` (a publishable key, not a
+   Stripe `acct_` id) — wrong provider, wrong field.
+2. **Webhook metadata key mismatch → every webhook ignored.** Checkout sets
+   `metadata.invoiceId`/`paymentId`; `handlePaymentWebhook.ts:38` reads
+   `metadata['duesInvoiceId']` (never set) → returns `action: 'ignored'` for every
+   real event.
+3. **Ledger never settles (latent money bug on main).** `[FIX-001]` in checkout now
+   creates a `pending` `duesPayments` row and passes `metadata.paymentId`, but the
+   webhook ignores `paymentId` and only `invoiceRepo.markPaid(...)`. Reports read
+   `duesPayments.status='completed'` (`dues-payments.repo.ts:331-364`), so collected
+   money never appears in `totalCollected`/`collectionRate`.
+4. **Single global PayMongo key — violates the locked per-org model.**
+   `handlePaymentWebhook.ts:20-25` builds the adapter from platform-wide
+   `getPaymongoConfig()` (`core/config.ts`). The per-org secret IS stored
+   (`duesGatewayConfigs.encryptedSecret`, written by `upsertDuesGatewayConfig.ts`)
+   but is never decrypted/used. Money would route to the platform key, not the org.
+5. **No per-org webhook signing secret** column exists at all (`duesGatewayConfigs`
+   has `publicKey` + `encryptedSecret` only). Per-org webhook verification is
+   currently impossible.
+6. **No inbound validation.** The webhook never checks event amount/currency/org
+   against the token/invoice before settling → cross-org / mismatched-amount
+   settlement is open.
+7. **Idempotency is unsound.** `usedAt` is set at checkout creation (strands
+   abandoned payers); `markUsed` is an unconditional `SET usedAt=now()` (no CAS);
+   `createCheckout` sends no `Idempotency-Key`; the session is created by an external
+   HTTP call *before* any DB write, so a row lock can't prevent two sessions.
+
+**What is genuinely solid and reused:** `PayMongoAdapter.verifyWebhook` HMAC is
+timing-safe with a hex-format guard (`paymongo.adapter.ts:80-87`); `payment_token`
+has HMAC `tokenHash`, `amount` (centavos), `currency` (PHP), `expiresAt`, `usedAt`;
+`duesPaymentStatusEnum` already defines a real settlement state machine.
 
 ## Scope
 
-**In:** instant rail only — PayMongo checkout (GCash/Maya/card) + webhook
-auto-reconcile (`pending → paid`). Officer creates link; member pays login-free.
+**In (instant rail):** one canonical PayMongo checkout + one canonical webhook,
+per-org keys, correct atomic settlement, amount/org validation, sound idempotency.
 
-**Out (slice-1b, additive follow-up):** async OTC bank-transfer proof state
-machine (`pending → proof_submitted → officer_verified → reconciled`). The
-reconciliation status column is provisioned to hold those states now, so 1b is
-additive with no migration churn or rework of the token/reconcile core.
+**Out (slice-1b, additive):** async OTC bank-transfer proof. It reuses the
+**existing** `duesPaymentStatusEnum` states (`submitted → underReview →
+confirmed|rejected`) — no new "reconciliation status" column is invented.
 
-**Out (locked v1 scope):** refunds (officer-initiated manual, separate),
-late fees, partial dues. Signup is a post-payment OTP upsell, not part of pay.
+**Out (locked v1):** refunds (manual, separate), late fees, partial dues,
+renewals, roster import, events+pay, console org-create (later T9 slices).
 
-## Key reality (from the T7 spike, 2026-06-26)
+## Per-org account model (B1 — the headline)
 
-The doc assumed greenfield. It is not. The following already exist and are real:
+Each org owns its PayMongo account and its API + webhook secrets, stored encrypted
+per org. Resolution:
 
-- `handlers/association:member/utils/gateway-adapter.ts` — `GatewayAdapter`
-  interface (`createCheckout`, `verifyWebhook`, `getPaymentStatus`).
-- `handlers/association:member/utils/paymongo.adapter.ts` — `PayMongoAdapter`
-  hitting real PayMongo `/v1/checkout_sessions`; `verifyWebhook` is HMAC-SHA256
-  with **timing-safe compare + hex-format guard**. Has tests.
-- `handlers/dues/repos/payment-token.schema.ts` — `payment_token` table: HMAC
-  `tokenHash` (raw never stored), `amount` (centavos), `currency` default `PHP`,
-  `expiresAt` (72h), `usedAt` (single-use), org/person/officer refs.
-- `webhookRetryLogs` (idempotency key, unique constraint, retry state) — reused
-  verbatim for PayMongo webhook intake.
+- **Checkout:** decrypt `duesGatewayConfigs.encryptedSecret` for the token's org;
+  construct `PayMongoAdapter(orgSecret, orgWebhookSecret)`; the checkout session is
+  created on the org's account. The founder/platform key is never used for dues.
+- **Webhook → org routing (verify-before-trust):** each org registers its PayMongo
+  webhook to a **per-org URL**: `POST /webhooks/paymongo/:orgId`. Intake resolves
+  `:orgId` → that org's `encryptedWebhookSecret` → `verifyWebhook`. The org id comes
+  from the URL the org configured, and the signature is verified with *that org's*
+  secret, so a forged body for another org fails verification. No trust is extended
+  before the HMAC check.
+- **Schema add:** `duesGatewayConfigs.encrypted_webhook_secret` (PayMongo's webhook
+  signing secret is distinct from the API secret).
+- **Provider selection:** `duesGatewayConfigs.provider` (today read-but-dead at
+  `getGatewayConfig`, `dues-payments.repo.ts:659`) now branches: `paymongo` → this
+  path. `stripe` remains only for orgs explicitly on Stripe (not the PH default).
 
-So T7 here is **wire + harden + prove**, not build-from-scratch. The adapter is
-not yet wired into the live checkout, and `duesGatewayConfigs.provider` is read
-but nothing branches on it.
+> Test mode: each org's stored secret is a PayMongo **test** key until G2 clears.
+> The design is identical for live; only the key value changes.
 
 ## Architecture
 
 ```
-Officer (apps/org, later)            Member (login-free page, later)
-        │ POST create pay-link              │ GET /pay/:token  (public, no auth)
-        ▼                                   ▼
-  createPaymentToken handler          getPayLink handler → checkout handler
-        │ insert payment_token              │ branch on duesGatewayConfigs.provider
-        │ (HMAC hash, fixed amount,         │ → PayMongoAdapter.createCheckout()
-        │  72h TTL, officer-stamped)        │ → store sessionId on token
-        ▼                                   ▼ redirect to PayMongo checkout_url
-                                     ┌──────────────────────────────┐
-                                     │  PayMongo (GCash/Maya/card)   │
-                                     └──────────────┬───────────────┘
-                                                    │ webhook (signed)
-                                                    ▼
-                          POST /webhooks/paymongo  → verifyWebhook (HMAC, timing-safe)
-                                                    → webhookRetryLogs (idempotency key)
-                                                    → mark token usedAt + invoice pending→paid
+Officer (apps/org, later)              Member (login-free page, later)
+   POST .../paylinks  create            GET /pay/:token        (public)
+        │                                    │ POST /pay/:token/checkout (public)
+        ▼                                    ▼
+  createPaymentToken                    startCheckout
+   payment_token row                     - load token (active? else 410/409)
+   (HMAC hash, amount+currency           - decrypt org secret (B1)
+    from invoice, TTL, officer,          - claim-or-reuse session (R1/R2)
+    idempotency_key)                     - PayMongoAdapter(orgKey).createCheckout
+                                           with Idempotency-Key header
+                                         - store paymongo_session_id
+                                         → redirect to PayMongo checkout_url
+                                ┌──────────────────────────────┐
+                                │  PayMongo (org account)      │
+                                │  GCash / Maya / card         │
+                                └──────────────┬───────────────┘
+                                               │ signed webhook
+                                               ▼
+        POST /webhooks/paymongo/:orgId
+          → resolve org → org webhook secret → verifyWebhook (HMAC, timing-safe)
+          → webhookRetryLogs idempotency key (dedupe redelivery)
+          → VALIDATE event.amount==token.amount, currency match, org match (B4)
+          → ONE tx: duesPayments pending→completed  (by metadata.paymentId)
+                    + duesInvoices → paid (if invoiceId)
+                    + payment_token.usedAt = now()  (CAS)
 ```
 
-### Components (each independently testable)
+### Canonical handlers (replace the broken pair)
 
-1. **`payment_token` model + repo** (exists) — extended with `revokedAt` and
-   `paymongoSessionId`. Pure data; no provider knowledge.
-2. **Provider selection** — a thin factory reading `duesGatewayConfigs.provider`
-   → returns the right `GatewayAdapter`. Today: `paymongo` for PH orgs. The only
-   new branching code; isolates provider choice from handlers.
-3. **`PayMongoAdapter`** (exists) — unchanged except as bugfixes surface from
-   tests. Owns all PayMongo HTTP + signature logic.
-4. **Pay-link handlers** — `createPaymentToken` (officer), `getPayLink` +
-   `startCheckout` (public), `paymongoWebhook` (reconcile). Each thin; delegates
-   to repo + adapter.
-5. **Reconcile** — webhook → idempotency-keyed → flips `payment_token.usedAt`
-   and the dues invoice `pending → paid`. Reuses `webhookRetryLogs`.
+- `startCheckout` replaces `checkoutPaymentToken` — PayMongo via per-org key, no
+  Stripe, `usedAt` NOT set here.
+- `paymongoWebhook` replaces `handlePaymentWebhook` — per-org secret, binds by
+  `metadata.paymentId`, validates, settles the ledger row atomically.
 
-## Data flow + state
+The Stripe `billing` service stays for the org→founder subscription only (its own
+surface, untouched).
 
-- **Token states:** `active` (unused, unexpired, unrevoked) → `used` (`usedAt`
-  set on confirmed payment) | `expired` (`expiresAt` past) | `revoked`
-  (`revokedAt` set by officer).
-- **Invoice/payment reconciliation status:** `pending → paid` for instant.
-  Column typed to also hold `failed`, `expired`, and (slice-1b) `proof_submitted`,
-  `officer_verified`, `reconciled` — provisioned now, unused until 1b.
+## Settlement model (B3 — match the real tables)
 
-### Idempotency (no double-charge — the production-critical invariant)
+Source of truth for "money collected" is the **`duesPayments`** row, not the invoice.
 
-- **One active checkout session per token.** `startCheckout` on an `active`
-  token with a stored `paymongoSessionId` returns the **same** `checkout_url`
-  (re-fetch by sessionId), never creates a second session. First call with no
-  stored session creates one and persists `paymongoSessionId` atomically.
-- **Single-use:** `usedAt` is set only by the webhook on confirmed payment; once
-  set, the token is spent and `startCheckout` refuses.
-- **Webhook idempotency:** `webhookRetryLogs` unique key dedupes redelivery — a
-  replayed `paid` webhook is a no-op.
-- **Concurrency:** the create-session write is guarded (insert-once / row lock)
-  so two simultaneous taps cannot both create a session. Proven by a concurrent
-  double-tap real-PG test.
+- Checkout creates `duesPayments` `pending` (kept from `[FIX-001]`) and carries its
+  id as `metadata.paymentId`.
+- Webhook settles by `paymentId`: `duesPayments` `pending → completed`
+  (`duesPaymentStatusEnum`, transition guarded by `DUES_PAYMENT_VALID_TRANSITIONS`),
+  set `paidAt`, gateway event id. If the token has an `invoiceId`, also move the
+  invoice `generated|sent → paid` (`duesInvoiceStatusEnum`; **there is no `pending`
+  invoice status** — the rev-1 spec was wrong). All in one transaction.
 
-### Amount + currency
+## Idempotency — no double-charge (B4 + R1/R2/R3)
 
-- Token amount is **fixed** from the dues invoice at creation. The member cannot
-  alter it (PayMongo line-item amount is server-set), so **overpayment is
-  structurally impossible** for pay-links. The doc's "overpayment clamp" does
-  not apply to this surface; it is stated explicitly, not silently skipped.
-- Currency is `PHP` end-to-end. The one real schema gap is `duesInvoices` having
-  no `currency` column — added in this slice's migration.
+The invariant: **repeated taps of one token never produce more than one PayMongo
+session or more than one settled payment.**
+
+- **Single active session, claim-then-call.** Before calling PayMongo, atomically
+  claim the right to create a session:
+  `UPDATE payment_token SET checkout_started_at=now() WHERE id=$1 AND used_at IS NULL
+   AND revoked_at IS NULL AND expires_at > now() RETURNING ...`. The winner calls
+  PayMongo with a per-token `Idempotency-Key` header and persists
+  `paymongo_session_id`. A concurrent loser (row already claimed) reads the stored
+  `paymongo_session_id` and returns the **same** `checkout_url`. PayMongo's
+  `Idempotency-Key` is the belt to the DB-claim's suspenders, so even a true race
+  yields one session.
+- **`usedAt` set only on confirmed payment** (webhook), via CAS
+  `UPDATE ... SET used_at=now() WHERE id=$1 AND used_at IS NULL RETURNING`. Abandoned
+  checkouts leave the token active and re-tappable (fixes R2).
+- **Session re-fetch / expiry (R3).** On re-tap with a stored session, re-fetch it;
+  if PayMongo reports it expired/cancelled, mint a fresh session and overwrite
+  `paymongo_session_id`. A live session is reused; a dead one is replaced — the link
+  never becomes permanently unpayable before token TTL.
+- **Webhook redelivery** deduped via `webhookRetryLogs` unique idempotency key
+  (ported from the Stripe path — `handleStripeWebhook.ts:79-127` — not "reused
+  verbatim"; the live PayMongo webhook doesn't touch it today). Org-FK NOT NULL is
+  satisfied by the `:orgId` from the URL.
+- **Binding key (R5).** Bind the webhook to the payment by `metadata.paymentId`
+  (the adapter's `checkout_session_id` extraction is unreliable on `payment.paid`).
+  A slice task verifies in PayMongo **test mode** that checkout metadata round-trips
+  onto the `payment.paid` resource; if not, carry the id another supported way.
+
+## Amount + currency
+
+- Token amount is **fixed** from the invoice; PayMongo line-item amount is server-set
+  → the member cannot overpay on the **outbound** side. The **inbound** webhook is
+  now validated (`event.amount === token.amount`, currency + org match) before
+  settling — so a tampered/mismatched signed event cannot settle (closes B4).
+- Currency PHP end to end, centavos. One real schema gap: `duesInvoices` has no
+  `currency` column — added here. (`duesInvoices.totalAmount` is `bigint` vs
+  `integer` centavos elsewhere — noted; no change this slice.)
 
 ## Error handling
 
-- Expired token → `410 Gone` (link dead, officer re-issues).
-- Revoked token → `410 Gone`.
-- Used token → `409 Conflict` (already paid).
-- Bad/absent webhook signature → `verifyWebhook` returns null → `400`, no state
-  change, logged. Never trust an unsigned webhook (trust-boundary BR).
-- PayMongo API failure on checkout → `502`, token stays `active` (retryable).
-- Unknown/duplicate webhook event → idempotency key swallows it, `200`.
+- Invalid/unknown token → `400`. Expired → `410`. Revoked → `410`. Already
+  used/paid → `409`. Org not connected / no decryptable secret → `400`.
+- Bad/absent webhook signature → `verifyWebhook` null → `400`, no state change.
+- Amount/currency/org mismatch on a verified event → `409`, logged, no settle.
+- PayMongo API failure at checkout → `502`, token stays active (retryable).
+- Duplicate webhook (idempotency key seen) → `200`, no-op.
 
-## Schema changes (one migration, shown before it runs)
+## Schema changes (one migration; SQL reviewed before it runs)
 
-1. `duesInvoices` — add `currency varchar(3) NOT NULL DEFAULT 'PHP'`.
+1. `dues_gateway_configs` — add `encrypted_webhook_secret` (per-org webhook secret).
 2. `payment_token` — add `revoked_at timestamptz NULL`,
-   `paymongo_session_id varchar NULL`.
-3. Reconciliation status column — ensure it is an enum/varchar wide enough for
-   the full instant+OTC state set (additive; no data rewrite).
+   `paymongo_session_id varchar NULL`, `checkout_started_at timestamptz NULL`,
+   `idempotency_key varchar NULL`.
+3. `dues_invoices` — add `currency varchar(3) NOT NULL DEFAULT 'PHP'`.
 
-Migration follows the project gate: `bun run db:generate` → review SQL →
-`DELETE`+`WHERE` one-line rule (N/A here, additive only) → PR references
+All additive (no `DELETE`). `bun run db:generate` → review SQL → PR references
 `docs/security/MIGRATION_SAFETY_CHECKLIST.md`.
 
-## Business rules (extracted → `br-registry`, ratcheted same PR)
+## Business rules (→ `br-registry`, waivers ratcheted same PR)
 
-- **BR (pay-link single-use):** a token is spendable at most once; `usedAt`
-  set on confirmed payment makes it permanently spent.
-- **BR (pay-link TTL):** a token past `expiresAt` is unusable; re-issue creates
-  a new token. TTL tunable (default 72h).
-- **BR (pay-link revocable):** an officer may revoke an unused token; revoked
-  tokens are unusable.
-- **BR (pay-link idempotent — no double-charge):** repeated taps of one token
-  never produce more than one checkout session or more than one settled payment.
-- **BR (webhook signature trust boundary):** payment state changes only on a
-  webhook whose PayMongo HMAC signature verifies; unsigned/forged webhooks
-  cause no state change.
-- **BR (PHP currency):** dues money is denominated in PHP, stored in centavos.
-- **BR (exact-amount link):** the member pays exactly the invoice amount; the
-  amount is server-set and not member-modifiable (no overpayment surface).
-
-Each maps a WORKFLOW_MAP entry re-pointed to the lean flow + drops its
-`KNOWN_INCOMPLETE` waiver in `br-coverage.ts` once the lean test lands.
+- Pay-link **single-use** (`usedAt` permanent once set on confirmed payment).
+- Pay-link **TTL** (unusable past `expiresAt`; re-issue mints new; default 72h, tunable).
+- Pay-link **revocable** (officer sets `revokedAt`; revoked unusable).
+- Pay-link **idempotent** (≤1 session, ≤1 settlement per token, under concurrency).
+- **Webhook signature trust boundary** (state changes only on a per-org-HMAC-verified
+  event).
+- **Inbound amount/org validation** (settle only when event amount+currency+org match
+  the token).
+- **Per-org settlement** (dues route to the org's own PayMongo account; platform key
+  never used for dues).
+- **PHP currency**, centavos.
 
 ## Testing (VERTICAL_TDD: spec → RED → GREEN, real-PG where money moves)
 
-Real-PG (`createScratch`) integration tests, written RED first:
+`createScratch` real-PG integration tests, RED first:
 
-1. Create pay-link → `payment_token` row with correct hash/amount/TTL/officer.
-2. **Double-tap idempotency** (concurrent) → exactly one PayMongo session;
-   second tap returns the same `checkout_url`. (The money-safety test.)
-3. Webhook `paid` → token `usedAt` set, invoice `pending → paid`.
+1. Create pay-link → correct `payment_token` row.
+2. **Concurrent double-tap** → exactly one PayMongo session; loser gets same
+   `checkout_url`. (The money-safety test.)
+3. Webhook `paid` (valid amount/org) → `duesPayments pending→completed`,
+   invoice→paid, `usedAt` set — in one tx; reports' `totalCollected` moves
+   (regression test for bug #3).
 4. Webhook redelivery (same idempotency key) → no second settlement.
-5. Expired token → `410`, no checkout.
-6. Revoked token → `410`, no checkout.
-7. Used token → `409`.
+5. Webhook with **mismatched amount** → `409`, no settle (B4).
+6. Webhook for **wrong org** (verified with org A's secret, invoice of org B) →
+   rejected, no settle.
+7. Expired token checkout → `410`; revoked → `410`; used → `409`.
 8. Bad webhook signature → `400`, no state change (signed-fixture test).
+9. Per-org key: checkout decrypts org A's secret, not the platform key (assert the
+   adapter is constructed with the org's secret).
 
-PayMongo runs in **test mode** (test keys); webhook tests use signed fixtures so
-no live PayMongo call is needed. The `createCheckout` HTTP call is the only
-external boundary — stubbed at the fetch layer for unit, exercised against
-PayMongo test mode for the adapter contract test.
+PayMongo in **test mode**; webhook tests use signed fixtures (no live call). The
+`createCheckout` HTTP boundary is stubbed for unit tests and exercised against
+PayMongo test mode in one adapter contract test (which also verifies the metadata
+round-trip from R5).
 
 ## Definition of done
 
-- TypeSpec ops for the pay-link flow built; OpenAPI + types + routes + SDK
-  regenerated (no generated-file drift; CI git-diff gate green).
-- Migration generated, SQL reviewed, applies clean.
-- All 8 real-PG tests green; double-tap idempotency proven.
-- BRs registered; their WORKFLOW_MAP entries re-pointed to lean; matching
-  `KNOWN_INCOMPLETE` waivers removed; `br-coverage` + journey gates green.
-- `PayMongoAdapter` wired into the live checkout via provider selection.
-- Full engine suite + contract suite green; typecheck green.
+- One canonical PayMongo checkout + webhook; the broken Stripe-at-PH-route checkout
+  and the mismatched webhook are replaced. No parallel dead money paths.
+- Per-org secret used for checkout; per-org webhook secret verifies the webhook;
+  platform key not used for dues.
+- Ledger settles correctly (`duesPayments → completed`); the report-collection
+  regression test passes.
+- Concurrent double-tap proven to mint one session; amount/org validation enforced.
+- TypeSpec ops built; OpenAPI + types + routes + SDK regenerated (no generated-file
+  drift; CI git-diff gate green).
+- Migration reviewed + applies clean.
+- BRs registered; WORKFLOW_MAP entries re-pointed lean; matching `KNOWN_INCOMPLETE`
+  waivers removed; `br-coverage` + journey gates green.
+- Full engine suite + contract suite + typecheck green.
 
 ## Explicitly deferred
 
-- OTC bank-transfer proof rail (slice-1b).
-- The officer UI (`apps/org`) and the member pay page UI — this slice is the
-  API + money engine; the UIs consume it next on `packages/ui` + the SDK.
-- Refunds, late fees, partial dues, renewals, roster import, events+pay,
-  console org-create (later T9 slices).
+- OTC bank-transfer proof rail (slice-1b; reuses existing `submitted/underReview/
+  confirmed/rejected` states).
+- Officer UI (`apps/org`) + member pay page UI — this slice is the API + money
+  engine; UIs consume it next on `packages/ui` + the SDK.
+- Refunds, late fees, partial dues, renewals, roster import, events+pay, console
+  org-create.
+```
