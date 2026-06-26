@@ -7649,6 +7649,11 @@ export const PaymentTokenValidationSchema = z.object({
   status: z.string().optional()
 });
 
+export const PaymentWebhookAckSchema = z.object({
+  received: z.boolean(),
+  action: z.string()
+});
+
 export const PendingCreditEntrySchema = z.object({
   id: z.string(),
   personId: z.string(),
@@ -14014,6 +14019,16 @@ export type DownloadReceiptParams = z.infer<typeof DownloadReceiptParams>;
 
 export const DownloadReceiptResponse = z.string();
 
+export const RevokePaymentLinkParams = z.object({
+  organizationId: z.string(),
+  tokenId: z.string(),
+});
+export type RevokePaymentLinkParams = z.infer<typeof RevokePaymentLinkParams>;
+
+export const RevokePaymentLinkResponse = z.object({
+  revoked: z.boolean()
+});
+
 export const CheckoutPaymentTokenParams = z.object({
   token: z.string(),
 });
@@ -14369,3 +14384,10 @@ export const DismissSurveyResponseParams = z.object({
 export type DismissSurveyResponseParams = z.infer<typeof DismissSurveyResponseParams>;
 
 export const DismissSurveyResponseResponse = z.void();
+
+export const PaymongoWebhookParams = z.object({
+  organizationId: UUIDSchema,
+});
+export type PaymongoWebhookParams = z.infer<typeof PaymongoWebhookParams>;
+
+export const PaymongoWebhookResponse = PaymentWebhookAckSchema;

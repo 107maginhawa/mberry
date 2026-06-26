@@ -393,3 +393,35 @@ describe('PayMongoAdapter.getPaymentStatus', () => {
     }
   });
 });
+
+// ─── createCheckout idempotency ───────────────────────────────────────────────
+
+describe('PayMongoAdapter.createCheckout idempotency', () => {
+  test('sends the Idempotency-Key header when provided', async () => {
+    let seen: Record<string, string> = {};
+    const orig = globalThis.fetch;
+    globalThis.fetch = (async (_url: string, init: any) => {
+      seen = init.headers;
+      return new Response(JSON.stringify({ data: { id: 'cs_1', attributes: { checkout_url: 'https://x' } } }), { status: 200 });
+    }) as any;
+    try {
+      const a = new PayMongoAdapter('sk_test', 'whsec');
+      await a.createCheckout({ amount: 1000, currency: 'PHP', description: 'd', email: 'm@x.com', metadata: {}, successUrl: 's', cancelUrl: 'c' }, 'idem-123');
+      expect(seen['Idempotency-Key']).toBe('idem-123');
+    } finally { globalThis.fetch = orig; }
+  });
+
+  test('does NOT send Idempotency-Key header when arg is omitted', async () => {
+    let seen: Record<string, string> = {};
+    const orig = globalThis.fetch;
+    globalThis.fetch = (async (_url: string, init: any) => {
+      seen = init.headers;
+      return new Response(JSON.stringify({ data: { id: 'cs_2', attributes: { checkout_url: 'https://x' } } }), { status: 200 });
+    }) as any;
+    try {
+      const a = new PayMongoAdapter('sk_test', 'whsec');
+      await a.createCheckout({ amount: 1000, currency: 'PHP', description: 'd', email: 'm@x.com', metadata: {}, successUrl: 's', cancelUrl: 'c' });
+      expect(seen['Idempotency-Key']).toBeUndefined();
+    } finally { globalThis.fetch = orig; }
+  });
+});

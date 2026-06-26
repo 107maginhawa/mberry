@@ -22,6 +22,7 @@ const INTENTIONALLY_PUBLIC_ROUTES = new Set([
   'GET /invite/validate/:token',
   'POST /pay/:token/checkout',
   'GET /pay/:token/validate',
+  'POST /webhooks/paymongo/:organizationId',
   'GET /public/events',
   'GET /public/events/:slug',
   'GET /public/org/:slug',

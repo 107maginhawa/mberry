@@ -152,6 +152,7 @@ export const duesGatewayConfigs = pgTable('dues_gateway_config', {
   provider: gatewayProviderEnum('provider').notNull(),
   publicKey: varchar('public_key', { length: 255 }).notNull(),
   encryptedSecret: text('encrypted_secret').notNull(),
+  encryptedWebhookSecret: text('encrypted_webhook_secret'),
   connected: boolean('connected').notNull().default(false),
   lastTestAt: timestamp('last_test_at', { withTimezone: true }),
 }, (table) => ({

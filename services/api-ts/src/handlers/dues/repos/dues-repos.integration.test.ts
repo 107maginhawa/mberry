@@ -96,6 +96,10 @@ async function ddl(client: any) {
       currency varchar(3) NOT NULL DEFAULT 'PHP',
       expires_at timestamptz NOT NULL,
       used_at timestamptz,
+      revoked_at timestamptz,
+      paymongo_session_id varchar(255),
+      checkout_started_at timestamptz,
+      idempotency_key varchar(255),
       created_by_officer uuid NOT NULL,${baseCols}
     )
   `);

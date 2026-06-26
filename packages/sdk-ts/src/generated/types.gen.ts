@@ -24913,11 +24913,11 @@ export type PaUpdateTicketStatusRequest = {
 export type PairStatus = 'proposed' | 'active' | 'completed' | 'dissolved';
 
 /**
- * Payment checkout response with Stripe redirect URL
+ * Payment checkout response with PayMongo redirect URL
  */
 export type PaymentCheckoutResponse = {
     /**
-     * Stripe Checkout session URL to redirect the member to
+     * PayMongo Checkout session URL to redirect the member to
      */
     checkoutUrl: string;
 };
@@ -24999,6 +24999,14 @@ export type PaymentTokenValidation = {
      * Status hint: already_paid, expired, etc.
      */
     status?: string;
+};
+
+/**
+ * Acknowledgement of a payment gateway webhook
+ */
+export type PaymentWebhookAck = {
+    received: boolean;
+    action: string;
 };
 
 /**
@@ -51302,6 +51310,48 @@ export type DownloadReceiptResponses = {
 
 export type DownloadReceiptResponse = DownloadReceiptResponses[keyof DownloadReceiptResponses];
 
+export type RevokePaymentLinkData = {
+    body?: never;
+    path: {
+        organizationId: string;
+        tokenId: string;
+    };
+    query?: never;
+    url: '/org/{organizationId}/payments/{tokenId}/revoke';
+};
+
+export type RevokePaymentLinkErrors = {
+    /**
+     * Validation error response
+     */
+    400: ValidationError;
+    /**
+     * Unauthorized access response
+     */
+    401: AuthenticationError;
+    /**
+     * Forbidden access response
+     */
+    403: AuthorizationError;
+    /**
+     * Resource not found response
+     */
+    404: NotFoundError;
+};
+
+export type RevokePaymentLinkError = RevokePaymentLinkErrors[keyof RevokePaymentLinkErrors];
+
+export type RevokePaymentLinkResponses = {
+    /**
+     * Success response with data
+     */
+    200: {
+        revoked: boolean;
+    };
+};
+
+export type RevokePaymentLinkResponse = RevokePaymentLinkResponses[keyof RevokePaymentLinkResponses];
+
 export type CheckoutPaymentTokenData = {
     body?: never;
     path: {
@@ -51316,6 +51366,18 @@ export type CheckoutPaymentTokenErrors = {
      * Validation error response
      */
     400: ValidationError;
+    /**
+     * Conflict response
+     */
+    409: ConflictError;
+    /**
+     * Client error
+     */
+    410: ValidationError;
+    /**
+     * Server error
+     */
+    502: ValidationError;
 };
 
 export type CheckoutPaymentTokenError = CheckoutPaymentTokenErrors[keyof CheckoutPaymentTokenErrors];
@@ -51325,6 +51387,10 @@ export type CheckoutPaymentTokenResponses = {
      * Success response with data
      */
     200: PaymentCheckoutResponse;
+    /**
+     * The request has been accepted for processing, but processing has not yet completed.
+     */
+    202: PaymentCheckoutResponse;
 };
 
 export type CheckoutPaymentTokenResponse = CheckoutPaymentTokenResponses[keyof CheckoutPaymentTokenResponses];
@@ -53062,3 +53128,34 @@ export type DismissSurveyResponseResponses = {
 };
 
 export type DismissSurveyResponseResponse = DismissSurveyResponseResponses[keyof DismissSurveyResponseResponses];
+
+export type PaymongoWebhookData = {
+    body?: never;
+    path: {
+        organizationId: Uuid;
+    };
+    query?: never;
+    url: '/webhooks/paymongo/{organizationId}';
+};
+
+export type PaymongoWebhookErrors = {
+    /**
+     * Validation error response
+     */
+    400: ValidationError;
+    /**
+     * Conflict response
+     */
+    409: ConflictError;
+};
+
+export type PaymongoWebhookError = PaymongoWebhookErrors[keyof PaymongoWebhookErrors];
+
+export type PaymongoWebhookResponses = {
+    /**
+     * Success response with data
+     */
+    200: PaymentWebhookAck;
+};
+
+export type PaymongoWebhookResponse = PaymongoWebhookResponses[keyof PaymongoWebhookResponses];

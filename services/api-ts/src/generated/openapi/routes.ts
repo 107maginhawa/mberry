@@ -3449,6 +3449,14 @@ export function registerRoutes(app: Hono<{ Variables: Variables }>) {
     registry.downloadReceipt as unknown as Handler
   );
 
+  // revokePaymentLink
+  app.post('/org/:organizationId/payments/:tokenId/revoke',
+    authMiddleware({ roles: ["association:admin", "association:staff"] }),
+    requireOfficerMiddleware(),
+    zValidator('param', validators.RevokePaymentLinkParams, validationErrorHandler),
+    registry.revokePaymentLink as unknown as Handler
+  );
+
   // checkoutPaymentToken
   app.post('/pay/:token/checkout',
     zValidator('param', validators.CheckoutPaymentTokenParams, validationErrorHandler),
@@ -3790,6 +3798,12 @@ export function registerRoutes(app: Hono<{ Variables: Variables }>) {
     authMiddleware({ roles: ["user"] }),
     zValidator('param', validators.DismissSurveyResponseParams, validationErrorHandler),
     registry.dismissSurveyResponse as unknown as Handler
+  );
+
+  // paymongoWebhook
+  app.post('/webhooks/paymongo/:organizationId',
+    zValidator('param', validators.PaymongoWebhookParams, validationErrorHandler),
+    registry.paymongoWebhook as unknown as Handler
   );
 
 }

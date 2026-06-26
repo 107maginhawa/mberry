@@ -133,6 +133,22 @@ const KNOWN_INCOMPLETE: Set<string> = new Set([
   "BR-01", "BR-03", "BR-06", "BR-07", "BR-08", "BR-09", "BR-10", "BR-21",
   "BR-24", "BR-25", "BR-26", "BR-32", "BR-36", "BR-41", "BR-43", "BR-44",
   "BR-45", "BR-46", "BR-49", "BR-50", "BR-67",
+
+  // ── Slice-1 dues pay-link / PayMongo (2026-06-27) ─────────
+  // BRs minted in slice-1 (Task 10). Backend integration tests exist and are
+  // green. Contract hurl is absent for these three because the surfaces are
+  // either inbound server-to-server webhooks (no public route shape) or
+  // officer-facing routes that wait on apps/org being built. Allowlisted until
+  // the corresponding contract/e2e layers land in a later slice.
+  "BR-80", // Pay-link revocable: DELETE /org/:orgId/payments/:tokenId/revoke —
+           // no hurl yet (apps/org not built). Backend: revokePaymentLink.test.ts
+           // + payment-token.repo.test.ts cover org-scope + CAS.
+  "BR-82", // Webhook signature trust boundary: inbound PayMongo push has no
+           // contract-hurl surface. Backend: paymongoWebhook.integration.test.ts
+           // covers HMAC bad-sig → 400, missing-sig → 400, valid-sig → proceeds.
+  "BR-83", // Inbound amount/org validation: same inbound webhook — no hurl.
+           // Backend: paymongoWebhook.integration.test.ts covers amount/org
+           // mismatch → reject.
 ]);
 
 // ── Coverage derivation ──────────────────────────────────

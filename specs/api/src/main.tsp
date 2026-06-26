@@ -694,6 +694,9 @@ namespace MonobaseAPI {
   @tag("Member/DuesSpecialAssessments")
   interface ReceiptEndpoints extends DuesCustomModule.ReceiptEndpoints {}
 
+  @tag("Member/DuesSpecialAssessments")
+  interface PayMongoWebhookEndpoints extends DuesCustomModule.PayMongoWebhookEndpoints {}
+
   // =========================================================================
   // Invite Module — officer invites, public validation, authenticated claim
   // =========================================================================

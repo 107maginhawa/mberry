@@ -373,7 +373,7 @@ describe('validatePaymentToken — public pay page returns the real invoice (rea
 //    Stripe / ledger work (stubbed repos; the gate is the unit under test).
 // ═══════════════════════════════════════════════════════════════════════════
 
-describe('checkoutPaymentToken — token gate rejects forged/expired/used tokens (400)', () => {
+describe('checkoutPaymentToken — token gate rejects forged/expired/used tokens before any PayMongo work', () => {
   test('a forged token (no matching row) is rejected 400 and never reaches billing', () => {
     const { raw } = generatePaymentToken(TEST_SECRET);
     const mocks = stubRepo(PaymentTokenRepository, {
@@ -392,7 +392,7 @@ describe('checkoutPaymentToken — token gate rejects forged/expired/used tokens
     }
   });
 
-  test('an already-used token is rejected 400 (double-pay prevention) before any checkout', () => {
+  test('an already-used token is rejected 409 (double-pay prevention) before any checkout', () => {
     const { raw } = generatePaymentToken(TEST_SECRET);
     const mocks = stubRepo(PaymentTokenRepository, {
       findByTokenHash: async () => ({
@@ -411,7 +411,7 @@ describe('checkoutPaymentToken — token gate rejects forged/expired/used tokens
       return checkoutPaymentToken(
         makeCtx({ user: null, session: null, _params: { token: raw }, billing }) as any,
       ).then((res: any) => {
-        expect(res.status).toBe(400);
+        expect(res.status).toBe(409);
         expect(res.body.error).toMatch(/already been processed/i);
       });
     } finally {
@@ -419,7 +419,7 @@ describe('checkoutPaymentToken — token gate rejects forged/expired/used tokens
     }
   });
 
-  test('an expired token is rejected 400 before any checkout', () => {
+  test('an expired token is rejected 410 before any checkout', () => {
     const { raw } = generatePaymentToken(TEST_SECRET);
     const mocks = stubRepo(PaymentTokenRepository, {
       findByTokenHash: async () => ({
@@ -438,7 +438,7 @@ describe('checkoutPaymentToken — token gate rejects forged/expired/used tokens
       return checkoutPaymentToken(
         makeCtx({ user: null, session: null, _params: { token: raw }, billing }) as any,
       ).then((res: any) => {
-        expect(res.status).toBe(400);
+        expect(res.status).toBe(410);
         expect(res.body.error).toMatch(/expired/i);
       });
     } finally {
@@ -446,7 +446,35 @@ describe('checkoutPaymentToken — token gate rejects forged/expired/used tokens
     }
   });
 
-  test('a valid token whose org has NO connected gateway is rejected 400 (no Stripe call)', () => {
+  test('a revoked token is rejected 410 before any checkout', () => {
+    const { raw } = generatePaymentToken(TEST_SECRET);
+    const mocks = stubRepo(PaymentTokenRepository, {
+      findByTokenHash: async () => ({
+        id: freshId(),
+        organizationId: freshId(),
+        personId: freshId(),
+        invoiceId: null,
+        amount: 100000,
+        currency: 'PHP',
+        expiresAt: new Date(Date.now() + 60 * 60 * 1000),
+        usedAt: null,
+        revokedAt: new Date(), // officer revoked
+      }),
+    });
+    try {
+      const billing = { createPaymentIntent: async () => { throw new Error('billing must not be called'); } };
+      return checkoutPaymentToken(
+        makeCtx({ user: null, session: null, _params: { token: raw }, billing }) as any,
+      ).then((res: any) => {
+        expect(res.status).toBe(410);
+        expect(res.body.error).toMatch(/revoked/i);
+      });
+    } finally {
+      mocks.findByTokenHash.mockRestore();
+    }
+  });
+
+  test('a valid token whose org has NO connected gateway is refused (GatewayNotConfiguredError → 400 via middleware), no PayMongo call', async () => {
     const { raw } = generatePaymentToken(TEST_SECRET);
     const orgId = freshId();
     const tokMocks = stubRepo(PaymentTokenRepository, {
@@ -462,17 +490,24 @@ describe('checkoutPaymentToken — token gate rejects forged/expired/used tokens
       }),
     });
     const duesMocks = stubRepo(DuesRepository, {
-      // Gateway not connected → checkout must refuse before creating any payment.
+      // Gateway not connected → resolveCheckoutAdapter throws GatewayNotConfiguredError
+      // (AppError 400) which the route's error middleware renders as a 400 — the
+      // handler itself never creates a payment or calls PayMongo.
       getGatewayConfig: async () => ({ connected: false }),
     });
     try {
       const billing = { createPaymentIntent: async () => { throw new Error('billing must not be called'); } };
-      return checkoutPaymentToken(
-        makeCtx({ user: null, session: null, _params: { token: raw }, billing }) as any,
-      ).then((res: any) => {
-        expect(res.status).toBe(400);
-        expect(res.body.error).toMatch(/not configured/i);
-      });
+      await expect(
+        checkoutPaymentToken(
+          makeCtx({
+            user: null,
+            session: null,
+            _params: { token: raw },
+            billing,
+            config: { auth: { secret: 'test-secret' } },
+          }) as any,
+        ),
+      ).rejects.toThrow(/not configured/i);
     } finally {
       tokMocks.findByTokenHash.mockRestore();
       duesMocks.getGatewayConfig.mockRestore();
