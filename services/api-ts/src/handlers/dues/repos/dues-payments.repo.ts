@@ -186,7 +186,9 @@ export class DuesRepository {
   }
 
   /**
-   * [FIX-008] Lock-and-read a payment row for in-transaction refund accounting.
+   * [FIX-008] Lock-and-read a payment row for in-transaction money accounting —
+   * both the refund cap (below) and the online-settle path (settleOnlinePayment
+   * locks the row here so concurrent webhook redeliveries serialize on it).
    *
    * Returns the payment row under a `SELECT … FOR UPDATE` row lock so the
    * caller can re-read `refundedAmount`, validate the over-refund cap, and write

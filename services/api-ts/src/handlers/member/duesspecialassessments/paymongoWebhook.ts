@@ -47,53 +47,76 @@ export async function paymongoWebhook(
 
   const event = adapter.verifyWebhook(body, signature);
   if (!event) return ctx.json({ error: 'Invalid webhook signature' }, 400);
+  // NOTE: bad signature / no adapter rejected ABOVE, OUTSIDE the transaction and
+  // BEFORE any ledger write — an attacker cannot persist a dedupe row with unsigned
+  // junk (that would let forged event ids suppress a later genuine redelivery).
 
-  // Durable idempotency: claim the event id in the unique webhook_retry_log ledger
-  // BEFORE any settlement. A redelivery conflicts on the unique key → ack as a
-  // duplicate and do NOT settle again. Mirrors handleStripeWebhook's onConflictDoNothing.
-  const claimed = await insertWebhookLogOnce(db, {
-    idempotencyKey: event.gatewayEventId,
-    provider: 'paymongo',
-    eventType: event.type,
-    payload: safeParse(body),
-    organizationId: orgId,
+  // ── One transaction for claim + settle (mirrors handleStripeWebhook FIX-WEBHOOK-IDEMP) ──
+  // The dedupe-claim INSERT and ALL settlement side effects share ONE tx. A
+  // deliberate rejection (duplicate / non-paid / tamper-409) RETURNS normally so
+  // the tx commits and the claim sticks → the provider's redelivery is not
+  // reprocessed. An unexpected throw mid-settle propagates OUT of the tx, rolling
+  // the claim back WITH the side effects → the redelivery reprocesses cleanly
+  // (closing the crash-between-commits reconcile hole where money sat pending
+  // forever). settleOnlinePayment opens its own tx → nests as a SAVEPOINT here.
+  const outcome = await db.transaction(async (tx: DatabaseInstance) => {
+    // Durable idempotency: claim the event id in the unique webhook_retry_log
+    // ledger BEFORE settling. A redelivery conflicts on the unique key → ack as a
+    // duplicate and do NOT settle again. Tx-bound so the claim commits/rolls back
+    // atomically with settlement.
+    const claimed = await insertWebhookLogOnce(tx, {
+      idempotencyKey: event.gatewayEventId,
+      provider: 'paymongo',
+      eventType: event.type,
+      payload: safeParse(body),
+      organizationId: orgId,
+    });
+    if (!claimed) return { action: 'duplicate' as const };
+
+    // Only a paid/settled event moves money. Anything else is acked + noted.
+    if (event.status !== 'paid') return { action: 'noted' as const };
+
+    // The webhook settles by `paymentId` — the load-bearing metadata field set at checkout.
+    const paymentId = event.metadata['paymentId'];
+    if (!paymentId) return { action: 'ignored' as const };
+
+    const duesRepo = new DuesRepository(tx);
+    const payment = await duesRepo.getPayment(paymentId);
+    if (!payment) return { action: 'unknown_payment' as const };
+
+    // ── Inbound validation (B4): org + amount + currency must match the record ──
+    // A deliberate rejection — RETURN (do not throw) so the claim COMMITS and a
+    // forged event is not reprocessed on redelivery. Mirrors Stripe's split:
+    // deliberate rejections commit, only unexpected crashes roll back.
+    // The URL org must own the payment (a misrouted/cross-org event must not settle).
+    if (payment.organizationId !== orgId) return { action: 'tamper' as const, error: 'Organization mismatch' };
+    // Amount + currency are validated against the recorded dues_payment (which carries
+    // both columns) — a tampered/incorrect event amount must never settle.
+    if (event.amount !== payment.amount) return { action: 'tamper' as const, error: 'Amount mismatch' };
+    if (event.currency !== payment.currency) return { action: 'tamper' as const, error: 'Currency mismatch' };
+
+    // Atomic settle: payment pending→completed, invoice→paid (when present), pay-link
+    // token stamped used (markUsedCas inside the tx). invoiceId derives from the
+    // recorded payment, not caller input — a cross-invoice settle is impossible.
+    const tokenId = event.metadata['paymentTokenId'] ?? '';
+    const res = await duesRepo.settleOnlinePayment({
+      paymentId,
+      tokenId,
+      invoiceId: payment.invoiceId,
+      gatewayEventId: event.gatewayEventId,
+      paidAt: new Date(),
+    });
+    return { action: res.settled ? ('processed' as const) : ('already_settled' as const), paymentId };
   });
-  if (!claimed) return ctx.json({ received: true, action: 'duplicate' }, 200);
 
-  // Only a paid/settled event moves money. Anything else is acked + noted.
-  if (event.status !== 'paid') return ctx.json({ received: true, action: 'noted' }, 200);
+  // A tamper mismatch is a deliberate 409 (the claim already committed above).
+  if (outcome.action === 'tamper') return ctx.json({ error: outcome.error }, 409);
 
-  // The webhook settles by `paymentId` — the load-bearing metadata field set at checkout.
-  const paymentId = event.metadata['paymentId'];
-  if (!paymentId) return ctx.json({ received: true, action: 'ignored' }, 200);
-
-  const duesRepo = new DuesRepository(db);
-  const payment = await duesRepo.getPayment(paymentId);
-  if (!payment) return ctx.json({ received: true, action: 'unknown_payment' }, 200);
-
-  // ── Inbound validation (B4): org + amount + currency must match the record ──
-  // The URL org must own the payment (a misrouted/cross-org event must not settle).
-  if (payment.organizationId !== orgId) return ctx.json({ error: 'Organization mismatch' }, 409);
-  // Amount + currency are validated against the recorded dues_payment (which carries
-  // both columns) — a tampered/incorrect event amount must never settle.
-  if (event.amount !== payment.amount) return ctx.json({ error: 'Amount mismatch' }, 409);
-  if (event.currency !== payment.currency) return ctx.json({ error: 'Currency mismatch' }, 409);
-
-  // Atomic settle: payment pending→completed, invoice→paid (when present), pay-link
-  // token stamped used (markUsedCas inside the tx). invoiceId derives from the
-  // recorded payment, not caller input — a cross-invoice settle is impossible.
-  const tokenId = event.metadata['paymentTokenId'] ?? '';
-  const res = await duesRepo.settleOnlinePayment({
-    paymentId,
-    tokenId,
-    invoiceId: payment.invoiceId,
-    gatewayEventId: event.gatewayEventId,
-    paidAt: new Date(),
-  });
-
-  ctx.set('auditResourceId', paymentId);
-  ctx.set('auditDescription', `Online payment via PayMongo: ${event.gatewayEventId}`);
-  return ctx.json({ received: true, action: res.settled ? 'processed' : 'already_settled' }, 200);
+  if (outcome.action === 'processed' || outcome.action === 'already_settled') {
+    ctx.set('auditResourceId', outcome.paymentId);
+    ctx.set('auditDescription', `Online payment via PayMongo: ${event.gatewayEventId}`);
+  }
+  return ctx.json({ received: true, action: outcome.action }, 200);
 }
 
 /**
