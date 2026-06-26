@@ -241,8 +241,10 @@ import { listSpecialAssessments } from '../../handlers/member/duesspecialassessm
 import { getDuesDashboard } from '../../handlers/member/duesspecialassessments/getDuesDashboard';
 import { sendPaymentLink } from '../../handlers/member/duesspecialassessments/sendPaymentLink';
 import { downloadReceipt } from '../../handlers/member/duesspecialassessments/downloadReceipt';
+import { revokePaymentLink } from '../../handlers/member/duesspecialassessments/revokePaymentLink';
 import { checkoutPaymentToken } from '../../handlers/member/duesspecialassessments/checkoutPaymentToken';
 import { validatePaymentToken } from '../../handlers/member/duesspecialassessments/validatePaymentToken';
+import { paymongoWebhook } from '../../handlers/member/duesspecialassessments/paymongoWebhook';
 import { createMembershipApplication } from '../../handlers/member/membership/createMembershipApplication';
 import { listMembershipApplications } from '../../handlers/member/membership/listMembershipApplications';
 import { bulkApproveMembershipApplications } from '../../handlers/member/membership/bulkApproveMembershipApplications';
@@ -743,8 +745,10 @@ export const registry = {
   getDuesDashboard,
   sendPaymentLink,
   downloadReceipt,
+  revokePaymentLink,
   checkoutPaymentToken,
   validatePaymentToken,
+  paymongoWebhook,
 
   // Member/membership handlers
   createMembershipApplication,

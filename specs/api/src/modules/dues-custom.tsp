@@ -59,6 +59,12 @@ model PaymentCheckoutResponse {
   checkoutUrl: string;
 }
 
+@doc("Acknowledgement of a payment gateway webhook")
+model PaymentWebhookAck {
+  received: boolean;
+  action: string;
+}
+
 @doc("Request body for sending a payment link to a member")
 model SendPaymentLinkRequest {
   @doc("Person ID of the member to send the payment link to")
@@ -299,13 +305,14 @@ namespace DuesCustomModule {
       @path token: string,
     ): ApiOkResponse<PaymentTokenValidation>;
 
-    @doc("Initiate Stripe checkout for a payment token. Creates a checkout session and returns the redirect URL. Token is single-use (double-pay prevention).")
+    @doc("Initiate PayMongo checkout for a payment token. Single-use, idempotent (one active session per token; double-tap returns the same URL or 202 while a session is being created).")
     @operationId("checkoutPaymentToken")
     @post
     @route("/pay/{token}/checkout")
     checkoutPaymentToken(
       @path token: string,
     ): ApiOkResponse<PaymentCheckoutResponse>
+      | { @statusCode statusCode: 202; @body body: PaymentCheckoutResponse }
       | ApiBadRequestResponse;
   }
 
@@ -335,6 +342,17 @@ namespace DuesCustomModule {
       | ApiBadRequestResponse;
   }
 
+  @doc("Public PayMongo webhook — per-org URL; signature verified with the org's webhook secret. No bearer auth.")
+  interface PayMongoWebhookEndpoints {
+    @doc("Receive a PayMongo webhook for one org and reconcile the matching payment.")
+    @operationId("paymongoWebhook")
+    @post
+    @route("/webhooks/paymongo/{organizationId}")
+    paymongoWebhook(
+      @path organizationId: UUID,
+    ): ApiOkResponse<PaymentWebhookAck> | ApiBadRequestResponse;
+  }
+
   @doc("Officer endpoint for generating payment links")
   interface PaymentLinkManagement {
     @doc("Generate a one-tap payment link for a member. Requires officer auth and org context.")
@@ -351,5 +369,21 @@ namespace DuesCustomModule {
       | ApiBadRequestResponse
       | ApiUnauthorizedResponse
       | ApiForbiddenResponse;
+
+    @doc("Revoke an unused payment link. Officer only.")
+    @operationId("revokePaymentLink")
+    @post
+    @route("/org/{organizationId}/payments/{tokenId}/revoke")
+    @useAuth(bearerAuth)
+    @extension("x-security-required-roles", #["association:admin", "association:staff"])
+    @extension("x-require-officer", true)
+    revokePaymentLink(
+      @path organizationId: string,
+      @path tokenId: string,
+    ): ApiOkResponse<{ revoked: boolean }>
+      | ApiBadRequestResponse
+      | ApiUnauthorizedResponse
+      | ApiForbiddenResponse
+      | ApiNotFoundResponse;
   }
 }

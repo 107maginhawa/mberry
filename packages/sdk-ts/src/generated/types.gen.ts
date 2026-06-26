@@ -25002,6 +25002,14 @@ export type PaymentTokenValidation = {
 };
 
 /**
+ * Acknowledgement of a payment gateway webhook
+ */
+export type PaymentWebhookAck = {
+    received: boolean;
+    action: string;
+};
+
+/**
  * Response wrapping the list of pending credit entries awaiting officer review
  */
 export type PendingCreditEntriesResponse = {
@@ -51302,6 +51310,48 @@ export type DownloadReceiptResponses = {
 
 export type DownloadReceiptResponse = DownloadReceiptResponses[keyof DownloadReceiptResponses];
 
+export type RevokePaymentLinkData = {
+    body?: never;
+    path: {
+        organizationId: string;
+        tokenId: string;
+    };
+    query?: never;
+    url: '/org/{organizationId}/payments/{tokenId}/revoke';
+};
+
+export type RevokePaymentLinkErrors = {
+    /**
+     * Validation error response
+     */
+    400: ValidationError;
+    /**
+     * Unauthorized access response
+     */
+    401: AuthenticationError;
+    /**
+     * Forbidden access response
+     */
+    403: AuthorizationError;
+    /**
+     * Resource not found response
+     */
+    404: NotFoundError;
+};
+
+export type RevokePaymentLinkError = RevokePaymentLinkErrors[keyof RevokePaymentLinkErrors];
+
+export type RevokePaymentLinkResponses = {
+    /**
+     * Success response with data
+     */
+    200: {
+        revoked: boolean;
+    };
+};
+
+export type RevokePaymentLinkResponse = RevokePaymentLinkResponses[keyof RevokePaymentLinkResponses];
+
 export type CheckoutPaymentTokenData = {
     body?: never;
     path: {
@@ -51325,6 +51375,10 @@ export type CheckoutPaymentTokenResponses = {
      * Success response with data
      */
     200: PaymentCheckoutResponse;
+    /**
+     * The request has been accepted for processing, but processing has not yet completed.
+     */
+    202: PaymentCheckoutResponse;
 };
 
 export type CheckoutPaymentTokenResponse = CheckoutPaymentTokenResponses[keyof CheckoutPaymentTokenResponses];
@@ -53062,3 +53116,30 @@ export type DismissSurveyResponseResponses = {
 };
 
 export type DismissSurveyResponseResponse = DismissSurveyResponseResponses[keyof DismissSurveyResponseResponses];
+
+export type PaymongoWebhookData = {
+    body?: never;
+    path: {
+        organizationId: Uuid;
+    };
+    query?: never;
+    url: '/webhooks/paymongo/{organizationId}';
+};
+
+export type PaymongoWebhookErrors = {
+    /**
+     * Validation error response
+     */
+    400: ValidationError;
+};
+
+export type PaymongoWebhookError = PaymongoWebhookErrors[keyof PaymongoWebhookErrors];
+
+export type PaymongoWebhookResponses = {
+    /**
+     * Success response with data
+     */
+    200: PaymentWebhookAck;
+};
+
+export type PaymongoWebhookResponse = PaymongoWebhookResponses[keyof PaymongoWebhookResponses];
