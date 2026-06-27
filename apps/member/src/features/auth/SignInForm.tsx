@@ -52,8 +52,7 @@ export function SignInForm() {
     setBusy(false)
     if (res.ok) {
       await qc.invalidateQueries({ queryKey: ['session'] })
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      navigate({ to: '/dashboard' as any }) // /dashboard route added in the next task (B4)
+      navigate({ to: '/dashboard' })
     } else {
       setError(res.error)
     }

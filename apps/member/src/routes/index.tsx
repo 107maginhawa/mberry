@@ -11,8 +11,7 @@ function IndexRedirect() {
   const navigate = useNavigate()
 
   useEffect(() => {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    if (status === 'authed') navigate({ to: '/dashboard' as any }) // route added in later task
+    if (status === 'authed') navigate({ to: '/dashboard' })
     else if (status === 'unauthed') navigate({ to: '/sign-in' })
   }, [status, navigate])
 
