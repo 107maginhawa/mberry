@@ -4,6 +4,17 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+## [0.1.7.0] - 2026-06-27
+
+### Added
+- **Slice-2c — roster CSV import (`apps/org`).** An officer can now populate the chapter roster — the funnel asset that feeds dues and future health apps — by uploading a CSV. On a new `/import` screen, the officer picks a membership tier, uploads a `.csv` exported from a spreadsheet, sees a parsed preview (member count plus advisories for rows missing an email/license or a first name), and clicks "Import N members". The frozen engine match-or-creates membership rows and returns a summary the officer sees immediately: new members added, already-members skipped, and a per-row list of any failures. The roster screen's empty state and header now link straight to import. After a successful import the roster refreshes automatically.
+- The CSV is parsed entirely in the browser (RFC-4180: quoted commas, escaped quotes, embedded newlines, CRLF, and a leading UTF-8 BOM from Excel-on-Windows) and posted as a JSON array — no file upload plumbing. Headers auto-map case-insensitively (`first name`/`firstName`, `email`, `PRC`/`license`, `member no`, etc.). Files over the engine's 500-row cap are blocked client-side with a clear message.
+- Built on `@monobase/ui` Friendly-Clarity tokens with the older-dentist accessibility baseline (≥18px text, ≥48px tap targets, `role="alert"` on every error, labeled inputs, one primary task per screen). Authorization is the engine's (Secretary/President via `requirePosition`, which also enforces 2FA in production) — a 403 surfaces as a friendly message, with no redundant client-side gate.
+
+### Notes
+- Engine, TypeSpec specs, and the generated SDK are byte-untouched (additive-only). The feature is pure new UI in `apps/org` over two already-shipped, frozen engine endpoints (`importRosterMembers`, `listMembershipTiers`).
+- Live officer click-through and a real import against a seeded chapter wait on the founder's PayMongo/entity paperwork (G2) — not blocking this slice.
+
 ## [0.1.6.0] - 2026-06-27
 
 ### Added

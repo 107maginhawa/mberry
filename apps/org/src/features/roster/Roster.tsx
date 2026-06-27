@@ -40,6 +40,12 @@ export function RosterView({ orgName, members, errored, linkFor }: RosterViewPro
       <div className="flex flex-col gap-4 p-4">
         {orgName && <h1 className="text-title font-semibold text-foreground">{orgName}</h1>}
         <EmptyState headline="No members yet" description="Import your roster to get started." />
+        <Link
+          to="/import"
+          className="min-h-tap inline-flex items-center justify-center rounded-md bg-plum-600 px-4 text-sm font-semibold text-white hover:bg-plum-700 focus-visible:outline focus-visible:outline-2 self-start"
+        >
+          Import roster
+        </Link>
       </div>
     )
   }
@@ -95,11 +101,11 @@ export default function Roster() {
   return (
     <div className="min-h-screen bg-[var(--color-bg)]">
       <div className="max-w-lg mx-auto pt-4">
-        <div className="px-4 pb-2 flex justify-end">
-          <Link
-            to="/dues"
-            className="text-sm font-medium text-plum-500 hover:text-plum-700"
-          >
+        <div className="px-4 pb-2 flex justify-between">
+          <Link to="/import" className="text-sm font-medium text-plum-500 hover:text-plum-700">
+            + Import roster
+          </Link>
+          <Link to="/dues" className="text-sm font-medium text-plum-500 hover:text-plum-700">
             Dues →
           </Link>
         </div>

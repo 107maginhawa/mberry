@@ -1,6 +1,12 @@
-import { describe, it, expect } from 'vitest'
+import { describe, it, expect, vi } from 'vitest'
 import { render, screen } from '@testing-library/react'
 import { RosterView } from './Roster'
+
+// Mock Link as a plain anchor — unit tests for presentational components
+// don't need a full router; navigation is tested at E2E layer.
+vi.mock('@tanstack/react-router', () => ({
+  Link: ({ to, children, ...props }: any) => <a href={to} {...props}>{children}</a>,
+}))
 
 describe('RosterView', () => {
   const members = [{ membershipId: 'm1', personId: 'p1', name: 'Olive Cruz', memberNumber: 'A-1', status: 'active' }]
@@ -18,8 +24,9 @@ describe('RosterView', () => {
     expect(screen.getByText(/officer or admin access/i)).toBeInTheDocument()
   })
 
-  it('shows empty state', () => {
+  it('shows empty state with Import roster CTA', () => {
     render(<RosterView orgName="Chapter A" members={[]} />)
     expect(screen.getByText(/no members yet/i)).toBeInTheDocument()
+    expect(screen.getByRole('link', { name: /import roster/i })).toHaveAttribute('href', '/import')
   })
 })
