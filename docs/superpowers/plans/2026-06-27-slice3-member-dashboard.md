@@ -32,7 +32,7 @@
 - Consumes: `createScratch` real-PG harness (mirror an existing `*.integration.test.ts` that uses it), `personRepo`/person schema, membership schema, the exported `auth` factory or a way to build a better-auth instance against the scratch DB.
 - Produces: a failing test that Task A2 makes pass. No exported symbols.
 
-- [ ] **Step 1: Locate harness + auth construction.** Read one existing real-PG test that imports `createScratch` (e.g. `services/api-ts/src/handlers/.../*.integration.test.ts`) to copy the DB-setup pattern. Read `services/api-ts/src/core/auth.ts` top to find how `auth` is built (factory taking `{ database, config }`?) so the test can construct an instance pointed at the scratch DB with `config.auth.secret` set.
+- [ ] **Step 1: Locate harness + auth construction.** Read one existing real-PG test that imports `createScratch` to copy the DB-setup pattern. Read `services/api-ts/src/core/auth.ts` top: `auth` is built by a **factory** — confirm the exact signature (review says `createAuth(db, config, logger, emailService, { auditRepo, personRepo })`, real `PersonRepository` required). The test constructs an instance against the scratch DB with a real `PersonRepository(db)` and `config.auth.secret` set, so `create.before`/`after` run against scratch.
 
 - [ ] **Step 2: Write the failing integration test.**
 
@@ -51,9 +51,13 @@ describe('account-claim by email (real PG)', () => {
         contactInfo: { email: 'olive@chapter.ph' }, createdBy: rosterPersonId })
       await db.insert(memberships).values({ /* organizationId, personId: rosterPersonId, status:'active', ... */ })
 
-      const auth = buildAuth({ database: db, /* config with auth.secret */ })
-      // create a user with the SAME email through better-auth (fires user.create hooks)
-      await auth.api.signUpEmail({ body: { email: 'olive@chapter.ph', password: 'Str0ng!pass', name: 'Olive Dy' } })
+      const auth = createAuth(db, config, logger, emailService, { auditRepo, personRepo: new PersonRepository(db) })
+      // Drive the EMAIL-OTP SIGN-IN path (sets emailVerified=true → claim fires).
+      // send-otp creates a verification row; read the code from it (no email infra),
+      // then sign-in/email-otp creates the user via create.before/after.
+      await auth.api.sendVerificationOTP({ body: { email: 'olive@chapter.ph', type: 'sign-in' } })
+      const otp = /* SELECT value/otp from the verification table for this email */
+      await auth.api.signInEmailOTP({ body: { email: 'olive@chapter.ph', otp } })
 
       // the new user's id must equal the roster person's id (claim happened)
       const [user] = await db.select().from(schema.user).where(eq(schema.user.email, 'olive@chapter.ph'))
@@ -71,7 +75,7 @@ describe('account-claim by email (real PG)', () => {
 })
 ```
 
-> If constructing a full better-auth instance against scratch proves impractical, split the proof: (a) a unit test on the extracted claim helper (Task A2) that asserts email-match → `{ data: { id: rosterPersonId } }`; (b) this real-PG test inserting a `user` row with the claim-resolved id and asserting the membership query + no-dup-person compose. better-auth's id-merge is already source-confirmed (`with-hooks.mjs` spreads `result.data` with `forceAllowId:true`), so the membership-visibility assertion is the load-bearing one.
+> **[review I4]** If driving the live OTP endpoints against scratch proves impractical (code-extraction from the verification table is the only fiddly part), use the documented fallback: build the same `createAuth(db, ...)` instance, then create a user **with `emailVerified: true`** directly through better-auth's adapter / `auth.api` user-create so `create.before`/`after` run, and assert `user.id === rosterPersonId` + no-dup-person + membership-visible. better-auth's id-merge is source-confirmed (`with-hooks.mjs` spreads `result.data` with `forceAllowId:true`); the load-bearing assertions are (1) emailVerified-true claims, (2) membership becomes visible under `user.id`. Add a companion negative: an `emailVerified:false` (password) creation must NOT claim.
 
 - [ ] **Step 3: Run — verify it FAILS.** Run: `cd services/api-ts && bun test src/core/account-claim.integration.test.ts`. Expected: FAIL — `user.id` ≠ `rosterPersonId` (current after-hook creates a fresh person; claim not implemented) and/or membership query empty.
 
@@ -86,37 +90,45 @@ git commit -m "test(engine): RED — roster member email login must claim person
 ### Task A2: GREEN — account-claim in `create.before` + guards + unit tests
 
 **Files:**
-- Modify: `services/api-ts/src/core/auth.ts:162-193` (the `user.create.before` hook)
+- Modify: `services/api-ts/src/core/auth.ts` — the `user.create.before` hook (~162-193) AND the `AuthPersonRepo` interface declaration (**[review I3]**: it currently declares only `findOneById`/`createOne` — add `findByEmailOrLicense(email?: string, licenseNumber?: string): Promise<{ id: string; contactInfo?: { email?: string } | null } | null>` or import the real `Person` type; the real `personRepo` already implements it, so this is interface-only + additive).
 - Test: `services/api-ts/src/core/auth.test.ts` (add cases; mirror existing mocked-repo unit style)
 
 **Interfaces:**
 - Consumes: `personRepo.findByEmailOrLicense(email)` (exists, `person.repo.ts:126`), `database` + `schema.user` (in scope, used by the `update.after` hook), `logger`, `maskEmail`.
-- Produces: claim behavior — first user creation whose email matches exactly one roster person persists `user.id = person.id`.
+- Produces: claim behavior — first **email-verified** user creation whose email matches exactly one roster person persists `user.id = person.id`.
+
+> **[review C2 — SECURITY, make-or-break]** The claim runs in the GLOBAL `create.before`, which fires for EVERY user creation including email+password signup (no inbox proof). Without a gate, an attacker who knows a roster member's email could pre-bind / lock out that money-bearing identity. **Gate the claim on `user.emailVerified === true`.** The email-OTP sign-in path (`/auth/sign-in/email-otp`) sets `emailVerified=true` (inbox proven); password signup leaves it `false`. The implementer MUST confirm via the A1 integration test that the OTP sign-in path presents `emailVerified===true` to `create.before` (if better-auth sets it only post-insert for the OTP path, escalate — the claim would need to move to a verify-time hook; source-check `node_modules/better-auth` email-otp plugin user creation before assuming).
 
 - [ ] **Step 1: Add unit tests (RED).** In `auth.test.ts`, add cases against the `create.before` hook (extract it or invoke through the configured hook). Mock `personRepo.findByEmailOrLicense` and the user-existence check:
 
 ```ts
+const V = { id: 'u1', email: 'olive@chapter.ph', emailVerified: true } // verified base
+
+// [C2] NOT verified → NO claim even on email match (blocks password-signup takeover)
+findByEmailOrLicense.mockResolvedValue({ id: 'roster-1', contactInfo: { email: 'olive@chapter.ph' } })
+expect((await before({ ...V, emailVerified: false })).data.id).toBe('u1')
+
 // no match → unchanged
 findByEmailOrLicense.mockResolvedValue(null)
-expect((await before({ id: 'u1', email: 'x@y.ph' })).data.id).toBe('u1')
+expect((await before(V)).data.id).toBe('u1')
 
-// match + not yet a user → id overridden to person.id
+// verified + match + not yet a user → id overridden to person.id
 findByEmailOrLicense.mockResolvedValue({ id: 'roster-1', contactInfo: { email: 'olive@chapter.ph' } })
 userExists.mockResolvedValue(false)
-expect((await before({ id: 'u1', email: 'olive@chapter.ph' })).data.id).toBe('roster-1')
+expect((await before(V)).data.id).toBe('roster-1')
 
-// match but already claimed (a user already has that id) → NOT overridden
+// verified + match but already claimed (a user already has that id) → NOT overridden
 userExists.mockResolvedValue(true)
-expect((await before({ id: 'u1', email: 'olive@chapter.ph' })).data.id).toBe('u1')
+expect((await before(V)).data.id).toBe('u1')
 
 // no email → unchanged, no repo call
-expect((await before({ id: 'u1', email: undefined })).data.id).toBe('u1')
+expect((await before({ id: 'u1', emailVerified: true })).data.id).toBe('u1')
 
 // repo throws → non-blocking, returns unchanged user (does not throw)
 findByEmailOrLicense.mockRejectedValue(new Error('db'))
-await expect(before({ id: 'u1', email: 'olive@chapter.ph' })).resolves.toMatchObject({ data: { id: 'u1' } })
+await expect(before(V)).resolves.toMatchObject({ data: { id: 'u1' } })
 
-// admin email still promoted to admin AND claimed (both apply)
+// admin email still promoted to admin AND claimed (both apply) when verified
 ```
 Run: `cd services/api-ts && bun test src/core/auth.test.ts` → Expected: FAIL.
 
@@ -142,8 +154,11 @@ before: async (user) => {
   // Account-claim: link a pre-existing roster person to this new user by email,
   // by overriding the user's id with the roster person's id (preserves the
   // person.id === user.id invariant; no PK re-key). Non-blocking on error.
+  // [review C2] ONLY when the email is verified (email-OTP/magic-link prove inbox
+  // ownership; password signup does not) — otherwise knowing a roster email would
+  // let an attacker seize that member's identity/money.
   try {
-    if (user.email) {
+    if (user.email && user.emailVerified === true) {
       const match = await personRepo.findByEmailOrLicense(user.email)
       if (match && match.id !== user.id) {
         const claimed = await database.select({ id: schema.user.id })
@@ -239,12 +254,12 @@ git commit -m "chore(member): port anti-false-green test machinery (tsconfig.tes
 
 - [ ] **Step 2: Test `api.ts`** (mirror org's `api.test.ts` if present): asserts no `x-org-id`/CSRF on `/auth/*` and `/pay/*`; injects `x-org-id` from `member.selectedOrgId` on `/association/*`. Run → PASS.
 
-- [ ] **Step 3: Port `use-session.ts`** verbatim from `apps/org/src/features/auth/use-session.ts` (probe via `getMyMemberships`, 401/undef → unauthed). Write `use-session.test.tsx` mirroring org: mock `getMyMemberships` → `ok({ data: [...], total })` → `authed`; `err(401)` → `unauthed`. Run → PASS.
+- [ ] **Step 3: Port `use-session.ts`** from `apps/org/src/features/auth/use-session.ts` (probe via `getMyMemberships`, 401/undef → unauthed), but **[review m7]** add an `enabled` param so the probe does NOT fire on public paths: `useSession(enabled = true)` → pass `enabled` into the `useQuery({ enabled })`. When disabled, return `status:'loading'` (RootGate short-circuits public paths to `<Outlet/>` regardless). Expose the resolved `memberships` array from the query data for `useMemberOrg`. Write `use-session.test.tsx` mirroring org: mock `getMyMemberships` → `ok({ data: [...], total })` → `authed`; `err(401)` → `unauthed`; `enabled:false` → no SDK call. Run → PASS.
 
-- [ ] **Step 4: Create `use-member-org.ts`.** Reads memberships from the session query; auto-selects the single membership's `organizationId` into `member.selectedOrgId` (so dues reads get `x-org-id`); exposes `select(orgId)` for the >1 case. Keep minimal:
+- [ ] **Step 4: Create `use-member-org.ts`.** **[review I6]** Must REACTIVELY subscribe to the session memberships (read from the same `['session']` `useQuery` via `useSession()`, NOT a one-shot localStorage read) so that when the session resolves the component re-renders and `orgId` flips from null → set, re-enabling the dues queries. Auto-selects the single membership's `organizationId` into `member.selectedOrgId`; exposes `select(orgId)` for the >1 case:
 ```ts
 export function useMemberOrg() {
-  const { memberships } = useSessionMemberships() // from the session query cache
+  const { memberships } = useSession()                       // reactive subscription
   const stored = localStorage.getItem('member.selectedOrgId')
   const orgId = stored ?? (memberships?.length ? memberships[0].organizationId : null)
   if (orgId && orgId !== stored) localStorage.setItem('member.selectedOrgId', orgId)
@@ -256,10 +271,10 @@ export function useMemberOrg() {
 - [ ] **Step 5: Update `__root.tsx`** to the guard, exempting the public pay flow:
 ```tsx
 function RootGate() {
-  const { status } = useSession()
   const navigate = useNavigate()
   const pathname = useRouterState({ select: (s) => s.location.pathname })
   const isPublic = pathname === '/sign-in' || pathname.startsWith('/pay/')
+  const { status } = useSession(!isPublic)   // [review m7] no probe on public /pay/* + /sign-in
   useEffect(() => {
     if (status === 'unauthed' && !isPublic) navigate({ to: '/sign-in' })
   }, [status, isPublic, navigate])
@@ -267,7 +282,7 @@ function RootGate() {
   return <div role="status" aria-label="Loading" className="min-h-screen flex items-center justify-center">…</div>
 }
 ```
-Add a guard test: unauthed on `/pay/abc` renders `<Outlet/>` (no redirect); unauthed on `/dashboard` redirects to `/sign-in`.
+Add a guard test: unauthed on `/pay/abc` renders `<Outlet/>` (no redirect, **no `getMyMemberships` probe call**); unauthed on `/dashboard` redirects to `/sign-in`.
 
 - [ ] **Step 6: Update `index.tsx`** → redirect `/` to `/dashboard` if authed else `/sign-in`. Update `main.tsx` to call `configureApiClient()` at startup (replace the bare `client.setConfig`).
 
@@ -291,7 +306,9 @@ git commit -m "feat(member): authed SDK client + session probe + org-select + ro
 **Interfaces:**
 - Produces: `requestOtp(email, baseUrl?): Promise<{ok:true}|{ok:false,error}>`, `verifyOtp(email, otp, baseUrl?): Promise<{ok:true}|{ok:false,error}>`.
 
-- [ ] **Step 1: Write `sign-in.test.ts` (RED).** Mock `fetch`. `requestOtp` POSTs `/auth/email-otp/send-verification-otp` with `{email, type:'sign-in'}`, `credentials:'include'`; res.ok → `{ok:true}`; non-ok → `{ok:false, error}`. `verifyOtp` POSTs `/auth/email-otp/check-verification-otp` with `{email, type:'sign-in', otp}`; same envelope. Run → FAIL.
+> **[review C1]** The VERIFY step MUST hit `/auth/sign-in/email-otp` `{email, otp}` — the actual passwordless **sign-in** endpoint that creates the user (if absent) + session cookie. Do NOT use `/auth/email-otp/check-verification-otp` (verify-only; creates no user/session → member login dead in prod, and an E2E faking the cookie passes false-green). The SEND step stays `/auth/email-otp/send-verification-otp` `{email, type:'sign-in'}`. The sign-in path sets `emailVerified=true` on the created user → this is what enables the engine account-claim (Task A2, review C2).
+
+- [ ] **Step 1: Write `sign-in.test.ts` (RED).** Mock `fetch`. `requestOtp` POSTs `/auth/email-otp/send-verification-otp` with `{email, type:'sign-in'}`, `credentials:'include'`; res.ok → `{ok:true}`; non-ok → `{ok:false, error}`. `verifyOtp` POSTs **`/auth/sign-in/email-otp`** with `{email, otp}`; same envelope. Run → FAIL.
 
 - [ ] **Step 2: Implement `sign-in.ts`** (mirror org `sign-in.ts` fetch pattern, OTP endpoints):
 ```ts
@@ -307,7 +324,7 @@ async function post(path: string, body: object, baseUrl: string) {
 export const requestOtp = (email: string, baseUrl = `${window.location.origin}/api`) =>
   post('/auth/email-otp/send-verification-otp', { email, type: 'sign-in' }, baseUrl)
 export const verifyOtp = (email: string, otp: string, baseUrl = `${window.location.origin}/api`) =>
-  post('/auth/email-otp/check-verification-otp', { email, type: 'sign-in', otp }, baseUrl)
+  post('/auth/sign-in/email-otp', { email, otp }, baseUrl)   // [review C1] sign-in path creates user+session+cookie
 ```
 Run `sign-in.test.ts` → PASS.
 
@@ -336,7 +353,9 @@ git add apps/member && git commit -m "feat(member): email-OTP two-step sign-in (
 
 - [ ] **Step 1: `use-member-data.ts` (RED→GREEN).** Three `useQuery` hooks (`['memberships']`, `['my-dues-invoices', orgId]`, `['my-dues-payments', orgId]`); dues queries `enabled: !!orgId`. Each reads `response.status` for error, returns typed data. Tests mock each SDK fn with `ok(<handler shape> as any)` (DRIFT cast) + `err(401)`. Run → PASS.
 
-- [ ] **Step 2: `MembershipTile` (RED→GREEN).** Shows `orgName`, status (use `@monobase/ui` `StatusBadge`), renewal-due date (`duesExpiryDate`, label "Renews"). Loading / empty ("No active membership") / error (`role=alert`) states. Anchor mock to handler shape. Run → PASS.
+- [ ] **Step 2: `MembershipTile` (RED→GREEN).** Shows `orgName`, status (use `@monobase/ui` `StatusBadge`), renewal-due date (`duesExpiryDate`, label "Renews"). **[review m8]** the memberships transformer converts only `startDate`/`endDate` to Date — `duesExpiryDate` stays a **string**, so wrap it `new Date(duesExpiryDate)` before formatting (and guard null). Loading / empty ("No active membership") / error (`role=alert`) states. Anchor mock to handler shape. Run → PASS.
+
+- [ ] **[review I6] Step 2b: orgId disabled→enabled transition test.** In `use-member-data.test.tsx` (or a dashboard integration test), assert: session pending → `useMemberOrg().orgId === null` → dues query `enabled:false` (no SDK call); session resolves with a membership → `orgId` becomes the org → dues `getMyMemberships`/`listDuesInvoices` fire. Prevents the "owes dues but sees 'all paid up'" race. Run → PASS.
 
 - [ ] **Step 3: `DuesOwedTile` (RED→GREEN).** Sums outstanding invoices' `totalAmount` via `Number()`; shows `₱` amount + count, or "You're all paid up" when zero. Informational footer: "To pay, use the link your chapter sent you." (no self-serve pay endpoint). Loading/error states. Run → PASS.
 
@@ -361,7 +380,14 @@ git add apps/member && git commit -m "feat(member): read-only dashboard — memb
 
 - [ ] **Step 1: Add the funnel CTA** to `PayResult.tsx` success branch: a single link "Create an account to track your dues" → `/sign-in` (use the router `Link`; ≥48px tap; does not alter existing pay states). Update/extend the existing `PayResult` test to assert the link renders on success only.
 
-- [ ] **Step 2: Write `dashboard-flow.spec.ts`.** Self-contained `page.route` stubs: `**/csrf-token` → `{token:'t'}`; `**/auth/email-otp/send-verification-otp` → 200; `**/auth/email-otp/check-verification-otp` → 200 + a `set-cookie`; `**/persons/me/memberships` → `{data:[{... orgName:'Olive Dental Chapter', status:'active', duesExpiryDate, organizationId}], total:1}`; `**/association/member/dues-invoices*` → `{data:[{...status:'sent', totalAmount:150000, invoiceNumber}], pagination:{...}}`; `**/association/member/dues-payments*` → `{data:[{...receiptNumber:'R-1', amount:150000, status:'completed', paidAt}], totalCount:1}`. Drive: goto `/sign-in` → type email → "Send code" → "Code sent" → type `123456` → "Verify & sign in" → dashboard shows "Olive Dental Chapter", "₱1,500" owed, receipt "R-1". Assert real component copy (non-vacuous).
+- [ ] **Step 2: Write `dashboard-flow.spec.ts`.** Self-contained `page.route` stubs. **[review C1]** verify endpoint is `**/auth/sign-in/email-otp` (NOT check-verification-otp). **[review I5]** stubs MUST include EVERY field the SDK response transformers touch, or the transformer throws on a real 2xx and the tile errors (false-RED while mocked unit tests stay green):
+  - `**/csrf-token` → `{token:'t'}`
+  - `**/auth/email-otp/send-verification-otp` → 200 `{}`
+  - `**/auth/sign-in/email-otp` → 200 `{ token:'t', user:{ id:'u1', email } }` + a `set-cookie` header
+  - `**/persons/me/memberships` → `{ data:[{ id, organizationId:'org1', personId:'u1', status:'active', startDate:'2026-01-01', duesExpiryDate:'2027-01-01', orgName:'Olive Dental Chapter', orgSlug:'olive', joinedAt:'2026-01-01' }], total:1 }`
+  - `**/association/member/dues-invoices*` → `{ data:[{ id, invoiceNumber:'INV-1', organizationId:'org1', personId:'u1', status:'sent', totalAmount:150000, currency:'PHP', periodStart:'2026-01-01', periodEnd:'2026-12-31', fundAllocations:[], generatedAt:'2026-01-01', createdAt:'2026-01-01', updatedAt:'2026-01-01' }], pagination:{ offset:0, limit:20, count:1, totalCount:1, totalPages:1, currentPage:1, hasNextPage:false, hasPreviousPage:false } }`
+  - `**/association/member/dues-payments*` → `{ data:[{ id, organizationId:'org1', personId:'u1', receiptNumber:'R-1', amount:150000, refundedAmount:0, currency:'PHP', paymentMethod:'online', status:'completed', paidAt:'2026-02-01', createdAt:'2026-02-01', updatedAt:'2026-02-01' }], totalCount:1 }`
+  - Drive: goto `/sign-in` → type email → "Send code" → "Code sent" → type `123456` → "Verify & sign in" → dashboard shows "Olive Dental Chapter", "₱1,500" owed, receipt "R-1". Assert real component copy (non-vacuous).
 
 - [ ] **Step 3: Run the E2E.** `cd apps/member && bun run test:e2e` (dev server auto-started by playwright config, or start `bun run --filter @monobase/member dev` first). Expected: 1 passed. (Controller MUST run this independently — do not trust a reported pass.)
 
@@ -385,3 +411,16 @@ git add apps/member && git commit -m "test(member): stubbed E2E login→dashboar
 - **Spec coverage:** §3 engine claim → A1/A2. §4.1 machinery → B1. §4.2 client/org → B2. §4.3 OTP → B3. §4.4 guard (`/pay/*` exempt) → B2 Step 5. §4.5 tiles → B4. §4.6 CTA + §6 E2E → B5. §3.3/§7 gates → A2 Step 5 + B5 Step 4. ✓
 - **Placeholders:** none — claim code, hook code, sign-in code, guard code all concrete; tile shapes specified with handler field names. The "…" in loading divs is literal ellipsis UI copy (matches org).
 - **Type consistency:** `configureApiClient`, `useSession`, `useMemberOrg`, `requestOtp`/`verifyOtp`, `ok`/`err`, `member.selectedOrgId` used consistently across tasks. Money via `Number()` everywhere (no request seam this slice). DRIFT endpoints (memberships) flagged identically in B2/B4.
+
+## Adversarial review (opus) — APPROVE-WITH-FIXES (2 Crit / 4 Imp / 2 Minor), all applied pre-execution
+
+Detail: `.superpowers/sdd/slice3-plan-review.md`. Fixes folded into tasks:
+- **C1** (B3): verify endpoint → `/auth/sign-in/email-otp` (creates user+session; `check-verification-otp` was verify-only → dead login + false-green E2E).
+- **C2** (A2, security): claim gated on `user.emailVerified === true` (blocks password-signup roster-identity takeover; OTP/magic-link prove inbox).
+- **I3** (A2): extend `AuthPersonRepo` interface with `findByEmailOrLicense` (else typecheck break).
+- **I4** (A1): real `createAuth(db, config, logger, emailService, {auditRepo, personRepo})` signature; drive OTP path (or emailVerified:true insert fallback) + negative password case.
+- **I5** (B5): E2E stubs include ALL transformer-touched fields (`fundAllocations:[]`, `refundedAmount:0`, dates) or transformer throws on 2xx.
+- **I6** (B2/B4): `useMemberOrg` reactively subscribes to session memberships + disabled→enabled transition test (no "owes dues but shows paid up" race).
+- **m7** (B2): `useSession(!isPublic)` — no probe on public `/pay/*`.
+- **m8** (B4): `duesExpiryDate` is a string (transformer skips it) → `new Date(...)` before formatting.
+Confirmed-OK (not re-litigated): additive engine gate holds (schema.user/database/eq/maskEmail in scope, empty specs+sdk diff, no migration); `createAuth` factory → A1 feasible against scratch; already-claimed guard + unique user.email race-safe; after-hook re-entrancy safe; integration test runs against real PG in the api-ts CI job.
