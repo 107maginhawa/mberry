@@ -69,9 +69,9 @@ apps/member/src/
   `new Date(e.startDate) >= now` AND `status !== 'cancelled'`, sort by startDate asc, slice(0,5). Read no
   pagination fields (drift). Return the typed `Event[]`.
 - **use-rsvp.ts**: `useMutation` calling `registerForCustomEvent({ path: { eventId } })` (empty body). On
-  success invalidate `['member-events', orgId]` (registeredCount changes). Map the result `status`
-  (confirmed → "You're registered", waitlisted → "Added to the waitlist"). 409 → friendly "You're already
-  registered". Read `serverError(error)` for other failures.
+  success invalidate `['member-events', orgId]`. Detect waitlist via the `waitlisted` flag (`isWaitlisted()`),
+  NOT `status` (the waitlist body has no status). There is no 409 — `serverError(error)` covers failures; the
+  UI disables the button after a successful RSVP to prevent the duplicate-500.
 - **EventsTile.tsx**: per event row — title, `startDate` formatted (`toLocaleString('en-PH')`), location,
   fee = `registrationFee && Number(registrationFee) > 0 ? centavosToPhp(Number(registrationFee)) : 'Free'`,
   spots-left when capacity set. Free → `<Button>RSVP</Button>` (disabled while pending / after registered);
@@ -92,8 +92,8 @@ apps/member/src/
 
 - orgId null (no membership) → query disabled → EmptyState.
 - No upcoming network events for the org → EmptyState "No upcoming events".
-- RSVP 409 (already registered) → friendly toast, button shows "Registered".
-- RSVP capacity full → 201 waitlisted → toast "Added to the waitlist".
+- RSVP success → button shows "Registered" (disabled) so the member can't re-submit (no 409; a dup would 500).
+- RSVP capacity full → `{ waitlisted: true }` → toast "Added to the waitlist".
 - RSVP non-membership/403 → friendly error toast (shouldn't happen for an authed member, but handle).
 - Paid event → no RSVP call; show fee + deferred note.
 
@@ -103,7 +103,7 @@ apps/member/src/
   past/future dates, cancelled; assert filter (org + upcoming + not-cancelled), sort asc, cap 5, disabled when
   orgId null. registrationFee as bigint in the fixture.
 - **use-rsvp.test.ts**: `vi.mock` `registerForCustomEvent`; assert path `{ eventId }` + empty body; confirmed
-  vs waitlisted status mapping; 409 → friendly message.
+  (not waitlisted) vs waitlist via the `waitlisted` flag (real shape, no `status`); 500 → generic error (no 409).
 - **EventsTile.test.tsx**: render with fixture — free event shows RSVP button, paid event shows fee +
   "coming soon" note (no RSVP), spots-left, loading/error/empty states, `not.toMatch(/NaN|undefined|\d+n/)`
   (no raw bigint leak).
