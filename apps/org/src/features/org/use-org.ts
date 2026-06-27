@@ -1,6 +1,6 @@
 import { useQuery } from '@tanstack/react-query'
 import { useCallback, useEffect, useState } from 'react'
-import { getMyMemberships, getMyOfficerRole } from '@monobase/sdk-ts/generated'
+import { getMyMemberships } from '@monobase/sdk-ts/generated'
 
 const STORAGE_KEY = 'org.selectedOrgId'
 
@@ -64,25 +64,4 @@ export function useSelectedOrg(): { orgId: string | null; setOrgId: (id: string)
   }, [])
 
   return { orgId, setOrgId }
-}
-
-export function useIsOfficer(orgId: string | null): { status: 'loading' | 'officer' | 'notOfficer' } {
-  const q = useQuery({
-    queryKey: ['org', 'officer-role', orgId],
-    enabled: !!orgId,
-    retry: false,
-    queryFn: async () => {
-      // VERIFIED: path key is `organizationId`, url /persons/me/officer-role/{organizationId}.
-      const { data } = await getMyOfficerRole({ path: { organizationId: orgId! } })
-      if (!data) throw new Error('officer-role failed')
-      return data
-    },
-  })
-  if (!orgId || q.isLoading) return { status: 'loading' }
-  // Engine type/impl drift: the generated type says { data: { isOfficer, positions } }
-  // but the live handler returns { data: terms[] } (empty array = not an officer).
-  // Handle both: non-empty array OR isOfficer:true. (Engine FROZEN — cannot fix upstream.)
-  const d = q.data?.data as unknown
-  const isOfficer = Array.isArray(d) ? d.length > 0 : (d as { isOfficer?: boolean } | null | undefined)?.isOfficer === true
-  return { status: isOfficer ? 'officer' : 'notOfficer' }
 }

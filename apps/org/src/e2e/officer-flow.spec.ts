@@ -8,11 +8,11 @@
  * use-roster.ts, use-send-link.ts, SendLink.tsx, sign-in.ts, lib/api.ts).
  *
  * Key shapes:
- *   - officer-role: { data: terms[] }  (ARRAY — live handler; NOT { isOfficer, positions })
- *     use-org.ts lines 85-86 has the dual-shape shim; non-empty array → isOfficer=true.
  *   - memberships: stateful — 401 pre-login (unauthed), 200 post-login (authed + org list).
  *     useSession (queryKey ['session']) and useOrgs (queryKey ['org','memberships']) both
  *     call getMyMemberships → same URL; the stateful flag covers both.
+ *   - roster: listOrgMembers returns members → engine enforces officer/admin 403 server-side.
+ *     No client-side officer pre-gate (useIsOfficer removed; getMyOfficerRole not called).
  *   - CSRF: fetched by lib/api.ts getCsrfToken() before sendPaymentLink POST.
  *     /auth/ and /pay/ are exempt; /payments/send-link is NOT exempt.
  */
@@ -49,21 +49,8 @@ test('officer signs in, sends a pay-link', async ({ page }) => {
     }
   })
 
-  // Officer role — SCHEMA shape required here (even though live handler returns terms[]).
-  // Reason: SDK's officerRoleResponseSchemaResponseTransformer runs on our stub response and
-  // does `data.data.positions.map(...)`. If data.data is an array (live handler shape), this
-  // throws → query errors → status='notOfficer'. We must provide { data: { isOfficer, positions } }
-  // so the transformer succeeds, then use-org.ts dual-shape shim (lines 85-86) reads isOfficer.
-  // The task brief's "ARRAY" note describes what the live handler sends to clients that bypass
-  // the generated SDK transformer; the E2E stub goes THROUGH the transformer.
-  await page.route('**/officer-role/**', (r) =>
-    r.fulfill({
-      contentType: 'application/json',
-      body: JSON.stringify({ data: { isOfficer: true, positions: [] } }),
-    }),
-  )
-
   // Roster members — listOrgMembers → /membership/members/{orgId}
+  // No officer-role stub needed: useIsOfficer removed; engine 403 is the authz gate.
   await page.route('**/membership/members/**', (r) =>
     r.fulfill({
       contentType: 'application/json',

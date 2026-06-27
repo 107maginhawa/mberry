@@ -2,9 +2,9 @@ import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { renderHook, waitFor, act } from '@testing-library/react'
 import { useState } from 'react'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
-vi.mock('@monobase/sdk-ts/generated', () => ({ getMyMemberships: vi.fn(), getMyOfficerRole: vi.fn() }))
-import { getMyMemberships, getMyOfficerRole } from '@monobase/sdk-ts/generated'
-import { useOrgs, useSelectedOrg, useIsOfficer } from './use-org'
+vi.mock('@monobase/sdk-ts/generated', () => ({ getMyMemberships: vi.fn() }))
+import { getMyMemberships } from '@monobase/sdk-ts/generated'
+import { useOrgs, useSelectedOrg } from './use-org'
 import { ok } from '../../test-utils/mock-sdk'
 
 // F4: QueryClient created inside useState so it's stable across re-renders (anti-pattern fix).
@@ -65,37 +65,3 @@ describe('useSelectedOrg', () => {
   })
 })
 
-describe('useIsOfficer', () => {
-  it('officer when terms array non-empty (real runtime shape)', async () => {
-    // engine type/impl drift: handler returns {data:[...terms]} (array), generated type says
-    // {data:{isOfficer,positions}}. Primary shape is array — anchor to handler.
-    vi.mocked(getMyOfficerRole).mockResolvedValue(
-      ok({ data: [{ id: 'term1', status: 'active' }] } as any)
-    )
-    const { result } = renderHook(() => useIsOfficer('o1'), { wrapper })
-    await waitFor(() => expect(result.current.status).toBe('officer'))
-  })
-  it('notOfficer when terms array empty (real runtime shape)', async () => {
-    // engine type/impl drift: see above
-    vi.mocked(getMyOfficerRole).mockResolvedValue(ok({ data: [] } as any))
-    const { result } = renderHook(() => useIsOfficer('o1'), { wrapper })
-    await waitFor(() => expect(result.current.status).toBe('notOfficer'))
-  })
-  it('officer when object isOfficer:true (defensive/future typed shape)', async () => {
-    // engine type/impl drift: see above — object branch is defensive fallback, not primary
-    vi.mocked(getMyOfficerRole).mockResolvedValue(
-      ok({ data: { isOfficer: true, positions: [] } } as any)
-    )
-    const { result } = renderHook(() => useIsOfficer('o1'), { wrapper })
-    await waitFor(() => expect(result.current.status).toBe('officer'))
-  })
-  // F6: cover object isOfficer:false branch — locks the safe-fail defensive path.
-  it('notOfficer when object isOfficer:false (defensive path)', async () => {
-    // engine type/impl drift: see above
-    vi.mocked(getMyOfficerRole).mockResolvedValue(
-      ok({ data: { isOfficer: false, positions: [] } } as any)
-    )
-    const { result } = renderHook(() => useIsOfficer('o1'), { wrapper })
-    await waitFor(() => expect(result.current.status).toBe('notOfficer'))
-  })
-})

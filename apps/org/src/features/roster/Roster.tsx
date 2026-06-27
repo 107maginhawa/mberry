@@ -1,6 +1,6 @@
 import { Link } from '@tanstack/react-router'
 import { EmptyState, StatusBadge } from '@monobase/ui'
-import { useIsOfficer, useOrgs, useSelectedOrg } from '../org/use-org'
+import { useOrgs, useSelectedOrg } from '../org/use-org'
 import { OrgPicker } from '../org/OrgPicker'
 import { useRoster, type RosterMember } from './use-roster'
 
@@ -14,21 +14,22 @@ type KnownStatus = 'active' | 'grace' | 'lapsed' | 'pending' | 'suspended'
 export interface RosterViewProps {
   orgName: string
   members: RosterMember[]
-  isOfficer: boolean
+  /** True when the roster query errored (e.g. 403 — not an officer/admin). */
+  errored?: boolean
   /** Maps a member to a send-pay-link href. Defaults to /members/:id/send */
   linkFor?: (member: RosterMember) => string
 }
 
-export function RosterView({ orgName, members, isOfficer, linkFor }: RosterViewProps) {
+export function RosterView({ orgName, members, errored, linkFor }: RosterViewProps) {
   const href = linkFor ?? ((m: RosterMember) => `/members/${m.membershipId}/send`)
 
-  if (!isOfficer) {
+  if (errored) {
     return (
       <div className="flex flex-col gap-4 p-4">
         {orgName && <h1 className="text-title font-semibold text-foreground">{orgName}</h1>}
         <EmptyState
-          headline="You are not an officer"
-          description="Contact your chapter administrator to get officer access."
+          headline="Roster unavailable"
+          description="You need officer or admin access to view this chapter's roster."
         />
       </div>
     )
@@ -84,13 +85,12 @@ export function RosterView({ orgName, members, isOfficer, linkFor }: RosterViewP
 export default function Roster() {
   const { orgs } = useOrgs()
   const { orgId } = useSelectedOrg()
-  const { status: officerStatus } = useIsOfficer(orgId)
   const { status: rosterStatus, members } = useRoster(orgId)
 
   const selectedOrg = orgs.find((o) => o.id === orgId)
   const orgName = selectedOrg?.name ?? ''
 
-  const isLoading = officerStatus === 'loading' || rosterStatus === 'loading'
+  const isLoading = rosterStatus === 'loading'
 
   return (
     <div className="min-h-screen bg-[var(--color-bg)]">
@@ -118,7 +118,7 @@ export default function Roster() {
           <RosterView
             orgName={orgName}
             members={members}
-            isOfficer={officerStatus === 'officer'}
+            errored={rosterStatus === 'error'}
             linkFor={(m) =>
               `/members/${m.membershipId}/send?personId=${encodeURIComponent(m.personId)}&name=${encodeURIComponent(m.name)}`
             }

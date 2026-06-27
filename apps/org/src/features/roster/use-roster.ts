@@ -11,7 +11,7 @@ export type RosterMember = {
 
 export function useRoster(
   orgId: string | null,
-): { status: 'idle' | 'loading' | 'ready' | 'empty'; members: RosterMember[] } {
+): { status: 'idle' | 'loading' | 'ready' | 'empty' | 'error'; members: RosterMember[] } {
   const q = useQuery({
     queryKey: ['roster', orgId],
     enabled: !!orgId,
@@ -39,6 +39,7 @@ export function useRoster(
   })
   if (!orgId) return { status: 'idle', members: [] }
   if (q.isLoading) return { status: 'loading', members: [] }
+  if (q.isError) return { status: 'error', members: [] }
   const members = q.data ?? []
   return { status: members.length === 0 ? 'empty' : 'ready', members }
 }
