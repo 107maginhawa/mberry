@@ -11,6 +11,7 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as SignInRouteImport } from './routes/sign-in'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as MembersMembershipIdSendRouteImport } from './routes/members/$membershipId/send'
 
 const SignInRoute = SignInRouteImport.update({
   id: '/sign-in',
@@ -22,31 +23,40 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const MembersMembershipIdSendRoute = MembersMembershipIdSendRouteImport.update({
+  id: '/members/$membershipId/send',
+  path: '/members/$membershipId/send',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/sign-in': typeof SignInRoute
+  '/members/$membershipId/send': typeof MembersMembershipIdSendRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/sign-in': typeof SignInRoute
+  '/members/$membershipId/send': typeof MembersMembershipIdSendRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/sign-in': typeof SignInRoute
+  '/members/$membershipId/send': typeof MembersMembershipIdSendRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/sign-in'
+  fullPaths: '/' | '/sign-in' | '/members/$membershipId/send'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/sign-in'
-  id: '__root__' | '/' | '/sign-in'
+  to: '/' | '/sign-in' | '/members/$membershipId/send'
+  id: '__root__' | '/' | '/sign-in' | '/members/$membershipId/send'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   SignInRoute: typeof SignInRoute
+  MembersMembershipIdSendRoute: typeof MembersMembershipIdSendRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -65,12 +75,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/members/$membershipId/send': {
+      id: '/members/$membershipId/send'
+      path: '/members/$membershipId/send'
+      fullPath: '/members/$membershipId/send'
+      preLoaderRoute: typeof MembersMembershipIdSendRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   SignInRoute: SignInRoute,
+  MembersMembershipIdSendRoute: MembersMembershipIdSendRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

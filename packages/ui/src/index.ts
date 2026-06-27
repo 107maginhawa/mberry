@@ -1,4 +1,5 @@
 export { cn } from "./lib/utils"
+export * from "./money"
 export * from "./components/alert"
 export * from "./components/alert-dialog"
 export * from "./components/avatar"

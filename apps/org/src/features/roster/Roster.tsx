@@ -14,12 +14,12 @@ export interface RosterViewProps {
   orgName: string
   members: RosterMember[]
   isOfficer: boolean
-  /** Maps a membershipId to a send-pay-link href. Defaults to /members/:id/send */
-  linkFor?: (membershipId: string) => string
+  /** Maps a member to a send-pay-link href. Defaults to /members/:id/send */
+  linkFor?: (member: RosterMember) => string
 }
 
 export function RosterView({ orgName, members, isOfficer, linkFor }: RosterViewProps) {
-  const href = linkFor ?? ((id: string) => `/members/${id}/send`)
+  const href = linkFor ?? ((m: RosterMember) => `/members/${m.membershipId}/send`)
 
   if (!isOfficer) {
     return (
@@ -64,7 +64,7 @@ export function RosterView({ orgName, members, isOfficer, linkFor }: RosterViewP
                 <StatusBadge variant="muted">{m.status}</StatusBadge>
               )}
               <a
-                href={href(m.membershipId)}
+                href={href(m)}
                 className="min-h-tap inline-flex items-center justify-center rounded-md bg-plum-600 px-4 text-sm font-semibold text-white hover:bg-plum-700 focus-visible:outline focus-visible:outline-2"
                 aria-label={`Send pay-link to ${m.name}`}
               >
@@ -110,7 +110,9 @@ export default function Roster() {
             orgName={orgName}
             members={members}
             isOfficer={officerStatus === 'officer'}
-            linkFor={(id) => `/members/${id}/send`}
+            linkFor={(m) =>
+              `/members/${m.membershipId}/send?personId=${encodeURIComponent(m.personId)}&name=${encodeURIComponent(m.name)}`
+            }
           />
         )}
       </div>
