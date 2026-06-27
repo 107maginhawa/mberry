@@ -1,24 +1,32 @@
 import { createFileRoute, useNavigate } from '@tanstack/react-router'
 import { useQueryClient } from '@tanstack/react-query'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Button, Card } from '@monobase/ui'
 import { signIn } from '@/features/auth/sign-in'
+import { useSession } from '@/features/auth/use-session'
+import { API_BASE } from '@/lib/api'
 
 export const Route = createFileRoute('/sign-in')({ component: SignInPage })
 
 function SignInPage() {
   const navigate = useNavigate()
   const qc = useQueryClient()
+  const { status } = useSession()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [error, setError] = useState('')
   const [busy, setBusy] = useState(false)
 
+  // Redirect already-authed users away from the sign-in page.
+  useEffect(() => {
+    if (status === 'authed') void navigate({ to: '/' })
+  }, [status, navigate])
+
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault()
     if (busy) return
     setBusy(true); setError('')
-    const res = await signIn(email, password)
+    const res = await signIn(email, password, API_BASE)
     setBusy(false)
     if (res.ok) { await qc.invalidateQueries({ queryKey: ['session'] }); navigate({ to: '/' }) }
     else setError(res.error)

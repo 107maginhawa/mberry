@@ -57,6 +57,12 @@ function isExemptPath(pathname: string): boolean {
 }
 
 /**
+ * Single source of truth for the API base URL — used by both configureApiClient
+ * and the sign-in raw fetch so they can never drift.
+ */
+export const API_BASE = import.meta.env.VITE_API_URL ?? `${window.location.origin}/api`
+
+/**
  * Configure the shared SDK client for the authed officer app:
  *  - send the session cookie on every request (credentials:'include')
  *  - mirror the CSRF cookie token into the x-csrf-token header on mutating,
@@ -66,7 +72,7 @@ function isExemptPath(pathname: string): boolean {
  * ponytail: clear-on-403, no auto-retry — token is long-lived; a single re-tap
  *           recovers the rare mid-session expiry. Add retry only if it bites.
  */
-export function configureApiClient(baseUrl = `${window.location.origin}/api`): void {
+export function configureApiClient(baseUrl = API_BASE): void {
   // Clear before registering so repeated calls (HMR, tests) don't stack duplicates.
   client.interceptors.request.clear()
   client.interceptors.response.clear()

@@ -22,4 +22,12 @@ describe('useSession', () => {
     const { result } = renderHook(() => useSession(), { wrapper })
     await waitFor(() => expect(result.current.status).toBe('unauthed'))
   })
+
+  it('unauthed when response is undefined (transport failure)', async () => {
+    // SDK returns {data: undefined, response: undefined} on network errors.
+    // The queryFn throws, query errors, retry:false → status stays 'unauthed'.
+    ;(getMyMemberships as any).mockResolvedValue({ data: undefined, response: undefined } as any)
+    const { result } = renderHook(() => useSession(), { wrapper })
+    await waitFor(() => expect(result.current.status).toBe('unauthed'))
+  })
 })
