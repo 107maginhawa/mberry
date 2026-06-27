@@ -16,7 +16,8 @@ announcement**. Pure-FE over frozen, already-correct engine handlers.
   (`EventCreateRequestSchema`, **matches the SDK `EventCreateRequest` type** — both TypeSpec-generated):
   required `title`, `organizationId`, `eventType` (enum: assembly|seminar|social|networking|fundraiser|governance|custom),
   `startDate` (ISO datetime), `creditBearing` (boolean); optional `endDate`, `location`, `capacity` (int≥1),
-  `description`, `registrationFee` (**`z.number().int()≥0` — integer centavos, NOT bigint at request seam**),
+  `description`, `registrationFee` (wire validator `z.number().int()≥0` but the **generated `EventCreateRequest`
+  type is `bigint`** → send `BigInt(centavos)`; **`startDate`/`endDate` typed `Date`** → `new Date(iso)`),
   `currency` (≤3), `visibility` (internal|network). Returns `Event` (201) with a date-parse responseTransformer.
   ⚠️ handler does `endDate: body.endDate!` → treat endDate as required in the form to avoid passing undefined.
 - `POST /communications/announcements/:organizationId` → `createAnnouncement`. Auth:
@@ -24,11 +25,12 @@ announcement**. Pure-FE over frozen, already-correct engine handlers.
   Request validator (`AnnouncementCreateRequestSchema`, matches SDK `AnnouncementCreateRequest`): required
   `title` (≤200), `content`; optional `audienceType`, `audienceCategories`, `channelPush`, `channelEmail`,
   `visibility`, `status`, `scheduledAt`. Returns `Announcement` (201).
-- **2FA-in-prod (requirePositionMiddleware):** privileged positions = president/treasurer/secretary.
-  - Event create needs **Society Officer OR President**. "Society Officer" is NOT privileged → an officer with
-    that title can create events without 2FA. President needs 2FA in prod.
-  - Announcement needs **President OR Secretary** → BOTH privileged → **2FA required in prod.** Without 2FA the
-    officer gets 403. Surface as a friendly `role="alert"` (same class as slice-2c), not a crash.
+- **2FA-in-prod (requirePositionMiddleware) — BOTH routes.** `requestingPrivileged = allowedTitles.some(privileged)`
+  where privileged = president/treasurer/secretary. Event create allows **Society Officer OR President**; because
+  President is in the allowed set, `requestingPrivileged` is true → **the whole event route enforces 2FA in prod**.
+  Announcement allows **President OR Secretary** → also 2FA. So in prod a pilot officer without 2FA gets 403 on
+  BOTH. Surface as a friendly `role="alert"` (slice-2c class), not a crash; both forms show an up-front 2FA note.
+  Founder action: Dr. Olive must enable 2FA before first-peso event creation (carry to Wave C checklist).
 - SDK fns `createEvent` / `createAnnouncement` exist; their **request types match the handlers** → typed-bind is
   safe (wrong field = compile error). Response drift exists but we only need success/error.
 

@@ -11,10 +11,11 @@
 ## Global Constraints
 
 - **Engine FROZEN:** no changes to `services/api-ts/src`, `specs/`, `packages/sdk-ts/src/generated`. `git diff main -- services/api-ts/src specs/ packages/sdk-ts/src/generated` empty at PR.
-- **registrationFee is an integer (centavos), `z.number().int()` — NOT bigint at the request seam.** Form takes PHP, send `Math.round(php*100)`. Omit when blank. No `BigInt()`.
+- **registrationFee: the generated `EventCreateRequest` type is `bigint`** (the wire validator is `z.number().int()`; the SDK bodySerializer converts bigint→number). So at the typed seam send `BigInt(Math.round(php*100))` — mirror the shipped house pattern `apps/org/src/features/paylink/use-send-link.ts` (`amount: BigInt(amount)`). Omit when blank.
+- **startDate/endDate: the generated `EventCreateRequest` types them as `Date`** (not string). Pass `new Date(isoString)`; JSON-serializes to ISO which the validator accepts.
 - **creditBearing is REQUIRED** in the event validator → always send `creditBearing: false`.
-- **endDate**: the handler non-null-asserts it (`body.endDate!`) → make endDate a required form field; send ISO.
-- **2FA-in-prod:** announcements need President/Secretary (privileged → 2FA); events need Society Officer (non-privileged, no 2FA) or President. A 403 (`Officer access required` / `Two-factor authentication required`) must surface as a friendly `role="alert"`, never a crash. Announcement form shows an up-front 2FA note.
+- **endDate**: the handler non-null-asserts it (`body.endDate!`) → make endDate a required form field.
+- **2FA-in-prod — BOTH forms.** `requirePositionMiddleware` sets `requestingPrivileged = allowedTitles.some(privileged)`; events allow `['Society Officer','President']` and President IS privileged → **the whole event route enforces 2FA in prod**, same as announcements (`['President','Secretary']`). So in prod a pilot officer without 2FA gets 403 on BOTH create-event and post-announcement (dev/e2e skip via `NODE_ENV!=='production'`). A 403 (`Officer access required` / `Two-factor authentication required`) must surface as a friendly `role="alert"`, never a crash. **Both forms show an up-front 2FA note.** This is a founder-facing prod gate — flag it for the Wave C checklist (Dr. Olive must enable 2FA before first-peso event creation).
 - **Typed-bind requests:** bodies are typed `EventCreateRequest` / `AnnouncementCreateRequest`. **Confirm the exact import names + the SDK fn option shape (body vs path) in `packages/sdk-ts/src/generated`** before coding — do NOT invent field names.
 - **No-throw SDK:** read `{ data, error }`; `if (!data) throw new Error(serverError(error) ?? '<fallback>')`. Mirror `apps/org/src/features/roster-import/use-import-roster.ts`.
 - **a11y (DESIGN.md):** 18px base, ≥48px tap, every input `<label htmlFor>`, errors `role="alert"`, native `<select>`/`<input type=datetime-local>`, one primary task per route, submit disabled while pending or orgId null.
@@ -59,17 +60,21 @@ const BASE = { title: 'AGM', eventType: 'assembly', startDate: '2026-09-01T01:00
 describe('useCreateEvent', () => {
   beforeEach(() => vi.clearAllMocks())
 
-  it('sends a typed body with fee as integer centavos + creditBearing false', async () => {
+  it('sends a typed body with fee as bigint centavos, Date objects + creditBearing false', async () => {
     mockCreate.mockResolvedValue(ok({ id: 'e1' }, 201))
     const { result } = renderHook(() => useCreateEvent('org-1'), { wrapper })
     result.current.mutate({ ...BASE, feePhp: 250 })
     await waitFor(() => expect(result.current.isSuccess).toBe(true))
     const body = mockCreate.mock.calls[0]![0].body
-    expect(body).toMatchObject({
-      organizationId: 'org-1', title: 'AGM', eventType: 'assembly',
-      startDate: BASE.startDate, endDate: BASE.endDate,
-      creditBearing: false, registrationFee: 25000, currency: 'PHP',
-    })
+    expect(body.organizationId).toBe('org-1')
+    expect(body.title).toBe('AGM')
+    expect(body.eventType).toBe('assembly')
+    expect(body.creditBearing).toBe(false)
+    expect(body.registrationFee).toBe(25000n) // bigint at the typed seam
+    expect(body.currency).toBe('PHP')
+    expect(body.startDate).toBeInstanceOf(Date)
+    expect(body.startDate.toISOString()).toBe(BASE.startDate)
+    expect(body.endDate.toISOString()).toBe(BASE.endDate)
   })
 
   it('omits registrationFee when feePhp is blank/zero', async () => {
@@ -77,7 +82,7 @@ describe('useCreateEvent', () => {
     const { result } = renderHook(() => useCreateEvent('org-1'), { wrapper })
     result.current.mutate({ ...BASE })
     await waitFor(() => expect(result.current.isSuccess).toBe(true))
-    expect(mockCreate.mock.calls[0]![0].body).not.toHaveProperty('registrationFee')
+    expect(mockCreate.mock.calls[0]![0].body.registrationFee).toBeUndefined()
   })
 
   it('throws the server error message on 403', async () => {
@@ -121,13 +126,14 @@ export function useCreateEvent(orgId: string | null): UseMutationResult<Event, E
   return useMutation<Event, Error, CreateEventInput>({
     mutationFn: async (input) => {
       if (!orgId) throw new Error('No organization selected.')
-      const fee = input.feePhp && input.feePhp > 0 ? Math.round(input.feePhp * 100) : undefined
+      // EventCreateRequest types registrationFee as bigint + dates as Date (see use-send-link.ts house pattern).
+      const fee = input.feePhp && input.feePhp > 0 ? BigInt(Math.round(input.feePhp * 100)) : undefined
       const body: EventCreateRequest = {
         organizationId: orgId,
         title: input.title,
         eventType: input.eventType as EventCreateRequest['eventType'],
-        startDate: input.startDate,
-        endDate: input.endDate,
+        startDate: new Date(input.startDate),
+        endDate: new Date(input.endDate),
         creditBearing: false,
         ...(fee !== undefined ? { registrationFee: fee, currency: 'PHP' } : {}),
         ...(input.capacity ? { capacity: input.capacity } : {}),
@@ -142,7 +148,7 @@ export function useCreateEvent(orgId: string | null): UseMutationResult<Event, E
 }
 ```
 
-> If `EventCreateRequest`'s `startDate`/`endDate` are typed as `Date` (not string) by the generated type, pass `new Date(input.startDate)` instead — confirm from Step 1 and adjust. The validator transforms ISO strings, so string input is what the handler expects on the wire.
+> Verified in Step 1: `EventCreateRequest` types `registrationFee` as `bigint` and `startDate`/`endDate` as `Date` — the code above already handles both (`BigInt(...)`, `new Date(...)`). JSON serialization sends number + ISO, which the wire validator (`z.number().int()` / `z.string().datetime()`) accepts. If Step 1 shows a field name differs, adjust — do not weaken the typed bind.
 
 - [ ] **Step 5: Run — expect pass.** `cd apps/org && bun run test -- use-create-event`.
 - [ ] **Step 6: Typecheck.** `cd apps/org && bun run typecheck` → exit 0. (A wrong field on `EventCreateRequest` fails here.)
@@ -223,7 +229,7 @@ describe('CreateEventForm', () => {
 ```tsx
 import { useState } from 'react'
 import { toast } from 'sonner'
-import { Card, CardHeader, CardTitle, CardContent, Button, Input, Label } from '@monobase/ui'
+import { Card, CardHeader, CardTitle, CardContent, Button, Input, Label, Textarea } from '@monobase/ui'
 import { useSelectedOrg } from '@/features/org/use-org'
 import { useCreateEvent } from './use-create-event'
 
@@ -277,12 +283,18 @@ export function CreateEventForm() {
     <Card>
       <CardHeader><CardTitle>Create event</CardTitle></CardHeader>
       <CardContent>
+        <p className="mb-3 text-body text-muted-foreground">
+          Creating events requires a Society Officer or President; the President/Treasurer/Secretary roles also
+          require two-factor authentication in production.
+        </p>
         {!orgId && <p className="text-body text-muted-foreground">Select an organization first.</p>}
         {alertMessage && <p role="alert" className="mb-3 text-body text-destructive">{alertMessage}</p>}
         <form onSubmit={onSubmit} className="space-y-4">
           <div><Label htmlFor="ev-title">Title</Label><Input id="ev-title" value={title} onChange={(e) => setTitle(e.target.value)} required /></div>
           <div>
             <Label htmlFor="ev-type">Type</Label>
+            {/* ponytail: native <select> on purpose — @monobase/ui Select is Radix (36px trigger < 48px a11y floor,
+                and not drivable via getByLabelText+fireEvent.change in tests). Native is taller + keyboard/label native. */}
             <select id="ev-type" value={eventType} onChange={(e) => setEventType(e.target.value)}
               className="min-h-[48px] w-full rounded-md border bg-background px-3 text-body">
               {EVENT_TYPES.map((t) => <option key={t} value={t}>{t}</option>)}
@@ -293,7 +305,7 @@ export function CreateEventForm() {
           <div><Label htmlFor="ev-loc">Location (optional)</Label><Input id="ev-loc" value={location} onChange={(e) => setLocation(e.target.value)} /></div>
           <div><Label htmlFor="ev-cap">Capacity (optional)</Label><Input id="ev-cap" type="number" min={1} value={capacity} onChange={(e) => setCapacity(e.target.value)} /></div>
           <div><Label htmlFor="ev-fee">Registration fee in PHP (optional)</Label><Input id="ev-fee" type="number" min={0} step="0.01" value={feePhp} onChange={(e) => setFeePhp(e.target.value)} /></div>
-          <div><Label htmlFor="ev-desc">Description (optional)</Label><Input id="ev-desc" value={description} onChange={(e) => setDescription(e.target.value)} /></div>
+          <div><Label htmlFor="ev-desc">Description (optional)</Label><Textarea id="ev-desc" value={description} onChange={(e) => setDescription(e.target.value)} /></div>
           <Button type="submit" disabled={!orgId || create.isPending} className="min-h-[48px]">
             {create.isPending ? 'Creating…' : 'Create event'}
           </Button>
@@ -304,7 +316,7 @@ export function CreateEventForm() {
 }
 ```
 
-> Confirm `Input`, `Label`, `Button` exist in `@monobase/ui` (the roster/dues forms use them). If a `Textarea` exists, use it for description; otherwise `Input` is fine for the minimal slice.
+> `Input`, `Label`, `Button`, `Textarea` all exist in `@monobase/ui` (verified) — the roster/dues forms use them. Mirror those forms' structure (useState per field + onSubmit + `role="alert"`). Keep the native `<select>` (justified in the comment above) rather than the Radix `Select`.
 
 - [ ] **Step 4: Create the route** — `apps/org/src/routes/events.tsx`
 
@@ -460,7 +472,7 @@ describe('CreateAnnouncementForm', () => {
 ```tsx
 import { useState } from 'react'
 import { toast } from 'sonner'
-import { Card, CardHeader, CardTitle, CardContent, Button, Input, Label } from '@monobase/ui'
+import { Card, CardHeader, CardTitle, CardContent, Button, Input, Label, Textarea } from '@monobase/ui'
 import { useSelectedOrg } from '@/features/org/use-org'
 import { useCreateAnnouncement } from './use-create-announcement'
 
@@ -492,7 +504,7 @@ export function CreateAnnouncementForm() {
         {serverMessage && <p role="alert" className="mb-3 text-body text-destructive">{serverMessage}</p>}
         <form onSubmit={onSubmit} className="space-y-4">
           <div><Label htmlFor="an-title">Title</Label><Input id="an-title" value={title} onChange={(e) => setTitle(e.target.value)} required /></div>
-          <div><Label htmlFor="an-content">Message</Label><Input id="an-content" value={content} onChange={(e) => setContent(e.target.value)} required /></div>
+          <div><Label htmlFor="an-content">Message</Label><Textarea id="an-content" value={content} onChange={(e) => setContent(e.target.value)} required /></div>
           <Button type="submit" disabled={!orgId || create.isPending} className="min-h-[48px]">
             {create.isPending ? 'Posting…' : 'Post announcement'}
           </Button>
@@ -548,9 +560,11 @@ import { test, expect } from '@playwright/test'
 // Auth + officer gated. Run against a seeded signed-in officer stack. Self-skips otherwise.
 test('officer can open the create-event form', async ({ page }) => {
   await page.goto('/events')
+  // __root redirect is an async effect — wait for the app to settle before asserting.
+  await page.waitForLoadState('networkidle')
   if (page.url().includes('/sign-in')) test.skip(true, 'no authed session in this environment')
-  await expect(page.getByText(/create event/i)).toBeVisible()
-  await expect(page.getByLabel(/title/i)).toBeVisible()
+  await expect(page.getByText(/create event/i).first()).toBeVisible()
+  await expect(page.getByLabel(/^title/i)).toBeVisible()
 })
 ```
 
@@ -567,4 +581,6 @@ test('officer can open the create-event form', async ({ page }) => {
 - **Spec coverage:** create-event hook+form+route (T1/T2), announcement hook+form+route (T3), dashboard links + e2e + FROZEN (T4). Listing intentionally out of scope (spec §Scope). ✓
 - **Placeholder scan:** none — full code in every step. SDK-shape confirmation steps are explicit "read + adjust" instructions, not placeholders.
 - **Type consistency:** `CreateEventInput`/`useCreateEvent` (T1) consumed by T2; `useCreateAnnouncement` (T3) consumed by its form; `EventCreateRequest`/`Announcement` are the generated types (confirm names in Step 1 of T1/T3).
-- **Risk notes for implementer:** (a) `EventCreateRequest` date fields may be typed `Date` not `string` — confirm and convert. (b) `createAnnouncement` option shape (`path` vs body-embedded orgId) — confirm. (c) `@monobase/ui` `Input`/`Label`/`Button`/`Textarea` names — confirm against `packages/ui/src/index.ts` and the existing dues/roster forms; do not invent.
+- **Verified facts (from adversarial review — do not re-litigate):** `EventCreateRequest.registrationFee` is `bigint` (use `BigInt(...)`), `startDate`/`endDate` are `Date` (use `new Date(...)`); the event route enforces 2FA in prod (President is privileged) so BOTH forms 403 without 2FA — friendly alert + up-front note on both; `Input`/`Label`/`Button`/`Textarea` all exist in `@monobase/ui`; keep native `<select>`.
+- **Still confirm at Step 1:** exact generated names for `createEvent`/`createAnnouncement` and the `createAnnouncement` option shape (`path:{organizationId}` vs body-embedded) — adjust calls if they differ, never weaken the typed bind.
+- **Founder-facing:** event creation + announcements are 2FA-gated in prod → carry to the Wave C checklist (Dr. Olive enables 2FA before first-peso event creation).
