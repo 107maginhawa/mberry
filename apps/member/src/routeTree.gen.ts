@@ -11,6 +11,7 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as SignInRouteImport } from './routes/sign-in'
 import { Route as DashboardRouteImport } from './routes/dashboard'
+import { Route as CardRouteImport } from './routes/card'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as PayTokenRouteImport } from './routes/pay/$token'
 
@@ -22,6 +23,11 @@ const SignInRoute = SignInRouteImport.update({
 const DashboardRoute = DashboardRouteImport.update({
   id: '/dashboard',
   path: '/dashboard',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CardRoute = CardRouteImport.update({
+  id: '/card',
+  path: '/card',
   getParentRoute: () => rootRouteImport,
 } as any)
 const IndexRoute = IndexRouteImport.update({
@@ -37,12 +43,14 @@ const PayTokenRoute = PayTokenRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/card': typeof CardRoute
   '/dashboard': typeof DashboardRoute
   '/sign-in': typeof SignInRoute
   '/pay/$token': typeof PayTokenRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/card': typeof CardRoute
   '/dashboard': typeof DashboardRoute
   '/sign-in': typeof SignInRoute
   '/pay/$token': typeof PayTokenRoute
@@ -50,20 +58,22 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/card': typeof CardRoute
   '/dashboard': typeof DashboardRoute
   '/sign-in': typeof SignInRoute
   '/pay/$token': typeof PayTokenRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/dashboard' | '/sign-in' | '/pay/$token'
+  fullPaths: '/' | '/card' | '/dashboard' | '/sign-in' | '/pay/$token'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/dashboard' | '/sign-in' | '/pay/$token'
-  id: '__root__' | '/' | '/dashboard' | '/sign-in' | '/pay/$token'
+  to: '/' | '/card' | '/dashboard' | '/sign-in' | '/pay/$token'
+  id: '__root__' | '/' | '/card' | '/dashboard' | '/sign-in' | '/pay/$token'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  CardRoute: typeof CardRoute
   DashboardRoute: typeof DashboardRoute
   SignInRoute: typeof SignInRoute
   PayTokenRoute: typeof PayTokenRoute
@@ -85,6 +95,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DashboardRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/card': {
+      id: '/card'
+      path: '/card'
+      fullPath: '/card'
+      preLoaderRoute: typeof CardRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/': {
       id: '/'
       path: '/'
@@ -104,6 +121,7 @@ declare module '@tanstack/react-router' {
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  CardRoute: CardRoute,
   DashboardRoute: DashboardRoute,
   SignInRoute: SignInRoute,
   PayTokenRoute: PayTokenRoute,
