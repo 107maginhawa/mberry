@@ -3,31 +3,26 @@ import { renderHook, waitFor } from '@testing-library/react'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 vi.mock('@monobase/sdk-ts/generated', () => ({ getDuesDashboard: vi.fn(), listDuesPayments: vi.fn(), listDuesInvoices: vi.fn() }))
 import { getDuesDashboard, listDuesPayments, listDuesInvoices } from '@monobase/sdk-ts/generated'
+import type { ListDuesPaymentsResponse, ListDuesInvoicesResponse } from '@monobase/sdk-ts/generated'
 import { useDuesDashboard, useRecentPayments, useOutstandingInvoices } from './use-dues'
+import { ok } from '../../test-utils/mock-sdk'
 
 function wrapper({ children }: { children: React.ReactNode }) {
   const qc = new QueryClient({ defaultOptions: { queries: { retry: false } } })
   return <QueryClientProvider client={qc}>{children}</QueryClientProvider>
 }
 
+// Shared pagination stub — hook reads data.data only; pagination shape is ignored at runtime.
+const PAGE1 = { offset: 0, limit: 50, count: 1, totalCount: 1, totalPages: 1, currentPage: 1, hasNextPage: false, hasPreviousPage: false }
+
 // ─── Dashboard ───────────────────────────────────────────────────────────────
 
 it('useDuesDashboard coerces money fields to number and exposes collectionRate+memberCount', async () => {
-  // Ground-truth handler shape: plain numbers, WITH collectionRate+memberCount, NO upcomingActivities
-  ;(getDuesDashboard as any).mockResolvedValue({
-    data: {
-      data: {
-        totalCollected: 250000,
-        totalOutstanding: 500000,
-        paidCount: 1,
-        unpaidCount: 2,
-        overdueCount: 0,
-        collectionRate: 33,
-        memberCount: 3,
-      },
-    },
-    response: new Response('', { status: 200 }),
-  } as any)
+  // engine type/impl drift: handler returns {data:{...collectionRate,memberCount}} but generated type
+  // omits collectionRate/memberCount and requires upcomingActivities. Anchor to handler.
+  vi.mocked(getDuesDashboard).mockResolvedValue(
+    ok({ data: { totalCollected: 250000, totalOutstanding: 500000, paidCount: 1, unpaidCount: 2, overdueCount: 0, collectionRate: 33, memberCount: 3 } } as any)
+  )
   const { result } = renderHook(() => useDuesDashboard('o1'), { wrapper })
   await waitFor(() => expect(result.current.data).toBeTruthy())
   expect(result.current.data!.totalCollected).toBe(250000)
@@ -40,10 +35,10 @@ it('useDuesDashboard coerces money fields to number and exposes collectionRate+m
 
 it('useDuesDashboard falls back collectionRate+memberCount when handler omits them', async () => {
   // Simulates a future engine version that drops these fields
-  ;(getDuesDashboard as any).mockResolvedValue({
-    data: { data: { totalCollected: 0, totalOutstanding: 0, paidCount: 2, unpaidCount: 3, overdueCount: 1 } },
-    response: new Response('', { status: 200 }),
-  } as any)
+  // engine type/impl drift: see above
+  vi.mocked(getDuesDashboard).mockResolvedValue(
+    ok({ data: { totalCollected: 0, totalOutstanding: 0, paidCount: 2, unpaidCount: 3, overdueCount: 1 } } as any)
+  )
   const { result } = renderHook(() => useDuesDashboard('o1'), { wrapper })
   await waitFor(() => expect(result.current.data).toBeTruthy())
   // memberCount fallback = paidCount + unpaidCount + overdueCount = 6
@@ -55,10 +50,16 @@ it('useDuesDashboard falls back collectionRate+memberCount when handler omits th
 // ─── Payments ────────────────────────────────────────────────────────────────
 
 it('useRecentPayments coerces amount + refundedAmount to number', async () => {
-  ;(listDuesPayments as any).mockResolvedValue({
-    data: { data: [{ id: 'p1', amount: 100000n, refundedAmount: 0n, status: 'completed' }], totalCount: 1 },
-    response: new Response('', { status: 200 }),
-  } as any)
+  vi.mocked(listDuesPayments).mockResolvedValue(
+    ok<ListDuesPaymentsResponse>({
+      data: [{
+        id: 'p1', version: 1, createdAt: new Date('2026-01-01'), updatedAt: new Date('2026-01-01'),
+        organizationId: 'o1', personId: 'p1', receiptNumber: 'REC-001',
+        amount: 100000n, currency: 'PHP', paymentMethod: 'gcash', refundedAmount: 0n, status: 'completed',
+      }],
+      pagination: { ...PAGE1, limit: 20 },
+    })
+  )
   const { result } = renderHook(() => useRecentPayments('o1'), { wrapper })
   await waitFor(() => expect(result.current.data).toBeTruthy())
   expect(result.current.data![0].amount).toBe(100000)
@@ -69,16 +70,20 @@ it('useRecentPayments coerces amount + refundedAmount to number', async () => {
 // ─── Invoices ────────────────────────────────────────────────────────────────
 
 it('useOutstandingInvoices maps totalAmount→amount (CRIT-1: invoice has no amount field)', async () => {
-  // Ground-truth handler shape: field is `totalAmount`, NOT `amount`
-  ;(listDuesInvoices as any).mockResolvedValue({
-    data: {
-      data: [{ id: 'inv1', totalAmount: 200000n, status: 'sent', memberName: 'Olive Cruz' }],
-      totalCount: 1,
-      totalPages: 1,
-      currentPage: 1,
-    },
-    response: new Response('', { status: 200 }),
-  } as any)
+  // Ground-truth handler shape: field is `totalAmount`, NOT `amount`.
+  // Note: handler also sends memberName on items at runtime but DuesInvoice type omits it
+  // (handler-added JOIN field; drift documented; no assertion depends on it here).
+  vi.mocked(listDuesInvoices).mockResolvedValue(
+    ok<ListDuesInvoicesResponse>({
+      data: [{
+        id: 'inv1', version: 1, createdAt: new Date('2026-01-01'), updatedAt: new Date('2026-01-01'),
+        membershipId: 'ms1', personId: 'p1', organizationId: 'o1',
+        invoiceNumber: 'INV-001', periodStart: new Date('2026-01-01'), periodEnd: new Date('2026-12-31'),
+        totalAmount: 200000n, fundAllocations: [], status: 'sent', generatedAt: new Date('2026-01-01'),
+      }],
+      pagination: PAGE1,
+    })
+  )
   const { result } = renderHook(() => useOutstandingInvoices('o1'), { wrapper })
   await waitFor(() => expect(result.current.data).toBeTruthy())
   expect(result.current.data![0].amount).toBe(200000)
@@ -89,22 +94,28 @@ it('useOutstandingInvoices maps totalAmount→amount (CRIT-1: invoice has no amo
 
 it('useOutstandingInvoices IMP-2: includes both sent AND overdue invoices', async () => {
   // Hook makes two calls — use mockImplementation to route by status param
-  ;(listDuesInvoices as any).mockImplementation(({ query }: any) => {
+  vi.mocked(listDuesInvoices).mockImplementation(({ query }: any) => {
     if (query.status === 'sent') {
-      return Promise.resolve({
-        data: {
-          data: [{ id: 'inv-sent', totalAmount: 150000n, status: 'sent', memberName: 'Olive Cruz' }],
-        },
-        response: new Response('', { status: 200 }),
-      })
+      return Promise.resolve(ok<ListDuesInvoicesResponse>({
+        data: [{
+          id: 'inv-sent', version: 1, createdAt: new Date(), updatedAt: new Date(),
+          membershipId: 'ms1', personId: 'p1', organizationId: 'o1',
+          invoiceNumber: 'INV-001', periodStart: new Date(), periodEnd: new Date(),
+          totalAmount: 150000n, fundAllocations: [], status: 'sent', generatedAt: new Date(),
+        }],
+        pagination: PAGE1,
+      }))
     }
     // status === 'overdue'
-    return Promise.resolve({
-      data: {
-        data: [{ id: 'inv-overdue', totalAmount: 200000n, status: 'overdue', memberName: 'Juan dela Cruz' }],
-      },
-      response: new Response('', { status: 200 }),
-    })
+    return Promise.resolve(ok<ListDuesInvoicesResponse>({
+      data: [{
+        id: 'inv-overdue', version: 1, createdAt: new Date(), updatedAt: new Date(),
+        membershipId: 'ms2', personId: 'p2', organizationId: 'o1',
+        invoiceNumber: 'INV-002', periodStart: new Date(), periodEnd: new Date(),
+        totalAmount: 200000n, fundAllocations: [], status: 'overdue', generatedAt: new Date(),
+      }],
+      pagination: PAGE1,
+    }))
   })
   const { result } = renderHook(() => useOutstandingInvoices('o1'), { wrapper })
   await waitFor(() => expect(result.current.data).toBeTruthy())

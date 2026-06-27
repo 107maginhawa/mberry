@@ -1,0 +1,6 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": { "noEmit": true },
+  "exclude": ["node_modules", "dist"],
+  "include": ["src/**/*.test.ts", "src/**/*.test.tsx", "src/test-utils/**/*", "src/test-setup.ts", "src/routeTree.gen.ts"]
+}

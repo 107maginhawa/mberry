@@ -19,7 +19,7 @@ describe('SendLinkView', () => {
       />,
     )
     expect(screen.getByText('₱2,500.00')).toBeInTheDocument()
-    await userEvent.click(screen.getAllByRole('button', { name: /send link/i })[0])
+    await userEvent.click(screen.getAllByRole('button', { name: /send link/i })[0]!)
     expect(onSendInvoice).toHaveBeenCalledWith('inv1', 250000)
   })
 

@@ -38,7 +38,7 @@ describe('signIn', () => {
     vi.stubGlobal('fetch', fetchMock)
     // Call without 3rd arg — default is `${window.location.origin}/api`
     await signIn('a@b.com', 'pw')
-    const calledUrl: string = fetchMock.mock.calls[0][0] as string
+    const calledUrl: string = fetchMock.mock.calls[0]![0] as string
     expect(calledUrl).toBe(`${window.location.origin}/api/auth/sign-in/email`)
   })
 })
