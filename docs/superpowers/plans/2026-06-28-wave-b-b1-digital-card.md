@@ -29,8 +29,8 @@
 
 **Interfaces:**
 - Produces: `export interface IdCardData { personId; firstName; lastName: string|null; licenseNumber: string|null; organizationName; membershipStatus; photoUrl: string|null; qrPayload; qrSignature; validUntil: string|null; verifyCredentialNumber: string|null }` (all string unless noted)
-- Produces: `export function useIdCard(): UseQueryResult<IdCardData>` — queryKey `['id-card', orgId]`, `enabled: !!orgId`, `retry: false`. orgId from `useMemberOrg()`.
-- Consumes: `useMemberOrg` from `@/features/org/use-member-org`.
+- Produces: `export function useIdCard(): UseQueryResult<IdCardData | null>` — queryKey `['id-card', orgId]`, `enabled: !!orgId`, `retry: false`. orgId from `useMemberOrg()`. **404 → resolves `null`** (no card yet → EmptyState); other non-ok → throws (ErrorState).
+- Consumes: `useMemberOrg` from `@/features/org/use-member-org`; `API_BASE` from `@/lib/api`.
 
 - [ ] **Step 1: Add the dependency**
 
@@ -81,10 +81,17 @@ describe('useIdCard', () => {
     expect(url).toContain('/api/persons/me/id-card/org-1')
   })
 
-  it('throws on non-ok response', async () => {
+  it('throws on non-ok (>=500) response', async () => {
     ;(globalThis.fetch as ReturnType<typeof vi.fn>).mockResolvedValue(new Response('', { status: 500 }))
     const { result } = renderHook(() => useIdCard(), { wrapper })
     await waitFor(() => expect(result.current.isError).toBe(true))
+  })
+
+  it('resolves null on 404 (no card yet → empty state)', async () => {
+    ;(globalThis.fetch as ReturnType<typeof vi.fn>).mockResolvedValue(new Response('', { status: 404 }))
+    const { result } = renderHook(() => useIdCard(), { wrapper })
+    await waitFor(() => expect(result.current.isSuccess).toBe(true))
+    expect(result.current.data).toBeNull()
   })
 
   it('is disabled when no orgId', async () => {
@@ -108,6 +115,7 @@ Expected: FAIL (cannot find module / useIdCard undefined).
 ```ts
 import { useQuery, type UseQueryResult } from '@tanstack/react-query'
 import { useMemberOrg } from '@/features/org/use-member-org'
+import { API_BASE } from '@/lib/api'
 
 /** Mirrors services/api-ts/src/handlers/person/utils/id-card-data.ts IdCardData (NOT in SDK). */
 export interface IdCardData {
@@ -126,18 +134,18 @@ export interface IdCardData {
 
 /**
  * GET /persons/me/id-card/:orgId — un-SDK'd endpoint, raw fetch (engine FROZEN).
- * Mirrors the raw idiom in features/auth/sign-in.ts. GET → no CSRF header needed.
+ * Mirrors the raw idiom in features/auth/sign-in.ts; uses API_BASE so VITE_API_URL
+ * override is honored. GET → no CSRF header needed. 404 → null (no card → EmptyState).
  */
-export function useIdCard(): UseQueryResult<IdCardData> {
+export function useIdCard(): UseQueryResult<IdCardData | null> {
   const { orgId } = useMemberOrg()
   return useQuery({
     queryKey: ['id-card', orgId],
     enabled: !!orgId,
     retry: false,
     queryFn: async () => {
-      const res = await fetch(`${window.location.origin}/api/persons/me/id-card/${orgId}`, {
-        credentials: 'include',
-      })
+      const res = await fetch(`${API_BASE}/persons/me/id-card/${orgId}`, { credentials: 'include' })
+      if (res.status === 404) return null
       if (!res.ok) throw new Error(`ID card fetch failed: ${res.status}`)
       const body = (await res.json()) as { data: IdCardData }
       return body.data
@@ -145,6 +153,8 @@ export function useIdCard(): UseQueryResult<IdCardData> {
   })
 }
 ```
+
+> If `lib/api.ts` does not already `export const API_BASE`, add the export there (it is referenced internally by `configureApiClient`). Do NOT change its value.
 
 - [ ] **Step 5: Run tests — expect pass**
 
@@ -175,7 +185,7 @@ git add apps/member/package.json apps/member/src/features/card/use-id-card.ts ap
 - Test: `apps/member/src/features/card/IdCardView.test.tsx`
 
 **Interfaces:**
-- Consumes: `useIdCard`, `IdCardData` from `./use-id-card`; `Card, CardHeader, CardTitle, CardContent, Skeleton, Avatar, StatusBadge, ErrorState, EmptyState` from `@monobase/ui`; `QRCodeSVG` from `qrcode.react`.
+- Consumes: `useIdCard`, `IdCardData` from `./use-id-card`; `Card, CardHeader, CardTitle, CardContent, Skeleton, Avatar, AvatarImage, AvatarFallback, StatusBadge, ErrorState, EmptyState` from `@monobase/ui`; `QRCodeSVG` from `qrcode.react`.
 - Produces: `export function IdCardView(): JSX.Element`.
 
 - [ ] **Step 1: Write the failing test** — `apps/member/src/features/card/IdCardView.test.tsx`
@@ -249,7 +259,7 @@ Expected: FAIL (IdCardView not defined).
 import { QRCodeSVG } from 'qrcode.react'
 import {
   Card, CardHeader, CardTitle, CardContent,
-  Skeleton, Avatar, StatusBadge, ErrorState, EmptyState,
+  Skeleton, Avatar, AvatarImage, AvatarFallback, StatusBadge, ErrorState, EmptyState,
 } from '@monobase/ui'
 import { useIdCard } from './use-id-card'
 
@@ -302,9 +312,8 @@ export function IdCardView() {
         <p className="text-section font-semibold text-foreground">{data.organizationName}</p>
         <div className="flex items-center gap-3">
           <Avatar>
-            {data.photoUrl
-              ? <img src={data.photoUrl} alt={`${fullName} photo`} className="h-full w-full object-cover" />
-              : <span aria-hidden className="flex h-full w-full items-center justify-center text-body font-semibold">{initials}</span>}
+            {data.photoUrl && <AvatarImage src={data.photoUrl} alt={`${fullName} photo`} />}
+            <AvatarFallback>{initials}</AvatarFallback>
           </Avatar>
           <div>
             <p className="text-body font-semibold text-foreground">{fullName}</p>
@@ -346,22 +355,23 @@ git add apps/member/src/features/card && git commit -m "feat(member): IdCardView
 
 ---
 
-### Task 3: `/card` route + MembershipTile link + e2e
+### Task 3: `/card` route + dashboard link + e2e
 
 **Files:**
 - Create: `apps/member/src/routes/card.tsx`
-- Modify: `apps/member/src/features/dashboard/MembershipTile.tsx` (add "View digital card" link)
+- Modify: `apps/member/src/routes/dashboard.tsx` (add "View digital card" link — renders inside RouterProvider, no unit test to break)
 - Modify: `apps/member/src/routeTree.gen.ts` (regenerated)
 - Create: `apps/member/src/e2e/card-flow.spec.ts`
-- Test: extend `apps/member/src/features/dashboard/MembershipTile.test.tsx` if present (link visibility)
 
 **Interfaces:**
 - Consumes: `IdCardView` from `@/features/card/IdCardView`; `createFileRoute`, `Link` from `@tanstack/react-router`.
 
+> **Why dashboard.tsx, not MembershipTile (C1 fix):** the 6 existing `MembershipTile.test.tsx` cases render the tile **bare** (no RouterProvider). A TanStack `<Link>` calls `useRouter()` and throws without router context → would RED the whole suite. `dashboard.tsx` is a route component (always rendered inside RouterProvider at runtime) with no unit test, so the link is safe there. The link is always shown; the `/card` route itself renders EmptyState when the member has no membership — no per-tile gating needed.
+
 - [ ] **Step 1: Create the route** — `apps/member/src/routes/card.tsx`
 
 ```tsx
-import { createFileRoute } from '@tanstack/react-router'
+import { createFileRoute, Link } from '@tanstack/react-router'
 import { IdCardView } from '@/features/card/IdCardView'
 
 export const Route = createFileRoute('/card')({ component: CardPage })
@@ -369,6 +379,9 @@ export const Route = createFileRoute('/card')({ component: CardPage })
 function CardPage() {
   return (
     <main className="mx-auto max-w-md p-4">
+      <Link to="/dashboard" className="mb-4 inline-flex min-h-[48px] items-center text-body font-medium text-primary underline">
+        ← Back to dashboard
+      </Link>
       <h1 className="mb-4 text-section font-semibold text-foreground">Your digital card</h1>
       <IdCardView />
     </main>
@@ -381,31 +394,27 @@ function CardPage() {
 ```bash
 cd apps/member && bun run build 2>&1 | tail -20
 ```
-Expected: build succeeds; `routeTree.gen.ts` now contains `/card`. (The dev-only TanStack generator runs on build/dev — confirm the file changed.) If build is heavy, alternatively run `bun run dev` briefly to trigger generation, then stop. COMMIT the regenerated `routeTree.gen.ts`.
+Expected: build succeeds; `routeTree.gen.ts` now contains `/card` (the vite `tanstackRouter` plugin regenerates it on build). COMMIT the regenerated `routeTree.gen.ts`. The typed `Link to="/card"` only typechecks AFTER the tree contains `/card`, so do this before Step 3.
 
-- [ ] **Step 3: Add the link in MembershipTile** — `apps/member/src/features/dashboard/MembershipTile.tsx`
+- [ ] **Step 3: Add the link in dashboard.tsx** — `apps/member/src/routes/dashboard.tsx`
 
-In the success branch (where `membership` is non-null), add before the closing `</CardContent>`:
+Add `import { Link } from '@tanstack/react-router'` (alongside the existing `createFileRoute` import), and inside the dashboard layout (near the tiles) add:
 
 ```tsx
-        <Link
-          to="/card"
-          className="inline-flex min-h-[48px] items-center text-body font-medium text-primary underline"
-        >
-          View digital card
-        </Link>
+      <Link
+        to="/card"
+        className="inline-flex min-h-[48px] items-center text-body font-medium text-primary underline"
+      >
+        View digital card
+      </Link>
 ```
 
-Add the import at top: `import { Link } from '@tanstack/react-router'`.
-
-- [ ] **Step 4: Test the link is gated on having a membership**
-
-If `MembershipTile.test.tsx` exists, add a case asserting the "View digital card" link renders when a membership is present and is absent in the empty state. Run:
+- [ ] **Step 4: (no MembershipTile test change)** — link lives in the route component; existing MembershipTile suite is untouched. Confirm it still passes:
 
 ```bash
 cd apps/member && bun run test -- MembershipTile
 ```
-Expected: PASS. (If no test file exists, create a minimal one mirroring the existing tile test pattern — mock `useMemberData` to return a membership, assert the link; mock empty, assert no link.)
+Expected: PASS (unchanged).
 
 - [ ] **Step 5: Write the e2e spec** — `apps/member/src/e2e/card-flow.spec.ts`
 
@@ -440,7 +449,7 @@ Expected: EMPTY output.
 - [ ] **Step 8: Commit**
 
 ```bash
-git add apps/member/src/routes/card.tsx apps/member/src/routeTree.gen.ts apps/member/src/features/dashboard/MembershipTile.tsx apps/member/src/e2e/card-flow.spec.ts apps/member/src/features/dashboard/MembershipTile.test.tsx 2>/dev/null; git add -A apps/member; git commit -m "feat(member): /card route + dashboard link + e2e (B1)"
+git add -A apps/member; git commit -m "feat(member): /card route + dashboard link + e2e (B1)"
 ```
 
 ---
