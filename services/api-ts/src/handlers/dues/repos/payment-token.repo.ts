@@ -153,4 +153,24 @@ export class PaymentTokenRepository {
       .returning({ id: paymentTokens.id });
     return !!row;
   }
+
+  /**
+   * Find the active (unused, unrevoked, unexpired) token for a given invoice+person pair.
+   * Used as the double-charge guard: if an active token already exists, do not mint another.
+   * Returns null when no such token exists.
+   */
+  async findActiveForInvoice(invoiceId: string, personId: string): Promise<PaymentToken | null> {
+    const [row] = await this.db
+      .select()
+      .from(paymentTokens)
+      .where(and(
+        eq(paymentTokens.invoiceId, invoiceId),
+        eq(paymentTokens.personId, personId),
+        isNull(paymentTokens.usedAt),
+        isNull(paymentTokens.revokedAt),
+        gt(paymentTokens.expiresAt, sql`now()`),
+      ))
+      .limit(1);
+    return row ?? null;
+  }
 }

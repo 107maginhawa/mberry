@@ -198,3 +198,97 @@ describe('revoke', () => {
     expect(await repo.claimForCheckout(id, 'key')).toBeNull();
   });
 });
+
+// ─── Nullable createdByOfficer ────────────────────────────────────────────────
+// Verifies the column is truly nullable now (migration 0086).
+
+describe('createdByOfficer nullable (migration 0086)', () => {
+  test('inserts with createdByOfficer: null and reads back null', async () => {
+    if (!H.dbReachable) return;
+    const repo = new PaymentTokenRepository(H.db as any);
+    const id = await seedActiveToken(H.db, { createdByOfficer: null });
+    const found = await repo.findById(id);
+    expect(found).toBeTruthy();
+    expect(found!.createdByOfficer).toBeNull();
+  });
+
+  test('inserts with a non-null officer still works', async () => {
+    if (!H.dbReachable) return;
+    const repo = new PaymentTokenRepository(H.db as any);
+    const id = await seedActiveToken(H.db, { createdByOfficer: OFFICER });
+    const found = await repo.findById(id);
+    expect(found!.createdByOfficer).toBe(OFFICER);
+  });
+});
+
+// ─── findActiveForInvoice ─────────────────────────────────────────────────────
+// Double-charge guard: returns the active token or null for exhausted/missing.
+
+describe('findActiveForInvoice', () => {
+  const INVOICE = '00000000-0000-4000-8000-0000000000e1';
+  const PERSON2 = '00000000-0000-4000-8000-0000000000c2';
+
+  test('returns the active token when it exists', async () => {
+    if (!H.dbReachable) return;
+    const repo = new PaymentTokenRepository(H.db as any);
+    await seedActiveToken(H.db, { invoiceId: INVOICE, personId: PERSON });
+    const found = await repo.findActiveForInvoice(INVOICE, PERSON);
+    expect(found).not.toBeNull();
+    expect(found!.invoiceId).toBe(INVOICE);
+    expect(found!.personId).toBe(PERSON);
+  });
+
+  test('returns null when the token is used', async () => {
+    if (!H.dbReachable) return;
+    const repo = new PaymentTokenRepository(H.db as any);
+    const id = await seedActiveToken(H.db, { invoiceId: INVOICE, personId: PERSON });
+    await repo.markUsedCas(id);
+    // This person has no other active token for this invoice.
+    const found = await repo.findActiveForInvoice(INVOICE, PERSON);
+    // May find a token from a previous test; only check the one we just used is excluded.
+    // Use a unique invoice to isolate.
+    const uniqueInvoice = crypto.randomUUID();
+    const id2 = await seedActiveToken(H.db, { invoiceId: uniqueInvoice, personId: PERSON });
+    await repo.markUsedCas(id2);
+    expect(await repo.findActiveForInvoice(uniqueInvoice, PERSON)).toBeNull();
+  });
+
+  test('returns null when the token is revoked', async () => {
+    if (!H.dbReachable) return;
+    const repo = new PaymentTokenRepository(H.db as any);
+    const uniqueInvoice = crypto.randomUUID();
+    const id = await seedActiveToken(H.db, { invoiceId: uniqueInvoice, personId: PERSON });
+    await repo.revoke(id);
+    expect(await repo.findActiveForInvoice(uniqueInvoice, PERSON)).toBeNull();
+  });
+
+  test('returns null when the token is expired', async () => {
+    if (!H.dbReachable) return;
+    const repo = new PaymentTokenRepository(H.db as any);
+    const uniqueInvoice = crypto.randomUUID();
+    await seedActiveToken(H.db, {
+      invoiceId: uniqueInvoice,
+      personId: PERSON,
+      expiresAt: new Date(Date.now() - 1000), // 1 second ago
+    });
+    expect(await repo.findActiveForInvoice(uniqueInvoice, PERSON)).toBeNull();
+  });
+
+  test('returns null for a different person on the same invoice', async () => {
+    if (!H.dbReachable) return;
+    const repo = new PaymentTokenRepository(H.db as any);
+    const uniqueInvoice = crypto.randomUUID();
+    await seedActiveToken(H.db, { invoiceId: uniqueInvoice, personId: PERSON });
+    // PERSON2 has no token for this invoice.
+    expect(await repo.findActiveForInvoice(uniqueInvoice, PERSON2)).toBeNull();
+  });
+
+  test('returns null when invoiceId is not set on the token', async () => {
+    if (!H.dbReachable) return;
+    const repo = new PaymentTokenRepository(H.db as any);
+    const uniqueInvoice = crypto.randomUUID();
+    // Token without invoiceId.
+    await seedActiveToken(H.db, { personId: PERSON });
+    expect(await repo.findActiveForInvoice(uniqueInvoice, PERSON)).toBeNull();
+  });
+});
