@@ -1,4 +1,4 @@
-import { createFileRoute } from '@tanstack/react-router'
+import { createFileRoute, Link } from '@tanstack/react-router'
 import { useSession } from '@/features/auth/use-session'
 import { MembershipTile } from '@/features/dashboard/MembershipTile'
 import { DuesOwedTile } from '@/features/dashboard/DuesOwedTile'
@@ -41,6 +41,12 @@ function DashboardPage() {
           <MembershipTile />
           <DuesOwedTile />
           <ReceiptsTile />
+          <Link
+            to="/card"
+            className="inline-flex min-h-[48px] items-center text-body font-medium text-primary underline"
+          >
+            View digital card
+          </Link>
         </main>
       </div>
     </div>
