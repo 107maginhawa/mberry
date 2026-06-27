@@ -1,4 +1,4 @@
-import { Card, CardHeader, CardTitle, CardContent, ErrorState, Skeleton, centavosToPhp } from '@monobase/ui'
+import { Card, CardHeader, CardTitle, CardContent, EmptyState, ErrorState, Skeleton, centavosToPhp } from '@monobase/ui'
 import { useMemberData } from './use-member-data'
 
 /**
@@ -53,7 +53,7 @@ export function ReceiptsTile() {
       </CardHeader>
       <CardContent>
         {payments.length === 0 ? (
-          <p className="text-body text-muted-foreground py-4 text-center">No payments yet.</p>
+          <EmptyState headline="No payments yet." />
         ) : (
           <ul className="divide-y divide-border" aria-label="Payment receipts">
             {payments.map((p) => {

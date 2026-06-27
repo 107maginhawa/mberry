@@ -1,3 +1,4 @@
+import { Link } from '@tanstack/react-router'
 import { ErrorState, EmptyState } from '@monobase/ui'
 import type { PayState } from './use-pay-link'
 
@@ -40,11 +41,20 @@ function ResultContent({ state, onRetry }: PayResultProps) {
   switch (state.kind) {
     case 'succeeded':
       return (
-        <EmptyState
-          icon={SuccessIcon}
-          headline="Payment successful"
-          description="Your dues payment has been received. You'll get a receipt by email."
-        />
+        <>
+          <EmptyState
+            icon={SuccessIcon}
+            headline="Payment successful"
+            description="Your dues payment has been received. You'll get a receipt by email."
+          />
+          {/* Funnel CTA — sign-in is login-free upsell post payment (DESIGN.md) */}
+          <Link
+            to="/sign-in"
+            className="mt-4 flex min-h-tap items-center justify-center text-center text-body text-primary underline"
+          >
+            Create an account to track your dues
+          </Link>
+        </>
       )
     case 'alreadyPaid':
       return (
