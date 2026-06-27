@@ -119,9 +119,10 @@ mirroring `apps/org` Task-3 sign-in. Authorization is the **`platform_admin` tab
 
 - All workspaces typecheck **including** `apps/console` tests (`tsc -p tsconfig.test.json`).
 - `apps/console` unit tests + stubbed E2E pass; `apps/console` builds (`routeTree.gen.ts` regenerated + committed).
-- **Engine FROZEN:** `git diff main -- services/api-ts/src specs/ packages/sdk-ts/src/generated`
-  is **EMPTY** — except the single additive new file `services/api-ts/scripts/seed-console.ts`
-  (no handler/spec/migration/generated change; verify the generated paths show 0 diff).
+- **Engine FROZEN (two checks — the seed file lives in `scripts/`, outside `src/`):**
+  (a) `git diff main -- services/api-ts/src specs/ packages/sdk-ts/src/generated` is **EMPTY**
+  (no handler/spec/migration/generated change); (b) `git diff --name-only main -- services/api-ts`
+  contains **only** `services/api-ts/scripts/seed-console.ts` (the sole additive new file).
 - New CI `console` job green on the PR; whole-branch opus review = Ready-to-merge.
 
 ## 9. Flagged follow-ups (NOT in this slice)
@@ -135,6 +136,11 @@ mirroring `apps/org` Task-3 sign-in. Authorization is the **`platform_admin` tab
    (beachhead = single seeded association).
 4. **Richer stats:** `/admin/analytics/revenue` (MRR/ARR) + `/admin/analytics/health` exist in the
    engine but are NOT in the OpenAPI spec / SDK — expose additively later for a fuller stats strip.
+   **Note:** `getPlatformSummary` (used for the Members/Revenue/Avg-collection tiles) is
+   **snapshot-derived** — it aggregates `chapterSnapshots` written by a monthly cron, NOT by
+   create-org / roster-import. Until that cron runs those tiles are unavailable by design (the
+   console shows a "no snapshot yet" empty state, never confident zeros). Organizations +
+   Associations tiles come from live tables (`listOrganizations` / `listAssociations`) and are always real.
 5. **Engine-contract drift (additive fixes, deferred):** `listOrganizations` pagination
    (handler sends `{offset,limit,total}`, type declares more); the `exportDashboardReport`
    comma-role exact-equality bug (pre-existing, not touched here).

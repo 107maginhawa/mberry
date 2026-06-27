@@ -282,7 +282,11 @@ export function useSession(): { status: SessionStatus } {
 
 - [ ] **Step 7: Run → PASS**.
 
-- [ ] **Step 8: Write failing __root.test.tsx** (assert: unauthed → `listOrganizations` probe still runs but the protected `<Outlet>` content is NOT shown and a redirect is requested; forbidden → access-required text shown). Port the assertion style from `apps/org/src/routes` guard tests if present; otherwise test `RootGate` by rendering it inside a router-free harness is hard — instead test the **status→render** decision by extracting a pure helper. Implement `__root.tsx`:
+- [ ] **Step 8: Write failing __root.test.tsx (PIN it — this is the app's ONLY authz boundary; a vacuous test ships a silent regression).** Mock `useSession` (`vi.mock('@/features/auth/use-session')`) and `@tanstack/react-router`'s `useNavigate` + `useRouterState`. Render `<RootGate/>` and assert THREE branches non-vacuously:
+  1. `status:'unauthed'`, pathname `/` → `navigate` called with `{to:'/sign-in'}` AND the protected Outlet content is NOT rendered.
+  2. `status:'forbidden'` → "Platform operator access required" heading IS rendered AND `navigate` is NOT called.
+  3. `status:'authed'` → Outlet IS rendered (mock `Outlet` to a sentinel `<div>authed-tree</div>` and assert it shows).
+  Do NOT extract a "pure helper" — test the real `RootGate` directly with mocked hooks. Implement `__root.tsx`:
 
 ```tsx
 // apps/console/src/routes/__root.tsx
@@ -318,8 +322,6 @@ export function RootGate() {
   return <div role="status" aria-label="Loading" className="min-h-screen flex items-center justify-center">…</div>
 }
 ```
-
-For the test, keep it simple and robust: mock `useSession` and `@tanstack/react-router`'s `useNavigate`/`useRouterState`, render `<RootGate/>`, assert the `forbidden` branch shows the heading and the `unauthed` branch calls navigate to `/sign-in`. (Mirror the mock-the-router approach used in `apps/org` view tests.)
 
 - [ ] **Step 9: Run → PASS. Typecheck (incl tests). Verify frozen. Commit.**
 
@@ -379,13 +381,14 @@ git add apps/console && git commit -m "feat(console): operator email+password si
 **Interfaces:**
 - Produces:
   - `useOrgs(): { status:'loading'|'ready'|'error'; orgs: OrgRow[]; total: number }` where `OrgRow = { id:string; name:string; region:string|null; orgType:string; status:string; createdAt: Date|string }`.
-  - `usePlatformStats(): { status:'loading'|'ready'|'error'; stats: PlatformStats }` where `PlatformStats = { associations:number; totalMembers:number; activeMembers:number; totalRevenueCents:number; avgCollectionRate:number }`.
-  - `OrgsView` (presentational, props `{ orgs, total, orgsStatus, stats, statsStatus, onCreate }`).
-- Consumes: SDK `listOrganizations`, `getPlatformSummary`; `centavosToPhp` from `@monobase/ui`.
+  - `usePlatformStats(): { status:'loading'|'ready'|'error'; hasSnapshot: boolean; stats: PlatformStats }` where `PlatformStats = { totalMembers:number; activeMembers:number; totalRevenueCents:number; avgCollectionRate:number }`. **`hasSnapshot` = the summary returned ≥1 association row.**
+  - `OrgsView` (presentational, props `{ orgs, total, orgsStatus, associationsCount, stats, statsStatus, hasSnapshot, onCreate }`).
+- Consumes: SDK `listOrganizations`, `getPlatformSummary`; the `associationsCount` comes from `useAssociations` (Task 5) — Task 4 may add a tiny `useAssociations` first OR Task 5 lands it and the container wires it; if Task 4 runs first, pass `associationsCount={undefined}` and render the Associations tile em-dash until Task 5 wires it. `centavosToPhp` from `@monobase/ui`.
 
 **Shape facts (verified vs handler source):**
-- `listOrganizations({query})` → `{ data: Organization[], pagination: { offset, limit, total } }`. **DRIFT**: SDK type declares richer pagination → mock with `as any`; read only `data` + `pagination.total`. `Organization` has `{id, name, region, orgType, status, createdAt, ...}`; `createdAt` is a `Date` (response transformer).
-- `getPlatformSummary({query})` → `{ data: AssocRow[], meta: { cursor, hasMore, total } }`, NO transformer, NO drift. `AssocRow = { associationId, associationName?, chapterCount, totalMembers, activeMembers, collectionRate(%), creditCompliance(%), totalRevenueCents(number) }`. **May be empty** on a fresh platform (per-month snapshot) → tolerate empty (zeros).
+- `listOrganizations({query})` → `{ data: Organization[], pagination: { offset, limit, total } }`. **DRIFT**: SDK type declares richer pagination (`count/totalCount/totalPages`, NO `total`) → mock with `as any`; read only `data` + `pagination.total`. ⚠️ **Do NOT later "fix" this cast to bind the type and read `pagination.count`/`totalCount` — those are `undefined` at runtime (M4).** `Organization` has `{id, name, region, orgType, status, createdAt, ...}`; `createdAt` is a `Date` (response transformer).
+- `getPlatformSummary({query})` → `{ data: AssocRow[], meta: { cursor, hasMore, total } }`, NO transformer, NO drift → bind to `GetPlatformSummaryResponse`. `AssocRow = { associationId, associationName?, chapterCount, totalMembers, activeMembers, collectionRate(%), creditCompliance(%), totalRevenueCents(number) }`.
+- ⚠️ **I1 — `getPlatformSummary` is SNAPSHOT-derived.** It aggregates from `chapterSnapshots` filtered by `snapshotMonth`, written by a **monthly snapshot cron — NOT by create-org or roster-import.** On a fresh platform / any month before the cron runs, `data` is `[]`. So Members/Active/Revenue/Avg-collection are **unavailable by design** until the cron runs. **Never render confident `0`/`₱0.00` for these** — show an em-dash + "No snapshot for `<month>` yet" empty state (driven by `hasSnapshot===false`). The reliable tiles are **Organizations** (`useOrgs().total`) and **Associations** (`useAssociations().length`), which come from live tables, not snapshots.
 
 - [ ] **Step 1: Write failing use-orgs.test.tsx** (mock `listOrganizations`; assert maps rows + exposes `total` from `pagination.total`; empty list → `ready` with `[]`).
 
@@ -425,9 +428,10 @@ export function useOrgs(): { status: 'loading' | 'ready' | 'error'; orgs: OrgRow
 
 - [ ] **Step 3: Run → PASS.**
 
-- [ ] **Step 4: Write failing use-platform-stats.test.tsx** (mock `getPlatformSummary`; assert aggregates: sum members/revenue, avg collectionRate; empty `data` → all zeros, status `ready`).
+- [ ] **Step 4: Write failing use-platform-stats.test.tsx** (mock `getPlatformSummary`). Assert TWO cases: (a) non-empty → aggregates sum members/revenue + avg collectionRate + `hasSnapshot:true`; (b) **empty `data:[]` → `hasSnapshot:false`, status `ready`, stats all 0** (the empty-state signal, NOT presented as real data).
 
 ```tsx
+// (a) non-empty
 vi.mocked(getPlatformSummary).mockResolvedValue(
   ok<GetPlatformSummaryResponse>({
     data: [
@@ -437,7 +441,12 @@ vi.mocked(getPlatformSummary).mockResolvedValue(
     meta: { cursor: null, hasMore: false, total: 2 },
   })
 )
-// expect stats.associations 2, totalMembers 30, totalRevenueCents 200000, avgCollectionRate 60
+// expect hasSnapshot true, totalMembers 30, totalRevenueCents 200000, avgCollectionRate 60
+// (b) empty
+vi.mocked(getPlatformSummary).mockResolvedValue(
+  ok<GetPlatformSummaryResponse>({ data: [], meta: { cursor: null, hasMore: false, total: 0 } })
+)
+// expect status 'ready', hasSnapshot false, stats.totalMembers 0 (used only to render the em-dash empty state, never as a confident value)
 ```
 
 - [ ] **Step 5: Run → FAIL. Implement use-platform-stats.ts:**
@@ -447,9 +456,9 @@ import { useQuery } from '@tanstack/react-query'
 import { getPlatformSummary } from '@monobase/sdk-ts/generated'
 import type { GetPlatformSummaryResponse } from '@monobase/sdk-ts/generated'
 
-export type PlatformStats = { associations: number; totalMembers: number; activeMembers: number; totalRevenueCents: number; avgCollectionRate: number }
+export type PlatformStats = { totalMembers: number; activeMembers: number; totalRevenueCents: number; avgCollectionRate: number }
 
-export function usePlatformStats(): { status: 'loading' | 'ready' | 'error'; stats: PlatformStats } {
+export function usePlatformStats(): { status: 'loading' | 'ready' | 'error'; hasSnapshot: boolean; stats: PlatformStats } {
   const q = useQuery({
     queryKey: ['platform-stats'],
     retry: false,
@@ -458,25 +467,27 @@ export function usePlatformStats(): { status: 'loading' | 'ready' | 'error'; sta
       if (!data) throw new Error('stats failed')
       const rows = (data as GetPlatformSummaryResponse).data
       const n = rows.length
-      const totalMembers = rows.reduce((s, r) => s + r.totalMembers, 0)
-      const activeMembers = rows.reduce((s, r) => s + r.activeMembers, 0)
-      const totalRevenueCents = rows.reduce((s, r) => s + Number(r.totalRevenueCents), 0)
-      const avgCollectionRate = n ? rows.reduce((s, r) => s + r.collectionRate, 0) / n : 0
-      return { associations: n, totalMembers, activeMembers, totalRevenueCents, avgCollectionRate }
+      return {
+        hasSnapshot: n > 0, // I1: snapshot-cron data; [] means "no snapshot yet", not zero.
+        totalMembers: rows.reduce((s, r) => s + r.totalMembers, 0),
+        activeMembers: rows.reduce((s, r) => s + r.activeMembers, 0),
+        totalRevenueCents: rows.reduce((s, r) => s + Number(r.totalRevenueCents), 0),
+        avgCollectionRate: n ? rows.reduce((s, r) => s + r.collectionRate, 0) / n : 0,
+      }
     },
   })
-  const zero: PlatformStats = { associations: 0, totalMembers: 0, activeMembers: 0, totalRevenueCents: 0, avgCollectionRate: 0 }
-  if (q.isLoading) return { status: 'loading', stats: zero }
-  if (q.isError || !q.data) return { status: 'error', stats: zero }
-  return { status: 'ready', stats: q.data }
+  const zero: PlatformStats = { totalMembers: 0, activeMembers: 0, totalRevenueCents: 0, avgCollectionRate: 0 }
+  if (q.isLoading) return { status: 'loading', hasSnapshot: false, stats: zero }
+  if (q.isError || !q.data) return { status: 'error', hasSnapshot: false, stats: zero }
+  return { status: 'ready', hasSnapshot: q.data.hasSnapshot, stats: q.data }
 }
 ```
 
 - [ ] **Step 6: Run → PASS.**
 
-- [ ] **Step 7: Write failing OrgsView.test.tsx** (presentational; props-driven). Assert: stats strip shows `centavosToPhp(200000)` (= ₱2,000.00) with NO `NaN`; org table lists org names; "Create organization" button calls `onCreate`. Use `@monobase/ui` `Button`/`Card`/`Table` primitives (check what `@monobase/ui` exports; fall back to semantic `<table>` if no Table component).
+- [ ] **Step 7: Write failing OrgsView.test.tsx** (presentational; props-driven). Assert: (1) Organizations tile shows `total`; (2) Associations tile shows `associationsCount`; (3) when `hasSnapshot=true`, Revenue shows `centavosToPhp(200000)` (= ₱2,000.00) with NO `NaN`; (4) **when `hasSnapshot=false`, Members/Revenue/Avg tiles show an em-dash + "No snapshot" text, NOT `0`/`₱0.00`**; (5) org table lists org names; (6) "Create organization" button calls `onCreate`. Use `@monobase/ui` `Button`/`Card` primitives; fall back to semantic `<table>` if no Table component is exported.
 
-- [ ] **Step 8: Run → FAIL. Implement OrgsView.tsx** (presentational, no router): a stats strip of `Card`s (Organizations = `total`; Associations; Members; Revenue = `centavosToPhp(Number(stats.totalRevenueCents))`; Avg collection = `stats.avgCollectionRate.toFixed(0)%`) + an orgs table (name, region, type, status, created). Loading/empty/error states. `min-h-tap` primary "Create organization" button → `onCreate`. All `@monobase/ui` tokens, ≥18px text.
+- [ ] **Step 8: Run → FAIL. Implement OrgsView.tsx** (presentational, no router): a stats strip of `Card`s — **Organizations** = `total` (live) · **Associations** = `associationsCount ?? '—'` (live) · **Members / Active / Revenue / Avg collection** = real values when `hasSnapshot`, else an em-dash with helper text "No snapshot for this month yet" (I1 — never confident zeros). Revenue = `centavosToPhp(Number(stats.totalRevenueCents))`; Avg = `stats.avgCollectionRate.toFixed(0)%`. Below: an orgs table (name, region, type, status, created). Loading/empty/error states. `min-h-tap` primary "Create organization" button → `onCreate`. All `@monobase/ui` tokens, ≥18px text.
 
 - [ ] **Step 9: Run → PASS. Implement container Orgs.tsx + wire index route:**
 
@@ -485,16 +496,20 @@ export function usePlatformStats(): { status: 'loading' | 'ready' | 'error'; sta
 import { useNavigate } from '@tanstack/react-router'
 import { useOrgs } from './use-orgs'
 import { usePlatformStats } from './use-platform-stats'
+import { useAssociations } from './use-associations' // from Task 5; if Task 4 runs first, inline a minimal version or pass associationsCount={undefined}
 import OrgsView from './OrgsView'
 
 export default function Orgs() {
   const navigate = useNavigate()
   const { orgs, total, status: orgsStatus } = useOrgs()
-  const { stats, status: statsStatus } = usePlatformStats()
-  return <OrgsView orgs={orgs} total={total} orgsStatus={orgsStatus} stats={stats} statsStatus={statsStatus}
-    onCreate={() => navigate({ to: '/orgs/new' })} />
+  const { stats, status: statsStatus, hasSnapshot } = usePlatformStats()
+  const { associations } = useAssociations()
+  return <OrgsView orgs={orgs} total={total} orgsStatus={orgsStatus} associationsCount={associations.length}
+    stats={stats} statsStatus={statsStatus} hasSnapshot={hasSnapshot} onCreate={() => navigate({ to: '/orgs/new' })} />
 }
 ```
+
+> **Task ordering note:** `Orgs.tsx` imports `useAssociations` (Task 5). Implement Task 5's `use-associations.ts` BEFORE wiring `Orgs.tsx` here, or land a 2-line `useAssociations` in Task 4 and let Task 5 keep it. Simplest: move `use-associations.ts` + its test to the TOP of Task 5 and reorder so Task 5's hook exists; or fold `use-associations.ts` into Task 4. Pick one and keep the build green at the task boundary.
 ```tsx
 // apps/console/src/routes/index.tsx
 import { createFileRoute } from '@tanstack/react-router'
@@ -565,7 +580,7 @@ export function useAssociations(): { status: 'loading' | 'ready' | 'error'; asso
 - [ ] **Step 3: Run → PASS.**
 
 - [ ] **Step 4: Write failing use-create-org.test.tsx** (mock `createOrganization`):
-  - success: `mockResolvedValue(ok<CreateOrganizationResponse>({ id:'o9', name:'New Chapter', ... }, 201))` → `submit` resolves ok; invalidates `['orgs']` (assert via a spy on `queryClient.invalidateQueries` or a fresh QueryClient + refetch flag).
+  - success: `mockResolvedValue(ok<CreateOrganizationResponse>({ ...FULL org shape... }, 201))` → `submit` resolves ok; invalidates `['orgs']` (assert via a spy on `queryClient.invalidateQueries` or a fresh QueryClient + refetch flag). **M5: binding to `CreateOrganizationResponse` (= `PlatformAdminModuleOrganization`) requires EVERY required field (`id, associationId, name, slug?, orgType, status, createdAt, updatedAt`, etc.) — fill the COMPLETE shape (read the type); do NOT reach for `as any`. The compile-error-on-missing-field IS the drift tripwire.**
   - 409: `mockResolvedValue(err(409, { error: 'Organization with this name already exists in this association' }))` → error string surfaced.
   - 403: `err(403, { error: 'Super admin access required' })` → error surfaced.
 
@@ -678,17 +693,20 @@ git add apps/console && git commit -m "feat(console): create-organization form (
 
 - [ ] **Step 2: Controller runs the E2E locally** (`cd apps/console && bun run dev` in one shell on :3006, then `bun run --filter @monobase/console test:e2e` — or use Playwright's `webServer`). Expected: 1 passed. (CI e2e-console deferred per Task 1 NOTE.)
 
-- [ ] **Step 3: Write `services/api-ts/scripts/seed-console.ts`** — a dev bootstrap that seeds: (a) one association (via `AssociationRepository` or direct insert), (b) a Better-Auth user for the founder, (c) a `platform_admin` row (role `super`) for that user. Model it on `services/api-ts/scripts/seed-paylink.ts` (env `DATABASE_URL`, `AUTH_SECRET`; idempotent upserts). Header comment: run command + that real onboarding/create-org against a live stack is otherwise blocked only by needing this seed (NOT G2 — create-org has no money path). **This file is the sole permitted `services/` change; engine handlers/specs/migrations untouched.**
+- [ ] **Step 3: Write `services/api-ts/scripts/seed-console.ts`** — a dev bootstrap that seeds: (a) one association (via `AssociationRepository` or direct insert), (b) a Better-Auth user for the founder, (c) a `platform_admin` row (role `super`) for that user. **Before writing, READ the real patterns (the review flagged this step as hand-wavy):** `services/api-ts/scripts/seed-paylink.ts` for the Better-Auth-user-creation mechanism + env handling (`DATABASE_URL`, `AUTH_SECRET`), and `services/api-ts/src/handlers/platformadmin/repos/platform-admin.schema.ts` for the exact `platform_admin` row columns (role enum `super`/`support`/`analyst`). Idempotent upserts. Header comment: run command + that real create-org against a live stack is blocked ONLY by needing this seed (NOT G2 — create-org has no money path). **This file is the sole permitted `services/` change; engine handlers/specs/migrations untouched.**
 
-- [ ] **Step 4: Final hard gate (controller-verified, evidence before done):**
+- [ ] **Step 4: Final hard gate (controller-verified, evidence before done). I2 — TWO separate frozen checks (the seed file lives in `scripts/`, OUTSIDE `src/`, so it never appears in the first diff):**
 
 ```bash
 bun run --filter '*' typecheck         # all workspaces incl console source+tests = 0 errors
 bun run --filter @monobase/console test # all unit tests pass
 bun run --filter @monobase/console build
-git diff main -- services/api-ts/src specs/ packages/sdk-ts/src/generated   # ONLY scripts/seed-console.ts
+# (a) src/specs/generated frozen — MUST be EMPTY (no exceptions):
+git diff --stat main -- services/api-ts/src specs/ packages/sdk-ts/src/generated
+# (b) the ONLY new services/ file is the seed script — this MUST print nothing:
+git diff --name-only main -- services/api-ts | grep -v '^services/api-ts/scripts/seed-console\.ts$'
 ```
-Expected: typecheck 0, tests PASS, build PASS, frozen diff = only `services/api-ts/scripts/seed-console.ts`.
+Expected: typecheck 0, tests PASS, build PASS, check (a) EMPTY, check (b) prints nothing.
 
 - [ ] **Step 5: Commit.**
 
