@@ -11,8 +11,7 @@ export function RootGate() {
   const pathname = useRouterState({ select: (s) => s.location.pathname })
 
   useEffect(() => {
-    // /sign-in route is added in a later task; cast until the route is registered.
-    if (status === 'unauthed' && pathname !== '/sign-in') navigate({ to: '/sign-in' as any })
+    if (status === 'unauthed' && pathname !== '/sign-in') navigate({ to: '/sign-in' })
   }, [status, pathname, navigate])
 
   if (status === 'forbidden') {
