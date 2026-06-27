@@ -11,8 +11,7 @@ export function RootGate() {
   const { status } = useSession(!isPublic) // [review m7] no probe on public /pay/* + /sign-in
 
   useEffect(() => {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    if (status === 'unauthed' && !isPublic) navigate({ to: '/sign-in' as any })
+    if (status === 'unauthed' && !isPublic) navigate({ to: '/sign-in' })
   }, [status, isPublic, navigate])
 
   // Only render the route tree when authed, or when on a public path.
