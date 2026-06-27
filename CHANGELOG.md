@@ -4,6 +4,14 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+## [0.1.10.0] - 2026-06-28
+
+### Added
+- **Wave B / B1 — digital membership card (`apps/member`).** A signed-in member can open a digital membership card from the dashboard ("View digital card" → `/card`). The card shows their organization, name, license number, membership status, photo (with initials fallback), and a "Valid until" date, plus a scannable QR code ("Scan to verify membership") and their credential number. It consumes the existing `GET /persons/me/id-card/:orgId` endpoint over a raw authenticated fetch (the endpoint is wired in the engine but not in the SDK), so the engine stays frozen — no handler, spec, migration, or generated-SDK change. Built on `@monobase/ui` Friendly-Clarity tokens with the older-user accessibility baseline (≥18px text, ≥48px tap targets, labeled QR, image alt text, back-to-dashboard link, one primary task per screen). The QR encodes a self-contained `payload.signature` so a future verifier can validate it server-side via the existing public credential-verify endpoint.
+
+### Notes
+- **Deferred (flagged):** a public verifier/scan UI, PDF download, and wallet passes are out of scope for this slice. The login-free `/pay/:token` page stays untouched and unauthenticated.
+
 ## [0.1.9.0] - 2026-06-27
 
 ### Added
