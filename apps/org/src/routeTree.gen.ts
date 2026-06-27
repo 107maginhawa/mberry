@@ -11,7 +11,9 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as SignInRouteImport } from './routes/sign-in'
 import { Route as ImportRouteImport } from './routes/import'
+import { Route as EventsRouteImport } from './routes/events'
 import { Route as DuesRouteImport } from './routes/dues'
+import { Route as AnnouncementsRouteImport } from './routes/announcements'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as MembersMembershipIdSendRouteImport } from './routes/members/$membershipId/send'
 
@@ -25,9 +27,19 @@ const ImportRoute = ImportRouteImport.update({
   path: '/import',
   getParentRoute: () => rootRouteImport,
 } as any)
+const EventsRoute = EventsRouteImport.update({
+  id: '/events',
+  path: '/events',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const DuesRoute = DuesRouteImport.update({
   id: '/dues',
   path: '/dues',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AnnouncementsRoute = AnnouncementsRouteImport.update({
+  id: '/announcements',
+  path: '/announcements',
   getParentRoute: () => rootRouteImport,
 } as any)
 const IndexRoute = IndexRouteImport.update({
@@ -43,14 +55,18 @@ const MembersMembershipIdSendRoute = MembersMembershipIdSendRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/announcements': typeof AnnouncementsRoute
   '/dues': typeof DuesRoute
+  '/events': typeof EventsRoute
   '/import': typeof ImportRoute
   '/sign-in': typeof SignInRoute
   '/members/$membershipId/send': typeof MembersMembershipIdSendRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/announcements': typeof AnnouncementsRoute
   '/dues': typeof DuesRoute
+  '/events': typeof EventsRoute
   '/import': typeof ImportRoute
   '/sign-in': typeof SignInRoute
   '/members/$membershipId/send': typeof MembersMembershipIdSendRoute
@@ -58,7 +74,9 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/announcements': typeof AnnouncementsRoute
   '/dues': typeof DuesRoute
+  '/events': typeof EventsRoute
   '/import': typeof ImportRoute
   '/sign-in': typeof SignInRoute
   '/members/$membershipId/send': typeof MembersMembershipIdSendRoute
@@ -67,16 +85,27 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/announcements'
     | '/dues'
+    | '/events'
     | '/import'
     | '/sign-in'
     | '/members/$membershipId/send'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/dues' | '/import' | '/sign-in' | '/members/$membershipId/send'
+  to:
+    | '/'
+    | '/announcements'
+    | '/dues'
+    | '/events'
+    | '/import'
+    | '/sign-in'
+    | '/members/$membershipId/send'
   id:
     | '__root__'
     | '/'
+    | '/announcements'
     | '/dues'
+    | '/events'
     | '/import'
     | '/sign-in'
     | '/members/$membershipId/send'
@@ -84,7 +113,9 @@ export interface FileRouteTypes {
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AnnouncementsRoute: typeof AnnouncementsRoute
   DuesRoute: typeof DuesRoute
+  EventsRoute: typeof EventsRoute
   ImportRoute: typeof ImportRoute
   SignInRoute: typeof SignInRoute
   MembersMembershipIdSendRoute: typeof MembersMembershipIdSendRoute
@@ -106,11 +137,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ImportRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/events': {
+      id: '/events'
+      path: '/events'
+      fullPath: '/events'
+      preLoaderRoute: typeof EventsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/dues': {
       id: '/dues'
       path: '/dues'
       fullPath: '/dues'
       preLoaderRoute: typeof DuesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/announcements': {
+      id: '/announcements'
+      path: '/announcements'
+      fullPath: '/announcements'
+      preLoaderRoute: typeof AnnouncementsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/': {
@@ -132,7 +177,9 @@ declare module '@tanstack/react-router' {
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AnnouncementsRoute: AnnouncementsRoute,
   DuesRoute: DuesRoute,
+  EventsRoute: EventsRoute,
   ImportRoute: ImportRoute,
   SignInRoute: SignInRoute,
   MembersMembershipIdSendRoute: MembersMembershipIdSendRoute,

@@ -109,6 +109,10 @@ export default function Roster() {
             Dues →
           </Link>
         </div>
+        <div className="px-4 pb-2 flex gap-6">
+          <Link to="/events" className="inline-flex min-h-[48px] items-center text-body font-medium text-primary underline">Create event</Link>
+          <Link to="/announcements" className="inline-flex min-h-[48px] items-center text-body font-medium text-primary underline">Post announcement</Link>
+        </div>
         {orgs.length > 1 && (
           <div className="px-4 pb-2">
             <OrgPicker />

@@ -4,6 +4,15 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+## [0.1.11.0] - 2026-06-28
+
+### Added
+- **Wave B / B3 — minimal events for officers (`apps/org`).** An officer can now **create an event** and **post an announcement** from the org app. The new `/events` screen has a single-task "Create event" form (title, type, start/end, optional location, capacity, registration fee in PHP, description); the optional fee is sent as integer centavos over the existing `POST /association/events`. The new `/announcements` screen posts an announcement (title + message) and **actually publishes it** by chaining the create + publish endpoints, so "Announcement posted" is truthful (not a hidden draft). Both screens link from the dashboard. Built on `@monobase/ui` Friendly-Clarity tokens with the older-user accessibility baseline (≥18px text, ≥48px tap targets, labeled inputs, native date/select controls, `role="alert"` errors, one primary task per screen). Engine stays frozen — pure-FE over existing handlers; no handler, spec, migration, or generated-SDK change.
+
+### Notes
+- **Two-factor required in production.** Both creating events and posting announcements are gated by an officer position that requires two-factor authentication in production (President/Secretary, and the event route because it allows President). Without 2FA the officer gets a friendly "Two-factor authentication required" alert (no crash); each form shows an up-front note. **Founder action:** the pilot officer must enable 2FA before creating events / posting announcements in production.
+- **Deferred (flagged):** event/announcement list & manage views, event editing/cancellation, scheduling, CPD/credit-bearing events, capacity-waitlist UI. Member-facing event view + RSVP is the next sub-slice (B4).
+
 ## [0.1.10.0] - 2026-06-28
 
 ### Added
