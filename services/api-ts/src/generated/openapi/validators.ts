@@ -6993,6 +6993,10 @@ export const MessageTemplateListResponseSchema = z.object({
 
 export const MessageTypeSchema = z.enum(["text", "system", "video_call"]);
 
+export const MintMyPaymentLinkRequestSchema = z.object({
+  invoiceId: z.string()
+});
+
 export const MinutesStatusSchema = z.enum(["draft", "submitted", "approved"]);
 
 export const ModuleTypeSchema = z.enum(["video", "reading", "quiz", "assignment"]);
@@ -14000,6 +14004,16 @@ export const UpdateOnboardingStepBody = UpdateOnboardingStepRequestSchema;
 export type UpdateOnboardingStepBody = z.infer<typeof UpdateOnboardingStepBody>;
 
 export const UpdateOnboardingStepResponse = UpdateOnboardingStepResponseSchema;
+
+export const MintMyPaymentLinkParams = z.object({
+  organizationId: z.string(),
+});
+export type MintMyPaymentLinkParams = z.infer<typeof MintMyPaymentLinkParams>;
+
+export const MintMyPaymentLinkBody = MintMyPaymentLinkRequestSchema;
+export type MintMyPaymentLinkBody = z.infer<typeof MintMyPaymentLinkBody>;
+
+export const MintMyPaymentLinkResponse = SendPaymentLinkResponseSchema;
 
 export const SendPaymentLinkParams = z.object({
   organizationId: z.string(),

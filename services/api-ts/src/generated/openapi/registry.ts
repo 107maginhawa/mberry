@@ -239,6 +239,7 @@ import { applySpecialAssessment } from '../../handlers/member/duesspecialassessm
 import { getSpecialAssessmentCollection } from '../../handlers/member/duesspecialassessments/getSpecialAssessmentCollection';
 import { listSpecialAssessments } from '../../handlers/member/duesspecialassessments/listSpecialAssessments';
 import { getDuesDashboard } from '../../handlers/member/duesspecialassessments/getDuesDashboard';
+import { mintMyPaymentLink } from '../../handlers/member/duesspecialassessments/mintMyPaymentLink';
 import { sendPaymentLink } from '../../handlers/member/duesspecialassessments/sendPaymentLink';
 import { downloadReceipt } from '../../handlers/member/duesspecialassessments/downloadReceipt';
 import { revokePaymentLink } from '../../handlers/member/duesspecialassessments/revokePaymentLink';
@@ -743,6 +744,7 @@ export const registry = {
   getSpecialAssessmentCollection,
   listSpecialAssessments,
   getDuesDashboard,
+  mintMyPaymentLink,
   sendPaymentLink,
   downloadReceipt,
   revokePaymentLink,

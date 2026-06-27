@@ -3432,6 +3432,14 @@ export function registerRoutes(app: Hono<{ Variables: Variables }>) {
     registry.updateOnboardingStep as unknown as Handler
   );
 
+  // mintMyPaymentLink
+  app.post('/org/:organizationId/payments/mint-mine',
+    authMiddleware({ roles: ["association:member"] }),
+    zValidator('param', validators.MintMyPaymentLinkParams, validationErrorHandler),
+    zValidator('json', validators.MintMyPaymentLinkBody, validationErrorHandler),
+    registry.mintMyPaymentLink as unknown as Handler
+  );
+
   // sendPaymentLink
   app.post('/org/:organizationId/payments/send-link',
     authMiddleware({ roles: ["association:admin", "association:staff"] }),

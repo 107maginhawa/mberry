@@ -674,6 +674,7 @@ export const markDuesInvoicePaidMutation = makeStub('markDuesInvoicePaidMutation
 export const markInvoiceUncollectibleMutation = makeStub('markInvoiceUncollectibleMutation');
 export const markNoShowBookingMutation = makeStub('markNoShowBookingMutation');
 export const markNotificationAsReadMutation = makeStub('markNotificationAsReadMutation');
+export const mintMyPaymentLinkMutation = makeStub('mintMyPaymentLinkMutation');
 export const myBallotsOptions = makeStub('myBallotsOptions');
 export const myBallotsQueryKey = makeStub('myBallotsQueryKey');
 export const onboardMerchantAccountMutation = makeStub('onboardMerchantAccountMutation');

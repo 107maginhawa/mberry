@@ -89,6 +89,12 @@ model SendPaymentLinkResponse {
   expiresAt: string;
 }
 
+@doc("Request body for a member minting a pay-link for their own dues.")
+model MintMyPaymentLinkRequest {
+  @doc("The member's own unpaid invoice to pay.")
+  invoiceId: string;
+}
+
 // ---------------------------------------------------------------------------
 // Dues Dashboard Models
 // ---------------------------------------------------------------------------
@@ -393,6 +399,23 @@ namespace DuesCustomModule {
       | ApiBadRequestResponse
       | ApiUnauthorizedResponse
       | ApiForbiddenResponse
+      | ApiNotFoundResponse;
+
+    @doc("Mint a one-tap payment link for the authenticated member's own dues invoice (self-serve).")
+    @operationId("mintMyPaymentLink")
+    @post
+    @route("/org/{organizationId}/payments/mint-mine")
+    @useAuth(bearerAuth)
+    @extension("x-security-required-roles", #["association:member"])
+    mintMyPaymentLink(
+      @path organizationId: string,
+      @body body: MintMyPaymentLinkRequest,
+    ): ApiCreatedResponse<SendPaymentLinkResponse>
+      | ApiBadRequestResponse
+      | ApiUnauthorizedResponse
+      | ApiForbiddenResponse
+      // 409 — an active payment link already exists for this invoice (double-charge guard).
+      | ApiConflictResponse
       | ApiNotFoundResponse;
   }
 }

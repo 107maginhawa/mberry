@@ -100,7 +100,7 @@ async function ddl(client: any) {
       paymongo_session_id varchar(255),
       checkout_started_at timestamptz,
       idempotency_key varchar(255),
-      created_by_officer uuid NOT NULL,${baseCols}
+      created_by_officer uuid,${baseCols}
     )
   `);
 

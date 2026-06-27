@@ -4,6 +4,19 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+## [0.1.13.0] - 2026-06-28
+
+### Added
+- **Wave B / B2 — member self-serve dues payment (`apps/member` + engine).** The member dues tile is now actionable: when a member has outstanding dues, a **"Pay now"** button mints a one-tap payment link for their own invoice and takes them straight to the existing login-free `/pay/:token` checkout. This adds one new member-authenticated engine endpoint, `POST /org/{organizationId}/payments/mint-mine` (`mintMyPaymentLink`), that reuses the same PayMongo payment-token rail as the officer-sent links — the member is never in a separate money flow. The amount is always derived server-side from the member's own invoice (never trusted from the client), and the endpoint enforces invoice ownership, organization match, and unpaid status. To support member-initiated links, `payment_token.created_by_officer` is now nullable (migration 0086).
+
+### Security / correctness
+- **No double-charge:** minting is guarded so a member can hold at most one active payment link per invoice — the check and the token creation run in a single transaction with a row lock on the invoice, so even two simultaneous "Pay now" taps resolve to one link (the second returns "a payment is already in progress"). The button also disables after the first tap.
+- **Self-scope only:** a member can only mint a link for an invoice they own, in an organization they belong to, that is still unpaid — verified by real-Postgres integration tests (ownership / cross-org / paid / cancelled / concurrent-double-mint all covered).
+
+### Notes
+- **LIVE checkout is G2-gated** (PayMongo platform account). The mint endpoint, token, and `/pay` page work in test mode now; real card / GCash payment needs G2. Carried to the founder checklist.
+- **Deferred (flagged):** partial payments and choosing among multiple invoices (v1 pays the first outstanding invoice); an officer-sent link concurrent with a member self-mint can still create two active links for one invoice (the officer endpoint is unchanged) — handled by the locked v1 manual-refund policy.
+
 ## [0.1.12.0] - 2026-06-28
 
 ### Added

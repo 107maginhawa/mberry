@@ -55,8 +55,8 @@ export const paymentTokens = pgTable('payment_token', {
   /** Per-attempt PayMongo Idempotency-Key; regenerated on each claim/remint */
   idempotencyKey: varchar('idempotency_key', { length: 255 }),
 
-  /** Officer who created this payment link */
-  createdByOfficer: uuid('created_by_officer').notNull().references(() => persons.id),
+  /** Officer who created this payment link (nullable: member-initiated tokens have no officer) */
+  createdByOfficer: uuid('created_by_officer').references(() => persons.id),
 }, (table) => [
   index('idx_payment_token_hash').on(table.tokenHash),
   index('idx_payment_token_person').on(table.personId),
