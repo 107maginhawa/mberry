@@ -8,6 +8,7 @@ function makeReq(method: string, url: string): Request {
 
 describe('configureApiClient CSRF interceptor', () => {
   let interceptor: (req: Request) => Promise<Request> | Request
+  let responseInterceptor: (res: Response, req: Request) => Response
   const fetchMock = vi.fn()
 
   beforeEach(() => {
@@ -15,13 +16,21 @@ describe('configureApiClient CSRF interceptor', () => {
     vi.stubGlobal('fetch', fetchMock)
     fetchMock.mockReset()
     fetchMock.mockResolvedValue(new Response(JSON.stringify({ token: 'csrf-abc' }), { status: 200 }))
-    // Capture the registered interceptor by spying on the client's use().
-    const useSpy = vi.spyOn(client.interceptors.request, 'use')
+    // Capture interceptors by spying on use() before configureApiClient registers them.
+    const reqUseSpy = vi.spyOn(client.interceptors.request, 'use')
+    const resUseSpy = vi.spyOn(client.interceptors.response, 'use')
     configureApiClient('http://localhost/api')
-    interceptor = useSpy.mock.calls.at(-1)![0] as typeof interceptor
-    useSpy.mockRestore()
+    interceptor = reqUseSpy.mock.calls.at(-1)![0] as typeof interceptor
+    responseInterceptor = resUseSpy.mock.calls.at(-1)![0] as typeof responseInterceptor
+    reqUseSpy.mockRestore()
+    resUseSpy.mockRestore()
   })
-  afterEach(() => vi.unstubAllGlobals())
+
+  afterEach(() => {
+    client.interceptors.request.clear()
+    client.interceptors.response.clear()
+    vi.unstubAllGlobals()
+  })
 
   it('injects x-csrf-token on POST to a protected path', async () => {
     const out = await interceptor(makeReq('POST', 'http://localhost/api/org/o1/payments/send-link'))
@@ -52,5 +61,41 @@ describe('configureApiClient CSRF interceptor', () => {
     const out = await interceptor(makeReq('GET', 'http://localhost/api/association/member/dues-payments'))
     expect(out.headers.get('x-org-id')).toBe('o9')
     localStorage.removeItem('org.selectedOrgId')
+  })
+
+  it('does NOT inject x-org-id on /auth or /pay paths (MIN-2)', async () => {
+    localStorage.setItem('org.selectedOrgId', 'o9')
+    const authReq = await interceptor(makeReq('POST', 'http://localhost/api/auth/sign-in/email'))
+    const payReq = await interceptor(makeReq('POST', 'http://localhost/api/pay/tok/checkout'))
+    expect(authReq.headers.get('x-org-id')).toBeNull()
+    expect(payReq.headers.get('x-org-id')).toBeNull()
+    localStorage.removeItem('org.selectedOrgId')
+  })
+
+  it('clear-on-403: response interceptor clears cache so next POST refetches /csrf-token (IMP-2a)', async () => {
+    // Populate cache with first call.
+    await interceptor(makeReq('POST', 'http://localhost/api/org/o1/payments/send-link'))
+    expect(fetchMock).toHaveBeenCalledTimes(1)
+
+    // Simulate a 403 response — clears the cached token.
+    const fakeReq = makeReq('POST', 'http://localhost/api/org/o1/payments/send-link')
+    responseInterceptor(new Response(null, { status: 403 }), fakeReq)
+
+    // Reset fetchMock so we can count fresh calls.
+    fetchMock.mockReset()
+    fetchMock.mockResolvedValue(new Response(JSON.stringify({ token: 'csrf-new' }), { status: 200 }))
+
+    // Next mutating request must refetch.
+    const out = await interceptor(makeReq('POST', 'http://localhost/api/org/o1/payments/send-link'))
+    expect(fetchMock).toHaveBeenCalledTimes(1)
+    expect(out.headers.get('x-csrf-token')).toBe('csrf-new')
+  })
+
+  it('concurrency dedupe: two concurrent protected POSTs call /csrf-token exactly once (IMP-2b)', async () => {
+    // Fire both without awaiting in between — they race for the token.
+    const p1 = interceptor(makeReq('POST', 'http://localhost/api/org/o1/payments/send-link'))
+    const p2 = interceptor(makeReq('POST', 'http://localhost/api/org/o1/payments/t1/revoke'))
+    await Promise.all([p1, p2])
+    expect(fetchMock).toHaveBeenCalledTimes(1)
   })
 })
