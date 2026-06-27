@@ -18,11 +18,15 @@ rail + G2-gated). Pure-FE over frozen handlers.
   `data.data` → parses dates to `Date` and `registrationFee`/`earlyBirdFee` to **`bigint`**. SDK fn
   `listPublicEvents`; query params `limit, offset, eventType, dateFrom, dateTo, pricing, q`. The member
   app filters **client-side** by `organizationId === orgId` + upcoming (`startDate >= now`).
-- **Free RSVP:** `POST /association/event-lifecycle/{eventId}/register` → `registerForCustomEvent`. Auth:
-  session + **active membership**. **Empty body** (eventId is the path param). Returns `EventRegistration`
-  (201, `status` = confirmed | waitlisted when capacity full). `409` if already registered; `200` for an
-  idempotent waitlisted re-register. responseTransformer is single-object (dates + amountPaid bigint) —
-  **no `.map` crash risk**. SDK fn `registerForCustomEvent`.
+- **Free RSVP:** `POST /association/event-lifecycle/{eventId}/register` → `registerForCustomEvent`
+  (the WIRED `handlers/association:operations/registerForCustomEvent.ts`; an earlier recon mis-read an
+  unwired `registerOrWaitlist`). Auth: session + **active membership**. **Empty body** (eventId is the path
+  param). Confirmed → `EventRegistration` (201); capacity full → **`{ ...waitlistEntry, waitlisted: true }`**
+  (a WaitlistEntry with **NO `status` field**) → detect waitlist via the `waitlisted` flag, never `status`.
+  **There is NO 409:** a duplicate RSVP raises Postgres 23505 with no ConflictError catch → the API returns
+  **500**. The UI prevents the duplicate by disabling the button after a successful RSVP. The handler also
+  rejects events whose `status !== 'published'` (BusinessLogicError) → the list is filtered to published only.
+  SDK fn `registerForCustomEvent`.
 - **Paid (DEFERRED):** `POST /association/event-lifecycle/{eventId}/register-and-pay` →
   `registerAndPayForEvent` (enforces `registrationFee > 0`; returns `{ data: { checkoutUrl, registrationId } }`
   with **NO transformer** → envelope drift; runs the **legacy Stripe** connected-account rail, NOT slice-1

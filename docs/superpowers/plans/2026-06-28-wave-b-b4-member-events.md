@@ -12,10 +12,13 @@
 
 - **Engine FROZEN:** no changes to `services/api-ts/src`, `specs/`, `packages/sdk-ts/src/generated`. `git diff main -- services/api-ts/src specs/ packages/sdk-ts/src/generated` empty at PR.
 - **registrationFee is `bigint`** in the response (transformer) → `Number(registrationFee)` before `centavosToPhp`; `0`/undefined → "Free". Never render a raw bigint.
-- **Discovery = `listPublicEvents`** (public, network+published, all-orgs) → client-filter `organizationId === orgId` + upcoming (`startDate >= now`) + not cancelled, sort asc, take 5. Read only `data.data` (pagination drifts — ignore it).
-- **RSVP = `registerForCustomEvent({ path: { eventId } })`**, empty body. `409` → friendly "already registered"; `200/201` data has `status` confirmed|waitlisted.
+- **Discovery = `listPublicEvents`** (public, network + published/completed, all-orgs) → client-filter `organizationId === orgId` + **`status === 'published'`** (RSVP only works on published; drops cancelled/completed/draft) + upcoming (`startDate >= now`), sort asc, take 5. Pass `query.dateFrom = now` to narrow before the 50-cap. Read only `data.data` (pagination drifts — ignore it).
+- **RSVP = `registerForCustomEvent({ path: { eventId } })`**, empty body. **Verified against the WIRED handler (`handlers/association:operations/registerForCustomEvent.ts`) — do NOT trust the generated type here:**
+  - It calls a naive `createOne` with **no already-registered guard**: a duplicate RSVP raises Postgres 23505 with **no 23505→ConflictError catch → the API returns 500, NOT 409.** So there is **no 409 path** — do not branch on `response.status === 409`. Prevent the duplicate in the UI instead: after a successful RSVP, mark that event "Registered" and disable its button.
+  - **Waitlist (capacity full) returns `{ ...waitlistEntry, waitlisted: true }` — a WaitlistEntry with NO `status` field.** The confirmed path returns an EventRegistration. So detect waitlist via the **`waitlisted` boolean flag**, never `reg.status`. The hook result is the union `EventRegistration | { waitlisted: true }`.
+  - It throws `BusinessLogicError` unless `event.status === 'published'` — another reason the list is filtered to published only.
 - **Paid deferred:** events with `Number(registrationFee) > 0` show the fee + "Paid registration coming soon" — do NOT call `registerAndPayForEvent`.
-- **Typed-bind where clean:** import `Event`, `EventRegistration` types; mocks bound via `ok<...>()`/`err()` (relative `../../test-utils/mock-sdk` if the `@/` alias fails at vitest runtime — confirm the convention used by existing apps/member tests).
+- **Typed-bind where clean:** import `Event` type for the list (organizationId/registrationFee/status/capacity/registeredCount all on it). The RSVP response is drift-prone (union, type lies) → read defensively (`'waitlisted' in reg`), cast with a comment. Mocks bound via `ok<...>()`/`err()` from **`@/test-utils/mock-sdk`** (the apps/member convention — `use-session.test.tsx`/`use-member-data.test.tsx` use the `@/` alias and it works at vitest runtime here, unlike apps/org).
 - **No-throw SDK:** read `{ data, error, response }`.
 - **a11y (DESIGN.md):** 18px base, ≥48px tap RSVP, fee/status as text, RSVP `aria-label` includes the event title, toasts via `sonner`.
 - **Version:** bump apps/member chain → v0.1.12.0 at ship.
@@ -43,7 +46,7 @@ import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { renderHook, waitFor } from '@testing-library/react'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { createElement, type ReactNode } from 'react'
-import { ok } from '../../test-utils/mock-sdk'
+import { ok } from '@/test-utils/mock-sdk'
 import { useMemberEvents } from './use-member-events'
 
 vi.mock('@/features/org/use-member-org', () => ({ useMemberOrg: vi.fn(() => ({ orgId: 'org-1', memberships: [], select: vi.fn() })) }))
@@ -106,12 +109,13 @@ export function useMemberEvents(): UseQueryResult<Event[]> {
     enabled: !!orgId,
     retry: false,
     queryFn: async () => {
-      const { data, response } = await listPublicEvents({ query: { limit: 50 } })
+      const { data, response } = await listPublicEvents({ query: { limit: 50, dateFrom: new Date().toISOString() } })
       if (!response || !response.ok) throw new Error(`Events fetch failed: ${response?.status ?? 'no response'}`)
       const all = (data?.data ?? []) as Event[]
       const now = Date.now()
+      // status==='published' only — the wired RSVP handler rejects non-published; also drops cancelled/completed/draft.
       return all
-        .filter((e) => e.organizationId === orgId && e.status !== 'cancelled' && new Date(e.startDate).getTime() >= now)
+        .filter((e) => e.organizationId === orgId && e.status === 'published' && new Date(e.startDate).getTime() >= now)
         .sort((a, b) => new Date(a.startDate).getTime() - new Date(b.startDate).getTime())
         .slice(0, 5)
     },
@@ -126,8 +130,8 @@ import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { renderHook, waitFor } from '@testing-library/react'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { createElement, type ReactNode } from 'react'
-import { ok, err } from '../../test-utils/mock-sdk'
-import { useRsvp } from './use-rsvp'
+import { ok, err } from '@/test-utils/mock-sdk'
+import { useRsvp, isWaitlisted } from './use-rsvp'
 
 vi.mock('@/features/org/use-member-org', () => ({ useMemberOrg: vi.fn(() => ({ orgId: 'org-1', memberships: [], select: vi.fn() })) }))
 vi.mock('@monobase/sdk-ts/generated', () => ({ registerForCustomEvent: vi.fn() }))
@@ -142,21 +146,31 @@ function wrapper({ children }: { children: ReactNode }) {
 describe('useRsvp', () => {
   beforeEach(() => vi.clearAllMocks())
 
-  it('posts eventId as a path param (empty body) and returns the registration', async () => {
+  it('posts eventId as a path param (empty body); confirmed result is not waitlisted', async () => {
+    // confirmed path → EventRegistration (real wired handler)
     mockReg.mockResolvedValue(ok({ id: 'r1', status: 'confirmed' }, 201))
     const { result } = renderHook(() => useRsvp(), { wrapper })
     result.current.mutate({ eventId: 'e1' })
     await waitFor(() => expect(result.current.isSuccess).toBe(true))
     expect(mockReg.mock.calls[0]![0]).toEqual({ path: { eventId: 'e1' } })
-    expect(result.current.data!.status).toBe('confirmed')
+    expect(isWaitlisted(result.current.data!)).toBe(false)
   })
 
-  it('maps a 409 to a friendly already-registered message', async () => {
-    mockReg.mockResolvedValue(err(409, { error: 'You are already registered for this event' }))
+  it('detects a waitlisted result via the waitlisted flag (real shape has NO status)', async () => {
+    // capacity-full path → { ...waitlistEntry, waitlisted: true }, NO status field
+    mockReg.mockResolvedValue(ok({ id: 'w1', waitlisted: true }, 201))
+    const { result } = renderHook(() => useRsvp(), { wrapper })
+    result.current.mutate({ eventId: 'e1' })
+    await waitFor(() => expect(result.current.isSuccess).toBe(true))
+    expect(isWaitlisted(result.current.data!)).toBe(true)
+  })
+
+  it('throws a generic error on engine failure (a duplicate RSVP 500s — there is no 409)', async () => {
+    mockReg.mockResolvedValue(err(500, { error: 'Internal Server Error' }))
     const { result } = renderHook(() => useRsvp(), { wrapper })
     result.current.mutate({ eventId: 'e1' })
     await waitFor(() => expect(result.current.isError).toBe(true))
-    expect(result.current.error?.message).toMatch(/already registered/i)
+    expect(result.current.error?.message).toMatch(/could not rsvp|internal server error/i)
   })
 })
 ```
@@ -176,15 +190,24 @@ function serverError(error: unknown): string | undefined {
   return undefined
 }
 
-export function useRsvp(): UseMutationResult<EventRegistration, Error, { eventId: string }> {
+// The wired handler returns EventRegistration (confirmed) OR a WaitlistEntry spread with { waitlisted: true }
+// (capacity full). The waitlist branch has NO `status` field — detect waitlist via the flag, never status.
+export type RsvpResult = EventRegistration | { waitlisted: true }
+
+export function isWaitlisted(reg: RsvpResult): boolean {
+  return typeof reg === 'object' && reg !== null && 'waitlisted' in reg && (reg as { waitlisted?: boolean }).waitlisted === true
+}
+
+export function useRsvp(): UseMutationResult<RsvpResult, Error, { eventId: string }> {
   const { orgId } = useMemberOrg()
   const qc = useQueryClient()
-  return useMutation<EventRegistration, Error, { eventId: string }>({
+  return useMutation<RsvpResult, Error, { eventId: string }>({
     mutationFn: async ({ eventId }) => {
-      const { data, error, response } = await registerForCustomEvent({ path: { eventId } })
-      if (response?.status === 409) throw new Error('You are already registered for this event.')
+      // No 409 from this handler — a duplicate RSVP raises 23505 → 500 (no ConflictError catch).
+      // The UI prevents re-submit by disabling the button after a successful RSVP.
+      const { data, error } = await registerForCustomEvent({ path: { eventId } })
       if (!data) throw new Error(serverError(error) ?? 'Could not RSVP. Please try again.')
-      return data as EventRegistration
+      return data as RsvpResult
     },
     onSuccess: () => qc.invalidateQueries({ queryKey: ['member-events', orgId] }),
   })
@@ -262,11 +285,12 @@ describe('EventsTile', () => {
 - [ ] **Step 3: Implement** — `EventsTile.tsx`
 
 ```tsx
+import { useState } from 'react'
 import { Card, CardHeader, CardTitle, CardContent, Button, Skeleton, EmptyState, ErrorState, centavosToPhp } from '@monobase/ui'
 import { toast } from 'sonner'
 import type { Event } from '@monobase/sdk-ts/generated'
 import { useMemberEvents } from './use-member-events'
-import { useRsvp } from './use-rsvp'
+import { useRsvp, isWaitlisted } from './use-rsvp'
 
 function Title() {
   return <CardTitle className="text-body font-semibold text-muted-foreground">Upcoming events</CardTitle>
@@ -275,6 +299,8 @@ function Title() {
 export function EventsTile() {
   const { isLoading, isError, data } = useMemberEvents()
   const rsvp = useRsvp()
+  // Track local RSVPs so we disable the button after success — the engine has NO 409, a re-RSVP would 500.
+  const [registered, setRegistered] = useState<Set<string>>(new Set())
 
   if (isLoading) {
     return <Card><CardHeader><Title /></CardHeader><CardContent className="space-y-2"><Skeleton className="h-6 w-3/4" /><Skeleton className="h-4 w-1/2" /></CardContent></Card>
@@ -288,7 +314,10 @@ export function EventsTile() {
 
   function onRsvp(ev: Event) {
     rsvp.mutate({ eventId: ev.id }, {
-      onSuccess: (reg) => toast.success(reg.status === 'waitlisted' ? 'Added to the waitlist' : "You're registered"),
+      onSuccess: (reg) => {
+        setRegistered((s) => new Set(s).add(ev.id))
+        toast.success(isWaitlisted(reg) ? 'Added to the waitlist' : "You're registered")
+      },
       onError: (e) => toast.error(e.message),
     })
   }
@@ -302,6 +331,7 @@ export function EventsTile() {
           const isPaid = fee > 0
           const spotsLeft = ev.capacity != null ? ev.capacity - (ev.registeredCount ?? 0) : null
           const pendingThis = rsvp.isPending && rsvp.variables?.eventId === ev.id
+          const isRegistered = registered.has(ev.id)
           return (
             <div key={ev.id} className="space-y-1 border-b pb-3 last:border-b-0 last:pb-0">
               <p className="text-body font-semibold text-foreground">{ev.title}</p>
@@ -310,7 +340,7 @@ export function EventsTile() {
               <p className="text-body text-foreground">{isPaid ? centavosToPhp(fee) : 'Free'}{spotsLeft != null && ` · ${spotsLeft} spots left`}</p>
               {isPaid
                 ? <p className="text-body text-muted-foreground">Paid registration coming soon.</p>
-                : <Button className="min-h-[48px]" disabled={pendingThis} aria-label={`RSVP to ${ev.title}`} onClick={() => onRsvp(ev)}>{pendingThis ? 'RSVPing…' : 'RSVP'}</Button>}
+                : <Button className="min-h-[48px]" disabled={pendingThis || isRegistered} aria-label={`RSVP to ${ev.title}`} onClick={() => onRsvp(ev)}>{isRegistered ? 'Registered' : pendingThis ? 'RSVPing…' : 'RSVP'}</Button>}
             </div>
           )
         })}
@@ -359,4 +389,6 @@ test('dashboard shows the upcoming events tile', async ({ page }) => {
 - **Spec coverage:** discovery+filter hook + RSVP hook (T1), tile with free/paid/states (T2), dashboard wire + e2e + FROZEN (T3). Paid deferred (note only); coherence gap flagged in spec. ✓
 - **Placeholder scan:** none — full code in every step; SDK-confirm steps are explicit read+adjust.
 - **Type consistency:** `useMemberEvents`/`useRsvp` (T1) consumed by `EventsTile` (T2); `Event`/`EventRegistration` are generated types (confirm in T1 Step 1).
-- **Risk notes:** (a) `listPublicEvents`/`registerForCustomEvent` option shapes — confirm in T1 Step 1. (b) `Event.registrationFee` bigint → always `Number()` before `centavosToPhp`; the EventsTile test guards `/\d+n/`. (c) mock-sdk import path: use the convention existing apps/member tests use (B1 used `vi.mock` factories; ok/err from test-utils — confirm relative vs `@/`).
+- **Verified facts (from adversarial review — do not re-litigate):** RSVP handler has **no 409** (dup → 500), waitlist returns `{ ...waitlistEntry, waitlisted: true }` (no `status`) → detect via `isWaitlisted()` flag, disable button after success to prevent the dup-500; RSVP requires `status==='published'` → list filtered to published; `Event.organizationId`/`registrationFee`(bigint)/`status`(incl cancelled)/`capacity`/`registeredCount` are all on the typed `Event`; `centavosToPhp`/`EmptyState`/`ErrorState`/`Skeleton`/`Button`/`Card*` exist; apps/member tests use the `@/test-utils/mock-sdk` alias (works at vitest runtime here, unlike apps/org).
+- **Still confirm at T1 Step 1:** exact generated names for `listPublicEvents`/`registerForCustomEvent` and that `listPublicEvents` accepts `query.dateFrom`. Adjust calls if names differ; never weaken the typed bind.
+- **Coherence gap (carry to backlog/Wave C):** B3 events are draft + default visibility → invisible to `listPublicEvents` (network+published) until an officer publish/network-visibility UI exists. B4 is correct vs the discovery contract; the tile will read empty for B3 data until then.
