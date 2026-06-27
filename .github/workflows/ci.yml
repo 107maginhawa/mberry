@@ -57,7 +57,7 @@ jobs:
       - run: bun install --frozen-lockfile
       - name: Build (tsc-b + vite; generates routeTree.gen.ts via TanStack plugin)
         run: bun run --filter @monobase/member build
-      - name: Typecheck
+      - name: Typecheck (source + tests via tsconfig.test.json — durable false-green guard)
         run: bun run --filter @monobase/member typecheck
       - name: Unit tests
         run: bun run --filter @monobase/member test

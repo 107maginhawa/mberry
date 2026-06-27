@@ -32,7 +32,7 @@ const CANCELLED_EMPTY: Extract<PayState, { kind: 'cancelled' }> = {
 // Thin test harness that mirrors the route component logic — driven by the
 // mocked hook so we can verify each state renders the right subtree.
 function TestPayPage({ token = 'tok' }: { token?: string } = {}) {
-  const { state, pay } = (usePayLink as ReturnType<typeof vi.fn>)(token)
+  const { state, pay } = vi.mocked(usePayLink)(token)
   if (state.kind === 'loading') {
     return <div role="status" aria-label="Loading payment details" />
   }
