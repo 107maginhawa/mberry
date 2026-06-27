@@ -94,6 +94,14 @@ export default function Roster() {
   return (
     <div className="min-h-screen bg-[var(--color-bg)]">
       <div className="max-w-lg mx-auto pt-4">
+        <div className="px-4 pb-2 flex justify-end">
+          <a
+            href="/dues"
+            className="text-sm font-medium text-plum-500 hover:text-plum-700"
+          >
+            Dues →
+          </a>
+        </div>
         {orgs.length > 1 && (
           <div className="px-4 pb-2">
             <OrgPicker />
