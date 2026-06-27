@@ -105,6 +105,22 @@ export class DuesInvoiceRepository extends DatabaseRepository<DuesInvoice, NewDu
   }
 
   /**
+   * Find invoice by ID with a SELECT … FOR UPDATE row lock.
+   * MUST be called inside a db.transaction() — the lock is held until commit/rollback.
+   * Used by mintMyPaymentLink to serialize concurrent mints for the same invoice so
+   * at most one active payment_token is ever created (double-charge TOCTOU fix).
+   */
+  async findOneByIdForUpdate(id: string): Promise<DuesInvoice | null> {
+    const [record] = await this.db
+      .select()
+      .from(duesInvoices)
+      .where(eq(duesInvoices.id, id))
+      .for('update')
+      .limit(1);
+    return (record as DuesInvoice) || null;
+  }
+
+  /**
    * Find all overdue invoices for an organization —
    * invoices whose due date (periodEnd) has passed and status is not paid/cancelled/writtenOff
    */

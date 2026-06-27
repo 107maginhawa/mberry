@@ -62,31 +62,49 @@ export async function mintMyPaymentLink(ctx: ValidatedContext<any, never, never>
     return ctx.json({ error: 'This invoice is not payable.' }, 409)
   }
 
-  const tokenRepo = new PaymentTokenRepository(db)
+  // 5. Atomic double-charge guard: acquire invoice row lock THEN check-and-create
+  //    inside ONE transaction so concurrent mints for the same invoice serialize.
+  //    Req B blocks on SELECT…FOR UPDATE until Req A commits; after commit B's
+  //    findActiveForInvoice sees A's token → 409. Net: at most one active token
+  //    per invoice even under concurrent POST /mint-mine from two tabs/devices.
+  const result = await db.transaction(async (tx: DatabaseInstance) => {
+    // Exclusive row lock on the invoice — serializes all concurrent mints.
+    const lockedInvoice = await new DuesInvoiceRepository(tx).findOneByIdForUpdate(invoiceId)
 
-  // 5. Double-charge guard: exactly one active (unused, unrevoked, unexpired) token
-  //    is permitted per invoice per member. Two active tokens = two settleable charges.
-  const existing = await tokenRepo.findActiveForInvoice(invoiceId, personId)
-  if (existing) {
-    return ctx.json({ error: 'A payment is already in progress for this invoice.' }, 409)
-  }
+    // Re-guard status under the lock (invoice may have been paid concurrently).
+    if (!lockedInvoice || !UNPAID.has(lockedInvoice.status)) {
+      return { ok: false as const, message: 'This invoice is not payable.' }
+    }
 
-  // 6. Mint: generate HMAC token (raw sent to member, hash stored in DB).
-  //    Amount from invoice.totalAmount — bigint(mode:'number') is already a JS number.
-  const secret = getPaymentTokenSecret()
-  const { raw, hash } = generatePaymentToken(secret)
-  const expiresAt = new Date(Date.now() + MEMBER_TOKEN_TTL_MS)
+    const txTokenRepo = new PaymentTokenRepository(tx)
+    const existing = await txTokenRepo.findActiveForInvoice(invoiceId, personId)
+    if (existing) {
+      return { ok: false as const, message: 'A payment is already in progress for this invoice.' }
+    }
 
-  await tokenRepo.create({
-    tokenHash: hash,
-    personId,
-    organizationId: orgId,
-    invoiceId,
-    amount: Number(invoice.totalAmount),
-    currency: invoice.currency ?? 'PHP',
-    expiresAt,
-    createdByOfficer: null,
+    // 6. Mint: generate HMAC token (raw sent to member, hash stored in DB).
+    //    Amount from invoice.totalAmount — bigint(mode:'number') is already a JS number.
+    const secret = getPaymentTokenSecret()
+    const { raw, hash } = generatePaymentToken(secret)
+    const expiresAt = new Date(Date.now() + MEMBER_TOKEN_TTL_MS)
+
+    await txTokenRepo.create({
+      tokenHash: hash,
+      personId,
+      organizationId: orgId,
+      invoiceId,
+      amount: Number(lockedInvoice.totalAmount),
+      currency: lockedInvoice.currency ?? 'PHP',
+      expiresAt,
+      createdByOfficer: null,
+    })
+
+    return { ok: true as const, raw, expiresAt }
   })
 
-  return ctx.json({ token: raw, paymentUrl: `/pay/${raw}`, expiresAt: expiresAt.toISOString() }, 201)
+  if (!result.ok) {
+    return ctx.json({ error: result.message }, 409)
+  }
+
+  return ctx.json({ token: result.raw, paymentUrl: `/pay/${result.raw}`, expiresAt: result.expiresAt.toISOString() }, 201)
 }

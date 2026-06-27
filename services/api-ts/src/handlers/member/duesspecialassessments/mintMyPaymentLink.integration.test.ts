@@ -314,6 +314,59 @@ describe('mintMyPaymentLink — missing invoice → NotFoundError', () => {
 // 10. DOUBLE-CHARGE guard: second mint → 409, exactly one active token
 // ══════════════════════════════════════════════════════════════════════════
 
+// ══════════════════════════════════════════════════════════════════════════
+// 11. CONCURRENCY: two simultaneous mints → exactly 1×201 + 1×409, 1 token
+// ══════════════════════════════════════════════════════════════════════════
+
+describe('mintMyPaymentLink — CONCURRENCY (atomic invoice-row lock)', () => {
+  test('two concurrent mints for same invoice → exactly 1 success + 1 conflict, exactly 1 active token', async () => {
+    if (!H.dbReachable) return;
+    const personId = freshId();
+    const orgId = freshId();
+    const invoiceId = await insertInvoice({
+      personId,
+      organizationId: orgId,
+      status: 'generated',
+    });
+
+    // Fire both mints concurrently — no await between them.
+    // Under the row-lock fix, PG serializes them: whichever grabs the
+    // SELECT…FOR UPDATE lock first succeeds; the other sees the committed
+    // token and returns 409.
+    const [r1, r2] = await Promise.allSettled([
+      mintMyPaymentLink(mintCtx({ user: { id: personId }, orgId, invoiceId })) as Promise<any>,
+      mintMyPaymentLink(mintCtx({ user: { id: personId }, orgId, invoiceId })) as Promise<any>,
+    ]);
+
+    // Both settled without unhandled rejections
+    expect(r1.status).toBe('fulfilled');
+    expect(r2.status).toBe('fulfilled');
+
+    const statuses = [
+      (r1 as PromiseFulfilledResult<any>).value.status,
+      (r2 as PromiseFulfilledResult<any>).value.status,
+    ].sort((a, b) => a - b);
+
+    // Exactly one 201 and one 409 — double-charge eliminated
+    expect(statuses).toEqual([201, 409]);
+
+    // DB invariant: exactly ONE active (unused, unrevoked, unexpired) token
+    const { rows } = await H.scopedPool.query(
+      `SELECT COUNT(*) AS cnt
+       FROM "${H.schema}".payment_token
+       WHERE invoice_id = $1
+         AND person_id = $2
+         AND used_at IS NULL
+         AND revoked_at IS NULL
+         AND expires_at > NOW()`,
+      [invoiceId, personId],
+    );
+    expect(Number(rows[0].cnt)).toBe(1);
+  });
+});
+
+// ──────────────────────────────────────────────────────────────────────────
+
 describe('mintMyPaymentLink — DOUBLE-CHARGE guard', () => {
   test('second mint while first token active → 409 + exactly one active token persisted', async () => {
     if (!H.dbReachable) return;
