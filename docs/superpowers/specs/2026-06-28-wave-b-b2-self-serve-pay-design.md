@@ -50,18 +50,19 @@ model MintMyPaymentLinkRequest { @doc("Member's own unpaid invoice to pay") invo
 Response: **reuse `SendPaymentLinkResponse`** `{ token, paymentUrl, expiresAt }` (201).
 
 Handler (`handlers/member/duesspecialassessments/mintMyPaymentLink.ts`, mirrors sendPaymentLink minus the
-officer requirement, plus self-ownership checks):
-1. `personId = ctx.get('user').id`; `orgId` from path.
-2. **Membership check:** the member belongs to `orgId` (else 403). (Reuse the membership-check util the other
-   member endpoints use.)
-3. **Load the invoice** (`invoiceId`) via the dues invoice repo. **Reject (400/403/404)** unless:
-   - it exists, AND
-   - `invoice.personId === personId` (**ownership — no paying others' invoices**), AND
-   - `invoice.organizationId === orgId`, AND
-   - it is **unpaid** (status in generated/sent/overdue — not paid/void).
-4. **`amount = invoice.amount` (server-derived — NEVER from the client).** `currency = invoice.currency ?? 'PHP'`.
-5. Generate token (`generatePaymentToken`), create the `payment_token` row with `personId`, `organizationId`,
-   `invoiceId`, `amount`, `currency`, `expiresAt` (same TTL as officer mint), **`createdByOfficer: null`**.
+officer requirement, plus self-ownership checks) — CORRECTED per adversarial review:
+1. `personId = ctx.get('user').id`; `orgId` from path. **No membership/officer check** (a current-membership
+   gate would wrongly block lapsed members paying overdue dues; ownership+org cover IDOR).
+2. **Load the invoice** via `DuesInvoiceRepository.findOneById(invoiceId)` (dues repo, NOT billing). Reject unless:
+   exists (else 404), `invoice.personId === personId` (else 403, IDOR), `invoice.organizationId === orgId`
+   (else 403), status ∈ `generated | sent | overdue` (else **409** — reject `paid | cancelled | writtenOff`;
+   there is no `void`).
+3. **Double-charge guard:** `findActiveForInvoice(invoiceId, personId)` (unused/unrevoked/unexpired); if one
+   exists → **409** (no second token). Guarantees ≤1 active token per invoice → no self-serve double charge.
+4. **`amount = Number(invoice.totalAmount)`** (the invoice column is `totalAmount` bigint mode:'number', NOT
+   `amount`; `payment_token.amount` is int4 — server-derived, NEVER from the client). `currency = invoice.currency ?? 'PHP'`.
+5. Generate token, create the `payment_token` row with `personId`, `organizationId`, `invoiceId`, `amount`,
+   `currency`, `expiresAt` (**short 1h TTL** so an abandoned token frees the invoice), **`createdByOfficer: null`**.
 6. Return `{ token: raw, paymentUrl: '/pay/${raw}', expiresAt }` (201).
 
 ### Migration (additive, reversible-safe)
@@ -78,15 +79,16 @@ with a non-null assumption** (revoke is org-scoped, settlement is tokenId-agnost
 
 ## Money / security invariants (opus review MUST verify)
 
-1. **Amount is server-derived from the invoice**, never trusted from the client body.
+1. **Amount is server-derived from `invoice.totalAmount`**, never from the client body (no amount field exists).
 2. **Invoice ownership** enforced (`invoice.personId === session.user.id`) — no cross-member pay / IDOR.
-3. **Invoice org match** + **unpaid** enforced (no minting against a paid invoice → no double-charge surface;
-   settlement is already idempotent, but mint should still reject paid).
-4. **Membership** enforced (can't mint for an org you're not in).
+3. **Invoice org match** + **unpaid** (`generated|sent|overdue` only) enforced.
+4. **Double-charge guard:** at most one active token per invoice (`findActiveForInvoice` → 409). Two tokens
+   would yield two settleable paymentIds → a completed orphan dues_payment = a real double charge; the guard
+   prevents the self-serve case. (Residual cross-source officer+member overpayment → locked v1 manual refund.)
 5. **`createdByOfficer: null`** for member-initiated provenance (not a fake officer id).
-6. Token single-use + TTL + the existing claim-mutex/CAS on checkout are inherited from the rail (unchanged).
-7. BigInt/Number discipline at the FE seam (invoice `totalAmount` is bigint → the mint sends only `invoiceId`,
-   so no money crosses the wire from the client — amount is derived server-side; FE redirects, no money math).
+6. **NO membership/officer-term check** (would block lapsed members who owe overdue dues).
+7. Token single-use + short TTL + the existing claim-mutex/CAS on checkout are inherited from the rail (unchanged).
+8. FE sends only `invoiceId` (no bigint over the wire); amount is server-derived; FE just redirects — no money math.
 
 ## Testing (anti-false-green + real-PG where money/member data moves)
 

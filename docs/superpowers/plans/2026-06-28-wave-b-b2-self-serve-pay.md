@@ -8,16 +8,19 @@
 
 **Tech Stack:** TypeSpec → OpenAPI → Hono/Drizzle, `@monobase/sdk-ts`, React, vitest + createScratch real-PG + Hurl, bun.
 
-## Global Constraints
+## Global Constraints (CORRECTED per adversarial review — these are source-verified, do not re-litigate)
 
 - **Engine ADDITIVE (not frozen) — but ONLY the agreed files** (spec §invariant). No existing handler/schema/contract logic may change. Settlement / checkout / validate / officer-mint stay byte-unchanged.
-- **Amount is ALWAYS server-derived** from the member's invoice — there is NO amount field in the request. The request body is `{ invoiceId }` only.
-- **Security invariants (every one MUST hold):** invoice ownership (`invoice.personId === session.user.id`), invoice org match, invoice unpaid, member belongs to org, `createdByOfficer: null`. A violation = 403/404/400, never a mint.
-- **Migration:** `created_by_officer` → nullable; new journal entry `idx 86, when 1782700000001` (strictly monotonic — ci-gotchas #1); update `dues-repos.integration.test.ts` hand-DDL to nullable (ci-gotchas #2). Non-destructive `DROP NOT NULL` (no DELETE → migration-safety lint clean).
+- **Amount is ALWAYS server-derived** from the member's invoice — NO amount field in the request body (`{ invoiceId }` only). **The invoice amount column is `totalAmount` (bigint, mode:'number'), NOT `amount`.** `payment_token.amount` is `integer` → assign `Number(invoice.totalAmount)` (centavos; fits int4 for dental dues). Currency = `invoice.currency ?? 'PHP'`.
+- **Invoice loader:** `DuesInvoiceRepository.findOneById(invoiceId)` from the **dues** repo (`@/handlers/dues/repos/dues.repo`). **NOT** the billing `InvoiceRepository`/`getInvoice` (different `invoices` table — a footgun).
+- **Security invariants (every one MUST hold):** invoice **ownership** (`invoice.personId === session.user.id` — person.id===user.id holds via slice-3; mirrors `listDuesInvoices` FIX-006 self-scope), invoice **org match** (`invoice.organizationId === orgId`), invoice **unpaid** (status ∈ `generated | sent | overdue` only — reject `paid | cancelled | writtenOff`; there is no `void`), `createdByOfficer: null`. Violation = 403/404/409, never a mint. **NO membership/officer-term check** — a *current-membership* gate would wrongly block lapsed members paying overdue dues, and no shared "member-belongs-to-org" util exists; ownership + org match fully cover IDOR.
+- **Double-charge guard (C2 — money safety):** two mints for one unpaid invoice → two `payment_token`s → two `paymentId`s → both can settle → a completed orphan dues_payment = a real double charge (settlement is idempotent only per-payment; `markPaid` is guarded but the 2nd payment still completes). The raw token can't be reused (only its hash is stored). So: **the handler MUST reject minting when an active token already exists for the invoice** — before generating, call `PaymentTokenRepository.findActiveForInvoice(invoiceId, personId)` (unused, unrevoked, `expiresAt > now`); if one exists → **409** "A payment is already in progress for this invoice." This guarantees ≤1 active token per invoice → at most one completable checkout → no self-serve double charge. Use a **short TTL (1 hour)** for member-minted tokens (vs officer 72h) so an abandoned token frees the invoice quickly. FE also disables the button after the first tap. (Residual cross-source officer+member case is pre-existing and out-of-scope: locked v1 = overpayment→manual officer refund.)
+- **Migration:** `created_by_officer` → nullable; new journal entry `idx 86, when 1782700000001` (strictly monotonic — ci-gotchas #1); update `dues-repos.integration.test.ts` hand-DDL to nullable (ci-gotchas #2). Non-destructive `DROP NOT NULL` (no DELETE → migration-safety lint clean). Verified: no production reader asserts `created_by_officer` non-null.
 - **Regen everything** after spec/schema changes (openapi, routes, validators, SDK) and **commit the generated files** (CI git-diff gate — feedback `api-first-sdk-regen`).
-- **Auth role:** member endpoints use `bearerAuth` + `["association:member"]`. **Confirm** the OTP member carries it by matching the role on `listDuesInvoices` (the member dashboard calls it successfully) — use whatever that uses.
-- **No `/api` prefix** in route registration. Restart the API after adding the route (no hot-reload for routes).
-- **Mirror, don't invent:** read `sendPaymentLink.ts` + the dues invoice repo for exact method names (`generatePaymentToken`, `PaymentTokenRepository.create`, the invoice-by-id lookup, the membership-check util, the expiry default). Do NOT fabricate signatures.
+- **Auth role:** `bearerAuth` + `["association:member"]` (verified: `listDuesInvoices` allows `association:admin, association:member`; `downloadReceipt` uses `association:member`). The OTP member carries it.
+- **`registry.ts` is AUTO-GENERATED (DO NOT EDIT).** `bun run generate` derives the handler import path from the op's namespace tag (`DuesCustomModule` → `Member/DuesSpecialAssessments` → `handlers/member/duesspecialassessments/<operationId>`) and rewrites the registry. So the op MUST be added **inside `namespace DuesCustomModule`** (in the existing `PaymentLinkManagement` interface) and the handler file MUST live at the derived path. Never hand-edit `registry.ts`.
+- **No `/api` prefix** in route registration. Restart the API after adding the route.
+- **Mirror, don't invent:** read `sendPaymentLink.ts` for `generatePaymentToken` + `PaymentTokenRepository.create` + the expiry/TTL helper. Do NOT fabricate signatures.
 - **Version:** v0.1.13.0 at ship.
 
 ---
@@ -43,18 +46,17 @@ This emits a new `00XX_*.sql` with `ALTER TABLE ... ALTER COLUMN "created_by_off
 
 - [ ] **Step 4: Update the hand-rolled test DDL.** In `dues-repos.integration.test.ts`, change `created_by_officer uuid NOT NULL,` to `created_by_officer uuid,` (nullable) in the inline `CREATE TABLE ... payment_token (...)`.
 
-- [ ] **Step 5: Add a real-PG proof test** in `payment-token.repo.test.ts` (createScratch harness): create a payment_token with `createdByOfficer: null` (alongside the other required fields) → expect it inserts and reads back with `createdByOfficer === null`. Also keep an existing officer-id insert passing.
+- [ ] **Step 5: Add the `findActiveForInvoice` finder** (additive, for the double-charge guard) to `PaymentTokenRepository` (`payment-token.repo.ts`): `findActiveForInvoice(invoiceId: string, personId: string): Promise<PaymentToken | null>` — returns a token where `invoiceId` + `personId` match AND `usedAt IS NULL` AND `revokedAt IS NULL` AND `expiresAt > now()`, else null. Mirror the existing finders' drizzle style in that repo.
+
+- [ ] **Step 6: Add real-PG tests** in `payment-token.repo.test.ts` (createScratch): (a) insert with `createdByOfficer: null` → inserts + reads back `null`; keep an officer-id insert passing. (b) `findActiveForInvoice` returns an active unused token, and returns `null` when the token is used / revoked / expired / for a different person.
 
 ```bash
 cd services/api-ts && bun test payment-token.repo
-```
-Expected: PASS (incl. the new null case). Run the dues-repos integration test too:
-```bash
 cd services/api-ts && bun test dues-repos.integration
 ```
-Expected: PASS (DDL now nullable).
+Expected: PASS (null case + finder cases; DDL now nullable).
 
-- [ ] **Step 6: Commit.** `git add services/api-ts/src/handlers/dues services/api-ts/src/generated/migrations && git commit -m "feat(dues): payment_token.created_by_officer nullable for member-initiated mint (B2)"`
+- [ ] **Step 7: Commit.** `git add services/api-ts/src/handlers/dues services/api-ts/src/generated/migrations && git commit -m "feat(dues): payment_token.created_by_officer nullable + findActiveForInvoice finder (B2)"`
 
 ---
 
@@ -67,7 +69,7 @@ Expected: PASS (DDL now nullable).
 - Modify: the handler registry / route registration so the generated route resolves
 - Generated: `packages/sdk-ts/src/generated/*` (regen)
 
-- [ ] **Step 1: Add the TypeSpec op + model** in `dues-custom.tsp`. Add a model near the other payment models and an interface (or extend an existing member interface). Mirror `sendPaymentLink` but member-auth, reusing `SendPaymentLinkResponse`:
+- [ ] **Step 1: Add the TypeSpec op + model** in `dues-custom.tsp`, **inside `namespace DuesCustomModule`** (the tag drives the generated handler path — it MUST be this namespace so the path resolves to `handlers/member/duesspecialassessments/`). Add the model near `SendPaymentLinkResponse` (line ~81), and add the op to the **existing `PaymentLinkManagement` interface** (alongside `sendPaymentLink`/`revokePaymentLink`). Mirror `sendPaymentLink` but member-auth (drop `@extension("x-require-officer", ...)`), reusing `SendPaymentLinkResponse`:
 
 ```tsp
 @doc("Request body for a member minting a pay-link for their own dues.")
@@ -75,26 +77,27 @@ model MintMyPaymentLinkRequest {
   @doc("The member's own unpaid invoice to pay.")
   invoiceId: string;
 }
-
-@doc("Member self-serve endpoint for paying their own dues")
-interface MemberSelfPayEndpoints {
-  @doc("Mint a one-tap payment link for the authenticated member's own dues invoice.")
-  @operationId("mintMyPaymentLink")
-  @post
-  @route("/org/{organizationId}/payments/mint-mine")
-  @useAuth(bearerAuth)
-  @extension("x-security-required-roles", #["association:member"])
-  mintMyPaymentLink(
-    @path organizationId: string,
-    @body body: MintMyPaymentLinkRequest,
-  ): ApiCreatedResponse<SendPaymentLinkResponse>
-    | ApiBadRequestResponse
-    | ApiUnauthorizedResponse
-    | ApiForbiddenResponse
-    | ApiNotFoundResponse;
-}
 ```
-> Confirm `SendPaymentLinkResponse` is in scope in this file (sendPaymentLink uses it) and that the interface is included by the namespace. If member endpoints must live in a specific namespace to get routed, place the interface accordingly (mirror where `downloadReceipt`/`ReceiptEndpoints` sits).
+…and inside `interface PaymentLinkManagement { ... }`:
+```tsp
+    @doc("Mint a one-tap payment link for the authenticated member's own dues invoice (self-serve).")
+    @operationId("mintMyPaymentLink")
+    @post
+    @route("/org/{organizationId}/payments/mint-mine")
+    @useAuth(bearerAuth)
+    @extension("x-security-required-roles", #["association:member"])
+    mintMyPaymentLink(
+      @path organizationId: string,
+      @body body: MintMyPaymentLinkRequest,
+    ): ApiCreatedResponse<SendPaymentLinkResponse>
+      | ApiBadRequestResponse
+      | ApiUnauthorizedResponse
+      | ApiForbiddenResponse
+      // 409 — an active payment link already exists for this invoice (double-charge guard).
+      | ApiConflictResponse
+      | ApiNotFoundResponse;
+```
+> `SendPaymentLinkResponse` is top-level in this file (line ~81) and reachable. No `x-require-officer` on this op.
 
 - [ ] **Step 2: Build the spec + generate routes/validators.**
 
@@ -104,7 +107,7 @@ cd ../../services/api-ts && bun run generate
 ```
 Confirm: `mintMyPaymentLink` now appears in the generated routes + a `MintMyPaymentLinkBody` validator exists. The generated route references `registry.mintMyPaymentLink` — so the handler must exist (next step) for the API to compile.
 
-- [ ] **Step 3: Stub handler so it compiles** — `mintMyPaymentLink.ts`:
+- [ ] **Step 3: Stub handler so it compiles** — create `handlers/member/duesspecialassessments/mintMyPaymentLink.ts` (the path the generator derives from the `DuesCustomModule` tag — confirm by reading where `sendPaymentLink.ts` sits; it's the same dir):
 
 ```ts
 import type { Context } from 'hono'
@@ -112,7 +115,7 @@ export async function mintMyPaymentLink(ctx: Context): Promise<Response> {
   return ctx.json({ error: 'Not implemented' }, 501)
 }
 ```
-Wire it into the handler registry exactly as `sendPaymentLink` is wired (find where `sendPaymentLink` is registered — mirror it). Ensure the route registration uses the generated validator + the member auth middleware that the generated route expects.
+**Do NOT hand-edit `registry.ts` — it is AUTO-GENERATED.** `bun run generate` (Step 2) already wrote the registry entry + import for `mintMyPaymentLink` pointing at this file path; creating the file at that exact path is all that's needed for it to resolve. If `generate` reported the handler missing, the file path is wrong — fix the path to match the generator's derived import, do not edit the registry.
 
 - [ ] **Step 4: Regenerate the SDK.**
 
@@ -143,30 +146,36 @@ git add specs/ services/api-ts/src/generated services/api-ts/src/handlers/member
 - Modify: `services/api-ts/src/handlers/member/duesspecialassessments/mintMyPaymentLink.ts` (real logic)
 - Test: `services/api-ts/src/handlers/member/duesspecialassessments/mintMyPaymentLink.integration.test.ts` (createScratch real-PG)
 
-- [ ] **Step 1: Read the references.** Read `sendPaymentLink.ts` fully (mirror its token-gen + `PaymentTokenRepository.create` + expiry). Find the dues **invoice repo** method to load an invoice by id (grep the dues repos for a `findById`/`getInvoice`/`findOneById` that returns `{ id, personId, organizationId, amount, currency, status }`) and the **membership-check** util the other member endpoints use (e.g. `utils/membership-check.ts`). Note exact names; the code below uses placeholders you must replace with the real ones.
+- [ ] **Step 1: Read the references.** Read `sendPaymentLink.ts` fully (mirror its `generatePaymentToken` + secret source + `PaymentTokenRepository.create` call). Read `DuesInvoiceRepository.findOneById` in `@/handlers/dues/repos/dues.repo` and the dues invoice schema (`dues.schema.ts`) to confirm the row fields: `personId`, `organizationId`, **`totalAmount` (bigint mode:'number')**, `currency`, `status` (enum `generated|sent|paid|overdue|cancelled|writtenOff`). Note the real `create` field names.
 
-- [ ] **Step 2: Write the failing real-PG integration test** — `mintMyPaymentLink.integration.test.ts`, using the createScratch harness (mirror an existing `*.integration.test.ts` for setup). Cover, with a seeded member + org + invoice:
+- [ ] **Step 2: Write the failing real-PG integration test** — `mintMyPaymentLink.integration.test.ts` (createScratch harness; mirror an existing `*.integration.test.ts`). Seeded member + org + dues invoice. Cover:
 
 ```
-- mint with an OWNED, UNPAID invoice → 201; a payment_token row exists with personId=member,
-  organizationId=org, invoiceId=invoice.id, amount === invoice.amount, createdByOfficer === null;
-  response = { token, paymentUrl: `/pay/${token}`, expiresAt }.
-- invoice owned by ANOTHER person → 403/404, NO token row created.
+- mint with an OWNED, UNPAID (generated/sent/overdue) invoice → 201; a payment_token row exists with
+  personId=member, organizationId=org, invoiceId=invoice.id, amount === Number(invoice.totalAmount),
+  createdByOfficer === null; response = { token, paymentUrl: `/pay/${token}`, expiresAt }.
+- invoice owned by ANOTHER person → 403 (or 404), NO token row created.
 - invoice in ANOTHER org → 403/404, NO token row.
-- invoice already PAID → 400/409, NO token row.
-- caller is NOT a member of the org → 403.
+- invoice status 'paid' → 409, NO token row. Also 'cancelled' and 'writtenOff' → 409, NO token row.
 - missing/unknown invoiceId → 404.
-- amount is taken from the invoice (assert the row amount equals the invoice amount, regardless of body — there is no amount in the body).
+- DOUBLE-CHARGE GUARD: a second mint for the SAME invoice while the first token is active (unused) → 409,
+  and NO second token row is created (assert exactly one active token for the invoice).
+- amount comes from invoice.totalAmount (there is no amount in the body).
+- NO membership/officer-term check: a member whose membership is lapsed but who owns an OVERDUE invoice
+  can still mint (assert 201) — do NOT block lapsed members.
 ```
-Run it — expect FAIL (handler is the 501 stub).
+Run it — expect FAIL (501 stub).
 
-- [ ] **Step 3: Implement the handler.** Mirror `sendPaymentLink` structure:
+- [ ] **Step 3: Implement the handler.** Mirror `sendPaymentLink` structure (replace placeholders with the real names from Step 1):
 
 ```ts
 import type { Context } from 'hono'
-import { UnauthorizedError, ForbiddenError, NotFoundError, ValidationError } from '@/core/errors'
-// + the real imports for: DatabaseInstance, PaymentTokenRepository, the invoice repo,
-//   generatePaymentToken, the expiry helper, the membership-check util (READ sendPaymentLink.ts).
+import { UnauthorizedError, ForbiddenError, NotFoundError } from '@/core/errors'
+// + real imports: DatabaseInstance, PaymentTokenRepository, DuesInvoiceRepository,
+//   generatePaymentToken + the secret source (READ sendPaymentLink.ts).
+
+const UNPAID = new Set(['generated', 'sent', 'overdue'])
+const MEMBER_TOKEN_TTL_MS = 60 * 60 * 1000 // 1h — short so an abandoned self-serve token frees the invoice
 
 export async function mintMyPaymentLink(ctx: Context): Promise<Response> {
   const user = ctx.get('user')
@@ -177,29 +186,32 @@ export async function mintMyPaymentLink(ctx: Context): Promise<Response> {
   const db = ctx.get('database') as DatabaseInstance
   if (!orgId) return ctx.json({ error: 'organizationId is required' }, 400)
 
-  // 1. membership: the member must belong to orgId (reuse the same util other member endpoints use)
-  //    → ForbiddenError if not a member.
+  // 1. load + validate the invoice (server-derived amount; ownership; org; unpaid). NO membership check.
+  const invoice = await new DuesInvoiceRepository(db).findOneById(invoiceId)
+  if (!invoice) throw new NotFoundError('Invoice not found')
+  if (invoice.personId !== personId) throw new ForbiddenError('Not your invoice')          // IDOR guard
+  if (invoice.organizationId !== orgId) throw new ForbiddenError('Invoice not in this organization')
+  if (!UNPAID.has(invoice.status)) return ctx.json({ error: 'This invoice is not payable.' }, 409)
 
-  // 2. load + validate the invoice (server-derived amount; ownership; org; unpaid)
-  //    const invoice = await invoiceRepo.<findById>(invoiceId)
-  //    if (!invoice) throw new NotFoundError('Invoice not found')
-  //    if (invoice.personId !== personId) throw new ForbiddenError('Not your invoice')  // IDOR guard
-  //    if (invoice.organizationId !== orgId) throw new ForbiddenError('Invoice not in this organization')
-  //    if (isPaid(invoice.status)) return ctx.json({ error: 'This invoice is already paid' }, 409)
+  const tokenRepo = new PaymentTokenRepository(db)
 
-  // 3. mint (mirror sendPaymentLink): generate token, create payment_token with createdByOfficer: null
-  //    const { raw, hash } = generatePaymentToken(secret)
-  //    const expiresAt = <same TTL helper sendPaymentLink uses>
-  //    await new PaymentTokenRepository(db).create({
-  //      tokenHash: hash, personId, organizationId: orgId, invoiceId,
-  //      amount: invoice.amount, currency: invoice.currency ?? 'PHP', expiresAt, createdByOfficer: null,
-  //    })
+  // 2. double-charge guard: at most one active token per invoice
+  const existing = await tokenRepo.findActiveForInvoice(invoiceId, personId)
+  if (existing) return ctx.json({ error: 'A payment is already in progress for this invoice.' }, 409)
 
-  // 4. return
-  //    return ctx.json({ token: raw, paymentUrl: `/pay/${raw}`, expiresAt }, 201)
+  // 3. mint (createdByOfficer: null; amount from invoice.totalAmount; short TTL)
+  const { raw, hash } = generatePaymentToken(secret)
+  const expiresAt = new Date(Date.now() + MEMBER_TOKEN_TTL_MS)
+  await tokenRepo.create({
+    tokenHash: hash, personId, organizationId: orgId, invoiceId,
+    amount: Number(invoice.totalAmount), currency: invoice.currency ?? 'PHP',
+    expiresAt, createdByOfficer: null,
+  })
+
+  return ctx.json({ token: raw, paymentUrl: `/pay/${raw}`, expiresAt }, 201)
 }
 ```
-Replace every placeholder with the real names read in Step 1. Keep the 5 security checks exactly. `amount` and `currency` come from the invoice, never the request.
+Use the real `generatePaymentToken`/secret exactly as `sendPaymentLink.ts` does. Keep every check.
 
 - [ ] **Step 4: Run the integration test — expect PASS.**
 
