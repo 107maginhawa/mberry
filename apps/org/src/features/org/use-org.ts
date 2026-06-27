@@ -61,9 +61,10 @@ export function useIsOfficer(orgId: string | null): { status: 'loading' | 'offic
     },
   })
   if (!orgId || q.isLoading) return { status: 'loading' }
-  // VERIFIED: OfficerRoleResponse = { data: { isOfficer: boolean; positions: [] } }.
-  // Read the boolean directly — `q.data.data` is always a non-null object, so a
-  // truthiness/array check would make the gate a no-op (always "officer").
-  const isOfficer = q.data?.data?.isOfficer === true
+  // Engine type/impl drift: the generated type says { data: { isOfficer, positions } }
+  // but the live handler returns { data: terms[] } (empty array = not an officer).
+  // Handle both: non-empty array OR isOfficer:true. (Engine FROZEN — cannot fix upstream.)
+  const d = q.data?.data as unknown
+  const isOfficer = Array.isArray(d) ? d.length > 0 : (d as { isOfficer?: boolean } | null | undefined)?.isOfficer === true
   return { status: isOfficer ? 'officer' : 'notOfficer' }
 }

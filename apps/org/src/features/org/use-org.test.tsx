@@ -51,14 +51,19 @@ describe('useSelectedOrg', () => {
 })
 
 describe('useIsOfficer', () => {
-  it('officer when isOfficer true', async () => {
-    ;(getMyOfficerRole as any).mockResolvedValue({ data: { data: { isOfficer: true, positions: [] } }, response: new Response('', { status: 200 }) })
+  it('officer when terms array non-empty (real runtime shape)', async () => {
+    ;(getMyOfficerRole as any).mockResolvedValue({ data: { data: [{ id: 'term1', status: 'active' }] }, response: new Response('', { status: 200 }) })
     const { result } = renderHook(() => useIsOfficer('o1'), { wrapper })
     await waitFor(() => expect(result.current.status).toBe('officer'))
   })
-  it('notOfficer when isOfficer false', async () => {
-    ;(getMyOfficerRole as any).mockResolvedValue({ data: { data: { isOfficer: false, positions: [] } }, response: new Response('', { status: 200 }) })
+  it('notOfficer when terms array empty (real runtime shape)', async () => {
+    ;(getMyOfficerRole as any).mockResolvedValue({ data: { data: [] }, response: new Response('', { status: 200 }) })
     const { result } = renderHook(() => useIsOfficer('o1'), { wrapper })
     await waitFor(() => expect(result.current.status).toBe('notOfficer'))
+  })
+  it('officer when object isOfficer:true (defensive/future typed shape)', async () => {
+    ;(getMyOfficerRole as any).mockResolvedValue({ data: { data: { isOfficer: true, positions: [] } }, response: new Response('', { status: 200 }) })
+    const { result } = renderHook(() => useIsOfficer('o1'), { wrapper })
+    await waitFor(() => expect(result.current.status).toBe('officer'))
   })
 })
