@@ -20,7 +20,8 @@ export function useImportRoster(orgId: string | null) {
         body: { organizationId: orgId, tierId, members },
       })
       if (!data) throw new Error(serverError(error) ?? 'Roster import failed.')
-      return data as ImportResult
+      // No cast: keep the typecheck as the drift tripwire if the SDK response shape ever changes.
+      return data
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['roster', orgId] })
