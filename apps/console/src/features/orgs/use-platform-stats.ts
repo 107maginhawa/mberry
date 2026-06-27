@@ -24,7 +24,7 @@ export function usePlatformStats(): { status: 'loading' | 'ready' | 'error'; has
         hasSnapshot: n > 0,
         totalMembers: rows.reduce((s, r) => s + r.totalMembers, 0),
         activeMembers: rows.reduce((s, r) => s + r.activeMembers, 0),
-        totalRevenueCents: rows.reduce((s, r) => s + r.totalRevenueCents, 0),
+        totalRevenueCents: rows.reduce((s, r) => s + Number(r.totalRevenueCents), 0),
         avgCollectionRate: n > 0 ? rows.reduce((s, r) => s + r.collectionRate, 0) / n : 0,
       }
     },

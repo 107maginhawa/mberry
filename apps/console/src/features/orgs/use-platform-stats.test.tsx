@@ -44,4 +44,25 @@ describe('usePlatformStats', () => {
     expect(result.current.stats.totalRevenueCents).toBe(0)
     expect(result.current.stats.avgCollectionRate).toBe(0)
   })
+
+  it('string totalRevenueCents: Number() wrapping prevents string-concat corruption', async () => {
+    // At runtime, bigint DB SUM can serialize as a string — simulate that drift here.
+    // Without Number(): 0 + '150000' + '50000' = '015000050000' (silent string concat)
+    // With Number():    0 + 150000  + 50000  = 200000 (correct numeric sum)
+    vi.mocked(getPlatformSummary).mockResolvedValue(
+      ok<GetPlatformSummaryResponse>({
+        data: [
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          { associationId: 'a1', chapterCount: 1, totalMembers: 10, activeMembers: 8, collectionRate: 50, creditCompliance: 0, totalRevenueCents: '150000' as any },
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          { associationId: 'a2', chapterCount: 2, totalMembers: 20, activeMembers: 15, collectionRate: 70, creditCompliance: 0, totalRevenueCents: '50000' as any },
+        ],
+        meta: { cursor: null, hasMore: false, total: 2 },
+      }),
+    )
+    const { result } = renderHook(() => usePlatformStats(), { wrapper })
+    await waitFor(() => expect(result.current.status).toBe('ready'))
+    // Must be numeric 200000, NOT the corrupted string '015000050000'
+    expect(result.current.stats.totalRevenueCents).toBe(200000)
+  })
 })

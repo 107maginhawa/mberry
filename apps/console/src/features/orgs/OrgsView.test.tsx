@@ -103,6 +103,34 @@ describe('OrgsView', () => {
     expect(container.innerHTML).not.toMatch(/NaN/)
   })
 
+  it('statsStatus=loading: skeleton shown for snapshot tiles, "No snapshot" text absent', () => {
+    render(
+      <OrgsView
+        orgs={[]} total={0} orgsStatus="ready"
+        associationsCount={0} stats={zeroStats} statsStatus="loading"
+        hasSnapshot={false} onCreate={vi.fn()}
+      />,
+    )
+    // Must show loading skeletons for the snapshot-derived tiles
+    expect(screen.getAllByTestId('skeleton').length).toBeGreaterThan(0)
+    // Must NOT show the confident-but-false "No snapshot" claim while loading
+    expect(screen.queryByText(/No snapshot/i)).toBeNull()
+  })
+
+  it('statsStatus=error: error note shown, "No snapshot" text absent', () => {
+    render(
+      <OrgsView
+        orgs={[]} total={0} orgsStatus="ready"
+        associationsCount={0} stats={zeroStats} statsStatus="error"
+        hasSnapshot={false} onCreate={vi.fn()}
+      />,
+    )
+    // Must show brief error note
+    expect(screen.getByText(/Stats unavailable/i)).toBeTruthy()
+    // Must NOT show "No snapshot" text during error
+    expect(screen.queryByText(/No snapshot/i)).toBeNull()
+  })
+
   it('no NaN in rendered output when hasSnapshot=false (I1 guard)', () => {
     const { container } = render(
       <OrgsView

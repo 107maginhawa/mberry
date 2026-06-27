@@ -42,7 +42,7 @@ export default function OrgsView({
   orgsStatus,
   associationsCount,
   stats,
-  statsStatus: _statsStatus,
+  statsStatus,
   hasSnapshot,
   onCreate,
 }: Props) {
@@ -61,8 +61,22 @@ export default function OrgsView({
         <StatTile label="Organizations" value={total} />
         <StatTile label="Associations" value={associationsCount ?? EMDASH} />
 
-        {/* Snapshot-derived tiles — I1: only show real values when hasSnapshot; else em-dash */}
-        {hasSnapshot ? (
+        {/* Snapshot-derived tiles — branch on statsStatus first (I1) */}
+        {statsStatus === 'loading' ? (
+          <>
+            <StatTile label="Members" value={<Skeleton className="h-7 w-16" />} />
+            <StatTile label="Active" value={<Skeleton className="h-7 w-16" />} />
+            <StatTile label="Revenue" value={<Skeleton className="h-7 w-20" />} />
+            <StatTile label="Avg collection" value={<Skeleton className="h-7 w-16" />} />
+          </>
+        ) : statsStatus === 'error' ? (
+          <>
+            <StatTile label="Members" value={EMDASH} />
+            <StatTile label="Active" value={EMDASH} />
+            <StatTile label="Revenue" value={EMDASH} />
+            <StatTile label="Avg collection" value={EMDASH} />
+          </>
+        ) : hasSnapshot ? (
           <>
             <StatTile label="Members" value={stats.totalMembers} />
             <StatTile label="Active" value={stats.activeMembers} />
@@ -85,8 +99,14 @@ export default function OrgsView({
         )}
       </div>
 
-      {/* Empty-state note when no snapshot yet (I1) */}
-      {!hasSnapshot && (
+      {/* Status notes below the strip */}
+      {statsStatus === 'error' && (
+        <p className="text-sm text-destructive" role="alert">
+          Stats unavailable
+        </p>
+      )}
+      {/* Empty-state note only when stats are ready but no snapshot yet (I1) */}
+      {statsStatus === 'ready' && !hasSnapshot && (
         <p className="text-sm text-muted-foreground" role="note">
           No snapshot for this month yet
         </p>
