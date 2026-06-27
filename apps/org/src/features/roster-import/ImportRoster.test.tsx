@@ -38,7 +38,7 @@ describe('ImportRosterView', () => {
         parsed={{ rows: [{ email: 'a@x.ph', firstName: 'A' }], stats: { total: 1, missingIdentifier: 0, missingName: 0 } }}
       />,
     )
-    expect(screen.getAllByText(/1 member/i).length).toBeGreaterThan(0)
+    expect(screen.getByText(/1 member.*found/i)).toBeInTheDocument()
     expect(screen.getByRole('button', { name: /import 1 member/i })).toBeEnabled()
   })
 
@@ -53,6 +53,7 @@ describe('ImportRosterView', () => {
     )
     expect(screen.getByRole('button', { name: /import/i })).toBeDisabled()
     expect(screen.getByText(/500/)).toBeInTheDocument()
+    expect(screen.getByRole('alert')).toBeInTheDocument()
   })
 
   it('renders a file error with role=alert', () => {
