@@ -18,6 +18,12 @@ describe('parseCsv', () => {
   it('keeps a trailing field with no terminating newline', () => {
     expect(parseCsv('a,b')).toEqual([['a', 'b']])
   })
+  it('ignores a trailing newline', () => {
+    expect(parseCsv('a,b\n')).toEqual([['a', 'b']])
+  })
+  it('strips a leading UTF-8 BOM', () => {
+    expect(parseCsv('﻿email\na@x.ph')).toEqual([['email'], ['a@x.ph']])
+  })
 })
 
 describe('mapRows', () => {

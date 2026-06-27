@@ -3,6 +3,7 @@ import type { ImportMemberRow } from '@monobase/sdk-ts/generated'
 
 /** Minimal RFC-4180 parser — ported from the engine's invite/bulkImportMembers.ts. */
 export function parseCsv(content: string): string[][] {
+  if (content.charCodeAt(0) === 0xfeff) content = content.slice(1)
   const rows: string[][] = []
   let field = ''
   let row: string[] = []

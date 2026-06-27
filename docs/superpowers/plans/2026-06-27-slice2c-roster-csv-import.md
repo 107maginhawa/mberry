@@ -126,7 +126,7 @@ describe('summarizeRows', () => {
 
 - [ ] **Step 2: Run test to verify it fails**
 
-Run: `cd apps/org && ../../node_modules/.bin/vitest run src/features/roster-import/csv.test.ts`
+Run: `cd apps/org && bun run test csv.test.ts`
 Expected: FAIL — `csv.ts` does not exist.
 
 - [ ] **Step 3: Write minimal implementation**
@@ -211,7 +211,7 @@ export function summarizeRows(rows: ImportMemberRow[]): {
 
 - [ ] **Step 4: Run test to verify it passes**
 
-Run: `cd apps/org && ../../node_modules/.bin/vitest run src/features/roster-import/csv.test.ts`
+Run: `cd apps/org && bun run test csv.test.ts`
 Expected: PASS (all 10 tests). Then `cd apps/org && bun run typecheck` → 0 errors.
 
 - [ ] **Step 5: Commit**
@@ -306,7 +306,7 @@ describe('useImportRoster', () => {
 
 - [ ] **Step 2: Run test to verify it fails**
 
-Run: `cd apps/org && ../../node_modules/.bin/vitest run src/features/roster-import/use-import-roster.test.tsx`
+Run: `cd apps/org && bun run test use-import-roster.test.tsx`
 Expected: FAIL — `use-import-roster.ts` does not exist.
 
 - [ ] **Step 3: Write minimal implementation**
@@ -372,7 +372,7 @@ export function useTiers(orgId: string | null): { tiers: Tier[]; loading: boolea
 
 - [ ] **Step 4: Run tests to verify they pass**
 
-Run: `cd apps/org && ../../node_modules/.bin/vitest run src/features/roster-import/use-import-roster.test.tsx` → 4 PASS.
+Run: `cd apps/org && bun run test use-import-roster.test.tsx` → 4 PASS.
 Run: `cd apps/org && bun run typecheck` → 0 errors (incl. test files).
 
 Note: if `ImportResult` is not exported from the SDK, reference the response type the SDK actually exports (`ImportRosterMembersResponse`) — read `packages/sdk-ts/src/generated/types.gen.ts` and use the exact exported name; the flat shape `{imported,skipped,failed,errors}` is the contract either way.
@@ -524,7 +524,7 @@ describe('ImportRosterView', () => {
 
 - [ ] **Step 2: Run test to verify it fails**
 
-Run: `cd apps/org && ../../node_modules/.bin/vitest run src/features/roster-import/ImportRoster.test.tsx`
+Run: `cd apps/org && bun run test ImportRoster.test.tsx`
 Expected: FAIL — `ImportRoster.tsx` does not exist.
 
 - [ ] **Step 3: Write minimal implementation**
@@ -738,7 +738,7 @@ export default function ImportRoster() {
 
 - [ ] **Step 4: Run test to verify it passes**
 
-Run: `cd apps/org && ../../node_modules/.bin/vitest run src/features/roster-import/ImportRoster.test.tsx` → 8 PASS.
+Run: `cd apps/org && bun run test ImportRoster.test.tsx` → 8 PASS.
 Run: `cd apps/org && bun run typecheck` → 0 errors.
 
 If `text-amber-700`/`text-red-700` are not in the preset, use the DESIGN.md token classes the slice-2b dues view uses for warn/error (check `apps/org/src/features/dues/`); match existing convention rather than introducing raw colors.
