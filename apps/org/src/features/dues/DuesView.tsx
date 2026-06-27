@@ -1,3 +1,4 @@
+import { Link } from '@tanstack/react-router'
 import {
   Card,
   CardContent,
@@ -6,6 +7,7 @@ import {
   StatusBadge,
   type StatusBadgeVariant,
   EmptyState,
+  ErrorState,
   centavosToPhp,
 } from '@monobase/ui'
 import { useDuesDashboard, useRecentPayments, useOutstandingInvoices, type DuesStats } from './use-dues'
@@ -48,21 +50,23 @@ export interface DuesViewProps {
   stats: DuesStats
   payments: Payment[]
   invoices: Invoice[]
+  paymentsError?: boolean
+  invoicesError?: boolean
 }
 
 // ─── Presentational ──────────────────────────────────────────────────────────
 
-export function DuesView({ stats, payments, invoices }: DuesViewProps) {
+export function DuesView({ stats, payments, invoices, paymentsError, invoicesError }: DuesViewProps) {
   return (
     <div className="flex flex-col gap-6 p-4">
       {/* Minimal nav */}
       <div className="flex items-center gap-4">
-        <a
-          href="/"
+        <Link
+          to="/"
           className="text-sm font-medium text-plum-500 hover:text-plum-700"
         >
           ← Roster
-        </a>
+        </Link>
         <h1 className="text-title font-semibold text-foreground">Dues</h1>
       </div>
 
@@ -111,7 +115,9 @@ export function DuesView({ stats, payments, invoices }: DuesViewProps) {
       {/* Recent payments */}
       <section aria-label="Recent payments">
         <h2 className="text-section font-semibold mb-3">Recent payments</h2>
-        {payments.length === 0 ? (
+        {paymentsError ? (
+          <ErrorState message="Could not load payments. Please refresh." />
+        ) : payments.length === 0 ? (
           <EmptyState
             headline="No payments yet"
             description="Payments will appear here once members pay their dues."
@@ -132,7 +138,12 @@ export function DuesView({ stats, payments, invoices }: DuesViewProps) {
       </section>
 
       {/* Outstanding invoices */}
-      {invoices.length > 0 && (
+      {invoicesError ? (
+        <section aria-label="Outstanding invoices">
+          <h2 className="text-section font-semibold mb-3">Outstanding invoices</h2>
+          <ErrorState message="Could not load invoices. Please refresh." />
+        </section>
+      ) : invoices.length > 0 ? (
         <section aria-label="Outstanding invoices">
           <h2 className="text-section font-semibold mb-3">Outstanding invoices</h2>
           <ul className="flex flex-col gap-2">
@@ -152,7 +163,7 @@ export function DuesView({ stats, payments, invoices }: DuesViewProps) {
             ))}
           </ul>
         </section>
-      )}
+      ) : null}
     </div>
   )
 }
@@ -162,8 +173,8 @@ export function DuesView({ stats, payments, invoices }: DuesViewProps) {
 export function Dues() {
   const { orgId } = useSelectedOrg()
   const { data: stats, isLoading: statsLoading } = useDuesDashboard(orgId)
-  const { data: payments = [], isLoading: paymentsLoading } = useRecentPayments(orgId)
-  const { data: invoices = [], isLoading: invoicesLoading } = useOutstandingInvoices(orgId)
+  const { data: payments = [], isLoading: paymentsLoading, isError: paymentsError } = useRecentPayments(orgId)
+  const { data: invoices = [], isLoading: invoicesLoading, isError: invoicesError } = useOutstandingInvoices(orgId)
 
   if (statsLoading || paymentsLoading || invoicesLoading) {
     return (
@@ -179,9 +190,9 @@ export function Dues() {
     return (
       <div className="min-h-screen bg-[var(--color-bg)]">
         <div className="max-w-lg mx-auto pt-4 p-4">
-          <a href="/" className="text-sm font-medium text-plum-500 hover:text-plum-700">
+          <Link to="/" className="text-sm font-medium text-plum-500 hover:text-plum-700">
             ← Roster
-          </a>
+          </Link>
           <p className="mt-4 text-body text-muted-foreground">Could not load dues data.</p>
         </div>
       </div>
@@ -191,7 +202,13 @@ export function Dues() {
   return (
     <div className="min-h-screen bg-[var(--color-bg)]">
       <div className="max-w-lg mx-auto pt-4">
-        <DuesView stats={stats} payments={payments} invoices={invoices} />
+        <DuesView
+          stats={stats}
+          payments={payments}
+          invoices={invoices}
+          paymentsError={paymentsError}
+          invoicesError={invoicesError}
+        />
       </div>
     </div>
   )

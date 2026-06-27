@@ -1,3 +1,4 @@
+import { Link } from '@tanstack/react-router'
 import { EmptyState, StatusBadge } from '@monobase/ui'
 import { useIsOfficer, useOrgs, useSelectedOrg } from '../org/use-org'
 import { OrgPicker } from '../org/OrgPicker'
@@ -95,12 +96,12 @@ export default function Roster() {
     <div className="min-h-screen bg-[var(--color-bg)]">
       <div className="max-w-lg mx-auto pt-4">
         <div className="px-4 pb-2 flex justify-end">
-          <a
-            href="/dues"
+          <Link
+            to="/dues"
             className="text-sm font-medium text-plum-500 hover:text-plum-700"
           >
             Dues →
-          </a>
+          </Link>
         </div>
         {orgs.length > 1 && (
           <div className="px-4 pb-2">
