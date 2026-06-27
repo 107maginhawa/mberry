@@ -15,7 +15,9 @@
 - Dev port **3005** (member uses 3004).
 - SDK client import: `@monobase/sdk-ts/generated/client.gen` (the `client`); endpoint fns from `@monobase/sdk-ts/generated`. NO root export.
 - SDK does NOT throw on non-2xx; returns `data: undefined` on transport error. Every queryFn/mutationFn reads `response.status` and throws/branches explicitly.
-- SDK transforms money `amount` → **bigint** at runtime — coerce `Number(...)` at every math/format boundary.
+- SDK transforms money `amount` → **bigint** at runtime — coerce `Number(...)` at every math/format/**display** boundary AND, the reverse, `BigInt(...)` at every **request-body** boundary (e.g. `sendPaymentLink` body `amount` is typed `bigint?` — passing a `number` is a typecheck error). UI state keeps `number`; convert only at the SDK seam.
+- **Org scoping (x-org-id):** the `/association/member/dues-*` list endpoints (`listDuesInvoices`, `listDuesPayments`) read org context from the **`x-org-id` request header** (engine `org-context.ts`), NOT from a query param — a call with no header 403s. `configureApiClient` (Task 2) injects `x-org-id` from `localStorage['org.selectedOrgId']` on every request, so these calls work by default. `getDuesDashboard` is path-scoped (`{path:{organizationId}}`) and needs no header.
+- **Test mocking (MANDATORY pattern):** mock the SDK with a hoisted module factory, mirroring the shipped `apps/member/src/features/pay/use-pay-link.test.tsx`. Do NOT use `vi.spyOn(sdk, 'fn')` on generated ESM named exports — it is unreliable here (the generated package resolves to source TS). Pattern: at the top of each test file `vi.mock('@monobase/sdk-ts/generated', () => ({ fnA: vi.fn(), fnB: vi.fn() }))`, then `import { fnA } from '@monobase/sdk-ts/generated'`, then in each test `(fnA as any).mockResolvedValue(...)`. Where the test code blocks below show `vi.spyOn(sdk, 'fn').mockResolvedValue(x)`, convert it to this factory form (`(fn as any).mockResolvedValue(x)`). (Spying on `client.interceptors.request.use` in `api.test.ts` is fine — that is an object method, not an ESM binding.)
 - NO `@monobase/vitest-test-shim`. Real vitest + RTL + jsdom; `test-setup.ts` imports `@testing-library/jest-dom`.
 - vitest `include:['src/**/*.test.ts','src/**/*.test.tsx']` so `.spec` E2E files are excluded.
 - `test:e2e` uses portable `../../node_modules/.bin/playwright test`. Playwright pinned `1.58.2`.
@@ -213,6 +215,13 @@ describe('configureApiClient CSRF interceptor', () => {
     await interceptor(makeReq('POST', 'http://localhost/api/org/o1/payments/t1/revoke'))
     expect(fetchMock).toHaveBeenCalledTimes(1)
   })
+
+  it('injects x-org-id from localStorage on a dues GET', async () => {
+    localStorage.setItem('org.selectedOrgId', 'o9')
+    const out = await interceptor(makeReq('GET', 'http://localhost/api/association/member/dues-payments'))
+    expect(out.headers.get('x-org-id')).toBe('o9')
+    localStorage.removeItem('org.selectedOrgId')
+  })
 })
 ```
 
@@ -271,6 +280,10 @@ export function configureApiClient(baseUrl = `${window.location.origin}/api`): v
 
   client.interceptors.request.use(async (request: Request) => {
     const { pathname } = new URL(request.url)
+    // Org-scoped read endpoints (dues-*) gate on the x-org-id header (org-context.ts).
+    // Inject the selected org by default so callers don't each thread it.
+    const orgId = localStorage.getItem('org.selectedOrgId')
+    if (orgId && !request.headers.has('x-org-id')) request.headers.set('x-org-id', orgId)
     if (needsCsrf(request.method, pathname)) {
       request.headers.set('x-csrf-token', await getCsrfToken(baseUrl))
     }
@@ -394,7 +407,8 @@ Expected: PASS (2).
 import { describe, it, expect, vi } from 'vitest'
 import { renderHook, waitFor } from '@testing-library/react'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
-import * as sdk from '@monobase/sdk-ts/generated'
+vi.mock('@monobase/sdk-ts/generated', () => ({ getMyMemberships: vi.fn() }))
+import { getMyMemberships } from '@monobase/sdk-ts/generated'
 import { useSession } from './use-session'
 
 function wrapper({ children }: { children: React.ReactNode }) {
@@ -404,13 +418,13 @@ function wrapper({ children }: { children: React.ReactNode }) {
 
 describe('useSession', () => {
   it('authed when memberships resolve', async () => {
-    vi.spyOn(sdk, 'getMyMemberships').mockResolvedValue({ data: { data: [], total: 0 }, response: new Response('', { status: 200 }) } as any)
+    (getMyMemberships as any).mockResolvedValue({ data: { data: [], total: 0 }, response: new Response('', { status: 200 }) } as any)
     const { result } = renderHook(() => useSession(), { wrapper })
     await waitFor(() => expect(result.current.status).toBe('authed'))
   })
 
   it('unauthed on 401', async () => {
-    vi.spyOn(sdk, 'getMyMemberships').mockResolvedValue({ data: undefined, response: new Response('', { status: 401 }) } as any)
+    (getMyMemberships as any).mockResolvedValue({ data: undefined, response: new Response('', { status: 401 }) } as any)
     const { result } = renderHook(() => useSession(), { wrapper })
     await waitFor(() => expect(result.current.status).toBe('unauthed'))
   })
@@ -521,10 +535,12 @@ function RootGate() {
     if (status === 'unauthed' && pathname !== '/sign-in') navigate({ to: '/sign-in' })
   }, [status, pathname, navigate])
 
-  if (status === 'loading') {
-    return <div role="status" aria-label="Loading" className="min-h-screen flex items-center justify-center">…</div>
-  }
-  return <Outlet />
+  // Only render the route tree when authed, or when on the public sign-in page.
+  // Otherwise show the spinner — never render a protected route (and fire its
+  // 401/403 queries) for an unauthed user even for a single frame before the
+  // redirect effect lands.
+  if (status === 'authed' || pathname === '/sign-in') return <Outlet />
+  return <div role="status" aria-label="Loading" className="min-h-screen flex items-center justify-center">…</div>
 }
 ```
 
@@ -561,8 +577,9 @@ git commit -m "feat(org): officer sign-in + session probe + route guard"
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { renderHook, waitFor, act } from '@testing-library/react'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
-import * as sdk from '@monobase/sdk-ts/generated'
-import { useOrgs, useSelectedOrg } from './use-org'
+vi.mock('@monobase/sdk-ts/generated', () => ({ getMyMemberships: vi.fn(), getMyOfficerRole: vi.fn() }))
+import { getMyMemberships, getMyOfficerRole } from '@monobase/sdk-ts/generated'
+import { useOrgs, useSelectedOrg, useIsOfficer } from './use-org'
 
 function wrapper({ children }: { children: React.ReactNode }) {
   const qc = new QueryClient({ defaultOptions: { queries: { retry: false } } })
@@ -573,7 +590,7 @@ beforeEach(() => localStorage.clear())
 
 describe('useOrgs', () => {
   it('dedupes memberships into distinct orgs', async () => {
-    vi.spyOn(sdk, 'getMyMemberships').mockResolvedValue({
+    (getMyMemberships as any).mockResolvedValue({
       data: { data: [
         { organizationId: 'o1', orgName: 'Chapter A' },
         { organizationId: 'o1', orgName: 'Chapter A' },
@@ -586,7 +603,7 @@ describe('useOrgs', () => {
   })
 
   it('empty when no memberships', async () => {
-    vi.spyOn(sdk, 'getMyMemberships').mockResolvedValue({ data: { data: [], total: 0 }, response: new Response('', { status: 200 }) } as any)
+    (getMyMemberships as any).mockResolvedValue({ data: { data: [], total: 0 }, response: new Response('', { status: 200 }) } as any)
     const { result } = renderHook(() => useOrgs(), { wrapper })
     await waitFor(() => expect(result.current.status).toBe('empty'))
   })
@@ -594,13 +611,13 @@ describe('useOrgs', () => {
 
 describe('useSelectedOrg', () => {
   it('auto-selects the only org', async () => {
-    vi.spyOn(sdk, 'getMyMemberships').mockResolvedValue({ data: { data: [{ organizationId: 'o1', orgName: 'A' }], total: 1 }, response: new Response('', { status: 200 }) } as any)
+    (getMyMemberships as any).mockResolvedValue({ data: { data: [{ organizationId: 'o1', orgName: 'A' }], total: 1 }, response: new Response('', { status: 200 }) } as any)
     const { result } = renderHook(() => useSelectedOrg(), { wrapper })
     await waitFor(() => expect(result.current.orgId).toBe('o1'))
   })
 
   it('persists an explicit selection', async () => {
-    vi.spyOn(sdk, 'getMyMemberships').mockResolvedValue({ data: { data: [{ organizationId: 'o1', orgName: 'A' }, { organizationId: 'o2', orgName: 'B' }], total: 2 }, response: new Response('', { status: 200 }) } as any)
+    (getMyMemberships as any).mockResolvedValue({ data: { data: [{ organizationId: 'o1', orgName: 'A' }, { organizationId: 'o2', orgName: 'B' }], total: 2 }, response: new Response('', { status: 200 }) } as any)
     const { result } = renderHook(() => useSelectedOrg(), { wrapper })
     await waitFor(() => expect(result.current.orgId).toBeNull()) // >1 org, no auto-select
     act(() => result.current.setOrgId('o2'))
@@ -608,7 +625,22 @@ describe('useSelectedOrg', () => {
     expect(localStorage.getItem('org.selectedOrgId')).toBe('o2')
   })
 })
+
+describe('useIsOfficer', () => {
+  it('officer when isOfficer true', async () => {
+    ;(getMyOfficerRole as any).mockResolvedValue({ data: { data: { isOfficer: true, positions: [] } }, response: new Response('', { status: 200 }) })
+    const { result } = renderHook(() => useIsOfficer('o1'), { wrapper })
+    await waitFor(() => expect(result.current.status).toBe('officer'))
+  })
+  it('notOfficer when isOfficer false', async () => {
+    ;(getMyOfficerRole as any).mockResolvedValue({ data: { data: { isOfficer: false, positions: [] } }, response: new Response('', { status: 200 }) })
+    const { result } = renderHook(() => useIsOfficer('o1'), { wrapper })
+    await waitFor(() => expect(result.current.status).toBe('notOfficer'))
+  })
+})
 ```
+
+(Note: where any `(fn as any).mockResolvedValue(` line is the first statement in a block, the leading `(` is safe; in this file the lines that needed a leading semicolon already have one — keep ASI-safe.)
 
 - [ ] **Step 2: Run to verify it fails.** Run: `cd apps/org && bun run test src/features/org/use-org.test.tsx` → FAIL.
 
@@ -668,21 +700,20 @@ export function useIsOfficer(orgId: string | null): { status: 'loading' | 'offic
     enabled: !!orgId,
     retry: false,
     queryFn: async () => {
-      const { data } = await getMyOfficerRole({ path: { orgId: orgId! } })
+      // VERIFIED: path key is `organizationId`, url /persons/me/officer-role/{organizationId}.
+      const { data } = await getMyOfficerRole({ path: { organizationId: orgId! } })
       if (!data) throw new Error('officer-role failed')
       return data
     },
   })
   if (!orgId || q.isLoading) return { status: 'loading' }
-  // getMyOfficerRole returns the user's active officer terms for the org;
-  // a non-empty result means they hold an active term.
-  const terms = (q.data as any)?.data ?? q.data
-  const isOfficer = Array.isArray(terms) ? terms.length > 0 : !!terms
+  // VERIFIED: OfficerRoleResponse = { data: { isOfficer: boolean; positions: [] } }.
+  // Read the boolean directly — `q.data.data` is always a non-null object, so a
+  // truthiness/array check would make the gate a no-op (always "officer").
+  const isOfficer = q.data?.data?.isOfficer === true
   return { status: isOfficer ? 'officer' : 'notOfficer' }
 }
 ```
-
-NOTE for implementer: verify `getMyOfficerRole`'s exact param shape (`{ path: { orgId } }` vs `{ path: { organizationId } }`) and its response shape against `packages/sdk-ts/src/generated/sdk.gen.ts` + `types.gen.ts`; adjust the `terms` extraction accordingly. Keep the "non-empty ⇒ officer" semantics.
 
 - [ ] **Step 4: Run to verify it passes.** Expected: PASS (4).
 
@@ -715,7 +746,8 @@ git commit -m "feat(org): org context — membership orgs, selection, officer ga
 import { describe, it, expect, vi } from 'vitest'
 import { renderHook, waitFor } from '@testing-library/react'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
-import * as sdk from '@monobase/sdk-ts/generated'
+vi.mock('@monobase/sdk-ts/generated', () => ({ listOrgMembers: vi.fn() }))
+import { listOrgMembers } from '@monobase/sdk-ts/generated'
 import { useRoster } from './use-roster'
 
 function wrapper({ children }: { children: React.ReactNode }) {
@@ -725,7 +757,7 @@ function wrapper({ children }: { children: React.ReactNode }) {
 
 describe('useRoster', () => {
   it('maps members with composed name', async () => {
-    vi.spyOn(sdk, 'listOrgMembers').mockResolvedValue({
+    ;(listOrgMembers as any).mockResolvedValue({
       data: { data: [{ id: 'm1', personId: 'p1', firstName: 'Olive', lastName: 'Cruz', status: 'active', memberNumber: 'A-1' }] },
       response: new Response('', { status: 200 }),
     } as any)
@@ -832,7 +864,7 @@ git commit -m "feat(org): roster screen — list members + send-link entry"
 **Files:**
 - Create: `packages/ui/src/money.ts` (shared `centavosToPhp`) + export from `packages/ui` index
 - Create: `apps/org/src/features/paylink/use-send-link.ts`, `apps/org/src/features/paylink/SendLink.tsx`, `apps/org/src/routes/members/$membershipId/send.tsx`
-- Test: `packages/ui/src/money.test.ts`, `apps/org/src/features/paylink/use-send-link.test.tsx`, `apps/org/src/features/paylink/SendLink.test.tsx`
+- Test: `apps/org/src/features/paylink/money.test.ts` (tests the shared util via `@monobase/ui`), `apps/org/src/features/paylink/use-send-link.test.tsx`, `apps/org/src/features/paylink/SendLink.test.tsx`
 
 **Interfaces:**
 - Consumes: `sendPaymentLink`, `revokePaymentLink`, `listDuesInvoices` from `@monobase/sdk-ts/generated`; `centavosToPhp` from `@monobase/ui`.
@@ -841,11 +873,11 @@ git commit -m "feat(org): roster screen — list members + send-link entry"
   - `useSendLink(orgId, personId)`: `{ mint(args: { amount: number; invoiceId?: string }): void; revoke(): void; state: SendState }` where
     `SendState = { kind: 'idle' } | { kind: 'minting' } | { kind: 'sent'; url: string; tokenId: string; expiresAt: string } | { kind: 'error'; message: string } | { kind: 'revoked' }`.
 
-- [ ] **Step 1: Shared money util — write failing test.** `packages/ui/src/money.test.ts`:
+- [ ] **Step 1: Shared money util — write failing test IN apps/org** (NOT in packages/ui — that package has no test runner and no CI test job, so a test there is never executed = false coverage; and a `*.test.ts` under `packages/ui/src` would be compiled by the ui `tsc --noEmit` job and need a vitest devDep just to typecheck). Put it where the `org` CI job runs it: `apps/org/src/features/paylink/money.test.ts`:
 
 ```ts
 import { describe, it, expect } from 'vitest'
-import { centavosToPhp } from './money'
+import { centavosToPhp } from '@monobase/ui'
 
 describe('centavosToPhp', () => {
   it('formats centavos as PHP', () => {
@@ -856,9 +888,7 @@ describe('centavosToPhp', () => {
 })
 ```
 
-NOTE: `packages/ui` currently has no vitest suite. Add `vitest` + a `test` script to `packages/ui/package.json` if absent (`"test": "vitest run"`, devDep `vitest`), and a minimal `vitest.config.ts` (`environment: 'node'`). Check first: `cat packages/ui/package.json`. If adding a runner is heavier than warranted, instead co-locate this test in apps/org importing from `@monobase/ui` — but prefer the util's own package test.
-
-- [ ] **Step 2: Run → FAIL.** Run: `cd packages/ui && bun run test src/money.test.ts` (or the apps/org fallback).
+- [ ] **Step 2: Run → FAIL.** Run: `cd apps/org && bun run test src/features/paylink/money.test.ts` (FAIL — `centavosToPhp` not yet exported from `@monobase/ui`).
 
 - [ ] **Step 3: Implement `packages/ui/src/money.ts`** (lifted from `apps/member/src/features/pay/money.ts`):
 
@@ -878,7 +908,8 @@ Export it from `packages/ui`'s entry (add `export * from './money'` or `export {
 import { describe, it, expect, vi } from 'vitest'
 import { renderHook, waitFor, act } from '@testing-library/react'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
-import * as sdk from '@monobase/sdk-ts/generated'
+vi.mock('@monobase/sdk-ts/generated', () => ({ sendPaymentLink: vi.fn(), revokePaymentLink: vi.fn() }))
+import { sendPaymentLink, revokePaymentLink } from '@monobase/sdk-ts/generated'
 import { useSendLink } from './use-send-link'
 
 function wrapper({ children }: { children: React.ReactNode }) {
@@ -887,25 +918,26 @@ function wrapper({ children }: { children: React.ReactNode }) {
 }
 
 describe('useSendLink', () => {
-  it('mint success → sent state with absolute url + tokenId', async () => {
-    vi.spyOn(sdk, 'sendPaymentLink').mockResolvedValue({
+  it('mint success → sent state, with amount coerced to bigint at the request boundary', async () => {
+    ;(sendPaymentLink as any).mockResolvedValue({
       data: { token: 'TOK', paymentUrl: '/pay/TOK', expiresAt: '2026-09-01T00:00:00Z' },
       response: new Response('', { status: 201 }),
-    } as any)
+    })
     const { result } = renderHook(() => useSendLink('o1', 'p1'), { wrapper })
     act(() => result.current.mint({ amount: 250000, invoiceId: 'inv1' }))
     await waitFor(() => expect(result.current.state.kind).toBe('sent'))
     const s = result.current.state as Extract<typeof result.current.state, { kind: 'sent' }>
     expect(s.tokenId).toBe('TOK')
     expect(s.url).toMatch(/\/pay\/TOK$/)
-    expect(sdk.sendPaymentLink).toHaveBeenCalledWith(expect.objectContaining({
+    // amount MUST be bigint (SendPaymentLinkRequest.amount is bigint?) — a number would not typecheck.
+    expect(sendPaymentLink).toHaveBeenCalledWith(expect.objectContaining({
       path: { organizationId: 'o1' },
-      body: { personId: 'p1', amount: 250000, invoiceId: 'inv1' },
+      body: { personId: 'p1', amount: 250000n, invoiceId: 'inv1' },
     }))
   })
 
   it('mint 400 → error state', async () => {
-    vi.spyOn(sdk, 'sendPaymentLink').mockResolvedValue({ data: undefined, response: new Response(JSON.stringify({ error: 'Gateway not configured' }), { status: 400 }) } as any)
+    ;(sendPaymentLink as any).mockResolvedValue({ data: undefined, response: new Response(JSON.stringify({ error: 'Gateway not configured' }), { status: 400 }) })
     const { result } = renderHook(() => useSendLink('o1', 'p1'), { wrapper })
     act(() => result.current.mint({ amount: 1000 }))
     await waitFor(() => expect(result.current.state.kind).toBe('error'))
@@ -913,23 +945,23 @@ describe('useSendLink', () => {
 
   it('double-mint is guarded (one call while pending)', async () => {
     let resolve!: (v: unknown) => void
-    vi.spyOn(sdk, 'sendPaymentLink').mockReturnValue(new Promise((r) => { resolve = r }) as any)
+    ;(sendPaymentLink as any).mockReturnValue(new Promise((r) => { resolve = r }))
     const { result } = renderHook(() => useSendLink('o1', 'p1'), { wrapper })
     act(() => { result.current.mint({ amount: 1000 }); result.current.mint({ amount: 1000 }) })
     await waitFor(() => expect(result.current.state.kind).toBe('minting'))
-    expect(sdk.sendPaymentLink).toHaveBeenCalledTimes(1)
+    expect(sendPaymentLink).toHaveBeenCalledTimes(1)
     resolve({ data: { token: 'T', paymentUrl: '/pay/T', expiresAt: 'x' }, response: new Response('', { status: 201 }) })
   })
 
   it('revoke success → revoked state', async () => {
-    vi.spyOn(sdk, 'sendPaymentLink').mockResolvedValue({ data: { token: 'T', paymentUrl: '/pay/T', expiresAt: 'x' }, response: new Response('', { status: 201 }) } as any)
-    vi.spyOn(sdk, 'revokePaymentLink').mockResolvedValue({ data: { revoked: true }, response: new Response('', { status: 200 }) } as any)
+    ;(sendPaymentLink as any).mockResolvedValue({ data: { token: 'T', paymentUrl: '/pay/T', expiresAt: 'x' }, response: new Response('', { status: 201 }) })
+    ;(revokePaymentLink as any).mockResolvedValue({ data: { revoked: true }, response: new Response('', { status: 200 }) })
     const { result } = renderHook(() => useSendLink('o1', 'p1'), { wrapper })
     act(() => result.current.mint({ amount: 1000 }))
     await waitFor(() => expect(result.current.state.kind).toBe('sent'))
     act(() => result.current.revoke())
     await waitFor(() => expect(result.current.state.kind).toBe('revoked'))
-    expect(sdk.revokePaymentLink).toHaveBeenCalledWith(expect.objectContaining({ path: { organizationId: 'o1', tokenId: 'T' } }))
+    expect(revokePaymentLink).toHaveBeenCalledWith(expect.objectContaining({ path: { organizationId: 'o1', tokenId: 'T' } }))
   })
 })
 ```
@@ -961,7 +993,8 @@ export function useSendLink(orgId: string, personId: string): {
     mutationFn: async ({ amount, invoiceId }) => {
       const { data, response } = await sendPaymentLink({
         path: { organizationId: orgId },
-        body: { personId, amount, ...(invoiceId ? { invoiceId } : {}) },
+        // SendPaymentLinkRequest.amount is typed `bigint?` — coerce at the SDK seam.
+        body: { personId, amount: BigInt(amount), ...(invoiceId ? { invoiceId } : {}) },
       })
       if (response.status === 201 && data) {
         return { kind: 'sent', url: `${window.location.origin}${data.paymentUrl}`, tokenId: data.token, expiresAt: data.expiresAt }
@@ -1066,7 +1099,8 @@ git commit -m "feat(org): send pay-link screen + shared centavosToPhp + revoke"
 import { describe, it, expect, vi } from 'vitest'
 import { renderHook, waitFor } from '@testing-library/react'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
-import * as sdk from '@monobase/sdk-ts/generated'
+vi.mock('@monobase/sdk-ts/generated', () => ({ getDuesDashboard: vi.fn(), listDuesPayments: vi.fn(), listDuesInvoices: vi.fn() }))
+import { getDuesDashboard } from '@monobase/sdk-ts/generated'
 import { useDuesDashboard } from './use-dues'
 
 function wrapper({ children }: { children: React.ReactNode }) {
@@ -1075,7 +1109,7 @@ function wrapper({ children }: { children: React.ReactNode }) {
 }
 
 it('coerces bigint money fields to number', async () => {
-  vi.spyOn(sdk, 'getDuesDashboard').mockResolvedValue({
+  ;(getDuesDashboard as any).mockResolvedValue({
     data: { data: { totalCollected: 250000n, totalOutstanding: 500000n, paidCount: 1, unpaidCount: 2, overdueCount: 0, collectionRate: 33, memberCount: 3 } },
     response: new Response('', { status: 200 }),
   } as any)
@@ -1142,7 +1176,7 @@ export function useOutstandingInvoices(orgId: string | null) {
 }
 ```
 
-Verify param shapes (`getDuesDashboard` path key; `listDuesPayments`/`listDuesInvoices` query keys + valid `status` enum values) against `sdk.gen.ts`/`types.gen.ts`. The dashboard route is org-scoped by path param; payments/invoices are org-scoped by session context (x-org-id) — if the engine needs an explicit org header, set it via the SDK call's `headers: { 'x-org-id': orgId }`.
+**Org scoping (C3 — VERIFIED):** `listDuesPayments`/`listDuesInvoices` gate on the `x-org-id` request header (engine `org-context.ts` reads `x-org-id` header or `orgId` query param — NOT the `organizationId` query key). The Task-2 `configureApiClient` interceptor injects `x-org-id` from `localStorage['org.selectedOrgId']` on every request, so these hooks need no per-call header and work at runtime. `getDuesDashboard` is path-scoped (`{path:{organizationId}}`) and needs no header. (Belt-and-suspenders alternative if the central interceptor is ever removed: pass `headers: { 'x-org-id': orgId! }` explicitly on each call.) Verify the `listDuesPayments`/`listDuesInvoices` query keys + valid `status` enum values against `types.gen.ts` (`DuesInvoiceStatus` includes `'sent'`).
 
 - [ ] **Step 4: Run → PASS.**
 
@@ -1201,7 +1235,7 @@ test('officer signs in, sends a pay-link', async ({ page }) => {
   await page.route('**/csrf-token', (r) => r.fulfill({ json: { token: 't' } }))
   await page.route('**/auth/sign-in/email', (r) => r.fulfill({ status: 200, json: {} }))
   await page.route('**/persons/me/memberships', (r) => r.fulfill({ json: { data: [{ organizationId: 'o1', orgName: 'Chapter A' }], total: 1 } }))
-  await page.route('**/officer-role/**', (r) => r.fulfill({ json: { data: [{ id: 'term1', status: 'active' }] } }))
+  await page.route('**/officer-role/**', (r) => r.fulfill({ json: { data: { isOfficer: true, positions: [] } } }))
   await page.route('**/membership/members/**', (r) => r.fulfill({ json: { data: [{ id: 'm1', personId: 'p1', firstName: 'Olive', lastName: 'Cruz', status: 'active', memberNumber: 'A-1' }] } }))
   await page.route('**/dues-invoices**', (r) => r.fulfill({ json: { data: [], totalCount: 0, totalPages: 0, currentPage: 1 } }))
   await page.route('**/payments/send-link', (r) => r.fulfill({ status: 201, json: { token: 'TOK', paymentUrl: '/pay/TOK', expiresAt: '2026-09-01T00:00:00Z' } }))
@@ -1224,12 +1258,17 @@ test('officer signs in, sends a pay-link', async ({ page }) => {
 Run: `cd apps/org && bun run build && (bun run preview --port 3005 &) && sleep 2 && bun run test:e2e; kill %1`
 Expected: 1 passed. (Adjust selectors to match the real components; iterate until green.) If `preview` needs the dev server instead, use `bun run dev` — match how slice-2a's e2e was run (it ran against a built/preview or dev server). Confirm the spec is excluded from vitest (`include` restricts to `*.test.*`).
 
-- [ ] **Step 3: Add the CI `org` job.** Edit `.github/workflows/ci.yml`: copy the `member` job block verbatim, rename `member` → `org`, change the working-directory/paths to `apps/org`, keep bun `1.2.21`, `--frozen-lockfile`, steps build → typecheck → test. Then add `org` to the `ci-gate` job's `needs:` array and add the same `if [ "${{ needs.org.result }}" != "success" ]` hard-fail check the member job uses. Mirror exactly — find the member job first: `grep -n "member" .github/workflows/ci.yml`.
+- [ ] **Step 3: Add the CI `org` job.** The `member` job (`.github/workflows/ci.yml`) uses `bun run --filter @monobase/member <step>` — it has NO `working-directory` and NO `needs:`. Mirror it exactly:
+  - Copy the `member` job block, rename the job key `member` → `org`.
+  - Keep `oven-sh/setup-bun@v2` with `bun-version: 1.2.21`, `bun install --frozen-lockfile`.
+  - Change the three step commands to `bun run --filter @monobase/org build`, `… typecheck`, `… test` (filter target = the package name from Task 1, `@monobase/org` — NOT a working-directory).
+  - In the `ci-gate` job: add `org` to its `needs:` array, add `[[ "${{ needs.org.result }}" != "success" ]] && exit 1` to the hard-fail check (mirroring the existing `needs.member.result` line), and add an `echo "  org: ${{ needs.org.result }}"` status line.
+  - Confirm the exact shapes first: `grep -n "member" .github/workflows/ci.yml` and read the member job + ci-gate `needs`/check blocks.
 
 - [ ] **Step 4: Verify the engine-frozen invariant.**
 
-Run: `git diff main -- services/api-ts/src specs/ packages/sdk-ts/src/generated`
-Expected: EMPTY output. (packages/ui/src/money.ts is allowed — it's not under those paths.)
+Run: `git diff main --stat -- services/api-ts/src specs/ packages/sdk-ts/src/generated`
+Expected: EMPTY output. (`packages/ui/src/money.ts` + `.github/workflows/ci.yml` are allowed — not under those paths.)
 
 - [ ] **Step 5: Full local hard gate.**
 

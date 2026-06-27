@@ -69,13 +69,15 @@ Read endpoints:
   (`listDuesInvoices.ts:30-55`). `amount` may be bigint at runtime — coerce `Number()`.
 - Dues payments: `GET /association/member/dues-payments`. Query `page,pageSize,offset,limit,personId?,status?`.
   → `{ data:[{ amount(number), refundedAmount, ... }], totalCount }` (`listDuesPayments.ts:28-50`).
-- Dues dashboard: `GET /association/member/dues/dashboard/{organizationId}` →
+- Dues dashboard: `GET /dues/dashboard/{organizationId}` (path-scoped; no x-org-id needed) →
   `{ data:{ totalCollected, totalOutstanding, paidCount, unpaidCount, overdueCount, collectionRate(0-100), memberCount } }`
   (`getDuesDashboard.ts:25-47`). `totalCollected/Outstanding` = centavos.
 - Org list (officer's orgs): `GET /persons/me/memberships` →
   `{ data:[{ organizationId, orgName, orgSlug, status, ... }], total }` (`getMyMemberships.ts`).
-- Officer-term confirm: `GET /officer-role/{orgId}` → active officer terms for the user in that org
-  (`getMyOfficerRole.ts:10`).
+- Officer-term confirm: `GET /persons/me/officer-role/{organizationId}` → `{ data: { isOfficer: boolean; positions: [] } }`
+  (`getMyOfficerRole.ts:10`). Read `data.isOfficer` (the wrapper object is always non-null).
+- Dues list endpoints (`listDuesInvoices`/`listDuesPayments`) gate on the **`x-org-id` request header**
+  (org-context.ts), NOT a query param — apps/org injects it from the selected org via the SDK client.
 
 ## Engine gaps (flagged, NOT silent scope creep — no engine change this slice)
 
