@@ -4,6 +4,14 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+## [0.1.12.0] - 2026-06-28
+
+### Added
+- **Wave B / B4 — upcoming events tile for members (`apps/member`).** The member dashboard now has its fourth tile: **Upcoming events**. It lists the next published events in the member's chapter (title, date, location, fee or "Free", and spots-left when capacity is set). Free events get a one-tap **RSVP** button; the button switches to "Registered" (disabled) after a successful RSVP, and a full event shows "Added to the waitlist". Paid events show the price and a "Paid registration coming soon" note (paid checkout is deferred). Built on `@monobase/ui` Friendly-Clarity tokens with the older-user accessibility baseline (≥18px text, ≥48px tap targets, per-event RSVP labels, loading/error/empty states). Engine stays frozen — pure-FE over the existing public events + register endpoints; no handler, spec, migration, or generated-SDK change.
+
+### Notes
+- **Deferred (flagged):** paid event checkout (runs the legacy Stripe rail + is G2-gated), event detail/calendar, and un-RSVP. **Coherence gap:** events created by an officer in B3 are saved as drafts with chapter-internal visibility, so they are not yet discoverable in this member tile — the member events list only shows network-visible, published events. An officer "publish event / make network-visible" flow is a deferred follow-up; until then this tile reads from any already-published events.
+
 ## [0.1.11.0] - 2026-06-28
 
 ### Added
