@@ -28,7 +28,7 @@
 - Request `ImportMembersRequest`: `{ organizationId: string; tierId: string; members: ImportMemberRow[] }`.
 - `ImportMemberRow`: `{ firstName?; lastName?; email?; licenseNumber?; memberNumber? }`. Row needs email OR licenseNumber; firstName required only to CREATE a new person.
 - Response (FLAT) `{ imported: number; skipped: number; failed: number; errors: Array<{ index: number; error: string }> }`.
-- Auth `requirePosition(Secretary|President)` — **no 2FA**. Org from `x-org-id` header (interceptor injects). 500-row cap (engine 400s above).
+- Auth `requirePosition(Secretary|President)` — ⚠️ this ALSO enforces 2FA in prod (`officer-checks.ts`; dev bypasses). FE surfaces the 403 `{error}` message; live happy path is 2FA-gated. Org from `x-org-id` header (interceptor injects). 500-row cap (engine 400s above).
 
 `listMembershipTiers` — `GET /association/member/tiers`, SDK `listMembershipTiers`, x-org-id scoped, any authed user:
 - Response (NESTED) `{ data: MembershipTier[]; pagination }`; `MembershipTier`: `{ id; name; code; description?; annualFee: bigint; currency; benefits[]; status }`. `tierId = tier.id`.

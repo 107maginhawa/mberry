@@ -26,7 +26,10 @@ No engine, spec, or generated-SDK changes. Additive-only.
   `{ imported: number; skipped: number; failed: number; errors: Array<{ index: number; error: string }> }`.
   - `imported` = new memberships created · `skipped` = person already a member (matched) ·
     `failed` = row failed validation/insert (each has an `errors[]` entry).
-- Auth: `requirePosition(Secretary | President)`. **No 2FA** on this handler.
+- Auth: `requirePosition(Secretary | President)`. ⚠️ In **production** `requirePosition` ALSO enforces
+  2FA for these privileged positions (`core/auth/officer-checks.ts`) — dev (`NODE_ENV!=='production'`) bypasses
+  it. So a live officer must have 2FA enabled or the import 403s. The app surfaces the 403 `{error}` message
+  via `role=alert` (no crash/lockout), but the live happy path is 2FA-gated (matches memory `d1-roster-import`).
 - Org scope: `ctx.get('organizationId')` from `x-org-id` header (Task-2 SDK interceptor injects it).
   Body also carries `organizationId` + `tierId` (both required by the type).
 - Cap: **500 rows max** per request (handler 400s above that).
