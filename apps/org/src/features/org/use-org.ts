@@ -1,10 +1,13 @@
 import { useQuery } from '@tanstack/react-query'
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { getMyMemberships, getMyOfficerRole } from '@monobase/sdk-ts/generated'
 
 const STORAGE_KEY = 'org.selectedOrgId'
 
 type Org = { id: string; name: string }
+
+// F2: stable empty reference — avoids triggering useEffect([orgId, orgs]) on every render during loading
+const EMPTY_ORGS: Org[] = []
 
 function useMembershipOrgs() {
   return useQuery({
@@ -26,7 +29,7 @@ function useMembershipOrgs() {
 
 export function useOrgs(): { status: 'loading' | 'ready' | 'empty'; orgs: Org[] } {
   const q = useMembershipOrgs()
-  if (q.isLoading) return { status: 'loading', orgs: [] }
+  if (q.isLoading) return { status: 'loading', orgs: EMPTY_ORGS }
   const orgs = q.data ?? []
   return { status: orgs.length === 0 ? 'empty' : 'ready', orgs }
 }
@@ -34,6 +37,16 @@ export function useOrgs(): { status: 'loading' | 'ready' | 'empty'; orgs: Org[] 
 export function useSelectedOrg(): { orgId: string | null; setOrgId: (id: string) => void } {
   const { orgs } = useOrgs()
   const [orgId, setOrgIdState] = useState<string | null>(() => localStorage.getItem(STORAGE_KEY))
+
+  // F5: stale stored orgId recovery — clear if the stored org is no longer in the list.
+  // Guard: only when orgId is set, orgs are loaded (length > 0), and orgId not found.
+  // Avoids loops: only fires when orgId non-null AND orgs non-empty AND not found.
+  useEffect(() => {
+    if (orgId && orgs.length > 0 && !orgs.some(o => o.id === orgId)) {
+      localStorage.removeItem(STORAGE_KEY)
+      setOrgIdState(null)
+    }
+  }, [orgId, orgs])
 
   // Auto-select when there's exactly one org and nothing chosen yet.
   useEffect(() => {
@@ -44,7 +57,12 @@ export function useSelectedOrg(): { orgId: string | null; setOrgId: (id: string)
     }
   }, [orgId, orgs])
 
-  const setOrgId = (id: string) => { localStorage.setItem(STORAGE_KEY, id); setOrgIdState(id) }
+  // F3: memoized — consumers can safely put setOrgId in useEffect dep arrays.
+  const setOrgId = useCallback((id: string) => {
+    localStorage.setItem(STORAGE_KEY, id)
+    setOrgIdState(id)
+  }, [])
+
   return { orgId, setOrgId }
 }
 
