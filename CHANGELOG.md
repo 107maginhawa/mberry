@@ -4,6 +4,11 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+## [0.1.14.0] - 2026-06-28
+
+### Added
+- **Wave C — founder onboarding checklist + per-org PayMongo credential seed.** `docs/WAVE_C_FOUNDER_CHECKLIST.md` is a concrete G1 (business entity + production secrets) / G2 (per-chapter PayMongo connected account + webhook registration) / G3 (PH SMS sender) checklist, with a "LIVE-gated vs buildable-now" status table and the full first-peso click-through. Since there is no officer "Connect PayMongo" UI yet, `services/api-ts/scripts/seed-paymongo-creds.ts` loads a chapter's PayMongo keys into its `dues_gateway_config` row (AES-256-GCM encrypted, `connected=true`) and prints the webhook URL to register — the one manual step to take a chapter live once G2 lands. No engine, spec, or SDK change (a doc + a dev script).
+
 ## [0.1.13.0] - 2026-06-28
 
 ### Added
