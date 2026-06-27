@@ -64,6 +64,24 @@ jobs:
       # NOTE (lean launch): e2e-member job deferred — needs live API + seed-in-CI.
       # Re-add when apps/member has a seed-paylink fixture available in CI.
 
+  org:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: 1.2.21
+      - run: bun install --frozen-lockfile
+      - name: Build (tsc-b + vite; generates routeTree.gen.ts via TanStack plugin)
+        run: bun run --filter @monobase/org build
+      - name: Typecheck (source + tests via tsconfig.test.json — durable false-green guard)
+        run: bun run --filter @monobase/org typecheck
+      - name: Unit tests
+        run: bun run --filter @monobase/org test
+      # NOTE (lean launch): e2e-org job deferred — stubbed spec needs a preview server in CI.
+      # Re-add when a CI step can serve the built app on :3005 before running Playwright.
+
   build-api:
     runs-on: ubuntu-latest
     timeout-minutes: 15
@@ -358,6 +376,7 @@ jobs:
       - coverage-gate
       - new-code-gate
       - member
+      - org
     steps:
       - name: Check all gates passed
         run: |
@@ -369,13 +388,15 @@ jobs:
           echo "  coverage-gate: ${{ needs.coverage-gate.result }}"
           echo "  new-code-gate: ${{ needs.new-code-gate.result }}"
           echo "  member: ${{ needs.member.result }}"
+          echo "  org: ${{ needs.org.result }}"
           if [[ "${{ needs.lint-typecheck.result }}" != "success" ]] || \
              [[ "${{ needs.unit-tests.result }}" != "success" ]] || \
              [[ "${{ needs.contract.result }}" != "success" ]] || \
              [[ "${{ needs.build-api.result }}" != "success" ]] || \
              [[ "${{ needs.coverage-gate.result }}" != "success" ]] || \
              [[ "${{ needs.new-code-gate.result }}" == "failure" ]] || \
-             [[ "${{ needs.member.result }}" != "success" ]]; then
+             [[ "${{ needs.member.result }}" != "success" ]] || \
+             [[ "${{ needs.org.result }}" != "success" ]]; then
             echo "::error::One or more CI gates failed"
             exit 1
           fi

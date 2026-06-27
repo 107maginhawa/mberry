@@ -7,7 +7,7 @@
     "build": "tsc -b && vite build",
     "typecheck": "tsc --noEmit && tsc -p tsconfig.test.json --noEmit",
     "test": "vitest run",
-    "test:e2e": "../../node_modules/.bin/playwright test"
+    "test:e2e": "./node_modules/.bin/playwright test"
   },
   "dependencies": {
     "@monobase/sdk-ts": "workspace:*",
