@@ -24,12 +24,12 @@ export function useSendLink(
 
   const mintM = useMutation<SendState, Error, { amount: number; invoiceId?: string }>({
     mutationFn: async ({ amount, invoiceId }) => {
-      const { data, response: rawResponse } = await sendPaymentLink({
+      const { data, error, response: rawResponse } = await sendPaymentLink({
         path: { organizationId: orgId },
         // SendPaymentLinkRequest.amount is typed `bigint?` — coerce at the SDK seam.
         body: { personId, amount: BigInt(amount), ...(invoiceId ? { invoiceId } : {}) },
       })
-      // SDK returns { data, response } and does NOT throw on non-2xx.
+      // SDK returns { data, error, response } and does NOT throw on non-2xx.
       const response = rawResponse as Response
       if (response.status === 201 && data) {
         return {
@@ -39,12 +39,12 @@ export function useSendLink(
           expiresAt: data.expiresAt,
         }
       }
-      const msg =
-        typeof (data as any)?.error === 'string'
-          ? (data as any).error
-          : response.status === 403
-            ? 'You are not an officer of this organization.'
-            : 'Could not create the pay-link.'
+      const serverMsg = (error as any)?.error ?? (error as any)?.message ?? (data as any)?.error
+      const msg = typeof serverMsg === 'string'
+        ? serverMsg
+        : response.status === 403
+          ? 'You are not an officer of this organization.'
+          : 'Could not create the pay-link.'
       throw new Error(msg)
     },
     onSuccess: (s) => {
@@ -54,14 +54,14 @@ export function useSendLink(
 
   const revokeM = useMutation<SendState, Error>({
     mutationFn: async () => {
-      const { data, response: rawResponse } = await revokePaymentLink({
+      const { data, error, response: rawResponse } = await revokePaymentLink({
         path: { organizationId: orgId, tokenId: tokenId! },
       })
-      // SDK returns { data, response } and does NOT throw on non-2xx.
+      // SDK returns { data, error, response } and does NOT throw on non-2xx.
       const response = rawResponse as Response
       // 404 = already used/revoked → treat as revoked (idempotent UX).
       if (response.status === 200 || response.status === 404) return { kind: 'revoked' }
-      throw new Error((data as any)?.error ?? 'Could not revoke the link.')
+      throw new Error((error as any)?.error ?? (error as any)?.message ?? (data as any)?.error ?? 'Could not revoke the link.')
     },
   })
 
@@ -76,6 +76,7 @@ export function useSendLink(
     mint: (args) => {
       if (mintingRef.current || mintM.isPending) return
       mintingRef.current = true
+      revokeM.reset()
       mintM.mutate(args, { onSettled: () => { mintingRef.current = false } })
     },
     revoke: () => {
