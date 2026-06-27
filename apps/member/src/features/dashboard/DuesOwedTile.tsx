@@ -1,5 +1,7 @@
-import { Card, CardHeader, CardTitle, CardContent, CardFooter, EmptyState, ErrorState, Skeleton, centavosToPhp } from '@monobase/ui'
+import { useState } from 'react'
+import { Card, CardHeader, CardTitle, CardContent, CardFooter, Button, EmptyState, ErrorState, Skeleton, centavosToPhp } from '@monobase/ui'
 import { useMemberData } from './use-member-data'
+import { usePayNow } from './use-pay-now'
 
 /**
  * DuesOwedTile — shows outstanding dues invoices total.
@@ -8,14 +10,20 @@ import { useMemberData } from './use-member-data'
  * Money: centavosToPhp(Number(totalAmount)) — totalAmount is bigint via SDK transformer;
  * Number() coerces bigint to number so centavosToPhp can divide by 100.
  *
- * No self-serve pay endpoint exists — informational footer directs member to
- * the officer-issued pay-link they received by SMS/email.
+ * When outstanding invoices exist: shows a "Pay now" button that mints a self-serve
+ * pay-link and redirects to /pay/:token. Button is disabled while pending or after
+ * success (before redirect) to prevent double-tap (engine also guards via CAS mutex).
  *
- * a11y: 18px base via tokens.css, role=alert on error.
+ * When no outstanding invoices: informational footer directs member to the
+ * officer-issued pay-link they received by SMS/email.
+ *
+ * a11y: 18px base via tokens.css, role=alert on error, min-h-[48px] tap target.
  */
 export function DuesOwedTile() {
   const { invoicesQuery, outstandingInvoices } = useMemberData()
   const { isLoading, isError } = invoicesQuery
+  const pay = usePayNow()
+  const [payErr, setPayErr] = useState<string | null>(null)
 
   if (isLoading) {
     return (
@@ -66,11 +74,38 @@ export function DuesOwedTile() {
             </p>
           </div>
         )}
+        {payErr && (
+          <p role="alert" className="text-caption text-destructive">
+            {payErr}
+          </p>
+        )}
       </CardContent>
       <CardFooter className="pt-0">
-        <p className="text-caption text-muted-foreground">
-          To pay, use the link your chapter sent you.
-        </p>
+        {count > 0 ? (
+          <Button
+            className="w-full min-h-[48px]"
+            disabled={pay.isPending || pay.isSuccess}
+            onClick={() => {
+              setPayErr(null)
+              pay.mutate(
+                // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+              { invoiceId: outstandingInvoices[0]!.id },
+                {
+                  onSuccess: ({ paymentUrl }) => {
+                    window.location.href = paymentUrl
+                  },
+                  onError: (e) => setPayErr(e.message),
+                },
+              )
+            }}
+          >
+            Pay now
+          </Button>
+        ) : (
+          <p className="text-caption text-muted-foreground">
+            To pay, use the link your chapter sent you.
+          </p>
+        )}
       </CardFooter>
     </Card>
   )
