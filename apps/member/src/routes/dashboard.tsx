@@ -3,6 +3,7 @@ import { useSession } from '@/features/auth/use-session'
 import { MembershipTile } from '@/features/dashboard/MembershipTile'
 import { DuesOwedTile } from '@/features/dashboard/DuesOwedTile'
 import { ReceiptsTile } from '@/features/dashboard/ReceiptsTile'
+import { EventsTile } from '@/features/events/EventsTile'
 
 export const Route = createFileRoute('/dashboard')({
   component: DashboardPage,
@@ -41,6 +42,7 @@ function DashboardPage() {
           <MembershipTile />
           <DuesOwedTile />
           <ReceiptsTile />
+          <EventsTile />
           <Link
             to="/card"
             className="inline-flex min-h-[48px] items-center text-body font-medium text-primary underline"
