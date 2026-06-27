@@ -53,8 +53,12 @@ function makeLogger() {
 function makeDb(opts: {
   userEmail?: string;
   deletedSessions?: Array<{ id: string }>;
+  /** For create.before claim check: ids already in the user table (already claimed). */
+  claimedIds?: string[];
 } = {}) {
-  const selectResult = opts.userEmail ? [{ email: opts.userEmail }] : [];
+  const selectResult = opts.claimedIds
+    ? opts.claimedIds.map((id) => ({ id }))
+    : opts.userEmail ? [{ email: opts.userEmail }] : [];
   const db: any = {
     select: () => db,
     from: () => db,
@@ -74,10 +78,14 @@ function makeAudit() {
   return { logEvent: mock(async () => ({})) };
 }
 
-function makePersonRepo(existing: { id: string } | null = null) {
+function makePersonRepo(
+  existing: { id: string } | null = null,
+  rosterMatch: { id: string; contactInfo?: { email?: string } | null } | null = null,
+) {
   return {
     findOneById: mock(async () => existing),
     createOne: mock(async () => ({})),
+    findByEmailOrLicense: mock(async () => rosterMatch),
   };
 }
 
@@ -287,6 +295,85 @@ describe('createAuth — user.create hooks', () => {
     const { opts, logger } = build({ person: person as any });
     await opts.databaseHooks.user.create.after({ id: 'u1', email: 'a@x.co' });
     expect(logger.warn).toHaveBeenCalled();
+  });
+});
+
+// ── createAuth: user.create.before — account-claim ───────────────────────────
+//
+// [review C2 – SECURITY] The claim is gated on emailVerified===true.
+// Email+password signup leaves emailVerified=false; the OTP path sets it true.
+// These tests prove both paths.
+
+describe('createAuth — user.create.before: account-claim', () => {
+  const rosterPerson = { id: 'roster-1', contactInfo: { email: 'olive@chapter.ph' } };
+  const V = { id: 'u1', email: 'olive@chapter.ph', emailVerified: true };
+
+  test('[C2 security] not-verified: no claim even on email match (blocks password-signup takeover)', async () => {
+    // emailVerified:false must NEVER trigger a claim regardless of roster match
+    const person = makePersonRepo(null, rosterPerson);
+    const { opts } = build({ person });
+    const res = await opts.databaseHooks.user.create.before({ ...V, emailVerified: false });
+    expect(res.data.id).toBe('u1');
+    // findByEmailOrLicense must NOT have been called (gate short-circuits)
+    expect(person.findByEmailOrLicense).not.toHaveBeenCalled();
+  });
+
+  test('verified + no email: unchanged, no repo call', async () => {
+    const person = makePersonRepo(null, null);
+    const { opts } = build({ person });
+    const res = await opts.databaseHooks.user.create.before({ id: 'u1', emailVerified: true });
+    expect(res.data.id).toBe('u1');
+    expect(person.findByEmailOrLicense).not.toHaveBeenCalled();
+  });
+
+  test('verified + no roster match: id unchanged', async () => {
+    const person = makePersonRepo(null, null); // findByEmailOrLicense returns null
+    const { opts } = build({ person });
+    const res = await opts.databaseHooks.user.create.before(V);
+    expect(res.data.id).toBe('u1');
+  });
+
+  test('verified + match + not yet a user: id overridden to roster person id', async () => {
+    // database.select(id).from(user).where(id=roster-1).limit(1) → [] (not claimed)
+    const db = makeDb(); // selectResult = [] → person not yet claimed
+    const person = makePersonRepo(null, rosterPerson);
+    const { opts } = build({ db, person });
+    const res = await opts.databaseHooks.user.create.before(V);
+    expect(res.data.id).toBe('roster-1');
+  });
+
+  test('verified + match + already claimed: id NOT overridden', async () => {
+    // database.select(id)...limit(1) → [{ id: 'roster-1' }] → user already exists
+    const db = makeDb({ claimedIds: ['roster-1'] });
+    const person = makePersonRepo(null, rosterPerson);
+    const { opts } = build({ db, person });
+    const res = await opts.databaseHooks.user.create.before(V);
+    expect(res.data.id).toBe('u1');
+  });
+
+  test('verified + repo throws: non-blocking — resolves unchanged (no throw)', async () => {
+    const person = makePersonRepo(null, null);
+    person.findByEmailOrLicense.mockRejectedValue(new Error('db'));
+    const { opts } = build({ person });
+    await expect(
+      opts.databaseHooks.user.create.before(V),
+    ).resolves.toMatchObject({ data: { id: 'u1' } });
+  });
+
+  test('admin email + verified + roster match: both admin-promotion AND claim apply', async () => {
+    // Admin email + emailVerified=true + roster match → role gains admin AND id overridden
+    const db = makeDb(); // not yet claimed
+    const adminRosterPerson = { id: 'roster-admin', contactInfo: { email: 'admin@memberry.ph' } };
+    const person = makePersonRepo(null, adminRosterPerson);
+    const { opts } = build({ db, person });
+    const res = await opts.databaseHooks.user.create.before({
+      id: 'u1',
+      email: 'admin@memberry.ph',
+      emailVerified: true,
+      role: 'user',
+    });
+    expect(res.data.id).toBe('roster-admin');
+    expect(String(res.data.role)).toContain('admin');
   });
 });
 

@@ -53,6 +53,11 @@ export interface AuthPersonRepo {
     contactInfo: { email: string };
     createdBy: string;
   }): Promise<unknown>;
+  /** [review I3] Added for account-claim (create.before hook). */
+  findByEmailOrLicense(
+    email?: string,
+    licenseNumber?: string,
+  ): Promise<{ id: string; contactInfo?: { email?: string } | null } | null>;
 }
 
 // Re-export auth instance type for type safety
@@ -160,36 +165,47 @@ export function createAuth(
       user: {
         create: {
           before: async (user) => {
-            // Check if user email is in admin list
-            const adminEmails = config.auth.adminEmails || [];
-            if (!adminEmails.includes(user.email)) {
-              return { data: user }; // No modification needed
-            }
+            const data: Record<string, unknown> = { ...user }
 
-            // Modify role data before it gets stored
-            const currentRole = user['role'] || 'user';
-            const existingRoles = typeof currentRole === 'string' 
-              ? currentRole.split(',').map((r: string) => r.trim()).filter(r => r)
-              : [];
-
-            if (!existingRoles.includes('admin')) {
-              existingRoles.push('admin');
-              const newRole = existingRoles.join(',');
-
-              if (logger) {
-                logger.info(`Auto-promoting new user ${maskEmail(user.email)} to admin role during creation`);
+            // Existing admin auto-promotion (unchanged behavior)
+            const adminEmails = config.auth.adminEmails || []
+            if (adminEmails.includes(user.email)) {
+              const currentRole = user['role'] || 'user'
+              const existingRoles = typeof currentRole === 'string'
+                ? currentRole.split(',').map((r: string) => r.trim()).filter((r) => r) : []
+              if (!existingRoles.includes('admin')) {
+                existingRoles.push('admin')
+                data['role'] = existingRoles.join(',')
+                logger?.info(`Auto-promoting new user ${maskEmail(user.email)} to admin role during creation`)
               }
-
-              // Return wrapped in data object - Better-Auth requirement
-              return {
-                data: {
-                  ...user,
-                  role: newRole
-                }
-              };
             }
 
-            return { data: user }; // Return unchanged if already admin
+            // Account-claim: link a pre-existing roster person to this new user by email,
+            // by overriding the user's id with the roster person's id (preserves the
+            // person.id === user.id invariant; no PK re-key). Non-blocking on error.
+            // [review C2] ONLY when the email is verified (email-OTP/magic-link prove inbox
+            // ownership; password signup does not) — otherwise knowing a roster email would
+            // let an attacker seize that member's identity/money.
+            try {
+              if (user.email && user.emailVerified === true) {
+                const match = await personRepo.findByEmailOrLicense(user.email)
+                if (match && match.id !== user.id) {
+                  const claimed = await database.select({ id: schema.user.id })
+                    .from(schema.user).where(eq(schema.user.id, match.id)).limit(1)
+                  if (claimed.length === 0) {
+                    data['id'] = match.id
+                    logger?.info({ personId: match.id, email: maskEmail(user.email) },
+                      'account-claim: linking new user to existing roster person by email')
+                  } else {
+                    logger?.warn({ personId: match.id }, 'account-claim: matched person already has a user — skipping')
+                  }
+                }
+              }
+            } catch (err) {
+              logger?.warn({ error: err, email: maskEmail(user.email) }, 'account-claim: lookup failed — proceeding unlinked')
+            }
+
+            return { data }
           },
           after: async (user) => {
             // Auto-create person record so profile/dashboard work immediately
