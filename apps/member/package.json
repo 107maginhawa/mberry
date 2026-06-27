@@ -5,7 +5,7 @@
   "scripts": {
     "dev": "vite --port 3004",
     "build": "tsc -b && vite build",
-    "typecheck": "tsc --noEmit",
+    "typecheck": "tsc --noEmit && tsc -p tsconfig.test.json",
     "test": "vitest run",
     "test:e2e": "../../node_modules/.bin/playwright test"
   },
@@ -15,7 +15,8 @@
     "@tanstack/react-query": "^5.85.9",
     "@tanstack/react-router": "^1.131.31",
     "react": "^19.1.1",
-    "react-dom": "^19.1.1"
+    "react-dom": "^19.1.1",
+    "sonner": "^2.0.3"
   },
   "devDependencies": {
     "@monobase/typescript-config": "workspace:*",

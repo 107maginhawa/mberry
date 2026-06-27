@@ -4,6 +4,19 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+## [0.1.8.0] - 2026-06-27
+
+### Added
+- **Slice-3 — member dashboard + passwordless login (`apps/member`).** A chapter member can now sign in without a password and see their own dues at a glance. On a new `/sign-in` screen they enter their email, receive a 6-digit one-time code by email, and verify it — better-auth creates their session. The new `/dashboard` shows three read-only tiles: membership status (org name, active/expired, renewal date), dues owed (the sum of any outstanding invoices, with a note to pay via the link their chapter sent), and recent receipts (receipt number, amount, date, status). Built on `@monobase/ui` Friendly-Clarity tokens with the older-dentist accessibility baseline (≥18px text, ≥48px tap targets, `role="alert"` on errors, labeled inputs, one primary task per screen). The public login-free `/pay/:token` page stays untouched and unauthenticated; the pay-success screen now offers a "Create an account to track your dues" link into sign-in.
+- **Account-claim by email (engine, additive).** When a member who was added via roster import logs in for the first time, the engine now links their new login to their existing roster record by matching the email — so their real memberships, dues, and receipts appear immediately instead of an empty dashboard. The link is gated on a verified email (the one-time code proves inbox ownership), so a password signup can never seize a roster member's identity.
+
+### Changed
+- **`apps/member` is now an authenticated app.** It gained the CSRF-aware SDK client, a session probe, an organization selector, and a route guard (mirroring `apps/org`), while keeping the `/pay/:token` flow public. Money is coerced to `Number` at every display boundary, and the member's organization is resolved reactively from their session so dues load as soon as the session does.
+
+### Notes
+- Additive-only on the engine: the sole engine change is the account-claim logic in the better-auth user-creation hook (`core/auth.ts`); TypeSpec specs, the generated SDK, and all other handlers are byte-untouched, and there is no migration.
+- OTP delivery is by email (the engine's only OTP channel). Phone-first OTP and member self-serve "pay now" are flagged engine follow-ups, out of scope here. Live end-to-end OTP delivery waits on email/SMS infrastructure (G3) and the founder's PayMongo paperwork (G2).
+
 ## [0.1.7.0] - 2026-06-27
 
 ### Added

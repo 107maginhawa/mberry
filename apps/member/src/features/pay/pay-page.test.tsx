@@ -3,6 +3,23 @@ import { render, screen, fireEvent } from '@testing-library/react'
 
 // Hoisted by Vitest — intercepts usePayLink for all imports in this file.
 vi.mock('./use-pay-link', () => ({ usePayLink: vi.fn() }))
+
+// Mock Link as a plain <a> so PayResult renders without a real router context.
+vi.mock('@tanstack/react-router', () => ({
+  Link: ({
+    to,
+    children,
+    className,
+  }: {
+    to: string
+    children: React.ReactNode
+    className?: string
+  }) => (
+    <a href={to} className={className}>
+      {children}
+    </a>
+  ),
+}))
 import { usePayLink } from './use-pay-link'
 
 import { PayCard } from './PayCard'
@@ -32,7 +49,7 @@ const CANCELLED_EMPTY: Extract<PayState, { kind: 'cancelled' }> = {
 // Thin test harness that mirrors the route component logic — driven by the
 // mocked hook so we can verify each state renders the right subtree.
 function TestPayPage({ token = 'tok' }: { token?: string } = {}) {
-  const { state, pay } = (usePayLink as ReturnType<typeof vi.fn>)(token)
+  const { state, pay } = vi.mocked(usePayLink)(token)
   if (state.kind === 'loading') {
     return <div role="status" aria-label="Loading payment details" />
   }
@@ -143,5 +160,19 @@ describe('PayResult', () => {
     expect(btn).toBeInTheDocument()
     fireEvent.click(btn)
     expect(onRetry).toHaveBeenCalledOnce()
+  })
+
+  it('succeeded → CTA link to /sign-in renders', () => {
+    render(<PayResult state={{ kind: 'succeeded' }} />)
+    const link = screen.getByRole('link', { name: /create an account to track your dues/i })
+    expect(link).toBeInTheDocument()
+    expect(link).toHaveAttribute('href', '/sign-in')
+  })
+
+  it('non-success (alreadyPaid) → CTA link absent', () => {
+    render(<PayResult state={{ kind: 'alreadyPaid' }} />)
+    expect(
+      screen.queryByRole('link', { name: /create an account/i }),
+    ).not.toBeInTheDocument()
   })
 })
