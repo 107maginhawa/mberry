@@ -19,7 +19,7 @@ export default function Orgs() {
       stats={stats}
       statsStatus={statsStatus}
       hasSnapshot={hasSnapshot}
-      onCreate={() => navigate({ to: '/orgs/new' as any })}  // Task 5 adds this route
+      onCreate={() => navigate({ to: '/orgs/new' })}
     />
   )
 }
