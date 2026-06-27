@@ -73,7 +73,6 @@ Before POSTing, show a preview table of parsed rows with per-row client validati
 - row has neither email nor licenseNumber → **will fail** (engine rejects).
 - row has no firstName and looks like a new person → **may create-fail** (we can't know match status
   client-side; surface as an advisory "needs first name if new", not a hard block — the engine decides).
-- duplicate emails within the file → advisory note (engine skips dupes by match).
 Show counts: total parsed, ready, advisory. "Import N members" button posts the full array
 (client does not pre-filter — the engine is the authority; client validation is guidance only).
 
@@ -123,6 +122,7 @@ not expected this slice).
 - Server-side preview / dry-run (use bulkImportMembers' preview mode) — different endpoint/asset (invites).
 - Editing parsed rows inline before import (re-upload a corrected CSV instead).
 - Per-row tier assignment (one tier per import v1).
+- Within-file duplicate-email advisory (the engine match-or-create skips dupes; not worth client code v1).
 
 ## Definition of done
 - Every workspace typechecks incl. apps/org tests (`bun run typecheck`); apps/org unit tests pass; apps/org builds.
