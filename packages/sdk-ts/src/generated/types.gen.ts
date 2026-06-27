@@ -22881,6 +22881,16 @@ export type MessageTemplateListResponse = {
 export type MessageType = 'text' | 'system' | 'video_call';
 
 /**
+ * Request body for a member minting a pay-link for their own dues.
+ */
+export type MintMyPaymentLinkRequest = {
+    /**
+     * The member's own unpaid invoice to pay.
+     */
+    invoiceId: string;
+};
+
+/**
  * Status of meeting minutes
  */
 export type MinutesStatus = 'draft' | 'submitted' | 'approved';
@@ -51234,6 +51244,49 @@ export type UpdateOnboardingStepResponses = {
 };
 
 export type UpdateOnboardingStepResponse2 = UpdateOnboardingStepResponses[keyof UpdateOnboardingStepResponses];
+
+export type MintMyPaymentLinkData = {
+    body: MintMyPaymentLinkRequest;
+    path: {
+        organizationId: string;
+    };
+    query?: never;
+    url: '/org/{organizationId}/payments/mint-mine';
+};
+
+export type MintMyPaymentLinkErrors = {
+    /**
+     * Validation error response
+     */
+    400: ValidationError;
+    /**
+     * Unauthorized access response
+     */
+    401: AuthenticationError;
+    /**
+     * Forbidden access response
+     */
+    403: AuthorizationError;
+    /**
+     * Resource not found response
+     */
+    404: NotFoundError;
+    /**
+     * Conflict response
+     */
+    409: ConflictError;
+};
+
+export type MintMyPaymentLinkError = MintMyPaymentLinkErrors[keyof MintMyPaymentLinkErrors];
+
+export type MintMyPaymentLinkResponses = {
+    /**
+     * Resource created response
+     */
+    201: SendPaymentLinkResponse;
+};
+
+export type MintMyPaymentLinkResponse = MintMyPaymentLinkResponses[keyof MintMyPaymentLinkResponses];
 
 export type SendPaymentLinkData = {
     body: SendPaymentLinkRequest;
