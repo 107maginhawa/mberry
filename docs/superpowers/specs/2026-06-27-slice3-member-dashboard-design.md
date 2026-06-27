@@ -163,8 +163,10 @@ client, `features/auth/use-session.ts` + `sign-in.ts`, `__root.tsx` guard,
 - `sign-in.ts` (raw `fetch`, not SDK — `/auth/*` isn't in the OpenAPI client):
   - `requestOtp(email)` → `POST /auth/email-otp/send-verification-otp`
     `{ email, type: 'sign-in' }`.
-  - `verifyOtp(email, otp)` → `POST /auth/email-otp/check-verification-otp`
-    `{ email, type: 'sign-in', otp }` → sets httpOnly session cookie on success.
+  - `verifyOtp(email, otp)` → `POST /auth/sign-in/email-otp` `{ email, otp }` →
+    creates the user (if absent) + sets httpOnly session cookie + emailVerified=true
+    (which enables the engine account-claim). (Plan review C1: the verify-only
+    `check-verification-otp` endpoint creates no session — not used.)
   - Both `credentials:'include'`. Return `{ ok } | { ok:false, error }`.
 - `use-session.ts`: probe via `getMyMemberships` (401 / transport-undef →
   unauthed), mirror org. Memberships data feeds org auto-select.
