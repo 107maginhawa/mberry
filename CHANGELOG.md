@@ -4,6 +4,16 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+## [0.1.9.0] - 2026-06-27
+
+### Added
+- **Wave A — founder/platform-operator console (`apps/console`).** The last of the three lean apps. A founder/platform operator can sign in with email + password and, from one authed PWA, see every organization on the platform plus basic stats, and create a new organization. The home screen shows a stats strip (organizations, associations, and snapshot-derived members / active / revenue / average collection) over an organizations table, with a primary "Create organization" action. The create-org form posts to the existing `POST /admin/organizations` (super-admin gated), picking an association from a dropdown and an org type (chapter / society / national / clinic); engine errors (not-super, duplicate name, association-not-found) surface as inline alerts. Built on `@monobase/ui` Friendly-Clarity tokens with the older-user accessibility baseline (≥18px text, ≥48px tap targets, `role="alert"` on errors, labeled inputs, one primary task per screen). New port 3006; a new CI `console` job (build → typecheck-incl-tests → test) gates it.
+- **Honest empty-states for snapshot-derived stats.** Platform members / revenue / collection figures come from a monthly snapshot job, not from creating orgs or importing rosters, so on a fresh platform they are genuinely unavailable. The console shows a skeleton while loading, "Stats unavailable" on error, and "No snapshot for this month yet" (em-dash tiles) when ready-but-empty — never a confident `0` / `₱0.00`. Organizations and Associations counts come from live tables and are always real.
+- **Founder bootstrap seed script (`services/api-ts/scripts/seed-console.ts`).** A dev-only, additive seed that creates a super platform-admin user plus one association so the console flow can run end-to-end against a local stack. The engine stays frozen otherwise — no handler, spec, migration, or generated-SDK change in this slice.
+
+### Notes
+- **Deferred (flagged, not silently cut):** seeding the first officer account at org-creation time and generating each org's PayMongo connect-onboarding link. Officer onboarding is already served by the shipped roster import + email-OTP account-claim; PayMongo connect onboarding is blocked on the PayMongo platform account (G2) and is net-new payment-rail work. Console v1 deliberately creates the organization row only.
+
 ## [0.1.8.0] - 2026-06-27
 
 ### Added
