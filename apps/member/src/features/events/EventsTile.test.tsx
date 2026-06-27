@@ -10,7 +10,7 @@ import { useMemberEvents } from './use-member-events'
 const mockEvents = useMemberEvents as ReturnType<typeof vi.fn>
 
 const future = new Date(Date.now() + 7 * 864e5).toISOString()
-const freeEvent = { id: 'free', title: 'Free Seminar', organizationId: 'org-1', eventType: 'seminar', startDate: future, endDate: future, registeredCount: 2, capacity: 10, status: 'published', registrationFee: 0n, currency: 'PHP' }
+const freeEvent = { id: 'free', title: 'Annual Seminar', organizationId: 'org-1', eventType: 'seminar', startDate: future, endDate: future, registeredCount: 2, capacity: 10, status: 'published', registrationFee: 0n, currency: 'PHP' }
 const paidEvent = { id: 'paid', title: 'Gala Dinner', organizationId: 'org-1', eventType: 'social', startDate: future, endDate: future, registeredCount: 0, status: 'published', registrationFee: 150000n, currency: 'PHP' }
 
 describe('EventsTile', () => {
@@ -19,9 +19,9 @@ describe('EventsTile', () => {
   it('shows a free event with an RSVP button and no raw bigint', () => {
     mockEvents.mockReturnValue({ isLoading: false, isError: false, data: [freeEvent] })
     const { container } = render(<EventsTile />)
-    expect(screen.getByText('Free Seminar')).toBeInTheDocument()
-    expect(screen.getByText(/free/i)).toBeInTheDocument()
-    expect(screen.getByRole('button', { name: /rsvp to free seminar/i })).toBeInTheDocument()
+    expect(screen.getByText('Annual Seminar')).toBeInTheDocument()
+    expect(screen.getByText('Free', { exact: true })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: /rsvp to annual seminar/i })).toBeInTheDocument()
     expect(container.textContent).not.toMatch(/NaN|undefined|\d+n/)
   })
 

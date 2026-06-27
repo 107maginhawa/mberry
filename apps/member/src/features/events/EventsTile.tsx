@@ -78,9 +78,7 @@ export function EventsTile() {
               {(ev as Event & { location?: string }).location && (
                 <p className="text-body text-muted-foreground">{(ev as Event & { location?: string }).location}</p>
               )}
-              {isPaid && (
-                <p className="text-body text-foreground">{centavosToPhp(fee)}</p>
-              )}
+              <p className="text-body text-foreground">{isPaid ? centavosToPhp(fee) : 'Free'}</p>
               {spotsLeft != null && (
                 <p className="text-body text-muted-foreground">{spotsLeft} spots left</p>
               )}
