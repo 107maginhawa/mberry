@@ -4,6 +4,22 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+## [0.1.6.0] - 2026-06-27
+
+### Added
+- **Slice-2b — officer pay-link + dues management app (`apps/org`).** A new authed officer PWA (the second app on the lean scaffold, port 3005) that closes the officer half of the first-peso loop. Dr. Olive signs in (email + password over better-auth, cookie session), the app resolves her chapter, and she can: view the member roster, mint a tokenized pay-link for a member (tied to an outstanding dues invoice or an ad-hoc amount), share it by copy/SMS, revoke a just-minted link, and see who has paid on a dues dashboard (collected ₱, collection rate, paid/unpaid/overdue, recent payments, outstanding invoices). Built on `@monobase/ui` Friendly-Clarity tokens with the older-dentist accessibility baseline (18px base, ≥48px tap targets, WCAG AA, `role="alert"`/`role="status"`, labeled controls).
+- **CSRF-aware authed SDK client** — a configured `@monobase/sdk-ts` client that sends the session cookie (`credentials: 'include'`), mirrors the `csrf_token` cookie into the `x-csrf-token` header on mutating non-allowlisted requests (matching the engine allowlist exactly), and injects the selected `x-org-id` on org-scoped reads. The reusable pattern for every future authed app.
+- **Shared `centavosToPhp`** money formatter lifted into `@monobase/ui` so both apps render PHP centavos identically (`₱X,XXX.00`, tabular figures).
+
+### Changed
+- **Officer authorization is anchored to the engine, not a client pre-check.** `apps/org` relies on the engine's role/officer enforcement (403 on `listOrgMembers` and `send-link`), surfaced as a clear "officer or admin access required" state, rather than a client-side officer gate.
+
+### Fixed
+- **Money request/display boundary is bigint-safe** — amounts are coerced to `BigInt` only at the send-link request seam and to `Number` at every display boundary, with a double-tap guard so an officer can never mint two pay-links for one debt.
+
+### Infrastructure
+- **Test files are now typechecked** in `apps/org` (`tsconfig.test.json` + a typed SDK-mock helper) so a mock whose shape drifts from the real API fails compilation instead of passing green while production breaks. New CI `org` job (build → typecheck-incl-tests → unit tests) wired into the gate.
+
 ## [0.1.5.0] - 2026-06-27
 
 ### Added
