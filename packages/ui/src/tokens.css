@@ -92,6 +92,14 @@
   body {
     font-family: "Hanken Grotesk", ui-sans-serif, system-ui, sans-serif;
     background-color: var(--color-bg);
+    /* Subtle four-radial cream wash, fixed — gives the warm depth DESIGN.md
+       asks for instead of a flat fill. Stays under the AA contrast headroom. */
+    background-image:
+      radial-gradient(60% 50% at 0% 0%, rgba(249, 240, 216, 0.55), transparent 70%),
+      radial-gradient(55% 45% at 100% 0%, rgba(242, 222, 176, 0.32), transparent 70%),
+      radial-gradient(60% 55% at 100% 100%, rgba(249, 240, 216, 0.45), transparent 70%),
+      radial-gradient(55% 50% at 0% 100%, rgba(242, 222, 176, 0.28), transparent 70%);
+    background-attachment: fixed;
     color: var(--color-text);
     font-size: 1rem; /* 18px */
     line-height: 1.55;
