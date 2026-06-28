@@ -725,4 +725,14 @@ export class DuesRepository {
       .limit(1);
     return config;
   }
+
+  async updateGatewayConfig(
+    organizationId: string,
+    patch: { connected: boolean; lastTestAt: Date },
+  ): Promise<void> {
+    await this.db
+      .update(duesGatewayConfigs)
+      .set({ connected: patch.connected, lastTestAt: patch.lastTestAt, updatedAt: new Date() })
+      .where(eq(duesGatewayConfigs.organizationId, organizationId));
+  }
 }

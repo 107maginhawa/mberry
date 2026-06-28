@@ -552,6 +552,9 @@ model GatewayConfigRequest {
   @doc("Secret key for the payment provider (write-only; never returned)")
   @minLength(1)
   secretKey: string;
+
+  @doc("Webhook signing secret for the payment provider (write-only; never returned). Optional — keys can be set first, webhook later.")
+  webhookSecret?: string;
 }
 
 @doc("Result of a gateway connection test")

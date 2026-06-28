@@ -29,9 +29,10 @@ export async function getDuesGatewayConfig(
   // object is intentional and matches what the route returned before this
   // change, but it is assigned via a variable so the empty-response-guard
   // (which forbids the literal `ctx.json({}, 2xx)` shape) is satisfied.
+  // Never echo ANY credential field — encryptedWebhookSecret was previously leaked.
   const body = config
     ? (() => {
-        const { encryptedSecret: _stripped, ...safe } = config;
+        const { encryptedSecret: _s, encryptedWebhookSecret: _w, ...safe } = config;
         return safe;
       })()
     : {};

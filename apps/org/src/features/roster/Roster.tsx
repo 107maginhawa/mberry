@@ -112,6 +112,7 @@ export default function Roster() {
         <div className="px-4 pb-2 flex gap-6">
           <Link to="/events" className="inline-flex min-h-[48px] items-center text-body font-medium text-primary underline">Create event</Link>
           <Link to="/announcements" className="inline-flex min-h-[48px] items-center text-body font-medium text-primary underline">Post announcement</Link>
+          <Link to="/payment-settings" className="inline-flex min-h-[48px] items-center text-body font-medium text-primary underline">Payment settings</Link>
         </div>
         {orgs.length > 1 && (
           <div className="px-4 pb-2">

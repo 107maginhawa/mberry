@@ -87,8 +87,11 @@ jsonpath "$.valid" == true
 jsonpath "$.amount" == 250
 
 # ── 5. Checkout the payment token — public endpoint ──────────────────────────
-# Hits Stripe via gateway. stripe-mock may not be wired into the dev config →
-# tolerate 200 (success) or 4xx/5xx (gateway not configured).
+# Hits PayMongo (previously Stripe) via gateway. The payment provider may not
+# be reachable in dev/CI (no live credentials) → tolerate 200 (success),
+# 4xx (gateway not configured / token invalid), or 502 (upstream unreachable).
+# B5: upsert now sets connected:true so checkout advances further before
+# failing — 502 is the expected shape when PayMongo is unavailable in CI.
 
 POST {{api}}/pay/{{pay_token}}/checkout
 Origin: {{origin}}
@@ -97,7 +100,7 @@ Content-Type: application/json
 {}
 HTTP *
 [Asserts]
-status toString matches "^(200|201|400|404|410|500)$"
+status toString matches "^(200|201|400|404|410|500|502)$"
 
 # ── 6. Receipt download — synthetic paymentId → 404, exercises the route ─────
 

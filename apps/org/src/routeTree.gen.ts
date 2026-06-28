@@ -10,6 +10,7 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as SignInRouteImport } from './routes/sign-in'
+import { Route as PaymentSettingsRouteImport } from './routes/payment-settings'
 import { Route as ImportRouteImport } from './routes/import'
 import { Route as EventsRouteImport } from './routes/events'
 import { Route as DuesRouteImport } from './routes/dues'
@@ -20,6 +21,11 @@ import { Route as MembersMembershipIdSendRouteImport } from './routes/members/$m
 const SignInRoute = SignInRouteImport.update({
   id: '/sign-in',
   path: '/sign-in',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PaymentSettingsRoute = PaymentSettingsRouteImport.update({
+  id: '/payment-settings',
+  path: '/payment-settings',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ImportRoute = ImportRouteImport.update({
@@ -59,6 +65,7 @@ export interface FileRoutesByFullPath {
   '/dues': typeof DuesRoute
   '/events': typeof EventsRoute
   '/import': typeof ImportRoute
+  '/payment-settings': typeof PaymentSettingsRoute
   '/sign-in': typeof SignInRoute
   '/members/$membershipId/send': typeof MembersMembershipIdSendRoute
 }
@@ -68,6 +75,7 @@ export interface FileRoutesByTo {
   '/dues': typeof DuesRoute
   '/events': typeof EventsRoute
   '/import': typeof ImportRoute
+  '/payment-settings': typeof PaymentSettingsRoute
   '/sign-in': typeof SignInRoute
   '/members/$membershipId/send': typeof MembersMembershipIdSendRoute
 }
@@ -78,6 +86,7 @@ export interface FileRoutesById {
   '/dues': typeof DuesRoute
   '/events': typeof EventsRoute
   '/import': typeof ImportRoute
+  '/payment-settings': typeof PaymentSettingsRoute
   '/sign-in': typeof SignInRoute
   '/members/$membershipId/send': typeof MembersMembershipIdSendRoute
 }
@@ -89,6 +98,7 @@ export interface FileRouteTypes {
     | '/dues'
     | '/events'
     | '/import'
+    | '/payment-settings'
     | '/sign-in'
     | '/members/$membershipId/send'
   fileRoutesByTo: FileRoutesByTo
@@ -98,6 +108,7 @@ export interface FileRouteTypes {
     | '/dues'
     | '/events'
     | '/import'
+    | '/payment-settings'
     | '/sign-in'
     | '/members/$membershipId/send'
   id:
@@ -107,6 +118,7 @@ export interface FileRouteTypes {
     | '/dues'
     | '/events'
     | '/import'
+    | '/payment-settings'
     | '/sign-in'
     | '/members/$membershipId/send'
   fileRoutesById: FileRoutesById
@@ -117,6 +129,7 @@ export interface RootRouteChildren {
   DuesRoute: typeof DuesRoute
   EventsRoute: typeof EventsRoute
   ImportRoute: typeof ImportRoute
+  PaymentSettingsRoute: typeof PaymentSettingsRoute
   SignInRoute: typeof SignInRoute
   MembersMembershipIdSendRoute: typeof MembersMembershipIdSendRoute
 }
@@ -128,6 +141,13 @@ declare module '@tanstack/react-router' {
       path: '/sign-in'
       fullPath: '/sign-in'
       preLoaderRoute: typeof SignInRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/payment-settings': {
+      id: '/payment-settings'
+      path: '/payment-settings'
+      fullPath: '/payment-settings'
+      preLoaderRoute: typeof PaymentSettingsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/import': {
@@ -181,6 +201,7 @@ const rootRouteChildren: RootRouteChildren = {
   DuesRoute: DuesRoute,
   EventsRoute: EventsRoute,
   ImportRoute: ImportRoute,
+  PaymentSettingsRoute: PaymentSettingsRoute,
   SignInRoute: SignInRoute,
   MembersMembershipIdSendRoute: MembersMembershipIdSendRoute,
 }
