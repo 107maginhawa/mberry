@@ -26,7 +26,7 @@ function DashboardPage() {
 
         {/* Secondary: supporting details, visually demoted */}
         <section className="space-y-4" aria-label="More about your membership">
-          <h2 className="text-large font-semibold text-muted-foreground px-1">Details</h2>
+          <h2 className="text-large font-semibold text-muted-foreground px-1">Your membership details</h2>
           <ReceiptsTile />
           <EventsTile />
           <Link
