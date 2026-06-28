@@ -43,7 +43,9 @@ it('renders payment status badge', () => {
       invoices={[]}
     />,
   )
-  expect(screen.getByText('pending')).toBeInTheDocument()
+  // friendly label, never the raw enum
+  expect(screen.getByText('Pending')).toBeInTheDocument()
+  expect(screen.queryByText('pending')).not.toBeInTheDocument()
 })
 
 it('shows ErrorState instead of EmptyState when paymentsError', () => {

@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { toast } from 'sonner'
-import { Alert, AlertDescription, Button, Card, CardContent, CardHeader, CardTitle, ConfirmDialog, ErrorState, centavosToPhp } from '@monobase/ui'
+import { Alert, AlertDescription, Button, Card, CardContent, CardHeader, CardTitle, ConfirmDialog, ErrorState, Input, centavosToPhp } from '@monobase/ui'
 import { listDuesInvoices } from '@monobase/sdk-ts/generated'
 import { Route } from '@/routes/members/$membershipId/send'
 import { useSelectedOrg } from '@/features/org/use-org'
@@ -154,7 +154,7 @@ export function SendLinkView({
         <CardContent className="flex flex-col gap-3">
           <div className="flex items-center gap-2">
             <span className="text-body text-text-secondary font-medium">₱</span>
-            <input
+            <Input
               type="number"
               min="0.01"
               step="0.01"
@@ -162,7 +162,7 @@ export function SendLinkView({
               aria-label="Amount in pesos"
               value={pesoInput}
               onChange={(e) => setPesoInput(e.target.value)}
-              className="flex-1 rounded-md border border-[var(--color-border)] px-3 py-2 text-body text-foreground focus:outline-none focus:ring-2 focus:ring-[var(--color-ring)] min-h-tap"
+              className="flex-1"
             />
           </div>
           <Button
