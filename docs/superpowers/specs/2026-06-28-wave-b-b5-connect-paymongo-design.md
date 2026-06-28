@@ -40,13 +40,19 @@ handlers in `handlers/member/duesspecialassessments/`):
 - **TypeSpec:** add `@doc("...write-only; never returned") webhookSecret?: string;` to `GatewayConfigRequest`
   in `dues.tsp`. (Optional — an officer might set keys first, webhook later.)
 - **`upsertDuesGatewayConfig.ts`:** if `body.webhookSecret` present, `encryptCredential` it →
-  `encryptedWebhookSecret` on both insert + `onConflictDoUpdate.set`. Strip **both** `encryptedSecret` AND
-  `encryptedWebhookSecret` from the returned object. (Leave `connected` untouched — see below.)
-- **`getDuesGatewayConfig.ts`:** strip **both** encrypted fields (security fix).
+  `encryptedWebhookSecret` (conditional, both insert + set). **Set `connected: true`** (insert + set) — this is
+  the C1 fix: checkout requires `connected=true` (`resolve-gateway.ts:52`), and the working seed sets it on
+  upsert. Strip **both** `encryptedSecret` AND `encryptedWebhookSecret` from the returned object.
+- **`getDuesGatewayConfig.ts`:** strip **both** encrypted fields (security fix — currently leaks `encryptedWebhookSecret`).
+- **`testDuesGatewayConnection.ts`:** make it a REAL check — decrypt the stored secret, hit a minimal
+  authenticated PayMongo endpoint (add `verifyCredentials()` to the adapter if absent). Success → `connected:true`,
+  `lastTestAt:now`, `{success:true, testedAt}`; auth failure → `connected:false`, `lastTestAt:now`,
+  `{success:false, testedAt}`; no config → `{success:false}` (not a 500). (`GatewayTestResult` requires `testedAt`.)
 - Regen openapi/routes/validators + SDK.
-- **`connected` semantics (unchanged):** `upsert` does NOT flip `connected`. `connected=true` is earned by a
-  successful `POST …/test` (existing behavior). Honest gate: creds saved ≠ verified. The FE makes "Test
-  connection" the next step after saving and shows "Saved — not yet verified" until a test passes.
+- **`connected` semantics:** upsert sets `connected: true` (creds present → usable immediately, matching the
+  seed). The **Test connection** button is a real PayMongo validation that downgrades `connected` to false if
+  the keys are invalid. So the dues→checkout flow works right after connecting (test keys included), and Test
+  catches bad keys.
 
 ### FE (apps/org)
 - New authed route `routes/payment-settings.tsx` (officer; server enforces admin + Treasurer/President + 2FA
@@ -54,9 +60,8 @@ handlers in `handlers/member/duesspecialassessments/`):
 - `features/payment-settings/use-gateway-config.ts`: `useQuery` (getDuesGatewayConfig) + mutations for
   upsert / test / disconnect (the generated SDK fns).
 - `features/payment-settings/PaymentSettings.tsx`:
-  - **Status:** connected ✓ / "Not connected" / "Saved — tap Test to verify"; masked public key
-    (`pk_…last4`); `lastTestAt` if present; whether the keys are **test or live** (derive from the `pk_test_`
-    / `pk_live_` prefix the GET returns — publicKey is non-secret).
+  - **Status:** "Connected ✓" / "Not connected"; the public key shown **plain** (non-secret); `lastTestAt`
+    if present; whether the keys are **test or live** (derive from the `pk_test_` / `pk_live_` prefix).
   - **Connect form:** provider fixed to `paymongo`; inputs for public key, secret key, webhook secret
     (secret + webhook are `type="password"`, write-only — never pre-filled from the server). Submit → PUT.
   - **Test connection** button → POST …/test → toast result + refetch status.
@@ -75,13 +80,14 @@ handlers in `handlers/member/duesspecialassessments/`):
 2. Both are stored **encrypted** (`encryptCredential` / `config.auth.secret`) — never plaintext, never logged.
 3. Officer-gated server-side (admin + Treasurer/President; 2FA in prod). FE shows the form but the engine is
    the gate; 403 → friendly alert (no crash).
-4. `connected` reflects a real verified test, not merely that creds were saved.
+4. `connected=true` is set on upsert (creds present → usable, matches the seed); the **Test** button validates
+   the keys against PayMongo and downgrades `connected` to false on auth failure, so a green "Connected" that
+   passed Test is genuinely verified. (`test` must not 500 on a missing config.)
 5. The webhook URL shown is informational; registering it in PayMongo is a manual founder step (documented).
 
 ## Money / a11y
 
-- No money math on this screen. Public key is shown masked (last 4) — it's non-secret but masking keeps the UI
-  clean.
+- No money math on this screen. Public key shown plain (non-secret; no masking).
 - a11y (DESIGN.md): 18px, ≥48px tap, labeled inputs, `type="password"` for secrets, errors `role="alert"`,
   copy-webhook-URL button labeled, one primary task (connect) per screen, sonner toasts.
 
@@ -101,9 +107,10 @@ handlers in `handlers/member/duesspecialassessments/`):
 ## Engine ADDITIVE invariant
 
 `git diff main -- services/api-ts/src specs/ packages/sdk-ts/src/generated` contains ONLY: `dues.tsp`
-(`webhookSecret` field), `upsertDuesGatewayConfig.ts` (encrypt webhookSecret + strip both),
-`getDuesGatewayConfig.ts` (strip both), regenerated openapi/routes/validators/SDK, and the handler-test
-updates. No other handler/schema change.
+(`webhookSecret` field), `upsertDuesGatewayConfig.ts` (encrypt webhookSecret + `connected:true` + strip both),
+`getDuesGatewayConfig.ts` (strip both), `testDuesGatewayConnection.ts` (real verify + set connected/lastTestAt),
+`paymongo.adapter.ts` (add `verifyCredentials` if absent), regenerated openapi/routes/validators/SDK, and the
+handler tests. No other handler/schema change.
 
 ## Out of scope (flagged)
 

@@ -8,14 +8,16 @@
 
 **Tech Stack:** TypeSpec → OpenAPI → Hono, `@monobase/sdk-ts`, React + TanStack, `@monobase/ui`, sonner, vitest, bun.
 
-## Global Constraints
+## Global Constraints (CORRECTED per adversarial review — source-verified, do not re-litigate)
 
-- **Engine ADDITIVE + 1 security fix only.** Allowed files: `dues.tsp` (add `webhookSecret`), `upsertDuesGatewayConfig.ts`, `getDuesGatewayConfig.ts`, regenerated openapi/routes/validators/SDK, handler tests. No other engine logic.
-- **Secret leak fix (security):** both `getDuesGatewayConfig` and `upsertDuesGatewayConfig` must strip **`encryptedSecret` AND `encryptedWebhookSecret`** from every response. `secretKey`/`webhookSecret` are write-only — never returned.
-- **Encrypt** `webhookSecret` with `encryptCredential(body.webhookSecret, config.auth.secret)` → `encryptedWebhookSecret` (mirror the existing `secretKey` → `encryptedSecret` line). Never log plaintext.
-- **`connected` unchanged:** upsert does NOT set `connected`; a successful `POST …/test` does. FE shows "saved — not yet verified" until tested.
-- **Officer auth is server-enforced** (admin + Treasurer/President, 2FA in prod). FE shows the form; a 403 → friendly `role="alert"` (no crash).
-- **FE secret discipline:** secret + webhook inputs are `type="password"`, never pre-filled from the server; the server never sends them back.
+- **Engine ADDITIVE — allowed files (expanded to make the feature actually work):** `dues.tsp` (add `webhookSecret`), `upsertDuesGatewayConfig.ts`, `getDuesGatewayConfig.ts`, **`testDuesGatewayConnection.ts`**, possibly `paymongo.adapter.ts` (add a minimal credential-verify method if one doesn't exist), regenerated openapi/routes/validators/SDK, handler tests. These are completions of incomplete handlers (additive — no breaking change to existing behavior). No OTHER handler/schema logic.
+- **C1 — `connected` MUST be set or checkout always fails.** Checkout requires `connected=true` (`resolve-gateway.ts:52`, `initiateOnlinePayment.ts:36`). The working seed sets `connected:true` on upsert. So: **`upsertDuesGatewayConfig` sets `connected: true`** on both insert and `onConflictDoUpdate.set` (creds present → usable immediately, matching the seed). This is the minimal fix that makes the dues→checkout flow work right after connecting (test keys included).
+- **Test makes `connected` honest (I4):** `testDuesGatewayConnection` must actually validate the secret against PayMongo (decrypt the stored secret → a minimal authenticated PayMongo GET via the adapter). On success: keep `connected=true`, set `lastTestAt=now`, return `{ success:true, message, testedAt }`. On failure: set `connected=false`, `lastTestAt=now`, return `{ success:false, message, testedAt }`. (`GatewayTestResult` in dues.tsp requires `testedAt` — return it.) If the adapter has no verify method, add a small `verifyCredentials()` (authenticated GET, e.g. list webhooks / merchant capabilities → 2xx = valid) — additive.
+- **Secret leak fix (security):** `getDuesGatewayConfig` AND `upsertDuesGatewayConfig` must strip **`encryptedSecret` AND `encryptedWebhookSecret`** from every response. (Verified: `test`/`disconnect` don't return the row, so no fix needed there.) `secretKey`/`webhookSecret` are write-only — never returned, never logged.
+- **Encrypt** `webhookSecret` with `encryptCredential(body.webhookSecret, config.auth.secret)` → `encryptedWebhookSecret`, conditional (only when provided, so a keys-only update doesn't wipe an existing webhook secret). `encryptedSecret` always set (`secretKey` required).
+- **Officer auth is server-enforced** (admin + Treasurer/President, 2FA in prod). FE shows the form; a 403 → friendly `role="alert"` (no crash). GET is admin-only (no position) — a plain admin can view status but PUT 403s (intended friendly-alert path).
+- **FE secret discipline:** secret + webhook inputs are `type="password"`, never pre-filled from the server; the server never sends them back. **Do NOT mask the public key** — PayMongo public keys are non-secret; show it plain (m2). Still use it to detect test-vs-live via the `pk_test_`/`pk_live_` prefix.
+- **Webhook URL host (I2):** the webhook is hit by PayMongo **directly**, not through the SPA. apps/org is a different origin from the API in prod, and `API_BASE` is `${origin}/api` — so do NOT derive the webhook URL from `window.location.origin` or `API_BASE` (would produce an unreachable `…/api/webhooks/…` on the SPA host). Require an explicit public API origin: read `import.meta.env.VITE_API_URL` (the absolute API base) and show `${publicApiOrigin}/webhooks/paymongo/${orgId}`. If `VITE_API_URL` is unset, show the path + an instruction ("your API domain + `/webhooks/paymongo/${orgId}`") rather than a wrong absolute URL. (Verified: the route `/webhooks/paymongo/{organizationId}` is registered + public/CSRF-exempt.)
 - **Regen + commit generated files** (CI git-diff gate). **No `/api` prefix** in routes; restart API after route changes (none new here — endpoints exist).
 - **Confirm, don't invent:** SDK fn names (`getDuesGatewayConfig`, `upsertDuesGatewayConfig`, `disconnectDuesGateway`, `testDuesGatewayConnection`) + their option shapes + the `GatewayConfig`/response type — read `packages/sdk-ts/src/generated` before coding the FE.
 - **Version:** v0.1.15.0 at ship.
@@ -44,15 +46,15 @@ cd ../../services/api-ts && bun run generate
 ```
 Confirm `UpsertDuesGatewayConfigBody` now includes optional `webhookSecret`.
 
-- [ ] **Step 3: Handler — encrypt webhookSecret + strip both (upsert).** Edit `upsertDuesGatewayConfig.ts`:
+- [ ] **Step 3: Handler — encrypt webhookSecret + set connected + strip both (upsert).** Edit `upsertDuesGatewayConfig.ts`:
   - After the existing `ciphertext` line, add (only when provided):
 ```ts
   const encryptedWebhookSecret = body.webhookSecret
     ? encryptCredential(body.webhookSecret, config.auth.secret)
     : undefined
 ```
-  - In `insertRow`, add `...(encryptedWebhookSecret ? { encryptedWebhookSecret } : {})`.
-  - In `onConflictDoUpdate.set`, add `...(encryptedWebhookSecret ? { encryptedWebhookSecret } : {})` (don't clobber an existing webhook secret with undefined when the officer updates only the keys).
+  - In `insertRow`, add `connected: true` AND `...(encryptedWebhookSecret ? { encryptedWebhookSecret } : {})`.
+  - In `onConflictDoUpdate.set`, add `connected: true` AND `...(encryptedWebhookSecret ? { encryptedWebhookSecret } : {})` (don't clobber an existing webhook secret with undefined on a keys-only update). **Setting `connected: true` is the C1 fix** — without it checkout throws `GatewayNotConfiguredError`. (Matches the working seed script.)
   - Change the return strip to remove BOTH encrypted fields:
 ```ts
   const { encryptedSecret: _s, encryptedWebhookSecret: _w, ...safe } = result
@@ -69,25 +71,29 @@ Confirm `UpsertDuesGatewayConfigBody` now includes optional `webhookSecret`.
     : {}
 ```
 
+- [ ] **Step 4b: Handler — make `testDuesGatewayConnection` real (I4) + honest `connected`.** Read `testDuesGatewayConnection.ts` + `paymongo.adapter.ts`. Change the test handler to: load the org's gateway config; if none → `{ success:false, message:'No gateway configured', testedAt }` (do not 500); else decrypt `encryptedSecret` (`decryptCredential(cfg.encryptedSecret, config.auth.secret)`) and make a minimal authenticated PayMongo call via the adapter to validate the key (add `verifyCredentials(secretKey)` to the adapter if absent — an authenticated GET that returns 2xx for a valid key, throws/false otherwise). On success → update the row `connected:true, lastTestAt:now` and return `{ success:true, message, testedAt:now }`; on auth failure → update `connected:false, lastTestAt:now`, return `{ success:false, message, testedAt:now }`. Return shape must satisfy `GatewayTestResult` (includes `testedAt`). Wrap the network call so a PayMongo/network error becomes `{ success:false }` (or a 502), never an unhandled throw.
+  > This keeps the C1 "works immediately" (upsert already set `connected:true`) while making Test a real verification that downgrades `connected` if the keys are bad. The handler test mocks the adapter (no real network in tests).
+
 - [ ] **Step 5: Regen SDK.**
 ```bash
 bun run --filter @monobase/sdk-ts generate
 ```
-Confirm `UpsertDuesGatewayConfig` request type has optional `webhookSecret`.
+Confirm `UpsertDuesGatewayConfig` request type has optional `webhookSecret` and `GatewayTestResult`/test response carries `testedAt`.
 
-- [ ] **Step 6: Tests (TDD-after for the existing handlers).** Find the existing tests for these handlers (grep `getDuesGatewayConfig`/`upsertDuesGatewayConfig` under `**/*.test.ts`). Add/extend cases:
-  - upsert with `webhookSecret` → row has `encryptedWebhookSecret` set (decrypts back to the input via `decryptCredential`); response object has **neither** `encryptedSecret` nor `encryptedWebhookSecret`.
-  - upsert WITHOUT `webhookSecret` (keys-only update) → does not clobber an existing `encryptedWebhookSecret`.
-  - get → response has neither encrypted field (assert `encryptedWebhookSecret` is absent — the leak fix).
+- [ ] **Step 6: Tests (TDD).** Find the existing tests for these handlers (grep `DuesGateway` under `**/*.test.ts`). Add/extend cases:
+  - **upsert** with `webhookSecret` → row has `encryptedWebhookSecret` set (decrypts back via `decryptCredential`) AND **`connected === true`**; response has **neither** `encryptedSecret` nor `encryptedWebhookSecret`.
+  - upsert WITHOUT `webhookSecret` (keys-only update) → does not clobber an existing `encryptedWebhookSecret`; still sets `connected=true`.
+  - **get** → response has neither encrypted field (assert `encryptedWebhookSecret` absent — the leak fix).
+  - **test** (mock the adapter's `verifyCredentials`): valid key → returns `{success:true, testedAt}` and the row stays `connected:true` + `lastTestAt` set; invalid key → `{success:false, testedAt}` and row becomes `connected:false`; no config → `{success:false}` (not a 500).
   Run:
 ```bash
-cd services/api-ts && bun test duesGateway && bun run typecheck
+cd services/api-ts && bun test DuesGateway && bun run typecheck
 ```
-Expected: green. (If no handler test files exist for these, create `upsertDuesGatewayConfig.test.ts` + `getDuesGatewayConfig.test.ts` mirroring a sibling handler test — the new-code-gate also wants `<handler>.test.ts` siblings if these handlers count as "new"; they're pre-existing, but adding the tests is correct regardless.)
+Expected: green. (If no `<handler>.test.ts` files exist for these handlers, create them — the new-code-gate wants exact `<handler>.test.ts` siblings; adding them is correct regardless.)
 
 - [ ] **Step 7: Commit.**
 ```bash
-git add specs/ services/api-ts/src packages/sdk-ts/src/generated && git commit -m "feat(dues): gateway-config webhookSecret field + strip-both-secrets leak fix (B5)"
+git add specs/ services/api-ts/src packages/sdk-ts/src/generated && git commit -m "feat(dues): gateway-config webhookSecret + connected-on-upsert + real test-connection + leak fix (B5)"
 ```
 
 ---
@@ -188,11 +194,12 @@ export function useGatewayConfig(orgId: string | null) {
 - [ ] **Step 4: Write failing component test** — `PaymentSettings.test.tsx`: mock `useGatewayConfig` + `useSelectedOrg` + sonner. Assert: not-connected state shows the form; connected state shows "Connected" + masked public key + lastTestAt; submitting the form calls `connect.mutate` with the entered values; secret + webhook inputs are `type="password"`; the webhook URL containing the orgId is rendered; Test + Disconnect call their mutations; a 403/error shows `role="alert"`; the server secret is never rendered (no `sk_` echoed).
 
 - [ ] **Step 5: Implement** — `PaymentSettings.tsx` (mirror the B3 form house style; `Card`/`Input`/`Label`/`Button`, `role="alert"` on error, `min-h-[48px]`):
-  - Read `statusQuery.data` → derive `connected`, masked `publicKey` (`pk_…` + last 4), `isTest = publicKey?.startsWith('pk_test_')`, `lastTestAt`.
+  - Read `statusQuery.data` → derive `connected`, `publicKey` (shown **plain**, not masked — it's non-secret), `isTest = publicKey?.startsWith('pk_test_')`, `lastTestAt`.
+  - Status line: `connected` → "Connected ✓" + (test-mode badge if `isTest`) + last-tested time; else "Not connected."
   - 2FA/officer note up-front (mirror B3: "Requires a Treasurer or President with two-factor authentication enabled.").
-  - Connect form: publicKey (`text`), secretKey (`password`), webhookSecret (`password`) → on submit `connect.mutate(...)` with `onSuccess` toast "Credentials saved — tap Test to verify" + clear the secret inputs; `onError` → alert.
-  - Buttons: **Test connection** (`test.mutate`, toast result), **Disconnect** (confirm then `disconnect.mutate`).
-  - **Webhook URL** block: compute the API host (reuse `API_BASE` from `@/lib/api`, strip a trailing `/api` if the host differs — prefer showing `${apiOrigin}/webhooks/paymongo/${orgId}`) + a copy button + the instruction line + the "test keys work without activation" note.
+  - Connect form: publicKey (`text`), secretKey (`password`), webhookSecret (`password`) → on submit `connect.mutate(...)` with `onSuccess` toast "Credentials saved" + clear the secret inputs; `onError` → alert.
+  - Buttons: **Test connection** (`test.mutate`, toast the result.success/message), **Disconnect** (confirm then `disconnect.mutate`).
+  - **Webhook URL** block: `const publicApiOrigin = import.meta.env.VITE_API_URL` (the absolute API base). If set → show `${publicApiOrigin}/webhooks/paymongo/${orgId}` with a copy button; if unset → show "`<your API domain>`/webhooks/paymongo/${orgId}" as instruction text (do NOT fabricate from `window.origin`/`API_BASE`). Plus the instruction line ("Add in PayMongo → Developers → Webhooks, event `payment.paid`") and the "test keys (`pk_test_`/`sk_test_`) work end-to-end without live activation" note.
   - States: `statusQuery.isLoading` → skeleton; `isError` → ErrorState; no orgId → "Select an organization first."
 
 - [ ] **Step 6: Route + nav.** Create `routes/payment-settings.tsx` (mirror `routes/events.tsx`: `createFileRoute('/payment-settings')`, back-to-dashboard Link, renders `<PaymentSettings/>`). Regen routeTree (`bun run build`, commit `routeTree.gen.ts`). Add a "Payment settings" `<Link to="/payment-settings">` in the dashboard nav (Roster.tsx, next to the events/announcements links).
