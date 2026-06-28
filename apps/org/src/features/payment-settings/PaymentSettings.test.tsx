@@ -1,6 +1,6 @@
 // apps/org/src/features/payment-settings/PaymentSettings.test.tsx
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { render, screen } from '@testing-library/react'
+import { render, screen, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 
 // Mock router — unit tests don't need a full router
@@ -83,7 +83,7 @@ describe('PaymentSettings', () => {
     expect(screen.getByText(/not connected/i)).toBeInTheDocument()
   })
 
-  it('shows "Connected ✓" when connected', () => {
+  it('shows a Connected status badge when connected', () => {
     vi.mocked(useGatewayConfig).mockReturnValue(
       mockHook({
         statusQuery: {
@@ -95,7 +95,7 @@ describe('PaymentSettings', () => {
       })
     )
     render(<PaymentSettings />)
-    expect(screen.getByText(/Connected ✓/)).toBeInTheDocument()
+    expect(screen.getByText('Connected')).toBeInTheDocument()
   })
 
   it('shows test-mode badge when public key starts with pk_test_', () => {
@@ -229,9 +229,8 @@ describe('PaymentSettings', () => {
     expect(vi.mocked(toast.success)).toHaveBeenCalled()
   })
 
-  it('Disconnect button calls disconnect.mutateAsync after confirm', async () => {
+  it('Disconnect opens a confirm dialog and only disconnects after confirming', async () => {
     const disconnectMutateAsync = vi.fn().mockResolvedValue(undefined)
-    vi.spyOn(window, 'confirm').mockReturnValue(true)
     vi.mocked(useGatewayConfig).mockReturnValue(
       mockHook({
         statusQuery: {
@@ -244,7 +243,12 @@ describe('PaymentSettings', () => {
       })
     )
     render(<PaymentSettings />)
-    await userEvent.click(screen.getByRole('button', { name: /disconnect/i }))
+    // Click the trigger — does NOT disconnect yet (no native window.confirm)
+    await userEvent.click(screen.getByRole('button', { name: /^disconnect$/i }))
+    expect(disconnectMutateAsync).not.toHaveBeenCalled()
+    // Confirm inside the dialog
+    const dialog = await screen.findByRole('alertdialog')
+    await userEvent.click(within(dialog).getByRole('button', { name: /disconnect/i }))
     expect(disconnectMutateAsync).toHaveBeenCalled()
   })
 

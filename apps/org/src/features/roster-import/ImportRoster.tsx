@@ -1,7 +1,7 @@
 // apps/org/src/features/roster-import/ImportRoster.tsx
 import { useState } from 'react'
 import { Link } from '@tanstack/react-router'
-import { EmptyState } from '@monobase/ui'
+import { Button, EmptyState } from '@monobase/ui'
 import type { ImportMemberRow, ImportResult } from '@monobase/sdk-ts/generated'
 import { useOrgs, useSelectedOrg } from '../org/use-org'
 import { OrgPicker } from '../org/OrgPicker'
@@ -41,11 +41,11 @@ export function ImportRosterView({
       <div className="flex flex-col gap-4 p-4">
         <h1 className="text-title font-semibold text-foreground">Import complete</h1>
         <ul className="flex flex-col gap-2 text-body">
-          <li className="text-plum-900">✓ {result.imported} new member{result.imported === 1 ? '' : 's'} added</li>
-          <li className="text-plum-700">
+          <li className="text-foreground">✓ {result.imported} new member{result.imported === 1 ? '' : 's'} added</li>
+          <li className="text-text-secondary">
             ↺ {result.skipped} {result.skipped === 1 ? 'already a member' : 'already members'} (skipped)
           </li>
-          <li className={result.failed > 0 ? 'text-[var(--color-error)]' : 'text-plum-500'}>
+          <li className={result.failed > 0 ? 'text-[var(--color-error)]' : 'text-muted-foreground'}>
             ✗ {result.failed} row{result.failed === 1 ? '' : 's'} failed
           </li>
         </ul>
@@ -56,12 +56,9 @@ export function ImportRosterView({
             ))}
           </ul>
         )}
-        <Link
-          to="/"
-          className="min-h-tap inline-flex items-center justify-center rounded-md bg-plum-600 px-4 text-sm font-semibold text-white hover:bg-plum-700 focus-visible:outline focus-visible:outline-2 self-start"
-        >
-          View roster
-        </Link>
+        <Button asChild className="min-h-tap self-start">
+          <Link to="/">View roster</Link>
+        </Button>
       </div>
     )
   }
@@ -75,9 +72,9 @@ export function ImportRosterView({
       <h1 className="text-title font-semibold text-foreground">Import roster</h1>
 
       <label className="flex flex-col gap-1">
-        <span className="text-body font-medium text-plum-900">Membership tier</span>
+        <span className="text-body font-medium text-foreground">Membership tier</span>
         <select
-          className="min-h-tap rounded-md border border-plum-200 bg-white px-3 text-body"
+          className="min-h-tap rounded-md border border-[var(--color-border)] bg-surface px-3 text-body"
           value={tierId}
           onChange={(e) => onTierChange(e.target.value)}
           disabled={tiersLoading}
@@ -90,7 +87,7 @@ export function ImportRosterView({
       </label>
 
       <div className="flex flex-col gap-1">
-        <label htmlFor="roster-file" className="text-body font-medium text-plum-900">Roster CSV file</label>
+        <label htmlFor="roster-file" className="text-body font-medium text-foreground">Roster CSV file</label>
         <input
           id="roster-file"
           type="file"
@@ -99,7 +96,7 @@ export function ImportRosterView({
           onChange={(e) => { const f = e.target.files?.[0]; if (f) onFile(f) }}
         />
         {/* help text is a sibling, NOT inside <label>, so it isn't folded into the input's accessible name */}
-        <span className="text-caption text-plum-500">
+        <span className="text-caption text-muted-foreground">
           Expected columns: firstName, lastName, email, licenseNumber, memberNumber. Email or licenseNumber is required.
         </span>
       </div>
@@ -109,17 +106,17 @@ export function ImportRosterView({
       )}
 
       {parsed && (
-        <div className="flex flex-col gap-2 rounded-lg border border-plum-100 bg-white p-4">
-          <p className="text-body text-plum-900">
+        <div className="flex flex-col gap-2 rounded-lg border border-[var(--color-border-light)] bg-surface p-4">
+          <p className="text-body text-foreground">
             {parsed.stats.total} member{parsed.stats.total === 1 ? '' : 's'} found
           </p>
           {parsed.stats.missingIdentifier > 0 && (
-            <p className="text-caption text-amber-700">
+            <p className="text-caption text-[var(--color-warning)]">
               {parsed.stats.missingIdentifier} with no email or license — these rows will fail.
             </p>
           )}
           {parsed.stats.missingName > 0 && (
-            <p className="text-caption text-amber-700">
+            <p className="text-caption text-[var(--color-warning)]">
               {parsed.stats.missingName} with no first name — will fail if not already a member.
             </p>
           )}
@@ -135,14 +132,14 @@ export function ImportRosterView({
         <p role="alert" className="text-body text-[var(--color-error)]">{importError}</p>
       )}
 
-      <button
+      <Button
         type="button"
         onClick={onImport}
         disabled={!canImport}
-        className="min-h-tap inline-flex items-center justify-center rounded-md bg-plum-600 px-4 text-sm font-semibold text-white hover:bg-plum-700 disabled:opacity-50 disabled:cursor-not-allowed focus-visible:outline focus-visible:outline-2 self-start"
+        className="min-h-tap self-start"
       >
         {importing ? 'Importing…' : `Import ${rowCount || ''} ${rowCount === 1 ? 'member' : 'members'}`.replace(/\s+/g, ' ').trim()}
-      </button>
+      </Button>
     </div>
   )
 }
@@ -176,7 +173,7 @@ export default function ImportRoster() {
     <div className="min-h-screen bg-[var(--color-bg)]">
       <div className="max-w-lg mx-auto pt-4">
         <div className="px-4 pb-2 flex justify-end">
-          <Link to="/" className="text-sm font-medium text-plum-500 hover:text-plum-700">← Roster</Link>
+          <Link to="/" className="inline-flex min-h-tap items-center text-body font-medium text-primary underline">Roster</Link>
         </div>
         {orgs.length > 1 && <div className="px-4 pb-2"><OrgPicker /></div>}
         {!orgId ? (

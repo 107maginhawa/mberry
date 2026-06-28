@@ -63,9 +63,9 @@ export function DuesView({ stats, payments, invoices, paymentsError, invoicesErr
       <div className="flex items-center gap-4">
         <Link
           to="/"
-          className="text-sm font-medium text-plum-500 hover:text-plum-700"
+          className="inline-flex min-h-tap items-center text-body font-medium text-primary underline"
         >
-          ← Roster
+          Roster
         </Link>
         <h1 className="text-title font-semibold text-foreground">Dues</h1>
       </div>
@@ -127,7 +127,7 @@ export function DuesView({ stats, payments, invoices, paymentsError, invoicesErr
             {payments.map((p) => (
               <li
                 key={p.id}
-                className="flex items-center justify-between rounded-lg border border-plum-100 bg-white px-4 py-3"
+                className="flex items-center justify-between rounded-lg border border-[var(--color-border-light)] bg-surface px-4 py-3"
               >
                 <StatusBadge variant={paymentVariant(p.status)}>{p.status}</StatusBadge>
                 <span className="tabular-amount text-body font-medium">{centavosToPhp(p.amount)}</span>
@@ -150,11 +150,11 @@ export function DuesView({ stats, payments, invoices, paymentsError, invoicesErr
             {invoices.map((inv) => (
               <li
                 key={inv.id}
-                className="flex items-center justify-between rounded-lg border border-plum-100 bg-white px-4 py-3"
+                className="flex items-center justify-between rounded-lg border border-[var(--color-border-light)] bg-surface px-4 py-3"
               >
                 <div className="flex flex-col gap-1">
                   {inv.memberName && (
-                    <span className="text-body font-medium text-plum-900">{inv.memberName}</span>
+                    <span className="text-body font-medium text-foreground">{inv.memberName}</span>
                   )}
                   <StatusBadge variant={invoiceVariant(inv.status)}>{inv.status}</StatusBadge>
                 </div>
@@ -179,7 +179,7 @@ export function Dues() {
   if (statsLoading || paymentsLoading || invoicesLoading) {
     return (
       <div className="min-h-screen bg-[var(--color-bg)] flex items-center justify-center">
-        <span className="text-body text-plum-400" role="status" aria-live="polite">
+        <span className="text-body text-muted-foreground" role="status" aria-live="polite">
           Loading…
         </span>
       </div>
@@ -190,8 +190,8 @@ export function Dues() {
     return (
       <div className="min-h-screen bg-[var(--color-bg)]">
         <div className="max-w-lg mx-auto pt-4 p-4">
-          <Link to="/" className="text-sm font-medium text-plum-500 hover:text-plum-700">
-            ← Roster
+          <Link to="/" className="inline-flex min-h-tap items-center text-body font-medium text-primary underline">
+            Roster
           </Link>
           <p className="mt-4 text-body text-muted-foreground">Could not load dues data.</p>
         </div>

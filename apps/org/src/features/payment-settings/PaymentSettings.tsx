@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { toast } from 'sonner'
-import { Card, CardHeader, CardTitle, CardContent, Button, Input, Label } from '@monobase/ui'
+import { Card, CardHeader, CardTitle, CardContent, Button, Input, Label, StatusBadge, ConfirmDialog } from '@monobase/ui'
 import { useSelectedOrg } from '@/features/org/use-org'
 import { useGatewayConfig } from './use-gateway-config'
 
@@ -12,6 +12,7 @@ export function PaymentSettings() {
   const [secretKey, setSecretKey] = useState('')
   const [webhookSecret, setWebhookSecret] = useState('')
   const [connectError, setConnectError] = useState<string | null>(null)
+  const [showDisconnect, setShowDisconnect] = useState(false)
 
   const config = statusQuery.data
   const connected = config?.connected ?? false
@@ -60,13 +61,7 @@ export function PaymentSettings() {
     }
   }
 
-  async function onDisconnect() {
-    if (
-      !window.confirm(
-        'Disconnect PayMongo? Members will not be able to pay online until you reconnect.',
-      )
-    )
-      return
+  async function doDisconnect() {
     try {
       await disconnect.mutateAsync()
       toast.success('PayMongo disconnected.')
@@ -137,14 +132,10 @@ export function PaymentSettings() {
         <div className="mb-4 flex flex-wrap items-center gap-2">
           {connected ? (
             <>
-              <span className="font-semibold text-green-700">Connected ✓</span>
-              {isTest && (
-                <span className="rounded bg-amber-100 px-2 py-0.5 text-xs font-medium text-amber-800">
-                  test mode
-                </span>
-              )}
+              <StatusBadge variant="success">Connected</StatusBadge>
+              {isTest && <StatusBadge variant="warning">Test mode</StatusBadge>}
               {lastTestAt && (
-                <span className="text-sm text-muted-foreground">
+                <span className="text-caption text-muted-foreground">
                   Last tested:{' '}
                   {lastTestAt instanceof Date
                     ? lastTestAt.toLocaleString()
@@ -153,7 +144,7 @@ export function PaymentSettings() {
               )}
             </>
           ) : (
-            <span className="text-muted-foreground">Not connected.</span>
+            <StatusBadge variant="muted">Not connected</StatusBadge>
           )}
         </div>
 
@@ -258,12 +249,25 @@ export function PaymentSettings() {
               variant="destructive"
               className="min-h-[48px]"
               disabled={disconnect.isPending}
-              onClick={() => void onDisconnect()}
+              onClick={() => setShowDisconnect(true)}
             >
               {disconnect.isPending ? 'Disconnecting…' : 'Disconnect'}
             </Button>
           </div>
         )}
+
+        <ConfirmDialog
+          open={showDisconnect}
+          onOpenChange={setShowDisconnect}
+          title="Disconnect PayMongo?"
+          description="Members will not be able to pay online until you reconnect."
+          confirmLabel="Disconnect"
+          variant="high-consequence"
+          onConfirm={() => {
+            setShowDisconnect(false)
+            void doDisconnect()
+          }}
+        />
       </CardContent>
     </Card>
   )
