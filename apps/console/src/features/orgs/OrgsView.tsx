@@ -71,6 +71,23 @@ export default function OrgsView({
       })
     : orgs
 
+  const [sort, setSort] = useState<{ key: 'name' | 'createdAt'; dir: 'asc' | 'desc' }>({
+    key: 'name',
+    dir: 'asc',
+  })
+  const sorted = [...filtered].sort((a, b) => {
+    const dir = sort.dir === 'asc' ? 1 : -1
+    if (sort.key === 'name') return a.name.localeCompare(b.name) * dir
+    const t = (v: OrgRow['createdAt']) =>
+      v instanceof Date ? v.getTime() : Date.parse(String(v)) || 0
+    return (t(a.createdAt) - t(b.createdAt)) * dir
+  })
+  const toggleSort = (key: 'name' | 'createdAt') =>
+    setSort((s) => (s.key === key ? { key, dir: s.dir === 'asc' ? 'desc' : 'asc' } : { key, dir: 'asc' }))
+  const ariaSort = (key: 'name' | 'createdAt') =>
+    sort.key === key ? (sort.dir === 'asc' ? 'ascending' : 'descending') : 'none'
+  const caret = (key: 'name' | 'createdAt') => (sort.key === key ? (sort.dir === 'asc' ? ' ↑' : ' ↓') : '')
+
   return (
     <div className="mx-auto max-w-6xl p-6 flex flex-col gap-6 text-body">
       <div className="flex items-center justify-between">
@@ -174,15 +191,23 @@ export default function OrgsView({
               <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Name</TableHead>
+                <TableHead aria-sort={ariaSort('name')}>
+                  <button type="button" onClick={() => toggleSort('name')} className="font-medium hover:text-foreground">
+                    Name{caret('name')}
+                  </button>
+                </TableHead>
                 <TableHead>Region</TableHead>
                 <TableHead>Type</TableHead>
                 <TableHead>Status</TableHead>
-                <TableHead>Created</TableHead>
+                <TableHead aria-sort={ariaSort('createdAt')}>
+                  <button type="button" onClick={() => toggleSort('createdAt')} className="font-medium hover:text-foreground">
+                    Created{caret('createdAt')}
+                  </button>
+                </TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
-              {filtered.map(org => (
+              {sorted.map(org => (
                 <TableRow key={org.id}>
                   <TableCell>{org.name}</TableCell>
                   <TableCell>{org.region ?? EMDASH}</TableCell>

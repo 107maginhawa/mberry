@@ -1,4 +1,4 @@
-import { createRootRoute, Outlet, useNavigate, useRouterState } from '@tanstack/react-router'
+import { createRootRoute, Link, Outlet, useNavigate, useRouterState } from '@tanstack/react-router'
 import { useEffect, useState } from 'react'
 import { useQueryClient } from '@tanstack/react-query'
 import { AppHeader } from '@monobase/ui'
@@ -7,6 +7,37 @@ import { signOut } from '@/features/auth/sign-in'
 import { API_BASE } from '@/lib/api'
 
 export const Route = createRootRoute({ component: RootGate })
+
+const NAV = [
+  { to: '/', label: 'Roster' },
+  { to: '/import', label: 'Import' },
+  { to: '/dues', label: 'Dues' },
+  { to: '/events', label: 'Events' },
+  { to: '/announcements', label: 'Announcements' },
+  { to: '/payment-settings', label: 'Payment settings' },
+] as const
+
+const NAV_LINK = 'inline-flex min-h-tap items-center text-body font-medium text-muted-foreground hover:text-foreground'
+
+// One primary nav for every authed officer screen (current-location via activeProps),
+// replacing the per-page scattered links (DESIGN.md: consistent nav + orientation).
+function OfficerNav() {
+  return (
+    <>
+      {NAV.map((item) => (
+        <Link
+          key={item.to}
+          to={item.to}
+          activeOptions={item.to === '/' ? { exact: true } : undefined}
+          className={NAV_LINK}
+          activeProps={{ className: `${NAV_LINK} !text-foreground font-semibold underline underline-offset-4` }}
+        >
+          {item.label}
+        </Link>
+      ))}
+    </>
+  )
+}
 
 function RootGate() {
   const { status } = useSession()
@@ -34,7 +65,7 @@ function RootGate() {
   if (status === 'authed') {
     return (
       <>
-        <AppHeader title="Memberry Officer" onSignOut={onSignOut} signingOut={signingOut} />
+        <AppHeader title="Memberry Officer" nav={<OfficerNav />} onSignOut={onSignOut} signingOut={signingOut} />
         <Outlet />
       </>
     )

@@ -59,16 +59,7 @@ export interface DuesViewProps {
 export function DuesView({ stats, payments, invoices, paymentsError, invoicesError }: DuesViewProps) {
   return (
     <div className="flex flex-col gap-6 p-4">
-      {/* Minimal nav */}
-      <div className="flex items-center gap-4">
-        <Link
-          to="/"
-          className="inline-flex min-h-tap items-center text-body font-medium text-primary underline"
-        >
-          Roster
-        </Link>
-        <h1 className="text-title font-semibold text-foreground">Dues</h1>
-      </div>
+      <h1 className="text-title font-semibold text-foreground">Dues</h1>
 
       {/* Dashboard tiles */}
       <section aria-label="Dues summary" className="grid grid-cols-2 gap-3">

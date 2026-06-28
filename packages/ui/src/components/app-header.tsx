@@ -14,15 +14,17 @@ interface AppHeaderProps {
 // Shared authed-app chrome (console + org). Gives every authed screen a persistent
 // header with orientation + the "emergency exit" sign-out (Nielsen #3). One
 // component, no per-app fork (DESIGN.md). Tokens + ≥48px tap targets.
+//
+// Title + sign-out share the top row; nav (when given) sits on its own row that
+// scrolls horizontally so many links survive a phone width without wrapping.
 // ponytail: z-10 is enough — Radix modals/toasts portal above their own stacking
 // context; promote to a z-index token scale if real overlap appears.
 export function AppHeader({ title, nav, onSignOut, signingOut }: AppHeaderProps) {
   return (
     <header className="sticky top-0 z-10 border-b border-[var(--color-border)] bg-[var(--color-surface)]">
-      <div className="mx-auto flex max-w-6xl items-center justify-between gap-4 px-4 py-3">
-        <span className="text-large font-semibold text-foreground">{title}</span>
-        <div className="flex items-center gap-2">
-          {nav}
+      <div className="mx-auto max-w-6xl px-4">
+        <div className="flex items-center justify-between gap-4 py-3">
+          <span className="text-large font-semibold text-foreground">{title}</span>
           {onSignOut && (
             <Button
               variant="ghost"
@@ -35,6 +37,14 @@ export function AppHeader({ title, nav, onSignOut, signingOut }: AppHeaderProps)
             </Button>
           )}
         </div>
+        {nav && (
+          <nav
+            aria-label="Primary"
+            className="flex items-center gap-4 overflow-x-auto whitespace-nowrap pb-2"
+          >
+            {nav}
+          </nav>
+        )}
       </div>
     </header>
   )

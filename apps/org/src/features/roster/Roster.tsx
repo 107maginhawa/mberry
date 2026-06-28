@@ -1,5 +1,6 @@
+import { useState } from 'react'
 import { Link } from '@tanstack/react-router'
-import { Button, EmptyState, StatusBadge } from '@monobase/ui'
+import { Button, EmptyState, Input, StatusBadge } from '@monobase/ui'
 import { useOrgs, useSelectedOrg } from '../org/use-org'
 import { OrgPicker } from '../org/OrgPicker'
 import { useRoster, type RosterMember } from './use-roster'
@@ -8,9 +9,6 @@ import { useRoster, type RosterMember } from './use-roster'
 // Others fall through to variant="muted" with the raw status text.
 const KNOWN_STATUSES = new Set(['active', 'grace', 'lapsed', 'pending', 'suspended'])
 type KnownStatus = 'active' | 'grace' | 'lapsed' | 'pending' | 'suspended'
-
-// Shared nav-link style — ≥48px tap target, token color (DESIGN.md).
-const NAV_LINK = 'inline-flex min-h-tap items-center text-body font-medium text-primary underline'
 
 // ─── Presentational ─────────────────────────────────────────────────────────
 
@@ -25,6 +23,16 @@ export interface RosterViewProps {
 
 export function RosterView({ orgName, members, errored, linkFor }: RosterViewProps) {
   const href = linkFor ?? ((m: RosterMember) => `/members/${m.membershipId}/send`)
+  const [query, setQuery] = useState('')
+  const q = query.trim().toLowerCase()
+  const filtered = q
+    ? members.filter(
+        (m) =>
+          m.name.toLowerCase().includes(q) ||
+          (m.memberNumber ?? '').toLowerCase().includes(q) ||
+          m.status.toLowerCase().includes(q),
+      )
+    : members
 
   if (errored) {
     return (
@@ -53,8 +61,19 @@ export function RosterView({ orgName, members, errored, linkFor }: RosterViewPro
   return (
     <div className="flex flex-col gap-4 p-4">
       {orgName && <h1 className="text-title font-semibold text-foreground">{orgName}</h1>}
+      <Input
+        type="search"
+        value={query}
+        onChange={(e: React.ChangeEvent<HTMLInputElement>) => setQuery(e.target.value)}
+        placeholder="Search members by name, number, or status"
+        aria-label="Search members"
+        className="min-h-tap"
+      />
+      {filtered.length === 0 ? (
+        <p className="text-body text-muted-foreground">No members match “{query}”.</p>
+      ) : (
       <ul className="flex flex-col gap-3">
-        {members.map((m) => (
+        {filtered.map((m) => (
           <li
             key={m.membershipId}
             className="flex items-center justify-between gap-3 rounded-lg border border-[var(--color-border-light)] bg-surface px-4 py-3"
@@ -80,6 +99,7 @@ export function RosterView({ orgName, members, errored, linkFor }: RosterViewPro
           </li>
         ))}
       </ul>
+      )}
     </div>
   )
 }
@@ -99,19 +119,6 @@ export default function Roster() {
   return (
     <div className="min-h-screen bg-[var(--color-bg)]">
       <div className="max-w-lg mx-auto pt-4">
-        <div className="px-4 pb-2 flex justify-between">
-          <Link to="/import" className={NAV_LINK}>
-            Import roster
-          </Link>
-          <Link to="/dues" className={NAV_LINK}>
-            Dues
-          </Link>
-        </div>
-        <div className="px-4 pb-2 flex gap-6">
-          <Link to="/events" className={NAV_LINK}>Create event</Link>
-          <Link to="/announcements" className={NAV_LINK}>Post announcement</Link>
-          <Link to="/payment-settings" className={NAV_LINK}>Payment settings</Link>
-        </div>
         {orgs.length > 1 && (
           <div className="px-4 pb-2">
             <OrgPicker />

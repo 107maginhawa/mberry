@@ -3,7 +3,9 @@ import react from '@vitejs/plugin-react'
 import tsconfigPaths from 'vite-tsconfig-paths'
 
 export default defineConfig({
-  plugins: [react(), tsconfigPaths()],
+  // tsconfigPaths: include tsconfig.test.json so @/* aliases resolve in test files
+  // (tsconfig.json excludes *.test.* so vite-tsconfig-paths skips them by default).
+  plugins: [react(), tsconfigPaths({ projects: ['./tsconfig.json', './tsconfig.test.json'] })],
   test: {
     environment: 'jsdom',
     setupFiles: ['./src/test-setup.ts'],
