@@ -4,6 +4,17 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+## [0.1.18.0] - 2026-06-28
+
+### Added
+- **Bulk send-pay-link (`apps/org` roster).** Officers can now mint pay-links for many members at once: tap **Select**, check members (or **Select all**), and **Send links to N selected**. Each member gets a pay-link for their oldest outstanding dues; members with no dues are skipped. A money-confirm step gates the batch, links mint one at a time with live progress, and a results screen shows per-member status with **Copy** and **Copy all sent links** (distribute manually until SMS lands). Single-send (custom amount) is unchanged.
+
+### Changed
+- **Cleaner officer navigation.** Removed the redundant per-page "Back to dashboard" / "Roster" links on Events, Announcements, Payment settings, and Import — the shared app header already provides navigation on every screen.
+
+### Fixed
+- Bulk send mints exactly the members shown in the confirmation count (a member hidden by search can no longer be charged past the confirmed number), a failed dues lookup surfaces as an error instead of a false "no dues", and a second bulk send in the same session works correctly.
+
 ## [0.1.17.0] - 2026-06-28
 
 ### Added
