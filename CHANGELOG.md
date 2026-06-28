@@ -4,6 +4,14 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+## [0.1.19.0] - 2026-06-28
+
+### Added
+- **Publish events (`apps/org`).** The Events screen now lists the chapter's events with a status badge each, drafts first. A **Publish** button on draft rows (with a confirm — "Members will see this event and can register") makes the event visible to members, who previously could never see officer-created events. Newly created events appear in the list immediately, ready to publish.
+
+### Fixed
+- A failed publish now shows an error toast instead of silently doing nothing; if an event was already published elsewhere, the list reconciles automatically; and all Publish buttons disable while a publish is in progress so a second one can't be lost.
+
 ## [0.1.18.0] - 2026-06-28
 
 ### Added

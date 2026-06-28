@@ -6,7 +6,7 @@ import { useCreateEvent } from './use-create-event'
 
 const EVENT_TYPES = ['assembly', 'seminar', 'social', 'networking', 'fundraiser', 'governance', 'custom'] as const
 
-export function CreateEventForm() {
+export function CreateEventForm({ onCreated }: { onCreated?: () => void } = {}) {
   const { orgId } = useSelectedOrg()
   const create = useCreateEvent(orgId)
   const [title, setTitle] = useState('')
@@ -44,6 +44,7 @@ export function CreateEventForm() {
         onSuccess: () => {
           toast.success('Event created')
           setTitle(''); setStart(''); setEnd(''); setLocation(''); setCapacity(''); setFeePhp(''); setDescription('')
+          onCreated?.()
         },
         onError: () => toast.error('Could not create the event'),
       },
