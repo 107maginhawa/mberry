@@ -24,7 +24,7 @@ export function IdCardView() {
   if (isError) {
     return (
       <Card><CardHeader><CardTitle className="text-body font-semibold text-muted-foreground">Membership card</CardTitle></CardHeader>
-        <CardContent><ErrorState message="Couldn't load your card. Please refresh." /></CardContent>
+        <CardContent><ErrorState bare message="Couldn't load your card. Please refresh." /></CardContent>
       </Card>
     )
   }

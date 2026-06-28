@@ -32,7 +32,7 @@ export function EventsTile() {
       <Card>
         <CardHeader><Title /></CardHeader>
         <CardContent>
-          <ErrorState message="We couldn't load events." onRetry={() => void refetch()} />
+          <ErrorState bare message="We couldn't load events." onRetry={() => void refetch()} />
         </CardContent>
       </Card>
     )
