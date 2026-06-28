@@ -138,7 +138,7 @@ export function StandingHero() {
           </>
         ) : (
           <div className="space-y-3 text-center">
-            <p className="text-section font-semibold text-[var(--color-success)]">
+            <p className="text-section font-semibold text-success">
               You&rsquo;re in good standing
             </p>
             <p className="text-body text-muted-foreground">No dues to pay right now.</p>

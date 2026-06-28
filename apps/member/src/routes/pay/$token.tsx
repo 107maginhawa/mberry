@@ -25,7 +25,7 @@ function PayTokenPage() {
 
   if (state.kind === 'loading') {
     return (
-      <div
+      <main
         role="status"
         aria-label="Loading payment details"
         className="min-h-screen flex items-center justify-center bg-background p-4"
@@ -36,19 +36,19 @@ function PayTokenPage() {
           <Skeleton className="h-6 w-1/2 mx-auto" />
           <Skeleton className="min-h-tap w-full" />
         </div>
-      </div>
+      </main>
     )
   }
 
   if (state.kind === 'paying') {
     return (
-      <div
+      <main
         role="status"
         aria-label="Processing payment"
         className="min-h-screen flex items-center justify-center bg-background p-4"
       >
         <p className="text-body text-muted-foreground animate-pulse">Processing your payment…</p>
-      </div>
+      </main>
     )
   }
 

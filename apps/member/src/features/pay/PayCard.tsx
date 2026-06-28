@@ -21,7 +21,7 @@ export function PayCard({ state, paying, onPay }: PayCardProps) {
 
   if (!hasFields) {
     return (
-      <div
+      <main
         role="status"
         aria-label="Loading payment details"
         className="min-h-screen flex items-center justify-center bg-background p-4"
@@ -32,21 +32,21 @@ export function PayCard({ state, paying, onPay }: PayCardProps) {
           <Skeleton className="h-6 w-1/2 mx-auto" />
           <Skeleton className="min-h-tap w-full" />
         </div>
-      </div>
+      </main>
     )
   }
 
   const isCancelled = state.kind === 'cancelled'
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-background p-4">
+    <main className="min-h-screen flex items-center justify-center bg-background p-4">
       <Card className="w-full max-w-sm overflow-hidden">
         {/* Org header band — primary color background */}
         <div className="bg-primary px-6 py-5 text-primary-foreground text-center">
           <p className="text-caption font-medium text-primary-foreground/90">
             Dues payment
           </p>
-          <p className="text-section font-semibold mt-1">{state.orgName}</p>
+          <h1 className="text-section font-semibold mt-1">{state.orgName}</h1>
         </div>
 
         <CardContent className="pt-6 pb-6 space-y-5">
@@ -54,7 +54,7 @@ export function PayCard({ state, paying, onPay }: PayCardProps) {
           {isCancelled && (
             <p
               role="status"
-              className="rounded-md bg-[var(--color-warning-bg)] px-4 py-3 text-center text-body font-medium text-[var(--color-warning)]"
+              className="rounded-md bg-warning-bg px-4 py-3 text-center text-body font-medium text-warning"
             >
               Payment cancelled. You can try again below.
             </p>
@@ -96,11 +96,11 @@ export function PayCard({ state, paying, onPay }: PayCardProps) {
             {paying ? 'Processing…' : isCancelled ? 'Try payment again' : 'Pay now'}
           </Button>
 
-          <p className="text-caption text-center text-muted-foreground">
+          <p className="text-body text-center text-muted-foreground">
             Secure payment via GCash, Maya, or card
           </p>
         </CardContent>
       </Card>
-    </div>
+    </main>
   )
 }

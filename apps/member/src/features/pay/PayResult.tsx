@@ -16,18 +16,18 @@ interface PayResultProps {
 // ErrorState), positive states via EmptyState. Every icon has a text label.
 export function PayResult({ state, onRetry }: PayResultProps) {
   return (
-    <div className="min-h-screen flex items-center justify-center bg-background p-4">
+    <main className="min-h-screen flex items-center justify-center bg-background p-4">
       <div className="w-full max-w-sm">
         <ResultContent state={state} onRetry={onRetry} />
       </div>
-    </div>
+    </main>
   )
 }
 
 // Inline icon nodes — decorative, aria-hidden. No lucide-react dep needed
 // (lucide-react is not resolvable from app-level code in this Bun workspace).
 const SuccessIcon = (
-  <span aria-hidden="true" style={{ fontSize: '2rem', color: 'var(--color-success)' }}>
+  <span aria-hidden="true" className="text-amount text-success">
     ✓
   </span>
 )

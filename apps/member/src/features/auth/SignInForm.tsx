@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { useNavigate } from '@tanstack/react-router'
 import { useQueryClient } from '@tanstack/react-query'
 import { toast } from 'sonner'
-import { Button, Card } from '@monobase/ui'
+import { Button, Card, Input, Label } from '@monobase/ui'
 import { requestOtp, verifyOtp } from '@/features/auth/sign-in'
 import { API_BASE } from '@/lib/api'
 
@@ -86,16 +86,13 @@ export function SignInForm() {
         {step === 'email' ? (
           <form onSubmit={handleSend} className="space-y-4">
             <div className="space-y-1">
-              <label htmlFor="email" className="text-body">
-                Email address
-              </label>
-              <input
+              <Label htmlFor="email">Email address</Label>
+              <Input
                 id="email"
                 type="email"
                 required
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="w-full min-h-tap rounded-md border border-input px-3 text-body"
               />
             </div>
             {error && (
@@ -113,10 +110,8 @@ export function SignInForm() {
               We sent a 6-digit code to your email. Enter it below to sign in.
             </p>
             <div className="space-y-1">
-              <label htmlFor="otp" className="text-body">
-                6-digit code
-              </label>
-              <input
+              <Label htmlFor="otp">6-digit code</Label>
+              <Input
                 id="otp"
                 type="text"
                 inputMode="numeric"
@@ -126,7 +121,7 @@ export function SignInForm() {
                 autoFocus
                 value={otp}
                 onChange={(e) => setOtp(e.target.value)}
-                className="w-full min-h-tap rounded-md border border-input px-3 text-body tracking-widest"
+                className="tracking-widest"
               />
             </div>
             {error && (
@@ -137,14 +132,15 @@ export function SignInForm() {
             <Button type="submit" disabled={busy} className="w-full min-h-tap">
               {busy ? 'Verifying…' : 'Verify & sign in'}
             </Button>
-            <button
+            <Button
               type="button"
+              variant="link"
               onClick={handleResend}
               disabled={busy}
-              className="min-h-tap w-full text-body text-primary underline"
+              className="w-full"
             >
               Resend code
-            </button>
+            </Button>
           </form>
         )}
       </Card>
