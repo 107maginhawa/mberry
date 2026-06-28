@@ -113,11 +113,10 @@ export class PayMongoAdapter implements GatewayAdapter {
    * and throws on network/unexpected errors so callers can distinguish
    * "bad key" from "network down".
    *
-   * Uses GET /v1/payment_methods — lightweight, no side-effects, always
-   * available with a valid secret key.
+   * Uses GET /v1/payments?limit=1 — listable with a secret key, no side-effects.
    */
   static async verifyCredentials(secretKey: string): Promise<boolean> {
-    const response = await fetch('https://api.paymongo.com/v1/payment_methods', {
+    const response = await fetch('https://api.paymongo.com/v1/payments?limit=1', {
       headers: {
         'Authorization': `Basic ${btoa(secretKey + ':')}`,
       },

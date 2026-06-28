@@ -394,6 +394,112 @@ describe('PayMongoAdapter.getPaymentStatus', () => {
   });
 });
 
+// ─── verifyCredentials ────────────────────────────────────────────────────────
+
+describe('PayMongoAdapter.verifyCredentials', () => {
+  test('returns true for 2xx response (valid key)', async () => {
+    spyOn(globalThis, 'fetch').mockResolvedValue({
+      ok: true,
+      status: 200,
+      text: async () => '{"data":[]}',
+      json: async () => ({ data: [] }),
+    } as Response);
+
+    const result = await PayMongoAdapter.verifyCredentials('sk_test_valid');
+    expect(result).toBe(true);
+  });
+
+  test('calls GET /v1/payments?limit=1', async () => {
+    let capturedUrl: string | undefined;
+    spyOn(globalThis, 'fetch').mockImplementation(async (url: any) => {
+      capturedUrl = typeof url === 'string' ? url : String(url);
+      return { ok: true, status: 200, text: async () => '{}', json: async () => ({}) } as Response;
+    });
+
+    await PayMongoAdapter.verifyCredentials('sk_test_valid');
+    expect(capturedUrl).toBe('https://api.paymongo.com/v1/payments?limit=1');
+  });
+
+  test('sends Basic auth header with secretKey + colon', async () => {
+    let capturedInit: RequestInit | undefined;
+    spyOn(globalThis, 'fetch').mockImplementation(async (_url: any, init?: RequestInit) => {
+      capturedInit = init;
+      return { ok: true, status: 200, text: async () => '{}', json: async () => ({}) } as Response;
+    });
+
+    await PayMongoAdapter.verifyCredentials('sk_test_mykey');
+    const auth = (capturedInit?.headers as Record<string, string>)?.['Authorization'];
+    expect(auth).toBe(`Basic ${btoa('sk_test_mykey:')}`);
+  });
+
+  test('returns false for 401 (bad key)', async () => {
+    spyOn(globalThis, 'fetch').mockResolvedValue({
+      ok: false,
+      status: 401,
+      text: async () => 'Unauthorized',
+      json: async () => ({}),
+    } as Response);
+
+    const result = await PayMongoAdapter.verifyCredentials('sk_bad_key');
+    expect(result).toBe(false);
+  });
+
+  test('returns false for 403 (forbidden key)', async () => {
+    spyOn(globalThis, 'fetch').mockResolvedValue({
+      ok: false,
+      status: 403,
+      text: async () => 'Forbidden',
+      json: async () => ({}),
+    } as Response);
+
+    const result = await PayMongoAdapter.verifyCredentials('sk_forbidden_key');
+    expect(result).toBe(false);
+  });
+
+  test('throws ExternalServiceError for unexpected status (e.g. 500)', async () => {
+    spyOn(globalThis, 'fetch').mockResolvedValue({
+      ok: false,
+      status: 500,
+      text: async () => 'Internal Server Error',
+      json: async () => ({}),
+    } as Response);
+
+    await expect(PayMongoAdapter.verifyCredentials('sk_test_key')).rejects.toBeInstanceOf(ExternalServiceError);
+  });
+
+  test('ExternalServiceError message contains the unexpected status code', async () => {
+    spyOn(globalThis, 'fetch').mockResolvedValue({
+      ok: false,
+      status: 503,
+      text: async () => 'Service Unavailable',
+      json: async () => ({}),
+    } as Response);
+
+    try {
+      await PayMongoAdapter.verifyCredentials('sk_test_key');
+      expect(true).toBe(false); // should not reach
+    } catch (e: any) {
+      expect(e.message).toContain('503');
+    }
+  });
+
+  test('does NOT log the secret key (no key in error message)', async () => {
+    spyOn(globalThis, 'fetch').mockResolvedValue({
+      ok: false,
+      status: 500,
+      text: async () => 'Error',
+      json: async () => ({}),
+    } as Response);
+
+    const secretKey = 'sk_live_supersecret_12345';
+    try {
+      await PayMongoAdapter.verifyCredentials(secretKey);
+    } catch (e: any) {
+      expect(e.message).not.toContain(secretKey);
+    }
+  });
+});
+
 // ─── createCheckout idempotency ───────────────────────────────────────────────
 
 describe('PayMongoAdapter.createCheckout idempotency', () => {
