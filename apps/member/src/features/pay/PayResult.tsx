@@ -1,4 +1,5 @@
 import { Link } from '@tanstack/react-router'
+import { CheckCircle2, Info } from 'lucide-react'
 import { ErrorState, EmptyState } from '@monobase/ui'
 import type { PayState } from './use-pay-link'
 
@@ -24,18 +25,10 @@ export function PayResult({ state, onRetry }: PayResultProps) {
   )
 }
 
-// Inline icon nodes — decorative, aria-hidden. No lucide-react dep needed
-// (lucide-react is not resolvable from app-level code in this Bun workspace).
-const SuccessIcon = (
-  <span aria-hidden="true" className="text-amount text-success">
-    ✓
-  </span>
-)
-const InfoIcon = (
-  <span aria-hidden="true" style={{ fontSize: '2rem', color: 'var(--color-primary)' }}>
-    ℹ
-  </span>
-)
+// Icon nodes — decorative, aria-hidden (the EmptyState headline is the accessible
+// name). Real lucide icons, not glyph characters (DESIGN.md bans glyph-as-icon).
+const SuccessIcon = <CheckCircle2 aria-hidden="true" className="h-8 w-8 text-success" />
+const InfoIcon = <Info aria-hidden="true" className="h-8 w-8 text-primary" />
 
 function ResultContent({ state, onRetry }: PayResultProps) {
   switch (state.kind) {
