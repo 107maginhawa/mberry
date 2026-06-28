@@ -4,6 +4,18 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+## [0.1.22.0] - 2026-06-28
+
+Impeccable technical audit (a11y / perf / theming / responsive / anti-patterns) across `packages/ui` + all three apps, followed by full P1→P3 remediation. Report: `docs/audits/impeccable-audit-2026-06-28.md`. All four surfaces scored in the "Good" band with no P0s; fixes land in the shared design system where possible (no per-app forks).
+
+### Fixed
+- **Readable shared components.** Form labels, table text, and select menus rendered below the 16px floor (shadcn defaults left un-retuned); they now use the 18px design-system tokens. Select controls are a full 48px tap target. Older users on phones can read and tap them.
+- **Officer "Send pay-link" no longer reloads the whole app.** The most-used roster action was a plain link that triggered a full page reload (re-login, re-fetch, lost scroll) on every tap; it's now in-app navigation. Faster and keeps your place on slow mobile connections.
+- **Officer screens show loading skeletons** instead of plain "Loading…" text (Roster, Dues, Events, Payment settings), so the page doesn't jump when data arrives.
+- **Member pay page is now navigable by screen readers.** The login-free pay-link and its result screens gained a page landmark and a real heading — previously absent on the most important money screen.
+- **Console org list** now shows a proper empty state ("Create your first organization") and a friendly error state instead of a bare line of text, and its column sort headers are tappable on touch.
+- **Smaller fixes:** receipts no longer print "Paid —" for a payment with no date (the line is omitted); the dues summary stacks instead of clipping large peso amounts on narrow phones; the brand font preconnects for a faster first paint; hand-rolled sign-in inputs now use the shared field component with its standard focus ring.
+
 ## [0.1.21.2] - 2026-06-28
 
 ### Fixed
