@@ -4,6 +4,31 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+## [0.1.23.0] - 2026-06-28
+
+Second QA remediation batch (the deferred findings from the first lean-apps QA).
+
+### Fixed
+- **Members can see their chapter's events.** The member dashboard listed only
+  web-public events, but chapter events default to internal visibility, so members
+  always saw "No upcoming events." It now lists the org's published events and their
+  RSVP actions.
+- **Members can read their chapter's contact info.** The "Contact your chapter"
+  links silently disappeared for regular members because the org-profile endpoint
+  required officer access; members may now read their own org's public profile
+  (update stays officer-only).
+- **An officer who is also a dues-paying member can pay their own dues.** "Pay dues"
+  picked an org-wide invoice for officers and failed with "Not your invoice"; the
+  dashboard now self-scopes to the member's own invoices. (Matters for the pilot
+  chapter, whose officer is also a member.)
+- **Console create-org returns a clear error on a bad association.** A missing or
+  malformed association id leaked a raw database error as a 500; it now returns a
+  clean validation error.
+
+### Changed
+- The dues summary's "Members Paid 106 / 26" metric (a confusing over-100% ratio
+  that counted paid invoices over members) is now "Payments received" with the count.
+
 ## [0.1.22.1] - 2026-06-28
 
 Follow-up accessibility pass after re-running the impeccable audit on 0.1.22.0. Targets the remaining gaps to lift every surface to an 18+/20 audit score (packages/ui 17→~19, member 17→~19, console 19→20, org 18→~20).
