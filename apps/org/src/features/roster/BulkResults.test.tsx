@@ -70,7 +70,7 @@ describe('BulkResults', () => {
   it('shows an explicit message when nothing was sent', () => {
     render(
       <BulkResults
-        members={[members[0]]}
+        members={[members[0]!]}
         progress={{ done: 1, total: 1 }}
         results={{ m1: { status: 'no-dues' } }}
         onBack={() => {}}

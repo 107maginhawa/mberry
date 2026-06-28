@@ -39,7 +39,7 @@ describe('useBulkSend', () => {
     const { result } = renderHook(() => useBulkSend('org1', members))
     await act(async () => { await result.current.start() })
 
-    await waitFor(() => expect(result.current.results['m1'].status).toBe('sent'))
+    await waitFor(() => expect(result.current.results['m1']!.status).toBe('sent'))
     expect(sendPaymentLink).toHaveBeenCalledTimes(1)
     expect(sendPaymentLink).toHaveBeenCalledWith({
       path: { organizationId: 'org1' },
@@ -54,7 +54,7 @@ describe('useBulkSend', () => {
     const members = [{ membershipId: 'm1', personId: 'p1', name: 'Ben' }]
     const { result } = renderHook(() => useBulkSend('org1', members))
     await act(async () => { await result.current.start() })
-    await waitFor(() => expect(result.current.results['m1'].status).toBe('no-dues'))
+    await waitFor(() => expect(result.current.results['m1']!.status).toBe('no-dues'))
     expect(sendPaymentLink).not.toHaveBeenCalled()
   })
 
@@ -70,8 +70,8 @@ describe('useBulkSend', () => {
     const { result } = renderHook(() => useBulkSend('org1', members))
     await act(async () => { await result.current.start() })
     await waitFor(() => expect(result.current.progress.done).toBe(2))
-    expect(result.current.results['m1'].status).toBe('error')
-    expect(result.current.results['m2'].status).toBe('sent')
+    expect(result.current.results['m1']!.status).toBe('error')
+    expect(result.current.results['m2']!.status).toBe('sent')
   })
 
   it('start() is idempotent — a second call does not double-mint', async () => {
