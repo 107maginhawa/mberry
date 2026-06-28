@@ -171,7 +171,7 @@ describe('PaymentSettings', () => {
     expect(secretInput.value).toBe('')
   })
 
-  it('shows error role="alert" when connect fails', () => {
+  it('shows error role="alert" when connect fails', async () => {
     vi.mocked(useGatewayConfig).mockReturnValue(
       mockHook({
         connect: {
@@ -186,9 +186,12 @@ describe('PaymentSettings', () => {
       })
     )
     render(<PaymentSettings />)
-    userEvent.click(screen.getByRole('button', { name: /connect paymongo/i }))
-    // error surfaces via onError callback setting local state → role="alert"
-    // we rely on the submit handler triggering the mock which calls onError synchronously
+    // Fill required fields so the form submits (required attrs block empty submit in jsdom)
+    await userEvent.type(screen.getByLabelText(/payMongo public key/i), 'pk_test_pub')
+    await userEvent.type(screen.getByLabelText(/secret key/i), 'sk_test_sec')
+    await userEvent.click(screen.getByRole('button', { name: /connect paymongo/i }))
+    // mutate mock calls onError synchronously → setConnectError → re-render → role="alert"
+    expect(screen.getByRole('alert')).toHaveTextContent(/two-factor|officer access|could not/i)
   })
 
   it('shows Test connection and Disconnect buttons when connected', () => {
