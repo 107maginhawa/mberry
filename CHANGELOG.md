@@ -4,6 +4,11 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+## [0.1.21.1] - 2026-06-28
+
+### Fixed
+- **Officer app sign-in works in local dev.** The API now trusts `http://localhost:3005` (officer app) and `http://localhost:3006` (console) as origins, alongside `:3004` (member). Before, officers hit "Invalid origin" CSRF errors the moment they tried to sign in or take any action locally. Production origins are unaffected — they come from the explicit `CORS_ORIGINS` env var.
+
 ## [0.1.20.0] - 2026-06-28
 
 UI/UX audit pass over `apps/org`, `apps/member`, and `packages/ui` (impeccable). Fixes land in the shared design system so all three apps benefit, no per-app forks.
