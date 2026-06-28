@@ -43,6 +43,7 @@ HTTP 200
 jsonpath "$.publicKey" == "pk_test_contract_visible"
 jsonpath "$.encryptedSecret" not exists
 jsonpath "$.secretKey" not exists
+jsonpath "$.encryptedWebhookSecret" not exists
 
 
 # 2. Read it back (GET) — non-secret metadata only, no secret of any kind.
@@ -53,3 +54,41 @@ jsonpath "$.provider" == "stripe"
 jsonpath "$.publicKey" == "pk_test_contract_visible"
 jsonpath "$.encryptedSecret" not exists
 jsonpath "$.secretKey" not exists
+jsonpath "$.encryptedWebhookSecret" not exists
+
+
+# [B5] 3. PUT with webhookSecret — encrypted at rest, never returned at wire.
+# BR-65 extension: webhookSecret is write-only just like secretKey. The upsert
+# must store AES-256-GCM ciphertext (encryptedWebhookSecret) but never expose it.
+# C1 fix: upsert now sets connected:true so checkout gates can verify the org is live.
+PUT {{api}}/association/member/dues-gateway/{{org_id}}
+Origin: {{origin}}
+x-csrf-token: {{csrf_token}}
+Content-Type: application/json
+{
+  "provider": "paymongo",
+  "publicKey": "pk_test_paymongo_visible",
+  "secretKey": "sk_test_paymongo_never_returned",
+  "webhookSecret": "whsec_test_paymongo_never_returned"
+}
+HTTP 200
+[Asserts]
+jsonpath "$.encryptedSecret" not exists
+jsonpath "$.encryptedWebhookSecret" not exists
+jsonpath "$.secretKey" not exists
+jsonpath "$.webhookSecret" not exists
+jsonpath "$.connected" == true
+jsonpath "$.provider" == "paymongo"
+jsonpath "$.publicKey" == "pk_test_paymongo_visible"
+
+
+# [B5] 4. GET after webhookSecret upsert — both encrypted fields still absent.
+GET {{api}}/association/member/dues-gateway/{{org_id}}
+HTTP 200
+[Asserts]
+jsonpath "$.provider" == "paymongo"
+jsonpath "$.publicKey" == "pk_test_paymongo_visible"
+jsonpath "$.encryptedSecret" not exists
+jsonpath "$.encryptedWebhookSecret" not exists
+jsonpath "$.secretKey" not exists
+jsonpath "$.webhookSecret" not exists
