@@ -118,5 +118,9 @@ export function useOutstandingInvoices(orgId: string | null) {
     data: hasAnyData ? merged : undefined,
     isLoading: sentQ.isLoading || overdueQ.isLoading,
     isError: (sentQ.isError || overdueQ.isError) && !hasAnyData,
+    refetch: () => {
+      void sentQ.refetch()
+      void overdueQ.refetch()
+    },
   }
 }

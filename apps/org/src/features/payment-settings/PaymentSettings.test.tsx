@@ -1,6 +1,6 @@
 // apps/org/src/features/payment-settings/PaymentSettings.test.tsx
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { render, screen, within } from '@testing-library/react'
+import { render, screen, within, fireEvent } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 
 // Mock router — unit tests don't need a full router
@@ -265,6 +265,24 @@ describe('PaymentSettings', () => {
     )
     render(<PaymentSettings />)
     expect(screen.getByRole('alert')).toBeInTheDocument()
+  })
+
+  it('error: Try again calls statusQuery.refetch', () => {
+    const refetch = vi.fn()
+    vi.mocked(useGatewayConfig).mockReturnValue(
+      mockHook({
+        statusQuery: {
+          isLoading: false,
+          isError: true,
+          data: undefined,
+          error: new Error('Forbidden'),
+          refetch,
+        } as any,
+      })
+    )
+    render(<PaymentSettings />)
+    fireEvent.click(screen.getByRole('button', { name: /try again/i }))
+    expect(refetch).toHaveBeenCalledTimes(1)
   })
 
   it('shows loading skeleton while statusQuery.isLoading', () => {

@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { toast } from 'sonner'
-import { Card, CardHeader, CardTitle, CardContent, Button, Input, Label, StatusBadge, ConfirmDialog } from '@monobase/ui'
+import { Card, CardHeader, CardTitle, CardContent, Button, Input, Label, StatusBadge, ConfirmDialog, ErrorState } from '@monobase/ui'
 import { useSelectedOrg } from '@/features/org/use-org'
 import { useGatewayConfig } from './use-gateway-config'
 
@@ -105,9 +105,10 @@ export function PaymentSettings() {
           <CardTitle>Payment settings</CardTitle>
         </CardHeader>
         <CardContent>
-          <p role="alert" className="text-body text-destructive">
-            {(statusQuery.error as Error)?.message ?? 'Could not load payment settings.'}
-          </p>
+          <ErrorState
+            message="We couldn't load payment settings."
+            onRetry={() => void statusQuery.refetch()}
+          />
           <p className="mt-2 text-caption text-muted-foreground">
             Requires a Treasurer or President with two-factor authentication enabled.
           </p>

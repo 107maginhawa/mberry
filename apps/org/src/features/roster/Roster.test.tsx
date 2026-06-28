@@ -29,8 +29,15 @@ describe('RosterView', () => {
 
   it('shows errored state when roster query fails (e.g. 403 not an officer)', () => {
     render(<RosterView orgName="Chapter A" members={[]} errored />)
-    expect(screen.getByText(/roster unavailable/i)).toBeInTheDocument()
+    expect(screen.getByRole('alert')).toBeInTheDocument()
     expect(screen.getByText(/officer or admin access/i)).toBeInTheDocument()
+  })
+
+  it('errored: Try again calls onRetry', () => {
+    const onRetry = vi.fn()
+    render(<RosterView orgName="Chapter A" members={[]} errored onRetry={onRetry} />)
+    fireEvent.click(screen.getByRole('button', { name: /try again/i }))
+    expect(onRetry).toHaveBeenCalledTimes(1)
   })
 
   it('shows empty state with Import roster CTA', () => {

@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Button, ConfirmDialog, EmptyState, StatusBadge } from '@monobase/ui'
+import { Button, ConfirmDialog, EmptyState, ErrorState, StatusBadge } from '@monobase/ui'
 import type { OrgEvent } from './use-org-events'
 
 const STATUS: Record<string, { label: string; variant: 'muted' | 'success' | 'error' }> = {
@@ -18,11 +18,13 @@ export function EventsList({
   status,
   onPublish,
   publishingId,
+  onRetry,
 }: {
   events: OrgEvent[]
   status: 'idle' | 'loading' | 'ready' | 'empty' | 'error'
   onPublish: (id: string) => void
   publishingId: string | null
+  onRetry?: () => void
 }) {
   const [ask, setAsk] = useState<OrgEvent | null>(null)
 
@@ -31,9 +33,10 @@ export function EventsList({
   }
   if (status === 'error') {
     return (
-      <div role="alert" className="rounded-md bg-error-bg border border-error p-3 text-body text-error">
-        Could not load events. You may need officer or admin access.
-      </div>
+      <ErrorState
+        message="We couldn't load events. You may need officer or admin access."
+        onRetry={onRetry}
+      />
     )
   }
   if (status === 'empty' || status === 'idle') {

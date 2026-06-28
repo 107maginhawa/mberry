@@ -43,4 +43,11 @@ describe('EventsList', () => {
     rerender(<EventsList status="empty" publishingId={null} onPublish={() => {}} events={[]} />)
     expect(screen.getByText(/no events yet/i)).toBeInTheDocument()
   })
+
+  it('error: Try again calls onRetry', () => {
+    const onRetry = vi.fn()
+    render(<EventsList status="error" publishingId={null} onPublish={() => {}} events={[]} onRetry={onRetry} />)
+    fireEvent.click(screen.getByRole('button', { name: /try again/i }))
+    expect(onRetry).toHaveBeenCalledTimes(1)
+  })
 })
