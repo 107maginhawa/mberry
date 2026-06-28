@@ -17,7 +17,7 @@ export function ContactOfficer() {
     'inline-flex min-h-tap items-center justify-center gap-2 rounded-md border border-input bg-background px-4 text-body font-medium text-primary'
 
   return (
-    <section aria-label="Contact your chapter" className="space-y-3 rounded-lg border border-border bg-[var(--color-surface-warm)] p-4">
+    <section aria-label="Contact your chapter" className="space-y-3 rounded-lg border border-border bg-surface-warm p-4">
       <p className="text-body text-muted-foreground">
         Need help? Contact <span className="font-medium text-foreground">{data.name}</span>.
       </p>

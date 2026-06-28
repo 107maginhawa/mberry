@@ -63,13 +63,15 @@ export function ReceiptsTile() {
             {payments.map((p) => {
               // [review] amount is Number from handler but transformer→bigint; Number() at display
               const amountDisplay = centavosToPhp(Number(p.amount))
+              // DESIGN.md bans rendering a bare "—" for missing data — omit the
+              // "Paid {date}" line entirely when paidAt is absent.
               const paidDate = p.paidAt
                 ? new Date(p.paidAt).toLocaleDateString('en-PH', {
                     year: 'numeric',
                     month: 'short',
                     day: 'numeric',
                   })
-                : '—'
+                : null
 
               return (
                 <li key={p.id} className="py-3 flex items-start justify-between gap-2">
@@ -77,9 +79,11 @@ export function ReceiptsTile() {
                     <p className="text-body font-medium text-foreground">
                       {p.receiptNumber ?? p.id}
                     </p>
-                    <p className="text-caption text-muted-foreground">
-                      <span className="font-medium">Paid</span>{' '}{paidDate}
-                    </p>
+                    {paidDate && (
+                      <p className="text-caption text-muted-foreground">
+                        <span className="font-medium">Paid</span>{' '}{paidDate}
+                      </p>
+                    )}
                   </div>
                   <div className="text-right shrink-0">
                     <p className="text-body font-semibold text-foreground">{amountDisplay}</p>

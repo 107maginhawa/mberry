@@ -1,7 +1,7 @@
 import { createRootRoute, Link, Outlet, useNavigate, useRouterState } from '@tanstack/react-router'
 import { useEffect, useState } from 'react'
 import { useQueryClient } from '@tanstack/react-query'
-import { AppHeader } from '@monobase/ui'
+import { AppHeader, Skeleton } from '@monobase/ui'
 import { useSession } from '@/features/auth/use-session'
 import { signOut } from '@/features/auth/sign-in'
 import { API_BASE } from '@/lib/api'
@@ -74,5 +74,9 @@ function RootGate() {
   // Otherwise show the spinner — never render a protected route (and fire its
   // 401/403 queries) for an unauthed user even for a single frame before the
   // redirect effect lands.
-  return <div role="status" aria-label="Loading" className="min-h-screen flex items-center justify-center">…</div>
+  return (
+    <div role="status" aria-label="Loading" className="min-h-screen flex items-center justify-center p-4">
+      <Skeleton className="h-12 w-48" />
+    </div>
+  )
 }

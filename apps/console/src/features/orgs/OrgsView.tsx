@@ -12,6 +12,8 @@ import {
   TableHead,
   TableCell,
   Skeleton,
+  EmptyState,
+  ErrorState,
   centavosToPhp,
 } from '@monobase/ui'
 import type { OrgRow } from './use-orgs'
@@ -97,14 +99,22 @@ export default function OrgsView({
         </Button>
       </div>
 
-      {/* Stats strip */}
-      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
+      {/* Stats strip — grouped so hierarchy isn't a flat 6-card row */}
+      <div className="flex flex-col gap-4">
         {/* Live tiles — always show real values from live tables */}
-        <StatTile label="Organizations" value={total} />
-        <StatTile label="Associations" value={associationsCount ?? EMDASH} />
+        <div className="flex flex-col gap-2">
+          <span className="text-caption uppercase tracking-wide text-muted-foreground">Live counts</span>
+          <div className="grid grid-cols-2 gap-4">
+            <StatTile label="Organizations" value={total} />
+            <StatTile label="Associations" value={associationsCount ?? EMDASH} />
+          </div>
+        </div>
 
         {/* Snapshot-derived tiles — branch on statsStatus first (I1) */}
-        {statsStatus === 'loading' ? (
+        <div className="flex flex-col gap-2">
+          <span className="text-caption uppercase tracking-wide text-muted-foreground">This month (snapshot)</span>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            {statsStatus === 'loading' ? (
           <>
             <StatTile label="Members" value={<Skeleton className="h-7 w-16" />} />
             <StatTile label="Active" value={<Skeleton className="h-7 w-16" />} />
@@ -139,7 +149,9 @@ export default function OrgsView({
             <StatTile label="Revenue" value={EMDASH} />
             <StatTile label="Avg collection" value={EMDASH} />
           </>
-        )}
+            )}
+          </div>
+        </div>
       </div>
 
       {/* Status notes below the strip */}
@@ -166,13 +178,15 @@ export default function OrgsView({
         )}
 
         {orgsStatus === 'error' && (
-          <p role="alert" className="text-destructive">
-            Failed to load organizations.
-          </p>
+          <ErrorState message="Failed to load organizations." />
         )}
 
         {orgsStatus === 'ready' && orgs.length === 0 && (
-          <p className="text-muted-foreground text-body">No organizations yet.</p>
+          <EmptyState
+            headline="No organizations yet"
+            description="Create the first organization to get the platform started."
+            action={{ label: 'Create your first organization', onClick: onCreate }}
+          />
         )}
 
         {orgsStatus === 'ready' && orgs.length > 0 && (
@@ -186,13 +200,21 @@ export default function OrgsView({
               className="max-w-sm min-h-tap"
             />
             {filtered.length === 0 ? (
-              <p className="text-muted-foreground text-body">No organizations match “{query}”.</p>
+              <EmptyState
+                headline="No organizations match your search."
+                description={`No results for “${query}”.`}
+                action={{ label: 'Clear search', onClick: () => setQuery('') }}
+              />
             ) : (
               <Table>
             <TableHeader>
               <TableRow>
                 <TableHead aria-sort={ariaSort('name')}>
-                  <button type="button" onClick={() => toggleSort('name')} className="font-medium hover:text-foreground">
+                  <button
+                    type="button"
+                    onClick={() => toggleSort('name')}
+                    className="min-h-tap inline-flex items-center gap-1 rounded-md px-2 font-medium focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+                  >
                     Name{caret('name')}
                   </button>
                 </TableHead>
@@ -200,7 +222,11 @@ export default function OrgsView({
                 <TableHead>Type</TableHead>
                 <TableHead>Status</TableHead>
                 <TableHead aria-sort={ariaSort('createdAt')}>
-                  <button type="button" onClick={() => toggleSort('createdAt')} className="font-medium hover:text-foreground">
+                  <button
+                    type="button"
+                    onClick={() => toggleSort('createdAt')}
+                    className="min-h-tap inline-flex items-center gap-1 rounded-md px-2 font-medium focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+                  >
                     Created{caret('createdAt')}
                   </button>
                 </TableHead>

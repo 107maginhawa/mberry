@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Button, ConfirmDialog, EmptyState, ErrorState, StatusBadge } from '@monobase/ui'
+import { Button, ConfirmDialog, EmptyState, ErrorState, Skeleton, StatusBadge } from '@monobase/ui'
 import type { OrgEvent } from './use-org-events'
 
 const STATUS: Record<string, { label: string; variant: 'muted' | 'success' | 'error' }> = {
@@ -29,7 +29,13 @@ export function EventsList({
   const [ask, setAsk] = useState<OrgEvent | null>(null)
 
   if (status === 'loading') {
-    return <p role="status" aria-live="polite" className="text-body text-muted-foreground">Loading events…</p>
+    return (
+      <div role="status" aria-live="polite" aria-label="Loading events" className="flex flex-col gap-3">
+        {[0, 1, 2].map((i) => (
+          <Skeleton key={i} className="h-16 w-full rounded-lg" />
+        ))}
+      </div>
+    )
   }
   if (status === 'error') {
     return (

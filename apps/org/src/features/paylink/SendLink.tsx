@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { toast } from 'sonner'
-import { Button, Card, CardContent, CardHeader, CardTitle, ConfirmDialog, ErrorState, centavosToPhp } from '@monobase/ui'
+import { Alert, AlertDescription, Button, Card, CardContent, CardHeader, CardTitle, ConfirmDialog, ErrorState, centavosToPhp } from '@monobase/ui'
 import { listDuesInvoices } from '@monobase/sdk-ts/generated'
 import { Route } from '@/routes/members/$membershipId/send'
 import { useSelectedOrg } from '@/features/org/use-org'
@@ -103,15 +103,15 @@ export function SendLinkView({
       <h1 className="text-title font-semibold text-foreground">Send pay-link to {memberName}</h1>
 
       {state.kind === 'error' && (
-        <div role="alert" className="rounded-md bg-error-bg border border-error p-3 text-body text-error">
-          {state.message}
-        </div>
+        <Alert variant="destructive">
+          <AlertDescription>{state.message}</AlertDescription>
+        </Alert>
       )}
 
       {state.kind === 'revoked' && (
-        <div role="alert" className="rounded-md bg-warning-bg border border-warning p-3 text-body text-warning">
-          Link revoked.
-        </div>
+        <Alert className="border-warning bg-warning-bg text-warning">
+          <AlertDescription>Link revoked.</AlertDescription>
+        </Alert>
       )}
 
       {/* Outstanding invoices */}

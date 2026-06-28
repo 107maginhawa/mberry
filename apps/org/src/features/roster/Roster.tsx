@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
 import { Link } from '@tanstack/react-router'
-import { Button, ConfirmDialog, EmptyState, ErrorState, Input, StatusBadge } from '@monobase/ui'
+import { Button, ConfirmDialog, EmptyState, ErrorState, Input, Skeleton, StatusBadge } from '@monobase/ui'
 import { useOrgs, useSelectedOrg } from '../org/use-org'
 import { OrgPicker } from '../org/OrgPicker'
 import { useRoster, type RosterMember } from './use-roster'
@@ -21,14 +21,11 @@ export interface RosterViewProps {
   errored?: boolean
   /** Retries the roster query (wired to the ErrorState "Try again"). */
   onRetry?: () => void
-  /** Maps a member to a send-pay-link href. Defaults to /members/:id/send */
-  linkFor?: (member: RosterMember) => string
   /** When present, enables bulk select-and-send. */
   orgId?: string
 }
 
-export function RosterView({ orgName, members, errored, onRetry, linkFor, orgId }: RosterViewProps) {
-  const href = linkFor ?? ((m: RosterMember) => `/members/${m.membershipId}/send`)
+export function RosterView({ orgName, members, errored, onRetry, orgId }: RosterViewProps) {
   const [query, setQuery] = useState('')
   const [selecting, setSelecting] = useState(false)
   const [selected, setSelected] = useState<Set<string>>(new Set())
@@ -200,9 +197,14 @@ export function RosterView({ orgName, members, errored, onRetry, linkFor, orgId 
                 )}
                 {!selecting && (
                   <Button asChild className="min-h-tap">
-                    <a href={href(m)} aria-label={`Send pay-link to ${m.name}`}>
+                    <Link
+                      to="/members/$membershipId/send"
+                      params={{ membershipId: m.membershipId }}
+                      search={{ personId: m.personId, name: m.name }}
+                      aria-label={`Send pay-link to ${m.name}`}
+                    >
                       Send pay-link
-                    </a>
+                    </Link>
                   </Button>
                 )}
               </div>
@@ -255,10 +257,10 @@ export default function Roster() {
           </div>
         )}
         {isLoading ? (
-          <div className="flex items-center justify-center py-24">
-            <span className="text-body text-muted-foreground" role="status" aria-live="polite">
-              Loading…
-            </span>
+          <div className="flex flex-col gap-3 p-4" role="status" aria-label="Loading roster">
+            {[0, 1, 2, 3, 4].map((i) => (
+              <Skeleton key={i} className="h-16 w-full rounded-lg" />
+            ))}
           </div>
         ) : (
           <RosterView
@@ -267,9 +269,6 @@ export default function Roster() {
             errored={rosterStatus === 'error'}
             onRetry={refetch}
             orgId={orgId ?? undefined}
-            linkFor={(m) =>
-              `/members/${m.membershipId}/send?personId=${encodeURIComponent(m.personId)}&name=${encodeURIComponent(m.name)}`
-            }
           />
         )}
       </div>

@@ -8,6 +8,7 @@ import {
   type StatusBadgeVariant,
   EmptyState,
   ErrorState,
+  Skeleton,
   centavosToPhp,
 } from '@monobase/ui'
 import { useDuesDashboard, useRecentPayments, useOutstandingInvoices, type DuesStats } from './use-dues'
@@ -72,7 +73,7 @@ export function DuesView({
       <h1 className="text-title font-semibold text-foreground">Dues</h1>
 
       {/* Dashboard tiles */}
-      <section aria-label="Dues summary" className="grid grid-cols-2 gap-3">
+      <section aria-label="Dues summary" className="grid grid-cols-1 sm:grid-cols-2 gap-3">
         <Card>
           <CardHeader className="pb-1">
             <CardTitle className="text-caption text-muted-foreground">Collected</CardTitle>
@@ -179,10 +180,21 @@ export function Dues() {
 
   if (statsLoading || paymentsLoading || invoicesLoading) {
     return (
-      <div className="min-h-screen bg-[var(--color-bg)] flex items-center justify-center">
-        <span className="text-body text-muted-foreground" role="status" aria-live="polite">
-          Loading…
-        </span>
+      <div className="min-h-screen bg-[var(--color-bg)]">
+        <div className="max-w-lg mx-auto pt-4">
+          <div className="flex flex-col gap-6 p-4" role="status" aria-label="Loading dues">
+            <Skeleton className="h-8 w-32" />
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              {[0, 1, 2, 3].map((i) => (
+                <Skeleton key={i} className="h-24 w-full rounded-lg" />
+              ))}
+            </div>
+            <Skeleton className="h-6 w-40" />
+            {[0, 1, 2].map((i) => (
+              <Skeleton key={i} className="h-14 w-full rounded-lg" />
+            ))}
+          </div>
+        </div>
       </div>
     )
   }

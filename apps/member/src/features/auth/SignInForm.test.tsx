@@ -48,12 +48,13 @@ describe('email step', () => {
     expect(screen.getByRole('button', { name: /send code/i })).toBeInTheDocument()
   })
 
-  it('button and input have min-h-tap class (≥48px tap target)', () => {
+  it('button and input meet the ≥48px tap-target floor', () => {
     render(<SignInForm />, { wrapper })
     const btn = screen.getByRole('button', { name: /send code/i })
     expect(btn.className).toMatch(/min-h-tap/)
+    // shared Input enforces the 48px floor via h-12 (DESIGN.md a11y baseline)
     const input = screen.getByLabelText(/email/i)
-    expect(input.className).toMatch(/min-h-tap/)
+    expect(input.className).toMatch(/h-12/)
   })
 
   it('requestOtp ok → advances to code step + toast', async () => {

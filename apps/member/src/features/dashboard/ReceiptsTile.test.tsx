@@ -119,7 +119,7 @@ describe('ReceiptsTile', () => {
     expect(screen.getByText('REC-002')).toBeTruthy()
   })
 
-  it('data: paidAt null shows dash', () => {
+  it('data: paidAt null omits the Paid line (DESIGN.md bans bare "—")', () => {
     mockData({
       isLoading: false,
       isSuccess: true,
@@ -128,7 +128,8 @@ describe('ReceiptsTile', () => {
       ],
     })
     render(<ReceiptsTile />)
-    // null paidAt → '—'
-    expect(screen.getByText('—')).toBeTruthy()
+    // null paidAt → no "Paid {date}" line and no bare dash
+    expect(screen.queryByText(/paid/i)).toBeNull()
+    expect(screen.queryByText('—')).toBeNull()
   })
 })

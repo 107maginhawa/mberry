@@ -21,7 +21,7 @@ export function EventsPage() {
         <EventsList status={status} events={events} onPublish={publish} publishingId={publishingId} onRetry={refetch} />
       </section>
       <section className="flex flex-col gap-4">
-        <h2 className="text-lg font-semibold text-foreground">Create a new event</h2>
+        <h2 className="text-section font-semibold text-foreground">Create a new event</h2>
         <CreateEventForm onCreated={() => qc.invalidateQueries({ queryKey: ['org-events', orgId] })} />
       </section>
     </main>

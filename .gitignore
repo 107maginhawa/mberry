@@ -275,3 +275,6 @@ apps/*/.auth/
 
 # Local code-graph artifact (understand-anything) — regenerated per machine
 .codegraph/
+
+# impeccable skill hook scratch
+**/.impeccable/

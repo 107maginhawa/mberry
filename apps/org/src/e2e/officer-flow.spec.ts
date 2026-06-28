@@ -109,8 +109,8 @@ test('officer signs in, sends a pay-link', async ({ page }) => {
   await expect(page.getByText('Olive Cruz')).toBeVisible()
 
   // ── 6. Click "Send pay-link" link for Olive Cruz ─────────────────────────
-  // Roster.tsx renders: <a aria-label={`Send pay-link to ${m.name}`}>Send pay-link</a>
-  // href = /members/m1/send?personId=p1&name=Olive%20Cruz
+  // Roster.tsx renders a TanStack <Link> (anchor, role=link) aria-label={`Send pay-link to ${m.name}`}
+  // → /members/m1/send?personId=p1&name=Olive%20Cruz (SPA nav, no full reload)
   await page.getByRole('link', { name: /send pay-link to olive cruz/i }).click()
 
   // ── 7. Custom amount form — no invoices (empty stub) → only custom section ──

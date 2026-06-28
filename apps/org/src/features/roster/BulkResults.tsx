@@ -1,6 +1,6 @@
 import { useEffect, useRef } from 'react'
 import { toast } from 'sonner'
-import { Button, StatusBadge } from '@monobase/ui'
+import { Alert, AlertDescription, Button, StatusBadge } from '@monobase/ui'
 import type { BulkMember, BulkResult } from './use-bulk-send'
 
 const STATUS_LABEL: Record<BulkResult['status'], string> = {
@@ -47,9 +47,9 @@ export function BulkResults({
           : `Minting ${progress.done} of ${progress.total}…`}
       </p>
       {done && counts.sent === 0 && (
-        <div role="alert" className="rounded-md bg-warning-bg border border-warning p-3 text-body text-warning">
-          No links sent — no outstanding dues.
-        </div>
+        <Alert className="border-warning bg-warning-bg text-warning">
+          <AlertDescription>No links sent — no outstanding dues.</AlertDescription>
+        </Alert>
       )}
 
       <ul className="flex flex-col gap-3">

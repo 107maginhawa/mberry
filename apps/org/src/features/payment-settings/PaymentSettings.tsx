@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { toast } from 'sonner'
-import { Card, CardHeader, CardTitle, CardContent, Button, Input, Label, StatusBadge, ConfirmDialog, ErrorState } from '@monobase/ui'
+import { Card, CardContent, Button, Input, Label, StatusBadge, ConfirmDialog, ErrorState, Skeleton } from '@monobase/ui'
 import { useSelectedOrg } from '@/features/org/use-org'
 import { useGatewayConfig } from './use-gateway-config'
 
@@ -73,10 +73,7 @@ export function PaymentSettings() {
   if (!orgId) {
     return (
       <Card>
-        <CardHeader>
-          <CardTitle>Payment settings</CardTitle>
-        </CardHeader>
-        <CardContent>
+        <CardContent className="pt-6">
           <p className="text-body text-muted-foreground">Select an organization first.</p>
         </CardContent>
       </Card>
@@ -86,13 +83,12 @@ export function PaymentSettings() {
   if (statusQuery.isLoading) {
     return (
       <Card>
-        <CardHeader>
-          <CardTitle>Payment settings</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <p role="status" className="text-body text-muted-foreground">
-            Loading payment settings…
-          </p>
+        <CardContent className="pt-6">
+          <div role="status" aria-label="Loading payment settings" className="flex flex-col gap-3">
+            <Skeleton className="h-6 w-40" />
+            <Skeleton className="h-12 w-full" />
+            <Skeleton className="h-12 w-full" />
+          </div>
         </CardContent>
       </Card>
     )
@@ -101,10 +97,7 @@ export function PaymentSettings() {
   if (statusQuery.isError) {
     return (
       <Card>
-        <CardHeader>
-          <CardTitle>Payment settings</CardTitle>
-        </CardHeader>
-        <CardContent>
+        <CardContent className="pt-6">
           <ErrorState
             message="We couldn't load payment settings."
             onRetry={() => void statusQuery.refetch()}
@@ -119,10 +112,7 @@ export function PaymentSettings() {
 
   return (
     <Card>
-      <CardHeader>
-        <CardTitle>Payment settings</CardTitle>
-      </CardHeader>
-      <CardContent>
+      <CardContent className="pt-6">
         {/* 2FA / officer note — mirror B3 style */}
         <p className="mb-4 text-body text-muted-foreground">
           Requires a Treasurer or President with two-factor authentication enabled. If you see a
