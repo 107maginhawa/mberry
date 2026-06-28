@@ -28,3 +28,10 @@ export const verifyOtp = (
   baseUrl = `${window.location.origin}/api`,
 ): Promise<{ ok: true } | { ok: false; error: string }> =>
   post('/auth/sign-in/email-otp', { email, otp }, baseUrl)
+
+// better-auth sign-out (POST /auth/sign-out, CSRF-exempt /auth/*). Clears the
+// session cookie server-side; caller invalidates ['session'] + redirects.
+export const signOut = (
+  baseUrl = `${window.location.origin}/api`,
+): Promise<{ ok: true } | { ok: false; error: string }> =>
+  post('/auth/sign-out', {}, baseUrl)

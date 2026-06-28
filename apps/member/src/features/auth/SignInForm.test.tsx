@@ -83,6 +83,11 @@ describe('email step', () => {
     // The heading or description should reference email
     expect(screen.getByText(/email/i)).toBeInTheDocument()
   })
+
+  it('shows "Step 1 of 2" on the email step (multi-step indicator, DESIGN.md)', () => {
+    render(<SignInForm />, { wrapper })
+    expect(screen.getByText(/step 1 of 2/i)).toBeInTheDocument()
+  })
 })
 
 // ── code step ─────────────────────────────────────────────────────────────────
@@ -112,6 +117,11 @@ describe('code step', () => {
   it('copy mentions email', async () => {
     await advanceToCodeStep()
     expect(screen.getByText(/email/i)).toBeInTheDocument()
+  })
+
+  it('shows "Step 2 of 2" on the code step (multi-step indicator, DESIGN.md)', async () => {
+    await advanceToCodeStep()
+    expect(screen.getByText(/step 2 of 2/i)).toBeInTheDocument()
   })
 
   it('verifyOtp ok → invalidateQueries([session]) + navigate(/dashboard)', async () => {

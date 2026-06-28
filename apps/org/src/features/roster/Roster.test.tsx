@@ -1,5 +1,5 @@
 import { describe, it, expect, vi } from 'vitest'
-import { render, screen } from '@testing-library/react'
+import { render, screen, fireEvent } from '@testing-library/react'
 import { RosterView } from './Roster'
 
 // Mock Link as a plain anchor — unit tests for presentational components
@@ -28,5 +28,20 @@ describe('RosterView', () => {
     render(<RosterView orgName="Chapter A" members={[]} />)
     expect(screen.getByText(/no members yet/i)).toBeInTheDocument()
     expect(screen.getByRole('link', { name: /import roster/i })).toHaveAttribute('href', '/import')
+  })
+
+  it('filters the list by the search query (name/number/status)', () => {
+    const many = [
+      { membershipId: 'm1', personId: 'p1', name: 'Olive Cruz', memberNumber: 'A-1', status: 'active' },
+      { membershipId: 'm2', personId: 'p2', name: 'Ben Santos', memberNumber: 'B-2', status: 'lapsed' },
+    ]
+    render(<RosterView orgName="Chapter A" members={many} />)
+    expect(screen.getByText('Olive Cruz')).toBeInTheDocument()
+    expect(screen.getByText('Ben Santos')).toBeInTheDocument()
+    fireEvent.change(screen.getByLabelText(/search members/i), { target: { value: 'olive' } })
+    expect(screen.getByText('Olive Cruz')).toBeInTheDocument()
+    expect(screen.queryByText('Ben Santos')).not.toBeInTheDocument()
+    fireEvent.change(screen.getByLabelText(/search members/i), { target: { value: 'zzz' } })
+    expect(screen.getByText(/no members match/i)).toBeInTheDocument()
   })
 })

@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { toast } from 'sonner'
-import { Button, Card, CardContent, CardHeader, CardTitle, ErrorState, centavosToPhp } from '@monobase/ui'
+import { Button, Card, CardContent, CardHeader, CardTitle, ConfirmDialog, ErrorState, centavosToPhp } from '@monobase/ui'
 import { listDuesInvoices } from '@monobase/sdk-ts/generated'
 import { Route } from '@/routes/members/$membershipId/send'
 import { useSelectedOrg } from '@/features/org/use-org'
@@ -36,15 +36,32 @@ export function SendLinkView({
   const centavos = Math.round(parseFloat(pesoInput) * 100)
   const customValid = pesoInput !== '' && !isNaN(centavos) && centavos > 0
 
+  // Money-step confirmation (DESIGN.md: confirm at every money step + ConfirmDialog
+  // for consequential mutations). A typo'd custom amount or a fat-finger Revoke is
+  // live money — gate both behind an explicit "are you sure".
+  const [ask, setAsk] = useState<
+    null | { title: string; description: string; confirmLabel: string; run: () => void }
+  >(null)
+  const confirmEl = ask ? (
+    <ConfirmDialog
+      open
+      onOpenChange={(o) => { if (!o) setAsk(null) }}
+      title={ask.title}
+      description={ask.description}
+      confirmLabel={ask.confirmLabel}
+      onConfirm={() => { ask.run(); setAsk(null) }}
+    />
+  ) : null
+
   // Sent panel — show once the link is minted
   if (state.kind === 'sent') {
     return (
       <div className="flex flex-col gap-4 p-4 max-w-lg mx-auto">
-        <h1 className="text-title font-semibold text-plum-900">Pay-link for {memberName}</h1>
+        <h1 className="text-title font-semibold text-foreground">Pay-link for {memberName}</h1>
         <Card>
           <CardContent className="flex flex-col gap-4 pt-4">
-            <p className="text-body text-plum-900 break-all">{state.url}</p>
-            <p className="text-caption text-plum-500">Expires {new Date(state.expiresAt).toLocaleDateString('en-PH')}</p>
+            <p className="text-body text-foreground break-all">{state.url}</p>
+            <p className="text-caption text-muted-foreground">Expires {new Date(state.expiresAt).toLocaleDateString('en-PH')}</p>
             <div className="flex gap-3 flex-wrap">
               <Button
                 className="min-h-tap"
@@ -55,17 +72,20 @@ export function SendLinkView({
               >
                 Copy link
               </Button>
-              <a
-                href={`sms:?body=${encodeURIComponent(state.url)}`}
-                className="min-h-tap inline-flex items-center justify-center rounded-md border border-plum-300 px-4 text-sm font-medium text-plum-700 hover:bg-plum-50 focus-visible:outline focus-visible:outline-2"
-                aria-label="Share via SMS"
-              >
-                Share via SMS
-              </a>
+              <Button asChild variant="outline" className="min-h-tap">
+                <a href={`sms:?body=${encodeURIComponent(state.url)}`} aria-label="Share via SMS">
+                  Share via SMS
+                </a>
+              </Button>
               <Button
                 variant="destructive"
                 className="min-h-tap"
-                onClick={onRevoke}
+                onClick={() => setAsk({
+                  title: 'Revoke this pay-link?',
+                  description: `${memberName} won't be able to use this link anymore. You can send a new one anytime.`,
+                  confirmLabel: 'Yes, revoke',
+                  run: onRevoke,
+                })}
                 aria-label="Revoke link"
               >
                 Revoke
@@ -73,22 +93,23 @@ export function SendLinkView({
             </div>
           </CardContent>
         </Card>
+        {confirmEl}
       </div>
     )
   }
 
   return (
     <div className="flex flex-col gap-4 p-4 max-w-lg mx-auto">
-      <h1 className="text-title font-semibold text-plum-900">Send pay-link to {memberName}</h1>
+      <h1 className="text-title font-semibold text-foreground">Send pay-link to {memberName}</h1>
 
       {state.kind === 'error' && (
-        <div role="alert" className="rounded-md bg-red-50 border border-red-200 p-3 text-sm text-red-700">
+        <div role="alert" className="rounded-md bg-error-bg border border-error p-3 text-body text-error">
           {state.message}
         </div>
       )}
 
       {state.kind === 'revoked' && (
-        <div role="alert" className="rounded-md bg-amber-50 border border-amber-200 p-3 text-sm text-amber-700">
+        <div role="alert" className="rounded-md bg-warning-bg border border-warning p-3 text-body text-warning">
           Link revoked.
         </div>
       )}
@@ -103,13 +124,18 @@ export function SendLinkView({
             {invoices.map((inv) => (
               <div key={inv.id} className="flex items-center justify-between gap-3">
                 <div className="flex flex-col gap-0.5">
-                  <span className="text-body font-semibold text-plum-900">{centavosToPhp(inv.amount)}</span>
-                  <span className="text-caption text-plum-500 capitalize">{inv.status}</span>
+                  <span className="text-body font-semibold text-foreground">{centavosToPhp(inv.amount)}</span>
+                  <span className="text-caption text-muted-foreground capitalize">{inv.status}</span>
                 </div>
                 <Button
                   className="min-h-tap"
                   disabled={state.kind === 'minting'}
-                  onClick={() => onSendInvoice(inv.id, inv.amount)}
+                  onClick={() => setAsk({
+                    title: 'Send pay-link?',
+                    description: `Send ${memberName} a payment link for ${centavosToPhp(inv.amount)}?`,
+                    confirmLabel: 'Send pay-link',
+                    run: () => onSendInvoice(inv.id, inv.amount),
+                  })}
                   aria-label={`Send link for ${centavosToPhp(inv.amount)} invoice`}
                 >
                   Send link
@@ -127,7 +153,7 @@ export function SendLinkView({
         </CardHeader>
         <CardContent className="flex flex-col gap-3">
           <div className="flex items-center gap-2">
-            <span className="text-body text-plum-600 font-medium">₱</span>
+            <span className="text-body text-text-secondary font-medium">₱</span>
             <input
               type="number"
               min="0.01"
@@ -136,19 +162,28 @@ export function SendLinkView({
               aria-label="Amount in pesos"
               value={pesoInput}
               onChange={(e) => setPesoInput(e.target.value)}
-              className="flex-1 rounded-md border border-plum-200 px-3 py-2 text-body text-plum-900 focus:outline-none focus:ring-2 focus:ring-plum-500 min-h-tap"
+              className="flex-1 rounded-md border border-[var(--color-border)] px-3 py-2 text-body text-foreground focus:outline-none focus:ring-2 focus:ring-[var(--color-ring)] min-h-tap"
             />
           </div>
           <Button
             className="min-h-tap"
             disabled={!customValid || state.kind === 'minting'}
-            onClick={() => { if (customValid) onSendCustom(centavos) }}
+            onClick={() => {
+              if (!customValid) return
+              setAsk({
+                title: 'Send pay-link?',
+                description: `Send ${memberName} a payment link for ${centavosToPhp(centavos)}?`,
+                confirmLabel: 'Send pay-link',
+                run: () => onSendCustom(centavos),
+              })
+            }}
             aria-label="Send custom amount link"
           >
             {state.kind === 'minting' ? 'Minting…' : 'Send link'}
           </Button>
         </CardContent>
       </Card>
+      {confirmEl}
     </div>
   )
 }

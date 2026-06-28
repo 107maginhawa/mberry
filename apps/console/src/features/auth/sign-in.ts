@@ -16,3 +16,19 @@ export async function signIn(
   const body = await res.json().catch(() => ({}))
   return { ok: false, error: (body as { message?: string }).message ?? 'Sign-in failed' }
 }
+
+// better-auth sign-out (POST /auth/sign-out, CSRF-exempt /auth/*). Clears the
+// session cookie server-side; caller invalidates ['session'] + redirects.
+export async function signOut(
+  baseUrl = `${window.location.origin}/api`,
+): Promise<{ ok: true } | { ok: false; error: string }> {
+  const res = await fetch(`${baseUrl}/auth/sign-out`, {
+    method: 'POST',
+    credentials: 'include',
+    headers: { 'content-type': 'application/json' },
+    body: '{}',
+  })
+  if (res.ok) return { ok: true }
+  const body = await res.json().catch(() => ({}))
+  return { ok: false, error: (body as { message?: string }).message ?? 'Sign-out failed' }
+}

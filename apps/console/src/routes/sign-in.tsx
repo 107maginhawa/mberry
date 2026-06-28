@@ -1,7 +1,7 @@
 import { createFileRoute, useNavigate } from '@tanstack/react-router'
 import { useQueryClient } from '@tanstack/react-query'
 import { useState, useEffect } from 'react'
-import { Button, Card } from '@monobase/ui'
+import { Button, Card, Input } from '@monobase/ui'
 import { signIn } from '@/features/auth/sign-in'
 import { useSession } from '@/features/auth/use-session'
 import { API_BASE } from '@/lib/api'
@@ -39,13 +39,13 @@ export function SignInPage() {
         <form onSubmit={onSubmit} className="space-y-4">
           <div className="space-y-1">
             <label htmlFor="email" className="text-body">Email</label>
-            <input id="email" type="email" required value={email} onChange={(e) => setEmail(e.target.value)}
-              className="w-full min-h-tap rounded-md border px-3 text-body" />
+            <Input id="email" type="email" required value={email} onChange={(e) => setEmail(e.target.value)}
+              className="min-h-tap" />
           </div>
           <div className="space-y-1">
             <label htmlFor="password" className="text-body">Password</label>
-            <input id="password" type="password" required value={password} onChange={(e) => setPassword(e.target.value)}
-              className="w-full min-h-tap rounded-md border px-3 text-body" />
+            <Input id="password" type="password" required value={password} onChange={(e) => setPassword(e.target.value)}
+              className="min-h-tap" />
           </div>
           {error && <p role="alert" className="text-body text-destructive">{error}</p>}
           <Button type="submit" disabled={busy} className="w-full min-h-tap">{busy ? 'Signing in…' : 'Sign in'}</Button>

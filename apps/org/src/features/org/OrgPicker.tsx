@@ -11,9 +11,9 @@ export function OrgPicker() {
 
   return (
     <label className="flex flex-col gap-1">
-      <span className="text-sm font-medium text-plum-700">Organisation</span>
+      <span className="text-caption font-medium text-text-secondary">Organisation</span>
       <select
-        className="min-h-tap rounded border border-plum-200 bg-white px-3 py-2 text-base text-plum-900"
+        className="min-h-tap rounded border border-[var(--color-border)] bg-surface px-3 py-2 text-body text-foreground"
         value={orgId ?? ''}
         onChange={(e) => setOrgId(e.target.value)}
         aria-label="Select organisation"

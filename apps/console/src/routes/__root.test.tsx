@@ -9,6 +9,9 @@ vi.mock('@tanstack/react-router', () => ({
   useRouterState: vi.fn(),
   Outlet: () => <div>authed-tree</div>,
 }))
+vi.mock('@tanstack/react-query', () => ({
+  useQueryClient: () => ({ invalidateQueries: vi.fn() }),
+}))
 // Card is a styled wrapper — mock it to avoid any design-system side-effects in jsdom.
 vi.mock('@monobase/ui', () => ({
   Card: ({ children, className }: { children: React.ReactNode; className?: string }) => (
@@ -16,6 +19,7 @@ vi.mock('@monobase/ui', () => ({
       {children}
     </div>
   ),
+  AppHeader: ({ title }: { title: string }) => <header>{title}</header>,
 }))
 
 import { useSession } from '@/features/auth/use-session'

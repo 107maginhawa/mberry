@@ -7,16 +7,13 @@ import { requestOtp, verifyOtp } from '@/features/auth/sign-in'
 import { API_BASE } from '@/lib/api'
 
 /**
- * Two-step email-OTP sign-in form.
+ * Two-step email-OTP officer sign-in (passwordless, DESIGN.md). Mirrors the member
+ * app. Step 1: enter email → "Send code". Step 2: enter the 6-digit code.
+ * On verify: invalidate ['session'] + navigate to the roster (/). Prod 2FA for
+ * privileged officer roles still applies on top of the session.
  *
- * Step 1 (email): member enters their email and clicks "Send code".
- * Step 2 (code):  member enters the 6-digit code sent to their email.
- *
- * On successful verify: invalidates the ['session'] query and navigates to /dashboard.
- * Code is sent by email only (phone OTP is a flagged follow-up, not implemented).
- *
- * a11y: 18px base via tokens.css, min-h-tap (≥48px) tap targets, labeled inputs,
- * role=alert on errors, one primary task per screen.
+ * a11y: 18px base, min-h-tap (≥48px) targets, labeled inputs, role=alert errors,
+ * "Step N of 2" indicator, one primary task per screen.
  */
 export function SignInForm() {
   const navigate = useNavigate()
@@ -52,7 +49,7 @@ export function SignInForm() {
     setBusy(false)
     if (res.ok) {
       await qc.invalidateQueries({ queryKey: ['session'] })
-      navigate({ to: '/dashboard' })
+      navigate({ to: '/' })
     } else {
       setError(res.error)
     }
@@ -76,11 +73,11 @@ export function SignInForm() {
     <div className="min-h-screen flex items-center justify-center bg-background p-4">
       <Card className="w-full max-w-sm p-6 space-y-4">
         <div className="space-y-1">
-          {/* Step indicator (DESIGN.md): orient the member in the 2-step flow */}
+          {/* Step indicator (DESIGN.md): orient the officer in the 2-step flow */}
           <p className="text-caption font-medium text-muted-foreground">
             {step === 'email' ? 'Step 1 of 2' : 'Step 2 of 2'}
           </p>
-          <h1 className="text-section font-semibold text-foreground">Member sign in</h1>
+          <h1 className="text-section font-semibold text-foreground">Officer sign in</h1>
         </div>
 
         {step === 'email' ? (

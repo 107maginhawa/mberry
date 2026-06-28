@@ -36,6 +36,8 @@ export function PayCard({ state, paying, onPay }: PayCardProps) {
     )
   }
 
+  const isCancelled = state.kind === 'cancelled'
+
   return (
     <div className="min-h-screen flex items-center justify-center bg-background p-4">
       <Card className="w-full max-w-sm overflow-hidden">
@@ -48,6 +50,15 @@ export function PayCard({ state, paying, onPay }: PayCardProps) {
         </div>
 
         <CardContent className="pt-6 pb-6 space-y-5">
+          {/* Cancelled banner — tell the member it wasn't a glitch; they can retry. */}
+          {isCancelled && (
+            <p
+              role="status"
+              className="rounded-md bg-[var(--color-warning-bg)] px-4 py-3 text-center text-body font-medium text-[var(--color-warning)]"
+            >
+              Payment cancelled. You can try again below.
+            </p>
+          )}
           {/* Big tabular amount (DESIGN.md: .tabular-amount, GCash lesson) */}
           <p
             className="tabular-amount text-amount font-bold text-center text-foreground"
@@ -82,7 +93,7 @@ export function PayCard({ state, paying, onPay }: PayCardProps) {
             disabled={paying}
             aria-busy={paying}
           >
-            {paying ? 'Processing…' : 'Pay now'}
+            {paying ? 'Processing…' : isCancelled ? 'Try payment again' : 'Pay now'}
           </Button>
 
           <p className="text-caption text-center text-muted-foreground">

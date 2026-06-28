@@ -1,5 +1,6 @@
+import { useState } from 'react'
 import { Link } from '@tanstack/react-router'
-import { EmptyState, StatusBadge } from '@monobase/ui'
+import { Button, EmptyState, Input, StatusBadge } from '@monobase/ui'
 import { useOrgs, useSelectedOrg } from '../org/use-org'
 import { OrgPicker } from '../org/OrgPicker'
 import { useRoster, type RosterMember } from './use-roster'
@@ -22,6 +23,16 @@ export interface RosterViewProps {
 
 export function RosterView({ orgName, members, errored, linkFor }: RosterViewProps) {
   const href = linkFor ?? ((m: RosterMember) => `/members/${m.membershipId}/send`)
+  const [query, setQuery] = useState('')
+  const q = query.trim().toLowerCase()
+  const filtered = q
+    ? members.filter(
+        (m) =>
+          m.name.toLowerCase().includes(q) ||
+          (m.memberNumber ?? '').toLowerCase().includes(q) ||
+          m.status.toLowerCase().includes(q),
+      )
+    : members
 
   if (errored) {
     return (
@@ -40,12 +51,9 @@ export function RosterView({ orgName, members, errored, linkFor }: RosterViewPro
       <div className="flex flex-col gap-4 p-4">
         {orgName && <h1 className="text-title font-semibold text-foreground">{orgName}</h1>}
         <EmptyState headline="No members yet" description="Import your roster to get started." />
-        <Link
-          to="/import"
-          className="min-h-tap inline-flex items-center justify-center rounded-md bg-plum-600 px-4 text-sm font-semibold text-white hover:bg-plum-700 focus-visible:outline focus-visible:outline-2 self-start"
-        >
-          Import roster
-        </Link>
+        <Button asChild className="min-h-tap self-start">
+          <Link to="/import">Import roster</Link>
+        </Button>
       </div>
     )
   }
@@ -53,16 +61,27 @@ export function RosterView({ orgName, members, errored, linkFor }: RosterViewPro
   return (
     <div className="flex flex-col gap-4 p-4">
       {orgName && <h1 className="text-title font-semibold text-foreground">{orgName}</h1>}
+      <Input
+        type="search"
+        value={query}
+        onChange={(e: React.ChangeEvent<HTMLInputElement>) => setQuery(e.target.value)}
+        placeholder="Search members by name, number, or status"
+        aria-label="Search members"
+        className="min-h-tap"
+      />
+      {filtered.length === 0 ? (
+        <p className="text-body text-muted-foreground">No members match “{query}”.</p>
+      ) : (
       <ul className="flex flex-col gap-3">
-        {members.map((m) => (
+        {filtered.map((m) => (
           <li
             key={m.membershipId}
-            className="flex items-center justify-between gap-3 rounded-lg border border-plum-100 bg-white px-4 py-3"
+            className="flex items-center justify-between gap-3 rounded-lg border border-[var(--color-border-light)] bg-surface px-4 py-3"
           >
             <div className="flex flex-col gap-1 min-w-0">
-              <span className="text-body font-medium text-plum-900 truncate">{m.name}</span>
+              <span className="text-body font-medium text-foreground truncate">{m.name}</span>
               {m.memberNumber && (
-                <span className="text-caption text-plum-500">{m.memberNumber}</span>
+                <span className="text-caption text-muted-foreground">{m.memberNumber}</span>
               )}
             </div>
             <div className="flex items-center gap-3 shrink-0">
@@ -71,17 +90,16 @@ export function RosterView({ orgName, members, errored, linkFor }: RosterViewPro
               ) : (
                 <StatusBadge variant="muted">{m.status}</StatusBadge>
               )}
-              <a
-                href={href(m)}
-                className="min-h-tap inline-flex items-center justify-center rounded-md bg-plum-600 px-4 text-sm font-semibold text-white hover:bg-plum-700 focus-visible:outline focus-visible:outline-2"
-                aria-label={`Send pay-link to ${m.name}`}
-              >
-                Send pay-link
-              </a>
+              <Button asChild className="min-h-tap">
+                <a href={href(m)} aria-label={`Send pay-link to ${m.name}`}>
+                  Send pay-link
+                </a>
+              </Button>
             </div>
           </li>
         ))}
       </ul>
+      )}
     </div>
   )
 }
@@ -101,19 +119,6 @@ export default function Roster() {
   return (
     <div className="min-h-screen bg-[var(--color-bg)]">
       <div className="max-w-lg mx-auto pt-4">
-        <div className="px-4 pb-2 flex justify-between">
-          <Link to="/import" className="text-sm font-medium text-plum-500 hover:text-plum-700">
-            + Import roster
-          </Link>
-          <Link to="/dues" className="text-sm font-medium text-plum-500 hover:text-plum-700">
-            Dues →
-          </Link>
-        </div>
-        <div className="px-4 pb-2 flex gap-6">
-          <Link to="/events" className="inline-flex min-h-[48px] items-center text-body font-medium text-primary underline">Create event</Link>
-          <Link to="/announcements" className="inline-flex min-h-[48px] items-center text-body font-medium text-primary underline">Post announcement</Link>
-          <Link to="/payment-settings" className="inline-flex min-h-[48px] items-center text-body font-medium text-primary underline">Payment settings</Link>
-        </div>
         {orgs.length > 1 && (
           <div className="px-4 pb-2">
             <OrgPicker />
@@ -121,7 +126,7 @@ export default function Roster() {
         )}
         {isLoading ? (
           <div className="flex items-center justify-center py-24">
-            <span className="text-body text-plum-400" role="status" aria-live="polite">
+            <span className="text-body text-muted-foreground" role="status" aria-live="polite">
               Loading…
             </span>
           </div>

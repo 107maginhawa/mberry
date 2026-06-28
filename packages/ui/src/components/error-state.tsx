@@ -17,7 +17,7 @@ export function ErrorState({ message, onRetry }: ErrorStateProps) {
       <AlertCircle className="h-8 w-8 text-[var(--color-error)]" aria-hidden="true" />
       <p className="text-body text-[var(--color-error)]">{message}</p>
       {onRetry && (
-        <Button variant="outline" size="sm" onClick={onRetry}>
+        <Button variant="outline" onClick={onRetry}>
           Try again
         </Button>
       )}

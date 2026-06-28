@@ -1,7 +1,10 @@
-import React from 'react'
+import React, { useState } from 'react'
 import {
   Button,
   Card,
+  Input,
+  StatusBadge,
+  type StatusBadgeVariant,
   Table,
   TableHeader,
   TableBody,
@@ -13,6 +16,16 @@ import {
 } from '@monobase/ui'
 import type { OrgRow } from './use-orgs'
 import type { PlatformStats } from './use-platform-stats'
+
+// Org lifecycle status → StatusBadge variant (status = text + color, DESIGN.md).
+function orgStatusVariant(status: string): StatusBadgeVariant {
+  if (status === 'active') return 'success'
+  if (status === 'pending') return 'info'
+  if (status === 'suspended' || status === 'archived') return 'error'
+  return 'muted'
+}
+
+const titleCase = (s: string) => (s ? s.charAt(0).toUpperCase() + s.slice(1) : s)
 
 type Props = {
   orgs: OrgRow[]
@@ -27,11 +40,11 @@ type Props = {
 
 const EMDASH = '—'
 
-function StatTile({ label, value }: { label: string; value: React.ReactNode }) {
+function StatTile({ label, value, mono }: { label: string; value: React.ReactNode; mono?: boolean }) {
   return (
     <Card className="p-4 flex flex-col gap-1">
-      <span className="text-sm text-muted-foreground">{label}</span>
-      <span className="text-2xl font-semibold">{value}</span>
+      <span className="text-caption text-muted-foreground">{label}</span>
+      <span className={`text-section font-semibold${mono ? ' tabular-amount' : ''}`}>{value}</span>
     </Card>
   )
 }
@@ -46,10 +59,39 @@ export default function OrgsView({
   hasSnapshot,
   onCreate,
 }: Props) {
+  const [query, setQuery] = useState('')
+  const filtered = query.trim()
+    ? orgs.filter((o) => {
+        const q = query.trim().toLowerCase()
+        return (
+          o.name.toLowerCase().includes(q) ||
+          (o.region ?? '').toLowerCase().includes(q) ||
+          o.orgType.toLowerCase().includes(q)
+        )
+      })
+    : orgs
+
+  const [sort, setSort] = useState<{ key: 'name' | 'createdAt'; dir: 'asc' | 'desc' }>({
+    key: 'name',
+    dir: 'asc',
+  })
+  const sorted = [...filtered].sort((a, b) => {
+    const dir = sort.dir === 'asc' ? 1 : -1
+    if (sort.key === 'name') return a.name.localeCompare(b.name) * dir
+    const t = (v: OrgRow['createdAt']) =>
+      v instanceof Date ? v.getTime() : Date.parse(String(v)) || 0
+    return (t(a.createdAt) - t(b.createdAt)) * dir
+  })
+  const toggleSort = (key: 'name' | 'createdAt') =>
+    setSort((s) => (s.key === key ? { key, dir: s.dir === 'asc' ? 'desc' : 'asc' } : { key, dir: 'asc' }))
+  const ariaSort = (key: 'name' | 'createdAt') =>
+    sort.key === key ? (sort.dir === 'asc' ? 'ascending' : 'descending') : 'none'
+  const caret = (key: 'name' | 'createdAt') => (sort.key === key ? (sort.dir === 'asc' ? ' ↑' : ' ↓') : '')
+
   return (
-    <div className="p-6 flex flex-col gap-6" style={{ fontSize: '18px' }}>
+    <div className="mx-auto max-w-6xl p-6 flex flex-col gap-6 text-body">
       <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold">Organizations</h1>
+        <h1 className="text-title font-bold">Organizations</h1>
         <Button className="min-h-tap" onClick={onCreate} aria-label="Create organization">
           Create organization
         </Button>
@@ -82,6 +124,7 @@ export default function OrgsView({
             <StatTile label="Active" value={stats.activeMembers} />
             <StatTile
               label="Revenue"
+              mono
               value={centavosToPhp(Number(stats.totalRevenueCents))}
             />
             <StatTile
@@ -129,27 +172,51 @@ export default function OrgsView({
         )}
 
         {orgsStatus === 'ready' && orgs.length === 0 && (
-          <p className="text-muted-foreground text-sm">No organizations yet.</p>
+          <p className="text-muted-foreground text-body">No organizations yet.</p>
         )}
 
         {orgsStatus === 'ready' && orgs.length > 0 && (
-          <Table>
+          <div className="flex flex-col gap-3">
+            <Input
+              type="search"
+              value={query}
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) => setQuery(e.target.value)}
+              placeholder="Search by name, region, or type"
+              aria-label="Search organizations"
+              className="max-w-sm min-h-tap"
+            />
+            {filtered.length === 0 ? (
+              <p className="text-muted-foreground text-body">No organizations match “{query}”.</p>
+            ) : (
+              <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Name</TableHead>
+                <TableHead aria-sort={ariaSort('name')}>
+                  <button type="button" onClick={() => toggleSort('name')} className="font-medium hover:text-foreground">
+                    Name{caret('name')}
+                  </button>
+                </TableHead>
                 <TableHead>Region</TableHead>
                 <TableHead>Type</TableHead>
                 <TableHead>Status</TableHead>
-                <TableHead>Created</TableHead>
+                <TableHead aria-sort={ariaSort('createdAt')}>
+                  <button type="button" onClick={() => toggleSort('createdAt')} className="font-medium hover:text-foreground">
+                    Created{caret('createdAt')}
+                  </button>
+                </TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
-              {orgs.map(org => (
+              {sorted.map(org => (
                 <TableRow key={org.id}>
                   <TableCell>{org.name}</TableCell>
                   <TableCell>{org.region ?? EMDASH}</TableCell>
-                  <TableCell>{org.orgType}</TableCell>
-                  <TableCell>{org.status}</TableCell>
+                  <TableCell>{titleCase(org.orgType)}</TableCell>
+                  <TableCell>
+                    <StatusBadge variant={orgStatusVariant(org.status)}>
+                      {titleCase(org.status)}
+                    </StatusBadge>
+                  </TableCell>
                   <TableCell>
                     {org.createdAt instanceof Date
                       ? org.createdAt.toLocaleDateString()
@@ -158,7 +225,9 @@ export default function OrgsView({
                 </TableRow>
               ))}
             </TableBody>
-          </Table>
+              </Table>
+            )}
+          </div>
         )}
       </div>
     </div>

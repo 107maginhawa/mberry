@@ -60,23 +60,36 @@ export function CreateEventForm() {
         </p>
         {!orgId && <p className="text-body text-muted-foreground">Select an organization first.</p>}
         {alertMessage && <p role="alert" className="mb-3 text-body text-destructive">{alertMessage}</p>}
-        <form onSubmit={onSubmit} className="space-y-4">
-          <div><Label htmlFor="ev-title">Title</Label><Input id="ev-title" value={title} onChange={(e) => setTitle(e.target.value)} required /></div>
-          <div>
-            <Label htmlFor="ev-type">Type</Label>
-            {/* ponytail: native <select> on purpose — @monobase/ui Select is Radix (36px trigger < 48px a11y floor,
-                and not drivable via getByLabelText+fireEvent.change in tests). Native is taller + keyboard/label native. */}
-            <select id="ev-type" value={eventType} onChange={(e) => setEventType(e.target.value)}
-              className="min-h-[48px] w-full rounded-md border bg-background px-3 text-body">
-              {EVENT_TYPES.map((t) => <option key={t} value={t}>{t}</option>)}
-            </select>
-          </div>
-          <div><Label htmlFor="ev-start">Start</Label><Input id="ev-start" type="datetime-local" value={start} onChange={(e) => setStart(e.target.value)} required /></div>
-          <div><Label htmlFor="ev-end">End</Label><Input id="ev-end" type="datetime-local" value={end} onChange={(e) => setEnd(e.target.value)} required /></div>
-          <div><Label htmlFor="ev-loc">Location (optional)</Label><Input id="ev-loc" value={location} onChange={(e) => setLocation(e.target.value)} /></div>
-          <div><Label htmlFor="ev-cap">Capacity (optional)</Label><Input id="ev-cap" type="number" min={1} value={capacity} onChange={(e) => setCapacity(e.target.value)} /></div>
-          <div><Label htmlFor="ev-fee">Registration fee in PHP (optional)</Label><Input id="ev-fee" type="number" min={0} step="0.01" value={feePhp} onChange={(e) => setFeePhp(e.target.value)} /></div>
-          <div><Label htmlFor="ev-desc">Description (optional)</Label><Textarea id="ev-desc" value={description} onChange={(e) => setDescription(e.target.value)} /></div>
+        <form onSubmit={onSubmit} className="space-y-6">
+          {/* Grouped into ≤4-field sections (DESIGN.md: chunk the form, one decision at a time). */}
+          <fieldset className="space-y-4">
+            <legend className="text-body font-semibold text-foreground mb-2">Basics</legend>
+            <div><Label htmlFor="ev-title">Title</Label><Input id="ev-title" value={title} onChange={(e) => setTitle(e.target.value)} required /></div>
+            <div>
+              <Label htmlFor="ev-type">Type</Label>
+              {/* ponytail: native <select> on purpose — @monobase/ui Select is Radix (36px trigger < 48px a11y floor,
+                  and not drivable via getByLabelText+fireEvent.change in tests). Native is taller + keyboard/label native. */}
+              <select id="ev-type" value={eventType} onChange={(e) => setEventType(e.target.value)}
+                className="min-h-[48px] w-full rounded-md border bg-background px-3 text-body">
+                {EVENT_TYPES.map((t) => <option key={t} value={t}>{t}</option>)}
+              </select>
+            </div>
+          </fieldset>
+
+          <fieldset className="space-y-4">
+            <legend className="text-body font-semibold text-foreground mb-2">When</legend>
+            <div><Label htmlFor="ev-start">Start</Label><Input id="ev-start" type="datetime-local" value={start} onChange={(e) => setStart(e.target.value)} required /></div>
+            <div><Label htmlFor="ev-end">End</Label><Input id="ev-end" type="datetime-local" value={end} onChange={(e) => setEnd(e.target.value)} required /></div>
+          </fieldset>
+
+          <fieldset className="space-y-4">
+            <legend className="text-body font-semibold text-foreground mb-2">Details (optional)</legend>
+            <div><Label htmlFor="ev-loc">Location</Label><Input id="ev-loc" value={location} onChange={(e) => setLocation(e.target.value)} /></div>
+            <div><Label htmlFor="ev-cap">Capacity</Label><Input id="ev-cap" type="number" min={1} value={capacity} onChange={(e) => setCapacity(e.target.value)} /></div>
+            <div><Label htmlFor="ev-fee">Registration fee in PHP</Label><Input id="ev-fee" type="number" min={0} step="0.01" value={feePhp} onChange={(e) => setFeePhp(e.target.value)} /></div>
+            <div><Label htmlFor="ev-desc">Description</Label><Textarea id="ev-desc" value={description} onChange={(e) => setDescription(e.target.value)} /></div>
+          </fieldset>
+
           <Button type="submit" disabled={!orgId || create.isPending} className="min-h-[48px]">
             {create.isPending ? 'Creating…' : 'Create event'}
           </Button>
