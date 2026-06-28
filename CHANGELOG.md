@@ -4,6 +4,11 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+## [0.1.21.2] - 2026-06-28
+
+### Fixed
+- **Dashboard error tiles no longer show a box-in-a-box.** When a member dashboard tile (membership, receipts, events, digital card) failed to load, the error message rendered as a second framed box nested inside the tile's card. The error now fills the tile body flush, with no double frame. The "Try again" retry and screen-reader alert behavior are unchanged.
+
 ## [0.1.21.1] - 2026-06-28
 
 ### Fixed

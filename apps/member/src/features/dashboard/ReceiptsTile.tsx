@@ -39,6 +39,7 @@ export function ReceiptsTile() {
         </CardHeader>
         <CardContent>
           <ErrorState
+            bare
             message="We couldn't load your payment history."
             onRetry={() => void paymentsQuery.refetch()}
           />
