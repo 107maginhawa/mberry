@@ -38,7 +38,10 @@ export function ReceiptsTile() {
           <CardTitle className="text-body font-semibold text-muted-foreground">Payment Receipts</CardTitle>
         </CardHeader>
         <CardContent>
-          <ErrorState message="Could not load your payment history. Please refresh." />
+          <ErrorState
+            message="We couldn't load your payment history."
+            onRetry={() => void paymentsQuery.refetch()}
+          />
         </CardContent>
       </Card>
     )

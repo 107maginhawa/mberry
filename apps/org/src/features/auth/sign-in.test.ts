@@ -30,11 +30,23 @@ describe('officer email-OTP auth', () => {
     )
   })
 
-  it('returns an error on non-2xx', async () => {
+  it('maps a "not found" API message to friendly account copy', async () => {
     vi.stubGlobal('fetch', vi.fn().mockResolvedValue(
       new Response(JSON.stringify({ message: 'Email not found' }), { status: 404 })))
     const res = await verifyOtp('a@b.com', '000000', 'http://localhost/api')
-    expect(res).toEqual({ ok: false, error: 'Email not found' })
+    expect(res).toEqual({
+      ok: false,
+      error: "We couldn't find an account with that email. Check the spelling, or contact your chapter officer.",
+    })
+  })
+
+  it('returns a connection error (no throw) when fetch rejects', async () => {
+    vi.stubGlobal('fetch', vi.fn().mockRejectedValue(new TypeError('Failed to fetch')))
+    const res = await verifyOtp('a@b.com', '000000', 'http://localhost/api')
+    expect(res).toEqual({
+      ok: false,
+      error: "We couldn't reach the server. Check your connection and try again.",
+    })
   })
 
   it('signOut posts to /auth/sign-out', async () => {

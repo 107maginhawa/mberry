@@ -92,7 +92,9 @@ export function ImportRosterView({
           id="roster-file"
           type="file"
           accept=".csv,text/csv"
-          className="text-body"
+          // The native picker button is ~28px tall — below the 48px tap floor.
+          // Style it via file: utilities into a real ≥48px branded button.
+          className="text-body file:mr-4 file:min-h-tap file:cursor-pointer file:rounded-md file:border-0 file:bg-secondary file:px-5 file:text-body file:font-medium file:text-secondary-foreground hover:file:bg-primary-subtle"
           onChange={(e) => { const f = e.target.files?.[0]; if (f) onFile(f) }}
         />
         {/* help text is a sibling, NOT inside <label>, so it isn't folded into the input's accessible name */}

@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { render, screen } from '@testing-library/react'
+import { render, screen, fireEvent } from '@testing-library/react'
 
 vi.mock('./use-member-data', () => ({
   useMemberData: vi.fn(),
@@ -38,7 +38,15 @@ describe('ReceiptsTile', () => {
     mockData({ isLoading: false, isError: true })
     render(<ReceiptsTile />)
     expect(screen.getByRole('alert')).toBeTruthy()
-    expect(screen.getByText(/could not load your payment history/i)).toBeTruthy()
+    expect(screen.getByText(/couldn't load your payment history/i)).toBeTruthy()
+  })
+
+  it('error: Try again refetches', () => {
+    const refetch = vi.fn()
+    mockData({ isLoading: false, isError: true, refetch })
+    render(<ReceiptsTile />)
+    fireEvent.click(screen.getByRole('button', { name: /try again/i }))
+    expect(refetch).toHaveBeenCalledTimes(1)
   })
 
   it('empty: shows "No payments yet." when data is empty', () => {

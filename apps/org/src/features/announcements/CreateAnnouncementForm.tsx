@@ -33,7 +33,7 @@ export function CreateAnnouncementForm() {
         <form onSubmit={onSubmit} className="space-y-4">
           <div><Label htmlFor="an-title">Title</Label><Input id="an-title" value={title} onChange={(e) => setTitle(e.target.value)} required /></div>
           <div><Label htmlFor="an-content">Message</Label><Textarea id="an-content" value={content} onChange={(e) => setContent(e.target.value)} required /></div>
-          <Button type="submit" disabled={!orgId || create.isPending} className="min-h-[48px]">
+          <Button type="submit" disabled={!orgId || create.isPending} className="min-h-tap">
             {create.isPending ? 'Posting…' : 'Post announcement'}
           </Button>
         </form>

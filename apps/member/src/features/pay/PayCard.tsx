@@ -43,8 +43,8 @@ export function PayCard({ state, paying, onPay }: PayCardProps) {
       <Card className="w-full max-w-sm overflow-hidden">
         {/* Org header band — primary color background */}
         <div className="bg-primary px-6 py-5 text-primary-foreground text-center">
-          <p className="text-caption font-medium opacity-75 uppercase tracking-wide">
-            Dues Payment
+          <p className="text-caption font-medium text-primary-foreground/90">
+            Dues payment
           </p>
           <p className="text-section font-semibold mt-1">{state.orgName}</p>
         </div>

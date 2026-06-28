@@ -10,7 +10,7 @@ function Title() {
 }
 
 export function EventsTile() {
-  const { isLoading, isError, data } = useMemberEvents()
+  const { isLoading, isError, data, refetch } = useMemberEvents()
   const rsvp = useRsvp()
   // Track local RSVPs so we disable the button after success — the engine has NO 409, a re-RSVP would 500.
   const [registered, setRegistered] = useState<Set<string>>(new Set())
@@ -32,7 +32,7 @@ export function EventsTile() {
       <Card>
         <CardHeader><Title /></CardHeader>
         <CardContent>
-          <ErrorState message="Could not load events. Please refresh." />
+          <ErrorState message="We couldn't load events." onRetry={() => void refetch()} />
         </CardContent>
       </Card>
     )
@@ -86,7 +86,7 @@ export function EventsTile() {
                 ? <p className="text-body text-muted-foreground">Paid registration coming soon.</p>
                 : (
                   <Button
-                    className="min-h-[48px]"
+                    className="min-h-tap"
                     disabled={pendingThis || isRegistered}
                     aria-label={`RSVP to ${ev.title}`}
                     onClick={() => onRsvp(ev)}
