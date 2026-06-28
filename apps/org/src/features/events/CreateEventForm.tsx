@@ -71,7 +71,7 @@ export function CreateEventForm({ onCreated }: { onCreated?: () => void } = {}) 
               {/* ponytail: native <select> on purpose — @monobase/ui Select is Radix (36px trigger < 48px a11y floor,
                   and not drivable via getByLabelText+fireEvent.change in tests). Native is taller + keyboard/label native. */}
               <select id="ev-type" value={eventType} onChange={(e) => setEventType(e.target.value)}
-                className="min-h-[48px] w-full rounded-md border bg-background px-3 text-body">
+                className="min-h-tap w-full rounded-md border bg-background px-3 text-body">
                 {EVENT_TYPES.map((t) => <option key={t} value={t}>{t}</option>)}
               </select>
             </div>
@@ -91,7 +91,7 @@ export function CreateEventForm({ onCreated }: { onCreated?: () => void } = {}) 
             <div><Label htmlFor="ev-desc">Description</Label><Textarea id="ev-desc" value={description} onChange={(e) => setDescription(e.target.value)} /></div>
           </fieldset>
 
-          <Button type="submit" disabled={!orgId || create.isPending} className="min-h-[48px]">
+          <Button type="submit" disabled={!orgId || create.isPending} className="min-h-tap">
             {create.isPending ? 'Creating…' : 'Create event'}
           </Button>
         </form>

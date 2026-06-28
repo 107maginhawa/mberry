@@ -14,7 +14,7 @@ export function ContactOfficer() {
   if (!data || (!data.contactEmail && !data.phone)) return null
 
   const linkClass =
-    'inline-flex min-h-[48px] items-center justify-center gap-2 rounded-md border border-input bg-background px-4 text-body font-medium text-primary'
+    'inline-flex min-h-tap items-center justify-center gap-2 rounded-md border border-input bg-background px-4 text-body font-medium text-primary'
 
   return (
     <section aria-label="Contact your chapter" className="space-y-3 rounded-lg border border-border bg-[var(--color-surface-warm)] p-4">

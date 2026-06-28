@@ -196,7 +196,7 @@ export function PaymentSettings() {
               {connectError}
             </p>
           )}
-          <Button type="submit" disabled={connect.isPending} className="min-h-[48px]">
+          <Button type="submit" disabled={connect.isPending} className="min-h-tap">
             {connect.isPending
               ? 'Saving…'
               : connected

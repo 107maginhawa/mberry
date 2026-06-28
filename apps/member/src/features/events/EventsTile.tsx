@@ -86,7 +86,7 @@ export function EventsTile() {
                 ? <p className="text-body text-muted-foreground">Paid registration coming soon.</p>
                 : (
                   <Button
-                    className="min-h-[48px]"
+                    className="min-h-tap"
                     disabled={pendingThis || isRegistered}
                     aria-label={`RSVP to ${ev.title}`}
                     onClick={() => onRsvp(ev)}
