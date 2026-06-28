@@ -25,11 +25,19 @@ export async function upsertDuesGatewayConfig(
 
   const ciphertext = encryptCredential(body.secretKey, config.auth.secret);
 
+  // Encrypt webhook secret only when provided — don't clobber an existing one
+  // on a keys-only update (officer may set secretKey first, webhookSecret later).
+  const encryptedWebhookSecret = body.webhookSecret
+    ? encryptCredential(body.webhookSecret, config.auth.secret)
+    : undefined;
+
   const insertRow = {
     organizationId,
     provider: body.provider,
     publicKey: body.publicKey,
     encryptedSecret: ciphertext,
+    connected: true, // C1 fix: mark connected on upsert so checkout passes
+    ...(encryptedWebhookSecret ? { encryptedWebhookSecret } : {}),
   } as typeof duesGatewayConfigs.$inferInsert;
 
   const [result] = await db
@@ -41,7 +49,10 @@ export async function upsertDuesGatewayConfig(
         provider: body.provider,
         publicKey: body.publicKey,
         encryptedSecret: ciphertext,
+        connected: true, // C1 fix: keep connected=true on update
         updatedAt: new Date(),
+        // Only overwrite encryptedWebhookSecret when a new one was supplied.
+        ...(encryptedWebhookSecret ? { encryptedWebhookSecret } : {}),
       },
     })
     .returning();
@@ -53,8 +64,8 @@ export async function upsertDuesGatewayConfig(
     throw new Error('Failed to upsert dues gateway config');
   }
 
-  // Never echo the secret (encrypted or plaintext) back to the client. The
-  // wire shape exposes only non-secret metadata.
-  const { encryptedSecret: _stripped, ...safe } = result;
+  // Never echo ANY credential (encrypted or plaintext) back to the client.
+  // Both encryptedSecret and encryptedWebhookSecret are write-only.
+  const { encryptedSecret: _s, encryptedWebhookSecret: _w, ...safe } = result;
   return ctx.json(safe, 200);
 }

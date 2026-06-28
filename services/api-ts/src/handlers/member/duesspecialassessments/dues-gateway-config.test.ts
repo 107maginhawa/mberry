@@ -3,8 +3,11 @@
  *
  * Covers:
  *  - upsertDuesGatewayConfig encrypts the secretKey before INSERT
- *  - upsertDuesGatewayConfig response does NOT include encryptedSecret
- *  - getDuesGatewayConfig response does NOT include encryptedSecret
+ *  - upsertDuesGatewayConfig sets connected:true (C1 fix)
+ *  - upsertDuesGatewayConfig encrypts webhookSecret when provided
+ *  - upsertDuesGatewayConfig does NOT clobber encryptedWebhookSecret when not provided
+ *  - upsertDuesGatewayConfig response strips BOTH encryptedSecret + encryptedWebhookSecret
+ *  - getDuesGatewayConfig response strips BOTH encrypted fields
  *  - Round-trip: ciphertext stored on upsert can be decrypted with config.auth.secret
  */
 
@@ -17,6 +20,7 @@ import { getDuesGatewayConfig } from './getDuesGatewayConfig';
 
 const ENCRYPTION_SECRET = 'gateway-encryption-test-secret-32+chars-min';
 const PLAINTEXT_SECRET = 'sk_test_super_secret_do_not_leak';
+const PLAINTEXT_WEBHOOK_SECRET = 'whsec_test_webhook_signing_secret_xyz';
 
 function makeConfigStub() {
   return {
@@ -44,7 +48,8 @@ function makeCapturingDb(): { db: any; lastInsert: { values: any | null } } {
             provider: vals.provider,
             publicKey: vals.publicKey,
             encryptedSecret: vals.encryptedSecret,
-            connected: true,
+            encryptedWebhookSecret: vals.encryptedWebhookSecret ?? null,
+            connected: vals.connected ?? true,
             lastTestAt: null,
           }],
         }),
@@ -87,16 +92,30 @@ describe('upsertDuesGatewayConfig', () => {
     expect(decrypted).toBe(PLAINTEXT_SECRET);
   });
 
-  test('response body never includes encryptedSecret', async () => {
+  test('sets connected:true on insert (C1 fix — checkout requires connected=true)', async () => {
+    const { db, lastInsert } = makeCapturingDb();
+    const ctx = makeCtx({
+      database: db,
+      config: makeConfigStub(),
+      _params: { organizationId: 'org-1' },
+      _body: { provider: 'paymongo', publicKey: 'pk_test_abc', secretKey: PLAINTEXT_SECRET },
+    });
+
+    await upsertDuesGatewayConfig(ctx as any);
+    expect(lastInsert.values.connected).toBe(true);
+  });
+
+  test('response body strips BOTH encryptedSecret and encryptedWebhookSecret', async () => {
     const { db } = makeCapturingDb();
     const ctx = makeCtx({
       database: db,
       config: makeConfigStub(),
       _params: { organizationId: 'org-1' },
       _body: {
-        provider: 'stripe',
+        provider: 'paymongo',
         publicKey: 'pk_test_abc',
         secretKey: PLAINTEXT_SECRET,
+        webhookSecret: PLAINTEXT_WEBHOOK_SECRET,
       },
     });
 
@@ -104,10 +123,56 @@ describe('upsertDuesGatewayConfig', () => {
     const body = (res as any).body;
     expect(body).toBeDefined();
     expect('encryptedSecret' in body).toBe(false);
+    expect('encryptedWebhookSecret' in body).toBe(false);
     // Non-secret metadata still flows back.
-    expect(body.provider).toBe('stripe');
+    expect(body.provider).toBe('paymongo');
     expect(body.publicKey).toBe('pk_test_abc');
     expect(body.organizationId).toBe('org-1');
+    expect(body.connected).toBe(true);
+  });
+
+  test('encrypts webhookSecret when provided — round-trips back to plaintext', async () => {
+    const { db, lastInsert } = makeCapturingDb();
+    const ctx = makeCtx({
+      database: db,
+      config: makeConfigStub(),
+      _params: { organizationId: 'org-1' },
+      _body: {
+        provider: 'paymongo',
+        publicKey: 'pk_test_abc',
+        secretKey: PLAINTEXT_SECRET,
+        webhookSecret: PLAINTEXT_WEBHOOK_SECRET,
+      },
+    });
+
+    await upsertDuesGatewayConfig(ctx as any);
+
+    expect(lastInsert.values.encryptedWebhookSecret).toBeDefined();
+    expect(lastInsert.values.encryptedWebhookSecret).not.toBe(PLAINTEXT_WEBHOOK_SECRET);
+    const decrypted = decryptCredential(lastInsert.values.encryptedWebhookSecret, ENCRYPTION_SECRET);
+    expect(decrypted).toBe(PLAINTEXT_WEBHOOK_SECRET);
+  });
+
+  test('keys-only update (no webhookSecret) does NOT set encryptedWebhookSecret', async () => {
+    const { db, lastInsert } = makeCapturingDb();
+    const ctx = makeCtx({
+      database: db,
+      config: makeConfigStub(),
+      _params: { organizationId: 'org-1' },
+      _body: {
+        provider: 'paymongo',
+        publicKey: 'pk_test_abc',
+        secretKey: PLAINTEXT_SECRET,
+        // no webhookSecret
+      },
+    });
+
+    await upsertDuesGatewayConfig(ctx as any);
+
+    // encryptedWebhookSecret must be absent so it doesn't clobber an existing one
+    expect(lastInsert.values.encryptedWebhookSecret).toBeUndefined();
+    // connected must still be set
+    expect(lastInsert.values.connected).toBe(true);
   });
 
   test('different plaintexts produce different ciphertexts (non-deterministic IV)', async () => {
@@ -158,6 +223,7 @@ describe('getDuesGatewayConfig', () => {
         provider: 'stripe',
         publicKey: 'pk_test_public',
         encryptedSecret: 'some-encrypted-payload-base64==',
+        encryptedWebhookSecret: null,
         connected: true,
         lastTestAt: null,
         createdAt: new Date(),
@@ -178,6 +244,38 @@ describe('getDuesGatewayConfig', () => {
     // Non-secret fields preserved.
     expect(body.provider).toBe('stripe');
     expect(body.publicKey).toBe('pk_test_public');
+  });
+
+  test('response body never includes encryptedWebhookSecret (leak fix)', async () => {
+    stubRepo(DuesRepository, {
+      getGatewayConfig: async () => ({
+        id: 'gw-1',
+        organizationId: 'org-1',
+        provider: 'paymongo',
+        publicKey: 'pk_test_public',
+        encryptedSecret: 'encrypted-secret-base64==',
+        encryptedWebhookSecret: 'encrypted-webhook-secret-base64==',
+        connected: true,
+        lastTestAt: null,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        version: 1,
+        createdBy: null,
+        updatedBy: null,
+      }),
+    });
+
+    const ctx = makeCtx({
+      _params: { organizationId: 'org-1' },
+    });
+    const res = await getDuesGatewayConfig(ctx as any);
+    expect(res.status).toBe(200);
+    const body = (res as any).body;
+    expect('encryptedSecret' in body).toBe(false);
+    expect('encryptedWebhookSecret' in body).toBe(false);
+    // Non-secret fields preserved.
+    expect(body.provider).toBe('paymongo');
+    expect(body.connected).toBe(true);
   });
 
   test('returns empty object when no config exists (no leak path)', async () => {

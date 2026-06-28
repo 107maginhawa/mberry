@@ -5799,7 +5799,8 @@ export const GatewayConfigSchema = z.object({
 export const GatewayConfigRequestSchema = z.object({
   provider: z.enum(["paymongo", "stripe"]),
   publicKey: z.string().min(1).max(255),
-  secretKey: z.string().min(1)
+  secretKey: z.string().min(1),
+  webhookSecret: z.string().optional()
 });
 
 export const GatewayConfigUpdateSchema = z.object({

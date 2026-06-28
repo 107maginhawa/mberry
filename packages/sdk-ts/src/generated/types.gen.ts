@@ -18946,6 +18946,10 @@ export type GatewayConfigRequest = {
      * Secret key for the payment provider (write-only; never returned)
      */
     secretKey: string;
+    /**
+     * Webhook signing secret for the payment provider (write-only; never returned). Optional — keys can be set first, webhook later.
+     */
+    webhookSecret?: string;
 };
 
 /**

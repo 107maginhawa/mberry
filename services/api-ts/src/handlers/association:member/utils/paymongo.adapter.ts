@@ -107,6 +107,31 @@ export class PayMongoAdapter implements GatewayAdapter {
     }
   }
 
+  /**
+   * Verify that a secret key is valid by making a minimal authenticated GET
+   * to the PayMongo API. Returns true on 2xx, false on 401/403 (bad key),
+   * and throws on network/unexpected errors so callers can distinguish
+   * "bad key" from "network down".
+   *
+   * Uses GET /v1/payment_methods — lightweight, no side-effects, always
+   * available with a valid secret key.
+   */
+  static async verifyCredentials(secretKey: string): Promise<boolean> {
+    const response = await fetch('https://api.paymongo.com/v1/payment_methods', {
+      headers: {
+        'Authorization': `Basic ${btoa(secretKey + ':')}`,
+      },
+    });
+    if (response.status === 401 || response.status === 403) return false;
+    if (response.ok) return true;
+    // Unexpected status (e.g. 500 from PayMongo) — treat as network error
+    throw new ExternalServiceError(
+      `PayMongo credential check returned ${response.status}`,
+      'PayMongo',
+      'verifyCredentials',
+    );
+  }
+
   async getPaymentStatus(sessionId: string): Promise<PaymentStatusResult> {
     const response = await fetch(`https://api.paymongo.com/v1/checkout_sessions/${sessionId}`, {
       headers: {
