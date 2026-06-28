@@ -30,6 +30,26 @@ function invoiceVariant(status: string): StatusBadgeVariant {
   return 'muted'
 }
 
+// Friendly labels — never leak the raw enum to members (DESIGN.md). Unknown
+// values fall back to the raw string.
+const PAYMENT_LABEL: Record<string, string> = {
+  completed: 'Completed',
+  confirmed: 'Confirmed',
+  pending: 'Pending',
+  submitted: 'Submitted',
+  underReview: 'Under review',
+  failed: 'Failed',
+  rejected: 'Rejected',
+  expired: 'Expired',
+}
+
+const INVOICE_LABEL: Record<string, string> = {
+  paid: 'Paid',
+  sent: 'Sent',
+  generated: 'Generated',
+  overdue: 'Overdue',
+}
+
 // ─── Types ───────────────────────────────────────────────────────────────────
 
 interface Payment {
@@ -108,7 +128,7 @@ export function DuesView({
               <span className="text-caption text-muted-foreground"> / {stats.memberCount}</span>
             </p>
             {stats.overdueCount > 0 && (
-              <p className="text-caption text-[var(--color-error)]">{stats.overdueCount} overdue</p>
+              <p className="text-caption text-error">{stats.overdueCount} overdue</p>
             )}
           </CardContent>
         </Card>
@@ -131,7 +151,7 @@ export function DuesView({
                 key={p.id}
                 className="flex items-center justify-between rounded-lg border border-[var(--color-border-light)] bg-surface px-4 py-3"
               >
-                <StatusBadge variant={paymentVariant(p.status)}>{p.status}</StatusBadge>
+                <StatusBadge variant={paymentVariant(p.status)}>{PAYMENT_LABEL[p.status] ?? p.status}</StatusBadge>
                 <span className="tabular-amount text-body font-medium">{centavosToPhp(p.amount)}</span>
               </li>
             ))}
@@ -158,7 +178,7 @@ export function DuesView({
                   {inv.memberName && (
                     <span className="text-body font-medium text-foreground">{inv.memberName}</span>
                   )}
-                  <StatusBadge variant={invoiceVariant(inv.status)}>{inv.status}</StatusBadge>
+                  <StatusBadge variant={invoiceVariant(inv.status)}>{INVOICE_LABEL[inv.status] ?? inv.status}</StatusBadge>
                 </div>
                 <span className="tabular-amount text-body font-medium">{centavosToPhp(inv.amount)}</span>
               </li>

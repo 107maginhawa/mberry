@@ -50,12 +50,12 @@ export default function CreateOrgView({ associations, onSubmit, pending, error }
       </CardHeader>
       <CardContent>
         {noAssociations && (
-          <div role="alert" className="text-destructive text-sm mb-4">
+          <div role="alert" className="text-destructive text-body mb-4">
             Seed an association first before creating an organization.
           </div>
         )}
         {error && (
-          <div role="alert" className="text-destructive text-sm mb-4">
+          <div role="alert" className="text-destructive text-body mb-4">
             {error}
           </div>
         )}

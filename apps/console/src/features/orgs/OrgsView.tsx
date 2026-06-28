@@ -156,13 +156,13 @@ export default function OrgsView({
 
       {/* Status notes below the strip */}
       {statsStatus === 'error' && (
-        <p className="text-sm text-destructive" role="alert">
+        <p className="text-body text-destructive" role="alert">
           Stats unavailable
         </p>
       )}
       {/* Empty-state note only when stats are ready but no snapshot yet (I1) */}
       {statsStatus === 'ready' && !hasSnapshot && (
-        <p className="text-sm text-muted-foreground" role="note">
+        <p className="text-caption text-muted-foreground" role="note">
           No snapshot for this month yet
         </p>
       )}

@@ -113,12 +113,12 @@ export function ImportRosterView({
             {parsed.stats.total} member{parsed.stats.total === 1 ? '' : 's'} found
           </p>
           {parsed.stats.missingIdentifier > 0 && (
-            <p className="text-caption text-[var(--color-warning)]">
+            <p className="text-caption text-warning">
               {parsed.stats.missingIdentifier} with no email or license — these rows will fail.
             </p>
           )}
           {parsed.stats.missingName > 0 && (
-            <p className="text-caption text-[var(--color-warning)]">
+            <p className="text-caption text-warning">
               {parsed.stats.missingName} with no first name — will fail if not already a member.
             </p>
           )}

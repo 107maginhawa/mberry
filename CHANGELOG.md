@@ -4,6 +4,20 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+## [0.1.22.1] - 2026-06-28
+
+Follow-up accessibility pass after re-running the impeccable audit on 0.1.22.0. Targets the remaining gaps to lift every surface to an 18+/20 audit score (packages/ui 17→~19, member 17→~19, console 19→20, org 18→~20).
+
+### Fixed
+- **Shared components meet the 16px text floor and 48px tap floor.** Form error messages, dropdown/tab/toggle/command menus, and other interactive controls in the design system rendered below 16px (leftover shadcn defaults); they now use the 18px tokens. Checkbox, switch, slider, and the dialog close button gained full 48px tap areas. A textarea regression that shrank text to 15.75px on desktop was removed.
+- **Officers see plain-language dues statuses.** The dues list showed raw codes like "underReview" and "generated"; it now shows "Under review", "Overdue", etc.
+- **Member payment-result screens use real icons** instead of bare ✓/ℹ characters, and the critical payment-error line is now full-size body text.
+- **Console alerts** (create-org errors, "stats unavailable") are now full-size body text instead of 15.75px.
+- Smaller consistency fixes: org amount input uses the shared field component; semantic color classes replace arbitrary CSS-var utilities.
+
+### Note
+- Deliberately did **not** add a responsive table-to-card reflow to the shared `Table`: no phone-primary table surface exists and the console table is design-exempt, so it stays a desktop pattern. Tracked in the audit report.
+
 ## [0.1.22.0] - 2026-06-28
 
 Impeccable technical audit (a11y / perf / theming / responsive / anti-patterns) across `packages/ui` + all three apps, followed by full P1→P3 remediation. Report: `docs/audits/impeccable-audit-2026-06-28.md`. All four surfaces scored in the "Good" band with no P0s; fixes land in the shared design system where possible (no per-app forks).

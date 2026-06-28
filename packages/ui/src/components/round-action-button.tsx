@@ -3,6 +3,8 @@ import { Button } from './button'
 import { cn } from '../lib/utils'
 
 const ROUND_DIMS = {
+  // sm is a desktop-dense opt-in (below the 48px tap floor) — mirror button.tsx's
+  // size convention; use md/lg for touch-primary surfaces.
   sm: 'h-8 w-8',    // 32px — avatar / inline ops
   md: 'h-12 w-12',  // 48px — secondary call control
   lg: 'h-14 w-14',  // 56px — primary call control
@@ -13,6 +15,8 @@ type RoundSize = keyof typeof ROUND_DIMS
 interface RoundActionButtonProps extends Omit<ComponentProps<typeof Button>, 'size'> {
   size?: RoundSize
   children: ReactNode
+  // Required: icon-only button must be labeled for assistive tech.
+  'aria-label': string
 }
 
 /**

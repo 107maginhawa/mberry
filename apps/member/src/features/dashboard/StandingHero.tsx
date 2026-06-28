@@ -107,7 +107,7 @@ export function StandingHero() {
             </div>
 
             {payErr && (
-              <p role="alert" className="text-caption text-center text-destructive">
+              <p role="alert" className="text-body text-center text-destructive">
                 {payErr}
               </p>
             )}
