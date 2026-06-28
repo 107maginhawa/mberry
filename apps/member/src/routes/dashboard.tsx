@@ -4,7 +4,6 @@ import { StandingHero } from '@/features/dashboard/StandingHero'
 import { ReceiptsTile } from '@/features/dashboard/ReceiptsTile'
 import { EventsTile } from '@/features/events/EventsTile'
 import { ContactOfficer } from '@/features/org/ContactOfficer'
-import { SignOutButton } from '@/features/auth/SignOutButton'
 
 export const Route = createFileRoute('/dashboard')({
   component: DashboardPage,
@@ -38,11 +37,8 @@ function DashboardPage() {
           </Link>
           <ContactOfficer />
         </section>
-
-        {/* Account control — the emergency exit (Nielsen #3) */}
-        <footer className="pt-2">
-          <SignOutButton />
-        </footer>
+        {/* Sign-out moved to the shared AppHeader (persistent on every authed
+            member screen, not just here) — see routes/__root.tsx. */}
       </PageContainer>
     </div>
   )
