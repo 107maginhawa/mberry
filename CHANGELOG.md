@@ -29,6 +29,16 @@ Second QA remediation batch (the deferred findings from the first lean-apps QA).
 - The dues summary's "Members Paid 106 / 26" metric (a confusing over-100% ratio
   that counted paid invoices over members) is now "Payments received" with the count.
 
+## [0.1.22.2] - 2026-06-28
+
+### Fixed
+- Officers can now create paid events again. The create-event form sent the
+  registration fee as a bigint, which serialized to a JSON string the engine
+  rejected, so every paid event failed with "Could not create the event."
+- Officers can now send dues pay-links again (single and bulk). The amount was
+  sent as a bigint and rejected the same way, breaking the core "send a member
+  their dues link" flow. Both paths now send a number and are verified live.
+
 ## [0.1.22.1] - 2026-06-28
 
 Follow-up accessibility pass after re-running the impeccable audit on 0.1.22.0. Targets the remaining gaps to lift every surface to an 18+/20 audit score (packages/ui 17→~19, member 17→~19, console 19→20, org 18→~20).
