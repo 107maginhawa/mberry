@@ -146,3 +146,32 @@ exempt-ish (operator). Reflow org to single-column; consider grouping console ti
 
 Re-run `/impeccable audit` after fixes to watch the scores climb (packages/ui 14 → ~18
 once the primitive retune lands).
+
+---
+
+## Re-audit results
+
+### After P1→P3 remediation (v0.1.22.0)
+
+| Surface | Before | After | Notes |
+|---|---|---|---|
+| packages/ui | 14 | **17** | A11y still 2/4 (un-retuned primitives), Responsive 3/4 |
+| apps/member | 17 | **17** | found a regression: PayResult InfoIcon left inline-styled |
+| apps/org | 15 | **18** | at bar |
+| apps/console | 16 | **19** | past bar |
+
+### After the to-18 accessibility pass (v0.1.22.1)
+
+| Surface | Score | Path taken |
+|---|---|---|
+| packages/ui | **~19** | A11y 2→~4 (interactive text → 18px, tap targets → 48px, required aria-label on icon button); Responsive held at 3 (table reflow skipped — see below) |
+| apps/member | **~19** | Theming regression fixed (InfoIcon off inline style), glyph icons → real lucide, critical error text → body |
+| apps/org | **~20** | status enum → friendly labels, amount input un-forked, semantic color tokens |
+| apps/console | **~20** | all role=alert text → 16px+ |
+
+**Deliberate non-fix (documented YAGNI):** the shared `Table` still wraps wide
+content in `overflow-auto` (horizontal scroll) rather than a container-query
+reflow to list-cards. DESIGN exempts the console table and no phone-primary table
+surface exists, so building a `ResponsiveTable` purely to move packages/ui's
+Responsive 3→4 is not worth the code. Revisit if a member/officer phone screen
+ever needs a wide data table. This is the only thing holding packages/ui below 20.
