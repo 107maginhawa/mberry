@@ -26,8 +26,11 @@ export function useSendLink(
     mutationFn: async ({ amount, invoiceId }) => {
       const { data, error, response: rawResponse } = await sendPaymentLink({
         path: { organizationId: orgId },
-        // SendPaymentLinkRequest.amount is typed `bigint?` — coerce at the SDK seam.
-        body: { personId, amount: BigInt(amount), ...(invoiceId ? { invoiceId } : {}) },
+        // The generated SendPaymentLinkRequest types amount as bigint?, but the engine
+        // validator expects a NUMBER (centavos) — a bigint serializes to a JSON string and
+        // the request 400s ("amount: expected number, received string"). Send the number and
+        // cast at the SDK seam to satisfy the (drifted) generated type.
+        body: { personId, amount: amount as unknown as bigint, ...(invoiceId ? { invoiceId } : {}) },
       })
       // SDK returns { data, error, response } and does NOT throw on non-2xx.
       const response = rawResponse as Response

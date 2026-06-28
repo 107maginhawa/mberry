@@ -19,7 +19,7 @@ function wrapper({ children }: { children: React.ReactNode }) {
 type MintResult = Awaited<ReturnType<typeof sendPaymentLink>>
 
 describe('useSendLink', () => {
-  it('mint success → sent state, with amount coerced to bigint at the request boundary', async () => {
+  it('mint success → sent state, sends amount as a number at the request boundary', async () => {
     vi.mocked(sendPaymentLink).mockResolvedValue(
       ok<SendPaymentLinkResponse>({ token: 'TOK', paymentUrl: '/pay/TOK', expiresAt: '2026-09-01T00:00:00Z' }, 201)
     )
@@ -29,10 +29,11 @@ describe('useSendLink', () => {
     const s = result.current.state as Extract<typeof result.current.state, { kind: 'sent' }>
     expect(s.tokenId).toBe('TOK')
     expect(s.url).toMatch(/\/pay\/TOK$/)
-    // amount MUST be bigint (SendPaymentLinkRequest.amount is bigint?) — a number would not typecheck.
+    // amount MUST be a number (centavos): the engine validator rejects a bigint (serialized to a
+    // string) with "expected number, received string". The bigint? generated type is cast at the seam.
     expect(sendPaymentLink).toHaveBeenCalledWith(expect.objectContaining({
       path: { organizationId: 'o1' },
-      body: { personId: 'p1', amount: 250000n, invoiceId: 'inv1' },
+      body: { personId: 'p1', amount: 250000, invoiceId: 'inv1' },
     }))
   })
 
