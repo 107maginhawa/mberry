@@ -172,9 +172,6 @@ export default function ImportRoster() {
   return (
     <div className="min-h-screen bg-[var(--color-bg)]">
       <div className="max-w-lg mx-auto pt-4">
-        <div className="px-4 pb-2 flex justify-end">
-          <Link to="/" className="inline-flex min-h-tap items-center text-body font-medium text-primary underline">Roster</Link>
-        </div>
         {orgs.length > 1 && <div className="px-4 pb-2"><OrgPicker /></div>}
         {!orgId ? (
           <div className="p-4">

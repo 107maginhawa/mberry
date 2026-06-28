@@ -1,4 +1,4 @@
-import { describe, it, expect, vi } from 'vitest'
+import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { render, screen, fireEvent } from '@testing-library/react'
 import { RosterView } from './Roster'
 
@@ -7,6 +7,15 @@ import { RosterView } from './Roster'
 vi.mock('@tanstack/react-router', () => ({
   Link: ({ to, children, ...props }: any) => <a href={to} {...props}>{children}</a>,
 }))
+
+// Mock the bulk hook so select-mode UI is tested in isolation from the SDK loop.
+const { startSpy } = vi.hoisted(() => ({ startSpy: vi.fn() }))
+vi.mock('./use-bulk-send', async (importOriginal) => ({
+  ...(await importOriginal<Record<string, unknown>>()),
+  useBulkSend: () => ({ results: {}, progress: { done: 0, total: 0 }, start: startSpy, reset: vi.fn() }),
+}))
+
+beforeEach(() => startSpy.mockClear())
 
 describe('RosterView', () => {
   const members = [{ membershipId: 'm1', personId: 'p1', name: 'Olive Cruz', memberNumber: 'A-1', status: 'active' }]
@@ -43,5 +52,51 @@ describe('RosterView', () => {
     expect(screen.queryByText('Ben Santos')).not.toBeInTheDocument()
     fireEvent.change(screen.getByLabelText(/search members/i), { target: { value: 'zzz' } })
     expect(screen.getByText(/no members match/i)).toBeInTheDocument()
+  })
+})
+
+describe('RosterView — select mode', () => {
+  const members = [
+    { membershipId: 'm1', personId: 'p1', name: 'Olive', status: 'active' },
+    { membershipId: 'm2', personId: 'p2', name: 'Ben', status: 'active' },
+  ]
+
+  it('Select toggle reveals checkboxes and hides the per-row send link', () => {
+    render(<RosterView orgName="Org" members={members} orgId="o1" />)
+    expect(screen.queryByRole('checkbox', { name: /select olive/i })).not.toBeInTheDocument()
+    fireEvent.click(screen.getByRole('button', { name: /^select$/i }))
+    expect(screen.getByRole('checkbox', { name: /select olive/i })).toBeInTheDocument()
+    expect(screen.queryByRole('link', { name: /send pay-link to olive/i })).not.toBeInTheDocument()
+  })
+
+  it('sticky bar reflects the selected count and opens a confirm before minting', () => {
+    render(<RosterView orgName="Org" members={members} orgId="o1" />)
+    fireEvent.click(screen.getByRole('button', { name: /^select$/i }))
+    fireEvent.click(screen.getByRole('checkbox', { name: /select olive/i }))
+    fireEvent.click(screen.getByRole('button', { name: /send links to 1 selected/i }))
+    // ConfirmDialog open, loop NOT started yet
+    expect(startSpy).not.toHaveBeenCalled()
+    fireEvent.click(screen.getByRole('button', { name: /send pay-links/i }))
+    expect(startSpy).toHaveBeenCalled()
+  })
+
+  it('a member hidden by search is dropped from the count and the confirm (money-consent)', () => {
+    render(<RosterView orgName="Org" members={members} orgId="o1" />)
+    fireEvent.click(screen.getByRole('button', { name: /^select$/i }))
+    fireEvent.click(screen.getByRole('checkbox', { name: /select olive/i }))
+    fireEvent.click(screen.getByRole('checkbox', { name: /select ben/i }))
+    expect(screen.getByRole('button', { name: /send links to 2 selected/i })).toBeInTheDocument()
+    // Hide Ben — the confirmed/mintable set must drop to just the visible Olive.
+    fireEvent.change(screen.getByRole('searchbox', { name: /search members/i }), { target: { value: 'olive' } })
+    fireEvent.click(screen.getByRole('button', { name: /send links to 1 selected/i }))
+    expect(screen.getByRole('heading', { name: /send 1 pay-link\?/i })).toBeInTheDocument()
+  })
+
+  it('Select all picks only the currently-filtered rows', () => {
+    render(<RosterView orgName="Org" members={members} orgId="o1" />)
+    fireEvent.click(screen.getByRole('button', { name: /^select$/i }))
+    fireEvent.change(screen.getByRole('searchbox', { name: /search members/i }), { target: { value: 'olive' } })
+    fireEvent.click(screen.getByRole('checkbox', { name: /select all/i }))
+    expect(screen.getByRole('button', { name: /send links to 1 selected/i })).toBeInTheDocument()
   })
 })
