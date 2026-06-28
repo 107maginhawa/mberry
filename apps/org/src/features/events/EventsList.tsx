@@ -59,7 +59,7 @@ export function EventsList({
                 {e.status === 'draft' && (
                   <Button
                     className="min-h-tap"
-                    disabled={publishingId === e.id}
+                    disabled={publishingId !== null}
                     onClick={() => setAsk(e)}
                     aria-label={`Publish ${e.title}`}
                   >

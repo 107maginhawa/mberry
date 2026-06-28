@@ -2,7 +2,9 @@ import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { renderHook, act, waitFor } from '@testing-library/react'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 vi.mock('@monobase/sdk-ts/generated', () => ({ publishEvent: vi.fn() }))
+vi.mock('sonner', () => ({ toast: { error: vi.fn(), success: vi.fn() } }))
 import { publishEvent } from '@monobase/sdk-ts/generated'
+import { toast } from 'sonner'
 import { ok, err } from '../../test-utils/mock-sdk'
 import { usePublishEvent } from './use-publish-event'
 
@@ -35,12 +37,13 @@ describe('usePublishEvent', () => {
     await waitFor(() => expect(result.current.publishingId).toBeNull())
   })
 
-  it('surfaces error without invalidating', async () => {
+  it('on error: toasts and still reconciles the list (refetch on settle)', async () => {
     vi.mocked(publishEvent).mockResolvedValue(err(409, { error: 'INVALID_STATUS' }) as any)
     const { spy, wrapper } = mk()
     const { result } = renderHook(() => usePublishEvent('o1'), { wrapper })
     act(() => result.current.publish('d1'))
-    await waitFor(() => expect(publishEvent).toHaveBeenCalled())
-    expect(spy).not.toHaveBeenCalled()
+    // toast.error fires; the list invalidates on settle so a stale 409 draft row reconciles.
+    await waitFor(() => expect(toast.error).toHaveBeenCalledWith('INVALID_STATUS'))
+    await waitFor(() => expect(spy).toHaveBeenCalledWith({ queryKey: ['org-events', 'o1'] }))
   })
 })

@@ -14,6 +14,13 @@ describe('EventsList', () => {
     expect(screen.getByText('Draft')).toBeInTheDocument()
   })
 
+  it('disables every Publish button while any publish is in flight', () => {
+    render(<EventsList status="ready" publishingId="d1" onPublish={() => {}}
+      events={[ev(), ev({ id: 'd2', title: 'Second Draft' })]} />)
+    expect(screen.getByRole('button', { name: /publish spring assembly/i })).toBeDisabled()
+    expect(screen.getByRole('button', { name: /publish second draft/i })).toBeDisabled()
+  })
+
   it('does not render an ISO date string', () => {
     render(<EventsList status="ready" publishingId={null} onPublish={() => {}} events={[ev()]} />)
     expect(screen.queryByText(/2026-03-01T06:00:00Z/)).not.toBeInTheDocument()
