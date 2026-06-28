@@ -125,9 +125,9 @@ export const PageShell = React.forwardRef<HTMLDivElement, PageShellProps>(
           )}
           <div className="flex items-center justify-between gap-4">
             <div className="min-w-0">
-              <TitleTag className="text-h2">{title}</TitleTag>
+              <TitleTag className="text-title">{title}</TitleTag>
               {subtitle && (
-                <p className="text-sm text-[var(--color-muted)] mt-1">{subtitle}</p>
+                <p className="text-caption text-[var(--color-muted)] mt-1">{subtitle}</p>
               )}
             </div>
             {actions && <div className="flex items-center gap-2 shrink-0">{actions}</div>}
