@@ -10,7 +10,9 @@ function friendlyAuthError(raw: string): string {
     return "We couldn't verify this device. Refresh the page and try again."
   if (m.includes('expired'))
     return 'That code expired. Tap “Resend code” to get a new one.'
-  if (m.includes('otp') || m.includes('code') || m.includes('invalid') || m.includes('incorrect'))
+  // Only OTP-specific words — bare "invalid" would mis-map an email-step error
+  // ("invalid email") to the code message before any code is sent.
+  if (m.includes('otp') || m.includes('code'))
     return "That code didn't match. Check it and try again, or resend a new code."
   if (m.includes('too many') || m.includes('rate'))
     return 'Too many tries. Please wait a minute, then try again.'
