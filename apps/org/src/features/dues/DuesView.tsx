@@ -120,13 +120,12 @@ export function DuesView({
         </Card>
         <Card>
           <CardHeader className="pb-1">
-            <CardTitle className="text-caption text-muted-foreground">Members Paid</CardTitle>
+            <CardTitle className="text-caption text-muted-foreground">Payments received</CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="text-section font-semibold">
-              {stats.paidCount}
-              <span className="text-caption text-muted-foreground"> / {stats.memberCount}</span>
-            </p>
+            {/* paidCount is the count of paid invoices (across periods), not distinct members —
+                showing it over memberCount produced a misleading >100% ratio (e.g. "106 / 26"). */}
+            <p className="text-section font-semibold">{stats.paidCount}</p>
             {stats.overdueCount > 0 && (
               <p className="text-caption text-error">{stats.overdueCount} overdue</p>
             )}
