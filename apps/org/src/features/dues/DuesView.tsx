@@ -52,11 +52,21 @@ export interface DuesViewProps {
   invoices: Invoice[]
   paymentsError?: boolean
   invoicesError?: boolean
+  onRetryPayments?: () => void
+  onRetryInvoices?: () => void
 }
 
 // ─── Presentational ──────────────────────────────────────────────────────────
 
-export function DuesView({ stats, payments, invoices, paymentsError, invoicesError }: DuesViewProps) {
+export function DuesView({
+  stats,
+  payments,
+  invoices,
+  paymentsError,
+  invoicesError,
+  onRetryPayments,
+  onRetryInvoices,
+}: DuesViewProps) {
   return (
     <div className="flex flex-col gap-6 p-4">
       <h1 className="text-title font-semibold text-foreground">Dues</h1>
@@ -107,7 +117,7 @@ export function DuesView({ stats, payments, invoices, paymentsError, invoicesErr
       <section aria-label="Recent payments">
         <h2 className="text-section font-semibold mb-3">Recent payments</h2>
         {paymentsError ? (
-          <ErrorState message="Could not load payments. Please refresh." />
+          <ErrorState message="We couldn't load payments." onRetry={onRetryPayments} />
         ) : payments.length === 0 ? (
           <EmptyState
             headline="No payments yet"
@@ -132,7 +142,7 @@ export function DuesView({ stats, payments, invoices, paymentsError, invoicesErr
       {invoicesError ? (
         <section aria-label="Outstanding invoices">
           <h2 className="text-section font-semibold mb-3">Outstanding invoices</h2>
-          <ErrorState message="Could not load invoices. Please refresh." />
+          <ErrorState message="We couldn't load invoices." onRetry={onRetryInvoices} />
         </section>
       ) : invoices.length > 0 ? (
         <section aria-label="Outstanding invoices">
@@ -164,8 +174,8 @@ export function DuesView({ stats, payments, invoices, paymentsError, invoicesErr
 export function Dues() {
   const { orgId } = useSelectedOrg()
   const { data: stats, isLoading: statsLoading } = useDuesDashboard(orgId)
-  const { data: payments = [], isLoading: paymentsLoading, isError: paymentsError } = useRecentPayments(orgId)
-  const { data: invoices = [], isLoading: invoicesLoading, isError: invoicesError } = useOutstandingInvoices(orgId)
+  const { data: payments = [], isLoading: paymentsLoading, isError: paymentsError, refetch: refetchPayments } = useRecentPayments(orgId)
+  const { data: invoices = [], isLoading: invoicesLoading, isError: invoicesError, refetch: refetchInvoices } = useOutstandingInvoices(orgId)
 
   if (statsLoading || paymentsLoading || invoicesLoading) {
     return (
@@ -199,6 +209,8 @@ export function Dues() {
           invoices={invoices}
           paymentsError={paymentsError}
           invoicesError={invoicesError}
+          onRetryPayments={() => void refetchPayments()}
+          onRetryInvoices={refetchInvoices}
         />
       </div>
     </div>

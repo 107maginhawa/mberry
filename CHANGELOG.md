@@ -9,6 +9,21 @@ All notable changes to this project will be documented in this file.
 ### Fixed
 - **Dashboard error tiles no longer show a box-in-a-box.** When a member dashboard tile (membership, receipts, events, digital card) failed to load, the error message rendered as a second framed box nested inside the tile's card. The error now fills the tile body flush, with no double frame. The "Try again" retry and screen-reader alert behavior are unchanged.
 
+## [0.1.21.1] - 2026-06-28
+
+### Fixed
+- **Officer app sign-in works in local dev.** The API now trusts `http://localhost:3005` (officer app) and `http://localhost:3006` (console) as origins, alongside `:3004` (member). Before, officers hit "Invalid origin" CSRF errors the moment they tried to sign in or take any action locally. Production origins are unaffected — they come from the explicit `CORS_ORIGINS` env var.
+
+## [0.1.21.0] - 2026-06-28
+
+Error-tile retry parity across `apps/org`, mirroring the member dashboard harden. When a screen fails to load, officers now get a **Try again** button that refetches instead of a dead-end "Please refresh." Wiring stays app-level; the shared `ErrorState` component is unchanged.
+
+### Changed
+- **Retry on the Dues screen.** Recent-payments and outstanding-invoices error tiles now refetch on **Try again**. Reworded "Could not load X. Please refresh." → "We couldn't load X."
+- **Retry on Events.** The events list error swaps its bespoke inline banner for the shared `ErrorState` with a **Try again** that refetches (kept the officer/admin access hint).
+- **Retry on the Roster.** A failed roster load (often a 403 for non-officers, but also a network blip) now shows a real error with **Try again** instead of a passive "Roster unavailable" empty state.
+- **Retry on Payment settings.** The gateway-status load error becomes a shared `ErrorState` with **Try again** (kept the 2FA officer caption).
+
 ## [0.1.20.0] - 2026-06-28
 
 UI/UX audit pass over `apps/org`, `apps/member`, and `packages/ui` (impeccable). Fixes land in the shared design system so all three apps benefit, no per-app forks.

@@ -1,5 +1,5 @@
 import { it, expect, vi } from 'vitest'
-import { render, screen } from '@testing-library/react'
+import { render, screen, fireEvent } from '@testing-library/react'
 import { DuesView } from './DuesView'
 
 // Mock Link as a plain anchor — unit tests for presentational components
@@ -70,4 +70,34 @@ it('shows invoices ErrorState when invoicesError', () => {
     />,
   )
   expect(screen.getByRole('alert')).toBeInTheDocument()
+})
+
+it('payments error: Try again calls onRetryPayments', () => {
+  const onRetryPayments = vi.fn()
+  render(
+    <DuesView
+      stats={{ totalCollected: 0, totalOutstanding: 0, paidCount: 0, unpaidCount: 0, overdueCount: 0, collectionRate: 0, memberCount: 0 }}
+      payments={[]}
+      invoices={[]}
+      paymentsError
+      onRetryPayments={onRetryPayments}
+    />,
+  )
+  fireEvent.click(screen.getByRole('button', { name: /try again/i }))
+  expect(onRetryPayments).toHaveBeenCalledTimes(1)
+})
+
+it('invoices error: Try again calls onRetryInvoices', () => {
+  const onRetryInvoices = vi.fn()
+  render(
+    <DuesView
+      stats={{ totalCollected: 0, totalOutstanding: 0, paidCount: 0, unpaidCount: 0, overdueCount: 0, collectionRate: 0, memberCount: 0 }}
+      payments={[]}
+      invoices={[]}
+      invoicesError
+      onRetryInvoices={onRetryInvoices}
+    />,
+  )
+  fireEvent.click(screen.getByRole('button', { name: /try again/i }))
+  expect(onRetryInvoices).toHaveBeenCalledTimes(1)
 })

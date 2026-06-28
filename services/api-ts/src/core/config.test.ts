@@ -75,7 +75,7 @@ describe('parseList — via CORS_ORIGINS', () => {
     const restore = withEnv({ CORS_ORIGINS: '' });
     try {
       const cfg = parseConfig();
-      expect(cfg.cors.origins).toEqual(['http://localhost:3003', 'http://localhost:3004']);
+      expect(cfg.cors.origins).toEqual(['http://localhost:3003', 'http://localhost:3004', 'http://localhost:3005', 'http://localhost:3006']);
     } finally {
       restore();
     }
@@ -85,7 +85,7 @@ describe('parseList — via CORS_ORIGINS', () => {
     const restore = withEnv({ CORS_ORIGINS: undefined });
     try {
       const cfg = parseConfig();
-      expect(cfg.cors.origins).toEqual(['http://localhost:3003', 'http://localhost:3004']);
+      expect(cfg.cors.origins).toEqual(['http://localhost:3003', 'http://localhost:3004', 'http://localhost:3005', 'http://localhost:3006']);
     } finally {
       restore();
     }
@@ -360,7 +360,7 @@ describe('parseConfig — default values (clean environment)', () => {
   });
 
   test('cors.origins defaults to explicit dev origins (not wildcard)', () => {
-    expect(cfg.cors.origins).toEqual(['http://localhost:3003', 'http://localhost:3004']);
+    expect(cfg.cors.origins).toEqual(['http://localhost:3003', 'http://localhost:3004', 'http://localhost:3005', 'http://localhost:3006']);
   });
 
   test('cors.credentials defaults to true', () => {
