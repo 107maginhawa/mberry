@@ -4,6 +4,11 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+## [0.1.21.1] - 2026-06-28
+
+### Fixed
+- **Officer app sign-in works in local dev.** The API now trusts `http://localhost:3005` (officer app) and `http://localhost:3006` (console) as origins, alongside `:3004` (member). Before, officers hit "Invalid origin" CSRF errors the moment they tried to sign in or take any action locally. Production origins are unaffected — they come from the explicit `CORS_ORIGINS` env var.
+
 ## [0.1.21.0] - 2026-06-28
 
 Error-tile retry parity across `apps/org`, mirroring the member dashboard harden. When a screen fails to load, officers now get a **Try again** button that refetches instead of a dead-end "Please refresh." Wiring stays app-level; the shared `ErrorState` component is unchanged.

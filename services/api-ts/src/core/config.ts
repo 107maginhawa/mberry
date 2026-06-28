@@ -147,7 +147,12 @@ const envSchema = z.object({
   DB_LOGGING: boolish(false),
 
   // CORS
-  CORS_ORIGINS: csvList(['http://localhost:3003', 'http://localhost:3004']),
+  CORS_ORIGINS: csvList([
+    'http://localhost:3003',
+    'http://localhost:3004', // apps/member
+    'http://localhost:3005', // apps/org
+    'http://localhost:3006', // apps/console
+  ]),
   CORS_CREDENTIALS: boolish(true),
   // P0-3: default to false — tunnel/local-network origins must be opted into
   // explicitly per environment, never on by default (CSRF/credentialed-origin risk).
