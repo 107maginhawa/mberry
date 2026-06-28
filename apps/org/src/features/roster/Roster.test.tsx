@@ -5,7 +5,10 @@ import { RosterView } from './Roster'
 // Mock Link as a plain anchor — unit tests for presentational components
 // don't need a full router; navigation is tested at E2E layer.
 vi.mock('@tanstack/react-router', () => ({
-  Link: ({ to, children, ...props }: any) => <a href={to} {...props}>{children}</a>,
+  Link: ({ to, params, search, children, ...props }: any) => {
+    const path = params ? String(to).replace(/\$(\w+)/g, (_: string, k: string) => params[k]) : to
+    return <a href={path} {...props}>{children}</a>
+  },
 }))
 
 // Mock the bulk hook so select-mode UI is tested in isolation from the SDK loop.
