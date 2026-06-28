@@ -59,7 +59,15 @@ const OUTSTANDING_STATUSES = new Set(['generated', 'sent', 'overdue'])
 // ─── Hook ────────────────────────────────────────────────────────────────────
 
 export function useMemberData() {
-  const { orgId } = useMemberOrg()
+  const { orgId, memberships } = useMemberOrg()
+  // [FIX-006] Self-scope the dashboard's invoices to THIS member's own membership.
+  // listDuesInvoices returns org-wide invoices for officers (effectivePersonId=undefined);
+  // an officer who is also a member would otherwise see other members' invoices here and
+  // "Pay dues" would mint a link for an invoice they don't own → "Not your invoice" 403.
+  // Passing membershipId pins the query to the caller's own invoices for officers and
+  // non-officers alike (the pilot officer is also a dues-paying member).
+  const myMembershipId =
+    (memberships.find((m) => m.organizationId === orgId)?.['id'] as string | undefined) ?? null
 
   const membershipsQuery = useQuery({
     queryKey: ['memberships'],
@@ -74,12 +82,13 @@ export function useMemberData() {
   })
 
   const invoicesQuery = useQuery({
-    queryKey: ['my-dues-invoices', orgId],
-    enabled: !!orgId,
+    queryKey: ['my-dues-invoices', orgId, myMembershipId],
+    enabled: !!orgId && !!myMembershipId,
     retry: false,
     queryFn: async () => {
-      // DRIFT: SDK DuesInvoice may mis-type totalAmount; cast to handler shape
-      const { data, response } = await listDuesInvoices()
+      // DRIFT: SDK DuesInvoice may mis-type totalAmount; cast to handler shape.
+      // membershipId pins results to the caller's own invoices (see FIX-006 above).
+      const { data, response } = await listDuesInvoices({ query: { membershipId: myMembershipId! } })
       if (!response || !response.ok) throw new Error(`Invoices fetch failed: ${response?.status ?? 'no response'}`)
       if (!data) throw new Error('No invoice data returned')
       return (data as any).data as HandlerInvoice[]
