@@ -4,6 +4,18 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+## [0.1.15.0] - 2026-06-28
+
+### Added
+- **Wave B / B5 — officer Connect-PayMongo screen (`apps/org` + engine).** An officer (Treasurer/President) can now connect their chapter's PayMongo account from a new **Payment settings** screen instead of running a seed script: paste the public key, secret key, and webhook secret, see connection status, run **Test connection**, and **Disconnect**. The screen shows the exact per-org webhook URL to register in PayMongo and notes that **test keys (`pk_test_`/`sk_test_`) work end-to-end with no live activation**, so a chapter can be dogfooded before going live. The dues-gateway request now accepts a `webhookSecret` (stored AES-256-GCM encrypted), `upsertDuesGatewayConfig` marks the gateway `connected` so checkout works immediately, and `testDuesGatewayConnection` now makes a real authenticated PayMongo call (`GET /v1/payments`) that confirms or downgrades the connection.
+
+### Security
+- **Secret-leak fix:** the gateway-config read paths now strip **both** the encrypted secret and the encrypted webhook secret from every response. Secret key and webhook secret are write-only — never returned, never pre-filled in the UI (password inputs), never logged.
+- The connect/test/disconnect actions are officer-gated (admin + Treasurer/President, two-factor required in production); a 403 surfaces as a friendly alert.
+
+### Notes
+- The webhook URL shown is derived from the configured public API origin (`VITE_API_URL`); registering it in the PayMongo dashboard (event `payment.paid`) remains a manual step. This replaces the `seed-paymongo-creds.ts` script for officer self-service.
+
 ## [0.1.14.0] - 2026-06-28
 
 ### Added
