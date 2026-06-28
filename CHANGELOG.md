@@ -4,6 +4,22 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+## [0.1.17.0] - 2026-06-28
+
+### Added
+- **Passwordless officer sign-in (`apps/org`).** Officers now sign in with a 2-step email OTP (Step 1 of 2 / Step 2 of 2 indicator), the same flow as members, instead of email + password. Reuses the existing `/auth/email-otp/*` endpoints; production two-factor for privileged officer roles still applies on top.
+- **Shared app shell with sign-out (`packages/ui` `AppHeader`).** Console and org now have a persistent header (title + scrollable nav + a labelled **Sign out** "emergency exit") on every authed screen — closing the cross-app gap where there was no way to sign out. One shared component, no per-app fork.
+- **Org primary nav consolidated into the header** with current-location highlighting, replacing the scattered per-page links.
+- **Search on long lists.** Officer **Roster** and the console **Organizations** table both gained client-side search; the console table also gained sortable Name / Created columns.
+- **Money-step confirmation (`apps/org` Send pay-link).** Sending a pay-link (invoice or custom amount) and revoking a link now pop a confirm dialog ("Send ₱X to [member]?" / "Revoke?"), so a typo'd custom amount or a fat-finger revoke can't fire a live-money action by accident.
+
+### Changed
+- **Member home is now a "poster" (`apps/member`).** A single `StandingHero` answers standing + dues + the Pay action above the fold, with receipts/events/digital-card/contact-officer demoted below it (replaces the four equal-weight tiles). Adds an actionable **Contact your chapter** affordance (tel:/mailto:) and a sign-out control.
+- **Design-system consistency sweep.** Shared `Button` now defaults to a 48px tap target (dense `sm`/`xs` are explicit opt-ins); console moved off raw Tailwind type/inline font-size onto design tokens + `StatusBadge`; `CreateEventForm` groups its 8 fields into Basics / When / Details sections.
+
+### Fixed
+- Member pay-link cancelled state now shows a "Payment cancelled — you can try again" banner instead of looking like a glitch.
+
 ## [0.1.16.0] - 2026-06-28
 
 ### Changed
