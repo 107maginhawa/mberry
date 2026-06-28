@@ -16,6 +16,16 @@ vi.mock('@monobase/ui', () => ({
   TableHead: ({ children }: { children: React.ReactNode }) => <th>{children}</th>,
   TableCell: ({ children }: { children: React.ReactNode }) => <td>{children}</td>,
   Skeleton: ({ className }: { className?: string }) => <div data-testid="skeleton" className={className} />,
+  EmptyState: ({ headline, description, action }: { headline: string; description?: string; action?: { label: string; onClick: () => void } }) => (
+    <div data-testid="empty-state">
+      <h3>{headline}</h3>
+      {description && <p>{description}</p>}
+      {action && <button onClick={action.onClick}>{action.label}</button>}
+    </div>
+  ),
+  ErrorState: ({ message }: { message: string }) => (
+    <div role="alert" data-testid="error-state">{message}</div>
+  ),
   Input: (props: React.InputHTMLAttributes<HTMLInputElement>) => <input {...props} />,
   StatusBadge: ({ children, status }: { children?: React.ReactNode; status?: string }) => (
     <span data-testid="status-badge">{children ?? status}</span>
