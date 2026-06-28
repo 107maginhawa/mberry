@@ -19,7 +19,7 @@ const BASE = { title: 'AGM', eventType: 'assembly', startDate: '2026-09-01T01:00
 describe('useCreateEvent', () => {
   beforeEach(() => vi.clearAllMocks())
 
-  it('sends a typed body with fee as bigint centavos, Date objects + creditBearing false', async () => {
+  it('sends a typed body with fee as number centavos, Date objects + creditBearing false', async () => {
     mockCreate.mockResolvedValue(ok({ id: 'e1' }, 201))
     const { result } = renderHook(() => useCreateEvent('org-1'), { wrapper })
     result.current.mutate({ ...BASE, feePhp: 250 })
@@ -29,7 +29,7 @@ describe('useCreateEvent', () => {
     expect(body.title).toBe('AGM')
     expect(body.eventType).toBe('assembly')
     expect(body.creditBearing).toBe(false)
-    expect(body.registrationFee).toBe(25000n) // bigint at the typed seam
+    expect(body.registrationFee).toBe(25000) // number centavos — engine validator rejects a bigint (serializes to string)
     expect(body.currency).toBe('PHP')
     expect(body.startDate).toBeInstanceOf(Date)
     expect(body.startDate.toISOString()).toBe(BASE.startDate)

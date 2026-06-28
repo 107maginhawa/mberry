@@ -24,8 +24,14 @@ export function useCreateEvent(orgId: string | null): UseMutationResult<Event, E
   return useMutation<Event, Error, CreateEventInput>({
     mutationFn: async (input) => {
       if (!orgId) throw new Error('No organization selected.')
-      // EventCreateRequest types registrationFee as bigint + dates as Date (see use-send-link.ts house pattern).
-      const fee = input.feePhp && input.feePhp > 0 ? BigInt(Math.round(input.feePhp * 100)) : undefined
+      // The generated EventCreateRequest types registrationFee as bigint, but the engine's
+      // create-event validator strictly expects a NUMBER (centavos) — a bigint serializes to a
+      // JSON string and the request 400s ("expected number, received string"). This differs from
+      // the send-payment-link endpoint (use-send-link.ts), whose validator coerces the bigint.
+      // Send a number and cast at the SDK seam to satisfy the (drifted) generated type.
+      const fee = input.feePhp && input.feePhp > 0
+        ? (Math.round(input.feePhp * 100) as unknown as bigint)
+        : undefined
       const body: EventCreateRequest = {
         organizationId: orgId,
         title: input.title,

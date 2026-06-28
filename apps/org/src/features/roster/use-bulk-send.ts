@@ -76,7 +76,9 @@ export function useBulkSend(
             const inv = pickOldest(outstanding as any[])
             const { data: link, response: mintResponse } = await sendPaymentLink({
               path: { organizationId: orgId },
-              body: { personId: m.personId, amount: BigInt(Number(inv.totalAmount)), invoiceId: inv.id },
+              // Engine validator expects a number (centavos); a bigint serializes to a string
+              // and 400s. Cast at the SDK seam to satisfy the drifted bigint? type.
+              body: { personId: m.personId, amount: Number(inv.totalAmount) as unknown as bigint, invoiceId: inv.id },
             })
             const mintRes = mintResponse as Response
             if (mintRes.status === 201 && link) {

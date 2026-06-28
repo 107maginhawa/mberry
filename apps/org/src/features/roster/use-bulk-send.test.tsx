@@ -43,7 +43,7 @@ describe('useBulkSend', () => {
     expect(sendPaymentLink).toHaveBeenCalledTimes(1)
     expect(sendPaymentLink).toHaveBeenCalledWith({
       path: { organizationId: 'org1' },
-      body: { personId: 'p1', amount: 500n, invoiceId: 'older' },
+      body: { personId: 'p1', amount: 500, invoiceId: 'older' },
     })
     expect(result.current.results['m1']).toEqual({ status: 'sent', url: 'https://app.test/pay/abc' })
     expect(result.current.progress).toEqual({ done: 1, total: 1 })
