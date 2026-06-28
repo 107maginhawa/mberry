@@ -4,6 +4,16 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+## [0.1.21.0] - 2026-06-28
+
+Error-tile retry parity across `apps/org`, mirroring the member dashboard harden. When a screen fails to load, officers now get a **Try again** button that refetches instead of a dead-end "Please refresh." Wiring stays app-level; the shared `ErrorState` component is unchanged.
+
+### Changed
+- **Retry on the Dues screen.** Recent-payments and outstanding-invoices error tiles now refetch on **Try again**. Reworded "Could not load X. Please refresh." → "We couldn't load X."
+- **Retry on Events.** The events list error swaps its bespoke inline banner for the shared `ErrorState` with a **Try again** that refetches (kept the officer/admin access hint).
+- **Retry on the Roster.** A failed roster load (often a 403 for non-officers, but also a network blip) now shows a real error with **Try again** instead of a passive "Roster unavailable" empty state.
+- **Retry on Payment settings.** The gateway-status load error becomes a shared `ErrorState` with **Try again** (kept the 2FA officer caption).
+
 ## [0.1.20.0] - 2026-06-28
 
 UI/UX audit pass over `apps/org`, `apps/member`, and `packages/ui` (impeccable). Fixes land in the shared design system so all three apps benefit, no per-app forks.

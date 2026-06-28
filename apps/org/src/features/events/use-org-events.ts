@@ -11,7 +11,7 @@ export type OrgEvent = {
 
 export function useOrgEvents(
   orgId: string | null,
-): { status: 'idle' | 'loading' | 'ready' | 'empty' | 'error'; events: OrgEvent[] } {
+): { status: 'idle' | 'loading' | 'ready' | 'empty' | 'error'; events: OrgEvent[]; refetch: () => void } {
   const q = useQuery({
     queryKey: ['org-events', orgId],
     enabled: !!orgId,
@@ -36,11 +36,12 @@ export function useOrgEvents(
       }))
     },
   })
-  if (!orgId) return { status: 'idle', events: [] }
-  if (q.isLoading) return { status: 'loading', events: [] }
-  if (q.isError) return { status: 'error', events: [] }
+  const refetch = () => void q.refetch()
+  if (!orgId) return { status: 'idle', events: [], refetch }
+  if (q.isLoading) return { status: 'loading', events: [], refetch }
+  if (q.isError) return { status: 'error', events: [], refetch }
   const all = q.data ?? []
   // Drafts first (only actionable rows), otherwise preserve server order.
   const events = [...all].sort((a, b) => (a.status === 'draft' ? 0 : 1) - (b.status === 'draft' ? 0 : 1))
-  return { status: events.length === 0 ? 'empty' : 'ready', events }
+  return { status: events.length === 0 ? 'empty' : 'ready', events, refetch }
 }
