@@ -10,6 +10,8 @@ UI/UX audit pass over `apps/org`, `apps/member`, and `packages/ui` (impeccable).
 
 ### Added
 - **Persistent header on the member app.** Every signed-in member screen (dashboard and digital card) now shows the shared app header with a clear **Sign out**. Before, sign-out lived only at the bottom of the dashboard and was missing from the card screen entirely.
+- **Retry on the member dashboard.** When membership, receipts, or events fail to load, the tile now shows a **Try again** button that refetches, instead of a dead-end "Please refresh." A network blip is one tap to recover.
+- **Reduced-motion respected.** Users who ask their device to reduce motion no longer get the skeleton shimmer or transitions (global guard in the design system).
 
 ### Fixed
 - **Pay-now button was nearly unreadable.** The login-free pay-link's primary button rendered dark-on-plum (about 1.8:1 contrast) because the shared class merger dropped its text color. The button is now white-on-plum (12.6:1). This was the single most important button in the product. Same class of bug could have silently stripped the text color from any colored button given a custom text size.

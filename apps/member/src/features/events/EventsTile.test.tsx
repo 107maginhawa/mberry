@@ -39,7 +39,7 @@ describe('EventsTile', () => {
     expect(container.querySelector('.animate-pulse, [data-slot="skeleton"]')).toBeTruthy()
     mockEvents.mockReturnValue({ isLoading: false, isError: true, data: undefined })
     rerender(<EventsTile />)
-    expect(screen.getByText(/could not load|refresh/i)).toBeInTheDocument()
+    expect(screen.getByText(/couldn't load events/i)).toBeInTheDocument()
     mockEvents.mockReturnValue({ isLoading: false, isError: false, data: [] })
     rerender(<EventsTile />)
     expect(screen.getByText(/no upcoming events/i)).toBeInTheDocument()

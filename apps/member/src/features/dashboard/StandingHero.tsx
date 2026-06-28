@@ -40,7 +40,13 @@ export function StandingHero() {
     return (
       <Card>
         <CardContent className="py-6">
-          <ErrorState message="Could not load your membership. Please refresh." />
+          <ErrorState
+            message="We couldn't load your membership."
+            onRetry={() => {
+              void membershipsQuery.refetch()
+              void invoicesQuery.refetch()
+            }}
+          />
         </CardContent>
       </Card>
     )
