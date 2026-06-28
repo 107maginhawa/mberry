@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
 import { Link } from '@tanstack/react-router'
-import { Button, ConfirmDialog, EmptyState, Input, StatusBadge } from '@monobase/ui'
+import { Button, ConfirmDialog, EmptyState, ErrorState, Input, StatusBadge } from '@monobase/ui'
 import { useOrgs, useSelectedOrg } from '../org/use-org'
 import { OrgPicker } from '../org/OrgPicker'
 import { useRoster, type RosterMember } from './use-roster'
@@ -19,13 +19,15 @@ export interface RosterViewProps {
   members: RosterMember[]
   /** True when the roster query errored (e.g. 403 — not an officer/admin). */
   errored?: boolean
+  /** Retries the roster query (wired to the ErrorState "Try again"). */
+  onRetry?: () => void
   /** Maps a member to a send-pay-link href. Defaults to /members/:id/send */
   linkFor?: (member: RosterMember) => string
   /** When present, enables bulk select-and-send. */
   orgId?: string
 }
 
-export function RosterView({ orgName, members, errored, linkFor, orgId }: RosterViewProps) {
+export function RosterView({ orgName, members, errored, onRetry, linkFor, orgId }: RosterViewProps) {
   const href = linkFor ?? ((m: RosterMember) => `/members/${m.membershipId}/send`)
   const [query, setQuery] = useState('')
   const [selecting, setSelecting] = useState(false)
@@ -64,9 +66,9 @@ export function RosterView({ orgName, members, errored, linkFor, orgId }: Roster
     return (
       <div className="flex flex-col gap-4 p-4">
         {orgName && <h1 className="text-title font-semibold text-foreground">{orgName}</h1>}
-        <EmptyState
-          headline="Roster unavailable"
-          description="You need officer or admin access to view this chapter's roster."
+        <ErrorState
+          message="We couldn't load the roster. You may need officer or admin access."
+          onRetry={onRetry}
         />
       </div>
     )
@@ -237,7 +239,7 @@ export function RosterView({ orgName, members, errored, linkFor, orgId }: Roster
 export default function Roster() {
   const { orgs } = useOrgs()
   const { orgId } = useSelectedOrg()
-  const { status: rosterStatus, members } = useRoster(orgId)
+  const { status: rosterStatus, members, refetch } = useRoster(orgId)
 
   const selectedOrg = orgs.find((o) => o.id === orgId)
   const orgName = selectedOrg?.name ?? ''
@@ -263,6 +265,7 @@ export default function Roster() {
             orgName={orgName}
             members={members}
             errored={rosterStatus === 'error'}
+            onRetry={refetch}
             orgId={orgId ?? undefined}
             linkFor={(m) =>
               `/members/${m.membershipId}/send?personId=${encodeURIComponent(m.personId)}&name=${encodeURIComponent(m.name)}`
