@@ -2044,7 +2044,7 @@ export function registerRoutes(app: Hono<{ Variables: Variables }>) {
 
   // getOrganizationProfile
   app.get('/association/member/org-profile/:organizationId',
-    authMiddleware({ roles: ["association:admin"] }),
+    authMiddleware({ roles: ["association:admin", "association:member"] }),
     zValidator('param', validators.GetOrganizationProfileParams, validationErrorHandler),
     registry.getOrganizationProfile as unknown as Handler
   );

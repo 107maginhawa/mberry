@@ -5799,7 +5799,7 @@ export const updateOfficerTermMutation = (options?: Partial<Options<UpdateOffice
 export const getOrganizationProfileQueryKey = (options: Options<GetOrganizationProfileData>) => createQueryKey('getOrganizationProfile', options);
 
 /**
- * Get the profile of an association organization. Requires role: 'association:admin'
+ * Get the profile of an association organization. Requires role: 'association:admin', 'association:member'
  */
 export const getOrganizationProfileOptions = (options: Options<GetOrganizationProfileData>) => queryOptions<GetOrganizationProfileResponse, GetOrganizationProfileError, GetOrganizationProfileResponse, ReturnType<typeof getOrganizationProfileQueryKey>>({
     queryFn: async ({ queryKey, signal }) => {

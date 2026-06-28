@@ -2895,7 +2895,7 @@ export const updateOfficerTerm = <ThrowOnError extends boolean = false>(options:
 });
 
 /**
- * Get the profile of an association organization. Requires role: 'association:admin'
+ * Get the profile of an association organization. Requires role: 'association:admin', 'association:member'
  */
 export const getOrganizationProfile = <ThrowOnError extends boolean = false>(options: Options<GetOrganizationProfileData, ThrowOnError>) => (options.client ?? client).get<GetOrganizationProfileResponses, GetOrganizationProfileErrors, ThrowOnError>({
     responseTransformer: getOrganizationProfileResponseTransformer,

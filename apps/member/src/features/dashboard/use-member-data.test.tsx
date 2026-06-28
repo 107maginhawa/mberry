@@ -135,7 +135,7 @@ describe('useMemberData', () => {
 
     // Phase 2: orgId set — dues queries MUST fire
     act(() => {
-      vi.mocked(useMemberOrg).mockReturnValue({ orgId: 'org-1', memberships: [], select: vi.fn() })
+      vi.mocked(useMemberOrg).mockReturnValue({ orgId: 'org-1', memberships: [MEMBERSHIP], select: vi.fn() })
     })
     rerender()
 
@@ -148,7 +148,7 @@ describe('useMemberData', () => {
   // ── invoicesQuery ──────────────────────────────────────────────────────────
 
   it('invoicesQuery: returns data when orgId set', async () => {
-    vi.mocked(useMemberOrg).mockReturnValue({ orgId: 'org-1', memberships: [], select: vi.fn() })
+    vi.mocked(useMemberOrg).mockReturnValue({ orgId: 'org-1', memberships: [MEMBERSHIP], select: vi.fn() })
     vi.mocked(getMyMemberships).mockResolvedValue(ok({ data: [], total: 0 } as any))
     vi.mocked(listDuesInvoices).mockResolvedValue(
       ok({ data: [INVOICE], pagination: { offset: 0, limit: 20, count: 1, totalCount: 1, totalPages: 1, currentPage: 1, hasNextPage: false, hasPreviousPage: false } } as any),
@@ -163,7 +163,7 @@ describe('useMemberData', () => {
   })
 
   it('invoicesQuery: isError on 401', async () => {
-    vi.mocked(useMemberOrg).mockReturnValue({ orgId: 'org-1', memberships: [], select: vi.fn() })
+    vi.mocked(useMemberOrg).mockReturnValue({ orgId: 'org-1', memberships: [MEMBERSHIP], select: vi.fn() })
     vi.mocked(getMyMemberships).mockResolvedValue(ok({ data: [], total: 0 } as any))
     vi.mocked(listDuesInvoices).mockResolvedValue(err(401) as any)
 
@@ -174,7 +174,7 @@ describe('useMemberData', () => {
   // ── paymentsQuery ──────────────────────────────────────────────────────────
 
   it('paymentsQuery: returns data when orgId set', async () => {
-    vi.mocked(useMemberOrg).mockReturnValue({ orgId: 'org-1', memberships: [], select: vi.fn() })
+    vi.mocked(useMemberOrg).mockReturnValue({ orgId: 'org-1', memberships: [MEMBERSHIP], select: vi.fn() })
     vi.mocked(getMyMemberships).mockResolvedValue(ok({ data: [], total: 0 } as any))
     vi.mocked(listDuesPayments).mockResolvedValue(
       ok({ data: [PAYMENT], totalCount: 1 } as any),
@@ -190,7 +190,7 @@ describe('useMemberData', () => {
   })
 
   it('paymentsQuery: isError on 401', async () => {
-    vi.mocked(useMemberOrg).mockReturnValue({ orgId: 'org-1', memberships: [], select: vi.fn() })
+    vi.mocked(useMemberOrg).mockReturnValue({ orgId: 'org-1', memberships: [MEMBERSHIP], select: vi.fn() })
     vi.mocked(getMyMemberships).mockResolvedValue(ok({ data: [], total: 0 } as any))
     vi.mocked(listDuesPayments).mockResolvedValue(err(401) as any)
 
@@ -201,7 +201,7 @@ describe('useMemberData', () => {
   // ── outstandingInvoices filter ─────────────────────────────────────────────
 
   it('outstandingInvoices: only generated/sent/overdue statuses', async () => {
-    vi.mocked(useMemberOrg).mockReturnValue({ orgId: 'org-1', memberships: [], select: vi.fn() })
+    vi.mocked(useMemberOrg).mockReturnValue({ orgId: 'org-1', memberships: [MEMBERSHIP], select: vi.fn() })
     vi.mocked(getMyMemberships).mockResolvedValue(ok({ data: [], total: 0 } as any))
     vi.mocked(listDuesInvoices).mockResolvedValue(
       ok({

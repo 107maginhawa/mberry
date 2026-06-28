@@ -6,10 +6,10 @@ import { ok } from '@/test-utils/mock-sdk'
 import { useMemberEvents } from './use-member-events'
 
 vi.mock('@/features/org/use-member-org', () => ({ useMemberOrg: vi.fn(() => ({ orgId: 'org-1', memberships: [], select: vi.fn() })) }))
-vi.mock('@monobase/sdk-ts/generated', () => ({ listPublicEvents: vi.fn() }))
+vi.mock('@monobase/sdk-ts/generated', () => ({ searchEvents: vi.fn() }))
 import { useMemberOrg } from '@/features/org/use-member-org'
-import { listPublicEvents } from '@monobase/sdk-ts/generated'
-const mockList = listPublicEvents as unknown as ReturnType<typeof vi.fn>
+import { searchEvents } from '@monobase/sdk-ts/generated'
+const mockList = searchEvents as unknown as ReturnType<typeof vi.fn>
 
 const future = new Date(Date.now() + 7 * 864e5).toISOString()
 const past = new Date(Date.now() - 7 * 864e5).toISOString()

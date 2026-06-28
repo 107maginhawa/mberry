@@ -1347,7 +1347,9 @@ namespace Association.Member.Membership {
     @get
     @route("/{organizationId}")
     @useAuth(bearerAuth)
-    @extension("x-security-required-roles", #["association:admin"])
+    // Members may read their own org's public-facing profile (name + contact channels);
+    // the member app's "Contact your chapter" links depend on it. Update stays admin-only.
+    @extension("x-security-required-roles", #["association:admin", "association:member"])
     getOrganizationProfile(
       @path organizationId: string
     ): ApiOkResponse<OrganizationProfile>
