@@ -4,6 +4,11 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+## [0.1.16.0] - 2026-06-28
+
+### Changed
+- **Wave C founder checklist updated for the Connect-PayMongo UI (B5).** `docs/WAVE_C_FOUNDER_CHECKLIST.md` now describes the officer **Payment settings** screen as the primary way to load a chapter's PayMongo keys (with the `seed-paymongo-creds.ts` script as the scripted/CI alternative), and marks the "officer Connect-PayMongo UI" backlog item DONE. Docs only.
+
 ## [0.1.15.0] - 2026-06-28
 
 ### Added

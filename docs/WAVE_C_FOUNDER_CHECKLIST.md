@@ -66,26 +66,28 @@ with the secret + webhook secret stored **AES-256-GCM encrypted** (key = `AUTH_S
 (`handlers/association:member/utils/paymongo.adapter.ts`) supports GCash / Maya / card / bank transfer. Test
 vs live is purely which key prefix you load (`pk_test_`/`sk_test_` vs `pk_live_`/`sk_live_`) — no separate env.
 
-> ⚠️ **There is no officer "Connect PayMongo" UI yet** (deferred in Wave A). Until that ships, load each
-> chapter's credentials with the seed script below (or direct DB). This is the one manual step per chapter.
+> ✅ **There is now an officer "Connect PayMongo" UI** (apps/org → **Payment settings**, shipped v0.1.15.0).
+> A Treasurer/President pastes the keys + webhook secret, runs **Test connection**, and the screen shows the
+> exact webhook URL to register. The `seed-paymongo-creds.ts` script remains as a scripted/CI alternative.
+> Works with **test keys** (no live activation) so you can verify a chapter before G2.
 
-**Per chapter (founder, once per org):**
-- [ ] The chapter signs up for a **live** PayMongo account and generates `pk_live_*` + `sk_live_*`.
+**Per chapter (officer, once per org) — via the UI:**
+- [ ] The chapter signs up for a PayMongo account and generates keys (`pk_test_*`/`sk_test_*` to dogfood, or
+      `pk_live_*`/`sk_live_*` once activated).
 - [ ] In the PayMongo dashboard → Webhooks, register the per-org webhook:
-      **URL** `https://<your-domain>/webhooks/paymongo/<ORG_ID>` (the org's UUID),
-      **events** at least `checkout_session.payment.paid`. Copy the generated **webhook secret** (`whsec_*`).
-- [ ] Load the credentials into Memberry with the seed script (no UI yet):
+      **URL** `https://<your-API-domain>/webhooks/paymongo/<ORG_ID>` (shown on the Payment settings screen),
+      **event** `payment.paid`. Copy the generated **webhook secret** (`whsec_*`).
+- [ ] In apps/org → **Payment settings**: paste public key + secret key + webhook secret → Save → **Test
+      connection** (a green "Connected" + a passed test means the keys are valid). The keys are stored
+      AES-256-GCM encrypted; secrets are write-only (never shown back).
+- [ ] *(Scripted alternative / CI)* instead of the UI, load creds with:
       ```bash
       cd services/api-ts
-      ORG_ID=<org-uuid> \
-      PAYMONGO_PUBLIC_KEY=pk_live_xxx \
-      PAYMONGO_SECRET_KEY=sk_live_xxx \
-      PAYMONGO_WEBHOOK_SECRET=whsec_xxx \
-      DATABASE_URL=<prod-db> AUTH_SECRET=<same-as-API> \
+      ORG_ID=<org-uuid> PAYMONGO_PUBLIC_KEY=pk_xxx PAYMONGO_SECRET_KEY=sk_xxx \
+      PAYMONGO_WEBHOOK_SECRET=whsec_xxx DATABASE_URL=<db> AUTH_SECRET=<same-as-API> \
       bun scripts/seed-paymongo-creds.ts
       ```
-      It upserts the org's `dues_gateway_config` (encrypted, `connected=true`, `provider=paymongo`) and prints
-      the webhook URL to register. (`AUTH_SECRET` MUST match the running API or the secret can't be decrypted.)
+      (`AUTH_SECRET` MUST match the running API or the secret can't be decrypted.)
 - [ ] Smoke test: run `bun scripts/seed-paylink.ts` against a non-prod copy, open the printed `/pay/:token`
       link, complete a small real checkout, and confirm the PayMongo dashboard shows the payment AND the
       invoice flips to `paid` (webhook settled).
@@ -117,7 +119,7 @@ G3 is deferred deliberately — it's polish, not a first-peso blocker. Start the
 |---|---|
 | `services/api-ts/scripts/seed-console.ts` | Super platform-admin (`founder@memberry.ph`) + an association → lets you sign into the **console** and create orgs. |
 | `services/api-ts/scripts/seed-paylink.ts` | Full test path: association → org → officer + member → tier → dues config → **dues invoice (₱3,000)** → `dues_gateway_config` (test keys) → a payment token; prints a ready `/pay/:token` link. The fastest way to exercise checkout end-to-end. |
-| `services/api-ts/scripts/seed-paymongo-creds.ts` | **NEW (this slice).** Loads a chapter's live (or test) PayMongo keys into `dues_gateway_config` (encrypted, `connected=true`) — the manual G2 step until the officer Connect-PayMongo UI exists. |
+| `services/api-ts/scripts/seed-paymongo-creds.ts` | Loads a chapter's live (or test) PayMongo keys into `dues_gateway_config` (encrypted, `connected=true`) — the scripted/CI alternative to the **Payment settings** UI (v0.1.15.0). |
 
 **Recommended first-live dry run (once G2 keys exist):** create org in console → `seed-paymongo-creds.ts` with
 the live keys → register the webhook in PayMongo → import a small roster (officer, with 2FA) → have a test
@@ -128,7 +130,7 @@ member email-OTP in, tap **Pay now**, complete a real small payment → confirm 
 ## First-peso click-through (what's wired, end to end)
 
 1. Founder creates the chapter — console → `POST /admin/organizations` (super-admin). *(no PayMongo needed)*
-2. Founder loads the chapter's PayMongo keys — `seed-paymongo-creds.ts` + register the webhook. **(G2)**
+2. Officer loads the chapter's PayMongo keys — apps/org → **Payment settings** (or `seed-paymongo-creds.ts`) + register the webhook. **(G2)**
 3. Officer imports the roster — `importRosterMembers` (CSV, client-parsed). *(officer 2FA in prod)*
 4. Member logs in passwordless — email OTP (`/auth/sign-in/email-otp`); account-claim links them to their
    roster record by email.
@@ -148,7 +150,7 @@ registering the webhook unlocks.
 
 ## Known deferred items to revisit post-first-peso (engineering backlog)
 
-- Officer **Connect-PayMongo UI** (so G2 isn't a script) — Wave A deferred.
+- ~~Officer Connect-PayMongo UI~~ — **DONE** (v0.1.15.0, apps/org → Payment settings).
 - Officer **publish-event / network-visibility** flow — B3 events are created `draft`+internal, so they don't
   yet appear in the B4 member events tile until published & network-visible.
 - **Paid** event registration on the PayMongo rail (currently legacy Stripe + deferred).
