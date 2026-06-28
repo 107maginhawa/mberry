@@ -19,6 +19,7 @@ vi.mock('@monobase/ui', () => ({
   Card: ({ children, className }: { children: React.ReactNode; className?: string }) => (
     <div data-testid="card" className={className}>{children}</div>
   ),
+  Input: (props: React.InputHTMLAttributes<HTMLInputElement>) => <input {...props} />,
 }))
 
 import { signIn } from '@/features/auth/sign-in'

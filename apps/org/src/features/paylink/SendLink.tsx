@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { toast } from 'sonner'
-import { Button, Card, CardContent, CardHeader, CardTitle, ErrorState, centavosToPhp } from '@monobase/ui'
+import { Button, Card, CardContent, CardHeader, CardTitle, ConfirmDialog, ErrorState, centavosToPhp } from '@monobase/ui'
 import { listDuesInvoices } from '@monobase/sdk-ts/generated'
 import { Route } from '@/routes/members/$membershipId/send'
 import { useSelectedOrg } from '@/features/org/use-org'
@@ -36,6 +36,23 @@ export function SendLinkView({
   const centavos = Math.round(parseFloat(pesoInput) * 100)
   const customValid = pesoInput !== '' && !isNaN(centavos) && centavos > 0
 
+  // Money-step confirmation (DESIGN.md: confirm at every money step + ConfirmDialog
+  // for consequential mutations). A typo'd custom amount or a fat-finger Revoke is
+  // live money — gate both behind an explicit "are you sure".
+  const [ask, setAsk] = useState<
+    null | { title: string; description: string; confirmLabel: string; run: () => void }
+  >(null)
+  const confirmEl = ask ? (
+    <ConfirmDialog
+      open
+      onOpenChange={(o) => { if (!o) setAsk(null) }}
+      title={ask.title}
+      description={ask.description}
+      confirmLabel={ask.confirmLabel}
+      onConfirm={() => { ask.run(); setAsk(null) }}
+    />
+  ) : null
+
   // Sent panel — show once the link is minted
   if (state.kind === 'sent') {
     return (
@@ -63,7 +80,12 @@ export function SendLinkView({
               <Button
                 variant="destructive"
                 className="min-h-tap"
-                onClick={onRevoke}
+                onClick={() => setAsk({
+                  title: 'Revoke this pay-link?',
+                  description: `${memberName} won't be able to use this link anymore. You can send a new one anytime.`,
+                  confirmLabel: 'Yes, revoke',
+                  run: onRevoke,
+                })}
                 aria-label="Revoke link"
               >
                 Revoke
@@ -71,6 +93,7 @@ export function SendLinkView({
             </div>
           </CardContent>
         </Card>
+        {confirmEl}
       </div>
     )
   }
@@ -107,7 +130,12 @@ export function SendLinkView({
                 <Button
                   className="min-h-tap"
                   disabled={state.kind === 'minting'}
-                  onClick={() => onSendInvoice(inv.id, inv.amount)}
+                  onClick={() => setAsk({
+                    title: 'Send pay-link?',
+                    description: `Send ${memberName} a payment link for ${centavosToPhp(inv.amount)}?`,
+                    confirmLabel: 'Send pay-link',
+                    run: () => onSendInvoice(inv.id, inv.amount),
+                  })}
                   aria-label={`Send link for ${centavosToPhp(inv.amount)} invoice`}
                 >
                   Send link
@@ -140,13 +168,22 @@ export function SendLinkView({
           <Button
             className="min-h-tap"
             disabled={!customValid || state.kind === 'minting'}
-            onClick={() => { if (customValid) onSendCustom(centavos) }}
+            onClick={() => {
+              if (!customValid) return
+              setAsk({
+                title: 'Send pay-link?',
+                description: `Send ${memberName} a payment link for ${centavosToPhp(centavos)}?`,
+                confirmLabel: 'Send pay-link',
+                run: () => onSendCustom(centavos),
+              })
+            }}
             aria-label="Send custom amount link"
           >
             {state.kind === 'minting' ? 'Minting…' : 'Send link'}
           </Button>
         </CardContent>
       </Card>
+      {confirmEl}
     </div>
   )
 }

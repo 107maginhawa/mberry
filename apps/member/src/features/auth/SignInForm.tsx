@@ -75,7 +75,13 @@ export function SignInForm() {
   return (
     <div className="min-h-screen flex items-center justify-center bg-background p-4">
       <Card className="w-full max-w-sm p-6 space-y-4">
-        <h1 className="text-section font-semibold text-foreground">Member sign in</h1>
+        <div className="space-y-1">
+          {/* Step indicator (DESIGN.md): orient the member in the 2-step flow */}
+          <p className="text-caption font-medium text-muted-foreground">
+            {step === 'email' ? 'Step 1 of 2' : 'Step 2 of 2'}
+          </p>
+          <h1 className="text-section font-semibold text-foreground">Member sign in</h1>
+        </div>
 
         {step === 'email' ? (
           <form onSubmit={handleSend} className="space-y-4">

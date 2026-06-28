@@ -1,46 +1,33 @@
 import { createFileRoute, Link } from '@tanstack/react-router'
-import { useSession } from '@/features/auth/use-session'
-import { MembershipTile } from '@/features/dashboard/MembershipTile'
-import { DuesOwedTile } from '@/features/dashboard/DuesOwedTile'
+import { PageContainer } from '@monobase/ui'
+import { StandingHero } from '@/features/dashboard/StandingHero'
 import { ReceiptsTile } from '@/features/dashboard/ReceiptsTile'
 import { EventsTile } from '@/features/events/EventsTile'
+import { ContactOfficer } from '@/features/org/ContactOfficer'
+import { SignOutButton } from '@/features/auth/SignOutButton'
 
 export const Route = createFileRoute('/dashboard')({
   component: DashboardPage,
 })
 
 /**
- * DashboardPage — read-only member dashboard. Three tiles: membership status,
- * dues owed, payment receipts. One primary screen (DESIGN.md).
+ * DashboardPage — member home as a "poster" (DESIGN.md): StandingHero answers the
+ * member's #1 question (standing + dues + Pay CTA) above the fold, with secondary
+ * details (receipts, events, digital card) demoted below it.
  *
- * a11y: 18px base via tokens.css, min-h-tap on interactive elements (tiles are
- * informational — no tap targets needed here), labeled sections via headings.
+ * a11y: 18px base via tokens.css; the chapter name is the page h1 (inside the
+ * hero); secondary section is labeled; the digital-card link is a ≥48px target.
  */
 function DashboardPage() {
-  const { memberships } = useSession()
-  // Greeting: use first membership's orgName if available, fall back to generic.
-  const firstMembership = memberships && memberships.length > 0 ? memberships[0] : null
-  const orgName = firstMembership
-    ? (firstMembership as { orgName?: string | null }).orgName ?? null
-    : null
-
   return (
     <div className="min-h-screen bg-background">
-      <div className="max-w-2xl mx-auto px-4 py-8 space-y-6">
-        {/* Header — member greeting */}
-        <header className="space-y-1">
-          <h1 className="text-section font-bold text-foreground">
-            {orgName ? `Welcome, ${orgName} member` : 'My Dashboard'}
-          </h1>
-          <p className="text-body text-muted-foreground">
-            Your membership summary
-          </p>
-        </header>
+      <PageContainer width="narrow" className="py-8 space-y-8">
+        {/* Primary: the standing poster */}
+        <StandingHero />
 
-        {/* Tiles — one primary screen, stacked for mobile-first */}
-        <main className="space-y-4">
-          <MembershipTile />
-          <DuesOwedTile />
+        {/* Secondary: supporting details, visually demoted */}
+        <section className="space-y-4" aria-label="More about your membership">
+          <h2 className="text-large font-semibold text-muted-foreground px-1">Details</h2>
           <ReceiptsTile />
           <EventsTile />
           <Link
@@ -49,8 +36,14 @@ function DashboardPage() {
           >
             View digital card
           </Link>
-        </main>
-      </div>
+          <ContactOfficer />
+        </section>
+
+        {/* Account control — the emergency exit (Nielsen #3) */}
+        <footer className="pt-2">
+          <SignOutButton />
+        </footer>
+      </PageContainer>
     </div>
   )
 }

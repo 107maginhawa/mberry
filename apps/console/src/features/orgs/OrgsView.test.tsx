@@ -16,6 +16,10 @@ vi.mock('@monobase/ui', () => ({
   TableHead: ({ children }: { children: React.ReactNode }) => <th>{children}</th>,
   TableCell: ({ children }: { children: React.ReactNode }) => <td>{children}</td>,
   Skeleton: ({ className }: { className?: string }) => <div data-testid="skeleton" className={className} />,
+  Input: (props: React.InputHTMLAttributes<HTMLInputElement>) => <input {...props} />,
+  StatusBadge: ({ children, status }: { children?: React.ReactNode; status?: string }) => (
+    <span data-testid="status-badge">{children ?? status}</span>
+  ),
   // Use en-US locale (always available in Node.js) so commas are predictable
   centavosToPhp: (amount: number) =>
     '₱' + (amount / 100).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }),
