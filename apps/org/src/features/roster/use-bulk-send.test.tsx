@@ -74,6 +74,28 @@ describe('useBulkSend', () => {
     expect(result.current.results['m2']!.status).toBe('sent')
   })
 
+  it('marks a failed invoice lookup as error, not no-dues, and never mints', async () => {
+    ;(listDuesInvoices as any).mockResolvedValue({ data: undefined, error: { error: 'nope' }, response: { status: 403 } as Response })
+    const members = [{ membershipId: 'm1', personId: 'p1', name: 'A' }]
+    const { result } = renderHook(() => useBulkSend('org1', members))
+    await act(async () => { await result.current.start() })
+    await waitFor(() => expect(result.current.results['m1']!.status).toBe('error'))
+    expect(sendPaymentLink).not.toHaveBeenCalled()
+  })
+
+  it('reset() allows a fresh send to mint again', async () => {
+    ;(listDuesInvoices as any).mockResolvedValue({ data: { data: [{ id: 'i1', status: 'generated', periodStart: '2026-01-01', totalAmount: 100n }] } })
+    ;(sendPaymentLink as any).mockResolvedValue(ok201('/pay/x'))
+    const members = [{ membershipId: 'm1', personId: 'p1', name: 'A' }]
+    const { result } = renderHook(() => useBulkSend('org1', members))
+    await act(async () => { await result.current.start() })
+    expect(sendPaymentLink).toHaveBeenCalledTimes(1)
+    act(() => result.current.reset())
+    await waitFor(() => expect(result.current.progress.done).toBe(0))
+    await act(async () => { await result.current.start() })
+    expect(sendPaymentLink).toHaveBeenCalledTimes(2)
+  })
+
   it('start() is idempotent — a second call does not double-mint', async () => {
     ;(listDuesInvoices as any).mockResolvedValue({ data: { data: [{ id: 'i1', status: 'generated', periodStart: '2026-01-01', totalAmount: 100n }] } })
     ;(sendPaymentLink as any).mockResolvedValue(ok201('/pay/x'))

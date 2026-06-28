@@ -12,7 +12,7 @@ vi.mock('@tanstack/react-router', () => ({
 const { startSpy } = vi.hoisted(() => ({ startSpy: vi.fn() }))
 vi.mock('./use-bulk-send', async (importOriginal) => ({
   ...(await importOriginal<Record<string, unknown>>()),
-  useBulkSend: () => ({ results: {}, progress: { done: 0, total: 0 }, running: false, start: startSpy }),
+  useBulkSend: () => ({ results: {}, progress: { done: 0, total: 0 }, start: startSpy, reset: vi.fn() }),
 }))
 
 beforeEach(() => startSpy.mockClear())
@@ -78,6 +78,18 @@ describe('RosterView — select mode', () => {
     expect(startSpy).not.toHaveBeenCalled()
     fireEvent.click(screen.getByRole('button', { name: /send pay-links/i }))
     expect(startSpy).toHaveBeenCalled()
+  })
+
+  it('a member hidden by search is dropped from the count and the confirm (money-consent)', () => {
+    render(<RosterView orgName="Org" members={members} orgId="o1" />)
+    fireEvent.click(screen.getByRole('button', { name: /^select$/i }))
+    fireEvent.click(screen.getByRole('checkbox', { name: /select olive/i }))
+    fireEvent.click(screen.getByRole('checkbox', { name: /select ben/i }))
+    expect(screen.getByRole('button', { name: /send links to 2 selected/i })).toBeInTheDocument()
+    // Hide Ben — the confirmed/mintable set must drop to just the visible Olive.
+    fireEvent.change(screen.getByRole('searchbox', { name: /search members/i }), { target: { value: 'olive' } })
+    fireEvent.click(screen.getByRole('button', { name: /send links to 1 selected/i }))
+    expect(screen.getByRole('heading', { name: /send 1 pay-link\?/i })).toBeInTheDocument()
   })
 
   it('Select all picks only the currently-filtered rows', () => {

@@ -11,7 +11,11 @@ export type BulkResult =
   | { status: 'error'; message: string }
 
 const OUTSTANDING = new Set(['generated', 'sent', 'overdue'])
-const ms = (d: unknown) => new Date(d as string).getTime()
+// Missing/bad dates sort LAST so they never win "oldest" (NaN would be non-deterministic).
+const ms = (d: unknown) => {
+  const t = new Date(d as string).getTime()
+  return Number.isNaN(t) ? Infinity : t
+}
 
 // Oldest by periodStart, tie-break createdAt. Mirrors the single-send seam.
 function pickOldest<T extends { periodStart: unknown; createdAt?: unknown }>(invoices: T[]): T {
@@ -31,39 +35,55 @@ function errMessage(response: Response): string {
 export function useBulkSend(
   orgId: string,
   members: BulkMember[],
-): { results: Record<string, BulkResult>; progress: { done: number; total: number }; running: boolean; start: () => void } {
+): {
+  results: Record<string, BulkResult>
+  progress: { done: number; total: number }
+  start: () => void
+  reset: () => void
+} {
   const [results, setResults] = useState<Record<string, BulkResult>>({})
   const [done, setDone] = useState(0)
-  const [running, setRunning] = useState(false)
   // Synchronous guard so a double-tap (or a re-render before state flips) can't start twice.
   const startedRef = useRef(false)
 
   const set = (id: string, r: BulkResult) => setResults((prev) => ({ ...prev, [id]: r }))
 
+  function reset() {
+    startedRef.current = false
+    setResults({})
+    setDone(0)
+  }
+
   async function start() {
     if (startedRef.current) return
     startedRef.current = true
-    setRunning(true)
     setResults(Object.fromEntries(members.map((m) => [m.membershipId, { status: 'pending' as const }])))
 
     for (const m of members) {
       set(m.membershipId, { status: 'minting' })
       try {
-        const { data } = await listDuesInvoices({ query: { membershipId: m.membershipId, pageSize: 50 } })
-        const outstanding = (data?.data ?? []).filter((inv: any) => OUTSTANDING.has(inv.status))
-        if (outstanding.length === 0) {
-          set(m.membershipId, { status: 'no-dues' })
+        const { data, response } = await listDuesInvoices({ query: { membershipId: m.membershipId, pageSize: 50 } })
+        const listRes = response as Response | undefined
+        // SDK does not throw on non-2xx — a failed lookup would otherwise read as an
+        // empty list and be mislabeled "no dues", hiding a member who actually owes.
+        if (listRes && listRes.status >= 400) {
+          set(m.membershipId, { status: 'error', message: errMessage(listRes) })
         } else {
-          const inv = pickOldest(outstanding as any[])
-          const { data: link, response } = await sendPaymentLink({
-            path: { organizationId: orgId },
-            body: { personId: m.personId, amount: BigInt(Number(inv.totalAmount)), invoiceId: inv.id },
-          })
-          const res = response as Response
-          if (res.status === 201 && link) {
-            set(m.membershipId, { status: 'sent', url: `${window.location.origin}${link.paymentUrl}` })
+          const outstanding = (data?.data ?? []).filter((inv: any) => OUTSTANDING.has(inv.status))
+          if (outstanding.length === 0) {
+            set(m.membershipId, { status: 'no-dues' })
           } else {
-            set(m.membershipId, { status: 'error', message: errMessage(res) })
+            const inv = pickOldest(outstanding as any[])
+            const { data: link, response: mintResponse } = await sendPaymentLink({
+              path: { organizationId: orgId },
+              body: { personId: m.personId, amount: BigInt(Number(inv.totalAmount)), invoiceId: inv.id },
+            })
+            const mintRes = mintResponse as Response
+            if (mintRes.status === 201 && link) {
+              set(m.membershipId, { status: 'sent', url: `${window.location.origin}${link.paymentUrl}` })
+            } else {
+              set(m.membershipId, { status: 'error', message: errMessage(mintRes) })
+            }
           }
         }
       } catch {
@@ -71,8 +91,7 @@ export function useBulkSend(
       }
       setDone((d) => d + 1)
     }
-    setRunning(false)
   }
 
-  return { results, progress: { done, total: members.length }, running, start }
+  return { results, progress: { done, total: members.length }, start, reset }
 }

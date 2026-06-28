@@ -91,7 +91,7 @@ export function RosterView({ orgName, members, errored, linkFor, orgId }: Roster
         members={sendMembers}
         results={bulk.results}
         progress={bulk.progress}
-        onBack={() => { setSendMembers(null); setSelecting(false); setSelected(new Set()) }}
+        onBack={() => { bulk.reset(); setSendMembers(null); setSelecting(false); setSelected(new Set()) }}
       />
     )
   }
@@ -111,9 +111,13 @@ export function RosterView({ orgName, members, errored, linkFor, orgId }: Roster
     })
 
   function startSend() {
-    const list: BulkMember[] = members
-      .filter((m) => selected.has(m.membershipId))
-      .map((m) => ({ membershipId: m.membershipId, personId: m.personId, name: m.name }))
+    // Mint exactly the set the confirm count reflects — visibleSelected (filtered +
+    // selected), NOT the raw `selected` set, which may retain rows hidden by search.
+    const list: BulkMember[] = visibleSelected.map((m) => ({
+      membershipId: m.membershipId,
+      personId: m.personId,
+      name: m.name,
+    }))
     setSendMembers(list)
     setConfirmOpen(false)
   }
@@ -143,7 +147,7 @@ export function RosterView({ orgName, members, errored, linkFor, orgId }: Roster
       />
 
       {selecting && (
-        <label className="flex items-center gap-3 text-body text-foreground">
+        <label className="flex min-h-tap items-center gap-3 text-body text-foreground">
           <input
             type="checkbox"
             className="size-5"
