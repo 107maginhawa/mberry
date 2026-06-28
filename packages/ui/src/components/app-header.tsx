@@ -28,8 +28,7 @@ export function AppHeader({ title, nav, onSignOut, signingOut }: AppHeaderProps)
           {onSignOut && (
             <Button
               variant="ghost"
-              size="sm"
-              className="min-h-tap text-muted-foreground"
+              className="text-muted-foreground"
               disabled={signingOut}
               onClick={onSignOut}
             >

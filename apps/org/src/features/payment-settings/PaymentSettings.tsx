@@ -108,7 +108,7 @@ export function PaymentSettings() {
           <p role="alert" className="text-body text-destructive">
             {(statusQuery.error as Error)?.message ?? 'Could not load payment settings.'}
           </p>
-          <p className="mt-2 text-sm text-muted-foreground">
+          <p className="mt-2 text-caption text-muted-foreground">
             Requires a Treasurer or President with two-factor authentication enabled.
           </p>
         </CardContent>
@@ -150,7 +150,7 @@ export function PaymentSettings() {
 
         {/* Public key — non-secret, shown plain */}
         {configPublicKey && (
-          <p className="mb-4 text-sm text-muted-foreground">
+          <p className="mb-4 text-caption text-muted-foreground">
             Public key: <span className="font-mono">{configPublicKey}</span>
           </p>
         )}
@@ -206,14 +206,14 @@ export function PaymentSettings() {
         </form>
 
         {/* Webhook URL block */}
-        <div className="mt-6 rounded-md bg-muted p-4 text-sm">
+        <div className="mt-6 rounded-md bg-muted p-4 text-caption">
           <p className="mb-1 font-medium">Webhook URL</p>
-          <p className="mb-2 break-all font-mono text-xs">{webhookUrl}</p>
+          <p className="mb-2 break-all font-mono text-caption">{webhookUrl}</p>
           {publicApiOrigin && (
             <Button
               type="button"
               variant="outline"
-              className="mb-2 min-h-[48px] text-sm"
+              className="mb-2 min-h-tap"
               onClick={() => {
                 void navigator.clipboard.writeText(webhookUrl)
                 toast.success('Copied!')
@@ -238,7 +238,7 @@ export function PaymentSettings() {
             <Button
               type="button"
               variant="outline"
-              className="min-h-[48px]"
+              className="min-h-tap"
               disabled={test.isPending}
               onClick={() => void onTest()}
             >
@@ -247,7 +247,7 @@ export function PaymentSettings() {
             <Button
               type="button"
               variant="destructive"
-              className="min-h-[48px]"
+              className="min-h-tap"
               disabled={disconnect.isPending}
               onClick={() => setShowDisconnect(true)}
             >

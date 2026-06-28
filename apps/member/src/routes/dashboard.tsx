@@ -31,7 +31,7 @@ function DashboardPage() {
           <EventsTile />
           <Link
             to="/card"
-            className="inline-flex min-h-[48px] items-center text-body font-medium text-primary underline"
+            className="inline-flex min-h-tap items-center text-body font-medium text-primary underline"
           >
             View digital card
           </Link>
