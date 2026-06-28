@@ -4,6 +4,24 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+## [0.1.20.0] - 2026-06-28
+
+UI/UX audit pass over `apps/org`, `apps/member`, and `packages/ui` (impeccable). Fixes land in the shared design system so all three apps benefit, no per-app forks.
+
+### Added
+- **Persistent header on the member app.** Every signed-in member screen (dashboard and digital card) now shows the shared app header with a clear **Sign out**. Before, sign-out lived only at the bottom of the dashboard and was missing from the card screen entirely.
+
+### Fixed
+- **Pay-now button was nearly unreadable.** The login-free pay-link's primary button rendered dark-on-plum (about 1.8:1 contrast) because the shared class merger dropped its text color. The button is now white-on-plum (12.6:1). This was the single most important button in the product. Same class of bug could have silently stripped the text color from any colored button given a custom text size.
+- **Inputs now meet the 48px tap target** and never shrink below 16px text on desktop (was 36px tall with 14px text), so older users on phones can tap and read them.
+- **Plain-language sign-in errors.** Officers and members no longer see raw technical strings like "Invalid origin"; errors map to clear next steps ("We couldn't verify this device. Refresh the page and try again."), and a dropped network connection now shows a friendly message instead of leaving the button stuck on "Sending…".
+- **Roster CSV file picker** now meets the 48px tap target.
+- Stronger keyboard focus rings and a pressed state on buttons; card descriptions and payment-settings help text raised to readable sizes; the pay card's all-caps eyebrow replaced with a plain readable label.
+
+### Changed
+- Card depth and the warm cream background now use the design system's own tokens (brand shadow + the four-radial cream wash from DESIGN.md) instead of flat defaults.
+- Tap-target sizing is defined once via the `min-h-tap` token across both apps (no more hardcoded `48px`).
+
 ## [0.1.19.0] - 2026-06-28
 
 ### Added
