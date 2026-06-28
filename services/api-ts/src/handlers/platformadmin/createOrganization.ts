@@ -29,6 +29,14 @@ export async function createOrganization(
   const orgRepo = new OrganizationRepository(db, logger);
   const assocRepo = new AssociationRepository(db, logger);
 
+  // Guard the associationId shape before the lookup. An empty/malformed id reaches
+  // the uuid column and Postgres throws at query time (leaking the raw SQL as a 500)
+  // instead of cleanly returning "not found". Reject non-UUID input as a 400.
+  const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+  if (!UUID_RE.test(body.associationId)) {
+    throw new ValidationError('associationId must be a valid UUID');
+  }
+
   // Verify association exists
   const association = await assocRepo.findById(body.associationId);
   if (!association) {
