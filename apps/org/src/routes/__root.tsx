@@ -1,6 +1,7 @@
 import { createRootRoute, Link, Outlet, useNavigate, useRouterState } from '@tanstack/react-router'
 import { useEffect, useState } from 'react'
 import { useQueryClient } from '@tanstack/react-query'
+import { toast } from 'sonner'
 import { AppHeader, Skeleton } from '@monobase/ui'
 import { useSession } from '@/features/auth/use-session'
 import { signOut } from '@/features/auth/sign-in'
@@ -48,12 +49,14 @@ function RootGate() {
 
   useEffect(() => {
     if (status === 'unauthed' && pathname !== '/sign-in') navigate({ to: '/sign-in' })
+    else if (status === 'authed' && pathname === '/sign-in') navigate({ to: '/' })
   }, [status, pathname, navigate])
 
   async function onSignOut() {
     if (signingOut) return
     setSigningOut(true)
-    await signOut(API_BASE)
+    const res = await signOut(API_BASE)
+    if (!res.ok) { toast.error(res.error); setSigningOut(false); return }
     await qc.invalidateQueries({ queryKey: ['session'] })
     navigate({ to: '/sign-in' })
   }

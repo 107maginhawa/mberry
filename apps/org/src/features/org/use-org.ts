@@ -4,6 +4,13 @@ import { getMyMemberships } from '@monobase/sdk-ts/generated'
 
 const STORAGE_KEY = 'org.selectedOrgId'
 
+// Safe localStorage wrappers: Safari Private Mode (and locked-down browsers) can
+// throw on access. A throw in the useState initializer would crash the whole app
+// on load; getItem-throws → null, set/remove-throws → swallowed (best-effort).
+const safeGet = (k: string): string | null => { try { return localStorage.getItem(k) } catch { return null } }
+const safeSet = (k: string, v: string): void => { try { localStorage.setItem(k, v) } catch { /* private mode */ } }
+const safeRemove = (k: string): void => { try { localStorage.removeItem(k) } catch { /* private mode */ } }
+
 type Org = { id: string; name: string }
 
 // F2: stable empty reference — avoids triggering useEffect([orgId, orgs]) on every render during loading
@@ -36,14 +43,14 @@ export function useOrgs(): { status: 'loading' | 'ready' | 'empty'; orgs: Org[] 
 
 export function useSelectedOrg(): { orgId: string | null; setOrgId: (id: string) => void } {
   const { orgs } = useOrgs()
-  const [orgId, setOrgIdState] = useState<string | null>(() => localStorage.getItem(STORAGE_KEY))
+  const [orgId, setOrgIdState] = useState<string | null>(() => safeGet(STORAGE_KEY))
 
   // F5: stale stored orgId recovery — clear if the stored org is no longer in the list.
   // Guard: only when orgId is set, orgs are loaded (length > 0), and orgId not found.
   // Avoids loops: only fires when orgId non-null AND orgs non-empty AND not found.
   useEffect(() => {
     if (orgId && orgs.length > 0 && !orgs.some(o => o.id === orgId)) {
-      localStorage.removeItem(STORAGE_KEY)
+      safeRemove(STORAGE_KEY)
       setOrgIdState(null)
     }
   }, [orgId, orgs])
@@ -53,13 +60,13 @@ export function useSelectedOrg(): { orgId: string | null; setOrgId: (id: string)
     const only = orgs[0]
     if (!orgId && orgs.length === 1 && only) {
       setOrgIdState(only.id)
-      localStorage.setItem(STORAGE_KEY, only.id)
+      safeSet(STORAGE_KEY, only.id)
     }
   }, [orgId, orgs])
 
   // F3: memoized — consumers can safely put setOrgId in useEffect dep arrays.
   const setOrgId = useCallback((id: string) => {
-    localStorage.setItem(STORAGE_KEY, id)
+    safeSet(STORAGE_KEY, id)
     setOrgIdState(id)
   }, [])
 

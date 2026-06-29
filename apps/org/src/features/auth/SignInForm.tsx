@@ -141,6 +141,13 @@ export function SignInForm() {
             >
               Resend code
             </button>
+            <button
+              type="button"
+              onClick={() => { setStep('email'); setOtp(''); setError('') }}
+              className="min-h-tap w-full text-body text-primary underline"
+            >
+              Use a different email
+            </button>
           </form>
         )}
       </Card>

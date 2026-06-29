@@ -84,7 +84,11 @@ export function configureApiClient(baseUrl = API_BASE): void {
     // Org-scoped read endpoints (dues-*) gate on the x-org-id header (org-context.ts).
     // Inject the selected org only on org-scoped paths (not /auth or /pay public flows).
     if (!isExemptPath(pathname)) {
-      const orgId = localStorage.getItem('org.selectedOrgId')
+      // Guard localStorage: Safari Private Mode can throw on access → treat as no
+      // selected org (don't crash the request interceptor). Behaviour-preserving
+      // when storage works.
+      let orgId: string | null = null
+      try { orgId = localStorage.getItem('org.selectedOrgId') } catch { orgId = null }
       if (orgId && !request.headers.has('x-org-id')) request.headers.set('x-org-id', orgId)
     }
     if (needsCsrf(request.method, pathname)) {

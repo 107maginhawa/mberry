@@ -49,6 +49,23 @@ describe('useSelectedOrg', () => {
     await waitFor(() => expect(result.current.orgId).toBe('o1'))
   })
 
+  it('survives a throwing localStorage (private mode) without crashing', async () => {
+    // Safari Private Mode can throw on getItem/setItem. The useState initializer
+    // and the auto-select effect must not crash the hook.
+    const getSpy = vi.spyOn(Storage.prototype, 'getItem').mockImplementation(() => { throw new Error('private mode') })
+    const setSpy = vi.spyOn(Storage.prototype, 'setItem').mockImplementation(() => { throw new Error('private mode') })
+    vi.mocked(getMyMemberships).mockResolvedValue(
+      ok({ data: [{ organizationId: 'o1', orgName: 'A' }], total: 1 } as any)
+    )
+    const { result } = renderHook(() => useSelectedOrg(), { wrapper })
+    // Initial read throws → falls back to null instead of crashing on load.
+    expect(result.current.orgId).toBeNull()
+    // Auto-select still updates in-memory state even though setItem throws (swallowed).
+    await waitFor(() => expect(result.current.orgId).toBe('o1'))
+    getSpy.mockRestore()
+    setSpy.mockRestore()
+  })
+
   it('persists an explicit selection', async () => {
     // engine type/impl drift: see above
     vi.mocked(getMyMemberships).mockResolvedValue(

@@ -48,6 +48,27 @@ describe('officer SignInForm (email-OTP)', () => {
     expect(screen.queryByLabelText(/6-digit code/i)).not.toBeInTheDocument()
   })
 
+  it('"Use a different email" returns to step 1 and clears the code', async () => {
+    vi.mocked(requestOtp).mockResolvedValue({ ok: true })
+    render(<SignInForm />, { wrapper })
+    fireEvent.change(screen.getByLabelText(/email/i), { target: { value: 'olive@pda.ph' } })
+    fireEvent.click(screen.getByRole('button', { name: /send code/i }))
+    await waitFor(() => expect(screen.getByLabelText(/6-digit code/i)).toBeInTheDocument())
+
+    fireEvent.change(screen.getByLabelText(/6-digit code/i), { target: { value: '123456' } })
+    fireEvent.click(screen.getByRole('button', { name: /use a different email/i }))
+
+    // Back on step 1: email input present, code input gone.
+    expect(screen.getByText(/step 1 of 2/i)).toBeInTheDocument()
+    expect(screen.getByLabelText(/email/i)).toBeInTheDocument()
+    expect(screen.queryByLabelText(/6-digit code/i)).not.toBeInTheDocument()
+
+    // Code was cleared: re-send, return to step 2, field is empty.
+    fireEvent.click(screen.getByRole('button', { name: /send code/i }))
+    await waitFor(() => expect(screen.getByLabelText(/6-digit code/i)).toBeInTheDocument())
+    expect(screen.getByLabelText(/6-digit code/i)).toHaveValue('')
+  })
+
   it('verifyOtp ok → invalidate([session]) + navigate to roster (/)', async () => {
     vi.mocked(requestOtp).mockResolvedValue({ ok: true })
     render(<SignInForm />, { wrapper })
