@@ -14,11 +14,11 @@ conditions, and update your row when done.
 | 003  | Housekeeping — scope SendLink invoice query key by org + apps/org README | P2 | S | — | DONE (4939f289) |
 | 004  | E2E coverage for the money flows (events publish, payment-settings, dues) | P3 | L | 001 | DONE (312854ce) |
 | 005  | Port officer-flow.spec.ts off the removed password sign-in (OTP) | P2 | S | — | DONE (see git log) |
-| 006  | Dues dashboard error+retry (no dead-end) | P1 | S | — | TODO |
-| 007  | Router error boundary + 404 screen | P1 | M | — | TODO |
-| 008  | Auth/session flow hardening (4 small fixes) | P2 | S | — | TODO |
-| 009  | Form-validation + a11y polish (3 fixes) | P2 | S | — | TODO |
-| 010  | Announcements list (close create-only gap) | P3 | M | — | TODO |
+| 006  | Dues dashboard error+retry (no dead-end) | P1 | S | — | DONE (09a88e47) |
+| 007  | Router error boundary + 404 screen | P1 | M | — | DONE (b9f7fa64) |
+| 008  | Auth/session flow hardening (4 small fixes) | P2 | S | — | DONE (2eae45d1) |
+| 009  | Form-validation + a11y polish (3 fixes) | P2 | S | — | DONE (2184e8ce) |
+| 010  | Announcements list (close create-only gap) | P3 | M | — | DONE (1058fa09) |
 
 Status values: TODO | IN PROGRESS | DONE | BLOCKED (one-line reason) | REJECTED (one-line rationale)
 
