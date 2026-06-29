@@ -5,11 +5,20 @@ import { createRouter, RouterProvider } from '@tanstack/react-router'
 import { Toaster } from 'sonner'
 import { configureApiClient, API_BASE } from './lib/api'
 import { routeTree } from './routeTree.gen'
+import { RouteError } from './components/RouteError'
+import { NotFound } from './components/NotFound'
 import './styles.css'
 
 configureApiClient(API_BASE)
 
-const router = createRouter({ routeTree })
+// App-wide fallbacks: every route inherits a friendly, recoverable error
+// boundary (defaultErrorComponent) and a 404 (defaultNotFoundComponent) instead
+// of a blank screen / bare router default.
+const router = createRouter({
+  routeTree,
+  defaultErrorComponent: RouteError,
+  defaultNotFoundComponent: NotFound,
+})
 
 declare module '@tanstack/react-router' {
   interface Register {
