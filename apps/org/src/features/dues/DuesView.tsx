@@ -1,4 +1,3 @@
-import { Link } from '@tanstack/react-router'
 import {
   Card,
   CardContent,
@@ -193,7 +192,7 @@ export function DuesView({
 
 export function Dues() {
   const { orgId } = useSelectedOrg()
-  const { data: stats, isLoading: statsLoading } = useDuesDashboard(orgId)
+  const { data: stats, isLoading: statsLoading, isError: statsError, refetch: refetchStats } = useDuesDashboard(orgId)
   const { data: payments = [], isLoading: paymentsLoading, isError: paymentsError, refetch: refetchPayments } = useRecentPayments(orgId)
   const { data: invoices = [], isLoading: invoicesLoading, isError: invoicesError, refetch: refetchInvoices } = useOutstandingInvoices(orgId)
 
@@ -218,14 +217,12 @@ export function Dues() {
     )
   }
 
-  if (!stats) {
+  if (statsError || !stats) {
     return (
       <div className="min-h-screen bg-[var(--color-bg)]">
-        <div className="max-w-lg mx-auto pt-4 p-4">
-          <Link to="/" className="inline-flex min-h-tap items-center text-body font-medium text-primary underline">
-            Roster
-          </Link>
-          <p className="mt-4 text-body text-muted-foreground">Could not load dues data.</p>
+        <div className="max-w-lg mx-auto pt-4 p-4 flex flex-col gap-4">
+          <h1 className="text-title font-semibold text-foreground">Dues</h1>
+          <ErrorState message="We couldn't load the dues summary." onRetry={() => void refetchStats()} />
         </div>
       </div>
     )

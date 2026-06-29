@@ -15,6 +15,7 @@ export function useDuesDashboard(orgId: string | null): {
   data?: DuesStats
   isLoading: boolean
   isError: boolean
+  refetch: () => void
 } {
   const q = useQuery({
     queryKey: ['dues', 'dashboard', orgId],
@@ -50,7 +51,7 @@ export function useDuesDashboard(orgId: string | null): {
       } as DuesStats
     },
   })
-  return { data: q.data, isLoading: q.isLoading, isError: q.isError }
+  return { data: q.data, isLoading: q.isLoading, isError: q.isError, refetch: () => void q.refetch() }
 }
 
 export function useRecentPayments(orgId: string | null) {

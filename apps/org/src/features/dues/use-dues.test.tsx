@@ -47,6 +47,16 @@ it('useDuesDashboard falls back collectionRate+memberCount when handler omits th
   expect(result.current.data!.collectionRate).toBe(33)
 })
 
+it('useDuesDashboard surfaces isError and exposes a callable refetch on failure', async () => {
+  vi.mocked(getDuesDashboard).mockRejectedValue(new Error('boom'))
+  const { result } = renderHook(() => useDuesDashboard('o1'), { wrapper })
+  await waitFor(() => expect(result.current.isError).toBe(true))
+  expect(result.current.data).toBeUndefined()
+  expect(typeof result.current.refetch).toBe('function')
+  // Calling refetch must not throw
+  expect(() => result.current.refetch()).not.toThrow()
+})
+
 // ─── Payments ────────────────────────────────────────────────────────────────
 
 it('useRecentPayments coerces amount + refundedAmount to number', async () => {
