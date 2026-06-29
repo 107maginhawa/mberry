@@ -1,4 +1,4 @@
-import { useMutation, type UseMutationResult } from '@tanstack/react-query'
+import { useMutation, useQueryClient, type UseMutationResult } from '@tanstack/react-query'
 import { createAnnouncement, publishAnnouncement, type Announcement } from '@monobase/sdk-ts/generated'
 
 function serverError(error: unknown): string | undefined {
@@ -10,6 +10,7 @@ function serverError(error: unknown): string | undefined {
 }
 
 export function useCreateAnnouncement(orgId: string | null): UseMutationResult<Announcement, Error, { title: string; content: string }> {
+  const queryClient = useQueryClient()
   return useMutation<Announcement, Error, { title: string; content: string }>({
     mutationFn: async ({ title, content }) => {
       if (!orgId) throw new Error('No organization selected.')
@@ -19,5 +20,8 @@ export function useCreateAnnouncement(orgId: string | null): UseMutationResult<A
       if (!published) throw new Error(serverError(pubError) ?? 'Could not publish the announcement.')
       return published
     },
+    // Refetch the list so a freshly posted announcement appears without a manual
+    // refresh. Key must match useListAnnouncements' ['announcements', orgId].
+    onSuccess: () => { void queryClient.invalidateQueries({ queryKey: ['announcements', orgId] }) },
   })
 }
