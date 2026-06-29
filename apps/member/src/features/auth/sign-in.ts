@@ -57,6 +57,16 @@ export const verifyOtp = (
 ): Promise<{ ok: true } | { ok: false; error: string }> =>
   post('/auth/sign-in/email-otp', { email, otp }, baseUrl)
 
+// ponytail: dev-only. Seeded members have a password (TestPass123!); the member
+// app is OTP-only by design, so this exists purely to skip the Mailpit dance in
+// local dev. Gated by import.meta.env.DEV at the call site — never shipped to prod.
+export const signInWithPassword = (
+  email: string,
+  password: string,
+  baseUrl = `${window.location.origin}/api`,
+): Promise<{ ok: true } | { ok: false; error: string }> =>
+  post('/auth/sign-in/email', { email, password }, baseUrl)
+
 // better-auth sign-out (POST /auth/sign-out, CSRF-exempt /auth/*). Clears the
 // session cookie server-side; caller invalidates ['session'] + redirects.
 export const signOut = (

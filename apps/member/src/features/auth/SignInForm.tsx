@@ -3,7 +3,7 @@ import { useNavigate } from '@tanstack/react-router'
 import { useQueryClient } from '@tanstack/react-query'
 import { toast } from 'sonner'
 import { Button, Card, Input, Label } from '@monobase/ui'
-import { requestOtp, verifyOtp } from '@/features/auth/sign-in'
+import { requestOtp, verifyOtp, signInWithPassword } from '@/features/auth/sign-in'
 import { API_BASE } from '@/lib/api'
 
 /**
@@ -25,8 +25,27 @@ export function SignInForm() {
   const [step, setStep] = useState<'email' | 'code'>('email')
   const [email, setEmail] = useState('')
   const [otp, setOtp] = useState('')
+  const [password, setPassword] = useState('')
   const [error, setError] = useState('')
   const [busy, setBusy] = useState(false)
+
+  // ponytail: dev-only password shortcut — skips the OTP/Mailpit dance locally.
+  // import.meta.env.DEV is false in any production build, so this whole block
+  // and its handler vanish from shipped bundles.
+  async function handlePasswordSignIn(e: React.FormEvent) {
+    e.preventDefault()
+    if (busy) return
+    setBusy(true)
+    setError('')
+    const res = await signInWithPassword(email, password, API_BASE)
+    setBusy(false)
+    if (res.ok) {
+      await qc.invalidateQueries({ queryKey: ['session'] })
+      navigate({ to: '/dashboard' })
+    } else {
+      setError(res.error)
+    }
+  }
 
   async function handleSend(e: React.FormEvent) {
     e.preventDefault()
@@ -103,6 +122,32 @@ export function SignInForm() {
             <Button type="submit" disabled={busy} className="w-full min-h-tap">
               {busy ? 'Sending…' : 'Send code'}
             </Button>
+            {import.meta.env.DEV && (
+              <div className="space-y-2 border-t border-border pt-4">
+                <p className="text-caption font-medium text-muted-foreground">
+                  Dev only — password sign in
+                </p>
+                <div className="space-y-1">
+                  <Label htmlFor="dev-password">Password</Label>
+                  <Input
+                    id="dev-password"
+                    type="password"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    placeholder="TestPass123!"
+                  />
+                </div>
+                <Button
+                  type="button"
+                  variant="secondary"
+                  disabled={busy}
+                  onClick={handlePasswordSignIn}
+                  className="w-full min-h-tap"
+                >
+                  Sign in with password
+                </Button>
+              </div>
+            )}
           </form>
         ) : (
           <form onSubmit={handleVerify} className="space-y-4">
