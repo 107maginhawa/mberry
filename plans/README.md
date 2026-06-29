@@ -9,10 +9,11 @@ conditions, and update your row when done.
 
 | Plan | Title | Priority | Effort | Depends on | Status |
 |------|-------|----------|--------|------------|--------|
-| 001  | Stop showing raw server error strings to officers | P1 | M | — | TODO |
-| 002  | Unit tests for OrgPicker and useTiers | P2 | S | — | TODO |
-| 003  | Housekeeping — scope SendLink invoice query key by org + apps/org README | P2 | S | — | TODO |
-| 004  | E2E coverage for the money flows (events publish, payment-settings, dues) | P3 | L | 001 | TODO |
+| 001  | Stop showing raw server error strings to officers | P1 | M | — | DONE (f4c95a4d) |
+| 002  | Unit tests for OrgPicker and useTiers | P2 | S | — | DONE (b2a1b311) |
+| 003  | Housekeeping — scope SendLink invoice query key by org + apps/org README | P2 | S | — | DONE (4939f289) |
+| 004  | E2E coverage for the money flows (events publish, payment-settings, dues) | P3 | L | 001 | DONE (312854ce) |
+| 005  | Port officer-flow.spec.ts off the removed password sign-in (OTP) | P2 | S | — | TODO (newly found) |
 
 Status values: TODO | IN PROGRESS | DONE | BLOCKED (one-line reason) | REJECTED (one-line rationale)
 
@@ -56,6 +57,17 @@ Status values: TODO | IN PROGRESS | DONE | BLOCKED (one-line reason) | REJECTED 
 - **Cross-org IDOR via the SendLink invoice query key** — overstated by a
   subagent. `membershipId` is globally unique, so no cross-org cache collision is
   possible. Downgraded to a one-line consistency fix (folded into plan 003).
+
+## Newly discovered during execution
+
+- **`officer-flow.spec.ts` is pre-existing red** (found while running plan 004).
+  The org app migrated to passwordless email-OTP, but this E2E spec still drives
+  a Password field (`getByLabel('Password')`) that no longer exists, so it times
+  out. It has been failing since the OTP migration, independent of plans 001-004.
+  Plan 004's new specs deliberately model on `import-flow.spec.ts` (localStorage
+  org seed) instead. **Plan 005** (TODO) should port `officer-flow.spec.ts` to
+  the OTP form or the import-flow auth pattern. Until then the full org E2E suite
+  has one known red unrelated to this batch.
 
 ## Direction options (not planned — for the maintainer to weigh)
 
