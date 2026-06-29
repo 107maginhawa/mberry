@@ -14,6 +14,11 @@ conditions, and update your row when done.
 | 003  | Housekeeping — scope SendLink invoice query key by org + apps/org README | P2 | S | — | DONE (4939f289) |
 | 004  | E2E coverage for the money flows (events publish, payment-settings, dues) | P3 | L | 001 | DONE (312854ce) |
 | 005  | Port officer-flow.spec.ts off the removed password sign-in (OTP) | P2 | S | — | DONE (see git log) |
+| 006  | Dues dashboard error+retry (no dead-end) | P1 | S | — | TODO |
+| 007  | Router error boundary + 404 screen | P1 | M | — | TODO |
+| 008  | Auth/session flow hardening (4 small fixes) | P2 | S | — | TODO |
+| 009  | Form-validation + a11y polish (3 fixes) | P2 | S | — | TODO |
+| 010  | Announcements list (close create-only gap) | P3 | M | — | TODO |
 
 Status values: TODO | IN PROGRESS | DONE | BLOCKED (one-line reason) | REJECTED (one-line rationale)
 
@@ -68,6 +73,30 @@ Status values: TODO | IN PROGRESS | DONE | BLOCKED (one-line reason) | REJECTED 
   org seed) instead. **Plan 005 (DONE)** ported `officer-flow.spec.ts` to the OTP
   flow (and confirmed the money-step ConfirmDialog that the old spec never reached
   because it died at the password step). The full org E2E suite is now 10/10 green.
+
+## Round 2 — deep workflow audit (2026-06-29, at 4a024135)
+
+A deep, workflow-focused re-audit (6 parallel auditors) after 001-005 landed.
+Produced plans 006-010. Deferred direction + rejections from this round below.
+
+### Deferred direction (recorded, NOT planned this round)
+
+- **Events edit/delete** — created events are publish-only (no edit/delete UI). Same coherence-gap shape as the announcements list (010), and the SDK has the endpoints, but each needs its own confirm/permission UX. Revisit after 010. M-L.
+- **Bulk-send cancel/resume + parallelize** — `use-bulk-send` is fully sequential with no abort/resume; large rosters take minutes. Tolerable for a single beachhead chapter (Dr. Olive), so deferred until roster scale demands it. M-L.
+- **PWA manifest + service worker + offline messaging** — DESIGN.md calls the app a PWA but there's no manifest/SW and no offline affordance (not installable; offline mid-task fails silently). Not first-peso critical. L.
+- **Import polish** — auto-refresh/navigate after a successful import, partial-failure retry, and a `FileReader.onerror` handler. M.
+
+### Considered and rejected this round (do not re-audit)
+
+- **Org-switch stale cache** — claimed org-scoped query keys omit `orgId`. FALSE: `use-roster` (`['roster', orgId]`), `use-org-events` (`['org-events', orgId]`), and all `use-dues` queries key on `orgId`; switching org changes the key → auto-refetch. (Same misconception class as the round-1 IDOR over-report.)
+- **`csv.ts` has no tests** — FALSE: `apps/org/src/features/roster-import/csv.test.ts` exists.
+- **Refactor all data hooks to one return shape** — churn for its own sake. The one concrete bug the inconsistency caused (dues dashboard error) is fixed directly in plan 006.
+- **Roster virtualization/pagination** — chapter-scale rosters (hundreds) render fine; premature for a lean single-chapter launch.
+- **Invalidate dues queries after a pay-link mint** — minting a link doesn't change invoice/payment status server-side (payment lands later via webhook), so there's nothing fresher to show.
+- **PayMongo key-format validation / `.env.example` / webhook-secret copy** — the current flow degrades gracefully (placeholder webhook URL, server-side validation); low value.
+- **Duplicated `serverError` helper (3 small copies)** — marginal; not worth a shared-util churn.
+- **CSRF token cleared on every 403** — conservative and safe; a micro-optimization at most.
+- **Announcement "silent failure on empty"** — inputs are `required` (browser blocks empty) + there's a toast on error; only the whitespace-only case is real, folded into plan 009.
 
 ## Direction options (not planned — for the maintainer to weigh)
 
