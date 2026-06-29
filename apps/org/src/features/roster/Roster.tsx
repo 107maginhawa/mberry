@@ -152,6 +152,7 @@ export function RosterView({ orgName, members, errored, onRetry, orgId }: Roster
             className="size-5"
             aria-label="Select all"
             checked={allFilteredSelected}
+            aria-checked={selectedCount > 0 && !allFilteredSelected ? 'mixed' : allFilteredSelected}
             ref={(el) => { if (el) el.indeterminate = selectedCount > 0 && !allFilteredSelected }}
             onChange={toggleAll}
           />

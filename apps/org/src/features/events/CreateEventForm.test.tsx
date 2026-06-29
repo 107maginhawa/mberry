@@ -43,6 +43,17 @@ describe('CreateEventForm', () => {
     expect(mutate).not.toHaveBeenCalled()
   })
 
+  it('rejects a start date in the past (client-side) without calling mutate', async () => {
+    render(<CreateEventForm />)
+    fireEvent.change(screen.getByLabelText(/title/i), { target: { value: 'AGM' } })
+    fireEvent.change(screen.getByLabelText(/type/i), { target: { value: 'assembly' } })
+    fireEvent.change(screen.getByLabelText(/start/i), { target: { value: '2020-01-01T10:00' } })
+    fireEvent.change(screen.getByLabelText(/end/i), { target: { value: '2020-01-01T13:00' } })
+    fireEvent.click(screen.getByRole('button', { name: /create event/i }))
+    await waitFor(() => expect(screen.getByRole('alert')).toHaveTextContent(/in the past/i))
+    expect(mutate).not.toHaveBeenCalled()
+  })
+
   it('shows a friendly alert on a 403 error', () => {
     state = { mutate, isPending: false, isError: true, error: new Error('Two-factor authentication required') }
     render(<CreateEventForm />)

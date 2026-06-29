@@ -102,6 +102,17 @@ describe('RosterView — select mode', () => {
     expect(screen.getByRole('heading', { name: /send 1 pay-link\?/i })).toBeInTheDocument()
   })
 
+  it('select-all announces aria-checked="mixed" when some but not all rows are selected', () => {
+    render(<RosterView orgName="Org" members={members} orgId="o1" />)
+    fireEvent.click(screen.getByRole('button', { name: /^select$/i }))
+    const selectAll = screen.getByRole('checkbox', { name: /select all/i })
+    expect(selectAll).toHaveAttribute('aria-checked', 'false')
+    fireEvent.click(screen.getByRole('checkbox', { name: /select olive/i }))
+    expect(selectAll).toHaveAttribute('aria-checked', 'mixed')
+    fireEvent.click(screen.getByRole('checkbox', { name: /select ben/i }))
+    expect(selectAll).toHaveAttribute('aria-checked', 'true')
+  })
+
   it('Select all picks only the currently-filtered rows', () => {
     render(<RosterView orgName="Org" members={members} orgId="o1" />)
     fireEvent.click(screen.getByRole('button', { name: /^select$/i }))

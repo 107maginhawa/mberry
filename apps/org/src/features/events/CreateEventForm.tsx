@@ -28,6 +28,7 @@ export function CreateEventForm({ onCreated }: { onCreated?: () => void } = {}) 
     if (!orgId) return
     if (!title || !start || !end) { setClientError('Title, start, and end are required.'); return }
     if (new Date(end) < new Date(start)) { setClientError('End time must be after the start time.'); return }
+    if (new Date(start) < new Date()) { setClientError('The event start time cannot be in the past.'); return }
     const fee = feePhp ? Number(feePhp) : undefined
     if (fee !== undefined && (Number.isNaN(fee) || fee < 0)) { setClientError('Fee must be a non-negative amount.'); return }
     create.mutate(
@@ -86,7 +87,7 @@ export function CreateEventForm({ onCreated }: { onCreated?: () => void } = {}) 
           <fieldset className="space-y-4">
             <legend className="text-body font-semibold text-foreground mb-2">Details (optional)</legend>
             <div><Label htmlFor="ev-loc">Location</Label><Input id="ev-loc" value={location} onChange={(e) => setLocation(e.target.value)} /></div>
-            <div><Label htmlFor="ev-cap">Capacity</Label><Input id="ev-cap" type="number" min={1} value={capacity} onChange={(e) => setCapacity(e.target.value)} /></div>
+            <div><Label htmlFor="ev-cap">Capacity</Label><Input id="ev-cap" type="number" min={1} step={1} value={capacity} onChange={(e) => setCapacity(e.target.value)} /></div>
             <div><Label htmlFor="ev-fee">Registration fee in PHP</Label><Input id="ev-fee" type="number" min={0} step="0.01" value={feePhp} onChange={(e) => setFeePhp(e.target.value)} /></div>
             <div><Label htmlFor="ev-desc">Description</Label><Textarea id="ev-desc" value={description} onChange={(e) => setDescription(e.target.value)} /></div>
           </fieldset>

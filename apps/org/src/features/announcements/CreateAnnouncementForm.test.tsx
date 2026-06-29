@@ -23,6 +23,25 @@ describe('CreateAnnouncementForm', () => {
     ))
   })
 
+  it('does not submit whitespace-only title/content (trimmed guard)', () => {
+    render(<CreateAnnouncementForm />)
+    fireEvent.change(screen.getByLabelText(/title/i), { target: { value: '   ' } })
+    fireEvent.change(screen.getByLabelText(/content|message/i), { target: { value: '   ' } })
+    fireEvent.click(screen.getByRole('button', { name: /post announcement/i }))
+    expect(mutate).not.toHaveBeenCalled()
+  })
+
+  it('trims surrounding whitespace before submitting', async () => {
+    render(<CreateAnnouncementForm />)
+    fireEvent.change(screen.getByLabelText(/title/i), { target: { value: '  Hi  ' } })
+    fireEvent.change(screen.getByLabelText(/content|message/i), { target: { value: '  Body  ' } })
+    fireEvent.click(screen.getByRole('button', { name: /post announcement/i }))
+    await waitFor(() => expect(mutate).toHaveBeenCalledWith(
+      expect.objectContaining({ title: 'Hi', content: 'Body' }),
+      expect.anything(),
+    ))
+  })
+
   it('surfaces a 403 as a friendly alert', () => {
     state = { mutate, isPending: false, isError: true, error: new Error('Two-factor authentication required') }
     render(<CreateAnnouncementForm />)

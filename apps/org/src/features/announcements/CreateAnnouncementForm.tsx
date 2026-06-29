@@ -14,8 +14,9 @@ export function CreateAnnouncementForm() {
 
   function onSubmit(e: React.FormEvent) {
     e.preventDefault()
-    if (!orgId || !title || !content) return
-    create.mutate({ title, content }, {
+    const t = title.trim(); const c = content.trim()
+    if (!orgId || !t || !c) return
+    create.mutate({ title: t, content: c }, {
       onSuccess: () => { toast.success('Announcement posted'); setTitle(''); setContent('') },
       onError: () => toast.error('Could not post the announcement'),
     })
