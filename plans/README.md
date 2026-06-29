@@ -13,7 +13,7 @@ conditions, and update your row when done.
 | 002  | Unit tests for OrgPicker and useTiers | P2 | S | — | DONE (b2a1b311) |
 | 003  | Housekeeping — scope SendLink invoice query key by org + apps/org README | P2 | S | — | DONE (4939f289) |
 | 004  | E2E coverage for the money flows (events publish, payment-settings, dues) | P3 | L | 001 | DONE (312854ce) |
-| 005  | Port officer-flow.spec.ts off the removed password sign-in (OTP) | P2 | S | — | TODO (newly found) |
+| 005  | Port officer-flow.spec.ts off the removed password sign-in (OTP) | P2 | S | — | DONE (see git log) |
 
 Status values: TODO | IN PROGRESS | DONE | BLOCKED (one-line reason) | REJECTED (one-line rationale)
 
@@ -65,9 +65,9 @@ Status values: TODO | IN PROGRESS | DONE | BLOCKED (one-line reason) | REJECTED 
   a Password field (`getByLabel('Password')`) that no longer exists, so it times
   out. It has been failing since the OTP migration, independent of plans 001-004.
   Plan 004's new specs deliberately model on `import-flow.spec.ts` (localStorage
-  org seed) instead. **Plan 005** (TODO) should port `officer-flow.spec.ts` to
-  the OTP form or the import-flow auth pattern. Until then the full org E2E suite
-  has one known red unrelated to this batch.
+  org seed) instead. **Plan 005 (DONE)** ported `officer-flow.spec.ts` to the OTP
+  flow (and confirmed the money-step ConfirmDialog that the old spec never reached
+  because it died at the password step). The full org E2E suite is now 10/10 green.
 
 ## Direction options (not planned — for the maintainer to weigh)
 
