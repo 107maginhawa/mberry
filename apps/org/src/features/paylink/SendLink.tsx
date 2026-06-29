@@ -203,7 +203,7 @@ export default function SendLink() {
 
   // Fetch outstanding invoices for this membership
   const { data: invoicesData } = useQuery({
-    queryKey: ['dues-invoices', membershipId],
+    queryKey: ['dues-invoices', orgId, membershipId],
     enabled: !!membershipId,
     retry: false,
     queryFn: async () => {
