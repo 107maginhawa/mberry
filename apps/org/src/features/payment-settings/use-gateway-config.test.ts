@@ -128,6 +128,8 @@ describe('useGatewayConfig', () => {
     const { result } = renderHook(() => useGatewayConfig('org-1'), { wrapper: wrapper(qc) })
     result.current.connect.mutate({ publicKey: 'bad', secretKey: 'bad' })
     await waitFor(() => expect(result.current.connect.isError).toBe(true))
-    expect((result.current.connect.error as Error).message).toBe('Invalid public key format')
+    // Server string is mapped through friendlyApiError before reaching the UI;
+    // 'Invalid public key format' matches no known category → friendly generic.
+    expect((result.current.connect.error as Error).message).toBe('Something went wrong. Please try again.')
   })
 })

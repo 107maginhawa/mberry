@@ -46,7 +46,9 @@ describe('useSendLink', () => {
     act(() => result.current.mint({ amount: 1000 }))
     await waitFor(() => expect(result.current.state.kind).toBe('error'))
     const s = result.current.state as Extract<typeof result.current.state, { kind: 'error' }>
-    expect(s.message).toBe('Gateway not configured')
+    // Server string is mapped through friendlyApiError; 'Gateway not configured'
+    // matches the gateway/payment-provider category → plain-language message.
+    expect(s.message).toBe("We couldn't reach the payment provider. Double-check your PayMongo keys and try again.")
   })
 
   it('double-mint is guarded (one call while pending)', async () => {

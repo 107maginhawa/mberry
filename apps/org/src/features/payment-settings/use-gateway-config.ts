@@ -5,11 +5,12 @@ import {
   testDuesGatewayConnection,
   disconnectDuesGateway,
 } from '@monobase/sdk-ts/generated'
+import { friendlyApiError } from '@/lib/friendly-error'
 
 function serverError(error: unknown): string | undefined {
   if (error && typeof error === 'object' && 'error' in error) {
     const e = (error as { error?: unknown }).error
-    if (typeof e === 'string') return e
+    if (typeof e === 'string') return friendlyApiError(e)
   }
   return undefined
 }

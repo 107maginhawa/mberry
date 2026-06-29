@@ -3,6 +3,7 @@ import { toast } from 'sonner'
 import { Card, CardContent, Button, Input, Label, StatusBadge, ConfirmDialog, ErrorState, Skeleton } from '@monobase/ui'
 import { useSelectedOrg } from '@/features/org/use-org'
 import { useGatewayConfig } from './use-gateway-config'
+import { friendlyApiError } from '@/lib/friendly-error'
 
 export function PaymentSettings() {
   const { orgId } = useSelectedOrg()
@@ -54,7 +55,7 @@ export function PaymentSettings() {
       if (data?.success) {
         toast.success(data.message ?? 'Connection test passed.')
       } else {
-        toast.error(data?.message ?? 'Connection test failed.')
+        toast.error(data?.message ? friendlyApiError(data.message) : 'Connection test failed.')
       }
     } catch (err) {
       toast.error((err as Error).message ?? 'Connection test failed.')

@@ -1,6 +1,7 @@
 import { useMutation } from '@tanstack/react-query'
 import { useRef, useState } from 'react'
 import { sendPaymentLink, revokePaymentLink } from '@monobase/sdk-ts/generated'
+import { friendlyApiError } from '@/lib/friendly-error'
 
 export type SendState =
   | { kind: 'idle' }
@@ -44,7 +45,7 @@ export function useSendLink(
       }
       const serverMsg = (error as any)?.error ?? (error as any)?.message ?? (data as any)?.error
       const msg = typeof serverMsg === 'string'
-        ? serverMsg
+        ? friendlyApiError(serverMsg)
         : response.status === 403
           ? 'You are not an officer of this organization.'
           : 'Could not create the pay-link.'
@@ -64,7 +65,8 @@ export function useSendLink(
       const response = rawResponse as Response
       // 404 = already used/revoked → treat as revoked (idempotent UX).
       if (response.status === 200 || response.status === 404) return { kind: 'revoked' }
-      throw new Error((error as any)?.error ?? (error as any)?.message ?? (data as any)?.error ?? 'Could not revoke the link.')
+      const revokeMsg = (error as any)?.error ?? (error as any)?.message ?? (data as any)?.error
+      throw new Error((typeof revokeMsg === 'string' ? friendlyApiError(revokeMsg) : undefined) ?? 'Could not revoke the link.')
     },
   })
 
