@@ -28,8 +28,14 @@ test('officer signs in, sends a pay-link', async ({ page }) => {
     r.fulfill({ contentType: 'application/json', body: JSON.stringify({ token: 't' }) }),
   )
 
-  // Sign-in — raw fetch to /api/auth/sign-in/email (not via SDK; /auth/ is CSRF-exempt).
-  await page.route('**/auth/sign-in/email', (r) => {
+  // Sign-in is passwordless email-OTP — raw fetches to /auth/* (not via SDK; /auth/ is CSRF-exempt).
+  // Request OTP — CSRF-exempt /auth/*; just acknowledge.
+  await page.route('**/auth/email-otp/send-verification-otp', (r) =>
+    r.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({}) }),
+  )
+
+  // Verify OTP — session-creating passwordless sign-in. Flip signedIn here.
+  await page.route('**/auth/sign-in/email-otp', (r) => {
     signedIn = true
     r.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({}) })
   })
@@ -93,12 +99,15 @@ test('officer signs in, sends a pay-link', async ({ page }) => {
   // Membership probe → 401 → status='unauthed' → form renders (not spinner).
   await expect(page.getByText('Officer sign in')).toBeVisible()
 
-  // ── 2. Fill credentials (inputs: id="email", id="password" in sign-in.tsx) ──
-  await page.getByLabel('Email').fill('officer@test.com')
-  await page.getByLabel('Password').fill('secret')
+  // ── 2. Step 1: enter email, request code (input id="email" in SignInForm.tsx) ──
+  // → POST /auth/email-otp/send-verification-otp → 200 → form advances to step 2.
+  await page.getByLabel('Email address').fill('officer@test.com')
+  await page.getByRole('button', { name: 'Send code' }).click()
 
-  // ── 3. Submit form → POST /api/auth/sign-in/email → 200; signedIn=true ──
-  await page.getByRole('button', { name: 'Sign in' }).click()
+  // ── 3. Step 2: enter the 6-digit code, verify (input id="otp") ───────────
+  // → POST /auth/sign-in/email-otp → 200; signedIn=true; creates session.
+  await page.getByLabel('6-digit code').fill('123456')
+  await page.getByRole('button', { name: 'Verify & sign in' }).click()
 
   // ── 4. Wait for redirect to roster (/) ──────────────────────────────────
   // onSubmit invalidates ['session'] → re-queries memberships → 200 → 'authed'
@@ -117,6 +126,8 @@ test('officer signs in, sends a pay-link', async ({ page }) => {
   // Input aria-label="Amount in pesos" (SendLink.tsx); button aria-label="Send custom amount link"
   await page.getByLabel('Amount in pesos').fill('2500')
   await page.getByRole('button', { name: /send custom amount link/i }).click()
+  // Money-step ConfirmDialog (SendLink.tsx, confirmLabel: 'Send pay-link') — confirm to mint.
+  await page.getByRole('button', { name: 'Send pay-link' }).click()
 
   // ── 8. Result panel: pay-link URL and "Copy link" button visible ─────────
   // state.url = window.location.origin + '/pay/TOK' = 'http://localhost:3005/pay/TOK'
