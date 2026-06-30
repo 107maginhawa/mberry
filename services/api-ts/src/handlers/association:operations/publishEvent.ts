@@ -29,7 +29,8 @@ export async function publishEvent(
     throw new BusinessLogicError('Only draft events can be published', 'INVALID_STATUS');
   }
 
-  // [S6] Block publishing paid events if org has no Stripe account
+  // [S6 / 7d] Block publishing a paid event unless the org can take payment — on EITHER rail:
+  // a Stripe merchant account (legacy) OR a connected PayMongo gateway (the lean rail).
   if (existing.registrationFee && existing.registrationFee > 0) {
     const { MerchantAccountRepository } = await import('@/handlers/billing/repos/billing.repo');
     const merchantRepo = new MerchantAccountRepository(db);
@@ -38,10 +39,15 @@ export async function publishEvent(
     const stripeAccountId = merchant?.metadata
       ? (merchant.metadata as Record<string, unknown>)?.['stripeAccountId']
       : undefined;
-    if (!stripeAccountId) {
+
+    const { DuesRepository } = await import('@/handlers/dues/repos/dues-payments.repo');
+    const gatewayCfg = await new DuesRepository(db).getGatewayConfig(existing.organizationId);
+    const paymongoConnected = !!(gatewayCfg?.connected && gatewayCfg?.encryptedSecret);
+
+    if (!stripeAccountId && !paymongoConnected) {
       throw new BusinessLogicError(
-        'Set up billing before publishing a paid event. Go to Settings → Billing to connect your Stripe account.',
-        'STRIPE_NOT_ONBOARDED'
+        'Connect online payments before publishing a paid event — set up PayMongo in Payment settings (or connect Stripe).',
+        'PAYMENT_NOT_ONBOARDED'
       );
     }
   }

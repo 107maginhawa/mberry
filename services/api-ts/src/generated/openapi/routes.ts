@@ -596,6 +596,13 @@ export function registerRoutes(app: Hono<{ Variables: Variables }>) {
     registry.registerAndPayForEvent as unknown as Handler
   );
 
+  // registerAndPayForEventViaPaymongo
+  app.post('/association/event-lifecycle/:eventId/register-and-pay-paymongo',
+    authMiddleware({ roles: ["association:member"] }),
+    zValidator('param', validators.RegisterAndPayForEventViaPaymongoParams, validationErrorHandler),
+    registry.registerAndPayForEventViaPaymongo as unknown as Handler
+  );
+
   // listCustomEventRegistrations
   app.get('/association/event-lifecycle/:eventId/registrations',
     authMiddleware({ roles: ["association:admin", "association:staff"] }),

@@ -37023,6 +37023,58 @@ export type RegisterAndPayForEventResponses = {
 
 export type RegisterAndPayForEventResponse = RegisterAndPayForEventResponses[keyof RegisterAndPayForEventResponses];
 
+export type RegisterAndPayForEventViaPaymongoData = {
+    body?: never;
+    path: {
+        eventId: string;
+    };
+    query?: never;
+    url: '/association/event-lifecycle/{eventId}/register-and-pay-paymongo';
+};
+
+export type RegisterAndPayForEventViaPaymongoErrors = {
+    /**
+     * Validation error response
+     */
+    400: ValidationError;
+    /**
+     * Unauthorized access response
+     */
+    401: AuthenticationError;
+    /**
+     * Forbidden access response
+     */
+    403: AuthorizationError;
+    /**
+     * Resource not found response
+     */
+    404: NotFoundError;
+    /**
+     * Conflict response
+     */
+    409: ConflictError;
+};
+
+export type RegisterAndPayForEventViaPaymongoError = RegisterAndPayForEventViaPaymongoErrors[keyof RegisterAndPayForEventViaPaymongoErrors];
+
+export type RegisterAndPayForEventViaPaymongoResponses = {
+    /**
+     * Resource created response
+     */
+    201: {
+        /**
+         * PayMongo Checkout session URL
+         */
+        checkoutUrl: string;
+        /**
+         * Registration ID (pending payment)
+         */
+        registrationId: string;
+    };
+};
+
+export type RegisterAndPayForEventViaPaymongoResponse = RegisterAndPayForEventViaPaymongoResponses[keyof RegisterAndPayForEventViaPaymongoResponses];
+
 export type ListCustomEventRegistrationsData = {
     body?: never;
     path: {

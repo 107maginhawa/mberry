@@ -26,6 +26,7 @@ import type { DatabaseInstance } from '@/core/database';
 import { resolveWebhookAdapter } from '@/handlers/dues/utils/resolve-gateway';
 import { DuesRepository } from '@/handlers/dues/repos/dues-payments.repo';
 import { webhookRetryLogs } from '@/handlers/dues/repos/dues-payments.schema';
+import { settleEventRegistrationPayment } from '@/handlers/association:operations/settle-event-registration';
 
 export async function paymongoWebhook(
   ctx: ValidatedContext<never, never, PaymongoWebhookParams>
@@ -76,6 +77,19 @@ export async function paymongoWebhook(
 
     // Only a paid/settled event moves money. Anything else is acked + noted.
     if (event.status !== 'paid') return { action: 'noted' as const };
+
+    // ── EVENT settlement (paid-event PayMongo rail) ──────────────────────────────
+    // A paid-event checkout carries metadata.type==='event_registration' (no dues paymentId).
+    // Settle by stamping event_registration.paid_at — mirrors processStripePayment for the
+    // Stripe rail. ADDITIVE: the dues path below is reached only when type !== event_registration.
+    if (event.metadata['type'] === 'event_registration') {
+      const registrationId = event.metadata['registrationId'];
+      const settle = await settleEventRegistrationPayment(tx, { registrationId, orgId, amount: event.amount });
+      if (settle.action === 'tamper') return { action: 'tamper' as const, error: settle.error };
+      if (settle.action === 'unknown_registration') return { action: 'unknown_payment' as const };
+      if (settle.action === 'ignored') return { action: 'ignored' as const };
+      return { action: 'processed' as const, paymentId: registrationId };
+    }
 
     // The webhook settles by `paymentId` — the load-bearing metadata field set at checkout.
     const paymentId = event.metadata['paymentId'];

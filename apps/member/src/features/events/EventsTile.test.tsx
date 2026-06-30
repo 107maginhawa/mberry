@@ -1,10 +1,12 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { render, screen } from '@testing-library/react'
+import { render, screen, fireEvent } from '@testing-library/react'
 import { EventsTile } from './EventsTile'
 
 vi.mock('sonner', () => ({ toast: { success: vi.fn(), error: vi.fn() } }))
 const rsvp = { mutate: vi.fn(), isPending: false, variables: undefined as { eventId: string } | undefined }
-vi.mock('./use-rsvp', () => ({ useRsvp: () => rsvp }))
+const pay = { mutate: vi.fn(), isPending: false, variables: undefined as { eventId: string } | undefined }
+vi.mock('./use-rsvp', async (orig) => ({ ...(await orig<Record<string, unknown>>()), useRsvp: () => rsvp }))
+vi.mock('./use-event-payment', () => ({ useRegisterAndPay: () => pay }))
 vi.mock('./use-member-events', () => ({ useMemberEvents: vi.fn() }))
 import { useMemberEvents } from './use-member-events'
 const mockEvents = useMemberEvents as ReturnType<typeof vi.fn>
@@ -14,7 +16,7 @@ const freeEvent = { id: 'free', title: 'Annual Seminar', organizationId: 'org-1'
 const paidEvent = { id: 'paid', title: 'Gala Dinner', organizationId: 'org-1', eventType: 'social', startDate: future, endDate: future, registeredCount: 0, status: 'published', registrationFee: 150000n, currency: 'PHP' }
 
 describe('EventsTile', () => {
-  beforeEach(() => { vi.clearAllMocks(); rsvp.isPending = false; rsvp.variables = undefined })
+  beforeEach(() => { vi.clearAllMocks(); rsvp.isPending = false; rsvp.variables = undefined; pay.isPending = false; pay.variables = undefined })
 
   it('shows a free event with an RSVP button and no raw bigint', () => {
     mockEvents.mockReturnValue({ isLoading: false, isError: false, data: [freeEvent] })
@@ -25,12 +27,14 @@ describe('EventsTile', () => {
     expect(container.textContent).not.toMatch(/NaN|undefined|\d+n/)
   })
 
-  it('shows a paid event with the fee and the deferred note, no RSVP button', () => {
+  it('shows a paid event with a Register & pay button (no RSVP) that starts payment', () => {
     mockEvents.mockReturnValue({ isLoading: false, isError: false, data: [paidEvent] })
     render(<EventsTile />)
-    expect(screen.getByText(/₱1,500\.00/)).toBeInTheDocument()
-    expect(screen.getByText(/coming soon/i)).toBeInTheDocument()
     expect(screen.queryByRole('button', { name: /rsvp to gala dinner/i })).not.toBeInTheDocument()
+    const btn = screen.getByRole('button', { name: /register and pay for gala dinner/i })
+    expect(btn).toHaveTextContent(/₱1,500\.00/) // button shows the fee
+    fireEvent.click(btn)
+    expect(pay.mutate).toHaveBeenCalledWith({ eventId: 'paid' }, expect.anything())
   })
 
   it('loading → skeleton, error → error state, empty → empty state', () => {

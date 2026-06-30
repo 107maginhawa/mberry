@@ -898,6 +898,25 @@ namespace Association.Operations.Events {
       | ApiNotFoundResponse
       | ApiConflictResponse;
 
+    @doc("Register and pay for a paid event via the org's PayMongo connected account. Creates a PayMongo checkout session and returns the checkout URL; the registration settles when the PayMongo webhook fires.")
+    @operationId("registerAndPayForEventViaPaymongo")
+    @post
+    @route("/{eventId}/register-and-pay-paymongo")
+    @extension("x-security-required-roles", #["association:member"])
+    registerAndPayForEventViaPaymongo(
+      @path eventId: string
+    ): ApiCreatedResponse<{
+      @doc("PayMongo Checkout session URL")
+      checkoutUrl: string;
+      @doc("Registration ID (pending payment)")
+      registrationId: string;
+    }>
+      | ApiBadRequestResponse
+      | ApiUnauthorizedResponse
+      | ApiForbiddenResponse
+      | ApiNotFoundResponse
+      | ApiConflictResponse;
+
     @doc("Check in an attendee at a specific event.")
     @operationId("checkInCustomEvent")
     @post

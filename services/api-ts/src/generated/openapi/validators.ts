@@ -10774,6 +10774,16 @@ export const RegisterAndPayForEventResponse = z.object({
   registrationId: z.string()
 });
 
+export const RegisterAndPayForEventViaPaymongoParams = z.object({
+  eventId: z.string(),
+});
+export type RegisterAndPayForEventViaPaymongoParams = z.infer<typeof RegisterAndPayForEventViaPaymongoParams>;
+
+export const RegisterAndPayForEventViaPaymongoResponse = z.object({
+  checkoutUrl: z.string(),
+  registrationId: z.string()
+});
+
 export const ListCustomEventRegistrationsParams = z.object({
   eventId: z.string(),
 });

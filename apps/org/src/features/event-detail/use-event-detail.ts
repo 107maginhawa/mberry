@@ -92,7 +92,10 @@ export function useAttendees(orgId: string | null, eventId: string): {
         registrationId: r.id,
         personId: r.personId,
         status: r.status,
-        paid: Number(r.amountPaid ?? 0) > 0 || r.paymentId != null,
+        // paidAt is the handler/table truth (set when a paid registration settles via the
+        // PayMongo/Stripe webhook); amountPaid/paymentId are SDK-type fields not on the table —
+        // kept as a defensive fallback.
+        paid: r.paidAt != null || Number(r.amountPaid ?? 0) > 0 || r.paymentId != null,
       }))
       return { rows, total: Number((data as any).total ?? rows.length) }
     },

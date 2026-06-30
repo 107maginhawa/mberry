@@ -696,6 +696,7 @@ export const refundEventRegistrationMutation = makeStub('refundEventRegistration
 export const refundInvoicePaymentMutation = makeStub('refundInvoicePaymentMutation');
 export const regenerateBookingEventSlotsMutation = makeStub('regenerateBookingEventSlotsMutation');
 export const registerAndPayForEventMutation = makeStub('registerAndPayForEventMutation');
+export const registerAndPayForEventViaPaymongoMutation = makeStub('registerAndPayForEventViaPaymongoMutation');
 export const registerForCustomEventMutation = makeStub('registerForCustomEventMutation');
 export const reinstateMembershipMutation = makeStub('reinstateMembershipMutation');
 export const rejectBookingMutation = makeStub('rejectBookingMutation');

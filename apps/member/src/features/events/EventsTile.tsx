@@ -4,6 +4,7 @@ import { toast } from 'sonner'
 import type { Event } from '@monobase/sdk-ts/generated'
 import { useMemberEvents } from './use-member-events'
 import { useRsvp, isWaitlisted } from './use-rsvp'
+import { useRegisterAndPay } from './use-event-payment'
 
 function Title() {
   return <CardTitle className="text-body font-semibold text-muted-foreground">Upcoming events</CardTitle>
@@ -12,6 +13,7 @@ function Title() {
 export function EventsTile() {
   const { isLoading, isError, data, refetch } = useMemberEvents()
   const rsvp = useRsvp()
+  const pay = useRegisterAndPay()
   // Track local RSVPs so we disable the button after success — the engine has NO 409, a re-RSVP would 500.
   const [registered, setRegistered] = useState<Set<string>>(new Set())
 
@@ -59,6 +61,14 @@ export function EventsTile() {
     })
   }
 
+  function onPay(ev: Event) {
+    pay.mutate({ eventId: ev.id }, {
+      // Redirect to the PayMongo checkout; the registration settles to paid via the webhook.
+      onSuccess: ({ checkoutUrl }) => { window.location.href = checkoutUrl },
+      onError: (e) => toast.error(e.message),
+    })
+  }
+
   return (
     <Card>
       <CardHeader><Title /></CardHeader>
@@ -83,7 +93,16 @@ export function EventsTile() {
                 <p className="text-body text-muted-foreground">{spotsLeft} spots left</p>
               )}
               {isPaid
-                ? <p className="text-body text-muted-foreground">Paid registration coming soon.</p>
+                ? (
+                  <Button
+                    className="min-h-tap"
+                    disabled={pay.isPending && pay.variables?.eventId === ev.id}
+                    aria-label={`Register and pay for ${ev.title}`}
+                    onClick={() => onPay(ev)}
+                  >
+                    {pay.isPending && pay.variables?.eventId === ev.id ? 'Starting payment…' : `Register & pay ${centavosToPhp(fee)}`}
+                  </Button>
+                )
                 : (
                   <Button
                     className="min-h-tap"
