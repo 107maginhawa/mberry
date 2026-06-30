@@ -1,6 +1,6 @@
 import { createFileRoute, Link } from '@tanstack/react-router'
 import { NavIcon } from '@monobase/ui'
-import { Upload, Wallet, Megaphone, CreditCard, ChevronRight } from '@monobase/ui/icons'
+import { Upload, Wallet, Megaphone, CreditCard, ChevronRight, RefreshCw } from '@monobase/ui/icons'
 import { ExportMembers } from '@/features/export/ExportMembers'
 
 export const Route = createFileRoute('/more')({ component: MorePage })
@@ -10,6 +10,7 @@ export const Route = createFileRoute('/more')({ component: MorePage })
 // labeled tap target (DESIGN.md ≥48px, icon + text). Dues lives here until
 // Slice 3 folds it into member detail (money is a property of a member).
 const TOOLS = [
+  { to: '/renewals', label: 'Renewals', desc: 'Who is due, in grace, or lapsed', icon: RefreshCw },
   { to: '/import', label: 'Import roster', desc: 'Add members from a CSV file', icon: Upload },
   { to: '/dues', label: 'Dues', desc: 'Outstanding dues and invoices', icon: Wallet },
   { to: '/announcements', label: 'Announcements', desc: 'Post updates to your chapter', icon: Megaphone },

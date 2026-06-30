@@ -25,7 +25,7 @@ const TABS = [
     // The hub itself + every tool parked under it. Exact-or-subpath match (not a
     // bare prefix) so an unrelated route like /importers wouldn't light More.
     match: (p: string) =>
-      ['/more', '/import', '/dues', '/announcements', '/payment-settings'].some(
+      ['/more', '/renewals', '/import', '/dues', '/announcements', '/payment-settings'].some(
         (r) => p === r || p.startsWith(`${r}/`),
       ),
   },
