@@ -48,6 +48,7 @@ test('officer runs the door: sees paid status, checks in, marks no-show', async 
   await page.route('**/association/event-lifecycle/**', (r) => {
     const path = new URL(r.request().url()).pathname
     const m = r.request().method()
+    if (path.endsWith('/registrations/summary') && m === 'GET') return r.fulfill({ contentType: 'application/json', body: JSON.stringify({ totalAttending: 2, paid: 1, checkedIn: 1, noShow: 0 }) })
     if (path.endsWith('/registrations') && m === 'GET') return r.fulfill({ contentType: 'application/json', body: JSON.stringify({ data: regs, total: regs.length, limit: 200, offset: 0 }) })
     if (path.endsWith('/check-in') && m === 'POST') { checkins.push(checkin({})); return r.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(checkin({})) }) }
     return r.fallback()
@@ -59,7 +60,7 @@ test('officer runs the door: sees paid status, checks in, marks no-show', async 
     const m = r.request().method()
     if (path.includes('/checkins') && m === 'GET') return r.fulfill({ contentType: 'application/json', body: JSON.stringify({ data: checkins, total: checkins.length, limit: 200, offset: 0 }) })
     if (path.endsWith('/mark-paid') && m === 'POST') { regs = regs.map((x) => (x.id === 'r2' ? { ...x, paidAt: ISO } : x)); return r.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(regs.find((x) => x.id === 'r2')) }) }
-    if (path.includes('/registrations/') && m === 'PATCH') { regs = regs.map((x) => (x.id === 'r2' ? { ...x, status: 'no_show' } : x)); return r.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(regs.find((x) => x.id === 'r2')) }) }
+    if (path.includes('/registrations/') && m === 'PATCH') { regs = regs.map((x) => (x.id === 'r2' ? { ...x, status: 'noShow' } : x)); return r.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(regs.find((x) => x.id === 'r2')) }) }
     // getEvent — suffix match (requests carry the /api proxy prefix); checkins handled above.
     if (m === 'GET' && /\/association\/events\/[^/]+$/.test(path)) return r.fulfill({ contentType: 'application/json', body: JSON.stringify(EVENT) })
     return r.fallback()
@@ -76,6 +77,8 @@ test('officer runs the door: sees paid status, checks in, marks no-show', async 
 
   // ── Header + attendees with paid status ──
   await expect(page.getByRole('heading', { name: 'Annual Assembly' })).toBeVisible()
+  // Count summary comes from the server endpoint (accurate beyond the 100-row page).
+  await expect(page.getByText('2 attending · 1 paid · 1 checked in')).toBeVisible()
   // Filter by member number too — Sonner toasts are <li> and contain the member name,
   // which would otherwise make these row locators ambiguous after a toast fires.
   const maria = page.locator('li').filter({ hasText: 'Maria Santos' }).filter({ hasText: 'A-1' })

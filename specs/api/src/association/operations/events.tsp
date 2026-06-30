@@ -280,6 +280,25 @@ model EventRegistration extends BaseEntity {
   status: RegistrationStatus;
 }
 
+@doc("Aggregate attendee counts for an event's door screen (server-side, accurate beyond the 100-row registration page).")
+model EventRegistrationsSummary {
+  @doc("Registrations not cancelled/refunded (confirmed + waitlisted + no-show)")
+  @minValue(0)
+  totalAttending: int32;
+
+  @doc("Of the attending, those with payment settled (paidAt set)")
+  @minValue(0)
+  paid: int32;
+
+  @doc("Registrations with a recorded check-in")
+  @minValue(0)
+  checkedIn: int32;
+
+  @doc("Registrations marked no-show")
+  @minValue(0)
+  noShow: int32;
+}
+
 @doc("A position held on an event waitlist")
 model WaitlistEntry extends BaseEntity {
 
@@ -975,6 +994,18 @@ namespace Association.Operations.Events {
       @path eventId: string,
       ...PaginationQuery
     ): ApiOkResponse<PaginatedResponse<EventRegistration>>
+      | ApiUnauthorizedResponse
+      | ApiForbiddenResponse
+      | ApiNotFoundResponse;
+
+    @doc("Attendee summary counts for an event (total attending, paid, checked-in, no-show), computed server-side so the door screen is accurate beyond the 100-row registration page.")
+    @operationId("getEventRegistrationsSummary")
+    @get
+    @route("/{eventId}/registrations/summary")
+    @extension("x-security-required-roles", #["association:admin", "association:staff"])
+    getEventRegistrationsSummary(
+      @path eventId: string
+    ): ApiOkResponse<EventRegistrationsSummary>
       | ApiUnauthorizedResponse
       | ApiForbiddenResponse
       | ApiNotFoundResponse;

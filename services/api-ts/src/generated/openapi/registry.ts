@@ -22,6 +22,7 @@ import { registerForCustomEvent } from '../../handlers/association:operations/re
 import { registerAndPayForEvent } from '../../handlers/association:operations/registerAndPayForEvent';
 import { registerAndPayForEventViaPaymongo } from '../../handlers/association:operations/registerAndPayForEventViaPaymongo';
 import { listCustomEventRegistrations } from '../../handlers/association:operations/listCustomEventRegistrations';
+import { getEventRegistrationsSummary } from '../../handlers/association:operations/getEventRegistrationsSummary';
 import { createEvent } from '../../handlers/association:operations/createEvent';
 import { searchEvents } from '../../handlers/association:operations/searchEvents';
 import { createCheckIn } from '../../handlers/association:operations/createCheckIn';
@@ -513,6 +514,7 @@ export const registry = {
   registerAndPayForEvent,
   registerAndPayForEventViaPaymongo,
   listCustomEventRegistrations,
+  getEventRegistrationsSummary,
   createEvent,
   searchEvents,
   createCheckIn,

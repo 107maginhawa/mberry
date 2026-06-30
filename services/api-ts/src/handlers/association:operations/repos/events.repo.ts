@@ -2,7 +2,7 @@
  * Event repositories - Data access layer for events, registrations, check-ins, and waitlist
  */
 
-import { eq, and, type SQL } from 'drizzle-orm';
+import { eq, and, sql, type SQL } from 'drizzle-orm';
 import type { DatabaseInstance } from '@/core/database';
 import { DatabaseRepository } from '@/core/database.repo';
 import { NotFoundError } from '@/core/errors';
@@ -126,6 +126,38 @@ export class EventRegistrationRepository extends DatabaseRepository<
     }
 
     return conditions.length > 0 ? and(...conditions) : undefined;
+  }
+
+  /**
+   * Aggregate attendee counts for one event's door screen — a single query (no N+1, no 100-row
+   * cap). Counts use the REAL registration_status enum values ('cancelled'/'refunded'/'noShow');
+   * check_in links by (event_id, person_id) — there is no registration_id on check_in — so a person
+   * with multiple check-ins fans out the join, hence COUNT(DISTINCT registration) on every total.
+   */
+  async summaryByEvent(
+    eventId: string,
+    orgId: string,
+  ): Promise<{ totalAttending: number; paid: number; checkedIn: number; noShow: number }> {
+    const attending = sql`${eventRegistrations.status} NOT IN ('cancelled', 'refunded')`;
+    const [row] = await this.db
+      .select({
+        totalAttending: sql<number>`COUNT(DISTINCT ${eventRegistrations.id}) FILTER (WHERE ${attending})::int`,
+        paid: sql<number>`COUNT(DISTINCT ${eventRegistrations.id}) FILTER (WHERE ${attending} AND ${eventRegistrations.paidAt} IS NOT NULL)::int`,
+        checkedIn: sql<number>`COUNT(DISTINCT ${eventRegistrations.id}) FILTER (WHERE ${attending} AND ${checkIns.id} IS NOT NULL)::int`,
+        noShow: sql<number>`COUNT(DISTINCT ${eventRegistrations.id}) FILTER (WHERE ${eventRegistrations.status} = 'noShow')::int`,
+      })
+      .from(eventRegistrations)
+      .leftJoin(
+        checkIns,
+        and(eq(checkIns.eventId, eventRegistrations.eventId), eq(checkIns.personId, eventRegistrations.personId)),
+      )
+      .where(and(eq(eventRegistrations.eventId, eventId), eq(eventRegistrations.organizationId, orgId)));
+    return {
+      totalAttending: row?.totalAttending ?? 0,
+      paid: row?.paid ?? 0,
+      checkedIn: row?.checkedIn ?? 0,
+      noShow: row?.noShow ?? 0,
+    };
   }
 }
 

@@ -611,6 +611,13 @@ export function registerRoutes(app: Hono<{ Variables: Variables }>) {
     registry.listCustomEventRegistrations as unknown as Handler
   );
 
+  // getEventRegistrationsSummary
+  app.get('/association/event-lifecycle/:eventId/registrations/summary',
+    authMiddleware({ roles: ["association:admin", "association:staff"] }),
+    zValidator('param', validators.GetEventRegistrationsSummaryParams, validationErrorHandler),
+    registry.getEventRegistrationsSummary as unknown as Handler
+  );
+
   // createEvent
   app.post('/association/events',
     authMiddleware({ roles: ["association:admin", "association:staff"] }),

@@ -3,7 +3,7 @@ import { Link } from '@tanstack/react-router'
 import { toast } from 'sonner'
 import { Button, ConfirmDialog, EmptyState, ErrorState, Input, Skeleton, StatusBadge, centavosToPhp } from '@monobase/ui'
 import { useSelectedOrg } from '../org/use-org'
-import { useAttendees, useCheckIn, useMarkNoShow, useMarkPaid, useEvent, type Attendee } from './use-event-detail'
+import { useAttendees, useCheckIn, useMarkNoShow, useMarkPaid, useEvent, useEventSummary, type Attendee } from './use-event-detail'
 
 const EVENT_STATUS: Record<string, { label: string; variant: 'muted' | 'success' | 'error' | 'info' }> = {
   draft: { label: 'Draft', variant: 'muted' },
@@ -18,8 +18,7 @@ const REG_STATUS: Record<string, { label: string; variant: 'info' | 'success' | 
   registered: { label: 'Registered', variant: 'info' },
   confirmed: { label: 'Confirmed', variant: 'success' },
   waitlisted: { label: 'Waitlisted', variant: 'muted' },
-  checked_in: { label: 'Confirmed', variant: 'success' },
-  no_show: { label: 'No-show', variant: 'error' },
+  noShow: { label: 'No-show', variant: 'error' },
   cancelled: { label: 'Cancelled', variant: 'muted' },
   refunded: { label: 'Refunded', variant: 'muted' },
 }
@@ -43,7 +42,7 @@ function AttendeeRow({
 }) {
   const reg = REG_STATUS[a.status] ?? { label: a.status, variant: 'muted' as const }
   const terminal = a.status === 'cancelled' || a.status === 'refunded'
-  const showActions = !a.checkedIn && a.status !== 'no_show' && !terminal
+  const showActions = !a.checkedIn && a.status !== 'noShow' && !terminal
   // Door cash is orthogonal to check-in: an unpaid attendee on a paid event can pay even after
   // checking in. Hidden once paid or for a cancelled/refunded registration.
   const canMarkPaid = paidEvent && !a.paid && !terminal
@@ -89,7 +88,10 @@ function AttendeeRow({
 export function EventDetail({ eventId }: { eventId: string }) {
   const { orgId } = useSelectedOrg()
   const { event, isLoading: evLoading, isError: evError, refetch: refetchEvent } = useEvent(orgId, eventId)
-  const { attendees, summary, total, truncated, isLoading: atLoading, isError: atError, refetch } = useAttendees(orgId, eventId)
+  const { attendees, summary: clientSummary, total, truncated, isLoading: atLoading, isError: atError, refetch } = useAttendees(orgId, eventId)
+  // Prefer accurate server-side counts; fall back to the client tally while the summary loads/errors.
+  const { summary: serverSummary } = useEventSummary(orgId, eventId)
+  const summary = serverSummary ?? clientSummary
   const checkIn = useCheckIn(eventId)
   const noShow = useMarkNoShow(eventId)
   const markPaid = useMarkPaid(eventId)

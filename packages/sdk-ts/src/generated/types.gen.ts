@@ -18017,6 +18017,28 @@ export type EventRegistrationUpdate = {
 };
 
 /**
+ * Aggregate attendee counts for an event's door screen (server-side, accurate beyond the 100-row registration page).
+ */
+export type EventRegistrationsSummary = {
+    /**
+     * Registrations not cancelled/refunded (confirmed + waitlisted + no-show)
+     */
+    totalAttending: number;
+    /**
+     * Of the attending, those with payment settled (paidAt set)
+     */
+    paid: number;
+    /**
+     * Registrations with a recorded check-in
+     */
+    checkedIn: number;
+    /**
+     * Registrations marked no-show
+     */
+    noShow: number;
+};
+
+/**
  * Lifecycle status of an association event
  */
 export type EventStatus = 'draft' | 'published' | 'registration_open' | 'registration_closed' | 'in_progress' | 'completed' | 'cancelled';
@@ -37142,6 +37164,41 @@ export type ListCustomEventRegistrationsResponses = {
 };
 
 export type ListCustomEventRegistrationsResponse = ListCustomEventRegistrationsResponses[keyof ListCustomEventRegistrationsResponses];
+
+export type GetEventRegistrationsSummaryData = {
+    body?: never;
+    path: {
+        eventId: string;
+    };
+    query?: never;
+    url: '/association/event-lifecycle/{eventId}/registrations/summary';
+};
+
+export type GetEventRegistrationsSummaryErrors = {
+    /**
+     * Unauthorized access response
+     */
+    401: AuthenticationError;
+    /**
+     * Forbidden access response
+     */
+    403: AuthorizationError;
+    /**
+     * Resource not found response
+     */
+    404: NotFoundError;
+};
+
+export type GetEventRegistrationsSummaryError = GetEventRegistrationsSummaryErrors[keyof GetEventRegistrationsSummaryErrors];
+
+export type GetEventRegistrationsSummaryResponses = {
+    /**
+     * Success response with data
+     */
+    200: EventRegistrationsSummary;
+};
+
+export type GetEventRegistrationsSummaryResponse = GetEventRegistrationsSummaryResponses[keyof GetEventRegistrationsSummaryResponses];
 
 export type SearchEventsData = {
     body?: never;

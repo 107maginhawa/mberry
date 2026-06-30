@@ -6,6 +6,7 @@ import {
   checkInCustomEvent,
   updateEventRegistration,
   markEventRegistrationPaid,
+  getEventRegistrationsSummary,
   listRosterMembers,
 } from '@monobase/sdk-ts/generated'
 
@@ -58,7 +59,7 @@ export type Attendee = {
   personId: string
   label: string
   memberNumber?: string | null
-  status: string // registered|waitlisted|confirmed|checked_in|cancelled|no_show|refunded
+  status: string // DB enum: confirmed|waitlisted|cancelled|refunded|noShow (check-in is a separate table)
   paid: boolean
   checkedIn: boolean
 }
@@ -153,7 +154,7 @@ export function useAttendees(orgId: string | null, eventId: string): {
     total: active.length,
     paid: active.filter((a) => a.paid).length,
     checkedIn: active.filter((a) => a.checkedIn).length,
-    noShow: attendees.filter((a) => a.status === 'no_show').length,
+    noShow: attendees.filter((a) => a.status === 'noShow').length,
   }
 
   const total = regs.data?.total ?? attendees.length
@@ -168,9 +169,38 @@ export function useAttendees(orgId: string | null, eventId: string): {
   }
 }
 
+// Server-side attendee counts (accurate beyond the 100-row registration page, and counts no-shows
+// on the real DB status enum). The client-side tally in useAttendees is the load/error fallback.
+export function useEventSummary(orgId: string | null, eventId: string): {
+  summary?: AttendeeSummary
+  isLoading: boolean
+  isError: boolean
+} {
+  const q = useQuery({
+    queryKey: ['event-summary', eventId],
+    enabled: !!orgId && !!eventId,
+    retry: false,
+    queryFn: async () => {
+      const { data, response } = await getEventRegistrationsSummary({ path: { eventId } })
+      const res = response as Response | undefined
+      if (res && res.status >= 400) throw new Error('summary failed')
+      if (!data) throw new Error('summary failed')
+      const d = data as any
+      return {
+        total: Number(d.totalAttending ?? 0),
+        paid: Number(d.paid ?? 0),
+        checkedIn: Number(d.checkedIn ?? 0),
+        noShow: Number(d.noShow ?? 0),
+      } satisfies AttendeeSummary
+    },
+  })
+  return { summary: q.data, isLoading: q.isLoading, isError: q.isError }
+}
+
 function invalidate(qc: ReturnType<typeof useQueryClient>, eventId: string) {
   qc.invalidateQueries({ queryKey: ['event-registrations', eventId] })
   qc.invalidateQueries({ queryKey: ['event-checkins', eventId] })
+  qc.invalidateQueries({ queryKey: ['event-summary', eventId] })
 }
 
 export function useCheckIn(eventId: string) {
@@ -210,7 +240,10 @@ export function useMarkNoShow(eventId: string) {
     mutationFn: async ({ registrationId }) => {
       const { data, error, response } = await updateEventRegistration({
         path: { registrationId },
-        body: { status: 'no_show' },
+        // The DB registration_status pgEnum value is 'noShow' (the SDK type's 'no_show' is drift —
+        // sending it writes an invalid enum label → Postgres 500). updateEventRegistration's body
+        // validator is open (z.record), so 'noShow' passes through correctly.
+        body: { status: 'noShow' },
       })
       if ((response as Response | undefined)?.status === 403) throw new Error('You are not allowed to update registrations.')
       if (!data) throw new Error((error as any)?.error ?? 'Could not mark no-show. Try again.')

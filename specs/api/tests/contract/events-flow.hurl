@@ -115,6 +115,16 @@ x-org-id: {{org_id}}
 HTTP 200
 
 
+# ── 7b. Attendee summary endpoint exists (Slice 7e) ────────
+# Server-side counts for the door screen. Returns 200 (event created in step 2) or 404.
+
+GET {{api}}/association/event-lifecycle/{{event_id}}/registrations/summary
+x-org-id: {{org_id}}
+HTTP *
+[Asserts]
+status < 500
+
+
 # ── 7. Walk-up mark-paid endpoint exists (Slice 7c) ────────
 # Officer marks a registration paid (cash at the door). A bogus registration id
 # must resolve (404), proving the route + officer auth + validators are wired —

@@ -11,6 +11,7 @@ const state = vi.hoisted(() => ({
   checkIn: vi.fn(),
   noShow: vi.fn(),
   markPaid: vi.fn(),
+  serverSummary: undefined as any,
 }))
 const { toast } = vi.hoisted(() => ({ toast: { success: vi.fn(), error: vi.fn() } }))
 
@@ -20,6 +21,7 @@ vi.mock('sonner', () => ({ toast }))
 vi.mock('./use-event-detail', () => ({
   useEvent: () => ({ event: state.event, isLoading: false, isError: false, refetch: vi.fn() }),
   useAttendees: () => ({ attendees: state.attendees, summary: state.summary, total: state.total, truncated: state.truncated, isLoading: false, isError: false, refetch: vi.fn() }),
+  useEventSummary: () => ({ summary: state.serverSummary, isLoading: false, isError: false }),
   useCheckIn: () => ({ mutateAsync: state.checkIn }),
   useMarkNoShow: () => ({ mutateAsync: state.noShow }),
   useMarkPaid: () => ({ mutateAsync: state.markPaid }),
@@ -34,6 +36,7 @@ beforeEach(() => {
   state.summary = { total: 0, paid: 0, checkedIn: 0, noShow: 0 }
   state.total = 0
   state.truncated = false
+  state.serverSummary = undefined
 })
 
 describe('EventDetail', () => {
@@ -44,6 +47,14 @@ describe('EventDetail', () => {
     expect(screen.getByRole('heading', { name: 'Annual Assembly' })).toBeInTheDocument()
     expect(screen.getByText('Published')).toBeInTheDocument()
     expect(screen.getByText('2 attending · 1 paid · 0 checked in')).toBeInTheDocument()
+  })
+
+  it('prefers server summary counts over the client tally when available', () => {
+    state.attendees = [att(), att({ registrationId: 'r2', personId: 'p2', label: 'Jose', paid: false })]
+    state.summary = { total: 2, paid: 1, checkedIn: 0, noShow: 0 } // client tally (capped/possibly stale)
+    state.serverSummary = { total: 150, paid: 140, checkedIn: 120, noShow: 5 } // accurate server counts
+    render(<EventDetail eventId="e1" />)
+    expect(screen.getByText('150 attending · 140 paid · 120 checked in · 5 no-show')).toBeInTheDocument()
   })
 
   it('shows paid/unpaid badges for a paid event', () => {

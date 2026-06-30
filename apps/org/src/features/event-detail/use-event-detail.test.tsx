@@ -9,12 +9,13 @@ vi.mock('@monobase/sdk-ts/generated', () => ({
   checkInCustomEvent: vi.fn(),
   updateEventRegistration: vi.fn(),
   markEventRegistrationPaid: vi.fn(),
+  getEventRegistrationsSummary: vi.fn(),
   listRosterMembers: vi.fn(),
 }))
 import {
-  listCustomEventRegistrations, searchCheckIns, checkInCustomEvent, updateEventRegistration, markEventRegistrationPaid, listRosterMembers,
+  listCustomEventRegistrations, searchCheckIns, checkInCustomEvent, updateEventRegistration, markEventRegistrationPaid, getEventRegistrationsSummary, listRosterMembers,
 } from '@monobase/sdk-ts/generated'
-import { useAttendees, useCheckIn, useMarkNoShow, useMarkPaid } from './use-event-detail'
+import { useAttendees, useCheckIn, useMarkNoShow, useMarkPaid, useEventSummary } from './use-event-detail'
 import { ok } from '../../test-utils/mock-sdk'
 
 function wrapper({ children }: { children: React.ReactNode }) {
@@ -29,7 +30,7 @@ describe('useAttendees (registrations ⨝ check-ins ⨝ roster)', () => {
     vi.mocked(listCustomEventRegistrations).mockResolvedValue(ok({ data: [
       { id: 'r1', personId: 'p1', status: 'confirmed', amountPaid: 50000, paymentId: 'pay1' }, // paid
       { id: 'r2', personId: 'p2', status: 'confirmed', amountPaid: 0, paymentId: null },        // unpaid, checked-in
-      { id: 'r3', personId: 'p3', status: 'no_show' },                                          // no-show
+      { id: 'r3', personId: 'p3', status: 'noShow' },                                           // no-show (real DB enum value)
       { id: 'r4', personId: 'p4', status: 'cancelled' },                                        // excluded from total
     ] } as any))
     vi.mocked(searchCheckIns).mockResolvedValue(ok({ data: [{ personId: 'p2', registrationId: 'r2' }] } as any))
@@ -53,6 +54,16 @@ describe('useAttendees (registrations ⨝ check-ins ⨝ roster)', () => {
   })
 })
 
+describe('useEventSummary (server-side counts)', () => {
+  it('maps totalAttending->total and coerces counts to numbers', async () => {
+    vi.mocked(getEventRegistrationsSummary).mockResolvedValue(ok({ totalAttending: 150, paid: 140, checkedIn: 120, noShow: 5 }) as any)
+    const { result } = renderHook(() => useEventSummary('o1', 'e1'), { wrapper })
+    await waitFor(() => expect(result.current.summary).toBeDefined())
+    expect(vi.mocked(getEventRegistrationsSummary)).toHaveBeenCalledWith({ path: { eventId: 'e1' } })
+    expect(result.current.summary).toEqual({ total: 150, paid: 140, checkedIn: 120, noShow: 5 })
+  })
+})
+
 describe('check-in / no-show payloads', () => {
   it('checkInCustomEvent gets eventId path + person/registration body', async () => {
     vi.mocked(checkInCustomEvent).mockResolvedValue(ok({ id: 'c1' }) as any)
@@ -64,13 +75,13 @@ describe('check-in / no-show payloads', () => {
     })
   })
 
-  it('updateEventRegistration marks no_show by registrationId', async () => {
-    vi.mocked(updateEventRegistration).mockResolvedValue(ok({ id: 'r1', status: 'no_show' }) as any)
+  it('updateEventRegistration marks noShow (real DB enum) by registrationId', async () => {
+    vi.mocked(updateEventRegistration).mockResolvedValue(ok({ id: 'r1', status: 'noShow' }) as any)
     const { result } = renderHook(() => useMarkNoShow('e1'), { wrapper })
     await result.current.mutateAsync({ registrationId: 'r1' })
     expect(vi.mocked(updateEventRegistration)).toHaveBeenCalledWith({
       path: { registrationId: 'r1' },
-      body: { status: 'no_show' },
+      body: { status: 'noShow' },
     })
   })
 

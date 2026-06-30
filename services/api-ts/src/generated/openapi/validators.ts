@@ -5557,6 +5557,13 @@ export const EventRegistrationUpdateSchema = z.object({
   status: z.enum(["registered", "waitlisted", "confirmed", "checked_in", "cancelled", "no_show", "refunded"]).optional()
 });
 
+export const EventRegistrationsSummarySchema = z.object({
+  totalAttending: z.number().int().gte(0),
+  paid: z.number().int().gte(0),
+  checkedIn: z.number().int().gte(0),
+  noShow: z.number().int().gte(0)
+});
+
 export const EventStatusSchema = z.enum(["draft", "published", "registration_open", "registration_closed", "in_progress", "completed", "cancelled"]);
 
 export const EventTopicSchema = z.object({
@@ -10802,6 +10809,13 @@ export const ListCustomEventRegistrationsQuery = z.object({
 export type ListCustomEventRegistrationsQuery = z.infer<typeof ListCustomEventRegistrationsQuery>;
 
 export const ListCustomEventRegistrationsResponse = EventRegistrationListResponseSchema;
+
+export const GetEventRegistrationsSummaryParams = z.object({
+  eventId: z.string(),
+});
+export type GetEventRegistrationsSummaryParams = z.infer<typeof GetEventRegistrationsSummaryParams>;
+
+export const GetEventRegistrationsSummaryResponse = EventRegistrationsSummarySchema;
 
 export const CreateEventBody = EventCreateRequestSchema;
 export type CreateEventBody = z.infer<typeof CreateEventBody>;
