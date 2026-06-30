@@ -119,10 +119,12 @@ test('officer signs in, sends a pay-link', async ({ page }) => {
   // ── 5. Roster: member "Olive Cruz" visible ───────────────────────────────
   await expect(page.getByText('Olive Cruz')).toBeVisible()
 
-  // ── 6. Click "Send pay-link" link for Olive Cruz ─────────────────────────
-  // Roster.tsx renders a TanStack <Link> (anchor, role=link) aria-label={`Send pay-link to ${m.name}`}
-  // → /members/m1/send?personId=p1&name=Olive%20Cruz (SPA nav, no full reload)
-  await page.getByRole('link', { name: /send pay-link to olive cruz/i }).click()
+  // ── 6. Go to the send flow ───────────────────────────────────────────────
+  // The directory row now opens member detail; the dedicated send flow lives at
+  // /members/$id/send (reached from detail's "Send pay-link"). The row→detail→send
+  // chain is covered in member-detail-flow.spec.ts; here we deep-link to the mint.
+  await expect(page.getByRole('link', { name: /view olive cruz/i })).toBeVisible()
+  await page.goto('/members/m1/send?personId=p1&name=Olive%20Cruz')
 
   // ── 7. Custom amount form — no invoices (empty stub) → only custom section ──
   // Input aria-label="Amount in pesos" (SendLink.tsx); button aria-label="Send custom amount link"

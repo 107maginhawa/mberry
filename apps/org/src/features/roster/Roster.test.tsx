@@ -23,11 +23,11 @@ beforeEach(() => startSpy.mockClear())
 describe('RosterView', () => {
   const members = [{ membershipId: 'm1', personId: 'p1', name: 'Olive Cruz', memberNumber: 'A-1', status: 'active' }]
 
-  it('lists members with a send link', () => {
+  it('lists members; each row links to the member detail', () => {
     render(<RosterView orgName="Chapter A" members={members} />)
     expect(screen.getByText('Chapter A')).toBeInTheDocument()
     expect(screen.getByText('Olive Cruz')).toBeInTheDocument()
-    expect(screen.getByRole('link', { name: /send pay-link/i })).toHaveAttribute('href', expect.stringContaining('m1'))
+    expect(screen.getByRole('link', { name: /view olive cruz/i })).toHaveAttribute('href', expect.stringContaining('m1'))
   })
 
   it('shows errored state when roster query fails (e.g. 403 not an officer)', () => {
@@ -71,12 +71,15 @@ describe('RosterView — select mode', () => {
     { membershipId: 'm2', personId: 'p2', name: 'Ben', status: 'active' },
   ]
 
-  it('Select toggle reveals checkboxes and hides the per-row send link', () => {
+  it('Select toggle turns detail-link rows into selectable checkbox rows', () => {
     render(<RosterView orgName="Org" members={members} orgId="o1" />)
     expect(screen.queryByRole('checkbox', { name: /select olive/i })).not.toBeInTheDocument()
+    // browsing: the whole row is a link to the member detail
+    expect(screen.getByRole('link', { name: /view olive/i })).toBeInTheDocument()
     fireEvent.click(screen.getByRole('button', { name: /^select$/i }))
     expect(screen.getByRole('checkbox', { name: /select olive/i })).toBeInTheDocument()
-    expect(screen.queryByRole('link', { name: /send pay-link to olive/i })).not.toBeInTheDocument()
+    // selecting: rows are no longer links
+    expect(screen.queryByRole('link', { name: /view olive/i })).not.toBeInTheDocument()
   })
 
   it('sticky bar reflects the selected count and opens a confirm before minting', () => {

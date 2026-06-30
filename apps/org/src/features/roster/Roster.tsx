@@ -37,6 +37,26 @@ function metaLine(m: RosterMember): string {
   return parts.join(' · ')
 }
 
+const ROW_CLASS = 'flex flex-col gap-1.5 rounded-lg border border-[var(--color-border-light)] bg-surface px-4 py-3'
+
+// Browsing → the whole row navigates to the member detail (design: tap a member). Selecting →
+// the row toggles its checkbox instead. Send pay-link now lives on the detail screen.
+function rowAs(content: ReactNode, m: RosterMember, selecting: boolean, onToggle: () => void) {
+  if (selecting) {
+    return <div className={ROW_CLASS} onClick={onToggle}>{content}</div>
+  }
+  return (
+    <Link
+      to="/members/$membershipId"
+      params={{ membershipId: m.membershipId }}
+      className={`${ROW_CLASS} block`}
+      aria-label={`View ${m.name}`}
+    >
+      {content}
+    </Link>
+  )
+}
+
 // ─── Presentational ─────────────────────────────────────────────────────────
 
 export interface RosterViewProps {
@@ -247,57 +267,46 @@ export function RosterView({
           const checked = selected.has(m.membershipId)
           const badge = STATUS_BADGE[m.status]
           return (
-            <li
-              key={m.membershipId}
-              className="flex flex-col gap-1.5 rounded-lg border border-[var(--color-border-light)] bg-surface px-4 py-3"
-              onClick={selecting ? () => toggle(m.membershipId) : undefined}
-            >
-              <div className="flex items-center justify-between gap-3">
-                <div className="flex items-center gap-3 min-w-0">
-                  {selecting && (
-                    <input
-                      type="checkbox"
-                      className="size-5 shrink-0"
-                      aria-label={`Select ${m.name}`}
-                      checked={checked}
-                      onChange={() => toggle(m.membershipId)}
-                      onClick={(e) => e.stopPropagation()}
-                    />
-                  )}
-                  <span className="text-body font-medium text-foreground truncate">{m.name}</span>
+            <li key={m.membershipId}>{rowAs(
+              <>
+                <div className="flex items-center justify-between gap-3">
+                  <div className="flex items-center gap-3 min-w-0">
+                    {selecting && (
+                      <input
+                        type="checkbox"
+                        className="size-5 shrink-0"
+                        aria-label={`Select ${m.name}`}
+                        checked={checked}
+                        onChange={() => toggle(m.membershipId)}
+                        onClick={(e) => e.stopPropagation()}
+                      />
+                    )}
+                    <span className="text-body font-medium text-foreground truncate">{m.name}</span>
+                  </div>
+                  <div className="flex items-center gap-3 shrink-0">
+                    {badge ? (
+                      <StatusBadge status={badge} />
+                    ) : (
+                      <StatusBadge variant="muted">{m.status}</StatusBadge>
+                    )}
+                    {/* Per-row unpaid cue for the full derivation (open invoice on an otherwise
+                        "Active" member) — the Pending badge already conveys pendingPayment. */}
+                    {m.unpaid && m.status !== 'pendingPayment' && (
+                      <StatusBadge variant="warning">Unpaid</StatusBadge>
+                    )}
+                  </div>
                 </div>
-                <div className="flex items-center gap-3 shrink-0">
-                  {badge ? (
-                    <StatusBadge status={badge} />
-                  ) : (
-                    <StatusBadge variant="muted">{m.status}</StatusBadge>
-                  )}
-                  {/* Per-row unpaid cue for the full derivation (open invoice on an otherwise
-                      "Active" member) — the Pending badge already conveys pendingPayment. */}
-                  {m.unpaid && m.status !== 'pendingPayment' && (
-                    <StatusBadge variant="warning">Unpaid</StatusBadge>
-                  )}
-                  {!selecting && (
-                    <Button asChild className="min-h-tap">
-                      <Link
-                        to="/members/$membershipId/send"
-                        params={{ membershipId: m.membershipId }}
-                        search={{ personId: m.personId, name: m.name }}
-                        aria-label={`Send pay-link to ${m.name}`}
-                      >
-                        Send pay-link
-                      </Link>
-                    </Button>
-                  )}
-                </div>
-              </div>
-              {/* Present-facts meta on its own full-width line so "Member since … · tier" is never crushed by the action. */}
-              {(m.memberNumber || metaLine(m)) && (
-                <span className={`text-caption text-muted-foreground truncate ${selecting ? 'pl-8' : ''}`}>
-                  {[m.memberNumber, metaLine(m)].filter(Boolean).join(' · ')}
-                </span>
-              )}
-            </li>
+                {/* Present-facts meta on its own full-width line. */}
+                {(m.memberNumber || metaLine(m)) && (
+                  <span className={`text-caption text-muted-foreground truncate ${selecting ? 'pl-8' : ''}`}>
+                    {[m.memberNumber, metaLine(m)].filter(Boolean).join(' · ')}
+                  </span>
+                )}
+              </>,
+              m,
+              selecting,
+              () => toggle(m.membershipId),
+            )}</li>
           )
         })}
       </ul>
