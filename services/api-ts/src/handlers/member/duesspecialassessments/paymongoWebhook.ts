@@ -84,7 +84,7 @@ export async function paymongoWebhook(
     // Stripe rail. ADDITIVE: the dues path below is reached only when type !== event_registration.
     if (event.metadata['type'] === 'event_registration') {
       const registrationId = event.metadata['registrationId'];
-      const settle = await settleEventRegistrationPayment(tx, { registrationId, orgId, amount: event.amount });
+      const settle = await settleEventRegistrationPayment(tx, { registrationId, orgId, amount: event.amount, currency: event.currency });
       if (settle.action === 'tamper') return { action: 'tamper' as const, error: settle.error };
       if (settle.action === 'unknown_registration') return { action: 'unknown_payment' as const };
       if (settle.action === 'ignored') return { action: 'ignored' as const };

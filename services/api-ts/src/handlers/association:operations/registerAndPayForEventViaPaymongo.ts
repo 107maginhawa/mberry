@@ -84,26 +84,34 @@ export async function registerAndPayForEventViaPaymongo(
 
   const reqUrl = ctx.req.url ?? '';
   const baseUrl = reqUrl.includes('/association/') ? reqUrl.split('/association/')[0] : '';
-  const result = await adapter.createCheckout(
-    {
-      amount: event.registrationFee,
-      currency: event.currency ?? 'PHP',
-      description: `Event registration: ${event.title}`,
-      email: await resolveMemberEmail(db, session.user.id),
-      successUrl: `${baseUrl}/events/${params.eventId}?payment=success`,
-      cancelUrl: `${baseUrl}/events/${params.eventId}?payment=cancelled`,
-      metadata: {
-        // The webhook settles an event registration by these fields (mirrors processStripePayment).
-        type: 'event_registration',
-        eventId: params.eventId,
-        registrationId: registration.id,
-        personId: session.user.id,
-        orgId: event.organizationId,
-        organizationId: event.organizationId,
+  let result;
+  try {
+    result = await adapter.createCheckout(
+      {
+        amount: event.registrationFee,
+        currency: event.currency ?? 'PHP',
+        description: `Event registration: ${event.title}`,
+        email: await resolveMemberEmail(db, session.user.id),
+        successUrl: `${baseUrl}/events/${params.eventId}?payment=success`,
+        cancelUrl: `${baseUrl}/events/${params.eventId}?payment=cancelled`,
+        metadata: {
+          // The webhook settles an event registration by these fields (mirrors processStripePayment).
+          type: 'event_registration',
+          eventId: params.eventId,
+          registrationId: registration.id,
+          personId: session.user.id,
+          orgId: event.organizationId,
+          organizationId: event.organizationId,
+        },
       },
-    },
-    randomUUID(),
-  );
+      randomUUID(),
+    );
+  } catch (err) {
+    // Compensate: a failed checkout must not leave a confirmed-unpaid row holding a seat (the
+    // unique active-registration index would also lock the member out of retrying). Remove it.
+    await regRepo.deleteOneById(registration.id, session.user.id);
+    throw err;
+  }
 
   return ctx.json(
     {

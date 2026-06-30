@@ -18,15 +18,19 @@ export type SettleEventOutcome =
  */
 export async function settleEventRegistrationPayment(
   db: DatabaseInstance,
-  args: { registrationId: string | undefined; orgId: string; amount: number },
+  args: { registrationId: string | undefined; orgId: string; amount: number; currency?: string },
 ): Promise<SettleEventOutcome> {
   if (!args.registrationId) return { action: 'ignored' };
   const regRepo = new EventRegistrationRepository(db);
   const reg = await regRepo.findOneById(args.registrationId);
   if (!reg) return { action: 'unknown_registration' };
   if (reg.organizationId !== args.orgId) return { action: 'tamper', error: 'Organization mismatch' };
+  // The event MUST exist to validate the amount — a missing event must not bypass the check.
   const ev = await new EventRepository(db).findOneById(reg.eventId);
-  if (ev && Number(ev.registrationFee ?? 0) !== args.amount) return { action: 'tamper', error: 'Amount mismatch' };
+  if (!ev) return { action: 'unknown_registration' };
+  if (Number(ev.registrationFee ?? 0) !== args.amount) return { action: 'tamper', error: 'Amount mismatch' };
+  // Currency parity with the dues settle (per-org PayMongo is PHP, but match the invariant).
+  if (args.currency != null && (ev.currency ?? 'PHP') !== args.currency) return { action: 'tamper', error: 'Currency mismatch' };
   if (!reg.paidAt) {
     await regRepo.updateOneById(args.registrationId, { paidAt: new Date(), updatedBy: reg.personId });
   }

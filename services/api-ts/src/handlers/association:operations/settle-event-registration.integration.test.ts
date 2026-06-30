@@ -78,6 +78,15 @@ describe('settleEventRegistrationPayment (real-PG)', () => {
     expect((await readReg(reg.id)).paid_at).toBeNull();
   });
 
+  test('NEVER settles a wrong-currency event (tamper)', async () => {
+    if (!H.dbReachable) return;
+    const ev = await seedEvent(); // PHP
+    const reg = await seedReg(ev.id);
+    const out = await settleEventRegistrationPayment(H.db as never, { registrationId: reg.id, orgId: ORG, amount: FEE, currency: 'USD' });
+    expect(out).toMatchObject({ action: 'tamper' });
+    expect((await readReg(reg.id)).paid_at).toBeNull();
+  });
+
   test('reports an unknown registration without stamping anything', async () => {
     if (!H.dbReachable) return;
     const out = await settleEventRegistrationPayment(H.db as never, { registrationId: crypto.randomUUID(), orgId: ORG, amount: FEE });
