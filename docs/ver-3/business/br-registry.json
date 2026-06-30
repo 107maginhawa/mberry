@@ -1383,5 +1383,87 @@
       "e2e": []
     },
     "annotations": "Slice-1. All dues amounts are denominated in PHP with integer centavos (no floating-point representation). dues-payments.settle.test and payment-token.repo.test assert PHP currency on token and settlement records. dues-extended-flow.hurl exercises the checkout path that carries amount+currency. Backs WF-038 lean."
+  },
+  "BR-86": {
+    "rule": "Walk-up mark-paid: owning-org officer only",
+    "phase": 1,
+    "module": "M05",
+    "ruleClass": "p0-security",
+    "tests": {
+      "backend": [
+        "services/api-ts/src/handlers/association:operations/markEventRegistrationPaid.integration.test.ts"
+      ],
+      "contract": [
+        "specs/api/tests/contract/events-flow.hurl"
+      ],
+      "e2e": [
+        "apps/org/src/e2e/event-detail-flow.spec.ts"
+      ]
+    },
+    "annotations": "BR-EVT-CASH-1 (Slice 7c walk-up cash). Only an officer (association:admin/staff) of the OWNING org may mark a registration paid; a cross-org registration is reported 404 so existence never leaks across tenants. integration test asserts cross-org → 404 with no paid_at write."
+  },
+  "BR-87": {
+    "rule": "Walk-up mark-paid: paid events only",
+    "phase": 1,
+    "module": "M05",
+    "ruleClass": "p1-business",
+    "tests": {
+      "backend": [
+        "services/api-ts/src/handlers/association:operations/markEventRegistrationPaid.integration.test.ts"
+      ],
+      "contract": [
+        "specs/api/tests/contract/events-flow.hurl"
+      ],
+      "e2e": []
+    },
+    "annotations": "BR-EVT-CASH-2 (Slice 7c). A registration may only be marked paid for a paid event (registrationFee > 0); marking a free event paid is meaningless → 400. integration test asserts free event → 400 with no paid_at write."
+  },
+  "BR-88": {
+    "rule": "Walk-up mark-paid: idempotent (double-tap safe)",
+    "phase": 1,
+    "module": "M05",
+    "ruleClass": "p0-security",
+    "tests": {
+      "backend": [
+        "services/api-ts/src/handlers/association:operations/markEventRegistrationPaid.integration.test.ts"
+      ],
+      "contract": [
+        "specs/api/tests/contract/events-flow.hurl"
+      ],
+      "e2e": []
+    },
+    "annotations": "BR-EVT-CASH-3 (Slice 7c, money path). mark-paid is idempotent: a second call returns the already-paid row without re-stamping paid_at and never errors hard — a door double-tap settles once. integration test asserts second call → 200 with identical paid_at timestamp."
+  },
+  "BR-89": {
+    "rule": "Walk-up mark-paid: terminal registration rejected",
+    "phase": 1,
+    "module": "M05",
+    "ruleClass": "p1-business",
+    "tests": {
+      "backend": [
+        "services/api-ts/src/handlers/association:operations/markEventRegistrationPaid.integration.test.ts"
+      ],
+      "contract": [
+        "specs/api/tests/contract/events-flow.hurl"
+      ],
+      "e2e": []
+    },
+    "annotations": "BR-EVT-CASH-4 (Slice 7c). A terminal registration (cancelled/refunded) cannot be marked paid → 409. integration test asserts both cancelled → 409 and refunded → 409."
+  },
+  "BR-90": {
+    "rule": "Walk-up mark-paid: audit event is the cash trail",
+    "phase": 1,
+    "module": "M05",
+    "ruleClass": "p0-security",
+    "tests": {
+      "backend": [
+        "services/api-ts/src/handlers/association:operations/markEventRegistrationPaid.integration.test.ts"
+      ],
+      "contract": [
+        "specs/api/tests/contract/events-flow.hurl"
+      ],
+      "e2e": []
+    },
+    "annotations": "BR-EVT-CASH-5 (Slice 7c). There is no per-registration payment-method column; the cash trail is the audit event (officer + timestamp via x-audit update/event-registration). Handler sets auditResourceId + auditDescription on every stamp and on the idempotent no-op."
   }
 }
