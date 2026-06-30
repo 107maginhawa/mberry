@@ -24,7 +24,8 @@ paperwork (G1/G2/G3)** plus loading each chapter's live PayMongo credentials. No
 | PayMongo webhook settlement | ✅ `paymongoWebhook` | ✅ test | **G2** webhook registration |
 | Officer events + announcements | ✅ (B3) | ✅ | officer **2FA in prod** |
 | Member event RSVP (free) | ✅ (B4) | ✅ | — |
-| **Paid** event registration | ⛔ deferred (legacy Stripe rail) | partial | future PayMongo wiring + G2 |
+| **Paid** event registration (PayMongo) | ✅ `registerAndPayForEventViaPaymongo` (Slice 7d) | ✅ test keys | **G2** live keys |
+| Walk-up **cash** mark-paid (officer at door) | ✅ `markEventRegistrationPaid` (Slice 7c) | ✅ | officer **2FA in prod** |
 | SMS pay-link delivery / phone-OTP | ⛔ not wired | email-only | **G3** (provider + sender ID) + better-auth phone plugin |
 
 **Bottom line:** everything for first-peso DUES is built. **G2 (a live PayMongo connected account per
@@ -153,7 +154,7 @@ registering the webhook unlocks.
 - ~~Officer Connect-PayMongo UI~~ — **DONE** (v0.1.15.0, apps/org → Payment settings).
 - Officer **publish-event / network-visibility** flow — B3 events are created `draft`+internal, so they don't
   yet appear in the B4 member events tile until published & network-visible.
-- **Paid** event registration on the PayMongo rail (currently legacy Stripe + deferred).
+- ~~**Paid** event registration on the PayMongo rail~~ — **DONE** (Slice 7d `registerAndPayForEventViaPaymongo`, settles via the same per-org webhook; G2-gated for live like dues). Walk-up **cash** at the door also shipped (Slice 7c `markEventRegistrationPaid`, audit-trailed).
 - SMS (G3) wiring (above).
 - Cross-source double-charge edge: an officer-sent link concurrent with a member self-mint can leave two
   active links for one invoice (the member self-mint path is guarded; the officer path is unchanged) — handled
