@@ -97,6 +97,7 @@ export class EventRepository extends DatabaseRepository<Event, NewEvent, EventFi
 // ---------------------------------------------------------------------------
 
 export interface EventRegistrationFilters {
+  organizationId?: string;
   eventId?: string;
   personId?: string;
   status?: string;
@@ -115,6 +116,9 @@ export class EventRegistrationRepository extends DatabaseRepository<
     if (!filters) return undefined;
     const conditions = [];
 
+    if (filters.organizationId) {
+      conditions.push(eq(eventRegistrations.organizationId, filters.organizationId));
+    }
     if (filters.eventId) {
       conditions.push(eq(eventRegistrations.eventId, filters.eventId));
     }

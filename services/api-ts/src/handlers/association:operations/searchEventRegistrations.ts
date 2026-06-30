@@ -26,7 +26,9 @@ export async function searchEventRegistrations(
   const limit = Number(query.limit) || 20;
   const offset = Number(query.offset) || 0;
 
-  const filters: Record<string, unknown> = {};
+  // Always scope to the caller's org — a registration search must never cross tenants (a person can
+  // belong to several chapters; an officer of one must not see another chapter's registrations).
+  const filters: Record<string, unknown> = { organizationId: orgId };
   const q = query as Record<string, unknown>;
   if (q['eventId']) filters['eventId'] = q['eventId'];
   if (q['personId']) filters['personId'] = q['personId'];
