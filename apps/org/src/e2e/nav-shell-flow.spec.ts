@@ -30,8 +30,8 @@ test('officer navigates the 3-tab shell: Members ↔ Events ↔ More → a tool'
         })
       : r.fulfill({ status: 401, contentType: 'application/json', body: JSON.stringify({ error: 'unauthorized' }) }),
   )
-  await page.route('**/membership/members/**', (r) =>
-    r.fulfill({ contentType: 'application/json', body: JSON.stringify({ data: [] }) }),
+  await page.route('**/association/member/roster**', (r) =>
+    r.fulfill({ contentType: 'application/json', body: JSON.stringify({ data: [], totalCount: 0 }) }),
   )
   // Events list — empty is fine; the Events tab just has to render its screen.
   // Anchor to the API path (/association/events) — a bare **/events** glob also

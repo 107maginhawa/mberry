@@ -11,7 +11,7 @@
  *   - memberships: stateful — 401 pre-login (unauthed), 200 post-login (authed + org list).
  *     useSession (queryKey ['session']) and useOrgs (queryKey ['org','memberships']) both
  *     call getMyMemberships → same URL; the stateful flag covers both.
- *   - roster: listOrgMembers returns members → engine enforces officer/admin 403 server-side.
+ *   - roster: listRosterMembers returns members → engine enforces officer/admin 403 server-side.
  *     No client-side officer pre-gate (useIsOfficer removed; getMyOfficerRole not called).
  *   - CSRF: fetched by lib/api.ts getCsrfToken() before sendPaymentLink POST.
  *     /auth/ and /pay/ are exempt; /payments/send-link is NOT exempt.
@@ -55,9 +55,9 @@ test('officer signs in, sends a pay-link', async ({ page }) => {
     }
   })
 
-  // Roster members — listOrgMembers → /membership/members/{orgId}
-  // No officer-role stub needed: useIsOfficer removed; engine 403 is the authz gate.
-  await page.route('**/membership/members/**', (r) =>
+  // Roster members — the directory now reads listRosterMembers → GET /association/member/roster
+  // (handler shape { data, totalCount }). No officer-role stub: engine 403 is the authz gate.
+  await page.route('**/association/member/roster**', (r) =>
     r.fulfill({
       contentType: 'application/json',
       body: JSON.stringify({
@@ -65,12 +65,14 @@ test('officer signs in, sends a pay-link', async ({ page }) => {
           {
             id: 'm1',
             personId: 'p1',
+            name: 'Olive Cruz',
             firstName: 'Olive',
             lastName: 'Cruz',
             status: 'active',
             memberNumber: 'A-1',
           },
         ],
+        totalCount: 1,
       }),
     }),
   )

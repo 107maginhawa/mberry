@@ -121,3 +121,56 @@ describe('RosterView — select mode', () => {
     expect(screen.getByRole('button', { name: /send links to 1 selected/i })).toBeInTheDocument()
   })
 })
+
+describe('RosterView — directory (Slice 2)', () => {
+  const rich = [
+    { membershipId: 'm1', personId: 'p1', name: 'Maria Santos', memberNumber: '#00142', status: 'pendingPayment', joinedAt: '2019-05-01T00:00:00Z', tier: 'Gold', unpaid: true },
+  ]
+
+  it('maps engine pendingPayment → Pending badge, shows since/tier meta + count strip', () => {
+    render(<RosterView orgName="Org" members={rich} totalCount={1} />)
+    expect(screen.getByText('Pending')).toBeInTheDocument()
+    expect(screen.getByText(/Member since 2019/)).toBeInTheDocument()
+    expect(screen.getByText(/Gold/)).toBeInTheDocument()
+    expect(screen.getByText('1 member')).toBeInTheDocument()
+  })
+
+  it('shows an Unpaid cue for an active member with an open invoice (full derivation)', () => {
+    const activeUnpaid = [{ membershipId: 'm9', personId: 'p9', name: 'Open Invoice', status: 'active', unpaid: true }]
+    render(<RosterView orgName="Org" members={activeUnpaid} />)
+    expect(screen.getByText('Active')).toBeInTheDocument()
+    expect(screen.getByText('Unpaid')).toBeInTheDocument()
+  })
+
+  it('does not double-mark a pendingPayment member (Pending only, no extra Unpaid)', () => {
+    render(<RosterView orgName="Org" members={rich} />)
+    expect(screen.getByText('Pending')).toBeInTheDocument()
+    expect(screen.queryByText('Unpaid')).not.toBeInTheDocument()
+  })
+
+  it('count strip is honest about the pageSize cap', () => {
+    render(<RosterView orgName="Org" members={rich} totalCount={150} />)
+    expect(screen.getByText('Showing 1 of 150 members')).toBeInTheDocument()
+  })
+
+  it('renders filter chips and reports a chip change', () => {
+    const onFilterChange = vi.fn()
+    render(<RosterView orgName="Org" members={rich} filter="all" onFilterChange={onFilterChange} />)
+    fireEvent.click(screen.getByRole('radio', { name: 'Unpaid' }))
+    expect(onFilterChange).toHaveBeenCalledWith('unpaid')
+  })
+
+  it('renders the add-member slot in the header', () => {
+    render(<RosterView orgName="Org" members={rich} orgId="o1" addMemberSlot={<button>Add member</button>} />)
+    expect(screen.getByRole('button', { name: 'Add member' })).toBeInTheDocument()
+  })
+
+  it('a filter that returns nothing offers "Show all", not the Import CTA', () => {
+    const onFilterChange = vi.fn()
+    render(<RosterView orgName="Org" members={[]} filter="unpaid" onFilterChange={onFilterChange} />)
+    expect(screen.getByText(/no members match this filter/i)).toBeInTheDocument()
+    expect(screen.queryByRole('link', { name: /import roster/i })).not.toBeInTheDocument()
+    fireEvent.click(screen.getByRole('button', { name: /show all members/i }))
+    expect(onFilterChange).toHaveBeenCalledWith('all')
+  })
+})

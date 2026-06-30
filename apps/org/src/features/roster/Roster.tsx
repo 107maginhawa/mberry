@@ -1,16 +1,41 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useState, type ReactNode } from 'react'
 import { Link } from '@tanstack/react-router'
-import { Button, ConfirmDialog, EmptyState, ErrorState, Input, Skeleton, StatusBadge } from '@monobase/ui'
+import { Button, ConfirmDialog, EmptyState, ErrorState, Input, Skeleton, StatusBadge, ToggleGroup, ToggleGroupItem } from '@monobase/ui'
 import { useOrgs, useSelectedOrg } from '../org/use-org'
 import { OrgPicker } from '../org/OrgPicker'
-import { useRoster, type RosterMember } from './use-roster'
+import { useRoster, type RosterMember, type MemberFilter } from './use-roster'
 import { useBulkSend, type BulkMember } from './use-bulk-send'
 import { BulkResults } from './BulkResults'
+import { AddMemberDialog } from './AddMemberDialog'
 
-// Known membership statuses that StatusBadge renders with colour + label.
-// Others fall through to variant="muted" with the raw status text.
-const KNOWN_STATUSES = new Set(['active', 'grace', 'lapsed', 'pending', 'suspended'])
+// Engine membership status → StatusBadge key (colour + label). Unmapped statuses
+// (expired/removed/resigned/…) fall through to a muted badge with the raw text.
 type KnownStatus = 'active' | 'grace' | 'lapsed' | 'pending' | 'suspended'
+const STATUS_BADGE: Record<string, KnownStatus> = {
+  active: 'active',
+  gracePeriod: 'grace',
+  lapsed: 'lapsed',
+  pendingPayment: 'pending',
+  suspended: 'suspended',
+}
+
+const FILTERS: { value: MemberFilter; label: string }[] = [
+  { value: 'all', label: 'All' },
+  { value: 'unpaid', label: 'Unpaid' },
+  { value: 'lapsed', label: 'Lapsed' },
+  { value: 'due', label: 'Due soon' },
+]
+
+// "Member since {year} · {tier}" — present facts only; omit either piece when absent.
+function metaLine(m: RosterMember): string {
+  const parts: string[] = []
+  if (m.joinedAt) {
+    const y = new Date(m.joinedAt).getFullYear()
+    if (!Number.isNaN(y)) parts.push(`Member since ${y}`)
+  }
+  if (m.tier) parts.push(m.tier)
+  return parts.join(' · ')
+}
 
 // ─── Presentational ─────────────────────────────────────────────────────────
 
@@ -23,9 +48,20 @@ export interface RosterViewProps {
   onRetry?: () => void
   /** When present, enables bulk select-and-send. */
   orgId?: string
+  /** Active server-side status filter (chip). */
+  filter?: MemberFilter
+  /** When present, renders the filter chips and changes the server query. */
+  onFilterChange?: (f: MemberFilter) => void
+  /** Total member count (for the thin orientation strip). */
+  totalCount?: number
+  /** "+ Add member" control (container-owned: it uses query hooks). */
+  addMemberSlot?: ReactNode
 }
 
-export function RosterView({ orgName, members, errored, onRetry, orgId }: RosterViewProps) {
+export function RosterView({
+  orgName, members, errored, onRetry, orgId,
+  filter = 'all', onFilterChange, totalCount, addMemberSlot,
+}: RosterViewProps) {
   const [query, setQuery] = useState('')
   const [selecting, setSelecting] = useState(false)
   const [selected, setSelected] = useState<Set<string>>(new Set())
@@ -72,13 +108,28 @@ export function RosterView({ orgName, members, errored, onRetry, orgId }: Roster
   }
 
   if (members.length === 0) {
+    // A filter that returns nothing is NOT a fresh org — offer to clear, not to import.
+    if (filter !== 'all') {
+      return (
+        <div className="flex flex-col gap-4 p-4">
+          {orgName && <h1 className="text-title font-semibold text-foreground">{orgName}</h1>}
+          <EmptyState headline="No members match this filter" description="Try a different filter to see more members." />
+          <Button variant="outline" className="min-h-tap self-start" onClick={() => onFilterChange?.('all')}>
+            Show all members
+          </Button>
+        </div>
+      )
+    }
     return (
       <div className="flex flex-col gap-4 p-4">
         {orgName && <h1 className="text-title font-semibold text-foreground">{orgName}</h1>}
-        <EmptyState headline="No members yet" description="Import your roster to get started." />
-        <Button asChild className="min-h-tap self-start">
-          <Link to="/import">Import roster</Link>
-        </Button>
+        <EmptyState headline="No members yet" description="Import your roster or add your first member." />
+        <div className="flex flex-wrap gap-3">
+          <Button asChild className="min-h-tap">
+            <Link to="/import">Import roster</Link>
+          </Button>
+          {addMemberSlot}
+        </div>
       </div>
     )
   }
@@ -126,15 +177,27 @@ export function RosterView({ orgName, members, errored, onRetry, orgId }: Roster
       <div className="flex items-center justify-between gap-3">
         {orgName && <h1 className="text-title font-semibold text-foreground">{orgName}</h1>}
         {orgId && (
-          <Button
-            variant="outline"
-            className="min-h-tap shrink-0"
-            onClick={() => { setSelecting((s) => !s); setSelected(new Set()) }}
-          >
-            {selecting ? 'Cancel' : 'Select'}
-          </Button>
+          <div className="flex items-center gap-2 shrink-0">
+            {addMemberSlot}
+            <Button
+              variant="outline"
+              className="min-h-tap shrink-0"
+              onClick={() => { setSelecting((s) => !s); setSelected(new Set()) }}
+            >
+              {selecting ? 'Cancel' : 'Select'}
+            </Button>
+          </div>
         )}
       </div>
+
+      {totalCount != null && (
+        <p className="text-caption text-muted-foreground">
+          {/* Honest about the pageSize=100 cap: never imply more rows than are rendered. */}
+          {members.length < totalCount
+            ? `Showing ${members.length} of ${totalCount} members`
+            : `${totalCount} member${totalCount === 1 ? '' : 's'}`}
+        </p>
+      )}
 
       <Input
         type="search"
@@ -144,6 +207,22 @@ export function RosterView({ orgName, members, errored, onRetry, orgId }: Roster
         aria-label="Search members"
         className="min-h-tap"
       />
+
+      {onFilterChange && (
+        <ToggleGroup
+          type="single"
+          value={filter}
+          onValueChange={(v) => { if (v) onFilterChange(v as MemberFilter) }}
+          className="flex-wrap justify-start gap-2"
+          aria-label="Filter members"
+        >
+          {FILTERS.map((f) => (
+            <ToggleGroupItem key={f.value} value={f.value} className="min-h-tap px-4">
+              {f.label}
+            </ToggleGroupItem>
+          ))}
+        </ToggleGroup>
+      )}
 
       {selecting && (
         <label className="flex min-h-tap items-center gap-3 text-body text-foreground">
@@ -166,49 +245,58 @@ export function RosterView({ orgName, members, errored, onRetry, orgId }: Roster
       <ul className="flex flex-col gap-3">
         {filtered.map((m) => {
           const checked = selected.has(m.membershipId)
+          const badge = STATUS_BADGE[m.status]
           return (
             <li
               key={m.membershipId}
-              className="flex items-center justify-between gap-3 rounded-lg border border-[var(--color-border-light)] bg-surface px-4 py-3"
+              className="flex flex-col gap-1.5 rounded-lg border border-[var(--color-border-light)] bg-surface px-4 py-3"
               onClick={selecting ? () => toggle(m.membershipId) : undefined}
             >
-              <div className="flex items-center gap-3 min-w-0">
-                {selecting && (
-                  <input
-                    type="checkbox"
-                    className="size-5 shrink-0"
-                    aria-label={`Select ${m.name}`}
-                    checked={checked}
-                    onChange={() => toggle(m.membershipId)}
-                    onClick={(e) => e.stopPropagation()}
-                  />
-                )}
-                <div className="flex flex-col gap-1 min-w-0">
+              <div className="flex items-center justify-between gap-3">
+                <div className="flex items-center gap-3 min-w-0">
+                  {selecting && (
+                    <input
+                      type="checkbox"
+                      className="size-5 shrink-0"
+                      aria-label={`Select ${m.name}`}
+                      checked={checked}
+                      onChange={() => toggle(m.membershipId)}
+                      onClick={(e) => e.stopPropagation()}
+                    />
+                  )}
                   <span className="text-body font-medium text-foreground truncate">{m.name}</span>
-                  {m.memberNumber && (
-                    <span className="text-caption text-muted-foreground">{m.memberNumber}</span>
+                </div>
+                <div className="flex items-center gap-3 shrink-0">
+                  {badge ? (
+                    <StatusBadge status={badge} />
+                  ) : (
+                    <StatusBadge variant="muted">{m.status}</StatusBadge>
+                  )}
+                  {/* Per-row unpaid cue for the full derivation (open invoice on an otherwise
+                      "Active" member) — the Pending badge already conveys pendingPayment. */}
+                  {m.unpaid && m.status !== 'pendingPayment' && (
+                    <StatusBadge variant="warning">Unpaid</StatusBadge>
+                  )}
+                  {!selecting && (
+                    <Button asChild className="min-h-tap">
+                      <Link
+                        to="/members/$membershipId/send"
+                        params={{ membershipId: m.membershipId }}
+                        search={{ personId: m.personId, name: m.name }}
+                        aria-label={`Send pay-link to ${m.name}`}
+                      >
+                        Send pay-link
+                      </Link>
+                    </Button>
                   )}
                 </div>
               </div>
-              <div className="flex items-center gap-3 shrink-0">
-                {KNOWN_STATUSES.has(m.status) ? (
-                  <StatusBadge status={m.status as KnownStatus} />
-                ) : (
-                  <StatusBadge variant="muted">{m.status}</StatusBadge>
-                )}
-                {!selecting && (
-                  <Button asChild className="min-h-tap">
-                    <Link
-                      to="/members/$membershipId/send"
-                      params={{ membershipId: m.membershipId }}
-                      search={{ personId: m.personId, name: m.name }}
-                      aria-label={`Send pay-link to ${m.name}`}
-                    >
-                      Send pay-link
-                    </Link>
-                  </Button>
-                )}
-              </div>
+              {/* Present-facts meta on its own full-width line so "Member since … · tier" is never crushed by the action. */}
+              {(m.memberNumber || metaLine(m)) && (
+                <span className={`text-caption text-muted-foreground truncate ${selecting ? 'pl-8' : ''}`}>
+                  {[m.memberNumber, metaLine(m)].filter(Boolean).join(' · ')}
+                </span>
+              )}
             </li>
           )
         })}
@@ -216,7 +304,7 @@ export function RosterView({ orgName, members, errored, onRetry, orgId }: Roster
       )}
 
       {selecting && selectedCount > 0 && (
-        <div className="fixed inset-x-0 bottom-0 z-10 border-t border-[var(--color-border-light)] bg-surface p-4 pb-[calc(1rem+env(safe-area-inset-bottom))]">
+        <div className="fixed inset-x-0 bottom-[calc(4rem+env(safe-area-inset-bottom))] z-20 border-t border-[var(--color-border-light)] bg-surface p-4">
           <div className="max-w-lg mx-auto">
             <Button className="min-h-tap w-full" onClick={() => setConfirmOpen(true)}>
               Send links to {selectedCount} selected
@@ -242,7 +330,8 @@ export function RosterView({ orgName, members, errored, onRetry, orgId }: Roster
 export default function Roster() {
   const { orgs } = useOrgs()
   const { orgId } = useSelectedOrg()
-  const { status: rosterStatus, members, refetch } = useRoster(orgId)
+  const [filter, setFilter] = useState<MemberFilter>('all')
+  const { status: rosterStatus, members, totalCount, refetch } = useRoster(orgId, filter)
 
   const selectedOrg = orgs.find((o) => o.id === orgId)
   const orgName = selectedOrg?.name ?? ''
@@ -270,6 +359,10 @@ export default function Roster() {
             errored={rosterStatus === 'error'}
             onRetry={refetch}
             orgId={orgId ?? undefined}
+            filter={filter}
+            onFilterChange={setFilter}
+            totalCount={rosterStatus === 'error' ? undefined : totalCount}
+            addMemberSlot={orgId ? <AddMemberDialog orgId={orgId} /> : undefined}
           />
         )}
       </div>
