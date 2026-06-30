@@ -1,5 +1,11 @@
 import { describe, it, expect, vi } from 'vitest'
 import { render, screen, fireEvent } from '@testing-library/react'
+
+// Event rows link to the detail via a TanStack <Link>; mock it as a plain anchor
+// so the presentational component renders without a RouterProvider.
+vi.mock('@tanstack/react-router', () => ({
+  Link: ({ to: _to, params: _p, children, ...rest }: any) => <a {...rest}>{children}</a>,
+}))
 import { EventsList } from './EventsList'
 
 const ev = (over: Partial<any> = {}) => ({ id: 'd1', title: 'Spring Assembly', status: 'draft', startDate: '2026-03-01T06:00:00Z', ...over })

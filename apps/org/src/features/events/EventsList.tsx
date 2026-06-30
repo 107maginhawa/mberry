@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { Link } from '@tanstack/react-router'
 import { Button, ConfirmDialog, EmptyState, ErrorState, Skeleton, StatusBadge } from '@monobase/ui'
 import type { OrgEvent } from './use-org-events'
 
@@ -59,10 +60,15 @@ export function EventsList({
               key={e.id}
               className="flex items-center justify-between gap-3 rounded-lg border border-[var(--color-border-light)] bg-surface px-4 py-3"
             >
-              <div className="flex flex-col gap-1 min-w-0">
+              <Link
+                to="/events/$eventId"
+                params={{ eventId: e.id }}
+                className="flex flex-col gap-1 min-w-0"
+                aria-label={`Open ${e.title}`}
+              >
                 <span className="text-body font-medium text-foreground truncate">{e.title}</span>
                 <span className="text-caption text-muted-foreground">{fmtDate(e.startDate)}</span>
-              </div>
+              </Link>
               <div className="flex items-center gap-3 shrink-0">
                 <StatusBadge variant={s.variant}>{s.label}</StatusBadge>
                 {e.status === 'draft' && (

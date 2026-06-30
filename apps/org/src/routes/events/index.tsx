@@ -6,7 +6,7 @@ import { useOrgEvents } from '@/features/events/use-org-events'
 import { usePublishEvent } from '@/features/events/use-publish-event'
 import { useSelectedOrg } from '@/features/org/use-org'
 
-export const Route = createFileRoute('/events')({ component: EventsPage })
+export const Route = createFileRoute('/events/')({ component: EventsPage })
 
 export function EventsPage() {
   const { orgId } = useSelectedOrg()

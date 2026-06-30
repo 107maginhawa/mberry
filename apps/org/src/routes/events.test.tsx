@@ -2,6 +2,10 @@ import { describe, it, expect, vi } from 'vitest'
 import { render, screen } from '@testing-library/react'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 
+vi.mock('@tanstack/react-router', async (orig) => ({
+  ...(await orig<Record<string, unknown>>()),
+  Link: ({ to: _to, params: _p, children, ...rest }: any) => <a {...rest}>{children}</a>,
+}))
 vi.mock('@/features/org/use-org', () => ({ useSelectedOrg: () => ({ orgId: 'o1' }) }))
 vi.mock('@/features/events/use-org-events', () => ({
   useOrgEvents: () => ({

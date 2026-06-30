@@ -13,10 +13,11 @@ import { Route as SignInRouteImport } from './routes/sign-in'
 import { Route as PaymentSettingsRouteImport } from './routes/payment-settings'
 import { Route as MoreRouteImport } from './routes/more'
 import { Route as ImportRouteImport } from './routes/import'
-import { Route as EventsRouteImport } from './routes/events'
 import { Route as DuesRouteImport } from './routes/dues'
 import { Route as AnnouncementsRouteImport } from './routes/announcements'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as EventsIndexRouteImport } from './routes/events/index'
+import { Route as EventsEventIdRouteImport } from './routes/events/$eventId'
 import { Route as MembersMembershipIdIndexRouteImport } from './routes/members/$membershipId/index'
 import { Route as MembersMembershipIdSendRouteImport } from './routes/members/$membershipId/send'
 
@@ -40,11 +41,6 @@ const ImportRoute = ImportRouteImport.update({
   path: '/import',
   getParentRoute: () => rootRouteImport,
 } as any)
-const EventsRoute = EventsRouteImport.update({
-  id: '/events',
-  path: '/events',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const DuesRoute = DuesRouteImport.update({
   id: '/dues',
   path: '/dues',
@@ -58,6 +54,16 @@ const AnnouncementsRoute = AnnouncementsRouteImport.update({
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const EventsIndexRoute = EventsIndexRouteImport.update({
+  id: '/events/',
+  path: '/events/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const EventsEventIdRoute = EventsEventIdRouteImport.update({
+  id: '/events/$eventId',
+  path: '/events/$eventId',
   getParentRoute: () => rootRouteImport,
 } as any)
 const MembersMembershipIdIndexRoute =
@@ -76,11 +82,12 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/announcements': typeof AnnouncementsRoute
   '/dues': typeof DuesRoute
-  '/events': typeof EventsRoute
   '/import': typeof ImportRoute
   '/more': typeof MoreRoute
   '/payment-settings': typeof PaymentSettingsRoute
   '/sign-in': typeof SignInRoute
+  '/events/$eventId': typeof EventsEventIdRoute
+  '/events/': typeof EventsIndexRoute
   '/members/$membershipId/send': typeof MembersMembershipIdSendRoute
   '/members/$membershipId/': typeof MembersMembershipIdIndexRoute
 }
@@ -88,11 +95,12 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/announcements': typeof AnnouncementsRoute
   '/dues': typeof DuesRoute
-  '/events': typeof EventsRoute
   '/import': typeof ImportRoute
   '/more': typeof MoreRoute
   '/payment-settings': typeof PaymentSettingsRoute
   '/sign-in': typeof SignInRoute
+  '/events/$eventId': typeof EventsEventIdRoute
+  '/events': typeof EventsIndexRoute
   '/members/$membershipId/send': typeof MembersMembershipIdSendRoute
   '/members/$membershipId': typeof MembersMembershipIdIndexRoute
 }
@@ -101,11 +109,12 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/announcements': typeof AnnouncementsRoute
   '/dues': typeof DuesRoute
-  '/events': typeof EventsRoute
   '/import': typeof ImportRoute
   '/more': typeof MoreRoute
   '/payment-settings': typeof PaymentSettingsRoute
   '/sign-in': typeof SignInRoute
+  '/events/$eventId': typeof EventsEventIdRoute
+  '/events/': typeof EventsIndexRoute
   '/members/$membershipId/send': typeof MembersMembershipIdSendRoute
   '/members/$membershipId/': typeof MembersMembershipIdIndexRoute
 }
@@ -115,11 +124,12 @@ export interface FileRouteTypes {
     | '/'
     | '/announcements'
     | '/dues'
-    | '/events'
     | '/import'
     | '/more'
     | '/payment-settings'
     | '/sign-in'
+    | '/events/$eventId'
+    | '/events/'
     | '/members/$membershipId/send'
     | '/members/$membershipId/'
   fileRoutesByTo: FileRoutesByTo
@@ -127,11 +137,12 @@ export interface FileRouteTypes {
     | '/'
     | '/announcements'
     | '/dues'
-    | '/events'
     | '/import'
     | '/more'
     | '/payment-settings'
     | '/sign-in'
+    | '/events/$eventId'
+    | '/events'
     | '/members/$membershipId/send'
     | '/members/$membershipId'
   id:
@@ -139,11 +150,12 @@ export interface FileRouteTypes {
     | '/'
     | '/announcements'
     | '/dues'
-    | '/events'
     | '/import'
     | '/more'
     | '/payment-settings'
     | '/sign-in'
+    | '/events/$eventId'
+    | '/events/'
     | '/members/$membershipId/send'
     | '/members/$membershipId/'
   fileRoutesById: FileRoutesById
@@ -152,11 +164,12 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AnnouncementsRoute: typeof AnnouncementsRoute
   DuesRoute: typeof DuesRoute
-  EventsRoute: typeof EventsRoute
   ImportRoute: typeof ImportRoute
   MoreRoute: typeof MoreRoute
   PaymentSettingsRoute: typeof PaymentSettingsRoute
   SignInRoute: typeof SignInRoute
+  EventsEventIdRoute: typeof EventsEventIdRoute
+  EventsIndexRoute: typeof EventsIndexRoute
   MembersMembershipIdSendRoute: typeof MembersMembershipIdSendRoute
   MembersMembershipIdIndexRoute: typeof MembersMembershipIdIndexRoute
 }
@@ -191,13 +204,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ImportRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/events': {
-      id: '/events'
-      path: '/events'
-      fullPath: '/events'
-      preLoaderRoute: typeof EventsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/dues': {
       id: '/dues'
       path: '/dues'
@@ -217,6 +223,20 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/events/': {
+      id: '/events/'
+      path: '/events'
+      fullPath: '/events/'
+      preLoaderRoute: typeof EventsIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/events/$eventId': {
+      id: '/events/$eventId'
+      path: '/events/$eventId'
+      fullPath: '/events/$eventId'
+      preLoaderRoute: typeof EventsEventIdRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/members/$membershipId/': {
@@ -240,11 +260,12 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AnnouncementsRoute: AnnouncementsRoute,
   DuesRoute: DuesRoute,
-  EventsRoute: EventsRoute,
   ImportRoute: ImportRoute,
   MoreRoute: MoreRoute,
   PaymentSettingsRoute: PaymentSettingsRoute,
   SignInRoute: SignInRoute,
+  EventsEventIdRoute: EventsEventIdRoute,
+  EventsIndexRoute: EventsIndexRoute,
   MembersMembershipIdSendRoute: MembersMembershipIdSendRoute,
   MembersMembershipIdIndexRoute: MembersMembershipIdIndexRoute,
 }
