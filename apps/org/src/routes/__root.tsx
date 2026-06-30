@@ -2,41 +2,48 @@ import { createRootRoute, Link, Outlet, useNavigate, useRouterState } from '@tan
 import { useEffect, useState } from 'react'
 import { useQueryClient } from '@tanstack/react-query'
 import { toast } from 'sonner'
-import { AppHeader, Skeleton } from '@monobase/ui'
+import { AppHeader, BottomTabBar, bottomTabClass, NavIcon, Skeleton } from '@monobase/ui'
+import { Users, Calendar, Settings } from '@monobase/ui/icons'
 import { useSession } from '@/features/auth/use-session'
 import { signOut } from '@/features/auth/sign-in'
 import { API_BASE } from '@/lib/api'
 
 export const Route = createRootRoute({ component: RootGate })
 
-const NAV = [
-  { to: '/', label: 'Roster' },
-  { to: '/import', label: 'Import' },
-  { to: '/dues', label: 'Dues' },
-  { to: '/events', label: 'Events' },
-  { to: '/announcements', label: 'Announcements' },
-  { to: '/payment-settings', label: 'Payment settings' },
+// People-first IA (DESIGN.md / MEMBERSHIP_MANAGEMENT_UI.md): three thumb-reachable
+// tabs replace the old flat link row. Members is home (the directory + send-link
+// deep links); Events its own tab; everything low-frequency lives under More
+// (/import, /dues, /announcements, /payment-settings). `match` lights the right
+// tab on deep routes (e.g. /members/$id/send → Members, /import → More).
+const TABS = [
+  { to: '/', label: 'Members', icon: Users, match: (p: string) => p === '/' || p.startsWith('/members') },
+  { to: '/events', label: 'Events', icon: Calendar, match: (p: string) => p.startsWith('/events') },
+  {
+    to: '/more',
+    label: 'More',
+    icon: Settings,
+    // The hub itself + every tool parked under it. Exact-or-subpath match (not a
+    // bare prefix) so an unrelated route like /importers wouldn't light More.
+    match: (p: string) =>
+      ['/more', '/import', '/dues', '/announcements', '/payment-settings'].some(
+        (r) => p === r || p.startsWith(`${r}/`),
+      ),
+  },
 ] as const
 
-const NAV_LINK = 'inline-flex min-h-tap items-center text-body font-medium text-muted-foreground hover:text-foreground'
-
-// One primary nav for every authed officer screen (current-location via activeProps),
-// replacing the per-page scattered links (DESIGN.md: consistent nav + orientation).
-function OfficerNav() {
+function OfficerTabs({ pathname }: { pathname: string }) {
   return (
-    <>
-      {NAV.map((item) => (
-        <Link
-          key={item.to}
-          to={item.to}
-          activeOptions={item.to === '/' ? { exact: true } : undefined}
-          className={NAV_LINK}
-          activeProps={{ className: `${NAV_LINK} !text-foreground font-semibold underline underline-offset-4` }}
-        >
-          {item.label}
-        </Link>
-      ))}
-    </>
+    <BottomTabBar>
+      {TABS.map((tab) => {
+        const active = tab.match(pathname)
+        return (
+          <Link key={tab.to} to={tab.to} aria-current={active ? 'page' : undefined} className={bottomTabClass(active)}>
+            <NavIcon icon={tab.icon} size="lg" aria-hidden />
+            <span>{tab.label}</span>
+          </Link>
+        )
+      })}
+    </BottomTabBar>
   )
 }
 
@@ -64,12 +71,17 @@ function RootGate() {
   // Public sign-in page renders bare (no app chrome).
   if (pathname === '/sign-in') return <Outlet />
 
-  // Authed: wrap the route tree in shared chrome (orientation + sign-out).
+  // Authed: shared chrome = top header (title + sign-out) and the bottom tab bar.
+  // Pad the outlet by the bar's own height (min-h-tap 48 + py-2 16 = 4rem) plus
+  // the device safe-area inset, so the fixed bar never covers a screen's last row.
   if (status === 'authed') {
     return (
       <>
-        <AppHeader title="Memberry Officer" nav={<OfficerNav />} onSignOut={onSignOut} signingOut={signingOut} />
-        <Outlet />
+        <AppHeader title="Memberry Officer" onSignOut={onSignOut} signingOut={signingOut} />
+        <div className="pb-[calc(4rem+env(safe-area-inset-bottom))]">
+          <Outlet />
+        </div>
+        <OfficerTabs pathname={pathname} />
       </>
     )
   }

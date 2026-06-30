@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { render, screen, fireEvent, waitFor } from '@testing-library/react'
+import { render, screen, fireEvent, waitFor, within } from '@testing-library/react'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import type { ReactNode } from 'react'
 
@@ -10,7 +10,11 @@ let sessionStatus: 'loading' | 'authed' | 'unauthed' = 'authed'
 // Capture RootGate via the mocked createRootRoute so we can render it directly.
 vi.mock('@tanstack/react-router', () => ({
   createRootRoute: (opts: { component: () => ReactNode }) => ({ options: opts }),
-  Link: ({ children }: { children: ReactNode }) => <a>{children}</a>,
+  // Map `to`→href (so the anchor has the link role) and forward className/
+  // aria-current (the tab-active signal) onto the node.
+  Link: ({ children, to, ...rest }: { children: ReactNode; to?: string }) => (
+    <a href={to ?? '#'} {...rest}>{children}</a>
+  ),
   Outlet: () => <div data-testid="outlet" />,
   useNavigate: () => mockNavigate,
   useRouterState: ({ select }: { select: (s: { location: { pathname: string } }) => unknown }) =>
@@ -73,5 +77,46 @@ describe('RootGate redirect (Fix 2)', () => {
     render(<RootGate />, { wrapper })
     await Promise.resolve()
     expect(mockNavigate).not.toHaveBeenCalled()
+  })
+})
+
+describe('Bottom tab shell (Slice 1)', () => {
+  it('authed user sees exactly the three people-first tabs (no old flat nav)', () => {
+    sessionStatus = 'authed'
+    mockPathname = '/'
+    render(<RootGate />, { wrapper })
+    const tabs = screen.getByRole('navigation', { name: 'Sections' })
+    expect(within(tabs).getByRole('link', { name: 'Members' })).toBeInTheDocument()
+    expect(within(tabs).getByRole('link', { name: 'Events' })).toBeInTheDocument()
+    expect(within(tabs).getByRole('link', { name: 'More' })).toBeInTheDocument()
+    // Old flat top-nav labels are gone (low-frequency tools moved under More).
+    expect(screen.queryByText('Roster')).not.toBeInTheDocument()
+    expect(screen.queryByText('Payment settings')).not.toBeInTheDocument()
+  })
+
+  it('lights Members on / and on a /members deep route', () => {
+    sessionStatus = 'authed'
+    for (const path of ['/', '/members/m1/send']) {
+      mockPathname = path
+      const { unmount } = render(<RootGate />, { wrapper })
+      expect(screen.getByRole('link', { name: 'Members' })).toHaveAttribute('aria-current', 'page')
+      expect(screen.getByRole('link', { name: 'Events' })).not.toHaveAttribute('aria-current')
+      unmount()
+    }
+  })
+
+  it('lights More on the low-frequency routes parked under it (e.g. /import)', () => {
+    sessionStatus = 'authed'
+    mockPathname = '/import'
+    render(<RootGate />, { wrapper })
+    expect(screen.getByRole('link', { name: 'More' })).toHaveAttribute('aria-current', 'page')
+    expect(screen.getByRole('link', { name: 'Members' })).not.toHaveAttribute('aria-current')
+  })
+
+  it('renders no app chrome (no tabs) on the bare /sign-in page', () => {
+    sessionStatus = 'unauthed'
+    mockPathname = '/sign-in'
+    render(<RootGate />, { wrapper })
+    expect(screen.queryByRole('navigation', { name: 'Sections' })).not.toBeInTheDocument()
   })
 })

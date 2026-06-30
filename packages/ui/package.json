@@ -6,6 +6,7 @@
     ".": "./src/index.ts",
     "./lib/utils": "./src/lib/utils.ts",
     "./components/*": "./src/components/*.tsx",
+    "./icons": "./src/icons.ts",
     "./tokens.css": "./src/tokens.css",
     "./tailwind-preset": "./tailwind-preset.ts"
   },
