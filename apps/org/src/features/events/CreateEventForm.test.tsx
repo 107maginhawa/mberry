@@ -54,6 +54,15 @@ describe('CreateEventForm', () => {
     expect(mutate).not.toHaveBeenCalled()
   })
 
+  it('warns at the fee field when a paid fee is entered, and not when free', () => {
+    render(<CreateEventForm />)
+    expect(screen.queryByText(/Paid events need card setup/i)).not.toBeInTheDocument()
+    fireEvent.change(screen.getByLabelText(/registration fee/i), { target: { value: '500' } })
+    expect(screen.getByText(/Paid events need card setup/i)).toBeInTheDocument()
+    fireEvent.change(screen.getByLabelText(/registration fee/i), { target: { value: '0' } })
+    expect(screen.queryByText(/Paid events need card setup/i)).not.toBeInTheDocument()
+  })
+
   it('shows a friendly alert on a 403 error', () => {
     state = { mutate, isPending: false, isError: true, error: new Error('Two-factor authentication required') }
     render(<CreateEventForm />)

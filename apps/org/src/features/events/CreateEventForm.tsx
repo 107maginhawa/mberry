@@ -43,7 +43,9 @@ export function CreateEventForm({ onCreated }: { onCreated?: () => void } = {}) 
       },
       {
         onSuccess: () => {
-          toast.success('Event created')
+          // New events default to draft — tell the officer where to find + publish it
+          // (the list defaults to the Upcoming tab, which hides drafts).
+          toast.success('Event saved as a draft — open the Drafts tab to publish it')
           setTitle(''); setStart(''); setEnd(''); setLocation(''); setCapacity(''); setFeePhp(''); setDescription('')
           onCreated?.()
         },
@@ -88,7 +90,20 @@ export function CreateEventForm({ onCreated }: { onCreated?: () => void } = {}) 
             <legend className="text-body font-semibold text-foreground mb-2">Details (optional)</legend>
             <div><Label htmlFor="ev-loc">Location</Label><Input id="ev-loc" value={location} onChange={(e) => setLocation(e.target.value)} /></div>
             <div><Label htmlFor="ev-cap">Capacity</Label><Input id="ev-cap" type="number" min={1} step={1} value={capacity} onChange={(e) => setCapacity(e.target.value)} /></div>
-            <div><Label htmlFor="ev-fee">Registration fee in PHP</Label><Input id="ev-fee" type="number" min={0} step="0.01" value={feePhp} onChange={(e) => setFeePhp(e.target.value)} /></div>
+            <div>
+              <Label htmlFor="ev-fee">Registration fee in PHP</Label>
+              <Input id="ev-fee" type="number" min={0} step="0.01" value={feePhp} onChange={(e) => setFeePhp(e.target.value)} />
+              {/* Honest warning at the fee field (design Round-2 #6) — paid events run on card billing,
+                  which isn't set up on the lean PayMongo rail yet. Non-blocking: a paid draft can be
+                  created; only publish is gated server-side. */}
+              {Number(feePhp) > 0 && (
+                // Advisory (not an error) → aria-live polite, not role=alert.
+                <p aria-live="polite" className="mt-1 text-caption text-warning">
+                  Paid events need card setup, which isn’t available yet (PayMongo coming soon). You can save this as a
+                  draft, but publishing a paid event won’t work until billing is set up.
+                </p>
+              )}
+            </div>
             <div><Label htmlFor="ev-desc">Description</Label><Textarea id="ev-desc" value={description} onChange={(e) => setDescription(e.target.value)} /></div>
           </fieldset>
 

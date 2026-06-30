@@ -10,7 +10,7 @@ vi.mock('@/features/org/use-org', () => ({ useSelectedOrg: () => ({ orgId: 'o1' 
 vi.mock('@/features/events/use-org-events', () => ({
   useOrgEvents: () => ({
     status: 'ready',
-    events: [{ id: 'd1', title: 'Spring Assembly', status: 'draft', startDate: '2026-03-01T06:00:00Z' }],
+    events: [{ id: 'u1', title: 'Spring Assembly', status: 'published', startDate: '2027-03-01T06:00:00Z', endDate: null, registeredCount: 0, waitlistCount: 0 }],
   }),
 }))
 vi.mock('@/features/events/use-publish-event', () => ({

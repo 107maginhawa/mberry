@@ -6,7 +6,10 @@ export type OrgEvent = {
   title: string
   status: string
   startDate: string | Date
+  endDate?: string | Date | null
   registrationFee?: number
+  registeredCount: number
+  waitlistCount: number
 }
 
 export function useOrgEvents(
@@ -17,22 +20,31 @@ export function useOrgEvents(
     enabled: !!orgId,
     retry: false,
     queryFn: async () => {
-      const { data, error } = await searchEvents({ query: { organizationId: orgId!, pageSize: 50 } })
+      // ponytail: pageSize 100 (the engine cap) — filtering is client-side, so a chapter with
+      // 100+ lifetime events would silently miss the oldest. Surface "showing first N" + paginate
+      // if a real chapter ever crosses it (v1 known limit).
+      const { data, error } = await searchEvents({ query: { organizationId: orgId!, pageSize: 100 } })
       if (!data) throw new Error((error as any)?.error ?? 'events failed')
       const rows = (data.data ?? []) as Array<{
         id: string
         title: string
         status: string
         startDate: string | Date
+        endDate?: string | Date | null
         registrationFee?: bigint
+        registeredCount?: number
+        waitlistCount?: number
       }>
       return rows.map((e) => ({
         id: e.id,
         title: e.title,
         status: e.status,
         startDate: e.startDate,
+        endDate: e.endDate ?? null,
         // registrationFee is bigint at runtime — coerce for display.
         ...(e.registrationFee != null ? { registrationFee: Number(e.registrationFee) } : {}),
+        registeredCount: Number(e.registeredCount ?? 0),
+        waitlistCount: Number(e.waitlistCount ?? 0),
       }))
     },
   })

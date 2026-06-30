@@ -101,8 +101,11 @@ test('officer creates an event and it appears in the list', async ({ page }) => 
   await page.getByRole('button', { name: 'Create event' }).click()
 
   // Success signal: toast + the new event rendered in the list (after refetch).
-  await expect(page.getByText('Event created')).toBeVisible()
+  await expect(page.getByText(/saved as a draft/i)).toBeVisible()
+  // A new event is a draft → switch to the Drafts tab to see it (with its count).
+  await page.getByRole('radio', { name: 'Drafts' }).click()
   await expect(page.getByText('Spring General Assembly')).toBeVisible()
+  await expect(page.getByText(/0 going/)).toBeVisible()
 })
 
 test('officer publishes a draft event', async ({ page }) => {
@@ -152,14 +155,17 @@ test('officer publishes a draft event', async ({ page }) => {
 
   await page.goto('/events')
 
-  // Draft event renders with a Draft badge and a Publish button.
+  // Drafts live under the Drafts tab; the row has a Draft badge + Publish button.
+  await page.getByRole('radio', { name: 'Drafts' }).click()
   await expect(page.getByText('Annual Convention')).toBeVisible()
-  await expect(page.getByText('Draft')).toBeVisible()
+  await expect(page.getByText('Draft', { exact: true })).toBeVisible() // the badge, not the "Drafts" tab
 
   // Open the confirm dialog, then confirm publish.
   await page.getByRole('button', { name: 'Publish Annual Convention' }).click()
   await page.getByRole('alertdialog').getByRole('button', { name: 'Publish' }).click()
 
-  // The row reconciles to Published after the publish POST + refetch.
+  // Once published (a future event) it moves to the Upcoming tab.
+  await page.getByRole('radio', { name: 'Upcoming' }).click()
+  await expect(page.getByText('Annual Convention')).toBeVisible()
   await expect(page.getByText('Published')).toBeVisible()
 })

@@ -13,10 +13,10 @@ function wrapper({ children }: { children: React.ReactNode }) {
 }
 
 describe('useOrgEvents', () => {
-  it('maps events and sorts drafts first', async () => {
+  it('maps events (incl. counts + endDate) and sorts drafts first', async () => {
     vi.mocked(searchEvents).mockResolvedValue(ok({
       data: [
-        { id: 'p1', title: 'Pub', status: 'published', startDate: '2026-02-01', registrationFee: 5000n },
+        { id: 'p1', title: 'Pub', status: 'published', startDate: '2026-02-01', endDate: '2026-02-02', registrationFee: 5000n, registeredCount: 38, waitlistCount: 2 },
         { id: 'd1', title: 'Draft', status: 'draft', startDate: '2026-03-01' },
       ],
       pagination: {},
@@ -24,7 +24,13 @@ describe('useOrgEvents', () => {
     const { result } = renderHook(() => useOrgEvents('o1'), { wrapper })
     await waitFor(() => expect(result.current.status).toBe('ready'))
     expect(result.current.events.map((e) => e.id)).toEqual(['d1', 'p1'])
-    expect(result.current.events[1]!.registrationFee).toBe(5000)
+    const pub = result.current.events[1]!
+    expect(pub.registrationFee).toBe(5000)
+    expect(pub.registeredCount).toBe(38)
+    expect(pub.waitlistCount).toBe(2)
+    expect(pub.endDate).toBe('2026-02-02')
+    // counts default to 0 when the row omits them (the draft)
+    expect(result.current.events[0]!.registeredCount).toBe(0)
   })
 
   it('empty when no events', async () => {
