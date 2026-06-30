@@ -194,8 +194,24 @@ export function createAuth(
                     .from(schema.user).where(eq(schema.user.id, match.id)).limit(1)
                   if (claimed.length === 0) {
                     data['id'] = match.id
+                    // Grant the association:member role so the claimed member can read
+                    // their own org-scoped dashboard data — dues/payments/events/org-profile
+                    // gate on this role (authMiddleware). Without it a claimed member logs
+                    // in to a 403 wall ("Insufficient permissions"). The role is coarse:
+                    // org-context middleware still enforces per-org active membership, so
+                    // this is necessary-but-not-sufficient (no cross-org leak). Compose with
+                    // any role already set above (admin auto-promotion) rather than clobber.
+                    const currentRole =
+                      (typeof data['role'] === 'string' && data['role']
+                        ? (data['role'] as string)
+                        : (typeof user['role'] === 'string' ? (user['role'] as string) : 'user'))
+                    const merged = new Set(
+                      currentRole.split(',').map((r) => r.trim()).filter(Boolean)
+                    )
+                    merged.add('association:member')
+                    data['role'] = Array.from(merged).join(',')
                     logger?.info({ personId: match.id, email: maskEmail(user.email) },
-                      'account-claim: linking new user to existing roster person by email')
+                      'account-claim: linking new user to existing roster person by email + granting association:member')
                   } else {
                     logger?.warn({ personId: match.id }, 'account-claim: matched person already has a user — skipping')
                   }

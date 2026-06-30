@@ -208,3 +208,85 @@ describe('[A1 RED] roster email-OTP login must claim roster person + surface mem
     },
   );
 });
+
+// ── Role grant on claim ──────────────────────────────────────────────────────
+// A claimed roster member must also receive the `association:member` role, or
+// every org-scoped dashboard read (/association/member/dues-*, /org-profile,
+// /association/events) 403s "Insufficient permissions" (authMiddleware checks
+// user.role). The claim links identity (user.id = person.id) but the member is
+// still role='user' without this grant. org-context middleware still enforces
+// per-org active membership, so the role is necessary-but-not-sufficient.
+describe('account-claim grants the association:member role', () => {
+  test(
+    'a claimed roster member can satisfy the association:member role gate',
+    async () => {
+      if (!H.dbReachable) return;
+
+      const rosterPersonId = randomUUID();
+      const orgId = randomUUID();
+      const tierId = randomUUID();
+      const email = 'rosa@chapter.ph';
+
+      await H.scopedPool.query(
+        `INSERT INTO person
+           (id, first_name, contact_info, created_at, updated_at, version)
+         VALUES ($1, $2, $3::jsonb, now(), now(), 1)`,
+        [rosterPersonId, 'Rosa', JSON.stringify({ email })],
+      );
+      await H.scopedPool.query(
+        `INSERT INTO membership
+           (id, organization_id, person_id, tier_id, start_date, status,
+            joined_at, grace_period_days, created_at, updated_at, version)
+         VALUES ($1, $2, $3, $4, '2025-01-01', 'active',
+                 now(), 30, now(), now(), 1)`,
+        [randomUUID(), orgId, rosterPersonId, tierId],
+      );
+
+      let capturedOtp: string | undefined;
+      const mockEmailService = {
+        queueEmail: async (req: { variables?: { code?: unknown } }) => {
+          if (req.variables?.code !== undefined) capturedOtp = String(req.variables.code);
+          return {};
+        },
+        sendEmail: async () => ({ success: true, messageId: 'test' }),
+        initializeDefaultTemplates: async () => {},
+        previewTemplate: async () => ({ html: '', subject: '' }),
+        renderTemplate: async () => ({ html: '', subject: '' }),
+        processPendingEmails: async () => {},
+      } as unknown as EmailService;
+
+      const auth = createAuth(
+        H.db as never,
+        TEST_CONFIG,
+        undefined,
+        mockEmailService,
+        { auditRepo: { logEvent: async () => undefined }, personRepo: new PersonRepository(H.db as never) },
+      );
+
+      await auth.api.sendVerificationOTP({ body: { email, type: 'sign-in' } });
+      if (!capturedOtp) {
+        const verRow = await H.scopedPool.query<{ value: string }>(
+          `SELECT value FROM verification WHERE identifier LIKE $1 ORDER BY created_at DESC LIMIT 1`,
+          [`%${email}%`],
+        );
+        capturedOtp = verRow.rows[0]?.value;
+      }
+      expect(capturedOtp).toBeDefined();
+
+      await auth.api.signInEmailOTP({ body: { email, otp: capturedOtp! } });
+
+      const users = await H.db
+        .select()
+        .from(authSchema.user)
+        .where(eq(authSchema.user.email, email));
+      expect(users).toHaveLength(1);
+      const newUser = users[0]!;
+
+      // Claim linked identity…
+      expect(newUser.id).toBe(rosterPersonId);
+      // …AND granted the member role (RED: role is 'user' until the fix).
+      const roles = (newUser.role ?? '').split(',').map((r) => r.trim());
+      expect(roles).toContain('association:member');
+    },
+  );
+});
