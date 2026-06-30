@@ -9,9 +9,11 @@ vi.mock('@monobase/sdk-ts/generated', () => ({
   recordDuesPayment: vi.fn(),
   refundDuesPayment: vi.fn(),
   renewMembership: vi.fn(),
+  searchEventRegistrations: vi.fn(),
+  getEvent: vi.fn(),
 }))
-import { recordDuesPayment, refundDuesPayment, renewMembership } from '@monobase/sdk-ts/generated'
-import { useRecordPayment, useRefundPayment, useRenewMembership, canVoid, type MemberPayment } from './use-member-detail'
+import { recordDuesPayment, refundDuesPayment, renewMembership, searchEventRegistrations, getEvent } from '@monobase/sdk-ts/generated'
+import { useRecordPayment, useRefundPayment, useRenewMembership, useMemberEventPayments, canVoid, type MemberPayment } from './use-member-detail'
 import { ok, err } from '../../test-utils/mock-sdk'
 
 function wrapper({ children }: { children: React.ReactNode }) {
@@ -25,6 +27,49 @@ const pay = (o: Partial<MemberPayment>): MemberPayment => ({
 })
 
 beforeEach(() => vi.clearAllMocks())
+
+describe('useMemberEventPayments (paid event registrations)', () => {
+  it('keeps only settled non-terminal regs in this org; joins event title + fee', async () => {
+    vi.mocked(searchEventRegistrations).mockResolvedValue(ok({ data: [
+      { id: 'r1', eventId: 'e1', organizationId: 'o1', status: 'confirmed', paidAt: '2030-03-14T01:00:00Z' }, // kept
+      { id: 'r2', eventId: 'e2', organizationId: 'o1', status: 'confirmed', paidAt: null },                   // unpaid — dropped
+      { id: 'r3', eventId: 'e3', organizationId: 'o1', status: 'refunded', paidAt: '2030-03-14T01:00:00Z' },  // refunded — dropped
+      { id: 'r4', eventId: 'e4', organizationId: 'o2', status: 'confirmed', paidAt: '2030-03-14T01:00:00Z' }, // other org — dropped (no cross-org leak)
+    ] } as any))
+    vi.mocked(getEvent).mockImplementation(((opts: any) =>
+      Promise.resolve(ok({ id: opts.path.eventId, title: 'Annual Gala', registrationFee: 150000 as any, currency: 'PHP' }))) as any)
+
+    const { result } = renderHook(() => useMemberEventPayments('person-1', 'o1'), { wrapper })
+    await waitFor(() => expect(result.current.eventPayments[0]?.eventTitle).toBe('Annual Gala'))
+
+    expect(vi.mocked(searchEventRegistrations)).toHaveBeenCalledWith({ query: { personId: 'person-1', limit: 50 } })
+    expect(result.current.eventPayments).toHaveLength(1)
+    expect(result.current.eventPayments[0]).toMatchObject({
+      id: 'r1', eventTitle: 'Annual Gala', amount: 150000, currency: 'PHP', paidAt: '2030-03-14T01:00:00Z',
+    })
+    // The other-org event is never even fetched.
+    expect(vi.mocked(getEvent)).not.toHaveBeenCalledWith({ path: { eventId: 'e4' } })
+  })
+
+  it('suppresses the amount (null, not ₱0) when the event lookup fails', async () => {
+    vi.mocked(searchEventRegistrations).mockResolvedValue(ok({ data: [
+      { id: 'r1', eventId: 'e1', organizationId: 'o1', status: 'confirmed', paidAt: '2030-03-14T01:00:00Z' },
+    ] } as any))
+    vi.mocked(getEvent).mockResolvedValue({ data: undefined, error: undefined, response: { status: 404 } } as any)
+
+    const { result } = renderHook(() => useMemberEventPayments('person-1', 'o1'), { wrapper })
+    await waitFor(() => expect(result.current.eventPayments).toHaveLength(1))
+    expect(result.current.eventPayments[0]).toMatchObject({ id: 'r1', eventTitle: 'Event', amount: null })
+  })
+
+  it('returns no event payments for a member with none (graceful)', async () => {
+    vi.mocked(searchEventRegistrations).mockResolvedValue(ok({ data: [] } as any))
+    const { result } = renderHook(() => useMemberEventPayments('person-2', 'o1'), { wrapper })
+    await waitFor(() => expect(result.current.isLoading).toBe(false))
+    expect(result.current.eventPayments).toEqual([])
+    expect(vi.mocked(getEvent)).not.toHaveBeenCalled()
+  })
+})
 
 describe('canVoid', () => {
   it('allows voiding a completed payment ≤30 days old', () => {

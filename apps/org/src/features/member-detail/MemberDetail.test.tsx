@@ -6,6 +6,7 @@ const state = vi.hoisted(() => ({
   member: undefined as any,
   isError: false,
   payments: [] as any[],
+  eventPayments: [] as any[],
   outstanding: 0,
   openCount: 0,
   refundMutate: vi.fn(),
@@ -23,6 +24,7 @@ vi.mock('./use-member-detail', async (orig) => ({
   ...(await orig<Record<string, unknown>>()), // keep canVoid real
   useRosterMember: () => ({ member: state.member, isLoading: false, isError: state.isError, refetch: vi.fn() }),
   useMemberPayments: () => ({ payments: state.payments, isLoading: false, isError: false, refetch: vi.fn() }),
+  useMemberEventPayments: () => ({ eventPayments: state.eventPayments, isLoading: false, isError: false }),
   useMemberOutstanding: () => ({ outstanding: state.outstanding, openCount: state.openCount, isLoading: false }),
   useRefundPayment: () => ({ mutate: state.refundMutate, isPending: false }),
   useRenewMembership: () => ({ mutate: state.renewMutate, isPending: false }),
@@ -35,7 +37,7 @@ const MARIA = {
 
 beforeEach(() => {
   vi.clearAllMocks()
-  state.member = MARIA; state.isError = false; state.payments = []; state.outstanding = 0; state.openCount = 0
+  state.member = MARIA; state.isError = false; state.payments = []; state.eventPayments = []; state.outstanding = 0; state.openCount = 0
 })
 
 describe('MemberDetail', () => {
@@ -74,6 +76,25 @@ describe('MemberDetail', () => {
     state.payments = [{ id: 'p2', amount: 150000, currency: 'PHP', paymentMethod: 'cash', status: 'completed', refundedAmount: 0, paidAt: old }]
     render(<MemberDetail membershipId="m1" />)
     expect(screen.queryByRole('button', { name: /void \/ refund/i })).not.toBeInTheDocument()
+  })
+
+  it('merges dues + paid-event payments into one chronological timeline (event row read-only)', () => {
+    const duesDate = new Date(Date.now() - 5 * 86_400_000).toISOString() // recent → voidable
+    const eventDate = new Date().toISOString()                            // newer → sorts first
+    state.payments = [{ id: 'pay1', amount: 150000, currency: 'PHP', paymentMethod: 'gcash', status: 'completed', refundedAmount: 0, paidAt: duesDate }]
+    state.eventPayments = [{ id: 'er1', eventTitle: 'Annual Gala', amount: 50000, currency: 'PHP', paidAt: eventDate }]
+    render(<MemberDetail membershipId="m1" />)
+    // Both appear.
+    expect(screen.getByText(/Annual Gala/)).toBeInTheDocument()
+    expect(screen.getByText('Event')).toBeInTheDocument()
+    expect(screen.getByText('₱1,500.00')).toBeInTheDocument()
+    expect(screen.getByText('₱500.00')).toBeInTheDocument()
+    // Newest first: the March event row precedes the February dues row in the DOM.
+    const gala = screen.getByText(/Annual Gala/)
+    const gcash = screen.getByText(/GCash/)
+    expect(gala.compareDocumentPosition(gcash) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy()
+    // Event payments are read-only — no void on the event row (the only void belongs to dues).
+    expect(screen.getAllByRole('button', { name: /void \/ refund/i })).toHaveLength(1)
   })
 
   it('renews on confirm', () => {

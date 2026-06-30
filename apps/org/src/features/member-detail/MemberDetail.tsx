@@ -16,11 +16,13 @@ import { useSelectedOrg } from '../org/use-org'
 import { RecordPaymentDialog } from './RecordPaymentDialog'
 import {
   canVoid,
+  useMemberEventPayments,
   useMemberOutstanding,
   useMemberPayments,
   useRefundPayment,
   useRenewMembership,
   useRosterMember,
+  type EventPayment,
   type MemberPayment,
 } from './use-member-detail'
 
@@ -67,11 +69,37 @@ function PaymentRow({ p, onVoid }: { p: MemberPayment; onVoid: (p: MemberPayment
   )
 }
 
+// A paid-event registration in the unified history. Read-only — event refunds are the legacy
+// Stripe path, out of scope for this screen.
+function EventPaymentRow({ e }: { e: EventPayment }) {
+  const meta = fmtDate(e.paidAt)
+  return (
+    <TimelineItem
+      tone="success"
+      title={
+        <span className="flex items-center gap-2">
+          {e.amount != null && <span className="tabular-amount">{centavosToPhp(e.amount)}</span>}
+          <span className="text-muted-foreground">{e.amount != null ? '· ' : ''}{e.eventTitle}</span>
+          <StatusBadge variant="info">Event</StatusBadge>
+        </span>
+      }
+      meta={meta || undefined}
+    />
+  )
+}
+
+// Sort key for the merged timeline (newest first). Unparseable dates sink to the bottom.
+function ms(d: unknown): number {
+  const t = new Date(d as string).getTime()
+  return Number.isNaN(t) ? 0 : t
+}
+
 export function MemberDetail({ membershipId }: { membershipId: string }) {
   const { orgId } = useSelectedOrg()
   const { member, isLoading, isError, refetch } = useRosterMember(membershipId, orgId)
   const personId = member?.personId ?? null
   const { payments, isLoading: payLoading, refetch: refetchPay } = useMemberPayments(personId)
+  const { eventPayments, isLoading: evLoading } = useMemberEventPayments(personId, orgId)
   const { outstanding, openCount } = useMemberOutstanding(membershipId)
   const renew = useRenewMembership()
   const refund = useRefundPayment()
@@ -165,18 +193,25 @@ export function MemberDetail({ membershipId }: { membershipId: string }) {
         </Button>
       </div>
 
-      {/* Payment history */}
+      {/* Payment history — dues + paid events, merged chronologically */}
       <section className="flex flex-col gap-3">
         <h2 className="text-section font-semibold text-foreground">Payment history</h2>
-        {payLoading ? (
+        {payLoading || evLoading ? (
           <Skeleton className="h-32 w-full rounded-lg" />
-        ) : payments.length === 0 ? (
+        ) : payments.length === 0 && eventPayments.length === 0 ? (
           <EmptyState headline="No payments recorded yet" description="Record a cash or GCash payment, or send a pay-link." />
         ) : (
           <Timeline>
-            {payments.map((p) => (
-              <PaymentRow key={p.id} p={p} onVoid={setVoidTarget} />
-            ))}
+            {[
+              ...payments.map((p) => ({ kind: 'dues' as const, date: p.paidAt, p })),
+              ...eventPayments.map((e) => ({ kind: 'event' as const, date: e.paidAt, e })),
+            ]
+              .sort((a, b) => ms(b.date) - ms(a.date))
+              .map((row) =>
+                row.kind === 'dues'
+                  ? <PaymentRow key={`d:${row.p.id}`} p={row.p} onVoid={setVoidTarget} />
+                  : <EventPaymentRow key={`e:${row.e.id}`} e={row.e} />,
+              )}
           </Timeline>
         )}
       </section>

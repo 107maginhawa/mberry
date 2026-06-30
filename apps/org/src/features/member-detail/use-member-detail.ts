@@ -1,4 +1,4 @@
-import { useMutation, useQuery, useQueryClient, type QueryClient } from '@tanstack/react-query'
+import { useMutation, useQuery, useQueries, useQueryClient, type QueryClient } from '@tanstack/react-query'
 import {
   getRosterMember,
   listDuesPayments,
@@ -6,6 +6,8 @@ import {
   recordDuesPayment,
   refundDuesPayment,
   renewMembership,
+  searchEventRegistrations,
+  getEvent,
 } from '@monobase/sdk-ts/generated'
 
 export type RosterMemberProfile = {
@@ -119,6 +121,88 @@ export function useMemberPayments(personId: string | null): {
     },
   })
   return { payments: q.data ?? [], isLoading: q.isLoading, isError: q.isError, refetch: () => void q.refetch() }
+}
+
+// A settled paid-event registration, surfaced in the member's payment history. Event registrations
+// carry no amount column — the amount paid is the event's registrationFee (per 7c/7d). The event
+// title + fee come from getEvent (fanned out over the member's few paid events, cached).
+export type EventPayment = {
+  id: string
+  eventTitle: string
+  amount: number | null // centavos; null when the event lookup failed (show the row, not a false ₱0)
+  currency: string
+  paidAt?: string | Date | null
+}
+
+const TERMINAL_REG = new Set(['cancelled', 'refunded'])
+
+export function useMemberEventPayments(personId: string | null, orgId: string | null): {
+  eventPayments: EventPayment[]
+  isLoading: boolean
+  isError: boolean
+} {
+  const regsQ = useQuery({
+    queryKey: ['member-event-regs', personId, orgId],
+    enabled: !!personId && !!orgId,
+    retry: false,
+    queryFn: async () => {
+      const { data, response } = await searchEventRegistrations({ query: { personId: personId!, limit: 50 } })
+      const res = response as Response | undefined
+      if (res && res.status >= 400) throw new Error('event registrations failed')
+      if (!data) throw new Error('event registrations failed')
+      // A payment is a settled (paidAt) registration that is NOT terminal — a refund keeps paidAt
+      // but flips status to 'refunded', so paidAt alone would show refunded events as paid (mirrors
+      // the engine's own paid predicate in summaryByEvent). Also scope to THIS org: the search
+      // endpoint is not org-scoped, so a multi-chapter member would otherwise leak other chapters'
+      // event payments here — the reg row carries organizationId, so filter on it.
+      return (data.data as any[])
+        .filter((r) => r.paidAt != null && !TERMINAL_REG.has(r.status) && r.organizationId === orgId)
+        .map((r) => ({ id: r.id as string, eventId: r.eventId as string, paidAt: r.paidAt as string }))
+    },
+  })
+
+  const regs = regsQ.data ?? []
+  const eventIds = Array.from(new Set(regs.map((r) => r.eventId)))
+  const eventQs = useQueries({
+    queries: eventIds.map((id) => ({
+      queryKey: ['event-lite', id],
+      enabled: !!id,
+      retry: false,
+      queryFn: async () => {
+        const { data, response } = await getEvent({ path: { eventId: id } })
+        const res = response as Response | undefined
+        if (res && res.status >= 400) throw new Error('event lookup failed')
+        const e = data as any
+        return e
+          ? { id: e.id as string, title: (e.title ?? 'Event') as string, registrationFee: Number(e.registrationFee ?? 0), currency: (e.currency ?? 'PHP') as string }
+          : null
+      },
+    })),
+  })
+
+  const eventMap = new Map<string, { title: string; registrationFee: number; currency: string }>()
+  for (const q of eventQs) {
+    if (q.data) eventMap.set(q.data.id, { title: q.data.title, registrationFee: q.data.registrationFee, currency: q.data.currency })
+  }
+
+  const eventPayments: EventPayment[] = regs.map((r) => {
+    const e = eventMap.get(r.eventId)
+    return {
+      id: r.id,
+      eventTitle: e?.title ?? 'Event',
+      // Amount = the event's current registrationFee (no per-registration amount column exists).
+      // When the event lookup failed, show the row without a false ₱0.00.
+      amount: e ? e.registrationFee : null,
+      currency: e?.currency ?? 'PHP',
+      paidAt: r.paidAt,
+    }
+  })
+
+  return {
+    eventPayments,
+    isLoading: regsQ.isLoading || eventQs.some((q) => q.isLoading),
+    isError: regsQ.isError,
+  }
 }
 
 // Outstanding dues for one member (standing). Invoice money field is `totalAmount` (NOT amount).
