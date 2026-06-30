@@ -12,4 +12,5 @@ export {
   Megaphone,
   CreditCard,
   ChevronRight,
+  Download,
 } from "lucide-react"

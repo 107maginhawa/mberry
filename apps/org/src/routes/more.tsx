@@ -1,6 +1,7 @@
 import { createFileRoute, Link } from '@tanstack/react-router'
 import { NavIcon } from '@monobase/ui'
 import { Upload, Wallet, Megaphone, CreditCard, ChevronRight } from '@monobase/ui/icons'
+import { ExportMembers } from '@/features/export/ExportMembers'
 
 export const Route = createFileRoute('/more')({ component: MorePage })
 
@@ -34,6 +35,7 @@ function MorePage() {
             <NavIcon icon={ChevronRight} size="sm" className="text-muted-foreground" aria-hidden />
           </Link>
         ))}
+        <ExportMembers />
       </nav>
     </main>
   )
