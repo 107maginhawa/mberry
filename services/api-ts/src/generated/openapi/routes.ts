@@ -692,6 +692,15 @@ export function registerRoutes(app: Hono<{ Variables: Variables }>) {
     registry.cancelEventRegistration as unknown as Handler
   );
 
+  // markEventRegistrationPaid
+  app.post('/association/events/registrations/:registrationId/mark-paid',
+    authMiddleware({ roles: ["association:admin", "association:staff"] }),
+    requirePositionMiddleware({ titles: ["Society Officer", "President"] }),
+    createPerRouteAuditMiddleware({ action: "update", resourceType: "event-registration" }),
+    zValidator('param', validators.MarkEventRegistrationPaidParams, validationErrorHandler),
+    registry.markEventRegistrationPaid as unknown as Handler
+  );
+
   // refundEventRegistration
   app.post('/association/events/registrations/:registrationId/refund',
     authMiddleware({ roles: ["association:admin", "association:staff"] }),

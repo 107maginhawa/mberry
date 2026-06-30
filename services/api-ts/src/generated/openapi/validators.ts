@@ -5514,6 +5514,7 @@ export const EventRegistrationSchema = z.object({
   ticketType: z.string().max(100).optional(),
   amountPaid: z.number().int().gte(0).optional(),
   paymentId: z.string().optional(),
+  paidAt: z.string().datetime().transform((str) => new Date(str)).optional(),
   status: z.enum(["registered", "waitlisted", "confirmed", "checked_in", "cancelled", "no_show", "refunded"])
 });
 
@@ -5552,6 +5553,7 @@ export const EventRegistrationUpdateSchema = z.object({
   ticketType: z.string().max(100).optional(),
   amountPaid: z.number().int().gte(0).optional(),
   paymentId: z.string().optional(),
+  paidAt: z.string().datetime().transform((str) => new Date(str)).optional(),
   status: z.enum(["registered", "waitlisted", "confirmed", "checked_in", "cancelled", "no_show", "refunded"]).optional()
 });
 
@@ -10893,6 +10895,13 @@ export const CancelEventRegistrationParams = z.object({
 export type CancelEventRegistrationParams = z.infer<typeof CancelEventRegistrationParams>;
 
 export const CancelEventRegistrationResponse = EventRegistrationSchema;
+
+export const MarkEventRegistrationPaidParams = z.object({
+  registrationId: z.string(),
+});
+export type MarkEventRegistrationPaidParams = z.infer<typeof MarkEventRegistrationPaidParams>;
+
+export const MarkEventRegistrationPaidResponse = EventRegistrationSchema;
 
 export const RefundEventRegistrationParams = z.object({
   registrationId: z.string(),

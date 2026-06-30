@@ -58,6 +58,7 @@ test('officer runs the door: sees paid status, checks in, marks no-show', async 
     const path = new URL(r.request().url()).pathname
     const m = r.request().method()
     if (path.includes('/checkins') && m === 'GET') return r.fulfill({ contentType: 'application/json', body: JSON.stringify({ data: checkins, total: checkins.length, limit: 200, offset: 0 }) })
+    if (path.endsWith('/mark-paid') && m === 'POST') { regs = regs.map((x) => (x.id === 'r2' ? { ...x, paidAt: ISO } : x)); return r.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(regs.find((x) => x.id === 'r2')) }) }
     if (path.includes('/registrations/') && m === 'PATCH') { regs = regs.map((x) => (x.id === 'r2' ? { ...x, status: 'no_show' } : x)); return r.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(regs.find((x) => x.id === 'r2')) }) }
     // getEvent — suffix match (requests carry the /api proxy prefix); checkins handled above.
     if (m === 'GET' && /\/association\/events\/[^/]+$/.test(path)) return r.fulfill({ contentType: 'application/json', body: JSON.stringify(EVENT) })
@@ -86,6 +87,11 @@ test('officer runs the door: sees paid status, checks in, marks no-show', async 
   await maria.getByRole('button', { name: 'Check in' }).click()
   await expect(page.getByText('Checked in Maria Santos')).toBeVisible() // toast
   await expect(maria.getByText('Checked in')).toBeVisible()
+
+  // ── Record Jose's walk-up cash → confirm step → row flips Paid ──
+  await jose.getByRole('button', { name: 'Record cash payment' }).click()
+  await page.getByRole('button', { name: 'Record payment' }).click()
+  await expect(jose.getByText('Paid')).toBeVisible()
 
   // ── Mark Jose no-show ──
   await jose.getByRole('button', { name: 'No-show' }).click()

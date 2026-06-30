@@ -10,6 +10,7 @@ const state = vi.hoisted(() => ({
   truncated: false,
   checkIn: vi.fn(),
   noShow: vi.fn(),
+  markPaid: vi.fn(),
 }))
 const { toast } = vi.hoisted(() => ({ toast: { success: vi.fn(), error: vi.fn() } }))
 
@@ -21,6 +22,7 @@ vi.mock('./use-event-detail', () => ({
   useAttendees: () => ({ attendees: state.attendees, summary: state.summary, total: state.total, truncated: state.truncated, isLoading: false, isError: false, refetch: vi.fn() }),
   useCheckIn: () => ({ mutateAsync: state.checkIn }),
   useMarkNoShow: () => ({ mutateAsync: state.noShow }),
+  useMarkPaid: () => ({ mutateAsync: state.markPaid }),
 }))
 
 const att = (o: Partial<any> = {}) => ({ registrationId: 'r1', personId: 'p1', label: 'Maria Santos', memberNumber: 'A-1', status: 'confirmed', paid: true, checkedIn: false, ...o })
@@ -100,5 +102,33 @@ describe('EventDetail', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Check in' }))
     await waitFor(() => expect(state.checkIn).toHaveBeenCalledWith({ personId: 'p1', registrationId: 'r1' }))
     expect(toast.success).toHaveBeenCalledWith('Checked in Maria Santos')
+  })
+
+  it('offers "Record cash payment" only for unpaid attendees on a paid event', () => {
+    state.attendees = [att({ paid: false })]
+    render(<EventDetail eventId="e1" />)
+    expect(screen.getByRole('button', { name: /record cash payment/i })).toBeInTheDocument()
+  })
+
+  it('hides "Record cash payment" once paid and for a free event', () => {
+    state.attendees = [att({ paid: true })]
+    const { rerender } = render(<EventDetail eventId="e1" />)
+    expect(screen.queryByRole('button', { name: /record cash payment/i })).not.toBeInTheDocument()
+    state.event = { ...state.event, registrationFee: 0 }
+    state.attendees = [att({ paid: false })]
+    rerender(<EventDetail eventId="e1" />)
+    expect(screen.queryByRole('button', { name: /record cash payment/i })).not.toBeInTheDocument()
+  })
+
+  it('records cash only after the confirm step (money guard)', async () => {
+    state.attendees = [att({ paid: false })]
+    state.markPaid.mockResolvedValue({})
+    render(<EventDetail eventId="e1" />)
+    fireEvent.click(screen.getByRole('button', { name: /record cash payment/i }))
+    // Confirm dialog must appear with the amount — payment not yet sent.
+    expect(state.markPaid).not.toHaveBeenCalled()
+    fireEvent.click(screen.getByRole('button', { name: 'Record payment' }))
+    await waitFor(() => expect(state.markPaid).toHaveBeenCalledWith({ registrationId: 'r1' }))
+    expect(toast.success).toHaveBeenCalledWith('Recorded payment for Maria Santos')
   })
 })

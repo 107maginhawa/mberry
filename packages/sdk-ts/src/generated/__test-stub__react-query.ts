@@ -671,6 +671,7 @@ export const lookupCredentialPublicOptions = makeStub('lookupCredentialPublicOpt
 export const lookupCredentialPublicQueryKey = makeStub('lookupCredentialPublicQueryKey');
 export const markAllNotificationsAsReadMutation = makeStub('markAllNotificationsAsReadMutation');
 export const markDuesInvoicePaidMutation = makeStub('markDuesInvoicePaidMutation');
+export const markEventRegistrationPaidMutation = makeStub('markEventRegistrationPaidMutation');
 export const markInvoiceUncollectibleMutation = makeStub('markInvoiceUncollectibleMutation');
 export const markNoShowBookingMutation = makeStub('markNoShowBookingMutation');
 export const markNotificationAsReadMutation = makeStub('markNotificationAsReadMutation');

@@ -273,6 +273,9 @@ model EventRegistration extends BaseEntity {
   @doc("Reference to the corresponding payment transaction")
   paymentId?: string;
 
+  @doc("UTC timestamp when payment settled (online webhook or walk-up cash mark-paid). Null until paid — the paid/unpaid door signal.")
+  paidAt?: utcDateTime;
+
   @doc("Current status of this registration")
   status: RegistrationStatus;
 }
@@ -772,6 +775,22 @@ namespace Association.Operations.Events {
     refundEventRegistration(
       @path registrationId: string
     ): ApiOkResponse<EventRegistration>
+      | ApiUnauthorizedResponse
+      | ApiForbiddenResponse
+      | ApiNotFoundResponse
+      | ApiConflictResponse;
+
+    @doc("Mark a paid-event registration as paid for walk-up cash collected at the door. Officer-only, idempotent (a second call returns the already-paid registration), and rejected for free events. The cash trail is the audit event.")
+    @operationId("markEventRegistrationPaid")
+    @post
+    @route("/registrations/{registrationId}/mark-paid")
+    @extension("x-security-required-roles", #["association:admin", "association:staff"])
+    @extension("x-require-position", #["Society Officer", "President"])
+    @extension("x-audit", #{ action: "update", resourceType: "event-registration" })
+    markEventRegistrationPaid(
+      @path registrationId: string
+    ): ApiOkResponse<EventRegistration>
+      | ApiBadRequestResponse
       | ApiUnauthorizedResponse
       | ApiForbiddenResponse
       | ApiNotFoundResponse

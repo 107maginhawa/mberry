@@ -113,3 +113,17 @@ status < 500
 GET {{api}}/association/event-lifecycle/{{event_id}}/attendance
 x-org-id: {{org_id}}
 HTTP 200
+
+
+# ── 7. Walk-up mark-paid endpoint exists (Slice 7c) ────────
+# Officer marks a registration paid (cash at the door). A bogus registration id
+# must resolve (404), proving the route + officer auth + validators are wired —
+# not 500. The money-path guards are proven on real-PG in markEventRegistrationPaid.integration.test.ts.
+
+POST {{api}}/association/events/registrations/00000000-0000-0000-0000-000000000000/mark-paid
+Origin: {{origin}}
+x-csrf-token: {{csrf_token}}
+x-org-id: {{org_id}}
+HTTP *
+[Asserts]
+status < 500

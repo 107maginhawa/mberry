@@ -8,12 +8,13 @@ vi.mock('@monobase/sdk-ts/generated', () => ({
   searchCheckIns: vi.fn(),
   checkInCustomEvent: vi.fn(),
   updateEventRegistration: vi.fn(),
+  markEventRegistrationPaid: vi.fn(),
   listRosterMembers: vi.fn(),
 }))
 import {
-  listCustomEventRegistrations, searchCheckIns, checkInCustomEvent, updateEventRegistration, listRosterMembers,
+  listCustomEventRegistrations, searchCheckIns, checkInCustomEvent, updateEventRegistration, markEventRegistrationPaid, listRosterMembers,
 } from '@monobase/sdk-ts/generated'
-import { useAttendees, useCheckIn, useMarkNoShow } from './use-event-detail'
+import { useAttendees, useCheckIn, useMarkNoShow, useMarkPaid } from './use-event-detail'
 import { ok } from '../../test-utils/mock-sdk'
 
 function wrapper({ children }: { children: React.ReactNode }) {
@@ -71,5 +72,18 @@ describe('check-in / no-show payloads', () => {
       path: { registrationId: 'r1' },
       body: { status: 'no_show' },
     })
+  })
+
+  it('markEventRegistrationPaid posts by registrationId (walk-up cash)', async () => {
+    vi.mocked(markEventRegistrationPaid).mockResolvedValue(ok({ id: 'r1', paidAt: '2030-03-14T01:00:00Z' }) as any)
+    const { result } = renderHook(() => useMarkPaid('e1'), { wrapper })
+    await result.current.mutateAsync({ registrationId: 'r1' })
+    expect(vi.mocked(markEventRegistrationPaid)).toHaveBeenCalledWith({ path: { registrationId: 'r1' } })
+  })
+
+  it('useMarkPaid surfaces a friendly 403 (officer-only)', async () => {
+    vi.mocked(markEventRegistrationPaid).mockResolvedValue({ data: undefined, error: undefined, response: { status: 403 } } as any)
+    const { result } = renderHook(() => useMarkPaid('e1'), { wrapper })
+    await expect(result.current.mutateAsync({ registrationId: 'r1' })).rejects.toThrow(/not allowed/i)
   })
 })

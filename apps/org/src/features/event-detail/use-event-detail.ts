@@ -5,6 +5,7 @@ import {
   searchCheckIns,
   checkInCustomEvent,
   updateEventRegistration,
+  markEventRegistrationPaid,
   listRosterMembers,
 } from '@monobase/sdk-ts/generated'
 
@@ -182,6 +183,21 @@ export function useCheckIn(eventId: string) {
       })
       if ((response as Response | undefined)?.status === 403) throw new Error('You are not allowed to check members in.')
       if (!data) throw new Error((error as any)?.error ?? 'Could not check in. Try again.')
+      return data
+    },
+    onSuccess: () => invalidate(qc, eventId),
+  })
+}
+
+// Walk-up cash collected at the door: officer marks a paid-event registration paid. The engine
+// stamps paid_at idempotently (double-tap = one settlement); the cash trail is the audit event.
+export function useMarkPaid(eventId: string) {
+  const qc = useQueryClient()
+  return useMutation<unknown, Error, { registrationId: string }>({
+    mutationFn: async ({ registrationId }) => {
+      const { data, error, response } = await markEventRegistrationPaid({ path: { registrationId } })
+      if ((response as Response | undefined)?.status === 403) throw new Error('You are not allowed to record payments.')
+      if (!data) throw new Error((error as any)?.error ?? 'Could not record the payment. Try again.')
       return data
     },
     onSuccess: () => invalidate(qc, eventId),

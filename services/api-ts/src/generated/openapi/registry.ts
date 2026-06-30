@@ -32,6 +32,7 @@ import { getEventRegistration } from '../../handlers/association:operations/getE
 import { updateEventRegistration } from '../../handlers/association:operations/updateEventRegistration';
 import { deleteEventRegistration } from '../../handlers/association:operations/deleteEventRegistration';
 import { cancelEventRegistration } from '../../handlers/association:operations/cancelEventRegistration';
+import { markEventRegistrationPaid } from '../../handlers/association:operations/markEventRegistrationPaid';
 import { refundEventRegistration } from '../../handlers/association:operations/refundEventRegistration';
 import { getEvent } from '../../handlers/association:operations/getEvent';
 import { updateEvent } from '../../handlers/association:operations/updateEvent';
@@ -522,6 +523,7 @@ export const registry = {
   updateEventRegistration,
   deleteEventRegistration,
   cancelEventRegistration,
+  markEventRegistrationPaid,
   refundEventRegistration,
   getEvent,
   updateEvent,

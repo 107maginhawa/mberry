@@ -1,9 +1,9 @@
 import { useMemo, useState } from 'react'
 import { Link } from '@tanstack/react-router'
 import { toast } from 'sonner'
-import { Button, EmptyState, ErrorState, Input, Skeleton, StatusBadge, centavosToPhp } from '@monobase/ui'
+import { Button, ConfirmDialog, EmptyState, ErrorState, Input, Skeleton, StatusBadge, centavosToPhp } from '@monobase/ui'
 import { useSelectedOrg } from '../org/use-org'
-import { useAttendees, useCheckIn, useMarkNoShow, useEvent, type Attendee } from './use-event-detail'
+import { useAttendees, useCheckIn, useMarkNoShow, useMarkPaid, useEvent, type Attendee } from './use-event-detail'
 
 const EVENT_STATUS: Record<string, { label: string; variant: 'muted' | 'success' | 'error' | 'info' }> = {
   draft: { label: 'Draft', variant: 'muted' },
@@ -30,7 +30,7 @@ function fmtDateTime(d: unknown): string {
 }
 
 function AttendeeRow({
-  a, paidEvent, pending, failed, blocked, onCheckIn, onNoShow,
+  a, paidEvent, pending, failed, blocked, onCheckIn, onNoShow, onMarkPaid,
 }: {
   a: Attendee
   paidEvent: boolean
@@ -39,9 +39,14 @@ function AttendeeRow({
   blocked: boolean
   onCheckIn: (a: Attendee) => void
   onNoShow: (a: Attendee) => void
+  onMarkPaid: (a: Attendee) => void
 }) {
   const reg = REG_STATUS[a.status] ?? { label: a.status, variant: 'muted' as const }
-  const showActions = !a.checkedIn && a.status !== 'no_show' && a.status !== 'cancelled' && a.status !== 'refunded'
+  const terminal = a.status === 'cancelled' || a.status === 'refunded'
+  const showActions = !a.checkedIn && a.status !== 'no_show' && !terminal
+  // Door cash is orthogonal to check-in: an unpaid attendee on a paid event can pay even after
+  // checking in. Hidden once paid or for a cancelled/refunded registration.
+  const canMarkPaid = paidEvent && !a.paid && !terminal
   return (
     <li className="flex flex-col gap-2 rounded-lg border border-[var(--color-border-light)] bg-surface px-4 py-3">
       <div className="flex items-center justify-between gap-3">
@@ -54,20 +59,29 @@ function AttendeeRow({
           {paidEvent && (a.paid ? <StatusBadge variant="success">Paid</StatusBadge> : <StatusBadge variant="warning">Unpaid</StatusBadge>)}
         </div>
       </div>
-      {showActions && (blocked ? (
+      {blocked ? (
         // A 403 (wrong role / no 2FA) is permanent — don't dangle a retry that always fails.
         <p role="alert" className="text-caption text-[var(--color-error)]">Only the Treasurer or President (with 2FA) can do this.</p>
-      ) : (
-        <div className="flex items-center gap-2">
-          <Button className="min-h-tap" disabled={pending} onClick={() => onCheckIn(a)}>
-            {pending ? 'Checking in…' : failed ? 'Retry check-in' : 'Check in'}
-          </Button>
-          <Button variant="outline" className="min-h-tap" disabled={pending} onClick={() => onNoShow(a)}>
-            No-show
-          </Button>
+      ) : (showActions || canMarkPaid) && (
+        <div className="flex items-center gap-2 flex-wrap">
+          {showActions && (
+            <>
+              <Button className="min-h-tap" disabled={pending} onClick={() => onCheckIn(a)}>
+                {pending ? 'Checking in…' : failed ? 'Retry check-in' : 'Check in'}
+              </Button>
+              <Button variant="outline" className="min-h-tap" disabled={pending} onClick={() => onNoShow(a)}>
+                No-show
+              </Button>
+            </>
+          )}
+          {canMarkPaid && (
+            <Button variant="outline" className="min-h-tap" disabled={pending} onClick={() => onMarkPaid(a)}>
+              Record cash payment
+            </Button>
+          )}
           {failed && <span role="alert" className="text-caption text-[var(--color-error)]">Failed — tap retry</span>}
         </div>
-      ))}
+      )}
     </li>
   )
 }
@@ -78,11 +92,13 @@ export function EventDetail({ eventId }: { eventId: string }) {
   const { attendees, summary, total, truncated, isLoading: atLoading, isError: atError, refetch } = useAttendees(orgId, eventId)
   const checkIn = useCheckIn(eventId)
   const noShow = useMarkNoShow(eventId)
+  const markPaid = useMarkPaid(eventId)
 
   const [query, setQuery] = useState('')
   const [pending, setPending] = useState<Set<string>>(new Set())
   const [failed, setFailed] = useState<Set<string>>(new Set())
   const [blocked, setBlocked] = useState<Set<string>>(new Set())
+  const [payTarget, setPayTarget] = useState<Attendee | null>(null)
 
   const paidEvent = (event?.registrationFee ?? 0) > 0
   const q = query.trim().toLowerCase()
@@ -109,6 +125,12 @@ export function EventDetail({ eventId }: { eventId: string }) {
     mutateRow(a.registrationId, () => checkIn.mutateAsync({ personId: a.personId, registrationId: a.registrationId }), `Checked in ${a.label}`)
   const onNoShow = (a: Attendee) =>
     mutateRow(a.registrationId, () => noShow.mutateAsync({ registrationId: a.registrationId }), `Marked ${a.label} no-show`)
+  const confirmPay = () => {
+    const a = payTarget
+    if (!a) return
+    setPayTarget(null)
+    mutateRow(a.registrationId, () => markPaid.mutateAsync({ registrationId: a.registrationId }), `Recorded payment for ${a.label}`)
+  }
 
   // While the selected org resolves, the event query is disabled (not loading) — treat as
   // loading so we never flash the access error on a deep link.
@@ -186,11 +208,21 @@ export function EventDetail({ eventId }: { eventId: string }) {
                 blocked={blocked.has(a.registrationId)}
                 onCheckIn={onCheckIn}
                 onNoShow={onNoShow}
+                onMarkPaid={setPayTarget}
               />
             ))}
           </ul>
         )}
       </section>
+
+      <ConfirmDialog
+        open={payTarget != null}
+        onOpenChange={(o) => { if (!o) setPayTarget(null) }}
+        title="Record cash payment?"
+        description={payTarget ? `Confirm you collected ${centavosToPhp(event.registrationFee)} in cash from ${payTarget.label} for ${event.title}. This marks the registration paid.` : ''}
+        confirmLabel="Record payment"
+        onConfirm={confirmPay}
+      />
     </div>
   )
 }

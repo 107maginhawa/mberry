@@ -17872,6 +17872,10 @@ export type EventRegistration = {
      */
     paymentId?: string;
     /**
+     * UTC timestamp when payment settled (online webhook or walk-up cash mark-paid). Null until paid — the paid/unpaid door signal.
+     */
+    paidAt?: Date;
+    /**
      * Current status of this registration
      */
     status: 'registered' | 'waitlisted' | 'confirmed' | 'checked_in' | 'cancelled' | 'no_show' | 'refunded';
@@ -18002,6 +18006,10 @@ export type EventRegistrationUpdate = {
      * Reference to the corresponding payment transaction
      */
     paymentId?: string;
+    /**
+     * UTC timestamp when payment settled (online webhook or walk-up cash mark-paid). Null until paid — the paid/unpaid door signal.
+     */
+    paidAt?: Date;
     /**
      * Current status of this registration
      */
@@ -37601,6 +37609,49 @@ export type CancelEventRegistrationResponses = {
 };
 
 export type CancelEventRegistrationResponse = CancelEventRegistrationResponses[keyof CancelEventRegistrationResponses];
+
+export type MarkEventRegistrationPaidData = {
+    body?: never;
+    path: {
+        registrationId: string;
+    };
+    query?: never;
+    url: '/association/events/registrations/{registrationId}/mark-paid';
+};
+
+export type MarkEventRegistrationPaidErrors = {
+    /**
+     * Validation error response
+     */
+    400: ValidationError;
+    /**
+     * Unauthorized access response
+     */
+    401: AuthenticationError;
+    /**
+     * Forbidden access response
+     */
+    403: AuthorizationError;
+    /**
+     * Resource not found response
+     */
+    404: NotFoundError;
+    /**
+     * Conflict response
+     */
+    409: ConflictError;
+};
+
+export type MarkEventRegistrationPaidError = MarkEventRegistrationPaidErrors[keyof MarkEventRegistrationPaidErrors];
+
+export type MarkEventRegistrationPaidResponses = {
+    /**
+     * Success response with data
+     */
+    200: EventRegistration;
+};
+
+export type MarkEventRegistrationPaidResponse = MarkEventRegistrationPaidResponses[keyof MarkEventRegistrationPaidResponses];
 
 export type RefundEventRegistrationData = {
     body?: never;
